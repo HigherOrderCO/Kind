@@ -54,6 +54,15 @@ fn main() -> Result<(), std::string::String> {
         /true  .true Bool
         /false .false Bool
 
+        /Bool_ind
+        #P @b Bool *
+        #T :P true
+        #F :P false
+        #b Bool
+        ~Bool b #x Bool :P x
+        |true  T
+        |false F
+
         /not #bbb Bool
             ~Bool bbb #x Bool Bool
             |true  false
@@ -146,16 +155,13 @@ fn main() -> Result<(), std::string::String> {
     }
 
     let mut nf = term.clone();
-    reduce(&mut nf, &defs);
+    reduce(&mut nf, &defs, true);
     println!("norm {}", to_string(&nf, &mut Vec::new()));
 
     let mut ty : Term = infer(&term, &defs, true).unwrap();
-    reduce(&mut ty, &defs);
-    reduce(&mut ty, &defs);
-    reduce(&mut ty, &defs);
-    reduce(&mut ty, &defs);
+    reduce(&mut ty, &defs, true);
     println!("type {}", to_string(&ty, &mut Vec::new()));
-    println!("type {:?}", ty);
+    //println!("type {:?}", ty);
 
 
     Ok(())

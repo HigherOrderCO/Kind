@@ -297,7 +297,7 @@ pub fn to_bytes(term : &Term, vars : &mut Vars) -> Vec<u8> {
             &Ref{ref nam} => {
                 code.append(&mut nam.clone());
             },
-            &Idt{ref nam, ref typ, ref ctr} => {
+            &Idt{ref nam, typ: _, ctr: _} => {
                 let nam = rename(nam, vars);
                 //code.extend_from_slice(b"$");
                 code.append(&mut nam.clone());
@@ -478,108 +478,6 @@ pub fn subs(term : &mut Term, value : &Term, dph : i32) {
     };
 }
 
-// Equality test.
-pub fn equals(a : &Term, b : &Term, defs : &Defs) -> bool {
-    match (a,b) {
-        (&App{fun: ref a_fun, arg: ref a_arg}, &App{fun: ref b_fun, arg: ref b_arg}) => {
-            equals(a_fun, b_fun, defs) && equals(a_arg, b_arg, defs)
-        },
-        (&Lam{nam: _, typ: ref a_typ, bod: ref a_bod}, &Lam{nam: _, typ: ref b_typ, bod: ref b_bod}) => {
-            equals(a_typ, b_typ, defs) && equals(a_bod, b_bod, defs)
-        },
-        (&All{nam: _, typ: ref a_typ, bod: ref a_bod}, &All{nam: _, typ: ref b_typ, bod: ref b_bod}) => {
-            equals(a_typ, b_typ, defs) && equals(a_bod, b_bod, defs)
-        },
-        (&Var{idx: ref a_idx}, &Var{idx: ref b_idx}) => {
-            a_idx == b_idx
-        },
-        (&Ref{nam: ref a_nam}, &Ref{nam: ref b_nam}) => {
-            a_nam == b_nam
-        },
-        (&Ref{nam: ref a_nam}, b) => {
-            match defs.get(a_nam) {
-                Some(a) => equals(a, b, defs),
-                None => false
-            }
-        },
-        (a, &Ref{nam: ref b_nam}) => {
-            match defs.get(b_nam) {
-                Some(b) => equals(a, b, defs),
-                None => false
-            }
-        },
-        (&Idt{nam: _, typ: ref a_typ, ctr: ref a_ctr}, &Idt{nam: _, typ: ref b_typ, ctr: ref b_ctr}) => {
-            let mut eql_ctr = true;
-            if a_ctr.len() != b_ctr.len() {
-                return false;
-            }
-            for i in 0..a_ctr.len() {
-                let (a_ctr_nam, a_ctr_typ) = a_ctr[i].clone();
-                let (b_ctr_nam, b_ctr_typ) = b_ctr[i].clone();
-                eql_ctr = eql_ctr && a_ctr_nam == b_ctr_nam && equals(&a_ctr_typ, &b_ctr_typ, defs);
-            }
-            equals(a_typ, b_typ, defs) && eql_ctr
-        },
-        (&Ctr{nam: ref a_nam, idt: ref a_idt}, &Ctr{nam: ref b_nam, idt: ref b_idt}) => {
-            a_nam == b_nam && equals(a_idt, b_idt, defs)
-        },
-        (&Cas{idt: ref a_idt, val: ref a_val, ret: ref a_ret, cas: ref a_cas}, &Cas{idt: ref b_idt, val: ref b_val, ret: ref b_ret, cas: ref b_cas}) => {
-            let mut eql_cas = true;
-            for i in 0..a_cas.len() {
-                let (_, a_cas_fun) = a_cas[i].clone();
-                let (_, b_cas_fun) = b_cas[i].clone();
-                eql_cas = eql_cas && equals(&a_cas_fun, &b_cas_fun, defs);
-            }
-            equals(a_idt, b_idt, defs) && equals(a_val, b_val, defs) && equals(a_ret, b_ret, defs) && eql_cas
-        },
-        (Set, Set) => true,
-        (a, b) => {
-            let mut new_a = a.clone();
-            if weak_reduce(&mut new_a, defs) {
-                equals(&new_a, b, defs)
-            } else {
-                let mut new_b = b.clone();
-                if weak_reduce(&mut new_b, defs) {
-                    equals(a, &new_b, defs)
-                } else {
-                    false
-                }
-            }
-        },
-    }
-}
-
-// Performs a pattern-match.
-//fn pattern_match(val : &mut Term, cases : &Vec<(Vec<u8>,Box<Term>)>, defs : &Defs) -> bool {
-    //let tmp_val = std::mem::replace(val, Set);
-    //let new_val : Term;
-    //let changed = match tmp_val {
-        //App{mut fun, arg} => {
-            //let changed = pattern_match(&mut fun, cases, defs);
-            //new_val = App{fun, arg};
-            //changed
-        //},
-        //Ctr{nam, idt:_} => {
-            //let mut fun : Term = Set;
-            //for i in 0..cases.len() {
-                //let case_nam = &cases[i].0;
-                //let case_fun = &cases[i].1;
-                //if *case_nam == nam {
-                    //fun = *case_fun.clone();
-                //}
-            //}
-            //new_val = fun;
-            //true
-        //},
-        //t => {
-            //new_val = t;
-            //false
-        //}
-    //};
-    //std::mem::replace(val, new_val);
-    //changed
-//}
-
 // The expected type of a branch in a pattern-match.
 pub fn case_type(fun : &Term, idt : &Term, mut ret : Term, mut slf : Term, dph : i32) -> Term {
     match fun {
@@ -605,7 +503,7 @@ pub fn case_type(fun : &Term, idt : &Term, mut ret : Term, mut slf : Term, dph :
 }
 
 // Reduces an expression if it is a redex, returns true if was.
-pub fn redex(term : &mut Term, defs : &Defs) -> bool {
+pub fn redex(term : &mut Term, defs : &Defs, refs : bool) -> bool {
     let mut changed = false;
     let tmp_term = std::mem::replace(term, Set);
     let new_term : Term = match tmp_term {
@@ -643,14 +541,18 @@ pub fn redex(term : &mut Term, defs : &Defs) -> bool {
             }
         },
         Ref{nam} => {
-            match defs.get(&nam) {
-                Some(val) => {
-                    changed = true;
-                    val.clone()
-                },
-                None => {
-                    panic!(format!("Unbound variable: {}.", String::from_utf8_lossy(&nam)))
+            if refs {
+                match defs.get(&nam) {
+                    Some(val) => {
+                        changed = true;
+                        val.clone()
+                    },
+                    None => {
+                        panic!(format!("Unbound variable: {}.", String::from_utf8_lossy(&nam)))
+                    }
                 }
+            } else {
+                Ref{nam}
             }
         },
         t => t
@@ -660,78 +562,160 @@ pub fn redex(term : &mut Term, defs : &Defs) -> bool {
 }
 
 // Performs a global parallel reduction step.
-pub fn global_reduce_step(term : &mut Term, defs : &Defs) -> bool {
+pub fn global_reduce_step(term : &mut Term, defs : &Defs, refs : bool) -> bool {
     let changed_below = match term {
         App{ref mut fun, ref mut arg} => {
-            global_reduce_step(fun, defs) ||
-            global_reduce_step(arg, defs)
+            global_reduce_step(fun, defs, refs) ||
+            global_reduce_step(arg, defs, refs)
         },
         Lam{nam: _, ref mut typ, ref mut bod} => {
-            global_reduce_step(typ, defs) ||
-            global_reduce_step(bod, defs)
+            global_reduce_step(typ, defs, refs) ||
+            global_reduce_step(bod, defs, refs)
         },
         All{nam: _, ref mut typ, ref mut bod} => {
-            global_reduce_step(typ, defs) ||
-            global_reduce_step(bod, defs)
+            global_reduce_step(typ, defs, refs) ||
+            global_reduce_step(bod, defs, refs)
         },
         Idt{nam: _, ref mut typ, ref mut ctr} => {
             let mut changed_ctr = false;
             for i in 0..ctr.len() {
-                changed_ctr = changed_ctr || global_reduce_step(&mut ctr[i].1, defs);
+                changed_ctr = changed_ctr || global_reduce_step(&mut ctr[i].1, defs, refs);
             }
-            changed_ctr || global_reduce_step(typ, defs)
+            changed_ctr || global_reduce_step(typ, defs, refs)
         },
         Ctr{nam: _, ref mut idt} => {
-            global_reduce_step(idt, defs)
+            global_reduce_step(idt, defs, refs)
         },
         Cas{ref mut idt, ref mut val, ref mut ret, ref mut cas} => {
             let mut changed_cas = false;
             for i in 0..cas.len() {
                 let cas_fun = &mut cas[i].1;
-                changed_cas = changed_cas || global_reduce_step(cas_fun, defs);
+                changed_cas = changed_cas || global_reduce_step(cas_fun, defs, refs);
             }
             changed_cas ||
-            global_reduce_step(idt, defs) ||
-            global_reduce_step(val, defs) ||
-            global_reduce_step(ret, defs)
+            global_reduce_step(idt, defs, refs) ||
+            global_reduce_step(val, defs, refs) ||
+            global_reduce_step(ret, defs, refs)
         },
         _ => false
     };
-    let changed_self = redex(term, defs);
+    let changed_self = redex(term, defs, refs);
     changed_below || changed_self
 }
 
 // Performs a global parallel weak reduction step.
-pub fn weak_global_reduce_step(term : &mut Term, defs : &Defs) -> bool {
+pub fn weak_global_reduce_step(term : &mut Term, defs : &Defs, refs : bool) -> bool {
     let changed_below = match term {
         App{ref mut fun, arg: _} => {
-            weak_global_reduce_step(fun, defs)
+            weak_global_reduce_step(fun, defs, refs)
         },
         Cas{idt: _, ref mut val, ret: _, cas: _} => {
-            weak_global_reduce_step(val, defs)
+            weak_global_reduce_step(val, defs, refs)
         },
         _ => false
     };
-    let changed_self = redex(term, defs);
+    let changed_self = redex(term, defs, refs);
     changed_below || changed_self
 }
 
 // Reduces a term to weak head normal form.
-pub fn weak_reduce(term : &mut Term, defs : &Defs) -> bool {
+pub fn weak_reduce(term : &mut Term, defs : &Defs, refs : bool) -> bool {
     let mut changed = false;
-    while weak_global_reduce_step(term, defs) {
+    while weak_global_reduce_step(term, defs, refs) {
         changed = true;
     }
     changed
 }
 
 // Reduces a term to normal form.
-pub fn reduce(term : &mut Term, defs : &Defs) -> bool {
+pub fn reduce(term : &mut Term, defs : &Defs, refs : bool) -> bool {
     let mut changed = false;
-    while global_reduce_step(term, defs) {
+    while global_reduce_step(term, defs, refs) {
         changed = true;
     }
     changed
+}
+
+// Performs an equality test. Mutable, because it may reduce redexes.
+pub fn equals_mut(a : &mut Term, b : &mut Term, defs : &Defs) -> bool {
+    // Reduces terms to weak head normal norm without dereferences.
+    weak_reduce(a, defs, false);
+    weak_reduce(b, defs, false);
+    // If one is a Ref and the other not, dereference.
+    match (&a, &b) {
+        (&Ref{nam: _}, &Ref{nam: _}) => {},
+        (&Ref{nam: _}, _)            => { weak_reduce(a, defs, true); },
+        (_, &Ref{nam: _})            => { weak_reduce(b, defs, true); },
+        _                            => {}
+    };
+    // Check if the heads are equal.
+    match (a, b) {
+        (&mut App{fun: ref mut a_fun, arg: ref mut a_arg},
+         &mut App{fun: ref mut b_fun, arg: ref mut b_arg}) => {
+            equals_mut(a_fun, b_fun, defs) &&
+            equals_mut(a_arg, b_arg, defs)
+        },
+        (&mut Lam{nam: _, typ: ref mut a_typ, bod: ref mut a_bod},
+         &mut Lam{nam: _, typ: ref mut b_typ, bod: ref mut b_bod}) => {
+            equals_mut(a_typ, b_typ, defs) &&
+            equals_mut(a_bod, b_bod, defs)
+        },
+        (&mut All{nam: _, typ: ref mut a_typ, bod: ref mut a_bod},
+         &mut All{nam: _, typ: ref mut b_typ, bod: ref mut b_bod}) => {
+            equals_mut(a_typ, b_typ, defs) &&
+            equals_mut(a_bod, b_bod, defs)
+        },
+        (&mut Var{idx: ref mut a_idx},
+         &mut Var{idx: ref mut b_idx}) => {
+            a_idx == b_idx
+        },
+        (&mut Ref{nam: ref mut a_nam},
+         &mut Ref{nam: ref mut b_nam}) => {
+            a_nam == b_nam
+        },
+        (&mut Idt{nam: _, typ: ref mut a_typ, ctr: ref mut a_ctr},
+         &mut Idt{nam: _, typ: ref mut b_typ, ctr: ref mut b_ctr}) => {
+            let mut eql_ctr = true;
+            if a_ctr.len() != b_ctr.len() {
+                return false;
+            }
+            for i in 0..a_ctr.len() {
+                let (mut a_ctr_nam, mut a_ctr_typ) = a_ctr[i].clone();
+                let (mut b_ctr_nam, mut b_ctr_typ) = b_ctr[i].clone();
+                eql_ctr =
+                    eql_ctr &&
+                    a_ctr_nam == b_ctr_nam &&
+                    equals_mut(&mut a_ctr_typ, &mut b_ctr_typ, defs);
+            }
+            equals_mut(a_typ, b_typ, defs) && eql_ctr
+        },
+        (&mut Ctr{nam: ref mut a_nam, idt: ref mut a_idt},
+         &mut Ctr{nam: ref mut b_nam, idt: ref mut b_idt}) => {
+            a_nam == b_nam && equals_mut(a_idt, b_idt, defs)
+        },
+        (&mut Cas{idt: ref mut a_idt, val: ref mut a_val, ret: ref mut a_ret, cas: ref mut a_cas},
+         &mut Cas{idt: ref mut b_idt, val: ref mut b_val, ret: ref mut b_ret, cas: ref mut b_cas}) => {
+            let mut eql_cas = true;
+            for i in 0..a_cas.len() {
+                let (_, mut a_cas_fun) = a_cas[i].clone();
+                let (_, mut b_cas_fun) = b_cas[i].clone();
+                eql_cas = eql_cas && equals_mut(&mut a_cas_fun, &mut b_cas_fun, defs);
+            }
+            eql_cas &&
+            equals_mut(a_idt, b_idt, defs) &&
+            equals_mut(a_val, b_val, defs) &&
+            equals_mut(a_ret, b_ret, defs)
+        },
+        (Set, Set) => true,
+        _ => false
+    }
+}
+
+// Equality test. Requires copying, as it may need to reduce redexes.
+pub fn equals(a : &Term, b : &Term, defs : &Defs) -> bool {
+    let mut a_mut = a.clone();
+    let mut b_mut = b.clone();
+    equals_mut(&mut a_mut, &mut b_mut, defs)
 }
 
 // A Context is a vector of (name, value) assignments.
@@ -761,7 +745,7 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
         match term {
             App{fun, arg} => {
                 let mut fun_t = go(fun, vars, defs, ctx, checked)?;
-                weak_reduce(&mut fun_t, defs);
+                weak_reduce(&mut fun_t, defs, true);
                 match fun_t {
                     All{nam: _f_nam, typ: f_typ, bod: f_bod} => {
                         let mut arg_n = arg.clone();
@@ -770,9 +754,11 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
                             let mut new_typ = f_typ.clone();
                             subs(&mut new_typ, &arg_n, 0);
                             if !equals(&new_typ, &arg_t, defs) {
+                                let mut new_typ_whnf = new_typ.clone();
+                                reduce(&mut new_typ_whnf, defs, false);
                                 return Err(format!(
                                     "Type mismatch.\n- Expected : {}\n- Actual   : {}\n- On term: {}",
-                                    to_string(&new_typ, vars),
+                                    to_string(&new_typ_whnf, vars),
                                     to_string(&arg_t, vars),
                                     to_string(&term, vars)))
                             }
@@ -845,7 +831,7 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
             },
             Ctr{nam, idt} => {
                 let mut tmp_idt : Term = *idt.clone();
-                weak_reduce(&mut tmp_idt, defs);
+                weak_reduce(&mut tmp_idt, defs, true);
                 match tmp_idt {
                     Idt{nam:_, typ: _, ref ctr} => {
                         for i in 0..ctr.len() {
@@ -867,7 +853,7 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
             Cas{idt, val, ret, cas} => {
                 let mut indices : Vec<Term> = Vec::new();
                 let mut tmp_idt : Term = *idt.clone();
-                weak_reduce(&mut tmp_idt, defs);
+                weak_reduce(&mut tmp_idt, defs, true);
                 loop {
                     match tmp_idt {
                         App{fun, arg} => {
@@ -898,10 +884,12 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
                                     let cas_typ = case_type(ctr_typ, idt, ret, ctr_val, 0);
                                     let cas_val_t = go(cas_val, vars, defs, ctx, checked)?;
                                     if !equals(&cas_val_t, &cas_typ, defs) {
+                                        let mut cas_typ_whnf = cas_typ.clone();
+                                        reduce(&mut cas_typ_whnf, defs, true);
                                         return Err(format!(
                                             "Type mismatch on `{}` case of pattern-match.\n- Expected : {}\n- Actual   : {}",
                                             String::from_utf8_lossy(ctr_nam),
-                                            to_string(&cas_typ, vars),
+                                            to_string(&cas_typ_whnf, vars),
                                             to_string(&cas_val_t, vars)));
                                     }
                                 }
