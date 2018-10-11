@@ -33,10 +33,53 @@ def add(a : Nat, b : Nat)
     fold Nat a to Nat
     | succ(add_a) (b : Nat) -> Suc(add_a(b))
     | zero        (b : Nat) -> Zer
+
+
+
+data List(T : Type)
+| cons : ...
+| nil  : ...
+
+
+
+
+
 */
 
 fn main() -> Result<(), std::string::String> {
     let (term, defs) = from_string_slice("
+        /Bool $Bool *
+            |true  Bool
+            |false Bool
+        /true  .true Bool
+        /false .false Bool
+
+        /not #bbb Bool
+            ~Bool bbb #x Bool Bool
+            |true  false
+            |false true
+
+        not
+
+        /Nat $Nat *
+            |succ @ Nat Nat
+            |zero Nat
+        /succ .succ Nat
+        /zero .zero Nat
+
+        /isZero #n Nat
+            ~Nat n #n Nat Bool
+            |succ #n Nat false
+            |zero true
+
+        isZero
+            
+            :succ :succ zero
+
+        main
+        
+        #x * x
+
         /Inf @P * @c @ Bool @ Inf P P
         /inf #P * #c @ Bool @ Inf P ::c true 
              #P * #c @ Bool @ Inf P ::c false
@@ -106,8 +149,13 @@ fn main() -> Result<(), std::string::String> {
     reduce(&mut nf, &defs);
     println!("norm {}", to_string(&nf, &mut Vec::new()));
 
-    let ty : Term = infer(&term, &defs, true).unwrap();
+    let mut ty : Term = infer(&term, &defs, true).unwrap();
+    reduce(&mut ty, &defs);
+    reduce(&mut ty, &defs);
+    reduce(&mut ty, &defs);
+    reduce(&mut ty, &defs);
     println!("type {}", to_string(&ty, &mut Vec::new()));
+    println!("type {:?}", ty);
 
 
     Ok(())
