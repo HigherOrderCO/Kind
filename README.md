@@ -6,47 +6,12 @@ Like Agda, Idris and Coq, Formality has a powerful type system capable of expres
 
 ### How?
 
-What makes most functional programming languages slow is the fact functions are, simply, too slow. Since a function can copy and enclosure variables indiscriminately, runtimes for functional languages tend to be bloated with heavy machinery for computing beta-reduction. Formality is a modification of the Calculus of Inductive Constructions, which is the foundation of the proof assistant Coq, with Elementary-Affine Logic concepts. This puts a strict discipline on how and when variables can be duplicated, which, in turn, allows Formality programs to be compiled to the [Abstract Calculus](https://github.com/maiavictor/abstract-calculus), a massivelly parallel, non-garbage-collected and optimal model of computation.
+Formality is merely a syntax for expressing inductive types (data) and dependent functions (computation). It is compilled to [Cedille-Core](https://github.com/maiavictor/cedille-core), which acts as a minimalist termination / consistency checker for that syntax, allowing us to prove theorems about Formality programs. It is, then, compiled to the [Abstract Calculus](https://github.com/maiavictor/abstract-calculus), a massivelly parallel, non-garbage-collected and optimal model of computation. This lightweight language allows it to be used both for front-end applications and back-end smart-contracts. 
 
 ### Benchmarks
 
 (TODO)
 
-### Examples
+### Syntax
 
-Formality is, similarly to other proof assistants, basically combination of inductive datatypes, representing data, and functions, representing computations. Here is an example of addition in the planned syntax:
-
-```haskell
-data Nat : Type
-| succ(x : Nat) : Nat
-| zero          : Nat
-
-def double(a : Nat)
-  match a : Nat to Nat
-  | succ(pred) => succ(succ(double(pred)))
-  | zero => zero
-
-data Fin : Nat -> Type
-| zer(n : Nat)            : Fin (suc n)
-| suc(n : Nat, i : Fin n) : Fin (suc n)
-```
-
-This syntax isn't implemented yet, but an improvised syntax can already be used to test programs, as can be seen on src/Main.rs.
-
-### Implementation status
-
-The implementation is in a very early stage. It hasn't been reviewed by experts, doesn't include a termination checker (and, thus, is still inconsistent), doesn't include EAL-checks. There are no tests and it certainly has bugs. 
-
-### TODO
-
-- Parser/formatter for the syntax above
-
-- Termination checker
-
-- Stratified duplications (currently only linear functions allowed)
-
-- Compilation to the EVM
-
-- CUDA runtime for the Abstract Calculus
-
-- Benchmarks
+[Here.](https://gist.github.com/MaiaVictor/b9fcf40f5b21a8cf399e48978bd167d1)

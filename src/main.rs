@@ -39,6 +39,29 @@ data List(T : Type)
     | nil  : ...
 */
 
+// Simple datatype declaration
+data Nat
+| succ(n : Nat) -> Nat
+| zero          -> Nat
+
+// Simple function
+def double(n : Nat)
+    match Nat n : Nat
+    | succ(x : Nat) => succ(succ(id(x)))
+    | zero          => zero
+
+// Datatype declaration
+data Vec(T : Set, len : Nat)
+| cons(T : Set, len : Nat, x : T, xs : Vec(T,n)) -> Vec(T, succ n)
+| nil(T : Set)                                   -> Vec(T, zero)
+
+// Function
+def id(T : Set, len : Nat, vec : Vec T len)
+    match Vec(T, len) vec : (T : Set, len : Nat) => Vect T len
+    | cons(T : Set, len : Nat, x : T, xs : Vect(T,len)) => cons(T, len, x, id(T, len, xs))
+    | nil(T : Set)                                      => zero
+
+
 fn main() -> Result<(), std::string::String> {
     let (term, defs) = from_string_slice("
         /False
