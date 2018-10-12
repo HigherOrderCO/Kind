@@ -289,9 +289,10 @@ pub fn to_bytes(term : &Term, vars : &mut Vars) -> Vec<u8> {
                 vars.pop();
             },
             &Var{idx} => {
-                let idx = vars.len() - idx as usize - 1;
-                let quo = b"X".to_vec();
-                let nam = if idx < vars.len() { &vars[idx] } else { &quo };
+                let new_idx = vars.len() - idx as usize - 1;
+                let mut quo = b"X".to_vec();
+                quo.append(&mut idx.to_string().into_bytes());
+                let nam = if new_idx < vars.len() { &vars[new_idx] } else { &quo };
                 code.append(&mut nam.clone());
             },
             &Ref{ref nam} => {
@@ -479,13 +480,12 @@ pub fn subs(term : &mut Term, value : &Term, dph : i32) {
 }
 
 // The expected type of a branch in a pattern-match.
-pub fn case_type(fun : &Term, idt : &Term, mut ret : Term, mut slf : Term, dph : i32) -> Term {
+pub fn case_type(fun : &Term, idt : &Term, ret : &Term, mut slf : Term, dph : i32) -> Term {
     match fun {
         All{nam, ref typ, ref bod} => {
             let mut typ = typ.clone();
             subs(&mut typ, idt, dph+1);
             shift(&mut slf, 1, 0);
-            shift(&mut ret, 1, 0);
             slf = App{fun: Box::new(slf), arg: Box::new(Var{idx: 0})};
             let bod = case_type(bod, idt, ret, slf, dph+1);
             let nam = nam.to_vec();
@@ -494,7 +494,7 @@ pub fn case_type(fun : &Term, idt : &Term, mut ret : Term, mut slf : Term, dph :
         },
         _ => {
             let mut new_fun = fun.clone();
-            subs(&mut new_fun, &ret, 0);
+            subs(&mut new_fun, &ret, dph);
             let fun = Box::new(new_fun);
             let arg = Box::new(slf.clone());
             App{fun, arg}
@@ -765,7 +765,6 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
                         }
                         let mut new_bod = f_bod.clone();
                         subs(&mut new_bod, &arg_n, 0);
-                        //reduce(&mut new_bod, defs);
                         Ok(*new_bod)
                     },
                     _ => {
@@ -779,11 +778,9 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
             Lam{nam, typ, bod} => {
                 let nam = rename(&nam, vars);
                 let mut typ_n = typ.clone();
-                //reduce(&mut typ_n, defs);
                 vars.push(nam.to_vec());
                 extend_context(typ_n.clone(), ctx);
                 let bod_t = Box::new(go(bod, vars, defs, ctx, checked)?);
-                //println!("ueee {}", bod_t);
                 vars.pop();
                 narrow_context(ctx);
                 if !checked {
@@ -795,17 +792,14 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
                 Ok(All{nam: nam.clone(), typ: typ_n, bod: bod_t})
             },
             All{nam, typ, bod} => {
-                //println!("all {} ... {} ... {}", String::from_utf8_lossy(&nam), typ, bod);
                 if !checked {
                     let nam = rename(&nam, vars);
                     let mut typ_n = typ.clone();
-                    //reduce(&mut typ_n, defs);
                     vars.push(nam.to_vec());
                     extend_context(typ_n, ctx);
                     let typ_t = Box::new(go(typ, vars, defs, ctx, checked)?);
                     let bod_t = Box::new(go(bod, vars, defs, ctx, checked)?);
                     vars.pop();
-                    //println!("... {} ... {}", typ_t, bod_t);
                     narrow_context(ctx);
                     if !equals(&typ_t, &Set, defs) || !equals(&bod_t, &Set, defs) {
                         return Err("Forall not a type.".to_string());
@@ -826,7 +820,6 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
             },
             Idt{nam: _, typ, ctr: _} => {
                 let mut typ_v = typ.clone();
-                //reduce(&mut typ_v, defs);
                 Ok(*typ_v)
             },
             Ctr{nam, idt} => {
@@ -879,7 +872,6 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
                                             String::from_utf8_lossy(&nam),
                                             String::from_utf8_lossy(ctr_nam)));
                                     }
-                                    let mut ret = *ret.clone();
                                     let ctr_val = Ctr{nam: ctr_nam.to_vec(), idt: idt.clone()};
                                     let cas_typ = case_type(ctr_typ, idt, ret, ctr_val, 0);
                                     let cas_val_t = go(cas_val, vars, defs, ctx, checked)?;
@@ -887,7 +879,7 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
                                         let mut cas_typ_whnf = cas_typ.clone();
                                         reduce(&mut cas_typ_whnf, defs, true);
                                         return Err(format!(
-                                            "Type mismatch on `{}` case of pattern-match.\n- Expected : {}\n- Actual   : {}",
+                                            "Type mismatch on `{}` case of pattern-match.\n- Expected : {:?}\n- Actual   : {}",
                                             String::from_utf8_lossy(ctr_nam),
                                             to_string(&cas_typ_whnf, vars),
                                             to_string(&cas_val_t, vars)));
@@ -903,7 +895,6 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
                             let fun = Box::new(res);
                             let arg = Box::new(*val.clone());
                             res = App{fun, arg};
-                            //println!("res {}", res);
                             return Ok(res);
                         },
                         _ => {

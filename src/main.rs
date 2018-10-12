@@ -34,35 +34,46 @@ def add(a : Nat, b : Nat)
     | succ(add_a) (b : Nat) -> Suc(add_a(b))
     | zero        (b : Nat) -> Zer
 
-
-
 data List(T : Type)
-| cons : ...
-| nil  : ...
-
-
-
-
-
+    | cons : ...
+    | nil  : ...
 */
 
 fn main() -> Result<(), std::string::String> {
     let (term, defs) = from_string_slice("
+        /Nat $Nat *
+            |succ @pred Nat Nat
+            |zero Nat
+        /succ .succ Nat
+        /zero .zero Nat
+        /Nat_ind
+            #P @n Nat *
+            #S @n Nat @i :P n :P :succ n
+            #Z :P zero
+            #n Nat
+            ~Nat n #n Nat :P n
+            |succ #n Nat ::S n ::::Nat_ind P S Z n
+            |zero Z
+        Nat_ind
+
         /Bool $Bool *
             |true  Bool
             |false Bool
         /true  .true Bool
         /false .false Bool
-
         /Bool_ind
-        #P @b Bool *
-        #T :P true
-        #F :P false
-        #b Bool
-        ~Bool b #x Bool :P x
-        |true  T
-        |false F
+            #P @b Bool *
+            #T :P true
+            #F :P false
+            #b Bool
+            ~Bool b #x Bool :P x
+            |true  T
+            |false F
 
+
+
+
+        Nat
         /not #bbb Bool
             ~Bool bbb #x Bool Bool
             |true  false
@@ -154,14 +165,15 @@ fn main() -> Result<(), std::string::String> {
         }
     }
 
+    let mut ty : Term = infer(&term, &defs, true).unwrap();
+    reduce(&mut ty, &defs, false);
+    println!("type {}", to_string(&ty, &mut Vec::new()));
+
     let mut nf = term.clone();
-    reduce(&mut nf, &defs, true);
+    weak_reduce(&mut nf, &defs, true);
+    reduce(&mut nf, &defs, false);
     println!("norm {}", to_string(&nf, &mut Vec::new()));
 
-    let mut ty : Term = infer(&term, &defs, true).unwrap();
-    reduce(&mut ty, &defs, true);
-    println!("type {}", to_string(&ty, &mut Vec::new()));
-    //println!("type {:?}", ty);
 
 
     Ok(())
