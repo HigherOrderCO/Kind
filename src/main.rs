@@ -41,6 +41,14 @@ data List(T : Type)
 
 fn main() -> Result<(), std::string::String> {
     let (term, defs) = from_string_slice("
+        /False
+            $False *
+
+        /True
+            $True *
+            |unit True
+        /unit .unit True
+
         /Nat $Nat *
             |succ @pred Nat Nat
             |zero Nat
@@ -54,7 +62,6 @@ fn main() -> Result<(), std::string::String> {
             ~Nat n #n Nat :P n
             |succ #n Nat ::S n ::::Nat_ind P S Z n
             |zero Z
-        Nat_ind
 
         /Bool $Bool *
             |true  Bool
@@ -70,90 +77,42 @@ fn main() -> Result<(), std::string::String> {
             |true  T
             |false F
 
+        /IsTrue $IsTrue @ Bool *
+        |ist :IsTrue true 
+        /ist .ist IsTrue
 
+        /IsFalse $IsFalse @ Bool *
+        |isf :IsFalse false 
+        /isf .isf IsFalse
 
-
-        Nat
-        /not #bbb Bool
-            ~Bool bbb #x Bool Bool
-            |true  false
-            |false true
-
-        not
-
-        /Nat $Nat *
-            |succ @ Nat Nat
-            |zero Nat
-        /succ .succ Nat
-        /zero .zero Nat
-
-        /isZero #n Nat
-            ~Nat n #n Nat Bool
-            |succ #n Nat false
-            |zero true
-
-        isZero
-            
-            :succ :succ zero
-
-        main
-        
-        #x * x
-
-        /Inf @P * @c @ Bool @ Inf P P
-        /inf #P * #c @ Bool @ Inf P ::c true 
-             #P * #c @ Bool @ Inf P ::c false
-             inf
-        /fst #x Inf ::x Bool #b Bool #bs Inf b 
-        /snd #x Inf ::x Inf  #b Bool #bs Inf bs 
-
-        /Bool $Bool *
-            |true  Bool
-            |false Bool
-        /true  .true Bool
-        /false .false Bool
-
-        /Bool_ind
-            #P @ Bool *
-            #t :P true
-            #f :P false
+        /IsTrue_rect
+            #P @b Bool @ :IsTrue b *
+            #k ::P true ist
             #b Bool
-            ~Bool b :P self
-            |true t
-            |false f
+            #i :IsTrue b
+            ~:IsTrue b i #b Bool #i :IsTrue b Bool
+            |ist true
 
-        /Nat $Nat *
-            |succ @x Nat Nat
-            |zero Nat
-        /succ .succ Nat
-        /zero .zero Nat
-        /pred #n Nat
-            ~Nat n Nat
-            |succ #n Nat n
-            |zero zero
-        /0 zero
-        /1 :succ 0
-        /2 :succ 1
-        /3 :succ 2
-        /4 :succ 3
+        /typ
+            #b Bool
+            #it :IsTrue b
+            ~Bool b #b Bool *
+            |true True
+            |false False
+        
+        /test
+            #b Bool
+            #f :IsTrue false
+            ~:IsTrue false f typ
+            |ist unit
 
-        /Nat_ind
-            #P @ Nat *
-            #n Nat
-            #s @n Nat @ :P n :P :succ n
-            #z :P zero
-            ~Nat n :P self
-            |succ #x Nat ::s x ::::Nat_ind P x s z
-            |zero z
+        /pest
+            #b Bool
+            #f :IsTrue true
+            ~:IsTrue true f typ
+            |ist unit
 
-        /double
-            #n Nat
-            ::::Nat_ind
-                #x Nat Nat n
-                #n Nat #r Nat :succ :succ r
-                zero
-                
-        :pred :double 2
+        test
     ");
 
     println!("term {}", to_string(&term, &mut Vec::new()));
@@ -166,7 +125,7 @@ fn main() -> Result<(), std::string::String> {
     }
 
     let mut ty : Term = infer(&term, &defs, true).unwrap();
-    reduce(&mut ty, &defs, false);
+    reduce(&mut ty, &defs, true);
     println!("type {}", to_string(&ty, &mut Vec::new()));
 
     let mut nf = term.clone();

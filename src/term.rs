@@ -314,11 +314,11 @@ pub fn to_bytes(term : &Term, vars : &mut Vars) -> Vec<u8> {
                 //}
                 //vars.pop();
             },
-            &Ctr{ref nam, ref idt} => {
-                code.extend_from_slice(b".");
+            &Ctr{ref nam, idt: _} => {
+                //code.extend_from_slice(b".");
                 code.append(&mut nam.clone());
-                code.extend_from_slice(b" ");
-                build(code, &idt, vars);
+                //code.extend_from_slice(b" ");
+                //build(code, &idt, vars);
             },
             &Cas{ref idt, ref val, ref ret, ref cas} => {
                 code.extend_from_slice(b"~");
@@ -638,9 +638,9 @@ pub fn reduce(term : &mut Term, defs : &Defs, refs : bool) -> bool {
 
 // Performs an equality test. Mutable, because it may reduce redexes.
 pub fn equals_mut(a : &mut Term, b : &mut Term, defs : &Defs) -> bool {
-    // Reduces terms to weak head normal norm without dereferences.
-    weak_reduce(a, defs, false);
-    weak_reduce(b, defs, false);
+    // Reduces terms to weak head normal form
+    weak_reduce(a, defs, true);
+    weak_reduce(b, defs, true);
     // If one is a Ref and the other not, dereference.
     match (&a, &b) {
         (&Ref{nam: _}, &Ref{nam: _}) => {},
@@ -668,10 +668,6 @@ pub fn equals_mut(a : &mut Term, b : &mut Term, defs : &Defs) -> bool {
         (&mut Var{idx: ref mut a_idx},
          &mut Var{idx: ref mut b_idx}) => {
             a_idx == b_idx
-        },
-        (&mut Ref{nam: ref mut a_nam},
-         &mut Ref{nam: ref mut b_nam}) => {
-            a_nam == b_nam
         },
         (&mut Idt{nam: _, typ: ref mut a_typ, ctr: ref mut a_ctr},
          &mut Idt{nam: _, typ: ref mut b_typ, ctr: ref mut b_ctr}) => {
@@ -757,7 +753,7 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
                                 let mut new_typ_whnf = new_typ.clone();
                                 reduce(&mut new_typ_whnf, defs, false);
                                 return Err(format!(
-                                    "Type mismatch.\n- Expected : {}\n- Actual   : {}\n- On term: {}",
+                                    "Type mismatch.\n- Expected : {}\n- Actual   : {}\n- On term  : {}",
                                     to_string(&new_typ_whnf, vars),
                                     to_string(&arg_t, vars),
                                     to_string(&term, vars)))
@@ -799,11 +795,13 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
                     extend_context(typ_n, ctx);
                     let typ_t = Box::new(go(typ, vars, defs, ctx, checked)?);
                     let bod_t = Box::new(go(bod, vars, defs, ctx, checked)?);
+                    if !equals(&typ_t, &Set, defs) || !equals(&bod_t, &Set, defs) {
+                        return Err(format!("Forall not a type:\n- Fun type: {}\n- Bod type: {}",
+                            to_string(&typ_t, vars),
+                            to_string(&bod_t, vars)));
+                    }
                     vars.pop();
                     narrow_context(ctx);
-                    if !equals(&typ_t, &Set, defs) || !equals(&bod_t, &Set, defs) {
-                        return Err("Forall not a type.".to_string());
-                    }
                 }
                 Ok(Set)
             },
@@ -853,7 +851,7 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
                             indices.push(*arg.clone());
                             tmp_idt = *fun;
                         },
-                        Idt{nam, typ: _, ctr} => {
+                        Idt{nam, typ, ctr} => {
                             if !checked {
                                 if cas.len() != ctr.len() {
                                     return Err(format!(
@@ -872,14 +870,15 @@ pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::st
                                             String::from_utf8_lossy(&nam),
                                             String::from_utf8_lossy(ctr_nam)));
                                     }
-                                    let ctr_val = Ctr{nam: ctr_nam.to_vec(), idt: idt.clone()};
-                                    let cas_typ = case_type(ctr_typ, idt, ret, ctr_val, 0);
+                                    let ctr_idt = Idt{nam: nam.to_vec(), typ: typ.clone(), ctr: ctr.clone()};
+                                    let ctr_val = Ctr{nam: ctr_nam.to_vec(), idt: Box::new(ctr_idt)};
+                                    let cas_typ = case_type(ctr_typ, &idt, ret, ctr_val, 0);
                                     let cas_val_t = go(cas_val, vars, defs, ctx, checked)?;
                                     if !equals(&cas_val_t, &cas_typ, defs) {
                                         let mut cas_typ_whnf = cas_typ.clone();
                                         reduce(&mut cas_typ_whnf, defs, true);
                                         return Err(format!(
-                                            "Type mismatch on `{}` case of pattern-match.\n- Expected : {:?}\n- Actual   : {}",
+                                            "Type mismatch on `{}` case of pattern-match.\n- Expected : {}\n- Actual   : {}",
                                             String::from_utf8_lossy(ctr_nam),
                                             to_string(&cas_typ_whnf, vars),
                                             to_string(&cas_val_t, vars)));
