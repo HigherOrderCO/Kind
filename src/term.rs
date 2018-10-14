@@ -60,8 +60,8 @@ pub enum Term {
 
 use self::Term::{*};
 
-type Vars = Vec<Vec<u8>>;
-type Defs = HashMap<Vec<u8>, Term>;
+pub type Vars = Vec<Vec<u8>>;
+pub type Defs = HashMap<Vec<u8>, Term>;
 
 // Skips spaces, newlines, etc.
 pub fn skip_whites(code : &[u8]) -> &[u8] {

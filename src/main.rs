@@ -1,7 +1,17 @@
 pub mod term;
+pub mod syntax;
 use term::*;
 
 fn main() -> Result<(), std::string::String> {
+    let (term, defs) = syntax::from_string_slice("(P : Type, S : ((x : P) -> P), Z : P) -> P")?;
+    println!("Result: {}", syntax::to_string(&term, &mut Vec::new()));
+    println!("Result: {}", term);
+    return Ok(());
+
+
+
+
+
     let (term, defs) = from_string_slice("
         /False
             $False *
