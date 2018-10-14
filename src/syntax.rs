@@ -134,24 +134,26 @@ pub fn parse_term
     , defs   : &mut Defs)
     -> Result<Term, String> {
 
-    println!("parsing term");
+    //println!("parsing term");
 
     prepare_to_parse(cursor, code)?;
 
-    println!("ready: {}", String::from_utf8_lossy(&code[cursor.index..]));
+    //println!("ready: {}", String::from_utf8_lossy(&code[cursor.index..]));
 
     let parsed : Term;
+    let appliable : bool;
 
     // Parenthesis
-    if match_exact(cursor, code, b"((") {
-        println!("parens");
+    if match_exact(cursor, code, b"((") || match_exact(cursor, code, b"(data ") {
+        //println!("parens");
         advance_char(cursor, 1);
         parsed = parse_term(cursor, code, vars, defs)?;
+        appliable = true;
         parse_one_of(cursor, code, &[b")"])?;
 
     // Abstraction
     } else if match_exact(cursor, code, b"(") {
-        println!("abstraction");
+        //println!("abstraction");
         advance_char(cursor, 1);
         prepare_to_parse(cursor, code)?;
 
@@ -177,10 +179,10 @@ pub fn parse_term
         prepare_to_parse(cursor, code)?;
         let kind = parse_one_of(cursor, code, &[b"-", b"="])?;
         parse_one_of(cursor, code, &[b">"])?;
-        println!("aqui");
+        //println!("aqui");
         let mut abs = parse_term(cursor, code, vars, defs)?;
 
-        println!("aqui");
+        //println!("aqui");
 
         // Builds resulting lambda / forall
         for i in (0..args.len()).rev() {
@@ -195,17 +197,91 @@ pub fn parse_term
             vars.pop();
         }
         parsed = abs;
+        appliable = false;
 
     // Set
     } else if match_exact(cursor, code, b"Type") {
-        println!("Type");
+        //println!("Type");
         advance_char(cursor, 4);
         parsed = Set;
+        appliable = false;
+
+    // Inductive datatype
+    } else if match_exact(cursor, code, b"data") {
+        advance_char(cursor, 4);
+        let nam = parse_name(cursor, code)?;
+        prepare_to_parse(cursor, code)?;
+        parse_one_of(cursor, code, &[b":"])?;
+        prepare_to_parse(cursor, code)?;
+        //println!("hmm {}", String::from_utf8_lossy(&nam));
+        let typ = parse_term(cursor, code, vars, defs)?;
+        skip_whites(cursor, code);
+        let mut ctr : Vec<(Vec<u8>, Box<Term>)> = Vec::new();
+        vars.push(nam.to_vec());
+        while cursor.index < code.len() && match_exact(cursor, code, b"|") {
+            advance_char(cursor, 1);
+            let ctr_nam = parse_name(cursor, code)?;
+            parse_one_of(cursor, code, &[b":"])?;
+            let ctr_typ = parse_term(cursor, code, vars, defs)?;
+            let ctr_typ = Box::new(ctr_typ);
+            ctr.push((ctr_nam, ctr_typ));
+            skip_whites(cursor, code);
+        }
+        vars.pop();
+        let typ = Box::new(typ);
+        let def = nam.to_vec();
+        let idt = Idt{nam, typ, ctr};
+        defs.insert(def, idt.clone());
+        skip_whites(cursor, code);
+        //println!("hmm");
+        if match_exact(cursor, code, b")") {
+            //println!("a");
+            parsed = idt;
+        } else {
+            //println!("b");
+            parsed = parse_term(cursor, code, vars, defs)?;
+        }
+        appliable = false;
+
+    // Pattern-matching
+    } else if match_exact(cursor, code, b"match") {
+        // case Name(a, b) value : (a, b) => MOT | ctor (f0, f1) CASE_BOD
+        advance_char(cursor, 5);
+        let idt = parse_term(cursor, code, vars, defs)?;
+        let val = parse_term(cursor, code, vars, defs)?;
+        parse_one_of(cursor, code, &[b":"])?;
+        let ret = parse_term(cursor, code, vars, defs)?;
+        skip_whites(cursor, code);
+        let mut cas : Vec<(Vec<u8>, Box<Term>)> = Vec::new();
+        while cursor.index < code.len() && match_exact(cursor, code, b"|") {
+            advance_char(cursor, 1);
+            let cas_nam = parse_name(cursor, code)?;
+            let cas_fun = parse_term(cursor, code, vars, defs)?;
+            let cas_fun = Box::new(cas_fun);
+            cas.push((cas_nam, cas_fun));
+            skip_whites(cursor, code);
+        }
+        let idt = Box::new(idt);
+        let val = Box::new(val);
+        let ret = Box::new(ret);
+        parsed = Cas{idt, val, ret, cas};
+        appliable = false;
+
+    // Definition
+    } else if match_exact(cursor, code, b"def") {
+        advance_char(cursor, 3);
+        let nam = parse_name(cursor, code)?;
+        let val = parse_term(cursor, code, vars, defs)?;
+        defs.insert(nam.to_vec(), val);
+        let bod = parse_term(cursor, code, vars, defs)?;
+        parsed = bod;
+        appliable = false;
 
     // Variable
     } else {
-        println!("var");
+        //println!("var");
         let nam = parse_name(cursor, code)?;
+        //println!("var: {}", String::from_utf8_lossy(&nam));
         let mut idx : Option<usize> = None;
         for i in (0..vars.len()).rev() {
             if vars[i] == nam {
@@ -217,9 +293,46 @@ pub fn parse_term
             Some(idx) => Var{idx: idx as i32},
             None      => Ref{nam: nam.to_vec()}
         };
+        appliable = true;
     };
 
-    Ok(parsed)
+    // Constructor
+    let parsed = if appliable && match_exact(cursor, code, b".") {
+        advance_char(cursor, 1);
+        let nam = parse_name(cursor, code)?;
+        let idt = Box::new(parsed);
+        Ctr{nam,idt}
+    } else {
+        parsed
+    };
+
+    // Application
+    if appliable && match_exact(cursor, code, b"(") {
+        advance_char(cursor, 1);
+        // Parses arguments
+        let mut args : Vec<Term> = Vec::new();
+        while !match_exact(cursor, code, b")") {
+            let arg = parse_term(cursor, code, vars, defs)?;
+            args.push(arg);
+            prepare_to_parse(cursor, code)?;
+            if code[cursor.index] == b',' {
+                advance_char(cursor, 1);
+                prepare_to_parse(cursor, code)?;
+            }
+        }
+        advance_char(cursor, 1);
+        // Creates arguments object
+        let mut app = parsed;
+        for i in (0..args.len()).rev() {
+            let fun = Box::new(app);
+            let arg = Box::new(args[i].clone());
+            app = App{fun, arg}
+        }
+        Ok(app)
+
+    } else {
+        Ok(parsed)
+    }
 }
 
 // Converts a source-code to a term.
@@ -246,143 +359,6 @@ pub fn from_string(code : String) -> Result<(Term, Defs), String> {
     from_string_slice(&code)
 }
 
-/*
-    //if code[0] == b'(' && code[1] == b'(' {
-        //parse_term(&code[1..]);
-    //// Abstraction
-    //} else if code[0] == b'(' {
-        //while code[
-        
-    //// Datatype
-    //} else if code[0..4] == b"data" {
-    //// Pattern matching
-    //} else if code[0..4] == b"case" {
-    //// Definition
-    //} else if code[0..3] == b"def" {
-    //// Variable
-    //} else {
-    //}
-    ////let code = skip_whites(code);
-    ////if code[0..3] == b"def" {
-    ////} else if 
-    ////match code[0] {
-        ////// Definition
-        ////b'/' => {
-            ////let (code, nam) = parse_name(&code[1..]);
-            ////let (code, val) = parse_term(code, vars, defs);
-            ////defs.insert(nam.to_vec(), val);
-            ////let (code, bod) = parse_term(code, vars, defs);
-            ////(code, bod)
-        ////},
-        ////// Application
-        ////b':' => {
-            ////let (code, fun) = parse_term(&code[1..], vars, defs);
-            ////let (code, arg) = parse_term(code, vars, defs);
-            ////let fun = Box::new(fun);
-            ////let arg = Box::new(arg);
-            ////(code, App{fun,arg})
-        ////},
-        ////// Lambda
-        ////b'#' => {
-            ////let (code, nam) = parse_name(&code[1..]);
-            ////vars.push(nam.to_vec());
-            ////let (code, typ) = parse_term(code, vars, defs);
-            ////let (code, bod) = parse_term(code, vars, defs);
-            ////vars.pop();
-            ////let nam = nam.to_vec();
-            ////let typ = Box::new(typ);
-            ////let bod = Box::new(bod);
-            ////(code, Lam{nam,typ,bod})
-        ////},
-        ////// Forall
-        ////b'@' => {
-            ////let (code, nam) = parse_name(&code[1..]);
-            ////vars.push(nam.to_vec());
-            ////let (code, typ) = parse_term(code, vars, defs);
-            ////let (code, bod) = parse_term(code, vars, defs);
-            ////vars.pop();
-            ////let nam = nam.to_vec();
-            ////let typ = Box::new(typ);
-            ////let bod = Box::new(bod);
-            ////(code, All{nam,typ,bod})
-        ////},
-        ////// Inductive Data Type
-        ////b'$' => {
-            ////let (code, nam) = parse_name(&code[1..]);
-            ////let (code, typ) = parse_term(code, vars, defs);
-            ////let nam = nam.to_vec();
-            ////let typ = Box::new(typ);
-            ////let code = skip_whites(code);
-            ////let mut new_code = code;
-            ////let mut ctr : Vec<(Vec<u8>, Box<Term>)> = Vec::new();
-            ////vars.push(nam.to_vec());
-            ////while new_code.len() > 0 && new_code[0] == b'|' {
-                ////let code = &new_code[1..];
-                ////let (code, ctr_nam) = parse_name(code);
-                ////let (code, ctr_typ) = parse_term(code, vars, defs);
-                ////let code = skip_whites(code);
-                ////let ctr_nam = ctr_nam.to_vec();
-                ////let ctr_typ = Box::new(ctr_typ);
-                ////ctr.push((ctr_nam, ctr_typ));
-                ////new_code = code;
-            ////};
-            ////vars.pop();
-            ////(new_code, Idt{nam, typ, ctr})
-        ////},
-        ////// Constructor
-        ////b'.' => {
-            ////let (code, nam) = parse_name(&code[1..]);
-            ////let (code, idt) = parse_term(code, vars, defs);
-            ////let nam = nam.to_vec();
-            ////let idt = Box::new(idt);
-            ////(code, Ctr{nam,idt})
-        ////},
-        ////// Pattern-Matching
-        ////b'~' => {
-            ////let (code, idt) = parse_term(&code[1..], vars, defs);
-            ////let (code, val) = parse_term(code, vars, defs);
-            ////let (code, ret) = parse_term(code, vars, defs);
-            ////let val = Box::new(val);
-            ////let idt = Box::new(idt);
-            ////let ret = Box::new(ret);
-            ////let code = skip_whites(code);
-            ////let mut new_code = code;
-            ////let mut cas : Vec<(Vec<u8>, Box<Term>)> = Vec::new();
-            ////while new_code.len() > 0 && new_code[0] == b'|' {
-                ////let code = &new_code[1..];
-                ////let (code, cas_nam) = parse_name(code);
-                ////let (code, cas_fun) = parse_term(code, vars, defs);
-                ////let cas_nam = cas_nam.to_vec();
-                ////let cas_fun = Box::new(cas_fun);
-                ////cas.push((cas_nam, cas_fun));
-                ////new_code = skip_whites(code);
-            ////}
-            ////(new_code, Cas{idt,val,ret,cas})
-        ////},
-        ////// Set
-        ////b'*' => {
-            ////(&code[1..], Set)
-        ////},
-        ////// Variable
-        ////_ => {
-            ////let (code, nam) = parse_name(code);
-            ////let mut idx : Option<i32> = None;
-            ////for i in (0..vars.len()).rev() {
-                ////if vars[i] == nam {
-                    ////idx = Some((vars.len() - i - 1) as i32);
-                    ////break;
-                ////}
-            ////}
-            ////(code, match idx {
-                ////Some(idx) => Var{idx},
-                ////None => Ref{nam: nam.to_vec()}
-            ////})
-        ////}
-    ////}
-////}
-*/
-
-
 // Converts a λ-term back to a source-code.
 pub fn to_bytes(term : &Term, vars : &mut Vars) -> Vec<u8> {
     fn build(code : &mut Vec<u8>, term : &Term, vars : &mut Vars) {
@@ -395,18 +371,19 @@ pub fn to_bytes(term : &Term, vars : &mut Vars) -> Vec<u8> {
             },
             &Lam{ref nam, ref typ, ref bod} => {
                 let nam = rename(nam, vars);
-                code.extend_from_slice(b"(");
+                code.extend_from_slice(b"((");
                 code.append(&mut nam.clone());
                 code.extend_from_slice(b" : ");
                 vars.push(nam.to_vec());
                 build(code, &typ, vars);
                 code.extend_from_slice(b") => ");
                 build(code, &bod, vars);
+                code.extend_from_slice(b")");
                 vars.pop();
             },
             &All{ref nam, ref typ, ref bod} => {
                 let nam = rename(nam, vars);
-                code.extend_from_slice(b"(");
+                code.extend_from_slice(b"((");
                 code.append(&mut nam.clone());
                 code.extend_from_slice(b" : ");
                 vars.push(nam.to_vec());
@@ -414,6 +391,7 @@ pub fn to_bytes(term : &Term, vars : &mut Vars) -> Vec<u8> {
                 code.extend_from_slice(b") -> ");
                 build(code, &bod, vars);
                 vars.pop();
+                code.extend_from_slice(b")");
             },
             &Var{idx} => {
                 let new_idx = vars.len() - idx as usize - 1;
@@ -425,34 +403,33 @@ pub fn to_bytes(term : &Term, vars : &mut Vars) -> Vec<u8> {
             &Ref{ref nam} => {
                 code.append(&mut nam.clone());
             },
-            &Idt{ref nam, typ: _, ctr: _} => {
+            &Idt{ref nam, ref typ, ref ctr} => {
                 let nam = rename(nam, vars);
-                //code.extend_from_slice(b"$");
+                code.extend_from_slice(b"data ");
                 code.append(&mut nam.clone());
-                //code.extend_from_slice(b" ");
-                //vars.push(nam.to_vec());
-                //build(code, &typ, vars);
-                //for (nam,typ) in ctr {
-                    //code.extend_from_slice(b" ");
-                    //code.extend_from_slice(b"|");
-                    //code.append(&mut nam.clone());
-                    //code.extend_from_slice(b" ");
-                    //build(code, &typ, vars);
-                //}
-                //vars.pop();
+                code.extend_from_slice(b" : ");
+                vars.push(nam.to_vec());
+                build(code, &typ, vars);
+                for (nam,typ) in ctr {
+                    code.extend_from_slice(b" ");
+                    code.extend_from_slice(b"|");
+                    code.append(&mut nam.clone());
+                    code.extend_from_slice(b" ");
+                    build(code, &typ, vars);
+                }
+                vars.pop();
             },
-            &Ctr{ref nam, idt: _} => {
-                //code.extend_from_slice(b".");
+            &Ctr{ref nam, ref idt} => {
+                build(code, &idt, vars);
+                code.extend_from_slice(b".");
                 code.append(&mut nam.clone());
-                //code.extend_from_slice(b" ");
-                //build(code, &idt, vars);
             },
             &Cas{ref idt, ref val, ref ret, ref cas} => {
-                code.extend_from_slice(b"~");
+                code.extend_from_slice(b"match ");
                 build(code, &idt, vars);
                 code.extend_from_slice(b" ");
                 build(code, &val, vars);
-                code.extend_from_slice(b" ");
+                code.extend_from_slice(b" : ");
                 build(code, &ret, vars);
                 for (nam,fun) in cas {
                     code.extend_from_slice(b" ");
@@ -479,7 +456,7 @@ pub fn to_bytes(term : &Term, vars : &mut Vars) -> Vec<u8> {
                 //build(code, &val);
             //},
             &Set => {
-                code.extend_from_slice(b"*");
+                code.extend_from_slice(b"Type");
             }
         }
     }

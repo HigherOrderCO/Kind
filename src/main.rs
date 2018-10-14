@@ -3,90 +3,45 @@ pub mod syntax;
 use term::*;
 
 fn main() -> Result<(), std::string::String> {
-    let (term, defs) = syntax::from_string_slice("(P : Type, S : ((x : P) -> P), Z : P) -> P")?;
-    println!("Result: {}", syntax::to_string(&term, &mut Vec::new()));
-    println!("Result: {}", term);
+    let (term, defs) = syntax::from_string_slice("
+        data False : Type
+
+        data True : Type
+        | unit : True
+
+        data Bool : Type
+        | true  : Bool
+        | false : Bool
+
+        data Nat : Type
+        | succ : (x : Nat) -> Nat
+        | zero : Nat
+
+        data IsTrue : Type
+        | Yep : IsTrue(Bool.true)
+
+        def isZero(n : Nat) =>
+            match Nat n : Bool
+            | succ(n : Nat) => Bool.true
+            | zero()        => Bool.false
+
+        def natInduction
+            ( P : (n : Nat) -> Type
+            , S : (n : Nat, i : P(n)) -> P(Nat.succ(n))
+            , Z : P(zero)
+            , n : Nat) =>
+            match Nat n : (n : Nat) -> P(n)
+            | succ(n : Nat) => S(n, natInduction(P, S, Z, n))
+            | zero()        => Z
+
+        natInduction
+    ")?;
+        //(P : Type, S : ((x : P) -> P), Z : P) -> S(P)
+    println!("term: {}", syntax::to_string(&term, &mut Vec::new()));
+    //println!("Result: {}", term);
     return Ok(());
 
-
-
-
-
-    let (term, defs) = from_string_slice("
-        /False
-            $False *
-
-        /True
-            $True *
-            |unit True
-        /unit .unit True
-
-        /Nat $Nat *
-            |succ @pred Nat Nat
-            |zero Nat
-        /succ .succ Nat
-        /zero .zero Nat
-        /Nat_ind
-            #P @n Nat *
-            #S @n Nat @i :P n :P :succ n
-            #Z :P zero
-            #n Nat
-            ~Nat n #n Nat :P n
-            |succ #n Nat ::S n ::::Nat_ind P S Z n
-            |zero Z
-
-        /Bool $Bool *
-            |true  Bool
-            |false Bool
-        /true  .true Bool
-        /false .false Bool
-        /Bool_ind
-            #P @b Bool *
-            #T :P true
-            #F :P false
-            #b Bool
-            ~Bool b #x Bool :P x
-            |true  T
-            |false F
-
-        /IsTrue $IsTrue @ Bool *
-        |ist :IsTrue true 
-        /ist .ist IsTrue
-
-        /IsFalse $IsFalse @ Bool *
-        |isf :IsFalse false 
-        /isf .isf IsFalse
-
-        /IsTrue_rect
-            #P @b Bool @ :IsTrue b *
-            #k ::P true ist
-            #b Bool
-            #i :IsTrue b
-            ~:IsTrue b i #b Bool #i :IsTrue b Bool
-            |ist true
-
-        /typ
-            #b Bool
-            #it :IsTrue b
-            ~Bool b #b Bool *
-            |true True
-            |false False
-        
-        /test
-            #b Bool
-            #f :IsTrue false
-            ~:IsTrue false f typ
-            |ist unit
-
-        /pest
-            #b Bool
-            #f :IsTrue true
-            ~:IsTrue true f typ
-            |ist unit
-
-        test
-    ");
-
+/*
     println!("term {}", to_string(&term, &mut Vec::new()));
 
     for (nam,val) in defs.iter() {
@@ -106,6 +61,7 @@ fn main() -> Result<(), std::string::String> {
     println!("norm {}", to_string(&nf, &mut Vec::new()));
 
 
+*/
 
     Ok(())
 }
