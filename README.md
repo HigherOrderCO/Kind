@@ -45,7 +45,7 @@ data Eq : (A : Type, x : A, y : A) -> Type
 
 data Vect : (A : Type, n : Nat) -> Type
 | cons : (A : Type, n : Nat, x : A, xs : Vect(A, n)) -> Vect(A, Nat.succ(n))
-| nil  : Vect(A, Nat.zero)
+| nil  : (A : Type) -> Vect(A, Nat.zero)
 
 let the(P : Type, x : P) =>
     x
@@ -61,6 +61,15 @@ let add(a : Nat, b : Nat) =>
     | succ(pred) => Nat.succ(add(pred, b))
     | zero       => b
     : Nat
+
+let tail(A : Type, n : Nat, vect : Vect(A, Nat.succ(n))) =>
+    case vect
+    | cons(A, n, x, xs) => xs
+    | nil(A)            => True.unit
+    : (A, n) => case n
+        | succ(m) => Vect(A, m)
+        | zero    => True
+        : Type
 
 let EFQ(P : Type, f : False) =>
     case f : P

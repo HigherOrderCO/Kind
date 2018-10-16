@@ -33,7 +33,7 @@ fn main() {
 
         data Vect : (A : Type, n : Nat) -> Type
         | cons : (A : Type, n : Nat, x : A, xs : Vect(A, n)) -> Vect(A, Nat.succ(n))
-        | nil  : Vect(A, Nat.zero)
+        | nil  : (A : Type) -> Vect(A, Nat.zero)
 
         let the(P : Type, x : P) =>
             x
@@ -63,6 +63,15 @@ fn main() {
             | zero       => z
             : P(self)
 
+        let tail(A : Type, n : Nat, vect : Vect(A, Nat.succ(n))) =>
+            case vect
+            | cons(A, n, x, xs) => xs
+            | nil(A)            => True.unit
+            : (A, n) => case n
+                | succ(m) => Vect(A, m)
+                | zero    => True
+                : Type
+
         let two
             Nat.succ(Nat.succ(Nat.zero))
 
@@ -90,4 +99,5 @@ fn main() {
     let mut nor : Term = val.clone();
     reduce(&mut nor, &defs, true);
     println!("[Norm]\n{}", syntax::term_to_string(&nor, &mut Vec::new(), true));
+
 }

@@ -249,6 +249,7 @@ pub fn get_fun_args(term : &Term) -> (&Term, Vec<&Term>) {
             _ => break
         }
     }
+    args.reverse();
     (term, args)
 }
 
@@ -722,7 +723,7 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                     let cas_bod = &cas[i].2;
                     let cas_typ = &ctr[i].1;
 
-                    // Check sure if case name matches the constructor's name
+                    // Checks if case name matches the constructor's name
                     if cas_nam != &ctr[i].0 {
                         return Err(WrongCaseName{
                             expect: ctr[i].0.clone(),
@@ -761,10 +762,10 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                     // For each field of this case
                     for j in 0..cas_arg.len() {
                         // Extends context with the field's type
-                        vars.push(cas_arg[i].clone());
                         let mut cas_arg_typ = cas_arg_typ[j].clone();
                         subs(&mut cas_arg_typ, &idt.clone(), j as i32 + 1);
                         extend_context(Box::new(cas_arg_typ.clone()), ctx);
+                        vars.push(cas_arg[j].clone());
 
                         // Shifts the return type
                         shift(&mut expect_cas_ret_typ, 1, 1 + ret.0.len() as i32) ;
@@ -777,13 +778,13 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                         };
                     }
 
+                    // Applies the witness to the expected case return type
+                    subs(&mut expect_cas_ret_typ, &wit, cas_idx.len() as i32);
+
                     // Applies each index to the expected case return type
                     for i in 0..cas_idx.len() {
-                        subs(&mut expect_cas_ret_typ, cas_idx[i], 0);
+                        subs(&mut expect_cas_ret_typ, cas_idx[i], (cas_idx.len() - i - 1) as i32);
                     }
-
-                    // Applies the witness to the expected case return type
-                    subs(&mut expect_cas_ret_typ, &wit, 0);
 
                     // Infers the actual case return type
                     let actual_cas_ret_typ = do_infer(cas_bod, vars, defs, ctx, checked)?;
@@ -809,10 +810,10 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
 
             // Builds the match return type
             let mut ret_typ : Term = *ret.1.clone();
-            for i in (0..idx.len()).rev() {
-                subs(&mut ret_typ, &idx[i], 0);
+            subs(&mut ret_typ, &val, idx.len() as i32);
+            for i in 0..idx.len() {
+                subs(&mut ret_typ, &idx[i], (idx.len() - i - 1) as i32);
             }
-            subs(&mut ret_typ, &val, 0);
             return Ok(ret_typ);
         },
         Set => {

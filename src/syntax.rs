@@ -45,7 +45,8 @@ pub fn is_name_char(chr : u8) -> bool {
     chr >= b'A' && chr <= b'Z' ||
     chr >= b'0' && chr <= b'9' ||
     chr == b'_' ||
-    chr == b'-'
+    chr == b'-' ||
+    chr == b'\''
 }
 
 // Skips spaces, newlines, etc.
@@ -136,18 +137,13 @@ pub fn parse_term
     , defs   : &mut Defs)
     -> Result<Term, String> {
 
-    //println!("parsing term");
-
     prepare_to_parse(cursor, code)?;
-
-    //println!("ready: {}", String::from_utf8_lossy(&code[cursor.index..]));
 
     let parsed : Term;
     let appliable : bool;
 
     // Parenthesis
     if match_exact(cursor, code, b"((") || match_exact(cursor, code, b"(data ") {
-        //println!("parens");
         advance_char(cursor, 1);
         parsed = parse_term(cursor, code, vars, defs)?;
         appliable = true;
@@ -155,7 +151,6 @@ pub fn parse_term
 
     // Abstraction
     } else if match_exact(cursor, code, b"(") {
-        //println!("abstraction");
         advance_char(cursor, 1);
         prepare_to_parse(cursor, code)?;
 
@@ -181,10 +176,7 @@ pub fn parse_term
         prepare_to_parse(cursor, code)?;
         let kind = parse_one_of(cursor, code, &[b"-", b"="])?;
         parse_one_of(cursor, code, &[b">"])?;
-        //println!("aqui");
         let mut abs = parse_term(cursor, code, vars, defs)?;
-
-        //println!("aqui");
 
         // Builds resulting lambda / forall
         for i in (0..args.len()).rev() {
@@ -203,7 +195,6 @@ pub fn parse_term
 
     // Set
     } else if match_exact(cursor, code, b"Type") {
-        //println!("Type");
         advance_char(cursor, 4);
         parsed = Set;
         appliable = false;
@@ -215,7 +206,6 @@ pub fn parse_term
         prepare_to_parse(cursor, code)?;
         parse_one_of(cursor, code, &[b":"])?;
         prepare_to_parse(cursor, code)?;
-        //println!("hmm {}", String::from_utf8_lossy(&nam));
         let typ = parse_term(cursor, code, vars, defs)?;
         skip_whites(cursor, code);
         let mut ctr : Vec<(Vec<u8>, Box<Term>)> = Vec::new();
@@ -235,12 +225,9 @@ pub fn parse_term
         let idt = Idt{nam, typ, ctr};
         defs.insert(def, idt.clone());
         skip_whites(cursor, code);
-        //println!("hmm");
         if match_exact(cursor, code, b")") {
-            //println!("a");
             parsed = idt;
         } else {
-            //println!("b");
             parsed = parse_term(cursor, code, vars, defs)?;
         }
         appliable = false;
@@ -339,9 +326,7 @@ pub fn parse_term
 
     // Variable
     } else {
-        //println!("var");
         let nam = parse_name(cursor, code)?;
-        //println!("var: {}", String::from_utf8_lossy(&nam));
         let mut idx : Option<usize> = None;
         for i in (0..vars.len()).rev() {
             if vars[i] == nam {
@@ -500,7 +485,7 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
                     if arg.len() > 0 {
                         code.extend_from_slice(b"(");
                         for i in 0..arg.len() {
-                            let mut arg_nam = arg[i].clone();
+                            let mut arg_nam = rename(&arg[i], vars);
                             code.append(&mut arg_nam.clone());
                             vars.push(arg_nam.to_vec());
                             if i < arg.len() - 1 {
@@ -520,8 +505,8 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
                 if ret.0.len() > 0 {
                     code.extend_from_slice(b"(");
                     for i in 0..ret.0.len() {
-                        let mut ret_arg_nam = ret.0[i].clone();
-                        code.append(&mut ret_arg_nam);
+                        let mut ret_arg_nam = rename(&ret.0[i], vars);
+                        code.append(&mut ret_arg_nam.clone());
                         vars.push(ret_arg_nam.to_vec());
                         if i < ret.0.len() - 1 {
                             code.extend_from_slice(b",");
