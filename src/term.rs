@@ -9,239 +9,130 @@ pub enum Term {
         typ: Box<Term>,
         bod: Box<Term>
     },
-
     // Lambda
     Lam {
         nam: Vec<u8>,
         typ: Box<Term>,
         bod: Box<Term>
     },
-
     // Variable
     Var {
         idx: i32
     },
-
     // Application
     App {
         fun: Box<Term>,
         arg: Box<Term>
     },
-
     // Inductive Data Type
     Idt {
         nam: Vec<u8>,
         typ: Box<Term>,
         ctr: Vec<(Vec<u8>, Box<Term>)>
     },
-
     // Constructor
     Ctr {
         nam: Vec<u8>,
         idt: Box<Term>
     },
-
     // Pattern-Matching
     Cas {
-        idt: Box<Term>,
         val: Box<Term>,
-        ret: Box<Term>,
-        cas: Vec<(Vec<u8>, Box<Term>)>
+        cas: Vec<(Vec<u8>, Vars, Box<Term>)>,
+        ret: (Vars, Box<Term>)
     },
-
     // Reference
     Ref {
         nam: Vec<u8>
     },
-
     // Type of Types
     Set
 }
-
 use self::Term::{*};
 
 pub type Vars = Vec<Vec<u8>>;
 pub type Defs = HashMap<Vec<u8>, Term>;
 
-// Skips spaces, newlines, etc.
-pub fn skip_whites(code : &[u8]) -> &[u8] {
-    let mut new_code : &[u8] = code;
-    while new_code.len() > 0 && (new_code[0] == b' ' || new_code[0] == b'\n') {
-        new_code = &new_code[1..];
-    }
-    new_code
+#[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
+pub enum TypeError {
+    AppTypeMismatch {
+        expect: Term,
+        actual: Term,
+        argval: Term,
+        term: Term,
+        vars: Vars
+    },
+    AppNotAll {
+        funval: Term,
+        funtyp: Term,
+        term: Term,
+        vars: Vars
+    },
+    ForallNotAType {
+        typtyp: Term,
+        bodtyp: Term,
+        term: Term,
+        vars: Vars
+    },
+    Unbound {
+        name: Vec<u8>,
+        vars: Vars
+    },
+    CtrNotIDT {
+        actual: Term,
+        term: Term,
+        vars: Vars
+    },
+    CtrNotFound {
+        name: Vec<u8>,
+        term: Term,
+        vars: Vars
+    },
+    MatchNotIDT {
+        actual: Term,
+        term: Term,
+        vars: Vars
+    },
+    WrongMatchIndexCount {
+        expect: usize,
+        actual: usize,
+        term: Term,
+        vars: Vars
+    },
+    WrongMatchReturnArity {
+        expect: usize,
+        actual: usize,
+        term: Term,
+        vars: Vars
+    },
+    WrongMatchCaseCount {
+        expect: usize,
+        actual: usize,
+        term: Term,
+        vars: Vars
+    },
+    WrongCaseName {
+        expect: Vec<u8>,
+        actual: Vec<u8>,
+        term: Term,
+        vars: Vars
+    },
+    WrongCaseArity {
+        expect: usize,
+        actual: usize,
+        name: Vec<u8>,
+        term: Term,
+        vars: Vars
+    },
+    WrongCaseType {
+        expect: Term,
+        actual: Term,
+        name: Vec<u8>,
+        term: Term,
+        vars: Vars
+    },
 }
-
-// Parses a name, returns the remaining code and the name.
-fn parse_name(code : &[u8]) -> (&[u8], &[u8]) {
-    let mut i : usize = 0;
-    while i < code.len() && !(code[i] == b' ' || code[i] == b'\n') {
-        i += 1;
-    }
-    (&code[i..], &code[0..i])
-}
-
-// Parses a term, returning the remaining code and the term.
-// Note: parsing currently panics on error. TODO: chill and return a Result.
-pub fn parse_term<'a>(code : &'a [u8], vars : &mut Vars, defs : &mut Defs) -> (&'a [u8], Term) {
-    let code = skip_whites(code);
-    match code[0] {
-        // Definition
-        b'/' => {
-            let (code, nam) = parse_name(&code[1..]);
-            let (code, val) = parse_term(code, vars, defs);
-            defs.insert(nam.to_vec(), val);
-            let (code, bod) = parse_term(code, vars, defs);
-            (code, bod)
-        },
-        // Application
-        b':' => {
-            let (code, fun) = parse_term(&code[1..], vars, defs);
-            let (code, arg) = parse_term(code, vars, defs);
-            let fun = Box::new(fun);
-            let arg = Box::new(arg);
-            (code, App{fun,arg})
-        },
-        // Lambda
-        b'#' => {
-            let (code, nam) = parse_name(&code[1..]);
-            vars.push(nam.to_vec());
-            let (code, typ) = parse_term(code, vars, defs);
-            let (code, bod) = parse_term(code, vars, defs);
-            vars.pop();
-            let nam = nam.to_vec();
-            let typ = Box::new(typ);
-            let bod = Box::new(bod);
-            (code, Lam{nam,typ,bod})
-        },
-        // Forall
-        b'@' => {
-            let (code, nam) = parse_name(&code[1..]);
-            vars.push(nam.to_vec());
-            let (code, typ) = parse_term(code, vars, defs);
-            let (code, bod) = parse_term(code, vars, defs);
-            vars.pop();
-            let nam = nam.to_vec();
-            let typ = Box::new(typ);
-            let bod = Box::new(bod);
-            (code, All{nam,typ,bod})
-        },
-        // Inductive Data Type
-        b'$' => {
-            let (code, nam) = parse_name(&code[1..]);
-            let (code, typ) = parse_term(code, vars, defs);
-            let nam = nam.to_vec();
-            let typ = Box::new(typ);
-            let code = skip_whites(code);
-            let mut new_code = code;
-            let mut ctr : Vec<(Vec<u8>, Box<Term>)> = Vec::new();
-            vars.push(nam.to_vec());
-            while new_code.len() > 0 && new_code[0] == b'|' {
-                let code = &new_code[1..];
-                let (code, ctr_nam) = parse_name(code);
-                let (code, ctr_typ) = parse_term(code, vars, defs);
-                let code = skip_whites(code);
-                let ctr_nam = ctr_nam.to_vec();
-                let ctr_typ = Box::new(ctr_typ);
-                ctr.push((ctr_nam, ctr_typ));
-                new_code = code;
-            };
-            vars.pop();
-            (new_code, Idt{nam, typ, ctr})
-        },
-        // Constructor
-        b'.' => {
-            let (code, nam) = parse_name(&code[1..]);
-            let (code, idt) = parse_term(code, vars, defs);
-            let nam = nam.to_vec();
-            let idt = Box::new(idt);
-            (code, Ctr{nam,idt})
-        },
-        // Pattern-Matching
-        b'~' => {
-            let (code, idt) = parse_term(&code[1..], vars, defs);
-            let (code, val) = parse_term(code, vars, defs);
-            let (code, ret) = parse_term(code, vars, defs);
-            let val = Box::new(val);
-            let idt = Box::new(idt);
-            let ret = Box::new(ret);
-            let code = skip_whites(code);
-            let mut new_code = code;
-            let mut cas : Vec<(Vec<u8>, Box<Term>)> = Vec::new();
-            while new_code.len() > 0 && new_code[0] == b'|' {
-                let code = &new_code[1..];
-                let (code, cas_nam) = parse_name(code);
-                let (code, cas_fun) = parse_term(code, vars, defs);
-                let cas_nam = cas_nam.to_vec();
-                let cas_fun = Box::new(cas_fun);
-                cas.push((cas_nam, cas_fun));
-                new_code = skip_whites(code);
-            }
-            (new_code, Cas{idt,val,ret,cas})
-        },
-        // Set
-        b'*' => {
-            (&code[1..], Set)
-        },
-        // Variable
-        _ => {
-            let (code, nam) = parse_name(code);
-            let mut idx : Option<i32> = None;
-            for i in (0..vars.len()).rev() {
-                if vars[i] == nam {
-                    idx = Some((vars.len() - i - 1) as i32);
-                    break;
-                }
-            }
-            (code, match idx {
-                Some(idx) => Var{idx},
-                None => Ref{nam: nam.to_vec()}
-            })
-        }
-    }
-}
-
-// Converts a source-code to a λ-term.
-pub fn from_bytes_slice<'a>(code : &'a [u8]) -> (Term, Defs) {
-    let mut vars = Vec::new();
-    let mut defs = HashMap::new();
-    let (_code, term) = parse_term(code, &mut vars, &mut defs);
-    (term, defs)
-}
-
-// Convenience
-pub fn from_bytes(code : Vec<u8>) -> (Term, Defs) {
-    from_bytes_slice(&code)
-}
-
-// Convenience
-pub fn from_string_slice(code : &str) -> (Term, Defs) {
-    from_bytes_slice(code.as_bytes())
-}
-
-// Convenience
-pub fn from_string(code : String) -> (Term, Defs) {
-    from_string_slice(&code)
-}
-
-// Builds a var name from an index (0="a", 1="b", 26="aa"...).
-pub fn var_name(idx : i32) -> Vec<u8> {
-    let mut name = Vec::new();
-    let mut idx  = idx;
-    if idx < 0 {
-        idx = -idx;
-        name.push(45);
-    }
-    if idx == 0 {
-        name.push(63);
-    }
-    while idx > 0 {
-        idx = idx - 1;
-        name.push((97 + idx % 26) as u8);
-        idx = idx / 26;
-    }
-    return name;
-}
+use self::TypeError::{*};
 
 // Adds an unique name to a Vars vector, properly renaming if shadowed.
 pub fn rename(nam : &Vec<u8>, vars : &Vars) -> Vec<u8> {
@@ -254,127 +145,6 @@ pub fn rename(nam : &Vec<u8>, vars : &Vars) -> Vec<u8> {
         }
     }
     new_nam
-}
-
-// Converts a λ-term back to a source-code.
-pub fn to_bytes(term : &Term, vars : &mut Vars) -> Vec<u8> {
-    fn build(code : &mut Vec<u8>, term : &Term, vars : &mut Vars) {
-        match term {
-            &App{ref fun, ref arg} => {
-                code.extend_from_slice(b":");
-                build(code, &fun, vars);
-                code.extend_from_slice(b" ");
-                build(code, &arg, vars);
-            },
-            &Lam{ref nam, ref typ, ref bod} => {
-                let nam = rename(nam, vars);
-                code.extend_from_slice(b"#");
-                code.append(&mut nam.clone());
-                code.extend_from_slice(b" ");
-                vars.push(nam.to_vec());
-                build(code, &typ, vars);
-                code.extend_from_slice(b" ");
-                build(code, &bod, vars);
-                vars.pop();
-            },
-            &All{ref nam, ref typ, ref bod} => {
-                let nam = rename(nam, vars);
-                code.extend_from_slice(b"@");
-                code.append(&mut nam.clone());
-                code.extend_from_slice(b" ");
-                vars.push(nam.to_vec());
-                build(code, &typ, vars);
-                code.extend_from_slice(b" ");
-                build(code, &bod, vars);
-                vars.pop();
-            },
-            &Var{idx} => {
-                let new_idx = vars.len() - idx as usize - 1;
-                let mut quo = b"X".to_vec();
-                quo.append(&mut idx.to_string().into_bytes());
-                let nam = if new_idx < vars.len() { &vars[new_idx] } else { &quo };
-                code.append(&mut nam.clone());
-            },
-            &Ref{ref nam} => {
-                code.append(&mut nam.clone());
-            },
-            &Idt{ref nam, typ: _, ctr: _} => {
-                let nam = rename(nam, vars);
-                //code.extend_from_slice(b"$");
-                code.append(&mut nam.clone());
-                //code.extend_from_slice(b" ");
-                //vars.push(nam.to_vec());
-                //build(code, &typ, vars);
-                //for (nam,typ) in ctr {
-                    //code.extend_from_slice(b" ");
-                    //code.extend_from_slice(b"|");
-                    //code.append(&mut nam.clone());
-                    //code.extend_from_slice(b" ");
-                    //build(code, &typ, vars);
-                //}
-                //vars.pop();
-            },
-            &Ctr{ref nam, idt: _} => {
-                //code.extend_from_slice(b".");
-                code.append(&mut nam.clone());
-                //code.extend_from_slice(b" ");
-                //build(code, &idt, vars);
-            },
-            &Cas{ref idt, ref val, ref ret, ref cas} => {
-                code.extend_from_slice(b"~");
-                build(code, &idt, vars);
-                code.extend_from_slice(b" ");
-                build(code, &val, vars);
-                code.extend_from_slice(b" ");
-                build(code, &ret, vars);
-                for (nam,fun) in cas {
-                    code.extend_from_slice(b" ");
-                    code.extend_from_slice(b"|");
-                    code.append(&mut nam.clone());
-                    code.extend_from_slice(b" ");
-                    build(code, &fun, vars);
-                }
-            },
-            //&Let{ref nam, ref val, ref bod} => {
-                //code.extend_from_slice(b"=");
-                //code.append(&mut nam.clone());
-                //code.extend_from_slice(b" ");
-                //build(code, &val);
-                //code.extend_from_slice(b" ");
-                //build(code, &bod);
-            //},
-            //&Bxv{ref val} => {
-                //code.extend_from_slice(b"|");
-                //build(code, &val);
-            //},
-            //&Bxt{ref val} => {
-                //code.extend_from_slice(b"!");
-                //build(code, &val);
-            //},
-            &Set => {
-                code.extend_from_slice(b"*");
-            }
-        }
-    }
-    let mut code = Vec::new();
-    build(&mut code, term, vars);
-    return code;
-}
-
-// Convenience.
-pub fn to_string(term : &Term, vars : &mut Vars) -> String {
-    let bytes = to_bytes(term, vars);
-    match String::from_utf8(bytes) {
-        Ok(s) => s,
-        Err(_) => String::from("Stringified code not a valid UTF8 string. This is a ironically a Formality bug.")
-    }
-}
-
-// Display trait.
-impl std::fmt::Display for Term {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", String::from_utf8_lossy(&to_bytes(&self, &mut Vec::new())))
-    }
 }
 
 // Increases the index of all free variables of a term, assuming `cut` enclosing lambdas, by `inc`.
@@ -405,24 +175,13 @@ pub fn shift(term : &mut Term, inc : i32, cut : i32) {
         &mut Ctr{nam: ref mut _nam, ref mut idt} => {
             shift(idt, inc, cut);
         },
-        &mut Cas{ref mut idt, ref mut val, ref mut ret, ref mut cas} => {
-            shift(idt, inc, cut);
+        &mut Cas{ref mut val, ref mut ret, ref mut cas} => {
             shift(val, inc, cut);
-            shift(ret, inc, cut);
-            for (_,cas_fun) in cas {
-                shift(cas_fun, inc, cut);
+            shift(&mut ret.1, inc, cut + 1 + ret.0.len() as i32);
+            for (_, cas_arg, cas_bod) in cas {
+                shift(cas_bod, inc, cut + cas_arg.len() as i32);
             }
         },
-        //&mut Let{nam: ref mut _nam, ref mut val, ref mut bod} => {
-            //shift(val, d, c);
-            //shift(bod, d, c);
-        //},
-        //&mut Bxv{ref mut val} => {
-            //shift(val, d, c);
-        //},
-        //&mut Bxt{ref mut val} => {
-            //shift(val, d, c);
-        //},
         &mut Set => {}
     }
 }
@@ -462,12 +221,11 @@ pub fn subs(term : &mut Term, value : &Term, dph : i32) {
         &mut Ctr{nam: _, ref mut idt} => {
             subs(idt, value, dph);
         },
-        &mut Cas{ref mut idt, ref mut val, ref mut ret, ref mut cas} => {
-            subs(idt, value, dph);
+        &mut Cas{ref mut val, ref mut ret, ref mut cas} => {
             subs(val, value, dph);
-            subs(ret, value, dph);
-            for (_,cas_fun) in cas {
-                subs(cas_fun, value, dph);
+            subs(&mut ret.1, value, dph + 1 + ret.0.len() as i32);
+            for (_, cas_arg, cas_bod) in cas {
+                subs(cas_bod, value, dph + cas_arg.len() as i32);
             }
         },
         _ => {}
@@ -479,27 +237,41 @@ pub fn subs(term : &mut Term, value : &Term, dph : i32) {
     };
 }
 
-// The expected type of a branch in a pattern-match.
-pub fn case_type(fun : &Term, idt : &Term, ret : &Term, mut slf : Term, dph : i32) -> Term {
-    match fun {
-        All{nam, ref typ, ref bod} => {
-            let mut typ = typ.clone();
-            subs(&mut typ, idt, dph+1);
-            shift(&mut slf, 1, 0);
-            slf = App{fun: Box::new(slf), arg: Box::new(Var{idx: 0})};
-            let bod = case_type(bod, idt, ret, slf, dph+1);
-            let nam = nam.to_vec();
-            let bod = Box::new(bod);
-            All{nam, typ, bod}
-        },
-        _ => {
-            let mut new_fun = fun.clone();
-            subs(&mut new_fun, &ret, dph);
-            let fun = Box::new(new_fun);
-            let arg = Box::new(slf.clone());
-            App{fun, arg}
+pub fn get_fun_args(term : &Term) -> (&Term, Vec<&Term>) {
+    let mut term : &Term = term;
+    let mut args : Vec<&Term> = Vec::new();
+    loop {
+        match term {
+            App{ref fun, ref arg} => {
+                args.push(arg);
+                term = fun;
+            },
+            _ => break
         }
     }
+    (term, args)
+}
+
+pub fn get_nams_typs_bod(term : &Term) -> (Vec<&Vec<u8>>, Vec<&Term>, &Term) {
+    let mut term : &Term = term;
+    let mut nams : Vec<&Vec<u8>> = Vec::new();
+    let mut typs : Vec<&Term> = Vec::new();
+    loop {
+        match term {
+            Lam{ref nam, ref typ, ref bod} => {
+                nams.push(nam);
+                typs.push(typ);
+                term = bod;
+            },
+            All{ref nam, ref typ, ref bod} => {
+                nams.push(nam);
+                typs.push(typ);
+                term = bod;
+            },
+            _ => break
+        }
+    }
+    (nams, typs, term)
 }
 
 // Reduces an expression if it is a redex, returns true if was.
@@ -520,23 +292,26 @@ pub fn redex(term : &mut Term, defs : &Defs, refs : bool) -> bool {
                 }
             }
         },
-        Cas{mut idt, mut val, mut ret, mut cas} => {
-            let tmp_val : Term = *val;
-            match tmp_val {
-                Ctr{nam, idt:_} => {
+        Cas{mut val, mut ret, mut cas} => {
+            let (ctr, args) = get_fun_args(&val);
+            match ctr {
+                Ctr{nam, idt: _} => {
                     changed = true;
-                    let mut fun : Term = Set;
+                    let mut ret : Term = Set;
                     for i in 0..cas.len() {
-                        let case_nam = &cas[i].0;
-                        let case_fun = &cas[i].1;
-                        if *case_nam == nam {
-                            fun = *case_fun.clone();
+                        let cas_nam = &cas[i].0;
+                        let cas_bod = &cas[i].2;
+                        if cas_nam == nam {
+                            ret = *cas_bod.clone();
                         }
                     }
-                    fun
+                    for arg in args {
+                        subs(&mut ret, &arg, 0);
+                    }
+                    ret
                 },
-                t => {
-                    Cas{idt, val: Box::new(t), ret, cas}
+                _ => {
+                    Cas{val: val.clone(), ret, cas} // TODO: how to avoid this clone?
                 }
             }
         },
@@ -565,37 +340,40 @@ pub fn redex(term : &mut Term, defs : &Defs, refs : bool) -> bool {
 pub fn global_reduce_step(term : &mut Term, defs : &Defs, refs : bool) -> bool {
     let changed_below = match term {
         App{ref mut fun, ref mut arg} => {
-            global_reduce_step(fun, defs, refs) ||
-            global_reduce_step(arg, defs, refs)
+            let fun = global_reduce_step(fun, defs, refs);
+            let arg = global_reduce_step(arg, defs, refs);
+            fun || arg
         },
         Lam{nam: _, ref mut typ, ref mut bod} => {
-            global_reduce_step(typ, defs, refs) ||
-            global_reduce_step(bod, defs, refs)
+            let typ = global_reduce_step(typ, defs, refs);
+            let bod = global_reduce_step(bod, defs, refs);
+            typ || bod
         },
         All{nam: _, ref mut typ, ref mut bod} => {
-            global_reduce_step(typ, defs, refs) ||
-            global_reduce_step(bod, defs, refs)
+            let typ = global_reduce_step(typ, defs, refs);
+            let bod = global_reduce_step(bod, defs, refs);
+            typ || bod
         },
         Idt{nam: _, ref mut typ, ref mut ctr} => {
             let mut changed_ctr = false;
             for i in 0..ctr.len() {
                 changed_ctr = changed_ctr || global_reduce_step(&mut ctr[i].1, defs, refs);
             }
-            changed_ctr || global_reduce_step(typ, defs, refs)
+            let typ = global_reduce_step(typ, defs, refs);
+            changed_ctr || typ
         },
         Ctr{nam: _, ref mut idt} => {
             global_reduce_step(idt, defs, refs)
         },
-        Cas{ref mut idt, ref mut val, ref mut ret, ref mut cas} => {
+        Cas{ref mut val, ref mut ret, ref mut cas} => {
             let mut changed_cas = false;
             for i in 0..cas.len() {
-                let cas_fun = &mut cas[i].1;
-                changed_cas = changed_cas || global_reduce_step(cas_fun, defs, refs);
+                let cas_ret = &mut cas[i].2;
+                changed_cas = changed_cas || global_reduce_step(cas_ret, defs, refs);
             }
-            changed_cas ||
-            global_reduce_step(idt, defs, refs) ||
-            global_reduce_step(val, defs, refs) ||
-            global_reduce_step(ret, defs, refs)
+            let val = global_reduce_step(val, defs, refs);
+            let ret = global_reduce_step(&mut ret.1, defs, refs);
+            changed_cas || val || ret
         },
         _ => false
     };
@@ -609,7 +387,7 @@ pub fn weak_global_reduce_step(term : &mut Term, defs : &Defs, refs : bool) -> b
         App{ref mut fun, arg: _} => {
             weak_global_reduce_step(fun, defs, refs)
         },
-        Cas{idt: _, ref mut val, ret: _, cas: _} => {
+        Cas{ref mut val, ret: _, cas: _} => {
             weak_global_reduce_step(val, defs, refs)
         },
         _ => false
@@ -630,8 +408,18 @@ pub fn weak_reduce(term : &mut Term, defs : &Defs, refs : bool) -> bool {
 // Reduces a term to normal form.
 pub fn reduce(term : &mut Term, defs : &Defs, refs : bool) -> bool {
     let mut changed = false;
-    while global_reduce_step(term, defs, refs) {
-        changed = true;
+    loop {
+        // Reduces as much as possible without ref expansions
+        while global_reduce_step(term, defs, false) {
+            changed = true;
+        }
+        // Reduces once with ref expansion
+        if refs && global_reduce_step(term, defs, true) {
+            changed = true;
+        // If nothing changed, halt
+        } else {
+            break;
+        }
     }
     changed
 }
@@ -642,12 +430,12 @@ pub fn equals_mut(a : &mut Term, b : &mut Term, defs : &Defs) -> bool {
     weak_reduce(a, defs, true);
     weak_reduce(b, defs, true);
     // If one is a Ref and the other not, dereference.
-    match (&a, &b) {
-        (&Ref{nam: _}, &Ref{nam: _}) => {},
-        (&Ref{nam: _}, _)            => { weak_reduce(a, defs, true); },
-        (_, &Ref{nam: _})            => { weak_reduce(b, defs, true); },
-        _                            => {}
-    };
+    //match (&a, &b) {
+        //(&Ref{nam: _}, &Ref{nam: _}) => {},
+        //(&Ref{nam: _}, _)            => { weak_reduce(a, defs, true); },
+        //(_, &Ref{nam: _})            => { weak_reduce(b, defs, true); },
+        //_                            => {}
+    //};
     // Check if the heads are equal.
     match (a, b) {
         (&mut App{fun: ref mut a_fun, arg: ref mut a_arg},
@@ -689,18 +477,17 @@ pub fn equals_mut(a : &mut Term, b : &mut Term, defs : &Defs) -> bool {
          &mut Ctr{nam: ref mut b_nam, idt: ref mut b_idt}) => {
             a_nam == b_nam && equals_mut(a_idt, b_idt, defs)
         },
-        (&mut Cas{idt: ref mut a_idt, val: ref mut a_val, ret: ref mut a_ret, cas: ref mut a_cas},
-         &mut Cas{idt: ref mut b_idt, val: ref mut b_val, ret: ref mut b_ret, cas: ref mut b_cas}) => {
+        (&mut Cas{val: ref mut a_val, ret: ref mut a_ret, cas: ref mut a_cas},
+         &mut Cas{val: ref mut b_val, ret: ref mut b_ret, cas: ref mut b_cas}) => {
             let mut eql_cas = true;
             for i in 0..a_cas.len() {
-                let (_, mut a_cas_fun) = a_cas[i].clone();
-                let (_, mut b_cas_fun) = b_cas[i].clone();
-                eql_cas = eql_cas && equals_mut(&mut a_cas_fun, &mut b_cas_fun, defs);
+                let (_, _, mut a_cas_bod) = a_cas[i].clone();
+                let (_, _, mut b_cas_bod) = b_cas[i].clone();
+                eql_cas = eql_cas && equals_mut(&mut a_cas_bod, &mut b_cas_bod, defs);
             }
             eql_cas &&
-            equals_mut(a_idt, b_idt, defs) &&
             equals_mut(a_val, b_val, defs) &&
-            equals_mut(a_ret, b_ret, defs)
+            equals_mut(&mut a_ret.1, &mut b_ret.1, defs)
         },
         (Set, Set) => true,
         _ => false
@@ -735,177 +522,306 @@ fn narrow_context<'a>(ctx : &'a mut Context<'a>) -> &'a mut Context<'a> {
     ctx
 }
 
-// TODO: return Result
-pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, std::string::String> {
-    pub fn go<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Context, checked : bool) -> Result<Term, std::string::String> {
-        match term {
-            App{fun, arg} => {
-                let mut fun_t = go(fun, vars, defs, ctx, checked)?;
-                weak_reduce(&mut fun_t, defs, true);
-                match fun_t {
-                    All{nam: _f_nam, typ: f_typ, bod: f_bod} => {
-                        let mut arg_n = arg.clone();
-                        if !checked {
-                            let arg_t = go(arg, vars, defs, ctx, checked)?;
-                            let mut new_typ = f_typ.clone();
-                            subs(&mut new_typ, &arg_n, 0);
-                            if !equals(&new_typ, &arg_t, defs) {
-                                let mut new_typ_whnf = new_typ.clone();
-                                reduce(&mut new_typ_whnf, defs, false);
-                                return Err(format!(
-                                    "Type mismatch.\n- Expected : {}\n- Actual   : {}\n- On term  : {}",
-                                    to_string(&new_typ_whnf, vars),
-                                    to_string(&arg_t, vars),
-                                    to_string(&term, vars)))
-                            }
+// The expected type of a branch in a pattern-match.
+//pub fn case_type(fun : &Term, idt : &Term, ret : &Term, mut slf : Term, dph : i32) -> Term {
+    //match fun {
+        //All{nam, ref typ, ref bod} => {
+            //let mut typ = typ.clone();
+            //subs(&mut typ, idt, dph+1);
+            //shift(&mut slf, 1, 0);
+            //slf = App{fun: Box::new(slf), arg: Box::new(Var{idx: 0})};
+            //let bod = case_type(bod, idt, ret, slf, dph+1);
+            //let nam = nam.to_vec();
+            //let bod = Box::new(bod);
+            //All{nam, typ, bod}
+        //},
+        //_ => {
+            //let mut new_fun = fun.clone();
+            //subs(&mut new_fun, &ret, dph);
+            //let fun = Box::new(new_fun);
+            //let arg = Box::new(slf.clone());
+            //App{fun, arg}
+        //}
+    //}
+//}
+
+// Infers the type
+pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Context, checked : bool) -> Result<Term, TypeError> {
+    match term {
+        App{fun, arg} => {
+            let mut fun_t = do_infer(fun, vars, defs, ctx, checked)?;
+            weak_reduce(&mut fun_t, defs, true);
+            match fun_t {
+                All{nam: _f_nam, typ: f_typ, bod: f_bod} => {
+                    let mut arg_n = arg.clone();
+                    if !checked {
+                        let arg_t = do_infer(arg, vars, defs, ctx, checked)?;
+                        let mut new_typ = f_typ.clone();
+                        subs(&mut new_typ, &arg_n, 0);
+                        if !equals(&new_typ, &arg_t, defs) {
+                            //let mut new_typ_whnf = new_typ.clone();
+                            //reduce(&mut new_typ_whnf, defs, false);
+                            return Err(AppTypeMismatch{
+                                expect: arg_t.clone(), 
+                                actual: *new_typ.clone(),
+                                argval: *arg.clone(),
+                                term: term.clone(),
+                                vars: vars.clone()
+                            });
                         }
-                        let mut new_bod = f_bod.clone();
-                        subs(&mut new_bod, &arg_n, 0);
-                        Ok(*new_bod)
-                    },
-                    _ => {
-                        Err(format!(
-                            "Not a function.\n- Type: {}\n- On term: {}",
-                            to_string(&fun_t, vars),
-                            to_string(&term, vars)))
                     }
+                    let mut new_bod = f_bod.clone();
+                    subs(&mut new_bod, &arg_n, 0);
+                    Ok(*new_bod)
+                },
+                _ => {
+                    Err(AppNotAll{
+                        funval: *fun.clone(),
+                        funtyp: fun_t.clone(),
+                        term: term.clone(),
+                        vars: vars.clone()
+                    })
                 }
-            },
-            Lam{nam, typ, bod} => {
+            }
+        },
+        Lam{nam, typ, bod} => {
+            let nam = rename(&nam, vars);
+            let mut typ_n = typ.clone();
+            vars.push(nam.to_vec());
+            extend_context(typ_n.clone(), ctx);
+            let bod_t = Box::new(do_infer(bod, vars, defs, ctx, checked)?);
+            vars.pop();
+            narrow_context(ctx);
+            if !checked {
+                let nam = nam.clone();
+                let typ = typ.clone();
+                let bod = bod_t.clone();
+                do_infer(&All{nam,typ,bod}, vars, defs, ctx, checked)?;
+            }
+            Ok(All{nam: nam.clone(), typ: typ_n, bod: bod_t})
+        },
+        All{nam, typ, bod} => {
+            if !checked {
                 let nam = rename(&nam, vars);
                 let mut typ_n = typ.clone();
                 vars.push(nam.to_vec());
-                extend_context(typ_n.clone(), ctx);
-                let bod_t = Box::new(go(bod, vars, defs, ctx, checked)?);
+                extend_context(typ_n, ctx);
+                let typ_t = Box::new(do_infer(typ, vars, defs, ctx, checked)?);
+                let bod_t = Box::new(do_infer(bod, vars, defs, ctx, checked)?);
+                if !equals(&typ_t, &Set, defs) || !equals(&bod_t, &Set, defs) {
+                    return Err(ForallNotAType{
+                        typtyp: *typ_t.clone(),
+                        bodtyp: *bod_t.clone(),
+                        term: term.clone(),
+                        vars: vars.clone()
+                    });
+                }
                 vars.pop();
                 narrow_context(ctx);
-                if !checked {
-                    let nam = nam.clone();
-                    let typ = typ.clone();
-                    let bod = bod_t.clone();
-                    go(&All{nam,typ,bod}, vars, defs, ctx, checked)?;
-                }
-                Ok(All{nam: nam.clone(), typ: typ_n, bod: bod_t})
-            },
-            All{nam, typ, bod} => {
-                if !checked {
-                    let nam = rename(&nam, vars);
-                    let mut typ_n = typ.clone();
-                    vars.push(nam.to_vec());
-                    extend_context(typ_n, ctx);
-                    let typ_t = Box::new(go(typ, vars, defs, ctx, checked)?);
-                    let bod_t = Box::new(go(bod, vars, defs, ctx, checked)?);
-                    if !equals(&typ_t, &Set, defs) || !equals(&bod_t, &Set, defs) {
-                        return Err(format!("Forall not a type:\n- Fun type: {}\n- Bod type: {}",
-                            to_string(&typ_t, vars),
-                            to_string(&bod_t, vars)));
-                    }
-                    vars.pop();
-                    narrow_context(ctx);
-                }
-                Ok(Set)
-            },
-            Var{idx} => {
-                Ok(*ctx[ctx.len() - (*idx as usize) - 1].clone())
-            },
-            Ref{nam} => {
-                match defs.get(nam) {
-                    Some(val) => {
-                        infer(val, &defs, true)
-                    },
-                    None => Err(format!("Unbound variable {}.", String::from_utf8_lossy(nam)))
-                }
-            },
-            Idt{nam: _, typ, ctr: _} => {
-                let mut typ_v = typ.clone();
-                Ok(*typ_v)
-            },
-            Ctr{nam, idt} => {
-                let mut tmp_idt : Term = *idt.clone();
-                weak_reduce(&mut tmp_idt, defs, true);
-                match tmp_idt {
-                    Idt{nam:_, typ: _, ref ctr} => {
-                        for i in 0..ctr.len() {
-                            let ctr_nam = &ctr[i].0;
-                            let ctr_typ = &ctr[i].1;
-                            if ctr_nam == nam {
-                                let mut res_typ = ctr_typ.clone();
-                                subs(&mut res_typ, &idt.clone(), 0);
-                                return Ok(*res_typ);
-                            }
-                        }
-                        return Err(format!("Constructor not found: {}.", String::from_utf8_lossy(nam)))
-                    },
-                    _ => {
-                        Err(format!("Not an IDT: {:?}", to_string(&idt, vars)))
-                    }
-                }
-            },
-            Cas{idt, val, ret, cas} => {
-                let mut indices : Vec<Term> = Vec::new();
-                let mut tmp_idt : Term = *idt.clone();
-                weak_reduce(&mut tmp_idt, defs, true);
-                loop {
-                    match tmp_idt {
-                        App{fun, arg} => {
-                            indices.push(*arg.clone());
-                            tmp_idt = *fun;
-                        },
-                        Idt{nam, typ, ctr} => {
-                            if !checked {
-                                if cas.len() != ctr.len() {
-                                    return Err(format!(
-                                        "Mismatched pattern-match. The type `{}` has {} constructors, but {} were provided.",
-                                        String::from_utf8_lossy(&nam), ctr.len(), cas.len()));
-                                } 
-                                for i in 0..ctr.len() {
-                                    let ctr_nam = &ctr[i].0;
-                                    let ctr_typ = &ctr[i].1;
-                                    let cas_nam = &cas[i].0;
-                                    let cas_val = &cas[i].1;
-                                    if ctr_nam != cas_nam {
-                                        return Err(format!(
-                                            "Mismatched pattern-match. The case {} has name `{}`, but type `{}` calls it `{}`.", i,
-                                            String::from_utf8_lossy(cas_nam),
-                                            String::from_utf8_lossy(&nam),
-                                            String::from_utf8_lossy(ctr_nam)));
-                                    }
-                                    let ctr_idt = Idt{nam: nam.to_vec(), typ: typ.clone(), ctr: ctr.clone()};
-                                    let ctr_val = Ctr{nam: ctr_nam.to_vec(), idt: Box::new(ctr_idt)};
-                                    let cas_typ = case_type(ctr_typ, &idt, ret, ctr_val, 0);
-                                    let cas_val_t = go(cas_val, vars, defs, ctx, checked)?;
-                                    if !equals(&cas_val_t, &cas_typ, defs) {
-                                        let mut cas_typ_whnf = cas_typ.clone();
-                                        reduce(&mut cas_typ_whnf, defs, true);
-                                        return Err(format!(
-                                            "Type mismatch on `{}` case of pattern-match.\n- Expected : {}\n- Actual   : {}",
-                                            String::from_utf8_lossy(ctr_nam),
-                                            to_string(&cas_typ_whnf, vars),
-                                            to_string(&cas_val_t, vars)));
-                                    }
-                                }
-                            }
-                            let mut res : Term = *ret.clone();
-                            for i in (0..indices.len()).rev() {
-                                let fun = Box::new(res);
-                                let arg = Box::new(indices[i].clone());
-                                res = App{fun, arg};
-                            }
-                            let fun = Box::new(res);
-                            let arg = Box::new(*val.clone());
-                            res = App{fun, arg};
-                            return Ok(res);
-                        },
-                        _ => {
-                            return Err(format!("Pattern match type not a valid IDT."));
+            }
+            Ok(Set)
+        },
+        Var{idx} => {
+            Ok(*ctx[ctx.len() - (*idx as usize) - 1].clone())
+        },
+        Ref{nam} => {
+            match defs.get(nam) {
+                Some(val) => infer(val, &defs, true),
+                None => Err(Unbound{name: nam.clone(), vars: vars.clone()})
+            }
+        },
+        Idt{nam: _, typ, ctr: _} => {
+            let mut typ_v = typ.clone();
+            Ok(*typ_v)
+        },
+        Ctr{nam, idt} => {
+            let mut tmp_idt : Term = *idt.clone();
+            weak_reduce(&mut tmp_idt, defs, true);
+            match tmp_idt {
+                Idt{nam:_, typ: _, ref ctr} => {
+                    for i in 0..ctr.len() {
+                        let ctr_nam = &ctr[i].0;
+                        let ctr_typ = &ctr[i].1;
+                        if ctr_nam == nam {
+                            let mut res_typ = ctr_typ.clone();
+                            subs(&mut res_typ, &idt.clone(), 0);
+                            return Ok(*res_typ);
                         }
                     }
+                    return Err(CtrNotFound{
+                        name: nam.clone(),
+                        term: term.clone(),
+                        vars: vars.clone()
+                    });
+                },
+                _ => {
+                    Err(CtrNotIDT{
+                        actual: *idt.clone(),
+                        term: term.clone(),
+                        vars: vars.clone()
+                    })
                 }
-            },
-            Set => {
-                Ok(Set)
-            },
-        }
+            }
+        },
+        Cas{val, ret, cas} => {
+            // Gets datatype and applied indices
+            let idt_app = do_infer(val, vars, defs, ctx, checked)?;
+            let mut idt_fxs = get_fun_args(&idt_app);
+            let mut idt = idt_fxs.0.clone();
+            let mut idx = idt_fxs.1;
+            weak_reduce(&mut idt, defs, true);
+
+            // Gets datatype type and constructors
+            let (typ, ctr) = (match &idt {
+                Idt{nam:_, typ, ctr} => Ok((typ.clone(), ctr.clone())),
+                _ => Err(MatchNotIDT{
+                    actual: idt.clone(),
+                    term: term.clone(),
+                    vars: vars.clone()
+                })
+            })?;
+
+            if !checked {
+                let (_, expect_idx_typ, _) = get_nams_typs_bod(&typ); 
+
+                // Checks if number of indices match
+                if idx.len() != expect_idx_typ.len() {
+                    return Err(WrongMatchIndexCount{
+                        expect: expect_idx_typ.len(),
+                        actual: idx.len(),
+                        term: term.clone(),
+                        vars: vars.clone()
+                    });
+                }
+
+                // Check if return type has expected arity
+                if ret.0.len() != idx.len() {
+                    return Err(WrongMatchReturnArity{
+                        expect: idx.len(),
+                        actual: ret.0.len(),
+                        term: term.clone(),
+                        vars: vars.clone()
+                    });
+                }
+
+                // Checks if number of cases matches number of constructors
+                if cas.len() != ctr.len() {
+                    return Err(WrongMatchCaseCount{
+                        expect: ctr.len(),
+                        actual: cas.len(),
+                        term: term.clone(),
+                        vars: vars.clone()
+                    });
+                } 
+
+                // For each case of the pattern match
+                for i in 0..cas.len() {
+                    // Get its name, variables, body and type
+                    let cas_nam = &cas[i].0;
+                    let cas_arg = &cas[i].1;
+                    let cas_bod = &cas[i].2;
+                    let cas_typ = &ctr[i].1;
+
+                    // Check sure if case name matches the constructor's name
+                    if cas_nam != &ctr[i].0 {
+                        return Err(WrongCaseName{
+                            expect: ctr[i].0.clone(),
+                            actual: cas_nam.clone(),
+                            term: term.clone(),
+                            vars: vars.clone()
+                        });
+                    }
+
+                    // Gets argument types and body type
+                    let (_, cas_arg_typ, cas_bod_typ) = get_nams_typs_bod(cas_typ);
+
+                    // Gets the datatype indices
+                    let (_, cas_idx) = get_fun_args(cas_bod_typ);
+
+                    // Checks if case field count matches constructor field count
+                    if cas_arg_typ.len() != cas_arg.len() {
+                        return Err(WrongCaseArity{
+                            expect: cas_arg_typ.len(),
+                            actual: cas_arg.len(),
+                            name: cas_nam.clone(),
+                            term: term.clone(),
+                            vars: vars.clone()
+                        });
+                    }
+
+                    // Initializes the witness
+                    let mut wit = Ctr{
+                        nam: cas_nam.to_vec(),
+                        idt: Box::new(idt.clone())
+                    };
+
+                    // Initializes the expected case return type
+                    let mut expect_cas_ret_typ = ret.1.clone();
+
+                    // For each field of this case
+                    for j in 0..cas_arg.len() {
+                        // Extends context with the field's type
+                        vars.push(cas_arg[i].clone());
+                        let mut cas_arg_typ = cas_arg_typ[j].clone();
+                        subs(&mut cas_arg_typ, &idt.clone(), j as i32 + 1);
+                        extend_context(Box::new(cas_arg_typ.clone()), ctx);
+
+                        // Shifts the return type
+                        shift(&mut expect_cas_ret_typ, 1, 1 + ret.0.len() as i32) ;
+
+                        // Appends field variable to the witness
+                        shift(&mut wit, 1, 0);
+                        wit = App{
+                            fun: Box::new(wit),
+                            arg: Box::new(Var{idx: 0})
+                        };
+                    }
+
+                    // Applies each index to the expected case return type
+                    for i in 0..cas_idx.len() {
+                        subs(&mut expect_cas_ret_typ, cas_idx[i], 0);
+                    }
+
+                    // Applies the witness to the expected case return type
+                    subs(&mut expect_cas_ret_typ, &wit, 0);
+
+                    // Infers the actual case return type
+                    let actual_cas_ret_typ = do_infer(cas_bod, vars, defs, ctx, checked)?;
+
+                    // Checks if expected case return type matches actual case return type
+                    if !equals(&expect_cas_ret_typ, &actual_cas_ret_typ, defs) {
+                        return Err(WrongCaseType{
+                            expect: *expect_cas_ret_typ.clone(),
+                            actual: actual_cas_ret_typ.clone(),
+                            name: cas_nam.clone(),
+                            term: term.clone(),
+                            vars: vars.clone()
+                        });
+                    }
+
+                    // Removes vars and narrows context
+                    for _ in 0..cas_arg.len() {
+                        narrow_context(ctx);
+                        vars.pop();
+                    }
+                }
+            }
+
+            // Builds the match return type
+            let mut ret_typ : Term = *ret.1.clone();
+            for i in (0..idx.len()).rev() {
+                subs(&mut ret_typ, &idx[i], 0);
+            }
+            subs(&mut ret_typ, &val, 0);
+            return Ok(ret_typ);
+        },
+        Set => {
+            Ok(Set)
+        },
     }
-    go(term, &mut Vec::new(), defs, &mut Vec::new(), checked)
+}
+
+// Convenience
+pub fn infer(term : &Term, defs : &Defs, checked : bool) -> Result<Term, TypeError> {
+    do_infer(term, &mut Vec::new(), defs, &mut Vec::new(), checked)
 }
