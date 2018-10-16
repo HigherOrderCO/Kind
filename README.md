@@ -24,26 +24,31 @@ An efficient programming language featuring formal proofs.
 
 ## Example
 
-Here is a minimal example with some definitions, and a trivial proof that `2 + 2 = 4`.
+Here is a minimal example with some random definitions, and a trivial proof that `2 + 2 = 4`.
 
 ```haskell
-let the(P : Type, x : P) =>
-    x
-
 data False : Type
 
 data True : Type
-| Unit : True
-
-let EFQ(P : Type, f : False) =>
-    case f : P
-
-data Eq : (A : Type, x : A, y : A) -> Type
-| refl : (A : Type, x : A) -> Eq(A, x, x)
+| unit : True
 
 data Bool : Type
 | true    : Bool
 | false   : Bool
+
+data Nat : Type
+| succ : (n : Nat) -> Nat
+| zero : Nat
+
+data Eq : (A : Type, x : A, y : A) -> Type
+| refl : (A : Type, x : A) -> Eq(A, x, x)
+
+data Vect : (A : Type, n : Nat) -> Type
+| cons : (A : Type, n : Nat, x : A, xs : Vect(A, n)) -> Vect(A, Nat.succ(n))
+| nil  : Vect(A, Nat.zero)
+
+let the(P : Type, x : P) =>
+    x
 
 let not(b : Bool) =>
     case b
@@ -51,9 +56,14 @@ let not(b : Bool) =>
     | false => Bool.true
     : Bool
 
-data Nat : Type
-| succ : (n : Nat) -> Nat
-| zero : Nat
+let add(a : Nat, b : Nat) =>
+    case a
+    | succ(pred) => Nat.succ(add(pred, b))
+    | zero       => b
+    : Nat
+
+let EFQ(P : Type, f : False) =>
+    case f : P
 
 let induction
     ( P : (n : Nat) -> Type
@@ -64,12 +74,6 @@ let induction
     | succ(pred) => s(pred, induction(P, s, z, pred))
     | zero       => z
     : P(self)
-
-let add(a : Nat, b : Nat) =>
-    case a
-    | succ(pred) => Nat.succ(add(pred, b))
-    | zero       => b
-    : Nat
 
 let two
     Nat.succ(Nat.succ(Nat.zero))
