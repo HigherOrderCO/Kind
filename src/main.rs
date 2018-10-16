@@ -18,22 +18,22 @@ fn main() {
         data False : Type
 
         data True : Type
-        | unit : True
+        | unit    : True
 
         data Bool : Type
         | true    : Bool
         | false   : Bool
 
         data Nat : Type
-        | succ : (n : Nat) -> Nat
-        | zero : Nat
+        | succ   : (n : Nat) -> Nat
+        | zero   : Nat
 
         data Eq : (A : Type, x : A, y : A) -> Type
-        | refl : (A : Type, x : A) -> Eq(A, x, x)
+        | refl  : (A : Type, x : A) -> Eq(A, x, x)
 
         data Vect : (A : Type, n : Nat) -> Type
-        | cons : (A : Type, n : Nat, x : A, xs : Vect(A, n)) -> Vect(A, Nat.succ(n))
-        | nil  : (A : Type) -> Vect(A, Nat.zero)
+        | cons    : (A : Type, n : Nat, x : A, xs : Vect(A, n)) -> Vect(A, Nat.succ(n))
+        | nil     : (A : Type) -> Vect(A, Nat.zero)
 
         let the(P : Type, x : P) =>
             x
