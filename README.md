@@ -29,10 +29,10 @@ Here is a minimal example with some random definitions, and a trivial proof that
 *(Edit: to be clear, this code is just some arbitrary definitions to show the syntax! The proof of `2 + 2 = 4` is just the last definition, and it isn't really interesting. Soon, I'll be explaining how to prove cool things, and possibly write a tutorial on how to make a "DAO" Smart Contract that is provably "unhackable", in the sense its internal balance always matches the sum of its users balances.)*
 
 ```haskell
-data False : Type
+data Empty : Type
 
-data True : Type
-| unit    : True
+data Unit : Type
+| void    : Unit
 
 data Bool : Type
 | true    : Bool
@@ -64,16 +64,7 @@ let add(a : Nat, b : Nat) =>
     | zero       => b
     : Nat
 
-let tail(A : Type, n : Nat, vect : Vect(A, Nat.succ(n))) =>
-    case vect
-    | cons(A, n, x, xs) => xs
-    | nil(A)            => True.unit
-    : (A, n) => case n
-        | succ(m) => Vect(A, m)
-        | zero    => True
-        : Type
-
-let EFQ(P : Type, f : False) =>
+let EFQ(P : Type, f : Empty) =>
     case f : P
 
 let induction
@@ -85,6 +76,15 @@ let induction
     | succ(pred) => s(pred, induction(P, s, z, pred))
     | zero       => z
     : P(self)
+
+let tail(A : Type, n : Nat, vect : Vect(A, Nat.succ(n))) =>
+    case vect
+    | cons(A, n, x, xs) => xs
+    | nil(A)            => Unit.void
+    : (A, n) => case n
+        | succ(m) => Vect(A, m)
+        | zero    => Unit
+        : Type
 
 let two
     Nat.succ(Nat.succ(Nat.zero))

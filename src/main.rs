@@ -15,10 +15,10 @@ fn get_result<T>(name : Vec<u8>, result : Result<T, String>) -> T {
 
 fn main() {
     let (val, defs) = get_result(b"main".to_vec(), syntax::term_from_string_slice("
-        data False : Type
+        data Empty : Type
 
-        data True : Type
-        | unit    : True
+        data Unit : Type
+        | void    : Unit
 
         data Bool : Type
         | true    : Bool
@@ -50,7 +50,7 @@ fn main() {
             | zero       => b
             : Nat
 
-        let EFQ(P : Type, f : False) =>
+        let EFQ(P : Type, f : Empty) =>
             case f : P
 
         let induction
@@ -66,10 +66,10 @@ fn main() {
         let tail(A : Type, n : Nat, vect : Vect(A, Nat.succ(n))) =>
             case vect
             | cons(A, n, x, xs) => xs
-            | nil(A)            => True.unit
+            | nil(A)            => Unit.void
             : (A, n) => case n
                 | succ(m) => Vect(A, m)
-                | zero    => True
+                | zero    => Unit
                 : Type
 
         let two
