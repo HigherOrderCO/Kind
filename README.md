@@ -1,14 +1,30 @@
-## Formality
+# Formality
 
 An efficient programming language featuring formal proofs.
 
-Like Agda, Idris and Coq, Formality has a powerful type system capable of expressing and proving arbitrary theorems about its programs. Like Rust, C and C++, it is very lightweight and doesn't require a garbage collection. Unlike both, its runtime is massively parallel, being the first general-purpose programming language aiming the GPU. This allows it to be used for cases that are simply not viable in other proof assistants, such as smart contracts and computer graphics.
+## Features
 
-### How?
+- **Formal proofs:** Formality's type system allows it to [prove theorems](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence) about its own programs.
 
-Formality is merely a syntax for expressing inductive types (data) and dependent functions (computation). It is compilled to [Cedille-Core](https://github.com/maiavictor/cedille-core), which acts as a minimalist termination / consistency checker for it, allowing us to prove mathematical theorems about its programs. It is, then, compiled to the [Abstract Calculus](https://github.com/maiavictor/abstract-calculus), a massivelly parallel, non-garbage-collected and optimal model of computation. This lightweight runtime allows it to be used both for front-end applications and back-end smart-contracts. 
+- **Optimality:** Formality performs beta-reduction (lambda substitution) [optimally](https://www.amazon.com/Implementation-Functional-Programming-Languages-Theoretical/dp/0521621127).
 
-### Example
+- **No garbage-collection:** Formality doesn't require a garbage collection, making it resource-efficient.
+
+- **EVM-compatibility:** Formality can be compiled to the EVM to run [Ethereum](https://www.ethereum.org/) smart-contracts.
+
+- **GPU-compatibility:** Formality can also compile to CUDA / OpenCL and run in thousands of cores, making it *very fast*.
+
+- **Simplicity:** The entire implementation is ~2k LOC and aims to be kept simple.
+
+## How?
+
+*Theorem proving* is possible thanks to dependent functions and inductive datatypes, similarly to [Coq](https://coq.inria.fr/refman/language/cic.html), [Agda](https://github.com/agda/agda) and other proof assistants. To guarantee mathematical meaningfulness, Formality is compiled to [Cedille-core](https://github.com/maiavictor/cedille-core), a minimalist type theory which acts as a termination and consistency checker.
+
+*Optimality*, no *garbage-collection*, *EVM* and *GPU* compatibility are all possible due to compilation to the [symmetric interaction calculus](https://github.com/MaiaVictor/symmetric-interaction-calculus), a lightweight computing model that combines good aspects of the Turing Machine and the Lambda Calculus. In order for this to work, Formality enforces some compile-time restrictions based on Elementary Affine Logic.
+
+## Example
+
+Here is a minimal example with some definitions, and a trivial proof that `2 + 2 = 4`.
 
 ```haskell
 let the(P : Type, x : P) =>
@@ -68,10 +84,30 @@ let two_plus_two_is_four
 two_plus_two_is_four
 ```
 
-### Benchmarks
+## Done
 
-(TODO)
+- Formality syntax (parser / stringifier)
 
-### Syntax
+- Formality type checker
 
-(TODO)
+- Formality interpreter
+
+- [Symmetric Interaction Calculus (syntax, runtime)](https://github.com/maiavictor/symmetric-interaction-calculus)
+
+- [Cedille-core](https://github.com/maiavictor/cedille-core)
+
+- [GPU evaluator prototype](https://github.com/maiavictor/absal-rs/tree/parallel-test-3) and [concept](https://github.com/maiavictor/absal-ex)
+
+* Sans bugs, incremental improvements, minor missing features, etc.
+
+## To do
+
+- Elementary Affine Logic checks
+
+- Cedille compilation (port to Rust?)
+
+- Symmetric Interaction Calculus compilation and decompilation
+
+- EVM compilation
+
+- Complete CUDA / OpenCL evaluator
