@@ -26,6 +26,8 @@ An efficient programming language featuring formal proofs.
 
 Here is a minimal example with some random definitions, and a trivial proof that `2 + 2 = 4`.
 
+*(Edit: to be clear, this code is just some arbitrary definitions to show the syntax! The proof of `2 + 2 = 4` is just the last definition, and it isn't really interesting. Soon, I'll be explaining how to prove cool things, and possibly write a tutorial on how to make a "DAO" Smart Contract that is provably "unhackable", in the sense its internal balance always matches the sum of its users balances.)*
+
 ```haskell
 data False : Type
 
