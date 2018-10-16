@@ -50,6 +50,12 @@ fn main() {
             | zero       => b
             : Nat
 
+        let pred(a : Nat) =>
+            case a
+            | succ(pred) => pred
+            | zero       => Nat.zero
+            : Nat
+
         let EFQ(P : Type, f : Empty) =>
             case f : P
 
@@ -66,9 +72,15 @@ fn main() {
         let tail(A : Type, n : Nat, vect : Vect(A, Nat.succ(n))) =>
             case vect
             | cons(A, n, x, xs) => xs
+            | nil(A)            => Vect.nil(A)
+            : (A, n) => Vect(A, pred(n))
+
+        let head(A : Type, n : Nat, vect : Vect(A, Nat.succ(n))) =>
+            case vect
+            | cons(A, n, x, xs) => x
             | nil(A)            => Unit.void
             : (A, n) => case n
-                | succ(m) => Vect(A, m)
+                | succ(m) => A
                 | zero    => Unit
                 : Type
 
@@ -79,8 +91,7 @@ fn main() {
             Nat.succ(Nat.succ(Nat.succ(Nat.succ(Nat.zero))))
 
         let two_plus_two_is_four
-            the(Eq(Nat, add(two, two), four),
-                Eq.refl(Nat, four))
+            the(Eq(Nat, add(two, two), four), Eq.refl(Nat, four))
 
         two_plus_two_is_four
     "));
