@@ -248,6 +248,8 @@ You can see it on the `examples` directory. Soon, I'll explain how to prove cool
 
 - Formality interpreter
 
+- Formality interface
+
 - [Symmetric Interaction Calculus (syntax, runtime)](https://github.com/maiavictor/symmetric-interaction-calculus)
 
 - [Cedille-core](https://github.com/maiavictor/cedille-core)
@@ -257,8 +259,6 @@ You can see it on the `examples` directory. Soon, I'll explain how to prove cool
 * Sans bugs, incremental improvements, minor missing features, etc.
 
 ## To do
-
-- Properly present as a library and a command line interface
 
 - Elementary Affine Logic checks
 
