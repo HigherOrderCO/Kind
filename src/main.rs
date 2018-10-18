@@ -46,7 +46,7 @@ fn main() {
         | cons    : (A : Type, n : Nat, x : A, xs : Vect(A, n)) -> Vect(A, Nat.succ(n))
         | nil     : (A : Type)                                  -> Vect(A, Nat.zero)
 
-        -- Equality type: hold a proof that two values are identical
+        -- Equality type: holds a proof that two values are identical
         data Eq : (A : Type, x : A, y : A) -> Type
         | refl  : (A : Type, x : A) -> Eq(A, x, x)
 
@@ -62,9 +62,16 @@ fn main() {
             : Bool
 
         -- Predecessor of a natural number
-        let pred (a : Nat) =>
+        let pred(a : Nat) =>
             case a
             | succ(pred) => pred
+            | zero       => Nat.zero
+            : Nat
+
+        -- Double of a number: the keyword `fold` is used for recursion
+        let double(a : Nat) =>
+            case a
+            | succ(pred) => Nat.succ(Nat.succ(fold(pred)))
             | zero       => Nat.zero
             : Nat
 

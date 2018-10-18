@@ -58,7 +58,7 @@ data Vect : (A : Type, n : Nat) -> Type
 | cons    : (A : Type, n : Nat, x : A, xs : Vect(A, n)) -> Vect(A, Nat.succ(n))
 | nil     : (A : Type)                                  -> Vect(A, Nat.zero)
 
--- Equality type: hold a proof that two values are identical
+-- Equality type: holds a proof that two values are identical
 data Eq : (A : Type, x : A, y : A) -> Type
 | refl  : (A : Type, x : A) -> Eq(A, x, x)
 
@@ -74,9 +74,16 @@ let not(b : Bool) =>
     : Bool
 
 -- Predecessor of a natural number
-let pred (a : Nat) =>
+let pred(a : Nat) =>
     case a
     | succ(pred) => pred
+    | zero       => Nat.zero
+    : Nat
+
+-- Double of a number: the keyword `fold` is used for recursion
+let double(a : Nat) =>
+    case a
+    | succ(pred) => Nat.succ(Nat.succ(fold(pred)))
     | zero       => Nat.zero
     : Nat
 
@@ -213,11 +220,13 @@ Soon, I'll explain how to prove cooler things, and write a tutorial on how to ma
 
 ## To do
 
-- Properly serve as a library and a command line interface
+- Properly present as a library and a command line interface
 
 - Elementary Affine Logic checks
 
 - Cedille compilation (port to Rust?)
+
+- Coq compilation
 
 - Symmetric Interaction Calculus compilation and decompilation
 
@@ -237,4 +246,6 @@ Soon, I'll explain how to prove cooler things, and write a tutorial on how to ma
 
 ## Disclaimer
 
-This is just a sneak peek. There are missing features and code certainly has bugs. Do not it use on rocket engines.
+This is just a sneak peek. There are missing features and code certainly has bugs. Do not use it use on rocket engines.
+
+See [this thread](https://www.reddit.com/r/haskell/comments/9ojicd/sneak_peek_of_formality_a_language_combining/) for more info.
