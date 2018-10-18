@@ -24,7 +24,7 @@ An efficient programming language featuring formal proofs.
 
 ## Example
 
-Here are some random datatypes and functions to show the syntax, and a 1-LOC proof that `a + b == b + a`.
+Here are some random datatypes and functions to show the syntax, and a proof that `a + b == b + a`.
 
 ```haskell
 -- Empty, the type with no constructors
