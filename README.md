@@ -213,6 +213,8 @@ Soon, I'll explain how to prove cooler things, and write a tutorial on how to ma
 
 ## To do
 
+- Properly serve as a library and a command line interface
+
 - Elementary Affine Logic checks
 
 - Cedille compilation (port to Rust?)
@@ -222,3 +224,9 @@ Soon, I'll explain how to prove cooler things, and write a tutorial on how to ma
 - EVM compilation
 
 - Complete CUDA / OpenCL evaluator
+
+- IPFS imports, complete pretty-printing (so that printed proofs carry all dependencies, and you can just copypaste it), tests, documentation...
+
+## Disclaimer
+
+This is just a sneak peek. There are missing features and code certainly has bugs. 
