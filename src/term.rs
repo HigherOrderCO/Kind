@@ -155,12 +155,12 @@ pub fn shift(term : &mut Term, inc : i32, cut : i32) {
             shift(arg, inc, cut);
         },
         &mut Lam{nam: ref mut _nam, ref mut typ, ref mut bod} => {
-            shift(typ, inc, cut+1);
-            shift(bod, inc, cut+1);
+            shift(typ, inc, cut + 1);
+            shift(bod, inc, cut + 1);
         },
         &mut All{nam: ref mut _nam, ref mut typ, ref mut bod} => {
-            shift(typ, inc, cut+1);
-            shift(bod, inc, cut+1);
+            shift(typ, inc, cut + 1);
+            shift(bod, inc, cut + 1);
         },
         &mut Var{ref mut idx} => {
             *idx = if *idx < cut { *idx } else { *idx + inc };
@@ -179,7 +179,7 @@ pub fn shift(term : &mut Term, inc : i32, cut : i32) {
             shift(val, inc, cut);
             shift(&mut ret.1, inc, cut + 1 + ret.0.len() as i32);
             for (_, cas_arg, cas_bod) in cas {
-                shift(cas_bod, inc, cut + cas_arg.len() as i32);
+                shift(cas_bod, inc, cut + 1 + cas_arg.len() as i32);
             }
         },
         &mut Set => {}
@@ -225,7 +225,7 @@ pub fn subs(term : &mut Term, value : &Term, dph : i32) {
             subs(val, value, dph);
             subs(&mut ret.1, value, dph + 1 + ret.0.len() as i32);
             for (_, cas_arg, cas_bod) in cas {
-                subs(cas_bod, value, dph + cas_arg.len() as i32);
+                subs(cas_bod, value, dph + 1 + cas_arg.len() as i32);
             }
         },
         _ => {}
@@ -276,7 +276,7 @@ pub fn get_nams_typs_bod(term : &Term) -> (Vec<&Vec<u8>>, Vec<&Term>, &Term) {
 }
 
 // Reduces an expression if it is a redex, returns true if was.
-pub fn redex(term : &mut Term, defs : &Defs, refs : bool) -> bool {
+pub fn redex(term : &mut Term, defs : &Defs, deref : bool) -> bool {
     let mut changed = false;
     let tmp_term = std::mem::replace(term, Set);
     let new_term : Term = match tmp_term {
@@ -298,18 +298,37 @@ pub fn redex(term : &mut Term, defs : &Defs, refs : bool) -> bool {
             match ctr {
                 Ctr{nam, idt: _} => {
                     changed = true;
-                    let mut ret : Term = Set;
+                    // Creates the folding function
+                    let mut new_ret = ret.clone();
+                    let mut new_cas = cas.clone();
+                    shift(&mut new_ret.1, 1, 1 + new_ret.0.len() as i32);
+                    for (_, ref mut new_cas_arg, ref mut new_cas_bod) in &mut new_cas {
+                        shift(new_cas_bod, 1, 1 + new_cas_arg.len() as i32);
+                    }
+                    let mut fold_fun = Lam{
+                        nam: b"X".to_vec(),
+                        typ: Box::new(Set),
+                        bod: Box::new(Cas{
+                            val: Box::new(Var{idx: 0}),
+                            ret: new_ret,
+                            cas: new_cas
+                        })
+                    };
+                    // Finds matching constructor and substitutes
+                    let mut bod : Term = Set;
                     for i in 0..cas.len() {
                         let cas_nam = &cas[i].0;
                         let cas_bod = &cas[i].2;
                         if cas_nam == nam {
-                            ret = *cas_bod.clone();
+                            bod = *cas_bod.clone();
                         }
                     }
-                    for arg in args {
-                        subs(&mut ret, &arg, 0);
+                    subs(&mut bod, &fold_fun, args.len() as i32);
+                    for i in 0..args.len() {
+                        subs(&mut bod, &args[i], (args.len() - i - 1) as i32);
                     }
-                    ret
+
+                    bod
                 },
                 _ => {
                     Cas{val: val.clone(), ret, cas} // TODO: how to avoid this clone?
@@ -317,7 +336,7 @@ pub fn redex(term : &mut Term, defs : &Defs, refs : bool) -> bool {
             }
         },
         Ref{nam} => {
-            if refs {
+            if deref {
                 match defs.get(&nam) {
                     Some(val) => {
                         changed = true;
@@ -338,76 +357,76 @@ pub fn redex(term : &mut Term, defs : &Defs, refs : bool) -> bool {
 }
 
 // Performs a global parallel reduction step.
-pub fn global_reduce_step(term : &mut Term, defs : &Defs, refs : bool) -> bool {
+pub fn global_reduce_step(term : &mut Term, defs : &Defs, deref : bool) -> bool {
     let changed_below = match term {
         App{ref mut fun, ref mut arg} => {
-            let fun = global_reduce_step(fun, defs, refs);
-            let arg = global_reduce_step(arg, defs, refs);
+            let fun = global_reduce_step(fun, defs, deref);
+            let arg = global_reduce_step(arg, defs, deref);
             fun || arg
         },
         Lam{nam: _, ref mut typ, ref mut bod} => {
-            let typ = global_reduce_step(typ, defs, refs);
-            let bod = global_reduce_step(bod, defs, refs);
+            let typ = global_reduce_step(typ, defs, deref);
+            let bod = global_reduce_step(bod, defs, deref);
             typ || bod
         },
         All{nam: _, ref mut typ, ref mut bod} => {
-            let typ = global_reduce_step(typ, defs, refs);
-            let bod = global_reduce_step(bod, defs, refs);
+            let typ = global_reduce_step(typ, defs, deref);
+            let bod = global_reduce_step(bod, defs, deref);
             typ || bod
         },
         Idt{nam: _, ref mut typ, ref mut ctr} => {
             let mut changed_ctr = false;
             for i in 0..ctr.len() {
-                changed_ctr = changed_ctr || global_reduce_step(&mut ctr[i].1, defs, refs);
+                changed_ctr = changed_ctr || global_reduce_step(&mut ctr[i].1, defs, deref);
             }
-            let typ = global_reduce_step(typ, defs, refs);
+            let typ = global_reduce_step(typ, defs, deref);
             changed_ctr || typ
         },
         Ctr{nam: _, ref mut idt} => {
-            global_reduce_step(idt, defs, refs)
+            global_reduce_step(idt, defs, deref)
         },
         Cas{ref mut val, ref mut ret, ref mut cas} => {
             let mut changed_cas = false;
             for i in 0..cas.len() {
                 let cas_ret = &mut cas[i].2;
-                changed_cas = changed_cas || global_reduce_step(cas_ret, defs, refs);
+                changed_cas = changed_cas || global_reduce_step(cas_ret, defs, deref);
             }
-            let val = global_reduce_step(val, defs, refs);
-            let ret = global_reduce_step(&mut ret.1, defs, refs);
+            let val = global_reduce_step(val, defs, deref);
+            let ret = global_reduce_step(&mut ret.1, defs, deref);
             changed_cas || val || ret
         },
         _ => false
     };
-    let changed_self = redex(term, defs, refs);
+    let changed_self = redex(term, defs, deref);
     changed_below || changed_self
 }
 
 // Performs a global parallel weak reduction step.
-pub fn weak_global_reduce_step(term : &mut Term, defs : &Defs, refs : bool) -> bool {
+pub fn weak_global_reduce_step(term : &mut Term, defs : &Defs, deref : bool) -> bool {
     let changed_below = match term {
         App{ref mut fun, arg: _} => {
-            weak_global_reduce_step(fun, defs, refs)
+            weak_global_reduce_step(fun, defs, deref)
         },
         Cas{ref mut val, ret: _, cas: _} => {
-            weak_global_reduce_step(val, defs, refs)
+            weak_global_reduce_step(val, defs, deref)
         },
         _ => false
     };
-    let changed_self = redex(term, defs, refs);
+    let changed_self = redex(term, defs, deref);
     changed_below || changed_self
 }
 
 // Reduces a term to weak head normal form.
-pub fn weak_reduce(term : &mut Term, defs : &Defs, refs : bool) -> bool {
+pub fn weak_reduce(term : &mut Term, defs : &Defs, deref : bool) -> bool {
     let mut changed = false;
-    while weak_global_reduce_step(term, defs, refs) {
+    while weak_global_reduce_step(term, defs, deref) {
         changed = true;
     }
     changed
 }
 
 // Reduces a term to normal form.
-pub fn reduce(term : &mut Term, defs : &Defs, refs : bool) -> bool {
+pub fn reduce(term : &mut Term, defs : &Defs, deref : bool) -> bool {
     let mut changed = false;
     loop {
         // Reduces as much as possible without ref expansions
@@ -415,7 +434,7 @@ pub fn reduce(term : &mut Term, defs : &Defs, refs : bool) -> bool {
             changed = true;
         }
         // Reduces once with ref expansion
-        if refs && global_reduce_step(term, defs, true) {
+        if deref && global_reduce_step(term, defs, true) {
             changed = true;
         // If nothing changed, halt
         } else {
@@ -426,80 +445,75 @@ pub fn reduce(term : &mut Term, defs : &Defs, refs : bool) -> bool {
 }
 
 // Performs an equality test. Mutable, because it may reduce redexes.
-pub fn equals_mut(a : &mut Term, b : &mut Term, defs : &Defs) -> bool {
-    // Reduces terms to weak head normal form
-    weak_reduce(a, defs, true);
-    weak_reduce(b, defs, true);
-    // If one is a Ref and the other not, dereference.
-    //match (&a, &b) {
-        //(&Ref{nam: _}, &Ref{nam: _}) => {},
-        //(&Ref{nam: _}, _)            => { weak_reduce(a, defs, true); },
-        //(_, &Ref{nam: _})            => { weak_reduce(b, defs, true); },
-        //_                            => {}
-    //};
+pub fn equals(a : &Term, b : &Term) -> bool {
     // Check if the heads are equal.
     match (a, b) {
-        (&mut App{fun: ref mut a_fun, arg: ref mut a_arg},
-         &mut App{fun: ref mut b_fun, arg: ref mut b_arg}) => {
-            equals_mut(a_fun, b_fun, defs) &&
-            equals_mut(a_arg, b_arg, defs)
+        (&App{fun: ref a_fun, arg: ref a_arg},
+         &App{fun: ref b_fun, arg: ref b_arg}) => {
+            equals(a_fun, b_fun) &&
+            equals(a_arg, b_arg)
         },
-        (&mut Lam{nam: _, typ: ref mut a_typ, bod: ref mut a_bod},
-         &mut Lam{nam: _, typ: ref mut b_typ, bod: ref mut b_bod}) => {
-            equals_mut(a_typ, b_typ, defs) &&
-            equals_mut(a_bod, b_bod, defs)
+        (&Lam{nam: _, typ: ref a_typ, bod: ref a_bod},
+         &Lam{nam: _, typ: ref b_typ, bod: ref b_bod}) => {
+            equals(a_typ, b_typ) &&
+            equals(a_bod, b_bod)
         },
-        (&mut All{nam: _, typ: ref mut a_typ, bod: ref mut a_bod},
-         &mut All{nam: _, typ: ref mut b_typ, bod: ref mut b_bod}) => {
-            equals_mut(a_typ, b_typ, defs) &&
-            equals_mut(a_bod, b_bod, defs)
+        (&All{nam: _, typ: ref a_typ, bod: ref a_bod},
+         &All{nam: _, typ: ref b_typ, bod: ref b_bod}) => {
+            equals(a_typ, b_typ) &&
+            equals(a_bod, b_bod)
         },
-        (&mut Var{idx: ref mut a_idx},
-         &mut Var{idx: ref mut b_idx}) => {
+        (&Var{idx: ref a_idx},
+         &Var{idx: ref b_idx}) => {
             a_idx == b_idx
         },
-        (&mut Idt{nam: _, typ: ref mut a_typ, ctr: ref mut a_ctr},
-         &mut Idt{nam: _, typ: ref mut b_typ, ctr: ref mut b_ctr}) => {
+        (&Ref{nam: ref a_nam},
+         &Ref{nam: ref b_nam}) => {
+            a_nam == b_nam
+         },
+        (&Idt{nam: _, typ: ref a_typ, ctr: ref a_ctr},
+         &Idt{nam: _, typ: ref b_typ, ctr: ref b_ctr}) => {
             let mut eql_ctr = true;
             if a_ctr.len() != b_ctr.len() {
                 return false;
             }
             for i in 0..a_ctr.len() {
-                let (mut a_ctr_nam, mut a_ctr_typ) = a_ctr[i].clone();
-                let (mut b_ctr_nam, mut b_ctr_typ) = b_ctr[i].clone();
+                let (a_ctr_nam, a_ctr_typ) = a_ctr[i].clone();
+                let (b_ctr_nam, b_ctr_typ) = b_ctr[i].clone();
                 eql_ctr =
                     eql_ctr &&
                     a_ctr_nam == b_ctr_nam &&
-                    equals_mut(&mut a_ctr_typ, &mut b_ctr_typ, defs);
+                    equals(&a_ctr_typ, &b_ctr_typ);
             }
-            equals_mut(a_typ, b_typ, defs) && eql_ctr
+            equals(a_typ, b_typ) && eql_ctr
         },
-        (&mut Ctr{nam: ref mut a_nam, idt: ref mut a_idt},
-         &mut Ctr{nam: ref mut b_nam, idt: ref mut b_idt}) => {
-            a_nam == b_nam && equals_mut(a_idt, b_idt, defs)
+        (&Ctr{nam: ref a_nam, idt: ref a_idt},
+         &Ctr{nam: ref b_nam, idt: ref b_idt}) => {
+            a_nam == b_nam && equals(a_idt, b_idt)
         },
-        (&mut Cas{val: ref mut a_val, ret: ref mut a_ret, cas: ref mut a_cas},
-         &mut Cas{val: ref mut b_val, ret: ref mut b_ret, cas: ref mut b_cas}) => {
+        (&Cas{val: ref a_val, ret: ref a_ret, cas: ref a_cas},
+         &Cas{val: ref b_val, ret: ref b_ret, cas: ref b_cas}) => {
             let mut eql_cas = true;
             for i in 0..a_cas.len() {
-                let (_, _, mut a_cas_bod) = a_cas[i].clone();
-                let (_, _, mut b_cas_bod) = b_cas[i].clone();
-                eql_cas = eql_cas && equals_mut(&mut a_cas_bod, &mut b_cas_bod, defs);
+                let (_, _, ref a_cas_bod) = a_cas[i];
+                let (_, _, ref b_cas_bod) = b_cas[i];
+                eql_cas = eql_cas && equals(&a_cas_bod, &b_cas_bod);
             }
             eql_cas &&
-            equals_mut(a_val, b_val, defs) &&
-            equals_mut(&mut a_ret.1, &mut b_ret.1, defs)
+            equals(a_val, b_val) &&
+            equals(&a_ret.1, &b_ret.1)
         },
         (Set, Set) => true,
         _ => false
     }
 }
 
-// Equality test. Requires copying, as it may need to reduce redexes.
-pub fn equals(a : &Term, b : &Term, defs : &Defs) -> bool {
-    let mut a_mut = a.clone();
-    let mut b_mut = b.clone();
-    equals_mut(&mut a_mut, &mut b_mut, defs)
+pub fn equals_reduced(a : &Term, b : &Term, defs : &Defs) -> bool {
+    let mut a_nf = a.clone();
+    let mut b_nf = b.clone();
+    reduce(&mut a_nf, defs, true);
+    reduce(&mut b_nf, defs, true);
+    equals(&a_nf, &b_nf)
 }
 
 // A Context is a vector of (name, value) assignments.
@@ -523,29 +537,6 @@ fn narrow_context<'a>(ctx : &'a mut Context<'a>) -> &'a mut Context<'a> {
     ctx
 }
 
-// The expected type of a branch in a pattern-match.
-//pub fn case_type(fun : &Term, idt : &Term, ret : &Term, mut slf : Term, dph : i32) -> Term {
-    //match fun {
-        //All{nam, ref typ, ref bod} => {
-            //let mut typ = typ.clone();
-            //subs(&mut typ, idt, dph+1);
-            //shift(&mut slf, 1, 0);
-            //slf = App{fun: Box::new(slf), arg: Box::new(Var{idx: 0})};
-            //let bod = case_type(bod, idt, ret, slf, dph+1);
-            //let nam = nam.to_vec();
-            //let bod = Box::new(bod);
-            //All{nam, typ, bod}
-        //},
-        //_ => {
-            //let mut new_fun = fun.clone();
-            //subs(&mut new_fun, &ret, dph);
-            //let fun = Box::new(new_fun);
-            //let arg = Box::new(slf.clone());
-            //App{fun, arg}
-        //}
-    //}
-//}
-
 // Infers the type
 pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Context, checked : bool) -> Result<Term, TypeError> {
     match term {
@@ -559,9 +550,7 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                         let arg_t = do_infer(arg, vars, defs, ctx, checked)?;
                         let mut new_typ = f_typ.clone();
                         subs(&mut new_typ, &arg_n, 0);
-                        if !equals(&new_typ, &arg_t, defs) {
-                            //let mut new_typ_whnf = new_typ.clone();
-                            //reduce(&mut new_typ_whnf, defs, false);
+                        if !equals_reduced(&new_typ, &arg_t, defs) {
                             return Err(AppTypeMismatch{
                                 expect: arg_t.clone(), 
                                 actual: *new_typ.clone(),
@@ -609,7 +598,7 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                 extend_context(typ_n, ctx);
                 let typ_t = Box::new(do_infer(typ, vars, defs, ctx, checked)?);
                 let bod_t = Box::new(do_infer(bod, vars, defs, ctx, checked)?);
-                if !equals(&typ_t, &Set, defs) || !equals(&bod_t, &Set, defs) {
+                if !equals_reduced(&typ_t, &Set, defs) || !equals_reduced(&bod_t, &Set, defs) {
                     return Err(ForallNotAType{
                         typtyp: *typ_t.clone(),
                         bodtyp: *bod_t.clone(),
@@ -666,8 +655,8 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
         },
         Cas{val, ret, cas} => {
             // Gets datatype and applied indices
-            let idt_app = do_infer(val, vars, defs, ctx, checked)?;
-            let mut idt_fxs = get_fun_args(&idt_app);
+            let val_typ = do_infer(val, vars, defs, ctx, checked)?;
+            let mut idt_fxs = get_fun_args(&val_typ);
             let mut idt = idt_fxs.0.clone();
             let mut idx = idt_fxs.1;
             weak_reduce(&mut idt, defs, true);
@@ -681,6 +670,20 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                     vars: vars.clone()
                 })
             })?;
+
+            // Builds the match return type
+            let mut ret_typ : Term = *ret.1.clone();
+            subs(&mut ret_typ, &val, idx.len() as i32);
+            for i in 0..idx.len() {
+                subs(&mut ret_typ, &idx[i], (idx.len() - i - 1) as i32);
+            }
+
+            // Creates the fold type
+            let mut fold_typ : Term = All{
+                nam: b"X".to_vec(),
+                typ: Box::new(val_typ.clone()),
+                bod: Box::new(ret_typ.clone())
+            };
 
             if !checked {
                 let (_, expect_idx_typ, _) = get_nams_typs_bod(&typ); 
@@ -759,6 +762,11 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                     // Initializes the expected case return type
                     let mut expect_cas_ret_typ = ret.1.clone();
 
+                    // Extends the context with the fold type
+                    extend_context(Box::new(fold_typ.clone()), ctx);
+                    vars.push(b"fold".to_vec());
+                    shift(&mut expect_cas_ret_typ, 1, 1 + ret.0.len() as i32);
+
                     // For each field of this case
                     for j in 0..cas_arg.len() {
                         // Extends context with the field's type
@@ -768,7 +776,7 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                         vars.push(cas_arg[j].clone());
 
                         // Shifts the return type
-                        shift(&mut expect_cas_ret_typ, 1, 1 + ret.0.len() as i32) ;
+                        shift(&mut expect_cas_ret_typ, 1, 1 + ret.0.len() as i32);
 
                         // Appends field variable to the witness
                         shift(&mut wit, 1, 0);
@@ -790,7 +798,7 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                     let actual_cas_ret_typ = do_infer(cas_bod, vars, defs, ctx, checked)?;
 
                     // Checks if expected case return type matches actual case return type
-                    if !equals(&expect_cas_ret_typ, &actual_cas_ret_typ, defs) {
+                    if !equals_reduced(&expect_cas_ret_typ, &actual_cas_ret_typ, defs) {
                         return Err(WrongCaseType{
                             expect: *expect_cas_ret_typ.clone(),
                             actual: actual_cas_ret_typ.clone(),
@@ -800,7 +808,11 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                         });
                     }
 
-                    // Removes vars and narrows context
+                    // Cleans up fold var
+                    narrow_context(ctx);
+                    vars.pop();
+
+                    // Cleans up constructor vars
                     for _ in 0..cas_arg.len() {
                         narrow_context(ctx);
                         vars.pop();
@@ -808,12 +820,6 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                 }
             }
 
-            // Builds the match return type
-            let mut ret_typ : Term = *ret.1.clone();
-            subs(&mut ret_typ, &val, idx.len() as i32);
-            for i in 0..idx.len() {
-                subs(&mut ret_typ, &idx[i], (idx.len() - i - 1) as i32);
-            }
             return Ok(ret_typ);
         },
         Set => {

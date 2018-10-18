@@ -1,13 +1,3 @@
-// (a : A, b : B...) -> c (a : A, b : B...) => c
-// f(x, y, z)
-// ((a : A, b : B) -> a + b)
-// ((a : A, b : B) -> c)(1, 2)
-// data Name(a : A, b : B) | ctor TYP
-// case Name(a, b) value : (a, b) => MOT | ctor (f0, f1) CASE_BOD
-// def name val
-//def hyp(x : Int, y : Int)
-    //add(mul(x, x), mul(y, y))
-
 use term::*;
 use term::Vars;
 use term::Defs;
@@ -56,6 +46,16 @@ pub fn skip_whites(cursor : &mut Cursor, code : &[u8]) {
             advance_line(cursor);
         } else if code[cursor.index] == b' ' {
             advance_char(cursor, 1);
+        } else if match_exact(cursor, code, b"{-") {
+            while cursor.index < code.len() - 1 && !match_exact(cursor, code, b"-}") {
+                advance_char(cursor, 1);
+            }
+            advance_char(cursor, 2);
+        } else if match_exact(cursor, code, b"--") {
+            while cursor.index < code.len() && !match_exact(cursor, code, b"\n") {
+                advance_char(cursor, 1);
+            }
+            advance_char(cursor, 1);
         } else {
             break;
         }
@@ -86,7 +86,18 @@ fn parse_name(cursor : &mut Cursor, code : &[u8]) -> Result<Vec<u8>, String> {
         name.push(code[cursor.index]);
         advance_char(cursor, 1);
     }
-    return Ok(name);
+    if name.len() == 0 {
+        Err(format!("Syntax error (at line {}, col {}): expected a name, found `{}`.",
+            cursor.line,
+            cursor.column,
+            if cursor.index < code.len() {
+                String::from_utf8_lossy(&[code[cursor.index]]).to_string()
+            } else {
+                "EOF".to_string()
+            }))
+    } else {
+        Ok(name)
+    }
 }
 
 // Checks if certain string is at a position.
@@ -143,7 +154,7 @@ pub fn parse_term
     let appliable : bool;
 
     // Parenthesis
-    if match_exact(cursor, code, b"((") || match_exact(cursor, code, b"(data ") {
+    if match_exact(cursor, code, b"((") || match_exact(cursor, code, b"(case ") || match_exact(cursor, code, b"(data ") {
         advance_char(cursor, 1);
         parsed = parse_term(cursor, code, vars, defs)?;
         appliable = true;
@@ -249,6 +260,9 @@ pub fn parse_term
             // Case name
             let cas_nam = parse_name(cursor, code)?;
 
+            // Fold arg
+            vars.push(b"fold".to_vec());
+
             // Case args
             let mut cas_arg = Vec::new();
             prepare_to_parse(cursor, code)?;
@@ -278,6 +292,7 @@ pub fn parse_term
             for _ in 0..cas_arg.len() {
                 vars.pop();
             }
+            vars.pop();
             cas.push((cas_nam, cas_arg, cas_bod));
             skip_whites(cursor, code);
         }
@@ -482,38 +497,36 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
                     code.extend_from_slice(b" ");
                     code.extend_from_slice(b"| ");
                     code.append(&mut nam.clone());
-                    if arg.len() > 0 {
-                        code.extend_from_slice(b"(");
-                        for i in 0..arg.len() {
-                            let mut arg_nam = rename(&arg[i], vars);
-                            code.append(&mut arg_nam.clone());
-                            vars.push(arg_nam.to_vec());
-                            if i < arg.len() - 1 {
-                                code.extend_from_slice(b",");
-                            }
+                    vars.push(b"fold".to_vec());
+                    code.extend_from_slice(b"(");
+                    for i in 0..arg.len() {
+                        let mut arg_nam = rename(&arg[i], vars);
+                        code.append(&mut arg_nam.clone());
+                        vars.push(arg_nam.to_vec());
+                        if i < arg.len() - 1 {
+                            code.extend_from_slice(b",");
                         }
-                        code.extend_from_slice(b")");
                     }
+                    code.extend_from_slice(b")");
                     code.extend_from_slice(b" => ");
                     build(code, &bod, vars, short);
                     for _ in 0..arg.len() {
                         vars.pop();
                     }
+                    vars.pop();
                 }
                 code.extend_from_slice(b" : ");
                 vars.push(b"self".to_vec());
-                if ret.0.len() > 0 {
-                    code.extend_from_slice(b"(");
-                    for i in 0..ret.0.len() {
-                        let mut ret_arg_nam = rename(&ret.0[i], vars);
-                        code.append(&mut ret_arg_nam.clone());
-                        vars.push(ret_arg_nam.to_vec());
-                        if i < ret.0.len() - 1 {
-                            code.extend_from_slice(b",");
-                        }
+                code.extend_from_slice(b"(");
+                for i in 0..ret.0.len() {
+                    let mut ret_arg_nam = rename(&ret.0[i], vars);
+                    code.append(&mut ret_arg_nam.clone());
+                    vars.push(ret_arg_nam.to_vec());
+                    if i < ret.0.len() - 1 {
+                        code.extend_from_slice(b",");
                     }
-                    code.extend_from_slice(b") => ");
                 }
+                code.extend_from_slice(b") => ");
                 build(code, &ret.1, vars, short);
                 for _ in 0..ret.0.len() {
                     vars.pop();
