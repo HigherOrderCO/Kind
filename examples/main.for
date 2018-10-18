@@ -20,7 +20,7 @@ data Pair : (A : Type) -> Type
 | new     : (A : Type, x : A, y : A) -> Pair(A)
 
 -- Polymorphic lists
-data List : (A : type) -> Type
+data List : (A : Type) -> Type
 | cons    : (A : Type, x : A, xs : List(A)) -> List(A)
 | nil     : (A : Type)                      -> List(A)
 
@@ -186,3 +186,6 @@ let add-comm(n : Nat) =>
         sym(Nat, add(m, Nat.succ(n)), Nat.succ(add(m, n)), add-n-succ-m(m, n)))
     | zero    => (m : Nat) => sym(Nat, add(m, Nat.zero), m, add-n-zero(m))
     : ()      => (m : Nat) -> Eq(Nat, add(self, m), add(m, self))
+
+
+let main (a : Nat, b : Nat, e : Eq(Nat, a, b)) => sym(Nat, a, b, e)

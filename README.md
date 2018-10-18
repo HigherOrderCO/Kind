@@ -70,7 +70,7 @@ data Pair : (A : Type) -> Type
 | new     : (A : Type, x : A, y : A) -> Pair(A)
 
 -- Polymorphic lists
-data List : (A : type) -> Type
+data List : (A : Type) -> Type
 | cons    : (A : Type, x : A, xs : List(A)) -> List(A)
 | nil     : (A : Type)                      -> List(A)
 
