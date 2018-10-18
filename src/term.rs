@@ -519,7 +519,7 @@ pub fn equals_reduced(a : &Term, b : &Term, defs : &Defs) -> bool {
     equals(&a_nf, &b_nf)
 }
 
-// A Context is a vector of (name, value) assignments.
+// A Context is a vector of type assignments.
 type Context<'a> = Vec<Box<Term>>;
 
 // Extends a context.
@@ -624,6 +624,7 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
             }
         },
         Idt{nam: _, typ, ctr: _} => {
+            // TODO: data declarations aren't checked yet
             let mut typ_v = typ.clone();
             Ok(*typ_v)
         },
