@@ -168,8 +168,8 @@ fn main() {
             , y : A
             , e : Eq(A, x, y)) =>
             (case e
-            | refl(A1, x1) => (P : (x : A1) -> Type, px : P(x1)) => px
-            : (A0, x0, y0) => (P : (x : A0) -> Type, px : P(x0)) -> P(y0))(P)
+            | refl(A, x) => (P : (x : A) -> Type, px : P(x)) => px
+            : (A, x, y)  => (P : (x : A) -> Type, px : P(x)) -> P(y))(P)
 
         -- Proof that `a + 0 == a`
         let add-n-zero(n : Nat) =>
