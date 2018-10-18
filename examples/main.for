@@ -186,3 +186,5 @@ let add-comm(n : Nat) =>
         sym(Nat, add(m, Nat.succ(n)), Nat.succ(add(m, n)), add-n-succ-m(m, n)))
     | zero    => (m : Nat) => sym(Nat, add(m, Nat.zero), m, add-n-zero(m))
     : ()      => (m : Nat) -> Eq(Nat, add(self, m), add(m, self))
+
+let main add-comm

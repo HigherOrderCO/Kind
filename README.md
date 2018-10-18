@@ -25,26 +25,23 @@ An efficient programming language featuring formal proofs.
 ## Usage
 
 ```bash
-# Installs formality
+# Installs formality and enters the `examples` dir
 git clone https://github.com/maiavictor/formality
 cd formality
 cargo install
-
-# Enters the example directory
 cd examples
 
 # Evals `add(two, two)`. Output: `Nat.succ(Nat.succ(Nat.succ(Nat.succ(Nat.zero))))`
 formality main.for -e four 
 
-# Type-checks the `not` function. Output: `((b : Bool) -> Bool)`
-formality main.for -t not
+# Type-checks `add`. Output: `((a : Nat) -> ((b : Nat) -> Nat))`
+formality main.for -t add
 
 # Type checks `add-comm`. Output: `((n : Nat) -> ((m : Nat) -> Eq(Nat)(add(n)(m))(add(m)(n))))`
 formality main.for -t add-comm
-
-# This means Formality verified that `add-comm` proves that,
-# for every pair of Nats `n` and `m`, `n + m == m + n`.
 ```
+
+The last example verifies the proof that `a + b == b + a`.
 
 ## Example
 
