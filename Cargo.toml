@@ -1,0 +1,12 @@
+[package]
+name = "formality"
+version = "0.1.0"
+authors = ["maiavictor <srvictormaia@gmail.com>"]
+
+[dependencies]
+symmetric-interaction-calculus = "0.1.3"
+clap = "2.26.0"
+
+[[bin]]
+name = "formality"
+path = "src/main.rs"
