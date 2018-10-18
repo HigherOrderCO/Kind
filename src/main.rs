@@ -1,11 +1,18 @@
+extern crate clap;
+use clap::{Arg, App};
+
 pub mod term;
 pub mod syntax;
 use term::*;
-use std::string::*;
 
+use std::io;
+use std::io::prelude::*;
+use std::fs::File;
+
+// Because `?` doesn't format strings nicely
 fn get_result<T>(name : Vec<u8>, result : Result<T, String>) -> T {
     match result {
-        Ok(term) => term,
+        Ok(result) => result,
         Err(err) => {
             println!("[Error on `{}`]\n{}", String::from_utf8_lossy(&name), err);
             std::process::exit(0);
@@ -13,205 +20,119 @@ fn get_result<T>(name : Vec<u8>, result : Result<T, String>) -> T {
     }
 }
 
-fn main() {
-    let (val, defs) = get_result(b"main".to_vec(), syntax::term_from_string_slice("
-        -- Empty, the type with no constructors
-        data Empty : Type
+fn get_term(name : &Vec<u8>, defs : &Defs) -> Term {
+    match defs.get(name) {
+        Some(term) => term.clone(),
+        None => {
+            println!("[Error]\nTerm `{}` not found", String::from_utf8_lossy(&name));
+            std::process::exit(0);
+        }
+    }
+}
 
-        -- Unit, the type with one constructor
-        data Unit : Type
-        | void    : Unit
+fn main() -> io::Result<()> {
+    let matches = App::new("Formality")
+        .version("0.1.0")
+        .author("Victor Maia <srvictormaia@gmail.com>")
+        .about("Formality")
+        .arg(Arg::with_name("TYPE")
+            .short("t")
+            .long("type")
+            .value_name("TYPE")
+            .help("Infers the type of a term")
+            .takes_value(true))
+        .arg(Arg::with_name("EVAL")
+            .short("e")
+            .long("eval")
+            .value_name("EVAL")
+            .help("Evaluates a term")
+            .takes_value(true))
+        .arg(Arg::with_name("BOTH")
+            .short("b")
+            .long("both")
+            .value_name("BOTH")
+            .help("Evaluates and checks a term")
+            .takes_value(true))
+        .arg(Arg::with_name("FILE")
+            .help("Sets the input file to use")
+            .required(true)
+            .index(1))
+        .get_matches();
 
-        -- Bool, the type with two constructors
-        data Bool : Type
-        | true    : Bool
-        | false   : Bool
+    // Reads the file to check / eval
+    let file_name = matches.value_of("FILE").unwrap();
+    let mut file = File::open(file_name)?;
+    let mut code = Vec::new();
+    file.read_to_end(&mut code)?;
 
-        -- Natural numbers
-        data Nat : Type
-        | succ   : (n : Nat) -> Nat
-        | zero   : Nat
+    // We are not using the main return value, so just add one
+    code.extend_from_slice(b"\nType");
 
-        -- Simple pairs
-        data Pair : (A : Type) -> Type
-        | new     : (A : Type, x : A, y : A) -> Pair(A)
+    let (_, defs) = get_result(b"main".to_vec(), syntax::term_from_ascii(code));
 
-        -- Polymorphic lists
-        data List : (A : type) -> Type
-        | cons    : (A : Type, x : A, xs : List(A)) -> List(A)
-        | nil     : (A : Type)                      -> List(A)
+    // Infers the type of a term
+    match matches.value_of("TYPE") {
+        Some(term_name) => {
+            let term_name = term_name.to_string().into_bytes();
 
-        -- Vectors, i.e., lists with statically known lengths
-        data Vect : (A : Type, n : Nat) -> Type
-        | cons    : (A : Type, n : Nat, x : A, xs : Vect(A, n)) -> Vect(A, Nat.succ(n))
-        | nil     : (A : Type)                                  -> Vect(A, Nat.zero)
+            // Type-checks all dependencies
+            for (nam, def) in &defs {
+                get_result(nam.to_vec(), syntax::infer_with_string_error(&def, &defs, false, true));
+            }
 
-        -- Equality type: holds a proof that two values are identical
-        data Eq : (A : Type, x : A, y : A) -> Type
-        | refl  : (A : Type, x : A) -> Eq(A, x, x)
+            // Loads the term
+            let term = get_term(&term_name, &defs);
 
-        -- Polymorphic identity function for a type P
-        let the(P : Type, x : P) =>
-            x
-
-        -- Boolean negation
-        let not(b : Bool) =>
-            case b
-            | true  => Bool.false
-            | false => Bool.true
-            : Bool
-
-        -- Predecessor of a natural number
-        let pred(a : Nat) =>
-            case a
-            | succ(pred) => pred
-            | zero       => Nat.zero
-            : Nat
-
-        -- Double of a number: the keyword `fold` is used for recursion
-        let double(a : Nat) =>
-            case a
-            | succ(pred) => Nat.succ(Nat.succ(fold(pred)))
-            | zero       => Nat.zero
-            : Nat
-
-        -- Addition of natural numbers
-        let add(a : Nat, b : Nat) =>
-            (case a
-            | succ(pred) => (b : Nat) => Nat.succ(fold(pred, b))
-            | zero       => (b : Nat) => b
-            : () => (a : Nat) -> Nat)(b)
-
-        -- First element of a pair
-        let fst(A : Type, pair : Pair(A)) =>
-            case pair
-            | new(A, x, y) => x
-            : (A) => A
-
-        -- Second element of a pair
-        let snd(A : Type, pair : Pair(A)) =>
-            case pair
-            | new(A, x, y) => y
-            : (A) => A
-
-        -- Principle of explosion: from falsehood, everything follows
-        let EFQ(P : Type, f : Empty) =>
-            case f : P
-
-        -- Returns the first element of a vector which is *statically*
-        -- asserted to be non-empty, preventing runtime errors.
-        let head(A : Type, n : Nat, vect : Vect(A, Nat.succ(n))) =>
-            case vect
-            | cons(A, n, x, xs) => x
-            | nil(A)            => Unit.void
-            : (A, n) => case n
-                | succ(m) => A
-                | zero    => Unit
-                : Type
-            
-        -- Returns a vector without its first element
-        let tail(A : Type, n : Nat, vect : Vect(A, Nat.succ(n))) =>
-            case vect
-            | cons(A, n, x, xs) => xs
-            | nil(A)            => Vect.nil(A)
-            : (A, n) => Vect(A, pred(n))
-            
-        -- The induction principle on natural numbers
-        -- can be obtained from total pattern-matching
-        -- This function gets somewhat bloated by type
-        -- sigs; could be improved with bidirectional?
-        let induction(n : Nat) =>
-            case n
-            | succ(pred) => 
-                ( P : (n : Nat) -> Type
-                , s : (n : Nat, p : P(n)) -> P(Nat.succ(n))
-                , z : P(Nat.zero))
-                => s(pred, fold(pred, P, s, z))
-            | zero => 
-                ( P : (n : Nat) -> Type
-                , s : (n : Nat, p : P(n)) -> P(Nat.succ(n))
-                , z : P(Nat.zero))
-                => z
-            : () =>
-                ( P : (n : Nat) -> Type
-                , s : (n : Nat, p : P(n)) -> P(Nat.succ(n))
-                , z : P(Nat.zero))
-                -> P(self)
-
-        -- Congruence of equality: a proof that `a == b` implies `f(a) == f(b)`
-        let cong
-            ( A : Type
-            , B : Type
-            , a : A
-            , b : A
-            , e : Eq(A, a, b)) =>
-            case e
-            | refl(A, x) => (f : (x : A) -> B) => Eq.refl(B, f(x))
-            : (A, a, b)  => (f : (x : A) -> B) -> Eq(B, f(a), f(b))
-
-        -- Symmetry of equality: a proof that `a == b` implies `b == a`
-        let sym
-            ( A : Type
-            , a : A
-            , b : A
-            , e : Eq(A, a, b)) =>
-            case e
-            | refl(A, x) => Eq.refl(A, x)
-            : (A, a, b)  => Eq(A, b, a)
-
-        -- Substitution of equality: if `a == b`, then `a` can be replaced by `b` in a proof `P`
-        let subst
-            ( A : Type
-            , x : A
-            , y : A
-            , e : Eq(A, x, y)) =>
-            case e
-            | refl(A, x) => (P : (x : A) -> Type, px : P(x)) => px
-            : (A, x, y)  => (P : (x : A) -> Type, px : P(x)) -> P(y)
-
-        -- Proof that `a + 0 == a`
-        let add-n-zero(n : Nat) =>
-            case n
-            | succ(a) => cong(Nat, Nat, add(a, Nat.zero), a, fold(a), Nat.succ)
-            | zero    => Eq.refl(Nat, Nat.zero)
-            : Eq(Nat, add(self, Nat.zero), self)
-
-        -- Proof that `a + (1 + b) == 1 + (a + b)`
-        let add-n-succ-m(n : Nat) =>
-            case n
-            | succ(n) => (m : Nat) => cong(Nat, Nat, add(n, Nat.succ(m)), Nat.succ(add(n,m)), fold(n,m), Nat.succ)
-            | zero    => (m : Nat) => Eq.refl(Nat, Nat.succ(m))
-            : ()      => (m : Nat) -> Eq(Nat, add(self, Nat.succ(m)), Nat.succ(add(self, m)))
-
-        -- Proof that `a + b = b + a`
-        let add-comm(n : Nat) =>
-            case n
-            | succ(n) => (m : Nat) =>
-                subst(Nat, add(m,n), add(n,m), fold(m,n), (x : Nat) => Eq(Nat, Nat.succ(x), add(m, Nat.succ(n))),
-                sym(Nat, add(m, Nat.succ(n)), Nat.succ(add(m, n)), add-n-succ-m(m, n)))
-            | zero    => (m : Nat) => sym(Nat, add(m, Nat.zero), m, add-n-zero(m))
-            : ()      => (m : Nat) -> Eq(Nat, add(self, m), add(m, self))
-
-        induction
-    "));
-
-    // Prints main term
-    println!("[Term]\n{}", syntax::term_to_string(&val, &mut Vec::new(), true));
-    println!("");
-
-    // Type-checks all dependencies
-    for (nam, def) in &defs {
-        get_result(nam.to_vec(), syntax::infer_with_string_error(&def, &defs, false, true));
+            // Prints its inferred type
+            let t_ty = get_result(term_name, syntax::infer_with_string_error(&term, &defs, false, true));
+            println!("{}", syntax::term_to_string(&t_ty, &mut Vec::new(), true));
+        },
+        None => {}
     }
 
-    // Type-checks main term
-    let typ : Term = get_result(b"main".to_vec(), syntax::infer_with_string_error(&val, &defs, false, true));
-    println!("[Type]\n{}", syntax::term_to_string(&typ, &mut Vec::new(), true));
-    println!("");
+    // Evals a term to normal form
+    match matches.value_of("EVAL") {
+        Some(term_name) => {
+            let term_name = term_name.to_string().into_bytes();
 
-    // Normalizes and prints
-    let mut nor : Term = val.clone();
-    reduce(&mut nor, &defs, true);
-    println!("[Norm]\n{}", syntax::term_to_string(&nor, &mut Vec::new(), true));
+            // Loads the term
+            let term = get_term(&term_name, &defs);
 
+            // Prints its normal form
+            let mut t_nf = term.clone();
+            reduce(&mut t_nf, &defs, true);
+            println!("{}", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
+        },
+        None => {}
+    }
+
+    // Evals and prints
+    match matches.value_of("BOTH") {
+        Some(term_name) => {
+            let term_name = term_name.to_string().into_bytes();
+
+            // Type-checks all dependencies
+            for (nam, def) in &defs {
+                get_result(nam.to_vec(), syntax::infer_with_string_error(&def, &defs, false, true));
+            }
+
+            // Loads the term
+            let term = get_term(&term_name, &defs);
+
+            // Prints it
+            println!("[TERM]\n\n{}\n", syntax::term_to_string(&term, &mut Vec::new(), true));
+
+            // Prints its inferred type
+            let t_ty = get_result(term_name, syntax::infer_with_string_error(&term, &defs, false, true));
+            println!("[TYPE]\n\n{}\n", syntax::term_to_string(&t_ty, &mut Vec::new(), true));
+
+            // Prints its normal form
+            let mut t_nf = term.clone();
+            reduce(&mut t_nf, &defs, true);
+            println!("[EVAL]\n\n{}\n", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
+        },
+        None => {}
+    }
+
+    Ok(())
 }
