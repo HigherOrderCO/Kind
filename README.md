@@ -248,7 +248,7 @@ You can see it on the `examples` directory. Soon, I'll explain how to prove cool
 
 - Formality interpreter
 
-- Formality interface
+- Formality command-line interface
 
 - [Symmetric Interaction Calculus (syntax, runtime)](https://github.com/maiavictor/symmetric-interaction-calculus)
 
