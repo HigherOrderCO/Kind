@@ -55,7 +55,7 @@ pub fn skip_whites(cursor : &mut Cursor, code : &[u8]) {
             while cursor.index < code.len() && !match_exact(cursor, code, b"\n") {
                 advance_char(cursor, 1);
             }
-            advance_char(cursor, 1);
+            advance_line(cursor);
         } else {
             break;
         }
@@ -491,7 +491,7 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
                 code.append(&mut nam.clone());
             },
             &Cas{ref val, ref cas, ref ret} => {
-                code.extend_from_slice(b"case ");
+                code.extend_from_slice(b"(case ");
                 build(code, &val, vars, short);
                 for (nam, arg, bod) in cas {
                     code.extend_from_slice(b" ");
@@ -528,6 +528,7 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
                 }
                 code.extend_from_slice(b") => ");
                 build(code, &ret.1, vars, short);
+                code.extend_from_slice(b")");
                 for _ in 0..ret.0.len() {
                     vars.pop();
                 }
