@@ -181,17 +181,21 @@ fn main() {
         add-comm
     "));
 
+    // Prints main term
     println!("[Term]\n{}", syntax::term_to_string(&val, &mut Vec::new(), true));
     println!("");
 
+    // Type-checks all dependencies
     for (nam, def) in &defs {
         get_result(nam.to_vec(), syntax::infer_with_string_error(&def, &defs, false, true));
     }
-    let mut typ : Term = get_result(b"a-plus-zero-is-a".to_vec(), syntax::infer_with_string_error(&val, &defs, false, true));
-    weak_reduce(&mut typ, &defs, true);
+
+    // Type-checks main term
+    let typ : Term = get_result(b"main".to_vec(), syntax::infer_with_string_error(&val, &defs, false, true));
     println!("[Type]\n{}", syntax::term_to_string(&typ, &mut Vec::new(), true));
     println!("");
 
+    // Normalizes and prints
     let mut nor : Term = val.clone();
     reduce(&mut nor, &defs, true);
     println!("[Norm]\n{}", syntax::term_to_string(&nor, &mut Vec::new(), true));

@@ -225,8 +225,16 @@ Soon, I'll explain how to prove cooler things, and write a tutorial on how to ma
 
 - Complete CUDA / OpenCL evaluator
 
-- IPFS imports, complete pretty-printing (so that printed proofs carry all dependencies, and you can just copypaste it), tests, documentation...
+- IPFS imports
+
+- Uncurrying of pretty-printed normal forms
+
+- Including dependencies when pretty-printing (so you can copypaste proofs)
+
+- Tests
+
+- Documentation
 
 ## Disclaimer
 
-This is just a sneak peek. There are missing features and code certainly has bugs. 
+This is just a sneak peek. There are missing features and code certainly has bugs. Do not it use on rocket engines.
