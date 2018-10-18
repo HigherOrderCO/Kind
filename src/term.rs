@@ -237,6 +237,7 @@ pub fn subs(term : &mut Term, value : &Term, dph : i32) {
     };
 }
 
+// Extracts the function and a list of arguments from a curried f(x, y, z) expression.
 pub fn get_fun_args(term : &Term) -> (&Term, Vec<&Term>) {
     let mut term : &Term = term;
     let mut args : Vec<&Term> = Vec::new();
@@ -253,6 +254,7 @@ pub fn get_fun_args(term : &Term) -> (&Term, Vec<&Term>) {
     (term, args)
 }
 
+// Extracts the names, types and body from a curried `(x : A) => (y : B) => c` expression.
 pub fn get_nams_typs_bod(term : &Term) -> (Vec<&Vec<u8>>, Vec<&Term>, &Term) {
     let mut term : &Term = term;
     let mut nams : Vec<&Vec<u8>> = Vec::new();
@@ -444,7 +446,7 @@ pub fn reduce(term : &mut Term, defs : &Defs, deref : bool) -> bool {
     changed
 }
 
-// Performs an equality test. Mutable, because it may reduce redexes.
+// Performs an equality test.
 pub fn equals(a : &Term, b : &Term) -> bool {
     // Check if the heads are equal.
     match (a, b) {
@@ -508,6 +510,7 @@ pub fn equals(a : &Term, b : &Term) -> bool {
     }
 }
 
+// Performs an equality test after normalization.
 pub fn equals_reduced(a : &Term, b : &Term, defs : &Defs) -> bool {
     let mut a_nf = a.clone();
     let mut b_nf = b.clone();

@@ -98,18 +98,6 @@ fn main() {
         let EFQ(P : Type, f : Empty) =>
             case f : P
 
-        -- The induction principle on natural numbers
-        -- can be obtained from total pattern-matching
-        let induction
-            ( P : (n : Nat) -> Type
-            , s : (n : Nat, p : P(n)) -> P(Nat.succ(n))
-            , z : P(Nat.zero)
-            , n : Nat) =>
-            case n
-            | succ(pred) => s(pred, induction(P, s, z, pred))
-            | zero       => z
-            : P(self)
-
         -- Returns the first element of a vector which is *statically*
         -- asserted to be non-empty, preventing runtime errors.
         let head(A : Type, n : Nat, vect : Vect(A, Nat.succ(n))) =>
@@ -127,6 +115,28 @@ fn main() {
             | cons(A, n, x, xs) => xs
             | nil(A)            => Vect.nil(A)
             : (A, n) => Vect(A, pred(n))
+            
+        -- The induction principle on natural numbers
+        -- can be obtained from total pattern-matching
+        -- This function gets somewhat bloated by type
+        -- sigs; could be improved with bidirectional?
+        let induction(n : Nat) =>
+            case n
+            | succ(pred) => 
+                ( P : (n : Nat) -> Type
+                , s : (n : Nat, p : P(n)) -> P(Nat.succ(n))
+                , z : P(Nat.zero))
+                => s(pred, fold(pred, P, s, z))
+            | zero => 
+                ( P : (n : Nat) -> Type
+                , s : (n : Nat, p : P(n)) -> P(Nat.succ(n))
+                , z : P(Nat.zero))
+                => z
+            : () =>
+                ( P : (n : Nat) -> Type
+                , s : (n : Nat, p : P(n)) -> P(Nat.succ(n))
+                , z : P(Nat.zero))
+                -> P(self)
 
         -- Congruence of equality: a proof that `a == b` implies `f(a) == f(b)`
         let cong
@@ -185,7 +195,7 @@ fn main() {
             | zero    => (m : Nat) => sym(Nat, add(m, Nat.zero), m, add-n-zero(m))
             : ()      => (m : Nat) -> Eq(Nat, add(self, m), add(m, self))
 
-        add-comm
+        induction
     "));
 
     // Prints main term
