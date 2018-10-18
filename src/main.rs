@@ -142,13 +142,12 @@ fn main() {
         let cong
             ( A : Type
             , B : Type
-            , f : (a : A) -> B
             , a : A
             , b : A
             , e : Eq(A, a, b)) =>
-            (case e
+            case e
             | refl(A, x) => (f : (x : A) -> B) => Eq.refl(B, f(x))
-            : (A, a, b)  => (f : (x : A) -> B) -> Eq(B, f(a), f(b)))(f)
+            : (A, a, b)  => (f : (x : A) -> B) -> Eq(B, f(a), f(b))
 
         -- Symmetry of equality: a proof that `a == b` implies `b == a`
         let sym
@@ -163,25 +162,24 @@ fn main() {
         -- Substitution of equality: if `a == b`, then `a` can be replaced by `b` in a proof `P`
         let subst
             ( A : Type
-            , P : (x : A) -> Type
             , x : A
             , y : A
             , e : Eq(A, x, y)) =>
-            (case e
+            case e
             | refl(A, x) => (P : (x : A) -> Type, px : P(x)) => px
-            : (A, x, y)  => (P : (x : A) -> Type, px : P(x)) -> P(y))(P)
+            : (A, x, y)  => (P : (x : A) -> Type, px : P(x)) -> P(y)
 
         -- Proof that `a + 0 == a`
         let add-n-zero(n : Nat) =>
             case n
-            | succ(a) => cong(Nat, Nat, Nat.succ, add(a, Nat.zero), a, fold(a))
+            | succ(a) => cong(Nat, Nat, add(a, Nat.zero), a, fold(a), Nat.succ)
             | zero    => Eq.refl(Nat, Nat.zero)
             : Eq(Nat, add(self, Nat.zero), self)
 
         -- Proof that `a + (1 + b) == 1 + (a + b)`
         let add-n-succ-m(n : Nat) =>
             case n
-            | succ(n) => (m : Nat) => cong(Nat, Nat, Nat.succ, add(n, Nat.succ(m)), Nat.succ(add(n,m)), fold(n,m))
+            | succ(n) => (m : Nat) => cong(Nat, Nat, add(n, Nat.succ(m)), Nat.succ(add(n,m)), fold(n,m), Nat.succ)
             | zero    => (m : Nat) => Eq.refl(Nat, Nat.succ(m))
             : ()      => (m : Nat) -> Eq(Nat, add(self, Nat.succ(m)), Nat.succ(add(self, m)))
 
@@ -189,9 +187,8 @@ fn main() {
         let add-comm(n : Nat) =>
             case n
             | succ(n) => (m : Nat) =>
-                subst(Nat, (x : Nat) => Eq(Nat, Nat.succ(x), add(m, Nat.succ(n))), add(m,n), add(n,m), fold(m,n),
-                sym(Nat, add(m, Nat.succ(n)), Nat.succ(add(m, n)),
-                add-n-succ-m(m, n)))
+                subst(Nat, add(m,n), add(n,m), fold(m,n), (x : Nat) => Eq(Nat, Nat.succ(x), add(m, Nat.succ(n))),
+                sym(Nat, add(m, Nat.succ(n)), Nat.succ(add(m, n)), add-n-succ-m(m, n)))
             | zero    => (m : Nat) => sym(Nat, add(m, Nat.zero), m, add-n-zero(m))
             : ()      => (m : Nat) -> Eq(Nat, add(self, m), add(m, self))
 
