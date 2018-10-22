@@ -520,10 +520,10 @@ pub fn equals_reduced(a : &Term, b : &Term, defs : &Defs) -> bool {
 }
 
 // A Context is a vector of type assignments.
-type Context<'a> = Vec<Box<Term>>;
+pub type Context<'a> = Vec<Box<Term>>;
 
 // Extends a context.
-fn extend_context<'a>(val : Box<Term>, ctx : &'a mut Context<'a>) -> &'a mut Context<'a> {
+pub fn extend_context<'a>(val : Box<Term>, ctx : &'a mut Context<'a>) -> &'a mut Context<'a> {
     for i in 0..ctx.len() {
         shift(&mut ctx[i], 1, 0);
     }
@@ -532,7 +532,7 @@ fn extend_context<'a>(val : Box<Term>, ctx : &'a mut Context<'a>) -> &'a mut Con
 }
 
 // Narrows a context.
-fn narrow_context<'a>(ctx : &'a mut Context<'a>) -> &'a mut Context<'a> {
+pub fn narrow_context<'a>(ctx : &'a mut Context<'a>) -> &'a mut Context<'a> {
     ctx.pop();
     for i in 0..ctx.len() {
         shift(&mut ctx[i], -1, 0);

@@ -3,6 +3,7 @@ use clap::{Arg, App};
 
 pub mod term;
 pub mod syntax;
+pub mod compiler;
 use term::*;
 
 use std::io;
@@ -30,6 +31,7 @@ fn get_term(name : &Vec<u8>, defs : &Defs) -> Term {
     }
 }
 
+
 fn main() -> io::Result<()> {
     let matches = App::new("Formality")
         .version("0.1.0")
@@ -46,6 +48,12 @@ fn main() -> io::Result<()> {
             .long("eval")
             .value_name("EVAL")
             .help("Evaluates a term")
+            .takes_value(true))
+        .arg(Arg::with_name("FASTEVAL")
+            .short("f")
+            .long("fasteval")
+            .value_name("FASTEVAL")
+            .help("Evaluates a term using interaction nets")
             .takes_value(true))
         .arg(Arg::with_name("BOTH")
             .short("b")
@@ -102,6 +110,23 @@ fn main() -> io::Result<()> {
             let mut t_nf = term.clone();
             reduce(&mut t_nf, &defs, true);
             println!("{}", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
+        },
+        None => {}
+    }
+
+    // Evals a term to normal form using interaction nets
+    match matches.value_of("FASTEVAL") {
+        Some(term_name) => {
+            let term_name = term_name.to_string().into_bytes();
+
+            // Loads the term
+            let term = get_term(&term_name, &defs);
+
+            // Prints its normal form
+            let (stats, t_nf) = compiler::eval(&term, &defs);
+
+            println!("Stats : {:?}", stats);
+            println!("Term  : {}", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
         },
         None => {}
     }
