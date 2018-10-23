@@ -97,7 +97,7 @@ fn main() -> io::Result<()> {
         imports_code.extend_from_slice(b"\n");
     }
     if imports_code.len() > 0 {
-        imports_code.append(&mut code);
+        imports_code.extend_from_slice(&code[idx..]);
         code = imports_code;
     }
 
