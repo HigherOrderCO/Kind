@@ -9,6 +9,7 @@ use term::*;
 use std::io;
 use std::io::prelude::*;
 use std::fs::File;
+use std::path::Path;
 
 // Because `?` doesn't format strings nicely
 fn get_result<T>(name : Vec<u8>, result : Result<T, String>) -> T {
@@ -78,6 +79,27 @@ fn main() -> io::Result<()> {
     let mut file = File::open(file_name)?;
     let mut code = Vec::new();
     file.read_to_end(&mut code)?;
+
+    // Imports aren't supported yet, but this allows a rudimentary version
+    let mut imports_code = Vec::new();
+    let mut idx = 0;
+    while code[idx..idx+6] == b"import"[..] {
+        idx += 7;
+        let mut import_name = Vec::new();
+        while code[idx] != b'\n' {
+            import_name.push(code[idx]);
+            idx += 1;
+        }
+        idx += 1;
+        import_name.extend_from_slice(b".for");
+        let mut import_file = File::open(Path::new(unsafe { std::str::from_utf8_unchecked(&import_name) }))?;
+        import_file.read_to_end(&mut imports_code)?;
+        imports_code.extend_from_slice(b"\n");
+    }
+    if imports_code.len() > 0 {
+        imports_code.append(&mut code);
+        code = imports_code;
+    }
 
     // We are not using the main return value, so just add one
     code.extend_from_slice(b"\nType");
