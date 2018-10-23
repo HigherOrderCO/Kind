@@ -1,12 +1,12 @@
 [package]
 name = "formality"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["maiavictor <srvictormaia@gmail.com>"]
 license = "MIT"
 description = "An efficient programming language featuring formal proofs."
 
 [dependencies]
-symmetric-interaction-calculus = "0.1.5"
+symmetric-interaction-calculus = "0.1.8"
 clap = "2.26.0"
 
 [[bin]]

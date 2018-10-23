@@ -329,6 +329,24 @@ pub fn parse_term
         parsed = Cas{val, cas, ret};
         appliable = false;
 
+    } else if match_exact(cursor, code, b"copy") {
+        advance_char(cursor, 4);
+        let val = parse_term(cursor, code, vars, defs)?;
+        parse_one_of(cursor, code, &[b"as"])?;
+        let nam_a = parse_name(cursor, code)?;
+        vars.push(nam_a.clone());
+        parse_one_of(cursor, code, &[b","])?;
+        let nam_b = parse_name(cursor, code)?;
+        vars.push(nam_b.clone());
+        let nam = (nam_a, nam_b);
+        let bod = parse_term(cursor, code, vars, defs)?;
+        vars.pop();
+        vars.pop();
+        let val = Box::new(val);
+        let bod = Box::new(bod);
+        parsed = Cpy{nam, val, bod};
+        appliable = false;
+
     // Definition
     } else if match_exact(cursor, code, b"let") {
         advance_char(cursor, 3);
@@ -532,6 +550,20 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
                 for _ in 0..ret.0.len() {
                     vars.pop();
                 }
+                vars.pop();
+            },
+            &Cpy{ref nam, ref val, ref bod} => {
+                code.extend_from_slice(b"copy ");
+                build(code, &val, vars, short);
+                code.extend_from_slice(b" as ");
+                code.append(&mut nam.0.clone());
+                vars.push(nam.0.to_vec());
+                code.extend_from_slice(b", ");
+                code.append(&mut nam.1.clone());
+                vars.push(nam.1.to_vec());
+                code.extend_from_slice(b" ");
+                build(code, &bod, vars, short);
+                vars.pop();
                 vars.pop();
             },
             &Set => {

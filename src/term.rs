@@ -45,6 +45,12 @@ pub enum Term {
     Ref {
         nam: Vec<u8>
     },
+    // Copy
+    Cpy {
+        nam: (Vec<u8>, Vec<u8>),
+        val: Box<Term>,
+        bod: Box<Term>
+    },
     // Type of Types
     Set
 }
@@ -154,11 +160,11 @@ pub fn shift(term : &mut Term, inc : i32, cut : i32) {
             shift(fun, inc, cut);
             shift(arg, inc, cut);
         },
-        &mut Lam{nam: ref mut _nam, ref mut typ, ref mut bod} => {
+        &mut Lam{nam: _, ref mut typ, ref mut bod} => {
             shift(typ, inc, cut + 1);
             shift(bod, inc, cut + 1);
         },
-        &mut All{nam: ref mut _nam, ref mut typ, ref mut bod} => {
+        &mut All{nam: _, ref mut typ, ref mut bod} => {
             shift(typ, inc, cut + 1);
             shift(bod, inc, cut + 1);
         },
@@ -166,13 +172,13 @@ pub fn shift(term : &mut Term, inc : i32, cut : i32) {
             *idx = if *idx < cut { *idx } else { *idx + inc };
         },
         &mut Ref{nam: _} => {},
-        &mut Idt{nam: ref mut _nam, ref mut typ, ref mut ctr} => {
+        &mut Idt{nam: _, ref mut typ, ref mut ctr} => {
             shift(typ, inc, cut);
             for (_,ctr_typ) in ctr {
                 shift(ctr_typ, inc, cut+1);
             }
         },
-        &mut Ctr{nam: ref mut _nam, ref mut idt} => {
+        &mut Ctr{nam: _, ref mut idt} => {
             shift(idt, inc, cut);
         },
         &mut Cas{ref mut val, ref mut ret, ref mut cas} => {
@@ -181,6 +187,10 @@ pub fn shift(term : &mut Term, inc : i32, cut : i32) {
             for (_, cas_arg, cas_bod) in cas {
                 shift(cas_bod, inc, cut + 1 + cas_arg.len() as i32);
             }
+        },
+        &mut Cpy{nam: _, ref mut val, ref mut bod} => {
+            shift(val, inc, cut);
+            shift(bod, inc, cut + 2);
         },
         &mut Set => {}
     }
@@ -227,6 +237,10 @@ pub fn subs(term : &mut Term, value : &Term, dph : i32) {
             for (_, cas_arg, cas_bod) in cas {
                 subs(cas_bod, value, dph + 1 + cas_arg.len() as i32);
             }
+        },
+        &mut Cpy{nam: _, ref mut val, ref mut bod} => {
+            subs(val, value, dph);
+            subs(bod, value, dph + 2);
         },
         _ => {}
     };
@@ -337,6 +351,12 @@ pub fn redex(term : &mut Term, defs : &Defs, deref : bool) -> bool {
                 }
             }
         },
+        Cpy{nam: _, mut val, mut bod} => {
+            subs(&mut bod, &val, 0);
+            subs(&mut bod, &val, 0);
+            changed = true;
+            *bod
+        },
         Ref{nam} => {
             if deref {
                 match defs.get(&nam) {
@@ -396,6 +416,10 @@ pub fn global_reduce_step(term : &mut Term, defs : &Defs, deref : bool) -> bool 
             let val = global_reduce_step(val, defs, deref);
             let ret = global_reduce_step(&mut ret.1, defs, deref);
             changed_cas || val || ret
+        },
+        Cpy{nam: _, ref mut val, ref mut bod} => {
+            global_reduce_step(val, defs, deref) ||
+            global_reduce_step(bod, defs, deref)
         },
         _ => false
     };
@@ -504,6 +528,11 @@ pub fn equals(a : &Term, b : &Term) -> bool {
             eql_cas &&
             equals(a_val, b_val) &&
             equals(&a_ret.1, &b_ret.1)
+        },
+        (&Cpy{nam: _, val: ref a_val, bod: ref a_bod},
+         &Cpy{nam: _, val: ref b_val, bod: ref b_bod}) => {
+            equals(a_val, b_val) &&
+            equals(a_bod, b_bod)
         },
         (Set, Set) => true,
         _ => false
@@ -624,7 +653,7 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
             }
         },
         Idt{nam: _, typ, ctr: _} => {
-            // TODO: data declarations aren't checked yet
+            // TODO: IDT isn't checked
             let mut typ_v = typ.clone();
             Ok(*typ_v)
         },
@@ -824,7 +853,28 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                 }
             }
 
-            return Ok(ret_typ);
+            Ok(ret_typ)
+        },
+        Cpy{nam, val, bod} => {
+            let nam_0 = rename(&nam.0, vars);
+            let nam_1 = rename(&nam.1, vars);
+            let val_typ = do_infer(val, vars, defs, ctx, checked)?;
+
+            extend_context(Box::new(val_typ.clone()), ctx);
+            vars.push(nam_0.clone());
+
+            extend_context(Box::new(val_typ.clone()), ctx);
+            vars.push(nam_1.clone());
+
+            let bod_typ = do_infer(bod, vars, defs, ctx, checked)?;
+
+            narrow_context(ctx);
+            vars.pop();
+
+            narrow_context(ctx);
+            vars.pop();
+
+            Ok(bod_typ)
         },
         Set => {
             Ok(Set)

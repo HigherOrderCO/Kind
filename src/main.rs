@@ -55,6 +55,12 @@ fn main() -> io::Result<()> {
             .value_name("FASTEVAL")
             .help("Evaluates a term using interaction nets")
             .takes_value(true))
+        .arg(Arg::with_name("STATS")
+            .short("s")
+            .long("stats")
+            .value_name("STATS")
+            .help("Shows stats when evaluating with FASTEVAL")
+            .takes_value(false))
         .arg(Arg::with_name("BOTH")
             .short("b")
             .long("both")
@@ -124,9 +130,13 @@ fn main() -> io::Result<()> {
 
             // Prints its normal form
             let (stats, t_nf) = compiler::eval(&term, &defs);
+            println!("{}", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
 
-            println!("Stats : {:?}", stats);
-            println!("Term  : {}", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
+            // Prints stats, if requested
+            if matches.is_present("STATS") {
+                println!("Total rewrites  : {}", stats.rules);
+                println!("Loop iterations : {}", stats.loops);
+            }
         },
         None => {}
     }
