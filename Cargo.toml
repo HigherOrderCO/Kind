@@ -1,6 +1,6 @@
 [package]
 name = "formality"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["maiavictor <srvictormaia@gmail.com>"]
 license = "MIT"
 description = "An efficient programming language featuring formal proofs."

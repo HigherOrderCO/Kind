@@ -114,6 +114,8 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
                 } else {
                     match defs.get(nam) {
                         Some(term) => {
+                            *copy_count += 1;
+
                             let mut nam_a = nam.clone();
                             nam_a.extend_from_slice(b"$a$");
                             nam_a.append(&mut copy_count.to_string().into_bytes());
@@ -122,14 +124,12 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
                             nam_b.extend_from_slice(b"$b$");
                             nam_b.append(&mut copy_count.to_string().into_bytes());
 
-                            *copy_count += 1;
-
                             let mut rec = (nam.to_vec(), nam_b.clone());
+                            let tag = *copy_count + 2;
+                            let fst = nam_a.clone();
+                            let snd = nam_b.clone();
                             let ter = build(&term, &mut rec, defs, scope, name_count, copy_count);
                             if rec.1 == b"" {
-                                let tag = *copy_count + 2;
-                                let fst = nam_a.clone();
-                                let snd = nam_b.clone();
                                 let val = Box::new(ter);
                                 let nxt = Box::new(sic::term::Term::Var{nam: nam_a});
                                 sic::term::Term::Let{tag, fst, snd, val, nxt}
