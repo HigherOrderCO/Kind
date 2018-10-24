@@ -22,7 +22,7 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
         *name_count += 1;
         sic::term::new_name(*name_count)
     }
-    pub fn build(term : &Term, rec : &(Vec<u8>, Vec<u8>), defs : &Defs, scope : &mut Vec<Vec<u8>>, name_count : &mut u32, copy_count : &mut u32) -> sic::term::Term {
+    pub fn build(term : &Term, rec : &mut (Vec<u8>, Vec<u8>), defs : &Defs, scope : &mut Vec<Vec<u8>>, name_count : &mut u32, copy_count : &mut u32) -> sic::term::Term {
         match term {
             All{nam: _, typ: _, bod: _} => {
                 // TODO: implement properly
@@ -108,7 +108,9 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
             },
             Ref{nam} => {
                 if *nam == rec.0 {
-                    sic::term::Term::Var{nam: rec.1.clone()}
+                    let nam = rec.1.clone();
+                    rec.1 = b"".to_vec();
+                    sic::term::Term::Var{nam}
                 } else {
                     match defs.get(nam) {
                         Some(term) => {
@@ -122,13 +124,18 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
 
                             *copy_count += 1;
 
-                            let tag = *copy_count + 2;
-                            let fst = nam_a.clone();
-                            let snd = nam_b.clone();
-                            let rec = (nam.to_vec(), nam_b);
-                            let val = Box::new(build(&term, &rec, defs, scope, name_count, copy_count));
-                            let nxt = Box::new(sic::term::Term::Var{nam: nam_a});
-                            sic::term::Term::Let{tag, fst, snd, val, nxt}
+                            let mut rec = (nam.to_vec(), nam_b.clone());
+                            let ter = build(&term, &mut rec, defs, scope, name_count, copy_count);
+                            if rec.1 == b"" {
+                                let tag = *copy_count + 2;
+                                let fst = nam_a.clone();
+                                let snd = nam_b.clone();
+                                let val = Box::new(ter);
+                                let nxt = Box::new(sic::term::Term::Var{nam: nam_a});
+                                sic::term::Term::Let{tag, fst, snd, val, nxt}
+                            } else {
+                                ter
+                            }
                         },
                         None => panic!("Undefined variable.")
                     }
@@ -139,7 +146,7 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
             }
         }
     }
-    build(term, &(b"".to_vec(), b"".to_vec()), defs, scope, name_count, copy_count)
+    build(term, &mut (b"".to_vec(), b"".to_vec()), defs, scope, name_count, copy_count)
 }
 
 pub fn term_from_lambda(term : &sic::term::Term, typ : &Term, defs : &Defs, vars : &mut Vars, ctx : &mut Context) -> Term {
