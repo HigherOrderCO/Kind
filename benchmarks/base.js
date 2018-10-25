@@ -99,6 +99,14 @@ const apply_pow2n_times = (function apply_pow2n_times() {
       (f => x => f(x));
 })();
 
+// Applies a function 2^n times to a value
+const apply_pow2n_times_bits = (function apply_pow2n_times_bits() {
+  return n =>
+    n (null)
+      (n => f => apply_pow2n_times_bits()(n)(x => f(f(x))))
+      (f => x => f(x));
+})();
+
 // Doubles the size of a list
 const double_size = (function double_size() {
   return xs =>
@@ -118,5 +126,15 @@ const length = (function length() {
   return xs => length_aux(xs)(u32_zero);
 })();
 
+// Flips every bit of a bitstring. Not fusible, in order to force it
+// pattern-matches as many times as expected without being optimized away
+const flip_unfusible = (function flip_unfusible() {
+  return bs => bs(null)
+    (bs => f => s_I(f(bs)))
+    (bs => f => s_O(f(bs)))
+    (f => s_z)
+    (flip_unfusible());
+})();
 
-module.exports = {O, I, z, succ, zero, cons, nil, s_z, s_O, s_I, s_zero, s_succ, s_nil, s_cons, s_Bits_to_Bits, s_List_to_List, inc, map, apply_pow2n_times, double_size, length, n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16, n17, n18, n19, n20, n21, n22, u32_zero};
+
+module.exports = {O, I, z, succ, zero, cons, nil, s_z, s_O, s_I, s_zero, s_succ, s_nil, s_cons, s_Bits_to_Bits, s_List_to_List, inc, map, apply_pow2n_times, apply_pow2n_times_bits, double_size, length, flip_unfusible, n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16, n17, n18, n19, n20, n21, n22, u32_zero};

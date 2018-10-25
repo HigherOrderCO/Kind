@@ -2,10 +2,10 @@
 
 Some benchmarks comparing Formality to other languages. Current results:
 
-Benchmark | Formality | JavaScript V8 (identical) | JavaScript V8 (native) | Haskell GHC (identical) | Haskell GHC (native)
+Benchmark | Formality | Haskell GHC (identical) | Haskell GHC (native) | JavaScript V8 (identical) | JavaScript V8 (native) 
 --- | --- | --- | --- | --- | ---
-MapInc | 0.29s | 819s | 93.2s | 29.4s | 23.4s
-Alloc | 15.0s | 11.2s | - | 0.41s | -
+RuntimeFusion | 0.29s| 29.4s | 23.4s | 819s | 8.63s 
+PatternMatch | 66.4s| 5.21s | 2.87s | 13.2s | 0.56s 
 
 Tested in a 3.3 GHz Intel Core i7, 16 GB LPDDR3.
 
@@ -27,25 +27,71 @@ Tested in a 3.3 GHz Intel Core i7, 16 GB LPDDR3.
 
 6. Once Formality is more mature, we should aim for more standard benchmarks such as the [Benchmark Game](https://benchmarksgame-team.pages.debian.net/benchmarksgame/).
 
-## Benchmark #1: MapInc
+## Benchmark #1: RuntimeFusion
 
-Applies `.map(x => x + 1)` `2^20` times to a small list of `100` zeros. The purpose of this is to measure how the programming language deals with highly functional code such as using `.map` extensively. Run with:
+Applies `.map(x => x + 1)` `2^20` times to a small list of `100` zeros. The purpose of this is to measure how the programming language deals with highly functional code such as using `.map` extensively; specifically, if it is capable of performing [runtime fusion](https://en.wikipedia.org/wiki/Deforestation_(computer_science)). Equivalent to:
 
-```bash
-time formality mapinc.for -f main
+```javascript
+var list = [];
+for (var i = 0; i < 100; ++i) {
+  list.push(0);
+}
 
-ghc -O2 mapinc_identical.hs -o mapinc_identical; time ./mapinc_identical
-ghc -O2 mapinc_native.hs -o mapinc_native; time ./mapinc_native
+for (var i = 0; i < Math.pow(2, 20); ++i) {
+  list = list.map(x => x + 1);
+}
 
-time node mapinc_identical.js # requires recuding the size of n
-time node mapinc_native.js
+console.log(JSON.stringify(list));
 ```
 
-## Benchmark #2: Alloc
+Run with:
 
-This tests allocates a very huge list and then iterates over it to count its length. The purpose of this is to measure the raw allocation performance of a language.
+```bash
+time formality runtimefusion.for -f main
 
-## Benchmark #3: PatternMatch
+ghc -O2 runtimefusion_identical.hs -o runtimefusion_identical; time ./runtimefusion_identical
+ghc -O2 runtimefusion_native.hs -o runtimefusion_native; time ./runtimefusion_native
+
+time node runtimefusion_identical.js # requires recuding the size of n
+time node runtimefusion_native.js
+```
+
+## Benchmark #2: PatternMatch
+
+This tests repeatedly flips the bits of a string of 32 bits, `2^20` times, using algebraic datatypes. Caution is made so that no optimization takes place; i.e., all those pattern matches are actually performed, forcing all languages to do roughly the same actual work. The purpose of this is to measure the raw allocation and matching performance. Equivalent to:
+
+```javascript
+const O = (bs) => ({ctor: "O", tail: bs});
+const I = (bs) => ({ctor: "I", tail: bs});
+const Z = {ctor: "Z"};
+
+const flip = bits => {
+  switch (bits.ctor) {
+    case "O": return I(flip(bits.tail));
+    case "I": return O(flip(bits.tail));
+    case "Z": return Z;
+  }
+}
+
+var bits = O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(Z))))))))))))))))))))))))))))))));
+for (var i = 0; i < Math.pow(2, 20); ++i) {
+  bits = flip(bits);
+}
+
+console.log(JSON.stringify(bits));
+```
+
+Run with:
+
+```bash
+time formality patternmatch.for -f main
+
+ghc -O2 patternmatch_identical.hs -o patternmatch_identical; time ./patternmatch_identical
+ghc -O2 patternmatch_native.hs -o patternmatch_native; time ./patternmatch_native
+
+time node patternmatch_identical.js
+time node patternmatch_native.js
+```
 
 ## Comments
 

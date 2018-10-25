@@ -107,10 +107,27 @@ apply_pow2n_times (S_Nat n) = n
   (\ n f -> apply_pow2n_times n (\ x -> f (f x)))
   (\ f x -> f x)
 
+-- Applies a function 2^n times to a value
+apply_pow2n_times_bits :: S_Nat -> (S_Bits -> S_Bits) -> S_Bits -> S_Bits
+apply_pow2n_times_bits (S_Nat n) = n
+  (\ n f -> apply_pow2n_times_bits n (\ x -> f (f x)))
+  (\ f x -> f x)
+
+-- Doubles the size of a list
 double_size :: S_List -> S_List
 double_size (S_List xs) = xs (\x xs -> s_cons x (s_cons x (double_size xs))) s_nil
 
+-- Computes the length of a list
 length :: S_List -> S_Bits
 length xs = length_aux xs u32_zero where
   length_aux :: S_List -> S_Bits -> S_Bits
   length_aux (S_List xs) = xs (\ x xs r -> length_aux xs (inc r)) (\ r -> r)
+
+-- Flips every bit of a bitstring. Not fusible, in order to force it
+-- pattern-matches as many times as expected without being optimized away
+flip_unfusible :: S_Bits -> S_Bits 
+flip_unfusible (S_Bits bs) = (bs
+  (\ bs f -> s_i (f bs))
+  (\ bs f -> s_o (f bs))
+  (\ f -> s_z)
+  flip_unfusible)

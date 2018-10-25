@@ -96,6 +96,12 @@ let apply-pow2n-times(n : S-Nat) =>
     (n : S-List, f : (x : S-List) -> S-List) => copy f as g, h in apply-pow2n-times(n, (x : S-List) => g(h(x))),
     (f : (x : S-List) -> S-List, x : S-List) => f(x))
 
+-- Applies a function 2^n times to a value
+let apply-pow2n-times-bits(n : S-Nat) =>
+  n((f : (x : S-Bits) -> S-Bits, x : S-Bits) -> S-Bits,
+    (n : S-Bits, f : (x : S-Bits) -> S-Bits) => copy f as g, h in apply-pow2n-times-bits(n, (x : S-Bits) => g(h(x))),
+    (f : (x : S-Bits) -> S-Bits, x : S-Bits) => f(x))
+
 -- Doubles the size of a list
 let double-size(xs : S-List) =>
   xs(S-List,
@@ -109,3 +115,11 @@ let length(xs : S-List) =>
       (x : S-Bits, xs : S-List, r : S-Bits) => length-aux(xs, inc(r)),
       (r : S-Bits) => r)
   length-aux(xs, u32-zero)
+
+-- Flips every bit of a bitstring. Not fusible, in order to force it
+-- pattern-matches as many times as expected without being optimized away
+let flip-unfusible(bs : S-Bits) => bs((x : S-Bits) -> Bits,
+  (bs : S-Bits, f : (bs : S-Bits) -> S-Bits) => S-1(f(bs)),
+  (bs : S-Bits, f : (bs : S-Bits) -> S-Bits) => S-0(f(bs)),
+  (f : (bs : S-Bits) -> S-Bits) => S-z,
+  flip-unfusible)
