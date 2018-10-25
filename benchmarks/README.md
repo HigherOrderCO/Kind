@@ -4,7 +4,7 @@ Some benchmarks comparing Formality to other languages. Current results:
 
 Benchmark | Formality | JavaScript V8 (identical) | JavaScript V8 (native) | Haskell GHC (identical) | Haskell GHC (native)
 --- | --- | --- | --- | --- | ---
-MapInc | 0.29s | 819s | 93.2s | 29.4s | 28.9s
+MapInc | 0.29s | 819s | 93.2s | 29.4s | 23.4s
 BinTrees | 28.3s | - | 4.82s | - | 0.41s
 
 Tested in a 3.3 GHz Intel Core i7, 16 GB LPDDR3.
