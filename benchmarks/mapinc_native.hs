@@ -1,9 +1,7 @@
 -- This is just a quick example to address a feedback on /r/haskell and point
--- that using native ints and lists does NOT make a difference! The reason I
--- used Scott encodings in both is that I believe we should test identical
--- programs, otherwise we'd not be evaluating how well compilers deal with the
--- same programs! We can have other benchmarks to test different things, but
--- they should always be identical.
+-- that using native ints and lists does NOT make a difference. This still
+-- takes 30s. The reason I used Scott encodings in both is that we should test
+-- identical programs, otherwise it'd not be meaningful to compare compilers IMO.
 
 list :: [Int]
 list = map (const 0) [0..1000]

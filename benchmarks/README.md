@@ -14,6 +14,7 @@ This test initializes a list of `1000` lists of 32-bit bitstrings, all zeroes an
 ```bash
 ghc -O2 mapinc.hs -o mapinc; time ./mapinc; rm mapinc
 time formality mapinc.for -f main
+node mapinc.js --stack-size=1000000 # requires recuding the size of n
 ```
 
 ### 2. BinTrees
