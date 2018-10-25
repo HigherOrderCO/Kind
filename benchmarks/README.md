@@ -99,7 +99,7 @@ Ideas are welcome!
 
 ## Comments
 
-Formality is still interpreted and there is much work to do before it reaches the raw performance of mature languages. Despite that, due to asymptotical beta-reduction optimality, it beats them in some interesting cases where it benefits from runtime fusion; the more you abuse high order functions, maps, folds etc., the more likely that is. Similarly, if your code is close to the metal, using the cache efficiently, unboxed structures, etc., Formality will fall far behind. Those benchmarks aim to measure those extremes and give us directions on how to improve Formality to catch up with mature compilers.
+Formality is still interpreted and there is much work to do before it reaches the raw performance of mature languages. Despite that, due to asymptotical beta-reduction optimality, it beats them in some interesting cases such as when it benefits from runtime fusion; the more you abuse high order functions, maps, folds etc., the more likely that is. Similarly, if your code is close to the metal, using the cache efficiently, unboxed structures, etc., Formality will fall far behind. Those benchmarks aim to measure those extremes and give us directions on how to improve Formality to catch up with mature compilers.
 
 ## Note
 
