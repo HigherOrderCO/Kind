@@ -2,24 +2,22 @@
 
 Some benchmarks comparing Formality to other languages. Current results:
 
-test | JavaScript (V8) | Haskell (GHC) | Formality
---- | --- | --- | --- 
-MapInc | 819s | 29s | 0.3s
-BinTrees | 4.8s | 0.41s | 28s
+test | Formality | JavaScript V8 (identical) | JavaScript V8 (native) | Haskell GHC (identical) | Haskell GHC (native)
+--- | --- | --- | --- | --- | ---
+MapInc | 0.29s | 819s | 93.2s | 29.4s | 28.9s
+BinTrees | 28.3s | - | 4.82s | - | 0.41s
+
+Tested in a 3.3 GHz Intel Core i7, 16 GB LPDDR3.
 
 ### Philosophy
 
-1. Tested programs should **identical**, up to the most minimal details.
+1. Identical programs should be identical to the Formality implementation, up to the most minimal details.
 
-    It'd be meaningless to compare how well compilers behave if we used different inputs! If a language performs bad in a benchmark because the tested program isn't "idiomatic" in that language, then a **new** benchmark should be designed with a representation where it performs better.
+2. Native programs should "feel natural" on the implemented language.
  
-2. Benchmarks should cover common idioms that happen in practice.
+3. Benchmarks should cover common idioms that happen in practice.
 
-    Computer Benchmark Game cases are welcome, but, IMO, not enough alone, because they don't cover a lot of important features, such as the ability of a language to optimize with high-level, functional code.
-
-3. The compiler shouldn't be pre-running programs.
-
-    In the case of Formality, that is obviously the case as the compilation time is included in its numbers. Other languages may need some caution.
+4. The compiler shouldn't be pre-running programs.
 
 ### Benchmark #1: MapInc
 

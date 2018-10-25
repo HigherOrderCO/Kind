@@ -1,10 +1,5 @@
--- This is just a quick example to address a feedback on /r/haskell and point
--- that using native ints and lists does NOT make a difference. This still
--- takes 30s. The reason I used Scott encodings in both is that we should test
--- identical programs, otherwise it'd not be meaningful to compare compilers IMO.
-
 list :: [Int]
-list = map (const 0) [0..1000]
+list = map (const 0) [0..100]
 
 apply_pow2n_times :: Int -> ([Int] -> [Int]) -> [Int] -> [Int]
 apply_pow2n_times 0 f x = f x
