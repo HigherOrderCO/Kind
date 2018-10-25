@@ -30,7 +30,4 @@ list =
 
 -- Maps `inc` 2^20 times to `list`
 main :: IO ()
-main
-  = print
-  . s_List_to_Bits
-  $ apply_pow2n_times n (map inc) list
+main = print . s_List_to_Bits $ apply_pow2n_times n (map inc) list

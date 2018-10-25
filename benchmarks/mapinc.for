@@ -25,6 +25,4 @@ let list
 -- MAIN
 
 -- Maps `inc` 2^20 times to `list`
-let main
-  S-List-to-List(
-  apply-pow2n-times(n, map(inc), list))
+let main S-List-to-List(apply-pow2n-times(n, map(inc), list))

@@ -35,7 +35,4 @@ const list =
 // MAIN
 
 // Maps `inc` 2^20 times to `list`
-console.log(
-  JSON.stringify(
-  s_List_to_List(
-  apply_pow2n_times(n)(map(inc))(list))));
+console.log(JSON.stringify(s_List_to_List(apply_pow2n_times(n)(map(inc))(list))));
