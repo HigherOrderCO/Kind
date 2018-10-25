@@ -18,7 +18,7 @@ const n = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(
 // A string of 32 bits, all zeroes
 const zeroes = s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O( s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_z))))))))))))))))))))))))))))))));
 
-// A list with 1000 strings of 32 bits, all zeroes
+// A list with 100 strings of 32 bits, all zeroes
 const list =
   s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(
   s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(
@@ -34,7 +34,7 @@ const list =
 
 // MAIN
 
-// Maps `inc` 2^20 times to `list`; in total, `inc` is applied 2^20*1000 = 1,048,576,000 = about 1 billion times
+// Maps `inc` 2^20 times to `list`
 console.log(
   JSON.stringify(
   s_List_to_List(

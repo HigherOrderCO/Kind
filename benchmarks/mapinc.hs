@@ -11,7 +11,7 @@ n = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_s
 zero :: S_Bits
 zero = (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o s_z)))))))))))))))))))))))))))))))) 
 
--- A list with 1000 strings of 32 bits, all zeroes
+-- A list with 100 strings of 32 bits, all zeroes
 list :: S_List
 list =
   (s_cons zero (s_cons zero (s_cons zero (s_cons zero (s_cons zero (s_cons zero (s_cons zero (s_cons zero (s_cons zero (s_cons zero 
@@ -28,7 +28,7 @@ list =
 
 -- MAIN
 
--- Maps `inc` 2^20 times to `list`; in total, `inc` is applied 2^20*1000 = 1,048,576,000 = about 1 billion times
+-- Maps `inc` 2^20 times to `list`
 main :: IO ()
 main
   = print
