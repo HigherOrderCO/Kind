@@ -2,10 +2,10 @@
 
 Some benchmarks comparing Formality to other languages. Current results:
 
-test | JavaScript (V8) | Haskell (GHC) | Rust | Formality
---- | --- | --- | --- | --- 
-MapInc | 819s | 29s | - | 0.3s
-BinTrees | 4.8s | - | - | 28s
+test | JavaScript (V8) | Haskell (GHC) | Formality
+--- | --- | --- | --- 
+MapInc | 819s | 29s | 0.3s
+BinTrees | 4.8s | 0.41s | 28s
 
 ### 1. MapInc
 
