@@ -339,6 +339,7 @@ pub fn parse_term
         let nam_b = parse_name(cursor, code)?;
         vars.push(nam_b.clone());
         let nam = (nam_a, nam_b);
+        parse_one_of(cursor, code, &[b"in"])?;
         let bod = parse_term(cursor, code, vars, defs)?;
         vars.pop();
         vars.pop();
@@ -561,7 +562,7 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
                 code.extend_from_slice(b", ");
                 code.append(&mut nam.1.clone());
                 vars.push(nam.1.to_vec());
-                code.extend_from_slice(b" ");
+                code.extend_from_slice(b" in ");
                 build(code, &bod, vars, short);
                 vars.pop();
                 vars.pop();
