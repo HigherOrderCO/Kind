@@ -24,9 +24,13 @@ Tested in a 3.3 GHz Intel Core i7, 16 GB LPDDR3.
 This test initializes a list of `1000` lists of 32-bit bitstrings, all zeroes and increments each bitstring of the list by `1`, repeating that operation `2^20` times. The purpose of this test is to measure how good a programming language is at creating algebraic data structures, processing them recursively, and, in particular, eliminating intermediate structures at runtime. Since no other functional language performs runtime-fusion, this is a good example of optimality providing an asymptotical speedup. Run with:
 
 ```bash
-ghc -O2 mapinc.hs -o mapinc; time ./mapinc; rm mapinc
 time formality mapinc.for -f main
-node mapinc.js --stack-size=1000000 # requires recuding the size of n
+
+ghc -O2 mapinc_identical.hs -o mapinc_identical; time ./mapinc_identical
+ghc -O2 mapinc_inative.hs -o mapinc_native; time ./mapinc_native
+
+time node mapinc_identical.js # requires recuding the size of n
+time node mapinc_native.js
 ```
 
 ### Benchmark #2: BinTrees
