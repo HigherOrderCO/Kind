@@ -34,6 +34,36 @@ let S-List (P : Type, c : (x : S-Bits, xs : S-List) -> P, n : P) -> P
 let S-nil  (P : Type, c : (x : S-Bits, xs : S-List) -> P, n : P) => n
 let S-cons (x : S-Bits, xs : S-List) => (P : Type, c : (x : S-Bits, xs : S-List) -> P, n : P) => c(x, xs)
 
+-- VALUES
+
+-- Some natural numbers
+let n0 S-zero
+let n1 S-succ(S-zero)
+let n2 S-succ(S-succ(S-zero))
+let n3 S-succ(S-succ(S-succ(S-zero)))
+let n4 S-succ(S-succ(S-succ(S-succ(S-zero))))
+let n5 S-succ(S-succ(S-succ(S-succ(S-succ(S-zero)))))
+let n6 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero))))))
+let n7 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero)))))))
+let n8 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero))))))))
+let n9 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero)))))))))
+let n10 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero))))))))))
+let n11 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero)))))))))))
+let n12 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero))))))))))))
+let n13 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero)))))))))))))
+let n14 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero))))))))))))))
+let n15 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero)))))))))))))))
+let n16 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero))))))))))))))))
+let n17 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero)))))))))))))))))
+let n18 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero))))))))))))))))))
+let n19 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero)))))))))))))))))))
+let n20 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero))))))))))))))))))))
+let n21 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero)))))))))))))))))))))
+let n22 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero))))))))))))))))))))))
+
+-- A string of 32 bits, all zeroes
+let u32-zero S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-z)))))))))))))))))))))))))))))))) 
+
 -- CONVERSIONS
 
 -- Converts a lambda-encoded bitstring to a native bitstring
@@ -66,3 +96,16 @@ let apply-pow2n-times(n : S-Nat) =>
     (n : S-List, f : (x : S-List) -> S-List) => copy f as g, h in apply-pow2n-times(n, (x : S-List) => g(h(x))),
     (f : (x : S-List) -> S-List, x : S-List) => f(x))
 
+-- Doubles the size of a list
+let double-size(xs : S-List) =>
+  xs(S-List,
+    (x : S-Bits, xs : S-List) => copy x as y, z in S-cons(y, S-cons(z, double-size(xs))),
+    S-nil)
+
+-- Computes the length of a list
+let length(xs : S-List) =>
+  let length-aux(xs : S-List) =>
+    xs((x : S-Bits) -> S-Bits,
+      (x : S-Bits, xs : S-List, r : S-Bits) => length-aux(xs, inc(r)),
+      (r : S-Bits) => r)
+  length-aux(xs, u32-zero)

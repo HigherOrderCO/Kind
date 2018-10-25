@@ -2,7 +2,7 @@
 
 module Base where
 
-import Prelude hiding (Bool, True, False, not, map)
+import Prelude hiding (Bool, True, False, not, map, id)
 
 -- NATIVE DATATYPES
 
@@ -57,6 +57,37 @@ s_Bits_to_Bits (S_Bits bs) = (bs
 s_List_to_Bits :: S_List -> List
 s_List_to_Bits (S_List xs) = xs (\x xs -> Cons (s_Bits_to_Bits x) (s_List_to_Bits xs)) Nil
 
+-- VALUES
+
+-- Some natural numbers
+n0 = s_zero
+n1 = (s_succ s_zero)
+n2 = (s_succ (s_succ s_zero))
+n3 = (s_succ (s_succ (s_succ s_zero)))
+n4 = (s_succ (s_succ (s_succ (s_succ s_zero))))
+n5 = (s_succ (s_succ (s_succ (s_succ (s_succ s_zero)))))
+n6 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero))))))
+n7 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero)))))))
+n8 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero))))))))
+n9 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero)))))))))
+n10 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero))))))))))
+n11 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero)))))))))))
+n12 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero))))))))))))
+n13 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero)))))))))))))
+n14 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero))))))))))))))
+n15 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero)))))))))))))))
+n16 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero))))))))))))))))
+n17 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero)))))))))))))))))
+n18 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero))))))))))))))))))
+n19 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero)))))))))))))))))))
+n20 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero))))))))))))))))))))
+n21 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero)))))))))))))))))))))
+n22 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ s_zero))))))))))))))))))))))
+
+-- A string of 32 bits, all zeroes
+u32_zero :: S_Bits
+u32_zero = (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o s_z)))))))))))))))))))))))))))))))) 
+
 -- FUNCTIONS
 
 -- Increments a bitstring by 1
@@ -76,3 +107,10 @@ apply_pow2n_times (S_Nat n) = n
   (\ n f -> apply_pow2n_times n (\ x -> f (f x)))
   (\ f x -> f x)
 
+double_size :: S_List -> S_List
+double_size (S_List xs) = xs (\x xs -> s_cons x (s_cons x (double_size xs))) s_nil
+
+length :: S_List -> S_Bits
+length xs = length_aux xs u32_zero where
+  length_aux :: S_List -> S_Bits -> S_Bits
+  length_aux (S_List xs) = xs (\ x xs r -> length_aux xs (inc r)) (\ r -> r)

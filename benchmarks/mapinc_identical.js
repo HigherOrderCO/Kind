@@ -10,29 +10,23 @@
 // if the trend continued, 2^20 calls would take 819s.
 // TEST VALUES
 
-const {s_succ, s_zero, s_O, s_z, s_cons, s_nil, s_List_to_List, apply_pow2n_times, map, inc} = require("./base.js");
-
-// The natural number 20
-const n = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero))))))))))))))))))));
-
-// A string of 32 bits, all zeroes
-const zeroes = s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O( s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_z))))))))))))))))))))))))))))))));
+const {s_succ, s_zero, s_O, s_z, s_cons, s_nil, s_List_to_List, apply_pow2n_times, map, inc, n20, u32_zero} = require("./base.js");
 
 // A list with 100 strings of 32 bits, all zeroes
 const list =
-  s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(
-  s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(
-  s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(
-  s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(
-  s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(
-  s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(
-  s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(
-  s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(
-  s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(
-  s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(s_cons(zeroes)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
     s_nil))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));
 
 // MAIN
 
 // Maps `inc` 2^20 times to `list`
-console.log(JSON.stringify(s_List_to_List(apply_pow2n_times(n)(map(inc))(list))));
+console.log(JSON.stringify(s_List_to_List(apply_pow2n_times(n20)(map(inc))(list))));

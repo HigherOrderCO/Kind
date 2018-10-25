@@ -5,7 +5,7 @@ Some benchmarks comparing Formality to other languages. Current results:
 Benchmark | Formality | JavaScript V8 (identical) | JavaScript V8 (native) | Haskell GHC (identical) | Haskell GHC (native)
 --- | --- | --- | --- | --- | ---
 MapInc | 0.29s | 819s | 93.2s | 29.4s | 23.4s
-BinTrees | 28.3s | - | 4.82s | - | 0.41s
+Alloc | 15.0s | 11.2s | - | 0.41s | -
 
 Tested in a 3.3 GHz Intel Core i7, 16 GB LPDDR3.
 
@@ -41,12 +41,16 @@ time node mapinc_identical.js # requires recuding the size of n
 time node mapinc_native.js
 ```
 
-## Benchmark #2: BinTrees
+## Benchmark #2: Alloc
 
-This tests initializes a perfect binary tree and recursivelly pattern-matches over the whole structure. The purpose of this is to measure the **raw allocation/pattern-matching** performance of a language.
+This tests allocates a very huge list and then iterates over it to count its length. The purpose of this is to measure the raw allocation performance of a language.
 
-TODO: not here yet, but [this](https://github.com/MaiaVictor/symmetric-interaction-calculus-benchmarks) test can be executed with [SIC](https://github.com/maiavictor/symmetric-interaction-calculus).
+## Benchmark #3: PatternMatch
 
 ## Comments
 
 Formality is still interpreted and there is much work to do before it reaches the raw performance of mature languages. Despite that, due to asymptotical beta-reduction optimality, it beats them in some interesting cases where it benefits from runtime fusion; the more you abuse high order functions, maps, folds etc., the more likely that is. Similarly, if your code is close to the metal, using the cache efficiently, unboxed structures, etc., Formality will fall far behind. Those benchmarks aim to measure those extremes and give us directions on how to improve Formality to catch up with mature compilers.
+
+## Note
+
+Formality doesn't feature native number types yet. As such, the goal of those benchmarks is to test, mainly, memory allocation / cleanup, and how well it optimizes functional idioms (algebraic datatypes, pattern-matching, recursion, etc.).

@@ -44,6 +44,36 @@ const s_List_to_List = (function s_List_to_List() {
     (nil);
 })();
 
+// VALUES
+
+// Some natural numbers
+const n0 = s_zero;
+const n1 = s_succ(s_zero);
+const n2 = s_succ(s_succ(s_zero));
+const n3 = s_succ(s_succ(s_succ(s_zero)));
+const n4 = s_succ(s_succ(s_succ(s_succ(s_zero))));
+const n5 = s_succ(s_succ(s_succ(s_succ(s_succ(s_zero)))));
+const n6 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero))))));
+const n7 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero)))))));
+const n8 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero))))))));
+const n9 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero)))))))));
+const n10 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero))))))))));
+const n11 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero)))))))))));
+const n12 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero))))))))))));
+const n13 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero)))))))))))));
+const n14 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero))))))))))))));
+const n15 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero)))))))))))))));
+const n16 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero))))))))))))))));
+const n17 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero)))))))))))))))));
+const n18 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero))))))))))))))))));
+const n19 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero)))))))))))))))))));
+const n20 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero))))))))))))))))))));
+const n21 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero)))))))))))))))))))));
+const n22 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero))))))))))))))))))))));
+
+// A string of 32 bits, all zeroes
+const u32_zero = s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O( s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_z))))))))))))))))))))))))))))))));
+
 // FUNCTIONS
 
 // Increments a bitstring by 1
@@ -68,5 +98,25 @@ const apply_pow2n_times = (function apply_pow2n_times() {
       (n => f => apply_pow2n_times()(n)(x => f(f(x))))
       (f => x => f(x));
 })();
-    
-module.exports = {O, I, z, succ, zero, cons, nil, s_z, s_O, s_I, s_zero, s_succ, s_nil, s_cons, s_Bits_to_Bits, s_List_to_List, inc, map, apply_pow2n_times};
+
+// Doubles the size of a list
+const double_size = (function double_size() {
+  return xs =>
+    xs(null)
+      (x => xs => s_cons(x)(s_cons(x)(double_size()(xs))))
+      (s_nil);
+})();
+
+// Computes the length of a list
+const length = (function length() {
+  const length_aux = (function length_aux() {
+    return xs =>
+      xs(null)
+        (x => xs => r => length_aux()(xs)(inc(r)))
+        (r => r);
+  })();
+  return xs => length_aux(xs)(u32_zero);
+})();
+
+
+module.exports = {O, I, z, succ, zero, cons, nil, s_z, s_O, s_I, s_zero, s_succ, s_nil, s_cons, s_Bits_to_Bits, s_List_to_List, inc, map, apply_pow2n_times, double_size, length, n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16, n17, n18, n19, n20, n21, n22, u32_zero};
