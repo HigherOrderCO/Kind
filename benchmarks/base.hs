@@ -46,16 +46,16 @@ s_cons x xs    = S_List (\ c n -> c x xs)
 -- CONVERSIONS
 
 -- Converts a lambda-encoded bitstring to a native bitstring
-s_Bits_to_Bits :: S_Bits -> Bits 
-s_Bits_to_Bits (S_Bits bs) = (bs
+to_Bits :: S_Bits -> Bits 
+to_Bits (S_Bits bs) = (bs
   (\ bs f -> O (f bs))
   (\ bs f -> I (f bs))
   (\ f -> Z)
-  s_Bits_to_Bits)
+  to_Bits)
 
 -- Converts a lambda-encoded list to a native list
-s_List_to_Bits :: S_List -> List
-s_List_to_Bits (S_List xs) = xs (\x xs -> Cons (s_Bits_to_Bits x) (s_List_to_Bits xs)) Nil
+to_List :: S_List -> List
+to_List (S_List xs) = xs (\x xs -> Cons (to_Bits x) (to_List xs)) Nil
 
 -- VALUES
 
@@ -87,6 +87,21 @@ n22 = (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s_succ (s
 -- A string of 32 bits, all zeroes
 u32_zero :: S_Bits
 u32_zero = (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o (s_o s_z)))))))))))))))))))))))))))))))) 
+
+-- A list with 100 strings of 32 bits, all zeroes
+list_with_100_zeros :: S_List
+list_with_100_zeros =
+  (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero 
+  (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero 
+  (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero 
+  (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero 
+  (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero 
+  (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero 
+  (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero 
+  (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero 
+  (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero 
+  (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero (s_cons u32_zero 
+    s_nil))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
 
 -- FUNCTIONS
 

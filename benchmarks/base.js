@@ -29,18 +29,18 @@ const s_nil = P => c => n => n;
 const s_cons = x => xs => P => c => n => c(x)(xs);
 
 // Converts a lambda-encoded bitstring to a native bitstring
-const s_Bits_to_Bits = (function s_Bits_to_Bits() {
+const to_Bits = (function to_Bits() {
   return bs => bs(null)
     (bs => f => O(f(bs)))
     (bs => f => I(f(bs)))
     (f => z)
-    (s_Bits_to_Bits());
+    (to_Bits());
 })();
 
 // Converts a lambda-encoded list to a native list
-const s_List_to_List = (function s_List_to_List() {
+const to_List = (function to_List() {
   return xs => xs(null)
-    (x => xs => cons(s_Bits_to_Bits(x))(s_List_to_List()(xs)))
+    (x => xs => cons(to_Bits(x))(to_List()(xs)))
     (nil);
 })();
 
@@ -73,6 +73,21 @@ const n22 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_suc
 
 // A string of 32 bits, all zeroes
 const u32_zero = s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O( s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_z))))))))))))))))))))))))))))))));
+
+// A list with 100 strings of 32 bits, all zeroes
+const list_with_100_zeros =
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+  s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(s_cons(u32_zero)(
+    s_nil))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));
+
 
 // FUNCTIONS
 
@@ -137,4 +152,4 @@ const flip_unfusible = (function flip_unfusible() {
 })();
 
 
-module.exports = {O, I, z, succ, zero, cons, nil, s_z, s_O, s_I, s_zero, s_succ, s_nil, s_cons, s_Bits_to_Bits, s_List_to_List, inc, map, apply_pow2n_times, apply_pow2n_times_bits, double_size, length, flip_unfusible, n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16, n17, n18, n19, n20, n21, n22, u32_zero};
+module.exports = {O, I, z, succ, zero, cons, nil, s_z, s_O, s_I, s_zero, s_succ, s_nil, s_cons, to_Bits, to_List, inc, map, apply_pow2n_times, apply_pow2n_times_bits, double_size, length, flip_unfusible, n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16, n17, n18, n19, n20, n21, n22, u32_zero, list_with_100_zeros};

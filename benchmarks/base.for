@@ -64,18 +64,32 @@ let n22 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-
 -- A string of 32 bits, all zeroes
 let u32-zero S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-z)))))))))))))))))))))))))))))))) 
 
+-- A list with 100 strings of 32 bits, all zeroes
+let list-with-100-zeros
+  S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, 
+  S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, 
+  S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, 
+  S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, 
+  S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, 
+  S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, 
+  S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, 
+  S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, 
+  S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, 
+  S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, S-cons(u32-zero, 
+    S-nil))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+
 -- CONVERSIONS
 
 -- Converts a lambda-encoded bitstring to a native bitstring
-let S-Bits-to-Bits(bs : S-Bits) => bs((x : S-Bits) -> Bits,
+let to-Bits(bs : S-Bits) => bs((x : S-Bits) -> Bits,
   (bs : S-Bits, f : (bs : S-Bits) -> Bits) => Bits.0(f(bs)),
   (bs : S-Bits, f : (bs : S-Bits) -> Bits) => Bits.1(f(bs)),
   (f : (bs : S-Bits) -> Bits) => Bits.z,
-  S-Bits-to-Bits)
+  to-Bits)
 
 -- Converts a lambda-encoded list to a native list
-let S-List-to-List(xs : S-List) => xs(List,
-  (x : S-Bool, xs : S-List) => List.cons(S-Bits-to-Bits(x), S-List-to-List(xs)),
+let to-List(xs : S-List) => xs(List,
+  (x : S-Bool, xs : S-List) => List.cons(to-Bits(x), to-List(xs)),
   List.nil)
 
 -- FUNCTIONS
