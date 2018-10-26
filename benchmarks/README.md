@@ -5,7 +5,7 @@ Some benchmarks comparing Formality to other languages. Current results:
 Benchmark | Formality | Haskell GHC (identical) | Haskell GHC (native) | JavaScript V8 (identical) | JavaScript V8 (native) 
 --- | --- | --- | --- | --- | ---
 RuntimeFusion | 0.29s| 29.4s | 23.4s | 819s | 9.09s 
-PatternMatch | 66.4s| 5.21s | 2.87s | 13.2s | 0.56s 
+PatternMatch | 66.4s| 5.21s | 2.87s | 13.2s | 0.84s 
 
 Tested in a 3.3 GHz Intel Core i7, 16 GB LPDDR3.
 

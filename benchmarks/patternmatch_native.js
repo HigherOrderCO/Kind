@@ -1,18 +1,19 @@
-const O = (bs) => ({ctor: "O", tail: bs});
-const I = (bs) => ({ctor: "I", tail: bs});
-const Z = {ctor: "Z"};
-
-const flip = bits => {
-  switch (bits.ctor) {
-    case "O": return I(flip(bits.tail));
-    case "I": return O(flip(bits.tail));
-    case "Z": return Z;
+// Flips all Bits
+const flip = (bits) => {
+  switch (bits[0]) {
+    case 0  : return [1, flip(bits[1])];
+    case 1  : return [0, flip(bits[1])];
+    default : return [];
   }
 }
 
-var bits = O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(O(Z))))))))))))))))))))))))))))))));
+// String of 32 bits (zeros)
+var bits = [0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[0,[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]];
+
+// Flips all bits 2^20 times
 for (var i = 0; i < Math.pow(2, 20); ++i) {
   bits = flip(bits);
 }
 
+// Prints result
 console.log(JSON.stringify(bits));
