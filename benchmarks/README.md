@@ -1,13 +1,13 @@
 ## Benchmarks
 
-Some benchmarks comparing Formality to other languages. Current results:
+Some benchmarks comparing Formality to other languages. There are still only a few tests, a lot more will be added over the next months. Current results, tested in a 3.3 GHz Intel Core i7, 16 GB LPDDR3:
 
 Benchmark | Formality | Haskell GHC (identical) | Haskell GHC (native) | JavaScript V8 (identical) | JavaScript V8 (native) 
 --- | --- | --- | --- | --- | ---
 RuntimeFusion | 0.29s| 29.4s | 23.4s | 819s | 9.09s 
 PatternMatch | 66.4s| 5.21s | 2.87s | 13.2s | 0.84s 
 
-Tested in a 3.3 GHz Intel Core i7, 16 GB LPDDR3.
+To understand why Formality performs so well in "very high-level code", check [this Medium post](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07).
 
 ### Philosophy
 
