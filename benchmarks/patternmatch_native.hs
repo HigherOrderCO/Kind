@@ -1,10 +1,12 @@
+{-# LANGUAGE BangPatterns #-}
+
 import Prelude hiding (flip)
 
 data Bits = O Bits | I Bits | Z deriving Show
 
 flip :: Bits -> Bits
-flip (O bs) = I (flip bs)
-flip (I bs) = O (flip bs)
+flip (O bs) = I bs' where !bs' = flip bs
+flip (I bs) = O bs' where !bs' = flip bs
 flip Z      = Z
 
 go :: Int -> Bits -> Bits
