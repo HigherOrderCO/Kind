@@ -11,7 +11,7 @@ function flip(bits) {
 }
 
 // Flips all bits 2^20 times
-for (var i = 0; i < Math.pow(2, 20); ++i) {
+for (var i = 0; i < Math.pow(2, 24); ++i) {
   bits = flip(bits);
 }
 

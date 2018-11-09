@@ -16,4 +16,4 @@ map' f (x:xs) = x' : xs'
    !xs' = map' f xs 
 
 main :: IO ()
-main = print $ apply_n_times (2^20) (map' (+ 1)) list
+main = print $ apply_n_times (2^24) (map' (+ 1)) list

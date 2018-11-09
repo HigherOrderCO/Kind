@@ -10,6 +10,6 @@
 // if the trend continued, 2^20 calls would take 819s.
 // TEST VALUES
 
-const {s_succ, s_zero, s_O, s_z, s_cons, s_nil, to_List, apply_pow2n_times, map, inc, n20, u32_zero, list_with_100_zeros} = require("./base.js");
+const {s_succ, s_zero, s_O, s_z, s_cons, s_nil, to_List, apply_pow2n_times, map, inc, n24, u32_zero, list_with_100_zeros} = require("./base.js");
 
-console.log(JSON.stringify(to_List(apply_pow2n_times(n20)(map(inc))(list_with_100_zeros))));
+console.log(JSON.stringify(to_List(apply_pow2n_times(n24)(map(inc))(list_with_100_zeros))));

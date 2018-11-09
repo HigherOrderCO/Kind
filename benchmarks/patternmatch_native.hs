@@ -17,4 +17,4 @@ u32_zero :: Bits
 u32_zero = (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O (O Z))))))))))))))))))))))))))))))))
 
 main :: IO ()
-main = print $ go (2^20) u32_zero
+main = print $ go (2^24) u32_zero

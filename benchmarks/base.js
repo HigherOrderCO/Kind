@@ -70,6 +70,8 @@ const n19 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_suc
 const n20 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero))))))))))))))))))));
 const n21 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero)))))))))))))))))))));
 const n22 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero))))))))))))))))))))));
+const n23 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero)))))))))))))))))))))));
+const n24 = s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_succ(s_zero))))))))))))))))))))))));
 
 // A string of 32 bits, all zeroes
 const u32_zero = s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O( s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_O(s_z))))))))))))))))))))))))))))))));
@@ -152,4 +154,4 @@ const flip_unfusible = (function flip_unfusible() {
 })();
 
 
-module.exports = {O, I, z, succ, zero, cons, nil, s_z, s_O, s_I, s_zero, s_succ, s_nil, s_cons, to_Bits, to_List, inc, map, apply_pow2n_times, apply_pow2n_times_bits, double_size, length, flip_unfusible, n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16, n17, n18, n19, n20, n21, n22, u32_zero, list_with_100_zeros};
+module.exports = {O, I, z, succ, zero, cons, nil, s_z, s_O, s_I, s_zero, s_succ, s_nil, s_cons, to_Bits, to_List, inc, map, apply_pow2n_times, apply_pow2n_times_bits, double_size, length, flip_unfusible, n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16, n17, n18, n19, n20, n21, n22, n23, n24, u32_zero, list_with_100_zeros};

@@ -1,6 +1,6 @@
 var list = Array(100).fill(0);
 
-for (var i = 0; i < Math.pow(2, 20); ++i) {
+for (var i = 0; i < Math.pow(2, 24); ++i) {
   list = list.map(x => x + 1);
 }
 
