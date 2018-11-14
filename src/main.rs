@@ -70,12 +70,12 @@ fn main() -> io::Result<()> {
             .takes_value(true))
         .arg(Arg::with_name("FILE")
             .help("Sets the input file to use")
-            .required(true)
+            .required(false)
             .index(1))
         .get_matches();
 
     // Reads the file to check / eval
-    let file_name = matches.value_of("FILE").unwrap();
+    let file_name = match matches.value_of("FILE") { Some(name) => name, None => "main.for" };
     let mut file = File::open(file_name)?;
     let mut code = Vec::new();
     file.read_to_end(&mut code)?;
@@ -189,6 +189,34 @@ fn main() -> io::Result<()> {
             println!("[EVAL]\n\n{}\n", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
         },
         None => {}
+    }
+
+    // Evals and prints
+    match matches.value_of("FILE") {
+        Some(_) => {},
+        None => {
+            let term_name = b"main".to_vec();
+
+            // Type-checks all dependencies
+            for (nam, def) in &defs {
+                get_result(nam.to_vec(), syntax::infer_with_string_error(&def, &defs, false, true));
+            }
+
+            // Loads the term
+            let term = get_term(&term_name, &defs);
+
+            // Prints it
+            println!("[TERM]\n\n{}\n", syntax::term_to_string(&term, &mut Vec::new(), true));
+
+            // Prints its inferred type
+            let t_ty = get_result(term_name, syntax::infer_with_string_error(&term, &defs, false, true));
+            println!("[TYPE]\n\n{}\n", syntax::term_to_string(&t_ty, &mut Vec::new(), true));
+
+            // Prints its normal form
+            let mut t_nf = term.clone();
+            reduce(&mut t_nf, &defs, true);
+            println!("[EVAL]\n\n{}\n", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
+        }
     }
 
     Ok(())
