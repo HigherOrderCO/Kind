@@ -60,6 +60,8 @@ let n19 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-
 let n20 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero))))))))))))))))))))
 let n21 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero)))))))))))))))))))))
 let n22 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero))))))))))))))))))))))
+let n23 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero)))))))))))))))))))))))
+let n24 S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-succ(S-zero))))))))))))))))))))))))
 
 -- A string of 32 bits, all zeroes
 let u32-zero S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-0(S-z)))))))))))))))))))))))))))))))) 
@@ -82,15 +84,15 @@ let list-with-100-zeros
 
 -- Converts a lambda-encoded bitstring to a native bitstring
 let to-Bits(bs : S-Bits) => bs((x : S-Bits) -> Bits,
-  (bs : S-Bits, f : (bs : S-Bits) -> Bits) => Bits.0(f(bs)),
-  (bs : S-Bits, f : (bs : S-Bits) -> Bits) => Bits.1(f(bs)),
-  (f : (bs : S-Bits) -> Bits) => Bits.z,
+  (bs : S-Bits, f : (bs : S-Bits) -> Bits) => Bits{0(f(bs))},
+  (bs : S-Bits, f : (bs : S-Bits) -> Bits) => Bits{1(f(bs))},
+  (f : (bs : S-Bits) -> Bits) => Bits{z},
   to-Bits)
 
 -- Converts a lambda-encoded list to a native list
 let to-List(xs : S-List) => xs(List,
-  (x : S-Bool, xs : S-List) => List.cons(to-Bits(x), to-List(xs)),
-  List.nil)
+  (x : S-Bool, xs : S-List) => List{cons(to-Bits(x), to-List(xs))},
+  List{nil})
 
 -- FUNCTIONS
 

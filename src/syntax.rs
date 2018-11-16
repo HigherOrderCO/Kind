@@ -134,7 +134,7 @@ fn parse_one_of(cursor : &mut Cursor, code : &[u8], strings : &[&[u8]]) -> Resul
             error.push_str(", ");
         }
     }
-    error.push_str("; found '");
+    error.push_str("found '");
     error.push(code[cursor.index] as char);
     error.push_str("'.");
     Err(error)
@@ -329,6 +329,7 @@ pub fn parse_term
         parsed = Cas{val, cas, ret};
         appliable = false;
 
+    // Copy
     } else if match_exact(cursor, code, b"copy") {
         advance_char(cursor, 4);
         let val = parse_term(cursor, code, vars, defs)?;
@@ -375,14 +376,35 @@ pub fn parse_term
         appliable = true;
     };
 
-    // Constructor
-    let parsed = if appliable && match_exact(cursor, code, b".") {
+    // Instantiation
+    let (parsed, appliable) = if match_exact(cursor, code, b"{") {
         advance_char(cursor, 1);
-        let nam = parse_name(cursor, code)?;
-        let idt = Box::new(parsed);
-        Ctr{nam,idt}
+        prepare_to_parse(cursor, code)?;
+        let idt = parsed;
+        let mut idt_whnf = idt.clone();
+        weak_reduce(&mut idt_whnf, defs, true);
+        let mut ctr = Vec::new();
+        match idt_whnf {
+            Idt{nam: _, typ: _, ctr: idt_ctr} => {
+                for i in 0..idt_ctr.len() {
+                    ctr.push(idt_ctr[i].0.clone());
+                }
+            },
+            _ => {}
+        }
+        for i in 0..ctr.len() {
+            vars.push(ctr[i].to_vec())
+        }
+        let bod = parse_term(cursor, code, vars, defs)?;
+        for _ in 0..ctr.len() {
+            vars.pop();
+        }
+        parse_one_of(cursor, code, &[b"}"])?;
+        let idt = Box::new(idt);
+        let bod = Box::new(bod);
+        (New{idt, ctr, bod}, true)
     } else {
-        parsed
+        (parsed, appliable)
     };
 
     // Application
@@ -504,10 +526,17 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
                     code.extend_from_slice(b")");
                 }
             },
-            &Ctr{ref nam, ref idt} => {
+            &New{ref idt, ref ctr, ref bod} => {
                 build(code, &idt, vars, short);
-                code.extend_from_slice(b".");
-                code.append(&mut nam.clone());
+                code.extend_from_slice(b"{");
+                for i in 0..ctr.len() {
+                    vars.push(ctr[i].to_vec())
+                }
+                build(code, &bod, vars, short);
+                for _ in 0..ctr.len() {
+                    vars.pop();
+                }
+                code.extend_from_slice(b"}");
             },
             &Cas{ref val, ref cas, ref ret} => {
                 code.extend_from_slice(b"(case ");
@@ -599,10 +628,10 @@ pub fn type_error_to_ascii(type_error : &TypeError, short : bool) -> Vec<u8> {
             message.append(&mut term_to_ascii(argval, &mut vars.clone(), short));
             message.extend_from_slice(b"\n");
             message.extend_from_slice(b"- Has type   : ");
-            message.append(&mut term_to_ascii(expect, &mut vars.clone(), short));
+            message.append(&mut term_to_ascii(actual, &mut vars.clone(), short));
             message.extend_from_slice(b"\n");
             message.extend_from_slice(b"- Instead of : ");
-            message.append(&mut term_to_ascii(actual, &mut vars.clone(), short));
+            message.append(&mut term_to_ascii(expect, &mut vars.clone(), short));
             message.extend_from_slice(b"\n");
             message.extend_from_slice(b"- On call    : ");
             message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
@@ -650,26 +679,20 @@ pub fn type_error_to_ascii(type_error : &TypeError, short : bool) -> Vec<u8> {
             }
             message.extend_from_slice(b".");
         },
-        CtrNotIDT{ref actual, ref term, ref vars} => {
-            message.extend_from_slice(b"Not a datatype.");
-            message.extend_from_slice(b"- Expected : (a datatype).\n");
-            message.extend_from_slice(b"- Found    : "); 
+        NewTypeMismatch{ref expect, ref actual, ref term, ref vars} => {
+            message.extend_from_slice(b"Type mismatch.\n");
+            message.extend_from_slice(b"- This term  : ");
+            message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
+            message.extend_from_slice(b"\n");
+            message.extend_from_slice(b"- Has type   : ");
             message.append(&mut term_to_ascii(actual, &mut vars.clone(), short));
             message.extend_from_slice(b"\n");
-            message.extend_from_slice(b"- On term  : ");
+            message.extend_from_slice(b"- Instead of : ");
+            message.append(&mut term_to_ascii(expect, &mut vars.clone(), short));
+            message.extend_from_slice(b"\n");
+            message.extend_from_slice(b"- On inst    : ");
             message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
             message.extend_from_slice(b"\n");
-            message.extend_from_slice(b"* You attempted to access a constructor of something that isn't a datatype.");
-        },
-        CtrNotFound{ref name, ref term, ref vars} => {
-            message.extend_from_slice(b"Constructor not found.\n");
-            message.extend_from_slice(b"- Constructor name : ");
-            message.append(&mut name.clone());
-            message.extend_from_slice(b"\n");
-            message.extend_from_slice(b"- On term : ");
-            message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
-            message.extend_from_slice(b"\n");
-            message.extend_from_slice(b"* That isn't a constructor of the corresponding datatype.\n");
         },
         MatchNotIDT{ref actual, ref term, ref vars} => {
             message.extend_from_slice(b"Not a datatype.");

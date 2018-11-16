@@ -47,38 +47,41 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
                 // TODO: implement properly
                 make_id(name_count)
             },
-            Ctr{nam, idt} => {
-                let mut tmp_idt : Term = *idt.clone();
-                weak_reduce(&mut tmp_idt, defs, true);
-                match tmp_idt {
-                    Idt{nam: _, typ: _, ctr} => {
-                        let len = ctr.len() as u32;
-                        let mut idx = 0;
-                        let mut fds = 0;
-                        for i in 0..len {
-                            if ctr[i as usize].0 == *nam {
-                                idx = i;
-                                fds = get_nams_typs_bod(&ctr[i as usize].1).0.len() as u32;
-                            }
-                        }
-                        *name_count += 1;
-                        let mut res = sic::term::Term::Var{nam: sic::term::new_name((*name_count + fds + idx) as u32)};
-                        for i in 0..fds {
-                            let fun = Box::new(res);
-                            let arg = Box::new(sic::term::Term::Var{nam: sic::term::new_name(*name_count + i)});
-                            res = sic::term::Term::App{fun, arg};
-                        }
-                        for i in 0..(len + fds) {
-                            let nam = sic::term::new_name(*name_count + (len + fds - i - 1));
-                            let bod = Box::new(res);
-                            res = sic::term::Term::Lam{nam, bod}
-                        }
-                        *name_count += ctr.len() as u32 + fds;
-                        res
-                    },
-                    _ => panic!("Not implemented.")
-                }
+            New{idt, ctr, bod} => {
+                panic!("Not implemented.");
             },
+            //Ctr{nam, idt} => {
+                //let mut tmp_idt : Term = *idt.clone();
+                //weak_reduce(&mut tmp_idt, defs, true);
+                //match tmp_idt {
+                    //Idt{nam: _, typ: _, ctr} => {
+                        //let len = ctr.len() as u32;
+                        //let mut idx = 0;
+                        //let mut fds = 0;
+                        //for i in 0..len {
+                            //if ctr[i as usize].0 == *nam {
+                                //idx = i;
+                                //fds = get_nams_typs_bod(&ctr[i as usize].1).0.len() as u32;
+                            //}
+                        //}
+                        //*name_count += 1;
+                        //let mut res = sic::term::Term::Var{nam: sic::term::new_name((*name_count + fds + idx) as u32)};
+                        //for i in 0..fds {
+                            //let fun = Box::new(res);
+                            //let arg = Box::new(sic::term::Term::Var{nam: sic::term::new_name(*name_count + i)});
+                            //res = sic::term::Term::App{fun, arg};
+                        //}
+                        //for i in 0..(len + fds) {
+                            //let nam = sic::term::new_name(*name_count + (len + fds - i - 1));
+                            //let bod = Box::new(res);
+                            //res = sic::term::Term::Lam{nam, bod}
+                        //}
+                        //*name_count += ctr.len() as u32 + fds;
+                        //res
+                    //},
+                    //_ => panic!("Not implemented.")
+                //}
+            //},
             Cas{val: _, cas: _, ret: _} => {
                 panic!("Not implemented.")
             },
@@ -196,44 +199,44 @@ pub fn term_from_lambda(term : &sic::term::Term, typ : &Term, defs : &Defs, vars
                     vars.pop();
                     Lam{nam, typ, bod}
                 },
-                Idt{nam: _, typ: _, ctr} => {
-                    let mut val : &sic::term::Term = term;
-                    let mut cid : usize = 0;
-                    let mut nams : Vec<Vec<u8>> = Vec::new();
-                    let mut args : Vec<sic::term::Term> = Vec::new();
-                    loop {
-                        val = match val {
-                            sic::term::Term::Lam{ref nam, ref bod} => {
-                                nams.push(nam.to_vec());
-                                bod
-                            },
-                            sic::term::Term::App{ref fun, ref arg} => {
-                                args.push(*arg.clone());
-                                fun
-                            },
-                            sic::term::Term::Var{ref nam} => {
-                                for i in 0..nams.len() {
-                                    if nams[i] == *nam {
-                                        cid = i;
-                                    }
-                                }
-                                &sic::term::Term::Set
-                            },
-                            _ => break
-                        }
-                    }
-                    let (ref ctr_nam, ref ctr_typ) = ctr[cid];
-                    let mut new_ctr_typ = ctr_typ.clone();
-                    subs(&mut new_ctr_typ, &typ, 0);
-                    let (_, arg_typs, _) = get_nams_typs_bod(&new_ctr_typ);
-                    let mut res = Ctr{nam: ctr_nam.to_vec(), idt: Box::new(typ.clone())};
-                    for i in (0..args.len()).rev() {
-                        let fun = Box::new(res.clone());
-                        let arg = Box::new(term_from_lambda(&args[i], &arg_typs[args.len() - i - 1], defs, vars, ctx));
-                        res = App{fun, arg}
-                    }
-                    res
-                },
+                //Idt{nam: _, typ: _, ctr} => {
+                    //let mut val : &sic::term::Term = term;
+                    //let mut cid : usize = 0;
+                    //let mut nams : Vec<Vec<u8>> = Vec::new();
+                    //let mut args : Vec<sic::term::Term> = Vec::new();
+                    //loop {
+                        //val = match val {
+                            //sic::term::Term::Lam{ref nam, ref bod} => {
+                                //nams.push(nam.to_vec());
+                                //bod
+                            //},
+                            //sic::term::Term::App{ref fun, ref arg} => {
+                                //args.push(*arg.clone());
+                                //fun
+                            //},
+                            //sic::term::Term::Var{ref nam} => {
+                                //for i in 0..nams.len() {
+                                    //if nams[i] == *nam {
+                                        //cid = i;
+                                    //}
+                                //}
+                                //&sic::term::Term::Set
+                            //},
+                            //_ => break
+                        //}
+                    //}
+                    //let (ref ctr_nam, ref ctr_typ) = ctr[cid];
+                    //let mut new_ctr_typ = ctr_typ.clone();
+                    //subs(&mut new_ctr_typ, &typ, 0);
+                    //let (_, arg_typs, _) = get_nams_typs_bod(&new_ctr_typ);
+                    //let mut res = Ctr{nam: ctr_nam.to_vec(), idt: Box::new(typ.clone())};
+                    //for i in (0..args.len()).rev() {
+                        //let fun = Box::new(res.clone());
+                        //let arg = Box::new(term_from_lambda(&args[i], &arg_typs[args.len() - i - 1], defs, vars, ctx));
+                        //res = App{fun, arg}
+                    //}
+                    //res
+                //},
                 t => panic!("Not implemented. {}", t)
             }
         },
