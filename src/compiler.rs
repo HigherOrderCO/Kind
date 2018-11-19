@@ -12,12 +12,6 @@ use term::Term::*;
 use term::Context;
 
 pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, name_count : &mut u32, copy_count : &mut u32) -> sic::term::Term {
-    pub fn make_id(name_count : &mut u32) -> sic::term::Term {
-        *name_count += 1;
-        let nam = sic::term::new_name(*name_count);
-        let bod = Box::new(sic::term::Term::Var{nam: nam.clone()});
-        sic::term::Term::Lam{nam, bod}
-    }
     pub fn gen_name(name_count : &mut u32) -> Vec<u8> {
         *name_count += 1;
         sic::term::new_name(*name_count)
@@ -26,7 +20,8 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
         match term {
             All{nam: _, typ: _, bod: _} => {
                 // TODO: implement properly
-                make_id(name_count)
+                //make_id(name_count)
+                sic::term::Term::Set
             },
             Lam{nam: _, typ: _, bod} => {
                 let nam = gen_name(name_count);
@@ -45,43 +40,30 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
             },
             Idt{nam: _, typ: _, ctr: _} => {
                 // TODO: implement properly
-                make_id(name_count)
+                //make_id(name_count)
+                sic::term::Term::Set
             },
-            New{idt, ctr, bod} => {
-                panic!("Not implemented.");
+            New{idt: _, ctr, bod} => {
+                let mut nams = Vec::new();
+
+                for _ in 0..ctr.len() {
+                    let nam = gen_name(name_count);
+                    scope.push(nam.clone());
+                    nams.push(nam);
+                }
+
+                let mut res = build(bod, rec, defs, scope, name_count, copy_count);
+
+                for _ in 0..ctr.len() {
+                    scope.pop();
+                }
+
+                for i in (0..ctr.len()).rev() {
+                    res = sic::term::Term::Lam{nam: nams[i].clone(), bod: Box::new(res)};
+                }
+
+                res
             },
-            //Ctr{nam, idt} => {
-                //let mut tmp_idt : Term = *idt.clone();
-                //weak_reduce(&mut tmp_idt, defs, true);
-                //match tmp_idt {
-                    //Idt{nam: _, typ: _, ctr} => {
-                        //let len = ctr.len() as u32;
-                        //let mut idx = 0;
-                        //let mut fds = 0;
-                        //for i in 0..len {
-                            //if ctr[i as usize].0 == *nam {
-                                //idx = i;
-                                //fds = get_nams_typs_bod(&ctr[i as usize].1).0.len() as u32;
-                            //}
-                        //}
-                        //*name_count += 1;
-                        //let mut res = sic::term::Term::Var{nam: sic::term::new_name((*name_count + fds + idx) as u32)};
-                        //for i in 0..fds {
-                            //let fun = Box::new(res);
-                            //let arg = Box::new(sic::term::Term::Var{nam: sic::term::new_name(*name_count + i)});
-                            //res = sic::term::Term::App{fun, arg};
-                        //}
-                        //for i in 0..(len + fds) {
-                            //let nam = sic::term::new_name(*name_count + (len + fds - i - 1));
-                            //let bod = Box::new(res);
-                            //res = sic::term::Term::Lam{nam, bod}
-                        //}
-                        //*name_count += ctr.len() as u32 + fds;
-                        //res
-                    //},
-                    //_ => panic!("Not implemented.")
-                //}
-            //},
             Cas{val: _, cas: _, ret: _} => {
                 panic!("Not implemented.")
             },
@@ -102,7 +84,7 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
 
                 *copy_count += 1;
 
-                let tag = *copy_count + 2;
+                let tag = *copy_count + 10;
                 let fst = nam_a;
                 let snd = nam_b;
                 let val = val;
@@ -128,7 +110,7 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
                             nam_b.append(&mut copy_count.to_string().into_bytes());
 
                             let mut rec = (nam.to_vec(), nam_b.clone());
-                            let tag = *copy_count + 2;
+                            let tag = *copy_count + 10;
                             let fst = nam_a.clone();
                             let snd = nam_b.clone();
                             let ter = build(&term, &mut rec, defs, scope, name_count, copy_count);
@@ -181,12 +163,15 @@ pub fn term_from_lambda(term : &sic::term::Term, typ : &Term, defs : &Defs, vars
                 }
                 panic!("Not implemented.");
             },
+            sic::term::Term::Set => {
+                (Set, Set)
+            },
             _ => panic!("Not implemented.")
         }
     }
     match term {
         sic::term::Term::Lam{nam: term_nam, bod: term_bod} => {
-            let mut new_typ = typ.clone();
+            let mut new_typ = get_fun_args(typ).0.clone();
             weak_reduce(&mut new_typ, defs, true);
             match new_typ {
                 All{nam, typ, bod} => {
@@ -199,45 +184,43 @@ pub fn term_from_lambda(term : &sic::term::Term, typ : &Term, defs : &Defs, vars
                     vars.pop();
                     Lam{nam, typ, bod}
                 },
-                //Idt{nam: _, typ: _, ctr} => {
-                    //let mut val : &sic::term::Term = term;
-                    //let mut cid : usize = 0;
-                    //let mut nams : Vec<Vec<u8>> = Vec::new();
-                    //let mut args : Vec<sic::term::Term> = Vec::new();
-                    //loop {
-                        //val = match val {
-                            //sic::term::Term::Lam{ref nam, ref bod} => {
-                                //nams.push(nam.to_vec());
-                                //bod
-                            //},
-                            //sic::term::Term::App{ref fun, ref arg} => {
-                                //args.push(*arg.clone());
-                                //fun
-                            //},
-                            //sic::term::Term::Var{ref nam} => {
-                                //for i in 0..nams.len() {
-                                    //if nams[i] == *nam {
-                                        //cid = i;
-                                    //}
-                                //}
-                                //&sic::term::Term::Set
-                            //},
-                            //_ => break
-                        //}
-                    //}
-                    //let (ref ctr_nam, ref ctr_typ) = ctr[cid];
-                    //let mut new_ctr_typ = ctr_typ.clone();
-                    //subs(&mut new_ctr_typ, &typ, 0);
-                    //let (_, arg_typs, _) = get_nams_typs_bod(&new_ctr_typ);
-                    //let mut res = Ctr{nam: ctr_nam.to_vec(), idt: Box::new(typ.clone())};
-                    //for i in (0..args.len()).rev() {
-                        //let fun = Box::new(res.clone());
-                        //let arg = Box::new(term_from_lambda(&args[i], &arg_typs[args.len() - i - 1], defs, vars, ctx));
-                        //res = App{fun, arg}
-                    //}
-                    //res
-                //},
-                t => panic!("Not implemented. {}", t)
+                Idt{nam: _, typ: _, ctr} => {
+                    // Extends the context with IDT's constructor types
+                    for i in 0..ctr.len() {
+                        let mut ctr_typ = ctr[i].1.clone();
+                        subs(&mut ctr_typ, &typ, 0);
+                        extend_context(ctr_typ, ctx);
+                    }
+
+                    // Extracts the body of the Scott-encoded SIC term, appending var names
+                    let mut bod = term;
+                    for _ in 0..ctr.len() {
+                        bod = match bod {
+                            sic::term::Term::Lam{ref nam, ref bod} => {
+                                vars.push(nam.clone());
+                                bod
+                            },
+                            _ => panic!("Attempted to read wrongly shaped SIC term. This is probably a Formality bug.")
+                        }
+                    }
+
+                    // Converts body of the Scott-encoded SIC term to Formality
+                    let (res, _) = infer(bod, defs, vars, ctx);
+
+                    // Narrows the context and clears var names
+                    for _ in 0..ctr.len() {
+                        vars.pop();
+                        narrow_context(ctx);
+                    }
+
+                    // Completes the Formality instantiator term
+                    New {
+                        idt: Box::new(typ.clone()),
+                        ctr: ctr.iter().map(|c| c.0.clone()).collect(),
+                        bod: Box::new(res)
+                    }
+                },
+                t => panic!("Not implemented. {} : {}", term, t)
             }
         },
         term => {
@@ -251,7 +234,7 @@ pub fn eval(term : &Term, defs : &Defs) -> (sic::net::Stats, Term) {
     let lambda = term_to_lambda(&term, &defs, &mut Vec::new(), &mut 0, &mut 0);
     let mut net = sic::term::to_net(&lambda);
     let stats = sic::net::reduce(&mut net);
-    let lambda_nf = sic::extra::lambda_term_from_net(&net); // TODO: correctly read-back lets (i.e., use sic::term::from_net)
+    let lambda_nf = sic::term::from_net(&net); // TODO: correctly read-back lets (i.e., use sic::term::from_net)
     let term_nf = term_from_lambda(&lambda_nf, &term_type, defs, &mut Vec::new(), &mut Vec::new());
     (stats, term_nf)
 }

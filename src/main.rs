@@ -216,6 +216,14 @@ fn main() -> io::Result<()> {
             let mut t_nf = term.clone();
             reduce(&mut t_nf, &defs, true);
             println!("[EVAL]\n\n{}\n", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
+
+            // Prints its normal form using SIC
+            let (stats, t_nf) = compiler::eval(&term, &defs);
+            println!("[FASTEVAL]\n\n{}\n", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
+
+            // Prints stats
+            println!("Total rewrites  : {}", stats.rules);
+            println!("Loop iterations : {}", stats.loops);
         }
     }
 
