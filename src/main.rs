@@ -137,7 +137,7 @@ fn main() -> io::Result<()> {
             // Prints its normal form
             let mut t_nf = term.clone();
             reduce(&mut t_nf, &defs, true);
-            println!("{}", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
+            //println!("{}", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
         },
         None => {}
     }
@@ -187,6 +187,14 @@ fn main() -> io::Result<()> {
             let mut t_nf = term.clone();
             reduce(&mut t_nf, &defs, true);
             println!("[EVAL]\n\n{}\n", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
+
+            // Prints its normal form using SIC
+            let (stats, t_nf) = compiler::eval(&term, &defs);
+            println!("[FASTEVAL]\n\n{}\n", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
+
+            // Prints stats
+            println!("Total rewrites  : {}", stats.rules);
+            println!("Loop iterations : {}", stats.loops);
         },
         None => {}
     }
@@ -210,7 +218,7 @@ fn main() -> io::Result<()> {
 
             // Prints its inferred type
             let t_ty = get_result(term_name, syntax::infer_with_string_error(&term, &defs, false, true));
-            println!("[TYPE]\n\n{}\n", syntax::term_to_string(&t_ty, &mut Vec::new(), true));
+            println!("[TYPE]\n\n{}\n", syntax::term_to_string(&reduced(&t_ty, &defs, true), &mut Vec::new(), true));
 
             // Prints its normal form
             let mut t_nf = term.clone();

@@ -29,6 +29,8 @@ pub enum Term {
     // Inductive Data Type
     Idt {
         nam: Vec<u8>,
+        arg: Vec<Box<Term>>,
+        par: Vec<(Vec<u8>, Box<Term>)>,
         typ: Box<Term>,
         ctr: Vec<(Vec<u8>, Box<Term>)>
     },
@@ -160,21 +162,27 @@ pub fn shift(term : &mut Term, inc : i32, cut : i32) {
             shift(arg, inc, cut);
         },
         &mut Lam{nam: _, ref mut typ, ref mut bod} => {
-            shift(typ, inc, cut + 1);
+            shift(typ, inc, cut);
             shift(bod, inc, cut + 1);
         },
         &mut All{nam: _, ref mut typ, ref mut bod} => {
-            shift(typ, inc, cut + 1);
+            shift(typ, inc, cut);
             shift(bod, inc, cut + 1);
         },
         &mut Var{ref mut idx} => {
             *idx = if *idx < cut { *idx } else { *idx + inc };
         },
         &mut Ref{nam: _} => {},
-        &mut Idt{nam: _, ref mut typ, ref mut ctr} => {
-            shift(typ, inc, cut);
+        &mut Idt{nam: _, ref mut arg, ref mut par, ref mut typ, ref mut ctr} => {
+            for arg_val in arg {
+                shift(arg_val, inc, cut);
+            }
+            for i in 0..par.len() { 
+                shift(&mut par[i].1, inc, cut);
+            }
+            shift(typ, inc, cut + par.len() as i32);
             for (_,ctr_typ) in ctr {
-                shift(ctr_typ, inc, cut+1);
+                shift(ctr_typ, inc, cut + par.len() as i32 + 1);
             }
         },
         &mut New{ref mut idt, ref mut ctr, ref mut bod} => {
@@ -196,6 +204,12 @@ pub fn shift(term : &mut Term, inc : i32, cut : i32) {
     }
 }
 
+pub fn shifted(term : &Term, inc : i32, cut : i32) -> Term {
+    let mut term_copy = term.clone();
+    shift(&mut term_copy, inc, cut);
+    term_copy
+}
+
 // Substitutes the variable at given depth in term by value.
 pub fn subs(term : &mut Term, value : &Term, dph : i32) {
     let mut new_term : Option<Term> = None;
@@ -205,12 +219,12 @@ pub fn subs(term : &mut Term, value : &Term, dph : i32) {
             subs(arg, value, dph);
         },
         &mut Lam{nam: ref mut _nam, ref mut typ, ref mut bod} => {
-            subs(typ, value, dph+1);
-            subs(bod, value, dph+1);
+            subs(typ, value, dph);
+            subs(bod, value, dph + 1);
         },
         &mut All{nam: ref mut _nam, ref mut typ, ref mut bod} => {
-            subs(typ, value, dph+1);
-            subs(bod, value, dph+1);
+            subs(typ, value, dph);
+            subs(bod, value, dph + 1);
         },
         &mut Var{idx} => {
             if dph == idx {
@@ -222,10 +236,16 @@ pub fn subs(term : &mut Term, value : &Term, dph : i32) {
             }
         },
         &mut Ref{nam: _} => {},
-        &mut Idt{nam: ref mut _nam, ref mut typ, ref mut ctr} => {
-            subs(typ, value, dph);
+        &mut Idt{nam: ref mut _nam, ref mut arg, ref mut par, ref mut typ, ref mut ctr} => {
+            for arg_val in arg {
+                subs(arg_val, value, dph);
+            }
+            for i in 0..par.len() {
+                subs(&mut par[i].1, value, dph);
+            }
+            subs(typ, value, dph + par.len() as i32);
             for (_,ctr_typ) in ctr {
-                subs(ctr_typ, value, dph + 1);
+                subs(ctr_typ, value, dph + par.len() as i32 + 1);
             }
         },
         &mut New{ref mut idt, ref mut ctr, ref mut bod} => {
@@ -411,13 +431,21 @@ pub fn global_reduce_step(term : &mut Term, defs : &Defs, deref : bool) -> bool 
             let bod = global_reduce_step(bod, defs, deref);
             typ || bod
         },
-        Idt{nam: _, ref mut typ, ref mut ctr} => {
+        Idt{nam: _, ref mut arg, ref mut par, ref mut typ, ref mut ctr} => {
+            let mut changed_arg = false;
+            for i in 0..arg.len() {
+                changed_arg = changed_arg || global_reduce_step(&mut arg[i], defs, deref);
+            }
+            let mut changed_par = false;
+            for i in 0..par.len() {
+                changed_par = changed_par || global_reduce_step(&mut par[i].1, defs, deref);
+            }
             let mut changed_ctr = false;
             for i in 0..ctr.len() {
                 changed_ctr = changed_ctr || global_reduce_step(&mut ctr[i].1, defs, deref);
             }
             let typ = global_reduce_step(typ, defs, deref);
-            changed_ctr || typ
+            changed_arg || changed_par || changed_ctr || typ
         },
         New{ref mut idt, ctr: _, ref mut bod} => {
             let idt = global_reduce_step(idt, defs, deref);
@@ -468,6 +496,13 @@ pub fn weak_reduce(term : &mut Term, defs : &Defs, deref : bool) -> bool {
     changed
 }
 
+// Immutable weak_reduce.
+pub fn weak_reduced(term : &Term, defs : &Defs, deref : bool) -> Term {
+    let mut term_copy = term.clone();
+    weak_reduce(&mut term_copy, defs, deref);
+    term_copy
+}
+
 // Reduces a term to normal form.
 pub fn reduce(term : &mut Term, defs : &Defs, deref : bool) -> bool {
     let mut changed = false;
@@ -485,6 +520,13 @@ pub fn reduce(term : &mut Term, defs : &Defs, deref : bool) -> bool {
         }
     }
     changed
+}
+
+// Immutable reduce.
+pub fn reduced(term : &Term, defs : &Defs, deref : bool) -> Term {
+    let mut term_copy = term.clone();
+    reduce(&mut term_copy, defs, deref); 
+    term_copy
 }
 
 // Performs an equality test.
@@ -514,8 +556,26 @@ pub fn equals(a : &Term, b : &Term) -> bool {
          &Ref{nam: ref b_nam}) => {
             a_nam == b_nam
          },
-        (&Idt{nam: _, typ: ref a_typ, ctr: ref a_ctr},
-         &Idt{nam: _, typ: ref b_typ, ctr: ref b_ctr}) => {
+        (&Idt{nam: _, arg: ref a_arg, par: ref a_par, typ: ref a_typ, ctr: ref a_ctr},
+         &Idt{nam: _, arg: ref b_arg, par: ref b_par, typ: ref b_typ, ctr: ref b_ctr}) => {
+            let mut eql_arg = true;
+            if a_arg.len() != b_arg.len() {
+                return false;
+            }
+            for i in 0..a_arg.len() {
+                let a_arg_val = a_arg[i].clone();
+                let b_arg_val = b_arg[i].clone();
+                eql_arg = eql_arg && equals(&a_arg_val, &b_arg_val);
+            }
+            let mut eql_par = true;
+            if a_par.len() != b_par.len() {
+                return false;
+            }
+            for i in 0..a_par.len() {
+                let (a_par_nam, a_par_typ) = a_par[i].clone();
+                let (b_par_nam, b_par_typ) = b_par[i].clone();
+                eql_par = eql_par && a_par_nam == b_par_nam && equals(&a_par_typ, &b_par_typ);
+            }
             let mut eql_ctr = true;
             if a_ctr.len() != b_ctr.len() {
                 return false;
@@ -523,12 +583,9 @@ pub fn equals(a : &Term, b : &Term) -> bool {
             for i in 0..a_ctr.len() {
                 let (a_ctr_nam, a_ctr_typ) = a_ctr[i].clone();
                 let (b_ctr_nam, b_ctr_typ) = b_ctr[i].clone();
-                eql_ctr =
-                    eql_ctr &&
-                    a_ctr_nam == b_ctr_nam &&
-                    equals(&a_ctr_typ, &b_ctr_typ);
+                eql_ctr = eql_ctr && a_ctr_nam == b_ctr_nam && equals(&a_ctr_typ, &b_ctr_typ);
             }
-            equals(a_typ, b_typ) && eql_ctr
+            eql_arg && eql_par && equals(a_typ, b_typ) && eql_ctr
         },
         (&New{idt: ref a_idt, ctr: _, bod: ref a_bod},
          &New{idt: ref b_idt, ctr: _, bod: ref b_bod}) => {
@@ -566,14 +623,14 @@ pub fn equals_reduced(a : &Term, b : &Term, defs : &Defs) -> bool {
 }
 
 // A Context is a vector of type assignments.
-pub type Context<'a> = Vec<Box<Term>>;
+pub type Context<'a> = Vec<Term>;
 
 // Extends a context.
-pub fn extend_context<'a>(val : Box<Term>, ctx : &'a mut Context<'a>) -> &'a mut Context<'a> {
+pub fn extend_context<'a>(val : &Term, ctx : &'a mut Context<'a>) -> &'a mut Context<'a> {
     for i in 0..ctx.len() {
         shift(&mut ctx[i], 1, 0);
     }
-    ctx.push(val);
+    ctx.push(val.clone());
     ctx
 }
 
@@ -586,22 +643,43 @@ pub fn narrow_context<'a>(ctx : &'a mut Context<'a>) -> &'a mut Context<'a> {
     ctx
 }
 
-// Infers the type
+// Returns the type of an IDT and its constructors, with parameters substituted.
+pub fn apply_idt_args(idt : &Term) -> (Term, Vec<(Vec<u8>, Term)>) {
+    match idt {
+        Idt{nam:_, ref arg, par: _, ref typ, ref ctr} => {
+            let mut typ = *typ.clone();
+            for j in 0..arg.len() {
+                subs(&mut typ, &arg[j], (arg.len() - j - 1) as i32);
+            }
+            let mut ctr_typs = Vec::new();
+            for i in 0..ctr.len() {
+                let ctr_nam = ctr[i].0.clone();
+                let mut ctr_typ = *ctr[i].1.clone();
+                for j in 0..arg.len() {
+                    subs(&mut ctr_typ, &arg[j], (arg.len() + 1 - j - 1) as i32);
+                }
+                subs(&mut ctr_typ, &idt, 0);
+                ctr_typs.push((ctr_nam, ctr_typ));
+            }
+            (typ, ctr_typs)
+        },
+        _ => (Set, Vec::new())
+    }
+}
+
+// Infers the type.
 pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Context, checked : bool) -> Result<Term, TypeError> {
     match term {
         App{fun, arg} => {
-            let mut fun_t = do_infer(fun, vars, defs, ctx, checked)?;
-            weak_reduce(&mut fun_t, defs, true);
+            let fun_t = weak_reduced(&do_infer(fun, vars, defs, ctx, checked)?, defs, true);
             match fun_t {
                 All{nam: _f_nam, typ: f_typ, bod: f_bod} => {
                     let mut arg_n = arg.clone();
                     if !checked {
                         let arg_t = do_infer(arg, vars, defs, ctx, checked)?;
-                        let mut new_typ = f_typ.clone();
-                        subs(&mut new_typ, &arg_n, 0);
-                        if !equals_reduced(&new_typ, &arg_t, defs) {
+                        if !equals_reduced(&f_typ, &arg_t, defs) {
                             return Err(AppTypeMismatch{
-                                expect: *new_typ.clone(), 
+                                expect: *f_typ.clone(), 
                                 actual: arg_t.clone(),
                                 argval: *arg.clone(),
                                 term: term.clone(),
@@ -625,9 +703,8 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
         },
         Lam{nam, typ, bod} => {
             let nam = rename(&nam, vars);
-            let mut typ_n = typ.clone();
             vars.push(nam.to_vec());
-            extend_context(typ_n.clone(), ctx);
+            extend_context(&shifted(&typ,1,0), ctx);
             let bod_t = Box::new(do_infer(bod, vars, defs, ctx, checked)?);
             vars.pop();
             narrow_context(ctx);
@@ -637,15 +714,14 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                 let bod = bod_t.clone();
                 do_infer(&All{nam,typ,bod}, vars, defs, ctx, checked)?;
             }
-            Ok(All{nam: nam.clone(), typ: typ_n, bod: bod_t})
+            Ok(All{nam: nam.clone(), typ: typ.clone(), bod: bod_t})
         },
         All{nam, typ, bod} => {
             if !checked {
                 let nam = rename(&nam, vars);
-                let mut typ_n = typ.clone();
-                vars.push(nam.to_vec());
-                extend_context(typ_n, ctx);
                 let typ_t = Box::new(do_infer(typ, vars, defs, ctx, checked)?);
+                vars.push(nam.to_vec());
+                extend_context(&shifted(&typ,1,0), ctx);
                 let bod_t = Box::new(do_infer(bod, vars, defs, ctx, checked)?);
                 if !equals_reduced(&typ_t, &Set, defs) || !equals_reduced(&bod_t, &Set, defs) {
                     return Err(ForallNotAType{
@@ -661,7 +737,7 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
             Ok(Set)
         },
         Var{idx} => {
-            Ok(*ctx[ctx.len() - (*idx as usize) - 1].clone())
+            Ok(ctx[ctx.len() - (*idx as usize) - 1].clone())
         },
         Ref{nam} => {
             match defs.get(nam) {
@@ -669,84 +745,43 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                 None => Err(Unbound{name: nam.clone(), vars: vars.clone()})
             }
         },
-        Idt{nam: _, typ, ctr: _} => {
+        Idt{nam: _, arg, par: _, typ, ctr: _} => {
             // TODO: IDT isn't checked
-            let mut typ_v = typ.clone();
-            Ok(*typ_v)
+            let mut typ = typ.clone();
+            for i in 0..arg.len() {
+                subs(&mut typ, &arg[i], (arg.len() - i - 1) as i32);
+            }
+            Ok(*typ)
         },
         New{idt, ctr: _, bod} => {
-            let mut tmp_idt : Term = *idt.clone();
-            weak_reduce(&mut tmp_idt, defs, true);
-            match tmp_idt {
-                Idt{nam:_, typ: _, ref ctr} => {
-                    for i in 0..ctr.len() {
-                        vars.push(ctr[i].0.clone());
-                        let mut ctr_typ = ctr[i].1.clone();
-                        subs(&mut ctr_typ, &idt, 0);
-                        extend_context(ctr_typ, ctx);
-                    }
-
-                    let mut bod_typ = do_infer(bod, vars, defs, ctx, checked)?;
-                    shift(&mut bod_typ, ctr.len() as i32 * -1, 0);
-
-                    for _ in 0..ctr.len() {
-                        vars.pop();
-                        narrow_context(ctx);
-                    }
-
-                    // TODO: check if body has right type
-                    Ok(bod_typ)
-                },
-                _ => panic!("foo")
+            let idt = weak_reduced(&idt, defs, true);
+            let (_, idt_ctr) = apply_idt_args(&idt);
+            for i in 0..idt_ctr.len() {
+                vars.push(idt_ctr[i].0.clone());
+                extend_context(&shifted(&idt_ctr[i].1, idt_ctr.len() as i32, 0), ctx);
             }
+
+            let mut bod_typ = do_infer(bod, vars, defs, ctx, checked)?;
+            shift(&mut bod_typ, idt_ctr.len() as i32 * -1, 0);
+
+            for _ in 0..idt_ctr.len() {
+                vars.pop();
+                narrow_context(ctx);
+            }
+
+            // TODO: check if body has right type
+            Ok(bod_typ)
         },
-        //Ctr{nam, idt} => {
-            //let mut tmp_idt : Term = *idt.clone();
-            //weak_reduce(&mut tmp_idt, defs, true);
-            //match tmp_idt {
-                //Idt{nam:_, typ: _, ref ctr} => {
-                    //for i in 0..ctr.len() {
-                        //let ctr_nam = &ctr[i].0;
-                        //let ctr_typ = &ctr[i].1;
-                        //if ctr_nam == nam {
-                            //let mut res_typ = ctr_typ.clone();
-                            //subs(&mut res_typ, &idt.clone(), 0);
-                            //return Ok(*res_typ);
-                        //}
-                    //}
-                    //return Err(CtrNotFound{
-                        //name: nam.clone(),
-                        //term: term.clone(),
-                        //vars: vars.clone()
-                    //});
-                //},
-                //_ => {
-                    //Err(CtrNotIDT{
-                        //actual: *idt.clone(),
-                        //term: term.clone(),
-                        //vars: vars.clone()
-                    //})
-                //}
-            //}
-        //},
         Cas{val, ret, cas} => {
             // Gets datatype and applied indices
             let val_typ = do_infer(val, vars, defs, ctx, checked)?;
             let mut idt_fxs = get_fun_args(&val_typ);
-            let mut idt = idt_fxs.0.clone();
+            let mut idt = weak_reduced(&idt_fxs.0, defs, true);
             let mut idx = idt_fxs.1;
-            weak_reduce(&mut idt, defs, true);
 
             // Gets datatype type and constructors
-            let (typ, ctr) = (match &idt {
-                Idt{nam:_, typ, ctr} => Ok((typ.clone(), ctr.clone())),
-                _ => Err(MatchNotIDT{
-                    actual: idt.clone(),
-                    term: term.clone(),
-                    vars: vars.clone()
-                })
-            })?;
-
+            let (typ, ctr) = apply_idt_args(&idt);
+            
             // Builds the match return type
             let mut ret_typ : Term = *ret.1.clone();
             subs(&mut ret_typ, &val, idx.len() as i32);
@@ -813,7 +848,9 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                     }
 
                     // Gets argument types and body type
-                    let (_, cas_arg_typ, cas_bod_typ) = get_nams_typs_bod(cas_typ);
+                    let mut cas_typ = cas_typ.clone();
+                    shift(&mut cas_typ, 1, 0); // because of fold
+                    let (_, cas_arg_typ, cas_bod_typ) = get_nams_typs_bod(&cas_typ);
 
                     // Gets the datatype indices
                     let (_, cas_idx) = get_fun_args(cas_bod_typ);
@@ -830,26 +867,25 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                     }
 
                     // Initializes the witness
-                    let mut wit = Var{idx: ctr.len() as i32 - i as i32 - 1};
+                    let mut wit = Var{idx: (ctr.len() - i - 1) as i32};
+                    let mut idt = idt.clone();
 
                     // Initializes the expected case return type
                     let mut expect_cas_ret_typ = ret.1.clone();
 
                     // Extends the context with the fold type
-                    extend_context(Box::new(fold_typ.clone()), ctx);
+                    extend_context(&fold_typ, ctx);
                     vars.push(b"fold".to_vec());
                     shift(&mut expect_cas_ret_typ, 1, 1 + ret.0.len() as i32);
+                    shift(&mut idt, 1, 0);
 
                     // For each field of this case
                     for j in 0..cas_arg.len() {
                         // Extends context with the field's type
-                        let mut cas_arg_typ = cas_arg_typ[j].clone();
-                        subs(&mut cas_arg_typ, &idt.clone(), j as i32 + 1);
-                        extend_context(Box::new(cas_arg_typ.clone()), ctx);
+                        extend_context(&shifted(&cas_arg_typ[j],1,0), ctx);
                         vars.push(cas_arg[j].clone());
-
-                        // Shifts the return type
                         shift(&mut expect_cas_ret_typ, 1, 1 + ret.0.len() as i32);
+                        shift(&mut idt, 1, 0);
 
                         // Appends field variable to the witness
                         shift(&mut wit, 1, ctr.len() as i32);
@@ -861,7 +897,7 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
 
                     // Completes witness
                     wit = New{
-                        idt: Box::new(idt.clone()),
+                        idt: Box::new(idt),
                         ctr: ctr.iter().map(|c| c.0.clone()).collect(),
                         bod: Box::new(wit)
                     };
@@ -879,10 +915,6 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
 
                     // Checks if expected case return type matches actual case return type
                     if !equals_reduced(&expect_cas_ret_typ, &actual_cas_ret_typ, defs) {
-                        let mut a = expect_cas_ret_typ.clone();
-                        let mut b = actual_cas_ret_typ.clone();
-                        reduce(&mut a, defs, true);
-                        reduce(&mut b, defs, true);
                         return Err(WrongCaseType{
                             expect: *expect_cas_ret_typ.clone(),
                             actual: actual_cas_ret_typ.clone(),
@@ -911,10 +943,10 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
             let nam_1 = rename(&nam.1, vars);
             let val_typ = do_infer(val, vars, defs, ctx, checked)?;
 
-            extend_context(Box::new(val_typ.clone()), ctx);
+            extend_context(&val_typ, ctx);
             vars.push(nam_0.clone());
 
-            extend_context(Box::new(val_typ.clone()), ctx);
+            extend_context(&val_typ, ctx);
             vars.push(nam_1.clone());
 
             let bod_typ = do_infer(bod, vars, defs, ctx, checked)?;

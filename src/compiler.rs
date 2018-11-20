@@ -20,7 +20,6 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
         match term {
             All{nam: _, typ: _, bod: _} => {
                 // TODO: implement properly
-                //make_id(name_count)
                 sic::term::Term::Set
             },
             Lam{nam: _, typ: _, bod} => {
@@ -38,9 +37,8 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
                 let arg = Box::new(build(arg, rec, defs, scope, name_count, copy_count));
                 sic::term::Term::App{fun, arg}
             },
-            Idt{nam: _, typ: _, ctr: _} => {
+            Idt{nam: _, arg: _, par: _, typ: _, ctr: _} => {
                 // TODO: implement properly
-                //make_id(name_count)
                 sic::term::Term::Set
             },
             New{idt: _, ctr, bod} => {
@@ -157,7 +155,7 @@ pub fn term_from_lambda(term : &sic::term::Term, typ : &Term, defs : &Defs, vars
                 for i in (0..vars.len()).rev() {
                     if *nam == vars[i] {
                         let val = Var{idx: (vars.len() - i - 1) as i32};
-                        let typ = *ctx[i].clone();
+                        let typ = ctx[i].clone();
                         return (val, typ);
                     }
                 }
@@ -171,25 +169,23 @@ pub fn term_from_lambda(term : &sic::term::Term, typ : &Term, defs : &Defs, vars
     }
     match term {
         sic::term::Term::Lam{nam: term_nam, bod: term_bod} => {
-            let mut new_typ = get_fun_args(typ).0.clone();
-            weak_reduce(&mut new_typ, defs, true);
-            match new_typ {
+            let typ = weak_reduced(&typ, defs, true);
+            match &typ {
                 All{nam, typ, bod} => {
-                    extend_context(typ.clone(), ctx);
-                    vars.push(term_nam.clone());
                     let nam = nam.to_vec();
                     let typ = typ.clone();
+                    extend_context(&shifted(&typ,1,0), ctx);
+                    vars.push(term_nam.clone());
                     let bod = Box::new(term_from_lambda(term_bod, &bod, defs, vars, ctx));
                     narrow_context(ctx);
                     vars.pop();
                     Lam{nam, typ, bod}
                 },
-                Idt{nam: _, typ: _, ctr} => {
+                Idt{nam: _, arg: _, par: _, typ: _, ctr} => {
                     // Extends the context with IDT's constructor types
                     for i in 0..ctr.len() {
-                        let mut ctr_typ = ctr[i].1.clone();
-                        subs(&mut ctr_typ, &typ, 0);
-                        extend_context(ctr_typ, ctx);
+                        let ctr_typ = &apply_idt_args(&typ).1[i].1;
+                        extend_context(&shifted(&ctr_typ, ctr.len() as i32, 0), ctx);
                     }
 
                     // Extracts the body of the Scott-encoded SIC term, appending var names

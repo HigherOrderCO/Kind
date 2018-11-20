@@ -169,11 +169,10 @@ pub fn parse_term
         let mut args : Vec<(Vec<u8>, Term)> = Vec::new();
         while code[cursor.index] != b')' {
             let var = parse_name(cursor, code)?;
-            vars.push(var.clone());
             prepare_to_parse(cursor, code)?;
             parse_one_of(cursor, code, &[b":"])?;
-            //panic!("im done");
             let typ = parse_term(cursor, code, vars, defs)?;
+            vars.push(var.clone());
             args.push((var, typ));
             prepare_to_parse(cursor, code)?;
             if code[cursor.index] == b',' {
@@ -215,6 +214,27 @@ pub fn parse_term
         advance_char(cursor, 4);
         let nam = parse_name(cursor, code)?;
         prepare_to_parse(cursor, code)?;
+        let arg = Vec::new();
+        let mut par = Vec::new();
+        if match_exact(cursor, code, b"<") {
+            advance_char(cursor, 1);
+            while code[cursor.index] != b'>' {
+                let var = parse_name(cursor, code)?;
+                prepare_to_parse(cursor, code)?;
+                parse_one_of(cursor, code, &[b":"])?;
+                let typ = Box::new(parse_term(cursor, code, vars, defs)?);
+                par.push((var, typ));
+                prepare_to_parse(cursor, code)?;
+                if code[cursor.index] == b',' {
+                    advance_char(cursor, 1);
+                    prepare_to_parse(cursor, code)?;
+                }
+            }
+            advance_char(cursor, 1);
+        }
+        for i in 0..par.len() {
+            vars.push(par[i].0.clone());
+        }
         parse_one_of(cursor, code, &[b":"])?;
         prepare_to_parse(cursor, code)?;
         let typ = parse_term(cursor, code, vars, defs)?;
@@ -230,10 +250,13 @@ pub fn parse_term
             ctr.push((ctr_nam, ctr_typ));
             skip_whites(cursor, code);
         }
+        for _ in 0..par.len() {
+            vars.pop();
+        }
         vars.pop();
         let typ = Box::new(typ);
         let def = nam.to_vec();
-        let idt = Idt{nam, typ, ctr};
+        let idt = Idt{nam, arg, par, typ, ctr};
         defs.insert(def, idt.clone());
         skip_whites(cursor, code);
         if match_exact(cursor, code, b")") {
@@ -245,7 +268,6 @@ pub fn parse_term
 
     // Pattern-matching
     } else if match_exact(cursor, code, b"case") {
-        // case Name(a, b) value : (a, b) => MOT | ctor (f0, f1) CASE_BOD
         advance_char(cursor, 4);
 
         // Matched value
@@ -376,16 +398,41 @@ pub fn parse_term
         appliable = true;
     };
 
+    // Parameterization
+    let (parsed, appliable) = if match_exact(cursor, code, b"<") {
+        advance_char(cursor, 1);
+        prepare_to_parse(cursor, code)?;
+        let mut idt = parsed.clone();
+        weak_reduce(&mut idt, defs, true);
+        match idt {
+            Idt{nam: _, ref mut arg, par: _, typ: _, ctr: _} => {
+                while !match_exact(cursor, code, b">") {
+                    arg.push(Box::new(parse_term(cursor, code, vars, defs)?));
+                    prepare_to_parse(cursor, code)?;
+                    if code[cursor.index] == b',' {
+                        advance_char(cursor, 1);
+                        prepare_to_parse(cursor, code)?;
+                    }
+                }
+                advance_char(cursor, 1);
+            },
+            _ => panic!("TODO")
+        }
+        (idt, true)
+    } else {
+        (parsed, appliable)
+    };
+
     // Instantiation
     let (parsed, appliable) = if match_exact(cursor, code, b"{") {
         advance_char(cursor, 1);
         prepare_to_parse(cursor, code)?;
-        let idt = parsed;
+        let idt = parsed.clone();
         let mut idt_whnf = idt.clone();
         weak_reduce(&mut idt_whnf, defs, true);
         let mut ctr = Vec::new();
         match idt_whnf {
-            Idt{nam: _, typ: _, ctr: idt_ctr} => {
+            Idt{nam: _, arg: _, par: _, typ: _, ctr: idt_ctr} => {
                 for i in 0..idt_ctr.len() {
                     ctr.push(idt_ctr[i].0.clone());
                 }
@@ -476,21 +523,21 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
                 code.extend_from_slice(b"((");
                 code.append(&mut nam.clone());
                 code.extend_from_slice(b" : ");
-                vars.push(nam.to_vec());
                 build(code, &typ, vars, short);
                 code.extend_from_slice(b") => ");
+                vars.push(nam.to_vec());
                 build(code, &bod, vars, short);
-                code.extend_from_slice(b")");
                 vars.pop();
+                code.extend_from_slice(b")");
             },
             &All{ref nam, ref typ, ref bod} => {
                 let nam = rename(nam, vars);
                 code.extend_from_slice(b"((");
                 code.append(&mut nam.clone());
                 code.extend_from_slice(b" : ");
-                vars.push(nam.to_vec());
                 build(code, &typ, vars, short);
                 code.extend_from_slice(b") -> ");
+                vars.push(nam.to_vec());
                 build(code, &bod, vars, short);
                 vars.pop();
                 code.extend_from_slice(b")");
@@ -505,7 +552,7 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
             &Ref{ref nam} => {
                 code.append(&mut nam.clone());
             },
-            &Idt{ref nam, ref typ, ref ctr} => {
+            &Idt{ref nam, ref arg, ref par, ref typ, ref ctr} => {
                 let nam = rename(nam, vars);
                 if short {
                     code.append(&mut nam.clone());
@@ -513,6 +560,9 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
                     code.extend_from_slice(b"(data ");
                     code.append(&mut nam.clone());
                     code.extend_from_slice(b" : ");
+                    for i in 0..par.len() {
+                        vars.push(par[i].0.clone());
+                    }
                     vars.push(nam.to_vec());
                     build(code, &typ, vars, short);
                     for (nam,typ) in ctr {
@@ -522,8 +572,21 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
                         code.extend_from_slice(b" : ");
                         build(code, &typ, vars, short);
                     }
+                    for _ in 0..par.len() {
+                        vars.pop();
+                    }
                     vars.pop();
                     code.extend_from_slice(b")");
+                }
+                if arg.len() > 0 {
+                    code.extend_from_slice(b"<");
+                    for i in 0..arg.len() {
+                        build(code, &arg[i], vars, short);
+                        if i < arg.len() - 1 {
+                            code.extend_from_slice(b",");
+                        }
+                    }
+                    code.extend_from_slice(b">");
                 }
             },
             &New{ref idt, ref ctr, ref bod} => {
@@ -694,15 +757,16 @@ pub fn type_error_to_ascii(type_error : &TypeError, short : bool) -> Vec<u8> {
             message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
             message.extend_from_slice(b"\n");
         },
-        MatchNotIDT{ref actual, ref term, ref vars} => {
+        MatchNotIDT{ref actual, term: _, ref vars} => {
             message.extend_from_slice(b"Not a datatype.");
             message.extend_from_slice(b"- Expected : (a datatype).\n");
             message.extend_from_slice(b"- Found    : "); 
             message.append(&mut term_to_ascii(actual, &mut vars.clone(), short));
             message.extend_from_slice(b"\n");
-            message.extend_from_slice(b"- On match : ");
-            message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
-            message.extend_from_slice(b"\n");
+            // TODO: remove fold/field vars
+            //message.extend_from_slice(b"- On match : ");
+            //message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
+            //message.extend_from_slice(b"\n");
             message.extend_from_slice(b"* You attempted to pattern match a value that isn't member of a datatype.");
         },
         WrongMatchIndexCount{ref expect, ref actual, ref term, ref vars} => {

@@ -3,35 +3,46 @@ data Empty : Type
 
 -- Unit, the type with one constructor
 data Unit : Type
-| void    : Unit
+| void : Unit
 
 -- Bool, the type with two constructors
 data Bool : Type
-| true    : Bool
-| false   : Bool
+| true  : Bool
+| false : Bool
+
+-- Some bools
+let true  Bool{true}
+let false Bool{false}
 
 -- Natural numbers
 data Nat : Type
-| succ   : (n : Nat) -> Nat
-| zero   : Nat
+| succ : (n : Nat) -> Nat
+| zero : Nat
+
+-- Some nats
+let 0 Nat{zero}
+let 1 Nat{succ(0)}
+let 2 Nat{succ(1)}
+let 3 Nat{succ(2)}
+let 4 Nat{succ(3)}
 
 -- Simple pairs
-data Pair : (A : Type) -> Type
-| new     : (A : Type, x : A, y : A) -> Pair(A)
+data Pair<A : Type, B : Type> : Type
+| new : (x : A, y : B) -> Pair
 
 -- Polymorphic lists
-data List : (A : Type) -> Type
-| cons    : (A : Type, x : A, xs : List(A)) -> List(A)
-| nil     : (A : Type)                      -> List(A)
+data List<A : Type> : Type
+| cons : (x : A, xs : List) -> List
+| nil  : List
 
 -- Vectors, i.e., lists with statically known lengths
-data Vect : (A : Type, n : Nat) -> Type
-| cons    : (A : Type, n : Nat, x : A, xs : Vect(A, n)) -> Vect(A, Nat{succ(n)})
-| nil     : (A : Type)                                  -> Vect(A, Nat{zero})
+data Vect<A : Type> : (n : Nat) -> Type
+| cons : (n : Nat, x : A, xs : Vect(n)) -> Vect(Nat{succ(n)})
+| nil  : Vect(Nat{zero})
 
 -- Equality type: holds a proof that two values are identical
-data Eq : (A : Type, x : A, y : A) -> Type
-| refl  : (A : Type, x : A) -> Eq(A, x, x)
+data Eq<A : Type> : (x : A, y : A) -> Type
+| refl : (x : A) -> Eq(x, x)
 
 -- Polymorphic identity function for a type P
 let the(P : Type, x : P) =>
@@ -43,7 +54,7 @@ let not(b : Bool) =>
     | true  => Bool{false}
     | false => Bool{true}
     : Bool
-
+    
 -- Predecessor of a natural number
 let pred(a : Nat) =>
     case a
@@ -66,16 +77,16 @@ let add(a : Nat, b : Nat) =>
     : () => (a : Nat) -> Nat)(b)
 
 -- First element of a pair
-let fst(A : Type, pair : Pair(A)) =>
+let fst(A : Type, B : Type, pair : Pair<A, B>) =>
     case pair
-    | new(A, x, y) => x
-    : (A) => A
+    | new(x, y) => x
+    : A
 
 -- Second element of a pair
-let snd(A : Type, pair : Pair(A)) =>
+let snd(A : Type, B : Type, pair : Pair<A, B>) =>
     case pair
-    | new(A, x, y) => y
-    : (A) => A
+    | new(x, y) => y
+    : B
 
 -- Principle of explosion: from falsehood, everything follows
 let EFQ(P : Type, f : Empty) =>
@@ -83,21 +94,21 @@ let EFQ(P : Type, f : Empty) =>
 
 -- Returns the first element of a vector which is *statically*
 -- asserted to be non-empty, preventing runtime errors.
-let head(A : Type, n : Nat, vect : Vect(A, Nat{succ(n)})) =>
+let head(A : Type, n : Nat, vect : Vect<A>(Nat{succ(n)})) =>
     case vect
-    | cons(A, n, x, xs) => x
-    | nil(A)            => Unit{void}
-    : (A, n) => case n
+    | cons(n, x, xs) => x
+    | nil            => Unit{void}
+    : (n) => case n
         | succ(m) => A
         | zero    => Unit
         : Type
-    
+
 -- Returns a vector without its first element
-let tail(A : Type, n : Nat, vect : Vect(A, Nat{succ(n)})) =>
+let tail(A : Type, n : Nat, vect : Vect<A>(Nat{succ(n)})) =>
     case vect
-    | cons(A, n, x, xs) => xs
-    | nil(A)            => Vect{nil(A)}
-    : (A, n) => Vect(A, pred(n))
+    | cons(n, x, xs) => xs
+    | nil            => Vect<A>{nil}
+    : (n)            => Vect<A>(pred(n))
 
 -- The induction principle on natural numbers
 -- can be obtained from total pattern-matching
@@ -129,9 +140,11 @@ let two
 let four
   add(two, two)
 
--- Proof that `2 + 2 == 4`
+let vect
+  Vect<Nat>{cons(0, 0, Vect<Nat>{nil})}
+
 let two-plus-two-is-four
-  the(Eq(Nat,add(two,two),four), Eq{refl(Nat,four)})
+  the(Eq<Nat>(add(two,two),four), Eq<Nat>{refl(four)})
 
 -- Congruence of equality: a proof that `a == b` implies `f(a) == f(b)`
 let cong
@@ -139,54 +152,57 @@ let cong
     , B : Type
     , a : A
     , b : A
-    , e : Eq(A, a, b)) =>
+    , e : Eq<A>(a, b)) =>
     case e
-    | refl(A, x) => (f : (x : A) -> B) => Eq{refl(B, f(x))}
-    : (A, a, b)  => (f : (x : A) -> B) -> Eq(B, f(a), f(b))
+    | refl(x) => (f : (x : A) -> B) => Eq<B>{refl(f(x))}
+    : (a, b)  => (f : (x : A) -> B) -> Eq<B>(f(a), f(b))
 
 -- Symmetry of equality: a proof that `a == b` implies `b == a`
 let sym
     ( A : Type
     , a : A
     , b : A
-    , e : Eq(A, a, b)) =>
+    , e : Eq<A>(a, b)) =>
     case e
-    | refl(A, x) => Eq{refl(A, x)}
-    : (A, a, b)  => Eq(A, b, a)
+    | refl(x) => Eq<A>{refl(x)}
+    : (a, b)  => Eq<A>(b, a)
 
 -- Substitution of equality: if `a == b`, then `a` can be replaced by `b` in a proof `P`
 let subst
     ( A : Type
     , x : A
     , y : A
-    , e : Eq(A, x, y)) =>
+    , e : Eq<A>(x, y)) =>
     case e
-    | refl(A, x) => (P : (x : A) -> Type, px : P(x)) => px
-    : (A, x, y)  => (P : (x : A) -> Type, px : P(x)) -> P(y)
-
+    | refl(x) => (P : (x : A) -> Type, px : P(x)) => px
+    : (x, y)  => (P : (x : A) -> Type, px : P(x)) -> P(y)
 
 -- Proof that `a + 0 == a`
 let add-n-zero(n : Nat) =>
     case n
     | succ(a) => cong(Nat, Nat, add(a, Nat{zero}), a, fold(a), (x : Nat) => Nat{succ(x)})
-    | zero    => Eq{refl(Nat, Nat{zero})}
-    : Eq(Nat, add(self, Nat{zero}), self)
+    | zero    => Eq<Nat>{refl(Nat{zero})}
+    : Eq<Nat>(add(self, Nat{zero}), self)
 
 -- Proof that `a + (1 + b) == 1 + (a + b)`
 let add-n-succ-m(n : Nat) =>
     case n
     | succ(n) => (m : Nat) => cong(Nat, Nat, add(n, Nat{succ(m)}), Nat{succ(add(n,m))}, fold(n,m), (x : Nat) => Nat{succ(x)})
-    | zero    => (m : Nat) => Eq{refl(Nat, Nat{succ(m)})}
-    : ()      => (m : Nat) -> Eq(Nat, add(self, Nat{succ(m)}), Nat{succ(add(self, m))})
+    | zero    => (m : Nat) => Eq<Nat>{refl(Nat{succ(m)})}
+    : ()      => (m : Nat) -> Eq<Nat>(add(self, Nat{succ(m)}), Nat{succ(add(self, m))})
 
 -- Proof that `a + b = b + a`
 let add-comm(n : Nat) =>
     case n
     | succ(n) => (m : Nat) =>
-        subst(Nat, add(m,n), add(n,m), fold(m,n), (x : Nat) => Eq(Nat, Nat{succ(x)}, add(m, Nat{succ(n)})),
+        subst(Nat, add(m,n), add(n,m), fold(m,n), (x : Nat) => Eq<Nat>(Nat{succ(x)}, add(m, Nat{succ(n)})),
         sym(Nat, add(m, Nat{succ(n)}), Nat{succ(add(m, n))}, add-n-succ-m(m, n)))
     | zero    => (m : Nat) => sym(Nat, add(m, Nat{zero}), m, add-n-zero(m))
-    : ()      => (m : Nat) -> Eq(Nat, add(self, m), add(m, self))
+    : ()      => (m : Nat) -> Eq<Nat>(add(self, m), add(m, self))
 
-let main (a : Nat, b : Nat, e : Eq(Nat, a, b)) =>
-  sym(Nat, a, b, e)
+-- Random test
+let main
+  let twice(n : Nat) => 
+    copy n as a, b
+    in Pair<Nat, Nat>{new(a, b)}
+  twice(2)
