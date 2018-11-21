@@ -62,6 +62,18 @@ fn main() -> io::Result<()> {
             .value_name("STATS")
             .help("Shows stats when evaluating with FASTEVAL")
             .takes_value(false))
+        .arg(Arg::with_name("SIC")
+            .short("z")
+            .long("sic")
+            .value_name("SIC")
+            .help("Compile to SIC and print")
+            .takes_value(true))
+        .arg(Arg::with_name("PRINT")
+            .short("p")
+            .long("print")
+            .value_name("PRINT")
+            .help("Print term as is (debugging)")
+            .takes_value(true))
         .arg(Arg::with_name("BOTH")
             .short("b")
             .long("both")
@@ -137,7 +149,7 @@ fn main() -> io::Result<()> {
             // Prints its normal form
             let mut t_nf = term.clone();
             reduce(&mut t_nf, &defs, true);
-            //println!("{}", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
+            println!("{}", syntax::term_to_string(&t_nf, &mut Vec::new(), true));
         },
         None => {}
     }
@@ -159,6 +171,38 @@ fn main() -> io::Result<()> {
                 println!("Total rewrites  : {}", stats.rules);
                 println!("Loop iterations : {}", stats.loops);
             }
+        },
+        None => {}
+    }
+    // Compiles to SIC and prints
+    match matches.value_of("SIC") {
+        Some(term_name) => {
+            let term_name = term_name.to_string().into_bytes();
+
+            // Loads the term
+            let term = get_term(&term_name, &defs);
+
+            // Prints its normal form
+            let (stats, t_nf) = compiler::partial_eval(&term, &defs);
+            println!("{}", t_nf);
+
+            if matches.is_present("STATS") {
+                println!("Total rewrites  : {}", stats.rules);
+                println!("Loop iterations : {}", stats.loops);
+            }
+
+        },
+        None => {}
+    }
+    // Print term as is
+    match matches.value_of("PRINT") {
+        Some(term_name) => {
+            let term_name = term_name.to_string().into_bytes();
+
+            // Loads the term
+            let term = get_term(&term_name, &defs);
+
+            println!("{:?}", term);
         },
         None => {}
     }

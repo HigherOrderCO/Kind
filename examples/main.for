@@ -54,7 +54,7 @@ let not(b : Bool) =>
     | true  => Bool{false}
     | false => Bool{true}
     : Bool
-    
+
 -- Predecessor of a natural number
 let pred(a : Nat) =>
     case a
@@ -75,6 +75,27 @@ let add(a : Nat, b : Nat) =>
     | succ(pred) => (b : Nat) => Nat{succ(fold(pred, b))}
     | zero       => (b : Nat) => b
     : () => (a : Nat) -> Nat)(b)
+
+-- Some more nats
+let 5 add(4,1)
+let 6 double(3)
+let 7 add(2,5)
+let 8 double(4)
+-- Anonymous recursion
+let 9 ((a : Nat, b : Nat) =>
+       (case a
+       | succ(pred) => (b : Nat) => Nat{succ(fold(pred, b))}
+       | zero       => (b : Nat) => b
+       : () => (a : Nat) -> Nat)(b))(3,6)
+
+-- Recursion without fold
+let double2(a : Nat) =>
+    case a
+    | succ(pred) => Nat{succ(Nat{succ(double2(pred))})}
+    | zero       => Nat{zero}
+    : Nat
+
+let 10 double2(5)
 
 -- First element of a pair
 let fst(A : Type, B : Type, pair : Pair<A, B>) =>
@@ -116,12 +137,12 @@ let tail(A : Type, n : Nat, vect : Vect<A>(Nat{succ(n)})) =>
 -- sigs; could be improved with bidirectional?
 let induction(n : Nat) =>
     case n
-    | succ(pred) => 
+    | succ(pred) =>
         ( P : (n : Nat) -> Type
         , s : (n : Nat, p : P(n)) -> P(Nat{succ(n)})
         , z : P(Nat{zero}))
         => s(pred, fold(pred, P, s, z))
-    | zero => 
+    | zero =>
         ( P : (n : Nat) -> Type
         , s : (n : Nat, p : P(n)) -> P(Nat{succ(n)})
         , z : P(Nat{zero}))
@@ -202,7 +223,7 @@ let add-comm(n : Nat) =>
 
 -- Random test
 let main
-  let twice(n : Nat) => 
+  let twice(n : Nat) =>
     copy n as a, b
     in Pair<Nat, Nat>{new(a, b)}
   twice(2)
