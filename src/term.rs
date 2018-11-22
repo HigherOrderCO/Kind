@@ -709,6 +709,38 @@ pub fn apply_idt_args(idt : &Term) -> (Term, Vec<(Vec<u8>, Term)>) {
     }
 }
 
+// Builds a datatype's constructor function given its name.
+pub fn build_idt_ctr(idt : &Term, nam : Vec<u8>) -> Term {
+    let (_, idt_ctr) = apply_idt_args(&idt);
+    let mut idx = 0;
+    for i in 0..idt_ctr.len() {
+        if idt_ctr[i].0 == nam {
+            idx = i;
+        }
+    }
+    let (nams, typs, _) = get_nams_typs_bod(&idt_ctr[idx].1);
+    let mut res = Var{idx: (idt_ctr.len() - idx - 1) as i32};
+    for i in 0..typs.len() {
+        res = App{
+            fun: Box::new(res),
+            arg: Box::new(Var{idx: (idt_ctr.len() + typs.len() - i - 1) as i32})
+        };
+    }
+    res = New{
+        idt: Box::new(idt.clone()),
+        ctr: idt_ctr.iter().map(|c| c.0.clone()).collect(),
+        bod: Box::new(res)
+    };
+    for i in 0..typs.len() {
+        res = Lam{
+            nam: nams[i].clone(),
+            typ: Box::new(typs[i].clone()),
+            bod: Box::new(res)
+        };
+    }
+    res
+}
+
 // Infers the type.
 pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Context, checked : bool) -> Result<Term, TypeError> {
     match term {

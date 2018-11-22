@@ -423,15 +423,24 @@ pub fn parse_term
         (parsed, appliable)
     };
 
+    // Constructor (`Foo.bar` as syntax sugar for `Foo{bar}`)
+    let (parsed, appliable) = if match_exact(cursor, code, b".") {
+        advance_char(cursor, 1);
+        let idt = weak_reduced(&parsed, defs, true);
+        let nam = parse_name(cursor, code)?;
+        let ctr = build_idt_ctr(&idt, nam);
+        (ctr, true)
+    } else {
+        (parsed, appliable)
+    };
+
     // Instantiation
     let (parsed, appliable) = if match_exact(cursor, code, b"{") {
         advance_char(cursor, 1);
         prepare_to_parse(cursor, code)?;
         let idt = parsed.clone();
-        let mut idt_whnf = idt.clone();
-        weak_reduce(&mut idt_whnf, defs, true);
         let mut ctr = Vec::new();
-        match idt_whnf {
+        match weak_reduced(&idt, defs, true) {
             Idt{nam: _, arg: _, par: _, typ: _, ctr: idt_ctr} => {
                 for i in 0..idt_ctr.len() {
                     ctr.push(idt_ctr[i].0.clone());
@@ -859,6 +868,7 @@ pub fn type_error_to_string(type_error : &TypeError, short : bool) -> String {
     ascii_to_string(type_error_to_ascii(type_error, short))
 }
 
+// Convenience.
 pub fn infer_with_string_error(term : &Term, defs : &Defs, checked : bool, short : bool) -> Result<Term, String> {
     match infer(term, defs, checked) {
         Ok(term) => Ok(term),
