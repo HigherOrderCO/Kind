@@ -11,16 +11,6 @@ use term::Defs;
 use term::Term::*;
 use term::Context;
 
-fn enclose_term(term: &Term, vars: &Vars) -> Term{
-    let mut new_term = term.clone();
-    for i in (0..vars.len()).rev(){
-        let nam = vars[i].clone();
-        let typ = Box::new(Set); // no need to extract correct types as they are thrown out
-        new_term = Lam{nam, typ, bod: Box::new(new_term)};
-    }
-    new_term
-}
-
 pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, name_count : &mut u32, copy_count : &mut u32) -> sic::term::Term {
     pub fn gen_name(name_count : &mut u32) -> Vec<u8> {
         *name_count += 1;
@@ -73,39 +63,92 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
                 res
             },
             Cas{val, cas, ret: _} => {
-                let len: usize = scope.len();
-
+                // Allocates names for fold variables.
                 let fold_a = gen_name(name_count);
-                scope.push(fold_a.clone());
                 let fold_b = gen_name(name_count);
-                scope.push(fold_b.clone());
-                let mut val = val.clone();
-                shift(&mut val, 2, 0); // shifts to avoid fold_a and fold_b
+                let mut folds = false;
 
-                let mut term: Term = Var{ idx: 0 };
-                for (_cas_nam, cas_args, cas_bod) in cas{
-                    let mut bod = enclose_term(&cas_bod, cas_args);
-                    shift(&mut bod, 1, 0); // shifts the fold variable so it doesn't get caught
-                    term = App{ fun:Box::new(term), arg: Box::new(bod) };
+                // Builds the matching function body on SIC. For example:
+                // - This:    (case v | A  (x,  y) =>  P(x, fold(y))  | B => Q)
+                // - Becomes:      (v (λF. λx. λy.    (P x  (F   y))) (λF.   Q))
+                // Notice that each case includes a local fold argument `F`.
+
+                // Inits the matching function body as just the matched variable.
+                let var = gen_name(name_count);
+                let mut fun_bod = sic::term::Term::Var{nam: var.clone()};
+
+                // Then, for each case of the pattern match...
+                for (_cas_nam, cas_args, cas_bod) in cas {
+                    // Checks if the fold variable is used on this branch.
+                    folds = folds || uses(cas_bod, 0) > 0;
+
+                    // Generates names for the local fold and each field, and extends the scope.
+                    let mut nams = Vec::new();
+                    let fold_nam = gen_name(name_count);
+                    scope.push(fold_nam.clone());
+                    nams.push(fold_nam.clone());
+                    for _ in 0..cas_args.len() {
+                        let field_nam = gen_name(name_count);
+                        scope.push(field_nam.clone());
+                        nams.push(field_nam);
+                    }
+
+                    // Builds the case body on SIC.
+                    let cas_bod = build(cas_bod, rec, defs, scope, name_count, copy_count);
+
+                    // Narrows the scope back.
+                    scope.pop();
+                    for _ in 0..cas_args.len() {
+                        scope.pop();
+                    }
+
+                    // Builds the case function on SIC by closing the body with generated names.
+                    let mut cas_fun = cas_bod;
+                    for i in 0..nams.len() {
+                        cas_fun = sic::term::Term::Lam{nam: nams[i].clone(), bod: Box::new(cas_fun)}
+                    }
+
+                    // Extends the matching function body by applying it to this new case function.
+                    fun_bod = sic::term::Term::App{fun: Box::new(fun_bod), arg: Box::new(cas_fun)};
                 }
-                term = Lam{ nam: vec![], typ: Box::new(Set), bod: Box::new(term) }; //names and types do not matter
-                shift(&mut term, 1, 1); // shifts to avoid fold_a
 
-                let sic_let = build(&term, rec, defs, scope, name_count, copy_count);
-                let sic_app = sic::term::Term::App{
-                    fun: Box::new(sic::term::Term::Var{nam: fold_a.clone()}),
-                    arg: Box::new(build(&val, rec, defs, scope, name_count, copy_count))
+                // Builds the matching function on SIC. It takes the matching function body and
+                // closes over the matched variable, turning the body into a lambda. Then if it
+                // folds, it turns it recursive by applying it to a copy o itself. Otherwise, it
+                // removes the fold argument by applying the function body to an erase node.
+                let fun = if folds {
+                    sic::term::Term::Let{
+                        tag: *copy_count + 10,
+                        fst: fold_a.clone(),
+                        snd: fold_b.clone(),
+                        val: Box::new(sic::term::Term::Lam{
+                            nam: var,
+                            bod: Box::new(sic::term::Term::App{
+                                fun: Box::new(fun_bod),
+                                arg: Box::new(sic::term::Term::Var{nam: fold_a})
+                            })
+                        }),
+                        nxt: Box::new(sic::term::Term::Var{nam: fold_b.clone()})
+                    }
+                } else {
+                    sic::term::Term::Lam{
+                        nam: var,
+                        bod: Box::new(sic::term::Term::App{
+                            fun: Box::new(fun_bod),
+                            arg: Box::new(sic::term::Term::Set)
+                        })
+                    }
                 };
 
-                *copy_count += 1;
-                let res = sic::term::Term::Let{
-                    tag: *copy_count+10,
-                    fst: fold_a,
-                    snd: fold_b,
-                    val: Box::new(sic_let),
-                    nxt: Box::new(sic_app)
+                // Builds the matched value on SIC.
+                let val = build(val, rec, defs, scope, name_count, copy_count);
+
+                // The result is an application of the folding function to the matched value.
+                let res = sic::term::Term::App{
+                    fun: Box::new(fun),
+                    arg: Box::new(val)
                 };
-                scope.drain(len..len+2);
+
                 res
             },
 
@@ -208,7 +251,7 @@ pub fn term_from_lambda(term : &sic::term::Term, typ : &Term, defs : &Defs, vars
             sic::term::Term::Set => {
                 (Set, Set)
             },
-            _ => panic!("Not implemented.")
+            _ => panic!("Not implemented. {}", term)
         }
     }
     match term {

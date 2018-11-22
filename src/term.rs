@@ -154,6 +154,48 @@ pub fn rename(nam : &Vec<u8>, vars : &Vars) -> Vec<u8> {
     new_nam
 }
 
+// Returns how many time the variable at depth `dpt` is used.
+pub fn uses(term : &Term, dpt : i32) -> u32 {
+    match term {
+        &App{ref fun, ref arg} => {
+            uses(fun, dpt) +
+            uses(arg, dpt)
+        },
+        &Lam{nam: _, ref typ, ref bod} => {
+            uses(typ, dpt) +
+            uses(bod, dpt + 1)
+        },
+        &All{nam: _, ref typ, ref bod} => {
+            uses(typ, dpt) +
+            uses(bod, dpt + 1)
+        },
+        &Var{idx} => {
+            if idx == dpt - 1 { 1 } else { 0 }
+        },
+        &Ref{nam: _} => 0,
+        &Idt{nam: _, ref arg, ref par, ref typ, ref ctr} => {
+            arg.iter().fold(0, |res, val| res + uses(&val, dpt)) +
+            par.iter().fold(0, |res, val| res + uses(&val.1, dpt)) +
+            uses(typ, dpt + par.len() as i32) +
+            ctr.iter().fold(0, |res, val| res + uses(&val.1, dpt + par.len() as i32 + 1))
+        },
+        &New{ref idt, ref ctr, ref bod} => {
+            uses(idt, dpt) +
+            uses(bod, dpt + ctr.len() as i32)
+        },
+        &Cas{ref val, ref ret, ref cas} => {
+            uses(val, dpt) +
+            uses(&ret.1, dpt + 1 + ret.0.len() as i32) +
+            cas.iter().fold(0, |res, val| res + uses(&val.2, dpt + 1 + val.1.len() as i32))
+        },
+        &Cpy{nam: _, ref val, ref bod} => {
+            uses(val, dpt) +
+            uses(bod, dpt + 2)
+        },
+        &Set => 0
+    }
+}
+
 // Increases the index of all free variables of a term, assuming `cut` enclosing lambdas, by `inc`.
 pub fn shift(term : &mut Term, inc : i32, cut : i32) {
     match term {
@@ -211,57 +253,57 @@ pub fn shifted(term : &Term, inc : i32, cut : i32) -> Term {
 }
 
 // Substitutes the variable at given depth in term by value.
-pub fn subs(term : &mut Term, value : &Term, dph : i32) {
+pub fn subs(term : &mut Term, value : &Term, dpt : i32) {
     let mut new_term : Option<Term> = None;
     match term {
         &mut App{ref mut fun, ref mut arg} => {
-            subs(fun, value, dph);
-            subs(arg, value, dph);
+            subs(fun, value, dpt);
+            subs(arg, value, dpt);
         },
         &mut Lam{nam: ref mut _nam, ref mut typ, ref mut bod} => {
-            subs(typ, value, dph);
-            subs(bod, value, dph + 1);
+            subs(typ, value, dpt);
+            subs(bod, value, dpt + 1);
         },
         &mut All{nam: ref mut _nam, ref mut typ, ref mut bod} => {
-            subs(typ, value, dph);
-            subs(bod, value, dph + 1);
+            subs(typ, value, dpt);
+            subs(bod, value, dpt + 1);
         },
         &mut Var{idx} => {
-            if dph == idx {
+            if dpt == idx {
                 let mut val = value.clone();
-                shift(&mut val, dph as i32, 0);
+                shift(&mut val, dpt as i32, 0);
                 new_term = Some(val);
-            } else if dph < idx {
+            } else if dpt < idx {
                 new_term = Some(Var{idx: idx - 1})
             }
         },
         &mut Ref{nam: _} => {},
         &mut Idt{nam: ref mut _nam, ref mut arg, ref mut par, ref mut typ, ref mut ctr} => {
             for arg_val in arg {
-                subs(arg_val, value, dph);
+                subs(arg_val, value, dpt);
             }
             for i in 0..par.len() {
-                subs(&mut par[i].1, value, dph);
+                subs(&mut par[i].1, value, dpt);
             }
-            subs(typ, value, dph + par.len() as i32);
+            subs(typ, value, dpt + par.len() as i32);
             for (_,ctr_typ) in ctr {
-                subs(ctr_typ, value, dph + par.len() as i32 + 1);
+                subs(ctr_typ, value, dpt + par.len() as i32 + 1);
             }
         },
         &mut New{ref mut idt, ref mut ctr, ref mut bod} => {
-            subs(idt, value, dph);
-            subs(bod, value, dph + ctr.len() as i32);
+            subs(idt, value, dpt);
+            subs(bod, value, dpt + ctr.len() as i32);
         },
         &mut Cas{ref mut val, ref mut ret, ref mut cas} => {
-            subs(val, value, dph);
-            subs(&mut ret.1, value, dph + 1 + ret.0.len() as i32);
+            subs(val, value, dpt);
+            subs(&mut ret.1, value, dpt + 1 + ret.0.len() as i32);
             for (_, cas_arg, cas_bod) in cas {
-                subs(cas_bod, value, dph + 1 + cas_arg.len() as i32);
+                subs(cas_bod, value, dpt + 1 + cas_arg.len() as i32);
             }
         },
         &mut Cpy{nam: _, ref mut val, ref mut bod} => {
-            subs(val, value, dph);
-            subs(bod, value, dph + 2);
+            subs(val, value, dpt);
+            subs(bod, value, dpt + 2);
         },
         _ => {}
     };
