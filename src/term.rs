@@ -246,6 +246,7 @@ pub fn shift(term : &mut Term, inc : i32, cut : i32) {
     }
 }
 
+// Immutable shift.
 pub fn shifted(term : &Term, inc : i32, cut : i32) -> Term {
     let mut term_copy = term.clone();
     shift(&mut term_copy, inc, cut);
@@ -429,7 +430,8 @@ pub fn redex(term : &mut Term, defs : &Defs, deref : bool) -> bool {
             }
         },
         Cpy{nam: _, mut val, mut bod} => {
-            subs(&mut bod, &val, 0);
+            let mut bod = bod.clone();
+            subs(&mut bod, &val, 1);
             subs(&mut bod, &val, 0);
             changed = true;
             *bod
@@ -709,38 +711,6 @@ pub fn apply_idt_args(idt : &Term) -> (Term, Vec<(Vec<u8>, Term)>) {
     }
 }
 
-// Builds a datatype's constructor function given its name.
-pub fn build_idt_ctr(idt : &Term, nam : Vec<u8>) -> Term {
-    let (_, idt_ctr) = apply_idt_args(&idt);
-    let mut idx = 0;
-    for i in 0..idt_ctr.len() {
-        if idt_ctr[i].0 == nam {
-            idx = i;
-        }
-    }
-    let (nams, typs, _) = get_nams_typs_bod(&idt_ctr[idx].1);
-    let mut res = Var{idx: (idt_ctr.len() - idx - 1) as i32};
-    for i in 0..typs.len() {
-        res = App{
-            fun: Box::new(res),
-            arg: Box::new(Var{idx: (idt_ctr.len() + typs.len() - i - 1) as i32})
-        };
-    }
-    res = New{
-        idt: Box::new(idt.clone()),
-        ctr: idt_ctr.iter().map(|c| c.0.clone()).collect(),
-        bod: Box::new(res)
-    };
-    for i in 0..typs.len() {
-        res = Lam{
-            nam: nams[i].clone(),
-            typ: Box::new(typs[i].clone()),
-            bod: Box::new(res)
-        };
-    }
-    res
-}
-
 // Infers the type.
 pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Context, checked : bool) -> Result<Term, TypeError> {
     match term {
@@ -832,7 +802,7 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
             let (_, idt_ctr) = apply_idt_args(&idt);
             for i in 0..idt_ctr.len() {
                 vars.push(idt_ctr[i].0.clone());
-                extend_context(&shifted(&idt_ctr[i].1, idt_ctr.len() as i32, 0), ctx);
+                extend_context(&shifted(&idt_ctr[i].1, (i + 1) as i32, 0), ctx); // TODO: (i+1) or ctr.len()?
             }
 
             let mut bod_typ = do_infer(bod, vars, defs, ctx, checked)?;
@@ -1017,13 +987,14 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
             let nam_1 = rename(&nam.1, vars);
             let val_typ = do_infer(val, vars, defs, ctx, checked)?;
 
-            extend_context(&val_typ, ctx);
+            extend_context(&shifted(&val_typ, 1, 0), ctx);
             vars.push(nam_0.clone());
 
-            extend_context(&val_typ, ctx);
+            extend_context(&shifted(&val_typ, 2, 0), ctx);
             vars.push(nam_1.clone());
 
-            let bod_typ = do_infer(bod, vars, defs, ctx, checked)?;
+            let mut bod_typ = do_infer(bod, vars, defs, ctx, checked)?;
+            shift(&mut bod_typ, -2, 0);
 
             narrow_context(ctx);
             vars.pop();

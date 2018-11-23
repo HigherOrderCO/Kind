@@ -2,6 +2,7 @@ extern crate clap;
 use clap::{Arg, App};
 
 pub mod term;
+pub mod extra;
 pub mod syntax;
 pub mod compiler;
 use term::*;

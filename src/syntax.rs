@@ -1,3 +1,5 @@
+use extra;
+
 use term::*;
 use term::Vars;
 use term::Defs;
@@ -381,6 +383,14 @@ pub fn parse_term
         parsed = bod;
         appliable = false;
 
+    // SUGAR: Church Nat (fast repeated application)
+    } else if match_exact(cursor, code, b"#") {
+        advance_char(cursor, 1);
+        let nam = unsafe { String::from_utf8_unchecked(parse_name(cursor, code)?) };
+        let nat = nam.parse::<i32>().unwrap();
+        parsed = extra::build_church_nat(nat);
+        appliable = true;
+
     // Variable
     } else {
         let nam = parse_name(cursor, code)?;
@@ -423,12 +433,12 @@ pub fn parse_term
         (parsed, appliable)
     };
 
-    // Constructor (`Foo.bar` as syntax sugar for `Foo{bar}`)
+    // SUGAR: Constructor (`Foo.bar` becomes `Foo{bar}`)
     let (parsed, appliable) = if match_exact(cursor, code, b".") {
         advance_char(cursor, 1);
         let idt = weak_reduced(&parsed, defs, true);
         let nam = parse_name(cursor, code)?;
-        let ctr = build_idt_ctr(&idt, nam);
+        let ctr = extra::build_idt_ctr(&idt, nam);
         (ctr, true)
     } else {
         (parsed, appliable)
