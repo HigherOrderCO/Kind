@@ -63,15 +63,20 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
                 res
             },
             Cas{val, cas, ret: _} => {
-                // Allocates names for fold variables.
-                let fold_a = gen_name(name_count);
-                let fold_b = gen_name(name_count);
+                // Checks if this pattern match folds.
                 let mut folds = false;
+                for (_, _, cas_bod) in cas {
+                    folds = folds || uses(cas_bod, 0) > 0;
+                }
+
+                // Allocates names for fold variables.
+                let fold_a = if folds { gen_name(name_count) } else { Vec::new() };
+                let fold_b = if folds { gen_name(name_count) } else { Vec::new() };
 
                 // Builds the matching function body on SIC. For example:
                 // - This:    (case v | A  (x,  y) =>  P(x, fold(y))  | B => Q)
                 // - Becomes:      (v (λF. λx. λy.    (P x  (F   y))) (λF.   Q))
-                // Notice that each case includes a local fold argument `F`.
+                // Note that, if folds, each case includes a local fold argument `F`.
 
                 // Inits the matching function body as just the matched variable.
                 let var = gen_name(name_count);
@@ -79,14 +84,11 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
 
                 // Then, for each case of the pattern match...
                 for (_cas_nam, cas_args, cas_bod) in cas {
-                    // Checks if the fold variable is used on this branch.
-                    folds = folds || uses(cas_bod, 0) > 0;
-
                     // Generates names for the local fold and each field, and extends the scope.
                     let mut nams = Vec::new();
                     let fold_nam = gen_name(name_count);
                     scope.push(fold_nam.clone());
-                    nams.push(fold_nam.clone());
+                    if folds { nams.push(fold_nam.clone()); }
                     for _ in 0..cas_args.len() {
                         let field_nam = gen_name(name_count);
                         scope.push(field_nam.clone());
@@ -113,9 +115,8 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
                 }
 
                 // Builds the matching function on SIC. It takes the matching function body and
-                // closes over the matched variable, turning the body into a lambda. Then if it
-                // folds, it turns it recursive by applying it to a copy o itself. Otherwise, it
-                // removes the fold argument by applying the function body to an erase node.
+                // closes over the matched variable, turning the body into a lambda. Then, if it
+                // folds, it turns it recursive by applying it to a copy o itself.
                 let fun = if folds {
                     sic::term::Term::Let{
                         tag: *copy_count + 10,
@@ -133,10 +134,7 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
                 } else {
                     sic::term::Term::Lam{
                         nam: var,
-                        bod: Box::new(sic::term::Term::App{
-                            fun: Box::new(fun_bod),
-                            arg: Box::new(sic::term::Term::Set)
-                        })
+                        bod: Box::new(fun_bod)
                     }
                 };
 
@@ -324,7 +322,6 @@ pub fn eval(term : &Term, defs : &Defs) -> (sic::net::Stats, Term) {
 
 pub fn partial_eval(term : &Term, defs : &Defs) -> (sic::net::Stats, sic::term::Term) {
     let lambda = term_to_lambda(&term, &defs, &mut Vec::new(), &mut 0, &mut 0);
-    println!("The lambda term, not reduced, is:\n{}\nThe reduced term is:",lambda);
     let mut net = sic::term::to_net(&lambda);
     let stats = sic::net::reduce(&mut net);
     let lambda_nf = sic::term::from_net(&net);
