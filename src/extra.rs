@@ -93,7 +93,7 @@ pub fn build_idt_ctr(idt : &Term, nam : Vec<u8>) -> Term {
         ctr: idt_ctr.iter().map(|c| c.0.clone()).collect(),
         bod: Box::new(res)
     };
-    for i in 0..typs.len() {
+    for i in (0..typs.len()).rev() {
         res = Lam{
             nam: nams[i].clone(),
             typ: Box::new(typs[i].clone()),
