@@ -70,11 +70,11 @@ data Nat : Type
 | zero : Nat
 
 -- Some nats
-let 0 Nat.zero
-let 1 Nat.succ(0)
-let 2 Nat.succ(1)
-let 3 Nat.succ(2)
-let 4 Nat.succ(3)
+let n0 Nat.zero
+let n1 Nat.succ(n0)
+let n2 Nat.succ(n1)
+let n3 Nat.succ(n2)
+let n4 Nat.succ(n3)
 
 -- Simple pairs
 data Pair<A : Type, B : Type> : Type
@@ -155,14 +155,6 @@ let induction(n : Nat) =>
     | succ(pred) => () => (P : (n : Nat) -> Type , s : (n : Nat, p : P(n)) -> P(Nat.succ(n)) , z : P(Nat.zero)) => s(pred, fold(pred, P, s, z))
     | zero       => () => (P : (n : Nat) -> Type , s : (n : Nat, p : P(n)) -> P(Nat.succ(n)) , z : P(Nat.zero)) => z
 
--- The number 2
-let two
-  Nat.succ(Nat.succ(Nat.zero))
-
--- The number 4
-let four
-  add(two, two)
-
 -- Congruence of equality: a proof that `a == b` implies `f(a) == f(b)`
 let cong(A : Type, B : Type, a : A, b : A, e : Eq<A>(a, b)) =>
     case e    -> (a, b) => (f : (x : A) -> B) -> Eq<B>(f(a), f(b))
@@ -201,7 +193,7 @@ let main
   let twice(n : Nat) =>
     copy n as a, b
     in Pair<Nat, Nat>.new(a, b)
-  twice(2)
+  twice(Nat.succ(Nat.succ(Nat.zero)))
 ```
 
 You can see it on the `examples` directory. Soon, I'll explain how to prove cooler things, and write a tutorial on how to make a "DAO" Smart Contract that is provably "unhackable", in the sense its internal balance always matches the sum of its users balances.

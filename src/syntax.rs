@@ -384,28 +384,26 @@ pub fn parse_term
         parsed = bod;
         appliable = false;
 
-    // SUGAR: Church Nat (fast repeated application)
-    } else if match_exact(cursor, code, b"#") {
-        advance_char(cursor, 1);
-        let nam = unsafe { String::from_utf8_unchecked(parse_name(cursor, code)?) };
-        let nat = nam.parse::<i32>().unwrap();
-        parsed = extra::build_church_nat(nat);
-        appliable = true;
-
-    // Variable
+    // Variables, references and numbers
     } else {
         let nam = parse_name(cursor, code)?;
-        let mut idx : Option<usize> = None;
-        for i in (0..vars.len()).rev() {
-            if vars[i] == nam {
-                idx = Some(vars.len() - i - 1);
-                break;
+        if nam.len() > 0 && nam[0] >= b'0' && nam[0] <= b'9' {
+            let nam = unsafe { String::from_utf8_unchecked(nam) };
+            let nat = nam.parse::<i32>().unwrap();
+            parsed = extra::build_church_nat(nat);
+        } else {
+            let mut idx : Option<usize> = None;
+            for i in (0..vars.len()).rev() {
+                if vars[i] == nam {
+                    idx = Some(vars.len() - i - 1);
+                    break;
+                }
             }
+            parsed = match idx {
+                Some(idx) => Var{idx: idx as i32},
+                None      => Ref{nam: nam.to_vec()}
+            };
         }
-        parsed = match idx {
-            Some(idx) => Var{idx: idx as i32},
-            None      => Ref{nam: nam.to_vec()}
-        };
         appliable = true;
     };
 
