@@ -89,7 +89,7 @@ pub fn build_idt_ctr(idt : &Term, nam : Vec<u8>) -> Term {
         };
     }
     res = New{
-        idt: Box::new(idt.clone()),
+        idt: Box::new(shifted(&idt, typs.len() as i32, 0)),
         ctr: idt_ctr.iter().map(|c| c.0.clone()).collect(),
         bod: Box::new(res)
     };
