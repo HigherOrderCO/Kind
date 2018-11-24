@@ -107,7 +107,7 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
                     // Builds the case function on SIC by closing the body with generated names.
                     let mut cas_fun = cas_bod;
                     for i in 0..nams.len() {
-                        cas_fun = sic::term::Term::Lam{nam: nams[i].clone(), bod: Box::new(cas_fun)}
+                        cas_fun = sic::term::Term::Lam{nam: nams[nams.len() - i - 1].clone(), bod: Box::new(cas_fun)}
                     }
 
                     // Extends the matching function body by applying it to this new case function.
