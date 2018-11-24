@@ -170,7 +170,7 @@ pub fn uses(term : &Term, dpt : i32) -> u32 {
             uses(bod, dpt + 1)
         },
         &Var{idx} => {
-            if idx == dpt - 1 { 1 } else { 0 }
+            if idx == dpt { 1 } else { 0 }
         },
         &Ref{nam: _} => 0,
         &Idt{nam: _, ref arg, ref par, ref typ, ref ctr} => {
