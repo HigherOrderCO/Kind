@@ -75,7 +75,7 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
 
                 // Builds the matching function body on SIC. For example:
                 // - This:    (case v | A  (x,  y) =>  P(x, fold(y))  | B => Q)
-                // - Becomes:      (v (λF. λx. λy.    (P x  (F   y))) (λF.   Q))
+                // - Becomes:      (v (λx. λy. λF.    (P x  (F   y))) (λF.   Q))
                 // Note that, if folds, each case includes a local fold argument `F`.
 
                 // Inits the matching function body as just the matched variable.
@@ -88,12 +88,12 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
                     let mut nams = Vec::new();
                     let fold_nam = gen_name(name_count);
                     scope.push(fold_nam.clone());
-                    if folds { nams.push(fold_nam.clone()); }
                     for _ in 0..cas_args.len() {
                         let field_nam = gen_name(name_count);
                         scope.push(field_nam.clone());
                         nams.push(field_nam);
                     }
+                    if folds { nams.push(fold_nam.clone()); }
 
                     // Builds the case body on SIC.
                     let cas_bod = build(cas_bod, rec, defs, scope, name_count, copy_count);
