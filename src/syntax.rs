@@ -274,6 +274,33 @@ pub fn parse_term
 
         // Matched value
         let val = parse_term(cursor, code, vars, defs)?;
+        prepare_to_parse(cursor, code)?;
+
+        // Return type
+        parse_one_of(cursor, code, &[b"->"])?;
+        vars.push(b"self".to_vec());
+        let mut ret_arg = Vec::new();
+        prepare_to_parse(cursor, code)?;
+        if match_exact(cursor, code, b"(") {
+            advance_char(cursor, 1);
+            while !match_exact(cursor, code, b")") {
+                let arg = parse_name(cursor, code)?;
+                vars.push(arg.clone());
+                ret_arg.push(arg);
+                prepare_to_parse(cursor, code)?;
+                if code[cursor.index] == b',' {
+                    advance_char(cursor, 1);
+                    prepare_to_parse(cursor, code)?;
+                }
+            }
+            advance_char(cursor, 1);
+            parse_one_of(cursor, code, &[b"=>"])?;
+        }
+        let ret_bod = parse_term(cursor, code, vars, defs)?;
+        for _ in 0..ret_arg.len() {
+            vars.pop();
+        }
+        vars.pop();
         skip_whites(cursor, code);
 
         // Case expressions
@@ -320,32 +347,6 @@ pub fn parse_term
             cas.push((cas_nam, cas_arg, cas_bod));
             skip_whites(cursor, code);
         }
-
-        // Return type
-        parse_one_of(cursor, code, &[b":"])?;
-        vars.push(b"self".to_vec());
-        let mut ret_arg = Vec::new();
-        prepare_to_parse(cursor, code)?;
-        if match_exact(cursor, code, b"(") {
-            advance_char(cursor, 1);
-            while !match_exact(cursor, code, b")") {
-                let arg = parse_name(cursor, code)?;
-                vars.push(arg.clone());
-                ret_arg.push(arg);
-                prepare_to_parse(cursor, code)?;
-                if code[cursor.index] == b',' {
-                    advance_char(cursor, 1);
-                    prepare_to_parse(cursor, code)?;
-                }
-            }
-            advance_char(cursor, 1);
-            parse_one_of(cursor, code, &[b"=>"])?;
-        }
-        let ret_bod = parse_term(cursor, code, vars, defs)?;
-        for _ in 0..ret_arg.len() {
-            vars.pop();
-        }
-        vars.pop();
 
         // Finish
         let val = Box::new(val);
@@ -623,6 +624,19 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
             &Cas{ref val, ref cas, ref ret} => {
                 code.extend_from_slice(b"(case ");
                 build(code, &val, vars, short);
+                code.extend_from_slice(b" -> ");
+                vars.push(b"self".to_vec());
+                code.extend_from_slice(b"(");
+                for i in 0..ret.0.len() {
+                    let mut ret_arg_nam = rename(&ret.0[i], vars);
+                    code.append(&mut ret_arg_nam.clone());
+                    vars.push(ret_arg_nam.to_vec());
+                    if i < ret.0.len() - 1 {
+                        code.extend_from_slice(b",");
+                    }
+                }
+                code.extend_from_slice(b") => ");
+                build(code, &ret.1, vars, short);
                 for (nam, arg, bod) in cas {
                     code.extend_from_slice(b" ");
                     code.extend_from_slice(b"| ");
@@ -645,19 +659,6 @@ pub fn term_to_ascii(term : &Term, vars : &mut Vars, short : bool) -> Vec<u8> {
                     }
                     vars.pop();
                 }
-                code.extend_from_slice(b" : ");
-                vars.push(b"self".to_vec());
-                code.extend_from_slice(b"(");
-                for i in 0..ret.0.len() {
-                    let mut ret_arg_nam = rename(&ret.0[i], vars);
-                    code.append(&mut ret_arg_nam.clone());
-                    vars.push(ret_arg_nam.to_vec());
-                    if i < ret.0.len() - 1 {
-                        code.extend_from_slice(b",");
-                    }
-                }
-                code.extend_from_slice(b") => ");
-                build(code, &ret.1, vars, short);
                 code.extend_from_slice(b")");
                 for _ in 0..ret.0.len() {
                     vars.pop();
