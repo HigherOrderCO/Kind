@@ -66,7 +66,7 @@ pub fn term_to_lambda(term : &Term, defs : &Defs, scope : &mut Vec<Vec<u8>>, nam
                 // Checks if this pattern match folds.
                 let mut folds = false;
                 for (_, _, cas_bod) in cas {
-                    folds = folds || uses(cas_bod, 0) > 0;
+                    folds = folds || uses(cas_bod, cas.len() as i32) > 0;
                 }
 
                 // Allocates names for fold variables.
