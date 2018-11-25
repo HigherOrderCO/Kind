@@ -1,12 +1,18 @@
 # Formality
 
-An efficient programming language featuring formal proofs.
+A general-purpose programming language for front-end apps, back-end services and smart-contracts. It is:
 
+- **Fast:** no garbage-collection, [optimal beta-reduction](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07) and a massively parallel GPU compiler make it *insanely fast*.
+
+- **Safe:** a type system capable of proving mathematical theorems about its own programs make it *really secure*.
+
+- **Simple:** its entire implementation is ~2k LOC, making it a simple standard *you could implement yourself*.
+
+**Theorem proving** is possible due to dependent types, like on other proof assistants. **Massively parallel evaluation** is possible due to [Symmetric Interaction Calculus](https://github.com/MaiaVictor/symmetric-interaction-calculus) (SIC), a new model of computation that combines the best aspects of the Turing Machine and the λ-Calculus. **No garbage-collection** is possible due to linearity: values are simply freed when they go out of scope. To use a variable twice, we just clone it: SIC's *lazy copying* makes that virtually free. With no ownership system needed, we have [Rust](https://www.rust-lang.org/en-US/)-like computational properties with a [Haskell](https://www.haskell.org/)-like high-level feel.
 
 ## Table of contents
+<a name="table-of-contents"/>
 
-   * [Features](#features)
-   * [How?](#how)
    * [Installation](#installation)
    * [Usage](#usage)
    * [Examples](#examples)
@@ -18,28 +24,6 @@ An efficient programming language featuring formal proofs.
       * [Optimal evaluation](#optimal-evaluation)
       * [More examples](#more-examples)
    * [Warning](#warning)
-
-## Features
-<a name="features"/>
-
-- **Formal proofs:** Formality's type system allows it to [prove theorems](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence) about its own programs.
-
-- **Optimality:** Formality performs beta-reduction (lambda substitution) [optimally](https://www.amazon.com/Implementation-Functional-Programming-Languages-Theoretical/dp/0521621127).
-
-- **No garbage-collection:** Formality doesn't require a garbage collection, making it resource-efficient.
-
-- **EVM-compatibility:** Formality can be compiled to the EVM to run [Ethereum](https://www.ethereum.org/) smart-contracts.
-
-- **GPU-compatibility:** Formality can also compile to CUDA / OpenCL and run in thousands of cores, making it *very fast*.
-
-- **Simplicity:** The entire implementation is ~2k LOC and aims to be kept simple.
-
-## How?
-<a name="how"/>
-
-*Theorem proving* is possible thanks to dependent functions and inductive datatypes, similarly to [Coq](https://coq.inria.fr/refman/language/cic.html), [Agda](https://github.com/agda/agda) and other proof assistants. To guarantee mathematical meaningfulness, Formality is compiled to [Cedille-core](https://github.com/maiavictor/cedille-core), a minimalist type theory which acts as a termination and consistency checker.
-
-*Optimality*, no *garbage-collection*, *EVM* and *GPU* compatibility are all possible due to compilation to the [symmetric interaction calculus](https://github.com/MaiaVictor/symmetric-interaction-calculus), a lightweight computing model that combines good aspects of the Turing Machine and the Lambda Calculus. In order for this to work, Formality enforces some compile-time restrictions based on Elementary Affine Logic.
 
 ## Installation
 <a name="installation"/>
@@ -67,13 +51,14 @@ Example usage:
 git clone https://github.com/maiavictor/formality
 cd examples
 
-# Evals `not(Bool.true)`. Output: `Bool{false}`
+# Interpreter evaluation
 formality everything.formality.hs -e not_true 
 
-# Type-checks `add`. Output: `((a : Nat) -> ((b : Nat) -> Nat))`
-formality everything.formality.hs -t add
+# SIC evaluation
+formality everything.formality.hs -s -f not_true 
 
-# Type checks `add-comm`. Output: `((n : Nat) -> ((m : Nat) -> Eq(Nat)(add(n)(m))(add(m)(n))))`
+# Type-checking
+formality everything.formality.hs -t add
 formality everything.formality.hs -t add-comm
 ```
 
