@@ -15,7 +15,7 @@ data List<A : Type> : Type
 
 -- Boolean negation
 let not(b : Bool) => Bool{
-  case b -> Bool
+  case b  -> Bool
   | true  => false
   | false => true
 }
@@ -30,7 +30,7 @@ let map(A : Type, B : Type, f : (x : A) -> B, xs : List<A>) => List<B>{
 -- Identity function for lists of bools
 let id(xs : List<Bool>) =>
   case xs       -> List<Bool>
-  | cons(x, xs) => List<Bool>.cons((case x -> Bool | true => Bool.true | false => Bool.false), fold(xs))
+  | cons(x, xs) => List<Bool>.cons(x, fold(xs))
   | nil         => List<Bool>.nil
 
 -- List with 100 falses
