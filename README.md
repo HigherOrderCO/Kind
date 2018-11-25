@@ -129,7 +129,7 @@ This allows us to write powerful type-safe functions, such as an indexing functi
 
 ### Theorem Proving
 
-Those features allow Formality to express mathematical theorems as types. For example, mathematical equality can be defined as:
+Those features allow Formality to express theorems as types. For example, mathematical equality can be defined as:
 
 ```haskell
 data Eq<A : Type> : (x : A, y : A) -> Type
@@ -154,7 +154,7 @@ The following Formality program:
 id(1000000000(List<Bool>, map(Bool, Bool, not), list))
 ```
 
-Flips every bit in list of 100 bits, a billion times. It prints the correct output in `0.03s`. You could increase that to beyound the number of stars in the universe, and it'd still output the correct result, instantly. No, your computer isn't doing that many operations: that's possible because Formality programs are compiled to [SIC](https://github.com/MaiaVictor/Symmetric-Interaction-Calculus), an optimal evaluator for functional programs. That allows it to exploit insane runtime optimizations that no other language can, making it often faster than decades-old compilers such as GHC.
+Flips every bit in a list of 100 bits, a billion times. It prints the correct output in `0.03s`. You could increase that to beyound the number of stars in the universe, and it'd still output the correct result, instantly. No, your computer isn't doing that many operations: that's possible because Formality is compiled to [SIC](https://github.com/MaiaVictor/Symmetric-Interaction-Calculus), an optimal evaluator for functional programs. That allows it to exploit insane runtime optimizations that no other language can, making it often faster than decades-old compilers such as GHC.
 
 ### More examples
 
