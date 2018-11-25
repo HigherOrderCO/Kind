@@ -4,15 +4,15 @@ use term::Term::*;
 // Builds a binary-compressed, Church-encoded natural number (for fast repeated application).
 // For example, the number #15 is encoded as:
 // (P : Type, f : (x : P) -> P) => 
-//     copy f                        as f1_f, f1_k // i=0 n=1  
-//     copy f1_k                     as f1_a, f1_b // i=1 n=1  
-//     copy (x : P) => f1_a(f1_b(x)) as f2_f, f2_k // i=2 n=2  
-//     copy f2_k                     as f2_a, f2_b // i=3 n=2  
-//     copy (x : P) => f4_a(f2_b(x)) as f4_f, f4_k // i=4 n=4  
-//     copy f4_k                     as f4_a, f4_b // i=5 n=4  
-//     copy (x : P) => f4_a(f4_b(x)) as f8_f, f8_k // i=6 n=8  
-//     copy f8_k                     as f8_a, f8_b // i=7 n=8  
-//     i=8 n=16 (x : 17) => 4(8(12(16(x))))
+//     copy f                        as f1_f, f1_k
+//     copy f1_k                     as f1_a, f1_b
+//     copy (x : P) => f1_a(f1_b(x)) as f2_f, f2_k
+//     copy f2_k                     as f2_a, f2_b
+//     copy (x : P) => f4_a(f2_b(x)) as f4_f, f4_k
+//     copy f4_k                     as f4_a, f4_b
+//     copy (x : P) => f4_a(f4_b(x)) as f8_f, f8_k
+//     copy f8_k                     as f8_a, f8_b
+//     (x : P) => f1_f(f2_f(f4_f(f8_f(x))))
 pub fn build_church_nat(nat : i32) -> Term {
     fn build(nam : &mut u32, i : i32, n : i32, nat : i32) -> Term {
         if n <= nat {
