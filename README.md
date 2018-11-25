@@ -31,217 +31,135 @@ cd formality
 cargo install
 cd examples
 
-# Evals `add(two, two)`. Output: `Nat.succ(Nat.succ(Nat.succ(Nat.succ(Nat.zero))))`
-formality main.for -e four 
+# Evals `not(Bool.true)`. Output: `Bool{false}`
+formality everything.formality.hs -e not_true 
 
 # Type-checks `add`. Output: `((a : Nat) -> ((b : Nat) -> Nat))`
-formality main.for -t add
+formality everything.formality.hs -t add
 
 # Type checks `add-comm`. Output: `((n : Nat) -> ((m : Nat) -> Eq(Nat)(add(n)(m))(add(m)(n))))`
-formality main.for -t add-comm
+formality everything.formality.hs -t add-comm
 ```
 
-The last example verifies the proof that `a + b == b + a`.
+## Examples and Features
 
-## Example
+Formality is a very simple language. Its programs are composed of just two building blocks: inductive datatypes, which represent data formats, and functions, which represent computations over those types of data. And that's all you need.
 
-Here are some random datatypes and functions to show the syntax, and a proof that `a + b == b + a`.
+### Simple types
+
+One of the simplest types, the boolean, can be declared as:
 
 ```haskell
--- Empty, the type with no constructors
-data Empty : Type
-
--- Unit, the type with one constructor
-data Unit : Type
-| void : Unit
-
--- Bool, the type with two constructors
 data Bool : Type
-| true  : Bool
-| false : Bool
+| true    : Bool
+| false   : Bool
+```
 
--- Some bools
-let true  Bool.true
-let false Bool.false
+And the negation function as:
 
--- Natural numbers
-data Nat : Type
-| succ : (n : Nat) -> Nat
-| zero : Nat
-
--- Some nats
-let n0 Nat.zero
-let n1 Nat.succ(n0)
-let n2 Nat.succ(n1)
-let n3 Nat.succ(n2)
-let n4 Nat.succ(n3)
-
--- Simple pairs
-data Pair<A : Type, B : Type> : Type
-| new : (x : A, y : B) -> Pair
-
--- Polymorphic lists
-data List<A : Type> : Type
-| cons : (x : A, xs : List) -> List
-| nil  : List
-
--- Vectors, i.e., lists with statically known lengths
-data Vect<A : Type> : (n : Nat) -> Type
-| cons : (n : Nat, x : A, xs : Vect(n)) -> Vect(Nat.succ(n))
-| nil  : Vect(Nat.zero)
-
--- Equality type: holds a proof that two values are identical
-data Eq<A : Type> : (x : A, y : A) -> Type
-| refl : (x : A) -> Eq(x, x)
-
--- Polymorphic identity function for a type P
-let the(P : Type, x : P) =>
-    x
-
--- Boolean negation
+```haskell
 let not(b : Bool) =>
     case b  -> Bool
     | true  => Bool.false
     | false => Bool.true
-    
--- Predecessor of a natural number
-let pred(a : Nat) =>
-    case a       -> Nat
-    | succ(pred) => pred
-    | zero       => Nat.zero
+```
 
--- Double of a number: the keyword `fold` is used for recursion
+Pattern-matching is used everytime we want to inspect the value of a datatype.
+
+### Recursive types
+
+One of the simplest recursive types, the natural number, can be declared as:
+
+```haskell
+data Nat : Type
+| succ   : (n : Nat) -> Nat
+| zero   : Nat
+```
+
+And a function that doubles it can be written as:
+
+```haskell
 let double(a : Nat) =>
     case a       -> Nat
     | succ(pred) => Nat.succ(Nat.succ(fold(pred)))
     | zero       => Nat.zero
+```
 
--- Addition of natural numbers
-let add(a : Nat, b : Nat) =>
-    (case a       -> () => (a : Nat) -> Nat
-    | succ(pred)  => () => (b : Nat) => Nat.succ(fold(pred, b))
-    | zero        => () => (b : Nat) => b)(b)
+Since Formality is total, recursion is performed by using the `fold` keyword, which is available inside cases of a pattern-match. It allows us to recursivelly apply the same logic to structurally smaller values.
 
--- First element of a pair
+### Polymorphic types
+
+Types can be easily parameterized:
+
+```haskell
+data Pair<A : Type, B : Type> : Type
+| new : (x : A, y : B) -> Pair
+```
+
+Declaring polymorphic functions is as simple as taking types as arguments:
+
+```haskell
 let fst(A : Type, B : Type, pair : Pair<A, B>) =>
     case pair   -> A
     | new(x, y) => x
+```
 
--- Second element of a pair
-let snd(A : Type, B : Type, pair : Pair<A, B>) =>
-    case pair   -> B
-    | new(x, y) => y
+That allows you to reuse the same implementation of a function for multiple concrete types, a powerful, ancient trick that certain "modern system languages" surprisingly couldn't get right.
 
--- Principle of explosion: from falsehood, everything follows
-let EFQ(P : Type, f : Empty) =>
-    case f -> P
+### Dependent types
 
--- Returns the first element of a non-empty vector
-let head(A : Type, n : Nat, vect : Vect<A>(Nat.succ(n))) =>
-    case vect        -> (n) => (case n -> Type | succ(m) => A | zero => Unit)
-    | cons(n, x, xs) => x
-    | nil            => Unit.void
+Formality allows types to be parameterized not only by other static types, but by runtime values: we call those "indices". The classic `Vector` type, with a length that is symbolically known at compile time, can be declared as:
 
--- Returns a vector without its first element
+```haskell
+data Vect<A : Type> : (n : Nat) -> Type
+| cons : (n : Nat, x : A, xs : Vect(n)) -> Vect(Nat.succ(n))
+| nil  : Vect(Nat.zero)
+```
+
+When pattern-matching on those, we can specify a return type that depends on indices:
+
+```haskell
 let tail(A : Type, n : Nat, vect : Vect<A>(Nat.succ(n))) =>
     case vect        -> (n) => Vect<A>(pred(n))
     | cons(n, x, xs) => xs
     | nil            => Vect<A>.nil
+```
 
--- The induction principle on natural numbers can be obtained from total pattern-matching.
--- This function gets somewhat bloated by type sigs; could be improved with bidirectional?
-let induction(n : Nat) =>
-    case n       -> () => (P : (n : Nat) -> Type , s : (n : Nat, p : P(n)) -> P(Nat.succ(n)) , z : P(Nat.zero)) -> P(self)
-    | succ(pred) => () => (P : (n : Nat) -> Type , s : (n : Nat, p : P(n)) -> P(Nat.succ(n)) , z : P(Nat.zero)) => s(pred, fold(pred, P, s, z))
-    | zero       => () => (P : (n : Nat) -> Type , s : (n : Nat, p : P(n)) -> P(Nat.succ(n)) , z : P(Nat.zero)) => z
+This allows us to write powerful type-safe functions, such as an indexing function over vectors that can't overflow. We can also use the `self` keyword to refer to the matched structure itself, allowing us to express mathematical induction (see examples).
 
--- Congruence of equality: a proof that `a == b` implies `f(a) == f(b)`
-let cong(A : Type, B : Type, a : A, b : A, e : Eq<A>(a, b)) =>
-    case e    -> (a, b) => (f : (x : A) -> B) -> Eq<B>(f(a), f(b))
-    | refl(x) => (f : (x : A) -> B) => Eq<B>.refl(f(x))
+### Theorem Proving
 
--- Symmetry of equality: a proof that `a == b` implies `b == a`
+Those features allow Formality to express mathematical theorems as types. For example, mathematical equality can be defined as:
+
+```haskell
+data Eq<A : Type> : (x : A, y : A) -> Type
+| refl : (x : A) -> Eq(x, x)
+```
+
+And the proof that `a == b` implies `b == a` is just:
+
+```haskell
 let sym(A : Type, a : A, b : A, e : Eq<A>(a, b)) =>
     case e    -> (a, b) => Eq<A>(b, a)
     | refl(x) => Eq<A>.refl(x)
-
--- Substitution of equality: if `a == b`, then `a` can be replaced by `b` in a proof `P`
-let subst(A : Type, x : A, y : A, e : Eq<A>(x, y)) =>
-    case e    -> (x, y) => (P : (x : A) -> Type, px : P(x)) -> P(y)
-    | refl(x) => (P : (x : A) -> Type, px : P(x)) => px
-
--- Proof that `a + 0 == a`
-let add-n-zero(n : Nat) =>
-    case n    -> Eq<Nat>(add(self, Nat.zero), self)
-    | succ(a) => cong(Nat, Nat, add(a, Nat.zero), a, fold(a), (x : Nat) => Nat.succ(x))
-    | zero    => Eq<Nat>.refl(Nat.zero)
-
--- Proof that `a + (1 + b) == 1 + (a + b)`
-let add-n-succ-m(n : Nat) =>
-    case n    -> () => (m : Nat) -> Eq<Nat>(add(self, Nat.succ(m)), Nat.succ(add(self, m)))
-    | succ(n) => (m : Nat) => cong(Nat, Nat, add(n, Nat.succ(m)), Nat.succ(add(n,m)), fold(n,m), (x : Nat) => Nat.succ(x))
-    | zero    => (m : Nat) => Eq<Nat>.refl(Nat.succ(m))
-
--- Proof that `a + b = b + a`
-let add-comm(n : Nat) =>
-    case n    -> () => (m : Nat) -> Eq<Nat>(add(self, m), add(m, self))
-    | succ(n) => (m : Nat) => subst(Nat, add(m,n), add(n,m), fold(m,n), (x : Nat) => Eq<Nat>(Nat.succ(x), add(m, Nat.succ(n))), sym(Nat, add(m, Nat.succ(n)), Nat.succ(add(m, n)), add-n-succ-m(m, n)))
-    | zero    => (m : Nat) => sym(Nat, add(m, Nat.zero), m, add-n-zero(m))
-
--- Arbitrary example
-let main
-  let twice(n : Nat) =>
-    copy n as a, b
-    in Pair<Nat, Nat>.new(a, b)
-  twice(Nat.succ(Nat.succ(Nat.zero)))
 ```
 
-You can see it on the `examples` directory. Soon, I'll explain how to prove cooler things, and write a tutorial on how to make a "DAO" Smart Contract that is provably "unhackable", in the sense its internal balance always matches the sum of its users balances.
+With that much expressivity, Formality types can be seen as a "language of specifications". We can, for example, write "the type of sorted lists", "the type of prime numbers >10", or even "the type of smart contracts that can't be drained".
 
-## Done
+### Optimal Evaluation
 
-- Formality syntax (parser / stringifier)
+The following Formality program:
 
-- Formality type checker
+```haskell
+id(1000000000(List<Bool>, map(Bool, Bool, not), list))
+```
 
-- Formality interpreter
+Flips every bit in list of 100 bits, a billion times. It prints the correct output in `0.03s`. You could increase that to beyound the number of stars in the universe, and it'd still output the correct result, instantly. No, your computer isn't doing that many operations: that's possible because Formality programs are compiled to [SIC](https://github.com/MaiaVictor/Symmetric-Interaction-Calculus), an optimal evaluator for functional programs. That allows it to exploit insane runtime optimizations that no other language can, making it often faster than decades-old compilers such as GHC.
 
-- Formality command-line interface
+### More examples
 
-- [Symmetric Interaction Calculus (syntax, runtime)](https://github.com/maiavictor/symmetric-interaction-calculus)
+For more of those examples, please check the [`/examples`](https://github.com/MaiaVictor/Formality/tree/master/examples) directory.
 
-- [Cedille-core](https://github.com/maiavictor/cedille-core)
+## Warning
 
-- [GPU evaluator prototype](https://github.com/maiavictor/absal-rs/tree/parallel-test-3) and [concept](https://github.com/maiavictor/absal-ex)
-
-* Sans bugs, incremental improvements, minor missing features, etc.
-
-## To do
-
-- Elementary Affine Logic checks
-
-- Cedille compilation (port to Rust?)
-
-- Coq compilation
-
-- Symmetric Interaction Calculus compilation and decompilation
-
-- EVM compilation
-
-- Complete CUDA / OpenCL evaluator
-
-- IPFS imports
-
-- Uncurrying of pretty-printed normal forms
-
-- Including dependencies when pretty-printing (so you can copypaste proofs)
-
-- Tests
-
-- Documentation
-
-## Disclaimer
-
-Formality is still at an experimental stage. There are missing features and code certainly has bugs. Do not use it use on rocket engines.
-
-See [this thread](https://www.reddit.com/r/haskell/comments/9ojicd/sneak_peek_of_formality_a_language_combining/) for more info.
+Formality is still at an experimental stage. There are missing features and code probably has bugs. Do not use it use on rocket engines. See [this thread](https://www.reddit.com/r/haskell/comments/9ojicd/sneak_peek_of_formality_a_language_combining/) for more info.

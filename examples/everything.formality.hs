@@ -1,3 +1,21 @@
+-- General Formality examples
+-- 
+-- To type-check a term: `formality -t term_name everything.formality.hs`
+-- To evaluate a term:   `formality -e term_name everything.formality.hs`
+-- To evaluate on SIC:   `formality -s -f term_name everything.formality.hs`
+-- 
+-- Examples:
+--
+-- The command: `formality -s -f ten everything.formality.hs`
+-- ... outputs: Bool{false}
+-- ...          Total rewrites  : 4
+-- ...          Loop iterations : 19
+-- ... which means applying `not(Bool.true)` on SIC took 4 graph rewrites
+-- 
+-- The command: `formality -t add-comm everything.formality.hs` 
+-- ... outputs: ((n : Nat) -> ((m : Nat) -> Eq<Nat>(add(n)(m))(add(m)(n))))
+-- ... which means `add-comm` is a proof that `∀ n m . n + m == m + n`
+
 -- Empty, the type with no constructors
 data Empty : Type
 
@@ -10,21 +28,10 @@ data Bool : Type
 | true  : Bool
 | false : Bool
 
--- Some bools
-let true  Bool.true
-let false Bool.false
-
 -- Natural numbers
 data Nat : Type
 | succ : (n : Nat) -> Nat
 | zero : Nat
-
--- Some nats
-let 0 Nat.zero
-let 1 Nat.succ(0)
-let 2 Nat.succ(1)
-let 3 Nat.succ(2)
-let 4 Nat.succ(3)
 
 -- Simple pairs
 data Pair<A : Type, B : Type> : Type
@@ -48,11 +55,31 @@ data Eq<A : Type> : (x : A, y : A) -> Type
 let the(P : Type, x : P) =>
     x
 
+-- Some bools
+let true  Bool.true
+let false Bool.false
+
+-- Some nats
+let n0 Nat.zero
+let n1 Nat.succ(n0)
+let n2 Nat.succ(n1)
+let n3 Nat.succ(n2)
+let n4 Nat.succ(n3)
+let n5 Nat.succ(n4)
+
+-- Arbitrary example of lazy copying
+let two-twos
+  copy n2 as a, b in
+  Pair<Nat, Nat>.new(a, b)
+
 -- Boolean negation
 let not(b : Bool) =>
     case b  -> Bool
     | true  => Bool.false
     | false => Bool.true
+
+-- Applies not to true
+let not_true not(Bool{true})
     
 -- Predecessor of a natural number
 let pred(a : Nat) =>
@@ -105,14 +132,6 @@ let induction(n : Nat) =>
     | succ(pred) => () => (P : (n : Nat) -> Type , s : (n : Nat, p : P(n)) -> P(Nat.succ(n)) , z : P(Nat.zero)) => s(pred, fold(pred, P, s, z))
     | zero       => () => (P : (n : Nat) -> Type , s : (n : Nat, p : P(n)) -> P(Nat.succ(n)) , z : P(Nat.zero)) => z
 
--- The number 2
-let two
-  Nat.succ(Nat.succ(Nat.zero))
-
--- The number 4
-let four
-  add(two, two)
-
 -- Congruence of equality: a proof that `a == b` implies `f(a) == f(b)`
 let cong(A : Type, B : Type, a : A, b : A, e : Eq<A>(a, b)) =>
     case e    -> (a, b) => (f : (x : A) -> B) -> Eq<B>(f(a), f(b))
@@ -145,10 +164,3 @@ let add-comm(n : Nat) =>
     case n    -> () => (m : Nat) -> Eq<Nat>(add(self, m), add(m, self))
     | succ(n) => (m : Nat) => subst(Nat, add(m,n), add(n,m), fold(m,n), (x : Nat) => Eq<Nat>(Nat.succ(x), add(m, Nat.succ(n))), sym(Nat, add(m, Nat.succ(n)), Nat.succ(add(m, n)), add-n-succ-m(m, n)))
     | zero    => (m : Nat) => sym(Nat, add(m, Nat.zero), m, add-n-zero(m))
-
--- Arbitrary example
-let main
-  let twice(n : Nat) =>
-    copy n as a, b
-    in Pair<Nat, Nat>.new(a, b)
-  twice(2)
