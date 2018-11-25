@@ -19,8 +19,8 @@ An efficient programming language featuring formal proofs.
       * [More examples](#more-examples)
    * [Warning](#warning)
 
-<a name="features"/>
 ## Features
+<a name="features"/>
 
 - **Formal proofs:** Formality's type system allows it to [prove theorems](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence) about its own programs.
 
@@ -34,15 +34,15 @@ An efficient programming language featuring formal proofs.
 
 - **Simplicity:** The entire implementation is ~2k LOC and aims to be kept simple.
 
-<a name="how"/>
 ## How?
+<a name="how"/>
 
 *Theorem proving* is possible thanks to dependent functions and inductive datatypes, similarly to [Coq](https://coq.inria.fr/refman/language/cic.html), [Agda](https://github.com/agda/agda) and other proof assistants. To guarantee mathematical meaningfulness, Formality is compiled to [Cedille-core](https://github.com/maiavictor/cedille-core), a minimalist type theory which acts as a termination and consistency checker.
 
 *Optimality*, no *garbage-collection*, *EVM* and *GPU* compatibility are all possible due to compilation to the [symmetric interaction calculus](https://github.com/MaiaVictor/symmetric-interaction-calculus), a lightweight computing model that combines good aspects of the Turing Machine and the Lambda Calculus. In order for this to work, Formality enforces some compile-time restrictions based on Elementary Affine Logic.
 
-<a name="installation"/>
 ## Installation
+<a name="installation"/>
 
 To install Formality, first make sure you [installed Rust](https://doc.rust-lang.org/cargo/getting-started/installation.html):
 
@@ -58,8 +58,8 @@ cd formality
 cargo install
 ```
 
-<a name="usage"/>
 ## Usage
+<a name="usage"/>
 
 Example usage:
 
@@ -77,13 +77,13 @@ formality everything.formality.hs -t add
 formality everything.formality.hs -t add-comm
 ```
 
-<a name="examples"/>
 ## Examples
+<a name="examples"/>
 
 Formality is a very simple language. Its programs are composed of just two building blocks: inductive datatypes, which represent data formats, and functions, which represent computations over those types of data. And that's all you need.
 
-<a name="simple-types"/>
 ### Simple types
+<a name="simple-types"/>
 
 One of the simplest types, the boolean, can be declared as:
 
@@ -104,8 +104,8 @@ let not(b : Bool) =>
 
 Pattern-matching is used everytime we want to inspect the value of a datatype.
 
-<a name="recursive-types"/>
 ### Recursive types
+<a name="recursive-types"/>
 
 One of the simplest recursive types, the natural number, can be declared as:
 
@@ -126,8 +126,8 @@ let double(a : Nat) =>
 
 Since Formality is total, recursion is performed by using the `fold` keyword, which is available inside cases of a pattern-match. It allows us to recursivelly apply the same logic to structurally smaller values.
 
-<a name="polomorphic-types"/>
 ### Polymorphic types
+<a name="polomorphic-types"/>
 
 Types can be easily parameterized:
 
@@ -146,8 +146,8 @@ let fst(A : Type, B : Type, pair : Pair<A, B>) =>
 
 That allows you to reuse the same implementation of a function for multiple concrete types, a powerful, ancient trick that certain "modern system languages" surprisingly couldn't get right.
 
-<a name="dependent-types"/>
 ### Dependent types
+<a name="dependent-types"/>
 
 Formality allows types to be parameterized not only by other static types, but by runtime values: we call those "indices". The classic `Vector` type, with a length that is symbolically known at compile time, can be declared as:
 
@@ -168,8 +168,8 @@ let tail(A : Type, n : Nat, vect : Vect<A>(Nat.succ(n))) =>
 
 This allows us to write powerful type-safe functions, such as an indexing function over vectors that can't overflow. We can also use the `self` keyword to refer to the matched structure itself, allowing us to express mathematical induction (see examples).
 
-<a name="theorem-proving"/>
 ### Theorem Proving
+<a name="theorem-proving"/>
 
 Those features allow Formality to express theorems as types. For example, mathematical equality can be defined as:
 
@@ -188,8 +188,8 @@ let sym(A : Type, a : A, b : A, e : Eq<A>(a, b)) =>
 
 With that much expressivity, Formality types can be seen as a "language of specifications". We can, for example, write "the type of sorted lists", "the type of prime numbers >10", or even "the type of smart contracts that can't be drained".
 
-<a name="optimal-evaluation"/>
 ### Optimal Evaluation
+<a name="optimal-evaluation"/>
 
 The following Formality program:
 
@@ -199,12 +199,12 @@ id(1000000000(List<Bool>, map(Bool, Bool, not), list))
 
 Flips every bit in a list of 100 bits, a billion times. It prints the correct output in `0.03s`. You could increase that to beyound the number of stars in the universe, and it'd still output the correct result, instantly. No, your computer isn't doing that many operations: that's possible because Formality is compiled to [SIC](https://github.com/MaiaVictor/Symmetric-Interaction-Calculus), an optimal evaluator for functional programs. That allows it to exploit insane runtime optimizations that no other language can, making it often faster than decades-old compilers such as GHC.
 
-<a name="more-examples"/>
 ### More examples
+<a name="more-examples"/>
 
 For more of those examples, please check the [`/examples`](https://github.com/MaiaVictor/Formality/tree/master/examples) directory.
 
-<a name="warning"/>
 ## Warning
+<a name="warning"/>
 
 Formality is still at an experimental stage. There are missing features and code probably has bugs. Do not use it use on rocket engines. See [this thread](https://www.reddit.com/r/haskell/comments/9ojicd/sneak_peek_of_formality_a_language_combining/) for more info.
