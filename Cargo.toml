@@ -1,6 +1,6 @@
 [package]
 name = "formality"
-version = "0.1.9"
+version = "0.1.10"
 authors = ["maiavictor <srvictormaia@gmail.com>"]
 license = "MIT"
 description = "An efficient programming language featuring formal proofs."
@@ -8,6 +8,10 @@ description = "An efficient programming language featuring formal proofs."
 [dependencies]
 symmetric-interaction-calculus = "0.1.8"
 clap = "2.26.0"
+
+[lib]
+name = "formality"
+path = "src/lib.rs"
 
 [[bin]]
 name = "formality"
