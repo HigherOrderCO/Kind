@@ -834,10 +834,14 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
             }
 
             // Creates the fold type
+            let mut fold_ret_typ : Term = *ret.1.clone();
+            for i in 0..idx.len() {
+                subs(&mut fold_ret_typ, &idx[i], (idx.len() - i - 1) as i32);
+            }
             let mut fold_typ : Term = All{
                 nam: b"X".to_vec(),
                 typ: Box::new(val_typ.clone()),
-                bod: Box::new(ret_typ.clone())
+                bod: Box::new(fold_ret_typ.clone())
             };
 
             if !checked {
@@ -918,7 +922,7 @@ pub fn do_infer<'a>(term : &Term, vars : &mut Vars, defs : &Defs, ctx : &mut Con
                     let mut expect_cas_ret_typ = ret.1.clone();
 
                     // Extends the context with the fold type
-                    extend_context(&fold_typ, ctx);
+                    extend_context(&shifted(&fold_typ,1,0), ctx);
                     vars.push(b"fold".to_vec());
                     shift(&mut expect_cas_ret_typ, 1, 1 + ret.0.len() as i32);
                     shift(&mut idt, 1, 0);

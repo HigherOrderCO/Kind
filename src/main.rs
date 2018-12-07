@@ -88,7 +88,7 @@ fn main() -> io::Result<()> {
         .get_matches();
 
     // Reads the file to check / eval
-    let file_name = match matches.value_of("FILE") { Some(name) => name, None => "main.for" };
+    let file_name = match matches.value_of("FILE") { Some(name) => name, None => "main.formality.hs" };
     let mut file = File::open(file_name)?;
     let mut code = Vec::new();
     file.read_to_end(&mut code)?;

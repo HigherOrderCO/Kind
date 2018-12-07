@@ -787,7 +787,7 @@ pub fn type_error_to_ascii(type_error : &TypeError, short : bool) -> Vec<u8> {
             //message.extend_from_slice(b"\n");
             message.extend_from_slice(b"* You attempted to pattern match a value that isn't member of a datatype.");
         },
-        WrongMatchIndexCount{ref expect, ref actual, ref term, ref vars} => {
+        WrongMatchIndexCount{ref expect, ref actual, term: ref _term, vars: ref _vars} => {
             message.extend_from_slice(b"Incorrect match index count.");
             message.extend_from_slice(b"- Expected : ");
             message.append(&mut expect.to_string().into_bytes());
@@ -795,12 +795,12 @@ pub fn type_error_to_ascii(type_error : &TypeError, short : bool) -> Vec<u8> {
             message.extend_from_slice(b"- Found    : ");
             message.append(&mut actual.to_string().into_bytes());
             message.extend_from_slice(b"\n");
-            message.extend_from_slice(b"- On match : ");
-            message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
-            message.extend_from_slice(b"\n");
+            //message.extend_from_slice(b"- On match : ");
+            //message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
+            //message.extend_from_slice(b"\n");
             message.extend_from_slice(b"* The matched value isn't a concrete datatype.\n");
         },
-        WrongMatchReturnArity{ref expect, ref actual, ref term, ref vars} => {
+        WrongMatchReturnArity{ref expect, ref actual, term: ref _term, vars: ref _vars} => {
             message.extend_from_slice(b"Incorrect match return arity.\n");
             message.extend_from_slice(b"- Expected : ");
             message.append(&mut expect.to_string().into_bytes());
@@ -808,12 +808,12 @@ pub fn type_error_to_ascii(type_error : &TypeError, short : bool) -> Vec<u8> {
             message.extend_from_slice(b"- Found    : ");
             message.append(&mut actual.to_string().into_bytes());
             message.extend_from_slice(b"\n");
-            message.extend_from_slice(b"- On match : ");
-            message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
-            message.extend_from_slice(b"\n");
+            //message.extend_from_slice(b"- On match : ");
+            //message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
+            //message.extend_from_slice(b"\n");
             message.extend_from_slice(b"* The specified return type of pattern match has the wrong number of arguments.\n");
         },
-        WrongMatchCaseCount{ref expect, ref actual, ref term, ref vars} => {
+        WrongMatchCaseCount{ref expect, ref actual, term: ref _term, vars: ref _vars} => {
             message.extend_from_slice(b"Incorrect case count.\n");
             message.extend_from_slice(b"- Expected : ");
             message.append(&mut expect.to_string().into_bytes());
@@ -821,12 +821,12 @@ pub fn type_error_to_ascii(type_error : &TypeError, short : bool) -> Vec<u8> {
             message.extend_from_slice(b"- Found    : ");
             message.append(&mut actual.to_string().into_bytes());
             message.extend_from_slice(b"\n");
-            message.extend_from_slice(b"- On match : ");
-            message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
-            message.extend_from_slice(b"\n");
+            //message.extend_from_slice(b"- On match : ");
+            //message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
+            //message.extend_from_slice(b"\n");
             message.extend_from_slice(b"* The number of cases should be equal to the number of constructors.\n");
         },
-        WrongCaseName{ref expect, ref actual, ref term, ref vars} => {
+        WrongCaseName{ref expect, ref actual, term: ref _term, vars: ref _vars} => {
             message.extend_from_slice(b"Incorrect case name.\n");
             message.extend_from_slice(b"- Expected : ");
             message.append(&mut expect.clone());
@@ -834,11 +834,11 @@ pub fn type_error_to_ascii(type_error : &TypeError, short : bool) -> Vec<u8> {
             message.extend_from_slice(b"- Found    : ");
             message.append(&mut actual.clone());
             message.extend_from_slice(b"\n");
-            message.extend_from_slice(b"- On match : ");
-            message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
-            message.extend_from_slice(b"\n");
+            //message.extend_from_slice(b"- On match : ");
+            //message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
+            //message.extend_from_slice(b"\n");
         },
-        WrongCaseArity{ref expect, ref actual, ref name, ref term, ref vars} => {
+        WrongCaseArity{ref expect, ref actual, ref name, term: ref _term, vars: ref _vars} => {
             message.extend_from_slice(b"Incorrect case arity.\n");
             message.extend_from_slice(b"- Expected : ");
             message.append(&mut expect.to_string().into_bytes());
@@ -846,14 +846,14 @@ pub fn type_error_to_ascii(type_error : &TypeError, short : bool) -> Vec<u8> {
             message.extend_from_slice(b"- Found    : ");
             message.append(&mut actual.to_string().into_bytes());
             message.extend_from_slice(b"\n");
-            message.extend_from_slice(b"- On match : ");
-            message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
-            message.extend_from_slice(b"\n");
+            //message.extend_from_slice(b"- On match : ");
+            //message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
+            //message.extend_from_slice(b"\n");
             message.extend_from_slice(b"* The case `");
             message.append(&mut name.clone());
             message.extend_from_slice(b"` of this match has the incorrect number of fields.");
         },
-        WrongCaseType{ref expect, ref actual, ref name, ref term, ref vars} => {
+        WrongCaseType{ref expect, ref actual, ref name, term: ref _term, vars} => {
             message.extend_from_slice(b"Incorrect case type.\n");
             message.extend_from_slice(b"- Expected : ");
             message.append(&mut term_to_ascii(expect, &mut vars.clone(), short));
@@ -861,9 +861,9 @@ pub fn type_error_to_ascii(type_error : &TypeError, short : bool) -> Vec<u8> {
             message.extend_from_slice(b"- Found    : ");
             message.append(&mut term_to_ascii(actual, &mut vars.clone(), short));
             message.extend_from_slice(b"\n");
-            message.extend_from_slice(b"- On match : ");
-            message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
-            message.extend_from_slice(b"\n");
+            //message.extend_from_slice(b"- On match : ");
+            //message.append(&mut term_to_ascii(term, &mut vars.clone(), short));
+            //message.extend_from_slice(b"\n");
             message.extend_from_slice(b"* The case `");
             message.append(&mut name.clone());
             message.extend_from_slice(b"` of this match has the incorrect type.");
