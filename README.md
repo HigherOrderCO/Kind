@@ -109,7 +109,7 @@ let double(a : Nat) =>
     | zero       => Nat.zero
 ```
 
-Since Formality is total, recursion is performed by using the `fold` keyword, which is available inside cases of a pattern-match. It allows us to recursivelly apply the same logic to structurally smaller values.
+Since Formality is total, recursion is performed by using the `fold` keyword, which is available inside cases of a pattern-match. It allows us to recursively apply the same logic to structurally smaller values.
 
 ### Polymorphic types
 <a name="polomorphic-types"/>
