@@ -694,7 +694,7 @@ const compile = (term, defs) => {
         return ptr;
       } else {
         var dups_ptr = net.enter_port(ptr);
-        var dup_addr = net.alloc_node(level_of[ptr.to_string()] + 2);
+        var dup_addr = net.alloc_node(Math.floor((1 + Math.random()) * Math.pow(2,16)));
         net.link_ports(new Pointer(dup_addr, 0), ptr);
         net.link_ports(new Pointer(dup_addr, 1), dups_ptr);
         return new Pointer(dup_addr, 2);
