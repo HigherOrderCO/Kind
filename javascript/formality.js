@@ -388,7 +388,7 @@ const equals = (a, b, defs) => {
 }
 
 // Reduces a term to normal form or head normal form
-const norm = ([ctor, term], defs, full) => {
+const norm = ([ctor, term], defs = {}, full = true) => {
   const cont = full ? norm : (x => x);
   const apply = (eras, func, argm) => {
     var func = norm(func, defs, false);
