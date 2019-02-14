@@ -30,9 +30,9 @@ const get_name = (ctx, i) => {
   const repeat = (str, i) => {
     return i === 0 ? "" : str + repeat(str, i - 1);
   }
-  var name = get_bind(ctx, i);
-  if (name) {
-    return name[0] + repeat("'", count(ctx, name, i));
+  var bind = get_bind(ctx, i);
+  if (bind) {
+    return bind[0] + repeat("'", count(ctx, bind[0], i));
   } else {
     return "#" + i;
   }
