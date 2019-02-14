@@ -153,6 +153,15 @@ let add-n-zero(n : Nat) =>
     | succ(a) => cong(Nat, Nat, add(a, Nat.zero), a, fold(a), (x : Nat) => Nat.succ(x))
     | zero    => Eq<Nat>.refl(Nat.zero)
 
+  n 
+  n + 0 == n
+
+a : Nat
+p : a + 0 == a
+----------------
+S (a + 0) == S a
+
+
 -- Proof that `a + (1 + b) == 1 + (a + b)`
 let add-n-succ-m(n : Nat) =>
     case n    -> () => (m : Nat) -> Eq<Nat>(add(self, Nat.succ(m)), Nat.succ(add(self, m)))
@@ -165,4 +174,34 @@ let add-comm(n : Nat) =>
     | succ(n) => (m : Nat) => subst(Nat, add(m,n), add(n,m), fold(m,n), (x : Nat) => Eq<Nat>(Nat.succ(x), add(m, Nat.succ(n))), sym(Nat, add(m, Nat.succ(n)), Nat.succ(add(m, n)), add-n-succ-m(m, n)))
     | zero    => (m : Nat) => sym(Nat, add(m, Nat.zero), m, add-n-zero(m))
 
-let main add-comm
+
+data Foo : (b : Bool) -> Type
+| foo    : Foo(Bool.true)
+
+
+let main Foo.foo
+
+  case Foo.foo -> (b) => the(self, Type)
+  | foo               => Type
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

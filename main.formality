@@ -1,0 +1,137 @@
+// Identity
+
+the
+: {A : Type} {u : A} A
+= [A] [u] u
+
+// A self-referential type
+
+Self
+: {T : (Self T)} Type
+= [T] {self : (T self)} Type
+
+// The empty, uninhabited type
+
+Empty
+: (Self Empty)
+= [self]
+  {-Prop : (Self Empty)}
+  (Prop self)
+
+// The unit type
+
+Unit
+: (Self Unit)
+= [self]
+  {-Prop : (Self Unit)}
+  {new   : (Prop Unit.new)}
+  (Prop self)
+
+Unit.new
+: (Unit Unit.new)
+= [-Prop] [new] new
+
+// The booleans true and false
+
+Bool
+: (Self Bool)
+= [self]
+  {-Prop : (Self Bool)}
+  {true  : (Prop Bool.true)}
+  {false : (Prop Bool.false)}
+  (Prop self)
+
+Bool.true
+: (Bool Bool.true)
+= [-Prop] [true] [false] true
+
+Bool.false
+: (Bool Bool.false)
+= [-Prop] [true] [false] false
+
+Bool.induct
+: {self  : (Bool self)}
+  {-Prop : (Self Bool)}
+  {true  : (Prop Bool.true)}
+  {false : (Prop Bool.false)}
+  (Prop self)
+= [self] [-Prop] [true] [false]
+  (self -Prop true false)
+
+Bool.not
+: {self : (Bool self)} (Bool (Bool.not self))
+= [self]
+  (self
+    -[self] (Bool (Bool.not self))
+    Bool.false
+    Bool.true)
+
+Bool.not2
+: {self : (Bool self)} (Bool (Bool.not self))
+= [self] [-Prop] [T] [F]
+  (self -[self] (Prop (Bool.not self)) F T)
+
+// Natural numbers (Scott)
+
+Nat
+: (Self Nat)
+= [self]
+  {-Prop : (Self Nat)}
+  {succ  : {pred : (Nat pred)} (Prop (Nat.succ pred))}
+  {zero  : (Prop Nat.zero)}
+  (Prop self)
+
+Nat.succ
+: {pred : (Nat pred)} (Nat (Nat.succ pred))
+= [pred] [-Prop] [succ] [zero]
+  (succ pred)
+
+Nat.zero
+: (Nat Nat.zero)
+= [-Prop] [succ] [zero] zero
+
+Nat.0 : (Nat Nat.0) = Nat.zero
+Nat.1 : (Nat Nat.1) = (Nat.succ Nat.0)
+Nat.2 : (Nat Nat.2) = (Nat.succ Nat.1)
+Nat.3 : (Nat Nat.3) = (Nat.succ Nat.2)
+Nat.4 : (Nat Nat.4) = (Nat.succ Nat.3)
+Nat.5 : (Nat Nat.5) = (Nat.succ Nat.4)
+Nat.6 : (Nat Nat.6) = (Nat.succ Nat.5)
+Nat.7 : (Nat Nat.7) = (Nat.succ Nat.6)
+Nat.8 : (Nat Nat.8) = (Nat.succ Nat.7)
+Nat.9 : (Nat Nat.9) = (Nat.succ Nat.8)
+
+Nat.id
+: {a : (Nat a)} (Nat (Nat.id a))
+= [a] [-Prop] [succ] [zero]
+  (a
+    -[a] (Prop (Nat.id a))
+    [pred] (succ (Nat.id pred))
+    zero)
+
+Nat.copy
+: {a : (Nat a)} (Nat (Nat.copy a))
+= [a]
+  (a
+    -[a] (Nat (Nat.copy a))
+    [pred] (Nat.succ (Nat.copy pred))
+    Nat.zero)
+
+Nat.double
+: {n : (Nat n)} (Nat (Nat.double n))
+= [n]
+  (n
+    -[n] (Nat (Nat.double n))
+    [pred] (Nat.succ (Nat.succ (Nat.double pred)))
+    Nat.zero)
+
+Nat.add
+: {a : (Nat a)} {b : (Nat b)} (Nat (Nat.add a b))
+= [a] [b]
+  (a
+    -[a] (Nat (Nat.add a b))
+    [a] (Nat.succ (Nat.add a b))
+    b)
+
+main
+= (Nat.double Nat.3)

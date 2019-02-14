@@ -30,4 +30,4 @@ let zero
 
 -- Increments it 200 million times
 let main
-  id(200000000(Uint, inc, zero))
+  inc(zero)

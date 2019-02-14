@@ -21,11 +21,10 @@ let not(b : Bool) => Bool{
 }
 
 -- Maps a function over a list
-let map(A : Type, B : Type, f : (x : A) -> B, xs : List<A>) => List<B>{
+let map(A : Type, B : Type, f : (x : A) -> B, xs : List<A>) =>
   case xs       -> List<B>
-  | cons(x, xs) => copy f as f_a, f_b in cons(f_a(x), map(A, B, f_b, xs))
-  | nil         => nil
-}
+  | cons(x, xs) => copy f as f_a, f_b in List<B>.cons(f_a(x), map(A, B, f_b, xs))
+  | nil         => List<B>.nil
 
 -- Identity function for lists of bools
 let id(xs : List<Bool>) =>
@@ -38,4 +37,4 @@ let list
   100(List<Bool>, List<Bool>.cons(Bool.false), List<Bool>.nil)
 
 let main
-  id(1000000000(List<Bool>, map(Bool, Bool, not), list))
+  id(50000(List<Bool>, map(Bool, Bool, not), list))
