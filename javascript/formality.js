@@ -58,8 +58,8 @@ const index_of = (ctx, name, skip, i = 0) => {
 const show_context = (ctx, i = 0) => {
   var bind = get_bind(ctx, i);
   if (bind) {
-    var term = ": " + (bind[1] ? show(norm(bind[1], {}, true), ctx) : "?");
-    return show_context(ctx, i + 1) + bind[0] + "\n" + term + "\n" + term + "\n\n";
+    var term = " : " + (bind[1] ? show(norm(bind[1], {}, true), ctx) : "?");
+    return show_context(ctx, i + 1) + bind[0] + term + "\n";
   } else {
     return "";
   }
@@ -425,12 +425,12 @@ const infer = (term, defs, ctx = Ctx()) => {
       var bind_t = infer(term[1].bind, defs, ex_ctx);
       var body_t = infer(term[1].body, defs, ex_ctx);
       if (!equals(bind_t, Typ(), defs, ctx) || !equals(body_t, Typ(), defs, ctx)) {
-        throw "[ERROR]\nForall not a type: `" + show(term, ctx) + "`. Context:\n\n" + show_context(ctx);
+        throw "[ERROR]\nForall not a type: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
       return Typ();
     case "Lam":
       if (term[1].bind === null) {
-        throw "[ERROR]\nCan't infer non-annotated lambda. Context:\n\n" + show_context(ctx);
+        throw "[ERROR]\nCan't infer non-annotated lambda.\n\n[CONTEXT]\n" + show_context(ctx);
       } else {
         var ex_ctx = extend(ctx, [term[1].name, term[1].bind]);
         var body_t = infer(term[1].body, defs, ex_ctx);
@@ -441,10 +441,10 @@ const infer = (term, defs, ctx = Ctx()) => {
     case "App":
       var func_t = norm(infer(term[1].func, defs, ctx), defs, false);
       if (func_t[0] !== "All") {
-        throw "[ERROR]\nNon-function application on `" + show(term, ctx) + "`. Context:\n\n" + show_context(ctx);
+        throw "[ERROR]\nNon-function application on `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
       if (func_t[1].eras !== term[1].eras) {
-        throw "[ERROR]\nErasure doesn't match on application `" + show(term, ctx) + "`. Context:\n\n" + show_context(ctx);
+        throw "[ERROR]\nErasure doesn't match on application `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
       var bind_t = subst(func_t[1].bind, term[1].argm, 0);
       var argm_v = check(term[1].argm, bind_t, defs, ctx, () => "`" + show(term, ctx) + "`'s argument");
