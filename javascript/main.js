@@ -39,13 +39,3 @@ try {
   console.log(e);
   console.log("");
 }
-
-try {
-  var net = formality.compile(term, defs);
-  var rwt = net.reduce_lazy();
-  var tnf = formality.decompile(net);
-  console.log("Norm (" + rwt + " graph rewrites):");
-  console.log(formality.show(tnf));
-} catch (e) {
-  console.log(e);
-}
