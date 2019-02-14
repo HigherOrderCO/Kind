@@ -1,4 +1,4 @@
-// Identity
+// Identit
 
 the
 : {A : Type} {u : A} A
@@ -71,7 +71,7 @@ Bool.not2
 = [self] [-Prop] [T] [F]
   (self -[self] (Prop (Bool.not self)) F T)
 
-// Natural numbers (Scott)
+// Natural numbers
 
 Nat
 : (Self Nat)
@@ -133,5 +133,284 @@ Nat.add
     [a] (Nat.succ (Nat.add a b))
     b)
 
+Nat.add_n_zero
+: {n : (Nat n)} (Eq Nat (Nat.add n Nat.zero) n (Nat.add_n_zero n))
+= [n]
+  (n
+    -[self] (Eq Nat (Nat.add self Nat.zero) self (Nat.add_n_zero self))
+    [pred] (Eq.cong Nat Nat (Nat.add pred Nat.zero) pred (Nat.add_n_zero pred) Nat.succ)
+    (Eq.refl Nat Nat.zero))
+
+Nat.add_n_succ_m
+: {n : (Nat n)} {m : (Nat m)} (Eq Nat (Nat.add n (Nat.succ m)) (Nat.succ (Nat.add n m)) (Nat.add_n_succ_m n m))
+= [N] [M]
+  (N
+    -[self] (Eq Nat (Nat.add self (Nat.succ M)) (Nat.succ (Nat.add self M)) (Nat.add_n_succ_m self M))
+    [pred] (Eq.cong Nat Nat (Nat.add pred (Nat.succ M)) (Nat.succ (Nat.add pred M)) (Nat.add_n_succ_m pred M) Nat.succ)
+    (Eq.refl Nat (Nat.succ M)))
+
+Nat.add_comm
+: {n : (Nat n)} {m : (Nat m)} (Eq Nat (Nat.add n m) (Nat.add m n) (Nat.add_comm n m))
+= [n : (Nat n)]
+  (n
+    -[self] {m : (Nat m)} (Eq Nat (Nat.add self m) (Nat.add m self) (Nat.add_comm self m))
+    [pred] [m]
+      (Eq.subst Nat
+        (Nat.add m pred) (Nat.add pred m) (Eq.sym Nat (Nat.add pred m) (Nat.add m pred) (Nat.add_comm pred m))
+        [x : (Nat x)] (Eq Nat (Nat.succ x) (Nat.add m (Nat.succ pred)))
+        (Eq.sym Nat (Nat.add m (Nat.succ pred)) (Nat.succ (Nat.add m pred)) (Nat.add_n_succ_m m pred)))
+    [m] (Eq.sym Nat (Nat.add m Nat.zero) m (Nat.add_n_zero m)))
+
+// Natural numbers (Church)
+
+Cat
+: (Self Cat)
+= [self]
+  {-P : (Self P)}
+  {s  : {x : (P x)} (P (s x))}
+  {z  : (P z)}
+  (P (self -P s z))
+
+Cat.succ
+: {n : (Cat n)} (Cat (Cat.succ n))
+= [n] [-P] [s] [z]
+  (s (n -P s z))
+
+Cat.zero
+: (Cat Cat.zero)
+= [-P] [s] [z]
+  z
+
+Cat.0 : (Cat Cat.0) = Cat.zero
+Cat.1 : (Cat Cat.1) = (Cat.succ Cat.0)
+Cat.2 : (Cat Cat.2) = (Cat.succ Cat.1)
+Cat.3 : (Cat Cat.3) = (Cat.succ Cat.2)
+Cat.4 : (Cat Cat.4) = (Cat.succ Cat.3)
+Cat.5 : (Cat Cat.5) = (Cat.succ Cat.4)
+Cat.6 : (Cat Cat.6) = (Cat.succ Cat.5)
+Cat.7 : (Cat Cat.7) = (Cat.succ Cat.6)
+Cat.8 : (Cat Cat.8) = (Cat.succ Cat.7)
+Cat.9 : (Cat Cat.9) = (Cat.succ Cat.8)
+
+Cat.add
+: {n : (Cat n)} {m : (Cat m)} (Cat (Cat.add n m))
+= [n] [m] [-P] [s] [z]
+  (n -P s (m -P s z))
+
+Cat.mul
+: {n : (Cat n)} {m : (Cat m)} (Cat (Cat.mul n m))
+= [n] [m] [-P] [s] [z]
+  (n -P (m -P s) z)
+
+Cat.example
+: (Eq Cat Cat.zero Cat.zero (Eq.refl Cat Cat.zero))
+= (Eq.refl Cat Cat.zero)
+
+Cat.is_even
+: {n : (Cat n)} (Bool (Cat.is_even n))
+= [n]
+  (n
+    -[n : (Bool n)] (Bool n)
+    [n : (Bool n)] (Bool.not n)
+    Bool.true)
+
+// Natural numbers (Parigot)
+
+Rat
+: (Self Rat)
+= [self]
+  {-Prop : {self : (Rat self)} {fold : (Prop self fold)} Type}
+  {succ  : {pred : (Rat pred)} {fold : (Prop pred fold)} (Prop (Rat.succ pred) (succ pred fold))}
+  {zero  : (Prop Rat.zero zero)}
+  (Prop self (self -Prop succ zero))
+
+Rat.succ
+: {pred : (Rat pred)} (Rat (Rat.succ pred))
+= [pred] [-Prop] [succ] [zero]
+  (succ pred (pred -Prop succ zero))
+
+Rat.zero
+: (Rat Rat.zero)
+= [-Prop] [succ] [zero] zero
+
+Rat.0 : (Rat Rat.0) = Rat.zero
+Rat.1 : (Rat Rat.1) = (Rat.succ Rat.0)
+Rat.2 : (Rat Rat.2) = (Rat.succ Rat.1)
+Rat.3 : (Rat Rat.3) = (Rat.succ Rat.2)
+Rat.4 : (Rat Rat.4) = (Rat.succ Rat.3)
+Rat.5 : (Rat Rat.5) = (Rat.succ Rat.4)
+Rat.6 : (Rat Rat.6) = (Rat.succ Rat.5)
+Rat.7 : (Rat Rat.7) = (Rat.succ Rat.6)
+Rat.8 : (Rat Rat.8) = (Rat.succ Rat.7)
+Rat.9 : (Rat Rat.9) = (Rat.succ Rat.8)
+
+Rat.to_cat
+: {n : (Rat n)} (Cat (Rat.to_cat n))
+= [n] (n
+  -[self : (Rat self)] [fold : (Cat fold)] (Cat fold)
+  [pred : (Rat pred)] [fold : (Cat fold)] (Cat.succ fold)
+  Cat.zero)
+
+Rat.id
+: {n : (Rat n)} (Rat (Rat.id n))
+= [n] (n
+  -[self : (Rat self)] [fold : (Rat fold)] (Rat fold)
+  [pred : (Rat pred)] [fold : (Rat fold)] (Rat.succ (Rat.succ (Rat.succ fold)))
+  Rat.zero)
+
+Rat.add_n_zero
+: {n : (Rat n)} (Eq Rat (Rat.add n Rat.zero) n (Rat.add_n_zero n))
+= [n]
+  let motive [self : (Rat self)] [fold : (Eq Rat (Rat.add self Rat.zero) self fold)]
+    (Eq Rat (Rat.add self Rat.zero) self fold)
+  let case_succ [pred : (Rat pred)] [fold : (Eq Rat (Rat.add pred Rat.zero) pred fold)]
+    (Eq.cong Rat Rat (Rat.add pred Rat.zero) pred (Rat.add_n_zero pred) Rat.succ)
+  let case_zero
+    (Eq.refl Rat Rat.zero)
+  (n -motive case_succ case_zero)
+
+Rat.add
+: {n : (Rat n)} {m : (Rat m)} (Rat (Rat.add n m))
+= [n] [m] (n
+  -[n : (Rat n)] [r : (Rat r)] (Rat r)
+  [n : (Rat n)] [r : (Rat r)] (Rat.succ r)
+  m)
+
+// Binary
+
+Bin
+: (Self Bin)
+= [self]
+  {-Prop : (Self Bin)}
+  {O     : {pred : (Bin pred)} (Prop (Bin.O pred))}
+  {I     : {pred : (Bin pred)} (Prop (Bin.I pred))}
+  {E     : (Prop Bin.E)}
+  (Prop self)
+
+Bin.O
+: {pred : (Bin pred)}
+  (Bin (Bin.O pred))
+= [pred] [-Prop] [O] [I] [E]
+  (O pred)
+
+Bin.I
+: {pred : (Bin pred)}
+  (Bin (Bin.I pred))
+= [pred] [-Prop] [O] [I] [E]
+  (I pred)
+
+Bin.E
+: (Bin Bin.E)
+= [-Prop] [O] [I] [E]
+  E
+
+Bin.inc
+: {x : (Bin x)}
+  (Bin (Bin.inc x))
+= [xs]
+  (xs
+    -[self : (Bin self)] (Bin (Bin.inc self))
+    [pred] (Bin.I pred)
+    [pred] (Bin.O (Bin.inc pred))
+    Bin.E)
+
+// Equality
+
+Eq
+: {T    : (Self T)}
+  {a    : (T a)}
+  {b    : (T b)}
+  {self : (Eq T a b self)}
+  Type
+= [T] [a] [b] [self]
+  {Prop : {b : (T b)} {self : (Eq T a b self)} Type}
+  {refl : (Prop a (Eq.refl T a))}
+  (Prop b self)
+
+Eq.refl
+: {T : (Self T)}
+  {a : (T a)}
+  (Eq T a a (Eq.refl T a))
+= [T] [a] [Prop] [refl]
+  refl
+
+Eq.sym
+: {T : {self : (T self)} Type}
+  {a : (T a)}
+  {b : (T b)}
+  {e : (Eq T a b e)}
+  (Eq T b a (Eq.sym T a b e))
+= [T] [a] [b] [e]
+  (e [b] [self] (Eq T b a (Eq.sym T a b self))
+    (Eq.refl T a))
+
+Eq.cong
+: {A : {self : (A self)} Type}
+  {B : {self : (B self)} Type}
+  {a : (A a)}
+  {b : (A b)}
+  {e : (Eq A a b e)}
+  {f : {a : (A a)} (B (f a))}
+  (Eq B (f a) (f b) (Eq.cong A B a b e f))
+= [A] [B] [a] [b] [e] [f]
+  (e [b] [self] (Eq B (f a) (f b) (Eq.cong A B a b self f))
+    (Eq.refl B (f a)))
+
+Eq.subst
+: {T : (Self T)}
+  {a : (T a)}
+  {b : (T b)}
+  {e : (Eq T a b e)}
+  {P : {a : (T a)} (Self (P a))}
+  {x : (P a x)}
+  (P b (Eq.subst T a b e P x))
+= [T] [a] [b] [e] [P] [x]
+  (e [b] [self] (P b (Eq.subst T a b self P x)) x)
+
+
+// Sigma
+
+Sigma
+: {A : (Self A)}
+  {B : {x : (A x)} (Self (B x))}
+  {self : (Sigma A B self)}
+  Type
+= [A] [B] [self]
+  {-Prop : {self : (Sigma A B self)} Type}
+  {new   : {a : (A a)} {b : (B a b)} (Prop (Sigma.new A B a b))}
+  (Prop self)
+
+Sigma.new
+: {A : (Self A)}
+  {B : {x : (A x)} (Self (B x))}
+  {a : (A a)}
+  {b : (B a b)}
+  (Sigma A B (Sigma.new A B a b))
+= [A] [B] [a] [b] [-Prop] [new]
+  (new a b)
+
+Sigma.fst
+: {A : (Self A)}
+  {B : {x : (A x)} (Self (B x))}
+  {sigma : (Sigma A B sigma)}
+  (A (Sigma.fst A B sigma))
+= [A] [B] [sigma]
+  (sigma
+    -[self] (A (Sigma.fst A B self))
+    [a] [b] a)
+
+Sigma.snd
+: {A : (Self A)}
+  {B : {x : (A x)} (Self (B x))}
+  {sigma : (Sigma A B sigma)}
+  (B (Sigma.fst A B sigma) (Sigma.snd A B sigma))
+= [A] [B] [sigma]
+  (sigma
+    -[self] (B (Sigma.fst A B self) (Sigma.snd A B self))
+    [a] [b] b)
+
+Sigma.example
+= (Sigma.new Nat [x : (Nat x)](Eq Nat x x) Nat.3 (Eq.refl Nat Nat.3))
+
 main
-= (Nat.double Nat.3)
+= Sigma.example
