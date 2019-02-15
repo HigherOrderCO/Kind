@@ -395,7 +395,7 @@ const norm = ([ctor, term], defs = {}, full = true) => {
     if (func[0] === "Lam") {
       return norm(subst(func[1].body, argm, 0), defs, full);
     } else {
-      return App(eras, cont(func, defs, false), cont(argm, defs, full));
+      return App(eras, cont(func, defs, full), cont(argm, defs, full));
     }
   }
   const dereference = (name) => {
