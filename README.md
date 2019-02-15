@@ -6,7 +6,7 @@ A general-purpose programming language for front-end apps, back-end services and
 
 - **Safe:** a type system capable of proving mathematical theorems about its own programs make it *really secure*.
 
-- **Simple:** its entire implementation is [500 LOC](javascript/formality.js), making it a simple standard *you could implement yourself*.
+- **Simple:** its entire implementation takes [500 LOC](javascript/formality.js), making it a simple standard *you could implement yourself*.
 
 **Theorem proving** is possible due to dependent types, like on other proof assistants. **Massively parallel evaluation** is possible due to [Symmetric Interaction Calculus](https://github.com/MaiaVictor/symmetric-interaction-calculus) (SIC), a new model of computation that combines the best aspects of the Turing Machine and the λ-Calculus. **No garbage-collection** is possible due to linearity: values are simply freed when they go out of scope. To use a variable twice, we just clone it: SIC's *lazy copying* makes that virtually free. With no ownership system needed, we have [Rust](https://www.rust-lang.org/en-US/)-like computational properties with a [Haskell](https://www.haskell.org/)-like high-level feel.
 
