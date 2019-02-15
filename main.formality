@@ -1,4 +1,4 @@
-// Identit
+// Identity
 
 the
 : {A : Type} {u : A} A
@@ -492,6 +492,8 @@ List.map
     (List.nil A)
   (l -motive case_cons case_nil)
 
+// Byte
+
 Byte
 : (Self Byte)
 = [self]
@@ -521,6 +523,18 @@ Byte.new
 = [x0] [x1] [x2] [x3] [x4] [x5] [x6] [x7] [-Prop] [new]
   (new x0 x1 x2 x3 x4 x5 x6 x7)
 
+Byte.0
+: (Byte Byte.0)
+= let 0 Bool.false
+  let 1 Bool.true
+  (Byte.new 0 0 1 1 0 0 0 0)
+
+Byte.1
+: (Byte Byte.1)
+= let 0 Bool.false
+  let 1 Bool.true
+  (Byte.new 0 0 1 1 0 0 0 1)
+
 // Textual App
 
 TextApp
@@ -541,6 +555,19 @@ TextApp.new
   (TextApp (TextApp.new init next draw))
 = [init] [next] [draw] [-Prop] [new]
   (new init next draw)
+  
+Bin.to_bytes
+: {b : (Bin b)} (List Byte (Bin.to_bytes b))
+= [b] (b -[b](List Byte (Bin.to_bytes b))
+  [bs](List.cons Byte Byte.0 (Bin.to_bytes bs))
+  [bs](List.cons Byte Byte.1 (Bin.to_bytes bs))
+  (List.nil Byte))
 
-main
-= TextApp
+TextApp.example
+: (TextApp TextApp.example)
+= let init (Bin.O (Bin.O (Bin.O (Bin.O Bin.E))))
+  let next [key] [state] (Bin.inc state)
+  let draw [state] (Bin.to_bytes state)
+  (TextApp.new init next draw)
+
+main = TextApp.example
