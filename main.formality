@@ -373,8 +373,7 @@ Eq.subst
 Sigma
 : {A : (Self A)}
   {B : {x : (A x)} (Self (B x))}
-  {self : (Sigma A B self)}
-  Type
+  (Self (Sigma A B))
 = [A] [B] [self]
   {-Prop : {self : (Sigma A B self)} Type}
   {new   : {a : (A a)} {b : (B a b)} (Prop (Sigma.new A B a b))}
@@ -412,5 +411,62 @@ Sigma.snd
 Sigma.example
 = (Sigma.new Nat [x : (Nat x)](Eq Nat x x) Nat.3 (Eq.refl Nat Nat.3))
 
-main
-= Sigma.example
+// Lists
+
+List
+: {A : (Self A)}
+  (Self (List A))
+= [A] [self]
+  {-Prop : (Self (List A))}
+  {cons  : {head : (A head)} {tail : (List A tail)} (Prop (List.cons A head tail))}
+  {nil   : (Prop (List.nil A))}
+  (Prop self)
+
+List.cons
+: {A    : (Self A)}
+  {head : (A head)}
+  {tail : (List A tail)}
+  (List A (List.cons A head tail))
+= [A] [head] [tail] [-Prop] [cons] [nil]
+  (cons head tail)
+
+List.nil
+: {A : (Self A)}
+  (List A (List.nil A))
+= [A] [-Prop] [cons] [nil]
+  nil
+
+List.length
+: {A : (Self A)}
+  {l : (List A l)}
+  (Nat (List.length A l))
+= [A] [l]
+  let motive [self]
+    (Nat (List.length A self))
+  let case_cons [head] [tail]
+    (Nat.succ (List.length A tail))
+  let case_nil
+    Nat.zero
+  (l -motive case_cons case_nil) 
+
+List.map
+: {A : (Self A)}
+  {f : {x : (A x)} (A (f x))}
+  {l : (List A l)}
+  (List A (List.map A f l))
+= [A] [f] [l]
+  let motive [self]
+    (List A (List.map A f self))
+  let case_cons [head] [tail]
+    (List.cons A (f head) (List.map A f tail))
+  let case_nil
+    (List.nil A)
+  (l -motive case_cons case_nil)
+
+main = 
+  let xs
+    (List.cons Nat Nat.1
+    (List.cons Nat Nat.2
+    (List.cons Nat Nat.3 
+    (List.nil Nat))))
+  (List.length Nat (List.map Nat Nat.succ xs))
