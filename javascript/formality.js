@@ -473,6 +473,7 @@ const infer = (term, defs, ctx = Ctx()) => {
 
 // Checks if a term has given type
 const check = (term, type, defs, ctx = Ctx(), expr) => {
+  var expr = expr || (() => show(term, ctx));
   var type = norm(type, defs, false);
   if (type[0] === "All" && term[0] === "Lam" && !term[1].bind) {
     infer(type, defs, ctx);
