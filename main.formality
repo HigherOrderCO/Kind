@@ -58,6 +58,19 @@ Bool.induct
 = [self] [-Prop] [true] [false]
   (self -Prop true false)
 
+Bool.equals
+: {x : (Bool x)}
+  {y : (Bool y)}
+  (Bool (Bool.equals x y))
+= [x] [y] [-Prop] [true] [false]
+  (x -[x] (Prop (Bool.equals x y))
+    (y -[y](Prop (Bool.equals Bool.true y))
+      true
+      false)
+    (y -[y](Prop (Bool.equals Bool.false y))
+      false
+      true))
+
 Bool.not
 : {self : (Bool self)} (Bool (Bool.not self))
 = [self]
@@ -307,12 +320,28 @@ Bin.E
 Bin.inc
 : {x : (Bin x)}
   (Bin (Bin.inc x))
-= [xs]
-  (xs
-    -[self : (Bin self)] (Bin (Bin.inc self))
-    [pred] (Bin.I pred)
-    [pred] (Bin.O (Bin.inc pred))
-    Bin.E)
+= [xs] (xs -[self : (Bin self)] (Bin (Bin.inc self))
+  [pred] (Bin.I pred)
+  [pred] (Bin.O (Bin.inc pred))
+  Bin.E)
+
+Bin.equals
+: {x : (Bin x)}
+  {y : (Bin y)}
+  (Bool (Bin.equals x y))
+= [x] (x -[x] {y : (Bin y)} (Bool (Bin.equals x y))
+  [xp] [y] (y -[y](Bool (Bin.equals (Bin.O xp) y))
+    [yp] (Bin.equals xp yp)
+    [yp] Bool.false
+    Bool.false)
+  [xp] [y] (y -[y](Bool (Bin.equals (Bin.I xp) y))
+    [yp] Bool.false
+    [yp] (Bin.equals xp yp)
+    Bool.false)
+  [y] (y -[y](Bool (Bin.equals Bin.E y))
+    [yp] Bool.false
+    [yp] Bool.false
+    Bool.true))
 
 // Equality
 
@@ -463,10 +492,55 @@ List.map
     (List.nil A)
   (l -motive case_cons case_nil)
 
-main = 
-  let xs
-    (List.cons Nat Nat.1
-    (List.cons Nat Nat.2
-    (List.cons Nat Nat.3 
-    (List.nil Nat))))
-  (List.length Nat (List.map Nat Nat.succ xs))
+Byte
+: (Self Byte)
+= [self]
+  {-Prop : (Self Byte)}
+  {new :
+    {x0 : (Bool x0)}
+    {x1 : (Bool x1)}
+    {x2 : (Bool x2)}
+    {x3 : (Bool x3)}
+    {x4 : (Bool x4)}
+    {x5 : (Bool x5)}
+    {x6 : (Bool x6)}
+    {x7 : (Bool x7)}
+    (Prop (Byte.new x0 x1 x2 x3 x4 x5 x6 x7))}
+  (Prop self)
+
+Byte.new
+: {x0 : (Bool x0)}
+  {x1 : (Bool x1)}
+  {x2 : (Bool x2)}
+  {x3 : (Bool x3)}
+  {x4 : (Bool x4)}
+  {x5 : (Bool x5)}
+  {x6 : (Bool x6)}
+  {x7 : (Bool x7)}
+  (Byte (Byte.new x0 x1 x2 x3 x4 x5 x6 x7))
+= [x0] [x1] [x2] [x3] [x4] [x5] [x6] [x7] [-Prop] [new]
+  (new x0 x1 x2 x3 x4 x5 x6 x7)
+
+// Textual App
+
+TextApp
+: (Self TextApp)
+= [self]
+  {-Prop : (Self TextApp)}
+  {new :
+    {init : (Bin init)}
+    {next : {key : (Byte key)} {state : (Bin state)} (Bin (next key state))}
+    {draw : {state : (Bin state)} (List Byte (draw state))}
+    (TextApp (TextApp.new init next draw))}
+  (TextApp self)
+
+TextApp.new
+: {init : (Bin init)}
+  {next : {key : (Byte key)} {state : (Bin state)} (Bin (next key state))}
+  {draw : {state : (Bin state)} (List Byte (draw state))}
+  (TextApp (TextApp.new init next draw))
+= [init] [next] [draw] [-Prop] [new]
+  (new init next draw)
+
+main
+= TextApp
