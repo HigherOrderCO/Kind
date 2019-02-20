@@ -148,33 +148,189 @@ Nat.add
     [a] (Nat.succ (Nat.add a b))
     b)
 
-Nat.add_n_zero
-: {n : (Nat n)} (Eq Nat (Nat.add n Nat.zero) n (Nat.add_n_zero n))
-= [n]
-  (n
-    -[self] (Eq Nat (Nat.add self Nat.zero) self (Nat.add_n_zero self))
-    [pred] (Eq.cong Nat Nat (Nat.add pred Nat.zero) pred (Nat.add_n_zero pred) Nat.succ)
-    (Eq.refl Nat Nat.zero))
+Nat.add_zero_r
+: {a : (Nat a)} (Eq Nat (Nat.add a Nat.zero) a (Nat.add_zero_r a))
+= [a]
+  let motive [self]
+    (Eq Nat (Nat.add self Nat.zero) self (Nat.add_zero_r self))
+  let case_succ [pred]
+    (Eq.cong Nat Nat (Nat.add pred Nat.zero) pred (Nat.add_zero_r pred) Nat.succ)
+  let case_zero (Eq.refl Nat Nat.zero)
+  (a -motive case_succ case_zero)
 
-Nat.add_n_succ_m
-: {n : (Nat n)} {m : (Nat m)} (Eq Nat (Nat.add n (Nat.succ m)) (Nat.succ (Nat.add n m)) (Nat.add_n_succ_m n m))
-= [N] [M]
-  (N
-    -[self] (Eq Nat (Nat.add self (Nat.succ M)) (Nat.succ (Nat.add self M)) (Nat.add_n_succ_m self M))
-    [pred] (Eq.cong Nat Nat (Nat.add pred (Nat.succ M)) (Nat.succ (Nat.add pred M)) (Nat.add_n_succ_m pred M) Nat.succ)
-    (Eq.refl Nat (Nat.succ M)))
+Nat.add_succ_r
+: {a : (Nat a)} {b : (Nat b)} (Eq Nat (Nat.add a (Nat.succ b)) (Nat.succ (Nat.add a b)) (Nat.add_succ_r a b))
+= [a] [b]
+  let motive [self]
+    (Eq Nat (Nat.add self (Nat.succ b)) (Nat.succ (Nat.add self b)) (Nat.add_succ_r self b))
+  let case_succ [pred]
+    (Eq.cong Nat Nat (Nat.add pred (Nat.succ b)) (Nat.succ (Nat.add pred b)) (Nat.add_succ_r pred b) Nat.succ)
+  let case_zero (Eq.refl Nat (Nat.succ b))
+  (a -motive case_succ case_zero)
 
 Nat.add_comm
-: {n : (Nat n)} {m : (Nat m)} (Eq Nat (Nat.add n m) (Nat.add m n) (Nat.add_comm n m))
-= [n : (Nat n)]
-  (n
-    -[self] {m : (Nat m)} (Eq Nat (Nat.add self m) (Nat.add m self) (Nat.add_comm self m))
-    [pred] [m]
+: {a : (Nat a)} {b : (Nat b)} (Eq Nat (Nat.add a b) (Nat.add b a) (Nat.add_comm a b))
+= [a : (Nat a)]
+  let motive [self]
+    {b : (Nat b)} (Eq Nat (Nat.add self b) (Nat.add b self) (Nat.add_comm self b))
+  let case_succ [pred] [b]
       (Eq.subst Nat
-        (Nat.add m pred) (Nat.add pred m) (Eq.sym Nat (Nat.add pred m) (Nat.add m pred) (Nat.add_comm pred m))
-        [x : (Nat x)] (Eq Nat (Nat.succ x) (Nat.add m (Nat.succ pred)))
-        (Eq.sym Nat (Nat.add m (Nat.succ pred)) (Nat.succ (Nat.add m pred)) (Nat.add_n_succ_m m pred)))
-    [m] (Eq.sym Nat (Nat.add m Nat.zero) m (Nat.add_n_zero m)))
+        (Nat.add b pred) (Nat.add pred b) (Eq.sym Nat (Nat.add pred b) (Nat.add b pred) (Nat.add_comm pred b))
+        [x : (Nat x)] (Eq Nat (Nat.succ x) (Nat.add b (Nat.succ pred)))
+        (Eq.sym Nat (Nat.add b (Nat.succ pred)) (Nat.succ (Nat.add b pred)) (Nat.add_succ_r b pred)))
+  let case_zero [b]
+    (Eq.sym Nat (Nat.add b Nat.zero) b (Nat.add_zero_r b))
+  (a -motive case_succ case_zero)
+
+
+Nat.add_assoc
+: {a : (Nat a)} {b : (Nat b)} {c : (Nat c)} (Eq Nat (Nat.add (Nat.add a b) c) (Nat.add a (Nat.add b c)) (Nat.add_assoc a b c))
+= [a] [b] [c]
+  let motive [self]
+    (Eq Nat (Nat.add (Nat.add self b) c) (Nat.add self (Nat.add b c)) (Nat.add_assoc self b c))
+  let case_succ [a]
+    let ab_c (Nat.add (Nat.add a b) c)
+    let a_bc (Nat.add a (Nat.add b c))
+    (Eq.cong Nat Nat ab_c a_bc (Nat.add_assoc a b c) Nat.succ)
+  let case_zero
+    (Eq.refl Nat (Nat.add b c))
+  (a -motive case_succ case_zero)
+
+Nat.add_assoc_r
+: {a : (Nat a)} {b : (Nat b)} {c : (Nat c)} (Eq Nat (Nat.add a (Nat.add b c)) (Nat.add (Nat.add a b) c) (Nat.add_assoc_r a b c))
+= [a] [b] [c]
+  (Eq.sym Nat (Nat.add (Nat.add a b) c) (Nat.add a (Nat.add b c)) (Nat.add_assoc a b c))
+
+// Proof that `a + (b + c) = b + (a + c)`
+Nat.add_swap
+: {a : (Nat a)} {b : (Nat b)} {c : (Nat c)} (Eq Nat (Nat.add a (Nat.add b c)) (Nat.add b (Nat.add a c)) (Nat.add_swap a b c))
+= [a] [b] [c]
+  (Eq.r_trans Nat
+    (Nat.add a (Nat.add b c)) (Nat.add (Nat.add a b) c) (Nat.add b (Nat.add a c)) (Nat.add_assoc a b c)
+    (Eq.trans Nat (Nat.add (Nat.add a b) c) (Nat.add (Nat.add b a) c) (Nat.add b (Nat.add a c))
+      (Eq.cong Nat Nat (Nat.add a b) (Nat.add b a) (Nat.add_comm a b) [x : (Nat x)] (Nat.add x c))
+      (Nat.add_assoc b a c)))
+
+Nat.mul
+: {a : (Nat a)} {b : (Nat b)} (Nat (Nat.mul a b))
+= [a] [b]
+  (a -[a] (Nat (Nat.mul a b))
+    [pred] (Nat.add b (Nat.mul pred b))
+    Nat.zero)
+
+Nat.mul_zero_r
+: {a : (Nat a)} (Eq Nat (Nat.mul a Nat.zero) Nat.zero (Nat.mul_zero_r a))
+= [a]
+  let motive [self]
+    (Eq Nat (Nat.mul self Nat.zero) Nat.zero (Nat.mul_zero_r self))
+  let case_succ [a]
+    (Eq.cong Nat Nat (Nat.mul a Nat.zero) Nat.zero (Nat.mul_zero_r a) (Nat.add Nat.zero))
+  let case_zero
+    (Eq.refl Nat Nat.zero)
+  (a -motive case_succ case_zero)
+
+Nat.mul_one_r
+: {a : (Nat a)} (Eq Nat (Nat.mul a (Nat.succ Nat.zero)) a (Nat.mul_one_r a))
+= [a]
+  let motive [self]
+    (Eq Nat (Nat.mul self (Nat.succ Nat.zero)) self (Nat.mul_a_one self))
+  let case_succ [a]
+    (Eq.cong Nat Nat (Nat.mul a (Nat.succ Nat.zero)) a (Nat.mul_one_r a) Nat.succ)
+  let case_zero
+    (Eq.refl Nat Nat.zero)
+  (a -motive case_succ case_zero)
+
+Nat.mul_succ_r
+: {a : (Nat a)} {b : (Nat b)} (Eq Nat (Nat.mul a (Nat.succ b)) (Nat.add a (Nat.mul a b)) (Nat.mul_succ_r a b))
+= [a]
+  let motive [self] {b : (Nat b)}
+    (Eq Nat (Nat.mul self (Nat.succ b)) (Nat.add self (Nat.mul self b)) (Nat.mul_succ_r self b))
+  let case_succ [a] [b]
+    (Eq.cong Nat Nat
+      (Nat.add b (Nat.mul a (Nat.succ b)))
+      (Nat.add a (Nat.add b (Nat.mul a b)))
+      (Eq.trans Nat
+        (Nat.add b (Nat.mul a (Nat.succ b)))
+        (Nat.add b (Nat.add a (Nat.mul a b)))
+        (Nat.add a (Nat.add b (Nat.mul a b)))
+        (Eq.cong Nat Nat
+          (Nat.mul a (Nat.succ b))
+          (Nat.add a (Nat.mul a b))
+          (Nat.mul_succ_r a b)
+          [x : (Nat x)] (Nat.add b x))
+        (Nat.add_swap b a (Nat.mul a b)))
+      Nat.succ)
+  let case_zero [b]
+    (Eq.refl Nat Nat.zero)
+  (a -motive case_succ case_zero)
+
+Nat.mul_comm
+: {a : (Nat a)} {b : (Nat b)} (Eq Nat (Nat.mul a b) (Nat.mul b a) (Nat.mul_comm a b))
+= [a]
+  let motive [self] {b : (Nat b)}
+    (Eq Nat (Nat.mul self b) (Nat.mul b self) (Nat.mul_comm self b))
+  let case_succ [a] [b]
+    (Eq.trans_r Nat (Nat.add b (Nat.mul a b)) (Nat.add b (Nat.mul b a))
+      (Nat.mul b (Nat.succ a))
+      (Eq.cong Nat Nat (Nat.mul a b) (Nat.mul b a) (Nat.mul_comm a b) [x : (Nat x)] (Nat.add b x))
+      (Nat.mul_succ_r b a))
+  let case_zero [b]
+    (Eq.sym Nat (Nat.mul b Nat.zero) Nat.zero (Nat.mul_zero_r b))
+  (a -motive case_succ case_zero)
+
+// Proof that `(a + b) * c == (a * c) + (b * c)`
+Nat.mul_distr_r
+: {a : (Nat a)} {b : (Nat b)} {c : (Nat c)}
+  (Eq Nat (Nat.mul (Nat.add a b) c) (Nat.add (Nat.mul a c) (Nat.mul b c)) (Nat.mul_distr_r a b c))
+= [a]
+  let motive [self] {b : (Nat b)} {c : (Nat c)}
+    (Eq Nat (Nat.mul (Nat.add self b) c) (Nat.add (Nat.mul self c) (Nat.mul b c)) (Nat.mul_distr_r self b c))
+  let case_succ [a] [b] [c]
+    (Eq.subst Nat (Nat.add (Nat.mul a c) (Nat.mul b c)) (Nat.mul (Nat.add a b) c)
+      (Eq.sym Nat (Nat.mul (Nat.add a b) c) (Nat.add (Nat.mul a c) (Nat.mul b c)) (Nat.mul_distr_r a b c))
+      [x : (Nat x)] (Eq Nat (Nat.add c x) (Nat.add (Nat.add c (Nat.mul a c)) (Nat.mul b c)))
+      (Nat.add_assoc_r c (Nat.mul a c) (Nat.mul b c)))
+   let case_zero [b] [c] (Eq.refl Nat (Nat.mul b c))
+ (a -motive case_succ case_zero)
+
+// Proof that `a * (b + c) == (a * b) + (a * c)`
+Nat.mul_distr_l
+: {a : (Nat a)} {b : (Nat b)} {c : (Nat c)}
+  (Eq Nat (Nat.mul a (Nat.add b c)) (Nat.add (Nat.mul a b) (Nat.mul a c)) (Nat.mul_distr_l a b c))
+= [a] [b] [c]
+  let mul Nat.mul
+  let add Nat.add
+  (Eq.subst Nat (mul c a) (mul a c) (Nat.mul_comm c a)
+    [x : (Nat x)] (Eq Nat (Nat.mul a (Nat.add b c)) (Nat.add (Nat.mul a b) x))
+    (Eq.subst Nat (mul b a) (mul a b) (Nat.mul_comm b a)
+      [x : (Nat x)] (Eq Nat (Nat.mul a (Nat.add b c)) (Nat.add x (Nat.mul c a)))
+      (Eq.trans Nat (mul a (add b c)) (mul (add b c) a) (add (mul b a) (mul c a))
+        (Nat.mul_comm a (add b c))
+        (Nat.mul_distr_r b c a))))
+
+Nat.mul_assoc
+: {a : (Nat a)} {b : (Nat b)} {c : (Nat c)}
+  (Eq Nat (Nat.mul (Nat.mul a b) c) (Nat.mul a (Nat.mul b c)) (Nat.mul_assoc a b c))
+= [a]
+  let mul Nat.mul
+  let add Nat.add
+  let motive [self]
+    {b : (Nat b)} {c : (Nat c)} (Eq Nat (Nat.mul (Nat.mul self b) c) (Nat.mul self (Nat.mul b c)) (Nat.mul_assoc self b c))
+  let case_succ [a] [b] [c]
+   (Eq.trans Nat
+      (mul (add b (mul a b)) c)
+      (add (mul b c) (mul (mul a b) c))
+      (add (mul b c) (mul a (mul b c)))
+      (Nat.mul_distr_r b (mul a b) c)
+      (Eq.cong Nat Nat (mul (mul a b) c) (mul a (mul b c)) (Nat.mul_assoc a b c) [x: (Nat x)] (add (mul b c) x)))
+  let case_zero [b] [c] (Eq.refl Nat Nat.zero)
+  (a -motive case_succ case_zero)
+
+Nat.mul_assoc_r
+: {a : (Nat a)} {b : (Nat b)} {c : (Nat c)}
+  (Eq Nat (Nat.mul a (Nat.mul b c)) (Nat.mul (Nat.mul a b) c) (Nat.mul_assoc_r a b c))
+= [a] [b] [c]
+  (Eq.sym Nat (Nat.mul (Nat.mul a b) c) (Nat.mul a (Nat.mul b c)) (Nat.mul_assoc a b c))
 
 // Natural numbers (Church)
 
@@ -398,6 +554,54 @@ Eq.subst
 = [T] [a] [b] [e] [P] [x]
   (e [b] [self] (P b (Eq.subst T a b self P x)) x)
 
+// Transitivity of equality: a proof that `a == b` and `b == c` implies `a == c` (and all other permutations)
+Eq.trans
+: {T : {self : (T self)} Type}
+  {a : (T a)}
+  {b : (T b)}
+  {c : (T c)}
+  {e1 : (Eq T a b e1)}
+  {e2 : (Eq T b c e2)}
+  (Eq T a c (Eq.trans T a b c e1 e2))
+= [T] [a] [b] [c] [e1]
+  (e1 [b] [self] {e2 : (Eq T b c e2)} (Eq T a c (Eq.trans T a b c self e2))
+    [e2] e2)
+
+Eq.trans_r
+: {T : {self : (T self)} Type}
+  {a : (T a)}
+  {b : (T b)}
+  {c : (T c)}
+  {e1 : (Eq T a b e1)}
+  {e2 : (Eq T c b e2)}
+  (Eq T a c (Eq.trans_r T a b c e1 e2))
+= [T] [a] [b] [c] [e1]
+  (e1 [b] [self] {e2 : (Eq T c b e2)} (Eq T a c (Eq.trans_r T a b c self e2))
+    [e2] (Eq.sym T c a e2))
+
+Eq.r_trans
+: {T : {self : (T self)} Type}
+  {a : (T a)}
+  {b : (T b)}
+  {c : (T c)}
+  {e1 : (Eq T b a e1)}
+  {e2 : (Eq T b c e2)}
+  (Eq T a c (Eq.r_trans T a b c e1 e2))
+= [T] [a] [b] [c] [e1]
+  (e1 [a] [self] {e2 : (Eq T b c e2)} (Eq T a c (Eq.r_trans T a b c self e2))
+    [e2] e2)
+
+Eq.r_trans_r
+: {T : {self : (T self)} Type}
+  {a : (T a)}
+  {b : (T b)}
+  {c : (T c)}
+  {e1 : (Eq T b a e1)}
+  {e2 : (Eq T c b e2)}
+  (Eq T a c (Eq.r_trans_r T a b c e1 e2))
+= [T] [a] [b] [c] [e1]
+  (e1 [a] [self] {e2 : (Eq T c b e2)} (Eq T a c (Eq.r_trans_r T a b c self e2))
+    [e2] (Eq.sym T c b e2))
 
 // Sigma
 
@@ -478,7 +682,7 @@ List.length
     (Nat.succ (List.length A tail))
   let case_nil
     Nat.zero
-  (l -motive case_cons case_nil) 
+  (l -motive case_cons case_nil)
 
 List.map
 : {A : (Self A)}
@@ -565,6 +769,13 @@ App.new
 = [init] [next] [draw] [-Prop] [new]
   (new init next draw)
 
+Bin.to_bytes
+: {b : (Bin b)} (List Byte (Bin.to_bytes b))
+= [b] (b -[b](List Byte (Bin.to_bytes b))
+  [bs](List.cons Byte Byte.0 (Bin.to_bytes bs))
+  [bs](List.cons Byte Byte.1 (Bin.to_bytes bs))
+  (List.nil Byte))
+
 App.init
 : {app : (App app)}
   (Bin (App.init app))
@@ -606,3 +817,5 @@ App.example
   let next [event : (Bin event)] [state : (Bin state)] (Bin.inc state)
   let draw [state : (Bin state)] state
   (App.new init next draw)
+
+main = Nat.mul_assoc_r
