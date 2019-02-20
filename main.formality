@@ -1,3 +1,5 @@
+main = App.example
+
 // Identity
 
 the
@@ -535,27 +537,6 @@ Byte.1
   let 1 Bool.true
   (Byte.new 0 0 1 1 0 0 0 1)
 
-// Textual App
-
-TextApp
-: (Self TextApp)
-= [self]
-  {-Prop : (Self TextApp)}
-  {new :
-    {init : (Bin init)}
-    {next : {key : (Byte key)} {state : (Bin state)} (Bin (next key state))}
-    {draw : {state : (Bin state)} (List Byte (draw state))}
-    (TextApp (TextApp.new init next draw))}
-  (TextApp self)
-
-TextApp.new
-: {init : (Bin init)}
-  {next : {key : (Byte key)} {state : (Bin state)} (Bin (next key state))}
-  {draw : {state : (Bin state)} (List Byte (draw state))}
-  (TextApp (TextApp.new init next draw))
-= [init] [next] [draw] [-Prop] [new]
-  (new init next draw)
-  
 Bin.to_bytes
 : {b : (Bin b)} (List Byte (Bin.to_bytes b))
 = [b] (b -[b](List Byte (Bin.to_bytes b))
@@ -563,11 +544,65 @@ Bin.to_bytes
   [bs](List.cons Byte Byte.1 (Bin.to_bytes bs))
   (List.nil Byte))
 
-TextApp.example
-: (TextApp TextApp.example)
-= let init (Bin.O (Bin.O (Bin.O (Bin.O Bin.E))))
-  let next [key] [state] (Bin.inc state)
-  let draw [state] (Bin.to_bytes state)
-  (TextApp.new init next draw)
+// App
 
-main = TextApp.example
+App
+: (Self App)
+= [self]
+  {-Prop : (Self App)}
+  {new :
+    {init : (Bin init)}
+    {next : {event : (Bin event)} {state : (Bin state)} (Bin (next event state))}
+    {draw : {state : (Bin state)} (Bin (draw state))}
+    (Prop (App.new init next draw))}
+  (Prop self)
+
+App.new
+: {init : (Bin init)}
+  {next : {event : (Bin event)} {state : (Bin state)} (Bin (next event state))}
+  {draw : {state : (Bin state)} (Bin (draw state))}
+  (App (App.new init next draw))
+= [init] [next] [draw] [-Prop] [new]
+  (new init next draw)
+
+App.init
+: {app : (App app)}
+  (Bin (App.init app))
+= [app]
+  let motive [self]
+    (Bin (App.init self))
+  let case_new [init] [next] [draw]
+    init
+  (app -motive case_new)
+
+App.next
+: {app : (App app)}
+  {event : (Bin event)}
+  {state : (Bin state)}
+  (Bin (App.next app event state))
+= [app]
+  let motive [self]
+    {event : (Bin event)}
+    {state : (Bin state)}
+    (Bin (App.next self event state))
+  let case_new [init] [next] [draw]
+    next
+  (app -motive case_new)
+
+App.draw
+: {app : (App app)}
+  {state : (Bin state)}
+  (Bin (App.draw app state))
+= [app]
+  let motive [self]
+    {state : (Bin state)} (Bin (App.draw self state))
+  let case_new [init] [next] [draw]
+    draw
+  (app -motive case_new)
+  
+App.example
+: (App App.example)
+= let init (Bin.O (Bin.O (Bin.O (Bin.O Bin.E))))
+  let next [event : (Bin event)] [state : (Bin state)] (Bin.inc state)
+  let draw [state : (Bin state)] state
+  (App.new init next draw)
