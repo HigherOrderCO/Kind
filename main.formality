@@ -1,31 +1,43 @@
 main = App.example
 
-// Identity
-
-the
-: {A : Type} {u : A} A
-= [A] [u] u
-
 // A self-referential type
 
-Self
-: {T : (Self T)} Type
+Typ
+: {T : (Typ T)} Type
 = [T] {self : (T self)} Type
+
+// A function between self-referential types
+
+All
+: {A : (Typ A)} {B : {x : (A x)} (Typ (B x))} (Typ (All A B))
+= [A] [B] [self] {x : (A x)} (B x (self x))
+
+// Self-referential identity
+
+the
+: {A : (Typ A)} {u : (A u)} (A (the A u))
+= [A] [u] u
 
 // The empty, uninhabited type
 
 Empty
-: (Self Empty)
+: (Typ Empty)
 = [self]
-  {-Prop : (Self Empty)}
+  {-Prop : (Typ Empty)}
   (Prop self)
+
+// Proof that a self-referential type is uninhabited, `Not = λP. P -> Empty`
+
+Not
+: {P : (Typ P)} (Typ (Not P))
+= [P] (All P [x : (P x)] Empty)
 
 // The unit type
 
 Unit
-: (Self Unit)
+: (Typ Unit)
 = [self]
-  {-Prop : (Self Unit)}
+  {-Prop : (Typ Unit)}
   {new   : (Prop Unit.new)}
   (Prop self)
 
@@ -36,9 +48,9 @@ Unit.new
 // The booleans true and false
 
 Bool
-: (Self Bool)
+: (Typ Bool)
 = [self]
-  {-Prop : (Self Bool)}
+  {-Prop : (Typ Bool)}
   {true  : (Prop Bool.true)}
   {false : (Prop Bool.false)}
   (Prop self)
@@ -53,7 +65,7 @@ Bool.false
 
 Bool.induct
 : {self  : (Bool self)}
-  {-Prop : (Self Bool)}
+  {-Prop : (Typ Bool)}
   {true  : (Prop Bool.true)}
   {false : (Prop Bool.false)}
   (Prop self)
@@ -89,9 +101,9 @@ Bool.not2
 // Natural numbers
 
 Nat
-: (Self Nat)
+: (Typ Nat)
 = [self]
-  {-Prop : (Self Nat)}
+  {-Prop : (Typ Nat)}
   {succ  : {pred : (Nat pred)} (Prop (Nat.succ pred))}
   {zero  : (Prop Nat.zero)}
   (Prop self)
@@ -133,7 +145,7 @@ Nat.copy
     Nat.zero)
 
 Nat.double
-: {n : (Nat n)} (Nat (Nat.double n))
+: (All Nat [n : (Nat n)]Nat Nat.double)
 = [n]
   (n
     -[n] (Nat (Nat.double n))
@@ -335,9 +347,9 @@ Nat.mul_assoc_r
 // Natural numbers (Church)
 
 Cat
-: (Self Cat)
+: (Typ Cat)
 = [self]
-  {-P : (Self P)}
+  {-P : (Typ P)}
   {s  : {x : (P x)} (P (s x))}
   {z  : (P z)}
   (P (self -P s z))
@@ -388,7 +400,7 @@ Cat.is_even
 // Natural numbers (Parigot)
 
 Rat
-: (Self Rat)
+: (Typ Rat)
 = [self]
   {-Prop : {self : (Rat self)} {fold : (Prop self fold)} Type}
   {succ  : {pred : (Rat pred)} {fold : (Prop pred fold)} (Prop (Rat.succ pred) (succ pred fold))}
@@ -450,9 +462,9 @@ Rat.add
 // Binary
 
 Bin
-: (Self Bin)
+: (Typ Bin)
 = [self]
-  {-Prop : (Self Bin)}
+  {-Prop : (Typ Bin)}
   {O     : {pred : (Bin pred)} (Prop (Bin.O pred))}
   {I     : {pred : (Bin pred)} (Prop (Bin.I pred))}
   {E     : (Prop Bin.E)}
@@ -501,10 +513,17 @@ Bin.equals
     [yp] Bool.false
     Bool.true))
 
+Bin.to_bytes
+: {b : (Bin b)} (List Byte (Bin.to_bytes b))
+= [b] (b -[b](List Byte (Bin.to_bytes b))
+  [bs](List.cons Byte Byte.0 (Bin.to_bytes bs))
+  [bs](List.cons Byte Byte.1 (Bin.to_bytes bs))
+  (List.nil Byte))
+
 // Equality
 
 Eq
-: {T    : (Self T)}
+: {T    : (Typ T)}
   {a    : (T a)}
   {b    : (T b)}
   {self : (Eq T a b self)}
@@ -515,7 +534,7 @@ Eq
   (Prop b self)
 
 Eq.refl
-: {T : (Self T)}
+: {T : (Typ T)}
   {a : (T a)}
   (Eq T a a (Eq.refl T a))
 = [T] [a] [Prop] [refl]
@@ -544,11 +563,11 @@ Eq.cong
     (Eq.refl B (f a)))
 
 Eq.subst
-: {T : (Self T)}
+: {T : (Typ T)}
   {a : (T a)}
   {b : (T b)}
   {e : (Eq T a b e)}
-  {P : {a : (T a)} (Self (P a))}
+  {P : {a : (T a)} (Typ (P a))}
   {x : (P a x)}
   (P b (Eq.subst T a b e P x))
 = [T] [a] [b] [e] [P] [x]
@@ -606,17 +625,17 @@ Eq.r_trans_r
 // Sigma
 
 Sigma
-: {A : (Self A)}
-  {B : {x : (A x)} (Self (B x))}
-  (Self (Sigma A B))
+: {A : (Typ A)}
+  {B : {x : (A x)} (Typ (B x))}
+  (Typ (Sigma A B))
 = [A] [B] [self]
   {-Prop : {self : (Sigma A B self)} Type}
   {new   : {a : (A a)} {b : (B a b)} (Prop (Sigma.new A B a b))}
   (Prop self)
 
 Sigma.new
-: {A : (Self A)}
-  {B : {x : (A x)} (Self (B x))}
+: {A : (Typ A)}
+  {B : {x : (A x)} (Typ (B x))}
   {a : (A a)}
   {b : (B a b)}
   (Sigma A B (Sigma.new A B a b))
@@ -624,8 +643,8 @@ Sigma.new
   (new a b)
 
 Sigma.fst
-: {A : (Self A)}
-  {B : {x : (A x)} (Self (B x))}
+: {A : (Typ A)}
+  {B : {x : (A x)} (Typ (B x))}
   {sigma : (Sigma A B sigma)}
   (A (Sigma.fst A B sigma))
 = [A] [B] [sigma]
@@ -634,8 +653,8 @@ Sigma.fst
     [a] [b] a)
 
 Sigma.snd
-: {A : (Self A)}
-  {B : {x : (A x)} (Self (B x))}
+: {A : (Typ A)}
+  {B : {x : (A x)} (Typ (B x))}
   {sigma : (Sigma A B sigma)}
   (B (Sigma.fst A B sigma) (Sigma.snd A B sigma))
 = [A] [B] [sigma]
@@ -649,16 +668,16 @@ Sigma.example
 // Lists
 
 List
-: {A : (Self A)}
-  (Self (List A))
+: {A : (Typ A)}
+  (Typ (List A))
 = [A] [self]
-  {-Prop : (Self (List A))}
+  {-Prop : (Typ (List A))}
   {cons  : {head : (A head)} {tail : (List A tail)} (Prop (List.cons A head tail))}
   {nil   : (Prop (List.nil A))}
   (Prop self)
 
 List.cons
-: {A    : (Self A)}
+: {A    : (Typ A)}
   {head : (A head)}
   {tail : (List A tail)}
   (List A (List.cons A head tail))
@@ -666,13 +685,13 @@ List.cons
   (cons head tail)
 
 List.nil
-: {A : (Self A)}
+: {A : (Typ A)}
   (List A (List.nil A))
 = [A] [-Prop] [cons] [nil]
   nil
 
 List.length
-: {A : (Self A)}
+: {A : (Typ A)}
   {l : (List A l)}
   (Nat (List.length A l))
 = [A] [l]
@@ -685,7 +704,7 @@ List.length
   (l -motive case_cons case_nil)
 
 List.map
-: {A : (Self A)}
+: {A : (Typ A)}
   {f : {x : (A x)} (A (f x))}
   {l : (List A l)}
   (List A (List.map A f l))
@@ -701,9 +720,9 @@ List.map
 // Byte
 
 Byte
-: (Self Byte)
+: (Typ Byte)
 = [self]
-  {-Prop : (Self Byte)}
+  {-Prop : (Typ Byte)}
   {new :
     {x0 : (Bool x0)}
     {x1 : (Bool x1)}
@@ -748,74 +767,71 @@ Bin.to_bytes
   [bs](List.cons Byte Byte.1 (Bin.to_bytes bs))
   (List.nil Byte))
 
-// App
+// AppSpec
+
+IO
+: (Typ IO) 
+= [self]
+  {-Prop : (Typ IO)}
+  {ask :
+    {data : (Bin data)}
+    {cont : {res : (Bin res)} (IO (cont res))}
+    (Prop (IO.ask data cont))}
+  {end : (Prop IO.end)}
+  (Prop self)
+
+IO.ask
+: {data : (Bin data)}
+  {cont : {res : (Bin res)} (IO (cont res))}
+  (IO (IO.ask data cont))
+= [data] [cont] [-Prop] [ask] [end]
+  (ask data cont)
+    
+IO.end
+: (IO IO.end)
+= [-Prop] [ask] [end] end
 
 App
-: (Self App)
+: (Typ App)
 = [self]
-  {-Prop : (Self App)}
+  {-Prop : (Typ App)}
   {new :
     {init : (Bin init)}
-    {next : {event : (Bin event)} {state : (Bin state)} (Bin (next event state))}
-    {draw : {state : (Bin state)} (Bin (draw state))}
+    {next : {event : (Bin event)} {state : (Bin state)} (IO (next event state))}
+    {draw : {event : (Bin event)} {state : (Bin state)} (Bin (draw event state))}
     (Prop (App.new init next draw))}
   (Prop self)
 
 App.new
 : {init : (Bin init)}
-  {next : {event : (Bin event)} {state : (Bin state)} (Bin (next event state))}
-  {draw : {state : (Bin state)} (Bin (draw state))}
+  {next : {event : (Bin event)} {state : (Bin state)} (IO (next event state))}
+  {draw : {event : (Bin event)} {state : (Bin state)} (Bin (draw event state))}
   (App (App.new init next draw))
 = [init] [next] [draw] [-Prop] [new]
   (new init next draw)
 
-Bin.to_bytes
-: {b : (Bin b)} (List Byte (Bin.to_bytes b))
-= [b] (b -[b](List Byte (Bin.to_bytes b))
-  [bs](List.cons Byte Byte.0 (Bin.to_bytes bs))
-  [bs](List.cons Byte Byte.1 (Bin.to_bytes bs))
-  (List.nil Byte))
+App.get_init
+: {app : (App app)} (Bin (App.get_init app))
+= [app] (app -[self](Bin (App.get_init self)) [i] [n] [d] i)
 
-App.init
-: {app : (App app)}
-  (Bin (App.init app))
-= [app]
-  let motive [self]
-    (Bin (App.init self))
-  let case_new [init] [next] [draw]
-    init
-  (app -motive case_new)
+App.get_next
+: {app : (App app)}  {e : (Bin e)} {s : (Bin s)} (IO (App.get_next app  e s))
+= [app] (app -[self] {e : (Bin e)} {s : (Bin s)} (IO (App.get_next self e s)) [i] [n] [d] n)
 
-App.next
-: {app : (App app)}
-  {event : (Bin event)}
-  {state : (Bin state)}
-  (Bin (App.next app event state))
-= [app]
-  let motive [self]
-    {event : (Bin event)}
-    {state : (Bin state)}
-    (Bin (App.next self event state))
-  let case_new [init] [next] [draw]
-    next
-  (app -motive case_new)
-
-App.draw
-: {app : (App app)}
-  {state : (Bin state)}
-  (Bin (App.draw app state))
-= [app]
-  let motive [self]
-    {state : (Bin state)} (Bin (App.draw self state))
-  let case_new [init] [next] [draw]
-    draw
-  (app -motive case_new)
+App.get_draw
+: {app : (App app)}  {e : (Bin e)} {s : (Bin s)} (Bin (App.get_draw app  e s))
+= [app] (app -[self] {e : (Bin e)} {s : (Bin s)} (Bin (App.get_draw self e s)) [i] [n] [d] d)
   
-App.example
-: (App App.example)
-= let init (Bin.O (Bin.O (Bin.O (Bin.O Bin.E))))
-  let next [event : (Bin event)] [state : (Bin state)] (Bin.inc state)
-  let draw [state : (Bin state)] state
-  (App.new init next draw)
+Empty.is_uninhabited
+: (Not Empty Empty.is_uninhabited)
+= [x] x
 
-main = Nat.mul_assoc_r
+Bool.not_true_eq_false_mot
+: (All Bool [x : (Bool x)]Typ Bool.not_true_eq_false_mot)
+= [x] (x -[x](Typ (Bool.not_true_eq_false_mot x)) Unit Empty)
+
+Bool.not_true_eq_false
+: (Not (Eq Bool Bool.true Bool.false) Bool.not_true_eq_false)
+= [e] (Eq.subst Bool Bool.true Bool.false e Bool.not_true_eq_false_mot Unit.new)
+
+main = Bool.not_true_eq_false_mot
