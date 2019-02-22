@@ -1,0 +1,9 @@
+// Natural numbers (Scott)
+
+Nat
+: (Typ Nat)
+= [self]
+  {-Prop : (Typ Nat)}
+  {succ  : {pred : (Nat pred)} (Prop (Nat.succ pred))}
+  {zero  : (Prop Nat.zero)}
+  (Prop self)

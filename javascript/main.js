@@ -6,16 +6,25 @@ var formality = require("./formality.js");
 
 try {
   var args = [].slice.call(process.argv, 2);
-  var file = args[args.length - 1] || "./main.formality";
-  var code = fs.readFileSync("./" + (file.indexOf(".") === -1 ? file + ".formality" : file), "utf8");
+  var expr = args[args.length - 1] || "main";
+
+  var code = "";
+  var files = fs.readdirSync(".");
+  for (var i = 0; i < files.length; ++i) {
+    if (files[i].slice(-3) === ".fm") {
+      code += fs.readFileSync("./" + files[i], "utf8") + "\n";
+    }
+  }
 } catch (e) {
+  console.log(e);
   console.log("Formality: a nano proof language.");
-  console.log("Usage: formality file_name[.formality]");
+  console.log("Usage: formality term_to_check");
+  console.log("It will automatically import any local file ending in `.fm`.");
   process.exit();
 }
 
 var defs = formality.parse(code);
-var term = defs.main.term;
+var term = formality.parse("main = (" + expr + ")").main.term;
 
 console.log("Term:\n" + formality.show(term) + "\n");
 
@@ -33,9 +42,8 @@ try {
 
 try {
   var type = formality.infer(term, defs);
-  console.log("Type:\n" + formality.show(formality.norm(type, {}, true)) + "\n");
+  console.log("Type:\n" + formality.show(formality.norm(type, {}, true)));
 } catch (e) {
   console.log("Type:");
   console.log(e);
-  console.log("");
 }

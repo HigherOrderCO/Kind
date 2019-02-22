@@ -1,0 +1,10 @@
+Eq.subst
+: {T : (Typ T)}
+  {a : (T a)}
+  {b : (T b)}
+  {e : (Eq T a b e)}
+  {P : {a : (T a)} (Typ (P a))}
+  {x : (P a x)}
+  (P b (Eq.subst T a b e P x))
+= [T] [a] [b] [e] [P] [x]
+  (e [b] [self] (P b (Eq.subst T a b self P x)) x)

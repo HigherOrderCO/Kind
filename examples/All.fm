@@ -1,0 +1,5 @@
+// A function between self-referential types
+
+All
+: {A : (Typ A)} {B : {x : (A x)} (Typ (B x))} (Typ (All A B))
+= [A] [B] [self] {x : (A x)} (B x (self x))

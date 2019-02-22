@@ -1,0 +1,7 @@
+List.cons
+: {A    : (Typ A)}
+  {head : (A head)}
+  {tail : (List A tail)}
+  (List A (List.cons A head tail))
+= [A] [head] [tail] [-Prop] [cons] [nil]
+  (cons head tail)

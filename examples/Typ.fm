@@ -1,0 +1,5 @@
+// A self-referential type
+
+Typ
+: {T : (Typ T)} Type
+= [T] {self : (T self)} Type

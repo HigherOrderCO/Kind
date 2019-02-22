@@ -1,0 +1,4 @@
+Cat.mul
+: {n : (Cat n)} {m : (Cat m)} (Cat (Cat.mul n m))
+= [n] [m] [-P] [s] [z]
+  (n -P (m -P s) z)

@@ -1,0 +1,9 @@
+Eq.sym
+: {T : {self : (T self)} Type}
+  {a : (T a)}
+  {b : (T b)}
+  {e : (Eq T a b e)}
+  (Eq T b a (Eq.sym T a b e))
+= [T] [a] [b] [e]
+  (e [b] [self] (Eq T b a (Eq.sym T a b self))
+    (Eq.refl T a))

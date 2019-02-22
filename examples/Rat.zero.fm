@@ -1,0 +1,3 @@
+Rat.zero
+: (Rat Rat.zero)
+= [-Prop] [succ] [zero] zero

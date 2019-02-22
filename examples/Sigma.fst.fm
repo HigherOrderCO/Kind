@@ -1,0 +1,9 @@
+Sigma.fst
+: {A : (Typ A)}
+  {B : {x : (A x)} (Typ (B x))}
+  {sigma : (Sigma A B sigma)}
+  (A (Sigma.fst A B sigma))
+= [A] [B] [sigma]
+  (sigma
+    -[self] (A (Sigma.fst A B self))
+    [a] [b] a)

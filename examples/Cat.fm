@@ -1,0 +1,9 @@
+// Natural numbers (Church)
+
+Cat
+: (Typ Cat)
+= [self]
+  {-P : (Typ P)}
+  {s  : {x : (P x)} (P (s x))}
+  {z  : (P z)}
+  (P (self -P s z))

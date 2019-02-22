@@ -1,0 +1,4 @@
+Cat.add
+: {n : (Cat n)} {m : (Cat m)} (Cat (Cat.add n m))
+= [n] [m] [-P] [s] [z]
+  (n -P s (m -P s z))

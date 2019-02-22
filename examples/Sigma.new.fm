@@ -1,0 +1,8 @@
+Sigma.new
+: {A : (Typ A)}
+  {B : {x : (A x)} (Typ (B x))}
+  {a : (A a)}
+  {b : (B a b)}
+  (Sigma A B (Sigma.new A B a b))
+= [A] [B] [a] [b] [-Prop] [new]
+  (new a b)

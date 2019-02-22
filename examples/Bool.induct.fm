@@ -1,0 +1,8 @@
+Bool.induct
+: {self  : (Bool self)}
+  {-Prop : {self : (Bool self)} Type}
+  {true  : (Prop Bool.true)}
+  {false : (Prop Bool.false)}
+  (Prop self)
+= [self] [-Prop] [true] [false]
+  (self -Prop true false)

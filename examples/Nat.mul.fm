@@ -1,0 +1,6 @@
+Nat.mul
+: {a : (Nat a)} {b : (Nat b)} (Nat (Nat.mul a b))
+= [a] [b]
+  (a -[a] (Nat (Nat.mul a b))
+    [pred] (Nat.add b (Nat.mul pred b))
+    Nat.zero)

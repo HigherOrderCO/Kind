@@ -1,0 +1,9 @@
+// Natural numbers (Parigot)
+
+Rat
+: (Typ Rat)
+= [self]
+  {-Prop : {self : (Rat self)} {fold : (Prop self fold)} Type}
+  {succ  : {pred : (Rat pred)} {fold : (Prop pred fold)} (Prop (Rat.succ pred) (succ pred fold))}
+  {zero  : (Prop Rat.zero zero)}
+  (Prop self (self -Prop succ zero))

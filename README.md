@@ -24,19 +24,23 @@ This repo is currently going through a major refactoring, as Formality will now 
 <a name="usage"/>
 
 ```bash
-# clones repository
+# Installs formality
+npm i -g formality
+
+# Enters the example repository
 git clone https://github.com/maiavictor/formality
-cd formality
+cd formality/examples
 
-# installs formality
-cd javascript
-npm i -g
-cd ..
+# Checks the proof of Nat induction
+formality Nat.induct
 
-# uses it on the example file
-formality main.formality
+# Evaluates 2 + 1 (Scott-encoded)
+formality '(Nat.add Nat.2 Nat.1)'
+
+# Evaluates 2 + 1 (Church-encoded)
+formality '(Cat.add Cat.2 Cat.1)'
 ```
 
 ## Examples
 
-(TODO)
+Illustrative examples are available on the [`examples`](examples) directory. Standard libraries are being developed on the [moonad-stdlib](https://github.com/moonad/moonad-stdlib) repository.

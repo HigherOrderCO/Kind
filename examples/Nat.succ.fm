@@ -1,0 +1,4 @@
+Nat.succ
+: {pred : (Nat pred)} (Nat (Nat.succ pred))
+= [pred] [-Prop] [succ] [zero]
+  (succ pred)

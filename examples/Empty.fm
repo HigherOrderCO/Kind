@@ -1,0 +1,7 @@
+// The empty, uninhabited type
+
+Empty
+: (Typ Empty)
+= [self]
+  {-Prop : (Typ Empty)}
+  (Prop self)

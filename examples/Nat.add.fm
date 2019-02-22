@@ -1,0 +1,7 @@
+Nat.add
+: {a : (Nat a)} {b : (Nat b)} (Nat (Nat.add a b))
+= [a] [b]
+  (a
+    -[a] (Nat (Nat.add a b))
+    [a] (Nat.succ (Nat.add a b))
+    b)

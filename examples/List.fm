@@ -1,0 +1,10 @@
+// Lists
+
+List
+: {A : (Typ A)}
+  (Typ (List A))
+= [A] [self]
+  {-Prop : (Typ (List A))}
+  {cons  : {head : (A head)} {tail : (List A tail)} (Prop (List.cons A head tail))}
+  {nil   : (Prop (List.nil A))}
+  (Prop self)

@@ -1,0 +1,3 @@
+Nat.zero
+: (Nat Nat.zero)
+= [-Prop] [succ] [zero] zero

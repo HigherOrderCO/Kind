@@ -1,0 +1,8 @@
+Nat.induct
+: {self  : (Nat self)}
+  {-Prop : {self : (Nat self)} Type}
+  {succ  : {n : (Nat n)} {ih : (Prop n)} (Prop (Nat.succ n))}
+  {zero  : (Prop Nat.zero)}
+  (Prop self)
+= [self] [-Prop] [succ] [zero]
+  (self -Prop [n](succ n (Nat.induct n -Prop succ zero)) zero)

@@ -1,0 +1,6 @@
+Rat.add
+: {n : (Rat n)} {m : (Rat m)} (Rat (Rat.add n m))
+= [n] [m] (n
+  -[n : (Rat n)] [r : (Rat r)] (Rat r)
+  [n : (Rat n)] [r : (Rat r)] (Rat.succ r)
+  m)

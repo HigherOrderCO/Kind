@@ -1,0 +1,5 @@
+// Self-referential identity
+
+the
+: {A : (Typ A)} {u : (A u)} (A (the A u))
+= [A] [u] u

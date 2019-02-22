@@ -1,0 +1,3 @@
+Nat.2
+: (Nat Nat.2)
+= (Nat.succ Nat.1)

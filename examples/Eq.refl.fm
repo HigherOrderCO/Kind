@@ -1,0 +1,6 @@
+Eq.refl
+: {T : (Typ T)}
+  {a : (T a)}
+  (Eq T a a (Eq.refl T a))
+= [T] [a] [Prop] [refl]
+  refl

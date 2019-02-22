@@ -1,0 +1,4 @@
+Cat.succ
+: {n : (Cat n)} (Cat (Cat.succ n))
+= [n] [-P] [s] [z]
+  (s (n -P s z))

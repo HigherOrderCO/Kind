@@ -1,0 +1,11 @@
+Eq.cong
+: {A : {self : (A self)} Type}
+  {B : {self : (B self)} Type}
+  {a : (A a)}
+  {b : (A b)}
+  {e : (Eq A a b e)}
+  {f : {a : (A a)} (B (f a))}
+  (Eq B (f a) (f b) (Eq.cong A B a b e f))
+= [A] [B] [a] [b] [e] [f]
+  (e [b] [self] (Eq B (f a) (f b) (Eq.cong A B a b self f))
+    (Eq.refl B (f a)))

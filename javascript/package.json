@@ -1,7 +1,7 @@
 {
   "name": "formality-lang",
-  "version": "0.1.12",
-  "description": "Proof language.",
+  "version": "0.1.14",
+  "description": "Minimal proof language.",
   "main": "formality.js",
   "bin": {
     "formality": "main.js"

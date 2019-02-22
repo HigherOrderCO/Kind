@@ -1,0 +1,13 @@
+List.map
+: {A : (Typ A)}
+  {f : {x : (A x)} (A (f x))}
+  {l : (List A l)}
+  (List A (List.map A f l))
+= [A] [f] [l]
+  let motive [self]
+    (List A (List.map A f self))
+  let case_cons [head] [tail]
+    (List.cons A (f head) (List.map A f tail))
+  let case_nil
+    (List.nil A)
+  (l -motive case_cons case_nil)

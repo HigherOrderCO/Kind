@@ -1,0 +1,12 @@
+// Equality
+
+Eq
+: {T    : (Typ T)}
+  {a    : (T a)}
+  {b    : (T b)}
+  {self : (Eq T a b self)}
+  Type
+= [T] [a] [b] [self]
+  {Prop : {b : (T b)} {self : (Eq T a b self)} Type}
+  {refl : (Prop a (Eq.refl T a))}
+  (Prop b self)

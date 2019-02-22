@@ -1,0 +1,5 @@
+List.nil
+: {A : (Typ A)}
+  (List A (List.nil A))
+= [A] [-Prop] [cons] [nil]
+  nil

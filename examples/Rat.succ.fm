@@ -1,0 +1,4 @@
+Rat.succ
+: {pred : (Rat pred)} (Rat (Rat.succ pred))
+= [pred] [-Prop] [succ] [zero]
+  (succ pred (pred -Prop succ zero))

@@ -1,0 +1,2 @@
+Sigma.example
+= (Sigma.new Nat [x : (Nat x)](Eq Nat x x) Nat.3 (Eq.refl Nat Nat.3))
