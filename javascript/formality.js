@@ -478,6 +478,9 @@ const check = (term, type, defs, ctx = Ctx(), expr) => {
   var expr = expr || (() => show(term, ctx));
   var type = norm(type, defs, false);
   if (type[0] === "All" && term[0] === "Lam" && !term[1].bind) {
+    if (type[1].eras !== term[1].eras) {
+      throw "Erasure doesn't match on " + expr() + ".";
+    }
     infer(type, defs, ctx);
     var ex_ctx = extend(ctx, [type[1].name, type[1].bind]);
     var body_v = check(term[1].body, type[1].body, defs, ex_ctx, () => "`" + show(term, ctx) + "`'s body");
@@ -486,13 +489,15 @@ const check = (term, type, defs, ctx = Ctx(), expr) => {
     var term_t = infer(term, defs, ctx);
     try {
       var checks = equals(type, term_t, defs, ctx);
+      var unsure = false;
     } catch (e) {
       var checks = false;
-      console.log("Couldn't decide if terms are equal.");
-      console.log(e);
+      var unsure = true;
     }
     if (!checks) {
-      throw show_mismatch(type, norm(term_t, defs, false), expr, ctx);
+      var error = unsure ? "Couldn't decide if terms are equal." : "";
+      var error = error + show_mismatch(type, norm(term_t, defs, false), expr, ctx);
+      throw error;
     }
     return term;
   }
