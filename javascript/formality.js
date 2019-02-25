@@ -4,7 +4,7 @@ const Typ = ()                       => ["Typ", {},                       "*"];
 const All = (eras, name, bind, body) => ["All", {eras, name, bind, body}, "&" + bind[2] + body[2]];
 const Lam = (eras, name, bind, body) => ["Lam", {eras, name, bind, body}, "^" + (bind?bind[2]:"") + body[2]];
 const App = (eras, func, argm)       => ["App", {eras, func, argm},       "@" + func[2] + argm[2]];
-const Ref = (name)                   => ["Ref", {name},                   "{" + name + "}"];
+const Ref = (eras, name)             => ["Ref", {eras, name},             "{" + name + "}"];
 
 // A context is an array of (name, type, term) triples
 const Ctx = () => null;
@@ -93,7 +93,7 @@ const show = ([ctor, args], ctx = Ctx()) => {
       }
       return "(" + show(term, ctx) + text;
     case "Ref":
-      return args.name;
+      return (args.eras ? "~" : "") + args.name;
   }
 }
 
@@ -211,7 +211,7 @@ const parse = (code) => {
       }
       var var_index = index_of(ctx, name, skip);
       if (var_index === null) {
-        return Ref(name, false);
+        return Ref(match("~"), name);
       } else {
         return get_bind(ctx, var_index)[1];
       }
@@ -263,7 +263,7 @@ const shift = ([ctor, term], inc, depth) => {
       var argm = shift(term.argm, inc, depth);
       return App(eras, func, argm);
     case "Ref":
-      return Ref(term.name);
+      return Ref(term.eras, term.name);
   }
 }
 
@@ -292,8 +292,9 @@ const subst = ([ctor, term], val, depth) => {
       var argm = subst(term.argm, val, depth);
       return App(eras, func, argm);
     case "Ref":
+      var eras = term.eras;
       var name = term.name;
-      return Ref(name);
+      return Ref(eras, name);
   }
 }
 
@@ -305,7 +306,7 @@ const erase = ([ctor, args]) => {
     case "All": return All(args.eras, args.name, erase(args.bind), erase(args.body));
     case "Lam": return args.eras ? subst(erase(args.body), Typ(), 0) : Lam(args.eras, args.name, null, erase(args.body));
     case "App": return args.eras ? erase(args.func) : App(args.eras, erase(args.func), erase(args.argm));
-    case "Ref": return Ref(args.name);
+    case "Ref": return Ref(true, args.name);
   }
 }
 
@@ -398,11 +399,12 @@ const norm = ([ctor, term], defs = {}, full = true) => {
       return App(eras, cont(func, defs, full), cont(argm, defs, full));
     }
   }
-  const dereference = (name) => {
-    if (defs[name] && !defs[name].seen) {
-      return norm(defs[name].term, defs, full);
+  const dereference = (eras, name) => {
+    if (defs[name]) {
+      var nf = norm(defs[name].term, defs, full);
+      return eras ? erase(nf) : nf;
     } else {
-      return Ref(name);
+      return Ref(eras, name);
     }
   }
   switch (ctor) {
@@ -411,7 +413,7 @@ const norm = ([ctor, term], defs = {}, full = true) => {
     case "All": return All(term.eras, term.name, cont(term.bind, defs, false), cont(term.body, defs, full));
     case "Lam": return Lam(term.eras, term.name, term.bind && cont(term.bind, defs, false), cont(term.body, defs, full)); 
     case "App": return apply(term.eras, term.func, term.argm);
-    case "Ref": return dereference(term.name);
+    case "Ref": return dereference(term.eras, term.name);
   }
 }
 
