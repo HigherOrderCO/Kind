@@ -93,7 +93,7 @@ const show = ([ctor, args], ctx = Ctx()) => {
       }
       return "(" + show(term, ctx) + text;
     case "Ref":
-      return (args.eras ? "~" : "") + args.name;
+      return args.name;
   }
 }
 
@@ -211,7 +211,7 @@ const parse = (code) => {
       }
       var var_index = index_of(ctx, name, skip);
       if (var_index === null) {
-        return Ref(name, match("~"));
+        return Ref(name, false);
       } else {
         return get_bind(ctx, var_index)[1];
       }
@@ -227,10 +227,20 @@ const parse = (code) => {
       }
     } else {
       var name = parse_name();
+      var comm = "";
+      while (match("|")) {
+        var line = "";
+        while (index < code.length && code[index] !== "\n") {
+          line += code[index];
+          index += 1;
+        }
+        comm += line + "\n";
+      }
       var type = match(":") ? parse_term(Ctx()) : null;
       var skip = parse_exact("=");
       var term = parse_term(Ctx());
-      defs[name] = {term: term, type: type, done: false};
+      var done = false;
+      defs[name] = {term, type, comm, done};
       skip_spaces();
     }
   }
