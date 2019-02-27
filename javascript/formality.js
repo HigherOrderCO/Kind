@@ -221,12 +221,12 @@ const parse = (code) => {
   var index = 0;
   var defs = {};
   while (index < code.length) {
+    skip_spaces();
     if (match("//")) {
       while (index < code.length && code[index] !== "\n") {
         index += 1;
       }
     } else {
-      skip_spaces();
       var init = index;
       var name = parse_name();
       var comm = "";
@@ -244,6 +244,7 @@ const parse = (code) => {
       var done = false;
       defs[name] = {term, type, comm, done, code: code.slice(init, index)};
     }
+    skip_spaces();
   }
 
   return defs;
