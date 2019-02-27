@@ -1,6 +1,5 @@
-// Natural numbers (Parigot)
-
 Rat
+| A Parigot-encoded natural number.
 : (Typ Rat)
 = [self]
   {-Prop : {self : (Rat self)} {fold : (Prop self fold)} Type}
