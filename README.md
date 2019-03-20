@@ -6,22 +6,25 @@ A general-purpose programming language for front-end apps, back-end services and
 
 - **Safe:** a type system capable of proving mathematical theorems about its own programs make it *really secure*.
 
-- **Simple:** its entire implementation takes [500 LOC](javascript/formality.js), making it a simple standard *you could implement yourself*.
+- **Simple:** its entire implementation takes [<1k LOC](javascript/formality.js), making it a simple standard *you could implement yourself*.
 
 **Theorem proving** is possible due to dependent types, like on other proof assistants. **Massively parallel evaluation** is possible due to [Symmetric Interaction Calculus](https://github.com/MaiaVictor/symmetric-interaction-calculus) (SIC), a new model of computation that combines the best aspects of the Turing Machine and the λ-Calculus. **No garbage-collection** is possible due to linearity: values are simply freed when they go out of scope. To use a variable twice, we just clone it: SIC's *lazy copying* makes that virtually free. With no ownership system needed, we have [Rust](https://www.rust-lang.org/en-US/)-like computational properties with a [Haskell](https://www.haskell.org/)-like high-level feel.
 
-## NOTE
 
-This repo is currently going through a major refactoring, as Formality will now be based on [ESCoC](https://github.com/maiavictor/escoc). This makes the language considerably simpler (from 3.5k to 500 LOC!) while being faster (in several senses), more powerful (capable of expressing countless different data encodings) and secure (as it naturally prevents several implementation bugs). The implementation is now in JavaScript, but soon Haskell, Rust and other languages implementations should be available, allowing it to be used as a library in multiple environments.
+## Specification
+<a name="specification"/>
 
-## Table of contents
-<a name="table-of-contents"/>
+Formality's specification is being written [here](spec.md).
 
-   * [Usage](#usage)
-   * [Examples](#examples)
+## Examples
+<a name="examples"/>
+
+Illustrative examples are available on the [`examples`](examples) directory and on [formality-stdlib](https://github.com/moonad/formality-stdlib).
 
 ## Usage
 <a name="usage"/>
+
+To try the version without linearity checks:
 
 ```bash
 # Installs formality
@@ -41,6 +44,8 @@ formality '(Nat.add Nat.2 Nat.1)'
 formality '(Cat.add Cat.2 Cat.1)'
 ```
 
-## Examples
+## Notes
 
-Illustrative examples are available on the [`examples`](examples) directory. Standard libraries are being developed on the [moonad-stdlib](https://github.com/moonad/moonad-stdlib) repository.
+This repo is currently going through a major refactoring, as Formality will now be based on [ESCoC](https://github.com/maiavictor/escoc). This makes the language considerably simpler (from 3.5k to 500 LOC!) while being faster (in several senses), more powerful (capable of expressing countless different data encodings) and secure (easier to formalize, less bug-prone). It currently has two preliminary versions: one without linearity checks, non-terminating and inconsistent, [here](javascript), and one with linearity checks, terminating and possibly consistent, [here](javascript-consistent), both written in JavaScript. Examples and libraries are written on the former. The later is still being designed and can change considerably, because proving the consistency of a proof language while keeping it expressive is a hard task. Once that is done, the final version will be fully specified in a small document and formalized in Agda.
+
+

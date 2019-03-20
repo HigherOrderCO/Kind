@@ -1,0 +1,23 @@
+Bool : Type = {-P : Type} {T : P} {F : P} P
+true : Bool = [-P : Type] [T : P] [F : P] T
+fals : Bool = [-P : Type] [T : P] [F : P] F
+
+Pair
+: {-A : Type} {-B : Type} Type
+= [-A : Type] [-B : Type] {-P : Type} {pair : {a : A} {b : B} P}
+  P
+
+pair
+: {-A : Type} {-B : Type} {a : A} {b : B}
+  (Pair -A -B)
+= [-A] [-B] [a] [b] [-P] [pair]
+  (pair a b)
+
+test
+| Church-encoded natural numbers.
+: (Typ Cat)
+= [self]
+  {-P : (Typ P)}
+  {s  : !{x : (P x)} (P (s x))}
+  {z  : !(P z)}
+  ! (P (self -P s z))
