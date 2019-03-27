@@ -31,11 +31,15 @@ not
 | [z] (S (S (S (S z))))
 
 add
-= [a] [b] [s] [S = s] [A = (a |S)] [B = (b |S)]
-  | [z] (A (B z)) 
+= [a] [b] [s]
+  [S = s]
+  [A = (a |S)]
+  [B = (b |S)]
+| [z] (A (B z)) 
 
 mul
-= [a] [b] [s] [S = s]
+= [a] [b] [s]
+  [S = s]
   (a (b |S))
 
 main

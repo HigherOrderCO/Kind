@@ -1,8 +1,8 @@
-# Elementary Affine Calculus (EAC)
+# Elementary Affine Calculus
 
-The Elementary Affine Calculus (EAC) is a very simple, untyped language similar to the λ-calculus, but with two notable differences:
+The Elementary Affine Calculus (EAC) is a small untyped language similar to the λ-calculus, with 2 main differences:
 
-1. It is terminating.
+1. It is not Turing-complete, i.e., its programs are guaranteed to halt.
 
 2. It is fully compatible with the [optimal reduction algorithm](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07).
 
@@ -21,6 +21,8 @@ You can also import it and use as a library.
 
 ## Syntax
 
+The core syntax of EAC is:
+
 ```
 var ::=
   <any alphanumeric string>
@@ -32,6 +34,54 @@ term ::=
   | term          -- box 
   [x = term] term -- duplication
 ```
+
+Plus the stratification condition, which dictates that:
+
+1. Variables bound by lambdas can only be used at most once.
+
+2. There must be exactly 0 boxes between a variable bound by a lambda and its occurrence.
+
+3. There must be exactly 1 box between a variable bound by a duplication and its occurrence.
+
+## Reduction rules
+
+EAC has the following reduction rules:
+
+1. Application of a lambda
+
+        ([x]a b) ~> [b/x]a
+
+    A function `[x]a` applied to an argument `b` evaluates to the body `a` of that function with the occurrence of its variable `x` replaced by the argument `a`.
+
+2. Duplication of a boxed term
+
+        [x = |a] b ~> [a/x]b
+
+    The duplication `[x = |a] b` of a boxed term `|a` evaluates to the body `b` of the duplication with all occurrences of its variable `x` replaced by the unboxed term `a`.
+
+3. Application of a duplication
+        
+        ([x = a] b c) ~> [x = a] (b c)
+
+    The application of a duplication simply lifts the duplication outwards.
+
+4. Duplication of a duplication
+
+        [x = [y = a] b] c ~> [y = a] [x = b] c
+
+    The duplication of a duplication simply lifts the inner duplication outwards.
+
+5. Application of a boxed term
+  
+        (|a b) ~> ⊥
+
+    The application of a boxed term is undefined behavior.
+
+6. Duplication of a lambda
+
+        [x = [y] b] c ~> ⊥
+
+    The duplication of a lambda is undefined behavior.
 
 ## Examples
 
