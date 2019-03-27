@@ -1,4 +1,43 @@
-not
-= [b] [t] [f] (b f t)
+true
+= [t] [f]
+  t
 
-main = [a = | [x] x] [t] (t a a)
+false
+= [t] [f]
+  f
+
+not
+= [b] [t] [f]
+  (b f t)
+
+0
+= [s] [S = s]
+| [z] z
+
+1
+= [s] [S = s]
+| [z] (S z)
+
+2
+= [s] [S = s]
+| [z] (S (S z))
+
+3
+= [s] [S = s]
+| [z] (S (S (S z)))
+
+4
+= [s] [S = s]
+| [z] (S (S (S (S z))))
+
+add
+= [a] [b] [s] [S = s] [A = (a |S)] [B = (b |S)]
+  | [z] (A (B z)) 
+
+mul
+= [a] [b] [s] [S = s]
+  (a (b |S))
+
+main
+= (mul 3 3)
+  

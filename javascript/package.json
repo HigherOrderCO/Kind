@@ -18,5 +18,6 @@
   "bugs": {
     "url": "https://github.com/moonad/elementary-affine-calculus/issues"
   },
-  "homepage": "https://github.com/moonad/elementary-affine-calculus#readme"
+  "homepage": "https://github.com/moonad/elementary-affine-calculus#readme",
+  "dependencies": {}
 }

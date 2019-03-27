@@ -2,34 +2,46 @@
 const Var = (index)            => ["Var", {index}];
 const Lam = (name, body)       => ["Lam", {name, body}];
 const App = (func, argm)       => ["App", {func, argm}];
-const Ref = (name)             => ["Ref", {name}];
 const Put = (expr)             => ["Put", {expr}];
 const Dup = (name, expr, body) => ["Dup", {name, expr, body}];
+const Ref = (name)             => ["Ref", {name}];
+
+// Generates a name
+const gen_name = (n) => {
+  var str = "";
+  ++n;
+  while (n > 0) {
+    --n;
+    str += String.fromCharCode(97 + n % 26);
+    n = Math.floor(n / 26);
+  }
+  return str;
+};
 
 // Converts a term to a string
-const show = ([ctor, args], ctx = []) => {
+const show = ([ctor, args], canon = false, ctx = []) => {
   switch (ctor) {
     case "Var":
       return ctx[ctx.length - args.index - 1] || "#" + args.index;
     case "Lam":
-      var name = args.name;
-      var body = show(args.body, ctx.concat([name]));
+      var name = canon ? gen_name(ctx.length) : args.name;
+      var body = show(args.body, canon, ctx.concat([name]));
       return "[" + name + "] " + body;
     case "App":
       var text = ")";
       var term = [ctor, args];
       while (term[0] === "App") {
-        text = " " + show(term[1].argm, ctx) + text;
+        text = " " + show(term[1].argm, canon, ctx) + text;
         term = term[1].func;
       }
-      return "(" + show(term, ctx) + text;
+      return "(" + show(term, canon, ctx) + text;
     case "Put":
-      var expr = show(args.expr, ctx);
+      var expr = show(args.expr, canon, ctx);
       return "|" + expr;
     case "Dup":
       var name = args.name;
-      var expr = show(args.expr, ctx);
-      var body = show(args.body, ctx.concat([name]));
+      var expr = show(args.expr, canon, ctx);
+      var body = show(args.body, canon, ctx.concat([name]));
       return "[" + name + " = " + expr + "] " + body;
     case "Ref":
       return args.name;
@@ -88,7 +100,7 @@ const parse = (code) => {
 
   function parse_term(ctx) {
     // Comment
-    if (match("//")) {
+    if (match("-")) {
       while (index < code.length && code[index] !== "\n") {
         index += 1;
       }
@@ -154,13 +166,18 @@ const parse = (code) => {
   var defs = {};
   while (index < code.length) {
     skip_spaces();
-    if (match("//")) {
+    if (match("/")) {
       while (index < code.length && code[index] !== "\n") {
         index += 1;
       }
     } else {
       var init = index;
       var name = parse_name();
+      while (match("-")) {
+        while (index < code.length && code[index] !== "\n") {
+          index += 1;
+        }
+      }
       var skip = parse_exact("=");
       var term = parse_term([]);
       defs[name] = term;
@@ -243,69 +260,114 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Lam": return is_at_level(term.body, at_level, depth + 1, level);
     case "App": return is_at_level(term.func, at_level, depth, level) && (term.eras || is_at_level(term.argm, at_level, depth, level));
     case "Put": return is_at_level(term.expr, at_level, depth, level + 1);
-    case "Dup": return is_at_level(term.expr, at_level, depth, level) + is_at_level(term.body, at_level, depth + 1, level);
+    case "Dup": return is_at_level(term.expr, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level);
     case "Ref": return true;
   }
 }
 
-// Checks if a term is stratified.
-const stratified = ([ctor, term], defs = {}) => {
+// Checks if a term is stratified
+const check_stratification = ([ctor, term], defs = {}, ctx = []) => {
   switch (ctor) {
-    case "Var": return true;
-    case "Lam": return uses(term.body) <= 1 && is_at_level(term.body, 0) && stratified(term.body);
-    case "App": return stratified(term.func) && stratified(term.argm);
-    case "Put": return stratified(term.expr);
-    case "Dup": return is_at_level(term.body, 1) && stratified(term.expr) && stratified(term.body);
-    case "Ref": return stratified(defs[term.name]);
+    case "Lam": 
+      if (uses(term.body) > 1) {
+        throw "[ERROR]\nAffine variable `" + term.name + "` used more than once in:\n" + show([ctor, term], false, ctx);
+      }
+      if (!is_at_level(term.body, 0)) {
+        throw "[ERROR]\nAffine variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], false, ctx);
+      }
+      check_stratification(term.body, defs, ctx.concat([term.name]));
+      break;
+    case "App":
+      check_stratification(term.func, defs, ctx);
+      check_stratification(term.argm, defs, ctx);
+      break;
+    case "Put":
+      check_stratification(term.expr, defs, ctx);
+      break;
+    case "Dup":
+      if (!is_at_level(term.body, 1)) {
+        throw "[ERROR]\nExponential variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], false, ctx);
+      }
+      check_stratification(term.expr, defs, ctx);
+      check_stratification(term.body, defs, ctx.concat([term.name]));
+      break;
+    case "Ref":
+      check_stratification(defs[term.name], defs, ctx);
+      break;
   }
 }
 
 // Reduces a term to normal form or head normal form
-const norm = ([ctor, term], defs = {}) => {
+const norm = ([ctor, term], defs = {}, dup = false) => {
   const apply = (func, argm) => {
-    var func = norm(func, defs);
+    var func = norm(func, defs, dup);
+    // ([x]a b) ~> [b/x]a
     if (func[0] === "Lam") {
-      return norm(subst(func[1].body, argm, 0), defs);
+      return norm(subst(func[1].body, argm, 0), defs, dup);
+    // ([x = a] b c) ~> [x = a] (b c)
+    } else if (func[0] === "Dup") {
+      return norm(Dup(func[1].name, func[1].expr, App(func[1].body, shift(argm, 1, 0))), defs, dup);
+    // (|a b) ~> ⊥
+    } else if (func[0] === "Put") {
+      throw "[RUNTIME-ERROR]\nCan't apply a boxed value.";
     } else {
-      return App(norm(func, defs), norm(argm, defs));
+      return App(norm(func, defs, dup), norm(argm, defs, dup));
     }
   }
   const duplicate = (name, expr, body) => {
-    var expr = norm(expr, defs, false);
+    var expr = norm(expr, defs, dup);
     // [x = |a] b ~> [a/x]b
     if (expr[0] === "Put") {
-      return norm(subst(body, expr[1].expr, 0), defs);
+      return norm(subst(body, expr[1].expr, 0), defs, dup);
     // [x = [y = a] b] c ~> [y = a] [x = b] c
     } else if (expr[0] === "Dup") {
-      return norm(Dup(expr[1].name, expr[1].expr, Dup(name, expr[1].body, shift(body, 1, 0)))); 
+      return norm(Dup(expr[1].name, expr[1].expr, Dup(name, expr[1].body, shift(body, 1, 0))), defs, dup); 
+    // [x = [y] b] c ~> ⊥
+    } else if (expr[0] === "Lam") {
+      throw "[RUNTIME-ERROR]\nCan't duplicate a lambda.";
     } else {
-      return Dup(name, norm(expr, defs), norm(body, defs));
+      return Dup(name, norm(expr, defs, dup), norm(body, defs, dup));
     }
   }
   const dereference = (name) => {
     if (defs[name]) {
-      return norm(defs[name], defs);
+      return norm(defs[name], defs, dup);
     } else {
       return Ref(name);
     }
   }
   switch (ctor) {
     case "Var": return Var(term.index);
-    case "Lam": return Lam(term.name, norm(term.body, defs)); 
+    case "Lam": return Lam(term.name, norm(term.body, defs, dup)); 
     case "App": return apply(term.func, term.argm);
-    case "Put": return Put(norm(term.expr, defs));
-    case "Dup": return duplicate(term.name, term.expr, term.body);
+    case "Put": return dup ? norm(term.expr, defs, dup) : Put(norm(term.expr, defs, dup));
+    case "Dup": return dup ? norm(subst(term.body, term.expr, 0), defs, dup) : duplicate(term.name, term.expr, term.body);
     case "Ref": return dereference(term.name);
   }
 }
 
+// Checks if two terms are equal
+const equal = ([a_ctor, a_term], [b_ctor, b_term]) => {
+  switch (a_ctor + "-" + b_ctor) {
+    case "var-var": return a_term.index === b_term.index;
+    case "lam-lam": return equal(a_term.body, b_term.body);
+    case "app-app": return equal(a_term.func, b_term.func) && equal(a_term.argm, b_term.argm);
+    case "put-put": return equal(a_term.expr, b_term.expr);
+    case "dup-dup": return equal(a_term.expr, b_term.expr) && equal(a_term.body, b_term.body);
+    case "ref-ref": return a_term.name === b_term.name;
+    default: return false;
+  }
+}
+
 module.exports = {
+  gen_name,
   Var,
   Lam,
   App,
   Ref,
   show,
   parse,
-  stratified,
-  norm
+  check_stratification,
+  norm,
+  equal
 };
