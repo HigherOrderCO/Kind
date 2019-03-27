@@ -28,11 +28,11 @@ var ::=
   <any alphanumeric string>
 
 term ::=
-  var             -- variables
-  [var] term      -- lambdas
-  (term term)     -- applicatons
-  | term          -- box 
-  [x = term] term -- duplication
+  var               -- variables
+  [var] term        -- lambdas
+  (term term)       -- applicatons
+  | term            -- box 
+  [var = term] term -- duplication
 ```
 
 Plus the stratification condition, which dictates that:
@@ -87,12 +87,12 @@ EAC has the following reduction rules:
 
 Examples can be seen on the [main.eac](main.eac) file.
 
-## Relationship to SIC, Formality, etc.
+## Relationship with NASIC, Formality, etc.
 
-[Symmetric Interaction Combinators](https://pdfs.semanticscholar.org/1731/a6e49c6c2afda3e72256ba0afb34957377d3.pdf) are an universal interaction net system. They are the foundation for my optimal reducer implementations.
+[Symmetric Interaction Combinators](https://pdfs.semanticscholar.org/1731/a6e49c6c2afda3e72256ba0afb34957377d3.pdf) are an universal interaction net system. They are a massively parallel, strongly confluent, graph-based model of computation, and the foundation for my optimal reducer implementations.
 
-[N-Ary Symmetric Interaction Combinators](https://github.com/moonad/nasic) (NASIC) are similar to Symmetric Interaction Combinators, except with 32-bit integers instead of boolean labels on nodes, for practical optimization purposes, allowing EAC terms to be compiled to single nodes. NASIC is like the "assembly language" of EAC and Formality, it is the system that can be implemented on GPUs, for example.
+[N-Ary Symmetric Interaction Combinators](https://github.com/moonad/nasic) (NASIC) are an adaptation of Symmetric Interaction Combinators with 32-bit instead of boolean labels, allowing practical EAC evaluation. It is like our assembly language / virtual machine.
 
 The [Symmetric Interaction Calculus](https://github.com/maiavictor/symmetric-interaction-calculus) is a textual syntax for Symmetric Interaction Combinators. As such, it is Turing-complete, and isn't an usual programming language due to global scopes.
 
-[Formality](https://github.com/moonad/formality) is a typed proof language that compiles to untyped EAC terms, which are then compiled to NASIC to run efficiently.
+[Formality](https://github.com/moonad/formality) is a proof language that compiles to untyped EAC terms, which are compiled to NASIC to run efficiently.
