@@ -1,0 +1,4 @@
+not
+= [b] [t] [f] (b f t)
+
+main = [a = | [x] x] [t] (t a a)
