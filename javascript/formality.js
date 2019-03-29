@@ -683,11 +683,11 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
       if (term[1].type === null) {
         throw "[ERROR]\nCan't infer non-annotated put `"+show(term,ctx)+"`.\n\n[CONTEXT]\n" + show_context(ctx);
       } else {
-        check(term[1].expr, term[1].type, defs, ctx, strat, seen);
-        return Box(term[1].type);
+        var term_t = infer(term[1].expr, defs, ctx, strat, seen);
+        return Box(term_t);
       }
     case "Dup":
-      var expr_t = infer(term[1].expr, defs, ctx, strat);
+      var expr_t = infer(term[1].expr, defs, ctx, strat, seen);
       if (expr_t[0] !== "Box") {
         throw "[ERROR]\nUnboxed duplication: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
@@ -760,7 +760,7 @@ const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = nu
     var expr_v = check(term[1].expr, type[1].expr, defs, ctx, strat, seen, () => "`" + show(term, ctx) + "`.");
     return Put(expr_v);
   } else if (term[0] === "Dup") {
-    var expr_t = infer(term[1].expr, defs, ctx, strat);
+    var expr_t = infer(term[1].expr, defs, ctx, strat, seen);
     if (expr_t[0] !== "Box") {
       throw "[ERROR]\nUnboxed duplication: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
     }
