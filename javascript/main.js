@@ -2,12 +2,16 @@
 
 var fs = require("fs");
 var path = require("path");
-var formality = require("./formality.js");
+var fm = require(".");
 
 try {
-  var args = [].slice.call(process.argv, 2);
-  var expr = args[args.length - 1] || "main";
-
+  var argv = [].slice.call(process.argv, 2);
+  if (argv.length === 0 || argv[0] === "--help") throw "";
+  var expr = argv.pop() || "main";
+  var args = {};
+  var defa = "-itleTRx";
+  if (argv.length === 0) argv = [defa];
+  argv.join("").split("").forEach(c => args[c] = 1);
   var code = "";
   var files = fs.readdirSync(".");
   for (var i = 0; i < files.length; ++i) {
@@ -16,34 +20,52 @@ try {
     }
   }
 } catch (e) {
-  console.log(e);
-  console.log("Formality: a nano proof language.");
-  console.log("Usage: formality term_to_check");
-  console.log("It will automatically import any local file ending in `.fm`.");
+  if (e) console.log(e);
+  console.log("Formality: an efficient proof language.");
+  console.log("");
+  console.log("Usage: fm [options] expr");
+  console.log("(loads local .fm files and runs/checks an expr)");
+  console.log("");
+  console.log("Options:");
+  console.log("-i shows extra information");
+  console.log("-T shows type");
+  console.log("-R shows type with references untouched");
+  console.log("-W shows type on weak normal form");
+  console.log("-L shows type on LAM form instead of EAC");
+  console.log("-E shows type erased");
+  console.log("-t shows term");
+  console.log("-r shows term with references untouched");
+  console.log("-w shows term on weak normal form");
+  console.log("-l shows term on LAM form instead of EAC");
+  console.log("-e shows term erased");
+  console.log("-x shows NASIC evaluation");
+  console.log("(default: "+defa+")");
   process.exit();
 }
 
-var defs = formality.parse(code);
-var term = formality.parse("main = (" + expr + ")").main.term;
+var defs = fm.parse(code);
+var term = fm.parse(". main (" + expr + ")").main;
 
-console.log("Term:\n" + formality.show(term) + "\n");
+var funcs = {
+  T: ["Type:", () => console.log(fm.show(fm.norm((args.E ? fm.erase : (x => x))(fm.infer(term, defs)), args.R ? {} : defs, args.W, args.L)))],
+  t: ["Norm:", () => console.log(fm.show(fm.norm((args.e ? fm.erase : (x => x))(term), args.r ? {} : defs, args.w, args.l)))],
+  x: ["Norm (with-NASIC):", () => {
+    var net = fm.compile(term, defs);
+    var stats = net.reduce();
+    console.log(fm.show(fm.norm((args.e ? fm.erase : (x => x))(fm.decompile(net)), args.r ? {} : defs, args.w, args.l)))
+    console.log("(" + stats.rewrites + " rewrites)");
+  }]
+};
 
-try {
-  console.log("Norm (head):\n" + formality.show(formality.norm(formality.norm(term, defs, false), {}, true)) + "\n");
-} catch (e) {
-  console.log("Norm (head):\n<none?>\n");
-}
-
-try {
-  console.log("Norm (full):\n" + formality.show(formality.erase(formality.norm(term, defs, true))) + "\n");
-} catch (e) {
-  console.log("Norm (full):\n<infinite?>\n");
-}
-
-try {
-  var type = formality.infer(term, defs);
-  console.log("Type:\n" + formality.show(formality.norm(type, {}, true)));
-} catch (e) {
-  console.log("Type:");
-  console.log(e);
+for (var key in funcs) {
+  if (args[key]) {
+    if (args.i) console.log("\x1b[4m" + funcs[key][0] + "\x1b[0m");
+    try {
+      funcs[key][1]();
+      if (args.i) console.log("");
+    } catch (e) {
+      console.log(e);
+      if (args.i) console.log("");
+    }
+  }
 }

@@ -1,0 +1,51 @@
+// Empty
+. Empty : Type = $self {-P : {self : Empty} Type} (P self)
+
+// Unit
+. Unit : Type = $self {-P : {:Unit} Type} {:(P unit)} (P self)
+. unit : Unit = @Unit [-P] [U] U
+
+// Booleans
+. Bool  : Type = $self {-P : {:Bool} Type} {:(P true)} {:(P false)} (P self)
+. true  : Bool = @Bool [-P] [T] [F] T
+. false : Bool = @Bool [-P] [T] [F] F
+
+// Induction on Booleans
+. Bool.induct
+: {b : Bool} {P : {:Bool} Type} {:(P true)} {:(P false)} (P b)
+= [b] [P] [T] [F] (~b -P T F)
+
+// Natural numbers (Scott, inductive)
+. Nat            : Type = $self {-P : {:Nat} Type} {S : {n : Nat} (P (succ n))} {Z : (P zero)} (P self)
+. succ [n : Nat] : Nat  = @Nat [-P] [S] [Z] (S n)
+. zero           : Nat  = @Nat [-P] [S] [Z] Z
+
+// Natural numbers (Church, non-inductive)
+. Cat                : Type = {-P : Type} {S : ! {:P} P} ! {Z : P} P
+. Cat.succ [n : Cat] : Cat  = [-P] [S] [S = S] [A = (n -P #S)] # [Z] (S (A Z))
+. Cat.zero           : Cat  = [-P] [S] [S = S] # [Z] Z
+
+// Cat addition
+. Cat.add
+: {a : Cat} {b : Cat} Cat
+= [a] [b] [-P] [s]
+  [S = s]
+  [A = (a -P #S)]
+  [B = (b -P #S)]
+# [z] (A (B z)) 
+
+// Cat multiplication
+. Cat.mul
+: {a : Cat} {b : Cat} Cat
+= [a] [b] [-P] [s]
+  [S = s]
+  (a -P (b -P #S))
+
+// Cat numbers
+. Cat.0 Cat.zero
+. Cat.1 (Cat.succ Cat.0)
+. Cat.2 (Cat.succ Cat.1)
+. Cat.3 (Cat.succ Cat.2)
+. Cat.4 (Cat.succ Cat.3)
+
+. main (Cat.mul Cat.4 Cat.4)
