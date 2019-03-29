@@ -10,15 +10,35 @@
 . true  : Bool = @Bool [-P] [T] [F] T
 . false : Bool = @Bool [-P] [T] [F] F
 
-// Induction on Booleans
+// Boolean induction
 . Bool.induct
 : {b : Bool} {P : {:Bool} Type} {:(P true)} {:(P false)} (P b)
 = [b] [P] [T] [F] (~b -P T F)
+
+// Boolean negation
+. Bool.not
+: {b : Bool} Bool
+= [b] (~b -[b]Bool false true)
+
+// Boolean negation (fusible)
+. Bool.fnot_aux
+: {b  : Bool} {-P : {:Bool} Type} {:(P true)} {:(P false)} (P @Bool (Bool.fnot_aux b))
+= [b] [-P] [T] [F] (~b -[b](P @Bool (Bool.fnot_aux b)) F T)
+
+. Bool.fnot
+: {b : Bool} Bool
+= [b] @Bool (Bool.fnot_aux b)
 
 // Natural numbers (Scott, inductive)
 . Nat            : Type = $self {-P : {:Nat} Type} {S : {n : Nat} (P (succ n))} {Z : (P zero)} (P self)
 . succ [n : Nat] : Nat  = @Nat [-P] [S] [Z] (S n)
 . zero           : Nat  = @Nat [-P] [S] [Z] Z
+
+// Nat numbers
+. Nat.0 Nat.zero
+. Nat.1 (Nat.succ Nat.0)
+. Nat.2 (Nat.succ Nat.1)
+. Nat.3 (Nat.succ Nat.2)
 
 // Natural numbers (Church, non-inductive)
 . Cat                : Type = {-P : Type} {S : ! {:P} P} ! {Z : P} P
@@ -42,10 +62,30 @@
   (a -P (b -P #S))
 
 // Cat numbers
-. Cat.0 Cat.zero
-. Cat.1 (Cat.succ Cat.0)
-. Cat.2 (Cat.succ Cat.1)
-. Cat.3 (Cat.succ Cat.2)
-. Cat.4 (Cat.succ Cat.3)
+. Cat.0  Cat.zero
+. Cat.1  (Cat.succ Cat.0)
+. Cat.2  (Cat.succ Cat.1)
+. Cat.3  (Cat.succ Cat.2)
+. Cat.4  (Cat.mul Cat.2 Cat.2)
+. Cat.8  (Cat.mul Cat.4 Cat.2)
+. Cat.16 (Cat.mul Cat.8 Cat.2)
+. Cat.32 (Cat.mul Cat.16 Cat.2)
+. Cat.64 (Cat.mul Cat.32 Cat.2)
 
-. main (Cat.mul Cat.4 Cat.4)
+// Natural numbers (Parigot, erased to Church, inductive)
+. Rat                : Type = $self {-P : {:Rat} Type} {S : ! {-n : Rat} {h : (P n)} (P (Rat.succ n))} ! {Z : (P Rat.zero)} (P self)
+. Rat.succ [n : Rat] : Rat  = @Rat [-P] [S] [S = S] [A = (~n -P #S)] # [Z] (S -n (A Z))
+. Rat.zero           : Rat  = @Rat [-P] [S] [S = S] # [Z] Z
+
+// Rat induction
+. Rat.induct
+: {n : Rat} {-P : {:Rat} Type} {:!{n : Rat}{:(P n)}(P (Rat.succ n))} !{:(P Rat.zero)} (P n)
+= [a] [-P] [s] [S = s] [A = (~a -[n](P n) #S)] # [z] (A z)
+
+// Rat identity (non-fusible)
+. Rat.id
+: {n : Rat} !Rat
+= [n : Rat] ([F = (~n -[n]Rat #[-n : Rat][h : Rat](Rat.succ h))] #(F Rat.zero))
+
+// Tests the fusible Not
+. main (Cat.64 -Bool #Bool.fnot true)

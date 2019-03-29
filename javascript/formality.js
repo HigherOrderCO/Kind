@@ -596,7 +596,7 @@ const norm = (foo, defs = {}, weak = false, dup = false) => {
     } else if (func[0] === "Dup") {
       return cont(Dup(func[1].name, func[1].expr, App(func[1].body, shift(argm, 1, 0), eras)), defs, weak, dup);
     } else {
-      return App(cont(func, defs, weak, dup), cont(argm, defs, weak, dup), eras);
+      return App(cont(func, defs, weak, dup), cont(argm, defs, eras || weak, dup), eras);
     }
   }
   const duplicate = (name, expr, body) => {
@@ -696,7 +696,7 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
       }
       var ex_ctx = extend(ctx, [term[1].name, shift(expr_t[1].expr, 1, 0)]);
       var body_t = infer(term[1].body, defs, ex_ctx, strat, seen);
-      return body_t;
+      return subst(body_t, Dup(term[1].name, term[1].expr, Var(0)), 0);
     case "Slf":
       var ex_ctx = extend(ctx, [term[1].name, term]);
       var type_t = infer(term[1].type, defs, ex_ctx, false, seen);
@@ -711,7 +711,7 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
       }
       infer(type, defs, ctx, false, seen);
       check(term[1].expr, subst(type[1].type, Ann(type, term, true), 0), defs, ctx, strat, seen);
-      return type;
+      return term[1].type;
     case "Use":
       var expr_t = norm(infer(term[1].expr, defs, ctx, false, seen), defs, true);
       if (expr_t[0] !== "Slf") {
@@ -772,7 +772,6 @@ const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = nu
     return Dup(term[1].name, term[1].expr, body_v);
   } else {
     var term_t = infer(term, defs, ctx, strat, seen);
-    if (!term_t) throw new Error("aff");
     try {
       var checks = equals(type, term_t, defs, ctx);
       var unsure = false;
