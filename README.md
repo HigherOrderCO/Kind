@@ -89,7 +89,39 @@ Examples can be seen on the [main.eac](main.eac) file.
 
 ## Termination
 
-We're looking to formalize EAL in Agda. Meanwhile, a quick/informal argument for its termination goes like this. First, lets define `level(t)` as the number of boxes wrapping an expression. For example, the expression `[z] z` on the term `[x] (x |[y] (y |[z] z))` has level 3, because it has 3 surrounding boxes. Also, let's assign a size `size(t, n)` to each level `n` of a term `t` by counting the number of constructors on that level. First, notice that reducing application/duplication redexes in any level `n` always decreases `size(t,n)`. On the `application` case, the reduction consumes an application constructor, and, since lambdas are affine, doesn't add any constructor on the same level, thus, `size(t,n)` decreases by 1. On the `duplication` case, the reduction consumes a duplication constructor, and, since it can only duplicate expressions on higher levels, doesn't add any new on the same level, thus, `size(t,n)` also decreases by 1. Permutations do not decrease the level's size, but can be seen to terminate since they only rearrange duplications upwards. Also, notice that reductions on any level `n = S(m)` can't introduce new redexes at level `m`. As such, we can normalize any EAC term as follows. First, continously reduce redexes at level `0`. Since this process decreases `size(t,n)`, eventually there will be no redex left. Moreover, since reductions at higher levels can't introduce redexes at lower levels, we can conclude that level `0` is at normal form, there will be no more redexes on it. We then proceed by reducing all redexes at level `1` and so on. Since a term has a finite maximum level, this process always terminates.
+We're looking to formalize EAL in Agda. Meanwhile, here is a quick informal (and incomplete) argument for its termination.
+
+### Definitions
+
+Lets define `level(t)` as the number of boxes wrapping an expression. Ex:
+
+    The expression `[z] z` on the term `[x] (x |[y] (y |[z] z))` has level 3,
+    because it has 3 surrounding boxes.
+
+Lets define `size(t, n)` as the number of constructors that a term `t` has on level `n`. Ex:
+
+    If `t = [x] (x |[y] (y |[z] z))` is the term above, then `size(t, 3) = 1`,
+    because that term has only one constructor at level `3` (`[z] z`).
+
+### Reducing redexes at level `n` always decreases `size(t,n)`.
+
+- `application` case (`([x]a b) ~> [b/x]a`):
+
+The reduction consumes an application constructor, and, since lambdas are affine, doesn't add any constructor on the same level, thus, `size(t,n)` decreases by 1.
+
+- `duplication` case (`[x = |a] b ~> [a/x]b`):
+
+The reduction consumes a duplication constructor, and, since it can only duplicate expressions on higher levels, doesn't add any new on the same level, thus, `size(t,n)` also decreases by 1. 
+
+Note: permutations do not decrease the level's size, but terminate since they only rearrange duplications upwards. A different formulation of redexes that avoids permutations also exists. I'll skip this for now.
+
+### Reductions at level `n = S(m)` can't increase `size(t, m)`. 
+
+Similarly as above: applications and duplications can only substitute on equal/higher levels.
+
+### EAC is strongly normalizing.
+
+We can normalize any EAC term as follows: first, continously reduce redexes at level `0`. Since this process decreases `size(t,n)`, eventually there will be no redex left. Moreover, since reductions at higher levels can't introduce redexes at lower levels, we can conclude that level `0` is at normal form, there will be no more redexes on it. We then proceed by reducing all redexes at level `1` and so on. Since a term has a finite maximum level, this process always terminates.
 
 ## Relationship with NASIC, Formality, etc.
 
