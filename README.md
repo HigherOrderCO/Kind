@@ -87,6 +87,10 @@ EAC has the following reduction rules:
 
 Examples can be seen on the [main.eac](main.eac) file.
 
+## Termination
+
+We're looking to formalize EAL in Agda. Meanwhile, a quick/informal argument for its termination goes like this. First, lets define `level(t)` as the number of boxes wrapping an expression. For example, the expression `[z] z` on the term `[x] (x |[y] (y |[z] z))` has level 3, because it has 3 surrounding boxes. Also, let's assign a size `size(t, n)` to each level `n` of a term `t` by counting the number of constructors on that level. First, notice that reducing application/duplication redexes in any level `n` always decreases `size(t,n)`. On the `application` case, the reduction consumes an application constructor, and, since lambdas are affine, doesn't add any constructor on the same level, thus, `size(t,n)` decreases by 1. On the `duplication` case, the reduction consumes a duplication constructor, and, since it can only duplicate expressions on higher levels, doesn't add any new on the same level, thus, `size(t,n)` also decreases by 1. Permutations do not decrease the level's size, but can be seen to terminate since they only rearrange duplications upwards. Also, notice that reductions on any level `n = S(m)` can't introduce new redexes at level `m`. As such, we can normalize any EAC term as follows. First, continously reduce redexes at level `0`. Since this process decreases `size(t,n)`, eventually there will be no redex left. Moreover, since reductions at higher levels can't introduce redexes at lower levels, we can conclude that level `0` is at normal form, there will be no more redexes on it. We then proceed by reducing all redexes at level `1` and so on. Since a term has a finite maximum level, this process always terminates.
+
 ## Relationship with NASIC, Formality, etc.
 
 [Symmetric Interaction Combinators](https://pdfs.semanticscholar.org/1731/a6e49c6c2afda3e72256ba0afb34957377d3.pdf) are an universal interaction net system. They are a massively parallel, strongly confluent, graph-based model of computation, and the foundation for my optimal reducer implementations.
