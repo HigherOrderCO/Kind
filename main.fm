@@ -77,15 +77,39 @@
 . Rat.succ [n : Rat] : Rat  = @Rat [-P] [S] [S = S] [A = (~n -P #S)] # [Z] (S -n (A Z))
 . Rat.zero           : Rat  = @Rat [-P] [S] [S = S] # [Z] Z
 
-// Rat induction
+// Cat numbers
+. Rat.0  Rat.zero
+. Rat.1  (Rat.succ Rat.0)
+. Rat.2  (Rat.succ Rat.1)
+. Rat.3  (Rat.succ Rat.2)
+. Rat.4  (Rat.succ Rat.3)
+
+// Rat induction (but it increases a level)
 . Rat.induct
 : {n : Rat} {-P : {:Rat} Type} {:!{n : Rat}{:(P n)}(P (Rat.succ n))} !{:(P Rat.zero)} (P n)
 = [a] [-P] [s] [S = s] [A = (~a -[n](P n) #S)] # [z] (A z)
 
-// Rat identity (non-fusible)
-. Rat.id
+// Rat double (uses induction, thus isn't fusible and increases a level)
+. Rat.double
 : {n : Rat} !Rat
-= [n : Rat] ([F = (~n -[n]Rat #[-n : Rat][h : Rat](Rat.succ h))] #(F Rat.zero))
+= [n]
+  [F = (~n -[s : Rat]Rat #[-n : Rat][h : Rat](Rat.succ (Rat.succ h)))]
+  # (F Rat.zero)
 
-// Tests the fusible Not
-. main (Cat.64 -Bool #Bool.fnot true)
+// Rat double (doesn't use induction, is fusible, doesn't increase a level)
+. Rat.fdouble_aux
+: {n : Rat} {-P : {n : Rat} Type} {S : ! {-n : Rat} {h : (P n)} (P (Rat.succ n))} ! {Z : (P Rat.zero)} (P @Rat (Rat.fdouble_aux n))
+= [n] [-P] [S] [S = S]
+  [A = (~n -[n] (P @Rat (Rat.fdouble_aux n)) #[-n : Rat] [h : (P n)] (S -(Rat.succ @Rat (Rat.fdouble_aux n)) (S -@Rat (Rat.fdouble_aux n) h)))]
+  # [Z] (A Z)
+. Rat.fdouble
+: {n : Rat} Rat
+= [n] @Rat (Rat.fdouble_aux n)
+  
+// Tests non-fusible double (67 rewrites)
+. fusible_double (Rat.double Rat.3)
+
+// Tests fusible double (19 rewrites!)
+. fusible_double_test (Rat.fdouble Rat.3)
+
+. main fusible_double
