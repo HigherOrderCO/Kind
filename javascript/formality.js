@@ -606,7 +606,7 @@ const norm = (foo, defs = {}, weak = false, dup = false) => {
       return norm(subst(body, expr[1].expr, 0), defs, weak, dup);
     // [x = [y = a] b] c ~> [y = a] [x = b] c
     } else if (expr[0] === "Dup") {
-      return cont(Dup(expr[1].name, expr[1].expr, Dup(name, expr[1].body, shift(body, 1, 0))), dup); 
+      return cont(Dup(expr[1].name, expr[1].expr, Dup(name, expr[1].body, shift(body, 1, 1))), dup);
     } else {
       return Dup(name, cont(expr, defs, weak, dup), cont(body, defs, weak, dup));
     }
