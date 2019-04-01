@@ -321,7 +321,7 @@ const norm = ([ctor, term], defs = {}, dup = false) => {
       return norm(subst(body, expr[1].expr, 0), defs, dup);
     // [x = [y = a] b] c ~> [y = a] [x = b] c
     } else if (expr[0] === "Dup") {
-      return norm(Dup(expr[1].name, expr[1].expr, Dup(name, expr[1].body, shift(body, 1, 0))), defs, dup); 
+      return norm(Dup(expr[1].name, expr[1].expr, Dup(name, expr[1].body, shift(body, 1, 1))), defs, dup); 
     // [x = [y] b] c ~> ⊥
     } else if (expr[0] === "Lam") {
       throw "[RUNTIME-ERROR]\nCan't duplicate a lambda.";
