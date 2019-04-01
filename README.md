@@ -98,22 +98,30 @@ Lets define `level(t)` as the number of boxes wrapping an expression. Ex:
     The expression `[z] z` on the term `[x] (x |[y] (y |[z] z))` has level 3,
     because it has 3 surrounding boxes.
 
-Lets define `size(t, n)` as the number of constructors that a term `t` has on level `n`. Ex:
+Lets define `size(t, n)` as the number of constructors that a term `t` has on level `n` exactly. Ex:
 
-    If `t = [x] (x |[y] (y |[z] z))` is the term above, then `size(t, 3) = 1`,
-    because that term has only one constructor at level `3` (`[z] z`).
+    If `t = [x] |([y]y [z]z |([w]w [u]u))`, then `size(t, 1) = 3`,
+    because that term has 3 constructors at level 1:
+
+    1. `[y]y` (a LAM)
+
+    2. `[z]z` (a LAM)
+
+    3. `|([w]w [u]u)` (a BOX)
+
+    Note that `[w]w`, `[u]u` and `([w]w [u]u)` are on level 2, not 1
 
 ### Reducing redexes at level `n` always decreases `size(t,n)`.
 
 - `application` case (`([x]a b) ~> [b/x]a`):
 
-The reduction consumes an application constructor, and, since lambdas are affine, doesn't add any constructor on the same level, thus, `size(t,n)` decreases by 1.
+The reduction consumes an application constructor, thus, `size(t,n)` decreases by 1. It also causes the occurrence of `x` in `a` to be substituted by `b`. Since, though, lambdas are affine, there can only be at most one occurrence of `x`. As such, that substitution doesn't increase `size(t,n)`.
 
 - `duplication` case (`[x = |a] b ~> [a/x]b`):
 
-The reduction consumes a duplication constructor, and, since it can only duplicate expressions on higher levels, doesn't add any new on the same level, thus, `size(t,n)` also decreases by 1. 
+The reduction consumes a duplication constructor, thus, `size(t,n)` decreases by 1. Also, it causes the substitution of multiple ocurrences of `x` by `a` on `b`, but, due to the stratification condition, the occurrences of `x` in `b` would have been wrapped by exactly one box and, thus, on level `S(n)`. As such, they do not increase `size(t,n)`.
 
-Note: permutations do not decrease the level's size, but terminate since they only rearrange duplications upwards. A different formulation of redexes that avoids permutations also exists. I'll skip this for now.
+Note: permutations on level `n` do not decrease `size(t,n)`, but terminate since they only rearrange duplications upwards. A different formulation of redexes that avoids permutations also exists. I'll skip this for now.
 
 ### Reductions at level `n = S(m)` can't increase `size(t, m)`. 
 
