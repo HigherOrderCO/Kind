@@ -15,16 +15,15 @@
 : {b : Bool} {P : {:Bool} Type} {:(P true)} {:(P false)} (P b)
 = [b] [P] [T] [F] (~b -P T F)
 
-// Boolean negation
+// Boolean negation (fusible)
 . Bool.not
+: {b  : Bool} Bool
+= [b] @Bool [-P] [T] [F] (~b -[b](P (Bool.not b)) F T)
+
+// Boolean negation (non-fusible)
+. Bool.slow_not
 : {b : Bool} Bool
 = [b] (~b -[b]Bool false true)
-
-// Boolean negation (fusible)
-. Bool.fnot
-: {b  : Bool} Bool
-= [b] @Bool [-P] [T] [F] (~b -[b](P (Bool.fnot b)) F T)
-
 
 // Natural numbers (Scott, inductive)
 . Nat            : Type = $self {-P : {:Nat} Type} {S : {n : Nat} (P (succ n))} {Z : (P zero)} (P self)
@@ -86,26 +85,46 @@
 : {n : Rat} {-P : {:Rat} Type} {:!{n : Rat}{:(P n)}(P (Rat.succ n))} !{:(P Rat.zero)} (P n)
 = [a] [-P] [s] [S = s] [A = (~a -[n](P n) #S)] # [z] (A z)
 
-// Rat double (uses induction, thus isn't fusible and increases a level)
-. Rat.double
-: {n : Rat} !Rat
-= [n]
-  [F = (~n -[s : Rat]Rat #[-n : Rat][h : Rat](Rat.succ (Rat.succ h)))]
-  # (F Rat.zero)
+// Rat identity (fusible)
+. Rat.id
+: {n : Rat} Rat
+= [n] @Rat [-P] [S] [S = S] [F = (~n -[n] (P (Rat.id n)) #[-n] [h] (S -(Rat.id n) h))] # [Z] (F Z)
 
-// Rat double (doesn't use induction, is fusible, doesn't increase a level)
-. Rat.fdouble
+// Rat identity (non-fusible)
+. Rat.slow_id
+: {n : Rat} !Rat
+= [n] [F = (~n -[s]Rat #[-n][h](Rat.succ h))] # (F Rat.zero)
+
+// Rat double
+. Rat.double
 : {n : Rat} Rat
 = [n] @Rat [-P] [S] [S = S]
-  let motive [n] (P (Rat.fdouble n))
-  let case_s #[-n] [h] (S -(Rat.succ (Rat.fdouble n)) (S -(Rat.fdouble n) h))
+  let motive [n] (P (Rat.double n))
+  let case_s #[-n] [h] (S -(Rat.succ (Rat.double n)) (S -(Rat.double n) h))
   [F = (~n -motive case_s)]
   # [Z] (F Z)
 
-// Tests non-fusible double (67 rewrites)
-. non_fusible_double_test (Rat.double Rat.3)
+// Rat addition
+. Rat.add
+: {a : Rat} {b : Rat} Rat
+= [a] [b] @Rat [-P] [s]
+  [S = s]
+  [A = (~a -[a](P (Rat.add a b)) #[-n] [h] (S -(Rat.add n b) h))]
+  [B = (~b -[b](P (Rat.add Rat.zero b)) #[-n] [h] (S -(Rat.add Rat.zero n) h))]
+# [z] (A (B z)) 
 
-// Tests fusible double (19 rewrites!)
-. fusible_double_test (Rat.fdouble Rat.3)
+// Rat multiplication
+//. Rat.mul
+//: {a : Rat} {b : Rat} Rat
+//= [a] [b] @Rat [-P] [s] [S = s]
+  //let A (~a -?)
+  //let B (~b -? #[-n] [h] (S -(Rat.add b n) h))
+  //(A B)
 
-. main Rat.fdouble
+// Tests non-fusible id (72 rewrites)
+. non_fusible_id_test (Rat.slow_id Rat.4)
+
+// Tests fusible id (23 rewrites!)
+. fusible_id_test (Rat.id Rat.4)
+
+. main fusible_id_test
