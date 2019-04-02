@@ -21,13 +21,10 @@
 = [b] (~b -[b]Bool false true)
 
 // Boolean negation (fusible)
-. Bool.fnot_aux
-: {b  : Bool} {-P : {:Bool} Type} {:(P true)} {:(P false)} (P @Bool (Bool.fnot_aux b))
-= [b] [-P] [T] [F] (~b -[b](P @Bool (Bool.fnot_aux b)) F T)
-
 . Bool.fnot
-: {b : Bool} Bool
-= [b] @Bool (Bool.fnot_aux b)
+: {b  : Bool} Bool
+= [b] @Bool [-P] [T] [F] (~b -[b](P (Bool.fnot b)) F T)
+
 
 // Natural numbers (Scott, inductive)
 . Nat            : Type = $self {-P : {:Nat} Type} {S : {n : Nat} (P (succ n))} {Z : (P zero)} (P self)
@@ -78,11 +75,11 @@
 . Rat.zero           : Rat  = @Rat [-P] [S] [S = S] # [Z] Z
 
 // Cat numbers
-. Rat.0  Rat.zero
-. Rat.1  (Rat.succ Rat.0)
-. Rat.2  (Rat.succ Rat.1)
-. Rat.3  (Rat.succ Rat.2)
-. Rat.4  (Rat.succ Rat.3)
+. Rat.0 Rat.zero
+. Rat.1 (Rat.succ Rat.0)
+. Rat.2 (Rat.succ Rat.1)
+. Rat.3 (Rat.succ Rat.2)
+. Rat.4 (Rat.succ Rat.3)
 
 // Rat induction (but it increases a level)
 . Rat.induct
@@ -97,19 +94,18 @@
   # (F Rat.zero)
 
 // Rat double (doesn't use induction, is fusible, doesn't increase a level)
-. Rat.fdouble_aux
-: {n : Rat} {-P : {n : Rat} Type} {S : ! {-n : Rat} {h : (P n)} (P (Rat.succ n))} ! {Z : (P Rat.zero)} (P @Rat (Rat.fdouble_aux n))
-= [n] [-P] [S] [S = S]
-  [A = (~n -[n] (P @Rat (Rat.fdouble_aux n)) #[-n : Rat] [h : (P n)] (S -(Rat.succ @Rat (Rat.fdouble_aux n)) (S -@Rat (Rat.fdouble_aux n) h)))]
-  # [Z] (A Z)
 . Rat.fdouble
 : {n : Rat} Rat
-= [n] @Rat (Rat.fdouble_aux n)
-  
+= [n] @Rat [-P] [S] [S = S]
+  let motive [n] (P (Rat.fdouble n))
+  let case_s #[-n] [h] (S -(Rat.succ (Rat.fdouble n)) (S -(Rat.fdouble n) h))
+  [F = (~n -motive case_s)]
+  # [Z] (F Z)
+
 // Tests non-fusible double (67 rewrites)
 . non_fusible_double_test (Rat.double Rat.3)
 
 // Tests fusible double (19 rewrites!)
 . fusible_double_test (Rat.fdouble Rat.3)
 
-. main fusible_double_test
+. main Rat.fdouble
