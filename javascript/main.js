@@ -9,7 +9,7 @@ try {
   if (argv.length === 0 || argv[0] === "--help") throw "";
   var expr = argv.pop() || "main";
   var args = {};
-  var defa = "-iteTRx";
+  var defa = "-itleTRx";
   if (argv.length === 0) argv = [defa];
   argv.join("").split("").forEach(c => args[c] = 1);
   var code = "";

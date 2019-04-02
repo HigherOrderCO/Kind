@@ -698,7 +698,7 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
       var body_t = infer(term[1].body, defs, ex_ctx, strat, seen);
       return subst(body_t, Dup(term[1].name, term[1].expr, Var(0)), 0);
     case "Slf":
-      var ex_ctx = extend(ctx, [term[1].name, term]);
+      var ex_ctx = extend(ctx, [term[1].name, shift(term, 1, 0)]);
       var type_t = infer(term[1].type, defs, ex_ctx, false, seen);
       if (!equals(type_t, Typ(), defs, ctx)) {
         throw "[ERROR]\nSelf not a type: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
