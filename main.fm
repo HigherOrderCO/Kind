@@ -107,9 +107,9 @@
 = [n] @Rat (Rat.fdouble_aux n)
   
 // Tests non-fusible double (67 rewrites)
-. fusible_double (Rat.double Rat.3)
+. non_fusible_double_test (Rat.double Rat.3)
 
 // Tests fusible double (19 rewrites!)
 . fusible_double_test (Rat.fdouble Rat.3)
 
-. main fusible_double
+. main fusible_double_test
