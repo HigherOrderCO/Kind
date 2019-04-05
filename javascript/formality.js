@@ -576,7 +576,7 @@ const equals = (a, b, defs) => {
   }
 
   // Expands the search tree until it finds an answer
-  var tree = Eqs(a, b);
+  var tree = Eqs(erase(a), erase(b));
   while (tree[0] !== "Val") {
     var tree = step(tree);
   }
