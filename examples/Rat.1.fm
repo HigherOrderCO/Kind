@@ -1,3 +1,0 @@
-Rat.1
-: (Rat Rat.1)
-= (Rat.succ Rat.0)

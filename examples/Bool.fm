@@ -1,9 +1,0 @@
-// The booleans true and false
-
-Bool
-: (Typ Bool)
-= [self]
-  {-Prop : (Typ Bool)}
-  {true  : (Prop Bool.true)}
-  {false : (Prop Bool.false)}
-  (Prop self)

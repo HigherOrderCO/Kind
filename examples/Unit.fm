@@ -1,8 +1,0 @@
-// The unit type
-
-Unit
-: (Typ Unit)
-= [self]
-  {-Prop : (Typ Unit)}
-  {new   : (Prop Unit.new)}
-  (Prop self)

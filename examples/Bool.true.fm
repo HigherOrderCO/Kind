@@ -1,3 +1,0 @@
-Bool.true
-: (Bool Bool.true)
-= [-Prop] [true] [false] true

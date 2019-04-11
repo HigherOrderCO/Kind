@@ -1,3 +1,0 @@
-Cat.2
-: (Cat Cat.2)
-= (Cat.succ Cat.1)

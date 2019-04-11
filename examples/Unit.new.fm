@@ -1,3 +1,0 @@
-Unit.new
-: (Unit Unit.new)
-= [-Prop] [new] new

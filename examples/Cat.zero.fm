@@ -1,4 +1,0 @@
-Cat.zero
-: (Cat Cat.zero)
-= [-P] [s] [z]
-  z

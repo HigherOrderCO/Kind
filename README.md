@@ -8,7 +8,7 @@ A general-purpose proof-gramming language for front-end apps, back-end services 
 
 - **Simple:** its entire implementation takes [<1k LOC](javascript/formality.js), making it a simple standard *you could implement yourself*.
 
-[Specification](spec.md) ~ [Examples](main.js)
+[Specification](spec.md) ~ [Examples](stdlib.fm)
 
 ## Usage
 <a name="usage"/>

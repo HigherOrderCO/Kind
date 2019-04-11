@@ -284,8 +284,6 @@
 : Rat
 = @Rat [-P] [s] [z] z
 
-.main [n : Nat] (pred (succ n))
-
 // :::::::::
 // :: Sat ::
 // :::::::::
@@ -389,4 +387,4 @@
   //[S = (~n -motive case_s)]
   //# (S case_z)
 
-.stdlib main
+.stdlib count_test
