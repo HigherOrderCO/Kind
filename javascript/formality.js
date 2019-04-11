@@ -31,6 +31,10 @@ const extend = (ctx, bind) => {
   return {head: bind, tail: ctx};
 }
 
+const len = (ctx) => {
+  return ctx ? 1 + ctx.tail : 0;
+}
+
 const get_bind = (ctx, i, j = 0) => {
   if (!ctx) {
     return null;
@@ -50,7 +54,7 @@ const get_name = (ctx, i) => {
   }
   var bind = get_bind(ctx, i);
   if (bind) {
-    return bind[0] + repeat("'", count(ctx, bind[0], i));
+    return (bind[0] || "x") + repeat("'", count(ctx, bind[0], i));
   } else {
     return "#" + i;
   }
@@ -87,18 +91,19 @@ const show_context = (ctx, i = 0) => {
 const show = ([ctor, args], ctx = Ctx()) => {
   switch (ctor) {
     case "Var":
-      return get_name(ctx, args.index) || "#" + args.index;
+      var name = get_name(ctx, args.index);
+      return name !== null ? name : "#" + args.index;
     case "Typ":
       return "Type";
     case "All":
       var eras = args.eras ? "-" : "";
-      var name = args.name;
+      var name = args.name || "x";
       var bind = show(args.bind, ctx);
       var body = show(args.body, extend(ctx, [args.name, null]));
       return "{" + eras + name + " : " + bind + "} " + body;
     case "Lam":
       var eras = args.eras ? "-" : "";
-      var name = args.name;
+      var name = args.name || "x";
       var bind = args.bind && show(args.bind, ctx);
       var body = show(args.body, extend(ctx, [name, null]));
       return bind ? "[" + eras + name + " : " + bind + "] " + body : "[" + eras + name + "] " + body;
@@ -740,10 +745,10 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
 
 // Checks if a term has given type
 const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = null) => {
-  var expr = expr || (() => "`" + show(term, ctx) + "`");
-  var type = norm(type, defs, true);
-  if (type[0] === "All" && term[0] === "Lam") {
-    if (type[1].eras !== term[1].eras) {
+  var expr   = expr || (() => "`" + show(term, ctx) + "`");
+  var type_n = norm(type, defs, true);
+  if (type_n[0] === "All" && term[0] === "Lam") {
+    if (type_n[1].eras !== term[1].eras) {
       throw "Erasure doesn't match on " + expr() + ".";
     }
     if (strat && uses(term[1].body) > 1) {
@@ -752,12 +757,12 @@ const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = nu
     if (strat && !is_at_level(term[1].body, 0)) {
       throw "Lambda-bound variable occurs inside boxes: " + show(term, ctx);
     }
-    infer(type, defs, ctx, false, seen);
-    var ex_ctx = extend(ctx, [term[1].name, shift(type[1].bind, 1, 0)]);
-    var body_v = check(term[1].body, type[1].body, defs, ex_ctx, strat, seen, () => "`" + show(term, ctx) + "`'s body");
-    return Lam(type[1].name, type[1].bind, body_v, type[1].eras);
-  } else if (type[0] === "Box" && term[0] === "Put") {
-    var expr_v = check(term[1].expr, type[1].expr, defs, ctx, strat, seen, () => "`" + show(term, ctx) + "`.");
+    infer(type_n, defs, ctx, false, seen);
+    var ex_ctx = extend(ctx, [term[1].name, shift(type_n[1].bind, 1, 0)]);
+    var body_v = check(term[1].body, type_n[1].body, defs, ex_ctx, strat, seen, () => "`" + show(term, ctx) + "`'s body");
+    return Lam(type_n[1].name, type_n[1].bind, body_v, type_n[1].eras);
+  } else if (type_n[0] === "Box" && term[0] === "Put") {
+    var expr_v = check(term[1].expr, type_n[1].expr, defs, ctx, strat, seen, () => "`" + show(term, ctx) + "`.");
     return Put(expr_v);
   } else if (term[0] === "Dup") {
     var expr_t = infer(term[1].expr, defs, ctx, strat, seen);
@@ -768,12 +773,12 @@ const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = nu
       throw "[ERROR]\nOccurrence of duplication varible isn't wrapped by exactly 1 box: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
     }
     var ex_ctx = extend(ctx, [term[1].name, shift(expr_t[1].expr, 1, 0)]);
-    var body_v = check(term[1].body, shift(type, 1, 0), defs, ex_ctx, strat, seen, () => "`" + show(term, ctx) + "`'s body");
+    var body_v = check(term[1].body, shift(type_n, 1, 0), defs, ex_ctx, strat, seen, () => "`" + show(term, ctx) + "`'s body");
     return Dup(term[1].name, term[1].expr, body_v);
   } else {
     var term_t = infer(term, defs, ctx, strat, seen);
     try {
-      var checks = equals(type, term_t, defs, ctx);
+      var checks = equals(type_n, term_t, defs, ctx);
       var unsure = false;
     } catch (e) {
       var checks = false;
@@ -781,7 +786,7 @@ const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = nu
     }
     if (!checks) {
       var error = unsure ? "Couldn't decide if terms are equal." : "";
-      var error = error + show_mismatch(type, norm(term_t, defs, true), expr, ctx);
+      var error = error + show_mismatch(type, term_t, expr, ctx, defs);
       throw error;
     }
     return term;
@@ -789,11 +794,21 @@ const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = nu
 }
 
 // Formats a type-mismatch error message
-const show_mismatch = (expect, actual, expr, ctx) => {
+const show_mismatch = (expect, actual, expr, ctx, defs) => {
   var text = "";
   text += "[ERROR]\nType mismatch on " + expr() + ".\n";
-  text += "- Expect = " + show(norm(expect, {}), ctx) + "\n";
-  text += "- Actual = " + show(norm(actual, {}), ctx) + "\n"
+  text += "- Expected:\n";
+  text += "-- type: " + show(expect, ctx) + "\n";
+  text += "-- nf-0: " + show(norm(expect, {}, true), ctx) + "\n";
+  text += "-- nf-1: " + show(norm(expect, {}, false), ctx) + "\n";
+  text += "-- nf-2: " + show(norm(erase(expect), defs, true), ctx) + "\n";
+  text += "-- nf-3: " + show(norm(erase(expect), defs, false), ctx) + "\n";
+  text += "- Actual:\n";
+  text += "-- type: " + show(actual, ctx) + "\n";
+  text += "-- nf-0: " + show(norm(actual, {}, true), ctx) + "\n";
+  text += "-- nf-1: " + show(norm(actual, {}, false), ctx) + "\n";
+  text += "-- nf-2: " + show(norm(erase(actual), defs, true), ctx) + "\n";
+  text += "-- nf-3: " + show(norm(erase(actual), defs, false), ctx) + "\n";
   text += "\n[CONTEXT]\n" 
   text += show_context(ctx);
   return text;
