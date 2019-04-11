@@ -207,8 +207,52 @@
   [B = (~b -[b](P (add zero b)) #[-n] [h] (s -(add zero n) h))]
 # [z] (A (B z)) 
 
+// This was quite hard to get right, so it deserves some explaining. To make
+// this, first I defined the untyped function this should erase to:
+// . Z [s] [z] z
+// . S [n] [s] [z] (s n (n s z))
+// . pred [n] [s] [z] 
+//    let case_s [n] [h] [b] (b [-n][h]h s n (h [t][f]f))
+//    let case_z [b] z
+//    (n case_s case_z [t][f]t)
+// The idea is that the induction over the nat would receive an extra argument,
+// a boolean, indicating if this is the first constructor. If it isn't, then we
+// apply a `succ` to the result. If it is, then we drop that `succ`. In the end,
+// we'll return the same Nat with one less constructor. So far so good. Now, how
+// to assign a type to it? 
+// First, we need to define what will be the motive of the induction. The
+// problem with fusible definitions is that their motive can't return `Nat`,
+// they must return `(P ...)`. On simpler functions like `id`, this is just `(P
+// (id n))`. On pred, though, it depends on the bool received. If we receive
+// `true`, then we return the pred, i.e., `pred n`. If we receive `false`, then
+// we return the same number, i.e., `n`. But we do so inductivelly, so we can't
+// simply write `(P n)`, we must refer to `pred`. As such, we can write `(P
+// (pred (succ n)))`, because `pred (succ n) == n`! With our motive defined, we
+// just need to write the rest of the function complying to it. The `succ`
+// case, for example, must pattern-match on the boolan, and return either the
+// same number (`(pred (succ n))`) or the successor (`(succ (pred (succ n)))`).
+// The `zero` case must, too, pattern-match on the boolean, otherwise, it'd
+// return `(P (pred zero))`, without referring to `b`, which is necessary
+// because of our motive.
+. pred
+: {n : Nat} Nat
+= [n] @Nat [-P] [S] [S = S]
+  let motive [n] {b : Bool}
+    (~b -[b]Type (P (pred n)) (P (pred (succ n))))
+  let case_s [-n] [h] [b]
+    let motive [b] {h : (P (pred (succ n)))} (~b -[b]Type (P (pred (succ n))) (P (succ (pred (succ n)))))
+    let case_t [x] x
+    let case_f (S -(pred (succ n)))
+    (~b -motive case_t case_f (h false))
+  [F = (~n -motive #case_s)] # [Z] 
+  let case_z [b]
+    let motive [b]{n : (P zero)}(~b -[b] Type (P (pred zero)) (P (pred (succ zero))))
+    let case_t [z]z
+    let case_f [z]z
+    (~b -motive case_t case_f Z)
+  (F case_z true)
+
 // TODO: mul
-// TODO: pred
 
 // Tests non-fusible id (72 rewrites)
 . slow_count_test (slow_count 4)
@@ -239,6 +283,8 @@
 . Rat.zero
 : Rat
 = @Rat [-P] [s] [z] z
+
+.main [n : Nat] (pred (succ n))
 
 // :::::::::
 // :: Sat ::
@@ -318,7 +364,7 @@
   @(Bits (succ n)) [-P] [o] [i] [e] (i -n x)
 
 . e
-:  (Bits zero)
+: (Bits zero)
 = @(Bits zero) [-P] [o] [i] [e] e
 
 // TODO: is this possible?
@@ -343,4 +389,4 @@
   //[S = (~n -motive case_s)]
   //# (S case_z)
 
-.stdlib count_test
+.stdlib main
