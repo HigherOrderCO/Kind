@@ -1,0 +1,325 @@
+// ::::::::::::::::::::::::::::::::::
+// :: Formality's standard library ::
+// ::::::::::::::::::::::::::::::::::
+
+// :::::::::::
+// :: Empty ::
+// :::::::::::
+
+. Empty
+: Type
+= $self
+  {-Prop : {self : Empty} Type}
+  (Prop self)
+
+// ::::::::::
+// :: Unit ::
+// ::::::::::
+
+. Unit
+: Type
+= $self
+  {-Prop : {:Unit} Type}
+  {unit  : (Prop unit)}
+  (Prop self)
+
+. unit
+: Unit
+= @Unit [-Prop] [unit] unit
+
+. erase
+: {-A : Type} {-x : A} Unit
+= [-A] [-x] unit
+
+// ::::::::
+// :: Eq ::
+// ::::::::
+
+. Eq
+: {T : Type} {a : T} {b : T} Type
+= [T] [a] [b] $self
+  {-Prop : {b : T} {self : (Eq T a b)} Type}
+  {refl  : (Prop a (refl -T -a))}
+  (Prop b self)
+
+. refl
+: {-T : Type} {-a : T} (Eq T a a)
+= [-T] [-a] @(Eq T a a) [-Prop] [refl]
+  refl
+
+. sym
+: {-T : Type}
+  {-a : T}
+  {-b : T}
+  {e  : (Eq T a b)}
+  (Eq T b a)
+= [-T] [-a] [-b] [e]
+  (~e -[b] [self] (Eq T b a)
+    (refl -T -a))
+
+. cong
+: {-A : Type}
+  {-B : Type}
+  {-a : A}
+  {-b : A}
+  {e  : (Eq A a b)}
+  {-f : {a : A} B}
+  (Eq B (f a) (f b))
+= [-A] [-B] [-a] [-b] [e] [-f]
+  (~e -[b] [self] (Eq B (f a) (f b))
+    (refl -B -(f a)))
+
+. rewrite
+: {-T : Type}
+  {-a : T}
+  {-b : T}
+  {e  : (Eq T a b)}
+  {-P : {a : T} Type}
+  {x  : (P a)}
+  (P b)
+= [-T] [-a] [-b] [e] [-P] [x]
+  (~e -[b] [self] (P b) x)
+
+// ::::::::::
+// :: Bool ::
+// ::::::::::
+
+. Bool
+: Type
+= $self
+  {-Prop : {:Bool} Type}
+  {true  : (Prop true)}
+  {false : (Prop false)}
+  (Prop self)
+
+. true
+: Bool
+= @Bool [-P] [t] [f] t
+
+. false
+: Bool
+= @Bool [-P] [t] [f] f
+
+. if
+: {b : Bool} {-P : {:Bool} Type} {:(P true)} {:(P false)} (P b)
+= [b] [-P] [t] [f] (~b -P t f)
+
+. not
+: {b : Bool} Bool
+= [b] @Bool [-P] [t] [f] (if b -[b](P (not b)) f t)
+
+. or 
+: {a : Bool} {b : Bool} Bool
+= [a] (if a -[a]{b : Bool}Bool [b]true [b]b)
+
+. and 
+: {a : Bool} {b : Bool} Bool
+= [a] (if a -[a]{b : Bool}Bool [b]b [b]false)
+
+. slow_not
+: {b : Bool} Bool
+= [b] (if b -[b]Bool false true)
+
+// ::::::::::
+// :: Pair ::
+// ::::::::::
+
+. Pair [A : Type] [B : Type]
+: Type
+= $self
+  {-P   : {:(Pair A B)} Type}
+  {pair : {a : A} {b : B} (P (pair A B a b))}
+  (P self)
+
+. pair [A : Type] [B : Type]
+: {a : A} {b : B} (Pair A B)
+= [a] [b]
+  @(Pair A B) [-P] [pair] (pair a b)
+
+// :::::::::
+// :: Nat ::
+// :::::::::
+
+. Nat
+: Type
+= $self
+  {-P : {:Nat} Type}
+  {s : ! {-n : Nat} {h : (P n)} (P (succ n))}
+  ! {z : (P zero)}
+    (P self)
+
+. succ
+: {n : Nat} Nat
+= [n]
+  @Nat [-P] [s] [s = s] [A = (~n -P #s)] # [z] (s -n (A z))
+
+. zero
+: Nat
+= @Nat [-P] [s] [s = s] # [z] z
+
+. 0 zero
+. 1 (succ 0)
+. 2 (succ 1)
+. 3 (succ 2)
+. 4 (succ 3)
+. 5 (succ 4)
+. 6 (succ 5)
+. 7 (succ 6)
+. 8 (succ 7)
+. 9 (succ 8)
+
+. induct
+: {n : Nat} {-P : {:Nat} Type} {:!{n : Nat}{:(P n)}(P (succ n))} !{:(P zero)} (P n)
+= [a] [-P] [s] [s = s] [A = (~a -[n](P n) #s)] # [z] (A z)
+
+. count
+: {n : Nat} Nat
+= [n] @Nat [-P] [s] [s = s] [f = (~n -[n] (P (count n)) #[-n] (s -(count n)))] # [z] (f z)
+
+. slow_count
+: {n : Nat} !Nat
+= [n] [f = (~n -[s]Nat #[-n][h](succ h))] # (f zero)
+
+. slow_pred
+: {n : Nat} !Nat
+= [n]
+  let motive [n] {f : {:Nat}Nat} Nat
+  let case_s #[-n] [h] [f] (f (h succ))
+  let case_z [f] zero
+  [f = (~n -motive case_s)]
+  # (f case_z count)
+
+. double
+: {n : Nat} Nat
+= [n] @Nat [-P] [s] [s = s]
+  let motive [n] (P (double n))
+  let case_s #[-n] [h] (s -(succ (double n)) (s -(double n) h))
+  [f = (~n -motive case_s)]
+  # [z] (f z)
+
+. add
+: {a : Nat} {b : Nat} Nat
+= [a] [b] @Nat [-P] [s]
+  [s = s]
+  [A = (~a -[a](P (add a b)) #[-n] [h] (s -(add n b) h))]
+  [B = (~b -[b](P (add zero b)) #[-n] [h] (s -(add zero n) h))]
+# [z] (A (B z)) 
+
+// TODO: mul
+
+// Tests non-fusible id (72 rewrites)
+. slow_count_test (slow_count 4)
+
+// Tests fusible id (23 rewrites!)
+. count_test (count 4)
+
+// TODO: Nat pred
+. Z [s] [z] z
+. S [n] [s] [z] (s n (n s z))
+. pred_a [n] [s] [z] (n [n] [h] [f] (f n (h s)) [f] z [n] [h] h)
+. pred_b [n] [s] [z] (n [n] [h] [b] (b [-n][h]h s n (h [t][f]f)) [b] z [t][f]t)
+
+// :::::::::
+// :: Sat ::
+// :::::::::
+
+. Sat                : Type = $self {-P : {:Sat} Type} {S : {n : Sat} (P (Sat.succ n))} {Z : (P Sat.zero)} (P self)
+. Sat.succ [n : Sat] : Sat  = @Sat [-P] [S] [Z] (S n)
+. Sat.zero           : Sat  = @Sat [-P] [S] [Z] Z
+
+. Sat.0 Sat.zero
+. Sat.1 (Sat.succ Sat.0)
+. Sat.2 (Sat.succ Sat.1)
+. Sat.3 (Sat.succ Sat.2)
+
+// :::::::::
+// :: Cat ::
+// :::::::::
+
+. Cat                : Type = {-P : Type} {S : ! {:P} P} ! {Z : P} P
+. Cat.succ [n : Cat] : Cat  = [-P] [S] [S = S] [A = (n -P #S)] # [Z] (S (A Z))
+. Cat.zero           : Cat  = [-P] [S] [S = S] # [Z] Z
+
+. Cat.add
+: {a : Cat} {b : Cat} Cat
+= [a] [b] [-P] [s]
+  [S = s]
+  [A = (a -P #S)]
+  [B = (b -P #S)]
+# [z] (A (B z)) 
+
+. Cat.mul
+: {a : Cat} {b : Cat} Cat
+= [a] [b] [-P] [s]
+  [S = s]
+  [A = [B = (b -P #S)] (a -P # B)]
+  # [z] (A z)
+
+. Cat.pred
+: {n : Cat} Cat
+= [n] [-P] [S] [S = S]
+  let motive {f : {x:P} P} P
+  let case_s #[h] [f] (f (h S))
+  [f = (n -motive case_s)]
+  # [Z] (f [f] Z [h] h)
+
+. Cat.0  Cat.zero
+. Cat.1  (Cat.succ Cat.0)
+. Cat.2  (Cat.succ Cat.1)
+. Cat.3  (Cat.succ Cat.2)
+. Cat.4  (Cat.mul Cat.2 Cat.2)
+. Cat.8  (Cat.mul Cat.4 Cat.2)
+. Cat.16 (Cat.mul Cat.8 Cat.2)
+. Cat.32 (Cat.mul Cat.16 Cat.2)
+. Cat.64 (Cat.mul Cat.32 Cat.2)
+
+// ::::::::::
+// :: Bits ::
+// ::::::::::
+
+. Bits
+: {n : Nat} Type
+= [n] $self
+  {-P : {n : Nat} {x : (Bits n)} Type}
+  {o  : {-n : Nat} {x : (Bits n)} (P (succ n) (o -n x))}
+  {i  : {-n : Nat} {x : (Bits n)} (P (succ n) (i -n x))}
+  {e  : (P zero e)}
+  (P n self)
+
+. o
+: {-n : Nat} {x : (Bits n)} (Bits (succ n))
+= [-n] [x]
+  @(Bits (succ n)) [-P] [o] [i] [e] (o -n x)
+
+. i 
+: {-n : Nat} {x : (Bits n)} (Bits (succ n))
+= [-n] [x]
+  @(Bits (succ n)) [-P] [o] [i] [e] (i -n x)
+
+. e
+:  (Bits zero)
+= @(Bits zero) [-P] [o] [i] [e] e
+
+// TODO: is this possible?
+// The idea is that recursive structures like bits, lists, vectors don't need
+// to be Parigot->Church encoded. Instead, they can be Scott-encoded, with a
+// Nat index specifying their size (maximum depth). In order to recurse over
+// them, we instead recurse over the index. This allows us to avoid the
+// complexity of having to deal with Church/Parigot encodings on recursive
+// datatypes. But I'm not sure if this is possible. For `Bits.inc` in particular,
+// I think we need `pred : Nat -> Nat`, which seems to be hard to implement.
+
+//. Bits.inc
+  //[n : Nat] [bs : (Bits n)] 
+  //let motive [n] {bs : (Bits n)} (Bits n)
+  //let case_s # [-n] [cont] [bs]
+    //let motive [m] [x] {cont : {bs : (Bits m)} (Bits m)} (Bits m)
+    //let case_o [-m] [x] [cont] (O -m x)
+    //let case_i [-m] [x] [cont] (I -m x)
+    //let case_e [cont] E
+    //(~bs -motive case_o case_i case_e cont)
+  //let case_z [bs : (Bits zero)] bs
+  //[S = (~n -motive case_s)]
+  //# (S case_z)
+
+.stdlib count_test
