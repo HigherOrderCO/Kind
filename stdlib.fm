@@ -139,6 +139,8 @@
 // :::::::::
 // :: Nat ::
 // :::::::::
+// The main Nat type consists of stratified inductive Church encoding.
+// It is erased from Parigot, and uses boxed dups to be EAC-compatible.
 
 . Nat
 : Type
@@ -206,6 +208,7 @@
 # [z] (A (B z)) 
 
 // TODO: mul
+// TODO: pred
 
 // Tests non-fusible id (72 rewrites)
 . slow_count_test (slow_count 4)
@@ -213,11 +216,29 @@
 // Tests fusible id (23 rewrites!)
 . count_test (count 4)
 
-// TODO: Nat pred
-. Z [s] [z] z
-. S [n] [s] [z] (s n (n s z))
-. pred_a [n] [s] [z] (n [n] [h] [f] (f n (h s)) [f] z [n] [h] h)
-. pred_b [n] [s] [z] (n [n] [h] [b] (b [-n][h]h s n (h [t][f]f)) [b] z [t][f]t)
+// :::::::::
+// :: Rat ::
+// :::::::::
+// Rat consists of non-stratified inductive Church encoding.
+// It is like Nat, except without boxed duplication. As such,
+// it can only be used in computationally irrelevant positions.
+
+. Rat
+: Type
+= $self
+  {-P : {:Rat} Type}
+  {s : {-n : Rat} {h : (P n)} (P (Rat.succ n))}
+  {z : (P Rat.zero)}
+  (P self)
+
+. Rat.succ
+: {n : Rat} Rat
+= [n]
+  @Rat [-P] [s] [z] (s -n (~n -P s z))
+
+. Rat.zero
+: Rat
+= @Rat [-P] [s] [z] z
 
 // :::::::::
 // :: Sat ::
