@@ -31,6 +31,11 @@
 : {-A : Type} {-x : A} Unit
 = [-A] [-x] unit
 
+. open
+: {-A : Type} {x : !A} A
+= [-A] [x]
+  [y = x] y
+
 // ::::::::
 // :: Eq ::
 // ::::::::
@@ -104,6 +109,10 @@
 : {b : Bool} {-P : {:Bool} Type} {:(P true)} {:(P false)} (P b)
 = [b] [-P] [t] [f] (~b -P t f)
 
+. slow_not
+: {b : Bool} Bool
+= [b] (if b -[b]Bool false true)
+
 . not
 : {b : Bool} Bool
 = [b] @Bool [-P] [t] [f] (if b -[b](P (not b)) f t)
@@ -115,10 +124,6 @@
 . and 
 : {a : Bool} {b : Bool} Bool
 = [a] (if a -[a]{b : Bool}Bool [b]b [b]false)
-
-. slow_not
-: {b : Bool} Bool
-= [b] (if b -[b]Bool false true)
 
 // ::::::::::
 // :: Pair ::
@@ -169,6 +174,12 @@
 . 7 (succ 6)
 . 8 (succ 7)
 . 9 (succ 8)
+
+. apply
+: {n : Nat} Cat
+= [n] [-P] [s] [s = s]
+  [F = (~n -[x]P #[-n][h](s h))]
+  # [z] (F z)
 
 . induct
 : {n : Nat} {-P : {:Nat} Type} {:!{n : Nat}{:(P n)}(P (succ n))} !{:(P zero)} (P n)
@@ -252,13 +263,14 @@
     (~b -motive case_t case_f Z)
   (F case_z true)
 
+. elim_pred_succ
+: {n : Nat} !(Eq Nat (pred (succ n)) n)
+= [n]
+  let motive [n] (Eq Nat (pred (succ n)) n)
+  let case_s # [-n] [h] (cong -Nat -Nat -(pred (succ n)) -n h -succ)
+  [F = (~n -motive case_s)] # (F (refl -Nat -zero))
+
 // TODO: mul
-
-// Tests non-fusible id (72 rewrites)
-. slow_count_test (slow_count 4)
-
-// Tests fusible id (23 rewrites!)
-. count_test (count 4)
 
 // :::::::::
 // :: Rat ::
@@ -337,54 +349,92 @@
 . Cat.16 (Cat.mul Cat.8 Cat.2)
 . Cat.32 (Cat.mul Cat.16 Cat.2)
 . Cat.64 (Cat.mul Cat.32 Cat.2)
+. Cat.128 (Cat.mul Cat.64 Cat.2)
 
 // ::::::::::
 // :: Bits ::
 // ::::::::::
 
 . Bits
-: {n : Nat} Type
-= [n] $self
-  {-P : {n : Nat} {x : (Bits n)} Type}
-  {o  : {-n : Nat} {x : (Bits n)} (P (succ n) (o -n x))}
-  {i  : {-n : Nat} {x : (Bits n)} (P (succ n) (i -n x))}
-  {e  : (P zero e)}
-  (P n self)
+: Type
+= $self
+  {-P : {x : Bits} Type}
+  {o  : {x : Bits} (P (o x))}
+  {i  : {x : Bits} (P (i x))}
+  {e  : (P e)}
+  (P self)
 
 . o
-: {-n : Nat} {x : (Bits n)} (Bits (succ n))
-= [-n] [x]
-  @(Bits (succ n)) [-P] [o] [i] [e] (o -n x)
+: {x : Bits} Bits
+= [x]
+  @Bits [-P] [o] [i] [e]
+  (o x)
 
 . i 
-: {-n : Nat} {x : (Bits n)} (Bits (succ n))
-= [-n] [x]
-  @(Bits (succ n)) [-P] [o] [i] [e] (i -n x)
+: {x : Bits} Bits
+= [x]
+  @Bits [-P] [o] [i] [e]
+  (i x)
 
 . e
-: (Bits zero)
-= @(Bits zero) [-P] [o] [i] [e] e
+: Bits
+= @Bits [-P] [o] [i] [e]
+  e
 
-// TODO: is this possible?
-// The idea is that recursive structures like bits, lists, vectors don't need
-// to be Parigot->Church encoded. Instead, they can be Scott-encoded, with a
-// Nat index specifying their size (maximum depth). In order to recurse over
-// them, we instead recurse over the index. This allows us to avoid the
-// complexity of having to deal with Church/Parigot encodings on recursive
-// datatypes. But I'm not sure if this is possible. For `Bits.inc` in particular,
-// I think we need `pred : Nat -> Nat`, which seems to be hard to implement.
+. slow_inc
+  [n : Nat] 
+  let motive [n] {bs : Bits} Bits
+  let case_s # [-n] [cont] [bs]
+    let motive [x] {cont : {bs : Bits} Bits} Bits
+    let case_o [x] [cont] (i x)
+    let case_i [x] [cont] (o (cont x))
+    let case_e [cont] e
+    (~bs -motive case_o case_i case_e cont)
+  let case_z [bs : Bits] bs
+  [S = (~n -motive case_s)]
+  # (S case_z)
 
-//. Bits.inc
-  //[n : Nat] [bs : (Bits n)] 
-  //let motive [n] {bs : (Bits n)} (Bits n)
-  //let case_s # [-n] [cont] [bs]
-    //let motive [m] [x] {cont : {bs : (Bits m)} (Bits m)} (Bits m)
-    //let case_o [-m] [x] [cont] (O -m x)
-    //let case_i [-m] [x] [cont] (I -m x)
-    //let case_e [cont] E
-    //(~bs -motive case_o case_i case_e cont)
-  //let case_z [bs : (Bits zero)] bs
-  //[S = (~n -motive case_s)]
-  //# (S case_z)
+. inc.cont
+: {bs : Bits} {cont : {bs : Bits} Bits} Bits
+= [bs] [cont]
+  @Bits [-P] [o] [i] [e]
+  let motive [x] (P (inc.cont x cont))
+  let case_o i
+  let case_i [x] (o (cont x))
+  let case_e e
+  (~bs -motive case_o case_i case_e) 
 
-.stdlib count_test
+. inc
+: {n : Nat} ! {bs : Bits} Bits
+= [n] 
+  let motive [n] {bs : Bits} Bits
+  let case_s # [-n] [cont] [bs] (inc.cont bs cont)
+  let case_z [bs] bs
+  [S = (~n -motive case_s)]
+  # (S case_z)
+
+. cpy
+  [n : Nat] 
+  let motive [n] {bs : Bits} Bits
+  let case_s # [-n] [cont] [bs]
+    let motive [x] {cont : {bs : Bits} Bits} Bits
+    let case_o [x] [cont] (o (cont x))
+    let case_i [x] [cont] (i (cont x))
+    let case_e [cont] e
+    (~bs -motive case_o case_i case_e cont)
+  let case_z [bs : Bits] bs
+  [S = (~n -motive case_s)]
+  # (S case_z)
+
+// ::::::::::::::
+// :: Examples ::
+// ::::::::::::::
+
+// Non-fusible inc (9648 rewrites on lazy evaluator)
+.slow_inc_test [inc = (Cat.64 -Bits (slow_inc 8))] [cpy = (cpy 8)] # (cpy (inc (o (o (o (o (o (o (o (o e))))))))))
+
+// Fusible inc (1580 rewrites on lazy evaluator)
+.inc_test [inc = (Cat.64 -Bits (inc 8))] [cpy = (cpy 8)] # (cpy (inc (o (o (o (o (o (o (o (o e))))))))))
+  
+.main   inc_test
+.stdlib inc_test
