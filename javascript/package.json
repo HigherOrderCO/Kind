@@ -1,6 +1,6 @@
 {
   "name": "formality-lang",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "description": "Minimal proof language.",
   "main": "index.js",
   "bin": {
