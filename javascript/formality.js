@@ -682,7 +682,7 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
       var argm_v = check(term[1].argm, func_t[1].bind, defs, ctx, strat && !func_t[1].eras, seen, () => "`" + show(term, ctx) + "`'s argument");
       return subst(func_t[1].body, argm_v, 0);
     case "Box":
-      var expr_t = infer(term[1].expr, defs, ctx, strat, seen);
+      var expr_t = norm(infer(term[1].expr, defs, ctx, strat, seen), defs, true);
       if (!equals(expr_t, Typ(), defs, ctx)) {
         throw "[ERROR]\nBox not a type: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
@@ -695,7 +695,7 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
         return Box(term_t);
       }
     case "Dup":
-      var expr_t = infer(term[1].expr, defs, ctx, strat, seen);
+      var expr_t = norm(infer(term[1].expr, defs, ctx, strat, seen), defs, true);
       if (expr_t[0] !== "Box") {
         throw "[ERROR]\nUnboxed duplication: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
@@ -768,7 +768,7 @@ const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = nu
     var expr_v = check(term[1].expr, type_n[1].expr, defs, ctx, strat, seen, () => "`" + show(term, ctx) + "`.");
     return Put(expr_v);
   } else if (term[0] === "Dup") {
-    var expr_t = infer(term[1].expr, defs, ctx, strat, seen);
+    var expr_t = norm(infer(term[1].expr, defs, ctx, strat, seen), defs, true);
     if (expr_t[0] !== "Box") {
       throw "[ERROR]\nUnboxed duplication: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
     }
