@@ -1,12 +1,12 @@
 # Formality
 
-The goal of this work is to design a proof language, that is:
+Formality is a proof language that:
 
-1. Very small, in the sense it can be implemented in, say, `< 1000 LOC` in a common programming language;
+1. Is very small, in the sense it can be fully implemented in about 1000 lines of code.
 
-2. Optimal, in the sense it can be evaluated fastly by the [optimal algorithm](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07) without oracles.
+2. Efficient, in the sense it can [run in parallel with inets](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07) with no bookkeeping machinery.
 
-Those two features allow it to be a small specification that people can easily implement independently; lightweight and portable, so it can be implemented as a lib in many other languages; extremelly efficient, being able to run optimally in massively parallel architectures. This document is a informal specification of its current design.
+This document is a draft of Formality's specification. Its goal is to provide all the information required for independent parties to implement complying evaluators/checkers for Formality. Right now it is very early and incomplete. In a future, it will include pseudo-code, examples, and even a formalization of Formality within itself. Hopefully, though, this serves as a good starting point.
 
 ## Syntax
 
