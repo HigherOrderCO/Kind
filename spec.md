@@ -6,7 +6,7 @@ Formality is a proof language that:
 
 2. Efficient, in the sense it can [run in parallel with inets](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07) with no bookkeeping machinery.
 
-This document is a draft of Formality's specification. Its goal is to provide all the information required for independent parties to implement complying evaluators/checkers for Formality. Right now it is very early and incomplete. In a future, it will include pseudo-code, examples, and even a formalization of Formality within itself. Hopefully, though, this serves as a good starting point.
+This document is a draft of Formality's specification. Its goal is to provide all the information required to independently implement complying evaluators, compilers and type-checkers for it. Right now it is very early and incomplete. In a future, it will include pseudo-code, examples, and even a formalization of Formality within itself. Hopefully, though, this serves as a good starting point.
 
 ## Syntax
 
