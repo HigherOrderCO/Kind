@@ -49,8 +49,8 @@ var defs = fm.parse(code);
 var term = fm.parse(". main (" + expr + ")").main;
 
 var funcs = {
-  T: ["Type:", () => console.log(fm.show(fm.norm((args.E ? fm.erase : (x => x))(fm.infer(term, defs)), args.R ? {} : defs, args.W, args.L)))],
-  t: ["Norm (interpreted):", () => console.log(fm.show(fm.norm((args.e ? fm.erase : (x => x))(term), args.r ? {} : defs, args.w, args.l)))],
+  N: ["Type:", () => console.log(fm.show(fm.norm((args.E ? fm.erase : (x => x))(fm.infer(term, defs)), args.R ? {} : defs, args.W, args.L)))],
+  n: ["Norm (interpreted):", () => console.log(fm.show(fm.norm((args.e ? fm.erase : (x => x))(term), args.r ? {} : defs, args.w, args.l)))],
   x: ["Norm (using NASIC):", () => {
     var net = fm.compile(term, defs);
     var stats = net.reduce_lazy();
@@ -58,8 +58,6 @@ var funcs = {
     console.log("(" + stats.rewrites + " rewrites)");
   }]
 };
-
-console.log(args);
 
 for (var key in funcs) {
   if (args[key]) {
