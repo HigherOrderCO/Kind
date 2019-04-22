@@ -6,6 +6,7 @@ var fm = require(".");
 
 try {
   var argv = [].slice.call(process.argv, 2);
+  if (argv[0] === "-v") { console.log(require("./package.json").version); process.exit(); }
   if (argv.length === 0 || argv[0] === "--help") throw "";
   var expr = argv.pop() || "main";
   var args = {};
@@ -27,14 +28,15 @@ try {
   console.log("(loads local .fm files and runs/checks an expr)");
   console.log("");
   console.log("Options:");
+  console.log("-v shows Formality version");
   console.log("-i shows extra information");
-  console.log("-T shows type");
-  console.log("-R shows type with references untouched");
+  console.log("-N shows type normalized");
+  console.log("-R shows type with unexpanded references");
   console.log("-W shows type on weak normal form");
   console.log("-L shows type on LAM form instead of EAC");
   console.log("-E shows type erased");
-  console.log("-t shows term");
-  console.log("-r shows term with references untouched");
+  console.log("-n shows term");
+  console.log("-r shows term with unexpanded references");
   console.log("-w shows term on weak normal form");
   console.log("-l shows term on LAM form instead of EAC");
   console.log("-e shows term erased");
@@ -56,6 +58,8 @@ var funcs = {
     console.log("(" + stats.rewrites + " rewrites)");
   }]
 };
+
+console.log(args);
 
 for (var key in funcs) {
   if (args[key]) {
