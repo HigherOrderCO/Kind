@@ -170,11 +170,11 @@
 . succ
 : {n : Nat} Nat
 = [n]
-  @Nat [-P] [s] [s = s] [A = (~n -P #s)] # [z] (s -n (A z))
+  @Nat [-P] [s] [s = s] [A = (~n -P |s)] | [z] (s -n (A z))
 
 . zero
 : Nat
-= @Nat [-P] [s] [s = s] # [z] z
+= @Nat [-P] [s] [s = s] | [z] z
 
 . 0 zero
 . 1 (succ 0)
@@ -190,45 +190,45 @@
 . apply
 : {n : Nat} Cat
 = [n] [-P] [s] [s = s]
-  [F = (~n -[x]P #[-n][h](s h))]
-  # [z] (F z)
+  [F = (~n -[x]P |[-n][h](s h))]
+  | [z] (F z)
 
 . induct
 : {n : Nat} {-P : {:Nat} Type} {:!{n : Nat}{:(P n)}(P (succ n))} !{:(P zero)} (P n)
-= [a] [-P] [s] [s = s] [A = (~a -[n](P n) #s)] # [z] (A z)
+= [a] [-P] [s] [s = s] [A = (~a -[n](P n) |s)] | [z] (A z)
 
 . count
 : {n : Nat} Nat
-= [n] @Nat [-P] [s] [s = s] [f = (~n -[n] (P (count n)) #[-n] (s -(count n)))] # [z] (f z)
+= [n] @Nat [-P] [s] [s = s] [f = (~n -[n] (P (count n)) |[-n] (s -(count n)))] | [z] (f z)
 
 . slow_count
 : {n : Nat} !Nat
-= [n] [f = (~n -[s]Nat #[-n][h](succ h))] # (f zero)
+= [n] [f = (~n -[s]Nat |[-n][h](succ h))] | (f zero)
 
 . slow_pred
 : {n : Nat} !Nat
 = [n]
   let motive [n] {f : {:Nat}Nat} Nat
-  let case_s #[-n] [h] [f] (f (h succ))
+  let case_s |[-n] [h] [f] (f (h succ))
   let case_z [f] zero
   [f = (~n -motive case_s)]
-  # (f case_z count)
+  | (f case_z count)
 
 . double
 : {n : Nat} Nat
 = [n] @Nat [-P] [s] [s = s]
   let motive [n] (P (double n))
-  let case_s #[-n] [h] (s -(succ (double n)) (s -(double n) h))
+  let case_s |[-n] [h] (s -(succ (double n)) (s -(double n) h))
   [f = (~n -motive case_s)]
-  # [z] (f z)
+  | [z] (f z)
 
 . add
 : {a : Nat} {b : Nat} Nat
 = [a] [b] @Nat [-P] [s]
   [s = s]
-  [A = (~a -[a](P (add a b)) #[-n] [h] (s -(add n b) h))]
-  [B = (~b -[b](P (add zero b)) #[-n] [h] (s -(add zero n) h))]
-# [z] (A (B z)) 
+  [A = (~a -[a](P (add a b)) |[-n] [h] (s -(add n b) h))]
+  [B = (~b -[b](P (add zero b)) |[-n] [h] (s -(add zero n) h))]
+| [z] (A (B z)) 
 
 // This was quite hard to get right, so it deserves some explaining. To make
 // this, first I defined the untyped function this should erase to:
@@ -267,7 +267,7 @@
     let case_t [x] x
     let case_f (S -(pred (succ n)))
     (~b -motive case_t case_f (h false))
-  [F = (~n -motive #case_s)] # [Z] 
+  [F = (~n -motive |case_s)] | [Z] 
   let case_z [b]
     let motive [b]{n : (P zero)}(~b -[b] Type (P (pred zero)) (P (pred (succ zero))))
     let case_t [z]z
@@ -279,8 +279,8 @@
 : {n : Nat} !(Eq Nat (pred (succ n)) n)
 = [n]
   let motive [n] (Eq Nat (pred (succ n)) n)
-  let case_s # [-n] [h] (cong -Nat -Nat -(pred (succ n)) -n h -succ)
-  [F = (~n -motive case_s)] # (F (refl -Nat -zero))
+  let case_s | [-n] [h] (cong -Nat -Nat -(pred (succ n)) -n h -succ)
+  [F = (~n -motive case_s)] | (F (refl -Nat -zero))
 
 // TODO: mul
 //. mul
@@ -288,7 +288,7 @@
 //= [a] [b] @Nat [-P] [s]
 //  [S = s]
 //  let motive [a] (P (mul a b))
-//  let case_s [-n:Nat] (~b -[x](P (add x (mul n b))) #[-m] [h] (S -(add m (mul n b)) h))
+//  let case_s [-n:Nat] (~b -[x](P (add x (mul n b))) |[-m] [h] (S -(add m (mul n b)) h))
 //  (~a -motive case_s)
 
 // :::::::::
@@ -333,31 +333,31 @@
 // :::::::::
 
 . Cat                : Type = {-P : Type} {S : ! {:P} P} ! {Z : P} P
-. Cat.succ [n : Cat] : Cat  = [-P] [S] [S = S] [A = (n -P #S)] # [Z] (S (A Z))
-. Cat.zero           : Cat  = [-P] [S] [S = S] # [Z] Z
+. Cat.succ [n : Cat] : Cat  = [-P] [S] [S = S] [A = (n -P |S)] | [Z] (S (A Z))
+. Cat.zero           : Cat  = [-P] [S] [S = S] | [Z] Z
 
 . Cat.add
 : {a : Cat} {b : Cat} Cat
 = [a] [b] [-P] [s]
   [S = s]
-  [A = (a -P #S)]
-  [B = (b -P #S)]
-# [z] (A (B z)) 
+  [A = (a -P |S)]
+  [B = (b -P |S)]
+| [z] (A (B z)) 
 
 . Cat.mul
 : {a : Cat} {b : Cat} Cat
 = [a] [b] [-P] [s]
   [S = s]
-  [A = [B = (b -P #S)] (a -P # B)]
-  # [z] (A z)
+  [A = [B = (b -P |S)] (a -P | B)]
+  | [z] (A z)
 
 . Cat.pred
 : {n : Cat} Cat
 = [n] [-P] [S] [S = S]
   let motive {f : {x:P} P} P
-  let case_s #[h] [f] (f (h S))
+  let case_s |[h] [f] (f (h S))
   [f = (n -motive case_s)]
-  # [Z] (f [f] Z [h] h)
+  | [Z] (f [f] Z [h] h)
 
 . Cat.0  Cat.zero
 . Cat.1  (Cat.succ Cat.0)
@@ -403,7 +403,7 @@
 . slow_inc
   [n : Nat] 
   let motive [n] {bs : Bits} Bits
-  let case_s # [-n] [cont] [bs]
+  let case_s | [-n] [cont] [bs]
     let motive [x] {cont : {bs : Bits} Bits} Bits
     let case_o [x] [cont] (i x)
     let case_i [x] [cont] (o (cont x))
@@ -411,7 +411,7 @@
     (~bs -motive case_o case_i case_e cont)
   let case_z [bs : Bits] bs
   [S = (~n -motive case_s)]
-  # (S case_z)
+  | (S case_z)
 
 . dec.cont
 : {bs : Bits} {cont : {bs : Bits} Bits} Bits
@@ -427,10 +427,10 @@
 : {n : Nat} ! {bs : Bits} Bits
 = [n] 
   let motive [n] {bs : Bits} Bits
-  let case_s # [-n] [cont] [bs] (dec.cont bs cont)
+  let case_s | [-n] [cont] [bs] (dec.cont bs cont)
   let case_z [bs] bs
   [S = (~n -motive case_s)]
-  # (S case_z)
+  | (S case_z)
 
 . inc.cont
 : {bs : Bits} {cont : {bs : Bits} Bits} Bits
@@ -446,43 +446,43 @@
 : {n : Nat} ! {bs : Bits} Bits
 = [n] 
   let motive [n] {bs : Bits} Bits
-  let case_s # [-n] [cont] [bs] (inc.cont bs cont)
+  let case_s | [-n] [cont] [bs] (inc.cont bs cont)
   let case_z [bs] bs
   [S = (~n -motive case_s)]
-  # (S case_z)
+  | (S case_z)
 
 . incdec
-: {n : Nat} !{bs : Bits} (Eq !Bits [inc = (inc n)] [dec = (dec n)] #bs [inc = (inc n)] [dec = (dec n)] #(inc (dec bs)))
+: {n : Nat} !{bs : Bits} (Eq !Bits [inc = (inc n)] [dec = (dec n)] |bs [inc = (inc n)] [dec = (dec n)] |(inc (dec bs)))
 = [n]
-  let motive [n] {bs : Bits} (Eq !Bits [inc = (inc n)] [dec = (dec n)] #bs [inc = (inc n)] [dec = (dec n)] #(inc (dec bs)))
-  let case_s #[-n] [h] [bs]
-    let motive_bits [bs] (Eq !Bits [inc = (inc (succ n))] [dec = (dec (succ n))] #bs [inc = (inc (succ n))] [dec = (dec (succ n))] #(inc (dec bs)))
-    let case_e (refl -!Bits -[inc = (inc n)] [dec = (dec n)] #e)
-    let case_i [bs] (refl -!Bits -[inc = (inc n)] [dec = (dec n)] #(i bs))
-    let case_o [bs] (cong -!Bits -!Bits -[inc = (inc n)] [dec = (dec n)] #bs -[inc = (inc n)] [dec = (dec n)] #(inc (dec bs)) (h bs) -[dbs] [bs=dbs] #(o bs))
+  let motive [n] {bs : Bits} (Eq !Bits [inc = (inc n)] [dec = (dec n)] |bs [inc = (inc n)] [dec = (dec n)] |(inc (dec bs)))
+  let case_s |[-n] [h] [bs]
+    let motive_bits [bs] (Eq !Bits [inc = (inc (succ n))] [dec = (dec (succ n))] |bs [inc = (inc (succ n))] [dec = (dec (succ n))] |(inc (dec bs)))
+    let case_e (refl -!Bits -[inc = (inc n)] [dec = (dec n)] |e)
+    let case_i [bs] (refl -!Bits -[inc = (inc n)] [dec = (dec n)] |(i bs))
+    let case_o [bs] (cong -!Bits -!Bits -[inc = (inc n)] [dec = (dec n)] |bs -[inc = (inc n)] [dec = (dec n)] |(inc (dec bs)) (h bs) -[dbs] [bs=dbs] |(o bs))
     (~bs -motive_bits case_o case_i case_e)
   [S = (~n -motive case_s)]
-# let case_z [bs] (refl -!Bits -#bs)
+| let case_z [bs] (refl -!Bits -|bs)
   (S case_z)
 
 . decinc
-: {n : Nat} !{bs : Bits} (Eq !Bits [dec = (dec n)] [inc = (inc n)] #bs [dec = (dec n)] [inc = (inc n)] #(dec (inc bs)))
+: {n : Nat} !{bs : Bits} (Eq !Bits [dec = (dec n)] [inc = (inc n)] |bs [dec = (dec n)] [inc = (inc n)] |(dec (inc bs)))
 = [n]
-  let motive [n] {bs : Bits} (Eq !Bits [dec = (dec n)] [inc = (inc n)] #bs [dec = (dec n)] [inc = (inc n)] #(dec (inc bs)))
-  let case_s #[-n] [h] [bs]
-    let motive_bits [bs] (Eq !Bits [dec = (dec (succ n))] [inc = (inc (succ n))] #bs [dec = (dec (succ n))] [inc = (inc (succ n))] #(dec (inc bs)))
-    let case_e (refl -!Bits -[dec = (dec n)] [inc = (inc n)] #e)
-    let case_o [bs] (refl -!Bits -[dec = (dec n)] [inc = (inc n)] #(o bs))
-    let case_i [bs] (cong -!Bits -!Bits -[dec = (dec n)] [inc = (inc n)] #bs -[dec = (dec n)] [inc = (inc n)] #(dec (inc bs)) (h bs) -[dbs] [bs=dbs] #(i bs))
+  let motive [n] {bs : Bits} (Eq !Bits [dec = (dec n)] [inc = (inc n)] |bs [dec = (dec n)] [inc = (inc n)] |(dec (inc bs)))
+  let case_s |[-n] [h] [bs]
+    let motive_bits [bs] (Eq !Bits [dec = (dec (succ n))] [inc = (inc (succ n))] |bs [dec = (dec (succ n))] [inc = (inc (succ n))] |(dec (inc bs)))
+    let case_e (refl -!Bits -[dec = (dec n)] [inc = (inc n)] |e)
+    let case_o [bs] (refl -!Bits -[dec = (dec n)] [inc = (inc n)] |(o bs))
+    let case_i [bs] (cong -!Bits -!Bits -[dec = (dec n)] [inc = (inc n)] |bs -[dec = (dec n)] [inc = (inc n)] |(dec (inc bs)) (h bs) -[dbs] [bs=dbs] |(i bs))
     (~bs -motive_bits case_o case_i case_e)
   [S = (~n -motive case_s)]
-# let case_z [bs] (refl -!Bits -#bs)
+| let case_z [bs] (refl -!Bits -|bs)
   (S case_z)
 
 . cpy
   [n : Nat] 
   let motive [n] {bs : Bits} Bits
-  let case_s # [-n] [cont] [bs]
+  let case_s | [-n] [cont] [bs]
     let motive [x] {cont : {bs : Bits} Bits} Bits
     let case_o [x] [cont] (o (cont x))
     let case_i [x] [cont] (i (cont x))
@@ -490,20 +490,20 @@
     (~bs -motive case_o case_i case_e cont)
   let case_z [bs : Bits] bs
   [S = (~n -motive case_s)]
-  # (S case_z)
+  | (S case_z)
 
 . bitconcat
 : {n : Nat} !{as : Bits} {bs : Bits} Bits
 = [n]
   let motive [n] {as : Bits} {bs : Bits} Bits
-  let case_s # [-n] [cont] [as]
+  let case_s | [-n] [cont] [as]
     let motive [as] {cont : {as : Bits} {bs : Bits} Bits} {bs : Bits} Bits
     let case_o [as] [cont] [bs] (o (cont as bs)) 
     let case_i [as] [cont] [bs] (i (cont as bs))
     let case_e [cont] [bs] bs
     (~as -motive case_o case_i case_e cont)
   let case_z [as] [bs] bs
-  [S = (~n -motive case_s)] # (S case_z)
+  [S = (~n -motive case_s)] | (S case_z)
 
 // ::::::::::
 // :: List ::
@@ -532,14 +532,14 @@
 : {n : Nat} !{as : (List A)} {bs : (List A)} (List A)
 = [n]
   let motive [n] {as : (List A)} {bs : (List A)} (List A)
-  let case_s # [-n] [h] [as]
+  let case_s | [-n] [h] [as]
     let motive [] {bs : (List A)} (List A)
     let case_cons [a] [as] [bs] (cons -A a (h as bs)) 
     let case_nil [bs] bs
     (~as -motive case_cons case_nil)
   let case_z [as] [bs] bs
   [S = (~n -motive case_s)]
-  # (S case_z)
+  | (S case_z)
 
 // ::::::::::::
 // :: Vector ::
@@ -569,10 +569,10 @@
 // ::::::::::::::
 
 // Non-fusible inc (9648 rewrites on lazy evaluator)
-.slow_inc_test [inc = (Cat.64 -Bits (slow_inc 8))] [cpy = (cpy 8)] # (cpy (inc (o (o (o (o (o (o (o (o e))))))))))
+.slow_inc_test [inc = (Cat.64 -Bits (slow_inc 8))] [cpy = (cpy 8)] | (cpy (inc (o (o (o (o (o (o (o (o e))))))))))
 
 // Fusible inc (1580 rewrites on lazy evaluator)
-.inc_test [inc = (Cat.64 -Bits (inc 8))] [cpy = (cpy 8)] # (cpy (inc (o (o (o (o (o (o (o (o e))))))))))
+.inc_test [inc = (Cat.64 -Bits (inc 8))] [cpy = (cpy 8)] | (cpy (inc (o (o (o (o (o (o (o (o e))))))))))
   
 .main   inc_test
 .stdlib inc_test

@@ -120,7 +120,7 @@ const show = ([ctor, args], ctx = Ctx()) => {
       return "!" + expr;
     case "Put":
       var expr = show(args.expr, ctx);
-      return "#" + expr;
+      return "|" + expr;
     case "Dup":
       var name = args.name;
       var expr = show(args.expr, ctx);
@@ -254,7 +254,7 @@ const parse = (code) => {
     }
 
     // Put
-    else if (match("#")) {
+    else if (match("|")) {
       var expr = parse_term(ctx);
       return Put(expr);
     }
