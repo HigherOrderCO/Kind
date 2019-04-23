@@ -14,7 +14,7 @@ const Ann = (type, expr, done)       => ["Ann", {type, expr, done},       "#ann"
 
 // Generates a name
 const gen_name = (n) => {
-  var str = "";
+  let str = "";
   ++n;
   while (n > 0) {
     --n;
@@ -108,8 +108,8 @@ const show = ([ctor, args], ctx = Ctx()) => {
       const body = show(args.body, extend(ctx, [name, null]));
       return bind ? "[" + eras + name + " : " + bind + "] " + body : "[" + eras + name + "] " + body;
     case "App":
-      var text = ")";
-      var term = [ctor, args];
+      let text = ")";
+      let term = [ctor, args];
       while (term[0] === "App") {
         text = (term[1].eras ? " -" : " ") + show(term[1].argm, ctx) + text;
         term = term[1].func;
@@ -191,7 +191,7 @@ const parse = (code) => {
 
   function parse_name() {
     skip_spaces();
-    var name = "";
+    let name = "";
     while (index < code.length && is_name_char(code[index])) {
       name = name + code[index];
       index += 1;
@@ -210,11 +210,11 @@ const parse = (code) => {
 
     // Application
     else if (match("(")) {
-      var func = parse_term(ctx);
+      let func = parse_term(ctx);
       while (index < code.length && !match(")")) {
         const eras = match("-");
         const argm = parse_term(ctx);
-        var func = App(func, argm, eras);
+        func = App(func, argm, eras);
         skip_spaces();
       }
       return func;
@@ -298,7 +298,7 @@ const parse = (code) => {
     // Variable / Reference
     else {
       const name = parse_name();
-      var skip = 0;
+      let skip = 0;
       while (match("'")) {
         skip += 1;
       }
@@ -311,7 +311,7 @@ const parse = (code) => {
     }
   }
 
-  var index = 0;
+  let index = 0;
   const defs = {};
   while (index < code.length) {
     skip_spaces();
@@ -527,7 +527,7 @@ const equals = (a, b, defs) => {
         }
 
         // If non-deref whnfs are app and fields are equal, then a == b
-        var x = null;
+        let x = null;
         if (ax[2] !== ay[2] || bx[2] !== by[2]) {
           if (ax[0] === "Ref" && bx[0] === "Ref" && ax[1].name === bx[1].name) {
             x = Val(true);
@@ -539,7 +539,7 @@ const equals = (a, b, defs) => {
         }
 
         // If whnfs are equal and fields are equal, then a == b
-        var y = null;
+        let y = null;
         if (ay[0] === "Typ" && by[0] === "Typ") {
           y = Val(true);
         } else if (ay[0] === "All" && by[0] === "All") {
@@ -584,9 +584,9 @@ const equals = (a, b, defs) => {
   }
 
   // Expands the search tree until it finds an answer
-  var tree = Eqs(erase(a), erase(b));
+  let tree = Eqs(erase(a), erase(b));
   while (tree[0] !== "Val") {
-    var tree = step(tree);
+    tree = step(tree);
   }
   return tree[1].v;
 }
@@ -780,16 +780,18 @@ const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = nu
     return Dup(term[1].name, term[1].expr, body_v);
   } else {
     const term_t = infer(term, defs, ctx, strat, seen);
+    let checks;
+    let unsure;
     try {
-      var checks = equals(type_n, term_t, defs, ctx);
-      var unsure = false;
+      checks = equals(type_n, term_t, defs, ctx);
+      unsure = false;
     } catch (e) {
-      var checks = false;
-      var unsure = true;
+      checks = false;
+      unsure = true;
     }
     if (!checks) {
-      var error = unsure ? "Couldn't decide if terms are equal." : "";
-      var error = error + show_mismatch(type, term_t, expr, ctx, defs);
+      let error = unsure ? "Couldn't decide if terms are equal." : "";
+      error = error + show_mismatch(type, term_t, expr, ctx, defs);
       throw error;
     }
     return term;
@@ -798,7 +800,7 @@ const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = nu
 
 // Formats a type-mismatch error message
 const show_mismatch = (expect, actual, expr, ctx, defs) => {
-  var text = "";
+  let text = "";
   text += "[ERROR]\nType mismatch on " + expr() + ".\n";
   text += "- Expected:\n";
   text += "-- type: " + show(expect, ctx) + "\n";
