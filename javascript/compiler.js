@@ -47,7 +47,6 @@ const compile = (term, defs = {}) => {
         return build_net(Lam("", null, Var(0)), net, var_ptrs, level);
     }
   };
-  var level_of = {};
   const net = new Net();
   const root_addr = net.alloc_node(0);
   const term_ptr = build_net(erase(term), net, [], 0);
