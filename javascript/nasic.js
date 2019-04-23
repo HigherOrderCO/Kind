@@ -36,13 +36,14 @@ class Net {
 
   // Allocates a new node, return its addr
   alloc_node(label) {
+    let addr;
 
     // If there is reclaimable memory, use it
     if (this.freed.length > 0) {
-      var addr = this.freed.pop();
+      addr = this.freed.pop();
     } else { // Otherwise, extend the array of nodes
       this.nodes.push(null);
-      var addr = this.nodes.length - 1;
+      addr = this.nodes.length - 1;
     }
 
     // Fill the memory with an empty node without pointers
@@ -117,7 +118,7 @@ class Net {
     }
 
     // Deallocates the space used by the active pair
-    for (var i = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++) {
       this.unlink_port(new Pointer(a_addr, i));
       this.unlink_port(new Pointer(b_addr, i));
     }
@@ -130,7 +131,7 @@ class Net {
   // Rewrites active pairs until none is left, reducing the graph to normal form
   // This could be performed in parallel. Unreachable data is freed automatically.
   reduce() {
-    var rewrite_count = 0;
+    let rewrite_count = 0;
     while (this.redex.length > 0) {
       this.rewrite(this.redex.pop());
       rewrite_count += 1;
@@ -143,10 +144,10 @@ class Net {
   reduce_lazy() {
     const warp = [];
     const exit = [];
-    var next = this.enter_port(new Pointer(0, 1));
-    var prev = null;
-    var back = null;
-    var rwts = 0;
+    let next = this.enter_port(new Pointer(0, 1));
+    let prev = null;
+    let back = null;
+    let rwts = 0;
     while (next.addr > 0 || warp.length > 0) {
       next = next.addr === 0 ? this.enter_port(warp.pop()) : next;
       prev = this.enter_port(next);
@@ -167,8 +168,8 @@ class Net {
   }
 
   to_string() {
-    var text = '';
-    for (var i = 0; i < this.nodes.length; i++) {
+    let text = '';
+    for (let i = 0; i < this.nodes.length; i++) {
       if (this.nodes[i] !== null) {
         text += i + ': ' + this.nodes[i].to_string() + '\n';
       } else {
