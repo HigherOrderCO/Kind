@@ -79,7 +79,7 @@ class Net {
 
   // Disconnects a port, causing both sides to point to themselves
   unlink_port(a_ptr) {
-    var b_ptr = this.enter_port(a_ptr);
+    const b_ptr = this.enter_port(a_ptr);
     if (this.enter_port(b_ptr).equal(a_ptr)) {
       this.nodes[a_ptr.addr].ports[a_ptr.port] = a_ptr;
       this.nodes[b_ptr.addr].ports[b_ptr.port] = b_ptr;
@@ -88,24 +88,24 @@ class Net {
 
   // Rewrites an active pair
   rewrite([a_addr, b_addr]) {
-    var a_node = this.nodes[a_addr];
-    var b_node = this.nodes[b_addr];
+    const a_node = this.nodes[a_addr];
+    const b_node = this.nodes[b_addr];
 
     // If both nodes have the same label, connects their neighbors
     if (a_node.label === b_node.label) {
-      var a_aux1_dest = this.enter_port(new Pointer(a_addr, 1));
-      var b_aux1_dest = this.enter_port(new Pointer(b_addr, 1));
+      const a_aux1_dest = this.enter_port(new Pointer(a_addr, 1));
+      const b_aux1_dest = this.enter_port(new Pointer(b_addr, 1));
       this.link_ports(a_aux1_dest, b_aux1_dest);
-      var a_aux2_dest = this.enter_port(new Pointer(a_addr, 2));
-      var b_aux2_dest = this.enter_port(new Pointer(b_addr, 2));
+      const a_aux2_dest = this.enter_port(new Pointer(a_addr, 2));
+      const b_aux2_dest = this.enter_port(new Pointer(b_addr, 2));
       this.link_ports(a_aux2_dest, b_aux2_dest);
 
     // Otherwise, the nodes pass through each-other, duplicating themselves
     } else {
-      var p_addr = this.alloc_node(b_node.label);
-      var q_addr = this.alloc_node(b_node.label);
-      var r_addr = this.alloc_node(a_node.label);
-      var s_addr = this.alloc_node(a_node.label);
+      const p_addr = this.alloc_node(b_node.label);
+      const q_addr = this.alloc_node(b_node.label);
+      const r_addr = this.alloc_node(a_node.label);
+      const s_addr = this.alloc_node(a_node.label);
       this.link_ports(new Pointer(r_addr, 1), new Pointer(p_addr, 1));
       this.link_ports(new Pointer(s_addr, 1), new Pointer(p_addr, 2));
       this.link_ports(new Pointer(r_addr, 2), new Pointer(q_addr, 1));
@@ -141,8 +141,8 @@ class Net {
   // Rewrites active pairs lazily. Lazy reductions avoid wasting work and
   // allows recursive terms, but requires GC and enforces sequentiality.
   reduce_lazy() {
-    var warp = [];
-    var exit = [];
+    const warp = [];
+    const exit = [];
     var next = this.enter_port(new Pointer(0, 1));
     var prev = null;
     var back = null;
