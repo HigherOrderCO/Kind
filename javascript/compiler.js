@@ -76,7 +76,7 @@ const decompile = (net) => {
           var_ptrs.pop();
           return Lam(gen_name(var_ptrs.length), null, body);
         case 1:
-          for (var index = 0; index < var_ptrs.length; ++index) {
+          for (let index = 0; index < var_ptrs.length; ++index) {
             if (var_ptrs[var_ptrs.length - index - 1].equal(ptr)) {
               return Var(index);
             }
