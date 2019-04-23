@@ -1,18 +1,18 @@
-var compiler = require("./compiler.js");
-var nasic = require("./nasic.js");
-var formality = require("./formality.js");
+const compiler = require("./compiler.js");
+const nasic = require("./nasic.js");
+const formality = require("./formality.js");
 
-var lib = {};
+const lib = {};
 
-for (var key in compiler) {
+for (const key in compiler) {
   lib[key] = compiler[key];
 }
 
-for (var key in nasic) {
+for (const key in nasic) {
   lib[key] = nasic[key];
 }
 
-for (var key in formality) {
+for (const key in formality) {
   lib[key] = formality[key];
 }
 
