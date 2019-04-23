@@ -13,9 +13,9 @@ try {
   const defa = "-itleTRx";
   if (argv.length === 0) argv = [defa];
   argv.join("").split("").forEach(c => args[c] = 1);
-  var code = "";
+  let code = "";
   const files = fs.readdirSync(".");
-  for (var i = 0; i < files.length; ++i) {
+  for (let i = 0; i < files.length; ++i) {
     if (files[i].slice(-3) === ".fm") {
       code += fs.readFileSync("./" + files[i], "utf8") + "\n";
     }
