@@ -20,7 +20,7 @@ Formality is currently implemented as a small, dependency-free JavaScript librar
 npm i -g formality
 
 # Enters the repository
-git clone https://github.com/maiavictor/formality
+git clone https://github.com/moonad/formality
 cd formality
 
 # Checks and evaluates main
