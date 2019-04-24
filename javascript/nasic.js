@@ -36,13 +36,14 @@ class Net {
 
   // Allocates a new node, return its addr
   alloc_node(label) {
+    let addr;
 
     // If there is reclaimable memory, use it
     if (this.freed.length > 0) {
-      var addr = this.freed.pop();
+      addr = this.freed.pop();
     } else { // Otherwise, extend the array of nodes
       this.nodes.push(null);
-      var addr = this.nodes.length - 1;
+      addr = this.nodes.length - 1;
     }
 
     // Fill the memory with an empty node without pointers
@@ -79,7 +80,7 @@ class Net {
 
   // Disconnects a port, causing both sides to point to themselves
   unlink_port(a_ptr) {
-    var b_ptr = this.enter_port(a_ptr);
+    const b_ptr = this.enter_port(a_ptr);
     if (this.enter_port(b_ptr).equal(a_ptr)) {
       this.nodes[a_ptr.addr].ports[a_ptr.port] = a_ptr;
       this.nodes[b_ptr.addr].ports[b_ptr.port] = b_ptr;
@@ -88,24 +89,24 @@ class Net {
 
   // Rewrites an active pair
   rewrite([a_addr, b_addr]) {
-    var a_node = this.nodes[a_addr];
-    var b_node = this.nodes[b_addr];
+    const a_node = this.nodes[a_addr];
+    const b_node = this.nodes[b_addr];
 
     // If both nodes have the same label, connects their neighbors
     if (a_node.label === b_node.label) {
-      var a_aux1_dest = this.enter_port(new Pointer(a_addr, 1));
-      var b_aux1_dest = this.enter_port(new Pointer(b_addr, 1));
+      const a_aux1_dest = this.enter_port(new Pointer(a_addr, 1));
+      const b_aux1_dest = this.enter_port(new Pointer(b_addr, 1));
       this.link_ports(a_aux1_dest, b_aux1_dest);
-      var a_aux2_dest = this.enter_port(new Pointer(a_addr, 2));
-      var b_aux2_dest = this.enter_port(new Pointer(b_addr, 2));
+      const a_aux2_dest = this.enter_port(new Pointer(a_addr, 2));
+      const b_aux2_dest = this.enter_port(new Pointer(b_addr, 2));
       this.link_ports(a_aux2_dest, b_aux2_dest);
 
     // Otherwise, the nodes pass through each-other, duplicating themselves
     } else {
-      var p_addr = this.alloc_node(b_node.label);
-      var q_addr = this.alloc_node(b_node.label);
-      var r_addr = this.alloc_node(a_node.label);
-      var s_addr = this.alloc_node(a_node.label);
+      const p_addr = this.alloc_node(b_node.label);
+      const q_addr = this.alloc_node(b_node.label);
+      const r_addr = this.alloc_node(a_node.label);
+      const s_addr = this.alloc_node(a_node.label);
       this.link_ports(new Pointer(r_addr, 1), new Pointer(p_addr, 1));
       this.link_ports(new Pointer(s_addr, 1), new Pointer(p_addr, 2));
       this.link_ports(new Pointer(r_addr, 2), new Pointer(q_addr, 1));
@@ -117,7 +118,7 @@ class Net {
     }
 
     // Deallocates the space used by the active pair
-    for (var i = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++) {
       this.unlink_port(new Pointer(a_addr, i));
       this.unlink_port(new Pointer(b_addr, i));
     }
@@ -130,7 +131,7 @@ class Net {
   // Rewrites active pairs until none is left, reducing the graph to normal form
   // This could be performed in parallel. Unreachable data is freed automatically.
   reduce() {
-    var rewrite_count = 0;
+    let rewrite_count = 0;
     while (this.redex.length > 0) {
       this.rewrite(this.redex.pop());
       rewrite_count += 1;
@@ -141,12 +142,12 @@ class Net {
   // Rewrites active pairs lazily. Lazy reductions avoid wasting work and
   // allows recursive terms, but requires GC and enforces sequentiality.
   reduce_lazy() {
-    var warp = [];
-    var exit = [];
-    var next = this.enter_port(new Pointer(0, 1));
-    var prev = null;
-    var back = null;
-    var rwts = 0;
+    const warp = [];
+    const exit = [];
+    let next = this.enter_port(new Pointer(0, 1));
+    let prev = null;
+    let back = null;
+    let rwts = 0;
     while (next.addr > 0 || warp.length > 0) {
       next = next.addr === 0 ? this.enter_port(warp.pop()) : next;
       prev = this.enter_port(next);
@@ -167,8 +168,8 @@ class Net {
   }
 
   to_string() {
-    var text = '';
-    for (var i = 0; i < this.nodes.length; i++) {
+    let text = '';
+    for (let i = 0; i < this.nodes.length; i++) {
       if (this.nodes[i] !== null) {
         text += i + ': ' + this.nodes[i].to_string() + '\n';
       } else {

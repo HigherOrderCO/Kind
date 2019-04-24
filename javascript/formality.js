@@ -14,7 +14,7 @@ const Ann = (type, expr, done)       => ["Ann", {type, expr, done},       "#ann"
 
 // Generates a name
 const gen_name = (n) => {
-  var str = "";
+  let str = "";
   ++n;
   while (n > 0) {
     --n;
@@ -52,7 +52,7 @@ const get_name = (ctx, i) => {
   const repeat = (str, i) => {
     return i === 0 ? "" : str + repeat(str, i - 1);
   }
-  var bind = get_bind(ctx, i);
+  const bind = get_bind(ctx, i);
   if (bind) {
     return (bind[0] || "x") + repeat("'", count(ctx, bind[0], i));
   } else {
@@ -78,9 +78,9 @@ const index_of = (ctx, name, skip, i = 0) => {
 
 // Pretty prints a context
 const show_context = (ctx, i = 0) => {
-  var bind = get_bind(ctx, i);
+  const bind = get_bind(ctx, i);
   if (bind) {
-    var term = " : " + (bind[1] ? show(norm(bind[1], {}), ctx) : "?");
+    const term = " : " + (bind[1] ? show(norm(bind[1], {}), ctx) : "?");
     return show_context(ctx, i + 1) + bind[0] + term + "\n";
   } else {
     return "";
@@ -91,58 +91,58 @@ const show_context = (ctx, i = 0) => {
 const show = ([ctor, args], ctx = Ctx()) => {
   switch (ctor) {
     case "Var":
-      var name = get_name(ctx, args.index);
+      const name = get_name(ctx, args.index);
       return name !== null ? name : "#" + args.index;
     case "Typ":
       return "Type";
     case "All":
-      var eras = args.eras ? "-" : "";
-      var name = args.name || "x";
-      var bind = show(args.bind, ctx);
-      var body = show(args.body, extend(ctx, [args.name, null]));
+      const eras = args.eras ? "-" : "";
+      const name = args.name || "x";
+      const bind = show(args.bind, ctx);
+      const body = show(args.body, extend(ctx, [args.name, null]));
       return "{" + eras + name + " : " + bind + "} " + body;
     case "Lam":
-      var eras = args.eras ? "-" : "";
-      var name = args.name || "x";
-      var bind = args.bind && show(args.bind, ctx);
-      var body = show(args.body, extend(ctx, [name, null]));
+      const eras = args.eras ? "-" : "";
+      const name = args.name || "x";
+      const bind = args.bind && show(args.bind, ctx);
+      const body = show(args.body, extend(ctx, [name, null]));
       return bind ? "[" + eras + name + " : " + bind + "] " + body : "[" + eras + name + "] " + body;
     case "App":
-      var text = ")";
-      var term = [ctor, args];
+      let text = ")";
+      let term = [ctor, args];
       while (term[0] === "App") {
         text = (term[1].eras ? " -" : " ") + show(term[1].argm, ctx) + text;
         term = term[1].func;
       }
       return "(" + show(term, ctx) + text;
     case "Box":
-      var expr = show(args.expr, ctx);
+      const expr = show(args.expr, ctx);
       return "!" + expr;
     case "Put":
-      var expr = show(args.expr, ctx);
+      const expr = show(args.expr, ctx);
       return "|" + expr;
     case "Dup":
-      var name = args.name;
-      var expr = show(args.expr, ctx);
-      var body = show(args.body, extend(ctx, [args.name, null]));
+      const name = args.name;
+      const expr = show(args.expr, ctx);
+      const body = show(args.body, extend(ctx, [args.name, null]));
       return "[" + name + " = " + expr + "] " + body;
     case "Slf":
-      var name = args.name;
-      var type = show(args.type, extend(ctx, [args.name, null]));
+      const name = args.name;
+      const type = show(args.type, extend(ctx, [args.name, null]));
       return "$" + name + " " + type;
     case "New":
-      var type = show(args.type, ctx);
-      var expr = show(args.expr, ctx);
+      const type = show(args.type, ctx);
+      const expr = show(args.expr, ctx);
       return "@" + type + " " + expr;
     case "Use":
-      var expr = show(args.expr, ctx);
+      const expr = show(args.expr, ctx);
       return "~" + expr; 
     case "Ann":
       //var type = show(args.type, ctx);
       //var expr = show(args.expr, ctx);
       //return ":" + type + " = " + expr;
       //var type = show(args.type, ctx);
-      var expr = show(args.expr, ctx);
+      const expr = show(args.expr, ctx);
       return expr;
     case "Ref":
       return args.name;
@@ -168,7 +168,7 @@ const parse = (code) => {
 
   function match(string) {
     skip_spaces();
-    var sliced = code.slice(index, index + string.length);
+    const sliced = code.slice(index, index + string.length);
     if (sliced === string) {
       index += string.length;
       return true;
@@ -191,7 +191,7 @@ const parse = (code) => {
 
   function parse_name() {
     skip_spaces();
-    var name = "";
+    let name = "";
     while (index < code.length && is_name_char(code[index])) {
       name = name + code[index];
       index += 1;
@@ -210,11 +210,11 @@ const parse = (code) => {
 
     // Application
     else if (match("(")) {
-      var func = parse_term(ctx);
+      let func = parse_term(ctx);
       while (index < code.length && !match(")")) {
-        var eras = match("-");
-        var argm = parse_term(ctx);
-        var func = App(func, argm, eras);
+        const eras = match("-");
+        const argm = parse_term(ctx);
+        func = App(func, argm, eras);
         skip_spaces();
       }
       return func;
@@ -227,82 +227,82 @@ const parse = (code) => {
 
     // Forall
     else if (match("{")) {
-      var eras = match("-");
-      var name = parse_name();
-      var skip = parse_exact(":");
-      var bind = parse_term(ctx);
-      var skip = parse_exact("}");
-      var body = parse_term(extend(ctx, [name, Var(0)]));
+      const eras = match("-");
+      const name = parse_name();
+      const skip = parse_exact(":");
+      const bind = parse_term(ctx);
+      const skip = parse_exact("}");
+      const body = parse_term(extend(ctx, [name, Var(0)]));
       return All(name, bind, body, eras);
     }
 
     // Lambda
     else if (match("[")) {
-      var eras = match("-");
-      var name = parse_name();
-      var bind = match(":") ? parse_term(ctx) : null;
-      var expr = match("=") ? parse_term(ctx) : null;
-      var skip = parse_exact("]");
-      var body = parse_term(extend(ctx, [name, Var(0)]));
+      const eras = match("-");
+      const name = parse_name();
+      const bind = match(":") ? parse_term(ctx) : null;
+      const expr = match("=") ? parse_term(ctx) : null;
+      const skip = parse_exact("]");
+      const body = parse_term(extend(ctx, [name, Var(0)]));
       return expr ? Dup(name, expr, body) : Lam(name, bind, body, eras);
     }
 
     // Box
     else if (match("!")) {
-      var expr = parse_term(ctx);
+      const expr = parse_term(ctx);
       return Box(expr);
     }
 
     // Put
     else if (match("|")) {
-      var expr = parse_term(ctx);
+      const expr = parse_term(ctx);
       return Put(expr);
     }
 
     // Let
     else if (match("let")) {
-      var name = parse_name();
-      var copy = parse_term(ctx);
-      var body = parse_term(extend(ctx, [name, Var(0)]));
+      const name = parse_name();
+      const copy = parse_term(ctx);
+      const body = parse_term(extend(ctx, [name, Var(0)]));
       return subst(body, copy, 0);
     }
 
     // Slf
     else if (match("$")) {
-      var name = parse_name();
-      var type = parse_term(extend(ctx, [name, Var(0)]));
+      const name = parse_name();
+      const type = parse_term(extend(ctx, [name, Var(0)]));
       return Slf(name, type);
     }
 
     // New
     else if (match("@")) {
-      var type = parse_term(ctx);
-      var expr = parse_term(ctx);
+      const type = parse_term(ctx);
+      const expr = parse_term(ctx);
       return New(type, expr);
     }
 
     // Use
     else if (match("~")) {
-      var expr = parse_term(ctx);
+      const expr = parse_term(ctx);
       return Use(expr);
     }
 
     // Ann
     else if (match(":")) {
-      var type = parse_term(ctx);
-      var skip = parse_exact("=");
-      var expr = parse_term(ctx);
+      const type = parse_term(ctx);
+      const skip = parse_exact("=");
+      const expr = parse_term(ctx);
       return Ann(type, expr, false);
     }
 
     // Variable / Reference
     else {
-      var name = parse_name();
-      var skip = 0;
+      const name = parse_name();
+      let skip = 0;
       while (match("'")) {
         skip += 1;
       }
-      var var_index = index_of(ctx, name, skip);
+      const var_index = index_of(ctx, name, skip);
       if (var_index === null) {
         return Ref(name, false);
       } else {
@@ -311,8 +311,8 @@ const parse = (code) => {
     }
   }
 
-  var index = 0;
-  var defs = {};
+  let index = 0;
+  const defs = {};
   while (index < code.length) {
     skip_spaces();
     if (match("//")) {
@@ -320,9 +320,9 @@ const parse = (code) => {
         index += 1;
       }
     } else {
-      var skip = parse_exact(".");
-      var name = parse_name();
-      var term = parse_term(Ctx());
+      const skip = parse_exact(".");
+      const name = parse_name();
+      const term = parse_term(Ctx());
       defs[name] = term;
     }
     skip_spaces();
@@ -339,48 +339,48 @@ const shift = ([ctor, term], inc, depth) => {
     case "Typ":
       return Typ();
     case "All":
-      var eras = term.eras;
-      var name = term.name;
-      var bind = shift(term.bind, inc, depth);
-      var body = shift(term.body, inc, depth + 1);
+      const eras = term.eras;
+      const name = term.name;
+      const bind = shift(term.bind, inc, depth);
+      const body = shift(term.body, inc, depth + 1);
       return All(name, bind, body, eras);
     case "Lam":
-      var eras = term.eras;
-      var name = term.name;
-      var bind = term.bind && shift(term.bind, inc, depth);
-      var body = shift(term.body, inc, depth + 1);
+      const eras = term.eras;
+      const name = term.name;
+      const bind = term.bind && shift(term.bind, inc, depth);
+      const body = shift(term.body, inc, depth + 1);
       return Lam(name, bind, body, eras);
     case "App":
-      var eras = term.eras;
-      var func = shift(term.func, inc, depth);
-      var argm = shift(term.argm, inc, depth);
+      const eras = term.eras;
+      const func = shift(term.func, inc, depth);
+      const argm = shift(term.argm, inc, depth);
       return App(func, argm, eras);
     case "Box":
-      var expr = shift(term.expr, inc, depth);
+      const expr = shift(term.expr, inc, depth);
       return Box(expr);
     case "Put":
-      var expr = shift(term.expr, inc, depth);
+      const expr = shift(term.expr, inc, depth);
       return Put(expr);
     case "Dup":
-      var name = term.name;
-      var expr = shift(term.expr, inc, depth);
-      var body = shift(term.body, inc, depth + 1);
+      const name = term.name;
+      const expr = shift(term.expr, inc, depth);
+      const body = shift(term.body, inc, depth + 1);
       return Dup(name, expr, body);
     case "Slf":
-      var name = term.name;
-      var type = shift(term.type, inc, depth + 1);
+      const name = term.name;
+      const type = shift(term.type, inc, depth + 1);
       return Slf(name, type);
     case "New":
-      var type = shift(term.type, inc, depth);
-      var expr = shift(term.expr, inc, depth);
+      const type = shift(term.type, inc, depth);
+      const expr = shift(term.expr, inc, depth);
       return New(type, expr);
     case "Use":
-      var expr = shift(term.expr, inc, depth);
+      const expr = shift(term.expr, inc, depth);
       return Use(expr);
     case "Ann":
-      var type = shift(term.type, inc, depth);
-      var expr = shift(term.expr, inc, depth);
-      var done = term.done;
+      const type = shift(term.type, inc, depth);
+      const expr = shift(term.expr, inc, depth);
+      const done = term.done;
       return Ann(type, expr, done);
     case "Ref":
       return Ref(term.name, term.eras);
@@ -395,52 +395,52 @@ const subst = ([ctor, term], val, depth) => {
     case "Typ":
       return Typ();
     case "All":
-      var eras = term.eras;
-      var name = term.name;
-      var bind = subst(term.bind, val, depth);
-      var body = subst(term.body, val && shift(val, 1, 0), depth + 1);
+      const eras = term.eras;
+      const name = term.name;
+      const bind = subst(term.bind, val, depth);
+      const body = subst(term.body, val && shift(val, 1, 0), depth + 1);
       return All(name, bind, body, eras);
     case "Lam":
-      var eras = term.eras;
-      var name = term.name;
-      var bind = term.bind && subst(term.bind, val, depth);
-      var body = subst(term.body, val && shift(val, 1, 0), depth + 1);
+      const eras = term.eras;
+      const name = term.name;
+      const bind = term.bind && subst(term.bind, val, depth);
+      const body = subst(term.body, val && shift(val, 1, 0), depth + 1);
       return Lam(name, bind, body, eras);
     case "App":
-      var eras = term.eras;
-      var func = subst(term.func, val, depth);
-      var argm = subst(term.argm, val, depth);
+      const eras = term.eras;
+      const func = subst(term.func, val, depth);
+      const argm = subst(term.argm, val, depth);
       return App(func, argm, eras);
     case "Box":
-      var expr = subst(term.expr, val, depth);
+      const expr = subst(term.expr, val, depth);
       return Box(expr);
     case "Put":
-      var expr = subst(term.expr, val, depth);
+      const expr = subst(term.expr, val, depth);
       return Put(expr);
     case "Dup": 
-      var name = term.name;
-      var expr = subst(term.expr, val, depth);
-      var body = subst(term.body, val && shift(val, 1, 0), depth + 1);
+      const name = term.name;
+      const expr = subst(term.expr, val, depth);
+      const body = subst(term.body, val && shift(val, 1, 0), depth + 1);
       return Dup(name, expr, body);
     case "Slf":
-      var name = term.name;
-      var type = subst(term.type, val && shift(val, 1, 0), depth + 1);
+      const name = term.name;
+      const type = subst(term.type, val && shift(val, 1, 0), depth + 1);
       return Slf(name, type);
     case "New":
-      var type = subst(term.type, val, depth);
-      var expr = subst(term.expr, val, depth);
+      const type = subst(term.type, val, depth);
+      const expr = subst(term.expr, val, depth);
       return New(type, expr);
     case "Use":
-      var expr = subst(term.expr, val, depth);
+      const expr = subst(term.expr, val, depth);
       return Use(expr);
     case "Ann":
-      var type = subst(term.type, val, depth);
-      var expr = subst(term.expr, val, depth);
-      var done = term.done;
+      const type = subst(term.type, val, depth);
+      const expr = subst(term.expr, val, depth);
+      const done = term.done;
       return Ann(type, expr, done);
     case "Ref":
-      var eras = term.eras;
-      var name = term.name;
+      const eras = term.eras;
+      const name = term.name;
       return Ref(name, eras);
   }
 }
@@ -513,13 +513,13 @@ const equals = (a, b, defs) => {
     switch (node[0]) {
       // An equality test
       case "Eqs":
-        var {a, b} = node[1];
+        const {a, b} = node[1];
 
         // Gets whnfs with and without dereferencing
-        var ax = norm(a, {}, true);
-        var bx = norm(b, {}, true);
-        var ay = norm(a, defs, true);
-        var by = norm(b, defs, true);
+        const ax = norm(a, {}, true);
+        const bx = norm(b, {}, true);
+        const ay = norm(a, defs, true);
+        const by = norm(b, defs, true);
 
         // Optional optimization: if hashes are equal, then a == b
         if (a[2] === b[2] || ax[2] === bx[2] || ay[2] === by[2]) {
@@ -527,19 +527,19 @@ const equals = (a, b, defs) => {
         }
 
         // If non-deref whnfs are app and fields are equal, then a == b
-        var x = null;
+        let x = null;
         if (ax[2] !== ay[2] || bx[2] !== by[2]) {
           if (ax[0] === "Ref" && bx[0] === "Ref" && ax[1].name === bx[1].name) {
             x = Val(true);
           } else if (ax[0] === "App" && bx[0] === "App") {
-            var func = Eqs(ax[1].func, bx[1].func);
-            var argm = Eqs(ax[1].argm, bx[1].argm);
+            const func = Eqs(ax[1].func, bx[1].func);
+            const argm = Eqs(ax[1].argm, bx[1].argm);
             x = Bop(false, func, argm);
           }
         }
 
         // If whnfs are equal and fields are equal, then a == b
-        var y = null;
+        let y = null;
         if (ay[0] === "Typ" && by[0] === "Typ") {
           y = Val(true);
         } else if (ay[0] === "All" && by[0] === "All") {
@@ -568,7 +568,7 @@ const equals = (a, b, defs) => {
 
       // A binary operation (or / and)
       case "Bop":
-        var {v, x, y} = node[1];
+        const {v, x, y} = node[1];
         if (x[0] === "Val") {
           return x[1].v === v ? Val(v) : y;
         } else if (y[0] === "Val") {
@@ -584,9 +584,9 @@ const equals = (a, b, defs) => {
   }
 
   // Expands the search tree until it finds an answer
-  var tree = Eqs(erase(a), erase(b));
+  let tree = Eqs(erase(a), erase(b));
   while (tree[0] !== "Val") {
-    var tree = step(tree);
+    tree = step(tree);
   }
   return tree[1].v;
 }
@@ -596,7 +596,7 @@ const norm = (foo, defs = {}, weak = false, dup = false) => {
   const [ctor, term] = foo;
   const cont = !weak ? norm : (x => x);
   const apply = (eras, func, argm) => {
-    var func = norm(func, defs, true, dup);
+    const func = norm(func, defs, true, dup);
     // ([x]a b) ~> [b/x]a
     if (func[0] === "Lam") {
       return norm(subst(func[1].body, argm, 0), defs, weak, dup);
@@ -608,7 +608,7 @@ const norm = (foo, defs = {}, weak = false, dup = false) => {
     }
   }
   const duplicate = (name, expr, body) => {
-    var expr = norm(expr, defs, true, dup);
+    const expr = norm(expr, defs, true, dup);
     // [x = |a] b ~> [a/x]b
     if (expr[0] === "Put") {
       return norm(subst(body, expr[1].expr, 0), defs, weak, dup);
@@ -621,7 +621,7 @@ const norm = (foo, defs = {}, weak = false, dup = false) => {
   }
   const dereference = (eras, name) => {
     if (defs[name]) {
-      var nf = norm(defs[name], defs, weak, dup);
+      const nf = norm(defs[name], defs, weak, dup);
       return eras ? erase(nf) : nf;
     } else {
       return Ref(name, eras);
@@ -650,9 +650,9 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
     case "Typ":
       return Typ();
     case "All":
-      var bind_t = infer(term[1].bind, defs, ctx, false, seen);
-      var ex_ctx = extend(ctx, [term[1].name, shift(term[1].bind, 1, 0)]);
-      var body_t = infer(term[1].body, defs, ex_ctx, false, seen);
+      const bind_t = infer(term[1].bind, defs, ctx, false, seen);
+      const ex_ctx = extend(ctx, [term[1].name, shift(term[1].bind, 1, 0)]);
+      const body_t = infer(term[1].body, defs, ex_ctx, false, seen);
       if (!equals(bind_t, Typ(), defs, ctx) || !equals(body_t, Typ(), defs, ctx)) {
         throw "[ERROR]\nForall not a type: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
@@ -665,24 +665,24 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
       } else if (strat && !is_at_level(term[1].body, 0)) {
         throw "Lambda-bound variable occurs inside boxes: " + show(term, ctx);
       } else {
-        var ex_ctx = extend(ctx, [term[1].name, shift(term[1].bind, 1, 0)]);
-        var body_t = infer(term[1].body, defs, ex_ctx, strat, seen);
-        var term_t = All(term[1].name, term[1].bind, body_t, term[1].eras);
+        const ex_ctx = extend(ctx, [term[1].name, shift(term[1].bind, 1, 0)]);
+        const body_t = infer(term[1].body, defs, ex_ctx, strat, seen);
+        const term_t = All(term[1].name, term[1].bind, body_t, term[1].eras);
         infer(term_t, defs, ctx, false, seen);
         return term_t;
       }
     case "App":
-      var func_t = norm(infer(term[1].func, defs, ctx, strat, seen), defs, true);
+      const func_t = norm(infer(term[1].func, defs, ctx, strat, seen), defs, true);
       if (func_t[0] !== "All") {
         throw "[ERROR]\nNon-function application on `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
       if (func_t[1].eras !== term[1].eras) {
         throw "[ERROR]\nErasure doesn't match on application `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
-      var argm_v = check(term[1].argm, func_t[1].bind, defs, ctx, strat && !func_t[1].eras, seen, () => "`" + show(term, ctx) + "`'s argument");
+      const argm_v = check(term[1].argm, func_t[1].bind, defs, ctx, strat && !func_t[1].eras, seen, () => "`" + show(term, ctx) + "`'s argument");
       return subst(func_t[1].body, argm_v, 0);
     case "Box":
-      var expr_t = norm(infer(term[1].expr, defs, ctx, strat, seen), defs, true);
+      const expr_t = norm(infer(term[1].expr, defs, ctx, strat, seen), defs, true);
       if (!equals(expr_t, Typ(), defs, ctx)) {
         throw "[ERROR]\nBox not a type: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
@@ -691,29 +691,29 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
       if (term[1].type === null) {
         throw "[ERROR]\nCan't infer non-annotated put `"+show(term,ctx)+"`.\n\n[CONTEXT]\n" + show_context(ctx);
       } else {
-        var term_t = infer(term[1].expr, defs, ctx, strat, seen);
+        const term_t = infer(term[1].expr, defs, ctx, strat, seen);
         return Box(term_t);
       }
     case "Dup":
-      var expr_t = norm(infer(term[1].expr, defs, ctx, strat, seen), defs, true);
+      const expr_t = norm(infer(term[1].expr, defs, ctx, strat, seen), defs, true);
       if (expr_t[0] !== "Box") {
         throw "[ERROR]\nUnboxed duplication: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
       if (strat && !is_at_level(term[1].body, 1)) {
         throw "[ERROR]\nOccurrence of duplication varible isn't wrapped by exactly 1 box: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
-      var ex_ctx = extend(ctx, [term[1].name, shift(expr_t[1].expr, 1, 0)]);
-      var body_t = infer(term[1].body, defs, ex_ctx, strat, seen);
+      const ex_ctx = extend(ctx, [term[1].name, shift(expr_t[1].expr, 1, 0)]);
+      const body_t = infer(term[1].body, defs, ex_ctx, strat, seen);
       return subst(body_t, Dup(term[1].name, term[1].expr, Var(0)), 0);
     case "Slf":
-      var ex_ctx = extend(ctx, [term[1].name, shift(term, 1, 0)]);
-      var type_t = infer(term[1].type, defs, ex_ctx, false, seen);
+      const ex_ctx = extend(ctx, [term[1].name, shift(term, 1, 0)]);
+      const type_t = infer(term[1].type, defs, ex_ctx, false, seen);
       if (!equals(type_t, Typ(), defs, ctx)) {
         throw "[ERROR]\nSelf not a type: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
       return Typ();
     case "New":
-      var type = norm(term[1].type, defs, true);
+      const type = norm(term[1].type, defs, true);
       if (type[0] !== "Slf") { 
         throw "[ERROR]\nNon-self instantiation: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
@@ -721,7 +721,7 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
       check(term[1].expr, subst(type[1].type, Ann(type, term, true), 0), defs, ctx, strat, seen);
       return term[1].type;
     case "Use":
-      var expr_t = norm(infer(term[1].expr, defs, ctx, false, seen), defs, true);
+      const expr_t = norm(infer(term[1].expr, defs, ctx, false, seen), defs, true);
       if (expr_t[0] !== "Slf") {
         throw "[ERROR]\nNon-self projection: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
@@ -739,7 +739,7 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
       if (!defs[term[1].name]) {
         throw "[ERROR]\nUndefined reference: `" + term[1].name + "`.";
       }
-      var def = defs[term[1].name];
+      const def = defs[term[1].name];
       return infer(def, defs, ctx, strat, Object.assign({[term[1].name]: true}, seen));
     case "Var":
       return get_term(ctx, term[1].index);
@@ -748,8 +748,8 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
 
 // Checks if a term has given type
 const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = null) => {
-  var expr   = expr || (() => "`" + show(term, ctx) + "`");
-  var type_n = norm(type, defs, true);
+  const expr   = expr || (() => "`" + show(term, ctx) + "`");
+  const type_n = norm(type, defs, true);
   if (type_n[0] === "All" && term[0] === "Lam") {
     if (type_n[1].eras !== term[1].eras) {
       throw "Erasure doesn't match on " + expr() + ".";
@@ -761,35 +761,37 @@ const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = nu
       throw "Lambda-bound variable occurs inside boxes: " + show(term, ctx);
     }
     infer(type_n, defs, ctx, false, seen);
-    var ex_ctx = extend(ctx, [term[1].name, shift(type_n[1].bind, 1, 0)]);
-    var body_v = check(term[1].body, type_n[1].body, defs, ex_ctx, strat, seen, () => "`" + show(term, ctx) + "`'s body");
+    const ex_ctx = extend(ctx, [term[1].name, shift(type_n[1].bind, 1, 0)]);
+    const body_v = check(term[1].body, type_n[1].body, defs, ex_ctx, strat, seen, () => "`" + show(term, ctx) + "`'s body");
     return Lam(type_n[1].name, type_n[1].bind, body_v, type_n[1].eras);
   } else if (type_n[0] === "Box" && term[0] === "Put") {
-    var expr_v = check(term[1].expr, type_n[1].expr, defs, ctx, strat, seen, () => "`" + show(term, ctx) + "`.");
+    const expr_v = check(term[1].expr, type_n[1].expr, defs, ctx, strat, seen, () => "`" + show(term, ctx) + "`.");
     return Put(expr_v);
   } else if (term[0] === "Dup") {
-    var expr_t = norm(infer(term[1].expr, defs, ctx, strat, seen), defs, true);
+    const expr_t = norm(infer(term[1].expr, defs, ctx, strat, seen), defs, true);
     if (expr_t[0] !== "Box") {
       throw "[ERROR]\nUnboxed duplication: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
     }
     if (strat && !is_at_level(term[1].body, 1)) {
       throw "[ERROR]\nOccurrence of duplication varible isn't wrapped by exactly 1 box: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
     }
-    var ex_ctx = extend(ctx, [term[1].name, shift(expr_t[1].expr, 1, 0)]);
-    var body_v = check(term[1].body, shift(type_n, 1, 0), defs, ex_ctx, strat, seen, () => "`" + show(term, ctx) + "`'s body");
+    const ex_ctx = extend(ctx, [term[1].name, shift(expr_t[1].expr, 1, 0)]);
+    const body_v = check(term[1].body, shift(type_n, 1, 0), defs, ex_ctx, strat, seen, () => "`" + show(term, ctx) + "`'s body");
     return Dup(term[1].name, term[1].expr, body_v);
   } else {
-    var term_t = infer(term, defs, ctx, strat, seen);
+    const term_t = infer(term, defs, ctx, strat, seen);
+    let checks;
+    let unsure;
     try {
-      var checks = equals(type_n, term_t, defs, ctx);
-      var unsure = false;
+      checks = equals(type_n, term_t, defs, ctx);
+      unsure = false;
     } catch (e) {
-      var checks = false;
-      var unsure = true;
+      checks = false;
+      unsure = true;
     }
     if (!checks) {
-      var error = unsure ? "Couldn't decide if terms are equal." : "";
-      var error = error + show_mismatch(type, term_t, expr, ctx, defs);
+      let error = unsure ? "Couldn't decide if terms are equal." : "";
+      error = error + show_mismatch(type, term_t, expr, ctx, defs);
       throw error;
     }
     return term;
@@ -798,7 +800,7 @@ const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = nu
 
 // Formats a type-mismatch error message
 const show_mismatch = (expect, actual, expr, ctx, defs) => {
-  var text = "";
+  let text = "";
   text += "[ERROR]\nType mismatch on " + expr() + ".\n";
   text += "- Expected:\n";
   text += "-- type: " + show(expect, ctx) + "\n";
