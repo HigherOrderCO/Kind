@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 
-var fs = require("fs");
-var path = require("path");
-var fm = require(".");
+const fs = require("fs");
+const path = require("path");
+const fm = require(".");
 
 try {
-  var argv = [].slice.call(process.argv, 2);
+  const argv = [].slice.call(process.argv, 2);
   if (argv[0] === "-v") { console.log(require("./package.json").version); process.exit(); }
   if (argv.length === 0 || argv[0] === "--help") throw "";
-  var expr = argv.pop() || "main";
-  var args = {};
-  var defa = "-itleTRx";
+  const expr = argv.pop() || "main";
+  const args = {};
+  const defa = "-itleTRx";
   if (argv.length === 0) argv = [defa];
   argv.join("").split("").forEach(c => args[c] = 1);
-  var code = "";
-  var files = fs.readdirSync(".");
-  for (var i = 0; i < files.length; ++i) {
+  let code = "";
+  const files = fs.readdirSync(".");
+  for (let i = 0; i < files.length; ++i) {
     if (files[i].slice(-3) === ".fm") {
       code += fs.readFileSync("./" + files[i], "utf8") + "\n";
     }
@@ -45,21 +45,21 @@ try {
   process.exit();
 }
 
-var defs = fm.parse(code);
-var term = fm.parse(". main (" + expr + ")").main;
+const defs = fm.parse(code);
+const term = fm.parse(". main (" + expr + ")").main;
 
-var funcs = {
+const funcs = {
   N: ["Type:", () => console.log(fm.show(fm.norm((args.E ? fm.erase : (x => x))(fm.infer(term, defs)), args.R ? {} : defs, args.W, args.L)))],
   n: ["Norm (interpreted):", () => console.log(fm.show(fm.norm((args.e ? fm.erase : (x => x))(term), args.r ? {} : defs, args.w, args.l)))],
   x: ["Norm (using NASIC):", () => {
-    var net = fm.compile(term, defs);
-    var stats = net.reduce_lazy();
+    const net = fm.compile(term, defs);
+    const stats = net.reduce_lazy();
     console.log(fm.show(fm.norm((args.e ? fm.erase : (x => x))(fm.decompile(net)), args.r ? {} : defs, args.w, args.l)))
     console.log("(" + stats.rewrites + " rewrites)");
   }]
 };
 
-for (var key in funcs) {
+for (const key in funcs) {
   if (args[key]) {
     if (args.i) console.log("\x1b[4m" + funcs[key][0] + "\x1b[0m");
     try {
