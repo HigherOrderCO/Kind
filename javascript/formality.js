@@ -486,11 +486,13 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
           
 // Removes computationally irrelevant expressions
 const erase = ([ctor, args]) => {
+    const is_eta = (lam) => lam[1].body[0] === "App" && lam[1].body[1].argm[0] === "Var" && lam[1].body[1].argm[1].index === 0 && uses(lam[1].body[1].func, 0) === 0;
+    const do_eta = (lam) => is_eta(lam) ? subst(lam[1].body[1].func, Typ(), 0) : lam;
   switch (ctor) {
     case "Var": return Var(args.index);
     case "Typ": return Typ();
     case "All": return All(args.name, erase(args.bind), erase(args.body), args.eras);
-    case "Lam": return args.eras ? subst(erase(args.body), Typ(), 0) : Lam(args.name, null, erase(args.body), args.eras);
+    case "Lam": return args.eras ? subst(erase(args.body), Typ(), 0) : do_eta(Lam(args.name, null, erase(args.body), args.eras));
     case "App": return args.eras ? erase(args.func) : App(erase(args.func), erase(args.argm), args.eras);
     case "Box": return Box(erase(args.expr));
     case "Put": return Put(erase(args.expr));

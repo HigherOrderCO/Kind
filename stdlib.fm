@@ -230,6 +230,103 @@
   [B = (~b -[b](P (add zero b)) |[-n] [h] (s -(add zero n) h))]
 | [z] (A (B z)) 
 
+. add_zero_r
+: {a : Nat} !(Eq Nat (add a zero) a)
+= [a]
+  let motive [x]
+    (Eq Nat (add x zero) x)
+  let case_succ |[-pred] [h]
+    (cong -Nat -Nat -(add pred zero) -pred h -succ)
+  let case_zero (refl -Nat -zero)
+  [S = (~a -motive case_succ)]
+| (S case_zero)
+
+. add_zero_l
+: {a : Nat} !(Eq Nat (add a zero) a)
+= [a]
+  let motive [x]
+    (Eq Nat (add x zero) x)
+  let case_succ |[-pred] [h] (refl -Nat -(succ pred))
+  let case_zero (refl -Nat -zero)
+  [S = (~a -motive case_succ)]
+| (S case_zero)
+
+. add_succ_r
+: {a : Nat} {b : Nat} !(Eq Nat (add a (succ b)) (succ (add a b)))
+= [a] [b]
+  let motive [self]
+    (Eq Nat (add self (succ b)) (succ (add self b)))
+  let case_succ |[-pred] [h]
+    (cong -Nat -Nat -(add pred (succ b)) -(succ (add pred b)) h -succ)
+  let case_zero (refl -Nat -(succ b))
+  [S = (~a -motive case_succ)]
+| (S case_zero)
+
+. add_comm_zero
+: {b : Nat} !(Eq Nat (add zero b) (add b zero))
+= [a]
+  let motive [x]
+    (Eq Nat (add x zero) (add zero x))
+  let case_succ |[-pred] [h] (refl -Nat -(succ pred))
+  let case_zero (refl -Nat -(add zero zero))
+  [S = (~a -motive case_succ)]
+| (S case_zero)
+
+
+// Two different nonstratified proofs of commutativity; only works in erased positions.
+. add_comm
+: {a : Nat} !{b : Nat} (Eq Nat (add a b) (add b a))
+= [a]
+  let motive [self]
+    {b : Nat} (Eq Nat (add self b) (add b self))
+  let case_succ | [-pred] [h] [b]
+      [prf = (add_succ_r b pred)]
+      let h (h b)
+      (rewrite -Nat
+        -(add b pred) -(add pred b) (sym -Nat -(add pred b) -(add b pred) h)
+        -[x : Nat] (Eq Nat (succ x) (add b (succ pred)))
+        (sym -Nat -(add b (succ pred)) -(succ (add b pred)) prf))
+  let case_zero [b]
+    [prf = (add_comm_zero b)]
+    prf
+  [S = (~a -motive case_succ)]
+| (S case_zero)
+
+. add_comm2
+: {a : Nat} {b : Nat} !(Eq Nat (add a b) (add b a))
+= [a] [b]
+  let motive [self] (Eq Nat (add self b) (add b self))
+  let case_succ | [-pred] [h]
+      [prf = (add_succ_r b pred)]
+      (rewrite -Nat
+        -(add b pred) -(add pred b) (sym -Nat -(add pred b) -(add b pred) h)
+        -[x : Nat] (Eq Nat (succ x) (add b (succ pred)))
+        (sym -Nat -(add b (succ pred)) -(succ (add b pred)) prf))
+  let case_zero
+    [prf = (add_comm_zero b)]
+    prf
+  [S = (~a -motive case_succ)]
+| (S case_zero)
+
+. add_assoc
+: {a : Nat} {b : Nat} {c : Nat} !(Eq Nat (add (add a b) c) (add a (add b c)))
+= [a] [b] [c]
+  let motive [self]
+    (Eq Nat (add (add self b) c) (add self (add b c)))
+  let case_succ |[-a] [h]
+    let ab_c (add (add a b) c)
+    let a_bc (add a (add b c))
+    (cong -Nat -Nat -ab_c -a_bc h -succ)
+  let case_zero
+    (refl -Nat -(add b c))
+  [S = (~a -motive case_succ)]
+  | (S case_zero)
+
+. add_assoc_l
+: {a : Nat} {b : Nat} {c : Nat} !(Eq Nat (add a (add b c)) (add (add a b) c))
+= [a] [b] [c] [prf = (add_assoc a b c)]
+  | (sym -Nat -(add (add a b) c) -(add a (add b c)) prf)
+
 // This was quite hard to get right, so it deserves some explaining. To make
 // this, first I defined the untyped function this should erase to:
 // . Z [s] [z] z
