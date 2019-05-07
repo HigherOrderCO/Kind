@@ -47,7 +47,7 @@ var show_info = args.i;
 var show_stats = args.S;
 
 var defs = eac.parse(code);
-var term = eac.parse("main = (" + expr + ")").main;
+var term = eac.parse(". main (" + expr + ")").main;
 
 var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 

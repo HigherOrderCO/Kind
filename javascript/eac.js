@@ -148,13 +148,13 @@ const parse = (code) => {
       while (match("'")) {
         skip += 1;
       }
-      for (var i = 0; i < ctx.length; ++i) {
+      for (var i = ctx.length - 1; i >= 0; --i) {
         if (ctx[i] === name) {
           if (skip === 0) break;
           else skip -= 1;
         }
       }
-      if (i === ctx.length) {
+      if (i === -1) {
         return Ref(name);
       } else {
         return Var(ctx.length - i - 1);
@@ -172,13 +172,8 @@ const parse = (code) => {
       }
     } else {
       var init = index;
+      var skip = parse_exact(".");
       var name = parse_name();
-      while (match("-")) {
-        while (index < code.length && code[index] !== "\n") {
-          index += 1;
-        }
-      }
-      var skip = parse_exact("=");
       var term = parse_term([]);
       defs[name] = term;
     }
@@ -292,8 +287,12 @@ const check_stratification = ([ctor, term], defs = {}, ctx = []) => {
       check_stratification(term.body, defs, ctx.concat([term.name]));
       break;
     case "Ref":
-      check_stratification(defs[term.name], defs, ctx);
-      break;
+      if (!defs[term.name]) {
+        throw "[ERROR]\nUndefined reference: " + term.name;
+      } else {
+        check_stratification(defs[term.name], defs, ctx);
+        break;
+      }
   }
 }
 
