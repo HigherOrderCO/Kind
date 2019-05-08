@@ -1,0 +1,26 @@
+. true  [t] [f] t
+. false [t] [f] f
+. not   [b] [t] [f] (b f t)
+. not   [b] (b false true)
+
+. zero [s] | [z] z
+. succ [n] [s] [s = s] [k = (n |s)] | [z] (s (k z))
+. mul  [a] [b] [s] [S = s] [A = [B = (b |S)] (a |B)] | [z] (A z)
+
+. n0 [s]         | [z] z
+. n1 [s] [s = s] | [z] (s z)
+. n2 [s] [s = s] | [z] (s (s z))
+. n3 [s] [s = s] | [z] (s (s (s z)))
+. n4 (mul n2 n2)
+. n8 (mul n4 n2)
+. n16 (mul n8 n2)
+. n32 (mul n16 n2)
+. n64 (mul n32 n2)
+. n128 (mul n64 n2)
+. n256 (mul n128 n2)
+
+. add_test {3.2 + 2}
+. mul_test {3.2 * 2}
+. fun_test [x] {x + 7}
+
+. main [F = (n256 |[x] {x * 1.01})] | (F 1)
