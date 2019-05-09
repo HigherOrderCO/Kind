@@ -11,6 +11,10 @@
 . head [x] [xs] (xs [x] [xs] x x)
 . tail [xs] (xs [x] [xs] xs nil)
 
+. pair [a] [b] [pair] (pair a b)
+. fst  [a] [b] a
+. snd  [a] [b] b
+
 . n0 [s]         # [z] z
 . n1 [s] [s = s] # [z] (s z)
 . n2 [s] [s = s] # [z] (s (s z))
@@ -22,6 +26,16 @@
 . n64 (mul n32 n2)
 . n128 (mul n64 n2)
 . n256 (mul n128 n2)
+. n65536 (mul n256 n256)
+
+. fib [n]
+  let init (pair #0 #1)
+  let next [p] [pair] (p [a] [b] [A = a] [B = b] (pair #B #{A + B}))
+  [F = (n #next)] # (F init [a] [b] a)
+
+// outputs 832827963 (which is fib(65536) % 2^32), in 393555 graph rewrites
+. fib_test
+  (fib n65536)
 
 . add_test
   {3 + 2}
@@ -45,5 +59,4 @@
   # (F 0)
 
 . main
-  get_fst_char_test
-
+  fib_test
