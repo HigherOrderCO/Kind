@@ -70,7 +70,6 @@ if (show_eal_sic) {
   if (show_info) console.log(BOLD("Norm (λ-NASIC):"));
   try {
     var net = e2n.compile(term, defs);
-    //console.log(net.to_string());
     var stats = net.reduce();
     console.log(fmc.show(e2n.decompile(net)));
     if (show_stats) {
@@ -81,6 +80,7 @@ if (show_eal_sic) {
     if (show_info) console.log("");
   } catch (e) {
     console.log(e);
+    process.exit();
     if (show_info) console.log("");
   }
 }

@@ -9,6 +9,10 @@ const Num = (numb)             => ["Num", {numb}];
 const Op1 = (func, num0, num1) => ["Op1", {func, num0, num1}];
 const Op2 = (func, num0, num1) => ["Op2", {func, num0, num1}];
 
+const BUF = new ArrayBuffer(8);
+const U32 = new Uint32Array(BUF);
+const F64 = new Float64Array(BUF);
+
 // Generates a name
 const gen_name = (n) => {
   var str = "";
@@ -27,9 +31,14 @@ const show = ([ctor, args], canon = false, ctx = []) => {
     case "Var":
       return ctx[ctx.length - args.index - 1] || "^" + args.index;
     case "Lam":
-      var name = canon ? gen_name(ctx.length) : args.name;
-      var body = show(args.body, canon, ctx.concat([name]));
-      return "[" + name + "] " + body;
+      var text = term_to_text([ctor, args]);
+      if (text) {
+        return "\"" + text + "\"";
+      } else {
+        var name = canon ? gen_name(ctx.length) : args.name;
+        var body = show(args.body, canon, ctx.concat([name]));
+        return "[" + name + "] " + body;
+      }
     case "App":
       var text = ")";
       var term = [ctor, args];
@@ -40,7 +49,7 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       return "(" + show(term, canon, ctx) + text;
     case "Put":
       var expr = show(args.expr, canon, ctx);
-      return "|" + expr;
+      return "#" + expr;
     case "Dup":
       var name = args.name;
       var expr = show(args.expr, canon, ctx);
@@ -66,7 +75,7 @@ const parse = (code) => {
   }
 
   function is_name_char(char) {
-    return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-/*_.~".indexOf(char) !== -1;
+    return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.+-*/%&|^~<>".indexOf(char) !== -1;
   }
 
   function skip_spaces() {
@@ -139,7 +148,7 @@ const parse = (code) => {
     }
 
     // Put
-    else if (match("|")) {
+    else if (match("#")) {
       var expr = parse_term(ctx);
       return Put(expr);
     }
@@ -161,12 +170,23 @@ const parse = (code) => {
       return Op2(func, num0, num1);
     }
 
+    // String
+    else if (match("\"")) {
+      // Parses text
+      var text = "";
+      while (code[index] !== "\"") {
+        text += code[index++];
+      }
+      index++;
+      return text_to_term(text);
+    }
+
     // Variable / Reference
     else {
       var name = parse_name();
       var numb = Number(name);
       if (!isNaN(numb)) {
-        return Num(numb);
+        return Num(numb >>> 0);
       }
       var skip = 0;
       while (match("'")) {
@@ -393,11 +413,22 @@ const norm = ([ctor, term], defs = {}, dup = false) => {
     var num0 = norm(num0, defs, dup);
     if (num0[0] === "Num") {
       switch (func) {
-        case "+": return Num(num0[1].numb + num1[1].numb);
-        case "-": return Num(num0[1].numb - num1[1].numb);
-        case "*": return Num(num0[1].numb * num1[1].numb);
-        case "/": return Num(num0[1].numb / num1[1].numb);
-        default: throw "[RUNTIME-ERROR]\nUnknown primitive: " + func + ".";
+        case "+"  : return Num((num0[1].numb + num1[1].numb) >>> 0);
+        case "-"  : return Num((num0[1].numb - num1[1].numb) >>> 0);
+        case "*"  : return Num((num0[1].numb * num1[1].numb) >>> 0);
+        case "/"  : return Num((num0[1].numb / num1[1].numb) >>> 0);
+        case "%"  : return Num((num0[1].numb % num1[1].numb) >>> 0);
+        case "**" : return Num((num0[1].numb ** num1[1].numb) >>> 0);
+        case "&"  : return Num((num0[1].numb & num1[1].numb) >>> 0);
+        case "|"  : return Num((num0[1].numb | num1[1].numb) >>> 0);
+        case "^"  : return Num((num0[1].numb ^ num1[1].numb) >>> 0);
+        case "~"  : return Num((~ num1[1].numb) >>> 0);
+        case ">>" : return Num((num0[1].numb >>> num1[1].numb) >>> 0);
+        case "<<" : return Num((num0[1].numb << num1[1].numb) >>> 0);
+        case ">"  : return Num((num0[1].numb > num1[1].numb ? 1 : 0) >>> 0);
+        case "<"  : return Num((num0[1].numb < num1[1].numb ? 1 : 0) >>> 0);
+        case "==" : return Num((num0[1].numb === num1[1].numb ? 1 : 0) >>> 0);
+        default   : throw "[RUNTIME-ERROR]\nUnknown primitive: " + func + ".";
       }
     } else {
       return Op1(func, num0, norm(num1, defs, dup));
@@ -437,6 +468,49 @@ const equal = ([a_ctor, a_term], [b_ctor, b_term]) => {
     case "op1-op1": return a_term.func === b_term.func && equal(a_term.num0, b_term.num0) && a_term.num1 === a_term.num1;
     case "op2-op2": return a_term.func === b_term.func && equal(a_term.num0, b_term.num0) && equal(a_term.num1, b_term.num1);
     default: return false;
+  }
+}
+
+const text_to_term = (text) => {
+  // Converts UTF-8 to bytes
+  var bytes = [].slice.call(new TextEncoder("utf-8").encode(text), 0);
+
+  // Converts bytes to uints
+  while (bytes.length % 8 !== 0) {
+    bytes.push(0);
+  }
+  var nums = new Uint32Array(new Uint8Array(bytes).buffer);
+
+  // Converts uints to C-List of nums
+  var term = Var(0);
+  for (var i = nums.length - 1; i >= 0; --i) {
+    term = App(App(Var(1), Num(nums[i])), term);
+  }
+  term = App(App(Var(1), Num(0x74786574)), term);
+  term = Lam("c", Dup("c", Var(0), Put(Lam("n", term))));
+  return term;
+}
+
+const term_to_text = (term) => {
+  try {
+    try {
+      term = term[1].body[1].body[1].expr[1].body;
+    } catch(e) {
+      term = term[1].body[1].body;
+    }
+    if (term[1].func[1].argm[1].numb === 0x74786574) {
+      term = term[1].argm;
+      var nums = [];
+      while (term[0] !== "Var") {
+        nums.push(term[1].func[1].argm[1].numb);
+        term = term[1].argm;
+      }
+      return new TextDecoder("utf-8").decode(new Uint8Array(new Uint32Array(nums).buffer));
+    } else {
+      return null;
+    }
+  } catch (e) {
+    return null;
   }
 }
 

@@ -1,23 +1,34 @@
 const {Var, App, Lam, Num, Op1, Op2, gen_name} = require("./core.js");
-const {Net, Pointer, addr_of, slot_of, NOD, NUM, OP1, OP2} = require("./nasic.js");
+const {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, NOD, OP1, OP2, NUM, PTR} = require("./nasic.js");
 
 const op_kind = {
-  0: "+", "+": 0, 
-  1: "-", "-": 1, 
-  2: "*", "*": 2, 
-  3: "/", "/": 3, 
+   0 : "+"  , "+"  : 0, 
+   1 : "-"  , "-"  : 1, 
+   2 : "*"  , "*"  : 2, 
+   3 : "/"  , "/"  : 3, 
+   4 : "%"  , "%"  : 4,
+   5 : "**" , "**" : 5,
+   6 : "&"  , "&"  : 6,
+   7 : "|"  , "|"  : 7,
+   8 : "^"  , "^"  : 8,
+   9 : "~"  , "~"  : 9,
+  10 : ">>" , ">>" : 10,
+  11 : "<<" , "<<" : 11,
+  12 : ">"  , ">"  : 12,
+  13 : "<"  , "<"  : 13,
+  14 : "==" , "=="  : 14,
 };
 
 const compile = (term, defs = {}) => {
   const build_net = (term, net, var_ptrs, level) => {
-    const get_var = (ptr) => {
-      if (!net.enter_port(ptr) || net.enter_port(ptr) === ptr) {
-        return ptr;
+    const get_var = (ptrn) => {
+      if (net.enter_port(ptrn) === ptrn) {
+        return ptrn;
       } else {
-        var dups_ptr = net.enter_port(ptr);
+        var dups_ptrn = net.enter_port(ptrn);
         var dup_addr = net.alloc_node(NOD, Math.floor((1 + Math.random()) * Math.pow(2,16)));
-        net.link_ports(Pointer(dup_addr, 0), ptr);
-        net.link_ports(Pointer(dup_addr, 1), dups_ptr);
+        net.link_ports(Pointer(dup_addr, 0), ptrn);
+        net.link_ports(Pointer(dup_addr, 1), dups_ptrn);
         return Pointer(dup_addr, 2);
       }
     };
@@ -47,14 +58,10 @@ const compile = (term, defs = {}) => {
         net.link_ports(Pointer(app_addr, 1), argm_ptr)
         return Pointer(app_addr, 2);
       case "Num":
-        var num_addr = net.alloc_node(NUM, 0);
-        net.set_num(num_addr, term[1].numb);
-        return Pointer(num_addr, 0);
+        return Numeric(term[1].numb | 0);
       case "Op1":
         var op1_addr = net.alloc_node(OP1, op_kind[term[1].func]);
-        var num_addr = net.alloc_node(NUM, 0);
-        net.set_num(num_addr, term[1].num1);
-        net.link_ports(Pointer(num_addr, 0), Pointer(op1_addr, 1));
+        net.link_ports(Numeric(term[1].num1[1].numb), Pointer(op1_addr, 1));
         var num0_ptr = build_net(term[1].num0, net, var_ptrs, level);
         net.link_ports(num0_ptr, Pointer(op1_addr, 0));
         return Pointer(op1_addr, 2);
@@ -81,64 +88,72 @@ const compile = (term, defs = {}) => {
   net.link_ports(Pointer(root_addr, 1), term_ptr);
   // Removes invalid redexes. They can be created by the
   // compiler when duplicating variables more than once.
-  net.redex = net.redex.filter(([a_addr, b_addr]) => {
-    var a_p0 = Pointer(a_addr, 0);
-    var b_p0 = Pointer(b_addr, 0);
-    var a_ok = net.enter_port(a_p0) === b_p0;
-    var b_ok = net.enter_port(b_p0) === a_p0;
-    return a_ok && b_ok;
+  net.redex = net.redex.filter((a_addr) => {
+    var b_ptrn = net.enter_port(Pointer(a_addr, 0));
+    if (type_of(b_ptrn) !== NUM) {
+      var b_addr = addr_of(b_ptrn);
+      var a_p0 = Pointer(a_addr, 0);
+      var b_p0 = Pointer(b_addr, 0);
+      var a_ok = net.enter_port(a_p0) === b_p0;
+      var b_ok = net.enter_port(b_p0) === a_p0;
+      return a_ok && b_ok;
+    } else {
+      return true;
+    }
   });
   return net;
 };
 
 const decompile = (net) => {
-  const build_term = (net, ptr, var_ptrs, dup_exit) => {
-    var addr = addr_of(ptr);
-    var type = net.nodes[addr * 4 + 3] & 0x3;
-    var kind = net.nodes[addr * 4 + 3] >>> 2;
-    if (type === NOD) {
-      if (kind === 1) {
-        switch (slot_of(ptr)) {
-          case 0:
-            var_ptrs.push(Pointer(addr, 1));
-            var body = build_term(net, net.enter_port(Pointer(addr, 2)), var_ptrs, dup_exit);
-            var_ptrs.pop();
-            return Lam(gen_name(var_ptrs.length), body);
-          case 1:
-            for (var index = 0; index < var_ptrs.length; ++index) {
-              if (var_ptrs[var_ptrs.length - index - 1] === ptr) {
-                return Var(index);
+  const build_term = (net, ptrn, var_ptrs, dup_exit) => {
+    if (type_of(ptrn) === NUM) {
+      return Num(numb_of(ptrn));
+    } else {
+      var addr = addr_of(ptrn);
+      var type = net.type_of(addr);
+      var kind = net.kind_of(addr);
+      if (type === NOD) {
+        if (kind === 1) {
+          switch (slot_of(ptrn)) {
+            case 0:
+              var_ptrs.push(Pointer(addr, 1));
+              var body = build_term(net, net.enter_port(Pointer(addr, 2)), var_ptrs, dup_exit);
+              var_ptrs.pop();
+              return Lam(gen_name(var_ptrs.length), body);
+            case 1:
+              for (var index = 0; index < var_ptrs.length; ++index) {
+                if (var_ptrs[var_ptrs.length - index - 1] === ptrn) {
+                  return Var(index);
+                }
               }
-            }
-          case 2:
-            var argm = build_term(net, net.enter_port(Pointer(addr, 1)), var_ptrs, dup_exit);
-            var func = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
-            return App(func, argm);
+            case 2:
+              var argm = build_term(net, net.enter_port(Pointer(addr, 1)), var_ptrs, dup_exit);
+              var func = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
+              return App(func, argm);
+          }
+        } else {
+          switch (slot_of(ptrn)) {
+            case 0:
+              var exit = dup_exit.pop();
+              var term = build_term(net, net.enter_port(Pointer(addr, exit)), var_ptrs, dup_exit);
+              dup_exit.push(exit);
+              return term;
+            default:
+              dup_exit.push(slot_of(ptrn));
+              var term = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
+              dup_exit.pop();
+              return term;
+          }
         }
-      } else {
-        switch (slot_of(ptr)) {
-          case 0:
-            var exit = dup_exit.pop();
-            var term = build_term(net, net.enter_port(Pointer(addr, exit)), var_ptrs, dup_exit);
-            dup_exit.push(exit);
-            return term;
-          default:
-            dup_exit.push(slot_of(ptr));
-            var term = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
-            dup_exit.pop();
-            return term;
-        }
+      } else if (type === OP1) {
+        var num0 = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
+        var num1 = Num(numb_of(net.enter_port(Pointer(addr, 1))));
+        return Op1(op_kind[kind], num0, num1);
+      } else if (type === OP2) {
+        var num0 = build_term(net, net.enter_port(Pointer(addr, 1)), var_ptrs, dup_exit);
+        var num1 = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
+        return Op2(op_kind[kind], num0, num1);
       }
-    } else if (type === OP1) {
-      var num0 = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
-      var num1 = Num(net.get_num(addr_of(net.enter_port(Pointer(addr, 1)))));
-      return Op1(op_kind[kind], num0, num1);
-    } else if (type === OP2) {
-      var num0 = build_term(net, net.enter_port(Pointer(addr, 1)), var_ptrs, dup_exit);
-      var num1 = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
-      return Op2(op_kind[kind], num0, num1);
-    } else if (type === NUM) {
-      return Num(net.get_num(addr));
     }
   };
   return build_term(net, net.enter_port(Pointer(0, 1)), [], []);

@@ -1,16 +1,20 @@
 . true  [t] [f] t
 . false [t] [f] f
 . not   [b] [t] [f] (b f t)
-. not   [b] (b false true)
 
-. zero [s] | [z] z
-. succ [n] [s] [s = s] [k = (n |s)] | [z] (s (k z))
-. mul  [a] [b] [s] [S = s] [A = [B = (b |S)] (a |B)] | [z] (A z)
+. zero [s] # [z] z
+. succ [n] [s] [s = s] [k = (n #s)] # [z] (s (k z))
+. mul  [a] [b] [s] [S = s] [A = [B = (b #S)] (a #B)] # [z] (A z)
 
-. n0 [s]         | [z] z
-. n1 [s] [s = s] | [z] (s z)
-. n2 [s] [s = s] | [z] (s (s z))
-. n3 [s] [s = s] | [z] (s (s (s z)))
+. cons [x] [xs] [c] [n] (c x xs)
+. nil  [c] [n] n
+. head [x] [xs] (xs [x] [xs] x x)
+. tail [xs] (xs [x] [xs] xs nil)
+
+. n0 [s]         # [z] z
+. n1 [s] [s = s] # [z] (s z)
+. n2 [s] [s = s] # [z] (s (s z))
+. n3 [s] [s = s] # [z] (s (s (s z)))
 . n4 (mul n2 n2)
 . n8 (mul n4 n2)
 . n16 (mul n8 n2)
@@ -19,8 +23,27 @@
 . n128 (mul n64 n2)
 . n256 (mul n128 n2)
 
-. add_test {3.2 + 2}
-. mul_test {3.2 * 2}
-. fun_test [x] {x + 7}
+. add_test
+  {3 + 2}
 
-. main [F = (n256 |[x] {x * 1.01})] | (F 1)
+. mul_test
+  {3 * 2}
+
+. fun_test
+  ([x] {x + 7} 1)
+
+. inc_test
+  [F = (n2 #[x]{x + 1})]
+  # (F 0)
+
+. get_fst_char_test
+  [F = ("test" #cons)]
+  # {(head 0 (tail (F nil))) >> 24}
+
+. incs_test
+  [F = (n256 #[x]{x + 1})]
+  # (F 0)
+
+. main
+  get_fst_char_test
+
