@@ -10,32 +10,23 @@
 . nil  [c] [n] n
 . head [x] [xs] (xs [x] [xs] x x)
 . tail [xs] (xs [x] [xs] xs nil)
+. concat [a] [b] [cons] [cons = cons] [nil] (a #[h] [t] (cons h t) (b #cons nil))
 
 . pair [a] [b] [pair] (pair a b)
 . fst  [a] [b] a
 . snd  [a] [b] b
 
-. n0 [s]         # [z] z
-. n1 [s] [s = s] # [z] (s z)
-. n2 [s] [s = s] # [z] (s (s z))
-. n3 [s] [s = s] # [z] (s (s (s z)))
-. n4 (mul n2 n2)
-. n8 (mul n4 n2)
-. n16 (mul n8 n2)
-. n32 (mul n16 n2)
-. n64 (mul n32 n2)
-. n128 (mul n64 n2)
-. n256 (mul n128 n2)
-. n65536 (mul n256 n256)
+. SUCC [n] [s] [z] (s n)
+. ZERO     [s] [z] z
 
 . fib [n]
   let init (pair #0 #1)
   let next [p] [pair] (p [a] [b] [A = a] [B = b] (pair #B #{A + B}))
   [F = (n #next)] # (F init [a] [b] a)
 
-// outputs 832827963 (which is fib(65536) % 2^32), in 393555 graph rewrites
+// outputs 832827963 (which is fib(65536) % 2^32), in 393481 graph rewrites
 . fib_test
-  (fib n65536)
+  (fib ~65536)
 
 . add_test
   {3 + 2}
@@ -55,8 +46,22 @@
   # {(head 0 (tail (F nil))) >> 24}
 
 . incs_test
-  [F = (n256 #[x]{x + 1})]
+  [F = (~256 #[x]{x + 1})]
   # (F 0)
+
+. Lam [body]        [Lam] [App] (Lam body)
+. App [func] [argm] [Lam] [App] (App func argm)
+
+. redex [term]
+  let lam [body]
+    (Lam body)
+  let app [func]
+    let app-lam [lam-body] [argm]
+      (lam-body argm) 
+    let app-app [app-func] [app-argm] [argm]
+      (App (App app-func app-argm) argm)
+    (func app-lam app-app)
+  (term lam app)
 
 . main
   fib_test

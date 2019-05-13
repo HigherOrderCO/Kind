@@ -26,7 +26,7 @@ const compile = (term, defs = {}) => {
         return ptrn;
       } else {
         var dups_ptrn = net.enter_port(ptrn);
-        var dup_addr = net.alloc_node(NOD, Math.floor((1 + Math.random()) * Math.pow(2,16)));
+        var dup_addr = net.alloc_node(NOD, level_of[ptrn] + 1);
         net.link_ports(Pointer(dup_addr, 0), ptrn);
         net.link_ports(Pointer(dup_addr, 1), dups_ptrn);
         return Pointer(dup_addr, 2);
@@ -35,6 +35,7 @@ const compile = (term, defs = {}) => {
     switch (term[0]) {
       case "Dup":
         var expr_ptr = build_net(term[1].expr, net, var_ptrs, level);
+        level_of[expr_ptr] = level;
         var_ptrs.push(expr_ptr);
         var body_ptr = build_net(term[1].body, net, var_ptrs, level);
         var_ptrs.pop();
@@ -43,15 +44,16 @@ const compile = (term, defs = {}) => {
         var expr_ptr = build_net(term[1].expr, net, var_ptrs, level + 1);
         return expr_ptr;
       case "Lam":
-        var lam_addr = net.alloc_node(NOD, 1);
+        var lam_addr = net.alloc_node(NOD, 0);
         net.link_ports(Pointer(lam_addr, 1), Pointer(lam_addr, 1));
+        level_of[Pointer(lam_addr, 1)] = level;
         var_ptrs.push(Pointer(lam_addr, 1));
         var body_ptr = build_net(term[1].body, net, var_ptrs, level);
         var_ptrs.pop();
         net.link_ports(Pointer(lam_addr, 2), body_ptr);
         return Pointer(lam_addr, 0);
       case "App":
-        var app_addr = net.alloc_node(NOD, 1);
+        var app_addr = net.alloc_node(NOD, 0);
         var func_ptr = build_net(term[1].func, net, var_ptrs, level);
         net.link_ports(Pointer(app_addr, 0), func_ptr);
         var argm_ptr = build_net(term[1].argm, net, var_ptrs, level);
@@ -113,7 +115,7 @@ const decompile = (net) => {
       var type = net.type_of(addr);
       var kind = net.kind_of(addr);
       if (type === NOD) {
-        if (kind === 1) {
+        if (kind === 0) {
           switch (slot_of(ptrn)) {
             case 0:
               var_ptrs.push(Pointer(addr, 1));

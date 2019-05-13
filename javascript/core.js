@@ -181,6 +181,13 @@ const parse = (code) => {
       return text_to_term(text);
     }
 
+    // Nat
+    else if (match("~")) {
+      var name = parse_name();
+      var numb = Number(name);
+      return numb_to_term(numb);
+    }
+
     // Variable / Reference
     else {
       var name = parse_name();
@@ -513,6 +520,20 @@ const term_to_text = (term) => {
     return null;
   }
 }
+
+const numb_to_term = (numb) => {
+  var term = Var(0);
+  var log2 = Math.floor(Math.log(numb) / Math.log(2));
+  for (var i = 0; i < log2 + 1; ++i) {
+    term = (numb >>> (log2 - i)) & 1 ? App(Var(i + 1), term) : term;
+  }
+  term = Put(Lam("x", term));
+  for (var i = 0; i < log2; ++i) {
+    term = Dup("s" + (log2 - i), Put(Lam("x", App(Var(1), App(Var(1), Var(0))))), term);
+  }
+  term = Lam("s", Dup("s0", Var(0), term));
+  return term;
+};
 
 module.exports = {
   gen_name,
