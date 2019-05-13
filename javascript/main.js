@@ -61,7 +61,7 @@ if (check_eal) {
   try {
     fmc.check_stratification(term, defs);
   } catch (e) {
-    console.log(e);
+    console.log(e.toString());
     process.exit();
   }
 }
@@ -80,7 +80,6 @@ if (show_eal_sic) {
     if (show_info) console.log("");
   } catch (e) {
     console.log(e);
-    process.exit();
     if (show_info) console.log("");
   }
 }

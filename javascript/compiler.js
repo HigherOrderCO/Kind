@@ -60,7 +60,7 @@ const compile = (term, defs = {}) => {
         net.link_ports(Pointer(app_addr, 1), argm_ptr)
         return Pointer(app_addr, 2);
       case "Num":
-        return Numeric(term[1].numb | 0);
+        return Numeric(term[1].numb >>> 0);
       case "Op1":
         var op1_addr = net.alloc_node(OP1, op_kind[term[1].func]);
         net.link_ports(Numeric(term[1].num1[1].numb), Pointer(op1_addr, 1));
