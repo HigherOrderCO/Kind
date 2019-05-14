@@ -13,8 +13,8 @@
 . concat [a] [b] [cons] [cons = cons] [nil] (a #[h] [t] (cons h t) (b #cons nil))
 
 . pair [a] [b] [pair] (pair a b)
-. fst  [a] [b] a
-. snd  [a] [b] b
+. fst  [p] (p [a] [b] a)
+. snd  [p] (p [a] [b] b)
 
 . SUCC [n] [s] [z] (s n)
 . ZERO     [s] [z] z
@@ -64,8 +64,14 @@
   (term lam app)
 
 . to_chars [str] [cons] [cons = cons]
-  [f = (str #[c] [C = c] # [cs] (cons #C cs))]
+  [f =
+    (snd str #[c] [c = c] [cs]
+      let c0 #{{c >> 24} & 0xFF}
+      let c1 #{{c >> 16} & 0xFF}
+      let c2 #{{c >>  8} & 0xFF}
+      let c3 #{{c >>  0} & 0xFF}
+      (cons c0 (cons c1 (cons c2 (cons c3 cs)))))]
   # [nil] (f nil)
 
 . main
-  ~10
+  (to_chars "test")

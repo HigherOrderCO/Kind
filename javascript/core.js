@@ -515,7 +515,7 @@ const text_to_term = (text) => {
   var bytes = [].slice.call(new TextEncoder("utf-8").encode(text), 0);
 
   // Converts bytes to uints
-  while (bytes.length % 8 !== 0) {
+  while (bytes.length % 4 !== 0) {
     bytes.push(0);
   }
   var nums = new Uint32Array(new Uint8Array(bytes).buffer);
@@ -523,9 +523,8 @@ const text_to_term = (text) => {
   // Converts uints to C-List of nums
   var term = Var(0);
   for (var i = nums.length - 1; i >= 0; --i) {
-    term = App(App(Var(1), Num(nums[i])), term);
+    term = App(App(Var(1), Put(Num(nums[i]))), term);
   }
-  //term = App(App(Var(1), Num(0x74786574)), term);
   term = Lam("t", App(App(Var(0), Num(0x74786574)), Lam("c", Dup("c", Var(0), Put(Lam("n", term))))));
   return term;
 }
@@ -545,7 +544,7 @@ const term_to_text = (term) => {
         if (term[1].func[1].func[1].index !== 1) {
           return null;
         }
-        nums.push(term[1].func[1].argm[1].numb);
+        nums.push(term[1].func[1].argm[1].expr[1].numb);
         term = term[1].argm;
       }
       if (term[1].index !== 0) {
