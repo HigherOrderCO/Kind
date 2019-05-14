@@ -1,3 +1,7 @@
+// ::::::::::
+// :: Term ::
+// ::::::::::
+
 // An ESCoC term is an ADT represented by a JSON
 const Var = (index)            => ["Var", {index}];
 const Lam = (name, body)       => ["Lam", {name, body}];
@@ -9,67 +13,9 @@ const Num = (numb)             => ["Num", {numb}];
 const Op1 = (func, num0, num1) => ["Op1", {func, num0, num1}];
 const Op2 = (func, num0, num1) => ["Op2", {func, num0, num1}];
 
-const BUF = new ArrayBuffer(8);
-const U32 = new Uint32Array(BUF);
-const F64 = new Float64Array(BUF);
-
-// Generates a name
-const gen_name = (n) => {
-  var str = "";
-  ++n;
-  while (n > 0) {
-    --n;
-    str += String.fromCharCode(97 + n % 26);
-    n = Math.floor(n / 26);
-  }
-  return str;
-};
-
-// Converts a term to a string
-const show = ([ctor, args], canon = false, ctx = []) => {
-  switch (ctor) {
-    case "Var":
-      return ctx[ctx.length - args.index - 1] || "^" + args.index;
-    case "Lam":
-      var text = term_to_text([ctor, args]);
-      var numb = term_to_numb([ctor, args]);
-      if (text) {
-        return "\"" + text + "\"";
-      } else if (numb) {
-        return "~" + Number(numb);
-      } else {
-        var name = canon ? gen_name(ctx.length) : args.name;
-        var body = show(args.body, canon, ctx.concat([name]));
-        return "[" + name + "] " + body;
-      }
-    case "App":
-      var text = ")";
-      var term = [ctor, args];
-      while (term[0] === "App") {
-        text = " " + show(term[1].argm, canon, ctx) + text;
-        term = term[1].func;
-      }
-      return "(" + show(term, canon, ctx) + text;
-    case "Put":
-      var expr = show(args.expr, canon, ctx);
-      return "#" + expr;
-    case "Dup":
-      var name = args.name;
-      var expr = show(args.expr, canon, ctx);
-      var body = show(args.body, canon, ctx.concat([name]));
-      return "[" + name + " = " + expr + "] " + body;
-    case "Num":
-      return args.numb.toString();
-    case "Op1":
-    case "Op2":
-      var func = args.func;
-      var num0 = show(args.num0, canon, ctx);
-      var num1 = show(args.num1, canon, ctx);
-      return "{" + num0 + " " + func + " " + num1 + "}";
-    case "Ref":
-      return args.name;
-  }
-}
+// :::::::::::::
+// :: Parsing ::
+// :::::::::::::
 
 // Converts a string to a term
 const parse = (code) => {
@@ -237,6 +183,72 @@ const parse = (code) => {
   return defs;
 }
 
+// :::::::::::::::::::::
+// :: Stringification ::
+// :::::::::::::::::::::
+
+// Generates a name
+const gen_name = (n) => {
+  var str = "";
+  ++n;
+  while (n > 0) {
+    --n;
+    str += String.fromCharCode(97 + n % 26);
+    n = Math.floor(n / 26);
+  }
+  return str;
+};
+
+// Converts a term to a string
+const show = ([ctor, args], canon = false, ctx = []) => {
+  switch (ctor) {
+    case "Var":
+      return ctx[ctx.length - args.index - 1] || "^" + args.index;
+    case "Lam":
+      var text = term_to_text([ctor, args]);
+      var numb = term_to_numb([ctor, args]);
+      if (text) {
+        return "\"" + text + "\"";
+      } else if (numb) {
+        return "~" + Number(numb);
+      } else {
+        var name = canon ? gen_name(ctx.length) : args.name;
+        var body = show(args.body, canon, ctx.concat([name]));
+        return "[" + name + "] " + body;
+      }
+    case "App":
+      var text = ")";
+      var term = [ctor, args];
+      while (term[0] === "App") {
+        text = " " + show(term[1].argm, canon, ctx) + text;
+        term = term[1].func;
+      }
+      return "(" + show(term, canon, ctx) + text;
+    case "Put":
+      var expr = show(args.expr, canon, ctx);
+      return "#" + expr;
+    case "Dup":
+      var name = args.name;
+      var expr = show(args.expr, canon, ctx);
+      var body = show(args.body, canon, ctx.concat([name]));
+      return "[" + name + " = " + expr + "] " + body;
+    case "Num":
+      return args.numb.toString();
+    case "Op1":
+    case "Op2":
+      var func = args.func;
+      var num0 = show(args.num0, canon, ctx);
+      var num1 = show(args.num1, canon, ctx);
+      return "{" + num0 + " " + func + " " + num1 + "}";
+    case "Ref":
+      return args.name;
+  }
+}
+
+// ::::::::::::::::::
+// :: Substitution ::
+// ::::::::::::::::::
+
 // Shifts a term
 const shift = ([ctor, term], inc, depth) => {
   switch (ctor) {
@@ -307,6 +319,10 @@ const subst = ([ctor, term], val, depth) => {
       return Ref(name);
   }
 }
+
+// ::::::::::::::::::::
+// :: Stratification ::
+// ::::::::::::::::::::
 
 // How many times a variable was used in computational positions
 const uses = ([ctor, term], depth = 0) => {
@@ -379,6 +395,10 @@ const check_stratification = ([ctor, term], defs = {}, ctx = []) => {
       }
   }
 }
+
+// ::::::::::::::::
+// :: Evaluation ::
+// ::::::::::::::::
 
 // Reduces a term to normal form or head normal form
 const norm = ([ctor, term], defs = {}, dup = false) => {
@@ -465,6 +485,10 @@ const norm = ([ctor, term], defs = {}, dup = false) => {
   }
 }
 
+// ::::::::::::::
+// :: Equality ::
+// ::::::::::::::
+
 // Checks if two terms are equal
 const equal = ([a_ctor, a_term], [b_ctor, b_term]) => {
   switch (a_ctor + "-" + b_ctor) {
@@ -481,6 +505,11 @@ const equal = ([a_ctor, a_term], [b_ctor, b_term]) => {
   }
 }
 
+// :::::::::::::::::::
+// :: Syntax Sugars ::
+// :::::::::::::::::::
+
+// Converts an utf-8 string to a λ-encoded term
 const text_to_term = (text) => {
   // Converts UTF-8 to bytes
   var bytes = [].slice.call(new TextEncoder("utf-8").encode(text), 0);
@@ -501,6 +530,7 @@ const text_to_term = (text) => {
   return term;
 }
 
+// Converts a λ-encoded term to a string, if possible
 const term_to_text = (term) => {
   try {
     term = term[1].body;
@@ -530,6 +560,7 @@ const term_to_text = (term) => {
   }
 }
 
+// Converts a number to a λ-encoded nat for repeated application (bounded for-loop)
 const numb_to_term = (numb) => {
   var term = Var(0);
   var log2 = Math.floor(Math.log(numb) / Math.log(2));
@@ -544,6 +575,7 @@ const numb_to_term = (numb) => {
   return term;
 }
 
+// Converts a λ-encoded nat to a number, if possible
 const term_to_numb = (term) => {
   try {
     try {
@@ -567,7 +599,6 @@ const term_to_numb = (term) => {
     return null;
   }
 }
-
 
 module.exports = {
   gen_name,
