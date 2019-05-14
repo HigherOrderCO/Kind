@@ -681,6 +681,8 @@ const norm = (term, defs = {}, to_lam = false) => {
     return norm(subst(term.body, term.expr, 0), defs, to_lam)
   } else if (to_lam && ctor === "Prj") {
     return norm(subst(subst(term.body, Fst(shift(term.pair, 1, 0)), 1), Snd(term.pair), 0), defs, to_lam);
+  } else if (to_lam && ctor === "Cpy") {
+    return norm(Par(term.numb, term.numb), defs, to_lam);
   } else {
     switch (ctor) {
       case "Var": return Var(term.index);

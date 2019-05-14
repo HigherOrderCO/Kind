@@ -41,6 +41,12 @@ def fib [n]
   let next [p] [tup] (p [a] [b] [A = a] [B = b] (tup #B #{A + B}))
   [F = (n #next)] # (F init [a] [b] a)
 
+// Using numeric copy primitive instead of duplications
+def fib2 [n]
+  let init (tup 0 1)
+  let next [p] [tup] (p [a] [b] @ B0 B1 *b (tup B0 {a + B1}))
+  [F = (n #next)] # (F init [a] [b] a)
+
 // ::::::::::::
 // :: String ::
 // ::::::::::::
