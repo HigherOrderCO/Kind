@@ -32,8 +32,11 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       return ctx[ctx.length - args.index - 1] || "^" + args.index;
     case "Lam":
       var text = term_to_text([ctor, args]);
+      var numb = term_to_numb([ctor, args]);
       if (text) {
         return "\"" + text + "\"";
+      } else if (numb) {
+        return "~" + Number(numb);
       } else {
         var name = canon ? gen_name(ctx.length) : args.name;
         var body = show(args.body, canon, ctx.concat([name]));
@@ -493,24 +496,30 @@ const text_to_term = (text) => {
   for (var i = nums.length - 1; i >= 0; --i) {
     term = App(App(Var(1), Num(nums[i])), term);
   }
-  term = App(App(Var(1), Num(0x74786574)), term);
-  term = Lam("c", Dup("c", Var(0), Put(Lam("n", term))));
+  //term = App(App(Var(1), Num(0x74786574)), term);
+  term = Lam("t", App(App(Var(0), Num(0x74786574)), Lam("c", Dup("c", Var(0), Put(Lam("n", term))))));
   return term;
 }
 
 const term_to_text = (term) => {
   try {
-    try {
-      term = term[1].body[1].body[1].expr[1].body;
-    } catch(e) {
-      term = term[1].body[1].body;
-    }
+    term = term[1].body;
     if (term[1].func[1].argm[1].numb === 0x74786574) {
-      term = term[1].argm;
+      try {
+        term = term[1].argm[1].body[1].body[1].expr[1].body;
+      } catch(e) {
+        term = term[1].argm[1].body[1].body;
+      }
       var nums = [];
       while (term[0] !== "Var") {
+        if (term[1].func[1].func[1].index !== 1) {
+          return null;
+        }
         nums.push(term[1].func[1].argm[1].numb);
         term = term[1].argm;
+      }
+      if (term[1].index !== 0) {
+        return null;
       }
       return new TextDecoder("utf-8").decode(new Uint8Array(new Uint32Array(nums).buffer));
     } else {
@@ -533,7 +542,32 @@ const numb_to_term = (numb) => {
   }
   term = Lam("s", Dup("s0", Var(0), term));
   return term;
-};
+}
+
+const term_to_numb = (term) => {
+  try {
+    try {
+      term = term[1].body[1].body[1].expr[1].body;
+    } catch(e) {
+      term = term[1].body[1].body;
+    }
+    var count = 0;
+    while (term[0] !== "Var") {
+      if (term[1].func[1].index !== 1) {
+        return null;
+      }
+      count++;
+      term = term[1].argm;
+    }
+    if (term[1].index !== 0) {
+      return null;
+    }
+    return count;
+  } catch (e) {
+    return null;
+  }
+}
+
 
 module.exports = {
   gen_name,

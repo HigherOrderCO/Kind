@@ -63,5 +63,9 @@
     (func app-lam app-app)
   (term lam app)
 
+. to_chars [str] [cons] [cons = cons]
+  [f = (str #[c] [C = c] # [cs] (cons #C cs))]
+  # [nil] (f nil)
+
 . main
-  fib_test
+  ~10
