@@ -5,19 +5,21 @@
 // ::::::::::
 
 // An ESCoC term is an ADT represented by a JSON
-const Var = (index)            => ["Var", {index}];
-const Lam = (name, body)       => ["Lam", {name, body}];
-const App = (func, argm)       => ["App", {func, argm}];
-const Put = (expr)             => ["Put", {expr}];
-const Dup = (name, expr, body) => ["Dup", {name, expr, body}];
-const Num = (numb)             => ["Num", {numb}];
-const Op1 = (func, num0, num1) => ["Op1", {func, num0, num1}];
-const Op2 = (func, num0, num1) => ["Op2", {func, num0, num1}];
-const Ite = (cond, pair)       => ["Ite", {cond, pair}];
-const Par = (val0, val1)       => ["Par", {val0, val1}];
-const Fst = (pair)             => ["Fst", {pair}];
-const Snd = (pair)             => ["Snd", {pair}];
-const Ref = (name)             => ["Ref", {name}];
+const Var = (index)                  => ["Var", {index}];
+const Lam = (name, body)             => ["Lam", {name, body}];
+const App = (func, argm)             => ["App", {func, argm}];
+const Put = (expr)                   => ["Put", {expr}];
+const Dup = (name, expr, body)       => ["Dup", {name, expr, body}];
+const Num = (numb)                   => ["Num", {numb}];
+const Op1 = (func, num0, num1)       => ["Op1", {func, num0, num1}];
+const Op2 = (func, num0, num1)       => ["Op2", {func, num0, num1}];
+const Ite = (cond, pair)             => ["Ite", {cond, pair}];
+const Cpy = (numb)                   => ["Cpy", {numb}];
+const Par = (val0, val1)             => ["Par", {val0, val1}];
+const Fst = (pair)                   => ["Fst", {pair}];
+const Snd = (pair)                   => ["Snd", {pair}];
+const Prj = (nam0, nam1, pair, body) => ["Prj", {nam0, nam1, pair, body}];
+const Ref = (name)                   => ["Ref", {name}];
 
 // :::::::::::::
 // :: Parsing ::
@@ -150,6 +152,12 @@ const parse = (code) => {
       return Ite(cond, pair);
     }
 
+    // If-Then-Else
+    else if (match("*")) {
+      var numb = parse_term(ctx);
+      return Cpy(numb);
+    }
+
     // Pair
     else if (match("&")) {
       var val0 = parse_term(ctx);
@@ -167,6 +175,15 @@ const parse = (code) => {
     else if (match("@1")) {
       var pair = parse_term(ctx);
       return Snd(pair);
+    }
+
+    // Projection
+    else if (match("@")) {
+      var nam0 = parse_name();
+      var nam1 = parse_name();
+      var pair = parse_term(ctx);
+      var body = parse_term(ctx.concat([nam0, nam1]));
+      return Prj(nam0, nam1, pair, body);
     }
 
     // Variable / Reference
@@ -276,6 +293,9 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       var cond = show(args.cond, canon, ctx);
       var pair = show(args.pair, canon, ctx);
       return "? " + cond + " " + pair;
+    case "Cpy":
+      var numb = show(args.numb, canon, ctx);
+      return "*" + numb;
     case "Par":
       var val0 = show(args.val0, canon, ctx);
       var val1 = show(args.val1, canon, ctx);
@@ -286,6 +306,12 @@ const show = ([ctor, args], canon = false, ctx = []) => {
     case "Snd":
       var pair = show(args.pair, canon, ctx);
       return "@1 " + pair;
+    case "Prj":
+      var nam0 = args.nam0;
+      var nam1 = args.nam1;
+      var pair = show(args.pair, canon, ctx);
+      var body = show(args.body, canon, ctx.concat([nam0, nam1]));
+      return "@ " + nam0 + " " + nam1 + " " + pair + " " + body;
     case "Ref":
       return args.name;
   }
@@ -329,6 +355,9 @@ const shift = ([ctor, term], inc, depth) => {
       var cond = shift(term.cond, inc, depth);
       var pair = shift(term.pair, inc, depth);
       return Ite(cond, pair);
+    case "Cpy":
+      var numb = shift(term.numb, inc, depth);
+      return Cpy(numb);
     case "Par":
       var val0 = shift(term.val0, inc, depth);
       var val1 = shift(term.val1, inc, depth);
@@ -339,6 +368,12 @@ const shift = ([ctor, term], inc, depth) => {
     case "Snd":
       var pair = shift(term.pair, inc, depth);
       return Snd(pair);
+    case "Prj":
+      var nam0 = term.nam0;
+      var nam1 = term.nam1;
+      var pair = shift(term.pair, inc, depth);
+      var body = shift(term.body, inc, depth + 2);
+      return Prj(nam0, nam1, pair, body);
     case "Ref":
       return Ref(term.name);
   }
@@ -378,6 +413,9 @@ const subst = ([ctor, term], val, depth) => {
       var cond = subst(term.cond, val, depth);
       var pair = subst(term.pair, val, depth);
       return Ite(cond, pair);
+    case "Cpy":
+      var numb = subst(term.numb, val, depth);
+      return Cpy(numb);
     case "Par":
       var val0 = subst(term.val0, val, depth);
       var val1 = subst(term.val1, val, depth);
@@ -388,6 +426,12 @@ const subst = ([ctor, term], val, depth) => {
     case "Snd":
       var pair = subst(term.pair, val, depth);
       return Snd(pair);
+    case "Prj":
+      var nam0 = term.nam0;
+      var nam1 = term.nam1;
+      var pair = subst(term.pair, val, depth);
+      var body = subst(term.body, val && shift(val, 2, 0), depth + 2);
+      return Prj(nam0, nam1, pair, body);
     case "Ref":
       var name = term.name;
       return Ref(name);
@@ -410,9 +454,11 @@ const uses = ([ctor, term], depth = 0) => {
     case "Op1": return uses(term.num0, depth) + uses(term.num1, depth);
     case "Op2": return uses(term.num0, depth) + uses(term.num1, depth);
     case "Ite": return uses(term.cond, depth) + uses(term.pair, depth);
+    case "Cpy": return uses(term.numb, depth);
     case "Par": return uses(term.val0, depth) + uses(term.val1, depth);
     case "Fst": return uses(term.pair, depth);
     case "Snd": return uses(term.pair, depth);
+    case "Prj": return uses(term.pair, depth) + uses(term.body, depth + 2);
     case "Ref": return 0;
   }
 }
@@ -422,16 +468,18 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
   switch (ctor) {
     case "Var": return term.index !== depth || level === at_level;
     case "Lam": return is_at_level(term.body, at_level, depth + 1, level);
-    case "App": return is_at_level(term.func, at_level, depth, level) && (term.eras || is_at_level(term.argm, at_level, depth, level));
+    case "App": return is_at_level(term.func, at_level, depth, level) && is_at_level(term.argm, at_level, depth, level);
     case "Put": return is_at_level(term.expr, at_level, depth, level + 1);
     case "Dup": return is_at_level(term.expr, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level);
     case "Num": return true;
     case "Op1": return is_at_level(term.num0, at_level, depth, level) + is_at_level(term.num1, at_level, depth, level);
     case "Op2": return is_at_level(term.num0, at_level, depth, level) + is_at_level(term.num1, at_level, depth, level);
     case "Ite": return is_at_level(term.cond, at_level, depth, level) + is_at_level(term.pair, at_level, depth, level);
+    case "Cpy": return is_at_level(term.numb, at_level, depth, level);
     case "Par": return is_at_level(term.val0, at_level, depth, level) + is_at_level(term.val1, at_level, depth, level);
     case "Fst": return is_at_level(term.pair, at_level, depth, level);
     case "Snd": return is_at_level(term.pair, at_level, depth, level);
+    case "Prj": return is_at_level(term.pair, at_level, depth, level) && is_at_level(term.body, at_level, depth + 2, level);
     case "Pri": return is_at_level(term.argm, at_level, depth, level);
     case "Ref": return true;
   }
@@ -439,6 +487,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
 
 // Checks if a term is stratified
 const check = ([ctor, term], defs = {}, ctx = []) => {
+  return true
   switch (ctor) {
     case "Lam": 
       if (uses(term.body) > 1) {
@@ -472,6 +521,9 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
       check(term.cond, defs, ctx);
       check(term.pair, defs, ctx);
       break;
+    case "Cpy":
+      check(term.numb, defs, ctx);
+      break;
     case "Par":
       check(term.val0, defs, ctx);
       check(term.val1, defs, ctx);
@@ -481,6 +533,20 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
       break;
     case "Snd":
       check(term.pair, defs, ctx);
+      break;
+    case "Prj":
+      var uses0 = uses(term.body, 1);
+      var uses1 = uses(term.body, 0);
+      var isat0 = is_at_level(term.body, 0, 1);
+      var isat1 = is_at_level(term.body, 0, 0);
+      if (uses0 > 1 || uses1 > 1) {
+        throw "[ERROR]\nAffine variable `" + (uses0 > 1 ? term.nam0 : term.nam1) + "` used more than once in:\n" + show([ctor, term], false, ctx);
+      }
+      if (!isat0 || !isat1) {
+        throw "[ERROR]\nAffine variable `" + (!isat0 ? term.nam0 : term.nam1) + "` used inside a box in:\n" + show([ctor, term], false, ctx);
+      }
+      check(term.pair, defs, ctx);
+      check(term.body, defs, ctx.concat([term.nam0, term.nam1]));
       break;
     case "Ref":
       if (!defs[term.name]) {
@@ -497,47 +563,47 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
 // ::::::::::::::::
 
 // Reduces a term to normal form or head normal form
-const norm = (term, defs = {}, dup = false) => {
+const norm = (term, defs = {}, to_lam = false) => {
   var [ctor, term] = term;
   const apply = (func, argm) => {
-    var func = norm(func, defs, dup);
+    var func = norm(func, defs, to_lam);
     // ([x]a b) ~> [b/x]a
     if (func[0] === "Lam") {
-      return norm(subst(func[1].body, argm, 0), defs, dup);
+      return norm(subst(func[1].body, argm, 0), defs, to_lam);
     // ([x = a] b c) ~> [x = a] (b c)
     } else if (func[0] === "Dup") {
-      return norm(Dup(func[1].name, func[1].expr, App(func[1].body, shift(argm, 1, 0))), defs, dup);
+      return norm(Dup(func[1].name, func[1].expr, App(func[1].body, shift(argm, 1, 0))), defs, to_lam);
     // (|a b) ~> ⊥
     } else if (func[0] === "Put") {
       throw "[RUNTIME-ERROR]\nCan't apply a boxed value.";
     } else {
-      return App(norm(func, defs, dup), norm(argm, defs, dup));
+      return App(norm(func, defs, to_lam), norm(argm, defs, to_lam));
     }
   }
   const duplicate = (name, expr, body) => {
-    var expr = norm(expr, defs, dup);
+    var expr = norm(expr, defs, to_lam);
     // [x = |a] b ~> [a/x]b
     if (expr[0] === "Put") {
-      return norm(subst(body, expr[1].expr, 0), defs, dup);
+      return norm(subst(body, expr[1].expr, 0), defs, to_lam);
     // [x = [y = a] b] c ~> [y = a] [x = b] c
     } else if (expr[0] === "Dup") {
-      return norm(Dup(expr[1].name, expr[1].expr, Dup(name, expr[1].body, shift(body, 1, 1))), defs, dup); 
+      return norm(Dup(expr[1].name, expr[1].expr, Dup(name, expr[1].body, shift(body, 1, 1))), defs, to_lam); 
     // [x = [y] b] c ~> ⊥
     } else if (expr[0] === "Lam") {
       throw "[RUNTIME-ERROR]\nCan't duplicate a lambda.";
     } else {
-      return Dup(name, norm(expr, defs, dup), norm(body, defs, dup));
+      return Dup(name, norm(expr, defs, to_lam), norm(body, defs, to_lam));
     }
   }
   const dereference = (name) => {
     if (defs[name]) {
-      return norm(defs[name], defs, dup);
+      return norm(defs[name], defs, to_lam);
     } else {
       return Ref(name);
     }
   }
   const op1 = (func, num0, num1) => {
-    var num0 = norm(num0, defs, dup);
+    var num0 = norm(num0, defs, to_lam);
     if (num0[0] === "Num") {
       switch (func) {
         case "+"  : return Num((num0[1].numb + num1[1].numb) >>> 0);
@@ -558,55 +624,81 @@ const norm = (term, defs = {}, dup = false) => {
         default   : throw "[RUNTIME-ERROR]\nUnknown primitive: " + func + ".";
       }
     } else {
-      return Op1(func, num0, norm(num1, defs, dup));
+      return Op1(func, num0, norm(num1, defs, to_lam));
     }
   }
   const op2 = (func, num0, num1) => {
-    var num1 = norm(num1, defs, dup);
+    var num1 = norm(num1, defs, to_lam);
     if (num1[0] === "Num") {
-      return norm(Op1(func, num0, num1), defs, dup);
+      return norm(Op1(func, num0, num1), defs, to_lam);
     } else {
-      return Op2(func, norm(num0, defs, dup), num1);
+      return Op2(func, norm(num0, defs, to_lam), num1);
     }
   }
   const if_then_else = (cond, pair) => {
-    var cond = norm(cond, defs, dup);
+    var cond = norm(cond, defs, to_lam);
     if (cond[0] === "Num") {
-      return norm(cond[1].numb > 0 ? Fst(pair) : Snd(pair), defs, dup);
+      return norm(cond[1].numb > 0 ? Fst(pair) : Snd(pair), defs, to_lam);
     } else {
-      return Ite(cond, norm(pair, defs, dup));
+      return Ite(cond, norm(pair, defs, to_lam));
+    }
+  }
+  const copy = (numb) => {
+    var numb = norm(numb, defs, to_lam);
+    if (numb[0] === "Num") {
+      return norm(Par(numb, numb), defs, to_lam);
+    } else {
+      return Cpy(numb);
     }
   }
   const first = (pair) => {
-    var pair = norm(pair, defs, dup);
+    var pair = norm(pair, defs, to_lam);
     if (pair[0] === "Par") {
-      return norm(pair[1].val0, defs, dup);
+      return norm(pair[1].val0, defs, to_lam);
     } else {
       return Fst(pair);
     }
   }
   const second = (pair) => {
-    var pair = norm(pair, defs, dup);
+    var pair = norm(pair, defs, to_lam);
     if (pair[0] === "Par") {
-      return norm(pair[1].val1, defs, dup);
+      return norm(pair[1].val1, defs, to_lam);
     } else {
       return Snd(pair);
     }
   }
-  switch (ctor) {
-    case "Var": return Var(term.index);
-    case "Lam": return Lam(term.name, norm(term.body, defs, dup)); 
-    case "App": return apply(term.func, term.argm);
-    case "Put": return dup ? norm(term.expr, defs, dup) : Put(norm(term.expr, defs, dup));
-    case "Dup": return dup ? norm(subst(term.body, term.expr, 0), defs, dup) : duplicate(term.name, term.expr, term.body);
-    case "Num": return Num(term.numb);
-    case "Op1": return op1(term.func, term.num0, term.num1);
-    case "Op2": return op2(term.func, term.num0, term.num1);
-    case "Ite": return if_then_else(term.cond, term.pair);
-    case "Par": return Par(norm(term.val0, defs, dup), norm(term.val1, defs, dup));
-    case "Fst": return first(term.pair);
-    case "Snd": return second(term.pair);
-    case "Ref": return dereference(term.name);
+  const case_of = (nam0, nam1, pair, body) => {
+    var pair = norm(pair, defs, to_lam);
+    if (pair[0] === "Par") {
+      return norm(subst(subst(body, shift(pair[1].val0, 1, 0), 1), pair[1].val1, 0), defs, to_lam);
+    } else {
+      return Prj(nam0, nam1, pair, norm(body, defs, to_lam));
+    }
+  }
+  if (to_lam && ctor === "Put") {
+    return norm(term.expr, defs, to_lam);
+  } else if (to_lam && ctor === "Dup") {
+    return norm(subst(term.body, term.expr, 0), defs, to_lam)
+  } else if (to_lam && ctor === "Prj") {
+    return norm(subst(subst(term.body, Fst(shift(term.pair, 1, 0)), 1), Snd(term.pair), 0), defs, to_lam);
+  } else {
+    switch (ctor) {
+      case "Var": return Var(term.index);
+      case "Lam": return Lam(term.name, norm(term.body, defs, to_lam)); 
+      case "App": return apply(term.func, term.argm);
+      case "Put": return Put(norm(term.expr, defs, to_lam));
+      case "Dup": return duplicate(term.name, term.expr, term.body);
+      case "Num": return Num(term.numb);
+      case "Op1": return op1(term.func, term.num0, term.num1);
+      case "Op2": return op2(term.func, term.num0, term.num1);
+      case "Ite": return if_then_else(term.cond, term.pair);
+      case "Cpy": return copy(term.numb);
+      case "Par": return Par(norm(term.val0, defs, to_lam), norm(term.val1, defs, to_lam));
+      case "Fst": return first(term.pair);
+      case "Snd": return second(term.pair);
+      case "Prj": return case_of(term.nam0, term.nam1, term.pair, term.body);
+      case "Ref": return dereference(term.name);
+    }
   }
 }
 
@@ -627,9 +719,11 @@ const equal = ([a_ctor, a_term], [b_ctor, b_term]) => {
     case "op1-op1": return a_term.func === b_term.func && equal(a_term.num0, b_term.num0) && a_term.num1 === a_term.num1;
     case "op2-op2": return a_term.func === b_term.func && equal(a_term.num0, b_term.num0) && equal(a_term.num1, b_term.num1);
     case "ite-ite": return equal(a_term.cond, b_term.cond) && equal(a_term.pair, b_term.pair);
+    case "cpy-cpy": return equal(a_term.numb, b_term.numb);
     case "par-par": return equal(a_term.val0, b_term.val0) && equal(a_term.val1, b_term.val1);
     case "fst-fst": return equal(a_term.pair, b_term.pair);
     case "snd-snd": return equal(a_term.pair, b_term.pair);
+    case "cas-cas": return equal(a_term.pair, b_term.pair) && equal(a_term.body, b_term.body);
     default: return false;
   }
 }
@@ -652,7 +746,7 @@ const text_to_term = (text) => {
   // Converts uints to C-List of nums
   var term = Var(0);
   for (var i = nums.length - 1; i >= 0; --i) {
-    term = App(App(Var(1), Put(Num(nums[i]))), term);
+    term = App(App(Var(1), Num(nums[i])), term);
   }
   term = Lam("t", App(App(Var(0), Num(0x74786574)), Lam("c", Dup("c", Var(0), Put(Lam("n", term))))));
   return term;
@@ -673,11 +767,7 @@ const term_to_text = (term) => {
         if (term[1].func[1].func[1].index !== 1) {
           return null;
         }
-        try {
-          nums.push(term[1].func[1].argm[1].expr[1].numb);
-        } catch(e) {
-          nums.push(term[1].func[1].argm[1].numb);
-        }
+        nums.push(term[1].func[1].argm[1].numb);
         term = term[1].argm;
       }
       if (term[1].index !== 0) {
@@ -735,7 +825,7 @@ const term_to_numb = (term) => {
 module.exports = {
   Var, Ref, Lam, App, Put,
   Dup, Num, Op1, Op2, Ite,
-  Par, Fst, Snd,
+  Cpy, Par, Fst, Snd, Prj,
   gen_name,
   parse,
   show,

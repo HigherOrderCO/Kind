@@ -2,7 +2,7 @@
 
 var fs = require("fs");
 var path = require("path");
-var F = require(".");
+var fm = require(".");
 
 try {
   var argv = [].slice.call(process.argv, 2);
@@ -34,7 +34,7 @@ try {
   console.log("-d disables stratification (termination) checks");
   console.log("");
   console.log("Note: Everything is shown by default.");
-  console.log("Note: FMC will automatically import any local file ending in `.fmc`.");
+  console.log("Note: fmC will automatically import any local file ending in `.fmc`.");
   process.exit();
 }
 
@@ -46,20 +46,20 @@ var show_eal_sic = args.s;
 var show_info = args.i;
 var show_stats = args.S;
 
-var defs = F.core.parse(code);
-var term = F.core.parse(". main (" + expr + ")").main;
+var defs = fm.core.parse(code);
+var term = fm.core.parse("def main (" + expr + ")").main;
 
 var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
 if (show_term) {
   if (show_info) console.log(BOLD("Term:"));
-  console.log(F.core.show(term));
+  console.log(fm.core.show(term));
   if (show_info) console.log("");
 }
 
 if (check_eal) {
   try {
-    F.core.check(term, defs);
+    fm.core.check(term, defs);
   } catch (e) {
     console.log(e.toString());
     process.exit();
@@ -69,9 +69,9 @@ if (check_eal) {
 if (show_eal_sic) {
   if (show_info) console.log(BOLD("Norm (λ-NASIC):"));
   try {
-    var net = F.comp.compile(term, defs);
+    var net = fm.comp.compile(term, defs);
     var stats = net.reduce();
-    console.log(F.core.show(F.comp.decompile(net)));
+    console.log(fm.core.show(fm.comp.decompile(net)));
     if (show_stats) {
       for (var key in stats) {
         console.log(key + " = " + stats[key]);
@@ -79,7 +79,7 @@ if (show_eal_sic) {
     }
     if (show_info) console.log("");
   } catch (e) {
-    console.log(e);
+    console.log(e.toString());
     if (show_info) console.log("");
   }
 }
@@ -88,10 +88,10 @@ if (show_eal_sic) {
 if (show_lam_interp) {
   if (show_info) console.log(BOLD("Norm (λ-INTERP):"));
   try {
-    console.log(F.core.show(F.core.norm(term, defs, true), true));
+    console.log(fm.core.show(fm.core.norm(term, defs, true), true));
     if (show_info) console.log("");
   } catch (e) {
-    console.log(e.toString());
+    console.log(e);
     if (show_info) console.log("");
   }
 }
@@ -99,7 +99,7 @@ if (show_lam_interp) {
 if (show_eal_interp) {
   if (show_info) console.log(BOLD("Norm (EAL-INTERP):"));
   try {
-    console.log(F.core.show(F.core.norm(term, defs, false)));
+    console.log(fm.core.show(fm.core.norm(term, defs, false)));
     if (show_info) console.log("");
   } catch (e) {
     console.log(e.toString());

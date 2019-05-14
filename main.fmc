@@ -46,13 +46,21 @@ def fib [n]
 // ::::::::::::
 
 def to_chars [str] [cons] [cons = cons]
+  let cons-non0 [c]
+    @ c0 c1 *c
+    ? {c0 > 0}
+    & (cons c1)
+    : [x]x
   [f =
-    (snd str #[c] [c = c] [cs]
-      let c0 #{{c >>  0} & 0xFF}
-      let c1 #{{c >>  8} & 0xFF}
-      let c2 #{{c >> 16} & 0xFF}
-      let c3 #{{c >> 24} & 0xFF}
-      (cons c0 (cons c1 (cons c2 (cons c3 cs)))))]
+    (snd str #[c] [cs]
+      @ ca cb *c
+      @ c0 c1 *ca
+      @ c2 c3 *cb
+      (cons-non0 {{c0 >>  0} & 0xFF}
+      (cons-non0 {{c1 >>  8} & 0xFF}
+      (cons-non0 {{c2 >> 16} & 0xFF}
+      (cons-non0 {{c3 >> 24} & 0xFF}
+        cs)))))]
   # [nil] (f nil)
 
 // ::::::::::
@@ -73,6 +81,10 @@ def redex [term]
     (func app-lam app-app)
   (term lam app)
 
+// :::::::::::
+// :: Tests ::
+// :::::::::::
+
 def add_test
   {3 + 2}
 
@@ -83,6 +95,9 @@ def incs_test
   [F = (~256 #[x]{x + 1})]
   # (F 0)
 
+def tup_test
+  (fst (tup 42 1337))
+
 def pair_test
   @0 (& 42 1337)
 
@@ -91,13 +106,19 @@ def if_test
   & "cond is true"
   : "cond is false"
 
-// outputs 832827963 (which is fib(65536) % 2^32), in 393481 graph rewrites
+def cpy_test
+  * 42
+
+def prj_test
+  @ fst snd
+  & 42 1337
+  (tup fst snd)
+
 def fib_test
   (fib ~65536)
 
-def get_fst_char_test
-  [F = ("test" #cons)]
-  # {(head 0 (tail (F nil))) >> 24}
+def to_chars_test
+  (to_chars "tester")
 
 def main
-  if_test
+  to_chars_test

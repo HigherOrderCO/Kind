@@ -24,14 +24,18 @@ const op_kind = {
 const compile = (term, defs = {}) => {
   const build_net = (term, net, var_ptrs, level) => {
     const get_var = (ptrn) => {
-      if (net.enter_port(ptrn) === ptrn) {
+      if (type_of(ptrn) === NUM) {
         return ptrn;
       } else {
-        var dups_ptrn = net.enter_port(ptrn);
-        var dup_addr = net.alloc_node(NOD, level_of[ptrn] + 1);
-        net.link_ports(Pointer(dup_addr, 0), ptrn);
-        net.link_ports(Pointer(dup_addr, 1), dups_ptrn);
-        return Pointer(dup_addr, 2);
+        if (net.enter_port(ptrn) === ptrn) {
+          return ptrn;
+        } else {
+          var dups_ptrn = net.enter_port(ptrn);
+          var dup_addr = net.alloc_node(NOD, level_of[ptrn] + 1);
+          net.link_ports(Pointer(dup_addr, 0), ptrn);
+          net.link_ports(Pointer(dup_addr, 1), dups_ptrn);
+          return Pointer(dup_addr, 2);
+        }
       }
     };
     switch (term[0]) {
@@ -95,6 +99,18 @@ const compile = (term, defs = {}) => {
         net.link_ports(Pointer(snd_addr, 0), pair_ptr);
         net.link_ports(Pointer(snd_addr, 1), Pointer(snd_addr, 1));
         return Pointer(snd_addr, 2);
+      case "Prj":
+        var prj_addr = net.alloc_node(NOD, 0xFFFF);
+        level_of[Pointer(prj_addr, 1)] = level;
+        level_of[Pointer(prj_addr, 2)] = level;
+        var pair_ptr = build_net(term[1].pair, net, var_ptrs, level);
+        var_ptrs.push(Pointer(prj_addr, 1));
+        var_ptrs.push(Pointer(prj_addr, 2));
+        var body_ptr = build_net(term[1].body, net, var_ptrs, level);
+        var_ptrs.pop();
+        var_ptrs.pop();
+        net.link_ports(Pointer(prj_addr, 0), pair_ptr);
+        return body_ptr;
       case "Ite":
         var ite_addr = net.alloc_node(ITE, 0xFFFF);
         var cond_ptr = build_net(term[1].cond, net, var_ptrs, level);
@@ -102,6 +118,14 @@ const compile = (term, defs = {}) => {
         var pair_ptr = build_net(term[1].pair, net, var_ptrs, level);
         net.link_ports(Pointer(ite_addr, 1), pair_ptr);
         return Pointer(ite_addr, 2);
+      case "Cpy":
+        var cpy_addr = net.alloc_node(NOD, 0xFFFE);
+        var par_addr = net.alloc_node(NOD, 0xFFFF);
+        var numb_ptr = build_net(term[1].numb, net, var_ptrs, level);
+        net.link_ports(Pointer(cpy_addr, 0), numb_ptr);
+        net.link_ports(Pointer(cpy_addr, 1), Pointer(par_addr, 1));
+        net.link_ports(Pointer(cpy_addr, 2), Pointer(par_addr, 2));
+        return Pointer(par_addr, 0);
       case "Var":
         return get_var(var_ptrs[var_ptrs.length - term[1].index - 1]);
       case "Ref":
