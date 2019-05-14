@@ -2,50 +2,50 @@
 // :: Bool ::
 // ::::::::::
 
-. true  [t] [f] t
-. false [t] [f] f
-. not   [b] [t] [f] (b f t)
+def true  [t] [f] t
+def false [t] [f] f
+def not   [b] [t] [f] (b f t)
 
 // :::::::::
 // :: Nat ::
 // :::::::::
 
-. zero [s] # [z] z
-. succ [n] [s] [s = s] [k = (n #s)] # [z] (s (k z))
-. mul  [a] [b] [s] [S = s] [A = [B = (b #S)] (a #B)] # [z] (A z)
+def zero [s] # [z] z
+def succ [n] [s] [s = s] [k = (n #s)] # [z] (s (k z))
+def mul  [a] [b] [s] [S = s] [A = [B = (b #S)] (a #B)] # [z] (A z)
 
 // ::::::::::
 // :: List ::
 // ::::::::::
 
-. cons [x] [xs] [c] [n] (c x xs)
-. nil  [c] [n] n
-. head [x] [xs] (xs [x] [xs] x x)
-. tail [xs] (xs [x] [xs] xs nil)
-. concat [a] [b] [cons] [cons = cons] [nil] (a #[h] [t] (cons h t) (b #cons nil))
+def cons   [x] [xs] [c] [n] (c x xs)
+def nil    [c] [n] n
+def head   [x] [xs] (xs [x] [xs] x x)
+def tail   [xs] (xs [x] [xs] xs nil)
+def concat [a] [b] [cons] [cons = cons] [nil] (a #[h] [t] (cons h t) (b #cons nil))
 
-// ::::::::::
-// :: Pair ::
-// ::::::::::
+// :::::::::::
+// :: Tuple ::
+// :::::::::::
 
-. pair [a] [b] [pair] (pair a b)
-. fst  [p] (p [a] [b] a)
-. snd  [p] (p [a] [b] b)
+def tup [a] [b] [tup] (tup a b)
+def fst [p] (p [a] [b] a)
+def snd [p] (p [a] [b] b)
 
 // :::::::::
 // :: Num ::
 // :::::::::
 
-. fib [n]
-  let init (pair #0 #1)
-  let next [p] [pair] (p [a] [b] [A = a] [B = b] (pair #B #{A + B}))
+def fib [n]
+  let init (tup #0 #1)
+  let next [p] [tup] (p [a] [b] [A = a] [B = b] (tup #B #{A + B}))
   [F = (n #next)] # (F init [a] [b] a)
 
 // ::::::::::::
 // :: String ::
 // ::::::::::::
 
-. to_chars [str] [cons] [cons = cons]
+def to_chars [str] [cons] [cons = cons]
   [f =
     (snd str #[c] [c = c] [cs]
       let c0 #{{c >>  0} & 0xFF}
@@ -59,10 +59,10 @@
 // :: Term ::
 // ::::::::::
 
-. Lam [body]        [Lam] [App] (Lam body)
-. App [func] [argm] [Lam] [App] (App func argm)
+def Lam [body]        [Lam] [App] (Lam body)
+def App [func] [argm] [Lam] [App] (App func argm)
 
-. redex [term]
+def redex [term]
   let lam [body]
     (Lam body)
   let app [func]
@@ -73,31 +73,31 @@
     (func app-lam app-app)
   (term lam app)
 
-. add_test
+def add_test
   {3 + 2}
 
-. mul_test
+def mul_test
   {3 * 2}
 
-. incs_test
+def incs_test
   [F = (~256 #[x]{x + 1})]
   # (F 0)
 
-. pair_test
+def pair_test
   @0 (& 42 1337)
 
-. if_test
+def if_test
   ? 1
   & "cond is true"
   : "cond is false"
 
 // outputs 832827963 (which is fib(65536) % 2^32), in 393481 graph rewrites
-. fib_test
+def fib_test
   (fib ~65536)
 
-. get_fst_char_test
+def get_fst_char_test
   [F = ("test" #cons)]
   # {(head 0 (tail (F nil))) >> 24}
 
-. main
+def main
   if_test

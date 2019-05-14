@@ -204,7 +204,7 @@ const parse = (code) => {
       }
     } else {
       var init = index;
-      var skip = parse_exact(".");
+      var skip = parse_exact("def ");
       var name = parse_name();
       var term = parse_term([]);
       defs[name] = term;
