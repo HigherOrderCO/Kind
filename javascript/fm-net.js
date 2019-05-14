@@ -1,3 +1,5 @@
+// ~~ Formality Interaction Net System ~~
+
 const Pointer = (addr, port) => (addr << 2) + (port & 3);
 const addr_of = (ptr) => ptr >>> 2;
 const slot_of = (ptr) => ptr & 3;
@@ -13,6 +15,7 @@ const NUM = 1;
 const NOD = 0;
 const OP1 = 1;
 const OP2 = 2;
+const ITE = 3;
 
 class Net {
   // A net stores nodes (this.nodes), reclaimable memory addrs (this.freed) and active pairs (this.redex)
@@ -165,6 +168,17 @@ class Net {
       } else if (a_type === NOD) {
         this.link_ports(b_ptrn, this.enter_port(Pointer(a_addr, 1)));
         this.link_ports(b_ptrn, this.enter_port(Pointer(a_addr, 2)));
+
+      // IfThenElse
+      } else if (a_type === ITE) {
+        var pair_ptr = this.enter_port(Pointer(a_addr, 1));
+        var dest_ptr = this.enter_port(Pointer(a_addr, 2));
+        var cond_val = numb_of(b_ptrn) === 0;
+        this.set_type(a_addr, NOD);
+        this.link_ports(Pointer(a_addr, 0), pair_ptr);
+        this.link_ports(Pointer(a_addr, cond_val ? 1 : 2), Pointer(a_addr, cond_val ? 1 : 2));
+        this.link_ports(Pointer(a_addr, cond_val ? 2 : 1), dest_ptr);
+
       } else {
         throw "[ERROR]\nInvalid interaction.";
       }
@@ -177,7 +191,10 @@ class Net {
       var b_kind = this.kind_of(b_addr);
 
       // NodeAnnihilation, UnaryAnnihilation, BinaryAnnihilation
-      if (a_type === NOD && b_type === NOD && a_kind === b_kind || a_type === OP1 && b_type === OP1 || a_type === OP2 && b_type === OP2) {
+      if ( a_type === NOD && b_type === NOD && a_kind === b_kind
+        || a_type === OP1 && b_type === OP1
+        || a_type === OP2 && b_type === OP2
+        || a_type === ITE && b_type === ITE) {
         var a_aux1_dest = this.enter_port(Pointer(a_addr, 1));
         var b_aux1_dest = this.enter_port(Pointer(b_addr, 1));
         this.link_ports(a_aux1_dest, b_aux1_dest);
@@ -194,7 +211,10 @@ class Net {
         }
 
       // NodeDuplication, BinaryDuplication
-      } else if (a_type === NOD && b_type === NOD && a_kind !== b_kind || a_type === NOD && b_type === OP2) {
+      } else if
+        (  a_type === NOD && b_type === NOD && a_kind !== b_kind
+        || a_type === NOD && b_type === OP2
+        || a_type === NOD && b_type === ITE) {
         var p_addr = this.alloc_node(b_type, b_kind);
         var q_addr = this.alloc_node(b_type, b_kind);
         var r_addr = this.alloc_node(a_type, a_kind);
@@ -217,7 +237,9 @@ class Net {
         }
 
       // UnaryDuplication
-      } else if (a_type === NOD && b_type === OP1) {
+      } else if
+        (  a_type === NOD && b_type === OP1
+        || a_type === ITE && b_type === OP1) {
         var c_addr = this.alloc_node(OP1, b_kind);
         this.link_ports(Pointer(c_addr, 1), this.enter_port(Pointer(b_addr, 1)));
         this.link_ports(Pointer(a_addr, 0), this.enter_port(Pointer(b_addr, 2)));
@@ -230,6 +252,8 @@ class Net {
       } else if (a_type === OP1 && b_type === NOD) {
         return this.rewrite(b_addr);
       } else if (a_type === OP2 && b_type === NOD) {
+        return this.rewrite(b_addr);
+      } else if (a_type === ITE && b_type === NOD) {
         return this.rewrite(b_addr);
 
       // InvalidInteraction
@@ -306,4 +330,4 @@ class Net {
   }
 }
 
-module.exports = {Pointer, addr_of, slot_of, Numeric, numb_of, type_of, Net, NOD, NUM, OP1, OP2};
+module.exports = {Pointer, addr_of, slot_of, Numeric, numb_of, type_of, Net, NUM, PTR, NOD, OP1, OP2, ITE};

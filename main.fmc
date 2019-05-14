@@ -1,10 +1,22 @@
+// ::::::::::
+// :: Bool ::
+// ::::::::::
+
 . true  [t] [f] t
 . false [t] [f] f
 . not   [b] [t] [f] (b f t)
 
+// :::::::::
+// :: Nat ::
+// :::::::::
+
 . zero [s] # [z] z
 . succ [n] [s] [s = s] [k = (n #s)] # [z] (s (k z))
 . mul  [a] [b] [s] [S = s] [A = [B = (b #S)] (a #B)] # [z] (A z)
+
+// ::::::::::
+// :: List ::
+// ::::::::::
 
 . cons [x] [xs] [c] [n] (c x xs)
 . nil  [c] [n] n
@@ -12,42 +24,40 @@
 . tail [xs] (xs [x] [xs] xs nil)
 . concat [a] [b] [cons] [cons = cons] [nil] (a #[h] [t] (cons h t) (b #cons nil))
 
+// ::::::::::
+// :: Pair ::
+// ::::::::::
+
 . pair [a] [b] [pair] (pair a b)
 . fst  [p] (p [a] [b] a)
 . snd  [p] (p [a] [b] b)
 
-. SUCC [n] [s] [z] (s n)
-. ZERO     [s] [z] z
+// :::::::::
+// :: Num ::
+// :::::::::
 
 . fib [n]
   let init (pair #0 #1)
   let next [p] [pair] (p [a] [b] [A = a] [B = b] (pair #B #{A + B}))
   [F = (n #next)] # (F init [a] [b] a)
 
-// outputs 832827963 (which is fib(65536) % 2^32), in 393481 graph rewrites
-. fib_test
-  (fib ~65536)
+// ::::::::::::
+// :: String ::
+// ::::::::::::
 
-. add_test
-  {3 + 2}
+. to_chars [str] [cons] [cons = cons]
+  [f =
+    (snd str #[c] [c = c] [cs]
+      let c0 #{{c >>  0} & 0xFF}
+      let c1 #{{c >>  8} & 0xFF}
+      let c2 #{{c >> 16} & 0xFF}
+      let c3 #{{c >> 24} & 0xFF}
+      (cons c0 (cons c1 (cons c2 (cons c3 cs)))))]
+  # [nil] (f nil)
 
-. mul_test
-  {3 * 2}
-
-. fun_test
-  ([x] {x + 7} 1)
-
-. inc_test
-  [F = (n2 #[x]{x + 1})]
-  # (F 0)
-
-. get_fst_char_test
-  [F = ("test" #cons)]
-  # {(head 0 (tail (F nil))) >> 24}
-
-. incs_test
-  [F = (~256 #[x]{x + 1})]
-  # (F 0)
+// ::::::::::
+// :: Term ::
+// ::::::::::
 
 . Lam [body]        [Lam] [App] (Lam body)
 . App [func] [argm] [Lam] [App] (App func argm)
@@ -63,15 +73,31 @@
     (func app-lam app-app)
   (term lam app)
 
-. to_chars [str] [cons] [cons = cons]
-  [f =
-    (snd str #[c] [c = c] [cs]
-      let c0 #{{c >> 24} & 0xFF}
-      let c1 #{{c >> 16} & 0xFF}
-      let c2 #{{c >>  8} & 0xFF}
-      let c3 #{{c >>  0} & 0xFF}
-      (cons c0 (cons c1 (cons c2 (cons c3 cs)))))]
-  # [nil] (f nil)
+. add_test
+  {3 + 2}
+
+. mul_test
+  {3 * 2}
+
+. incs_test
+  [F = (~256 #[x]{x + 1})]
+  # (F 0)
+
+. pair_test
+  @0 (& 42 1337)
+
+. if_test
+  ? 1
+  & "cond is true"
+  : "cond is false"
+
+// outputs 832827963 (which is fib(65536) % 2^32), in 393481 graph rewrites
+. fib_test
+  (fib ~65536)
+
+. get_fst_char_test
+  [F = ("test" #cons)]
+  # {(head 0 (tail (F nil))) >> 24}
 
 . main
-  (to_chars "test")
+  if_test

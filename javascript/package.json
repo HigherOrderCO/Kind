@@ -1,8 +1,8 @@
 {
   "name": "formality-core",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "",
-  "main": "index.js",
+  "main": "exports.js",
   "bin": {
     "fmc": "main.js"
   },

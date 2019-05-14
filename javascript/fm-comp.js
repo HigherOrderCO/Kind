@@ -1,5 +1,7 @@
-const {Var, App, Lam, Num, Op1, Op2, gen_name} = require("./core.js");
-const {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, NOD, OP1, OP2, NUM, PTR} = require("./nasic.js");
+// ~~ Compiles Formality Core to Formality Net ~~
+
+const {Var, App, Lam, Num, Op1, Op2, Ite, Par, Fst, Snd, gen_name} = require("./fm-core.js");
+const {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, NOD, OP1, OP2, NUM, ITE, PTR} = require("./fm-net.js");
 
 const op_kind = {
    0 : "+"  , "+"  : 0, 
@@ -74,6 +76,32 @@ const compile = (term, defs = {}) => {
         var num1_ptr = build_net(term[1].num1, net, var_ptrs, level);
         net.link_ports(Pointer(op2_addr, 0), num1_ptr);
         return Pointer(op2_addr, 2);
+      case "Par":
+        var par_addr = net.alloc_node(NOD, 0xFFFF);
+        var val0_ptr = build_net(term[1].val0, net, var_ptrs, level);
+        net.link_ports(Pointer(par_addr, 1), val0_ptr);
+        var val1_ptr = build_net(term[1].val1, net, var_ptrs, level);
+        net.link_ports(Pointer(par_addr, 2), val1_ptr);
+        return Pointer(par_addr, 0);
+      case "Fst":
+        var fst_addr = net.alloc_node(NOD, 0xFFFF);
+        var pair_ptr = build_net(term[1].pair, net, var_ptrs, level);
+        net.link_ports(Pointer(fst_addr, 0), pair_ptr);
+        net.link_ports(Pointer(fst_addr, 2), Pointer(fst_addr, 2));
+        return Pointer(fst_addr, 1);
+      case "Snd":
+        var snd_addr = net.alloc_node(NOD, 0xFFFF);
+        var pair_ptr = build_net(term[1].pair, net, var_ptrs, level);
+        net.link_ports(Pointer(snd_addr, 0), pair_ptr);
+        net.link_ports(Pointer(snd_addr, 1), Pointer(snd_addr, 1));
+        return Pointer(snd_addr, 2);
+      case "Ite":
+        var ite_addr = net.alloc_node(ITE, 0xFFFF);
+        var cond_ptr = build_net(term[1].cond, net, var_ptrs, level);
+        net.link_ports(Pointer(ite_addr, 0), cond_ptr);
+        var pair_ptr = build_net(term[1].pair, net, var_ptrs, level);
+        net.link_ports(Pointer(ite_addr, 1), pair_ptr);
+        return Pointer(ite_addr, 2);
       case "Var":
         return get_var(var_ptrs[var_ptrs.length - term[1].index - 1]);
       case "Ref":
@@ -133,6 +161,19 @@ const decompile = (net) => {
               var func = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
               return App(func, argm);
           }
+        } else if (kind === 0xFFFF) {
+          switch (slot_of(ptrn)) {
+            case 0:
+              var val0 = build_term(net, net.enter_port(Pointer(addr, 1)), var_ptrs, dup_exit);
+              var val1 = build_term(net, net.enter_port(Pointer(addr, 2)), var_ptrs, dup_exit);
+              return Par(val0, val1);
+            case 1:
+              var pair = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
+              return Fst(pair);
+            case 2:
+              var pair = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
+              return Snd(pair);
+          }
         } else {
           switch (slot_of(ptrn)) {
             case 0:
@@ -155,6 +196,10 @@ const decompile = (net) => {
         var num0 = build_term(net, net.enter_port(Pointer(addr, 1)), var_ptrs, dup_exit);
         var num1 = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
         return Op2(op_kind[kind], num0, num1);
+      } else if (type === ITE) {
+        var cond = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
+        var pair = build_term(net, net.enter_port(Pointer(addr, 1)), var_ptrs, dup_exit);
+        return Ite(cond, pair);
       }
     }
   };
