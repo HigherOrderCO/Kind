@@ -1,20 +1,61 @@
 # Formality-Core
 
-An lightweight untyped functional programming language. It is:
+An optimal compilation target for functional programming languages. It is:
 
-1. Compatible with efficient optimal reductions (no bookkeeping/oracle needed).
+1. **Optimal:** compatible with interaction combinators, no bookkeeping/oracle needed.
 
-2. Garbage-collection-free (space is freed when values go out of scope).
+2. **GC-free:** memory is freed when values go out of scope.
 
-3. Massively parallel (can be evaluated in GPUs, FGPAs and similar).
+3. **Parallel:** can be evaluated in GPUs, FGPAs and similar.
 
-4. Efficient (only 128 bits per lambda/pair node, fully unboxed 32-bit ints).
+4. **Efficient:** 128 bits per lambda/pair, unboxed 32-bit ints, constant-time beta-reduction.
 
-5. Strongly normalizing: reductions are guaranteed to terminate in elementary time.
+5. **Terminating:** computations are guaranteed to halt in elementary time.
 
-6. All operations (including beta-reduction!) are simple, constant-time computations.
+6. **Simple:** the entire implementation (all included) takes about 1.5k lines of code.
 
 It features affine lambdas, elementary duplication ("cloning"), 32-bit numeric primitives and pairs.
+
+## Example
+
+This example computes the nth number of the Fibonacci sequence. It uses compact λ-encoded nats to emulate loops.
+
+```javascript
+// Gets the nth number of the Fibonacci sequence
+def fib: [n]
+  let init = &(0,1)
+  let loop = [state]
+    get &(a, b) = state
+    get &(x, y) = cpy b
+    &(x, {a + y})
+  let stop = [state]
+    (snd state)
+  (for n #init #loop #stop)
+```
+
+Here is a table showing how many graph rewrites it takes for it to compute `fib(n)`:
+
+n | fib(n) % 2^32 | graph rewrites
+--- | --- | ---
+1000 | 1318412525 | 6116
+2000 | 3779916130 | 12124
+3000 | 628070097 | 18139
+4000 | 45579869 | 24132
+5000 | 2020817954 | 30133
+6000 | 1434712737 | 36147
+7000 | 1424409805 | 42147
+8000 | 1154982114 | 48140
+9000 | 4044733297 | 54141
+10000 | 2132534333 | 60141
+11000 | 1648091042 | 66162
+12000 | 690383169 | 72155
+13000 | 4244933805 | 78148
+14000 | 1699985506 | 84155
+15000 | 774935569 | 90155
+
+As you can see, `fib(n)` is linear, and needs exactly 6 graph rewrites per iteration of the loop. This JS implementation performs roughly `3m` rewrites/s. We expect this to increase a few orders of magnitude with compilers and hardware.
+
+For more examples, check [main.fmc](main.fmc).
 
 ## Usage
 
@@ -32,9 +73,6 @@ cd formality-core
 fmc -s main
 ```
 
-## Syntax and Documentation
-
-To be developed. Check our example file, [main.fmc](main.fmc).
 
 ## Theory
 
