@@ -1,265 +1,345 @@
+// Hello! This is some code in Formality-Core.
+// 
+// It is an untyped functional programming language that is fully compatible
+// with optimal reductions using a very lightweight interaction net system that
+// doesn't need a heavy "bookkeeping" mechanism (i.e., the oracle). As such, it
+// can be reduced in massively parallel architectures (such as GPUs), and it
+// doesn't need garbage collection. It consists of:
+// 
+// 1. Affine lambdas
+// 2. Elementary duplication ("cloning")
+// 3. 32-bit numeric primitives (add, mul, if-then-else, cpy, etc.)
+// 4. Pairs (including fst, snd and projections)
+// 
+// Despite having lambdas and closures, it is a quite "low-level" language and
+// should be seen as our assembly. It compiles to FM-Net, our interaction net
+// system. On it, each lambda, pair and duplication uses exactly 128 bits of
+// space. Numbers are fully unboxed and, thus, do not use any extra space. When
+// you run this implementation, it says how many graph rewrites it took to get
+// to the normal form. This is a very good measure of the complexity of your
+// programs since a graph rewrite is a lightweight, constant time operation.
+
 // ::::::::::
 // :: Bool ::
 // ::::::::::
 
-def true
+def true:
   [t] [f] t
 
-def false
+def false:
   [t] [f] f
 
-def not [b]
+def not: [b]
   [t] [f] (b f t)
 
 // :::::::::
 // :: Nat ::
 // :::::::::
 
-def Zero
-  [s] # [z] z
+// Church-encoded Nats are used to perform bounded loops and recursion.
+// See the examples on the end of the file to see how they work!
 
-def Succ [n]
-  [s] [s = s]
-  [f = (n #s)]
+def Zero:
+  [s]
+  # [z] z
+
+def Succ: [n]
+  [s]
+  dup s: s
+  dup f: (n #s)
   # [z] (s (f z))
 
-def mul[a] [b]
-  [s] [S = s]
-  [A = [B = (b #S)] (a #B)]
+def mul: [a] [b]
+  [s] 
+  dup S: s
+  dup A:
+    dup B: (b #S)
+    (a #B)
   # [z] (A z)
 
 // ::::::::::
 // :: List ::
 // ::::::::::
 
-def Cons [x] [xs]
+// Scott-encoded functions
+
+def Cons: [x] [xs]
   [c] [n] (c x xs)
 
-def Nil
+def Nil:
   [c] [n] n
 
-def head
-  [x] [xs] (xs [x] [xs] x x)
+def head:
+  [x] [xs] (xs [x][xs]x x)
 
-def tail
-  [xs] (xs [x] [xs] xs Nil)
+def tail:
+  [xs] (xs [x][xs]xs Nil)
 
-def ConsF [x] [xs]
+def fold: [len] [list]
   [cons]
-  [x    = x]
-  [cons = cons]
-  [func = (xs #cons)]
+  dup list: list
+  dup cons: cons
+  dup fold:
+    let func: [cont] [list]
+      let case_cons: [head] [tail]
+        [nil] (cons head (cont tail nil))
+      let case_nil:
+        [nil] nil
+      (list case_cons [nil] nil)
+    (len #func)
+  # [nil] (fold [tail][nil]nil list nil)
+
+// Church-encoded functions
+
+def ConsF: [x] [xs]
+  [cons]
+  dup x: x
+  dup cons: cons
+  dup func: (xs #cons)
   # [nil] (cons x (func nil))
 
-def NilF
+def NilF:
   [cons]
   # [nil] nil
 
-def list_fold [len] [list]
-  [cons]
-  [list = list]
-  [cons = cons]
-  [build_fold = (len # [cont] [list]
-    let case_cons [head] [tail]
-      [nil] (cons head (cont tail nil))
-    let case_nil
-      [nil] nil
-    (list case_cons [nil] nil))]
-  # [nil] (build_fold [tail][nil]nil list nil)
+def unfold: [list]
+  dup F: (list #cons)
+  # (F nil)
 
-def list_unfold [list]
-  [F = (list #cons)] #(F nil)
+// Concatenates two lists
+def concat: [a] [b]
+  [cons]
+  dup cons: cons
+  dup append-a: (a #cons)
+  dup append-b: (b #cons)
+  # [nil] (append-a (append-b nil))
+
+// ::::::::::
+// :: Pair ::
+// ::::::::::
+
+// Native pairs are lightweight, using only 128 bits per node.
+
+def Pair: [a] [b]
+  &(a, b)
+
+def pair_fst: [pair]
+  fst pair
+
+def pair_snd: [pair]
+  snd pair
+
+def pair_prj: [pair] [func]
+  get val0 val1: pair
+  (func val0 val1)
 
 // :::::::::::
 // :: Tuple ::
 // :::::::::::
 
-def tup [a] [b]
+// Scott-encoded tuples are similar to native pairs, but use 3x more space.
+
+def Tup: [a] [b]
   [tup] (tup a b)
 
-def fst [tup]
+def tup_fst: [tup]
   (tup [a] [b] a)
 
-def snd [tup]
+def tup_snd: [tup]
   (tup [a] [b] b)
 
-// :::::::::
-// :: Num ::
-// :::::::::
+// ::::::::::::
+// :: Number ::
+// ::::::::::::
 
-def fib [n]
-  let init (tup #0 #1)
-  let next [p] [tup] (p [a] [b] [A = a] [B = b] (tup #B #{A + B}))
-  [F = (n #next)] # (F init [a] [b] a)
+// Gets the nth number of the Fibonacci sequence
+def fib: [n]
+  let init: (Tup #0 #1)
+  let next: [p] [tup]
+    let func: [a] [b]
+      dup A: a
+      dup B: b
+      (Tup #B #{A + B})
+    (p func)
+  dup F: (n #next)
+  # (F init [a] [b] a)
 
 // Using numeric copy primitive instead of duplications
-def fib2 [n]
-  let init (tup 0 1)
-  let next [p] [tup] (p [a] [b] @ B0 B1 *b (tup B0 {a + B1}))
-  [F = (n #next)] # (F init [a] [b] a)
+def fib2: [n]
+  let init: (Tup 0 1)
+  let next: [p] [tup] 
+    let func: [a] [b]
+      get B0 B1: cpy b
+      (Tup B0 {a + B1})
+    (p func)
+  dup F: (n #next)
+  # (F init [a] [b] a)
 
 // ::::::::::::
 // :: String ::
 // ::::::::::::
 
-def concat [a] [b]
-  [cons] [cons = cons] [nil]
-  (a #[h] [t] (cons h t)
-  (b #cons nil))
-
-def to_chars [str] [cons] [cons = cons]
-  let cons-non-0 [c]
-    @ c0 c1 *c
-    ? {c0 > 0}
-    & (cons c1)
-    : [x]x
-  [f =
-    (snd str #[c] [cs]
-      @ ca cb *c
-      @ c0 c1 *ca
-      @ c2 c3 *cb
-      (cons-non-0 {{c0 >>  0} & 0xFF}
-      (cons-non-0 {{c1 >>  8} & 0xFF}
-      (cons-non-0 {{c2 >> 16} & 0xFF}
-      (cons-non-0 {{c3 >> 24} & 0xFF}
-        cs)))))]
+// Converts an UTF-8 string into a list of bytes
+def to_chars: [str]
+  [cons]
+  dup cons: cons
+  let cons-non-0: [c]
+    get c0 c1: cpy c
+    if {c0 > 0}
+    then: (cons c1)
+    else: [x] x
+  dup f:
+    let func: [c] [cs]
+      get ca cb: cpy c
+      get c0 c1: cpy ca
+      get c2 c3: cpy cb
+      let cons-c0: (cons-non-0 {{c0 >>  0} & 0xFF})
+      let cons-c1: (cons-non-0 {{c1 >>  8} & 0xFF})
+      let cons-c2: (cons-non-0 {{c2 >> 16} & 0xFF})
+      let cons-c3: (cons-non-0 {{c3 >> 24} & 0xFF})
+      (cons-c0 (cons-c1 (cons-c2 (cons-c3 cs))))
+    (tup_snd str #func)
   # [nil] (f nil)
+
+// Converts a list of bytes back to an UTF-8 string
+def from_chars: [chars]
+  let nums:
+    [cons]
+    dup cons: cons
+    dup func:
+      let loop: [c] [cont] [char] [indx]
+        get indx0 indx1: cpy indx
+        get char0 char1: cpy {{char >> 8} | {c << 24}}
+        get done0 done1: cpy {{indx0 % 4} == 3}
+        let cons-char: if done0 then: (cons char0) else: [x]x
+        let next-char: if done1 then: 0 else: char1
+        (cons-char (cont next-char {indx1 + 1}))
+      (chars #loop)
+    # [nil] (func [char][indx](cons char nil) 0 0)
+  [tup] (tup 1954047348 nums)
+
+def string_concat: [a] [b]
+  (from_chars (concat (to_chars a) (to_chars b)))
 
 // ::::::::::
 // :: Term ::
 // ::::::::::
 
-def Lam [body]
+// Scott-encoded functions
+
+def Lam: [body]
   [Lam] [App] [Var]
   (Lam body)
 
-def App [func] [argm]
+def App: [func] [argm]
   [Lam] [App] [Var]
   (App func argm)
 
-def Var [indx]
+def Var: [indx]
   [Lam] [App] [Var]
   (Var indx)
 
-def LamF [body]
+// Church-encoded functions
+
+def LamF: [body]
   [Lam] [App] [Var]
-  [Lam  = Lam]
-  [App  = App]
-  [Var  = Var]
-  [body = (body #Lam #App #Var)]
+  dup Lam:  Lam
+  dup App:  App
+  dup Var:  Var
+  dup body: (body #Lam #App #Var)
   # (Lam body)
 
-def AppF [func] [argm]
+def AppF: [func] [argm]
   [Lam] [App] [Var]
-  [Lam  = Lam]
-  [App  = App]
-  [Var  = Var]
-  [func = (func #Lam #App #Var)]
-  [argm = (argm #Lam #App #Var)]
+  dup Lam:  Lam
+  dup App:  App
+  dup Var:  Var
+  dup func: (func #Lam #App #Var)
+  dup argm: (argm #Lam #App #Var)
   # (App func argm)
 
-def VarF [indx]
+def VarF: [indx]
   [Lam] [App] [Var]
-  [Lam  = Lam]
-  [App  = App]
-  [Var  = Var]
+  dup Lam: Lam
+  dup App: App
+  dup Var: Var
   # (Var indx)
 
-def term_to_string [term]
-  let case_lam [body]
+def term_to_string: [term]
+  let case_lam: [body]
     (concat "λ" body)
-  let case_app [func] [argm]
+  let case_app: [func] [argm]
     (concat "@" (concat func (concat " " argm)))
-  let case_var
+  let case_var:
     "x"
   (term #case_lam #case_app #case_var)
 
-def redex [term]
-  let lam [body]
+def redex: [term]
+  let lam: [body]
     (Lam body)
-  let app [func]
-    let app-lam [lam-body] [argm]
+  let app: [func]
+    let app-lam: [lam-body] [argm]
       (lam-body argm) 
-    let app-app [app-func] [app-argm] [argm]
+    let app-app: [app-func] [app-argm] [argm]
       (App (App app-func app-argm) argm)
     (func app-lam app-app)
   (term lam app)
   
-def term_fold [rec] [term]
-  [Lam] [App] [Var]
-  [Lam = Lam]
-  [App = App]
-  [Var = Var]
-  # (rec
-      [cont] [term] (term
-        [body] (Lam (cont body))
-        [func] [argm] (App (cont func) (Var 0))
-        [indx] (Var indx)
-      )
-      [term] term
-      term)
-
-
 // :::::::::::
 // :: Tests ::
 // :::::::::::
 
-def add_test
+def add_test:
   {3 + 2}
 
-def mul_test
+def mul_test:
   {3 * 2}
 
-def incs_test
-  [F = (~256 #[x]{x + 1})]
-  # (F 0)
+// Example of a constant-time loop
+def sum_test:
+  dup sum-til-10:
+    let loop: [state]
+      get idx   sum   : state
+      get idx-a idx-b : cpy idx
+      &({idx-a + 1}, {sum + idx-b})
+    (~10 #loop)
+  # (snd (sum-til-10 &(0, 0)))
 
-def tup_test
-  (fst (tup 42 1337))
+def tup_test:
+  (tup_fst (tup 42 1337))
 
-def pair_test
-  @0 (& 42 1337)
+def pair_test:
+  fst &(42 , 1337)
 
-def list_test
+def list_test:
   (Cons 1 (Cons 2 (Cons 3 Nil)))
 
-def clist_test
+def clist_test:
   (ConsF #1 (ConsF #2 (ConsF #3 NilF)))
 
-def list_fold_test
+def list_fold_test:
   (list_fold ~3 #list_test)
 
-def if_test
-  ? 1
-  & "cond is true"
-  : "cond is false"
+def if_test:
+  if 1
+  then: "cond is true"
+  else: "cond is false"
 
-def cpy_test
-  * 42
+def cpy_test:
+  cpy 42
 
-def prj_test
-  @ fst snd
-  & 42 1337
+def prj_test:
+  get fst snd: &(42,1337)
   (tup fst snd)
 
-def fib_test
+def fib_test:
   (fib ~65536)
 
-def to_chars_test
+def to_chars_test:
   (to_chars "ksjkajf")
 
-def tmp_test [chars]
-  [cons]
-  [cons = cons]
-  [f =
-    (chars
-      #[c] [cs] [indx]
-        @indx0 indx1 *indx
-        ( ? {indx0 % 2}
-          & [x]x
-          : (cons c)
-          (cs {indx1 + 1})))]
-  # [nil] (f [indx]nil 0)
+def string_concat_test:
+  (string_concat "Hello, " "world!")
 
-def main
-  (tmp_test (to_chars "abcdefgh"))
+def main:
+  string_concat_test

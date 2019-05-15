@@ -28,49 +28,66 @@ const Ref = (name)                   => ["Ref", {name}];
 // Converts a string to a term
 const parse = (code) => {
   function is_space(char) {
-    return char === " " || char === "\t" || char === "\n" || char === ":";
+    return char === " " || char === "\t" || char === "\n";
+  }
+
+  function is_newline(char) {
+    return char === "\n";
   }
 
   function is_name_char(char) {
     return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=.+-*/%&|^~<>".indexOf(char) !== -1;
   }
 
-  function skip_spaces() {
-    while (index < code.length && is_space(code[index])) {
-      index += 1;
+  function next() {
+    if (is_newline(code[idx])) {
+      row += 1;
+      col = 0;
+    } else {
+      col += 1;
     }
-    return index;
+    idx += 1;
+  }
+
+  function skip_spaces() {
+    while (idx < code.length && is_space(code[idx])) {
+      next();
+    }
+    return idx;
   }
 
   function match(string) {
     skip_spaces();
-    var sliced = code.slice(index, index + string.length);
+    var sliced = code.slice(idx, idx + string.length);
     if (sliced === string) {
-      index += string.length;
+      for (var i = 0; i < string.length; ++i) {
+        next();
+      }
       return true;
     }
     return false;
   }
 
-  function error(text) {
-    text += "This is the relevant code:\n\n<<<";
-    text += code.slice(index - 64, index) + "<<<HERE>>>";
-    text += code.slice(index, index + 64) + ">>>";
-    throw text;
-  }
-
   function parse_exact(string) {
     if (!match(string)) {
-      error("Parse error, expected '" + string + "'.\n");
+      var text = "";
+      var part = "";
+      text += "Parse error: expected '" + string + "' ";
+      text += "on line " + (row+1) + ", col " + col + ", but found '" + code[idx] + "' instead. Relevant code:\n";
+      for (var ini = idx, il = 0; il < 6 && ini >=          0; --ini) if (code[ini] === "\n") ++il;
+      for (var end = idx, el = 0; el < 6 && end < code.length; ++end) if (code[end] === "\n") ++el;
+      part += code.slice(ini+1, idx) + "<HERE>" + code.slice(idx, end);
+      text += part.split("\n").map((line,i) => ("    " + (row-il+i+1)).slice(-4) + "| " + line).join("\n");
+      throw text;
     }
   }
 
   function parse_name() {
     skip_spaces();
     var name = "";
-    while (index < code.length && is_name_char(code[index])) {
-      name = name + code[index];
-      index += 1;
+    while (idx < code.length && is_name_char(code[idx])) {
+      name = name + code[idx];
+      next();
     }
     return name;
   }
@@ -78,8 +95,8 @@ const parse = (code) => {
   function parse_term(ctx) {
     // Comment
     if (match("-")) {
-      while (index < code.length && code[index] !== "\n") {
-        index += 1;
+      while (idx < code.length && code[idx] !== "\n") {
+        next();
       }
       return parse_term(ctx);
     }
@@ -87,7 +104,7 @@ const parse = (code) => {
     // Application
     else if (match("(")) {
       var func = parse_term(ctx);
-      while (index < code.length && !match(")")) {
+      while (idx < code.length && !match(")")) {
         var argm = parse_term(ctx);
         var func = App(func, argm);
         skip_spaces();
@@ -95,13 +112,21 @@ const parse = (code) => {
       return func;
     }
 
-    // Lambda / Duplication
+    // Lambda
     else if (match("[")) {
       var name = parse_name();
-      var expr = match("=") ? parse_term(ctx) : null;
       var skip = parse_exact("]");
       var body = parse_term(ctx.concat([name]));
-      return expr ? Dup(name, expr, body) : Lam(name, body);
+      return Lam(name, body);
+    }
+
+    // Duplication
+    else if (match("dup ")) {
+      var name = parse_name();
+      var skip = parse_exact(":");
+      var expr = parse_term(ctx);
+      var body = parse_term(ctx.concat([name]));
+      return Dup(name, expr, body);
     }
 
     // Put
@@ -111,8 +136,9 @@ const parse = (code) => {
     }
 
     // Let
-    else if (match("let")) {
+    else if (match("let ")) {
       var name = parse_name();
+      var skip = parse_exact(":");
       var copy = parse_term(ctx);
       var body = parse_term(ctx.concat([name]));
       return subst(body, copy, 0);
@@ -131,10 +157,11 @@ const parse = (code) => {
     else if (match("\"")) {
       // Parses text
       var text = "";
-      while (code[index] !== "\"") {
-        text += code[index++];
+      while (code[idx] !== "\"") {
+        text += code[idx];
+        next();
       }
-      index++;
+      next();
       return text_to_term(text);
     }
 
@@ -146,41 +173,53 @@ const parse = (code) => {
     }
 
     // If-Then-Else
-    else if (match("?")) {
+    else if (match("if")) {
       var cond = parse_term(ctx);
       var pair = parse_term(ctx);
       return Ite(cond, pair);
     }
 
-    // If-Then-Else
-    else if (match("*")) {
+    // Copy
+    else if (match("cpy ")) {
       var numb = parse_term(ctx);
       return Cpy(numb);
     }
 
     // Pair
     else if (match("&")) {
+      var skip = parse_exact("(");
       var val0 = parse_term(ctx);
+      var skip = parse_exact(",");
+      var val1 = parse_term(ctx);
+      var skip = parse_exact(")");
+      return Par(val0, val1);
+    }
+    
+    // Pair (If-Then-Else sugar)
+    else if (match("then: ")) {
+      var val0 = parse_term(ctx);
+      var skip = parse_exact("else: ");
       var val1 = parse_term(ctx);
       return Par(val0, val1);
     }
 
     // First
-    else if (match("@0")) {
+    else if (match("fst ")) {
       var pair = parse_term(ctx);
       return Fst(pair);
     }
 
     // Second
-    else if (match("@1")) {
+    else if (match("snd ")) {
       var pair = parse_term(ctx);
       return Snd(pair);
     }
 
     // Projection
-    else if (match("@")) {
+    else if (match("get ")) {
       var nam0 = parse_name();
       var nam1 = parse_name();
+      var skip = parse_exact(":");
       var pair = parse_term(ctx);
       var body = parse_term(ctx.concat([nam0, nam1]));
       return Prj(nam0, nam1, pair, body);
@@ -211,18 +250,21 @@ const parse = (code) => {
     }
   }
 
-  var index = 0;
+  var idx = 0;
+  var row = 0;
+  var col = 0;
   var defs = {};
-  while (index < code.length) {
+  while (idx < code.length) {
     skip_spaces();
     if (match("/")) {
-      while (index < code.length && code[index] !== "\n") {
-        index += 1;
+      while (idx < code.length && code[idx] !== "\n") {
+        next();
       }
     } else {
-      var init = index;
+      var init = idx;
       var skip = parse_exact("def ");
       var name = parse_name();
+      var skip = parse_exact(":");
       var term = parse_term([]);
       defs[name] = term;
     }
@@ -280,7 +322,7 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       var name = args.name;
       var expr = show(args.expr, canon, ctx);
       var body = show(args.body, canon, ctx.concat([name]));
-      return "[" + name + " = " + expr + "] " + body;
+      return "dup " + name + ": " + expr + " " + body;
     case "Num":
       return args.numb.toString();
     case "Op1":
@@ -292,26 +334,26 @@ const show = ([ctor, args], canon = false, ctx = []) => {
     case "Ite":
       var cond = show(args.cond, canon, ctx);
       var pair = show(args.pair, canon, ctx);
-      return "? " + cond + " " + pair;
+      return "if " + cond + " " + pair;
     case "Cpy":
       var numb = show(args.numb, canon, ctx);
-      return "*" + numb;
+      return "cpy " + numb;
     case "Par":
       var val0 = show(args.val0, canon, ctx);
       var val1 = show(args.val1, canon, ctx);
-      return "(& " + val0 + " " + val1 + ")";
+      return "&(" + val0 + "," + val1 + ")";
     case "Fst":
       var pair = show(args.pair, canon, ctx);
-      return "@0 " + pair;
+      return "fst " + pair;
     case "Snd":
       var pair = show(args.pair, canon, ctx);
-      return "@1 " + pair;
+      return "snd " + pair;
     case "Prj":
       var nam0 = args.nam0;
       var nam1 = args.nam1;
       var pair = show(args.pair, canon, ctx);
       var body = show(args.body, canon, ctx.concat([nam0, nam1]));
-      return "@ " + nam0 + " " + nam1 + " " + pair + " " + body;
+      return "get " + nam0 + " " + nam1 + ": " + pair + " " + body;
     case "Ref":
       return args.name;
   }
