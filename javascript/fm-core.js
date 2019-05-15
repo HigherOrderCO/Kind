@@ -32,7 +32,7 @@ const parse = (code) => {
   }
 
   function is_name_char(char) {
-    return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.+-*/%&|^~<>".indexOf(char) !== -1;
+    return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=.+-*/%&|^~<>".indexOf(char) !== -1;
   }
 
   function skip_spaces() {
@@ -487,7 +487,6 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
 
 // Checks if a term is stratified
 const check = ([ctor, term], defs = {}, ctx = []) => {
-  return true
   switch (ctor) {
     case "Lam": 
       if (uses(term.body) > 1) {

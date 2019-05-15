@@ -2,35 +2,86 @@
 // :: Bool ::
 // ::::::::::
 
-def true  [t] [f] t
-def false [t] [f] f
-def not   [b] [t] [f] (b f t)
+def true
+  [t] [f] t
+
+def false
+  [t] [f] f
+
+def not [b]
+  [t] [f] (b f t)
 
 // :::::::::
 // :: Nat ::
 // :::::::::
 
-def zero [s] # [z] z
-def succ [n] [s] [s = s] [k = (n #s)] # [z] (s (k z))
-def mul  [a] [b] [s] [S = s] [A = [B = (b #S)] (a #B)] # [z] (A z)
+def Zero
+  [s] # [z] z
+
+def Succ [n]
+  [s] [s = s]
+  [f = (n #s)]
+  # [z] (s (f z))
+
+def mul[a] [b]
+  [s] [S = s]
+  [A = [B = (b #S)] (a #B)]
+  # [z] (A z)
 
 // ::::::::::
 // :: List ::
 // ::::::::::
 
-def cons   [x] [xs] [c] [n] (c x xs)
-def nil    [c] [n] n
-def head   [x] [xs] (xs [x] [xs] x x)
-def tail   [xs] (xs [x] [xs] xs nil)
-def concat [a] [b] [cons] [cons = cons] [nil] (a #[h] [t] (cons h t) (b #cons nil))
+def Cons [x] [xs]
+  [c] [n] (c x xs)
+
+def Nil
+  [c] [n] n
+
+def head
+  [x] [xs] (xs [x] [xs] x x)
+
+def tail
+  [xs] (xs [x] [xs] xs Nil)
+
+def ConsF [x] [xs]
+  [cons]
+  [x    = x]
+  [cons = cons]
+  [func = (xs #cons)]
+  # [nil] (cons x (func nil))
+
+def NilF
+  [cons]
+  # [nil] nil
+
+def list_fold [len] [list]
+  [cons]
+  [list = list]
+  [cons = cons]
+  [build_fold = (len # [cont] [list]
+    let case_cons [head] [tail]
+      [nil] (cons head (cont tail nil))
+    let case_nil
+      [nil] nil
+    (list case_cons [nil] nil))]
+  # [nil] (build_fold [tail][nil]nil list nil)
+
+def list_unfold [list]
+  [F = (list #cons)] #(F nil)
 
 // :::::::::::
 // :: Tuple ::
 // :::::::::::
 
-def tup [a] [b] [tup] (tup a b)
-def fst [p] (p [a] [b] a)
-def snd [p] (p [a] [b] b)
+def tup [a] [b]
+  [tup] (tup a b)
+
+def fst [tup]
+  (tup [a] [b] a)
+
+def snd [tup]
+  (tup [a] [b] b)
 
 // :::::::::
 // :: Num ::
@@ -51,8 +102,13 @@ def fib2 [n]
 // :: String ::
 // ::::::::::::
 
+def concat [a] [b]
+  [cons] [cons = cons] [nil]
+  (a #[h] [t] (cons h t)
+  (b #cons nil))
+
 def to_chars [str] [cons] [cons = cons]
-  let cons-non0 [c]
+  let cons-non-0 [c]
     @ c0 c1 *c
     ? {c0 > 0}
     & (cons c1)
@@ -62,10 +118,10 @@ def to_chars [str] [cons] [cons = cons]
       @ ca cb *c
       @ c0 c1 *ca
       @ c2 c3 *cb
-      (cons-non0 {{c0 >>  0} & 0xFF}
-      (cons-non0 {{c1 >>  8} & 0xFF}
-      (cons-non0 {{c2 >> 16} & 0xFF}
-      (cons-non0 {{c3 >> 24} & 0xFF}
+      (cons-non-0 {{c0 >>  0} & 0xFF}
+      (cons-non-0 {{c1 >>  8} & 0xFF}
+      (cons-non-0 {{c2 >> 16} & 0xFF}
+      (cons-non-0 {{c3 >> 24} & 0xFF}
         cs)))))]
   # [nil] (f nil)
 
@@ -73,8 +129,50 @@ def to_chars [str] [cons] [cons = cons]
 // :: Term ::
 // ::::::::::
 
-def Lam [body]        [Lam] [App] (Lam body)
-def App [func] [argm] [Lam] [App] (App func argm)
+def Lam [body]
+  [Lam] [App] [Var]
+  (Lam body)
+
+def App [func] [argm]
+  [Lam] [App] [Var]
+  (App func argm)
+
+def Var [indx]
+  [Lam] [App] [Var]
+  (Var indx)
+
+def LamF [body]
+  [Lam] [App] [Var]
+  [Lam  = Lam]
+  [App  = App]
+  [Var  = Var]
+  [body = (body #Lam #App #Var)]
+  # (Lam body)
+
+def AppF [func] [argm]
+  [Lam] [App] [Var]
+  [Lam  = Lam]
+  [App  = App]
+  [Var  = Var]
+  [func = (func #Lam #App #Var)]
+  [argm = (argm #Lam #App #Var)]
+  # (App func argm)
+
+def VarF [indx]
+  [Lam] [App] [Var]
+  [Lam  = Lam]
+  [App  = App]
+  [Var  = Var]
+  # (Var indx)
+
+def term_to_string [term]
+  let case_lam [body]
+    (concat "λ" body)
+  let case_app [func] [argm]
+    (concat "@" (concat func (concat " " argm)))
+  let case_var
+    "x"
+  (term #case_lam #case_app #case_var)
 
 def redex [term]
   let lam [body]
@@ -86,6 +184,21 @@ def redex [term]
       (App (App app-func app-argm) argm)
     (func app-lam app-app)
   (term lam app)
+  
+def term_fold [rec] [term]
+  [Lam] [App] [Var]
+  [Lam = Lam]
+  [App = App]
+  [Var = Var]
+  # (rec
+      [cont] [term] (term
+        [body] (Lam (cont body))
+        [func] [argm] (App (cont func) (Var 0))
+        [indx] (Var indx)
+      )
+      [term] term
+      term)
+
 
 // :::::::::::
 // :: Tests ::
@@ -107,6 +220,15 @@ def tup_test
 def pair_test
   @0 (& 42 1337)
 
+def list_test
+  (Cons 1 (Cons 2 (Cons 3 Nil)))
+
+def clist_test
+  (ConsF #1 (ConsF #2 (ConsF #3 NilF)))
+
+def list_fold_test
+  (list_fold ~3 #list_test)
+
 def if_test
   ? 1
   & "cond is true"
@@ -124,7 +246,20 @@ def fib_test
   (fib ~65536)
 
 def to_chars_test
-  (to_chars "tester")
+  (to_chars "ksjkajf")
+
+def tmp_test [chars]
+  [cons]
+  [cons = cons]
+  [f =
+    (chars
+      #[c] [cs] [indx]
+        @indx0 indx1 *indx
+        ( ? {indx0 % 2}
+          & [x]x
+          : (cons c)
+          (cs {indx1 + 1})))]
+  # [nil] (f [indx]nil 0)
 
 def main
-  to_chars_test
+  (tmp_test (to_chars "abcdefgh"))
