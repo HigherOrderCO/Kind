@@ -57,6 +57,13 @@ def mul: [a] [b]
     (a #B)
   # [z] (A z)
 
+// Bounded for-loop
+def for: [numb] [init] [loop] [stop]
+  dup init: init
+  dup exec: (numb loop)
+  dup stop: stop
+  # (stop (exec init))
+
 // ::::::::::
 // :: List ::
 // ::::::::::
@@ -295,16 +302,6 @@ def add_test:
 def mul_test:
   {3 * 2}
 
-// Example of a constant-time loop
-def sum_test:
-  dup sum-til-10:
-    let loop: [state]
-      get idx   sum   : state
-      get idx-a idx-b : cpy idx
-      &({idx-a + 1}, {sum + idx-b})
-    (~10 #loop)
-  # (snd (sum-til-10 &(0, 0)))
-
 def tup_test:
   (tup_fst (tup 42 1337))
 
@@ -341,5 +338,20 @@ def to_chars_test:
 def string_concat_test:
   (string_concat "Hello, " "world!")
 
+// Example of a bounded loop
+// init: initial state of the loop (pair with index and current sum)
+// loop: body of the loop (increments index, adds it to current sum)
+// stop: finalizer (gets second number of the pair)
+def sum_test:
+  let init:
+    &(0, 0)
+  let loop: [state]
+    get idx   sum   : state
+    get idx-a idx-b : cpy idx
+    &({idx-a + 1}, {sum + idx-b})
+  let stop: [state]
+    (snd state)
+  (for ~10 #init #loop #stop)
+
 def main:
-  string_concat_test
+  sum_test

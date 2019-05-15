@@ -84,7 +84,6 @@ if (show_eal_sic) {
   }
 }
 
-
 if (show_lam_interp) {
   if (show_info) console.log(BOLD("Norm (λ-INTERP):"));
   try {
