@@ -64,6 +64,16 @@ def for: [numb] [init] [loop] [stop]
   dup stop: stop
   # (stop (exec init))
 
+def nat_to_chars: [nat]
+  let init: (to_chars "Z")
+  let loop: [chars] (concat (to_chars "S") chars)
+  let stop: [chars] chars
+  (for nat #init #loop #stop)
+
+def nat_to_string: [nat]
+  dup chars: (nat_to_chars nat)
+  # (from_chars chars) 
+
 // ::::::::::
 // :: List ::
 // ::::::::::
@@ -137,7 +147,7 @@ def pair_snd: [pair]
   snd pair
 
 def pair_prj: [pair] [func]
-  get val0 val1: pair
+  get &(val0, val1): pair
   (func val0 val1)
 
 // :::::::::::
@@ -176,7 +186,7 @@ def fib2: [n]
   let init: (Tup 0 1)
   let next: [p] [tup] 
     let func: [a] [b]
-      get B0 B1: cpy b
+      get &(B0, B1): cpy b
       (Tup B0 {a + B1})
     (p func)
   dup F: (n #next)
@@ -191,15 +201,15 @@ def to_chars: [str]
   [cons]
   dup cons: cons
   let cons-non-0: [c]
-    get c0 c1: cpy c
+    get &(c0, c1): cpy c
     if {c0 > 0}
     then: (cons c1)
     else: [x] x
   dup f:
     let func: [c] [cs]
-      get ca cb: cpy c
-      get c0 c1: cpy ca
-      get c2 c3: cpy cb
+      get &(ca, cb): cpy c
+      get &(c0, c1): cpy ca
+      get &(c2, c3): cpy cb
       let cons-c0: (cons-non-0 {{c0 >>  0} & 0xFF})
       let cons-c1: (cons-non-0 {{c1 >>  8} & 0xFF})
       let cons-c2: (cons-non-0 {{c2 >> 16} & 0xFF})
@@ -215,9 +225,9 @@ def from_chars: [chars]
     dup cons: cons
     dup func:
       let loop: [c] [cont] [char] [indx]
-        get indx0 indx1: cpy indx
-        get char0 char1: cpy {{char >> 8} | {c << 24}}
-        get done0 done1: cpy {{indx0 % 4} == 3}
+        get &(indx0, indx1): cpy indx
+        get &(char0, char1): cpy {{char >> 8} | {c << 24}}
+        get &(done0, done1): cpy {{indx0 % 4} == 3}
         let cons-char: if done0 then: (cons char0) else: [x]x
         let next-char: if done1 then: 0 else: char1
         (cons-char (cont next-char {indx1 + 1}))
@@ -270,16 +280,23 @@ def VarF: [indx]
   dup Lam: Lam
   dup App: App
   dup Var: Var
+  dup indx: indx
   # (Var indx)
 
 def term_to_string: [term]
   let case_lam: [body]
-    (concat "λ" body)
+    (concat (to_chars "λ")
+            body)
   let case_app: [func] [argm]
-    (concat "@" (concat func (concat " " argm)))
-  let case_var:
-    "x"
-  (term #case_lam #case_app #case_var)
+    (concat (to_chars "(")
+    (concat func
+    (concat (to_chars " ")
+    (concat argm
+            (to_chars ")")))))
+  let case_var: [indx]
+    (to_chars "<todo>")
+  dup chars: (term #case_lam #case_app #case_var)
+  # (from_chars chars)
 
 def redex: [term]
   let lam: [body]
@@ -326,7 +343,7 @@ def cpy_test:
   cpy 42
 
 def prj_test:
-  get fst snd: &(42,1337)
+  get &(fst, snd): &(42,1337)
   (tup fst snd)
 
 def fib_test:
@@ -338,6 +355,9 @@ def to_chars_test:
 def string_concat_test:
   (string_concat "Hello, " "world!")
 
+def term_to_string_test:
+  (term_to_string (LamF (LamF (AppF (VarF #~0) (VarF #~1)))))
+
 // Example of a bounded loop
 // init: initial state of the loop (pair with index and current sum)
 // loop: body of the loop (increments index, adds it to current sum)
@@ -346,9 +366,9 @@ def sum_test:
   let init:
     &(0, 0)
   let loop: [state]
-    get idx   sum   : state
-    get idx-a idx-b : cpy idx
-    &({idx-a + 1}, {sum + idx-b})
+    get &(idx, sum): state
+    get &(i-a, i-b): cpy idx
+    &({i-a + 1}, {sum + i-b})
   let stop: [state]
     (snd state)
   (for ~10 #init #loop #stop)

@@ -217,8 +217,12 @@ const parse = (code) => {
 
     // Projection
     else if (match("get ")) {
+      var skip = parse_exact("&");
+      var skip = parse_exact("(");
       var nam0 = parse_name();
+      var skip = parse_exact(",");
       var nam1 = parse_name();
+      var skip = parse_exact(")");
       var skip = parse_exact(":");
       var pair = parse_term(ctx);
       var body = parse_term(ctx.concat([nam0, nam1]));
@@ -353,7 +357,7 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       var nam1 = args.nam1;
       var pair = show(args.pair, canon, ctx);
       var body = show(args.body, canon, ctx.concat([nam0, nam1]));
-      return "get " + nam0 + " " + nam1 + ": " + pair + " " + body;
+      return "get &(" + nam0 + "," + nam1 + "): " + pair + " " + body;
     case "Ref":
       return args.name;
   }
