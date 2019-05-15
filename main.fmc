@@ -45,33 +45,33 @@ def Zero:
 
 def Succ: [n]
   [s]
-  dup s: s
-  dup f: (n #s)
+  dup s = s
+  dup f = (n #s)
   # [z] (s (f z))
 
 def mul: [a] [b]
   [s] 
-  dup S: s
-  dup A:
-    dup B: (b #S)
+  dup S = s
+  dup A =
+    dup B = (b #S)
     (a #B)
   # [z] (A z)
 
 // Bounded for-loop
 def for: [numb] [init] [loop] [stop]
-  dup init: init
-  dup exec: (numb loop)
-  dup stop: stop
+  dup init = init
+  dup exec = (numb loop)
+  dup stop = stop
   # (stop (exec init))
 
 def nat_to_chars: [nat]
-  let init: (to_chars "Z")
-  let loop: [chars] (concat (to_chars "S") chars)
-  let stop: [chars] chars
+  let init = (to_chars "Z")
+  let loop = [chars] (concat (to_chars "S") chars)
+  let stop = [chars] chars
   (for nat #init #loop #stop)
 
 def nat_to_string: [nat]
-  dup chars: (nat_to_chars nat)
+  dup chars = (nat_to_chars nat)
   # (from_chars chars) 
 
 // ::::::::::
@@ -94,13 +94,13 @@ def tail:
 
 def fold: [len] [list]
   [cons]
-  dup list: list
-  dup cons: cons
-  dup fold:
-    let func: [cont] [list]
-      let case_cons: [head] [tail]
+  dup list = list
+  dup cons = cons
+  dup fold =
+    let func = [cont] [list]
+      let case_cons = [head] [tail]
         [nil] (cons head (cont tail nil))
-      let case_nil:
+      let case_nil =
         [nil] nil
       (list case_cons [nil] nil)
     (len #func)
@@ -110,9 +110,9 @@ def fold: [len] [list]
 
 def ConsF: [x] [xs]
   [cons]
-  dup x: x
-  dup cons: cons
-  dup func: (xs #cons)
+  dup x = x
+  dup cons = cons
+  dup func = (xs #cons)
   # [nil] (cons x (func nil))
 
 def NilF:
@@ -120,15 +120,15 @@ def NilF:
   # [nil] nil
 
 def unfold: [list]
-  dup F: (list #cons)
+  dup F = (list #cons)
   # (F nil)
 
 // Concatenates two lists
 def concat: [a] [b]
   [cons]
-  dup cons: cons
-  dup append-a: (a #cons)
-  dup append-b: (b #cons)
+  dup cons = cons
+  dup append-a = (a #cons)
+  dup append-b = (b #cons)
   # [nil] (append-a (append-b nil))
 
 // ::::::::::
@@ -147,7 +147,7 @@ def pair_snd: [pair]
   snd pair
 
 def pair_prj: [pair] [func]
-  get &(val0, val1): pair
+  get &(val0, val1) = pair
   (func val0 val1)
 
 // :::::::::::
@@ -171,25 +171,25 @@ def tup_snd: [tup]
 
 // Gets the nth number of the Fibonacci sequence
 def fib: [n]
-  let init: (Tup #0 #1)
-  let next: [p] [tup]
-    let func: [a] [b]
-      dup A: a
-      dup B: b
+  let init = (Tup #0 #1)
+  let next = [p] [tup]
+    let func = [a] [b]
+      dup A = a
+      dup B = b
       (Tup #B #{A + B})
     (p func)
-  dup F: (n #next)
+  dup F = (n #next)
   # (F init [a] [b] a)
 
 // Using numeric copy primitive instead of duplications
 def fib2: [n]
-  let init: (Tup 0 1)
-  let next: [p] [tup] 
-    let func: [a] [b]
-      get &(B0, B1): cpy b
+  let init = (Tup 0 1)
+  let next = [p] [tup] 
+    let func = [a] [b]
+      get &(B0, B1) = cpy b
       (Tup B0 {a + B1})
     (p func)
-  dup F: (n #next)
+  dup F = (n #next)
   # (F init [a] [b] a)
 
 // ::::::::::::
@@ -199,37 +199,37 @@ def fib2: [n]
 // Converts an UTF-8 string into a list of bytes
 def to_chars: [str]
   [cons]
-  dup cons: cons
-  let cons-non-0: [c]
-    get &(c0, c1): cpy c
+  dup cons = cons
+  let cons-non-0 = [c]
+    get &(c0, c1) = cpy c
     if {c0 > 0}
-    then: (cons c1)
-    else: [x] x
-  dup f:
-    let func: [c] [cs]
-      get &(ca, cb): cpy c
-      get &(c0, c1): cpy ca
-      get &(c2, c3): cpy cb
-      let cons-c0: (cons-non-0 {{c0 >>  0} & 0xFF})
-      let cons-c1: (cons-non-0 {{c1 >>  8} & 0xFF})
-      let cons-c2: (cons-non-0 {{c2 >> 16} & 0xFF})
-      let cons-c3: (cons-non-0 {{c3 >> 24} & 0xFF})
+    then (cons c1)
+    else [x] x
+  dup f =
+    let func = [c] [cs]
+      get &(ca, cb) = cpy c
+      get &(c0, c1) = cpy ca
+      get &(c2, c3) = cpy cb
+      let cons-c0 = (cons-non-0 {{c0 >>  0} & 0xFF})
+      let cons-c1 = (cons-non-0 {{c1 >>  8} & 0xFF})
+      let cons-c2 = (cons-non-0 {{c2 >> 16} & 0xFF})
+      let cons-c3 = (cons-non-0 {{c3 >> 24} & 0xFF})
       (cons-c0 (cons-c1 (cons-c2 (cons-c3 cs))))
     (tup_snd str #func)
   # [nil] (f nil)
 
 // Converts a list of bytes back to an UTF-8 string
 def from_chars: [chars]
-  let nums:
+  let nums =
     [cons]
-    dup cons: cons
-    dup func:
-      let loop: [c] [cont] [char] [indx]
-        get &(indx0, indx1): cpy indx
-        get &(char0, char1): cpy {{char >> 8} | {c << 24}}
-        get &(done0, done1): cpy {{indx0 % 4} == 3}
-        let cons-char: if done0 then: (cons char0) else: [x]x
-        let next-char: if done1 then: 0 else: char1
+    dup cons = cons
+    dup func =
+      let loop = [c] [cont] [char] [indx]
+        get &(indx0, indx1) = cpy indx
+        get &(char0, char1) = cpy {{char >> 8} | {c << 24}}
+        get &(done0, done1) = cpy {{indx0 % 4} == 3}
+        let cons-char = if done0 then (cons char0) else [x]x
+        let next-char = if done1 then 0 else char1
         (cons-char (cont next-char {indx1 + 1}))
       (chars #loop)
     # [nil] (func [char][indx](cons char nil) 0 0)
@@ -260,51 +260,51 @@ def Var: [indx]
 
 def LamF: [body]
   [Lam] [App] [Var]
-  dup Lam:  Lam
-  dup App:  App
-  dup Var:  Var
-  dup body: (body #Lam #App #Var)
+  dup Lam  = Lam
+  dup App  = App
+  dup Var  = Var
+  dup body = (body #Lam #App #Var)
   # (Lam body)
 
 def AppF: [func] [argm]
   [Lam] [App] [Var]
-  dup Lam:  Lam
-  dup App:  App
-  dup Var:  Var
-  dup func: (func #Lam #App #Var)
-  dup argm: (argm #Lam #App #Var)
+  dup Lam  = Lam
+  dup App  = App
+  dup Var  = Var
+  dup func = (func #Lam #App #Var)
+  dup argm = (argm #Lam #App #Var)
   # (App func argm)
 
 def VarF: [indx]
   [Lam] [App] [Var]
-  dup Lam: Lam
-  dup App: App
-  dup Var: Var
-  dup indx: indx
+  dup Lam  = Lam
+  dup App  = App
+  dup Var  = Var
+  dup indx = indx
   # (Var indx)
 
 def term_to_string: [term]
-  let case_lam: [body]
+  let case_lam = [body]
     (concat (to_chars "λ")
             body)
-  let case_app: [func] [argm]
+  let case_app = [func] [argm]
     (concat (to_chars "(")
     (concat func
     (concat (to_chars " ")
     (concat argm
             (to_chars ")")))))
-  let case_var: [indx]
+  let case_var = [indx]
     (to_chars "<todo>")
-  dup chars: (term #case_lam #case_app #case_var)
+  dup chars = (term #case_lam #case_app #case_var)
   # (from_chars chars)
 
 def redex: [term]
-  let lam: [body]
+  let lam = [body]
     (Lam body)
-  let app: [func]
-    let app-lam: [lam-body] [argm]
+  let app = [func]
+    let app-lam = [lam-body] [argm]
       (lam-body argm) 
-    let app-app: [app-func] [app-argm] [argm]
+    let app-app = [app-func] [app-argm] [argm]
       (App (App app-func app-argm) argm)
     (func app-lam app-app)
   (term lam app)
@@ -336,14 +336,14 @@ def list_fold_test:
 
 def if_test:
   if 1
-  then: "cond is true"
-  else: "cond is false"
+  then "cond is true"
+  else "cond is false"
 
 def cpy_test:
   cpy 42
 
 def prj_test:
-  get &(fst, snd): &(42,1337)
+  get &(fst, snd) = &(42,1337)
   (tup fst snd)
 
 def fib_test:
@@ -363,13 +363,13 @@ def term_to_string_test:
 // loop: body of the loop (increments index, adds it to current sum)
 // stop: finalizer (gets second number of the pair)
 def sum_test:
-  let init:
+  let init =
     &(0, 0)
-  let loop: [state]
-    get &(idx, sum): state
-    get &(i-a, i-b): cpy idx
+  let loop = [state]
+    get &(idx, sum) = state
+    get &(i-a, i-b) = cpy idx
     &({i-a + 1}, {sum + i-b})
-  let stop: [state]
+  let stop = [state]
     (snd state)
   (for ~10 #init #loop #stop)
 

@@ -123,7 +123,7 @@ const parse = (code) => {
     // Duplication
     else if (match("dup ")) {
       var name = parse_name();
-      var skip = parse_exact(":");
+      var skip = parse_exact("=");
       var expr = parse_term(ctx);
       var body = parse_term(ctx.concat([name]));
       return Dup(name, expr, body);
@@ -138,7 +138,7 @@ const parse = (code) => {
     // Let
     else if (match("let ")) {
       var name = parse_name();
-      var skip = parse_exact(":");
+      var skip = parse_exact("=");
       var copy = parse_term(ctx);
       var body = parse_term(ctx.concat([name]));
       return subst(body, copy, 0);
@@ -196,9 +196,9 @@ const parse = (code) => {
     }
     
     // Pair (If-Then-Else sugar)
-    else if (match("then: ")) {
+    else if (match("then ")) {
       var val0 = parse_term(ctx);
-      var skip = parse_exact("else: ");
+      var skip = parse_exact("else ");
       var val1 = parse_term(ctx);
       return Par(val0, val1);
     }
@@ -223,7 +223,7 @@ const parse = (code) => {
       var skip = parse_exact(",");
       var nam1 = parse_name();
       var skip = parse_exact(")");
-      var skip = parse_exact(":");
+      var skip = parse_exact("=");
       var pair = parse_term(ctx);
       var body = parse_term(ctx.concat([nam0, nam1]));
       return Prj(nam0, nam1, pair, body);
@@ -326,7 +326,7 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       var name = args.name;
       var expr = show(args.expr, canon, ctx);
       var body = show(args.body, canon, ctx.concat([name]));
-      return "dup " + name + ": " + expr + " " + body;
+      return "dup " + name + " = " + expr + " " + body;
     case "Num":
       return args.numb.toString();
     case "Op1":
@@ -357,7 +357,7 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       var nam1 = args.nam1;
       var pair = show(args.pair, canon, ctx);
       var body = show(args.body, canon, ctx.concat([nam0, nam1]));
-      return "get &(" + nam0 + "," + nam1 + "): " + pair + " " + body;
+      return "get &(" + nam0 + "," + nam1 + ") = " + pair + " " + body;
     case "Ref":
       return args.name;
   }

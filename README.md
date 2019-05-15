@@ -12,6 +12,8 @@ An lightweight untyped functional programming language. It is:
 
 5. Strongly normalizing: reductions are guaranteed to terminate in elementary time.
 
+6. All operations (including beta-reduction!) are simple, constant-time computations.
+
 It features affine lambdas, elementary duplication ("cloning"), 32-bit numeric primitives and pairs.
 
 ## Usage
