@@ -171,26 +171,14 @@ def tup_snd: [tup]
 
 // Gets the nth number of the Fibonacci sequence
 def fib: [n]
-  let init = (Tup #0 #1)
-  let next = [p] [tup]
-    let func = [a] [b]
-      dup A = a
-      dup B = b
-      (Tup #B #{A + B})
-    (p func)
-  dup F = (n #next)
-  # (F init [a] [b] a)
-
-// Using numeric copy primitive instead of duplications
-def fib2: [n]
-  let init = (Tup 0 1)
-  let next = [p] [tup] 
-    let func = [a] [b]
-      get &(B0, B1) = cpy b
-      (Tup B0 {a + B1})
-    (p func)
-  dup F = (n #next)
-  # (F init [a] [b] a)
+  let init = &(0,1)
+  let loop = [state]
+    get &(a, b) = state
+    get &(x, y) = cpy b
+    &(x, {a + y})
+  let stop = [state]
+    (snd state)
+  (for n #init #loop #stop)
 
 // ::::::::::::
 // :: String ::
