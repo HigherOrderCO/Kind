@@ -78,4 +78,4 @@ fmc -s main
 
 Formality-Core is based on the [Elementary Affine Calculus](https://github.com/moonad/elementary-affine-calculus), extended with numeric primitives and pairs. It is compiled to a lightweight interaction net system based on [Symmetric Interaction Combinators](https://pdfs.semanticscholar.org/1731/a6e49c6c2afda3e72256ba0afb34957377d3.pdf) for optimal parallel evaluation, as shown below:
 
-![animation](https://github.com/moonad/Nasic-Render/raw/master/nasic-render.gif)
+<img src="interaction-combinators.gif" width="500" height="300" />
