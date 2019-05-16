@@ -78,6 +78,6 @@ fmc -s main
 
 Formality-Core is based on the [Elementary Affine Calculus](https://github.com/moonad/elementary-affine-calculus), extended with numeric primitives and pairs. It is compiled to a lightweight interaction net system based on [Symmetric Interaction Combinators](https://pdfs.semanticscholar.org/1731/a6e49c6c2afda3e72256ba0afb34957377d3.pdf) for evaluation, as shown below:
 
-![animation](https://github.com/moonad/Nasic-Render/raw/master/nasic-render.gif)
+<img src="interaction-combinators.gif" width="500" height="300" />
 
 To learn more about optimal evaluators and how they relate to traditional functional languages, check [this Reddit post](https://www.reddit.com/r/haskell/comments/bp55ua/new_tool_for_exploring_optimal_reductions/enr3d42/).
