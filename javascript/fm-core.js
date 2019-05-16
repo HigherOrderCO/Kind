@@ -196,9 +196,9 @@ const parse = (code) => {
     }
     
     // Pair (If-Then-Else sugar)
-    else if (match("then ")) {
+    else if (match("then:")) {
       var val0 = parse_term(ctx);
-      var skip = parse_exact("else ");
+      var skip = parse_exact("else:");
       var val1 = parse_term(ctx);
       return Par(val0, val1);
     }

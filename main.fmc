@@ -191,8 +191,8 @@ def to_chars: [str]
   let cons-non-0 = [c]
     get &(c0, c1) = cpy c
     if {c0 > 0}
-    then (cons c1)
-    else [x] x
+    then: (cons c1)
+    else: [x] x
   dup f =
     let func = [c] [cs]
       get &(ca, cb) = cpy c
@@ -216,8 +216,14 @@ def from_chars: [chars]
         get &(indx0, indx1) = cpy indx
         get &(char0, char1) = cpy {{char >> 8} | {c << 24}}
         get &(done0, done1) = cpy {{indx0 % 4} == 3}
-        let cons-char = if done0 then (cons char0) else [x]x
-        let next-char = if done1 then 0 else char1
+        let cons-char =
+          if done0
+          then: (cons char0)
+          else: [x]x
+        let next-char =
+          if done1
+          then: 0
+          else: char1
         (cons-char (cont next-char {indx1 + 1}))
       (chars #loop)
     # [nil] (func [char][indx](cons char nil) 0 0)
@@ -324,8 +330,8 @@ def list_fold_test:
 
 def if_test:
   if 1
-  then "cond is true"
-  else "cond is false"
+  then: "cond is true"
+  else: "cond is false"
 
 def cpy_test:
   cpy 42
@@ -362,4 +368,4 @@ def sum_test:
   (for ~10 #init #loop #stop)
 
 def main:
-  sum_test
+  string_concat_test
