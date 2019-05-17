@@ -180,6 +180,21 @@ def fib: [n]
     (snd state)
   (for n #init #loop #stop)
 
+// `inf` is an external utility for non-termination and constant-space loops
+inf fib1m:
+  init:
+    &(0, &(0, 1))
+  step:
+    get &(i, p) = self
+    get &(a, b) = p
+    get &(x, y) = cpy b
+    &({i + 1}, &(x, {a + y}))
+  stop:
+    get &(i, p) = self
+    {i == 1000000}
+  done:
+    snd snd self
+
 // ::::::::::::
 // :: String ::
 // ::::::::::::
@@ -368,4 +383,4 @@ def sum_test:
   (for ~10 #init #loop #stop)
 
 def main:
-  string_concat_test
+  fib1m

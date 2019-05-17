@@ -258,6 +258,7 @@ const parse = (code) => {
   var row = 0;
   var col = 0;
   var defs = {};
+  var infs = {};
   while (idx < code.length) {
     skip_spaces();
     if (match("/")) {
@@ -265,17 +266,30 @@ const parse = (code) => {
         next();
       }
     } else {
-      var init = idx;
-      var skip = parse_exact("def ");
-      var name = parse_name();
-      var skip = parse_exact(":");
-      var term = parse_term([]);
-      defs[name] = term;
+      if (match("inf ")) {
+        var name = parse_name();
+        var skip = parse_exact(":");
+        var skip = parse_exact("init:");
+        var init = parse_term([]);
+        var skip = parse_exact("step:");
+        var step = Lam("self", parse_term(["self"]));
+        var skip = parse_exact("stop:");
+        var stop = Lam("self", parse_term(["self"]));
+        var skip = parse_exact("done:");
+        var done = Lam("self", parse_term(["self"]));
+        infs[name] = {init, step, stop, done};
+      } else {
+        var skip = parse_exact("def ");
+        var name = parse_name();
+        var skip = parse_exact(":");
+        var term = parse_term([]);
+        defs[name] = term;
+      }
     }
     skip_spaces();
   }
 
-  return defs;
+  return {defs, infs};
 }
 
 // :::::::::::::::::::::
@@ -326,7 +340,7 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       var name = args.name;
       var expr = show(args.expr, canon, ctx);
       var body = show(args.body, canon, ctx.concat([name]));
-      return "dup " + name + " = " + expr + " " + body;
+      return "(dup " + name + " = " + expr + " " + body + ")";
     case "Num":
       return args.numb.toString();
     case "Op1":
@@ -338,26 +352,26 @@ const show = ([ctor, args], canon = false, ctx = []) => {
     case "Ite":
       var cond = show(args.cond, canon, ctx);
       var pair = show(args.pair, canon, ctx);
-      return "if " + cond + " " + pair;
+      return "(if " + cond + " " + pair + ")";
     case "Cpy":
       var numb = show(args.numb, canon, ctx);
-      return "cpy " + numb;
+      return "(cpy " + numb + ")";
     case "Par":
       var val0 = show(args.val0, canon, ctx);
       var val1 = show(args.val1, canon, ctx);
       return "&(" + val0 + "," + val1 + ")";
     case "Fst":
       var pair = show(args.pair, canon, ctx);
-      return "fst " + pair;
+      return "(fst " + pair + ")";
     case "Snd":
       var pair = show(args.pair, canon, ctx);
-      return "snd " + pair;
+      return "(snd " + pair + ")";
     case "Prj":
       var nam0 = args.nam0;
       var nam1 = args.nam1;
       var pair = show(args.pair, canon, ctx);
       var body = show(args.body, canon, ctx.concat([nam0, nam1]));
-      return "get &(" + nam0 + "," + nam1 + ") = " + pair + " " + body;
+      return "(get &(" + nam0 + "," + nam1 + ") = " + pair + " " + body + ")";
     case "Ref":
       return args.name;
   }
