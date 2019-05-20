@@ -34,74 +34,17 @@ try {
 }
 
 var mode = args.e ? "EAL" : args.l ? "INT" : "NET";
-var info = args.s;
 var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
 var {defs, infs} = fm.core.parse(code);
 
-function check(term) {
-  if (!args.d) {
-    try {
-      fm.core.check(term, defs);
-      return term;
-    } catch (e) {
-      console.log(e.toString());
-      process.exit();
-    }
-  }
-}
-
-function norm(term, mode, stats) {
-  switch (mode) {
-    case "EAL":
-      return fm.core.norm(term, defs, false);
-    case "INT":
-      return fm.core.norm(term, defs, true);
-    case "NET":
-      var net = fm.comp.compile(term, defs);
-      var new_stats = net.reduce();
-      if (stats) stats.rewrites += new_stats.rewrites;
-      return fm.comp.decompile(net);
-  }
-}
-
-function exec(name, mode, stats) {
-  if (defs[name] && defs[name][0] === "Ref" && !defs[defs[name][1].name]) {
-    name = defs[name][1].name;
-  }
-  if (defs[name]) {
-    return norm(check(defs[name]), mode, stats);
-  } else if (infs[name]) {
-    var data = infs[name];
-    var init = check(data.init);
-    var step = check(data.step);
-    var stop = check(data.stop);
-    var done = check(data.done);
-    var term = fm.core.norm(init, mode, stats);
-    var cont = term => {
-      var res = norm(fm.core.App(stop, term), mode, stats);
-      if (res[0] === "Put") {
-        res = res[1].expr;
-      }
-      return res[0] === "Num" && res[1].numb === 0;
-    }
-    while (cont(term)) {
-      term = norm(fm.core.App(step, term), mode, stats);
-      stats.loops += 1;
-    }
-    term = norm(fm.core.App(done, term), mode, stats);
-    return term;
-  } else {
-    throw "Definition '" + name + "' not found.";
-  }
-}
-
 try {
   var stats = {rewrites: 0, loops: 0};
-  var term = exec(name, mode, stats);
+  var term = fm.exec(name, defs, mode, args.d, stats);
   console.log(fm.core.show(term));
-  if (stats) console.log(JSON.stringify(stats));
+  if (args.s) console.log(JSON.stringify(stats));
 } catch (e) {
+  console.log(e);
   console.log(e.toString());
   console.log(e)
 }
