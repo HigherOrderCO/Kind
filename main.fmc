@@ -181,11 +181,7 @@ def fib: [n]
   (for n #init #loop #stop)
 
 // `inf` is an external utility for non-termination and constant-space loops
-<<<<<<< HEAD
 inf fib1m:
-=======
-inf fib10b:
->>>>>>> e636f48bbb90abdab480047bffca3ce313a9346a
   init:
     &(0, &(0, 1))
   step:
