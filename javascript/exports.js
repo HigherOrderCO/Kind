@@ -13,8 +13,17 @@ function norm(term, defs, mode = "NET", stats = {}) {
       return fm.core.norm(term, defs, true);
     case "NET":
       var net = fm.comp.compile(term, defs);
+      if (stats && stats.input_net === null) {
+        stats.input_net = JSON.parse(JSON.stringify(net));
+      }
       var new_stats = net.reduce();
-      if (stats) stats.rewrites += new_stats.rewrites;
+      if (stats && stats.output_net !== undefined) {
+        stats.output_net = JSON.parse(JSON.stringify(net));
+      }
+      if (stats) {
+        stats.rewrites += new_stats.rewrites;
+        stats.passes += new_stats.passes;
+      }
       return fm.comp.decompile(net);
   }
 }

@@ -266,12 +266,16 @@ class Net {
   // Rewrites active pairs until none is left, reducing the graph to normal form
   // This could be performed in parallel. Unreachable data is freed automatically.
   reduce() {
-    var rewrite_count = 0;
+    var rewrites = 0;
+    var passes = 0;
     while (this.redex.length > 0) {
-      this.rewrite(this.redex.pop());
-      rewrite_count += 1;
+      for (var i = 0, l = this.redex.length; i < l; ++i) {
+        this.rewrite(this.redex.pop());
+        ++rewrites;
+      }
+      ++passes;
     }
-    return {rewrites: rewrite_count};
+    return {rewrites, passes};
   }
 
   // Rewrites active pairs lazily. Lazy reductions avoid wasting work and

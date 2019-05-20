@@ -28,6 +28,7 @@ try {
   console.log("-e uses interpreter and preserves EAL boxes");
   console.log("-d disables stratification (termination) checks");
   console.log("-s shows stats");
+  console.log("-p prints net as JSON");
   console.log("");
   console.log("Note: fmC will automatically import any local file ending in `.fmc`.");
   process.exit();
@@ -39,10 +40,17 @@ var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 var {defs, infs} = fm.core.parse(code);
 
 try {
-  var stats = {rewrites: 0, loops: 0};
+  var stats = {
+    rewrites: 0,
+    passes: 0,
+    input_net: args.p ? null : undefined,
+    output_net: args.p ? null : undefined
+  };
   var term = fm.exec(name, defs, mode, args.d, stats);
   console.log(fm.core.show(term));
-  if (args.s) console.log(JSON.stringify(stats));
+  if (args.p || args.s) {
+    console.log(JSON.stringify(stats, null, 2));
+  }
 } catch (e) {
   console.log(e);
   console.log(e.toString());
