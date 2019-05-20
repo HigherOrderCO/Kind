@@ -92,44 +92,49 @@ def head:
 def tail:
   [xs] (xs [x][xs]xs Nil)
 
-def fold: [len] [list]
-  [cons]
-  dup list = list
-  dup cons = cons
-  dup fold =
-    let func = [cont] [list]
-      let case_cons = [head] [tail]
-        [nil] (cons head (cont tail nil))
-      let case_nil =
-        [nil] nil
-      (list case_cons [nil] nil)
-    (len #func)
-  # [nil] (fold [tail][nil]nil list nil)
-
 // Church-encoded functions
 
 def ConsF: [x] [xs]
-  [cons]
-  dup x = x
-  dup cons = cons
-  dup func = (xs #cons)
-  # [nil] (cons x (func nil))
+  [Cons]
+  dup x    = x
+  dup Cons = Cons
+  dup func = (xs #Cons)
+  # [nil] (Cons x (func nil))
 
 def NilF:
-  [cons]
+  [Cons]
   # [nil] nil
 
 def unfold: [list]
-  dup F = (list #cons)
+  dup F = (list #Cons)
   # (F nil)
 
 // Concatenates two lists
 def concat: [a] [b]
-  [cons]
-  dup cons = cons
-  dup append-a = (a #cons)
-  dup append-b = (b #cons)
+  [Cons]
+  dup Cons = Cons
+  dup append-a = (a #Cons)
+  dup append-b = (b #Cons)
   # [nil] (append-a (append-b nil))
+
+// Converts Scott to Church in O(len).
+def list_fold: [len]
+  let func = [cont] [list]
+    let case_cons = [head] [tail] (ConsF head (cont tail))
+    let case_nil  = NilF
+    (list case_cons case_nil)
+  dup fold = (len #func)
+  # [list] (fold [tail]NilF list)
+
+// Faster version of the function above.
+def list_fold_f: [len] [Cons]
+  dup Cons = Cons
+  let func = [cont] [list]
+    let case_cons = [head] [tail] [nil] (Cons head (cont tail nil))
+    let case_nil  = [nil] nil
+    (list case_cons case_nil)
+  dup fold = (len #func)
+  # [nil] [list] (fold [tail][nil]nil list nil)
 
 // ::::::::::
 // :: Pair ::
@@ -201,47 +206,47 @@ inf fib1m:
 
 // Converts an UTF-8 string into a list of bytes
 def to_chars: [str]
-  [cons]
-  dup cons = cons
-  let cons-non-0 = [c]
+  [Cons]
+  dup Cons = Cons
+  let Cons-non-0 = [c]
     get &(c0, c1) = cpy c
     if {c0 > 0}
-    then: (cons c1)
+    then: (Cons c1)
     else: [x] x
   dup f =
     let func = [c] [cs]
       get &(ca, cb) = cpy c
       get &(c0, c1) = cpy ca
       get &(c2, c3) = cpy cb
-      let cons-c0 = (cons-non-0 {{c0 >>  0} & 0xFF})
-      let cons-c1 = (cons-non-0 {{c1 >>  8} & 0xFF})
-      let cons-c2 = (cons-non-0 {{c2 >> 16} & 0xFF})
-      let cons-c3 = (cons-non-0 {{c3 >> 24} & 0xFF})
-      (cons-c0 (cons-c1 (cons-c2 (cons-c3 cs))))
+      let Cons-c0 = (Cons-non-0 {{c0 >>  0} & 0xFF})
+      let Cons-c1 = (Cons-non-0 {{c1 >>  8} & 0xFF})
+      let Cons-c2 = (Cons-non-0 {{c2 >> 16} & 0xFF})
+      let Cons-c3 = (Cons-non-0 {{c3 >> 24} & 0xFF})
+      (Cons-c0 (Cons-c1 (Cons-c2 (Cons-c3 cs))))
     (tup_snd str #func)
   # [nil] (f nil)
 
 // Converts a list of bytes back to an UTF-8 string
 def from_chars: [chars]
   let nums =
-    [cons]
-    dup cons = cons
+    [Cons]
+    dup Cons = Cons
     dup func =
       let loop = [c] [cont] [char] [indx]
         get &(indx0, indx1) = cpy indx
         get &(char0, char1) = cpy {{char >> 8} | {c << 24}}
         get &(done0, done1) = cpy {{indx0 % 4} == 3}
-        let cons-char =
+        let Cons-char =
           if done0
-          then: (cons char0)
+          then: (Cons char0)
           else: [x]x
         let next-char =
           if done1
           then: 0
           else: char1
-        (cons-char (cont next-char {indx1 + 1}))
+        (Cons-char (cont next-char {indx1 + 1}))
       (chars #loop)
-    # [nil] (func [char][indx](cons char nil) 0 0)
+    # [nil] (func [char][indx](Cons char nil) 0 0)
   [tup] (tup 1954047348 nums)
 
 def string_concat: [a] [b]
@@ -345,6 +350,25 @@ def term_fold: [len]
   dup fold = (len #func)
   # [term] (snd (fold [term]&([x]x,term) term))
 
+// Faster version of the function above.
+def term_fold_f: [len] [Lam] [App] [Var]
+  dup Lam = Lam
+  dup App = App
+  dup Var = Var
+  let func = [cont] [term]
+    let case_lam = [body] [cont]
+      get &(cont, body) = (cont body)
+      &(cont, (Lam body))
+    let case_app = [func] [argm] [cont]
+      get &(cont, func) = (cont func)
+      get &(cont, argm) = (cont argm)
+      &(cont, (App func argm))
+    let case_var = [indx] [cont]
+      &(cont, (Var indx))
+    (term case_lam case_app case_var cont)
+  dup fold = (len #func)
+  # [term] (snd (fold [term]&([x]x,term) term))
+
 def term_to_string: [term]
   let case_lam = [body]
     (concat (to_chars "λ")
@@ -388,13 +412,19 @@ def pair_test:
   fst &(42 , 1337)
 
 def list_test:
-  (Cons 1 (Cons 2 (Cons 3 Nil)))
+  (Cons #123 (Cons #2 (Cons #3 Nil)))
 
-def clist_test:
+def list_f_test:
   (ConsF #1 (ConsF #2 (ConsF #3 NilF)))
 
 def list_fold_test:
-  (list_fold ~3 #list_test)
+  dup fold = (list_fold ~3)
+  # (fold list_test)
+
+def list_fold_f_test:
+  [Cons]
+  dup fold_f = (list_fold_f ~3 Cons)
+  # [Nil] (fold_f Nil list_test)
 
 def if_test:
   if 1
@@ -420,6 +450,21 @@ def string_concat_test:
 def term_to_string_test:
   (term_to_string (LamF (LamF (AppF (VarF #~0) (VarF #~1)))))
 
+def term_test:
+  (Lam (Lam (App (Var #1) (App (Var #1) (Var #0)))))
+
+def term_f_test:
+  (LamF (LamF (AppF (VarF #1) (AppF (VarF #1) (VarF #0)))))
+
+def term_fold_test:
+  dup fold = (term_fold ~10)
+  # (fold term_test)
+
+def term_fold_f_test:
+  [Lam] [App] [Var]
+  dup fold_f = (term_fold_f ~10 Lam App Var)
+  # (fold_f term_test)
+
 // Example of a bounded loop
 // init: initial state of the loop (pair with index and current sum)
 // loop: body of the loop (increments index, adds it to current sum)
@@ -434,10 +479,6 @@ def sum_test:
   let stop = [state]
     (snd state)
   (for ~10 #init #loop #stop)
-
-def term_fold_test:
-  dup fold = (term_fold ~2048)
-  # (fold (Lam (Lam (App (Var 1) (App (Var 1) (Var 0))))))
 
 def main:
   string_concat_test
