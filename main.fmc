@@ -329,6 +329,22 @@ def VarF: [indx]
   dup indx = indx
   # (Var indx)
 
+// (This is how we convert from Scott to Church in O(len).)
+def term_fold: [len]
+  let func = [cont] [term]
+    let case_lam = [body] [cont]
+      get &(cont, body) = (cont body)
+      &(cont, (LamF body))
+    let case_app = [func] [argm] [cont]
+      get &(cont, func) = (cont func)
+      get &(cont, argm) = (cont argm)
+      &(cont, (AppF func argm))
+    let case_var = [indx] [cont]
+      &(cont, (VarF indx))
+    (term case_lam case_app case_var cont)
+  dup fold = (len #func)
+  # [term] (snd (fold [term]&([x]x,term) term))
+
 def term_to_string: [term]
   let case_lam = [body]
     (concat (to_chars "λ")
@@ -418,6 +434,10 @@ def sum_test:
   let stop = [state]
     (snd state)
   (for ~10 #init #loop #stop)
+
+def term_fold_test:
+  dup fold = (term_fold ~2048)
+  # (fold (Lam (Lam (App (Var 1) (App (Var 1) (Var 0))))))
 
 def main:
   string_concat_test
