@@ -70,7 +70,7 @@ function exec(name, mode, stats) {
     name = defs[name][1].name;
   }
   if (defs[name]) {
-    return norm(check(defs[name]), mode, null);
+    return norm(check(defs[name]), mode, stats);
   } else if (infs[name]) {
     var data = infs[name];
     var init = check(data.init);
