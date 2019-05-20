@@ -68,7 +68,7 @@ npm i -g formality-core
 2. Type `fmc` to see a list of options and test in our example:
 
 ```
-git clone https://github.com/formality-core
+git clone https://github.com/moonad/formality-core.git
 cd formality-core
 fmc -s main
 ```
