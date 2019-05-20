@@ -550,10 +550,10 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
   switch (ctor) {
     case "Lam": 
       if (uses(term.body) > 1) {
-        throw "[ERROR]\nAffine variable `" + term.name + "` used more than once in:\n" + show([ctor, term], false, ctx);
+        throw "[ERROR]\nLambda variable `" + term.name + "` used more than once in:\n" + show([ctor, term], false, ctx);
       }
       if (!is_at_level(term.body, 0)) {
-        throw "[ERROR]\nAffine variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], false, ctx);
+        throw "[ERROR]\nLambda variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], false, ctx);
       }
       check(term.body, defs, ctx.concat([term.name]));
       break;
@@ -566,7 +566,7 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
       break;
     case "Dup":
       if (!is_at_level(term.body, 1)) {
-        throw "[ERROR]\nExponential variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], false, ctx);
+        throw "[ERROR]\nDuplication variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], false, ctx);
       }
       check(term.expr, defs, ctx);
       check(term.body, defs, ctx.concat([term.name]));
@@ -599,10 +599,10 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
       var isat0 = is_at_level(term.body, 0, 1);
       var isat1 = is_at_level(term.body, 0, 0);
       if (uses0 > 1 || uses1 > 1) {
-        throw "[ERROR]\nAffine variable `" + (uses0 > 1 ? term.nam0 : term.nam1) + "` used more than once in:\n" + show([ctor, term], false, ctx);
+        throw "[ERROR]\nProjection variable `" + (uses0 > 1 ? term.nam0 : term.nam1) + "` used more than once in:\n" + show([ctor, term], false, ctx);
       }
       if (!isat0 || !isat1) {
-        throw "[ERROR]\nAffine variable `" + (!isat0 ? term.nam0 : term.nam1) + "` used inside a box in:\n" + show([ctor, term], false, ctx);
+        throw "[ERROR]\nProjection variable `" + (!isat0 ? term.nam0 : term.nam1) + "` used inside a box in:\n" + show([ctor, term], false, ctx);
       }
       check(term.pair, defs, ctx);
       check(term.body, defs, ctx.concat([term.nam0, term.nam1]));
