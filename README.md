@@ -18,6 +18,18 @@ It features affine lambdas, elementary duplication ("cloning"), 32-bit numeric p
 
 ## Example
 
+An interesting example is map-reduce. Since Formality is evaluated with interaction nets, all you need to do to parallelize your program is to perform tree-like, branching recursion. Parallelism comes for free, as long as those branches are independent. Here, we sum all numbers from 0 to 65536 by creating a binary tree of depth 16 and folding over it:
+
+```javascript
+// Sums all numbers from 0 to 65536 (2**16) in parallel
+// Uses `map_reduce` from http://tiny.cc/fmc_map_reduce
+def main:
+  let map = [i] i
+  let red = [a] [b] {a + b}
+  let sum = (map_reduce ~16 ##map ##red)
+  &("Sum from 0 from 65536 is:", sum)
+```
+
 This example computes the nth number of the Fibonacci sequence. It uses compact λ-encoded nats to emulate loops.
 
 ```javascript
@@ -48,19 +60,7 @@ n | fib(n) % 2^32 | graph rewrites
 
 As you can see, `fib(n)` is linear, and needs exactly 6 graph rewrites per iteration of the loop. This JS implementation performs roughly `3m` rewrites/s. We expect this to increase a few orders of magnitude with compilers and hardware.
 
-Another interesting example is map-reduce. Since Formality is evaluated with interaction nets, all you need to do to parallelize your program is to perform tree-like, branching recursion. Parallelism comes for free, as long as those branches are independent. Here, we sum all numbers from 0 to 65536 by creating a binary tree of depth 16 and folding over it:
-
-```javascript
-// Sums all numbers from 0 to 65536 (2**16) in parallel
-// Uses `map_reduce` from http://tiny.cc/fmc_map_reduce
-def main:
-  let map = [i] i
-  let red = [a] [b] {a + b}
-  let sum = (map_reduce ~16 ##map ##red)
-  &("Sum from 0 from 65536 is:", sum)
-```
-
-For more examples, check [main.fmc](main.fmc).
+For more examples, check our [wiki](https://github.com/moonad/formality-core/wiki).
 
 ## Usage
 
