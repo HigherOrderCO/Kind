@@ -73,7 +73,7 @@ cd formality-core
 fmc -s main
 ```
 
-For a reference of the language features, check our [wiki](wiki).
+For a reference of the language features, check our [wiki](https://github.com/moonad/formality-core/wiki).
 
 ## Theory
 
