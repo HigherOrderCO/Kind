@@ -45,13 +45,6 @@ n | fib(n) % 2^32 | graph rewrites
 6000 | 1434712737 | 36147
 7000 | 1424409805 | 42147
 8000 | 1154982114 | 48140
-9000 | 4044733297 | 54141
-10000 | 2132534333 | 60141
-11000 | 1648091042 | 66162
-12000 | 690383169 | 72155
-13000 | 4244933805 | 78148
-14000 | 1699985506 | 84155
-15000 | 774935569 | 90155
 
 As you can see, `fib(n)` is linear, and needs exactly 6 graph rewrites per iteration of the loop. This JS implementation performs roughly `3m` rewrites/s. We expect this to increase a few orders of magnitude with compilers and hardware.
 
