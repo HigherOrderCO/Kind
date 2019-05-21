@@ -73,9 +73,7 @@ cd formality-core
 fmc -s main
 ```
 
-## Documentation
-
-Check our [wiki](wiki).
+For a reference of the language features, check our [wiki](wiki).
 
 ## Theory
 
