@@ -379,10 +379,7 @@ def pair_test:
   fst &(42 , 1337)
 
 def list_test:
-  (Cons #123 (Cons #2 (Cons #3 Nil)))
-
-def list_f_test:
-  (ConsF #1 (ConsF #2 (ConsF #3 NilF)))
+  (Cons #1 (Cons #2 (Cons #3 Nil)))
 
 def list_fold_test:
   dup fold = (list_fold ~3)
@@ -418,13 +415,10 @@ def term_to_string_test:
   (term_to_string (LamF (LamF (AppF (VarF #~0) (VarF #~1)))))
 
 def term_test:
-  (Lam (Lam (Lam (App (Var #~2) (App (Var #~1) (Var #~0))))))
-
-def term_f_test:
-  (LamF (LamF (AppF (VarF #1) (AppF (VarF #1) (VarF #0)))))
+  (Lam (Lam (Lam (App (Var #~2) (App (Var #~1) (Var #~1))))))
 
 def term_fold_test:
-  dup fold = (term_fold ~10)
+  dup fold = (term_fold ~16)
   # (fold term_test)
 
 def term_fold_f_test:
@@ -451,4 +445,4 @@ def sum_test:
   (for ~10 #init #loop #stop)
 
 def main:
-  term_to_string_test
+  string_concat_test
