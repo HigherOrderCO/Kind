@@ -118,15 +118,6 @@ def concat: [a] [b]
   # [nil] (append-a (append-b nil))
 
 // Converts Scott to Church in O(len).
-def list_fold: [len]
-  let func = [cont] [list]
-    let case_cons = [head] [tail] (ConsF head (cont tail))
-    let case_nil  = NilF
-    (list case_cons case_nil)
-  dup fold = (len #func)
-  # [list] (fold [tail]NilF list)
-
-// Faster version of the function above.
 def list_fold_f: [len] [Cons]
   dup Cons = Cons
   let func = [cont] [list]
@@ -135,6 +126,11 @@ def list_fold_f: [len] [Cons]
     (list case_cons case_nil)
   dup fold = (len #func)
   # [nil] [list] (fold [tail][nil]nil list nil)
+
+// Non-fused version of the function above.
+def list_fold: [len]
+  dup fold_f = (list_fold_f len #ConsF)
+  # [list] (fold_f NilF list)
 
 // ::::::::::
 // :: Pair ::
@@ -272,22 +268,6 @@ def inc: [n]
   let case_z = [bs] bs
   dup S = (n case_s)
   # (S case_z)
-def o: [bs] [o] [i] [e] (o bs)
-def i: [bs] [o] [i] [e] (i bs)
-def e:      [o] [i] [e] e
-
-def inc_cont: [bs] [cont]
-  [o] [i] [e]
-  let case_o = i
-  let case_i = [x] (o (cont x))
-  let case_e = e
-  (bs case_o case_i case_e) 
-
-def inc: [n]
-  let case_s = # [cont] [bs] (inc_cont bs cont)
-  let case_z = [bs] bs
-  dup S = (n case_s)
-  # (S case_z)
 
 // ::::::::::
 // :: Term ::
@@ -334,23 +314,7 @@ def VarF: [indx]
   dup indx = indx
   # (Var indx)
 
-// (This is how we convert from Scott to Church in O(len).)
-def term_fold: [len]
-  let func = [cont] [term]
-    let case_lam = [body] [cont]
-      get &(cont, body) = (cont body)
-      &(cont, (LamF body))
-    let case_app = [func] [argm] [cont]
-      get &(cont, func) = (cont func)
-      get &(cont, argm) = (cont argm)
-      &(cont, (AppF func argm))
-    let case_var = [indx] [cont]
-      &(cont, (VarF indx))
-    (term case_lam case_app case_var cont)
-  dup fold = (len #func)
-  # [term] (snd (fold [term]&([x]x,term) term))
-
-// Faster version of the function above.
+// This is how we convert from Scott to Church in O(len).
 def term_fold_f: [len] [Lam] [App] [Var]
   dup Lam = Lam
   dup App = App
@@ -369,20 +333,23 @@ def term_fold_f: [len] [Lam] [App] [Var]
   dup fold = (len #func)
   # [term] (snd (fold [term]&([x]x,term) term))
 
-def term_to_string: [term]
+// Non-fused version of the function above.
+def term_fold: [len]
+  dup fold_f = (term_fold_f len #LamF #AppF #VarF)
+  # [term] (fold_f term_test)
+
+def term_to_string: [len]
   let case_lam = [body]
-    (concat (to_chars "λ")
-            body)
+    (concat (to_chars "λ") body)
   let case_app = [func] [argm]
     (concat (to_chars "(")
     (concat func
     (concat (to_chars " ")
-    (concat argm
-            (to_chars ")")))))
+    (concat argm (to_chars ")")))))
   let case_var = [indx]
-    (to_chars "<todo>")
-  dup chars = (term #case_lam #case_app #case_var)
-  # (from_chars chars)
+    (to_chars (nat_to_string indx))
+  dup fold_f = (term_fold_f len #case_lam #case_app #case_var)
+  # [term] (from_chars (fold_f term))
 
 def redex: [term]
   let lam = [body]
@@ -451,7 +418,7 @@ def term_to_string_test:
   (term_to_string (LamF (LamF (AppF (VarF #~0) (VarF #~1)))))
 
 def term_test:
-  (Lam (Lam (App (Var #1) (App (Var #1) (Var #0)))))
+  (Lam (Lam (Lam (App (Var #~2) (App (Var #~1) (Var #~0))))))
 
 def term_f_test:
   (LamF (LamF (AppF (VarF #1) (AppF (VarF #1) (VarF #0)))))
@@ -464,6 +431,9 @@ def term_fold_f_test:
   [Lam] [App] [Var]
   dup fold_f = (term_fold_f ~10 Lam App Var)
   # (fold_f term_test)
+
+def term_to_string_test:
+  (term_to_string ~10 term_test)
 
 // Example of a bounded loop
 // init: initial state of the loop (pair with index and current sum)
@@ -481,4 +451,4 @@ def sum_test:
   (for ~10 #init #loop #stop)
 
 def main:
-  string_concat_test
+  term_to_string_test
