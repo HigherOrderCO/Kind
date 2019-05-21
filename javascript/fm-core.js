@@ -28,7 +28,7 @@ const Ref = (name)                   => ["Ref", {name}];
 // Converts a string to a term
 const parse = (code) => {
   function is_space(char) {
-    return char === " " || char === "\t" || char === "\n";
+    return char === " " || char === "\t" || char === "\n" || char === "\r" || char === "\r\n";
   }
 
   function is_newline(char) {
