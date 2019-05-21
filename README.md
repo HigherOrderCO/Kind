@@ -48,7 +48,7 @@ n | fib(n) % 2^32 | graph rewrites
 
 As you can see, `fib(n)` is linear, and needs exactly 6 graph rewrites per iteration of the loop. This JS implementation performs roughly `3m` rewrites/s. We expect this to increase a few orders of magnitude with compilers and hardware.
 
-Another cool example is summing numbers in parallel. Since Formality is evaluated with interaction nets, all you need to do to parallelize your program is to perform tree-like, branching recursion. Here, we sum all numbers from 0 to 65536 by creating a binary tree of depth 16 and folding over it, in a map-reduce fashion:
+Another interesting example is map-reduce. Since Formality is evaluated with interaction nets, all you need to do to parallelize your program is to perform tree-like, branching recursion. Parallelism comes for free, as long as those branches are independent. Here, we sum all numbers from 0 to 65536 by creating a binary tree of depth 16 and folding over it:
 
 ```javascript
 // Sums all numbers from 0 to 65536 (2**16) in parallel
