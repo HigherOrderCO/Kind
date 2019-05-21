@@ -28,7 +28,7 @@ function norm(term, defs, mode = "NET", stats = {}) {
   }
 }
 
-function exec(name, defs, mode = "NET", bipass = false, stats = {}) {
+function exec(name, defs, infs, mode = "NET", bipass = false, stats = {}) {
   if (defs[name] && defs[name][0] === "Ref" && !defs[defs[name][1].name]) {
     name = defs[name][1].name;
   }

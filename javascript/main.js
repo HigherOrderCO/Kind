@@ -24,8 +24,9 @@ try {
   console.log("Usage: fmc [options] term_name");
   console.log("");
   console.log("Options:");
-  console.log("-i uses interpreter instead of inets");
-  console.log("-e uses interpreter and preserves EAL boxes");
+  console.log("-e uses interpreter (default)");
+  console.log("-i uses interpreter, erasing boxes");
+  console.log("-n uses interaction nets, erasing boxes (fast)");
   console.log("-d disables stratification (termination) checks");
   console.log("-s shows stats");
   console.log("-p prints net as JSON");
@@ -34,7 +35,7 @@ try {
   process.exit();
 }
 
-var mode = args.e ? "EAL" : args.l ? "INT" : "NET";
+var mode = args.e ? "EAL" : args.l ? "INT" : args.n ? "NET" : "EAL";
 var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
 var {defs, infs} = fm.core.parse(code);
@@ -46,7 +47,7 @@ try {
     input_net: args.p ? null : undefined,
     output_net: args.p ? null : undefined
   };
-  var term = fm.exec(name, defs, mode, args.d, stats);
+  var term = fm.exec(name, defs, infs, mode, args.d, stats);
   console.log(fm.core.show(term));
   if (args.p || args.s) {
     console.log(JSON.stringify(stats, null, 2));
