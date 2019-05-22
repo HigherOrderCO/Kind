@@ -173,7 +173,7 @@ const parse = (code) => {
     }
 
     // If-Then-Else
-    else if (match("if")) {
+    else if (match("if ")) {
       var cond = parse_term(ctx);
       var pair = parse_term(ctx);
       return Ite(cond, pair);
