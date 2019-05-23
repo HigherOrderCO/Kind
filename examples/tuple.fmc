@@ -1,0 +1,8 @@
+def Tup: [a] [b]
+  [tup] (tup a b)
+
+def tup_fst: [tup]
+  (tup [a] [b] a)
+
+def tup_snd: [tup]
+  (tup [a] [b] b)

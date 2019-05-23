@@ -1,0 +1,54 @@
+// Scott-encoded functions
+
+def Cons: [x] [xs]
+  [c] [n] (c x xs)
+
+def Nil:
+  [c] [n] n
+
+def head:
+  [x] [xs] (xs [x][xs]x x)
+
+def tail:
+  [xs] (xs [x][xs]xs Nil)
+
+// Church-encoded functions
+
+def ConsF: [x] [xs]
+  [Cons]
+  dup x    = x
+  dup Cons = Cons
+  dup func = (xs #Cons)
+  # [nil] (Cons x (func nil))
+
+def NilF:
+  [Cons]
+  # [nil] nil
+
+def list_unfold: [list]
+  dup F = (list #Cons)
+  # (F nil)
+
+// Concatenates two lists
+def concat: [a] [b]
+  [Cons]
+  dup Cons = Cons
+  dup append-a = (a #Cons)
+  dup append-b = (b #Cons)
+  # [nil] (append-a (append-b nil))
+
+// Converts Scott to Church in O(len).
+def list_fold_f: [len] [Cons]
+  dup Cons = Cons
+  let func = [cont] [list]
+    let case_cons = [head] [tail] [nil] (Cons head (cont tail nil))
+    let case_nil  = [nil] nil
+    (list case_cons case_nil)
+  dup fold = (len #func)
+  # [nil] [list] (fold [tail][nil]nil list nil)
+
+// Non-fused version of the function above.
+def list_fold: [len]
+  dup fold_f = (list_fold_f len #ConsF)
+  # [list] (fold_f NilF list)
+

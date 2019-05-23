@@ -1,0 +1,25 @@
+// Gets the nth number of the Fibonacci sequence
+def fib: [n]
+  let init = &(0,1)
+  let loop = [state]
+    get &(a, b) = state
+    get &(x, y) = cpy b
+    &(x, {a + y})
+  let stop = [state]
+    (snd state)
+  (for n #init #loop #stop)
+
+// `inf` is an external utility for non-termination and constant-space loops
+inf fib1m:
+  init:
+    &(0, &(0, 1))
+  step:
+    get &(i, p) = self
+    get &(a, b) = p
+    get &(x, y) = cpy b
+    &({i + 1}, &(x, {a + y}))
+  stop:
+    get &(i, p) = self
+    {i == 1000000}
+  done:
+    snd snd self

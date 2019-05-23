@@ -74,7 +74,7 @@ npm i -g formality-core
 
 ```
 git clone https://github.com/moonad/formality-core.git
-cd formality-core
+cd formality-core/examples
 fmc -s main
 ```
 
