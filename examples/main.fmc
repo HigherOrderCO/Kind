@@ -58,4 +58,4 @@ def term_test:
   term_example
 
 def main:
-  term_test
+  string_concat_test

@@ -306,6 +306,58 @@ class Net {
     //return {rewrites: rwts};
   //}
 
+  // Returns a string that is preserved on reduction, good for debugging
+  denote(ptrn = this.enter_port(Pointer(0, 1)), exit = []) {
+    function path_to_string(path) {
+      var str = "<";
+      while (path) {
+        str += path.head === 1 ? "a" : "b";
+        path = path.tail; 
+      }
+      str += ">";
+      return str;
+    }
+    while (true) {
+      if (type_of(ptrn) === PTR) {
+        var ai = addr_of(ptrn);
+        var as = slot_of(ptrn)
+        var ak = this.kind_of(ai);
+        switch (this.type_of(ai)) {
+          case NOD:
+            if (slot_of(ptrn) === 0) {
+              if (exit[ak]) {
+                var new_exit = exit.slice(0);
+                new_exit[ak] = new_exit[ak].tail;
+                ptrn = this.enter_port(Pointer(ai, Number(exit[ak].head)));
+                exit = new_exit;
+                continue; // tail-call: denote(ptrn, exit)
+              } else {
+                var lft = this.denote(this.enter_port(Pointer(ai, 1)), exit);
+                var rgt = this.denote(this.enter_port(Pointer(ai, 2)), exit);
+                return "(" + ak + " " + lft + " " + rgt + ")";
+              }
+            } else {
+              if (ai === 0) {
+                while (exit[exit.length - 1] === null) exit.pop();
+                return exit.map(path_to_string).join(":");
+              } else {
+                var new_exit = exit.slice(0);
+                new_exit[ak] = {head: as, tail: new_exit[ak] || null};
+                ptrn = this.enter_port(Pointer(ai, 0));
+                exit = new_exit;
+                continue; // tail-call: denote(ptrn, exit)
+              }
+            }
+            break;
+          default:
+            return "<TODO>";
+        }
+      } else {
+        return "#" + numb_of(ptrn);
+      }
+    }
+  }
+
   to_string() {
     const pointer = (ptrn) => {
       if (type_of(ptrn) === NUM) {
