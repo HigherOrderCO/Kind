@@ -53,11 +53,20 @@ const parse = (code) => {
     while (idx < code.length && is_space(code[idx])) {
       next();
     }
-    return idx;
+  }
+
+  function next_char() {
+    skip_spaces();
+    while (code.slice(idx, idx + 2) === "//") {
+      while (code[idx] !== "\n" && idx < code.length) {
+        next();
+      }
+      skip_spaces();
+    }
   }
 
   function match(string) {
-    skip_spaces();
+    next_char();
     var sliced = code.slice(idx, idx + string.length);
     if (sliced === string) {
       for (var i = 0; i < string.length; ++i) {
@@ -83,7 +92,7 @@ const parse = (code) => {
   }
 
   function parse_name() {
-    skip_spaces();
+    next_char();
     var name = "";
     while (idx < code.length && is_name_char(code[idx])) {
       name = name + code[idx];
@@ -93,21 +102,13 @@ const parse = (code) => {
   }
 
   function parse_term(ctx) {
-    // Comment
-    if (match("-")) {
-      while (idx < code.length && code[idx] !== "\n") {
-        next();
-      }
-      return parse_term(ctx);
-    }
-
     // Application
-    else if (match("(")) {
+    if (match("(")) {
       var func = parse_term(ctx);
       while (idx < code.length && !match(")")) {
         var argm = parse_term(ctx);
         var func = App(func, argm);
-        skip_spaces();
+        next_char();
       }
       return func;
     }
@@ -260,33 +261,27 @@ const parse = (code) => {
   var defs = {};
   var infs = {};
   while (idx < code.length) {
-    skip_spaces();
-    if (match("/")) {
-      while (idx < code.length && code[idx] !== "\n") {
-        next();
-      }
+    next_char();
+    if (match("inf ")) {
+      var name = parse_name();
+      var skip = parse_exact(":");
+      var skip = parse_exact("init:");
+      var init = parse_term([]);
+      var skip = parse_exact("step:");
+      var step = Lam("self", parse_term(["self"]));
+      var skip = parse_exact("stop:");
+      var stop = Lam("self", parse_term(["self"]));
+      var skip = parse_exact("done:");
+      var done = Lam("self", parse_term(["self"]));
+      infs[name] = {init, step, stop, done};
     } else {
-      if (match("inf ")) {
-        var name = parse_name();
-        var skip = parse_exact(":");
-        var skip = parse_exact("init:");
-        var init = parse_term([]);
-        var skip = parse_exact("step:");
-        var step = Lam("self", parse_term(["self"]));
-        var skip = parse_exact("stop:");
-        var stop = Lam("self", parse_term(["self"]));
-        var skip = parse_exact("done:");
-        var done = Lam("self", parse_term(["self"]));
-        infs[name] = {init, step, stop, done};
-      } else {
-        var skip = parse_exact("def ");
-        var name = parse_name();
-        var skip = parse_exact(":");
-        var term = parse_term([]);
-        defs[name] = term;
-      }
+      var skip = parse_exact("def ");
+      var name = parse_name();
+      var skip = parse_exact(":");
+      var term = parse_term([]);
+      defs[name] = term;
     }
-    skip_spaces();
+    next_char();
   }
 
   return {defs, infs};
