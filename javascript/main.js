@@ -7,7 +7,10 @@ var fm = require(".");
 try {
   var argv = [].slice.call(process.argv, 2);
   if (argv.length === 0 || argv[0] === "--help") throw "";
-  var name = argv.pop() || "main";
+  var name = argv[argv.length - 1];
+  if (!name || name[0] === "-") {
+    name = "main";
+  }
   var args = {};
   argv.join("").split("").forEach(c => args[c] = 1);
   var code = "";
@@ -27,16 +30,26 @@ try {
   console.log("-e uses interpreter (default)");
   console.log("-i uses interpreter, erasing boxes");
   console.log("-n uses interaction nets, erasing boxes (fast)");
+  console.log("-s same as -n, but showing stats");
   console.log("-d disables stratification (termination) checks");
-  console.log("-s shows stats");
   console.log("-p prints net as JSON");
+  console.log("-v displays the version");
   console.log("");
-  console.log("Note: fmC will automatically import any local file ending in `.fmc`.");
+  console.log("Note: fmc will automatically import any local file ending in `.fmc`.");
   process.exit();
 }
 
 var mode = args.e ? "EAL" : args.l ? "INT" : args.n ? "NET" : "EAL";
 var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
+
+if (args.v) {
+  console.log(require("./package.json").version);
+  process.exit();
+}
+
+if (args.s) {
+  args.n = true;
+}
 
 var {defs, infs} = fm.core.parse(code);
 
@@ -50,7 +63,7 @@ try {
   var term = fm.exec(name, defs, infs, mode, args.d, stats);
   console.log(fm.core.show(term));
   if (args.p || args.s) {
-    console.log(JSON.stringify(stats, null, 2));
+    console.log(JSON.stringify(stats));
   }
 } catch (e) {
   console.log(e);
