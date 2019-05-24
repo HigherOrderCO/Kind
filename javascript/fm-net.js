@@ -54,6 +54,13 @@ class Net {
     this.freed.push(addr);
   }
 
+  is_free(addr) {
+    return this.nodes[addr * 4 + 0] === addr * 4 + 0
+        && this.nodes[addr * 4 + 1] === addr * 4 + 1
+        && this.nodes[addr * 4 + 2] === addr * 4 + 2
+        && this.nodes[addr * 4 + 3] === 0;
+  }
+
   // Returns if given slot holds a number
   is_numeric(addr, slot) {
     return (this.nodes[addr * 4 + 3] >>> slot) & 1; 
@@ -62,7 +69,7 @@ class Net {
   set_port(addr, slot, ptrn) {
     if (type_of(ptrn) === NUM) {
       this.nodes[addr * 4 + slot] = numb_of(ptrn);
-      this.nodes[addr * 4 + 3] = this.nodes[addr * 4 + 3] | (1 << slot)
+      this.nodes[addr * 4 + 3] = this.nodes[addr * 4 + 3] | (1 << slot);
     } else {
       this.nodes[addr * 4 + slot] = ptrn;
       this.nodes[addr * 4 + 3] = this.nodes[addr * 4 + 3] & ~(1 << slot);
@@ -73,12 +80,12 @@ class Net {
     return this.nodes[addr * 4 + slot] + (this.is_numeric(addr, slot) ? 0x100000000 : 0);
   }
 
-  set_type(addr, type) {
-    this.nodes[addr * 4 + 3] = (this.nodes[addr * 4 + 3] & ~0b11000) | (type << 3);
-  }
-
   type_of(addr) {
     return (this.nodes[addr * 4 + 3] >>> 3) & 0x3;
+  }
+
+  set_type(addr, type) {
+    this.nodes[addr * 4 + 3] = (this.nodes[addr * 4 + 3] & ~0b11000) | (type << 3);
   }
 
   kind_of(addr) {
@@ -278,34 +285,6 @@ class Net {
     return {rewrites, passes};
   }
 
-  // Rewrites active pairs lazily. Lazy reductions avoid wasting work and
-  // allows recursive terms, but requires GC and enforces sequentiality.
-  //reduce_lazy() {
-    //var warp = [];
-    //var exit = [];
-    //var next = this.enter_port(Pointer(0, 1));
-    //var prev = null;
-    //var back = null;
-    //var rwts = 0;
-    //while (addr_of(next) > 0 || warp.length > 0) {
-      //next = addr_of(next) === 0 ? this.enter_port(warp.pop()) : next;
-      //prev = this.enter_port(next);
-      //if (slot_of(next) === 0 && slot_of(prev) === 0) {
-        //back = this.enter_port(Pointer(addr_of(prev), exit.pop()));
-        //this.rewrite([addr_of(prev), addr_of(next)]);
-        //next = this.enter_port(back);
-        //++rwts;
-      //} else if (slot_of(next) === 0) {
-        //warp.push(Pointer(addr_of(next), 2));
-        //next = this.enter_port(Pointer(addr_of(next), 1));
-      //} else {
-        //exit.push(slot_of(next));
-        //next = this.enter_port(Pointer(addr_of(next), 0));
-      //}
-    //}
-    //return {rewrites: rwts};
-  //}
-
   // Returns a string that is preserved on reduction, good for debugging
   denote(ptrn = this.enter_port(Pointer(0, 1)), exit = []) {
     function path_to_string(path) {
@@ -368,7 +347,7 @@ class Net {
     };
     var text = '';
     for (var i = 0; i < this.nodes.length / 4; i++) {
-      if (this.freed.indexOf(i) !== -1) {
+      if (this.is_free(i)) {
         text += i + ": ~\n";
       } else {
         var type = this.type_of(i);
