@@ -68,5 +68,7 @@ function check(term, defs, bipass = false) {
       console.log(e.toString());
       process.exit();
     }
+  } else {
+    return term;
   }
 }

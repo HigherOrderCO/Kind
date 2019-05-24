@@ -7,12 +7,9 @@ var fm = require(".");
 try {
   var argv = [].slice.call(process.argv, 2);
   if (argv.length === 0 || argv[0] === "--help") throw "";
-  var name = argv[argv.length - 1];
-  if (!name || name[0] === "-") {
-    name = "main";
-  }
+  var name = argv.filter(str => str[0] !== "-")[0] || "main";
   var args = {};
-  argv.join("").split("").forEach(c => args[c] = 1);
+  argv.filter(str => str[0] === "-").map(str => str.slice(1)).join("").split("").forEach(c => args[c] = 1);
   var code = "";
   var files = fs.readdirSync(".");
   for (var i = 0; i < files.length; ++i) {
@@ -39,17 +36,16 @@ try {
   process.exit();
 }
 
-var mode = args.e ? "EAL" : args.l ? "INT" : args.n ? "NET" : "EAL";
-var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
-
 if (args.v) {
   console.log(require("./package.json").version);
   process.exit();
 }
 
 if (args.s) {
-  args.n = true;
+  args.n = 1;
 }
+var mode = args.e ? "EAL" : args.l ? "INT" : args.n ? "NET" : "EAL";
+var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
 var {defs, infs} = fm.core.parse(code);
 
