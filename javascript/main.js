@@ -44,7 +44,7 @@ if (args.v) {
 if (args.s) {
   args.n = 1;
 }
-var mode = args.e ? "EAL" : args.l ? "INT" : args.n ? "NET" : "EAL";
+var mode = args.e ? "EAL" : args.i ? "INT" : args.n ? "NET" : "EAL";
 var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
 var {defs, infs} = fm.core.parse(code);
