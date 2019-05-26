@@ -53,6 +53,7 @@ try {
   var stats = {
     rewrites: 0,
     passes: 0,
+    maxlen: 0,
     input_net: args.p ? null : undefined,
     output_net: args.p ? null : undefined
   };

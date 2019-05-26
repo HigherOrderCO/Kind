@@ -275,14 +275,16 @@ class Net {
   reduce() {
     var rewrites = 0;
     var passes = 0;
+    var maxlen = 0;
     while (this.redex.length > 0) {
       for (var i = 0, l = this.redex.length; i < l; ++i) {
         this.rewrite(this.redex.pop());
         ++rewrites;
       }
       ++passes;
+      maxlen = Math.max(maxlen, this.nodes.length / 4);
     }
-    return {rewrites, passes};
+    return {rewrites, passes, maxlen};
   }
 
   // Returns a string that is preserved on reduction, good for debugging
