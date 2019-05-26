@@ -10,3 +10,7 @@ def pair_snd: [pair]
 def pair_prj: [pair] [func]
   get &(val0, val1) = pair
   (func val0 val1)
+
+def swap: [pair]
+  get &(a,b) = pair
+  &(b, a)

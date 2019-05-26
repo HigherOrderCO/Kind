@@ -57,5 +57,8 @@ def sum_test:
 def term_test:
   term_example
 
+def array_test:
+  array_example
+
 def main:
   string_concat_test

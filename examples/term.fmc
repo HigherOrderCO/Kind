@@ -1,3 +1,18 @@
+// Formality implementation in Formality-Core (ongoing work)
+
+// Example usage of this library
+
+def term_example:
+  dup true_t    = #(Lam [t] (Lam [f] t))
+  dup false_t   = #(Lam [t] (Lam [f] f))
+  dup not_t     = #(Lam [b] (App (App b false_t) true_t))
+  dup main_t    = #(App not_t (App not_t (App not_t true_t)))
+  dup reduce    = (reduce ~64)
+  dup to_string = (to_string ~64) 
+  # &(
+    &("term:", (to_string main_t)),
+    &("norm:", (to_string (reduce (main_t)))))
+
 // Scott-encoded functions
 
 def Lam: [body]
@@ -129,14 +144,3 @@ def to_string: [len]
     get &(call, chrs) = (call TERM_TO_CHARS term 0)
     (from_chars chrs)
   (for len #init #loop #stop)
-
-def term_example:
-  dup true_t    = #(Lam [t] (Lam [f] t))
-  dup false_t   = #(Lam [t] (Lam [f] f))
-  dup not_t     = #(Lam [b] (App (App b false_t) true_t))
-  dup main_t    = #(App not_t (App not_t (App not_t true_t)))
-  dup reduce    = (reduce ~64)
-  dup to_string = (to_string ~64) 
-  # &(
-    &("term:", (to_string main_t)),
-    &("norm:", (to_string (reduce (main_t)))))
