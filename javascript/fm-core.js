@@ -527,11 +527,11 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Put": return is_at_level(term.expr, at_level, depth, level + 1);
     case "Dup": return is_at_level(term.expr, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level);
     case "Num": return true;
-    case "Op1": return is_at_level(term.num0, at_level, depth, level) + is_at_level(term.num1, at_level, depth, level);
-    case "Op2": return is_at_level(term.num0, at_level, depth, level) + is_at_level(term.num1, at_level, depth, level);
-    case "Ite": return is_at_level(term.cond, at_level, depth, level) + is_at_level(term.pair, at_level, depth, level);
+    case "Op1": return is_at_level(term.num0, at_level, depth, level) && is_at_level(term.num1, at_level, depth, level);
+    case "Op2": return is_at_level(term.num0, at_level, depth, level) && is_at_level(term.num1, at_level, depth, level);
+    case "Ite": return is_at_level(term.cond, at_level, depth, level) && is_at_level(term.pair, at_level, depth, level);
     case "Cpy": return is_at_level(term.numb, at_level, depth, level);
-    case "Par": return is_at_level(term.val0, at_level, depth, level) + is_at_level(term.val1, at_level, depth, level);
+    case "Par": return is_at_level(term.val0, at_level, depth, level) && is_at_level(term.val1, at_level, depth, level);
     case "Fst": return is_at_level(term.pair, at_level, depth, level);
     case "Snd": return is_at_level(term.pair, at_level, depth, level);
     case "Prj": return is_at_level(term.pair, at_level, depth, level) && is_at_level(term.body, at_level, depth + 2, level);
