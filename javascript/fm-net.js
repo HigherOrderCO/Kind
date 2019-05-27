@@ -175,6 +175,7 @@ class Net {
       } else if (a_type === NOD) {
         this.link_ports(b_ptrn, this.enter_port(Pointer(a_addr, 1)));
         this.link_ports(b_ptrn, this.enter_port(Pointer(a_addr, 2)));
+        this.free_node(a_addr);
 
       // IfThenElse
       } else if (a_type === ITE) {
@@ -270,21 +271,62 @@ class Net {
     }
   }
 
-  // Rewrites active pairs until none is left, reducing the graph to normal form
-  // This could be performed in parallel. Unreachable data is freed automatically.
-  reduce() {
+  // Rewrites active pairs until none is left, reducing the graph to normal form.
+  // This could be performed in parallel and doesn't need GC.
+  reduce_strict(stats) {
     var rewrites = 0;
-    var passes = 0;
-    var maxlen = 0;
+    var loops = 0;
+    var max_len = 0;
     while (this.redex.length > 0) {
       for (var i = 0, l = this.redex.length; i < l; ++i) {
         this.rewrite(this.redex.pop());
-        ++rewrites;
+        stats.max_len = Math.max(stats.max_len, this.nodes.length / 4);
+        ++stats.rewrites;
       }
-      ++passes;
-      maxlen = Math.max(maxlen, this.nodes.length / 4);
+      ++stats.loops;
     }
-    return {rewrites, passes, maxlen};
+  }
+
+  // Rewrites active pairs until none is left, reducing the graph to normal form.
+  // This avoids unecessary computations, but is sequential and would need GC.
+  reduce_lazy(stats) {
+    var warp = [];
+    var back = [];
+    var prev = Pointer(0, 1);
+    var next = this.enter_port(prev);
+    var rwts = 0;
+    while (true) {
+      ++stats.loops;
+      if (type_of(next) === PTR && (addr_of(next) === 0 || this.is_free(addr_of(next)))) {
+        if (warp.length === 0) {
+          break;
+        } else {
+          prev = warp.pop();
+          next = this.enter_port(prev);
+        }
+      } else {
+        if (slot_of(prev) === 0 && (type_of(next) === NUM || slot_of(next) === 0)) {
+          this.rewrite(addr_of(prev));
+          stats.rewrites += 1;
+          stats.max_len = Math.max(stats.max_len, this.nodes.length / 4);
+          prev = back.pop();
+          next = this.enter_port(prev);
+          ++rwts;
+        } else if (type_of(next) === NUM) {
+          [prev,next] = [next,prev];
+        } else if (slot_of(next) === 0) {
+          if (this.type_of(addr_of(next)) !== OP1) {
+            warp.push(Pointer(addr_of(next), 1));
+          }
+          prev = Pointer(addr_of(next), 2);
+          next = this.enter_port(prev);
+        } else {
+          back.push(prev);
+          prev = Pointer(addr_of(next), 0);
+          next = this.enter_port(prev);
+        }
+      }
+    }
   }
 
   // Returns a string that is preserved on reduction, good for debugging

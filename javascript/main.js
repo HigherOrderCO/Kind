@@ -23,12 +23,15 @@ try {
   console.log("");
   console.log("Usage: fmc [options] term_name");
   console.log("");
+  console.log("Evaluation modes (default: -b):");
+  console.log("-b boxed (using interpreter)");
+  console.log("-u unboxed (using interpreter)");
+  console.log("-l optimal, lazy (using interaction nets)");
+  console.log("-s optimal, strict (using interaction nets)");
+  console.log("-n native (using JavaScript closures)");
+  console.log("");
   console.log("Options:");
-  console.log("-e uses interpreter, preserving boxes (default)");
-  console.log("-i uses interpreter");
-  console.log("-j uses native JS functions");
-  console.log("-n uses interaction nets (optimal)");
-  console.log("-s same as -n, but showing stats");
+  console.log("-h hides interaction net stats");
   console.log("-d disables stratification (termination) checks");
   console.log("-p prints net as JSON");
   console.log("-v displays the version");
@@ -42,10 +45,13 @@ if (args.v) {
   process.exit();
 }
 
-if (args.s) {
-  args.n = 1;
-}
-var mode = args.e ? "EAL" : args.i ? "INT" : args.n ? "NET" : args.j ? "JSC" : "EAL";
+var mode
+  = args.b ? "BOXED"
+  : args.u ? "UNBOXED"
+  : args.l ? "OPTIMAL_LAZY"
+  : args.s ? "OPTIMAL_STRICT"
+  : args.n ? "NATIVE"
+  : "BOXED";
 var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
 var {defs, infs} = fm.core.parse(code);
@@ -53,14 +59,14 @@ var {defs, infs} = fm.core.parse(code);
 try {
   var stats = {
     rewrites: 0,
-    passes: 0,
-    maxlen: 0,
+    loops: 0,
+    max_len: 0,
     input_net: args.p ? null : undefined,
     output_net: args.p ? null : undefined
   };
   var term = fm.exec(name, defs, infs, mode, args.d, stats);
   console.log(fm.core.show(term));
-  if (args.p || args.s) {
+  if (args.p || (mode.slice(0,3) === "OPT" && !args.h)) {
     console.log(JSON.stringify(stats));
   }
 } catch (e) {

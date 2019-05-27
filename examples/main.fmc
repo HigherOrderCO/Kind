@@ -5,7 +5,7 @@ def mul_test:
   {3 * 2}
 
 def tup_test:
-  (tup_fst (tup 42 1337))
+  (tup_fst (Tup 42 1337))
 
 def pair_test:
   fst &(42 , 1337)

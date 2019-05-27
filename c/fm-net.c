@@ -208,6 +208,7 @@ void rewrite(Net* net, u32 a_addr) {
     } else if (a_type == NOD) {
       link_ports(net, b_ptrn, enter_port(net, Pointer(a_addr, 1)));
       link_ports(net, b_ptrn, enter_port(net, Pointer(a_addr, 2)));
+      free_node(net, a_addr);
 
     // IfThenElse
     } else if (a_type == ITE) {

@@ -6,33 +6,33 @@ var fm = module.exports = {
   norm, check, exec
 };
 
-function norm(term, defs, mode = "NET", stats = {}) {
+function norm(term, defs, mode = "OPTIMAL_LAZY", stats = {}) {
   switch (mode) {
-    case "EAL":
+    case "BOXED":
       return fm.core.norm(term, defs, false);
-    case "INT":
+    case "UNBOXED":
       return fm.core.norm(term, defs, true);
-    case "JSC":
+    case "NATIVE":
       return fm.to_js.decompile(fm.to_js.compile(term, defs));
-    case "NET":
+    case "OPTIMAL_STRICT":
+    case "OPTIMAL_LAZY":
       var net = fm.to_net.compile(term, defs);
       if (stats && stats.input_net === null) {
         stats.input_net = JSON.parse(JSON.stringify(net));
       }
-      var new_stats = net.reduce();
+      if (mode === "OPTIMAL_LAZY") {
+        var new_stats = net.reduce_lazy(stats || {});
+      } else {
+        var new_stats = net.reduce_strict(stats || {});
+      }
       if (stats && stats.output_net !== undefined) {
         stats.output_net = JSON.parse(JSON.stringify(net));
-      }
-      if (stats) {
-        stats.rewrites += new_stats.rewrites;
-        stats.passes += new_stats.passes;
-        stats.maxlen = Math.max(stats.maxlen, new_stats.maxlen);
       }
       return fm.to_net.decompile(net);
   }
 }
 
-function exec(name, defs, infs, mode = "NET", bipass = false, stats = {}) {
+function exec(name, defs, infs, mode = "OPTIMAL_LAZY", bipass = false, stats = {}) {
   if (defs[name] && defs[name][0] === "Ref" && !defs[defs[name][1].name]) {
     name = defs[name][1].name;
   }
