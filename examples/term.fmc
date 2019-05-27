@@ -7,8 +7,8 @@ def term_example:
   dup false_t   = #(Lam [t] (Lam [f] f))
   dup not_t     = #(Lam [b] (App (App b false_t) true_t))
   dup main_t    = #(App not_t (App not_t (App not_t true_t)))
-  dup reduce    = (reduce ~64)
-  dup to_string = (to_string ~64) 
+  dup reduce    = (reduce ~256)
+  dup to_string = (to_string ~256)
   # &(
     &("term:", (to_string main_t)),
     &("norm:", (to_string (reduce (main_t)))))

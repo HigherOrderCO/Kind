@@ -24,9 +24,10 @@ try {
   console.log("Usage: fmc [options] term_name");
   console.log("");
   console.log("Options:");
-  console.log("-e uses interpreter (default)");
-  console.log("-i uses interpreter, erasing boxes");
-  console.log("-n uses interaction nets, erasing boxes (fast)");
+  console.log("-e uses interpreter, preserving boxes (default)");
+  console.log("-i uses interpreter");
+  console.log("-j uses native JS functions");
+  console.log("-n uses interaction nets (optimal)");
   console.log("-s same as -n, but showing stats");
   console.log("-d disables stratification (termination) checks");
   console.log("-p prints net as JSON");
@@ -44,7 +45,7 @@ if (args.v) {
 if (args.s) {
   args.n = 1;
 }
-var mode = args.e ? "EAL" : args.i ? "INT" : args.n ? "NET" : "EAL";
+var mode = args.e ? "EAL" : args.i ? "INT" : args.n ? "NET" : args.j ? "JSC" : "EAL";
 var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
 var {defs, infs} = fm.core.parse(code);

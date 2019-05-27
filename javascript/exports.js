@@ -1,7 +1,8 @@
 var fm = module.exports = {
-  comp: require("./fm-comp.js"),
   core: require("./fm-core.js"),
   net: require("./fm-net.js"),
+  to_net: require("./fm-to-net.js"),
+  to_js: require("./fm-to-js.js"),
   norm, check, exec
 };
 
@@ -11,8 +12,10 @@ function norm(term, defs, mode = "NET", stats = {}) {
       return fm.core.norm(term, defs, false);
     case "INT":
       return fm.core.norm(term, defs, true);
+    case "JSC":
+      return fm.to_js.decompile(fm.to_js.compile(term, defs));
     case "NET":
-      var net = fm.comp.compile(term, defs);
+      var net = fm.to_net.compile(term, defs);
       if (stats && stats.input_net === null) {
         stats.input_net = JSON.parse(JSON.stringify(net));
       }
@@ -25,7 +28,7 @@ function norm(term, defs, mode = "NET", stats = {}) {
         stats.passes += new_stats.passes;
         stats.maxlen = Math.max(stats.maxlen, new_stats.maxlen);
       }
-      return fm.comp.decompile(net);
+      return fm.to_net.decompile(net);
   }
 }
 

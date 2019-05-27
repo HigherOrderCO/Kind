@@ -309,11 +309,8 @@ const show = ([ctor, args], canon = false, ctx = []) => {
     case "Var":
       return ctx[ctx.length - args.index - 1] || "^" + args.index;
     case "Lam":
-      var text = term_to_text([ctor, args]);
       var numb = term_to_numb([ctor, args]);
-      if (text) {
-        return "\"" + text + "\"";
-      } else if (numb) {
+      if (numb) {
         return "~" + Number(numb);
       } else {
         var name = canon ? gen_name(ctx.length) : args.name;
@@ -352,9 +349,14 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       var numb = show(args.numb, canon, ctx);
       return "(cpy " + numb + ")";
     case "Par":
-      var val0 = show(args.val0, canon, ctx);
-      var val1 = show(args.val1, canon, ctx);
-      return "&(" + val0 + "," + val1 + ")";
+      var text = term_to_text([ctor, args]);
+      if (text) {
+        return "\"" + text + "\"";
+      } else {
+        var val0 = show(args.val0, canon, ctx);
+        var val1 = show(args.val1, canon, ctx);
+        return "&(" + val0 + "," + val1 + ")";
+      }
     case "Fst":
       var pair = show(args.pair, canon, ctx);
       return "(fst " + pair + ")";
@@ -804,19 +806,18 @@ const text_to_term = (text) => {
   for (var i = nums.length - 1; i >= 0; --i) {
     term = App(App(Var(1), Num(nums[i])), term);
   }
-  term = Lam("t", App(App(Var(0), Num(0x74786574)), Lam("c", Dup("c", Var(0), Put(Lam("n", term))))));
+  term = Par(Num(0x74786574), Lam("c", Dup("c", Var(0), Put(Lam("n", term)))));
   return term;
 }
 
 // Converts a λ-encoded term to a string, if possible
 const term_to_text = (term) => {
   try {
-    term = term[1].body;
-    if (term[1].func[1].argm[1].numb === 0x74786574) {
+    if (term[1].val0[1].numb === 0x74786574) {
       try {
-        term = term[1].argm[1].body[1].body[1].expr[1].body;
+        term = term[1].val1[1].body[1].body[1].expr[1].body;
       } catch(e) {
-        term = term[1].argm[1].body[1].body;
+        term = term[1].val1[1].body[1].body;
       }
       var nums = [];
       while (term[0] !== "Var") {

@@ -24,6 +24,15 @@ inf fib1m:
   done:
     snd snd self
 
+inf fact1m:
+  init: &(1, 1)
+  step:
+    get &(i, n) = self
+    get &(j, k) = cpy i
+    &({j + 1}, {n * k})
+  stop: {fst self == 1000000}
+  done: snd self
+
 def boxed_add: [x] [y]
   dup x = x
   dup y = y

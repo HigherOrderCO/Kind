@@ -17,7 +17,6 @@ def array_example:
   # let add       = boxed_add
     let arr       = (write 0 #10 arr)       // arr[0] = 10
     let arr       = (write 1 #12 arr)       // arr[1] = 12 
-    let arr       = (write 1 #12 arr)       // arr[1] = 12 
     let arr       = (update 2 (add #8) arr) // arr[2] += 8
     get &(arr, a) = (read 0 arr)            // a = arr[0]
     get &(arr, b) = (read 1 arr)            // b = arr[1]
