@@ -23,7 +23,7 @@ function norm(term, defs, mode = "NET", stats = {}) {
       if (stats) {
         stats.rewrites += new_stats.rewrites;
         stats.passes += new_stats.passes;
-        stats.maxlen += new_stats.maxlen;
+        stats.maxlen = Math.max(stats.maxlen, new_stats.maxlen);
       }
       return fm.comp.decompile(net);
   }
