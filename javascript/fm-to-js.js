@@ -65,7 +65,7 @@ const compile = ([ctor, term], defs, vars) => {
       var nam0 = term.nam0;
       var nam1 = term.nam1;
       var pair = compile(term.pair, defs, vars);
-      var body = (x,y) => compile(term.body, defs, [x,[y,vars]]);
+      var body = (x,y) => compile(term.body, defs, [y,[x,vars]]);
       return body(pair[0], pair[1]);
     case "Ref":
       return compile(defs[term.name], defs, vars);
