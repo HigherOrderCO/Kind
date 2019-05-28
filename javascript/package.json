@@ -1,6 +1,6 @@
 {
-  "name": "elementary-affine-calculus",
-  "version": "0.1.5",
+  "name": "elementary-affine-core",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "bin": {
@@ -11,15 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/moonad/elementary-affine-calculus.git"
+    "url": "git+https://github.com/moonad/elementary-affine-core.git"
   },
   "author": "Victor Maia",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/moonad/elementary-affine-calculus/issues"
+    "url": "https://github.com/moonad/elementary-affine-core/issues"
   },
-  "homepage": "https://github.com/moonad/elementary-affine-calculus#readme",
+  "homepage": "https://github.com/moonad/elementary-affine-core#readme",
   "dependencies": {
-    "elementary-affine-interaction-net": "^0.1.0"
+    "elementary-affine-net": "^0.1.0"
   }
 }

@@ -20,7 +20,7 @@ try {
   }
 } catch (e) {
   if (e) console.log(e);
-  console.log("Elementary-Affine-Calculus: an efficient, terminating language.");
+  console.log("Elementary-Affine-Core: an efficient, terminating language.");
   console.log("");
   console.log("Usage: eac [options] term_name");
   console.log("");

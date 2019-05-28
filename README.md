@@ -1,6 +1,6 @@
-# Elementary Affine Calculus
+# Elementary Affine Core
 
-The Elementary Affine Calculus (EAC) is a small untyped language similar to the λ-calculus, with 2 main differences:
+The Elementary Affine Core (EAC) is a small untyped language similar to the λ-calculus, with 2 main differences:
 
 1. It is not Turing-complete, i.e., its programs are guaranteed to halt.
 
