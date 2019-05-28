@@ -91,9 +91,9 @@ if (show_lam_interp) {
 if (show_eal_sic) {
   if (show_info) console.log(BOLD("Norm (λ-NASIC):"));
   try {
-    var net = ea.to_net.compile(term, defs);
+    var net = ea.core.to_net.compile(term, defs);
     var stats = net.reduce();
-    console.log(ea.core.show(ea.to_net.decompile(net)));
+    console.log(ea.core.show(ea.core.to_net.decompile(net)));
     if (show_info) console.log("");
   } catch (e) {
     console.log(e.toString());
