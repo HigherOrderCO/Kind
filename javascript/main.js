@@ -2,7 +2,7 @@
 
 var fs = require("fs");
 var path = require("path");
-var {eac, nasic, compiler: e2n} = require(".");
+var ea = require(".");
 
 try {
   var argv = [].slice.call(process.argv, 2);
@@ -46,20 +46,20 @@ var show_eal_sic = args.s;
 var show_info = args.i;
 var show_stats = args.S;
 
-var defs = eac.parse(code);
-var term = eac.parse(". main (" + expr + ")").main;
+var defs = ea.core.parse(code);
+var term = ea.core.parse("def main: (" + expr + ")").main;
 
 var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
 if (show_term) {
   if (show_info) console.log(BOLD("Term:"));
-  console.log(eac.show(term));
+  console.log(ea.core.show(term));
   if (show_info) console.log("");
 }
 
 if (check_eal) {
   try {
-    eac.check_stratification(term, defs);
+    ea.core.check(term, defs);
   } catch (e) {
     console.log(e);
     process.exit();
@@ -69,7 +69,7 @@ if (check_eal) {
 if (show_eal_interp) {
   if (show_info) console.log(BOLD("Norm (EAL-INTERP):"));
   try {
-    console.log(eac.show(eac.norm(term, defs, false)));
+    console.log(ea.core.show(ea.core.norm(term, defs, false)));
     if (show_info) console.log("");
   } catch (e) {
     console.log(e.toString());
@@ -80,7 +80,7 @@ if (show_eal_interp) {
 if (show_lam_interp) {
   if (show_info) console.log(BOLD("Norm (λ-INTERP):"));
   try {
-    console.log(eac.show(eac.norm(term, defs, true), true));
+    console.log(ea.core.show(ea.core.norm(term, defs, true), true));
     if (show_info) console.log("");
   } catch (e) {
     console.log(e.toString());
@@ -91,9 +91,9 @@ if (show_lam_interp) {
 if (show_eal_sic) {
   if (show_info) console.log(BOLD("Norm (λ-NASIC):"));
   try {
-    var net = e2n.compile(term, defs);
+    var net = ea.to_net.compile(term, defs);
     var stats = net.reduce();
-    console.log(eac.show(e2n.decompile(net)));
+    console.log(ea.core.show(ea.to_net.decompile(net)));
     if (show_info) console.log("");
   } catch (e) {
     console.log(e.toString());

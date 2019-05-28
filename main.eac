@@ -1,47 +1,37 @@
-true
-= [t] [f]
+def true:[t] [f]
   t
 
-false
-= [t] [f]
+def false: [t] [f]
   f
 
-not
-= [b] [t] [f]
+def not: [b] [t] [f]
   (b f t)
 
-0
-= [s] [S = s]
-| [z] z
+def 0: [s]
+  dup S = s
+  # [z] z
 
-1
-= [s] [S = s]
-| [z] (S z)
+def 1: [s]
+  dup S = s
+  # [z] (S z)
 
-2
-= [s] [S = s]
-| [z] (S (S z))
+def 2: [s]
+  dup S = s
+  # [z] (S (S z))
 
-3
-= [s] [S = s]
-| [z] (S (S (S z)))
+def 3: [s]
+  dup S = s
+  # [z] (S (S (S z)))
 
-4
-= [s] [S = s]
-| [z] (S (S (S (S z))))
+def add: [a] [b] [s]
+  dup S = s
+  dup A = (a #S)
+  dup B = (b #S)
+  # [z] (A (B z))
 
-add
-= [a] [b] [s]
-  [S = s]
-  [A = (a |S)]
-  [B = (b |S)]
-| [z] (A (B z)) 
+def mul:[a] [b] [s]
+  dup S = s
+  (a (b #S))
 
-mul
-= [a] [b] [s]
-  [S = s]
-  (a (b |S))
-
-main
-= (mul 3 3)
-  
+def main:
+  (mul 3 3)

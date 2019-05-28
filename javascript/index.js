@@ -1,5 +1,5 @@
 module.exports = {
-  compiler: require("./compiler.js"),
-  eac: require("./eac.js"),
-  nasic: require("./nasic.js")
+  to_net: require("./ea-to-net.js"),
+  core: require("./ea-core.js"),
+  net: require("elementary-affine-interaction-net")
 };

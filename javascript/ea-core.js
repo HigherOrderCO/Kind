@@ -37,12 +37,12 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       return "(" + show(term, canon, ctx) + text;
     case "Put":
       var expr = show(args.expr, canon, ctx);
-      return "|" + expr;
+      return "#" + expr;
     case "Dup":
       var name = args.name;
       var expr = show(args.expr, canon, ctx);
       var body = show(args.body, canon, ctx.concat([name]));
-      return "[" + name + " = " + expr + "] " + body;
+      return "dup " + name + " = " + expr + " " + body;
     case "Ref":
       return args.name;
   }
@@ -51,7 +51,7 @@ const show = ([ctor, args], canon = false, ctx = []) => {
 // Converts a string to a term
 const parse = (code) => {
   function is_space(char) {
-    return char === " " || char === "\t" || char === "\n";
+    return char === " " || char === "\t" || char === "\n" || char === "\r";
   }
 
   function is_name_char(char) {
@@ -118,17 +118,25 @@ const parse = (code) => {
       return func;
     }
 
-    // Lambda / Duplication
+    // Lambda
     else if (match("[")) {
       var name = parse_name();
-      var expr = match("=") ? parse_term(ctx) : null;
       var skip = parse_exact("]");
       var body = parse_term(ctx.concat([name]));
-      return expr ? Dup(name, expr, body) : Lam(name, body);
+      return Lam(name, body);
+    }
+
+    // Duplication
+    else if (match("dup")) {
+      var name = parse_name();
+      var skip = parse_exact("=");
+      var expr = parse_term(ctx);
+      var body = parse_term(ctx.concat([name]));
+      return Dup(name, expr, body);
     }
 
     // Put
-    else if (match("|")) {
+    else if (match("#")) {
       var expr = parse_term(ctx);
       return Put(expr);
     }
@@ -137,6 +145,7 @@ const parse = (code) => {
     else if (match("let")) {
       var name = parse_name();
       var copy = parse_term(ctx);
+      var skip = parse_exact("=");
       var body = parse_term(ctx.concat([name]));
       return subst(body, copy, 0);
     }
@@ -172,8 +181,9 @@ const parse = (code) => {
       }
     } else {
       var init = index;
-      var skip = parse_exact(".");
+      var skip = parse_exact("def ");
       var name = parse_name();
+      var skip = parse_exact(":");
       var term = parse_term([]);
       defs[name] = term;
     }
@@ -261,7 +271,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
 }
 
 // Checks if a term is stratified
-const check_stratification = ([ctor, term], defs = {}, ctx = []) => {
+const check = ([ctor, term], defs = {}, ctx = []) => {
   switch (ctor) {
     case "Lam": 
       if (uses(term.body) > 1) {
@@ -270,27 +280,27 @@ const check_stratification = ([ctor, term], defs = {}, ctx = []) => {
       if (!is_at_level(term.body, 0)) {
         throw "[ERROR]\nAffine variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], false, ctx);
       }
-      check_stratification(term.body, defs, ctx.concat([term.name]));
+      check(term.body, defs, ctx.concat([term.name]));
       break;
     case "App":
-      check_stratification(term.func, defs, ctx);
-      check_stratification(term.argm, defs, ctx);
+      check(term.func, defs, ctx);
+      check(term.argm, defs, ctx);
       break;
     case "Put":
-      check_stratification(term.expr, defs, ctx);
+      check(term.expr, defs, ctx);
       break;
     case "Dup":
       if (!is_at_level(term.body, 1)) {
         throw "[ERROR]\nExponential variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], false, ctx);
       }
-      check_stratification(term.expr, defs, ctx);
-      check_stratification(term.body, defs, ctx.concat([term.name]));
+      check(term.expr, defs, ctx);
+      check(term.body, defs, ctx.concat([term.name]));
       break;
     case "Ref":
       if (!defs[term.name]) {
         throw "[ERROR]\nUndefined reference: " + term.name;
       } else {
-        check_stratification(defs[term.name], defs, ctx);
+        check(defs[term.name], defs, ctx);
         break;
       }
   }
@@ -366,7 +376,7 @@ module.exports = {
   Ref,
   show,
   parse,
-  check_stratification,
+  check,
   norm,
   equal
 };

@@ -1,5 +1,5 @@
-const {Var, App, Lam, gen_name} = require("./eac.js");
-const {Net, Pointer, Node} = require("./nasic.js");
+const {Var, App, Lam, gen_name} = require("./ea-core.js");
+const {Net, Pointer, Node} = require("elementary-affine-interaction-net");
 
 const compile = (term, defs = {}) => {
   const build_net = (term, net, var_ptrs, level) => {
