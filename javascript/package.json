@@ -1,5 +1,5 @@
 {
-  "name": "elementary-affine-interaction-net",
+  "name": "elementary-affine-net",
   "version": "0.1.0",
   "description": "",
   "main": "ea-net.js",
@@ -8,13 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/moonad/elementary-affine-interaction-net.git"
+    "url": "git+https://github.com/moonad/elementary-affine-net.git"
   },
   "author": "Victor Maia",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/moonad/elementary-affine-interaction-net/issues"
+    "url": "https://github.com/moonad/elementary-affine-net/issues"
   },
-  "homepage": "https://github.com/moonad/elementary-affine-interaction-net#readme",
+  "homepage": "https://github.com/moonad/elementary-affine-net#readme",
   "dependencies": {}
 }
