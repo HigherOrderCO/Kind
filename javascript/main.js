@@ -2,7 +2,7 @@
 
 var fs = require("fs");
 var path = require("path");
-var fm = require(".");
+var ea = require(".");
 
 try {
   var argv = [].slice.call(process.argv, 2);
@@ -16,7 +16,7 @@ try {
   var code = "";
   var files = fs.readdirSync(".");
   for (var i = 0; i < files.length; ++i) {
-    if (files[i].slice(-3) === ".fm") {
+    if (files[i].slice(-5) === ".eatt") {
       code += fs.readFileSync("./" + files[i], "utf8") + "\n";
     }
   }
@@ -44,16 +44,19 @@ try {
   process.exit();
 }
 
-var defs = fm.parse(code);
-var term = fm.parse(". main (" + expr + ")").main;
+var defs = ea.tt.parse(code);
+var term = ea.tt.parse(". main (" + expr + ")").main;
 
 var funcs = {
-  N: ["Type:", () => console.log(fm.show(fm.norm((args.E ? fm.erase : (x => x))(fm.infer(term, defs)), args.R ? {} : defs, args.W, args.L)))],
-  n: ["Norm (interpreted):", () => console.log(fm.show(fm.norm((args.e ? fm.erase : (x => x))(term), args.r ? {} : defs, args.w, args.l)))],
+  N: ["Type:", () => console.log(ea.tt.show(ea.tt.norm((args.E ? ea.tt.erase : (x => x))(ea.tt.infer(term, defs)), args.R ? {} : defs, args.W, args.L)))],
+  n: ["Norm (interpreted):", () => console.log(ea.tt.show(ea.tt.norm((args.e ? ea.tt.erase : (x => x))(term), args.r ? {} : defs, args.w, args.l)))],
   x: ["Norm (using NASIC):", () => {
-    var net = fm.compile(term, defs);
+    var core  = ea.tt.to_core.compile(term, defs);
+    var net   = ea.core.to_net.compile(core, defs);
     var stats = net.reduce_lazy();
-    console.log(fm.show(fm.norm((args.e ? fm.erase : (x => x))(fm.decompile(net)), args.r ? {} : defs, args.w, args.l)))
+    var norm  = ea.tt.to_core.decompile(ea.core.to_net.decompile(net));
+    var eras  = args.e ? ea.tt.erase : (x => x);
+    console.log(ea.tt.show(ea.tt.norm(eras(norm), args.r ? {} : defs, args.w, args.l)))
     console.log("(" + stats.rewrites + " rewrites)");
   }]
 };

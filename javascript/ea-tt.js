@@ -1,3 +1,5 @@
+const eac = require("elementary-affine-calculus").core;
+
 const Var = (index)                  => ["Var", {index},                  "[" + index + "]"];
 const Typ = ()                       => ["Typ", {},                       "#typ"];
 const All = (name, bind, body, eras) => ["All", {name, bind, body, eras}, "#all" + bind[2] + body[2]];
@@ -482,14 +484,13 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Ann": var ret = is_at_level(term.expr, at_level, depth, level); break;
     case "Ref": var ret = true; break;
   }
-  if (K) console.log("is_at_level", at_level, depth, level, "->", ret, show([ctor,term]));
   return ret;
 }
           
 // Removes computationally irrelevant expressions
 const erase = ([ctor, args]) => {
-    const is_eta = (lam) => lam[1].body[0] === "App" && lam[1].body[1].argm[0] === "Var" && lam[1].body[1].argm[1].index === 0 && uses(lam[1].body[1].func, 0) === 0;
-    const do_eta = (lam) => is_eta(lam) ? subst(lam[1].body[1].func, Typ(), 0) : lam;
+  const is_eta = (lam) => lam[1].body[0] === "App" && lam[1].body[1].argm[0] === "Var" && lam[1].body[1].argm[1].index === 0 && uses(lam[1].body[1].func, 0) === 0;
+  const do_eta = (lam) => is_eta(lam) ? subst(lam[1].body[1].func, Typ(), 0) : lam;
   switch (ctor) {
     case "Var": return Var(args.index);
     case "Typ": return Typ();
@@ -662,7 +663,6 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
       }
       return Typ();
     case "Lam":
-      //console.log("infer lam", term[1].name);
       if (term[1].bind === null) {
         throw "[ERROR]\nCan't infer non-annotated lambda `"+show(term,ctx)+"`.\n\n[CONTEXT]\n" + show_context(ctx);
       } else if (strat && uses(term[1].body) > 1) {
@@ -752,16 +752,10 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
 }
 
 // Checks if a term has given type
-var K = 0;
 const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = null) => {
   var expr   = expr || (() => "`" + show(term, ctx) + "`");
   var type_n = norm(type, defs, true);
   if (type_n[0] === "All" && term[0] === "Lam") {
-    if (term[1].name === "op") {
-      K = 1;
-      console.log("->", uses(term[1].body), is_at_level(term[1].body, 0));
-      K = 0;
-    }
     if (type_n[1].eras !== term[1].eras) {
       throw "Erasure doesn't match on " + expr() + ".";
     }
@@ -828,6 +822,37 @@ const show_mismatch = (expect, actual, expr, ctx, defs) => {
   return text;
 }
 
+// Converts to/from EA-CORE
+const to_core = {
+  compile: (term, defs) => {
+    const compile = ([ctor, term]) => {
+      switch (ctor) {
+        case "Var": return eac.Var(term.index);
+        case "Lam": return eac.Lam(term.name, compile(term.body));
+        case "App": return eac.App(compile(term.func), compile(term.argm));
+        case "Dup": return eac.Dup(term.name, compile(term.expr), compile(term.body));
+        case "Put": return eac.Put(compile(term.expr));
+        case "Ref": return compile(erase(defs[term.name]));
+        default: return eac.Lam(eac.Var(0));
+      }
+    };
+    return compile(erase(term));
+  },
+  decompile: (term) => {
+    const decompile = ([ctor, term]) => {
+      switch (ctor) {
+        case "Var": return Var(term.index);
+        case "Lam": return Lam(term.name, null, decompile(term.body));
+        case "App": return App(decompile(term.func), decompile(term.argm));
+        case "Dup": return Dup(term.name, decompile(term.expr), decompile(term.body));
+        case "Put": return Put(decompile(term.expr));
+        default: return Lam(Var(0));
+      }
+    };
+    return decompile(term);
+  }
+}
+
 module.exports = {
   gen_name,
   Ctx,
@@ -850,5 +875,6 @@ module.exports = {
   infer,
   check,
   equals,
-  erase
+  erase,
+  to_core
 };

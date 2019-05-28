@@ -1,19 +1,5 @@
-var compiler = require("./compiler.js");
-var eanet = require("./ea-net.js");
-var eatt = require("./ea-tt.js");
-
-var lib = {};
-
-for (var key in compiler) {
-  lib[key] = compiler[key];
+module.exports = {
+  net: require("elementary-affine-interaction-net"),
+  core: require("elementary-affine-calculus").core,
+  tt: require("./ea-tt.js")
 }
-
-for (var key in eanet) {
-  lib[key] = eanet[key];
-}
-
-for (var key in eatt) {
-  lib[key] = eatt[key];
-}
-
-module.exports = lib;

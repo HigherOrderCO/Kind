@@ -2,10 +2,9 @@
 
 The underlying pure type theory behind [Formality](https://github.com/moonad/formality).
 
-[Specification](spec.md) ~ [Examples](stdlib.fm)
+[Specification](spec.md) ~ [Examples](main.fm)
 
 ## Usage
-<a name="usage"/>
 
 Elementary Affine Type Theory is currently implemented as a small, dependency-free JavaScript library. It will futurely be implemented in other languages, and formalized in Agda/Coq. To use the current implementation:
 
