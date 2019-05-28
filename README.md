@@ -6,7 +6,7 @@ An optimal compilation target for functional programming languages. It is:
 
 2. **GC-free:** memory is freed when values go out of scope.
 
-3. **Parallel:** can be evaluated in GPUs, FGPAs and similar.
+3. **Parallel:** can be evaluated in GPUs, FPGAs and similar.
 
 4. **Efficient:** 128 bits per lambda/pair, unboxed 32-bit ints, constant-time beta-reduction.
 
