@@ -16,11 +16,13 @@ def array_example:
   // Performs some writes and reads
   # let add       = boxed_add
     let arr       = (write 0 #10 arr)       // arr[0] = 10
-    let arr       = (write 1 #12 arr)       // arr[1] = 12 
+    let arr       = (write 1 #12 arr)       // arr[1] = 12
     let arr       = (update 2 (add #8) arr) // arr[2] += 8
+    let arr       = (write 3 #7 arr)        // arr[1] = 12
     get &(arr, a) = (read 0 arr)            // a = arr[0]
     get &(arr, b) = (read 1 arr)            // b = arr[1]
     get &(arr, c) = (read 2 arr)            // c = arr[2]
+    get &(arr, d) = (read 3 arr)            // c = arr[2]
     &("arr[0] + arr[1] + arr[2]:", (add (add a b) c))
 
 // with

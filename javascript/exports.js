@@ -1,6 +1,6 @@
 var fm = module.exports = {
   core: require("./fm-core.js"),
-  net: require("./fm-net.js"),
+  net: require("formality-net"),
   to_net: require("./fm-to-net.js"),
   to_js: require("./fm-to-js.js"),
   norm, check, exec
