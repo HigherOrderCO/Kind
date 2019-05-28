@@ -373,6 +373,8 @@ module.exports = {
   Var,
   Lam,
   App,
+  Put,
+  Dup,
   Ref,
   show,
   parse,
