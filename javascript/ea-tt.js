@@ -833,7 +833,7 @@ const to_core = {
         case "Dup": return eac.Dup(term.name, compile(term.expr), compile(term.body));
         case "Put": return eac.Put(compile(term.expr));
         case "Ref": return compile(erase(defs[term.name]));
-        default: return eac.Lam(eac.Var(0));
+        default: return eac.Lam("x", eac.Var(0));
       }
     };
     return compile(erase(term));
