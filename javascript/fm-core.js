@@ -310,7 +310,7 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       return ctx[ctx.length - args.index - 1] || "^" + args.index;
     case "Lam":
       var numb = term_to_numb([ctor, args]);
-      if (numb) {
+      if (numb !== null) {
         return "~" + Number(numb);
       } else {
         var name = canon ? gen_name(ctx.length) : args.name;
@@ -350,7 +350,7 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       return "(cpy " + numb + ")";
     case "Par":
       var text = term_to_text([ctor, args]);
-      if (text) {
+      if (text !== null) {
         return "\"" + text + "\"";
       } else {
         var val0 = show(args.val0, canon, ctx);
