@@ -468,20 +468,22 @@ const uses = ([ctor, term], depth = 0) => {
 // Checks if variable only occurs at a specific relative level
 const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
   switch (ctor) {
-    case "Var": return term.index !== depth || level === at_level;
-    case "Typ": return true;
-    case "All": return true;
-    case "Lam": return is_at_level(term.body, at_level, depth + 1, level);
-    case "App": return is_at_level(term.func, at_level, depth, level) && (term.eras || is_at_level(term.argm, at_level, depth, level));
-    case "Box": return is_at_level(term.expr, at_level, depth, level);
-    case "Put": return is_at_level(term.expr, at_level, depth, level + 1);
-    case "Dup": return is_at_level(term.expr, at_level, depth, level) + is_at_level(term.body, at_level, depth + 1, level);
-    case "Slf": return true;
-    case "New": return is_at_level(term.expr, at_level, depth, level);
-    case "Use": return is_at_level(term.expr, at_level, depth, level);
-    case "Ann": return is_at_level(term.expr, at_level, depth, level);
-    case "Ref": return true;
+    case "Var": var ret = term.index !== depth || level === at_level; break;
+    case "Typ": var ret = true; break;
+    case "All": var ret = true; break;
+    case "Lam": var ret = is_at_level(term.body, at_level, depth + 1, level); break;
+    case "App": var ret = is_at_level(term.func, at_level, depth, level) && (term.eras || is_at_level(term.argm, at_level, depth, level)); break;
+    case "Box": var ret = is_at_level(term.expr, at_level, depth, level); break;
+    case "Put": var ret = is_at_level(term.expr, at_level, depth, level + 1); break;
+    case "Dup": var ret = is_at_level(term.expr, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level); break;
+    case "Slf": var ret = true; break;
+    case "New": var ret = is_at_level(term.expr, at_level, depth, level); break;
+    case "Use": var ret = is_at_level(term.expr, at_level, depth, level); break;
+    case "Ann": var ret = is_at_level(term.expr, at_level, depth, level); break;
+    case "Ref": var ret = true; break;
   }
+  if (K) console.log("is_at_level", at_level, depth, level, "->", ret, show([ctor,term]));
+  return ret;
 }
           
 // Removes computationally irrelevant expressions
@@ -660,6 +662,7 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
       }
       return Typ();
     case "Lam":
+      //console.log("infer lam", term[1].name);
       if (term[1].bind === null) {
         throw "[ERROR]\nCan't infer non-annotated lambda `"+show(term,ctx)+"`.\n\n[CONTEXT]\n" + show_context(ctx);
       } else if (strat && uses(term[1].body) > 1) {
@@ -749,10 +752,16 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
 }
 
 // Checks if a term has given type
+var K = 0;
 const check = (term, type, defs, ctx = Ctx(), strat = true, seen = {}, expr = null) => {
   var expr   = expr || (() => "`" + show(term, ctx) + "`");
   var type_n = norm(type, defs, true);
   if (type_n[0] === "All" && term[0] === "Lam") {
+    if (term[1].name === "op") {
+      K = 1;
+      console.log("->", uses(term[1].body), is_at_level(term[1].body, 0));
+      K = 0;
+    }
     if (type_n[1].eras !== term[1].eras) {
       throw "Erasure doesn't match on " + expr() + ".";
     }

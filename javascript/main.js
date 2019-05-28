@@ -6,11 +6,11 @@ var fm = require(".");
 
 try {
   var argv = [].slice.call(process.argv, 2);
+  var defa = "-inleNRx";
   if (argv[0] === "-v") { console.log(require("./package.json").version); process.exit(); }
   if (argv.length === 0 || argv[0] === "--help") throw "";
   var expr = argv.pop() || "main";
   var args = {};
-  var defa = "-itleTRx";
   if (argv.length === 0) argv = [defa];
   argv.join("").split("").forEach(c => args[c] = 1);
   var code = "";
@@ -21,14 +21,13 @@ try {
     }
   }
 } catch (e) {
-  if (e) console.log(e);
-  console.log("Formality: an efficient proof language.");
+  console.log("Elementary Affine Type Theory");
   console.log("");
-  console.log("Usage: fm [options] expr");
-  console.log("(loads local .fm files and runs/checks an expr)");
+  console.log("Usage: eatt [options] expr");
+  console.log("(loads local .eatt files and runs/checks an expr)");
   console.log("");
   console.log("Options:");
-  console.log("-v shows Formality version");
+  console.log("-v shows EATT version");
   console.log("-i shows extra information");
   console.log("-N shows type normalized");
   console.log("-R shows type with unexpanded references");

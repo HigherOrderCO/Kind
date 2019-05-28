@@ -1,16 +1,10 @@
-# Formality
+# Elementary Affine Type Theory
 
-Formality is a proof language that:
-
-1. Is very small, in the sense it can be fully implemented in about 1000 lines of code.
-
-2. Efficient, in the sense it can [run in parallel with inets](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07) with no bookkeeping machinery.
-
-This document is a draft of Formality's specification. Its goal is to provide all the information required to independently implement complying evaluators, compilers and type-checkers for it. Right now it is very early and incomplete. In a future, it will include pseudo-code, examples, and even a formalization of Formality within itself. Hopefully, though, this serves as a good starting point.
+EATT is the pure proof language behind [Formality](https://github.com/moonad/formality). This document is a draft of EATT's specification. Its goal is to provide all the information required to independently implement complying evaluators, compilers and type-checkers for it.
 
 ## Syntax
 
-The syntax of Formality is:
+The syntax of EATT is:
 
 ```javascript
 var ::=
@@ -56,7 +50,7 @@ Plus the stratification condition, which dictates that:
 
 ## Erasure to EAC
 
-Computationally, Formality terms are erased to the [Elementary Affine Calculus](https://github.com/moonad/elementary-affine-calculus). The erasure `E(t)` of a Formality term to EAC is defined as:
+Computationally, EATT terms are erased to the [Elementary Affine Calculus](https://github.com/moonad/elementary-affine-calculus). The erasure `E(t)` of a EATT term to EAC is defined as:
 
 ```javascript
 E(Type)      = [x] x
@@ -75,7 +69,7 @@ E(~a)        = E(a)
 
 ## Reduction rules
 
-Formality has the same reduction rules as the Elementary Affine Calculus. They are:
+EATT has the same reduction rules as the Elementary Affine Calculus. They are:
 
 1. Application of a lambda
 
@@ -101,11 +95,11 @@ Formality has the same reduction rules as the Elementary Affine Calculus. They a
 
     The duplication of a duplication simply lifts the inner duplication outwards.
 
-Applicating a boxed term and duplicating a lambda are undefined, prevented by Formality's type system.
+Applicating a boxed term and duplicating a lambda are undefined, prevented by EATT's type system.
 
 ## Typing rules
 
-Formality's typing rules are the following:
+EATT's typing rules are the following:
 
 ```javascript
 ----------- TYP
@@ -153,7 +147,7 @@ ctx |- ~a : [a/x]A
 ```
 
 
-The first 5 rules are just the plain Calculus of Constructions. Notice that we have `Type : Type`, which should not introduce an inconsistency (see below). The next 3 rules enable implicit duplication, giving Formality the power to express Church iteration (i.e., bounded for-loops, recursion, etc.). The last 3 rules are Self-Types, allowing Formality to express inductive datatypes. Finally, we also allow mutually recursive definitions inside types and erased positions, which isn't shown here.
+The first 5 rules are just the plain Calculus of Constructions. Notice that we have `Type : Type`, which should not introduce an inconsistency (see below). The next 3 rules enable implicit duplication, giving EATT the power to express Church iteration (i.e., bounded for-loops, recursion, etc.). The last 3 rules are Self-Types, allowing EATT to express inductive datatypes. Finally, we also allow mutually recursive definitions inside types and erased positions, which isn't shown here.
 
 ## Examples
 
@@ -161,7 +155,7 @@ The first 5 rules are just the plain Calculus of Constructions. Notice that we h
 
 ## Consistency
 
-Formality is based on the Elementary Affine Calculus (EAC), which is a terminating untyped language. On EAC, it is impossible to express never-ending terms such as `(λx. (x x) λx. (x x))` due to its reduction rules (i.e., independent of a type system). That means contradictions such as Russel's Paradox naturally can't be expressed. For that reason, we enable powerful type-level features such as mutual recursion and `Type : Type`, under the hypothesis that those won't cause an inconsistency. We're currently studying Formality to verify if that hypothesis actually holds. Obviously, only once that study is complete and Formality is properly formalized it can be considered a proper proof language.
+EATT is based on the Elementary Affine Calculus (EAC), which is a terminating untyped language. On EAC, it is impossible to express never-ending terms such as `(λx. (x x) λx. (x x))` due to its reduction rules (i.e., independent of a type system). That means contradictions such as Russel's Paradox naturally can't be expressed. For that reason, we enable powerful type-level features such as mutual recursion and `Type : Type`, under the hypothesis that those won't cause an inconsistency. We're currently studying EATT to verify if that hypothesis actually holds. Obviously, only once that study is complete and EATT is properly formalized it can be considered a proper proof language.
 
 ## Relationship with Cedille
 

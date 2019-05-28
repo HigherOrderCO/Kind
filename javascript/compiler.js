@@ -1,5 +1,5 @@
-const {Var, App, Lam, erase, gen_name, show} = require("./formality.js");
-const {Net, Pointer, Node} = require("./nasic.js");
+const {Var, App, Lam, erase, gen_name, show} = require("./ea-tt.js");
+const {Net, Pointer, Node} = require("./ea-net.js");
 
 const compile = (term, defs = {}) => {
   const build_net = (term, net, var_ptrs, level) => {

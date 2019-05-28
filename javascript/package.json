@@ -1,17 +1,17 @@
 {
-  "name": "formality-lang",
-  "version": "0.2.16",
+  "name": "elementary-affine-type-theory",
+  "version": "0.1.0",
   "description": "Minimal proof language.",
   "main": "index.js",
   "bin": {
-    "formality": "main.js"
+    "eatt": "main.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maiavictor/formality.git"
+    "url": "git+https://github.com/moonad/elementary-affine-type-theory.git"
   },
   "keywords": [
     "formality"
@@ -19,7 +19,7 @@
   "author": "Victor Maia",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/maiavictor/formality/issues"
+    "url": "https://github.com/moonad/elementary-affine-type-theory/issues"
   },
-  "homepage": "https://github.com/maiavictor/formality#readme"
+  "homepage": "https://github.com/moonad/elementary-affine-type-theory#readme"
 }
