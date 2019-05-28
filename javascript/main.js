@@ -21,23 +21,23 @@ try {
     }
   }
 } catch (e) {
-  console.log("Elementary Affine Type Theory");
+  console.log("Elementary Affine Type Theory (EA-TT)");
   console.log("");
   console.log("Usage: eatt [options] expr");
   console.log("(loads local .eatt files and runs/checks an expr)");
   console.log("");
   console.log("Options:");
-  console.log("-v shows EATT version");
+  console.log("-v shows EA-TT version");
   console.log("-i shows extra information");
   console.log("-N shows type normalized");
   console.log("-R shows type with unexpanded references");
   console.log("-W shows type on weak normal form");
-  console.log("-L shows type on LAM form instead of EAC");
+  console.log("-L shows type on LAM form instead of EA-CORE");
   console.log("-E shows type erased");
   console.log("-n shows term");
   console.log("-r shows term with unexpanded references");
   console.log("-w shows term on weak normal form");
-  console.log("-l shows term on LAM form instead of EAC");
+  console.log("-l shows term on LAM form instead of EA-CORE");
   console.log("-e shows term erased");
   console.log("-x shows NASIC evaluation");
   console.log("(default: "+defa+")");

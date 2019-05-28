@@ -157,7 +157,7 @@
 // :: Nat ::
 // :::::::::
 // The main Nat type consists of stratified inductive Church encoding.
-// It is erased from Parigot, and uses boxed dups to be EAC-compatible.
+// It is erased from Parigot, and uses boxed dups to be EA-Core-compatible.
 
 . Nat
 : Type

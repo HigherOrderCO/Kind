@@ -1,10 +1,10 @@
 # Elementary Affine Type Theory
 
-EATT is the pure proof language behind [Formality](https://github.com/moonad/formality). This document is a draft of EATT's specification. Its goal is to provide all the information required to independently implement complying evaluators, compilers and type-checkers for it.
+Elementary Affine Type Theory (EA-TT) is the pure proof language behind [Formality](https://github.com/moonad/formality). This document is a draft of EA-TT's specification. Its goal is to provide all the information required to independently implement complying evaluators, compilers and type-checkers for it.
 
 ## Syntax
 
-The syntax of EATT is:
+The syntax of EA-TT is:
 
 ```javascript
 var ::=
@@ -48,9 +48,9 @@ Plus the stratification condition, which dictates that:
 
 4. Recursion can only be used in computationally irrelevant positions (typed and erased terms).
 
-## Erasure to EAC
+## Erasure to EA-CORE
 
-Computationally, EATT terms are erased to the [Elementary Affine Calculus](https://github.com/moonad/elementary-affine-calculus). The erasure `E(t)` of a EATT term to EAC is defined as:
+Computationally, EA-TT terms are erased to the [Elementary Affine Core](https://github.com/moonad/elementary-affine-core). The erasure `E(t)` of a EA-TT term to EA-CORE is defined as:
 
 ```javascript
 E(Type)      = [x] x
@@ -69,7 +69,7 @@ E(~a)        = E(a)
 
 ## Reduction rules
 
-EATT has the same reduction rules as the Elementary Affine Calculus. They are:
+EA-TT has the same reduction rules as the Elementary Affine Core. They are:
 
 1. Application of a lambda
 
@@ -95,11 +95,11 @@ EATT has the same reduction rules as the Elementary Affine Calculus. They are:
 
     The duplication of a duplication simply lifts the inner duplication outwards.
 
-Applicating a boxed term and duplicating a lambda are undefined, prevented by EATT's type system.
+Applicating a boxed term and duplicating a lambda are undefined, prevented by EA-TT's type system.
 
 ## Typing rules
 
-EATT's typing rules are the following:
+EA-TT's typing rules are the following:
 
 ```javascript
 ----------- TYP
@@ -147,7 +147,7 @@ ctx |- ~a : [a/x]A
 ```
 
 
-The first 5 rules are just the plain Calculus of Constructions. Notice that we have `Type : Type`, which should not introduce an inconsistency (see below). The next 3 rules enable implicit duplication, giving EATT the power to express Church iteration (i.e., bounded for-loops, recursion, etc.). The last 3 rules are Self-Types, allowing EATT to express inductive datatypes. Finally, we also allow mutually recursive definitions inside types and erased positions, which isn't shown here.
+The first 5 rules are just the plain Calculus of Constructions. Notice that we have `Type : Type`, which should not introduce an inconsistency (see below). The next 3 rules enable implicit duplication, giving EA-TT the power to express Church iteration (i.e., bounded for-loops, recursion, etc.). The last 3 rules are Self-Types, allowing EA-TT to express inductive datatypes. Finally, we also allow mutually recursive definitions inside types and erased positions, which isn't shown here.
 
 ## Examples
 
@@ -155,7 +155,7 @@ The first 5 rules are just the plain Calculus of Constructions. Notice that we h
 
 ## Consistency
 
-EATT is based on the Elementary Affine Calculus (EAC), which is a terminating untyped language. On EAC, it is impossible to express never-ending terms such as `(λx. (x x) λx. (x x))` due to its reduction rules (i.e., independent of a type system). That means contradictions such as Russel's Paradox naturally can't be expressed. For that reason, we enable powerful type-level features such as mutual recursion and `Type : Type`, under the hypothesis that those won't cause an inconsistency. We're currently studying EATT to verify if that hypothesis actually holds. Obviously, only once that study is complete and EATT is properly formalized it can be considered a proper proof language.
+EA-TT is based on the Elementary Affine Core (EA-CORE), which is a terminating untyped language. On EA-CORE, it is impossible to express never-ending terms such as `(λx. (x x) λx. (x x))` due to its reduction rules (i.e., independent of a type system). That means contradictions such as Russel's Paradox naturally can't be expressed. For that reason, we enable powerful type-level features such as mutual recursion and `Type : Type`, under the hypothesis that those won't cause an inconsistency. We're currently studying EA-TT to verify if that hypothesis actually holds. Obviously, only once that study is complete and EA-TT is properly formalized it can be considered a proper proof language.
 
 ## Relationship with Cedille
 

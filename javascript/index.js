@@ -1,5 +1,5 @@
 module.exports = {
-  net: require("elementary-affine-interaction-net"),
-  core: require("elementary-affine-calculus").core,
+  net: require("elementary-affine-net"),
+  core: require("elementary-affine-core").core,
   tt: require("./ea-tt.js")
 }

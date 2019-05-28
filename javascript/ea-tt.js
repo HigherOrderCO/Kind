@@ -1,4 +1,4 @@
-const eac = require("elementary-affine-calculus").core;
+const eac = require("elementary-affine-core").core;
 
 const Var = (index)                  => ["Var", {index},                  "[" + index + "]"];
 const Typ = ()                       => ["Typ", {},                       "#typ"];

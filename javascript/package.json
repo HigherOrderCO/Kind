@@ -1,6 +1,6 @@
 {
   "name": "elementary-affine-type-theory",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Minimal proof language.",
   "main": "index.js",
   "bin": {
@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/moonad/elementary-affine-type-theory#readme",
   "dependencies": {
-    "elementary-affine-calculus": "^0.1.5",
-    "elementary-affine-interaction-net": "^0.1.0"
+    "elementary-affine-core": "^0.1.0",
+    "elementary-affine-net": "^0.1.0"
   }
 }
