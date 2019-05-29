@@ -52,3 +52,45 @@ def list_fold: [len]
   dup fold_f = (list_fold_f len #ConsF)
   # [list] (fold_f NilF list)
 
+def map: [as] [f] [Cons]
+  dup f = f
+  dup Cons = Cons
+  let case_cons = [a] (Cons (f a))
+  dup A = (as #case_cons)
+  # [Nil] (A Nil)
+
+// reverse tail call and fusionable
+def reverse:
+  [as]
+  let iterate = [xs] [ys] [Cons]
+    dup Cons = Cons
+    dup rec = (xs #[x] [h] [p] (h (Cons x p)))
+    dup p = (ys #Cons)
+    #[N] (rec [p] p (p N))
+  (iterate as NilF)
+
+def filter:
+// {:(List !A)} {:!{:!A} Bool} !(List !A)
+  [xs] [p]
+  dup p = p
+  [Cons]
+  dup Cons = Cons
+  dup rec = (xs #[x] [h]
+    dup x = x
+    (p #x [r] (Cons #x r) [r] r h))
+  #[N] (rec N)
+
+def foldl: [as] [op]
+  dup op = op
+  dup rec = (as #[a] [h] (op h a))
+  #[b] (rec b)
+
+def foldr: [as] [op]
+  dup op = op
+  dup rec = (as #[a] [h] (op a h))
+  # [b] (rec b)
+
+def even: [x] if {{x % 2} == 0} then: true else: false
+
+def example_list: (reverse (map (ConsF #3 (ConsF #4 (ConsF #7 (ConsF #2 (ConsF #0 NilF))))) #[x] {x * 2}))
+def example_foldr: (foldr example_list #[x] [y] {x + y})
