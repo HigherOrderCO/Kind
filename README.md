@@ -2,19 +2,19 @@
 
 An optimal compilation target for functional programming languages. It is:
 
-1. **Optimal:** compatible with interaction combinators, no bookkeeping/oracle needed.
+1. **Beta-optimal:** beta-reduction is [asymptotically faster](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07) than other functional languages.
 
-2. **GC-free:** memory is freed when values go out of scope.
+2. **GC-free:** due to affine lambdas, memory is simply freed when values go out of scope.
 
-3. **Parallel:** can be evaluated in GPUs, FPGAs and similar.
+3. **Parallel:** can efficiently target GPUs, FPGAs and other parallel architectures.
 
-4. **Efficient:** 128 bits per lambda/pair, unboxed 32-bit ints, constant-time beta-reduction.
+4. **Efficient:** interaction-net runtime with 128-bit nodes, unboxed 32-bit uints, no costly bookkeeping.
 
 5. **Terminating:** computations are guaranteed to halt in elementary time.
 
-6. **Simple:** the entire implementation (all included) takes about 1.5k lines of code.
+6. **Portable:** soon-to-be implemented in [FM-NET](https://github.com/moonad/formality-net), a portable, 400-LOC runtime.
 
-It features affine lambdas, elementary duplication ("cloning"), 32-bit numeric primitives and pairs.
+This repository includes a refrence implementation in JavaScript. We're working in specifications/formalizations, and low-level (LLVM/CUDA) backends.
 
 ## Example
 
