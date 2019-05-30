@@ -3,10 +3,10 @@
 // ::::::::::
 
 def true:
-  [t] [f] t
+  {t f} t
 
 def false:
-  [t] [f] f
+  {t f} f
 
-def not: [b]
-  [t] [f] (b f t)
+def not: {b}
+  {t f} (b f t)

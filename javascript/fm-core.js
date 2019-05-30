@@ -36,7 +36,7 @@ const parse = (code) => {
   }
 
   function is_name_char(char) {
-    return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=.+-*/%&|^~<>".indexOf(char) !== -1;
+    return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-".indexOf(char) !== -1;
   }
 
   function next() {
@@ -91,10 +91,10 @@ const parse = (code) => {
     }
   }
 
-  function parse_name() {
+  function parse_string(fn = is_name_char) {
     next_char();
     var name = "";
-    while (idx < code.length && is_name_char(code[idx])) {
+    while (idx < code.length && fn(code[idx])) {
       name = name + code[idx];
       next();
     }
@@ -104,26 +104,31 @@ const parse = (code) => {
   function parse_term(ctx) {
     // Application
     if (match("(")) {
-      var func = parse_term(ctx);
+      var term = parse_term(ctx);
       while (idx < code.length && !match(")")) {
         var argm = parse_term(ctx);
-        var func = App(func, argm);
+        var term = App(term, argm);
         next_char();
       }
-      return func;
+      return term;
     }
 
     // Lambda
-    else if (match("[")) {
-      var name = parse_name();
-      var skip = parse_exact("]");
-      var body = parse_term(ctx.concat([name]));
-      return Lam(name, body);
+    else if (match("{")) {
+      var names = [];
+      while (idx < code.length && !match("}")) {
+        names.push(parse_string());
+      }
+      var term = parse_term(ctx.concat(names));
+      for (var i = names.length - 1; i >= 0; --i) {
+        term = Lam(names[i], term);
+      }
+      return term;
     }
 
     // Duplication
     else if (match("dup ")) {
-      var name = parse_name();
+      var name = parse_string();
       var skip = parse_exact("=");
       var expr = parse_term(ctx);
       var body = parse_term(ctx.concat([name]));
@@ -138,7 +143,7 @@ const parse = (code) => {
 
     // Let
     else if (match("let ")) {
-      var name = parse_name();
+      var name = parse_string();
       var skip = parse_exact("=");
       var copy = parse_term(ctx);
       var body = parse_term(ctx.concat([name]));
@@ -146,11 +151,11 @@ const parse = (code) => {
     }
 
     // Operation
-    else if (match("{")) {
+    else if (match("|")) {
       var num0 = parse_term(ctx);
-      var func = parse_name();
+      var func = parse_string(c => !is_space(c));
       var num1 = parse_term(ctx);
-      var skip = parse_exact("}");
+      var skip = parse_exact("|");
       return Op2(func, num0, num1);
     }
 
@@ -168,7 +173,7 @@ const parse = (code) => {
 
     // Nat
     else if (match("~")) {
-      var name = parse_name();
+      var name = parse_string();
       var numb = Number(name);
       return numb_to_term(numb);
     }
@@ -187,12 +192,11 @@ const parse = (code) => {
     }
 
     // Pair
-    else if (match("&")) {
-      var skip = parse_exact("(");
+    else if (match("[")) {
       var val0 = parse_term(ctx);
       var skip = parse_exact(",");
       var val1 = parse_term(ctx);
-      var skip = parse_exact(")");
+      var skip = parse_exact("]");
       return Par(val0, val1);
     }
     
@@ -218,12 +222,11 @@ const parse = (code) => {
 
     // Projection
     else if (match("get ")) {
-      var skip = parse_exact("&");
-      var skip = parse_exact("(");
-      var nam0 = parse_name();
+      var skip = parse_exact("[");
+      var nam0 = parse_string();
       var skip = parse_exact(",");
-      var nam1 = parse_name();
-      var skip = parse_exact(")");
+      var nam1 = parse_string();
+      var skip = parse_exact("]");
       var skip = parse_exact("=");
       var pair = parse_term(ctx);
       var body = parse_term(ctx.concat([nam0, nam1]));
@@ -232,7 +235,7 @@ const parse = (code) => {
 
     // Variable / Reference
     else {
-      var name = parse_name();
+      var name = parse_string();
       var numb = Number(name);
       if (!isNaN(numb)) {
         return Num(numb >>> 0);
@@ -263,7 +266,7 @@ const parse = (code) => {
   while (idx < code.length) {
     next_char();
     if (match("inf ")) {
-      var name = parse_name();
+      var name = parse_string();
       var skip = parse_exact(":");
       var skip = parse_exact("init:");
       var init = parse_term([]);
@@ -276,7 +279,7 @@ const parse = (code) => {
       infs[name] = {init, step, stop, done};
     } else {
       var skip = parse_exact("def ");
-      var name = parse_name();
+      var name = parse_string();
       var skip = parse_exact(":");
       var term = parse_term([]);
       defs[name] = term;
@@ -309,13 +312,23 @@ const show = ([ctor, args], canon = false, ctx = []) => {
     case "Var":
       return ctx[ctx.length - args.index - 1] || "^" + args.index;
     case "Lam":
-      var numb = term_to_numb([ctor, args]);
+      var term = [ctor, args];
+      var numb = null;
+      var names = [];
+      while (term[0] === "Lam") {
+        numb = term_to_numb(term);
+        if (numb !== null) {
+          break;
+        } else {
+          names.push(canon ? gen_name(ctx.length) : term[1].name);
+          term = term[1].body;
+        }
+      }
+      var head = names.length > 0 ? "{" + names.join(" ") + "} " : "";
       if (numb !== null) {
-        return "~" + Number(numb);
+        return head + "~" + Number(numb);
       } else {
-        var name = canon ? gen_name(ctx.length) : args.name;
-        var body = show(args.body, canon, ctx.concat([name]));
-        return "[" + name + "] " + body;
+        return head + show(term, canon, ctx.concat(names))
       }
     case "App":
       var text = ")";
@@ -340,7 +353,7 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       var func = args.func;
       var num0 = show(args.num0, canon, ctx);
       var num1 = show(args.num1, canon, ctx);
-      return "{" + num0 + " " + func + " " + num1 + "}";
+      return "|" + num0 + " " + func + " " + num1 + "|";
     case "Ite":
       var cond = show(args.cond, canon, ctx);
       var pair = show(args.pair, canon, ctx);
@@ -355,7 +368,7 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       } else {
         var val0 = show(args.val0, canon, ctx);
         var val1 = show(args.val1, canon, ctx);
-        return "&(" + val0 + "," + val1 + ")";
+        return "[" + val0 + "," + val1 + "]";
       }
     case "Fst":
       var pair = show(args.pair, canon, ctx);
@@ -368,7 +381,7 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       var nam1 = args.nam1;
       var pair = show(args.pair, canon, ctx);
       var body = show(args.body, canon, ctx.concat([nam0, nam1]));
-      return "(get &(" + nam0 + "," + nam1 + ") = " + pair + " " + body + ")";
+      return "(get [" + nam0 + "," + nam1 + "] = " + pair + " " + body + ")";
     case "Ref":
       return args.name;
   }

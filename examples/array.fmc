@@ -14,41 +14,41 @@ def array_example:
     dup read   = (read dpt)   // ~650 graph-rewrites per read with dpt=16
 
   // Performs some writes and reads
-  # let add       = boxed_add
-    let arr       = (write 0 #10 arr)       // arr[0] = 10
-    let arr       = (write 1 #12 arr)       // arr[1] = 12
-    let arr       = (update 2 (add #8) arr) // arr[2] += 8
-    let arr       = (write 3 #7 arr)        // arr[1] = 12
-    get &(arr, a) = (read 0 arr)            // a = arr[0]
-    get &(arr, b) = (read 1 arr)            // b = arr[1]
-    get &(arr, c) = (read 2 arr)            // c = arr[2]
-    get &(arr, d) = (read 3 arr)            // c = arr[2]
-    &("arr[0] + arr[1] + arr[2]:", (add (add a b) c))
+  # let add      = boxed_add
+    let arr      = (write 0 #10 arr)       // arr[0] = 10
+    let arr      = (write 1 #12 arr)       // arr[1] = 12
+    let arr      = (update 2 (add #8) arr) // arr[2] += 8
+    let arr      = (write 3 #7 arr)        // arr[1] = 12
+    get [arr, a] = (read 0 arr)            // a = arr[0]
+    get [arr, b] = (read 1 arr)            // b = arr[1]
+    get [arr, c] = (read 2 arr)            // c = arr[2]
+    get [arr, d] = (read 3 arr)            // c = arr[2]
+    ["arr[0] + arr[1] + arr[2]:", (add (add a b) c)]
 
 // with
 // | Searches an element, updates it, returns the updated
 // | array and a value that can depend on the element
-// : {-A  : Type}              -- Type of the elements
-//   {dpt : CNat}              -- Length of array = 2^dpt
-//   ! {path : Num}            -- Num storing path to element
-//     {fn   : {x : A} &(A,A)} -- Receives found element, returns an element to replace it by, and a return value.
-//     {(Array dpt A)}         -- The array to be queried
-//     &((Array dpt A), A)     -- The updated array, and return value returned by `fn`.
-def with: [dpt]
-  let init = [path] [fn] fn
-  let loop = [cont] [path] [fn]
-    get &(path0, path1) = cpy path
-    get &(swap0, swap1) =
-      if {path0 % 2}
-      then: &([x]x, [x]x)
-      else: &(swap, swap)
-    (cont {path1 / 2} [arr]
-      get &(a,b) = (swap0 arr)
-      get &(b,x) = (fn b)
-      &((swap1 &(a,b)), x))
-  let stop = [func] func
+// : {-A  : Type}             -- Type of the elements
+//   {dpt : CNat}             -- Length of array = 2^dpt
+//   ! {path : Num}           -- Num storing path to element
+//     {fn   : {x : A} (A,A)} -- Receives found element, returns an element to replace it by, and a return value.
+//     {(Array dpt A)}        -- The array to be queried
+//     ((Array dpt A), A)     -- The updated array, and return value returned by `fn`.
+def with: {dpt}
+  let init = {path fn} fn
+  let loop = {cont path fn}
+    get [path0, path1] = cpy path
+    get [swap0, swap1] =
+      if |path0 % 2|
+      then: [{x}x, {x}x]
+      else: [swap, swap]
+    (cont |path1 / 2| {arr}
+      get [a,b] = (swap0 arr)
+      get [b,x] = (fn b)
+      [(swap1 [a,b]), x])
+  let stop = {func} func
   dup fold = (for dpt #init #loop #stop)
-  # [path] [fn] [arr] (fold path fn arr)
+  # {path fn arr} (fold path fn arr)
 
 // update
 // | Applies a function to an element
@@ -58,9 +58,9 @@ def with: [dpt]
 //     {fn   : {x : A} A}     -- Update function
 //     {arr  : (Array dpt A)} -- The array to be updated
 //     (Array dpt A)          -- The updated array, and return value returned by `fn`.
-def update: [dpt]
+def update: {dpt}
   dup with = (with dpt) 
-  # [path] [f] [arr] (fst (with path [x]&((f x), 0) arr))
+  # {path f arr} (fst (with path {x}[(f x), 0] arr))
 
 // read
 // | Returns a copy of an element and returns the array unchanged
@@ -68,13 +68,13 @@ def update: [dpt]
 //   {dpt : CNat}              -- Length of array = 2^dpt
 //   ! {path : Num}            -- Num storing path to element
 //     {arr  : (Array dpt !A)} -- The array to be read
-//     &((Array dpt !A),!A)    -- The array itself, and a copy of the element
-def read: [dpt]
+//     {(Array dpt !A),!A}    -- The array itself, and a copy of the element
+def read: {dpt}
   dup with = (with dpt)
-  # [path] [arr]
-    let f = [x]
+  # {path arr}
+    let f = {x}
       dup x = x
-      &(#x, #x)
+      [#x, #x]
     (with path f arr)
 
 // write
@@ -85,9 +85,9 @@ def read: [dpt]
 //     {arr  : (Array dpt A)} -- Array to be written
 //     {val  : A}             -- Value to be written
 //     (Array dpt A)          -- The overwritten array
-def write: [dpt]
+def write: {dpt}
   dup update = (update dpt)
-  # [path] [val] (update path [x]val)
+  # {path val} (update path {x}val)
 
 // init
 // | Generates an array with 2^dpt copies of val
@@ -95,12 +95,12 @@ def write: [dpt]
 //   {dpt : CNat}
 //   ! {val : !A}
 //   ! (Array dpt A)
-def init: [dpt]
-  let loop = [arr]
+def init: {dpt}
+  let loop = {arr}
     dup arr = arr
-    # &(arr, arr)
+    # [arr, arr]
   dup fold = (dpt #loop)
-  # [init] (fold init)
+  # {init} (fold init)
 
 // gen
 // | Generates an array by mapping a function to each index
@@ -108,18 +108,18 @@ def init: [dpt]
 //   {dpt : CNat}
 //   ! {fun : !{idx : !Num} A}
 //   ! (Array dpt !A)
-def gen: [dpt]
-  let init = [fun]
+def gen: {dpt}
+  let init = {fun}
     dup fun = fun
-    # [idx] (fun idx)
-  let loop = [arr] [fun]
+    # {idx} (fun idx)
+  let loop = {arr fun}
     dup arr = (arr fun)
-    # [idx]
+    # {idx}
       dup idx = idx
-      let lft = (arr #{{idx * 2} + 0})
-      let rgt = (arr #{{idx * 2} + 1})
-      &(lft, rgt)
-  let stop = [arr] [fun]
+      let lft = (arr #||idx * 2| + 0|)
+      let rgt = (arr #||idx * 2| + 1|)
+      [lft, rgt]
+  let stop = {arr fun}
     dup arr = (arr fun)
     # (arr #0)
   (for dpt #init #loop #stop)
@@ -128,6 +128,6 @@ def gen: [dpt]
 // | Generates an array with all numbers from 0 to 2^dpt
 // : {dpt : CNat}
 //   !!(Array dpt !Num)
-def range: [dpt]
+def range: {dpt}
   dup gen = (gen dpt)
-  # (gen #[x]x)
+  # (gen #{x}x)
