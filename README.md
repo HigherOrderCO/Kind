@@ -24,23 +24,23 @@ An interesting example is map-reduce. Since Formality is evaluated with interact
 // Sums all numbers from 0 to 65536 (2**16) in parallel
 // Uses `map_reduce` from http://tiny.cc/fmc_map_reduce
 def main:
-  let map = [i] i
-  let red = [a] [b] {a + b}
+  let map = {i} i
+  let red = {a b} |a + b|
   let sum = (map_reduce ~16 ##map ##red)
-  &("Sum from 0 from 65536 is:", sum)
+  ["Sum from 0 from 65536 is:", sum]
 ```
 
 This example computes the nth number of the Fibonacci sequence. It uses compact λ-encoded nats to emulate loops.
 
 ```javascript
 // Gets the nth number of the Fibonacci sequence
-def fib: [n]
-  let init = &(0,1)
-  let loop = [state]
-    get &(a, b) = state
-    get &(x, y) = cpy b
-    &(x, {a + y})
-  let stop = [state]
+def fib: {n}
+  let init = [0,1]
+  let loop = {state}
+    get [a, b] = state
+    get [x, y] = cpy b
+    [x, |a + y|]
+  let stop = {state}
     (snd state)
   (for n #init #loop #stop)
 ```
