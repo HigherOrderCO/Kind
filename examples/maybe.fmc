@@ -1,0 +1,7 @@
+def None:
+  {None Just}
+  None
+
+def Just: {val}
+  {None Just}
+  (Just val)
