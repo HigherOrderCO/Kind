@@ -25,6 +25,14 @@ def array_example:
     get [arr, d] = (read 3 arr)            // c = arr[2]
     ["arr[0] + arr[1] + arr[2]:", (add (add a b) c)]
 
+// Example of folding over an array
+def fold_array_example:
+  let array = [[[1,2],[3,4]],[[5,6],[7,8]]]
+  let node  = {a b} |a + b|
+  let leaf  = {x} |x * 2|
+  dup fold  = (fold_array ~3)
+  # (fold #array #node #leaf)
+
 // with
 // | Searches an element, updates it, returns the updated
 // | array and a value that can depend on the element
@@ -131,3 +139,33 @@ def gen: {dpt}
 def range: {dpt}
   dup gen = (gen dpt)
   # (gen #{x}x)
+
+// fold_array
+// : {-A : Type}
+//   {dpt : Nat}
+//   ! {arr  : !(Array dpt A)}
+//     {-P   : Type}
+//     {Node : !{lft : A} {rgt : A} P}
+//     {Leaf : !{val : A} P}
+//     ! P
+def fold_array: {dpt}
+  let init = {Node Leaf}
+    dup Node = Node
+    dup Leaf = Leaf
+    # {val} (Leaf val)
+  let loop = {rec Node Leaf}
+    dup Node = Node
+    dup Leaf = Leaf
+    dup rec  = (rec #Node #Leaf)
+    # {arr}
+      get [lft,rgt] = arr
+      let lft = (rec lft)
+      let rgt = (rec rgt)
+      (Node lft rgt)
+  dup fold = (dpt #loop)
+  # {arr Node Leaf}
+    dup arr  = arr
+    dup Node = Node
+    dup Leaf = Leaf
+    dup fold = (fold init #Node #Leaf)
+    # (fold arr)
