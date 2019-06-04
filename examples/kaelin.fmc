@@ -30,31 +30,79 @@
 // Stanci  | Support | Healer         | Dev
 // Zagatur | Support | Summoner       | Zagara, Abathur (Blizzard)
 // Mewrue  | Support | Influencer     | Mewtwo (Pokémon), Meruem (Hunter X Hunter)
+//
+// ## Stats
+// 
+// Name    |MOV| HP
+// ------- | - | ---
+// Tophoro | 2 | 80
+// Agdris  | 1 | 10
+// Gonku   | 2 | 60
+// Erkos   | 3 | 30
+// Croni   | 3 | 30
+// Snarch  | 3 | 40
+// Sirpix  | 3 | 40
+// Kenlua  | 4 | 40
+// Flina   | 4 | 40
+// Stanci  | 3 | 40
+// Zagatur | 1 | 10
+// Mewrue  | 1 | 10
 // 
 // ## Moves
 // 
 // - Tophoro
-//     - Touch-Me-Not: sleeps an enemy up to 2 range
-//     - Earth Rise: pushes or pulls enemies in a 1-2-3 wave area ahead, creates a single earth wall where they were
-//     - Earth Wall: creates a 3x1 earth wall in 1, 2 or 3 tiles ahead, pulls or pushes enemies hit
-//     - Earth Slam: slams enemies standing on the 3 ahead tiles
-//     - Ingrain: self-roots for 3 turns, gaining massive shield and heal
+//   - Touch-Me-Not: stuns a selected enemy up to 3 range.
+//   - Earth Rise: pushes or pulls enemies in a 1-3-5 (wave) ahead, creates a single earth wall where they were.
+//   - Earth Wall: creates earth in a 3x1 (wall) up to 3 tiles ahead; pulls or pushes enemies hit.
+//   - Earth Slam: slams enemies in a 3x1 (wall) ahead, stunning them for 1 turn.
+//   - Ingrain: self-roots for 3 turns, gaining massive shield and heal.
 // 
 // - Agdris
+//   - Bless: select an ally up to 8 range. He/she can't take damage this turn.
+//   - Silence: select an enemy up to 8 range. He/she can't attack on this turn.
+//   - Retreat: select an enemy up to 8 range. He/she is teleported to the position he/she started this sturn.
+//   - Memento: dies. Enemies can't attack or move on this turn.
 // 
 // - Gonku
+//   - Jokame: select an enemy up to 1 range. Deals an amount of damage proportional to life lost.
+//   - Rest: heals 10 HP. Can't attack or move on this turn. 
+//   - Endure: can't die on this turn, staying at 1 HP if killed.
+//   - Berserker: loses 2 HP. Hits a 3x3 area around.
 //
 // - Erkos
+//   - Flame Ball: hits a 5x5 (circle) up to 4 range.
+//   - Flame Wave: hits a 3-3-5-5 (wave) ahead.
+//   - Flame Rage: on the next turn, attacks deal +2 dmg. Stacks. Can't attack on this turn.
+//   - Flame Soul: selects an enemy up to 1 range. Deals massive damage.
+//   - Flame Nova: loses 15 HP. Deals massive damage in a 11x11 circle.
 // 
 // - Croni
+//   - Shadow Doll: places a doll in empty tile for up to 8 range, blocking the way until the end of the turn.
+//   - Shadow Ball: launches a ball that travels up to 8 tiles ahead, dealing high damage to first enemy hit.
+//   - Shadow Flux: after a delay, hits a 3x3 (square) in up to 8 range for high damage.
+//   - Shadow Trap: places a trap in a secret position; if an enemy stands on it, activate to stun him/her.
+//   - Shadow Bond: loses half hp. If Croni dies on this turn, takes the killer with her. Can't attack on this turn.
 // 
 // - Snarch
+//   - Precise Shot: hits a selected enemy up to 4 range.
+//   - Piercing Bolt: hits all enemies in a 4x1 (line) ahead.
+//   - Explosive Arrow: hits a 3x3 (circle) up to 4 range.
+//   - Ballista: mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks gain triple range.
 // 
 // - Sirpix
+//   - Blink: select an empty tile in a 5x5 (circle) around. Sirpix moves to that tile.
 // 
 // - Kenlua
+//   - Dodge: select 3 tiles up to 3 range. Prevent all damage from enemies standing on those tiles on this turn.
+//   - Jolt: hits a 3x3 (square) around. 
+//   - Godspeed: dashes up to 4 tiles forward. 
+//   - Recall: returns to the position Kenlua was at on the beginning of the turn.
+//   - Slash: hits a 1x1 (point) up to 1 range. Deals massive damage.
 // 
 // - Flina
+//   - Fly: walks up to 4 additional steps. Can pass through enemies and cliffs.
+//   - Carry: select an ally up to 1 range. He/she can't attack this turn. After your move, he/she is teleported behind you.
+//   - Lance: hits a selected enemy up to 2 range.
 // 
 // - Stanci
 // 
@@ -239,11 +287,11 @@ def kmap:
   let r11 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
   let r12 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
   let r13 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
-  let r14 = [[[[[W,C],[C,W]],[[W,C],[C,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
-  let r15 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]] // MID
+  let r14 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
+  let r15 = [[[[[C,C],[C,C]],[[C,C],[C,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[C,C],[C,C]],[[C,C],[C,C]]]]] // MID
 
-  let r16 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]] // MID
-  let r17 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,C],[C,W]],[[W,C],[C,W]]]]]
+  let r16 = [[[[[C,C],[C,C]],[[C,C],[C,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[C,C],[C,C]],[[C,C],[C,C]]]]] // MID
+  let r17 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
   let r18 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
   let r19 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
   let r20 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
