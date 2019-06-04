@@ -1,113 +1,573 @@
-def kaelin_example:
-  dup map_to_string = map_to_string
-  # (map_to_string #kaelin.map)
+// # Kaelin 
+// 
+// A simple MOBA-like boardgame and a showcase for Formality-Core
+// 
+// It aims to be blockchain-compatible. That means real-time Kaelin matches can
+// take place inside smart-contract platforms like Ethereum or Tezos. That's
+// because turns have 10-20 seconds, and moves are made in a commit-reveal
+// scheme, allowing the game state to be computed by players directly, without
+// a central server (aka state-channels). In the case of a dispute (such as a
+// player stopping to respond), the blockchain can be consulted and resolve the
+// conflict in an acceptable time (about 1 minute).
+// 
+// Kaelin aims to preserve many of the fun characteristics of a MOBA such as
+// map control, micro and macro decisions, team-work, and essentially answer
+// the question: how do you dodge a skillshot in a turn-based boardgame?
+// 
+// ## Heroes
+// 
+// Name    | Role    | Description    | References
+// ------- | ------- | -------------- | -------------------------------------------------
+// Tophoro | Tank    | Terrain Bender | Toph (Avatar TLA), Totoro (Studio Ghibli)
+// Agdris  | Tank    | Silencer       | Agda, Idris (programming language)
+// Gonku   | Tank    | Warrior        | Gon (Hunter X Hunter), Goku (Gradon Ball Z)
+// Erkos   | Ranged  | Fire Mage      | Erk (Fire Emblem), Harry Potter (Harry Potter)
+// Croni   | Ranged  | Dark Mage      | Chromie (Blizzard), Raven (Teen Titans)
+// Snarch  | Ranged  | Archer         | Zk-Snarks (crypto)
+// Sirpix  | Melee   | Thief          | Dev
+// Kenlua  | Melee   | Swordsman      | Killua (Hunter X Hunter), Kenshin (Rurouni Kenshin)
+// Flina   | Melee   | Pegasus Knight | Florina (Fire Emblem), Link (The Legend of Zelda)
+// Stanci  | Support | Healer         | Dev
+// Zagatur | Support | Summoner       | Zagara, Abathur (Blizzard)
+// Mewrue  | Support | Influencer     | Mewtwo (Pokémon), Meruem (Hunter X Hunter)
+// 
+// ## Moves
+// 
+// - Tophoro
+//     - Touch-Me-Not: sleeps an enemy up to 2 range
+//     - Earth Rise: pushes or pulls enemies in a 1-2-3 wave area ahead, creates a single earth wall where they were
+//     - Earth Wall: creates a 3x1 earth wall in 1, 2 or 3 tiles ahead, pulls or pushes enemies hit
+//     - Earth Slam: slams enemies standing on the 3 ahead tiles
+//     - Ingrain: self-roots for 3 turns, gaining massive shield and heal
+// 
+// - Agdris
+// 
+// - Gonku
+//
+// - Erkos
+// 
+// - Croni
+// 
+// - Snarch
+// 
+// - Sirpix
+// 
+// - Kenlua
+// 
+// - Flina
+// 
+// - Stanci
+// 
+// - Zagatur
+// 
+// - Mewrue
+// 
+// ## Move Priority
+// 
+// - Tophoro Ingrain
+// - Tophoro Touch-Me-Not
+// - Tophoro Earth Rise
+// - Tophoro Earth Wall
+// - Tophoro Earth Slam
+
+def kmap_to_string:
+  dup fold = (fold_array ~10)
+  # {map}
+    let chars = (fold map #concat #thing_to_icon)
+    let chars = (cons-every #64 #10 chars)
+    (from_chars chars)
 
 def kaelin:
-  kaelin_example
-
+  dup write = kmap_write
+  dup Step  = Step
+  # let map = kmap
+    let map = (Step [[1,30],UP] map)
+    let map = (Step [[1,29],UP] map)
+    let map = (Step [[1,28],UP] map)
+    let map = (Step [[1,27],UP] map)
+    let map = (Step [[1,26],UP] map) // no effect because of wall
+    let map = (Step [[1,26],RIGHT] map)
+    (kmap_to_string map)
+    
 // :::::::::::::
 // :: Vector2 ::
 // :::::::::::::
 
-def add2: {a b}
+def vec_add: {a b}
   get [ax,ay] = a
   get [bx,by] = b
   [|ax + bx|, |ay + by|]
+
+def vec_cpy: {a}
+  get [ax,ay]   = a
+  get [ax0,ax1] = cpy ax
+  get [ay0,ay1] = cpy ay
+  [[ax0,ay0], [ax1,ay1]]
+
+def RIGHT : 0 //  1
+def DOWN  : 1 //  0
+def LEFT  : 2 // -1
+def UP    : 3 //  0
+
+def dir_to_vec: {a}
+  get [a0,a1] = cpy a
+  get [a2,a3] = cpy a0
+  if |a1 < 2|
+  then:
+    if |a2 == 0|
+    then: [ 1,  0]
+    else: [ 0,  1]
+  else:
+    if |a3 == 2|
+    then: [-1,  0]
+    else: [ 0, -1]
+
+// ::::::::::
+// :: Side ::
+// ::::::::::
+
+def WHITE : 0
+def BLACK : 1
+def BOARD : 2
+
+def eql_side: {a b}
+  |a == b|
+
+def side_to_icon: {side}
+  get [side0,side1] = cpy side
+  if |side0 === WHITE|
+  then: (to_chars "O")
+  else: if |side1 == BLACK|
+    then: (to_chars "X")
+    else: (to_chars "B")
 
 // :::::::::::
 // :: Thing ::
 // :::::::::::
 
 def Air:
-  {Air Wall Throne Hero}
+  {Air Wall Cliff Throne Unit}
   Air
 
 def Wall:
-  {Air Wall Throne Hero}
+  {Air Wall Cliff Throne Unit}
   Wall
 
-def Throne:
-  {Air Throne Hero Wall}
-  Throne
+def Cliff:
+  {Air Wall Cliff Throne Unit}
+  Cliff
 
-def Hero: {pid}
-  {Air Wall Throne Hero}
-  let dir = [1,0]
-  (Hero pid dir)
+def Throne: {side}
+  {Air Wall Cliff Throne Unit}
+  (Throne side)
+
+def Unit: {side flies}
+  {Air Wall Cliff Throne Unit}
+  (Unit side flies)
 
 def thing_to_icon: {thing}
   let case_air    = (to_chars " .")
   let case_wall   = (to_chars " W")
-  let case_throne = (to_chars " T")
-  let case_hero   = {pid dir} (to_chars " H")
-  (thing case_air case_wall case_throne case_hero)
+  let case_cliff  = (to_chars " C")
+  let case_throne = {side} (to_chars " T")
+  let case_hero   = {side flies} (concat (to_chars " ") (side_to_icon side))
+  (thing case_air case_wall case_cliff case_throne case_hero)
+
+def step: {a b}
+  let case_air    = {b} [Air, b]
+  let case_wall   = {b} [Wall, b]
+  let case_cliff  = {b} [Cliff, b]
+  let case_throne = {a_side b} [(Throne a_side), b]
+  let case_unit   = {a_side a_flies b}
+    let case_air    = {a_side a_flies}
+      let a_val     = (Unit a_side a_flies)
+      let b_val     = Air
+      [b_val, a_val]
+    let case_wall   = {a_side a_flies}
+      let a_val     = (Unit a_side a_flies)
+      let b_val     = Wall
+      [a_val, b_val]
+    let case_cliff  = {a_side a_flies}
+      let a_val     = (Unit a_side a_flies)
+      let b_val     = Cliff
+      [a_val, b_val]
+    let case_throne = {b_side a_side a_flies}
+      let a_val     = (Unit a_side a_flies)
+      let b_val     = (Throne b_side)
+      [a_val, b_val]
+    let case_unit   = {b_side b_flies a_side a_flies}
+      get [as0,as1] = cpy a_side
+      get [bs0,bs1] = cpy b_side
+      let a_val     = (Unit as1 a_flies)
+      let b_val     = (Unit bs1 b_flies)
+      let can_pass  = (eql_side as0 bs0)
+      let then_swap = [{a b}[a,b],{a b}[b,a]]
+      (if can_pass then_swap a_val b_val)
+    (b case_air case_wall case_cliff case_throne case_unit a_side a_flies)
+  (a case_air case_wall case_cliff case_throne case_unit b)
 
 // :::::::::
 // :: Map ::
 // :::::::::
 
-def kaelin.map:
+def kmap:
   let O   = Air
-  let a   = (Hero 0)
-  let b   = (Hero 1)
-  let c   = (Hero 2)
-  let d   = (Hero 3)
-  let e   = (Hero 4)
-  let f   = (Hero 5)
-  let g   = (Hero 6)
-  let h   = (Hero 7)
+  let a   = (Unit WHITE 0)
+  let b   = (Unit WHITE 0)
+  let c   = (Unit WHITE 0)
+  let d   = (Unit WHITE 0)
+  let e   = (Unit BLACK 0)
+  let f   = (Unit BLACK 0)
+  let g   = (Unit BLACK 0)
+  let h   = (Unit BLACK 0)
   let W   = Wall
-  let T   = Throne
-  let r00 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#W],[#W,#W]],[[#W,#W],[#W,#W]]]]]
-  let r01 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#W],[#O,#O]],[[#h,#g],[#O,#T]]]]]
-  let r02 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#f,#W]]]]]
-  let r03 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#e,#W]]]]]
-  let r04 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#W]]]]]
-  let r05 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#W],[#O,#O]],[[#O,#O],[#O,#W]]]]]
-  let r06 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#W],[#W,#O]],[[#O,#O],[#W,#W]]]]]
-  let r07 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r08 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r09 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r10 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r11 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r12 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r13 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r14 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r15 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r16 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r17 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r18 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r19 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r20 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r21 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r22 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r23 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r24 = [[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r25 = [[[[[#W,#W],[#O,#O]],[[#O,#W],[#W,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r26 = [[[[[#W,#O],[#O,#O]],[[#O,#O],[#W,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r27 = [[[[[#W,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r28 = [[[[[#W,#a],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r29 = [[[[[#W,#b],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r30 = [[[[[#T,#O],[#c,#d]],[[#O,#O],[#W,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
-  let r31 = [[[[[#W,#T],[#W,#W]],[[#W,#W],[#W,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]],[[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]],[[[#O,#O],[#O,#O]],[[#O,#O],[#O,#O]]]]]
+  let C   = Cliff
+  let x   = (Throne WHITE)
+  let y   = (Throne BLACK)
+  let r00 = [[[[[W,W],[W,W]],[[W,W],[W,O]]],[[[O,W],[W,O]],[[O,O],[O,W]]]],[[[[W,O],[O,O]],[[O,W],[W,O]]],[[[O,W],[W,W]],[[y,W],[W,W]]]]]
+  let r01 = [[[[[W,O],[O,W]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[h,g]],[[O,f],[e,W]]]]]
+  let r02 = [[[[[W,W],[W,W]],[[W,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,C],[O,O]],[[O,O],[O,W]]]]]
+  let r03 = [[[[[W,O],[O,W]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[O,O],[O,W]]]]]
+  let r04 = [[[[[W,O],[W,W]],[[W,W],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,C],[O,O]],[[O,O],[O,W]]]]]
+  let r05 = [[[[[W,O],[O,W]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[O,O],[O,W]]]]]
+  let r06 = [[[[[W,W],[W,W]],[[W,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[W,O]],[[O,O],[W,W]]]]]
+  let r07 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
+
+  let r08 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
+  let r09 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
+  let r10 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
+  let r11 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
+  let r12 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
+  let r13 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
+  let r14 = [[[[[W,C],[C,W]],[[W,C],[C,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
+  let r15 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]] // MID
+
+  let r16 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]] // MID
+  let r17 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,C],[C,W]],[[W,C],[C,W]]]]]
+  let r18 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
+  let r19 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
+  let r20 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
+  let r21 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
+  let r22 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
+  let r23 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
+
+  let r24 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
+  let r25 = [[[[[W,W],[O,O]],[[O,W],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[W,W]],[[W,W],[W,W]]]]]
+  let r26 = [[[[[W,O],[O,O]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[O,O],[O,W]]]]]
+  let r27 = [[[[[W,O],[O,O]],[[O,O],[C,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[W,W],[W,W]]]]]
+  let r28 = [[[[[W,O],[O,O]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[O,O],[O,W]]]]]
+  let r29 = [[[[[W,O],[O,O]],[[O,O],[C,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[O,W],[W,W]]]]]
+  let r30 = [[[[[W,a],[b,O]],[[c,d],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[O,W],[O,W]]]]]
+  let r31 = [[[[[W,W],[W,x]],[[W,W],[W,O]]],[[[O,W],[W,O]],[[O,O],[O,W]]]],[[[[W,O],[O,O]],[[O,W],[W,O]]],[[[O,W],[W,W]],[[W,W],[W,W]]]]]
   [[[[[r00,r01],[r02,r03]],[[r04,r05],[r06,r07]]],[[[r08,r09],[r10,r11]],[[r12,r13],[r14,r15]]]],
    [[[[r16,r17],[r18,r19]],[[r20,r21],[r22,r23]]],[[[r24,r25],[r26,r27]],[[r28,r29],[r30,r31]]]]]
 
-def kaelin.map.index: {x y}
+def index: {pos}
+  get [x,y] = pos
   ||y * 32| + x|
 
-  
-def map_to_string:
-  dup fold = (fold_array ~10)
-  # {map}
-    let chars = (fold #kaelin.map #concat #thing_to_icon)
-    let chars = (cons-every #64 #10 chars)
-    (from_chars chars)
-  
-// ::::::::::
-// :: Move ::
-// ::::::::::
+def kmap_interact:
+  dup write = (write ~10)
+  dup take  = (take ~10)
+  # {a_pos b_pos fun map}
+    let a_idx           = (index a_pos)
+    let b_idx           = (index b_pos)
+    get [a_idx0,a_idx1] = cpy a_idx
+    get [b_idx0,b_idx1] = cpy b_idx
+    get [map,a_val]     = (take a_idx0 Air map)
+    get [map,b_val]     = (take b_idx0 Air map)
+    get [a_val,b_val]   = (fun a_val b_val)
+    let map             = (write a_idx1 a_val map)
+    let map             = (write b_idx1 b_val map)
+    map
 
-def Walk: {pos}
-  {Walk}
-  (Walk pos)
+def kmap_write:
+  (write ~10)
+
+def Wait:
+  # {map args}
+    map
+
+def Step:
+  dup inter = kmap_interact
+  # {args map}
+    get [a_pos,dir] = args
+    get [a_pos,ap1] = (vec_cpy a_pos)
+    let b_pos       = (vec_add ap1 (dir_to_vec dir))
+    (inter a_pos b_pos step map)
+
+def moves:
+  let m00 = Wait
+  let m01 = Wait
+  let m02 = Wait
+  let m03 = Wait
+  let m04 = Wait
+  let m05 = Wait
+  let m06 = Wait
+  let m07 = Wait
+  let m08 = Wait
+  let m09 = Wait
+  let m0A = Wait
+  let m0B = Wait
+  let m0C = Wait
+  let m0D = Wait
+  let m0E = Wait
+  let m0F = Wait
+  let m10 = Wait
+  let m11 = Wait
+  let m12 = Wait
+  let m13 = Wait
+  let m14 = Wait
+  let m15 = Wait
+  let m16 = Wait
+  let m17 = Wait
+  let m18 = Wait
+  let m19 = Wait
+  let m1A = Wait
+  let m1B = Wait
+  let m1C = Wait
+  let m1D = Wait
+  let m1E = Wait
+  let m1F = Wait
+  let m20 = Wait
+  let m21 = Wait
+  let m22 = Wait
+  let m23 = Wait
+  let m24 = Wait
+  let m25 = Wait
+  let m26 = Wait
+  let m27 = Wait
+  let m28 = Wait
+  let m29 = Wait
+  let m2A = Wait
+  let m2B = Wait
+  let m2C = Wait
+  let m2D = Wait
+  let m2E = Wait
+  let m2F = Wait
+  let m30 = Wait
+  let m31 = Wait
+  let m32 = Wait
+  let m33 = Wait
+  let m34 = Wait
+  let m35 = Wait
+  let m36 = Wait
+  let m37 = Wait
+  let m38 = Wait
+  let m39 = Wait
+  let m3A = Wait
+  let m3B = Wait
+  let m3C = Wait
+  let m3D = Wait
+  let m3E = Wait
+  let m3F = Wait
+  let m40 = Wait
+  let m41 = Wait
+  let m42 = Wait
+  let m43 = Wait
+  let m44 = Wait
+  let m45 = Wait
+  let m46 = Wait
+  let m47 = Wait
+  let m48 = Wait
+  let m49 = Wait
+  let m4A = Wait
+  let m4B = Wait
+  let m4C = Wait
+  let m4D = Wait
+  let m4E = Wait
+  let m4F = Wait
+  let m50 = Wait
+  let m51 = Wait
+  let m52 = Wait
+  let m53 = Wait
+  let m54 = Wait
+  let m55 = Wait
+  let m56 = Wait
+  let m57 = Wait
+  let m58 = Wait
+  let m59 = Wait
+  let m5A = Wait
+  let m5B = Wait
+  let m5C = Wait
+  let m5D = Wait
+  let m5E = Wait
+  let m5F = Wait
+  let m60 = Wait
+  let m61 = Wait
+  let m62 = Wait
+  let m63 = Wait
+  let m64 = Wait
+  let m65 = Wait
+  let m66 = Wait
+  let m67 = Wait
+  let m68 = Wait
+  let m69 = Wait
+  let m6A = Wait
+  let m6B = Wait
+  let m6C = Wait
+  let m6D = Wait
+  let m6E = Wait
+  let m6F = Wait
+  let m70 = Wait
+  let m71 = Wait
+  let m72 = Wait
+  let m73 = Wait
+  let m74 = Wait
+  let m75 = Wait
+  let m76 = Wait
+  let m77 = Wait
+  let m78 = Wait
+  let m79 = Wait
+  let m7A = Wait
+  let m7B = Wait
+  let m7C = Wait
+  let m7D = Wait
+  let m7E = Wait
+  let m7F = Wait
+  let m80 = Wait
+  let m81 = Wait
+  let m82 = Wait
+  let m83 = Wait
+  let m84 = Wait
+  let m85 = Wait
+  let m86 = Wait
+  let m87 = Wait
+  let m88 = Wait
+  let m89 = Wait
+  let m8A = Wait
+  let m8B = Wait
+  let m8C = Wait
+  let m8D = Wait
+  let m8E = Wait
+  let m8F = Wait
+  let m90 = Wait
+  let m91 = Wait
+  let m92 = Wait
+  let m93 = Wait
+  let m94 = Wait
+  let m95 = Wait
+  let m96 = Wait
+  let m97 = Wait
+  let m98 = Wait
+  let m99 = Wait
+  let m9A = Wait
+  let m9B = Wait
+  let m9C = Wait
+  let m9D = Wait
+  let m9E = Wait
+  let m9F = Wait
+  let mA0 = Wait
+  let mA1 = Wait
+  let mA2 = Wait
+  let mA3 = Wait
+  let mA4 = Wait
+  let mA5 = Wait
+  let mA6 = Wait
+  let mA7 = Wait
+  let mA8 = Wait
+  let mA9 = Wait
+  let mAA = Wait
+  let mAB = Wait
+  let mAC = Wait
+  let mAD = Wait
+  let mAE = Wait
+  let mAF = Wait
+  let mB0 = Wait
+  let mB1 = Wait
+  let mB2 = Wait
+  let mB3 = Wait
+  let mB4 = Wait
+  let mB5 = Wait
+  let mB6 = Wait
+  let mB7 = Wait
+  let mB8 = Wait
+  let mB9 = Wait
+  let mBA = Wait
+  let mBB = Wait
+  let mBC = Wait
+  let mBD = Wait
+  let mBE = Wait
+  let mBF = Wait
+  let mC0 = Wait
+  let mC1 = Wait
+  let mC2 = Wait
+  let mC3 = Wait
+  let mC4 = Wait
+  let mC5 = Wait
+  let mC6 = Wait
+  let mC7 = Wait
+  let mC8 = Wait
+  let mC9 = Wait
+  let mCA = Wait
+  let mCB = Wait
+  let mCC = Wait
+  let mCD = Wait
+  let mCE = Wait
+  let mCF = Wait
+  let mD0 = Wait
+  let mD1 = Wait
+  let mD2 = Wait
+  let mD3 = Wait
+  let mD4 = Wait
+  let mD5 = Wait
+  let mD6 = Wait
+  let mD7 = Wait
+  let mD8 = Wait
+  let mD9 = Wait
+  let mDA = Wait
+  let mDB = Wait
+  let mDC = Wait
+  let mDD = Wait
+  let mDE = Wait
+  let mDF = Wait
+  let mE0 = Wait
+  let mE1 = Wait
+  let mE2 = Wait
+  let mE3 = Wait
+  let mE4 = Wait
+  let mE5 = Wait
+  let mE6 = Wait
+  let mE7 = Wait
+  let mE8 = Wait
+  let mE9 = Wait
+  let mEA = Wait
+  let mEB = Wait
+  let mEC = Wait
+  let mED = Wait
+  let mEE = Wait
+  let mEF = Wait
+  let mF0 = Wait
+  let mF1 = Wait
+  let mF2 = Wait
+  let mF3 = Wait
+  let mF4 = Wait
+  let mF5 = Wait
+  let mF6 = Wait
+  let mF7 = Wait
+  let mF8 = Wait
+  let mF9 = Wait
+  let mFA = Wait
+  let mFB = Wait
+  let mFC = Wait
+  let mFD = Wait
+  let mFE = Wait
+  let mFF = Wait
+  let y0 = [[[[m00,m01],[m02,m03]],[[m04,m05],[m06,m07]]],[[[m08,m09],[m0A,m0B]],[[m0C,m0D],[m0E,m0F]]]]
+  let y1 = [[[[m10,m11],[m12,m13]],[[m14,m15],[m16,m17]]],[[[m18,m19],[m1A,m1B]],[[m1C,m1D],[m1E,m1F]]]]
+  let y2 = [[[[m20,m21],[m22,m23]],[[m24,m25],[m26,m27]]],[[[m28,m29],[m2A,m2B]],[[m2C,m2D],[m2E,m2F]]]]
+  let y3 = [[[[m30,m31],[m32,m33]],[[m34,m35],[m36,m37]]],[[[m38,m39],[m3A,m3B]],[[m3C,m3D],[m3E,m3F]]]]
+  let y4 = [[[[m40,m41],[m42,m43]],[[m44,m45],[m46,m47]]],[[[m48,m49],[m4A,m4B]],[[m4C,m4D],[m4E,m4F]]]]
+  let y5 = [[[[m50,m51],[m52,m53]],[[m54,m55],[m56,m57]]],[[[m58,m59],[m5A,m5B]],[[m5C,m5D],[m5E,m5F]]]]
+  let y6 = [[[[m60,m61],[m62,m63]],[[m64,m65],[m66,m67]]],[[[m68,m69],[m6A,m6B]],[[m6C,m6D],[m6E,m6F]]]]
+  let y7 = [[[[m70,m71],[m72,m73]],[[m74,m75],[m76,m77]]],[[[m78,m79],[m7A,m7B]],[[m7C,m7D],[m7E,m7F]]]]
+  let y8 = [[[[m80,m81],[m82,m83]],[[m84,m85],[m86,m87]]],[[[m88,m89],[m8A,m8B]],[[m8C,m8D],[m8E,m8F]]]]
+  let y9 = [[[[m90,m91],[m92,m93]],[[m94,m95],[m96,m97]]],[[[m98,m99],[m9A,m9B]],[[m9C,m9D],[m9E,m9F]]]]
+  let yA = [[[[mA0,mA1],[mA2,mA3]],[[mA4,mA5],[mA6,mA7]]],[[[mA8,mA9],[mAA,mAB]],[[mAC,mAD],[mAE,mAF]]]]
+  let yB = [[[[mB0,mB1],[mB2,mB3]],[[mB4,mB5],[mB6,mB7]]],[[[mB8,mB9],[mBA,mBB]],[[mBC,mBD],[mBE,mBF]]]]
+  let yC = [[[[mC0,mC1],[mC2,mC3]],[[mC4,mC5],[mC6,mC7]]],[[[mC8,mC9],[mCA,mCB]],[[mCC,mCD],[mCE,mCF]]]]
+  let yD = [[[[mD0,mD1],[mD2,mD3]],[[mD4,mD5],[mD6,mD7]]],[[[mD8,mD9],[mDA,mDB]],[[mDC,mDD],[mDE,mDF]]]]
+  let yE = [[[[mE0,mE1],[mE2,mE3]],[[mE4,mE5],[mE6,mE7]]],[[[mE8,mE9],[mEA,mEB]],[[mEC,mED],[mEE,mEF]]]]
+  let yF = [[[[mF0,mF1],[mF2,mF3]],[[mF4,mF5],[mF6,mF7]]],[[[mF8,mF9],[mFA,mFB]],[[mFC,mFD],[mFE,mFF]]]]
+  [[[[y0,y1],[y2,y3]],[[y4,y5],[y6,y7]]],
+   [[[y8,y9],[yA,yB]],[[yC,yD],[yE,yF]]]]

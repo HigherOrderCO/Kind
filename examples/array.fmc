@@ -85,6 +85,19 @@ def read: {dpt}
       [#x, #x]
     (with path f arr)
 
+// take
+// | Takes an element out of an array and returns it
+// : {-A  : Type}             -- Type of the elements
+//   {dpt : CNat}             -- Length of array = 2^dpt
+//   ! {path : Num}           -- Num storing path to element
+//     {val  : A}             -- New value to put in place of old
+//     {arr  : (Array dpt A)} -- The array to be taken
+//     {(Array dpt A),A}      -- The updated array and the take element
+def take: {dpt}
+  dup with = (with dpt)
+  # {path val arr}
+    (with path {x}[val,x] arr)
+
 // write
 // | Overwrites an element of the array
 // : {-A  : Type}             -- Type of hte elements

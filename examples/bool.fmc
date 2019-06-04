@@ -10,3 +10,6 @@ def false:
 
 def not: {b}
   {t f} (b f t)
+
+def eql: {a b}
+  (a {x}x not b)
