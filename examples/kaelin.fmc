@@ -16,172 +16,213 @@
 // 
 // ## Heroes
 // 
-// Name    | Role    | Description    | References
-// ------- | ------- | -------------- | -------------------------------------------------
-// Tophoro | Tank    | Terrain Bender | Toph (Avatar TLA), Totoro (Studio Ghibli)
-// Agdris  | Tank    | Silencer       | Agda, Idris (programming language)
-// Gonk    | Tank    | Warrior        | Gon (Hunter X Hunter), Goku (Gradon Ball Z)
-// Erkos   | Ranged  | Fire Mage      | Erk (Fire Emblem), Harry Potter (Harry Potter)
-// Croni   | Ranged  | Dark Mage      | Chromie (Blizzard), Raven (Teen Titans)
-// Snarch  | Ranged  | Archer         | Zk-Snarks (crypto)
-// Sirpix  | Melee   | Thief          | Dev
-// Kenlua  | Melee   | Swordsman      | Killua (Hunter X Hunter), Kenshin (Rurouni Kenshin)
-// Flina   | Melee   | Pegasus Knight | Florina (Fire Emblem), Link (The Legend of Zelda)
-// Stanci  | Support | Healer         | Dev
-// Zagatur | Support | Summoner       | Zagara, Abathur (Blizzard)
-// Mewrue  | Support | Influencer     | Mewtwo (Pokémon), Meruem (Hunter X Hunter)
+// Name    | Role       | Description    | MOV | HP  | References & Inspiration
+// ------- | ---------- | -------------- | --- | --- | -------------------------------------------------
+// Tophoro | Tank       | Terrain Bender |   2 | 120 | Toph (Avatar TLA), Totoro (Studio Ghibli)
+// Gonk    | Tank       | Warrior        |   2 |  90 | Gon (Hunter X Hunter), Goku (Gradon Ball Z)
+// ?       | Tank       | ?              |   ? |   ? | ?
+// ?       | Tank       | ?              |   ? |   ? | ?
+// ?       | Tank       | ?              |   ? |   ? | ?
+// ?       | Tank       | ?              |   ? |   ? | ?
+// Erkos   | Ranged     | Fire Mage      |   3 |  40 | Erk (Fire Emblem), Harry Potter (Harry Potter)
+// Croni   | Ranged     | Dark Mage      |   3 |  40 | Chromie (Blizzard), Raven (Teen Titans)
+// Snarch  | Ranged     | Archer         |   3 |  60 | Zk-Snarks (crypto)
+// ?       | Ranged     | ?              |   ? |   ? | ?
+// ?       | Ranged     | ?              |   ? |   ? | ?
+// ?       | Ranged     | ?              |   ? |   ? | ?
+// Sirpix  | Melee      | Thief          |   3 |  60 | Dev
+// Kenlua  | Melee      | Swordsman      |   4 |  60 | Killua (Hunter X Hunter), Kenshin (Rurouni Kenshin)
+// Flina   | Melee      | Pegasus Knight |   4 |  60 | Florina (Fire Emblem), Link (The Legend of Zelda)
+// ?       | Melee      | ?              |   ? |   ? | ?
+// ?       | Melee      | ?              |   ? |   ? | ?
+// ?       | Melee      | ?              |   ? |   ? | ?
+// Stanci  | Support    | Healer         |   3 |  40 | Dev
+// ?       | Support    | ?              |   ? |   ? | ?
+// ?       | Support    | ?              |   ? |   ? | ?
+// ?       | Support    | ?              |   ? |   ? | ?
+// ?       | Support    | ?              |   ? |   ? | ?
+// ?       | Support    | ?              |   ? |   ? | ?
+// Zagatur | Influencer | Summoner       |   0 |  10 | Zagara, Abathur (Blizzard)
+// Agdris  | Influencer | Silencer       |   1 |  20 | Agda, Idris (programming language)
+// Mewru   | Influencer | Psychic        |   0 |  20 | Mewtwo (Pokémon), Meruem (Hunter X Hunter)
+// ?       | Influencer | ?              |   ? |   ? | ?
+// ?       | ?          | ?              |   ? |   ? | ?
+// ?       | ?          | ?              |   ? |   ? | ?
+// ?       | ?          | ?              |   ? |   ? | ?
+// ?       | ?          | ?              |   ? |   ? | ?
 //
-// ## Stats
-// 
-// Name    |MOV| HP
-// ------- | - | ---
-// Tophoro | 2 | 120
-// Agdris  | 1 | 10
-// Gonk    | 2 | 90
-// Erkos   | 3 | 40
-// Croni   | 3 | 40
-// Snarch  | 3 | 60
-// Sirpix  | 3 | 60
-// Kenlua  | 4 | 60
-// Flina   | 4 | 60
-// Stanci  | 3 | 40
-// Zagatur | 1 | 10
-// Mewrue  | 1 | 60
-// 
 // ## Moves
 // 
 // - Tophoro
-//   - Touch-Me-Not: stuns a selected enemy up to 3 range.
-//   - Earth Rise: pushes or pulls enemies in a 1-3-5 (wave) ahead, creates a single earth wall where they were.
-//   - Earth Wall: creates earth in a 3x1 (wall) up to 3 tiles ahead; pulls or pushes enemies hit.
-//   - Earth Slam: slams enemies in a 3x1 (wall) ahead, stunning them for 1 turn.
-//   - Ingrain: self-roots for 3 turns, gaining massive shield and heal.
-// 
-// - Agdris
-//   - Silence: select an enemy up to 10 range. He/she can't attack on this turn.
-//   - Memento: dies. Enemies can't attack or move on this turn.
+//   - Earth Lock : selects an enemy in a 5x5 (circle) around. Stuns him/her.
+//   - Earth Pull : pulls enemies in a 1-3-5 (wave) ahead.
+//   - Earth Wall : creates up to 3 earth walls in a 5x5 (circle) around.
+//   - Earth Slam : slams enemies in a 3x3 (square) around, stunning him/her.
+//   - Earth Root : self-roots for 3 turns, gaining massive shield and heal.
 // 
 // - Gonk
-//   - Jokame: select an enemy up to 1 range. Deals an amount of damage proportional to life lost.
-//   - Rest: heals 10 HP. Can't attack or move on this turn. 
-//   - Endure: can't die on this turn, staying at 1 HP if would be killed.
-//   - Berserker: loses 2 HP. Hits a 3x3 area around.
+//   - Endure  : can't die on this turn, staying at 1 HP minimum. Can't attack on this turn. Can't use for more than 3 consecutive turns.
+//   - Breath  : heals 9 HP. Can't move on this turn. 
+//   - Empathy : allies in a 5x5 range can't take damage during this turn. Gonk takes all damage they would take.
+//   - Counter : select an enemy up to 5 range. If he/she damages Gonk directly during this turn, he/she takes the damage instead.
+//   - Shatter : select an enemy up to 1 range. Deals an amount of damage inversely proportional to remaining HP.
 //
 // - Erkos
-//   - Flame Ball: hits a 5x5 (circle) up to 4 range.
-//   - Flame Wave: hits a 3-3-5-5 (wave) ahead.
-//   - Flame Rage: on the next turn, attacks deal +1 dmg. Stacks. Can't attack on this turn.
-//   - Flame Soul: selects an enemy up to 1 range. Deals massive damage.
-//   - Flame Nova: loses 30 HP. Deals massive damage in a 11x11 circle.
+//   - Flame Ball : hits a 5x5 (circle) up to 4 range.
+//   - Flame Wave : hits a 3-3-5-5 (wave) ahead.
+//   - Flame Rage : on the next turn, attacks deal +2 dmg. Stacks. Can't attack on this turn.
+//   - Flame Soul : selects an enemy up to 1 range. Deals massive damage (20?).
+//   - Flame Nova : loses 30 HP. Deals massive damage in a 11x11 circle (20?).
 // 
 // - Croni
-//   - Shadow Doll: places a doll in empty tile for up to 8 range, blocking the way until the end of the turn.
-//   - Shadow Ball: launches a ball that travels up to 8 tiles ahead, dealing high damage to first enemy hit.
-//   - Shadow Flux: after a delay, hits a 3x3 (square) in up to 8 range for high damage.
-//   - Shadow Trap: places a trap in a secret position; if an enemy stands on it, activate to stun him/her.
-//   - Shadow Bond: loses half hp. If Croni dies on this turn, takes the killer with her. Can't attack on this turn.
-// 
+//   - Shadow Doll : places a doll in empty tile for up to 8 range, blocking the way until the end of the turn.
+//   - Shadow Ball : launches a ball that travels up to 8 tiles ahead, dealing high damage to first enemy hit.
+//   - Shadow Flux : after a delay, hits a 3x3 (square) in up to 8 range for high damage.
+//   - Shadow Trap : places a trap in a secret position; activate to reveal and stun in a 3x3 (circle).
+//   - Shadow Bond : loses half hp. If Croni dies on this turn, takes the killer with her. Can't attack on this turn. Can't use on next turn.
+//
 // - Snarch
-//   - Precise Shot: hits a selected enemy up to 4 range.
-//   - Piercing Bolt: hits all enemies in a 4x1 (line) ahead.
-//   - Explosive Arrow: hits a 3x3 (circle) up to 4 range.
-//   - Ballista: mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks gain triple range.
+//   - Quick Shot      : hits a selected enemy up to 5 range.
+//   - Piercing Bolt   : hits all enemies in a 5x1 (line) ahead.
+//   - Explosive Arrow : hits up to 2 3x3 (circles) up to 5 range.
+//   - Ballista        : mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range increase to 12.
 // 
 // - Sirpix
-//   - Blink: select an empty tile in a 5x5 (circle) around. Sirpix moves to that tile.
+//   - Stealth Clone : creates a stealth in up to 3 range. If already created, moves it 3 steps. 
+//   - Stealth Swap  : reveals your stealth clone's position. If it is an empty tile, swaps with it.
+//   - Killing Edge  : hits a 3x3 (square) around.
 // 
 // - Kenlua
-//   - Dodge: select 3 tiles up to 3 range. Prevent all damage from enemies standing on those tiles on this turn.
-//   - Jolt: hits a 3x3 (square) around. 
-//   - Godspeed: dashes up to 4 tiles forward. 
-//   - Recall: returns to the position Kenlua was at on the beginning of the turn.
-//   - Slash: hits a 1x1 (point) up to 1 range. Deals massive damage.
+//   - Dodge : select 4 tiles up to 3 range. Prevent all damage from enemies standing on those tiles during this turn.
+//   - Whirl : hits a 3x3 (square) around, dealing damage. 
+//   - Haste : moves 4 steps. 
+//   - Slash : hits a 1x1 (point) up to 1 range. Deals massive damage. If the hit lands, returns to the position you were at the beginning of the turn.
 // 
 // - Flina
-//   - Fly: walks up to 4 additional steps. Can pass through enemies and cliffs.
-//   - Carry: select an ally up to 1 range. He/she can't attack this turn. After your move, he/she is teleported behind you.
-//   - Lance: hits a selected enemy up to 2 range.
+//   - Fly   : Selects an ally up to 1 range. Moves 4 steps, passing through enemies and cliffs. Afterwards, enemy is moved to behind Flina.
+//   - Lance : hits a selected enemy up to 2 range.
 // 
 // - Stanci
-//   - Heal: selects an ally up to 4 range. Heals him/her.
-//   - Shield: selects an ally up to 4 range. Gives him/her armor.
-//   - Restore: hits a 5x5 (circle) up to 4 range, healing allies inside.
-//   - Light: selects an enemy up to 4 range to deal damage.
-//   - 
+//   - Heal    : selects an ally up to 4 range. Heals him/her.
+//   - Shield  : selects an ally up to 4 range. Gives him/her armor.
+//   - Restore : hits a 5x5 (circle) up to 4 range, healing allies inside.
+//   - Light   : selects an enemy up to 4 range to deal damage.
 // 
 // - Zagatur
-//   - Summon: selects an empty tile up to 32 range. Places a standing, low-hp ally on it.
-//   - Sludge: selects an empty tile up to 32 range. Places a bomb that, when stepped over, deals damage and slows (-1 MOV).
-//   - Needle: selects an ally up to 32 range. Hits all enemies in a 4x1 (line) ahead.
-//   - Spikes: selects an ally up to 32 range. Hits all enemies in a 5x5 (circle) around.
-//   - 
+//   - Summon : selects an empty tile up to 4 range. Spawns a clone of Zagatur on it.
+//   - Needle : Hits a 3x1 (line) ahead, dealing damage.
+//   - Spikes : Hits a 3x3 (circle) around, dealing damage.
 // 
-// - Mewrue
-//   - Psyshock: places up to 2 bombs in selected tiles. Reactivate to explode in a 5x5 (circle) around, dealing damage.
-//   - Telekinesis: select an ally or enemy up to 32 range. Moves him/her 2 positions.
-//   - Barrier: select an ally up to 32 range. Gives him/her 2 armor.
-//   - Teleport: select an ally up to 32 range. Moves him to any other position on the map. Can only be used once.
-//   - 
-//   
+// - Agdris
+//   - Silence : selects up to two enemies up to 12 range. They can't attack on this turn.
+//   ? Protect : selects up to two allies up to 12 range. Grants him/her 10 armor.
+//   - Memento : dies. Enemies can't move or attack on this turn.
+// 
+// - Mewru
+//   - Psychock    : hits a 3x3 (circle) up to 5 range, dealing damage.
+//   - Telekinesis : pushes enemies in a 1-3-5 (wave) ahead.
+//   - Teleport    : selects an empty location on the map. Moves to that location. 
+//   - Absorb      : selects an enemy unit. During this turn, damage dealt by this unit to Mewru heals instead.
 // 
 // ## Move Priority
 // 
-// - Tophoro Ingrain
-// - Tophoro Touch-Me-Not
-// - Tophoro Earth Rise
+// - Agdris Silence
+// - Agdris Protect
+// - Agdris Memento
+// -
+// - Croni Shadow Trap (activate)
+// - 
+// - Sirpix Stealth Swap
+// - Sirpix Stealth Clone
+// - Snarch Ballista
+// - Erkos Flame Rage
+// - Gonk Endure
+// - Gonk Breath
+// - Gonk Counter
+// - Gonk Empathy 
+// - Tophoro Earth Root
+// - Mewru Absorb
+// - Croni Shadow Bond
+// - 
+// - Kenlua Haste
+// - Kenlua Whirl
+// - Tophoro Earth Lock
+// - Stanci Heal
+// - Stanci Shield
+// - Stanci Light
+// - Snarch Quick Shot
+// - Flina Lance
+// - Erkos Flame Soul
+// - Gonk Shatter
+// - 
 // - Tophoro Earth Wall
+// - Croni Shadow Doll
+// -
+// - Kenlua Walk
+// - Sirpix Walk
+// - Flina Walk
+// - Snarch Walk
+// - Erkos Walk
+// - Stanci Walk
+// - Croni Walk
+// - Gonk Walk
+// - Tophoro Walk
+// - Agdris Walk
+// - Mewru Walk
+// - Zagatur Walk
+// -
+// - Flina Fly
+// - Mewru Teleport
+// -
+// - Kenlua Dodge 
+// - 
+// - Kenlua Slash
+// - SirPix Killing Edge
+// - Snarch Piercing Bolt
+// - Snarch Explosive Arrow
+// - Erkos Flame Wave
+// - Erkos Flame Ball
+// - Erkos Flame Nova
+// - Tophoro Earth Pull
 // - Tophoro Earth Slam
+// - Zagatur Needles
+// - Zagatur Spikes
+// - Mewru Telekinesis
+// - Mewru Psychock
+// - Croni Shadow Flux
+// - Croni Shadow Ball
+// - Stanci Restore
 // 
-//W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
-//W . . W . . W . . . . . . . . . . . . . . . . . . W O O . O O W
-//W W W W W . W . . . . . . . . . . . . . . . . . . C . . . . . W
-//W . . W . . W . . . . . . . . X . . . . . . . . . W . . . . . W
-//W . W W W W W . . . . . . . X X . . . . . . . . . C . . . . . W
-//W . . W . . . . . . . . T X X X . . . . . . . . . W . . . . . W
-//W W W W W . W . . . . . . . X X . . . . . . . . . W W . . . W W
-//. . . . . . . . . . . . . . . X . . . . . . . . . . . . . . . .
-//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-//W . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . W
-//W . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . W
-//W . . . . . . . . . . . X X X . . . . . . . . . . . . . . . . W
-//. . . . . . . . . . . X X X X X . . . . . . . . . . . . . . . .
-//. . . . . . . . . E . X X X X X . . . . . . . . . . . . . . . .
-//. . . . . . . . . . . X X X X X . . . . . . . . . . . . . . . .
-//C C C C C C C . . . . . X X X . . . . . . . . . C C C C C C C C
-//C C C C C C C . . . . . . . . . . . . . . . . . C C C C C C C C
-//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-//. . . . . . . . . . . . . X . . . X X X . . . . . . . . . . . .
-//. . . . . . . . . . X . X X X . . X X X . . . . . . . . . . . .
-//W . . . . . . . . . . . . X . . . X X X . . . . . . . . . . . W
-//W . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . W
-//W . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . W
-//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-//W W . . . W W . . . . . . . . . . . . . . . . . . W W W W W W W
-//W . B . . . W . . . . . . . . . . . . . . . . . . W . . . . . W
-//W . . . . . C . . . . . . . . . . . . . . . . . . W . W W W W W
-//W . . . . . W . . . . . . . . . . . . . . . . . . W . W . . . W
-//W . . . . . C . . . . . . . . . . . . . . . . . . W . W . W W W
-//W . B . B B W . . . . . . . . . . . . . . . . . . W . W . W . W
-//W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
-
-def kmap_to_string:
-  dup fold = (fold_array ~10)
-  # {map}
-    let chars = (fold map #concat #thing_to_icon)
-    let chars = (cons-every #64 #10 chars)
-    (from_chars chars)
+// - Croni Shadow Trap (place)
+// - Zagatur Summon
 
 def kaelin:
-  dup write = kmap_write
-  dup Step  = Step
+  dup write           = kmap_write
+  dup step            = step
+  dup earth_pull      = earth_pull
+  dup kmap_to_string  = kmap_to_string
+
   # let map = kmap
-    let map = (Step [1,30] UP map)
-    let map = (Step [1,29] UP map)
-    let map = (Step [1,28] UP map)
-    let map = (Step [1,27] UP map)
-    let map = (Step [1,26] UP map) // no effect because of wall
-    let map = (Step [1,26] RIGHT map)
+
+    let map = (step [2,30] UP map)
+    let map = (step [2,29] UP map)
+    let map = (step [2,28] UP map)
+    let map = (step [2,27] UP map)
+    let map = (step [2,26] UP map)
+    let map = (step [2,25] UP map)
+    let map = (step [2,24] UP map)
+
+    let map = (step [4,30] UP map)
+    let map = (step [4,29] UP map)
+    let map = (step [4,28] UP map)
+    let map = (step [4,27] UP map)
+    let map = (step [4,26] UP map)
+    let map = (step [4,25] UP map)
+    let map = (step [4,24] UP map)
+
+    let map = (earth_pull [5,23] LEFT map)
+    let map = (earth_pull [5,23] LEFT map)
+
     (kmap_to_string map)
     
 // :::::::::::::
@@ -229,7 +270,7 @@ def eql_side: {a b}
 
 def side_to_icon: {side}
   cpy side = side
-  if |side === WHITE|
+  if |side == WHITE|
   then: (to_chars "O")
   else: if |side == BLACK|
     then: (to_chars "X")
@@ -267,7 +308,7 @@ def thing_to_icon: {thing}
   let case_hero   = {side flies} (concat (to_chars " ") (side_to_icon side))
   (thing case_air case_wall case_cliff case_throne case_hero)
 
-def step: {a b}
+def step_both: {a b}
   let case_air    = {b} [Air, b]
   let case_wall   = {b} [Wall, b]
   let case_cliff  = {b} [Cliff, b]
@@ -373,282 +414,312 @@ def kmap_interact:
     let map             = (write b_idx b_val map)
     map
 
+def kmap_to_string:
+  dup fold = (fold_array ~10)
+  # {map}
+    let chars = (fold map #concat #thing_to_icon)
+    let chars = (cons-every #64 #10 chars)
+    (from_chars chars)
+
 def kmap_write:
   (write ~10)
 
-def Wait:
+// :::::::::::
+// :: Moves ::
+// :::::::::::
+
+def wait:
   # {map args}
     map
 
-def Step:
+def step:
   dup inter = kmap_interact
   # {a_pos dir map}
     get [a_pos,ap1] = (vec_cpy a_pos)
     let b_pos       = (vec_add ap1 (dir_to_vec dir))
-    (inter a_pos b_pos step map)
+    (inter a_pos b_pos step_both map)
 
-//def EarthRise:
-  //dup inter = kmap_interact
-  //# {a_pos dir map}
-    //get [a_pos,dir] 
+def earth_pull:
+  dup step = step
+  # {pos dir map}
+    cpy dir = dir
+    get [ax,ay] = pos
+    get [dx,dy] = (dir_to_vec dir)
+    cpy ax = ax
+    cpy ay = ay
+    cpy dx = dx
+    cpy dy = dy
+    cpy nx = dy
+    cpy ny = |0 - dx|
+    let p0 = [||ax + |dx * 1|| + |nx *  0||, ||ay + |dy * 1|| + |nx *  0||]
+    let p1 = [||ax + |dx * 2|| + |nx *  1||, ||ay + |dy * 2|| + |nx *  1||]
+    let p2 = [||ax + |dx * 2|| + |nx *  0||, ||ay + |dy * 2|| + |nx *  0||]
+    let p3 = [||ax + |dx * 2|| + |nx * -1||, ||ay + |dy * 2|| + |nx * -1||]
+    let p4 = [||ax + |dx * 3|| + |nx *  2||, ||ay + |dy * 3|| + |nx *  2||]
+    let p5 = [||ax + |dx * 3|| + |nx *  1||, ||ay + |dy * 3|| + |nx *  1||]
+    let p6 = [||ax + |dx * 3|| + |nx *  0||, ||ay + |dy * 3|| + |nx *  0||]
+    let p7 = [||ax + |dx * 3|| + |nx * -1||, ||ay + |dy * 3|| + |nx * -1||]
+    let p8 = [||ax + |dx * 3|| + |nx * -2||, ||ay + |dy * 3|| + |nx * -2||]
+    let fn = {pos map} (step pos ||dir + 2| % 4| map)
+    (fn p8 (fn p7 (fn p6 (fn p5 (fn p4 (fn p3 (fn p2 (fn p1 (fn p0 map)))))))))
 
 def moves:
-  let m00 = Wait
-  let m01 = Wait
-  let m02 = Wait
-  let m03 = Wait
-  let m04 = Wait
-  let m05 = Wait
-  let m06 = Wait
-  let m07 = Wait
-  let m08 = Wait
-  let m09 = Wait
-  let m0A = Wait
-  let m0B = Wait
-  let m0C = Wait
-  let m0D = Wait
-  let m0E = Wait
-  let m0F = Wait
-  let m10 = Wait
-  let m11 = Wait
-  let m12 = Wait
-  let m13 = Wait
-  let m14 = Wait
-  let m15 = Wait
-  let m16 = Wait
-  let m17 = Wait
-  let m18 = Wait
-  let m19 = Wait
-  let m1A = Wait
-  let m1B = Wait
-  let m1C = Wait
-  let m1D = Wait
-  let m1E = Wait
-  let m1F = Wait
-  let m20 = Wait
-  let m21 = Wait
-  let m22 = Wait
-  let m23 = Wait
-  let m24 = Wait
-  let m25 = Wait
-  let m26 = Wait
-  let m27 = Wait
-  let m28 = Wait
-  let m29 = Wait
-  let m2A = Wait
-  let m2B = Wait
-  let m2C = Wait
-  let m2D = Wait
-  let m2E = Wait
-  let m2F = Wait
-  let m30 = Wait
-  let m31 = Wait
-  let m32 = Wait
-  let m33 = Wait
-  let m34 = Wait
-  let m35 = Wait
-  let m36 = Wait
-  let m37 = Wait
-  let m38 = Wait
-  let m39 = Wait
-  let m3A = Wait
-  let m3B = Wait
-  let m3C = Wait
-  let m3D = Wait
-  let m3E = Wait
-  let m3F = Wait
-  let m40 = Wait
-  let m41 = Wait
-  let m42 = Wait
-  let m43 = Wait
-  let m44 = Wait
-  let m45 = Wait
-  let m46 = Wait
-  let m47 = Wait
-  let m48 = Wait
-  let m49 = Wait
-  let m4A = Wait
-  let m4B = Wait
-  let m4C = Wait
-  let m4D = Wait
-  let m4E = Wait
-  let m4F = Wait
-  let m50 = Wait
-  let m51 = Wait
-  let m52 = Wait
-  let m53 = Wait
-  let m54 = Wait
-  let m55 = Wait
-  let m56 = Wait
-  let m57 = Wait
-  let m58 = Wait
-  let m59 = Wait
-  let m5A = Wait
-  let m5B = Wait
-  let m5C = Wait
-  let m5D = Wait
-  let m5E = Wait
-  let m5F = Wait
-  let m60 = Wait
-  let m61 = Wait
-  let m62 = Wait
-  let m63 = Wait
-  let m64 = Wait
-  let m65 = Wait
-  let m66 = Wait
-  let m67 = Wait
-  let m68 = Wait
-  let m69 = Wait
-  let m6A = Wait
-  let m6B = Wait
-  let m6C = Wait
-  let m6D = Wait
-  let m6E = Wait
-  let m6F = Wait
-  let m70 = Wait
-  let m71 = Wait
-  let m72 = Wait
-  let m73 = Wait
-  let m74 = Wait
-  let m75 = Wait
-  let m76 = Wait
-  let m77 = Wait
-  let m78 = Wait
-  let m79 = Wait
-  let m7A = Wait
-  let m7B = Wait
-  let m7C = Wait
-  let m7D = Wait
-  let m7E = Wait
-  let m7F = Wait
-  let m80 = Wait
-  let m81 = Wait
-  let m82 = Wait
-  let m83 = Wait
-  let m84 = Wait
-  let m85 = Wait
-  let m86 = Wait
-  let m87 = Wait
-  let m88 = Wait
-  let m89 = Wait
-  let m8A = Wait
-  let m8B = Wait
-  let m8C = Wait
-  let m8D = Wait
-  let m8E = Wait
-  let m8F = Wait
-  let m90 = Wait
-  let m91 = Wait
-  let m92 = Wait
-  let m93 = Wait
-  let m94 = Wait
-  let m95 = Wait
-  let m96 = Wait
-  let m97 = Wait
-  let m98 = Wait
-  let m99 = Wait
-  let m9A = Wait
-  let m9B = Wait
-  let m9C = Wait
-  let m9D = Wait
-  let m9E = Wait
-  let m9F = Wait
-  let mA0 = Wait
-  let mA1 = Wait
-  let mA2 = Wait
-  let mA3 = Wait
-  let mA4 = Wait
-  let mA5 = Wait
-  let mA6 = Wait
-  let mA7 = Wait
-  let mA8 = Wait
-  let mA9 = Wait
-  let mAA = Wait
-  let mAB = Wait
-  let mAC = Wait
-  let mAD = Wait
-  let mAE = Wait
-  let mAF = Wait
-  let mB0 = Wait
-  let mB1 = Wait
-  let mB2 = Wait
-  let mB3 = Wait
-  let mB4 = Wait
-  let mB5 = Wait
-  let mB6 = Wait
-  let mB7 = Wait
-  let mB8 = Wait
-  let mB9 = Wait
-  let mBA = Wait
-  let mBB = Wait
-  let mBC = Wait
-  let mBD = Wait
-  let mBE = Wait
-  let mBF = Wait
-  let mC0 = Wait
-  let mC1 = Wait
-  let mC2 = Wait
-  let mC3 = Wait
-  let mC4 = Wait
-  let mC5 = Wait
-  let mC6 = Wait
-  let mC7 = Wait
-  let mC8 = Wait
-  let mC9 = Wait
-  let mCA = Wait
-  let mCB = Wait
-  let mCC = Wait
-  let mCD = Wait
-  let mCE = Wait
-  let mCF = Wait
-  let mD0 = Wait
-  let mD1 = Wait
-  let mD2 = Wait
-  let mD3 = Wait
-  let mD4 = Wait
-  let mD5 = Wait
-  let mD6 = Wait
-  let mD7 = Wait
-  let mD8 = Wait
-  let mD9 = Wait
-  let mDA = Wait
-  let mDB = Wait
-  let mDC = Wait
-  let mDD = Wait
-  let mDE = Wait
-  let mDF = Wait
-  let mE0 = Wait
-  let mE1 = Wait
-  let mE2 = Wait
-  let mE3 = Wait
-  let mE4 = Wait
-  let mE5 = Wait
-  let mE6 = Wait
-  let mE7 = Wait
-  let mE8 = Wait
-  let mE9 = Wait
-  let mEA = Wait
-  let mEB = Wait
-  let mEC = Wait
-  let mED = Wait
-  let mEE = Wait
-  let mEF = Wait
-  let mF0 = Wait
-  let mF1 = Wait
-  let mF2 = Wait
-  let mF3 = Wait
-  let mF4 = Wait
-  let mF5 = Wait
-  let mF6 = Wait
-  let mF7 = Wait
-  let mF8 = Wait
-  let mF9 = Wait
-  let mFA = Wait
-  let mFB = Wait
-  let mFC = Wait
-  let mFD = Wait
-  let mFE = Wait
-  let mFF = Wait
+  let m00 = wait
+  let m01 = wait
+  let m02 = wait
+  let m03 = wait
+  let m04 = wait
+  let m05 = wait
+  let m06 = wait
+  let m07 = wait
+  let m08 = wait
+  let m09 = wait
+  let m0A = wait
+  let m0B = wait
+  let m0C = wait
+  let m0D = wait
+  let m0E = wait
+  let m0F = wait
+  let m10 = wait
+  let m11 = wait
+  let m12 = wait
+  let m13 = wait
+  let m14 = wait
+  let m15 = wait
+  let m16 = wait
+  let m17 = wait
+  let m18 = wait
+  let m19 = wait
+  let m1A = wait
+  let m1B = wait
+  let m1C = wait
+  let m1D = wait
+  let m1E = wait
+  let m1F = wait
+  let m20 = wait
+  let m21 = wait
+  let m22 = wait
+  let m23 = wait
+  let m24 = wait
+  let m25 = wait
+  let m26 = wait
+  let m27 = wait
+  let m28 = wait
+  let m29 = wait
+  let m2A = wait
+  let m2B = wait
+  let m2C = wait
+  let m2D = wait
+  let m2E = wait
+  let m2F = wait
+  let m30 = wait
+  let m31 = wait
+  let m32 = wait
+  let m33 = wait
+  let m34 = wait
+  let m35 = wait
+  let m36 = wait
+  let m37 = wait
+  let m38 = wait
+  let m39 = wait
+  let m3A = wait
+  let m3B = wait
+  let m3C = wait
+  let m3D = wait
+  let m3E = wait
+  let m3F = wait
+  let m40 = wait
+  let m41 = wait
+  let m42 = wait
+  let m43 = wait
+  let m44 = wait
+  let m45 = wait
+  let m46 = wait
+  let m47 = wait
+  let m48 = wait
+  let m49 = wait
+  let m4A = wait
+  let m4B = wait
+  let m4C = wait
+  let m4D = wait
+  let m4E = wait
+  let m4F = wait
+  let m50 = wait
+  let m51 = wait
+  let m52 = wait
+  let m53 = wait
+  let m54 = wait
+  let m55 = wait
+  let m56 = wait
+  let m57 = wait
+  let m58 = wait
+  let m59 = wait
+  let m5A = wait
+  let m5B = wait
+  let m5C = wait
+  let m5D = wait
+  let m5E = wait
+  let m5F = wait
+  let m60 = wait
+  let m61 = wait
+  let m62 = wait
+  let m63 = wait
+  let m64 = wait
+  let m65 = wait
+  let m66 = wait
+  let m67 = wait
+  let m68 = wait
+  let m69 = wait
+  let m6A = wait
+  let m6B = wait
+  let m6C = wait
+  let m6D = wait
+  let m6E = wait
+  let m6F = wait
+  let m70 = wait
+  let m71 = wait
+  let m72 = wait
+  let m73 = wait
+  let m74 = wait
+  let m75 = wait
+  let m76 = wait
+  let m77 = wait
+  let m78 = wait
+  let m79 = wait
+  let m7A = wait
+  let m7B = wait
+  let m7C = wait
+  let m7D = wait
+  let m7E = wait
+  let m7F = wait
+  let m80 = wait
+  let m81 = wait
+  let m82 = wait
+  let m83 = wait
+  let m84 = wait
+  let m85 = wait
+  let m86 = wait
+  let m87 = wait
+  let m88 = wait
+  let m89 = wait
+  let m8A = wait
+  let m8B = wait
+  let m8C = wait
+  let m8D = wait
+  let m8E = wait
+  let m8F = wait
+  let m90 = wait
+  let m91 = wait
+  let m92 = wait
+  let m93 = wait
+  let m94 = wait
+  let m95 = wait
+  let m96 = wait
+  let m97 = wait
+  let m98 = wait
+  let m99 = wait
+  let m9A = wait
+  let m9B = wait
+  let m9C = wait
+  let m9D = wait
+  let m9E = wait
+  let m9F = wait
+  let mA0 = wait
+  let mA1 = wait
+  let mA2 = wait
+  let mA3 = wait
+  let mA4 = wait
+  let mA5 = wait
+  let mA6 = wait
+  let mA7 = wait
+  let mA8 = wait
+  let mA9 = wait
+  let mAA = wait
+  let mAB = wait
+  let mAC = wait
+  let mAD = wait
+  let mAE = wait
+  let mAF = wait
+  let mB0 = wait
+  let mB1 = wait
+  let mB2 = wait
+  let mB3 = wait
+  let mB4 = wait
+  let mB5 = wait
+  let mB6 = wait
+  let mB7 = wait
+  let mB8 = wait
+  let mB9 = wait
+  let mBA = wait
+  let mBB = wait
+  let mBC = wait
+  let mBD = wait
+  let mBE = wait
+  let mBF = wait
+  let mC0 = wait
+  let mC1 = wait
+  let mC2 = wait
+  let mC3 = wait
+  let mC4 = wait
+  let mC5 = wait
+  let mC6 = wait
+  let mC7 = wait
+  let mC8 = wait
+  let mC9 = wait
+  let mCA = wait
+  let mCB = wait
+  let mCC = wait
+  let mCD = wait
+  let mCE = wait
+  let mCF = wait
+  let mD0 = wait
+  let mD1 = wait
+  let mD2 = wait
+  let mD3 = wait
+  let mD4 = wait
+  let mD5 = wait
+  let mD6 = wait
+  let mD7 = wait
+  let mD8 = wait
+  let mD9 = wait
+  let mDA = wait
+  let mDB = wait
+  let mDC = wait
+  let mDD = wait
+  let mDE = wait
+  let mDF = wait
+  let mE0 = wait
+  let mE1 = wait
+  let mE2 = wait
+  let mE3 = wait
+  let mE4 = wait
+  let mE5 = wait
+  let mE6 = wait
+  let mE7 = wait
+  let mE8 = wait
+  let mE9 = wait
+  let mEA = wait
+  let mEB = wait
+  let mEC = wait
+  let mED = wait
+  let mEE = wait
+  let mEF = wait
+  let mF0 = wait
+  let mF1 = wait
+  let mF2 = wait
+  let mF3 = wait
+  let mF4 = wait
+  let mF5 = wait
+  let mF6 = wait
+  let mF7 = wait
+  let mF8 = wait
+  let mF9 = wait
+  let mFA = wait
+  let mFB = wait
+  let mFC = wait
+  let mFD = wait
+  let mFE = wait
+  let mFF = wait
   let y0 = [[[[m00,m01],[m02,m03]],[[m04,m05],[m06,m07]]],[[[m08,m09],[m0A,m0B]],[[m0C,m0D],[m0E,m0F]]]]
   let y1 = [[[[m10,m11],[m12,m13]],[[m14,m15],[m16,m17]]],[[[m18,m19],[m1A,m1B]],[[m1C,m1D],[m1E,m1F]]]]
   let y2 = [[[[m20,m21],[m22,m23]],[[m24,m25],[m26,m27]]],[[[m28,m29],[m2A,m2B]],[[m2C,m2D],[m2E,m2F]]]]
@@ -667,3 +738,70 @@ def moves:
   let yF = [[[[mF0,mF1],[mF2,mF3]],[[mF4,mF5],[mF6,mF7]]],[[[mF8,mF9],[mFA,mFB]],[[mFC,mFD],[mFE,mFF]]]]
   [[[[y0,y1],[y2,y3]],[[y4,y5],[y6,y7]]],
    [[[y8,y9],[yA,yB]],[[yC,yD],[yE,yF]]]]
+
+//W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
+//W . . W . . W . . . . . . . . . . . . . . . . . . W X X . X X W
+//W W W W W . W . . . . . . . . . . . . . . . . . . C . . . . . W
+//W . . W . . W . . . . . . . . . . . . . . . . . . W . . . . . W
+//W . W W W W W . . . . . . . . . . . . . . . X . . C . . . . . W
+//W . . W . . . . . . . . . . . . . . . . X X X X X W . . . . . W
+//W W W W W . W . . . . . . . . . . . . X X X X X X W W . . . W W
+//. . . . . . . . . . . . . X X . . . X X X X X X X X X . . . . .
+//. . . . . . . . . . . X X X X . . . X X X X X X X X X . . . . .
+//W . . . . . . . . . E X X X X . . X X X X X T X X X X X . . . W
+//W . . . . . . . . . . X X X X . . . X X X X X X X X X . . . . W
+//W . . . . . . . . . . . . X X . . . X X X X X X X X X . . . . W
+//. . . . . . . . . . . . . . . . . . . X X X X X X X . . . . . .
+//. . . . . . . . . . . . . . . . . . . . X X X X X . . . . . . .
+//. . . . . . . . . . . . . . X X X . . . . . X . . . . . . . . .
+//C C C C C C C . . . . . . X X X X X . . . . . . C C C C C C C C
+//C C C C C C C . . . . E . X X T X X . . . . . . C C C C C C C C
+//. . . . . . . . . . . . . X X X X X . . . . . . . . . . . . . .
+//. . . . . . . . . . . . . . X X X . . . . . . . . . . . . . . .
+//. . . . . . . . . . . . . . . . . . . . . X X X . . . . . . . .
+//W . . . . . . . . . . . . . . . . . . . . X T X . . . . . . . W
+//W . . . . . . . . . . K . . . . . X . . . X X X . . . . . . . W
+//W . . . . . . . . . . . . . . . X X . . . . . . . . . . . . . W
+//. . . . O O . . . . . . . . T X X X . . . . . . . . . . . . . .
+//. . . . . . . . . . . . . . . . X X . . . . . . . . . . . . . .
+//W W . . . W W . . . . . . . . . . X . . . . . . . W W W W W W W
+//W . . . . . W . . . . . . . . . . . . . . . . . . W . . . . . W
+//W . . . . . C . . . . . . . . . . . . . . . . . . W . W W W W W
+//W . . . . . W . . . . . . . . . . . . . . . . . . W . W . . . W
+//W . . . . . C . . . . . . . . . . . . . . . . . . W . W . W W W
+//W O . . . O W . . . . . . . . . . . . . . . . . . W . W . W . W
+//W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
+
+//W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
+//W . . W . . W . . . . . . . M . . . . . . . . . . W X X . X X W
+//W W W W W . W . . . . . . M M M . . . . . . . . . C . . . . . W
+//W . . W . . W . . . . . M M M M M . . . . . . . . W . . . . . W
+//W . W W W W W . . . . M M M M M M M . . . . . . . C . . . . . W
+//W . . W . . . . . . M M M M O M M M M . . . . . . W . . . . . W
+//W W W W W . W . . M M M M O O O M M M M . . . . . W W . . . W W
+//. . . . . . . . M M M M O O O O O M M M M . . . . . . . . . . .
+//. . . . . . . M M M M O O O O O O O M M M M . . . . . X . . . .
+//W . . . . . M M M M O O O O 4 O O O O M M M M . . . X X X . . W
+//W . . . . M M M M O O O O 4 4 4 O O O O M M M M . . . X . . . W
+//W . . . M M M M O O O O 4 4 4 4 4 O O O O M M M M . . . . . . W
+//. . . M M M M O O O O 4 4 4 4 4 4 4 O O O O M M M M . . . . . .
+//. . M M M M O O O O 4 4 4 4 C 4 4 4 4 O O O O M M M M . . . . .
+//. . . M M M M O O O O 4 4 4 4 4 4 4 O O O O M M M M . . . . . .
+//C C C C C C C M O O O O 4 4 4 4 4 O O O O M M M C C C C C C C C
+//C C C C C C C M M O O O O 4 4 4 O O O O M M M M C C C C C C C C
+//. . . . . . M M M M O O O O 4 O O O O M M M M . . . . . . . . .
+//. . . . . . . M M M M O O O O O O O M M M M . . . . . . . . . .
+//. . . . . . . . M M M M O O O O O M M M M . . . . . . . . . . .
+//W . . . . . . . . M M M M O O O M M M M . . . . . . . . . . . W
+//W . . . . . . . . . M M M M O M M M M . . . C . . . . . . . . W
+//W . . . . . . . . . . M M M M M M M . . . . 4 . . . . . . . . W
+//. . . . O O . . . . . . M M M M M . . . . . 4 . . . . . . . . .
+//. . . . . . . . . . . . . M M M . . . . . . 4 . . . . . . . . .
+//W W . . . W W . . . . . . . M . . . . . . . 4 . . W W W W W W W
+//W . . . . . W . . . . . . . . . . . . . . . O . . W . . . . . W
+//W . . . . . C . . . . . . . . . . . . . . . O . . W . W W W W W
+//W . . . . . W . . . . . . . . . . . . . . . O . . W . W . . . W
+//W . . . . . C . . . . . . . . . . . . . . . O . . W . W . W W W
+//W O . . . O W . . . . . . . . . . . . . . . . . . W . W . W . W
+//W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
+
