@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --stack_size=100000
 
 var fs = require("fs");
 var path = require("path");
