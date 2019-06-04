@@ -37,9 +37,9 @@ This example computes the nth number of the Fibonacci sequence. It uses compact 
 def fib: {n}
   let init = [0,1]
   let loop = {state}
-    get [a, b] = state
-    get [x, y] = cpy b
-    [x, |a + y|]
+    get [a,b] = state
+    cpy b = b
+    [b, |a + b|]
   let stop = {state}
     (snd state)
   (for n #init #loop #stop)

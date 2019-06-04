@@ -45,15 +45,15 @@ def fold_array_example:
 def with: {dpt}
   let init = {path fn} fn
   let loop = {cont path fn}
-    get [path0, path1] = cpy path
-    get [swap0, swap1] =
-      if |path0 % 2|
+    cpy path = path
+    cpy swap =
+      if |path % 2|
       then: [{x}x, {x}x]
       else: [swap, swap]
-    (cont |path1 / 2| {arr}
-      get [a,b] = (swap0 arr)
+    (cont |path / 2| {arr}
+      get [a,b] = (swap arr)
       get [b,x] = (fn b)
-      [(swap1 [a,b]), x])
+      [(swap [a,b]), x])
   let stop = {func} func
   dup fold = (for dpt #init #loop #stop)
   # {path fn arr} (fold path fn arr)

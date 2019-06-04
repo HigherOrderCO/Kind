@@ -28,7 +28,8 @@ def if_test:
   else: "cond is false"
 
 def cpy_test:
-  cpy 42
+  cpy num = 42
+  [[num, num], |num + num|]
 
 def prj_test:
   get [fst, snd] = [42, 1337]
@@ -48,8 +49,8 @@ def sum_test:
     [0, 0]
   let loop = {state}
     get [idx, sum] = state
-    get [i-a, i-b] = cpy idx
-    [|i-a + 1|, |sum + i-b|]
+    cpy idx        = idx
+    [|idx + 1|, |sum + idx|]
   let stop = {state}
     (snd state)
   (for ~10 #init #loop #stop)

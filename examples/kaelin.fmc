@@ -20,7 +20,7 @@
 // ------- | ------- | -------------- | -------------------------------------------------
 // Tophoro | Tank    | Terrain Bender | Toph (Avatar TLA), Totoro (Studio Ghibli)
 // Agdris  | Tank    | Silencer       | Agda, Idris (programming language)
-// Gonku   | Tank    | Warrior        | Gon (Hunter X Hunter), Goku (Gradon Ball Z)
+// Gonk    | Tank    | Warrior        | Gon (Hunter X Hunter), Goku (Gradon Ball Z)
 // Erkos   | Ranged  | Fire Mage      | Erk (Fire Emblem), Harry Potter (Harry Potter)
 // Croni   | Ranged  | Dark Mage      | Chromie (Blizzard), Raven (Teen Titans)
 // Snarch  | Ranged  | Archer         | Zk-Snarks (crypto)
@@ -35,18 +35,18 @@
 // 
 // Name    |MOV| HP
 // ------- | - | ---
-// Tophoro | 2 | 80
+// Tophoro | 2 | 120
 // Agdris  | 1 | 10
-// Gonku   | 2 | 60
-// Erkos   | 3 | 30
-// Croni   | 3 | 30
-// Snarch  | 3 | 40
-// Sirpix  | 3 | 40
-// Kenlua  | 4 | 40
-// Flina   | 4 | 40
+// Gonk    | 2 | 90
+// Erkos   | 3 | 40
+// Croni   | 3 | 40
+// Snarch  | 3 | 60
+// Sirpix  | 3 | 60
+// Kenlua  | 4 | 60
+// Flina   | 4 | 60
 // Stanci  | 3 | 40
 // Zagatur | 1 | 10
-// Mewrue  | 1 | 10
+// Mewrue  | 1 | 60
 // 
 // ## Moves
 // 
@@ -58,23 +58,21 @@
 //   - Ingrain: self-roots for 3 turns, gaining massive shield and heal.
 // 
 // - Agdris
-//   - Bless: select an ally up to 8 range. He/she can't take damage this turn.
-//   - Silence: select an enemy up to 8 range. He/she can't attack on this turn.
-//   - Retreat: select an enemy up to 8 range. He/she is teleported to the position he/she started this sturn.
+//   - Silence: select an enemy up to 10 range. He/she can't attack on this turn.
 //   - Memento: dies. Enemies can't attack or move on this turn.
 // 
-// - Gonku
+// - Gonk
 //   - Jokame: select an enemy up to 1 range. Deals an amount of damage proportional to life lost.
 //   - Rest: heals 10 HP. Can't attack or move on this turn. 
-//   - Endure: can't die on this turn, staying at 1 HP if killed.
+//   - Endure: can't die on this turn, staying at 1 HP if would be killed.
 //   - Berserker: loses 2 HP. Hits a 3x3 area around.
 //
 // - Erkos
 //   - Flame Ball: hits a 5x5 (circle) up to 4 range.
 //   - Flame Wave: hits a 3-3-5-5 (wave) ahead.
-//   - Flame Rage: on the next turn, attacks deal +2 dmg. Stacks. Can't attack on this turn.
+//   - Flame Rage: on the next turn, attacks deal +1 dmg. Stacks. Can't attack on this turn.
 //   - Flame Soul: selects an enemy up to 1 range. Deals massive damage.
-//   - Flame Nova: loses 15 HP. Deals massive damage in a 11x11 circle.
+//   - Flame Nova: loses 30 HP. Deals massive damage in a 11x11 circle.
 // 
 // - Croni
 //   - Shadow Doll: places a doll in empty tile for up to 8 range, blocking the way until the end of the turn.
@@ -105,10 +103,26 @@
 //   - Lance: hits a selected enemy up to 2 range.
 // 
 // - Stanci
+//   - Heal: selects an ally up to 4 range. Heals him/her.
+//   - Shield: selects an ally up to 4 range. Gives him/her armor.
+//   - Restore: hits a 5x5 (circle) up to 4 range, healing allies inside.
+//   - Light: selects an enemy up to 4 range to deal damage.
+//   - 
 // 
 // - Zagatur
+//   - Summon: selects an empty tile up to 32 range. Places a standing, low-hp ally on it.
+//   - Sludge: selects an empty tile up to 32 range. Places a bomb that, when stepped over, deals damage and slows (-1 MOV).
+//   - Needle: selects an ally up to 32 range. Hits all enemies in a 4x1 (line) ahead.
+//   - Spikes: selects an ally up to 32 range. Hits all enemies in a 5x5 (circle) around.
+//   - 
 // 
 // - Mewrue
+//   - Psyshock: places up to 2 bombs in selected tiles. Reactivate to explode in a 5x5 (circle) around, dealing damage.
+//   - Telekinesis: select an ally or enemy up to 32 range. Moves him/her 2 positions.
+//   - Barrier: select an ally up to 32 range. Gives him/her 2 armor.
+//   - Teleport: select an ally up to 32 range. Moves him to any other position on the map. Can only be used once.
+//   - 
+//   
 // 
 // ## Move Priority
 // 
@@ -117,6 +131,39 @@
 // - Tophoro Earth Rise
 // - Tophoro Earth Wall
 // - Tophoro Earth Slam
+// 
+//W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
+//W . . W . . W . . . . . . . . . . . . . . . . . . W O O . O O W
+//W W W W W . W . . . . . . . . . . . . . . . . . . C . . . . . W
+//W . . W . . W . . . . . . . . X . . . . . . . . . W . . . . . W
+//W . W W W W W . . . . . . . X X . . . . . . . . . C . . . . . W
+//W . . W . . . . . . . . T X X X . . . . . . . . . W . . . . . W
+//W W W W W . W . . . . . . . X X . . . . . . . . . W W . . . W W
+//. . . . . . . . . . . . . . . X . . . . . . . . . . . . . . . .
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+//W . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . W
+//W . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . W
+//W . . . . . . . . . . . X X X . . . . . . . . . . . . . . . . W
+//. . . . . . . . . . . X X X X X . . . . . . . . . . . . . . . .
+//. . . . . . . . . E . X X X X X . . . . . . . . . . . . . . . .
+//. . . . . . . . . . . X X X X X . . . . . . . . . . . . . . . .
+//C C C C C C C . . . . . X X X . . . . . . . . . C C C C C C C C
+//C C C C C C C . . . . . . . . . . . . . . . . . C C C C C C C C
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+//. . . . . . . . . . . . . X . . . X X X . . . . . . . . . . . .
+//. . . . . . . . . . X . X X X . . X X X . . . . . . . . . . . .
+//W . . . . . . . . . . . . X . . . X X X . . . . . . . . . . . W
+//W . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . W
+//W . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . W
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+//W W . . . W W . . . . . . . . . . . . . . . . . . W W W W W W W
+//W . B . . . W . . . . . . . . . . . . . . . . . . W . . . . . W
+//W . . . . . C . . . . . . . . . . . . . . . . . . W . W W W W W
+//W . . . . . W . . . . . . . . . . . . . . . . . . W . W . . . W
+//W . . . . . C . . . . . . . . . . . . . . . . . . W . W . W W W
+//W . B . B B W . . . . . . . . . . . . . . . . . . W . W . W . W
+//W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
 
 def kmap_to_string:
   dup fold = (fold_array ~10)
@@ -129,12 +176,12 @@ def kaelin:
   dup write = kmap_write
   dup Step  = Step
   # let map = kmap
-    let map = (Step [[1,30],UP] map)
-    let map = (Step [[1,29],UP] map)
-    let map = (Step [[1,28],UP] map)
-    let map = (Step [[1,27],UP] map)
-    let map = (Step [[1,26],UP] map) // no effect because of wall
-    let map = (Step [[1,26],RIGHT] map)
+    let map = (Step [1,30] UP map)
+    let map = (Step [1,29] UP map)
+    let map = (Step [1,28] UP map)
+    let map = (Step [1,27] UP map)
+    let map = (Step [1,26] UP map) // no effect because of wall
+    let map = (Step [1,26] RIGHT map)
     (kmap_to_string map)
     
 // :::::::::::::
@@ -147,10 +194,10 @@ def vec_add: {a b}
   [|ax + bx|, |ay + by|]
 
 def vec_cpy: {a}
-  get [ax,ay]   = a
-  get [ax0,ax1] = cpy ax
-  get [ay0,ay1] = cpy ay
-  [[ax0,ay0], [ax1,ay1]]
+  get [ax,ay] = a
+  cpy ax      = ax
+  cpy ay      = ay
+  [[ax,ay], [ax,ay]]
 
 def RIGHT : 0 //  1
 def DOWN  : 1 //  0
@@ -158,15 +205,14 @@ def LEFT  : 2 // -1
 def UP    : 3 //  0
 
 def dir_to_vec: {a}
-  get [a0,a1] = cpy a
-  get [a2,a3] = cpy a0
-  if |a1 < 2|
+  cpy a = a
+  if |a < 2|
   then:
-    if |a2 == 0|
+    if |a == 0|
     then: [ 1,  0]
     else: [ 0,  1]
   else:
-    if |a3 == 2|
+    if |a == 2|
     then: [-1,  0]
     else: [ 0, -1]
 
@@ -182,10 +228,10 @@ def eql_side: {a b}
   |a == b|
 
 def side_to_icon: {side}
-  get [side0,side1] = cpy side
-  if |side0 === WHITE|
+  cpy side = side
+  if |side === WHITE|
   then: (to_chars "O")
-  else: if |side1 == BLACK|
+  else: if |side == BLACK|
     then: (to_chars "X")
     else: (to_chars "B")
 
@@ -244,11 +290,11 @@ def step: {a b}
       let b_val     = (Throne b_side)
       [a_val, b_val]
     let case_unit   = {b_side b_flies a_side a_flies}
-      get [as0,as1] = cpy a_side
-      get [bs0,bs1] = cpy b_side
-      let a_val     = (Unit as1 a_flies)
-      let b_val     = (Unit bs1 b_flies)
-      let can_pass  = (eql_side as0 bs0)
+      cpy a_side    = a_side
+      cpy b_side    = b_side
+      let a_val     = (Unit a_side a_flies)
+      let b_val     = (Unit b_side b_flies)
+      let can_pass  = (eql_side a_side b_side)
       let then_swap = [{a b}[a,b],{a b}[b,a]]
       (if can_pass then_swap a_val b_val)
     (b case_air case_wall case_cliff case_throne case_unit a_side a_flies)
@@ -318,15 +364,13 @@ def kmap_interact:
   dup write = (write ~10)
   dup take  = (take ~10)
   # {a_pos b_pos fun map}
-    let a_idx           = (index a_pos)
-    let b_idx           = (index b_pos)
-    get [a_idx0,a_idx1] = cpy a_idx
-    get [b_idx0,b_idx1] = cpy b_idx
-    get [map,a_val]     = (take a_idx0 Air map)
-    get [map,b_val]     = (take b_idx0 Air map)
+    cpy a_idx           = (index a_pos)
+    cpy b_idx           = (index b_pos)
+    get [map,a_val]     = (take a_idx Air map)
+    get [map,b_val]     = (take b_idx Air map)
     get [a_val,b_val]   = (fun a_val b_val)
-    let map             = (write a_idx1 a_val map)
-    let map             = (write b_idx1 b_val map)
+    let map             = (write a_idx a_val map)
+    let map             = (write b_idx b_val map)
     map
 
 def kmap_write:
@@ -338,11 +382,15 @@ def Wait:
 
 def Step:
   dup inter = kmap_interact
-  # {args map}
-    get [a_pos,dir] = args
+  # {a_pos dir map}
     get [a_pos,ap1] = (vec_cpy a_pos)
     let b_pos       = (vec_add ap1 (dir_to_vec dir))
     (inter a_pos b_pos step map)
+
+//def EarthRise:
+  //dup inter = kmap_interact
+  //# {a_pos dir map}
+    //get [a_pos,dir] 
 
 def moves:
   let m00 = Wait

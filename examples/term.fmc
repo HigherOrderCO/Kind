@@ -119,13 +119,13 @@ def to_string: {len}
   let loop = {call name}
     let term_to_chars = {call term dept}
       let lam_case = {body call dept}
-        get [dpt0, dpt1] = cpy dept
-        get [call, body] = (call TERM_TO_CHARS (body (Var dpt0)) |dpt1 + 1|)
+        cpy dept         = dept
+        get [call, body] = (call TERM_TO_CHARS (body (Var dept)) |dept + 1|)
         [call, (concat (to_chars "λ") body)]
       let app_case = {func argm call dept}
-        get [dpt0, dpt1] = cpy dept
-        get [call, func] = (call TERM_TO_CHARS func dpt0)
-        get [call, argm] = (call TERM_TO_CHARS argm dpt1)
+        cpy dept         = dept
+        get [call, func] = (call TERM_TO_CHARS func dept)
+        get [call, argm] = (call TERM_TO_CHARS argm dept)
         [call, (concat (to_chars "(") (concat func (concat (to_chars " ") (concat argm (to_chars (")"))))))]
       let var_case = {indx call dept}
         get [call, indx] = (call NUMB_TO_CHARS indx)
@@ -137,8 +137,8 @@ def to_string: {len}
         [call, (concat (to_chars "S") pred)]
       let zero_case = {call}
         [call, (to_chars "Z")]
-      get [n0, n1] = cpy num
-      (if |n0 > 0| [(succ_case |n1 - 1|),zero_case] call)
+      cpy num = num
+      (if |num > 0| [(succ_case |num - 1|),zero_case] call)
     (name term_to_chars numb_to_chars call)
   let stop = {call term}
     get [call, chrs] = (call TERM_TO_CHARS term 0)

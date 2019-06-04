@@ -119,13 +119,12 @@ const compile = (term, defs = {}) => {
         net.link_ports(Pointer(ite_addr, 1), pair_ptr);
         return Pointer(ite_addr, 2);
       case "Cpy":
-        var cpy_addr = net.alloc_node(NOD, 0xFFFE);
-        var par_addr = net.alloc_node(NOD, 0xFFFF);
         var numb_ptr = build_net(term[1].numb, net, var_ptrs, level);
-        net.link_ports(Pointer(cpy_addr, 0), numb_ptr);
-        net.link_ports(Pointer(cpy_addr, 1), Pointer(par_addr, 1));
-        net.link_ports(Pointer(cpy_addr, 2), Pointer(par_addr, 2));
-        return Pointer(par_addr, 0);
+        level_of[numb_ptr] = 0xFFFE;
+        var_ptrs.push(numb_ptr);
+        var body_ptr = build_net(term[1].body, net, var_ptrs, level);
+        var_ptrs.pop();
+        return body_ptr;
       case "Var":
         return get_var(var_ptrs[var_ptrs.length - term[1].index - 1]);
       case "Ref":

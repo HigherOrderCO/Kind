@@ -3,8 +3,8 @@ def fib: {n}
   let init = [0,1]
   let loop = {state}
     get [a, b] = state
-    get [x, y] = cpy b
-    [x, |a + y|]
+    cpy b      = b
+    [b, |a + b|]
   let stop = {state}
     (snd state)
   (for n #init #loop #stop)
@@ -15,9 +15,8 @@ inf fib1m:
     [0, [0, 1]]
   step:
     get [i, p] = self
-    get [a, b] = p
-    get [x, y] = cpy b
-    [|i + 1|, [x, |a + y|]]
+    cpy b      = b
+    [|i + 1|, [b, |a + b|]]
   stop:
     get [i, p] = self
     |i == 1000000|
@@ -28,8 +27,8 @@ inf fact1m:
   init: [1, 1]
   step:
     get [i, n] = self
-    get [j, k] = cpy i
-    [|j + 1|, |n * k|]
+    cpy i      = i
+    [|i + 1|, |n * i|]
   stop: |fst self == 1000000|
   done: snd self
 

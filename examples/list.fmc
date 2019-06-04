@@ -88,14 +88,14 @@ def cons-every: {num val list}
   {Cons}
   dup Cons = Cons
   let cons = {x xs nm}
-    get [n0,m0] = nm
-    get [n1,n2] = cpy n0
-    get [m1,m2] = cpy m0
+    get [n,m] = nm
+    cpy n     = n
+    cpy m     = m
     let ConsIf = {cond} if cond
       then: {x xs} (Cons x xs)
       else: {x xs} xs
-    let mod0 = ||n1 % m1| == 0|
-    let list = (Cons x (xs [|n2 + 1|, m2]))
+    let mod0 = ||n % m| == 0|
+    let list = (Cons x (xs [|n + 1|, m]))
     (ConsIf mod0 val list)
   dup fold = (list #cons)
   # {nil} (fold {nm}nil [0,num])

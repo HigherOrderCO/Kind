@@ -14,7 +14,7 @@ const Num = (numb)                   => ["Num", {numb}];
 const Op1 = (func, num0, num1)       => ["Op1", {func, num0, num1}];
 const Op2 = (func, num0, num1)       => ["Op2", {func, num0, num1}];
 const Ite = (cond, pair)             => ["Ite", {cond, pair}];
-const Cpy = (numb)                   => ["Cpy", {numb}];
+const Cpy = (name, numb, body)       => ["Cpy", {name, numb, body}];
 const Par = (val0, val1)             => ["Par", {val0, val1}];
 const Fst = (pair)                   => ["Fst", {pair}];
 const Snd = (pair)                   => ["Snd", {pair}];
@@ -187,8 +187,11 @@ const parse = (code) => {
 
     // Copy
     else if (match("cpy ")) {
+      var name = parse_string();
+      let skip = parse_exact("=");
       var numb = parse_term(ctx);
-      return Cpy(numb);
+      var body = parse_term(ctx.concat([name]));
+      return Cpy(name, numb, body);
     }
 
     // Pair
@@ -359,8 +362,10 @@ const show = ([ctor, args], canon = false, ctx = []) => {
       var pair = show(args.pair, canon, ctx);
       return "(if " + cond + " " + pair + ")";
     case "Cpy":
+      var name = args.name;
       var numb = show(args.numb, canon, ctx);
-      return "(cpy " + numb + ")";
+      var body = show(args.body, canon, ctx.concat([name]));
+      return "(cpy " + name + " = " + numb + " " + body + ")";
     case "Par":
       var text = term_to_text([ctor, args]);
       if (text !== null) {
@@ -426,8 +431,10 @@ const shift = ([ctor, term], inc, depth) => {
       var pair = shift(term.pair, inc, depth);
       return Ite(cond, pair);
     case "Cpy":
+      var name = term.name;
       var numb = shift(term.numb, inc, depth);
-      return Cpy(numb);
+      var body = shift(term.body, inc, depth + 1);
+      return Cpy(name, numb, body);
     case "Par":
       var val0 = shift(term.val0, inc, depth);
       var val1 = shift(term.val1, inc, depth);
@@ -484,8 +491,10 @@ const subst = ([ctor, term], val, depth) => {
       var pair = subst(term.pair, val, depth);
       return Ite(cond, pair);
     case "Cpy":
+      var name = term.name;
       var numb = subst(term.numb, val, depth);
-      return Cpy(numb);
+      var body = subst(term.body, val && shift(val, 1, 0), depth + 1);
+      return Cpy(name, numb, body);
     case "Par":
       var val0 = subst(term.val0, val, depth);
       var val1 = subst(term.val1, val, depth);
@@ -524,7 +533,7 @@ const uses = ([ctor, term], depth = 0) => {
     case "Op1": return uses(term.num0, depth) + uses(term.num1, depth);
     case "Op2": return uses(term.num0, depth) + uses(term.num1, depth);
     case "Ite": return uses(term.cond, depth) + uses(term.pair, depth);
-    case "Cpy": return uses(term.numb, depth);
+    case "Cpy": return uses(term.numb, depth) + uses(term.body, depth + 1);
     case "Par": return uses(term.val0, depth) + uses(term.val1, depth);
     case "Fst": return uses(term.pair, depth);
     case "Snd": return uses(term.pair, depth);
@@ -545,7 +554,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Op1": return is_at_level(term.num0, at_level, depth, level) && is_at_level(term.num1, at_level, depth, level);
     case "Op2": return is_at_level(term.num0, at_level, depth, level) && is_at_level(term.num1, at_level, depth, level);
     case "Ite": return is_at_level(term.cond, at_level, depth, level) && is_at_level(term.pair, at_level, depth, level);
-    case "Cpy": return is_at_level(term.numb, at_level, depth, level);
+    case "Cpy": return is_at_level(term.numb, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level);
     case "Par": return is_at_level(term.val0, at_level, depth, level) && is_at_level(term.val1, at_level, depth, level);
     case "Fst": return is_at_level(term.pair, at_level, depth, level);
     case "Snd": return is_at_level(term.pair, at_level, depth, level);
@@ -592,6 +601,7 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
       break;
     case "Cpy":
       check(term.numb, defs, ctx);
+      check(term.body, defs, ctx.concat([term.name]));
       break;
     case "Par":
       check(term.val0, defs, ctx);
@@ -661,7 +671,7 @@ const norm = (term, defs = {}, to_lam = false) => {
     } else if (expr[0] === "Lam") {
       throw "[RUNTIME-ERROR]\nCan't duplicate a lambda.";
     } else {
-      return Dup(name, norm(expr, defs, to_lam), norm(body, defs, to_lam));
+      return Dup(name, expr, norm(body, defs, to_lam));
     }
   }
   const dereference = (name) => {
@@ -712,12 +722,12 @@ const norm = (term, defs = {}, to_lam = false) => {
       return Ite(cond, norm(pair, defs, to_lam));
     }
   }
-  const copy = (numb) => {
+  const copy = (name, numb, body) => {
     var numb = norm(numb, defs, to_lam);
     if (numb[0] === "Num") {
-      return norm(Par(numb, numb), defs, to_lam);
+      return norm(subst(body, numb, 0), defs, to_lam);
     } else {
-      return Cpy(numb);
+      return Cpy(name, numb, norm(body, defs, to_lam));
     }
   }
   const first = (pair) => {
@@ -751,7 +761,7 @@ const norm = (term, defs = {}, to_lam = false) => {
   } else if (to_lam && ctor === "Prj") {
     return norm(subst(subst(term.body, Fst(shift(term.pair, 1, 0)), 1), Snd(term.pair), 0), defs, to_lam);
   } else if (to_lam && ctor === "Cpy") {
-    return norm(Par(term.numb, term.numb), defs, to_lam);
+    return norm(subst(term.body, term.numb, 0), defs, to_lam)
   } else {
     switch (ctor) {
       case "Var": return Var(term.index);
@@ -763,7 +773,7 @@ const norm = (term, defs = {}, to_lam = false) => {
       case "Op1": return op1(term.func, term.num0, term.num1);
       case "Op2": return op2(term.func, term.num0, term.num1);
       case "Ite": return if_then_else(term.cond, term.pair);
-      case "Cpy": return copy(term.numb);
+      case "Cpy": return copy(term.name, term.numb, term.body);
       case "Par": return Par(norm(term.val0, defs, to_lam), norm(term.val1, defs, to_lam));
       case "Fst": return first(term.pair);
       case "Snd": return second(term.pair);
@@ -790,7 +800,7 @@ const equal = ([a_ctor, a_term], [b_ctor, b_term]) => {
     case "op1-op1": return a_term.func === b_term.func && equal(a_term.num0, b_term.num0) && a_term.num1 === a_term.num1;
     case "op2-op2": return a_term.func === b_term.func && equal(a_term.num0, b_term.num0) && equal(a_term.num1, b_term.num1);
     case "ite-ite": return equal(a_term.cond, b_term.cond) && equal(a_term.pair, b_term.pair);
-    case "cpy-cpy": return equal(a_term.numb, b_term.numb);
+    case "cpy-cpy": return equal(a_term.numb, b_term.numb) && equal(a_term.body, b_term.body);
     case "par-par": return equal(a_term.val0, b_term.val0) && equal(a_term.val1, b_term.val1);
     case "fst-fst": return equal(a_term.pair, b_term.pair);
     case "snd-snd": return equal(a_term.pair, b_term.pair);

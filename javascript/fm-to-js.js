@@ -50,7 +50,8 @@ const compile = ([ctor, term], defs, vars) => {
       return cond ? pair[0] : pair[1];
     case "Cpy":
       var numb = compile(term.numb, defs, vars);
-      return [numb, numb];
+      var body = x => compile(term.body, defs, [x,vars]);
+      return body(numb);
     case "Par":
       var val0 = compile(term.val0, defs, vars);
       var val1 = compile(term.val1, defs, vars);
