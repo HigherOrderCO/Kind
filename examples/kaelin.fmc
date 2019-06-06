@@ -196,6 +196,7 @@
 // - Croni Shadow Trap (place)
 // - Zagatur Summon
 
+// Testing pull action
 def kaelin:
   dup write           = kmap_write
   dup step            = step
@@ -245,6 +246,7 @@ def DOWN  : 1 //  0
 def LEFT  : 2 // -1
 def UP    : 3 //  0
 
+// Transforms a direction [RIGHT, LEFT, UP, DOWN] into a vector that represents that position
 def dir_to_vec: {a}
   cpy a = a
   if |a < 2|
@@ -308,6 +310,10 @@ def thing_to_icon: {thing}
   let case_hero   = {side flies} (concat (to_chars " ") (side_to_icon side))
   (thing case_air case_wall case_cliff case_throne case_hero)
 
+// "a" and "b" are adjacent positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
+// - The same position: if they can't interact with each other. 
+//   E.g: an air can't change the position with a unit, but a unit can change it with an air 
+// - Inverted position: the elements interacted and one now occupies the position of the other.
 def step_both: {a b}
   let case_air    = {b} [Air, b]
   let case_wall   = {b} [Wall, b]
@@ -335,16 +341,22 @@ def step_both: {a b}
       cpy b_side    = b_side
       let a_val     = (Unit a_side a_flies)
       let b_val     = (Unit b_side b_flies)
+      // If they are from equal sides, they can swap positions
       let can_pass  = (eql_side a_side b_side)
       let then_swap = [{a b}[a,b],{a b}[b,a]]
       (if can_pass then_swap a_val b_val)
+      // Check if "a" can swap with type "b"
     (b case_air case_wall case_cliff case_throne case_unit a_side a_flies)
+  // Check the cases for "a" perfom the swap
   (a case_air case_wall case_cliff case_throne case_unit b)
 
 // :::::::::
 // :: Map ::
 // :::::::::
 
+
+// Draws the map with castles on side A and B, players for both team, map structures and cliffs
+// Each symbol represents a game element.
 def kmap:
   let O   = Air
   let a   = (Unit WHITE 0)
@@ -397,13 +409,18 @@ def kmap:
   [[[[[r00,r01],[r02,r03]],[[r04,r05],[r06,r07]]],[[[r08,r09],[r10,r11]],[[r12,r13],[r14,r15]]]],
    [[[[r16,r17],[r18,r19]],[[r20,r21],[r22,r23]]],[[[r24,r25],[r26,r27]],[[r28,r29],[r30,r31]]]]]
 
+// Simulates an index in an array of 1024 elements (32x32 map).
+// x: column
+// y: line 
 def index: {pos}
   get [x,y] = pos
   ||y * 32| + x|
 
+// Performs a map interaction between two positions.
+// Returns a map state as result of the interaction
 def kmap_interact:
-  dup write = (write ~10)
-  dup take  = (take ~10)
+  dup write = kmap_write
+  dup take  = kmap_take
   # {a_pos b_pos fun map}
     cpy a_idx           = (index a_pos)
     cpy b_idx           = (index b_pos)
@@ -421,8 +438,13 @@ def kmap_to_string:
     let chars = (cons-every #64 #10 chars)
     (from_chars chars)
 
+// Write into the map as a binary tree with deep of 10 (that is 2^10 elements = 1024)
 def kmap_write:
   (write ~10)
+
+// Read the map as a binary tree with deep of 10 (that is 2^10 elements = 1024)  
+def kmap_take:
+  (take ~10)
 
 // :::::::::::
 // :: Moves ::
@@ -432,13 +454,17 @@ def wait:
   # {map args}
     map
 
+// Given a position and a direction to step forward, move the element (if is possible) and return the updated map
 def step:
   dup inter = kmap_interact
-  # {a_pos dir map}
-    get [a_pos,ap1] = (vec_cpy a_pos)
-    let b_pos       = (vec_add ap1 (dir_to_vec dir))
-    (inter a_pos b_pos step_both map)
+  # {pos dir map}
+    // pos: current position
+    get [pos,pos1] = (vec_cpy pos)
+    // n_pos: new position
+    let n_pos       = (vec_add pos1 (dir_to_vec dir))
+    (inter pos n_pos step_both map)
 
+// [Tophoro]
 def earth_pull:
   dup step = step
   # {pos dir map}
@@ -451,6 +477,7 @@ def earth_pull:
     cpy dy = dy
     cpy nx = dy
     cpy ny = |0 - dx|
+    // Set each position (x,y) where Eart Pull can interact with 
     let p0 = [||ax + |dx * 1|| + |nx *  0||, ||ay + |dy * 1|| + |nx *  0||]
     let p1 = [||ax + |dx * 2|| + |nx *  1||, ||ay + |dy * 2|| + |nx *  1||]
     let p2 = [||ax + |dx * 2|| + |nx *  0||, ||ay + |dy * 2|| + |nx *  0||]
@@ -460,7 +487,10 @@ def earth_pull:
     let p6 = [||ax + |dx * 3|| + |nx *  0||, ||ay + |dy * 3|| + |nx *  0||]
     let p7 = [||ax + |dx * 3|| + |nx * -1||, ||ay + |dy * 3|| + |nx * -1||]
     let p8 = [||ax + |dx * 3|| + |nx * -2||, ||ay + |dy * 3|| + |nx * -2||]
-    let fn = {pos map} (step pos ||dir + 2| % 4| map)
+    // Calculus to get the inverse direction of "dir"
+    // "% 4" means that we can have 4 positions (right, left, up and down)
+    let inv_dir = ||dir + 2| % 4|
+    let fn = {pos map} (step pos inv_dir map)
     (fn p8 (fn p7 (fn p6 (fn p5 (fn p4 (fn p3 (fn p2 (fn p1 (fn p0 map)))))))))
 
 def moves:
