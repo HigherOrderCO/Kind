@@ -29,6 +29,15 @@ def list_unfold: {list}
   dup F = (list #Cons)
   # (F nil)
 
+def build: {len init loop} {cons}
+  dup loop = loop
+  dup init = init
+  dup cons = cons
+  dup fold = (len #{list state}
+    get [state, element] = (loop state)
+    (cons element (list state)))
+  # {nil} (fold {state}nil init)
+
 // Concatenates two lists
 def concat: {a b}
   {Cons}
