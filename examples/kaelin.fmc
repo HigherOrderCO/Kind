@@ -197,6 +197,7 @@
 // - Croni Shadow Trap (place)
 // - Zagatur Summon
 
+// Testing pull action
 def kaelin:
   dup write       = board_write
   dup step        = step
@@ -241,6 +242,9 @@ def kaelin:
     let board = (earth_pull [5,23] [-1,0] board)
 
     (print_board board)
+
+def kaelin:
+  (Gonk WHITE)
     
 // :::::::::::::::
 // :: Direction ::
@@ -251,6 +255,7 @@ def DOWN  : 1 //  0
 def LEFT  : 2 // -1
 def UP    : 3 //  0
 
+// Transforms a direction [RIGHT, LEFT, UP, DOWN] into a vector that represents that position
 def dir_to_vec: {a}
   cpy a = a
   if |a < 2|
@@ -299,18 +304,18 @@ def ZAGATUR : 24
 def AGDRIS  : 25
 def MEWRU   : 26
 
-def Tophoro : {side} (Unit side TOPHORO 120 0)
-def Gonk    : {side} (Unit side GONK     90 0)
-def Erkos   : {side} (Unit side ERKOS    40 0)
-def Croni   : {side} (Unit side CRONI    40 0)
-def Snarch  : {side} (Unit side SNARCH   60 0)
-def Sirpix  : {side} (Unit side SIRPIX   60 0)
-def Kenlua  : {side} (Unit side KENLUA   60 0)
-def Flina   : {side} (Unit side FLINA    60 0)
-def Stanci  : {side} (Unit side STANCI   40 0)
-def Zagatur : {side} (Unit side ZAGATUR  10 0)
-def Agdris  : {side} (Unit side AGDRIS   20 0)
-def Mewru   : {side} (Unit side MEWRU    20 0)
+def Tophoro : {side} (Unit side TOPHORO 120)
+def Gonk    : {side} (Unit side GONK     90)
+def Erkos   : {side} (Unit side ERKOS    40)
+def Croni   : {side} (Unit side CRONI    40)
+def Snarch  : {side} (Unit side SNARCH   60)
+def Sirpix  : {side} (Unit side SIRPIX   60)
+def Kenlua  : {side} (Unit side KENLUA   60)
+def Flina   : {side} (Unit side FLINA    60)
+def Stanci  : {side} (Unit side STANCI   40)
+def Zagatur : {side} (Unit side ZAGATUR  10)
+def Agdris  : {side} (Unit side AGDRIS   20)
+def Mewru   : {side} (Unit side MEWRU    20)
 
 def hero_name:
   let hero00 = (to_chars "Tophoro ")
@@ -414,9 +419,9 @@ def Throne: {side}
   {Air Wall Cliff Throne Unit}
   (Throne side)
 
-def Unit: {hero side hp flies}
+def Unit: {hero side hp}
   {Air Wall Cliff Throne Unit}
-  (Unit hero side hp flies)
+  (Unit hero side hp)
 
 def piece_icon:
   dup hero_icon = hero_icon
@@ -425,7 +430,7 @@ def piece_icon:
     let case_wall   = (to_chars " W")
     let case_cliff  = (to_chars " C")
     let case_throne = {side} (to_chars " T")
-    let case_unit   = {side hero hp flies} (hero_icon hero)
+    let case_unit   = {side hero hp} (hero_icon hero)
     (piece case_air case_wall case_cliff case_throne case_unit)
 
 def piece_info:
@@ -435,11 +440,11 @@ def piece_info:
     let case_wall   = [Wall, NilF]
     let case_cliff  = [Cliff, NilF]
     let case_throne = {side} [(Throne side), NilF]
-    let case_unit   = {side hero hp flies}
+    let case_unit   = {side hero hp}
       cpy hero = hero
       cpy hp   = hp
       cpy side = side
-      let val  = (Unit side hero hp flies)
+      let val  = (Unit side hero hp)
       let info =
         (concat (hero_name hero) // Hero name
         (concat (to_chars ": ")
@@ -452,37 +457,40 @@ def piece_info:
       [val, info]
     (piece case_air case_wall case_cliff case_throne case_unit)
 
+// "a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
+// - The same position: if they can't interact with each other.
+// - Inverted position: the elements interacted and one now occupies the position of the other.
 def a_step_to_b: {a b}
   let case_a_air      = {b} [Air, b]
   let case_a_wall     = {b} [Wall, b]
   let case_a_cliff    = {b} [Cliff, b]
   let case_a_throne   = {a_side} {b} [(Throne a_side), b]
-  let case_a_unit     = {a_side a_hero a_hp a_flies} {b}
-    let case_b_air    = {a_side a_hero a_hp a_flies}
-      let a_val       = (Unit a_side a_hero a_hp a_flies)
+  let case_a_unit     = {a_side a_hero a_hp} {b}
+    let case_b_air    = {a_side a_hero a_hp}
+      let a_val       = (Unit a_side a_hero a_hp)
       let b_val       = Air
       [b_val, a_val]
-    let case_b_wall   = {a_side a_hero a_hp a_flies}
-      let a_val       = (Unit a_side a_hero a_hp a_flies)
+    let case_b_wall   = {a_side a_hero a_hp}
+      let a_val       = (Unit a_side a_hero a_hp)
       let b_val       = Wall
       [a_val, b_val]
-    let case_b_cliff  = {a_side a_hero a_hp a_flies}
-      let a_val       = (Unit a_side a_hero a_hp a_flies)
+    let case_b_cliff  = {a_side a_hero a_hp}
+      let a_val       = (Unit a_side a_hero a_hp)
       let b_val       = Cliff
       [a_val, b_val]
-    let case_b_throne = {b_side} {a_side a_hero a_hp a_flies}
-      let a_val       = (Unit a_side a_hero a_hp a_flies)
+    let case_b_throne = {b_side} {a_side a_hero a_hp}
+      let a_val       = (Unit a_side a_hero a_hp)
       let b_val       = (Throne b_side)
       [a_val, b_val]
-    let case_b_unit   = {b_side b_hero b_hp b_flies} {a_side a_hero a_hp a_flies}
+    let case_b_unit   = {b_side b_hero b_hp} {a_side a_hero a_hp}
       cpy a_side      = a_side
       cpy b_side      = b_side
-      let a_val       = (Unit a_side a_hero a_hp a_flies)
-      let b_val       = (Unit b_side b_hero b_hp b_flies)
+      let a_val       = (Unit a_side a_hero a_hp)
+      let b_val       = (Unit b_side b_hero b_hp)
       let can_pass    = (eql_side a_side b_side)
       let then_swap   = [{a b}[b,a],{a b}[a,b]]
       (if can_pass then_swap a_val b_val)
-    (b case_b_air case_b_wall case_b_cliff case_b_throne case_b_unit a_side a_hero a_hp a_flies)
+    (b case_b_air case_b_wall case_b_cliff case_b_throne case_b_unit a_side a_hero a_hp)
   (a case_a_air case_a_wall case_a_cliff case_a_throne case_a_unit b)
 
 // :::::::::::
@@ -541,6 +549,9 @@ def new_board:
   [[[[[r00,r01],[r02,r03]],[[r04,r05],[r06,r07]]],[[[r08,r09],[r10,r11]],[[r12,r13],[r14,r15]]]],
    [[[[r16,r17],[r18,r19]],[[r20,r21],[r22,r23]]],[[[r24,r25],[r26,r27]],[[r28,r29],[r30,r31]]]]]
 
+// Simulates an index in an array of 1024 elements (32x32 map).
+// x: column
+// y: line 
 def index: {pos}
   get [x,y] = pos
   ||y * 32| + x|
@@ -574,11 +585,15 @@ def print_board:
       [info, (piece_icon piece)]
     get [info, board] = (fold board #fold_node #fold_leaf)
     let board = (cons-every #64 #10 board)
-    (from_chars (concat board (concat (ConsF 10 NilF) info)))
+    (from_chars (concat (ConsF 10 NilF) (concat info board)))
 
 
 def board_write:
   (write ~10)
+
+// Read the map as a binary tree with deep of 10 (that is 2^10 elements = 1024)  
+def kmap_take:
+  (take ~10)
 
 // :::::::::::
 // :: Moves ::
@@ -588,6 +603,7 @@ def wait:
   # {board args}
    board 
 
+// Given a position and a direction to step forward, move the element (if is possible) and return the updated map
 def step:
   dup inter = board_interact
   # {a_pos a_dxy board}
@@ -595,6 +611,7 @@ def step:
     let b_pos           = (vec2_add a_pos0 a_dxy)
     (inter a_pos1 b_pos a_step_to_b board)
 
+// [Tophoro]
 def earth_pull:
   dup step = step
   let form = (ConsF #1 (ConsF #3 (ConsF #5 NilF)))
