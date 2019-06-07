@@ -203,6 +203,7 @@ def kaelin:
   dup step        = step
   dup earth_pull  = earth_pull
   dup print_board = print_board
+  dup board_inter = board_interact
 
   # let board = new_board
     let board = (step [1,30] [0,-1] board)
@@ -241,10 +242,25 @@ def kaelin:
     let board = (earth_pull [5,23] [-1,0] board)
     let board = (earth_pull [5,23] [-1,0] board)
 
+    let board = (board_inter [29,1] [30,1] {a b}[(damage 10 b), (damage 10 a)] board)
+
     (print_board board)
 
-def kaelin:
-  (Gonk WHITE)
+def atk_test:
+  let hero  = (Gonk WHITE)
+  let air = (Air) 
+  (set_damage 20 hero)
+
+// TODO: 
+// - check is a the life of the piece is bigger than the damage
+def damage: {dmg piece}
+  let case_air    = Air
+  let case_wall   = Wall
+  let case_cliff  = Cliff
+  let case_throne = {side} (Throne side)
+  let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
+  (piece case_air case_wall case_cliff case_throne case_unit)
+
     
 // :::::::::::::::
 // :: Direction ::
