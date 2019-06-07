@@ -198,51 +198,49 @@
 // - Zagatur Summon
 
 def kaelin:
-  dup write           = kmap_write
-  dup step            = step
-  dup earth_pull      = earth_pull
-  dup kmap_to_string  = kmap_to_string
+  dup write       = board_write
+  dup step        = step
+  dup earth_pull  = earth_pull
+  dup print_board = print_board
 
-  #
-    let map = kmap
+  # let board = new_board
+    let board = (step [1,30] [0,-1] board)
+    let board = (step [1,29] [0,-1] board)
+    let board = (step [1,28] [0,-1] board)
+    let board = (step [1,27] [0,-1] board)
+    let board = (step [1,26] [0,-1] board)
+    let board = (step [1,25] [0,-1] board)
+    let board = (step [1,24] [0,-1] board)
 
-    let map = (step [1,30] [0,-1] map)
-    let map = (step [1,29] [0,-1] map)
-    let map = (step [1,28] [0,-1] map)
-    let map = (step [1,27] [0,-1] map)
-    let map = (step [1,26] [0,-1] map)
-    let map = (step [1,25] [0,-1] map)
-    let map = (step [1,24] [0,-1] map)
+    let board = (step [2,30] [0,-1] board)
+    let board = (step [2,29] [0,-1] board)
+    let board = (step [2,28] [0,-1] board)
+    let board = (step [2,27] [0,-1] board)
+    let board = (step [2,26] [0,-1] board)
+    let board = (step [2,25] [0,-1] board)
+    let board = (step [2,24] [0,-1] board)
 
-    let map = (step [2,30] [0,-1] map)
-    let map = (step [2,29] [0,-1] map)
-    let map = (step [2,28] [0,-1] map)
-    let map = (step [2,27] [0,-1] map)
-    let map = (step [2,26] [0,-1] map)
-    let map = (step [2,25] [0,-1] map)
-    let map = (step [2,24] [0,-1] map)
+    let board = (step [4,30] [0,-1] board)
+    let board = (step [4,29] [0,-1] board)
+    let board = (step [4,28] [0,-1] board)
+    let board = (step [4,27] [0,-1] board)
+    let board = (step [4,26] [0,-1] board)
+    let board = (step [4,25] [0,-1] board)
+    let board = (step [4,24] [0,-1] board)
 
-    let map = (step [4,30] [0,-1] map)
-    let map = (step [4,29] [0,-1] map)
-    let map = (step [4,28] [0,-1] map)
-    let map = (step [4,27] [0,-1] map)
-    let map = (step [4,26] [0,-1] map)
-    let map = (step [4,25] [0,-1] map)
-    let map = (step [4,24] [0,-1] map)
+    let board = (step [5,30] [0,-1] board)
+    let board = (step [5,29] [0,-1] board)
+    let board = (step [5,28] [0,-1] board)
+    let board = (step [5,27] [0,-1] board)
+    let board = (step [5,26] [0,-1] board)
+    let board = (step [5,25] [0,-1] board)
+    let board = (step [5,24] [0,-1] board)
 
-    let map = (step [5,30] [0,-1] map)
-    let map = (step [5,29] [0,-1] map)
-    let map = (step [5,28] [0,-1] map)
-    let map = (step [5,27] [0,-1] map)
-    let map = (step [5,26] [0,-1] map)
-    let map = (step [5,25] [0,-1] map)
-    let map = (step [5,24] [0,-1] map)
+    let board = (earth_pull [4,23] [-1,0] board)
+    let board = (earth_pull [5,23] [-1,0] board)
+    let board = (earth_pull [5,23] [-1,0] board)
 
-    let map = (earth_pull [4,23] [-1,0] map)
-    let map = (earth_pull [5,23] [-1,0] map)
-    let map = (earth_pull [5,23] [-1,0] map)
-
-    (kmap_to_string map)
+    (print_board board)
     
 // :::::::::::::::
 // :: Direction ::
@@ -284,8 +282,120 @@ def side_to_icon: {side}
     then: (to_chars "X")
     else: (to_chars "B")
 
+// ::::::::::::
+// :: Heroes ::
+// ::::::::::::
+
+def TOPHORO : 0
+def GONK    : 1
+def ERKOS   : 6
+def CRONI   : 7
+def SNARCH  : 8
+def SIRPIX  : 12
+def KENLUA  : 13
+def FLINA   : 14
+def STANCI  : 18
+def ZAGATUR : 24
+def AGDRIS  : 25
+def MEWRU   : 26
+
+def Tophoro : {side} (Unit side TOPHORO 120 0)
+def Gonk    : {side} (Unit side GONK     90 0)
+def Erkos   : {side} (Unit side ERKOS    40 0)
+def Croni   : {side} (Unit side CRONI    40 0)
+def Snarch  : {side} (Unit side SNARCH   60 0)
+def Sirpix  : {side} (Unit side SIRPIX   60 0)
+def Kenlua  : {side} (Unit side KENLUA   60 0)
+def Flina   : {side} (Unit side FLINA    60 0)
+def Stanci  : {side} (Unit side STANCI   40 0)
+def Zagatur : {side} (Unit side ZAGATUR  10 0)
+def Agdris  : {side} (Unit side AGDRIS   20 0)
+def Mewru   : {side} (Unit side MEWRU    20 0)
+
+def hero_name:
+  let hero00 = (to_chars "Tophoro ")
+  let hero01 = (to_chars "Gonk    ")
+  let hero02 = (to_chars "Missna  ")
+  let hero03 = (to_chars "Missna  ")
+  let hero04 = (to_chars "Missna  ")
+  let hero05 = (to_chars "Missna  ")
+  let hero06 = (to_chars "Erkos   ")
+  let hero07 = (to_chars "Croni   ")
+  let hero08 = (to_chars "Snarch  ")
+  let hero09 = (to_chars "Missna  ")
+  let hero10 = (to_chars "Missna  ")
+  let hero11 = (to_chars "Missna  ")
+  let hero12 = (to_chars "Sirpix  ")
+  let hero13 = (to_chars "Kenlua  ")
+  let hero14 = (to_chars "Flina   ")
+  let hero15 = (to_chars "Missna  ")
+  let hero16 = (to_chars "Missna  ")
+  let hero17 = (to_chars "Missna  ")
+  let hero18 = (to_chars "Stanci  ")
+  let hero19 = (to_chars "Missna  ")
+  let hero20 = (to_chars "Missna  ")
+  let hero21 = (to_chars "Missna  ")
+  let hero22 = (to_chars "Missna  ")
+  let hero23 = (to_chars "Missna  ")
+  let hero24 = (to_chars "Zagatur ")
+  let hero25 = (to_chars "Agdris  ")
+  let hero26 = (to_chars "Mewru   ")
+  let hero27 = (to_chars "Missna  ")
+  let hero28 = (to_chars "Missna  ")
+  let hero29 = (to_chars "Missna  ")
+  let hero30 = (to_chars "Missna  ")
+  let hero31 = (to_chars "Missna  ")
+  let quad00 = [[[hero00,hero01],[hero02,hero03]],[[hero04,hero05],[hero06,hero07]]]
+  let quad01 = [[[hero08,hero09],[hero10,hero11]],[[hero12,hero13],[hero14,hero15]]]
+  let quad02 = [[[hero16,hero17],[hero18,hero19]],[[hero20,hero21],[hero22,hero23]]]
+  let quad03 = [[[hero24,hero25],[hero26,hero27]],[[hero28,hero29],[hero30,hero31]]]
+  let heroes = [[quad00,quad01],[quad02,quad03]]
+  dup take   = (take ~5)
+  # {hero} snd (take hero NilF heroes)
+
+def hero_icon:
+  let hero00 = (to_chars "To")
+  let hero01 = (to_chars "Go")
+  let hero02 = (to_chars "??")
+  let hero03 = (to_chars "??")
+  let hero04 = (to_chars "??")
+  let hero05 = (to_chars "??")
+  let hero06 = (to_chars "Er")
+  let hero07 = (to_chars "Cr")
+  let hero08 = (to_chars "Sn")
+  let hero09 = (to_chars "??")
+  let hero10 = (to_chars "??")
+  let hero11 = (to_chars "??")
+  let hero12 = (to_chars "Sr")
+  let hero13 = (to_chars "Kl")
+  let hero14 = (to_chars "Fl")
+  let hero15 = (to_chars "??")
+  let hero16 = (to_chars "??")
+  let hero17 = (to_chars "??")
+  let hero18 = (to_chars "St")
+  let hero19 = (to_chars "??")
+  let hero20 = (to_chars "??")
+  let hero21 = (to_chars "??")
+  let hero22 = (to_chars "??")
+  let hero23 = (to_chars "??")
+  let hero24 = (to_chars "Za")
+  let hero25 = (to_chars "Ag")
+  let hero26 = (to_chars "Me")
+  let hero27 = (to_chars "??")
+  let hero28 = (to_chars "??")
+  let hero29 = (to_chars "??")
+  let hero30 = (to_chars "??")
+  let hero31 = (to_chars "??")
+  let quad00 = [[[hero00,hero01],[hero02,hero03]],[[hero04,hero05],[hero06,hero07]]]
+  let quad01 = [[[hero08,hero09],[hero10,hero11]],[[hero12,hero13],[hero14,hero15]]]
+  let quad02 = [[[hero16,hero17],[hero18,hero19]],[[hero20,hero21],[hero22,hero23]]]
+  let quad03 = [[[hero24,hero25],[hero26,hero27]],[[hero28,hero29],[hero30,hero31]]]
+  let heroes = [[quad00,quad01],[quad02,quad03]]
+  dup take   = (take ~5)
+  # {hero} snd (take hero NilF heroes)
+
 // :::::::::::
-// :: Thing ::
+// :: Piece ::
 // :::::::::::
 
 def Air:
@@ -304,65 +414,91 @@ def Throne: {side}
   {Air Wall Cliff Throne Unit}
   (Throne side)
 
-def Unit: {side hp flies}
+def Unit: {hero side hp flies}
   {Air Wall Cliff Throne Unit}
-  (Unit side hp flies)
+  (Unit hero side hp flies)
 
-def thing_to_icon: {thing}
-  let case_air    = (to_chars " .")
-  let case_wall   = (to_chars " W")
-  let case_cliff  = (to_chars " C")
-  let case_throne = {side} (to_chars " T")
-  let case_unit   = {side hp flies} (concat (to_chars " ") (side_to_icon side))
-  (thing case_air case_wall case_cliff case_throne case_unit)
+def piece_icon:
+  dup hero_icon = hero_icon
+  # {piece}
+    let case_air    = (to_chars " .")
+    let case_wall   = (to_chars " W")
+    let case_cliff  = (to_chars " C")
+    let case_throne = {side} (to_chars " T")
+    let case_unit   = {side hero hp flies} (hero_icon hero)
+    (piece case_air case_wall case_cliff case_throne case_unit)
+
+def piece_info:
+  dup hero_name = hero_name
+  # {piece}
+    let case_air    = [Air, NilF]
+    let case_wall   = [Wall, NilF]
+    let case_cliff  = [Cliff, NilF]
+    let case_throne = {side} [(Throne side), NilF]
+    let case_unit   = {side hero hp flies}
+      cpy hero = hero
+      cpy hp   = hp
+      cpy side = side
+      let val  = (Unit side hero hp flies)
+      let info =
+        (concat (hero_name hero) // Hero name
+        (concat (to_chars ": ")
+        (concat (ConsF (box_byte (num_to_char ||hp / 100| % 10|)) NilF) // HP
+        (concat (ConsF (box_byte (num_to_char ||hp /  10| % 10|)) NilF) // HP
+        (concat (ConsF (box_byte (num_to_char ||hp /   1| % 10|)) NilF) // HP
+        (concat (to_chars " hp -- ")
+        (concat (if side [(to_chars "black"),(to_chars "white")])
+                (ConsF #10 NilF))))))))
+      [val, info]
+    (piece case_air case_wall case_cliff case_throne case_unit)
 
 def a_step_to_b: {a b}
   let case_a_air      = {b} [Air, b]
   let case_a_wall     = {b} [Wall, b]
   let case_a_cliff    = {b} [Cliff, b]
   let case_a_throne   = {a_side} {b} [(Throne a_side), b]
-  let case_a_unit     = {a_side a_hp a_flies} {b}
-    let case_b_air    = {a_side a_hp a_flies}
-      let a_val       = (Unit a_side a_hp a_flies)
+  let case_a_unit     = {a_side a_hero a_hp a_flies} {b}
+    let case_b_air    = {a_side a_hero a_hp a_flies}
+      let a_val       = (Unit a_side a_hero a_hp a_flies)
       let b_val       = Air
       [b_val, a_val]
-    let case_b_wall   = {a_side a_hp a_flies}
-      let a_val       = (Unit a_side a_hp a_flies)
+    let case_b_wall   = {a_side a_hero a_hp a_flies}
+      let a_val       = (Unit a_side a_hero a_hp a_flies)
       let b_val       = Wall
       [a_val, b_val]
-    let case_b_cliff  = {a_side a_hp a_flies}
-      let a_val       = (Unit a_side a_hp a_flies)
+    let case_b_cliff  = {a_side a_hero a_hp a_flies}
+      let a_val       = (Unit a_side a_hero a_hp a_flies)
       let b_val       = Cliff
       [a_val, b_val]
-    let case_b_throne = {b_side} {a_side a_hp a_flies}
-      let a_val       = (Unit a_side a_hp a_flies)
+    let case_b_throne = {b_side} {a_side a_hero a_hp a_flies}
+      let a_val       = (Unit a_side a_hero a_hp a_flies)
       let b_val       = (Throne b_side)
       [a_val, b_val]
-    let case_b_unit   = {b_side b_hp b_flies} {a_side a_hp a_flies}
+    let case_b_unit   = {b_side b_hero b_hp b_flies} {a_side a_hero a_hp a_flies}
       cpy a_side      = a_side
       cpy b_side      = b_side
-      let a_val       = (Unit a_side a_hp a_flies)
-      let b_val       = (Unit b_side b_hp b_flies)
+      let a_val       = (Unit a_side a_hero a_hp a_flies)
+      let b_val       = (Unit b_side b_hero b_hp b_flies)
       let can_pass    = (eql_side a_side b_side)
       let then_swap   = [{a b}[b,a],{a b}[a,b]]
       (if can_pass then_swap a_val b_val)
-    (b case_b_air case_b_wall case_b_cliff case_b_throne case_b_unit a_side a_hp a_flies)
+    (b case_b_air case_b_wall case_b_cliff case_b_throne case_b_unit a_side a_hero a_hp a_flies)
   (a case_a_air case_a_wall case_a_cliff case_a_throne case_a_unit b)
 
-// :::::::::
-// :: Map ::
-// :::::::::
+// :::::::::::
+// :: Board ::
+// :::::::::::
 
-def kmap:
+def new_board:
   let O   = Air
-  let a   = (Unit WHITE 0 0)
-  let b   = (Unit WHITE 0 0)
-  let c   = (Unit WHITE 0 0)
-  let d   = (Unit WHITE 0 0)
-  let e   = (Unit BLACK 0 0)
-  let f   = (Unit BLACK 0 0)
-  let g   = (Unit BLACK 0 0)
-  let h   = (Unit BLACK 0 0)
+  let a   = (Gonk WHITE)
+  let b   = (Erkos WHITE)
+  let c   = (Kenlua WHITE)
+  let d   = (Mewru WHITE)
+  let e   = (Tophoro BLACK)
+  let f   = (Croni BLACK)
+  let g   = (Stanci BLACK)
+  let h   = (Flina BLACK)
   let W   = Wall
   let C   = Cliff
   let x   = (Throne WHITE)
@@ -409,27 +545,39 @@ def index: {pos}
   get [x,y] = pos
   ||y * 32| + x|
 
-def kmap_interact:
+def board_interact:
   dup write = (write ~10)
   dup take  = (take ~10)
-  # {a_pos b_pos fun map}
+  # {a_pos b_pos fun board}
     cpy a_idx         = (index a_pos)
     cpy b_idx         = (index b_pos)
-    get [map,a_val]   = (take a_idx Air map)
-    get [map,b_val]   = (take b_idx Air map)
+    get [board,a_val]   = (take a_idx Air board)
+    get [board,b_val]   = (take b_idx Air board)
     get [a_val,b_val] = (fun a_val b_val)
-    let map           = (write a_idx a_val map)
-    let map           = (write b_idx b_val map)
-    map
+    let board           = (write a_idx a_val board)
+    let board           = (write b_idx b_val board)
+   board 
 
-def kmap_to_string:
+def print_board:
   dup fold = (fold_array ~10)
-  # {map}
-    let chars = (fold map #concat #thing_to_icon)
-    let chars = (cons-every #64 #10 chars)
-    (from_chars chars)
+  dup piece_info = #piece_info
+  dup piece_icon = #piece_icon
+  # {board}
+    dup piece_info = piece_info
+    dup piece_icon = piece_icon
+    let fold_node = {lft rgt}
+      get [lft_info, lft_board] = lft
+      get [rgt_info, rgt_board] = rgt
+      [(concat lft_info rgt_info), (concat lft_board rgt_board)]
+    let fold_leaf = {piece}
+      get [piece, info] = (piece_info piece)
+      [info, (piece_icon piece)]
+    get [info, board] = (fold board #fold_node #fold_leaf)
+    let board = (cons-every #64 #10 board)
+    (from_chars (concat board (concat (ConsF 10 NilF) info)))
 
-def kmap_write:
+
+def board_write:
   (write ~10)
 
 // :::::::::::
@@ -437,20 +585,20 @@ def kmap_write:
 // :::::::::::
 
 def wait:
-  # {map args}
-    map
+  # {board args}
+   board 
 
 def step:
-  dup inter = kmap_interact
-  # {a_pos a_dxy map}
+  dup inter = board_interact
+  # {a_pos a_dxy board}
     get [a_pos0,a_pos1] = (vec2_cpy a_pos)
     let b_pos           = (vec2_add a_pos0 a_dxy)
-    (inter a_pos1 b_pos a_step_to_b map)
+    (inter a_pos1 b_pos a_step_to_b board)
 
 def earth_pull:
   dup step = step
   let form = (ConsF #1 (ConsF #3 (ConsF #5 NilF)))
-  let hits = {pos dxy map} (step pos dxy map)
+  let hits = {pos dxy board} (step pos dxy board)
   (vec_wave_in form #hits)
 
 def moves:

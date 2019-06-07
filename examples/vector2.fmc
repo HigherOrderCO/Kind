@@ -121,4 +121,3 @@ def vec_wave_in: {widths} {cons}
   # {pos dxy nil}
     get [dxy0,dxy1] = (vec2_cpy dxy)
     (wave pos dxy0 {res dxy}res nil (vec2_neg dxy1))
-
