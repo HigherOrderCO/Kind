@@ -197,6 +197,7 @@
 // - Croni Shadow Trap (place)
 // - Zagatur Summon
 
+// Testing pull action
 def kaelin:
   dup write           = kmap_write
   dup step            = step
@@ -253,6 +254,7 @@ def DOWN  : 1 //  0
 def LEFT  : 2 // -1
 def UP    : 3 //  0
 
+// Transforms a direction [RIGHT, LEFT, UP, DOWN] into a vector that represents that position
 def dir_to_vec: {a}
   cpy a = a
   if |a < 2|
@@ -316,6 +318,9 @@ def thing_to_icon: {thing}
   let case_unit   = {side hp flies} (concat (to_chars " ") (side_to_icon side))
   (thing case_air case_wall case_cliff case_throne case_unit)
 
+"a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
+// - The same position: if they can't interact with each other.
+// - Inverted position: the elements interacted and one now occupies the position of the other.
 def a_step_to_b: {a b}
   let case_a_air      = {b} [Air, b]
   let case_a_wall     = {b} [Wall, b]
@@ -353,6 +358,9 @@ def a_step_to_b: {a b}
 // :: Map ::
 // :::::::::
 
+
+// Draws the map with castles on side A and B, players for both team, map structures and cliffs
+// Each symbol represents a game element.
 def kmap:
   let O   = Air
   let a   = (Unit WHITE 0 0)
@@ -405,13 +413,18 @@ def kmap:
   [[[[[r00,r01],[r02,r03]],[[r04,r05],[r06,r07]]],[[[r08,r09],[r10,r11]],[[r12,r13],[r14,r15]]]],
    [[[[r16,r17],[r18,r19]],[[r20,r21],[r22,r23]]],[[[r24,r25],[r26,r27]],[[r28,r29],[r30,r31]]]]]
 
+// Simulates an index in an array of 1024 elements (32x32 map).
+// x: column
+// y: line 
 def index: {pos}
   get [x,y] = pos
   ||y * 32| + x|
 
+// Performs a map interaction between two positions.
+// Returns a map state as result of the interaction
 def kmap_interact:
-  dup write = (write ~10)
-  dup take  = (take ~10)
+  dup write = kmap_write
+  dup take  = kmap_take
   # {a_pos b_pos fun map}
     cpy a_idx         = (index a_pos)
     cpy b_idx         = (index b_pos)
@@ -429,8 +442,13 @@ def kmap_to_string:
     let chars = (cons-every #64 #10 chars)
     (from_chars chars)
 
+// Write into the map as a binary tree with deep of 10 (that is 2^10 elements = 1024)
 def kmap_write:
   (write ~10)
+
+// Read the map as a binary tree with deep of 10 (that is 2^10 elements = 1024)  
+def kmap_take:
+  (take ~10)
 
 // :::::::::::
 // :: Moves ::
@@ -440,6 +458,7 @@ def wait:
   # {map args}
     map
 
+// Given a position and a direction to step forward, move the element (if is possible) and return the updated map
 def step:
   dup inter = kmap_interact
   # {a_pos a_dxy map}
@@ -447,6 +466,7 @@ def step:
     let b_pos           = (vec2_add a_pos0 a_dxy)
     (inter a_pos1 b_pos a_step_to_b map)
 
+// [Tophoro]
 def earth_pull:
   dup step = step
   let form = (ConsF #1 (ConsF #3 (ConsF #5 NilF)))
