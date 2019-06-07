@@ -318,7 +318,7 @@ def thing_to_icon: {thing}
   let case_unit   = {side hp flies} (concat (to_chars " ") (side_to_icon side))
   (thing case_air case_wall case_cliff case_throne case_unit)
 
-"a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
+// "a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
 // - The same position: if they can't interact with each other.
 // - Inverted position: the elements interacted and one now occupies the position of the other.
 def a_step_to_b: {a b}
