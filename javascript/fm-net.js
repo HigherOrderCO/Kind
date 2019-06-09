@@ -24,6 +24,7 @@ class Net {
     this.nodes = []; // nodes
     this.freed = []; // integers
     this.redex = []; // array of (integer, integer) tuples representing addrs
+    this.find_redex = true;
   }
 
   // Allocates a new node, return its addr
@@ -112,7 +113,7 @@ class Net {
     if (!b_numb) this.set_port(addr_of(b_ptrn), slot_of(b_ptrn), a_ptrn);
 
     // If both are main ports, add this to the list of active pairs
-    if (!(a_numb && b_numb) && (a_numb || slot_of(a_ptrn) === 0) && (b_numb || slot_of(b_ptrn) === 0)) {
+    if (this.find_redex && !(a_numb && b_numb) && (a_numb || slot_of(a_ptrn) === 0) && (b_numb || slot_of(b_ptrn) === 0)) {
       this.redex.push(a_numb ? addr_of(b_ptrn) : addr_of(a_ptrn));
     }
   }
@@ -316,6 +317,7 @@ class Net {
   // Rewrites active pairs until none is left, reducing the graph to normal form.
   // This avoids unecessary computations, but is sequential and would need GC.
   reduce_lazy(stats) {
+    this.find_redex = false;
     var warp = [];
     var back = [];
     var prev = Pointer(0, 1);
@@ -358,6 +360,7 @@ class Net {
         }
       }
     }
+    this.find_redex = true;
   }
 
   // Returns a string that is preserved on reduction, good for debugging

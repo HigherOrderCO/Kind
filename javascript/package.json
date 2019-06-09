@@ -1,6 +1,6 @@
 {
   "name": "formality-net",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "",
   "main": "fm-net.js",
   "scripts": {
