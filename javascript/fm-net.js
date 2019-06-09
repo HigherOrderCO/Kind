@@ -339,7 +339,7 @@ class Net {
             prev = Pointer(addr_of(prev), 1);
             next = this.enter_port(prev);
           } else {
-            prev = back.pop();
+            do { prev = back.pop(); } while (type_of(prev) !== PTR);
             next = this.enter_port(prev);
           }
           ++rwts;
