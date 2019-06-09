@@ -7,30 +7,7 @@ def fib: {n}
     [b, |a + b|]
   let stop = {state}
     (snd state)
-  (for n #init #loop #stop)
-
-// `inf` is an external utility for non-termination and constant-space loops
-inf fib1m:
-  init:
-    [0, [0, 1]]
-  step:
-    get [i, p] = self
-    cpy b      = b
-    [|i + 1|, [b, |a + b|]]
-  stop:
-    get [i, p] = self
-    |i == 1000000|
-  done:
-    snd snd self
-
-inf fact1m:
-  init: [1, 1]
-  step:
-    get [i, n] = self
-    cpy i      = i
-    [|i + 1|, |n * i|]
-  stop: |fst self == 1000000|
-  done: snd self
+  (nfor n #init #loop #stop)
 
 def boxed_add: {x y}
   dup x = x

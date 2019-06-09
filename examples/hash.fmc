@@ -297,7 +297,7 @@ def keccak.f_loop: {arr} {t}
       #a40 #a41 #a42 #a43 #a44 #a45 #a46 #a47 #a48 #a49))
 
 def keccak.f: {arr}
-  (for ~24 arr #keccak.f_loop #{x}x)
+  (nfor ~24 arr #keccak.f_loop #{x}x)
 
 def keccak.zero_array: {t} (t 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
 def keccak.example_hash: (keccak.f #keccak.zero_array)

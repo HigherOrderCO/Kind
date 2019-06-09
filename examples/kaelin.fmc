@@ -243,9 +243,6 @@ def kaelin:
 
     (print_board board)
 
-def kaelin:
-  (Gonk WHITE)
-    
 // :::::::::::::::
 // :: Direction ::
 // :::::::::::::::

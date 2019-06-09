@@ -55,7 +55,7 @@ def with: {dpt}
       get [b,x] = (fn b)
       [(swap1 [a,b]), x])
   let stop = {func} func
-  dup fold = (for dpt #init #loop #stop)
+  dup fold = (nfor dpt #init #loop #stop)
   # {path fn arr} (fold path fn arr)
 
 // update
@@ -143,7 +143,7 @@ def gen: {dpt}
   let stop = {arr fun}
     dup arr = (arr fun)
     # (arr #0)
-  (for dpt #init #loop #stop)
+  (nfor dpt #init #loop #stop)
 
 // range
 // | Generates an array with all numbers from 0 to 2^dpt
