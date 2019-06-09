@@ -16,6 +16,7 @@ const NOD = 0;
 const OP1 = 1;
 const OP2 = 2;
 const ITE = 3;
+const FOR = 4;
 
 class Net {
   // A net stores nodes (this.nodes), reclaimable memory addrs (this.freed) and active pairs (this.redex)
@@ -41,7 +42,7 @@ class Net {
     this.nodes[addr * 4 + 0] = addr * 4 + 0;
     this.nodes[addr * 4 + 1] = addr * 4 + 1;
     this.nodes[addr * 4 + 2] = addr * 4 + 2;
-    this.nodes[addr * 4 + 3] = (kind << 5) + ((type & 0x3) << 3);
+    this.nodes[addr * 4 + 3] = (kind << 6) + ((type & 0x7) << 3);
     return addr;
   }
 
@@ -81,15 +82,15 @@ class Net {
   }
 
   type_of(addr) {
-    return (this.nodes[addr * 4 + 3] >>> 3) & 0x3;
+    return (this.nodes[addr * 4 + 3] >>> 3) & 0x7;
   }
 
   set_type(addr, type) {
-    this.nodes[addr * 4 + 3] = (this.nodes[addr * 4 + 3] & ~0b11000) | (type << 3);
+    this.nodes[addr * 4 + 3] = (this.nodes[addr * 4 + 3] & ~0b111000) | (type << 3);
   }
 
   kind_of(addr) {
-    return this.nodes[addr * 4 + 3] >>> 5;
+    return this.nodes[addr * 4 + 3] >>> 6;
   }
 
   // Given a pointer to a port, returns a pointer to the opposing port
@@ -186,6 +187,31 @@ class Net {
         this.link_ports(Pointer(a_addr, 0), pair_ptr);
         this.link_ports(Pointer(a_addr, cond_val ? 1 : 2), Pointer(a_addr, cond_val ? 1 : 2));
         this.link_ports(Pointer(a_addr, cond_val ? 2 : 1), dest_ptr);
+
+      // ForLoop
+      } else if (a_type === FOR) {
+        var pair_ptr = this.enter_port(Pointer(a_addr, 1))
+        var p_addr   = addr_of(pair_ptr);
+        var func_ptr = this.enter_port(Pointer(p_addr, 1));
+        var argm_ptr = this.enter_port(Pointer(p_addr, 2));
+        if (numb_of(b_ptrn) === 0) {
+          this.link_ports(this.enter_port(Pointer(a_addr, 2)), argm_ptr);
+          for (var i = 0; i < 3; i++) {
+            this.unlink_port(Pointer(a_addr, i));
+            this.unlink_port(Pointer(p_addr, i));
+          }
+          this.free_node(a_addr);
+          this.free_node(p_addr);
+        } else {
+          var dup_addr = this.alloc_node(NOD, a_kind);
+          var app_addr = this.alloc_node(NOD, 0);
+          this.link_ports(Pointer(dup_addr, 0), func_ptr);
+          this.link_ports(Pointer(app_addr, 1), argm_ptr);
+          this.link_ports(Pointer(dup_addr, 1), Pointer(app_addr, 0));
+          this.link_ports(Pointer(dup_addr, 2), Pointer(addr_of(pair_ptr), 1));
+          this.link_ports(Pointer(app_addr, 2), Pointer(addr_of(pair_ptr), 2));
+          this.link_ports(Pointer(a_addr, 0), Numeric(numb_of(b_ptrn) - 1));
+        }
 
       } else {
         throw "[ERROR]\nInvalid interaction.";
@@ -309,8 +335,13 @@ class Net {
           this.rewrite(addr_of(prev));
           stats.rewrites += 1;
           stats.max_len = Math.max(stats.max_len, this.nodes.length / 4);
-          prev = back.pop();
-          next = this.enter_port(prev);
+          if (type_of(prev) === PTR && this.type_of(addr_of(prev)) === FOR && numb_of(next) > 0) {
+            prev = Pointer(addr_of(prev), 1);
+            next = this.enter_port(prev);
+          } else {
+            prev = back.pop();
+            next = this.enter_port(prev);
+          }
           ++rwts;
         } else if (type_of(next) === NUM) {
           [prev,next] = [next,prev];
@@ -409,4 +440,4 @@ class Net {
   }
 }
 
-module.exports = {Pointer, addr_of, slot_of, Numeric, numb_of, type_of, Net, NUM, PTR, NOD, OP1, OP2, ITE};
+module.exports = {Pointer, addr_of, slot_of, Numeric, numb_of, type_of, Net, NUM, PTR, NOD, OP1, OP2, ITE, FOR};
