@@ -14,6 +14,13 @@ def boxed_add: {x y}
   dup y = y
   # |x + y|
 
+def num_dif: {a b}
+  cpy a = a
+  cpy b = b
+  if |a > b|
+  then: |a - b|
+  else: |b - a|
+
 def num_to_char: {n}
   cpy n = n
   if |n < 10|
@@ -76,5 +83,9 @@ def box_num: {n}
     (b07 (b06 (b05 (b04 (b03 (b02 (b01 (b00
       0))))))))))))))))))))))))))))))))
 
-def num:
-  (from_chars (ConsF #(num_to_char 32) NilF))
+def num_from_nat: {n}
+  dup fold = (n #{x}|x + 1|)
+  # (fold 0)
+
+def sqrt: {n}
+  |n ^^ 2147483648|

@@ -12,6 +12,11 @@ def vec2_add: {a b}
   get [bx,by] = b
   [|ax + bx|, |ay + by|]
 
+// vec2_scale
+def vec2_scale: {a s}
+  get [ax,ay] = a
+  [|ax * s|, |ay * s|]
+
 // vec2_neg
 // | Negates a 2D vector
 // : {a : [Num,Num]}
@@ -31,7 +36,25 @@ def vec2_cpy: {a}
   cpy ay      = ay
   [[ax,ay], [ax,ay]]
 
-// vec_line
+// vec2_sqr_dist
+// : {a : [Num,Num]}
+//   {b : [Num,Num]}
+//   Num
+def vec2_sqr_dist: {a b}
+  get [ax,ay] = a
+  get [bx,by] = b
+  cpy dx = |(num_dif ax bx) ** 2|
+  cpy dy = |(num_dif ay by) ** 2|
+  |dx + dy|
+
+// vec2_dist
+// : {a : [Num,Num]}
+//   {b : [Num,Num]}
+//   Num
+def vec2_dist: {a b}
+  (sqrt (vec2_sqr_dist a b))
+
+// vec2_line
 // | Up to `max_len`, given a length `len`, a center pos `pos`, and a displacement
 // | vector `dxy`, returns vectors from `pos`, incrementing by `dxy`, `len` times.
 // : {max_len : Nat}
@@ -42,7 +65,7 @@ def vec2_cpy: {a}
 //   {dxy     : [Num,Num]}
 //   {nil     : P}
 //   P
-def vec_line: {max_len} {cons}
+def vec2_line: {max_len} {cons}
   dup cons = cons
   dup fold = (max_len #{list len pos dxy}
     get [ax,ay] = pos
@@ -59,7 +82,62 @@ def vec_line: {max_len} {cons}
   # {len pos dxy nil}
     (fold {len pos dxy}nil len pos dxy)
 
-// vec_wave
+// vec2_area
+// : {mlen : Nat}
+//   {size : [Num,Num]}
+//   {-P   : Type}
+//   {cond : ! {x : [Num,Num]} Num}
+//   {cons : ! {x : [Num,Num]} {xs : P} P}
+// ! {pos  : [Num,Num]}
+//   {siz  : [Num,Num]}
+//   {nil  : P}
+//   P
+def vec2_area: {mlen size cond} {cons}
+  dup cons = cons
+  dup size = size
+  dup cond = cond
+  dup fold = (mlen #{list pos idx}
+    get [cx,cy] = pos
+    get [sx,sy] = size
+    cpy sx = sx
+    cpy sy = sy
+    cpy cx = cx
+    cpy cy = cy
+    cpy ix = idx
+    cpy px = ||cx + |ix % sx|| - |sx / 2||
+    cpy py = ||cy + |ix / sx|| - |sy / 2||
+    let fn = (if (cond [cx,cy] [sx,sy] [px,py]) [(cons [px,py]),{x}x])
+    let xs = (list [cx,cy] |ix + 1|)
+    (fn xs))
+  # {pos nil}
+    (fold {pos idx}nil pos 0)
+
+// vec2_area
+// : {max_len : Nat}
+//   {-P      : Type}
+//   {cons    : ! {x : [Num,Num]} {xs : P} P}
+// ! {pos     : [Num,Num]}
+//   {siz     : [Num,Num]}
+//   {nil     : P}
+//   P
+def vec2_rect: {mlen size}
+  (vec2_area mlen size #{cen siz pos}1)
+
+//vec2_circle
+def vec2_circle: {mlen srad cons}
+  dup cons = cons
+  dup srad = srad
+  let isin = {cen siz pos} |(vec2_sqr_dist cen pos) < srad|
+  dup size = #||(sqrt srad) * 2| + 1|
+  dup area = (vec2_area mlen #[size,size] #isin #cons)
+  # {pos} (area pos)
+
+def vector2: {cons}
+  dup cons = cons
+  dup circ = (vec2_circle ~256 #16 #cons)
+  # (circ [16,16])
+
+// vec2_wave
 // | Given a list of widths, returns vectors filling a wave from from `pos` pointing to `dir`.
 // : {widths : {-P : Type} {cons : ! {w : Num} {ws : P} P} ! {nil : P} P}
 //   {-P     : Type}
@@ -68,9 +146,9 @@ def vec_line: {max_len} {cons}
 //   {dxy    : [Num,Num]}
 //   {nil    : P}
 //   P
-def vec_wave: {widths} {cons}
+def vec2_wave: {widths} {cons}
   dup cons = cons
-  dup line = (vec_line ~7 #cons)
+  dup line = (vec2_line ~7 #cons)
   dup fold = (widths #{w ws pos dxy}
     get [ax,ay] = pos
     get [dx,dy] = dxy
@@ -88,7 +166,7 @@ def vec_wave: {widths} {cons}
   # {pos dxy nil}
     (fold {pos dxy}nil pos dxy)
 
-// vec_wave_out
+// vec2_wave_out
 // : {widths : {-P : Type} {cons : ! {w : Num} {ws : P} P} ! {nil : P} P}
 //   {-P     : Type}
 //   {cons   : ! {pos : [Num,Num]} {dir : [Num,Num]} {res : P} P}
@@ -96,16 +174,16 @@ def vec_wave: {widths} {cons}
 //   {dxy    : [Num,Num]}
 //   {nil    : P}
 //   P
-def vec_wave_out: {widths} {cons} 
+def vec2_wave_out: {widths} {cons} 
   dup cons = cons
-  dup wave = (vec_wave widths #{pos rest dxy}
+  dup wave = (vec2_wave widths #{pos rest dxy}
     get [dxy0,dxy1] = (vec2_cpy dxy)
     (cons pos dxy0 (rest dxy1)))
   # {pos dxy nil}
     get [dxy0,dxy1] = (vec2_cpy dxy)
     (wave pos dxy0 {dxy}nil dxy1)
 
-// vec_wave_in
+// vec2_wave_in
 // : {widths : {-P : Type} {cons : ! {w : Num} {ws : P} P} ! {nil : P} P}
 //   {-P     : Type}
 //   {cons   : ! {pos : [Num,Num]} {dir : [Num,Num]} {res : P} P}
@@ -113,9 +191,9 @@ def vec_wave_out: {widths} {cons}
 //   {dxy    : [Num,Num]}
 //   {nil    : P}
 //   P
-def vec_wave_in: {widths} {cons} 
+def vec2_wave_in: {widths} {cons} 
   dup cons = cons
-  dup wave = (vec_wave widths #{pos rest res dxy}
+  dup wave = (vec2_wave widths #{pos rest res dxy}
     get [dxy0,dxy1] = (vec2_cpy dxy)
     (rest (cons pos dxy0 res) dxy1))
   # {pos dxy nil}

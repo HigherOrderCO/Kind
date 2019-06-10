@@ -691,6 +691,7 @@ const norm = (term, defs = {}, to_lam = false) => {
         case "/"  : return Num((num0[1].numb / num1[1].numb) >>> 0);
         case "%"  : return Num((num0[1].numb % num1[1].numb) >>> 0);
         case "**" : return Num((num0[1].numb ** num1[1].numb) >>> 0);
+        case "^^" : return Num((num0[1].numb ** (num1[1].numb / (2 ** 32))) >>> 0);
         case "&"  : return Num((num0[1].numb & num1[1].numb) >>> 0);
         case "|"  : return Num((num0[1].numb | num1[1].numb) >>> 0);
         case "^"  : return Num((num0[1].numb ^ num1[1].numb) >>> 0);
