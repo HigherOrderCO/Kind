@@ -297,8 +297,40 @@ def keccak.f_loop: {arr} {t}
       #a40 #a41 #a42 #a43 #a44 #a45 #a46 #a47 #a48 #a49))
 
 def keccak.f: {arr}
-  (nfor ~24 arr #keccak.f_loop #{x}x)
+  dup arr = arr
+  dup iterate = (nfor ~24 #{t}(arr (t #0)) #keccak.f_loop #{x}x)
+  #{t} (iterate {-}t)
 
-def keccak.zero_array: {t} (t 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+def keccak.zero_array: {t} (t #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0)
 def keccak.example_hash: (keccak.f #keccak.zero_array)
 def hash: keccak.example_hash
+
+def update_zero: {t k} (k t)
+def pushfront_update: {f update} {t k} {x} (update (t (f x)) k)
+def pushback_update: {f update} {t k} (update t {tup} {x} (k (tup (f x))))
+def apply_update: {update arr} {t} (arr (update t {x} x))
+
+// Currently only works for strings composed of chunks of 4 bytes. The result hash of a string with a length not multiple of 4 will be
+// the Keccak hash of the string concatenated with the smallest string of \0's such that the result has a length that is a multiple of 4.
+def Keccak256: {str}
+  let words = (snd str) 
+  let state = {t} (t #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0) 
+  let update = update_zero
+  let fold_cons = {x h i state update}
+    cpy i = i
+    (if ||i % 34| == 33|
+    then: {x h i state update} (h |i + 1| (keccak.f (apply_update (pushback_update {y} |x ^ y| update) state)) update_zero)
+    else: {x h i state update} (h |i + 1| state (pushback_update {y} |x ^ y| update))
+    x h i state update)
+  let fold_nil = {i state update}
+    (keccak.f
+      {t} (apply_update (pushback_update {y} |y ^ 1| update) state
+          {s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 s12 s13 s14 s15 s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31 s32 s33}
+          (t s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 s12 s13 s14 s15 s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31 s32 |s33 ^ 2147483648|))
+      {a1 a2 a3 a4 a5 a6 a7 a8 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -}
+      (ConsF a1 (ConsF a2 (ConsF a3 (ConsF a4 (ConsF a5 (ConsF a6 (ConsF a7 (ConsF a8 NilF)))))))))
+  dup fold = (words #fold_cons)
+# (fold fold_nil 0 state update)
+
+def stringtest: "test keccak hash"
+def keccaktest: (Keccak256 stringtest)
