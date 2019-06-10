@@ -240,7 +240,7 @@ def vec2_circle_j: (vec2_circle ~81 #17)
 
 def vec2_circle_example: {cons}
   dup cons = cons
-  dup circ = (vec2_circle_j #cons)
+  dup circ = (vec2_circle_d #cons)
   # (circ [100,100])
 
 // vec2_wave
