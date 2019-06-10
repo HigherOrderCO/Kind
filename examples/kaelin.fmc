@@ -202,6 +202,7 @@ def kaelin:
   dup write       = board_write
   dup step        = step
   dup earth_pull  = earth_pull
+  dup flame_wave  = flame_wave
   dup print_board = print_board
   dup board_inter = board_interact
 
@@ -242,7 +243,8 @@ def kaelin:
     let board = (earth_pull [5,23] [-1,0] board)
     let board = (earth_pull [5,23] [-1,0] board)
 
-    let board = (board_inter [29,1] [30,1] {a b}[(damage 10 b), (damage 10 a)] board)
+    //let board = (board_inter [29,1] [30,1] {a b}[(damage 10 b), (damage 10 a)] board)
+    let board   = (flame_wave [3, 23] [1,0] board)
 
     (print_board board)
 
