@@ -148,15 +148,16 @@ class Net {
           case  3: var res = Numeric((fst / snd) >>> 0); break;
           case  4: var res = Numeric((fst % snd) >>> 0); break;
           case  5: var res = Numeric((fst ** snd) >>> 0); break;
-          case  6: var res = Numeric((fst & snd) >>> 0); break;
-          case  7: var res = Numeric((fst | snd) >>> 0); break;
-          case  8: var res = Numeric((fst ^ snd) >>> 0); break;
-          case  9: var res = Numeric((~snd) >>> 0); break;
-          case 10: var res = Numeric((fst >>> snd) >>> 0); break;
-          case 11: var res = Numeric((fst << snd) >>> 0); break;
-          case 12: var res = Numeric((fst > snd ? 1 : 0) >>> 0); break;
-          case 13: var res = Numeric((fst < snd ? 1 : 0) >>> 0); break;
-          case 14: var res = Numeric((fst == snd ? 1 : 0) >>> 0); break;
+          case  6: var res = Numeric((fst ** (snd / (2 ** 32)) >>> 0)); break;
+          case  7: var res = Numeric((fst & snd) >>> 0); break;
+          case  8: var res = Numeric((fst | snd) >>> 0); break;
+          case  9: var res = Numeric((fst ^ snd) >>> 0); break;
+          case 10: var res = Numeric((~snd) >>> 0); break;
+          case 11: var res = Numeric((fst >>> snd) >>> 0); break;
+          case 12: var res = Numeric((fst << snd) >>> 0); break;
+          case 13: var res = Numeric((fst > snd ? 1 : 0) >>> 0); break;
+          case 14: var res = Numeric((fst < snd ? 1 : 0) >>> 0); break;
+          case 15: var res = Numeric((fst == snd ? 1 : 0) >>> 0); break;
           default: throw "[ERROR]\nInvalid interaction.";
         }
         this.link_ports(dst, res);

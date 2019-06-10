@@ -180,15 +180,16 @@ void rewrite(Net* net, u32 a_addr) {
         case  3: res = Numeric(fst / snd); break;
         case  4: res = Numeric(fst % snd); break;
         case  5: res = Numeric((u32)(pow((float)fst, (float)snd))); break;
-        case  6: res = Numeric(fst & snd); break;
-        case  7: res = Numeric(fst | snd); break;
-        case  8: res = Numeric(fst ^ snd); break;
-        case  9: res = Numeric(~snd); break;
-        case 10: res = Numeric(fst >> snd); break;
-        case 11: res = Numeric(fst << snd); break;
-        case 12: res = Numeric(fst > snd ? 1 : 0); break;
-        case 13: res = Numeric(fst < snd ? 1 : 0); break;
-        case 14: res = Numeric(fst == snd ? 1 : 0); break;
+        case  6: res = Numeric((u32)(pow((float)fst, ((float)snd / pow(2.0,32.0))))); break;
+        case  7: res = Numeric(fst & snd); break;
+        case  8: res = Numeric(fst | snd); break;
+        case  9: res = Numeric(fst ^ snd); break;
+        case 10: res = Numeric(~snd); break;
+        case 11: res = Numeric(fst >> snd); break;
+        case 12: res = Numeric(fst << snd); break;
+        case 13: res = Numeric(fst > snd ? 1 : 0); break;
+        case 14: res = Numeric(fst < snd ? 1 : 0); break;
+        case 15: res = Numeric(fst == snd ? 1 : 0); break;
         default: res = 0; printf("[ERROR]\nInvalid interaction."); break;
       }
       link_ports(net, dst, res);
@@ -199,10 +200,9 @@ void rewrite(Net* net, u32 a_addr) {
     // BinaryOperation
     } else if (a_type == OP2) {
       set_type(net, a_addr, OP1);
-      u64 num0_ptr = enter_port(net, Pointer(a_addr, 1));
-      u64 num1_ptr = enter_port(net, Pointer(a_addr, 0));
-      link_ports(net, num0_ptr, Pointer(a_addr, 0));
-      link_ports(net, num1_ptr, Pointer(a_addr, 1));
+      link_ports(net, Pointer(a_addr, 0), enter_port(net, Pointer(a_addr, 1)));
+      unlink_port(net, Pointer(a_addr, 1));
+      link_ports(net, Pointer(a_addr, 1), b_ptrn);
   
     // NumberDuplication
     } else if (a_type == NOD) {
