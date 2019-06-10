@@ -34,6 +34,7 @@ const compile = ([ctor, term], defs, vars) => {
         case "/"  : return (num0 / num1) >>> 0;
         case "%"  : return (num0 % num1) >>> 0;
         case "**" : return (num0 ** num1) >>> 0;
+        case "^^" : return (num0 ** (num1 / (2 ** 32))) >>> 0;
         case "&"  : return (num0 & num1) >>> 0;
         case "|"  : return (num0 | num1) >>> 0;
         case "^"  : return (num0 ^ num1) >>> 0;

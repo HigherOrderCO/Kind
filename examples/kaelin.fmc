@@ -626,7 +626,7 @@ def earth_pull:
   dup step = step
   let form = (ConsF #1 (ConsF #3 (ConsF #5 NilF)))
   let hits = {pos dxy board} (step pos dxy board)
-  (vec_wave_in form #hits)
+  (vec2_wave_in form #hits)
 
 def moves:
   let m00 = wait
