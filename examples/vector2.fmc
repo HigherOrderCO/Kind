@@ -84,8 +84,8 @@ def vec2_line: {max_len} {cons}
 
 // vec2_area
 // : {mlen : Nat}
-//   {size : [Num,Num]}
 //   {-P   : Type}
+//   {size : [Num,Num]}
 //   {cond : ! {x : [Num,Num]} Num}
 //   {cons : ! {x : [Num,Num]} {xs : P} P}
 // ! {pos  : [Num,Num]}
@@ -112,18 +112,32 @@ def vec2_area: {mlen size cond} {cons}
   # {pos nil}
     (fold {pos idx}nil pos 0)
 
-// vec2_area
-// : {max_len : Nat}
-//   {-P      : Type}
-//   {cons    : ! {x : [Num,Num]} {xs : P} P}
-// ! {pos     : [Num,Num]}
-//   {siz     : [Num,Num]}
-//   {nil     : P}
+// vec2_rect
+// : {mlen : Nat}
+//   {-P   : Type}
+//   {size : [Num,Num]}
+//   {cons : ! {x : [Num,Num]} {xs : P} P}
+// ! {pos  : [Num,Num]}
+//   {siz  : [Num,Num]}
+//   {nil  : P}
 //   P
 def vec2_rect: {mlen size}
   (vec2_area mlen size #{cen siz pos}1)
 
+def vec2_rect_example: {cons}
+  dup cons = cons
+  dup area = (vec2_rect ~16 #[4,4] #cons)
+  # (area [100,100])
+
 //vec2_circle
+// : {mlen : Nat}
+//   {-P   : Type}
+//   {srad : Num} -- squared radius
+//   {cons : ! {x : [Num,Num]} {xs : P} P}
+// ! {pos  : [Num,Num]}
+//   {siz  : [Num,Num]}
+//   {nil  : P}
+//   P
 def vec2_circle: {mlen srad cons}
   dup cons = cons
   dup srad = srad
@@ -132,10 +146,102 @@ def vec2_circle: {mlen srad cons}
   dup area = (vec2_area mlen #[size,size] #isin #cons)
   # {pos} (area pos)
 
-def vector2: {cons}
+// . . .
+// . x .
+// . . .
+def vec2_circle_a: (vec2_circle ~1 #1)
+
+// . . . . .
+// . . x . .
+// . x x x .
+// . . x . .
+// . . . . .
+def vec2_circle_b: (vec2_circle ~9 #2)
+
+// . . . . .
+// . x x x .
+// . x x x .
+// . x x x .
+// . . . . .
+def vec2_circle_c: (vec2_circle ~9 #3)
+
+// . . . . . . .
+// . . . x . . .
+// . . x x x . .
+// . x x x x x .
+// . . x x x . .
+// . . . x . . .
+// . . . . . . .
+def vec2_circle_d: (vec2_circle ~25 #5)
+
+// . . . . . . .
+// . . x x x . .
+// . x x x x x .
+// . x x x x x .
+// . x x x x x .
+// . . x x x . .
+// . . . . . . .
+def vec2_circle_e: (vec2_circle ~25 #6)
+
+// . . . . . . .
+// . x x x x x .
+// . x x x x x .
+// . x x x x x .
+// . x x x x x .
+// . x x x x x .
+// . . . . . . .
+def vec2_circle_f: (vec2_circle ~25 #9)
+
+// . . . . . . . . .
+// . . . . x . . . .
+// . . x x x x x . .
+// . . x x x x x . .
+// . x x x x x x x .
+// . . x x x x x . .
+// . . x x x x x . .
+// . . . . x . . . .
+// . . . . . . . . .
+def vec2_circle_g: (vec2_circle ~49 #10)
+
+// . . . . . . . . .
+// . . . x x x . . .
+// . . x x x x x . .
+// . x x x x x x x .
+// . x x x x x x x .
+// . x x x x x x x .
+// . . x x x x x . .
+// . . . x x x . . .
+// . . . . . . . . .
+def vec2_circle_h: (vec2_circle ~49 #11)
+
+// . . . . . . . . .
+// . . x x x x x . .
+// . x x x x x x x .
+// . x x x x x x x .
+// . x x x x x x x .
+// . x x x x x x x .
+// . x x x x x x x .
+// . . x x x x x . .
+// . . . . . . . . .
+def vec2_circle_i: (vec2_circle ~49 #14)
+
+// . . . . . . . . . . .
+// . . . . . x . . . . .
+// . . . x x x x x . . .
+// . . x x x x x x x . .
+// . . x x x x x x x . .
+// . x x x x x x x x x .
+// . . x x x x x x x . .
+// . . x x x x x x x . .
+// . . . x x x x x . . .
+// . . . . . x . . . . .
+// . . . . . . . . . . .
+def vec2_circle_j: (vec2_circle ~81 #17)
+
+def vec2_circle_example: {cons}
   dup cons = cons
-  dup circ = (vec2_circle ~256 #16 #cons)
-  # (circ [16,16])
+  dup circ = (vec2_circle_d #cons)
+  # (circ [100,100])
 
 // vec2_wave
 // | Given a list of widths, returns vectors filling a wave from `pos` pointing to `dir`.
