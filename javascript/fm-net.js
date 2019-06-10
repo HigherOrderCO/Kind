@@ -167,10 +167,9 @@ class Net {
       // BinaryOperation
       } else if (a_type === OP2) {
         this.set_type(a_addr, OP1);
-        var num0_ptr = this.enter_port(Pointer(a_addr, 1));
-        var num1_ptr = this.enter_port(Pointer(a_addr, 0));
-        this.link_ports(num0_ptr, Pointer(a_addr, 0));
-        this.link_ports(num1_ptr, Pointer(a_addr, 1));
+        this.link_ports(Pointer(a_addr, 0), this.enter_port(Pointer(a_addr, 1)));
+        this.unlink_port(Pointer(a_addr, 1));
+        this.link_ports(Pointer(a_addr, 1), b_ptrn);
     
       // NumberDuplication
       } else if (a_type === NOD) {
