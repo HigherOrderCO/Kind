@@ -7,7 +7,7 @@ def fib: {n}
     [b, |a + b|]
   let stop = {state}
     (snd state)
-  (nfor n #init #loop #stop)
+  (for n #init #loop #stop)
 
 def boxed_add: {x y}
   dup x = x

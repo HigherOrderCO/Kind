@@ -1,6 +1,6 @@
 // ~~ Compiles Formality Core to Formality Net ~~
 
-const {Var, App, Lam, Num, Op1, Op2, Ite, Par, Fst, Snd, For, gen_name} = require("./fm-core.js");
+const {Var, App, Lam, Num, Op1, Op2, Ite, Par, Fst, Snd, gen_name} = require("./fm-core.js");
 const {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, NOD, OP1, OP2, NUM, ITE, PTR, FOR} = require("formality-net");
 
 
@@ -119,17 +119,6 @@ const compile = (term, defs = {}) => {
         var pair_ptr = build_net(term[1].pair, net, var_ptrs, level);
         net.link_ports(Pointer(ite_addr, 1), pair_ptr);
         return Pointer(ite_addr, 2);
-      case "For":
-        var for_addr = net.alloc_node(FOR, level + 1);
-        var par_addr = net.alloc_node(FOR, level + 1);
-        net.link_ports(Pointer(for_addr, 1), Pointer(par_addr, 0));
-        var numb_ptr = build_net(term[1].numb, net, var_ptrs, level);
-        net.link_ports(Pointer(for_addr, 0), numb_ptr);
-        var func_ptr = build_net(term[1].func, net, var_ptrs, level);
-        net.link_ports(Pointer(par_addr, 1), func_ptr);
-        var argm_ptr = build_net(term[1].argm, net, var_ptrs, level);
-        net.link_ports(Pointer(par_addr, 2), argm_ptr);
-        return Pointer(for_addr, 2);
       case "Cpy":
         var numb_ptr = build_net(term[1].numb, net, var_ptrs, level);
         level_of[numb_ptr] = 0xFFFE;
@@ -235,12 +224,6 @@ const decompile = (net) => {
         var cond = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
         var pair = build_term(net, net.enter_port(Pointer(addr, 1)), var_ptrs, dup_exit);
         return Ite(cond, pair);
-      } else if (type === FOR) {
-        var numb = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
-        var pair = addr_of(net.enter_port(Pointer(addr, 1)));
-        var func = build_term(net, net.enter_port(Pointer(pair, 1)), var_ptrs, dup_exit);
-        var argm = build_term(net, net.enter_port(Pointer(pair, 2)), var_ptrs, dup_exit);
-        return For(numb, func, argm);
       }
     }
   };

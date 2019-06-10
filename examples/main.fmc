@@ -45,15 +45,15 @@ def string_concat_test:
   (string_concat "Hello, " "world!")
 
 def sum_test:
-  let upto = 100000
+  let upto = ~100000
   let init =
     [0, 0]
   let loop = {state}
     get [idx, sum] = state
     cpy idx        = idx
     [|idx + 1|, |sum + idx|]
-  dup res = (for upto #init #loop)
-  # snd res
+  let done = {state} snd state
+  (for upto #init #loop #done)
 
 def term_test:
   term_example

@@ -143,4 +143,4 @@ def to_string: {len}
   let stop = {call term}
     get [call, chrs] = (call TERM_TO_CHARS term 0)
     (from_chars chrs)
-  (nfor len #init #loop #stop)
+  (for len #init #loop #stop)
