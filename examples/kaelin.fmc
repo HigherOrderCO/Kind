@@ -206,6 +206,8 @@ def kaelin:
   dup print_board = print_board
   dup board_inter = board_interact
   dup flame_ball  = flame_ball
+  dup flame_soul  = flame_soul
+  dup flame_nova  = flame_nova
 
   # let board = new_board
     let board = (step [1,30] [0,-1] board)
@@ -246,16 +248,18 @@ def kaelin:
 
     //let board = (board_inter [29,1] [30,1] {a b}[(damage 10 b), (damage 10 a)] board)
     //let board   = (flame_wave [3, 23] [1,0] board)
-    let board = (flame_ball [4,23] board)
+    //let board = (flame_ball [4,23] board)
+    //let board = (flame_soul [6, 23] board)
+    let board = (flame_nova [8, 23] board)
 
     (print_board board)
 
 // Change the occurrence of a 
 def damage_visual_effect: {dmg piece}
   let case_air    = Cliff
-  let case_wall   = Cliff
+  let case_wall   = Wall
   let case_cliff  = Cliff
-  let case_throne = {side} Cliff
+  let case_throne = {side} (Throne side)
   let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
   (piece case_air case_wall case_cliff case_throne case_unit)
 
@@ -622,13 +626,6 @@ def print_board:
     let board = (cons-every #64 #10 board)
     (from_chars (concat (ConsF 10 NilF) (concat info board)))
 
-
-def board_write:
-  (write ~10)
-
-def board_take:
-  (take ~10)
-
 // Read the map as a binary tree with deep of 10 (that is 2^10 elements = 1024)  
 def kmap_take:
   (take ~10)
@@ -665,10 +662,21 @@ def flame_wave:
 
 // Hits a 5x5 (circle). Deals 5 damage.
 def flame_ball:
-  let hits    = {pos board} (board_apply pos (damage 5) board)
-  let test = {pos board} (board_apply pos (damage_visual_effect 5) board)
-  (vec2_circle_e #test)
+  let hits   = {pos board} (board_apply pos (damage 5) board)
+  let visual = {pos board} (board_apply pos (damage_visual_effect 5) board)
+  (vec2_circle_e #visual)
 
+// Deals massive damage (20?)
+def flame_soul:
+  let hits   = {pos board} (board_apply pos (damage 20) board)
+  let visual = {pos board} (board_apply pos (damage_visual_effect 20) board)
+  visual
+
+// Deals massive damage in a 11x11 circle (20?)
+def flame_nova:
+  let hits   = {pos board} (board_apply pos (damage 20) board)
+  let visual = {pos board} (board_apply pos (damage_visual_effect 20) board)
+  (vec2_circle_j #visual)
 
 
 def moves:
