@@ -246,7 +246,7 @@ def vec2_circle_example:
   # (circ [0,0] 0)
 
 // vec2_wave
-// | Given a list of widths, returns vectors filling a wave from from `pos` pointing to `dir`.
+// | Given a list of widths, returns vectors filling a wave from `pos` pointing to `dir`.
 // : {widths : {-P : Type} {cons : ! {w : Num} {ws : P} P} ! {nil : P} P}
 //   {-P     : Type}
 //   {cons   : ! {pos : [Num,Num]} {res : P} P}

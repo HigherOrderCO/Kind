@@ -69,7 +69,7 @@
 //
 // - Erkos
 //   - Flame Ball : hits a 5x5 (circle) up to 4 range.
-//   - Flame Wave : hits a 3-3-5-5 (wave) ahead.
+//   - Flame Wave : hits a 1-3-3-5-5 (wave) ahead. Deals 5 damage.
 //   - Flame Rage : on the next turn, attacks deal +2 dmg. Stacks. Can't attack on this turn.
 //   - Flame Soul : selects an enemy up to 1 range. Deals massive damage (20?).
 //   - Flame Nova : loses 30 HP. Deals massive damage in a 11x11 circle (20?).
@@ -208,6 +208,7 @@ def kaelin:
   dup board_write = (write ~10)
   dup step        = step
   dup earth_pull  = earth_pull
+  dup flame_wave  = flame_wave
   dup print_board = print_board
   dup board_inter = board_interact
   dup exec_turn   = exec_turn
@@ -230,7 +231,7 @@ def kaelin:
     [(print_board board), anims]
 
 // TODO: 
-// - check is a the life of the piece is bigger than the damage
+// - check if the life of "piece" is bigger than the damage
 def damage: {dmg piece}
   let case_air    = Air
   let case_wall   = Wall
@@ -584,6 +585,17 @@ def board_interact:
     let board         = (write b_idx b_val board)
    board 
 
+// Apply a function to a board piece
+def board_apply:
+  dup write = (write ~10)
+  dup take  = (take ~10)
+  # {pos fun board}
+    cpy p_idx       = (index pos)
+    get [board,val] = (take p_idx Air board)
+    let p_update    = (fun val)
+    let board       = (write p_idx p_update board)
+  board
+
 def print_board:
   dup fold = (fold_array ~10)
   dup piece_info = #piece_info
@@ -619,6 +631,14 @@ def earth_pull:
   let form = (ConsF #1 (ConsF #3 (ConsF #5 NilF)))
   let hits = {pos dxy board} (step pos dxy board)
   (vec2_wave_in form #hits)
+
+// [Erkos]
+// Hits a 1-3-3-5-5 (wave) ahead.
+def flame_wave:
+  let form  = (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))
+  // missing the direction to apply the wave
+  let hits = {pos board} (board_apply pos (damage 5) board)  
+  (vec2_wave form #hits)
 
 // :::::::::::
 // :: Moves ::
