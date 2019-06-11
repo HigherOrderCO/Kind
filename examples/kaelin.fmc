@@ -94,7 +94,7 @@
 // 
 // - Kenlua
 //   - Dodge : select 4 tiles up to 32 range. Prevent all damage from enemies standing on those tiles during this turn.
-//   - Whirl : hits a 3x3 (square) around, dealing damage. 
+//   - Slice : hits a 3x3 (square) around, dealing damage. 
 //   - Haste : moves 4 steps. 
 //   - Slash : hits a 1x1 (point) up to 1 range. Deals massive damage. If the hit lands, returns to the position you were at the beginning of the turn.
 // 
@@ -127,11 +127,12 @@
 // 
 // ## Move Priority
 // 
+// <<Instant: 0>>
 // - Croni Shadow Trap (activate)
-// - 
 // - Agdris Silence
 // - Agdris Memento
-// - 
+//
+// <<SelfCast: 16>>
 // - Sirpix Stealth Clone
 // - Snarch Ballista
 // - Erkos Flame Rage
@@ -142,12 +143,13 @@
 // - Tophoro Earth Root
 // - Mewru Absorb
 // - Croni Shadow Bond
-// - 
+// 
+// <<PointAndClick: 64>>
 // - Tophoro Earth Lock
 // - Stanci Shield
 // - Stanci Heal
 // - Kenlua Haste
-// - Kenlua Whirl
+// - Kenlua Slice
 // - Sirpix Stealth Swap
 // - SirPix Killing Edge
 // - Stanci Light
@@ -155,10 +157,12 @@
 // - Flina Lance
 // - Erkos Flame Soul
 // - Gonk Shatter
-// - 
+//
+// <<TerrainControl: 112>>
 // - Tophoro Earth Wall
 // - Croni Shadow Doll
-// -
+//
+// - <<Walk: 128>>
 // - Kenlua Walk
 // - Sirpix Walk
 // - Flina Walk
@@ -171,15 +175,15 @@
 // - Agdris Walk
 // - Mewru Walk
 // - Zagatur Walk
-// -
+//
+// <<Post-Walk: 160>>
 // - Flina Fly
 // - Mewru Teleport
-// -
 // - Kenlua Dodge
-// - 
+// 
+// <<Skillshot: 176>>
 // - Tophoro Earth Pull
 // - Tophoro Earth Slam
-// - 
 // - Kenlua Slash
 // - Snarch Piercing Bolt
 // - Snarch Explosive Arrow
@@ -193,58 +197,37 @@
 // - Croni Shadow Flux
 // - Croni Shadow Ball
 // - Stanci Restore
-// 
+//
+// <<EndTurn: 224>>
 // - Croni Shadow Trap (place)
 // - Zagatur Summon
 
 // Testing pull action
 def kaelin:
-  dup write       = board_write
+  dup casts_write = (write ~8)
+  dup board_write = (write ~10)
   dup step        = step
   dup earth_pull  = earth_pull
   dup print_board = print_board
   dup board_inter = board_interact
+  dup exec_turn   = exec_turn
+  let casts       = empty_casts
 
   # let board = new_board
-    let board = (step [1,30] [0,-1] board)
-    let board = (step [1,29] [0,-1] board)
-    let board = (step [1,28] [0,-1] board)
-    let board = (step [1,27] [0,-1] board)
-    let board = (step [1,26] [0,-1] board)
-    let board = (step [1,25] [0,-1] board)
-    let board = (step [1,24] [0,-1] board)
 
-    let board = (step [2,30] [0,-1] board)
-    let board = (step [2,29] [0,-1] board)
-    let board = (step [2,28] [0,-1] board)
-    let board = (step [2,27] [0,-1] board)
-    let board = (step [2,26] [0,-1] board)
-    let board = (step [2,25] [0,-1] board)
-    let board = (step [2,24] [0,-1] board)
+    // Move Croni to below Tophoro
+    let board = (step [29,1] [0,1] board)
+    let board = (step [29,2] [0,1] board)
+    let board = (step [29,3] [1,0] board)
 
-    let board = (step [4,30] [0,-1] board)
-    let board = (step [4,29] [0,-1] board)
-    let board = (step [4,28] [0,-1] board)
-    let board = (step [4,27] [0,-1] board)
-    let board = (step [4,26] [0,-1] board)
-    let board = (step [4,25] [0,-1] board)
-    let board = (step [4,24] [0,-1] board)
+    // Deals damage to Erkos and Gonk
+    let board = (board_inter [1,30] [2,30] {a b}[(damage 5 b), (damage 5 a)] board)
 
-    let board = (step [5,30] [0,-1] board)
-    let board = (step [5,29] [0,-1] board)
-    let board = (step [5,28] [0,-1] board)
-    let board = (step [5,27] [0,-1] board)
-    let board = (step [5,26] [0,-1] board)
-    let board = (step [5,25] [0,-1] board)
-    let board = (step [5,24] [0,-1] board)
+    // Performs an example turn where Tophoro performs Earth Pull down
+    let casts = (casts_write EARTH_PULL [[30,1], {t}(t [0,1])] casts)
+    get [board, anims] = (exec_turn casts board)
 
-    let board = (earth_pull [4,23] [-1,0] board)
-    let board = (earth_pull [5,23] [-1,0] board)
-    let board = (earth_pull [5,23] [-1,0] board)
-
-    let board = (board_inter [29,1] [30,1] {a b}[(damage 10 b), (damage 10 a)] board)
-
-    (print_board board)
+    [(print_board board), anims]
 
 // TODO: 
 // - check is a the life of the piece is bigger than the damage
@@ -467,6 +450,28 @@ def piece_info:
       [val, info]
     (piece case_air case_wall case_cliff case_throne case_unit)
 
+def piece_cpy_with: {fn piece}
+  let case_air    = {fn} [Air, (fn Air)]
+  let case_wall   = {fn} [Wall, (fn Wall)]
+  let case_cliff  = {fn} [Cliff, (fn Cliff)]
+  let case_throne = {side} {fn}
+    cpy side = side
+    [(Throne side), (fn (Throne side))]
+  let case_unit = {side hero hp} {fn}
+    cpy side = side
+    cpy hero = hero
+    cpy hp   = hp
+    [(Unit side hero hp), (fn (Unit side hero hp))]
+  (piece case_air case_wall case_cliff case_throne case_unit fn)
+
+def piece_is_hero: {hero piece}
+  let case_air    = 0
+  let case_wall   = 0
+  let case_cliff  = 0
+  let case_throne = {a_side} 0
+  let case_unit   = {a_side a_hero a_hp} |a_hero == hero|
+  (piece case_air case_wall case_cliff case_throne case_unit)
+
 // "a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
 // - The same position: if they can't interact with each other.
 // - Inverted position: the elements interacted and one now occupies the position of the other.
@@ -562,7 +567,7 @@ def new_board:
 // Simulates an index in an array of 1024 elements (32x32 map).
 // x: column
 // y: line 
-def index: {pos}
+def board_index: {pos}
   get [x,y] = pos
   ||y * 32| + x|
 
@@ -570,13 +575,13 @@ def board_interact:
   dup write = (write ~10)
   dup take  = (take ~10)
   # {a_pos b_pos fun board}
-    cpy a_idx         = (index a_pos)
-    cpy b_idx         = (index b_pos)
-    get [board,a_val]   = (take a_idx Air board)
-    get [board,b_val]   = (take b_idx Air board)
+    cpy a_idx         = (board_index a_pos)
+    cpy b_idx         = (board_index b_pos)
+    get [board,a_val] = (take a_idx Air board)
+    get [board,b_val] = (take b_idx Air board)
     get [a_val,b_val] = (fun a_val b_val)
-    let board           = (write a_idx a_val board)
-    let board           = (write b_idx b_val board)
+    let board         = (write a_idx a_val board)
+    let board         = (write b_idx b_val board)
    board 
 
 def print_board:
@@ -595,23 +600,11 @@ def print_board:
       [info, (piece_icon piece)]
     get [info, board] = (fold board #fold_node #fold_leaf)
     let board = (cons-every #64 #10 board)
-    (from_chars (concat (ConsF 10 NilF) (concat info board)))
+    (from_chars (concat (ConsF 10 NilF) (concat info (concat board (ConsF 10 NilF)))))
 
-
-def board_write:
-  (write ~10)
-
-// Read the map as a binary tree with deep of 10 (that is 2^10 elements = 1024)  
-def kmap_take:
-  (take ~10)
-
-// :::::::::::
-// :: Moves ::
-// :::::::::::
-
-def wait:
-  # {board args}
-   board 
+// :::::::::::::
+// :: Effects ::
+// :::::::::::::
 
 // Given a position and a direction to step forward, move the element (if is possible) and return the updated map
 def step:
@@ -621,288 +614,69 @@ def step:
     let b_pos           = (vec2_add a_pos0 a_dxy)
     (inter a_pos1 b_pos a_step_to_b board)
 
-// [Tophoro]
 def earth_pull:
   dup step = step
   let form = (ConsF #1 (ConsF #3 (ConsF #5 NilF)))
   let hits = {pos dxy board} (step pos dxy board)
   (vec2_wave_in form #hits)
 
-def moves:
-  let m00 = wait
-  let m01 = wait
-  let m02 = wait
-  let m03 = wait
-  let m04 = wait
-  let m05 = wait
-  let m06 = wait
-  let m07 = wait
-  let m08 = wait
-  let m09 = wait
-  let m0A = wait
-  let m0B = wait
-  let m0C = wait
-  let m0D = wait
-  let m0E = wait
-  let m0F = wait
-  let m10 = wait
-  let m11 = wait
-  let m12 = wait
-  let m13 = wait
-  let m14 = wait
-  let m15 = wait
-  let m16 = wait
-  let m17 = wait
-  let m18 = wait
-  let m19 = wait
-  let m1A = wait
-  let m1B = wait
-  let m1C = wait
-  let m1D = wait
-  let m1E = wait
-  let m1F = wait
-  let m20 = wait
-  let m21 = wait
-  let m22 = wait
-  let m23 = wait
-  let m24 = wait
-  let m25 = wait
-  let m26 = wait
-  let m27 = wait
-  let m28 = wait
-  let m29 = wait
-  let m2A = wait
-  let m2B = wait
-  let m2C = wait
-  let m2D = wait
-  let m2E = wait
-  let m2F = wait
-  let m30 = wait
-  let m31 = wait
-  let m32 = wait
-  let m33 = wait
-  let m34 = wait
-  let m35 = wait
-  let m36 = wait
-  let m37 = wait
-  let m38 = wait
-  let m39 = wait
-  let m3A = wait
-  let m3B = wait
-  let m3C = wait
-  let m3D = wait
-  let m3E = wait
-  let m3F = wait
-  let m40 = wait
-  let m41 = wait
-  let m42 = wait
-  let m43 = wait
-  let m44 = wait
-  let m45 = wait
-  let m46 = wait
-  let m47 = wait
-  let m48 = wait
-  let m49 = wait
-  let m4A = wait
-  let m4B = wait
-  let m4C = wait
-  let m4D = wait
-  let m4E = wait
-  let m4F = wait
-  let m50 = wait
-  let m51 = wait
-  let m52 = wait
-  let m53 = wait
-  let m54 = wait
-  let m55 = wait
-  let m56 = wait
-  let m57 = wait
-  let m58 = wait
-  let m59 = wait
-  let m5A = wait
-  let m5B = wait
-  let m5C = wait
-  let m5D = wait
-  let m5E = wait
-  let m5F = wait
-  let m60 = wait
-  let m61 = wait
-  let m62 = wait
-  let m63 = wait
-  let m64 = wait
-  let m65 = wait
-  let m66 = wait
-  let m67 = wait
-  let m68 = wait
-  let m69 = wait
-  let m6A = wait
-  let m6B = wait
-  let m6C = wait
-  let m6D = wait
-  let m6E = wait
-  let m6F = wait
-  let m70 = wait
-  let m71 = wait
-  let m72 = wait
-  let m73 = wait
-  let m74 = wait
-  let m75 = wait
-  let m76 = wait
-  let m77 = wait
-  let m78 = wait
-  let m79 = wait
-  let m7A = wait
-  let m7B = wait
-  let m7C = wait
-  let m7D = wait
-  let m7E = wait
-  let m7F = wait
-  let m80 = wait
-  let m81 = wait
-  let m82 = wait
-  let m83 = wait
-  let m84 = wait
-  let m85 = wait
-  let m86 = wait
-  let m87 = wait
-  let m88 = wait
-  let m89 = wait
-  let m8A = wait
-  let m8B = wait
-  let m8C = wait
-  let m8D = wait
-  let m8E = wait
-  let m8F = wait
-  let m90 = wait
-  let m91 = wait
-  let m92 = wait
-  let m93 = wait
-  let m94 = wait
-  let m95 = wait
-  let m96 = wait
-  let m97 = wait
-  let m98 = wait
-  let m99 = wait
-  let m9A = wait
-  let m9B = wait
-  let m9C = wait
-  let m9D = wait
-  let m9E = wait
-  let m9F = wait
-  let mA0 = wait
-  let mA1 = wait
-  let mA2 = wait
-  let mA3 = wait
-  let mA4 = wait
-  let mA5 = wait
-  let mA6 = wait
-  let mA7 = wait
-  let mA8 = wait
-  let mA9 = wait
-  let mAA = wait
-  let mAB = wait
-  let mAC = wait
-  let mAD = wait
-  let mAE = wait
-  let mAF = wait
-  let mB0 = wait
-  let mB1 = wait
-  let mB2 = wait
-  let mB3 = wait
-  let mB4 = wait
-  let mB5 = wait
-  let mB6 = wait
-  let mB7 = wait
-  let mB8 = wait
-  let mB9 = wait
-  let mBA = wait
-  let mBB = wait
-  let mBC = wait
-  let mBD = wait
-  let mBE = wait
-  let mBF = wait
-  let mC0 = wait
-  let mC1 = wait
-  let mC2 = wait
-  let mC3 = wait
-  let mC4 = wait
-  let mC5 = wait
-  let mC6 = wait
-  let mC7 = wait
-  let mC8 = wait
-  let mC9 = wait
-  let mCA = wait
-  let mCB = wait
-  let mCC = wait
-  let mCD = wait
-  let mCE = wait
-  let mCF = wait
-  let mD0 = wait
-  let mD1 = wait
-  let mD2 = wait
-  let mD3 = wait
-  let mD4 = wait
-  let mD5 = wait
-  let mD6 = wait
-  let mD7 = wait
-  let mD8 = wait
-  let mD9 = wait
-  let mDA = wait
-  let mDB = wait
-  let mDC = wait
-  let mDD = wait
-  let mDE = wait
-  let mDF = wait
-  let mE0 = wait
-  let mE1 = wait
-  let mE2 = wait
-  let mE3 = wait
-  let mE4 = wait
-  let mE5 = wait
-  let mE6 = wait
-  let mE7 = wait
-  let mE8 = wait
-  let mE9 = wait
-  let mEA = wait
-  let mEB = wait
-  let mEC = wait
-  let mED = wait
-  let mEE = wait
-  let mEF = wait
-  let mF0 = wait
-  let mF1 = wait
-  let mF2 = wait
-  let mF3 = wait
-  let mF4 = wait
-  let mF5 = wait
-  let mF6 = wait
-  let mF7 = wait
-  let mF8 = wait
-  let mF9 = wait
-  let mFA = wait
-  let mFB = wait
-  let mFC = wait
-  let mFD = wait
-  let mFE = wait
-  let mFF = wait
-  let y0 = [[[[m00,m01],[m02,m03]],[[m04,m05],[m06,m07]]],[[[m08,m09],[m0A,m0B]],[[m0C,m0D],[m0E,m0F]]]]
-  let y1 = [[[[m10,m11],[m12,m13]],[[m14,m15],[m16,m17]]],[[[m18,m19],[m1A,m1B]],[[m1C,m1D],[m1E,m1F]]]]
-  let y2 = [[[[m20,m21],[m22,m23]],[[m24,m25],[m26,m27]]],[[[m28,m29],[m2A,m2B]],[[m2C,m2D],[m2E,m2F]]]]
-  let y3 = [[[[m30,m31],[m32,m33]],[[m34,m35],[m36,m37]]],[[[m38,m39],[m3A,m3B]],[[m3C,m3D],[m3E,m3F]]]]
-  let y4 = [[[[m40,m41],[m42,m43]],[[m44,m45],[m46,m47]]],[[[m48,m49],[m4A,m4B]],[[m4C,m4D],[m4E,m4F]]]]
-  let y5 = [[[[m50,m51],[m52,m53]],[[m54,m55],[m56,m57]]],[[[m58,m59],[m5A,m5B]],[[m5C,m5D],[m5E,m5F]]]]
-  let y6 = [[[[m60,m61],[m62,m63]],[[m64,m65],[m66,m67]]],[[[m68,m69],[m6A,m6B]],[[m6C,m6D],[m6E,m6F]]]]
-  let y7 = [[[[m70,m71],[m72,m73]],[[m74,m75],[m76,m77]]],[[[m78,m79],[m7A,m7B]],[[m7C,m7D],[m7E,m7F]]]]
-  let y8 = [[[[m80,m81],[m82,m83]],[[m84,m85],[m86,m87]]],[[[m88,m89],[m8A,m8B]],[[m8C,m8D],[m8E,m8F]]]]
-  let y9 = [[[[m90,m91],[m92,m93]],[[m94,m95],[m96,m97]]],[[[m98,m99],[m9A,m9B]],[[m9C,m9D],[m9E,m9F]]]]
-  let yA = [[[[mA0,mA1],[mA2,mA3]],[[mA4,mA5],[mA6,mA7]]],[[[mA8,mA9],[mAA,mAB]],[[mAC,mAD],[mAE,mAF]]]]
-  let yB = [[[[mB0,mB1],[mB2,mB3]],[[mB4,mB5],[mB6,mB7]]],[[[mB8,mB9],[mBA,mBB]],[[mBC,mBD],[mBE,mBF]]]]
-  let yC = [[[[mC0,mC1],[mC2,mC3]],[[mC4,mC5],[mC6,mC7]]],[[[mC8,mC9],[mCA,mCB]],[[mCC,mCD],[mCE,mCF]]]]
-  let yD = [[[[mD0,mD1],[mD2,mD3]],[[mD4,mD5],[mD6,mD7]]],[[[mD8,mD9],[mDA,mDB]],[[mDC,mDD],[mDE,mDF]]]]
-  let yE = [[[[mE0,mE1],[mE2,mE3]],[[mE4,mE5],[mE6,mE7]]],[[[mE8,mE9],[mEA,mEB]],[[mEC,mED],[mEE,mEF]]]]
-  let yF = [[[[mF0,mF1],[mF2,mF3]],[[mF4,mF5],[mF6,mF7]]],[[[mF8,mF9],[mFA,mFB]],[[mFC,mFD],[mFE,mFF]]]]
-  [[[[y0,y1],[y2,y3]],[[y4,y5],[y6,y7]]],
-   [[[y8,y9],[yA,yB]],[[yC,yD],[yE,yF]]]]
+// :::::::::::
+// :: Moves ::
+// :::::::::::
+
+def PASS       : 0
+def EARTH_PULL : 176
+
+// TODO: we need an array init function that doesn't add 2 levels
+def empty_casts:
+  let a = [0,0]
+  let b = [a,a]
+  let c = [b,b]
+  let d = [c,c]
+  let e = [d,d]
+  let f = [e,e]
+  let g = [f,f]
+  let h = [g,g]
+  [h,h]
+
+def exec_turn:
+  // Config
+  dup casts_take  = (take ~8)
+  dup casts_write = (write ~8)
+  dup board_take  = (take ~10)
+  dup board_write = (write ~10)
+
+  // Function
+  # {casts board}
+
+    // Utils
+    let get_cast  = {skill casts} (casts_take skill 0 casts)
+    let get_piece = {pos board} (board_take (board_index pos) Air board)
+
+    // Animations
+    let anims = Nil
+
+    // EARTH_PULL
+    // TODO: abstract this logic in a single `hero_use_skill` function
+    get [casts,cast]  = (get_cast EARTH_PULL casts)
+    get [pos,args]    = cast
+    get [pos,pos0]    = (vec2_cpy pos)
+    get [board,piece] = (get_piece pos0 board)
+    get [piece,allow] = (piece_cpy_with (piece_is_hero TOPHORO) piece)
+    get [pos,pos0]    = (vec2_cpy pos)
+    get [board,anims] = 
+      ( if allow
+        then: {board anims}
+          let board = (args (earth_pull pos0) board)
+          let anims = (Cons "Tophoro used Earth Pull." anims)
+          [board, anims]
+        else: {board anims}
+          [board, (Cons "Invalid use of Earth Pull." anims)]
+        board anims)
+    let board = (board_write (board_index pos) piece board)
+
+    // Result
+    [board, anims]
 
 //W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
 //W . . W . . W . . . . . . . . . . . . . . . . . . W X X . X X W

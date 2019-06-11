@@ -133,9 +133,8 @@ def vec2_rect_example: {cons}
 // : {mlen : Nat}
 //   {-P   : Type}
 //   {srad : Num} -- squared radius
-//   {cons : ! {x : [Num,Num]} {xs : P} P}
+//   {cons : ! {pos : [Num,Num]} {state : P} P}
 // ! {pos  : [Num,Num]}
-//   {siz  : [Num,Num]}
 //   {nil  : P}
 //   P
 def vec2_circle: {mlen srad cons}
@@ -238,10 +237,13 @@ def vec2_circle_i: (vec2_circle ~49 #14)
 // . . . . . . . . . . .
 def vec2_circle_j: (vec2_circle ~81 #17)
 
-def vec2_circle_example: {cons}
-  dup cons = cons
-  dup circ = (vec2_circle_d #cons)
-  # (circ [100,100])
+// Approximates the area of a circle (2*pi*r)
+def vec2_circle_example: 
+  let radi = 9
+  let form = (vec2_circle ~2048 #||radi * radi| + 1|)
+  let hits = {pos num} |num + 1|
+  dup circ = (form #hits)
+  # (circ [0,0] 0)
 
 // vec2_wave
 // | Given a list of widths, returns vectors filling a wave from from `pos` pointing to `dir`.
