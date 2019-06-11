@@ -205,6 +205,7 @@ def kaelin:
   dup flame_wave  = flame_wave
   dup print_board = print_board
   dup board_inter = board_interact
+  dup flame_ball  = flame_ball
 
   # let board = new_board
     let board = (step [1,30] [0,-1] board)
@@ -244,9 +245,20 @@ def kaelin:
     let board = (earth_pull [5,23] [-1,0] board)
 
     //let board = (board_inter [29,1] [30,1] {a b}[(damage 10 b), (damage 10 a)] board)
-    let board   = (flame_wave [3, 23] [1,0] board)
+    //let board   = (flame_wave [3, 23] [1,0] board)
+    let board = (flame_ball [4,23] board)
 
     (print_board board)
+
+// Change the occurrence of a 
+def damage_visual_effect: {dmg piece}
+  let case_air    = Cliff
+  let case_wall   = Cliff
+  let case_cliff  = Cliff
+  let case_throne = {side} Cliff
+  let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
+  (piece case_air case_wall case_cliff case_throne case_unit)
+
 
 // TODO: 
 // - check if the life of "piece" is bigger than the damage
@@ -614,6 +626,9 @@ def print_board:
 def board_write:
   (write ~10)
 
+def board_take:
+  (take ~10)
+
 // Read the map as a binary tree with deep of 10 (that is 2^10 elements = 1024)  
 def kmap_take:
   (take ~10)
@@ -637,17 +652,23 @@ def step:
 // [Tophoro]
 def earth_pull:
   dup step = step
-  let form = (ConsF #1 (ConsF #3 (ConsF #5 NilF)))
+  let form = (vec2_wave_in (ConsF #1 (ConsF #3 (ConsF #5 NilF))))
   let hits = {pos dxy board} (step pos dxy board)
-  (vec2_wave_in form #hits)
+  (form #hits)
 
 // [Erkos]
-// Hits a 1-3-3-5-5 (wave) ahead.
+// Hits a 1-3-3-5-5 (wave). Deals 5 damage.
 def flame_wave:
-  let form  = (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))
-  // missing the direction to apply the wave
-  let hits = {pos board} (board_apply pos (damage 5) board)  
-  (vec2_wave form #hits)
+  let form  = (vec2_wave (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF))))))
+  let hits  = {pos board} (board_apply pos (damage 5) board)  
+  (form #hits)
+
+// Hits a 5x5 (circle). Deals 5 damage.
+def flame_ball:
+  let hits    = {pos board} (board_apply pos (damage 5) board)
+  let test = {pos board} (board_apply pos (damage_visual_effect 5) board)
+  (vec2_circle_e #test)
+
 
 
 def moves:
