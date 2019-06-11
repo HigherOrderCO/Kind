@@ -211,6 +211,9 @@ def kaelin:
   dup flame_wave  = flame_wave
   dup print_board = print_board
   dup board_inter = board_interact
+  dup flame_ball  = flame_ball
+  dup flame_soul  = flame_soul
+  dup flame_nova  = flame_nova
   dup exec_turn   = exec_turn
   let casts       = empty_casts
 
@@ -229,6 +232,14 @@ def kaelin:
     get [board, anims] = (exec_turn casts board)
 
     [(print_board board), anims]
+
+def damage_visual_effect: {dmg piece}
+  let case_air    = Cliff
+  let case_wall   = Wall
+  let case_throne = {side} (Throne side)
+  let case_cliff  = Cliff
+  let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
+  (piece case_air case_wall case_cliff case_throne case_unit)
 
 // TODO: 
 // - check if the life of "piece" is bigger than the damage
@@ -590,7 +601,7 @@ def board_apply:
   dup write = (write ~10)
   dup take  = (take ~10)
   # {pos fun board}
-    cpy p_idx       = (index pos)
+    cpy p_idx       = (board_index pos)
     get [board,val] = (take p_idx Air board)
     let p_update    = (fun val)
     let board       = (write p_idx p_update board)
@@ -628,17 +639,33 @@ def step:
 
 def earth_pull:
   dup step = step
-  let form = (ConsF #1 (ConsF #3 (ConsF #5 NilF)))
+  let form = (vec2_wave_in (ConsF #1 (ConsF #3 (ConsF #5 NilF))))
   let hits = {pos dxy board} (step pos dxy board)
-  (vec2_wave_in form #hits)
+  (form #hits)
 
-// [Erkos]
-// Hits a 1-3-3-5-5 (wave) ahead.
+// Hits a 1-3-3-5-5 (wave). Deals 5 damage.
 def flame_wave:
-  let form  = (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))
-  // missing the direction to apply the wave
-  let hits = {pos board} (board_apply pos (damage 5) board)  
-  (vec2_wave form #hits)
+  let form  = (vec2_wave (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF))))))
+  let hits  = {pos board} (board_apply pos (damage 5) board)  
+  (form #hits)
+  
+// Hits a 5x5 (circle). Deals 5 damage.
+def flame_ball:
+  let hits   = {pos board} (board_apply pos (damage 5) board)
+  let visual = {pos board} (board_apply pos (damage_visual_effect 5) board)
+  (vec2_circle_e #visual)
+
+// Deals massive damage (20?)
+def flame_soul:
+  let hits   = {pos board} (board_apply pos (damage 20) board)
+  let visual = {pos board} (board_apply pos (damage_visual_effect 20) board)
+  visual
+
+// Deals massive damage in a 11x11 circle (20?)
+def flame_nova:
+  let hits   = {pos board} (board_apply pos (damage 20) board)
+  let visual = {pos board} (board_apply pos (damage_visual_effect 20) board)
+  (vec2_circle_j #visual)
 
 // :::::::::::
 // :: Moves ::
