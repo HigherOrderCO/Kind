@@ -229,8 +229,8 @@ def kaelin:
     let board = (step [29,2] [0,1] board)
     let board = (step [29,3] [1,0] board)
 
-    // Deals damage to Erkos and Gonk
-    let board = (board_inter [1,30] [2,30] {a b}[(damage 5 b), (damage 5 a)] board)
+    // Throws a flame ball at Erkos and Gonk
+    let board = (flame_ball [1,30] board)
 
     // Performs an example turn where Tophoro performs Earth Pull down
     let casts = (casts_write EARTH_PULL [[30,1], {t}(t [0,1])] casts)
@@ -648,33 +648,35 @@ def step:
 
 def earth_pull:
   dup step = step
-  let form = (vec2_wave_in (ConsF #1 (ConsF #3 (ConsF #5 NilF))))
+  let area = (vec2_wave_in (ConsF #1 (ConsF #3 (ConsF #5 NilF))))
   let hits = {pos dxy board} (step pos dxy board)
-  (form #hits)
+  (area #hits)
 
 // Hits a 1-3-3-5-5 (wave). Deals 5 damage.
 def flame_wave:
-  let form  = (vec2_wave (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF))))))
-  let hits  = {pos board} (board_apply pos (damage 5) board)  
-  (form #hits)
+  let area = (vec2_wave (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF))))))
+  let hits = {pos board} (board_apply pos (damage 5) board)  
+  (area #hits)
   
 // Hits a 5x5 (circle). Deals 5 damage.
 def flame_ball:
-  let hits   = {pos board} (board_apply pos (damage 5) board)
-  let visual = {pos board} (board_apply pos (damage_visual_effect 5) board)
-  (vec2_circle_e #visual)
+  let area = vec2_circle_e
+  let hits = {pos board} (board_apply pos (damage 5) board)
+  //let hits = {pos board} (board_apply pos (damage_visual_effect 5) board)
+  (area #hits)
 
 // Deals massive damage (20?)
 def flame_soul:
-  let hits   = {pos board} (board_apply pos (damage 20) board)
-  let visual = {pos board} (board_apply pos (damage_visual_effect 20) board)
-  visual
+  let hits = {pos board} (board_apply pos (damage 20) board)
+  //let hits = {pos board} (board_apply pos (damage_visual_effect 20) board)
+  hits
 
 // Deals massive damage in a 11x11 circle (20?)
 def flame_nova:
-  let hits   = {pos board} (board_apply pos (damage 20) board)
-  let visual = {pos board} (board_apply pos (damage_visual_effect 20) board)
-  (vec2_circle_j #visual)
+  let area = vec2_circle_j
+  let hits = {pos board} (board_apply pos (damage 20) board)
+  //let hits = {pos board} (board_apply pos (damage_visual_effect 20) board)
+  (area #hits)
 
 
 // Places a doll in an empty tile
