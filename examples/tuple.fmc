@@ -7,39 +7,14 @@ def tup_fst: {tup}
 def tup_snd: {tup}
   (tup {a b}b)
 
-// Tuples one level raised. This allows recursive functions from lists and natural numbers to not raise a level when returning a tuple
-def empty_tup: {t} dup t = t #t
+def pushfront: {a tup} {t} (tup (t a))
+def pushback: {a tup} {t} (tup t a)
+def popfront: {tup} {t} (tup {-} t)
 
-def pushfront: {a tup} dup a = a {t} dup t = t (tup #(t a))
-def pushback: {a tup} dup a = a {t} dup tup = (tup t) #(tup a)
-def popfront: {tup} {t} dup t = t (tup #{-} t)
+def empty_tup: {t} t
 
 def concat_tup: {tup1 tup2} {t}
   (tup2 (tup1 t))
 
-def list_to_tup: {xs} {t}
-  dup t = t
-  dup rec = (xs #{a h} {t} (h (t a)))
-  #(rec {t} t t)
-
-def list_to_tup_reverse: {xs} {t}
-  dup t = t
-  dup rec = (xs #{a h} (h a))
-  #(rec t)
-
-def take_1st: {length tup}
-  let first =
-    dup fold = (length #{h} {t} {-} (h t))
-    # {t} (fold {t} t t None)
-  (tup first)
-
-def take_nth: {length n tup}
-  dup n = n
-  let nth =
-    let loop = {h i} cpy i = i (if |i == n| then: {h i} {-} (h |i + 1|) else: {h i} {k} {-} (h |i + 1| k) h i)
-    dup fold = (length #loop)
-    #(fold {i} {k} k 0 None)
-  (tup nth)
-
-def example_tup: (concat_tup (pushfront #0 (pushback #4 (pushback #3 (pushfront #1 (pushfront #2 empty_tup))))) (list_to_tup (ConsF #5 (ConsF #6 (ConsF #7 NilF)))))
+def example_tup: (concat_tup (pushfront 0 (pushback 4 (pushback 3 (pushfront 1 (pushfront 2 empty_tup))))) (pushfront 5 empty_tup))
 

@@ -298,69 +298,77 @@ def keccak.f_loop: {arr} {t}
 
 def keccak.f: {arr}
   dup arr = arr
-  (for ~24 #{t}(arr (t 0)) #keccak.f_loop #{arr t} (arr {-}t))
-
-def keccak.zero_array: {t} (t 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
-def keccak.example_hash: (keccak.f #keccak.zero_array)
-def hash: keccak.example_hash
+  // transform array of 200 bytes into an array of 50 words
+  dup arr =
+    let 2num = {b1 b2 b3 b4} |b1 + ||b2 + ||b3 + |b4 << 8|| << 8|| << 8||
+    let loop = {arr} {cont t} (arr {k} {b1 b2 b3 b4} (cont (k (2num b1 b2 b3 b4))) t)
+    dup f = (for ~50 #{cont t} (cont t) #loop #{k} (k {x} x))
+    #{t} (arr (f t))
+  dup arr = (for ~24 #(pushfront 0 arr) #keccak.f_loop #popfront)
+  // transform array of 50 words into an array of 50 tuples of 4 bytes
+  dup arr =
+    let 2bytes = {x} {t}
+      cpy x = x
+      let b1 = |x % 256|
+      let x = |x >> 8|
+      cpy x = x
+      let b2 = |x % 256|
+      let x = |x >> 8|
+      cpy x = x
+      let b3 = |x % 256|
+      let b4 = |x >> 8|
+      (t b1 b2 b3 b4)
+    let init = {cont t} (cont t)
+    let loop = {arr} {cont t} (arr {k} {num} (cont (k (2bytes num))) t)
+    let stop = {k} (k {x} x)
+    dup f = (for ~50 #init #loop #stop)
+    #{t} (arr (f t))
+  // transform array of 50 tuples of 4 bytes into an array of 200 bytes
+  dup arr =
+    let init = {cont} (cont {t} t)
+    let loop = {fun} {cont} (fun {k} {tup} (cont {t} (tup (k t))))
+    let stop = {k} (k {x} x)
+    dup f = (for ~50 #init #loop #stop)
+    #(arr f)
+  #arr
 
 def update_zero: #{t k} (k t)
 def pushfront_update: {f update} dup f = f dup update = update #{t k} {x} (update (t (f x)) k)
 def pushback_update: {f update} dup f = f dup update = update #{t k} (update t {tup} {x} (k (tup (f x))))
 def apply_update: {update arr} dup update = update dup arr = arr #{t} (arr (update t {x} x))
 
-// Currently only works for strings composed of chunks of 4 bytes. The result hash of a string with a length not multiple of 4 will be
-// the Keccak hash of the string concatenated with the smallest string of \0's such that the result has a length that is a multiple of 4.
-def Keccak256: {str}
-  let words = (snd str) 
-  let state = {t} (t #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0) 
-  let update = update_zero
+def Keccak256: {bytes}
+  let state = (for ~200 #{t} t #(pushfront 0) #{x} x)
+  let update = #update_zero
   let fold_cons = {x h i state update}
     cpy i = i
-    (if ||i % 34| == 33|
+    (if ||i % 136| == 135|
     then: {x h i state update} (h |i + 1| (keccak.f (apply_update (pushback_update {y} |x ^ y| update) state)) update_zero)
     else: {x h i state update} (h |i + 1| state (pushback_update {y} |x ^ y| update))
     x h i state update)
   let fold_nil = {i state update}
-    (keccak.f
-      {t} (apply_update (pushback_update {y} |y ^ 1| update) state
-          {s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 s12 s13 s14 s15 s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31 s32 s33}
-          (t s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 s12 s13 s14 s15 s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31 s32 |s33 ^ 2147483648|))
-      {a1 a2 a3 a4 a5 a6 a7 a8 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -}
-      (ConsF a1 (ConsF a2 (ConsF a3 (ConsF a4 (ConsF a5 (ConsF a6 (ConsF a7 (ConsF a8 NilF)))))))))
-  dup fold = (words #fold_cons)
+    dup state = (apply_update (pushback_update {y} |y ^ 1| update) state)
+    // xor the position 135 of the state with 0x80
+    let state =
+      dup f = (for ~135 #{t x} (t |x ^ 128|) #{fun t x} (fun (t x)) #{x} x)
+      #{t} (state (f t))
+    dup state = (keccak.f state)
+    #(state {a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -}
+      (ConsF a1 (ConsF a2 (ConsF a3 (ConsF a4 (ConsF a5 (ConsF a6 (ConsF a7 (ConsF a8 (ConsF a9 (ConsF a10 (ConsF a11 (ConsF a12 (ConsF a13 (ConsF a14 (ConsF a15 (ConsF a16 (ConsF a17 (ConsF a18 (ConsF a19 (ConsF a20 (ConsF a21 (ConsF a22 (ConsF a23 (ConsF a24 (ConsF a25 (ConsF a26 (ConsF a27 (ConsF a28 (ConsF a29 (ConsF a30 (ConsF a31 (ConsF a32 NilF)))))))))))))))))))))))))))))))))
+  dup fold = (bytes #fold_cons)
 # (fold fold_nil 0 state update)
 
-def words_to_hex: {xs}
-  [TEXT,
+def bytes_to_hex: {xs}
+  (from_chars
   {Cons}
   dup Cons = Cons
   dup fold =
     (xs #{x h}
       cpy x = x
       let a0 = (num_to_char |x % 16|)
-      let x = |x / 16|
-      cpy x = x
-      let a1 = (num_to_char |x % 16|)
-      let x = |x / 16|
-      cpy x = x
-      let a2 = (num_to_char |x % 16|)
-      let x = |x / 16|
-      cpy x = x
-      let a3 = (num_to_char |x % 16|)
-      let x = |x / 16|
-      cpy x = x
-      let a4 = (num_to_char |x % 16|)
-      let x = |x / 16|
-      cpy x = x
-      let a5 = (num_to_char |x % 16|)
-      let x = |x / 16|
-      cpy x = x
-      let a6 = (num_to_char |x % 16|)
-      let x = |x / 16|
-      let a7 = (num_to_char |x % 16|)
-      (Cons |a1 + ||a0 + ||a3 + |a2 * 256|| * 256|| * 256|| (Cons |a5 + ||a4 + ||a7 + |a6 * 256|| * 256|| * 256|| h)))
-  #{n} (fold n)]
+      let a1 = (num_to_char |x / 16|)
+      (Cons a1 (Cons a0 h)))
+  #{n} (fold n))
 
-def stringtest: "test keccak hash"
-def keccaktest: (words_to_hex (Keccak256 stringtest))
+def stringtest: "random hash"
+def keccaktest: (bytes_to_hex (Keccak256 (to_chars stringtest)))
