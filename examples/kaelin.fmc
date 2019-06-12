@@ -215,6 +215,11 @@ def kaelin:
   dup flame_soul  = flame_soul
   dup flame_nova  = flame_nova
   dup exec_turn   = exec_turn
+  dup shadow_doll = shadow_doll
+  dup shadow_flux = shadow_flux
+  dup quick_shot  = quick_shot
+  dup piercing_bolt = piercing_bolt
+  dup explosive_arrow = explosive_arrow
   let casts       = empty_casts
 
   # let board = new_board
@@ -231,13 +236,17 @@ def kaelin:
     let casts = (casts_write EARTH_PULL [[30,1], {t}(t [0,1])] casts)
     get [board, anims] = (exec_turn casts board)
 
-    [(print_board board), anims]
+    //let board = (piercing_bolt [24,1] [1,0] board)
+    let board = (shadow_doll [10, 29] board)
+    (print_board board)
+
+    //[(print_board board), anims]
 
 def damage_visual_effect: {dmg piece}
   let case_air    = Cliff
   let case_wall   = Wall
-  let case_throne = {side} (Throne side)
   let case_cliff  = Cliff
+  let case_throne = {side} (Throne side)
   let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
   (piece case_air case_wall case_cliff case_throne case_unit)
 
@@ -668,6 +677,49 @@ def flame_nova:
   let hits = {pos board} (board_apply pos (damage 20) board)
   //let hits = {pos board} (board_apply pos (damage_visual_effect 20) board)
   (area #hits)
+
+
+// Places a doll in an empty tile
+def shadow_doll: {pos board}
+  let case_air     = Wall
+  let case_wall    = Wall
+  let case_cliff   = Cliff
+  let case_throne  = {side} (Throne side)
+  let case_unit    = {side hero hp} (Unit side hero hp)
+  let change_piece = {t} (t case_air case_wall case_cliff case_throne case_unit)
+  (board_apply pos change_piece board)
+
+// launches a ball that travels up to 8 tiles ahead, dealing high damage to first enemy hit
+//def shadow_ball: 
+//  let form = 
+
+// Hits a 3x3 (square) with for high damage (15?).
+def shadow_flux:
+  let form = vec2_circle_c
+  //let hits = {pos board} (board_apply pos (damage 15) board)
+  let hits = {pos board} (board_apply pos (damage_visual_effect 15) board) 
+  (form #hits)
+
+// Hits a selected enemy. Deals 5 damage
+def quick_shot: 
+  // {pos board} (board_apply pos (damage 5) board)
+  {pos board} (board_apply pos (damage_visual_effect 5) board)
+   
+// Hits all enemies in a 5x1 (line) ahead. Deals 3 damage.
+def piercing_bolt:
+  let form = (vec2_wave (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 NilF))))))
+  let hits = {pos board} (board_apply pos (damage_visual_effect 3) board)
+  (form #hits) 
+
+// Explosive Arrow : hits up to 2 3x3 (circles). Deals 2 damage.
+def explosive_arrow:
+  let form = vec2_circle_b
+  let hits = {pos board} (board_apply pos (damage_visual_effect 2) board)
+  # {pos1 pos2 board}
+    let board = (form #hits pos1 board)
+    let board = (form #hits pos2 board)
+    board
+    
 
 // :::::::::::
 // :: Moves ::
