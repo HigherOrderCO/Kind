@@ -204,23 +204,24 @@
 
 // Testing pull action
 def kaelin:
-  dup casts_write = (write ~8)
-  dup board_write = (write ~10)
-  dup step        = step
-  dup earth_pull  = earth_pull
-  dup flame_wave  = flame_wave
-  dup print_board = print_board
-  dup board_inter = board_interact
-  dup flame_ball  = flame_ball
-  dup flame_soul  = flame_soul
-  dup flame_nova  = flame_nova
-  dup exec_turn   = exec_turn
-  dup shadow_doll = shadow_doll
-  dup shadow_flux = shadow_flux
-  dup quick_shot  = quick_shot
-  dup piercing_bolt = piercing_bolt
+  dup casts_write     = (write ~8)
+  dup board_write     = (write ~10)
+  dup step            = step
+  dup earth_pull      = earth_pull
+  dup flame_wave      = flame_wave
+  dup print_board     = print_board
+  dup board_inter     = board_interact
+  dup flame_ball      = flame_ball
+  dup flame_soul      = flame_soul
+  dup flame_nova      = flame_nova
+  dup exec_turn       = exec_turn
+  dup shadow_doll     = shadow_doll
+  dup shadow_flux     = shadow_flux
+  dup quick_shot      = quick_shot
+  dup piercing_bolt   = piercing_bolt
   dup explosive_arrow = explosive_arrow
   dup earth_slam  = earth_slam
+  dup erkos_walk      = erkos_walk
   let casts       = empty_casts
 
   # let board = new_board
@@ -238,10 +239,12 @@ def kaelin:
     //get [board, anims] = (exec_turn casts board)
 
     //let board = (piercing_bolt [24,1] [1,0] board)
-    let mov = (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil)))
-    let board = (earth_slam [3,29] board)
+    let board = (quick_shot [1,30] (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))) board)
+    let board = (erkos_walk [2,30] (Cons [1,0] (Cons [1,0] (Cons [0,-1] Nil))) board)
+
     (print_board board)
-    
+    //board
+
 
     //[(print_board board), anims]
 
@@ -664,13 +667,45 @@ def stun_small_circle:
   let hits  = {pos board} (board_apply pos stun board)
   (area #hits) 
 
+// Checks if given position is a specific hero
+def is_hero_at:
+  dup board_with = (with ~10)
+  # {pos hero board}
+    (board_with (board_index pos) (piece_cpy_with (piece_is_hero hero)) board)
+
+// Walks through a set of directions
+def walk: {hero steps}
+  dup hero       = hero
+  dup is_hero_at = is_hero_at
+  let walk       = {state}
+    get [pos_dirs,board] = state
+    get [pos,dirs]       = pos_dirs
+    get [dirs,dir]       = (pop [0,0] dirs)
+    get [pos,pos_cpy]    = (vec2_cpy pos)
+    get [dir,dir_cpy]    = (vec2_cpy dir)
+    let new_pos          = (vec2_add pos_cpy dir_cpy)
+    get [pos,pos_cpy]    = (vec2_cpy pos)
+    get [board,allow]    = (is_hero_at pos_cpy hero board)
+    let board            = (if allow [step, {pos dir board}board] pos dir board)
+    [[new_pos,dirs], board]
+  dup walk = (steps #walk)
+  # {pos dirs board}
+    snd (walk [[pos,dirs],board])
+
+// Walk effects of each hero
+def erkos_walk  : (walk ERKOS ~3)
+def snarch_walk : (walk SNARCH ~3)
+
 // Using a path, goes from "pos" to "target position"
-// mov: movement list to get into the desired position
-// pos: initial position
-def add_dir_from_mov: {mov pos}
-  let case_cons = {dir mov} {pos} [mov, (vec2_add pos dir)]
-  let case_nil  = {pos} [Nil, pos]
-  (mov case_cons case_nil pos)
+// - dirs : movement list to get into the desired position
+// - pos  : initial position
+def add_dirs: {mlen}
+  dup move = (mlen {pos_dirs}
+    get [pos,dirs] = pos_dirs
+    get [dirs,dir] = (pop [0,0] dirs)
+    [(vec2_add pos dir), dirs])
+  # {pos dirs}
+    fst (move [pos,dirs])
 
 // Creates up to 3 earth walls in a 5x5 (circle) around.
 // TODO: Add box
@@ -754,13 +789,10 @@ def shadow_flux:
 //def shadow_bond: {side hero hp}
 
 // Hits a selected enemy up to 3 range. Deals 5 damage.
-def quick_shot: # {pos mov board}
-  get [mov,pos] = (add_dir_from_mov mov pos)
-  get [mov,pos] = (add_dir_from_mov mov pos)
-  get [mov,pos] = (add_dir_from_mov mov pos)
-  get [mov,pos] = (add_dir_from_mov mov pos)
-  let board = (board_apply pos (damage_visual_effect 5) board)
-  board
+def quick_shot:
+  dup add_dirs = (add_dirs ~4)
+  # {pos dirs board}
+    (board_apply (add_dirs pos dirs) (damage_visual_effect 3) board)
 
 // Hits all enemies in a 5x1 (line) ahead. Deals 3 damage.
 def piercing_bolt:

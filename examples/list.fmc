@@ -12,6 +12,9 @@ def head:
 def tail:
   {xs} (xs {x xs}xs Nil)
 
+def pop:
+  {x xs} (xs {x xs}[xs,x] [Nil,x])
+
 // Church-encoded functions
 
 def ConsF: {x xs}
