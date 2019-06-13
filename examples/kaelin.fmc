@@ -230,15 +230,17 @@ def kaelin:
     let board = (step [29,3] [1,0] board)
 
     // Throws a flame ball at Erkos and Gonk
-    let board = (flame_ball [1,30] board)
+    //let board = (flame_ball [1,30] board)
 
     // Performs an example turn where Tophoro performs Earth Pull down
-    let casts = (casts_write EARTH_PULL [[30,1], {t}(t [0,1])] casts)
-    get [board, anims] = (exec_turn casts board)
+    //let casts = (casts_write EARTH_PULL [[30,1], {t}(t [0,1])] casts)
+    //get [board, anims] = (exec_turn casts board)
 
     //let board = (piercing_bolt [24,1] [1,0] board)
-    let board = (shadow_doll [10, 29] board)
+    let mov = (Cons [0,-1] (Cons [0,-1] (Cons [0,-1] Nil)))
+    let board = (flame_soul [1,30] UP board)
     (print_board board)
+    
 
     //[(print_board board), anims]
 
@@ -264,10 +266,10 @@ def damage: {dmg piece}
 // :: Direction ::
 // :::::::::::::::
 
-def RIGHT : 0 //  1
-def DOWN  : 1 //  0
-def LEFT  : 2 // -1
-def UP    : 3 //  0
+def RIGHT : [1 , 0] 
+def DOWN  : [0 , 1] 
+def LEFT  : [-1, 0] 
+def UP    : [0 ,-1] 
 
 // Transforms a direction [RIGHT, LEFT, UP, DOWN] into a vector that represents that position
 def dir_to_vec: {a}
@@ -646,6 +648,27 @@ def step:
     let b_pos           = (vec2_add a_pos0 a_dxy)
     (inter a_pos1 b_pos a_step_to_b board)
 
+// Using a path, goes from "pos" to "target position"
+// mov: movement list to get into the desired position
+// pos: initial position
+def add_dir_from_mov: {mov pos}
+  let case_cons = {dir mov} {pos} [mov, (vec2_add pos dir)]
+  let case_nil  = {pos} [Nil, pos]
+  (mov case_cons case_nil pos)
+
+// Go from initial position to the target position using a list of movements
+// pos: initial position
+// mov: list of movements
+def range3: {pos mov}
+  get [mov,pos] = (add_dir_from_mov mov pos)
+  get [mov,pos] = (add_dir_from_mov mov pos)
+  get [mov,pos] = (add_dir_from_mov mov pos)
+  get [mov,pos] = (add_dir_from_mov mov pos)
+  pos
+
+// TODO: creates up to 3 earth walls in a 5x5 (circle) around.
+//def earth_wall:
+
 def earth_pull:
   dup step = step
   let area = (vec2_wave_in (ConsF #1 (ConsF #3 (ConsF #5 NilF))))
@@ -665,10 +688,11 @@ def flame_ball:
   //let hits = {pos board} (board_apply pos (damage_visual_effect 5) board)
   (area #hits)
 
-// Deals massive damage (20?)
-def flame_soul:
-  let hits = {pos board} (board_apply pos (damage 20) board)
-  //let hits = {pos board} (board_apply pos (damage_visual_effect 20) board)
+// Selects an enemy up to 1 range. Deals massive damage (20?)
+def flame_soul: {pos dir}
+  let t_pos = (vec2_add pos dir)
+  //let hits  = {board} (board_apply t_pos (damage 20) board)
+  let hits = {board} (board_apply t_pos (damage_visual_effect 21) board)
   hits
 
 // Deals massive damage in a 11x11 circle (20?)
@@ -677,7 +701,6 @@ def flame_nova:
   let hits = {pos board} (board_apply pos (damage 20) board)
   //let hits = {pos board} (board_apply pos (damage_visual_effect 20) board)
   (area #hits)
-
 
 // Places a doll in an empty tile
 def shadow_doll: {pos board}
@@ -689,7 +712,7 @@ def shadow_doll: {pos board}
   let change_piece = {t} (t case_air case_wall case_cliff case_throne case_unit)
   (board_apply pos change_piece board)
 
-// launches a ball that travels up to 8 tiles ahead, dealing high damage to first enemy hit
+// TODO: launches a ball that travels up to 8 tiles ahead, dealing high damage to first enemy hit
 //def shadow_ball: 
 //  let form = 
 
@@ -701,10 +724,13 @@ def shadow_flux:
   (form #hits)
 
 // Hits a selected enemy. Deals 5 damage
-def quick_shot: 
-  // {pos board} (board_apply pos (damage 5) board)
-  {pos board} (board_apply pos (damage_visual_effect 5) board)
-   
+// t_pos: target position
+def quick_shot: {pos mov}
+  let t_pos = (range3 pos mov)
+  //let hits  = {board} (board_apply t_pos (damage 3) board)
+  let hits  = {board} (board_apply t_pos (damage_visual_effect 3) board)
+  hits
+
 // Hits all enemies in a 5x1 (line) ahead. Deals 3 damage.
 def piercing_bolt:
   let form = (vec2_wave (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 NilF))))))
@@ -719,7 +745,13 @@ def explosive_arrow:
     let board = (form #hits pos1 board)
     let board = (form #hits pos2 board)
     board
-    
+
+// TODO: mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range increase to 12.
+//def ballista:
+
+
+
+
 
 // :::::::::::
 // :: Moves ::
