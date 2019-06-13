@@ -204,7 +204,6 @@
 
 // Testing pull action
 def kaelin:
-  dup casts_write     = (write ~8)
   dup board_write     = (write ~10)
   dup step            = step
   dup earth_pull      = earth_pull
@@ -230,40 +229,19 @@ def kaelin:
     let board = (step [29,2] [0,1] board)
     let board = (step [29,3] [1,0] board)
 
-    // Throws a flame ball at Erkos and Gonk
+    // Some random tests
     //let board = (flame_ball [1,30] board)
-
-    // Performs an example turn where Tophoro performs Earth Pull down
-    //let casts = (casts_write EARTH_PULL [[30,1], {t}(t [0,1])] casts)
-    //get [board, anims] = (exec_turn casts board)
-
     //let board = (piercing_bolt [24,1] [1,0] board)
-    let board = (quick_shot [1,30] (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))) board)
-    let board = (erkos_walk [2,30] (Cons [1,0] (Cons [1,0] (Cons [0,-1] Nil))) board)
+    //let board = (quick_shot [1,30] (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))) board)
+    //let board = (erkos_walk [2,30] (Cons [1,0] (Cons [1,0] (Cons [0,-1] Nil))) board)
+
+    // Performs an example turn
+    let turn = Init
+    let turn = (Cast EARTH_PULL    [30,1] {t}(t [0,1]) turn) // Tophoro casts EARTH_PULL down
+    let turn = (Cast PIERCING_BOLT [30,1] {t}(t [0,1]) turn) // Tophoro fails to cast PIERCING_BOLT
+    get [board, anims] = (exec_turn turn board)
 
     (print_board board)
-    //board
-
-
-    //[(print_board board), anims]
-
-def damage_visual_effect: {dmg piece}
-  let case_air    = Cliff
-  let case_wall   = Wall
-  let case_cliff  = Cliff
-  let case_throne = {side} (Throne side)
-  let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
-  (piece case_air case_wall case_cliff case_throne case_unit)
-
-// TODO: 
-// - check if the life of "piece" is bigger than the damage
-def damage: {dmg piece}
-  let case_air    = Air
-  let case_wall   = Wall
-  let case_cliff  = Cliff
-  let case_throne = {side} (Throne side)
-  let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
-  (piece case_air case_wall case_cliff case_throne case_unit)
 
 // :::::::::::::::
 // :: Direction ::
@@ -534,6 +512,24 @@ def a_step_to_b: {a b}
     (b case_b_air case_b_wall case_b_cliff case_b_throne case_b_unit a_side a_hero a_hp)
   (a case_a_air case_a_wall case_a_cliff case_a_throne case_a_unit b)
 
+def damage_visual_effect: {dmg piece}
+  let case_air    = Cliff
+  let case_wall   = Wall
+  let case_cliff  = Cliff
+  let case_throne = {side} (Throne side)
+  let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
+  (piece case_air case_wall case_cliff case_throne case_unit)
+
+// TODO: 
+// - check if the life of "piece" is bigger than the damage
+def damage: {dmg piece}
+  let case_air    = Air
+  let case_wall   = Wall
+  let case_cliff  = Cliff
+  let case_throne = {side} (Throne side)
+  let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
+  (piece case_air case_wall case_cliff case_throne case_unit)
+
 // :::::::::::
 // :: Board ::
 // :::::::::::
@@ -783,67 +779,82 @@ def explosive_arrow:
 // TODO: mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range increase to 12.
 //def ballista:
 
-
-
-
-
 // :::::::::::
 // :: Moves ::
 // :::::::::::
 
-def PASS       : 0
-def EARTH_PULL : 176
+def Init:
+  Nil
 
-// TODO: we need an array init function that doesn't add 2 levels
-def empty_casts:
-  let a = [0,0]
-  let b = [a,a]
-  let c = [b,b]
-  let d = [c,c]
-  let e = [d,d]
-  let f = [e,e]
-  let g = [f,f]
-  let h = [g,g]
-  [h,h]
+def Cast: {hero pos args casts}
+  (Cons [[hero, pos], args] casts)
+
+def PASS          : 0
+def EARTH_PULL    : 176
+def PIERCING_BOLT : 179
 
 def exec_turn:
-  // Config
+
+  // Functions
   dup casts_take  = (take ~8)
   dup casts_write = (write ~8)
   dup board_take  = (take ~10)
   dup board_write = (write ~10)
+  dup get_cast    = #{skill casts} (casts_take skill 0 casts)
+  dup get_piece   = #{pos board} (board_take (board_index pos) Air board)
 
+  // Converts casts to an array
+  dup order_casts =
+    let empty_256 =
+      let a = [0,0] let b = [a,a] let c = [b,b] let d = [c,c]
+      let e = [d,d] let f = [e,e] let g = [f,f] let h = [g,g] [h,h]
+    dup to_array = (~256 #{state}
+      get [casts, array] = state
+      let case_cons = {cast casts} {array}
+        get [sp, args]   = cast
+        get [skill, pos] = sp
+        [casts, (casts_write skill [pos, args] array)]
+      let case_nil = {array}
+        [Nil, array]
+      (casts case_cons case_nil array))
+    # {casts}
+      snd (to_array [casts, empty_256])
+
+  // Casts a skillshot
+  dup cast_skillshot = # {hero skill effect state}
+    get [state, casts] = state
+    get [board, anims] = state
+    get [casts, cast]  = (get_cast skill casts)
+    get [pos, args]    = cast
+    get [pos, pos_cpy] = (vec2_cpy pos)
+    get [board, piece] = (get_piece pos_cpy board)
+    get [piece, allow] = (piece_cpy_with (piece_is_hero hero) piece)
+    get [pos, pos_cpy] = (vec2_cpy pos)
+    get [board, anims] = (if allow
+      then: {board anims}
+        let board = (args (effect pos_cpy) board)
+        let anims = (Cons "skillshot_used" anims)
+        [board, anims]
+      else: {board anims}
+        [board, (Cons "skillshot_failed" anims)]
+      board anims)
+    let board = (board_write (board_index pos) piece board)
+    [[board, anims], casts]
+    
   // Function
   # {casts board}
 
-    // Utils
-    let get_cast  = {skill casts} (casts_take skill 0 casts)
-    let get_piece = {pos board} (board_take (board_index pos) Air board)
-
-    // Animations
+    // State
+    let casts = (order_casts casts)
     let anims = Nil
+    let state = [[board, anims], casts]
 
     // EARTH_PULL
-    // TODO: abstract this logic in a single `hero_use_skill` function
-    get [casts,cast]  = (get_cast EARTH_PULL casts)
-    get [pos,args]    = cast
-    get [pos,pos0]    = (vec2_cpy pos)
-    get [board,piece] = (get_piece pos0 board)
-    get [piece,allow] = (piece_cpy_with (piece_is_hero TOPHORO) piece)
-    get [pos,pos0]    = (vec2_cpy pos)
-    get [board,anims] = 
-      ( if allow
-        then: {board anims}
-          let board = (args (earth_pull pos0) board)
-          let anims = (Cons "Tophoro used Earth Pull." anims)
-          [board, anims]
-        else: {board anims}
-          [board, (Cons "Invalid use of Earth Pull." anims)]
-        board anims)
-    let board = (board_write (board_index pos) piece board)
+    let state = (cast_skillshot TOPHORO EARTH_PULL    earth_pull    state)
+    let state = (cast_skillshot SNARCH  PIERCING_BOLT piercing_bolt state)
 
     // Result
-    [board, anims]
+    (fst state)
 
 //W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
 //W . . W . . W . . . . . . . . . . . . . . . . . . W X X . X X W
