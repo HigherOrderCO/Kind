@@ -237,8 +237,8 @@ def kaelin:
     //get [board, anims] = (exec_turn casts board)
 
     //let board = (piercing_bolt [24,1] [1,0] board)
-    let mov = (Cons [0,-1] (Cons [0,-1] (Cons [0,-1] Nil)))
-    let board = (flame_soul [1,30] UP board)
+    let mov = (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil)))
+    let board = (quick_shot [1,30] mov board)
     (print_board board)
     
 
@@ -656,18 +656,15 @@ def add_dir_from_mov: {mov pos}
   let case_nil  = {pos} [Nil, pos]
   (mov case_cons case_nil pos)
 
-// Go from initial position to the target position using a list of movements
-// pos: initial position
-// mov: list of movements
-def range3: {pos mov}
-  get [mov,pos] = (add_dir_from_mov mov pos)
-  get [mov,pos] = (add_dir_from_mov mov pos)
-  get [mov,pos] = (add_dir_from_mov mov pos)
-  get [mov,pos] = (add_dir_from_mov mov pos)
-  pos
-
 // TODO: creates up to 3 earth walls in a 5x5 (circle) around.
-//def earth_wall:
+//def earth_wall: #{pos1 pos2 pos3}
+//  let case_air     = Wall
+//  let case_wall    = Wall
+//  let case_cliff   = Cliff
+//  let case_throne  = {side} (Throne side)
+//  let case_unit    = {side hero hp} (Unit side hero hp)
+//  let change_piece = {t} (t case_air case_wall case_cliff case_throne case_unit)
+//  let board = (board_apply pos change_piece board)
 
 def earth_pull:
   dup step = step
@@ -682,6 +679,7 @@ def flame_wave:
   (area #hits)
   
 // Hits a 5x5 (circle). Deals 5 damage.
+// TODO: add 4 range
 def flame_ball:
   let area = vec2_circle_e
   let hits = {pos board} (board_apply pos (damage 5) board)
@@ -703,6 +701,7 @@ def flame_nova:
   (area #hits)
 
 // Places a doll in an empty tile
+// TODO: add 8 range
 def shadow_doll: {pos board}
   let case_air     = Wall
   let case_wall    = Wall
@@ -717,19 +716,21 @@ def shadow_doll: {pos board}
 //  let form = 
 
 // Hits a 3x3 (square) with for high damage (15?).
+// TODO: add 8 range
 def shadow_flux:
   let form = vec2_circle_c
   //let hits = {pos board} (board_apply pos (damage 15) board)
   let hits = {pos board} (board_apply pos (damage_visual_effect 15) board) 
   (form #hits)
 
-// Hits a selected enemy. Deals 5 damage
-// t_pos: target position
-def quick_shot: {pos mov}
-  let t_pos = (range3 pos mov)
-  //let hits  = {board} (board_apply t_pos (damage 3) board)
-  let hits  = {board} (board_apply t_pos (damage_visual_effect 3) board)
-  hits
+// Hits a selected enemy up to 3 range. Deals 5 damage.
+def quick_shot: # {pos mov board}
+  get [mov,pos] = (add_dir_from_mov mov pos)
+  get [mov,pos] = (add_dir_from_mov mov pos)
+  get [mov,pos] = (add_dir_from_mov mov pos)
+  get [mov,pos] = (add_dir_from_mov mov pos)
+  let board = (board_apply pos (damage_visual_effect 5) board)
+  board
 
 // Hits all enemies in a 5x1 (line) ahead. Deals 3 damage.
 def piercing_bolt:
@@ -738,6 +739,7 @@ def piercing_bolt:
   (form #hits) 
 
 // Explosive Arrow : hits up to 2 3x3 (circles). Deals 2 damage.
+// TODO: add 5 range
 def explosive_arrow:
   let form = vec2_circle_b
   let hits = {pos board} (board_apply pos (damage_visual_effect 2) board)
