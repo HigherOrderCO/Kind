@@ -219,8 +219,9 @@ def kaelin:
   dup quick_shot      = quick_shot
   dup piercing_bolt   = piercing_bolt
   dup explosive_arrow = explosive_arrow
+  dup earth_slam  = earth_slam
   dup erkos_walk      = erkos_walk
-  let casts           = empty_casts
+  let casts       = empty_casts
 
   # let board = new_board
 
@@ -647,6 +648,39 @@ def step:
     let b_pos           = (vec2_add a_pos0 a_dxy)
     (inter a_pos1 b_pos a_step_to_b board)
 
+def damage_visual_effect: {dmg piece}
+  let case_air    = Cliff
+  let case_wall   = Wall
+  let case_cliff  = Cliff
+  let case_throne = {side} (Throne side)
+  let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
+  (piece case_air case_wall case_cliff case_throne case_unit)
+
+// TODO: 
+// - check if the life of "piece" is bigger than the damage
+def damage: {dmg piece}
+  let case_air    = Air
+  let case_wall   = Wall
+  let case_cliff  = Cliff
+  let case_throne = {side} (Throne side)
+  let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
+  (piece case_air case_wall case_cliff case_throne case_unit)
+
+// TODO: Flip properties of a piece about move and attack
+def stun: {piece}
+  let case_air     = Air
+  let case_wall    = Wall
+  let case_cliff   = Cliff
+  let case_throne  = {side} (Throne side)
+  let case_unit    = {side hero hp} (Unit side hero hp)
+  (piece case_air case_wall case_cliff case_throne case_unit)
+
+// Stun enemies in a 3x3 (circle) around
+def stun_small_circle:
+  let area  = vec2_circle_b
+  let hits  = {pos board} (board_apply pos stun board)
+  (area #hits) 
+
 // Checks if given position is a specific hero
 def is_hero_at:
   dup board_with = (with ~10)
@@ -687,15 +721,26 @@ def add_dirs: {mlen}
   # {pos dirs}
     fst (move [pos,dirs])
 
-// TODO: creates up to 3 earth walls in a 5x5 (circle) around.
-//def earth_wall: #{pos1 pos2 pos3}
-//  let case_air     = Wall
-//  let case_wall    = Wall
-//  let case_cliff   = Cliff
-//  let case_throne  = {side} (Throne side)
-//  let case_unit    = {side hero hp} (Unit side hero hp)
-//  let change_piece = {t} (t case_air case_wall case_cliff case_throne case_unit)
-//  let board = (board_apply pos change_piece board)
+// Creates up to 3 earth walls in a 5x5 (circle) around.
+// TODO: Add box
+// TODO: Add range area
+def earth_wall: {pos1 pos2 pos3 board}
+  let case_air     = Wall
+  let case_wall    = Wall
+  let case_cliff   = Cliff
+  let case_throne  = {side} (Throne side)
+  let case_unit    = {side hero hp} (Unit side hero hp)
+  let change_piece = {t} (t case_air case_wall case_cliff case_throne case_unit)
+  let board = (board_apply pos1 change_piece board)
+  let board = (board_apply pos2 change_piece board)
+  let board = (board_apply pos3 change_piece board)
+  board
+
+// Slams enemies in a 3x3 (square) around, stunning him/her.
+def earth_slam:
+  let area  = vec2_circle_c
+  let hits  = {pos board} (board_apply pos stun board)
+  (area #hits) 
 
 def earth_pull:
   dup step = step
@@ -749,10 +794,13 @@ def shadow_doll: {pos board}
 // Hits a 3x3 (square) with for high damage (15?).
 // TODO: add 8 range
 def shadow_flux:
-  let form = vec2_circle_c
+  let area = vec2_circle_c
   //let hits = {pos board} (board_apply pos (damage 15) board)
   let hits = {pos board} (board_apply pos (damage_visual_effect 15) board) 
-  (form #hits)
+  (area #hits)
+
+// TODO: Loses half hp. Can't attack on this turn. Can't use on next turn. If Croni dies on this turn, takes the killer with her.
+//def shadow_bond: {side hero hp}
 
 // Hits a selected enemy up to 3 range. Deals 5 damage.
 def quick_shot:
@@ -762,22 +810,49 @@ def quick_shot:
 
 // Hits all enemies in a 5x1 (line) ahead. Deals 3 damage.
 def piercing_bolt:
-  let form = (vec2_wave (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 NilF))))))
+  let area = (vec2_wave (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 NilF))))))
   let hits = {pos board} (board_apply pos (damage_visual_effect 3) board)
-  (form #hits) 
+  (area #hits) 
 
 // Explosive Arrow : hits up to 2 3x3 (circles). Deals 2 damage.
 // TODO: add 5 range
 def explosive_arrow:
-  let form = vec2_circle_b
+  let area = vec2_circle_b
   let hits = {pos board} (board_apply pos (damage_visual_effect 2) board)
   # {pos1 pos2 board}
-    let board = (form #hits pos1 board)
-    let board = (form #hits pos2 board)
+    let board = (area #hits pos1 board)
+    let board = (area #hits pos2 board)
     board
 
 // TODO: mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range increase to 12.
 //def ballista:
+
+// Hits a 3x3 (square) around. Deals 3 damage.
+def killing_edge:
+  let area = vec2_circle_c
+  let hits = {pos board} (board_apply pos (damage_visual_effect 3) board)
+  (area #hits)
+
+// Select 4 tiles up to 32 range. Prevent all damage from enemies standing on those tiles during this turn.
+// TODO: Add range
+// TODO: Change function applied to the positions to "silence"
+def dodge: {pos1 pos2 pos3 pos4 board}
+  let case_air     = Air
+  let case_wall    = Wall
+  let case_cliff   = Cliff
+  let case_throne  = {side} (Throne side)
+  let case_unit    = {side hero hp} (Unit side hero hp)
+  let board = (board_apply pos1 (damage_visual_effect 1) board)
+  let board = (board_apply pos2 (damage_visual_effect 1) board)
+  let board = (board_apply pos3 (damage_visual_effect 1) board)
+  let board = (board_apply pos4 (damage_visual_effect 1) board)
+  board
+
+// Hits a 3x3 (square) around. Deals 8 damage.
+def slice_area:
+  let area = vec2_circle_c
+  let hits = {pos board} (board_apply pos (damage_visual_effect 8) board)
+  (area #hits)
 
 // :::::::::::
 // :: Moves ::
