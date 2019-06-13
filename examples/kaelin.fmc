@@ -788,8 +788,15 @@ def shadow_doll: {pos board}
   (board_apply pos change_piece board)
 
 // TODO: launches a ball that travels up to 8 tiles ahead, dealing high damage to first enemy hit
-//def shadow_ball: 
-//  let form = 
+def shadow_ball:
+  let area = (vec2_wave (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 NilF)))))))))
+  let hits = {pos state}
+    get [board,hit] = state
+    let hit         = 0     // TODO: check if there is a hero on `pos`, if yes, set `has_hit` to `1`
+    let board       = board // TODO: apply `(board_apply pos (damage 5))` to `board` only if `has_hit = 0`
+    [board, hit]
+  # {pos dir board}
+    (fst (area #hits pos dir [board,0]))
 
 // Hits a 3x3 (square) with for high damage (15?).
 // TODO: add 8 range
