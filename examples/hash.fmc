@@ -6,237 +6,237 @@ def keccak.f_loop: {arr} {t}
     a30 a31 a32 a33 a34 a35 a36 a37 a38 a39
     a40 a41 a42 a43 a44 a45 a46 a47 a48 a49}
 
-    cpy n   = n
-    cpy a00 = a00
-    cpy a01 = a01
-    cpy a02 = a02
-    cpy a03 = a03
-    cpy a04 = a04
-    cpy a05 = a05
-    cpy a06 = a06
-    cpy a07 = a07
-    cpy a08 = a08
-    cpy a09 = a09
-    cpy a10 = a10
-    cpy a11 = a11
-    cpy a12 = a12
-    cpy a13 = a13
-    cpy a14 = a14
-    cpy a15 = a15
-    cpy a16 = a16
-    cpy a17 = a17
-    cpy a18 = a18
-    cpy a19 = a19
-    cpy a20 = a20
-    cpy a21 = a21
-    cpy a22 = a22
-    cpy a23 = a23
-    cpy a24 = a24
-    cpy a25 = a25
-    cpy a26 = a26
-    cpy a27 = a27
-    cpy a28 = a28
-    cpy a29 = a29
-    cpy a30 = a30
-    cpy a31 = a31
-    cpy a32 = a32
-    cpy a33 = a33
-    cpy a34 = a34
-    cpy a35 = a35
-    cpy a36 = a36
-    cpy a37 = a37
-    cpy a38 = a38
-    cpy a39 = a39
-    cpy a40 = a40
-    cpy a41 = a41
-    cpy a42 = a42
-    cpy a43 = a43
-    cpy a44 = a44
-    cpy a45 = a45
-    cpy a46 = a46
-    cpy a47 = a47
-    cpy a48 = a48
-    cpy a49 = a49
+    dup n   = n
+    dup a00 = a00
+    dup a01 = a01
+    dup a02 = a02
+    dup a03 = a03
+    dup a04 = a04
+    dup a05 = a05
+    dup a06 = a06
+    dup a07 = a07
+    dup a08 = a08
+    dup a09 = a09
+    dup a10 = a10
+    dup a11 = a11
+    dup a12 = a12
+    dup a13 = a13
+    dup a14 = a14
+    dup a15 = a15
+    dup a16 = a16
+    dup a17 = a17
+    dup a18 = a18
+    dup a19 = a19
+    dup a20 = a20
+    dup a21 = a21
+    dup a22 = a22
+    dup a23 = a23
+    dup a24 = a24
+    dup a25 = a25
+    dup a26 = a26
+    dup a27 = a27
+    dup a28 = a28
+    dup a29 = a29
+    dup a30 = a30
+    dup a31 = a31
+    dup a32 = a32
+    dup a33 = a33
+    dup a34 = a34
+    dup a35 = a35
+    dup a36 = a36
+    dup a37 = a37
+    dup a38 = a38
+    dup a39 = a39
+    dup a40 = a40
+    dup a41 = a41
+    dup a42 = a42
+    dup a43 = a43
+    dup a44 = a44
+    dup a45 = a45
+    dup a46 = a46
+    dup a47 = a47
+    dup a48 = a48
+    dup a49 = a49
 
-    cpy c0 = ||||a00 ^ a10| ^ a20| ^ a30| ^ a40|
-    cpy c1 = ||||a01 ^ a11| ^ a21| ^ a31| ^ a41|
-    cpy c2 = ||||a02 ^ a12| ^ a22| ^ a32| ^ a42|
-    cpy c3 = ||||a03 ^ a13| ^ a23| ^ a33| ^ a43|
-    cpy c4 = ||||a04 ^ a14| ^ a24| ^ a34| ^ a44|
-    cpy c5 = ||||a05 ^ a15| ^ a25| ^ a35| ^ a45|
-    cpy c6 = ||||a06 ^ a16| ^ a26| ^ a36| ^ a46|
-    cpy c7 = ||||a07 ^ a17| ^ a27| ^ a37| ^ a47|
-    cpy c8 = ||||a08 ^ a18| ^ a28| ^ a38| ^ a48|
-    cpy c9 = ||||a09 ^ a19| ^ a29| ^ a39| ^ a49|
+    dup c0 = #||||a00 ^ a10| ^ a20| ^ a30| ^ a40|
+    dup c1 = #||||a01 ^ a11| ^ a21| ^ a31| ^ a41|
+    dup c2 = #||||a02 ^ a12| ^ a22| ^ a32| ^ a42|
+    dup c3 = #||||a03 ^ a13| ^ a23| ^ a33| ^ a43|
+    dup c4 = #||||a04 ^ a14| ^ a24| ^ a34| ^ a44|
+    dup c5 = #||||a05 ^ a15| ^ a25| ^ a35| ^ a45|
+    dup c6 = #||||a06 ^ a16| ^ a26| ^ a36| ^ a46|
+    dup c7 = #||||a07 ^ a17| ^ a27| ^ a37| ^ a47|
+    dup c8 = #||||a08 ^ a18| ^ a28| ^ a38| ^ a48|
+    dup c9 = #||||a09 ^ a19| ^ a29| ^ a39| ^ a49|
 
-    cpy h   = |c8 ^ ||c2 << 1| | |c3 >> 31|||
-    cpy l   = |c9 ^ ||c3 << 1| | |c2 >> 31|||
-    cpy a00 = |a00 ^ h|
-    cpy a01 = |a01 ^ l|
-    cpy a10 = |a10 ^ h|
-    cpy a11 = |a11 ^ l|
-    cpy a20 = |a20 ^ h|
-    cpy a21 = |a21 ^ l|
-    cpy a30 = |a30 ^ h|
-    cpy a31 = |a31 ^ l|
-    cpy a40 = |a40 ^ h|
-    cpy a41 = |a41 ^ l|
+    dup h   = #|c8 ^ ||c2 << 1| | |c3 >> 31|||
+    dup l   = #|c9 ^ ||c3 << 1| | |c2 >> 31|||
+    dup a00 = #|a00 ^ h|
+    dup a01 = #|a01 ^ l|
+    dup a10 = #|a10 ^ h|
+    dup a11 = #|a11 ^ l|
+    dup a20 = #|a20 ^ h|
+    dup a21 = #|a21 ^ l|
+    dup a30 = #|a30 ^ h|
+    dup a31 = #|a31 ^ l|
+    dup a40 = #|a40 ^ h|
+    dup a41 = #|a41 ^ l|
 
-    cpy h   = |c0 ^ ||c4 << 1| | |c5 >> 31|||
-    cpy l   = |c1 ^ ||c5 << 1| | |c4 >> 31|||
-    cpy a02 = |a02 ^ h|
-    cpy a03 = |a03 ^ l|
-    cpy a12 = |a12 ^ h|
-    cpy a13 = |a13 ^ l|
-    cpy a22 = |a22 ^ h|
-    cpy a23 = |a23 ^ l|
-    cpy a32 = |a32 ^ h|
-    cpy a33 = |a33 ^ l|
-    cpy a42 = |a42 ^ h|
-    cpy a43 = |a43 ^ l|
+    dup h   = #|c0 ^ ||c4 << 1| | |c5 >> 31|||
+    dup l   = #|c1 ^ ||c5 << 1| | |c4 >> 31|||
+    dup a02 = #|a02 ^ h|
+    dup a03 = #|a03 ^ l|
+    dup a12 = #|a12 ^ h|
+    dup a13 = #|a13 ^ l|
+    dup a22 = #|a22 ^ h|
+    dup a23 = #|a23 ^ l|
+    dup a32 = #|a32 ^ h|
+    dup a33 = #|a33 ^ l|
+    dup a42 = #|a42 ^ h|
+    dup a43 = #|a43 ^ l|
 
-    cpy h   = |c2 ^ ||c6 << 1| | |c7 >> 31|||
-    cpy l   = |c3 ^ ||c7 << 1| | |c6 >> 31|||
-    cpy a04 = |a04 ^ h|
-    cpy a05 = |a05 ^ l|
-    cpy a14 = |a14 ^ h|
-    cpy a15 = |a15 ^ l|
-    cpy a24 = |a24 ^ h|
-    cpy a25 = |a25 ^ l|
-    cpy a34 = |a34 ^ h|
-    cpy a35 = |a35 ^ l|
-    cpy a44 = |a44 ^ h|
-    cpy a45 = |a45 ^ l|
+    dup h   = #|c2 ^ ||c6 << 1| | |c7 >> 31|||
+    dup l   = #|c3 ^ ||c7 << 1| | |c6 >> 31|||
+    dup a04 = #|a04 ^ h|
+    dup a05 = #|a05 ^ l|
+    dup a14 = #|a14 ^ h|
+    dup a15 = #|a15 ^ l|
+    dup a24 = #|a24 ^ h|
+    dup a25 = #|a25 ^ l|
+    dup a34 = #|a34 ^ h|
+    dup a35 = #|a35 ^ l|
+    dup a44 = #|a44 ^ h|
+    dup a45 = #|a45 ^ l|
 
-    cpy h   = |c4 ^ ||c8 << 1| | |c9 >> 31|||
-    cpy l   = |c5 ^ ||c9 << 1| | |c8 >> 31|||
-    cpy a06 = |a06 ^ h|
-    cpy a07 = |a07 ^ l|
-    cpy a16 = |a16 ^ h|
-    cpy a17 = |a17 ^ l|
-    cpy a26 = |a26 ^ h|
-    cpy a27 = |a27 ^ l|
-    cpy a36 = |a36 ^ h|
-    cpy a37 = |a37 ^ l|
-    cpy a46 = |a46 ^ h|
-    cpy a47 = |a47 ^ l|
+    dup h   = #|c4 ^ ||c8 << 1| | |c9 >> 31|||
+    dup l   = #|c5 ^ ||c9 << 1| | |c8 >> 31|||
+    dup a06 = #|a06 ^ h|
+    dup a07 = #|a07 ^ l|
+    dup a16 = #|a16 ^ h|
+    dup a17 = #|a17 ^ l|
+    dup a26 = #|a26 ^ h|
+    dup a27 = #|a27 ^ l|
+    dup a36 = #|a36 ^ h|
+    dup a37 = #|a37 ^ l|
+    dup a46 = #|a46 ^ h|
+    dup a47 = #|a47 ^ l|
 
-    cpy h   = |c6 ^ ||c0 << 1| | |c1 >> 31|||
-    cpy l   = |c7 ^ ||c1 << 1| | |c0 >> 31|||
-    cpy a08 = |a08 ^ h|
-    cpy a09 = |a09 ^ l|
-    cpy a18 = |a18 ^ h|
-    cpy a19 = |a19 ^ l|
-    cpy a28 = |a28 ^ h|
-    cpy a29 = |a29 ^ l|
-    cpy a38 = |a38 ^ h|
-    cpy a39 = |a39 ^ l|
-    cpy a48 = |a48 ^ h|
-    cpy a49 = |a49 ^ l|
+    dup h   = #|c6 ^ ||c0 << 1| | |c1 >> 31|||
+    dup l   = #|c7 ^ ||c1 << 1| | |c0 >> 31|||
+    dup a08 = #|a08 ^ h|
+    dup a09 = #|a09 ^ l|
+    dup a18 = #|a18 ^ h|
+    dup a19 = #|a19 ^ l|
+    dup a28 = #|a28 ^ h|
+    dup a29 = #|a29 ^ l|
+    dup a38 = #|a38 ^ h|
+    dup a39 = #|a39 ^ l|
+    dup a48 = #|a48 ^ h|
+    dup a49 = #|a49 ^ l|
 
-    cpy b00 = a00
-    cpy b01 = a01
-    cpy b32 = ||a11 <<  4| | |a10 >> 28||
-    cpy b33 = ||a10 <<  4| | |a11 >> 28||
-    cpy b14 = ||a20 <<  3| | |a21 >> 29||
-    cpy b15 = ||a21 <<  3| | |a20 >> 29||
-    cpy b46 = ||a31 <<  9| | |a30 >> 23||
-    cpy b47 = ||a30 <<  9| | |a31 >> 23||
-    cpy b28 = ||a40 << 18| | |a41 >> 14||
-    cpy b29 = ||a41 << 18| | |a40 >> 14||
-    cpy b20 = ||a02 <<  1| | |a03 >> 31||
-    cpy b21 = ||a03 <<  1| | |a02 >> 31||
-    cpy b02 = ||a13 << 12| | |a12 >> 20||
-    cpy b03 = ||a12 << 12| | |a13 >> 20||
-    cpy b34 = ||a22 << 10| | |a23 >> 22||
-    cpy b35 = ||a23 << 10| | |a22 >> 22||
-    cpy b16 = ||a33 << 13| | |a32 >> 19||
-    cpy b17 = ||a32 << 13| | |a33 >> 19||
-    cpy b48 = ||a42 << 02| | |a43 >> 30||
-    cpy b49 = ||a43 << 02| | |a42 >> 30||
-    cpy b40 = ||a05 << 30| | |a04 >>  2||
-    cpy b41 = ||a04 << 30| | |a05 >>  2||
-    cpy b22 = ||a14 << 06| | |a15 >> 26||
-    cpy b23 = ||a15 << 06| | |a14 >> 26||
-    cpy b04 = ||a25 << 11| | |a24 >> 21||
-    cpy b05 = ||a24 << 11| | |a25 >> 21||
-    cpy b36 = ||a34 << 15| | |a35 >> 17||
-    cpy b37 = ||a35 << 15| | |a34 >> 17||
-    cpy b18 = ||a45 << 29| | |a44 >>  3||
-    cpy b19 = ||a44 << 29| | |a45 >>  3||
-    cpy b10 = ||a06 << 28| | |a07 >>  4||
-    cpy b11 = ||a07 << 28| | |a06 >>  4||
-    cpy b42 = ||a17 << 23| | |a16 >>  9||
-    cpy b43 = ||a16 << 23| | |a17 >>  9||
-    cpy b24 = ||a26 << 25| | |a27 >>  7||
-    cpy b25 = ||a27 << 25| | |a26 >>  7||
-    cpy b06 = ||a36 << 21| | |a37 >> 11||
-    cpy b07 = ||a37 << 21| | |a36 >> 11||
-    cpy b38 = ||a47 << 24| | |a46 >>  8||
-    cpy b39 = ||a46 << 24| | |a47 >>  8||
-    cpy b30 = ||a08 << 27| | |a09 >>  5||
-    cpy b31 = ||a09 << 27| | |a08 >>  5||
-    cpy b12 = ||a18 << 20| | |a19 >> 12||
-    cpy b13 = ||a19 << 20| | |a18 >> 12||
-    cpy b44 = ||a29 << 07| | |a28 >> 25||
-    cpy b45 = ||a28 << 07| | |a29 >> 25||
-    cpy b26 = ||a38 << 08| | |a39 >> 24||
-    cpy b27 = ||a39 << 08| | |a38 >> 24||
-    cpy b08 = ||a48 << 14| | |a49 >> 18||
-    cpy b09 = ||a49 << 14| | |a48 >> 18||
+    dup b00 = #a00
+    dup b01 = #a01
+    dup b32 = #||a11 <<  4| | |a10 >> 28||
+    dup b33 = #||a10 <<  4| | |a11 >> 28||
+    dup b14 = #||a20 <<  3| | |a21 >> 29||
+    dup b15 = #||a21 <<  3| | |a20 >> 29||
+    dup b46 = #||a31 <<  9| | |a30 >> 23||
+    dup b47 = #||a30 <<  9| | |a31 >> 23||
+    dup b28 = #||a40 << 18| | |a41 >> 14||
+    dup b29 = #||a41 << 18| | |a40 >> 14||
+    dup b20 = #||a02 <<  1| | |a03 >> 31||
+    dup b21 = #||a03 <<  1| | |a02 >> 31||
+    dup b02 = #||a13 << 12| | |a12 >> 20||
+    dup b03 = #||a12 << 12| | |a13 >> 20||
+    dup b34 = #||a22 << 10| | |a23 >> 22||
+    dup b35 = #||a23 << 10| | |a22 >> 22||
+    dup b16 = #||a33 << 13| | |a32 >> 19||
+    dup b17 = #||a32 << 13| | |a33 >> 19||
+    dup b48 = #||a42 << 02| | |a43 >> 30||
+    dup b49 = #||a43 << 02| | |a42 >> 30||
+    dup b40 = #||a05 << 30| | |a04 >>  2||
+    dup b41 = #||a04 << 30| | |a05 >>  2||
+    dup b22 = #||a14 << 06| | |a15 >> 26||
+    dup b23 = #||a15 << 06| | |a14 >> 26||
+    dup b04 = #||a25 << 11| | |a24 >> 21||
+    dup b05 = #||a24 << 11| | |a25 >> 21||
+    dup b36 = #||a34 << 15| | |a35 >> 17||
+    dup b37 = #||a35 << 15| | |a34 >> 17||
+    dup b18 = #||a45 << 29| | |a44 >>  3||
+    dup b19 = #||a44 << 29| | |a45 >>  3||
+    dup b10 = #||a06 << 28| | |a07 >>  4||
+    dup b11 = #||a07 << 28| | |a06 >>  4||
+    dup b42 = #||a17 << 23| | |a16 >>  9||
+    dup b43 = #||a16 << 23| | |a17 >>  9||
+    dup b24 = #||a26 << 25| | |a27 >>  7||
+    dup b25 = #||a27 << 25| | |a26 >>  7||
+    dup b06 = #||a36 << 21| | |a37 >> 11||
+    dup b07 = #||a37 << 21| | |a36 >> 11||
+    dup b38 = #||a47 << 24| | |a46 >>  8||
+    dup b39 = #||a46 << 24| | |a47 >>  8||
+    dup b30 = #||a08 << 27| | |a09 >>  5||
+    dup b31 = #||a09 << 27| | |a08 >>  5||
+    dup b12 = #||a18 << 20| | |a19 >> 12||
+    dup b13 = #||a19 << 20| | |a18 >> 12||
+    dup b44 = #||a29 << 07| | |a28 >> 25||
+    dup b45 = #||a28 << 07| | |a29 >> 25||
+    dup b26 = #||a38 << 08| | |a39 >> 24||
+    dup b27 = #||a39 << 08| | |a38 >> 24||
+    dup b08 = #||a48 << 14| | |a49 >> 18||
+    dup b09 = #||a49 << 14| | |a48 >> 18||
 
-    cpy a00 = |b00 ^ ||0 ~ b02| & b04||
-    cpy a01 = |b01 ^ ||0 ~ b03| & b05||
-    cpy a10 = |b10 ^ ||0 ~ b12| & b14||
-    cpy a11 = |b11 ^ ||0 ~ b13| & b15||
-    cpy a20 = |b20 ^ ||0 ~ b22| & b24||
-    cpy a21 = |b21 ^ ||0 ~ b23| & b25||
-    cpy a30 = |b30 ^ ||0 ~ b32| & b34||
-    cpy a31 = |b31 ^ ||0 ~ b33| & b35||
-    cpy a40 = |b40 ^ ||0 ~ b42| & b44||
-    cpy a41 = |b41 ^ ||0 ~ b43| & b45||
-    cpy a02 = |b02 ^ ||0 ~ b04| & b06||
-    cpy a03 = |b03 ^ ||0 ~ b05| & b07||
-    cpy a12 = |b12 ^ ||0 ~ b14| & b16||
-    cpy a13 = |b13 ^ ||0 ~ b15| & b17||
-    cpy a22 = |b22 ^ ||0 ~ b24| & b26||
-    cpy a23 = |b23 ^ ||0 ~ b25| & b27||
-    cpy a32 = |b32 ^ ||0 ~ b34| & b36||
-    cpy a33 = |b33 ^ ||0 ~ b35| & b37||
-    cpy a42 = |b42 ^ ||0 ~ b44| & b46||
-    cpy a43 = |b43 ^ ||0 ~ b45| & b47||
-    cpy a04 = |b04 ^ ||0 ~ b06| & b08||
-    cpy a05 = |b05 ^ ||0 ~ b07| & b09||
-    cpy a14 = |b14 ^ ||0 ~ b16| & b18||
-    cpy a15 = |b15 ^ ||0 ~ b17| & b19||
-    cpy a24 = |b24 ^ ||0 ~ b26| & b28||
-    cpy a25 = |b25 ^ ||0 ~ b27| & b29||
-    cpy a34 = |b34 ^ ||0 ~ b36| & b38||
-    cpy a35 = |b35 ^ ||0 ~ b37| & b39||
-    cpy a44 = |b44 ^ ||0 ~ b46| & b48||
-    cpy a45 = |b45 ^ ||0 ~ b47| & b49||
-    cpy a06 = |b06 ^ ||0 ~ b08| & b00||
-    cpy a07 = |b07 ^ ||0 ~ b09| & b01||
-    cpy a16 = |b16 ^ ||0 ~ b18| & b10||
-    cpy a17 = |b17 ^ ||0 ~ b19| & b11||
-    cpy a26 = |b26 ^ ||0 ~ b28| & b20||
-    cpy a27 = |b27 ^ ||0 ~ b29| & b21||
-    cpy a36 = |b36 ^ ||0 ~ b38| & b30||
-    cpy a37 = |b37 ^ ||0 ~ b39| & b31||
-    cpy a46 = |b46 ^ ||0 ~ b48| & b40||
-    cpy a47 = |b47 ^ ||0 ~ b49| & b41||
-    cpy a08 = |b08 ^ ||0 ~ b00| & b02||
-    cpy a09 = |b09 ^ ||0 ~ b01| & b03||
-    cpy a18 = |b18 ^ ||0 ~ b10| & b12||
-    cpy a19 = |b19 ^ ||0 ~ b11| & b13||
-    cpy a28 = |b28 ^ ||0 ~ b20| & b22||
-    cpy a29 = |b29 ^ ||0 ~ b21| & b23||
-    cpy a38 = |b38 ^ ||0 ~ b30| & b32||
-    cpy a39 = |b39 ^ ||0 ~ b31| & b33||
-    cpy a48 = |b48 ^ ||0 ~ b40| & b42||
-    cpy a49 = |b49 ^ ||0 ~ b41| & b43||
+    dup a00 = #|b00 ^ ||0 ~ b02| & b04||
+    dup a01 = #|b01 ^ ||0 ~ b03| & b05||
+    dup a10 = #|b10 ^ ||0 ~ b12| & b14||
+    dup a11 = #|b11 ^ ||0 ~ b13| & b15||
+    dup a20 = #|b20 ^ ||0 ~ b22| & b24||
+    dup a21 = #|b21 ^ ||0 ~ b23| & b25||
+    dup a30 = #|b30 ^ ||0 ~ b32| & b34||
+    dup a31 = #|b31 ^ ||0 ~ b33| & b35||
+    dup a40 = #|b40 ^ ||0 ~ b42| & b44||
+    dup a41 = #|b41 ^ ||0 ~ b43| & b45||
+    dup a02 = #|b02 ^ ||0 ~ b04| & b06||
+    dup a03 = #|b03 ^ ||0 ~ b05| & b07||
+    dup a12 = #|b12 ^ ||0 ~ b14| & b16||
+    dup a13 = #|b13 ^ ||0 ~ b15| & b17||
+    dup a22 = #|b22 ^ ||0 ~ b24| & b26||
+    dup a23 = #|b23 ^ ||0 ~ b25| & b27||
+    dup a32 = #|b32 ^ ||0 ~ b34| & b36||
+    dup a33 = #|b33 ^ ||0 ~ b35| & b37||
+    dup a42 = #|b42 ^ ||0 ~ b44| & b46||
+    dup a43 = #|b43 ^ ||0 ~ b45| & b47||
+    dup a04 = #|b04 ^ ||0 ~ b06| & b08||
+    dup a05 = #|b05 ^ ||0 ~ b07| & b09||
+    dup a14 = #|b14 ^ ||0 ~ b16| & b18||
+    dup a15 = #|b15 ^ ||0 ~ b17| & b19||
+    dup a24 = #|b24 ^ ||0 ~ b26| & b28||
+    dup a25 = #|b25 ^ ||0 ~ b27| & b29||
+    dup a34 = #|b34 ^ ||0 ~ b36| & b38||
+    dup a35 = #|b35 ^ ||0 ~ b37| & b39||
+    dup a44 = #|b44 ^ ||0 ~ b46| & b48||
+    dup a45 = #|b45 ^ ||0 ~ b47| & b49||
+    dup a06 = #|b06 ^ ||0 ~ b08| & b00||
+    dup a07 = #|b07 ^ ||0 ~ b09| & b01||
+    dup a16 = #|b16 ^ ||0 ~ b18| & b10||
+    dup a17 = #|b17 ^ ||0 ~ b19| & b11||
+    dup a26 = #|b26 ^ ||0 ~ b28| & b20||
+    dup a27 = #|b27 ^ ||0 ~ b29| & b21||
+    dup a36 = #|b36 ^ ||0 ~ b38| & b30||
+    dup a37 = #|b37 ^ ||0 ~ b39| & b31||
+    dup a46 = #|b46 ^ ||0 ~ b48| & b40||
+    dup a47 = #|b47 ^ ||0 ~ b49| & b41||
+    dup a08 = #|b08 ^ ||0 ~ b00| & b02||
+    dup a09 = #|b09 ^ ||0 ~ b01| & b03||
+    dup a18 = #|b18 ^ ||0 ~ b10| & b12||
+    dup a19 = #|b19 ^ ||0 ~ b11| & b13||
+    dup a28 = #|b28 ^ ||0 ~ b20| & b22||
+    dup a29 = #|b29 ^ ||0 ~ b21| & b23||
+    dup a38 = #|b38 ^ ||0 ~ b30| & b32||
+    dup a39 = #|b39 ^ ||0 ~ b31| & b33||
+    dup a48 = #|b48 ^ ||0 ~ b40| & b42||
+    dup a49 = #|b49 ^ ||0 ~ b41| & b43||
 
-    cpy rcs = 
+    dup rcs = # 
       if |n < 12|
       then: if |n < 6|
       then: if |n < 3|
@@ -285,16 +285,16 @@ def keccak.f_loop: {arr} {t}
       else: [2147483649,0]
       else: [2147516424,2147483648]
 
-    cpy a00 = |fst rcs ^ a00|
-    cpy a01 = |snd rcs ^ a01|
+    dup a00 = #|fst rcs ^ a00|
+    dup a01 = #|snd rcs ^ a01|
 
     (t
-      |n + 1|
-      a00 a01 a02 a03 a04 a05 a06 a07 a08 a09
-      a10 a11 a12 a13 a14 a15 a16 a17 a18 a19
-      a20 a21 a22 a23 a24 a25 a26 a27 a28 a29
-      a30 a31 a32 a33 a34 a35 a36 a37 a38 a39
-      a40 a41 a42 a43 a44 a45 a46 a47 a48 a49))
+      #|n + 1|
+      #a00 #a01 #a02 #a03 #a04 #a05 #a06 #a07 #a08 #a09
+      #a10 #a11 #a12 #a13 #a14 #a15 #a16 #a17 #a18 #a19
+      #a20 #a21 #a22 #a23 #a24 #a25 #a26 #a27 #a28 #a29
+      #a30 #a31 #a32 #a33 #a34 #a35 #a36 #a37 #a38 #a39
+      #a40 #a41 #a42 #a43 #a44 #a45 #a46 #a47 #a48 #a49))
 
 def keccak.f: {arr}
   dup arr = arr
@@ -332,31 +332,42 @@ def keccak.f: {arr}
     #(arr f)
   #arr
 
-def update_zero: #{t k} (k t)
-def pushfront_update: {f update} dup f = f dup update = update #{t k} {x} (update (t (f x)) k)
-def pushback_update: {f update} dup f = f dup update = update #{t k} (update t {tup} {x} (k (tup (f x))))
-def apply_update: {update arr} dup update = update dup arr = arr #{t} (arr (update t {x} x))
+def update_zero: {t k} (k t)
+def pushfront_update: {f update} {t k} {x} (update (t (f x)) k)
+def pushback_update: {f update} {t k} (update t {tup} {x} (k (tup (f x))))
+def apply_update: {update arr} {t} (arr (update t {x} x))
 
 def Keccak256: {bytes}
-  let state = (for ~200 #{t} t #(pushfront 0) #{x} x)
-  let update = #update_zero
-  let fold_cons = {x h i state update}
+  let state = (for ~200 #{t} t #(pushfront #0) #{x} x)
+  let update = update_zero
+  let fold_cons = {x h i state update F}
     cpy i = i
     (if ||i % 136| == 135|
-    then: {x h i state update} (h |i + 1| (keccak.f (apply_update (pushback_update {y} |x ^ y| update) state)) update_zero)
-    else: {x h i state update} (h |i + 1| state (pushback_update {y} |x ^ y| update))
-    x h i state update)
-  let fold_nil = {i state update}
-    dup state = (apply_update (pushback_update {y} |y ^ 1| update) state)
+    then: {x h i state update F}
+      dup x = x
+      dup state = state
+      dup update = update
+      dup F = F
+      (h |i + 1| #(F (apply_update (pushback_update {y} |x ^ y| update) state)) #update_zero #F)
+    else: {x h i state update F}
+      dup x = x
+      dup update = update
+      (h |i + 1| state #(pushback_update {y} |x ^ y| update) F)
+    x h i state update F)
+  let fold_nil = {i state update F}
+    dup state = state
+    dup update = update
+    dup F = F
+    dup state = #(apply_update (pushback_update {y} |y ^ 1| update) state)
     // xor the position 135 of the state with 0x80
-    let state =
+    dup state =
       dup f = (for ~135 #{t x} (t |x ^ 128|) #{fun t x} (fun (t x)) #{x} x)
       #{t} (state (f t))
-    dup state = (keccak.f state)
+    dup state = #(F state)
     #(state {a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -}
       (ConsF a1 (ConsF a2 (ConsF a3 (ConsF a4 (ConsF a5 (ConsF a6 (ConsF a7 (ConsF a8 (ConsF a9 (ConsF a10 (ConsF a11 (ConsF a12 (ConsF a13 (ConsF a14 (ConsF a15 (ConsF a16 (ConsF a17 (ConsF a18 (ConsF a19 (ConsF a20 (ConsF a21 (ConsF a22 (ConsF a23 (ConsF a24 (ConsF a25 (ConsF a26 (ConsF a27 (ConsF a28 (ConsF a29 (ConsF a30 (ConsF a31 (ConsF a32 NilF)))))))))))))))))))))))))))))))))
   dup fold = (bytes #fold_cons)
-# (fold fold_nil 0 state update)
+# (fold fold_nil 0 state #update #keccak.f)
 
 def bytes_to_hex: {xs}
   (from_chars
