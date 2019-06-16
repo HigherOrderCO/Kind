@@ -156,11 +156,11 @@ def range: {dpt}
 // fold_array
 // : {-A : Type}
 //   {dpt : Nat}
-//   ! {arr  : !(Array dpt A)}
-//     {-P   : Type}
+//   ! {-P   : Type}
 //     {Node : !{lft : A} {rgt : A} P}
 //     {Leaf : !{val : A} P}
-//     ! P
+//     ! {arr  : !(Array dpt A)}
+//       P
 def fold_array: {dpt}
   let init = {Node Leaf}
     dup Node = Node
@@ -176,9 +176,58 @@ def fold_array: {dpt}
       let rgt = (rec rgt)
       (Node lft rgt)
   dup fold = (dpt #loop)
-  # {arr Node Leaf}
-    dup arr  = arr
-    dup Node = Node
-    dup Leaf = Leaf
-    dup fold = (fold init #Node #Leaf)
-    # (fold arr)
+  # (fold init)
+
+// fold_array_of_len
+// | Like `fold_array`, but needs length and can operate on arrays at level 1
+// | Requires much more rewrites to build, but is equally efficient once built
+// : {-A   : Type}
+//   {mlen : Nat}
+//   {mdpt : Num}
+//   {-P   : Type}
+//   {Node : !{lft : A} {rgt : A} P}
+//   {Leaf : !{val : A} P}
+//   ! {arr  : !(Array dpt A)}
+//     P
+def fold_array_of_len: {mlen mdpt Node Leaf}
+  dup mdpt = mdpt
+  dup Node = Node
+  dup Leaf = Leaf
+  dup fold = (mul ~2 mlen # {rec dpt arr}
+    cpy dpt = dpt
+    (if |dpt < mdpt|
+      then: {rec arr}
+        get [lft,rgt] = arr
+        get [rec,lft] = (rec |dpt + 1| lft)
+        get [rec,rgt] = (rec |dpt + 1| rgt)
+        [rec, (Node lft rgt)]
+      else: {rec arr}
+        [rec, (Leaf arr)]
+      rec arr))
+  # {arr} (snd (fold {dpt arr}[{x}x,arr] 0 arr))
+
+// array_1024
+// : (Array ~10 Num)
+def array_1024:
+  let a = [1,1]
+  let b = [a,a]
+  let c = [b,b]
+  let d = [c,c]
+  let e = [d,d]
+  let f = [e,e]
+  let g = [f,f]
+  let h = [g,g]
+  let i = [h,h]
+  [i,i]
+
+def fold_array_lv1_example:
+  dup fold = (fold_array_lv1 ~1024 #10 #{a b}|a + b| #{x}x)
+  # |(fold array_1024) + (fold array_1024)|
+
+def fold_array_example:
+  dup fold = (fold_array ~10)
+  # dup fold = (fold #{a b}|a + b| #{x}x)
+  # (fold array_1024)
+
+def array:
+  fold_array_example
