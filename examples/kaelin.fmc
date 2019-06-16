@@ -358,6 +358,14 @@ def kaelin:
       [(Unit side hero hp), (fn (Unit side hero hp))]
     (piece case_air case_wall case_cliff case_throne case_unit fn)
 
+  dup get_piece_hero = # {piece}
+    let case_air    = None
+    let case_wall   = None
+    let case_cliff  = None
+    let case_throne = {a_side} None
+    let case_unit   = {a_side a_hero a_hp} (Just a_hero)
+    (piece case_air case_wall case_cliff case_throne case_unit)
+
   dup piece_is_hero = # {hero piece}
     let case_air    = 0
     let case_wall   = 0
@@ -509,6 +517,10 @@ def kaelin:
   dup board_index = # {pos}
     get [x,y] = pos
     ||y * 32| + x|
+
+  dup board_position = # {idx}
+    cpy idx = idx
+    [|idx % 32|, |idx / 32|]
 
   dup board_interact = # {a_pos b_pos fun board}
     cpy a_idx         = (board_index a_pos)
@@ -806,9 +818,26 @@ def kaelin:
     then: SNARCH
     else: 31
 
+  dup find_hero_positions =
+    let fold_node = {a b pos idx}
+      cpy idx = idx
+      let pos = (a pos ||idx * 2| + 0|)
+      let pos = (b pos ||idx * 2| + 1|)
+      pos
+    let fold_leaf = {piece pos idx}
+      let case_none = {pos} pos
+      let case_just = {hero} {pos} (write5 hero (Just (board_position idx)) pos)
+      (get_piece_hero piece case_none case_just pos)
+    dup fold = (fold10 #fold_node #fold_leaf)
+    # {board}
+      let a = [None,None]
+      let b = [a,a]
+      let c = [b,b]
+      let d = [c,c]
+      let e = [d,d]
+      (fold board e 0)
+      
   dup exec_turn =
-
-    // Functions
     dup get_cast    = #{skill casts} (take8 skill 0 casts)
     dup get_piece   = #{pos board} (take10 (board_index pos) Air board)
 
@@ -965,4 +994,5 @@ def kaelin:
     //let turn = (Cast PIERCING_BOLT [30,1] {t}(t [0,1]) turn) // Tophoro fails to cast PIERCING_BOLT
     //get [board, anims] = (exec_turn turn board)
 
+    //(find_hero_positions board)
     (print_board board)
