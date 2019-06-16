@@ -32,7 +32,7 @@
 // ?       | Ranged     | ?              |   ? |   ? | ?
 // Sirpix  | Melee      | Thief          |   3 |  60 | Dev
 // Kenlua  | Melee      | Swordsman      |   4 |  60 | Killua (Hunter X Hunter), Kenshin (Rurouni Kenshin)
-// Flina   | Melee      | Pegasus Knight |   5 |  60 | Florina (Fire Emblem), Link (The Legend of Zelda)
+// Flina   | Melee      | Pegasus Knight |   6 |  60 | Florina (Fire Emblem), Link (The Legend of Zelda)
 // ?       | Melee      | ?              |   ? |   ? | ?
 // ?       | Melee      | ?              |   ? |   ? | ?
 // ?       | Melee      | ?              |   ? |   ? | ?
@@ -54,29 +54,25 @@
 // ## Moves
 // 
 // - Tophoro
-//   - Earth Lock : selects an enemy in a 5x5 (circle) around. Stuns him/her. Can't use Earth Lock on next turn.
+//   - Earth Lock : selects an enemy in a 5x5 (circle) around. Stuns him/her. Can't use on next turn.
 //   - Earth Pull : pulls enemies in a 1-3-5 (wave) ahead.
 //   - Earth Wall : creates up to 3 earth walls in a 5x5 (circle) around.
-//   - Earth Slam : slams enemies in a 3x3 (square) around, stunning him/her.
 //   - Earth Root : self-roots for 3 turns, gaining massive shield and heal.
 // 
 // - Gonk
-//   - Endure  : can't die on this turn, staying at 1 HP minimum. Can't attack on this turn. Can't use for more than 3 consecutive turns.
+//   - Endure  : can't die on this turn. Can't attack on this turn. Can't use on next turn.
 //   - Breath  : heals 9 HP. Can't move on this turn. 
 //   - Empathy : allies in a 5x5 range can't take damage during this turn. Gonk takes all damage they would take.
-//   - Counter : select an enemy up to 5 range. If he/she damages Gonk directly during this turn, he/she takes the damage instead.
 //   - Shatter : select an enemy up to 1 range. Deals an amount of damage inversely proportional to remaining HP.
 //
 // - Erkos
 //   - Flame Ball : hits a 5x5 (circle) up to 4 range.
 //   - Flame Wave : hits a 1-3-3-5-5 (wave) ahead. Deals 5 damage.
 //   - Flame Rage : on the next turn, attacks deal +2 dmg. Stacks. Can't attack on this turn.
-//   - Flame Soul : selects an enemy up to 1 range. Deals massive damage (20?).
 //   - Flame Nova : loses 30 HP. Deals massive damage in a 11x11 circle (20?).
 // 
 // - Croni
 //   - Shadow Doll : places a doll in empty tile for up to 8 range, blocking the way until the end of the turn.
-//   - Shadow Ball : launches a ball that travels up to 8 tiles ahead, dealing high damage to first enemy hit.
 //   - Shadow Flux : after a delay, hits a 3x3 (square) in up to 8 range for high damage.
 //   - Shadow Trap : places a trap in a secret position; activate to reveal and stun in a 3x3 (circle).
 //   - Shadow Bond : loses half hp. Can't attack on this turn. Can't use on next turn. If Croni dies on this turn, takes the killer with her.
@@ -98,8 +94,8 @@
 //   - Slash : hits a 1x1 (point) up to 1 range. Deals massive damage. If the hit lands, returns to the position you were at the beginning of the turn.
 // 
 // - Flina
-//   - Fly     : Select an position to pick an ally. Moves 4 steps, passing through enemies and cliffs. Afterwards, ally is moved to behind Flina.
-//   - Lance   : hits a selected enemy up to 2 range.
+//   - Fly     : Moves 4 steps, passing through enemies and cliffs.
+//   - Javelin : hits a selected enemy up to 4 range.
 //   - Ocarina : ...
 // 
 // - Stanci
@@ -200,26 +196,23 @@
 // - Croni Shadow Trap (place)
 // - Zagatur Summon
 
-
-
 def kaelin:
-
   // :::::::::::
   // :: Array ::
   // :::::::::::
 
+  dup fold5   = (fold_array ~5)
+  dup fold8   = (fold_array ~8)
+  dup fold10  = (fold_array ~10) #
   dup with5   = (with ~5)
   dup take5   = (take ~5)
   dup write5  = (write ~5)
-  let fold5   = (fold_array_of_len ~32 #5)
   dup with8   = (with ~8)
   dup take8   = (take ~8)
   dup write8  = (write ~8)
-  let fold8   = (fold_array_of_len ~256 #8)
   dup with10  = (with ~10)
   dup take10  = (take ~10)
   dup write10 = (write ~10)
-  let fold10  = (fold_array_of_len ~1024 #10)
 
   // :::::::::::::::
   // :: Direction ::
@@ -313,7 +306,6 @@ def kaelin:
     let quad03 = [[[hero24,hero25],[hero26,hero27]],[[hero28,hero29],[hero30,hero31]]]
     let heroes = [[quad00,quad01],[quad02,quad03]]
     (snd (take5 hero NilF heroes))
-
 
   dup piece_icon = # {piece}
     let case_air    = (to_chars " .")
@@ -444,6 +436,19 @@ def kaelin:
   dup ZAGATUR  = # 24
   dup AGDRIS   = # 25
   dup MEWRU    = # 26
+
+  let TO = TOPHORO
+  let GO = GONK
+  let ER = ERKOS
+  let CR = CRONI
+  let SN = SNARCH
+  let SI = SIRPIX
+  let KE = KENLUA
+  let FL = FLINA
+  let ST = STANCI
+  let ZA = ZAGATUR
+  let AG = AGDRIS
+  let ME = MEWRU
 
   dup Tophoro  = # {side} (Unit side TOPHORO 120)
   dup Gonk     = # {side} (Unit side GONK     90)
@@ -712,17 +717,6 @@ def kaelin:
     let change_piece = {t} (t case_air case_wall case_cliff case_throne case_unit)
     (board_apply pos change_piece board)
 
-  // TODO: launches a ball that travels up to 8 tiles ahead, dealing high damage to first enemy hit
-  dup shadow_ball =
-    let area = (vec2_wave (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 NilF)))))))))
-    let hits = {pos state}
-      get [board,hit] = state
-      let hit         = 0     // TODO: check if there is a hero on `pos`, if yes, set `has_hit` to `1`
-      let board       = board // TODO: apply `(board_apply pos (damage 5))` to `board` only if `has_hit = 0`
-      [board, hit]
-    # {pos dir board}
-      (fst (area #hits pos dir [board,0]))
-
   // Hits a 3x3 (square) with for high damage (15?).
   // TODO: add 8 range
   dup shadow_flux =
@@ -788,121 +782,105 @@ def kaelin:
   // :: Moves ::
   // :::::::::::
 
-  dup Init = #
-    Nil
+  dup PASS          = # 0
+  dup KENLUA_WALK   = # 128
+  dup SIRPIX_WALK   = # 129
+  dup FLINA_WALK    = # 130
+  dup SNARCH_WALK   = # 131
+  dup ERKOS_WALK    = # 132
+  dup STANCI_WALK   = # 133
+  dup CRONI_WALK    = # 134
+  dup GONK_WALK     = # 135
+  dup TOPHORO_WALK  = # 136
+  dup AGDRIS_WALK   = # 137
+  dup MEWRU_WALK    = # 138
+  dup ZAGATUR_WALK  = # 139
+  dup EARTH_PULL    = # 176
+  dup PIERCING_BOLT = # 179
 
-  dup Cast = # {move pos args casts}
-    (Cons [[move, pos], args] casts)
+  // | skill_hero
+  // : (Array ~10 Num)
+  dup get_skill_hero = # {skill}
+    let i000 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i016 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i032 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i048 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i064 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i080 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i096 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i112 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i128 = [[[[TO,SI],[FL,SN]],[[ER,ST],[CR,GO]]],[[[TO,AG],[ME,ZA]],[[ 0, 0],[ 0, 0]]]]
+    let i144 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i160 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i176 = [[[[TO, 0],[ 0,SN]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i192 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i208 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i224 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i240 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let smap = [[[[i000,i016],[i032,i048]],[[i064,i080],[i096,i112]]],[[[i128,i144],[i160,i176]],[[i192,i208],[i224,i240]]]]
+    snd (take8 skill 0 smap)
 
-  dup PASS           = # 0
-  dup KENLUA_WALK    = # 128
-  dup SIRPIX_WALK    = # 129
-  dup FLINA_WALK     = # 130
-  dup SNARCH_WALK    = # 131
-  dup ERKOS_WALK     = # 132
-  dup STANCI_WALK    = # 133
-  dup CRONI_WALK     = # 134
-  dup GONK_WALK      = # 135
-  dup TOPHORO_WALK   = # 136
-  dup AGDRIS_WALK    = # 137
-  dup MEWRU_WALK     = # 138
-  dup ZAGATUR_WALK   = # 139
-  dup EARTH_PULL     = # 176
-  dup PIERCING_BOLT  = # 179
+  // empty_casts
+  // : (Array ~8 (Maybe [Pos, ArgTup]))
+  dup empty_casts = #
+    let a = [None,None] let b = [a,a] let c = [b,b] let d = [c,c]
+    let e = [d,d] let f = [e,e] let g = [f,f] [g,g]
 
-  dup skill_hero = # {skill}
-    cpy skill = skill
-    if |skill == 176| 
-    then: TOPHORO
-    else: if |skill == 179|
-    then: SNARCH
-    else: 31
+  // cast
+  // : {skill : Num} ->
+  //   {pos   : [Num,Num]} ->
+  //   {args  : ArgTuple} ->
+  //   {casts : (Array ~8 (Maybe [Pos, ArgTup]))} ->
+  //   (Array ~8 (Maybe [Pos, ArgTup]))
+  dup cast = # {skill pos args casts}
+    (write8 skill (Just [pos, args]) casts)
 
-  dup find_hero_positions =
-    let fold_node = {a b pos idx}
-      cpy idx = idx
-      let pos = (a pos ||idx * 2| + 0|)
-      let pos = (b pos ||idx * 2| + 1|)
-      pos
-    let fold_leaf = {piece pos idx}
-      let case_none = {pos} pos
-      let case_just = {hero} {pos} (write5 hero (Just (board_position idx)) pos)
-      (get_piece_hero piece case_none case_just pos)
-    dup fold = (fold10 #fold_node #fold_leaf)
-    # {board}
-      let a = [None,None]
-      let b = [a,a]
-      let c = [b,b]
-      let d = [c,c]
-      let e = [d,d]
-      (fold board e 0)
-      
-  dup exec_turn =
-    dup get_cast    = #{skill casts} (take8 skill 0 casts)
-    dup get_piece   = #{pos board} (take10 (board_index pos) Air board)
-
-    // Converts casts to an array
-    dup order_casts =
-      let empty_256 =
-        let a = [0,0] let b = [a,a] let c = [b,b] let d = [c,c]
-        let e = [d,d] let f = [e,e] let g = [f,f] let h = [g,g] [h,h]
-      dup to_array = (~256 #{state}
-        get [casts, array] = state
-        let case_cons = {cast casts} {array}
-          get [sp, args]   = cast
-          get [skill, pos] = sp
-          [casts, (write8 skill [pos, args] array)]
-        let case_nil = {array}
-          [Nil, array]
-        (casts case_cons case_nil array))
-      # {casts}
-        snd (to_array [casts, empty_256])
-
-    // Casts a skillshot
-    dup cast_skill = # {hero skill effect state}
-      get [state, casts] = state
-      get [board, anims] = state
-      get [casts, cast]  = (get_cast skill casts)
+  // Casts a skill
+  dup cast_skill = # {hero skill effect log_msg state}
+    get [state, casts] = state
+    get [board, anims] = state
+    get [casts, mcast] = (take8 skill None casts)
+    let case_none = {board anims casts}
+      [[board, anims], casts]
+    let case_just = {cast board anims casts}
       get [pos, args]    = cast
       get [pos, pos_cpy] = (vec2_cpy pos)
-      get [board, piece] = (get_piece pos_cpy board)
-      get [piece, allow] = (piece_cpy_with (piece_is_hero hero) piece)
+      get [board, allow] = (with10 (board_index pos_cpy) (piece_cpy_with (piece_is_hero hero)) board)
       get [pos, pos_cpy] = (vec2_cpy pos)
       get [board, anims] = (if allow
         then: {board anims}
           let board = (args (effect pos_cpy) board)
-          let anims = (Cons "skillshot_used" anims)
+          let anims = {x} (anims (Cons log_msg x))
           [board, anims]
         else: {board anims}
-          [board, (Cons "skillshot_failed" anims)]
+          [board, anims]
         board anims)
-      let board = (write10 (board_index pos) piece board)
       [[board, anims], casts]
+    (mcast case_none case_just board anims casts)
 
-    // Function
-    # {casts board}
-
-      // State
-      let casts = (order_casts casts)
-      let anims = Nil
-      let state = [[board, anims], casts]
-      let state = (cast_skill KENLUA  KENLUA_WALK   kenlua_walk   state)
-      let state = (cast_skill SIRPIX  SIRPIX_WALK   sirpix_walk   state)
-      let state = (cast_skill FLINA   FLINA_WALK    flina_walk    state)
-      let state = (cast_skill SNARCH  SNARCH_WALK   snarch_walk   state)
-      let state = (cast_skill ERKOS   ERKOS_WALK    erkos_walk    state)
-      let state = (cast_skill STANCI  STANCI_WALK   stanci_walk   state)
-      let state = (cast_skill CRONI   CRONI_WALK    croni_walk    state)
-      let state = (cast_skill GONK    GONK_WALK     gonk_walk     state)
-      let state = (cast_skill TOPHORO TOPHORO_WALK  tophoro_walk  state)
-      let state = (cast_skill AGDRIS  AGDRIS_WALK   agdris_walk   state)
-      let state = (cast_skill MEWRU   MEWRU_WALK    mewru_walk    state)
-      let state = (cast_skill ZAGATUR ZAGATUR_WALK  zagatur_walk  state)
-      let state = (cast_skill TOPHORO EARTH_PULL    earth_pull    state)
-      let state = (cast_skill SNARCH  PIERCING_BOLT piercing_bolt state)
-
-      // Result
-      (fst state)
+  // exec_casts
+  // : {casts : (Array ~8 [Pos, ArgTup])}
+  //   {board : (Array ~10 Unit)}
+  //   (Array ~10 Unit)
+  dup exec_casts = # {casts board}
+    let anims = {x} x
+    let state = [[board, anims], casts]
+    let state = (cast_skill KENLUA  KENLUA_WALK   kenlua_walk   "Kenlua walked"             state)
+    let state = (cast_skill SIRPIX  SIRPIX_WALK   sirpix_walk   "Sirpix walked"             state)
+    let state = (cast_skill FLINA   FLINA_WALK    flina_walk    "Flina walked"              state)
+    let state = (cast_skill SNARCH  SNARCH_WALK   snarch_walk   "Snarch walked"             state)
+    let state = (cast_skill ERKOS   ERKOS_WALK    erkos_walk    "Erkos walked"              state)
+    let state = (cast_skill STANCI  STANCI_WALK   stanci_walk   "Stanci walked"             state)
+    let state = (cast_skill CRONI   CRONI_WALK    croni_walk    "Croni walked"              state)
+    let state = (cast_skill GONK    GONK_WALK     gonk_walk     "Gonk walked"               state)
+    let state = (cast_skill TOPHORO TOPHORO_WALK  tophoro_walk  "Tophoro walked"            state)
+    let state = (cast_skill AGDRIS  AGDRIS_WALK   agdris_walk   "Agdris walked"             state)
+    let state = (cast_skill MEWRU   MEWRU_WALK    mewru_walk    "Mewru walked"              state)
+    let state = (cast_skill ZAGATUR ZAGATUR_WALK  zagatur_walk  "Zagatur walked"            state)
+    let state = (cast_skill TOPHORO EARTH_PULL    earth_pull    "Tophoro used earth pull"   state)
+    let state = (cast_skill SNARCH  PIERCING_BOLT piercing_bolt "Snarch used piercing bolt" state)
+    get [board, anims] = fst state
+    [board, (anims Nil)]
 
   //W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
   //W . . W . . W . . . . . . . . . . . . . . . . . . W X X . X X W
@@ -970,29 +948,19 @@ def kaelin:
   //W O . . . O W . . . . . . . . . . . . . . . . . . W . W . W . W
   //W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
 
-  # let board = new_board
-    //new_board
+  dup example = #
+    let board = new_board
+    let casts = empty_casts
+    let casts = (cast CRONI_WALK [29,1] {t}(t (Cons [0,1] (Cons [0,1] (Cons [1,0] Nil)))) casts)
+    let casts = (cast EARTH_PULL [30,1] {t}(t [0,1]) casts)
+    get [board,anims] = (exec_casts casts board)
+    [(print_board board), anims]
 
-    // Move Croni to below Tophoro
-    let board = (step [29,1] [0,1] board)
-    let board = (step [29,2] [0,1] board)
-    let board = (step [29,3] [1,0] board)
+  dup export = #
+    [new_board,
+    [exec_casts,
+    [empty_casts,
+    [cast,
+      0]]]]
 
-    // Some random tests
-    let board = (flame_ball [3,30] board)
-    //let board = (quick_shot [1,30] (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))) board)
-    ////let board = (erkos_walk [2,30] (Cons [1,0] (Cons [1,0] (Cons [0,-1] Nil))) board)
-
-    //// Performs an example turn
-    //let turn = Init
-    //let turn = (Cast EARTH_PULL    [30,1] {t}(t [0,1]) turn) // Tophoro casts EARTH_PULL down
-    //let turn = (Cast PIERCING_BOLT [30,1] {t}(t [0,1]) turn) // Tophoro fails to cast PIERCING_BOLT
-    //get [board, anims] = (exec_turn turn board)
-
-    //let turn = Init
-    //let turn = (Cast EARTH_PULL    [30,1] {t}(t [0,1]) turn) // Tophoro casts EARTH_PULL down
-    //let turn = (Cast PIERCING_BOLT [30,1] {t}(t [0,1]) turn) // Tophoro fails to cast PIERCING_BOLT
-    //get [board, anims] = (exec_turn turn board)
-
-    //(find_hero_positions board)
-    (print_board board)
+  # export
