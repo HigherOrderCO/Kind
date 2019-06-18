@@ -54,9 +54,9 @@
 // ## Moves
 // 
 // - Tophoro
-//   - Earth Lock : selects an enemy in a 5x5 (circle) around. Stuns him/her. Can't use on next turn.
 //   - Earth Pull : pulls enemies in a 1-3-5 (wave) ahead.
 //   - Earth Wall : creates up to 3 earth walls in a 5x5 (circle) around.
+//   - Earth Lock : selects an enemy in a 5x5 (circle) around. Stuns him/her. Can't use on next turn.
 //   - Earth Root : self-roots for 3 turns, gaining massive shield and heal.
 // 
 // - Gonk
@@ -178,7 +178,6 @@
 // 
 // <<Skillshot: 176>>
 // - Tophoro Earth Pull
-// - Tophoro Earth Slam
 // - Kenlua Slash
 // - Snarch Explosive Arrow
 // - Erkos Flame Wave
@@ -201,9 +200,13 @@ def kaelin:
   // :: Array ::
   // :::::::::::
 
+  dup fold3   = (fold_array ~3)
   dup fold5   = (fold_array ~5)
   dup fold8   = (fold_array ~8)
   dup fold10  = (fold_array ~10) #
+  dup with3   = (with ~3)
+  dup take3   = (take ~3)
+  dup write3  = (write ~3)
   dup with5   = (with ~5)
   dup take5   = (take ~5)
   dup write5  = (write ~5)
@@ -669,12 +672,6 @@ def kaelin:
     let board = (board_apply pos3 change_piece board)
     board
 
-  // Slams enemies in a 3x3 (square) around, stunning him/her.
-  dup earth_slam =
-    let area  = vec2_circle_c
-    let hits  = {pos board} (board_apply pos stun board)
-    (area #hits) 
-
   dup earth_pull =
     let area = (vec2_wave_in (ConsF #1 (ConsF #3 (ConsF #5 NilF))))
     let hits = {pos dxy board} (step pos dxy board)
@@ -798,8 +795,9 @@ def kaelin:
   dup EARTH_PULL    = # 176
   dup PIERCING_BOLT = # 179
 
-  // | skill_hero
-  // : (Array ~10 Num)
+  // | get_skill_hero
+  // : {skill : Num}
+  //   Num
   dup get_skill_hero = # {skill}
     let i000 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let i016 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
@@ -819,6 +817,48 @@ def kaelin:
     let i240 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let smap = [[[[i000,i016],[i032,i048]],[[i064,i080],[i096,i112]]],[[[i128,i144],[i160,i176]],[[i192,i208],[i224,i240]]]]
     snd (take8 skill 0 smap)
+
+  // | get_hero_skill
+  // : {hero : Num}
+  //   {slot : Num}
+  //   Num
+  dup get_hero_skill = # {hero slot}
+    let to = [[[TOPHORO_WALK, 0], [0,0]], [[0,0], [0,0]]]
+    let go = [[[GONK_WALK,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let er = [[[ERKOS_WALK,0],[0,0]],[[0,0],[0,0]]]
+    let cr = [[[CRONI_WALK,0],[0,0]],[[0,0],[0,0]]]
+    let sn = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let si = [[[SIRPIX_WALK,0],[0,0]],[[0,0],[0,0]]]
+    let ke = [[[KENLUA_WALK,0],[0,0]],[[0,0],[0,0]]]
+    let fl = [[[FLINA_WALK,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let st = [[[STANCI_WALK,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let za = [[[ZAGATUR_WALK,0],[0,0]],[[0,0],[0,0]]]
+    let ag = [[[AGDRIS_WALK,0],[0,0]],[[0,0],[0,0]]]
+    let me = [[[MEWRU_WALK,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
+    let h0 = [[[[to,go],[xx,xx]],[[xx,xx],[er,cr]]],[[[sn,xx],[xx,xx]],[[si,ke],[fl,xx]]]]
+    let h1 = [[[[xx,xx],[st,xx]],[[xx,xx],[xx,xx]]],[[[za,ag],[me,xx]],[[xx,xx],[xx,xx]]]]
+    (snd (take3 slot 0 (snd (take5 hero 0 [h0,h1]))))
 
   // empty_casts
   // : (Array ~8 (Maybe [Pos, ArgTup]))
@@ -961,6 +1001,7 @@ def kaelin:
     [exec_casts,
     [empty_casts,
     [cast,
-      0]]]]
+    [get_hero_skill,
+      0]]]]]
 
   # export
