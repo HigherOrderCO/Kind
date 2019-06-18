@@ -277,7 +277,7 @@ def vec2_wave: {widths} {cons}
 // vec2_wave_out
 // : {widths : {-P : Type} {cons : ! {w : Num} {ws : P} P} ! {nil : P} P}
 //   {-P     : Type}
-//   {cons   : ! {pos : [Num,Num]} {dir : [Num,Num]} {res : P} P}
+//   {cons   : ! {pos_dir : [[Num,Num],[Num,Num]]} {res : P} P}
 // ! {pos    : [Num,Num]}
 //   {dxy    : [Num,Num]}
 //   {nil    : P}
@@ -286,7 +286,7 @@ def vec2_wave_out: {widths} {cons}
   dup cons = cons
   dup wave = (vec2_wave widths #{pos rest dxy}
     get [dxy0,dxy1] = (vec2_cpy dxy)
-    (cons pos dxy0 (rest dxy1)))
+    (cons [pos,dxy0] (rest dxy1)))
   # {pos dxy nil}
     get [dxy0,dxy1] = (vec2_cpy dxy)
     (wave pos dxy0 {dxy}nil dxy1)
@@ -294,7 +294,7 @@ def vec2_wave_out: {widths} {cons}
 // vec2_wave_in
 // : {widths : {-P : Type} {cons : ! {w : Num} {ws : P} P} ! {nil : P} P}
 //   {-P     : Type}
-//   {cons   : ! {pos : [Num,Num]} {dir : [Num,Num]} {res : P} P}
+//   {cons   : ! {pos_dir : [[Num,Num],[Num,Num]]} {res : P} P}
 // ! {pos    : [Num,Num]}
 //   {dxy    : [Num,Num]}
 //   {nil    : P}
@@ -303,7 +303,7 @@ def vec2_wave_in: {widths} {cons}
   dup cons = cons
   dup wave = (vec2_wave widths #{pos rest res dxy}
     get [dxy0,dxy1] = (vec2_cpy dxy)
-    (rest (cons pos dxy0 res) dxy1))
+    (rest (cons [pos,dxy0] res) dxy1))
   # {pos dxy nil}
     get [dxy0,dxy1] = (vec2_cpy dxy)
     (wave pos dxy0 {res dxy}res nil (vec2_neg dxy1))

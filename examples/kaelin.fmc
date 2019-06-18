@@ -55,8 +55,8 @@
 // 
 // - Tophoro
 //   - Earth Pull : pulls enemies in a 1-3-5 (wave) ahead.
-//   - Earth Wall : creates up to 3 earth walls in a 5x5 (circle) around.
-//   - Earth Lock : selects an enemy in a 5x5 (circle) around. Stuns him/her. Can't use on next turn.
+//   - Earth Wall : creates up to 3 earth walls in up to 5 range.
+//   - Earth Lock : selects an enemy in up to 5 range. Stuns him/her. Can't use on next turn.
 //   - Earth Root : self-roots for 3 turns, gaining massive shield and heal.
 // 
 // - Gonk
@@ -226,6 +226,21 @@ def kaelin:
   dup LEFT  = #[-1, 0] 
   dup UP    = #[ 0,-1] 
 
+  // Using a path, goes from "pos" to "target position"
+  // - dirs : movement list to get into the desired position
+  // - pos  : initial position
+  let add_dirs = {mlen}
+    dup move = (mlen {pos_dirs}
+      get [pos,dirs] = pos_dirs
+      get [dirs,dir] = (pop [0,0] dirs)
+      [(vec2_add pos dir), dirs])
+    # {pos dirs}
+      fst (move [pos,dirs])
+  dup add_dirs1 = (add_dirs ~1)
+  dup add_dirs2 = (add_dirs ~2)
+  dup add_dirs3 = (add_dirs ~3)
+  dup add_dirs4 = (add_dirs ~4)
+
   // ::::::::::
   // :: Side ::
   // ::::::::::
@@ -249,25 +264,10 @@ def kaelin:
   // :: Piece ::
   // :::::::::::
 
-  dup Air = #
-    {Air Wall Cliff Throne Unit}
-    Air
-
-  dup Wall = #
-    {Air Wall Cliff Throne Unit}
-    Wall
-
-  dup Cliff = #
-    {Air Wall Cliff Throne Unit}
-    Cliff
-
-  dup Throne = # {side}
-    {Air Wall Cliff Throne Unit}
-    (Throne side)
-
-  dup Unit = # {hero side hp}
-    {Air Wall Cliff Throne Unit}
-    (Unit hero side hp)
+  dup Air    = #                {Air Wall Throne Unit} Air
+  dup Wall   = #                {Air Wall Throne Unit} Wall
+  dup Throne = # {side}         {Air Wall Throne Unit} (Throne side)
+  dup Unit   = # {hero side hp} {Air Wall Throne Unit} (Unit hero side hp)
 
   dup hero_icon = # {hero long}
     cpy long   = long
@@ -313,15 +313,13 @@ def kaelin:
   dup piece_icon = # {piece}
     let case_air    = (to_chars " .")
     let case_wall   = (to_chars " W")
-    let case_cliff  = (to_chars " C")
     let case_throne = {side} (to_chars " T")
     let case_unit   = {side hero hp} (hero_icon hero 0)
-    (piece case_air case_wall case_cliff case_throne case_unit)
+    (piece case_air case_wall case_throne case_unit)
 
   dup piece_info = # {piece}
     let case_air    = [Air, NilF]
     let case_wall   = [Wall, NilF]
-    let case_cliff  = [Cliff, NilF]
     let case_throne = {side} [(Throne side), NilF]
     let case_unit   = {side hero hp}
       cpy hero = hero
@@ -337,12 +335,11 @@ def kaelin:
         (concat (to_chars " hp -- ")
         (concat (if side [(to_chars "black"),(to_chars "white")]) (ConsF #10 NilF))))))))
       [val, info]
-    (piece case_air case_wall case_cliff case_throne case_unit)
+    (piece case_air case_wall case_throne case_unit)
 
   dup piece_cpy_with = # {fn piece}
     let case_air    = {fn} [Air, (fn Air)]
     let case_wall   = {fn} [Wall, (fn Wall)]
-    let case_cliff  = {fn} [Cliff, (fn Cliff)]
     let case_throne = {side} {fn}
       cpy side = side
       [(Throne side), (fn (Throne side))]
@@ -351,23 +348,21 @@ def kaelin:
       cpy hero = hero
       cpy hp   = hp
       [(Unit side hero hp), (fn (Unit side hero hp))]
-    (piece case_air case_wall case_cliff case_throne case_unit fn)
+    (piece case_air case_wall case_throne case_unit fn)
 
   dup get_piece_hero = # {piece}
     let case_air    = None
     let case_wall   = None
-    let case_cliff  = None
     let case_throne = {a_side} None
     let case_unit   = {a_side a_hero a_hp} (Just a_hero)
-    (piece case_air case_wall case_cliff case_throne case_unit)
+    (piece case_air case_wall case_throne case_unit)
 
   dup piece_is_hero = # {hero piece}
     let case_air    = 0
     let case_wall   = 0
-    let case_cliff  = 0
     let case_throne = {a_side} 0
     let case_unit   = {a_side a_hero a_hp} |a_hero == hero|
-    (piece case_air case_wall case_cliff case_throne case_unit)
+    (piece case_air case_wall case_throne case_unit)
 
   // "a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
   // - The same position: if they can't interact with each other.
@@ -375,7 +370,6 @@ def kaelin:
   dup a_step_to_b = # {a b}
     let case_a_air      = {b} [Air, b]
     let case_a_wall     = {b} [Wall, b]
-    let case_a_cliff    = {b} [Cliff, b]
     let case_a_throne   = {a_side} {b} [(Throne a_side), b]
     let case_a_unit     = {a_side a_hero a_hp} {b}
       let case_b_air    = {a_side a_hero a_hp}
@@ -385,10 +379,6 @@ def kaelin:
       let case_b_wall   = {a_side a_hero a_hp}
         let a_val       = (Unit a_side a_hero a_hp)
         let b_val       = Wall
-        [a_val, b_val]
-      let case_b_cliff  = {a_side a_hero a_hp}
-        let a_val       = (Unit a_side a_hero a_hp)
-        let b_val       = Cliff
         [a_val, b_val]
       let case_b_throne = {b_side} {a_side a_hero a_hp}
         let a_val       = (Unit a_side a_hero a_hp)
@@ -402,30 +392,28 @@ def kaelin:
         let can_pass    = (eql_side a_side b_side)
         let then_swap   = [{a b}[b,a],{a b}[a,b]]
         (if can_pass then_swap a_val b_val)
-      (b case_b_air case_b_wall case_b_cliff case_b_throne case_b_unit a_side a_hero a_hp)
-    (a case_a_air case_a_wall case_a_cliff case_a_throne case_a_unit b)
+      (b case_b_air case_b_wall case_b_throne case_b_unit a_side a_hero a_hp)
+    (a case_a_air case_a_wall case_a_throne case_a_unit b)
 
   dup damage_visual_effect = # {dmg piece}
-    let case_air    = Cliff
+    let case_air    = Wall
     let case_wall   = Wall
-    let case_cliff  = Cliff
     let case_throne = {side} (Throne side)
     let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
-    (piece case_air case_wall case_cliff case_throne case_unit)
+    (piece case_air case_wall case_throne case_unit)
 
   // TODO: 
   // - check if the life of "piece" is bigger than the damage
   dup damage = # {dmg piece}
     let case_air    = Air
     let case_wall   = Wall
-    let case_cliff  = Cliff
     let case_throne = {side} (Throne side)
     let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
-    (piece case_air case_wall case_cliff case_throne case_unit)
+    (piece case_air case_wall case_throne case_unit)
 
-  // ::::::::::::
-  // :: Heroes ::
-  // ::::::::::::
+  // :::::::::::::::::::::
+  // :: Heroes & Skills ::
+  // :::::::::::::::::::::
 
   dup TOPHORO  = # 0
   dup GONK     = # 1
@@ -466,6 +454,89 @@ def kaelin:
   dup Agdris   = # {side} (Unit side AGDRIS   20)
   dup Mewru    = # {side} (Unit side MEWRU    20)
 
+  dup PASS          = # 0
+  dup KENLUA_WALK   = # 128
+  dup SIRPIX_WALK   = # 129
+  dup FLINA_WALK    = # 130
+  dup SNARCH_WALK   = # 131
+  dup ERKOS_WALK    = # 132
+  dup STANCI_WALK   = # 133
+  dup CRONI_WALK    = # 134
+  dup GONK_WALK     = # 135
+  dup TOPHORO_WALK  = # 136
+  dup AGDRIS_WALK   = # 137
+  dup MEWRU_WALK    = # 138
+  dup ZAGATUR_WALK  = # 139
+  dup EARTH_PULL    = # 176
+  dup PIERCING_BOLT = # 179
+
+  // get_skill_hero
+  // | Given a skill, returns the hero of that skill
+  // : {skill : Num}
+  //   Num
+  dup get_skill_hero = # {skill}
+    let i000 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i016 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i032 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i048 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i064 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i080 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i096 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i112 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i128 = [[[[KE,SI],[FL,SN]],[[ER,ST],[CR,GO]]],[[[TO,AG],[ME,ZA]],[[ 0, 0],[ 0, 0]]]]
+    let i144 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i160 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i176 = [[[[TO, 0],[ 0,SN]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i192 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i208 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i224 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i240 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let smap = [[[[i000,i016],[i032,i048]],[[i064,i080],[i096,i112]]],[[[i128,i144],[i160,i176]],[[i192,i208],[i224,i240]]]]
+    snd (take8 skill 0 smap)
+
+  // get_hero_skill
+  // | Given a hero and a skill slot, returns the skill
+  // : {hero : Num}
+  //   {slot : Num}
+  //   Num
+  dup get_hero_skill = # {hero slot}
+    let to = [[[TOPHORO_WALK , EARTH_PULL] , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let go = [[[GONK_WALK    , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let er = [[[ERKOS_WALK   , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let cr = [[[CRONI_WALK   , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let sn = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let si = [[[SIRPIX_WALK  , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let ke = [[[KENLUA_WALK  , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let fl = [[[FLINA_WALK   , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let st = [[[STANCI_WALK  , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let za = [[[ZAGATUR_WALK , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let ag = [[[AGDRIS_WALK  , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let me = [[[MEWRU_WALK   , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let h0 = [[[[to,go],[xx,xx]],[[xx,xx],[er,cr]]],[[[sn,xx],[xx,xx]],[[si,ke],[fl,xx]]]]
+    let h1 = [[[[xx,xx],[st,xx]],[[xx,xx],[xx,xx]]],[[[za,ag],[me,xx]],[[xx,xx],[xx,xx]]]]
+    (snd (take3 slot 0 (snd (take5 hero 0 [h0,h1]))))
+
   // :::::::::::
   // :: Board ::
   // :::::::::::
@@ -481,14 +552,13 @@ def kaelin:
     let g   = (Stanci BLACK)
     let h   = (Flina BLACK)
     let W   = Wall
-    let C   = Cliff
     let x   = (Throne WHITE)
     let y   = (Throne BLACK)
     let r00 = [[[[[W,W],[W,W]],[[W,W],[W,O]]],[[[O,W],[W,O]],[[O,O],[O,W]]]],[[[[W,O],[O,O]],[[O,W],[W,O]]],[[[O,W],[W,W]],[[y,W],[W,W]]]]]
     let r01 = [[[[[W,O],[O,W]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[h,g]],[[O,f],[e,W]]]]]
-    let r02 = [[[[[W,W],[W,W]],[[W,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,C],[O,O]],[[O,O],[O,W]]]]]
+    let r02 = [[[[[W,W],[W,W]],[[W,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[O,O],[O,W]]]]]
     let r03 = [[[[[W,O],[O,W]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[O,O],[O,W]]]]]
-    let r04 = [[[[[W,O],[W,W]],[[W,W],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,C],[O,O]],[[O,O],[O,W]]]]]
+    let r04 = [[[[[W,O],[W,W]],[[W,W],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[O,O],[O,W]]]]]
     let r05 = [[[[[W,O],[O,W]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[O,O],[O,W]]]]]
     let r06 = [[[[[W,W],[W,W]],[[W,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[W,O],[O,W]]]]]
     let r07 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
@@ -499,8 +569,8 @@ def kaelin:
     let r12 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
     let r13 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
     let r14 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
-    let r15 = [[[[[C,C],[C,C]],[[C,C],[C,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,C],[C,C]],[[C,C],[C,C]]]]] // MID
-    let r16 = [[[[[C,C],[C,C]],[[C,C],[C,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,C],[C,C]],[[C,C],[C,C]]]]] // MID
+    let r15 = [[[[[W,W],[W,W]],[[W,W],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[W,W]],[[W,W],[W,W]]]]] // MID
+    let r16 = [[[[[W,W],[W,W]],[[W,W],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[W,W]],[[W,W],[W,W]]]]] // MID
     let r17 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
     let r18 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
     let r19 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
@@ -511,9 +581,9 @@ def kaelin:
     let r24 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
     let r25 = [[[[[W,O],[O,W]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[W,W]],[[W,W],[W,W]]]]]
     let r26 = [[[[[W,O],[O,O]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[O,O],[O,W]]]]]
-    let r27 = [[[[[W,O],[O,O]],[[O,O],[C,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[W,W],[W,W]]]]]
+    let r27 = [[[[[W,O],[O,O]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[W,W],[W,W]]]]]
     let r28 = [[[[[W,O],[O,O]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[O,O],[O,W]]]]]
-    let r29 = [[[[[W,O],[O,O]],[[O,O],[C,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[O,W],[W,W]]]]]
+    let r29 = [[[[[W,O],[O,O]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[O,W],[W,W]]]]]
     let r30 = [[[[[W,a],[b,O]],[[c,d],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[O,W],[O,W]]]]]
     let r31 = [[[[[W,W],[W,x]],[[W,W],[W,O]]],[[[O,W],[W,O]],[[O,O],[O,W]]]],[[[[W,O],[O,O]],[[O,W],[W,O]]],[[[O,W],[W,W]],[[W,W],[W,W]]]]]
     [[[[[r00,r01],[r02,r03]],[[r04,r05],[r06,r07]]],[[[r08,r09],[r10,r11]],[[r12,r13],[r14,r15]]]],
@@ -566,9 +636,11 @@ def kaelin:
   // :: Animations ::
   // ::::::::::::::::
 
-  dup Text = # {text} {Text Path Area} (Text text)
-  dup Path = # {path} {Text Path Area} (Path path)
-  dup Area = # {area} {Text Path Area} (Area area)
+  dup Skip = #        {Skip Text Path Area Many} Skip
+  dup Text = # {text} {Skip Text Path Area Many} (Text text)
+  dup Path = # {path} {Skip Text Path Area Many} (Path path)
+  dup Area = # {area} {Skip Text Path Area Many} (Area area)
+  dup Many = # {list} {Skip Text Path Area Many} (Many list)
 
   // :::::::::::::
   // :: Effects ::
@@ -580,32 +652,13 @@ def kaelin:
     let b_pos           = (vec2_add a_pos0 a_dxy)
     (board_interact a_pos1 b_pos a_step_to_b board)
 
-  dup damage_visual_effect = # {dmg piece}
-    let case_air    = Cliff
-    let case_wall   = Wall
-    let case_cliff  = Cliff
-    let case_throne = {side} (Throne side)
-    let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
-    (piece case_air case_wall case_cliff case_throne case_unit)
-
-  // TODO: 
-  // - check if the life of "piece" is bigger than the damage
-  dup damage = # {dmg piece}
-    let case_air    = Air
-    let case_wall   = Wall
-    let case_cliff  = Cliff
-    let case_throne = {side} (Throne side)
-    let case_unit   = {side hero hp} (Unit side hero |hp - dmg|)
-    (piece case_air case_wall case_cliff case_throne case_unit)
-
   // TODO: Flip properties of a piece about move and attack
   dup stun = # {piece}
     let case_air     = Air
     let case_wall    = Wall
-    let case_cliff   = Cliff
     let case_throne  = {side} (Throne side)
     let case_unit    = {side hero hp} (Unit side hero hp)
-    (piece case_air case_wall case_cliff case_throne case_unit)
+    (piece case_air case_wall case_throne case_unit)
 
   // Stun enemies in a 3x3 (circle) around
   dup stun_small_circle =
@@ -617,9 +670,35 @@ def kaelin:
   dup is_hero_at = # {pos hero board}
     (with10 (board_index pos) (piece_cpy_with (piece_is_hero hero)) board)
 
-  // ::::::::::::
-  // :: Skills ::
-  // ::::::::::::
+  // :::::::::::::::::::
+  // :: Skill Effects ::
+  // :::::::::::::::::::
+
+  // == Walk ==
+  // ~~~~~~~~~~
+
+  let make_area_skill_aux = {with_dir area hits}
+    dup hits = hits
+    dup exec = (area (if with_dir
+      then: #{pos_dir state}
+        get [pos, dir]    = pos_dir
+        get [board, area] = state
+        get [pos0, pos1]  = (vec2_cpy pos)
+        let new_board     = (hits pos0 dir board)
+        let new_area      = (Cons pos1 area)
+        [new_board, new_area]
+      else: #{pos state}
+        get [board, area] = state
+        get [pos0, pos1]  = (vec2_cpy pos)
+        let new_board     = (hits pos0 board)
+        let new_area      = (Cons pos1 area)
+        [new_board, new_area]))
+    # {pos dir board}
+      get [board, area] = (exec pos dir [board, Nil])
+      [board, (Area area)]
+
+  let make_area_skill = (make_area_skill_aux 0)
+  let make_area_skill_with_dir = (make_area_skill_aux 1)
 
   // Walks through a set of directions
   let walk = {hero steps}
@@ -647,33 +726,21 @@ def kaelin:
       [board, (Path (path (Cons pos Nil)))]
 
   // Walk effects of each hero
-  dup kenlua_walk  = (walk #KENLUA ~4)
-  dup sirpix_walk  = (walk #SIRPIX ~3)
-  dup flina_walk   = (walk #FLINA ~5)
-  dup snarch_walk  = (walk #SNARCH ~3)
-  dup erkos_walk   = (walk #ERKOS ~3)
-  dup stanci_walk  = (walk #STANCI ~3)
-  dup croni_walk   = (walk #CRONI ~3)
-  dup gonk_walk    = (walk #GONK ~3)
+  dup kenlua_walk  = (walk #KENLUA  ~4)
+  dup sirpix_walk  = (walk #SIRPIX  ~3)
+  dup flina_walk   = (walk #FLINA   ~5)
+  dup snarch_walk  = (walk #SNARCH  ~3)
+  dup erkos_walk   = (walk #ERKOS   ~3)
+  dup stanci_walk  = (walk #STANCI  ~3)
+  dup croni_walk   = (walk #CRONI   ~3)
+  dup gonk_walk    = (walk #GONK    ~3)
   dup tophoro_walk = (walk #TOPHORO ~2)
-  dup agdris_walk  = (walk #AGDRIS ~1)
-  dup mewru_walk   = (walk #MEWRU ~0)
+  dup agdris_walk  = (walk #AGDRIS  ~1)
+  dup mewru_walk   = (walk #MEWRU   ~0)
   dup zagatur_walk = (walk #ZAGATUR ~0)
 
-  // Using a path, goes from "pos" to "target position"
-  // - dirs : movement list to get into the desired position
-  // - pos  : initial position
-  let add_dirs = {mlen}
-    dup move = (mlen {pos_dirs}
-      get [pos,dirs] = pos_dirs
-      get [dirs,dir] = (pop [0,0] dirs)
-      [(vec2_add pos dir), dirs])
-    # {pos dirs}
-      fst (move [pos,dirs])
-  dup add_dirs1 = (add_dirs ~1)
-  dup add_dirs2 = (add_dirs ~2)
-  dup add_dirs3 = (add_dirs ~3)
-  dup add_dirs4 = (add_dirs ~4)
+  // == Tophoro ==
+  // ~~~~~~~~~~~~~
 
   // Creates up to 3 earth walls in a 5x5 (circle) around.
   // TODO: Add box
@@ -681,27 +748,24 @@ def kaelin:
   dup earth_wall = # {pos1 pos2 pos3 board}
     let case_air     = Wall
     let case_wall    = Wall
-    let case_cliff   = Cliff
     let case_throne  = {side} (Throne side)
     let case_unit    = {side hero hp} (Unit side hero hp)
-    let change_piece = {t} (t case_air case_wall case_cliff case_throne case_unit)
+    let change_piece = {t} (t case_air case_wall case_throne case_unit)
     let board = (board_apply pos1 change_piece board)
     let board = (board_apply pos2 change_piece board)
     let board = (board_apply pos3 change_piece board)
     board
 
   dup earth_pull =
-    let area = (vec2_wave_in (ConsF #1 (ConsF #3 (ConsF #5 NilF))))
-    let hits = {pos dir state}
-      get [board, area] = state
-      get [pos0, pos1]  = (vec2_cpy pos)
-      let new_board     = (step pos0 dir board)
-      let new_area      = (Cons pos1 area)
-      [new_board, new_area]
-    dup exec = (area #hits)
-    # {pos dir board}
-      get [board, area] = (exec pos dir [board, Nil])
-      [board, (Area area)]
+    let area = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #5 NilF)))))
+    let hits = # {pos dir board} (step pos dir board)
+    (make_area_skill_with_dir area hits)
+
+  // == Gonk ==
+  // ~~~~~~~~~~
+
+  // == Erkos ==
+  // ~~~~~~~~~~~
 
   // Hits a 1-3-3-5-5 (wave). Deals 5 damage.
   dup flame_wave =
@@ -729,15 +793,17 @@ def kaelin:
     //let hits = {pos board} (board_apply pos (damage_visual_effect 20) board)
     (area #hits)
 
+  // == Croni ==
+  // ~~~~~~~~~~~
+
   // Places a doll in an empty tile
   // TODO: add 8 range
   dup shadow_doll = # {pos board}
     let case_air     = Wall
     let case_wall    = Wall
-    let case_cliff   = Cliff
     let case_throne  = {side} (Throne side)
     let case_unit    = {side hero hp} (Unit side hero hp)
-    let change_piece = {t} (t case_air case_wall case_cliff case_throne case_unit)
+    let change_piece = {t} (t case_air case_wall case_throne case_unit)
     (board_apply pos change_piece board)
 
   // Hits a 3x3 (square) with for high damage (15?).
@@ -750,6 +816,9 @@ def kaelin:
 
   // TODO: Loses half hp. Can't attack on this turn. Can't use on next turn. If Croni dies on this turn, takes the killer with her.
   //dup shadow_bond = # {side hero hp}
+
+  // == Snarch ==
+  // ~~~~~~~~~~~~
 
   // Hits a selected enemy up to 3 range. Deals 5 damage.
   dup quick_shot = # {pos dirs board}
@@ -774,6 +843,12 @@ def kaelin:
   // TODO: mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range increase to 12.
   //dup ballista = #
 
+  // == Sirpix ==
+  // ~~~~~~~~~~~~
+
+  // == Kenlua ==
+  // ~~~~~~~~~~~~
+
   // Hits a 3x3 (square) around. Deals 3 damage.
   dup killing_edge =
     let area = vec2_circle_c
@@ -784,15 +859,14 @@ def kaelin:
   // TODO: Add range
   // TODO: Change function applied to the positions to "silence"
   dup dodge = # {pos1 pos2 pos3 pos4 board}
-    let case_air     = Air
-    let case_wall    = Wall
-    let case_cliff   = Cliff
-    let case_throne  = {side} (Throne side)
-    let case_unit    = {side hero hp} (Unit side hero hp)
-    let board = (board_apply pos1 (damage_visual_effect 1) board)
-    let board = (board_apply pos2 (damage_visual_effect 1) board)
-    let board = (board_apply pos3 (damage_visual_effect 1) board)
-    let board = (board_apply pos4 (damage_visual_effect 1) board)
+    let case_air    = Air
+    let case_wall   = Wall
+    let case_throne = {side} (Throne side)
+    let case_unit   = {side hero hp} (Unit side hero hp)
+    let board       = (board_apply pos1 (damage_visual_effect 1) board)
+    let board       = (board_apply pos2 (damage_visual_effect 1) board)
+    let board       = (board_apply pos3 (damage_visual_effect 1) board)
+    let board       = (board_apply pos4 (damage_visual_effect 1) board)
     board
 
   // Hits a 3x3 (square) around. Deals 8 damage.
@@ -801,90 +875,24 @@ def kaelin:
     let hits = {pos board} (board_apply pos (damage_visual_effect 8) board)
     (area #hits)
 
-  // :::::::::::
-  // :: Moves ::
-  // :::::::::::
+  // == Flina ==
+  // ~~~~~~~~~~~
 
-  dup PASS          = # 0
-  dup KENLUA_WALK   = # 128
-  dup SIRPIX_WALK   = # 129
-  dup FLINA_WALK    = # 130
-  dup SNARCH_WALK   = # 131
-  dup ERKOS_WALK    = # 132
-  dup STANCI_WALK   = # 133
-  dup CRONI_WALK    = # 134
-  dup GONK_WALK     = # 135
-  dup TOPHORO_WALK  = # 136
-  dup AGDRIS_WALK   = # 137
-  dup MEWRU_WALK    = # 138
-  dup ZAGATUR_WALK  = # 139
-  dup EARTH_PULL    = # 176
-  dup PIERCING_BOLT = # 179
+  // == Stanci ==
+  // ~~~~~~~~~~~~
 
-  // | get_skill_hero
-  // : {skill : Num}
-  //   Num
-  dup get_skill_hero = # {skill}
-    let i000 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i016 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i032 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i048 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i064 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i080 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i096 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i112 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i128 = [[[[TO,SI],[FL,SN]],[[ER,ST],[CR,GO]]],[[[TO,AG],[ME,ZA]],[[ 0, 0],[ 0, 0]]]]
-    let i144 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i160 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i176 = [[[[TO, 0],[ 0,SN]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i192 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i208 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i224 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i240 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let smap = [[[[i000,i016],[i032,i048]],[[i064,i080],[i096,i112]]],[[[i128,i144],[i160,i176]],[[i192,i208],[i224,i240]]]]
-    snd (take8 skill 0 smap)
+  // == Zagatur ==
+  // ~~~~~~~~~~~~~
 
-  // | get_hero_skill
-  // : {hero : Num}
-  //   {slot : Num}
-  //   Num
-  dup get_hero_skill = # {hero slot}
-    let to = [[[TOPHORO_WALK, 0], [0,0]], [[0,0], [0,0]]]
-    let go = [[[GONK_WALK,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let er = [[[ERKOS_WALK,0],[0,0]],[[0,0],[0,0]]]
-    let cr = [[[CRONI_WALK,0],[0,0]],[[0,0],[0,0]]]
-    let sn = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let si = [[[SIRPIX_WALK,0],[0,0]],[[0,0],[0,0]]]
-    let ke = [[[KENLUA_WALK,0],[0,0]],[[0,0],[0,0]]]
-    let fl = [[[FLINA_WALK,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let st = [[[STANCI_WALK,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let za = [[[ZAGATUR_WALK,0],[0,0]],[[0,0],[0,0]]]
-    let ag = [[[AGDRIS_WALK,0],[0,0]],[[0,0],[0,0]]]
-    let me = [[[MEWRU_WALK,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let xx = [[[0,0],[0,0]],[[0,0],[0,0]]]
-    let h0 = [[[[to,go],[xx,xx]],[[xx,xx],[er,cr]]],[[[sn,xx],[xx,xx]],[[si,ke],[fl,xx]]]]
-    let h1 = [[[[xx,xx],[st,xx]],[[xx,xx],[xx,xx]]],[[[za,ag],[me,xx]],[[xx,xx],[xx,xx]]]]
-    (snd (take3 slot 0 (snd (take5 hero 0 [h0,h1]))))
+  // == Agdris ==
+  // ~~~~~~~~~~~~
+
+  // == Mewru ==
+  // ~~~~~~~~~~~
+
+  // ::::::::::::::::::
+  // :: Casts & Turn ::
+  // ::::::::::::::::::
 
   // empty_casts
   // : (Array ~8 (Maybe [Pos, Arg]))
@@ -896,7 +904,7 @@ def kaelin:
   // cast
   // : {skill : Num} ->
   //   {pos   : [Num,Num]} ->
-  //   {args  : Arg} ->
+  //   {arg   : Arg} ->
   //   {casts : (Array ~8 (Maybe [Pos, Arg]))} ->
   //   (Array ~8 (Maybe [Pos, Arg]))
   dup cast = # {skill pos arg casts}
@@ -1020,8 +1028,9 @@ def kaelin:
   dup example = #
     let board = new_board
     let casts = empty_casts
-    let casts = (cast CRONI_WALK [29,1] (Cons [0,1] (Cons [0,1] (Cons [1,0] Nil))) casts)
-    let casts = (cast EARTH_PULL [30,1] [0,1] casts)
+    let casts = (cast CRONI_WALK [29,1] (Cons [0,1] (Cons [0,1] (Cons [0,1] Nil))) casts)
+    let casts = (cast TOPHORO_WALK [30,1] (Cons [0,1] Nil) casts)
+    let casts = (cast EARTH_PULL [30,2] [0,1] casts)
     let board = (exec_casts casts board)
     (print_board board)
 
