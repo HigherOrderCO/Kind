@@ -562,6 +562,14 @@ def kaelin:
       let board = (cons-every #64 #10 board)
       (from_chars (concat (ConsF 10 NilF) (concat info (concat board (ConsF 10 NilF)))))
 
+  // ::::::::::::::::
+  // :: Animations ::
+  // ::::::::::::::::
+
+  dup Text = # {text} {Text Path Area} (Text text)
+  dup Path = # {path} {Text Path Area} (Path path)
+  dup Area = # {area} {Text Path Area} (Area area)
+
   // :::::::::::::
   // :: Effects ::
   // :::::::::::::
@@ -609,23 +617,34 @@ def kaelin:
   dup is_hero_at = # {pos hero board}
     (with10 (board_index pos) (piece_cpy_with (piece_is_hero hero)) board)
 
+  // ::::::::::::
+  // :: Skills ::
+  // ::::::::::::
+
   // Walks through a set of directions
   let walk = {hero steps}
     dup hero = hero
     let walk = {state}
-      get [pos_dirs,board] = state
-      get [pos,dirs]       = pos_dirs
-      get [dirs,dir]       = (pop [0,0] dirs)
-      get [pos,pos_cpy]    = (vec2_cpy pos)
-      get [dir,dir_cpy]    = (vec2_cpy dir)
+      get [state0, state1] = state
+      get [pos, dirs]      = state0
+      get [board, path]    = state1
+      get [new_dirs, dir]  = (pop [0,0] dirs)
+      get [pos, pos_cpy]   = (vec2_cpy pos)
+      get [dir, dir_cpy]   = (vec2_cpy dir)
       let new_pos          = (vec2_add pos_cpy dir_cpy)
-      get [pos,pos_cpy]    = (vec2_cpy pos)
-      get [board,allow]    = (is_hero_at pos_cpy hero board)
-      let board            = (if allow [step, {pos dir board}board] pos dir board)
-      [[new_pos,dirs], board]
+      get [pos, pos_cpy]   = (vec2_cpy pos)
+      let new_path         = {x} (path (Cons pos_cpy x))
+      get [pos, pos_cpy]   = (vec2_cpy pos)
+      get [board, allow]   = (is_hero_at pos_cpy hero board)
+      let new_board        = (if allow [step, {pos dir board}board] pos dir board)
+      [[new_pos, new_dirs], [new_board, new_path]]
     dup walk = (steps #walk)
     # {pos dirs board}
-      snd (walk [[pos,dirs],board])
+      let state            = [[pos, dirs], [board, {x}x]]
+      get [state0, state1] = (walk state)
+      get [pos, dirs]      = state0
+      get [board, path]    = state1
+      [board, (Path (path (Cons pos Nil)))]
 
   // Walk effects of each hero
   dup kenlua_walk  = (walk #KENLUA ~4)
@@ -651,7 +670,6 @@ def kaelin:
       [(vec2_add pos dir), dirs])
     # {pos dirs}
       fst (move [pos,dirs])
-
   dup add_dirs1 = (add_dirs ~1)
   dup add_dirs2 = (add_dirs ~2)
   dup add_dirs3 = (add_dirs ~3)
@@ -674,8 +692,16 @@ def kaelin:
 
   dup earth_pull =
     let area = (vec2_wave_in (ConsF #1 (ConsF #3 (ConsF #5 NilF))))
-    let hits = {pos dxy board} (step pos dxy board)
-    (area #hits)
+    let hits = {pos dir state}
+      get [board, area] = state
+      get [pos0, pos1]  = (vec2_cpy pos)
+      let new_board     = (step pos0 dir board)
+      let new_area      = (Cons pos1 area)
+      [new_board, new_area]
+    dup exec = (area #hits)
+    # {pos dir board}
+      get [board, area] = (exec pos dir [board, Nil])
+      [board, (Area area)]
 
   // Hits a 1-3-3-5-5 (wave). Deals 5 damage.
   dup flame_wave =
@@ -861,66 +887,69 @@ def kaelin:
     (snd (take3 slot 0 (snd (take5 hero 0 [h0,h1]))))
 
   // empty_casts
-  // : (Array ~8 (Maybe [Pos, ArgTup]))
+  // : (Array ~8 (Maybe [Pos, Arg]))
   dup empty_casts = #
-    let a = [None,None] let b = [a,a] let c = [b,b] let d = [c,c]
+    let a = [None,None]
+    let b = [a,a] let c = [b,b] let d = [c,c]
     let e = [d,d] let f = [e,e] let g = [f,f] [g,g]
 
   // cast
   // : {skill : Num} ->
   //   {pos   : [Num,Num]} ->
-  //   {args  : ArgTuple} ->
-  //   {casts : (Array ~8 (Maybe [Pos, ArgTup]))} ->
-  //   (Array ~8 (Maybe [Pos, ArgTup]))
-  dup cast = # {skill pos args casts}
-    (write8 skill (Just [pos, args]) casts)
+  //   {args  : Arg} ->
+  //   {casts : (Array ~8 (Maybe [Pos, Arg]))} ->
+  //   (Array ~8 (Maybe [Pos, Arg]))
+  dup cast = # {skill pos arg casts}
+    (write8 skill (Just [pos, arg]) casts)
 
   // Casts a skill
-  dup cast_skill = # {hero skill effect log_msg state}
-    get [state, casts] = state
-    get [board, anims] = state
+  dup cast_skill = # {hero skill effect state log}
+    cpy hero = hero
+    cpy skill = skill
+    get [board, casts] = state
     get [casts, mcast] = (take8 skill None casts)
-    let case_none = {board anims casts}
-      [[board, anims], casts]
-    let case_just = {cast board anims casts}
-      get [pos, args]    = cast
+    let case_none = {board casts}
+      [board, casts]
+    let case_just = {cast board casts}
+      get [pos, arg]     = cast
       get [pos, pos_cpy] = (vec2_cpy pos)
       get [board, allow] = (with10 (board_index pos_cpy) (piece_cpy_with (piece_is_hero hero)) board)
       get [pos, pos_cpy] = (vec2_cpy pos)
-      get [board, anims] = (if allow
-        then: {board anims}
-          let board = (args (effect pos_cpy) board)
-          let anims = {x} (anims (Cons log_msg x))
-          [board, anims]
-        else: {board anims}
-          [board, anims]
-        board anims)
-      [[board, anims], casts]
-    (mcast case_none case_just board anims casts)
+      let board = (if allow
+        then: {board}
+          get [board, anims] = (effect pos_cpy arg board)
+          (log [hero, skill] anims board)
+        else: {board}
+          board
+        board)
+      [board, casts]
+    (mcast case_none case_just board casts)
+
+  let exec_casts_with = {log} 
+    dup log = log
+    # {casts board}
+      let state = [board, casts]
+      let state = (cast_skill KENLUA  KENLUA_WALK   kenlua_walk   state log)
+      let state = (cast_skill SIRPIX  SIRPIX_WALK   sirpix_walk   state log)
+      let state = (cast_skill FLINA   FLINA_WALK    flina_walk    state log)
+      let state = (cast_skill SNARCH  SNARCH_WALK   snarch_walk   state log)
+      let state = (cast_skill ERKOS   ERKOS_WALK    erkos_walk    state log)
+      let state = (cast_skill STANCI  STANCI_WALK   stanci_walk   state log)
+      let state = (cast_skill CRONI   CRONI_WALK    croni_walk    state log)
+      let state = (cast_skill GONK    GONK_WALK     gonk_walk     state log)
+      let state = (cast_skill TOPHORO TOPHORO_WALK  tophoro_walk  state log)
+      let state = (cast_skill AGDRIS  AGDRIS_WALK   agdris_walk   state log)
+      let state = (cast_skill MEWRU   MEWRU_WALK    mewru_walk    state log)
+      let state = (cast_skill ZAGATUR ZAGATUR_WALK  zagatur_walk  state log)
+      let state = (cast_skill TOPHORO EARTH_PULL    earth_pull    state log)
+      let state = (cast_skill SNARCH  PIERCING_BOLT piercing_bolt state log)
+      (fst state)
 
   // exec_casts
-  // : {casts : (Array ~8 [Pos, ArgTup])}
+  // : {casts : (Array ~8 [Pos, Arg])}
   //   {board : (Array ~10 Unit)}
   //   (Array ~10 Unit)
-  dup exec_casts = # {casts board}
-    let anims = {x} x
-    let state = [[board, anims], casts]
-    let state = (cast_skill KENLUA  KENLUA_WALK   kenlua_walk   "Kenlua walked"             state)
-    let state = (cast_skill SIRPIX  SIRPIX_WALK   sirpix_walk   "Sirpix walked"             state)
-    let state = (cast_skill FLINA   FLINA_WALK    flina_walk    "Flina walked"              state)
-    let state = (cast_skill SNARCH  SNARCH_WALK   snarch_walk   "Snarch walked"             state)
-    let state = (cast_skill ERKOS   ERKOS_WALK    erkos_walk    "Erkos walked"              state)
-    let state = (cast_skill STANCI  STANCI_WALK   stanci_walk   "Stanci walked"             state)
-    let state = (cast_skill CRONI   CRONI_WALK    croni_walk    "Croni walked"              state)
-    let state = (cast_skill GONK    GONK_WALK     gonk_walk     "Gonk walked"               state)
-    let state = (cast_skill TOPHORO TOPHORO_WALK  tophoro_walk  "Tophoro walked"            state)
-    let state = (cast_skill AGDRIS  AGDRIS_WALK   agdris_walk   "Agdris walked"             state)
-    let state = (cast_skill MEWRU   MEWRU_WALK    mewru_walk    "Mewru walked"              state)
-    let state = (cast_skill ZAGATUR ZAGATUR_WALK  zagatur_walk  "Zagatur walked"            state)
-    let state = (cast_skill TOPHORO EARTH_PULL    earth_pull    "Tophoro used earth pull"   state)
-    let state = (cast_skill SNARCH  PIERCING_BOLT piercing_bolt "Snarch used piercing bolt" state)
-    get [board, anims] = fst state
-    [board, (anims Nil)]
+  dup exec_casts = (exec_casts_with #{a b c}c)
 
   //W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
   //W . . W . . W . . . . . . . . . . . . . . . . . . W X X . X X W
@@ -991,17 +1020,17 @@ def kaelin:
   dup example = #
     let board = new_board
     let casts = empty_casts
-    let casts = (cast CRONI_WALK [29,1] {t}(t (Cons [0,1] (Cons [0,1] (Cons [1,0] Nil)))) casts)
-    let casts = (cast EARTH_PULL [30,1] {t}(t [0,1]) casts)
-    get [board,anims] = (exec_casts casts board)
-    [(print_board board), anims]
+    let casts = (cast CRONI_WALK [29,1] (Cons [0,1] (Cons [0,1] (Cons [1,0] Nil))) casts)
+    let casts = (cast EARTH_PULL [30,1] [0,1] casts)
+    let board = (exec_casts casts board)
+    (print_board board)
 
-  dup export = #
-    [new_board,
-    [exec_casts,
-    [empty_casts,
-    [cast,
-    [get_hero_skill,
+  dup export = 
+    [#new_board,
+    [exec_casts_with,
+    [#empty_casts,
+    [#cast,
+    [#get_hero_skill,
       0]]]]]
 
   # export
