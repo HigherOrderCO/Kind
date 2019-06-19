@@ -19,7 +19,7 @@
 // Name    | Role       | Description    | MOV | HP  | References & Inspiration
 // ------- | ---------- | -------------- | --- | --- | -------------------------------------------------
 // Tophoro | Tank       | Terrain Bender |   3 | 120 | Toph (Avatar TLA), Totoro (Studio Ghibli)
-// Gonk    | Tank       | Warrior        |   3 |  90 | Gon (Hunter X Hunter), Goku (Gradon Ball Z)
+// Gonk    | Tank       | Warrior        |   3 |  80 | Gon (Hunter X Hunter), Goku (Gradon Ball Z)
 // ?       | Tank       | ?              |   ? |   ? | ?
 // ?       | Tank       | ?              |   ? |   ? | ?
 // ?       | Tank       | ?              |   ? |   ? | ?
@@ -60,10 +60,10 @@
 //   - Earth Root : self-roots for 3 turns, gaining massive shield and heal.
 // 
 // - Gonk
-//   - Endure  : loses N HP. Grants N*2 armor to itself.
-//   - Breath  : heals 6 HP. Can't move on this turn. 
-//   - Empathy : loses N HP. Grants N armor to allies in a 5x5 (cirlce) around.
-//   - Shatter : select an enemy up to 1 range. Deals an amount of damage inversely proportional to remaining HP.
+//   - Endure  : gains 20 armor. Can't move for the next 2 turns.
+//   - Breath  : heals 8 HP. Can't move on this turn.
+//   - Empathy : loses N HP. Grants N*2 armor to allies in a 3x3 (square) around.
+//   - Shatter : select an enemy up to 2 range. Deals an amount of damage inversely proportional to remaining HP.
 //
 // - Erkos
 //   - Flame Ball : hits a 5x5 (circle) up to 4 range.
@@ -388,16 +388,20 @@ def kaelin:
     let case_unit   = {side hero stats}
       (stats {hp shield armor buff locked muted}
         cpy hp = hp
+        cpy armor = armor
         (concat (hero_icon hero 1) // Hero name
         (concat (to_chars ": ")
         (concat (ConsF (box_byte (num_to_char ||hp / 100| % 10|)) NilF) // HP
         (concat (ConsF (box_byte (num_to_char ||hp /  10| % 10|)) NilF) // HP
         (concat (ConsF (box_byte (num_to_char ||hp /   1| % 10|)) NilF) // HP
-        (concat (to_chars " hp ")
+        (concat (to_chars "hp ")
+        (concat (ConsF (box_byte (num_to_char ||armor /  10| % 10|)) NilF) // armor
+        (concat (ConsF (box_byte (num_to_char ||armor /   1| % 10|)) NilF) // armor
+        (concat (to_chars "armor ")
         (concat (if side [(to_chars "(black)"),(to_chars "(white)")])
         (concat (if locked [(to_chars " <locked> "), NilF])
         (concat (if muted [(to_chars " <muted> "), NilF])
-                (ConsF #10 NilF)))))))))))
+                (ConsF #10 NilF))))))))))))))
     (piece case_air case_wall case_throne case_unit)
 
   dup get_piece_hero = # {piece}
@@ -433,6 +437,13 @@ def kaelin:
     let case_wall   = {a_temp} 0
     let case_throne = {a_side} 0
     let case_unit   = {a_side a_hero a_stats} |(get_muted a_stats) > 0|
+    (piece case_air case_wall case_throne case_unit)
+
+  dup get_piece_hp = # {piece}
+    let case_air    = 0
+    let case_wall   = {a_temp} 0
+    let case_throne = {a_side} 0
+    let case_unit   = {a_side a_hero a_stats} (get_hp a_stats)
     (piece case_air case_wall case_throne case_unit)
 
   // "a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
@@ -482,22 +493,26 @@ def kaelin:
     let case_unit   = {side hero stats} (Unit side hero (mod_hp {hp}|hp - dmg| stats))
     (piece case_air case_wall case_throne case_unit)
 
-  // TODO:
-  // - check if the life of "piece" is bigger than the damage
   dup lock = # {turns piece}
     let case_air    = Air
     let case_wall   = {temp} (Wall temp)
     let case_throne = {side} (Throne side)
-    let case_unit   = {side hero stats} (Unit side hero (mod_locked {x}turns stats))
+    let case_unit   = {side hero stats} (Unit side hero (mod_locked {x}|turns + x| stats))
     (piece case_air case_wall case_throne case_unit)
 
-  // TODO:
-  // - check if the life of "piece" is bigger than the damage
   dup mute = # {turns piece}
     let case_air    = Air
     let case_wall   = {temp} (Wall temp)
     let case_throne = {side} (Throne side)
-    let case_unit   = {side hero stats} (Unit side hero (mod_muted {x}turns stats))
+    let case_unit   = {side hero stats} (Unit side hero (mod_muted {x}|turns + x| stats))
+    (piece case_air case_wall case_throne case_unit)
+
+  // TODO:
+  dup armor = # {armor piece}
+    let case_air    = Air
+    let case_wall   = {temp} (Wall temp)
+    let case_throne = {side} (Throne side)
+    let case_unit   = {side hero stats} (Unit side hero (mod_armor {x}|armor + x| stats))
     (piece case_air case_wall case_throne case_unit)
 
   // :::::::::::::::::::::
@@ -773,57 +788,61 @@ def kaelin:
   dup get_side_at = # {pos board}
     (board_query_at pos get_piece_side board)
 
+  // Checks if given position is a specific hero
+  dup get_hp_at = # {pos hero board}
+    (board_query_at pos get_piece_hp board)
+
   // :::::::::::::::::::
   // :: Skill Effects ::
   // :::::::::::::::::::
 
-  // make_area_skill
+  // animated_area
   // : {-P    : Type}
   //   {area  : Area}
   //   {hits  : {cpos : [Num,Num]} {pos : [Num,Num]} {state : P} P}
   // ! {pos   : [Num,Num]}
-  //   {board : P}
+  //   {state : P}
   //   P
-  let make_area_skill = {area hits}
+  let animated_area = {area hits}
     dup hits = hits
-    dup exec = (area #{pos state}
-        get [state, area]  = state
-        get [board, cpos]  = state
+    dup exec = (area #{pos st}
+        get [st, area]     = st
+        get [state, cpos]  = st
         get [cpos0, cpos1] = (vec2_cpy cpos)
         get [pos0, pos1]   = (vec2_cpy pos)
-        let new_board      = (hits cpos0 pos0 board)
+        let new_state      = (hits cpos0 pos0 state)
         let new_area       = (Cons pos1 area)
-        [[new_board, cpos1], new_area])
-    # {pos board}
+        [[new_state, cpos1], new_area])
+    # {pos state}
       get [pos0, pos1]  = (vec2_cpy pos)
-      get [state, area] = (exec pos0 [[board, pos1], Nil])
-      get [board, cpos] = state
-      [board, (Area area)]
+      get [st, area]    = (exec pos0 [[state, pos1], Nil])
+      get [state, cpos] = st
+      [state, (Area area)]
 
-  // make_wave_skill
+  // animated_wave
   // : {-P    : Type}
   //   {area  : Area}
   //   {hits  : {cpos : [Num,Num]} {pos : [Num,Num]} {dir : [Num,Num]} {state : P} P}
   // ! {pos   : [Num,Num]}
   //   {dir   : [Num,Num]}
-  //   {board : P}
+  //   {state : P}
   //   P
-  let make_wave_skill = {area hits}
+  let animated_wave = {area hits}
     dup hits = hits
-    dup exec = (area #{pos_dir state}
+    dup exec = (area #{pos_dir st}
       get [pos, dir]     = pos_dir
-      get [state, area]  = state
-      get [board, cpos]  = state
+      get [st, area]     = st
+      get [state, cpos]  = st
       get [cpos0, cpos1] = (vec2_cpy cpos)
       get [pos0, pos1]   = (vec2_cpy pos)
-      let new_board      = (hits cpos0 pos0 dir board)
+      let new_state      = (hits cpos0 pos0 dir state)
       let new_area       = (Cons pos1 area)
-      [[new_board, cpos1], new_area])
-    # {pos dir board}
+      [[new_state, cpos1], new_area])
+    # {pos dir state}
       get [pos0, pos1]  = (vec2_cpy pos)
-      get [state, area] = (exec pos0 dir [[board, pos1], Nil])
-      get [board, cpos] = state
-      [board, (Area area)]
+      get [st, area]    = (exec pos0 dir [[state, pos1], Nil])
+      get [state, cpos] = st
+      [state, (Area area)]
 
   dup do_if_side = # {comp a_pos b_pos board func}
     get [b_pos0, b_pos1] = (vec2_cpy b_pos)
@@ -871,7 +890,7 @@ def kaelin:
   dup earth_pull =
     let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #5 NilF)))))
     let hits = # {cpos hpos dir board} (do_if_enemy cpos hpos board {hpos board}(step hpos dir board))
-    (make_wave_skill wave hits)
+    (animated_wave wave hits)
 
   dup earth_wall =
     let loop = {state}
@@ -901,6 +920,39 @@ def kaelin:
   // ~~~~~~~~~~
 
   dup gonk_walk = (walk #GONK ~4)
+
+  dup endure = # {pos hp board}
+    let endure = {piece} (armor 20 (mute 2 piece))
+    let board  = (board_update pos endure board)
+    [board, Skip]
+
+  dup breath = # {pos arg board}
+    let breath = {piece} (damage -8 (mute 1 piece))
+    let board  = (board_update pos breath board)
+    [board, Skip]
+
+  dup empathy =
+    let area = vec2_circle_c
+    let hits = # {cpos hpos state}
+      get [board, hp] = state
+      cpy hp          = hp
+      let board       = (board_update hpos (armor |hp * 2|) board)
+      [board, hp]
+    dup exec = (animated_area area hits)
+    # {pos hp board}
+      get [pos0,pos1] = (vec2_cpy pos)
+      get [st, anim]  = (exec pos0 [board, hp])
+      get [board, hp] = st
+      let board       = (board_update pos1 (damage hp) board)
+      [board, Skip]
+
+  dup shatter = # {pos dirs board}
+    get [pos0, pos1]   = (vec2_cpy pos)
+    get [hpos0, hpos1] = (vec2_cpy (add_dirs pos0 dirs))
+    get [board, hp]    = (get_hp_at hpos0 board)
+    let shatter        = {hpos board} (board_update hpos (damage ||80 - hp| / 4|) board)
+    let board          = (do_if_enemy pos1 hpos1 board shatter)
+    [board, Skip]
 
   // == Erkos ==
   // ~~~~~~~~~~~
@@ -1207,13 +1259,13 @@ def kaelin:
     //let board = (earth_wall [30,1] (Cons (Cons DOWN (Cons DOWN Nil)) Nil) board)
     //let board = (end_turn board)
 
-    let casts = empty_casts
-    let casts = (cast EARTH_ROOT [30,1] {x}x casts)
+    //let casts = empty_casts
+    //let casts = (cast EARTH_ROOT [30,1] {x}x casts)
     //let casts = (cast TOPHORO_WALK [30,1] (Cons [0,1] Nil) casts)
     //let casts = (cast EARTH_LOCK [30,1] (Cons [-1,0] Nil) casts)
     //let casts = (cast CRONI_WALK [29,1] (Cons [0,1] (Cons [0,1] (Cons [0,1] Nil))) casts)
     //let casts = (cast EARTH_PULL [30,2] [0,1] casts)
-    let board = (exec_casts casts board)
+    //let board = (exec_casts casts board)
 
     (print_board board)
 
