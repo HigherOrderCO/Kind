@@ -60,7 +60,7 @@
 //   - Earth Root : self-roots for 3 turns, gaining massive shield and heal.
 // 
 // - Gonk
-//   - Endure  : can't die on this turn. Can't use on next turn.
+//   - Endure  : loses N HP. Grants N*2 armor to itself.
 //   - Breath  : heals 6 HP. Can't move on this turn. 
 //   - Empathy : loses N HP. Grants N armor to allies in a 5x5 (cirlce) around.
 //   - Shatter : select an enemy up to 1 range. Deals an amount of damage inversely proportional to remaining HP.
@@ -68,7 +68,7 @@
 // - Erkos
 //   - Flame Ball : hits a 5x5 (circle) up to 4 range.
 //   - Flame Wave : hits a 1-3-3-5-5 (wave) ahead. Deals 5 damage.
-//   - Flame Rage : on the next turn, attacks deal +2 dmg. Stacks. Can't attack on this turn.
+//   - Flame Rage : after 2 turns, attacks deal +5 dmg. Can't attack on this and on the next turn.
 //   - Flame Nova : loses 30 HP. Deals massive damage in a 11x11 circle (20?).
 // 
 // - Croni
@@ -276,6 +276,14 @@ def kaelin:
   dup base_stats = # {hp}
     (Stats hp 0 0 0 0 0)
 
+  dup end_turn_stats = # {stats}
+    (stats {hp shield armor buff locked muted}
+      cpy locked = locked
+      cpy muted  = muted
+      let locked = if |locked > 0| [|locked - 1|, 0]
+      let muted  = if |muted > 0| [|muted - 1|, 0]
+      (Stats hp shield 0 0 locked muted))
+
   dup stats_cpy = # {stats}
     (stats {hp shield armor buff locked muted}
       cpy hp     = hp
@@ -289,6 +297,11 @@ def kaelin:
       [cpy0, cpy1])
 
   dup mod_hp     = # {fn stats} (stats {hp shield armor buff locked muted} (Stats (fn hp) shield armor buff locked muted))
+  dup mod_shield = # {fn stats} (stats {hp shield armor buff locked muted} (Stats hp (fn shield) armor buff locked muted))
+  dup mod_armor  = # {fn stats} (stats {hp shield armor buff locked muted} (Stats hp shield (fn armor) buff locked muted))
+  dup mod_buff   = # {fn stats} (stats {hp shield armor buff locked muted} (Stats hp shield armor (fn buff) locked muted))
+  dup mod_locked = # {fn stats} (stats {hp shield armor buff locked muted} (Stats hp shield armor buff (fn locked) muted))
+  dup mod_muted  = # {fn stats} (stats {hp shield armor buff locked muted} (Stats hp shield armor buff locked (fn muted)))
   dup get_hp     = # {stats} (stats {hp shield armor buff locked muted} hp)
   dup get_shield = # {stats} (stats {hp shield armor buff locked muted} shield)
   dup get_armor  = # {stats} (stats {hp shield armor buff locked muted} armor)
@@ -346,34 +359,6 @@ def kaelin:
     let heroes = [[quad00,quad01],[quad02,quad03]]
     (snd (take5 hero NilF heroes))
 
-  dup piece_icon = # {piece}
-    let case_air    = (to_chars " .")
-    let case_wall   = {temp} if temp [(to_chars " M"), (to_chars " W")]
-    let case_throne = {side} (to_chars " T")
-    let case_unit   = {side hero stats} (hero_icon hero 0)
-    (piece case_air case_wall case_throne case_unit)
-
-  dup piece_info = # {piece}
-    let case_air    = [Air, NilF]
-    let case_wall   = {temp} [(Wall temp), NilF]
-    let case_throne = {side} [(Throne side), NilF]
-    let case_unit   = {side hero stats}
-      get [stats0, stats1] = (stats_cpy stats)
-      cpy hero = hero
-      cpy hp   = (get_hp stats0)
-      cpy side = side
-      let val  = (Unit side hero stats1)
-      let info =
-        (concat (hero_icon hero 1) // Hero name
-        (concat (to_chars ": ")
-        (concat (ConsF (box_byte (num_to_char ||hp / 100| % 10|)) NilF) // HP
-        (concat (ConsF (box_byte (num_to_char ||hp /  10| % 10|)) NilF) // HP
-        (concat (ConsF (box_byte (num_to_char ||hp /   1| % 10|)) NilF) // HP
-        (concat (to_chars " hp -- ")
-        (concat (if side [(to_chars "black"),(to_chars "white")]) (ConsF #10 NilF))))))))
-      [val, info]
-    (piece case_air case_wall case_throne case_unit)
-
   dup piece_cpy_with = # {fn piece}
     let case_air    = {fn} [Air, (fn Air)]
     let case_wall   = {temp} {fn}
@@ -388,6 +373,32 @@ def kaelin:
       get [stats0, stats1] = (stats_cpy stats)
       [(Unit side hero stats0), (fn (Unit side hero stats1))]
     (piece case_air case_wall case_throne case_unit fn)
+
+  dup piece_icon = # {piece}
+    let case_air    = (to_chars " .")
+    let case_wall   = {temp} if temp [(to_chars " M"), (to_chars " W")]
+    let case_throne = {side} (to_chars " T")
+    let case_unit   = {side hero stats} (hero_icon hero 0)
+    (piece case_air case_wall case_throne case_unit)
+
+  dup piece_info = # {piece}
+    let case_air    = NilF
+    let case_wall   = {temp} NilF
+    let case_throne = {side} NilF
+    let case_unit   = {side hero stats}
+      (stats {hp shield armor buff locked muted}
+        cpy hp = hp
+        (concat (hero_icon hero 1) // Hero name
+        (concat (to_chars ": ")
+        (concat (ConsF (box_byte (num_to_char ||hp / 100| % 10|)) NilF) // HP
+        (concat (ConsF (box_byte (num_to_char ||hp /  10| % 10|)) NilF) // HP
+        (concat (ConsF (box_byte (num_to_char ||hp /   1| % 10|)) NilF) // HP
+        (concat (to_chars " hp ")
+        (concat (if side [(to_chars "(black)"),(to_chars "(white)")])
+        (concat (if locked [(to_chars " <locked> "), NilF])
+        (concat (if muted [(to_chars " <muted> "), NilF])
+                (ConsF #10 NilF)))))))))))
+    (piece case_air case_wall case_throne case_unit)
 
   dup get_piece_hero = # {piece}
     let case_air    = None
@@ -408,6 +419,20 @@ def kaelin:
     let case_wall   = {a_temp} 0
     let case_throne = {a_side} 0
     let case_unit   = {a_side a_hero a_stats} |a_hero == hero|
+    (piece case_air case_wall case_throne case_unit)
+
+  dup piece_is_locked = # {piece}
+    let case_air    = 0
+    let case_wall   = {a_temp} 0
+    let case_throne = {a_side} 0
+    let case_unit   = {a_side a_hero a_stats} |(get_locked a_stats) > 0|
+    (piece case_air case_wall case_throne case_unit)
+
+  dup piece_is_muted = # {piece}
+    let case_air    = 0
+    let case_wall   = {a_temp} 0
+    let case_throne = {a_side} 0
+    let case_unit   = {a_side a_hero a_stats} |(get_muted a_stats) > 0|
     (piece case_air case_wall case_throne case_unit)
 
   // "a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
@@ -448,13 +473,31 @@ def kaelin:
     let case_unit   = {side hero stats} (Unit side hero (mod_hp {hp}|hp - dmg| stats))
     (piece case_air case_wall case_throne case_unit)
 
-  // TODO: 
+  // TODO:
   // - check if the life of "piece" is bigger than the damage
   dup damage = # {dmg piece}
     let case_air    = Air
     let case_wall   = {temp} (Wall temp)
     let case_throne = {side} (Throne side)
     let case_unit   = {side hero stats} (Unit side hero (mod_hp {hp}|hp - dmg| stats))
+    (piece case_air case_wall case_throne case_unit)
+
+  // TODO:
+  // - check if the life of "piece" is bigger than the damage
+  dup lock = # {turns piece}
+    let case_air    = Air
+    let case_wall   = {temp} (Wall temp)
+    let case_throne = {side} (Throne side)
+    let case_unit   = {side hero stats} (Unit side hero (mod_locked {x}turns stats))
+    (piece case_air case_wall case_throne case_unit)
+
+  // TODO:
+  // - check if the life of "piece" is bigger than the damage
+  dup mute = # {turns piece}
+    let case_air    = Air
+    let case_wall   = {temp} (Wall temp)
+    let case_throne = {side} (Throne side)
+    let case_unit   = {side hero stats} (Unit side hero (mod_muted {x}turns stats))
     (piece case_air case_wall case_throne case_unit)
 
   // :::::::::::::::::::::
@@ -501,6 +544,9 @@ def kaelin:
   dup Mewru    = # {side} (Unit side MEWRU   (base_stats  20))
 
   dup PASS          = # 0
+  dup EARTH_ROOT    = # 22
+  dup EARTH_LOCK    = # 64
+  dup EARTH_WALL    = # 112
   dup KENLUA_WALK   = # 128
   dup SIRPIX_WALK   = # 129
   dup FLINA_WALK    = # 130
@@ -522,13 +568,13 @@ def kaelin:
   //   Num
   dup get_skill_hero = # {skill}
     let i000 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i016 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i016 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[TO, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let i032 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let i048 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i064 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i064 = [[[[TO, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let i080 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let i096 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i112 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i112 = [[[[TO, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let i128 = [[[[KE,SI],[FL,SN]],[[ER,ST],[CR,GO]]],[[[TO,AG],[ME,ZA]],[[ 0, 0],[ 0, 0]]]]
     let i144 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let i160 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
@@ -546,39 +592,39 @@ def kaelin:
   //   {slot : Num}
   //   Num
   dup get_hero_skill = # {hero slot}
-    let to = [[[TOPHORO_WALK , EARTH_PULL] , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let go = [[[GONK_WALK    , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let er = [[[ERKOS_WALK   , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let cr = [[[CRONI_WALK   , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let sn = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let si = [[[SIRPIX_WALK  , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let ke = [[[KENLUA_WALK  , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let fl = [[[FLINA_WALK   , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let st = [[[STANCI_WALK  , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let za = [[[ZAGATUR_WALK , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let ag = [[[AGDRIS_WALK  , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let me = [[[MEWRU_WALK   , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS , PASS]] , [[PASS , PASS] , [PASS , PASS]]]
+    let to = [[[TOPHORO_WALK , EARTH_PULL] , [EARTH_WALL , EARTH_LOCK]] , [[EARTH_ROOT , PASS] , [PASS , PASS]]]
+    let go = [[[GONK_WALK    , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let er = [[[ERKOS_WALK   , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let cr = [[[CRONI_WALK   , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let sn = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let si = [[[SIRPIX_WALK  , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let ke = [[[KENLUA_WALK  , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let fl = [[[FLINA_WALK   , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let st = [[[STANCI_WALK  , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let za = [[[ZAGATUR_WALK , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let ag = [[[AGDRIS_WALK  , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let me = [[[MEWRU_WALK   , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
     let h0 = [[[[to,go],[xx,xx]],[[xx,xx],[er,cr]]],[[[sn,xx],[xx,xx]],[[si,ke],[fl,xx]]]]
     let h1 = [[[[xx,xx],[st,xx]],[[xx,xx],[xx,xx]]],[[[za,ag],[me,xx]],[[xx,xx],[xx,xx]]]]
     (snd (take3 slot 0 (snd (take5 hero 0 [h0,h1]))))
@@ -666,7 +712,7 @@ def kaelin:
       get [rgt_info, rgt_board] = rgt
       [(concat lft_info rgt_info), (concat lft_board rgt_board)]
     let fold_leaf = {piece}
-      get [piece, info] = (piece_info piece)
+      get [piece, info] = (piece_cpy_with piece_info piece)
       [info, (piece_icon piece)]
     dup fold = (fold10 #fold_node #fold_leaf)
     # {board}
@@ -714,6 +760,14 @@ def kaelin:
   // Checks if given position is a specific hero
   dup is_hero_at = # {pos hero board}
     (board_query_at pos (piece_is_hero hero) board)
+
+  // Checks if hero at given posittion can move
+  dup is_locked_at = # {pos board}
+    (board_query_at pos piece_is_locked board)
+
+  // Checks if hero at given posittion can cast
+  dup is_muted_at = # {pos board}
+    (board_query_at pos piece_is_muted board)
 
   // Gets the side of the piece in some position
   dup get_side_at = # {pos board}
@@ -786,18 +840,20 @@ def kaelin:
   let walk = {hero steps}
     dup hero = hero
     let walk = {state}
-      get [state0, state1] = state
-      get [pos, dirs]      = state0
-      get [board, path]    = state1
-      get [new_dirs, dir]  = (pop [0,0] dirs)
-      get [pos, pos_cpy]   = (vec2_cpy pos)
-      get [dir, dir_cpy]   = (vec2_cpy dir)
-      let new_pos          = (vec2_add pos_cpy dir_cpy)
-      get [pos, pos_cpy]   = (vec2_cpy pos)
-      let new_path         = {x} (path (Cons pos_cpy x))
-      get [pos, pos_cpy]   = (vec2_cpy pos)
-      get [board, allow]   = (is_hero_at pos_cpy hero board)
-      let new_board        = (if allow [step, {pos dir board}board] pos dir board)
+      get [state0, state1]   = state
+      get [pos, dirs]        = state0
+      get [board, path]      = state1
+      get [new_dirs, dir]    = (pop [0,0] dirs)
+      get [pos, pos_cpy]     = (vec2_cpy pos)
+      get [dir, dir_cpy]     = (vec2_cpy dir)
+      let new_pos            = (vec2_add pos_cpy dir_cpy)
+      get [pos, pos_cpy]     = (vec2_cpy pos)
+      let new_path           = {x} (path (Cons pos_cpy x))
+      get [pos, pos_cpy]     = (vec2_cpy pos)
+      get [board, is_hero]   = (is_hero_at pos_cpy hero board)
+      get [pos, pos_cpy]     = (vec2_cpy pos)
+      get [board, is_locked] = (is_locked_at pos_cpy board)
+      let new_board          = (if |is_hero & |1 - is_locked|| [step, {pos dir board}board] pos dir board)
       [[new_pos, new_dirs], [new_board, new_path]]
     dup walk = (steps #walk)
     # {pos dirs board}
@@ -814,7 +870,7 @@ def kaelin:
 
   dup earth_pull =
     let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #5 NilF)))))
-    let hits = # {cpos hpos dir board} (do_if_ally cpos hpos board {hpos board}(step hpos dir board))
+    let hits = # {cpos hpos dir board} (do_if_enemy cpos hpos board {hpos board}(step hpos dir board))
     (make_wave_skill wave hits)
 
   dup earth_wall =
@@ -829,6 +885,17 @@ def kaelin:
     dup put_walls = (~3 #loop)
     # {pos dirs_list board}
       (fst (fst (put_walls [[board,pos], dirs_list])))
+
+  dup earth_lock = # {pos dirs board}
+    get [pos0, pos1] = (vec2_cpy pos)
+    let hpos         = (add_dirs3 pos0 dirs)
+    let board        = (do_if_enemy pos1 hpos board {hpos board}(board_update hpos (lock 1) board))
+    [board, Skip]
+
+  dup earth_root = # {pos arg board}
+    let root  = {piece} (damage -30 (mute 3 piece))
+    let board = (board_update pos root board)
+    [board, Skip]
 
   // == Gonk ==
   // ~~~~~~~~~~
@@ -985,6 +1052,18 @@ def kaelin:
   // :: Casts & Turn ::
   // ::::::::::::::::::
 
+  // Removes temporary walls, stuns, etc.
+  dup end_turn =
+    let fold_node = {a b} [a,b]
+    let fold_leaf = {piece}
+      let case_air    = Air
+      let case_wall   = {temp} if temp [Air, (Wall 0)]
+      let case_throne = Throne
+      let case_unit   = {hero side stats} (Unit hero side (end_turn_stats stats))
+      (piece case_air case_wall case_throne case_unit)
+    dup fold = (fold10 #fold_node #fold_leaf)
+    # {board} (fold board)
+
   // empty_casts
   // : (Array ~8 (Maybe [Pos, Arg]))
   dup empty_casts = #
@@ -1002,7 +1081,7 @@ def kaelin:
     (write8 skill (Just [pos, arg]) casts)
 
   // Casts a skill
-  dup cast_skill = # {hero skill effect state log}
+  dup cast_skill = # {mutable hero skill effect state log}
     cpy hero = hero
     cpy skill = skill
     get [board, casts] = state
@@ -1010,11 +1089,13 @@ def kaelin:
     let case_none = {board casts}
       [board, casts]
     let case_just = {cast board casts}
-      get [pos, arg]     = cast
-      get [pos, pos_cpy] = (vec2_cpy pos)
-      get [board, allow] = (with10 (board_index pos_cpy) (piece_cpy_with (piece_is_hero hero)) board)
-      get [pos, pos_cpy] = (vec2_cpy pos)
-      let board = (if allow
+      get [pos, arg]        = cast
+      get [pos, pos_cpy]    = (vec2_cpy pos)
+      get [board, is_hero]  = (is_hero_at pos_cpy hero board)
+      get [pos, pos_cpy]    = (vec2_cpy pos)
+      get [board, is_muted] = (is_muted_at pos_cpy board)
+      get [pos, pos_cpy]    = (vec2_cpy pos)
+      let board = (if |is_hero & ||1 - mutable| | |1 - is_muted|||
         then: {board}
           get [board, anims] = (effect pos_cpy arg board)
           (log [hero, skill] anims board)
@@ -1024,37 +1105,29 @@ def kaelin:
       [board, casts]
     (mcast case_none case_just board casts)
 
-  // Removes temporary walls, stuns, etc.
-  dup end_turn =
-    let fold_node = {a b} [a,b]
-    let fold_leaf = {piece}
-      let case_air    = Air
-      let case_wall   = {temp} if temp [Air, (Wall 0)]
-      let case_throne = Throne
-      let case_unit   = Unit
-      (piece case_air case_wall case_throne case_unit)
-    dup fold = (fold10 #fold_node #fold_leaf)
-    # {board} (fold board)
-
   let exec_casts_with = {log} 
     dup log = log
     # {casts board}
       let state = [board, casts]
-      let state = (cast_skill KENLUA  KENLUA_WALK   kenlua_walk   state log)
-      let state = (cast_skill SIRPIX  SIRPIX_WALK   sirpix_walk   state log)
-      let state = (cast_skill FLINA   FLINA_WALK    flina_walk    state log)
-      let state = (cast_skill SNARCH  SNARCH_WALK   snarch_walk   state log)
-      let state = (cast_skill ERKOS   ERKOS_WALK    erkos_walk    state log)
-      let state = (cast_skill STANCI  STANCI_WALK   stanci_walk   state log)
-      let state = (cast_skill CRONI   CRONI_WALK    croni_walk    state log)
-      let state = (cast_skill GONK    GONK_WALK     gonk_walk     state log)
-      let state = (cast_skill TOPHORO TOPHORO_WALK  tophoro_walk  state log)
-      let state = (cast_skill AGDRIS  AGDRIS_WALK   agdris_walk   state log)
-      let state = (cast_skill MEWRU   MEWRU_WALK    mewru_walk    state log)
-      let state = (cast_skill ZAGATUR ZAGATUR_WALK  zagatur_walk  state log)
-      let state = (cast_skill TOPHORO EARTH_PULL    earth_pull    state log)
-      let state = (cast_skill SNARCH  PIERCING_BOLT piercing_bolt state log)
-      (fst state)
+      let state = (cast_skill 1 TOPHORO EARTH_ROOT    earth_root    state log)
+      let state = (cast_skill 1 TOPHORO EARTH_LOCK    earth_lock    state log)
+      let state = (cast_skill 0 TOPHORO EARTH_WALL    earth_wall    state log)
+      let state = (cast_skill 0 KENLUA  KENLUA_WALK   kenlua_walk   state log)
+      let state = (cast_skill 0 SIRPIX  SIRPIX_WALK   sirpix_walk   state log)
+      let state = (cast_skill 0 FLINA   FLINA_WALK    flina_walk    state log)
+      let state = (cast_skill 0 SNARCH  SNARCH_WALK   snarch_walk   state log)
+      let state = (cast_skill 0 ERKOS   ERKOS_WALK    erkos_walk    state log)
+      let state = (cast_skill 0 STANCI  STANCI_WALK   stanci_walk   state log)
+      let state = (cast_skill 0 CRONI   CRONI_WALK    croni_walk    state log)
+      let state = (cast_skill 0 GONK    GONK_WALK     gonk_walk     state log)
+      let state = (cast_skill 0 TOPHORO TOPHORO_WALK  tophoro_walk  state log)
+      let state = (cast_skill 0 AGDRIS  AGDRIS_WALK   agdris_walk   state log)
+      let state = (cast_skill 0 MEWRU   MEWRU_WALK    mewru_walk    state log)
+      let state = (cast_skill 0 ZAGATUR ZAGATUR_WALK  zagatur_walk  state log)
+      let state = (cast_skill 1 TOPHORO EARTH_PULL    earth_pull    state log)
+      let state = (cast_skill 1 SNARCH  PIERCING_BOLT piercing_bolt state log)
+      let board = fst state
+      (end_turn board)
 
   // exec_casts
   // : {casts : (Array ~8 [Pos, Arg])}
@@ -1130,14 +1203,17 @@ def kaelin:
 
   dup example = #
     let board = new_board
-    let board = (earth_wall [30,1] (Cons (Cons DOWN (Cons DOWN Nil)) Nil) board)
-    let board = (end_turn board)
 
-    //let casts = empty_casts
-    //let casts = (cast CRONI_WALK [29,1] (Cons [0,1] (Cons [0,1] (Cons [0,1] Nil))) casts)
+    //let board = (earth_wall [30,1] (Cons (Cons DOWN (Cons DOWN Nil)) Nil) board)
+    //let board = (end_turn board)
+
+    let casts = empty_casts
+    let casts = (cast EARTH_ROOT [30,1] {x}x casts)
     //let casts = (cast TOPHORO_WALK [30,1] (Cons [0,1] Nil) casts)
+    //let casts = (cast EARTH_LOCK [30,1] (Cons [-1,0] Nil) casts)
+    //let casts = (cast CRONI_WALK [29,1] (Cons [0,1] (Cons [0,1] (Cons [0,1] Nil))) casts)
     //let casts = (cast EARTH_PULL [30,2] [0,1] casts)
-    //let board = (exec_casts casts board)
+    let board = (exec_casts casts board)
 
     (print_board board)
 
@@ -1149,4 +1225,4 @@ def kaelin:
     [#get_hero_skill,
       0]]]]]
 
-  # export
+  # example
