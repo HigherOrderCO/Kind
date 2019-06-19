@@ -1,19 +1,25 @@
 // Scott-encoded functions
 
 def Cons: {x xs}
-  {c n} (c x xs)
+  {Cons Nil} (Cons x xs)
 
 def Nil:
-  {c n} n
+  {Cons Nil} Nil
 
-def head:
-  {x xs} (xs {x xs}x x)
+def head: {default list}
+  let case_cons = {x rest} x
+  let case_nil  = default
+  (list case_cons case_nil)
 
-def tail:
-  {xs} (xs {x xs}xs Nil)
+def tail: {list}
+  let case_cons = {x rest} rest
+  let case_nil  = Nil
+  (list case_cons case_nil)
 
-def pop:
-  {x xs} (xs {x xs}[xs,x] [Nil,x])
+def pop: {default list}
+  let case_cons = {x rest} [rest, x]
+  let case_nil  = [Nil, default]
+  (list case_cons case_nil)
 
 // Church-encoded functions
 
