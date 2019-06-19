@@ -543,10 +543,42 @@ def kaelin:
   dup Agdris   = # {side} (Unit side AGDRIS  (base_stats  20))
   dup Mewru    = # {side} (Unit side MEWRU   (base_stats  20))
 
+// << Instant >> 
   dup PASS          = # 0
+  dup SHADOW_TRAP   = # 1
+  dup SILENCE       = # 2
+  dup MEMENTO       = # 3
+
+// << SelfCast >>
+  dup STEALTH_CLONE = # 16
+  dup BALLISTA      = # 17
+  dup FLAME_RAGE    = # 18
+  dup ENDURE        = # 19
+  dup BREATH        = # 20
+  dup EMPATHY       = # 21 
   dup EARTH_ROOT    = # 22
+  dup SHADOW_BOND   = # 23
+  dup TELEKINESIS   = # 24
+  dup TELEPORT      = # 25
+
+// << Point and Click >>
   dup EARTH_LOCK    = # 64
+  dup SHIELD        = # 65
+  dup HEAL          = # 66
+  dup HASTE         = # 67
+  dup SLICE         = # 68
+  dup STEALTH_SWAP  = # 69
+  dup KILLING_EDGE  = # 70
+  dup LIGHT         = # 71
+  dup QUICK_BOLT    = # 72
+  dup JAVELIN       = # 73
+  dup SHATTER       = # 74
+
+  // << TerrainControl >>
   dup EARTH_WALL    = # 112
+  dup SHADOW_DOLL   = # 113
+
+  // << WALK >>
   dup KENLUA_WALK   = # 128
   dup SIRPIX_WALK   = # 129
   dup FLINA_WALK    = # 130
@@ -559,29 +591,51 @@ def kaelin:
   dup AGDRIS_WALK   = # 137
   dup MEWRU_WALK    = # 138
   dup ZAGATUR_WALK  = # 139
+
+  // << Post-Walk >>
+  dup FLY           = # 160
+  dup DODGE         = # 161
+
+  // << Skillshot >>
   dup EARTH_PULL    = # 176
-  dup PIERCING_BOLT = # 179
+  dup SLASH         = # 177
+  dup PIERCING_BOLT = # 178
+  dup EXPLOSIVE_BOLT = # 179
+  dup FLAME_WAVE     = # 180
+  dup FLAME_BALL     = # 181
+  dup FLAME_NOVA     = # 182
+  dup NEEDLE         = # 183
+  dup SPIKES         = # 184
+  dup MEND           = # 185
+  dup PSYCHOCK       = # 186
+  dup SHADOW_FLUX    = # 187
+  dup RESTORE        = # 188
+  dup PETALKILL      = # 189 
+
+  // << End Turn >>
+  dup SHADOW_TRAP    = # 224
+  dup SUMMON         = # 225
 
   // get_skill_hero
   // | Given a skill, returns the hero of that skill
   // : {skill : Num}
   //   Num
   dup get_skill_hero = # {skill}
-    let i000 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i016 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[TO, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i000 = [[[[ 0,CR],[AG,AG]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i016 = [[[[SI,SN],[ER,GO]],[[GO,GO],[TO,CR]]],[[[ME,ME],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let i032 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let i048 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i064 = [[[[TO, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i064 = [[[[TO,ST],[ST,KE]],[[KE,SI],[SI,ST]]],[[[SN,FL],[GO, 0]],[[ 0, 0],[ 0, 0]]]]
     let i080 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let i096 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i112 = [[[[TO, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i112 = [[[[TO,CR],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let i128 = [[[[KE,SI],[FL,SN]],[[ER,ST],[CR,GO]]],[[[TO,AG],[ME,ZA]],[[ 0, 0],[ 0, 0]]]]
     let i144 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i160 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i176 = [[[[TO, 0],[ 0,SN]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i160 = [[[[FL,KE],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i176 = [[[[TO,KE],[SN,SN]],[[ER,ER],[ER,ZA]]],[[[ZA,ME],[ME,CR]],[[ST,ZA],[ 0, 0]]]]
     let i192 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let i208 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i224 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
+    let i224 = [[[[CR,ZA],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let i240 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
     let smap = [[[[i000,i016],[i032,i048]],[[i064,i080],[i096,i112]]],[[[i128,i144],[i160,i176]],[[i192,i208],[i224,i240]]]]
     snd (take8 skill 0 smap)
@@ -592,39 +646,39 @@ def kaelin:
   //   {slot : Num}
   //   Num
   dup get_hero_skill = # {hero slot}
-    let to = [[[TOPHORO_WALK , EARTH_PULL] , [EARTH_WALL , EARTH_LOCK]] , [[EARTH_ROOT , PASS] , [PASS , PASS]]]
-    let go = [[[GONK_WALK    , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let er = [[[ERKOS_WALK   , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let cr = [[[CRONI_WALK   , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let sn = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let si = [[[SIRPIX_WALK  , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let ke = [[[KENLUA_WALK  , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let fl = [[[FLINA_WALK   , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let st = [[[STANCI_WALK  , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let za = [[[ZAGATUR_WALK , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let ag = [[[AGDRIS_WALK  , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let me = [[[MEWRU_WALK   , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]       , [PASS       , PASS]]       , [[PASS       , PASS] , [PASS , PASS]]]
+    let to = [[[TOPHORO_WALK , EARTH_PULL]   , [EARTH_WALL   , EARTH_LOCK]]    , [[EARTH_ROOT , PASS] , [PASS , PASS]]]
+    let go = [[[GONK_WALK    , ENDURE]       , [BREATH       , EMPATHY]]       , [[SHATTER    , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let er = [[[ERKOS_WALK   , FLAME_BALL]   , [FLAME_WAVE   , FLAME_RAGE]]    , [[FLAME_NOVA , PASS] , [PASS , PASS]]]
+    let cr = [[[CRONI_WALK   , SHADOW_DOLL]  , [SHADOW_FLUX  , SHADOW_TRAP]]   , [[SHADOW_BOND, PASS] , [PASS , PASS]]]
+    let sn = [[[SNARCH_WALK  , QUICK_BOLT]   , [PIERCING_BOLT, EXPLOSIVE_BOLT]], [[BALLISTA   , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let si = [[[SIRPIX_WALK  , STEALTH_CLONE], [STEALTH_SWAP , KILLING_EDGE]]  , [[PASS       , PASS] , [PASS , PASS]]]
+    let ke = [[[KENLUA_WALK  , DODGE]        , [SLICE        , HASTE]]         , [[SLASH      , PASS] , [PASS , PASS]]]
+    let fl = [[[FLINA_WALK   , FLY]          , [JAVELIN      , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let st = [[[STANCI_WALK  , HEAL]         , [SHIELD       , RESTORE]]       , [[LIGHT      , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let za = [[[ZAGATUR_WALK , SUMMON]       , [NEEDLE       , SPIKES]]        , [[PETALKILL  , PASS] , [PASS , PASS]]]
+    let ag = [[[AGDRIS_WALK  , SILENCE]      , [MEMENTO      , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let me = [[[MEWRU_WALK   , PSYCHOCK]     , [MEND         , TELEKINESIS]]   , [[TELEPORT   , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
+    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
     let h0 = [[[[to,go],[xx,xx]],[[xx,xx],[er,cr]]],[[[sn,xx],[xx,xx]],[[si,ke],[fl,xx]]]]
     let h1 = [[[[xx,xx],[st,xx]],[[xx,xx],[xx,xx]]],[[[za,ag],[me,xx]],[[xx,xx],[xx,xx]]]]
     (snd (take3 slot 0 (snd (take5 hero 0 [h0,h1]))))
