@@ -547,7 +547,7 @@ def kaelin:
   let ME = MEWRU
 
   dup Tophoro  = # {side} (Unit side TOPHORO (base_stats 120))
-  dup Gonk     = # {side} (Unit side GONK    (base_stats  90))
+  dup Gonk     = # {side} (Unit side GONK    (base_stats  80))
   dup Erkos    = # {side} (Unit side ERKOS   (base_stats  40))
   dup Croni    = # {side} (Unit side CRONI   (base_stats  40))
   dup Snarch   = # {side} (Unit side SNARCH  (base_stats  60))
@@ -845,7 +845,7 @@ def kaelin:
     (board_query_at pos get_piece_side board)
 
   // Checks if given position is a specific hero
-  dup get_hp_at = # {pos hero board}
+  dup get_hp_at = # {pos board}
     (board_query_at pos get_piece_hp board)
 
   // :::::::::::::::::::
@@ -1003,11 +1003,12 @@ def kaelin:
       [board, Skip]
 
   dup shatter = # {pos dirs board}
-    get [pos0, pos1]   = (vec2_cpy pos)
-    get [hpos0, hpos1] = (vec2_cpy (add_dirs pos0 dirs))
-    get [board, hp]    = (get_hp_at hpos0 board)
-    let shatter        = {hpos board} (board_update hpos (damage ||80 - hp| / 4|) board)
-    let board          = (do_if_enemy pos1 hpos1 board shatter)
+    get [pos0, pos1] = (vec2_cpy pos)
+    get [pos2, pos3] = (vec2_cpy pos0)
+    let hpos         = (add_dirs2 pos1 dirs)
+    get [board, hp]  = (get_hp_at pos2 board)
+    let shatter      = {hpos board} (board_update hpos (damage ||80 - hp| / 4|) board)
+    let board        = (do_if_enemy pos3 hpos board shatter)
     [board, Skip]
 
   // == Erkos ==
@@ -1311,6 +1312,9 @@ def kaelin:
 
   dup example = #
     let board = new_board
+
+    //let board         = (board_update [1,30] (damage 79) board)
+    //get [board, anim] = (shatter [1,30] (Cons [1,0] Nil) board)
 
     //let board = (earth_wall [30,1] (Cons (Cons DOWN (Cons DOWN Nil)) Nil) board)
     //let board = (end_turn board)
