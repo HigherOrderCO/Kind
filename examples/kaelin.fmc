@@ -482,7 +482,7 @@ def kaelin:
     (a case_a_air case_a_wall case_a_throne case_a_unit b)
 
   dup damage_visual_effect = # {dmg piece}
-    let case_air    = (Wall 1)
+    let case_air    = (Wall 0)
     let case_wall   = {temp} (Wall temp)
     let case_throne = {side} (Throne side)
     let case_unit   = {side hero stats} (Unit side hero (mod_hp {hp}|hp - dmg| stats))
@@ -1011,31 +1011,29 @@ def kaelin:
 
   dup erkos_walk = (walk #ERKOS ~4)
 
-  // Hits a 1-3-3-5-5 (wave). Deals 5 damage.
   dup flame_wave =
-    let area = (vec2_wave (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF))))))
-    let hits = {pos board} (board_update pos (damage 5) board)
-    (area #hits)
+    let wave  = (vec2_wave_out (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))))
+    let hits  = # {hpos dir board} (board_update hpos (damage_visual_effect 5) board)
+    (animated_wave wave hits)
   
-  // Hits a 5x5 (circle). Deals 5 damage.
-  // TODO: add 4 range
   dup flame_ball =
     let area = vec2_circle_e
-    let hits = {pos board} (board_update pos (damage 5) board)
-    //let hits = {pos board} (board_update pos (damage_visual_effect 5) board)
-    (area #hits)
+    let hits = {hpos board} (board_update hpos (damage_visual_effect 5) board)
+    dup exec = (animated_area area #hits)
+      # {pos dirs board}
+      let hpos = (add_dirs5 pos dirs)
+      (exec hpos board)
 
-  // Selects an enemy up to 1 range. Deals massive damage (20?)
   dup flame_soul = # {pos dir board}
-    let t_pos = (vec2_add pos dir)
-    (board_update t_pos (damage_visual_effect 21) board)
+    let hpos = (vec2_add pos dir)
+    let board = (board_update hpos (damage_visual_effect 21) board)
+    [board, Skip]
 
   // Deals massive damage in a 11x11 circle (20?)
   dup flame_nova =
     let area = vec2_circle_j
-    let hits = {pos board} (board_update pos (damage 20) board)
-    //let hits = {pos board} (board_update pos (damage_visual_effect 20) board)
-    (area #hits)
+    let hits = # {hpos board} (board_update hpos (damage_visual_effect 20) board)
+    (animated_area area hits)
 
   // == Croni ==
   // ~~~~~~~~~~~
@@ -1226,6 +1224,8 @@ def kaelin:
       let state = (cast_skill 1 0 TOPHORO EARTH_PULL    earth_pull    state log)
       let state = (cast_skill 1 0 SNARCH  PIERCING_BOLT piercing_bolt state log)
       let state = (cast_skill 1 0 CRONI   SHADOW_FLUX   shadow_flux   state log)
+      let state = (cast_skill 0 1 ERKOS   FLAME_WAVE    flame_wave    state log)
+      let state = (cast_skill 0 1 ERKOS   FLAME_BALL    flame_ball    state log)
       let board = fst state
       //let board = (end_turn board)
       board
@@ -1305,8 +1305,13 @@ def kaelin:
   dup example = #
     let board = new_board
 
-    get [board, anim]  = (earth_pull [30,3] UP board)
-    (print_board board)
+    let dirs4 = (Cons RIGHT (Cons UP (Cons UP Nil)))
+    //get [board, anim]  = (earth_pull [30,3] UP board)
+    //get [board, anim] = (flame_wave [15,15] RIGHT board)
+    //get [board, anim] = (shadow_flux [15,15] dirs4 board)
+    //get [board, anim] = (flame_ball [15,15] dirs4 board)
+    //get [board, anim] = (flame_soul [2,29] DOWN board)
+    //get [board, anim] = (flame_nova [15,15] board)
 
     //let board         = (board_update [1,30] (damage 79) board)
     //get [board, anim] = (shatter [1,30] (Cons [1,0] Nil) board)
@@ -1323,9 +1328,13 @@ def kaelin:
     //let casts = (cast EARTH_LOCK [30,1] (Cons [-1,0] Nil) casts)
     //let casts = (cast CRONI_WALK [29,1] (Cons [0,1] (Cons [0,1] (Cons [0,1] Nil))) casts)
     //let casts = (cast EARTH_PULL [30,2] [0,1] casts)
+    //let casts = (cast FLAME_BALL [2,30] casts)
+    //let casts = (cast FLAME_WAVE [2,30] RIGHT casts])
     //let board = (exec_casts casts board)
 
-    //(print_board board)
+    //get [board, anim]  = (flame_ball [30,2] board)
+
+    (print_board board)
 
   dup export = 
     [#new_board,
