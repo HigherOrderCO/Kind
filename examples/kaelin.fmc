@@ -893,8 +893,7 @@ def kaelin:
       let new_area       = (Cons pos1 area)
       [new_state, new_area])
     # {pos dir state}
-      get [pos0, pos1]  = (vec2_cpy pos)
-      get [state, area] = (exec pos0 dir [[state, pos1], Nil])
+      get [state, area] = (exec pos dir [state, Nil])
       [state, (Area area)]
 
   dup do_if_side = # {comp a_pos b_pos board func}
@@ -941,7 +940,7 @@ def kaelin:
 
   dup earth_pull =
     let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #5 NilF)))))
-    let hits = # {hpos dir board} {hpos board}(step hpos dir board)
+    let hits = # {hpos dir board} (step hpos dir board)
     (animated_wave wave hits)
 
   dup earth_wall =
@@ -1306,13 +1305,16 @@ def kaelin:
   dup example = #
     let board = new_board
 
+    get [board, anim]  = (earth_pull [30,3] UP board)
+    (print_board board)
+
     //let board         = (board_update [1,30] (damage 79) board)
     //get [board, anim] = (shatter [1,30] (Cons [1,0] Nil) board)
 
     //get [board, anims] = (earth_wall [30,1] (Cons (Cons DOWN (Cons DOWN Nil)) Nil) board)
     //let board = (end_turn board)
 
-    let casts = empty_casts
+    //let casts = empty_casts
     //let casts = (cast SHADOW_FLUX [29,1] (Cons RIGHT (Cons RIGHT Nil)) casts)
     //let casts = (cast SHADOW_DOLL [29,1] (Cons [0,1] (Cons [0,1] Nil)) casts)
     //let casts = (cast EARTH_WALL [30,1] (Cons (Cons DOWN (Cons DOWN Nil)) Nil) casts)
@@ -1321,9 +1323,9 @@ def kaelin:
     //let casts = (cast EARTH_LOCK [30,1] (Cons [-1,0] Nil) casts)
     //let casts = (cast CRONI_WALK [29,1] (Cons [0,1] (Cons [0,1] (Cons [0,1] Nil))) casts)
     //let casts = (cast EARTH_PULL [30,2] [0,1] casts)
-    let board = (exec_casts casts board)
+    //let board = (exec_casts casts board)
 
-    (print_board board)
+    //(print_board board)
 
   dup export = 
     [#new_board,
