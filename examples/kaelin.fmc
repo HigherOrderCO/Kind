@@ -1012,28 +1012,28 @@ def kaelin:
   dup erkos_walk = (walk #ERKOS ~4)
 
   dup flame_wave =
-    let wave  = (vec2_wave (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF))))))
-    let skill = {hpos board} (board_update hpos (damage_visual_effect 5) board)
-    let hits  = # {cpos hpos dir board} (do_if_enemy cpos hpos board skill)
+    let wave  = (vec2_wave_out (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))))
+    let hits  = # {hpos dir board} (board_update hpos (damage_visual_effect 5) board)
     (animated_wave wave hits)
   
-  // TODO: add 4 range
   dup flame_ball =
     let area = vec2_circle_e
-    let hits = # {cpos hpos board} (board_update hpos (damage_visual_effect 5) board)
-    (animated_area area hits)
+    let hits = {hpos board} (board_update hpos (damage_visual_effect 5) board)
+    dup exec = (animated_area area #hits)
+      # {pos dirs board}
+      let hpos = (add_dirs5 pos dirs)
+      (exec hpos board)
 
-  // Selects an enemy up to 1 range. Deals massive damage (20?)
   dup flame_soul = # {pos dir board}
-    let t_pos = (vec2_add pos dir)
-    (board_update t_pos (damage_visual_effect 21) board)
+    let hpos = (vec2_add pos dir)
+    let board = (board_update hpos (damage_visual_effect 21) board)
+    [board, Skip]
 
   // Deals massive damage in a 11x11 circle (20?)
   dup flame_nova =
     let area = vec2_circle_j
-    let hits = {pos board} (board_update pos (damage 20) board)
-    //let hits = {pos board} (board_update pos (damage_visual_effect 20) board)
-    (area #hits)
+    let hits = # {hpos board} (board_update hpos (damage_visual_effect 20) board)
+    (animated_area area hits)
 
   // == Croni ==
   // ~~~~~~~~~~~
@@ -1305,8 +1305,13 @@ def kaelin:
   dup example = #
     let board = new_board
 
-    get [board, anim]  = (earth_pull [30,3] UP board)
-    (print_board board)
+    let dirs4 = (Cons RIGHT (Cons UP (Cons UP Nil)))
+    //get [board, anim]  = (earth_pull [30,3] UP board)
+    //get [board, anim] = (flame_wave [15,15] RIGHT board)
+    //get [board, anim] = (shadow_flux [15,15] dirs4 board)
+    //get [board, anim] = (flame_ball [15,15] dirs4 board)
+    //get [board, anim] = (flame_soul [2,29] DOWN board)
+    //get [board, anim] = (flame_nova [15,15] board)
 
     //let board         = (board_update [1,30] (damage 79) board)
     //get [board, anim] = (shatter [1,30] (Cons [1,0] Nil) board)
