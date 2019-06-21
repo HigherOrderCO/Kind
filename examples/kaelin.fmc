@@ -68,7 +68,7 @@
 // - Erkos
 //   * Flame Ball : hits a 5x5 (circle) up to 4 range.
 //   * Flame Wave : hits a 1-3-3-5-5 (wave) ahead. Deals 5 damage.
-//   - Flame Rage : after 2 turns, attacks deal +5 dmg. Can't attack on this and on the next turn.
+//   + Flame Rage : loses 5 HP. During this turn, attacks deal +5 dmg. Can't attack on this turn.
 //   * Flame Nova : loses 30 HP. Deals massive damage in a 11x11 circle (20?).
 // 
 // - Croni
@@ -275,14 +275,14 @@ def kaelin:
   // :: Stats ::
   // :::::::::::
 
-  dup Stats = # {mhp hp armor buff locked muted} {Stats} (Stats mhp hp armor buff locked muted)
+  dup Stats = # {mhp hp armor power locked muted} {Stats} (Stats mhp hp armor power locked muted)
 
   dup base_stats = # {mhp}
     cpy mhp = mhp
     (Stats mhp mhp 0 0 0 0)
 
   dup end_turn_stats = # {stats}
-    (stats {mhp hp armor buff locked muted}
+    (stats {mhp hp armor power locked muted}
       cpy locked = locked
       cpy muted  = muted
       let locked = if |locked > 0| [|locked - 1|, 0]
@@ -290,29 +290,29 @@ def kaelin:
       (Stats mhp hp 0 0 locked muted))
 
   dup stats_cpy = # {stats}
-    (stats {mhp hp armor buff locked muted}
+    (stats {mhp hp armor power locked muted}
       cpy mhp    = mhp
       cpy hp     = hp
       cpy armor  = armor
-      cpy buff   = buff
+      cpy power  = power
       cpy locked = locked
       cpy muted  = muted
-      let cpy0   = (Stats mhp hp armor buff locked muted)
-      let cpy1   = (Stats mhp hp armor buff locked muted)
+      let cpy0   = (Stats mhp hp armor power locked muted)
+      let cpy1   = (Stats mhp hp armor power locked muted)
       [cpy0, cpy1])
 
-  dup mod_mhp    = # {fn stats} (stats {mhp hp armor buff locked muted} (Stats (fn mhp) hp armor buff locked muted))
-  dup mod_hp     = # {fn stats} (stats {mhp hp armor buff locked muted} (Stats mhp (fn hp) armor buff locked muted))
-  dup mod_armor  = # {fn stats} (stats {mhp hp armor buff locked muted} (Stats mhp hp (fn armor) buff locked muted))
-  dup mod_buff   = # {fn stats} (stats {mhp hp armor buff locked muted} (Stats mhp hp armor (fn buff) locked muted))
-  dup mod_locked = # {fn stats} (stats {mhp hp armor buff locked muted} (Stats mhp hp armor buff (fn locked) muted))
-  dup mod_muted  = # {fn stats} (stats {mhp hp armor buff locked muted} (Stats mhp hp armor buff locked (fn muted)))
-  dup get_mhp    = # {stats} (stats {mhp hp armor buff locked muted} mhp)
-  dup get_hp     = # {stats} (stats {mhp hp armor buff locked muted} hp)
-  dup get_armor  = # {stats} (stats {mhp hp armor buff locked muted} armor)
-  dup get_buff   = # {stats} (stats {mhp hp armor buff locked muted} buff)
-  dup get_locked = # {stats} (stats {mhp hp armor buff locked muted} locked)
-  dup get_muted  = # {stats} (stats {mhp hp armor buff locked muted} muted)
+  dup mod_mhp    = # {fn stats} (stats {mhp hp armor power locked muted} (Stats (fn mhp) hp armor power locked muted))
+  dup mod_hp     = # {fn stats} (stats {mhp hp armor power locked muted} (Stats mhp (fn hp) armor power locked muted))
+  dup mod_armor  = # {fn stats} (stats {mhp hp armor power locked muted} (Stats mhp hp (fn armor) power locked muted))
+  dup mod_power   = # {fn stats} (stats {mhp hp armor power locked muted} (Stats mhp hp armor (fn power) locked muted))
+  dup mod_locked = # {fn stats} (stats {mhp hp armor power locked muted} (Stats mhp hp armor power (fn locked) muted))
+  dup mod_muted  = # {fn stats} (stats {mhp hp armor power locked muted} (Stats mhp hp armor power locked (fn muted)))
+  dup get_mhp    = # {stats} (stats {mhp hp armor power locked muted} mhp)
+  dup get_hp     = # {stats} (stats {mhp hp armor power locked muted} hp)
+  dup get_armor  = # {stats} (stats {mhp hp armor power locked muted} armor)
+  dup get_power   = # {stats} (stats {mhp hp armor power locked muted} power)
+  dup get_locked = # {stats} (stats {mhp hp armor power locked muted} locked)
+  dup get_muted  = # {stats} (stats {mhp hp armor power locked muted} muted)
 
   // :::::::::::
   // :: Piece ::
@@ -391,7 +391,7 @@ def kaelin:
     let case_wall   = {temp} NilF
     let case_throne = {side} NilF
     let case_unit   = {side hero stats}
-      (stats {mhp hp armor buff locked muted}
+      (stats {mhp hp armor power locked muted}
         cpy mhp   = mhp
         cpy hp    = hp
         cpy armor = armor
@@ -528,7 +528,7 @@ def kaelin:
     let case_wall   = {temp} (Wall temp)
     let case_throne = {side} (Throne side)
     let case_unit   = {side hero stats}
-      (stats {mhp hp armor buff locked muted}
+      (stats {mhp hp armor power locked muted}
         cpy add = add
         cpy nhp = |hp + add|
         cpy mhp = mhp
@@ -536,7 +536,7 @@ def kaelin:
           then: {side hero} Air
           else: {side hero}
             let nhp = if |nhp > mhp| [mhp, nhp]
-            (Unit side hero (Stats mhp nhp armor buff locked muted))
+            (Unit side hero (Stats mhp nhp armor power locked muted))
           side hero))
     (piece case_air case_wall case_throne case_unit)
   dup damage = # {dmg} (heal |0 - dmg|)
@@ -1046,7 +1046,7 @@ def kaelin:
     [board, Skip]
 
   dup breath = # {pos arg board}
-    let breath = {piece} (heal 8 (mute 1 piece))
+    let breath = {piece} (heal 8 (lock 1 piece))
     let board  = (board_update pos breath board)
     [board, Skip]
 
@@ -1497,14 +1497,47 @@ def kaelin:
     //(print_board board)
 
   dup all_tests = #
-    [[[["earth_pull", test_earth_pull],
-       ["earth_lock", test_earth_lock]],
-      [["earth_wall", test_earth_wall],
-       ["breath", test_breath]]],
-     [[["empathy", test_empathy],
-       ["shadow_flux", test_shadow_flux]],
-      [["_", 1],
-       ["_", 1]]]]
+    let test00 = ["earth_pull"  , test_earth_pull]
+    let test01 = ["earth_lock"  , test_earth_lock]
+    let test02 = ["earth_wall"  , test_earth_wall]
+    let test03 = ["breath"      , test_breath]
+    let test04 = ["empathy"     , test_empathy]
+    let test05 = ["shadow_flux" , test_shadow_flux]
+    let test06 = ["_"           , 1]
+    let test07 = ["_"           , 1]
+    let test08 = ["_"           , 1]
+    let test09 = ["_"           , 1]
+    let test10 = ["_"           , 1]
+    let test11 = ["_"           , 1]
+    let test12 = ["_"           , 1]
+    let test13 = ["_"           , 1]
+    let test14 = ["_"           , 1]
+    let test15 = ["_"           , 1]
+    let test16 = ["_"           , 1]
+    let test17 = ["_"           , 1]
+    let test18 = ["_"           , 1]
+    let test18 = ["_"           , 1]
+    let test19 = ["_"           , 1]
+    let test20 = ["_"           , 1]
+    let test21 = ["_"           , 1]
+    let test22 = ["_"           , 1]
+    let test23 = ["_"           , 1]
+    let test24 = ["_"           , 1]
+    let test25 = ["_"           , 1]
+    let test26 = ["_"           , 1]
+    let test27 = ["_"           , 1]
+    let test28 = ["_"           , 1]
+    let test29 = ["_"           , 1]
+    let test30 = ["_"           , 1]
+    let test31 = ["_"           , 1]
+    [[[[[test00, test01], [test02, test03]],
+       [[test04, test05], [test06, test07]]],
+      [[[test08, test09], [test10, test11]],
+       [[test12, test13], [test14, test15]]]],
+     [[[[test16, test17], [test18, test19]],
+       [[test20, test21], [test22, test23]]],
+      [[[test24, test25], [test26, test27]],
+       [[test28, test29], [test30, test31]]]]]
 
   dup example = #
     test_restore
