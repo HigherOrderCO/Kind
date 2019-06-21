@@ -54,74 +54,74 @@
 // ## Moves
 // 
 // - Tophoro
-//   - Earth Pull : pulls enemies in a 1-3-5 (wave) ahead.
-//   - Earth Wall : creates up to 3 earth walls in up to 3 range.
-//   - Earth Lock : selects an enemy in up to 2 range. Stuns him/her. Can't use on next turn.
-//   - Earth Root : self-roots for 3 turns, gaining massive shield and heal.
+//   + Earth Pull : pulls enemies in a 1-3-5 (wave) ahead.
+//   + Earth Wall : creates up to 3 earth walls in up to 3 range.
+//   + Earth Lock : selects an enemy in up to 2 range. Stuns him/her. Can't use on next turn.
+//   + Earth Root : self-roots for 3 turns, gaining massive shield and heal.
 // 
 // - Gonk
-//   - Endure  : gains 20 armor. Can't move for the next 2 turns.
-//   - Breath  : heals 8 HP. Can't move on this turn.
-//   - Empathy : loses N HP. Grants N*2 armor to allies in a 3x3 (square) around.
-//   - Shatter : select an enemy up to 2 range. Deals an amount of damage inversely proportional to remaining HP.
+//   + Endure  : gains 20 armor. Can't move for the next 2 turns.
+//   + Breath  : heals 8 HP. Can't move on this turn.
+//   + Empathy : loses N HP. Grants N*2 armor to allies in a 3x3 (square) around.
+//   + Shatter : select an enemy up to 2 range. Deals an amount of damage inversely proportional to remaining HP.
 //
 // - Erkos
-//   - Flame Ball : hits a 5x5 (circle) up to 4 range.
-//   - Flame Wave : hits a 1-3-3-5-5 (wave) ahead. Deals 5 damage.
+//   * Flame Ball : hits a 5x5 (circle) up to 4 range.
+//   * Flame Wave : hits a 1-3-3-5-5 (wave) ahead. Deals 5 damage.
 //   - Flame Rage : after 2 turns, attacks deal +5 dmg. Can't attack on this and on the next turn.
-//   - Flame Nova : loses 30 HP. Deals massive damage in a 11x11 circle (20?).
+//   * Flame Nova : loses 30 HP. Deals massive damage in a 11x11 circle (20?).
 // 
 // - Croni
-//   - Shadow Doll : places a doll in empty tile for up to 8 range, blocking the way until the end of the turn.
-//   - Shadow Flux : after a delay, hits a 3x3 (square) in up to 8 range for high damage.
+//   + Shadow Doll : places a doll in empty tile for up to 8 range, blocking the way until the end of the turn.
+//   + Shadow Flux : after a delay, hits a 3x3 (square) in up to 8 range for high damage.
 //   - Shadow Trap : places a trap in a secret position; activate to reveal and stun in a 3x3 (circle).
 //   - Shadow Bond : loses 3 hp. Can't attack on this turn. If Croni dies on this turn, takes the killer with her.
 // 
 // - Flina
-//   - Javelin : hits a selected enemy up to 2 range.
-//   - Gust    : pushes and deal damage to enemies in a 1-3-5 (wave) ahead.
-//   - Fly     : moves 4 steps, passing through enemies and walls.
+//   * Javelin : hits a selected enemy up to 2 range.
+//   * Gust    : pushes and deal damage to enemies in a 1-3-5 (wave) ahead.
+//   * Fly     : moves 4 steps, passing through enemies and walls.
 //   - Ocarina : ...
 //
 // - Snarch
-//   - Quick Bolt     : hits a selected enemy up to 6 range.
-//   - Piercing Bolt  : hits a 1-1-1-1-1-1 (wave) ahead.
-//   - Explosive Bolt : hits up to 2 3x3 (circles) up to 6 range.
+//   * Quick Bolt     : hits a selected enemy up to 6 range.
+//   * Piercing Bolt  : hits a 1-1-1-1-1-1 (wave) ahead.
+//   * Explosive Bolt : hits up to 2 3x3 (circles) up to 6 range.
 //   - Ballista       : mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range doubled.
 // 
 // - Sirpix
 //   - Stealth Clone : creates a stealth in up to 4 range. If already created, moves it 4 steps.
 //   - Stealth Swap  : if your clone is in an empty tile, swaps position with it.
-//   - Killing Edge  : hits a 3x3 (square) around.
+//   * Killing Edge  : hits a 3x3 (square) around.
 //   - Lockpick      : special effects on map.
 // 
 // - Kenlua
 //   - Dodge : select 4 tiles up to 32 range. Prevent all damage from enemies standing on those tiles during this turn.
-//   - Slice : hits a 3x3 (square) around, dealing damage.
-//   - Haste : moves 4 steps. 
-//   - Slash : hits a 1x1 (point) up to 1 range. Deals massive damage. If the hit lands, returns to the position you were at the beginning of the turn.
+//   * Slice : hits a 3x3 (square) around, dealing damage.
+//   * Haste : moves 4 steps.
+//   * Slash : hits a 1x1 (point) up to 1 range. Deals massive damage. If the hit lands, returns to the position you were at the beginning of the turn.
 // 
 // - Stanci
-//   - Heal    : selects an ally up to 4 range. Heals him/her.
-//   - Shield  : selects an ally up to 4 range. Gives him/her armor.
-//   - Restore : hits a 5x5 (circle) up to 4 range, healing allies inside.
-//   - Light   : selects an enemy up to 4 range to deal damage.
+//   * Heal    : selects an ally up to 4 range. Heals him/her.
+//   * Shield  : selects an ally up to 4 range. Gives him/her armor.
+//   * Restore : hits a 5x5 (circle) up to 4 range, healing allies inside.
+//   * Light   : selects an enemy up to 4 range to deal damage.
 // 
 // - Zagatur
-//   - Summon    : selects an empty tile up to 4 range. Spawns a clone of Zagatur on it.
-//   - Needle    : hits a 3x1 (line) ahead, dealing damage.
-//   - Spikes    : hits a 3x3 (square) around, dealing damage.
-//   - Petalkill : all zagatur die and hit a 3x3 square around, dealing high damage.
+//   * Summon    : selects an empty tile up to 4 range. Spawns a clone of Zagatur on it.
+//   * Needle    : hits a 3x1 (line) ahead, dealing damage.
+//   * Spikes    : hits a 3x3 (square) around, dealing damage.
+//   * Petalkill : all zagatur die and hit a 3x3 square around, dealing high damage.
 // 
 // - Agdris
-//   - Silence : selects an enemy up to 12 range. It can't attack on this turn.
-//   - Memento : dies. Enemies can't attack on this turn.
+//   * Silence : selects an enemy up to 12 range. It can't attack on this turn.
+//   * Memento : dies. Enemies can't attack on this turn.
 // 
 // - Mewru
-//   - Psychock    : hits a 7x7 (circle) around, dealing damage.
-//   - Mend        : hits a 7x7 (circle) around, healing allies.
-//   - Telekinesis : selects an enemy up to 4 range. Performs 4 steps in selected directions.
-//   - Teleport    : selects an empty location on the map. Moves to that location.
+//   * Psychock    : hits a 7x7 (circle) around, dealing damage.
+//   * Mend        : hits a 7x7 (circle) around, healing allies.
+//   * Telekinesis : selects an enemy up to 4 range. Performs 4 steps in selected directions.
+//   * Teleport    : selects an empty location on the map. Moves to that location.
 // 
 // ## Move Priority
 // 
@@ -275,44 +275,45 @@ def kaelin:
   // :: Stats ::
   // :::::::::::
 
-  dup Stats = # {hp shield armor buff locked muted} {Stats} (Stats hp shield armor buff locked muted)
+  dup Stats = # {mhp hp armor buff locked muted} {Stats} (Stats mhp hp armor buff locked muted)
 
-  dup base_stats = # {hp}
-    (Stats hp 0 0 0 0 0)
+  dup base_stats = # {mhp}
+    cpy mhp = mhp
+    (Stats mhp mhp 0 0 0 0)
 
   dup end_turn_stats = # {stats}
-    (stats {hp shield armor buff locked muted}
+    (stats {mhp hp armor buff locked muted}
       cpy locked = locked
       cpy muted  = muted
       let locked = if |locked > 0| [|locked - 1|, 0]
       let muted  = if |muted > 0| [|muted - 1|, 0]
-      (Stats hp 0 armor 0 locked muted))
+      (Stats mhp hp 0 0 locked muted))
 
   dup stats_cpy = # {stats}
-    (stats {hp shield armor buff locked muted}
+    (stats {mhp hp armor buff locked muted}
+      cpy mhp    = mhp
       cpy hp     = hp
-      cpy shield = shield
       cpy armor  = armor
       cpy buff   = buff
       cpy locked = locked
       cpy muted  = muted
-      let cpy0   = (Stats hp shield armor buff locked muted)
-      let cpy1   = (Stats hp shield armor buff locked muted)
+      let cpy0   = (Stats mhp hp armor buff locked muted)
+      let cpy1   = (Stats mhp hp armor buff locked muted)
       [cpy0, cpy1])
 
-  dup mod_hp     = # {fn stats} (stats {hp shield armor buff locked muted} (Stats (fn hp) shield armor buff locked muted))
-  dup mod_shield = # {fn stats} (stats {hp shield armor buff locked muted} (Stats hp (fn shield) armor buff locked muted))
-  dup mod_armor  = # {fn stats} (stats {hp shield armor buff locked muted} (Stats hp shield (fn armor) buff locked muted))
-  dup mod_buff   = # {fn stats} (stats {hp shield armor buff locked muted} (Stats hp shield armor (fn buff) locked muted))
-  dup mod_locked = # {fn stats} (stats {hp shield armor buff locked muted} (Stats hp shield armor buff (fn locked) muted))
-  dup mod_muted  = # {fn stats} (stats {hp shield armor buff locked muted} (Stats hp shield armor buff locked (fn muted)))
-  dup get_hp     = # {stats} (stats {hp shield armor buff locked muted} hp)
-  dup get_shield = # {stats} (stats {hp shield armor buff locked muted} shield)
-  dup get_armor  = # {stats} (stats {hp shield armor buff locked muted} armor)
-  dup get_buff   = # {stats} (stats {hp shield armor buff locked muted} buff)
-  dup get_locked = # {stats} (stats {hp shield armor buff locked muted} locked)
-  dup get_muted  = # {stats} (stats {hp shield armor buff locked muted} muted)
- 
+  dup mod_mhp    = # {fn stats} (stats {mhp hp armor buff locked muted} (Stats (fn mhp) hp armor buff locked muted))
+  dup mod_hp     = # {fn stats} (stats {mhp hp armor buff locked muted} (Stats mhp (fn hp) armor buff locked muted))
+  dup mod_armor  = # {fn stats} (stats {mhp hp armor buff locked muted} (Stats mhp hp (fn armor) buff locked muted))
+  dup mod_buff   = # {fn stats} (stats {mhp hp armor buff locked muted} (Stats mhp hp armor (fn buff) locked muted))
+  dup mod_locked = # {fn stats} (stats {mhp hp armor buff locked muted} (Stats mhp hp armor buff (fn locked) muted))
+  dup mod_muted  = # {fn stats} (stats {mhp hp armor buff locked muted} (Stats mhp hp armor buff locked (fn muted)))
+  dup get_mhp    = # {stats} (stats {mhp hp armor buff locked muted} mhp)
+  dup get_hp     = # {stats} (stats {mhp hp armor buff locked muted} hp)
+  dup get_armor  = # {stats} (stats {mhp hp armor buff locked muted} armor)
+  dup get_buff   = # {stats} (stats {mhp hp armor buff locked muted} buff)
+  dup get_locked = # {stats} (stats {mhp hp armor buff locked muted} locked)
+  dup get_muted  = # {stats} (stats {mhp hp armor buff locked muted} muted)
+
   // :::::::::::
   // :: Piece ::
   // :::::::::::
@@ -390,14 +391,19 @@ def kaelin:
     let case_wall   = {temp} NilF
     let case_throne = {side} NilF
     let case_unit   = {side hero stats}
-      (stats {hp shield armor buff locked muted}
-        cpy hp = hp
+      (stats {mhp hp armor buff locked muted}
+        cpy mhp   = mhp
+        cpy hp    = hp
         cpy armor = armor
         (concat (hero_icon hero 1) // Hero name
         (concat (to_chars ": ")
         (concat (ConsF (box_byte (num_to_char ||hp / 100| % 10|)) NilF) // HP
         (concat (ConsF (box_byte (num_to_char ||hp /  10| % 10|)) NilF) // HP
         (concat (ConsF (box_byte (num_to_char ||hp /   1| % 10|)) NilF) // HP
+        (concat (to_chars "/")
+        (concat (ConsF (box_byte (num_to_char ||mhp / 100| % 10|)) NilF) // MHP
+        (concat (ConsF (box_byte (num_to_char ||mhp /  10| % 10|)) NilF) // MHP
+        (concat (ConsF (box_byte (num_to_char ||mhp /   1| % 10|)) NilF) // MHP
         (concat (to_chars "hp ")
         (concat (ConsF (box_byte (num_to_char ||armor /  10| % 10|)) NilF) // armor
         (concat (ConsF (box_byte (num_to_char ||armor /   1| % 10|)) NilF) // armor
@@ -405,7 +411,7 @@ def kaelin:
         (concat (if side [(to_chars "(black)"),(to_chars "(white)")])
         (concat (if locked [(to_chars " <locked> "), NilF])
         (concat (if muted [(to_chars " <muted> "), NilF])
-                (ConsF #10 NilF))))))))))))))
+                (ConsF #10 NilF))))))))))))))))))
     (piece case_air case_wall case_throne case_unit)
 
   dup get_piece_hero = # {piece}
@@ -429,6 +435,34 @@ def kaelin:
     let case_unit   = {a_side a_hero a_stats} |a_hero == hero|
     (piece case_air case_wall case_throne case_unit)
 
+  dup piece_is_wall = # {piece}
+    let case_air    = 0
+    let case_wall   = {a_temp} 1
+    let case_throne = {a_side} 0
+    let case_unit   = {a_side a_hero a_stats} 0
+    (piece case_air case_wall case_throne case_unit)
+
+  dup get_piece_hp = # {piece}
+    let case_air    = 0
+    let case_wall   = {a_temp} 0
+    let case_throne = {a_side} 0
+    let case_unit   = {a_side a_hero a_stats} (get_hp a_stats)
+    (piece case_air case_wall case_throne case_unit)
+
+  dup get_piece_mhp = # {piece}
+    let case_air    = 0
+    let case_wall   = {a_temp} 0
+    let case_throne = {a_side} 0
+    let case_unit   = {a_side a_hero a_stats} (get_mhp a_stats)
+    (piece case_air case_wall case_throne case_unit)
+
+  dup get_piece_armor = # {piece}
+    let case_air    = 0
+    let case_wall   = {a_temp} 0
+    let case_throne = {a_side} 0
+    let case_unit   = {a_side a_hero a_stats} (get_armor a_stats)
+    (piece case_air case_wall case_throne case_unit)
+
   dup piece_is_locked = # {piece}
     let case_air    = 0
     let case_wall   = {a_temp} 0
@@ -441,13 +475,6 @@ def kaelin:
     let case_wall   = {a_temp} 0
     let case_throne = {a_side} 0
     let case_unit   = {a_side a_hero a_stats} |(get_muted a_stats) > 0|
-    (piece case_air case_wall case_throne case_unit)
-
-  dup get_piece_hp = # {piece}
-    let case_air    = 0
-    let case_wall   = {a_temp} 0
-    let case_throne = {a_side} 0
-    let case_unit   = {a_side a_hero a_stats} (get_hp a_stats)
     (piece case_air case_wall case_throne case_unit)
 
   // "a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
@@ -511,7 +538,6 @@ def kaelin:
     let case_unit   = {side hero stats} (Unit side hero (mod_muted {x}|turns + x| stats))
     (piece case_air case_wall case_throne case_unit)
 
-  // TODO:
   dup armor = # {armor piece}
     let case_air    = Air
     let case_wall   = {temp} (Wall temp)
@@ -562,7 +588,7 @@ def kaelin:
   dup Agdris   = # {side} (Unit side AGDRIS  (base_stats  20))
   dup Mewru    = # {side} (Unit side MEWRU   (base_stats  20))
 
-  // << Instant >>
+  // << Pre-Walk >>
   dup PASS           = # 0
   dup SHADOW_TRAP    = # 1
   dup SILENCE        = # 2
@@ -776,6 +802,9 @@ def kaelin:
     let board         = (write10 b_idx b_val board)
     board 
 
+  dup board_swap = # {a_pos b_pos board}
+    (board_interact a_pos b_pos {a b}[b,a] board)
+
   // Apply a function to a board piece
   dup board_update = # {pos fun board}
     (update10 (board_index pos) fun board)
@@ -835,6 +864,10 @@ def kaelin:
   dup is_hero_at = # {pos hero board}
     (board_query_at pos (piece_is_hero hero) board)
 
+  // Checks if given position is a specific hero
+  dup is_wall_at = # {pos board}
+    (board_query_at pos piece_is_wall board)
+
   // Checks if hero at given posittion can move
   dup is_locked_at = # {pos board}
     (board_query_at pos piece_is_locked board)
@@ -851,49 +884,63 @@ def kaelin:
   dup get_hp_at = # {pos board}
     (board_query_at pos get_piece_hp board)
 
+  // Checks if given position is a specific hero
+  dup get_armor_at = # {pos board}
+    (board_query_at pos get_piece_armor board)
+
   // :::::::::::::::::::
   // :: Skill Effects ::
   // :::::::::::::::::::
 
-  // animated_area
+  // cast_area
   // : {-P    : Type}
-  //   {-T    : Type}
+  //   {range : Nat}
   //   {area  : Area}
-  //   {hits  : {hpos : [Num,Num]} {arg : T} {state : P} P}
+  //   {hits  : {cpos : [Num,Num]} {hpos : [Num,Num]} {state : P} P}
   // ! {pos   : [Num,Num]}
+  //   {dirs  : (SList [Num,Num])}
   //   {state : P}
   //   P
-  let animated_area = {area hits}
+  let cast_area = {range area hits}
     dup hits = hits
-    dup exec = (area #{pos st}
-        get [state, area]  = st
-        get [pos0, pos1]   = (vec2_cpy pos)
-        let new_state      = (hits pos0 state)
-        let new_area       = (Cons pos1 area)
-        [new_state, new_area])
-    # {pos state}
-      get [state, area] = (exec pos [state, Nil])
+    dup exec = (area #{hpos state}
+      get [state, area]  = state
+      get [state, cpos]  = state
+      get [cpos0, cpos1] = (vec2_cpy cpos)
+      get [hpos0, hpos1] = (vec2_cpy hpos)
+      let new_state      = (hits cpos0 hpos0 state)
+      let new_area       = (Cons hpos1 area)
+      [[new_state, cpos1], new_area])
+    dup add_range = (add_dirs range)
+    # {pos dirs state}
+      get [cpos0, cpos1] = (vec2_cpy pos)
+      get [state, area]  = (exec (add_range cpos0 dirs) [[state, cpos1], Nil])
+      get [state, cpos]  = state
       [state, (Area area)]
 
-  // animated_wave
+  // cast_wave
   // : {-P    : Type}
   //   {area  : Area}
-  //   {hits  : {pos : [Num,Num]} {dir : [Num,Num]} {state : P} P}
+  //   {hits  : {cpos : [Num,Num]} {pos : [Num,Num]} {dir : [Num,Num]} {state : P} P}
   // ! {pos   : [Num,Num]}
   //   {dir   : [Num,Num]}
   //   {state : P}
   //   P
-  let animated_wave = {area hits}
+  let cast_wave = {area hits}
     dup hits = hits
-    dup exec = (area #{pos_dir st}
-      get [pos, dir]     = pos_dir
-      get [state, area]  = st
-      get [pos0, pos1]   = (vec2_cpy pos)
-      let new_state      = (hits pos0 dir state)
-      let new_area       = (Cons pos1 area)
-      [new_state, new_area])
+    dup exec = (area #{hpos_dir state}
+      get [hpos, dir]    = hpos_dir
+      get [state, area]  = state
+      get [state, cpos]  = state
+      get [cpos0, cpos1] = (vec2_cpy cpos)
+      get [hpos0, hpos1] = (vec2_cpy hpos)
+      let new_state      = (hits cpos0 hpos0 dir state)
+      let new_area       = (Cons hpos1 area)
+      [[new_state, cpos1], new_area])
     # {pos dir state}
-      get [state, area] = (exec pos dir [state, Nil])
+      get [cpos0, cpos1] = (vec2_cpy pos)
+      get [state, area]  = (exec cpos0 dir [[state, cpos1], Nil])
+      get [state, cpos]  = state
       [state, (Area area)]
 
   dup do_if_side = # {comp a_pos b_pos board func}
@@ -940,8 +987,8 @@ def kaelin:
 
   dup earth_pull =
     let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #5 NilF)))))
-    let hits = # {hpos dir board} (step hpos dir board)
-    (animated_wave wave hits)
+    let hits = # {cpos hpos dir board} (step hpos dir board)
+    (cast_wave wave hits)
 
   dup earth_wall =
     let loop = {state}
@@ -984,17 +1031,17 @@ def kaelin:
 
   dup empathy =
     let area = vec2_circle_c
-    let hits = # {hpos state}
+    let hits = # {cpos hpos state}
       get [board, hp] = state
       cpy hp          = hp
       let board       = (board_update hpos (armor |hp * 2|) board)
       [board, hp]
-    dup exec = (animated_area area hits)
+    dup exec = (cast_area ~0 area hits)
     # {pos hp board}
-      get [pos0,pos1] = (vec2_cpy pos)
-      get [st, anim]  = (exec pos0 [board, hp])
-      get [board, hp] = st
-      let board       = (board_update pos1 (damage hp) board)
+      get [pos0,pos1]   = (vec2_cpy pos)
+      get [state, anim] = (exec pos0 Nil [board, hp])
+      get [board, hp]   = state
+      let board         = (board_update pos1 (damage hp) board)
       [board, Skip]
 
   dup shatter = # {pos dirs board}
@@ -1011,29 +1058,32 @@ def kaelin:
 
   dup erkos_walk = (walk #ERKOS ~4)
 
-  dup flame_wave =
-    let wave  = (vec2_wave_out (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))))
-    let hits  = # {hpos dir board} (board_update hpos (damage_visual_effect 5) board)
-    (animated_wave wave hits)
+  // TODO: updpate
+  //dup flame_wave =
+    //let wave  = (vec2_wave_out (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))))
+    //let hits  = # {hpos dir board} (board_update hpos (damage_visual_effect 5) board)
+    //(animated_wave wave hits)
   
-  dup flame_ball =
-    let area = vec2_circle_e
-    let hits = {hpos board} (board_update hpos (damage_visual_effect 5) board)
-    dup exec = (animated_area area #hits)
-      # {pos dirs board}
-      let hpos = (add_dirs5 pos dirs)
-      (exec hpos board)
+  // TODO: updpate
+  //dup flame_ball =
+    //let area = vec2_circle_e
+    //let hits = {hpos board} (board_update hpos (damage_visual_effect 5) board)
+    //dup exec = (animated_area area #hits)
+      //# {pos dirs board}
+      //let hpos = (add_dirs5 pos dirs)
+      //(exec hpos board)
 
-  dup flame_soul = # {pos dir board}
-    let hpos = (vec2_add pos dir)
-    let board = (board_update hpos (damage_visual_effect 21) board)
-    [board, Skip]
+  // TODO: updpate
+  //dup flame_soul = # {pos dir board}
+    //let hpos = (vec2_add pos dir)
+    //let board = (board_update hpos (damage_visual_effect 21) board)
+    //[board, Skip]
 
-  // Deals massive damage in a 11x11 circle (20?)
-  dup flame_nova =
-    let area = vec2_circle_j
-    let hits = # {hpos board} (board_update hpos (damage_visual_effect 20) board)
-    (animated_area area hits)
+  // TODO: updpate
+  //dup flame_nova =
+    //let area = vec2_circle_j
+    //let hits = # {hpos board} (board_update hpos (damage_visual_effect 20) board)
+    //(animated_area area hits)
 
   // == Croni ==
   // ~~~~~~~~~~~
@@ -1047,26 +1097,23 @@ def kaelin:
 
   dup shadow_flux =
     let area = vec2_circle_c
-    let hits = {hpos board} (board_update hpos (damage 15) board)
-    dup exec = (animated_area area #hits)
-    # {pos dirs board}
-      let hpos = (add_dirs8 pos dirs)
-      (exec hpos board)
+    let hits = {cpos hpos board} (board_update hpos (damage 15) board)
+    (cast_area ~8 area #hits)
 
   // == Snarch ==
   // ~~~~~~~~~~~~
 
   dup snarch_walk = (walk #SNARCH ~4)
 
-  // Hits a selected enemy up to 3 range. Deals 5 damage.
-  dup quick_shot = # {pos dirs board}
-    (board_update (add_dirs4 pos dirs) (damage_visual_effect 3) board)
+  // TODO: updpate
+  //dup quick_shot = # {pos dirs board}
+    //(board_update (add_dirs4 pos dirs) (damage_visual_effect 3) board)
 
-  // Hits all enemies in a 5x1 (line) ahead. Deals 3 damage.
-  dup piercing_bolt =
-    let area = (vec2_wave (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 NilF))))))
-    let hits = {pos board} (board_update pos (damage_visual_effect 3) board)
-    (area #hits) 
+  // TODO: updpate
+  //dup piercing_bolt =
+    //let area = (vec2_wave (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 NilF))))))
+    //let hits = {pos board} (board_update pos (damage_visual_effect 3) board)
+    //(area #hits) 
 
   // Explosive Arrow : hits up to 2 3x3 (circles). Deals 2 damage.
   // TODO: add 5 range
@@ -1091,31 +1138,29 @@ def kaelin:
 
   dup kenlua_walk = (walk #KENLUA ~4)
 
-  // Hits a 3x3 (square) around. Deals 3 damage.
-  dup killing_edge =
-    let area = vec2_circle_c
-    let hits = {pos board} (board_update pos (damage_visual_effect 3) board)
-    (area #hits)
+  // TODO: updpate
+  //dup killing_edge =
+    //let area = vec2_circle_c
+    //let hits = {pos board} (board_update pos (damage_visual_effect 3) board)
+    //(area #hits)
 
-  // Select 4 tiles up to 32 range. Prevent all damage from enemies standing on those tiles during this turn.
-  // TODO: Add range
-  // TODO: Change function applied to the positions to "silence"
-  dup dodge = # {pos1 pos2 pos3 pos4 board}
-    let case_air    = Air
-    let case_wall   = {temp} (Wall temp)
-    let case_throne = {side} (Throne side)
-    let case_unit   = {side hero stats} (Unit side hero stats)
-    let board       = (board_update pos1 (damage_visual_effect 1) board)
-    let board       = (board_update pos2 (damage_visual_effect 1) board)
-    let board       = (board_update pos3 (damage_visual_effect 1) board)
-    let board       = (board_update pos4 (damage_visual_effect 1) board)
-    board
+  // TODO: updpate
+  //dup dodge = # {pos1 pos2 pos3 pos4 board}
+    //let case_air    = Air
+    //let case_wall   = {temp} (Wall temp)
+    //let case_throne = {side} (Throne side)
+    //let case_unit   = {side hero stats} (Unit side hero stats)
+    //let board       = (board_update pos1 (damage_visual_effect 1) board)
+    //let board       = (board_update pos2 (damage_visual_effect 1) board)
+    //let board       = (board_update pos3 (damage_visual_effect 1) board)
+    //let board       = (board_update pos4 (damage_visual_effect 1) board)
+    //board
 
-  // Hits a 3x3 (square) around. Deals 8 damage.
-  dup slice_area =
-    let area = vec2_circle_c
-    let hits = {pos board} (board_update pos (damage_visual_effect 8) board)
-    (area #hits)
+  // TODO: updpate
+  //dup slice_area =
+    //let area = vec2_circle_c
+    //let hits = {pos board} (board_update pos (damage_visual_effect 8) board)
+    //(area #hits)
 
   // == Flina ==
   // ~~~~~~~~~~~
@@ -1218,10 +1263,11 @@ def kaelin:
       [board, casts]
     (mcast case_none case_just board casts)
 
-  let exec_casts_with = {log} 
+  let exec_casts_with = {log}
     dup log = log
     # {casts board}
       let state = [board, casts]
+      let state = (cast_skill 1 0 GONK    EMPATHY       empathy       state log)
       let state = (cast_skill 1 0 TOPHORO EARTH_ROOT    earth_root    state log)
       let state = (cast_skill 1 0 TOPHORO EARTH_LOCK    earth_lock    state log)
       let state = (cast_skill 1 0 TOPHORO EARTH_WALL    earth_wall    state log)
@@ -1239,12 +1285,11 @@ def kaelin:
       let state = (cast_skill 0 1 MEWRU   MEWRU_WALK    mewru_walk    state log)
       let state = (cast_skill 0 1 ZAGATUR ZAGATUR_WALK  zagatur_walk  state log)
       let state = (cast_skill 1 0 TOPHORO EARTH_PULL    earth_pull    state log)
-      let state = (cast_skill 1 0 SNARCH  PIERCING_BOLT piercing_bolt state log)
+      //let state = (cast_skill 1 0 SNARCH  PIERCING_BOLT piercing_bolt state log)
       let state = (cast_skill 1 0 CRONI   SHADOW_FLUX   shadow_flux   state log)
-      let state = (cast_skill 0 1 ERKOS   FLAME_WAVE    flame_wave    state log)
-      let state = (cast_skill 0 1 ERKOS   FLAME_BALL    flame_ball    state log)
+      //let state = (cast_skill 0 1 ERKOS   FLAME_WAVE    flame_wave    state log)
+      //let state = (cast_skill 0 1 ERKOS   FLAME_BALL    flame_ball    state log)
       let board = fst state
-      //let board = (end_turn board)
       board
 
   // exec_casts
@@ -1278,11 +1323,11 @@ def kaelin:
   //W . . . . . . . . . . . . . . . X X . . . . . . . . . . . . . W
   //. . . . O O . . . . . . . . T X X X . . . . . . . . . . . . . .
   //. . . . . . . . . . . . . . . . X X . . . . . . . . . . . . . .
-  //W W . . . W W . . . . . . . . . . X . . . . . . . W W W W W W W
-  //W . . . . . W . . . . . . . . . . . . . . . . . . W . . . . . W
-  //W . . . . . C . . . . . . . . . . . . . . . . . . W . W W W W W
-  //W . . . . . W . . . . . . . . . . . . . . . . . . W . W . . . W
-  //W . . . . . C . . . . . . . . . . . . . . . . . . W . W . W W W
+  //W W . . . W W . . . . X . . . . . X . . . . . . . W W W W W W W
+  //W . . . . . W . . . X X X . . . . . . . . . . . . W . . . . . W
+  //W . . . . . C . . X X K X X . . . . . . . . . . . W . W W W W W
+  //W . . . . . W . . . X X X . . . . . . . . . . . . W . W . . . W
+  //W . . . . . C . . . . X . . . . . . . . . . . . . W . W . W W W
   //W O . K . O W . . . . . . . . . . . . . . . . . . W . W . W . W
   //W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
 
@@ -1319,43 +1364,53 @@ def kaelin:
   //W O . . . O W . . . . . . . . . . x . . . . . . . W . W . W . W
   //W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
 
-  dup example = #
+  dup test_earth_pull = #
     let board = new_board
+    let board = (board_swap [1,30] [30,3] board) // teleports gonk to near tophoro
+    let casts = empty_casts
+    let casts = (cast EARTH_PULL [30,1] DOWN casts)
+    let board = (exec_casts casts board)
+    snd (is_hero_at [30,2] GONK board)
 
-    let dirs2 = (Cons RIGHT (Cons RIGHT Nil))
-    //get [board, anim]  = (earth_pull [30,3] UP board)
-    //get [board, anim] = (flame_wave [15,15] RIGHT board)
-    //get [board, anim] = (shadow_flux [15,15] dirs4 board)
-    //get [board, anim] = (flame_ball [15,15] dirs4 board)
-    //get [board, anim] = (flame_soul [2,29] DOWN board)
-    //get [board, anim] = (flame_nova [15,15] board)
-    //get [board, anim] = (heal [2,30] dirs2 board)
-    get [board, anim] = (shield [2,30] dirs2 board)
+  dup test_earth_lock = #
+    let board = new_board
+    let board = (board_swap [1,30] [30,2] board) // teleports gonk to near tophoro
+    let casts = empty_casts
+    let casts = (cast EARTH_LOCK [30,1] (Cons DOWN Nil) casts)
+    let casts = (cast GONK_WALK [30,2] (Cons DOWN Nil) casts)
+    let board = (exec_casts casts board)
+    snd (is_hero_at [30,2] GONK board)
 
-    //let board         = (board_update [1,30] (damage 79) board)
-    //get [board, anim] = (shatter [1,30] (Cons [1,0] Nil) board)
+  dup test_earth_wall = #
+    let board = new_board
+    let casts = empty_casts
+    let casts = (cast EARTH_WALL [30,1] (Cons (Cons DOWN Nil) Nil) casts)
+    let board = (exec_casts casts board)
+    snd (is_wall_at [30,2] board)
 
-    //get [board, anims] = (earth_wall [30,1] (Cons (Cons DOWN (Cons DOWN Nil)) Nil) board)
-    //let board = (end_turn board)
+  dup test_empathy = #
+    let board = new_board
+    let casts = empty_casts
+    let casts = (cast EMPATHY [1,30] 3 casts)
+    let board = (exec_casts casts board)
+    let test0 = |snd (get_armor_at [2,30] board) == 6|
+    let test1 = |snd (get_armor_at [1,30] board) == 6|
+    let test3 = |snd (get_hp_at [1,30] board) == 77|
+    |test1 & |test0 & test1||
 
-    //let casts = empty_casts
-    //let casts = (cast SHADOW_FLUX [29,1] (Cons RIGHT (Cons RIGHT Nil)) casts)
-    //let casts = (cast SHADOW_DOLL [29,1] (Cons [0,1] (Cons [0,1] Nil)) casts)
-    //let casts = (cast EARTH_WALL [30,1] (Cons (Cons DOWN (Cons DOWN Nil)) Nil) casts)
-    //let casts = (cast EARTH_ROOT [30,1] {x}x casts)
-    //let casts = (cast TOPHORO_WALK [30,1] (Cons [0,1] Nil) casts)
-    //let casts = (cast EARTH_LOCK [30,1] (Cons [-1,0] Nil) casts)
-    //let casts = (cast CRONI_WALK [29,1] (Cons [0,1] (Cons [0,1] (Cons [0,1] Nil))) casts)
-    //let casts = (cast EARTH_PULL [30,2] [0,1] casts)
-    //let casts = (cast FLAME_BALL [2,30] casts)
-    //let casts = (cast FLAME_WAVE [2,30] RIGHT casts])
-    //let board = (exec_casts casts board)
+  dup test_shadow_flux = #
+    let board = new_board
+    let board = (board_swap [1,30] [29,3] board) // teleports gonk to near cromi
+    let casts = empty_casts
+    let casts = (cast SHADOW_FLUX [29,1] (Cons DOWN (Cons DOWN Nil)) casts)
+    let board = (exec_casts casts board)
+    let test0 = |(snd (get_hp_at [29,3] board)) < 80|
+    test0
 
-    //get [board, anim]  = (flame_ball [30,2] board)
+  dup example = #
+    test_earth_lock
 
-    (print_board board)
-
-  dup export = 
+  dup export =
     [#new_board,
     [exec_casts_with,
     [#empty_casts,
