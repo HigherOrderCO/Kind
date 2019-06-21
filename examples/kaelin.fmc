@@ -60,7 +60,7 @@
 //   + Earth Root : self-roots for 3 turns, gaining massive shield and heal.
 // 
 // - Gonk
-//   + Endure  : gains 20 armor. Can't move for the next 2 turns.
+//   + Endure  : gains 20 armor. Can't attack for the next 2 turns.
 //   + Breath  : heals 8 HP. Can't move on this turn.
 //   + Empathy : loses N HP. Grants N*2 armor to allies in a 3x3 (square) around.
 //   + Shatter : select an enemy up to 2 range. Deals an amount of damage inversely proportional to remaining HP.
@@ -442,6 +442,13 @@ def kaelin:
     let case_unit   = {a_side a_hero a_stats} 0
     (piece case_air case_wall case_throne case_unit)
 
+  dup piece_is_air = # {piece}
+    let case_air    = 1
+    let case_wall   = {a_temp} 0
+    let case_throne = {a_side} 0
+    let case_unit   = {a_side a_hero a_stats} 0
+    (piece case_air case_wall case_throne case_unit)
+
   dup get_piece_hp = # {piece}
     let case_air    = 0
     let case_wall   = {a_temp} 0
@@ -516,13 +523,23 @@ def kaelin:
     (piece case_air case_wall case_throne case_unit)
 
   // TODO:
-  // - check if the life of "piece" is bigger than the damage
-  dup damage = # {dmg piece}
+  dup heal = # {add piece}
     let case_air    = Air
     let case_wall   = {temp} (Wall temp)
     let case_throne = {side} (Throne side)
-    let case_unit   = {side hero stats} (Unit side hero (mod_hp {hp}|hp - dmg| stats))
+    let case_unit   = {side hero stats}
+      (stats {mhp hp armor buff locked muted}
+        cpy add = add
+        cpy nhp = |hp + add|
+        cpy mhp = mhp
+        (if |nhp > |2 ** 31||
+          then: {side hero} Air
+          else: {side hero}
+            let nhp = if |nhp > mhp| [mhp, nhp]
+            (Unit side hero (Stats mhp nhp armor buff locked muted))
+          side hero))
     (piece case_air case_wall case_throne case_unit)
+  dup damage = # {dmg} (heal |0 - dmg|)
 
   dup lock = # {turns piece}
     let case_air    = Air
@@ -864,9 +881,13 @@ def kaelin:
   dup is_hero_at = # {pos hero board}
     (board_query_at pos (piece_is_hero hero) board)
 
-  // Checks if given position is a specific hero
+  // Checks if given position is a wall
   dup is_wall_at = # {pos board}
     (board_query_at pos piece_is_wall board)
+
+  // Checks if given position is air
+  dup is_air_at = # {pos board}
+    (board_query_at pos piece_is_air board)
 
   // Checks if hero at given posittion can move
   dup is_locked_at = # {pos board}
@@ -1010,7 +1031,7 @@ def kaelin:
     [board, Skip]
 
   dup earth_root = # {pos arg board}
-    let root  = {piece} (damage -30 (mute 3 piece))
+    let root  = {piece} (heal 30 (mute 3 piece))
     let board = (board_update pos root board)
     [board, Skip]
 
@@ -1025,7 +1046,7 @@ def kaelin:
     [board, Skip]
 
   dup breath = # {pos arg board}
-    let breath = {piece} (damage -8 (mute 1 piece))
+    let breath = {piece} (heal 8 (mute 1 piece))
     let board  = (board_update pos breath board)
     [board, Skip]
 
@@ -1282,6 +1303,8 @@ def kaelin:
     dup log = log
     # {casts board}
       let state = [board, casts]
+      let state = (cast_skill 1 0 GONK    ENDURE        endure        state log)
+      let state = (cast_skill 1 0 GONK    BREATH        breath        state log)
       let state = (cast_skill 1 0 GONK    EMPATHY       empathy       state log)
       let state = (cast_skill 1 0 TOPHORO EARTH_ROOT    earth_root    state log)
       let state = (cast_skill 1 0 TOPHORO EARTH_LOCK    earth_lock    state log)
@@ -1404,6 +1427,15 @@ def kaelin:
     let board = (exec_casts casts board)
     snd (is_wall_at [30,2] board)
 
+  dup test_breath = #
+    let board = new_board
+    let board = (board_update [1,30] (damage 5) board)
+    let casts = empty_casts
+    let casts = (cast BREATH [1,30] {x}x casts)
+    let board = (exec_casts casts board)
+    let test0 = |snd (get_hp_at [1,30] board) == 80|
+    test0
+
   dup test_empathy = #
     let board = new_board
     let casts = empty_casts
@@ -1416,11 +1448,12 @@ def kaelin:
 
   dup test_shadow_flux = #
     let board = new_board
+    let board = (board_update [1,30] (damage 79) board) // leaves gonk with 1hp
     let board = (board_swap [1,30] [29,3] board) // teleports gonk to near cromi
     let casts = empty_casts
     let casts = (cast SHADOW_FLUX [29,1] (Cons DOWN (Cons DOWN Nil)) casts)
     let board = (exec_casts casts board)
-    let test0 = |(snd (get_hp_at [29,3] board)) < 80|
+    let test0 = (snd (is_air_at [29,3] board))
     test0
 
   dup test_heal = #
@@ -1444,8 +1477,18 @@ def kaelin:
     let test0 = |(snd (get_hp_at [29,1] board)) > 39|
     test0
 
+  dup all_tests = #
+    [[[["earth_pull", test_earth_pull],
+       ["earth_lock", test_earth_lock]],
+      [["earth_wall", test_earth_wall],
+       ["breath", test_breath]]],
+     [[["empathy", test_empathy],
+       ["shadow_flux", test_shadow_flux]],
+      [["_", 1],
+       ["_", 1]]]]
+
   dup example = #
-    test_heal
+    all_tests
 
   dup export =
     [#new_board,
