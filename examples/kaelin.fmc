@@ -1497,14 +1497,47 @@ def kaelin:
     //(print_board board)
 
   dup all_tests = #
-    [[[["earth_pull", test_earth_pull],
-       ["earth_lock", test_earth_lock]],
-      [["earth_wall", test_earth_wall],
-       ["breath", test_breath]]],
-     [[["empathy", test_empathy],
-       ["shadow_flux", test_shadow_flux]],
-      [["_", 1],
-       ["_", 1]]]]
+    let test00 = ["earth_pull"  , test_earth_pull]
+    let test01 = ["earth_lock"  , test_earth_lock]
+    let test02 = ["earth_wall"  , test_earth_wall]
+    let test03 = ["breath"      , test_breath]
+    let test04 = ["empathy"     , test_empathy]
+    let test05 = ["shadow_flux" , test_shadow_flux]
+    let test06 = ["_"           , 1]
+    let test07 = ["_"           , 1]
+    let test08 = ["_"           , 1]
+    let test09 = ["_"           , 1]
+    let test10 = ["_"           , 1]
+    let test11 = ["_"           , 1]
+    let test12 = ["_"           , 1]
+    let test13 = ["_"           , 1]
+    let test14 = ["_"           , 1]
+    let test15 = ["_"           , 1]
+    let test16 = ["_"           , 1]
+    let test17 = ["_"           , 1]
+    let test18 = ["_"           , 1]
+    let test18 = ["_"           , 1]
+    let test19 = ["_"           , 1]
+    let test20 = ["_"           , 1]
+    let test21 = ["_"           , 1]
+    let test22 = ["_"           , 1]
+    let test23 = ["_"           , 1]
+    let test24 = ["_"           , 1]
+    let test25 = ["_"           , 1]
+    let test26 = ["_"           , 1]
+    let test27 = ["_"           , 1]
+    let test28 = ["_"           , 1]
+    let test29 = ["_"           , 1]
+    let test30 = ["_"           , 1]
+    let test31 = ["_"           , 1]
+    [[[[[test00, test01], [test02, test03]],
+       [[test04, test05], [test06, test07]]],
+      [[[test08, test09], [test10, test11]],
+       [[test12, test13], [test14, test15]]]],
+     [[[[test16, test17], [test18, test19]],
+       [[test20, test21], [test22, test23]]],
+      [[[test24, test25], [test26, test27]],
+       [[test28, test29], [test30, test31]]]]]
 
   dup example = #
     test_restore
