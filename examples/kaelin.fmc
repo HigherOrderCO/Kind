@@ -1175,12 +1175,27 @@ def kaelin:
   dup heal = # {pos dir board}
     get [pos0, pos1] = (vec2_cpy pos)
     let hpos  = (add_dirs5 pos0 dir)
-    let hits  = {hpos board} (board_update hpos (damage_visual_effect -5) board)
-    let board = (do_if_ally pos1 hpos board hits)
+    get [hpos0,hpos1] = (vec2_cpy hpos)
+    get [hpos2,hpos3] = (vec2_cpy hpos0)
+    //let hits  = {hpos board} (board_update hpos (damage_visual_effect -5) board)  
+
+    let max_hp   = (get_piece_mhp hpos2)
+    let hp = (get_piece_hp hpos3)
+    cpy c_hp = hp
+    cpy c_mhp = max_hp
+
+    let hits = 
+      if |c_hp < |c_mhp - 5|| // check if heal will not pass max_hp
+      // can heal
+      then: {hpos board} (board_update hpos (damage_visual_effect 5) board)
+      else: 
+        {hpos board} (board_update hpos (damage_visual_effect |c_mhp - c_hp|) board)
+    
+    let board = (do_if_ally pos1 hpos1 board hits)
     [board, Skip]
 
   // TODO: add "do_if_ally"
-  dup shield = # {pos dir board} 
+  dup give_armor = # {pos dir board} 
     get [pos0, pos1] = (vec2_cpy pos)
     let hpos  = (add_dirs5 pos0 dir)
     let armor = {piece} (armor 10 piece)
@@ -1289,6 +1304,7 @@ def kaelin:
       let state = (cast_skill 1 0 CRONI   SHADOW_FLUX   shadow_flux   state log)
       //let state = (cast_skill 0 1 ERKOS   FLAME_WAVE    flame_wave    state log)
       //let state = (cast_skill 0 1 ERKOS   FLAME_BALL    flame_ball    state log)
+      let state = (cast_skill 0 1 STANCI  HEAL   heal   state log)
       let board = fst state
       board
 
@@ -1407,8 +1423,29 @@ def kaelin:
     let test0 = |(snd (get_hp_at [29,3] board)) < 80|
     test0
 
+  dup test_heal = #
+    let board = new_board 
+    let board = (board_update [29,1] (damage 11) board)
+    let casts = empty_casts
+    //get [board,anim] = (heal [27,1] dir board)
+    let casts = (cast HEAL [27,01] (Cons RIGHT (Cons RIGHT Nil)) casts)
+    let board = (exec_casts casts board)
+    //let test0 = |(snd (get_hp_at [29,1] board)) > 39|
+    //test0
+    (print_board board)
+
+  dup test_give_armor = #
+    let board = new_board 
+    let casts = empty_casts
+    let dir = (Cons RIGHT (Cons RIGHT Nil))
+    //get [board,anim] = (heal [27,1] dir board)
+    let casts = (cast HEAL [27,01] dir casts)
+    let board = (exec_casts casts board)
+    let test0 = |(snd (get_hp_at [29,1] board)) > 39|
+    test0
+
   dup example = #
-    test_earth_lock
+    test_heal
 
   dup export =
     [#new_board,
