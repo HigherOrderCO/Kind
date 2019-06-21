@@ -1009,7 +1009,9 @@ def kaelin:
   dup earth_pull =
     let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #5 NilF)))))
     let hits = # {cpos hpos dir board} (step hpos dir board)
-    (cast_wave wave hits)
+    dup make = (cast_wave wave hits)
+    # {pos dir board}
+      (make pos dir board)
 
   dup earth_wall =
     let loop = {state}
@@ -1404,7 +1406,7 @@ def kaelin:
   //W O . . . O W . . . . . . . . . . x . . . . . . . W . W . W . W
   //W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
 
-  dup test_earth_pull = #
+  let test_earth_pull =
     let board = new_board
     let board = (board_swap [1,30] [30,3] board) // teleports gonk to near tophoro
     let casts = empty_casts
@@ -1412,7 +1414,7 @@ def kaelin:
     let board = (exec_casts casts board)
     snd (is_hero_at [30,2] GONK board)
 
-  dup test_earth_lock = #
+  let test_earth_lock =
     let board = new_board
     let board = (board_swap [1,30] [30,2] board) // teleports gonk to near tophoro
     let casts = empty_casts
@@ -1421,14 +1423,14 @@ def kaelin:
     let board = (exec_casts casts board)
     snd (is_hero_at [30,2] GONK board)
 
-  dup test_earth_wall = #
+  let test_earth_wall =
     let board = new_board
     let casts = empty_casts
     let casts = (cast EARTH_WALL [30,1] (Cons (Cons DOWN Nil) Nil) casts)
     let board = (exec_casts casts board)
     snd (is_wall_at [30,2] board)
 
-  dup test_breath = #
+  let test_breath =
     let board = new_board
     let board = (board_update [1,30] (damage 5) board)
     let casts = empty_casts
@@ -1437,7 +1439,7 @@ def kaelin:
     let test0 = |snd (get_hp_at [1,30] board) == 80|
     test0
 
-  dup test_empathy = #
+  let test_empathy =
     let board = new_board
     let casts = empty_casts
     let casts = (cast EMPATHY [1,30] 3 casts)
@@ -1447,7 +1449,7 @@ def kaelin:
     let test3 = |snd (get_hp_at [1,30] board) == 77|
     |test1 & |test0 & test1||
 
-  dup test_shadow_flux = #
+  let test_shadow_flux =
     let board = new_board
     let board = (board_update [1,30] (damage 79) board) // leaves gonk with 1hp
     let board = (board_swap [1,30] [29,3] board) // teleports gonk to near cromi
@@ -1457,7 +1459,7 @@ def kaelin:
     let test0 = (snd (is_air_at [29,3] board))
     test0
 
-  dup test_light_heal = #
+  let test_light_heal =
     let board = new_board 
     let board = (board_update [29,1] (damage 11) board) // Croni receives damage
     let casts = empty_casts
@@ -1467,7 +1469,7 @@ def kaelin:
     test0
     //(print_board board)
 
-  dup test_protect = #
+  let test_protect =
     let board = new_board 
     //let board = (board_update [27,1] (armor 13) board)
     //get [board, anim] = (protect [27,01] (Cons RIGHT (Cons RIGHT Nil)) board)
@@ -1478,7 +1480,7 @@ def kaelin:
     test0
     //(print_board board)
 
-  dup test_restore = # 
+  let test_restore = 
     let board = new_board 
     let board = (board_update [29,1] (damage 11) board) // Croni receives damage
     let board = (board_update [26,1] (damage 3) board) // Flyna receives damage
@@ -1491,7 +1493,7 @@ def kaelin:
     |test0 & test1|
     // (print_board board)
 
-  dup test_light = #
+  let test_light =
     let board = new_board
     let casts = empty_casts
     let casts = (cast LIGHT [27,01] (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))) casts)
