@@ -1199,15 +1199,25 @@ def kaelin:
     let hits = {cpos hpos board} (board_update hpos (damage_visual_effect -5) board)
     (cast_area ~4 area #hits)
 
-   // TODO: add "do_if_ally"
-   // TODO: vec2_circle_a with bug, temporary using vec2_cicle_b
+  // TODO: add "do_if_ally"
+  // TODO: vec2_circle_a with bug, temporary using vec2_cicle_b
   dup protect =
     let area = vec2_circle_b
     let armor = {piece} (armor 5 piece)
     let hits = {cpos hpos board} (board_update hpos armor board)
     (cast_area ~4 area #hits)
 
+  dup restore = 
+    let area = vec2_circle_e
+    let hits = {cpos hpos board} (board_update hpos (damage_visual_effect -3) board)
+    (cast_area ~4 area #hits)
 
+  // TODO: vec2_circle_a with bug, temporary using vec2_cicle_b
+  // TODO: add "do_if_enemy"
+  dup light = 
+    let area = vec2_circle_b
+    let hits = {cpos hpos board} (board_update hpos (damage_visual_effect 2) board)
+    (cast_area ~4 area #hits)
 
   // == Zagatur ==
   // ~~~~~~~~~~~~~
@@ -1311,8 +1321,10 @@ def kaelin:
       let state = (cast_skill 1 0 CRONI   SHADOW_FLUX   shadow_flux   state log)
       //let state = (cast_skill 0 1 ERKOS   FLAME_WAVE    flame_wave    state log)
       //let state = (cast_skill 0 1 ERKOS   FLAME_BALL    flame_ball    state log)
-      let state = (cast_skill 0 1 STANCI  HEAL   heal   state log)
+      let state = (cast_skill 0 1 STANCI  HEAL      heal   state log)
       let state = (cast_skill 0 1 STANCI  PROTECT   protect   state log)
+      let state = (cast_skill 0 1 STANCI  RESTORE   restore   state log)
+      let state = (cast_skill 0 1 STANCI  LIGHT     light     state log)
       let board = fst state
       board
 
@@ -1462,6 +1474,28 @@ def kaelin:
     test0
     //(print_board board)
 
+  dup test_restore = # 
+    let board = new_board 
+    let board = (board_update [29,1] (damage 11) board) // Croni receives damage
+    let board = (board_update [26,1] (damage 3) board) // Flyna receives damage
+    let board = (board_update [27,1] (damage 3) board) // Stanci receives damage
+    let casts = empty_casts
+    let casts = (cast RESTORE [27,01] (Cons DOWN Nil) casts)
+    let board = (exec_casts casts board)
+    let test0 =  |(snd (get_hp_at [27,1] board)) == 40| // Stanci recovers full hp
+    let test1 =  |(snd (get_hp_at [29,1] board)) == 32| // Croni restores to 29 + 3
+    |test0 & test1|
+    // (print_board board)
+
+  dup test_light = #
+    let board = new_board
+    let casts = empty_casts
+    let casts = (cast LIGHT [27,01] (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))) casts)
+    let board = (exec_casts casts board)
+    let test0 = |(snd (get_hp_at [30,1] board)) == 118|
+    test0
+    //(print_board board)
+
   dup all_tests = #
     [[[["earth_pull", test_earth_pull],
        ["earth_lock", test_earth_lock]],
@@ -1473,7 +1507,7 @@ def kaelin:
        ["_", 1]]]]
 
   dup example = #
-    test_heal
+    test_restore
 
   dup export =
     [#new_board,
