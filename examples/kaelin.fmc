@@ -625,7 +625,7 @@ def kaelin:
 
   // << PointAndClick >>
   dup EARTH_LOCK     = # 64
-  dup SHIELD         = # 65
+  dup PROTECT        = # 65
   dup HEAL           = # 66
   dup HASTE          = # 67
   dup SLICE          = # 68
@@ -727,7 +727,7 @@ def kaelin:
     let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
     let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
     let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let st = [[[STANCI_WALK  , HEAL]         , [SHIELD       , RESTORE]]       , [[LIGHT      , PASS] , [PASS , PASS]]]
+    let st = [[[STANCI_WALK  , HEAL]         , [PROTECT      , RESTORE]]       , [[LIGHT      , PASS] , [PASS , PASS]]]
     let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
     let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
     let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
@@ -1193,36 +1193,20 @@ def kaelin:
 
   dup stanci_walk = (walk #STANCI ~4)
 
-  dup heal = # {pos dir board}
-    get [pos0, pos1] = (vec2_cpy pos)
-    let hpos  = (add_dirs5 pos0 dir)
-    get [hpos0,hpos1] = (vec2_cpy hpos)
-    get [hpos2,hpos3] = (vec2_cpy hpos0)
-    //let hits  = {hpos board} (board_update hpos (damage_visual_effect -5) board)  
+  // TODO: add heal function, heal only allies
+  dup heal =
+    let area = vec2_circle_c
+    let hits = {cpos hpos board} (board_update hpos (damage_visual_effect -5) board)
+    (cast_area ~4 area #hits)
 
-    let max_hp   = (get_piece_mhp hpos2)
-    let hp = (get_piece_hp hpos3)
-    cpy c_hp = hp
-    cpy c_mhp = max_hp
+   // TODO: add "do_if_ally"
+   // TODO: vec2_circle_a with bug, temporary using vec2_cicle_b
+  dup protect =
+    let area = vec2_circle_b
+    let armor = {piece} (armor 5 piece)
+    let hits = {cpos hpos board} (board_update hpos armor board)
+    (cast_area ~4 area #hits)
 
-    let hits = 
-      if |c_hp < |c_mhp - 5|| // check if heal will not pass max_hp
-      // can heal
-      then: {hpos board} (board_update hpos (damage_visual_effect 5) board)
-      else: 
-        {hpos board} (board_update hpos (damage_visual_effect |c_mhp - c_hp|) board)
-    
-    let board = (do_if_ally pos1 hpos1 board hits)
-    [board, Skip]
-
-  // TODO: add "do_if_ally"
-  dup give_armor = # {pos dir board} 
-    get [pos0, pos1] = (vec2_cpy pos)
-    let hpos  = (add_dirs5 pos0 dir)
-    let armor = {piece} (armor 10 piece)
-    let hits = (board_update hpos armor board)
-    //let board = (do_if_ally pos1 hpos board hits)
-    [hits, Skip]
 
 
   // == Zagatur ==
@@ -1328,6 +1312,7 @@ def kaelin:
       //let state = (cast_skill 0 1 ERKOS   FLAME_WAVE    flame_wave    state log)
       //let state = (cast_skill 0 1 ERKOS   FLAME_BALL    flame_ball    state log)
       let state = (cast_skill 0 1 STANCI  HEAL   heal   state log)
+      let state = (cast_skill 0 1 STANCI  PROTECT   protect   state log)
       let board = fst state
       board
 
@@ -1458,24 +1443,24 @@ def kaelin:
 
   dup test_heal = #
     let board = new_board 
-    let board = (board_update [29,1] (damage 11) board)
+    let board = (board_update [29,1] (damage 11) board) // Croni receives damage
     let casts = empty_casts
-    //get [board,anim] = (heal [27,1] dir board)
-    let casts = (cast HEAL [27,01] (Cons RIGHT (Cons RIGHT Nil)) casts)
+    let casts = (cast HEAL [27,1] (Cons RIGHT (Cons RIGHT Nil)) casts)
     let board = (exec_casts casts board)
-    //let test0 = |(snd (get_hp_at [29,1] board)) > 39|
-    //test0
-    (print_board board)
-
-  dup test_give_armor = #
-    let board = new_board 
-    let casts = empty_casts
-    let dir = (Cons RIGHT (Cons RIGHT Nil))
-    //get [board,anim] = (heal [27,1] dir board)
-    let casts = (cast HEAL [27,01] dir casts)
-    let board = (exec_casts casts board)
-    let test0 = |(snd (get_hp_at [29,1] board)) > 39|
+    let test0 = |(snd (get_hp_at [29,1] board)) == 34|
     test0
+    //(print_board board)
+
+  dup test_protect = #
+    let board = new_board 
+    //let board = (board_update [27,1] (armor 13) board)
+    //get [board, anim] = (protect [27,01] (Cons RIGHT (Cons RIGHT Nil)) board)
+    let casts = empty_casts
+    let casts = (cast PROTECT [27,01] (Cons RIGHT (Cons RIGHT Nil)) casts)
+    let board = (exec_casts casts board)
+    let test0 = |(snd (get_armor_at [29,1] board)) == 05|
+    test0
+    //(print_board board)
 
   dup all_tests = #
     [[[["earth_pull", test_earth_pull],
@@ -1488,7 +1473,7 @@ def kaelin:
        ["_", 1]]]]
 
   dup example = #
-    all_tests
+    test_heal
 
   dup export =
     [#new_board,
