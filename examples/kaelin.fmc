@@ -1079,32 +1079,34 @@ def kaelin:
 
   dup erkos_walk = (walk #ERKOS ~4)
 
-  // TODO: updpate
-  //dup flame_wave =
-    //let wave  = (vec2_wave_out (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))))
-    //let hits  = # {hpos dir board} (board_update hpos (damage_visual_effect 5) board)
-    //(animated_wave wave hits)
+  // TODO: add "do_if_enemy"
+  dup flame_wave =
+    let wave  = (vec2_wave_out (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))))
+    let hits  = # {cpos hpos dir board} (board_update hpos (damage_visual_effect 5) board)
+    (cast_wave wave hits)
   
-  // TODO: updpate
-  //dup flame_ball =
-    //let area = vec2_circle_e
-    //let hits = {hpos board} (board_update hpos (damage_visual_effect 5) board)
-    //dup exec = (animated_area area #hits)
-      //# {pos dirs board}
-      //let hpos = (add_dirs5 pos dirs)
-      //(exec hpos board)
+ // TODO: add "do_if_enemy"
+  dup flame_ball =
+    let area = vec2_circle_e
+    let hits = {cpos hpos board} (board_update hpos (damage_visual_effect 5) board)
+    (cast_area ~4 area #hits)
 
-  // TODO: updpate
-  //dup flame_soul = # {pos dir board}
-    //let hpos = (vec2_add pos dir)
-    //let board = (board_update hpos (damage_visual_effect 21) board)
-    //[board, Skip]
+  // TODO: add "do_if_enemy"
+  // TODO: check the skill description
+  //dup flame_rage = # {pos dir board}
 
-  // TODO: updpate
-  //dup flame_nova =
-    //let area = vec2_circle_j
-    //let hits = # {hpos board} (board_update hpos (damage_visual_effect 20) board)
-    //(animated_area area hits)
+  // loses 30 HP. Deals massive damage in a 11x11 circle (20?).
+  // TODO: check if the skill will have 9x9 or 11x11
+  // TODO: how to deal damage in the hero and in an area?
+  dup flame_nova =
+    let area = vec2_circle_j
+    let hits = # {cpos hpos board}
+      let board = (board_update hpos (damage_visual_effect 20) board)
+      [board, Skip]
+    dup exec = (cast_area ~0 area hits)
+    # {pos hp board} // self damage
+      let board = (board_update pos (damage_visual_effect 30) board)
+      [board, Skip]
 
   // == Croni ==
   // ~~~~~~~~~~~
@@ -1320,8 +1322,9 @@ def kaelin:
       let state = (cast_skill 1 0 TOPHORO EARTH_PULL    earth_pull    state log)
       //let state = (cast_skill 1 0 SNARCH  PIERCING_BOLT piercing_bolt state log)
       let state = (cast_skill 1 0 CRONI   SHADOW_FLUX   shadow_flux   state log)
-      //let state = (cast_skill 0 1 ERKOS   FLAME_WAVE    flame_wave    state log)
-      //let state = (cast_skill 0 1 ERKOS   FLAME_BALL    flame_ball    state log)
+      let state = (cast_skill 0 1 ERKOS   FLAME_WAVE    flame_wave    state log)
+      let state = (cast_skill 0 1 ERKOS   FLAME_BALL    flame_ball    state log)
+      let state = (cast_skill 0 1 ERKOS   FLAME_NOVA    flame_nova    state log)
       let state = (cast_skill 0 1 STANCI  LIGHT_HEAL      light_heal  state log)
       let state = (cast_skill 0 1 STANCI  PROTECT   protect     state log)
       let state = (cast_skill 0 1 STANCI  RESTORE   restore     state log)
@@ -1497,6 +1500,34 @@ def kaelin:
     test0
     //(print_board board)
 
+  dup test_flame_wave = #
+    let board = new_board
+    let casts = empty_casts
+    let casts = (cast FLAME_WAVE [2,30] RIGHT casts)
+    let board = (exec_casts casts board)
+    let test0 = |(snd (get_hp_at [4,30] board)) == 55| // Kenlua receies 5 dmg
+    test0
+    //(print_board board)
+
+  dup test_flame_ball = #
+    let board = new_board
+    let casts = empty_casts
+    let casts = (cast FLAME_BALL [2,30] UP casts)
+    let board = (exec_casts casts board)
+    let test0 = |(snd (get_hp_at [1,30] board)) == 75| // Gonk receies 5 dmg
+    test0
+    //(print_board board)
+
+  //dup test_flame_nova = #
+    //let board = new_board
+    //let board = (flame_nova [15,15] board)
+    //let casts = empty_casts
+    //let casts = (cast FLAME_NOVA [2,30] casts)
+    //let board = (exec_casts casts board)
+    //let test0 = |(snd (get_hp_at [1,30] board)) == 75| // Gonk receies 5 dmg
+    //test0
+    //(print_board board)
+
   dup all_tests = #
     let test00 = ["earth_pull"  , test_earth_pull]
     let test01 = ["earth_lock"  , test_earth_lock]
@@ -1508,8 +1539,8 @@ def kaelin:
     let test07 = ["test_protect", test_protect]
     let test08 = ["test_restore", test_restore]
     let test09 = ["test_light"  , test_light]
-    let test10 = ["_"           , 1]
-    let test11 = ["_"           , 1]
+    let test10 = ["test_flame_wave",test_flame_wave]
+    let test11 = ["test_flame_ball",test_flame_ball]
     let test12 = ["_"           , 1]
     let test13 = ["_"           , 1]
     let test14 = ["_"           , 1]
