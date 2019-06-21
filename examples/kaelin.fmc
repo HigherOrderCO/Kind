@@ -522,7 +522,6 @@ def kaelin:
     let case_unit   = {side hero stats} (Unit side hero (mod_hp {hp}|hp - dmg| stats))
     (piece case_air case_wall case_throne case_unit)
 
-  // TODO:
   dup heal = # {add piece}
     let case_air    = Air
     let case_wall   = {temp} (Wall temp)
@@ -539,6 +538,7 @@ def kaelin:
             (Unit side hero (Stats mhp nhp armor power locked muted))
           side hero))
     (piece case_air case_wall case_throne case_unit)
+    
   dup damage = # {dmg} (heal |0 - dmg|)
 
   dup lock = # {turns piece}
@@ -626,7 +626,7 @@ def kaelin:
   // << PointAndClick >>
   dup EARTH_LOCK     = # 64
   dup PROTECT        = # 65
-  dup HEAL           = # 66
+  dup LIGHT_HEAL     = # 66
   dup HASTE          = # 67
   dup SLICE          = # 68
   dup STEALTH_SWAP   = # 69
@@ -727,7 +727,7 @@ def kaelin:
     let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
     let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
     let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let st = [[[STANCI_WALK  , HEAL]         , [PROTECT      , RESTORE]]       , [[LIGHT      , PASS] , [PASS , PASS]]]
+    let st = [[[STANCI_WALK  , LIGHT_HEAL]   , [PROTECT      , RESTORE]]       , [[LIGHT      , PASS] , [PASS , PASS]]]
     let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
     let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
     let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
@@ -1195,10 +1195,10 @@ def kaelin:
 
   dup stanci_walk = (walk #STANCI ~4)
 
-  // TODO: add heal function, heal only allies
-  dup heal =
+ // TODO: add "do_if_ally"
+  dup light_heal =
     let area = vec2_circle_c
-    let hits = {cpos hpos board} (board_update hpos (damage_visual_effect -5) board)
+    let hits = {cpos hpos board} (board_update hpos (heal 5) board)
     (cast_area ~4 area #hits)
 
   // TODO: add "do_if_ally"
@@ -1209,9 +1209,10 @@ def kaelin:
     let hits = {cpos hpos board} (board_update hpos armor board)
     (cast_area ~4 area #hits)
 
+ // TODO: add "do_if_ally"
   dup restore = 
     let area = vec2_circle_e
-    let hits = {cpos hpos board} (board_update hpos (damage_visual_effect -3) board)
+    let hits = {cpos hpos board} (board_update hpos (heal 3) board)
     (cast_area ~4 area #hits)
 
   // TODO: vec2_circle_a with bug, temporary using vec2_cicle_b
@@ -1323,10 +1324,10 @@ def kaelin:
       let state = (cast_skill 1 0 CRONI   SHADOW_FLUX   shadow_flux   state log)
       //let state = (cast_skill 0 1 ERKOS   FLAME_WAVE    flame_wave    state log)
       //let state = (cast_skill 0 1 ERKOS   FLAME_BALL    flame_ball    state log)
-      let state = (cast_skill 0 1 STANCI  HEAL      heal   state log)
-      let state = (cast_skill 0 1 STANCI  PROTECT   protect   state log)
-      let state = (cast_skill 0 1 STANCI  RESTORE   restore   state log)
-      let state = (cast_skill 0 1 STANCI  LIGHT     light     state log)
+      let state = (cast_skill 0 1 STANCI  LIGHT_HEAL      light_heal  state log)
+      let state = (cast_skill 0 1 STANCI  PROTECT   protect     state log)
+      let state = (cast_skill 0 1 STANCI  RESTORE   restore     state log)
+      let state = (cast_skill 0 1 STANCI  LIGHT     light       state log)
       let board = fst state
       board
 
@@ -1455,11 +1456,11 @@ def kaelin:
     let test0 = (snd (is_air_at [29,3] board))
     test0
 
-  let test_heal =
+  let test_light_heal =
     let board = new_board 
     let board = (board_update [29,1] (damage 11) board) // Croni receives damage
     let casts = empty_casts
-    let casts = (cast HEAL [27,1] (Cons RIGHT (Cons RIGHT Nil)) casts)
+    let casts = (cast LIGHT_HEAL [27,1] (Cons RIGHT (Cons RIGHT Nil)) casts)
     let board = (exec_casts casts board)
     let test0 = |(snd (get_hp_at [29,1] board)) == 34|
     test0
@@ -1505,10 +1506,10 @@ def kaelin:
     let test03 = ["breath"      , test_breath]
     let test04 = ["empathy"     , test_empathy]
     let test05 = ["shadow_flux" , test_shadow_flux]
-    let test06 = ["_"           , 1]
-    let test07 = ["_"           , 1]
-    let test08 = ["_"           , 1]
-    let test09 = ["_"           , 1]
+    let test06 = ["light_heal"  , test_light_heal]
+    let test07 = ["test_protect", test_protect]
+    let test08 = ["test_restore", test_restore]
+    let test09 = ["test_light"  , test_light]
     let test10 = ["_"           , 1]
     let test11 = ["_"           , 1]
     let test12 = ["_"           , 1]
