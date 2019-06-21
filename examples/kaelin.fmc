@@ -286,7 +286,7 @@ def kaelin:
       cpy muted  = muted
       let locked = if |locked > 0| [|locked - 1|, 0]
       let muted  = if |muted > 0| [|muted - 1|, 0]
-      (Stats hp shield 0 0 locked muted))
+      (Stats hp 0 armor 0 locked muted))
 
   dup stats_cpy = # {stats}
     (stats {hp shield armor buff locked muted}
@@ -1127,6 +1127,23 @@ def kaelin:
 
   dup stanci_walk = (walk #STANCI ~4)
 
+  dup heal = # {pos dir board}
+    get [pos0, pos1] = (vec2_cpy pos)
+    let hpos  = (add_dirs5 pos0 dir)
+    let hits  = {hpos board} (board_update hpos (damage_visual_effect -5) board)
+    let board = (do_if_ally pos1 hpos board hits)
+    [board, Skip]
+
+  // TODO: add "do_if_ally"
+  dup shield = # {pos dir board} 
+    get [pos0, pos1] = (vec2_cpy pos)
+    let hpos  = (add_dirs5 pos0 dir)
+    let armor = {piece} (armor 10 piece)
+    let hits = (board_update hpos armor board)
+    //let board = (do_if_ally pos1 hpos board hits)
+    [hits, Skip]
+
+
   // == Zagatur ==
   // ~~~~~~~~~~~~~
 
@@ -1305,13 +1322,15 @@ def kaelin:
   dup example = #
     let board = new_board
 
-    let dirs4 = (Cons RIGHT (Cons UP (Cons UP Nil)))
+    let dirs2 = (Cons RIGHT (Cons RIGHT Nil))
     //get [board, anim]  = (earth_pull [30,3] UP board)
     //get [board, anim] = (flame_wave [15,15] RIGHT board)
     //get [board, anim] = (shadow_flux [15,15] dirs4 board)
     //get [board, anim] = (flame_ball [15,15] dirs4 board)
     //get [board, anim] = (flame_soul [2,29] DOWN board)
     //get [board, anim] = (flame_nova [15,15] board)
+    //get [board, anim] = (heal [2,30] dirs2 board)
+    get [board, anim] = (shield [2,30] dirs2 board)
 
     //let board         = (board_update [1,30] (damage 79) board)
     //get [board, anim] = (shatter [1,30] (Cons [1,0] Nil) board)
