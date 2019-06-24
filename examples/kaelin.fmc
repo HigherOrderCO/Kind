@@ -562,6 +562,13 @@ def kaelin:
     let case_unit   = {side hero stats} (Unit side hero (mod_armor {x}|armor + x| stats))
     (piece case_air case_wall case_throne case_unit)
 
+  dup power = # {power piece}
+    let case_air    = Air
+    let case_wall   = {temp} (Wall temp)
+    let case_throne = {side} (Throne side)
+    let case_unit   = {side hero stats} (Unit side hero (mod_power {x}|power + x| stats))
+    (piece case_air case_wall case_throne case_unit)
+
   // :::::::::::::::::::::
   // :: Heroes & Skills ::
   // :::::::::::::::::::::
@@ -1081,34 +1088,30 @@ def kaelin:
 
   dup erkos_walk = (walk #ERKOS ~4)
 
-  // TODO: add "do_if_enemy"
   dup flame_wave =
     let wave  = (vec2_wave_out (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))))
-    let hits  = # {cpos hpos dir board} (board_update hpos (damage_visual_effect 5) board)
+    let hits  = # {cpos hpos dir board} (board_update hpos (damage 5) board)
     (cast_wave wave hits)
   
- // TODO: add "do_if_enemy"
   dup flame_ball =
     let area = vec2_circle_e
-    let hits = {cpos hpos board} (board_update hpos (damage_visual_effect 5) board)
+    let hits = {cpos hpos board} (board_update hpos (damage 5) board)
     (cast_area ~4 area #hits)
 
-  // TODO: add "do_if_enemy"
-  // TODO: check the skill description
-  //dup flame_rage = # {pos dir board}
+  dup flame_rage = # {pos dir board}
+    get [pos0,pos1] = (vec2_cpy pos)
+    let board = (board_update pos0 (damage 5) board)
+    let board = (board_update pos1 (power 5) board)
+    board
 
-  // loses 30 HP. Deals massive damage in a 11x11 circle (20?).
-  // TODO: check if the skill will have 9x9 or 11x11
-  // TODO: how to deal damage in the hero and in an area?
   dup flame_nova =
     let area = vec2_circle_j
-    let hits = # {cpos hpos board}
-      let board = (board_update hpos (damage_visual_effect 20) board)
-      [board, Skip]
+    let hits = # {cpos hpos board} (board_update hpos (damage 20) board)
     dup exec = (cast_area ~0 area hits)
-    # {pos hp board} // self damage
-      let board = (board_update pos (damage_visual_effect 30) board)
-      [board, Skip]
+    # {pos arg board}
+      get [pos0, pos1] = (vec2_cpy pos)
+      let board        = (board_update pos0 (damage 30) board)
+      (exec pos1 Nil board)
 
   // == Croni ==
   // ~~~~~~~~~~~
@@ -1491,7 +1494,6 @@ def kaelin:
     let test0 =  |(snd (get_hp_at [27,1] board)) == 40| // Stanci recovers full hp
     let test1 =  |(snd (get_hp_at [29,1] board)) == 32| // Croni restores to 29 + 3
     |test0 & test1|
-    // (print_board board)
 
   let test_light =
     let board = new_board
@@ -1500,7 +1502,6 @@ def kaelin:
     let board = (exec_casts casts board)
     let test0 = |(snd (get_hp_at [30,1] board)) == 118|
     test0
-    //(print_board board)
 
   dup test_flame_wave = #
     let board = new_board
@@ -1509,61 +1510,59 @@ def kaelin:
     let board = (exec_casts casts board)
     let test0 = |(snd (get_hp_at [4,30] board)) == 55| // Kenlua receies 5 dmg
     test0
-    //(print_board board)
 
   dup test_flame_ball = #
     let board = new_board
     let casts = empty_casts
-    let casts = (cast FLAME_BALL [2,30] UP casts)
+    let casts = (cast FLAME_BALL [2,30] (Cons UP Nil) casts)
     let board = (exec_casts casts board)
     let test0 = |(snd (get_hp_at [1,30] board)) == 75| // Gonk receies 5 dmg
     test0
-    //(print_board board)
 
-  //dup test_flame_nova = #
-    //let board = new_board
+  dup test_flame_nova = #
+    let board = new_board
     //let board = (flame_nova [15,15] board)
-    //let casts = empty_casts
-    //let casts = (cast FLAME_NOVA [2,30] casts)
-    //let board = (exec_casts casts board)
-    //let test0 = |(snd (get_hp_at [1,30] board)) == 75| // Gonk receies 5 dmg
-    //test0
-    //(print_board board)
+    let casts = empty_casts
+    let casts = (cast FLAME_NOVA [2,30] {x}x casts)
+    let board = (exec_casts casts board)
+    let test0 = |(snd (get_hp_at [1,30] board)) == 60| // Gonk receies 20 dmg
+    let test1 = (snd (is_air_at [2,30] board)) // Erkos dies
+    |test0 & test1|
 
   dup all_tests = #
-    let test00 = ["earth_pull"  , test_earth_pull]
-    let test01 = ["earth_lock"  , test_earth_lock]
-    let test02 = ["earth_wall"  , test_earth_wall]
-    let test03 = ["breath"      , test_breath]
-    let test04 = ["empathy"     , test_empathy]
-    let test05 = ["shadow_flux" , test_shadow_flux]
-    let test06 = ["light_heal"  , test_light_heal]
-    let test07 = ["test_protect", test_protect]
-    let test08 = ["test_restore", test_restore]
-    let test09 = ["test_light"  , test_light]
-    let test10 = ["test_flame_wave",test_flame_wave]
-    let test11 = ["test_flame_ball",test_flame_ball]
-    let test12 = ["_"           , 1]
-    let test13 = ["_"           , 1]
-    let test14 = ["_"           , 1]
-    let test15 = ["_"           , 1]
-    let test16 = ["_"           , 1]
-    let test17 = ["_"           , 1]
-    let test18 = ["_"           , 1]
-    let test18 = ["_"           , 1]
-    let test19 = ["_"           , 1]
-    let test20 = ["_"           , 1]
-    let test21 = ["_"           , 1]
-    let test22 = ["_"           , 1]
-    let test23 = ["_"           , 1]
-    let test24 = ["_"           , 1]
-    let test25 = ["_"           , 1]
-    let test26 = ["_"           , 1]
-    let test27 = ["_"           , 1]
-    let test28 = ["_"           , 1]
-    let test29 = ["_"           , 1]
-    let test30 = ["_"           , 1]
-    let test31 = ["_"           , 1]
+    let test00 = ["earth_pull"      , test_earth_pull]
+    let test01 = ["earth_lock"      , test_earth_lock]
+    let test02 = ["earth_wall"      , test_earth_wall]
+    let test03 = ["breath"          , test_breath]
+    let test04 = ["empathy"         , test_empathy]
+    let test05 = ["shadow_flux"     , test_shadow_flux]
+    let test06 = ["light_heal"      , test_light_heal]
+    let test07 = ["test_protect"    , test_protect]
+    let test08 = ["test_restore"    , test_restore]
+    let test09 = ["test_light"      , test_light]
+    let test10 = ["test_flame_wave" , test_flame_wave]
+    let test11 = ["test_flame_ball" , test_flame_ball]
+    let test12 = ["test_flame_nova" , test_flame_nova]
+    let test13 = ["_"               , 1]
+    let test14 = ["_"               , 1]
+    let test15 = ["_"               , 1]
+    let test16 = ["_"               , 1]
+    let test17 = ["_"               , 1]
+    let test18 = ["_"               , 1]
+    let test18 = ["_"               , 1]
+    let test19 = ["_"               , 1]
+    let test20 = ["_"               , 1]
+    let test21 = ["_"               , 1]
+    let test22 = ["_"               , 1]
+    let test23 = ["_"               , 1]
+    let test24 = ["_"               , 1]
+    let test25 = ["_"               , 1]
+    let test26 = ["_"               , 1]
+    let test27 = ["_"               , 1]
+    let test28 = ["_"               , 1]
+    let test29 = ["_"               , 1]
+    let test30 = ["_"               , 1]
+    let test31 = ["_"               , 1]
     [[[[[test00, test01], [test02, test03]],
        [[test04, test05], [test06, test07]]],
       [[[test08, test09], [test10, test11]],
@@ -1573,8 +1572,8 @@ def kaelin:
       [[[test24, test25], [test26, test27]],
        [[test28, test29], [test30, test31]]]]]
 
-  dup example = #
-    all_tests
+  //dup example = #
+    //all_tests
 
   dup export =
     [#new_board,
@@ -1584,4 +1583,4 @@ def kaelin:
     [#get_hero_skill,
       0]]]]]
 
-  # example
+  # all_tests
