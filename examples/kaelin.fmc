@@ -1025,7 +1025,7 @@ def kaelin:
       get [state, dirs_list] = state
       get [board, cpos]      = state
       get [cpos0, cpos1]     = (vec2_cpy cpos)
-      get [dirs_list, dirs]  = (pop [0,0] dirs_list)
+      get [dirs_list, dirs]  = (pop Nil dirs_list)
       let wall_pos           = (add_dirs3 cpos0 dirs)
       let board              = (board_update wall_pos {p}(p (Wall 1) {temp}(Wall temp) Throne Unit) board)
       [[board, cpos1], dirs_list]
@@ -1529,7 +1529,7 @@ def kaelin:
     let test1 = (snd (is_air_at [2,30] board)) // Erkos dies
     |test0 & test1|
 
-  dup all_tests = #
+  dup tests = #
     let test00 = ["earth_pull"      , test_earth_pull]
     let test01 = ["earth_lock"      , test_earth_lock]
     let test02 = ["earth_wall"      , test_earth_wall]
@@ -1572,9 +1572,6 @@ def kaelin:
       [[[test24, test25], [test26, test27]],
        [[test28, test29], [test30, test31]]]]]
 
-  //dup example = #
-    //all_tests
-
   dup export =
     [#new_board,
     [exec_casts_with,
@@ -1583,4 +1580,4 @@ def kaelin:
     [#get_hero_skill,
       0]]]]]
 
-  # all_tests
+  # tests
