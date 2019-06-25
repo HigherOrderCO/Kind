@@ -180,16 +180,15 @@ class Net {
 
       // IfThenElse
       } else if (a_type === ITE) {
-        var pair_ptr = this.enter_port(Pointer(a_addr, 1));
-        var dest_ptr = this.enter_port(Pointer(a_addr, 2));
         var cond_val = numb_of(b_ptrn) === 0;
-        this.unlink_port(Pointer(a_addr, 0));
-        this.unlink_port(Pointer(a_addr, 1));
-        this.unlink_port(Pointer(a_addr, 2));
+        var pair_ptr = this.enter_port(Pointer(a_addr, 1));
         this.set_type(a_addr, NOD);
         this.link_ports(Pointer(a_addr, 0), pair_ptr);
-        this.link_ports(Pointer(a_addr, cond_val ? 1 : 2), Pointer(a_addr, cond_val ? 1 : 2));
+        this.unlink_port(Pointer(a_addr, 1));
+        var dest_ptr = this.enter_port(Pointer(a_addr, 2));
         this.link_ports(Pointer(a_addr, cond_val ? 2 : 1), dest_ptr);
+        if (!cond_val) this.unlink_port(Pointer(a_addr, 2));
+        this.link_ports(Pointer(a_addr, cond_val ? 1 : 2), Pointer(a_addr, cond_val ? 1 : 2));
 
       } else {
         throw "[ERROR]\nInvalid interaction.";

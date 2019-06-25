@@ -212,16 +212,15 @@ void rewrite(Net* net, u32 a_addr) {
 
     // IfThenElse
     } else if (a_type == ITE) {
-      u64 pair_ptr = enter_port(net, Pointer(a_addr, 1));
-      u64 dest_ptr = enter_port(net, Pointer(a_addr, 2));
       u32 cond_val = numb_of(b_ptrn) == 0;
-      unlink_port(net, Pointer(a_addr, 0));
-      unlink_port(net, Pointer(a_addr, 1));
-      unlink_port(net, Pointer(a_addr, 2));
+      u64 pair_ptr = enter_port(net, Pointer(a_addr, 1));
       set_type(net, a_addr, NOD);
       link_ports(net, Pointer(a_addr, 0), pair_ptr);
-      link_ports(net, Pointer(a_addr, cond_val ? 1 : 2), Pointer(a_addr, cond_val ? 1 : 2));
+      unlink_port(net, Pointer(a_addr, 1));
+      u64 dest_ptr = enter_port(net, Pointer(a_addr, 2));
       link_ports(net, Pointer(a_addr, cond_val ? 2 : 1), dest_ptr);
+        if (!cond_val) unlink_port(net, Pointer(a_addr, 2));
+      link_ports(net, Pointer(a_addr, cond_val ? 1 : 2), Pointer(a_addr, cond_val ? 1 : 2));
 
     } else {
       printf("[ERROR]\nInvalid interaction.");
