@@ -238,8 +238,8 @@ def kaelin:
   dup FLAME_NOVA     = # 19
   dup CRONI_WALK     = # 20
   dup SHADOW_TRAP    = # 21
-  dup SHADOW_DOLL    = # 22
-  dup SHADOW_FLUX    = # 23
+  dup SHADOW_FLUX    = # 22
+  dup SHADOW_BOND    = # 23
   dup SNARCH_WALK    = # 24
   dup QUICK_BOLT_0   = # 25
   dup QUICK_BOLT_1   = # 26
@@ -276,6 +276,7 @@ def kaelin:
     (Cons STEALTH_MOVE
     (Cons TELEPORT
     (Cons EARTH_ROOT
+    (Cons SHADOW_BOND
     (Cons BALLISTA
     (Cons EMPATHY
     (Cons ESCORT
@@ -288,7 +289,6 @@ def kaelin:
     (Cons QUICK_BOLT_0
     (Cons QUICK_BOLT_1
     (Cons EARTH_WALL
-    (Cons SHADOW_DOLL
     (Cons SHADOW_TRAP
     (Cons WRAP
     (Cons KENLUA_WALK
@@ -524,7 +524,7 @@ def kaelin:
     then: (fun caster target)
     else: [caster, target]
 
-  dup dmge_enemy = # {val} (if_unit is_enemy {caster target} [caster, (dmge val target)])
+  dup dmge_enemy = # {val} (if_unit is_enemy {caster target} [caster, (dmge val target)]) // TODO: shadow_bond and dodge effects
   dup lock_enemy = # {val} (if_unit is_enemy {caster target} [caster, (lock val target)])
   dup mute_enemy = # {val} (if_unit is_enemy {caster target} [caster, (mute val target)])
   dup heal_ally  = # {val} (if_unit is_ally  {caster target} [caster, (heal val target)])
@@ -542,18 +542,16 @@ def kaelin:
     let case_a_hero   =
       let case_b_void = [b, a]
       let case_b_item =
-        if |(get_unit_type b) == TRAP| then:
-          [Void, (lock 1 a)]
-        else:
-          [a, b]
+        if |(get_unit_type b) == TRAP|
+          then: [Void, (lock 1 a)]
+          else: [a, b]
       let case_b_goal = [a, b]
       let case_b_hero = 
         cpy a_side    = (get_unit_side a)
         cpy b_side    = (get_unit_side b)
-        if |a_side == b_side| then:
-          [b, a]
-        else:
-          [a, b]
+        if |a_side == b_side|
+          then: [b, a]
+          else: [a, b]
       (match_unit_kind b case_b_void case_b_item case_b_goal case_b_hero)
     (match_unit_kind a case_a_void case_a_item case_a_goal case_a_hero)
 
@@ -668,6 +666,28 @@ def kaelin:
         (concat (ConsF NEWLINE NilF)
         (concat info_text
           (ConsF NEWLINE NilF)))))))))))
+
+  // get_hero_position
+  // | Returns the position of a hero on the board, if any
+  // | TODO: board should remember hero positions to avoid searching
+  // : {hero : HeroID} ->
+  //   {board : (Array ~8 Unitt)} ->
+  //   [(Array ~8 Unit), (Maybe [Num,Num])]
+  dup get_hero_position =
+    let fold_node = {lft rgt her idx}
+      cpy idx                  = idx
+      cpy her                  = her
+      get [lft_board, lft_pos] = (lft her |idx * 2|)
+      get [rgt_board, rgt_pos] = (rgt her ||idx * 2| + 1|)
+      [[lft_board, rgt_board], (maybe_concat lft_pos rgt_pos)]
+    let fold_leaf = {unit her idx}
+      cpy unit = unit
+      if ||(get_unit_kind unit) == HERO| & |(get_unit_hero unit) == her||
+        then: [unit, (Just (board_position idx))]
+        else: [unit, None]
+    dup find = (fold8 #fold_node #fold_leaf)
+    # {hero board}
+      (find board hero 0)
 
   dup query_at = # {pos func board}
     let cpy_app_func = {unit}
@@ -977,6 +997,8 @@ def kaelin:
   // == Croni ==
   // ~~~~~~~~~~~
 
+  dup croni_walk = (walk #CRONI ~4)
+
   dup shadow_flux =
     let rang = #8
     let area = vec2_range_1
@@ -995,11 +1017,23 @@ def kaelin:
       (board_update hpos put_trap board)
     (cast_area rang area hits)
 
+  dup shadow_bond = # {pos nil board}
+    let bind = {unit}
+      let unit = (dmge 3 unit)
+      let unit = (set_unit_spec 1 unit)
+      unit
+    (board_update pos bind board)
+
   let test_shadow_trap =
     let board = new_board
     let board = (board_swap [0xe,0x2] [0xa,0xd] board)
     let board = (shadow_trap [0xa,0xd] [0x2,0xd] board)
     let board = (erkos_walk [0x1,0xd] (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))) board)
+    (print_board board)
+
+  let test_shadow_bond =
+    let board = new_board
+    let board = (shadow_bond [0xe,0x2] 0 board)
     (print_board board)
 
   // == Snarch ==
@@ -1017,7 +1051,7 @@ def kaelin:
       unit
     (board_update pos mount board)
 
-  dup quick_shot_0 =
+  dup quick_bolt_0 =
     let area = vec2_range_1
     let hits = #{cpos hpos} (board_interact cpos hpos (dmge_enemy 2))
     let rngX = {rng} (cast_area rng area hits)
@@ -1028,19 +1062,19 @@ def kaelin:
       get [board, mounted] = (query_at cpos0 get_unit_spec board) 
       (if mounted [rngB, rngA] cpos1 hpos board)
 
-  dup quick_shot_1 = # quick_shot_0
+  dup quick_bolt_1 = # quick_bolt_0
 
-  let test_quick_shot_0 =
+  let test_quick_bolt_0 =
     let board = new_board
     let board = (write8 (board_index [0xd,0x4]) (Hero BLACK SNARCH) board)
-    let board = (quick_shot_0 [0xd,0x4] [0xd,0x1] board)
+    let board = (quick_bolt_0 [0xd,0x4] [0xd,0x1] board)
     (print_board board)
 
   let test_ballista =
     let board = new_board
     let board = (write8 (board_index [0xd,0xd]) (Hero BLACK SNARCH) board)
     let board = (ballista [0xd,0xd] 0 board)
-    let board = (quick_shot_0 [0xd,0xd] [0xd,0x1] board)
+    let board = (quick_bolt_0 [0xd,0xd] [0xd,0x1] board)
     (print_board board)
 
   // == Sirpix ==
@@ -1089,6 +1123,9 @@ def kaelin:
             else: {board}
               board
             board)
+
+  dup lockpick = # {cpos nil board}
+    board
 
   let test_stealth =
     let board = new_board
@@ -1167,6 +1204,8 @@ def kaelin:
   // == Flina ==
   // ~~~~~~~~~~~
 
+  dup flina_walk = (walk #FLINA ~4)
+
   dup javelin =
     let rang = #2
     let area = vec2_range_0
@@ -1228,7 +1267,7 @@ def kaelin:
       (board_interact cpos tpos effect board)
     (cast_area #2 vec2_range_0 #hits)
 
-  let test =
+  let test_summon =
     let board = new_board
     let board = (write8 (board_index [0x3,0xe]) (Hero BLACK ZAGATUR) board)
     let board = (summon [0x3,0xe] [0x5,0xe] board)
@@ -1324,4 +1363,130 @@ def kaelin:
     let hits = #{cpos tpos board} (board_interact cpos tpos (lock_enemy 2) board)
     (cast_area rang area hits)
 
-  # test_protect
+  // == That's all! ==
+  // ~~~~~~~~~~~~~~~~~
+
+  dup get_skill_effect = # {skill}
+    let to = [[tophoro_walk , earth_root]   , [earth_wall     , earth_wave]]
+    let go = [[gonk_walk    , ground_slam]  , [revenge        , empathy]]
+    let st = [[stanci_walk  , restore]      , [escort         , detain]]
+    let h3 = 0
+    let er = [[erkos_walk   , flame_ball]   , [flame_wave     , flame_nova]]
+    let cr = [[croni_walk   , shadow_trap]  , [shadow_flux    , shadow_bond]]
+    let sn = [[snarch_walk  , quick_bolt_0] , [quick_bolt_1   , ballista]]
+    let h7 = 0
+    let si = [[sirpix_walk  , stealth_move] , [stealth_strike , lockpick]]
+    let ke = [[kenlua_walk  , haste]        , [dodge          , slash]]
+    let fl = [[flina_walk   , javelin]      , [fly            , gust]]
+    let hB = 0
+    let za = [[zagatur_walk , needle]       , [wrap           , summon]]
+    let ag = [[agdris_walk  , protect]      , [silence        , memento]]
+    let me = [[mewem_walk   , teleport]     , [psychock       , imprison]]
+    let hF = 0
+    let r0 = [[[to,go],[st,h3]],[[er,cr],[sn,h7]]]
+    let r1 = [[[si,ke],[fl,hB]],[[za,ag],[me,hF]]]
+    (snd (take6 skill 0 [r0, r1]))
+
+  // :::::::::::
+  // :: Casts ::
+  // :::::::::::
+
+  // empty_cast
+  dup empty_cast = # Nil
+
+  // insert_cast
+  // | Inserts a cast into a list of casts in order of priority
+  // | TODO: simplify and optimize this monster
+  // : {-T    : Type}
+  //   {cast  : [SkillID, T]}
+  //   {casts : (SList [SkillID, T])}
+  //   (SList [SkillID, T])
+  dup insert_cast =
+    dup insert = (~64 #{state}
+      get [n_casts, state]        = state
+      get [o_casts, a_cast]       = state
+      let case_a_cast_none        = {o_casts n_casts}
+        let case_o_casts_nil      = {n_casts}
+          let n_casts             = n_casts
+          let o_casts             = Nil
+          let a_cast              = None
+          [n_casts, [o_casts, a_cast]]
+        let case_o_casts_cons     = {o_cast o_casts} {n_casts}
+          let n_casts             = {x} (n_casts (Cons o_cast x))
+          let o_casts             = o_casts
+          let a_cast              = None
+          [n_casts, [o_casts, a_cast]]
+        (o_casts case_o_casts_cons case_o_casts_nil n_casts)
+      let case_a_cast_just        = {a_cast} {o_casts n_casts}
+        let case_o_casts_nil      = {a_cast n_casts}
+          let n_casts             = {x} (n_casts (Cons a_cast x))
+          let o_casts             = Nil
+          let a_cast              = None
+          [n_casts, [o_casts, a_cast]]
+        let case_o_casts_cons     = {o_cast o_casts} {a_cast n_casts}
+          get [a_skill, a_argm]   = a_cast
+          get [o_skill, o_argm]   = o_cast
+          cpy a_skill             = a_skill
+          cpy o_skill             = o_skill
+          let a_prio              = (get_skill_priority a_skill)          
+          let o_prio              = (get_skill_priority o_skill)
+          (if |a_prio < o_prio|
+            then: {a_skill a_argm o_skill o_argm o_casts n_casts}
+              let n_casts         = {x} (n_casts (Cons [a_skill, a_argm] (Cons [o_skill, o_argm] x)))
+              let o_casts         = o_casts
+              let a_cast          = None
+              [n_casts, [o_casts, a_cast]]
+            else: {a_skill a_argm o_skill o_argm o_casts n_casts}
+              let n_casts         = {x} (n_casts (Cons [o_skill, o_argm] x))
+              let o_casts         = o_casts
+              let a_cast          = (Just [a_skill, a_argm])
+              [n_casts, [o_casts, a_cast]]
+            a_skill a_argm o_skill o_argm o_casts n_casts)
+        (o_casts case_o_casts_cons case_o_casts_nil a_cast n_casts)
+      (a_cast case_a_cast_none case_a_cast_just o_casts n_casts))
+    # {cast casts}
+      get [n_casts, state]  = (insert [{x}x, [casts, (Just cast)]])
+      get [o_casts, a_cast] = state
+      let case_a_cast_none  = {n_casts} (n_casts Nil)
+      let case_a_cast_just  = {a_cast} {n_casts} (n_casts (Cons a_cast Nil))
+      (a_cast case_a_cast_none case_a_cast_just n_casts)
+
+  let insert_cast_test = 
+    let casts = Nil
+    let casts = (insert_cast [EARTH_WAVE  , "earth_wave"]  casts)
+    let casts = (insert_cast [FLAME_BALL  , "flame_ball"]  casts)
+    let casts = (insert_cast [SHADOW_FLUX , "shadow_flux"] casts)
+    let casts = (insert_cast [RESTORE     , "restore"]     casts)
+    let casts = (insert_cast [EARTH_ROOT  , "earth_root"]  casts)
+    let casts = (insert_cast [EARTH_WALL  , "earth_wall"]  casts)
+    let casts = (insert_cast [MEMENTO     , "memento"]     casts)
+    let casts = (insert_cast [SILENCE     , "silence"]     casts)
+    let casts = (insert_cast [SUMMON      , "summon"]      casts)
+    let casts = (insert_cast [LOCKPICK    , "lockpick"]    casts)
+    let casts = (insert_cast [IMPRISON    , "imprison"]    casts)
+    casts
+
+  let cast = {cast board}
+    get [skill, argm]  = cast
+    cpy skill          = skill
+    let hero           = |skill / 4|
+    get [board, cpos]  = (get_hero_position hero board) 
+    let case_cpos_none = {board}
+      board
+    let case_cpos_just = {cpos} {board}
+      let effect       = (get_skill_effect skill)
+      let board        = (effect cpos argm board)
+      board
+    (cpos case_cpos_none case_cpos_just board)
+      
+  # 
+
+    let board = new_board
+    let board = (cast [GONK_WALK, (Cons UP (Cons UP (Cons UP (Cons UP Nil))))] board)
+    let board = (cast [GONK_WALK, (Cons RIGHT (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))))] board)
+    let board = (cast [CRONI_WALK, (Cons DOWN (Cons DOWN (Cons DOWN (Cons DOWN Nil))))] board)
+    let board = (cast [CRONI_WALK, (Cons LEFT (Cons LEFT (Cons LEFT (Cons LEFT Nil))))] board)
+    let board = (cast [SHADOW_FLUX, [0x4,0x8]] board)
+    (print_board board)
+
+    // yay! <3 

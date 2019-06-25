@@ -5,3 +5,6 @@ def None:
 def Just: {val}
   {None Just}
   (Just val)
+
+def maybe_concat: {a b}
+  (a b Just)
