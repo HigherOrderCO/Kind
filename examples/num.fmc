@@ -27,6 +27,22 @@ def num_to_char: {n}
   then: |n + 48|
   else: |n + 87|
 
+def max: {a b}
+  cpy a = a
+  cpy b = b
+  if |a > b| then:
+    a
+  else:
+    b
+
+def min: {a b}
+  cpy a = a
+  cpy b = b
+  if |a < b| then:
+    a
+  else:
+    b
+
 // box_byte
 // : {n : Num} !Num
 def box_byte: {n}

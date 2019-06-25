@@ -63,8 +63,8 @@
 //
 // - Snarch
 //   - Ballista(nil)     : mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range doubled.
-//   - Quick_Bolt_0(dir) : hits a selected enemy up to 6 range, dealing 3 damage.
-//   - Quick_Bolt_1(dir) : hits a selected enemy up to 6 range, dealing 3 damage.
+//   - Quick_Bolt_0(dir) : hits a selected enemy up to 6 range, dealing 2 damage.
+//   - Quick_Bolt_1(dir) : hits a selected enemy up to 6 range, dealing 2 damage.
 // 
 // - Sirpix
 //   - Stealth_Move(pos)   : moves your Stealth Clone up to 4 range.
@@ -73,7 +73,7 @@
 // 
 // - Kenlua
 //   - Haste(pos) : loses 2 hp. Blinks to given position up to 4 range. Afterwards, hits a 3x3 area around, dealing 4 damage.
-//   - Dodge(pos) : if there is an enemy at position `pos`, gains `|32 - dist| / 4` armor.
+//   - Dodge(pos) : can't take damage from enemy at given position during this turn.
 //   - Slash(dir) : hits a 1x1 area up to 2 range, dealing 12 damage. If it lands, heals 8 hp.
 // 
 // - Flina
@@ -102,18 +102,12 @@ def kaelin:
   // :: Array ::
   // :::::::::::
 
-  dup fold3    = (fold_array ~3)
-  dup fold5    = (fold_array ~4)
+  dup fold4    = (fold_array ~4)
   dup fold6    = (fold_array ~6)
   dup fold8    = (fold_array ~8) 
-  dup init3    = (init ~3)
-  dup init5    = (init ~4)
+  dup init4    = (init ~4)
   dup init6    = (init ~6)
   dup init8    = (init ~8) #
-  dup with3    = (with ~3)
-  dup take3    = (take ~3)
-  dup update3  = (update ~3)
-  dup write3   = (write ~3)
   dup with4    = (with ~4)
   dup take4    = (take ~4)
   dup update4  = (update ~4)
@@ -361,7 +355,7 @@ def kaelin:
   dup get_unit_type = # {unit} ||unit >> 26| & 0b00000011|
   dup get_unit_hero = # {unit} ||unit >> 24| & 0b00001111|
   dup get_unit_life = # {unit} ||unit >> 18| & 0b00111111|
-  dup get_unit_blok = # {unit} ||unit >> 14| & 0b00001111|
+  dup get_unit_defs = # {unit} ||unit >> 14| & 0b00001111|
   dup get_unit_eff1 = # {unit} ||unit >> 12| & 0b00000011|
   dup get_unit_lock = # {unit} ||unit >> 10| & 0b00000011|
   dup get_unit_mute = # {unit} ||unit >>  8| & 0b00000011|
@@ -373,7 +367,7 @@ def kaelin:
   dup set_unit_type = # {type unit} ||unit & 0b11110011111111111111111111111111| | ||type & 0b00000011| << 26||
   dup set_unit_hero = # {hero unit} ||unit & 0b11110000111111111111111111111111| | ||hero & 0b00001111| << 24||
   dup set_unit_life = # {life unit} ||unit & 0b11111111000000111111111111111111| | ||life & 0b00111111| << 18||
-  dup set_unit_blok = # {blok unit} ||unit & 0b11111111111111001111111111111111| | ||blok & 0b00001111| << 14||
+  dup set_unit_defs = # {defs unit} ||unit & 0b11111111111111001111111111111111| | ||defs & 0b00001111| << 14||
   dup set_unit_eff1 = # {eff1 unit} ||unit & 0b11111111111111111100111111111111| | ||eff1 & 0b00000011| << 12||
   dup set_unit_lock = # {lock unit} ||unit & 0b11111111111111111111001111111111| | ||lock & 0b00000011| << 10||
   dup set_unit_mute = # {mute unit} ||unit & 0b11111111111111111111110011111111| | ||mute & 0b00000011| <<  8||
@@ -385,7 +379,7 @@ def kaelin:
   dup mut_unit_side = # {func unit} cpy unit = unit (set_unit_side (func (get_unit_side unit)) unit)
   dup mut_unit_hero = # {func unit} cpy unit = unit (set_unit_hero (func (get_unit_hero unit)) unit)
   dup mut_unit_life = # {func unit} cpy unit = unit (set_unit_life (func (get_unit_life unit)) unit)
-  dup mut_unit_blok = # {func unit} cpy unit = unit (set_unit_blok (func (get_unit_blok unit)) unit)
+  dup mut_unit_defs = # {func unit} cpy unit = unit (set_unit_defs (func (get_unit_defs unit)) unit)
   dup mut_unit_eff1 = # {func unit} cpy unit = unit (set_unit_eff1 (func (get_unit_eff1 unit)) unit)
   dup mut_unit_lock = # {func unit} cpy unit = unit (set_unit_lock (func (get_unit_lock unit)) unit)
   dup mut_unit_mute = # {func unit} cpy unit = unit (set_unit_mute (func (get_unit_mute unit)) unit)
@@ -408,12 +402,12 @@ def kaelin:
       let unit = (set_unit_kind GOAL unit)
       let unit = (set_unit_side side unit)
       unit
-    else: if |kind == HERO| then: {side hero life blok eff1 lock mute spec}
+    else: if |kind == HERO| then: {side hero life defs eff1 lock mute spec}
       let unit = (set_unit_kind HERO unit)
       let unit = (set_unit_side side unit)
       let unit = (set_unit_hero hero unit)
       let unit = (set_unit_life life unit)
-      let unit = (set_unit_blok blok unit)
+      let unit = (set_unit_defs defs unit)
       let unit = (set_unit_eff1 eff1 unit)
       let unit = (set_unit_lock lock unit)
       let unit = (set_unit_mute mute unit)
@@ -473,19 +467,19 @@ def kaelin:
       cpy hero = (get_unit_hero unit)
       cpy side = (get_unit_side unit)
       cpy life = (get_unit_life unit)
-      cpy blok = (get_unit_blok unit)
+      cpy defs = (get_unit_defs unit)
       cpy eff1 = (get_unit_eff1 unit)
       cpy lock = (get_unit_lock unit)
       cpy mute = (get_unit_mute unit)
       cpy spec = (get_unit_spec unit)
       (concat (get_hero_icon hero) // Hero name
-      (concat (to_chars ": ")
+      (concat (to_chars " | ")
       (concat (ConsF (box_byte (num_to_char ||life /  10| % 10|)) NilF) // life
       (concat (ConsF (box_byte (num_to_char ||life /   1| % 10|)) NilF) // life
-      (concat (to_chars " life, ")
-      (concat (ConsF (box_byte (num_to_char ||blok /  10| % 10|)) NilF) // blok
-      (concat (ConsF (box_byte (num_to_char ||blok /   1| % 10|)) NilF) // blok
-      (concat (to_chars " blok, ")
+      (concat (to_chars " | ")
+      (concat (ConsF (box_byte (num_to_char ||defs /  10| % 10|)) NilF) //defs 
+      (concat (ConsF (box_byte (num_to_char ||defs /   1| % 10|)) NilF) //defs 
+      (concat (to_chars " | ")
       (concat (if side [(to_chars "black "),(to_chars "white ")])
       (concat (if eff1 [(to_chars "(eff1) "), NilF])
       (concat (if lock [(to_chars "(lock) "), NilF])
@@ -514,10 +508,14 @@ def kaelin:
     (match_unit_kind unit case_void case_item case_goal case_hero)
     
   // Removes an amount of life of an unit
-  dup damage = # {damage unit} (heal |0 - damage| unit)
-  dup mute   = # {turns unit} (mut_unit_mute {mute}|mute + turns| unit)
-  dup lock   = # {turns unit} (mut_unit_lock {lock}|lock + turns| unit)
-  dup blok   = # {armor unit} (mut_unit_blok {blok}|blok + armor| unit)
+  dup dmge       = # {dmg unit} (heal |0 - dmg| unit)
+  dup mute       = # {trn unit} (mut_unit_mute {mute}|mute + trn| unit)
+  dup lock       = # {trn unit} (mut_unit_lock {lock}|lock + trn| unit)
+  dup defs       = # {def unit} (mut_unit_defs {defs}|defs + def| unit)
+  dup dmge_enemy = # {dmg caster target} [caster, (dmge dmg target)]
+  dup mute_enemy = # {trn caster target} [caster, (mute trn target)]
+  dup heal_ally  = # {lif caster target} [caster, (heal lif target)]
+  dup defs_ally  = # {def caster target} [caster, (defs def target)]
 
   // "a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
   // - The same position: if they can't interact with each other.
@@ -584,6 +582,11 @@ def kaelin:
   // Converts a 16x16 position to an index up to 256.
   dup board_index = # {pos}
     get [x,y] = pos
+    cpy x     = x
+    cpy y     = y
+    cpy o     = ||x > 15| | |y > 15||
+    let x     = if o [0, x]
+    let y     = if o [0, y]
     ||y * 16| + x|
 
   // Converts an index up to 256 to a 16x16 position.
@@ -591,15 +594,23 @@ def kaelin:
     cpy idx = idx
     [|idx % 16|, |idx / 16|]
 
-  dup board_interact = # {a_pos b_pos fun board}
-    cpy a_idx         = (board_index a_pos)
-    cpy b_idx         = (board_index b_pos)
-    get [board,a_val] = (take8 a_idx Void board)
-    get [board,b_val] = (take8 b_idx Void board)
-    get [a_val,b_val] = (fun a_val b_val)
-    let board         = (write8 a_idx a_val board)
-    let board         = (write8 b_idx b_val board)
-    board 
+  dup board_interact = # {a_pos b_pos}
+    cpy a_idx = (board_index a_pos)
+    cpy b_idx = (board_index b_pos)
+    if |a_idx == b_idx|
+      then: {fun board}
+        get [board,b_val] = (take8 b_idx Void board)
+        cpy b_val         = b_val
+        get [a_val,b_val] = (fun b_val b_val)
+        let board         = (write8 b_idx b_val board)
+        board
+      else: {fun board}
+        get [board,a_val] = (take8 a_idx Void board)
+        get [board,b_val] = (take8 b_idx Void board)
+        get [a_val,b_val] = (fun a_val b_val)
+        let board         = (write8 a_idx a_val board)
+        let board         = (write8 b_idx b_val board)
+        board 
 
   dup board_swap = # {a_pos b_pos board}
     (board_interact a_pos b_pos {a b}[b,a] board)
@@ -635,27 +646,34 @@ def kaelin:
       get [info_text, board_text] = (fold board)
       (from_chars
         (concat (ConsF NEWLINE NilF)
-        (concat info_text
-        (concat (ConsF NEWLINE NilF)
         (concat (to_chars " 0 1 2 3 4 5 6 7 8 9 a b c d e f")
         (concat (break_lines board_text)
-          (ConsF NEWLINE NilF)))))))
+        (concat (ConsF NEWLINE NilF)
+        (concat (to_chars "HR | HP | DF |")
+        (concat (ConsF NEWLINE NilF)
+        (concat (to_chars "-- | -- | -- |")
+        (concat (ConsF NEWLINE NilF)
+        (concat info_text
+          (ConsF NEWLINE NilF)))))))))))
 
-  dup board_query_at = # {pos func board}
+  dup query_at = # {pos func board}
     let cpy_app_func = {unit}
       cpy unit = unit
       [unit, (func unit)]
     (with8 (board_index pos) cpy_app_func board)
 
-  dup is_void_at  = # {pos board} (board_query_at pos {unit}|(get_unit_kind unit) == VOID| board)
-  dup is_item_at  = # {pos board} (board_query_at pos {unit}|(get_unit_kind unit) == WALL| board)
-  dup is_goal_at  = # {pos board} (board_query_at pos {unit}|(get_unit_kind unit) == GOAL| board)
-  dup is_hero_at  = # {pos hero board} (board_query_at pos ({unit} cpy unit = unit ||(get_unit_kind unit) == HERO| & |(get_unit_hero unit) == hero||) board)
-  dup get_lock_at = # {pos board} (board_query_at pos get_unit_lock board)
-  dup get_mute_at = # {pos board} (board_query_at pos get_unit_mute board)
-  dup get_side_at = # {pos board} (board_query_at pos get_unit_side board)
-  dup get_life_at = # {pos board} (board_query_at pos get_unit_life board)
-  dup get_blok_at = # {pos board} (board_query_at pos get_unit_blok board)
+  dup get_at = # {pos board}
+    (query_at pos {x}x board)
+
+  dup is_void_at  = # {pos board} (query_at pos {unit}|(get_unit_kind unit) == VOID| board)
+  dup is_item_at  = # {pos board} (query_at pos {unit}|(get_unit_kind unit) == WALL| board)
+  dup is_goal_at  = # {pos board} (query_at pos {unit}|(get_unit_kind unit) == GOAL| board)
+  dup is_hero_at  = # {pos hero board} (query_at pos ({unit} cpy unit = unit ||(get_unit_kind unit) == HERO| & |(get_unit_hero unit) == hero||) board)
+  dup get_lock_at = # {pos board} (query_at pos get_unit_lock board)
+  dup get_mute_at = # {pos board} (query_at pos get_unit_mute board)
+  dup get_side_at = # {pos board} (query_at pos get_unit_side board)
+  dup get_life_at = # {pos board} (query_at pos get_unit_life board)
+  dup get_defs_at = # {pos board} (query_at pos get_unit_defs board)
   dup comp_side = # {comp a_pos b_pos board}
     get [board, a_side] = (get_side_at a_pos board)
     get [board, b_side] = (get_side_at b_pos board)
@@ -705,7 +723,7 @@ def kaelin:
   // cast_wave
   // : {-P    : Type}
   //   {area  : Area}
-  //   {hits  : {cpos : [Num,Num]} {pos : [Num,Num]} {dir : [Num,Num]} {state : P} P}
+  //   {hits  : {cpos : [Num,Num]} {tpos : [Num,Num]} {dir : [Num,Num]} {state : P} P}
   // ! {pos   : [Num,Num]}
   //   {dir   : [Num,Num]}
   //   {state : P}
@@ -752,22 +770,45 @@ def kaelin:
 
   dup tophoro_walk = (walk #TOPHORO ~4)
 
-  dup earth_root = # {pos arg board}
-    (board_update pos {unit}(heal 20 (mute 3 unit)) board)
+  dup earth_root = (cast_area #0 vec2_range_0 # {cpos tpos board}
+    (board_update cpos {unit}(heal 20 (mute 3 (lock 3 unit))) board))
 
   dup earth_wave =
     let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #5 NilF)))))
-    let hits = {cpos hpos dir} (board_update hpos {p}(damage 2 (mute 1 p)))
+    let hits = {cpos tpos dir board}
+      let effect = {caster target} (dmge_enemy 2 caster (mute 2 target))
+      (board_interact cpos tpos effect board)
     (cast_wave wave #hits)
 
-  dup earth_wall = (cast_area #2 vec2_range_0 #{cpos hpos board}
-    let put_wall = {unit}
+  dup earth_wall =
+    let rang = #2
+    let area = vec2_range_0
+    let wall = {unit}
       cpy unit = unit
       if |(get_unit_kind unit) == VOID|
-      then: (Item WALL)
+      then: (Item ROCK)
       else: unit
-    let board = (board_update hpos put_wall board)
-    board)
+    let hits = {cpos tpos board}
+      (board_update tpos wall board)
+    (cast_area #2 vec2_range_0 #hits)
+
+  let test_earth_root = 
+    let board = new_board
+    let board = (board_update [0xf,0x3] (dmge 50) board)
+    let board = (earth_root [0xf,0x3] [0xf,0x3] board)
+    (print_board board)
+
+  let test_earth_wave = 
+    let board = new_board
+    let board = (board_swap [0x3,0xf] [0xf,0x5] board)
+    let board = (earth_wave [0xf,0x3] DOWN board)
+    (print_board board)
+
+  let test_earth_wall =
+    let board = new_board
+    let board = (board_swap [0x3,0xf] [0xf,0x5] board)
+    let board = (earth_wall [0xf,0x3] [0xf,0x4] board)
+    (print_board board)
 
   // == Gonk ==
   // ~~~~~~~~~~
@@ -775,37 +816,59 @@ def kaelin:
   dup gonk_walk = (walk #GONK ~4)
 
   dup empathy = 
-    dup area = (cast_area #0 vec2_range_1 #{cpos hpos param}
-      get [board, dmg] = param
-      cpy dmg   = dmg
-      let board = (board_update hpos (blok |dmg * 3|) board)
-      [board, dmg])
+    let rang = #0
+    let area = vec2_range_2
+    let hits = #{cpos tpos state}
+      get [board, dmg] = state
+      cpy dmg          = dmg
+      let effect       = {caster target} (defs_ally |dmg * 2| caster target)
+      let board        = (board_interact cpos tpos effect board)
+      [board, dmg]
+    dup cast = (cast_area rang area hits)
     # {cpos dmg board}
-      cpy dmg            = dmg
+      cpy dmg            = (min dmg 8)
       get [cpos0, cpos1] = (vec2_cpy cpos)
       get [cpos2, cpos3] = (vec2_cpy cpos0)
-      let board = (board_update cpos1 (damage dmg) board)
-      (fst (area cpos2 cpos3 [board, dmg]))
+      let board          = (board_update cpos1 (dmge dmg) board)
+      get [board, dmg]   = (cast cpos2 cpos3 [board, dmg])
+      board
 
-  dup revenge = (cast_area #1 vec2_range_0 #{cpos hpos board}
-    get [board, life] = (get_life_at cpos board)
-    let dmg           = ||40 - life| / 4|
-    (board_update hpos (damage dmg) board))
+  dup revenge =
+    let rang = #1
+    let area = vec2_range_0
+    let hits = #{cpos tpos board}
+      get [cpos0, cpos1] = (vec2_cpy cpos)
+      get [board, life]  = (get_life_at cpos0 board)
+      let effect         = (dmge_enemy ||40 - life| / 4|)
+      (board_interact cpos1 tpos effect board)
+    (cast_area rang area hits)
 
-  dup ground_slam = (cast_area #0 vec2_range_2 #{cpos hpos board}
-    get [hpos0, hpos1] = (vec2_cpy hpos)
-    let board          = (board_update hpos0 (damage 2) board)
-    let board          = (board_update hpos1 (mute 1) board)
-    board)
+  dup ground_slam =
+    let rang = #0
+    let area = vec2_range_2
+    let hits = #{cpos tpos board}
+      get [tpos0, tpos1] = (vec2_cpy tpos)
+      let effect         = {caster target}
+        get [caster, target] = (dmge_enemy 2 caster target)
+        get [caster, target] = (mute_enemy 1 caster target)
+        [caster, target]
+      (board_interact cpos tpos1 effect board)
+    (cast_area rang area hits)
+
+  let test_empathy =
+    let board = new_board
+    let board = (gonk_walk [0x0,0xc] (Cons RIGHT Nil) board)
+    let board = (empathy [0x1,0xc] 7 board)
+    (print_board board)
 
   let test_revenge =
     let board = new_board
     let board = (board_swap [0x0,0xc] [0xf,0x4] board)
-    let board = (board_update [0xf,0x4] (damage 20) board)
+    let board = (board_update [0xf,0x4] (dmge 32) board)
     let board = (revenge [0xF,0x4] [0xF,0x3] board)
     (print_board board)
 
-  let test_ground_slam =
+  let test =
     let board = new_board
     let board = (board_swap [0x0,0xc] [0xe,0x3] board)
     let board = (ground_slam [0xe,0x3] [0xe,0x3] board)
@@ -816,13 +879,27 @@ def kaelin:
 
   dup stanci_walk = (walk #STANCI ~4)
 
-  dup restore = (cast_area #4 vec2_range_0 #{cpos hpos board} (board_update hpos (heal 3) board))
-  dup escort  = (cast_area #4 vec2_range_0 #{cpos hpos board} (board_update hpos (blok 3) board))
-  dup detain  = (cast_area #4 vec2_range_0 #{cpos hpos board} (board_update hpos (mute 1) board))
+  dup restore =
+    let rang = #4
+    let area = vec2_range_0
+    let hits = #{cpos hpos board} (board_interact cpos hpos (heal_ally 3) board)
+    (cast_area rang area hits)
+
+  dup escort =
+    let rang = #4
+    let area = vec2_range_0
+    let hits = #{cpos hpos board} (board_interact cpos hpos (defs_ally 3) board)
+    (cast_area rang area hits)
+
+  dup detain =
+    let rang = #4
+    let area = vec2_range_0
+    let hits = #{cpos hpos board} (board_interact cpos hpos (mute_enemy 1) board)
+    (cast_area rang area hits)
 
   let test_restore =
     let board = new_board
-    let board = (board_update [0xe,0x2] (damage 10) board)
+    let board = (board_update [0xe,0x2] (dmge 10) board)
     let board = (restore [0xd,0x1] [0xe,0x2] board)
     (print_board board)
 
@@ -843,27 +920,32 @@ def kaelin:
   dup erkos_walk = (walk #ERKOS ~4)
 
   dup flame_ball =
+    let rang = #4
     let area = vec2_range_2
-    let hits = {cpos hpos board} (board_update hpos (damage 3) board)
-    (cast_area #4 area #hits)
+    let hits = # {cpos hpos board} (board_interact cpos hpos (dmge_enemy 3) board)
+    (cast_area rang area hits)
 
   dup flame_wave =
     let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))))
-    let hits = {cpos hpos dir board} (board_update hpos (damage 3) board)
-    (cast_wave wave #hits)
+    let hits = # {cpos hpos dir board} (board_interact cpos hpos (dmge_enemy 3) board)
+    (cast_wave wave hits)
 
   dup flame_nova = 
-    dup area = (cast_area #0 vec2_range_6 #{cpos hpos param}
+    let rang = #0
+    let area = vec2_range_6
+    let hits = #{cpos hpos param}
       get [board, dmg] = param
       cpy dmg   = dmg
-      let board = (board_update hpos (damage |dmg / 2|) board)
-      [board, dmg])
+      let board = (board_interact cpos hpos (dmge_enemy |dmg / 2|) board)
+      [board, dmg]
+    dup cast = (cast_area rang area hits)
     # {cpos dmg board}
       cpy dmg            = dmg // TODO: can't be > current hp
       get [cpos0, cpos1] = (vec2_cpy cpos)
       get [cpos2, cpos3] = (vec2_cpy cpos0)
-      let board = (board_update cpos1 (damage dmg) board)
-      (fst (area cpos2 cpos3 [board, dmg]))
+      let board          = (board_update cpos1 (dmge dmg) board)
+      get [board, dmg]   = (cast cpos2 cpos3 [board, dmg])
+      board
 
   let test_flame_ball =
     let board = new_board
@@ -887,18 +969,22 @@ def kaelin:
   // ~~~~~~~~~~~
 
   dup shadow_flux =
+    let rang = #8
     let area = vec2_range_1
-    let hits = {cpos hpos board} (board_update hpos (damage 8) board)
-    (cast_area #8 area #hits)
+    let hits = #{cpos tpos board} (board_interact cpos tpos (dmge_enemy 8) board)
+    (cast_area rang area hits)
 
-  dup shadow_trap = (cast_area #8 vec2_range_0 #{cpos hpos board}
-    let put_trap = {unit}
-      cpy unit = unit
-      if |(get_unit_kind unit) == VOID|
-      then: (Item TRAP)
-      else: unit
-    let board = (board_update hpos put_trap board)
-    board)
+  dup shadow_trap = 
+    let rang = #8
+    let area = vec2_range_0
+    let hits = #{cpos hpos board}
+      let put_trap = {unit}
+        cpy unit = unit
+        if |(get_unit_kind unit) == VOID|
+        then: (Item TRAP)
+        else: unit
+      (board_update hpos put_trap board)
+    (cast_area rang area hits)
 
   let test_shadow_trap =
     let board = new_board
@@ -923,14 +1009,15 @@ def kaelin:
     (board_update pos mount board)
 
   dup quick_shot_0 =
-    let quick_shot_rng_x  = {x} (cast_area x vec2_range_1 #{cpos hpos} (board_update hpos (damage 3)))
-    dup quick_shot_rng_6  = (quick_shot_rng_x #6)
-    dup quick_shot_rng_12 = (quick_shot_rng_x #12)
+    let area = vec2_range_1
+    let hits = #{cpos hpos} (board_interact cpos hpos (dmge_enemy 2))
+    let rngX = {rng} (cast_area rng area hits)
+    dup rngA = (rngX #6)
+    dup rngB = (rngX #12)
     # {cpos hpos board}
-      get [cpos0,cpos1]    = (vec2_cpy cpos)
-      get [board, mounted] = (board_query_at cpos0 get_unit_spec board) 
-      let quick_shot       = (if mounted [quick_shot_rng_12, quick_shot_rng_6])
-      (quick_shot cpos1 hpos board)
+      get [cpos0, cpos1]   = (vec2_cpy cpos)
+      get [board, mounted] = (query_at cpos0 get_unit_spec board) 
+      (if mounted [rngB, rngA] cpos1 hpos board)
 
   dup quick_shot_1 = # quick_shot_0
 
@@ -961,7 +1048,7 @@ def kaelin:
     cpy cy            = cy
     cpy tx            = tx
     cpy ty            = ty
-    get [board, spec] = (board_query_at [cx,cy] get_unit_spec board)
+    get [board, spec] = (query_at [cx,cy] get_unit_spec board)
     cpy spec          = spec
     cpy spec          = if |spec == 0| [||cy << 4| | cx|, spec]
     cpy sx            = ||spec >> 0| & 0b1111|
@@ -972,13 +1059,15 @@ def kaelin:
       board)
 
     dup stealth_strike =
-      let hits   = {cpos hpos} (board_update hpos (damage 3))
-      let strike = (cast_area #0 vec2_range_1 hits)
+      let rang = #0
+      let area = vec2_range_1
+      let hits = {cpos hpos} (board_interact cpos hpos (dmge_enemy 3))
+      let cast = (cast_area rang area hits)
       # {cpos nil board}
           get [cx, cy]      = cpos
           cpy cx            = cx
           cpy cy            = cy
-          get [board, spec] = (board_query_at [cx,cy] get_unit_spec board)
+          get [board, spec] = (query_at [cx,cy] get_unit_spec board)
           cpy spec          = spec
           cpy spec          = if |spec == 0| [||cy << 4| | cx|, spec]
           cpy sx            = ||spec >> 0| & 0b1111|
@@ -986,8 +1075,9 @@ def kaelin:
           get [board, void] = (is_void_at [sx,sy] board)
           (if void
             then: {board}
+              let board = (board_update [cx,cy] (set_unit_spec ||cy << 4| | cx|) board)
               let board = (board_swap [cx,cy] [sx,sy] board)
-              let board = (strike [sx,sy] [sx,sy] board)
+              let board = (cast [sx,sy] [sx,sy] board)
               board
             else: {board}
               board
@@ -1012,7 +1102,10 @@ def kaelin:
   dup kenlua_walk = (walk #KENLUA ~4)
 
   dup haste =
-    dup strike = (cast_area #0 vec2_range_1 # {cpos hpos} (board_update hpos (damage 4)))
+    let rang = #0
+    let area = vec2_range_1
+    let hits = # {cpos hpos} (board_interact cpos hpos (dmge_enemy 4))
+    dup strike = (cast_area rang area hits)
     # {cpos tpos board}
       get [cpos0, cpos1] = (vec2_cpy cpos)
       get [tposA, tposB] = (vec2_cpy tpos)
@@ -1021,7 +1114,7 @@ def kaelin:
       get [board, void]  = (is_void_at tpos0 board)
       (if void
         then: {board}
-          let board = (board_update cpos0 (damage 2) board)
+          let board = (board_update cpos0 (dmge 2) board)
           let board = (board_swap cpos1 tpos1 board)
           let board = (strike tpos2 tpos3 board)
           board
@@ -1029,23 +1122,23 @@ def kaelin:
           board
         board)
 
-  dup dodge = (cast_area #32 vec2_range_0 # {cpos tpos board}
-    get [cposA, cpos0] = (vec2_cpy cpos)
-    get [cpos1, cpos2] = (vec2_cpy cposA)
-    get [tpos0, tpos1] = (vec2_cpy tpos)
-    get [board, cside] = (get_side_at cpos0 board)
-    get [board, tside] = (get_side_at tpos0 board)
-    (if (is_enemy_side cside tside)
-      then: {board} 
-        let dist = (vec2_flat_dist cpos1 tpos1)
-        (board_update cpos2 (blok ||32 - dist| / 4|) board)
-      else: {board}
-        board
-      board))
+  dup dodge =
+    let rang = #32
+    let area = vec2_range_0
+    let hits = #{cpos tpos board}
+      let effect = {caster target}
+        cpy caster = caster
+        cpy target = target
+        let caster = if |(get_unit_kind target) == HERO|
+          then: (set_unit_spec |(get_unit_hero target) + 128| caster)
+          else: caster
+        [caster, target]
+      (board_interact cpos tpos effect board)
+    (cast_area rang area hits)
 
   dup slash =
     let area = vec2_range_0
-    let hits = {cpos hpos} (board_update hpos (damage 12))
+    let hits = {cpos tpos} (board_interact cpos tpos (dmge_enemy 12))
     (cast_area #1 area #hits)
 
   let test_haste =
@@ -1057,48 +1150,18 @@ def kaelin:
 
   let test_dodge =
     let board = new_board
-    let board = (write8 (board_index [0xf,0x5]) (Hero WHITE KENLUA) board)
-    let board = (dodge [0xf,0x5] [0xf,0x3] board)
+    let board = (dodge [0x2,0xe] [0xf,0x3] board)
     (print_board board)
 
-  # test_dodge
+  let test_slash =
+    let board = new_board
+    let board = (write8 (board_index [0xe,0x3]) (Hero WHITE KENLUA) board)
+    let board = (board_update [0xe,0x3] (dmge 20) board)
+    let board = (slash [0xe,0x3] [0xf,0x3] board)
+    (print_board board)
 
   //// == Flina ==
   //// ~~~~~~~~~~~
-
-  //dup flina_walk = (walk #FLINA ~4)
-
-  //// == Stanci ==
-  //// ~~~~~~~~~~~~
-
-  //dup stanci_walk = (walk #STANCI ~4)
-
- //// TODO: add "do_if_ally"
-  //dup light_heal =
-    //let area = vec2_circle_c
-    //let hits = {cpos hpos board} (board_update hpos (heal 5) board)
-    //(cast_area ~4 area #hits)
-
-  //// TODO: add "do_if_ally"
-  //// TODO: vec2_circle_a with bug, temporary using vec2_cicle_b
-  //dup protect =
-    //let area = vec2_circle_b
-    //let armor = {piece} (armor 5 piece)
-    //let hits = {cpos hpos board} (board_update hpos armor board)
-    //(cast_area ~4 area #hits)
-
- //// TODO: add "do_if_ally"
-  //dup restore = 
-    //let area = vec2_circle_e
-    //let hits = {cpos hpos board} (board_update hpos (heal 3) board)
-    //(cast_area ~4 area #hits)
-
-  //// TODO: vec2_circle_a with bug, temporary using vec2_cicle_b
-  //// TODO: add "do_if_enemy"
-  //dup light = 
-    //let area = vec2_circle_b
-    //let hits = {cpos hpos board} (board_update hpos (damage_visual_effect 2) board)
-    //(cast_area ~4 area #hits)
 
   //// == Zagatur ==
   //// ~~~~~~~~~~~~~
@@ -1115,342 +1178,4 @@ def kaelin:
 
   //dup mewem_walk = (walk #MEWEM ~0)
 
-  //// ::::::::::::::::::
-  //// :: Casts & Turn ::
-  //// ::::::::::::::::::
-
-  //// Removes temporary walls, stuns, etc.
-  //dup end_turn =
-    //let fold_node = {a b} [a,b]
-    //let fold_leaf = {piece}
-      //let case_air    = Air
-      //let case_wall   = {temp} if temp [Air, (Wall 0)]
-      //let case_throne = Throne
-      //let case_unit   = {hero side stats} (Unit hero side (end_turn_stats stats))
-      //(piece case_air case_wall case_throne case_unit)
-    //dup fold = (fold8 #fold_node #fold_leaf)
-    //# {board} (fold board)
-
-  //// empty_casts
-  //// : (Array ~8 (Maybe [Pos, Arg]))
-  //dup empty_casts = #
-    //let a = [None,None]
-    //let b = [a,a] let c = [b,b] let d = [c,c]
-    //let e = [d,d] let f = [e,e] let g = [f,f] [g,g]
-
-  //// cast
-  //// : {skill : Num} ->
-  ////   {pos   : [Num,Num]} ->
-  ////   {arg   : Arg} ->
-  ////   {casts : (Array ~8 (Maybe [Pos, Arg]))} ->
-  ////   (Array ~8 (Maybe [Pos, Arg]))
-  //dup cast = # {skill pos arg casts}
-    //(write8 skill (Just [pos, arg]) casts)
-
-  //// Casts a skill
-  //dup cast_skill = # {mutable lockable hero skill effect state log}
-    //cpy hero = hero
-    //cpy skill = skill
-    //get [board, casts] = state
-    //get [casts, mcast] = (take8 skill None casts)
-    //let case_none = {board casts}
-      //[board, casts]
-    //let case_just = {cast board casts}
-      //get [pos, arg]         = cast
-      //get [pos, pos_cpy]     = (vec2_cpy pos)
-      //get [board, is_hero]   = (is_hero_at pos_cpy hero board)
-      //get [pos, pos_cpy]     = (vec2_cpy pos)
-      //get [board, is_muted]  = (if mutable [{board}(is_muted_at pos_cpy board), {board}[board,0]] board)
-      //get [pos, pos_cpy]     = (vec2_cpy pos)
-      //get [board, is_locked] = (if lockable [{board}(is_locked_at pos_cpy board), {board}[board,0]] board)
-      //get [pos, pos_cpy]     = (vec2_cpy pos)
-      //let board = (if |is_hero & ||1 - is_muted| & |1 - is_locked|||
-        //then: {board}
-          //get [board, anims] = (effect pos_cpy arg board)
-          //(log [hero, skill] anims board)
-        //else: {board}
-          //board
-        //board)
-      //[board, casts]
-    //(mcast case_none case_just board casts)
-
-  //let exec_casts_with = {log}
-    //dup log = log
-    //# {casts board}
-      //let state = [board, casts]
-      //let state = (cast_skill 1 0 GONK    ENDURE        endure        state log)
-      //let state = (cast_skill 1 0 GONK    BREATH        breath        state log)
-      //let state = (cast_skill 1 0 GONK    EMPATHY       empathy       state log)
-      //let state = (cast_skill 1 0 TOPHORO EARTH_ROOT    earth_root    state log)
-      //let state = (cast_skill 1 0 TOPHORO EARTH_LOCK    earth_lock    state log)
-      //let state = (cast_skill 1 0 TOPHORO EARTH_WALL    earth_wall    state log)
-      //let state = (cast_skill 1 0 CRONI   SHADOW_DOLL   shadow_doll   state log)
-      //let state = (cast_skill 0 1 KENLUA  KENLUA_WALK   kenlua_walk   state log)
-      //let state = (cast_skill 0 1 SIRPIX  SIRPIX_WALK   sirpix_walk   state log)
-      //let state = (cast_skill 0 1 FLINA   FLINA_WALK    flina_walk    state log)
-      //let state = (cast_skill 0 1 SNARCH  SNARCH_WALK   snarch_walk   state log)
-      //let state = (cast_skill 0 1 ERKOS   ERKOS_WALK    erkos_walk    state log)
-      //let state = (cast_skill 0 1 STANCI  STANCI_WALK   stanci_walk   state log)
-      //let state = (cast_skill 0 1 CRONI   CRONI_WALK    croni_walk    state log)
-      //let state = (cast_skill 0 1 GONK    GONK_WALK     gonk_walk     state log)
-      //let state = (cast_skill 0 1 TOPHORO TOPHORO_WALK  tophoro_walk  state log)
-      //let state = (cast_skill 0 1 AGDRIS  AGDRIS_WALK   agdris_walk   state log)
-      //let state = (cast_skill 0 1 MEWEM   MEWEM_WALK    mewem_walk    state log)
-      //let state = (cast_skill 0 1 ZAGATUR ZAGATUR_WALK  zagatur_walk  state log)
-      //let state = (cast_skill 1 0 TOPHORO EARTH_PULL    earth_pull    state log)
-      ////let state = (cast_skill 1 0 SNARCH  PIERCING_BOLT piercing_bolt state log)
-      //let state = (cast_skill 1 0 CRONI   SHADOW_FLUX   shadow_flux   state log)
-      //let state = (cast_skill 0 1 ERKOS   FLAME_WAVE    flame_wave    state log)
-      //let state = (cast_skill 0 1 ERKOS   FLAME_BALL    flame_ball    state log)
-      //let state = (cast_skill 0 1 ERKOS   FLAME_NOVA    flame_nova    state log)
-      //let state = (cast_skill 0 1 STANCI  LIGHT_HEAL      light_heal  state log)
-      //let state = (cast_skill 0 1 STANCI  PROTECT   protect     state log)
-      //let state = (cast_skill 0 1 STANCI  RESTORE   restore     state log)
-      //let state = (cast_skill 0 1 STANCI  LIGHT     light       state log)
-      //let board = fst state
-      //board
-
-  //// exec_casts
-  //// : {casts : (Array ~8 [Pos, Arg])}
-  ////   {board : (Array ~8 Unit)}
-  ////   (Array ~8 Unit)
-  //dup exec_casts = (exec_casts_with #{a b c}c)
-
-  ////W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
-  ////W . . W . . W . . . . . . . . . . . . . . . . . . W X X . X X W
-  ////W W W W W . W . . . . . . . . . . . . . . . . . . C . . . . . W
-  ////W . . W . . W . . . . . . . . . . . . . . . . . . W . . . . . W
-  ////W . W W W W W . . . . . . . . . . . . . . . X . . C . . . . . W
-  ////W . . W . . . . . . . . . . . . . . . . X X X X X W . . . . . W
-  ////W W W W W . W . . . . . . . . . . . . X X X X X X W W . . . W W
-  ////. . . . . . . . . . . . . X X . . . X X X X X X X X X . . . . .
-  ////. . . . . . . . . . . X X X X . . . X X X X X X X X X . . . . .
-  ////W . . . . . . . . E X X X X X . . X X X X X T X X X X X . . . W
-  ////W . . . . . . . . . . X X X X . . . X X X X X X X X X . . . . W
-  ////W . . . . . . . . . . . . X X . . . X X X X X X X X X . . . . W
-  ////. . . . . . . . . . . . . . . . . . . X X X X X X X . . . . . .
-  ////. . . . . . . . . . . . . . . . C . . . X X X X X . . . . . . .
-  ////. . . . . . . . . . . . . . X X S . . . . . X . . . . . . . . .
-  ////C C C C C C C C . . . . . X X X X X . . . . . . C C C C C C C C
-  ////C C C C C C C . . . . . . X X T X X . . . . . . C C C C C C C C
-  ////. . . . . . . . . . . . . X X X X X . . . . . . . . . . . . . .
-  ////. . . . . . . . M . . S . . X X X . . . . . . . . . . . . . . .
-  ////. . . . . . . . . . E . . . . . . . . . . X X X . . . . . . . .
-  ////W . . . . . . . . . K . . . . . . . . . . X T X . . . . . . . W
-  ////W . . . . . . . . . . . . . . . . X . . . X X X . . . . . . . W
-  ////W . . . . . . . . . . . . . . . X X . . . . . . . . . . . . . W
-  ////. . . . O O . . . . . . . . T X X X . . . . . . . . . . . . . .
-  ////. . . . . . . . . . . . . . . . X X . . . . . . . . . . . . . .
-  ////W W . . . W W . . . . X . . . . . X . . . . . . . W W W W W W W
-  ////W . . . . . W . . . X X X . . . . . . . . . . . . W . . . . . W
-  ////W . . . . . C . . X X K X X . . . . . . . . . . . W . W W W W W
-  ////W . . . . . W . . . X X X . . . . . . . . . . . . W . W . . . W
-  ////W . . . . . C . . . . X . . . . . . . . . . . . . W . W . W W W
-  ////W O . K . O W . . . . . . . . . . . . . . . . . . W . W . W . W
-  ////W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
-
-  ////W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
-  ////W . . W . . W . . . . . . . M . . . . . . . . . . W X X . X X W
-  ////W W W W W . W . . . . . . M M M . . . . . . . . . C . . . . . W
-  ////W . . W . . W . . . . . M M M M M . . . . . . . . W . . . . . W
-  ////W . W W W W W . . . . M M M M M M M . . . . . . . C . . . . . W
-  ////W . . W . . . . . . M M M M O M M M M . . . . . . W . . . . . W
-  ////W W W W W . W . . M M M M O O O M M M M . . . . . W W . . . W W
-  ////. . . . . . . . M M M M O O O O O M M M M . . . . . . . . . . .
-  ////. . . . . . . M M M M O O O O O O O M M M M . . . . . X . . . .
-  ////W . . . . . M M M M O O O O 4 O O O O M M M M . . . X X X . . W
-  ////W . . . . M M M M O O O O 4 4 4 O O O O M M M M . . . X . . . W
-  ////W . . . M M M M O O O O 4 4 4 4 4 O O O O M M M M . . . . . . W
-  ////. . . M M M M O O O O 4 4 4 4 4 4 4 O O O O M M M M . . . . . .
-  ////. . M M M M O O O O 4 4 4 4 C 4 4 4 4 O O O O M M M M . . . . .
-  ////. . . M M M M O O O O 4 4 4 4 4 4 4 O O O O M M M M . . . . . .
-  ////C C C C C C C M O O O O 4 4 4 4 4 O O O O M M M C C C C C C C C
-  ////C C C C C C C M M O O O O 4 4 4 O O O O M M M M C C C C C C C C
-  ////. . . . . . M M M M O O O O 4 O O O O M M M M . . . . . . . . .
-  ////. . . . . . . M M M M O O O O O O O M M M M . . . . . . . . . .
-  ////. . . . . . . . M M M M O O O O O M M M M . . . . . . . . . . .
-  ////W . . . . . . . . M M M M O O O M M M M . . . . . . . . . . . W
-  ////W . . . . . . . . . M M M M O M M M M . . . C . . . . . . . . W
-  ////W . . . . . . . . . . M M M M M M M . . . . 4 . . . . . . . . W
-  ////. . . . O O . . . . . . M M M M M . . . . . 4 . . . . . . . . .
-  ////. . . . . . . . . . . . . M M M . . . . . . 4 . . . . . . . . .
-  ////W W . . . W W . . . . . . . M . . . . . . . 4 . . W W W W W W W
-  ////W . . . . . W . . . . . . . . . . x . . . . O . . W . . . . . W
-  ////W . . . . . C . . . . . . . . . x x x . . . O . . W . W W W W W
-  ////W . . . . . W . . . . . . . . x x x x x . . O . . W . W . . . W
-  ////W . . . . . C . . . . . . . . . x x x . . . O . . W . W . W W W
-  ////W O . . . O W . . . . . . . . . . x . . . . . . . W . W . W . W
-  ////W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
-
-  //let test_earth_pull =
-    //let board = new_board
-    //let board = (board_swap [1,30] [30,3] board) // teleports gonk to near tophoro
-    //let casts = empty_casts
-    //let casts = (cast EARTH_PULL [30,1] DOWN casts)
-    //let board = (exec_casts casts board)
-    //snd (is_hero_at [30,2] GONK board)
-
-  //let test_earth_lock =
-    //let board = new_board
-    //let board = (board_swap [1,30] [30,2] board) // teleports gonk to near tophoro
-    //let casts = empty_casts
-    //let casts = (cast EARTH_LOCK [30,1] (Cons DOWN Nil) casts)
-    //let casts = (cast GONK_WALK [30,2] (Cons DOWN Nil) casts)
-    //let board = (exec_casts casts board)
-    //snd (is_hero_at [30,2] GONK board)
-
-  //let test_earth_wall =
-    //let board = new_board
-    //let casts = empty_casts
-    //let casts = (cast EARTH_WALL [30,1] (Cons (Cons DOWN Nil) Nil) casts)
-    //let board = (exec_casts casts board)
-    //snd (is_wall_at [30,2] board)
-
-  //let test_breath =
-    //let board = new_board
-    //let board = (board_update [1,30] (damage 5) board)
-    //let casts = empty_casts
-    //let casts = (cast BREATH [1,30] {x}x casts)
-    //let board = (exec_casts casts board)
-    //let test0 = |snd (get_hp_at [1,30] board) == 80|
-    //test0
-
-  //let test_empathy =
-    //let board = new_board
-    //let casts = empty_casts
-    //let casts = (cast EMPATHY [1,30] 3 casts)
-    //let board = (exec_casts casts board)
-    //let test0 = |snd (get_armor_at [2,30] board) == 6|
-    //let test1 = |snd (get_armor_at [1,30] board) == 6|
-    //let test3 = |snd (get_hp_at [1,30] board) == 77|
-    //|test1 & |test0 & test1||
-
-  //let test_shadow_flux =
-    //let board = new_board
-    //let board = (board_update [1,30] (damage 79) board) // leaves gonk with 1hp
-    //let board = (board_swap [1,30] [29,3] board) // teleports gonk to near cromi
-    //let casts = empty_casts
-    //let casts = (cast SHADOW_FLUX [29,1] (Cons DOWN (Cons DOWN Nil)) casts)
-    //let board = (exec_casts casts board)
-    //let test0 = (snd (is_air_at [29,3] board))
-    //test0
-
-  //let test_light_heal =
-    //let board = new_board 
-    //let board = (board_update [29,1] (damage 11) board) // Croni receives damage
-    //let casts = empty_casts
-    //let casts = (cast LIGHT_HEAL [27,1] (Cons RIGHT (Cons RIGHT Nil)) casts)
-    //let board = (exec_casts casts board)
-    //let test0 = |(snd (get_hp_at [29,1] board)) == 34|
-    //test0
-    ////(print_board board)
-
-  //let test_protect =
-    //let board = new_board 
-    ////let board = (board_update [27,1] (armor 13) board)
-    ////get [board, anim] = (protect [27,01] (Cons RIGHT (Cons RIGHT Nil)) board)
-    //let casts = empty_casts
-    //let casts = (cast PROTECT [27,01] (Cons RIGHT (Cons RIGHT Nil)) casts)
-    //let board = (exec_casts casts board)
-    //let test0 = |(snd (get_armor_at [29,1] board)) == 05|
-    //test0
-    ////(print_board board)
-
-  //let test_restore = 
-    //let board = new_board 
-    //let board = (board_update [29,1] (damage 11) board) // Croni receives damage
-    //let board = (board_update [26,1] (damage 3) board) // Flyna receives damage
-    //let board = (board_update [27,1] (damage 3) board) // Stanci receives damage
-    //let casts = empty_casts
-    //let casts = (cast RESTORE [27,01] (Cons DOWN Nil) casts)
-    //let board = (exec_casts casts board)
-    //let test0 =  |(snd (get_hp_at [27,1] board)) == 40| // Stanci recovers full hp
-    //let test1 =  |(snd (get_hp_at [29,1] board)) == 32| // Croni restores to 29 + 3
-    //|test0 & test1|
-
-  //let test_light =
-    //let board = new_board
-    //let casts = empty_casts
-    //let casts = (cast LIGHT [27,01] (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))) casts)
-    //let board = (exec_casts casts board)
-    //let test0 = |(snd (get_hp_at [30,1] board)) == 118|
-    //test0
-
-  //dup test_flame_wave = #
-    //let board = new_board
-    //let casts = empty_casts
-    //let casts = (cast FLAME_WAVE [2,30] RIGHT casts)
-    //let board = (exec_casts casts board)
-    //let test0 = |(snd (get_hp_at [4,30] board)) == 55| // Kenlua receies 5 dmg
-    //test0
-
-  //dup test_flame_ball = #
-    //let board = new_board
-    //let casts = empty_casts
-    //let casts = (cast FLAME_BALL [2,30] (Cons UP Nil) casts)
-    //let board = (exec_casts casts board)
-    //let test0 = |(snd (get_hp_at [1,30] board)) == 75| // Gonk receies 5 dmg
-    //test0
-
-  //dup test_flame_nova = #
-    //let board = new_board
-    ////let board = (flame_nova [15,15] board)
-    //let casts = empty_casts
-    //let casts = (cast FLAME_NOVA [2,30] {x}x casts)
-    //let board = (exec_casts casts board)
-    //let test0 = |(snd (get_hp_at [1,30] board)) == 60| // Gonk receies 20 dmg
-    //let test1 = (snd (is_air_at [2,30] board)) // Erkos dies
-    //|test0 & test1|
-
-  //dup tests = #
-    //let test00 = ["earth_pull"      , test_earth_pull]
-    //let test01 = ["earth_lock"      , test_earth_lock]
-    //let test02 = ["earth_wall"      , test_earth_wall]
-    //let test03 = ["breath"          , test_breath]
-    //let test04 = ["empathy"         , test_empathy]
-    //let test05 = ["shadow_flux"     , test_shadow_flux]
-    //let test06 = ["light_heal"      , test_light_heal]
-    //let test07 = ["test_protect"    , test_protect]
-    //let test08 = ["test_restore"    , test_restore]
-    //let test09 = ["test_light"      , test_light]
-    //let test10 = ["test_flame_wave" , test_flame_wave]
-    //let test11 = ["test_flame_ball" , test_flame_ball]
-    //let test12 = ["test_flame_nova" , test_flame_nova]
-    //let test13 = ["_"               , 1]
-    //let test14 = ["_"               , 1]
-    //let test15 = ["_"               , 1]
-    //let test16 = ["_"               , 1]
-    //let test17 = ["_"               , 1]
-    //let test18 = ["_"               , 1]
-    //let test18 = ["_"               , 1]
-    //let test19 = ["_"               , 1]
-    //let test20 = ["_"               , 1]
-    //let test21 = ["_"               , 1]
-    //let test22 = ["_"               , 1]
-    //let test23 = ["_"               , 1]
-    //let test24 = ["_"               , 1]
-    //let test25 = ["_"               , 1]
-    //let test26 = ["_"               , 1]
-    //let test27 = ["_"               , 1]
-    //let test28 = ["_"               , 1]
-    //let test29 = ["_"               , 1]
-    //let test30 = ["_"               , 1]
-    //let test31 = ["_"               , 1]
-    //[[[[[test00, test01], [test02, test03]],
-       //[[test04, test05], [test06, test07]]],
-      //[[[test08, test09], [test10, test11]],
-       //[[test12, test13], [test14, test15]]]],
-     //[[[[test16, test17], [test18, test19]],
-       //[[test20, test21], [test22, test23]]],
-      //[[[test24, test25], [test26, test27]],
-       //[[test28, test29], [test30, test31]]]]]
-
-  //dup export =
-    //[#new_board,
-    //[exec_casts_with,
-    //[#empty_casts,
-    //[#cast,
-    //[#get_hero_skill,
-      //0]]]]]
-
-  //# (print_board new_board)
+  # test

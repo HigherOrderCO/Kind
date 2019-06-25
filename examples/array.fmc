@@ -85,6 +85,21 @@ def read: {dpt}
       [#x, #x]
     (with path f arr)
 
+// peek
+// | Like read, but on numeric, unboxed arrays
+// : {-A  : Type}               -- Type of the elements
+//   {dpt : CNat}               -- Length of array = 2^dpt
+//   ! {path : Num}             -- Num storing path to element
+//     {arr  : (Array dpt Num)} -- The array to be read
+//     {(Array dpt Num), Num}   -- The array itself, and a copy of the element
+def peek: {dpt}
+  dup with = (with dpt)
+  # {path arr}
+    let f = {x}
+      cpy x = x
+      [x, x]
+    (with path f arr)
+
 // take
 // | Takes an element out of an array and returns it
 // : {-A  : Type}             -- Type of the elements
