@@ -54,6 +54,15 @@ def vec2_sqr_dist: {a b}
 def vec2_dist: {a b}
   (sqrt (vec2_sqr_dist a b))
 
+// vec2_flat_dist
+// : {a : [Num,Num]}
+//   {b : [Num,Num]}
+//   Num
+def vec2_flat_dist: {a b}
+  get [ax,ay] = a
+  get [bx,by] = b
+  |(num_dif ax bx) + (num_dif ay by)|
+
 // vec2_line
 // | Up to `max_len`, given a length `len`, a center pos `pos`, and a displacement
 // | vector `dxy`, returns vectors from `pos`, incrementing by `dxy`, `len` times.
@@ -244,6 +253,30 @@ def vec2_circle_example:
   let hits = {pos num} |num + 1|
   dup circ = (form #hits)
   # (circ [0,0] 0)
+
+//vec2_range
+// : {mlen : Nat}
+//   {-P   : Type}
+//   {rad  : Num} -- radius
+//   {cons : ! {pos : [Num,Num]} {state : P} P}
+// ! {pos  : [Num,Num]}
+//   {nil  : P}
+//   P
+def vec2_range: {mlen rad cons}
+  dup cons = cons
+  dup rad  = rad
+  let isin = {cen siz pos} |(vec2_flat_dist cen pos) < |rad + 1||
+  dup size = # ||rad * 2| + 1|
+  dup area = (vec2_area mlen #[size,size] #isin #cons)
+  # {pos} (area pos)
+
+def vec2_range_0: (vec2_range ~1 #0)
+def vec2_range_1: (vec2_range ~9 #1)
+def vec2_range_2: (vec2_range ~25 #2)
+def vec2_range_3: (vec2_range ~49 #3)
+def vec2_range_4: (vec2_range ~81 #4)
+def vec2_range_5: (vec2_range ~121 #5)
+def vec2_range_6: (vec2_range ~169 #6)
 
 // vec2_wave
 // | Given a list of widths, returns vectors filling a wave from `pos` pointing to `dir`.

@@ -16,213 +16,116 @@
 // 
 // ## Heroes
 // 
-// Name    | Role       | Description    | MOV | HP  | References & Inspiration
-// ------- | ---------- | -------------- | --- | --- | -------------------------------------------------
-// Tophoro | Tank       | Terrain Bender |   3 | 120 | Toph (Avatar TLA), Totoro (Studio Ghibli)
-// Gonk    | Tank       | Warrior        |   3 |  80 | Gon (Hunter X Hunter), Goku (Gradon Ball Z)
-// ?       | Tank       | ?              |   ? |   ? | ?
-// ?       | Tank       | ?              |   ? |   ? | ?
-// ?       | Tank       | ?              |   ? |   ? | ?
-// ?       | Tank       | ?              |   ? |   ? | ?
-// Erkos   | Ranged     | Fire Mage      |   4 |  40 | Erk (Fire Emblem), Harry Potter (Harry Potter)
-// Croni   | Ranged     | Dark Mage      |   4 |  40 | Chromie (Blizzard), Raven (Teen Titans)
-// Snarch  | Ranged     | Archer         |   4 |  60 | Zk-Snarks (crypto)
-// ?       | Ranged     | ?              |   ? |   ? | ?
-// ?       | Ranged     | ?              |   ? |   ? | ?
-// ?       | Ranged     | ?              |   ? |   ? | ?
-// Sirpix  | Melee      | Thief          |   4 |  60 | Dev
-// Kenlua  | Melee      | Swordsman      |   4 |  60 | Killua (Hunter X Hunter), Kenshin (Rurouni Kenshin)
-// Flina   | Melee      | Pegasus Knight |   6 |  60 | Florina (Fire Emblem), Link (The Legend of Zelda)
-// ?       | Melee      | ?              |   ? |   ? | ?
-// ?       | Melee      | ?              |   ? |   ? | ?
-// ?       | Melee      | ?              |   ? |   ? | ?
-// Stanci  | Support    | Healer         |   4 |  40 | Dev
-// ?       | Support    | ?              |   ? |   ? | ?
-// ?       | Support    | ?              |   ? |   ? | ?
-// ?       | Support    | ?              |   ? |   ? | ?
-// ?       | Support    | ?              |   ? |   ? | ?
-// ?       | Support    | ?              |   ? |   ? | ?
-// Zagatur | Influencer | Summoner       |   0 |  10 | Zagara, Abathur (Blizzard)
-// Agdris  | Influencer | Silencer       |   1 |  20 | Agda, Idris (programming language)
-// Mewru   | Influencer | Psychic        |   0 |  20 | Mewtwo (Pokémon), Meruem (Hunter X Hunter)
-// ?       | Influencer | ?              |   ? |   ? | ?
-// ?       | ?          | ?              |   ? |   ? | ?
-// ?       | ?          | ?              |   ? |   ? | ?
-// ?       | ?          | ?              |   ? |   ? | ?
-// ?       | ?          | ?              |   ? |   ? | ?
+// Name    | Role   | Description    | MOV | HP  | References & Inspiration
+// ------- | ------ | -------------- | --- | --- | -------------------------------------------------
+// Tophoro | Tank   | Terrain Bender |   4 |  60 | Toph (Avatar TLA), Totoro (Studio Ghibli)
+// Gonk    | Tank   | Warrior        |   4 |  40 | Gon (Hunter X Hunter), Goku (Gradon Ball Z)
+// Stanci  | Tank   | Healer         |   4 |  40 | Dev
+// ?????   | Tank   |                |     |     | 
+// Erkos   | Ranged | Fire Mage      |   4 |  20 | Erk (Fire Emblem), Harry Potter (Harry Potter)
+// Croni   | Ranged | Dark Mage      |   4 |  20 | Chromie (Blizzard), Raven (Teen Titans)
+// Snarch  | Ranged | Archer         |   4 |  20 | Zk-Snarks (crypto)
+// ?????   | Ranged | ?              |     |     |
+// Sirpix  | Melee  | Thief          |   4 |  30 | Dev
+// Kenlua  | Melee  | Swordsman      |   4 |  30 | Killua (Hunter X Hunter), Kenshin (Rurouni Kenshin)
+// Flina   | Melee  | Pegasus Knight |   4 |  30 | Florina (Fire Emblem), Link (The Legend of Zelda)
+// ?????   | Melee  | ?              |   4 |  30 | ????
+// Zagatur | Tactic | Summoner       |   0 |   4 | Zagara, Abathur (Blizzard)
+// Agdris  | Tactic | Silencer       |   2 |  20 | Agda, Idris (programming language)
+// Mewem   | Tactic | Psychic        |   0 |  20 | Mewtwo (Pokémon), Meruem (Hunter X Hunter)
+// ?????   | Tactic | ?              |   ? |  ?? | ????
 //
 // ## Moves
 // 
 // - Tophoro
-//   + Earth Pull : pulls enemies in a 1-3-5 (wave) ahead.
-//   + Earth Wall : creates up to 3 earth walls in up to 3 range.
-//   + Earth Lock : selects an enemy in up to 2 range. Stuns him/her. Can't use on next turn.
-//   + Earth Root : self-roots for 3 turns, gaining massive shield and heal.
+//   - Earth_Root(num) : heals 20 hp. Self-roots for 3 turns.
+//   - Earth_Wall(pos) : places a temporary wall in an empty tile for up to 2 range.
+//   - Earth_Pull(dir) : pulls enemies in a 1-3-5 wave ahead, dealing 2 dmg and muting them.
 // 
 // - Gonk
-//   + Endure  : gains 20 armor. Can't attack for the next 2 turns.
-//   + Breath  : heals 8 HP. Can't move on this turn.
-//   + Empathy : loses N HP. Grants N*2 armor to allies in a 3x3 (square) around.
-//   + Shatter : select an enemy up to 2 range. Deals an amount of damage inversely proportional to remaining HP.
-//
-// - Erkos
-//   * Flame Ball : hits a 5x5 (circle) up to 4 range.
-//   * Flame Wave : hits a 1-3-3-5-5 (wave) ahead. Deals 5 damage.
-//   + Flame Rage : loses 5 HP. During this turn, attacks deal +5 dmg. Can't attack on this turn.
-//   * Flame Nova : loses 30 HP. Deals massive damage in a 11x11 circle (20?).
-// 
-// - Croni
-//   + Shadow Doll : places a doll in empty tile for up to 8 range, blocking the way until the end of the turn.
-//   + Shadow Flux : after a delay, hits a 3x3 (square) in up to 8 range for high damage.
-//   - Shadow Trap : places a trap in a secret position; activate to reveal and stun in a 3x3 (circle).
-//   - Shadow Bond : loses 3 hp. Can't attack on this turn. If Croni dies on this turn, takes the killer with her.
-// 
-// - Flina
-//   * Javelin : hits a selected enemy up to 2 range.
-//   * Gust    : pushes and deal damage to enemies in a 1-3-5 (wave) ahead.
-//   * Fly     : moves 4 steps, passing through enemies and walls.
-//   - Ocarina : ...
-//
-// - Snarch
-//   * Quick Bolt     : hits a selected enemy up to 6 range.
-//   * Piercing Bolt  : hits a 1-1-1-1-1-1 (wave) ahead.
-//   * Explosive Bolt : hits up to 2 3x3 (circles) up to 6 range.
-//   - Ballista       : mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range doubled.
-// 
-// - Sirpix
-//   - Stealth Clone : creates a stealth in up to 4 range. If already created, moves it 4 steps.
-//   - Stealth Swap  : if your clone is in an empty tile, swaps position with it.
-//   * Killing Edge  : hits a 3x3 (square) around.
-//   - Lockpick      : special effects on map.
-// 
-// - Kenlua
-//   - Dodge : select 4 tiles up to 32 range. Prevent all damage from enemies standing on those tiles during this turn.
-//   * Slice : hits a 3x3 (square) around, dealing damage.
-//   * Haste : moves 4 steps.
-//   * Slash : hits a 1x1 (point) up to 1 range. Deals massive damage. If the hit lands, returns to the position you were at the beginning of the turn.
+//   - Empathy(dmg)     : loses `dmg` HP. Grants `num*2` armor to allies up to 1 range.
+//   - Revenge(pos)     : select an enemy up to 1 range. Deals `missing_hp / 4` dmg. 
+//   - Ground_Slam(nil) : hits all enemies up to 2 range around, dealing 2 dmg and muting them.
 // 
 // - Stanci
-//   * Heal    : selects an ally up to 4 range. Heals him/her.
-//   * Shield  : selects an ally up to 4 range. Gives him/her armor.
-//   * Restore : hits a 5x5 (circle) up to 4 range, healing allies inside.
-//   * Light   : selects an enemy up to 4 range to deal damage.
+//   - Restore(pos) : selects an ally up to 4 range. Heals 3 hp.
+//   - Escort(pos)  : selects an ally up to 4 range. Grants 3 armor.
+//   - Detain(pos)  : selects an enemy up to 4 range. Mutes him.
+// 
+// - Erkos
+//   - Flame_Ball(pos) : hits enemies around 2 range in a position up to 4 range, dealing 3 damage.
+//   - Flame_Wave(dir) : hits enemies in a 1-3-3-5-5 wave ahead, dealing 3 damage.
+//   - Flame_Nova(num) : loses `num` HP. Hits enemies around up to 6 range, dealing `num / 2` damage.
+// 
+// - Croni
+//   - Shadow_Trap(pos) : places a trap in an empty tile for up to 8 range, locking whoever steps on it.
+//   - Shadow_Flux(pos) : hits a 3x3 (square) up to 8 range, dealing 8 damage.
+//
+// - Snarch
+//   - Ballista(nil)     : mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range doubled.
+//   - Quick_Bolt_0(dir) : hits a selected enemy up to 6 range, dealing 3 damage.
+//   - Quick_Bolt_1(dir) : hits a selected enemy up to 6 range, dealing 3 damage.
+// 
+// - Sirpix
+//   - Stealth_Move(pos)   : moves your Stealth Clone up to 4 range.
+//   - Stealth_Strike(pos) : swaps position with your Stealth Clone. Hits a 3x3 area around, dealing 4 damage.
+//   - Lockpick(dir)       : special effects on map.
+// 
+// - Kenlua
+//   - Haste(pos) : loses 2 hp. Blinks to given position up to 4 range. Afterwards, hits a 3x3 area around, dealing 4 damage.
+//   - Dodge(pos) : if there is an enemy at position `pos`, gains 8 armor.
+//   - Slash(dir) : hits a 1x1 area up to 2 range, dealing 12 damage. If it lands, heals 8 hp.
+// 
+// - Flina
+//   - Javelin(pos) : hits a selected enemy up to 2 range.
+//   - Fly(pos)     : moves 4 steps, passing through enemies and walls.
+//   - Gust(dir)    : pushes enemies in a 1-3-5 (wave) ahead, dealing 1 dmg per hit.
 // 
 // - Zagatur
-//   * Summon    : selects an empty tile up to 4 range. Spawns a clone of Zagatur on it.
-//   * Needle    : hits a 3x1 (line) ahead, dealing damage.
-//   * Spikes    : hits a 3x3 (square) around, dealing damage.
-//   * Petalkill : all zagatur die and hit a 3x3 square around, dealing high damage.
+//   - Wrap(nil)   : hits a 3x3 area around, locking enemies.
+//   - Needle(dir) : hits a 1-1-1 wave ahead, dealing damage 4 damage.
+//   - Summon(pos) : selects an empty tile up to 3 range. Spawns a clone of Zagatur on it.
 // 
 // - Agdris
-//   * Silence : selects an enemy up to 12 range. It can't attack on this turn.
-//   * Memento : dies. Enemies can't attack on this turn.
+//   - Memento(pos) : loses 20 hp. Hits a 5x5 area up to 32 range, dealing 2 damage, locking and muting enemies, and healing 2 hp and granting 2 armors to allies.
+//   - Silence(pos) : loses 1 hp. Selects an enemy. It can't attack on this turn.
+//   - Protect(pos) : loses 1 hp. Selects an ally. Grants 4 armor.
 // 
-// - Mewru
-//   * Psychock    : hits a 7x7 (circle) around, dealing damage.
-//   * Mend        : hits a 7x7 (circle) around, healing allies.
-//   * Telekinesis : selects an enemy up to 4 range. Performs 4 steps in selected directions.
-//   * Teleport    : selects an empty location on the map. Moves to that location.
-// 
-// ## Move Priority
-// 
-// <<Instant: 0>>
-// - Croni Shadow Trap (activate)
-// - Agdris Silence
-// - Agdris Memento
-//
-// <<SelfCast: 16>>
-// - Sirpix Stealth Clone
-// - Snarch Ballista
-// - Erkos Flame Rage
-// - Gonk Endure
-// - Gonk Breath
-// - Gonk Empathy 
-// - Tophoro Earth Root
-// - Croni Shadow Bond
-// - Mewru Telekinesis
-// - Mewru Teleport
-// 
-// <<PointAndClick: 64>>
-// - Tophoro Earth Lock
-// - Stanci Shield
-// - Stanci Heal
-// - Kenlua Haste
-// - Kenlua Slice
-// - Sirpix Stealth Swap
-// - SirPix Killing Edge
-// - Stanci Light
-// - Snarch Quick Bolt
-// - Flina Javelin
-// - Gonk Shatter
-//
-// <<TerrainControl: 112>>
-// - Tophoro Earth Wall
-// - Croni Shadow Doll
-//
-// - <<Walk: 128>>
-// - Kenlua Walk
-// - Sirpix Walk
-// - Flina Walk
-// - Snarch Walk
-// - Erkos Walk
-// - Stanci Walk
-// - Croni Walk
-// - Gonk Walk
-// - Tophoro Walk
-// - Agdris Walk
-// - Mewru Walk
-// - Zagatur Walk
-//
-// <<Post-Walk: 160>>
-// - Flina Fly
-// - Kenlua Dodge
-// 
-// <<Skillshot: 176>>
-// - Tophoro Earth Pull
-// - Flina Gust
-// - Kenlua Slash
-// - Snarch Piercing Bolt
-// - Snarch Explosive Bolt
-// - Erkos Flame Wave
-// - Erkos Flame Ball
-// - Erkos Flame Nova
-// - Zagatur Needles
-// - Zagatur Spikes
-// - Mewru Mend
-// - Mewru Psychock
-// - Croni Shadow Flux
-// - Stanci Restore
-// - Zagatur Petalkill
-//
-// <<EndTurn: 224>>
-// - Croni Shadow Trap (place)
-// - Zagatur Summon
+// - Mewem
+//   - Teleport(pos) : selects an location on the map. If that location is empty or an ally, swaps positions.
+//   - Psychock(nil) : hits a 3x3 area up to 4 range, dealing 4 damage.
+//   - Imprison(pos) : hits a 3x3 area up to 4 range, locking enemies.
 
 def kaelin:
+
   // :::::::::::
   // :: Array ::
   // :::::::::::
 
   dup fold3    = (fold_array ~3)
-  dup fold5    = (fold_array ~5)
-  dup fold8    = (fold_array ~8)
-  dup fold10   = (fold_array ~10) #
+  dup fold5    = (fold_array ~4)
+  dup fold6    = (fold_array ~6)
+  dup fold8    = (fold_array ~8) 
+  dup init3    = (init ~3)
+  dup init5    = (init ~4)
+  dup init6    = (init ~6)
+  dup init8    = (init ~8) #
   dup with3    = (with ~3)
   dup take3    = (take ~3)
   dup update3  = (update ~3)
   dup write3   = (write ~3)
-  dup with5    = (with ~5)
-  dup take5    = (take ~5)
-  dup update5  = (update ~5)
-  dup write5   = (write ~5)
+  dup with4    = (with ~4)
+  dup take4    = (take ~4)
+  dup update4  = (update ~4)
+  dup write4   = (write ~4)
+  dup with6    = (with ~6)
+  dup take6    = (take ~6)
+  dup update6  = (update ~6)
+  dup write6   = (write ~6)
   dup with8    = (with ~8)
   dup take8    = (take ~8)
   dup update8  = (update ~8)
   dup write8   = (write ~8)
-  dup with10   = (with ~10)
-  dup take10   = (take ~10)
-  dup update10 = (update ~10)
-  dup write10  = (write ~10)
 
   // :::::::::::::::
   // :: Direction ::
@@ -233,632 +136,524 @@ def kaelin:
   dup LEFT  = #[-1, 0]
   dup UP    = #[ 0,-1]
 
-  // Using a path, goes from "pos" to "target position"
-  // - dirs : movement list to get into the desired position
-  // - pos  : initial position
-  let add_dirs = {mlen}
-    dup move = (mlen {pos_dirs}
-      get [pos,dirs] = pos_dirs
-      get [dirs,dir] = (pop [0,0] dirs)
-      [(vec2_add pos dir), dirs])
-    # {pos dirs}
-      fst (move [pos,dirs])
-  dup add_dirs1 = (add_dirs ~1)
-  dup add_dirs2 = (add_dirs ~2)
-  dup add_dirs3 = (add_dirs ~3)
-  dup add_dirs4 = (add_dirs ~4)
-  dup add_dirs5 = (add_dirs ~5)
-  dup add_dirs6 = (add_dirs ~6)
-  dup add_dirs7 = (add_dirs ~7)
-  dup add_dirs8 = (add_dirs ~8)
-
   // ::::::::::
   // :: Side ::
   // ::::::::::
 
-  dup WHITE = #0
-  dup BLACK = #1
-  dup BOARD = #2
+  dup WHITE = # 0
+  dup BLACK = # 1
+  dup BOARD = # 2
 
-  dup eql_side = #{a b}
-    |a == b|
+  // ::::::::::
+  // :: Hero ::
+  // ::::::::::
 
-  dup side_to_icon = #{side}
-    cpy side = side
-    if |side == WHITE|
-    then: (to_chars "O")
-    else: if |side == BLACK|
-      then: (to_chars "X")
-      else: (to_chars "B")
+  dup TOPHORO  = # 0
+  dup GONK     = # 1
+  dup STANCI   = # 2
+  dup HERO_03  = # 3
+  dup ERKOS    = # 4
+  dup CRONI    = # 5
+  dup SNARCH   = # 6
+  dup HERO_07  = # 7
+  dup SIRPIX   = # 8
+  dup KENLUA   = # 9
+  dup FLINA    = # 10
+  dup HERO_11  = # 11
+  dup ZAGATUR  = # 12
+  dup AGDRIS   = # 13
+  dup MEWEM    = # 14
+  dup HERO_15  = # 15
+
+  // Given a hero, returns its icon
+  dup get_hero_icon = # {hero}
+    let hero00 = (to_chars "To")
+    let hero01 = (to_chars "Go")
+    let hero02 = (to_chars "St")
+    let hero03 = (to_chars "??")
+    let hero04 = (to_chars "Er")
+    let hero05 = (to_chars "Cr")
+    let hero06 = (to_chars "Sn")
+    let hero07 = (to_chars "??")
+    let hero08 = (to_chars "Si")
+    let hero09 = (to_chars "Ke")
+    let hero10 = (to_chars "Fl")
+    let hero11 = (to_chars "??")
+    let hero12 = (to_chars "Za")
+    let hero13 = (to_chars "Ag")
+    let hero14 = (to_chars "Me")
+    let hero15 = (to_chars "??")
+    let half00 = [[[hero00,hero01],[hero02,hero03]],[[hero04,hero05],[hero06,hero07]]]
+    let half01 = [[[hero08,hero09],[hero10,hero11]],[[hero12,hero13],[hero14,hero15]]]
+    let heroes = [half00, half01]
+    (snd (take4 hero NilF heroes))
+
+  // Given a hero, returns its max life
+  dup get_hero_max_life = # {hero}
+    let hero00 = 60
+    let hero01 = 40
+    let hero02 = 40
+    let hero03 = 0
+    let hero04 = 20
+    let hero05 = 20
+    let hero06 = 20
+    let hero07 = 0
+    let hero08 = 30
+    let hero09 = 30
+    let hero10 = 30
+    let hero11 = 0
+    let hero12 = 1
+    let hero13 = 10
+    let hero14 = 10
+    let hero15 = 0
+    let half00 = [[[hero00,hero01],[hero02,hero03]],[[hero04,hero05],[hero06,hero07]]]
+    let half01 = [[[hero08,hero09],[hero10,hero11]],[[hero12,hero13],[hero14,hero15]]]
+    let heroes = [half00, half01]
+    (snd (take4 hero NilF heroes))
 
   // :::::::::::
-  // :: Stats ::
+  // :: Skill ::
   // :::::::::::
 
-  dup Stats = # {mhp hp armor power locked muted} {Stats} (Stats mhp hp armor power locked muted)
+  dup TOPHORO_WALK   = # 0
+  dup EARTH_ROOT     = # 1
+  dup EARTH_WALL     = # 2
+  dup EARTH_PULL     = # 3
+  dup GONK_WALK      = # 4
+  dup GROUND_SLAM    = # 5
+  dup REVENGE        = # 6
+  dup EMPATHY        = # 7
+  dup STANCI_WALK    = # 8
+  dup RESTORE        = # 9
+  dup ESCORT         = # 10
+  dup DETAIN         = # 11
+  dup ERKOS_WALK     = # 16
+  dup FLAME_BALL     = # 17
+  dup FLAME_WAVE     = # 18
+  dup FLAME_NOVA     = # 19
+  dup CRONI_WALK     = # 20
+  dup SHADOW_TRAP    = # 21
+  dup SHADOW_DOLL    = # 22
+  dup SHADOW_FLUX    = # 23
+  dup SNARCH_WALK    = # 24
+  dup QUICK_BOLT_0   = # 25
+  dup QUICK_BOLT_1   = # 26
+  dup BALLISTA       = # 27
+  dup SIRPIX_WALK    = # 32
+  dup STEALTH_MOVE   = # 33
+  dup STEALTH_STRIKE = # 34
+  dup LOCKPICK       = # 35
+  dup KENLUA_WALK    = # 36
+  dup HASTE          = # 37
+  dup DODGE          = # 38
+  dup SLASH          = # 39
+  dup FLINA_WALK     = # 40
+  dup JAVELIN        = # 41
+  dup FLY            = # 42
+  dup GUST           = # 43
+  dup ZAGATUR_WALK   = # 48
+  dup NEEDLE         = # 49
+  dup WRAP           = # 50
+  dup SUMMON         = # 51
+  dup AGDRIS_WALK    = # 52
+  dup PROTECT        = # 53
+  dup SILENCE        = # 54
+  dup MEMENTO        = # 55
+  dup MEWEN_WALK     = # 56
+  dup TELEPORT       = # 57
+  dup PSYCHOCK       = # 58
+  dup IMPRISON       = # 59
 
-  dup base_stats = # {mhp}
-    cpy mhp = mhp
-    (Stats mhp mhp 0 0 0 0)
+  dup PRIORITY_LIST = #
+    (Cons MEMENTO
+    (Cons SILENCE
+    (Cons PROTECT
+    (Cons STEALTH_MOVE
+    (Cons TELEPORT
+    (Cons EARTH_ROOT
+    (Cons BALLISTA
+    (Cons EMPATHY
+    (Cons ESCORT
+    (Cons RESTORE
+    (Cons DETAIN
+    (Cons HASTE
+    (Cons STEALTH_STRIKE
+    (Cons REVENGE
+    (Cons JAVELIN
+    (Cons QUICK_BOLT_0
+    (Cons QUICK_BOLT_1
+    (Cons EARTH_WALL
+    (Cons SHADOW_DOLL
+    (Cons SHADOW_TRAP
+    (Cons WRAP
+    (Cons KENLUA_WALK
+    (Cons SIRPIX_WALK
+    (Cons FLINA_WALK
+    (Cons SNARCH_WALK
+    (Cons ERKOS_WALK
+    (Cons CRONI_WALK
+    (Cons STANCI_WALK
+    (Cons GONK_WALK
+    (Cons TOPHORO_WALK
+    (Cons AGDRIS_WALK
+    (Cons MEWEN_WALK
+    (Cons ZAGATUR_WALK
+    (Cons FLY
+    (Cons DODGE
+    (Cons NEEDLE
+    (Cons EARTH_PULL
+    (Cons GROUND_SLAM
+    (Cons GUST
+    (Cons SLASH
+    (Cons FLAME_WAVE
+    (Cons FLAME_BALL
+    (Cons FLAME_NOVA
+    (Cons PSYCHOCK
+    (Cons IMPRISON
+    (Cons SHADOW_FLUX
+    (Cons LOCKPICK
+    (Cons SUMMON
+    Nil))))))))))))))))))))))))))))))))))))))))))))))))
 
-  dup end_turn_stats = # {stats}
-    (stats {mhp hp armor power locked muted}
-      cpy locked = locked
-      cpy muted  = muted
-      let locked = if |locked > 0| [|locked - 1|, 0]
-      let muted  = if |muted > 0| [|muted - 1|, 0]
-      (Stats mhp hp 0 0 locked muted))
+  dup get_skill_priority =
+    dup build_array = (~64 #{state}
+      get [array, state]  = state
+      get [index, skills] = state
+      get [skills, skill] = (pop 63 skills)
+      cpy index           = index
+      let array           = (write6 skill index array)
+      [array, [|index + 1|, skills]])
+    dup empty_array = (init6 #0)
+    # {skill}
+      let array = fst (build_array [empty_array, [0, PRIORITY_LIST]])
+      snd (take6 skill 0 array)
 
-  dup stats_cpy = # {stats}
-    (stats {mhp hp armor power locked muted}
-      cpy mhp    = mhp
-      cpy hp     = hp
-      cpy armor  = armor
-      cpy power  = power
-      cpy locked = locked
-      cpy muted  = muted
-      let cpy0   = (Stats mhp hp armor power locked muted)
-      let cpy1   = (Stats mhp hp armor power locked muted)
-      [cpy0, cpy1])
+  // ::::::::::
+  // :: Item ::
+  // ::::::::::
 
-  dup mod_mhp    = # {fn stats} (stats {mhp hp armor power locked muted} (Stats (fn mhp) hp armor power locked muted))
-  dup mod_hp     = # {fn stats} (stats {mhp hp armor power locked muted} (Stats mhp (fn hp) armor power locked muted))
-  dup mod_armor  = # {fn stats} (stats {mhp hp armor power locked muted} (Stats mhp hp (fn armor) power locked muted))
-  dup mod_power   = # {fn stats} (stats {mhp hp armor power locked muted} (Stats mhp hp armor (fn power) locked muted))
-  dup mod_locked = # {fn stats} (stats {mhp hp armor power locked muted} (Stats mhp hp armor power (fn locked) muted))
-  dup mod_muted  = # {fn stats} (stats {mhp hp armor power locked muted} (Stats mhp hp armor power locked (fn muted)))
-  dup get_mhp    = # {stats} (stats {mhp hp armor power locked muted} mhp)
-  dup get_hp     = # {stats} (stats {mhp hp armor power locked muted} hp)
-  dup get_armor  = # {stats} (stats {mhp hp armor power locked muted} armor)
-  dup get_power   = # {stats} (stats {mhp hp armor power locked muted} power)
-  dup get_locked = # {stats} (stats {mhp hp armor power locked muted} locked)
-  dup get_muted  = # {stats} (stats {mhp hp armor power locked muted} muted)
+  dup WALL = # 0
+  dup ROCK = # 1
+  dup TRAP = # 2
 
-  // :::::::::::
-  // :: Piece ::
-  // :::::::::::
+  // ::::::::::
+  // :: Unit ::
+  // ::::::::::
 
-  dup Air    = #                   {Air Wall Throne Unit} Air
-  dup Wall   = # {temp}            {Air Wall Throne Unit} (Wall temp)
-  dup Throne = # {side}            {Air Wall Throne Unit} (Throne side)
-  dup Unit   = # {hero side stats} {Air Wall Throne Unit} (Unit hero side stats)
+  dup VOID = # 0
+  dup ITEM = # 1
+  dup GOAL = # 2
+  dup HERO = # 3
 
-  dup hero_icon = # {hero long}
-    cpy long   = long
-    let hero00 = (to_chars (if long ["Tophoro ", "To"]))
-    let hero01 = (to_chars (if long ["Gonk    ", "Go"]))
-    let hero02 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero03 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero04 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero05 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero06 = (to_chars (if long ["Erkos   ", "Er"]))
-    let hero07 = (to_chars (if long ["Croni   ", "Cr"]))
-    let hero08 = (to_chars (if long ["Snarch  ", "Sn"]))
-    let hero09 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero10 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero11 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero12 = (to_chars (if long ["Sirpix  ", "Si"]))
-    let hero13 = (to_chars (if long ["Kenlua  ", "Ke"]))
-    let hero14 = (to_chars (if long ["Flina   ", "Fl"]))
-    let hero15 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero16 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero17 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero18 = (to_chars (if long ["Stanci  ", "St"]))
-    let hero19 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero20 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero21 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero22 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero23 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero24 = (to_chars (if long ["Zagatur ", "Za"]))
-    let hero25 = (to_chars (if long ["Agdris  ", "Ag"]))
-    let hero26 = (to_chars (if long ["Mewru   ", "Me"]))
-    let hero27 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero28 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero29 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero30 = (to_chars (if long ["Missna  ", "Mi"]))
-    let hero31 = (to_chars (if long ["Missna  ", "Mi"]))
-    let quad00 = [[[hero00,hero01],[hero02,hero03]],[[hero04,hero05],[hero06,hero07]]]
-    let quad01 = [[[hero08,hero09],[hero10,hero11]],[[hero12,hero13],[hero14,hero15]]]
-    let quad02 = [[[hero16,hero17],[hero18,hero19]],[[hero20,hero21],[hero22,hero23]]]
-    let quad03 = [[[hero24,hero25],[hero26,hero27]],[[hero28,hero29],[hero30,hero31]]]
-    let heroes = [[quad00,quad01],[quad02,quad03]]
-    (snd (take5 hero NilF heroes))
+  // Unit getters
+  dup get_unit_kind = # {unit} ||unit >> 30| & 0b00000011|
+  dup get_unit_side = # {unit} ||unit >> 28| & 0b00000011|
+  dup get_unit_type = # {unit} ||unit >> 28| & 0b00000011|
+  dup get_unit_hero = # {unit} ||unit >> 24| & 0b00001111|
+  dup get_unit_life = # {unit} ||unit >> 18| & 0b00111111|
+  dup get_unit_blok = # {unit} ||unit >> 14| & 0b00001111|
+  dup get_unit_eff1 = # {unit} ||unit >> 12| & 0b00000011|
+  dup get_unit_lock = # {unit} ||unit >> 10| & 0b00000011|
+  dup get_unit_mute = # {unit} ||unit >>  8| & 0b00000011|
+  dup get_unit_spec = # {unit} ||unit >>  0| & 0b11111111|
 
-  dup piece_cpy_with = # {fn piece}
-    let case_air    = {fn} [Air, (fn Air)]
-    let case_wall   = {temp} {fn}
-      cpy temp = temp
-      [(Wall temp), (fn (Wall temp))]
-    let case_throne = {side} {fn}
-      cpy side = side
-      [(Throne side), (fn (Throne side))]
-    let case_unit = {side hero stats} {fn}
-      cpy side = side
-      cpy hero = hero
-      get [stats0, stats1] = (stats_cpy stats)
-      [(Unit side hero stats0), (fn (Unit side hero stats1))]
-    (piece case_air case_wall case_throne case_unit fn)
+  // Unit setters
+  dup set_unit_kind = # {kind unit} ||unit & 0b00111111111111111111111111111111| | ||kind & 0b00000011| << 30||
+  dup set_unit_type = # {type unit} ||unit & 0b11011111111111111111111111111111| | ||type & 0b00000011| << 28||
+  dup set_unit_side = # {side unit} ||unit & 0b11001111111111111111111111111111| | ||side & 0b00000011| << 28||
+  dup set_unit_hero = # {hero unit} ||unit & 0b11110000111111111111111111111111| | ||hero & 0b00001111| << 24||
+  dup set_unit_life = # {life unit} ||unit & 0b11111111000000111111111111111111| | ||life & 0b00111111| << 18||
+  dup set_unit_blok = # {blok unit} ||unit & 0b11111111111111001111111111111111| | ||blok & 0b00001111| << 14||
+  dup set_unit_eff1 = # {eff1 unit} ||unit & 0b11111111111111111100111111111111| | ||eff1 & 0b00000011| << 12||
+  dup set_unit_lock = # {lock unit} ||unit & 0b11111111111111111111001111111111| | ||lock & 0b00000011| << 10||
+  dup set_unit_mute = # {mute unit} ||unit & 0b11111111111111111111110011111111| | ||mute & 0b00000011| <<  8||
+  dup set_unit_spec = # {spec unit} ||unit & 0b11111111111111111111111100000000| | ||spec & 0b11111111| <<  0||
 
-  dup piece_icon = # {piece}
-    let case_air    = (to_chars " .")
-    let case_wall   = {temp} if temp [(to_chars " M"), (to_chars " W")]
-    let case_throne = {side} (to_chars " T")
-    let case_unit   = {side hero stats} (hero_icon hero 0)
-    (piece case_air case_wall case_throne case_unit)
+  // Unit mappers
+  dup mut_unit_kind = # {func unit} cpy unit = unit (set_unit_kind (func (get_unit_kind unit)) unit)
+  dup mut_unit_type = # {func unit} cpy unit = unit (set_unit_type (func (get_unit_type unit)) unit)
+  dup mut_unit_side = # {func unit} cpy unit = unit (set_unit_side (func (get_unit_side unit)) unit)
+  dup mut_unit_hero = # {func unit} cpy unit = unit (set_unit_hero (func (get_unit_hero unit)) unit)
+  dup mut_unit_life = # {func unit} cpy unit = unit (set_unit_life (func (get_unit_life unit)) unit)
+  dup mut_unit_blok = # {func unit} cpy unit = unit (set_unit_blok (func (get_unit_blok unit)) unit)
+  dup mut_unit_eff1 = # {func unit} cpy unit = unit (set_unit_eff1 (func (get_unit_eff1 unit)) unit)
+  dup mut_unit_lock = # {func unit} cpy unit = unit (set_unit_lock (func (get_unit_lock unit)) unit)
+  dup mut_unit_mute = # {func unit} cpy unit = unit (set_unit_mute (func (get_unit_mute unit)) unit)
+  dup mut_unit_spec = # {func unit} cpy unit = unit (set_unit_spec (func (get_unit_spec unit)) unit)
 
-  dup piece_info = # {piece}
-    let case_air    = NilF
-    let case_wall   = {temp} NilF
-    let case_throne = {side} NilF
-    let case_unit   = {side hero stats}
-      (stats {mhp hp armor power locked muted}
-        cpy mhp   = mhp
-        cpy hp    = hp
-        cpy armor = armor
-        (concat (hero_icon hero 1) // Hero name
-        (concat (to_chars ": ")
-        (concat (ConsF (box_byte (num_to_char ||hp / 100| % 10|)) NilF) // HP
-        (concat (ConsF (box_byte (num_to_char ||hp /  10| % 10|)) NilF) // HP
-        (concat (ConsF (box_byte (num_to_char ||hp /   1| % 10|)) NilF) // HP
-        (concat (to_chars "/")
-        (concat (ConsF (box_byte (num_to_char ||mhp / 100| % 10|)) NilF) // MHP
-        (concat (ConsF (box_byte (num_to_char ||mhp /  10| % 10|)) NilF) // MHP
-        (concat (ConsF (box_byte (num_to_char ||mhp /   1| % 10|)) NilF) // MHP
-        (concat (to_chars "hp ")
-        (concat (ConsF (box_byte (num_to_char ||armor /  10| % 10|)) NilF) // armor
-        (concat (ConsF (box_byte (num_to_char ||armor /   1| % 10|)) NilF) // armor
-        (concat (to_chars "armor ")
-        (concat (if side [(to_chars "(black)"),(to_chars "(white)")])
-        (concat (if locked [(to_chars " <locked> "), NilF])
-        (concat (if muted [(to_chars " <muted> "), NilF])
-                (ConsF #10 NilF))))))))))))))))))
-    (piece case_air case_wall case_throne case_unit)
+  // Unit constructor
+  dup Unit = # {kind}
+    cpy kind = kind
+    cpy unit = 0
+    if |kind == VOID| then:
+      let unit = (set_unit_kind VOID unit) 
+      unit
+    else: if |kind == ITEM| then: {type}
+      let unit = (set_unit_kind ITEM unit)
+      let unit = (set_unit_type type unit)
+      unit
+    else: if |kind == GOAL| then: {side}
+      let unit = (set_unit_kind GOAL unit)
+      let unit = (set_unit_side side unit)
+      unit
+    else: if |kind == HERO| then: {side hero life blok eff1 lock mute spec}
+      let unit = (set_unit_kind HERO unit)
+      let unit = (set_unit_side side unit)
+      let unit = (set_unit_hero hero unit)
+      let unit = (set_unit_life life unit)
+      let unit = (set_unit_blok blok unit)
+      let unit = (set_unit_eff1 eff1 unit)
+      let unit = (set_unit_lock lock unit)
+      let unit = (set_unit_mute mute unit)
+      let unit = (set_unit_spec spec unit)
+      unit
+    else:
+      unit
 
-  dup get_piece_hero = # {piece}
-    let case_air    = None
-    let case_wall   = {a_temp} None
-    let case_throne = {a_side} None
-    let case_unit   = {a_side a_hero a_stats} (Just a_hero)
-    (piece case_air case_wall case_throne case_unit)
+  // Void constructor
+  dup Void = #
+    (Unit VOID)
 
-  dup get_piece_side = # {piece}
-    let case_air    = BOARD
-    let case_wall   = {a_temp} BOARD
-    let case_throne = {a_side} a_side
-    let case_unit   = {a_side a_hero a_stats} a_side
-    (piece case_air case_wall case_throne case_unit)
+  // Item constructor
+  dup Item = # {type}
+    (Unit ITEM type)
 
-  dup piece_is_hero = # {hero piece}
-    let case_air    = 0
-    let case_wall   = {a_temp} 0
-    let case_throne = {a_side} 0
-    let case_unit   = {a_side a_hero a_stats} |a_hero == hero|
-    (piece case_air case_wall case_throne case_unit)
+  // Goal constructor
+  dup Goal = # {side}
+    (Unit GOAL side)
 
-  dup piece_is_wall = # {piece}
-    let case_air    = 0
-    let case_wall   = {a_temp} 1
-    let case_throne = {a_side} 0
-    let case_unit   = {a_side a_hero a_stats} 0
-    (piece case_air case_wall case_throne case_unit)
+  // Hero constructor
+  dup Hero = # {side hero}
+    cpy hero = hero
+    (Unit HERO side hero (get_hero_max_life hero) 0 0 0 0 0 0)
 
-  dup piece_is_air = # {piece}
-    let case_air    = 1
-    let case_wall   = {a_temp} 0
-    let case_throne = {a_side} 0
-    let case_unit   = {a_side a_hero a_stats} 0
-    (piece case_air case_wall case_throne case_unit)
+  // Unit kind pattern-matching
+  dup match_unit_kind = # {unit case_void case_item case_goal case_hero}
+    cpy unit = unit 
+    cpy kind = (get_unit_kind unit)
+    if |kind == VOID| then:
+      case_void
+    else: if |kind == ITEM| then:
+      case_item
+    else: if |kind == GOAL| then:
+      case_goal
+    else: if |kind == HERO| then:
+      case_hero
+    else:
+      0
 
-  dup get_piece_hp = # {piece}
-    let case_air    = 0
-    let case_wall   = {a_temp} 0
-    let case_throne = {a_side} 0
-    let case_unit   = {a_side a_hero a_stats} (get_hp a_stats)
-    (piece case_air case_wall case_throne case_unit)
+  // Given a unit, returns its icon
+  dup get_unit_icon = # {unit}
+    cpy unit      = unit
+    let case_void = (to_chars " .")
+    let case_item = cpy t = (get_unit_type unit) if |t == WALL| [(to_chars "[]"), if |t == ROCK| [(to_chars "()"), (to_chars " %")]]
+    let case_goal = (to_chars "<>")
+    let case_unit = (get_hero_icon (get_unit_hero unit))
+    (match_unit_kind unit case_void case_item case_goal case_unit)
 
-  dup get_piece_mhp = # {piece}
-    let case_air    = 0
-    let case_wall   = {a_temp} 0
-    let case_throne = {a_side} 0
-    let case_unit   = {a_side a_hero a_stats} (get_mhp a_stats)
-    (piece case_air case_wall case_throne case_unit)
+  // Given a unit, returns a readable stats line
+  dup get_unit_info = # {unit}
+    cpy unit      = unit
+    let case_void = NilF
+    let case_item = NilF
+    let case_goal = NilF
+    let case_hero =
+      cpy hero = (get_unit_hero unit)
+      cpy side = (get_unit_side unit)
+      cpy life = (get_unit_life unit)
+      cpy blok = (get_unit_blok unit)
+      cpy eff1 = (get_unit_eff1 unit)
+      cpy lock = (get_unit_lock unit)
+      cpy mute = (get_unit_mute unit)
+      cpy spec = (get_unit_spec unit)
+      (concat (get_hero_icon hero) // Hero name
+      (concat (to_chars ": ")
+      (concat (ConsF (box_byte (num_to_char ||life /  10| % 10|)) NilF) // life
+      (concat (ConsF (box_byte (num_to_char ||life /   1| % 10|)) NilF) // life
+      (concat (to_chars " life, ")
+      (concat (ConsF (box_byte (num_to_char ||blok /  10| % 10|)) NilF) // blok
+      (concat (ConsF (box_byte (num_to_char ||blok /   1| % 10|)) NilF) // blok
+      (concat (to_chars " blok, ")
+      (concat (if side [(to_chars "black "),(to_chars "white ")])
+      (concat (if eff1 [(to_chars "(eff1) "), NilF])
+      (concat (if lock [(to_chars "(lock) "), NilF])
+      (concat (if mute [(to_chars "(mute) "), NilF])
+      (concat (if spec [(to_chars "(spec) "), NilF])
+              (ConsF #10 NilF))))))))))))))
+    (match_unit_kind unit case_void case_item case_goal case_hero)
 
-  dup get_piece_armor = # {piece}
-    let case_air    = 0
-    let case_wall   = {a_temp} 0
-    let case_throne = {a_side} 0
-    let case_unit   = {a_side a_hero a_stats} (get_armor a_stats)
-    (piece case_air case_wall case_throne case_unit)
-
-  dup piece_is_locked = # {piece}
-    let case_air    = 0
-    let case_wall   = {a_temp} 0
-    let case_throne = {a_side} 0
-    let case_unit   = {a_side a_hero a_stats} |(get_locked a_stats) > 0|
-    (piece case_air case_wall case_throne case_unit)
-
-  dup piece_is_muted = # {piece}
-    let case_air    = 0
-    let case_wall   = {a_temp} 0
-    let case_throne = {a_side} 0
-    let case_unit   = {a_side a_hero a_stats} |(get_muted a_stats) > 0|
-    (piece case_air case_wall case_throne case_unit)
+  // Adds an amount of life to an unit
+  dup heal = # {add_life unit}
+    cpy unit      = unit
+    let case_void = unit
+    let case_item = unit
+    let case_goal = unit
+    let case_hero =
+      cpy add_life = add_life
+      cpy has_life = (get_unit_life unit)
+      cpy max_life = (get_hero_max_life (get_unit_hero unit))
+      cpy new_life = |has_life + add_life|
+      if |new_life > 2147483648| then: // damage > life
+        Void
+      else: if |new_life > max_life| then:
+        (set_unit_life max_life unit)
+      else:
+        (set_unit_life new_life unit)
+    (match_unit_kind unit case_void case_item case_goal case_hero)
+    
+  // Removes an amount of life of an unit
+  dup damage = # {damage unit} (heal |0 - damage| unit)
+  dup mute   = # {turns unit} (mut_unit_mute {mute}|mute + turns| unit)
+  dup lock   = # {turns unit} (mut_unit_lock {lock}|lock + turns| unit)
+  dup blok   = # {armor unit} (mut_unit_blok {blok}|blok + armor| unit)
 
   // "a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
   // - The same position: if they can't interact with each other.
   // - Inverted position: the elements interacted and one now occupies the position of the other.
   dup a_step_to_b = # {a b}
-    let case_a_air      = {b} [Air, b]
-    let case_a_wall     = {a_temp} {b} [(Wall a_temp), b]
-    let case_a_throne   = {a_side} {b} [(Throne a_side), b]
-    let case_a_unit     = {a_side a_hero a_stats} {b}
-      let case_b_air    = {a_side a_hero a_stats}
-        let a_val       = (Unit a_side a_hero a_stats)
-        let b_val       = Air
-        [b_val, a_val]
-      let case_b_wall   = {b_temp} {a_side a_hero a_stats}
-        let a_val       = (Unit a_side a_hero a_stats)
-        let b_val       = (Wall b_temp)
-        [a_val, b_val]
-      let case_b_throne = {b_side} {a_side a_hero a_stats}
-        let a_val       = (Unit a_side a_hero a_stats)
-        let b_val       = (Throne b_side)
-        [a_val, b_val]
-      let case_b_unit   = {b_side b_hero b_stats} {a_side a_hero a_stats}
-        cpy a_side      = a_side
-        cpy b_side      = b_side
-        let a_val       = (Unit a_side a_hero a_stats)
-        let b_val       = (Unit b_side b_hero b_stats)
-        let can_pass    = (eql_side a_side b_side)
-        let then_swap   = [{a b}[b,a],{a b}[a,b]]
-        (if can_pass then_swap a_val b_val)
-      (b case_b_air case_b_wall case_b_throne case_b_unit a_side a_hero a_stats)
-    (a case_a_air case_a_wall case_a_throne case_a_unit b)
-
-  dup damage_visual_effect = # {dmg piece}
-    let case_air    = (Wall 0)
-    let case_wall   = {temp} (Wall temp)
-    let case_throne = {side} (Throne side)
-    let case_unit   = {side hero stats} (Unit side hero (mod_hp {hp}|hp - dmg| stats))
-    (piece case_air case_wall case_throne case_unit)
-
-  dup heal = # {add piece}
-    let case_air    = Air
-    let case_wall   = {temp} (Wall temp)
-    let case_throne = {side} (Throne side)
-    let case_unit   = {side hero stats}
-      (stats {mhp hp armor power locked muted}
-        cpy add = add
-        cpy nhp = |hp + add|
-        cpy mhp = mhp
-        (if |nhp > |2 ** 31||
-          then: {side hero} Air
-          else: {side hero}
-            let nhp = if |nhp > mhp| [mhp, nhp]
-            (Unit side hero (Stats mhp nhp armor power locked muted))
-          side hero))
-    (piece case_air case_wall case_throne case_unit)
-    
-  dup damage = # {dmg} (heal |0 - dmg|)
-
-  dup lock = # {turns piece}
-    let case_air    = Air
-    let case_wall   = {temp} (Wall temp)
-    let case_throne = {side} (Throne side)
-    let case_unit   = {side hero stats} (Unit side hero (mod_locked {x}|turns + x| stats))
-    (piece case_air case_wall case_throne case_unit)
-
-  dup mute = # {turns piece}
-    let case_air    = Air
-    let case_wall   = {temp} (Wall temp)
-    let case_throne = {side} (Throne side)
-    let case_unit   = {side hero stats} (Unit side hero (mod_muted {x}|turns + x| stats))
-    (piece case_air case_wall case_throne case_unit)
-
-  dup armor = # {armor piece}
-    let case_air    = Air
-    let case_wall   = {temp} (Wall temp)
-    let case_throne = {side} (Throne side)
-    let case_unit   = {side hero stats} (Unit side hero (mod_armor {x}|armor + x| stats))
-    (piece case_air case_wall case_throne case_unit)
-
-  dup power = # {power piece}
-    let case_air    = Air
-    let case_wall   = {temp} (Wall temp)
-    let case_throne = {side} (Throne side)
-    let case_unit   = {side hero stats} (Unit side hero (mod_power {x}|power + x| stats))
-    (piece case_air case_wall case_throne case_unit)
-
-  // :::::::::::::::::::::
-  // :: Heroes & Skills ::
-  // :::::::::::::::::::::
-
-  dup TOPHORO  = # 0
-  dup GONK     = # 1
-  dup ERKOS    = # 6
-  dup CRONI    = # 7
-  dup SNARCH   = # 8
-  dup SIRPIX   = # 12
-  dup KENLUA   = # 13
-  dup FLINA    = # 14
-  dup STANCI   = # 18
-  dup ZAGATUR  = # 24
-  dup AGDRIS   = # 25
-  dup MEWRU    = # 26
-
-  let TO = TOPHORO
-  let GO = GONK
-  let ER = ERKOS
-  let CR = CRONI
-  let SN = SNARCH
-  let SI = SIRPIX
-  let KE = KENLUA
-  let FL = FLINA
-  let ST = STANCI
-  let ZA = ZAGATUR
-  let AG = AGDRIS
-  let ME = MEWRU
-
-  dup Tophoro  = # {side} (Unit side TOPHORO (base_stats 120))
-  dup Gonk     = # {side} (Unit side GONK    (base_stats  80))
-  dup Erkos    = # {side} (Unit side ERKOS   (base_stats  40))
-  dup Croni    = # {side} (Unit side CRONI   (base_stats  40))
-  dup Snarch   = # {side} (Unit side SNARCH  (base_stats  60))
-  dup Sirpix   = # {side} (Unit side SIRPIX  (base_stats  60))
-  dup Kenlua   = # {side} (Unit side KENLUA  (base_stats  60))
-  dup Flina    = # {side} (Unit side FLINA   (base_stats  60))
-  dup Stanci   = # {side} (Unit side STANCI  (base_stats  40))
-  dup Zagatur  = # {side} (Unit side ZAGATUR (base_stats  10))
-  dup Agdris   = # {side} (Unit side AGDRIS  (base_stats  20))
-  dup Mewru    = # {side} (Unit side MEWRU   (base_stats  20))
-
-  // << Pre-Walk >>
-  dup PASS           = # 0
-  dup SHADOW_TRAP    = # 1
-  dup SILENCE        = # 2
-  dup MEMENTO        = # 3
-
-  // << SelfCast >>
-  dup STEALTH_CLONE  = # 16
-  dup BALLISTA       = # 17
-  dup FLAME_RAGE     = # 18
-  dup ENDURE         = # 19
-  dup BREATH         = # 20
-  dup EMPATHY        = # 21
-  dup EARTH_ROOT     = # 22
-  dup SHADOW_BOND    = # 23
-  dup TELEKINESIS    = # 24
-  dup TELEPORT       = # 25
-
-  // << PointAndClick >>
-  dup EARTH_LOCK     = # 64
-  dup PROTECT        = # 65
-  dup LIGHT_HEAL     = # 66
-  dup HASTE          = # 67
-  dup SLICE          = # 68
-  dup STEALTH_SWAP   = # 69
-  dup KILLING_EDGE   = # 70
-  dup LIGHT          = # 71
-  dup QUICK_BOLT     = # 72
-  dup JAVELIN        = # 73
-  dup SHATTER        = # 74
-
-  // << TerrainControl >>
-  dup EARTH_WALL     = # 112
-  dup SHADOW_DOLL    = # 113
-
-  // << Walk >>
-  dup KENLUA_WALK    = # 128
-  dup SIRPIX_WALK    = # 129
-  dup FLINA_WALK     = # 130
-  dup SNARCH_WALK    = # 131
-  dup ERKOS_WALK     = # 132
-  dup STANCI_WALK    = # 133
-  dup CRONI_WALK     = # 134
-  dup GONK_WALK      = # 135
-  dup TOPHORO_WALK   = # 136
-  dup AGDRIS_WALK    = # 137
-  dup MEWRU_WALK     = # 138
-  dup ZAGATUR_WALK   = # 139
-
-  // << PostWalk >>
-  dup FLY            = # 160
-  dup DODGE          = # 161
-
-  // << Skillshot >>
-  dup EARTH_PULL     = # 176
-  dup GUST           = # 177
-  dup SLASH          = # 178
-  dup PIERCING_BOLT  = # 179
-  dup EXPLOSIVE_BOLT = # 180
-  dup FLAME_WAVE     = # 181
-  dup FLAME_BALL     = # 182
-  dup FLAME_NOVA     = # 183
-  dup NEEDLE         = # 184
-  dup SPIKES         = # 185
-  dup MEND           = # 186
-  dup PSYCHOCK       = # 187
-  dup SHADOW_FLUX    = # 188
-  dup RESTORE        = # 189
-  dup PETALKILL      = # 190
-
-  // << EndTurn >>
-  dup SHADOW_TRAP    = # 224
-  dup SUMMON         = # 225
-
-  // get_skill_hero
-  // | Given a skill, returns the hero of that skill
-  // : {skill : Num}
-  //   Num
-  dup get_skill_hero = # {skill}
-    let i000 = [[[[ 0,CR],[AG,AG]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i016 = [[[[SI,SN],[ER,GO]],[[GO,GO],[TO,CR]]],[[[ME,ME],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i032 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i048 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i064 = [[[[TO,ST],[ST,KE]],[[KE,SI],[SI,ST]]],[[[SN,FL],[GO, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i080 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i096 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i112 = [[[[TO,CR],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i128 = [[[[KE,SI],[FL,SN]],[[ER,ST],[CR,GO]]],[[[TO,AG],[ME,ZA]],[[ 0, 0],[ 0, 0]]]]
-    let i144 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i160 = [[[[FL,KE],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i176 = [[[[TO,FL],[KE,SN]],[[SN,ER],[ER,ER]]],[[[ZA,ZA],[ME,ME]],[[CR,ST],[ZA, 0]]]]
-    let i192 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i208 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i224 = [[[[CR,ZA],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let i240 = [[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]],[[[ 0, 0],[ 0, 0]],[[ 0, 0],[ 0, 0]]]]
-    let smap = [[[[i000,i016],[i032,i048]],[[i064,i080],[i096,i112]]],[[[i128,i144],[i160,i176]],[[i192,i208],[i224,i240]]]]
-    snd (take8 skill 0 smap)
-
-  // get_hero_skill
-  // | Given a hero and a skill slot, returns the skill
-  // : {hero : Num}
-  //   {slot : Num}
-  //   Num
-  dup get_hero_skill = # {hero slot}
-    let to = [[[TOPHORO_WALK , EARTH_PULL]   , [EARTH_WALL   , EARTH_LOCK]]    , [[EARTH_ROOT , PASS] , [PASS , PASS]]]
-    let go = [[[GONK_WALK    , ENDURE]       , [BREATH       , EMPATHY]]       , [[SHATTER    , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let er = [[[ERKOS_WALK   , FLAME_BALL]   , [FLAME_WAVE   , FLAME_RAGE]]    , [[FLAME_NOVA , PASS] , [PASS , PASS]]]
-    let cr = [[[CRONI_WALK   , SHADOW_DOLL]  , [SHADOW_FLUX  , SHADOW_TRAP]]   , [[SHADOW_BOND, PASS] , [PASS , PASS]]]
-    let sn = [[[SNARCH_WALK  , QUICK_BOLT]   , [PIERCING_BOLT, EXPLOSIVE_BOLT]], [[BALLISTA   , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let si = [[[SIRPIX_WALK  , STEALTH_CLONE], [STEALTH_SWAP , KILLING_EDGE]]  , [[PASS       , PASS] , [PASS , PASS]]]
-    let ke = [[[KENLUA_WALK  , DODGE]        , [SLICE        , HASTE]]         , [[SLASH      , PASS] , [PASS , PASS]]]
-    let fl = [[[FLINA_WALK   , JAVELIN]      , [GUST         , FLY]]           , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let st = [[[STANCI_WALK  , LIGHT_HEAL]   , [PROTECT      , RESTORE]]       , [[LIGHT      , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let za = [[[ZAGATUR_WALK , SUMMON]       , [NEEDLE       , SPIKES]]        , [[PETALKILL  , PASS] , [PASS , PASS]]]
-    let ag = [[[AGDRIS_WALK  , SILENCE]      , [MEMENTO      , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let me = [[[MEWRU_WALK   , PSYCHOCK]     , [MEND         , TELEKINESIS]]   , [[TELEPORT   , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let xx = [[[PASS         , PASS]         , [PASS         , PASS]]          , [[PASS       , PASS] , [PASS , PASS]]]
-    let h0 = [[[[to,go],[xx,xx]],[[xx,xx],[er,cr]]],[[[sn,xx],[xx,xx]],[[si,ke],[fl,xx]]]]
-    let h1 = [[[[xx,xx],[st,xx]],[[xx,xx],[xx,xx]]],[[[za,ag],[me,xx]],[[xx,xx],[xx,xx]]]]
-    (snd (take3 slot 0 (snd (take5 hero 0 [h0,h1]))))
+    cpy a             = a
+    cpy b             = b
+    let case_a_void   = [a, b]
+    let case_a_item   = [a, b]
+    let case_a_goal   = [a, b]
+    let case_a_hero   =
+      let case_b_void = [b, a]
+      let case_b_item =
+        if |(get_unit_type b) == TRAP| then:
+          [Void, (lock 1 a)]
+        else:
+          [a, b]
+      let case_b_goal = [a, b]
+      let case_b_hero = 
+        cpy a_side    = (get_unit_side a)
+        cpy b_side    = (get_unit_side b)
+        if |a_side == b_side| then:
+          [b, a]
+        else:
+          [a, b]
+      (match_unit_kind b case_b_void case_b_item case_b_goal case_b_hero)
+    (match_unit_kind a case_a_void case_a_item case_a_goal case_a_hero)
 
   // :::::::::::
   // :: Board ::
   // :::::::::::
 
   dup new_board = #
-    let O   = Air
-    let a   = (Gonk WHITE)
-    let b   = (Erkos WHITE)
-    let c   = (Kenlua WHITE)
-    let d   = (Mewru WHITE)
-    let e   = (Tophoro BLACK)
-    let f   = (Croni BLACK)
-    let g   = (Stanci BLACK)
-    let h   = (Flina BLACK)
-    let W   = (Wall 0)
-    let x   = (Throne WHITE)
-    let y   = (Throne BLACK)
-    let r00 = [[[[[W,W],[W,W]],[[W,W],[W,O]]],[[[O,W],[W,O]],[[O,O],[O,W]]]],[[[[W,O],[O,O]],[[O,W],[W,O]]],[[[O,W],[W,W]],[[y,W],[W,W]]]]]
-    let r01 = [[[[[W,O],[O,W]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[h,g]],[[O,f],[e,W]]]]]
-    let r02 = [[[[[W,W],[W,W]],[[W,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[O,O],[O,W]]]]]
-    let r03 = [[[[[W,O],[O,W]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[O,O],[O,W]]]]]
-    let r04 = [[[[[W,O],[W,W]],[[W,W],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[O,O],[O,W]]]]]
-    let r05 = [[[[[W,O],[O,W]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[O,O],[O,W]]]]]
-    let r06 = [[[[[W,W],[W,W]],[[W,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[W,O],[O,W]]]]]
-    let r07 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
-    let r08 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
-    let r09 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
-    let r10 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
-    let r11 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
-    let r12 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
-    let r13 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
-    let r14 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
-    let r15 = [[[[[W,W],[W,W]],[[W,W],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[W,W]],[[W,W],[W,W]]]]] // MID
-    let r16 = [[[[[W,W],[W,W]],[[W,W],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[W,W]],[[W,W],[W,W]]]]] // MID
-    let r17 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
-    let r18 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
-    let r19 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
-    let r20 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
-    let r21 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
-    let r22 = [[[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]]
-    let r23 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
-    let r24 = [[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]]
-    let r25 = [[[[[W,O],[O,W]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[W,W]],[[W,W],[W,W]]]]]
-    let r26 = [[[[[W,O],[O,O]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,O]],[[O,O],[O,W]]]]]
-    let r27 = [[[[[W,O],[O,O]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[W,W],[W,W]]]]]
-    let r28 = [[[[[W,O],[O,O]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[O,O],[O,W]]]]]
-    let r29 = [[[[[W,O],[O,O]],[[O,O],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[O,W],[W,W]]]]]
-    let r30 = [[[[[W,a],[b,O]],[[c,d],[W,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]],[[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,W],[O,W]],[[O,W],[O,W]]]]]
-    let r31 = [[[[[W,W],[W,x]],[[W,W],[W,O]]],[[[O,W],[W,O]],[[O,O],[O,W]]]],[[[[W,O],[O,O]],[[O,W],[W,O]]],[[[O,W],[W,W]],[[W,W],[W,W]]]]]
-    [[[[[r00,r01],[r02,r03]],[[r04,r05],[r06,r07]]],[[[r08,r09],[r10,r11]],[[r12,r13],[r14,r15]]]],
-    [[[[r16,r17],[r18,r19]],[[r20,r21],[r22,r23]]],[[[r24,r25],[r26,r27]],[[r28,r29],[r30,r31]]]]]
+    let O   = Void
+    let W   = (Item WALL)
+    let a   = (Hero WHITE GONK)
+    let b   = (Hero WHITE ERKOS)
+    let c   = (Hero WHITE KENLUA)
+    let d   = (Hero WHITE MEWEM)
+    let x   = (Goal WHITE)
+    let e   = (Hero BLACK TOPHORO)
+    let f   = (Hero BLACK CRONI)
+    let g   = (Hero BLACK STANCI)
+    let h   = (Hero BLACK FLINA)
+    let y   = (Goal BLACK)
+    let r00 = [[[[W,W],[W,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[h,W],[W,W]]]]
+    let r01 = [[[[W,W],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,g],[y,W]]]]
+    let r02 = [[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[f,W]]]]
+    let r03 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,e]]]]
+    let r04 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
+    let r05 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
+    let r06 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
+    let r07 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
+    let r08 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
+    let r09 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
+    let r10 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
+    let r11 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
+    let r12 = [[[[a,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
+    let r13 = [[[[W,b],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]
+    let r14 = [[[[W,x],[c,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[W,W]]]]
+    let r15 = [[[[W,W],[W,d]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,W],[W,W]]]]
+    [[[[r00,r01],[r02,r03]],[[r04,r05],[r06,r07]]],[[[r08,r09],[r10,r11]],[[r12,r13],[r14,r15]]]]
 
-  // Simulates an index in an array of 1024 elements (32x32 map).
-  // x: column
-  // y: line 
+  // Converts a 16x16 position to an index up to 256.
   dup board_index = # {pos}
     get [x,y] = pos
-    ||y * 32| + x|
+    ||y * 16| + x|
 
+  // Converts an index up to 256 to a 16x16 position.
   dup board_position = # {idx}
     cpy idx = idx
-    [|idx % 32|, |idx / 32|]
+    [|idx % 16|, |idx / 16|]
 
   dup board_interact = # {a_pos b_pos fun board}
     cpy a_idx         = (board_index a_pos)
     cpy b_idx         = (board_index b_pos)
-    get [board,a_val] = (take10 a_idx Air board)
-    get [board,b_val] = (take10 b_idx Air board)
+    get [board,a_val] = (take8 a_idx Void board)
+    get [board,b_val] = (take8 b_idx Void board)
     get [a_val,b_val] = (fun a_val b_val)
-    let board         = (write10 a_idx a_val board)
-    let board         = (write10 b_idx b_val board)
+    let board         = (write8 a_idx a_val board)
+    let board         = (write8 b_idx b_val board)
     board 
 
   dup board_swap = # {a_pos b_pos board}
     (board_interact a_pos b_pos {a b}[b,a] board)
 
-  // Apply a function to a board piece
+  // Apply a function to a board unit
   dup board_update = # {pos fun board}
-    (update10 (board_index pos) fun board)
+    (update8 (board_index pos) fun board)
 
   dup print_board = 
+    let NEWLINE = 10
+    let SPACE   = 32
+    let break_lines = {list Cons}
+      dup Cons = Cons
+      dup fold = (list #{x xs i}
+        cpy i = i
+        (if |i == 0| then:
+          {list} (Cons NEWLINE list)
+        else: if ||i % 32| == 0| then:
+          {list} (Cons SPACE (Cons (num_to_char ||i - 1| / 32|) (Cons NEWLINE list)))
+        else:
+          {list} list
+        (Cons x (xs |i + 1|))))
+      # {Nil} (fold {i}(Cons SPACE (Cons (num_to_char 15) Nil)) 0)
     let fold_node = {lft rgt}
       get [lft_info, lft_board] = lft
       get [rgt_info, rgt_board] = rgt
       [(concat lft_info rgt_info), (concat lft_board rgt_board)]
-    let fold_leaf = {piece}
-      get [piece, info] = (piece_cpy_with piece_info piece)
-      [info, (piece_icon piece)]
-    dup fold = (fold10 #fold_node #fold_leaf)
+    let fold_leaf = {unit}
+      cpy unit = unit
+      [(get_unit_info unit), (get_unit_icon unit)]
+    dup fold = (fold8 #fold_node #fold_leaf)
     # {board}
-      get [info, board] = (fold board)
-      let board = (cons-every #64 #10 board)
-      (from_chars (concat (ConsF 10 NilF) (concat info (concat board (ConsF 10 NilF)))))
+      get [info_text, board_text] = (fold board)
+      (from_chars
+        (concat (ConsF NEWLINE NilF)
+        (concat info_text
+        (concat (ConsF NEWLINE NilF)
+        (concat (to_chars " 0 1 2 3 4 5 6 7 8 9 a b c d e f")
+        (concat (break_lines board_text)
+          (ConsF NEWLINE NilF)))))))
 
   dup board_query_at = # {pos func board}
-    (with10 (board_index pos) (piece_cpy_with func) board)
+    let cpy_app_func = {piece}
+      cpy piece = piece
+      [piece, (func piece)]
+    (with8 (board_index pos) cpy_app_func board)
 
-  // ::::::::::::::::
-  // :: Animations ::
-  // ::::::::::::::::
+  dup is_void_at  = # {pos board} (board_query_at pos {unit}|(get_unit_kind unit) == VOID| board)
+  dup is_item_at  = # {pos board} (board_query_at pos {unit}|(get_unit_kind unit) == WALL| board)
+  dup is_goal_at  = # {pos board} (board_query_at pos {unit}|(get_unit_kind unit) == GOAL| board)
+  dup is_hero_at  = # {pos hero board} (board_query_at pos ({unit} cpy unit = unit ||(get_unit_kind unit) == HERO| & |(get_unit_hero unit) == hero||) board)
+  dup get_lock_at = # {pos board} (board_query_at pos get_unit_lock board)
+  dup get_mute_at = # {pos board} (board_query_at pos get_unit_mute board)
+  dup get_side_at = # {pos board} (board_query_at pos get_unit_side board)
+  dup get_life_at = # {pos board} (board_query_at pos get_unit_life board)
+  dup get_blok_at = # {pos board} (board_query_at pos get_unit_blok board)
+  dup comp_side = # {comp a_pos b_pos board}
+    get [board, a_side] = (get_side_at a_pos board)
+    get [board, b_side] = (get_side_at b_pos board)
+    [board, (comp a_side b_side)]
+  dup are_enemies_at = # (comp_side {a b}|a == b|)
+  dup are_allies_at = # (comp_side {a b}|a == b|)
 
-  dup Skip = #        {Skip Text Path Area Many} Skip
-  dup Text = # {text} {Skip Text Path Area Many} (Text text)
-  dup Path = # {path} {Skip Text Path Area Many} (Path path)
-  dup Area = # {area} {Skip Text Path Area Many} (Area area)
-  dup Many = # {list} {Skip Text Path Area Many} (Many list)
+  //dup do_if_enemy = # (do_if_side {a_side b_side} |1 - |a_side == b_side||)
+  //dup do_if_ally  = # (do_if_side {a_side b_side}      |a_side == b_side|)
+
 
   // :::::::::::::
   // :: Effects ::
@@ -870,59 +665,9 @@ def kaelin:
     let b_pos           = (vec2_add a_pos0 a_dxy)
     (board_interact a_pos1 b_pos a_step_to_b board)
 
-  // TODO: Flip properties of a piece about move and attack
-  dup stun = # {piece}
-    let case_air     = Air
-    let case_wall    = {temp} (Wall temp)
-    let case_throne  = {side} (Throne side)
-    let case_unit    = {side hero stats} (Unit side hero stats)
-    (piece case_air case_wall case_throne case_unit)
-
-  // Stun enemies in a 3x3 (circle) around
-  dup stun_small_circle =
-    let area  = vec2_circle_b
-    let hits  = {pos board} (board_update pos stun board)
-    (area #hits) 
-
-  // Checks if given position is a specific hero
-  dup is_hero_at = # {pos hero board}
-    (board_query_at pos (piece_is_hero hero) board)
-
-  // Checks if given position is a wall
-  dup is_wall_at = # {pos board}
-    (board_query_at pos piece_is_wall board)
-
-  // Checks if given position is air
-  dup is_air_at = # {pos board}
-    (board_query_at pos piece_is_air board)
-
-  // Checks if hero at given posittion can move
-  dup is_locked_at = # {pos board}
-    (board_query_at pos piece_is_locked board)
-
-  // Checks if hero at given posittion can cast
-  dup is_muted_at = # {pos board}
-    (board_query_at pos piece_is_muted board)
-
-  // Gets the side of the piece in some position
-  dup get_side_at = # {pos board}
-    (board_query_at pos get_piece_side board)
-
-  // Checks if given position is a specific hero
-  dup get_hp_at = # {pos board}
-    (board_query_at pos get_piece_hp board)
-
-  // Checks if given position is a specific hero
-  dup get_armor_at = # {pos board}
-    (board_query_at pos get_piece_armor board)
-
-  // :::::::::::::::::::
-  // :: Skill Effects ::
-  // :::::::::::::::::::
-
   // cast_area
   // : {-P    : Type}
-  //   {range : Nat}
+  //   {range : Num}
   //   {area  : Area}
   //   {hits  : {cpos : [Num,Num]} {hpos : [Num,Num]} {state : P} P}
   // ! {pos   : [Num,Num]}
@@ -930,21 +675,20 @@ def kaelin:
   //   {state : P}
   //   P
   let cast_area = {range area hits}
-    dup hits = hits
-    dup exec = (area #{hpos state}
-      get [state, area]  = state
+    dup range = range
+    dup hits  = hits
+    dup exec  = (area #{hpos state}
       get [state, cpos]  = state
       get [cpos0, cpos1] = (vec2_cpy cpos)
       get [hpos0, hpos1] = (vec2_cpy hpos)
       let new_state      = (hits cpos0 hpos0 state)
-      let new_area       = (Cons hpos1 area)
-      [[new_state, cpos1], new_area])
-    dup add_range = (add_dirs range)
-    # {pos dirs state}
-      get [cpos0, cpos1] = (vec2_cpy pos)
-      get [state, area]  = (exec (add_range cpos0 dirs) [[state, cpos1], Nil])
-      get [state, cpos]  = state
-      [state, (Area area)]
+      [new_state, cpos1])
+    # {cpos tpos}
+      get [cpos0, cpos1] = (vec2_cpy cpos)
+      get [tpos0, tpos1] = (vec2_cpy tpos)
+      if |(vec2_flat_dist cpos0 tpos0) < |range + 1||
+      then: {state} (fst (exec tpos1 [state, cpos1]))
+      else: {state} state
 
   // cast_wave
   // : {-P    : Type}
@@ -958,626 +702,659 @@ def kaelin:
     dup hits = hits
     dup exec = (area #{hpos_dir state}
       get [hpos, dir]    = hpos_dir
-      get [state, area]  = state
       get [state, cpos]  = state
       get [cpos0, cpos1] = (vec2_cpy cpos)
       get [hpos0, hpos1] = (vec2_cpy hpos)
       let new_state      = (hits cpos0 hpos0 dir state)
-      let new_area       = (Cons hpos1 area)
-      [[new_state, cpos1], new_area])
+      [new_state, cpos1])
     # {pos dir state}
       get [cpos0, cpos1] = (vec2_cpy pos)
-      get [state, area]  = (exec cpos0 dir [[state, cpos1], Nil])
-      get [state, cpos]  = state
-      [state, (Area area)]
-
-  dup do_if_side = # {comp a_pos b_pos board func}
-    get [b_pos0, b_pos1] = (vec2_cpy b_pos)
-    get [board, a_side]  = (get_side_at a_pos board)
-    get [board, b_side]  = (get_side_at b_pos0 board)
-    (if (comp a_side b_side)
-      then: {board} (func b_pos1 board)
-      else: {board} board
-      board)
-  dup do_if_enemy = # (do_if_side {a_side b_side} |1 - |a_side == b_side||)
-  dup do_if_ally  = # (do_if_side {a_side b_side}      |a_side == b_side|)
+      get [state, cpos]  = (exec cpos0 dir [state, cpos1])
+      state
 
   // Walks through a set of directions
   let walk = {hero steps}
     dup hero = hero
     let walk = {state}
-      get [state0, state1]   = state
-      get [pos, dirs]        = state0
-      get [board, path]      = state1
-      get [new_dirs, dir]    = (pop [0,0] dirs)
-      get [pos, pos_cpy]     = (vec2_cpy pos)
-      get [dir, dir_cpy]     = (vec2_cpy dir)
-      let new_pos            = (vec2_add pos_cpy dir_cpy)
-      get [pos, pos_cpy]     = (vec2_cpy pos)
-      let new_path           = {x} (path (Cons pos_cpy x))
-      get [pos, pos_cpy]     = (vec2_cpy pos)
-      get [board, is_hero]   = (is_hero_at pos_cpy hero board)
-      get [pos, pos_cpy]     = (vec2_cpy pos)
-      let new_board          = (if is_hero [step, {pos dir board}board] pos dir board)
-      [[new_pos, new_dirs], [new_board, new_path]]
+      get [board, state]   = state
+      get [pos, dirs]      = state
+      get [new_dirs, dir]  = (pop [0,0] dirs)
+      get [px, py]         = pos
+      get [dx, dy]         = dir
+      cpy px               = px
+      cpy py               = py
+      cpy dx               = dx
+      cpy dy               = dy
+      let new_pos          = (vec2_add [px,py] [dx,dy])
+      get [board, is_hero] = (is_hero_at [px,py] hero board)
+      get [board, is_lock] = (get_lock_at [px,py] board)
+      let can_move         = |is_hero & |is_lock == 0||
+      let new_board        = (if can_move [step, {pos dir board}board] [px,py] [dx,dy] board)
+      [new_board, [new_pos, new_dirs]]
     dup walk = (steps #walk)
     # {pos dirs board}
-      let state            = [[pos, dirs], [board, {x}x]]
-      get [state0, state1] = (walk state)
-      get [pos, dirs]      = state0
-      get [board, path]    = state1
-      [board, (Path (path (Cons pos Nil)))]
+      (fst (walk [board, [pos, dirs]]))
 
   // == Tophoro ==
   // ~~~~~~~~~~~~~
 
-  dup tophoro_walk = (walk #TOPHORO ~3)
+  dup tophoro_walk = (walk #TOPHORO ~4)
+
+  dup earth_root = # {pos arg board}
+    (board_update pos {piece}(heal 20 (mute 3 piece)) board)
 
   dup earth_pull =
     let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #5 NilF)))))
-    let hits = # {cpos hpos dir board} (step hpos dir board)
-    dup make = (cast_wave wave hits)
+    let hits = # {cpos hpos dir board}
+      get [hx,hy] = hpos
+      cpy hx      = hx
+      cpy hy      = hy
+      let board   = (board_update [hx,hy] (mute 1) board)
+      let board   = (step [hx,hy] dir board)
+      board
+    dup earth_pull = (cast_wave wave hits)
     # {pos dir board}
-      (make pos dir board)
+      (earth_pull pos dir board)
 
-  dup earth_wall =
-    let loop = {state}
-      get [state, dirs_list] = state
-      get [board, cpos]      = state
-      get [cpos0, cpos1]     = (vec2_cpy cpos)
-      get [dirs_list, dirs]  = (pop Nil dirs_list)
-      let wall_pos           = (add_dirs3 cpos0 dirs)
-      let board              = (board_update wall_pos {p}(p (Wall 1) {temp}(Wall temp) Throne Unit) board)
-      [[board, cpos1], dirs_list]
-    dup put_walls = (~3 #loop)
-    # {pos dirs_list board}
-      [(fst (fst (put_walls [[board,pos], dirs_list]))), Skip]
-
-  dup earth_lock = # {pos dirs board}
-    get [pos0, pos1] = (vec2_cpy pos)
-    let hpos         = (add_dirs3 pos0 dirs)
-    let board        = (do_if_enemy pos1 hpos board {hpos board}(board_update hpos {p}(mute 1 (lock 1 p)) board))
-    [board, Skip]
-
-  dup earth_root = # {pos arg board}
-    let root  = {piece} (heal 30 (mute 3 piece))
-    let board = (board_update pos root board)
-    [board, Skip]
+  dup earth_wall = (cast_area #2 vec2_range_0 #{cpos hpos board}
+    let put_wall = {unit}
+      cpy unit = unit
+      if |(get_unit_kind unit) == VOID|
+      then: (Item WALL)
+      else: unit
+    let board = (board_update hpos put_wall board)
+    board)
 
   // == Gonk ==
   // ~~~~~~~~~~
 
   dup gonk_walk = (walk #GONK ~4)
 
-  dup endure = # {pos hp board}
-    let endure = {piece} (armor 20 (mute 2 piece))
-    let board  = (board_update pos endure board)
-    [board, Skip]
+  dup empathy = 
+    dup area = (cast_area #0 vec2_range_1 #{cpos hpos param}
+      get [board, dmg] = param
+      cpy dmg   = dmg
+      let board = (board_update hpos (blok |dmg * 3|) board)
+      [board, dmg])
+    # {cpos dmg board}
+      cpy dmg            = dmg
+      get [cpos0, cpos1] = (vec2_cpy cpos)
+      get [cpos2, cpos3] = (vec2_cpy cpos0)
+      let board = (board_update cpos1 (damage dmg) board)
+      (fst (area cpos2 cpos3 [board, dmg]))
 
-  dup breath = # {pos arg board}
-    let breath = {piece} (heal 8 (lock 1 piece))
-    let board  = (board_update pos breath board)
-    [board, Skip]
+  dup revenge = (cast_area #1 vec2_range_0 #{cpos hpos board}
+    get [board, life] = (get_life_at cpos board)
+    let dmg           = ||40 - life| / 4|
+    (board_update hpos (damage dmg) board))
 
-  dup empathy =
-    let area = vec2_circle_c
-    let hits = # {cpos hpos state}
-      get [board, hp] = state
-      cpy hp          = hp
-      let board       = (board_update hpos (armor |hp * 2|) board)
-      [board, hp]
-    dup exec = (cast_area ~0 area hits)
-    # {pos hp board}
-      get [pos0,pos1]   = (vec2_cpy pos)
-      get [state, anim] = (exec pos0 Nil [board, hp])
-      get [board, hp]   = state
-      let board         = (board_update pos1 (damage hp) board)
-      [board, Skip]
+  dup ground_slam = (cast_area #0 vec2_range_2 #{cpos hpos board}
+    get [hpos0, hpos1] = (vec2_cpy hpos)
+    let board          = (board_update hpos0 (damage 2) board)
+    let board          = (board_update hpos1 (mute 1) board)
+    board)
 
-  dup shatter = # {pos dirs board}
-    get [pos0, pos1] = (vec2_cpy pos)
-    get [pos2, pos3] = (vec2_cpy pos0)
-    let hpos         = (add_dirs2 pos1 dirs)
-    get [board, hp]  = (get_hp_at pos2 board)
-    let shatter      = {hpos board} (board_update hpos (damage ||80 - hp| / 4|) board)
-    let board        = (do_if_enemy pos3 hpos board shatter)
-    [board, Skip]
+  let test_revenge =
+    let board = new_board
+    let board = (board_swap [0x0,0xc] [0xf,0x4] board)
+    let board = (board_update [0xf,0x4] (damage 20) board)
+    let board = (revenge [0xF,0x4] [0xF,0x3] board)
+    (print_board board)
 
-  // == Erkos ==
-  // ~~~~~~~~~~~
-
-  dup erkos_walk = (walk #ERKOS ~4)
-
-  dup flame_wave =
-    let wave  = (vec2_wave_out (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))))
-    let hits  = # {cpos hpos dir board} (board_update hpos (damage 5) board)
-    (cast_wave wave hits)
-  
-  dup flame_ball =
-    let area = vec2_circle_e
-    let hits = {cpos hpos board} (board_update hpos (damage 5) board)
-    (cast_area ~4 area #hits)
-
-  dup flame_rage = # {pos dir board}
-    get [pos0,pos1] = (vec2_cpy pos)
-    let board = (board_update pos0 (damage 5) board)
-    let board = (board_update pos1 (power 5) board)
-    board
-
-  dup flame_nova =
-    let area = vec2_circle_j
-    let hits = # {cpos hpos board} (board_update hpos (damage 20) board)
-    dup exec = (cast_area ~0 area hits)
-    # {pos arg board}
-      get [pos0, pos1] = (vec2_cpy pos)
-      let board        = (board_update pos0 (damage 30) board)
-      (exec pos1 Nil board)
-
-  // == Croni ==
-  // ~~~~~~~~~~~
-
-  dup croni_walk = (walk #CRONI ~4)
-
-  dup shadow_doll = # {pos dirs board}
-    let wall_pos = (add_dirs8 pos dirs)
-    let board    = (board_update wall_pos {p}(p (Wall 1) Wall Throne Unit) board)
-    [board, Skip]
-
-  dup shadow_flux =
-    let area = vec2_circle_c
-    let hits = {cpos hpos board} (board_update hpos (damage 15) board)
-    (cast_area ~8 area #hits)
-
-  // == Snarch ==
-  // ~~~~~~~~~~~~
-
-  dup snarch_walk = (walk #SNARCH ~4)
-
-  // TODO: updpate
-  //dup quick_shot = # {pos dirs board}
-    //(board_update (add_dirs4 pos dirs) (damage_visual_effect 3) board)
-
-  // TODO: updpate
-  //dup piercing_bolt =
-    //let area = (vec2_wave (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 NilF))))))
-    //let hits = {pos board} (board_update pos (damage_visual_effect 3) board)
-    //(area #hits) 
-
-  // Explosive Arrow : hits up to 2 3x3 (circles). Deals 2 damage.
-  // TODO: add 5 range
-  //dup explosive_arrow =
-    //let area = vec2_circle_b
-    //let hits = {pos board} (board_update pos (damage_visual_effect 2) board)
-    //# {pos1 pos2 board}
-      //let board = (area #hits pos1 board)
-      //let board = (area #hits pos2 board)
-      //board
-
-  // TODO: mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range increase to 12.
-  //dup ballista = #
-
-  // == Sirpix ==
-  // ~~~~~~~~~~~~
-
-  dup sirpix_walk = (walk #SIRPIX ~4)
-
-  // == Kenlua ==
-  // ~~~~~~~~~~~~
-
-  dup kenlua_walk = (walk #KENLUA ~4)
-
-  // TODO: updpate
-  //dup killing_edge =
-    //let area = vec2_circle_c
-    //let hits = {pos board} (board_update pos (damage_visual_effect 3) board)
-    //(area #hits)
-
-  // TODO: updpate
-  //dup dodge = # {pos1 pos2 pos3 pos4 board}
-    //let case_air    = Air
-    //let case_wall   = {temp} (Wall temp)
-    //let case_throne = {side} (Throne side)
-    //let case_unit   = {side hero stats} (Unit side hero stats)
-    //let board       = (board_update pos1 (damage_visual_effect 1) board)
-    //let board       = (board_update pos2 (damage_visual_effect 1) board)
-    //let board       = (board_update pos3 (damage_visual_effect 1) board)
-    //let board       = (board_update pos4 (damage_visual_effect 1) board)
-    //board
-
-  // TODO: updpate
-  //dup slice_area =
-    //let area = vec2_circle_c
-    //let hits = {pos board} (board_update pos (damage_visual_effect 8) board)
-    //(area #hits)
-
-  // == Flina ==
-  // ~~~~~~~~~~~
-
-  dup flina_walk = (walk #FLINA ~4)
+  let test_ground_slam =
+    let board = new_board
+    let board = (board_swap [0x0,0xc] [0xe,0x3] board)
+    let board = (ground_slam [0xe,0x3] [0xe,0x3] board)
+    (print_board board)
 
   // == Stanci ==
   // ~~~~~~~~~~~~
 
   dup stanci_walk = (walk #STANCI ~4)
 
- // TODO: add "do_if_ally"
-  dup light_heal =
-    let area = vec2_circle_c
-    let hits = {cpos hpos board} (board_update hpos (heal 5) board)
-    (cast_area ~4 area #hits)
+  dup restore = (cast_area #4 vec2_range_0 #{cpos hpos board} (board_update hpos (heal 3) board))
+  dup escort  = (cast_area #4 vec2_range_0 #{cpos hpos board} (board_update hpos (blok 3) board))
+  dup detain  = (cast_area #4 vec2_range_0 #{cpos hpos board} (board_update hpos (mute 1) board))
 
-  // TODO: add "do_if_ally"
-  // TODO: vec2_circle_a with bug, temporary using vec2_cicle_b
-  dup protect =
-    let area = vec2_circle_b
-    let armor = {piece} (armor 5 piece)
-    let hits = {cpos hpos board} (board_update hpos armor board)
-    (cast_area ~4 area #hits)
+  let test_restore =
+    let board = new_board
+    let board = (board_update [0xe,0x2] (damage 10) board)
+    let board = (restore [0xd,0x1] [0xe,0x2] board)
+    (print_board board)
 
- // TODO: add "do_if_ally"
-  dup restore = 
-    let area = vec2_circle_e
-    let hits = {cpos hpos board} (board_update hpos (heal 3) board)
-    (cast_area ~4 area #hits)
+  let test_escort =
+    let board = new_board
+    let board = (escort [0xd,0x1] [0xe,0x2] board)
+    (print_board board)
 
-  // TODO: vec2_circle_a with bug, temporary using vec2_cicle_b
-  // TODO: add "do_if_enemy"
-  dup light = 
-    let area = vec2_circle_b
-    let hits = {cpos hpos board} (board_update hpos (damage_visual_effect 2) board)
-    (cast_area ~4 area #hits)
+  let test_detain =
+    let board = new_board
+    let board = (board_swap [0x0,0xc] [0xc,0x2] board)
+    let board = (detain [0xd,0x1] [0xc,0x2] board)
+    (print_board board)
 
-  // == Zagatur ==
-  // ~~~~~~~~~~~~~
-
-  dup zagatur_walk = (walk #ZAGATUR ~0)
-
-  // == Agdris ==
-  // ~~~~~~~~~~~~
-
-  dup agdris_walk = (walk #AGDRIS ~1)
-
-  // == Mewru ==
+  // == Erkos ==
   // ~~~~~~~~~~~
 
-  dup mewru_walk = (walk #MEWRU ~0)
+  dup erkos_walk = (walk #ERKOS ~4)
 
-  // ::::::::::::::::::
-  // :: Casts & Turn ::
-  // ::::::::::::::::::
+  dup flame_ball =
+    let area = vec2_range_2
+    let hits = {cpos hpos board} (board_update hpos (damage 3) board)
+    (cast_area #4 area #hits)
 
-  // Removes temporary walls, stuns, etc.
-  dup end_turn =
-    let fold_node = {a b} [a,b]
-    let fold_leaf = {piece}
-      let case_air    = Air
-      let case_wall   = {temp} if temp [Air, (Wall 0)]
-      let case_throne = Throne
-      let case_unit   = {hero side stats} (Unit hero side (end_turn_stats stats))
-      (piece case_air case_wall case_throne case_unit)
-    dup fold = (fold10 #fold_node #fold_leaf)
-    # {board} (fold board)
+  dup flame_wave =
+    let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))))
+    let hits = {cpos hpos dir board} (board_update hpos (damage 3) board)
+    (cast_wave wave #hits)
 
-  // empty_casts
-  // : (Array ~8 (Maybe [Pos, Arg]))
-  dup empty_casts = #
-    let a = [None,None]
-    let b = [a,a] let c = [b,b] let d = [c,c]
-    let e = [d,d] let f = [e,e] let g = [f,f] [g,g]
+  dup flame_nova = 
+    dup area = (cast_area #0 vec2_range_6 #{cpos hpos param}
+      get [board, dmg] = param
+      cpy dmg   = dmg
+      let board = (board_update hpos (damage |dmg / 2|) board)
+      [board, dmg])
+    # {cpos dmg board}
+      cpy dmg            = dmg // TODO: can't be > current hp
+      get [cpos0, cpos1] = (vec2_cpy cpos)
+      get [cpos2, cpos3] = (vec2_cpy cpos0)
+      let board = (board_update cpos1 (damage dmg) board)
+      (fst (area cpos2 cpos3 [board, dmg]))
 
-  // cast
-  // : {skill : Num} ->
-  //   {pos   : [Num,Num]} ->
-  //   {arg   : Arg} ->
-  //   {casts : (Array ~8 (Maybe [Pos, Arg]))} ->
-  //   (Array ~8 (Maybe [Pos, Arg]))
-  dup cast = # {skill pos arg casts}
-    (write8 skill (Just [pos, arg]) casts)
-
-  // Casts a skill
-  dup cast_skill = # {mutable lockable hero skill effect state log}
-    cpy hero = hero
-    cpy skill = skill
-    get [board, casts] = state
-    get [casts, mcast] = (take8 skill None casts)
-    let case_none = {board casts}
-      [board, casts]
-    let case_just = {cast board casts}
-      get [pos, arg]         = cast
-      get [pos, pos_cpy]     = (vec2_cpy pos)
-      get [board, is_hero]   = (is_hero_at pos_cpy hero board)
-      get [pos, pos_cpy]     = (vec2_cpy pos)
-      get [board, is_muted]  = (if mutable [{board}(is_muted_at pos_cpy board), {board}[board,0]] board)
-      get [pos, pos_cpy]     = (vec2_cpy pos)
-      get [board, is_locked] = (if lockable [{board}(is_locked_at pos_cpy board), {board}[board,0]] board)
-      get [pos, pos_cpy]     = (vec2_cpy pos)
-      let board = (if |is_hero & ||1 - is_muted| & |1 - is_locked|||
-        then: {board}
-          get [board, anims] = (effect pos_cpy arg board)
-          (log [hero, skill] anims board)
-        else: {board}
-          board
-        board)
-      [board, casts]
-    (mcast case_none case_just board casts)
-
-  let exec_casts_with = {log}
-    dup log = log
-    # {casts board}
-      let state = [board, casts]
-      let state = (cast_skill 1 0 GONK    ENDURE        endure        state log)
-      let state = (cast_skill 1 0 GONK    BREATH        breath        state log)
-      let state = (cast_skill 1 0 GONK    EMPATHY       empathy       state log)
-      let state = (cast_skill 1 0 TOPHORO EARTH_ROOT    earth_root    state log)
-      let state = (cast_skill 1 0 TOPHORO EARTH_LOCK    earth_lock    state log)
-      let state = (cast_skill 1 0 TOPHORO EARTH_WALL    earth_wall    state log)
-      let state = (cast_skill 1 0 CRONI   SHADOW_DOLL   shadow_doll   state log)
-      let state = (cast_skill 0 1 KENLUA  KENLUA_WALK   kenlua_walk   state log)
-      let state = (cast_skill 0 1 SIRPIX  SIRPIX_WALK   sirpix_walk   state log)
-      let state = (cast_skill 0 1 FLINA   FLINA_WALK    flina_walk    state log)
-      let state = (cast_skill 0 1 SNARCH  SNARCH_WALK   snarch_walk   state log)
-      let state = (cast_skill 0 1 ERKOS   ERKOS_WALK    erkos_walk    state log)
-      let state = (cast_skill 0 1 STANCI  STANCI_WALK   stanci_walk   state log)
-      let state = (cast_skill 0 1 CRONI   CRONI_WALK    croni_walk    state log)
-      let state = (cast_skill 0 1 GONK    GONK_WALK     gonk_walk     state log)
-      let state = (cast_skill 0 1 TOPHORO TOPHORO_WALK  tophoro_walk  state log)
-      let state = (cast_skill 0 1 AGDRIS  AGDRIS_WALK   agdris_walk   state log)
-      let state = (cast_skill 0 1 MEWRU   MEWRU_WALK    mewru_walk    state log)
-      let state = (cast_skill 0 1 ZAGATUR ZAGATUR_WALK  zagatur_walk  state log)
-      let state = (cast_skill 1 0 TOPHORO EARTH_PULL    earth_pull    state log)
-      //let state = (cast_skill 1 0 SNARCH  PIERCING_BOLT piercing_bolt state log)
-      let state = (cast_skill 1 0 CRONI   SHADOW_FLUX   shadow_flux   state log)
-      let state = (cast_skill 0 1 ERKOS   FLAME_WAVE    flame_wave    state log)
-      let state = (cast_skill 0 1 ERKOS   FLAME_BALL    flame_ball    state log)
-      let state = (cast_skill 0 1 ERKOS   FLAME_NOVA    flame_nova    state log)
-      let state = (cast_skill 0 1 STANCI  LIGHT_HEAL      light_heal  state log)
-      let state = (cast_skill 0 1 STANCI  PROTECT   protect     state log)
-      let state = (cast_skill 0 1 STANCI  RESTORE   restore     state log)
-      let state = (cast_skill 0 1 STANCI  LIGHT     light       state log)
-      let board = fst state
-      board
-
-  // exec_casts
-  // : {casts : (Array ~8 [Pos, Arg])}
-  //   {board : (Array ~10 Unit)}
-  //   (Array ~10 Unit)
-  dup exec_casts = (exec_casts_with #{a b c}c)
-
-  //W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
-  //W . . W . . W . . . . . . . . . . . . . . . . . . W X X . X X W
-  //W W W W W . W . . . . . . . . . . . . . . . . . . C . . . . . W
-  //W . . W . . W . . . . . . . . . . . . . . . . . . W . . . . . W
-  //W . W W W W W . . . . . . . . . . . . . . . X . . C . . . . . W
-  //W . . W . . . . . . . . . . . . . . . . X X X X X W . . . . . W
-  //W W W W W . W . . . . . . . . . . . . X X X X X X W W . . . W W
-  //. . . . . . . . . . . . . X X . . . X X X X X X X X X . . . . .
-  //. . . . . . . . . . . X X X X . . . X X X X X X X X X . . . . .
-  //W . . . . . . . . E X X X X X . . X X X X X T X X X X X . . . W
-  //W . . . . . . . . . . X X X X . . . X X X X X X X X X . . . . W
-  //W . . . . . . . . . . . . X X . . . X X X X X X X X X . . . . W
-  //. . . . . . . . . . . . . . . . . . . X X X X X X X . . . . . .
-  //. . . . . . . . . . . . . . . . C . . . X X X X X . . . . . . .
-  //. . . . . . . . . . . . . . X X S . . . . . X . . . . . . . . .
-  //C C C C C C C C . . . . . X X X X X . . . . . . C C C C C C C C
-  //C C C C C C C . . . . . . X X T X X . . . . . . C C C C C C C C
-  //. . . . . . . . . . . . . X X X X X . . . . . . . . . . . . . .
-  //. . . . . . . . M . . S . . X X X . . . . . . . . . . . . . . .
-  //. . . . . . . . . . E . . . . . . . . . . X X X . . . . . . . .
-  //W . . . . . . . . . K . . . . . . . . . . X T X . . . . . . . W
-  //W . . . . . . . . . . . . . . . . X . . . X X X . . . . . . . W
-  //W . . . . . . . . . . . . . . . X X . . . . . . . . . . . . . W
-  //. . . . O O . . . . . . . . T X X X . . . . . . . . . . . . . .
-  //. . . . . . . . . . . . . . . . X X . . . . . . . . . . . . . .
-  //W W . . . W W . . . . X . . . . . X . . . . . . . W W W W W W W
-  //W . . . . . W . . . X X X . . . . . . . . . . . . W . . . . . W
-  //W . . . . . C . . X X K X X . . . . . . . . . . . W . W W W W W
-  //W . . . . . W . . . X X X . . . . . . . . . . . . W . W . . . W
-  //W . . . . . C . . . . X . . . . . . . . . . . . . W . W . W W W
-  //W O . K . O W . . . . . . . . . . . . . . . . . . W . W . W . W
-  //W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
-
-  //W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
-  //W . . W . . W . . . . . . . M . . . . . . . . . . W X X . X X W
-  //W W W W W . W . . . . . . M M M . . . . . . . . . C . . . . . W
-  //W . . W . . W . . . . . M M M M M . . . . . . . . W . . . . . W
-  //W . W W W W W . . . . M M M M M M M . . . . . . . C . . . . . W
-  //W . . W . . . . . . M M M M O M M M M . . . . . . W . . . . . W
-  //W W W W W . W . . M M M M O O O M M M M . . . . . W W . . . W W
-  //. . . . . . . . M M M M O O O O O M M M M . . . . . . . . . . .
-  //. . . . . . . M M M M O O O O O O O M M M M . . . . . X . . . .
-  //W . . . . . M M M M O O O O 4 O O O O M M M M . . . X X X . . W
-  //W . . . . M M M M O O O O 4 4 4 O O O O M M M M . . . X . . . W
-  //W . . . M M M M O O O O 4 4 4 4 4 O O O O M M M M . . . . . . W
-  //. . . M M M M O O O O 4 4 4 4 4 4 4 O O O O M M M M . . . . . .
-  //. . M M M M O O O O 4 4 4 4 C 4 4 4 4 O O O O M M M M . . . . .
-  //. . . M M M M O O O O 4 4 4 4 4 4 4 O O O O M M M M . . . . . .
-  //C C C C C C C M O O O O 4 4 4 4 4 O O O O M M M C C C C C C C C
-  //C C C C C C C M M O O O O 4 4 4 O O O O M M M M C C C C C C C C
-  //. . . . . . M M M M O O O O 4 O O O O M M M M . . . . . . . . .
-  //. . . . . . . M M M M O O O O O O O M M M M . . . . . . . . . .
-  //. . . . . . . . M M M M O O O O O M M M M . . . . . . . . . . .
-  //W . . . . . . . . M M M M O O O M M M M . . . . . . . . . . . W
-  //W . . . . . . . . . M M M M O M M M M . . . C . . . . . . . . W
-  //W . . . . . . . . . . M M M M M M M . . . . 4 . . . . . . . . W
-  //. . . . O O . . . . . . M M M M M . . . . . 4 . . . . . . . . .
-  //. . . . . . . . . . . . . M M M . . . . . . 4 . . . . . . . . .
-  //W W . . . W W . . . . . . . M . . . . . . . 4 . . W W W W W W W
-  //W . . . . . W . . . . . . . . . . x . . . . O . . W . . . . . W
-  //W . . . . . C . . . . . . . . . x x x . . . O . . W . W W W W W
-  //W . . . . . W . . . . . . . . x x x x x . . O . . W . W . . . W
-  //W . . . . . C . . . . . . . . . x x x . . . O . . W . W . W W W
-  //W O . . . O W . . . . . . . . . . x . . . . . . . W . W . W . W
-  //W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
-
-  let test_earth_pull =
+  let test_flame_ball =
     let board = new_board
-    let board = (board_swap [1,30] [30,3] board) // teleports gonk to near tophoro
-    let casts = empty_casts
-    let casts = (cast EARTH_PULL [30,1] DOWN casts)
-    let board = (exec_casts casts board)
-    snd (is_hero_at [30,2] GONK board)
+    let board = (board_swap [0x1,0xd] [0xd,0x5] board)
+    let board = (flame_ball [0xd,0x5] [0xd,0x3] board)
+    (print_board board)
 
-  let test_earth_lock =
+  let test_flame_wave =
     let board = new_board
-    let board = (board_swap [1,30] [30,2] board) // teleports gonk to near tophoro
-    let casts = empty_casts
-    let casts = (cast EARTH_LOCK [30,1] (Cons DOWN Nil) casts)
-    let casts = (cast GONK_WALK [30,2] (Cons DOWN Nil) casts)
-    let board = (exec_casts casts board)
-    snd (is_hero_at [30,2] GONK board)
+    let board = (board_swap [0x1,0xd] [0xd,0x5] board)
+    let board = (flame_wave [0xd,0x5] UP board)
+    (print_board board)
 
-  let test_earth_wall =
+  let test_flame_nova =
     let board = new_board
-    let casts = empty_casts
-    let casts = (cast EARTH_WALL [30,1] (Cons (Cons DOWN Nil) Nil) casts)
-    let board = (exec_casts casts board)
-    snd (is_wall_at [30,2] board)
+    let board = (board_swap [0x1,0xd] [0xd,0x5] board)
+    let board = (flame_nova [0xd,0x5] 12 board)
+    (print_board board)
 
-  let test_breath =
+  // == Croni ==
+  // ~~~~~~~~~~~
+
+  dup shadow_flux =
+    let area = vec2_range_1
+    let hits = {cpos hpos board} (board_update hpos (damage 8) board)
+    (cast_area #8 area #hits)
+
+  dup shadow_trap = (cast_area #8 vec2_range_0 #{cpos hpos board}
+    let put_trap = {unit}
+      cpy unit = unit
+      if |(get_unit_kind unit) == VOID|
+      then: (Item TRAP)
+      else: unit
+    let board = (board_update hpos put_trap board)
+    board)
+
+  let test_shadow_trap =
     let board = new_board
-    let board = (board_update [1,30] (damage 5) board)
-    let casts = empty_casts
-    let casts = (cast BREATH [1,30] {x}x casts)
-    let board = (exec_casts casts board)
-    let test0 = |snd (get_hp_at [1,30] board) == 80|
-    test0
+    let board = (board_swap [0xe,0x2] [0xa,0xd] board)
+    let board = (shadow_trap [0xa,0xd] [0x2,0xd] board)
+    let board = (erkos_walk [0x1,0xd] (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))) board)
+    (print_board board)
 
-  let test_empathy =
-    let board = new_board
-    let casts = empty_casts
-    let casts = (cast EMPATHY [1,30] 3 casts)
-    let board = (exec_casts casts board)
-    let test0 = |snd (get_armor_at [2,30] board) == 6|
-    let test1 = |snd (get_armor_at [1,30] board) == 6|
-    let test3 = |snd (get_hp_at [1,30] board) == 77|
-    |test1 & |test0 & test1||
+  # test_shadow_trap
 
-  let test_shadow_flux =
-    let board = new_board
-    let board = (board_update [1,30] (damage 79) board) // leaves gonk with 1hp
-    let board = (board_swap [1,30] [29,3] board) // teleports gonk to near cromi
-    let casts = empty_casts
-    let casts = (cast SHADOW_FLUX [29,1] (Cons DOWN (Cons DOWN Nil)) casts)
-    let board = (exec_casts casts board)
-    let test0 = (snd (is_air_at [29,3] board))
-    test0
+  //// == Snarch ==
+  //// ~~~~~~~~~~~~
 
-  let test_light_heal =
-    let board = new_board 
-    let board = (board_update [29,1] (damage 11) board) // Croni receives damage
-    let casts = empty_casts
-    let casts = (cast LIGHT_HEAL [27,1] (Cons RIGHT (Cons RIGHT Nil)) casts)
-    let board = (exec_casts casts board)
-    let test0 = |(snd (get_hp_at [29,1] board)) == 34|
-    test0
-    //(print_board board)
+  //dup snarch_walk = (walk #SNARCH ~4)
 
-  let test_protect =
-    let board = new_board 
-    //let board = (board_update [27,1] (armor 13) board)
-    //get [board, anim] = (protect [27,01] (Cons RIGHT (Cons RIGHT Nil)) board)
-    let casts = empty_casts
-    let casts = (cast PROTECT [27,01] (Cons RIGHT (Cons RIGHT Nil)) casts)
-    let board = (exec_casts casts board)
-    let test0 = |(snd (get_armor_at [29,1] board)) == 05|
-    test0
-    //(print_board board)
+  //// TODO: updpate
+  ////dup quick_shot = # {pos dirs board}
+    ////(board_update (add_dirs4 pos dirs) (damage_visual_effect 3) board)
 
-  let test_restore = 
-    let board = new_board 
-    let board = (board_update [29,1] (damage 11) board) // Croni receives damage
-    let board = (board_update [26,1] (damage 3) board) // Flyna receives damage
-    let board = (board_update [27,1] (damage 3) board) // Stanci receives damage
-    let casts = empty_casts
-    let casts = (cast RESTORE [27,01] (Cons DOWN Nil) casts)
-    let board = (exec_casts casts board)
-    let test0 =  |(snd (get_hp_at [27,1] board)) == 40| // Stanci recovers full hp
-    let test1 =  |(snd (get_hp_at [29,1] board)) == 32| // Croni restores to 29 + 3
-    |test0 & test1|
+  //// TODO: updpate
+  ////dup piercing_bolt =
+    ////let area = (vec2_wave (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 NilF))))))
+    ////let hits = {pos board} (board_update pos (damage_visual_effect 3) board)
+    ////(area #hits) 
 
-  let test_light =
-    let board = new_board
-    let casts = empty_casts
-    let casts = (cast LIGHT [27,01] (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))) casts)
-    let board = (exec_casts casts board)
-    let test0 = |(snd (get_hp_at [30,1] board)) == 118|
-    test0
+  //// Explosive Arrow : hits up to 2 3x3 (circles). Deals 2 damage.
+  //// TODO: add 5 range
+  ////dup explosive_arrow =
+    ////let area = vec2_circle_b
+    ////let hits = {pos board} (board_update pos (damage_visual_effect 2) board)
+    ////# {pos1 pos2 board}
+      ////let board = (area #hits pos1 board)
+      ////let board = (area #hits pos2 board)
+      ////board
 
-  dup test_flame_wave = #
-    let board = new_board
-    let casts = empty_casts
-    let casts = (cast FLAME_WAVE [2,30] RIGHT casts)
-    let board = (exec_casts casts board)
-    let test0 = |(snd (get_hp_at [4,30] board)) == 55| // Kenlua receies 5 dmg
-    test0
+  //// TODO: mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range increase to 12.
+  ////dup ballista = #
 
-  dup test_flame_ball = #
-    let board = new_board
-    let casts = empty_casts
-    let casts = (cast FLAME_BALL [2,30] (Cons UP Nil) casts)
-    let board = (exec_casts casts board)
-    let test0 = |(snd (get_hp_at [1,30] board)) == 75| // Gonk receies 5 dmg
-    test0
+  //// == Sirpix ==
+  //// ~~~~~~~~~~~~
 
-  dup test_flame_nova = #
-    let board = new_board
-    //let board = (flame_nova [15,15] board)
-    let casts = empty_casts
-    let casts = (cast FLAME_NOVA [2,30] {x}x casts)
-    let board = (exec_casts casts board)
-    let test0 = |(snd (get_hp_at [1,30] board)) == 60| // Gonk receies 20 dmg
-    let test1 = (snd (is_air_at [2,30] board)) // Erkos dies
-    |test0 & test1|
+  //dup sirpix_walk = (walk #SIRPIX ~4)
 
-  dup tests = #
-    let test00 = ["earth_pull"      , test_earth_pull]
-    let test01 = ["earth_lock"      , test_earth_lock]
-    let test02 = ["earth_wall"      , test_earth_wall]
-    let test03 = ["breath"          , test_breath]
-    let test04 = ["empathy"         , test_empathy]
-    let test05 = ["shadow_flux"     , test_shadow_flux]
-    let test06 = ["light_heal"      , test_light_heal]
-    let test07 = ["test_protect"    , test_protect]
-    let test08 = ["test_restore"    , test_restore]
-    let test09 = ["test_light"      , test_light]
-    let test10 = ["test_flame_wave" , test_flame_wave]
-    let test11 = ["test_flame_ball" , test_flame_ball]
-    let test12 = ["test_flame_nova" , test_flame_nova]
-    let test13 = ["_"               , 1]
-    let test14 = ["_"               , 1]
-    let test15 = ["_"               , 1]
-    let test16 = ["_"               , 1]
-    let test17 = ["_"               , 1]
-    let test18 = ["_"               , 1]
-    let test18 = ["_"               , 1]
-    let test19 = ["_"               , 1]
-    let test20 = ["_"               , 1]
-    let test21 = ["_"               , 1]
-    let test22 = ["_"               , 1]
-    let test23 = ["_"               , 1]
-    let test24 = ["_"               , 1]
-    let test25 = ["_"               , 1]
-    let test26 = ["_"               , 1]
-    let test27 = ["_"               , 1]
-    let test28 = ["_"               , 1]
-    let test29 = ["_"               , 1]
-    let test30 = ["_"               , 1]
-    let test31 = ["_"               , 1]
-    [[[[[test00, test01], [test02, test03]],
-       [[test04, test05], [test06, test07]]],
-      [[[test08, test09], [test10, test11]],
-       [[test12, test13], [test14, test15]]]],
-     [[[[test16, test17], [test18, test19]],
-       [[test20, test21], [test22, test23]]],
-      [[[test24, test25], [test26, test27]],
-       [[test28, test29], [test30, test31]]]]]
+  //// == Kenlua ==
+  //// ~~~~~~~~~~~~
 
-  dup export =
-    [#new_board,
-    [exec_casts_with,
-    [#empty_casts,
-    [#cast,
-    [#get_hero_skill,
-      0]]]]]
+  //dup kenlua_walk = (walk #KENLUA ~4)
 
-  # tests
+  //// TODO: updpate
+  ////dup killing_edge =
+    ////let area = vec2_circle_c
+    ////let hits = {pos board} (board_update pos (damage_visual_effect 3) board)
+    ////(area #hits)
+
+  //// TODO: updpate
+  ////dup dodge = # {pos1 pos2 pos3 pos4 board}
+    ////let case_air    = Air
+    ////let case_wall   = {temp} (Wall temp)
+    ////let case_throne = {side} (Throne side)
+    ////let case_unit   = {side hero stats} (Unit side hero stats)
+    ////let board       = (board_update pos1 (damage_visual_effect 1) board)
+    ////let board       = (board_update pos2 (damage_visual_effect 1) board)
+    ////let board       = (board_update pos3 (damage_visual_effect 1) board)
+    ////let board       = (board_update pos4 (damage_visual_effect 1) board)
+    ////board
+
+  //// TODO: updpate
+  ////dup slice_area =
+    ////let area = vec2_circle_c
+    ////let hits = {pos board} (board_update pos (damage_visual_effect 8) board)
+    ////(area #hits)
+
+  //// == Flina ==
+  //// ~~~~~~~~~~~
+
+  //dup flina_walk = (walk #FLINA ~4)
+
+  //// == Stanci ==
+  //// ~~~~~~~~~~~~
+
+  //dup stanci_walk = (walk #STANCI ~4)
+
+ //// TODO: add "do_if_ally"
+  //dup light_heal =
+    //let area = vec2_circle_c
+    //let hits = {cpos hpos board} (board_update hpos (heal 5) board)
+    //(cast_area ~4 area #hits)
+
+  //// TODO: add "do_if_ally"
+  //// TODO: vec2_circle_a with bug, temporary using vec2_cicle_b
+  //dup protect =
+    //let area = vec2_circle_b
+    //let armor = {piece} (armor 5 piece)
+    //let hits = {cpos hpos board} (board_update hpos armor board)
+    //(cast_area ~4 area #hits)
+
+ //// TODO: add "do_if_ally"
+  //dup restore = 
+    //let area = vec2_circle_e
+    //let hits = {cpos hpos board} (board_update hpos (heal 3) board)
+    //(cast_area ~4 area #hits)
+
+  //// TODO: vec2_circle_a with bug, temporary using vec2_cicle_b
+  //// TODO: add "do_if_enemy"
+  //dup light = 
+    //let area = vec2_circle_b
+    //let hits = {cpos hpos board} (board_update hpos (damage_visual_effect 2) board)
+    //(cast_area ~4 area #hits)
+
+  //// == Zagatur ==
+  //// ~~~~~~~~~~~~~
+
+  //dup zagatur_walk = (walk #ZAGATUR ~0)
+
+  //// == Agdris ==
+  //// ~~~~~~~~~~~~
+
+  //dup agdris_walk = (walk #AGDRIS ~1)
+
+  //// == Mewem ==
+  //// ~~~~~~~~~~~
+
+  //dup mewem_walk = (walk #MEWEM ~0)
+
+  //// ::::::::::::::::::
+  //// :: Casts & Turn ::
+  //// ::::::::::::::::::
+
+  //// Removes temporary walls, stuns, etc.
+  //dup end_turn =
+    //let fold_node = {a b} [a,b]
+    //let fold_leaf = {piece}
+      //let case_air    = Air
+      //let case_wall   = {temp} if temp [Air, (Wall 0)]
+      //let case_throne = Throne
+      //let case_unit   = {hero side stats} (Unit hero side (end_turn_stats stats))
+      //(piece case_air case_wall case_throne case_unit)
+    //dup fold = (fold8 #fold_node #fold_leaf)
+    //# {board} (fold board)
+
+  //// empty_casts
+  //// : (Array ~8 (Maybe [Pos, Arg]))
+  //dup empty_casts = #
+    //let a = [None,None]
+    //let b = [a,a] let c = [b,b] let d = [c,c]
+    //let e = [d,d] let f = [e,e] let g = [f,f] [g,g]
+
+  //// cast
+  //// : {skill : Num} ->
+  ////   {pos   : [Num,Num]} ->
+  ////   {arg   : Arg} ->
+  ////   {casts : (Array ~8 (Maybe [Pos, Arg]))} ->
+  ////   (Array ~8 (Maybe [Pos, Arg]))
+  //dup cast = # {skill pos arg casts}
+    //(write8 skill (Just [pos, arg]) casts)
+
+  //// Casts a skill
+  //dup cast_skill = # {mutable lockable hero skill effect state log}
+    //cpy hero = hero
+    //cpy skill = skill
+    //get [board, casts] = state
+    //get [casts, mcast] = (take8 skill None casts)
+    //let case_none = {board casts}
+      //[board, casts]
+    //let case_just = {cast board casts}
+      //get [pos, arg]         = cast
+      //get [pos, pos_cpy]     = (vec2_cpy pos)
+      //get [board, is_hero]   = (is_hero_at pos_cpy hero board)
+      //get [pos, pos_cpy]     = (vec2_cpy pos)
+      //get [board, is_muted]  = (if mutable [{board}(is_muted_at pos_cpy board), {board}[board,0]] board)
+      //get [pos, pos_cpy]     = (vec2_cpy pos)
+      //get [board, is_locked] = (if lockable [{board}(is_locked_at pos_cpy board), {board}[board,0]] board)
+      //get [pos, pos_cpy]     = (vec2_cpy pos)
+      //let board = (if |is_hero & ||1 - is_muted| & |1 - is_locked|||
+        //then: {board}
+          //get [board, anims] = (effect pos_cpy arg board)
+          //(log [hero, skill] anims board)
+        //else: {board}
+          //board
+        //board)
+      //[board, casts]
+    //(mcast case_none case_just board casts)
+
+  //let exec_casts_with = {log}
+    //dup log = log
+    //# {casts board}
+      //let state = [board, casts]
+      //let state = (cast_skill 1 0 GONK    ENDURE        endure        state log)
+      //let state = (cast_skill 1 0 GONK    BREATH        breath        state log)
+      //let state = (cast_skill 1 0 GONK    EMPATHY       empathy       state log)
+      //let state = (cast_skill 1 0 TOPHORO EARTH_ROOT    earth_root    state log)
+      //let state = (cast_skill 1 0 TOPHORO EARTH_LOCK    earth_lock    state log)
+      //let state = (cast_skill 1 0 TOPHORO EARTH_WALL    earth_wall    state log)
+      //let state = (cast_skill 1 0 CRONI   SHADOW_DOLL   shadow_doll   state log)
+      //let state = (cast_skill 0 1 KENLUA  KENLUA_WALK   kenlua_walk   state log)
+      //let state = (cast_skill 0 1 SIRPIX  SIRPIX_WALK   sirpix_walk   state log)
+      //let state = (cast_skill 0 1 FLINA   FLINA_WALK    flina_walk    state log)
+      //let state = (cast_skill 0 1 SNARCH  SNARCH_WALK   snarch_walk   state log)
+      //let state = (cast_skill 0 1 ERKOS   ERKOS_WALK    erkos_walk    state log)
+      //let state = (cast_skill 0 1 STANCI  STANCI_WALK   stanci_walk   state log)
+      //let state = (cast_skill 0 1 CRONI   CRONI_WALK    croni_walk    state log)
+      //let state = (cast_skill 0 1 GONK    GONK_WALK     gonk_walk     state log)
+      //let state = (cast_skill 0 1 TOPHORO TOPHORO_WALK  tophoro_walk  state log)
+      //let state = (cast_skill 0 1 AGDRIS  AGDRIS_WALK   agdris_walk   state log)
+      //let state = (cast_skill 0 1 MEWEM   MEWEM_WALK    mewem_walk    state log)
+      //let state = (cast_skill 0 1 ZAGATUR ZAGATUR_WALK  zagatur_walk  state log)
+      //let state = (cast_skill 1 0 TOPHORO EARTH_PULL    earth_pull    state log)
+      ////let state = (cast_skill 1 0 SNARCH  PIERCING_BOLT piercing_bolt state log)
+      //let state = (cast_skill 1 0 CRONI   SHADOW_FLUX   shadow_flux   state log)
+      //let state = (cast_skill 0 1 ERKOS   FLAME_WAVE    flame_wave    state log)
+      //let state = (cast_skill 0 1 ERKOS   FLAME_BALL    flame_ball    state log)
+      //let state = (cast_skill 0 1 ERKOS   FLAME_NOVA    flame_nova    state log)
+      //let state = (cast_skill 0 1 STANCI  LIGHT_HEAL      light_heal  state log)
+      //let state = (cast_skill 0 1 STANCI  PROTECT   protect     state log)
+      //let state = (cast_skill 0 1 STANCI  RESTORE   restore     state log)
+      //let state = (cast_skill 0 1 STANCI  LIGHT     light       state log)
+      //let board = fst state
+      //board
+
+  //// exec_casts
+  //// : {casts : (Array ~8 [Pos, Arg])}
+  ////   {board : (Array ~8 Unit)}
+  ////   (Array ~8 Unit)
+  //dup exec_casts = (exec_casts_with #{a b c}c)
+
+  ////W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
+  ////W . . W . . W . . . . . . . . . . . . . . . . . . W X X . X X W
+  ////W W W W W . W . . . . . . . . . . . . . . . . . . C . . . . . W
+  ////W . . W . . W . . . . . . . . . . . . . . . . . . W . . . . . W
+  ////W . W W W W W . . . . . . . . . . . . . . . X . . C . . . . . W
+  ////W . . W . . . . . . . . . . . . . . . . X X X X X W . . . . . W
+  ////W W W W W . W . . . . . . . . . . . . X X X X X X W W . . . W W
+  ////. . . . . . . . . . . . . X X . . . X X X X X X X X X . . . . .
+  ////. . . . . . . . . . . X X X X . . . X X X X X X X X X . . . . .
+  ////W . . . . . . . . E X X X X X . . X X X X X T X X X X X . . . W
+  ////W . . . . . . . . . . X X X X . . . X X X X X X X X X . . . . W
+  ////W . . . . . . . . . . . . X X . . . X X X X X X X X X . . . . W
+  ////. . . . . . . . . . . . . . . . . . . X X X X X X X . . . . . .
+  ////. . . . . . . . . . . . . . . . C . . . X X X X X . . . . . . .
+  ////. . . . . . . . . . . . . . X X S . . . . . X . . . . . . . . .
+  ////C C C C C C C C . . . . . X X X X X . . . . . . C C C C C C C C
+  ////C C C C C C C . . . . . . X X T X X . . . . . . C C C C C C C C
+  ////. . . . . . . . . . . . . X X X X X . . . . . . . . . . . . . .
+  ////. . . . . . . . M . . S . . X X X . . . . . . . . . . . . . . .
+  ////. . . . . . . . . . E . . . . . . . . . . X X X . . . . . . . .
+  ////W . . . . . . . . . K . . . . . . . . . . X T X . . . . . . . W
+  ////W . . . . . . . . . . . . . . . . X . . . X X X . . . . . . . W
+  ////W . . . . . . . . . . . . . . . X X . . . . . . . . . . . . . W
+  ////. . . . O O . . . . . . . . T X X X . . . . . . . . . . . . . .
+  ////. . . . . . . . . . . . . . . . X X . . . . . . . . . . . . . .
+  ////W W . . . W W . . . . X . . . . . X . . . . . . . W W W W W W W
+  ////W . . . . . W . . . X X X . . . . . . . . . . . . W . . . . . W
+  ////W . . . . . C . . X X K X X . . . . . . . . . . . W . W W W W W
+  ////W . . . . . W . . . X X X . . . . . . . . . . . . W . W . . . W
+  ////W . . . . . C . . . . X . . . . . . . . . . . . . W . W . W W W
+  ////W O . K . O W . . . . . . . . . . . . . . . . . . W . W . W . W
+  ////W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
+
+  ////W W W W W W W . . W W . . . . W W . . . . W W . . W W W T W W W
+  ////W . . W . . W . . . . . . . M . . . . . . . . . . W X X . X X W
+  ////W W W W W . W . . . . . . M M M . . . . . . . . . C . . . . . W
+  ////W . . W . . W . . . . . M M M M M . . . . . . . . W . . . . . W
+  ////W . W W W W W . . . . M M M M M M M . . . . . . . C . . . . . W
+  ////W . . W . . . . . . M M M M O M M M M . . . . . . W . . . . . W
+  ////W W W W W . W . . M M M M O O O M M M M . . . . . W W . . . W W
+  ////. . . . . . . . M M M M O O O O O M M M M . . . . . . . . . . .
+  ////. . . . . . . M M M M O O O O O O O M M M M . . . . . X . . . .
+  ////W . . . . . M M M M O O O O 4 O O O O M M M M . . . X X X . . W
+  ////W . . . . M M M M O O O O 4 4 4 O O O O M M M M . . . X . . . W
+  ////W . . . M M M M O O O O 4 4 4 4 4 O O O O M M M M . . . . . . W
+  ////. . . M M M M O O O O 4 4 4 4 4 4 4 O O O O M M M M . . . . . .
+  ////. . M M M M O O O O 4 4 4 4 C 4 4 4 4 O O O O M M M M . . . . .
+  ////. . . M M M M O O O O 4 4 4 4 4 4 4 O O O O M M M M . . . . . .
+  ////C C C C C C C M O O O O 4 4 4 4 4 O O O O M M M C C C C C C C C
+  ////C C C C C C C M M O O O O 4 4 4 O O O O M M M M C C C C C C C C
+  ////. . . . . . M M M M O O O O 4 O O O O M M M M . . . . . . . . .
+  ////. . . . . . . M M M M O O O O O O O M M M M . . . . . . . . . .
+  ////. . . . . . . . M M M M O O O O O M M M M . . . . . . . . . . .
+  ////W . . . . . . . . M M M M O O O M M M M . . . . . . . . . . . W
+  ////W . . . . . . . . . M M M M O M M M M . . . C . . . . . . . . W
+  ////W . . . . . . . . . . M M M M M M M . . . . 4 . . . . . . . . W
+  ////. . . . O O . . . . . . M M M M M . . . . . 4 . . . . . . . . .
+  ////. . . . . . . . . . . . . M M M . . . . . . 4 . . . . . . . . .
+  ////W W . . . W W . . . . . . . M . . . . . . . 4 . . W W W W W W W
+  ////W . . . . . W . . . . . . . . . . x . . . . O . . W . . . . . W
+  ////W . . . . . C . . . . . . . . . x x x . . . O . . W . W W W W W
+  ////W . . . . . W . . . . . . . . x x x x x . . O . . W . W . . . W
+  ////W . . . . . C . . . . . . . . . x x x . . . O . . W . W . W W W
+  ////W O . . . O W . . . . . . . . . . x . . . . . . . W . W . W . W
+  ////W W W T W W W . . W W . . . . W W . . . . W W . . W W W W W W W"
+
+  //let test_earth_pull =
+    //let board = new_board
+    //let board = (board_swap [1,30] [30,3] board) // teleports gonk to near tophoro
+    //let casts = empty_casts
+    //let casts = (cast EARTH_PULL [30,1] DOWN casts)
+    //let board = (exec_casts casts board)
+    //snd (is_hero_at [30,2] GONK board)
+
+  //let test_earth_lock =
+    //let board = new_board
+    //let board = (board_swap [1,30] [30,2] board) // teleports gonk to near tophoro
+    //let casts = empty_casts
+    //let casts = (cast EARTH_LOCK [30,1] (Cons DOWN Nil) casts)
+    //let casts = (cast GONK_WALK [30,2] (Cons DOWN Nil) casts)
+    //let board = (exec_casts casts board)
+    //snd (is_hero_at [30,2] GONK board)
+
+  //let test_earth_wall =
+    //let board = new_board
+    //let casts = empty_casts
+    //let casts = (cast EARTH_WALL [30,1] (Cons (Cons DOWN Nil) Nil) casts)
+    //let board = (exec_casts casts board)
+    //snd (is_wall_at [30,2] board)
+
+  //let test_breath =
+    //let board = new_board
+    //let board = (board_update [1,30] (damage 5) board)
+    //let casts = empty_casts
+    //let casts = (cast BREATH [1,30] {x}x casts)
+    //let board = (exec_casts casts board)
+    //let test0 = |snd (get_hp_at [1,30] board) == 80|
+    //test0
+
+  //let test_empathy =
+    //let board = new_board
+    //let casts = empty_casts
+    //let casts = (cast EMPATHY [1,30] 3 casts)
+    //let board = (exec_casts casts board)
+    //let test0 = |snd (get_armor_at [2,30] board) == 6|
+    //let test1 = |snd (get_armor_at [1,30] board) == 6|
+    //let test3 = |snd (get_hp_at [1,30] board) == 77|
+    //|test1 & |test0 & test1||
+
+  //let test_shadow_flux =
+    //let board = new_board
+    //let board = (board_update [1,30] (damage 79) board) // leaves gonk with 1hp
+    //let board = (board_swap [1,30] [29,3] board) // teleports gonk to near cromi
+    //let casts = empty_casts
+    //let casts = (cast SHADOW_FLUX [29,1] (Cons DOWN (Cons DOWN Nil)) casts)
+    //let board = (exec_casts casts board)
+    //let test0 = (snd (is_air_at [29,3] board))
+    //test0
+
+  //let test_light_heal =
+    //let board = new_board 
+    //let board = (board_update [29,1] (damage 11) board) // Croni receives damage
+    //let casts = empty_casts
+    //let casts = (cast LIGHT_HEAL [27,1] (Cons RIGHT (Cons RIGHT Nil)) casts)
+    //let board = (exec_casts casts board)
+    //let test0 = |(snd (get_hp_at [29,1] board)) == 34|
+    //test0
+    ////(print_board board)
+
+  //let test_protect =
+    //let board = new_board 
+    ////let board = (board_update [27,1] (armor 13) board)
+    ////get [board, anim] = (protect [27,01] (Cons RIGHT (Cons RIGHT Nil)) board)
+    //let casts = empty_casts
+    //let casts = (cast PROTECT [27,01] (Cons RIGHT (Cons RIGHT Nil)) casts)
+    //let board = (exec_casts casts board)
+    //let test0 = |(snd (get_armor_at [29,1] board)) == 05|
+    //test0
+    ////(print_board board)
+
+  //let test_restore = 
+    //let board = new_board 
+    //let board = (board_update [29,1] (damage 11) board) // Croni receives damage
+    //let board = (board_update [26,1] (damage 3) board) // Flyna receives damage
+    //let board = (board_update [27,1] (damage 3) board) // Stanci receives damage
+    //let casts = empty_casts
+    //let casts = (cast RESTORE [27,01] (Cons DOWN Nil) casts)
+    //let board = (exec_casts casts board)
+    //let test0 =  |(snd (get_hp_at [27,1] board)) == 40| // Stanci recovers full hp
+    //let test1 =  |(snd (get_hp_at [29,1] board)) == 32| // Croni restores to 29 + 3
+    //|test0 & test1|
+
+  //let test_light =
+    //let board = new_board
+    //let casts = empty_casts
+    //let casts = (cast LIGHT [27,01] (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))) casts)
+    //let board = (exec_casts casts board)
+    //let test0 = |(snd (get_hp_at [30,1] board)) == 118|
+    //test0
+
+  //dup test_flame_wave = #
+    //let board = new_board
+    //let casts = empty_casts
+    //let casts = (cast FLAME_WAVE [2,30] RIGHT casts)
+    //let board = (exec_casts casts board)
+    //let test0 = |(snd (get_hp_at [4,30] board)) == 55| // Kenlua receies 5 dmg
+    //test0
+
+  //dup test_flame_ball = #
+    //let board = new_board
+    //let casts = empty_casts
+    //let casts = (cast FLAME_BALL [2,30] (Cons UP Nil) casts)
+    //let board = (exec_casts casts board)
+    //let test0 = |(snd (get_hp_at [1,30] board)) == 75| // Gonk receies 5 dmg
+    //test0
+
+  //dup test_flame_nova = #
+    //let board = new_board
+    ////let board = (flame_nova [15,15] board)
+    //let casts = empty_casts
+    //let casts = (cast FLAME_NOVA [2,30] {x}x casts)
+    //let board = (exec_casts casts board)
+    //let test0 = |(snd (get_hp_at [1,30] board)) == 60| // Gonk receies 20 dmg
+    //let test1 = (snd (is_air_at [2,30] board)) // Erkos dies
+    //|test0 & test1|
+
+  //dup tests = #
+    //let test00 = ["earth_pull"      , test_earth_pull]
+    //let test01 = ["earth_lock"      , test_earth_lock]
+    //let test02 = ["earth_wall"      , test_earth_wall]
+    //let test03 = ["breath"          , test_breath]
+    //let test04 = ["empathy"         , test_empathy]
+    //let test05 = ["shadow_flux"     , test_shadow_flux]
+    //let test06 = ["light_heal"      , test_light_heal]
+    //let test07 = ["test_protect"    , test_protect]
+    //let test08 = ["test_restore"    , test_restore]
+    //let test09 = ["test_light"      , test_light]
+    //let test10 = ["test_flame_wave" , test_flame_wave]
+    //let test11 = ["test_flame_ball" , test_flame_ball]
+    //let test12 = ["test_flame_nova" , test_flame_nova]
+    //let test13 = ["_"               , 1]
+    //let test14 = ["_"               , 1]
+    //let test15 = ["_"               , 1]
+    //let test16 = ["_"               , 1]
+    //let test17 = ["_"               , 1]
+    //let test18 = ["_"               , 1]
+    //let test18 = ["_"               , 1]
+    //let test19 = ["_"               , 1]
+    //let test20 = ["_"               , 1]
+    //let test21 = ["_"               , 1]
+    //let test22 = ["_"               , 1]
+    //let test23 = ["_"               , 1]
+    //let test24 = ["_"               , 1]
+    //let test25 = ["_"               , 1]
+    //let test26 = ["_"               , 1]
+    //let test27 = ["_"               , 1]
+    //let test28 = ["_"               , 1]
+    //let test29 = ["_"               , 1]
+    //let test30 = ["_"               , 1]
+    //let test31 = ["_"               , 1]
+    //[[[[[test00, test01], [test02, test03]],
+       //[[test04, test05], [test06, test07]]],
+      //[[[test08, test09], [test10, test11]],
+       //[[test12, test13], [test14, test15]]]],
+     //[[[[test16, test17], [test18, test19]],
+       //[[test20, test21], [test22, test23]]],
+      //[[[test24, test25], [test26, test27]],
+       //[[test28, test29], [test30, test31]]]]]
+
+  //dup export =
+    //[#new_board,
+    //[exec_casts_with,
+    //[#empty_casts,
+    //[#cast,
+    //[#get_hero_skill,
+      //0]]]]]
+
+  //# (print_board new_board)
