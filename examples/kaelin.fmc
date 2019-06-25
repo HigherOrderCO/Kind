@@ -40,7 +40,7 @@
 // - Tophoro
 //   - Earth_Root(num) : heals 20 hp. Self-roots for 3 turns.
 //   - Earth_Wall(pos) : places a temporary wall in an empty tile for up to 2 range.
-//   - Earth_Pull(dir) : pulls enemies in a 1-3-5 wave ahead, dealing 2 dmg and muting them.
+//   - Earth_Wave(dir) : hits enemies in a 1-3-5 wave ahead, dealing 2 dmg and muting them.
 // 
 // - Gonk
 //   - Empathy(dmg)     : loses `dmg` HP. Grants `num*2` armor to allies up to 1 range.
@@ -68,18 +68,18 @@
 // 
 // - Sirpix
 //   - Stealth_Move(pos)   : moves your Stealth Clone up to 4 range.
-//   - Stealth_Strike(pos) : swaps position with your Stealth Clone. Hits a 3x3 area around, dealing 4 damage.
+//   - Stealth_Strike(pos) : swaps position with your Stealth Clone. Hits a 3x3 area around, dealing 3 damage.
 //   - Lockpick(dir)       : special effects on map.
 // 
 // - Kenlua
 //   - Haste(pos) : loses 2 hp. Blinks to given position up to 4 range. Afterwards, hits a 3x3 area around, dealing 4 damage.
-//   - Dodge(pos) : if there is an enemy at position `pos`, gains 8 armor.
+//   - Dodge(pos) : if there is an enemy at position `pos`, gains `|32 - dist| / 4` armor.
 //   - Slash(dir) : hits a 1x1 area up to 2 range, dealing 12 damage. If it lands, heals 8 hp.
 // 
 // - Flina
 //   - Javelin(pos) : hits a selected enemy up to 2 range.
 //   - Fly(pos)     : moves 4 steps, passing through enemies and walls.
-//   - Gust(dir)    : pushes enemies in a 1-3-5 (wave) ahead, dealing 1 dmg per hit.
+//   - Gust(dir)    : hits enemies in a 1-3-5 (wave) ahead, dealing 3 dmg.
 // 
 // - Zagatur
 //   - Wrap(nil)   : hits a 3x3 area around, locking enemies.
@@ -143,6 +143,16 @@ def kaelin:
   dup WHITE = # 0
   dup BLACK = # 1
   dup BOARD = # 2
+
+  dup is_enemy_side = # {a b}
+    cpy a = a
+    cpy b = b
+    |||a == WHITE| & |b == BLACK|| | ||a == BLACK| & |b == WHITE|||
+    
+  dup is_ally_side = # {a b}
+    cpy a = a
+    cpy b = b
+    |||a == WHITE| & |b == WHITE|| | ||a == BLACK| & |b == BLACK|||
 
   // ::::::::::
   // :: Hero ::
@@ -218,7 +228,7 @@ def kaelin:
   dup TOPHORO_WALK   = # 0
   dup EARTH_ROOT     = # 1
   dup EARTH_WALL     = # 2
-  dup EARTH_PULL     = # 3
+  dup EARTH_WAVE     = # 3
   dup GONK_WALK      = # 4
   dup GROUND_SLAM    = # 5
   dup REVENGE        = # 6
@@ -301,7 +311,7 @@ def kaelin:
     (Cons FLY
     (Cons DODGE
     (Cons NEEDLE
-    (Cons EARTH_PULL
+    (Cons EARTH_WAVE
     (Cons GROUND_SLAM
     (Cons GUST
     (Cons SLASH
@@ -348,7 +358,7 @@ def kaelin:
   // Unit getters
   dup get_unit_kind = # {unit} ||unit >> 30| & 0b00000011|
   dup get_unit_side = # {unit} ||unit >> 28| & 0b00000011|
-  dup get_unit_type = # {unit} ||unit >> 28| & 0b00000011|
+  dup get_unit_type = # {unit} ||unit >> 26| & 0b00000011|
   dup get_unit_hero = # {unit} ||unit >> 24| & 0b00001111|
   dup get_unit_life = # {unit} ||unit >> 18| & 0b00111111|
   dup get_unit_blok = # {unit} ||unit >> 14| & 0b00001111|
@@ -359,8 +369,8 @@ def kaelin:
 
   // Unit setters
   dup set_unit_kind = # {kind unit} ||unit & 0b00111111111111111111111111111111| | ||kind & 0b00000011| << 30||
-  dup set_unit_type = # {type unit} ||unit & 0b11011111111111111111111111111111| | ||type & 0b00000011| << 28||
   dup set_unit_side = # {side unit} ||unit & 0b11001111111111111111111111111111| | ||side & 0b00000011| << 28||
+  dup set_unit_type = # {type unit} ||unit & 0b11110011111111111111111111111111| | ||type & 0b00000011| << 26||
   dup set_unit_hero = # {hero unit} ||unit & 0b11110000111111111111111111111111| | ||hero & 0b00001111| << 24||
   dup set_unit_life = # {life unit} ||unit & 0b11111111000000111111111111111111| | ||life & 0b00111111| << 18||
   dup set_unit_blok = # {blok unit} ||unit & 0b11111111111111001111111111111111| | ||blok & 0b00001111| << 14||
@@ -387,9 +397,11 @@ def kaelin:
     cpy unit = 0
     if |kind == VOID| then:
       let unit = (set_unit_kind VOID unit) 
+      let unit = (set_unit_side BOARD unit)
       unit
     else: if |kind == ITEM| then: {type}
       let unit = (set_unit_kind ITEM unit)
+      let unit = (set_unit_side BOARD unit)
       let unit = (set_unit_type type unit)
       unit
     else: if |kind == GOAL| then: {side}
@@ -630,9 +642,9 @@ def kaelin:
           (ConsF NEWLINE NilF)))))))
 
   dup board_query_at = # {pos func board}
-    let cpy_app_func = {piece}
-      cpy piece = piece
-      [piece, (func piece)]
+    let cpy_app_func = {unit}
+      cpy unit = unit
+      [unit, (func unit)]
     (with8 (board_index pos) cpy_app_func board)
 
   dup is_void_at  = # {pos board} (board_query_at pos {unit}|(get_unit_kind unit) == VOID| board)
@@ -741,20 +753,12 @@ def kaelin:
   dup tophoro_walk = (walk #TOPHORO ~4)
 
   dup earth_root = # {pos arg board}
-    (board_update pos {piece}(heal 20 (mute 3 piece)) board)
+    (board_update pos {unit}(heal 20 (mute 3 unit)) board)
 
-  dup earth_pull =
+  dup earth_wave =
     let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #5 NilF)))))
-    let hits = # {cpos hpos dir board}
-      get [hx,hy] = hpos
-      cpy hx      = hx
-      cpy hy      = hy
-      let board   = (board_update [hx,hy] (mute 1) board)
-      let board   = (step [hx,hy] dir board)
-      board
-    dup earth_pull = (cast_wave wave hits)
-    # {pos dir board}
-      (earth_pull pos dir board)
+    let hits = {cpos hpos dir} (board_update hpos {p}(damage 2 (mute 1 p)))
+    (cast_wave wave #hits)
 
   dup earth_wall = (cast_area #2 vec2_range_0 #{cpos hpos board}
     let put_wall = {unit}
@@ -903,69 +907,161 @@ def kaelin:
     let board = (erkos_walk [0x1,0xd] (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))) board)
     (print_board board)
 
-  # test_shadow_trap
+  // == Snarch ==
+  // ~~~~~~~~~~~~
 
-  //// == Snarch ==
-  //// ~~~~~~~~~~~~
+  dup snarch_walk = (walk #SNARCH ~4)
 
-  //dup snarch_walk = (walk #SNARCH ~4)
+  dup ballista = # {pos nil board}
+    let mount = {unit}
+      cpy unit = unit
+      let spec = (get_unit_spec unit)
+      let unit = (mut_unit_lock {x}|x + 1| unit)
+      let unit = (mut_unit_mute {x}|x + 1| unit)
+      let unit = (set_unit_spec |1 - spec| unit)
+      unit
+    (board_update pos mount board)
 
-  //// TODO: updpate
-  ////dup quick_shot = # {pos dirs board}
-    ////(board_update (add_dirs4 pos dirs) (damage_visual_effect 3) board)
+  dup quick_shot_0 =
+    let quick_shot_rng_x  = {x} (cast_area x vec2_range_1 #{cpos hpos} (board_update hpos (damage 3)))
+    dup quick_shot_rng_6  = (quick_shot_rng_x #6)
+    dup quick_shot_rng_12 = (quick_shot_rng_x #12)
+    # {cpos hpos board}
+      get [cpos0,cpos1]    = (vec2_cpy cpos)
+      get [board, mounted] = (board_query_at cpos0 get_unit_spec board) 
+      let quick_shot       = (if mounted [quick_shot_rng_12, quick_shot_rng_6])
+      (quick_shot cpos1 hpos board)
 
-  //// TODO: updpate
-  ////dup piercing_bolt =
-    ////let area = (vec2_wave (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 (ConsF #1 NilF))))))
-    ////let hits = {pos board} (board_update pos (damage_visual_effect 3) board)
-    ////(area #hits) 
+  dup quick_shot_1 = # quick_shot_0
 
-  //// Explosive Arrow : hits up to 2 3x3 (circles). Deals 2 damage.
-  //// TODO: add 5 range
-  ////dup explosive_arrow =
-    ////let area = vec2_circle_b
-    ////let hits = {pos board} (board_update pos (damage_visual_effect 2) board)
-    ////# {pos1 pos2 board}
-      ////let board = (area #hits pos1 board)
-      ////let board = (area #hits pos2 board)
-      ////board
+  let test_quick_shot_0 =
+    let board = new_board
+    let board = (write8 (board_index [0xd,0x4]) (Hero BLACK SNARCH) board)
+    let board = (quick_shot_0 [0xd,0x4] [0xd,0x1] board)
+    (print_board board)
 
-  //// TODO: mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range increase to 12.
-  ////dup ballista = #
+  let test_ballista =
+    let board = new_board
+    let board = (write8 (board_index [0xd,0xd]) (Hero BLACK SNARCH) board)
+    let board = (ballista [0xd,0xd] 0 board)
+    let board = (quick_shot_0 [0xd,0xd] [0xd,0x1] board)
+    //let board = (write8 (board_index [0xd,0x4]) (Hero BLACK SNARCH) board)
+    //let board = (quick_shot_0 [0xd,0x4] [0xd,0x1] board)
+    (print_board board)
 
-  //// == Sirpix ==
-  //// ~~~~~~~~~~~~
+  // == Sirpix ==
+  // ~~~~~~~~~~~~
 
-  //dup sirpix_walk = (walk #SIRPIX ~4)
+  dup sirpix_walk = (walk #SIRPIX ~4)
 
-  //// == Kenlua ==
-  //// ~~~~~~~~~~~~
+  dup stealth_move = # {cpos tpos board}
+    get [cx, cy]      = cpos
+    get [tx, ty]      = tpos
+    cpy cx            = cx
+    cpy cy            = cy
+    cpy tx            = tx
+    cpy ty            = ty
+    get [board, spec] = (board_query_at [cx,cy] get_unit_spec board)
+    cpy spec          = spec
+    cpy spec          = if |spec == 0| [||cy << 4| | cx|, spec]
+    cpy sx            = ||spec >> 0| & 0b1111|
+    cpy sy            = ||spec >> 4| & 0b1111|
+    (if |(vec2_flat_dist [sx,sy] [tx,ty]) < |4 + 1||
+      then: {board} (board_update [cx,cy] (set_unit_spec ||ty << 4| | tx|) board)
+      else: {board} board
+      board)
 
-  //dup kenlua_walk = (walk #KENLUA ~4)
+    dup stealth_strike =
+      let hits   = {cpos hpos} (board_update hpos (damage 3))
+      let strike = (cast_area #0 vec2_range_1 hits)
+      # {cpos nil board}
+          get [cx, cy]      = cpos
+          cpy cx            = cx
+          cpy cy            = cy
+          get [board, spec] = (board_query_at [cx,cy] get_unit_spec board)
+          cpy spec          = spec
+          cpy spec          = if |spec == 0| [||cy << 4| | cx|, spec]
+          cpy sx            = ||spec >> 0| & 0b1111|
+          cpy sy            = ||spec >> 4| & 0b1111|
+          get [board, void] = (is_void_at [sx,sy] board)
+          (if void
+            then: {board}
+              let board = (board_swap [cx,cy] [sx,sy] board)
+              let board = (strike [sx,sy] [sx,sy] board)
+              board
+            else: {board}
+              board
+            board)
 
-  //// TODO: updpate
-  ////dup killing_edge =
-    ////let area = vec2_circle_c
-    ////let hits = {pos board} (board_update pos (damage_visual_effect 3) board)
-    ////(area #hits)
+  let test_stealth =
+    let board = new_board
+    let board = (write8 (board_index [0xd,0xd]) (Hero BLACK SIRPIX) board)
+    let board = (stealth_move [0xd,0xd] [0xd,0x9] board)
+    let board = (stealth_move [0xd,0xd] [0xd,0x5] board)
+    let board = (stealth_move [0xd,0xd] [0xd,0x2] board)
+    let board = (stealth_strike [0xd,0xd] 0 board)
+    (print_board board)
 
-  //// TODO: updpate
-  ////dup dodge = # {pos1 pos2 pos3 pos4 board}
-    ////let case_air    = Air
-    ////let case_wall   = {temp} (Wall temp)
-    ////let case_throne = {side} (Throne side)
-    ////let case_unit   = {side hero stats} (Unit side hero stats)
-    ////let board       = (board_update pos1 (damage_visual_effect 1) board)
-    ////let board       = (board_update pos2 (damage_visual_effect 1) board)
-    ////let board       = (board_update pos3 (damage_visual_effect 1) board)
-    ////let board       = (board_update pos4 (damage_visual_effect 1) board)
-    ////board
+  // == Kenlua ==
+  // ~~~~~~~~~~~~
 
-  //// TODO: updpate
-  ////dup slice_area =
-    ////let area = vec2_circle_c
-    ////let hits = {pos board} (board_update pos (damage_visual_effect 8) board)
-    ////(area #hits)
+  // - Haste(pos) : loses 2 hp. Blinks to given position up to 4 range. Afterwards, hits a 3x3 area around, dealing 4 damage.
+  // - Dodge(pos) : if there is an enemy at position `pos`, gains 8 armor.
+  // - Slash(dir) : hits a 1x1 area up to 2 range, dealing 12 damage. If it lands, heals 8 hp.
+
+  dup kenlua_walk = (walk #KENLUA ~4)
+
+  dup haste =
+    dup strike = (cast_area #0 vec2_range_1 # {cpos hpos} (board_update hpos (damage 4)))
+    # {cpos tpos board}
+      get [cpos0, cpos1] = (vec2_cpy cpos)
+      get [tposA, tposB] = (vec2_cpy tpos)
+      get [tpos0, tpos1] = (vec2_cpy tposA)
+      get [tpos2, tpos3] = (vec2_cpy tposB)
+      get [board, void]  = (is_void_at tpos0 board)
+      (if void
+        then: {board}
+          let board = (board_update cpos0 (damage 2) board)
+          let board = (board_swap cpos1 tpos1 board)
+          let board = (strike tpos2 tpos3 board)
+          board
+        else: {board}
+          board
+        board)
+
+  dup dodge = (cast_area #32 vec2_range_0 # {cpos tpos board}
+    get [cposA, cpos0] = (vec2_cpy cpos)
+    get [cpos1, cpos2] = (vec2_cpy cposA)
+    get [tpos0, tpos1] = (vec2_cpy tpos)
+    get [board, cside] = (get_side_at cpos0 board)
+    get [board, tside] = (get_side_at tpos0 board)
+    (if (is_enemy_side cside tside)
+      then: {board} 
+        let dist = (vec2_flat_dist cpos1 tpos1)
+        (board_update cpos2 (blok ||32 - dist| / 4|) board)
+      else: {board}
+        board
+      board))
+
+  dup slash =
+    let area = vec2_range_0
+    let hits = {cpos hpos} (board_update hpos (damage 12))
+    (cast_area #1 area #hits)
+
+  let test_haste =
+    let board = new_board
+    let board = (write8 (board_index [0xd,0xb]) (Hero BLACK KENLUA) board)
+    let board = (kenlua_walk [0xd,0xb] (Cons UP (Cons UP (Cons UP (Cons UP Nil)))) board)
+    let board = (haste [0xd,0x7] [0xd,0x2] board)
+    (print_board board)
+
+  let test_dodge =
+    let board = new_board
+    let board = (write8 (board_index [0xf,0x5]) (Hero WHITE KENLUA) board)
+    let board = (dodge [0xf,0x5] [0xf,0x3] board)
+    (print_board board)
+
+  # test_dodge
 
   //// == Flina ==
   //// ~~~~~~~~~~~
