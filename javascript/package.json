@@ -1,6 +1,6 @@
 {
   "name": "formality-core",
-  "version": "0.1.44",
+  "version": "0.1.45",
   "description": "",
   "main": "exports.js",
   "bin": {
@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/moonad/formality-core#readme",
   "dependencies": {
-    "formality-net": "^0.1.9"
+    "formality-net": "^0.1.10"
   }
 }
