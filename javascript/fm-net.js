@@ -183,6 +183,9 @@ class Net {
         var pair_ptr = this.enter_port(Pointer(a_addr, 1));
         var dest_ptr = this.enter_port(Pointer(a_addr, 2));
         var cond_val = numb_of(b_ptrn) === 0;
+        this.unlink_port(Pointer(a_addr, 0));
+        this.unlink_port(Pointer(a_addr, 1));
+        this.unlink_port(Pointer(a_addr, 2));
         this.set_type(a_addr, NOD);
         this.link_ports(Pointer(a_addr, 0), pair_ptr);
         this.link_ports(Pointer(a_addr, cond_val ? 1 : 2), Pointer(a_addr, cond_val ? 1 : 2));
@@ -249,13 +252,24 @@ class Net {
       } else if
         (  a_type === NOD && b_type === OP1
         || a_type === ITE && b_type === OP1) {
-        var c_addr = this.alloc_node(OP1, b_kind);
-        this.link_ports(Pointer(c_addr, 1), this.enter_port(Pointer(b_addr, 1)));
-        this.link_ports(Pointer(a_addr, 0), this.enter_port(Pointer(b_addr, 2)));
-        this.link_ports(this.enter_port(Pointer(a_addr, 1)), Pointer(b_addr, 0));
-        this.link_ports(this.enter_port(Pointer(a_addr, 2)), Pointer(c_addr, 0));
-        this.link_ports(Pointer(a_addr, 1), Pointer(b_addr, 2));
-        this.link_ports(Pointer(a_addr, 2), Pointer(c_addr, 2));
+        var p_addr = this.alloc_node(b_type, b_kind);
+        var q_addr = this.alloc_node(b_type, b_kind);
+        var s_addr = this.alloc_node(a_type, a_kind);
+        this.link_ports(Pointer(p_addr, 1), this.enter_port(Pointer(b_addr, 1)));
+        this.link_ports(Pointer(q_addr, 1), this.enter_port(Pointer(b_addr, 1)));
+        this.link_ports(Pointer(s_addr, 1), Pointer(p_addr, 2));
+        this.link_ports(Pointer(s_addr, 2), Pointer(q_addr, 2));
+        this.link_ports(Pointer(p_addr, 0), this.enter_port(Pointer(a_addr, 1)));
+        this.link_ports(Pointer(q_addr, 0), this.enter_port(Pointer(a_addr, 2)));
+        this.link_ports(Pointer(s_addr, 0), this.enter_port(Pointer(b_addr, 2)));
+        for (var i = 0; i < 3; i++) {
+          this.unlink_port(Pointer(a_addr, i));
+          this.unlink_port(Pointer(b_addr, i));
+        }
+        this.free_node(a_addr);
+        if (a_addr !== b_addr) {
+          this.free_node(b_addr);
+        }
       
       // Permutations
       } else if (a_type === OP1 && b_type === NOD) {

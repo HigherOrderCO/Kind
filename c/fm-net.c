@@ -215,6 +215,9 @@ void rewrite(Net* net, u32 a_addr) {
       u64 pair_ptr = enter_port(net, Pointer(a_addr, 1));
       u64 dest_ptr = enter_port(net, Pointer(a_addr, 2));
       u32 cond_val = numb_of(b_ptrn) == 0;
+      unlink_port(net, Pointer(a_addr, 0));
+      unlink_port(net, Pointer(a_addr, 1));
+      unlink_port(net, Pointer(a_addr, 2));
       set_type(net, a_addr, NOD);
       link_ports(net, Pointer(a_addr, 0), pair_ptr);
       link_ports(net, Pointer(a_addr, cond_val ? 1 : 2), Pointer(a_addr, cond_val ? 1 : 2));
@@ -281,13 +284,24 @@ void rewrite(Net* net, u32 a_addr) {
     } else if
       (  (a_type == NOD && b_type == OP1)
       || (a_type == ITE && b_type == OP1)) {
-      u32 c_addr = alloc_node(net, OP1, b_kind);
-      link_ports(net, Pointer(c_addr, 1), enter_port(net, Pointer(b_addr, 1)));
-      link_ports(net, Pointer(a_addr, 0), enter_port(net, Pointer(b_addr, 2)));
-      link_ports(net, enter_port(net, Pointer(a_addr, 1)), Pointer(b_addr, 0));
-      link_ports(net, enter_port(net, Pointer(a_addr, 2)), Pointer(c_addr, 0));
-      link_ports(net, Pointer(a_addr, 1), Pointer(b_addr, 2));
-      link_ports(net, Pointer(a_addr, 2), Pointer(c_addr, 2));
+      u32 p_addr = alloc_node(net, b_type, b_kind);
+      u32 q_addr = alloc_node(net, b_type, b_kind);
+      u32 s_addr = alloc_node(net, a_type, a_kind);
+      link_ports(net, Pointer(p_addr, 1), enter_port(net, Pointer(b_addr, 1)));
+      link_ports(net, Pointer(q_addr, 1), enter_port(net, Pointer(b_addr, 1)));
+      link_ports(net, Pointer(s_addr, 1), Pointer(p_addr, 2));
+      link_ports(net, Pointer(s_addr, 2), Pointer(q_addr, 2));
+      link_ports(net, Pointer(p_addr, 0), enter_port(net, Pointer(a_addr, 1)));
+      link_ports(net, Pointer(q_addr, 0), enter_port(net, Pointer(a_addr, 2)));
+      link_ports(net, Pointer(s_addr, 0), enter_port(net, Pointer(b_addr, 2)));
+      for (u32 i = 0; i < 3; i++) {
+        unlink_port(net, Pointer(a_addr, i));
+        unlink_port(net, Pointer(b_addr, i));
+      }
+      free_node(net, a_addr);
+      if (a_addr != b_addr) {
+        free_node(net, b_addr);
+      }
     
     // Permutations
     } else if (a_type == OP1 && b_type == NOD) {
