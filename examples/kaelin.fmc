@@ -1,18 +1,12 @@
-// # Kaelin
+// ## Kaelin
 // 
-// A simple MOBA-like boardgame and a showcase for Formality-Core
+// A simple, blockhain-enabled MOBA implemented in Formality-Core.
 // 
-// It aims to be blockchain-compatible. That means real-time Kaelin matches can
-// take place inside smart-contract platforms like Ethereum or Tezos. That's
-// because turns have 10-20 seconds, and moves are made in a commit-reveal
-// scheme, allowing the game state to be computed by players directly, without
-// a central server (aka state-channels). In the case of a dispute (such as a
-// player stopping to respond), the blockchain can be consulted and resolve the
-// conflict in an acceptable time (about 1 minute).
-// 
-// Kaelin aims to preserve many of the fun characteristics of a MOBA such as
-// map control, micro and macro decisions, team-work, and essentially answer
-// the question: how do you dodge a skillshot in a turn-based boardgame?
+// Kaelin aims to capture some of the spirit of a MOBA, inluding map awareness,
+// micro and macro strategies, resource control, team-fights, skillshots and so
+// on, while aiming blockchain-compatible by being very lightweight (the entire
+// game state has only 8192 bits) and based on ~20 second turns. This allows it
+// to run on state-channels and use Ethereum for conflict resolution.
 // 
 // ## Heroes
 // 
@@ -37,65 +31,56 @@
 //
 // ## Moves
 // 
-// - Tophoro
-//   - Earth_Root(num) : heals 20 hp. Self-roots for 3 turns.
-//   - Earth_Wall(pos) : places a temporary wall in an empty tile for up to 2 range.
-//   - Earth_Wave(dir) : hits enemies in a 1-3-5 wave ahead, dealing 2 dmg and muting them.
-// 
-// - Gonk
-//   - Empathy(dmg)     : loses `dmg` HP. Grants `num*2` armor to allies up to 1 range.
-//   - Revenge(pos)     : select an enemy up to 1 range. Deals `missing_hp / 4` dmg. 
-//   - Ground_Slam(nil) : hits all enemies up to 2 range around, dealing 2 dmg and muting them.
-// 
-// - Stanci
-//   - Restore(pos) : selects an ally up to 4 range. Heals 3 hp.
-//   - Escort(pos)  : selects an ally up to 4 range. Grants 3 armor.
-//   - Detain(pos)  : selects an enemy up to 4 range. Mutes him.
-// 
-// - Erkos
-//   - Flame_Ball(pos) : hits enemies around 2 range in a position up to 4 range, dealing 3 damage.
-//   - Flame_Wave(dir) : hits enemies in a 1-3-3-5-5 wave ahead, dealing 3 damage.
-//   - Flame_Nova(num) : loses `num` HP. Hits enemies around up to 6 range, dealing `num / 2` damage.
-// 
-// - Croni
-//   - Shadow_Trap(pos) : places a trap in an empty tile for up to 8 range, locking whoever steps on it.
-//   - Shadow_Flux(pos) : hits a 3x3 (square) up to 8 range, dealing 8 damage.
-//   - Shadow_Bond(pos) : loses 3 HP. If enemy at given position kills Croni this turn, it dies too.
-//
-// - Snarch
-//   - Ballista(nil)     : mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range doubled.
-//   - Quick_Bolt_0(dir) : hits a selected enemy up to 6 range, dealing 2 damage.
-//   - Quick_Bolt_1(dir) : hits a selected enemy up to 6 range, dealing 2 damage.
-// 
-// - Sirpix
-//   - Stealth_Move(pos)   : moves your Stealth Clone up to 4 range.
-//   - Stealth_Strike(pos) : swaps position with your Stealth Clone. Hits a 3x3 area around, dealing 3 damage.
-//   - Lockpick(dir)       : special effects on map.
-// 
-// - Kenlua
-//   - Haste(pos) : loses 2 hp. Blinks to given position up to 4 range. Afterwards, hits a 3x3 area around, dealing 4 damage.
-//   - Dodge(pos) : can't take damage from enemy at given position during this turn.
-//   - Slash(dir) : hits a 1x1 area up to 2 range, dealing 12 damage. If it lands, heals 8 hp.
-// 
-// - Flina
-//   - Javelin(pos) : hits a selected enemy up to 2 range, dealing 4 dmg.
-//   - Fly(pos)     : moves 4 steps, passing through enemies and walls.
-//   - Gust(dir)    : hits enemies in a 1-3-5 (wave) ahead, dealing 4 dmg.
-// 
-// - Zagatur
-//   - Wrap(nil)   : hits a 3x3 area around, locking enemies.
-//   - Needle(dir) : hits a 1-1-1 wave ahead, dealing damage 4 damage.
-//   - Summon(pos) : selects an empty tile up to 3 range. Spawns a clone of Zagatur on it.
-// 
-// - Agdris
-//   - Memento(pos) : dies. Hits a 5x5 area up to 32 range, dealing 2 damage, locking and muting enemies, and healing 2 hp and granting 2 armors to allies.
-//   - Silence(pos) : selects an enemy. It can't attack on this turn.
-//   - Protect(pos) : selects an ally. Grants 3 armor.
-// 
-// - Mewem
-//   - Teleport(pos) : selects an location on the map. If that location is empty or an ally, swaps positions.
-//   - Psychock(nil) : hits a 3x3 area up to 4 range, dealing 6 damage.
-//   - Imprison(pos) : hits a 3x3 area up to 4 range, locking enemies.
+// HERO    | MOVE                | EFFECT
+// ------- | ------------------- | ------
+// TOPHORO | Earth_Root(num)     | heals 20 hp. Self-roots for 3 turns.
+// TOPHORO | Earth_Wall(pos)     | places a temporary wall in an empty tile for up to 2 range.
+// TOPHORO | Earth_Wave(dir)     | hits enemies in a 1-3-5 wave ahead, dealing 2 dmg and muting them.
+// GONK    | Empathy(dmg)        | loses `dmg` HP. Grants `num*2` armor to allies up to 1 range.
+// GONK    | Revenge(pos)        | select an enemy up to 1 range. Deals `missing_hp / 4` dmg.
+// GONK    | Ground_Slam(nil)    | hits all enemies up to 2 range around, dealing 2 dmg and muting them.
+// STANCI  | Restore(pos)        | selects an ally up to 4 range. Heals 3 hp.
+// STANCI  | Escort(pos)         | selects an ally up to 4 range. Grants 3 armor.
+// STANCI  | Detain(pos)         | selects an enemy up to 4 range. Mutes him.
+// ?       |                     |
+// ?       |                     |
+// ?       |                     |
+// ERKOS   | Flame_Ball(pos)     | hits enemies around 2 range in a position up to 4 range, dealing 3 damage.
+// ERKOS   | Flame_Wave(dir)     | hits enemies in a 1-3-3-5-5 wave ahead, dealing 3 damage.
+// ERKOS   | Flame_Nova(num)     | loses `num` HP. Hits enemies around up to 6 range, dealing `num / 2` damage.
+// CRONI   | Shadow_Trap(pos)    | places a trap in an empty tile for up to 8 range, locking whoever steps on it.
+// CRONI   | Shadow_Flux(pos)    | hits a 3x3 (square) up to 8 range, dealing 8 damage.
+// CRONI   | Shadow_Bond(pos)    | loses 3 HP. If enemy at given position kills Croni this turn, it dies too.
+// SNARCH  | Ballista(nil)       | mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range doubled.
+// SNARCH  | Quick_Bolt_0(dir)   | hits a selected enemy up to 6 range, dealing 2 damage.
+// SNARCH  | Quick_Bolt_1(dir)   | hits a selected enemy up to 6 range, dealing 2 damage.
+// ?       |                     |
+// ?       |                     |
+// ?       |                     |
+// SIRPIX  | Stealth_Move(pos)   | moves your Stealth Clone up to 4 range.
+// SIRPIX  | Stealth_Strike(pos) | swaps position with your Stealth Clone. Hits a 3x3 area around, dealing 3 damage.
+// SIRPIX  | Lockpick(dir)       | special effects on map.
+// KENLUA  | Haste(pos)          | loses 2 hp. Blinks to given position up to 4 range. Afterwards, hits a 3x3 area around, dealing 4 damage.
+// KENLUA  | Dodge(pos)          | can't take damage from enemy at given position during this turn.
+// KENLUA  | Slash(dir)          | hits a 1x1 area up to 2 range, dealing 12 damage. If it lands, heals 8 hp.
+// FLINA   | Javelin(pos)        | hits a selected enemy up to 2 range, dealing 4 dmg.
+// FLINA   | Fly(pos)            | moves 4 steps, passing through enemies and walls.
+// FLINA   | Gust(dir)           | hits enemies in a 1-3-5 (wave) ahead, dealing 4 dmg.
+// ?       |                     |
+// ?       |                     |
+// ?       |                     |
+// ZAGATUR | Wrap(nil)           | hits a 3x3 area around, locking enemies.
+// ZAGATUR | Needle(dir)         | hits a 1-1-1 wave ahead, dealing damage 4 damage.
+// ZAGATUR | Summon(pos)         | selects an empty tile up to 3 range. Spawns a clone of Zagatur on it.
+// AGDRIS  | Memento(pos)        | dies. Hits a 5x5 area up to 32 range, dealing 2 damage, locking and muting enemies, and healing 2 hp and granting 2 armors to allies.
+// AGDRIS  | Silence(pos)        | selects an enemy. It can't attack on this turn.
+// AGDRIS  | Protect(pos)        | selects an ally. Grants 3 armor.
+// MEWRU   | Teleport(pos)       | selects an location on the map. If that location is empty or an ally, swaps positions.
+// MEWRU   | Psychock(nil)       | hits a 3x3 area up to 4 range, dealing 6 damage.
+// MEWRU   | Imprison(pos)       | hits a 3x3 area up to 4 range, locking enemies.
+// ?       |                     |
+// ?       |                     |
+// ?       |                     |
 
 def kaelin:
 
