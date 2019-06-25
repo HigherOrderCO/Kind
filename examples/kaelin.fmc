@@ -31,8 +31,8 @@
 // Flina   | Melee  | Pegasus Knight |   4 |  30 | Florina (Fire Emblem), Link (The Legend of Zelda)
 // ?????   | Melee  | ?              |   4 |  30 | ????
 // Zagatur | Tactic | Summoner       |   0 |   4 | Zagara, Abathur (Blizzard)
-// Agdris  | Tactic | Silencer       |   2 |  20 | Agda, Idris (programming language)
-// Mewem   | Tactic | Psychic        |   0 |  20 | Mewtwo (Pokémon), Meruem (Hunter X Hunter)
+// Agdris  | Tactic | Silencer       |   2 |  10 | Agda, Idris (programming language)
+// Mewem   | Tactic | Psychic        |   0 |  10 | Mewtwo (Pokémon), Meruem (Hunter X Hunter)
 // ?????   | Tactic | ?              |   ? |  ?? | ????
 //
 // ## Moves
@@ -60,6 +60,7 @@
 // - Croni
 //   - Shadow_Trap(pos) : places a trap in an empty tile for up to 8 range, locking whoever steps on it.
 //   - Shadow_Flux(pos) : hits a 3x3 (square) up to 8 range, dealing 8 damage.
+//   - Shadow_Bond(pos) : loses 3 HP. If enemy at given position kills Croni this turn, it dies too.
 //
 // - Snarch
 //   - Ballista(nil)     : mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range doubled.
@@ -77,9 +78,9 @@
 //   - Slash(dir) : hits a 1x1 area up to 2 range, dealing 12 damage. If it lands, heals 8 hp.
 // 
 // - Flina
-//   - Javelin(pos) : hits a selected enemy up to 2 range.
+//   - Javelin(pos) : hits a selected enemy up to 2 range, dealing 4 dmg.
 //   - Fly(pos)     : moves 4 steps, passing through enemies and walls.
-//   - Gust(dir)    : hits enemies in a 1-3-5 (wave) ahead, dealing 3 dmg.
+//   - Gust(dir)    : hits enemies in a 1-3-5 (wave) ahead, dealing 4 dmg.
 // 
 // - Zagatur
 //   - Wrap(nil)   : hits a 3x3 area around, locking enemies.
@@ -87,13 +88,13 @@
 //   - Summon(pos) : selects an empty tile up to 3 range. Spawns a clone of Zagatur on it.
 // 
 // - Agdris
-//   - Memento(pos) : loses 20 hp. Hits a 5x5 area up to 32 range, dealing 2 damage, locking and muting enemies, and healing 2 hp and granting 2 armors to allies.
-//   - Silence(pos) : loses 1 hp. Selects an enemy. It can't attack on this turn.
-//   - Protect(pos) : loses 1 hp. Selects an ally. Grants 4 armor.
+//   - Memento(pos) : dies. Hits a 5x5 area up to 32 range, dealing 2 damage, locking and muting enemies, and healing 2 hp and granting 2 armors to allies.
+//   - Silence(pos) : selects an enemy. It can't attack on this turn.
+//   - Protect(pos) : selects an ally. Grants 3 armor.
 // 
 // - Mewem
 //   - Teleport(pos) : selects an location on the map. If that location is empty or an ally, swaps positions.
-//   - Psychock(nil) : hits a 3x3 area up to 4 range, dealing 4 damage.
+//   - Psychock(nil) : hits a 3x3 area up to 4 range, dealing 6 damage.
 //   - Imprison(pos) : hits a 3x3 area up to 4 range, locking enemies.
 
 def kaelin:
@@ -488,6 +489,9 @@ def kaelin:
               (ConsF #10 NilF))))))))))))))
     (match_unit_kind unit case_void case_item case_goal case_hero)
 
+  dup is_enemy = # {unit_a unit_b} (is_enemy_side (get_unit_side unit_a) (get_unit_side unit_b))
+  dup is_ally  = # {unit_a unit_b} (is_ally_side  (get_unit_side unit_a) (get_unit_side unit_b))
+
   // Adds an amount of life to an unit
   dup heal = # {add_life unit}
     cpy unit      = unit
@@ -508,14 +512,23 @@ def kaelin:
     (match_unit_kind unit case_void case_item case_goal case_hero)
     
   // Removes an amount of life of an unit
-  dup dmge       = # {dmg unit} (heal |0 - dmg| unit)
-  dup mute       = # {trn unit} (mut_unit_mute {mute}|mute + trn| unit)
-  dup lock       = # {trn unit} (mut_unit_lock {lock}|lock + trn| unit)
-  dup defs       = # {def unit} (mut_unit_defs {defs}|defs + def| unit)
-  dup dmge_enemy = # {dmg caster target} [caster, (dmge dmg target)]
-  dup mute_enemy = # {trn caster target} [caster, (mute trn target)]
-  dup heal_ally  = # {lif caster target} [caster, (heal lif target)]
-  dup defs_ally  = # {def caster target} [caster, (defs def target)]
+  dup dmge = # {dmg unit} (heal |0 - dmg| unit)
+  dup mute = # {trn unit} (mut_unit_mute {mute}|mute + trn| unit)
+  dup lock = # {trn unit} (mut_unit_lock {lock}|lock + trn| unit)
+  dup defs = # {def unit} (mut_unit_defs {defs}|defs + def| unit)
+
+  dup if_unit = # {comp fun caster target}
+    cpy caster = caster
+    cpy target = target
+    if (comp caster target)
+    then: (fun caster target)
+    else: [caster, target]
+
+  dup dmge_enemy = # {val} (if_unit is_enemy {caster target} [caster, (dmge val target)])
+  dup lock_enemy = # {val} (if_unit is_enemy {caster target} [caster, (lock val target)])
+  dup mute_enemy = # {val} (if_unit is_enemy {caster target} [caster, (mute val target)])
+  dup heal_ally  = # {val} (if_unit is_ally  {caster target} [caster, (heal val target)])
+  dup defs_ally  = # {val} (if_unit is_ally  {caster target} [caster, (defs val target)])
 
   // "a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
   // - The same position: if they can't interact with each other.
@@ -680,10 +693,6 @@ def kaelin:
     [board, (comp a_side b_side)]
   dup are_enemies_at = # (comp_side {a b}|a == b|)
   dup are_allies_at = # (comp_side {a b}|a == b|)
-
-  //dup do_if_enemy = # (do_if_side {a_side b_side} |1 - |a_side == b_side||)
-  //dup do_if_ally  = # (do_if_side {a_side b_side}      |a_side == b_side|)
-
 
   // :::::::::::::
   // :: Effects ::
@@ -868,7 +877,7 @@ def kaelin:
     let board = (revenge [0xF,0x4] [0xF,0x3] board)
     (print_board board)
 
-  let test =
+  let test_ground_slam =
     let board = new_board
     let board = (board_swap [0x0,0xc] [0xe,0x3] board)
     let board = (ground_slam [0xe,0x3] [0xe,0x3] board)
@@ -1032,8 +1041,6 @@ def kaelin:
     let board = (write8 (board_index [0xd,0xd]) (Hero BLACK SNARCH) board)
     let board = (ballista [0xd,0xd] 0 board)
     let board = (quick_shot_0 [0xd,0xd] [0xd,0x1] board)
-    //let board = (write8 (board_index [0xd,0x4]) (Hero BLACK SNARCH) board)
-    //let board = (quick_shot_0 [0xd,0x4] [0xd,0x1] board)
     (print_board board)
 
   // == Sirpix ==
@@ -1095,10 +1102,6 @@ def kaelin:
   // == Kenlua ==
   // ~~~~~~~~~~~~
 
-  // - Haste(pos) : loses 2 hp. Blinks to given position up to 4 range. Afterwards, hits a 3x3 area around, dealing 4 damage.
-  // - Dodge(pos) : if there is an enemy at position `pos`, gains 8 armor.
-  // - Slash(dir) : hits a 1x1 area up to 2 range, dealing 12 damage. If it lands, heals 8 hp.
-
   dup kenlua_walk = (walk #KENLUA ~4)
 
   dup haste =
@@ -1137,9 +1140,10 @@ def kaelin:
     (cast_area rang area hits)
 
   dup slash =
+    let rang = #1
     let area = vec2_range_0
-    let hits = {cpos tpos} (board_interact cpos tpos (dmge_enemy 12))
-    (cast_area #1 area #hits)
+    let hits = # {cpos tpos} (board_interact cpos tpos (dmge_enemy 12))
+    (cast_area rang area hits)
 
   let test_haste =
     let board = new_board
@@ -1160,22 +1164,164 @@ def kaelin:
     let board = (slash [0xe,0x3] [0xf,0x3] board)
     (print_board board)
 
-  //// == Flina ==
-  //// ~~~~~~~~~~~
+  // == Flina ==
+  // ~~~~~~~~~~~
 
-  //// == Zagatur ==
-  //// ~~~~~~~~~~~~~
+  dup javelin =
+    let rang = #2
+    let area = vec2_range_0
+    let hits = {cpos tpos} (board_interact cpos tpos (dmge_enemy 4))
+    (cast_area rang area #hits)
 
-  //dup zagatur_walk = (walk #ZAGATUR ~0)
+  dup fly =
+    let rang = #4
+    let area = vec2_range_0
+    let hits = {cpos tpos} (board_interact cpos tpos a_step_to_b)
+    (cast_area rang area #hits)
 
-  //// == Agdris ==
-  //// ~~~~~~~~~~~~
+  dup gust =
+    let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #5 NilF)))))
+    let hits = {cpos tpos dir board}
+      let effect = {caster target} (dmge_enemy 2 caster target)
+      (board_interact cpos tpos effect board)
+    (cast_wave wave #hits)
 
-  //dup agdris_walk = (walk #AGDRIS ~1)
+  let test_javelin =
+    let board = new_board
+    let board = (board_swap [0x1,0xd] [0xa,0x0] board)
+    let board = (javelin [0xc,0x0] [0xa,0x0] board)
+    (print_board board)
 
-  //// == Mewem ==
-  //// ~~~~~~~~~~~
+  let test_fly =
+    let board = new_board
+    let board = (board_swap [0x0,0xc] [0xa,0x2] board)
+    let board = (fly [0xc,0x0] [0xa,0x2] board)
+    (print_board board)
 
-  //dup mewem_walk = (walk #MEWEM ~0)
+  // == Zagatur ==
+  // ~~~~~~~~~~~~~
 
-  # test
+  dup zagatur_walk = (walk #ZAGATUR ~0)
+
+  dup wrap =
+    let rang = #0
+    let area = vec2_range_1
+    let hits = #{cpos tpos board} (board_interact cpos tpos (lock_enemy 1) board)
+    (cast_area rang area hits)
+
+  dup needle =
+    let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #1 (ConsF #1 NilF)))))
+    let hits = {cpos tpos dir} (board_interact cpos tpos (dmge_enemy 2))
+    (cast_wave wave #hits)
+
+  dup summon =
+    let rang = #4
+    let area = vec2_range_0
+    let hits = {cpos tpos board}
+      let effect = {caster target}
+        cpy caster = caster
+        cpy target = target
+        let target = if |(get_unit_kind target) == VOID|
+          then: (Hero (get_unit_side caster) ZAGATUR)
+          else: target
+        [caster, target]
+      (board_interact cpos tpos effect board)
+    (cast_area #2 vec2_range_0 #hits)
+
+  let test =
+    let board = new_board
+    let board = (write8 (board_index [0x3,0xe]) (Hero BLACK ZAGATUR) board)
+    let board = (summon [0x3,0xe] [0x5,0xe] board)
+    let board = (needle [0x3,0xe] DOWN board)
+    let board = (wrap [0x3,0xe] [0x3,0xe] board)
+    (print_board board)
+
+  // == Agdris ==
+  // ~~~~~~~~~~~~
+
+  dup agdris_walk = (walk #AGDRIS ~1)
+
+  dup silence =
+    let rang = #32
+    let area = vec2_range_0
+    let hits = {cpos tpos} (board_interact cpos tpos (mute_enemy 1))
+    (cast_area rang area #hits)
+
+  dup protect =
+    let rang = #32
+    let area = vec2_range_0
+    let hits = {cpos tpos} (board_interact cpos tpos (defs_ally 3))
+    (cast_area rang area #hits)
+
+  dup memento =
+    let rang = #32
+    let area = vec2_range_2
+    let hit0 = # {cpos tpos} (board_interact cpos tpos (mute_enemy 1))
+    let hit1 = # {cpos tpos} (board_interact cpos tpos (lock_enemy 1))
+    let hit2 = # {cpos tpos} (board_interact cpos tpos (dmge_enemy 2))
+    let hit3 = # {cpos tpos} (board_interact cpos tpos (defs_ally 2))
+    let hit4 = # {cpos tpos} (board_interact cpos tpos (heal_ally 2))
+    dup eff0 = (cast_area rang area hit0)
+    dup eff1 = (cast_area rang area hit1)
+    dup eff2 = (cast_area rang area hit2)
+    dup eff3 = (cast_area rang area hit3)
+    dup eff4 = (cast_area rang area hit4)
+    # {cpos tpos board}
+      get [cx, cy] = cpos
+      get [tx, ty] = tpos
+      cpy cx       = cx
+      cpy cy       = cy
+      cpy tx       = tx
+      cpy ty       = ty
+      let board    = (eff0 [cx,cy] [tx,ty] board)
+      let board    = (eff1 [cx,cy] [tx,ty] board)
+      let board    = (eff2 [cx,cy] [tx,ty] board)
+      let board    = (eff3 [cx,cy] [tx,ty] board)
+      let board    = (eff4 [cx,cy] [tx,ty] board)
+      let board    = (board_update [cx,cy] (dmge 63) board)
+      board
+
+  let test_silence =
+    let board = new_board
+    let board = (write8 (board_index [0x2,0xd]) (Hero WHITE AGDRIS) board)
+    let board = (silence [0x2,0xd] [0xc,0x0] board)
+    (print_board board)
+
+  let test_protect =
+    let board = new_board
+    let board = (write8 (board_index [0x2,0xd]) (Hero WHITE AGDRIS) board)
+    let board = (protect [0x2,0xd] [0x0,0xc] board)
+    (print_board board)
+
+  let test_memento =
+    let board = new_board
+    let board = (write8 (board_index [0x2,0xd]) (Hero WHITE AGDRIS) board)
+    let board = (board_swap [0xe,0x2] [0x3,0xd] board)
+    let board = (board_swap [0xd,0x1] [0x2,0xc] board)
+    let board = (memento [0x2,0xd] [0x2,0xd] board)
+    (print_board board)
+
+  // == Mewem ==
+  // ~~~~~~~~~~~
+
+  dup mewem_walk = (walk #MEWEM ~0)
+
+  dup teleport =
+    let rang = #12
+    let area = vec2_range_0
+    let hits = {cpos tpos} (board_interact cpos tpos a_step_to_b)
+    (cast_area rang area #hits)
+
+  dup psychock =
+    let rang = #4
+    let area = vec2_range_1
+    let hits = #{cpos tpos board} (board_interact cpos tpos (dmge_enemy 6) board)
+    (cast_area rang area hits)
+
+  dup imprison =
+    let rang = #4
+    let area = vec2_range_1
+    let hits = #{cpos tpos board} (board_interact cpos tpos (lock_enemy 2) board)
+    (cast_area rang area hits)
+
+  # test_protect
