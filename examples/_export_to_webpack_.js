@@ -8,7 +8,6 @@ var main    = require("./main.fmc").default;
 var maybe   = require("./maybe.fmc").default;
 var nat     = require("./nat.fmc").default;
 var num     = require("./num.fmc").default;
-var package = require("./package.json").default;
 var pair    = require("./pair.fmc").default;
 var string  = require("./string.fmc").default;
 var term    = require("./term.fmc").default;
@@ -27,7 +26,6 @@ module.exports = [
   maybe,
   nat,
   num,
-  package,
   pair,
   string,
   term,
