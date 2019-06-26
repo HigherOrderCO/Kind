@@ -417,7 +417,7 @@ def kaelin:
   // Hero constructor
   dup Hero = # {side hero}
     cpy hero = hero
-    (Unit HERO side hero (get_hero_max_life hero) 0 0 0 0 0 0)
+    (Unit HERO side hero (get_hero_max_life hero) 0 0 0 0 0)
 
   // Unit kind pattern-matching
   dup match_unit_kind = # {unit case_void case_item case_goal case_hero}
@@ -1464,14 +1464,18 @@ def kaelin:
       board
     (cpos case_cpos_none case_cpos_just board)
       
-  # 
+  dup exports =
+    [#new_board,
+    [#cast,
+    [#print_board,
+     0]]]
 
-    let board = new_board
-    let board = (cast [GONK_WALK, (Cons UP (Cons UP (Cons UP (Cons UP Nil))))] board)
-    let board = (cast [GONK_WALK, (Cons RIGHT (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))))] board)
-    let board = (cast [CRONI_WALK, (Cons DOWN (Cons DOWN (Cons DOWN (Cons DOWN Nil))))] board)
-    let board = (cast [CRONI_WALK, (Cons LEFT (Cons LEFT (Cons LEFT (Cons LEFT Nil))))] board)
-    let board = (cast [SHADOW_FLUX, [0x4,0x8]] board)
-    (print_board board)
+  //# let board = new_board
+    //let board = (cast [GONK_WALK, (Cons UP (Cons UP (Cons UP (Cons UP Nil))))] board)
+    //let board = (cast [GONK_WALK, (Cons RIGHT (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))))] board)
+    //let board = (cast [CRONI_WALK, (Cons DOWN (Cons DOWN (Cons DOWN (Cons DOWN Nil))))] board)
+    //let board = (cast [CRONI_WALK, (Cons LEFT (Cons LEFT (Cons LEFT (Cons LEFT Nil))))] board)
+    //let board = (cast [SHADOW_FLUX, [0x4,0x8]] board)
+    //(print_board board)
 
-    // yay! <3 
+  # exports
