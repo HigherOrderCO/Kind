@@ -1399,77 +1399,42 @@ def kaelin:
   // empty_cast
   dup empty_cast = # Nil
 
+  let sort_casts = {casts} {Cons}
+   dup Cons = Cons
+   dup arr = (init6 #{Nil} Nil)
+   let loop = {cast arr}
+     get [id, name] = cast
+     cpy id = id
+     let priority = (get_skill_priority id)
+     let append = {cont} {k} (Cons [id, name] (cont k))
+     (update6 priority append arr)
+   dup rec = (casts #loop)
+   dup arr = # (rec arr)
+   dup fold = (fold6 #{arr1 arr2} {Nil} (arr1 (arr2 Nil)) #{x} x)
+   #(fold arr)
+
   // insert_cast
   // | Inserts a cast into a list of casts in order of priority
-  // | TODO: simplify and optimize this monster
   // : {-T    : Type}
-  //   {cast  : [SkillID, T]}
-  //   {casts : (SList [SkillID, T])}
-  //   (SList [SkillID, T])
-  dup insert_cast =
-    dup insert = (~64 #{state}
-      get [n_casts, state]        = state
-      get [o_casts, a_cast]       = state
-      let case_a_cast_none        = {o_casts n_casts}
-        let case_o_casts_nil      = {n_casts}
-          let n_casts             = n_casts
-          let o_casts             = Nil
-          let a_cast              = None
-          [n_casts, [o_casts, a_cast]]
-        let case_o_casts_cons     = {o_cast o_casts} {n_casts}
-          let n_casts             = {x} (n_casts (Cons o_cast x))
-          let o_casts             = o_casts
-          let a_cast              = None
-          [n_casts, [o_casts, a_cast]]
-        (o_casts case_o_casts_cons case_o_casts_nil n_casts)
-      let case_a_cast_just        = {a_cast} {o_casts n_casts}
-        let case_o_casts_nil      = {a_cast n_casts}
-          let n_casts             = {x} (n_casts (Cons a_cast x))
-          let o_casts             = Nil
-          let a_cast              = None
-          [n_casts, [o_casts, a_cast]]
-        let case_o_casts_cons     = {o_cast o_casts} {a_cast n_casts}
-          get [a_skill, a_argm]   = a_cast
-          get [o_skill, o_argm]   = o_cast
-          cpy a_skill             = a_skill
-          cpy o_skill             = o_skill
-          let a_prio              = (get_skill_priority a_skill)          
-          let o_prio              = (get_skill_priority o_skill)
-          (if |a_prio < o_prio|
-            then: {a_skill a_argm o_skill o_argm o_casts n_casts}
-              let n_casts         = {x} (n_casts (Cons [a_skill, a_argm] (Cons [o_skill, o_argm] x)))
-              let o_casts         = o_casts
-              let a_cast          = None
-              [n_casts, [o_casts, a_cast]]
-            else: {a_skill a_argm o_skill o_argm o_casts n_casts}
-              let n_casts         = {x} (n_casts (Cons [o_skill, o_argm] x))
-              let o_casts         = o_casts
-              let a_cast          = (Just [a_skill, a_argm])
-              [n_casts, [o_casts, a_cast]]
-            a_skill a_argm o_skill o_argm o_casts n_casts)
-        (o_casts case_o_casts_cons case_o_casts_nil a_cast n_casts)
-      (a_cast case_a_cast_none case_a_cast_just o_casts n_casts))
-    # {cast casts}
-      get [n_casts, state]  = (insert [{x}x, [casts, (Just cast)]])
-      get [o_casts, a_cast] = state
-      let case_a_cast_none  = {n_casts} (n_casts Nil)
-      let case_a_cast_just  = {a_cast} {n_casts} (n_casts (Cons a_cast Nil))
-      (a_cast case_a_cast_none case_a_cast_just n_casts)
+  //   {cast  : ![SkillID, T]}
+  //   {casts : (CList ![SkillID, T])}
+  //   (CList ![SkillID, T])
+  let insert_cast = {cast casts} (sort_casts (ConsF cast casts))
 
   let insert_cast_test = 
-    let casts = Nil
-    let casts = (insert_cast [EARTH_WAVE  , "earth_wave"]  casts)
-    let casts = (insert_cast [FLAME_BALL  , "flame_ball"]  casts)
-    let casts = (insert_cast [SHADOW_FLUX , "shadow_flux"] casts)
-    let casts = (insert_cast [RESTORE     , "restore"]     casts)
-    let casts = (insert_cast [EARTH_ROOT  , "earth_root"]  casts)
-    let casts = (insert_cast [EARTH_WALL  , "earth_wall"]  casts)
-    let casts = (insert_cast [MEMENTO     , "memento"]     casts)
-    let casts = (insert_cast [SILENCE     , "silence"]     casts)
-    let casts = (insert_cast [SUMMON      , "summon"]      casts)
-    let casts = (insert_cast [LOCKPICK    , "lockpick"]    casts)
-    let casts = (insert_cast [IMPRISON    , "imprison"]    casts)
-    casts
+    let casts = NilF
+    let casts = (ConsF #[EARTH_WAVE  , "earth_wave"]  casts)
+    let casts = (ConsF #[FLAME_BALL  , "flame_ball"]  casts)
+    let casts = (ConsF #[SHADOW_FLUX , "shadow_flux"] casts)
+    let casts = (ConsF #[RESTORE     , "restore"]     casts)
+    let casts = (ConsF #[EARTH_ROOT  , "earth_root"]  casts)
+    let casts = (ConsF #[EARTH_WALL  , "earth_wall"]  casts)
+    let casts = (ConsF #[MEMENTO     , "memento"]     casts)
+    let casts = (ConsF #[SILENCE     , "silence"]     casts)
+    let casts = (ConsF #[SUMMON      , "summon"]      casts)
+    let casts = (ConsF #[LOCKPICK    , "lockpick"]    casts)
+    let casts = (ConsF #[IMPRISON    , "imprison"]    casts)
+    (sort_casts casts)
 
   let cast = {cast board}
     get [skill, argm]  = cast
