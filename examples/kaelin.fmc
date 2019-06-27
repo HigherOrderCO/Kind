@@ -572,6 +572,20 @@ def kaelin:
   dup heal_ally  = # {val} (if_unit is_ally  {caster target} [caster, (heal val target)])
   dup defs_ally  = # {val} (if_unit is_ally  {caster target} [caster, (defs val target)])
 
+  //dup check_croni_s_bond = {caster target}
+  //  cpy target      = target
+  //  let target_hero = (get_unit_hero target)
+  //  let target_life = (set_unit_life target)
+  //  if ||target_hero == CRONI| & |target_life == 0||
+  //  then: 
+  //    if (get_unit_spec target) 
+  //    then: {caster} (set_unit_life 0 caster)
+  //    else: {caster} caster
+  //  else: 
+  //    caster
+
+
+
   // "a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
   // - The same position: if they can't interact with each other.
   // - Inverted position: the elements interacted and one now occupies the position of the other.
@@ -602,7 +616,7 @@ def kaelin:
   // :: Board ::
   // :::::::::::
 
-  dup new_board = #
+dup new_board = #
     let O   = Void
     let W   = (Item WALL)
     let a   = (Hero WHITE GONK)
@@ -1441,11 +1455,25 @@ def kaelin:
     let case_cpos_none = {board}
       board
     let case_cpos_just = {cpos} {board}
-      // TODO: check if hero is muted, if so, don't apply the effect
-      let effect       = (get_skill_effect skill)
-      let board        = (effect cpos argm board)
-      board
+      get [cpos0, cpos1] = (vec2_cpy cpos)
+      get [board, unit]  = (get_at cpos0 board)
+      let is_muted       = (get_unit_mute unit)
+      (if is_muted
+        then: {cpos board} board
+        else: {cpos board}
+          let effect = (get_skill_effect skill)
+          let board  = (effect cpos argm board)
+          board
+      cpos1 board)
     (cpos case_cpos_none case_cpos_just board)
+
+  let test_muted_cast =
+      let board = new_board
+      let board = (write8 (board_index [0x2,0xd]) (Hero WHITE AGDRIS) board)
+      let board = (cast [SILENCE,[0xc,0x0]] board)
+      let board = (board_update [0xd,0x1] (dmge 8) board)
+      let board = (cast [RESTORE,[0xd,0x1]] board)
+      (print_board board)
 
   // TODO: create end_turn function
   dup end_turn = 
@@ -1477,18 +1505,6 @@ def kaelin:
       (match_unit_kind unit case_void case_item case_goal case_hero)
     (fold8 #fold_node #fold_leaf)
 
-  //# let board = new_board
-    //let board = (cast [GONK_WALK, [0x0,0x9]] board)
-    //let board = (cast [CRONI_WALK, [0xb,0x2]] board)
-    //let board = (cast [GONK_WALK, [0x3,0x9]] board)
-    //let board = (cast [CRONI_WALK, [0x9,0x2]] board)
-    //let board = (cast [GONK_WALK, [0x3,0x6]] board)
-    //let board = (cast [CRONI_WALK, [0x9,0x5]] board)
-    //let board = (cast [SHADOW_FLUX, [0x3,0x6]] board)
-    //let board = (cast [SHADOW_TRAP, [0x4,0x6]] board)
-    //let board = (end_turn board)
-    //(print_board board)
-
   dup exports =
     [#new_board,
     [#cast,
@@ -1515,4 +1531,4 @@ def kaelin:
     [#HERO_F,
      0]]]]]]]]]]]]]]]]]]]]]]]
 
-  # test_earth_rise
+  # test_muted_cast
