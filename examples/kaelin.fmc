@@ -563,28 +563,42 @@ def kaelin:
     else: [caster, target]
 
   dup dmge_enemy = # {val} (if_unit is_enemy {caster target}
-    // TODO: verify if target is croni with shadow_bond and dmg>hp, if yes, kill caster
-    // TODO: verify if target is kenlua with spec=caster, if yes, prevent dmg
-    // TODO: verify if target has armor and subtract from dmg
-    [caster, (dmge val target)])
+    // Gets caster and target
+    cpy c_old  = caster
+    cpy t_old  = target
+
+    // Gets hero and spec info
+    cpy c_hero = (get_unit_hero c_old)
+    cpy t_hero = (get_unit_hero t_old)
+    cpy t_spec = (get_unit_spec t_old)
+
+    // Applies armor
+    cpy dmg    = val
+    cpy def    = (get_unit_defs t_old)
+    cpy t_defs = if |def > dmg| [|def - dmg|, 0]
+    cpy dmg    = if |def > dmg| [0, |dmg - def|]
+
+    // Applies DODGE
+    cpy dmg    =
+      if ||t_hero == KENLUA| & |t_spec == |c_hero + 128|||
+      then: 0
+      else: dmg
+
+    // Applies damage
+    cpy t_new  = (dmge dmg (set_unit_defs t_defs t_old))
+
+    // Applies SHADOW_BOND
+    cpy c_new  =
+      if |||t_hero == CRONI| & |t_new == Void|| & |t_spec > 0||
+      then: Void
+      else: c_old
+
+    [c_new, t_new])
+
   dup lock_enemy = # {val} (if_unit is_enemy {caster target} [caster, (lock val target)])
   dup mute_enemy = # {val} (if_unit is_enemy {caster target} [caster, (mute val target)])
   dup heal_ally  = # {val} (if_unit is_ally  {caster target} [caster, (heal val target)])
   dup defs_ally  = # {val} (if_unit is_ally  {caster target} [caster, (defs val target)])
-
-  //dup check_croni_s_bond = {caster target}
-  //  cpy target      = target
-  //  let target_hero = (get_unit_hero target)
-  //  let target_life = (set_unit_life target)
-  //  if ||target_hero == CRONI| & |target_life == 0||
-  //  then: 
-  //    if (get_unit_spec target) 
-  //    then: {caster} (set_unit_life 0 caster)
-  //    else: {caster} caster
-  //  else: 
-  //    caster
-
-
 
   // "a" and "b" are side positions. The function checks if they can swap their position, that is, simulate a walk, and returns:
   // - The same position: if they can't interact with each other.
@@ -836,8 +850,11 @@ dup new_board = #
       let effect = {caster target}
         cpy caster = caster
         cpy target = target
-        // TODO: ballista can't walk
-        if (get_unit_lock caster)
+        cpy c_lock = (get_unit_lock caster)
+        cpy c_hero = (get_unit_hero caster)
+        cpy c_spec = (get_unit_spec caster)
+        cpy locked = |c_lock | ||c_hero == SNARCH| & |c_spec > 0|||
+        if locked
         then: [caster, target]
         else: (a_step_to_b caster target)
       (board_interact cpos tpos effect board)
@@ -932,7 +949,11 @@ dup new_board = #
   let test_empathy =
     let board = new_board
     let board = (gonk_walk [0x0,0xc] [0x2,0xc] board)
+    let board = (board_swap [0xf,0x3] [0x5,0xe] board)
     let board = (empathy [0x2,0xc] [0x2,0xd] board)
+    let board = (earth_rise [0x5,0xe] [0x3,0xe] board)
+    let board = (earth_rise [0x5,0xe] [0x3,0xe] board)
+    let board = (earth_rise [0x5,0xe] [0x3,0xe] board)
     (print_board board)
 
   let test_revenge =
@@ -1072,7 +1093,10 @@ dup new_board = #
 
   let test_shadow_bond =
     let board = new_board
-    let board = (shadow_bond [0xe,0x2] 0 board)
+    let board = (shadow_bond [0xe,0x2] [0,0] board)
+    let board = (board_swap [0x1,0xd] [0xe,0x3] board)
+    let board = (board_update [0xe,0x2] (dmge 16) board)
+    let board = (flame_wave [0xe,0x3] [0xe,0x2] board)
     (print_board board)
 
   // == Snarch ==
@@ -1111,9 +1135,12 @@ dup new_board = #
 
   let test_ballista =
     let board = new_board
-    let board = (write8 (board_index [0xd,0xd]) (Hero BLACK SNARCH) board)
+    let board = (write8 (board_index [0xd,0xd]) (Hero WHITE SNARCH) board)
     let board = (ballista [0xd,0xd] 0 board)
+    let board = (board_update [0xd,0xd] (set_unit_lock 0) board)
+    let board = (board_update [0xd,0xd] (set_unit_mute 0) board)
     let board = (quick_bolt_0 [0xd,0xd] [0xd,0x1] board)
+    let board = (snarch_walk [0xd,0xd] [0xd,0xe] board)
     (print_board board)
 
   // == Sirpix ==
@@ -1230,7 +1257,11 @@ dup new_board = #
 
   let test_dodge =
     let board = new_board
-    let board = (dodge [0x2,0xe] [0xf,0x3] board)
+    let board = (board_swap [0xf,0x3] [0x4,0xe] board)
+    let board = (board_swap [0xe,0x2] [0x6,0xe] board)
+    let board = (dodge [0x2,0xe] [0x4,0xe] board)
+    let board = (earth_rise [0x4,0xe] [0x2,0xe] board)
+    let board = (shadow_flux [0x6,0xe] [0x2,0xe] board)
     (print_board board)
 
   let test_slash =
@@ -1496,14 +1527,28 @@ dup new_board = #
       let case_hero =
         cpy lock = (get_unit_lock unit)
         cpy mute = (get_unit_mute unit)
+        cpy hero = (get_unit_hero unit)
+        cpy spec = (get_unit_spec unit)
         let lock = if |lock > 0| [|lock - 1|, lock]
         let mute = if |mute > 0| [|mute - 1|, mute]
+        let defs = 0
+        let spec = if ||hero == KENLUA| & |spec > 0|| [0, spec] // remove DODGE
+        let spec = if ||hero == CRONI| & |spec > 0|| [0, spec] // remove SHADOW_BOND
         let unit = (set_unit_lock lock unit)
         let unit = (set_unit_mute mute unit)
-        let unit = (set_unit_defs 0 unit)
+        let unit = (set_unit_defs defs unit)
+        let unit = (set_unit_spec spec unit)
         unit
       (match_unit_kind unit case_void case_item case_goal case_hero)
     (fold8 #fold_node #fold_leaf)
+
+  let test_end_turn =
+    let board = new_board
+    let board = (cast [EARTH_WALL,[0xf,0x4]] board)
+    let board = (cast [SHADOW_BOND,[0xe,0x2]] board)
+    let board = (board_update [0x0,0xc] (lock 1) board)
+    let board = (end_turn board)
+    (print_board board)
 
   dup exports =
     [#new_board,
@@ -1531,4 +1576,4 @@ dup new_board = #
     [#HERO_F,
      0]]]]]]]]]]]]]]]]]]]]]]]
 
-  # test_muted_cast
+  # exports
