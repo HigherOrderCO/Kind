@@ -605,20 +605,20 @@ def kaelin:
   dup new_board = #
     let O   = Void
     let W   = (Item WALL)
-    let a   = (Hero WHITE SNARCH)
-    let b   = (Hero WHITE CRONI)
-    //let c   = (Hero WHITE KENLUA)
-    //let d   = (Hero WHITE MEWEM)
+    let a   = (Hero WHITE GONK)
+    let b   = (Hero WHITE ERKOS)
+    let c   = (Hero WHITE KENLUA)
+    let d   = (Hero WHITE MEWEM)
     let x   = (Goal WHITE)
-    let e   = (Hero BLACK FLINA)
-    let f   = (Hero BLACK KENLUA)
-    //let g   = (Hero BLACK FLINA)
-    //let h   = (Hero BLACK STANCI)
+    let e   = (Hero BLACK TOPHORO)
+    let f   = (Hero BLACK CRONI)
+    let g   = (Hero BLACK FLINA)
+    let h   = (Hero BLACK STANCI)
     let y   = (Goal BLACK)
-    let r00 = [[[[W,W],[W,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,W],[W,W]]]]
-    let r01 = [[[[W,W],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,a],[y,W]]]]
-    let r02 = [[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[b,W]]]]
-    let r03 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
+    let r00 = [[[[W,W],[W,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[h,W],[W,W]]]]
+    let r01 = [[[[W,W],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,g],[y,W]]]]
+    let r02 = [[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[f,W]]]]
+    let r03 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,e]]]]
     let r04 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
     let r05 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
     let r06 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
@@ -627,10 +627,10 @@ def kaelin:
     let r09 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
     let r10 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
     let r11 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
-    let r12 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
-    let r13 = [[[[W,e],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]
-    let r14 = [[[[W,x],[f,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[W,W]]]]
-    let r15 = [[[[W,W],[W,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,W],[W,W]]]]
+    let r12 = [[[[a,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
+    let r13 = [[[[W,b],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]
+    let r14 = [[[[W,x],[c,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[W,W]]]]
+    let r15 = [[[[W,W],[W,d]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,W],[W,W]]]]
     [[[[r00,r01],[r02,r03]],[[r04,r05],[r06,r07]]],[[[r08,r09],[r10,r11]],[[r12,r13],[r14,r15]]]]
 
   // Converts a 16x16 position to an index up to 256.
@@ -1453,61 +1453,66 @@ def kaelin:
       [lft, rgt]
     let fold_leaf = {unit}
       cpy unit = unit
-      [(get_unit_info unit), (get_unit_icon unit)]
+      let case_void =
+        unit
+      let case_item =
+        cpy item = (get_unit_type unit)
+        if |item == ROCK| then:
+          Void
+        else: if |item == TRAP| then:
+          Void
+        else:
+          unit
+      let case_goal =
+        unit
+      let case_hero =
+        cpy lock = (get_unit_lock unit)
+        cpy mute = (get_unit_mute unit)
+        let lock = if |lock > 0| [|lock - 1|, lock]
+        let mute = if |mute > 0| [|mute - 1|, mute]
+        let unit = (set_unit_lock lock unit)
+        let unit = (set_unit_mute mute unit)
+        let unit = (set_unit_defs 0 unit)
+        unit
+      (match_unit_kind unit case_void case_item case_goal case_hero)
     (fold8 #fold_node #fold_leaf)
-      
-  # let board = new_board
-    let board = (cast [GONK_WALK, [0x0,0x9]] board)
-    let board = (cast [CRONI_WALK, [0xb,0x2]] board)
-    let board = (cast [GONK_WALK, [0x3,0x9]] board)
-    let board = (cast [CRONI_WALK, [0x9,0x2]] board)
-    let board = (cast [GONK_WALK, [0x3,0x6]] board)
-    let board = (cast [CRONI_WALK, [0x9,0x5]] board)
-    let board = (cast [SHADOW_FLUX, [0x3,0x6]] board)
+
+  //# let board = new_board
+    //let board = (cast [GONK_WALK, [0x0,0x9]] board)
+    //let board = (cast [CRONI_WALK, [0xb,0x2]] board)
+    //let board = (cast [GONK_WALK, [0x3,0x9]] board)
+    //let board = (cast [CRONI_WALK, [0x9,0x2]] board)
+    //let board = (cast [GONK_WALK, [0x3,0x6]] board)
+    //let board = (cast [CRONI_WALK, [0x9,0x5]] board)
+    //let board = (cast [SHADOW_FLUX, [0x3,0x6]] board)
+    //let board = (cast [SHADOW_TRAP, [0x4,0x6]] board)
     //let board = (end_turn board)
-    (print_board board)
+    //(print_board board)
 
-  //dup exports =
-    //[#new_board,
-    //[#cast,
-    //[#print_board,
-    //[#unit_to_scott,
-    //[#get_skill_priority,
-    //[#get_skill_area,
-    //[#get_at,
-    //[#TOPHORO,
-    //[#GONK,
-    //[#STANCI,
-    //[#HERO_3,
-    //[#ERKOS,
-    //[#CRONI,
-    //[#SNARCH,
-    //[#HERO_7,
-    //[#SIRPIX,
-    //[#KENLUA,
-    //[#FLINA,
-    //[#HERO_B,
-    //[#ZAGATUR,
-    //[#AGDRIS,
-    //[#MEWEM,
-    //[#HERO_F,
-     //0]]]]]]]]]]]]]]]]]]]]]]]
+  dup exports =
+    [#new_board,
+    [#cast,
+    [#print_board,
+    [#unit_to_scott,
+    [#get_skill_priority,
+    [#get_skill_area,
+    [#get_at,
+    [#TOPHORO,
+    [#GONK,
+    [#STANCI,
+    [#HERO_3,
+    [#ERKOS,
+    [#CRONI,
+    [#SNARCH,
+    [#HERO_7,
+    [#SIRPIX,
+    [#KENLUA,
+    [#FLINA,
+    [#HERO_B,
+    [#ZAGATUR,
+    [#AGDRIS,
+    [#MEWEM,
+    [#HERO_F,
+     0]]]]]]]]]]]]]]]]]]]]]]]
 
-  //# exports
-
-
-// 
-// Hero    | Skill F           | Skill D             | Skill S
-// ------- | ----------------- | ------------------- | -----------------
-// TOPHORO | Earth_Root        | Earth_Wall          | Earth_Rise     
-// GONK    | Empathy           | Revenge             | Ground_Slam     
-// STANCI  | Restore           | Escort              | Detain     
-// ERKOS   | Flame_Ball        | Flame_Wave          | Flame_Nova     
-// CRONI   | Shadow_Bond       | Shadow_Trap         | Shadow_Flux     
-// SNARCH  | Quick_Bolt_0      | Quick_Bolt_1        | Ballista
-// SIRPIX  | Stealth_Move      | Stealth_Strike      | Lockpick     
-// KENLUA  | Haste             | Dodge               | Slash     
-// FLINA   | Javelin           | Fly                 | Gust
-// ZAGATUR | Wrap              | Needle              | Summon     
-// AGDRIS  | Memento           | Silence             | Protect     
-// MEWRU   | Teleport          | Psychock            | Imprison     
+  # test_earth_rise
