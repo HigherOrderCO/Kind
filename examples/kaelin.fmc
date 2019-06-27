@@ -37,7 +37,7 @@
 // TOPHORO | Earth_Wall     | Range: 2. Area: 1. Places a temporary wall. Fast.
 // TOPHORO | Earth_Rise     | Range: 2. Area: 1. Damage: 2. Mutes.
 // GONK    | Empathy        | Range: 1. Area: 1. Armor: 8. Fast. Loses 4 HP.
-// GONK    | Revenge        | Range: 1. Area: 0. Damage: `missing_hp / 4`. Fast.
+// GONK    | Revenge        | Range: 1. Area: 0. Fast. Damage: `missing_hp / 4`. Fast.
 // GONK    | Ground_Slam    | Range: 0. Area: 2. Damage: 2. Mutes.
 // STANCI  | Restore        | Range: 4. Area: 0. Heal: 3. Fast.
 // STANCI  | Escort         | Range: 4. Area: 0. Armor: 3. Fast.
@@ -82,14 +82,14 @@
 // ?       |                |
 // ?       |                |
 // 
-// Hero    | Skill 0           | Skill 1             | Skill 2
+// Hero    | Skill F           | Skill D             | Skill S
 // ------- | ----------------- | ------------------- | -----------------
 // TOPHORO | Earth_Root        | Earth_Wall          | Earth_Rise     
 // GONK    | Empathy           | Revenge             | Ground_Slam     
 // STANCI  | Restore           | Escort              | Detain     
 // ERKOS   | Flame_Ball        | Flame_Wave          | Flame_Nova     
 // CRONI   | Shadow_Bond       | Shadow_Trap         | Shadow_Flux     
-// SNARCH  | Ballista          | Quick_Bolt_0        | Quick_Bolt_1     
+// SNARCH  | Quick_Bolt_0      | Quick_Bolt_1        | Ballista
 // SIRPIX  | Stealth_Move      | Stealth_Strike      | Lockpick     
 // KENLUA  | Haste             | Dodge               | Slash     
 // FLINA   | Javelin           | Fly                 | Gust
@@ -320,6 +320,24 @@ def kaelin:
     (Cons SUMMON
     Nil))))))))))))))))))))))))))))))))))))))))))))))))
 
+  let get_skill_area = {skill}
+    cpy skill = skill
+    if |skill ==  2| then: 1
+    else: if |skill ==  3| then: 1
+    else: if |skill ==  5| then: 1
+    else: if |skill ==  7| then: 2
+    else: if |skill == 17| then: 2
+    else: if |skill == 18| then: 1
+    else: if |skill == 19| then: 6
+    else: if |skill == 23| then: 1
+    else: if |skill == 43| then: 1
+    else: if |skill == 49| then: 1
+    else: if |skill == 50| then: 1
+    else: if |skill == 53| then: 2
+    else: if |skill == 58| then: 1
+    else: if |skill == 59| then: 1
+    else: 0
+
   dup get_skill_priority =
     dup build_array = (~64 #{state}
       get [array, state]  = state
@@ -368,7 +386,7 @@ def kaelin:
   dup set_unit_type = # {type unit} ||unit & 0b11110011111111111111111111111111| | ||type & 0b00000011| << 26||
   dup set_unit_hero = # {hero unit} ||unit & 0b11110000111111111111111111111111| | ||hero & 0b00001111| << 24||
   dup set_unit_life = # {life unit} ||unit & 0b11111111000000111111111111111111| | ||life & 0b00111111| << 18||
-  dup set_unit_defs = # {defs unit} ||unit & 0b11111111111111001111111111111111| | ||defs & 0b00001111| << 14||
+  dup set_unit_defs = # {defs unit} ||unit & 0b11111111111111000011111111111111| | ||defs & 0b00001111| << 14||
   dup set_unit_eff1 = # {eff1 unit} ||unit & 0b11111111111111111100111111111111| | ||eff1 & 0b00000011| << 12||
   dup set_unit_lock = # {lock unit} ||unit & 0b11111111111111111111001111111111| | ||lock & 0b00000011| << 10||
   dup set_unit_mute = # {mute unit} ||unit & 0b11111111111111111111110011111111| | ||mute & 0b00000011| <<  8||
@@ -544,7 +562,11 @@ def kaelin:
     then: (fun caster target)
     else: [caster, target]
 
-  dup dmge_enemy = # {val} (if_unit is_enemy {caster target} [caster, (dmge val target)]) // TODO: shadow_bond and dodge effects
+  dup dmge_enemy = # {val} (if_unit is_enemy {caster target}
+    // TODO: verify if target is croni with shadow_bond and dmg>hp, if yes, kill caster
+    // TODO: verify if target is kenlua with spec=caster, if yes, prevent dmg
+    // TODO: verify if target has armor and subtract from dmg
+    [caster, (dmge val target)])
   dup lock_enemy = # {val} (if_unit is_enemy {caster target} [caster, (lock val target)])
   dup mute_enemy = # {val} (if_unit is_enemy {caster target} [caster, (mute val target)])
   dup heal_ally  = # {val} (if_unit is_ally  {caster target} [caster, (heal val target)])
@@ -562,6 +584,7 @@ def kaelin:
     let case_a_hero   =
       let case_b_void = [b, a]
       let case_b_item =
+        // TODO: don't activate trap if it is from the same team (must add that info on the trap)
         if |(get_unit_type b) == TRAP|
           then: [Void, (lock 2 a)]
           else: [a, b]
@@ -582,20 +605,20 @@ def kaelin:
   dup new_board = #
     let O   = Void
     let W   = (Item WALL)
-    let a   = (Hero WHITE GONK)
-    let b   = (Hero WHITE ERKOS)
-    let c   = (Hero WHITE KENLUA)
-    let d   = (Hero WHITE MEWEM)
+    let a   = (Hero WHITE SNARCH)
+    let b   = (Hero WHITE CRONI)
+    //let c   = (Hero WHITE KENLUA)
+    //let d   = (Hero WHITE MEWEM)
     let x   = (Goal WHITE)
-    let e   = (Hero BLACK TOPHORO)
-    let f   = (Hero BLACK CRONI)
-    let g   = (Hero BLACK FLINA)
-    let h   = (Hero BLACK STANCI)
+    let e   = (Hero BLACK FLINA)
+    let f   = (Hero BLACK KENLUA)
+    //let g   = (Hero BLACK FLINA)
+    //let h   = (Hero BLACK STANCI)
     let y   = (Goal BLACK)
-    let r00 = [[[[W,W],[W,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[h,W],[W,W]]]]
-    let r01 = [[[[W,W],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,g],[y,W]]]]
-    let r02 = [[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[f,W]]]]
-    let r03 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,e]]]]
+    let r00 = [[[[W,W],[W,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,W],[W,W]]]]
+    let r01 = [[[[W,W],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,a],[y,W]]]]
+    let r02 = [[[[W,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[b,W]]]]
+    let r03 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
     let r04 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
     let r05 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
     let r06 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
@@ -604,10 +627,10 @@ def kaelin:
     let r09 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
     let r10 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
     let r11 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
-    let r12 = [[[[a,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
-    let r13 = [[[[W,b],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]
-    let r14 = [[[[W,x],[c,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[W,W]]]]
-    let r15 = [[[[W,W],[W,d]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,W],[W,W]]]]
+    let r12 = [[[[O,O],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,O]]]]
+    let r13 = [[[[W,e],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[O,W]]]]
+    let r14 = [[[[W,x],[f,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,O],[W,W]]]]
+    let r15 = [[[[W,W],[W,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,W],[W,W]]]]
     [[[[r00,r01],[r02,r03]],[[r04,r05],[r06,r07]]],[[[r08,r09],[r10,r11]],[[r12,r13],[r14,r15]]]]
 
   // Converts a 16x16 position to an index up to 256.
@@ -799,6 +822,7 @@ def kaelin:
       let effect = {caster target}
         cpy caster = caster
         cpy target = target
+        // TODO: ballista can't walk
         if (get_unit_lock caster)
         then: [caster, target]
         else: (a_step_to_b caster target)
@@ -1417,35 +1441,21 @@ def kaelin:
     let case_cpos_none = {board}
       board
     let case_cpos_just = {cpos} {board}
+      // TODO: check if hero is muted, if so, don't apply the effect
       let effect       = (get_skill_effect skill)
       let board        = (effect cpos argm board)
       board
     (cpos case_cpos_none case_cpos_just board)
-      
-  dup exports =
-    [#new_board,
-    [#cast,
-    [#print_board,
-    [#unit_to_scott,
-    [#get_skill_priority,
-    [#TOPHORO,
-    [#GONK,
-    [#STANCI,
-    [#HERO_3,
-    [#ERKOS,
-    [#CRONI,
-    [#SNARCH,
-    [#HERO_7,
-    [#SIRPIX,
-    [#KENLUA,
-    [#FLINA,
-    [#HERO_B,
-    [#ZAGATUR,
-    [#AGDRIS,
-    [#MEWEM,
-    [#HERO_F,
-     0]]]]]]]]]]]]]]]]]]]]]
 
+  // TODO: create end_turn function
+  dup end_turn = 
+    let fold_node = {lft rgt}
+      [lft, rgt]
+    let fold_leaf = {unit}
+      cpy unit = unit
+      [(get_unit_info unit), (get_unit_icon unit)]
+    (fold8 #fold_node #fold_leaf)
+      
   # let board = new_board
     let board = (cast [GONK_WALK, [0x0,0x9]] board)
     let board = (cast [CRONI_WALK, [0xb,0x2]] board)
@@ -1454,6 +1464,50 @@ def kaelin:
     let board = (cast [GONK_WALK, [0x3,0x6]] board)
     let board = (cast [CRONI_WALK, [0x9,0x5]] board)
     let board = (cast [SHADOW_FLUX, [0x3,0x6]] board)
+    //let board = (end_turn board)
     (print_board board)
 
-  //# test
+  //dup exports =
+    //[#new_board,
+    //[#cast,
+    //[#print_board,
+    //[#unit_to_scott,
+    //[#get_skill_priority,
+    //[#get_skill_area,
+    //[#get_at,
+    //[#TOPHORO,
+    //[#GONK,
+    //[#STANCI,
+    //[#HERO_3,
+    //[#ERKOS,
+    //[#CRONI,
+    //[#SNARCH,
+    //[#HERO_7,
+    //[#SIRPIX,
+    //[#KENLUA,
+    //[#FLINA,
+    //[#HERO_B,
+    //[#ZAGATUR,
+    //[#AGDRIS,
+    //[#MEWEM,
+    //[#HERO_F,
+     //0]]]]]]]]]]]]]]]]]]]]]]]
+
+  //# exports
+
+
+// 
+// Hero    | Skill F           | Skill D             | Skill S
+// ------- | ----------------- | ------------------- | -----------------
+// TOPHORO | Earth_Root        | Earth_Wall          | Earth_Rise     
+// GONK    | Empathy           | Revenge             | Ground_Slam     
+// STANCI  | Restore           | Escort              | Detain     
+// ERKOS   | Flame_Ball        | Flame_Wave          | Flame_Nova     
+// CRONI   | Shadow_Bond       | Shadow_Trap         | Shadow_Flux     
+// SNARCH  | Quick_Bolt_0      | Quick_Bolt_1        | Ballista
+// SIRPIX  | Stealth_Move      | Stealth_Strike      | Lockpick     
+// KENLUA  | Haste             | Dodge               | Slash     
+// FLINA   | Javelin           | Fly                 | Gust
+// ZAGATUR | Wrap              | Needle              | Summon     
+// AGDRIS  | Memento           | Silence             | Protect     
+// MEWRU   | Teleport          | Psychock            | Imprison     
