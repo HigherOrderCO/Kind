@@ -574,8 +574,8 @@ def kaelin:
     let x   = (Goal WHITE)
     let e   = (Hero BLACK TOPHORO)
     let f   = (Hero BLACK CRONI)
-    let g   = (Hero BLACK STANCI)
-    let h   = (Hero BLACK FLINA)
+    let g   = (Hero BLACK FLINA)
+    let h   = (Hero BLACK STANCI)
     let y   = (Goal BLACK)
     let r00 = [[[[W,W],[W,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[h,W],[W,W]]]]
     let r01 = [[[[W,W],[O,O]],[[O,O],[O,O]]],[[[O,O],[O,O]],[[O,g],[y,W]]]]
@@ -1412,29 +1412,6 @@ def kaelin:
    dup arr = # (rec arr)
    dup fold = (fold6 #{arr1 arr2} {Nil} (arr1 (arr2 Nil)) #{x} x)
    #(fold arr)
-
-  // insert_cast
-  // | Inserts a cast into a list of casts in order of priority
-  // : {-T    : Type}
-  //   {cast  : ![SkillID, T]}
-  //   {casts : (CList ![SkillID, T])}
-  //   (CList ![SkillID, T])
-  let insert_cast = {cast casts} (sort_casts (ConsF cast casts))
-
-  let insert_cast_test = 
-    let casts = NilF
-    let casts = (ConsF #[EARTH_WAVE  , "earth_wave"]  casts)
-    let casts = (ConsF #[FLAME_BALL  , "flame_ball"]  casts)
-    let casts = (ConsF #[SHADOW_FLUX , "shadow_flux"] casts)
-    let casts = (ConsF #[RESTORE     , "restore"]     casts)
-    let casts = (ConsF #[EARTH_ROOT  , "earth_root"]  casts)
-    let casts = (ConsF #[EARTH_WALL  , "earth_wall"]  casts)
-    let casts = (ConsF #[MEMENTO     , "memento"]     casts)
-    let casts = (ConsF #[SILENCE     , "silence"]     casts)
-    let casts = (ConsF #[SUMMON      , "summon"]      casts)
-    let casts = (ConsF #[LOCKPICK    , "lockpick"]    casts)
-    let casts = (ConsF #[IMPRISON    , "imprison"]    casts)
-    (sort_casts casts)
 
   let cast = {cast board}
     get [skill, argm]  = cast
