@@ -31,56 +31,71 @@
 //
 // ## Moves
 // 
-// HERO    | MOVE                | EFFECT
-// ------- | ------------------- | ------
-// TOPHORO | Earth_Root(num)     | heals 20 hp. Self-roots for 3 turns.
-// TOPHORO | Earth_Wall(pos)     | places a temporary wall in an empty tile for up to 2 range.
-// TOPHORO | Earth_Wave(dir)     | hits enemies in a 1-3-5 wave ahead, dealing 2 dmg and muting them.
-// GONK    | Empathy(num)        | loses `dmg` HP. Grants `num*2` armor to allies up to 1 range.
-// GONK    | Revenge(pos)        | select an enemy up to 1 range. Deals `missing_hp / 4` dmg.
-// GONK    | Ground_Slam(nil)    | hits all enemies up to 2 range around, dealing 2 dmg and muting them.
-// STANCI  | Restore(pos)        | selects an ally up to 4 range. Heals 3 hp.
-// STANCI  | Escort(pos)         | selects an ally up to 4 range. Grants 3 armor.
-// STANCI  | Detain(pos)         | selects an enemy up to 4 range. Mutes him.
-// ?       |                     |
-// ?       |                     |
-// ?       |                     |
-// ERKOS   | Flame_Ball(pos)     | hits enemies around 2 range in a position up to 4 range, dealing 3 damage.
-// ERKOS   | Flame_Wave(dir)     | hits enemies in a 1-3-3-5-5 wave ahead, dealing 3 damage.
-// ERKOS   | Flame_Nova(num)     | loses `num` HP. Hits enemies around up to 6 range, dealing `num / 2` damage.
-// CRONI   | Shadow_Trap(pos)    | places a trap in an empty tile for up to 8 range, locking whoever steps on it.
-// CRONI   | Shadow_Flux(pos)    | hits a 3x3 (square) up to 8 range, dealing 8 damage.
-// CRONI   | Shadow_Bond(pos)    | loses 3 HP. If enemy at given position kills Croni this turn, it dies too.
-// SNARCH  | Ballista(nil)       | mounts/dismounts from a ballista. Can't attack on this turn. While mounted, can't move and attacks range doubled.
-// SNARCH  | Quick_Bolt_0(dir)   | hits a selected enemy up to 6 range, dealing 2 damage.
-// SNARCH  | Quick_Bolt_1(dir)   | hits a selected enemy up to 6 range, dealing 2 damage.
-// ?       |                     |
-// ?       |                     |
-// ?       |                     |
-// SIRPIX  | Stealth_Move(pos)   | moves your Stealth Clone up to 4 range.
-// SIRPIX  | Stealth_Strike(pos) | swaps position with your Stealth Clone. Hits a 3x3 area around, dealing 3 damage.
-// SIRPIX  | Lockpick(dir)       | special effects on map.
-// KENLUA  | Haste(pos)          | loses 2 hp. Blinks to given position up to 4 range. Afterwards, hits a 3x3 area around, dealing 4 damage.
-// KENLUA  | Dodge(pos)          | can't take damage from enemy at given position during this turn.
-// KENLUA  | Slash(dir)          | hits a 1x1 area up to 2 range, dealing 12 damage. If it lands, heals 8 hp.
-// FLINA   | Javelin(pos)        | hits a selected enemy up to 2 range, dealing 4 dmg.
-// FLINA   | Fly(pos)            | moves 4 steps, passing through enemies and walls.
-// FLINA   | Gust(dir)           | hits enemies in a 1-3-5 (wave) ahead, dealing 4 dmg.
-// ?       |                     |
-// ?       |                     |
-// ?       |                     |
-// ZAGATUR | Wrap(nil)           | hits a 3x3 area around, locking enemies.
-// ZAGATUR | Needle(dir)         | hits a 1-1-1 wave ahead, dealing damage 4 damage.
-// ZAGATUR | Summon(pos)         | selects an empty tile up to 3 range. Spawns a clone of Zagatur on it.
-// AGDRIS  | Memento(pos)        | dies. Hits a 5x5 area up to 32 range, dealing 2 damage, locking and muting enemies, and healing 2 hp and granting 2 armors to allies.
-// AGDRIS  | Silence(pos)        | selects an enemy. It can't attack on this turn.
-// AGDRIS  | Protect(pos)        | selects an ally. Grants 3 armor.
-// MEWRU   | Teleport(pos)       | selects an location on the map. If that location is empty or an ally, swaps positions.
-// MEWRU   | Psychock(nil)       | hits a 3x3 area up to 4 range, dealing 6 damage.
-// MEWRU   | Imprison(pos)       | hits a 3x3 area up to 4 range, locking enemies.
-// ?       |                     |
-// ?       |                     |
-// ?       |                     |
+// HERO    | MOVE           | EFFECT
+// ------- | -------------- | ------
+// TOPHORO | Earth_Root     | Heals 20 hp. Self-roots for 3 turns. Fast.
+// TOPHORO | Earth_Wall     | Range: 2. Area: 1. Places a temporary wall. Fast.
+// TOPHORO | Earth_Rise     | Range: 2. Area: 1. Damage: 2. Mutes.
+// GONK    | Empathy        | Range: 1. Area: 1. Armor: 8. Fast. Loses 4 HP.
+// GONK    | Revenge        | Range: 1. Area: 0. Damage: `missing_hp / 4`. Fast.
+// GONK    | Ground_Slam    | Range: 0. Area: 2. Damage: 2. Mutes.
+// STANCI  | Restore        | Range: 4. Area: 0. Heal: 3. Fast.
+// STANCI  | Escort         | Range: 4. Area: 0. Armor: 3. Fast.
+// STANCI  | Detain         | Range: 4. Area: 0. Mutes. Fast.
+// ?       |                |
+// ?       |                |
+// ?       |                |
+// ERKOS   | Flame_Ball     | Range: 4. Area: 2. Damage: 3.
+// ERKOS   | Flame_Wave     | Range: 4. Area: 1. Damage: 5.
+// ERKOS   | Flame_Nova     | Range: 0. Area: 6. Damage: 15. Loses 30 HP.
+// CRONI   | Shadow_Bond    | Fast. Loses 3 HP. If enemy at given position kills Croni this turn, it dies too.
+// CRONI   | Shadow_Trap    | Range: 8. Area: 0. Fast. Places a trap that locks whoever steps on it.
+// CRONI   | Shadow_Flux    | Range: 8. Area: 1. Damage: 8.
+// SNARCH  | Ballista       | Mounts from a ballista, doubling Snarch's range and locking him. Can't attack on this turn
+// SNARCH  | Quick_Bolt_0   | Range: 6. Area: 0. Damage: 2. Fast.
+// SNARCH  | Quick_Bolt_1   | Range: 6. Area: 0. Damage: 2. Fast.
+// ?       |                |
+// ?       |                |
+// ?       |                |
+// SIRPIX  | Stealth_Move   | Moves your Stealth Clone up to 4 range.
+// SIRPIX  | Stealth_Strike | Range: 0. Area: 0. Damage: 3. Before attacking, swaps position with your Stealth Clone.
+// SIRPIX  | Lockpick       | Special effects on map.
+// KENLUA  | Haste          | Range: 3. Area: 0. Loses 2 hp. Blinks to target. Range: 0. Area: 1. Damage: 4.
+// KENLUA  | Dodge          | Range: 32. Can't take damage from target during this turn.
+// KENLUA  | Slash          | Range: 1. Area: 0. Damage: 12.
+// FLINA   | Javelin        | Range: 2. Area: 0. Damage: 4. Fast.
+// FLINA   | Fly            | Range: 3. Area: 0. Blinks to target.
+// FLINA   | Gust           | Range: 2. Area: 1. Damage: 3.
+// ?       |                |
+// ?       |                |
+// ?       |                |
+// ZAGATUR | Wrap           | Range: 0. Area: 1. Fast. Locks.
+// ZAGATUR | Needle         | Range: 0. Area: 1. Damage: 3.
+// ZAGATUR | Summon         | Range: 3. Spawns a clone of Zagatur.
+// AGDRIS  | Memento        | Range: 32. Area: 2. Damage: 2. Fast. Heal: 2. Armor: 2. Locks. Mutes. Dies.
+// AGDRIS  | Silence        | Range: 32. Area: 0. Mutes.
+// AGDRIS  | Protect        | Range: 32. Area: 0. Armor: 3.
+// MEWRU   | Teleport       | Range: 32. Fast. Blinks to target.
+// MEWRU   | Psychock       | hits a 3x3 area up to 4 range, dealing 6 damage.
+// MEWRU   | Imprison       | hits a 3x3 area up to 4 range, locking enemies.
+// ?       |                |
+// ?       |                |
+// ?       |                |
+// 
+// Hero    | Skill 0           | Skill 1             | Skill 2
+// ------- | ----------------- | ------------------- | -----------------
+// TOPHORO | Earth_Root        | Earth_Wall          | Earth_Rise     
+// GONK    | Empathy           | Revenge             | Ground_Slam     
+// STANCI  | Restore           | Escort              | Detain     
+// ERKOS   | Flame_Ball        | Flame_Wave          | Flame_Nova     
+// CRONI   | Shadow_Bond       | Shadow_Trap         | Shadow_Flux     
+// SNARCH  | Ballista          | Quick_Bolt_0        | Quick_Bolt_1     
+// SIRPIX  | Stealth_Move      | Stealth_Strike      | Lockpick     
+// KENLUA  | Haste             | Dodge               | Slash     
+// FLINA   | Javelin           | Fly                 | Gust
+// ZAGATUR | Wrap              | Needle              | Summon     
+// AGDRIS  | Memento           | Silence             | Protect     
+// MEWRU   | Teleport          | Psychock            | Imprison     
 
 def kaelin:
 
@@ -208,7 +223,7 @@ def kaelin:
   dup TOPHORO_WALK   = # 0
   dup EARTH_ROOT     = # 1
   dup EARTH_WALL     = # 2
-  dup EARTH_WAVE     = # 3
+  dup EARTH_RISE     = # 3
   dup GONK_WALK      = # 4
   dup GROUND_SLAM    = # 5
   dup REVENGE        = # 6
@@ -222,9 +237,9 @@ def kaelin:
   dup FLAME_WAVE     = # 18
   dup FLAME_NOVA     = # 19
   dup CRONI_WALK     = # 20
-  dup SHADOW_TRAP    = # 21
-  dup SHADOW_FLUX    = # 22
-  dup SHADOW_BOND    = # 23
+  dup SHADOW_BOND    = # 21
+  dup SHADOW_TRAP    = # 22
+  dup SHADOW_FLUX    = # 23
   dup SNARCH_WALK    = # 24
   dup QUICK_BOLT_0   = # 25
   dup QUICK_BOLT_1   = # 26
@@ -291,7 +306,7 @@ def kaelin:
     (Cons FLY
     (Cons DODGE
     (Cons NEEDLE
-    (Cons EARTH_WAVE
+    (Cons EARTH_RISE
     (Cons GROUND_SLAM
     (Cons GUST
     (Cons SLASH
@@ -548,7 +563,7 @@ def kaelin:
       let case_b_void = [b, a]
       let case_b_item =
         if |(get_unit_type b) == TRAP|
-          then: [Void, (lock 1 a)]
+          then: [Void, (lock 2 a)]
           else: [a, b]
       let case_b_goal = [a, b]
       let case_b_hero = 
@@ -777,46 +792,41 @@ def kaelin:
       state
 
   // Walks through a set of directions
-  let walk = {hero steps}
-    dup hero = hero
-    let walk = {state}
-      get [board, state]   = state
-      get [pos, dirs]      = state
-      get [new_dirs, dir]  = (pop [0,0] dirs)
-      get [px, py]         = pos
-      get [dx, dy]         = dir
-      cpy px               = px
-      cpy py               = py
-      cpy dx               = dx
-      cpy dy               = dy
-      let new_pos          = (vec2_add [px,py] [dx,dy])
-      get [board, is_hero] = (is_hero_at [px,py] hero board)
-      get [board, is_lock] = (get_lock_at [px,py] board)
-      let can_move         = |is_hero & |is_lock == 0||
-      let new_board        = (if can_move [step, {pos dir board}board] [px,py] [dx,dy] board)
-      [new_board, [new_pos, new_dirs]]
-    dup walk = (steps #walk)
-    # {pos dirs board}
-      (fst (walk [board, [pos, dirs]]))
+  let walk = {range}
+    let rang = range
+    let area = vec2_range_0
+    let hits = {cpos tpos board}
+      let effect = {caster target}
+        cpy caster = caster
+        cpy target = target
+        if (get_unit_lock caster)
+        then: [caster, target]
+        else: (a_step_to_b caster target)
+      (board_interact cpos tpos effect board)
+    (cast_area rang area #hits)
 
   // == Tophoro ==
   // ~~~~~~~~~~~~~
 
-  dup tophoro_walk = (walk #TOPHORO ~4)
+  dup tophoro_walk = (walk #3)
 
   dup earth_root = (cast_area #0 vec2_range_0 # {cpos tpos board}
     (board_update cpos {unit}(heal 20 (mute 3 (lock 3 unit))) board))
 
-  dup earth_wave =
-    let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #5 NilF)))))
-    let hits = {cpos tpos dir board}
-      let effect = {caster target} (dmge_enemy 2 caster (mute 2 target))
+  dup earth_rise =
+    let rang = #2
+    let area = vec2_range_1
+    let hits = #{cpos tpos board} 
+      let effect = {caster target}
+        get [caster, target] = (dmge_enemy 2 caster target)
+        get [caster, target] = (mute_enemy 1 caster target)
+        [caster, target]
       (board_interact cpos tpos effect board)
-    (cast_wave wave #hits)
+    (cast_area rang area hits)
 
   dup earth_wall =
     let rang = #2
-    let area = vec2_range_0
+    let area = vec2_range_1
     let wall = {unit}
       cpy unit = unit
       if |(get_unit_kind unit) == VOID|
@@ -824,7 +834,7 @@ def kaelin:
       else: unit
     let hits = {cpos tpos board}
       (board_update tpos wall board)
-    (cast_area #2 vec2_range_0 #hits)
+    (cast_area #2 area #hits)
 
   let test_earth_root = 
     let board = new_board
@@ -832,40 +842,32 @@ def kaelin:
     let board = (earth_root [0xf,0x3] [0xf,0x3] board)
     (print_board board)
 
-  let test_earth_wave = 
+  let test_earth_rise = 
     let board = new_board
     let board = (board_swap [0x3,0xf] [0xf,0x5] board)
-    let board = (earth_wave [0xf,0x3] DOWN board)
+    let board = (earth_rise [0xf,0x3] [0xf,0x4] board)
     (print_board board)
 
   let test_earth_wall =
     let board = new_board
     let board = (board_swap [0x3,0xf] [0xf,0x5] board)
-    let board = (earth_wall [0xf,0x3] [0xf,0x4] board)
+    let board = (earth_wall [0xf,0x3] [0xe,0x4] board)
     (print_board board)
 
   // == Gonk ==
   // ~~~~~~~~~~
 
-  dup gonk_walk = (walk #GONK ~4)
+  dup gonk_walk = (walk #3)
 
   dup empathy = 
-    let rang = #0
-    let area = vec2_range_2
-    let hits = #{cpos tpos state}
-      get [board, dmg] = state
-      cpy dmg          = dmg
-      let effect       = {caster target} (defs_ally |dmg * 2| caster target)
-      let board        = (board_interact cpos tpos effect board)
-      [board, dmg]
+    let rang = #1
+    let area = vec2_range_1
+    let hits = #{cpos tpos board} (board_interact cpos tpos (defs_ally 8) board)
     dup cast = (cast_area rang area hits)
-    # {cpos dmg board}
-      cpy dmg            = (min dmg 8)
+    # {cpos tpos board}
       get [cpos0, cpos1] = (vec2_cpy cpos)
-      get [cpos2, cpos3] = (vec2_cpy cpos0)
-      let board          = (board_update cpos1 (dmge dmg) board)
-      get [board, dmg]   = (cast cpos2 cpos3 [board, dmg])
-      board
+      let board          = (board_update cpos0 (dmge 4) board)
+      (cast cpos1 tpos board)
 
   dup revenge =
     let rang = #1
@@ -891,8 +893,8 @@ def kaelin:
 
   let test_empathy =
     let board = new_board
-    let board = (gonk_walk [0x0,0xc] (Cons RIGHT Nil) board)
-    let board = (empathy [0x1,0xc] 7 board)
+    let board = (gonk_walk [0x0,0xc] [0x2,0xc] board)
+    let board = (empathy [0x2,0xc] [0x2,0xd] board)
     (print_board board)
 
   let test_revenge =
@@ -911,7 +913,7 @@ def kaelin:
   // == Stanci ==
   // ~~~~~~~~~~~~
 
-  dup stanci_walk = (walk #STANCI ~4)
+  dup stanci_walk = (walk #3)
 
   dup restore =
     let rang = #4
@@ -951,7 +953,7 @@ def kaelin:
   // == Erkos ==
   // ~~~~~~~~~~~
 
-  dup erkos_walk = (walk #ERKOS ~4)
+  dup erkos_walk = (walk #3)
 
   dup flame_ball =
     let rang = #4
@@ -960,26 +962,20 @@ def kaelin:
     (cast_area rang area hits)
 
   dup flame_wave =
-    let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #3 (ConsF #5 (ConsF #5 NilF)))))))
-    let hits = # {cpos hpos dir board} (board_interact cpos hpos (dmge_enemy 3) board)
-    (cast_wave wave hits)
+    let rang = #4
+    let area = vec2_range_1
+    let hits = # {cpos hpos board} (board_interact cpos hpos (dmge_enemy 5) board)
+    (cast_area rang area hits)
 
   dup flame_nova = 
     let rang = #0
     let area = vec2_range_6
-    let hits = #{cpos hpos param}
-      get [board, dmg] = param
-      cpy dmg   = dmg
-      let board = (board_interact cpos hpos (dmge_enemy |dmg / 2|) board)
-      [board, dmg]
+    let hits = #{cpos hpos board} (board_interact cpos hpos (dmge_enemy 15) board)
     dup cast = (cast_area rang area hits)
-    # {cpos dmg board}
-      cpy dmg            = dmg // TODO: can't be > current hp
+    # {cpos tpos board}
       get [cpos0, cpos1] = (vec2_cpy cpos)
-      get [cpos2, cpos3] = (vec2_cpy cpos0)
-      let board          = (board_update cpos1 (dmge dmg) board)
-      get [board, dmg]   = (cast cpos2 cpos3 [board, dmg])
-      board
+      let board          = (board_update cpos0 (dmge 30) board)
+      (cast cpos1 tpos board)
 
   let test_flame_ball =
     let board = new_board
@@ -990,7 +986,7 @@ def kaelin:
   let test_flame_wave =
     let board = new_board
     let board = (board_swap [0x1,0xd] [0xd,0x5] board)
-    let board = (flame_wave [0xd,0x5] UP board)
+    let board = (flame_wave [0xd,0x5] [0xd,0x2] board)
     (print_board board)
 
   let test_flame_nova =
@@ -1002,13 +998,14 @@ def kaelin:
   // == Croni ==
   // ~~~~~~~~~~~
 
-  dup croni_walk = (walk #CRONI ~4)
+  dup croni_walk = (walk #3)
 
-  dup shadow_flux =
-    let rang = #8
-    let area = vec2_range_1
-    let hits = #{cpos tpos board} (board_interact cpos tpos (dmge_enemy 8) board)
-    (cast_area rang area hits)
+  dup shadow_bond = # {pos nil board}
+    let bind = {unit}
+      let unit = (dmge 3 unit)
+      let unit = (set_unit_spec 1 unit)
+      unit
+    (board_update pos bind board)
 
   dup shadow_trap = 
     let rang = #8
@@ -1022,18 +1019,17 @@ def kaelin:
       (board_update hpos put_trap board)
     (cast_area rang area hits)
 
-  dup shadow_bond = # {pos nil board}
-    let bind = {unit}
-      let unit = (dmge 3 unit)
-      let unit = (set_unit_spec 1 unit)
-      unit
-    (board_update pos bind board)
+  dup shadow_flux =
+    let rang = #8
+    let area = vec2_range_1
+    let hits = #{cpos tpos board} (board_interact cpos tpos (dmge_enemy 8) board)
+    (cast_area rang area hits)
 
   let test_shadow_trap =
     let board = new_board
     let board = (board_swap [0xe,0x2] [0xa,0xd] board)
     let board = (shadow_trap [0xa,0xd] [0x2,0xd] board)
-    let board = (erkos_walk [0x1,0xd] (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))) board)
+    let board = (erkos_walk [0x1,0xd] [0x2,0xd] board)
     (print_board board)
 
   let test_shadow_bond =
@@ -1044,7 +1040,7 @@ def kaelin:
   // == Snarch ==
   // ~~~~~~~~~~~~
 
-  dup snarch_walk = (walk #SNARCH ~4)
+  dup snarch_walk = (walk #3)
 
   dup ballista = # {pos nil board}
     let mount = {unit}
@@ -1085,7 +1081,7 @@ def kaelin:
   // == Sirpix ==
   // ~~~~~~~~~~~~
 
-  dup sirpix_walk = (walk #SIRPIX ~4)
+  dup sirpix_walk = (walk #3)
 
   dup stealth_move = # {cpos tpos board}
     get [cx, cy]      = cpos
@@ -1144,12 +1140,12 @@ def kaelin:
   // == Kenlua ==
   // ~~~~~~~~~~~~
 
-  dup kenlua_walk = (walk #KENLUA ~4)
+  dup kenlua_walk = (walk #3)
 
   dup haste =
     let rang = #0
     let area = vec2_range_1
-    let hits = # {cpos hpos} (board_interact cpos hpos (dmge_enemy 4))
+    let hits = # {cpos tpos} (board_interact cpos tpos (dmge_enemy 4))
     dup strike = (cast_area rang area hits)
     # {cpos tpos board}
       get [cpos0, cpos1] = (vec2_cpy cpos)
@@ -1189,9 +1185,9 @@ def kaelin:
 
   let test_haste =
     let board = new_board
-    let board = (write8 (board_index [0xd,0xb]) (Hero BLACK KENLUA) board)
-    let board = (kenlua_walk [0xd,0xb] (Cons UP (Cons UP (Cons UP (Cons UP Nil)))) board)
-    let board = (haste [0xd,0x7] [0xd,0x2] board)
+    let board = (write8 (board_index [0xd,0x8]) (Hero WHITE KENLUA) board)
+    let board = (kenlua_walk [0xd,0x8] [0xd,0x5] board)
+    let board = (haste [0xd,0x5] [0xd,0x2] board)
     (print_board board)
 
   let test_dodge =
@@ -1209,7 +1205,7 @@ def kaelin:
   // == Flina ==
   // ~~~~~~~~~~~
 
-  dup flina_walk = (walk #FLINA ~4)
+  dup flina_walk = (walk #3)
 
   dup javelin =
     let rang = #2
@@ -1218,17 +1214,16 @@ def kaelin:
     (cast_area rang area #hits)
 
   dup fly =
-    let rang = #4
+    let rang = #3
     let area = vec2_range_0
     let hits = {cpos tpos} (board_interact cpos tpos a_step_to_b)
     (cast_area rang area #hits)
 
   dup gust =
-    let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #3 (ConsF #5 NilF)))))
-    let hits = {cpos tpos dir board}
-      let effect = {caster target} (dmge_enemy 2 caster target)
-      (board_interact cpos tpos effect board)
-    (cast_wave wave #hits)
+    let rang = #2
+    let area = vec2_range_1
+    let hits = # {cpos hpos board} (board_interact cpos hpos (dmge_enemy 3) board)
+    (cast_area rang area hits)
 
   let test_javelin =
     let board = new_board
@@ -1245,7 +1240,7 @@ def kaelin:
   // == Zagatur ==
   // ~~~~~~~~~~~~~
 
-  dup zagatur_walk = (walk #ZAGATUR ~0)
+  dup zagatur_walk = (walk #0)
 
   dup wrap =
     let rang = #0
@@ -1254,9 +1249,10 @@ def kaelin:
     (cast_area rang area hits)
 
   dup needle =
-    let wave = (vec2_wave_in (ConsF #0 (ConsF #1 (ConsF #1 (ConsF #1 NilF)))))
-    let hits = {cpos tpos dir} (board_interact cpos tpos (dmge_enemy 2))
-    (cast_wave wave #hits)
+    let rang = #0
+    let area = vec2_range_1
+    let hits = # {cpos tpos board} (board_interact cpos tpos (dmge_enemy 3) board)
+    (cast_area rang area hits)
 
   dup summon =
     let rang = #4
@@ -1276,14 +1272,14 @@ def kaelin:
     let board = new_board
     let board = (write8 (board_index [0x3,0xe]) (Hero BLACK ZAGATUR) board)
     let board = (summon [0x3,0xe] [0x5,0xe] board)
-    let board = (needle [0x3,0xe] DOWN board)
+    let board = (needle [0x3,0xe] [0x3,0xe] board)
     let board = (wrap [0x3,0xe] [0x3,0xe] board)
     (print_board board)
 
   // == Agdris ==
   // ~~~~~~~~~~~~
 
-  dup agdris_walk = (walk #AGDRIS ~1)
+  dup agdris_walk = (walk #1)
 
   dup silence =
     let rang = #32
@@ -1348,10 +1344,10 @@ def kaelin:
   // == Mewem ==
   // ~~~~~~~~~~~
 
-  dup mewem_walk = (walk #MEWEM ~0)
+  dup mewem_walk = (walk #0)
 
   dup teleport =
-    let rang = #12
+    let rang = #32
     let area = vec2_range_0
     let hits = {cpos tpos} (board_interact cpos tpos a_step_to_b)
     (cast_area rang area #hits)
@@ -1372,12 +1368,12 @@ def kaelin:
   // ~~~~~~~~~~~~~~~~~
 
   dup get_skill_effect = # {skill}
-    let to = [[tophoro_walk , earth_root]   , [earth_wall     , earth_wave]]
+    let to = [[tophoro_walk , earth_root]   , [earth_wall     , earth_rise]]
     let go = [[gonk_walk    , ground_slam]  , [revenge        , empathy]]
     let st = [[stanci_walk  , restore]      , [escort         , detain]]
     let h3 = 0
     let er = [[erkos_walk   , flame_ball]   , [flame_wave     , flame_nova]]
-    let cr = [[croni_walk   , shadow_trap]  , [shadow_flux    , shadow_bond]]
+    let cr = [[croni_walk   , shadow_bond]  , [shadow_trap    , shadow_flux]]
     let sn = [[snarch_walk  , quick_bolt_0] , [quick_bolt_1   , ballista]]
     let h7 = 0
     let si = [[sirpix_walk  , stealth_move] , [stealth_strike , lockpick]]
@@ -1450,12 +1446,14 @@ def kaelin:
     [#HERO_F,
      0]]]]]]]]]]]]]]]]]]]]]
 
-  //# let board = new_board
-    //let board = (cast [GONK_WALK, (Cons UP (Cons UP (Cons UP (Cons UP Nil))))] board)
-    //let board = (cast [GONK_WALK, (Cons RIGHT (Cons RIGHT (Cons RIGHT (Cons RIGHT Nil))))] board)
-    //let board = (cast [CRONI_WALK, (Cons DOWN (Cons DOWN (Cons DOWN (Cons DOWN Nil))))] board)
-    //let board = (cast [CRONI_WALK, (Cons LEFT (Cons LEFT (Cons LEFT (Cons LEFT Nil))))] board)
-    //let board = (cast [SHADOW_FLUX, [0x4,0x8]] board)
-    //(print_board board)
+  # let board = new_board
+    let board = (cast [GONK_WALK, [0x0,0x9]] board)
+    let board = (cast [CRONI_WALK, [0xb,0x2]] board)
+    let board = (cast [GONK_WALK, [0x3,0x9]] board)
+    let board = (cast [CRONI_WALK, [0x9,0x2]] board)
+    let board = (cast [GONK_WALK, [0x3,0x6]] board)
+    let board = (cast [CRONI_WALK, [0x9,0x5]] board)
+    let board = (cast [SHADOW_FLUX, [0x3,0x6]] board)
+    (print_board board)
 
-  # exports
+  //# test
