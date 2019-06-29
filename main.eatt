@@ -1,0 +1,675 @@
+// ::::::::::::::::::::::::::::::::::
+// :: Formality's standard library ::
+// ::::::::::::::::::::::::::::::::::
+
+// :::::::::::
+// :: Empty ::
+// :::::::::::
+
+. Empty
+: Type
+= $self
+  {-Prop : {self : Empty} Type}
+  (Prop self)
+
+// ::::::::::
+// :: Unit ::
+// ::::::::::
+
+. Unit
+: Type
+= $self
+  {-Prop : {:Unit} Type}
+  {unit  : (Prop unit)}
+  (Prop self)
+
+. unit
+: Unit
+= @Unit [-Prop] [unit] unit
+
+. erase
+: {-A : Type} {-x : A} Unit
+= [-A] [-x] unit
+
+. open
+: {-A : Type} {x : !A} A
+= [-A] [x]
+  [y = x] y
+
+// ::::::::
+// :: Eq ::
+// ::::::::
+
+. Eq
+: {T : Type} {a : T} {b : T} Type
+= [T] [a] [b] $self
+  {-Prop : {b : T} {self : (Eq T a b)} Type}
+  {refl  : (Prop a (refl -T -a))}
+  (Prop b self)
+
+. refl
+: {-T : Type} {-a : T} (Eq T a a)
+= [-T] [-a] @(Eq T a a) [-Prop] [refl]
+  refl
+
+. sym
+: {-T : Type}
+  {-a : T}
+  {-b : T}
+  {e  : (Eq T a b)}
+  (Eq T b a)
+= [-T] [-a] [-b] [e]
+  (~e -[b] [self] (Eq T b a)
+    (refl -T -a))
+
+. cong
+: {-A : Type}
+  {-B : Type}
+  {-a : A}
+  {-b : A}
+  {e  : (Eq A a b)}
+  {-f : {a : A} B}
+  (Eq B (f a) (f b))
+= [-A] [-B] [-a] [-b] [e] [-f]
+  (~e -[b] [self] (Eq B (f a) (f b))
+    (refl -B -(f a)))
+
+. rewrite
+: {-T : Type}
+  {-a : T}
+  {-b : T}
+  {e  : (Eq T a b)}
+  {-P : {a : T} Type}
+  {x  : (P a)}
+  (P b)
+= [-T] [-a] [-b] [e] [-P] [x]
+  (~e -[b] [self] (P b) x)
+
+// ::::::::::
+// :: Bool ::
+// ::::::::::
+
+. Bool
+: Type
+= $self
+  {-Prop : {:Bool} Type}
+  {true  : (Prop true)}
+  {false : (Prop false)}
+  (Prop self)
+
+. true
+: Bool
+= @Bool [-P] [t] [f] t
+
+. false
+: Bool
+= @Bool [-P] [t] [f] f
+
+. if
+: {b : Bool} {-P : {:Bool} Type} {:(P true)} {:(P false)} (P b)
+= [b] [-P] [t] [f] (~b -P t f)
+
+. slow_not
+: {b : Bool} Bool
+= [b] (if b -[b]Bool false true)
+
+. not
+: {b : Bool} Bool
+= [b] @Bool [-P] [t] [f] (if b -[b](P (not b)) f t)
+
+. or 
+: {a : Bool} {b : Bool} Bool
+= [a] (if a -[a]{b : Bool}Bool [b]true [b]b)
+
+. and 
+: {a : Bool} {b : Bool} Bool
+= [a] (if a -[a]{b : Bool}Bool [b]b [b]false)
+
+// ::::::::::
+// :: Pair ::
+// ::::::::::
+
+. Pair [A : Type] [B : Type]
+: Type
+= $self
+  {-P   : {:(Pair A B)} Type}
+  {pair : {a : A} {b : B} (P (pair A B a b))}
+  (P self)
+
+. pair [A : Type] [B : Type]
+: {a : A} {b : B} (Pair A B)
+= [a] [b]
+  @(Pair A B) [-P] [pair] (pair a b)
+
+. Sigma [A : Type] [B : {a : A} Type]
+: Type
+= $self
+  { -P : {:(Sigma A B)} Type}
+  { pair : {a : A} {b : (B a)} (P (spair -A -B a b)) }
+  (P self)
+
+. spair [-A : Type] [-B : {a : A} Type]
+: {a : A} {b : (B a)} (Sigma A B)
+= [a] [b]
+  @(Sigma A B) [-P] [pair] (pair a b)
+
+// :::::::::
+// :: Nat ::
+// :::::::::
+// The main Nat type consists of stratified inductive Church encoding.
+// It is erased from Parigot, and uses boxed dups to be EA-Core-compatible.
+
+. Nat
+: Type
+= $self
+  {-P : {:Nat} Type}
+  {s : ! {-n : Nat} {h : (P n)} (P (succ n))}
+  ! {z : (P zero)}
+    (P self)
+
+. succ
+: {n : Nat} Nat
+= [n]
+  @Nat [-P] [s] [s = s] [A = (~n -P |s)] | [z] (s -n (A z))
+
+. zero
+: Nat
+= @Nat [-P] [s] [s = s] | [z] z
+
+. 0 zero
+. 1 (succ 0)
+. 2 (succ 1)
+. 3 (succ 2)
+. 4 (succ 3)
+. 5 (succ 4)
+. 6 (succ 5)
+. 7 (succ 6)
+. 8 (succ 7)
+. 9 (succ 8)
+
+. apply
+: {n : Nat} Cat
+= [n] [-P] [s] [s = s]
+  [F = (~n -[x]P |[-n][h](s h))]
+  | [z] (F z)
+
+. induct
+: {n : Nat} {-P : {:Nat} Type} {:!{n : Nat}{:(P n)}(P (succ n))} !{:(P zero)} (P n)
+= [a] [-P] [s] [s = s] [A = (~a -[n](P n) |s)] | [z] (A z)
+
+. count
+: {n : Nat} Nat
+= [n] @Nat [-P] [s] [s = s] [f = (~n -[n] (P (count n)) |[-n] (s -(count n)))] | [z] (f z)
+
+. slow_count
+: {n : Nat} !Nat
+= [n] [f = (~n -[s]Nat |[-n][h](succ h))] | (f zero)
+
+. slow_pred
+: {n : Nat} !Nat
+= [n]
+  let motive [n] {f : {:Nat}Nat} Nat
+  let case_s |[-n] [h] [f] (f (h succ))
+  let case_z [f] zero
+  [f = (~n -motive case_s)]
+  | (f case_z count)
+
+. double
+: {n : Nat} Nat
+= [n] @Nat [-P] [s] [s = s]
+  let motive [n] (P (double n))
+  let case_s |[-n] [h] (s -(succ (double n)) (s -(double n) h))
+  [f = (~n -motive case_s)]
+  | [z] (f z)
+
+. add
+: {a : Nat} {b : Nat} Nat
+= [a] [b] @Nat [-P] [s]
+  [s = s]
+  [A = (~a -[a](P (add a b)) |[-n] [h] (s -(add n b) h))]
+  [B = (~b -[b](P (add zero b)) |[-n] [h] (s -(add zero n) h))]
+| [z] (A (B z)) 
+
+. add_zero_r
+: {a : Nat} !(Eq Nat (add a zero) a)
+= [a]
+  let motive [x]
+    (Eq Nat (add x zero) x)
+  let case_succ |[-pred] [h]
+    (cong -Nat -Nat -(add pred zero) -pred h -succ)
+  let case_zero (refl -Nat -zero)
+  [S = (~a -motive case_succ)]
+| (S case_zero)
+
+. add_zero_l
+: {a : Nat} !(Eq Nat (add a zero) a)
+= [a]
+  let motive [x]
+    (Eq Nat (add x zero) x)
+  let case_succ |[-pred] [h] (refl -Nat -(succ pred))
+  let case_zero (refl -Nat -zero)
+  [S = (~a -motive case_succ)]
+| (S case_zero)
+
+. add_succ_r
+: {a : Nat} {b : Nat} !(Eq Nat (add a (succ b)) (succ (add a b)))
+= [a] [b]
+  let motive [self]
+    (Eq Nat (add self (succ b)) (succ (add self b)))
+  let case_succ |[-pred] [h]
+    (cong -Nat -Nat -(add pred (succ b)) -(succ (add pred b)) h -succ)
+  let case_zero (refl -Nat -(succ b))
+  [S = (~a -motive case_succ)]
+| (S case_zero)
+
+. add_comm_zero
+: {b : Nat} !(Eq Nat (add zero b) (add b zero))
+= [a]
+  let motive [x]
+    (Eq Nat (add x zero) (add zero x))
+  let case_succ |[-pred] [h] (refl -Nat -(succ pred))
+  let case_zero (refl -Nat -(add zero zero))
+  [S = (~a -motive case_succ)]
+| (S case_zero)
+
+
+// Two different nonstratified proofs of commutativity; only works in erased positions.
+. add_comm
+: {a : Nat} !{b : Nat} (Eq Nat (add a b) (add b a))
+= [a]
+  let motive [self]
+    {b : Nat} (Eq Nat (add self b) (add b self))
+  let case_succ | [-pred] [h] [b]
+      [prf = (add_succ_r b pred)]
+      let h (h b)
+      (rewrite -Nat
+        -(add b pred) -(add pred b) (sym -Nat -(add pred b) -(add b pred) h)
+        -[x : Nat] (Eq Nat (succ x) (add b (succ pred)))
+        (sym -Nat -(add b (succ pred)) -(succ (add b pred)) prf))
+  let case_zero [b]
+    [prf = (add_comm_zero b)]
+    prf
+  [S = (~a -motive case_succ)]
+| (S case_zero)
+
+. add_comm2
+: {a : Nat} {b : Nat} !(Eq Nat (add a b) (add b a))
+= [a] [b]
+  let motive [self] (Eq Nat (add self b) (add b self))
+  let case_succ | [-pred] [h]
+      [prf = (add_succ_r b pred)]
+      (rewrite -Nat
+        -(add b pred) -(add pred b) (sym -Nat -(add pred b) -(add b pred) h)
+        -[x : Nat] (Eq Nat (succ x) (add b (succ pred)))
+        (sym -Nat -(add b (succ pred)) -(succ (add b pred)) prf))
+  let case_zero
+    [prf = (add_comm_zero b)]
+    prf
+  [S = (~a -motive case_succ)]
+| (S case_zero)
+
+. add_assoc
+: {a : Nat} {b : Nat} {c : Nat} !(Eq Nat (add (add a b) c) (add a (add b c)))
+= [a] [b] [c]
+  let motive [self]
+    (Eq Nat (add (add self b) c) (add self (add b c)))
+  let case_succ |[-a] [h]
+    let ab_c (add (add a b) c)
+    let a_bc (add a (add b c))
+    (cong -Nat -Nat -ab_c -a_bc h -succ)
+  let case_zero
+    (refl -Nat -(add b c))
+  [S = (~a -motive case_succ)]
+  | (S case_zero)
+
+. add_assoc_l
+: {a : Nat} {b : Nat} {c : Nat} !(Eq Nat (add a (add b c)) (add (add a b) c))
+= [a] [b] [c] [prf = (add_assoc a b c)]
+  | (sym -Nat -(add (add a b) c) -(add a (add b c)) prf)
+
+// This was quite hard to get right, so it deserves some explaining. To make
+// this, first I defined the untyped function this should erase to:
+// . Z [s] [z] z
+// . S [n] [s] [z] (s n (n s z))
+// . pred [n] [s] [z] 
+//    let case_s [n] [h] [b] (b [-n][h]h s n (h [t][f]f))
+//    let case_z [b] z
+//    (n case_s case_z [t][f]t)
+// The idea is that the induction over the nat would receive an extra argument,
+// a boolean, indicating if this is the first constructor. If it isn't, then we
+// apply a `succ` to the result. If it is, then we drop that `succ`. In the end,
+// we'll return the same Nat with one less constructor. So far so good. Now, how
+// to assign a type to it? 
+// First, we need to define what will be the motive of the induction. The
+// problem with fusible definitions is that their motive can't return `Nat`,
+// they must return `(P ...)`. On simpler functions like `id`, this is just `(P
+// (id n))`. On pred, though, it depends on the bool received. If we receive
+// `true`, then we return the pred, i.e., `pred n`. If we receive `false`, then
+// we return the same number, i.e., `n`. But we do so inductivelly, so we can't
+// simply write `(P n)`, we must refer to `pred`. As such, we can write `(P
+// (pred (succ n)))`, because `pred (succ n) == n`! With our motive defined, we
+// just need to write the rest of the function complying to it. The `succ`
+// case, for example, must pattern-match on the boolan, and return either the
+// same number (`(pred (succ n))`) or the successor (`(succ (pred (succ n)))`).
+// The `zero` case must, too, pattern-match on the boolean, otherwise, it'd
+// return `(P (pred zero))`, without referring to `b`, which is necessary
+// because of our motive.
+. pred
+: {n : Nat} Nat
+= [n] @Nat [-P] [S] [S = S]
+  let motive [n] {b : Bool}
+    (~b -[b]Type (P (pred n)) (P (pred (succ n))))
+  let case_s [-n] [h] [b]
+    let motive [b] {h : (P (pred (succ n)))} (~b -[b]Type (P (pred (succ n))) (P (succ (pred (succ n)))))
+    let case_t [x] x
+    let case_f (S -(pred (succ n)))
+    (~b -motive case_t case_f (h false))
+  [F = (~n -motive |case_s)] | [Z] 
+  let case_z [b]
+    let motive [b]{n : (P zero)}(~b -[b] Type (P (pred zero)) (P (pred (succ zero))))
+    let case_t [z]z
+    let case_f [z]z
+    (~b -motive case_t case_f Z)
+  (F case_z true)
+
+. elim_pred_succ
+: {n : Nat} !(Eq Nat (pred (succ n)) n)
+= [n]
+  let motive [n] (Eq Nat (pred (succ n)) n)
+  let case_s | [-n] [h] (cong -Nat -Nat -(pred (succ n)) -n h -succ)
+  [F = (~n -motive case_s)] | (F (refl -Nat -zero))
+
+// TODO: mul
+//. mul
+//: {a : Nat} {b : Nat} Nat
+//= [a] [b] @Nat [-P] [s]
+//  [S = s]
+//  let motive [a] (P (mul a b))
+//  let case_s [-n:Nat] (~b -[x](P (add x (mul n b))) |[-m] [h] (S -(add m (mul n b)) h))
+//  (~a -motive case_s)
+
+// :::::::::
+// :: Rat ::
+// :::::::::
+// Rat consists of non-stratified inductive Church encoding.
+// It is like Nat, except without boxed duplication. As such,
+// it can only be used in computationally irrelevant positions.
+
+. Rat
+: Type
+= $self
+  {-P : {:Rat} Type}
+  {s : {-n : Rat} {h : (P n)} (P (Rat.succ n))}
+  {z : (P Rat.zero)}
+  (P self)
+
+. Rat.succ
+: {n : Rat} Rat
+= [n]
+  @Rat [-P] [s] [z] (s -n (~n -P s z))
+
+. Rat.zero
+: Rat
+= @Rat [-P] [s] [z] z
+
+// :::::::::
+// :: Sat ::
+// :::::::::
+
+. Sat                : Type = $self {-P : {:Sat} Type} {S : {n : Sat} (P (Sat.succ n))} {Z : (P Sat.zero)} (P self)
+. Sat.succ [n : Sat] : Sat  = @Sat [-P] [S] [Z] (S n)
+. Sat.zero           : Sat  = @Sat [-P] [S] [Z] Z
+
+. Sat.0 Sat.zero
+. Sat.1 (Sat.succ Sat.0)
+. Sat.2 (Sat.succ Sat.1)
+. Sat.3 (Sat.succ Sat.2)
+
+// :::::::::
+// :: Cat ::
+// :::::::::
+
+. Cat                : Type = {-P : Type} {S : ! {:P} P} ! {Z : P} P
+. Cat.succ [n : Cat] : Cat  = [-P] [S] [S = S] [A = (n -P |S)] | [Z] (S (A Z))
+. Cat.zero           : Cat  = [-P] [S] [S = S] | [Z] Z
+
+. Cat.add
+: {a : Cat} {b : Cat} Cat
+= [a] [b] [-P] [s]
+  [S = s]
+  [A = (a -P |S)]
+  [B = (b -P |S)]
+| [z] (A (B z)) 
+
+. Cat.mul
+: {a : Cat} {b : Cat} Cat
+= [a] [b] [-P] [s]
+  [S = s]
+  [A = [B = (b -P |S)] (a -P | B)]
+  | [z] (A z)
+
+. Cat.pred
+: {n : Cat} Cat
+= [n] [-P] [S] [S = S]
+  let motive {f : {x:P} P} P
+  let case_s |[h] [f] (f (h S))
+  [f = (n -motive case_s)]
+  | [Z] (f [f] Z [h] h)
+
+. Cat.0  Cat.zero
+. Cat.1  (Cat.succ Cat.0)
+. Cat.2  (Cat.succ Cat.1)
+. Cat.3  (Cat.succ Cat.2)
+. Cat.4  (Cat.mul Cat.2 Cat.2)
+. Cat.8  (Cat.mul Cat.4 Cat.2)
+. Cat.16 (Cat.mul Cat.8 Cat.2)
+. Cat.32 (Cat.mul Cat.16 Cat.2)
+. Cat.64 (Cat.mul Cat.32 Cat.2)
+. Cat.128 (Cat.mul Cat.64 Cat.2)
+
+// ::::::::::
+// :: Bits ::
+// ::::::::::
+
+. Bits
+: Type
+= $self
+  {-P : {x : Bits} Type}
+  {o  : {x : Bits} (P (o x))}
+  {i  : {x : Bits} (P (i x))}
+  {e  : (P e)}
+  (P self)
+
+. o
+: {x : Bits} Bits
+= [x]
+  @Bits [-P] [o] [i] [e]
+  (o x)
+
+. i 
+: {x : Bits} Bits
+= [x]
+  @Bits [-P] [o] [i] [e]
+  (i x)
+
+. e
+: Bits
+= @Bits [-P] [o] [i] [e]
+  e
+
+. slow_inc
+  [n : Nat] 
+  let motive [n] {bs : Bits} Bits
+  let case_s | [-n] [cont] [bs]
+    let motive [x] {cont : {bs : Bits} Bits} Bits
+    let case_o [x] [cont] (i x)
+    let case_i [x] [cont] (o (cont x))
+    let case_e [cont] e
+    (~bs -motive case_o case_i case_e cont)
+  let case_z [bs : Bits] bs
+  [S = (~n -motive case_s)]
+  | (S case_z)
+
+. dec.cont
+: {bs : Bits} {cont : {bs : Bits} Bits} Bits
+= [bs] [cont]
+  @Bits [-P] [o] [i] [e]
+  let motive [x] (P (dec.cont x cont))
+  let case_i o
+  let case_o [x] (i (cont x))
+  let case_e e
+  (~bs -motive case_o case_i case_e) 
+
+. dec
+: {n : Nat} ! {bs : Bits} Bits
+= [n] 
+  let motive [n] {bs : Bits} Bits
+  let case_s | [-n] [cont] [bs] (dec.cont bs cont)
+  let case_z [bs] bs
+  [S = (~n -motive case_s)]
+  | (S case_z)
+
+. inc.cont
+: {bs : Bits} {cont : {bs : Bits} Bits} Bits
+= [bs] [cont]
+  @Bits [-P] [o] [i] [e]
+  let motive [x] (P (inc.cont x cont))
+  let case_o i
+  let case_i [x] (o (cont x))
+  let case_e e
+  (~bs -motive case_o case_i case_e) 
+
+. inc
+: {n : Nat} ! {bs : Bits} Bits
+= [n] 
+  let motive [n] {bs : Bits} Bits
+  let case_s | [-n] [cont] [bs] (inc.cont bs cont)
+  let case_z [bs] bs
+  [S = (~n -motive case_s)]
+  | (S case_z)
+
+. incdec
+: {n : Nat} !{bs : Bits} (Eq !Bits [inc = (inc n)] [dec = (dec n)] |bs [inc = (inc n)] [dec = (dec n)] |(inc (dec bs)))
+= [n]
+  let motive [n] {bs : Bits} (Eq !Bits [inc = (inc n)] [dec = (dec n)] |bs [inc = (inc n)] [dec = (dec n)] |(inc (dec bs)))
+  let case_s |[-n] [h] [bs]
+    let motive_bits [bs] (Eq !Bits [inc = (inc (succ n))] [dec = (dec (succ n))] |bs [inc = (inc (succ n))] [dec = (dec (succ n))] |(inc (dec bs)))
+    let case_e (refl -!Bits -[inc = (inc n)] [dec = (dec n)] |e)
+    let case_i [bs] (refl -!Bits -[inc = (inc n)] [dec = (dec n)] |(i bs))
+    let case_o [bs] (cong -!Bits -!Bits -[inc = (inc n)] [dec = (dec n)] |bs -[inc = (inc n)] [dec = (dec n)] |(inc (dec bs)) (h bs) -[dbs] [bs=dbs] |(o bs))
+    (~bs -motive_bits case_o case_i case_e)
+  [S = (~n -motive case_s)]
+| let case_z [bs] (refl -!Bits -|bs)
+  (S case_z)
+
+. decinc
+: {n : Nat} !{bs : Bits} (Eq !Bits [dec = (dec n)] [inc = (inc n)] |bs [dec = (dec n)] [inc = (inc n)] |(dec (inc bs)))
+= [n]
+  let motive [n] {bs : Bits} (Eq !Bits [dec = (dec n)] [inc = (inc n)] |bs [dec = (dec n)] [inc = (inc n)] |(dec (inc bs)))
+  let case_s |[-n] [h] [bs]
+    let motive_bits [bs] (Eq !Bits [dec = (dec (succ n))] [inc = (inc (succ n))] |bs [dec = (dec (succ n))] [inc = (inc (succ n))] |(dec (inc bs)))
+    let case_e (refl -!Bits -[dec = (dec n)] [inc = (inc n)] |e)
+    let case_o [bs] (refl -!Bits -[dec = (dec n)] [inc = (inc n)] |(o bs))
+    let case_i [bs] (cong -!Bits -!Bits -[dec = (dec n)] [inc = (inc n)] |bs -[dec = (dec n)] [inc = (inc n)] |(dec (inc bs)) (h bs) -[dbs] [bs=dbs] |(i bs))
+    (~bs -motive_bits case_o case_i case_e)
+  [S = (~n -motive case_s)]
+| let case_z [bs] (refl -!Bits -|bs)
+  (S case_z)
+
+. cpy
+  [n : Nat] 
+  let motive [n] {bs : Bits} Bits
+  let case_s | [-n] [cont] [bs]
+    let motive [x] {cont : {bs : Bits} Bits} Bits
+    let case_o [x] [cont] (o (cont x))
+    let case_i [x] [cont] (i (cont x))
+    let case_e [cont] e
+    (~bs -motive case_o case_i case_e cont)
+  let case_z [bs : Bits] bs
+  [S = (~n -motive case_s)]
+  | (S case_z)
+
+. bitconcat
+: {n : Nat} !{as : Bits} {bs : Bits} Bits
+= [n]
+  let motive [n] {as : Bits} {bs : Bits} Bits
+  let case_s | [-n] [cont] [as]
+    let motive [as] {cont : {as : Bits} {bs : Bits} Bits} {bs : Bits} Bits
+    let case_o [as] [cont] [bs] (o (cont as bs)) 
+    let case_i [as] [cont] [bs] (i (cont as bs))
+    let case_e [cont] [bs] bs
+    (~as -motive case_o case_i case_e cont)
+  let case_z [as] [bs] bs
+  [S = (~n -motive case_s)] | (S case_z)
+
+// ::::::::::
+// :: List ::
+// ::::::::::
+
+. List [A : Type]
+: Type
+= $self
+  {-P : {x : (List A)} Type}
+  {cons  : {a : A} {x : (List A)} (P (cons -A a x))}
+  {nil  : (P (nil -A))}
+  (P self)
+
+. cons [-A : Type]
+: {a : A} {as : (List A)} (List A)
+= [a] [as]
+  @(List A) [-P] [cons] [nil]
+  (cons a as)
+
+. nil [-A : Type]
+: (List A)
+= @(List A) [-P] [cons] [nil]
+  nil
+
+. concat [-A : Type]
+: {n : Nat} !{as : (List A)} {bs : (List A)} (List A)
+= [n]
+  let motive [n] {as : (List A)} {bs : (List A)} (List A)
+  let case_s | [-n] [h] [as]
+    let motive [] {bs : (List A)} (List A)
+    let case_cons [a] [as] [bs] (cons -A a (h as bs)) 
+    let case_nil [bs] bs
+    (~as -motive case_cons case_nil)
+  let case_z [as] [bs] bs
+  [S = (~n -motive case_s)]
+  | (S case_z)
+
+// ::::::::::::
+// :: Vector ::
+// ::::::::::::
+
+. Vector [A : Type] [n : Nat]
+: Type
+= $self
+  {-P : {n : Nat} {as : (Vector A n)} Type}
+  {vcons  : {-n : Nat} {a : A} {as : (Vector A n)} (P (succ n) (vcons -A -n a as))}
+  {vnil  : (P zero (vnil -A))}
+  (P n self)
+
+. vcons [-A : Type] [-n : Nat]
+: {a : A} {as : (Vector A n)} (Vector A (succ n))
+= [a] [as]
+  @(Vector A (succ n)) [-P] [vcons] [vnil]
+  (vcons -n a as)
+
+. vnil [-A : Type]
+: (Vector A zero)
+= @(Vector A zero) [-P] [vcons] [vnil]
+  vnil
+
+// ::::::::::::::
+// :: Examples ::
+// ::::::::::::::
+
+// Non-fusible inc
+.slow_inc_test [inc = (Cat.16 -Bits (slow_inc 8))] [cpy = (cpy 8)] | (cpy (inc (o (o (o (o (o (o (o (o e))))))))))
+
+// Fusible inc
+.inc_test [inc = (Cat.16 -Bits (inc 8))] [cpy = (cpy 8)] | (cpy (inc (o (o (o (o (o (o (o (o e))))))))))
+  
+.main   inc_test
+.stdlib inc_test
