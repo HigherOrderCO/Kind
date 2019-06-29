@@ -1,0 +1,248 @@
+// Efficient "C-like" arrays using perfect binary trees
+
+// Example usage of this library
+def array_example:
+
+  // Creates function to allocate an arrays of 65536 (2^16) elements
+  let dpt  = ~16
+  dup init = (init dpt)
+
+  // Allocates a new array and creates its methods
+  # dup arr    = (init ##0)   // ~133k graph-rewrites to alloc 65536 zeros
+    dup write  = (write dpt)  // ~650 graph-rewrites per write with dpt=16
+    dup update = (update dpt) // ~650 graph-rewrites per update with dpt=16
+    dup read   = (read dpt)   // ~650 graph-rewrites per read with dpt=16
+
+  // Performs some writes and reads
+  # let add      = boxed_add
+    let arr      = (write 0 #10 arr)       // arr[0] = 10
+    let arr      = (write 1 #12 arr)       // arr[1] = 12
+    let arr      = (update 2 (add #8) arr) // arr[2] += 8
+    let arr      = (write 3 #7 arr)        // arr[1] = 12
+    get [arr, a] = (read 0 arr)            // a = arr[0]
+    get [arr, b] = (read 1 arr)            // b = arr[1]
+    get [arr, c] = (read 2 arr)            // c = arr[2]
+    get [arr, d] = (read 3 arr)            // c = arr[2]
+    ["arr[0] + arr[1] + arr[2]:", (add (add a b) c)]
+
+// Example of folding over an array
+def fold_array_example:
+  let array = [[[1,2],[3,4]],[[5,6],[7,8]]]
+  let node  = {a b} |a + b|
+  let leaf  = {x} |x * 2|
+  dup fold  = (fold_array ~3)
+  # (fold #array #node #leaf)
+
+// with
+// | Searches an element, updates it, returns the updated
+// | array and a value that can depend on the element
+// : {-A  : Type}             -- Type of the elements
+//   {dpt : CNat}             -- Length of array = 2^dpt
+//   ! {path : Num}           -- Num storing path to element
+//     {fn   : {x : A} (A,A)} -- Receives found element, returns an element to replace it by, and a return value.
+//     {(Array dpt A)}        -- The array to be queried
+//     ((Array dpt A), A)     -- The updated array, and return value returned by `fn`.
+def with: {dpt}
+  let init = {path fn} fn
+  let loop = {cont path fn}
+    cpy path = path
+    get [swap0,swap1] =
+      if |path % 2|
+      then: [{x}x, {x}x]
+      else: [swap, swap]
+    (cont |path / 2| {arr}
+      get [a,b] = (swap0 arr)
+      get [b,x] = (fn b)
+      [(swap1 [a,b]), x])
+  let stop = {func} func
+  dup fold = (for dpt #init #loop #stop)
+  # {path fn arr} (fold path fn arr)
+
+// update
+// | Applies a function to an element
+// : {-A  : Type}             -- Type of the elements
+//   {dpt : CNat}             -- Length of array = 2^dpt
+//   ! {path : Num}           -- Num storing path to element
+//     {fn   : {x : A} A}     -- Update function
+//     {arr  : (Array dpt A)} -- The array to be updated
+//     (Array dpt A)          -- The updated array, and return value returned by `fn`.
+def update: {dpt}
+  dup with = (with dpt) 
+  # {path f arr} (fst (with path {x}[(f x), 0] arr))
+
+// read
+// | Returns a copy of an element and returns the array unchanged
+// : {-A  : Type}              -- Type of the elements
+//   {dpt : CNat}              -- Length of array = 2^dpt
+//   ! {path : Num}            -- Num storing path to element
+//     {arr  : (Array dpt !A)} -- The array to be read
+//     {(Array dpt !A),!A}    -- The array itself, and a copy of the element
+def read: {dpt}
+  dup with = (with dpt)
+  # {path arr}
+    let f = {x}
+      dup x = x
+      [#x, #x]
+    (with path f arr)
+
+// peek
+// | Like read, but on numeric, unboxed arrays
+// : {-A  : Type}               -- Type of the elements
+//   {dpt : CNat}               -- Length of array = 2^dpt
+//   ! {path : Num}             -- Num storing path to element
+//     {arr  : (Array dpt Num)} -- The array to be read
+//     {(Array dpt Num), Num}   -- The array itself, and a copy of the element
+def peek: {dpt}
+  dup with = (with dpt)
+  # {path arr}
+    let f = {x}
+      cpy x = x
+      [x, x]
+    (with path f arr)
+
+// take
+// | Takes an element out of an array and returns it
+// : {-A  : Type}             -- Type of the elements
+//   {dpt : CNat}             -- Length of array = 2^dpt
+//   ! {path : Num}           -- Num storing path to element
+//     {val  : A}             -- New value to put in place of old
+//     {arr  : (Array dpt A)} -- The array to be taken
+//     {(Array dpt A),A}      -- The updated array and the take element
+def take: {dpt}
+  dup with = (with dpt)
+  # {path val arr}
+    (with path {x}[val,x] arr)
+
+// write
+// | Overwrites an element of the array
+// : {-A  : Type}             -- Type of hte elements
+//   {dpt : CNat}             -- Length of the array = 2^dpt
+//   ! {path : Num}           -- Num storing path to element
+//     {arr  : (Array dpt A)} -- Array to be written
+//     {val  : A}             -- Value to be written
+//     (Array dpt A)          -- The overwritten array
+def write: {dpt}
+  dup update = (update dpt)
+  # {path val} (update path {x}val)
+
+// init
+// | Generates an array with 2^dpt copies of val
+// : {-A  : Type}
+//   {dpt : CNat}
+//   ! {val : !A}
+//   ! (Array dpt A)
+def init: {dpt}
+  let loop = {arr}
+    dup arr = arr
+    # [arr, arr]
+  dup fold = (dpt #loop)
+  # {init} (fold init)
+
+// gen
+// | Generates an array by mapping a function to each index
+// : {-A  : Type}
+//   {dpt : CNat}
+//   ! {fun : !{idx : !Num} A}
+//   ! (Array dpt !A)
+def gen: {dpt}
+  let init = {fun}
+    dup fun = fun
+    # {idx} (fun idx)
+  let loop = {arr fun}
+    dup arr = (arr fun)
+    # {idx}
+      dup idx = idx
+      let lft = (arr #||idx * 2| + 0|)
+      let rgt = (arr #||idx * 2| + 1|)
+      [lft, rgt]
+  let stop = {arr fun}
+    dup arr = (arr fun)
+    # (arr #0)
+  (for dpt #init #loop #stop)
+
+// range
+// | Generates an array with all numbers from 0 to 2^dpt
+// : {dpt : CNat}
+//   !!(Array dpt !Num)
+def range: {dpt}
+  dup gen = (gen dpt)
+  # (gen #{x}x)
+
+// fold_array
+// : {-A : Type}
+//   {dpt : Nat}
+//   ! {-P   : Type}
+//     {Node : !{lft : A} {rgt : A} P}
+//     {Leaf : !{val : A} P}
+//     ! {arr  : !(Array dpt A)}
+//       P
+def fold_array: {dpt}
+  let init = {Node Leaf}
+    dup Node = Node
+    dup Leaf = Leaf
+    # {val} (Leaf val)
+  let loop = {rec Node Leaf}
+    dup Node = Node
+    dup Leaf = Leaf
+    dup rec  = (rec #Node #Leaf)
+    # {arr}
+      get [lft,rgt] = arr
+      let lft = (rec lft)
+      let rgt = (rec rgt)
+      (Node lft rgt)
+  dup fold = (dpt #loop)
+  # (fold init)
+
+// fold_array_of_len
+// | Like `fold_array`, but needs length and can operate on arrays at level 1
+// | Requires much more rewrites to build, but is equally efficient once built
+// : {-A   : Type}
+//   {mlen : Nat}
+//   {mdpt : Num}
+//   {-P   : Type}
+//   {Node : !{lft : A} {rgt : A} P}
+//   {Leaf : !{val : A} P}
+//   ! {arr  : !(Array dpt A)}
+//     P
+def fold_array_of_len: {mlen mdpt Node Leaf}
+  dup mdpt = mdpt
+  dup Node = Node
+  dup Leaf = Leaf
+  dup fold = (mul ~2 mlen # {rec dpt arr}
+    cpy dpt = dpt
+    (if |dpt < mdpt|
+      then: {rec arr}
+        get [lft,rgt] = arr
+        get [rec,lft] = (rec |dpt + 1| lft)
+        get [rec,rgt] = (rec |dpt + 1| rgt)
+        [rec, (Node lft rgt)]
+      else: {rec arr}
+        [rec, (Leaf arr)]
+      rec arr))
+  # {arr} (snd (fold {dpt arr}[{x}x,arr] 0 arr))
+
+// array_1024
+// : (Array ~10 Num)
+def array_1024:
+  let a = [1,1]
+  let b = [a,a]
+  let c = [b,b]
+  let d = [c,c]
+  let e = [d,d]
+  let f = [e,e]
+  let g = [f,f]
+  let h = [g,g]
+  let i = [h,h]
+  [i,i]
+
+def fold_array_lv1_example:
+  dup fold = (fold_array_lv1 ~1024 #10 #{a b}|a + b| #{x}x)
+  # |(fold array_1024) + (fold array_1024)|
+
+def fold_array_example:
+  dup fold = (fold_array ~10)
+  # dup fold = (fold #{a b}|a + b| #{x}x)
+  # (fold array_1024)
+
+def array:
+  fold_array_example

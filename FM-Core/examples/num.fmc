@@ -1,0 +1,107 @@
+// Gets the nth number of the Fibonacci sequence
+def fib: {n}
+  let init = [0,1]
+  let loop = {state}
+    get [a, b] = state
+    cpy b      = b
+    [b, |a + b|]
+  let stop = {state}
+    (snd state)
+  (for n #init #loop #stop)
+
+def boxed_add: {x y}
+  dup x = x
+  dup y = y
+  # |x + y|
+
+def num_dif: {a b}
+  cpy a = a
+  cpy b = b
+  if |a > b|
+  then: |a - b|
+  else: |b - a|
+
+def num_to_char: {n}
+  cpy n = n
+  if |n < 10|
+  then: |n + 48|
+  else: |n + 87|
+
+def max: {a b}
+  cpy a = a
+  cpy b = b
+  if |a > b| then:
+    a
+  else:
+    b
+
+def min: {a b}
+  cpy a = a
+  cpy b = b
+  if |a < b| then:
+    a
+  else:
+    b
+
+// box_byte
+// : {n : Num} !Num
+def box_byte: {n}
+  cpy n = n
+  dup b00 = if ||n >>  0| & 1| [#{x}|x + 0x1|, #{x}x]
+  dup b01 = if ||n >>  1| & 1| [#{x}|x + 0x2|, #{x}x]
+  dup b02 = if ||n >>  2| & 1| [#{x}|x + 0x4|, #{x}x]
+  dup b03 = if ||n >>  3| & 1| [#{x}|x + 0x8|, #{x}x]
+  dup b04 = if ||n >>  4| & 1| [#{x}|x + 0x10|, #{x}x]
+  dup b05 = if ||n >>  5| & 1| [#{x}|x + 0x20|, #{x}x]
+  dup b06 = if ||n >>  6| & 1| [#{x}|x + 0x40|, #{x}x]
+  dup b07 = if ||n >>  7| & 1| [#{x}|x + 0x80|, #{x}x]
+  # (b07 (b06 (b05 (b04 (b03 (b02 (b01 (b00 0))))))))
+
+// box_num
+// : {n : Num} !Num
+def box_num: {n}
+  cpy n = n
+  dup b00 = if ||n >>  0| & 1| [#{x}|x + 0x1|, #{x}x]
+  dup b01 = if ||n >>  1| & 1| [#{x}|x + 0x2|, #{x}x]
+  dup b02 = if ||n >>  2| & 1| [#{x}|x + 0x4|, #{x}x]
+  dup b03 = if ||n >>  3| & 1| [#{x}|x + 0x8|, #{x}x]
+  dup b04 = if ||n >>  4| & 1| [#{x}|x + 0x10|, #{x}x]
+  dup b05 = if ||n >>  5| & 1| [#{x}|x + 0x20|, #{x}x]
+  dup b06 = if ||n >>  6| & 1| [#{x}|x + 0x40|, #{x}x]
+  dup b07 = if ||n >>  7| & 1| [#{x}|x + 0x80|, #{x}x]
+  dup b08 = if ||n >>  8| & 1| [#{x}|x + 0x100|, #{x}x]
+  dup b09 = if ||n >>  9| & 1| [#{x}|x + 0x200|, #{x}x]
+  dup b10 = if ||n >> 10| & 1| [#{x}|x + 0x400|, #{x}x]
+  dup b11 = if ||n >> 11| & 1| [#{x}|x + 0x800|, #{x}x]
+  dup b12 = if ||n >> 12| & 1| [#{x}|x + 0x1000|, #{x}x]
+  dup b13 = if ||n >> 13| & 1| [#{x}|x + 0x2000|, #{x}x]
+  dup b14 = if ||n >> 14| & 1| [#{x}|x + 0x4000|, #{x}x]
+  dup b15 = if ||n >> 15| & 1| [#{x}|x + 0x8000|, #{x}x]
+  dup b16 = if ||n >> 16| & 1| [#{x}|x + 0x10000|, #{x}x]
+  dup b17 = if ||n >> 17| & 1| [#{x}|x + 0x20000|, #{x}x]
+  dup b18 = if ||n >> 18| & 1| [#{x}|x + 0x40000|, #{x}x]
+  dup b19 = if ||n >> 19| & 1| [#{x}|x + 0x80000|, #{x}x]
+  dup b20 = if ||n >> 20| & 1| [#{x}|x + 0x100000|, #{x}x]
+  dup b21 = if ||n >> 21| & 1| [#{x}|x + 0x200000|, #{x}x]
+  dup b22 = if ||n >> 22| & 1| [#{x}|x + 0x400000|, #{x}x]
+  dup b23 = if ||n >> 23| & 1| [#{x}|x + 0x800000|, #{x}x]
+  dup b24 = if ||n >> 24| & 1| [#{x}|x + 0x1000000|, #{x}x]
+  dup b25 = if ||n >> 25| & 1| [#{x}|x + 0x2000000|, #{x}x]
+  dup b26 = if ||n >> 26| & 1| [#{x}|x + 0x4000000|, #{x}x]
+  dup b27 = if ||n >> 27| & 1| [#{x}|x + 0x8000000|, #{x}x]
+  dup b28 = if ||n >> 28| & 1| [#{x}|x + 0x10000000|, #{x}x]
+  dup b29 = if ||n >> 29| & 1| [#{x}|x + 0x20000000|, #{x}x]
+  dup b30 = if ||n >> 30| & 1| [#{x}|x + 0x40000000|, #{x}x]
+  dup b31 = if ||n >> 31| & 1| [#{x}|x + 0x80000000|, #{x}x]
+  # (b31 (b30 (b29 (b28 (b27 (b26 (b25 (b24
+    (b23 (b22 (b21 (b20 (b19 (b18 (b17 (b16
+    (b15 (b14 (b13 (b12 (b11 (b10 (b09 (b08
+    (b07 (b06 (b05 (b04 (b03 (b02 (b01 (b00
+      0))))))))))))))))))))))))))))))))
+
+def num_from_nat: {n}
+  dup fold = (n #{x}|x + 1|)
+  # (fold 0)
+
+def sqrt: {n}
+  |n ^^ 2147483648|

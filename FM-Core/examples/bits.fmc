@@ -1,0 +1,16 @@
+def o: {bs o i e} (o bs)
+def i: {bs o i e} (i bs)
+def e:    {o i e} e
+
+def inc_cont: {bs cont}
+  {o i e}
+  let case_o = i
+  let case_i = {x} (o (cont x))
+  let case_e = e
+  (bs case_o case_i case_e) 
+
+def inc: {n}
+  let case_s = # {cont bs} (inc_cont bs cont)
+  let case_z = {bs} bs
+  dup S = (n case_s)
+  # (S case_z)

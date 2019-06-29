@@ -1,0 +1,65 @@
+def add_test:
+  |3 + 2|
+
+def mul_test:
+  |3 * 2|
+
+def tup_test:
+  (tup_fst (Tup 42 1337))
+
+def pair_test:
+  fst [42 , 1337]
+
+def list_test:
+  (Cons #1 (Cons #2 (Cons #3 Nil)))
+
+def list_fold_test:
+  dup fold = (list_fold ~3)
+  # (fold list_test)
+
+def list_fold_f_test:
+  {Cons}
+  dup fold_f = (list_fold_f ~3 Cons)
+  # {Nil} (fold_f Nil list_test)
+
+def if_test:
+  if 1
+  then: "cond is true"
+  else: "cond is false"
+
+def cpy_test:
+  cpy num = 42
+  [[num, num], |num + num|]
+
+def prj_test:
+  get [fst, snd] = [42, 1337]
+  (tup fst snd)
+
+def fib_test:
+  (fib ~65536)
+
+def to_chars_test:
+  (to_chars "abcdefgh")
+
+def string_concat_test:
+  (string_concat "Hello, " "world!")
+
+def sum_test:
+  let upto = ~100000
+  let init =
+    [0, 0]
+  let loop = {state}
+    get [idx, sum] = state
+    cpy idx        = idx
+    [|idx + 1|, |sum + idx|]
+  let done = {state} snd state
+  (for upto #init #loop #done)
+
+def term_test:
+  term_example
+
+def array_test:
+  array_example
+
+def main:
+  string_concat_test

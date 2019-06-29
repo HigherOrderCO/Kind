@@ -1,0 +1,116 @@
+// Scott-encoded functions
+
+def Cons: {x xs}
+  {Cons Nil} (Cons x xs)
+
+def Nil:
+  {Cons Nil} Nil
+
+def head: {default list}
+  let case_cons = {x rest} x
+  let case_nil  = default
+  (list case_cons case_nil)
+
+def tail: {list}
+  let case_cons = {x rest} rest
+  let case_nil  = Nil
+  (list case_cons case_nil)
+
+def pop: {default list}
+  let case_cons = {x rest} [rest, x]
+  let case_nil  = [Nil, default]
+  (list case_cons case_nil)
+
+// Church-encoded functions
+
+def ConsF: {x xs}
+  {Cons}
+  dup x    = x
+  dup Cons = Cons
+  dup func = (xs #Cons)
+  # {nil} (Cons x (func nil))
+
+def NilF:
+  {Cons}
+  # {nil} nil
+
+def list_unfold: {list}
+  dup F = (list #Cons)
+  # (F nil)
+
+def build: {len init loop} {cons}
+  dup loop = loop
+  dup init = init
+  dup cons = cons
+  dup fold = (len #{list state}
+    get [state, element] = (loop state)
+    (cons element (list state)))
+  # {nil} (fold {state}nil init)
+
+// Concatenates two lists
+def concat: {a b}
+  {Cons}
+  dup Cons = Cons
+  dup append-a = (a #Cons)
+  dup append-b = (b #Cons)
+  # {nil} (append-a (append-b nil))
+
+// Converts Scott to Church in O(len).
+def list_fold_f: {len Cons}
+  dup Cons = Cons
+  let func = {cont list}
+    let case_cons = {head tail nil} (Cons head (cont tail nil))
+    let case_nil  = {nil} nil
+    (list case_cons case_nil)
+  dup fold = (len #func)
+  # {nil list} (fold {tail}{nil}nil list nil)
+
+// Non-fused version of the function above.
+def list_fold: {len}
+  dup fold_f = (list_fold_f len #ConsF)
+  # {list} (fold_f NilF list)
+
+def map: {as f Cons}
+  dup f = f
+  dup Cons = Cons
+  let case_cons = {a} (Cons (f a))
+  dup A = (as #case_cons)
+  # {Nil} (A Nil)
+
+// reverse tail call and fusionable
+def reverse:
+  {as}
+  let iterate = {xs ys Cons}
+    dup Cons = Cons
+    dup rec = (xs #{x h p} (h (Cons x p)))
+    dup p = (ys #Cons)
+    #{N} (rec {p} p (p N))
+  (iterate as NilF)
+
+def filter:
+// {:(List !A)} {:!{:!A} Bool} !(List !A)
+  {xs p}
+  dup p = p
+  {Cons}
+  dup Cons = Cons
+  dup rec = (xs #{x h}
+    dup x = x
+    (p #x {r} (Cons #x r) {r} r h))
+  #{N} (rec N)
+
+def foldl: {as op}
+  dup op = op
+  dup rec = (as #{a h} (op h a))
+  #{b} (rec b)
+
+def foldr: {as op}
+  dup op = op
+  dup rec = (as #{a h} (op a h))
+  # {b} (rec b)
+
+def example_list: (reverse (map (ConsF #3 (ConsF #4 (ConsF #7 (ConsF #2 (ConsF #0 NilF))))) #{x} |x * 2|))
+def example_foldr: (foldr example_list #{x y} |x + y|)
+
+def list:
+  let list = {a} dup a = a # {b} (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 70 (a 32 (a 108 (a 32 (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 83 (a 32 (a 116 (a 32 (a 60 (a 32 (a 62 (a 32 (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 67 (a 32 (a 114 (a 32 (a 91 (a 32 (a 93 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 84 (a 32 (a 111 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 71 (a 32 (a 111 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 91 (a 32 (a 93 (a 32 (a 69 (a 32 (a 114 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 (a 32 (a 60 (a 32 (a 62 (a 32 (a 83 (a 32 (a 116 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 (a 32 (a 77 (a 32 (a 101 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 32 (a 32 (a 46 (a 32 (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 (a 32 (a 91 (a 32 (a 93 b)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+  (from_chars list)

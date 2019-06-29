@@ -1,0 +1,55 @@
+// :::::::::
+// :: Nat ::
+// :::::::::
+
+// Church-encoded Nats are used to perform bounded loops and recursion.
+// See the examples on the end of the file to see how they work!
+
+def Zero:
+  {Succ Zero}
+  Zero
+
+def Succ: {pred}
+  {Succ Zero}
+  (Succ pred)
+
+def ZeroF:
+  {s}
+  # {z} z
+
+def SuccF: {n}
+  {s}
+  dup s = s
+  dup f = (n #s)
+  # {z} (s (f z))
+
+def mul: {a b}
+  {s} 
+  dup S = s
+  dup A =
+    dup B = (b #S)
+    (a #B)
+  # {z} (A z)
+
+// Bounded for-loop
+def for: {numb init loop stop}
+  dup init = init
+  dup exec = (numb loop)
+  dup stop = stop
+  # (stop (exec init))
+
+def nat_to_chars: {nat}
+  let init = (to_chars "Z")
+  let loop = {chars} (concat (to_chars "S") chars)
+  let stop = {chars} chars
+  (for nat #init #loop #stop)
+
+def nat_to_string: {nat}
+  dup chars = (nat_to_chars nat)
+  # (from_chars chars) 
+
+def nat_unfold: {n}
+  let init = Zero
+  let loop = Succ
+  let stop = {x}x
+  (for n #init #loop #stop)

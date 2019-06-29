@@ -1,0 +1,146 @@
+// Formality implementation in Formality-Core (ongoing work)
+
+// Example usage of this library
+
+def term_example:
+  dup true_t    = #(Lam {t} (Lam {f} t))
+  dup false_t   = #(Lam {t} (Lam {f} f))
+  dup not_t     = #(Lam {b} (App (App b false_t) true_t))
+  dup main_t    = #(App not_t (App not_t (App not_t true_t)))
+  dup reduce    = (reduce ~256)
+  dup to_string = (to_string ~256)
+  # [
+    ["term:", (to_string main_t)],
+    ["norm:", (to_string (reduce (main_t)))]]
+
+// Scott-encoded functions
+
+def Lam: {body}
+  {Lam App Var}
+  (Lam body)
+
+def App: {func argm}
+  {Lam App Var}
+  (App func argm)
+
+def Var: {indx}
+  {Lam App Var}
+  (Var indx)
+
+// Church-encoded functions
+
+def LamF: {body}
+  {Lam App Var}
+  dup Lam  = Lam
+  dup App  = App
+  dup Var  = Var
+  dup body = (body #Lam #App #Var)
+  # (Lam body)
+
+def AppF: {func argm}
+  {Lam App Var}
+  dup Lam  = Lam
+  dup App  = App
+  dup Var  = Var
+  dup func = (func #Lam #App #Var)
+  dup argm = (argm #Lam #App #Var)
+  # (App func argm)
+
+def VarF: {indx}
+  {Lam App Var}
+  dup Lam  = Lam
+  dup App  = App
+  dup Var  = Var
+  dup indx = indx
+  # (Var indx)
+
+// This is how we convert from Scott to Church in O(len).
+def term_fold_f: {len Lam App Var}
+  dup Lam = Lam
+  dup App = App
+  dup Var = Var
+  let func = {cont term}
+    let case_lam = {body cont}
+      get [cont, body] = (cont body)
+      [cont, (Lam body)]
+    let case_app = {func argm cont}
+      get [cont, func] = (cont func)
+      get [cont, argm] = (cont argm)
+      [cont, (App func argm)]
+    let case_var = {indx cont}
+      [cont, (Var indx)]
+    (term case_lam case_app case_var cont)
+  dup fold = (len #func)
+  # {term} (snd (fold {term}[{x}x,term] term))
+
+// Non-fused version of the function above.
+def term_fold: {len}
+  dup fold_f = (term_fold_f len #LamF #AppF #VarF)
+  # {term} (fold_f term_test)
+
+def term_to_string: {len}
+  let case_lam = {body}
+    (concat (to_chars "λ") body)
+  let case_app = {func argm}
+    (concat (to_chars "(")
+    (concat func
+    (concat (to_chars " ")
+    (concat argm (to_chars ")")))))
+  let case_var = {indx}
+    (to_chars (nat_to_string indx))
+  dup fold_f = (term_fold_f len #case_lam #case_app #case_var)
+  # {term} (from_chars (fold_f term))
+  
+def reduce: {len}
+  let func = {cont term}
+    let lam_case = {body cont}
+      [cont, (Lam body)]
+    let app_case = {func argm cont}
+      let lam_case = {fbody argm cont} 
+        get [cont, term] = (cont (fbody argm))
+        [cont, term]
+      let app_case = {ffunc fargm argm cont}
+        get [cont, argm] = (cont argm)
+        [cont, (App (App ffunc fargm) argm)]
+      let var_case = {findx argm cont}
+        [cont, findx]
+      get [cont, func] = (cont func)
+      (func lam_case app_case var_case argm cont)
+    let var_case = {indx cont}
+      [cont, (Var indx)]
+    (term lam_case app_case var_case cont)
+  dup fold = (len #func)
+  # {term} (snd (fold {term}[{x}x,term] term))
+
+def to_string: {len}
+  let TERM_TO_CHARS = {a b}a
+  let NUMB_TO_CHARS = {a b}b
+  let init = {term} [{x}x, term]
+  let loop = {call name}
+    let term_to_chars = {call term dept}
+      let lam_case = {body call dept}
+        cpy dept         = dept
+        get [call, body] = (call TERM_TO_CHARS (body (Var dept)) |dept + 1|)
+        [call, (concat (to_chars "λ") body)]
+      let app_case = {func argm call dept}
+        cpy dept         = dept
+        get [call, func] = (call TERM_TO_CHARS func dept)
+        get [call, argm] = (call TERM_TO_CHARS argm dept)
+        [call, (concat (to_chars "(") (concat func (concat (to_chars " ") (concat argm (to_chars (")"))))))]
+      let var_case = {indx call dept}
+        get [call, indx] = (call NUMB_TO_CHARS indx)
+        [call, indx]
+      (term lam_case app_case var_case call dept)
+    let numb_to_chars = {call num}
+      let succ_case = {pred call}
+        get [call, pred] = (call NUMB_TO_CHARS pred)
+        [call, (concat (to_chars "S") pred)]
+      let zero_case = {call}
+        [call, (to_chars "Z")]
+      cpy num = num
+      (if |num > 0| [(succ_case |num - 1|),zero_case] call)
+    (name term_to_chars numb_to_chars call)
+  let stop = {call term}
+    get [call, chrs] = (call TERM_TO_CHARS term 0)
+    (from_chars chrs)
+  (for len #init #loop #stop)

@@ -1,0 +1,47 @@
+def TEXT: 1954047348
+
+// Converts an UTF-8 string into a list of bytes
+def to_chars: {str}
+  {Cons}
+  dup Cons = Cons
+  let Cons-non-0 = {c}
+    cpy c = c
+    if |c > 0|
+    then: (Cons c)
+    else: {x} x
+  dup f =
+    let func = {c cs}
+      cpy c = c
+      let Cons-c0 = (Cons-non-0 ||c >>  0| & 0xFF|)
+      let Cons-c1 = (Cons-non-0 ||c >>  8| & 0xFF|)
+      let Cons-c2 = (Cons-non-0 ||c >> 16| & 0xFF|)
+      let Cons-c3 = (Cons-non-0 ||c >> 24| & 0xFF|)
+      (Cons-c0 (Cons-c1 (Cons-c2 (Cons-c3 cs))))
+    (snd str #func)
+  # {nil} (f nil)
+
+// Converts a list of bytes back to an UTF-8 string
+def from_chars: {chars}
+  let nums =
+    {Cons}
+    dup Cons = Cons
+    dup func =
+      let loop = {c cont char indx}
+        cpy indx = indx
+        cpy char = ||char >> 8| | |c << 24||
+        cpy done = ||indx % 4| == 3|
+        let Cons-char =
+          if done
+          then: (Cons char)
+          else: {x}x
+        let next-char =
+          if done
+          then: 0
+          else: char
+        (Cons-char (cont next-char |indx + 1|))
+      (chars #loop)
+    # {nil} (func {char indx}(Cons char nil) 0 0)
+  [TEXT, nums]
+
+def string_concat: {a b}
+  (from_chars (concat (to_chars a) (to_chars b)))

@@ -1,0 +1,342 @@
+// ::::::::::
+// :: Vec2 ::
+// ::::::::::
+
+// vec2_add
+// | Receives two 2D vectors and adds them
+// : {a : [Num,Num]}
+//   {b : [Num,Num]}
+//   [Num,Num]
+def vec2_add: {a b}
+  get [ax,ay] = a
+  get [bx,by] = b
+  [|ax + bx|, |ay + by|]
+
+// vec2_scale
+def vec2_scale: {a s}
+  get [ax,ay] = a
+  [|ax * s|, |ay * s|]
+
+// vec2_neg
+// | Negates a 2D vector
+// : {a : [Num,Num]}
+//   [Num,Num]
+def vec2_neg: {a}
+  get [ax,ay] = a
+  [|0 - ax|, |0 - ay|]
+
+// vec2_cpy
+// | Copies a 2D vector
+// : {a : [Num,Num]}
+//   {b : [Num,Num]}
+//   [[Num,Num], [Num,Num]]
+def vec2_cpy: {a}
+  get [ax,ay] = a
+  cpy ax      = ax
+  cpy ay      = ay
+  [[ax,ay], [ax,ay]]
+
+// vec2_sqr_dist
+// : {a : [Num,Num]}
+//   {b : [Num,Num]}
+//   Num
+def vec2_sqr_dist: {a b}
+  get [ax,ay] = a
+  get [bx,by] = b
+  cpy dx = |(num_dif ax bx) ** 2|
+  cpy dy = |(num_dif ay by) ** 2|
+  |dx + dy|
+
+// vec2_dist
+// : {a : [Num,Num]}
+//   {b : [Num,Num]}
+//   Num
+def vec2_dist: {a b}
+  (sqrt (vec2_sqr_dist a b))
+
+// vec2_flat_dist
+// : {a : [Num,Num]}
+//   {b : [Num,Num]}
+//   Num
+def vec2_flat_dist: {a b}
+  get [ax,ay] = a
+  get [bx,by] = b
+  |(num_dif ax bx) + (num_dif ay by)|
+
+// vec2_line
+// | Up to `max_len`, given a length `len`, a center pos `pos`, and a displacement
+// | vector `dxy`, returns vectors from `pos`, incrementing by `dxy`, `len` times.
+// : {max_len : Nat}
+//   {-P      : Type}
+//   {cons    : ! {x : [Num,Num]} {xs : P} P}
+// ! {len     : Num}
+//   {pos     : [Num,Num]}
+//   {dxy     : [Num,Num]}
+//   {nil     : P}
+//   P
+def vec2_line: {max_len} {cons}
+  dup cons = cons
+  dup fold = (max_len #{list len pos dxy}
+    get [ax,ay] = pos
+    get [dx,dy] = dxy
+    cpy len = len
+    cpy ax  = ax
+    cpy ay  = ay
+    cpy dx  = dx
+    cpy dy  = dy
+    (if |len == 0|
+      then: {list} (list 0 [0,0] [0,0])
+      else: {list} (cons [ax,ay] (list |len - 1| [|ax + dx|,|ay + dy|] [dx,dy]))
+      list))
+  # {len pos dxy nil}
+    (fold {len pos dxy}nil len pos dxy)
+
+// vec2_area
+// : {mlen : Nat}
+//   {-P   : Type}
+//   {size : [Num,Num]}
+//   {cond : ! {x : [Num,Num]} Num}
+//   {cons : ! {x : [Num,Num]} {xs : P} P}
+// ! {pos  : [Num,Num]}
+//   {siz  : [Num,Num]}
+//   {nil  : P}
+//   P
+def vec2_area: {mlen size cond} {cons}
+  dup cons = cons
+  dup size = size
+  dup cond = cond
+  dup fold = (mlen #{list pos idx}
+    get [cx,cy] = pos
+    get [sx,sy] = size
+    cpy sx = sx
+    cpy sy = sy
+    cpy cx = cx
+    cpy cy = cy
+    cpy ix = idx
+    cpy px = ||cx + |ix % sx|| - |sx / 2||
+    cpy py = ||cy + |ix / sx|| - |sy / 2||
+    let fn = (if (cond [cx,cy] [sx,sy] [px,py]) [(cons [px,py]),{x}x])
+    let xs = (list [cx,cy] |ix + 1|)
+    (fn xs))
+  # {pos nil}
+    (fold {pos idx}nil pos 0)
+
+// vec2_rect
+// : {mlen : Nat}
+//   {-P   : Type}
+//   {size : [Num,Num]}
+//   {cons : ! {x : [Num,Num]} {xs : P} P}
+// ! {pos  : [Num,Num]}
+//   {siz  : [Num,Num]}
+//   {nil  : P}
+//   P
+def vec2_rect: {mlen size}
+  (vec2_area mlen size #{cen siz pos}1)
+
+def vec2_rect_example: {cons}
+  dup cons = cons
+  dup area = (vec2_rect ~16 #[4,4] #cons)
+  # (area [100,100])
+
+//vec2_circle
+// : {mlen : Nat}
+//   {-P   : Type}
+//   {srad : Num} -- squared radius
+//   {cons : ! {pos : [Num,Num]} {state : P} P}
+// ! {pos  : [Num,Num]}
+//   {nil  : P}
+//   P
+def vec2_circle: {mlen srad cons}
+  dup cons = cons
+  dup srad = srad
+  let isin = {cen siz pos} |(vec2_sqr_dist cen pos) < srad|
+  dup size = #||(sqrt srad) * 2| + 1|
+  dup area = (vec2_area mlen #[size,size] #isin #cons)
+  # {pos} (area pos)
+
+// . . .
+// . x .
+// . . .
+def vec2_circle_a: (vec2_circle ~1 #1)
+
+// . . . . .
+// . . x . .
+// . x x x .
+// . . x . .
+// . . . . .
+def vec2_circle_b: (vec2_circle ~9 #2)
+
+// . . . . .
+// . x x x .
+// . x x x .
+// . x x x .
+// . . . . .
+def vec2_circle_c: (vec2_circle ~9 #3)
+
+// . . . . . . .
+// . . . x . . .
+// . . x x x . .
+// . x x x x x .
+// . . x x x . .
+// . . . x . . .
+// . . . . . . .
+def vec2_circle_d: (vec2_circle ~25 #5)
+
+// . . . . . . .
+// . . x x x . .
+// . x x x x x .
+// . x x x x x .
+// . x x x x x .
+// . . x x x . .
+// . . . . . . .
+def vec2_circle_e: (vec2_circle ~25 #6)
+
+// . . . . . . .
+// . x x x x x .
+// . x x x x x .
+// . x x x x x .
+// . x x x x x .
+// . x x x x x .
+// . . . . . . .
+def vec2_circle_f: (vec2_circle ~25 #9)
+
+// . . . . . . . . .
+// . . . . x . . . .
+// . . x x x x x . .
+// . . x x x x x . .
+// . x x x x x x x .
+// . . x x x x x . .
+// . . x x x x x . .
+// . . . . x . . . .
+// . . . . . . . . .
+def vec2_circle_g: (vec2_circle ~49 #10)
+
+// . . . . . . . . .
+// . . . x x x . . .
+// . . x x x x x . .
+// . x x x x x x x .
+// . x x x x x x x .
+// . x x x x x x x .
+// . . x x x x x . .
+// . . . x x x . . .
+// . . . . . . . . .
+def vec2_circle_h: (vec2_circle ~49 #11)
+
+// . . . . . . . . .
+// . . x x x x x . .
+// . x x x x x x x .
+// . x x x x x x x .
+// . x x x x x x x .
+// . x x x x x x x .
+// . x x x x x x x .
+// . . x x x x x . .
+// . . . . . . . . .
+def vec2_circle_i: (vec2_circle ~49 #14)
+
+// . . . . . . . . . . .
+// . . . . . x . . . . .
+// . . . x x x x x . . .
+// . . x x x x x x x . .
+// . . x x x x x x x . .
+// . x x x x x x x x x .
+// . . x x x x x x x . .
+// . . x x x x x x x . .
+// . . . x x x x x . . .
+// . . . . . x . . . . .
+// . . . . . . . . . . .
+def vec2_circle_j: (vec2_circle ~81 #17)
+
+// Approximates the area of a circle (2*pi*r)
+def vec2_circle_example: 
+  let radi = 9
+  let form = (vec2_circle ~2048 #||radi * radi| + 1|)
+  let hits = {pos num} |num + 1|
+  dup circ = (form #hits)
+  # (circ [0,0] 0)
+
+//vec2_range
+// : {mlen : Nat}
+//   {-P   : Type}
+//   {rad  : Num} -- radius
+//   {cons : ! {pos : [Num,Num]} {state : P} P}
+// ! {pos  : [Num,Num]}
+//   {nil  : P}
+//   P
+def vec2_range: {mlen rad cons}
+  dup cons = cons
+  dup rad  = rad
+  let isin = {cen siz pos} |(vec2_flat_dist cen pos) < |rad + 1||
+  dup size = # ||rad * 2| + 1|
+  dup area = (vec2_area mlen #[size,size] #isin #cons)
+  # {pos} (area pos)
+
+def vec2_range_0: (vec2_range ~1 #0)
+def vec2_range_1: (vec2_range ~9 #1)
+def vec2_range_2: (vec2_range ~25 #2)
+def vec2_range_3: (vec2_range ~49 #3)
+def vec2_range_4: (vec2_range ~81 #4)
+def vec2_range_5: (vec2_range ~121 #5)
+def vec2_range_6: (vec2_range ~169 #6)
+
+// vec2_wave
+// | Given a list of widths, returns vectors filling a wave from `pos` pointing to `dir`.
+// : {widths : {-P : Type} {cons : ! {w : Num} {ws : P} P} ! {nil : P} P}
+//   {-P     : Type}
+//   {cons   : ! {pos : [Num,Num]} {res : P} P}
+// ! {pos    : [Num,Num]}
+//   {dxy    : [Num,Num]}
+//   {nil    : P}
+//   P
+def vec2_wave: {widths} {cons}
+  dup cons = cons
+  dup line = (vec2_line ~7 #cons)
+  dup fold = (widths #{w ws pos dxy}
+    get [ax,ay] = pos
+    get [dx,dy] = dxy
+    cpy w  = w
+    cpy ax = ax
+    cpy ay = ay
+    cpy dx = dx
+    cpy dy = dy
+    cpy nx = dy
+    cpy ny = |0 - dx|
+    let ix = |ax - |nx * |w / 2||| 
+    let iy = |ay - |ny * |w / 2|||
+    let t  = (ws [|ax + dx|,|ay + dy|] [dx,dy])
+    (line w [ix,iy] [nx,ny] t))
+  # {pos dxy nil}
+    (fold {pos dxy}nil pos dxy)
+
+// vec2_wave_out
+// : {widths : {-P : Type} {cons : ! {w : Num} {ws : P} P} ! {nil : P} P}
+//   {-P     : Type}
+//   {cons   : ! {pos_dir : [[Num,Num],[Num,Num]]} {res : P} P}
+// ! {pos    : [Num,Num]}
+//   {dxy    : [Num,Num]}
+//   {nil    : P}
+//   P
+def vec2_wave_out: {widths} {cons} 
+  dup cons = cons
+  dup wave = (vec2_wave widths #{pos rest dxy}
+    get [dxy0,dxy1] = (vec2_cpy dxy)
+    (cons [pos,dxy0] (rest dxy1)))
+  # {pos dxy nil}
+    get [dxy0,dxy1] = (vec2_cpy dxy)
+    (wave pos dxy0 {dxy}nil dxy1)
+
+// vec2_wave_in
+// : {widths : {-P : Type} {cons : ! {w : Num} {ws : P} P} ! {nil : P} P}
+//   {-P     : Type}
+//   {cons   : ! {pos_dir : [[Num,Num],[Num,Num]]} {res : P} P}
+// ! {pos    : [Num,Num]}
+//   {dxy    : [Num,Num]}
+//   {nil    : P}
+//   P
+def vec2_wave_in: {widths} {cons} 
+  dup cons = cons
+  dup wave = (vec2_wave widths #{pos rest res dxy}
+    get [dxy0,dxy1] = (vec2_cpy dxy)
+    (rest (cons [pos,dxy0] res) dxy1))
+  # {pos dxy nil}
+    get [dxy0,dxy1] = (vec2_cpy dxy)
+    (wave pos dxy0 {res dxy}res nil (vec2_neg dxy1))

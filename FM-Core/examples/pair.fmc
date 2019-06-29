@@ -1,0 +1,16 @@
+def Pair: {a b}
+  [a, b]
+
+def pair_fst: {pair}
+  fst pair
+
+def pair_snd: {pair}
+  snd pair
+
+def pair_prj: {pair func}
+  get [val0, val1] = pair
+  (func val0 val1)
+
+def swap: {pair}
+  get [a, b] = pair
+  [b, a]

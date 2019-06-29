@@ -1,0 +1,19 @@
+{
+  "name": "formality-core-stdlib",
+  "version": "0.1.0",
+  "description": "",
+  "main": "_export_to_webpack_.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moonad/formality-core.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/moonad/formality-core/issues"
+  },
+  "homepage": "https://github.com/moonad/formality-core#readme"
+}
