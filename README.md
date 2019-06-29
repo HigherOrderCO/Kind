@@ -1,3 +1,3 @@
 ## Formality-JavaScript
 
-JavaScript implementation of Formality.
+JavaScript implementation of [Formality](https://github.com/formality).
