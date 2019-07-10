@@ -178,6 +178,13 @@ const parse = (code) => {
       return numb_to_term(numb);
     }
 
+    // PBT
+    else if (match("&")) {
+      var name = parse_string();
+      var numb = Number(name);
+      return numb_to_tree_term(numb);
+    }
+
     // If-Then-Else
     else if (match("if ")) {
       var cond = parse_term(ctx);
@@ -875,6 +882,19 @@ const numb_to_term = (numb) => {
     term = Dup("s" + (log2 - i), Put(Lam("x", App(Var(1), App(Var(1), Var(0))))), term);
   }
   term = Lam("s", Dup("s0", Var(0), term));
+  return term;
+}
+
+// Converts a number to a λ-encoded nat for repeated application (bounded for-loop)
+const numb_to_tree_term = (numb) => {
+  var term = Put(Var(0));
+  for (var i = 0; i < numb; ++i) {
+    term = Dup("b" + (numb - i - 1), Put(App(App(Var(numb - i), Var(0)), Var(0))), term);
+  }
+  term = Dup("n", Var(1), term);
+  term = Dup("b", Var(1), term);
+  term = Lam("n", term);
+  term = Lam("b", term);
   return term;
 }
 
