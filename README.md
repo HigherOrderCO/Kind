@@ -1,3 +1,3 @@
 ## Formality-JavaScript
 
-JavaScript implementation of [Formality](https://github.com/formality).
+You can access the Wiki [here](https://github.com/moonad/Formality/wiki)
