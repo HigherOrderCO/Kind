@@ -550,7 +550,7 @@ const subst = ([ctor, term], val, depth) => {
       var bind = subst(term.bind, val, depth);
       var body = subst(term.body, val && shift(val, 1, 0), depth + 1);
       var eras = term.eras;
-      return Lam(name, body, eras);
+      return Lam(name, bind, body, eras);
     case "App":
       var func = subst(term.func, val, depth);
       var argm = subst(term.argm, val, depth);
