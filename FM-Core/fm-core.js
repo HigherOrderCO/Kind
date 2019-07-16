@@ -479,7 +479,7 @@ const subst = ([ctor, term], val, depth) => {
     case "Put":
       var expr = subst(term.expr, val, depth);
       return Put(expr);
-    case "Dup": 
+    case "Dup":
       var name = term.name;
       var expr = subst(term.expr, val, depth);
       var body = subst(term.body, val && shift(val, 1, 0), depth + 1);
@@ -574,7 +574,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
 // Checks if a term is stratified
 const check = ([ctor, term], defs = {}, ctx = []) => {
   switch (ctor) {
-    case "Lam": 
+    case "Lam":
       if (uses(term.body) > 1) {
         throw "[ERROR]\nLambda variable `" + term.name + "` used more than once in:\n" + show([ctor, term], false, ctx);
       }
@@ -649,47 +649,43 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
 // ::::::::::::::::
 
 // Reduces a term to normal form or head normal form
-const norm = (term, defs = {}, to_lam = false) => {
-  var [ctor, term] = term;
+const norm = (term, defs = {}) => {
   const apply = (func, argm) => {
-    var func = norm(func, defs, to_lam);
     // ([x]a b) ~> [b/x]a
     if (func[0] === "Lam") {
-      return norm(subst(func[1].body, argm, 0), defs, to_lam);
-    // ([x = a] b c) ~> [x = a] (b c)
+      return func[1].body(argm);
+    // ((dup x = a; b) c) ~> dup x = a; (b c)
     } else if (func[0] === "Dup") {
-      return norm(Dup(func[1].name, func[1].expr, App(func[1].body, shift(argm, 1, 0))), defs, to_lam);
+      return Dup(func[1].name, func[1].expr, x => App(func[1].body(x), argm));
     // (|a b) ~> ⊥
     } else if (func[0] === "Put") {
       throw "[RUNTIME-ERROR]\nCan't apply a boxed value.";
     } else {
-      return App(norm(func, defs, to_lam), norm(argm, defs, to_lam));
+      return App(func, argm);
     }
   }
   const duplicate = (name, expr, body) => {
-    var expr = norm(expr, defs, to_lam);
     // [x = |a] b ~> [a/x]b
     if (expr[0] === "Put") {
-      return norm(subst(body, expr[1].expr, 0), defs, to_lam);
-    // [x = [y = a] b] c ~> [y = a] [x = b] c
+      return body(expr[1].expr);
+    // dup x = (dup y = a; b); c ~> dup y = a; dup x = b; c
     } else if (expr[0] === "Dup") {
-      return norm(Dup(expr[1].name, expr[1].expr, Dup(name, expr[1].body, shift(body, 1, 1))), defs, to_lam); 
-    // [x = [y] b] c ~> ⊥
+      return Dup(expr[1].name, expr[1].expr, x => Dup(name, expr[1].body(x), x => body(x)));
+    // dup x = {y} b; c ~> ⊥
     } else if (expr[0] === "Lam") {
       throw "[RUNTIME-ERROR]\nCan't duplicate a lambda.";
     } else {
-      return Dup(name, expr, norm(body, defs, to_lam));
+      return Dup(name, expr, body);
     }
   }
   const dereference = (name) => {
     if (defs[name]) {
-      return norm(defs[name], defs, to_lam);
+      return unquote(defs[name], []);
     } else {
       return Ref(name);
     }
   }
   const op1 = (func, num0, num1) => {
-    var num0 = norm(num0, defs, to_lam);
     if (num0[0] === "Num") {
       switch (func) {
         case "+"  : return Num((num0[1].numb + num1[1].numb) >>> 0);
@@ -711,84 +707,93 @@ const norm = (term, defs = {}, to_lam = false) => {
         default   : throw "[RUNTIME-ERROR]\nUnknown primitive: " + func + ".";
       }
     } else {
-      return Op1(func, num0, norm(num1, defs, to_lam));
+      return Op1(func, num0, num1);
     }
   }
   const op2 = (func, num0, num1) => {
-    var num1 = norm(num1, defs, to_lam);
     if (num1[0] === "Num") {
-      return norm(Op1(func, num0, num1), defs, to_lam);
+      return op1(func, num0, num1);
     } else {
-      return Op2(func, norm(num0, defs, to_lam), num1);
+      return Op2(func, num0, num1);
     }
   }
   const if_then_else = (cond, pair) => {
-    var cond = norm(cond, defs, to_lam);
     if (cond[0] === "Num") {
-      return norm(cond[1].numb > 0 ? Fst(pair) : Snd(pair), defs, to_lam);
+      return cond[1].numb > 0 ? first(pair) : second(pair);
     } else {
-      return Ite(cond, norm(pair, defs, to_lam));
+      return Ite(cond, pair);
     }
   }
   const copy = (name, numb, body) => {
-    var numb = norm(numb, defs, to_lam);
     if (numb[0] === "Num") {
-      return norm(subst(body, numb, 0), defs, to_lam);
+      return body(numb);
     } else {
-      return Cpy(name, numb, norm(body, defs, to_lam));
+      return Cpy(name, numb, body);
     }
   }
   const first = (pair) => {
-    var pair = norm(pair, defs, to_lam);
     if (pair[0] === "Par") {
-      return norm(pair[1].val0, defs, to_lam);
+      return pair[1].val0;
     } else {
       return Fst(pair);
     }
   }
   const second = (pair) => {
-    var pair = norm(pair, defs, to_lam);
     if (pair[0] === "Par") {
-      return norm(pair[1].val1, defs, to_lam);
+      return pair[1].val1;
     } else {
       return Snd(pair);
     }
   }
-  const case_of = (nam0, nam1, pair, body) => {
-    var pair = norm(pair, defs, to_lam);
+  const project = (nam0, nam1, pair, body) => {
     if (pair[0] === "Par") {
-      return norm(subst(subst(body, shift(pair[1].val0, 1, 0), 1), pair[1].val1, 0), defs, to_lam);
+      return body(pair[1].val0, pair[1].val1);
     } else {
-      return Prj(nam0, nam1, pair, norm(body, defs, to_lam));
+      return Prj(nam0, nam1, pair, body);
     }
   }
-  if (to_lam && ctor === "Put") {
-    return norm(term.expr, defs, to_lam);
-  } else if (to_lam && ctor === "Dup") {
-    return norm(subst(term.body, term.expr, 0), defs, to_lam)
-  } else if (to_lam && ctor === "Prj") {
-    return norm(subst(subst(term.body, Fst(shift(term.pair, 1, 0)), 1), Snd(term.pair), 0), defs, to_lam);
-  } else if (to_lam && ctor === "Cpy") {
-    return norm(subst(term.body, term.numb, 0), defs, to_lam)
-  } else {
+  const unquote = (term, vars) => {
+    var [ctor, term] = term;
+    //console.log("unquote", ctor, show([ctor, term]));
     switch (ctor) {
-      case "Var": return Var(term.index);
-      case "Lam": return Lam(term.name, norm(term.body, defs, to_lam)); 
-      case "App": return apply(term.func, term.argm);
-      case "Put": return Put(norm(term.expr, defs, to_lam));
-      case "Dup": return duplicate(term.name, term.expr, term.body);
+      case "Var": return vars[term.index];
+      case "Lam": return Lam(term.name, x => unquote(term.body, [x].concat(vars)));
+      case "App": return apply(unquote(term.func, vars), unquote(term.argm, vars));
+      case "Put": return Put(unquote(term.expr, vars));
+      case "Dup": return duplicate(term.name, unquote(term.expr, vars), x => unquote(term.body, [x].concat(vars)));
       case "Num": return Num(term.numb);
-      case "Op1": return op1(term.func, term.num0, term.num1);
-      case "Op2": return op2(term.func, term.num0, term.num1);
-      case "Ite": return if_then_else(term.cond, term.pair);
-      case "Cpy": return copy(term.name, term.numb, term.body);
-      case "Par": return Par(norm(term.val0, defs, to_lam), norm(term.val1, defs, to_lam));
-      case "Fst": return first(term.pair);
-      case "Snd": return second(term.pair);
-      case "Prj": return case_of(term.nam0, term.nam1, term.pair, term.body);
+      case "Op1": return op1(term.func, unquote(term.num0, vars), unquote(term.num1, vars));
+      case "Op2": return op2(term.func, unquote(term.num0, vars), unquote(term.num1, vars));
+      case "Ite": return if_then_else(unquote(term.cond, vars), unquote(term.pair, vars));
+      case "Cpy": return copy(term.name, unquote(term.numb, vars), x => unquote(term.body, [x].concat(vars)));
+      case "Par": return Par(unquote(term.val0, vars), unquote(term.val1, vars));
+      case "Fst": return first(unquote(term.pair, vars));
+      case "Snd": return second(unquote(term.pair, vars));
+      case "Prj": return project(term.nam0, term.nam1, unquote(term.pair, vars), (x,y) => unquote(term.body, [y,x].concat(vars)));
       case "Ref": return dereference(term.name);
     }
-  }
+  };
+  const quote = (term, depth) => {
+    var [ctor, term] = term;
+    switch (ctor) {
+      case "Var": return Var(depth - 1 - term.index);
+      case "Lam": return Lam(term.name, quote(term.body(Var(depth)), depth + 1));
+      case "App": return App(quote(term.func, depth), quote(term.argm, depth));
+      case "Put": return Put(quote(term.expr, depth));
+      case "Dup": return Dup(term.name, quote(term.expr, depth), quote(term.body(Var(depth)), depth + 1));
+      case "Num": return Num(term.numb);
+      case "Op1": return Op1(term.func, quote(term.num0, depth), quote(term.num1, depth));
+      case "Op2": return Op2(term.func, quote(term.num0, depth), quote(term.num1, depth));
+      case "Ite": return Ite(quote(term.cond, depth), quote(term.pair, depth));
+      case "Cpy": return Cpy(term.name, quote(term.numb, depth), quote(term.body(Var(depth)), depth + 1));
+      case "Par": return Par(quote(term.val0, depth), quote(term.val1, depth));
+      case "Fst": return Fst(quote(term.pair, depth));
+      case "Snd": return Snd(quote(term.pair, depth));
+      case "Prj": return Prj(term.nam0, term.nam1, quote(term.pair, depth), quote(term.body(Var(depth), Var(depth + 1)), depth + 2));
+      case "Ref": return Ref(term.name);
+    }
+  };
+  return quote(unquote(term, []), 0);
 }
 
 // ::::::::::::::

@@ -1,6 +1,6 @@
 {
   "name": "formality-core",
-  "version": "0.1.45",
+  "version": "0.1.46",
   "description": "",
   "main": "exports.js",
   "bin": {
