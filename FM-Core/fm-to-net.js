@@ -131,7 +131,7 @@ const compile = (term, defs = {}) => {
       case "Ref":
         return build_net(defs[term[1].name], net, var_ptrs, level);
       default:
-        return build_net(Lam("", null, Var(0)), net, var_ptrs, level);
+        return build_net(Lam("", null, Var(0), false), net, var_ptrs, level);
     }
   };
   var level_of = {};
@@ -173,7 +173,7 @@ const decompile = (net) => {
               var_ptrs.push(Pointer(addr, 1));
               var body = build_term(net, net.enter_port(Pointer(addr, 2)), var_ptrs, dup_exit);
               var_ptrs.pop();
-              return Lam(gen_name(var_ptrs.length), body);
+              return Lam(gen_name(var_ptrs.length), null, body, false);
             case 1:
               for (var index = 0; index < var_ptrs.length; ++index) {
                 if (var_ptrs[var_ptrs.length - index - 1] === ptrn) {
@@ -183,7 +183,7 @@ const decompile = (net) => {
             case 2:
               var argm = build_term(net, net.enter_port(Pointer(addr, 1)), var_ptrs, dup_exit);
               var func = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
-              return App(func, argm);
+              return App(func, argm, false);
           }
         } else if (kind === 0xFFFF) {
           switch (slot_of(ptrn)) {
