@@ -29,6 +29,8 @@ function norm(term, defs, mode = "OPTIMAL_LAZY", stats = {}) {
         stats.output_net = JSON.parse(JSON.stringify(net));
       }
       return fm.to_net.decompile(net);
+    case "TYPE":
+      return fm.core.infer(term, defs);
   }
 }
 
@@ -69,7 +71,7 @@ function check(term, defs, bipass = false) {
       fm.core.check(term, defs);
       return term;
     } catch (e) {
-      console.log(e.toString());
+      console.log(e);
       process.exit();
     }
   } else {

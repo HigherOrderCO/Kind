@@ -51,10 +51,12 @@ var mode
   : args.l ? "OPTIMAL_LAZY"
   : args.s ? "OPTIMAL_STRICT"
   : args.n ? "NATIVE"
+  : args.t ? "TYPE"
   : "BOXED";
 var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
-var {defs, infs} = fm.core.parse(code);
+var defs = fm.core.parse(code);
+var infs = null;
 
 try {
   var stats = {
@@ -72,5 +74,4 @@ try {
 } catch (e) {
   console.log(e);
   console.log(e.toString());
-  console.log(e)
 }
