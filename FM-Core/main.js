@@ -23,12 +23,15 @@ try {
   console.log("");
   console.log("Usage: fmc [options] term_name");
   console.log("");
-  console.log("Evaluation modes (default: -b):");
-  console.log("-b boxed (using interpreter)");
-  console.log("-u unboxed (using interpreter)");
-  console.log("-l optimal, lazy (using interaction nets)");
-  console.log("-s optimal, strict (using interaction nets)");
-  console.log("-n native (using JavaScript closures)");
+  console.log("Evaluation modes (default: -d):");
+  console.log("-d debug (preserves boxes, using HOAS)");
+  console.log("-i interpreted (using HOAS)");
+  console.log("-l lazy (using interaction nets)");
+  console.log("-s strict (using interaction nets)");
+  console.log("-j JavaScript (using native functions)");
+  console.log("");
+  console.log("Type-checking modes:");
+  console.log("-t performs a type check");
   console.log("");
   console.log("Options:");
   console.log("-h hides interaction net stats");
@@ -46,13 +49,13 @@ if (args.v) {
 }
 
 var mode
-  = args.b ? "BOXED"
-  : args.u ? "UNBOXED"
+  = args.d ? "DEBUG"
+  : args.i ? "INTERPRETED"
   : args.l ? "OPTIMAL_LAZY"
   : args.s ? "OPTIMAL_STRICT"
-  : args.n ? "NATIVE"
+  : args.j ? "JAVASCRIPT"
   : args.t ? "TYPE"
-  : "BOXED";
+  : "DEBUG";
 var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
 var defs = fm.core.parse(code);
@@ -73,5 +76,4 @@ try {
   }
 } catch (e) {
   console.log(e);
-  console.log(e.toString());
 }

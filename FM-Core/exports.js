@@ -8,12 +8,12 @@ var fm = module.exports = {
 
 function norm(term, defs, mode = "OPTIMAL_LAZY", stats = {}) {
   switch (mode) {
-    case "BOXED":
-      return fm.core.norm(term, defs, false);
-    case "UNBOXED":
-      return fm.core.norm(term, defs, true);
-    case "NATIVE":
-      return fm.to_js.decompile(fm.to_js.compile(term, defs));
+    case "DEBUG":
+      return fm.core.erase(fm.core.norm(term, defs, false));
+    case "INTERPRETED":
+      return fm.core.erase(fm.core.norm(term, defs, true));
+    case "JAVASCRIPT":
+      return fm.core.erase(fm.to_js.decompile(fm.to_js.compile(term, defs)));
     case "OPTIMAL_STRICT":
     case "OPTIMAL_LAZY":
       var net = fm.to_net.compile(term, defs);
@@ -30,7 +30,7 @@ function norm(term, defs, mode = "OPTIMAL_LAZY", stats = {}) {
       }
       return fm.to_net.decompile(net);
     case "TYPE":
-      return fm.core.infer(term, defs);
+      return fm.core.typecheck(term, null, defs);
   }
 }
 
