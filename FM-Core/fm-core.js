@@ -24,6 +24,11 @@ const Par = (val0, val1, eras)             => ["Par", {val0, val1, eras}];
 const Fst = (pair, eras)                   => ["Fst", {pair, eras}];
 const Snd = (pair, eras)                   => ["Snd", {pair, eras}];
 const Prj = (nam0, nam1, pair, body, eras) => ["Prj", {nam0, nam1, pair, body, eras}];
+const Eql = (val0, val1)                   => ["Eql", {val0, val1}];
+const Rfl = (expr)                         => ["Rfl", {expr}];
+const Sym = (prof)                         => ["Sym", {prof}];
+const Rwt = (prof, name, type, expr)       => ["Rwt", {prof, name, type, expr}];
+const Cst = (prof, val0, val1)             => ["Cst", {prof, val0, val1}];
 const Ann = (type, expr)                   => ["Ann", {type, expr}];
 const Ref = (name)                         => ["Ref", {name}];
 
@@ -313,6 +318,47 @@ const parse = (code) => {
       return Prj(nam0, nam1, pair, body, eras);
     }
 
+    // Equality
+    else if (match("<")) {
+      var val0 = parse_term(ctx);
+      var skip = parse_exact("=");
+      var val1 = parse_term(ctx);
+      var skip = parse_exact(">");
+      return Eql(val0, val1);
+    }
+
+    // Reflexivity
+    else if (match("$")) {
+      var expr = parse_term(ctx);
+      return Rfl(expr);
+    }
+
+    // Symmetry
+    else if (match("sym")) {
+      var prof = parse_term(ctx);
+      return Sym(prof);
+    }
+
+    // Rewrite
+    else if (match("rwt")) {
+      var prof = parse_term(ctx);
+      var skip = parse_exact("<");
+      var name = parse_string();
+      var skip = parse_exact("@");
+      var type = parse_term(ctx.concat([name]));
+      var skip = parse_exact(">");
+      var expr = parse_term(ctx);
+      return Rwt(prof, name, type, expr);
+    }
+
+    // Cast
+    else if (match("cst")) {
+      var prof = parse_term(ctx);
+      var val0 = parse_term(ctx);
+      var val1 = parse_term(ctx);
+      return Cst(prof, val0, val1);
+    }
+
     // Projection
     else if (match(": ")) {
       var type = parse_term(ctx);
@@ -509,6 +555,27 @@ const show = ([ctor, args], canon = false, nams = []) => {
       var body = show(args.body, canon, nams.concat([nam0, nam1]));
       var eras = args.eras ? "~" : "";
       return "get [" + nam0 + "," + eras + nam1 + "] = " + pair + "; " + body + "";
+    case "Eql":
+      var val0 = show(args.val0, canon, nams);
+      var val1 = show(args.val1, canon, nams);
+      return "<" + val0 + " = " + val1 + ">";
+    case "Rfl":
+      var expr = show(args.expr, canon, nams);
+      return "$" + expr;
+    case "Sym":
+      var prof = show(args.prof, canon, nams);
+      return "(sym " + prof + ")";
+    case "Rwt":
+      var prof = show(args.prof, canon, nams);
+      var name = args.name;
+      var type = show(args.type, canon, nams.concat([name]));
+      var expr = show(args.expr, canon, nams);
+      return "(rwt " + prof + " <" + name + " @ " + type + "> " + expr + ")";
+    case "Cst":
+      var prof = show(args.prof, canon, nams);
+      var val0 = show(args.val0, canon, nams);
+      var val1 = show(args.val1, canon, nams);
+      return "(cst " + prof + " " + val0 + " " + val1 + ")";
     case "Ann":
       var type = show(args.type, canon, nams);
       var expr = show(args.expr, canon, nams);
@@ -603,6 +670,27 @@ const shift = ([ctor, term], inc, depth) => {
       var body = shift(term.body, inc, depth + 2);
       var eras = term.eras;
       return Prj(nam0, nam1, pair, body, eras);
+    case "Eql":
+      var val0 = shift(term.val0, inc, depth);
+      var val1 = shift(term.val1, inc, depth);
+      return Eql(val0, val1);
+    case "Rfl":
+      var expr = shift(term.expr, inc, depth);
+      return Rfl(expr);
+    case "Sym":
+      var prof = shift(term.prof, inc, depth);
+      return Sym(prof);
+    case "Rwt":
+      var prof = shift(term.prof, inc, depth);
+      var name = term.name;
+      var type = shift(term.type, inc, depth + 1);
+      var expr = shift(term.expr, inc, depth);
+      return Rwt(prof, name, type, expr);
+    case "Cst": 
+      var prof = shift(term.prof, inc, depth);
+      var val0 = shift(term.val0, inc, depth);
+      var val1 = shift(term.val1, inc, depth);
+      return Cst(prof, val0, val1);
     case "Ann":
       var type = shift(term.type, inc, depth);
       var expr = shift(term.expr, inc, depth);
@@ -693,9 +781,30 @@ const subst = ([ctor, term], val, depth) => {
       var body = subst(term.body, val && shift(val, 2, 0), depth + 2);
       var eras = term.eras;
       return Prj(nam0, nam1, pair, body, eras);
+    case "Eql":
+      var val0 = subst(term.val0, val, depth);
+      var val1 = subst(term.val1, val, depth);
+      return Eql(val0, val1);
+    case "Rfl":
+      var expr = subst(term.expr, val, depth);
+      return Rfl(expr);
+    case "Sym":
+      var prof = subst(term.prof, val, depth);
+      return Sym(prof);
+    case "Rwt":
+      var prof = subst(term.prof, val, depth);
+      var name = term.name;
+      var type = subst(term.type, val && shift(val, 1, 0), depth + 1);
+      var expr = subst(term.expr, val, depth);
+      return Rwt(prof, name, type, expr);
+    case "Cst": 
+      var prof = subst(term.prof, val, depth);
+      var val0 = subst(term.val0, val, depth);
+      var val1 = subst(term.val1, val, depth);
+      return Cst(prof, val0, val1);
     case "Ann":
-      var type = subst(term.type, inc, depth);
-      var expr = subst(term.expr, inc, depth);
+      var type = subst(term.type, val, depth);
+      var expr = subst(term.expr, val, depth);
       return Ann(type, expr);
     case "Ref":
       var name = term.name;
@@ -729,6 +838,11 @@ const uses = ([ctor, term], depth = 0) => {
     case "Fst": return uses(term.pair, depth);
     case "Snd": return uses(term.pair, depth);
     case "Prj": return uses(term.pair, depth) + uses(term.body, depth + 2);
+    case "Eql": return 0;
+    case "Rfl": return uses(term.expr, depth);
+    case "Sym": return 0;
+    case "Rwt": return 0;
+    case "Cst": return 0;
     case "Ann": return uses(term.expr, depth);
     case "Ref": return 0;
   }
@@ -758,6 +872,11 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Prj": return is_at_level(term.pair, at_level, depth, level) && is_at_level(term.body, at_level, depth + 2, level);
     case "Ann": return is_at_level(term.expr, at_level, depth, level);
     case "Pri": return is_at_level(term.argm, at_level, depth, level);
+    case "Eql": return true;
+    case "Rfl": return is_at_level(term.expr, at_level, depth, level);
+    case "Sym": return true;
+    case "Rwt": return true;
+    case "Cst": return true;
     case "Ref": return true;
   }
 }
@@ -830,6 +949,17 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
       }
       check(term.pair, defs, ctx);
       check(term.body, defs, ctx.concat([term.nam0, term.nam1]));
+      break;
+    case "Eql":
+      break;
+    case "Rfl":
+      check(term.expr, defs, ctx);
+      break;
+    case "Sym":
+      break;
+    case "Rwt":
+      break;
+    case "Cst":
       break;
     case "Ann":
       check(term.expr, defs, ctx);
@@ -974,6 +1104,11 @@ const norm = (term, defs = {}) => {
       case "Fst": return first(unquote(term.pair, vars), term.eras);
       case "Snd": return second(unquote(term.pair, vars), term.eras);
       case "Prj": return project(term.nam0, term.nam1, unquote(term.pair, vars), (x,y) => unquote(term.body, [y,x].concat(vars)), term.eras);
+      case "Eql": return Eql(unquote(term.val0, vars), unquote(term.val1, vars));
+      case "Rfl": return Rfl(unquote(term.expr, vars));
+      case "Sym": return unquote(term.prof, vars);
+      case "Rwt": return unquote(term.expr, vars);
+      case "Cst": return unquote(term.val1, vars);
       case "Ann": return unquote(term.expr, vars);
       case "Ref": return dereference(term.name);
     }
@@ -1000,6 +1135,11 @@ const norm = (term, defs = {}) => {
       case "Fst": return Fst(quote(term.pair, depth), term.eras);
       case "Snd": return Snd(quote(term.pair, depth), term.eras);
       case "Prj": return Prj(term.nam0, term.nam1, quote(term.pair, depth), quote(term.body(Var(depth), Var(depth + 1)), depth + 2), term.eras);
+      case "Eql": return Eql(quote(term.val0, depth), quote(term.val1, depth));
+      case "Rfl": return Rfl(quote(term.expr, depth));
+      case "Sym": return Sym(quote(term.prof, depth));
+      case "Rwt": return Rwt(quote(term.prof, depth), term.name, quote(term.type, depth + 1), quote(term.expr, depth));
+      case "Cst": return Cst(quote(term.prof, depth), quote(term.val0, depth), quote(term.val1, depth));
       case "Ann": return Ann(quote(term.type, depth), quote(term.expr, depth));
       case "Ref": return Ref(term.name);
     }
@@ -1029,6 +1169,11 @@ const erase = (term) => {
     case "Fst": return term.eras ? erase(term.pair) : Fst(erase(term.pair), term.eras);
     case "Snd": return term.eras ? Num(0) : Snd(erase(term.pair), term.eras);
     case "Prj": return term.eras ? subst(subst(term.body, Num(0), 0), erase(term.pair), 0) : Prj(term.nam0, term.nam1, erase(term.pair), erase(term.body), term.eras);
+    case "Eql": return Eql(erase(term.val0), erase(term.val1));
+    case "Rfl": return erase(term.expr);
+    case "Sym": return erase(term.prof);
+    case "Rwt": return erase(term.expr);
+    case "Cst": return erase(term.val1);
     case "Ann": return Ann(erase(term.type), erase(term.expr));
     case "Ref": return Ref(term.name);
   }
@@ -1061,6 +1206,11 @@ const equal = ([a_ctor, a_term], [b_ctor, b_term]) => {
     case "Fst-Fst": return equal(a_term.pair, b_term.pair) && a_term.eras === b_term.eras;
     case "Snd-Snd": return equal(a_term.pair, b_term.pair) && a_term.eras === b_term.eras;
     case "Prj-Prj": return equal(a_term.pair, b_term.pair) && equal(a_term.body, b_term.body) && a_term.eras === b_term.eras;
+    case "Eql-Eql": return equal(a_term.val0, b_term.val0) && equal(a_term.val1, b_term.val1);
+    case "Rfl-Rfl": return equal(a_term.expr, b_term.expr);
+    case "Sym-Sym": return equal(a_term.prof, b_term.prof);
+    case "Rwt-Rwt": return equal(a_term.prof, b_term.prof) && equal(a_term.type, b_term.type) && equal(a_term.expr, b_term.expr);
+    case "Cst-Cst": return equal(a_term.prof, b_term.prof) && equal(a_term.val0, b_term.val0) && equal(a_term.val1, b_term.val1);
     case "Ann-Ann": return equal(a_term.expr, b_term.expr);
     default: return false;
   }
@@ -1407,6 +1557,42 @@ const typecheck = (() => {
         type = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
         type = subst(type, Snd(shift(term[1].pair, 1, 0)), 0);
         type = subst(type, Fst(term[1].pair), 0);
+        break;
+      case "Eql":
+        type = Typ();
+        break;
+      case "Rfl":
+        type = Eql(term[1].expr, term[1].expr);
+        break;
+      case "Sym":
+        var prof_t = typecheck(term[1].prof, null, defs, ctx, [term, ctx]); 
+        if (prof_t[0] !== "Eql") {
+          ERROR("Attempted to use sym with an invalid equality proof.");
+        }
+        type = Eql(prof_t[1].val1, prof_t[1].val0);
+        break;
+      case "Rwt":
+        var prof_t = typecheck(term[1].prof, null, defs, ctx, [term, ctx]);
+        if (prof_t[0] !== "Eql") {
+          ERROR("Attempted to use rwt with an invalid equality proof.");
+        }
+        var expr_t0 = subst(term[1].type, prof_t[1].val0, 0);
+        var expr_t1 = typecheck(term[1].expr, null, defs, ctx, [term, ctx]);
+        MATCH(expr_t0, expr_t1);
+        type = subst(term[1].type, prof_t[1].val1, 0);
+        break;
+      case "Cst":
+        var prof_t = typecheck(term[1].prof, null, defs, ctx, [term, ctx]);
+        if (prof_t[0] !== "Eql") {
+          ERROR("Attempted to use rwt with an invalid equality proof.");
+        }
+        if (!equal(erase(norm(term[1].val0, defs)), erase(norm(prof_t[1].val0, defs)))) {
+          ERROR("Cast failed because " + TERM(term[1].val0) + " != " + TERM(prof_t[1].val0));
+        }
+        if (!equal(erase(norm(term[1].val0, defs)), erase(norm(prof_t[1].val0, defs)))) {
+          ERROR("Cast failed because " + TERM(term[1].val1) + " != " + TERM(prof_t[1].val1));
+        }
+        type = typecheck(term[1].val0, expect, defs, ctx, [term, ctx]); 
         break;
       case "Ann":
         typecheck(term[1].expr, term[1].type, defs, ctx, [term, ctx]);

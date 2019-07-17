@@ -138,7 +138,7 @@ const show = ([ctor, args], ctx = Ctx()) => {
       return "@" + type + " " + expr;
     case "Use":
       var expr = show(args.expr, ctx);
-      return "~" + expr; 
+      return "~" + expr;
     case "Ann":
       //var type = show(args.type, ctx);
       //var expr = show(args.expr, ctx);
@@ -419,7 +419,7 @@ const subst = ([ctor, term], val, depth) => {
     case "Put":
       var expr = subst(term.expr, val, depth);
       return Put(expr);
-    case "Dup": 
+    case "Dup":
       var name = term.name;
       var expr = subst(term.expr, val, depth);
       var body = subst(term.body, val && shift(val, 1, 0), depth + 1);
@@ -486,7 +486,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
   }
   return ret;
 }
-          
+
 // Removes computationally irrelevant expressions
 const erase = ([ctor, args]) => {
   const is_eta = (lam) => lam[1].body[0] === "App" && lam[1].body[1].argm[0] === "Var" && lam[1].body[1].argm[1].index === 0 && uses(lam[1].body[1].func, 0) === 0;
@@ -636,7 +636,7 @@ const norm = (foo, defs = {}, weak = false, dup = false) => {
     case "Var": return Var(term.index);
     case "Typ": return Typ();
     case "All": return All(term.name, cont(term.bind, defs, true, dup), cont(term.body, defs, weak, dup), term.eras);
-    case "Lam": return Lam(term.name, term.bind && cont(term.bind, defs, true, dup), cont(term.body, defs, weak, dup), term.eras); 
+    case "Lam": return Lam(term.name, term.bind && cont(term.bind, defs, true, dup), cont(term.body, defs, weak, dup), term.eras);
     case "App": return apply(term.eras, term.func, term.argm);
     case "Box": return Box(cont(term.expr, defs, weak, dup));
     case "Put": return dup ? norm(term.expr, defs, weak, dup) : Put(cont(term.expr, defs, weak, dup));
@@ -719,7 +719,7 @@ const infer = (term, defs, ctx = Ctx(), strat = true, seen = {}) => {
       return Typ();
     case "New":
       var type = norm(term[1].type, defs, true);
-      if (type[0] !== "Slf") { 
+      if (type[0] !== "Slf") {
         throw "[ERROR]\nNon-self instantiation: `" + show(term, ctx) + "`.\n\n[CONTEXT]\n" + show_context(ctx);
       }
       infer(type, defs, ctx, false, seen);
@@ -817,7 +817,7 @@ const show_mismatch = (expect, actual, expr, ctx, defs) => {
   text += "-- nf-1: " + show(norm(actual, {}, false), ctx) + "\n";
   text += "-- nf-2: " + show(norm(erase(actual), defs, true), ctx) + "\n";
   text += "-- nf-3: " + show(norm(erase(actual), defs, false), ctx) + "\n";
-  text += "\n[CONTEXT]\n" 
+  text += "\n[CONTEXT]\n";
   text += show_context(ctx);
   return text;
 }
