@@ -538,7 +538,7 @@ const show = ([ctor, args], canon = false, nams = []) => {
         var val0 = show(args.val0, canon, nams);
         var val1 = show(args.val1, canon, nams);
         var eras = args.eras ? "~" : "";
-        return "[" + val0 + "," + eras + val1 + "]";
+        return "[" + val0 + ", " + eras + val1 + "]";
       }
     case "Fst":
       var pair = show(args.pair, canon, nams);
@@ -715,7 +715,7 @@ const subst = ([ctor, term], val, depth) => {
       return All(name, bind, body, eras);
     case "Lam":
       var name = term.name;
-      var bind = subst(term.bind, val, depth);
+      var bind = term.bind && subst(term.bind, val, depth);
       var body = subst(term.body, val && shift(val, 1, 0), depth + 1);
       var eras = term.eras;
       return Lam(name, bind, body, eras);
@@ -823,7 +823,7 @@ const uses = ([ctor, term], depth = 0) => {
     case "Typ": return 0;
     case "All": return 0;
     case "Lam": return uses(term.body, depth + 1);
-    case "App": return uses(term.func, depth) + uses(term.argm, depth);
+    case "App": return uses(term.func, depth) + (term.eras ? 0 : uses(term.argm, depth));
     case "Box": return 0;
     case "Put": return uses(term.expr, depth);
     case "Dup": return uses(term.expr, depth) + uses(term.body, depth + 1);
@@ -855,7 +855,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Typ": return true;
     case "All": return true;
     case "Lam": return is_at_level(term.body, at_level, depth + 1, level);
-    case "App": return is_at_level(term.func, at_level, depth, level) && is_at_level(term.argm, at_level, depth, level);
+    case "App": return is_at_level(term.func, at_level, depth, level) && (term.eras ? true : is_at_level(term.argm, at_level, depth, level));
     case "Box": return true;
     case "Put": return is_at_level(term.expr, at_level, depth, level + 1);
     case "Dup": return is_at_level(term.expr, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level);
@@ -1099,7 +1099,7 @@ const norm = (term, defs = {}) => {
       case "Op2": return op2(term.func, unquote(term.num0, vars), unquote(term.num1, vars));
       case "Ite": return if_then_else(unquote(term.cond, vars), unquote(term.pair, vars));
       case "Cpy": return copy(term.name, unquote(term.numb, vars), x => unquote(term.body, [x].concat(vars)));
-      case "Sig": return Sig(term.name, unquote(term.typ0, vars), unquote(term.typ1, vars), term.eras);
+      case "Sig": return Sig(term.name, unquote(term.typ0, vars), x => unquote(term.typ1, [x].concat(vars)), term.eras);
       case "Par": return Par(unquote(term.val0, vars), unquote(term.val1, vars), term.eras);
       case "Fst": return first(unquote(term.pair, vars), term.eras);
       case "Snd": return second(unquote(term.pair, vars), term.eras);
@@ -1130,7 +1130,7 @@ const norm = (term, defs = {}) => {
       case "Op2": return Op2(term.func, quote(term.num0, depth), quote(term.num1, depth));
       case "Ite": return Ite(quote(term.cond, depth), quote(term.pair, depth));
       case "Cpy": return Cpy(term.name, quote(term.numb, depth), quote(term.body(Var(depth)), depth + 1));
-      case "Sig": return Sig(term.name, quote(term.typ0, depth), quote(term.typ1, depth), term.eras);
+      case "Sig": return Sig(term.name, quote(term.typ0, depth), quote(term.typ1(Var(depth)), depth + 1), term.eras);
       case "Par": return Par(quote(term.val0, depth), quote(term.val1, depth), term.eras);
       case "Fst": return Fst(quote(term.pair, depth), term.eras);
       case "Snd": return Snd(quote(term.pair, depth), term.eras);
@@ -1167,7 +1167,7 @@ const erase = (term) => {
     case "Sig": return Sig(term.name, erase(term.typ0), erase(term.typ1), term.eras);
     case "Par": return term.eras ? erase(term.val0) : Par(erase(term.val0), erase(term.val1), term.eras);
     case "Fst": return term.eras ? erase(term.pair) : Fst(erase(term.pair), term.eras);
-    case "Snd": return term.eras ? Num(0) : Snd(erase(term.pair), term.eras);
+    case "Snd": return term.eras ? erase(term.pair) : Snd(erase(term.pair), term.eras);
     case "Prj": return term.eras ? subst(subst(term.body, Num(0), 0), erase(term.pair), 0) : Prj(term.nam0, term.nam1, erase(term.pair), erase(term.body), term.eras);
     case "Eql": return Eql(erase(term.val0), erase(term.val1));
     case "Rfl": return erase(term.expr);
@@ -1299,6 +1299,7 @@ const numb_to_tree_term = (numb) => {
 
 // Converts a λ-encoded nat to a number, if possible
 const term_to_numb = (term) => {
+  return null;
   try {
     try {
       term = term[1].body[1].body[1].expr[1].body;
@@ -1381,14 +1382,15 @@ const typecheck = (() => {
       throw "[ERROR]\n" + str
         + "\n- When checking " + TERM(term)
         + (inside ? "\n- On expression " + CODE(show(inside[0], false, ctx_names(inside[1]))) : "")
+        //+ (inside ? "\n- On expression " + JSON.stringify(inside[0]) + " | " + JSON.stringify(ctx_names(inside[1])) : "")
         + (ctx !== null ? "\n- With the following context:\n" + ctx_str(ctx) : "");
     };
 
     const MATCH = (a, b) => {
       if (!equal(erase(norm(a, defs)), erase(norm(b, defs)))) {
         throw ERROR("Type mismatch."
-          + "\n- Found type... " + TERM(norm(a, defs))
-          + "\n- Instead of... " + TERM(norm(b, defs)));
+          + "\n- Found type... " + TERM(erase(norm(a, defs)))
+          + "\n- Instead of... " + TERM(erase(norm(b, defs))));
       }
     };
 
@@ -1423,6 +1425,9 @@ const typecheck = (() => {
         var ex_ctx = ctx_ext(term[1].name, bind_v, ctx);
         var body_t = typecheck(term[1].body, expect && expect[0] === "All" ? expect[1].body : null, defs, ex_ctx, [term, ctx]);
         var term_t = All(term[1].name, bind_v, body_t, term[1].eras);
+        if (term_t[1].eras !== term[1].eras) {
+          ERROR("Mismatched erasure.");
+        }
         typecheck(term_t, Typ(), defs, ctx, [term, ctx]);
         type = term_t;
         break;
@@ -1542,7 +1547,7 @@ const typecheck = (() => {
         if (term[1].eras !== pair_t[1].eras) {
           ERROR("Mismatched erasure.");
         }
-        type = subst(pair_t[1].typ1, Fst(term[1].pair), 0);
+        type = subst(pair_t[1].typ1, Fst(term[1].pair, term[1].eras), 0);
         break;
       case "Prj":
         var pair_t = typecheck(term[1].pair, null, defs, ctx, [term, ctx]);
@@ -1555,8 +1560,8 @@ const typecheck = (() => {
         var ex_ctx = ctx_ext(term[1].nam0, pair_t[1].typ0, ctx);
         var ex_ctx = ctx_ext(term[1].nam1, pair_t[1].typ1, ex_ctx);
         type = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
-        type = subst(type, Snd(shift(term[1].pair, 1, 0)), 0);
-        type = subst(type, Fst(term[1].pair), 0);
+        type = subst(type, Snd(shift(term[1].pair, 1, 0), term[1].eras), 0);
+        type = subst(type, Fst(term[1].pair, term[1].eras), 0);
         break;
       case "Eql":
         type = Typ();
