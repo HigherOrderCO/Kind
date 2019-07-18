@@ -70,7 +70,7 @@ try {
     output_net: args.p ? null : undefined
   };
   var term = fm.exec(name, defs, infs, mode, args.d, stats);
-  console.log(fm.core.show(term));
+  console.log(fm.core.show({expand: !args.t})(term));
   if (args.p || (mode.slice(0,3) === "OPT" && !args.h)) {
     console.log(JSON.stringify(stats));
   }

@@ -5,32 +5,32 @@
 // ::::::::::
 
 // An ESCoC term is an ADT represented by a JSON
-const Var = (index)                        => ["Var", {index}];
-const Typ = ()                             => ["Typ", {}];
-const All = (name, bind, body, eras)       => ["All", {name, bind, body, eras}];
-const Lam = (name, bind, body, eras)       => ["Lam", {name, bind, body, eras}];
-const App = (func, argm, eras)             => ["App", {func, argm, eras}];
-const Box = (expr)                         => ["Box", {expr}];
-const Put = (expr)                         => ["Put", {expr}];
-const Dup = (name, expr, body)             => ["Dup", {name, expr, body}];
-const U32 = ()                             => ["U32", {}];
-const Num = (numb)                         => ["Num", {numb}];
-const Op1 = (func, num0, num1)             => ["Op1", {func, num0, num1}];
-const Op2 = (func, num0, num1)             => ["Op2", {func, num0, num1}];
-const Ite = (cond, pair)                   => ["Ite", {cond, pair}];
-const Cpy = (name, numb, body)             => ["Cpy", {name, numb, body}];
-const Sig = (name, typ0, typ1, eras)       => ["Sig", {name, typ0, typ1, eras}];
-const Par = (val0, val1, eras)             => ["Par", {val0, val1, eras}];
-const Fst = (pair, eras)                   => ["Fst", {pair, eras}];
-const Snd = (pair, eras)                   => ["Snd", {pair, eras}];
-const Prj = (nam0, nam1, pair, body, eras) => ["Prj", {nam0, nam1, pair, body, eras}];
-const Eql = (val0, val1)                   => ["Eql", {val0, val1}];
-const Rfl = (expr)                         => ["Rfl", {expr}];
-const Sym = (prof)                         => ["Sym", {prof}];
-const Rwt = (prof, name, type, expr)       => ["Rwt", {prof, name, type, expr}];
-const Cst = (prof, val0, val1)             => ["Cst", {prof, val0, val1}];
-const Ann = (type, expr)                   => ["Ann", {type, expr}];
-const Ref = (name)                         => ["Ref", {name}];
+const Var = (index, show = null)                        => ["Var", {index, show}];
+const Typ = (show = null)                               => ["Typ", {show}];
+const All = (name, bind, body, eras, show = null)       => ["All", {name, bind, body, eras, show}];
+const Lam = (name, bind, body, eras, show = null)       => ["Lam", {name, bind, body, eras, show}];
+const App = (func, argm, eras, show = null)             => ["App", {func, argm, eras, show}];
+const Box = (expr, show = null)                         => ["Box", {expr, show}];
+const Put = (expr, show = null)                         => ["Put", {expr, show}];
+const Dup = (name, expr, body, show = null)             => ["Dup", {name, expr, body, show}];
+const U32 = (show = null)                               => ["U32", {show}];
+const Num = (numb, show = null)                         => ["Num", {numb, show}];
+const Op1 = (func, num0, num1, show = null)             => ["Op1", {func, num0, num1, show}];
+const Op2 = (func, num0, num1, show = null)             => ["Op2", {func, num0, num1, show}];
+const Ite = (cond, pair, show = null)                   => ["Ite", {cond, pair, show}];
+const Cpy = (name, numb, body, show = null)             => ["Cpy", {name, numb, body, show}];
+const Sig = (name, typ0, typ1, eras, show = null)       => ["Sig", {name, typ0, typ1, eras, show}];
+const Par = (val0, val1, eras, show = null)             => ["Par", {val0, val1, eras, show}];
+const Fst = (pair, eras, show = null)                   => ["Fst", {pair, eras, show}];
+const Snd = (pair, eras, show = null)                   => ["Snd", {pair, eras, show}];
+const Prj = (nam0, nam1, pair, body, eras, show = null) => ["Prj", {nam0, nam1, pair, body, eras, show}];
+const Eql = (val0, val1, show = null)                   => ["Eql", {val0, val1, show}];
+const Rfl = (expr, show = null)                         => ["Rfl", {expr, show}];
+const Sym = (prof, show = null)                         => ["Sym", {prof, show}];
+const Rwt = (prof, name, type, expr, show = null)       => ["Rwt", {prof, name, type, expr, show}];
+const Cst = (prof, val0, val1, show = null)             => ["Cst", {prof, val0, val1, show}];
+const Ann = (type, expr, show = null)                   => ["Ann", {type, expr, show}];
+const Ref = (name, show = null)                         => ["Ref", {name, show}];
 
 // :::::::::::::
 // :: Parsing ::
@@ -257,16 +257,16 @@ const parse = (code) => {
         var name = parse_string();
         var skip = parse_exact(":");
         var typ0 = parse_term(ctx);
-        var skip = parse_exact(",");
         var eras = match("~");
+        var skip = eras ? null : parse_exact(",");
         var typ1 = parse_term(ctx.concat([name]));
         var skip = parse_exact("]");
         return Sig(name, typ0, typ1, eras);
       // Pair
       } else {
         var val0 = parse_term(ctx);
-        var skip = parse_exact(",");
         var eras = match("~");
+        var skip = eras ? null : parse_exact(",");
         var val1 = parse_term(ctx);
         var skip = parse_exact("]");
         return Par(val0, val1, eras);
@@ -430,160 +430,167 @@ const gen_name = (n) => {
 };
 
 // Converts a term to a string
-const show = ([ctor, args], canon = false, nams = []) => {
-  switch (ctor) {
-    case "Var":
-      return nams[nams.length - args.index - 1] || "^" + args.index;
-    case "Typ":
-      return "Type";
-    case "All":
-      var term = [ctor, args];
-      var erase = [];
-      var names = [];
-      var types = [];
-      while (term[0] === "All") {
-        erase.push(term[1].eras);
-        names.push(canon ? gen_name(nams.length) : term[1].name);
-        types.push(show(term[1].bind, canon, nams.concat(names.slice(0,-1))));
-        term = term[1].body;
-      }
-      var text = "{";
-      for (var i = 0; i < names.length; ++i) {
-        text += erase[i] ? "~" : "";
-        text += names[i] + " : " + types[i];
-        text += i < names.length - 1 ? ", " : "";
-      }
-      text += "} -> ";
-      text += show(term, canon, nams.concat(names));
-      return text;
-    case "Lam":
-      var term = [ctor, args];
-      var numb = null;
-      var erase = [];
-      var names = [];
-      var types = [];
-      while (term[0] === "Lam") {
-        numb = term_to_numb(term);
-        if (numb !== null) {
-          break;
-        } else {
+const show = config => {
+  config = config || {};
+  const show = ([ctor, args], nams = []) => {
+    if (!config.expand && args.show) {
+      return args.show;
+    }
+    switch (ctor) {
+      case "Var":
+        return nams[nams.length - args.index - 1] || "^" + args.index;
+      case "Typ":
+        return "Type";
+      case "All":
+        var term = [ctor, args];
+        var erase = [];
+        var names = [];
+        var types = [];
+        while (term[0] === "All") {
           erase.push(term[1].eras);
-          names.push(canon ? gen_name(nams.length) : term[1].name);
-          types.push(term[1].bind ? show(term[1].bind, canon, nams.concat(names)) : null);
+          names.push(term[1].name);
+          types.push(show(term[1].bind, nams.concat(names.slice(0,-1))));
           term = term[1].body;
         }
-      }
-      var text = "{";
-      for (var i = 0; i < names.length; ++i) {
-        text += erase[i] ? "~" : "";
-        text += names[i] + (types[i] !== null ? " : " + types[i] : "");
-        text += i < names.length - 1 ? ", " : "";
-      }
-      text += "} => ";
-      if (numb !== null) {
-        text += "%" + Number(numb);
-      } else {
-        text += show(term, canon, nams.concat(names));
-      }
-      return text;
-    case "App":
-      var text = ")";
-      var term = [ctor, args];
-      while (term[0] === "App") {
-        text = " " + (term[1].eras ? "~" : "") + show(term[1].argm, canon, nams) + text;
-        term = term[1].func;
-      }
-      return "(" + show(term, canon, nams) + text;
-    case "Box":
-      var expr = show(args.expr, canon, nams);
-      return "!" + expr;
-    case "Put":
-      var expr = show(args.expr, canon, nams);
-      return "#" + expr;
-    case "Dup":
-      var name = args.name;
-      var expr = show(args.expr, canon, nams);
-      var body = show(args.body, canon, nams.concat([name]));
-      return "dup " + name + " = " + expr + "; " + body;
-    case "U32":
-      return "U32";
-    case "Num":
-      return args.numb.toString();
-    case "Op1":
-    case "Op2":
-      var func = args.func;
-      var num0 = show(args.num0, canon, nams);
-      var num1 = show(args.num1, canon, nams);
-      return "|" + num0 + " " + func + " " + num1 + "|";
-    case "Ite":
-      var cond = show(args.cond, canon, nams);
-      var pair = show(args.pair, canon, nams);
-      return "(if " + cond + " " + pair + ")";
-    case "Cpy":
-      var name = args.name;
-      var numb = show(args.numb, canon, nams);
-      var body = show(args.body, canon, nams.concat([name]));
-      return "cpy " + name + " = " + numb + "; " + body;
-    case "Sig":
-      var name = args.name;
-      var typ0 = show(args.typ0, canon, nams);
-      var typ1 = show(args.typ1, canon, nams.concat([name]));
-      var eras = args.eras ? "~" : "";
-      return "[" + name + " : " + typ0 + ", " + eras + typ1 + "]";
-    case "Par":
-      var text = term_to_text([ctor, args]);
-      if (text !== null) {
-        return "\"" + text + "\"";
-      } else {
-        var val0 = show(args.val0, canon, nams);
-        var val1 = show(args.val1, canon, nams);
+        var text = "{";
+        for (var i = 0; i < names.length; ++i) {
+          text += erase[i] ? "~" : "";
+          text += names[i] + " : " + types[i];
+          text += i < names.length - 1 ? ", " : "";
+        }
+        text += "} -> ";
+        text += show(term, nams.concat(names));
+        return text;
+      case "Lam":
+        var term = [ctor, args];
+        var numb = null;
+        var erase = [];
+        var names = [];
+        var types = [];
+        while (term[0] === "Lam") {
+          numb = term_to_numb(term);
+          if (numb !== null) {
+            break;
+          } else {
+            erase.push(term[1].eras);
+            names.push(term[1].name);
+            types.push(term[1].bind ? show(term[1].bind, nams.concat(names)) : null);
+            term = term[1].body;
+          }
+        }
+        var text = "{";
+        for (var i = 0; i < names.length; ++i) {
+          text += erase[i] ? "~" : "";
+          text += names[i] + (types[i] !== null ? " : " + types[i] : "");
+          text += i < names.length - 1 ? ", " : "";
+        }
+        text += "} => ";
+        if (numb !== null) {
+          text += "%" + Number(numb);
+        } else {
+          text += show(term, nams.concat(names));
+        }
+        return text;
+      case "App":
+        var text = ")";
+        var term = [ctor, args];
+        while (term[0] === "App") {
+          text = " " + (term[1].eras ? "~" : "") + show(term[1].argm, nams) + text;
+          term = term[1].func;
+        }
+        return "(" + show(term, nams) + text;
+      case "Box":
+        var expr = show(args.expr, nams);
+        return "!" + expr;
+      case "Put":
+        var expr = show(args.expr, nams);
+        return "#" + expr;
+      case "Dup":
+        var name = args.name;
+        var expr = show(args.expr, nams);
+        var body = show(args.body, nams.concat([name]));
+        return "dup " + name + " = " + expr + "; " + body;
+      case "U32":
+        return "U32";
+      case "Num":
+        return args.numb.toString();
+      case "Op1":
+      case "Op2":
+        var func = args.func;
+        var num0 = show(args.num0, nams);
+        var num1 = show(args.num1, nams);
+        return "|" + num0 + " " + func + " " + num1 + "|";
+      case "Ite":
+        var cond = show(args.cond, nams);
+        var pair = show(args.pair, nams);
+        return "(if " + cond + " " + pair + ")";
+      case "Cpy":
+        var name = args.name;
+        var numb = show(args.numb, nams);
+        var body = show(args.body, nams.concat([name]));
+        return "cpy " + name + " = " + numb + "; " + body;
+      case "Sig":
+        var name = args.name;
+        var typ0 = show(args.typ0, nams);
+        var typ1 = show(args.typ1, nams.concat([name]));
+        var comm = args.eras ? " ~ " : ",";
+        return "[" + name + " : " + typ0 + comm + typ1 + "]";
+      case "Par":
+        var text = term_to_text([ctor, args]);
+        if (text !== null) {
+          return "\"" + text + "\"";
+        } else {
+          var val0 = show(args.val0, nams);
+          var val1 = show(args.val1, nams);
+          var eras = args.eras ? "~" : "";
+          return "[" + val0 + ", " + eras + val1 + "]";
+        }
+      case "Fst":
+        var pair = show(args.pair, nams);
         var eras = args.eras ? "~" : "";
-        return "[" + val0 + ", " + eras + val1 + "]";
-      }
-    case "Fst":
-      var pair = show(args.pair, canon, nams);
-      var eras = args.eras ? "~" : "";
-      return "(" + eras + "fst " + pair + ")";
-    case "Snd":
-      var pair = show(args.pair, canon, nams);
-      var eras = args.eras ? "~" : "";
-      return "(" + eras + "snd " + pair + ")";
-    case "Prj":
-      var nam0 = args.nam0;
-      var nam1 = args.nam1;
-      var pair = show(args.pair, canon, nams);
-      var body = show(args.body, canon, nams.concat([nam0, nam1]));
-      var eras = args.eras ? "~" : "";
-      return "get [" + nam0 + "," + eras + nam1 + "] = " + pair + "; " + body + "";
-    case "Eql":
-      var val0 = show(args.val0, canon, nams);
-      var val1 = show(args.val1, canon, nams);
-      return "<" + val0 + " = " + val1 + ">";
-    case "Rfl":
-      var expr = show(args.expr, canon, nams);
-      return "$" + expr;
-    case "Sym":
-      var prof = show(args.prof, canon, nams);
-      return "(sym " + prof + ")";
-    case "Rwt":
-      var prof = show(args.prof, canon, nams);
-      var name = args.name;
-      var type = show(args.type, canon, nams.concat([name]));
-      var expr = show(args.expr, canon, nams);
-      return "(rwt " + prof + " <" + name + " @ " + type + "> " + expr + ")";
-    case "Cst":
-      var prof = show(args.prof, canon, nams);
-      var val0 = show(args.val0, canon, nams);
-      var val1 = show(args.val1, canon, nams);
-      return "(cst " + prof + " " + val0 + " " + val1 + ")";
-    case "Ann":
-      var type = show(args.type, canon, nams);
-      var expr = show(args.expr, canon, nams);
-      return ": " + type + " " + expr;
-    case "Ref":
-      return args.name;
-  }
-}
+        return "(" + eras + "fst " + pair + ")";
+      case "Snd":
+        var pair = show(args.pair, nams);
+        var eras = args.eras ? "~" : "";
+        return "(" + eras + "snd " + pair + ")";
+      case "Prj":
+        var nam0 = args.nam0;
+        var nam1 = args.nam1;
+        var pair = show(args.pair, nams);
+        var body = show(args.body, nams.concat([nam0, nam1]));
+        var eras = args.eras ? "~" : "";
+        return "get [" + nam0 + "," + eras + nam1 + "] = " + pair + "; " + body + "";
+      case "Eql":
+        var val0 = show(args.val0, nams);
+        var val1 = show(args.val1, nams);
+        return "<" + val0 + " = " + val1 + ">";
+      case "Rfl":
+        var expr = show(args.expr, nams);
+        return "$" + expr;
+      case "Sym":
+        var prof = show(args.prof, nams);
+        return "(sym " + prof + ")";
+      case "Rwt":
+        var prof = show(args.prof, nams);
+        var name = args.name;
+        var type = show(args.type, nams.concat([name]));
+        var expr = show(args.expr, nams);
+        return "(rwt " + prof + " <" + name + " @ " + type + "> " + expr + ")";
+      case "Cst":
+        var prof = show(args.prof, nams);
+        var val0 = show(args.val0, nams);
+        var val1 = show(args.val1, nams);
+        return "(cst " + prof + " " + val0 + " " + val1 + ")";
+      case "Ann":
+        var type = show(args.type, nams);
+        var expr = show(args.expr, nams);
+        return ": " + type + " " + expr;
+      case "Ref":
+        return args.name;
+    }
+  };
+  return show;
+};
 
 // ::::::::::::::::::
 // :: Substitution ::
@@ -593,110 +600,135 @@ const show = ([ctor, args], canon = false, nams = []) => {
 const shift = ([ctor, term], inc, depth) => {
   switch (ctor) {
     case "Var":
-      return Var(term.index < depth ? term.index : term.index + inc);
+      var show = term.show;
+      return Var(term.index < depth ? term.index : term.index + inc, show);
     case "Typ":
-      return Typ();
+      var show = term.show;
+      return Typ(show);
     case "All":
       var name = term.name;
       var bind = shift(term.bind, inc, depth);
       var body = shift(term.body, inc, depth + 1);
       var eras = term.eras;
-      return All(name, bind, body, eras);
+      var show = term.show;
+      return All(name, bind, body, eras, show);
     case "Lam":
       var name = term.name;
       var bind = term.bind && shift(term.bind, inc, depth);
       var body = shift(term.body, inc, depth + 1);
       var eras = term.eras;
-      return Lam(name, bind, body, eras);
+      var show = term.show;
+      return Lam(name, bind, body, eras, show);
     case "App":
       var func = shift(term.func, inc, depth);
       var argm = shift(term.argm, inc, depth);
       var eras = term.eras;
-      return App(func, argm, term.eras);
+      var show = term.show;
+      return App(func, argm, term.eras, show);
     case "Box":
       var expr = shift(term.expr, inc, depth);
-      return Box(expr);
+      var show = term.show;
+      return Box(expr, show);
     case "Put":
       var expr = shift(term.expr, inc, depth);
-      return Put(expr);
+      var show = term.show;
+      return Put(expr, show);
     case "Dup":
       var name = term.name;
       var expr = shift(term.expr, inc, depth);
       var body = shift(term.body, inc, depth + 1);
-      return Dup(name, expr, body);
+      var show = term.show;
+      return Dup(name, expr, body, show);
     case "U32":
-      return U32();
+      var show = term.show;
+      return U32(show);
     case "Num":
       var numb = term.numb;
-      return Num(numb);
+      var show = term.show;
+      return Num(numb, show);
     case "Op1":
     case "Op2":
       var func = term.func;
       var num0 = shift(term.num0, inc, depth);
       var num1 = shift(term.num1, inc, depth);
-      return Op2(func, num0, num1);
+      var show = term.show;
+      return Op2(func, num0, num1, show);
     case "Ite":
       var cond = shift(term.cond, inc, depth);
       var pair = shift(term.pair, inc, depth);
-      return Ite(cond, pair);
+      var show = term.show;
+      return Ite(cond, pair, show);
     case "Cpy":
       var name = term.name;
       var numb = shift(term.numb, inc, depth);
       var body = shift(term.body, inc, depth + 1);
-      return Cpy(name, numb, body);
+      var show = term.show;
+      return Cpy(name, numb, body, show);
     case "Sig":
       var name = term.name;
       var typ0 = shift(term.typ0, inc, depth);
       var typ1 = shift(term.typ1, inc, depth + 1);
       var eras = term.eras;
-      return Sig(name, typ0, typ1, eras);
+      var show = term.show;
+      return Sig(name, typ0, typ1, eras, show);
     case "Par":
       var val0 = shift(term.val0, inc, depth);
       var val1 = shift(term.val1, inc, depth);
       var eras = term.eras;
-      return Par(val0, val1, eras);
+      var show = term.show;
+      return Par(val0, val1, eras, show);
     case "Fst":
       var pair = shift(term.pair, inc, depth);
       var eras = term.eras;
-      return Fst(pair, eras);
+      var show = term.show;
+      return Fst(pair, eras, show);
     case "Snd":
       var pair = shift(term.pair, inc, depth);
       var eras = term.eras;
-      return Snd(pair, eras);
+      var show = term.show;
+      return Snd(pair, eras, show);
     case "Prj":
       var nam0 = term.nam0;
       var nam1 = term.nam1;
       var pair = shift(term.pair, inc, depth);
       var body = shift(term.body, inc, depth + 2);
       var eras = term.eras;
-      return Prj(nam0, nam1, pair, body, eras);
+      var show = term.show;
+      return Prj(nam0, nam1, pair, body, eras, show);
     case "Eql":
       var val0 = shift(term.val0, inc, depth);
       var val1 = shift(term.val1, inc, depth);
-      return Eql(val0, val1);
+      var show = term.show;
+      return Eql(val0, val1, show);
     case "Rfl":
       var expr = shift(term.expr, inc, depth);
-      return Rfl(expr);
+      var show = term.show;
+      return Rfl(expr, show);
     case "Sym":
       var prof = shift(term.prof, inc, depth);
-      return Sym(prof);
+      var show = term.show;
+      return Sym(prof, show);
     case "Rwt":
       var prof = shift(term.prof, inc, depth);
       var name = term.name;
       var type = shift(term.type, inc, depth + 1);
       var expr = shift(term.expr, inc, depth);
-      return Rwt(prof, name, type, expr);
+      var show = term.show;
+      return Rwt(prof, name, type, expr, show);
     case "Cst": 
       var prof = shift(term.prof, inc, depth);
       var val0 = shift(term.val0, inc, depth);
       var val1 = shift(term.val1, inc, depth);
-      return Cst(prof, val0, val1);
+      var show = term.show;
+      return Cst(prof, val0, val1, show);
     case "Ann":
       var type = shift(term.type, inc, depth);
       var expr = shift(term.expr, inc, depth);
-      return Ann(type, expr);
+      var show = term.show;
+      return Ann(type, expr, show);
     case "Ref":
-      return Ref(term.name);
+    var show = term.show;
+      return Ref(term.name, show);
   }
 }
 
@@ -704,111 +736,136 @@ const shift = ([ctor, term], inc, depth) => {
 const subst = ([ctor, term], val, depth) => {
   switch (ctor) {
     case "Var":
-      return depth === term.index ? val : Var(term.index - (term.index > depth ? 1 : 0));
+      var show = term.show;
+      return depth === term.index ? val : Var(term.index - (term.index > depth ? 1 : 0), show);
     case "Typ":
-      return Typ();
+    var show = term.show;
+      return Typ(show);
     case "All":
       var name = term.name;
       var bind = subst(term.bind, val, depth);
       var body = subst(term.body, val && shift(val, 1, 0), depth + 1);
       var eras = term.eras;
-      return All(name, bind, body, eras);
+      var show = term.show;
+      return All(name, bind, body, eras, show);
     case "Lam":
       var name = term.name;
       var bind = term.bind && subst(term.bind, val, depth);
       var body = subst(term.body, val && shift(val, 1, 0), depth + 1);
       var eras = term.eras;
-      return Lam(name, bind, body, eras);
+      var show = term.show;
+      return Lam(name, bind, body, eras, show);
     case "App":
       var func = subst(term.func, val, depth);
       var argm = subst(term.argm, val, depth);
       var eras = term.eras;
-      return App(func, argm, eras);
+      var show = term.show;
+      return App(func, argm, eras, show);
     case "Box":
       var expr = subst(term.expr, val, depth);
-      return Box(expr);
+      var show = term.show;
+      return Box(expr, show);
     case "Put":
       var expr = subst(term.expr, val, depth);
-      return Put(expr);
+      var show = term.show;
+      return Put(expr, show);
     case "Dup":
       var name = term.name;
       var expr = subst(term.expr, val, depth);
       var body = subst(term.body, val && shift(val, 1, 0), depth + 1);
-      return Dup(name, expr, body);
+      var show = term.show;
+      return Dup(name, expr, body, show);
     case "U32":
-      return U32();
+      var show = term.show;
+      return U32(show);
     case "Num":
       var numb = term.numb;
-      return Num(numb);
+      var show = term.show;
+      return Num(numb, show);
     case "Op1":
     case "Op2":
       var func = term.func;
       var num0 = subst(term.num0, val, depth);
       var num1 = subst(term.num1, val, depth);
-      return Op2(func, num0, num1);
+      var show = term.show;
+      return Op2(func, num0, num1, show);
     case "Ite":
       var cond = subst(term.cond, val, depth);
       var pair = subst(term.pair, val, depth);
-      return Ite(cond, pair);
+      var show = term.show;
+      return Ite(cond, pair, show);
     case "Cpy":
       var name = term.name;
       var numb = subst(term.numb, val, depth);
       var body = subst(term.body, val && shift(val, 1, 0), depth + 1);
-      return Cpy(name, numb, body);
+      var show = term.show;
+      return Cpy(name, numb, body, show);
     case "Sig":
       var name = term.name;
       var typ0 = subst(term.typ0, val, depth);
       var typ1 = subst(term.typ1, val && shift(val, 1, 0), depth + 1);
       var eras = term.eras;
-      return Sig(name, typ0, typ1, eras);
+      var show = term.show;
+      return Sig(name, typ0, typ1, eras, show);
     case "Par":
       var val0 = subst(term.val0, val, depth);
       var val1 = subst(term.val1, val, depth);
       var eras = term.eras;
-      return Par(val0, val1, eras);
+      var show = term.show;
+      return Par(val0, val1, eras, show);
     case "Fst":
       var pair = subst(term.pair, val, depth);
       var eras = term.eras;
-      return Fst(pair, eras);
+      var show = term.show;
+      return Fst(pair, eras, show);
     case "Snd":
       var pair = subst(term.pair, val, depth);
       var eras = term.eras;
-      return Snd(pair, eras);
+      var show = term.show;
+      return Snd(pair, eras, show);
     case "Prj":
       var nam0 = term.nam0;
       var nam1 = term.nam1;
       var pair = subst(term.pair, val, depth);
       var body = subst(term.body, val && shift(val, 2, 0), depth + 2);
       var eras = term.eras;
-      return Prj(nam0, nam1, pair, body, eras);
+      var show = term.show;
+      return Prj(nam0, nam1, pair, body, eras, show);
     case "Eql":
       var val0 = subst(term.val0, val, depth);
       var val1 = subst(term.val1, val, depth);
-      return Eql(val0, val1);
+      var show = term.show;
+      return Eql(val0, val1, show);
     case "Rfl":
       var expr = subst(term.expr, val, depth);
-      return Rfl(expr);
+      var show = term.show;
+      return Rfl(expr, show);
     case "Sym":
       var prof = subst(term.prof, val, depth);
-      return Sym(prof);
+      var show = term.show;
+      return Sym(prof, show);
     case "Rwt":
       var prof = subst(term.prof, val, depth);
       var name = term.name;
       var type = subst(term.type, val && shift(val, 1, 0), depth + 1);
       var expr = subst(term.expr, val, depth);
-      return Rwt(prof, name, type, expr);
+      var show = term.show;
+      return Rwt(prof, name, type, expr, show);
     case "Cst": 
       var prof = subst(term.prof, val, depth);
       var val0 = subst(term.val0, val, depth);
       var val1 = subst(term.val1, val, depth);
-      return Cst(prof, val0, val1);
+      var show = term.show;
+      return Cst(prof, val0, val1, show);
     case "Ann":
       var type = subst(term.type, val, depth);
       var expr = subst(term.expr, val, depth);
-      return Ann(type, expr);
+      var show = term.show;
+      return Ann(type, expr, show);
     case "Ref":
       var name = term.name;
-      return Ref(name);
+      var show = term.show;
+      return Ref(name, show);
   }
 }
 
@@ -888,10 +945,10 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
       break;
     case "Lam":
       if (uses(term.body) > 1) {
-        throw "[ERROR]\nLambda variable `" + term.name + "` used more than once in:\n" + show([ctor, term], false, ctx);
+        throw "[ERROR]\nLambda variable `" + term.name + "` used more than once in:\n" + show()([ctor, term], ctx);
       }
       if (!is_at_level(term.body, 0)) {
-        throw "[ERROR]\nLambda variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], false, ctx);
+        throw "[ERROR]\nLambda variable `" + term.name + "` used inside a box in:\n" + show()([ctor, term], ctx);
       }
       check(term.body, defs, ctx.concat([term.name]));
       break;
@@ -906,7 +963,7 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
       break;
     case "Dup":
       if (!is_at_level(term.body, 1)) {
-        throw "[ERROR]\nDuplication variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], false, ctx);
+        throw "[ERROR]\nDuplication variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show()([ctor, term], ctx);
       }
       check(term.expr, defs, ctx);
       check(term.body, defs, ctx.concat([term.name]));
@@ -942,10 +999,10 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
       var isat0 = is_at_level(term.body, 0, 1);
       var isat1 = is_at_level(term.body, 0, 0);
       if (uses0 > 1 || uses1 > 1) {
-        throw "[ERROR]\nProjection variable `" + (uses0 > 1 ? term.nam0 : term.nam1) + "` used more than once in:\n" + show([ctor, term], false, ctx);
+        throw "[ERROR]\nProjection variable `" + (uses0 > 1 ? term.nam0 : term.nam1) + "` used more than once in:\n" + show()([ctor, term], ctx);
       }
       if (!isat0 || !isat1) {
-        throw "[ERROR]\nProjection variable `" + (!isat0 ? term.nam0 : term.nam1) + "` used inside a box in:\n" + show([ctor, term], false, ctx);
+        throw "[ERROR]\nProjection variable `" + (!isat0 ? term.nam0 : term.nam1) + "` used inside a box in:\n" + show()([ctor, term], ctx);
       }
       check(term.pair, defs, ctx);
       check(term.body, defs, ctx.concat([term.nam0, term.nam1]));
@@ -979,43 +1036,46 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
 // ::::::::::::::::
 
 // Reduces a term to normal form or head normal form
-const norm = (term, defs = {}) => {
-  const apply = (func, argm, eras) => {
+const norm = (term, defs = {}, whnf = false) => {
+  const apply = (func, argm, eras, show) => {
     // ([x]a b) ~> [b/x]a
     if (func[0] === "Lam") {
       return func[1].body(argm);
     // ((dup x = a; b) c) ~> dup x = a; (b c)
     } else if (func[0] === "Dup") {
-      return Dup(func[1].name, func[1].expr, x => App(func[1].body(x), argm, eras));
+      return Dup(func[1].name, func[1].expr, x => App(func[1].body(x), argm, eras, show), func[1].show);
     // (|a b) ~> ⊥
     } else if (func[0] === "Put") {
       throw "[RUNTIME-ERROR]\nCan't apply a boxed value.";
     } else {
-      return App(func, argm, eras);
+      return App(func, argm, eras, show);
     }
   }
-  const duplicate = (name, expr, body) => {
+  const duplicate = (name, expr, body, show) => {
     // [x = |a] b ~> [a/x]b
     if (expr[0] === "Put") {
       return body(expr[1].expr);
     // dup x = (dup y = a; b); c ~> dup y = a; dup x = b; c
     } else if (expr[0] === "Dup") {
-      return Dup(expr[1].name, expr[1].expr, x => Dup(name, expr[1].body(x), x => body(x)));
+      return Dup(expr[1].name, expr[1].expr, x => Dup(name, expr[1].body(x), x => body(x), show), expr[1].show);
     // dup x = {y} b; c ~> ⊥
     } else if (expr[0] === "Lam") {
       throw "[RUNTIME-ERROR]\nCan't duplicate a lambda.";
     } else {
-      return Dup(name, expr, body);
+      return Dup(name, expr, body, show);
     }
   }
-  const dereference = (name) => {
+  const dereference = (name, show) => {
     if (defs[name]) {
-      return unquote(defs[name], []);
+      var term = defs[name];
+      var term = unquote(term, []);
+      term[1].show = name;
+      return term;
     } else {
       return Ref(name);
     }
   }
-  const op1 = (func, num0, num1) => {
+  const op1 = (func, num0, num1, show) => {
     if (num0[0] === "Num") {
       switch (func) {
         case "+"  : return Num((num0[1].numb + num1[1].numb) >>> 0);
@@ -1037,111 +1097,111 @@ const norm = (term, defs = {}) => {
         default   : throw "[RUNTIME-ERROR]\nUnknown primitive: " + func + ".";
       }
     } else {
-      return Op1(func, num0, num1);
+      return Op1(func, num0, num1, show);
     }
   }
-  const op2 = (func, num0, num1) => {
+  const op2 = (func, num0, num1, show) => {
     if (num1[0] === "Num") {
-      return op1(func, num0, num1);
+      return op1(func, num0, num1, null);
     } else {
-      return Op2(func, num0, num1);
+      return Op2(func, num0, num1, show);
     }
   }
-  const if_then_else = (cond, pair) => {
+  const if_then_else = (cond, pair, show) => {
     if (cond[0] === "Num") {
-      return cond[1].numb > 0 ? first(pair, false) : second(pair, false);
+      return cond[1].numb > 0 ? first(pair, false, null) : second(pair, false, null);
     } else {
-      return Ite(cond, pair);
+      return Ite(cond, pair, show);
     }
   }
-  const copy = (name, numb, body) => {
+  const copy = (name, numb, body, show) => {
     if (numb[0] === "Num") {
       return body(numb);
     } else {
-      return Cpy(name, numb, body);
+      return Cpy(name, numb, body, show);
     }
   }
-  const first = (pair, eras) => {
+  const first = (pair, eras, show) => {
     if (pair[0] === "Par") {
       return pair[1].val0;
     } else {
-      return Fst(pair, eras);
+      return Fst(pair, eras, show);
     }
   }
-  const second = (pair, eras) => {
+  const second = (pair, eras, show) => {
     if (pair[0] === "Par") {
       return pair[1].val1;
     } else {
-      return Snd(pair, eras);
+      return Snd(pair, eras, show);
     }
   }
-  const project = (nam0, nam1, pair, body, eras) => {
+  const project = (nam0, nam1, pair, body, eras, show) => {
     if (pair[0] === "Par") {
       return body(pair[1].val0, pair[1].val1);
     } else {
-      return Prj(nam0, nam1, pair, body, eras);
+      return Prj(nam0, nam1, pair, body, eras, show);
     }
   }
   const unquote = (term, vars) => {
     var [ctor, term] = term;
     switch (ctor) {
       case "Var": return vars[term.index] || Var(vars.length - term.index - 1);
-      case "Typ": return Typ();
-      case "All": return All(term.name, unquote(term.bind, vars), x => unquote(term.body, [x].concat(vars)), term.eras);
-      case "Lam": return Lam(term.name, term.bind && unquote(term.bind, vars), x => unquote(term.body, [x].concat(vars)), term.eras);
-      case "App": return apply(unquote(term.func, vars), unquote(term.argm, vars), term.eras);
-      case "Box": return Box(unquote(term.expr, vars));
-      case "Put": return Put(unquote(term.expr, vars));
-      case "Dup": return duplicate(term.name, unquote(term.expr, vars), x => unquote(term.body, [x].concat(vars)));
-      case "U32": return U32();
-      case "Num": return Num(term.numb);
-      case "Op1": return op1(term.func, unquote(term.num0, vars), unquote(term.num1, vars));
-      case "Op2": return op2(term.func, unquote(term.num0, vars), unquote(term.num1, vars));
-      case "Ite": return if_then_else(unquote(term.cond, vars), unquote(term.pair, vars));
-      case "Cpy": return copy(term.name, unquote(term.numb, vars), x => unquote(term.body, [x].concat(vars)));
-      case "Sig": return Sig(term.name, unquote(term.typ0, vars), x => unquote(term.typ1, [x].concat(vars)), term.eras);
-      case "Par": return Par(unquote(term.val0, vars), unquote(term.val1, vars), term.eras);
-      case "Fst": return first(unquote(term.pair, vars), term.eras);
-      case "Snd": return second(unquote(term.pair, vars), term.eras);
-      case "Prj": return project(term.nam0, term.nam1, unquote(term.pair, vars), (x,y) => unquote(term.body, [y,x].concat(vars)), term.eras);
-      case "Eql": return Eql(unquote(term.val0, vars), unquote(term.val1, vars));
-      case "Rfl": return Rfl(unquote(term.expr, vars));
+      case "Typ": return Typ(term.show);
+      case "All": return All(term.name, unquote(term.bind, vars), x => unquote(term.body, [x].concat(vars)), term.eras, term.show);
+      case "Lam": return Lam(term.name, term.bind && unquote(term.bind, vars), x => unquote(term.body, [x].concat(vars)), term.eras, term.show);
+      case "App": return apply(unquote(term.func, vars), unquote(term.argm, vars), term.eras, term.show);
+      case "Box": return Box(unquote(term.expr, vars), term.show);
+      case "Put": return Put(unquote(term.expr, vars), term.show);
+      case "Dup": return duplicate(term.name, unquote(term.expr, vars), x => unquote(term.body, [x].concat(vars)), term.show);
+      case "U32": return U32(term.show);
+      case "Num": return Num(term.numb, term.show);
+      case "Op1": return op1(term.func, unquote(term.num0, vars), unquote(term.num1, vars), term.show);
+      case "Op2": return op2(term.func, unquote(term.num0, vars), unquote(term.num1, vars), term.show);
+      case "Ite": return if_then_else(unquote(term.cond, vars), unquote(term.pair, vars), term.show);
+      case "Cpy": return copy(term.name, unquote(term.numb, vars), x => unquote(term.body, [x].concat(vars)), term.show);
+      case "Sig": return Sig(term.name, unquote(term.typ0, vars), x => unquote(term.typ1, [x].concat(vars)), term.eras, term.show);
+      case "Par": return Par(unquote(term.val0, vars), unquote(term.val1, vars), term.eras, term.show);
+      case "Fst": return first(unquote(term.pair, vars), term.eras, term.show);
+      case "Snd": return second(unquote(term.pair, vars), term.eras, term.show);
+      case "Prj": return project(term.nam0, term.nam1, unquote(term.pair, vars), (x,y) => unquote(term.body, [y,x].concat(vars)), term.eras, term.show);
+      case "Eql": return Eql(unquote(term.val0, vars), unquote(term.val1, vars), term.show);
+      case "Rfl": return Rfl(unquote(term.expr, vars), term.show);
       case "Sym": return unquote(term.prof, vars);
       case "Rwt": return unquote(term.expr, vars);
       case "Cst": return unquote(term.val1, vars);
       case "Ann": return unquote(term.expr, vars);
-      case "Ref": return dereference(term.name);
+      case "Ref": return dereference(term.name, term.show);
     }
   };
   const quote = (term, depth) => {
     var [ctor, term] = term;
     switch (ctor) {
-      case "Var": return Var(depth - 1 - term.index);
-      case "Typ": return Typ();
-      case "All": return All(term.name, quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras);
-      case "Lam": return Lam(term.name, term.bind && quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras);
-      case "App": return App(quote(term.func, depth), quote(term.argm, depth), term.eras);
-      case "Box": return Box(quote(term.expr, depth));
-      case "Put": return Put(quote(term.expr, depth));
-      case "Dup": return Dup(term.name, quote(term.expr, depth), quote(term.body(Var(depth)), depth + 1));
-      case "U32": return U32();
-      case "Num": return Num(term.numb);
-      case "Op1": return Op1(term.func, quote(term.num0, depth), quote(term.num1, depth));
-      case "Op2": return Op2(term.func, quote(term.num0, depth), quote(term.num1, depth));
-      case "Ite": return Ite(quote(term.cond, depth), quote(term.pair, depth));
-      case "Cpy": return Cpy(term.name, quote(term.numb, depth), quote(term.body(Var(depth)), depth + 1));
-      case "Sig": return Sig(term.name, quote(term.typ0, depth), quote(term.typ1(Var(depth)), depth + 1), term.eras);
-      case "Par": return Par(quote(term.val0, depth), quote(term.val1, depth), term.eras);
-      case "Fst": return Fst(quote(term.pair, depth), term.eras);
-      case "Snd": return Snd(quote(term.pair, depth), term.eras);
-      case "Prj": return Prj(term.nam0, term.nam1, quote(term.pair, depth), quote(term.body(Var(depth), Var(depth + 1)), depth + 2), term.eras);
-      case "Eql": return Eql(quote(term.val0, depth), quote(term.val1, depth));
-      case "Rfl": return Rfl(quote(term.expr, depth));
-      case "Sym": return Sym(quote(term.prof, depth));
-      case "Rwt": return Rwt(quote(term.prof, depth), term.name, quote(term.type, depth + 1), quote(term.expr, depth));
-      case "Cst": return Cst(quote(term.prof, depth), quote(term.val0, depth), quote(term.val1, depth));
-      case "Ann": return Ann(quote(term.type, depth), quote(term.expr, depth));
-      case "Ref": return Ref(term.name);
+      case "Var": return Var(depth - 1 - term.index, term.show);
+      case "Typ": return Typ(term.show);
+      case "All": return All(term.name, quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras, term.show);
+      case "Lam": return Lam(term.name, term.bind && quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras, term.show);
+      case "App": return App(quote(term.func, depth), quote(term.argm, depth), term.eras, term.show);
+      case "Box": return Box(quote(term.expr, depth), term.show);
+      case "Put": return Put(quote(term.expr, depth), term.show);
+      case "Dup": return Dup(term.name, quote(term.expr, depth), quote(term.body(Var(depth)), depth + 1), term.show);
+      case "U32": return U32(term.show);
+      case "Num": return Num(term.numb, term.show);
+      case "Op1": return Op1(term.func, quote(term.num0, depth), quote(term.num1, depth), term.show);
+      case "Op2": return Op2(term.func, quote(term.num0, depth), quote(term.num1, depth), term.show);
+      case "Ite": return Ite(quote(term.cond, depth), quote(term.pair, depth), term.show);
+      case "Cpy": return Cpy(term.name, quote(term.numb, depth), quote(term.body(Var(depth)), depth + 1), term.show);
+      case "Sig": return Sig(term.name, quote(term.typ0, depth), quote(term.typ1(Var(depth)), depth + 1), term.eras, term.show);
+      case "Par": return Par(quote(term.val0, depth), quote(term.val1, depth), term.eras, term.show);
+      case "Fst": return Fst(quote(term.pair, depth), term.eras, term.show);
+      case "Snd": return Snd(quote(term.pair, depth), term.eras, term.show);
+      case "Prj": return Prj(term.nam0, term.nam1, quote(term.pair, depth), quote(term.body(Var(depth), Var(depth + 1)), depth + 2), term.eras, term.show);
+      case "Eql": return Eql(quote(term.val0, depth), quote(term.val1, depth), term.show);
+      case "Rfl": return Rfl(quote(term.expr, depth), term.show);
+      case "Sym": return Sym(quote(term.prof, depth), term.show);
+      case "Rwt": return Rwt(quote(term.prof, depth), term.name, quote(term.type, depth + 1), quote(term.expr, depth), term.show);
+      case "Cst": return Cst(quote(term.prof, depth), quote(term.val0, depth), quote(term.val1, depth), term.show);
+      case "Ann": return Ann(quote(term.type, depth), quote(term.expr, depth), term.show);
+      case "Ref": return Ref(term.name, term.show);
     }
   };
   return quote(unquote(term, []), 0);
@@ -1150,32 +1210,32 @@ const norm = (term, defs = {}) => {
 const erase = (term) => {
   var [ctor, term] = term;
   switch (ctor) {
-    case "Var": return Var(term.index);
-    case "Typ": return Typ();
-    case "All": return All(term.name, erase(term.bind), erase(term.body), term.eras);
-    case "Lam": return term.eras ? erase(subst(term.body, Num(0), 0)) : Lam(term.name, null, erase(term.body), term.eras);
-    case "App": return term.eras ? erase(term.func) : App(erase(term.func), erase(term.argm), term.eras);
-    case "Box": return Box(erase(term.expr));
-    case "Put": return Put(erase(term.expr));
-    case "Dup": return Dup(term.name, erase(term.expr), erase(term.body));
-    case "U32": return U32();
-    case "Num": return Num(term.numb);
-    case "Op1": return Op1(term.func, erase(term.num0), erase(term.num1));
-    case "Op2": return Op2(term.func, erase(term.num0), erase(term.num1));
-    case "Ite": return Ite(erase(term.cond), erase(term.pair));
-    case "Cpy": return Cpy(term.name, erase(term.numb), erase(term.body));
-    case "Sig": return Sig(term.name, erase(term.typ0), erase(term.typ1), term.eras);
-    case "Par": return term.eras ? erase(term.val0) : Par(erase(term.val0), erase(term.val1), term.eras);
-    case "Fst": return term.eras ? erase(term.pair) : Fst(erase(term.pair), term.eras);
-    case "Snd": return term.eras ? erase(term.pair) : Snd(erase(term.pair), term.eras);
-    case "Prj": return term.eras ? subst(subst(term.body, Num(0), 0), erase(term.pair), 0) : Prj(term.nam0, term.nam1, erase(term.pair), erase(term.body), term.eras);
-    case "Eql": return Eql(erase(term.val0), erase(term.val1));
+    case "Var": return Var(term.index, term.show);
+    case "Typ": return Typ(term.show);
+    case "All": return All(term.name, erase(term.bind), erase(term.body), term.eras, term.show);
+    case "Lam": return term.eras ? erase(subst(term.body, Num(0), 0)) : Lam(term.name, null, erase(term.body), term.eras, term.show);
+    case "App": return term.eras ? erase(term.func) : App(erase(term.func), erase(term.argm), term.eras, term.show);
+    case "Box": return Box(erase(term.expr), term.show);
+    case "Put": return Put(erase(term.expr), term.show);
+    case "Dup": return Dup(term.name, erase(term.expr), erase(term.body), term.show);
+    case "U32": return U32(term.show);
+    case "Num": return Num(term.numb, term.show);
+    case "Op1": return Op1(term.func, erase(term.num0), erase(term.num1), term.show);
+    case "Op2": return Op2(term.func, erase(term.num0), erase(term.num1), term.show);
+    case "Ite": return Ite(erase(term.cond), erase(term.pair), term.show);
+    case "Cpy": return Cpy(term.name, erase(term.numb), erase(term.body), term.show);
+    case "Sig": return Sig(term.name, erase(term.typ0), erase(term.typ1), term.eras, term.show);
+    case "Par": return term.eras ? erase(term.val0) : Par(erase(term.val0), erase(term.val1), term.eras, term.show);
+    case "Fst": return term.eras ? erase(term.pair) : Fst(erase(term.pair), term.eras, term.show);
+    case "Snd": return term.eras ? erase(term.pair) : Snd(erase(term.pair), term.eras, term.show);
+    case "Prj": return term.eras ? subst(subst(term.body, Num(0), 0), erase(term.pair), 0) : Prj(term.nam0, term.nam1, erase(term.pair), erase(term.body), term.eras, term.show);
+    case "Eql": return Eql(erase(term.val0), erase(term.val1), term.show);
     case "Rfl": return erase(term.expr);
     case "Sym": return erase(term.prof);
     case "Rwt": return erase(term.expr);
     case "Cst": return erase(term.val1);
-    case "Ann": return Ann(erase(term.type), erase(term.expr));
-    case "Ref": return Ref(term.name);
+    case "Ann": return Ann(erase(term.type), erase(term.expr), term.show);
+    case "Ref": return Ref(term.name, term.show);
   }
 }
 
@@ -1359,7 +1419,7 @@ const typecheck = (() => {
     for (var c = ctx; c !== null; c = c.rest) {
       var name = c.name;
       var type = c.type;
-      txt.push("- " + PADR(max_len, " ", c.name) + " : " + CODE(show(type, false, ctx_names(c.rest))));
+      txt.push("- " + PADR(max_len, " ", c.name) + " : " + CODE(show()(type, ctx_names(c.rest))));
     }
     return txt.reverse().join("\n");
   };
@@ -1375,13 +1435,13 @@ const typecheck = (() => {
 
   const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
     const TERM = (term) => {
-      return CODE(show(term, false, ctx_names(ctx)));
+      return CODE(show()(term, ctx_names(ctx)));
     };
 
     const ERROR = (str)  => {
       throw "[ERROR]\n" + str
         + "\n- When checking " + TERM(term)
-        + (inside ? "\n- On expression " + CODE(show(inside[0], false, ctx_names(inside[1]))) : "")
+        + (inside ? "\n- On expression " + CODE(show()(inside[0], ctx_names(inside[1]))) : "")
         //+ (inside ? "\n- On expression " + JSON.stringify(inside[0]) + " | " + JSON.stringify(ctx_names(inside[1])) : "")
         + (ctx !== null ? "\n- With the following context:\n" + ctx_str(ctx) : "");
     };
@@ -1527,6 +1587,11 @@ const typecheck = (() => {
         }
         var val0_t = typecheck(term[1].val0, expect && expect[1].typ0, defs, ctx, [term, ctx]);
         var val1_t = typecheck(term[1].val1, expect && subst(expect[1].typ1, term[1].val0, 0), defs, ctx, [term, ctx]);
+        if (term[1].eras && !equal(erase(norm(term[1].val0, defs)), erase(norm(term[1].val1, defs)))) {
+          ERROR("Dependent interesction values must have same erasure."
+            + "\n- Erasure 0 is " + TERM(erase(norm(term[1].val0, defs)))
+            + "\n- Erasure 1 is " + TERM(erase(norm(term[1].val1, defs))));
+        }
         type = expect || Sig("x", val0_t, val1_t, term[1].eras);
         break;
       case "Fst":
