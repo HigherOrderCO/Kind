@@ -4,7 +4,33 @@
 // :: Term ::
 // ::::::::::
 
-// An ESCoC term is an ADT represented by a JSON
+// An FM-Lang term is an ADT represented as a JSON.
+// - Var: a variable
+// - Typ: the type of types, `Type`
+// - All: the dependent function type, `{x : A} -> B`, optionally erased
+// - Lam: a lambda, `{x} => B`, optionally erased/annotated
+// - App: an application `(f a)`, optionally erased
+// - Box: a boxed type, `!A`
+// - Put: a boxed value, `#a`
+// - Dup: copies a boxed value, `dup x = a; b`
+// - U32: type of a native number
+// - Num: value of a native number
+// - Op1: partially applied binary numeric operation, `|n + k|`, with `k` fixed
+// - Op2: binary numeric operation, `|x + y|`
+// - Ite: if-then-else, `if n p`,  with a numeric conditional `n`, and two branches in a pair `p`
+// - Cpy: copies a number, `cpy x = a; b`
+// - Sig: type of a dependent pair, `[x : A, (B x)]`, or of a dependent intersection, `[x : A ~ (B x)]`
+// - Par: value of a dependent pair, `[a, b]`, or of a dependent intersection `[a ~ b]`
+// - Fst: extracts 1st value of a dependent pair, `fst p`, or of a dependent intersection, `~fst p`
+// - Snd: extracts 2nd value of a dependent pair, `snd p`, or of a dependent intersection, `~snd p`
+// - Prj: projects a dependent pair, `get [x , y] = a; b`, or a dependent intersection, `get [x ~ y] = a; b`
+// - Eql: erased untyped equality type, `<a = b>`
+// - Rfl: reflexivity, i.e., a proof that a value is equal to itself, `$a`
+// - Sym: symmetry of equality, `sym e`
+// - Rwt: rewrite equal terms in types, `rwt e <x @ (P x)> a`
+// - Cst: casts a value to the type of another value equal to it, `cst e a b`
+// - Ann: an explicit type annotaion, `: A a`
+// - Ref: a reference to a global def
 const Var = (index, show = null)                        => ["Var", {index, show}];
 const Typ = (show = null)                               => ["Typ", {show}];
 const All = (name, bind, body, eras, show = null)       => ["All", {name, bind, body, eras, show}];
@@ -1277,111 +1303,8 @@ const equal = ([a_ctor, a_term], [b_ctor, b_term]) => {
 }
 
 // :::::::::::::::::::
-// :: Syntax Sugars ::
+// :: Type Checking ::
 // :::::::::::::::::::
-
-// Converts an utf-8 string to a λ-encoded term
-const text_to_term = (text) => {
-  // Converts UTF-8 to bytes
-  var bytes = [].slice.call(new TextEncoder("utf-8").encode(text), 0);
-
-  // Converts bytes to uints
-  while (bytes.length % 4 !== 0) {
-    bytes.push(0);
-  }
-  var nums = new Uint32Array(new Uint8Array(bytes).buffer);
-
-  // Converts uints to C-List of nums
-  var term = Var(0);
-  for (var i = nums.length - 1; i >= 0; --i) {
-    term = App(App(Var(1), Num(nums[i]), false), term, false);
-  }
-  term = Par(Num(0x74786574), Lam("c", null, Dup("c", Var(0), Put(Lam("n", null, term, false))), false), false);
-  return term;
-}
-
-// Converts a λ-encoded term to a string, if possible
-const term_to_text = (term) => {
-  try {
-    if (term[1].val0[1].numb === 0x74786574) {
-      try {
-        term = term[1].val1[1].body[1].body[1].expr[1].body;
-      } catch(e) {
-        term = term[1].val1[1].body[1].body;
-      }
-      var nums = [];
-      while (term[0] !== "Var") {
-        if (term[1].func[1].func[1].index !== 1) {
-          return null;
-        }
-        nums.push(term[1].func[1].argm[1].numb);
-        term = term[1].argm;
-      }
-      if (term[1].index !== 0) {
-        return null;
-      }
-      return new TextDecoder("utf-8").decode(new Uint8Array(new Uint32Array(nums).buffer));
-    } else {
-      return null;
-    }
-  } catch (e) {
-    return null;
-  }
-}
-
-// Converts a number to a λ-encoded nat for repeated application (bounded for-loop)
-const numb_to_term = (numb) => {
-  var term = Var(0);
-  var log2 = Math.floor(Math.log(numb) / Math.log(2));
-  for (var i = 0; i < log2 + 1; ++i) {
-    term = (numb >>> (log2 - i)) & 1 ? App(Var(i + 1), term, false) : term;
-  }
-  term = Put(Lam("x", null, term, false));
-  for (var i = 0; i < log2; ++i) {
-    term = Dup("s" + (log2 - i), Put(Lam("x", null, App(Var(1), App(Var(1), Var(0), false), false), false)), term);
-  }
-  term = Lam("s", null, Dup("s0", Var(0), term), false);
-  return term;
-}
-
-// Converts a number to a λ-encoded nat for repeated application (bounded for-loop)
-const numb_to_tree_term = (numb) => {
-  var term = Put(Var(0));
-  for (var i = 0; i < numb; ++i) {
-    term = Dup("b" + (numb - i - 1), Put(App(App(Var(numb - i), Var(0), false), Var(0), false)), term);
-  }
-  term = Dup("n", Var(1), term);
-  term = Dup("b", Var(1), term);
-  term = Lam("n", null, term, false);
-  term = Lam("b", null, term, false);
-  return term;
-}
-
-// Converts a λ-encoded nat to a number, if possible
-const term_to_numb = (term) => {
-  return null;
-  try {
-    try {
-      term = term[1].body[1].body[1].expr[1].body;
-    } catch(e) {
-      term = term[1].body[1].body;
-    }
-    var count = 0;
-    while (term[0] !== "Var") {
-      if (term[1].func[1].index !== 1) {
-        return null;
-      }
-      count++;
-      term = term[1].argm;
-    }
-    if (term[1].index !== 0) {
-      return null;
-    }
-    return count;
-  } catch (e) {
-    return null;
-  }
-}
 
 const typecheck = (() => {
 
@@ -1686,6 +1609,113 @@ const typecheck = (() => {
 
   return typecheck;
 })();
+
+// :::::::::::::::::::
+// :: Syntax Sugars ::
+// :::::::::::::::::::
+
+// Converts an utf-8 string to a λ-encoded term
+const text_to_term = (text) => {
+  // Converts UTF-8 to bytes
+  var bytes = [].slice.call(new TextEncoder("utf-8").encode(text), 0);
+
+  // Converts bytes to uints
+  while (bytes.length % 4 !== 0) {
+    bytes.push(0);
+  }
+  var nums = new Uint32Array(new Uint8Array(bytes).buffer);
+
+  // Converts uints to C-List of nums
+  var term = Var(0);
+  for (var i = nums.length - 1; i >= 0; --i) {
+    term = App(App(Var(1), Num(nums[i]), false), term, false);
+  }
+  term = Par(Num(0x74786574), Lam("c", null, Dup("c", Var(0), Put(Lam("n", null, term, false))), false), false);
+  return term;
+}
+
+// Converts a λ-encoded term to a string, if possible
+const term_to_text = (term) => {
+  try {
+    if (term[1].val0[1].numb === 0x74786574) {
+      try {
+        term = term[1].val1[1].body[1].body[1].expr[1].body;
+      } catch(e) {
+        term = term[1].val1[1].body[1].body;
+      }
+      var nums = [];
+      while (term[0] !== "Var") {
+        if (term[1].func[1].func[1].index !== 1) {
+          return null;
+        }
+        nums.push(term[1].func[1].argm[1].numb);
+        term = term[1].argm;
+      }
+      if (term[1].index !== 0) {
+        return null;
+      }
+      return new TextDecoder("utf-8").decode(new Uint8Array(new Uint32Array(nums).buffer));
+    } else {
+      return null;
+    }
+  } catch (e) {
+    return null;
+  }
+}
+
+// Converts a number to a λ-encoded nat for repeated application (bounded for-loop)
+const numb_to_term = (numb) => {
+  var term = Var(0);
+  var log2 = Math.floor(Math.log(numb) / Math.log(2));
+  for (var i = 0; i < log2 + 1; ++i) {
+    term = (numb >>> (log2 - i)) & 1 ? App(Var(i + 1), term, false) : term;
+  }
+  term = Put(Lam("x", null, term, false));
+  for (var i = 0; i < log2; ++i) {
+    term = Dup("s" + (log2 - i), Put(Lam("x", null, App(Var(1), App(Var(1), Var(0), false), false), false)), term);
+  }
+  term = Lam("s", null, Dup("s0", Var(0), term), false);
+  return term;
+}
+
+// Converts a number to a λ-encoded nat for repeated application (bounded for-loop)
+const numb_to_tree_term = (numb) => {
+  var term = Put(Var(0));
+  for (var i = 0; i < numb; ++i) {
+    term = Dup("b" + (numb - i - 1), Put(App(App(Var(numb - i), Var(0), false), Var(0), false)), term);
+  }
+  term = Dup("n", Var(1), term);
+  term = Dup("b", Var(1), term);
+  term = Lam("n", null, term, false);
+  term = Lam("b", null, term, false);
+  return term;
+}
+
+// Converts a λ-encoded nat to a number, if possible
+const term_to_numb = (term) => {
+  return null;
+  try {
+    try {
+      term = term[1].body[1].body[1].expr[1].body;
+    } catch(e) {
+      term = term[1].body[1].body;
+    }
+    var count = 0;
+    while (term[0] !== "Var") {
+      if (term[1].func[1].index !== 1) {
+        return null;
+      }
+      count++;
+      term = term[1].argm;
+    }
+    if (term[1].index !== 0) {
+      return null;
+    }
+    return count;
+  } catch (e) {
+    return null;
+  }
+}
 
 module.exports = {
   Var,
