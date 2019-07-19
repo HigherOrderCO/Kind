@@ -13,10 +13,10 @@ function norm(term, defs, mode = "OPTIMAL_LAZY", stats = {}) {
     case "INTERPRETED":
       return fm.core.erase(fm.core.norm(term, defs, true));
     case "JAVASCRIPT":
-      return fm.core.erase(fm.to_js.decompile(fm.to_js.compile(term, defs)));
+      return fm.core.erase(fm.to_js.decompile(fm.to_js.compile(fm.core.erase(term, defs), defs)));
     case "OPTIMAL_STRICT":
     case "OPTIMAL_LAZY":
-      var net = fm.to_net.compile(term, defs);
+      var net = fm.to_net.compile(fm.core.erase(term, defs), defs);
       if (stats && stats.input_net === null) {
         stats.input_net = JSON.parse(JSON.stringify(net));
       }

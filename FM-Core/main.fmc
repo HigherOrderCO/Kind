@@ -1,0 +1,162 @@
+// Congruence of equality
+def cong
+  {~A : Type} =>
+  {~B : Type} =>
+  {~x : A} =>
+  {~y : A} =>
+  {~e : <x == y>} =>
+  {~f : {x : A} -> B} =>
+  rwt e <k @ <(f x) == (f k)>> $(f x)
+
+// Unboxes a value in a computationally erased positions
+def unbox
+: {~A : Type, x : !A} -> A
+= {~A, x} => dup x = x; x
+
+// ::::::::::
+// :: Bool ::
+// ::::::::::
+
+// Simple booleans
+def CBool  : Type  = {~P : Type, true : P, false : P} -> P
+def CTrue  : CBool = {~P, true, false} => true
+def CFalse : CBool = {~P, true, false} => false
+
+// Inductive booleans
+def IBool  : {b : CBool} -> Type = {b} => {~P : {b : CBool} -> Type, true : (P CTrue), false : (P CFalse)} -> (P b)
+def ITrue  : (IBool CTrue)       = {~P, true, false} => true
+def IFalse : (IBool CFalse)      = {~P, true, false} => false
+
+// Booleans
+def Bool  : Type = [x : CBool ~ (IBool x)]
+def True  : Bool = [CTrue ~ ITrue]
+def False : Bool = [CFalse ~ IFalse]
+
+// From simple booleans to booleans
+def Bool.promote
+: {b : CBool} -> Bool
+= {b} => (b ~Bool True False)
+
+// Reflection
+def Bool.reflection
+: {b : Bool} -> <(Bool.promote b) == b> =
+= {b} =>
+  let motive     = {b : CBool} => <(Bool.promote b) == b>
+  let case_true  = $CTrue
+  let case_false = $CFalse
+  (~snd b ~motive case_true case_false)
+
+// Induction on Bool
+def Bool.induction
+: { P : {x : Bool} -> Type
+  , T : (P True)
+  , F : (P False)
+  , b : Bool} ->
+  (P b)
+= {P, T, F, b} =>
+  let motive     = {b : CBool} => (P (Bool.promote b))
+  let case_true  = T
+  let case_false = F
+  let P_prom_b   = (~snd b ~motive T F)
+  let P_b        = (rwt (Bool.reflection b) <x @ (P x)> P_prom_b)
+  P_b
+
+
+// :::::::::
+// :: Nat ::
+// :::::::::
+
+// Simple nats
+def CNat
+: Type
+= { ~P   : Type
+  , succ : !{x : P} -> P} ->
+  ! {zero : P} ->
+    P
+
+def CSucc
+: {n : CNat} -> CNat
+= {n, ~P, succ} =>
+  dup succ = succ
+  dup fold = (n ~P #succ)
+  # {zero} =>
+    (succ (fold zero))
+
+def CZero
+: CNat
+= {~P, succ} =>
+  # {zero} =>
+    zero
+
+// Inductive nats
+def INat
+: {n : CNat} -> Type
+= {n} =>
+  { ~P    : {n : CNat} -> Type
+  , succ  : ! {~n : CNat, i : (P n)} -> (P (CSucc n))} ->
+  ! {zero : (P CZero)} ->
+    (P n)
+
+def ISucc
+: {~n : CNat, i : (INat n)} -> (INat (CSucc n))
+= {~n, i, ~P, succ} =>
+  dup succ = succ
+  dup fold = (i ~P #succ)
+  # {zero} =>
+    (succ ~n (fold zero))
+
+def IZero
+: (INat CZero)
+= {~P, succ} =>
+  # {zero} =>
+    zero
+
+// Nats
+def Nat
+: Type
+= [n : CNat ~ (INat n)]
+
+def Succ
+: {n : Nat} -> Nat
+= {n}
+  [(CSucc (~fst n)) ~ (ISucc ~(~fst n) (~snd n))]
+  
+def Zero
+: Nat
+= [CZero ~ IZero]
+
+// From simple nats to nats
+def Nat.promote
+: {n : CNat} -> !Nat
+= {n : CNat} =>
+  dup fold = (n ~Nat #Succ)
+  # (fold Zero)
+
+// kill me
+def Nat.reflection
+: {n : Nat} -> ! <(Nat.promote n) == #n>
+= {n} =>
+  let moti = {n} => <(Nat.promote n) == #n>
+  let succ = {~n, i} => rwt i <k @ <(Nat.promote (CSucc n)) == (dup n = k # (Succ n))>> $(Nat.promote (CSucc n))
+  dup fold = (~snd n ~moti #succ)
+  # (fold $#CZero)
+
+// Induction on Nat
+def Nat.induction
+: { n  : Nat
+  , ~P : {n : Nat} -> Type
+  , S  : !{~i : Nat, h : (P i)} -> (P (Succ i))
+  , Z  : !(P Zero)} ->
+  ! (P n)
+= {n, ~P, S, Z} =>
+  dup S    = S
+  dup Z    = Z
+  let ubox = (unbox ~Nat)
+  let moti = {n} => (P (ubox (Nat.promote n)))
+  let succ = {~n, i} => (S ~(ubox (Nat.promote n)) i)
+  dup fold = (~snd n ~moti #succ)
+  # let prom_n_eq_box_n = (unbox ~<(Nat.promote n) == #n> (Nat.reflection n))
+    rwt prom_n_eq_box_n <x @ (P (ubox x))> (fold Z)
+
+def main
+  Nat.induction

@@ -347,7 +347,7 @@ const parse = (code) => {
     // Equality
     else if (match("<")) {
       var val0 = parse_term(ctx);
-      var skip = parse_exact("=");
+      var skip = parse_exact("==");
       var val1 = parse_term(ctx);
       var skip = parse_exact(">");
       return Eql(val0, val1);
@@ -589,7 +589,7 @@ const show = config => {
       case "Eql":
         var val0 = show(args.val0, nams);
         var val1 = show(args.val1, nams);
-        return "<" + val0 + " = " + val1 + ">";
+        return "<" + val0 + " == " + val1 + ">";
       case "Rfl":
         var expr = show(args.expr, nams);
         return "$" + expr;
@@ -917,7 +917,7 @@ const uses = ([ctor, term], depth = 0) => {
     case "Ite": return uses(term.cond, depth) + uses(term.pair, depth);
     case "Cpy": return uses(term.numb, depth) + uses(term.body, depth + 1);
     case "Sig": return 0;
-    case "Par": return uses(term.val0, depth) + uses(term.val1, depth);
+    case "Par": return uses(term.val0, depth) + (term.eras ? 0 : uses(term.val1, depth));
     case "Fst": return uses(term.pair, depth);
     case "Snd": return uses(term.pair, depth);
     case "Prj": return uses(term.pair, depth) + uses(term.body, depth + 2);
@@ -980,7 +980,9 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
       break;
     case "App":
       check(term.func, defs, ctx);
-      check(term.argm, defs, ctx);
+      if (!term.eras) {
+        check(term.argm, defs, ctx);
+      }
       break;
     case "Box":
       break;
@@ -1011,7 +1013,9 @@ const check = ([ctor, term], defs = {}, ctx = []) => {
       break;
     case "Par":
       check(term.val0, defs, ctx);
-      check(term.val1, defs, ctx);
+      if (!term.eras) {
+        check(term.val1, defs, ctx);
+      }
       break;
     case "Fst":
       check(term.pair, defs, ctx);
@@ -1069,7 +1073,7 @@ const norm = (term, defs = {}, whnf = false) => {
       return func[1].body(argm);
     // ((dup x = a; b) c) ~> dup x = a; (b c)
     } else if (func[0] === "Dup") {
-      return Dup(func[1].name, func[1].expr, x => App(func[1].body(x), argm, eras, show), func[1].show);
+      return Dup(func[1].name, func[1].expr, x => apply(func[1].body(x), argm, eras, show), func[1].show);
     // (|a b) ~> ⊥
     } else if (func[0] === "Put") {
       throw "[RUNTIME-ERROR]\nCan't apply a boxed value.";
@@ -1083,7 +1087,7 @@ const norm = (term, defs = {}, whnf = false) => {
       return body(expr[1].expr);
     // dup x = (dup y = a; b); c ~> dup y = a; dup x = b; c
     } else if (expr[0] === "Dup") {
-      return Dup(expr[1].name, expr[1].expr, x => Dup(name, expr[1].body(x), x => body(x), show), expr[1].show);
+      return Dup(expr[1].name, expr[1].expr, x => duplicate(name, expr[1].body(x), x => body(x), show), expr[1].show);
     // dup x = {y} b; c ~> ⊥
     } else if (expr[0] === "Lam") {
       throw "[RUNTIME-ERROR]\nCan't duplicate a lambda.";
@@ -1233,35 +1237,67 @@ const norm = (term, defs = {}, whnf = false) => {
   return quote(unquote(term, []), 0);
 }
 
-const erase = (term) => {
+const erase = (term, defs) => {
   var [ctor, term] = term;
   switch (ctor) {
     case "Var": return Var(term.index, term.show);
     case "Typ": return Typ(term.show);
-    case "All": return All(term.name, erase(term.bind), erase(term.body), term.eras, term.show);
-    case "Lam": return term.eras ? erase(subst(term.body, Num(0), 0)) : Lam(term.name, null, erase(term.body), term.eras, term.show);
-    case "App": return term.eras ? erase(term.func) : App(erase(term.func), erase(term.argm), term.eras, term.show);
-    case "Box": return Box(erase(term.expr), term.show);
-    case "Put": return Put(erase(term.expr), term.show);
-    case "Dup": return Dup(term.name, erase(term.expr), erase(term.body), term.show);
+    case "All": return All(term.name, erase(term.bind, defs), erase(term.body, defs), term.eras, term.show);
+    case "Lam": return term.eras ? erase(subst(term.body, Num(0), 0), defs) : Lam(term.name, null, erase(term.body, defs), term.eras, term.show);
+    case "App": return term.eras ? erase(term.func, defs) : App(erase(term.func, defs), erase(term.argm, defs), term.eras, term.show);
+    case "Box": return Box(erase(term.expr, defs), term.show);
+    case "Put": return Put(erase(term.expr, defs), term.show);
+    case "Dup": return Dup(term.name, erase(term.expr, defs), erase(term.body, defs), term.show);
     case "U32": return U32(term.show);
     case "Num": return Num(term.numb, term.show);
-    case "Op1": return Op1(term.func, erase(term.num0), erase(term.num1), term.show);
-    case "Op2": return Op2(term.func, erase(term.num0), erase(term.num1), term.show);
-    case "Ite": return Ite(erase(term.cond), erase(term.pair), term.show);
-    case "Cpy": return Cpy(term.name, erase(term.numb), erase(term.body), term.show);
-    case "Sig": return Sig(term.name, erase(term.typ0), erase(term.typ1), term.eras, term.show);
-    case "Par": return term.eras ? erase(term.val0) : Par(erase(term.val0), erase(term.val1), term.eras, term.show);
-    case "Fst": return term.eras ? erase(term.pair) : Fst(erase(term.pair), term.eras, term.show);
-    case "Snd": return term.eras ? erase(term.pair) : Snd(erase(term.pair), term.eras, term.show);
-    case "Prj": return term.eras ? subst(subst(term.body, Num(0), 0), erase(term.pair), 0) : Prj(term.nam0, term.nam1, erase(term.pair), erase(term.body), term.eras, term.show);
-    case "Eql": return Eql(erase(term.val0), erase(term.val1), term.show);
-    case "Rfl": return erase(term.expr);
-    case "Sym": return erase(term.prof);
-    case "Rwt": return erase(term.expr);
-    case "Cst": return erase(term.val1);
-    case "Ann": return Ann(erase(term.type), erase(term.expr), term.show);
-    case "Ref": return Ref(term.name, term.show);
+    case "Op1": return Op1(term.func, erase(term.num0, defs), erase(term.num1, defs), term.show);
+    case "Op2": return Op2(term.func, erase(term.num0, defs), erase(term.num1, defs), term.show);
+    case "Ite": return Ite(erase(term.cond, defs), erase(term.pair, defs), term.show);
+    case "Cpy": return Cpy(term.name, erase(term.numb, defs), erase(term.body, defs), term.show);
+    case "Sig": return Sig(term.name, erase(term.typ0, defs), erase(term.typ1, defs), term.eras, term.show);
+    case "Par": return term.eras ? erase(term.val0, defs) : Par(erase(term.val0, defs), erase(term.val1, defs), term.eras, term.show);
+    case "Fst": return term.eras ? erase(term.pair, defs) : Fst(erase(term.pair, defs), term.eras, term.show);
+    case "Snd": return term.eras ? erase(term.pair, defs) : Snd(erase(term.pair, defs), term.eras, term.show);
+    case "Prj": return term.eras ? subst(subst(term.body, Num(0), 0), erase(term.pair, defs), 0) : Prj(term.nam0, term.nam1, erase(term.pair, defs), erase(term.body, defs), term.eras, term.show);
+    case "Eql": return Eql(erase(term.val0, defs), erase(term.val1, defs), term.show);
+    case "Rfl": return erase(term.expr, defs);
+    case "Sym": return erase(term.prof, defs);
+    case "Rwt": return erase(term.expr, defs);
+    case "Cst": return erase(term.val1, defs);
+    case "Ann": return erase(term.expr, defs);
+    case "Ref": return erase(defs[term.name], defs);
+  }
+}
+
+const flatten = (term, defs) => {
+  var [ctor, term] = term;
+  switch (ctor) {
+    case "Var": return Var(term.index, term.show);
+    case "Typ": return Typ(term.show);
+    case "All": return All(term.name, flatten(term.bind, defs), flatten(term.body, defs), term.eras, term.show);
+    case "Lam": return Lam(term.name, term.bind && flatten(term.bind, defs), flatten(term.body, defs), term.eras, term.show);
+    case "App": return App(flatten(term.func, defs), flatten(term.argm, defs), term.eras, term.show);
+    case "Box": return Box(flatten(term.expr, defs), term.show);
+    case "Put": return flatten(term.expr, defs);
+    case "Dup": return flatten(subst(term.body, term.expr, 0), defs);
+    case "U32": return U32(term.show);
+    case "Num": return Num(term.numb, term.show);
+    case "Op1": return Op1(term.func, flatten(term.num0, defs), flatten(term.num1, defs), term.show);
+    case "Op2": return Op2(term.func, flatten(term.num0, defs), flatten(term.num1, defs), term.show);
+    case "Ite": return Ite(flatten(term.cond, defs), flatten(term.pair, defs), term.show);
+    case "Cpy": return Cpy(term.name, flatten(term.numb, defs), flatten(term.body, defs), term.show);
+    case "Sig": return Sig(term.name, flatten(term.typ0, defs), flatten(term.typ1, defs), term.eras, term.show);
+    case "Par": return Par(flatten(term.val0, defs), flatten(term.val1, defs), term.eras, term.show);
+    case "Fst": return Fst(flatten(term.pair, defs), term.eras, term.show);
+    case "Snd": return Snd(flatten(term.pair, defs), term.eras, term.show);
+    case "Prj": return Prj(term.nam0, term.nam1, flatten(term.pair, defs), flatten(term.body, defs), term.eras, term.show);
+    case "Eql": return Eql(flatten(term.val0, defs), flatten(term.val1, defs), term.show);
+    case "Rfl": return Rfl(flatten(term.expr, defs));
+    case "Sym": return Sym(flatten(term.prof, defs));
+    case "Rwt": return Rwt(flatten(term.prof, defs), term.name, flatten(term.expr, defs), term.show);
+    case "Cst": return Cst(flatten(term.prof, defs), flaten(term.val0, defs), flatten(term.val1, defs));
+    case "Ann": return Ann(flatten(term.type, defs), flatten(term.expr, defs), term.show);
+    case "Ref": return flatten(defs[term.name], defs);
   }
 }
 
@@ -1301,314 +1337,6 @@ const equal = ([a_ctor, a_term], [b_ctor, b_term]) => {
     default: return false;
   }
 }
-
-// :::::::::::::::::::
-// :: Type Checking ::
-// :::::::::::::::::::
-
-const typecheck = (() => {
-
-  const PADR = (len, chr, str) => {
-    while (str.length < len) {
-      str += chr;
-    }
-    return str;
-  };
-
-  const CODE = (str)  => {
-    return "\x1b[2m" + str + "\x1b[0m";
-  };
-
-  const ctx_new = null;
-
-  const ctx_ext = (name, type, ctx) => {
-    return {name, type, rest: ctx};
-  };
-
-  const ctx_get = (i, ctx) => {
-    for (var k = 0; k < i; ++k) {
-      ctx = ctx.rest;
-    }
-    return [ctx.name, shift(ctx.type, i + 1, 0)];
-  };
-
-  const ctx_str = (ctx) => {
-    var txt = [];
-    var idx = 0;
-    var max_len = 0;
-    for (var c = ctx; c !== null; c = c.rest) {
-      max_len = Math.max(c.name.length, max_len);
-    }
-    for (var c = ctx; c !== null; c = c.rest) {
-      var name = c.name;
-      var type = c.type;
-      txt.push("- " + PADR(max_len, " ", c.name) + " : " + CODE(show()(type, ctx_names(c.rest))));
-    }
-    return txt.reverse().join("\n");
-  };
-
-  const ctx_names = (ctx) => {
-    var names = [];
-    while (ctx !== null) {
-      names.push(ctx.name);
-      ctx = ctx.rest;
-    }
-    return names.reverse();
-  };
-
-  const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
-    const TERM = (term) => {
-      return CODE(show()(term, ctx_names(ctx)));
-    };
-
-    const ERROR = (str)  => {
-      throw "[ERROR]\n" + str
-        + "\n- When checking " + TERM(term)
-        + (inside ? "\n- On expression " + CODE(show()(inside[0], ctx_names(inside[1]))) : "")
-        //+ (inside ? "\n- On expression " + JSON.stringify(inside[0]) + " | " + JSON.stringify(ctx_names(inside[1])) : "")
-        + (ctx !== null ? "\n- With the following context:\n" + ctx_str(ctx) : "");
-    };
-
-    const MATCH = (a, b) => {
-      if (!equal(erase(norm(a, defs)), erase(norm(b, defs)))) {
-        throw ERROR("Type mismatch."
-          + "\n- Found type... " + TERM(erase(norm(a, defs)))
-          + "\n- Instead of... " + TERM(erase(norm(b, defs))));
-      }
-    };
-
-    var expect = expect ? norm(expect, defs) : null;
-    var type;
-    switch (term[0]) {
-      case "Var":
-        type = ctx_get(term[1].index, ctx)[1];
-        break;
-      case "All":
-        if (expect && expect[0] !== "Typ") {
-          ERROR("The annotated type of a forall (" + TERM(All("x", Ref("A"), Ref("B"), false)) +") isn't " + TERM(Typ()) + ".");
-        }
-        var bind_t = typecheck(term[1].bind, null, defs, ctx, [term, ctx]);
-        var ex_ctx = ctx_ext(term[1].name, term[1].bind, ctx);
-        var body_t = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
-        MATCH(bind_t, Typ());
-        MATCH(body_t, Typ());
-        type = Typ();
-        break;
-      case "Typ":
-        type = Typ();
-        break;
-      case "Lam":
-        var bind_v = expect && expect[0] === "All" ? expect[1].bind : term[1].bind;
-        if (bind_v === null && expect === null) {
-          ERROR("Can't infer non-annotated lambda.");
-        }
-        if (bind_v === null && expect !== null) {
-          ERROR("The annotated type of a lambda (" + TERM(Lam("x",null,Ref("f"),false)) + ") isn't forall (" + TERM(All("x", Ref("A"), Ref("B"), false)) + ").");
-        }
-        var ex_ctx = ctx_ext(term[1].name, bind_v, ctx);
-        var body_t = typecheck(term[1].body, expect && expect[0] === "All" ? expect[1].body : null, defs, ex_ctx, [term, ctx]);
-        var term_t = All(term[1].name, bind_v, body_t, term[1].eras);
-        if (term_t[1].eras !== term[1].eras) {
-          ERROR("Mismatched erasure.");
-        }
-        typecheck(term_t, Typ(), defs, ctx, [term, ctx]);
-        type = term_t;
-        break;
-      case "App":
-        var func_t = norm(typecheck(term[1].func, null, defs, ctx, [term, ctx]), defs);
-        if (func_t[0] !== "All") {
-          ERROR("Attempted to apply a value that isn't a function.");
-        }
-        typecheck(term[1].argm, func_t[1].bind, defs, ctx, [term, ctx]);
-        if (func_t[1].eras !== term[1].eras) {
-          ERROR("Erasure doesn't match.");
-        }
-        type = subst(func_t[1].body, Ann(func_t[1].bind, term[1].argm), 0);
-        break;
-      case "Box":
-        if (expect !== null && expect[0] !== "Typ") {
-          ERROR("The annotated type of a box (" + TERM(Box(Ref("A"))) + ") isn't " + TERM(Typ()) + ".");
-        }
-        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs);
-        MATCH(expr_t, Typ());
-        type = Typ();
-        break;
-      case "Put":
-        if (expect !== null && expect[0] !== "Box") {
-          ERROR("The annotated type of a put (" + TERM(Put(Ref("x"))) + ") isn't a box (" + TERM(Box(Ref("A"))) + ").");
-        }
-        var expr_t = expect && expect[0] === "Box" ? expect[1].expr : null;
-        var term_t = typecheck(term[1].expr, expr_t, defs, ctx, [term, ctx]);
-        type = Box(term_t);
-        break;
-      case "Dup":
-        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs);
-        if (expr_t[0] !== "Box") {
-          ERROR("Unboxed duplication.");
-        }
-        var ex_ctx = ctx_ext(term[1].name, expr_t[1].expr, ctx);
-        var body_t = typecheck(term[1].body, shift(expect, 1, 0), defs, ex_ctx, [term, ctx]);
-        type = subst(body_t, Dup(term[1].name, term[1].expr, Var(0)), 0);
-        break;
-      case "U32":
-        type = Typ();
-        break;
-      case "Num":
-        type = U32();
-        break;
-      case "Op1":
-      case "Op2":
-        if (expect !== null && expect[0] !== "Box") {
-          ERROR("The annotated type of a numeric operation (" + TERM(Op2(term[1].func, Ref("x"), Ref("y"))) + ") isn't " + TERM(U32()) + ".");
-        }
-        typecheck(term[1].num0, U32(), defs, ctx, [term, ctx]);
-        typecheck(term[1].num1, U32(), defs, ctx, [term, ctx]);
-        type = U32();
-        break;
-      case "Ite":
-        var cond_t = typecheck(term[1].cond, null, defs, ctx, [term, ctx]);
-        if (cond_t[0] !== "U32") {
-          ERROR("Attempted to use if on a non-numeric value.");
-        }
-        var pair_t = expect ? Sig("x", expect, shift(expect, 1, 0), false) : null;
-        var pair_t = typecheck(term[1].pair, pair_t, defs, ctx, [term, ctx]);
-        if (pair_t[0] !== "Sig") {
-          ERROR("The body of an if must be a pair.");
-        }
-        var typ0_v = pair_t[1].typ0;
-        var typ1_v = subst(pair_t[1].typ1, Typ(), 0);
-        if (!equal(erase(norm(typ0_v, defs)), erase(norm(typ1_v, defs)))) {
-          ERROR("Both branches of if must have the same type.");
-        }
-        type = expect || typ0_v;
-        break;
-      case "Cpy":
-        var numb_t = typecheck(term[1].numb, null, defs, ctx, [term, ctx]);
-        if (numb_t[0] !== "U32") {
-          ERROR("Attempted to use cpy on a non-numeric value.");
-        }
-        var ex_ctx = ctx_ext(term[1].name, U32(), ctx);
-        type = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
-        break;
-      case "Sig":
-        if (expect && expect[0] !== "Typ") {
-          ERROR("The annotated type of a sigma (" + TERM(Sig("x", Ref("A"), Ref("B"))) + ") isn't " + TERM(Typ()) + ".");
-        }
-        var typ0_t = typecheck(term[1].typ0, null, defs, ctx, [term, ctx]);
-        var ex_ctx = ctx_ext(term[1].name, term[1].typ0, ctx);
-        var typ1_t = typecheck(term[1].typ1, null, defs, ex_ctx, [term, ctx]);
-        MATCH(typ0_t, Typ());
-        MATCH(typ1_t, Typ());
-        type = Typ();
-        break;
-      case "Par":
-        if (expect && expect[0] !== "Sig") {
-          ERROR("Annotated type of a pair (" + TERM(Pair(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".");
-        }
-        if (expect && expect[1].eras !== term[1].eras) {
-          ERROR("Mismatched erasure.");
-        }
-        var val0_t = typecheck(term[1].val0, expect && expect[1].typ0, defs, ctx, [term, ctx]);
-        var val1_t = typecheck(term[1].val1, expect && subst(expect[1].typ1, term[1].val0, 0), defs, ctx, [term, ctx]);
-        if (term[1].eras && !equal(erase(norm(term[1].val0, defs)), erase(norm(term[1].val1, defs)))) {
-          ERROR("Dependent interesction values must have same erasure."
-            + "\n- Erasure 0 is " + TERM(erase(norm(term[1].val0, defs)))
-            + "\n- Erasure 1 is " + TERM(erase(norm(term[1].val1, defs))));
-        }
-        type = expect || Sig("x", val0_t, val1_t, term[1].eras);
-        break;
-      case "Fst":
-        var pair_t = typecheck(term[1].pair, null, defs, ctx, [term, ctx]);
-        if (pair_t[0] !== "Sig") {
-          ERROR("Attempted to extract the first element of a term that isn't a pair.");
-        }
-        if (term[1].eras !== pair_t[1].eras) {
-          ERROR("Mismatched erasure.");
-        }
-        type = pair_t[1].typ0;
-        break;
-      case "Snd":
-        var pair_t = typecheck(term[1].pair, null, defs, ctx, [term, ctx]);
-        if (pair_t[0] !== "Sig") {
-          ERROR("Attempted to extract the second element of a term that isn't a pair.");
-        }
-        if (term[1].eras !== pair_t[1].eras) {
-          ERROR("Mismatched erasure.");
-        }
-        type = subst(pair_t[1].typ1, Fst(term[1].pair, term[1].eras), 0);
-        break;
-      case "Prj":
-        var pair_t = typecheck(term[1].pair, null, defs, ctx, [term, ctx]);
-        if (pair_t[0] !== "Sig") {
-          ERROR("Attempted to project the elements of a term that isn't a pair.");
-        }
-        if (term[1].eras !== pair_t[1].eras) {
-          ERROR("Mismatched erasure.");
-        }
-        var ex_ctx = ctx_ext(term[1].nam0, pair_t[1].typ0, ctx);
-        var ex_ctx = ctx_ext(term[1].nam1, pair_t[1].typ1, ex_ctx);
-        type = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
-        type = subst(type, Snd(shift(term[1].pair, 1, 0), term[1].eras), 0);
-        type = subst(type, Fst(term[1].pair, term[1].eras), 0);
-        break;
-      case "Eql":
-        type = Typ();
-        break;
-      case "Rfl":
-        type = Eql(term[1].expr, term[1].expr);
-        break;
-      case "Sym":
-        var prof_t = typecheck(term[1].prof, null, defs, ctx, [term, ctx]); 
-        if (prof_t[0] !== "Eql") {
-          ERROR("Attempted to use sym with an invalid equality proof.");
-        }
-        type = Eql(prof_t[1].val1, prof_t[1].val0);
-        break;
-      case "Rwt":
-        var prof_t = typecheck(term[1].prof, null, defs, ctx, [term, ctx]);
-        if (prof_t[0] !== "Eql") {
-          ERROR("Attempted to use rwt with an invalid equality proof.");
-        }
-        var expr_t0 = subst(term[1].type, prof_t[1].val0, 0);
-        var expr_t1 = typecheck(term[1].expr, null, defs, ctx, [term, ctx]);
-        MATCH(expr_t0, expr_t1);
-        type = subst(term[1].type, prof_t[1].val1, 0);
-        break;
-      case "Cst":
-        var prof_t = typecheck(term[1].prof, null, defs, ctx, [term, ctx]);
-        if (prof_t[0] !== "Eql") {
-          ERROR("Attempted to use rwt with an invalid equality proof.");
-        }
-        if (!equal(erase(norm(term[1].val0, defs)), erase(norm(prof_t[1].val0, defs)))) {
-          ERROR("Cast failed because " + TERM(term[1].val0) + " != " + TERM(prof_t[1].val0));
-        }
-        if (!equal(erase(norm(term[1].val0, defs)), erase(norm(prof_t[1].val0, defs)))) {
-          ERROR("Cast failed because " + TERM(term[1].val1) + " != " + TERM(prof_t[1].val1));
-        }
-        type = typecheck(term[1].val0, expect, defs, ctx, [term, ctx]); 
-        break;
-      case "Ann":
-        typecheck(term[1].expr, term[1].type, defs, ctx, [term, ctx]);
-        type = term[1].type;
-        break;
-      case "Ref":
-        if (!defs[term[1].name]) {
-          ERROR("Undefined reference.");
-        } else {
-          type = typecheck(defs[term[1].name], null, defs, ctx, [term, ctx]);
-        }
-        break;
-      default:
-        throw "TODO: type checker for " + term[0] + ".";
-    }
-    if (expect) {
-      MATCH(type, expect);
-    }
-    return norm(type, defs);
-  };
-
-  return typecheck;
-})();
 
 // :::::::::::::::::::
 // :: Syntax Sugars ::
@@ -1716,6 +1444,318 @@ const term_to_numb = (term) => {
     return null;
   }
 }
+
+const typecheck = (() => {
+
+  const PADR = (len, chr, str) => {
+    while (str.length < len) {
+      str += chr;
+    }
+    return str;
+  };
+
+  const CODE = (str)  => {
+    return "\x1b[2m" + str + "\x1b[0m";
+  };
+
+  const DENON = (a, defs) => {
+    return erase(norm(flatten(a, defs), defs), defs);
+  };
+
+  const EQUAL = (a, b, defs) => {
+    return equal(DENON(a, defs), DENON(b, defs));
+  };
+
+  const ctx_new = null;
+
+  const ctx_ext = (name, type, ctx) => {
+    return {name, type, rest: ctx};
+  };
+
+  const ctx_get = (i, ctx) => {
+    for (var k = 0; k < i; ++k) {
+      ctx = ctx.rest;
+    }
+    return [ctx.name, shift(ctx.type, i + 1, 0)];
+  };
+
+  const ctx_str = (ctx, defs) => {
+    var txt = [];
+    var idx = 0;
+    var max_len = 0;
+    for (var c = ctx; c !== null; c = c.rest) {
+      max_len = Math.max(c.name.length, max_len);
+    }
+    for (var c = ctx; c !== null; c = c.rest) {
+      var name = c.name;
+      var type = c.type;
+      txt.push("- " + PADR(max_len, " ", c.name) + " : " + CODE(show()(type, ctx_names(c.rest))));
+    }
+    return txt.reverse().join("\n");
+  };
+
+  const ctx_names = (ctx) => {
+    var names = [];
+    while (ctx !== null) {
+      names.push(ctx.name);
+      ctx = ctx.rest;
+    }
+    return names.reverse();
+  };
+
+  const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
+    const TERM = (term) => {
+      return CODE(show()(term, ctx_names(ctx)));
+    };
+
+    const ERROR = (str)  => {
+      throw "[ERROR]\n" + str
+        + "\n- When checking " + TERM(term)
+        + (inside ? "\n- On expression " + CODE(show()(inside[0], ctx_names(inside[1]))) : "")
+        //+ (inside ? "\n- On expression " + JSON.stringify(inside[0]) + " | " + JSON.stringify(ctx_names(inside[1])) : "")
+        + (ctx !== null ? "\n- With the following context:\n" + ctx_str(ctx, defs) : "");
+    };
+
+    const MATCH = (a, b) => {
+      if (!EQUAL(a, b, defs, defs)) {
+        throw ERROR("Type mismatch."
+          + "\n- Found type... " + TERM(DENON(a, defs))
+          + "\n- Instead of... " + TERM(DENON(b, defs)));
+      }
+    };
+
+    var expect = expect ? norm(expect, defs) : null;
+    var type;
+    switch (term[0]) {
+      case "Var":
+        type = ctx_get(term[1].index, ctx)[1];
+        break;
+      case "All":
+        if (expect && expect[0] !== "Typ") {
+          ERROR("The annotated type of a forall (" + TERM(All("x", Ref("A"), Ref("B"), false)) +") isn't " + TERM(Typ()) + ".");
+        }
+        var bind_t = typecheck(term[1].bind, null, defs, ctx, [term, ctx]);
+        var ex_ctx = ctx_ext(term[1].name, term[1].bind, ctx);
+        var body_t = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
+        MATCH(bind_t, Typ());
+        MATCH(body_t, Typ());
+        type = Typ();
+        break;
+      case "Typ":
+        type = Typ();
+        break;
+      case "Lam":
+        var bind_v = expect && expect[0] === "All" ? expect[1].bind : term[1].bind;
+        if (bind_v === null && expect === null) {
+          ERROR("Can't infer non-annotated lambda.");
+        }
+        if (bind_v === null && expect !== null) {
+          ERROR("The annotated type of a lambda (" + TERM(Lam("x",null,Ref("f"),false)) + ") isn't forall (" + TERM(All("x", Ref("A"), Ref("B"), false)) + ").");
+        }
+        var ex_ctx = ctx_ext(term[1].name, bind_v, ctx);
+        var body_t = typecheck(term[1].body, expect && expect[0] === "All" ? expect[1].body : null, defs, ex_ctx, [term, ctx]);
+        var term_t = All(term[1].name, bind_v, body_t, term[1].eras);
+        if (term_t[1].eras !== term[1].eras) {
+          ERROR("Mismatched erasure.");
+        }
+        typecheck(term_t, Typ(), defs, ctx, [term, ctx]);
+        type = term_t;
+        break;
+      case "App":
+        var func_t = norm(typecheck(term[1].func, null, defs, ctx, [term, ctx]), defs);
+        if (func_t[0] !== "All") {
+          ERROR("Attempted to apply a value that isn't a function.");
+        }
+        typecheck(term[1].argm, func_t[1].bind, defs, ctx, [term, ctx]);
+        if (func_t[1].eras !== term[1].eras) {
+          ERROR("Erasure doesn't match.");
+        }
+        type = subst(func_t[1].body, Ann(func_t[1].bind, term[1].argm), 0);
+        break;
+      case "Box":
+        if (expect !== null && expect[0] !== "Typ") {
+          ERROR("The annotated type of a box (" + TERM(Box(Ref("A"))) + ") isn't " + TERM(Typ()) + ".");
+        }
+        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs);
+        MATCH(expr_t, Typ());
+        type = Typ();
+        break;
+      case "Put":
+        if (expect !== null && expect[0] !== "Box") {
+          ERROR("The annotated type of a put (" + TERM(Put(Ref("x"))) + ") isn't a box (" + TERM(Box(Ref("A"))) + ").");
+        }
+        var expr_t = expect && expect[0] === "Box" ? expect[1].expr : null;
+        var term_t = typecheck(term[1].expr, expr_t, defs, ctx, [term, ctx]);
+        type = Box(term_t);
+        break;
+      case "Dup":
+        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs);
+        if (expr_t[0] !== "Box") {
+          ERROR("Unboxed duplication.");
+        }
+        var ex_ctx = ctx_ext(term[1].name, expr_t[1].expr, ctx);
+        var body_t = typecheck(term[1].body, expect && shift(expect, 1, 0), defs, ex_ctx, [term, ctx]);
+        type = subst(body_t, Dup(term[1].name, term[1].expr, Var(0)), 0);
+        break;
+      case "U32":
+        type = Typ();
+        break;
+      case "Num":
+        type = U32();
+        break;
+      case "Op1":
+      case "Op2":
+        if (expect !== null && expect[0] !== "Box") {
+          ERROR("The annotated type of a numeric operation (" + TERM(Op2(term[1].func, Ref("x"), Ref("y"))) + ") isn't " + TERM(U32()) + ".");
+        }
+        typecheck(term[1].num0, U32(), defs, ctx, [term, ctx]);
+        typecheck(term[1].num1, U32(), defs, ctx, [term, ctx]);
+        type = U32();
+        break;
+      case "Ite":
+        var cond_t = typecheck(term[1].cond, null, defs, ctx, [term, ctx]);
+        if (cond_t[0] !== "U32") {
+          ERROR("Attempted to use if on a non-numeric value.");
+        }
+        var pair_t = expect ? Sig("x", expect, shift(expect, 1, 0), false) : null;
+        var pair_t = typecheck(term[1].pair, pair_t, defs, ctx, [term, ctx]);
+        if (pair_t[0] !== "Sig") {
+          ERROR("The body of an if must be a pair.");
+        }
+        var typ0_v = pair_t[1].typ0;
+        var typ1_v = subst(pair_t[1].typ1, Typ(), 0);
+        if (!EQUAL(typ0_v, typ1_v, defs)) {
+          ERROR("Both branches of if must have the same type.");
+        }
+        type = expect || typ0_v;
+        break;
+      case "Cpy":
+        var numb_t = typecheck(term[1].numb, null, defs, ctx, [term, ctx]);
+        if (numb_t[0] !== "U32") {
+          ERROR("Attempted to use cpy on a non-numeric value.");
+        }
+        var ex_ctx = ctx_ext(term[1].name, U32(), ctx);
+        type = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
+        break;
+      case "Sig":
+        if (expect && expect[0] !== "Typ") {
+          ERROR("The annotated type of a sigma (" + TERM(Sig("x", Ref("A"), Ref("B"))) + ") isn't " + TERM(Typ()) + ".");
+        }
+        var typ0_t = typecheck(term[1].typ0, null, defs, ctx, [term, ctx]);
+        var ex_ctx = ctx_ext(term[1].name, term[1].typ0, ctx);
+        var typ1_t = typecheck(term[1].typ1, null, defs, ex_ctx, [term, ctx]);
+        MATCH(typ0_t, Typ());
+        MATCH(typ1_t, Typ());
+        type = Typ();
+        break;
+      case "Par":
+        if (expect && expect[0] !== "Sig") {
+          ERROR("Annotated type of a pair (" + TERM(Pair(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".");
+        }
+        if (expect && expect[1].eras !== term[1].eras) {
+          ERROR("Mismatched erasure.");
+        }
+        var val0_t = typecheck(term[1].val0, expect && expect[1].typ0, defs, ctx, [term, ctx]);
+        var val1_t = typecheck(term[1].val1, expect && subst(expect[1].typ1, term[1].val0, 0), defs, ctx, [term, ctx]);
+        if (term[1].eras && !EQUAL(term[1].val0, term[1].val1, defs)) {
+          ERROR("Dependent interesction values must have same erasure."
+            + "\n- Erasure 0 is " + TERM(DENON(term[1].val0, defs))
+            + "\n- Erasure 1 is " + TERM(DENON(term[1].val1, defs)));
+        }
+        type = expect || Sig("x", val0_t, val1_t, term[1].eras);
+        break;
+      case "Fst":
+        var pair_t = typecheck(term[1].pair, null, defs, ctx, [term, ctx]);
+        if (pair_t[0] !== "Sig") {
+          ERROR("Attempted to extract the first element of a term that isn't a pair.");
+        }
+        if (term[1].eras !== pair_t[1].eras) {
+          ERROR("Mismatched erasure.");
+        }
+        type = pair_t[1].typ0;
+        break;
+      case "Snd":
+        var pair_t = typecheck(term[1].pair, null, defs, ctx, [term, ctx]);
+        if (pair_t[0] !== "Sig") {
+          ERROR("Attempted to extract the second element of a term that isn't a pair.");
+        }
+        if (term[1].eras !== pair_t[1].eras) {
+          ERROR("Mismatched erasure.");
+        }
+        type = subst(pair_t[1].typ1, Fst(term[1].pair, term[1].eras), 0);
+        break;
+      case "Prj":
+        var pair_t = typecheck(term[1].pair, null, defs, ctx, [term, ctx]);
+        if (pair_t[0] !== "Sig") {
+          ERROR("Attempted to project the elements of a term that isn't a pair.");
+        }
+        if (term[1].eras !== pair_t[1].eras) {
+          ERROR("Mismatched erasure.");
+        }
+        var ex_ctx = ctx_ext(term[1].nam0, pair_t[1].typ0, ctx);
+        var ex_ctx = ctx_ext(term[1].nam1, pair_t[1].typ1, ex_ctx);
+        type = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
+        type = subst(type, Snd(shift(term[1].pair, 1, 0), term[1].eras), 0);
+        type = subst(type, Fst(term[1].pair, term[1].eras), 0);
+        break;
+      case "Eql":
+        type = Typ();
+        break;
+      case "Rfl":
+        type = Eql(term[1].expr, term[1].expr);
+        break;
+      case "Sym":
+        var prof_t = typecheck(term[1].prof, null, defs, ctx, [term, ctx]); 
+        if (prof_t[0] !== "Eql") {
+          ERROR("Attempted to use sym with an invalid equality proof.");
+        }
+        type = Eql(prof_t[1].val1, prof_t[1].val0);
+        break;
+      case "Rwt":
+        var prof_t = typecheck(term[1].prof, null, defs, ctx, [term, ctx]);
+        if (prof_t[0] !== "Eql") {
+          ERROR("Attempted to use rwt with an invalid equality proof.");
+        }
+        var expr_t0 = subst(term[1].type, prof_t[1].val0, 0);
+        var expr_t1 = typecheck(term[1].expr, null, defs, ctx, [term, ctx]);
+        MATCH(expr_t1, expr_t0);
+        type = subst(term[1].type, prof_t[1].val1, 0);
+        break;
+      case "Cst":
+        var prof_t = typecheck(term[1].prof, null, defs, ctx, [term, ctx]);
+        if (prof_t[0] !== "Eql") {
+          ERROR("Attempted to use rwt with an invalid equality proof.");
+        }
+        if (!EQUAL(term[1].val0, prof_t[1].val0, defs)) {
+          ERROR("Cast failed because " + TERM(term[1].val0) + " != " + TERM(prof_t[1].val0));
+        }
+        if (!EQUAL(term[1].val0, prof_t[1].val0, defs)) {
+          ERROR("Cast failed because " + TERM(term[1].val1) + " != " + TERM(prof_t[1].val1));
+        }
+        type = typecheck(term[1].val0, expect, defs, ctx, [term, ctx]); 
+        break;
+      case "Ann":
+        typecheck(term[1].expr, term[1].type, defs, ctx, [term, ctx]);
+        type = term[1].type;
+        break;
+      case "Ref":
+        if (!defs[term[1].name]) {
+          ERROR("Undefined reference.");
+        } else {
+          type = typecheck(defs[term[1].name], null, defs, ctx, [term, ctx]);
+        }
+        break;
+      default:
+        throw "TODO: type checker for " + term[0] + ".";
+    }
+    if (expect) {
+      MATCH(type, expect);
+    }
+    return norm(type, defs);
+  };
+
+  return typecheck;
+})();
 
 module.exports = {
   Var,
