@@ -598,6 +598,7 @@ const equals = (a, b, defs) => {
 
 // Reduces a term to normal form or head normal form
 const norm = (foo, defs = {}, weak = false, dup = false) => {
+  weak = false;
   const [ctor, term] = foo;
   const cont = !weak ? norm : (x => x);
   const apply = (eras, func, argm) => {
