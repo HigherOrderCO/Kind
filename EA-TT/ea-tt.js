@@ -486,7 +486,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
   }
   return ret;
 }
-
+          
 // Removes computationally irrelevant expressions
 const erase = ([ctor, args]) => {
   const is_eta = (lam) => lam[1].body[0] === "App" && lam[1].body[1].argm[0] === "Var" && lam[1].body[1].argm[1].index === 0 && uses(lam[1].body[1].func, 0) === 0;
@@ -598,7 +598,6 @@ const equals = (a, b, defs) => {
 
 // Reduces a term to normal form or head normal form
 const norm = (foo, defs = {}, weak = false, dup = false) => {
-  weak = false;
   const [ctor, term] = foo;
   const cont = !weak ? norm : (x => x);
   const apply = (eras, func, argm) => {

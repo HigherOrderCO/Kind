@@ -39,7 +39,10 @@ function exec(name, defs, infs, mode = "OPTIMAL_LAZY", bipass = false, stats = {
     name = defs[name][1].name;
   }
   if (defs[name]) {
-    return fm.norm(check(defs[name], defs, bipass), defs, mode, stats);
+    var checked = check(defs[name], defs, bipass);
+    var result = fm.norm(checked, defs, mode, stats);
+    return result;
+
   } else if (infs[name]) {
     var data = infs[name];
     var init = check(data.init, defs, bipass);
