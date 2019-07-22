@@ -9,11 +9,11 @@ var fm = module.exports = {
 function norm(term, defs, mode = "OPTIMAL_LAZY", stats = {}) {
   switch (mode) {
     case "DEBUG":
-      return fm.core.erase(fm.core.norm(term, defs, false), defs);
+      return fm.core.norm(fm.core.erase(term, defs), defs, false);
     case "INTERPRETED":
-      return fm.core.erase(fm.core.norm(term, defs, true), defs);
+      return fm.core.norm(fm.core.erase(term, defs), defs, true);
     case "JAVASCRIPT":
-      return fm.core.erase(fm.to_js.decompile(fm.to_js.compile(fm.core.erase(term, defs), defs)), defs);
+      return fm.to_js.decompile(fm.to_js.compile(fm.core.erase(term, defs), defs));
     case "OPTIMAL_STRICT":
     case "OPTIMAL_LAZY":
       var net = fm.to_net.compile(fm.core.erase(term, defs), defs);

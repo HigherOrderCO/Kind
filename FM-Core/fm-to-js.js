@@ -71,7 +71,7 @@ const compile = (term, defs, vars) => {
       var body = (x,y) => compile(term.body, defs, [y,[x,vars]]);
       return body(pair[0], pair[1]);
     case "Ref":
-      return compile(defs[term.name], defs, vars);
+      return compile(fmc.erase(defs[term.name]), defs, vars);
   }
 };
 

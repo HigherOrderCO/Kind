@@ -392,7 +392,7 @@ const parse = (code) => {
     }
 
     // Projection
-    else if (match(": ")) {
+    else if (match(":")) {
       var type = parse_term(ctx);
       var expr = parse_term(ctx);
       return Ann(type, expr, false);
@@ -455,10 +455,62 @@ const parse = (code) => {
   var defs = {};
   while (idx < code.length) {
     next_char();
-    var skip = parse_exact("def ");
-    var name = parse_string();
-    var term = parse_term([]);
-    defs[name] = term;
+
+    if (match("def ")) {
+      var name = parse_string();
+      var term = parse_term([]);
+      defs[name] = term;
+    } else if (match("data ")) {
+      var adt_pram = [];
+      var adt_indx = [];
+      var adt_ctor = [];
+      var adt_name = parse_string();
+      var adt_ctx = [adt_name];
+      if (match("<")) {
+        while (idx < code.length) {
+          var eras = false;
+          var name = parse_string(); 
+          var skip = parse_exact(":");
+          var type = parse_term(adt_pram.map((([name,type]) => name)));
+          adt_pram.push([name, type, eras]);
+          if (match(">")) break; else parse_exact(",");
+        }
+      }
+      var adt_ctx = adt_ctx.concat(adt_pram.map(([name,type]) => name));
+      if (match("{")) {
+        while (idx < code.length) {
+          //var eras = match("~");
+          var eras = false;
+          var name = parse_string(); 
+          var skip = parse_exact(":");
+          var type = parse_term(adt_ctx.concat(adt_indx.map((([name,type]) => name))));
+          adt_indx.push([name, type, eras]);
+          if (match("}")) break; else parse_exact(",");
+        }
+      }
+      while (match("|")) {
+        var ctor_name = parse_string();
+        var ctor_flds = [];
+        if (match("{")) {
+          while (idx < code.length) {
+            var eras = match("~");
+            var name = parse_string();
+            var skip = parse_exact(":");
+            var type = parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name)));
+            ctor_flds.push([name, type, eras]);
+            if (match("}")) break; else parse_exact(",");
+          }
+        }
+        var ctor_skip = parse_exact(":");
+        var ctor_type = parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name)));
+        adt_ctor.push([ctor_name, ctor_flds, ctor_type]);
+      }
+      var adt = {adt_pram, adt_indx, adt_ctor, adt_name};
+      defs[adt_name] = derive_adt_type(adt);
+      for (var c = 0; c < adt_ctor.length; ++c) {
+        defs[adt_name + "." + adt_ctor[c][0]] = derive_adt_ctor(adt, c);
+      }
+    }
     next_char();
   }
 
@@ -485,7 +537,18 @@ const gen_name = (n) => {
 const show = ([ctor, args], nams = []) => {
   switch (ctor) {
     case "Var":
-      return nams[nams.length - args.index - 1] || "^" + args.index;
+      var name = nams[nams.length - args.index - 1];
+      if (!name) {
+        return "^" + args.index;
+      } else {
+        var suff = "";
+        for (var i = 0; i < args.index - 1; ++i) {
+          if (nams[nams.length - i - 1] === name) {
+            var suff = suff + "'";
+          }
+        }
+        return name + suff;
+      }
     case "Typ":
       return "Type";
     case "All":
@@ -521,7 +584,7 @@ const show = ([ctor, args], nams = []) => {
         } else {
           erase.push(term[1].eras);
           names.push(term[1].name);
-          types.push(term[1].bind ? show(term[1].bind, nams.concat(names)) : null);
+          types.push(term[1].bind ? show(term[1].bind, nams.concat(names.slice(0,-1))) : null);
           term = term[1].body;
         }
       }
@@ -896,6 +959,13 @@ const subst = ([ctor, term], val, depth) => {
       var name = term.name;
       return Ref(name, term.eras);
   }
+}
+
+const subst_many = (term, vals, depth) => {
+  for (var i = 0; i < vals.length; ++i) {
+    term = subst(term, shift(vals[i], vals.length - i - 1, 0), depth + vals.length - i - 1);
+  }
+  return term;
 }
 
 // ::::::::::::::::::::
@@ -1913,6 +1983,143 @@ const term_to_numb = (term) => {
   } catch (e) {
     return null;
   }
+}
+
+// Syntax sugaar for datatypes. They transform a statement like:
+// 
+//   data ADT <p0 : Param0, p1 : Param1...> {i0 : Index0, i1 : Index1}
+//   | ctr0 {ctr_fld0 : Ctr0_Fld0, ctr0_fld1 : Ctr0_Fld1, ...} : Cr0Type 
+//   | ctr1 {ctr_fld0 : Ctr0_Fld0, ctr0_fld1 : Ctr0_Fld1, ...} : Cr0Type 
+//   | ...
+//
+// on its corresponding self-encoded datatype:
+//
+//   def ADT
+//   : {p0 : Param0, p1 : Param1, ..., i0 : Index0, i1 : Index1, ...} -> Type 
+//   = {p0 : Param0, p1 : Param1, ..., i0 : Index0, i1 : Index1, ...} =>
+//     $self
+//     {~P   : {i0 : Index0, i1 : Index1, ..., wit : (ADT Index0 Index1...)} -> Type} ->
+//     {ctr0 : {ctr0_fld0 : Ctr0_Fld0, ctr0_fld1 : Ctr0_Fld1, ...} -> (Ctr0Type[ADT <- P] (ADT.ctr0 Param0 Param1... ctr0_fld0 ctr0_fld1 ...))} ->
+//     {ctr1 : {ctr1_fld0 : Ctr1_Fld0, ctr1_fld1 : Ctr1_Fld1, ...} -> (Ctr0Type[ADT <- P] (ADT.ctr1 Param0 Param1... ctr1_fld1 ctr0_fld1 ...))} ->
+//     ... ->
+//     (P i0 i1... self)
+//  
+//   def ADT.ctr0
+//   = {~p0 : Param0, ~p1 : Param1, ..., ctr0_fld0 : Ctr0_Fld0, ctr1_fld1 : Ctr1_Fld1, ...} =>
+//     : Ctr0Type
+//     @ Ctr0Type
+//       {~P, ctr0, ctr1, ...} => 
+//       (ctr0 ctr0_fld0 ctr0_fld1 ...)
+//
+//   (...)
+//   
+// TODO: clean-up, test, debug, comment, document, etc.
+
+const derive_adt_type = ({adt_pram, adt_indx, adt_ctor, adt_name}) => {
+  return (function adt_arg(p, i) {
+    if (p < adt_pram.length) {
+      return Lam(adt_pram[p][0], adt_pram[p][1], adt_arg(p + 1, i), adt_pram[p][2]);
+    } else if (i < adt_indx.length) {
+      var substs = [Ref(adt_name)];
+      for (var P = 0; P < p; ++P) {
+        substs.push(Var(-1 + i + p - P));
+      }
+      return Lam(adt_indx[i][0], subst_many(adt_indx[i][1], substs, i), adt_arg(p, i + 1), adt_indx[i][2]);
+    } else {
+      return (
+        Ann(Typ(),
+        Slf("self",
+        All("P",
+          (function motive(i) {
+            if (i < adt_indx.length) {
+              var substs = [Ref(adt_name)];
+              for (var P = 0; P < p; ++P) {
+                substs.push(Var(-1 + i + 1 + adt_indx.length + p - P));
+              }
+              return All(adt_indx[i][0], subst_many(adt_indx[i][1], substs, i), motive(i + 1), adt_indx[i][2]);
+            } else {
+              var wit_t = Ref(adt_name);
+              for (var P = 0; P < adt_pram.length; ++P) {
+                wit_t = App(wit_t, Var(-1 + i + 1 + i + adt_pram.length - P), adt_pram[P][2]); 
+              }
+              for (var I = 0; I < i; ++I) {
+                wit_t = App(wit_t, Var(-1 + i - I), adt_indx[I][2]);
+              }
+              return All("x", wit_t, Typ(), false);
+            }
+          })(0),
+        (function ctor(i) {
+          if (i < adt_ctor.length) {
+            return All(adt_ctor[i][0], (function field(j) {
+              var subst_prams = [];
+              for (var P = 0; P < adt_pram.length; ++P) {
+                subst_prams.push(Var(-1 + j + i + 1 + 1 + adt_indx.length + adt_pram.length - P));
+              }
+              if (j < adt_ctor[i][1].length) {
+                var sub = [Ref(adt_name)].concat(subst_prams);
+                var typ = subst_many(adt_ctor[i][1][j][1], sub, j);
+                return All(adt_ctor[i][1][j][0], typ, field(j + 1), adt_ctor[i][1][j][2]);
+              } else {
+                var typ = adt_ctor[i][2];
+                var sub = [Var(-1 + j + i + 1)].concat(subst_prams);
+                var typ = subst_many(adt_ctor[i][2], sub, j);
+                var rem = typ;
+                for (var I = 0; I < adt_indx.length; ++I) {
+                  rem = rem[1].func;
+                }
+                rem[0] = "Var";
+                rem[1] = {index: -1 + i + j + 1};
+                var wit = Ref(adt_name + "." + adt_ctor[i][0]);
+                for (var P = 0; P < adt_pram.length; ++P) {
+                  var wit = App(wit, Var(-1 + j + i + 1 + 1 + adt_indx.length + adt_pram.length - P), true);
+                }
+                for (var F = 0; F < adt_ctor[i][1].length; ++F) {
+                  var wit = App(wit, Var(-1 + j - F), adt_ctor[i][1][F][2]);
+                }
+                return App(typ, wit, false);
+              }
+            })(0),
+            ctor(i + 1),
+            false);
+          } else {
+            var ret = Var(adt_ctor.length + 1 - 1);
+            for (var i = 0; i < adt_indx.length; ++i) {
+              var ret = App(ret, Var(adt_ctor.length + 1 + 1 + adt_indx.length - i - 1), adt_indx[i][2]); 
+            }
+            var ret = App(ret, Var(adt_ctor.length + 1 + 1 - 1), false);
+            return ret;
+          }
+        })(0),
+        true))));
+    }
+  })(0, 0);
+}
+
+const derive_adt_ctor = ({adt_pram, adt_indx, adt_ctor, adt_name}, c) => {
+  return (function arg(p, i, f) {
+    var substs = [Ref(adt_name)];
+    for (var P = 0; P < p; ++P) {
+      substs.push(Var(-1 + f + p - P));
+    }
+    if (p < adt_pram.length) {
+      return Lam(adt_pram[p][0], adt_pram[p][1], arg(p + 1, i, f), true);
+    } else if (f < adt_ctor[c][1].length) {
+      return Lam(adt_ctor[c][1][f][0], subst_many(adt_ctor[c][1][f][1], substs, f), arg(p, i, f + 1), adt_ctor[c][1][f][2]);
+    } else {
+      var type = subst_many(adt_ctor[c][2], substs, f);
+      return Ann(type, New(type, Lam("P", null, (function opt(k) {
+        if (k < adt_ctor.length) {
+          return Lam(adt_ctor[k][0], null, opt(k + 1), false);
+        } else {
+          var sel = Var(-1 + adt_ctor.length - c);
+          for (var F = 0; F < adt_ctor[c][1].length; ++F) {
+            var sel = App(sel, Var(-1 + adt_ctor.length + 1 + adt_ctor[c][1].length - F), adt_ctor[c][1][F][2]);
+          }
+          return sel;
+        }
+      })(0), true)), false);
+    }
+  })(0, adt_indx.length, 0);
 }
 
 module.exports = {
