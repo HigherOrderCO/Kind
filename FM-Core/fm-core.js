@@ -105,8 +105,7 @@ const parse = (code) => {
     }
   }
 
-  function match(string) {
-    next_char();
+  function match_here(string) {
     var sliced = code.slice(idx, idx + string.length);
     if (sliced === string) {
       for (var i = 0; i < string.length; ++i) {
@@ -115,6 +114,11 @@ const parse = (code) => {
       return true;
     }
     return false;
+  }
+
+  function match(string) {
+    next_char();
+    return match_here(string);
   }
 
   function is_sigma(string) {
@@ -149,21 +153,25 @@ const parse = (code) => {
   }
 
   function parse_term(ctx) {
-    // Type
-    if (match("Type")) {
-      return Typ();
+    var parsed;
+
+    // Parenthesis
+    if (match("(")) {
+      var term = parse_term(ctx);
+      var skip = match(")");
+      parsed = term;
+      //while (idx < code.length && !match(")")) {
+        //var eras = match("~");
+        //var argm = parse_term(ctx);
+        //var term = App(term, argm, eras);
+        //next_char();
+      //}
+      //parsed = term;
     }
 
-    // Application
-    else if (match("(")) {
-      var term = parse_term(ctx);
-      while (idx < code.length && !match(")")) {
-        var eras = match("~");
-        var argm = parse_term(ctx);
-        var term = App(term, argm, eras);
-        next_char();
-      }
-      return term;
+    // Type
+    else if (match("Type")) {
+      parsed = Typ();
     }
 
     // Lambdas and Forall
@@ -175,11 +183,7 @@ const parse = (code) => {
         erase.push(match("~"));
         names.push(parse_string());
         types.push(match(":") ? parse_term(ctx.concat(names.slice(0,-1))) : null);
-        if (match("}")) {
-          break;
-        } else {
-          parse_exact(",");
-        }
+        if (match("}")) break; else parse_exact(",");
       }
       var isall = match("->");
       var islam = match("=>");
@@ -194,7 +198,7 @@ const parse = (code) => {
           throw "Parse error: invalid forall on line " + (row+1) + ", col " + col + ".";
         }
       }
-      return term;
+      parsed = term;
     }
 
     // Duplication
@@ -202,19 +206,19 @@ const parse = (code) => {
       var name = parse_string();
       var expr = parse_term(ctx);
       var body = parse_term(ctx.concat([name]));
-      return Dup(name, expr, body);
+      parsed = Dup(name, expr, body);
     }
 
     // Box
     else if (match("!")) {
       var expr = parse_term(ctx);
-      return Box(expr);
+      parsed = Box(expr);
     }
 
     // Put
     else if (match("#")) {
       var expr = parse_term(ctx);
-      return Put(expr);
+      parsed = Put(expr);
     }
 
     // Let
@@ -223,12 +227,12 @@ const parse = (code) => {
       var skip = parse_exact("=");
       var copy = parse_term(ctx);
       var body = parse_term(ctx.concat([name]));
-      return subst(body, copy, 0);
+      parsed = subst(body, copy, 0);
     }
 
     // U32
     else if (match("U32")) {
-      return U32();
+      parsed = U32();
     }
 
     // Operation
@@ -237,7 +241,7 @@ const parse = (code) => {
       var func = parse_string(c => !is_space(c));
       var num1 = parse_term(ctx);
       var skip = parse_exact("|");
-      return Op2(func, num0, num1);
+      parsed = Op2(func, num0, num1);
     }
 
     // String
@@ -249,28 +253,28 @@ const parse = (code) => {
         next();
       }
       next();
-      return text_to_term(text);
+      parsed = text_to_term(text);
     }
 
     // Nat
     //else if (match("^")) {
       //var name = parse_string();
       //var numb = Number(name);
-      //return numb_to_term(numb);
+      //parsed = numb_to_term(numb);
     //}
 
     // PBT
     //else if (match("&")) {
       //var name = parse_string();
       //var numb = Number(name);
-      //return numb_to_tree_term(numb);
+      //parsed = numb_to_tree_term(numb);
     //}
 
     // If-Then-Else
     else if (match("if ")) {
       var cond = parse_term(ctx);
       var pair = parse_term(ctx);
-      return Ite(cond, pair);
+      parsed = Ite(cond, pair);
     }
 
     // Copy
@@ -279,7 +283,7 @@ const parse = (code) => {
       let skip = parse_exact("=");
       var numb = parse_term(ctx);
       var body = parse_term(ctx.concat([name]));
-      return Cpy(name, numb, body);
+      parsed = Cpy(name, numb, body);
     }
 
     // Sigma / Pair
@@ -293,7 +297,7 @@ const parse = (code) => {
         var skip = eras ? null : parse_exact(",");
         var typ1 = parse_term(ctx.concat([name]));
         var skip = parse_exact("]");
-        return Sig(name, typ0, typ1, eras);
+        parsed = Sig(name, typ0, typ1, eras);
       // Pair
       } else {
         var val0 = parse_term(ctx);
@@ -301,7 +305,7 @@ const parse = (code) => {
         var skip = eras ? null : parse_exact(",");
         var val1 = parse_term(ctx);
         var skip = parse_exact("]");
-        return Par(val0, val1, eras);
+        parsed = Par(val0, val1, eras);
       }
     }
 
@@ -310,31 +314,31 @@ const parse = (code) => {
       var val0 = parse_term(ctx);
       var skip = parse_exact("else:");
       var val1 = parse_term(ctx);
-      return Par(val0, val1, false);
+      parsed = Par(val0, val1, false);
     }
 
     // First
     else if (match("fst ")) {
       var pair = parse_term(ctx);
-      return Fst(pair, false);
+      parsed = Fst(pair, false);
     }
 
     // First (erased)
     else if (match("~fst ")) {
       var pair = parse_term(ctx);
-      return Fst(pair, true);
+      parsed = Fst(pair, true);
     }
 
     // Second
     else if (match("snd ")) {
       var pair = parse_term(ctx);
-      return Snd(pair, false);
+      parsed = Snd(pair, false);
     }
 
     // Second (erased)
     else if (match("~snd ")) {
       var pair = parse_term(ctx);
-      return Snd(pair, true);
+      parsed = Snd(pair, true);
     }
 
     // Projection
@@ -347,7 +351,7 @@ const parse = (code) => {
       var skip = parse_exact("]");
       var pair = parse_term(ctx);
       var body = parse_term(ctx.concat([nam0, nam1]));
-      return Prj(nam0, nam1, pair, body, eras);
+      parsed = Prj(nam0, nam1, pair, body, eras);
     }
 
     // Equality
@@ -356,19 +360,19 @@ const parse = (code) => {
       var skip = parse_exact("==");
       var val1 = parse_term(ctx);
       var skip = parse_exact(">");
-      return Eql(val0, val1);
+      parsed = Eql(val0, val1);
     }
 
     // Reflexivity
     else if (match("rfl")) {
       var expr = parse_term(ctx);
-      return Rfl(expr);
+      parsed = Rfl(expr);
     }
 
     // Symmetry
     else if (match("sym")) {
       var prof = parse_term(ctx);
-      return Sym(prof);
+      parsed = Sym(prof);
     }
 
     // Rewrite
@@ -380,7 +384,7 @@ const parse = (code) => {
       var type = parse_term(ctx.concat([name]));
       var skip = parse_exact(">");
       var expr = parse_term(ctx);
-      return Rwt(prof, name, type, expr);
+      parsed = Rwt(prof, name, type, expr);
     }
 
     // Cast
@@ -388,65 +392,97 @@ const parse = (code) => {
       var prof = parse_term(ctx);
       var val0 = parse_term(ctx);
       var val1 = parse_term(ctx);
-      return Cst(prof, val0, val1);
+      parsed = Cst(prof, val0, val1);
     }
 
-    // Projection
+    // Annotation
     else if (match(":")) {
       var type = parse_term(ctx);
       var expr = parse_term(ctx);
-      return Ann(type, expr, false);
+      parsed = Ann(type, expr, false);
     }
 
     // Identiy
     else if (match("=")) {
       var expr = parse_term(ctx);
-      return expr;
+      parsed = expr;
     }
 
     // Slf
     else if (match("$")) {
       var name = parse_string();
       var type = parse_term(ctx.concat([name]));
-      return Slf(name, type);
+      parsed = Slf(name, type);
     }
 
     // New
     else if (match("@")) {
       var type = parse_term(ctx);
       var expr = parse_term(ctx);
-      return New(type, expr);
+      parsed = New(type, expr);
     }
 
     // Use
     else if (match("%")) {
       var expr = parse_term(ctx);
-      return Use(expr);
+      parsed = Use(expr);
     }
+
+    // Case syntax sugar
+    //else if (match("case ")) {
+      //var expr = parse_term(ctx);
+    //}
 
     // Variable / Reference
     else {
       var name = parse_string();
       var numb = Number(name);
       if (!isNaN(numb)) {
-        return Num(numb >>> 0);
-      }
-      var skip = 0;
-      while (match("'")) {
-        skip += 1;
-      }
-      for (var i = ctx.length - 1; i >= 0; --i) {
-        if (ctx[i] === name) {
-          if (skip === 0) break;
-          else skip -= 1;
+        parsed = Num(numb >>> 0);
+      } else {
+        var skip = 0;
+        while (match_here("'")) {
+          skip += 1;
+        }
+        for (var i = ctx.length - 1; i >= 0; --i) {
+          if (ctx[i] === name) {
+            if (skip === 0) break;
+            else skip -= 1;
+          }
+        }
+        if (i === -1) {
+          parsed = Ref(name, false);
+        } else {
+          parsed = Var(ctx.length - i - 1);
         }
       }
-      if (i === -1) {
-        return Ref(name, false);
-      } else {
-        return Var(ctx.length - i - 1);
-      }
     }
+
+    if (match_here("<")) {
+      var term = parsed;
+      while (idx < code.length) {
+        var eras = true;
+        var argm = parse_term(ctx);
+        var term = App(term, argm, eras);
+        if (match(">")) break;
+        else parse_exact(",");
+      }
+      parsed = term;
+    }
+
+    if (match_here("(")) {
+      var term = parsed;
+      while (idx < code.length) {
+        var eras = match("~");
+        var argm = parse_term(ctx);
+        var term = App(term, argm, eras);
+        if (match(")")) break;
+        else parse_exact(",");
+      }
+      parsed = term;
+    }
+
+    return parsed;
   }
 
   var idx = 0;
@@ -455,12 +491,7 @@ const parse = (code) => {
   var defs = {};
   while (idx < code.length) {
     next_char();
-
-    if (match("def ")) {
-      var name = parse_string();
-      var term = parse_term([]);
-      defs[name] = term;
-    } else if (match("data ")) {
+    if (match("T ")) {
       var adt_pram = [];
       var adt_indx = [];
       var adt_ctor = [];
@@ -501,14 +532,56 @@ const parse = (code) => {
             if (match("}")) break; else parse_exact(",");
           }
         }
-        var ctor_skip = parse_exact(":");
-        var ctor_type = parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name)));
+        if (match(":")) {
+          var ctor_type = parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name)));
+        } else {
+          var ctor_indx = [];
+          while (match("@")) {
+            ctor_indx.push(parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name))));
+          }
+          var ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
+          for (var p = 0; p < adt_pram.length; ++p) {
+            ctor_type = App(ctor_type, Var(-1 + ctor_flds.length + adt_pram.length + p), false);
+          }
+          for (var i = 0; i < ctor_indx.length; ++i) {
+            ctor_type = App(ctor_type, ctor_indx[i], false);
+          }
+        }
         adt_ctor.push([ctor_name, ctor_flds, ctor_type]);
       }
       var adt = {adt_pram, adt_indx, adt_ctor, adt_name};
       defs[adt_name] = derive_adt_type(adt);
       for (var c = 0; c < adt_ctor.length; ++c) {
         defs[adt_name + "." + adt_ctor[c][0]] = derive_adt_ctor(adt, c);
+      }
+    } else {
+      var name = parse_string();
+      if (name.length > 0) {
+        if (match(": ")) {
+          var erase = [];
+          var names = [];
+          var types = [];
+          if (match("{")) {
+            while (idx < code.length) {
+              erase.push(match("~"));
+              names.push(parse_string());
+              parse_exact(":");
+              types.push(parse_term(names.slice(0,-1)));
+              if (match("}")) break; else parse_exact(",");
+            }
+            var skip = parse_exact("->");
+          }
+          var type = parse_term(names);
+          var term = parse_term(names);
+          for (var i = names.length - 1; i >= 0; --i) {
+            type = All(names[i], types[i], type, erase[i]);
+            term = Lam(names[i], types[i], term, erase[i]);
+          }
+          defs[name] = Ann(type, term);
+        } else {
+          var term = parse_term([]);
+          defs[name] = term;
+        }
       }
     }
     next_char();
@@ -605,10 +678,10 @@ const show = ([ctor, args], nams = []) => {
       var text = ")";
       var term = [ctor, args];
       while (term[0] === "App") {
-        text = " " + (term[1].eras ? "~" : "") + show(term[1].argm, nams) + text;
+        text = (term[1].func[0] === "App" ? ", " : "") + (term[1].eras ? "~" : "") + show(term[1].argm, nams) + text;
         term = term[1].func;
       }
-      return "(" + show(term, nams) + text;
+      return show(term, nams) + "(" + text;
     case "Box":
       var expr = show(args.expr, nams);
       return "!" + expr;
@@ -1985,7 +2058,7 @@ const term_to_numb = (term) => {
   }
 }
 
-// Syntax sugaar for datatypes. They transform a statement like:
+// Syntax sugars for datatypes. They transform a statement like:
 // 
 //   data ADT <p0 : Param0, p1 : Param1...> {i0 : Index0, i1 : Index1}
 //   | ctr0 {ctr_fld0 : Ctr0_Fld0, ctr0_fld1 : Ctr0_Fld1, ...} : Cr0Type 
@@ -1995,10 +2068,10 @@ const term_to_numb = (term) => {
 // on its corresponding self-encoded datatype:
 //
 //   def ADT
-//   : {p0 : Param0, p1 : Param1, ..., i0 : Index0, i1 : Index1, ...} -> Type 
 //   = {p0 : Param0, p1 : Param1, ..., i0 : Index0, i1 : Index1, ...} =>
-//     $self
-//     {~P   : {i0 : Index0, i1 : Index1, ..., wit : (ADT Index0 Index1...)} -> Type} ->
+//     : Type
+//     $ self
+//     {~P   : {i0 : Index0, i1 : Index1, ..., wit : (ADT i0 i1...)} -> Type} ->
 //     {ctr0 : {ctr0_fld0 : Ctr0_Fld0, ctr0_fld1 : Ctr0_Fld1, ...} -> (Ctr0Type[ADT <- P] (ADT.ctr0 Param0 Param1... ctr0_fld0 ctr0_fld1 ...))} ->
 //     {ctr1 : {ctr1_fld0 : Ctr1_Fld0, ctr1_fld1 : Ctr1_Fld1, ...} -> (Ctr0Type[ADT <- P] (ADT.ctr1 Param0 Param1... ctr1_fld1 ctr0_fld1 ...))} ->
 //     ... ->
@@ -2012,13 +2085,12 @@ const term_to_numb = (term) => {
 //       (ctr0 ctr0_fld0 ctr0_fld1 ...)
 //
 //   (...)
-//   
-// TODO: clean-up, test, debug, comment, document, etc.
-
 const derive_adt_type = ({adt_pram, adt_indx, adt_ctor, adt_name}) => {
   return (function adt_arg(p, i) {
+    // ... {p0 : Param0, p1 : Param1...} ...
     if (p < adt_pram.length) {
       return Lam(adt_pram[p][0], adt_pram[p][1], adt_arg(p + 1, i), adt_pram[p][2]);
+    // ... {i0 : Index0, i1 : Index...} ...
     } else if (i < adt_indx.length) {
       var substs = [Ref(adt_name)];
       for (var P = 0; P < p; ++P) {
@@ -2027,16 +2099,21 @@ const derive_adt_type = ({adt_pram, adt_indx, adt_ctor, adt_name}) => {
       return Lam(adt_indx[i][0], subst_many(adt_indx[i][1], substs, i), adt_arg(p, i + 1), adt_indx[i][2]);
     } else {
       return (
+        // ... : Type ...
         Ann(Typ(),
+        // ... $ self ...
         Slf("self",
+        // ... P : ...
         All("P",
           (function motive(i) {
+            // ... {i0 : Index0, i1 : Index1...} ...
             if (i < adt_indx.length) {
               var substs = [Ref(adt_name)];
               for (var P = 0; P < p; ++P) {
                 substs.push(Var(-1 + i + 1 + adt_indx.length + p - P));
               }
               return All(adt_indx[i][0], subst_many(adt_indx[i][1], substs, i), motive(i + 1), adt_indx[i][2]);
+            // ... {wit : (ADT i0 i1...)} -> Type ...
             } else {
               var wit_t = Ref(adt_name);
               for (var P = 0; P < adt_pram.length; ++P) {
@@ -2045,20 +2122,23 @@ const derive_adt_type = ({adt_pram, adt_indx, adt_ctor, adt_name}) => {
               for (var I = 0; I < i; ++I) {
                 wit_t = App(wit_t, Var(-1 + i - I), adt_indx[I][2]);
               }
-              return All("x", wit_t, Typ(), false);
+              return All("wit", wit_t, Typ(), false);
             }
           })(0),
         (function ctor(i) {
           if (i < adt_ctor.length) {
+            // ... ctrX : ...
             return All(adt_ctor[i][0], (function field(j) {
               var subst_prams = [];
               for (var P = 0; P < adt_pram.length; ++P) {
                 subst_prams.push(Var(-1 + j + i + 1 + 1 + adt_indx.length + adt_pram.length - P));
               }
+              // ... {ctrX_fldX : CtrX_FldX, ctrX_fld1 : CtrX_Fld1, ...} -> ...
               if (j < adt_ctor[i][1].length) {
                 var sub = [Ref(adt_name)].concat(subst_prams);
                 var typ = subst_many(adt_ctor[i][1][j][1], sub, j);
                 return All(adt_ctor[i][1][j][0], typ, field(j + 1), adt_ctor[i][1][j][2]);
+              // ... (CtrXType[ADT <- P] (ADT.ctrX ParamX Param1... ctrX_fldX ctrX_fld1 ...)) -> ...
               } else {
                 var typ = adt_ctor[i][2];
                 var sub = [Var(-1 + j + i + 1)].concat(subst_prams);
@@ -2082,6 +2162,7 @@ const derive_adt_type = ({adt_pram, adt_indx, adt_ctor, adt_name}) => {
             ctor(i + 1),
             false);
           } else {
+            // ... (P i0 i1... self)
             var ret = Var(adt_ctor.length + 1 - 1);
             for (var i = 0; i < adt_indx.length; ++i) {
               var ret = App(ret, Var(adt_ctor.length + 1 + 1 + adt_indx.length - i - 1), adt_indx[i][2]); 
@@ -2101,15 +2182,20 @@ const derive_adt_ctor = ({adt_pram, adt_indx, adt_ctor, adt_name}, c) => {
     for (var P = 0; P < p; ++P) {
       substs.push(Var(-1 + f + p - P));
     }
+    // {~p0 : Param0, ~p1 : Param1...} ...
     if (p < adt_pram.length) {
       return Lam(adt_pram[p][0], adt_pram[p][1], arg(p + 1, i, f), true);
+    // ... {ctr0_fld0 : Ctr0_Fld0, ctr1_fld1 : Ctr1_Fld1, ...} ...
     } else if (f < adt_ctor[c][1].length) {
       return Lam(adt_ctor[c][1][f][0], subst_many(adt_ctor[c][1][f][1], substs, f), arg(p, i, f + 1), adt_ctor[c][1][f][2]);
     } else {
       var type = subst_many(adt_ctor[c][2], substs, f);
+      // ... : CtrXType {~P} ...
       return Ann(type, New(type, Lam("P", null, (function opt(k) {
+        // ... {ctr0, ctr1...} ...
         if (k < adt_ctor.length) {
           return Lam(adt_ctor[k][0], null, opt(k + 1), false);
+        // (ctrX ctrX_fld0 ctrX_fld1 ...)
         } else {
           var sel = Var(-1 + adt_ctor.length - c);
           for (var F = 0; F < adt_ctor[c][1].length; ++F) {
