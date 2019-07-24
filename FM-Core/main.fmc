@@ -1,162 +1,191 @@
-// Congruence of equality
-def cong
-  {~A : Type} =>
-  {~B : Type} =>
-  {~x : A} =>
-  {~y : A} =>
-  {~e : <x == y>} =>
-  {~f : {x : A} -> B} =>
-  rwt e <k @ <(f x) == (f k)>> $(f x)
-
-// Unboxes a value in a computationally erased positions
-def unbox
-: {~A : Type, x : !A} -> A
-= {~A, x} => dup x = x; x
+// With self-types, the λ-encoding of an inductive datatype coincides with its
+// own inductive hypothesis. Because of that, induction is just identity!
 
 // ::::::::::
 // :: Bool ::
 // ::::::::::
 
-// Simple booleans
-def CBool  : Type  = {~P : Type, true : P, false : P} -> P
-def CTrue  : CBool = {~P, true, false} => true
-def CFalse : CBool = {~P, true, false} => false
+// Bool datatype. Desugars to:
+// def Bool       : Type = $ self {~P : {b : Bool} -> Type, T : (P Bool.true), F : (P Bool.false)} -> (P self)
+// def Bool.true  : Bool = @ Bool {~P, T, F} => T
+// def Bool.false : Bool = @ Bool {~P, T, F} => F
+T Bool
+| true
+| false 
 
-// Inductive booleans
-def IBool  : {b : CBool} -> Type = {b} => {~P : {b : CBool} -> Type, true : (P CTrue), false : (P CFalse)} -> (P b)
-def ITrue  : (IBool CTrue)       = {~P, true, false} => true
-def IFalse : (IBool CFalse)      = {~P, true, false} => false
+// Simple not
+Bool.not : {|b : Bool} -> Bool
+| true  = Bool.false
+| false = Bool.true
 
-// Booleans
-def Bool  : Type = [x : CBool ~ (IBool x)]
-def True  : Bool = [CTrue ~ ITrue]
-def False : Bool = [CFalse ~ IFalse]
+// Simple and
+Bool.and : {|b0 : Bool, |b1 : Bool} -> Bool
+| true  | true  = Bool.true
+        | false = Bool.false
+| false | true  = Bool.false
+        | false = Bool.false
 
-// From simple booleans to booleans
-def Bool.promote
-: {b : CBool} -> Bool
-= {b} => (b ~Bool True False)
+// Simple or
+Bool.or : {|b0 : Bool, |b1 : Bool} -> Bool
+| true  | true  = Bool.true
+        | false = Bool.true
+| false | true  = Bool.true
+        | false = Bool.false
 
-// Reflection
-def Bool.reflection
-: {b : Bool} -> <(Bool.promote b) == b> =
-= {b} =>
-  let motive     = {b : CBool} => <(Bool.promote b) == b>
-  let case_true  = $CTrue
-  let case_false = $CFalse
-  (~snd b ~motive case_true case_false)
+// Not with runtime fusion
+Bool.not_f : {b : Bool} -> Bool
+  @Bool {~P, T, F} =>
+    let moti       = {b} => P(Bool.not_f(b))
+    let case_true  = F
+    let case_false = T
+    (%b)(~moti, case_true, case_false)
 
-// Induction on Bool
-def Bool.induction
-: { P : {x : Bool} -> Type
-  , T : (P True)
-  , F : (P False)
-  , b : Bool} ->
-  (P b)
-= {P, T, F, b} =>
-  let motive     = {b : CBool} => (P (Bool.promote b))
-  let case_true  = T
-  let case_false = F
-  let P_prom_b   = (~snd b ~motive T F)
-  let P_b        = (rwt (Bool.reflection b) <x @ (P x)> P_prom_b)
-  P_b
+// Type of boolean induction
+Bool.induction : {b : Bool} -> Type
+  {~P : {b : Bool} -> Type
+  , T : P(Bool.true)
+  , F : P(Bool.false)
+  } -> P(b)
 
+// Boolean induction is just `%b`.
+Bool.induct : {b : Bool} -> Bool.induction(b)
+  %b
+
+// Boolean example
+Bool.example
+  Bool.and(Bool.or(Bool.true, Bool.false), Bool.true)
 
 // :::::::::
 // :: Nat ::
 // :::::::::
 
-// Simple nats
-def CNat
-: Type
-= { ~P   : Type
-  , succ : !{x : P} -> P} ->
-  ! {zero : P} ->
-    P
+// A natural number. Desugars to:
+// Nat      : Type             = $ self {~P : {n : Nat} -> Type, S : {n : Nat} -> (P (Nat.succ n)), Z : (P Nat.zero)} -> (P self)
+// Nat.succ : {n : Nat} -> Nat = {n, ~P, S, Z} => (S n)
+// Nat.zero : Nat              = {~P, S, Z} => Z
+T Nat
+| succ {pred : Nat}
+| zero
 
-def CSucc
-: {n : CNat} -> CNat
-= {n, ~P, succ} =>
-  dup succ = succ
-  dup fold = (n ~P #succ)
-  # {zero} =>
-    (succ (fold zero))
+Nat.pred : {|n : Nat} -> Nat
+| succ = n.pred
+| zero = Nat.zero
 
-def CZero
-: CNat
-= {~P, succ} =>
-  # {zero} =>
-    zero
+Nat.predif : {|n : Nat, |b : Bool} -> Nat
+| succ | true  = n.pred
+       | false = Nat.succ(n.pred)
+| zero | true  = Nat.zero
+       | false = Nat.zero
 
-// Inductive nats
-def INat
-: {n : CNat} -> Type
-= {n} =>
-  { ~P    : {n : CNat} -> Type
-  , succ  : ! {~n : CNat, i : (P n)} -> (P (CSucc n))} ->
-  ! {zero : (P CZero)} ->
-    (P n)
+Nat.example
+  Nat.pred(Nat.succ(Nat.succ(Nat.zero)))
 
-def ISucc
-: {~n : CNat, i : (INat n)} -> (INat (CSucc n))
-= {~n, i, ~P, succ} =>
-  dup succ = succ
-  dup fold = (i ~P #succ)
-  # {zero} =>
-    (succ ~n (fold zero))
+// ::::::::::
+// :: List ::
+// ::::::::::
 
-def IZero
-: (INat CZero)
-= {~P, succ} =>
-  # {zero} =>
-    zero
+T List <A : Type>
+| push  {head : A, tail : List(A)}
+| empty
 
-// Nats
-def Nat
-: Type
-= [n : CNat ~ (INat n)]
+// The dependent pattern match syntax is still not able to deal with indices,
+// so we must use the `case` syntax
+head : {~T : Type, default : T, list : List(T)} -> T
+  case<List> list
+  | push  => head
+  | empty => default
+  : T
 
-def Succ
-: {n : Nat} -> Nat
-= {n}
-  [(CSucc (~fst n)) ~ (ISucc ~(~fst n) (~snd n))]
-  
-def Zero
-: Nat
-= [CZero ~ IZero]
+tail : {~T : Type, list : List(T)} -> List(T)
+  case<List> list
+  | push  => tail
+  | empty => List.empty(~T)
+  : List(T)
 
-// From simple nats to nats
-def Nat.promote
-: {n : CNat} -> !Nat
-= {n : CNat} =>
-  dup fold = (n ~Nat #Succ)
-  # (fold Zero)
+// ::::::::::::
+// :: Vector ::
+// ::::::::::::
 
-// kill me
-def Nat.reflection
-: {n : Nat} -> ! <(Nat.promote n) == #n>
-= {n} =>
-  let moti = {n} => <(Nat.promote n) == #n>
-  let succ = {~n, i} => rwt i <k @ <(Nat.promote (CSucc n)) == (dup n = k # (Succ n))>> $(Nat.promote (CSucc n))
-  dup fold = (~snd n ~moti #succ)
-  # (fold $#CZero)
+// A vector with a statically known length.
+T Vector <A : Type> {len : Nat}
+| push {~len : Nat, head : A, tail : Vector(A, len)} @ Nat.succ(len)
+| empty                                              @ Nat.zero
 
-// Induction on Nat
-def Nat.induction
-: { n  : Nat
-  , ~P : {n : Nat} -> Type
-  , S  : !{~i : Nat, h : (P i)} -> (P (Succ i))
-  , Z  : !(P Zero)} ->
-  ! (P n)
-= {n, ~P, S, Z} =>
-  dup S    = S
-  dup Z    = Z
-  let ubox = (unbox ~Nat)
-  let moti = {n} => (P (ubox (Nat.promote n)))
-  let succ = {~n, i} => (S ~(ubox (Nat.promote n)) i)
-  dup fold = (~snd n ~moti #succ)
-  # let prom_n_eq_box_n = (unbox ~<(Nat.promote n) == #n> (Nat.reflection n))
-    rwt prom_n_eq_box_n <x @ (P (ubox x))> (fold Z)
+// A type-safe `head` that *can't* be used on empty vectors.
+Vector.head : {~T : Type, n : Nat, vector : Vector(T, Nat.succ(n))} -> T
+  case<Vector> vector
+  | push  => head
+  | empty => 0
+  : case<Nat> len
+    | succ => T
+    | zero => U32
+    : Type
 
-def main
-  Nat.induction
+Vector.tail : {~T : Type, n : Nat, vector : Vector(T, n)} -> Vector(T, Nat.pred(n))
+  case<Vector> vector
+  | push  => tail
+  | empty => Vector.empty(~T)
+  : Vector(T, Nat.pred(len))
+
+// :::::::::
+// :: Rec ::
+// :::::::::
+
+// A Rec is a Parigot (erased to Church) of a Nat. It has this name because
+// those encodings should be used for recursion, not to store data. The ADT
+// syntax still doesn't allow making those datatypes, so I encode manually.
+
+Rec : Type
+  $ self {
+   ~P : {n : Rec} -> Type
+  , C : ! {~n : Rec, i : P(n)} -> P(Rec.call(n))
+  , S : ! P(Rec.stop)
+  }  -> ! P(self)
+
+Rec.call : {n : Rec} -> Rec
+  @Rec {~P, C, S} =>
+  dup C = C
+  dup S = S
+  dup A = (%n)(~P, #C, #S)
+  # C(~n, A)
+
+Rec.stop : Rec
+  @Rec {~P, C, S} =>
+  S
+
+Rec.induction : {n : Rec} -> Type
+  {~P : {n : Rec} -> Type
+  , C : ! {~n : Rec, i : P(n)} -> P(Rec.call(n))
+  , S : ! P(Rec.stop)
+  } -> ! P(n)
+
+Rec.induct : {n : Rec} -> Rec.induction(n)
+  %n
+
+Rec.double : {n : Rec} -> Rec
+  @Rec {~P, call, stop} =>
+  dup call = call
+  dup stop = stop
+  let moti = {n} => P(Rec.double(n))
+  let call = # {~n, i} => call(~Rec.call(Rec.double(n)), call(~Rec.double(n), i))
+  let stop = # stop
+  (%n)(~moti, call, stop)
+
+Rec.256 : Rec
+  Rec.double(Rec.double(Rec.double(Rec.double(
+  Rec.double(Rec.double(Rec.double(Rec.double(
+  Rec.call(Rec.stop)))))))))
+
+// Runtime fusion on repeated not
+Rec.example
+  let moti = {n}     => Bool
+  let call = {~n, x} => Bool.not_f(x)
+  let stop = Bool.true
+  (%Rec.256)(~moti, #call, #stop)
+
+// ::::::::::
+// :: Main ::
+// ::::::::::
+
+main
+  head

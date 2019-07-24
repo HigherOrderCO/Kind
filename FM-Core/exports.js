@@ -4,7 +4,9 @@ var fm = module.exports = {
   net: require("formality-net"),
   to_net: require("./fm-to-net.js"),
   to_js: require("./fm-to-js.js"),
-  norm, check, exec
+  norm,
+  check,
+  exec
 };
 
 function norm(term, defs, mode = "OPTIMAL_LAZY", stats = {}) {
@@ -43,27 +45,6 @@ function exec(name, defs, infs, mode = "OPTIMAL_LAZY", bipass = false, stats = {
     var checked = check(defs[name], defs, bipass);
     var result = fm.norm(checked, defs, mode, stats);
     return result;
-
-  } else if (infs[name]) {
-    var data = infs[name];
-    var init = check(data.init, defs, bipass);
-    var step = check(data.step, defs, bipass);
-    var stop = check(data.stop, defs, bipass);
-    var done = check(data.done, defs, bipass);
-    var term = fm.lang.norm(init, mode, stats);
-    var cont = term => {
-      var res = fm.norm(fm.lang.App(stop, term), defs, mode, stats);
-      if (res[0] === "Put") {
-        res = res[1].expr;
-      }
-      return res[0] === "Num" && res[1].numb === 0;
-    }
-    while (cont(term)) {
-      term = fm.norm(fm.lang.App(step, term), defs, mode, stats);
-      stats.loops += 1;
-    }
-    term = fm.norm(fm.lang.App(done, term), defs, mode, stats);
-    return term;
   } else {
     throw "Definition '" + name + "' not found.";
   }
