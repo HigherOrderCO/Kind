@@ -61,728 +61,6 @@ const Use = (expr)                         => ["Use", {expr}];
 const Ann = (type, expr, done)             => ["Ann", {type, expr, done}];
 const Ref = (name, eras)                   => ["Ref", {name, eras}];
 
-// :::::::::::::
-// :: Parsing ::
-// :::::::::::::
-
-// Converts a string to a term
-const parse = (code) => {
-  function is_space(char) {
-    return char === " " || char === "\t" || char === "\n" || char === "\r" || char === ";";
-  }
-
-  function is_newline(char) {
-    return char === "\n";
-  }
-
-  function is_name_char(char) {
-    return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-".indexOf(char) !== -1;
-  }
-
-  function next() {
-    if (is_newline(code[idx])) {
-      row += 1;
-      col = 0;
-    } else {
-      col += 1;
-    }
-    idx += 1;
-  }
-
-  function skip_spaces() {
-    while (idx < code.length && is_space(code[idx])) {
-      next();
-    }
-  }
-
-  function next_char() {
-    skip_spaces();
-    while (code.slice(idx, idx + 2) === "//") {
-      while (code[idx] !== "\n" && idx < code.length) {
-        next();
-      }
-      skip_spaces();
-    }
-  }
-
-  function match_here(string) {
-    var sliced = code.slice(idx, idx + string.length);
-    if (sliced === string) {
-      for (var i = 0; i < string.length; ++i) {
-        next();
-      }
-      return true;
-    }
-    return false;
-  }
-
-  function match(string) {
-    next_char();
-    return match_here(string);
-  }
-
-  function is_sigma(string) {
-    var i = idx;
-    while (i < code.length && is_name_char(code[i])) { ++i; }
-    while (i < code.length && is_space(code[i])) { ++i; }
-    return code[i] === ":";
-  }
-
-  function parse_exact(string) {
-    if (!match(string)) {
-      var text = "";
-      var part = "";
-      text += "Parse error: expected '" + string + "' ";
-      text += "on line " + (row+1) + ", col " + col + ", but found '" + code[idx] + "' instead. Relevant code:\n";
-      for (var ini = idx, il = 0; il < 6 && ini >=          0; --ini) if (code[ini] === "\n") ++il;
-      for (var end = idx, el = 0; el < 6 && end < code.length; ++end) if (code[end] === "\n") ++el;
-      part += code.slice(ini+1, idx) + "<HERE>" + code.slice(idx, end);
-      text += part.split("\n").map((line,i) => ("    " + (row-il+i+1)).slice(-4) + "| " + line).join("\n");
-      throw text;
-    }
-  }
-
-  function parse_string(fn = is_name_char) {
-    next_char();
-    var name = "";
-    while (idx < code.length && fn(code[idx])) {
-      name = name + code[idx];
-      next();
-    }
-    return name;
-  }
-
-  function parse_term(ctx) {
-    var parsed;
-
-    // Parenthesis
-    if (match("(")) {
-      var term = parse_term(ctx);
-      var skip = match(")");
-      parsed = term;
-      //while (idx < code.length && !match(")")) {
-        //var eras = match("~");
-        //var argm = parse_term(ctx);
-        //var term = App(term, argm, eras);
-        //next_char();
-      //}
-      //parsed = term;
-    }
-
-    // Type
-    else if (match("Type")) {
-      parsed = Typ();
-    }
-
-    // Lambdas and Forall
-    else if (match("{")) {
-      var erase = [];
-      var names = [];
-      var types = [];
-      while (idx < code.length) {
-        erase.push(match("~"));
-        names.push(parse_string());
-        types.push(match(":") ? parse_term(ctx.concat(names.slice(0,-1))) : null);
-        if (match("}")) break; else parse_exact(",");
-      }
-      var isall = match("->");
-      var islam = match("=>");
-      if (!isall && !islam) {
-        // TODO: error
-      }
-      var term = parse_term(ctx.concat(names));
-      for (var i = names.length - 1; i >= 0; --i) {
-        var ctr = isall ? All : Lam;
-        term = ctr(names[i], types[i], term, erase[i]);
-        if (isall && !types[i]) {
-          throw "Parse error: invalid forall on line " + (row+1) + ", col " + col + ".";
-        }
-      }
-      parsed = term;
-    }
-
-    // Duplication
-    else if (match("dup ")) {
-      var name = parse_string();
-      var expr = parse_term(ctx);
-      var body = parse_term(ctx.concat([name]));
-      parsed = Dup(name, expr, body);
-    }
-
-    // Box
-    else if (match("!")) {
-      var expr = parse_term(ctx);
-      parsed = Box(expr);
-    }
-
-    // Put
-    else if (match("#")) {
-      var expr = parse_term(ctx);
-      parsed = Put(expr);
-    }
-
-    // Let
-    else if (match("let ")) {
-      var name = parse_string();
-      var skip = parse_exact("=");
-      var copy = parse_term(ctx);
-      var body = parse_term(ctx.concat([name]));
-      parsed = subst(body, copy, 0);
-    }
-
-    // U32
-    else if (match("U32")) {
-      parsed = U32();
-    }
-
-    // Operation
-    else if (match("|")) {
-      var num0 = parse_term(ctx);
-      var func = parse_string(c => !is_space(c));
-      var num1 = parse_term(ctx);
-      var skip = parse_exact("|");
-      parsed = Op2(func, num0, num1);
-    }
-
-    // String
-    else if (match("\"")) {
-      // Parses text
-      var text = "";
-      while (code[idx] !== "\"") {
-        text += code[idx];
-        next();
-      }
-      next();
-      parsed = text_to_term(text);
-    }
-
-    // Nat
-    //else if (match("^")) {
-      //var name = parse_string();
-      //var numb = Number(name);
-      //parsed = numb_to_term(numb);
-    //}
-
-    // PBT
-    //else if (match("&")) {
-      //var name = parse_string();
-      //var numb = Number(name);
-      //parsed = numb_to_tree_term(numb);
-    //}
-
-    // If-Then-Else
-    else if (match("if ")) {
-      var cond = parse_term(ctx);
-      var pair = parse_term(ctx);
-      parsed = Ite(cond, pair);
-    }
-
-    // Copy
-    else if (match("cpy ")) {
-      var name = parse_string();
-      let skip = parse_exact("=");
-      var numb = parse_term(ctx);
-      var body = parse_term(ctx.concat([name]));
-      parsed = Cpy(name, numb, body);
-    }
-
-    // Sigma / Pair
-    else if (match("[")) {
-      // Sigma
-      if (is_sigma()) {
-        var name = parse_string();
-        var skip = parse_exact(":");
-        var typ0 = parse_term(ctx);
-        var eras = match("~");
-        var skip = eras ? null : parse_exact(",");
-        var typ1 = parse_term(ctx.concat([name]));
-        var skip = parse_exact("]");
-        parsed = Sig(name, typ0, typ1, eras);
-      // Pair
-      } else {
-        var val0 = parse_term(ctx);
-        var eras = match("~");
-        var skip = eras ? null : parse_exact(",");
-        var val1 = parse_term(ctx);
-        var skip = parse_exact("]");
-        parsed = Par(val0, val1, eras);
-      }
-    }
-
-    // Pair (If-Then-Else sugar)
-    else if (match("then:")) {
-      var val0 = parse_term(ctx);
-      var skip = parse_exact("else:");
-      var val1 = parse_term(ctx);
-      parsed = Par(val0, val1, false);
-    }
-
-    // First
-    else if (match("fst ")) {
-      var pair = parse_term(ctx);
-      parsed = Fst(pair, false);
-    }
-
-    // First (erased)
-    else if (match("~fst ")) {
-      var pair = parse_term(ctx);
-      parsed = Fst(pair, true);
-    }
-
-    // Second
-    else if (match("snd ")) {
-      var pair = parse_term(ctx);
-      parsed = Snd(pair, false);
-    }
-
-    // Second (erased)
-    else if (match("~snd ")) {
-      var pair = parse_term(ctx);
-      parsed = Snd(pair, true);
-    }
-
-    // Projection
-    else if (match("get ")) {
-      var skip = parse_exact("[");
-      var nam0 = parse_string();
-      var skip = parse_exact(",");
-      var eras = match("~");
-      var nam1 = parse_string();
-      var skip = parse_exact("]");
-      var pair = parse_term(ctx);
-      var body = parse_term(ctx.concat([nam0, nam1]));
-      parsed = Prj(nam0, nam1, pair, body, eras);
-    }
-
-    // Equality
-    else if (match("<")) {
-      var val0 = parse_term(ctx);
-      var skip = parse_exact("==");
-      var val1 = parse_term(ctx);
-      var skip = parse_exact(">");
-      parsed = Eql(val0, val1);
-    }
-
-    // Reflexivity
-    else if (match("rfl")) {
-      var expr = parse_term(ctx);
-      parsed = Rfl(expr);
-    }
-
-    // Symmetry
-    else if (match("sym")) {
-      var prof = parse_term(ctx);
-      parsed = Sym(prof);
-    }
-
-    // Rewrite
-    else if (match("rwt")) {
-      var prof = parse_term(ctx);
-      var skip = parse_exact("<");
-      var name = parse_string();
-      var skip = parse_exact("@");
-      var type = parse_term(ctx.concat([name]));
-      var skip = parse_exact(">");
-      var expr = parse_term(ctx);
-      parsed = Rwt(prof, name, type, expr);
-    }
-
-    // Cast
-    else if (match("cst")) {
-      var prof = parse_term(ctx);
-      var val0 = parse_term(ctx);
-      var val1 = parse_term(ctx);
-      parsed = Cst(prof, val0, val1);
-    }
-
-    // Annotation
-    else if (match(":")) {
-      var type = parse_term(ctx);
-      var expr = parse_term(ctx);
-      parsed = Ann(type, expr, false);
-    }
-
-    // Identiy
-    else if (match("=")) {
-      var expr = parse_term(ctx);
-      parsed = expr;
-    }
-
-    // Slf
-    else if (match("$")) {
-      var name = parse_string();
-      var type = parse_term(ctx.concat([name]));
-      parsed = Slf(name, type);
-    }
-
-    // New
-    else if (match("@")) {
-      var type = parse_term(ctx);
-      var expr = parse_term(ctx);
-      parsed = New(type, expr);
-    }
-
-    // Use
-    else if (match("%")) {
-      var expr = parse_term(ctx);
-      parsed = Use(expr);
-    }
-
-    // Case syntax sugar
-    //else if (match("case ")) {
-      //var expr = parse_term(ctx);
-    //}
-
-    // Variable / Reference
-    else {
-      var name = parse_string();
-      var numb = Number(name);
-      if (!isNaN(numb)) {
-        parsed = Num(numb >>> 0);
-      } else {
-        var skip = 0;
-        while (match_here("'")) {
-          skip += 1;
-        }
-        for (var i = ctx.length - 1; i >= 0; --i) {
-          if (ctx[i] === name) {
-            if (skip === 0) break;
-            else skip -= 1;
-          }
-        }
-        if (i === -1) {
-          parsed = Ref(name, false);
-        } else {
-          parsed = Var(ctx.length - i - 1);
-        }
-      }
-    }
-
-    if (match_here("<")) {
-      var term = parsed;
-      while (idx < code.length) {
-        var eras = true;
-        var argm = parse_term(ctx);
-        var term = App(term, argm, eras);
-        if (match(">")) break;
-        else parse_exact(",");
-      }
-      parsed = term;
-    }
-
-    if (match_here("(")) {
-      var term = parsed;
-      while (idx < code.length) {
-        var eras = match("~");
-        var argm = parse_term(ctx);
-        var term = App(term, argm, eras);
-        if (match(")")) break;
-        else parse_exact(",");
-      }
-      parsed = term;
-    }
-
-    return parsed;
-  }
-
-  var idx = 0;
-  var row = 0;
-  var col = 0;
-  var defs = {};
-  while (idx < code.length) {
-    next_char();
-    if (match("T ")) {
-      var adt_pram = [];
-      var adt_indx = [];
-      var adt_ctor = [];
-      var adt_name = parse_string();
-      var adt_ctx = [adt_name];
-      if (match("<")) {
-        while (idx < code.length) {
-          var eras = false;
-          var name = parse_string(); 
-          var skip = parse_exact(":");
-          var type = parse_term(adt_pram.map((([name,type]) => name)));
-          adt_pram.push([name, type, eras]);
-          if (match(">")) break; else parse_exact(",");
-        }
-      }
-      var adt_ctx = adt_ctx.concat(adt_pram.map(([name,type]) => name));
-      if (match("{")) {
-        while (idx < code.length) {
-          //var eras = match("~");
-          var eras = false;
-          var name = parse_string(); 
-          var skip = parse_exact(":");
-          var type = parse_term(adt_ctx.concat(adt_indx.map((([name,type]) => name))));
-          adt_indx.push([name, type, eras]);
-          if (match("}")) break; else parse_exact(",");
-        }
-      }
-      while (match("|")) {
-        var ctor_name = parse_string();
-        var ctor_flds = [];
-        if (match("{")) {
-          while (idx < code.length) {
-            var eras = match("~");
-            var name = parse_string();
-            var skip = parse_exact(":");
-            var type = parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name)));
-            ctor_flds.push([name, type, eras]);
-            if (match("}")) break; else parse_exact(",");
-          }
-        }
-        if (match(":")) {
-          var ctor_type = parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name)));
-        } else {
-          var ctor_indx = [];
-          while (match("@")) {
-            ctor_indx.push(parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name))));
-          }
-          var ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
-          for (var p = 0; p < adt_pram.length; ++p) {
-            ctor_type = App(ctor_type, Var(-1 + ctor_flds.length + adt_pram.length + p), false);
-          }
-          for (var i = 0; i < ctor_indx.length; ++i) {
-            ctor_type = App(ctor_type, ctor_indx[i], false);
-          }
-        }
-        adt_ctor.push([ctor_name, ctor_flds, ctor_type]);
-      }
-      var adt = {adt_pram, adt_indx, adt_ctor, adt_name};
-      defs[adt_name] = derive_adt_type(adt);
-      for (var c = 0; c < adt_ctor.length; ++c) {
-        defs[adt_name + "." + adt_ctor[c][0]] = derive_adt_ctor(adt, c);
-      }
-    } else {
-      var name = parse_string();
-      if (name.length > 0) {
-        if (match(": ")) {
-          var erase = [];
-          var names = [];
-          var types = [];
-          if (match("{")) {
-            while (idx < code.length) {
-              erase.push(match("~"));
-              names.push(parse_string());
-              parse_exact(":");
-              types.push(parse_term(names.slice(0,-1)));
-              if (match("}")) break; else parse_exact(",");
-            }
-            var skip = parse_exact("->");
-          }
-          var type = parse_term(names);
-          var term = parse_term(names);
-          for (var i = names.length - 1; i >= 0; --i) {
-            type = All(names[i], types[i], type, erase[i]);
-            term = Lam(names[i], types[i], term, erase[i]);
-          }
-          defs[name] = Ann(type, term);
-        } else {
-          var term = parse_term([]);
-          defs[name] = term;
-        }
-      }
-    }
-    next_char();
-  }
-
-  return defs;
-}
-
-// :::::::::::::::::::::
-// :: Stringification ::
-// :::::::::::::::::::::
-
-// Generates a name
-const gen_name = (n) => {
-  var str = "";
-  ++n;
-  while (n > 0) {
-    --n;
-    str += String.fromCharCode(97 + n % 26);
-    n = Math.floor(n / 26);
-  }
-  return str;
-};
-
-// Converts a term to a string
-const show = ([ctor, args], nams = []) => {
-  switch (ctor) {
-    case "Var":
-      var name = nams[nams.length - args.index - 1];
-      if (!name) {
-        return "^" + args.index;
-      } else {
-        var suff = "";
-        for (var i = 0; i < args.index - 1; ++i) {
-          if (nams[nams.length - i - 1] === name) {
-            var suff = suff + "'";
-          }
-        }
-        return name + suff;
-      }
-    case "Typ":
-      return "Type";
-    case "All":
-      var term = [ctor, args];
-      var erase = [];
-      var names = [];
-      var types = [];
-      while (term[0] === "All") {
-        erase.push(term[1].eras);
-        names.push(term[1].name);
-        types.push(show(term[1].bind, nams.concat(names.slice(0,-1))));
-        term = term[1].body;
-      }
-      var text = "{";
-      for (var i = 0; i < names.length; ++i) {
-        text += erase[i] ? "~" : "";
-        text += names[i] + " : " + types[i];
-        text += i < names.length - 1 ? ", " : "";
-      }
-      text += "} -> ";
-      text += show(term, nams.concat(names));
-      return text;
-    case "Lam":
-      var term = [ctor, args];
-      var numb = null;
-      var erase = [];
-      var names = [];
-      var types = [];
-      while (term[0] === "Lam") {
-        numb = term_to_numb(term);
-        if (numb !== null) {
-          break;
-        } else {
-          erase.push(term[1].eras);
-          names.push(term[1].name);
-          types.push(term[1].bind ? show(term[1].bind, nams.concat(names.slice(0,-1))) : null);
-          term = term[1].body;
-        }
-      }
-      var text = "{";
-      for (var i = 0; i < names.length; ++i) {
-        text += erase[i] ? "~" : "";
-        text += names[i] + (types[i] !== null ? " : " + types[i] : "");
-        text += i < names.length - 1 ? ", " : "";
-      }
-      text += "} => ";
-      if (numb !== null) {
-        text += "%" + Number(numb);
-      } else {
-        text += show(term, nams.concat(names));
-      }
-      return text;
-    case "App":
-      var text = ")";
-      var term = [ctor, args];
-      while (term[0] === "App") {
-        text = (term[1].func[0] === "App" ? ", " : "") + (term[1].eras ? "~" : "") + show(term[1].argm, nams) + text;
-        term = term[1].func;
-      }
-      return show(term, nams) + "(" + text;
-    case "Box":
-      var expr = show(args.expr, nams);
-      return "!" + expr;
-    case "Put":
-      var expr = show(args.expr, nams);
-      return "#" + expr;
-    case "Dup":
-      var name = args.name;
-      var expr = show(args.expr, nams);
-      var body = show(args.body, nams.concat([name]));
-      return "dup " + name + " = " + expr + "; " + body;
-    case "U32":
-      return "U32";
-    case "Num":
-      return args.numb.toString();
-    case "Op1":
-    case "Op2":
-      var func = args.func;
-      var num0 = show(args.num0, nams);
-      var num1 = show(args.num1, nams);
-      return "|" + num0 + " " + func + " " + num1 + "|";
-    case "Ite":
-      var cond = show(args.cond, nams);
-      var pair = show(args.pair, nams);
-      return "(if " + cond + " " + pair + ")";
-    case "Cpy":
-      var name = args.name;
-      var numb = show(args.numb, nams);
-      var body = show(args.body, nams.concat([name]));
-      return "cpy " + name + " = " + numb + "; " + body;
-    case "Sig":
-      var name = args.name;
-      var typ0 = show(args.typ0, nams);
-      var typ1 = show(args.typ1, nams.concat([name]));
-      var comm = args.eras ? " ~ " : ",";
-      return "[" + name + " : " + typ0 + comm + typ1 + "]";
-    case "Par":
-      var text = term_to_text([ctor, args]);
-      if (text !== null) {
-        return "\"" + text + "\"";
-      } else {
-        var val0 = show(args.val0, nams);
-        var val1 = show(args.val1, nams);
-        var eras = args.eras ? "~" : "";
-        return "[" + val0 + ", " + eras + val1 + "]";
-      }
-    case "Fst":
-      var pair = show(args.pair, nams);
-      var eras = args.eras ? "~" : "";
-      return "(" + eras + "fst " + pair + ")";
-    case "Snd":
-      var pair = show(args.pair, nams);
-      var eras = args.eras ? "~" : "";
-      return "(" + eras + "snd " + pair + ")";
-    case "Prj":
-      var nam0 = args.nam0;
-      var nam1 = args.nam1;
-      var pair = show(args.pair, nams);
-      var body = show(args.body, nams.concat([nam0, nam1]));
-      var eras = args.eras ? "~" : "";
-      return "get [" + nam0 + "," + eras + nam1 + "] = " + pair + "; " + body + "";
-    case "Eql":
-      var val0 = show(args.val0, nams);
-      var val1 = show(args.val1, nams);
-      return "<" + val0 + " == " + val1 + ">";
-    case "Rfl":
-      var expr = show(args.expr, nams);
-      return "(rfl " + expr + ")";
-    case "Sym":
-      var prof = show(args.prof, nams);
-      return "(sym " + prof + ")";
-    case "Rwt":
-      var prof = show(args.prof, nams);
-      var name = args.name;
-      var type = show(args.type, nams.concat([name]));
-      var expr = show(args.expr, nams);
-      return "(rwt " + prof + " <" + name + " @ " + type + "> " + expr + ")";
-    case "Cst":
-      var prof = show(args.prof, nams);
-      var val0 = show(args.val0, nams);
-      var val1 = show(args.val1, nams);
-      return "(cst " + prof + " " + val0 + " " + val1 + ")";
-    case "Slf":
-      var name = args.name;
-      var type = show(args.type, nams.concat([name]));
-      return "$" + name + " " + type;
-    case "New":
-      var type = show(args.type, nams);
-      var expr = show(args.expr, nams);
-      return "@" + type + " " + expr;
-    case "Use":
-      var expr = show(args.expr, nams);
-      return "%" + expr;
-    case "Ann":
-      var expr = show(args.expr, nams);
-      return expr;
-    case "Ref":
-      return args.name;
-  }
-};
-
 // ::::::::::::::::::
 // :: Substitution ::
 // ::::::::::::::::::
@@ -1041,186 +319,6 @@ const subst_many = (term, vals, depth) => {
   return term;
 }
 
-// ::::::::::::::::::::
-// :: Stratification ::
-// ::::::::::::::::::::
-
-// How many times a variable was used in computational positions
-const uses = ([ctor, term], depth = 0) => {
-  switch (ctor) {
-    case "Var": return term.index === depth ? 1 : 0;
-    case "Typ": return 0;
-    case "All": return 0;
-    case "Lam": return uses(term.body, depth + 1);
-    case "App": return uses(term.func, depth) + (term.eras ? 0 : uses(term.argm, depth));
-    case "Box": return 0;
-    case "Put": return uses(term.expr, depth);
-    case "Dup": return uses(term.expr, depth) + uses(term.body, depth + 1);
-    case "U32": return 0;
-    case "Num": return 0;
-    case "Op1": return uses(term.num0, depth) + uses(term.num1, depth);
-    case "Op2": return uses(term.num0, depth) + uses(term.num1, depth);
-    case "Ite": return uses(term.cond, depth) + uses(term.pair, depth);
-    case "Cpy": return uses(term.numb, depth) + uses(term.body, depth + 1);
-    case "Sig": return 0;
-    case "Par": return uses(term.val0, depth) + (term.eras ? 0 : uses(term.val1, depth));
-    case "Fst": return uses(term.pair, depth);
-    case "Snd": return uses(term.pair, depth);
-    case "Prj": return uses(term.pair, depth) + uses(term.body, depth + 2);
-    case "Eql": return 0;
-    case "Rfl": return uses(term.expr, depth);
-    case "Sym": return 0;
-    case "Rwt": return 0;
-    case "Cst": return 0;
-    case "Slf": return 0;
-    case "New": return uses(term.expr, depth);
-    case "Use": return uses(term.expr, depth);
-    case "Ann": return uses(term.expr, depth);
-    case "Ref": return 0;
-  }
-}
-
-// Checks if variable only occurs at a specific relative level
-const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
-  switch (ctor) {
-    case "Var": return term.index !== depth || level === at_level;
-    case "Typ": return true;
-    case "All": return true;
-    case "Lam": return is_at_level(term.body, at_level, depth + 1, level);
-    case "App": return is_at_level(term.func, at_level, depth, level) && (term.eras ? true : is_at_level(term.argm, at_level, depth, level));
-    case "Box": return true;
-    case "Put": return is_at_level(term.expr, at_level, depth, level + 1);
-    case "Dup": return is_at_level(term.expr, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level);
-    case "U32": return true;
-    case "Num": return true;
-    case "Op1": return is_at_level(term.num0, at_level, depth, level) && is_at_level(term.num1, at_level, depth, level);
-    case "Op2": return is_at_level(term.num0, at_level, depth, level) && is_at_level(term.num1, at_level, depth, level);
-    case "Ite": return is_at_level(term.cond, at_level, depth, level) && is_at_level(term.pair, at_level, depth, level);
-    case "Cpy": return is_at_level(term.numb, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level);
-    case "Sig": return true;
-    case "Par": return is_at_level(term.val0, at_level, depth, level) && is_at_level(term.val1, at_level, depth, level);
-    case "Fst": return is_at_level(term.pair, at_level, depth, level);
-    case "Snd": return is_at_level(term.pair, at_level, depth, level);
-    case "Prj": return is_at_level(term.pair, at_level, depth, level) && is_at_level(term.body, at_level, depth + 2, level);
-    case "Ann": return is_at_level(term.expr, at_level, depth, level);
-    case "Pri": return is_at_level(term.argm, at_level, depth, level);
-    case "Eql": return true;
-    case "Rfl": return is_at_level(term.expr, at_level, depth, level);
-    case "Sym": return true;
-    case "Rwt": return true;
-    case "Cst": return true;
-    case "Slf": return true;
-    case "New": return is_at_level(term.expr, at_level, depth, level);
-    case "Use": return is_at_level(term.expr, at_level, depth, level);
-    case "Ref": return true;
-  }
-}
-
-// Checks if a term is stratified
-const check = ([ctor, term], defs = {}, ctx = []) => {
-  switch (ctor) {
-    case "All":
-      break;
-    case "Lam":
-      if (uses(term.body) > 1) {
-        throw "[ERROR]\nLambda variable `" + term.name + "` used more than once in:\n" + show([ctor, term], ctx);
-      }
-      if (!is_at_level(term.body, 0)) {
-        throw "[ERROR]\nLambda variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], ctx);
-      }
-      check(term.body, defs, ctx.concat([term.name]));
-      break;
-    case "App":
-      check(term.func, defs, ctx);
-      if (!term.eras) {
-        check(term.argm, defs, ctx);
-      }
-      break;
-    case "Box":
-      break;
-    case "Put":
-      check(term.expr, defs, ctx);
-      break;
-    case "Dup":
-      if (!is_at_level(term.body, 1)) {
-        throw "[ERROR]\nDuplication variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], ctx);
-      }
-      check(term.expr, defs, ctx);
-      check(term.body, defs, ctx.concat([term.name]));
-      break;
-    case "Op1":
-    case "Op2":
-      check(term.num0, defs, ctx);
-      check(term.num1, defs, ctx);
-      break;
-    case "Ite":
-      check(term.cond, defs, ctx);
-      check(term.pair, defs, ctx);
-      break;
-    case "Cpy":
-      check(term.numb, defs, ctx);
-      check(term.body, defs, ctx.concat([term.name]));
-      break;
-    case "Sig":
-      break;
-    case "Par":
-      check(term.val0, defs, ctx);
-      if (!term.eras) {
-        check(term.val1, defs, ctx);
-      }
-      break;
-    case "Fst":
-      check(term.pair, defs, ctx);
-      break;
-    case "Snd":
-      check(term.pair, defs, ctx);
-      break;
-    case "Prj":
-      var uses0 = uses(term.body, 1);
-      var uses1 = uses(term.body, 0);
-      var isat0 = is_at_level(term.body, 0, 1);
-      var isat1 = is_at_level(term.body, 0, 0);
-      if (uses0 > 1 || uses1 > 1) {
-        throw "[ERROR]\nProjection variable `" + (uses0 > 1 ? term.nam0 : term.nam1) + "` used more than once in:\n" + show([ctor, term], ctx);
-      }
-      if (!isat0 || !isat1) {
-        throw "[ERROR]\nProjection variable `" + (!isat0 ? term.nam0 : term.nam1) + "` used inside a box in:\n" + show([ctor, term], ctx);
-      }
-      check(term.pair, defs, ctx);
-      check(term.body, defs, ctx.concat([term.nam0, term.nam1]));
-      break;
-    case "Eql":
-      break;
-    case "Rfl":
-      check(term.expr, defs, ctx);
-      break;
-    case "Sym":
-      break;
-    case "Rwt":
-      break;
-    case "Cst":
-      break;
-    case "Ann":
-      check(term.expr, defs, ctx);
-      break;
-    case "Slf":
-      break;
-    case "New":
-      check(term.expr, defs, ctx);
-      break;
-    case "Use":
-      check(term.expr, defs, ctx);
-      break;
-    case "Ref":
-      if (!defs[term.name]) {
-        throw "[ERROR]\nUndefined reference: " + term.name;
-      } else {
-        check(defs[term.name], defs, ctx);
-        break;
-      }
-  }
-}
-
 // ::::::::::::::::
 // :: Evaluation ::
 // ::::::::::::::::
@@ -1380,7 +478,7 @@ const norm = (term, defs = {}, weak = false) => {
       case "All": return All(term.name, term.bind, term.body, term.eras);
       case "Lam": return Lam(term.name, term.bind, x => weak_reduce(term.body(x)), term.eras);
       case "App": return apply(term.func, term.argm, term.eras);
-      case "Box": return Box(term.expr);
+      case "Box": return Box(weak_reduce(term.expr));
       case "Put": return Put(weak_reduce(term.expr));
       case "Dup": return duplicate(term.name, term.expr, term.body);
       case "U32": return U32();
@@ -1488,39 +586,6 @@ const erase = (term) => {
 // :: Equality ::
 // ::::::::::::::
 
-// Checks if two terms are equal
-//const equal = ([a_ctor, a_term], [b_ctor, b_term]) => {
-  //switch (a_ctor + "-" + b_ctor) {
-    //case "Var-Var": return a_term.index === b_term.index;
-    //case "Typ-Typ": return true;
-    //case "All-All": return equal(a_term.bind, b_term.bind) && equal(a_term.body, b_term.body);
-    //case "Lam-Lam": return equal(a_term.body, b_term.body);
-    //case "App-App": return equal(a_term.func, b_term.func) && equal(a_term.argm, b_term.argm) && a_term.eras === b_term.eras;
-    //case "Box-Box": return equal(a_term.expr, b_term.expr);
-    //case "Put-Put": return equal(a_term.expr, b_term.expr);
-    //case "Dup-Dup": return equal(a_term.expr, b_term.expr) && equal(a_term.body, b_term.body);
-    //case "Ref-Ref": return a_term.name === b_term.name;
-    //case "U32-U32": return true;
-    //case "Num-Num": return a_term.numb === b_term.numb;
-    //case "Op1-Op1": return a_term.func === b_term.func && equal(a_term.num0, b_term.num0) && a_term.num1 === a_term.num1;
-    //case "Op2-Op2": return a_term.func === b_term.func && equal(a_term.num0, b_term.num0) && equal(a_term.num1, b_term.num1);
-    //case "Ite-Ite": return equal(a_term.cond, b_term.cond) && equal(a_term.pair, b_term.pair);
-    //case "Cpy-Cpy": return equal(a_term.numb, b_term.numb) && equal(a_term.body, b_term.body);
-    //case "Sig-Sig": return equal(a_term.typ0, b_term.typ0) && equal(a_term.typ1, b_term.typ1) && a_term.eras === b_term.eras;
-    //case "Par-Par": return equal(a_term.val0, b_term.val0) && equal(a_term.val1, b_term.val1) && a_term.eras === b_term.eras;
-    //case "Fst-Fst": return equal(a_term.pair, b_term.pair) && a_term.eras === b_term.eras;
-    //case "Snd-Snd": return equal(a_term.pair, b_term.pair) && a_term.eras === b_term.eras;
-    //case "Prj-Prj": return equal(a_term.pair, b_term.pair) && equal(a_term.body, b_term.body) && a_term.eras === b_term.eras;
-    //case "Eql-Eql": return equal(a_term.val0, b_term.val0) && equal(a_term.val1, b_term.val1);
-    //case "Rfl-Rfl": return equal(a_term.expr, b_term.expr);
-    //case "Sym-Sym": return equal(a_term.prof, b_term.prof);
-    //case "Rwt-Rwt": return equal(a_term.prof, b_term.prof) && equal(a_term.type, b_term.type) && equal(a_term.expr, b_term.expr);
-    //case "Cst-Cst": return equal(a_term.prof, b_term.prof) && equal(a_term.val0, b_term.val0) && equal(a_term.val1, b_term.val1);
-    //case "Ann-Ann": return equal(a_term.expr, b_term.expr);
-    //default: return false;
-  //}
-//}
-
 const equal = (a, b, defs) => {
   const Eqs = (a, b)    => ["Eqs", {a, b}];
   const Bop = (v, x, y) => ["Bop", {v, x, y}];
@@ -1555,9 +620,9 @@ const equal = (a, b, defs) => {
         switch (ay[0] + "-" + by[0]) {
           case "Var-Var": y = Val(ay[1].index === by[1].index); break;
           case "Typ-Typ": y = Val(true); break;
-          case "All-All": y = Bop(false, Eqs(ay[1].bind, by[1].bind), Eqs(ay[1].body, by[1].body)); break;
-          case "Lam-Lam": y = Eqs(ay[1].body, by[1].body); break;
-          case "App-App": y = And(Eqs(ay[1].func, by[1].func), Eqs(ay[1].argm, by[1].argm)); break;
+          case "All-All": y = And(And(Eqs(ay[1].bind, by[1].bind), Eqs(ay[1].body, by[1].body)), Val(ay[1].eras === by[1].eras)); break;
+          case "Lam-Lam": y = And(Eqs(ay[1].body, by[1].body), Val(ay[1].eras === by[1].eras)); break;
+          case "App-App": y = And(And(Eqs(ay[1].func, by[1].func), Eqs(ay[1].argm, by[1].argm)), Val(ay[1].eras === by[1].eras)); break;
           case "Box-Box": y = Eqs(ay[1].expr, by[1].expr); break;
           case "Put-Put": y = Eqs(ay[1].expr, by[1].expr); break;
           case "Dup-Dup": y = And(Eqs(ay[1].expr, by[1].expr), Eqs(ay[1].body, by[1].body)); break;
@@ -1606,18 +671,199 @@ const equal = (a, b, defs) => {
   }
 
   // Expands the search tree until it finds an answer
-  var tree = Eqs(erase(a), erase(b));
+  var tree = Eqs(norm(erase(a, defs), defs), norm(erase(b, defs), defs));
   while (tree[0] !== "Val") {
     var tree = step(tree);
   }
   return tree[1].v;
 }
 
+
+// ::::::::::::::::::::
+// :: Stratification ::
+// ::::::::::::::::::::
+
+// How many times a variable was used in computational positions
+const uses = ([ctor, term], depth = 0) => {
+  switch (ctor) {
+    case "Var": return term.index === depth ? 1 : 0;
+    case "Typ": return 0;
+    case "All": return 0;
+    case "Lam": return uses(term.body, depth + 1);
+    case "App": return uses(term.func, depth) + (term.eras ? 0 : uses(term.argm, depth));
+    case "Box": return 0;
+    case "Put": return uses(term.expr, depth);
+    case "Dup": return uses(term.expr, depth) + uses(term.body, depth + 1);
+    case "U32": return 0;
+    case "Num": return 0;
+    case "Op1": return uses(term.num0, depth) + uses(term.num1, depth);
+    case "Op2": return uses(term.num0, depth) + uses(term.num1, depth);
+    case "Ite": return uses(term.cond, depth) + uses(term.pair, depth);
+    case "Cpy": return uses(term.numb, depth) + uses(term.body, depth + 1);
+    case "Sig": return 0;
+    case "Par": return uses(term.val0, depth) + (term.eras ? 0 : uses(term.val1, depth));
+    case "Fst": return uses(term.pair, depth);
+    case "Snd": return uses(term.pair, depth);
+    case "Prj": return uses(term.pair, depth) + uses(term.body, depth + 2);
+    case "Eql": return 0;
+    case "Rfl": return uses(term.expr, depth);
+    case "Sym": return 0;
+    case "Rwt": return 0;
+    case "Cst": return 0;
+    case "Slf": return 0;
+    case "New": return uses(term.expr, depth);
+    case "Use": return uses(term.expr, depth);
+    case "Ann": return uses(term.expr, depth);
+    case "Ref": return 0;
+  }
+}
+
+// Checks if variable only occurs at a specific relative level
+const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
+  switch (ctor) {
+    case "Var": return term.index !== depth || level === at_level;
+    case "Typ": return true;
+    case "All": return true;
+    case "Lam": return is_at_level(term.body, at_level, depth + 1, level);
+    case "App": return is_at_level(term.func, at_level, depth, level) && (term.eras ? true : is_at_level(term.argm, at_level, depth, level));
+    case "Box": return true;
+    case "Put": return is_at_level(term.expr, at_level, depth, level + 1);
+    case "Dup": return is_at_level(term.expr, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level);
+    case "U32": return true;
+    case "Num": return true;
+    case "Op1": return is_at_level(term.num0, at_level, depth, level) && is_at_level(term.num1, at_level, depth, level);
+    case "Op2": return is_at_level(term.num0, at_level, depth, level) && is_at_level(term.num1, at_level, depth, level);
+    case "Ite": return is_at_level(term.cond, at_level, depth, level) && is_at_level(term.pair, at_level, depth, level);
+    case "Cpy": return is_at_level(term.numb, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level);
+    case "Sig": return true;
+    case "Par": return is_at_level(term.val0, at_level, depth, level) && is_at_level(term.val1, at_level, depth, level);
+    case "Fst": return is_at_level(term.pair, at_level, depth, level);
+    case "Snd": return is_at_level(term.pair, at_level, depth, level);
+    case "Prj": return is_at_level(term.pair, at_level, depth, level) && is_at_level(term.body, at_level, depth + 2, level);
+    case "Ann": return is_at_level(term.expr, at_level, depth, level);
+    case "Pri": return is_at_level(term.argm, at_level, depth, level);
+    case "Eql": return true;
+    case "Rfl": return is_at_level(term.expr, at_level, depth, level);
+    case "Sym": return true;
+    case "Rwt": return true;
+    case "Cst": return true;
+    case "Slf": return true;
+    case "New": return is_at_level(term.expr, at_level, depth, level);
+    case "Use": return is_at_level(term.expr, at_level, depth, level);
+    case "Ref": return true;
+  }
+}
+
+// Checks if a term is stratified
+const boxcheck = show => ([ctor, term], defs = {}, ctx = []) => {
+  switch (ctor) {
+    case "All":
+      break;
+    case "Lam":
+      if (uses(term.body) > 1) {
+        throw "[ERROR]\nLambda variable `" + term.name + "` used more than once in:\n" + show([ctor, term], ctx);
+      }
+      if (!is_at_level(term.body, 0)) {
+        throw "[ERROR]\nLambda variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], ctx);
+      }
+      boxcheck(term.body, defs, ctx.concat([term.name]));
+      break;
+    case "App":
+      boxcheck(term.func, defs, ctx);
+      if (!term.eras) {
+        boxcheck(term.argm, defs, ctx);
+      }
+      break;
+    case "Box":
+      break;
+    case "Put":
+      boxcheck(term.expr, defs, ctx);
+      break;
+    case "Dup":
+      if (!is_at_level(term.body, 1)) {
+        throw "[ERROR]\nDuplication variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], ctx);
+      }
+      boxcheck(term.expr, defs, ctx);
+      boxcheck(term.body, defs, ctx.concat([term.name]));
+      break;
+    case "Op1":
+    case "Op2":
+      boxcheck(term.num0, defs, ctx);
+      boxcheck(term.num1, defs, ctx);
+      break;
+    case "Ite":
+      boxcheck(term.cond, defs, ctx);
+      boxcheck(term.pair, defs, ctx);
+      break;
+    case "Cpy":
+      boxcheck(term.numb, defs, ctx);
+      boxcheck(term.body, defs, ctx.concat([term.name]));
+      break;
+    case "Sig":
+      break;
+    case "Par":
+      boxcheck(term.val0, defs, ctx);
+      if (!term.eras) {
+        boxcheck(term.val1, defs, ctx);
+      }
+      break;
+    case "Fst":
+      boxcheck(term.pair, defs, ctx);
+      break;
+    case "Snd":
+      boxcheck(term.pair, defs, ctx);
+      break;
+    case "Prj":
+      var uses0 = uses(term.body, 1);
+      var uses1 = uses(term.body, 0);
+      var isat0 = is_at_level(term.body, 0, 1);
+      var isat1 = is_at_level(term.body, 0, 0);
+      if (uses0 > 1 || uses1 > 1) {
+        throw "[ERROR]\nProjection variable `" + (uses0 > 1 ? term.nam0 : term.nam1) + "` used more than once in:\n" + show([ctor, term], ctx);
+      }
+      if (!isat0 || !isat1) {
+        throw "[ERROR]\nProjection variable `" + (!isat0 ? term.nam0 : term.nam1) + "` used inside a box in:\n" + show([ctor, term], ctx);
+      }
+      boxcheck(term.pair, defs, ctx);
+      boxcheck(term.body, defs, ctx.concat([term.nam0, term.nam1]));
+      break;
+    case "Eql":
+      break;
+    case "Rfl":
+      boxcheck(term.expr, defs, ctx);
+      break;
+    case "Sym":
+      break;
+    case "Rwt":
+      break;
+    case "Cst":
+      break;
+    case "Ann":
+      boxcheck(term.expr, defs, ctx);
+      break;
+    case "Slf":
+      break;
+    case "New":
+      boxcheck(term.expr, defs, ctx);
+      break;
+    case "Use":
+      boxcheck(term.expr, defs, ctx);
+      break;
+    case "Ref":
+      if (!defs[term.name]) {
+        throw "[ERROR]\nUndefined reference: " + term.name;
+      } else {
+        boxcheck(defs[term.name], defs, ctx);
+        break;
+      }
+  }
+}
+
 // :::::::::::::::::::
 // :: Type Checking ::
 // :::::::::::::::::::
 
-const typecheck = (() => {
+const typecheck = (show) => {
 
   const PADR = (len, chr, str) => {
     while (str.length < len) {
@@ -1687,21 +933,20 @@ const typecheck = (() => {
     const MATCH = (a, b) => {
       if (!equal(a, b, defs)) {
         throw ERROR("Type mismatch."
-          + "\n- Found type... " + TERM(a)
-          + "\n- Instead of... " + TERM(b));
+          + "\n- Found type... " + TERM(norm(a, {}, false))
+          + "\n- Instead of... " + TERM(norm(b, {}, false)));
       }
     };
 
-    var old_expect = expect;
-    var expect = expect ? norm(expect, defs, true) : null;
+    var expect_nf = expect ? norm(expect, defs, true) : null;
     var type;
     switch (term[0]) {
       case "Var":
         type = ctx_get(term[1].index, ctx)[1];
         break;
       case "All":
-        if (expect && expect[0] !== "Typ") {
-          ERROR("The annotated type of a forall (" + TERM(All("x", Ref("A"), Ref("B"), false)) +") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect));
+        if (expect_nf && expect_nf[0] !== "Typ") {
+          ERROR("The annotated type of a forall (" + TERM(All("x", Ref("A"), Ref("B"), false)) +") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
         }
         var bind_t = typecheck(term[1].bind, null, defs, ctx, [term, ctx]);
         var ex_ctx = ctx_ext(term[1].name, term[1].bind, ctx);
@@ -1714,15 +959,15 @@ const typecheck = (() => {
         type = Typ();
         break;
       case "Lam":
-        var bind_v = expect && expect[0] === "All" ? expect[1].bind : term[1].bind;
-        if (bind_v === null && expect === null) {
+        var bind_v = expect_nf && expect_nf[0] === "All" ? expect_nf[1].bind : term[1].bind;
+        if (bind_v === null && expect_nf === null) {
           ERROR("Can't infer non-annotated lambda.");
         }
-        if (bind_v === null && expect !== null) {
-          ERROR("The annotated type of a lambda (" + TERM(Lam("x",null,Ref("f"),false)) + ") isn't forall (" + TERM(All("x", Ref("A"), Ref("B"), false)) + ").\n- Annotated type is " + TERM(expect));
+        if (bind_v === null && expect_nf !== null) {
+          ERROR("The annotated type of a lambda (" + TERM(Lam("x",null,Ref("f"),false)) + ") isn't forall (" + TERM(All("x", Ref("A"), Ref("B"), false)) + ").\n- Annotated type is " + TERM(expect_nf));
         }
         var ex_ctx = ctx_ext(term[1].name, bind_v, ctx);
-        var body_t = typecheck(term[1].body, expect && expect[0] === "All" ? expect[1].body : null, defs, ex_ctx, [term, ctx]);
+        var body_t = typecheck(term[1].body, expect_nf && expect_nf[0] === "All" ? expect_nf[1].body : null, defs, ex_ctx, [term, ctx]);
         var term_t = All(term[1].name, bind_v, body_t, term[1].eras);
         if (term_t[1].eras !== term[1].eras) {
           ERROR("Mismatched erasure.");
@@ -1742,18 +987,18 @@ const typecheck = (() => {
         type = subst(func_t[1].body, Ann(func_t[1].bind, term[1].argm, false), 0);
         break;
       case "Box":
-        if (expect !== null && expect[0] !== "Typ") {
-          ERROR("The annotated type of a box (" + TERM(Box(Ref("A"))) + ") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect));
+        if (expect_nf !== null && expect_nf[0] !== "Typ") {
+          ERROR("The annotated type of a box (" + TERM(Box(Ref("A"))) + ") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
         }
         var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, true);
         MATCH(expr_t, Typ());
         type = Typ();
         break;
       case "Put":
-        if (expect !== null && expect[0] !== "Box") {
-          ERROR("The annotated type of a put (" + TERM(Put(Ref("x"))) + ") isn't a box (" + TERM(Box(Ref("A"))) + ").\n- Annotated type is " + TERM(expect));
+        if (expect_nf !== null && expect_nf[0] !== "Box") {
+          ERROR("The annotated type of a put (" + TERM(Put(Ref("x"))) + ") isn't a box (" + TERM(Box(Ref("A"))) + ").\n- Annotated type is " + TERM(expect_nf));
         }
-        var expr_t = expect && expect[0] === "Box" ? expect[1].expr : null;
+        var expr_t = expect_nf && expect_nf[0] === "Box" ? expect_nf[1].expr : null;
         var term_t = typecheck(term[1].expr, expr_t, defs, ctx, [term, ctx]);
         type = Box(term_t);
         break;
@@ -1763,7 +1008,7 @@ const typecheck = (() => {
           ERROR("Unboxed duplication.");
         }
         var ex_ctx = ctx_ext(term[1].name, expr_t[1].expr, ctx);
-        var body_t = typecheck(term[1].body, expect && shift(expect, 1, 0), defs, ex_ctx, [term, ctx]);
+        var body_t = typecheck(term[1].body, expect_nf && shift(expect_nf, 1, 0), defs, ex_ctx, [term, ctx]);
         type = subst(body_t, Dup(term[1].name, term[1].expr, Var(0)), 0);
         break;
       case "U32":
@@ -1774,8 +1019,8 @@ const typecheck = (() => {
         break;
       case "Op1":
       case "Op2":
-        if (expect !== null && expect[0] !== "U32") {
-          ERROR("The annotated type of a numeric operation (" + TERM(Op2(term[1].func, Ref("x"), Ref("y"))) + ") isn't " + TERM(U32()) + ".\n- Annotated type is " + TERM(expect));
+        if (expect_nf !== null && expect_nf[0] !== "U32") {
+          ERROR("The annotated type of a numeric operation (" + TERM(Op2(term[1].func, Ref("x"), Ref("y"))) + ") isn't " + TERM(U32()) + ".\n- Annotated type is " + TERM(expect_nf));
         }
         typecheck(term[1].num0, U32(), defs, ctx, [term, ctx]);
         typecheck(term[1].num1, U32(), defs, ctx, [term, ctx]);
@@ -1786,7 +1031,7 @@ const typecheck = (() => {
         if (cond_t[0] !== "U32") {
           ERROR("Attempted to use if on a non-numeric value.");
         }
-        var pair_t = expect ? Sig("x", expect, shift(expect, 1, 0), false) : null;
+        var pair_t = expect_nf ? Sig("x", expect_nf, shift(expect_nf, 1, 0), false) : null;
         var pair_t = norm(typecheck(term[1].pair, pair_t, defs, ctx, [term, ctx]), defs, true);
         if (pair_t[0] !== "Sig") {
           ERROR("The body of an if must be a pair.");
@@ -1796,7 +1041,7 @@ const typecheck = (() => {
         if (!equal(typ0_v, typ1_v, defs)) {
           ERROR("Both branches of if must have the same type.");
         }
-        type = expect || typ0_v;
+        type = expect_nf || typ0_v;
         break;
       case "Cpy":
         var numb_t = norm(typecheck(term[1].numb, null, defs, ctx, [term, ctx]), defs, true);
@@ -1807,8 +1052,8 @@ const typecheck = (() => {
         type = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
         break;
       case "Sig":
-        if (expect && expect[0] !== "Typ") {
-          ERROR("The annotated type of a sigma (" + TERM(Sig("x", Ref("A"), Ref("B"))) + ") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect));
+        if (expect_nf && expect_nf[0] !== "Typ") {
+          ERROR("The annotated type of a sigma (" + TERM(Sig("x", Ref("A"), Ref("B"))) + ") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
         }
         var typ0_t = typecheck(term[1].typ0, null, defs, ctx, [term, ctx]);
         var ex_ctx = ctx_ext(term[1].name, term[1].typ0, ctx);
@@ -1818,20 +1063,20 @@ const typecheck = (() => {
         type = Typ();
         break;
       case "Par":
-        if (expect && expect[0] !== "Sig") {
-          ERROR("Annotated type of a pair (" + TERM(Pair(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".\n- Annotated type is " + TERM(expect));
+        if (expect_nf && expect_nf[0] !== "Sig") {
+          ERROR("Annotated type of a pair (" + TERM(Pair(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".\n- Annotated type is " + TERM(expect_nf));
         }
-        if (expect && expect[1].eras !== term[1].eras) {
+        if (expect_nf && expect_nf[1].eras !== term[1].eras) {
           ERROR("Mismatched erasure.");
         }
-        var val0_t = typecheck(term[1].val0, expect && expect[1].typ0, defs, ctx, [term, ctx]);
-        var val1_t = typecheck(term[1].val1, expect && subst(expect[1].typ1, term[1].val0, 0), defs, ctx, [term, ctx]);
+        var val0_t = typecheck(term[1].val0, expect_nf && expect_nf[1].typ0, defs, ctx, [term, ctx]);
+        var val1_t = typecheck(term[1].val1, expect_nf && subst(expect_nf[1].typ1, term[1].val0, 0), defs, ctx, [term, ctx]);
         if (term[1].eras && !equal(term[1].val0, term[1].val1, defs)) {
           ERROR("Dependent interesction values must have same erasure."
             + "\n- Erasure 0 is " + TERM(DENON(term[1].val0, defs))
             + "\n- Erasure 1 is " + TERM(DENON(term[1].val1, defs)));
         }
-        type = expect || Sig("x", val0_t, val1_t, term[1].eras);
+        type = expect_nf || Sig("x", val0_t, val1_t, term[1].eras);
         break;
       case "Fst":
         var pair_t = norm(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, true);
@@ -1901,7 +1146,7 @@ const typecheck = (() => {
         if (!equal(term[1].val0, prof_t[1].val0, defs)) {
           ERROR("Cast failed because " + TERM(term[1].val1) + " != " + TERM(prof_t[1].val1));
         }
-        type = typecheck(term[1].val0, expect, defs, ctx, [term, ctx]);
+        type = typecheck(term[1].val0, expect_nf, defs, ctx, [term, ctx]);
         break;
       case "Slf":
         var ex_ctx = ctx_ext(term[1].name, term, ctx);
@@ -1948,271 +1193,15 @@ const typecheck = (() => {
   };
 
   return typecheck;
-})();
-
-
-// :::::::::::::::::::
-// :: Syntax Sugars ::
-// :::::::::::::::::::
-
-// Converts an utf-8 string to a λ-encoded term
-const text_to_term = (text) => {
-  // Converts UTF-8 to bytes
-  var bytes = [].slice.call(new TextEncoder("utf-8").encode(text), 0);
-
-  // Converts bytes to uints
-  while (bytes.length % 4 !== 0) {
-    bytes.push(0);
-  }
-  var nums = new Uint32Array(new Uint8Array(bytes).buffer);
-
-  // Converts uints to C-List of nums
-  var term = Var(0);
-  for (var i = nums.length - 1; i >= 0; --i) {
-    term = App(App(Var(1), Num(nums[i]), false), term, false);
-  }
-  term = Par(Num(0x74786574), Lam("c", null, Dup("c", Var(0), Put(Lam("n", null, term, false))), false), false);
-  return term;
-}
-
-// Converts a λ-encoded term to a string, if possible
-const term_to_text = (term) => {
-  try {
-    if (term[1].val0[1].numb === 0x74786574) {
-      try {
-        term = term[1].val1[1].body[1].body[1].expr[1].body;
-      } catch(e) {
-        term = term[1].val1[1].body[1].body;
-      }
-      var nums = [];
-      while (term[0] !== "Var") {
-        if (term[1].func[1].func[1].index !== 1) {
-          return null;
-        }
-        nums.push(term[1].func[1].argm[1].numb);
-        term = term[1].argm;
-      }
-      if (term[1].index !== 0) {
-        return null;
-      }
-      return new TextDecoder("utf-8").decode(new Uint8Array(new Uint32Array(nums).buffer));
-    } else {
-      return null;
-    }
-  } catch (e) {
-    return null;
-  }
-}
-
-// Converts a number to a λ-encoded nat for repeated application (bounded for-loop)
-const numb_to_term = (numb) => {
-  var term = Var(0);
-  var log2 = Math.floor(Math.log(numb) / Math.log(2));
-  for (var i = 0; i < log2 + 1; ++i) {
-    term = (numb >>> (log2 - i)) & 1 ? App(Var(i + 1), term, false) : term;
-  }
-  term = Put(Lam("x", null, term, false));
-  for (var i = 0; i < log2; ++i) {
-    term = Dup("s" + (log2 - i), Put(Lam("x", null, App(Var(1), App(Var(1), Var(0), false), false), false)), term);
-  }
-  term = Lam("s", null, Dup("s0", Var(0), term), false);
-  return term;
-}
-
-// Converts a number to a λ-encoded nat for repeated application (bounded for-loop)
-const numb_to_tree_term = (numb) => {
-  var term = Put(Var(0));
-  for (var i = 0; i < numb; ++i) {
-    term = Dup("b" + (numb - i - 1), Put(App(App(Var(numb - i), Var(0), false), Var(0), false)), term);
-  }
-  term = Dup("n", Var(1), term);
-  term = Dup("b", Var(1), term);
-  term = Lam("n", null, term, false);
-  term = Lam("b", null, term, false);
-  return term;
-}
-
-// Converts a λ-encoded nat to a number, if possible
-const term_to_numb = (term) => {
-  return null;
-  try {
-    try {
-      term = term[1].body[1].body[1].expr[1].body;
-    } catch(e) {
-      term = term[1].body[1].body;
-    }
-    var count = 0;
-    while (term[0] !== "Var") {
-      if (term[1].func[1].index !== 1) {
-        return null;
-      }
-      count++;
-      term = term[1].argm;
-    }
-    if (term[1].index !== 0) {
-      return null;
-    }
-    return count;
-  } catch (e) {
-    return null;
-  }
-}
-
-// Syntax sugars for datatypes. They transform a statement like:
-// 
-//   data ADT <p0 : Param0, p1 : Param1...> {i0 : Index0, i1 : Index1}
-//   | ctr0 {ctr_fld0 : Ctr0_Fld0, ctr0_fld1 : Ctr0_Fld1, ...} : Cr0Type 
-//   | ctr1 {ctr_fld0 : Ctr0_Fld0, ctr0_fld1 : Ctr0_Fld1, ...} : Cr0Type 
-//   | ...
-//
-// on its corresponding self-encoded datatype:
-//
-//   def ADT
-//   = {p0 : Param0, p1 : Param1, ..., i0 : Index0, i1 : Index1, ...} =>
-//     : Type
-//     $ self
-//     {~P   : {i0 : Index0, i1 : Index1, ..., wit : (ADT i0 i1...)} -> Type} ->
-//     {ctr0 : {ctr0_fld0 : Ctr0_Fld0, ctr0_fld1 : Ctr0_Fld1, ...} -> (Ctr0Type[ADT <- P] (ADT.ctr0 Param0 Param1... ctr0_fld0 ctr0_fld1 ...))} ->
-//     {ctr1 : {ctr1_fld0 : Ctr1_Fld0, ctr1_fld1 : Ctr1_Fld1, ...} -> (Ctr0Type[ADT <- P] (ADT.ctr1 Param0 Param1... ctr1_fld1 ctr0_fld1 ...))} ->
-//     ... ->
-//     (P i0 i1... self)
-//  
-//   def ADT.ctr0
-//   = {~p0 : Param0, ~p1 : Param1, ..., ctr0_fld0 : Ctr0_Fld0, ctr1_fld1 : Ctr1_Fld1, ...} =>
-//     : Ctr0Type
-//     @ Ctr0Type
-//       {~P, ctr0, ctr1, ...} => 
-//       (ctr0 ctr0_fld0 ctr0_fld1 ...)
-//
-//   (...)
-const derive_adt_type = ({adt_pram, adt_indx, adt_ctor, adt_name}) => {
-  return (function adt_arg(p, i) {
-    // ... {p0 : Param0, p1 : Param1...} ...
-    if (p < adt_pram.length) {
-      return Lam(adt_pram[p][0], adt_pram[p][1], adt_arg(p + 1, i), adt_pram[p][2]);
-    // ... {i0 : Index0, i1 : Index...} ...
-    } else if (i < adt_indx.length) {
-      var substs = [Ref(adt_name)];
-      for (var P = 0; P < p; ++P) {
-        substs.push(Var(-1 + i + p - P));
-      }
-      return Lam(adt_indx[i][0], subst_many(adt_indx[i][1], substs, i), adt_arg(p, i + 1), adt_indx[i][2]);
-    } else {
-      return (
-        // ... : Type ...
-        Ann(Typ(),
-        // ... $ self ...
-        Slf("self",
-        // ... P : ...
-        All("P",
-          (function motive(i) {
-            // ... {i0 : Index0, i1 : Index1...} ...
-            if (i < adt_indx.length) {
-              var substs = [Ref(adt_name)];
-              for (var P = 0; P < p; ++P) {
-                substs.push(Var(-1 + i + 1 + adt_indx.length + p - P));
-              }
-              return All(adt_indx[i][0], subst_many(adt_indx[i][1], substs, i), motive(i + 1), adt_indx[i][2]);
-            // ... {wit : (ADT i0 i1...)} -> Type ...
-            } else {
-              var wit_t = Ref(adt_name);
-              for (var P = 0; P < adt_pram.length; ++P) {
-                wit_t = App(wit_t, Var(-1 + i + 1 + i + adt_pram.length - P), adt_pram[P][2]); 
-              }
-              for (var I = 0; I < i; ++I) {
-                wit_t = App(wit_t, Var(-1 + i - I), adt_indx[I][2]);
-              }
-              return All("wit", wit_t, Typ(), false);
-            }
-          })(0),
-        (function ctor(i) {
-          if (i < adt_ctor.length) {
-            // ... ctrX : ...
-            return All(adt_ctor[i][0], (function field(j) {
-              var subst_prams = [];
-              for (var P = 0; P < adt_pram.length; ++P) {
-                subst_prams.push(Var(-1 + j + i + 1 + 1 + adt_indx.length + adt_pram.length - P));
-              }
-              // ... {ctrX_fldX : CtrX_FldX, ctrX_fld1 : CtrX_Fld1, ...} -> ...
-              if (j < adt_ctor[i][1].length) {
-                var sub = [Ref(adt_name)].concat(subst_prams);
-                var typ = subst_many(adt_ctor[i][1][j][1], sub, j);
-                return All(adt_ctor[i][1][j][0], typ, field(j + 1), adt_ctor[i][1][j][2]);
-              // ... (CtrXType[ADT <- P] (ADT.ctrX ParamX Param1... ctrX_fldX ctrX_fld1 ...)) -> ...
-              } else {
-                var typ = adt_ctor[i][2];
-                var sub = [Var(-1 + j + i + 1)].concat(subst_prams);
-                var typ = subst_many(adt_ctor[i][2], sub, j);
-                var rem = typ;
-                for (var I = 0; I < adt_indx.length; ++I) {
-                  rem = rem[1].func;
-                }
-                rem[0] = "Var";
-                rem[1] = {index: -1 + i + j + 1};
-                var wit = Ref(adt_name + "." + adt_ctor[i][0]);
-                for (var P = 0; P < adt_pram.length; ++P) {
-                  var wit = App(wit, Var(-1 + j + i + 1 + 1 + adt_indx.length + adt_pram.length - P), true);
-                }
-                for (var F = 0; F < adt_ctor[i][1].length; ++F) {
-                  var wit = App(wit, Var(-1 + j - F), adt_ctor[i][1][F][2]);
-                }
-                return App(typ, wit, false);
-              }
-            })(0),
-            ctor(i + 1),
-            false);
-          } else {
-            // ... (P i0 i1... self)
-            var ret = Var(adt_ctor.length + 1 - 1);
-            for (var i = 0; i < adt_indx.length; ++i) {
-              var ret = App(ret, Var(adt_ctor.length + 1 + 1 + adt_indx.length - i - 1), adt_indx[i][2]); 
-            }
-            var ret = App(ret, Var(adt_ctor.length + 1 + 1 - 1), false);
-            return ret;
-          }
-        })(0),
-        true))));
-    }
-  })(0, 0);
-}
-
-const derive_adt_ctor = ({adt_pram, adt_indx, adt_ctor, adt_name}, c) => {
-  return (function arg(p, i, f) {
-    var substs = [Ref(adt_name)];
-    for (var P = 0; P < p; ++P) {
-      substs.push(Var(-1 + f + p - P));
-    }
-    // {~p0 : Param0, ~p1 : Param1...} ...
-    if (p < adt_pram.length) {
-      return Lam(adt_pram[p][0], adt_pram[p][1], arg(p + 1, i, f), true);
-    // ... {ctr0_fld0 : Ctr0_Fld0, ctr1_fld1 : Ctr1_Fld1, ...} ...
-    } else if (f < adt_ctor[c][1].length) {
-      return Lam(adt_ctor[c][1][f][0], subst_many(adt_ctor[c][1][f][1], substs, f), arg(p, i, f + 1), adt_ctor[c][1][f][2]);
-    } else {
-      var type = subst_many(adt_ctor[c][2], substs, f);
-      // ... : CtrXType {~P} ...
-      return Ann(type, New(type, Lam("P", null, (function opt(k) {
-        // ... {ctr0, ctr1...} ...
-        if (k < adt_ctor.length) {
-          return Lam(adt_ctor[k][0], null, opt(k + 1), false);
-        // (ctrX ctrX_fld0 ctrX_fld1 ...)
-        } else {
-          var sel = Var(-1 + adt_ctor.length - c);
-          for (var F = 0; F < adt_ctor[c][1].length; ++F) {
-            var sel = App(sel, Var(-1 + adt_ctor.length + 1 + adt_ctor[c][1].length - F), adt_ctor[c][1][F][2]);
-          }
-          return sel;
-        }
-      })(0), true)), false);
-    }
-  })(0, adt_indx.length, 0);
-}
+};
 
 module.exports = {
   Var,
-  Lam,
+  Typ,
   All,
+  Lam,
   App,
+  Box,
   Put,
   Dup,
   U32,
@@ -2225,15 +1214,23 @@ module.exports = {
   Par,
   Fst,
   Snd,
-  Ann,
   Prj,
+  Eql,
+  Rfl,
+  Sym,
+  Rwt,
+  Cst,
+  Slf,
+  New,
+  Use,
+  Ann,
   Ref,
-  gen_name,
-  parse,
-  typecheck,
-  show,
-  check,
+  shift,
+  subst,
+  subst_many,
   norm,
   erase,
-  equal
+  equal,
+  boxcheck,
+  typecheck,
 };

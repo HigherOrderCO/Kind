@@ -58,7 +58,7 @@ var mode
   : "DEBUG";
 var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
-var defs = fm.core.parse(code);
+var defs = fm.lang.parse(code);
 var infs = null;
 
 try {
@@ -70,7 +70,7 @@ try {
     output_net: args.p ? null : undefined
   };
   var term = fm.exec(name, defs, infs, mode, args.d, stats);
-  console.log(fm.core.show(term));
+  console.log(fm.lang.show(term));
   if (args.p || (mode.slice(0,3) === "OPT" && !args.h)) {
     console.log(JSON.stringify(stats));
   }

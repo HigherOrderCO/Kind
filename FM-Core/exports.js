@@ -1,5 +1,6 @@
 var fm = module.exports = {
   core: require("./fm-core.js"),
+  lang: require("./fm-lang.js"),
   net: require("formality-net"),
   to_net: require("./fm-to-net.js"),
   to_js: require("./fm-to-js.js"),
@@ -9,14 +10,14 @@ var fm = module.exports = {
 function norm(term, defs, mode = "OPTIMAL_LAZY", stats = {}) {
   switch (mode) {
     case "DEBUG":
-      return fm.core.norm(fm.core.erase(term, defs), defs, false);
+      return fm.lang.norm(fm.lang.erase(term, defs), defs, false);
     case "INTERPRETED":
-      return fm.core.norm(fm.core.erase(term, defs), defs, true);
+      return fm.lang.norm(fm.lang.erase(term, defs), defs, true);
     case "JAVASCRIPT":
-      return fm.to_js.decompile(fm.to_js.compile(fm.core.erase(term, defs), defs));
+      return fm.to_js.decompile(fm.to_js.compile(fm.lang.erase(term, defs), defs));
     case "OPTIMAL_STRICT":
     case "OPTIMAL_LAZY":
-      var net = fm.to_net.compile(fm.core.erase(term, defs), defs);
+      var net = fm.to_net.compile(fm.lang.erase(term, defs), defs);
       if (stats && stats.input_net === null) {
         stats.input_net = JSON.parse(JSON.stringify(net));
       }
@@ -30,7 +31,7 @@ function norm(term, defs, mode = "OPTIMAL_LAZY", stats = {}) {
       }
       return fm.to_net.decompile(net);
     case "TYPE":
-      return fm.core.typecheck(term, null, defs);
+      return fm.lang.norm(fm.lang.typecheck(term, null, defs), {}, false);
   }
 }
 
@@ -49,19 +50,19 @@ function exec(name, defs, infs, mode = "OPTIMAL_LAZY", bipass = false, stats = {
     var step = check(data.step, defs, bipass);
     var stop = check(data.stop, defs, bipass);
     var done = check(data.done, defs, bipass);
-    var term = fm.core.norm(init, mode, stats);
+    var term = fm.lang.norm(init, mode, stats);
     var cont = term => {
-      var res = fm.norm(fm.core.App(stop, term), defs, mode, stats);
+      var res = fm.norm(fm.lang.App(stop, term), defs, mode, stats);
       if (res[0] === "Put") {
         res = res[1].expr;
       }
       return res[0] === "Num" && res[1].numb === 0;
     }
     while (cont(term)) {
-      term = fm.norm(fm.core.App(step, term), defs, mode, stats);
+      term = fm.norm(fm.lang.App(step, term), defs, mode, stats);
       stats.loops += 1;
     }
-    term = fm.norm(fm.core.App(done, term), defs, mode, stats);
+    term = fm.norm(fm.lang.App(done, term), defs, mode, stats);
     return term;
   } else {
     throw "Definition '" + name + "' not found.";
@@ -71,7 +72,7 @@ function exec(name, defs, infs, mode = "OPTIMAL_LAZY", bipass = false, stats = {
 function check(term, defs, bipass = false) {
   if (!bipass) {
     try {
-      fm.core.check(term, defs);
+      fm.lang.boxcheck(term, defs);
       return term;
     } catch (e) {
       console.log(e);
