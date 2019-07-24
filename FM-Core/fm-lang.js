@@ -38,6 +38,8 @@ const {
   typecheck,
 } = require("./fm-core.js");
 
+const xhr = require("xhr-request-promise");
+
 // :::::::::::::
 // :: Parsing ::
 // :::::::::::::
@@ -53,7 +55,7 @@ const parse = (code, tokenify) => {
   }
 
   function is_name_char(char) {
-    return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-".indexOf(char) !== -1;
+    return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@".indexOf(char) !== -1;
   }
 
   function next() {
@@ -140,7 +142,7 @@ const parse = (code, tokenify) => {
     // Parenthesis
     if (match("(")) {
       var term = parse_term(ctx);
-      var skip = match(")");
+      var skip = parse_exact(")");
       parsed = term;
     }
 
@@ -339,19 +341,19 @@ const parse = (code, tokenify) => {
     }
 
     // Reflexivity
-    else if (match("rfl")) {
+    else if (match("rfl ")) {
       var expr = parse_term(ctx);
       parsed = Rfl(expr);
     }
 
     // Symmetry
-    else if (match("sym")) {
+    else if (match("sym ")) {
       var prof = parse_term(ctx);
       parsed = Sym(prof);
     }
 
     // Rewrite
-    else if (match("rwt")) {
+    else if (match("rwt ")) {
       var prof = parse_term(ctx);
       var skip = parse_exact("<");
       var name = parse_string();
@@ -363,7 +365,7 @@ const parse = (code, tokenify) => {
     }
 
     // Cast
-    else if (match("cst")) {
+    else if (match("cst ")) {
       var prof = parse_term(ctx);
       var val0 = parse_term(ctx);
       var val1 = parse_term(ctx);
@@ -391,7 +393,7 @@ const parse = (code, tokenify) => {
     }
 
     // New
-    else if (match("@")) {
+    else if (match("&")) {
       var type = parse_term(ctx);
       var expr = parse_term(ctx);
       parsed = New(type, expr);
@@ -459,6 +461,12 @@ const parse = (code, tokenify) => {
           }
         }
         if (i === -1) {
+          for (var mini in enlarge) {
+            if (name.slice(0, mini.length) === mini) {
+              var name = enlarge[mini] + name.slice(mini.length);
+              break;
+            }
+          }
           parsed = Ref(name, false);
           if (tokens) tokens[tokens.length - 1][0] = "ref";
         } else {
@@ -492,15 +500,26 @@ const parse = (code, tokenify) => {
   var col = 0;
   var defs = {};
   var adts = {};
+  var enlarge = {};
   while (idx < code.length) {
     next_char();
-    // Datatype syntax
-    if (match("T ")) {
+
+    // Shorten
+    if (match("shorten")) {
+      var full = parse_string();
+      var skip = parse_exact("as");
+      var mini = parse_string();
+      enlarge[mini] = full;
+
+    // Datatypes
+    } else if (match("T ")) {
       var adt_pram = [];
       var adt_indx = [];
       var adt_ctor = [];
       var adt_name = parse_string();
       var adt_ctx = [adt_name];
+
+      // Datatype parameters
       if (match("<")) {
         while (idx < code.length) {
           var eras = false;
@@ -511,6 +530,8 @@ const parse = (code, tokenify) => {
           if (match(">")) break; else parse_exact(",");
         }
       }
+
+      // Datatype indices
       var adt_ctx = adt_ctx.concat(adt_pram.map(([name,type]) => name));
       if (match("{")) {
         while (idx < code.length) {
@@ -523,8 +544,12 @@ const parse = (code, tokenify) => {
           if (match("}")) break; else parse_exact(",");
         }
       }
+
+      // Datatype constructors
       while (match("|")) {
+        // Constructor name
         var ctor_name = parse_string();
+        // Constructor fields
         var ctor_flds = [];
         if (match("{")) {
           while (idx < code.length) {
@@ -536,11 +561,13 @@ const parse = (code, tokenify) => {
             if (match("}")) break; else parse_exact(",");
           }
         }
+        // Constructor type (written)
         if (match(":")) {
           var ctor_type = parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name)));
+        // Constructor type (auto-filled)
         } else {
           var ctor_indx = [];
-          while (match("@")) {
+          while (match("&")) {
             ctor_indx.push(parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name))));
           }
           var ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
@@ -559,13 +586,17 @@ const parse = (code, tokenify) => {
         defs[adt_name + "." + adt_ctor[c][0]] = derive_adt_ctor(adt, c);
       }
       adts[adt_name] = adt;
-    // Definitions
+
+    // Definitions or end-of-file
     } else {
       if (tokens) tokens.push(["def", ""]);
       var name = parse_string();
       if (tokens) tokens.push(["txt", ""]);
+
+      // Definition
       if (name.length > 0) {
-        // Typed definition syntax-sugar
+
+        // Typed definition
         if (match(":")) {
           var cased = [];
           var erase = [];
@@ -584,8 +615,14 @@ const parse = (code, tokenify) => {
           }
           var type = parse_term(names);
 
-          // With compact case-analysis
-          if (cased.filter(x => x).length > 0) {
+          // Typed definition without patterns
+          if (cased.filter(x => x).length === 0) {
+            var term = parse_term(names);
+
+          // Typed definition with patterns
+          } else {
+
+            // Typed definition with patterns: finds matched datatypes
             var cadts = [];
             for (var i = 0; i < cased.length; ++i) {
               if (cased[i]) {
@@ -602,6 +639,7 @@ const parse = (code, tokenify) => {
               }
             }
 
+            // Typed definition with patterns: parses case-tree
             var case_tree = {};
             (function parse_case_tree(ctx, a, branch) {
               if (a < cadts.length) {
@@ -623,20 +661,19 @@ const parse = (code, tokenify) => {
                 case_tree[branch.join("_")] = term;
               }
             })(names, 0, []);
+
+            // Typed definition with patterns: derives matchinig term
             var term = derive_dependent_match({names, types, cased, erase, cadts}, type, case_tree);
-            //console.log("->", show(term, names));
           }
 
-          // Without compact case-analysis
-          else {
-            var term = parse_term(names);
-          }
-
+          // Typed definition: auto-fills foralls and lambdas
           for (var i = names.length - 1; i >= 0; --i) {
             type = All(names[i], types[i], type, erase[i]);
             term = Lam(names[i], types[i], term, erase[i]);
           }
+
           defs[name] = Ann(type, term);
+
         // Untyped definition
         } else {
           var term = parse_term([]);
@@ -644,10 +681,11 @@ const parse = (code, tokenify) => {
         }
       }
     }
+
     next_char();
   }
 
-  return tokens ? {defs, tokens} : defs;
+  return tokenify ? {defs, tokens} : defs;
 }
 
 // :::::::::::::::::::::
@@ -831,7 +869,7 @@ const show = ([ctor, args], nams = []) => {
     case "New":
       var type = show(args.type, nams);
       var expr = show(args.expr, nams);
-      return "@" + type + " " + expr;
+      return "&" + type + " " + expr;
     case "Use":
       var expr = show(args.expr, nams);
       return "%" + expr;
@@ -841,6 +879,139 @@ const show = ([ctor, args], nams = []) => {
     case "Ref":
       return args.name;
   }
+};
+
+// Maps defs
+const rename_refs = ([ctor, term], renamer) => {
+  switch (ctor) {
+    case "Var":
+      return Var(term.index);
+    case "Typ":
+      return Typ();
+    case "All":
+      var name = term.name;
+      var bind = rename_refs(term.bind, renamer);
+      var body = rename_refs(term.body, renamer);
+      var eras = term.eras;
+      return All(name, bind, body, eras);
+    case "Lam":
+      var name = term.name;
+      var bind = term.bind && rename_refs(term.bind, renamer);
+      var body = rename_refs(term.body, renamer);
+      var eras = term.eras;
+      return Lam(name, bind, body, eras);
+    case "App":
+      var func = rename_refs(term.func, renamer);
+      var argm = rename_refs(term.argm, renamer);
+      var eras = term.eras;
+      return App(func, argm, term.eras);
+    case "Box":
+      var expr = rename_refs(term.expr, renamer);
+      return Box(expr);
+    case "Put":
+      var expr = rename_refs(term.expr, renamer);
+      return Put(expr);
+    case "Dup":
+      var name = term.name;
+      var expr = rename_refs(term.expr, renamer);
+      var body = rename_refs(term.body, renamer);
+      return Dup(name, expr, body);
+    case "U32":
+      return U32();
+    case "Num":
+      var numb = term.numb;
+      return Num(numb);
+    case "Op1":
+    case "Op2":
+      var func = term.func;
+      var num0 = rename_refs(term.num0, renamer);
+      var num1 = rename_refs(term.num1, renamer);
+      return Op2(func, num0, num1);
+    case "Ite":
+      var cond = rename_refs(term.cond, renamer);
+      var pair = rename_refs(term.pair, renamer);
+      return Ite(cond, pair);
+    case "Cpy":
+      var name = term.name;
+      var numb = rename_refs(term.numb, renamer);
+      var body = rename_refs(term.body, renamer);
+      return Cpy(name, numb, body);
+    case "Sig":
+      var name = term.name;
+      var typ0 = rename_refs(term.typ0, renamer);
+      var typ1 = rename_refs(term.typ1, renamer);
+      var eras = term.eras;
+      return Sig(name, typ0, typ1, eras);
+    case "Par":
+      var val0 = rename_refs(term.val0, renamer);
+      var val1 = rename_refs(term.val1, renamer);
+      var eras = term.eras;
+      return Par(val0, val1, eras);
+    case "Fst":
+      var pair = rename_refs(term.pair, renamer);
+      var eras = term.eras;
+      return Fst(pair, eras);
+    case "Snd":
+      var pair = rename_refs(term.pair, renamer);
+      var eras = term.eras;
+      return Snd(pair, eras);
+    case "Prj":
+      var nam0 = term.nam0;
+      var nam1 = term.nam1;
+      var pair = rename_refs(term.pair, renamer);
+      var body = rename_refs(term.body, renamer);
+      var eras = term.eras;
+      return Prj(nam0, nam1, pair, body, eras);
+    case "Eql":
+      var val0 = rename_refs(term.val0, renamer);
+      var val1 = rename_refs(term.val1, renamer);
+      return Eql(val0, val1);
+    case "Rfl":
+      var expr = rename_refs(term.expr, renamer);
+      return Rfl(expr);
+    case "Sym":
+      var prof = rename_refs(term.prof, renamer);
+      return Sym(prof);
+    case "Rwt":
+      var prof = rename_refs(term.prof, renamer);
+      var name = term.name;
+      var type = rename_refs(term.type, renamer);
+      var expr = rename_refs(term.expr, renamer);
+      return Rwt(prof, name, type, expr);
+    case "Cst":
+      var prof = rename_refs(term.prof, renamer);
+      var val0 = rename_refs(term.val0, renamer);
+      var val1 = rename_refs(term.val1, renamer);
+      return Cst(prof, val0, val1);
+    case "Slf":
+      var name = term.name;
+      var type = rename_refs(term.type, renamer);
+      return Slf(name, type);
+    case "New":
+      var type = rename_refs(term.type, renamer);
+      var expr = rename_refs(term.expr, renamer);
+      return New(type, expr);
+    case "Use":
+      var expr = rename_refs(term.expr, renamer);
+      return Use(expr);
+    case "Ann":
+      var type = rename_refs(term.type, renamer);
+      var expr = rename_refs(term.expr, renamer);
+      var done = term.done;
+      return Ann(type, expr, done);
+    case "Ref":
+      return Ref(renamer(term.name), term.eras);
+  }
+}
+
+const prefix_refs = (prefix, defs) => {
+  var new_defs = {};
+  for (var name in defs) {
+    new_defs[prefix + name] = rename_refs(defs[name], ref_name => {
+      return (defs[ref_name] ? prefix : "") + ref_name;
+    });
+  }
+  return new_defs;
 };
 
 // :::::::::::::::::::
@@ -1236,6 +1407,92 @@ const derive_dependent_match = ({names, types, cased, erase, cadts}, type, case_
   })(0);
 }
 
+const post = (func, body) => {
+  return xhr("http://moonad.org/api/" + func,
+    { method: "POST"
+    , json: true
+    , body})
+    .then(res => {
+      if (res[0] === "ok") {
+        return res[1];
+      } else {
+        throw res[1];
+      }
+    });
+};
+
+const save_file = (file, code) => post("save_file", {file, code});
+const load_file = (file) => post("load_file", {file});
+const find_term = (term) => post("find_term", {term});
+
+// Recursivelly loads undefined references from fm-lab
+const resolve = (term, defs) => {
+  const get_file_name = name => {
+    let at_sign_index = name.indexOf("@");
+    let dot_index = name.indexOf(".");
+    if (at_sign_index !== -1 && dot_index !== -1 && at_sign_index < dot_index) {
+      return name.slice(0, dot_index);
+    } else {
+      return null;
+    }
+  };
+
+  var DEFS = {...defs};
+
+  let must_request = {};
+
+  return (function resolve_term(term, term_defs) {
+    // Finds undefined references to files we don't have
+    rename_refs(term, name => {
+      if (!term_defs[name]) {
+        let file_name = get_file_name(name);
+        if (file_name && must_request[file_name] === undefined) {
+          must_request[file_name] = true;
+        }
+      }
+      return name;
+    });
+
+    // Creates requests to load those files
+    let requests = [];
+    let must_parse = {};
+    for (let file_name in must_request) {
+      if (must_request[file_name]) { 
+        must_request[file_name] = false;
+        requests.push(load_file(file_name).then(file_code => [file_name, file_code]));
+      }
+    }
+
+    // Performs all requests
+    return Promise.all(requests).then((new_files) => {
+      let requests = [];
+
+      // For each new file...
+      for (let i = 0; i < new_files.length; ++i) {
+        // Parse its contents
+        let [file_name, file_code] = new_files[i];
+        let new_defs = parse(file_code);
+
+        // Creates requests to resolve each new term
+        for (let term_name in new_defs) {
+          requests.push(resolve_term(new_defs[term_name], new_defs));
+        }
+
+        // Prefixes this file's defs and merges with original defs
+        var prefixed_new_defs = prefix_refs(file_name + ".", new_defs);
+        for (let term_name in prefixed_new_defs) {
+          DEFS[term_name] = prefixed_new_defs[term_name];
+        }
+      }
+
+      // Wait to resolving all new terms
+      return Promise.all(requests).then(() => {
+        return DEFS;
+      });
+    });
+  })(term, defs);
+};
+
 module.exports = {
   Var,
   Typ,
@@ -1277,6 +1534,8 @@ module.exports = {
   parse,
   gen_name,
   show,
+  rename_refs,
+  prefix_refs,
   text_to_term,
   term_to_text,
   numb_to_term,
@@ -1284,5 +1543,9 @@ module.exports = {
   term_to_numb,
   derive_adt_type,
   derive_adt_ctor,
-  derive_dependent_match
+  derive_dependent_match,
+  save_file,
+  load_file,
+  find_term,
+  resolve
 };

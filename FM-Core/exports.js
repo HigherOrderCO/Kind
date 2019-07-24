@@ -9,7 +9,7 @@ var fm = module.exports = {
   exec
 };
 
-function norm(term, defs, mode = "OPTIMAL_LAZY", stats = {}) {
+function norm(term, defs, mode = "DEBUG", stats = {}) {
   switch (mode) {
     case "DEBUG":
       return fm.lang.norm(fm.lang.erase(term, defs), defs, false);
