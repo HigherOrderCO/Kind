@@ -129,7 +129,7 @@ const compile = (term, defs = {}) => {
       case "Var":
         return get_var(var_ptrs[var_ptrs.length - term[1].index - 1]);
       case "Ref":
-        return build_net(erase(defs[term[1].name]), net, var_ptrs, level);
+        return build_net(defs[term[1].name] ? erase(defs[term[1].name]) : Num(0), net, var_ptrs, level);
       default:
         return build_net(Lam("", null, Var(0), false), net, var_ptrs, level);
     }

@@ -1,14 +1,11 @@
-// With self-types, the λ-encoding of an inductive datatype coincides with its
-// own inductive hypothesis. Because of that, induction is just identity!
-
 // ::::::::::
 // :: Bool ::
 // ::::::::::
 
-// Bool datatype. Desugars to:
+// Bool datatype. Desugars to self-encoded datatypes.
 // def Bool       : Type = $ self {~P : {b : Bool} -> Type, T : (P Bool.true), F : (P Bool.false)} -> (P self)
-// def Bool.true  : Bool = @ Bool {~P, T, F} => T
-// def Bool.false : Bool = @ Bool {~P, T, F} => F
+// def Bool.true  : Bool = new Bool {~P, T, F} => T
+// def Bool.false : Bool = new Bool {~P, T, F} => F
 T Bool
 | true
 | false 
@@ -34,7 +31,7 @@ Bool.or : {|b0 : Bool, |b1 : Bool} -> Bool
 
 // Not with runtime fusion
 Bool.not_f : {b : Bool} -> Bool
-  @Bool {~P, T, F} =>
+  new Bool {~P, T, F} =>
     let moti       = {b} => P(Bool.not_f(b))
     let case_true  = F
     let case_false = T
@@ -108,8 +105,8 @@ tail : {~T : Type, list : List(T)} -> List(T)
 
 // A vector with a statically known length.
 T Vector <A : Type> {len : Nat}
-| push {~len : Nat, head : A, tail : Vector(A, len)} @ Nat.succ(len)
-| empty                                              @ Nat.zero
+| push {~len : Nat, head : A, tail : Vector(A, len)} & Nat.succ(len)
+| empty                                              & Nat.zero
 
 // A type-safe `head` that *can't* be used on empty vectors.
 Vector.head : {~T : Type, n : Nat, vector : Vector(T, Nat.succ(n))} -> T
@@ -143,14 +140,14 @@ Rec : Type
   }  -> ! P(self)
 
 Rec.call : {n : Rec} -> Rec
-  @Rec {~P, C, S} =>
+  new Rec {~P, C, S} =>
   dup C = C
   dup S = S
   dup A = (%n)(~P, #C, #S)
   # C(~n, A)
 
 Rec.stop : Rec
-  @Rec {~P, C, S} =>
+  new Rec {~P, C, S} =>
   S
 
 Rec.induction : {n : Rec} -> Type
@@ -163,7 +160,7 @@ Rec.induct : {n : Rec} -> Rec.induction(n)
   %n
 
 Rec.double : {n : Rec} -> Rec
-  @Rec {~P, call, stop} =>
+  new Rec {~P, call, stop} =>
   dup call = call
   dup stop = stop
   let moti = {n} => P(Rec.double(n))
@@ -188,4 +185,4 @@ Rec.example
 // ::::::::::
 
 main
-  head
+  Vector.tail

@@ -38,6 +38,9 @@ const {
   typecheck,
 } = require("./fm-core.js");
 
+// Usng eval prevents being catched by Webpack
+const fs = typeof window === "object" ? null : eval('require("fs")');
+const path = typeof window === "object" ? null : eval('require("path")');
 const xhr = require("xhr-request-promise");
 
 // :::::::::::::
@@ -233,19 +236,19 @@ const parse = (code, tokenify) => {
       parsed = text_to_term(text);
     }
 
-    // Nat
-    //else if (match("^")) {
-      //var name = parse_string();
-      //var numb = Number(name);
-      //parsed = numb_to_term(numb);
-    //}
-
     // PBT
-    //else if (match("&")) {
-      //var name = parse_string();
-      //var numb = Number(name);
-      //parsed = numb_to_tree_term(numb);
-    //}
+    else if (match("^^")) {
+      var name = parse_string();
+      var numb = Number(name);
+      parsed = numb_to_tree_term(numb);
+    }
+
+    // Nat
+    else if (match("^")) {
+      var name = parse_string();
+      var numb = Number(name);
+      parsed = numb_to_term(numb);
+    }
 
     // If-Then-Else
     else if (match("if ")) {
@@ -393,7 +396,7 @@ const parse = (code, tokenify) => {
     }
 
     // New
-    else if (match("&")) {
+    else if (match("new ")) {
       var type = parse_term(ctx);
       var expr = parse_term(ctx);
       parsed = New(type, expr);
@@ -1422,10 +1425,37 @@ const post = (func, body) => {
 };
 
 const save_file = (file, code) => post("save_file", {file, code});
-const load_file = (file) => post("load_file", {file});
 const find_term = (term) => post("find_term", {term});
+const load_file = (file) => {
+  var dir_path, file_path;
+  if (fs) {
+    dir_path = path.join(process.cwd(), "fm_modules");
+    file_path = path.join(dir_path, file + ".fm");
+    if (fs.existsSync(file_path)) {
+      return new Promise((resolve, reject) => {
+        fs.readFile(file_path, "utf8", (err, code) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(code);
+          }
+        })
+      });
+    }
+  }
+  return post("load_file", {file}).then(code => {
+    if (fs && code) {
+      var writeCache = () => fs.writeFile(file_path, code, (err, ok) => {});
+      if (!fs.existsSync(dir_path)) {
+        fs.mkdirSync(dir_path, () => writeCache());
+      } else {
+        writeCache();
+      }
+    }
+    return code;
+  });
+};
 
-// Recursivelly loads undefined references from fm-lab
 const resolve = (term, defs) => {
   const get_file_name = name => {
     let at_sign_index = name.indexOf("@");
@@ -1458,6 +1488,7 @@ const resolve = (term, defs) => {
     let must_parse = {};
     for (let file_name in must_request) {
       if (must_request[file_name]) { 
+        //console.log("due to " + show(term) + " must request " + file_name);
         must_request[file_name] = false;
         requests.push(load_file(file_name).then(file_code => [file_name, file_code]));
       }
@@ -1471,17 +1502,20 @@ const resolve = (term, defs) => {
       for (let i = 0; i < new_files.length; ++i) {
         // Parse its contents
         let [file_name, file_code] = new_files[i];
-        let new_defs = parse(file_code);
+        if (file_code) {
+          let new_defs = parse(file_code);
 
-        // Creates requests to resolve each new term
-        for (let term_name in new_defs) {
-          requests.push(resolve_term(new_defs[term_name], new_defs));
-        }
+          // Creates requests to resolve each new term
+          for (let term_name in new_defs) {
+            //console.log("must resolve term " + term_name);
+            requests.push(resolve_term(new_defs[term_name], new_defs));
+          }
 
-        // Prefixes this file's defs and merges with original defs
-        var prefixed_new_defs = prefix_refs(file_name + ".", new_defs);
-        for (let term_name in prefixed_new_defs) {
-          DEFS[term_name] = prefixed_new_defs[term_name];
+          // Prefixes this file's defs and merges with original defs
+          var prefixed_new_defs = prefix_refs(file_name + ".", new_defs);
+          for (let term_name in prefixed_new_defs) {
+            DEFS[term_name] = prefixed_new_defs[term_name];
+          }
         }
       }
 

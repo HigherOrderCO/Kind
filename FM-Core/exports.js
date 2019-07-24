@@ -10,11 +10,13 @@ var fm = module.exports = {
 };
 
 function norm(term, defs, mode = "DEBUG", stats = {}) {
+  //console.log(fm.lang.show(term));
+  //console.log(defs);
   switch (mode) {
     case "DEBUG":
       return fm.lang.norm(fm.lang.erase(term, defs), defs, false);
     case "INTERPRETED":
-      return fm.lang.norm(fm.lang.erase(term, defs), defs, true);
+      return fm.lang.norm(fm.lang.erase(term, defs), defs, false);
     case "JAVASCRIPT":
       return fm.to_js.decompile(fm.to_js.compile(fm.lang.erase(term, defs), defs));
     case "OPTIMAL_STRICT":
@@ -37,17 +39,21 @@ function norm(term, defs, mode = "DEBUG", stats = {}) {
   }
 }
 
-function exec(name, defs, infs, mode = "OPTIMAL_LAZY", bipass = false, stats = {}) {
-  if (defs[name] && defs[name][0] === "Ref" && !defs[defs[name][1].name]) {
-    name = defs[name][1].name;
-  }
-  if (defs[name]) {
-    var checked = check(defs[name], defs, bipass);
-    var result = fm.norm(checked, defs, mode, stats);
-    return result;
-  } else {
-    throw "Definition '" + name + "' not found.";
-  }
+function exec(name, defs, mode = "OPTIMAL_LAZY", bipass = false, stats = {}) {
+  return new Promise((resolve, reject) => {
+    if (defs[name] && defs[name][0] === "Ref" && !defs[defs[name][1].name]) {
+      name = defs[name][1].name;
+    }
+    var resolve_defs = defs[name]
+      ? fm.lang.resolve(defs[name], defs)
+      : fm.lang.resolve(fm.lang.Ref(name), {});
+    resolve_defs.then(defs => {
+      var term = defs[name] || fm.lang.Ref(name);
+      var checked = check(term, defs, bipass);
+      var result = fm.norm(checked, defs, mode, stats);
+      resolve(result);
+    }).catch(reject);
+  });
 }
 
 function check(term, defs, bipass = false) {
