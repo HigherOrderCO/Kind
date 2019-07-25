@@ -766,52 +766,52 @@ const boxcheck = show => ([ctor, term], defs = {}, ctx = []) => {
       if (!is_at_level(term.body, 0)) {
         throw "[ERROR]\nLambda variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], ctx);
       }
-      boxcheck(term.body, defs, ctx.concat([term.name]));
+      boxcheck(show)(term.body, defs, ctx.concat([term.name]));
       break;
     case "App":
-      boxcheck(term.func, defs, ctx);
+      boxcheck(show)(term.func, defs, ctx);
       if (!term.eras) {
-        boxcheck(term.argm, defs, ctx);
+        boxcheck(show)(term.argm, defs, ctx);
       }
       break;
     case "Box":
       break;
     case "Put":
-      boxcheck(term.expr, defs, ctx);
+      boxcheck(show)(term.expr, defs, ctx);
       break;
     case "Dup":
       if (!is_at_level(term.body, 1)) {
         throw "[ERROR]\nDuplication variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], ctx);
       }
-      boxcheck(term.expr, defs, ctx);
-      boxcheck(term.body, defs, ctx.concat([term.name]));
+      boxcheck(show)(term.expr, defs, ctx);
+      boxcheck(show)(term.body, defs, ctx.concat([term.name]));
       break;
     case "Op1":
     case "Op2":
-      boxcheck(term.num0, defs, ctx);
-      boxcheck(term.num1, defs, ctx);
+      boxcheck(show)(term.num0, defs, ctx);
+      boxcheck(show)(term.num1, defs, ctx);
       break;
     case "Ite":
-      boxcheck(term.cond, defs, ctx);
-      boxcheck(term.pair, defs, ctx);
+      boxcheck(show)(term.cond, defs, ctx);
+      boxcheck(show)(term.pair, defs, ctx);
       break;
     case "Cpy":
-      boxcheck(term.numb, defs, ctx);
-      boxcheck(term.body, defs, ctx.concat([term.name]));
+      boxcheck(show)(term.numb, defs, ctx);
+      boxcheck(show)(term.body, defs, ctx.concat([term.name]));
       break;
     case "Sig":
       break;
     case "Par":
-      boxcheck(term.val0, defs, ctx);
+      boxcheck(show)(term.val0, defs, ctx);
       if (!term.eras) {
-        boxcheck(term.val1, defs, ctx);
+        boxcheck(show)(term.val1, defs, ctx);
       }
       break;
     case "Fst":
-      boxcheck(term.pair, defs, ctx);
+      boxcheck(show)(term.pair, defs, ctx);
       break;
     case "Snd":
-      boxcheck(term.pair, defs, ctx);
+      boxcheck(show)(term.pair, defs, ctx);
       break;
     case "Prj":
       var uses0 = uses(term.body, 1);
@@ -824,13 +824,13 @@ const boxcheck = show => ([ctor, term], defs = {}, ctx = []) => {
       if (!isat0 || !isat1) {
         throw "[ERROR]\nProjection variable `" + (!isat0 ? term.nam0 : term.nam1) + "` used inside a box in:\n" + show([ctor, term], ctx);
       }
-      boxcheck(term.pair, defs, ctx);
-      boxcheck(term.body, defs, ctx.concat([term.nam0, term.nam1]));
+      boxcheck(show)(term.pair, defs, ctx);
+      boxcheck(show)(term.body, defs, ctx.concat([term.nam0, term.nam1]));
       break;
     case "Eql":
       break;
     case "Rfl":
-      boxcheck(term.expr, defs, ctx);
+      boxcheck(show)(term.expr, defs, ctx);
       break;
     case "Sym":
       break;
@@ -839,21 +839,21 @@ const boxcheck = show => ([ctor, term], defs = {}, ctx = []) => {
     case "Cst":
       break;
     case "Ann":
-      boxcheck(term.expr, defs, ctx);
+      boxcheck(show)(term.expr, defs, ctx);
       break;
     case "Slf":
       break;
     case "New":
-      boxcheck(term.expr, defs, ctx);
+      boxcheck(show)(term.expr, defs, ctx);
       break;
     case "Use":
-      boxcheck(term.expr, defs, ctx);
+      boxcheck(show)(term.expr, defs, ctx);
       break;
     case "Ref":
       if (!defs[term.name]) {
         throw "[ERROR]\nUndefined reference: " + term.name;
       } else {
-        boxcheck(defs[term.name], defs, ctx);
+        boxcheck(show)(defs[term.name], defs, ctx);
         break;
       }
   }
