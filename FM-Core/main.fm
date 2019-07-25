@@ -68,14 +68,32 @@ Nat.pred : {|n : Nat} -> Nat
 | succ = n.pred
 | zero = Nat.zero
 
+Nat.pred.example
+  Nat.pred(Nat.succ(Nat.succ(Nat.zero)))
+
 Nat.predif : {|n : Nat, |b : Bool} -> Nat
 | succ | true  = n.pred
        | false = Nat.succ(n.pred)
 | zero | true  = Nat.zero
        | false = Nat.zero
 
-Nat.example
-  Nat.pred(Nat.succ(Nat.succ(Nat.zero)))
+// Recursive functions must be annotated with `:!`. They must also provide a
+// "halt" case with `*`, which will be returned in the case the function runs
+// out of "gas". That's because Formality is terminating. This is NOT a "native"
+// "bounded recursion" feature, instead, it is desugared to `rec(TYPE, {r} =>
+// func[func <- r], halt)`. Notice that the `rec`, the function that repeatedly
+// calls `func` as many times as needed, must be in scope. See `rec` below to
+// see how Church nats can be used to accomplish that.
+Nat.double :! {n : Nat} -> Nat
+  case<Nat> n
+  | succ => Nat.succ(Nat.succ(Nat.double(pred)))
+  | zero => Nat.zero
+  : Nat
+  * n
+
+Nat.double.example
+  dup Nat.double = Nat.double
+  # Nat.double(Nat.succ(Nat.succ(Nat.succ(Nat.zero))))
 
 // ::::::::::
 // :: List ::
@@ -87,17 +105,38 @@ T List <A : Type>
 
 // The dependent pattern match syntax is still not able to deal with indices,
 // so we must use the `case` syntax
-head : {~T : Type, default : T, list : List(T)} -> T
+List.head : {~T : Type, default : T, list : List(T)} -> T
   case<List> list
   | push  => head
   | empty => default
   : T
 
-tail : {~T : Type, list : List(T)} -> List(T)
+List.tail : {~T : Type, list : List(T)} -> List(T)
   case<List> list
   | push  => tail
   | empty => List.empty(~T)
   : List(T)
+
+List.map :! {~A : Type, fn : !{x : A} -> A, list : List(!A)} -> List(!A)
+  dup fn = fn
+  case<List> list
+  | push =>
+    dup head = head
+    let head = #fn(head)
+    let tail = List.map<A>(#fn, tail)
+    List.push<!A>(head, tail)
+  | empty =>
+    List.empty<!A>
+  : List(!A)
+  * list
+  
+List.map.example
+  dup List.map = List.map
+  let list = List.empty<!U32>
+  let list = List.push<!U32>(#1, list)
+  let list = List.push<!U32>(#2, list)
+  let list = List.push<!U32>(#3, list)
+  # List.map<U32>(#{x} => |x * 2|, list)
 
 // ::::::::::::
 // :: Vector ::
@@ -136,7 +175,7 @@ Rec : Type
   $ self {
    ~P : {n : Rec} -> Type
   , C : ! {~n : Rec, i : P(n)} -> P(Rec.call(n))
-  , S : ! P(Rec.stop)
+  , S : ! P(Rec.halt)
   }  -> ! P(self)
 
 Rec.call : {n : Rec} -> Rec
@@ -146,43 +185,51 @@ Rec.call : {n : Rec} -> Rec
   dup A = (%n)(~P, #C, #S)
   # C(~n, A)
 
-Rec.stop : Rec
+Rec.halt : Rec
   new Rec {~P, C, S} =>
   S
+
+// This "fuels" recursive functions. Here, I use `Rec.256` (defined below),
+// which gives us a "bound" of 256 calls per recursive function. This can be
+// changed to be a very large number (i.e., 2^64 for example).
+rec : {~T : Type, call : !{x : T} -> T, halt : !T} -> !T
+  dup call = call
+  dup halt = halt
+  (%Rec.256)(~{r} => T, #{~n} => call, #halt)
 
 Rec.induction : {n : Rec} -> Type
   {~P : {n : Rec} -> Type
   , C : ! {~n : Rec, i : P(n)} -> P(Rec.call(n))
-  , S : ! P(Rec.stop)
+  , S : ! P(Rec.halt)
   } -> ! P(n)
 
 Rec.induct : {n : Rec} -> Rec.induction(n)
   %n
 
 Rec.double : {n : Rec} -> Rec
-  new Rec {~P, call, stop} =>
+  new Rec {~P, call, halt} =>
   dup call = call
-  dup stop = stop
+  dup halt = halt
   let moti = {n} => P(Rec.double(n))
   let call = # {~n, i} => call(~Rec.call(Rec.double(n)), call(~Rec.double(n), i))
-  let stop = # stop
-  (%n)(~moti, call, stop)
+  let halt = # halt
+  (%n)(~moti, call, halt)
 
 Rec.256 : Rec
   Rec.double(Rec.double(Rec.double(Rec.double(
   Rec.double(Rec.double(Rec.double(Rec.double(
-  Rec.call(Rec.stop)))))))))
+  Rec.call(Rec.halt)))))))))
 
 // Runtime fusion on repeated not
 Rec.example
   let moti = {n}     => Bool
   let call = {~n, x} => Bool.not_f(x)
-  let stop = Bool.true
-  (%Rec.256)(~moti, #call, #stop)
+  let halt = Bool.true
+  (%Rec.256)(~moti, #call, #halt)
 
 // ::::::::::
 // :: Main ::
 // ::::::::::
 
 main
-  Vector.tail
+  Nat.double.example

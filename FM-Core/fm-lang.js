@@ -115,17 +115,41 @@ const parse = (code, tokenify) => {
     return code[i] === ":";
   }
 
+  function error(error_message) {
+    var part = "";
+    var text = "";
+    text += "[PARSE-ERROR]\n";
+    text += error_message;
+    text += "\nI noticed the problem on line " + (row+1) + ", col " + col + ":\n";
+    for (var ini = idx, il = 0; il < 7 && ini >=          0; --ini) if (code[ini] === "\n") ++il;
+    for (var end = idx, el = 0; el < 6 && end < code.length; ++end) if (code[end] === "\n") ++el;
+    part += code.slice(ini+1, idx) + "<<HERE!>>" + code.slice(idx, end);
+    text += part.split("\n").map((line,i) => {
+      return (i === 6 ? "\x1b[31m" : "\x1b[2m") + ("    " + (row-il+i+1)).slice(-4) + "| " + line + "\x1b[0m";
+    }).join("\n");
+    text += "\nBut it could have happened a little earlier.";
+    var excuses = [
+      "My parse-robot brain isn't perfect, sorry.",
+      "What? If you can't get this right, don't expect me to!",
+      "Like you, I'm doing my best, ok?",
+      "I hope you figure it out!",
+      "I can't help any further. But I can pray for you!",
+      "I could be more precise, but unlike you, I'm not good enough.",
+      "Hey, at least I'm showing a location. I'm looking at you, type-checker...",
+      "Why programming needs to be so hard?",
+      "I hope this doesn't affect your deadlines!",
+      "If this is hard, consider relaxing. You deserve it!",
+      "It takes me some time to process things. Have patience with me!"
+    ];
+    text += "\n" + excuses[Math.floor(Math.random() * excuses.length)];
+    throw text;
+  }
+
   function parse_exact(string) {
     if (!match(string)) {
       var text = "";
       var part = "";
-      text += "Parse error: expected '" + string + "' ";
-      text += "on line " + (row+1) + ", col " + col + ", but found '" + (code[idx] || "(end of file)") + "' instead. Relevant code:\n";
-      for (var ini = idx, il = 0; il < 2 && ini >=          0; --ini) if (code[ini] === "\n") ++il;
-      for (var end = idx, el = 0; el < 6 && end < code.length; ++end) if (code[end] === "\n") ++el;
-      part += code.slice(ini+1, idx) + "<HERE>" + code.slice(idx, end);
-      text += part.split("\n").map((line,i) => ("    " + (row-il+i+1)).slice(-4) + "| " + line).join("\n");
-      throw text;
+      error("Expected '" + string + "', but found '" + (code[idx] || "(end of file)") + "' instead.");
     }
   }
 
@@ -175,7 +199,7 @@ const parse = (code, tokenify) => {
         var ctr = isall ? All : Lam;
         term = ctr(names[i], types[i], term, erase[i]);
         if (isall && !types[i]) {
-          throw "Parse error: invalid forall on line " + (row+1) + ", col " + col + ".";
+          error("Parse error: invalid forall.");
         }
       }
       parsed = term;
@@ -410,12 +434,10 @@ const parse = (code, tokenify) => {
 
     // Case syntax sugar
     else if (match("case<")) {
-      // ? ADT val -> motive
-      // | 
       var adt_name = parse_string();
       var skip = parse_exact(">");
       if (!adts[adt_name]) {
-        throw "Parse error: used case-syntax on undefined type `" + adt_name + "`.";
+        error("Used case-syntax on undefined type `" + adt_name + "`.");
       }
       var {adt_name, adt_pram, adt_indx, adt_ctor} = adts[adt_name];
       var term = parse_term(ctx);
@@ -601,6 +623,7 @@ const parse = (code, tokenify) => {
 
         // Typed definition
         if (match(":")) {
+          var isrec = match_here("!");
           var cased = [];
           var erase = [];
           var names = [];
@@ -634,7 +657,7 @@ const parse = (code, tokenify) => {
                 // This could be improved if the parser kept track of ctx types.
                 var adt_ref = types.map(function go(x) { return x[0] === "App" ? go(x[1].func) : x; });
                 if (adt_ref[i][0] !== "Ref" || !adts[adt_ref[i][1].name]) {
-                  throw "Couldn't find the ADT for the `" + names[i] + "` case of `" + name + "`.";
+                  error("Couldn't find the ADT for the `" + names[i] + "` case of `" + name + "`.");
                 }
                 cadts[i] = adts[adt_ref[i][1].name]; 
               } else {
@@ -672,10 +695,34 @@ const parse = (code, tokenify) => {
           // Typed definition: auto-fills foralls and lambdas
           for (var i = names.length - 1; i >= 0; --i) {
             type = All(names[i], types[i], type, erase[i]);
-            term = Lam(names[i], types[i], term, erase[i]);
+            term = Lam(names[i], null, term, erase[i]);
           }
 
-          defs[name] = Ann(type, term);
+          // Syntax sugar for recursive functions
+          var [is_recursive, term] = unrecurse(term, name);
+          if (is_recursive) {
+            //console.log("found recursive def:", name);
+            if (!isrec) {
+              error("Recursive function '" + name + "' must be annotated with `\x1b[2m:!\x1b[0m`, example: `\x1b[2m" + name + " :! type`\x1b[0m.");
+            }
+            if (!match("*")) {
+              error("The recursive function '" + name + "' needs a halting case. Provide it with `*`.");
+            }
+            var halt = parse_term(names);
+            for (var i = names.length - 1; i >= 0; --i) {
+              halt = Lam(names[i], null, halt, erase[i]);
+            }
+            defs[name+".call"] = Ann(All("rec", type, type, false), Lam(name, null, term, false));
+            defs[name+".halt"] = Ann(type, halt);
+            defs[name] = App(App(App(Ref("rec"), type, true), Put(Ref(name+".call")), false), Put(Ref(name+".halt")), false);
+            //console.log(name+".type", show(defs[name+".type"]));
+            //console.log("call", show(defs[name+".call"]));
+            //console.log("halt", show(defs[name+".halt"]));
+            //console.log("func", show(defs[name]));
+            //process.exit();
+          } else {
+            defs[name] = Ann(type, term);
+          }
 
         // Untyped definition
         } else {
@@ -689,6 +736,138 @@ const parse = (code, tokenify) => {
   }
 
   return tokenify ? {defs, tokens} : defs;
+}
+
+const unrecurse = (term, term_name) => {
+  var is_recursive = false;
+  const go = ([ctor, term], depth) => {
+    switch (ctor) {
+      case "Var":
+        return Var(term.index);
+      case "Typ":
+        return Typ();
+      case "All":
+        var name = term.name;
+        var bind = term.bind;
+        var body = go(term.body, depth + 1);
+        var eras = term.eras;
+        return All(name, bind, body, eras);
+      case "Lam":
+        var name = term.name;
+        var bind = term.bnid;
+        var body = go(term.body, depth + 1);
+        var eras = term.eras;
+        return Lam(name, bind, body, eras);
+      case "App":
+        var func = go(term.func, depth);
+        var argm = term.eras ? term.argm : go(term.argm, depth);
+        var eras = term.eras;
+        return App(func, argm, term.eras);
+      case "Box":
+        var expr = term.expr;
+        return Box(expr);
+      case "Put":
+        var expr = go(term.expr, depth);
+        return Put(expr);
+      case "Dup":
+        var name = term.name;
+        var expr = go(term.expr, depth);
+        var body = go(term.body, depth + 1);
+        return Dup(name, expr, body);
+      case "U32":
+        return U32();
+      case "Num":
+        var numb = term.numb;
+        return Num(numb);
+      case "Op1":
+      case "Op2":
+        var func = term.func;
+        var num0 = go(term.num0, depth);
+        var num1 = go(term.num1, depth);
+        return Op2(func, num0, num1);
+      case "Ite":
+        var cond = go(term.cond, depth);
+        var pair = go(term.pair, depth);
+        return Ite(cond, pair);
+      case "Cpy":
+        var name = term.name;
+        var numb = go(term.numb, depth);
+        var body = go(term.body, depth + 1);
+        return Cpy(name, numb, body);
+      case "Sig":
+        var name = term.name;
+        var typ0 = term.typ0;
+        var typ1 = term.typ1;
+        var eras = term.eras;
+        return Sig(name, typ0, typ1, eras);
+      case "Par":
+        var val0 = go(term.val0, depth);
+        var val1 = go(term.val1, depth);
+        var eras = term.eras;
+        return Par(val0, val1, eras);
+      case "Fst":
+        var pair = go(term.pair, depth);
+        var eras = term.eras;
+        return Fst(pair, eras);
+      case "Snd":
+        var pair = go(term.pair, depth);
+        var eras = term.eras;
+        return Snd(pair, eras);
+      case "Prj":
+        var nam0 = term.nam0;
+        var nam1 = term.nam1;
+        var pair = go(term.pair, depth);
+        var body = go(term.body, depth + 2);
+        var eras = term.eras;
+        return Prj(nam0, nam1, pair, body, eras);
+      case "Eql":
+        var val0 = term.val0;
+        var val1 = term.val1;
+        return Eql(val0, val1);
+      case "Rfl":
+        var expr = go(term.expr, depth);
+        return Rfl(expr);
+      case "Sym":
+        var prof = go(term.prof, depth);
+        return Sym(prof);
+      case "Rwt":
+        var prof = go(term.prof, depth);
+        var name = term.name;
+        var type = go(term.type, depth + 1);
+        var expr = go(term.expr, depth);
+        return Rwt(prof, name, type, expr);
+      case "Cst":
+        var prof = go(term.prof, depth);
+        var val0 = go(term.val0, depth);
+        var val1 = go(term.val1, depth);
+        return Cst(prof, val0, val1);
+      case "Slf":
+        var name = term.name;
+        var type = term.type;
+        return Slf(name, type);
+      case "New":
+        var type = term.type;
+        var expr = go(term.expr, depth);
+        return New(type, expr);
+      case "Use":
+        var expr = go(term.expr, depth);
+        return Use(expr);
+      case "Ann":
+        var type = term.type;
+        var expr = go(term.expr, depth);
+        var done = term.done;
+        return Ann(type, expr, done);
+      case "Ref":
+        if (term.name === term_name) {
+          is_recursive = true;
+          return Var(depth);
+        } else {
+          return Ref(term.name, term.eras);
+        }
+    }
+  };
+  var term = go(term, 0);
+  return [is_recursive, term];
 }
 
 // :::::::::::::::::::::
@@ -782,13 +961,18 @@ const show = ([ctor, args], nams = []) => {
         text = (term[1].func[0] === "App" ? ", " : "") + (term[1].eras ? "~" : "") + show(term[1].argm, nams) + text;
         term = term[1].func;
       }
-      return "(" + show(term, nams) + ")" + "(" + text;
+      if (term[0] === "Ref" || term[0] === "Var") {
+        var func = show(term, nams);
+      } else {
+        var func = "(" + show(term,nams) + ")";
+      }
+      return func + "(" + text;
     case "Box":
       var expr = show(args.expr, nams);
-      return "(!" + expr + ")";
+      return "!" + expr;
     case "Put":
       var expr = show(args.expr, nams);
-      return "(#" + expr + ")";
+      return "#" + expr;
     case "Dup":
       var name = args.name;
       var expr = show(args.expr, nams);
