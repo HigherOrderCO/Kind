@@ -1064,7 +1064,7 @@ const typecheck = (show) => {
         break;
       case "Par":
         if (expect_nf && expect_nf[0] !== "Sig") {
-          ERROR("Annotated type of a pair (" + TERM(Pair(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".\n- Annotated type is " + TERM(expect_nf));
+          ERROR("Annotated type of a pair (" + TERM(Par(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".\n- Annotated type is " + TERM(expect_nf));
         }
         if (expect_nf && expect_nf[1].eras !== term[1].eras) {
           ERROR("Mismatched erasure.");
