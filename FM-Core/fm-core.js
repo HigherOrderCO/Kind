@@ -409,7 +409,7 @@ const norm = (term, defs = {}, weak = false) => {
     if (numb[0] === "Num") {
       return reduce(body(numb));
     } else {
-      return Cpy(name, numb, weak_reduce(body));
+      return Cpy(name, numb, x => weak_reduce(body(x)));
     }
   }
   const first = (pair, eras) => {
