@@ -10,11 +10,9 @@ var fm = module.exports = {
 };
 
 function norm(term, defs, mode = "DEBUG", stats = {}) {
-  //console.log(fm.lang.show(term));
-  //console.log(defs);
   switch (mode) {
     case "DEBUG":
-      return fm.lang.norm(fm.lang.erase(term, defs), defs, false);
+      return fm.lang.erase(fm.lang.norm(term, defs, false), defs, false);
     case "INTERPRETED":
       return fm.lang.norm(fm.lang.erase(term, defs), defs, false);
     case "JAVASCRIPT":
