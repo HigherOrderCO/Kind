@@ -17,25 +17,27 @@ try {
   console.log("Usage: fm [options] [args]");
   console.log("");
   console.log("Evaluation modes (default: -d):");
-  console.log("-d <term> debug (preserves boxes, using HOAS)");
-  console.log("-i <term> interpreted (using HOAS)");
-  console.log("-l <term> lazy (using interaction nets)");
-  console.log("-s <term> strict (using interaction nets)");
-  console.log("-j <term> JavaScript (using native functions)");
+  console.log("-d <file>.<term> debug (preserves boxes, using HOAS)");
+  console.log("-i <file>.<term> interpreted (using HOAS)");
+  console.log("-l <file>.<term> lazy (using interaction nets)");
+  console.log("-s <file>.<term> strict (using interaction nets)");
+  console.log("-j <file>.<term> JavaScript (using native functions)");
   console.log("");
   console.log("Type-checking modes:");
-  console.log("-t <term> performs a type check");
+  console.log("-t <file>.<term> performs a type check");
   console.log("");
   console.log("FM-Lab:");
   console.log("-S <file> saves a file to FM-Lab"); 
+  console.log("");
+  console.log("Note:");
+  console.log("- <file> is the file name, without '.fm'.");
+  console.log("- <term> is the term name.");
   console.log("");
   console.log("Options:");
   console.log("-h hides interaction net stats");
   console.log("-d disables stratification (termination) checks");
   console.log("-p prints net as JSON");
   console.log("-v displays the version");
-  console.log("");
-  console.log("Note: fm will automatically import any local file ending in `.fm`.");
   process.exit();
 }
 
@@ -70,22 +72,11 @@ if (args.v) {
       : "DEBUG";
     var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
-    var code = "";
-    var all_defs = [];
-    var files = fs.readdirSync(".");
-    for (var i = 0; i < files.length; ++i) {
-      if (files[i].slice(-3) === ".fm") {
-        var file_code = fs.readFileSync("./" + files[i], "utf8");
-        all_defs.push((await fm.lang.parse(file_code)).defs);
-      }
-    }
-
-    var defs = {};
-    for (var i = 0; i < all_defs.length; ++i) {
-      for (var def_name in all_defs[i]) {
-        defs[def_name] = all_defs[i][def_name];
-      }
-    }
+    var names = name.split(".");
+    var file = names[0];
+    var defn = names.length > 1 ? names.slice(1).join(".") : "main";
+    var code = fs.readFileSync("./" + file + ".fm", "utf8");
+    var defs = (await fm.lang.parse(code)).defs;
 
     try {
       var stats = {
@@ -95,7 +86,7 @@ if (args.v) {
         input_net: args.p ? null : undefined,
         output_net: args.p ? null : undefined
       };
-      var term = fm.exec(name, defs, mode, args.d, stats);
+      var term = fm.exec(defn, defs, mode, args.d, stats);
       console.log(fm.lang.show(term));
       if (args.p || (mode.slice(0,3) === "OPT" && !args.h)) {
         console.log(JSON.stringify(stats));
