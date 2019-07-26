@@ -38,20 +38,13 @@ function norm(term, defs, mode = "DEBUG", stats = {}) {
 }
 
 function exec(name, defs, mode = "OPTIMAL_LAZY", bipass = false, stats = {}) {
-  return new Promise((resolve, reject) => {
-    if (defs[name] && defs[name][0] === "Ref" && !defs[defs[name][1].name]) {
-      name = defs[name][1].name;
-    }
-    var resolve_defs = defs[name]
-      ? fm.lang.resolve(defs[name], defs)
-      : fm.lang.resolve(fm.lang.Ref(name), {});
-    resolve_defs.then(defs => {
-      var term = defs[name] || fm.lang.Ref(name);
-      var checked = check(term, defs, bipass);
-      var result = fm.norm(checked, defs, mode, stats);
-      resolve(result);
-    }).catch(reject);
-  });
+  if (defs[name] && defs[name][0] === "Ref" && !defs[defs[name][1].name]) {
+    name = defs[name][1].name;
+  }
+  var term = defs[name] || fm.lang.Ref(name);
+  var checked = check(term, defs, bipass);
+  var result = fm.norm(checked, defs, mode, stats);
+  return result;
 }
 
 function check(term, defs, bipass = false) {

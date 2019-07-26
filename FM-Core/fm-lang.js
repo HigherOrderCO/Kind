@@ -47,8 +47,71 @@ const xhr = require("xhr-request-promise");
 // :: Parsing ::
 // :::::::::::::
 
+
 // Converts a string to a term
-const parse = (code, tokenify) => {
+const parse = async (code, tokenify, must_load = {}) => {
+  function get_ref_origin_file(ref) {
+    let at_sign_index = ref.indexOf("@");
+    let dot_index = ref.indexOf(".");
+    if (at_sign_index !== -1 && dot_index !== -1 && at_sign_index < dot_index) {
+      return ref.slice(0, dot_index);
+    } else {
+      return null;
+    }
+  }
+
+  async function resolve(term, used_prefix = null, open = false) {
+    // Finds undefined references to files we don't have
+    rename_refs(term, name => {
+      if (!defs[name]) {
+        let file_name = get_ref_origin_file(name);
+        if (file_name && must_load[file_name] === undefined) {
+          must_load[file_name] = true;
+        }
+      }
+      return name;
+    });
+
+    // Creates requests to load those files
+    let requests = [];
+    for (let file_name in must_load) {
+      if (must_load[file_name]) {
+        must_load[file_name] = false;
+        requests.push(load_file(file_name).then(file_code => [file_name, file_code]));
+      }
+    }
+
+    // Creates a parse for those files
+    let parses = [];
+    var new_files = await Promise.all(requests);
+    for (let i = 0; i < new_files.length; ++i) {
+      let [file_name, file_code] = new_files[i];
+      if (file_code) {
+        parses.push(parse(file_code, tokenify, must_load).then(file_defs => [file_name, file_defs]));
+      }
+    }
+
+    // Prefixes each file's parsed defs/adts and adds to local defs/adts
+    var new_file_parseds = await Promise.all(parses);
+    for (var i = 0; i < new_file_parseds.length; ++i) {
+      let [file_name, file_parseds] = new_file_parseds[i];
+      let {defs: file_defs, adts: file_adts} = file_parseds;
+      let prefix = open ? "" : (used_prefix || file_name) + ".";
+      let do_pfx = term => prefix_refs(prefix, term, file_defs);
+      for (let term_name in file_defs) {
+        defs[prefix + term_name] = do_pfx(file_defs[term_name]);
+      }
+      for (let adt_name in file_adts) {
+        let adt_pram = file_adts[adt_name].adt_pram.map(([name, type, eras]) => [name, do_pfx(type), eras]);
+        let adt_indx = file_adts[adt_name].adt_indx.map(([name, type, eras]) => [name, do_pfx(type), eras]);
+        var adt_ctor = file_adts[adt_name].adt_ctor.map(([name, flds, type]) => [name, flds.map(([name, type, eras]) => [name, do_pfx(type), eras]), do_pfx(type)]);
+        adts[prefix + adt_name] = {adt_pram, adt_indx, adt_ctor};
+      }
+    };
+
+    return term;
+  }
+
   function is_space(char) {
     return char === " " || char === "\t" || char === "\n" || char === "\r" || char === ";";
   }
@@ -406,7 +469,7 @@ const parse = (code, tokenify) => {
       parsed = Ann(type, expr, false);
     }
 
-    // Identiy
+    // Identity
     else if (match("=")) {
       var expr = parse_term(ctx);
       parsed = expr;
@@ -530,11 +593,18 @@ const parse = (code, tokenify) => {
     next_char();
 
     // Shorten
-    if (match("shorten")) {
+    if (match("alias")) {
       var full = parse_string();
       var skip = parse_exact("as");
       var mini = parse_string();
       enlarge[mini] = full;
+
+    // Import
+    } else if (match("import")) {
+      var file = parse_string();
+      var pref = match("as") ? parse_string() : null;
+      var open = match("open");
+      await resolve(Ref(file + ".main"), pref, open);
 
     // Datatypes
     } else if (match("T ")) {
@@ -548,9 +618,9 @@ const parse = (code, tokenify) => {
       if (match("<")) {
         while (idx < code.length) {
           var eras = false;
-          var name = parse_string(); 
+          var name = parse_string();
           var skip = parse_exact(":");
-          var type = parse_term(adt_pram.map((([name,type]) => name)));
+          var type = await resolve(parse_term(adt_pram.map((([name,type]) => name))));
           adt_pram.push([name, type, eras]);
           if (match(">")) break; else parse_exact(",");
         }
@@ -562,9 +632,9 @@ const parse = (code, tokenify) => {
         while (idx < code.length) {
           //var eras = match("~");
           var eras = false;
-          var name = parse_string(); 
+          var name = parse_string();
           var skip = parse_exact(":");
-          var type = parse_term(adt_ctx.concat(adt_indx.map((([name,type]) => name))));
+          var type = await resolve(parse_term(adt_ctx.concat(adt_indx.map((([name,type]) => name)))));
           adt_indx.push([name, type, eras]);
           if (match("}")) break; else parse_exact(",");
         }
@@ -581,19 +651,19 @@ const parse = (code, tokenify) => {
             var eras = match("~");
             var name = parse_string();
             var skip = parse_exact(":");
-            var type = parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name)));
+            var type = await resolve(parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name))));
             ctor_flds.push([name, type, eras]);
             if (match("}")) break; else parse_exact(",");
           }
         }
         // Constructor type (written)
         if (match(":")) {
-          var ctor_type = parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name)));
+          var ctor_type = await resolve(parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name))));
         // Constructor type (auto-filled)
         } else {
           var ctor_indx = [];
           while (match("&")) {
-            ctor_indx.push(parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name))));
+            ctor_indx.push(await resolve(parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name)))));
           }
           var ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
           for (var p = 0; p < adt_pram.length; ++p) {
@@ -638,13 +708,13 @@ const parse = (code, tokenify) => {
               if (match("*")) halti = count;
               names.push(parse_string());
               parse_exact(":");
-              types.push(parse_term(names.slice(0,-1)));
+              types.push(await resolve(parse_term(names.slice(0,-1))));
               if (match("}")) break; else parse_exact(",");
               ++count;
             }
             var skip = parse_exact("->");
           }
-          var type = parse_term(names);
+          var type = await resolve(parse_term(names));
 
           while (boxed && match("unbox")) {
             unbox.push(parse_string());
@@ -652,7 +722,7 @@ const parse = (code, tokenify) => {
 
           // Typed definition without patterns
           if (cased.filter(x => x).length === 0) {
-            var term = parse_term(unbox.concat(names));
+            var term = await resolve(parse_term(unbox.concat(names)));
 
           // Typed definition with patterns
           } else {
@@ -668,7 +738,7 @@ const parse = (code, tokenify) => {
                 if (adt_ref[i][0] !== "Ref" || !adts[adt_ref[i][1].name]) {
                   error("Couldn't find the ADT for the `" + names[i] + "` case of `" + name + "`.");
                 }
-                cadts[i] = adts[adt_ref[i][1].name]; 
+                cadts[i] = adts[adt_ref[i][1].name];
               } else {
                 cadts[i] = null;
               }
@@ -676,22 +746,22 @@ const parse = (code, tokenify) => {
 
             // Typed definition with patterns: parses case-tree
             var case_tree = {};
-            (function parse_case_tree(ctx, a, branch) {
+            await (async function parse_case_tree(ctx, a, branch) {
               if (a < cadts.length) {
                 if (cadts[a] === null) {
-                  return parse_case_tree(ctx, a + 1, branch);
+                  await parse_case_tree(ctx, a + 1, branch);
                 } else {
                   var {adt_name, adt_pram, adt_indx, adt_ctor} = cadts[a];
                   for (var c = 0; c < adt_ctor.length; ++c) {
                     var skip = parse_exact("|");
                     var skip = parse_exact(adt_ctor[c][0]);
                     var vars = adt_ctor[c][1].map((([name,type,eras]) => names[a] + "." + name));
-                    parse_case_tree(ctx.concat(vars), a + 1, branch.concat([adt_ctor[c][0]]));
+                    await parse_case_tree(ctx.concat(vars), a + 1, branch.concat([adt_ctor[c][0]]));
                   }
                 }
               } else {
                 var skip = parse_exact("=");
-                var term = parse_term(ctx);
+                var term = await resolve(parse_term(ctx));
                 case_tree[branch.join("_")] = term;
               }
             })(names, 0, []);
@@ -715,7 +785,7 @@ const parse = (code, tokenify) => {
             if (halti !== null) {
               var halt = Var(names.length - halti - 1);
             } else if (match("*")) {
-              var halt = parse_term(unbox.concat(names));
+              var halt = await resolve(parse_term(unbox.concat(names)));
             } else {
               error("The recursive function '" + name + "' needs a halting case. Provide it using `*`.");
             }
@@ -743,7 +813,7 @@ const parse = (code, tokenify) => {
 
         // Untyped definition
         } else {
-          var term = parse_term([]);
+          var term = await resolve(parse_term([]));
           defs[name] = term;
         }
       }
@@ -752,7 +822,7 @@ const parse = (code, tokenify) => {
     next_char();
   }
 
-  return tokenify ? {defs, tokens} : defs;
+  return {defs, tokens, adts};
 }
 
 const unrecurse = (term, term_name, add_depth) => {
@@ -1208,14 +1278,10 @@ const rename_refs = ([ctor, term], renamer) => {
   }
 }
 
-const prefix_refs = (prefix, defs) => {
-  var new_defs = {};
-  for (var name in defs) {
-    new_defs[prefix + name] = rename_refs(defs[name], ref_name => {
-      return (defs[ref_name] ? prefix : "") + ref_name;
-    });
-  }
-  return new_defs;
+const prefix_refs = (prefix, term, defs) => {
+  return rename_refs(term, ref_name => {
+    return (defs[ref_name] ? prefix : "") + ref_name;
+  });
 };
 
 // :::::::::::::::::::
@@ -1657,77 +1723,6 @@ const load_file = (file) => {
   });
 };
 
-const resolve = (term, defs) => {
-  const get_file_name = name => {
-    let at_sign_index = name.indexOf("@");
-    let dot_index = name.indexOf(".");
-    if (at_sign_index !== -1 && dot_index !== -1 && at_sign_index < dot_index) {
-      return name.slice(0, dot_index);
-    } else {
-      return null;
-    }
-  };
-
-  var DEFS = {...defs};
-
-  let must_request = {};
-
-  return (function resolve_term(term, term_defs) {
-    // Finds undefined references to files we don't have
-    rename_refs(term, name => {
-      if (!term_defs[name]) {
-        let file_name = get_file_name(name);
-        if (file_name && must_request[file_name] === undefined) {
-          must_request[file_name] = true;
-        }
-      }
-      return name;
-    });
-
-    // Creates requests to load those files
-    let requests = [];
-    let must_parse = {};
-    for (let file_name in must_request) {
-      if (must_request[file_name]) { 
-        //console.log("due to " + show(term) + " must request " + file_name);
-        must_request[file_name] = false;
-        requests.push(load_file(file_name).then(file_code => [file_name, file_code]));
-      }
-    }
-
-    // Performs all requests
-    return Promise.all(requests).then((new_files) => {
-      let requests = [];
-
-      // For each new file...
-      for (let i = 0; i < new_files.length; ++i) {
-        // Parse its contents
-        let [file_name, file_code] = new_files[i];
-        if (file_code) {
-          let new_defs = parse(file_code);
-
-          // Creates requests to resolve each new term
-          for (let term_name in new_defs) {
-            //console.log("must resolve term " + term_name);
-            requests.push(resolve_term(new_defs[term_name], new_defs));
-          }
-
-          // Prefixes this file's defs and merges with original defs
-          var prefixed_new_defs = prefix_refs(file_name + ".", new_defs);
-          for (let term_name in prefixed_new_defs) {
-            DEFS[term_name] = prefixed_new_defs[term_name];
-          }
-        }
-      }
-
-      // Wait to resolving all new terms
-      return Promise.all(requests).then(() => {
-        return DEFS;
-      });
-    });
-  })(term, defs);
-};
-
 module.exports = {
   Var,
   Typ,
@@ -1782,5 +1777,4 @@ module.exports = {
   save_file,
   load_file,
   find_term,
-  resolve
 };

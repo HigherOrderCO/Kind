@@ -59,34 +59,34 @@ if (args.v) {
 
 } else {
 
-  var mode
-    = args.d ? "DEBUG"
-    : args.i ? "INTERPRETED"
-    : args.l ? "OPTIMAL_LAZY"
-    : args.s ? "OPTIMAL_STRICT"
-    : args.j ? "JAVASCRIPT"
-    : args.t ? "TYPE"
-    : "DEBUG";
-  var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
-
-  var code = "";
-  var all_defs = [];
-  var files = fs.readdirSync(".");
-  for (var i = 0; i < files.length; ++i) {
-    if (files[i].slice(-3) === ".fm") {
-      var file_code = fs.readFileSync("./" + files[i], "utf8");
-      all_defs.push(fm.lang.parse(file_code));
-    }
-  }
-
-  var defs = {};
-  for (var i = 0; i < all_defs.length; ++i) {
-    for (var def_name in all_defs[i]) {
-      defs[def_name] = all_defs[i][def_name];
-    }
-  }
-
   (async () => {
+    var mode
+      = args.d ? "DEBUG"
+      : args.i ? "INTERPRETED"
+      : args.l ? "OPTIMAL_LAZY"
+      : args.s ? "OPTIMAL_STRICT"
+      : args.j ? "JAVASCRIPT"
+      : args.t ? "TYPE"
+      : "DEBUG";
+    var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
+
+    var code = "";
+    var all_defs = [];
+    var files = fs.readdirSync(".");
+    for (var i = 0; i < files.length; ++i) {
+      if (files[i].slice(-3) === ".fm") {
+        var file_code = fs.readFileSync("./" + files[i], "utf8");
+        all_defs.push((await fm.lang.parse(file_code)).defs);
+      }
+    }
+
+    var defs = {};
+    for (var i = 0; i < all_defs.length; ++i) {
+      for (var def_name in all_defs[i]) {
+        defs[def_name] = all_defs[i][def_name];
+      }
+    }
+
     try {
       var stats = {
         rewrites: 0,
@@ -95,7 +95,7 @@ if (args.v) {
         input_net: args.p ? null : undefined,
         output_net: args.p ? null : undefined
       };
-      var term = await fm.exec(name, defs, mode, args.d, stats);
+      var term = fm.exec(name, defs, mode, args.d, stats);
       console.log(fm.lang.show(term));
       if (args.p || (mode.slice(0,3) === "OPT" && !args.h)) {
         console.log(JSON.stringify(stats));

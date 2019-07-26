@@ -71,7 +71,7 @@ pred : {|n : Nat} -> Nat
 pred.example
   pred(succ(succ(zero)))
 
-predif : {|n : Nat, |b : Bool} -> Nat
+pred_if : {|n : Nat, |b : Bool} -> Nat
 | succ | true  = n.pred
        | false = succ(n.pred)
 | zero | true  = zero
@@ -231,6 +231,5 @@ Rec.example
 // :: Main ::
 // ::::::::::
 
-main :! Nat
-  unbox double
-  double(succ(zero))
+main
+  vhead
