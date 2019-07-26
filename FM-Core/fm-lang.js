@@ -623,11 +623,12 @@ const parse = (code, tokenify) => {
 
         // Typed definition
         if (match(":")) {
-          var isrec = match_here("!");
+          var boxed = match_here("!");
           var cased = [];
           var erase = [];
           var names = [];
           var types = [];
+          var unbox = [];
           if (match("{")) {
             while (idx < code.length) {
               cased.push(match("|"));
@@ -641,9 +642,13 @@ const parse = (code, tokenify) => {
           }
           var type = parse_term(names);
 
+          while (boxed && match("unbox")) {
+            unbox.push(parse_string());
+          }
+
           // Typed definition without patterns
           if (cased.filter(x => x).length === 0) {
-            var term = parse_term(names);
+            var term = parse_term(unbox.concat(names));
 
           // Typed definition with patterns
           } else {
@@ -681,7 +686,6 @@ const parse = (code, tokenify) => {
                   }
                 }
               } else {
-                //console.log("building branch: ", branch, "with ctx: ", JSON.stringify(ctx));
                 var skip = parse_exact("=");
                 var term = parse_term(ctx);
                 case_tree[branch.join("_")] = term;
@@ -694,35 +698,41 @@ const parse = (code, tokenify) => {
 
           // Typed definition: auto-fills foralls and lambdas
           for (var i = names.length - 1; i >= 0; --i) {
-            type = All(names[i], types[i], type, erase[i]);
-            term = Lam(names[i], null, term, erase[i]);
+            var type = All(names[i], types[i], type, erase[i]);
+            var term = Lam(names[i], null, term, erase[i]);
           }
 
-          // Syntax sugar for recursive functions
-          var [is_recursive, term] = unrecurse(term, name);
+          // Typed definition: syntax sugar for recursive functions
+          var [is_recursive, term] = unrecurse(term, name, unbox.length);
           if (is_recursive) {
-            //console.log("found recursive def:", name);
-            if (!isrec) {
-              error("Recursive function '" + name + "' must be annotated with `\x1b[2m:!\x1b[0m`, example: `\x1b[2m" + name + " :! type`\x1b[0m.");
+            if (!boxed) {
+              error("Recursive function '" + name + "' must be a boxed definition (annotated with `\x1b[2m:!\x1b[0m`, example: `\x1b[2m" + name + " :! type`\x1b[0m.)");
             }
             if (!match("*")) {
-              error("The recursive function '" + name + "' needs a halting case. Provide it with `*`.");
+              error("The recursive function '" + name + "' needs a halting case. Provide it using `*`.");
             }
-            var halt = parse_term(names);
+            var term = shift(term, 1, 0);
+            var term = subst(term, Var(0), unbox.length + 1);
+            var term = Lam(name, null, term, false);
+            var halt = parse_term(unbox.concat(names));
             for (var i = names.length - 1; i >= 0; --i) {
-              halt = Lam(names[i], null, halt, erase[i]);
+              var halt = Lam(names[i], null, halt, erase[i]);
             }
-            defs[name+".call"] = Ann(All("rec", type, type, false), Lam(name, null, term, false));
-            defs[name+".halt"] = Ann(type, halt);
-            defs[name] = App(App(App(Ref("rec"), type, true), Put(Ref(name+".call")), false), Put(Ref(name+".halt")), false);
-            //console.log(name+".type", show(defs[name+".type"]));
-            //console.log("call", show(defs[name+".call"]));
-            //console.log("halt", show(defs[name+".halt"]));
-            //console.log("func", show(defs[name]));
-            //process.exit();
+            var type = Box(type);
+            var term = App(App(App(Ref("rec"), type[1].expr, true), Put(term), false), Put(halt), false);
           } else {
-            defs[name] = Ann(type, term);
+            if (boxed) {
+              var type = Box(type);
+              var term = Put(term);
+            }
           }
+
+          // Typed definition: auto-fill unboxings
+          for (var i = 0; i < unbox.length; ++i) {
+            var term = Dup(unbox[unbox.length - i - 1], Ref(unbox[unbox.length - i - 1]), term);
+          }
+
+          defs[name] = Ann(type, term, false);
 
         // Untyped definition
         } else {
@@ -738,7 +748,7 @@ const parse = (code, tokenify) => {
   return tokenify ? {defs, tokens} : defs;
 }
 
-const unrecurse = (term, term_name) => {
+const unrecurse = (term, term_name, add_depth) => {
   var is_recursive = false;
   const go = ([ctor, term], depth) => {
     switch (ctor) {
@@ -754,7 +764,7 @@ const unrecurse = (term, term_name) => {
         return All(name, bind, body, eras);
       case "Lam":
         var name = term.name;
-        var bind = term.bnid;
+        var bind = term.bind;
         var body = go(term.body, depth + 1);
         var eras = term.eras;
         return Lam(name, bind, body, eras);
@@ -860,7 +870,7 @@ const unrecurse = (term, term_name) => {
       case "Ref":
         if (term.name === term_name) {
           is_recursive = true;
-          return Var(depth);
+          return Var(depth + add_depth);
         } else {
           return Ref(term.name, term.eras);
         }

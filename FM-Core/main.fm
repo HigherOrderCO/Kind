@@ -77,13 +77,13 @@ Nat.predif : {|n : Nat, |b : Bool} -> Nat
 | zero | true  = Nat.zero
        | false = Nat.zero
 
-// Recursive functions must be annotated with `:!`. They must also provide a
-// "halt" case with `*`, which will be returned in the case the function runs
-// out of "gas". That's because Formality is terminating. This is NOT a "native"
-// "bounded recursion" feature, instead, it is desugared to `rec(TYPE, {r} =>
-// func[func <- r], halt)`. Notice that the `rec`, the function that repeatedly
-// calls `func` as many times as needed, must be in scope. See `rec` below to
-// see how Church nats can be used to accomplish that.
+// Recursive functions must be boxed (annotated with `:!`). They must also
+// provide a "halt" case with `*`, which will be returned in the case the
+// function runs out of "gas". That's because Formality is terminating. This is
+// NOT a "native" "bounded recursion" feature, instead, it is desugared to
+// `rec(TYPE, {r} => func[func <- r], halt)`. Notice that the `rec`, the
+// function that repeatedly calls `func` as many times as needed, must be in
+// scope. See `rec` below to see how Church nats can be used for that.
 Nat.double :! {n : Nat} -> Nat
   case<Nat> n
   | succ => Nat.succ(Nat.succ(Nat.double(pred)))
@@ -91,9 +91,11 @@ Nat.double :! {n : Nat} -> Nat
   : Nat
   * n
 
-Nat.double.example
-  dup Nat.double = Nat.double
-  # Nat.double(Nat.succ(Nat.succ(Nat.succ(Nat.zero))))
+// Non-recursive functions that use recursive functions must also be boxed.
+// They must unbox the recursive functions they use.
+Nat.double.example :! Nat
+  unbox Nat.double
+  Nat.double(Nat.succ(Nat.zero))
 
 // ::::::::::
 // :: List ::
