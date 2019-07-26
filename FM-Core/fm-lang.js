@@ -608,7 +608,7 @@ const parse = (code, tokenify) => {
       var adt = {adt_pram, adt_indx, adt_ctor, adt_name};
       defs[adt_name] = derive_adt_type(adt);
       for (var c = 0; c < adt_ctor.length; ++c) {
-        defs[adt_name + "." + adt_ctor[c][0]] = derive_adt_ctor(adt, c);
+        defs[adt_ctor[c][0]] = derive_adt_ctor(adt, c);
       }
       adts[adt_name] = adt;
 
@@ -1416,7 +1416,7 @@ const derive_adt_type = ({adt_pram, adt_indx, adt_ctor, adt_name}) => {
                 }
                 rem[0] = "Var";
                 rem[1] = {index: -1 + i + j + 1};
-                var wit = Ref(adt_name + "." + adt_ctor[i][0]);
+                var wit = Ref(adt_ctor[i][0]);
                 for (var P = 0; P < adt_pram.length; ++P) {
                   var wit = App(wit, Var(-1 + j + i + 1 + 1 + adt_indx.length + adt_pram.length - P), true);
                 }
@@ -1533,7 +1533,7 @@ const derive_dependent_match = ({names, types, cased, erase, cadts}, type, case_
             } else if (v < names.length) {
               // If this is the matched value, rebuild it
               if (v === a) {
-                var wit = Ref(adt_name + "." + adt_ctor[c][0]);
+                var wit = Ref(adt_ctor[c][0]);
                 for (var F = 0; F < f; ++F) {
                   wit = App(wit, Var(-1 + v + f - F), adt_ctor[c][1][F][2]);
                 }

@@ -3,79 +3,79 @@
 // ::::::::::
 
 // Bool datatype. Desugars to self-encoded datatypes.
-// def Bool       : Type = $ self {~P : {b : Bool} -> Type, T : (P Bool.true), F : (P Bool.false)} -> (P self)
-// def Bool.true  : Bool = new Bool {~P, T, F} => T
-// def Bool.false : Bool = new Bool {~P, T, F} => F
+// def Bool  : Type = $ self {~P : {b : Bool} -> Type, T : (P true), F : (P false)} -> (P self)
+// def true  : Bool = new Bool {~P, T, F} => T
+// def false : Bool = new Bool {~P, T, F} => F
 T Bool
 | true
 | false 
 
 // Simple not
-Bool.not : {|b : Bool} -> Bool
-| true  = Bool.false
-| false = Bool.true
+not : {|b : Bool} -> Bool
+| true  = false
+| false = true
 
 // Simple and
-Bool.and : {|b0 : Bool, |b1 : Bool} -> Bool
-| true  | true  = Bool.true
-        | false = Bool.false
-| false | true  = Bool.false
-        | false = Bool.false
+and : {|b0 : Bool, |b1 : Bool} -> Bool
+| true  | true  = true
+        | false = false
+| false | true  = false
+        | false = false
 
 // Simple or
-Bool.or : {|b0 : Bool, |b1 : Bool} -> Bool
-| true  | true  = Bool.true
-        | false = Bool.true
-| false | true  = Bool.true
-        | false = Bool.false
+or : {|b0 : Bool, |b1 : Bool} -> Bool
+| true  | true  = true
+        | false = true
+| false | true  = true
+        | false = false
 
 // Not with runtime fusion
-Bool.not_f : {b : Bool} -> Bool
+not_f : {b : Bool} -> Bool
   new Bool {~P, T, F} =>
-    let moti       = {b} => P(Bool.not_f(b))
+    let moti       = {b} => P(not_f(b))
     let case_true  = F
     let case_false = T
     (%b)(~moti, case_true, case_false)
 
 // Type of boolean induction
-Bool.induction : {b : Bool} -> Type
+induction : {b : Bool} -> Type
   {~P : {b : Bool} -> Type
-  , T : P(Bool.true)
-  , F : P(Bool.false)
+  , T : P(true)
+  , F : P(false)
   } -> P(b)
 
 // Boolean induction is just `%b`.
-Bool.induct : {b : Bool} -> Bool.induction(b)
+induct : {b : Bool} -> induction(b)
   %b
 
 // Boolean example
-Bool.example
-  Bool.and(Bool.or(Bool.true, Bool.false), Bool.true)
+example
+  and(or(true, false), true)
 
 // :::::::::
 // :: Nat ::
 // :::::::::
 
 // A natural number. Desugars to:
-// Nat      : Type             = $ self {~P : {n : Nat} -> Type, S : {n : Nat} -> (P (Nat.succ n)), Z : (P Nat.zero)} -> (P self)
-// Nat.succ : {n : Nat} -> Nat = {n, ~P, S, Z} => (S n)
-// Nat.zero : Nat              = {~P, S, Z} => Z
+// Nat  : Type             = $ self {~P : {n : Nat} -> Type, S : {n : Nat} -> (P (succ n)), Z : (P zero)} -> (P self)
+// succ : {n : Nat} -> Nat = {n, ~P, S, Z} => (S n)
+// zero : Nat              = {~P, S, Z} => Z
 T Nat
 | succ {pred : Nat}
 | zero
 
-Nat.pred : {|n : Nat} -> Nat
+pred : {|n : Nat} -> Nat
 | succ = n.pred
-| zero = Nat.zero
+| zero = zero
 
-Nat.pred.example
-  Nat.pred(Nat.succ(Nat.succ(Nat.zero)))
+pred.example
+  pred(succ(succ(zero)))
 
-Nat.predif : {|n : Nat, |b : Bool} -> Nat
+predif : {|n : Nat, |b : Bool} -> Nat
 | succ | true  = n.pred
-       | false = Nat.succ(n.pred)
-| zero | true  = Nat.zero
-       | false = Nat.zero
+       | false = succ(n.pred)
+| zero | true  = zero
+       | false = zero
 
 // Recursive functions must be boxed (annotated with `:!`). They must also
 // provide a "halt" case with `*`, which will be returned in the case the
@@ -86,57 +86,57 @@ Nat.predif : {|n : Nat, |b : Bool} -> Nat
 // scope. See `rec` below to see how Church nats can be used for that.
 // Note: if the halt value isn't any of the function arguments, you can simply
 // provide it after the end of the function by writting `* halt_value` there.
-Nat.double :! {|*n : Nat} -> Nat
-| succ = Nat.succ(Nat.succ(Nat.double(n.pred)))
-| zero = Nat.zero
+double :! {|*n : Nat} -> Nat
+| succ = succ(succ(double(n.pred)))
+| zero = zero
 
 // Non-recursive functions that use recursive functions must also be boxed.
 // They must unbox the recursive functions they use.
-Nat.double.example :! Nat
-  unbox Nat.double
-  Nat.double(Nat.succ(Nat.zero))
+double.example :! Nat
+  unbox double
+  double(succ(zero))
 
 // ::::::::::
 // :: List ::
 // ::::::::::
 
 T List <A : Type>
-| push  {head : A, tail : List(A)}
+| push {head : A, tail : List(A)}
 | empty
 
 // The dependent pattern match syntax is still not able to deal with indices,
 // so we must use the `case` syntax
-List.head : {~T : Type, default : T, list : List(T)} -> T
+head : {~T : Type, default : T, list : List(T)} -> T
   case<List> list
   | push  => head
   | empty => default
   : T
 
-List.tail : {~T : Type, list : List(T)} -> List(T)
+tail : {~T : Type, list : List(T)} -> List(T)
   case<List> list
   | push  => tail
-  | empty => List.empty(~T)
+  | empty => empty(~T)
   : List(T)
 
-List.map :! {~A : Type, fn : !{x : A} -> A, *list : List(!A)} -> List(!A)
+map :! {~A : Type, fn : !{x : A} -> A, *list : List(!A)} -> List(!A)
   dup fn = fn
   case<List> list
   | push =>
     dup head = head
     let head = #fn(head)
-    let tail = List.map<A>(#fn, tail)
-    List.push<!A>(head, tail)
+    let tail = map<A>(#fn, tail)
+    push<!A>(head, tail)
   | empty =>
-    List.empty<!A>
+    empty<!A>
   : List(!A)
   
-List.map.example
-  dup List.map = List.map
-  let list = List.empty<!U32>
-  let list = List.push<!U32>(#1, list)
-  let list = List.push<!U32>(#2, list)
-  let list = List.push<!U32>(#3, list)
-  # List.map<U32>(#{x} => |x * 2|, list)
+map.example
+  dup map = map
+  let list = empty<!U32>
+  let list = push<!U32>(#1, list)
+  let list = push<!U32>(#2, list)
+  let list = push<!U32>(#3, list)
+  # map<U32>(#{x} => |x * 2|, list)
 
 // ::::::::::::
 // :: Vector ::
@@ -144,24 +144,24 @@ List.map.example
 
 // A vector with a statically known length.
 T Vector <A : Type> {len : Nat}
-| push {~len : Nat, head : A, tail : Vector(A, len)} & Nat.succ(len)
-| empty                                              & Nat.zero
+| vpush {~len : Nat, head : A, tail : Vector(A, len)} & succ(len)
+| vempty                                              & zero
 
 // A type-safe `head` that *can't* be used on empty vectors.
-Vector.head : {~T : Type, n : Nat, vector : Vector(T, Nat.succ(n))} -> T
+vhead : {~T : Type, n : Nat, vector : Vector(T, succ(n))} -> T
   case<Vector> vector
-  | push  => head
-  | empty => 0
+  | vpush  => head
+  | vempty => 0
   : case<Nat> len
     | succ => T
     | zero => U32
     : Type
 
-Vector.tail : {~T : Type, n : Nat, vector : Vector(T, n)} -> Vector(T, Nat.pred(n))
+vtail : {~T : Type, n : Nat, vector : Vector(T, n)} -> Vector(T, pred(n))
   case<Vector> vector
-  | push  => tail
-  | empty => Vector.empty(~T)
-  : Vector(T, Nat.pred(len))
+  | vpush  => tail
+  | vempty => vempty(~T)
+  : Vector(T, pred(len))
 
 // :::::::::
 // :: Rec ::
@@ -223,8 +223,8 @@ Rec.256 : Rec
 // Runtime fusion on repeated not
 Rec.example
   let moti = {n}     => Bool
-  let call = {~n, x} => Bool.not_f(x)
-  let halt = Bool.true
+  let call = {~n, x} => not_f(x)
+  let halt = true
   (%Rec.256)(~moti, #call, #halt)
 
 // ::::::::::
@@ -232,5 +232,5 @@ Rec.example
 // ::::::::::
 
 main :! Nat
-  unbox Nat.double
-  Nat.double(Nat.succ(Nat.zero))
+  unbox double
+  double(succ(zero))
