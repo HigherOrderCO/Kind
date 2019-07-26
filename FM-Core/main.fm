@@ -84,12 +84,11 @@ Nat.predif : {|n : Nat, |b : Bool} -> Nat
 // `rec(TYPE, {r} => func[func <- r], halt)`. Notice that the `rec`, the
 // function that repeatedly calls `func` as many times as needed, must be in
 // scope. See `rec` below to see how Church nats can be used for that.
-Nat.double :! {n : Nat} -> Nat
-  case<Nat> n
-  | succ => Nat.succ(Nat.succ(Nat.double(pred)))
-  | zero => Nat.zero
-  : Nat
-  * n
+// Note: if the halt value isn't any of the function arguments, you can simply
+// provide it after the end of the function by writting `* halt_value` there.
+Nat.double :! {|*n : Nat} -> Nat
+| succ = Nat.succ(Nat.succ(Nat.double(n.pred)))
+| zero = Nat.zero
 
 // Non-recursive functions that use recursive functions must also be boxed.
 // They must unbox the recursive functions they use.
@@ -119,7 +118,7 @@ List.tail : {~T : Type, list : List(T)} -> List(T)
   | empty => List.empty(~T)
   : List(T)
 
-List.map :! {~A : Type, fn : !{x : A} -> A, list : List(!A)} -> List(!A)
+List.map :! {~A : Type, fn : !{x : A} -> A, *list : List(!A)} -> List(!A)
   dup fn = fn
   case<List> list
   | push =>
@@ -130,7 +129,6 @@ List.map :! {~A : Type, fn : !{x : A} -> A, list : List(!A)} -> List(!A)
   | empty =>
     List.empty<!A>
   : List(!A)
-  * list
   
 List.map.example
   dup List.map = List.map
@@ -233,5 +231,6 @@ Rec.example
 // :: Main ::
 // ::::::::::
 
-main
-  Nat.double.example
+main :! Nat
+  unbox Nat.double
+  Nat.double(Nat.succ(Nat.zero))

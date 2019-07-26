@@ -627,16 +627,20 @@ const parse = (code, tokenify) => {
           var cased = [];
           var erase = [];
           var names = [];
+          var halti = null;
           var types = [];
           var unbox = [];
           if (match("{")) {
+            var count = 0;
             while (idx < code.length) {
               cased.push(match("|"));
               erase.push(match("~"));
+              if (match("*")) halti = count;
               names.push(parse_string());
               parse_exact(":");
               types.push(parse_term(names.slice(0,-1)));
               if (match("}")) break; else parse_exact(",");
+              ++count;
             }
             var skip = parse_exact("->");
           }
@@ -708,16 +712,19 @@ const parse = (code, tokenify) => {
             if (!boxed) {
               error("Recursive function '" + name + "' must be a boxed definition (annotated with `\x1b[2m:!\x1b[0m`, example: `\x1b[2m" + name + " :! type`\x1b[0m.)");
             }
-            if (!match("*")) {
+            if (halti !== null) {
+              var halt = Var(names.length - halti - 1);
+            } else if (match("*")) {
+              var halt = parse_term(unbox.concat(names));
+            } else {
               error("The recursive function '" + name + "' needs a halting case. Provide it using `*`.");
+            }
+            for (var i = names.length - 1; i >= 0; --i) {
+              var halt = Lam(names[i], null, halt, erase[i]);
             }
             var term = shift(term, 1, 0);
             var term = subst(term, Var(0), unbox.length + 1);
             var term = Lam(name, null, term, false);
-            var halt = parse_term(unbox.concat(names));
-            for (var i = names.length - 1; i >= 0; --i) {
-              var halt = Lam(names[i], null, halt, erase[i]);
-            }
             var type = Box(type);
             var term = App(App(App(Ref("rec"), type[1].expr, true), Put(term), false), Put(halt), false);
           } else {
