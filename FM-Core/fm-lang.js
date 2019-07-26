@@ -49,7 +49,7 @@ const xhr = require("xhr-request-promise");
 
 
 // Converts a string to a term
-const parse = async (code, tokenify, must_load = {}) => {
+const parse = async (code, tokenify) => {
   function get_ref_origin_file(ref) {
     let at_sign_index = ref.indexOf("@");
     let dot_index = ref.indexOf(".");
@@ -62,10 +62,11 @@ const parse = async (code, tokenify, must_load = {}) => {
 
   async function resolve(term, used_prefix = null, open = false) {
     // Finds undefined references to files we don't have
+    var must_load = {};
     rename_refs(term, name => {
       if (!defs[name]) {
         let file_name = get_ref_origin_file(name);
-        if (file_name && must_load[file_name] === undefined) {
+        if (file_name) {
           must_load[file_name] = true;
         }
       }
@@ -75,10 +76,7 @@ const parse = async (code, tokenify, must_load = {}) => {
     // Creates requests to load those files
     let requests = [];
     for (let file_name in must_load) {
-      if (must_load[file_name]) {
-        must_load[file_name] = false;
-        requests.push(load_file(file_name).then(file_code => [file_name, file_code]));
-      }
+      requests.push(load_file(file_name).then(file_code => [file_name, file_code]));
     }
 
     // Creates a parse for those files
@@ -87,7 +85,7 @@ const parse = async (code, tokenify, must_load = {}) => {
     for (let i = 0; i < new_files.length; ++i) {
       let [file_name, file_code] = new_files[i];
       if (file_code) {
-        parses.push(parse(file_code, tokenify, must_load).then(file_defs => [file_name, file_defs]));
+        parses.push(parse(file_code, tokenify).then(file_defs => [file_name, file_defs]));
       }
     }
 
@@ -1693,35 +1691,41 @@ const post = (func, body) => {
 
 const save_file = (file, code) => post("save_file", {file, code});
 const find_term = (term) => post("find_term", {term});
-const load_file = (file) => {
-  var dir_path, file_path;
-  if (fs) {
-    dir_path = path.join(process.cwd(), "fm_modules");
-    file_path = path.join(dir_path, file + ".fm");
-    if (fs.existsSync(file_path)) {
-      return new Promise((resolve, reject) => {
-        fs.readFile(file_path, "utf8", (err, code) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(code);
-          }
-        })
-      });
-    }
-  }
-  return post("load_file", {file}).then(code => {
-    if (fs && code) {
-      var writeCache = () => fs.writeFile(file_path, code, (err, ok) => {});
-      if (!fs.existsSync(dir_path)) {
-        fs.mkdirSync(dir_path, () => writeCache());
+const load_file = (() => {
+  var loading = {};
+  return (file) => {
+    var dir_path, file_path;
+    if (!loading[file]) {
+      if (fs) {
+        var dir_path = path.join(process.cwd(), "fm_modules");
+        var file_path = path.join(dir_path, file + ".fm");
+      }
+      if (fs && fs.existsSync(file_path)) {
+        loading[file] = new Promise((resolve, reject) => {
+          fs.readFile(file_path, "utf8", (err, code) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(code);
+            }
+          })
+        });
       } else {
-        writeCache();
+        loading[file] = post("load_file", {file}).then(code => {
+          if (fs && code) {
+            var writeCache = () => fs.writeFile(file_path, code, (err, ok) => {});
+            if (!fs.existsSync(dir_path)) {
+              fs.mkdirSync(dir_path, () => writeCache());
+            }
+            writeCache();
+          }
+          return code;
+        });
       }
     }
-    return code;
-  });
-};
+    return loading[file];
+  };
+})();
 
 module.exports = {
   Var,

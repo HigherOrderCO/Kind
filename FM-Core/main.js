@@ -62,23 +62,23 @@ if (args.v) {
 } else {
 
   (async () => {
-    var mode
-      = args.d ? "DEBUG"
-      : args.i ? "INTERPRETED"
-      : args.l ? "OPTIMAL_LAZY"
-      : args.s ? "OPTIMAL_STRICT"
-      : args.j ? "JAVASCRIPT"
-      : args.t ? "TYPE"
-      : "DEBUG";
-    var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
-
-    var names = name.split(".");
-    var file = names[0];
-    var defn = names.length > 1 ? names.slice(1).join(".") : "main";
-    var code = fs.readFileSync("./" + file + ".fm", "utf8");
-    var defs = (await fm.lang.parse(code)).defs;
-
     try {
+      var mode
+        = args.d ? "DEBUG"
+        : args.i ? "INTERPRETED"
+        : args.l ? "OPTIMAL_LAZY"
+        : args.s ? "OPTIMAL_STRICT"
+        : args.j ? "JAVASCRIPT"
+        : args.t ? "TYPE"
+        : "DEBUG";
+      var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
+
+      var names = name.split(".");
+      var file = names[0];
+      var defn = names.length > 1 ? names.slice(1).join(".") : "main";
+      var code = fs.readFileSync("./" + file + ".fm", "utf8");
+      var defs = (await fm.lang.parse(code)).defs;
+
       var stats = {
         rewrites: 0,
         loops: 0,
@@ -92,7 +92,7 @@ if (args.v) {
         console.log(JSON.stringify(stats));
       }
     } catch (e) {
-      console.log(e);
+      console.log(e.toString());
     }
   })();
 }

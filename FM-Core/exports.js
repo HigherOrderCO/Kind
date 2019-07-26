@@ -54,7 +54,6 @@ function check(term, defs, bipass = false) {
       return term;
     } catch (e) {
       console.log(e);
-      process.exit();
     }
   } else {
     return term;
