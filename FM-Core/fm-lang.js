@@ -516,7 +516,7 @@ const parse = async (code, tokenify) => {
       var skip = parse_exact(":");
       var moti = parse_term(ctx.concat(adt_indx.map(([name,type]) => name)).concat(["self"]));
       for (var i = 0; i < adt_indx.length; ++i) {
-        var moti = Lam(adt_indx[i][adt_indx.length - i - 1], null, moti, false);
+        var moti = Lam(adt_indx[i][0], null, moti, false);
       }
       var moti = Lam("self", null, moti, false);
       var term = Use(term);
