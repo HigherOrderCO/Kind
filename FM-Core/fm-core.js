@@ -556,8 +556,8 @@ const erase = (term) => {
     case "Lam": return term.eras ? erase(subst(term.body, Num(0), 0)) : Lam(term.name, null, erase(term.body), term.eras);
     case "App": return term.eras ? erase(term.func) : App(erase(term.func), erase(term.argm), term.eras);
     case "Box": return Box(erase(term.expr));
-    case "Put": return erase(term.expr);
-    case "Dup": return erase(subst(term.body, term.expr, 0));
+    case "Put": return Put(erase(term.expr));
+    case "Dup": return Dup(term.name, erase(term.expr), erase(term.body));
     case "U32": return U32();
     case "Num": return Num(term.numb);
     case "Op1": return Op1(term.func, erase(term.num0), erase(term.num1));
