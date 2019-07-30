@@ -398,7 +398,7 @@ const norm = (term, defs = {}, weak = false, force_dup = false) => {
   }
   const if_then_else = (cond, pair) => {
     var cond = reduce(cond);
-    if (cond[0] === "num") {
+    if (cond[0] === "Num") {
       return cond[1].numb > 0 ? reduce(Fst(pair, false, null)) : reduce(Snd(pair, false, null));
     } else {
       return Ite(cond, weak_reduce(pair));
