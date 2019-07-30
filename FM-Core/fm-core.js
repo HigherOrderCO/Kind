@@ -324,7 +324,7 @@ const subst_many = (term, vals, depth) => {
 // ::::::::::::::::
 
 // Reduces a term to normal form or head normal form
-const norm = (term, defs = {}, weak = false) => {
+const norm = (term, defs = {}, weak = false, force_dup = false) => {
   const apply = (func, argm, eras) => {
     var func = reduce(func);
     // ([x]a b) ~> [b/x]a
@@ -357,7 +357,7 @@ const norm = (term, defs = {}, weak = false) => {
   }
   const dereference = (name, eras) => {
     if (defs[name]) {
-      return reduce(unquote(eras ? erase(defs[name], defs) : defs[name], []));
+      return reduce(unquote(eras ? erase(defs[name]) : defs[name], []));
     } else {
       return Ref(name, eras);
     }
@@ -479,8 +479,8 @@ const norm = (term, defs = {}, weak = false) => {
       case "Lam": return Lam(term.name, term.bind, x => weak_reduce(term.body(x)), term.eras);
       case "App": return apply(term.func, term.argm, term.eras);
       case "Box": return Box(weak_reduce(term.expr));
-      case "Put": return Put(weak_reduce(term.expr));
-      case "Dup": return duplicate(term.name, term.expr, term.body);
+      case "Put": return force_dup ? reduce(term.expr) : Put(weak_reduce(term.expr));
+      case "Dup": return force_dup ? reduce(term.body(term.expr)) : duplicate(term.name, term.expr, term.body);
       case "U32": return U32();
       case "Num": return Num(term.numb);
       case "Op1": return op1(term.func, term.num0, term.num1);
@@ -600,10 +600,10 @@ const equal = (a, b, defs) => {
         var {a, b} = node[1];
 
         // Gets whnfs with and without dereferencing
-        var ax = norm(a, {}, true);
-        var bx = norm(b, {}, true);
-        var ay = norm(a, defs, true);
-        var by = norm(b, defs, true);
+        var ax = norm(a, {}, true, true);
+        var bx = norm(b, {}, true, true);
+        var ay = norm(a, defs, true, true);
+        var by = norm(b, defs, true, true);
 
         // If non-deref whnfs are app and fields are equal, then a == b
         var x = null;
@@ -671,7 +671,7 @@ const equal = (a, b, defs) => {
   }
 
   // Expands the search tree until it finds an answer
-  var tree = Eqs(norm(erase(a, defs), defs), norm(erase(b, defs), defs));
+  var tree = Eqs(norm(erase(a), defs, false, true), norm(erase(b), defs, false, true));
   while (tree[0] !== "Val") {
     var tree = step(tree);
   }
@@ -903,7 +903,7 @@ const typecheck = (show) => {
     for (var c = ctx; c !== null; c = c.rest) {
       var name = c.name;
       var type = c.type;
-      txt.push("- " + PADR(max_len, " ", c.name) + " : " + show(norm(type, {}, true), ctx_names(c.rest)));
+      txt.push("- " + PADR(max_len, " ", c.name) + " : " + show(norm(type, {}, true, true), ctx_names(c.rest)));
     }
     return txt.reverse().join("\n");
   };
@@ -933,12 +933,12 @@ const typecheck = (show) => {
     const MATCH = (a, b) => {
       if (!equal(a, b, defs)) {
         throw ERROR("Type mismatch."
-          + "\n- Found type... " + TERM(norm(a, {}, false))
-          + "\n- Instead of... " + TERM(norm(b, {}, false)));
+          + "\n- Found type... " + TERM(norm(a, {}, false, true))
+          + "\n- Instead of... " + TERM(norm(b, {}, false, true)));
       }
     };
 
-    var expect_nf = expect ? norm(expect, defs, true) : null;
+    var expect_nf = expect ? norm(expect, defs, true, true) : null;
     var type;
     switch (term[0]) {
       case "Var":
@@ -976,7 +976,7 @@ const typecheck = (show) => {
         type = term_t;
         break;
       case "App":
-        var func_t = norm(typecheck(term[1].func, null, defs, ctx, [term, ctx]), defs, true);
+        var func_t = norm(typecheck(term[1].func, null, defs, ctx, [term, ctx]), defs, true, true);
         if (func_t[0] !== "All") {
           ERROR("Attempted to apply a value that isn't a function.");
         }
@@ -990,7 +990,7 @@ const typecheck = (show) => {
         if (expect_nf !== null && expect_nf[0] !== "Typ") {
           ERROR("The annotated type of a box (" + TERM(Box(Ref("A"))) + ") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
         }
-        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, true);
+        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, true, true);
         MATCH(expr_t, Typ());
         type = Typ();
         break;
@@ -1003,7 +1003,7 @@ const typecheck = (show) => {
         type = Box(term_t);
         break;
       case "Dup":
-        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, true);
+        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, true, true);
         if (expr_t[0] !== "Box") {
           ERROR("Unboxed duplication.");
         }
@@ -1027,12 +1027,12 @@ const typecheck = (show) => {
         type = U32();
         break;
       case "Ite":
-        var cond_t = norm(typecheck(term[1].cond, null, defs, ctx, [term, ctx]), defs, true);
+        var cond_t = norm(typecheck(term[1].cond, null, defs, ctx, [term, ctx]), defs, true, true);
         if (cond_t[0] !== "U32") {
           ERROR("Attempted to use if on a non-numeric value.");
         }
         var pair_t = expect_nf ? Sig("x", expect_nf, shift(expect_nf, 1, 0), false) : null;
-        var pair_t = norm(typecheck(term[1].pair, pair_t, defs, ctx, [term, ctx]), defs, true);
+        var pair_t = norm(typecheck(term[1].pair, pair_t, defs, ctx, [term, ctx]), defs, true, true);
         if (pair_t[0] !== "Sig") {
           ERROR("The body of an if must be a pair.");
         }
@@ -1044,7 +1044,7 @@ const typecheck = (show) => {
         type = expect_nf || typ0_v;
         break;
       case "Cpy":
-        var numb_t = norm(typecheck(term[1].numb, null, defs, ctx, [term, ctx]), defs, true);
+        var numb_t = norm(typecheck(term[1].numb, null, defs, ctx, [term, ctx]), defs, true, true);
         if (numb_t[0] !== "U32") {
           ERROR("Attempted to use cpy on a non-numeric value.");
         }
@@ -1079,7 +1079,7 @@ const typecheck = (show) => {
         type = expect_nf || Sig("x", val0_t, val1_t, term[1].eras);
         break;
       case "Fst":
-        var pair_t = norm(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, true);
+        var pair_t = norm(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, true, true);
         if (pair_t[0] !== "Sig") {
           ERROR("Attempted to extract the first element of a term that isn't a pair.");
         }
@@ -1089,7 +1089,7 @@ const typecheck = (show) => {
         type = pair_t[1].typ0;
         break;
       case "Snd":
-        var pair_t = norm(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, true);
+        var pair_t = norm(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, true, true);
         if (pair_t[0] !== "Sig") {
           ERROR("Attempted to extract the second element of a term that isn't a pair.");
         }
@@ -1099,7 +1099,7 @@ const typecheck = (show) => {
         type = subst(pair_t[1].typ1, Fst(term[1].pair, term[1].eras), 0);
         break;
       case "Prj":
-        var pair_t = norm(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, true);
+        var pair_t = norm(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, true, true);
         if (pair_t[0] !== "Sig") {
           ERROR("Attempted to project the elements of a term that isn't a pair.");
         }
@@ -1119,14 +1119,14 @@ const typecheck = (show) => {
         type = Eql(term[1].expr, term[1].expr);
         break;
       case "Sym":
-        var prof_t = norm(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, true);
+        var prof_t = norm(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, true, true);
         if (prof_t[0] !== "Eql") {
           ERROR("Attempted to use sym with an invalid equality proof.");
         }
         type = Eql(prof_t[1].val1, prof_t[1].val0);
         break;
       case "Rwt":
-        var prof_t = norm(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, true);
+        var prof_t = norm(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, true, true);
         if (prof_t[0] !== "Eql") {
           ERROR("Attempted to use rwt with an invalid equality proof.");
         }
@@ -1136,7 +1136,7 @@ const typecheck = (show) => {
         type = subst(term[1].type, prof_t[1].val1, 0);
         break;
       case "Cst":
-        var prof_t = norm(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, true);
+        var prof_t = norm(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, true, true);
         if (prof_t[0] !== "Eql") {
           ERROR("Attempted to use rwt with an invalid equality proof.");
         }
@@ -1154,7 +1154,7 @@ const typecheck = (show) => {
         MATCH(type_t, Typ());
         return Typ();
       case "New":
-        var type = norm(term[1].type, defs, true);
+        var type = norm(term[1].type, defs, true, true);
         if (type[0] !== "Slf") {
           ERROR("Attempted to make an instance of a type that isn't self.");
         }
@@ -1163,7 +1163,7 @@ const typecheck = (show) => {
         type = term[1].type;
         break;
       case "Use":
-        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, true);
+        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, true, true);
         if (expr_t[0] !== "Slf") {
           ERROR("Attempted to use a value that isn't a self type.");
         }

@@ -1086,7 +1086,7 @@ const show = ([ctor, args], nams = []) => {
       var name = args.name;
       var typ0 = show(args.typ0, nams);
       var typ1 = show(args.typ1, nams.concat([name]));
-      var comm = args.eras ? " ~ " : ",";
+      var comm = args.eras ? " ~ " : ", ";
       return "[" + name + " : " + typ0 + comm + typ1 + "]";
     case "Par":
       var text = term_to_text([ctor, args]);
