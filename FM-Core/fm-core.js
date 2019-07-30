@@ -415,7 +415,7 @@ const norm = (term, defs = {}, weak = false, force_dup = false) => {
   const first = (pair, eras) => {
     var pair = reduce(pair);
     if (pair[0] === "Par") {
-      return pair[1].val0;
+      return reduce(pair[1].val0);
     } else {
       return Fst(pair, eras);
     }
@@ -423,7 +423,7 @@ const norm = (term, defs = {}, weak = false, force_dup = false) => {
   const second = (pair, eras) => {
     var pair = reduce(pair);
     if (pair[0] === "Par") {
-      return pair[1].val1;
+      return reduce(pair[1].val1);
     } else {
       return Snd(pair, eras);
     }
@@ -863,6 +863,7 @@ const boxcheck = show => ([ctor, term], defs = {}, ctx = []) => {
 // :: Type Checking ::
 // :::::::::::::::::::
 
+var K = 0;
 const typecheck = (show) => {
 
   const PADR = (len, chr, str) => {
@@ -1007,9 +1008,9 @@ const typecheck = (show) => {
         if (expr_t[0] !== "Box") {
           ERROR("Unboxed duplication.");
         }
-        var ex_ctx = ctx_ext(term[1].name, expr_t[1].expr, ctx);
-        var body_t = typecheck(term[1].body, expect_nf && shift(expect_nf, 1, 0), defs, ex_ctx, [term, ctx]);
-        type = subst(body_t, Dup(term[1].name, term[1].expr, Var(0)), 0);
+        var unboxd = Ann(expr_t[1].expr, Dup(term[1].name, term[1].expr, Var(0)), true);
+        var term_t = typecheck(subst(term[1].body, unboxd, 0), expect_nf, defs, ctx, [term, ctx]);
+        type = term_t;
         break;
       case "U32":
         type = Typ();
@@ -1064,7 +1065,7 @@ const typecheck = (show) => {
         break;
       case "Par":
         if (expect_nf && expect_nf[0] !== "Sig") {
-          ERROR("Annotated type of a pair (" + TERM(Par(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".\n- Annotated type is " + TERM(expect_nf));
+          ERROR("Annotated type of a pair (" + TERM(Par(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".\n- Annotated type is " + TERM(norm(expect_nf, defs, true, true)));
         }
         if (expect_nf && expect_nf[1].eras !== term[1].eras) {
           ERROR("Mismatched erasure.");
