@@ -1071,7 +1071,11 @@ const typecheck = (show) => {
           ERROR("Mismatched erasure.");
         }
         var val0_t = typecheck(term[1].val0, expect_nf && expect_nf[1].typ0, defs, ctx, [term, ctx]);
-        var val1_t = typecheck(term[1].val1, expect_nf && subst(expect_nf[1].typ1, term[1].val0, 0), defs, ctx, [term, ctx]);
+        if (expect_nf) {
+          var val1_t = typecheck(term[1].val1, subst(expect_nf[1].typ1, term[1].val0, 0), defs, ctx, [term, ctx]);
+        } else {
+          var val1_t = shift(typecheck(term[1].val1, null, defs, ctx, [term, ctx]), 1, 0);
+        }
         if (term[1].eras && !equal(term[1].val0, term[1].val1, defs)) {
           ERROR("Dependent interesction values must have same erasure."
             + "\n- Erasure 0 is " + TERM(DENON(term[1].val0, defs))
