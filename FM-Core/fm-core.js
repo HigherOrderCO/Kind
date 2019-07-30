@@ -1047,10 +1047,9 @@ const typecheck = (show) => {
       case "Cpy":
         var numb_t = norm(typecheck(term[1].numb, null, defs, ctx, [term, ctx]), defs, true, true);
         if (numb_t[0] !== "U32") {
-          ERROR("Attempted to use cpy on a non-numeric value.");
+          ERROR("Atempted to copy a non-numeric value.");
         }
-        var ex_ctx = ctx_ext(term[1].name, U32(), ctx);
-        type = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
+        type = typecheck(subst(term[1].body, term[1].numb, 0), expect_nf, defs, ctx, [term, ctx]);
         break;
       case "Sig":
         if (expect_nf && expect_nf[0] !== "Typ") {
