@@ -429,34 +429,43 @@ const parse = async (code, tokenify) => {
     }
 
     // Reflexivity
-    else if (match("rfl ")) {
+    else if (match("refl<")) {
       var expr = parse_term(ctx);
+      var skip = parse_exact(">");
       parsed = Rfl(expr);
     }
 
     // Symmetry
-    else if (match("sym ")) {
+    else if (match("sym<")) {
       var prof = parse_term(ctx);
+      var skip = parse_exact(">");
       parsed = Sym(prof);
     }
 
     // Rewrite
-    else if (match("rwt ")) {
+    else if (match("rewrite<")) {
       var prof = parse_term(ctx);
-      var skip = parse_exact("<");
-      var name = parse_string();
-      var skip = parse_exact("@");
-      var type = parse_term(ctx.concat([name]));
       var skip = parse_exact(">");
+      var skip = parse_exact("{");
+      var name = parse_string();
+      var skip = parse_exact("in");
+      var type = parse_term(ctx.concat([name]));
+      var skip = parse_exact("}");
+      var skip = parse_exact("(");
       var expr = parse_term(ctx);
-      parsed = Rwt(prof, name, type, expr);
+      var skip = parse_exact(")");
+      parsed = Rwt(name, type, prof, expr);
     }
 
     // Cast
-    else if (match("cst ")) {
+    else if (match("cast<")) {
       var prof = parse_term(ctx);
+      var skip = parse_exact(",");
       var val0 = parse_term(ctx);
+      var skip = parse_exact(">");
+      var skip = parse_exact("(");
       var val1 = parse_term(ctx);
+      var skip = parse_exact(")");
       parsed = Cst(prof, val0, val1);
     }
 
@@ -916,11 +925,11 @@ const unrecurse = (term, term_name, add_depth) => {
         var prof = go(term.prof, depth);
         return Sym(prof);
       case "Rwt":
-        var prof = go(term.prof, depth);
         var name = term.name;
         var type = go(term.type, depth + 1);
+        var prof = go(term.prof, depth);
         var expr = go(term.expr, depth);
-        return Rwt(prof, name, type, expr);
+        return Rwt(name, type, prof, expr);
       case "Cst":
         var prof = go(term.prof, depth);
         var val0 = go(term.val0, depth);
@@ -1119,21 +1128,21 @@ const show = ([ctor, args], nams = []) => {
       return "<" + val0 + " == " + val1 + ">";
     case "Rfl":
       var expr = show(args.expr, nams);
-      return "(rfl " + expr + ")";
+      return "refl<" + expr + ">";
     case "Sym":
       var prof = show(args.prof, nams);
-      return "(sym " + prof + ")";
+      return "sym(" + prof + ")";
     case "Rwt":
-      var prof = show(args.prof, nams);
       var name = args.name;
       var type = show(args.type, nams.concat([name]));
+      var prof = show(args.prof, nams);
       var expr = show(args.expr, nams);
-      return "(rwt " + prof + " <" + name + " @ " + type + "> " + expr + ")";
+      return "rewrite<" + prof + ">{" + name + " in " + type + "}(" + expr + ")";
     case "Cst":
       var prof = show(args.prof, nams);
       var val0 = show(args.val0, nams);
       var val1 = show(args.val1, nams);
-      return "(cst " + prof + " " + val0 + " " + val1 + ")";
+      return "cast<" + prof + ", " + val0 + ">(" + val1 + ")";
     case "Slf":
       var name = args.name;
       var type = show(args.type, nams.concat([name]));
@@ -1249,7 +1258,7 @@ const rename_refs = ([ctor, term], renamer) => {
       var name = term.name;
       var type = rename_refs(term.type, renamer);
       var expr = rename_refs(term.expr, renamer);
-      return Rwt(prof, name, type, expr);
+      return Rwt(name, type, prof, expr);
     case "Cst":
       var prof = rename_refs(term.prof, renamer);
       var val0 = rename_refs(term.val0, renamer);

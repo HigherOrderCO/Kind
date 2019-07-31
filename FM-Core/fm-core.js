@@ -53,7 +53,7 @@ const Prj = (nam0, nam1, pair, body, eras) => ["Prj", {nam0, nam1, pair, body, e
 const Eql = (val0, val1)                   => ["Eql", {val0, val1}];
 const Rfl = (expr)                         => ["Rfl", {expr}];
 const Sym = (prof)                         => ["Sym", {prof}];
-const Rwt = (prof, name, type, expr)       => ["Rwt", {prof, name, type, expr}];
+const Rwt = (name, type, prof, expr)       => ["Rwt", {name, type, prof, expr}];
 const Cst = (prof, val0, val1)             => ["Cst", {prof, val0, val1}];
 const Slf = (name, type)                   => ["Slf", {name, type}];
 const New = (type, expr)                   => ["New", {type, expr}];
@@ -157,11 +157,11 @@ const shift = ([ctor, term], inc, depth) => {
       var prof = shift(term.prof, inc, depth);
       return Sym(prof);
     case "Rwt":
-      var prof = shift(term.prof, inc, depth);
       var name = term.name;
       var type = shift(term.type, inc, depth + 1);
+      var prof = shift(term.prof, inc, depth);
       var expr = shift(term.expr, inc, depth);
-      return Rwt(prof, name, type, expr);
+      return Rwt(name, type, prof, expr);
     case "Cst":
       var prof = shift(term.prof, inc, depth);
       var val0 = shift(term.val0, inc, depth);
@@ -280,11 +280,11 @@ const subst = ([ctor, term], val, depth) => {
       var prof = subst(term.prof, val, depth);
       return Sym(prof);
     case "Rwt":
-      var prof = subst(term.prof, val, depth);
       var name = term.name;
       var type = subst(term.type, val && shift(val, 1, 0), depth + 1);
+      var prof = subst(term.prof, val, depth);
       var expr = subst(term.expr, val, depth);
-      return Rwt(prof, name, type, expr);
+      return Rwt(name, type, prof, expr);
     case "Cst":
       var prof = subst(term.prof, val, depth);
       var val0 = subst(term.val0, val, depth);
@@ -461,7 +461,7 @@ const norm = (term, defs = {}, weak = false, force_dup = false) => {
       case "Eql": return Eql(unquote(term.val0, vars), unquote(term.val1, vars));
       case "Rfl": return Rfl(unquote(term.expr, vars));
       case "Sym": return Sym(unquote(term.prof, vars));
-      case "Rwt": return Rwt(unquote(term.prof, vars), term.name, unquote(term.type, vars), unquote(term.expr, vars));
+      case "Rwt": return Rwt(term.name, unquote(term.type, vars), unquote(term.prof, vars), unquote(term.expr, vars));
       case "Cst": return Cst(unquote(term.prof, vars), unquote(term.val1, vars), unquote(term.val1, vars));
       case "Slf": return Slf(term.name, x => unquote(term.type, [x].concat(vars)));
       case "New": return New(unquote(term.type, vars), unquote(term.expr, vars));
@@ -532,7 +532,7 @@ const norm = (term, defs = {}, weak = false, force_dup = false) => {
       case "Eql": return Eql(quote(term.val0, depth), quote(term.val1, depth));
       case "Rfl": return Rfl(quote(term.expr, depth));
       case "Sym": return Sym(quote(term.prof, depth));
-      case "Rwt": return Rwt(quote(term.prof, depth), term.name, quote(term.type, depth + 1), quote(term.expr, depth));
+      case "Rwt": return Rwt(term.name, quote(term.type, depth + 1), quote(term.prof, depth), quote(term.expr, depth));
       case "Cst": return Cst(quote(term.prof, depth), quote(term.val0, depth), quote(term.val1, depth));
       case "Slf": return Slf(term.name, quote(term.type(Var(depth)), depth + 1));
       case "New": return New(quote(term.type, depth), quote(term.expr, depth));
