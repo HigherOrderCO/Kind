@@ -7,7 +7,7 @@ const {
   Box,
   Put,
   Dup,
-  U32,
+  Wrd,
   Num,
   Op1,
   Op2,
@@ -184,9 +184,9 @@ const parse = async (code, tokenify) => {
     text += "\nI noticed the problem on line " + (row+1) + ", col " + col + ":\n";
     for (var ini = idx, il = 0; il < 7 && ini >=          0; --ini) if (code[ini] === "\n") ++il;
     for (var end = idx, el = 0; el < 6 && end < code.length; ++end) if (code[end] === "\n") ++el;
-    part += code.slice(ini+1, idx) + "<<HERE!>>" + code.slice(idx, end);
+    part += "\x1b[31m" + code.slice(ini+1, idx) + "\x1b[4m" + code[idx] + "\x1b[0m\x1b[31m" + code.slice(idx + 1, end) + "\x1b[0m";
     text += part.split("\n").map((line,i) => {
-      return (i === 6 ? "\x1b[31m" : "\x1b[2m") + ("    " + (row-il+i+1)).slice(-4) + "| " + line + "\x1b[0m";
+      return (i === 7 ? "\x1b[31m" : "\x1b[2m") + ("    " + (row-il+i+1)).slice(-4) + "| " + line + "\x1b[0m";
     }).join("\n");
     text += "\nBut it could have happened a little earlier.";
     var excuses = [
@@ -222,6 +222,14 @@ const parse = async (code, tokenify) => {
       next();
     }
     return name;
+  }
+
+  function parse_op(func) {
+    var num0 = parse_term(ctx);
+    var skip = parse_exact(",");
+    var num1 = parse_term(ctx);
+    var skip = parse_exact(")");
+    return Op2(func, num0, num1);
   }
 
   function parse_term(ctx) {
@@ -294,19 +302,28 @@ const parse = async (code, tokenify) => {
       parsed = subst(body, copy, 0);
     }
 
-    // U32
-    else if (match("U32")) {
-      parsed = U32();
+    // Wrd
+    else if (match("Word")) {
+      parsed = Wrd();
     }
 
-    // Operation
-    else if (match("|")) {
-      var num0 = parse_term(ctx);
-      var func = parse_string(c => !is_space(c));
-      var num1 = parse_term(ctx);
-      var skip = parse_exact("|");
-      parsed = Op2(func, num0, num1);
-    }
+    // Operations
+    else if (match("+("))  { parsed = parse_op("+"); }
+    else if (match("-("))  { parsed = parse_op("-"); }
+    else if (match("*("))  { parsed = parse_op("*"); }
+    else if (match("/("))  { parsed = parse_op("/"); }
+    else if (match("%("))  { parsed = parse_op("%"); }
+    else if (match("**(")) { parsed = parse_op("**"); }
+    else if (match("^^(")) { parsed = parse_op("^^"); }
+    else if (match("&("))  { parsed = parse_op("&"); }
+    else if (match("|("))  { parsed = parse_op("|"); }
+    else if (match("^("))  { parsed = parse_op("^"); }
+    else if (match("~("))  { parsed = parse_op("~"); }
+    else if (match(">>(")) { parsed = parse_op(">>"); }
+    else if (match("<<(")) { parsed = parse_op("<<"); }
+    else if (match(">("))  { parsed = parse_op(">"); }
+    else if (match("<("))  { parsed = parse_op("<"); }
+    else if (match("==(")) { parsed = parse_op("=="); }
 
     // String
     else if (match("\"")) {
@@ -317,21 +334,61 @@ const parse = async (code, tokenify) => {
         next();
       }
       next();
-      parsed = text_to_term(text);
+      var bytes = [].slice.call(new TextEncoder("utf-8").encode(text), 0);
+      while (bytes.length % 4 !== 0) {
+        bytes.push(0);
+      }
+      var nums = new Uint32Array(new Uint8Array(bytes).buffer);
+      var term = App(Ref("nil"), Wrd(), true);
+      for (var i = nums.length - 1; i >= 0; --i) {
+        var term = App(App(App(Ref("cons"), Wrd(), true), Num(nums[i]), false), term, false);
+      }
+      parsed = term;
     }
 
-    // PBT
-    else if (match("^^")) {
-      var name = parse_string();
-      var numb = Number(name);
-      parsed = numb_to_tree_term(numb);
+    // List
+    else if (match("L<")) {
+      var type = parse_term(ctx);
+      var skip = parse_exact(">");
+      var list = [];
+      var skip = parse_exact("[");
+      while (idx < code.length) {
+        list.push(parse_term(ctx));
+        if (match("]")) break; else parse_exact(",");
+      }
+      var term = App(Ref("nil"), type, true);
+      for (var i = list.length - 1; i >= 0; --i) {
+        var term = App(App(App(Ref("cons"), type, true), list[i], false), term, false);
+      }
+      parsed = term;
     }
 
     // Nat
-    else if (match("^")) {
+    else if (match("0n")) {
       var name = parse_string();
       var numb = Number(name);
-      parsed = numb_to_term(numb);
+      var term = Ref("zero");
+      for (var i = 0; i < numb; ++i) {
+        term = App(Ref("succ"), term, false);
+      }
+      parsed = term;
+    }
+
+    // Rec
+    else if (match("0r")) {
+      var name = parse_string();
+      var numb = Number(name);
+      var bits = numb.toString(2);
+      var bits = bits === "0" ? "" : bits;
+      var term = Ref("halt");
+      for (var i = 0; i < bits.length; ++i) {
+        term = App(Ref("twice"), term, false);
+        if (bits[i] === "1") {
+          term = App(Ref("call"), term, false);
+        }
+      }
+      console.log(show(term));
+      parsed = term;
     }
 
     // If-Then-Else
@@ -381,26 +438,30 @@ const parse = async (code, tokenify) => {
     }
 
     // First
-    else if (match("fst ")) {
+    else if (match("fst(")) {
       var pair = parse_term(ctx);
+      var skip = parse_exact(")");
       parsed = Fst(pair, false);
     }
 
     // First (erased)
-    else if (match("~fst ")) {
+    else if (match("~fst(")) {
       var pair = parse_term(ctx);
+      var skip = parse_exact(")");
       parsed = Fst(pair, true);
     }
 
     // Second
-    else if (match("snd ")) {
+    else if (match("snd(")) {
       var pair = parse_term(ctx);
+      var skip = parse_exact(")");
       parsed = Snd(pair, false);
     }
 
     // Second (erased)
-    else if (match("~snd ")) {
+    else if (match("~snd(")) {
       var pair = parse_term(ctx);
+      var skip = parse_exact(")");
       parsed = Snd(pair, true);
     }
 
@@ -418,11 +479,11 @@ const parse = async (code, tokenify) => {
     }
 
     // Equality
-    else if (match("<")) {
+    else if (match("=(")) {
       var val0 = parse_term(ctx);
-      var skip = parse_exact("==");
+      var skip = parse_exact(",");
       var val1 = parse_term(ctx);
-      var skip = parse_exact(">");
+      var skip = parse_exact(")");
       parsed = Eql(val0, val1);
     }
 
@@ -831,6 +892,8 @@ const parse = async (code, tokenify) => {
           var term = await resolve(parse_term([]));
           defs[name] = term;
         }
+      } else {
+        break;
       }
     }
 
@@ -876,8 +939,8 @@ const unrecurse = (term, term_name, add_depth) => {
         var expr = go(term.expr, depth);
         var body = go(term.body, depth + 1);
         return Dup(name, expr, body);
-      case "U32":
-        return U32();
+      case "Wrd":
+        return Wrd();
       case "Num":
         var numb = term.numb;
         return Num(numb);
@@ -1033,15 +1096,10 @@ const show = ([ctor, args], nams = []) => {
       var names = [];
       var types = [];
       while (term[0] === "Lam") {
-        numb = term_to_numb(term);
-        if (numb !== null) {
-          break;
-        } else {
-          erase.push(term[1].eras);
-          names.push(term[1].name);
-          types.push(term[1].bind ? show(term[1].bind, nams.concat(names.slice(0,-1))) : null);
-          term = term[1].body;
-        }
+        erase.push(term[1].eras);
+        names.push(term[1].name);
+        types.push(term[1].bind ? show(term[1].bind, nams.concat(names.slice(0,-1))) : null);
+        term = term[1].body;
       }
       var text = "{";
       for (var i = 0; i < names.length; ++i) {
@@ -1080,8 +1138,8 @@ const show = ([ctor, args], nams = []) => {
       var expr = show(args.expr, nams);
       var body = show(args.body, nams.concat([name]));
       return "dup " + name + " = " + expr + "; " + body;
-    case "U32":
-      return "U32";
+    case "Wrd":
+      return "Word";
     case "Num":
       return args.numb.toString();
     case "Op1":
@@ -1106,7 +1164,7 @@ const show = ([ctor, args], nams = []) => {
       var comm = args.eras ? " ~ " : ", ";
       return "[" + name + " : " + typ0 + comm + typ1 + "]";
     case "Par":
-      var text = term_to_text([ctor, args]);
+      var text = pretty_print([ctor, args]);
       if (text !== null) {
         return "\"" + text + "\"";
       } else {
@@ -1133,7 +1191,7 @@ const show = ([ctor, args], nams = []) => {
     case "Eql":
       var val0 = show(args.val0, nams);
       var val1 = show(args.val1, nams);
-      return "<" + val0 + " == " + val1 + ">";
+      return "=(" + val0 + ", " + val1 + ")";
     case "Rfl":
       var expr = show(args.expr, nams);
       return "refl<" + expr + ">";
@@ -1205,8 +1263,8 @@ const rename_refs = ([ctor, term], renamer) => {
       var expr = rename_refs(term.expr, renamer);
       var body = rename_refs(term.body, renamer);
       return Dup(name, expr, body);
-    case "U32":
-      return U32();
+    case "Wrd":
+      return Wrd();
     case "Num":
       var numb = term.numb;
       return Num(numb);
@@ -1303,104 +1361,20 @@ const prefix_refs = (prefix, term, defs) => {
 // :: Syntax Sugars ::
 // :::::::::::::::::::
 
-// Converts an utf-8 string to a λ-encoded term
-const text_to_term = (text) => {
-  // Converts UTF-8 to bytes
-  var bytes = [].slice.call(new TextEncoder("utf-8").encode(text), 0);
-
-  // Converts bytes to uints
-  while (bytes.length % 4 !== 0) {
-    bytes.push(0);
-  }
-  var nums = new Uint32Array(new Uint8Array(bytes).buffer);
-
-  // Converts uints to C-List of nums
-  var term = Var(0);
-  for (var i = nums.length - 1; i >= 0; --i) {
-    term = App(App(Var(1), Num(nums[i]), false), term, false);
-  }
-  term = Par(Num(0x74786574), Lam("c", null, Dup("c", Var(0), Put(Lam("n", null, term, false))), false), false);
-  return term;
-}
-
-// Converts a λ-encoded term to a string, if possible
-const term_to_text = (term) => {
+const pretty_print = (term) => {
   try {
-    if (term[1].val0[1].numb === 0x74786574) {
-      try {
-        term = term[1].val1[1].body[1].body[1].expr[1].body;
-      } catch(e) {
-        term = term[1].val1[1].body[1].body;
-      }
+    if (term[1].val0[1].numb === 0x53484f57) {
+      term = term[1].val1;
       var nums = [];
-      while (term[0] !== "Var") {
-        if (term[1].func[1].func[1].index !== 1) {
-          return null;
-        }
+      while (term[1].body[1].body[0] !== "Var") {
+        term = term[1].body[1].body;
         nums.push(term[1].func[1].argm[1].numb);
         term = term[1].argm;
-      }
-      if (term[1].index !== 0) {
-        return null;
       }
       return new TextDecoder("utf-8").decode(new Uint8Array(new Uint32Array(nums).buffer));
     } else {
       return null;
     }
-  } catch (e) {
-    return null;
-  }
-}
-
-// Converts a number to a λ-encoded nat for repeated application (bounded for-loop)
-const numb_to_term = (numb) => {
-  var term = Var(0);
-  var log2 = Math.floor(Math.log(numb) / Math.log(2));
-  for (var i = 0; i < log2 + 1; ++i) {
-    term = (numb >>> (log2 - i)) & 1 ? App(Var(i + 1), term, false) : term;
-  }
-  term = Put(Lam("x", null, term, false));
-  for (var i = 0; i < log2; ++i) {
-    term = Dup("s" + (log2 - i), Put(Lam("x", null, App(Var(1), App(Var(1), Var(0), false), false), false)), term);
-  }
-  term = Lam("s", null, Dup("s0", Var(0), term), false);
-  return term;
-}
-
-// Converts a number to a λ-encoded nat for repeated application (bounded for-loop)
-const numb_to_tree_term = (numb) => {
-  var term = Put(Var(0));
-  for (var i = 0; i < numb; ++i) {
-    term = Dup("b" + (numb - i - 1), Put(App(App(Var(numb - i), Var(0), false), Var(0), false)), term);
-  }
-  term = Dup("n", Var(1), term);
-  term = Dup("b", Var(1), term);
-  term = Lam("n", null, term, false);
-  term = Lam("b", null, term, false);
-  return term;
-}
-
-// Converts a λ-encoded nat to a number, if possible
-const term_to_numb = (term) => {
-  return null;
-  try {
-    try {
-      term = term[1].body[1].body[1].expr[1].body;
-    } catch(e) {
-      term = term[1].body[1].body;
-    }
-    var count = 0;
-    while (term[0] !== "Var") {
-      if (term[1].func[1].index !== 1) {
-        return null;
-      }
-      count++;
-      term = term[1].argm;
-    }
-    if (term[1].index !== 0) {
-      return null;
-    }
-    return count;
   } catch (e) {
     return null;
   }
@@ -1753,7 +1727,7 @@ module.exports = {
   Box,
   Put,
   Dup,
-  U32,
+  Wrd,
   Num,
   Op1,
   Op2,
@@ -1787,11 +1761,7 @@ module.exports = {
   show,
   rename_refs,
   prefix_refs,
-  text_to_term,
-  term_to_text,
-  numb_to_term,
-  numb_to_tree_term,
-  term_to_numb,
+  pretty_print,
   derive_adt_type,
   derive_adt_ctor,
   derive_dependent_match,

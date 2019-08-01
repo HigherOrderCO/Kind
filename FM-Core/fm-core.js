@@ -13,7 +13,7 @@
 // - Box: a boxed type, `!A`
 // - Put: a boxed value, `#a`
 // - Dup: copies a boxed value, `dup x = a; b`
-// - U32: type of a native number
+// - Wrd: type of a native number
 // - Num: value of a native number
 // - Op1: partially applied binary numeric operation, `|n + k|`, with `k` fixed
 // - Op2: binary numeric operation, `|x + y|`
@@ -39,7 +39,7 @@ const App = (func, argm, eras)             => ["App", {func, argm, eras}];
 const Box = (expr)                         => ["Box", {expr}];
 const Put = (expr)                         => ["Put", {expr}];
 const Dup = (name, expr, body)             => ["Dup", {name, expr, body}];
-const U32 = ()                             => ["U32", {}];
+const Wrd = ()                             => ["Wrd", {}];
 const Num = (numb)                         => ["Num", {numb}];
 const Op1 = (func, num0, num1)             => ["Op1", {func, num0, num1}];
 const Op2 = (func, num0, num1)             => ["Op2", {func, num0, num1}];
@@ -100,8 +100,8 @@ const shift = ([ctor, term], inc, depth) => {
       var expr = shift(term.expr, inc, depth);
       var body = shift(term.body, inc, depth + 1);
       return Dup(name, expr, body);
-    case "U32":
-      return U32();
+    case "Wrd":
+      return Wrd();
     case "Num":
       var numb = term.numb;
       return Num(numb);
@@ -223,8 +223,8 @@ const subst = ([ctor, term], val, depth) => {
       var expr = subst(term.expr, val, depth);
       var body = subst(term.body, val && shift(val, 1, 0), depth + 1);
       return Dup(name, expr, body);
-    case "U32":
-      return U32();
+    case "Wrd":
+      return Wrd();
     case "Num":
       var numb = term.numb;
       return Num(numb);
@@ -447,7 +447,7 @@ const norm = (term, defs = {}, weak = false, force_dup = false) => {
       case "Box": return Box(unquote(term.expr, vars));
       case "Put": return Put(unquote(term.expr, vars));
       case "Dup": return Dup(term.name, unquote(term.expr, vars), x => unquote(term.body, [x].concat(vars)));
-      case "U32": return U32();
+      case "Wrd": return Wrd();
       case "Num": return Num(term.numb);
       case "Op1": return Op1(term.func, unquote(term.num0, vars), unquote(term.num1, vars));
       case "Op2": return Op2(term.func, unquote(term.num0, vars), unquote(term.num1, vars));
@@ -481,7 +481,7 @@ const norm = (term, defs = {}, weak = false, force_dup = false) => {
       case "Box": return Box(weak_reduce(term.expr));
       case "Put": return force_dup ? reduce(term.expr) : Put(weak_reduce(term.expr));
       case "Dup": return force_dup ? reduce(term.body(term.expr)) : duplicate(term.name, term.expr, term.body);
-      case "U32": return U32();
+      case "Wrd": return Wrd();
       case "Num": return Num(term.numb);
       case "Op1": return op1(term.func, term.num0, term.num1);
       case "Op2": return op2(term.func, term.num0, term.num1);
@@ -518,7 +518,7 @@ const norm = (term, defs = {}, weak = false, force_dup = false) => {
       case "Box": return Box(quote(term.expr, depth));
       case "Put": return Put(quote(term.expr, depth));
       case "Dup": return Dup(term.name, quote(term.expr, depth), quote(term.body(Var(depth)), depth + 1));
-      case "U32": return U32();
+      case "Wrd": return Wrd();
       case "Num": return Num(term.numb);
       case "Op1": return Op1(term.func, quote(term.num0, depth), quote(term.num1, depth));
       case "Op2": return Op2(term.func, quote(term.num0, depth), quote(term.num1, depth));
@@ -558,7 +558,7 @@ const erase = (term) => {
     case "Box": return Box(erase(term.expr));
     case "Put": return Put(erase(term.expr));
     case "Dup": return Dup(term.name, erase(term.expr), erase(term.body));
-    case "U32": return U32();
+    case "Wrd": return Wrd();
     case "Num": return Num(term.numb);
     case "Op1": return Op1(term.func, erase(term.num0), erase(term.num1));
     case "Op2": return Op2(term.func, erase(term.num0), erase(term.num1));
@@ -626,7 +626,7 @@ const equal = (a, b, defs) => {
           case "Box-Box": y = Eqs(ay[1].expr, by[1].expr); break;
           case "Put-Put": y = Eqs(ay[1].expr, by[1].expr); break;
           case "Dup-Dup": y = And(Eqs(ay[1].expr, by[1].expr), Eqs(ay[1].body, by[1].body)); break;
-          case "U32-U32": y = Val(true); break;
+          case "Wrd-Wrd": y = Val(true); break;
           case "Num-Num": y = Val(ay[1].numb === by[1].numb); break;
           case "Op1-Op1": y = And(Val(ay[1].func === by[1].func), And(Eqs(ay[1].num0, by[1].num0), Val(ay[1].num1[1].numb === ay[1].num1[1].numb))); break;
           case "Op2-Op2": y = And(Val(ay[1].func === by[1].func), And(Eqs(ay[1].num0, by[1].num0), Eqs(ay[1].num1, by[1].num1))); break;
@@ -694,7 +694,7 @@ const uses = ([ctor, term], depth = 0) => {
     case "Box": return 0;
     case "Put": return uses(term.expr, depth);
     case "Dup": return uses(term.expr, depth) + uses(term.body, depth + 1);
-    case "U32": return 0;
+    case "Wrd": return 0;
     case "Num": return 0;
     case "Op1": return uses(term.num0, depth) + uses(term.num1, depth);
     case "Op2": return uses(term.num0, depth) + uses(term.num1, depth);
@@ -729,7 +729,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Box": return true;
     case "Put": return is_at_level(term.expr, at_level, depth, level + 1);
     case "Dup": return is_at_level(term.expr, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level);
-    case "U32": return true;
+    case "Wrd": return true;
     case "Num": return true;
     case "Op1": return is_at_level(term.num0, at_level, depth, level) && is_at_level(term.num1, at_level, depth, level);
     case "Op2": return is_at_level(term.num0, at_level, depth, level) && is_at_level(term.num1, at_level, depth, level);
@@ -1016,24 +1016,24 @@ const typecheck = (show) => {
         var term_t = typecheck(subst(term[1].body, unboxd, 0), expect_nf, defs, ctx, [term, ctx]);
         type = term_t;
         break;
-      case "U32":
+      case "Wrd":
         type = Typ();
         break;
       case "Num":
-        type = U32();
+        type = Wrd();
         break;
       case "Op1":
       case "Op2":
-        if (expect_nf !== null && expect_nf[0] !== "U32") {
-          ERROR("The annotated type of a numeric operation (" + TERM(Op2(term[1].func, Ref("x"), Ref("y"))) + ") isn't " + TERM(U32()) + ".\n- Annotated type is " + TERM(expect_nf));
+        if (expect_nf !== null && expect_nf[0] !== "Wrd") {
+          ERROR("The annotated type of a numeric operation (" + TERM(Op2(term[1].func, Ref("x"), Ref("y"))) + ") isn't " + TERM(Wrd()) + ".\n- Annotated type is " + TERM(expect_nf));
         }
-        typecheck(term[1].num0, U32(), defs, ctx, [term, ctx]);
-        typecheck(term[1].num1, U32(), defs, ctx, [term, ctx]);
-        type = U32();
+        typecheck(term[1].num0, Wrd(), defs, ctx, [term, ctx]);
+        typecheck(term[1].num1, Wrd(), defs, ctx, [term, ctx]);
+        type = Wrd();
         break;
       case "Ite":
         var cond_t = norm(typecheck(term[1].cond, null, defs, ctx, [term, ctx]), defs, true, true);
-        if (cond_t[0] !== "U32") {
+        if (cond_t[0] !== "Wrd") {
           ERROR("Attempted to use if on a non-numeric value.");
         }
         var pair_t = expect_nf ? Sig("x", expect_nf, shift(expect_nf, 1, 0), false) : null;
@@ -1050,7 +1050,7 @@ const typecheck = (show) => {
         break;
       case "Cpy":
         var numb_t = norm(typecheck(term[1].numb, null, defs, ctx, [term, ctx]), defs, true, true);
-        if (numb_t[0] !== "U32") {
+        if (numb_t[0] !== "Wrd") {
           ERROR("Atempted to copy a non-numeric value.");
         }
         type = typecheck(subst(term[1].body, term[1].numb, 0), expect_nf, defs, ctx, [term, ctx]);
@@ -1212,7 +1212,7 @@ module.exports = {
   Box,
   Put,
   Dup,
-  U32,
+  Wrd,
   Num,
   Op1,
   Op2,
