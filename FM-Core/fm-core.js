@@ -570,7 +570,7 @@ const erase = (term) => {
     case "Snd": return term.eras ? erase(term.pair) : Snd(erase(term.pair), term.eras);
     case "Prj": return term.eras ? subst(subst(term.body, Num(0), 0), erase(term.pair), 0) : Prj(term.nam0, term.nam1, erase(term.pair), erase(term.body), term.eras);
     case "Eql": return Eql(erase(term.val0), erase(term.val1));
-    case "Rfl": return erase(term.expr);
+    case "Rfl": return Num(0);
     case "Sym": return erase(term.prof);
     case "Rwt": return erase(term.expr);
     case "Cst": return erase(term.val1);
@@ -743,7 +743,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Ann": return is_at_level(term.expr, at_level, depth, level);
     case "Pri": return is_at_level(term.argm, at_level, depth, level);
     case "Eql": return true;
-    case "Rfl": return is_at_level(term.expr, at_level, depth, level);
+    case "Rfl": return true;
     case "Sym": return true;
     case "Rwt": return true;
     case "Cst": return true;
@@ -830,7 +830,6 @@ const boxcheck = show => ([ctor, term], defs = {}, ctx = []) => {
     case "Eql":
       break;
     case "Rfl":
-      boxcheck(show)(term.expr, defs, ctx);
       break;
     case "Sym":
       break;

@@ -289,7 +289,6 @@ const parse = async (code, tokenify) => {
     // Let
     else if (match("let ")) {
       var name = parse_string();
-      var skip = parse_exact("=");
       var copy = parse_term(ctx);
       var body = parse_term(ctx.concat([name]));
       parsed = subst(body, copy, 0);
@@ -345,7 +344,6 @@ const parse = async (code, tokenify) => {
     // Copy
     else if (match("cpy ")) {
       var name = parse_string();
-      let skip = parse_exact("=");
       var numb = parse_term(ctx);
       var body = parse_term(ctx.concat([name]));
       parsed = Cpy(name, numb, body);
