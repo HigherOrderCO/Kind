@@ -784,6 +784,8 @@ const parse = async (code, tokenify) => {
           // Typed definition: syntax sugar for recursive functions
           var [is_recursive, term] = unrecurse(term, name, unbox.length);
           if (is_recursive) {
+            var TERM = term;
+            var TYPE = type;
             if (!boxed) {
               error("Recursive function '" + name + "' must be a boxed definition (annotated with `\x1b[2m:!\x1b[0m`, example: `\x1b[2m" + name + " :! type`\x1b[0m.)");
             }
@@ -800,6 +802,8 @@ const parse = async (code, tokenify) => {
             var term = shift(term, 1, 0);
             var term = subst(term, Var(0), unbox.length + 1);
             var term = Lam(name, null, term, false);
+            var TERM = shift(TERM, 1, 0);
+            var TERM = subst(TERM, Ref("-" + name), unbox.length + 1);
             var type = Box(type);
             var term = App(App(App(Ref("rec"), type[1].expr, true), Put(term), false), Put(halt), false);
           } else {
@@ -812,9 +816,15 @@ const parse = async (code, tokenify) => {
           // Typed definition: auto-fill unboxings
           for (var i = 0; i < unbox.length; ++i) {
             var term = Dup(unbox[unbox.length - i - 1], Ref(unbox[unbox.length - i - 1]), term);
+            if (is_recursive) {
+              var TERM = subst_many(unbox.map(name => "-" + name), TERM, 0);
+            }
           }
 
           defs[name] = Ann(type, term, false);
+          if (is_recursive) {
+            defs["-" + name] = Ann(TYPE, TERM, false);
+          }
 
         // Untyped definition
         } else {

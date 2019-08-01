@@ -755,107 +755,112 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
 }
 
 // Checks if a term is stratified
-const boxcheck = show => ([ctor, term], defs = {}, ctx = []) => {
-  switch (ctor) {
-    case "All":
-      break;
-    case "Lam":
-      if (uses(term.body) > 1) {
-        throw "[ERROR]\nLambda variable `" + term.name + "` used more than once in:\n" + show([ctor, term], ctx);
-      }
-      if (!is_at_level(term.body, 0)) {
-        throw "[ERROR]\nLambda variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], ctx);
-      }
-      boxcheck(show)(term.body, defs, ctx.concat([term.name]));
-      break;
-    case "App":
-      boxcheck(show)(term.func, defs, ctx);
-      if (!term.eras) {
-        boxcheck(show)(term.argm, defs, ctx);
-      }
-      break;
-    case "Box":
-      break;
-    case "Put":
-      boxcheck(show)(term.expr, defs, ctx);
-      break;
-    case "Dup":
-      if (!is_at_level(term.body, 1)) {
-        throw "[ERROR]\nDuplication variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], ctx);
-      }
-      boxcheck(show)(term.expr, defs, ctx);
-      boxcheck(show)(term.body, defs, ctx.concat([term.name]));
-      break;
-    case "Op1":
-    case "Op2":
-      boxcheck(show)(term.num0, defs, ctx);
-      boxcheck(show)(term.num1, defs, ctx);
-      break;
-    case "Ite":
-      boxcheck(show)(term.cond, defs, ctx);
-      boxcheck(show)(term.pair, defs, ctx);
-      break;
-    case "Cpy":
-      boxcheck(show)(term.numb, defs, ctx);
-      boxcheck(show)(term.body, defs, ctx.concat([term.name]));
-      break;
-    case "Sig":
-      break;
-    case "Par":
-      boxcheck(show)(term.val0, defs, ctx);
-      if (!term.eras) {
-        boxcheck(show)(term.val1, defs, ctx);
-      }
-      break;
-    case "Fst":
-      boxcheck(show)(term.pair, defs, ctx);
-      break;
-    case "Snd":
-      boxcheck(show)(term.pair, defs, ctx);
-      break;
-    case "Prj":
-      var uses0 = uses(term.body, 1);
-      var uses1 = uses(term.body, 0);
-      var isat0 = is_at_level(term.body, 0, 1);
-      var isat1 = is_at_level(term.body, 0, 0);
-      if (uses0 > 1 || uses1 > 1) {
-        throw "[ERROR]\nProjection variable `" + (uses0 > 1 ? term.nam0 : term.nam1) + "` used more than once in:\n" + show([ctor, term], ctx);
-      }
-      if (!isat0 || !isat1) {
-        throw "[ERROR]\nProjection variable `" + (!isat0 ? term.nam0 : term.nam1) + "` used inside a box in:\n" + show([ctor, term], ctx);
-      }
-      boxcheck(show)(term.pair, defs, ctx);
-      boxcheck(show)(term.body, defs, ctx.concat([term.nam0, term.nam1]));
-      break;
-    case "Eql":
-      break;
-    case "Rfl":
-      break;
-    case "Sym":
-      break;
-    case "Rwt":
-      break;
-    case "Cst":
-      break;
-    case "Ann":
-      boxcheck(show)(term.expr, defs, ctx);
-      break;
-    case "Slf":
-      break;
-    case "New":
-      boxcheck(show)(term.expr, defs, ctx);
-      break;
-    case "Use":
-      boxcheck(show)(term.expr, defs, ctx);
-      break;
-    case "Ref":
-      if (!defs[term.name]) {
-        throw "[ERROR]\nUndefined reference: " + term.name;
-      } else {
-        boxcheck(show)(defs[term.name], defs, ctx);
+const boxcheck = show => (term, defs = {}, ctx = []) => {
+  var seen = {};
+  const check = ([ctor, term], defs = {}, ctx = []) => {
+    switch (ctor) {
+      case "All":
         break;
-      }
-  }
+      case "Lam":
+        if (uses(term.body) > 1) {
+          throw "[ERROR]\nLambda variable `" + term.name + "` used more than once in:\n" + show([ctor, term], ctx);
+        }
+        if (!is_at_level(term.body, 0)) {
+          throw "[ERROR]\nLambda variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], ctx);
+        }
+        check(term.body, defs, ctx.concat([term.name]));
+        break;
+      case "App":
+        check(term.func, defs, ctx);
+        if (!term.eras) {
+          check(term.argm, defs, ctx);
+        }
+        break;
+      case "Box":
+        break;
+      case "Put":
+        check(term.expr, defs, ctx);
+        break;
+      case "Dup":
+        if (!is_at_level(term.body, 1)) {
+          throw "[ERROR]\nDuplication variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], ctx);
+        }
+        check(term.expr, defs, ctx);
+        check(term.body, defs, ctx.concat([term.name]));
+        break;
+      case "Op1":
+      case "Op2":
+        check(term.num0, defs, ctx);
+        check(term.num1, defs, ctx);
+        break;
+      case "Ite":
+        check(term.cond, defs, ctx);
+        check(term.pair, defs, ctx);
+        break;
+      case "Cpy":
+        check(term.numb, defs, ctx);
+        check(term.body, defs, ctx.concat([term.name]));
+        break;
+      case "Sig":
+        break;
+      case "Par":
+        check(term.val0, defs, ctx);
+        if (!term.eras) {
+          check(term.val1, defs, ctx);
+        }
+        break;
+      case "Fst":
+        check(term.pair, defs, ctx);
+        break;
+      case "Snd":
+        check(term.pair, defs, ctx);
+        break;
+      case "Prj":
+        var uses0 = uses(term.body, 1);
+        var uses1 = uses(term.body, 0);
+        var isat0 = is_at_level(term.body, 0, 1);
+        var isat1 = is_at_level(term.body, 0, 0);
+        if (uses0 > 1 || uses1 > 1) {
+          throw "[ERROR]\nProjection variable `" + (uses0 > 1 ? term.nam0 : term.nam1) + "` used more than once in:\n" + show([ctor, term], ctx);
+        }
+        if (!isat0 || !isat1) {
+          throw "[ERROR]\nProjection variable `" + (!isat0 ? term.nam0 : term.nam1) + "` used inside a box in:\n" + show([ctor, term], ctx);
+        }
+        check(term.pair, defs, ctx);
+        check(term.body, defs, ctx.concat([term.nam0, term.nam1]));
+        break;
+      case "Eql":
+        break;
+      case "Rfl":
+        break;
+      case "Sym":
+        break;
+      case "Rwt":
+        break;
+      case "Cst":
+        break;
+      case "Ann":
+        check(term.expr, defs, ctx);
+        break;
+      case "Slf":
+        break;
+      case "New":
+        check(term.expr, defs, ctx);
+        break;
+      case "Use":
+        check(term.expr, defs, ctx);
+        break;
+      case "Ref":
+        if (!defs[term.name]) {
+          throw "[ERROR]\nUndefined reference: " + term.name;
+        } else if (!seen[term.name]) {
+          seen[term.name] = true;
+          check(defs[term.name], defs, ctx);
+          break;
+        }
+    }
+  };
+  return check(term, defs, ctx);
 }
 
 // :::::::::::::::::::
