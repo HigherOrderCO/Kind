@@ -347,9 +347,8 @@ const parse = async (code, tokenify) => {
     }
 
     // List
-    else if (match("L<")) {
+    else if (match("*")) {
       var type = parse_term(ctx);
-      var skip = parse_exact(">");
       var list = [];
       var skip = parse_exact("[");
       while (idx < code.length) {
@@ -549,8 +548,9 @@ const parse = async (code, tokenify) => {
     }
 
     // New
-    else if (match("new ")) {
+    else if (match("new<")) {
       var type = parse_term(ctx);
+      var skip = parse_exact(">");
       var expr = parse_term(ctx);
       parsed = New(type, expr);
     }
@@ -771,7 +771,7 @@ const parse = async (code, tokenify) => {
             while (idx < code.length) {
               cased.push(match("|"));
               erase.push(match("~"));
-              if (match("*")) halti = count;
+              if (match("&")) halti = count;
               names.push(parse_string());
               parse_exact(":");
               types.push(await resolve(parse_term(names.slice(0,-1))));
@@ -852,10 +852,10 @@ const parse = async (code, tokenify) => {
             }
             if (halti !== null) {
               var halt = Var(names.length - halti - 1);
-            } else if (match("*")) {
+            } else if (match("&")) {
               var halt = await resolve(parse_term(unbox.concat(names)));
             } else {
-              error("The recursive function '" + name + "' needs a halting case. Provide it using `*`.");
+              error("The recursive function '" + name + "' needs a halting case. Provide it using `&`.");
             }
             for (var i = names.length - 1; i >= 0; --i) {
               var halt = Lam(names[i], null, halt, erase[i]);
@@ -1216,7 +1216,7 @@ const show = ([ctor, args], nams = []) => {
     case "New":
       var type = show(args.type, nams);
       var expr = show(args.expr, nams);
-      return "&" + type + " " + expr;
+      return "new<" + type + "> " + expr;
     case "Use":
       var expr = show(args.expr, nams);
       return "%" + expr;
