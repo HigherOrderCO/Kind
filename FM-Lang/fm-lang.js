@@ -781,7 +781,7 @@ const parse = async (code, tokenify) => {
           }
           var type = await resolve(parse_term(names));
 
-          while (boxed && match("unbox")) {
+          while (boxed && match("use")) {
             unbox.push(parse_string());
           }
 
