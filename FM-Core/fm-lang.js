@@ -224,7 +224,7 @@ const parse = async (code, tokenify) => {
     return name;
   }
 
-  function parse_op(func) {
+  function parse_op(func, ctx) {
     var num0 = parse_term(ctx);
     var skip = parse_exact(",");
     var num1 = parse_term(ctx);
@@ -308,22 +308,22 @@ const parse = async (code, tokenify) => {
     }
 
     // Operations
-    else if (match("+("))  { parsed = parse_op("+"); }
-    else if (match("-("))  { parsed = parse_op("-"); }
-    else if (match("*("))  { parsed = parse_op("*"); }
-    else if (match("/("))  { parsed = parse_op("/"); }
-    else if (match("%("))  { parsed = parse_op("%"); }
-    else if (match("**(")) { parsed = parse_op("**"); }
-    else if (match("^^(")) { parsed = parse_op("^^"); }
-    else if (match("&("))  { parsed = parse_op("&"); }
-    else if (match("|("))  { parsed = parse_op("|"); }
-    else if (match("^("))  { parsed = parse_op("^"); }
-    else if (match("~("))  { parsed = parse_op("~"); }
-    else if (match(">>(")) { parsed = parse_op(">>"); }
-    else if (match("<<(")) { parsed = parse_op("<<"); }
-    else if (match(">("))  { parsed = parse_op(">"); }
-    else if (match("<("))  { parsed = parse_op("<"); }
-    else if (match("==(")) { parsed = parse_op("=="); }
+    else if (match("+("))  { parsed = parse_op("+", ctx); }
+    else if (match("-("))  { parsed = parse_op("-", ctx); }
+    else if (match("*("))  { parsed = parse_op("*", ctx); }
+    else if (match("/("))  { parsed = parse_op("/", ctx); }
+    else if (match("%("))  { parsed = parse_op("%", ctx); }
+    else if (match("**(")) { parsed = parse_op("**", ctx); }
+    else if (match("^^(")) { parsed = parse_op("^^", ctx); }
+    else if (match("&("))  { parsed = parse_op("&", ctx); }
+    else if (match("|("))  { parsed = parse_op("|", ctx); }
+    else if (match("^("))  { parsed = parse_op("^", ctx); }
+    else if (match("~("))  { parsed = parse_op("~", ctx); }
+    else if (match(">>(")) { parsed = parse_op(">>", ctx); }
+    else if (match("<<(")) { parsed = parse_op("<<", ctx); }
+    else if (match(">("))  { parsed = parse_op(">", ctx); }
+    else if (match("<("))  { parsed = parse_op("<", ctx); }
+    else if (match("==(")) { parsed = parse_op("==", ctx); }
 
     // String
     else if (match("\"")) {
