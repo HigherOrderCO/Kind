@@ -347,7 +347,7 @@ const parse = async (code, tokenify) => {
     }
 
     // List
-    else if (match("*")) {
+    else if (match(".")) {
       var type = parse_term(ctx);
       var list = [];
       var skip = parse_exact("[");
@@ -842,19 +842,17 @@ const parse = async (code, tokenify) => {
           }
 
           // Typed definition: syntax sugar for recursive functions
-          var [is_recursive, term] = unrecurse(term, name, unbox.length);
-          if (is_recursive) {
+          var [is_recursive, is_unhalting, unrec_term] = unrecurse(term, name, unbox.length);
+          if (boxed && is_recursive) {
+            var term = unrec_term;
             var TERM = term;
             var TYPE = type;
-            if (!boxed) {
-              error("Recursive function '" + name + "' must be a boxed definition (annotated with `\x1b[2m:!\x1b[0m`, example: `\x1b[2m" + name + " :! type`\x1b[0m).");
-            }
             if (halti !== null) {
               var halt = Var(names.length - halti - 1);
             } else if (match("&")) {
               var halt = await resolve(parse_term(unbox.concat(names)));
             } else {
-              error("The recursive function '" + name + "' needs a halting case. Provide it using `&`.");
+              error("The bounded-recursive function '" + name + "' needs a halting case. Provide it using `&`.");
             }
             for (var i = names.length - 1; i >= 0; --i) {
               var halt = Lam(names[i], null, halt, erase[i]);
@@ -865,24 +863,29 @@ const parse = async (code, tokenify) => {
             var TERM = shift(TERM, 1, 0);
             var TERM = subst(TERM, Ref("-" + name), unbox.length + 1);
             var type = Box(type);
-            var term = App(App(App(Ref("rec"), type[1].expr, true), Put(term), false), Put(halt), false);
-          } else {
-            if (boxed) {
-              var type = Box(type);
-              var term = Put(term);
-            }
+            var call = term;
+            var term = App(App(App(Ref("rec"), type[1].expr, true), Put(Ref(name + ".call")), false), Put(Ref(name + ".halt")), false);
+          } else if (!boxed && is_recursive && is_unhalting) {
+            error("Non-terminating function '" + name + "'. Don't worry, if you annotate it as `\x1b[2m" + name + " :! (...)\x1b[0m`, I can make a bounded-recursive version of it for you!");
+          } else if (boxed) {
+            var type = Box(type);
+            var term = Put(term);
           }
 
           // Typed definition: auto-fill unboxings
           for (var i = 0; i < unbox.length; ++i) {
             var term = Dup(unbox[unbox.length - i - 1], Ref(unbox[unbox.length - i - 1]), term);
-            if (is_recursive) {
+            if (boxed && is_recursive) {
+              var halt = Dup(unbox[unbox.length - i - 1], Ref(unbox[unbox.length - i - 1]), halt);
+              var call = Dup(unbox[unbox.length - i - 1], Ref(unbox[unbox.length - i - 1]), call);
               var TERM = subst_many(unbox.map(name => "-" + name), TERM, 0);
             }
           }
 
           defs[name] = Ann(type, term, false);
-          if (is_recursive) {
+          if (boxed && is_recursive) {
+            defs[name + ".call"] = Ann(All("x", type[1].expr, type[1].expr, false), call);
+            defs[name + ".halt"] = Ann(type[1].expr, halt);
             defs["-" + name] = Ann(TYPE, TERM, false);
           }
 
@@ -904,7 +907,8 @@ const parse = async (code, tokenify) => {
 
 const unrecurse = (term, term_name, add_depth) => {
   var is_recursive = false;
-  const go = ([ctor, term], depth) => {
+  var is_unhalting = false;
+  const go = ([ctor, term], depth, eras) => {
     switch (ctor) {
       case "Var":
         return Var(term.index);
@@ -912,31 +916,31 @@ const unrecurse = (term, term_name, add_depth) => {
         return Typ();
       case "All":
         var name = term.name;
-        var bind = term.bind;
-        var body = go(term.body, depth + 1);
+        var bind = go(term.bind, depth, true);
+        var body = go(term.body, depth + 1, eras);
         var eras = term.eras;
         return All(name, bind, body, eras);
       case "Lam":
         var name = term.name;
-        var bind = term.bind;
-        var body = go(term.body, depth + 1);
+        var bind = term.bind && go(term.bind, depth, true);
+        var body = go(term.body, depth + 1, eras);
         var eras = term.eras;
         return Lam(name, bind, body, eras);
       case "App":
-        var func = go(term.func, depth);
-        var argm = term.eras ? term.argm : go(term.argm, depth);
+        var func = go(term.func, depth, eras);
+        var argm = go(term.argm, depth, term.eras || eras);
         var eras = term.eras;
         return App(func, argm, term.eras);
       case "Box":
-        var expr = term.expr;
+        var expr = go(term.expr, depth, true);
         return Box(expr);
       case "Put":
-        var expr = go(term.expr, depth);
+        var expr = go(term.expr, depth, eras);
         return Put(expr);
       case "Dup":
         var name = term.name;
-        var expr = go(term.expr, depth);
-        var body = go(term.body, depth + 1);
+        var expr = go(term.expr, depth, eras);
+        var body = go(term.body, depth + 1, eras);
         return Dup(name, expr, body);
       case "Wrd":
         return Wrd();
@@ -946,92 +950,93 @@ const unrecurse = (term, term_name, add_depth) => {
       case "Op1":
       case "Op2":
         var func = term.func;
-        var num0 = go(term.num0, depth);
-        var num1 = go(term.num1, depth);
+        var num0 = go(term.num0, depth, eras);
+        var num1 = go(term.num1, depth, eras);
         return Op2(func, num0, num1);
       case "Ite":
-        var cond = go(term.cond, depth);
-        var pair = go(term.pair, depth);
+        var cond = go(term.cond, depth, eras);
+        var pair = go(term.pair, depth, eras);
         return Ite(cond, pair);
       case "Cpy":
         var name = term.name;
-        var numb = go(term.numb, depth);
-        var body = go(term.body, depth + 1);
+        var numb = go(term.numb, depth, eras);
+        var body = go(term.body, depth + 1, eras);
         return Cpy(name, numb, body);
       case "Sig":
         var name = term.name;
-        var typ0 = term.typ0;
-        var typ1 = term.typ1;
+        var typ0 = go(term.typ0, depth, true);
+        var typ1 = go(term.typ1, depth + 1, true);
         var eras = term.eras;
         return Sig(name, typ0, typ1, eras);
       case "Par":
-        var val0 = go(term.val0, depth);
-        var val1 = go(term.val1, depth);
+        var val0 = go(term.val0, depth, eras);
+        var val1 = go(term.val1, depth, eras);
         var eras = term.eras;
         return Par(val0, val1, eras);
       case "Fst":
-        var pair = go(term.pair, depth);
+        var pair = go(term.pair, depth, eras);
         var eras = term.eras;
         return Fst(pair, eras);
       case "Snd":
-        var pair = go(term.pair, depth);
+        var pair = go(term.pair, depth, eras);
         var eras = term.eras;
         return Snd(pair, eras);
       case "Prj":
         var nam0 = term.nam0;
         var nam1 = term.nam1;
-        var pair = go(term.pair, depth);
-        var body = go(term.body, depth + 2);
+        var pair = go(term.pair, depth, eras);
+        var body = go(term.body, depth + 2, eras);
         var eras = term.eras;
         return Prj(nam0, nam1, pair, body, eras);
       case "Eql":
-        var val0 = term.val0;
-        var val1 = term.val1;
+        var val0 = go(term.val0, depth, eras);
+        var val1 = go(term.val1, depth, eras);
         return Eql(val0, val1);
       case "Rfl":
-        var expr = go(term.expr, depth);
+        var expr = go(term.expr, depth, true);
         return Rfl(expr);
       case "Sym":
-        var prof = go(term.prof, depth);
+        var prof = go(term.prof, depth, true);
         return Sym(prof);
       case "Rwt":
         var name = term.name;
-        var type = go(term.type, depth + 1);
-        var prof = go(term.prof, depth);
-        var expr = go(term.expr, depth);
+        var type = go(term.type, depth + 1, true);
+        var prof = go(term.prof, depth, true);
+        var expr = go(term.expr, depth, eras);
         return Rwt(name, type, prof, expr);
       case "Cst":
-        var prof = go(term.prof, depth);
-        var val0 = go(term.val0, depth);
-        var val1 = go(term.val1, depth);
+        var prof = go(term.prof, depth, true);
+        var val0 = go(term.val0, depth, true);
+        var val1 = go(term.val1, depth, eras);
         return Cst(prof, val0, val1);
       case "Slf":
         var name = term.name;
-        var type = term.type;
+        var type = go(term.type, depth + 1, true);
         return Slf(name, type);
       case "New":
         var type = term.type;
-        var expr = go(term.expr, depth);
+        var expr = go(term.expr, depth, eras);
         return New(type, expr);
       case "Use":
-        var expr = go(term.expr, depth);
+        var expr = go(term.expr, depth, eras);
         return Use(expr);
       case "Ann":
-        var type = term.type;
-        var expr = go(term.expr, depth);
+        var type = go(term.type, depth, true);
+        var expr = go(term.expr, depth, eras);
         var done = term.done;
         return Ann(type, expr, done);
       case "Ref":
         if (term.name === term_name) {
           is_recursive = true;
+          is_unhalting = is_unhalting || !eras;
           return Var(depth + add_depth);
         } else {
           return Ref(term.name, term.eras);
         }
     }
   };
-  var term = go(term, 0);
-  return [is_recursive, term];
+  var term = go(term, 0, false);
+  return [is_recursive, is_unhalting, term];
 }
 
 // :::::::::::::::::::::
