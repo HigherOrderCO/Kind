@@ -386,7 +386,6 @@ const parse = async (code, tokenify) => {
           term = App(Ref("call"), term, false);
         }
       }
-      console.log(show(term));
       parsed = term;
     }
 
