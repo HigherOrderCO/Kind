@@ -17,10 +17,11 @@ try {
   console.log("Usage: fm [options] [args]");
   console.log("");
   console.log("Evaluation modes (default: -d):");
-  console.log("-d <file>.<term> debug (preserves boxes, using HOAS)");
-  console.log("-i <file>.<term> interpreted (using HOAS)");
-  console.log("-l <file>.<term> lazy (using interaction nets)");
-  console.log("-s <file>.<term> strict (using interaction nets)");
+  console.log("-d <file>.<term> debug (using HOAS interpreter)");
+  console.log("  -T don't erase types");
+  console.log("  -B don't erase boxes");
+  console.log("-o <file>.<term> optimal (using interaction nets)");
+  console.log("  -S strict mode");
   console.log("-j <file>.<term> JavaScript (using native functions)");
   console.log("");
   console.log("Type-checking modes:");
@@ -35,7 +36,7 @@ try {
   console.log("");
   console.log("Options:");
   console.log("-h hides interaction net stats");
-  console.log("-d disables stratification (termination) checks");
+  console.log("-u disables stratification (termination) checks");
   console.log("-p prints net as JSON");
   console.log("-v displays the version");
   process.exit();
@@ -65,9 +66,7 @@ if (args.v) {
     try {
       var mode
         = args.d ? "DEBUG"
-        : args.i ? "INTERPRETED"
-        : args.l ? "OPTIMAL_LAZY"
-        : args.s ? "OPTIMAL_STRICT"
+        : args.o ? "OPTIMAL"
         : args.j ? "JAVASCRIPT"
         : args.t ? "TYPE"
         : "DEBUG";
@@ -86,7 +85,13 @@ if (args.v) {
         input_net: args.p ? null : undefined,
         output_net: args.p ? null : undefined
       };
-      var term = fm.exec(defn, defs, mode, args.d, stats);
+      var opts = {
+        boxcheck: !args.d,
+        erased: !args.T,
+        boxed: !!args.B,
+        strict: !!args.S
+      };
+      var term = fm.lang.exec(defn, defs, mode, opts, stats);
       console.log(fm.lang.show(term));
       if (args.p || (mode.slice(0,3) === "OPT" && !args.h)) {
         console.log(JSON.stringify(stats));
