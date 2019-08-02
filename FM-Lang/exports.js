@@ -9,10 +9,9 @@ var fm = module.exports = {
 // TODO: move to FM-Lang
 fm.lang.norm = function norm(term, defs, mode = "DEBUG", opts, stats = {}) {
   var erase = opts.erased ? fm.lang.erase : (x => x);
-  var force_dup = opts.boxed ? false : true;
   switch (mode) {
     case "DEBUG":
-      return fm.core.norm((opts.erased ? fm.lang.erase : (x=>x))(term, defs), defs, force_dup);
+      return fm.core.norm((opts.erased ? fm.lang.erase : (x=>x))(term, defs), defs, opts.weak, opts.force_dup);
     case "JAVASCRIPT":
       return fm.to_js.decompile(fm.to_js.compile(fm.lang.erase(term, defs), defs));
     case "OPTIMAL":

@@ -20,6 +20,7 @@ try {
   console.log("-d <file>.<term> debug (using HOAS interpreter)");
   console.log("  -T don't erase types");
   console.log("  -B don't erase boxes");
+  console.log("  -W stop on weak head normal form");
   console.log("-o <file>.<term> optimal (using interaction nets)");
   console.log("  -S strict mode");
   console.log("-j <file>.<term> JavaScript (using native functions)");
@@ -88,7 +89,8 @@ if (args.v) {
       var opts = {
         boxcheck: !args.d,
         erased: !args.T,
-        boxed: !!args.B,
+        force_dup: !args.B,
+        weak: !!args.W,
         strict: !!args.S
       };
       var term = fm.lang.exec(defn, defs, mode, opts, stats);
