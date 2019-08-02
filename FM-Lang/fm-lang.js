@@ -847,7 +847,7 @@ const parse = async (code, tokenify) => {
             var TERM = term;
             var TYPE = type;
             if (!boxed) {
-              error("Recursive function '" + name + "' must be a boxed definition (annotated with `\x1b[2m:!\x1b[0m`, example: `\x1b[2m" + name + " :! type`\x1b[0m.)");
+              error("Recursive function '" + name + "' must be a boxed definition (annotated with `\x1b[2m:!\x1b[0m`, example: `\x1b[2m" + name + " :! type`\x1b[0m).");
             }
             if (halti !== null) {
               var halt = Var(names.length - halti - 1);
