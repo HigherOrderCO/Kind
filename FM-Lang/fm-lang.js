@@ -604,7 +604,7 @@ const parse = async (code, tokenify) => {
         if (tokens) tokens[tokens.length - 1][0] = "num";
       } else {
         var skip = 0;
-        while (match_here("'")) {
+        while (match_here("^")) {
           skip += 1;
         }
         for (var i = ctx.length - 1; i >= 0; --i) {
@@ -791,48 +791,50 @@ const parse = async (code, tokenify) => {
 
           // Typed definition with patterns
           } else {
+            error("Dependent pattern-matching disabled until rework.");
 
             // Typed definition with patterns: finds matched datatypes
-            var cadts = [];
-            for (var i = 0; i < cased.length; ++i) {
-              if (cased[i]) {
-                // Right now, we can only build the compact case-analysis syntax
-                // if all the types on the annotation are refs to ADTs in scope.
-                // This could be improved if the parser kept track of ctx types.
-                var adt_ref = types.map(function go(x) { return x[0] === "App" ? go(x[1].func) : x; });
-                if (adt_ref[i][0] !== "Ref" || !adts[adt_ref[i][1].name]) {
-                  error("Couldn't find the ADT for the `" + names[i] + "` case of `" + name + "`.");
-                }
-                cadts[i] = adts[adt_ref[i][1].name];
-              } else {
-                cadts[i] = null;
-              }
-            }
+            // var cadts = [];
+            // for (var i = 0; i < cased.length; ++i) {
+            //   if (cased[i]) {
+            //     // Right now, we can only build the compact case-analysis syntax
+            //     // if all the types on the annotation are refs to ADTs in scope.
+            //     // This could be improved if the parser kept track of ctx types.
+            //     var adt_ref = types.map(function go(x) { return x[0] === "App" ? go(x[1].func) : x; });
+            //     if (adt_ref[i][0] !== "Ref" || !adts[adt_ref[i][1].name]) {
+            //       error("Couldn't find the ADT for the `" + names[i] + "` case of `" + name + "`.");
+            //     }
+            //     cadts[i] = adts[adt_ref[i][1].name];
+            //   } else {
+            //     cadts[i] = null;
+            //   }
+            // }
 
-            // Typed definition with patterns: parses case-tree
-            var case_tree = {};
-            await (async function parse_case_tree(ctx, a, branch) {
-              if (a < cadts.length) {
-                if (cadts[a] === null) {
-                  await parse_case_tree(ctx, a + 1, branch);
-                } else {
-                  var {adt_name, adt_pram, adt_indx, adt_ctor} = cadts[a];
-                  for (var c = 0; c < adt_ctor.length; ++c) {
-                    var skip = parse_exact("|");
-                    var skip = parse_exact(adt_ctor[c][0]);
-                    var vars = adt_ctor[c][1].map((([name,type,eras]) => names[a] + "." + name));
-                    await parse_case_tree(ctx.concat(vars), a + 1, branch.concat([adt_ctor[c][0]]));
-                  }
-                }
-              } else {
-                var skip = parse_exact("=");
-                var term = await resolve(parse_term(ctx));
-                case_tree[branch.join("_")] = term;
-              }
-            })(names, 0, []);
+            // // Typed definition with patterns: parses case-tree
+            // var case_tree = {};
+            // await (async function parse_case_tree(ctx, a, branch) {
+            //   if (a < cadts.length) {
+            //     if (cadts[a] === null) {
+            //       await parse_case_tree(ctx, a + 1, branch);
+            //     } else {
+            //       var {adt_name, adt_pram, adt_indx, adt_ctor} = cadts[a];
+            //       for (var c = 0; c < adt_ctor.length; ++c) {
+            //         var skip = parse_exact("|");
+            //         var skip = parse_exact(adt_ctor[c][0]);
+            //         var vars = adt_ctor[c][1].map((([name,type,eras]) => names[a] + "." + name));
+            //         await parse_case_tree(ctx.concat(vars), a + 1, branch.concat([adt_ctor[c][0]]));
+            //       }
+            //     }
+            //   } else {
+            //     var skip = parse_exact("=");
+            //     var term = await resolve(parse_term(ctx));
+            //     case_tree[branch.join("_")] = term;
+            //   }
+            // })(names, 0, []);
 
             // Typed definition with patterns: derives matchinig term
-            var term = derive_dependent_match({names, types, cased, erase, cadts}, type, case_tree);
+            // var term = derive_dependent_match({names, types, cased, erase, cadts}, type, case_tree);
+            // console.log("->", show(term, names));
           }
 
           // Typed definition: auto-fills foralls and lambdas
@@ -1066,7 +1068,7 @@ const show = ([ctor, args], nams = []) => {
         var suff = "";
         for (var i = 0; i < args.index - 1; ++i) {
           if (nams[nams.length - i - 1] === name) {
-            var suff = suff + "'";
+            var suff = suff + "^";
           }
         }
         return name + suff;
@@ -1534,141 +1536,142 @@ const derive_adt_ctor = ({adt_pram, adt_indx, adt_ctor, adt_name}, c) => {
   })(0, adt_indx.length, 0);
 }
 
-const derive_dependent_match = ({names, types, cased, erase, cadts}, type, case_tree) => {
-  return (function arg(a, last_carry = 0, carry = [], branch = []) {
-    //console.log("building arg ", a);
-
-    // For each argument to be projected
-    if (a < names.length) {
-      if (!cadts[a]) {
-        //console.log("not an adt");
-        return arg(a + 1, last_carry, carry, branch);
-      } else {
-        var {adt_name, adt_pram, adt_indx, adt_ctor} = cadts[a];
-        //console.log("it is the adt", adt_name);
-
-        // Creates the inductive pattern-matching function of this argument
-        var term = Use(Var(-1 + names.length - a));
-
-        // Applies the motive of this argument
-        var term = App(term, (function motive_idxs(i) {
-          if (i < adt_indx.length) {
-            return Lam(adt_indx[i][0], null, motive_idxs(i + 1), false);
-          } else {
-            return Lam("self", null, (function motive_others(v) {
-              var substs = [];
-              for (var V = 0; V < v; ++V) {
-                var to_self = (v < a ? v : v - 1) + (v >= names.length ? carry.length : 0);
-                substs.push(Var(to_self - (V < a ? V + 1 : V === a ? 0 : V)));
-              }
-              if (v < names.length) {
-                if (v === a) {
-                  return motive_others(v + 1);
-                } else {
-                  return All(names[v], subst_many(types[v], substs, 0), motive_others(v + 1), v < a && cased[v]);
-                }
-              } else {
-                return (function motive_carrys(k) {
-                  if (k < carry.length) {
-                    return All(carry[k][0], carry[k][1], motive_carrys(k + 1), false);
-                  } else {
-                    return subst_many(type, substs, 0);
-                  }
-                })(0);
-              }
-            })(0), false);
-          }
-        })(0), true);
-
-        // Applies each case of this argument
-        for (var c = 0; c < adt_ctor.length; ++c) {
-          //console.log("building case", adt_ctor[c][0]);
-          term = App(term, (function cases(f, v, k) {
-            // Case fields
-            if (f < adt_ctor[c][1].length) {
-              //console.log("field", adt_ctor[c][1][f]);
-              return Lam(names[a] + "." + adt_ctor[c][1][f][0], null, cases(f + 1, v, k), adt_ctor[c][1][f][2]);
-            // Variables to hold the other values
-            } else if (v < names.length) {
-              // If this is the matched value, rebuild it
-              if (v === a) {
-                var wit = Ref(adt_ctor[c][0]);
-                for (var F = 0; F < f; ++F) {
-                  wit = App(wit, Var(-1 + v + f - F), adt_ctor[c][1][F][2]);
-                }
-                return subst(cases(f, v + 1, k), wit, 0);
-              // Otherwise, just create a lam for it
-              } else {
-                return Lam(names[v], null, cases(f, v + 1, k), v < a && cased[v]);
-              }
-            // Variables to hold carried values
-            } else if (k < carry.length) {
-              return Lam(carry[k][0], null, cases(f, v, k + 1), false);
-            // Body of the case
-            } else {
-              var new_carry = adt_ctor[c][1].map(([name,type,eras]) => {
-                return [names[a] + "." + name, subst(type, Ref(adt_name), 0)];
-              });
-              //console.log("extending carry", JSON.stringify(carry), JSON.stringify(new_carry));
-              var case_body = arg(a + 1, adt_ctor[c][1].length, carry.concat(new_carry), branch.concat([adt_ctor[c][0]]));
-              //console.log("ue", a + 1, names.length);
-              //if (a + 1 < names.length) {
-                //for (var C = 0; C < adt_ctor[c][1].length; ++C) {
-                  //case_body = App(case_body, Var(-1 + (v - 1) + adt_ctor[c][1].length - C), false);
-                  //case_body = App(case_body, Var(-1 + carry.length + names.length + adt_ctor[c][1].length - C), false);
-                //}
-              //}
-              return case_body;
-            }
-          })(0, 0, 0), false);
-        }
-
-        // Applies other values
-        for (var v = 0; v < names.length; ++v) {
-          if (v !== a) {
-            term = App(term, Var(-1 + carry.length - last_carry + names.length - v), v < a && cased[v]);
-          }
-        }
-
-        // Applies old carry values
-        for (var k = 0; k < carry.length - last_carry; ++k) {
-          term = App(term, Var(-1 + carry.length - last_carry - k), false);
-        }
-
-        // Applies new carry values
-        for (var k = 0; k < last_carry; ++k) {
-          term = App(term, Var(-1 + carry.length + names.length - k), false);
-        }
-
-        return term;
-      }
-
-    // Done (i.e., this is the deepest spot, so, put the nth pattern-matching body here)
-    } else {
-      var substs = [];
-
-      // Substitutes other values
-      for (var v = 0; v < names.length; ++v) {
-        if (v !== a) {
-          substs.push(Var(-1 + carry.length - last_carry + names.length - v));
-        }
-      }
-
-      // Substitutes old carry values
-      for (var k = 0; k < carry.length - last_carry; ++k) {
-        substs.push(Var(-1 + carry.length - last_carry - k));
-      }
-
-      // Substitutes new carry values
-      for (var k = 0; k < last_carry; ++k) {
-        substs.push(Var(-1 + carry.length + names.length - k));
-      }
-      var term = case_tree[branch.join("_")];
-      var term = subst_many(term, substs, 0);
-      return term;
-    }
-  })(0);
-}
+// TODO: rework
+// const derive_dependent_match = ({names, types, cased, erase, cadts}, type, case_tree) => {
+//   return (function arg(a, last_carry = 0, carry = [], branch = []) {
+//     //console.log("building arg ", a);
+// 
+//     // For each argument to be projected
+//     if (a < names.length) {
+//       if (!cadts[a]) {
+//         //console.log("not an adt");
+//         return arg(a + 1, last_carry, carry, branch);
+//       } else {
+//         var {adt_name, adt_pram, adt_indx, adt_ctor} = cadts[a];
+//         //console.log("it is the adt", adt_name);
+// 
+//         // Creates the inductive pattern-matching function of this argument
+//         var term = Use(Var(-1 + names.length - a));
+// 
+//         // Applies the motive of this argument
+//         var term = App(term, (function motive_idxs(i) {
+//           if (i < adt_indx.length) {
+//             return Lam(adt_indx[i][0], null, motive_idxs(i + 1), false);
+//           } else {
+//             return Lam("self", null, (function motive_others(v) {
+//               var substs = [];
+//               for (var V = 0; V < v; ++V) {
+//                 var to_self = (v < a ? v : v - 1) + (v >= names.length ? carry.length : 0);
+//                 substs.push(Var(to_self - (V < a ? V + 1 : V === a ? 0 : V)));
+//               }
+//               if (v < names.length) {
+//                 if (v === a) {
+//                   return motive_others(v + 1);
+//                 } else {
+//                   return All(names[v], subst_many(types[v], substs, 0), motive_others(v + 1), v < a && cased[v]);
+//                 }
+//               } else {
+//                 return (function motive_carrys(k) {
+//                   if (k < carry.length) {
+//                     return All(carry[k][0], subst_many(carry[k][1], substs, 0), motive_carrys(k + 1), false);
+//                   } else {
+//                     return subst_many(type, substs, 0);
+//                   }
+//                 })(0);
+//               }
+//             })(0), false);
+//           }
+//         })(0), true);
+// 
+//         // Applies each case of this argument
+//         for (var c = 0; c < adt_ctor.length; ++c) {
+//           //console.log("building case", adt_ctor[c][0]);
+//           term = App(term, (function cases(f, v, k) {
+//             // Case fields
+//             if (f < adt_ctor[c][1].length) {
+//               //console.log("field", adt_ctor[c][1][f]);
+//               return Lam(names[a] + "." + adt_ctor[c][1][f][0], null, cases(f + 1, v, k), adt_ctor[c][1][f][2]);
+//             // Variables to hold the other values
+//             } else if (v < names.length) {
+//               // If this is the matched value, rebuild it
+//               if (v === a) {
+//                 var wit = Ref(adt_ctor[c][0]);
+//                 for (var F = 0; F < f; ++F) {
+//                   wit = App(wit, Var(-1 + v + f - F), adt_ctor[c][1][F][2]);
+//                 }
+//                 return subst(cases(f, v + 1, k), wit, 0);
+//               // Otherwise, just create a lam for it
+//               } else {
+//                 return Lam(names[v], null, cases(f, v + 1, k), v < a && cased[v]);
+//               }
+//             // Variables to hold carried values
+//             } else if (k < carry.length) {
+//               return Lam(carry[k][0], null, cases(f, v, k + 1), false);
+//             // Body of the case
+//             } else {
+//               var new_carry = adt_ctor[c][1].map(([name,type,eras]) => {
+//                 return [names[a] + "." + name, subst(type, Ref(adt_name), 0)];
+//               });
+//               //console.log("extending carry", JSON.stringify(carry), JSON.stringify(new_carry));
+//               var case_body = arg(a + 1, adt_ctor[c][1].length, carry.concat(new_carry), branch.concat([adt_ctor[c][0]]));
+//               //console.log("ue", a + 1, names.length);
+//               //if (a + 1 < names.length) {
+//                 //for (var C = 0; C < adt_ctor[c][1].length; ++C) {
+//                   //case_body = App(case_body, Var(-1 + (v - 1) + adt_ctor[c][1].length - C), false);
+//                   //case_body = App(case_body, Var(-1 + carry.length + names.length + adt_ctor[c][1].length - C), false);
+//                 //}
+//               //}
+//               return case_body;
+//             }
+//           })(0, 0, 0), false);
+//         }
+// 
+//         // Applies other values
+//         for (var v = 0; v < names.length; ++v) {
+//           if (v !== a) {
+//             term = App(term, Var(-1 + carry.length - last_carry + names.length - v), v < a && cased[v]);
+//           }
+//         }
+// 
+//         // Applies old carry values
+//         for (var k = 0; k < carry.length - last_carry; ++k) {
+//           term = App(term, Var(-1 + carry.length - last_carry - k), false);
+//         }
+// 
+//         // Applies new carry values
+//         for (var k = 0; k < last_carry; ++k) {
+//           term = App(term, Var(-1 + carry.length + names.length - k), false);
+//         }
+// 
+//         return term;
+//       }
+// 
+//     // Done (i.e., this is the deepest spot, so, put the nth pattern-matching body here)
+//     } else {
+//       var substs = [];
+// 
+//       // Substitutes other values
+//       for (var v = 0; v < names.length; ++v) {
+//         if (v !== a) {
+//           substs.push(Var(-1 + carry.length - last_carry + names.length - v));
+//         }
+//       }
+// 
+//       // Substitutes old carry values
+//       for (var k = 0; k < carry.length - last_carry; ++k) {
+//         substs.push(Var(-1 + carry.length - last_carry - k));
+//       }
+// 
+//       // Substitutes new carry values
+//       for (var k = 0; k < last_carry; ++k) {
+//         substs.push(Var(-1 + carry.length + names.length - k));
+//       }
+//       var term = case_tree[branch.join("_")];
+//       var term = subst_many(term, substs, 0);
+//       return term;
+//     }
+//   })(0);
+// }
 
 const post = (func, body) => {
   return xhr("http://moonad.org/api/" + func,
@@ -1768,7 +1771,7 @@ module.exports = {
   pretty_print,
   derive_adt_type,
   derive_adt_ctor,
-  derive_dependent_match,
+  //derive_dependent_match,
   save_file,
   load_file,
   find_term,
