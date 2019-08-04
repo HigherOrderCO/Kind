@@ -70,6 +70,8 @@ const compile = (term, defs, vars) => {
       var pair = compile(term.pair, defs, vars);
       var body = (x,y) => compile(term.body, defs, [y,[x,vars]]);
       return body(pair[0], pair[1]);
+    case "Log":
+      return compile(term.expr, defs, vars);
     case "Ref":
       return compile(fmc.erase(defs[term.name]), defs, vars);
   }

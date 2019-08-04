@@ -11,7 +11,7 @@ fm.lang.norm = function norm(term, defs, mode = "DEBUG", opts, stats = {}) {
   var erase = opts.erased ? fm.lang.erase : (x => x);
   switch (mode) {
     case "DEBUG":
-      return fm.core.norm((opts.erased ? fm.lang.erase : (x=>x))(term, defs), defs, opts.weak, opts.force_dup);
+      return fm.core.norm((opts.erased ? fm.lang.erase : (x=>x))(term, defs), defs, opts.weak, opts.force_dup, opts.log);
     case "JAVASCRIPT":
       return fm.to_js.decompile(fm.to_js.compile(fm.lang.erase(term, defs), defs));
     case "OPTIMAL":

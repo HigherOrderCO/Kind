@@ -27,7 +27,9 @@ const {
   New,
   Use,
   Ann,
+  Log,
   Ref,
+  show,
   shift,
   subst,
   subst_many,
@@ -47,9 +49,8 @@ const xhr = require("xhr-request-promise");
 // :: Parsing ::
 // :::::::::::::
 
-
 // Converts a string to a term
-const parse = async (code, tokenify) => {
+const parse = async (code, tokenify, auto_unbox = true) => {
   function get_ref_origin_file(ref) {
     let at_sign_index = ref.indexOf("@");
     let dot_index = ref.indexOf(".");
@@ -63,7 +64,7 @@ const parse = async (code, tokenify) => {
   async function resolve(term, used_prefix = null, open = false) {
     // Finds undefined references to files we don't have
     var must_load = {};
-    rename_refs(term, name => {
+    replace_refs(term, name => {
       if (!defs[name]) {
         let file_name = get_ref_origin_file(name);
         if (file_name) {
@@ -85,7 +86,7 @@ const parse = async (code, tokenify) => {
     for (let i = 0; i < new_files.length; ++i) {
       let [file_name, file_code] = new_files[i];
       if (file_code) {
-        parses.push(parse(file_code, tokenify).then(file_defs => [file_name, file_defs]));
+        parses.push(parse(file_code, tokenify, false).then(file_defs => [file_name, file_defs]));
       }
     }
 
@@ -224,14 +225,6 @@ const parse = async (code, tokenify) => {
     return name;
   }
 
-  function parse_op(func, ctx) {
-    var num0 = parse_term(ctx);
-    var skip = parse_exact(",");
-    var num1 = parse_term(ctx);
-    var skip = parse_exact(")");
-    return Op2(func, num0, num1);
-  }
-
   function parse_term(ctx) {
     var parsed;
 
@@ -245,6 +238,11 @@ const parse = async (code, tokenify) => {
     // Type
     else if (match("Type")) {
       parsed = Typ();
+    }
+
+    // Hole
+    else if (match("?")) {
+      parsed = Num(0); // TODO: a proper HOLE constructor
     }
 
     // Lambdas and Forall
@@ -308,22 +306,17 @@ const parse = async (code, tokenify) => {
     }
 
     // Operations
-    else if (match("+("))  { parsed = parse_op("+", ctx); }
-    else if (match("-("))  { parsed = parse_op("-", ctx); }
-    else if (match("*("))  { parsed = parse_op("*", ctx); }
-    else if (match("/("))  { parsed = parse_op("/", ctx); }
-    else if (match("%("))  { parsed = parse_op("%", ctx); }
-    else if (match("**(")) { parsed = parse_op("**", ctx); }
-    else if (match("^^(")) { parsed = parse_op("^^", ctx); }
-    else if (match("&("))  { parsed = parse_op("&", ctx); }
-    else if (match("|("))  { parsed = parse_op("|", ctx); }
-    else if (match("^("))  { parsed = parse_op("^", ctx); }
-    else if (match("~("))  { parsed = parse_op("~", ctx); }
-    else if (match(">>(")) { parsed = parse_op(">>", ctx); }
-    else if (match("<<(")) { parsed = parse_op("<<", ctx); }
-    else if (match(">("))  { parsed = parse_op(">", ctx); }
-    else if (match("<("))  { parsed = parse_op("<", ctx); }
-    else if (match("==(")) { parsed = parse_op("==", ctx); }
+    else if (match("|")) {
+      var val0 = parse_term(ctx);
+      var func = parse_string(x => !is_space(x));
+      var val1 = parse_term(ctx);
+      var skip = parse_exact("|");
+      if (func === "=") {
+        return Eql(val0, val1);
+      } else {
+        return Op2(func, val0, val1);
+      }
+    }
 
     // String
     else if (match("\"")) {
@@ -343,7 +336,7 @@ const parse = async (code, tokenify) => {
       for (var i = nums.length - 1; i >= 0; --i) {
         var term = App(App(App(Ref("cons"), Wrd(), true), Num(nums[i]), false), term, false);
       }
-      parsed = term;
+      parsed = Ann(Ref("String"), term);
     }
 
     // List
@@ -476,15 +469,6 @@ const parse = async (code, tokenify) => {
       parsed = Prj(nam0, nam1, pair, body, eras);
     }
 
-    // Equality
-    else if (match("=(")) {
-      var val0 = parse_term(ctx);
-      var skip = parse_exact(",");
-      var val1 = parse_term(ctx);
-      var skip = parse_exact(")");
-      parsed = Eql(val0, val1);
-    }
-
     // Reflexivity
     else if (match("refl<")) {
       var expr = parse_term(ctx);
@@ -531,6 +515,14 @@ const parse = async (code, tokenify) => {
       var type = parse_term(ctx);
       var expr = parse_term(ctx);
       parsed = Ann(type, expr, false);
+    }
+
+    // Logging
+    else if (match("log(")) {
+      var msge = parse_term(ctx);
+      var skip = parse_exact(")");
+      var expr = parse_term(ctx);
+      parsed = Log(msge, expr);
     }
 
     // Identity
@@ -757,14 +749,14 @@ const parse = async (code, tokenify) => {
       if (name.length > 0) {
 
         // Typed definition
-        if (match(":")) {
-          var boxed = match_here("!");
+        var boxed = match("!");
+        var typed = boxed || match(":");
+        if (boxed || typed) {
           var cased = [];
           var erase = [];
           var names = [];
           var halti = null;
           var types = [];
-          var unbox = [];
           if (match("{")) {
             var count = 0;
             while (idx < code.length) {
@@ -781,13 +773,9 @@ const parse = async (code, tokenify) => {
           }
           var type = await resolve(parse_term(names));
 
-          while (boxed && match("use")) {
-            unbox.push(parse_string());
-          }
-
           // Typed definition without patterns
           if (cased.filter(x => x).length === 0) {
-            var term = await resolve(parse_term(unbox.concat(names)));
+            var term = await resolve(parse_term(names));
 
           // Typed definition with patterns
           } else {
@@ -844,7 +832,7 @@ const parse = async (code, tokenify) => {
           }
 
           // Typed definition: syntax sugar for recursive functions
-          var [is_recursive, is_unhalting, unrec_term] = unrecurse(term, name, unbox.length);
+          var [is_recursive, is_unhalting, unrec_term] = unrecurse(term, name, 0);
           if (boxed && is_recursive) {
             var term = unrec_term;
             var TERM = term;
@@ -852,7 +840,7 @@ const parse = async (code, tokenify) => {
             if (halti !== null) {
               var halt = Var(names.length - halti - 1);
             } else if (match("&")) {
-              var halt = await resolve(parse_term(unbox.concat(names)));
+              var halt = await resolve(parse_term(names));
             } else {
               error("The bounded-recursive function '" + name + "' needs a halting case. Provide it using `&`.");
             }
@@ -860,10 +848,10 @@ const parse = async (code, tokenify) => {
               var halt = Lam(names[i], null, halt, erase[i]);
             }
             var term = shift(term, 1, 0);
-            var term = subst(term, Var(0), unbox.length + 1);
+            var term = subst(term, Var(0), 1);
             var term = Lam(name, null, term, false);
             var TERM = shift(TERM, 1, 0);
-            var TERM = subst(TERM, Ref("-" + name), unbox.length + 1);
+            var TERM = subst(TERM, Ref("-" + name), 1);
             var type = Box(type);
             var call = term;
             var term = App(App(App(Ref("rec"), type[1].expr, true), Put(Ref(name + ".call")), false), Put(Ref(name + ".halt")), false);
@@ -875,20 +863,23 @@ const parse = async (code, tokenify) => {
           }
 
           // Typed definition: auto-fill unboxings
-          for (var i = 0; i < unbox.length; ++i) {
-            var term = Dup(unbox[unbox.length - i - 1], Ref(unbox[unbox.length - i - 1]), term);
-            if (boxed && is_recursive) {
-              var halt = Dup(unbox[unbox.length - i - 1], Ref(unbox[unbox.length - i - 1]), halt);
-              var call = Dup(unbox[unbox.length - i - 1], Ref(unbox[unbox.length - i - 1]), call);
-              var TERM = subst_many(unbox.map(name => "-" + name), TERM, 0);
-            }
-          }
+          //for (var i = 0; i < unbox.length; ++i) {
+            //var term = Dup(unbox[unbox.length - i - 1], Ref(unbox[unbox.length - i - 1]), term);
+            //if (boxed && is_recursive) {
+              //var halt = Dup(unbox[unbox.length - i - 1], Ref(unbox[unbox.length - i - 1]), halt);
+              //var call = Dup(unbox[unbox.length - i - 1], Ref(unbox[unbox.length - i - 1]), call);
+              //var TERM = subst_many(unbox.map(name => "-" + name), TERM, 0);
+            //}
+          //}
 
           defs[name] = Ann(type, term, false);
           if (boxed && is_recursive) {
             defs[name + ".call"] = Ann(All("x", type[1].expr, type[1].expr, false), call);
             defs[name + ".halt"] = Ann(type[1].expr, halt);
             defs["-" + name] = Ann(TYPE, TERM, false);
+          }
+          if (boxed) {
+            defs["$ISBOXED$" + name] = Num(1);
           }
 
         // Untyped definition
@@ -902,6 +893,25 @@ const parse = async (code, tokenify) => {
     }
 
     next_char();
+  }
+
+  // When a reference to a boxed definiton is used inside a boxed definition,
+  // automatically unbox it by appending `dup ref = ref; ...` to the term
+  if (auto_unbox) {
+    for (var name in defs) {
+      if (defs["$ISBOXED$" + name]) {
+        var unboxings = [];
+        defs[name] = replace_refs(defs[name], (ref_name, depth) => {
+          if (ref_name !== name && defs["$ISBOXED$" + ref_name]) {
+            unboxings.push(ref_name);
+            return Var(depth + unboxings.length - 1);
+          }
+        });
+        for (var i = unboxings.length - 1; i >= 0; --i) {
+          defs[name] = Dup("dup_" + unboxings[i], Ref(unboxings[i]), defs[name]);
+        }
+      }
+    }
   }
 
   return {defs, tokens, adts};
@@ -1027,6 +1037,10 @@ const unrecurse = (term, term_name, add_depth) => {
         var expr = go(term.expr, depth, eras);
         var done = term.done;
         return Ann(type, expr, done);
+      case "Log":
+        var msge = go(term.msge, depth, true);
+        var expr = go(term.expr, depth, eras);
+        return Log(msge, expr);
       case "Ref":
         if (term.name === term_name) {
           is_recursive = true;
@@ -1057,185 +1071,8 @@ const gen_name = (n) => {
   return str;
 };
 
-// Converts a term to a string
-const show = ([ctor, args], nams = []) => {
-  switch (ctor) {
-    case "Var":
-      var name = nams[nams.length - args.index - 1];
-      if (!name) {
-        return "^" + args.index;
-      } else {
-        var suff = "";
-        for (var i = 0; i < args.index - 1; ++i) {
-          if (nams[nams.length - i - 1] === name) {
-            var suff = suff + "^";
-          }
-        }
-        return name + suff;
-      }
-    case "Typ":
-      return "Type";
-    case "All":
-      var term = [ctor, args];
-      var erase = [];
-      var names = [];
-      var types = [];
-      while (term[0] === "All") {
-        erase.push(term[1].eras);
-        names.push(term[1].name);
-        types.push(show(term[1].bind, nams.concat(names.slice(0,-1))));
-        term = term[1].body;
-      }
-      var text = "{";
-      for (var i = 0; i < names.length; ++i) {
-        text += erase[i] ? "~" : "";
-        text += names[i] + " : " + types[i];
-        text += i < names.length - 1 ? ", " : "";
-      }
-      text += "} -> ";
-      text += show(term, nams.concat(names));
-      return text;
-    case "Lam":
-      var term = [ctor, args];
-      var numb = null;
-      var erase = [];
-      var names = [];
-      var types = [];
-      while (term[0] === "Lam") {
-        erase.push(term[1].eras);
-        names.push(term[1].name);
-        types.push(term[1].bind ? show(term[1].bind, nams.concat(names.slice(0,-1))) : null);
-        term = term[1].body;
-      }
-      var text = "{";
-      for (var i = 0; i < names.length; ++i) {
-        text += erase[i] ? "~" : "";
-        text += names[i] + (types[i] !== null ? " : " + types[i] : "");
-        text += i < names.length - 1 ? ", " : "";
-      }
-      text += "} => ";
-      if (numb !== null) {
-        text += "%" + Number(numb);
-      } else {
-        text += show(term, nams.concat(names));
-      }
-      return text;
-    case "App":
-      var text = ")";
-      var term = [ctor, args];
-      while (term[0] === "App") {
-        text = (term[1].func[0] === "App" ? ", " : "") + (term[1].eras ? "~" : "") + show(term[1].argm, nams) + text;
-        term = term[1].func;
-      }
-      if (term[0] === "Ref" || term[0] === "Var") {
-        var func = show(term, nams);
-      } else {
-        var func = "(" + show(term,nams) + ")";
-      }
-      return func + "(" + text;
-    case "Box":
-      var expr = show(args.expr, nams);
-      return "!" + expr;
-    case "Put":
-      var expr = show(args.expr, nams);
-      return "#" + expr;
-    case "Dup":
-      var name = args.name;
-      var expr = show(args.expr, nams);
-      var body = show(args.body, nams.concat([name]));
-      return "dup " + name + " = " + expr + "; " + body;
-    case "Wrd":
-      return "Word";
-    case "Num":
-      return args.numb.toString();
-    case "Op1":
-    case "Op2":
-      var func = args.func;
-      var num0 = show(args.num0, nams);
-      var num1 = show(args.num1, nams);
-      return "|" + num0 + " " + func + " " + num1 + "|";
-    case "Ite":
-      var cond = show(args.cond, nams);
-      var pair = show(args.pair, nams);
-      return "(if " + cond + " " + pair + ")";
-    case "Cpy":
-      var name = args.name;
-      var numb = show(args.numb, nams);
-      var body = show(args.body, nams.concat([name]));
-      return "cpy " + name + " = " + numb + "; " + body;
-    case "Sig":
-      var name = args.name;
-      var typ0 = show(args.typ0, nams);
-      var typ1 = show(args.typ1, nams.concat([name]));
-      var comm = args.eras ? " ~ " : ", ";
-      return "[" + name + " : " + typ0 + comm + typ1 + "]";
-    case "Par":
-      var text = pretty_print([ctor, args]);
-      if (text !== null) {
-        return "\"" + text + "\"";
-      } else {
-        var val0 = show(args.val0, nams);
-        var val1 = show(args.val1, nams);
-        var eras = args.eras ? "~" : "";
-        return "[" + val0 + ", " + eras + val1 + "]";
-      }
-    case "Fst":
-      var pair = show(args.pair, nams);
-      var eras = args.eras ? "~" : "";
-      return "(" + eras + "fst " + pair + ")";
-    case "Snd":
-      var pair = show(args.pair, nams);
-      var eras = args.eras ? "~" : "";
-      return "(" + eras + "snd " + pair + ")";
-    case "Prj":
-      var nam0 = args.nam0;
-      var nam1 = args.nam1;
-      var pair = show(args.pair, nams);
-      var body = show(args.body, nams.concat([nam0, nam1]));
-      var eras = args.eras ? "~" : "";
-      return "get [" + nam0 + "," + eras + nam1 + "] = " + pair + "; " + body;
-    case "Eql":
-      var val0 = show(args.val0, nams);
-      var val1 = show(args.val1, nams);
-      return "=(" + val0 + ", " + val1 + ")";
-    case "Rfl":
-      var expr = show(args.expr, nams);
-      return "refl<" + expr + ">";
-    case "Sym":
-      var prof = show(args.prof, nams);
-      return "sym(" + prof + ")";
-    case "Rwt":
-      var name = args.name;
-      var type = show(args.type, nams.concat([name]));
-      var prof = show(args.prof, nams);
-      var expr = show(args.expr, nams);
-      return "rewrite<" + prof + ">{" + name + " in " + type + "}(" + expr + ")";
-    case "Cst":
-      var prof = show(args.prof, nams);
-      var val0 = show(args.val0, nams);
-      var val1 = show(args.val1, nams);
-      return "cast<" + prof + ", " + val0 + ">(" + val1 + ")";
-    case "Slf":
-      var name = args.name;
-      var type = show(args.type, nams.concat([name]));
-      return "$" + name + " " + type;
-    case "New":
-      var type = show(args.type, nams);
-      var expr = show(args.expr, nams);
-      return "new<" + type + "> " + expr;
-    case "Use":
-      var expr = show(args.expr, nams);
-      return "%" + expr;
-    case "Ann":
-      var expr = show(args.expr, nams);
-      return expr;
-    case "Ref":
-      return args.name;
-  }
-};
-
 // Maps defs
-const rename_refs = ([ctor, term], renamer) => {
+const replace_refs = ([ctor, term], renamer, depth = 0) => {
   switch (ctor) {
     case "Var":
       return Var(term.index);
@@ -1243,31 +1080,31 @@ const rename_refs = ([ctor, term], renamer) => {
       return Typ();
     case "All":
       var name = term.name;
-      var bind = rename_refs(term.bind, renamer);
-      var body = rename_refs(term.body, renamer);
+      var bind = replace_refs(term.bind, renamer, depth);
+      var body = replace_refs(term.body, renamer, depth + 1);
       var eras = term.eras;
       return All(name, bind, body, eras);
     case "Lam":
       var name = term.name;
-      var bind = term.bind && rename_refs(term.bind, renamer);
-      var body = rename_refs(term.body, renamer);
+      var bind = term.bind && replace_refs(term.bind, renamer, depth);
+      var body = replace_refs(term.body, renamer, depth + 1);
       var eras = term.eras;
       return Lam(name, bind, body, eras);
     case "App":
-      var func = rename_refs(term.func, renamer);
-      var argm = rename_refs(term.argm, renamer);
+      var func = replace_refs(term.func, renamer, depth);
+      var argm = replace_refs(term.argm, renamer, depth);
       var eras = term.eras;
       return App(func, argm, term.eras);
     case "Box":
-      var expr = rename_refs(term.expr, renamer);
+      var expr = replace_refs(term.expr, renamer, depth);
       return Box(expr);
     case "Put":
-      var expr = rename_refs(term.expr, renamer);
+      var expr = replace_refs(term.expr, renamer, depth);
       return Put(expr);
     case "Dup":
       var name = term.name;
-      var expr = rename_refs(term.expr, renamer);
-      var body = rename_refs(term.body, renamer);
+      var expr = replace_refs(term.expr, renamer, depth);
+      var body = replace_refs(term.body, renamer, depth + 1);
       return Dup(name, expr, body);
     case "Wrd":
       return Wrd();
@@ -1277,88 +1114,99 @@ const rename_refs = ([ctor, term], renamer) => {
     case "Op1":
     case "Op2":
       var func = term.func;
-      var num0 = rename_refs(term.num0, renamer);
-      var num1 = rename_refs(term.num1, renamer);
+      var num0 = replace_refs(term.num0, renamer, depth);
+      var num1 = replace_refs(term.num1, renamer, depth);
       return Op2(func, num0, num1);
     case "Ite":
-      var cond = rename_refs(term.cond, renamer);
-      var pair = rename_refs(term.pair, renamer);
+      var cond = replace_refs(term.cond, renamer, depth);
+      var pair = replace_refs(term.pair, renamer, depth);
       return Ite(cond, pair);
     case "Cpy":
       var name = term.name;
-      var numb = rename_refs(term.numb, renamer);
-      var body = rename_refs(term.body, renamer);
+      var numb = replace_refs(term.numb, renamer, depth);
+      var body = replace_refs(term.body, renamer, depth + 1);
       return Cpy(name, numb, body);
     case "Sig":
       var name = term.name;
-      var typ0 = rename_refs(term.typ0, renamer);
-      var typ1 = rename_refs(term.typ1, renamer);
+      var typ0 = replace_refs(term.typ0, renamer, depth);
+      var typ1 = replace_refs(term.typ1, renamer, depth + 1);
       var eras = term.eras;
       return Sig(name, typ0, typ1, eras);
     case "Par":
-      var val0 = rename_refs(term.val0, renamer);
-      var val1 = rename_refs(term.val1, renamer);
+      var val0 = replace_refs(term.val0, renamer, depth);
+      var val1 = replace_refs(term.val1, renamer, depth);
       var eras = term.eras;
       return Par(val0, val1, eras);
     case "Fst":
-      var pair = rename_refs(term.pair, renamer);
+      var pair = replace_refs(term.pair, renamer, depth);
       var eras = term.eras;
       return Fst(pair, eras);
     case "Snd":
-      var pair = rename_refs(term.pair, renamer);
+      var pair = replace_refs(term.pair, renamer, depth);
       var eras = term.eras;
       return Snd(pair, eras);
     case "Prj":
       var nam0 = term.nam0;
       var nam1 = term.nam1;
-      var pair = rename_refs(term.pair, renamer);
-      var body = rename_refs(term.body, renamer);
+      var pair = replace_refs(term.pair, renamer, depth);
+      var body = replace_refs(term.body, renamer, depth + 2);
       var eras = term.eras;
       return Prj(nam0, nam1, pair, body, eras);
     case "Eql":
-      var val0 = rename_refs(term.val0, renamer);
-      var val1 = rename_refs(term.val1, renamer);
+      var val0 = replace_refs(term.val0, renamer, depth);
+      var val1 = replace_refs(term.val1, renamer, depth);
       return Eql(val0, val1);
     case "Rfl":
-      var expr = rename_refs(term.expr, renamer);
+      var expr = replace_refs(term.expr, renamer, depth);
       return Rfl(expr);
     case "Sym":
-      var prof = rename_refs(term.prof, renamer);
+      var prof = replace_refs(term.prof, renamer, depth);
       return Sym(prof);
     case "Rwt":
-      var prof = rename_refs(term.prof, renamer);
       var name = term.name;
-      var type = rename_refs(term.type, renamer);
-      var expr = rename_refs(term.expr, renamer);
+      var type = replace_refs(term.type, renamer, depth + 1);
+      var prof = replace_refs(term.prof, renamer, depth);
+      var expr = replace_refs(term.expr, renamer, depth);
       return Rwt(name, type, prof, expr);
     case "Cst":
-      var prof = rename_refs(term.prof, renamer);
-      var val0 = rename_refs(term.val0, renamer);
-      var val1 = rename_refs(term.val1, renamer);
+      var prof = replace_refs(term.prof, renamer, depth);
+      var val0 = replace_refs(term.val0, renamer, depth);
+      var val1 = replace_refs(term.val1, renamer, depth);
       return Cst(prof, val0, val1);
     case "Slf":
       var name = term.name;
-      var type = rename_refs(term.type, renamer);
+      var type = replace_refs(term.type, renamer, depth + 1);
       return Slf(name, type);
     case "New":
-      var type = rename_refs(term.type, renamer);
-      var expr = rename_refs(term.expr, renamer);
+      var type = replace_refs(term.type, renamer, depth);
+      var expr = replace_refs(term.expr, renamer, depth);
       return New(type, expr);
     case "Use":
-      var expr = rename_refs(term.expr, renamer);
+      var expr = replace_refs(term.expr, renamer, depth);
       return Use(expr);
     case "Ann":
-      var type = rename_refs(term.type, renamer);
-      var expr = rename_refs(term.expr, renamer);
+      var type = replace_refs(term.type, renamer, depth);
+      var expr = replace_refs(term.expr, renamer, depth);
       var done = term.done;
       return Ann(type, expr, done);
+    case "Log":
+      var msge = replace_refs(term.msge, renamer, depth);
+      var expr = replace_refs(term.expr, renamer, depth);
+      return Log(msge, expr);
     case "Ref":
-      return Ref(renamer(term.name), term.eras);
+      var new_name = renamer(term.name, depth);
+      if (typeof new_name === "string") {
+        return Ref(new_name, term.eras);
+      } else if (typeof new_name === "object") {
+        return new_name;
+      } else {
+        return Ref(term.name, term.eras);
+      }
   }
 }
 
 const prefix_refs = (prefix, term, defs) => {
-  return rename_refs(term, ref_name => {
+  return replace_refs(term, ref_name => {
     return (defs[ref_name] ? prefix : "") + ref_name;
   });
 };
@@ -1366,25 +1214,6 @@ const prefix_refs = (prefix, term, defs) => {
 // :::::::::::::::::::
 // :: Syntax Sugars ::
 // :::::::::::::::::::
-
-const pretty_print = (term) => {
-  try {
-    if (term[1].val0[1].numb === 0x53484f57) {
-      term = term[1].val1;
-      var nums = [];
-      while (term[1].body[1].body[0] !== "Var") {
-        term = term[1].body[1].body;
-        nums.push(term[1].func[1].argm[1].numb);
-        term = term[1].argm;
-      }
-      return new TextDecoder("utf-8").decode(new Uint8Array(new Uint32Array(nums).buffer));
-    } else {
-      return null;
-    }
-  } catch (e) {
-    return null;
-  }
-}
 
 // Syntax sugars for datatypes. They transform a statement like:
 // 
@@ -1754,6 +1583,7 @@ module.exports = {
   New,
   Use,
   Ann,
+  Log,
   Ref,
   shift,
   subst,
@@ -1761,14 +1591,13 @@ module.exports = {
   norm,
   erase,
   equal,
-  boxcheck: boxcheck(show),
-  typecheck: typecheck(show),
+  boxcheck,
+  typecheck,
   parse,
   gen_name,
   show,
-  rename_refs,
+  replace_refs,
   prefix_refs,
-  pretty_print,
   derive_adt_type,
   derive_adt_ctor,
   //derive_dependent_match,

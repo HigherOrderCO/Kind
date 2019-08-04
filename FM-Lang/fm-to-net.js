@@ -126,6 +126,8 @@ const compile = (term, defs = {}) => {
         var body_ptr = build_net(term[1].body, net, var_ptrs, level);
         var_ptrs.pop();
         return body_ptr;
+      case "Log":
+        return build_net(term[1].expr, net, var_ptrs, level);
       case "Var":
         return get_var(var_ptrs[var_ptrs.length - term[1].index - 1]);
       case "Ref":
