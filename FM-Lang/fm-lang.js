@@ -630,6 +630,7 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     }
     while (match_here(" ")) {
       var matched = false;
+      if (code.slice(idx, idx + 2) === "//") break;
       for (var i = 0; i < op_symbol.length; ++i) {
         var op = op_symbol[i];
         if (match_here(op)) {
