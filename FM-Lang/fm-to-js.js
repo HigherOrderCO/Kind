@@ -1,7 +1,8 @@
-const fmc = require("./fm-core.js");
+const fmc = require("./fm-lang.js");
 
 // Converts a Formality-Core Term to a native JavaScript function
-const compile = ([ctor, term], defs, vars) => {
+const compile = (term, defs, vars) => {
+  var [ctor, term] = term();
   switch (ctor) {
     case "Var":
       for (var i = 0; i < term.index; ++i) {
@@ -43,7 +44,7 @@ const compile = ([ctor, term], defs, vars) => {
         case "<<" : return (num0 << num1) >>> 0;
         case ">"  : return (num0 > num1) >>> 0;
         case "<"  : return (num0 < num1) >>> 0;
-        case "==" : return (num0 === num1) >>> 0;
+        case "===" : return (num0 === num1) >>> 0;
       }
     case "Ite":
       var cond = compile(term.cond, defs, vars);
@@ -69,8 +70,10 @@ const compile = ([ctor, term], defs, vars) => {
       var pair = compile(term.pair, defs, vars);
       var body = (x,y) => compile(term.body, defs, [y,[x,vars]]);
       return body(pair[0], pair[1]);
+    case "Log":
+      return compile(term.expr, defs, vars);
     case "Ref":
-      return compile(defs[term.name], defs, vars);
+      return compile(fmc.erase(defs[term.name]), defs, vars);
   }
 };
 

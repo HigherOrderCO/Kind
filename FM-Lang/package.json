@@ -1,10 +1,10 @@
 {
-  "name": "formality-core",
-  "version": "0.1.47",
+  "name": "formality-lang",
+  "version": "0.3.43",
   "description": "",
   "main": "exports.js",
   "bin": {
-    "fmc": "main.js"
+    "fm": "main.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/moonad/formality-core#readme",
   "dependencies": {
-    "formality-net": "^0.1.10"
+    "formality-net": "^0.1.10",
+    "xhr-request-promise": "^0.1.2"
   }
 }

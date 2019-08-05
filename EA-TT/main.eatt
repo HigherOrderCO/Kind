@@ -650,11 +650,11 @@
   {vnil  : (P zero (vnil -A))}
   (P n self)
 
-. vcons [-A : Type] [-n : Nat]
-: {a : A} {as : (Vector A n)} (Vector A (succ n))
-= [a] [as]
-  @(Vector A (succ n)) [-P] [vcons] [vnil]
-  (vcons -n a as)
+. vcons
+  [-A : Type] [-n : Nat] [a : A] [as : (Vector A n)]
+  : (Vector A (succ n))
+  = @(Vector A (succ n)) [-P] [vcons] [vnil]
+    (vcons -n a as)
 
 . vnil [-A : Type]
 : (Vector A zero)
@@ -671,5 +671,4 @@
 // Fusible inc
 .inc_test [inc = (Cat.16 -Bits (inc 8))] [cpy = (cpy 8)] | (cpy (inc (o (o (o (o (o (o (o (o e))))))))))
   
-.main   inc_test
-.stdlib inc_test
+.main Vector
