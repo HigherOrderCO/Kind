@@ -215,14 +215,18 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     }
   }
 
-  function parse_string(fn = is_name_char) {
-    next_char();
+  function parse_string_here(fn = is_name_char) {
     var name = "";
     while (idx < code.length && fn(code[idx])) {
       name = name + code[idx];
       next();
     }
     return name;
+  }
+
+  function parse_string(fn = is_name_char) {
+    next_char();
+    return parse_string_here(fn);
   }
 
   function parse_term(ctx) {
@@ -275,6 +279,7 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     // Duplication
     else if (match("dup ")) {
       var name = parse_string();
+      var skip = parse_exact("=");
       var expr = parse_term(ctx);
       var body = parse_term(ctx.concat([name]));
       parsed = Dup(name, expr, body);
@@ -295,6 +300,7 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     // Let
     else if (match("let ")) {
       var name = parse_string();
+      var skip = parse_exact("=");
       var copy = parse_term(ctx);
       var body = parse_term(ctx.concat([name]));
       parsed = subst(body, copy, 0);
@@ -303,19 +309,6 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     // Wrd
     else if (match("Word")) {
       parsed = Wrd();
-    }
-
-    // Operations
-    else if (match("|")) {
-      var val0 = parse_term(ctx);
-      var func = parse_string(x => !is_space(x));
-      var val1 = parse_term(ctx);
-      var skip = parse_exact("|");
-      if (func === "=") {
-        return Eql(val0, val1);
-      } else {
-        return Op2(func, val0, val1);
-      }
     }
 
     // String
@@ -392,6 +385,7 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     // Copy
     else if (match("cpy ")) {
       var name = parse_string();
+      var skip = parse_exact("=");
       var numb = parse_term(ctx);
       var body = parse_term(ctx.concat([name]));
       parsed = Cpy(name, numb, body);
@@ -525,12 +519,6 @@ const parse = async (code, tokenify, auto_unbox = true) => {
       parsed = Log(msge, expr);
     }
 
-    // Identity
-    else if (match("=")) {
-      var expr = parse_term(ctx);
-      parsed = expr;
-    }
-
     // Slf
     else if (match("$")) {
       var name = parse_string();
@@ -634,6 +622,30 @@ const parse = async (code, tokenify, auto_unbox = true) => {
       }
       parsed = term;
       erased = false;
+    }
+    var op_symbol = ["+","-","*","/","%","^","&","|","^","~",">","<",">","="];
+    var is_native = {"+":1,"-":1,"*":1,"/":1,"%":1,"**":1,"^^":1,"&":1,"|":1,"^":1,"~":1,">>":1,"<<":1,">":1,"<":1,"===":1};
+    while (match_here(" ")) {
+      var matched = false;
+      for (var i = 0; i < op_symbol.length; ++i) {
+        var op = op_symbol[i];
+        if (match_here(op)) {
+          matched = true;
+          var func = op + parse_string_here(x => !is_space(x));
+          var argm = parse_term(ctx);
+          if (is_native[func]) {
+            parsed = Op2(func, parsed, argm);
+          } else if (func === "==") {
+            parsed = Eql(parsed, argm);
+          } else if (func === "->") {
+            parsed = All("", parsed, shift(argm, 1, 0), false);
+          } else {
+            parsed = App(App(Ref(func), parsed, false), argm);
+          }
+          break;
+        }
+      }
+      if (!matched) break;
     }
 
     return parsed;

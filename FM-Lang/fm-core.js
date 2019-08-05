@@ -117,7 +117,7 @@ const show = ([ctor, args], nams = []) => {
       var text = "{";
       for (var i = 0; i < names.length; ++i) {
         text += erase[i] ? "~" : "";
-        text += names[i] + " : " + types[i];
+        text += names[i] + (names[i].length > 0 ? " : " : ":") + types[i];
         text += i < names.length - 1 ? ", " : "";
       }
       text += "} -> ";
@@ -181,7 +181,7 @@ const show = ([ctor, args], nams = []) => {
       var func = args.func;
       var num0 = show(args.num0, nams);
       var num1 = show(args.num1, nams);
-      return "|" + num0 + " " + func + " " + num1 + "|";
+      return "(" + num0 + " " + func + " " + num1 + ")";
     case "Ite":
       var cond = show(args.cond, nams);
       var pair = show(args.pair, nams);
@@ -229,7 +229,7 @@ const show = ([ctor, args], nams = []) => {
     case "Eql":
       var val0 = show(args.val0, nams);
       var val1 = show(args.val1, nams);
-      return "|" + val0 + " = " + val1 + "|";
+      return "(" + val0 + " == " + val1 + ")";
     case "Rfl":
       var expr = show(args.expr, nams);
       return "refl<" + expr + ">";
@@ -600,7 +600,7 @@ const norm = (term, defs = {}, weak = false, force_dup = false, logging = false)
         case "<<" : return Num((num0[1].numb << num1[1].numb) >>> 0);
         case ">"  : return Num((num0[1].numb > num1[1].numb ? 1 : 0) >>> 0);
         case "<"  : return Num((num0[1].numb < num1[1].numb ? 1 : 0) >>> 0);
-        case "==" : return Num((num0[1].numb === num1[1].numb ? 1 : 0) >>> 0);
+        case "===": return Num((num0[1].numb === num1[1].numb ? 1 : 0) >>> 0);
         default   : throw "[RUNTIME-ERROR]\nUnknown primitive: " + func + ".";
       }
     } else {
