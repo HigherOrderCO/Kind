@@ -111,6 +111,10 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     return term;
   }
 
+  var is_op_sym = {"+":1,"-":1,"*":1,"/":1,"%":1,"^":1,"&":1,"|":1,"^":1,"~":1,"<":1,">":1,"=":1};
+  var op_symbol = ["+","-","*","/","%","^","&","|","^","~","<",">","="];
+  var is_native = {"+":1,"-":1,"*":1,"/":1,"%":1,"**":1,"^^":1,"&":1,"|":1,"^":1,"~":1,">>":1,"<<":1,">":1,"<":1,"===":1};
+
   function is_space(char) {
     return char === " " || char === "\t" || char === "\n" || char === "\r" || char === ";";
   }
@@ -458,6 +462,7 @@ const parse = async (code, tokenify, auto_unbox = true) => {
       var eras = match("~");
       var nam1 = parse_string();
       var skip = parse_exact("]");
+      var skip = parse_exact("=");
       var pair = parse_term(ctx);
       var body = parse_term(ctx.concat([nam0, nam1]));
       parsed = Prj(nam0, nam1, pair, body, eras);
@@ -623,8 +628,6 @@ const parse = async (code, tokenify, auto_unbox = true) => {
       parsed = term;
       erased = false;
     }
-    var op_symbol = ["+","-","*","/","%","^","&","|","^","~",">","<",">","="];
-    var is_native = {"+":1,"-":1,"*":1,"/":1,"%":1,"**":1,"^^":1,"&":1,"|":1,"^":1,"~":1,">>":1,"<<":1,">":1,"<":1,"===":1};
     while (match_here(" ")) {
       var matched = false;
       for (var i = 0; i < op_symbol.length; ++i) {
@@ -640,7 +643,7 @@ const parse = async (code, tokenify, auto_unbox = true) => {
           } else if (func === "->") {
             parsed = All("", parsed, shift(argm, 1, 0), false);
           } else {
-            parsed = App(App(Ref(func), parsed, false), argm);
+            parsed = App(App(Ref(func), parsed, false), argm, false);
           }
           break;
         }
@@ -754,7 +757,8 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     // Definitions or end-of-file
     } else {
       if (tokens) tokens.push(["def", ""]);
-      var name = parse_string();
+      var name = parse_string(x => is_op_sym[x]);
+      var name = name + parse_string_here();
       if (tokens) tokens.push(["txt", ""]);
 
       // Definition

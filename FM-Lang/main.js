@@ -81,7 +81,7 @@ if (args.v) {
       var file = names[0];
       var defn = names.length > 1 ? names.slice(1).join(".") : "main";
       var code = fs.readFileSync("./" + file + ".fm", "utf8");
-      var defs = (await fm.lang.parse(!args.d ? "import " + BASE + " open\n" + code : code)).defs;
+      var defs = (await fm.lang.parse(!args.d ? "import " + BASE + " open; " + code : code)).defs;
 
       var stats = {
         rewrites: 0,
