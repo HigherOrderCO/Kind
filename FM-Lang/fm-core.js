@@ -933,7 +933,7 @@ const uses = ([ctor, term], depth = 0) => {
     case "Ite": return uses(term.cond, depth) + uses(term.pair, depth);
     case "Cpy": return uses(term.numb, depth) + uses(term.body, depth + 1);
     case "Sig": return 0;
-    case "Par": return (term.eras === 1 ? 0 : uses(term.val1, depth)) + (term.eras === 2 ? 0 : uses(term.val2, depth));
+    case "Par": return (term.eras === 1 ? 0 : uses(term.val0, depth)) + (term.eras === 2 ? 0 : uses(term.val1, depth));
     case "Fst": return uses(term.pair, depth);
     case "Snd": return uses(term.pair, depth);
     case "Prj": return uses(term.pair, depth) + uses(term.body, depth + 2);

@@ -105,6 +105,7 @@ if (args.v) {
       }
     } catch (e) {
       console.log(e.toString());
+      console.log(e);
     }
   })();
 }
