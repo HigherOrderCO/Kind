@@ -893,10 +893,10 @@ const equal = (a, b, defs) => {
         var {a, b} = node[1];
 
         // Gets whnfs with and without dereferencing
-        var ax = norm(a, {}, true, true, false);
-        var bx = norm(b, {}, true, true, false);
-        var ay = norm(a, defs, true, true, false);
-        var by = norm(b, defs, true, true, false);
+        var ax = norm(a, {}, true, false, false);
+        var bx = norm(b, {}, true, false, false);
+        var ay = norm(a, defs, true, false, false);
+        var by = norm(b, defs, true, false, false);
 
         // If non-deref whnfs are app and fields are equal, then a == b
         var x = null;
@@ -965,7 +965,7 @@ const equal = (a, b, defs) => {
   }
 
   // Expands the search tree until it finds an answer
-  var tree = Eqs(norm(erase(a), defs, false, true, false), norm(erase(b), defs, false, true, false));
+  var tree = Eqs(norm(erase(a), defs, false, false, false), norm(erase(b), defs, false, false, false));
   while (tree[0] !== "Val") {
     var tree = step(tree);
   }

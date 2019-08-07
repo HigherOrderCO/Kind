@@ -1001,8 +1001,8 @@ const unrecurse = (term, term_name, add_depth) => {
         var eras = term.eras;
         return Sig(name, typ0, typ1, eras);
       case "Par":
-        var val0 = go(term.val0, depth, eras);
-        var val1 = go(term.val1, depth, eras);
+        var val0 = go(term.val0, depth, term.eras === 1);
+        var val1 = go(term.val1, depth, term.eras === 2);
         var eras = term.eras;
         return Par(val0, val1, eras);
       case "Fst":
