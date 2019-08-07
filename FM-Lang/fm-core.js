@@ -780,36 +780,98 @@ const norm = (term, defs = {}, weak = false, force_dup = false, logging = false)
 const erase = (term) => {
   var [ctor, term] = term;
   switch (ctor) {
-    case "Var": return Var(term.index);
-    case "Typ": return Typ();
-    case "All": return All(term.name, erase(term.bind), erase(term.body), term.eras);
-    case "Lam": return term.eras ? erase(subst(term.body, Num(0), 0)) : Lam(term.name, null, erase(term.body), term.eras);
-    case "App": return term.eras ? erase(term.func) : App(erase(term.func), erase(term.argm), term.eras);
-    case "Box": return Box(erase(term.expr));
-    case "Put": return Put(erase(term.expr));
-    case "Dup": return Dup(term.name, erase(term.expr), erase(term.body));
-    case "Wrd": return Wrd();
-    case "Num": return Num(term.numb);
-    case "Op1": return Op1(term.func, erase(term.num0), erase(term.num1));
-    case "Op2": return Op2(term.func, erase(term.num0), erase(term.num1));
-    case "Ite": return Ite(erase(term.cond), erase(term.pair));
-    case "Cpy": return Cpy(term.name, erase(term.numb), erase(term.body));
-    case "Sig": return Sig(term.name, erase(term.typ0), erase(term.typ1), term.eras);
-    case "Par": return term.eras === 1 ? erase(term.val1) : term.eras === 2 ? erase(term.val0) : Par(erase(term.val0), erase(term.val1), term.eras);
-    case "Fst": return term.eras === 1 ? Num(0)           : term.eras === 2 ? erase(term.pair) : Fst(erase(term.pair), term.eras);
-    case "Snd": return term.eras === 1 ? erase(term.pair) : term.eras === 2 ? Num(0)           : Snd(erase(term.pair), term.eras);
-    case "Prj": return term.eras === 1 ? subst(subst(term.body, erase(term.pair), 0), Num(0), 0) : term.eras === 2 ? subst(subst(term.body, Num(0), 0), erase(term.pair), 0) : Prj(term.nam0, term.nam1, erase(term.pair), erase(term.body), term.eras);
-    case "Eql": return Eql(erase(term.val0), erase(term.val1));
-    case "Rfl": return Num(0);
-    case "Sym": return erase(term.prof);
-    case "Rwt": return erase(term.expr);
-    case "Cst": return erase(term.val1);
-    case "Slf": return Slf(term.name, erase(term.type));
-    case "New": return erase(term.expr);
-    case "Use": return erase(term.expr);
-    case "Ann": return erase(term.expr);
-    case "Log": return Log(erase(term.msge), erase(term.expr));
-    case "Ref": return Ref(term.name, true);
+    case "Var":
+      return Var(term.index);
+    case "Typ":
+      return Typ();
+    case "All":
+      return All(term.name, erase(term.bind), erase(term.body), term.eras);
+    case "Lam":
+      if (term.eras) {
+        return erase(subst(term.body, Num(0), 0));
+      } else {
+        return Lam(term.name, null, erase(term.body), term.eras);
+      }
+    case "App":
+      if (term.eras) {
+        return erase(term.func);
+      } else {
+        return App(erase(term.func), erase(term.argm), term.eras);
+      }
+    case "Box":
+      return Box(erase(term.expr));
+    case "Put":
+      return Put(erase(term.expr));
+    case "Dup":
+      return Dup(term.name, erase(term.expr), erase(term.body));
+    case "Wrd":
+      return Wrd();
+    case "Num":
+      return Num(term.numb);
+    case "Op1":
+      return Op1(term.func, erase(term.num0), erase(term.num1));
+    case "Op2":
+      return Op2(term.func, erase(term.num0), erase(term.num1));
+    case "Ite":
+      return Ite(erase(term.cond), erase(term.pair));
+    case "Cpy":
+      return Cpy(term.name, erase(term.numb), erase(term.body));
+    case "Sig":
+      return Sig(term.name, erase(term.typ0), erase(term.typ1), term.eras);
+    case "Par":
+      if (term.eras === 1) {
+        return erase(term.val1);
+      } else if (term.eras === 2) {
+        return erase(term.val0);
+      } else {
+        return Par(erase(term.val0), erase(term.val1), term.eras);
+      }
+    case "Fst":
+      if (term.eras === 1) {
+        return Num(0);
+      } else if (term.eras === 2) {
+        return erase(term.pair);
+      } else {
+        return Fst(erase(term.pair), term.eras);
+      }
+    case "Snd":
+      if (term.eras === 1) {
+        return erase(term.pair);
+      } else if (term.eras === 2) {
+        return Num(0);
+      } else {
+        return Snd(erase(term.pair), term.eras);
+      }
+    case "Prj":
+      if (term.eras === 1) {
+        return erase(subst_many(term.body, [Num(7), erase(term.pair)], 0));
+      } else if (term.eras === 2) {
+        return erase(subst_many(term.body, [erase(term.pair), Num(7)], 0));
+      } else {
+        return Prj(term.nam0, term.nam1, erase(term.pair), erase(term.body), term.eras);
+      }
+    case "Eql":
+      return Eql(erase(term.val0), erase(term.val1));
+    case "Rfl":
+      return Num(0);
+    case "Sym":
+      return erase(term.prof);
+    case "Rwt":
+      return erase(term.expr);
+    case "Cst":
+      return erase(term.val1);
+    case "Slf":
+      return Slf(term.name, erase(term.type));
+    case "New":
+      return erase(term.expr);
+    case "Use":
+      return erase(term.expr);
+    case "Ann":
+      return erase(term.expr);
+    case "Log":
+      return Log(erase(term.msge), erase(term.expr));
+    case "Ref":
+      return Ref(term.name, true);
   }
 }
 
