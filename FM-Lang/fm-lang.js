@@ -176,7 +176,7 @@ const parse = async (code, tokenify, auto_unbox = true) => {
 
   function is_sigma(string) {
     var i = idx;
-    while (i < code.length && is_name_char(code[i])) { ++i; }
+    while (i < code.length && code[i] === "~" || is_name_char(code[i])) { ++i; }
     while (i < code.length && is_space(code[i])) { ++i; }
     return code[i] === ":";
   }
@@ -399,22 +399,24 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     else if (match("[")) {
       // Sigma
       if (is_sigma()) {
+        var era1 = match("~");
         var name = parse_string();
         var skip = parse_exact(":");
         var typ0 = parse_term(ctx);
-        var eras = match("~");
-        var skip = eras ? null : parse_exact(",");
+        var skip = parse_exact(",");
+        var era2 = match("~");
         var typ1 = parse_term(ctx.concat([name]));
         var skip = parse_exact("]");
-        parsed = Sig(name, typ0, typ1, eras);
+        parsed = Sig(name, typ0, typ1, era1 ? 1 : era2 ? 2 : 0);
       // Pair
       } else {
+        var era1 = match("~");
         var val0 = parse_term(ctx);
-        var eras = match("~");
-        var skip = eras ? null : parse_exact(",");
+        var skip = parse_exact(",");
+        var era2 = match("~");
         var val1 = parse_term(ctx);
         var skip = parse_exact("]");
-        parsed = Par(val0, val1, eras);
+        parsed = Par(val0, val1, era1 ? 1 : era2 ? 2 : 0);
       }
     }
 
@@ -423,49 +425,50 @@ const parse = async (code, tokenify, auto_unbox = true) => {
       var val0 = parse_term(ctx);
       var skip = parse_exact("else:");
       var val1 = parse_term(ctx);
-      parsed = Par(val0, val1, false);
+      parsed = Par(val0, val1, 0);
     }
 
     // First
     else if (match("fst(")) {
       var pair = parse_term(ctx);
       var skip = parse_exact(")");
-      parsed = Fst(pair, false);
+      parsed = Fst(pair, 0);
     }
 
     // First (erased)
     else if (match("~fst(")) {
       var pair = parse_term(ctx);
       var skip = parse_exact(")");
-      parsed = Fst(pair, true);
+      parsed = Fst(pair, 2);
     }
 
     // Second
     else if (match("snd(")) {
       var pair = parse_term(ctx);
       var skip = parse_exact(")");
-      parsed = Snd(pair, false);
+      parsed = Snd(pair, 0);
     }
 
     // Second (erased)
     else if (match("~snd(")) {
       var pair = parse_term(ctx);
       var skip = parse_exact(")");
-      parsed = Snd(pair, true);
+      parsed = Snd(pair, 1);
     }
 
     // Projection
     else if (match("get ")) {
       var skip = parse_exact("[");
+      var era1 = match("~");
       var nam0 = parse_string();
       var skip = parse_exact(",");
-      var eras = match("~");
+      var era2 = match("~");
       var nam1 = parse_string();
       var skip = parse_exact("]");
       var skip = parse_exact("=");
       var pair = parse_term(ctx);
       var body = parse_term(ctx.concat([nam0, nam1]));
-      parsed = Prj(nam0, nam1, pair, body, eras);
+      parsed = Prj(nam0, nam1, pair, body, era1 ? 1 : era2 ? 2 : 0);
     }
 
     // Reflexivity

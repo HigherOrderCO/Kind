@@ -192,40 +192,39 @@ const show = ([ctor, args], nams = []) => {
       var body = show(args.body, nams.concat([name]));
       return "cpy " + name + " = " + numb + "; " + body;
     case "Sig":
+      var era1 = args.eras === 1 ? "~" : "";
+      var era2 = args.eras === 2 ? "~" : "";
       var name = args.name;
       var typ0 = show(args.typ0, nams);
       var typ1 = show(args.typ1, nams.concat([name]));
-      var comm = args.eras ? " ~ " : ", ";
-      if (name.length > 0) {
-        return "[" + name + " : " + typ0 + comm + typ1 + "]";
-      } else {
-        return "[:" + typ0 + comm + typ1 + "]";
-      }
+      return "[" + era1 + name + (name.length > 0 ? " " : "") + ": " + typ0 + ", " + era2 + typ1 + "]";
     case "Par":
       var text = print_output([ctor, args]);
       if (text !== null) {
         return text;
       } else {
+        var era1 = args.eras === 1 ? "~" : "";
+        var era2 = args.eras === 2 ? "~" : "";
         var val0 = show(args.val0, nams);
         var val1 = show(args.val1, nams);
-        var eras = args.eras ? "~" : "";
-        return "[" + val0 + ", " + eras + val1 + "]";
+        return "[" + era1 + val0 + ", " + era2 + val1 + "]";
       }
     case "Fst":
       var pair = show(args.pair, nams);
-      var eras = args.eras ? "~" : "";
-      return "(" + eras + "fst " + pair + ")";
+      var eras = args.eras > 0 ? "~" : "";
+      return eras + "fst(" + pair + ")";
     case "Snd":
       var pair = show(args.pair, nams);
-      var eras = args.eras ? "~" : "";
-      return "(" + eras + "snd " + pair + ")";
+      var eras = args.eras > 0 ? "~" : "";
+      return eras + "snd(" + pair + ")";
     case "Prj":
       var nam0 = args.nam0;
       var nam1 = args.nam1;
       var pair = show(args.pair, nams);
       var body = show(args.body, nams.concat([nam0, nam1]));
-      var eras = args.eras ? "~" : "";
-      return "get [" + nam0 + "," + eras + nam1 + "] = " + pair + "; " + body;
+      var era1 = args.eras === 1 ? "~" : "";
+      var era2 = args.eras === 2 ? "~" : "";
+      return "get [" + era1 + nam0 + "," + era2 + nam1 + "] = " + pair + "; " + body;
     case "Eql":
       var val0 = show(args.val0, nams);
       var val1 = show(args.val1, nams);
@@ -661,7 +660,7 @@ const norm = (term, defs = {}, weak = false, force_dup = false, logging = false)
     if (logging) {
       var nams = names_arr(names).reverse();
       console.log(show(quote(msge, nams.length), nams));
-    } 
+    }
     return expr;
   }
   const unquote = (term, vars, names) => {
@@ -796,10 +795,10 @@ const erase = (term) => {
     case "Ite": return Ite(erase(term.cond), erase(term.pair));
     case "Cpy": return Cpy(term.name, erase(term.numb), erase(term.body));
     case "Sig": return Sig(term.name, erase(term.typ0), erase(term.typ1), term.eras);
-    case "Par": return term.eras ? erase(term.val0) : Par(erase(term.val0), erase(term.val1), term.eras);
-    case "Fst": return term.eras ? erase(term.pair) : Fst(erase(term.pair), term.eras);
-    case "Snd": return term.eras ? erase(term.pair) : Snd(erase(term.pair), term.eras);
-    case "Prj": return term.eras ? subst(subst(term.body, Num(0), 0), erase(term.pair), 0) : Prj(term.nam0, term.nam1, erase(term.pair), erase(term.body), term.eras);
+    case "Par": return term.eras === 1 ? erase(term.val1) : term.eras === 2 ? erase(term.val0) : Par(erase(term.val0), erase(term.val1), term.eras);
+    case "Fst": return term.eras === 1 ? Num(0)           : term.eras === 2 ? erase(term.pair) : Fst(erase(term.pair), term.eras);
+    case "Snd": return term.eras === 1 ? erase(term.pair) : term.eras === 2 ? Num(0)           : Snd(erase(term.pair), term.eras);
+    case "Prj": return term.eras === 1 ? subst(subst(term.body, erase(term.pair), 0), Num(0), 0) : term.eras === 2 ? subst(subst(term.body, Num(0), 0), erase(term.pair), 0) : Prj(term.nam0, term.nam1, erase(term.pair), erase(term.body), term.eras);
     case "Eql": return Eql(erase(term.val0), erase(term.val1));
     case "Rfl": return Num(0);
     case "Sym": return erase(term.prof);
@@ -867,7 +866,7 @@ const equal = (a, b, defs) => {
           case "Sig-Sig": y = And(Eqs(ay[1].typ0, by[1].typ0), Eqs(ay[1].typ1, by[1].typ1)); break;
           case "Par-Par": y = And(Eqs(ay[1].val0, by[1].val0), Eqs(ay[1].val1, by[1].val1)); break;
           case "Fst-Fst": y = And(Eqs(ay[1].pair, by[1].pair), Val(ay[1].eras === by[1].eras)); break;
-          case "Snd-Snd": y = And(Eqs(ay[1].pair, by[1].pair), ay[1].eras === by[1].eras); break;
+          case "Snd-Snd": y = And(Eqs(ay[1].pair, by[1].pair), Val(ay[1].eras === by[1].eras)); break;
           case "Prj-Prj": y = And(Eqs(ay[1].pair, by[1].pair), Eqs(ay[1].body, by[1].body)); break;
           case "Eql-Eql": y = And(Eqs(ay[1].val0, by[1].val0), Eqs(ay[1].val1, by[1].val1)); break;
           case "Rfl-Rfl": y = Eqs(ay[1].expr, by[1].expr); break;
@@ -934,7 +933,7 @@ const uses = ([ctor, term], depth = 0) => {
     case "Ite": return uses(term.cond, depth) + uses(term.pair, depth);
     case "Cpy": return uses(term.numb, depth) + uses(term.body, depth + 1);
     case "Sig": return 0;
-    case "Par": return uses(term.val0, depth) + (term.eras ? 0 : uses(term.val1, depth));
+    case "Par": return (term.eras === 1 ? 0 : uses(term.val1, depth)) + (term.eras === 2 ? 0 : uses(term.val2, depth));
     case "Fst": return uses(term.pair, depth);
     case "Snd": return uses(term.pair, depth);
     case "Prj": return uses(term.pair, depth) + uses(term.body, depth + 2);
@@ -970,7 +969,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Ite": return is_at_level(term.cond, at_level, depth, level) && is_at_level(term.pair, at_level, depth, level);
     case "Cpy": return is_at_level(term.numb, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level);
     case "Sig": return true;
-    case "Par": return is_at_level(term.val0, at_level, depth, level) && is_at_level(term.val1, at_level, depth, level);
+    case "Par": return (term.eras === 1 || is_at_level(term.val0, at_level, depth, level)) && (term.eras === 2 || is_at_level(term.val1, at_level, depth, level));
     case "Fst": return is_at_level(term.pair, at_level, depth, level);
     case "Snd": return is_at_level(term.pair, at_level, depth, level);
     case "Prj": return is_at_level(term.pair, at_level, depth, level) && is_at_level(term.body, at_level, depth + 2, level);
@@ -1039,10 +1038,8 @@ const boxcheck = (term, defs = {}, ctx = []) => {
       case "Sig":
         break;
       case "Par":
-        check(term.val0, defs, ctx);
-        if (!term.eras) {
-          check(term.val1, defs, ctx);
-        }
+        if (term.eras !== 1) check(term.val0, defs, ctx);
+        if (term.eras !== 2) check(term.val1, defs, ctx);
         break;
       case "Fst":
         check(term.pair, defs, ctx);
