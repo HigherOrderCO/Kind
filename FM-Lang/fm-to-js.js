@@ -39,7 +39,7 @@ const compile = (term, defs, vars) => {
         case "&"  : return (num0 & num1) >>> 0;
         case "|"  : return (num0 | num1) >>> 0;
         case "^"  : return (num0 ^ num1) >>> 0;
-        case "~"  : return (~ num1) >>> 0;
+        case "-!" : return (~ num1) >>> 0;
         case ">>" : return (num0 >>> num1) >>> 0;
         case "<<" : return (num0 << num1) >>> 0;
         case ">"  : return (num0 > num1) >>> 0;

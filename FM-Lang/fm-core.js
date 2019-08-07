@@ -9,7 +9,7 @@
 // - Typ: the type of types, `Type`
 // - All: the dependent function type, `{x : A} -> B`, optionally erased
 // - Lam: a lambda, `{x} => B`, optionally erased/annotated
-// - App: an application `(f a)`, optionally erased
+// - App: an application `f(a)`, optionally erased
 // - Box: a boxed type, `!A`
 // - Put: a boxed value, `#a`
 // - Dup: copies a boxed value, `dup x = a; b`
@@ -19,7 +19,7 @@
 // - Op2: binary numeric operation, `|x + y|`
 // - Ite: if-then-else, `if n p`,  with a numeric conditional `n`, and two branches in a pair `p`
 // - Cpy: copies a number, `cpy x = a; b`
-// - Sig: type of a dependent pair, `[x : A, (B x)]`, or of a dependent intersection, `[x : A ~ (B x)]`
+// - Sig: type of a dependent pair, `[x : A, B(x)]`, or of a subset type, `[x : A ~ B(x)]`
 // - Par: value of a dependent pair, `[a, b]`, or of a dependent intersection `[a ~ b]`
 // - Fst: extracts 1st value of a dependent pair, `fst p`, or of a dependent intersection, `~fst p`
 // - Snd: extracts 2nd value of a dependent pair, `snd p`, or of a dependent intersection, `~snd p`
@@ -595,7 +595,7 @@ const norm = (term, defs = {}, weak = false, force_dup = false, logging = false)
         case "&"  : return Num((num0[1].numb & num1[1].numb) >>> 0);
         case "|"  : return Num((num0[1].numb | num1[1].numb) >>> 0);
         case "^"  : return Num((num0[1].numb ^ num1[1].numb) >>> 0);
-        case "~"  : return Num((~ num1[1].numb) >>> 0);
+        case "-!" : return Num((~ num1[1].numb) >>> 0);
         case ">>" : return Num((num0[1].numb >>> num1[1].numb) >>> 0);
         case "<<" : return Num((num0[1].numb << num1[1].numb) >>> 0);
         case ">"  : return Num((num0[1].numb > num1[1].numb ? 1 : 0) >>> 0);
@@ -1315,11 +1315,6 @@ const typecheck = (() => {
           var val1_t = typecheck(term[1].val1, subst(expect_nf[1].typ1, term[1].val0, 0), defs, ctx, [term, ctx]);
         } else {
           var val1_t = shift(typecheck(term[1].val1, null, defs, ctx, [term, ctx]), 1, 0);
-        }
-        if (term[1].eras && !equal(term[1].val0, term[1].val1, defs)) {
-          ERROR("Dependent interesction values must have same erasure."
-            + "\n- Erasure 0 is " + TERM(DENON(term[1].val0, defs))
-            + "\n- Erasure 1 is " + TERM(DENON(term[1].val1, defs)));
         }
         type = expect_nf || Sig("x", val0_t, val1_t, term[1].eras);
         break;
