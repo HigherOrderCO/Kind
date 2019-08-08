@@ -111,20 +111,21 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     return term;
   }
 
-  var is_op_init = {"+":1,"-":1,"*":1,"/":1,"%":1,"*":1,"^":1,".":1,"=":1,"<":1,">":1};
+  function build_charset(chars) {
+    var set = {};
+    for (var i = 0; i < chars.length; ++i) {
+      set[chars[i]] = 1;
+    }
+    return chr => set[chr] === 1;
+  }
+
   var is_native_op = {"+":1,"-":1,"*":1,"/":1,"%":1,"^":1,"**":1,".&":1,".|":1,".^":1,".!":1,".>>":1,".<<":1,">":1,"<":1,"===":1};
-
-  function is_space(char) {
-    return char === " " || char === "\t" || char === "\n" || char === "\r" || char === ";";
-  }
-
-  function is_newline(char) {
-    return char === "\n";
-  }
-
-  function is_name_char(char) {
-    return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@".indexOf(char) !== -1;
-  }
+  var op_inits     = "+-*/%^.=<>";
+  var is_op_init   = build_charset("+-*/%^.=<>");
+  var is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@");
+  var is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@+*/%^!<>=&|");
+  var is_space     = build_charset(" \t\n\r;");
+  var is_newline   = build_charset("\n");
 
   function next() {
     if (tokens) tokens[tokens.length - 1][1] += code[idx];
@@ -232,6 +233,15 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     return parse_string_here(fn);
   }
 
+  function parse_name() {
+    if (is_op_init(code[idx])) {
+      match(code[idx]);
+      return code[idx - 1] + parse_string_here(is_op_char);
+    } else {
+      return parse_string();
+    }
+  }
+
   function parse_term(ctx) {
     var parsed;
 
@@ -245,6 +255,15 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     // Type
     else if (match("Type")) {
       parsed = Typ();
+    }
+
+    // Prints active definitions
+    else if (match("?scope?")) {
+      console.log("Scope:");
+      for (var i = 0; i < ctx.length; ++i) {
+        console.log("- " + ctx[i]);
+      }
+      parsed = parse_term(ctx);
     }
 
     // Hole
@@ -568,7 +587,7 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     // Variable / Reference
     else {
       if (tokens) tokens.push(["???", ""]);
-      var name = parse_string();
+      var name = parse_name();
       var numb = Number(name);
       if (!isNaN(numb)) {
         parsed = Num(numb >>> 0);
@@ -585,14 +604,19 @@ const parse = async (code, tokenify, auto_unbox = true) => {
           }
         }
         if (i === -1) {
-          for (var mini in enlarge) {
-            if (name.slice(0, mini.length) === mini) {
-              var name = enlarge[mini] + name.slice(mini.length);
-              break;
+          if (is_native_op[name]) {
+            parsed = Lam("x", Wrd(), Lam("y", Wrd(), Op2(name, Var(1), Var(0)), false), false);
+            if (tokens) tokens[tokens.length - 1][0] = "nop";
+          } else {
+            for (var mini in enlarge) {
+              if (name.slice(0, mini.length) === mini) {
+                var name = enlarge[mini] + name.slice(mini.length);
+                break;
+              }
             }
+            parsed = Ref(name, false);
+            if (tokens) tokens[tokens.length - 1][0] = "ref";
           }
-          parsed = Ref(name, false);
-          if (tokens) tokens[tokens.length - 1][0] = "ref";
         } else {
           parsed = Var(ctx.length - i - 1);
           if (tokens) tokens[tokens.length - 1][0] = "var";
@@ -635,7 +659,8 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     // Operators
     while (match_here(" ")) {
       var matched = false;
-      for (var op_init in is_op_init) {
+      for (var i = 0; i < op_inits.length; ++i) {
+        var op_init = op_inits[i];
         if (match_here(op_init)) {
           matched = true;
           var func = op_init + parse_string_here(x => !is_space(x));
@@ -757,15 +782,22 @@ const parse = async (code, tokenify, auto_unbox = true) => {
       }
       adts[adt_name] = adt;
 
+    // Prints active definitions
+    } else if (match("?defs")) {
+      var filt = match("/") ? parse_string(x => x !== "/") : "";
+      var regx = new RegExp(filt, "i");
+      console.log("Definitions:");
+      for (var def in defs) {
+        if (def[0] !== "$" && regx.test(def)) {
+          console.log("- " + def);
+        }
+      }
+      parsed = parse_term([]);
+
     // Definitions or end-of-file
     } else {
       if (tokens) tokens.push(["def", ""]);
-      if (is_op_init[code[idx]]) {
-        match(code[idx]);
-        var name = code[idx - 1] + parse_string_here(x => !is_space(x));
-      } else {
-        var name = parse_string();
-      }
+      var name = parse_name();
       if (tokens) tokens.push(["txt", ""]);
 
       // Definition
