@@ -111,7 +111,8 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     return term;
   }
 
-  var is_native_op = {".+":1,".-":1,".*":1,"./":1,".%":1,".*":1,".^":1,".**":1,".&":1,".|":1,".^":1,".!":1,".>>":1,".<<":1,".>":1,".<":1,".==":1};
+  var is_op_init = {"+":1,"-":1,"*":1,"/":1,"%":1,"*":1,"^":1,".":1,"=":1,"<":1,">":1};
+  var is_native_op = {"+":1,"-":1,"*":1,"/":1,"%":1,"^":1,"**":1,".&":1,".|":1,".^":1,".!":1,".>>":1,".<<":1,">":1,"<":1,"===":1};
 
   function is_space(char) {
     return char === " " || char === "\t" || char === "\n" || char === "\r" || char === ";";
@@ -123,10 +124,6 @@ const parse = async (code, tokenify, auto_unbox = true) => {
 
   function is_name_char(char) {
     return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@".indexOf(char) !== -1;
-  }
-
-  function is_operator_char(char) {
-    return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@+*/%^&|!=".indexOf(char) !== -1;
   }
 
   function next() {
@@ -336,22 +333,6 @@ const parse = async (code, tokenify, auto_unbox = true) => {
         var term = App(App(App(Ref("cons"), Wrd(), true), Num(nums[i]), false), term, false);
       }
       parsed = Ann(Ref("String"), term);
-    }
-
-    // List
-    else if (match("*")) {
-      var type = parse_term(ctx);
-      var list = [];
-      var skip = parse_exact("[");
-      while (idx < code.length) {
-        list.push(parse_term(ctx));
-        if (match("]")) break; else parse_exact(",");
-      }
-      var term = App(Ref("nil"), type, true);
-      for (var i = list.length - 1; i >= 0; --i) {
-        var term = App(App(App(Ref("cons"), type, true), list[i], false), term, false);
-      }
-      parsed = term;
     }
 
     // Nat
@@ -620,6 +601,7 @@ const parse = async (code, tokenify, auto_unbox = true) => {
       if (tokens) tokens.push(["txt", ""]);
     }
 
+    // Applications
     var erased = false;
     while (match_here("(") || (erased = match_here("<"))) {
       var term = parsed;
@@ -634,22 +616,42 @@ const parse = async (code, tokenify, auto_unbox = true) => {
       erased = false;
     }
 
-    var arrow = false;
-    var equal = false;
-    while (match_here(" ") && (match_here(".") || (equal = match_here("==")) || (arrow = match_here("->")))) {
-      var func = "." + parse_string_here(x => !is_space(x));
-      var argm = parse_term(ctx);
-      if (arrow) {
-        parsed = All("", parsed, shift(argm, 1, 0), false);
-      } else if (equal) {
-        parsed = Eql(parsed, argm);
-      } else if (is_native_op[func]) {
-        parsed = Op2(func, parsed, argm);
-      } else {
-        parsed = App(App(Ref(func), parsed, false), argm, false);
+    // List
+    while (match_here("$")) {
+      var type = parsed;
+      var list = [];
+      var skip = parse_exact("[");
+      while (idx < code.length) {
+        list.push(parse_term(ctx));
+        if (match("]")) break; else parse_exact(",");
       }
-      arrow = false;
-      equal = false;
+      var term = App(Ref("nil"), type, true);
+      for (var i = list.length - 1; i >= 0; --i) {
+        var term = App(App(App(Ref("cons"), type, true), list[i], false), term, false);
+      }
+      parsed = term;
+    }
+
+    // Operators
+    while (match_here(" ")) {
+      var matched = false;
+      for (var op_init in is_op_init) {
+        if (match_here(op_init)) {
+          matched = true;
+          var func = op_init + parse_string_here(x => !is_space(x));
+          var argm = parse_term(ctx);
+          if (is_native_op[func]) {
+            parsed = Op2(func, parsed, argm);
+          } else if (func === "->") {
+            parsed = All("", parsed, shift(argm, 1, 0), false);
+          } else if (func === "==") {
+            parsed = Eql(parsed, argm);
+          } else {
+            parsed = App(App(Ref(func), parsed, false), argm, false);
+          }
+        }
+        if (matched) break;
+      }
     }
 
     return parsed;
@@ -758,8 +760,9 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     // Definitions or end-of-file
     } else {
       if (tokens) tokens.push(["def", ""]);
-      if (match(".")) {
-        var name = "." + parse_string(is_operator_char);
+      if (is_op_init[code[idx]]) {
+        match(code[idx]);
+        var name = code[idx - 1] + parse_string_here(x => !is_space(x));
       } else {
         var name = parse_string();
       }

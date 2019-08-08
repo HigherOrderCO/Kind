@@ -3,7 +3,7 @@
 var fs = require("fs");
 var path = require("path");
 var fm = require(".");
-var BASE = "Base@8";
+var BASE = "Base@10";
 
 try {
   var argv = [].slice.call(process.argv, 2);
