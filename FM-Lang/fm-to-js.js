@@ -29,22 +29,22 @@ const compile = (term, defs, vars) => {
       var num0 = compile(term.num0, defs, vars);
       var num1 = compile(term.num1, defs, vars);
       switch (func) {
-        case "+"  : return (num0 + num1) >>> 0;
-        case "-"  : return (num0 - num1) >>> 0;
-        case "*"  : return (num0 * num1) >>> 0;
-        case "/"  : return (num0 / num1) >>> 0;
-        case "%"  : return (num0 % num1) >>> 0;
-        case "**" : return (num0 ** num1) >>> 0;
-        case "^^" : return (num0 ** (num1 / (2 ** 32))) >>> 0;
-        case "&"  : return (num0 & num1) >>> 0;
-        case "|"  : return (num0 | num1) >>> 0;
-        case "^"  : return (num0 ^ num1) >>> 0;
-        case "-!" : return (~ num1) >>> 0;
-        case ">>" : return (num0 >>> num1) >>> 0;
-        case "<<" : return (num0 << num1) >>> 0;
-        case ">"  : return (num0 > num1) >>> 0;
-        case "<"  : return (num0 < num1) >>> 0;
-        case "===" : return (num0 === num1) >>> 0;
+        case ".+" : return (num0 + num1) >>> 0;
+        case ".-" : return (num0 - num1) >>> 0;
+        case ".*" : return (num0 * num1) >>> 0;
+        case "./" : return (num0 / num1) >>> 0;
+        case ".%" : return (num0 % num1) >>> 0;
+        case ".^" : return (num0 ** num1) >>> 0;
+        case ".**": return (num0 ** (num1 / (2 ** 32))) >>> 0;
+        case ".&" : return (num0 & num1) >>> 0;
+        case ".|" : return (num0 | num1) >>> 0;
+        case ".^" : return (num0 ^ num1) >>> 0;
+        case ".!" : return (~ num1) >>> 0;
+        case ".>>": return (num0 >>> num1) >>> 0;
+        case ".<<": return (num0 << num1) >>> 0;
+        case ".>" : return (num0 > num1) >>> 0;
+        case ".<" : return (num0 < num1) >>> 0;
+        case ".==" : return (num0 === num1) >>> 0;
       }
     case "Ite":
       var cond = compile(term.cond, defs, vars);

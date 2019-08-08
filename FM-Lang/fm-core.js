@@ -584,22 +584,22 @@ const norm = (term, defs = {}, weak = false, force_dup = false, logging = false)
     var num0 = reduce(num0, names);
     if (num0[0] === "Num") {
       switch (func) {
-        case "+"  : return Num((num0[1].numb + num1[1].numb) >>> 0);
-        case "-"  : return Num((num0[1].numb - num1[1].numb) >>> 0);
-        case "*"  : return Num((num0[1].numb * num1[1].numb) >>> 0);
-        case "/"  : return Num((num0[1].numb / num1[1].numb) >>> 0);
-        case "%"  : return Num((num0[1].numb % num1[1].numb) >>> 0);
-        case "**" : return Num((num0[1].numb ** num1[1].numb) >>> 0);
-        case "^^" : return Num((num0[1].numb ** (num1[1].numb / (2 ** 32))) >>> 0);
-        case "&"  : return Num((num0[1].numb & num1[1].numb) >>> 0);
-        case "|"  : return Num((num0[1].numb | num1[1].numb) >>> 0);
-        case "^"  : return Num((num0[1].numb ^ num1[1].numb) >>> 0);
-        case "-!" : return Num((~ num1[1].numb) >>> 0);
-        case ">>" : return Num((num0[1].numb >>> num1[1].numb) >>> 0);
-        case "<<" : return Num((num0[1].numb << num1[1].numb) >>> 0);
-        case ">"  : return Num((num0[1].numb > num1[1].numb ? 1 : 0) >>> 0);
-        case "<"  : return Num((num0[1].numb < num1[1].numb ? 1 : 0) >>> 0);
-        case "===": return Num((num0[1].numb === num1[1].numb ? 1 : 0) >>> 0);
+        case ".+" : return Num((num0[1].numb + num1[1].numb) >>> 0);
+        case ".-" : return Num((num0[1].numb - num1[1].numb) >>> 0);
+        case ".*" : return Num((num0[1].numb * num1[1].numb) >>> 0);
+        case "./" : return Num((num0[1].numb / num1[1].numb) >>> 0);
+        case ".%" : return Num((num0[1].numb % num1[1].numb) >>> 0);
+        case ".^" : return Num((num0[1].numb ** num1[1].numb) >>> 0);
+        case ".**": return Num((num0[1].numb ** (num1[1].numb / (2 ** 32))) >>> 0);
+        case ".&" : return Num((num0[1].numb & num1[1].numb) >>> 0);
+        case ".|" : return Num((num0[1].numb | num1[1].numb) >>> 0);
+        case ".^" : return Num((num0[1].numb ^ num1[1].numb) >>> 0);
+        case ".!" : return Num((~ num1[1].numb) >>> 0);
+        case ".>>": return Num((num0[1].numb >>> num1[1].numb) >>> 0);
+        case ".<<": return Num((num0[1].numb << num1[1].numb) >>> 0);
+        case ".>" : return Num((num0[1].numb > num1[1].numb ? 1 : 0) >>> 0);
+        case ".<" : return Num((num0[1].numb < num1[1].numb ? 1 : 0) >>> 0);
+        case ".==": return Num((num0[1].numb === num1[1].numb ? 1 : 0) >>> 0);
         default   : throw "[RUNTIME-ERROR]\nUnknown primitive: " + func + ".";
       }
     } else {

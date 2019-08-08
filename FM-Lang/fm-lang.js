@@ -111,9 +111,7 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     return term;
   }
 
-  var is_op_sym = {"+":1,"-":1,"*":1,"/":1,"%":1,"^":1,"&":1,"|":1,"^":1,"<":1,">":1,"=":1};
-  var op_symbol = ["+","-","*","/","%","^","&","|","^","<",">","="];
-  var is_native = {"+":1,"-":1,"*":1,"/":1,"%":1,"**":1,"^^":1,"&":1,"|":1,"^":1,"-!":1,">>":1,"<<":1,">":1,"<":1,"===":1};
+  var is_native_op = {".+":1,".-":1,".*":1,"./":1,".%":1,".*":1,".^":1,".**":1,".&":1,".|":1,".^":1,".!":1,".>>":1,".<<":1,".>":1,".<":1,".==":1};
 
   function is_space(char) {
     return char === " " || char === "\t" || char === "\n" || char === "\r" || char === ";";
@@ -125,6 +123,10 @@ const parse = async (code, tokenify, auto_unbox = true) => {
 
   function is_name_char(char) {
     return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@".indexOf(char) !== -1;
+  }
+
+  function is_operator_char(char) {
+    return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@+*/%^&|!=".indexOf(char) !== -1;
   }
 
   function next() {
@@ -337,7 +339,7 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     }
 
     // List
-    else if (match(".")) {
+    else if (match("*")) {
       var type = parse_term(ctx);
       var list = [];
       var skip = parse_exact("[");
@@ -631,28 +633,23 @@ const parse = async (code, tokenify, auto_unbox = true) => {
       parsed = term;
       erased = false;
     }
-    while (match_here(" ")) {
-      var matched = false;
-      if (code.slice(idx, idx + 2) === "//") break;
-      for (var i = 0; i < op_symbol.length; ++i) {
-        var op = op_symbol[i];
-        if (match_here(op)) {
-          matched = true;
-          var func = op + parse_string_here(x => !is_space(x));
-          var argm = parse_term(ctx);
-          if (is_native[func]) {
-            parsed = Op2(func, parsed, argm);
-          } else if (func === "==") {
-            parsed = Eql(parsed, argm);
-          } else if (func === "->") {
-            parsed = All("", parsed, shift(argm, 1, 0), false);
-          } else {
-            parsed = App(App(Ref(func), parsed, false), argm, false);
-          }
-          break;
-        }
+
+    var arrow = false;
+    var equal = false;
+    while (match_here(" ") && (match_here(".") || (equal = match_here("==")) || (arrow = match_here("->")))) {
+      var func = "." + parse_string_here(x => !is_space(x));
+      var argm = parse_term(ctx);
+      if (arrow) {
+        parsed = All("", parsed, shift(argm, 1, 0), false);
+      } else if (equal) {
+        parsed = Eql(parsed, argm);
+      } else if (is_native_op[func]) {
+        parsed = Op2(func, parsed, argm);
+      } else {
+        parsed = App(App(Ref(func), parsed, false), argm, false);
       }
-      if (!matched) break;
+      arrow = false;
+      equal = false;
     }
 
     return parsed;
@@ -761,8 +758,11 @@ const parse = async (code, tokenify, auto_unbox = true) => {
     // Definitions or end-of-file
     } else {
       if (tokens) tokens.push(["def", ""]);
-      var name = parse_string(x => is_op_sym[x]);
-      var name = name + parse_string_here();
+      if (match(".")) {
+        var name = "." + parse_string(is_operator_char);
+      } else {
+        var name = parse_string();
+      }
       if (tokens) tokens.push(["txt", ""]);
 
       // Definition
