@@ -893,7 +893,7 @@ const parse = async (code, tokenify, auto_unbox = true) => {
             var term = subst(term, Var(0), 1);
             var term = Lam(name, null, term, false);
             var TERM = shift(TERM, 1, 0);
-            var TERM = subst(TERM, Ref("-" + name), 1);
+            var TERM = subst(TERM, Ref("@" + name), 1);
             var type = Box(type);
             var call = term;
             var term = App(App(App(Ref("rec"), type[1].expr, true), Put(Ref(name + ".call")), false), Put(Ref(name + ".halt")), false);
@@ -918,7 +918,7 @@ const parse = async (code, tokenify, auto_unbox = true) => {
           if (boxed && is_recursive) {
             defs[name + ".call"] = Ann(All("x", type[1].expr, type[1].expr, false), call);
             defs[name + ".halt"] = Ann(type[1].expr, halt);
-            defs["-" + name] = Ann(TYPE, TERM, false);
+            defs["@" + name] = Ann(TYPE, TERM, false);
           }
           if (boxed) {
             defs["$ISBOXED$" + name] = Num(1);

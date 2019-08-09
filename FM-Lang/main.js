@@ -3,7 +3,7 @@
 var fs = require("fs");
 var path = require("path");
 var fm = require(".");
-var BASE = "Base@10";
+var BASE = "Base@12";
 
 try {
   var argv = [].slice.call(process.argv, 2);
@@ -43,6 +43,7 @@ try {
   console.log("-u disables stratification (termination) checks");
   console.log("-p prints net as JSON");
   console.log("-v displays the version");
+  console.log("use @ instead of <term> to print all terms");
   process.exit();
 }
 
@@ -79,17 +80,16 @@ if (args.v) {
 
       var names = name.split(".");
       var file = names[0];
-      var defn = names.length > 1 ? names.slice(1).join(".") : "main";
       var code = fs.readFileSync("./" + file + ".fm", "utf8");
       var defs = (await fm.lang.parse(BASE && !args.d ? "import " + BASE + " open; " + code : code)).defs;
+      var nams = names.length > 1 ? [names.slice(1).join(".")] : ["main"];
+      if (nams.length === 1 && nams[0] === "@") {
+        nams = Object.keys(defs).sort();
+      }
+      if (nams.length === 1 && !defs[nams[0]]) {
+        throw "No definition for `" + nams[0] + "`.";
+      }
 
-      var stats = {
-        rewrites: 0,
-        loops: 0,
-        max_len: 0,
-        input_net: args.p ? null : undefined,
-        output_net: args.p ? null : undefined
-      };
       var opts = {
         boxcheck: !args.u,
         erased: !args.T,
@@ -98,10 +98,48 @@ if (args.v) {
         strict: !!args.O,
         logging: !args.m
       };
-      var term = fm.lang.exec(defn, defs, mode, opts, stats);
-      console.log(fm.lang.show(term));
-      if (args.p || (mode.slice(0,3) === "OPT" && !args.h)) {
-        console.log(JSON.stringify(stats));
+
+      for (var i = 0; i < nams.length; ++i) {
+        var stats = {
+          rewrites: 0,
+          loops: 0,
+          max_len: 0,
+          input_net: args.p ? null : undefined,
+          output_net: args.p ? null : undefined
+        };
+
+        var nam_size = 0;
+        for (var def in defs) {
+          if (def[0] !== "$" && def[0] !== "@") {
+            nam_size = Math.max(nam_size, def.length);
+          }
+        }
+
+        if (nams[i][0] !== "$" && nams[i][0] !== "@" && defs[nams[i]]) {
+          if (nams.length > 1) {
+            var init = nams[i];
+            while (init.length < nam_size) {
+              init += " ";
+            }
+            init += " : ";
+          } else {
+            var init = "";
+          }
+          try {
+            var term = fm.lang.exec(nams[i], defs, mode, opts, stats);
+            console.log(init + fm.lang.show(term));
+          } catch (e) {
+            if (nams.length > 1) {
+              console.log("\x1b[31m" + init + "error\x1b[0m");
+            } else {
+              console.log(e.toString());
+            }
+          }
+          if (args.p || (mode.slice(0,3) === "OPT" && !args.h)) {
+            console.log(JSON.stringify(stats));
+          }
+        }
+
       }
     } catch (e) {
       console.log(e.toString());
