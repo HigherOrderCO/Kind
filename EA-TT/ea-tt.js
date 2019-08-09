@@ -140,10 +140,6 @@ const show = ([ctor, args], ctx = Ctx()) => {
       var expr = show(args.expr, ctx);
       return "~" + expr;
     case "Ann":
-      //var type = show(args.type, ctx);
-      //var expr = show(args.expr, ctx);
-      //return ":" + type + " = " + expr;
-      //var type = show(args.type, ctx);
       var expr = show(args.expr, ctx);
       return expr;
     case "Ref":

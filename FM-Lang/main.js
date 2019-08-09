@@ -93,10 +93,10 @@ if (args.v) {
       var opts = {
         boxcheck: !args.u,
         erased: !args.T,
-        force_dup: !args.B,
+        unbox: !args.B,
         weak: !!args.W,
         strict: !!args.O,
-        log: !args.m
+        logging: !args.m
       };
       var term = fm.lang.exec(defn, defs, mode, opts, stats);
       console.log(fm.lang.show(term));

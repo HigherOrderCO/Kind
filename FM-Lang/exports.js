@@ -11,7 +11,8 @@ fm.lang.norm = function norm(term, defs, mode = "DEBUG", opts, stats = {}) {
   var erase = opts.erased ? fm.lang.erase : (x => x);
   switch (mode) {
     case "DEBUG":
-      return fm.core.norm((opts.erased ? fm.lang.erase : (x=>x))(term, defs), defs, opts.weak, opts.force_dup, opts.log);
+      var erased = (opts.erased ? fm.lang.erase : (x=>x))(term);
+      return fm.core.norm(erased, defs, {weak: opts.weak, unbox: opts.unbox, logging: opts.logging});
     case "JAVASCRIPT":
       return fm.to_js.decompile(fm.to_js.compile(fm.lang.erase(term, defs), defs));
     case "OPTIMAL":
@@ -29,7 +30,7 @@ fm.lang.norm = function norm(term, defs, mode = "DEBUG", opts, stats = {}) {
       }
       return fm.to_net.decompile(net);
     case "TYPE":
-      return fm.core.norm(fm.lang.typecheck(term, null, defs), {}, false);
+      return fm.core.norm(fm.lang.typecheck(term, null, defs), {});
   }
 }
 
