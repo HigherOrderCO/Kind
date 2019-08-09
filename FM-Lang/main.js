@@ -91,7 +91,7 @@ if (args.v) {
         output_net: args.p ? null : undefined
       };
       var opts = {
-        boxcheck: !args.d,
+        boxcheck: !args.u,
         erased: !args.T,
         force_dup: !args.B,
         weak: !!args.W,

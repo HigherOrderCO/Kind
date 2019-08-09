@@ -28,7 +28,6 @@
 // - Rfl: reflexivity, i.e., a proof that a value is equal to itself, `$a`
 // - Sym: symmetry of equality, `sym e`
 // - Rwt: rewrite equal terms in types, `rwt e <x @ (P x)> a`
-// - Cst: casts a value to the type of another value equal to it, `cst e a b`
 // - Ann: an explicit type annotaion, `: A a`
 // - Log: debug-prints a term during evaluation
 // - Ref: a reference to a global def
@@ -55,7 +54,6 @@ const Eql = (val0, val1)                   => ["Eql", {val0, val1}];
 const Rfl = (expr)                         => ["Rfl", {expr}];
 const Sym = (prof)                         => ["Sym", {prof}];
 const Rwt = (name, type, prof, expr)       => ["Rwt", {name, type, prof, expr}];
-const Cst = (prof, val0, val1)             => ["Cst", {prof, val0, val1}];
 const Slf = (name, type)                   => ["Slf", {name, type}];
 const New = (type, expr)                   => ["New", {type, expr}];
 const Use = (expr)                         => ["Use", {expr}];
@@ -241,11 +239,6 @@ const show = ([ctor, args], nams = []) => {
       var prof = show(args.prof, nams);
       var expr = show(args.expr, nams);
       return "rewrite<" + prof + ">{" + name + " in " + type + "}(" + expr + ")";
-    case "Cst":
-      var prof = show(args.prof, nams);
-      var val0 = show(args.val0, nams);
-      var val1 = show(args.val1, nams);
-      return "cast<" + prof + ", " + val0 + ">(" + val1 + ")";
     case "Slf":
       var name = args.name;
       var type = show(args.type, nams.concat([name]));
@@ -369,11 +362,6 @@ const shift = ([ctor, term], inc, depth) => {
       var prof = shift(term.prof, inc, depth);
       var expr = shift(term.expr, inc, depth);
       return Rwt(name, type, prof, expr);
-    case "Cst":
-      var prof = shift(term.prof, inc, depth);
-      var val0 = shift(term.val0, inc, depth);
-      var val1 = shift(term.val1, inc, depth);
-      return Cst(prof, val0, val1);
     case "Slf":
       var name = term.name;
       var type = shift(term.type, inc, depth + 1);
@@ -496,11 +484,6 @@ const subst = ([ctor, term], val, depth) => {
       var prof = subst(term.prof, val, depth);
       var expr = subst(term.expr, val, depth);
       return Rwt(name, type, prof, expr);
-    case "Cst":
-      var prof = subst(term.prof, val, depth);
-      var val0 = subst(term.val0, val, depth);
-      var val1 = subst(term.val1, val, depth);
-      return Cst(prof, val0, val1);
     case "Slf":
       var name = term.name;
       var type = subst(term.type, val && shift(val, 1, 0), depth + 1);
@@ -689,7 +672,6 @@ const norm = (term, defs = {}, weak = false, force_dup = false, logging = false)
       case "Rfl": return Rfl(unquote(term.expr, vars));
       case "Sym": return Sym(unquote(term.prof, vars));
       case "Rwt": return Rwt(term.name, unquote(term.type, vars), unquote(term.prof, vars), unquote(term.expr, vars));
-      case "Cst": return Cst(unquote(term.prof, vars), unquote(term.val1, vars), unquote(term.val1, vars));
       case "Slf": return Slf(term.name, x => unquote(term.type, [x].concat(vars)));
       case "New": return New(unquote(term.type, vars), unquote(term.expr, vars));
       case "Use": return Use(unquote(term.expr, vars));
@@ -724,7 +706,6 @@ const norm = (term, defs = {}, weak = false, force_dup = false, logging = false)
       case "Rfl": return Rfl(weak_reduce(term.expr, names));
       case "Sym": return reduce(term.prof, names);
       case "Rwt": return reduce(term.expr, names);
-      case "Cst": return reduce(term.val1, names);
       case "Slf": return Slf(term.name, x => weak_reduce(term.type(x), names_ext(term.name, names)));
       case "New": return reduce(term.expr, names);
       case "Use": return reduce(term.expr, names);
@@ -762,7 +743,6 @@ const norm = (term, defs = {}, weak = false, force_dup = false, logging = false)
       case "Rfl": return Rfl(quote(term.expr, depth));
       case "Sym": return Sym(quote(term.prof, depth));
       case "Rwt": return Rwt(term.name, quote(term.type, depth + 1), quote(term.prof, depth), quote(term.expr, depth));
-      case "Cst": return Cst(quote(term.prof, depth), quote(term.val0, depth), quote(term.val1, depth));
       case "Slf": return Slf(term.name, quote(term.type(Var(depth)), depth + 1));
       case "New": return New(quote(term.type, depth), quote(term.expr, depth));
       case "Use": return Use(quote(term.expr, depth));
@@ -858,8 +838,6 @@ const erase = (term) => {
       return erase(term.prof);
     case "Rwt":
       return erase(term.expr);
-    case "Cst":
-      return erase(term.val1);
     case "Slf":
       return Slf(term.name, erase(term.type));
     case "New":
@@ -893,10 +871,10 @@ const equal = (a, b, defs) => {
         var {a, b} = node[1];
 
         // Gets whnfs with and without dereferencing
-        var ax = norm(a, {}, true, false, false);
-        var bx = norm(b, {}, true, false, false);
-        var ay = norm(a, defs, true, false, false);
-        var by = norm(b, defs, true, false, false);
+        var ax = norm(a, {}, true, true, false);
+        var bx = norm(b, {}, true, true, false);
+        var ay = norm(a, defs, true, true, false);
+        var by = norm(b, defs, true, true, false);
 
         // If non-deref whnfs are app and fields are equal, then a == b
         var x = null;
@@ -934,7 +912,6 @@ const equal = (a, b, defs) => {
           case "Rfl-Rfl": y = Eqs(ay[1].expr, by[1].expr); break;
           case "Sym-Sym": y = Eqs(ay[1].prof, by[1].prof); break;
           case "Rwt-Rwt": y = And(And(Eqs(ay[1].prof, by[1].prof), Eqs(ay[1].type, by[1].type)), Eqs(ay[1].expr, by[1].expr)); break;
-          case "Cst-Cst": y = And(And(Eqs(ay[1].prof, by[1].prof), Eqs(ay[1].val0, by[1].val0)), Eqs(ay[1].val1, by[1].val1)); break;
           case "Slf-Slf": y = Eqs(ay[1].type, by[1].type); break;
           case "New-New": y = Eqs(ay[1].expr, by[1].expr); break;
           case "Use-Use": y = Eqs(ay[1].expr, by[1].expr); break;
@@ -965,7 +942,7 @@ const equal = (a, b, defs) => {
   }
 
   // Expands the search tree until it finds an answer
-  var tree = Eqs(norm(erase(a), defs, false, false, false), norm(erase(b), defs, false, false, false));
+  var tree = Eqs(erase(a), erase(b));
   while (tree[0] !== "Val") {
     var tree = step(tree);
   }
@@ -1003,7 +980,6 @@ const uses = ([ctor, term], depth = 0) => {
     case "Rfl": return uses(term.expr, depth);
     case "Sym": return 0;
     case "Rwt": return 0;
-    case "Cst": return 0;
     case "Slf": return 0;
     case "New": return uses(term.expr, depth);
     case "Use": return uses(term.expr, depth);
@@ -1041,7 +1017,6 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Rfl": return true;
     case "Sym": return true;
     case "Rwt": return true;
-    case "Cst": return true;
     case "Slf": return true;
     case "New": return is_at_level(term.expr, at_level, depth, level);
     case "Use": return is_at_level(term.expr, at_level, depth, level);
@@ -1130,8 +1105,6 @@ const boxcheck = (term, defs = {}, ctx = []) => {
       case "Sym":
         break;
       case "Rwt":
-        break;
-      case "Cst":
         break;
       case "Ann":
         check(term.expr, defs, ctx);
@@ -1231,7 +1204,7 @@ const typecheck = (() => {
         + (ctx !== null ? "\n- With the following context:\n" + ctx_str(ctx, defs) : "");
     };
 
-    const MATCH = (a, b) => {
+    const MATCH = (a, b, ctx) => {
       if (!equal(a, b, defs)) {
         throw ERROR("Type mismatch."
           + "\n- Found type... " + TERM(norm(a, {}, false, true, false))
@@ -1252,8 +1225,8 @@ const typecheck = (() => {
         var bind_t = typecheck(term[1].bind, null, defs, ctx, [term, ctx]);
         var ex_ctx = ctx_ext(term[1].name, term[1].bind, ctx);
         var body_t = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
-        MATCH(bind_t, Typ());
-        MATCH(body_t, Typ());
+        MATCH(bind_t, Typ(), ctx);
+        MATCH(body_t, Typ(), ctx);
         type = Typ();
         break;
       case "Typ":
@@ -1292,7 +1265,7 @@ const typecheck = (() => {
           ERROR("The annotated type of a box (" + TERM(Box(Ref("A"))) + ") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
         }
         var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, true, true, false);
-        MATCH(expr_t, Typ());
+        MATCH(expr_t, Typ(), ctx);
         type = Typ();
         break;
       case "Put":
@@ -1358,8 +1331,8 @@ const typecheck = (() => {
         var typ0_t = typecheck(term[1].typ0, null, defs, ctx, [term, ctx]);
         var ex_ctx = ctx_ext(term[1].name, term[1].typ0, ctx);
         var typ1_t = typecheck(term[1].typ1, null, defs, ex_ctx, [term, ctx]);
-        MATCH(typ0_t, Typ());
-        MATCH(typ1_t, Typ());
+        MATCH(typ0_t, Typ(), ctx);
+        MATCH(typ1_t, Typ(), ctx);
         type = Typ();
         break;
       case "Par":
@@ -1412,6 +1385,9 @@ const typecheck = (() => {
         type = subst(type, Fst(term[1].pair, term[1].eras), 0);
         break;
       case "Eql":
+        var val0_t = norm(typecheck(term[1].val0, null, defs, ctx, [term, ctx]), defs, true, true, false);
+        var val1_t = norm(typecheck(term[1].val1, null, defs, ctx, [term, ctx]), defs, true, true, false);
+        MATCH(val0_t, val1_t, ctx);
         type = Typ();
         break;
       case "Rfl":
@@ -1431,26 +1407,13 @@ const typecheck = (() => {
         }
         var expr_t0 = subst(term[1].type, prof_t[1].val0, 0);
         var expr_t1 = typecheck(term[1].expr, null, defs, ctx, [term, ctx]);
-        MATCH(expr_t1, expr_t0);
+        MATCH(expr_t1, expr_t0, ctx);
         type = subst(term[1].type, prof_t[1].val1, 0);
-        break;
-      case "Cst":
-        var prof_t = norm(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, true, true, false);
-        if (prof_t[0] !== "Eql") {
-          ERROR("Attempted to use rwt with an invalid equality proof.");
-        }
-        if (!equal(term[1].val0, prof_t[1].val0, defs)) {
-          ERROR("Cast failed because " + TERM(term[1].val0) + " != " + TERM(prof_t[1].val0));
-        }
-        if (!equal(term[1].val0, prof_t[1].val0, defs)) {
-          ERROR("Cast failed because " + TERM(term[1].val1) + " != " + TERM(prof_t[1].val1));
-        }
-        type = typecheck(term[1].val0, expect_nf, defs, ctx, [term, ctx]);
         break;
       case "Slf":
         var ex_ctx = ctx_ext(term[1].name, term, ctx);
         var type_t = typecheck(term[1].type, null, defs, ex_ctx, [term, ctx]);
-        MATCH(type_t, Typ());
+        MATCH(type_t, Typ(), ctx);
         return Typ();
       case "New":
         var type = norm(term[1].type, defs, true, true, false);
@@ -1489,7 +1452,7 @@ const typecheck = (() => {
         throw "TODO: type checker for " + term[0] + ".";
     }
     if (expect) {
-      MATCH(type, expect);
+      MATCH(type, expect, ctx);
     }
     return type;
   };
@@ -1521,7 +1484,6 @@ module.exports = {
   Rfl,
   Sym,
   Rwt,
-  Cst,
   Slf,
   New,
   Use,

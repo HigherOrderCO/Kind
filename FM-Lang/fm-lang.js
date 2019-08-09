@@ -22,7 +22,6 @@ const {
   Rfl,
   Sym,
   Rwt,
-  Cst,
   Slf,
   New,
   Use,
@@ -500,18 +499,6 @@ const parse = async (code, tokenify, auto_unbox = true) => {
       var expr = parse_term(ctx);
       var skip = parse_exact(")");
       parsed = Rwt(name, type, prof, expr);
-    }
-
-    // Cast
-    else if (match("cast<")) {
-      var prof = parse_term(ctx);
-      var skip = parse_exact(",");
-      var val0 = parse_term(ctx);
-      var skip = parse_exact(">");
-      var skip = parse_exact("(");
-      var val1 = parse_term(ctx);
-      var skip = parse_exact(")");
-      parsed = Cst(prof, val0, val1);
     }
 
     // Annotation
@@ -1071,11 +1058,6 @@ const unrecurse = (term, term_name, add_depth) => {
         var prof = go(term.prof, depth, true);
         var expr = go(term.expr, depth, eras);
         return Rwt(name, type, prof, expr);
-      case "Cst":
-        var prof = go(term.prof, depth, true);
-        var val0 = go(term.val0, depth, true);
-        var val1 = go(term.val1, depth, eras);
-        return Cst(prof, val0, val1);
       case "Slf":
         var name = term.name;
         var type = go(term.type, depth + 1, true);
@@ -1223,11 +1205,6 @@ const replace_refs = ([ctor, term], renamer, depth = 0) => {
       var prof = replace_refs(term.prof, renamer, depth);
       var expr = replace_refs(term.expr, renamer, depth);
       return Rwt(name, type, prof, expr);
-    case "Cst":
-      var prof = replace_refs(term.prof, renamer, depth);
-      var val0 = replace_refs(term.val0, renamer, depth);
-      var val1 = replace_refs(term.val1, renamer, depth);
-      return Cst(prof, val0, val1);
     case "Slf":
       var name = term.name;
       var type = replace_refs(term.type, renamer, depth + 1);
@@ -1633,7 +1610,6 @@ module.exports = {
   Rfl,
   Sym,
   Rwt,
-  Cst,
   Slf,
   New,
   Use,
