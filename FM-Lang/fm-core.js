@@ -1264,8 +1264,8 @@ const typecheck = (() => {
     const MATCH = (a, b, ctx) => {
       if (!equal(a, b, defs)) {
         throw ERROR("Type mismatch."
-          + "\n- Found type... " + TERM(norm((a), defs, {weak: false, unbox: true}))
-          + "\n- Instead of... " + TERM(norm((b), defs, {weak: false, unbox: true})));
+          + "\n- Found type... " + TERM(norm(a, {}, {weak: false, unbox: true}))
+          + "\n- Instead of... " + TERM(norm(b, {}, {weak: false, unbox: true})));
       }
     };
 

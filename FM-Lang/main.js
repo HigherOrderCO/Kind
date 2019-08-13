@@ -13,7 +13,7 @@ try {
   argv.filter(str => str[0] === "-").map(str => str.slice(1)).join("").split("").forEach(c => args[c] = 1);
 } catch (e) {
   if (e) console.log(e);
-  console.log("Formality-Core");
+  console.log("Formality");
   console.log("");
   console.log("Usage: fm [options] [args]");
   console.log("");
