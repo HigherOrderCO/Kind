@@ -1047,18 +1047,21 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
           if (func[0] === "Ref" && boxed_info[func[1].name] && boxed_info[func[1].name].boxed) {
             var func_info = boxed_info[func[1].name];
             if (func[1].name !== name && func_info.arity === args.length) {
+              var unboxable = true;
               for (var i = 0; i < scope.length; ++i) {
                 if (uses(term, scope.length - i - 1) > 0) {
-                  error("Couldn't auto-unbox reference to '" + func[1].name + "' inside '" + name + "'.\n"
-                    + "It uses the level_1 variable '" + scope[i] + "' inside a level_0 argument.");
+                  var unboxable = false;
+                  //error("Couldn't auto-unbox reference to '" + func[1].name + "' inside '" + name + "'.\n"
+                    //+ "It uses the level_1 variable '" + scope[i] + "' inside a level_0 argument.");
                 }
               }
-              //console.log("unboxing", func[1].name, "inside", name, "as", show(term));
-              for (var i = 0; i < scope.length; ++i) {
-                term = subst(term, Num(0), 0);
+              if (unboxable) {
+                for (var i = 0; i < scope.length; ++i) {
+                  term = subst(term, Num(0), 0);
+                }
+                unbox.push([func[1].name, term, args]);
+                return Ref("$TMP$" + (unbox.length - 1));
               }
-              unbox.push([func[1].name, term, args]);
-              return Ref("$TMP$" + (unbox.length - 1));
             }
           };
         });
