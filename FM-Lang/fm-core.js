@@ -922,10 +922,10 @@ const equal = (a, b, defs) => {
 
         // Gets whnfs with and without dereferencing
         // Note: can't use weak:true because it won't give opportunity to eta...
-        var ax = norm(a, {}, {undup: true, eta: true});
-        var bx = norm(b, {}, {undup: true, eta: true});
-        var ay = norm(a, defs, {undup: true, eta: true});
-        var by = norm(b, defs, {undup: true, eta: true});
+        var ax = norm(a, {}, {unbox: true, eta: true});
+        var bx = norm(b, {}, {unbox: true, eta: true});
+        var ay = norm(a, defs, {unbox: true, eta: true});
+        var by = norm(b, defs, {unbox: true, eta: true});
 
         // If non-deref whnfs are app and fields are equal, then a == b
         var x = null;
