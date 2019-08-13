@@ -3,7 +3,7 @@
 var fs = require("fs");
 var path = require("path");
 var fm = require(".");
-var BASE = "Base@12";
+var BASE = "Base@13";
 
 try {
   var argv = [].slice.call(process.argv, 2);
@@ -132,7 +132,8 @@ if (args.v) {
             if (nams.length > 1) {
               console.log("\x1b[31m" + init + "error\x1b[0m");
             } else {
-              console.log(e.toString());
+              console.log(e);
+              //console.log(e.toString());
             }
           }
           if (args.p || (mode.slice(0,3) === "OPT" && !args.h)) {
@@ -142,7 +143,8 @@ if (args.v) {
 
       }
     } catch (e) {
-      console.log(e.toString());
+      console.log(e);
+      //console.log(e.toString());
     }
   })();
 }

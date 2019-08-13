@@ -12,6 +12,7 @@
 // - App: an application `f(a)`, optionally erased
 // - Box: a boxed type, `!A`
 // - Put: a boxed value, `#a`
+// - Tak: unboxes a boxed value, `-#a`
 // - Dup: copies a boxed value, `dup x = a; b`
 // - Wrd: type of a native number
 // - Num: value of a native number
@@ -38,6 +39,7 @@ const Lam = (name, bind, body, eras)       => ["Lam", {name, bind, body, eras}];
 const App = (func, argm, eras)             => ["App", {func, argm, eras}];
 const Box = (expr)                         => ["Box", {expr}];
 const Put = (expr)                         => ["Put", {expr}];
+const Tak = (expr)                         => ["Tak", {expr}];
 const Dup = (name, expr, body)             => ["Dup", {name, expr, body}];
 const Wrd = ()                             => ["Wrd", {}];
 const Num = (numb)                         => ["Num", {numb}];
@@ -92,7 +94,7 @@ const show = ([ctor, args], nams = []) => {
         return "^" + args.index;
       } else {
         var suff = "";
-        for (var i = 0; i < args.index - 1; ++i) {
+        for (var i = 0; i < args.index; ++i) {
           if (nams[nams.length - i - 1] === name) {
             var suff = suff + "^";
           }
@@ -165,11 +167,18 @@ const show = ([ctor, args], nams = []) => {
     case "Put":
       var expr = show(args.expr, nams);
       return "#" + expr;
+    case "Tak":
+      var expr = show(args.expr, nams);
+      return "-#(" + expr + ")";
     case "Dup":
       var name = args.name;
       var expr = show(args.expr, nams);
-      var body = show(args.body, nams.concat([name]));
-      return "dup " + name + " = " + expr + "; " + body;
+      if (args.body[0] === "Var" && args.body[1].index === 0) {
+        return "-#(" + expr + ")";
+      } else {
+        var body = show(args.body, nams.concat([name]));
+        return "dup " + name + " = " + expr + "; " + body;
+      }
     case "Wrd":
       return "Word";
     case "Num":
@@ -252,6 +261,8 @@ const show = ([ctor, args], nams = []) => {
       return "%" + expr;
     case "Ann":
       var expr = show(args.expr, nams);
+      //var type = show(args.type, nams);
+      //return "\n: " + type + "\n= " + expr;
       return expr;
     case "Log":
       var expr = show(args.expr, nams);
@@ -295,6 +306,9 @@ const shift = ([ctor, term], inc, depth) => {
     case "Put":
       var expr = shift(term.expr, inc, depth);
       return Put(expr);
+    case "Tak":
+      var expr = shift(term.expr, inc, depth);
+      return Tak(expr);
     case "Dup":
       var name = term.name;
       var expr = shift(term.expr, inc, depth);
@@ -417,6 +431,9 @@ const subst = ([ctor, term], val, depth) => {
     case "Put":
       var expr = subst(term.expr, val, depth);
       return Put(expr);
+    case "Tak":
+      var expr = subst(term.expr, val, depth);
+      return Tak(expr);
     case "Dup":
       var name = term.name;
       var expr = subst(term.expr, val, depth);
@@ -554,6 +571,18 @@ const norm = (term, defs = {}, opts) => {
       return App(func, weak_reduce(argm, names), eras);
     }
   };
+  const take = (expr, names) => {
+    var expr = reduce(expr, names);
+    // -# #a ~> a
+    if (expr[0] === "Put") {
+      return reduce(expr[1].expr, names);
+    // -# (dup x = a; b) ~> dup x = a; -# b
+    } else if (expr[0] === "Dup"){
+      return Dup(expr[1].name, expr[1].expr, x => weak_reduce(Tak(expr[1].body(x))));
+    } else {
+      return Tak(expr);
+    }
+  };
   const duplicate = (name, expr, body, names) => {
     var expr = reduce(expr, names);
     // [x = |a] b ~> [a/x]b
@@ -566,7 +595,11 @@ const norm = (term, defs = {}, opts) => {
     } else if (expr[0] === "Lam") {
       throw "[RUNTIME-ERROR]\nCan't duplicate a lambda.";
     } else {
-      return Dup(name, expr, x => weak_reduce(body(x), names_ext(name, names)));
+      if (opts.undup) {
+        return reduce(body(Tak(expr)), names);
+      } else {
+        return Dup(name, expr, x => weak_reduce(body(x), names_ext(name, names)));
+      }
     }
   };
   const dereference = (name, eras, names) => {
@@ -655,7 +688,6 @@ const norm = (term, defs = {}, opts) => {
     var expr = reduce(expr, names);
     if (opts.logging) {
       var nams = names_arr(names).reverse();
-      console.log(show(quote(msge, nams.length), nams));
     }
     return expr;
   };
@@ -669,6 +701,7 @@ const norm = (term, defs = {}, opts) => {
       case "App": return App(unquote(term.func, vars), unquote(term.argm, vars), term.eras);
       case "Box": return Box(unquote(term.expr, vars));
       case "Put": return Put(unquote(term.expr, vars));
+      case "Tak": return Tak(unquote(term.expr, vars));
       case "Dup": return Dup(term.name, unquote(term.expr, vars), x => unquote(term.body, [x].concat(vars)));
       case "Wrd": return Wrd();
       case "Num": return Num(term.numb);
@@ -703,7 +736,8 @@ const norm = (term, defs = {}, opts) => {
       case "App": return apply(term.func, term.argm, term.eras, names);
       case "Box": return Box(weak_reduce(term.expr, names));
       case "Put": return opts.unbox ? reduce(term.expr, names) : Put(weak_reduce(term.expr, names));
-      case "Dup": return opts.unbox ? reduce(term.body(term.expr), names) : duplicate(term.name, term.expr, term.body);
+      case "Tak": return opts.unbox ? reduce(term.expr, names) : take(weak_reduce(term.expr, names), names);
+      case "Dup": return opts.unbox ? reduce(term.body(term.expr), names) : duplicate(term.name, term.expr, term.body, names);
       case "Wrd": return Wrd();
       case "Num": return Num(term.numb);
       case "Op1": return op1(term.func, term.num0, term.num1, names);
@@ -740,6 +774,7 @@ const norm = (term, defs = {}, opts) => {
       case "App": return App(quote(term.func, depth), quote(term.argm, depth), term.eras);
       case "Box": return Box(quote(term.expr, depth));
       case "Put": return Put(quote(term.expr, depth));
+      case "Tak": return Tak(quote(term.expr, depth));
       case "Dup": return Dup(term.name, quote(term.expr, depth), quote(term.body(Var(depth)), depth + 1));
       case "Wrd": return Wrd();
       case "Num": return Num(term.numb);
@@ -781,7 +816,7 @@ const erase = (term) => {
       return All(term.name, erase(term.bind), erase(term.body), term.eras);
     case "Lam":
       if (term.eras) {
-        return erase(subst(term.body, Num(0), 0));
+        return erase(subst(term.body, Put(Num(0)), 0));
       } else {
         return Lam(term.name, null, erase(term.body), term.eras);
       }
@@ -795,6 +830,8 @@ const erase = (term) => {
       return Box(erase(term.expr));
     case "Put":
       return Put(erase(term.expr));
+    case "Tak":
+      return Tak(erase(term.expr));
     case "Dup":
       return Dup(term.name, erase(term.expr), erase(term.body));
     case "Wrd":
@@ -821,7 +858,7 @@ const erase = (term) => {
       }
     case "Fst":
       if (term.eras === 1) {
-        return Num(0);
+        return Put(Num(0));
       } else if (term.eras === 2) {
         return erase(term.pair);
       } else {
@@ -831,7 +868,7 @@ const erase = (term) => {
       if (term.eras === 1) {
         return erase(term.pair);
       } else if (term.eras === 2) {
-        return Num(0);
+        return Put(Num(0));
       } else {
         return Snd(erase(term.pair), term.eras);
       }
@@ -846,7 +883,7 @@ const erase = (term) => {
     case "Eql":
       return Eql(erase(term.val0), erase(term.val1));
     case "Rfl":
-      return Num(0);
+      return Put(Num(0));
     case "Sym":
       return erase(term.prof);
     case "Rwt":
@@ -885,10 +922,10 @@ const equal = (a, b, defs) => {
 
         // Gets whnfs with and without dereferencing
         // Note: can't use weak:true because it won't give opportunity to eta...
-        var ax = norm(a, {}, {unbox: true, eta: true});
-        var bx = norm(b, {}, {unbox: true, eta: true});
-        var ay = norm(a, defs, {unbox: true, eta: true});
-        var by = norm(b, defs, {unbox: true, eta: true});
+        var ax = norm(a, {}, {undup: true, eta: true});
+        var bx = norm(b, {}, {undup: true, eta: true});
+        var ay = norm(a, defs, {undup: true, eta: true});
+        var by = norm(b, defs, {undup: true, eta: true});
 
         // If non-deref whnfs are app and fields are equal, then a == b
         var x = null;
@@ -910,6 +947,7 @@ const equal = (a, b, defs) => {
           case "App-App": y = And(And(Eqs(ay[1].func, by[1].func), Eqs(ay[1].argm, by[1].argm)), Val(ay[1].eras === by[1].eras)); break;
           case "Box-Box": y = Eqs(ay[1].expr, by[1].expr); break;
           case "Put-Put": y = Eqs(ay[1].expr, by[1].expr); break;
+          case "Tak-Tak": y = Eqs(ay[1].expr, by[1].expr); break;
           case "Dup-Dup": y = And(Eqs(ay[1].expr, by[1].expr), Eqs(ay[1].body, by[1].body)); break;
           case "Wrd-Wrd": y = Val(true); break;
           case "Num-Num": y = Val(ay[1].numb === by[1].numb); break;
@@ -978,6 +1016,7 @@ const uses = ([ctor, term], depth = 0) => {
     case "App": return uses(term.func, depth) + (term.eras ? 0 : uses(term.argm, depth));
     case "Box": return 0;
     case "Put": return uses(term.expr, depth);
+    case "Tak": return uses(term.expr, depth);
     case "Dup": return uses(term.expr, depth) + uses(term.body, depth + 1);
     case "Wrd": return 0;
     case "Num": return 0;
@@ -1013,6 +1052,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "App": return is_at_level(term.func, at_level, depth, level) && (term.eras ? true : is_at_level(term.argm, at_level, depth, level));
     case "Box": return true;
     case "Put": return is_at_level(term.expr, at_level, depth, level + 1);
+    case "Tak": return false;
     case "Dup": return is_at_level(term.expr, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level);
     case "Wrd": return true;
     case "Num": return true;
@@ -1064,6 +1104,9 @@ const boxcheck = (term, defs = {}, ctx = []) => {
       case "Box":
         break;
       case "Put":
+        check(term.expr, defs, ctx);
+        break;
+      case "Tak":
         check(term.expr, defs, ctx);
         break;
       case "Dup":
@@ -1191,7 +1234,7 @@ const typecheck = (() => {
     for (var c = ctx; c !== null; c = c.rest) {
       var name = c.name;
       var type = c.type;
-      txt.push("- " + PADR(max_len, " ", c.name) + " : " + show(norm(type, {}, {weak: true, unbox: true}), ctx_names(c.rest)));
+      txt.push("- " + PADR(max_len, " ", c.name) + " : " + show(norm(type, {}, {weak: true, undup: true}), ctx_names(c.rest)));
     }
     return txt.reverse().join("\n");
   };
@@ -1221,12 +1264,12 @@ const typecheck = (() => {
     const MATCH = (a, b, ctx) => {
       if (!equal(a, b, defs)) {
         throw ERROR("Type mismatch."
-          + "\n- Found type... " + TERM(norm(erase(a), defs, {weak: false, unbox: true}))
-          + "\n- Instead of... " + TERM(norm(erase(b), defs, {weak: false, unbox: true})));
+          + "\n- Found type... " + TERM(norm((a), defs, {weak: false, unbox: true}))
+          + "\n- Instead of... " + TERM(norm((b), defs, {weak: false, unbox: true})));
       }
     };
 
-    var expect_nf = expect ? norm(expect, defs, {weak: true, unbox: true}) : null;
+    var expect_nf = expect ? norm(expect, defs, {undup: true, weak: true}) : null;
     var type;
     switch (term[0]) {
       case "Var":
@@ -1264,8 +1307,10 @@ const typecheck = (() => {
         type = term_t;
         break;
       case "App":
-        var func_t = norm(typecheck(term[1].func, null, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
+        var func_t = norm(typecheck(term[1].func, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (func_t[0] !== "All") {
+          //console.log("->", show(term));
+          //console.log("->", show(func_t));
           ERROR("Attempted to apply a value that isn't a function.");
         }
         typecheck(term[1].argm, func_t[1].bind, defs, ctx, [term, ctx]);
@@ -1278,7 +1323,7 @@ const typecheck = (() => {
         if (expect_nf !== null && expect_nf[0] !== "Typ") {
           ERROR("The annotated type of a box (" + TERM(Box(Ref("A"))) + ") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
         }
-        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
+        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         MATCH(expr_t, Typ(), ctx);
         type = Typ();
         break;
@@ -1290,13 +1335,20 @@ const typecheck = (() => {
         var term_t = typecheck(term[1].expr, expr_t, defs, ctx, [term, ctx]);
         type = Box(term_t);
         break;
-      case "Dup":
-        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
+      case "Tak":
+        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (expr_t[0] !== "Box") {
           ERROR("Unboxed duplication.");
         }
-        var unboxd = Ann(expr_t[1].expr, Dup(term[1].name, term[1].expr, Var(0)), true);
-        var term_t = typecheck(subst(term[1].body, unboxd, 0), expect_nf, defs, ctx, [term, ctx]);
+        type = expr_t[1].expr;
+        break;
+      case "Dup":
+        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        if (expr_t[0] !== "Box") {
+          ERROR("Unboxed duplication.");
+        }
+        var unboxd = Tak(term[1].expr);
+        var term_t = typecheck(subst(term[1].body, Tak(term[1].expr), 0), expect_nf, defs, ctx, [term, ctx]);
         type = term_t;
         break;
       case "Wrd":
@@ -1315,12 +1367,12 @@ const typecheck = (() => {
         type = Wrd();
         break;
       case "Ite":
-        var cond_t = norm(typecheck(term[1].cond, null, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
+        var cond_t = norm(typecheck(term[1].cond, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (cond_t[0] !== "Wrd") {
           ERROR("Attempted to use if on a non-numeric value.");
         }
         var pair_t = expect_nf ? Sig("x", expect_nf, shift(expect_nf, 1, 0), 0) : null;
-        var pair_t = norm(typecheck(term[1].pair, pair_t, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
+        var pair_t = norm(typecheck(term[1].pair, pair_t, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (pair_t[0] !== "Sig") {
           ERROR("The body of an if must be a pair.");
         }
@@ -1332,7 +1384,7 @@ const typecheck = (() => {
         type = expect_nf || typ0_v;
         break;
       case "Cpy":
-        var numb_t = norm(typecheck(term[1].numb, null, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
+        var numb_t = norm(typecheck(term[1].numb, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (numb_t[0] !== "Wrd") {
           ERROR("Atempted to copy a non-numeric value.");
         }
@@ -1351,7 +1403,7 @@ const typecheck = (() => {
         break;
       case "Par":
         if (expect_nf && expect_nf[0] !== "Sig") {
-          ERROR("Annotated type of a pair (" + TERM(Par(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".\n- Annotated type is " + TERM(norm(expect_nf, defs, {weak: true, unbox: true})));
+          ERROR("Annotated type of a pair (" + TERM(Par(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".\n- Annotated type is " + TERM(norm(expect_nf, defs, {undup: true, weak: true})));
         }
         if (expect_nf && expect_nf[1].eras !== term[1].eras) {
           ERROR("Mismatched erasure.");
@@ -1365,7 +1417,7 @@ const typecheck = (() => {
         type = expect_nf || Sig("x", val0_t, val1_t, term[1].eras);
         break;
       case "Fst":
-        var pair_t = norm(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
+        var pair_t = norm(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (pair_t[0] !== "Sig") {
           ERROR("Attempted to extract the first element of a term that isn't a pair.");
         }
@@ -1375,7 +1427,7 @@ const typecheck = (() => {
         type = pair_t[1].typ0;
         break;
       case "Snd":
-        var pair_t = norm(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
+        var pair_t = norm(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (pair_t[0] !== "Sig") {
           ERROR("Attempted to extract the second element of a term that isn't a pair.");
         }
@@ -1385,7 +1437,7 @@ const typecheck = (() => {
         type = subst(pair_t[1].typ1, Fst(term[1].pair, term[1].eras), 0);
         break;
       case "Prj":
-        var pair_t = norm(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
+        var pair_t = norm(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (pair_t[0] !== "Sig") {
           ERROR("Attempted to project the elements of a term that isn't a pair.");
         }
@@ -1399,8 +1451,8 @@ const typecheck = (() => {
         type = subst(type, Fst(term[1].pair, term[1].eras), 0);
         break;
       case "Eql":
-        var val0_t = norm(typecheck(term[1].val0, null, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
-        var val1_t = norm(typecheck(term[1].val1, null, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
+        var val0_t = norm(typecheck(term[1].val0, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var val1_t = norm(typecheck(term[1].val1, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         MATCH(val0_t, val1_t, ctx);
         type = Typ();
         break;
@@ -1408,14 +1460,14 @@ const typecheck = (() => {
         type = Eql(term[1].expr, term[1].expr);
         break;
       case "Sym":
-        var prof_t = norm(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
+        var prof_t = norm(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (prof_t[0] !== "Eql") {
           ERROR("Attempted to use sym with an invalid equality proof.");
         }
         type = Eql(prof_t[1].val1, prof_t[1].val0);
         break;
       case "Rwt":
-        var prof_t = norm(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
+        var prof_t = norm(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (prof_t[0] !== "Eql") {
           ERROR("Attempted to use rwt with an invalid equality proof.");
         }
@@ -1430,7 +1482,7 @@ const typecheck = (() => {
         MATCH(type_t, Typ(), ctx);
         return Typ();
       case "New":
-        var type = norm(term[1].type, defs, {weak: true, unbox: true});
+        var type = norm(term[1].type, defs, {undup: true, weak: true});
         if (type[0] !== "Slf") {
           ERROR("Attempted to make an instance of a type that isn't self.");
         }
@@ -1439,7 +1491,7 @@ const typecheck = (() => {
         type = term[1].type;
         break;
       case "Use":
-        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {weak: true, unbox: true});
+        var expr_t = norm(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (expr_t[0] !== "Slf") {
           ERROR("Attempted to use a value that isn't a self type.");
         }
@@ -1482,6 +1534,7 @@ module.exports = {
   App,
   Box,
   Put,
+  Tak,
   Dup,
   Wrd,
   Num,
@@ -1511,6 +1564,7 @@ module.exports = {
   norm,
   erase,
   equal,
+  uses,
   boxcheck,
   typecheck,
 };
