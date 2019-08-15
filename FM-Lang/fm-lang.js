@@ -653,7 +653,7 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
       var type = parsed;
       var list = [];
       var skip = parse_exact("[");
-      while (idx < code.length) {
+      while (idx < code.length && !match("]")) {
         list.push(parse_term(ctx));
         if (match("]")) break; else parse_exact(",");
       }
