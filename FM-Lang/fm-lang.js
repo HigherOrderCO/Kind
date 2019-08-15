@@ -158,16 +158,20 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
   }
 
   function match_here(string) {
-    var sliced = code.slice(idx, idx + string.length);
-    if (sliced === string) {
-      if (tokens) tokens.push(["sym", ""]);
-      for (var i = 0; i < string.length; ++i) {
-        next();
+    if (code.slice(idx, idx + 2) === "//") {
+      return false;
+    } else {
+      var sliced = code.slice(idx, idx + string.length);
+      if (sliced === string) {
+        if (tokens) tokens.push(["sym", ""]);
+        for (var i = 0; i < string.length; ++i) {
+          next();
+        }
+        if (tokens) tokens.push(["txt", ""]);
+        return true;
       }
-      if (tokens) tokens.push(["txt", ""]);
-      return true;
+      return false;
     }
-    return false;
   }
 
   function match(string) {
