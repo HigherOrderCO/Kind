@@ -545,17 +545,17 @@ const norm = (term, defs = {}, opts) => {
   const names_new = null;
   const names_ext = (name, rest) => opts.logging ? {name, rest} : rest;
   const names_arr = names => names ? [names.name].concat(names_arr(names.rest)) : [];
-  const lam_eta = term => {
-    if (opts.eta) {
-      const is_eta = (term[1].body[0] === "App"
-        && term[1].body[1].argm[0] === "Var"
-        && term[1].body[1].argm[1].index === 0
-        && uses(term[1].body[1].func, 0) === 0);
-      return is_eta ? subst(term[1].body[1].func, Typ(), 0) : term;
-    } else {
-      return term;
-    }
-  };
+  //const lam_eta = term => {
+    //if (opts.eta) {
+      //const is_eta = (term[1].body[0] === "App"
+        //&& term[1].body[1].argm[0] === "Var"
+        //&& term[1].body[1].argm[1].index === 0
+        //&& uses(term[1].body[1].func, 0) === 0);
+      //return is_eta ? subst(term[1].body[1].func, Typ(), 0) : term;
+    //} else {
+      //return term;
+    //}
+  //};
   const apply = (func, argm, eras, names) => {
     var func = reduce(func, names);
     // ([x]a b) ~> [b/x]a
@@ -578,7 +578,7 @@ const norm = (term, defs = {}, opts) => {
       return reduce(expr[1].expr, names);
     // -# (dup x = a; b) ~> dup x = a; -# b
     } else if (expr[0] === "Dup"){
-      return Dup(expr[1].name, expr[1].expr, x => weak_reduce(Tak(expr[1].body(x))));
+      return Dup(expr[1].name, expr[1].expr, x => weak_reduce(Tak(expr[1].body(x)), names_ext(expr[1].name, names)));
     } else {
       return Tak(expr);
     }
@@ -731,8 +731,8 @@ const norm = (term, defs = {}, opts) => {
     switch (ctor) {
       case "Var": return Var(term.index);
       case "Typ": return Typ();
-      case "All": return All(term.name, term.bind, term.body, term.eras);
-      case "Lam": return Lam(term.name, term.bind, x => weak_reduce(term.body(x), names_ext(term.name, names)), term.eras);
+      case "All": return All(term.name, weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(term.name, names)), term.eras);
+      case "Lam": return Lam(term.name, term.bind && weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(term.name, names)), term.eras);
       case "App": return apply(term.func, term.argm, term.eras, names);
       case "Box": return Box(weak_reduce(term.expr, names));
       case "Put": return opts.unbox ? reduce(term.expr, names) : Put(weak_reduce(term.expr, names));
@@ -744,12 +744,12 @@ const norm = (term, defs = {}, opts) => {
       case "Op2": return op2(term.func, term.num0, term.num1, names);
       case "Ite": return if_then_else(term.cond, term.pair, names);
       case "Cpy": return copy(term.name, term.numb, term.body, names);
-      case "Sig": return Sig(term.name, term.typ0, term.typ1, term.eras);
+      case "Sig": return Sig(term.name, weak_reduce(term.typ0, names), x => weak_reduce(term.typ1(x), names_ext(term.name, names)), term.eras);
       case "Par": return Par(weak_reduce(term.val0, names), weak_reduce(term.val1, names), term.eras);
       case "Fst": return first(term.pair, term.eras, names);
       case "Snd": return second(term.pair, term.eras, names);
       case "Prj": return project(term.nam0, term.nam1, term.pair, term.body, term.eras, names);
-      case "Eql": return Eql(term.val0, term.val1);
+      case "Eql": return Eql(weak_reduce(term.val0, names), weak_reduce(term.val1, names));
       case "Rfl": return Rfl(weak_reduce(term.expr, names));
       case "Sym": return reduce(term.prof, names);
       case "Rwt": return reduce(term.expr, names);
@@ -770,7 +770,7 @@ const norm = (term, defs = {}, opts) => {
       case "Var": return Var(depth - 1 - term.index);
       case "Typ": return Typ();
       case "All": return All(term.name, quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras);
-      case "Lam": return lam_eta(Lam(term.name, term.bind && quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras));
+      case "Lam": return Lam(term.name, term.bind && quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras);
       case "App": return App(quote(term.func, depth), quote(term.argm, depth), term.eras);
       case "Box": return Box(quote(term.expr, depth));
       case "Put": return Put(quote(term.expr, depth));
@@ -922,10 +922,10 @@ const equal = (a, b, defs) => {
 
         // Gets whnfs with and without dereferencing
         // Note: can't use weak:true because it won't give opportunity to eta...
-        var ax = norm(a, {}, {unbox: true, eta: true});
-        var bx = norm(b, {}, {unbox: true, eta: true});
-        var ay = norm(a, defs, {unbox: true, eta: true});
-        var by = norm(b, defs, {unbox: true, eta: true});
+        var ax = norm(a, {}, {weak: true, unbox: true});
+        var bx = norm(b, {}, {weak: true, unbox: true});
+        var ay = norm(a, defs, {weak: true, unbox: true});
+        var by = norm(b, defs, {weak: true, unbox: true});
 
         // If non-deref whnfs are app and fields are equal, then a == b
         var x = null;
@@ -1234,7 +1234,7 @@ const typecheck = (() => {
     for (var c = ctx; c !== null; c = c.rest) {
       var name = c.name;
       var type = c.type;
-      txt.push("- " + PADR(max_len, " ", c.name) + " : " + show(norm(type, {}, {weak: true, undup: true}), ctx_names(c.rest)));
+      txt.push("- " + PADR(max_len, " ", c.name) + " : " + show(norm(type, {}, {weak: false, unbox: true}), ctx_names(c.rest)));
     }
     return txt.reverse().join("\n");
   };
