@@ -775,7 +775,7 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
           }
           var ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
           for (var p = 0; p < adt_pram.length; ++p) {
-            ctor_type = App(ctor_type, Var(-1 + ctor_flds.length + adt_pram.length + p), false);
+            ctor_type = App(ctor_type, Var(-1 + ctor_flds.length + adt_pram.length - p), false);
           }
           for (var i = 0; i < ctor_indx.length; ++i) {
             ctor_type = App(ctor_type, ctor_indx[i], false);
@@ -1029,7 +1029,6 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
     for (var name in boxed_info) {
       var info = boxed_info[name];
       var term = defs[name];
-      //console.log("unbox?",name,show(term));
       ["expr", "type"].forEach(field => {
         var lens = {term, field};
         for (var i = 0; i < info.depth; ++i) {
