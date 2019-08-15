@@ -1081,8 +1081,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
 
 // Checks if a term is stratified
 const boxcheck = (term, defs = {}, ctx = []) => {
-  var seen = {};
-  const check = ([ctor, term], defs = {}, ctx = []) => {
+  const check = ([ctor, term], defs = {}, ctx = [], seen = {}) => {
     switch (ctor) {
       case "All":
         break;
@@ -1093,53 +1092,53 @@ const boxcheck = (term, defs = {}, ctx = []) => {
         if (!is_at_level(term.body, 0)) {
           throw "[ERROR]\nLambda variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], ctx);
         }
-        check(term.body, defs, ctx.concat([term.name]));
+        check(term.body, defs, ctx.concat([term.name]), seen);
         break;
       case "App":
-        check(term.func, defs, ctx);
+        check(term.func, defs, ctx, seen);
         if (!term.eras) {
-          check(term.argm, defs, ctx);
+          check(term.argm, defs, ctx, seen);
         }
         break;
       case "Box":
         break;
       case "Put":
-        check(term.expr, defs, ctx);
+        check(term.expr, defs, ctx, seen);
         break;
       case "Tak":
-        check(term.expr, defs, ctx);
+        check(term.expr, defs, ctx, seen);
         break;
       case "Dup":
         if (!is_at_level(term.body, 1)) {
           throw "[ERROR]\nDuplication variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], ctx);
         }
-        check(term.expr, defs, ctx);
-        check(term.body, defs, ctx.concat([term.name]));
+        check(term.expr, defs, ctx, seen);
+        check(term.body, defs, ctx.concat([term.name]), seen);
         break;
       case "Op1":
       case "Op2":
-        check(term.num0, defs, ctx);
-        check(term.num1, defs, ctx);
+        check(term.num0, defs, ctx, seen);
+        check(term.num1, defs, ctx, seen);
         break;
       case "Ite":
-        check(term.cond, defs, ctx);
-        check(term.pair, defs, ctx);
+        check(term.cond, defs, ctx, seen);
+        check(term.pair, defs, ctx, seen);
         break;
       case "Cpy":
-        check(term.numb, defs, ctx);
-        check(term.body, defs, ctx.concat([term.name]));
+        check(term.numb, defs, ctx, seen);
+        check(term.body, defs, ctx.concat([term.name]), seen);
         break;
       case "Sig":
         break;
       case "Par":
-        if (term.eras !== 1) check(term.val0, defs, ctx);
-        if (term.eras !== 2) check(term.val1, defs, ctx);
+        if (term.eras !== 1) check(term.val0, defs, ctx, seen);
+        if (term.eras !== 2) check(term.val1, defs, ctx, seen);
         break;
       case "Fst":
-        check(term.pair, defs, ctx);
+        check(term.pair, defs, ctx, seen);
         break;
       case "Snd":
-        check(term.pair, defs, ctx);
+        check(term.pair, defs, ctx, seen);
         break;
       case "Prj":
         var uses0 = uses(term.body, 1);
@@ -1152,8 +1151,8 @@ const boxcheck = (term, defs = {}, ctx = []) => {
         if (!isat0 || !isat1) {
           throw "[ERROR]\nProjection variable `" + (!isat0 ? term.nam0 : term.nam1) + "` used inside a box in:\n" + show([ctor, term], ctx);
         }
-        check(term.pair, defs, ctx);
-        check(term.body, defs, ctx.concat([term.nam0, term.nam1]));
+        check(term.pair, defs, ctx, seen);
+        check(term.body, defs, ctx.concat([term.nam0, term.nam1]), seen);
         break;
       case "Eql":
         break;
@@ -1164,25 +1163,27 @@ const boxcheck = (term, defs = {}, ctx = []) => {
       case "Rwt":
         break;
       case "Ann":
-        check(term.expr, defs, ctx);
+        check(term.expr, defs, ctx, seen);
         break;
       case "Slf":
         break;
       case "New":
-        check(term.expr, defs, ctx);
+        check(term.expr, defs, ctx, seen);
         break;
       case "Use":
-        check(term.expr, defs, ctx);
+        check(term.expr, defs, ctx, seen);
         break;
       case "Log":
-        check(term.expr, defs, ctx);
+        check(term.expr, defs, ctx, seen);
         break;
       case "Ref":
         if (!defs[term.name]) {
           throw "[ERROR]\nUndefined reference: " + term.name;
         } else if (!seen[term.name]) {
-          seen[term.name] = true;
-          check(defs[term.name], defs, ctx);
+          check(defs[term.name], defs, ctx, {...seen, [term.name]: true});
+          break;
+        } else if (seen[term.name]) {
+          throw "[ERROR]\nRecursive occurrence of '" + term.name + "' in a computational position.";
           break;
         }
     }
