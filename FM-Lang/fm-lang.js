@@ -129,7 +129,9 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
   var is_newline   = build_charset("\n");
 
   function next() {
-    if (tokens) tokens[tokens.length - 1][1] += code[idx];
+    if (tokens) {
+      tokens[tokens.length - 1][1] += code[idx];
+    }
     if (is_newline(code[idx])) {
       row += 1;
       col = 0;
@@ -928,7 +930,7 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
         for (var i = names.length - 1; i >= 0; --i) {
           var type = All(names[i], types[i], type, erase[i]);
           var term = Lam(names[i], null    , term, erase[i]);
-          var base = Lam(names[i], null    , base, erase[i]);
+          var base = base && Lam(names[i], null    , base, erase[i]);
         }
 
         // Aux function to add level 0 headers
@@ -1068,9 +1070,6 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
             }
           };
         });
-        //for (var i = unbox.length - 1; i >= 0; --i) {
-          //lens.term[1][lens.field] = shift(lens.term[1][lens.field], 1, 0);
-        //}
         for (var i = unbox.length - 1; i >= 0; --i) {
           lens.term[1][lens.field] = Dup(unbox[i][0], unbox[i][1], shift(lens.term[1][lens.field], 1, 0));
         }
@@ -1080,7 +1079,6 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
           }
         });
       });
-      //console.log("unboxed ", name + ":", show(defs[name]), "\n");
     }
   }
 

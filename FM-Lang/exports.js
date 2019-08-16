@@ -30,7 +30,7 @@ fm.lang.norm = function norm(term, defs, mode = "DEBUG", opts, stats = {}) {
       }
       return fm.to_net.decompile(net);
     case "TYPE":
-      return fm.core.norm(fm.lang.typecheck(term, null, defs), {});
+      return fm.core.norm(fm.lang.typecheck(term, null, defs), {}, {weak: false, unbox: true});
   }
 }
 

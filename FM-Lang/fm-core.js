@@ -32,36 +32,37 @@
 // - Ann: an explicit type annotaion, `: A a`
 // - Log: debug-prints a term during evaluation
 // - Ref: a reference to a global def
-const Var = (index)                        => ["Var", {index}];
-const Typ = ()                             => ["Typ", {}];
-const All = (name, bind, body, eras)       => ["All", {name, bind, body, eras}];
-const Lam = (name, bind, body, eras)       => ["Lam", {name, bind, body, eras}];
-const App = (func, argm, eras)             => ["App", {func, argm, eras}];
-const Box = (expr)                         => ["Box", {expr}];
-const Put = (expr)                         => ["Put", {expr}];
-const Tak = (expr)                         => ["Tak", {expr}];
-const Dup = (name, expr, body)             => ["Dup", {name, expr, body}];
-const Wrd = ()                             => ["Wrd", {}];
-const Num = (numb)                         => ["Num", {numb}];
-const Op1 = (func, num0, num1)             => ["Op1", {func, num0, num1}];
-const Op2 = (func, num0, num1)             => ["Op2", {func, num0, num1}];
-const Ite = (cond, pair)                   => ["Ite", {cond, pair}];
-const Cpy = (name, numb, body)             => ["Cpy", {name, numb, body}];
-const Sig = (name, typ0, typ1, eras)       => ["Sig", {name, typ0, typ1, eras}];
-const Par = (val0, val1, eras)             => ["Par", {val0, val1, eras}];
-const Fst = (pair, eras)                   => ["Fst", {pair, eras}];
-const Snd = (pair, eras)                   => ["Snd", {pair, eras}];
-const Prj = (nam0, nam1, pair, body, eras) => ["Prj", {nam0, nam1, pair, body, eras}];
-const Eql = (val0, val1)                   => ["Eql", {val0, val1}];
-const Rfl = (expr)                         => ["Rfl", {expr}];
-const Sym = (prof)                         => ["Sym", {prof}];
-const Rwt = (name, type, prof, expr)       => ["Rwt", {name, type, prof, expr}];
-const Slf = (name, type)                   => ["Slf", {name, type}];
-const New = (type, expr)                   => ["New", {type, expr}];
-const Use = (expr)                         => ["Use", {expr}];
-const Ann = (type, expr, done)             => ["Ann", {type, expr, done}];
-const Log = (msge, expr)                   => ["Log", {msge, expr}];
-const Ref = (name, eras)                   => ["Ref", {name, eras}];
+var MEMO  = true;
+const Var = (index)                        => ["Var", {index},                        MEMO && ("^" + index)];
+const Typ = ()                             => ["Typ", {},                             MEMO && ("ty")];
+const All = (name, bind, body, eras)       => ["All", {name, bind, body, eras},       MEMO && ("al" + (eras?"-":"") + bind[2] + body[2])];
+const Lam = (name, bind, body, eras)       => ["Lam", {name, bind, body, eras},       MEMO && ("lm" + (eras?"-":"") + body[2])];
+const App = (func, argm, eras)             => ["App", {func, argm, eras},             MEMO && ("ap" + (eras?"-":"") + func[2] + argm[2])];
+const Box = (expr)                         => ["Box", {expr},                         MEMO && ("bx" + expr[2])];
+const Put = (expr)                         => ["Put", {expr},                         MEMO && ("pt" + expr[2])];
+const Tak = (expr)                         => ["Tak", {expr},                         MEMO && ("tk" + expr[2])];
+const Dup = (name, expr, body)             => ["Dup", {name, expr, body},             MEMO && ("dp" + expr[2] + body[2])];
+const Wrd = ()                             => ["Wrd", {},                             MEMO && ("wd")];
+const Num = (numb)                         => ["Num", {numb},                         MEMO && ("[" + numb + "]")];
+const Op1 = (func, num0, num1)             => ["Op1", {func, num0, num1},             MEMO && ("o1" + func +  num0[2] + num1[2])];
+const Op2 = (func, num0, num1)             => ["Op2", {func, num0, num1},             MEMO && ("o2" + func + num0[2] + num1[2])];
+const Ite = (cond, pair)                   => ["Ite", {cond, pair},                   MEMO && ("ie" + cond[2] + pair[2])];
+const Cpy = (name, numb, body)             => ["Cpy", {name, numb, body},             MEMO && ("cy" + numb[2] + body[2])];
+const Sig = (name, typ0, typ1, eras)       => ["Sig", {name, typ0, typ1, eras},       MEMO && ("sg" + eras + typ0[2] + typ1[2])];
+const Par = (val0, val1, eras)             => ["Par", {val0, val1, eras},             MEMO && ("pr" + eras + val0[2] + val1[2])];
+const Fst = (pair, eras)                   => ["Fst", {pair, eras},                   MEMO && ("ft" + eras + pair[2])];
+const Snd = (pair, eras)                   => ["Snd", {pair, eras},                   MEMO && ("sd" + eras + pair[2])];
+const Prj = (nam0, nam1, pair, body, eras) => ["Prj", {nam0, nam1, pair, body, eras}, MEMO && ("pj" + eras + pair[2] + body[2])];
+const Eql = (val0, val1)                   => ["Eql", {val0, val1},                   MEMO && ("eq" + val0[2] + val1[2])];
+const Rfl = (expr)                         => ["Rfl", {expr},                         MEMO && "*"];
+const Sym = (prof)                         => ["Sym", {prof},                         MEMO && prof[2]];
+const Rwt = (name, type, prof, expr)       => ["Rwt", {name, type, prof, expr},       MEMO && expr[2]];
+const Slf = (name, type)                   => ["Slf", {name, type},                   MEMO && ("sf" + type[2])];
+const New = (type, expr)                   => ["New", {type, expr},                   MEMO && expr[2]];
+const Use = (expr)                         => ["Use", {expr},                         MEMO && expr[2]];
+const Ann = (type, expr, done)             => ["Ann", {type, expr, done},             MEMO && expr[2]];
+const Log = (msge, expr)                   => ["Log", {msge, expr},                   MEMO && expr[2]];
+const Ref = (name, eras)                   => ["Ref", {name, eras},                   MEMO && ("{" + name + "}")];
 
 // :::::::::::::::::::::
 // :: Stringification ::
@@ -799,8 +800,10 @@ const norm = (term, defs = {}, opts) => {
       case "Ref": return Ref(term.name, term.eras);
     }
   };
+  MEMO = false;
   var unquoted = unquote(term, []);
   var reduced = reduce(unquoted);
+  MEMO = true;
   var quoted = quote(reduced, 0);
   return quoted;
 }
@@ -926,6 +929,11 @@ const equal = (a, b, defs) => {
         var bx = norm(b, {}, {weak: true, unbox: true});
         var ay = norm(a, defs, {weak: true, unbox: true});
         var by = norm(b, defs, {weak: true, unbox: true});
+
+        // Optimization: if hashes are equal, then a == b prematurely
+        if (a[2] === b[2] || ax[2] === bx[2] || ay[2] === by[2]) {
+          return Val(true);
+        }
 
         // If non-deref whnfs are app and fields are equal, then a == b
         var x = null;
@@ -1310,8 +1318,6 @@ const typecheck = (() => {
       case "App":
         var func_t = norm(typecheck(term[1].func, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (func_t[0] !== "All") {
-          //console.log("->", show(term));
-          //console.log("->", show(func_t));
           ERROR("Attempted to apply a value that isn't a function.");
         }
         typecheck(term[1].argm, func_t[1].bind, defs, ctx, [term, ctx]);
