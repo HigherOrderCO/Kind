@@ -22,6 +22,7 @@ Or via `nix` with:
 ```
 $ git clone https://gitlab.com/moonad/Formality-JavaScript.git
 $ cd Formality-JavaScript
+$ nix-channel add https://nixos.org/channels/nixpkgs-unstable unstable
 $ nix-env -f default.nix formality-lang
 ```
 
