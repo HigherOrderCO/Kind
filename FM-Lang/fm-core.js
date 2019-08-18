@@ -35,6 +35,7 @@
 var MEMO  = true;
 const Var = (index)                        => ["Var", {index},                        MEMO && ("^" + index)];
 const Typ = ()                             => ["Typ", {},                             MEMO && ("ty")];
+const Tid = (expr)                         => ["Tid", {expr},                         MEMO && expr[2]];
 const All = (name, bind, body, eras)       => ["All", {name, bind, body, eras},       MEMO && ("al" + (eras?"-":"") + bind[2] + body[2])];
 const Lam = (name, bind, body, eras)       => ["Lam", {name, bind, body, eras},       MEMO && ("lm" + (eras?"-":"") + body[2])];
 const App = (func, argm, eras)             => ["App", {func, argm, eras},             MEMO && ("ap" + (eras?"-":"") + func[2] + argm[2])];
@@ -104,6 +105,9 @@ const show = ([ctor, args], nams = []) => {
       }
     case "Typ":
       return "Type";
+    case "Tid":
+      var expr = show(args.expr, nams);
+      return "type(" + expr + ")";
     case "All":
       var term = [ctor, args];
       var erase = [];
@@ -284,6 +288,9 @@ const shift = ([ctor, term], inc, depth) => {
       return Var(term.index < depth ? term.index : term.index + inc);
     case "Typ":
       return Typ();
+    case "Tid":
+      var expr = shift(term.expr, inc, depth);
+      return Tid(expr);
     case "All":
       var name = term.name;
       var bind = shift(term.bind, inc, depth);
@@ -409,6 +416,9 @@ const subst = ([ctor, term], val, depth) => {
       return depth === term.index ? val : Var(term.index - (term.index > depth ? 1 : 0));
     case "Typ":
       return Typ();
+    case "Tid":
+      var expr = subst(term.expr, val, depth);
+      return Tid(expr);
     case "All":
       var name = term.name;
       var bind = subst(term.bind, val, depth);
@@ -697,6 +707,7 @@ const norm = (term, defs = {}, opts) => {
     switch (ctor) {
       case "Var": return vars[term.index] || Var(vars.length - term.index - 1);
       case "Typ": return Typ();
+      case "Tid": return Tid(unquote(term.expr, vars));
       case "All": return All(term.name, unquote(term.bind, vars), x => unquote(term.body, [x].concat(vars)), term.eras);
       case "Lam": return Lam(term.name, term.bind && unquote(term.bind, vars), x => unquote(term.body, [x].concat(vars)), term.eras);
       case "App": return App(unquote(term.func, vars), unquote(term.argm, vars), term.eras);
@@ -732,6 +743,7 @@ const norm = (term, defs = {}, opts) => {
     switch (ctor) {
       case "Var": return Var(term.index);
       case "Typ": return Typ();
+      case "Tid": return reduce(term.expr, names);
       case "All": return All(term.name, weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(term.name, names)), term.eras);
       case "Lam": return Lam(term.name, term.bind && weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(term.name, names)), term.eras);
       case "App": return apply(term.func, term.argm, term.eras, names);
@@ -770,6 +782,7 @@ const norm = (term, defs = {}, opts) => {
     switch (ctor) {
       case "Var": return Var(depth - 1 - term.index);
       case "Typ": return Typ();
+      case "Tid": return Tid(quote(term.expr, depth));
       case "All": return All(term.name, quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras);
       case "Lam": return Lam(term.name, term.bind && quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras);
       case "App": return App(quote(term.func, depth), quote(term.argm, depth), term.eras);
@@ -815,6 +828,8 @@ const erase = (term) => {
       return Var(term.index);
     case "Typ":
       return Typ();
+    case "Tid":
+      return erase(term.expr);
     case "All":
       return All(term.name, erase(term.bind), erase(term.body), term.eras);
     case "Lam":
@@ -950,6 +965,7 @@ const equal = (a, b, defs) => {
         switch (ay[0] + "-" + by[0]) {
           case "Var-Var": y = Val(ay[1].index === by[1].index); break;
           case "Typ-Typ": y = Val(true); break;
+          case "Tid-Tid": y = Eqs(ay[1].expr, by[1].expr); break;
           case "All-All": y = And(And(Eqs(ay[1].bind, by[1].bind), Eqs(ay[1].body, by[1].body)), Val(ay[1].eras === by[1].eras)); break;
           case "Lam-Lam": y = And(Eqs(ay[1].body, by[1].body), Val(ay[1].eras === by[1].eras)); break;
           case "App-App": y = And(And(Eqs(ay[1].func, by[1].func), Eqs(ay[1].argm, by[1].argm)), Val(ay[1].eras === by[1].eras)); break;
@@ -1019,6 +1035,7 @@ const uses = ([ctor, term], depth = 0) => {
   switch (ctor) {
     case "Var": return term.index === depth ? 1 : 0;
     case "Typ": return 0;
+    case "Tid": return 0;
     case "All": return 0;
     case "Lam": return uses(term.body, depth + 1);
     case "App": return uses(term.func, depth) + (term.eras ? 0 : uses(term.argm, depth));
@@ -1055,6 +1072,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
   switch (ctor) {
     case "Var": return term.index !== depth || level === at_level;
     case "Typ": return true;
+    case "Tid": return true;
     case "All": return true;
     case "Lam": return is_at_level(term.body, at_level, depth + 1, level);
     case "App": return is_at_level(term.func, at_level, depth, level) && (term.eras ? true : is_at_level(term.argm, at_level, depth, level));
@@ -1284,6 +1302,14 @@ const typecheck = (() => {
       case "Var":
         type = ctx_get(term[1].index, ctx)[1];
         break;
+      case "Typ":
+        type = Typ();
+        break;
+      case "Tid":
+        var expr_t = typecheck(term[1].expr, null, defs, ctx, [term, ctx]);
+        MATCH(expr_t, Typ(), ctx);
+        type = Typ();
+        break;
       case "All":
         if (expect_nf && expect_nf[0] !== "Typ") {
           ERROR("The annotated type of a forall (" + TERM(All("x", Ref("A"), Ref("B"), false)) +") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
@@ -1293,9 +1319,6 @@ const typecheck = (() => {
         var body_t = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
         MATCH(bind_t, Typ(), ctx);
         MATCH(body_t, Typ(), ctx);
-        type = Typ();
-        break;
-      case "Typ":
         type = Typ();
         break;
       case "Lam":
@@ -1536,6 +1559,7 @@ const typecheck = (() => {
 module.exports = {
   Var,
   Typ,
+  Tid,
   All,
   Lam,
   App,

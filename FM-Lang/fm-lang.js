@@ -1,6 +1,7 @@
 const {
   Var,
   Typ,
+  Tid,
   All,
   Lam,
   App,
@@ -219,7 +220,7 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
   }
 
   function build_ind(name) {
-    var numb = name === "" ? Math.pow(2,8) : Number(name);
+    var numb = name === "" ? Math.pow(2,48) - 1 : Number(name);
     var bits = numb.toString(2);
     var bits = bits === "0" ? "" : bits;
     var term = Ref("base");
@@ -318,6 +319,13 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
     // Type
     else if (match("Type")) {
       parsed = Typ();
+    }
+
+    // Type
+    else if (match("type(")) {
+      var expr = parse_term(ctx);
+      var skip = parse_exact(")");
+      parsed = Tid(expr);
     }
 
     // Prints active definitions
@@ -926,6 +934,11 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
           var term = Cpy(wordn[i], Var(-1 + names.length + i - wordi[i]), term);
         }
 
+        // Fills type wrapper
+        if (type[0] === "Typ") {
+          var term = Tid(term);
+        }
+
         // Fills foralls and lambdas of arguments
         for (var i = names.length - 1; i >= 0; --i) {
           var type = All(names[i], types[i], type, erase[i]);
@@ -1108,6 +1121,9 @@ const replace_refs = ([ctor, term], renamer, depth = 0) => {
       return Var(term.index);
     case "Typ":
       return Typ();
+    case "Tid":
+      var expr = replace_refs(term.expr, renamer, depth);
+      return Tid(expr);
     case "All":
       var name = term.name;
       var bind = replace_refs(term.bind, renamer, depth);
@@ -1249,6 +1265,9 @@ const rewrite = ([ctor, term], rewriter, scope = []) => {
         return Var(term.index);
       case "Typ":
         return Typ();
+      case "Tid":
+        var expr = require(term.expr, rewriter, scope);
+        return Tid(expr);
       case "All":
         var name = term.name;
         var bind = rewrite(term.bind, rewriter, scope);
