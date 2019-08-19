@@ -45,6 +45,27 @@ try {
   process.exit();
 }
 
+async function upload(name) {
+  var file_code = fs.readFileSync(name + ".fm", "utf8");
+  try {
+    var file_local_imports = (await fm.lang.parse(file_code)).local_imports;
+  } catch (e) {
+    console.log(e.toString());
+    process.exit();
+  }
+  for (var local_import in file_local_imports) {
+    var global_name = await upload(local_import);
+    var file_code = "version " + local_import + " " + global_name.slice(global_name.indexOf("@") + 1) + "\n" + file_code;
+  }
+  var saved = await fm.lang.save_file(name, file_code)
+    .then(file => {
+      console.log("Saved `" + name + ".fm` as `" + file + "`!");
+      return file;
+    })
+    .catch(e => { console.log(e); process.exit(); });
+  return saved;
+}
+
 if (args.v) {
   console.log(require("./package.json").version);
   process.exit();
@@ -52,16 +73,7 @@ if (args.v) {
   if (name.slice(-3) === ".fm") {
     name = name.slice(0, -3);
   }
-  var file_code = fs.readFileSync(name + ".fm", "utf8");
-  fm.lang.save_file(name, file_code)
-    .then(file => {
-      console.log("Saved file as `" + file + "`!")
-      process.exit();
-    })
-    .catch(e => {
-      console.log(e);
-      process.exit();
-    });
+  upload(name).then(() => process.exit());
 
 } else {
 
