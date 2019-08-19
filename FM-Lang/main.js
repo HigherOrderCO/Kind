@@ -17,16 +17,16 @@ try {
   console.log("Usage: fm [options] [args]");
   console.log("");
   console.log("Evaluation modes (default: -d):");
-  console.log("-d <file>.<term> debug (using HOAS interpreter)");
+  console.log("-d <file>/<term> debug (using HOAS interpreter)");
   console.log("  -T don't erase types");
   console.log("  -B don't erase boxes");
   console.log("  -W stop on weak head normal form");
-  console.log("-o <file>.<term> optimal (using interaction nets, lazy)");
-  console.log("-O <file>.<term> optimal (using interaction nets, strict)");
-  console.log("-j <file>.<term> JavaScript (using native functions)");
+  console.log("-o <file>/<term> optimal (using interaction nets, lazy)");
+  console.log("-O <file>/<term> optimal (using interaction nets, strict)");
+  console.log("-j <file>/<term> JavaScript (using native functions)");
   console.log("");
   console.log("Type-checking modes:");
-  console.log("-t <file>.<term> performs a type check");
+  console.log("-t <file>/<term> performs a type check");
   console.log("");
   console.log("FM-Lab:");
   console.log("-s <file> saves a file to FM-Lab"); 
@@ -97,7 +97,12 @@ if (args.v) {
       var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
       var [file, name] = main.indexOf("/") === -1 ? [main, "main"] : main.split("/");
-      var code = fs.readFileSync("./" + file + ".fm", "utf8");
+      try {
+        var code = fs.readFileSync("./" + file + ".fm", "utf8");
+      } catch(e) {
+        console.log("Couldn't find local file `" + file + ".fm`.");
+        process.exit();
+      }
       var defs = (await fm.lang.parse(file, code)).defs;
 
       var nams = [file + "/" + name];
@@ -114,6 +119,13 @@ if (args.v) {
         logging: !args.m
       };
 
+      var nam_size = 0;
+      for (var def in defs) {
+        if (def[0] !== "$" && def[0] !== "@") {
+          nam_size = Math.max(nam_size, def.length);
+        }
+      }
+
       for (var i = 0; i < nams.length; ++i) {
         var stats = {
           rewrites: 0,
@@ -123,14 +135,7 @@ if (args.v) {
           output_net: args.p ? null : undefined
         };
 
-        var nam_size = 0;
-        for (var def in defs) {
-          if (def[0] !== "$" && def[0] !== "@") {
-            nam_size = Math.max(nam_size, def.length);
-          }
-        }
-
-        if (nams[i][0] !== "$" && nams[i][0] !== "@" && defs[nams[i]]) {
+        if (nams[i][0] !== "$" && nams[i][0] !== "@") {
           if (nams.length > 1) {
             var init = nams[i];
             while (init.length < nam_size) {
@@ -141,8 +146,12 @@ if (args.v) {
             var init = "";
           }
           try {
-            var term = fm.lang.exec(nams[i], defs, mode, opts, stats);
-            console.log(init + fm.lang.show(term, [], {shorten_refs: !args.f}));
+            if (defs[nams[i]]) {
+              var term = fm.lang.exec(nams[i], defs, mode, opts, stats);
+              console.log(init + fm.lang.show(term, [], {shorten_refs: !args.f}));
+            } else {
+              console.log(init + "Definition not found: " + nams[i]);
+            }
           } catch (e) {
             if (nams.length > 1) {
               console.log("\x1b[31m" + init + "error\x1b[0m");
