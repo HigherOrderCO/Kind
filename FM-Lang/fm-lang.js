@@ -966,9 +966,9 @@ const parse = async (code, tokenify, root = true) => {
         }
 
         // Fills type wrapper
-        //if (type[0] === "Typ") {
-          //var term = Tid(term);
-        //}
+        if (type[0] === "Typ") {
+          var term = Tid(term);
+        }
 
         // Fills foralls and lambdas of arguments
         for (var i = names.length - 1; i >= 0; --i) {
