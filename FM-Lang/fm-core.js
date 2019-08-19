@@ -700,6 +700,7 @@ const norm = (term, defs = {}, opts) => {
     if (opts.logging) {
       var nams = names_arr(names).reverse();
     }
+    console.log(show(quote(msge, 0), names || []));
     return expr;
   };
   const unquote = (term, vars, names) => {
