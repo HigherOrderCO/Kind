@@ -148,7 +148,7 @@ if (args.v) {
           try {
             if (defs[nams[i]]) {
               var term = fm.lang.exec(nams[i], defs, mode, opts, stats);
-              console.log(init + fm.lang.show(term, [], {shorten_refs: !args.f}));
+              console.log(init + fm.lang.show(term, [], {full_refs: !!args.f}));
             } else {
               console.log(init + "Definition not found: " + nams[i]);
             }

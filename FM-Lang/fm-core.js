@@ -273,7 +273,7 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       var expr = show(args.expr, nams, opts);
       return expr;
     case "Ref":
-      return opts.shorten_refs ? args.name.replace(new RegExp(".*/", "g"), "") : args.name;
+      return !opts.full_refs ? args.name.replace(new RegExp(".*/", "g"), "") : args.name;
   }
 };
 
