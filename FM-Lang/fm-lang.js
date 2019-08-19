@@ -52,12 +52,16 @@ const xhr = require("xhr-request-promise");
 // :::::::::::::
 
 // Converts a string to a term
-const parse = async (code, tokenify, root = true, boxed_info = {}) => {
+const parse = async (code, tokenify, root = true) => {
   function get_ref_origin_file(ref) {
-    let at_sign_index = ref.indexOf("@");
-    let dot_index = ref.indexOf(".");
-    if (at_sign_index !== -1 && dot_index !== -1 && at_sign_index < dot_index) {
-      return ref.slice(0, dot_index);
+    let slash_index = ref.indexOf("/");
+    if (slash_index !== -1) {
+      var name = ref.slice(0, slash_index);
+      if (name.indexOf("@") === -1 && file_version[name]) {
+        return {name: name + file_version[name], prefix: name};
+      } else {
+        return {name: name, prefix: name};
+      }
     } else {
       return null;
     }
@@ -68,9 +72,13 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
     var must_load = {};
     replace_refs(term, name => {
       if (!defs[name]) {
-        let file_name = get_ref_origin_file(name);
-        if (file_name) {
-          must_load[file_name] = true;
+        let origin_file = get_ref_origin_file(name);
+        if (origin_file) {
+          var {name: file_name, prefix} = origin_file;
+          must_load[file_name + "-~-" + prefix] = true;
+          if (file_name.indexOf("@") === -1) {
+            local_imports[file_name] = true;
+          }
         }
       }
       return name;
@@ -78,29 +86,33 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
 
     // Creates requests to load those files
     let requests = [];
-    for (let file_name in must_load) {
-      requests.push(load_file(file_name).then(file_code => [file_name, file_code]));
+    for (let file_name_prefix in must_load) {
+      let [file_name, file_prefix] = file_name_prefix.split("-~-");
+      requests.push(load_file(file_name).then(file_code => [file_name, file_code, file_prefix]));
     }
 
     // Creates a parse for those files
     let parses = [];
     var new_files = await Promise.all(requests);
     for (let i = 0; i < new_files.length; ++i) {
-      let [file_name, file_code] = new_files[i];
+      let [file_name, file_code, file_prefix] = new_files[i];
       if (file_code) {
-        parses.push(parse(file_code, tokenify, false, boxed_info).then(file_defs => [file_name, file_defs]));
+        parses.push(parse(file_code, tokenify, false).then(file_parseds => [file_name, file_parseds, file_prefix]));
       }
     }
 
     // Prefixes each file's parsed defs/adts and adds to local defs/adts
     var new_file_parseds = await Promise.all(parses);
     for (var i = 0; i < new_file_parseds.length; ++i) {
-      let [file_name, file_parseds] = new_file_parseds[i];
-      let {defs: file_defs, adts: file_adts} = file_parseds;
-      let prefix = open ? "" : (used_prefix || file_name) + ".";
+      let [file_name, file_parseds, file_prefix] = new_file_parseds[i];
+      let {defs: file_defs, adts: file_adts, unbox_info: file_unbox_info} = file_parseds;
+      let prefix = open ? "" : (used_prefix || file_prefix) + "/";
       let do_pfx = term => prefix_refs(prefix, term, file_defs);
       for (let term_name in file_defs) {
         defs[prefix + term_name] = do_pfx(file_defs[term_name]);
+      }
+      for (let term_name in file_unbox_info) {
+        unbox_info[prefix + term_name] = file_unbox_info[term_name];
       }
       for (let adt_name in file_adts) {
         let adt_pram = file_adts[adt_name].adt_pram.map(([name, type, eras]) => [name, do_pfx(type), eras]);
@@ -124,7 +136,7 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
   var is_native_op = {"+":1,"-":1,"*":1,"/":1,"%":1,"^":1,"**":1,".&":1,".|":1,".^":1,".!":1,".>>":1,".<<":1,">":1,"<":1,"===":1};
   var op_inits     = "+-*/%^.=<>";
   var is_op_init   = build_charset("+-*/%^.=<>");
-  var is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@");
+  var is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@/");
   var is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@+*/%^!<>=&|");
   var is_space     = build_charset(" \t\n\r;");
   var is_newline   = build_charset("\n");
@@ -238,7 +250,7 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
       return Ref(name);
     } else {
       error("Attempted to use a syntax-sugar which requires `" + name + "` to be in scope, but it isn't.\n"
-          + "To solve that, import the official Base libraries or an equivalent replacement.\n"
+          + "To solve that, add `import Base@19 open` or similar on the start of your file.\n"
           + "See http://docs.formality-lang.org/en/latest/language/Hello,-world!.html for more info.");
     }
   }
@@ -714,6 +726,9 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
     return parsed;
   }
 
+  var local_imports = {};
+  var file_version = {};
+  var unbox_info = {};
   var tokens = tokenify ? [["txt",""]] : null;
   var idx = 0;
   var row = 0;
@@ -736,7 +751,13 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
       var file = parse_string();
       var pref = match("as") ? parse_string() : null;
       var open = match("open");
-      await resolve(Ref(file + ".main"), pref, open);
+      await resolve(Ref(file + "/main"), pref, open);
+
+    // File version
+    } else if (match("version")) {
+      var file = parse_string();
+      var vers = parse_string();
+      file_version[file] = "@" + vers;
 
     // Datatypes
     } else if (match("T ")) {
@@ -979,9 +1000,7 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
           var type = lv0_headers(1, Box(type), true);
           var term = lv0_headers(0, Put(term), true);
           defs[name] = Ann(type, term, false);
-          boxed_info[name] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
-          //console.log("built", name+"      : " + show(type));
-          //console.log("built", name+"      = " + show(term));
+          unbox_info[name] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
 
         // Builds a recursive, non-boxed definition
         } else if (!boxed && recur) {
@@ -1028,10 +1047,10 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
           defs[name+".step"]       = Ann(step_type, step_term, false);
           defs[name+".base"]       = Ann(base_type, base_term, false);
           defs[name]               = Ann(type, term, false);
-          boxed_info[name+".moti"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: false};
-          boxed_info[name+".step"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
-          boxed_info[name+".base"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
-          boxed_info[name]         = {arity: lv0_names.length + 1, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length + 1, boxed: true};
+          unbox_info[name+".moti"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: false};
+          unbox_info[name+".step"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
+          unbox_info[name+".base"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
+          unbox_info[name]         = {arity: lv0_names.length + 1, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length + 1, boxed: true};
           //console.log("built", name+".moti : " + show(moti_type));
           //console.log("built", name+".moti = " + show(moti_term));
           //console.log("built", name+".step : " + show(step_type));
@@ -1055,8 +1074,8 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
   // When a reference to a boxed definiton is used inside a boxed definition,
   // automatically unbox it by appending `dup ref = ref; ...` to the term
   if (root) {
-    for (var name in boxed_info) {
-      var info = boxed_info[name];
+    for (var name in unbox_info) {
+      var info = unbox_info[name];
       var term = defs[name];
       ["expr", "type"].forEach(field => {
         var lens = {term, field};
@@ -1072,8 +1091,8 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
             args.push(func[0].argm);
             func = func[1].func;
           }
-          if (func[0] === "Ref" && boxed_info[func[1].name] && boxed_info[func[1].name].boxed) {
-            var func_info = boxed_info[func[1].name];
+          if (func[0] === "Ref" && unbox_info[func[1].name] && unbox_info[func[1].name].boxed) {
+            var func_info = unbox_info[func[1].name];
             if (func[1].name !== name && func_info.arity === args.length) {
               var unboxable = true;
               for (var i = 0; i < scope.length; ++i) {
@@ -1105,7 +1124,7 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
     }
   }
 
-  return {defs, tokens, adts};
+  return {defs, tokens, adts, local_imports, unbox_info};
 }
 
 // :::::::::::::::::::::
@@ -1572,15 +1591,17 @@ const find_term = (term) => post("find_term", {term});
 const load_file = (() => {
   var loading = {};
   return (file) => {
-    var dir_path, file_path;
     if (!loading[file]) {
       if (fs) {
-        var dir_path = path.join(process.cwd(), "fm_modules");
-        var file_path = path.join(dir_path, file + ".fm");
+        var cache_dir_path = path.join(process.cwd(), "fm_modules");
+        var cached_file_path = path.join(cache_dir_path, file + ".fm");
+        var local_file_path = path.join(process.cwd(), file + ".fm");
       }
-      if (fs && fs.existsSync(file_path)) {
+      var has_cached = fs && fs.existsSync(cached_file_path);
+      var has_local = fs && fs.existsSync(local_file_path);
+      if (has_cached || has_local) {
         loading[file] = new Promise((resolve, reject) => {
-          fs.readFile(file_path, "utf8", (err, code) => {
+          fs.readFile(has_cached ? cached_file_path : local_file_path, "utf8", (err, code) => {
             if (err) {
               reject(err);
             } else {
@@ -1591,9 +1612,9 @@ const load_file = (() => {
       } else {
         loading[file] = post("load_file", {file}).then(code => {
           if (fs && code) {
-            var writeCache = () => fs.writeFile(file_path, code, (err, ok) => {});
-            if (!fs.existsSync(dir_path)) {
-              fs.mkdirSync(dir_path, () => writeCache());
+            var writeCache = () => fs.writeFile(cached_file_path, code, (err, ok) => {});
+            if (!fs.existsSync(cache_dir_path)) {
+              fs.mkdirSync(cache_dir_path, () => writeCache());
             }
             writeCache();
           }
