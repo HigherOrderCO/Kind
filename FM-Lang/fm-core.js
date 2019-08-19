@@ -1204,7 +1204,7 @@ const boxcheck = (term, defs = {}, ctx = []) => {
         break;
       case "Ref":
         if (!defs[term.name]) {
-          throw "[ERROR]\nUndefined reference: " + term.name;
+          throw "[ERROR]\nUndefined reference: `" + term.name + "`.";
         } else if (!seen[term.name]) {
           check(defs[term.name], defs, ctx, {...seen, [term.name]: true});
           break;
@@ -1539,7 +1539,7 @@ const typecheck = (() => {
         break;
       case "Ref":
         if (!defs[term[1].name]) {
-          ERROR("Undefined reference.");
+          ERROR("Undefined reference: `" + term[1].name + "`.");
         } else {
           type = typecheck(defs[term[1].name], null, defs, ctx, [term, ctx]);
         }

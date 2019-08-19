@@ -233,6 +233,16 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
     return term;
   }
 
+  function base_ref(name) {
+    if (defs[name]) {
+      return Ref(name);
+    } else {
+      error("Attempted to use a syntax-sugar which requires `" + name + "` to be in scope, but it isn't.\n"
+          + "To solve that, import the official Base libraries or an equivalent replacement.\n"
+          + "See http://docs.formality-lang.org/en/latest/language/Hello,-world!.html for more info.");
+    }
+  }
+
   function parse_exact(string) {
     if (!match(string)) {
       var text = "";
@@ -425,20 +435,20 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
         bytes.push(0);
       }
       var nums = new Uint32Array(new Uint8Array(bytes).buffer);
-      var term = App(Ref("nil"), Wrd(), true);
+      var term = App(base_ref("nil"), Wrd(), true);
       for (var i = nums.length - 1; i >= 0; --i) {
-        var term = App(App(App(Ref("cons"), Wrd(), true), Num(nums[i]), false), term, false);
+        var term = App(App(App(base_ref("cons"), Wrd(), true), Num(nums[i]), false), term, false);
       }
-      parsed = Ann(Ref("String"), term);
+      parsed = Ann(base_ref("String"), term);
     }
 
     // Nat
     else if (match("0n")) {
       var name = parse_string();
       var numb = Number(name);
-      var term = Ref("zero");
+      var term = base_ref("zero");
       for (var i = 0; i < numb; ++i) {
-        term = App(Ref("succ"), term, false);
+        term = App(base_ref("succ"), term, false);
       }
       parsed = term;
     }
@@ -671,9 +681,9 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
         list.push(parse_term(ctx));
         if (match("]")) break; else parse_exact(",");
       }
-      var term = App(Ref("nil"), type, true);
+      var term = App(base_ref("nil"), type, true);
       for (var i = list.length - 1; i >= 0; --i) {
-        var term = App(App(App(Ref("cons"), type, true), list[i], false), term, false);
+        var term = App(App(App(base_ref("cons"), type, true), list[i], false), term, false);
       }
       parsed = term;
     }
@@ -935,9 +945,9 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
         }
 
         // Fills type wrapper
-        if (type[0] === "Typ") {
-          var term = Tid(term);
-        }
+        //if (type[0] === "Typ") {
+          //var term = Tid(term);
+        //}
 
         // Fills foralls and lambdas of arguments
         for (var i = names.length - 1; i >= 0; --i) {
@@ -980,17 +990,17 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
         // Builds a recursive, boxed definition
         } else if (boxed && recur) {
           // Builds the motive
-          var moti_type = lv0_headers(1, All(rec_depth, Ref("Ind"), Typ(), false), false);
+          var moti_type = lv0_headers(1, All(rec_depth, base_ref("Ind"), Typ(), false), false);
           var moti_term = lv0_headers(0, Lam(rec_depth, null, type, false), false);
 
           // Builds the step case
           var step_typ0 = type;
-          var step_typ1 = shift(subst(shift(type, 1, 1), App(Ref("step"), Var(0), false), 0), 1, 0);
-          var step_type = lv0_headers(1, Box(All(rec_depth, Ref("Ind"), All(name, step_typ0, step_typ1, false), true)), true);
+          var step_typ1 = shift(subst(shift(type, 1, 1), App(base_ref("step"), Var(0), false), 0), 1, 0);
+          var step_type = lv0_headers(1, Box(All(rec_depth, base_ref("Ind"), All(name, step_typ0, step_typ1, false), true)), true);
           var step_term = lv0_headers(0, Put(Lam(rec_depth, null, Lam(name, null, term, false), true)), true);
 
           // Builds the base case
-          var base_type = lv0_headers(1, Box(subst(type, Ref("base"), 0)), true);
+          var base_type = lv0_headers(1, Box(subst(type, base_ref("base"), 0)), true);
           var base_term = lv0_headers(0, Put(base), true);
 
           // Builds the recursive function
@@ -1007,8 +1017,8 @@ const parse = async (code, tokenify, root = true, boxed_info = {}) => {
             ind_step = App(ind_step, vari, lv0_erase[i]);
             ind_base = App(ind_base, vari, lv0_erase[i]);
           }
-          var type = All(rec_depth, Ref("Ind"), lv0_headers(1, Box(subst(type, Var(lv0_names.length + lv0_dup_n.length + lv0_imp_n.length), 0)), true), false);
-          var term = App(Ref("ind"), Var(lv0_names.length + lv0_dup_n.length + lv0_imp_n.length), false);
+          var type = All(rec_depth, base_ref("Ind"), lv0_headers(1, Box(subst(type, Var(lv0_names.length + lv0_dup_n.length + lv0_imp_n.length), 0)), true), false);
+          var term = App(base_ref("ind"), Var(lv0_names.length + lv0_dup_n.length + lv0_imp_n.length), false);
           var term = App(term, ind_moti, true);
           var term = App(term, Put(ind_step), false);
           var term = App(term, Put(ind_base), false);

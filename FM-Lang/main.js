@@ -3,7 +3,6 @@
 var fs = require("fs");
 var path = require("path");
 var fm = require(".");
-var BASE = "Base@13";
 
 try {
   var argv = [].slice.call(process.argv, 2);
@@ -38,7 +37,6 @@ try {
   console.log("");
   console.log("Options:");
   console.log("-m disable logging");
-  console.log("-z don't load base");
   console.log("-h hides interaction net stats");
   console.log("-u disables stratification (termination) checks");
   console.log("-p prints net as JSON");
@@ -81,7 +79,7 @@ if (args.v) {
       var names = name.split(".");
       var file = names[0];
       var code = fs.readFileSync("./" + file + ".fm", "utf8");
-      var defs = (await fm.lang.parse(BASE && !args.d ? "import " + BASE + " open; " + code : code)).defs;
+      var defs = (await fm.lang.parse(code)).defs;
       var nams = names.length > 1 ? [names.slice(1).join(".")] : ["main"];
       if (nams.length === 1 && nams[0] === "@") {
         nams = Object.keys(defs).sort();
