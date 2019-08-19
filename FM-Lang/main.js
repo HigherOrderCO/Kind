@@ -7,7 +7,7 @@ var fm = require(".");
 try {
   var argv = [].slice.call(process.argv, 2);
   if (argv.length === 0 || argv[0] === "--help") throw "";
-  var name = argv.filter(str => str[0] !== "-")[0] || "main";
+  var main = argv.filter(str => str[0] !== "-")[0] || "main/main";
   var args = {};
   argv.filter(str => str[0] === "-").map(str => str.slice(1)).join("").split("").forEach(c => args[c] = 1);
 } catch (e) {
@@ -36,6 +36,7 @@ try {
   console.log("- <term> is the term name.");
   console.log("");
   console.log("Options:");
+  console.log("-f shows full names of references");
   console.log("-m disable logging");
   console.log("-h hides interaction net stats");
   console.log("-u disables stratification (termination) checks");
@@ -45,35 +46,42 @@ try {
   process.exit();
 }
 
-async function upload(name) {
-  var file_code = fs.readFileSync(name + ".fm", "utf8");
-  try {
-    var file_local_imports = (await fm.lang.parse(file_code)).local_imports;
-  } catch (e) {
-    console.log(e.toString());
-    process.exit();
+async function upload(file, global_path = {}) {
+  if (!global_path[file]) {
+    var code = fs.readFileSync(file + ".fm", "utf8");
+
+    try {
+      var local_imports = (await fm.lang.parse(file, code)).local_imports;
+    } catch (e) {
+      console.log(e.toString());
+      process.exit();
+    }
+    //console.log(file, local_imports);
+
+    for (var imp_file in local_imports) {
+      var g_path = await upload(imp_file, global_path);
+      var [g_name, g_vers] = g_path.split("@");
+      //console.log(file, "replace", "`import " + imp_file + " *`", "by", "`import " + g_name + "@" + g_vers + " as " + imp_file + "`");
+      var code = code.replace(new RegExp("import " + imp_file + " *\n")  , "import " + g_name + "@" + g_vers + " as " + imp_file + "\n");
+      var code = code.replace(new RegExp("import " + imp_file + " *open"), "import " + g_name + "@" + g_vers + " open");
+      var code = code.replace(new RegExp("import " + imp_file + " *as")  , "import " + g_name + "@" + g_vers + " as");
+    }
+
+    global_path[file] = await fm.lang.save_file(file, code);
+    console.log("Saved `" + file + "` as `" + global_path[file] + "`!");
   }
-  for (var local_import in file_local_imports) {
-    var global_name = await upload(local_import);
-    var file_code = "version " + local_import + " " + global_name.slice(global_name.indexOf("@") + 1) + "\n" + file_code;
-  }
-  var saved = await fm.lang.save_file(name, file_code)
-    .then(file => {
-      console.log("Saved `" + name + ".fm` as `" + file + "`!");
-      return file;
-    })
-    .catch(e => { console.log(e); process.exit(); });
-  return saved;
+  return global_path[file];
 }
 
 if (args.v) {
   console.log(require("./package.json").version);
   process.exit();
 } else if (args.S || args.s) {
-  if (name.slice(-3) === ".fm") {
-    name = name.slice(0, -3);
+  var file_name = main;
+  if (file_name.slice(-3) === ".fm") {
+    file_name = file_name.slice(0, -3);
   }
-  upload(name).then(() => process.exit());
+  upload(file_name).then(() => process.exit());
 
 } else {
 
@@ -88,16 +96,13 @@ if (args.v) {
         : "DEBUG";
       var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
-      var names = name.split(".");
-      var file = names[0];
+      var [file, name] = main.indexOf("/") === -1 ? [main, "main"] : main.split("/");
       var code = fs.readFileSync("./" + file + ".fm", "utf8");
-      var defs = (await fm.lang.parse(code)).defs;
-      var nams = names.length > 1 ? [names.slice(1).join(".")] : ["main"];
-      if (nams.length === 1 && nams[0] === "@") {
+      var defs = (await fm.lang.parse(file, code)).defs;
+
+      var nams = [file + "/" + name];
+      if (name === "@") {
         nams = Object.keys(defs).sort();
-      }
-      if (nams.length === 1 && !defs[nams[0]]) {
-        throw "No definition for `" + nams[0] + "`.";
       }
 
       var opts = {
@@ -137,7 +142,7 @@ if (args.v) {
           }
           try {
             var term = fm.lang.exec(nams[i], defs, mode, opts, stats);
-            console.log(init + fm.lang.show(term));
+            console.log(init + fm.lang.show(term, [], {shorten_refs: !args.f}));
           } catch (e) {
             if (nams.length > 1) {
               console.log("\x1b[31m" + init + "error\x1b[0m");

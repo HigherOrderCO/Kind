@@ -70,7 +70,7 @@ const Ref = (name, eras)                   => ["Ref", {name, eras},             
 // :::::::::::::::::::::
 
 // Converts a term to a string
-const show = ([ctor, args], nams = []) => {
+const show = ([ctor, args], nams = [], opts = {}) => {
   const print_output = (term) => {
     try {
       if (term[1].val0[1].numb === 0x53484f57) {
@@ -106,7 +106,7 @@ const show = ([ctor, args], nams = []) => {
     case "Typ":
       return "Type";
     case "Tid":
-      var expr = show(args.expr, nams);
+      var expr = show(args.expr, nams, opts);
       return "type(" + expr + ")";
     case "All":
       var term = [ctor, args];
@@ -116,7 +116,7 @@ const show = ([ctor, args], nams = []) => {
       while (term[0] === "All") {
         erase.push(term[1].eras);
         names.push(term[1].name);
-        types.push(show(term[1].bind, nams.concat(names.slice(0,-1))));
+        types.push(show(term[1].bind, nams.concat(names.slice(0,-1)), opts));
         term = term[1].body;
       }
       var text = "{";
@@ -126,7 +126,7 @@ const show = ([ctor, args], nams = []) => {
         text += i < names.length - 1 ? ", " : "";
       }
       text += "} -> ";
-      text += show(term, nams.concat(names));
+      text += show(term, nams.concat(names), opts);
       return text;
     case "Lam":
       var term = [ctor, args];
@@ -137,7 +137,7 @@ const show = ([ctor, args], nams = []) => {
       while (term[0] === "Lam") {
         erase.push(term[1].eras);
         names.push(term[1].name);
-        types.push(term[1].bind ? show(term[1].bind, nams.concat(names.slice(0,-1))) : null);
+        types.push(term[1].bind ? show(term[1].bind, nams.concat(names.slice(0,-1)), opts) : null);
         term = term[1].body;
       }
       var text = "{";
@@ -150,38 +150,38 @@ const show = ([ctor, args], nams = []) => {
       if (numb !== null) {
         text += "%" + Number(numb);
       } else {
-        text += show(term, nams.concat(names));
+        text += show(term, nams.concat(names), opts);
       }
       return text;
     case "App":
       var text = ")";
       var term = [ctor, args];
       while (term[0] === "App") {
-        text = (term[1].func[0] === "App" ? ", " : "") + (term[1].eras ? "~" : "") + show(term[1].argm, nams) + text;
+        text = (term[1].func[0] === "App" ? ", " : "") + (term[1].eras ? "~" : "") + show(term[1].argm, nams, opts) + text;
         term = term[1].func;
       }
       if (term[0] === "Ref" || term[0] === "Var") {
-        var func = show(term, nams);
+        var func = show(term, nams, opts);
       } else {
-        var func = "(" + show(term,nams) + ")";
+        var func = "(" + show(term,nams, opts) + ")";
       }
       return func + "(" + text;
     case "Box":
-      var expr = show(args.expr, nams);
+      var expr = show(args.expr, nams, opts);
       return "!" + expr;
     case "Put":
-      var expr = show(args.expr, nams);
+      var expr = show(args.expr, nams, opts);
       return "#" + expr;
     case "Tak":
-      var expr = show(args.expr, nams);
+      var expr = show(args.expr, nams, opts);
       return "-#(" + expr + ")";
     case "Dup":
       var name = args.name;
-      var expr = show(args.expr, nams);
+      var expr = show(args.expr, nams, opts);
       if (args.body[0] === "Var" && args.body[1].index === 0) {
         return "-#(" + expr + ")";
       } else {
-        var body = show(args.body, nams.concat([name]));
+        var body = show(args.body, nams.concat([name]), opts);
         return "dup " + name + " = " + expr + "; " + body;
       }
     case "Wrd":
@@ -191,24 +191,24 @@ const show = ([ctor, args], nams = []) => {
     case "Op1":
     case "Op2":
       var func = args.func;
-      var num0 = show(args.num0, nams);
-      var num1 = show(args.num1, nams);
+      var num0 = show(args.num0, nams, opts);
+      var num1 = show(args.num1, nams, opts);
       return "(" + num0 + " " + func + " " + num1 + ")";
     case "Ite":
-      var cond = show(args.cond, nams);
-      var pair = show(args.pair, nams);
+      var cond = show(args.cond, nams, opts);
+      var pair = show(args.pair, nams, opts);
       return "(if " + cond + " " + pair + ")";
     case "Cpy":
       var name = args.name;
-      var numb = show(args.numb, nams);
-      var body = show(args.body, nams.concat([name]));
+      var numb = show(args.numb, nams, opts);
+      var body = show(args.body, nams.concat([name]), opts);
       return "cpy " + name + " = " + numb + "; " + body;
     case "Sig":
       var era1 = args.eras === 1 ? "~" : "";
       var era2 = args.eras === 2 ? "~" : "";
       var name = args.name;
-      var typ0 = show(args.typ0, nams);
-      var typ1 = show(args.typ1, nams.concat([name]));
+      var typ0 = show(args.typ0, nams, opts);
+      var typ1 = show(args.typ1, nams.concat([name]), opts);
       return "[" + era1 + name + (name.length > 0 ? " " : "") + ": " + typ0 + ", " + era2 + typ1 + "]";
     case "Par":
       var text = print_output([ctor, args]);
@@ -217,63 +217,63 @@ const show = ([ctor, args], nams = []) => {
       } else {
         var era1 = args.eras === 1 ? "~" : "";
         var era2 = args.eras === 2 ? "~" : "";
-        var val0 = show(args.val0, nams);
-        var val1 = show(args.val1, nams);
+        var val0 = show(args.val0, nams, opts);
+        var val1 = show(args.val1, nams, opts);
         return "[" + era1 + val0 + ", " + era2 + val1 + "]";
       }
     case "Fst":
-      var pair = show(args.pair, nams);
+      var pair = show(args.pair, nams, opts);
       var eras = args.eras > 0 ? "~" : "";
       return eras + "fst(" + pair + ")";
     case "Snd":
-      var pair = show(args.pair, nams);
+      var pair = show(args.pair, nams, opts);
       var eras = args.eras > 0 ? "~" : "";
       return eras + "snd(" + pair + ")";
     case "Prj":
       var nam0 = args.nam0;
       var nam1 = args.nam1;
-      var pair = show(args.pair, nams);
-      var body = show(args.body, nams.concat([nam0, nam1]));
+      var pair = show(args.pair, nams, opts);
+      var body = show(args.body, nams.concat([nam0, nam1]), opts);
       var era1 = args.eras === 1 ? "~" : "";
       var era2 = args.eras === 2 ? "~" : "";
       return "get [" + era1 + nam0 + "," + era2 + nam1 + "] = " + pair + "; " + body;
     case "Eql":
-      var val0 = show(args.val0, nams);
-      var val1 = show(args.val1, nams);
+      var val0 = show(args.val0, nams, opts);
+      var val1 = show(args.val1, nams, opts);
       return "(" + val0 + " == " + val1 + ")";
     case "Rfl":
-      var expr = show(args.expr, nams);
+      var expr = show(args.expr, nams, opts);
       return "refl<" + expr + ">";
     case "Sym":
-      var prof = show(args.prof, nams);
+      var prof = show(args.prof, nams, opts);
       return "sym(" + prof + ")";
     case "Rwt":
       var name = args.name;
-      var type = show(args.type, nams.concat([name]));
-      var prof = show(args.prof, nams);
-      var expr = show(args.expr, nams);
+      var type = show(args.type, nams.concat([name]), opts);
+      var prof = show(args.prof, nams, opts);
+      var expr = show(args.expr, nams, opts);
       return "rewrite<" + prof + ">{" + name + " in " + type + "}(" + expr + ")";
     case "Slf":
       var name = args.name;
-      var type = show(args.type, nams.concat([name]));
+      var type = show(args.type, nams.concat([name]), opts);
       return "$" + name + " " + type;
     case "New":
-      var type = show(args.type, nams);
-      var expr = show(args.expr, nams);
+      var type = show(args.type, nams, opts);
+      var expr = show(args.expr, nams, opts);
       return "new<" + type + "> " + expr;
     case "Use":
-      var expr = show(args.expr, nams);
+      var expr = show(args.expr, nams, opts);
       return "%" + expr;
     case "Ann":
-      var expr = show(args.expr, nams);
-      //var type = show(args.type, nams);
+      var expr = show(args.expr, nams, opts);
+      //var type = show(args.type, nams, opts);
       //return "\n: " + type + "\n= " + expr;
       return expr;
     case "Log":
-      var expr = show(args.expr, nams);
+      var expr = show(args.expr, nams, opts);
       return expr;
     case "Ref":
-      return args.name;
+      return opts.shorten_refs ? args.name.replace(new RegExp(".*/", "g"), "") : args.name;
   }
 };
 

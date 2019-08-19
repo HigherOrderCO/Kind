@@ -52,77 +52,73 @@ const xhr = require("xhr-request-promise");
 // :::::::::::::
 
 // Converts a string to a term
-const parse = async (code, tokenify, root = true) => {
-  function get_ref_origin_file(ref) {
-    let slash_index = ref.indexOf("/");
-    if (slash_index !== -1) {
-      var name = ref.slice(0, slash_index);
-      if (name.indexOf("@") === -1 && file_version[name]) {
-        return {name: name + file_version[name], prefix: name};
-      } else {
-        return {name: name, prefix: name};
-      }
-    } else {
-      return null;
+const parse = async (file, code, tokenify, root = true, loaded = {}) => {
+  async function do_import(import_file) {
+    if (import_file.indexOf("@") === -1) {
+      local_imports[import_file] = true;
     }
+    if (!loaded[import_file]) {
+      var file_code = await load_file(import_file);
+      loaded[import_file] = await parse(import_file, file_code, tokenify, false, loaded);
+    }
+    var {defs: file_defs
+      , unbx: file_unbx
+      , adts: file_adts
+      , open_imports: file_open_imports
+      } = loaded[import_file];
+    for (let term_path in file_defs) {
+      defs[term_path] = file_defs[term_path];
+    }
+    for (let term_path in file_unbx) {
+      unbx[term_path] = file_unbx[term_path];
+    }
+    for (let term_path in file_adts) {
+      adts[term_path] = file_adts[term_path];
+    }
+    for (let open_import in file_open_imports) {
+      open_imports[open_import] = true;
+    }
+    return true;
   }
 
-  async function resolve(term, used_prefix = null, open = false) {
-    // Finds undefined references to files we don't have
-    var must_load = {};
-    replace_refs(term, name => {
-      if (!defs[name]) {
-        let origin_file = get_ref_origin_file(name);
-        if (origin_file) {
-          var {name: file_name, prefix} = origin_file;
-          must_load[file_name + "-~-" + prefix] = true;
-          if (file_name.indexOf("@") === -1) {
-            local_imports[file_name] = true;
+  function ref_path(str) {
+    var result = (function () {
+      if (str.indexOf("/") === -1) {
+        var [str_file, str_name] = [null, str];
+      } else {
+        var [str_file, str_name] = str.split("/");
+      }
+      if (!str_file && defs[file + "/" + str_name]) {
+        return file + "/" + str_name;
+      }
+      if (qual_imports[str_file]) {
+        return qual_imports[str_file] + "/" + str_name;
+      }
+      if (!str_file) {
+        for (var open_import in open_imports) {
+          if (defs[open_import + "/" + str_name]) {
+            return open_import + "/" + str_name;
           }
         }
       }
-      return name;
-    });
+      return str_file ? str_file + "/" + str_name : file + "/" + str_name;
+    })();
+    return result;
+  }
 
-    // Creates requests to load those files
-    let requests = [];
-    for (let file_name_prefix in must_load) {
-      let [file_name, file_prefix] = file_name_prefix.split("-~-");
-      requests.push(load_file(file_name).then(file_code => [file_name, file_code, file_prefix]));
+  function ref(str) {
+    return Ref(ref_path(str));
+  }
+
+  function base_ref(str) {
+    var path = ref_path(str);
+    if (defs[path]) {
+      return Ref(path);
+    } else {
+      error("Attempted to use a syntax-sugar which requires `" + str + "` to be in scope, but it isn't.\n"
+          + "To solve that, add `import Base@0 open` to the start of your file.\n"
+          + "See http://docs.formality-lang.org/en/latest/language/Hello,-world!.html for more info.");
     }
-
-    // Creates a parse for those files
-    let parses = [];
-    var new_files = await Promise.all(requests);
-    for (let i = 0; i < new_files.length; ++i) {
-      let [file_name, file_code, file_prefix] = new_files[i];
-      if (file_code) {
-        parses.push(parse(file_code, tokenify, false).then(file_parseds => [file_name, file_parseds, file_prefix]));
-      }
-    }
-
-    // Prefixes each file's parsed defs/adts and adds to local defs/adts
-    var new_file_parseds = await Promise.all(parses);
-    for (var i = 0; i < new_file_parseds.length; ++i) {
-      let [file_name, file_parseds, file_prefix] = new_file_parseds[i];
-      let {defs: file_defs, adts: file_adts, unbox_info: file_unbox_info} = file_parseds;
-      let prefix = open ? "" : (used_prefix || file_prefix) + "/";
-      let do_pfx = term => prefix_refs(prefix, term, file_defs);
-      for (let term_name in file_defs) {
-        defs[prefix + term_name] = do_pfx(file_defs[term_name]);
-      }
-      for (let term_name in file_unbox_info) {
-        unbox_info[prefix + term_name] = file_unbox_info[term_name];
-      }
-      for (let adt_name in file_adts) {
-        let adt_pram = file_adts[adt_name].adt_pram.map(([name, type, eras]) => [name, do_pfx(type), eras]);
-        let adt_indx = file_adts[adt_name].adt_indx.map(([name, type, eras]) => [name, do_pfx(type), eras]);
-        var adt_ctor = file_adts[adt_name].adt_ctor.map(([name, flds, type]) => [name, flds.map(([name, type, eras]) => [name, do_pfx(type), eras]), do_pfx(type)]);
-        adts[prefix + adt_name] = {adt_pram, adt_indx, adt_ctor};
-      }
-    };
-
-    return term;
   }
 
   function build_charset(chars) {
@@ -235,24 +231,14 @@ const parse = async (code, tokenify, root = true) => {
     var numb = name === "" ? Math.pow(2,48) - 1 : Number(name);
     var bits = numb.toString(2);
     var bits = bits === "0" ? "" : bits;
-    var term = Ref("base");
+    var term = base_ref("base");
     for (var i = 0; i < bits.length; ++i) {
-      term = App(Ref("twice"), term, false);
+      term = App(base_ref("twice"), term, false);
       if (bits[i] === "1") {
-        term = App(Ref("step"), term, false);
+        term = App(base_ref("step"), term, false);
       }
     }
     return term;
-  }
-
-  function base_ref(name) {
-    if (defs[name]) {
-      return Ref(name);
-    } else {
-      error("Attempted to use a syntax-sugar which requires `" + name + "` to be in scope, but it isn't.\n"
-          + "To solve that, add `import Base@19 open` or similar on the start of your file.\n"
-          + "See http://docs.formality-lang.org/en/latest/language/Hello,-world!.html for more info.");
-    }
   }
 
   function parse_exact(string) {
@@ -316,7 +302,7 @@ const parse = async (code, tokenify, root = true) => {
               break;
             }
           }
-          term = Ref(name, false);
+          term = Ref(ref_path(name), false);
           if (tokens) tokens[tokens.length - 1][0] = "ref";
         }
       } else {
@@ -627,10 +613,10 @@ const parse = async (code, tokenify, root = true) => {
     else if (match("case<")) {
       var adt_name = parse_string();
       var skip = parse_exact(">");
-      if (!adts[adt_name]) {
-        error("Used case-syntax on undefined type `" + adt_name + "`.");
+      if (!adts[ref_path(adt_name)]) {
+        error("Used case-syntax on undefined type `" + file + " " + adt_name + " " + ref_path(adt_name) + "`.");
       }
-      var {adt_name, adt_pram, adt_indx, adt_ctor} = adts[adt_name];
+      var {adt_name, adt_pram, adt_indx, adt_ctor} = adts[ref_path(adt_name)];
       var term = parse_term(ctx);
       var cses = [];
       for (var c = 0; c < adt_ctor.length; ++c) {
@@ -716,7 +702,7 @@ const parse = async (code, tokenify, root = true) => {
           } else if (func === "==") {
             parsed = Eql(parsed, argm);
           } else {
-            parsed = App(App(Ref(func), parsed, false), argm, false);
+            parsed = App(App(ref(func), parsed, false), argm, false);
           }
         }
         if (matched) break;
@@ -726,15 +712,17 @@ const parse = async (code, tokenify, root = true) => {
     return parsed;
   }
 
+  var open_imports = {};
+  var qual_imports = {};
   var local_imports = {};
   var file_version = {};
-  var unbox_info = {};
   var tokens = tokenify ? [["txt",""]] : null;
   var idx = 0;
   var row = 0;
   var col = 0;
   var defs = {};
   var adts = {};
+  var unbx = {};
   var enlarge = {};
   while (idx < code.length) {
     next_char();
@@ -748,16 +736,14 @@ const parse = async (code, tokenify, root = true) => {
 
     // Import
     } else if (match("import")) {
-      var file = parse_string();
-      var pref = match("as") ? parse_string() : null;
+      var impf = parse_string();
+      var qual = match("as") ? parse_string() : null;
       var open = match("open");
-      await resolve(Ref(file + "/main"), pref, open);
-
-    // File version
-    } else if (match("version")) {
-      var file = parse_string();
-      var vers = parse_string();
-      file_version[file] = "@" + vers;
+      qual_imports[qual || impf] = impf;
+      if (open) {
+        open_imports[impf] = true;
+      }
+      await do_import(impf);
 
     // Datatypes
     } else if (match("T ")) {
@@ -773,7 +759,7 @@ const parse = async (code, tokenify, root = true) => {
           var eras = false;
           var name = parse_string();
           var skip = parse_exact(":");
-          var type = await resolve(parse_term(adt_pram.map((([name,type]) => name))));
+          var type = await parse_term(adt_pram.map((([name,type]) => name)));
           adt_pram.push([name, type, eras]);
           if (match(">")) break; else parse_exact(",");
         }
@@ -787,7 +773,7 @@ const parse = async (code, tokenify, root = true) => {
           var eras = false;
           var name = parse_string();
           var skip = parse_exact(":");
-          var type = await resolve(parse_term(adt_ctx.concat(adt_indx.map((([name,type]) => name)))));
+          var type = await parse_term(adt_ctx.concat(adt_indx.map((([name,type]) => name))));
           adt_indx.push([name, type, eras]);
           if (match("}")) break; else parse_exact(",");
         }
@@ -804,19 +790,19 @@ const parse = async (code, tokenify, root = true) => {
             var eras = match("~");
             var name = parse_string();
             var skip = parse_exact(":");
-            var type = await resolve(parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name))));
+            var type = await parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name)));
             ctor_flds.push([name, type, eras]);
             if (match("}")) break; else parse_exact(",");
           }
         }
         // Constructor type (written)
         if (match(":")) {
-          var ctor_type = await resolve(parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name))));
+          var ctor_type = await parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name)));
         // Constructor type (auto-filled)
         } else {
           var ctor_indx = [];
           while (match("&")) {
-            ctor_indx.push(await resolve(parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name)))));
+            ctor_indx.push(await parse_term(adt_ctx.concat(ctor_flds.map(([name,type]) => name))));
           }
           var ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
           for (var p = 0; p < adt_pram.length; ++p) {
@@ -829,11 +815,11 @@ const parse = async (code, tokenify, root = true) => {
         adt_ctor.push([ctor_name, ctor_flds, ctor_type]);
       }
       var adt = {adt_pram, adt_indx, adt_ctor, adt_name};
-      defs[adt_name] = derive_adt_type(adt);
+      defs[file+"/"+adt_name] = derive_adt_type(file, adt);
       for (var c = 0; c < adt_ctor.length; ++c) {
-        defs[adt_ctor[c][0]] = derive_adt_ctor(adt, c);
+        defs[file+"/"+adt_ctor[c][0]] = derive_adt_ctor(file, adt, c);
       }
-      adts[adt_name] = adt;
+      adts[file+"/"+adt_name] = adt;
 
     // Prints active definitions
     } else if (match("?defs")) {
@@ -884,7 +870,7 @@ const parse = async (code, tokenify, root = true) => {
             var arg_name = parse_string();
             var arg_skip = parse_exact(":");
             var arg_boxd = match("!");
-            var arg_type = await resolve(parse_term(lv0_names));
+            var arg_type = await parse_term(lv0_names);
             lv0_erase.push(arg_eras);
             lv0_names.push(arg_name);
             lv0_boxed.push(arg_boxd);
@@ -929,7 +915,7 @@ const parse = async (code, tokenify, root = true) => {
             var arg_halt = match("*");
             var arg_name = parse_string();
             var arg_skip = parse_exact(":");
-            var arg_type = await resolve(parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_names).concat(names)));
+            var arg_type = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_names).concat(names));
             erase.push(arg_eras);
             names.push(arg_name);
             types.push(arg_type);
@@ -943,10 +929,10 @@ const parse = async (code, tokenify, root = true) => {
           }
           var skip = parse_exact("->");
         }
-        var type = await resolve(parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_names).concat(names)));
+        var type = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_names).concat(names));
 
         // Parses the definition body
-        var term = await resolve(parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_names).concat(recur ? [name] : []).concat(names).concat(wordn)));
+        var term = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_names).concat(recur ? [name] : []).concat(names).concat(wordn));
 
         // Parses the halting case
         if (recur && basex === null && !match("*")) {
@@ -955,7 +941,7 @@ const parse = async (code, tokenify, root = true) => {
         if (recur && basex !== null) {
           var base = Var(-1 + names.length - basex);
         } else if (recur) {
-          var base = await resolve(parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(names)));
+          var base = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(names));
         } else {
           var base = null;
         }
@@ -993,14 +979,14 @@ const parse = async (code, tokenify, root = true) => {
 
         // Builds a non-recursive, non-boxed definition
         if (!recur && !boxed) {
-          defs[name] = Ann(type, term, false);
+          defs[file+"/"+name] = Ann(type, term, false);
 
         // Builds a non-recursive, boxed definition
         } else if (!recur && boxed) {
           var type = lv0_headers(1, Box(type), true);
           var term = lv0_headers(0, Put(term), true);
-          defs[name] = Ann(type, term, false);
-          unbox_info[name] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
+          defs[file+"/"+name] = Ann(type, term, false);
+          unbx[file+"/"+name] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
 
         // Builds a recursive, non-boxed definition
         } else if (!boxed && recur) {
@@ -1023,9 +1009,9 @@ const parse = async (code, tokenify, root = true) => {
           var base_term = lv0_headers(0, Put(base), true);
 
           // Builds the recursive function
-          var ind_moti = Ref(name+".moti");
-          var ind_step = Ref(name+".step");
-          var ind_base = Ref(name+".base");
+          var ind_moti = ref(name+".moti");
+          var ind_step = ref(name+".step");
+          var ind_base = ref(name+".base");
           for (var i = 0, c = 0; i < lv0_names.length; ++i) {
             if (lv0_boxed[i]) {
               var vari = Put(Var(-1 + lv0_imp_n.length + lv0_dup_n.length - (c++)));
@@ -1043,14 +1029,14 @@ const parse = async (code, tokenify, root = true) => {
           var term = App(term, Put(ind_base), false);
           var term = Lam(rec_depth, null, lv0_headers(0, term, true), false);
 
-          defs[name+".moti"]       = Ann(moti_type, moti_term, false);
-          defs[name+".step"]       = Ann(step_type, step_term, false);
-          defs[name+".base"]       = Ann(base_type, base_term, false);
-          defs[name]               = Ann(type, term, false);
-          unbox_info[name+".moti"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: false};
-          unbox_info[name+".step"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
-          unbox_info[name+".base"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
-          unbox_info[name]         = {arity: lv0_names.length + 1, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length + 1, boxed: true};
+          defs[file+"/"+name+".moti"] = Ann(moti_type, moti_term, false);
+          defs[file+"/"+name+".step"] = Ann(step_type, step_term, false);
+          defs[file+"/"+name+".base"] = Ann(base_type, base_term, false);
+          defs[file+"/"+name]         = Ann(type, term, false);
+          unbx[file+"/"+name+".moti"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: false};
+          unbx[file+"/"+name+".step"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
+          unbx[file+"/"+name+".base"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
+          unbx[file+"/"+name]         = {arity: lv0_names.length + 1, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length + 1, boxed: true};
           //console.log("built", name+".moti : " + show(moti_type));
           //console.log("built", name+".moti = " + show(moti_term));
           //console.log("built", name+".step : " + show(step_type));
@@ -1063,8 +1049,8 @@ const parse = async (code, tokenify, root = true) => {
 
       // Untyped definition
       } else {
-        var term = await resolve(parse_term([]));
-        defs[name] = term;
+        var term = await parse_term([]);
+        defs[file+"/"+name] = term;
       }
     }
 
@@ -1074,9 +1060,9 @@ const parse = async (code, tokenify, root = true) => {
   // When a reference to a boxed definiton is used inside a boxed definition,
   // automatically unbox it by appending `dup ref = ref; ...` to the term
   if (root) {
-    for (var name in unbox_info) {
-      var info = unbox_info[name];
-      var term = defs[name];
+    for (var path in unbx) {
+      var info = unbx[path];
+      var term = defs[path];
       ["expr", "type"].forEach(field => {
         var lens = {term, field};
         for (var i = 0; i < info.depth; ++i) {
@@ -1091,9 +1077,9 @@ const parse = async (code, tokenify, root = true) => {
             args.push(func[0].argm);
             func = func[1].func;
           }
-          if (func[0] === "Ref" && unbox_info[func[1].name] && unbox_info[func[1].name].boxed) {
-            var func_info = unbox_info[func[1].name];
-            if (func[1].name !== name && func_info.arity === args.length) {
+          if (func[0] === "Ref" && unbx[func[1].name] && unbx[func[1].name].boxed) {
+            var func_info = unbx[func[1].name];
+            if (func[1].name !== path && func_info.arity === args.length) {
               var unboxable = true;
               for (var i = 0; i < scope.length; ++i) {
                 if (uses(term, scope.length - i - 1) > 0) {
@@ -1124,7 +1110,7 @@ const parse = async (code, tokenify, root = true) => {
     }
   }
 
-  return {defs, tokens, adts, local_imports, unbox_info};
+  return {defs, adts, unbx, tokens, local_imports, qual_imports, open_imports};
 }
 
 // :::::::::::::::::::::
@@ -1269,25 +1255,19 @@ const replace_refs = ([ctor, term], renamer, depth = 0) => {
     case "Ref":
       var new_name = renamer(term.name, depth);
       if (typeof new_name === "string") {
-        return Ref(new_name, term.eras);
+        return Ref(new_name, term.eras, term.file);
       } else if (typeof new_name === "object") {
         return new_name;
       } else {
-        return Ref(term.name, term.eras);
+        return Ref(term.name, term.eras, term.file);
       }
   }
 }
 
-const prefix_refs = (prefix, term, defs) => {
-  return replace_refs(term, ref_name => {
-    return (defs[ref_name] ? prefix : "") + ref_name;
-  });
-};
-
-const rewrite = ([ctor, term], rewriter, scope = []) => {
+const rewrite = ([ctor, term], rewriter, scope = [], only_once = false) => {
   var rewritten = rewriter([ctor, term], scope);
   if (rewritten) {
-    return rewrite(rewritten, rewriter, scope);
+    return only_once ? rewritten : rewrite(rewritten, rewriter, scope, only_once);
   } else {
     switch (ctor) {
       case "Var":
@@ -1295,38 +1275,38 @@ const rewrite = ([ctor, term], rewriter, scope = []) => {
       case "Typ":
         return Typ();
       case "Tid":
-        var expr = require(term.expr, rewriter, scope);
+        var expr = rewrite(term.expr, rewriter, scope, only_once);
         return Tid(expr);
       case "All":
         var name = term.name;
-        var bind = rewrite(term.bind, rewriter, scope);
-        var body = rewrite(term.body, rewriter, scope.concat([name]));
+        var bind = rewrite(term.bind, rewriter, scope, only_once);
+        var body = rewrite(term.body, rewriter, scope.concat([name]), only_once);
         var eras = term.eras;
         return All(name, bind, body, eras);
       case "Lam":
         var name = term.name;
-        var bind = term.bind && rewrite(term.bind, rewriter, scope);
-        var body = rewrite(term.body, rewriter, scope.concat([name]));
+        var bind = term.bind && rewrite(term.bind, rewriter, scope, only_once);
+        var body = rewrite(term.body, rewriter, scope.concat([name]), only_once);
         var eras = term.eras;
         return Lam(name, bind, body, eras);
       case "App":
-        var func = rewrite(term.func, rewriter, scope);
-        var argm = rewrite(term.argm, rewriter, scope);
+        var func = rewrite(term.func, rewriter, scope, only_once);
+        var argm = rewrite(term.argm, rewriter, scope, only_once);
         var eras = term.eras;
         return App(func, argm, term.eras);
       case "Box":
-        var expr = rewrite(term.expr, rewriter, scope);
+        var expr = rewrite(term.expr, rewriter, scope, only_once);
         return Box(expr);
       case "Put":
-        var expr = rewrite(term.expr, rewriter, scope);
+        var expr = rewrite(term.expr, rewriter, scope, only_once);
         return Put(expr);
       case "Tak":
-        var expr = rewrite(term.expr, rewriter, scope);
+        var expr = rewrite(term.expr, rewriter, scope, only_once);
         return Tak(expr);
       case "Dup":
         var name = term.name;
-        var expr = rewrite(term.expr, rewriter, scope);
-        var body = rewrite(term.body, rewriter, scope.concat([name]));
+        var expr = rewrite(term.expr, rewriter, scope, only_once);
+        var body = rewrite(term.body, rewriter, scope.concat([name]), only_once);
         return Dup(name, expr, body);
       case "Wrd":
         return Wrd();
@@ -1336,84 +1316,85 @@ const rewrite = ([ctor, term], rewriter, scope = []) => {
       case "Op1":
       case "Op2":
         var func = term.func;
-        var num0 = rewrite(term.num0, rewriter, scope);
-        var num1 = rewrite(term.num1, rewriter, scope);
+        var num0 = rewrite(term.num0, rewriter, scope, only_once);
+        var num1 = rewrite(term.num1, rewriter, scope, only_once);
         return Op2(func, num0, num1);
       case "Ite":
-        var cond = rewrite(term.cond, rewriter, scope);
-        var pair = rewrite(term.pair, rewriter, scope);
+        var cond = rewrite(term.cond, rewriter, scope, only_once);
+        var pair = rewrite(term.pair, rewriter, scope, only_once);
         return Ite(cond, pair);
       case "Cpy":
         var name = term.name;
-        var numb = rewrite(term.numb, rewriter, scope);
-        var body = rewrite(term.body, rewriter, scope.concat([name]));
+        var numb = rewrite(term.numb, rewriter, scope, only_once);
+        var body = rewrite(term.body, rewriter, scope.concat([name]), only_once);
         return Cpy(name, numb, body);
       case "Sig":
         var name = term.name;
-        var typ0 = rewrite(term.typ0, rewriter, scope);
-        var typ1 = rewrite(term.typ1, rewriter, scope.concat([name]));
+        var typ0 = rewrite(term.typ0, rewriter, scope, only_once);
+        var typ1 = rewrite(term.typ1, rewriter, scope.concat([name]), only_once);
         var eras = term.eras;
         return Sig(name, typ0, typ1, eras);
       case "Par":
-        var val0 = rewrite(term.val0, rewriter, scope);
-        var val1 = rewrite(term.val1, rewriter, scope);
+        var val0 = rewrite(term.val0, rewriter, scope, only_once);
+        var val1 = rewrite(term.val1, rewriter, scope, only_once);
         var eras = term.eras;
         return Par(val0, val1, eras);
       case "Fst":
-        var pair = rewrite(term.pair, rewriter, scope);
+        var pair = rewrite(term.pair, rewriter, scope, only_once);
         var eras = term.eras;
         return Fst(pair, eras);
       case "Snd":
-        var pair = rewrite(term.pair, rewriter, scope);
+        var pair = rewrite(term.pair, rewriter, scope, only_once);
         var eras = term.eras;
         return Snd(pair, eras);
       case "Prj":
         var nam0 = term.nam0;
         var nam1 = term.nam1;
-        var pair = rewrite(term.pair, rewriter, scope);
-        var body = rewrite(term.body, rewriter, scope.concat([nam0, nam1]));
+        var pair = rewrite(term.pair, rewriter, scope, only_once);
+        var body = rewrite(term.body, rewriter, scope.concat([nam0, nam1]), only_once);
         var eras = term.eras;
         return Prj(nam0, nam1, pair, body, eras);
       case "Eql":
-        var val0 = rewrite(term.val0, rewriter, scope);
-        var val1 = rewrite(term.val1, rewriter, scope);
+        var val0 = rewrite(term.val0, rewriter, scope, only_once);
+        var val1 = rewrite(term.val1, rewriter, scope, only_once);
         return Eql(val0, val1);
       case "Rfl":
-        var expr = rewrite(term.expr, rewriter, scope);
+        var expr = rewrite(term.expr, rewriter, scope, only_once);
         return Rfl(expr);
       case "Sym":
-        var prof = rewrite(term.prof, rewriter, scope);
+        var prof = rewrite(term.prof, rewriter, scope, only_once);
         return Sym(prof);
       case "Rwt":
         var name = term.name;
-        var type = rewrite(term.type, rewriter, scope.concat([name]));
-        var prof = rewrite(term.prof, rewriter, scope);
-        var expr = rewrite(term.expr, rewriter, scope);
+        var type = rewrite(term.type, rewriter, scope.concat([name]), only_once);
+        var prof = rewrite(term.prof, rewriter, scope, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, only_once);
         return Rwt(name, type, prof, expr);
       case "Slf":
         var name = term.name;
-        var type = rewrite(term.type, rewriter, scope.concat([name]));
+        var type = rewrite(term.type, rewriter, scope.concat([name]), only_once);
         return Slf(name, type);
       case "New":
-        var type = rewrite(term.type, rewriter, scope);
-        var expr = rewrite(term.expr, rewriter, scope);
+        var type = rewrite(term.type, rewriter, scope, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, only_once);
         return New(type, expr);
       case "Use":
-        var expr = rewrite(term.expr, rewriter, scope);
+        var expr = rewrite(term.expr, rewriter, scope, only_once);
         return Use(expr);
       case "Ann":
-        var type = rewrite(term.type, rewriter, scope);
-        var expr = rewrite(term.expr, rewriter, scope);
+        var type = rewrite(term.type, rewriter, scope, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, only_once);
         var done = term.done;
         return Ann(type, expr, done);
       case "Log":
-        var msge = rewrite(term.msge, rewriter, scope);
-        var expr = rewrite(term.expr, rewriter, scope);
+        var msge = rewrite(term.msge, rewriter, scope, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, only_once);
         return Log(msge, expr);
       case "Ref":
         var name = term.name;
         var eras = term.eras;
-        return Ref(name, eras);
+        var file = term.file;
+        return Ref(name, eras, file);
     }
   }
 }
@@ -1449,14 +1430,14 @@ const rewrite = ([ctor, term], rewriter, scope = []) => {
 //       (ctr0 ctr0_fld0 ctr0_fld1 ...)
 //
 //   (...)
-const derive_adt_type = ({adt_pram, adt_indx, adt_ctor, adt_name}) => {
+const derive_adt_type = (file, {adt_pram, adt_indx, adt_ctor, adt_name}) => {
   return (function adt_arg(p, i) {
     // ... {p0 : Param0, p1 : Param1...} ...
     if (p < adt_pram.length) {
       return Lam(adt_pram[p][0], adt_pram[p][1], adt_arg(p + 1, i), adt_pram[p][2]);
     // ... {i0 : Index0, i1 : Index...} ...
     } else if (i < adt_indx.length) {
-      var substs = [Ref(adt_name)];
+      var substs = [Ref(file+"/"+adt_name)];
       for (var P = 0; P < p; ++P) {
         substs.push(Var(-1 + i + p - P));
       }
@@ -1472,14 +1453,14 @@ const derive_adt_type = ({adt_pram, adt_indx, adt_ctor, adt_name}) => {
           (function motive(i) {
             // ... {i0 : Index0, i1 : Index1...} ...
             if (i < adt_indx.length) {
-              var substs = [Ref(adt_name)];
+              var substs = [Ref(file+"/"+adt_name)];
               for (var P = 0; P < p; ++P) {
                 substs.push(Var(-1 + i + 1 + adt_indx.length + p - P));
               }
               return All(adt_indx[i][0], subst_many(adt_indx[i][1], substs, i), motive(i + 1), adt_indx[i][2]);
             // ... {wit : (ADT i0 i1...)} -> Type ...
             } else {
-              var wit_t = Ref(adt_name);
+              var wit_t = Ref(file+"/"+adt_name);
               for (var P = 0; P < adt_pram.length; ++P) {
                 wit_t = App(wit_t, Var(-1 + i + 1 + i + adt_pram.length - P), adt_pram[P][2]); 
               }
@@ -1499,7 +1480,7 @@ const derive_adt_type = ({adt_pram, adt_indx, adt_ctor, adt_name}) => {
               }
               // ... {ctrX_fldX : CtrX_FldX, ctrX_fld1 : CtrX_Fld1, ...} -> ...
               if (j < adt_ctor[i][1].length) {
-                var sub = [Ref(adt_name)].concat(subst_prams);
+                var sub = [Ref(file+"/"+adt_name)].concat(subst_prams);
                 var typ = subst_many(adt_ctor[i][1][j][1], sub, j);
                 return All(adt_ctor[i][1][j][0], typ, field(j + 1), adt_ctor[i][1][j][2]);
               // ... (CtrXType[ADT <- P] (ADT.ctrX ParamX Param1... ctrX_fldX ctrX_fld1 ...)) -> ...
@@ -1513,7 +1494,7 @@ const derive_adt_type = ({adt_pram, adt_indx, adt_ctor, adt_name}) => {
                 }
                 rem[0] = "Var";
                 rem[1] = {index: -1 + i + j + 1};
-                var wit = Ref(adt_ctor[i][0]);
+                var wit = Ref(file+"/"+adt_ctor[i][0]);
                 for (var P = 0; P < adt_pram.length; ++P) {
                   var wit = App(wit, Var(-1 + j + i + 1 + 1 + adt_indx.length + adt_pram.length - P), true);
                 }
@@ -1540,9 +1521,9 @@ const derive_adt_type = ({adt_pram, adt_indx, adt_ctor, adt_name}) => {
   })(0, 0);
 }
 
-const derive_adt_ctor = ({adt_pram, adt_indx, adt_ctor, adt_name}, c) => {
+const derive_adt_ctor = (file, {adt_pram, adt_indx, adt_ctor, adt_name}, c) => {
   return (function arg(p, i, f) {
-    var substs = [Ref(adt_name)];
+    var substs = [Ref(file+"/"+adt_name)];
     for (var P = 0; P < p; ++P) {
       substs.push(Var(-1 + f + p - P));
     }
@@ -1610,16 +1591,19 @@ const load_file = (() => {
           })
         });
       } else {
-        loading[file] = post("load_file", {file}).then(code => {
+        loading[file] = post("load_file", {file}).then(code => new Promise((resolve, reject) => {
           if (fs && code) {
-            var writeCache = () => fs.writeFile(cached_file_path, code, (err, ok) => {});
             if (!fs.existsSync(cache_dir_path)) {
-              fs.mkdirSync(cache_dir_path, () => writeCache());
+              console.log("Downloading libraries to `fm_modules`. This may take a while...");
+              fs.mkdirSync(cache_dir_path);
+              fs.writeFile(cached_file_path, code, (err, ok) => resolve(code));
+            } else if (!fs.existsSync(cached_file_path)) {
+              fs.writeFile(cached_file_path, code, (err, ok) => resolve(code));
+            } else {
+              resolve(code);
             }
-            writeCache();
           }
-          return code;
-        });
+        }));
       }
     }
     return loading[file];
@@ -1669,7 +1653,6 @@ module.exports = {
   gen_name,
   show,
   replace_refs,
-  prefix_refs,
   derive_adt_type,
   derive_adt_ctor,
   //derive_dependent_match,
