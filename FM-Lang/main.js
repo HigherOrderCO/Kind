@@ -34,6 +34,7 @@ try {
   console.log("Note:");
   console.log("- <file> is the file name, without '.fm'.");
   console.log("- <term> is the term name.");
+  console.log("- use @ instead of <term> to print all terms");
   console.log("");
   console.log("Options:");
   console.log("-f shows full names of references");
@@ -42,7 +43,6 @@ try {
   console.log("-u disables stratification (termination) checks");
   console.log("-p prints net as JSON");
   console.log("-v displays the version");
-  console.log("use @ instead of <term> to print all terms");
   process.exit();
 }
 
