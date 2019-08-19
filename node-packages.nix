@@ -361,10 +361,10 @@ in
   formality-lang = nodeEnv.buildNodePackage {
     name = "formality-lang";
     packageName = "formality-lang";
-    version = "0.3.71";
+    version = "0.3.72";
     src = fetchurl {
-      url = "https://registry.npmjs.org/formality-lang/-/formality-lang-0.3.71.tgz";
-      sha512 = "8ssTMCbw7L65fHBy4k8jEVaqske5ZiBPBk+K7dZ1kK95xcsKH1IUvNxmeaQnq6GHv0IwJFn+wyFQztj7afZJGQ==";
+      url = "https://registry.npmjs.org/formality-lang/-/formality-lang-0.3.72.tgz";
+      sha512 = "1onV2zc0jiBVOHG5zRbbpEgP6tTALrMYKP/6JgCxXmIryDUg5S2NsP87viphr2MoUXCWfgi6P5ibiIem/bDDAQ==";
     };
     dependencies = [
       sources."buffer-to-arraybuffer-0.0.5"
