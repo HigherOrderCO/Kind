@@ -1222,59 +1222,60 @@ const boxcheck = (term, defs = {}, ctx = []) => {
 // :: Type Checking ::
 // :::::::::::::::::::
 
+const PADR = (len, chr, str) => {
+  while (str.length < len) {
+    str += chr;
+  }
+  return str;
+};
+
+const CODE = (str)  => {
+  return "\x1b[2m" + str + "\x1b[0m";
+};
+
+const DENON = (a, defs) => {
+  return norm(erase(a), defs);
+};
+
+const ctx_new = null;
+
+const ctx_ext = (name, type, ctx) => {
+  return {name, type, rest: ctx};
+};
+
+const ctx_get = (i, ctx) => {
+  for (var k = 0; k < i; ++k) {
+    ctx = ctx.rest;
+  }
+  return [ctx.name, shift(ctx.type, i + 1, 0)];
+};
+
+const ctx_str = (ctx, defs) => {
+  var txt = [];
+  var idx = 0;
+  var max_len = 0;
+  for (var c = ctx; c !== null; c = c.rest) {
+    max_len = Math.max(c.name.length, max_len);
+  }
+  for (var c = ctx; c !== null; c = c.rest) {
+    var name = c.name;
+    var type = c.type;
+    txt.push("- " + PADR(max_len, " ", c.name) + " : " + show(norm(type, {}, {weak: false, unbox: true}), ctx_names(c.rest)));
+  }
+  return txt.reverse().join("\n");
+};
+
+const ctx_names = (ctx) => {
+  var names = [];
+  while (ctx !== null) {
+    names.push(ctx.name);
+    ctx = ctx.rest;
+  }
+  return names.reverse();
+};
+
+
 const typecheck = (() => {
-
-  const PADR = (len, chr, str) => {
-    while (str.length < len) {
-      str += chr;
-    }
-    return str;
-  };
-
-  const CODE = (str)  => {
-    return "\x1b[2m" + str + "\x1b[0m";
-  };
-
-  const DENON = (a, defs) => {
-    return norm(erase(a), defs);
-  };
-
-  const ctx_new = null;
-
-  const ctx_ext = (name, type, ctx) => {
-    return {name, type, rest: ctx};
-  };
-
-  const ctx_get = (i, ctx) => {
-    for (var k = 0; k < i; ++k) {
-      ctx = ctx.rest;
-    }
-    return [ctx.name, shift(ctx.type, i + 1, 0)];
-  };
-
-  const ctx_str = (ctx, defs) => {
-    var txt = [];
-    var idx = 0;
-    var max_len = 0;
-    for (var c = ctx; c !== null; c = c.rest) {
-      max_len = Math.max(c.name.length, max_len);
-    }
-    for (var c = ctx; c !== null; c = c.rest) {
-      var name = c.name;
-      var type = c.type;
-      txt.push("- " + PADR(max_len, " ", c.name) + " : " + show(norm(type, {}, {weak: false, unbox: true}), ctx_names(c.rest)));
-    }
-    return txt.reverse().join("\n");
-  };
-
-  const ctx_names = (ctx) => {
-    var names = [];
-    while (ctx !== null) {
-      names.push(ctx.name);
-      ctx = ctx.rest;
-    }
-    return names.reverse();
-  };
 
   const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
     const TERM = (term) => {
@@ -1599,4 +1600,9 @@ module.exports = {
   uses,
   boxcheck,
   typecheck,
+  ctx_new,
+  ctx_ext,
+  ctx_get,
+  ctx_str,
+  ctx_names,
 };
