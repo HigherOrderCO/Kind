@@ -465,7 +465,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     // If-Then-Else
     else if (match("if ")) {
       var cond = parse_term(nams);
-      var skip = parse_exact(":");
+      var skip = match("then:") || parse_exact(":");
       var val0 = parse_term(nams);
       var skip = parse_exact("else:");
       var val1 = parse_term(nams);
