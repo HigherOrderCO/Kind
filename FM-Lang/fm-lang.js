@@ -1026,7 +1026,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
                 var term_moti = All(keeps[i].name, shift(keeps[i].type, 1 + projs.length - (idx + 1) + i, 0), term_moti, false);
               }
               for (var i = projs.length - 1; i > idx; --i) {
-                var term_moti = replace(projs[i].term[1].index + 1 + i - (idx + 1) + 1, Var(0), term_moti);
+                var term_moti = replace(projs[i].orig[1].index + 1 + i - (idx + 1) + 1, Var(0), term_moti);
                 var term_moti = All(projs[i].name, shift(projs[i].type, 1 + i - (idx + 1), 0), term_moti, false);
               }
               var term_moti = replace(projs[i].orig[1].index + 1, Var(0), term_moti);
