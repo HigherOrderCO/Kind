@@ -1110,7 +1110,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
                 for (var i = 0; i < fldn.length; ++i) {
                   self = App(self, Var(-1 + kepn.length + prjn.length + fldn.length - i), false);
                 }
-                var argm = replace(projs[idx].term[1].index + newn.length, self, argm);
+                var argm = replace(projs[idx].orig[1].index + newn.length, self, argm);
 
                 // Wraps keeps, projs and field lambdas
                 for (var i = kepn.length - 1; i >= 0; --i) {
