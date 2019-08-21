@@ -1031,6 +1031,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
               }
               var term_moti = replace(projs[i].orig[1].index + 1, Var(0), term_moti);
               var term_moti = Lam("self", null, term_moti, false);
+              var term_moti = replace(nams.length - 1, App(ref("step"), Var(nams.length - 1), false), term_moti);
 
               // Builds the application term
               var term = Use(projs[idx].term);
