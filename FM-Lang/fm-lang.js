@@ -232,18 +232,6 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     throw text;
   }
 
-  function infer(term, nams, typs) {
-    var ctx = ctx_new;
-    for (var i = 0; i < nams.length; ++i) {
-      ctx = ctx_ext(nams[i], typs[i], ctx);
-    }
-    try {
-      return typecheck(term, null, defs, ctx);
-    } catch(e) {
-      return null;
-    }
-  }
-
   function build_ind(name) {
     var numb = name === "" ? Math.pow(2,48) - 1 : Number(name);
     var bits = numb.toString(2);
@@ -331,12 +319,12 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     return term;
   }
 
-  function parse_term(nams, typs = []) {
+  function parse_term(nams) {
     var parsed;
 
     // Parenthesis
     if (match("(")) {
-      var term = parse_term(nams, typs);
+      var term = parse_term(nams);
       var skip = parse_exact(")");
       parsed = term;
     }
@@ -348,7 +336,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
     // Type
     else if (match("type(")) {
-      var expr = parse_term(nams, typs);
+      var expr = parse_term(nams);
       var skip = parse_exact(")");
       parsed = Tid(expr);
     }
@@ -359,7 +347,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       for (var i = 0; i < nams.length; ++i) {
         console.log("- " + nams[i]);
       }
-      parsed = parse_term(nams, typs);
+      parsed = parse_term(nams);
     }
 
     // Hole
@@ -369,13 +357,13 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
     // Lambdas and Forall
     else if (match("{")) {
-      var erase = [];
+      var erass = [];
       var names = [];
       var types = [];
       while (idx < code.length) {
-        erase.push(match("~"));
+        erass.push(match("~"));
         names.push(parse_string());
-        types.push(match(":") ? parse_term(nams.concat(names.slice(0,-1)), typs.concat(types.slice(0,-1))) : null);
+        types.push(match(":") ? parse_term(nams.concat(names.slice(0,-1))) : null);
         if (match("}")) break; else parse_exact(",");
       }
       var isall = match("->");
@@ -383,10 +371,10 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       if (!isall && !islam) {
         // TODO: error
       }
-      var term = parse_term(nams.concat(names), typs.concat(types));
+      var term = parse_term(nams.concat(names));
       for (var i = names.length - 1; i >= 0; --i) {
         var ctr = isall ? All : Lam;
-        term = ctr(names[i], types[i], term, erase[i]);
+        term = ctr(names[i], types[i], term, erass[i]);
         if (isall && !types[i]) {
           error("Parse error: invalid forall.");
         }
@@ -398,26 +386,26 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     else if (match("dup ")) {
       var name = parse_string();
       var skip = parse_exact("=");
-      var expr = parse_term(nams, typs);
-      var body = parse_term(nams.concat([name]), typs.concat([null]));
+      var expr = parse_term(nams);
+      var body = parse_term(nams.concat([name]));
       parsed = Dup(name, expr, body);
     }
 
     // Box
     else if (match("!")) {
-      var expr = parse_term(nams, typs);
+      var expr = parse_term(nams);
       parsed = Box(expr);
     }
 
     // Put
     else if (match("#")) {
-      var expr = parse_term(nams, typs);
+      var expr = parse_term(nams);
       parsed = Put(expr);
     }
 
     // Take
     else if (match("-#(")) {
-      var expr = parse_term(nams, typs);
+      var expr = parse_term(nams);
       var skip = parse_exact(")");
       parsed = Tak(expr);
     }
@@ -426,8 +414,8 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     else if (match("let ")) {
       var name = parse_string();
       var skip = parse_exact("=");
-      var copy = parse_term(nams, typs);
-      var body = parse_term(nams.concat([name]), typs.concat([null]));
+      var copy = parse_term(nams);
+      var body = parse_term(nams.concat([name]));
       parsed = subst(body, copy, 0);
     }
 
@@ -476,11 +464,11 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
     // If-Then-Else
     else if (match("if ")) {
-      var cond = parse_term(nams, typs);
+      var cond = parse_term(nams);
       var skip = parse_exact(":");
-      var val0 = parse_term(nams, typs);
+      var val0 = parse_term(nams);
       var skip = parse_exact("else:");
-      var val1 = parse_term(nams, typs);
+      var val1 = parse_term(nams);
       parsed = Ite(cond, Par(val0, val1, 0));
     }
 
@@ -488,8 +476,8 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     else if (match("cpy ")) {
       var name = parse_string();
       var skip = parse_exact("=");
-      var numb = parse_term(nams, typs);
-      var body = parse_term(nams.concat([name]), typs.concat([Wrd()]));
+      var numb = parse_term(nams);
+      var body = parse_term(nams.concat([name]));
       parsed = Cpy(name, numb, body);
     }
 
@@ -500,19 +488,19 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         var era1 = match("~");
         var name = parse_string();
         var skip = parse_exact(":");
-        var typ0 = parse_term(nams, typs);
+        var typ0 = parse_term(nams);
         var skip = parse_exact(",");
         var era2 = match("~");
-        var typ1 = parse_term(nams.concat([name]), typs.concat([typ0]));
+        var typ1 = parse_term(nams.concat([name]));
         var skip = parse_exact("]");
         parsed = Sig(name, typ0, typ1, era1 ? 1 : era2 ? 2 : 0);
       // Pair
       } else {
         var era1 = match("~");
-        var val0 = parse_term(nams, typs);
+        var val0 = parse_term(nams);
         var skip = parse_exact(",");
         var era2 = match("~");
-        var val1 = parse_term(nams, typs);
+        var val1 = parse_term(nams);
         var skip = parse_exact("]");
         parsed = Par(val0, val1, era1 ? 1 : era2 ? 2 : 0);
       }
@@ -520,28 +508,28 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
     // First
     else if (match("fst(")) {
-      var pair = parse_term(nams, typs);
+      var pair = parse_term(nams);
       var skip = parse_exact(")");
       parsed = Fst(pair, 0);
     }
 
     // First (erased)
     else if (match("~fst(")) {
-      var pair = parse_term(nams, typs);
+      var pair = parse_term(nams);
       var skip = parse_exact(")");
       parsed = Fst(pair, 2);
     }
 
     // Second
     else if (match("snd(")) {
-      var pair = parse_term(nams, typs);
+      var pair = parse_term(nams);
       var skip = parse_exact(")");
       parsed = Snd(pair, 0);
     }
 
     // Second (erased)
     else if (match("~snd(")) {
-      var pair = parse_term(nams, typs);
+      var pair = parse_term(nams);
       var skip = parse_exact(")");
       parsed = Snd(pair, 1);
     }
@@ -556,109 +544,84 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       var nam1 = parse_string();
       var skip = parse_exact("]");
       var skip = parse_exact("=");
-      var pair = parse_term(nams, typs);
-      var body = parse_term(nams.concat([nam0, nam1]), typs.concat([null, null]));
+      var pair = parse_term(nams);
+      var body = parse_term(nams.concat([nam0, nam1]));
       parsed = Prj(nam0, nam1, pair, body, era1 ? 1 : era2 ? 2 : 0);
     }
 
     // Reflexivity
     else if (match("refl<")) {
-      var expr = parse_term(nams, typs);
+      var expr = parse_term(nams);
       var skip = parse_exact(">");
       parsed = Rfl(expr);
     }
 
     // Symmetry
     else if (match("sym<")) {
-      var prof = parse_term(nams, typs);
+      var prof = parse_term(nams);
       var skip = parse_exact(">");
       parsed = Sym(prof);
     }
 
     // Rewrite
     else if (match("rewrite<")) {
-      var prof = parse_term(nams, typs);
+      var prof = parse_term(nams);
       var skip = parse_exact(">");
       var skip = parse_exact("{");
       var name = parse_string();
       var skip = parse_exact("in");
-      var type = parse_term(nams.concat([name]), typs.concat([null]));
+      var type = parse_term(nams.concat([name]));
       var skip = parse_exact("}");
       var skip = parse_exact("(");
-      var expr = parse_term(nams, typs);
+      var expr = parse_term(nams);
       var skip = parse_exact(")");
       parsed = Rwt(name, type, prof, expr);
     }
 
     // Annotation
     else if (match(":")) {
-      var type = parse_term(nams, typs);
-      var expr = parse_term(nams, typs);
+      var type = parse_term(nams);
+      var expr = parse_term(nams);
       parsed = Ann(type, expr, false);
     }
 
     // Logging
     else if (match("log(")) {
-      var msge = parse_term(nams, typs);
+      var msge = parse_term(nams);
       var skip = parse_exact(")");
-      var expr = parse_term(nams, typs);
+      var expr = parse_term(nams);
       parsed = Log(msge, expr);
     }
 
     // Slf
     else if (match("$")) {
       var name = parse_string();
-      var type = parse_term(nams.concat([name]), typs.concat([null]));
+      var type = parse_term(nams.concat([name]));
       parsed = Slf(name, type);
     }
 
     // New
     else if (match("new<")) {
-      var type = parse_term(nams, typs);
+      var type = parse_term(nams);
       var skip = parse_exact(">");
-      var expr = parse_term(nams, typs);
+      var expr = parse_term(nams);
       parsed = New(type, expr);
     }
 
     // Use
     else if (match("%")) {
-      var expr = parse_term(nams, typs);
+      var expr = parse_term(nams);
       parsed = Use(expr);
     }
 
     // Case syntax sugar
-    else if (match("@ ") || (case_has_adt = match("@"))) {
-      var adt_name = case_has_adt ? parse_string() : null;
-      var term = parse_term(nams, typs);
-      if (!adt_name) {
-        var term_type = infer(term, nams, typs);
-        var found = false;
-        if (term_type) {
-          var term_type = norm(term_type, {}, {weak: false, unbox: true});
-          while (term_type && term_type[0] === "App") {
-            term_type = term_type[1].func;
-          }
-          if (term_type[0] === "Ref" && adts[term_type[1].name]) {
-            var adt_name = term_type[1].name;
-            var found = true;
-          }
-        }
-        if (!found) {
-          error("Couldn't infer the datatype for case of '" + show(term, nams) + "'.\n"
-              + "Write the datatype name explicitly with `@Name`.");
-        }
-      }
+    else if (match("case/")) {
+      var adt_name = parse_string();
+      var term = parse_term(nams);
       if (!adt_name || !adts[ref_path(adt_name)]) {
         error("Used case-syntax on undefined type `" + (adt_name || "?") + "`.");
       }
       var {adt_name, adt_pram, adt_indx, adt_ctor} = adts[ref_path(adt_name)];
-
-      var skip = parse_exact("~>");
-      var moti = parse_term(nams.concat(adt_indx.map(([name,type]) => name)).concat(["self"]), typs.concat(adt_indx.map(([name,type]) => type)).concat([null]));
-      for (var i = 0; i < adt_indx.length; ++i) {
-        var moti = Lam(adt_indx[i][0], null, moti, false);
-      }
-      var moti = Lam("self", null, moti, false);
 
       var cses = [];
       for (var c = 0; c < adt_ctor.length; ++c) {
@@ -666,11 +629,18 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         var skip = parse_exact(adt_ctor[c][0]);
         var skip = parse_exact("=>");
         var ctors = adt_ctor[c][1];
-        cses[c] = parse_term(nams.concat(adt_ctor[c][1].map(([name,type]) => name)), typs.concat(adt_ctor[c][1].map(([name,type]) => type)));
+        cses[c] = parse_term(nams.concat(adt_ctor[c][1].map(([name,type]) => name)));
         for (var i = 0; i < ctors.length; ++i) {
           cses[c] = Lam(ctors[ctors.length - i - 1][0], null, cses[c], ctors[ctors.length - i - 1][2]);
         }
       }
+
+      var skip = parse_exact(":");
+      var moti = parse_term(nams.concat(adt_indx.map(([name,type]) => name)).concat(["self"]));
+      for (var i = 0; i < adt_indx.length; ++i) {
+        var moti = Lam(adt_indx[i][0], null, moti, false);
+      }
+      var moti = Lam("self", null, moti, false);
 
       var term = Use(term);
       var term = App(term, moti, true);
@@ -678,7 +648,6 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         var term = App(term, cses[i], false);
       }
 
-      case_has_adt = false;
       parsed = term;
     }
 
@@ -700,7 +669,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       var term = parsed;
       while (idx < code.length) {
         var eras = applier === "<" || match("~");
-        var argm = parse_term(nams, typs);
+        var argm = parse_term(nams);
         var term = App(term, argm, eras);
         if (applier === "<" && match(">")) break;
         if (applier === "(" && match(")")) break;
@@ -715,7 +684,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       var list = [];
       var skip = parse_exact("[");
       while (idx < code.length && !match("]")) {
-        list.push(parse_term(nams, typs));
+        list.push(parse_term(nams));
         if (match("]")) break; else parse_exact(",");
       }
       var term = App(base_ref("nil"), type, true);
@@ -733,7 +702,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         if (match_here(op_init)) {
           matched = true;
           var func = op_init + parse_string_here(x => !is_space(x));
-          var argm = parse_term(nams, typs);
+          var argm = parse_term(nams);
           if (is_native_op[func]) {
             parsed = Op2(func, parsed, argm);
           } else if (func === "->") {
@@ -755,7 +724,6 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
   var qual_imports = {};
   var local_imports = {};
   var file_version = {};
-  var case_has_adt = false;
   var tokens = tokenify ? [["txt",""]] : null;
   var idx = 0;
   var row = 0;
@@ -800,7 +768,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           var eras = false;
           var name = parse_string();
           var skip = parse_exact(":");
-          var type = await parse_term(adt_pram.map((([name,type]) => name)), adt_pram.map(([name,type]) => type));
+          var type = await parse_term(adt_pram.map((([name,type]) => name)));
           adt_pram.push([name, type, eras]);
           if (match(">")) break; else parse_exact(",");
         }
@@ -815,7 +783,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           var eras = false;
           var name = parse_string();
           var skip = parse_exact(":");
-          var type = await parse_term(adt_nams.concat(adt_indx.map((([name,type]) => name))), adt_typs.concat(adt_indx.map((([name,type]) => type))));
+          var type = await parse_term(adt_nams.concat(adt_indx.map((([name,type]) => name))));
           adt_indx.push([name, type, eras]);
           if (match("}")) break; else parse_exact(",");
         }
@@ -832,19 +800,19 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
             var eras = match("~");
             var name = parse_string();
             var skip = parse_exact(":");
-            var type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)), adt_typs.concat(ctor_flds.map(([name,type]) => type)));
+            var type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
             ctor_flds.push([name, type, eras]);
             if (match("}")) break; else parse_exact(",");
           }
         }
         // Constructor type (written)
         if (match(":")) {
-          var ctor_type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)), adt_typs.concat(ctor_flds.map(([name,type]) => type)));
+          var ctor_type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
         // Constructor type (auto-filled)
         } else {
           var ctor_indx = [];
           while (match("&")) {
-            ctor_indx.push(await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)), adt_typs.concat(ctor_flds.map(([name,type]) => type))));
+            ctor_indx.push(await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name))));
           }
           var ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
           for (var p = 0; p < adt_pram.length; ++p) {
@@ -873,7 +841,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           console.log("- " + def);
         }
       }
-      parsed = parse_term([], []);
+      parsed = parse_term([]);
 
     // Definitions or end-of-file
     } else {
@@ -889,10 +857,10 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       if (name.length === 0) break;
 
       // Parses recursion depth name
-      var recur = match_here("*");
+      var recur     = match_here("*");
       var rec_depth = recur ? parse_string() : null;
-      var rec_names = recur ? [rec_depth] : [];
-      var rec_types = recur ? [null] : [];
+      var rec_idx_n = recur ? [rec_depth] : [];
+      var rec_names = recur ? [name] : [];
 
       var typed = match(":");
 
@@ -900,7 +868,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       if (typed) {
 
         // Parses level 0 argument names and types
-        var lv0_erase = [];
+        var lv0_erass = [];
         var lv0_names = [];
         var lv0_boxed = [];
         var lv0_dup_n = [];
@@ -914,8 +882,8 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
             var arg_name = parse_string();
             var arg_skip = parse_exact(":");
             var arg_boxd = match("!");
-            var arg_type = await parse_term(lv0_names, lv0_types);
-            lv0_erase.push(arg_eras);
+            var arg_type = await parse_term(lv0_names);
+            lv0_erass.push(arg_eras);
             lv0_names.push(arg_name);
             lv0_boxed.push(arg_boxd);
             if (arg_boxd) {
@@ -937,7 +905,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         while (match("dup ")) {
           var dup_name = parse_string();
           var dup_skip = parse_exact("=");
-          var dup_expr = parse_term(lv0_names.concat(lv0_imp_n), lv0_types.concat(lv0_imp_t));
+          var dup_expr = parse_term(lv0_names.concat(lv0_imp_n));
           lv0_imp_n.push(dup_name);
           lv0_imp_t.push(null);
           lv0_imp_v.push(dup_expr);
@@ -949,8 +917,10 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         }
 
         // Parses argument names and types
-        var erase = [];
+        var erass = [];
         var names = [];
+        var projs = [];
+        var keeps = [];
         var wordn = [];
         var wordt = [];
         var wordi = [];
@@ -959,17 +929,21 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         if (match("{")) {
           var count = 0;
           while (idx < code.length) {
+            var arg_proj = match("case ");
             var arg_eras = match("~");
             var arg_halt = match("*");
             var arg_name = parse_string();
             var arg_skip = parse_exact(":");
-            var arg_type = await parse_term(
-              lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_names).concat(names),
-              lv0_names.concat(lv0_dup_t).concat(lv0_imp_t).concat(rec_types).concat(types));
-            erase.push(arg_eras);
+            var arg_type = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_idx_n).concat(names));
+            erass.push(arg_eras);
             names.push(arg_name);
             types.push(arg_type);
             basex = arg_halt ? count : basex;
+            if (arg_proj) {
+              projs.push(count);
+            } else if (!arg_eras) {
+              keeps.push(count);
+            }
             if (arg_type[0] === "Wrd") {
               wordn.push(arg_name);
               wordt.push(Wrd());
@@ -980,14 +954,206 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           }
           var skip = parse_exact("->");
         }
-        var type = await parse_term(
-          lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_names).concat(names),
-          lv0_types.concat(lv0_dup_t).concat(lv0_imp_t).concat(rec_types).concat(types));
+        var type = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_idx_n).concat(names));
 
         // Parses the definition body
-        var term = await parse_term(
-          lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_names).concat(recur ? [name] : []).concat(names).concat(wordn),
-          lv0_types.concat(lv0_dup_t).concat(lv0_imp_t).concat(rec_types).concat(recur ? [null] : []).concat(types).concat(wordt));
+        var body_nams = lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_idx_n).concat(rec_names).concat(names);
+
+        // Case-tree syntax
+        if (projs.length > 0) {
+
+          // Finds the ADTs from annotated types
+          var proj_adts = [];
+          for (var i = 0; i < projs.length; ++i) {
+            var proj_type = types[projs[i]];
+            while (proj_type[0] === "App") {
+              proj_type = erase(proj_type[1].func);
+            }
+            var adt_name = proj_type[0] === "Ref" ? ref_path(proj_type[1].name) : null;
+            if (adts[adt_name]) {
+              proj_adts[i] = adts[adt_name];
+            } else {
+              error("Couldn't find the datatype of the `" + names[projs[i]] + "` argument of the `" + name + "` function.\n"
+                  + "This is a language limitation. Consider removing type alises, or using the case expression instead.");
+            }
+          }
+
+          // Builds the objects for each proj
+          var proj_names = [];
+          var proj_terms = [];
+          var proj_types = [];
+          var proj_infos = [];
+          for (var i = 0; i < projs.length; ++i) {
+            proj_infos[i] = {
+              name: names[projs[i]],
+              orig: Var(-1 + names.length - projs[i]),
+              term: Var(-1 + names.length - projs[i]),
+              type: shift(types[projs[i]], names.length - projs[i], 0),
+              adt: proj_adts[i]
+            };
+          }
+
+          // Builds the objects for each keep
+          var keep_infos = [];
+          for (var i = 0; i < keeps.length; ++i) {
+            keep_infos[i] = {
+              name: names[keeps[i]],
+              orig: Var(-1 + names.length - keeps[i]),
+              term: Var(-1 + names.length - keeps[i]),
+              type: shift(types[keeps[i]], names.length - keeps[i], 0)
+            };
+          }
+
+          // Builds the initial motive
+          var moti = type;
+          var moti = shift(moti, rec_idx_n.length, names.length); // Adds recur variable
+
+          // Builds the case-tree by matching projected terms
+          var term = await (async function parse_case_tree(idx, projs, keeps, moti, branch, nams) {
+            // We still have values to project
+            if (idx < projs.length) {
+
+              // Gets the projected dataype
+              var {adt_name, adt_pram, adt_indx, adt_ctor} = projs[idx].adt;
+              if (adt_indx.length > 0) {
+                error("The case-tree syntax isn't compatible with the indexed datatype '" + adt_name + "' yet."
+                    + "Use the @ syntax to write the '" + name + "' function instead.");
+              }
+
+              // Builds the application motive
+              var term_moti = shift(moti, adt_indx.length + 1 + projs.length - (idx + 1) + keeps.length, 0);
+              for (var i = keeps.length - 1; i >= 0; --i) {
+                var term_moti = All(keeps[i].name, shift(keeps[i].type, 1 + projs.length - (idx + 1) + i, 0), term_moti, false);
+              }
+              for (var i = projs.length - 1; i > idx; --i) {
+                var term_moti = replace(projs[i].term[1].index + 1 + i - (idx + 1) + 1, Var(0), term_moti);
+                var term_moti = All(projs[i].name, shift(projs[i].type, 1 + i - (idx + 1), 0), term_moti, false);
+              }
+              var term_moti = replace(projs[i].orig[1].index + 1, Var(0), term_moti);
+              var term_moti = Lam("self", null, term_moti, false);
+
+              // Builds the application term
+              var term = Use(projs[idx].term);
+              var term = App(term, term_moti, true);
+
+              // Builds each applied case
+              for (var ctor_n = 0; ctor_n < adt_ctor.length; ++ctor_n) {
+                // Adjusts scope to enter case
+                var fldn = adt_ctor[ctor_n][1].map((([name,type,eras]) => projs[idx].name + "." + name));
+                var fldt = adt_ctor[ctor_n][1].map((([name,type,eras]) => type));
+                var prjn = projs.slice(idx + 1).map(({name}) => name);
+                var kepn = keeps.map(({name}) => name);
+                var newn = [].concat(fldn).concat(prjn).concat(kepn);
+
+                // Adjusts keeps to enter case
+                var new_keeps = [];
+                for (var i = 0; i < keeps.length; ++i) {
+                  new_keeps.push({
+                    name: keeps[i].name,
+                    term: Var(-1 + keeps.length - i),
+                    orig: shift(keeps[i].orig, newn.length, 0),
+                    type: shift(keeps[i].type, newn.length, 0)
+                  });
+                }
+
+                // Adjusts projs to enter case
+                var new_projs = [];
+                for (var i = 0; i < projs.length; ++i) {
+                  new_projs.push({
+                    name: projs[i].name,
+                    term: i < idx
+                      ? shift(projs[i].term, newn.length, 0)
+                      : Var(-1 + kepn.length + prjn.length - (i - (idx + 1))),
+                    orig: shift(projs[i].orig, newn.length, 0),
+                    type: shift(projs[i].type, newn.length, 0),
+                    adt: projs[i].adt
+                  });
+                }
+
+                // Builds the substitution list for ADT parameters
+                var adtt = projs[idx].type;
+                var pram = [];
+                while (adtt[0] === "App") {
+                  pram.push(adtt[1].argm);
+                  adtt = adtt[1].func;
+                }
+                if (pram.length !== adt_pram.length) {
+                  error("Couldn't build parameter list for argument `" + projs[idx].name + "` of function `" + name + "`.\n"
+                      + "This is a language limitation. Consider removing type alises, or using the case expression instead.");
+                }
+                var subs = [ref(adt_name)].concat(pram.reverse());
+
+                // Add constructor fields to keeps
+                for (var i = 0; i < fldn.length; ++i) {
+                  var field_type = fldt[i];
+                  var field_type = subst_many(field_type, subs, i);
+                  var field_type = shift(field_type, newn.length, 0);
+                  new_keeps.push({
+                    name: fldn[i],
+                    term: Var(-1 + newn.length - i),
+                    orig: Var(-1 + newn.length - i),
+                    type: field_type
+                  });
+                }
+
+                // Adjusts motive to enter case
+                var new_moti = shift(moti, newn.length, 0);
+
+                // Builds the case body recursively
+                var argm = await parse_case_tree(idx + 1, new_projs, new_keeps, new_moti, branch.concat([ctor_n]), nams.concat(newn));
+
+                // Substitutes the open form of the projected value
+                var self = ref(adt_ctor[ctor_n][0]);
+                for (var i = 0; i < fldn.length; ++i) {
+                  self = App(self, Var(-1 + kepn.length + prjn.length + fldn.length - i), false);
+                }
+                var argm = replace(projs[idx].term[1].index + newn.length, self, argm);
+
+                // Wraps keeps, projs and field lambdas
+                for (var i = kepn.length - 1; i >= 0; --i) {
+                  argm = Lam(kepn[i], null, argm, false);
+                }
+                for (var i = prjn.length - 1; i >= 0; --i) {
+                  argm = Lam(prjn[i], null, argm, false);
+                }
+                for (var i = fldn.length - 1; i >= 0; --i) {
+                  argm = Lam(fldn[i], null, argm, false);
+                }
+                var term = App(term, argm, false);
+              }
+
+              // Applies term to each proj and keep
+              for (var i = idx + 1; i < projs.length; ++i) {
+                var term = App(term, projs[i].term, false);
+              }
+              for (var i = 0; i < keeps.length; ++i) {
+                var term = App(term, keeps[i].term, false);
+              }
+
+              return term;
+            } else {
+              // Parses the case line
+              var skip = parse_exact("|");
+              for (var i = 0; i < branch.length; ++i) {
+                var skip = parse_exact(projs[i].adt.adt_ctor[branch[i]][0]);
+              }
+              var skip = parse_exact("=>");
+
+              // Parses the case term
+              var term = parse_term(nams);
+
+              return term;
+            }
+          })(0, proj_infos, keep_infos, moti, [], body_nams);
+
+        } else {
+          var term = await parse_term(body_nams.concat(wordn));
+
+          // Fills numeric copies
+          for (var i = wordn.length - 1; i >= 0; --i) {
+            var term = Cpy(wordn[i], Var(-1 + names.length + i - wordi[i]), term);
+          }
+        }
 
         // Parses the halting case
         if (recur && basex === null && !match("*")) {
@@ -996,16 +1162,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         if (recur && basex !== null) {
           var base = Var(-1 + names.length - basex);
         } else if (recur) {
-          var base = await parse_term(
-            lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(names),
-            lv0_types.concat(lv0_dup_t).concat(lv0_imp_t).concat(types));
+          var base = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(names));
         } else {
           var base = null;
-        }
-
-        // Fills numeric copies
-        for (var i = wordn.length - 1; i >= 0; --i) {
-          var term = Cpy(wordn[i], Var(-1 + names.length + i - wordi[i]), term);
         }
 
         // Fills type wrapper
@@ -1015,9 +1174,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
         // Fills foralls and lambdas of arguments
         for (var i = names.length - 1; i >= 0; --i) {
-          var type = All(names[i], types[i], type, erase[i]);
-          var term = Lam(names[i], null    , term, erase[i]);
-          var base = base && Lam(names[i], null    , base, erase[i]);
+          var type = All(names[i], types[i], type, erass[i]);
+          var term = Lam(names[i], null    , term, erass[i]);
+          var base = base && Lam(names[i], null    , base, erass[i]);
         }
 
         // Aux function to add level 0 headers
@@ -1029,7 +1188,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
             var term = Dup(lv0_dup_n[i], Var(-1 + lv0_names.length + i - lv0_dup_i[i]), term);
           }
           for (var i = lv0_names.length - 1; i >= 0; --i) {
-            var term = (is_type ? All : Lam)(lv0_names[i], is_type ? (lv0_boxed[i] ? Box : (x=>x))(lv0_types[i]) : null, term, eras && lv0_erase[i]);
+            var term = (is_type ? All : Lam)(lv0_names[i], is_type ? (lv0_boxed[i] ? Box : (x=>x))(lv0_types[i]) : null, term, eras && lv0_erass[i]);
           }
           return term;
         }
@@ -1076,8 +1235,8 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
               var vari = Var(-1 + lv0_imp_n.length + lv0_dup_n.length + lv0_names.length - i);
             }
             ind_moti = App(ind_moti, vari, false);
-            ind_step = App(ind_step, vari, lv0_erase[i]);
-            ind_base = App(ind_base, vari, lv0_erase[i]);
+            ind_step = App(ind_step, vari, lv0_erass[i]);
+            ind_base = App(ind_base, vari, lv0_erass[i]);
           }
           var type = All(rec_depth, base_ref("Ind"), lv0_headers(1, Box(subst(type, Var(lv0_names.length + lv0_dup_n.length + lv0_imp_n.length), 0)), true), false);
           var term = App(base_ref("ind"), Var(lv0_names.length + lv0_dup_n.length + lv0_imp_n.length), false);
@@ -1106,7 +1265,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
       // Untyped definition
       } else {
-        var term = await parse_term([], []);
+        var term = await parse_term([]);
         defs[file+"/"+name] = term;
       }
     }
@@ -1170,9 +1329,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
   return {defs, adts, unbx, tokens, local_imports, qual_imports, open_imports};
 }
 
-// :::::::::::::::::::::
-// :: Stringification ::
-// :::::::::::::::::::::
+// :::::::::::
+// :: Utils ::
+// :::::::::::
 
 // Generates a name
 const gen_name = (n) => {
@@ -1454,6 +1613,12 @@ const rewrite = ([ctor, term], rewriter, scope = [], only_once = false) => {
         return Ref(name, eras, file);
     }
   }
+}
+
+const replace = (idx, val, term) => {
+  var term = shift(term, 1, idx);
+  var term = subst(term, val, idx + 1);
+  return term;
 }
 
 // :::::::::::::::::::

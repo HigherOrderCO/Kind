@@ -1244,7 +1244,9 @@ const ctx_ext = (name, type, ctx) => {
 };
 
 const ctx_get = (i, ctx) => {
+  if (i < 0) return null;
   for (var k = 0; k < i; ++k) {
+    if (!ctx.rest) return null;
     ctx = ctx.rest;
   }
   return [ctx.name, shift(ctx.type, i + 1, 0)];
@@ -1302,7 +1304,12 @@ const typecheck = (() => {
     var type;
     switch (term[0]) {
       case "Var":
-        type = ctx_get(term[1].index, ctx)[1];
+        var name_type = ctx_get(term[1].index, ctx);
+        if (name_type) {
+          type = name_type[1];
+        } else {
+          ERROR("Unbound variable.");
+        }
         break;
       case "Typ":
         type = Typ();
