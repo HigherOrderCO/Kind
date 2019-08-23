@@ -1539,7 +1539,12 @@ const typecheck = (() => {
       case "Ann":
         if (!term[1].done) {
           term[1].done = true;
-          typecheck(term[1].expr, term[1].type, defs, ctx, [term, ctx]);
+          try {
+            typecheck(term[1].expr, term[1].type, defs, ctx, [term, ctx]);
+          } catch (e) {
+            term[1].done = false;
+            throw e;
+          }
         }
         type = term[1].type;
         break;
