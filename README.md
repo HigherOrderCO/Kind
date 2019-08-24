@@ -2,7 +2,7 @@
 
 Main repository for the JavaScript implementation of the Formality language.
 
-[Documentation.](https://docs.formaliy-lang.org)
+[Documentation.](https://docs.formality-lang.org)
 
 [Base libraries.](https://gitlab.com/moonad/Formality-Base)
 
