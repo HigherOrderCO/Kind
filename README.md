@@ -1,17 +1,12 @@
 ## Formality-JavaScript
 
-You can access the Wiki [here](https://github.com/moonad/Formality/wiki)
+Main repository for the JavaScript implementation of the Formality language.
 
-This repository exports the following npm packages:
+[Documentation.](https://docs.formaliy-lang.org)
 
-- [`formality-lang`](https://www.npmjs.com/package/formality-lang)
-- [`formality-core`](https://www.npmjs.com/package/formality-core)
-- [`formality-net`](https://www.npmjs.com/package/formality-net)
-- [`elementary-affine-type-theory`](https://www.npmjs.com/package/elementary-affine-type-theory)
-- [`elementary-affine-core`](https://www.npmjs.com/package/elementary-affine-core)
-- [`elementary-affine-net`](https://www.npmjs.com/package/elementary-affine-net)
+[Base libraries.](https://gitlab.com/moonad/Formality-Base)
 
-You can install these packages via `npm` with:
+You can install Formality via `npm` with:
 
 ```
 $ npm i -g formality-lang
@@ -26,3 +21,4 @@ $ nix-channel add https://nixos.org/channels/nixpkgs-unstable unstable
 $ nix-env -f default.nix formality-lang
 ```
 
+It can be used from the terminal with the `fm` command, or as a library with `require("formality-lang")`.
