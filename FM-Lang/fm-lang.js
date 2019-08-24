@@ -1,3 +1,7 @@
+// Parser for Formality-Lang. This is essentially a pack of syntax-sugars that
+// are converted to FM-Core terms. This file is substantially less elegant than
+// the others. Be warned!
+
 const {
   Var,
   Typ,

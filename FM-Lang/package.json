@@ -1,6 +1,6 @@
 {
   "name": "formality-lang",
-  "version": "0.3.86",
+  "version": "0.3.87",
   "description": "",
   "main": "exports.js",
   "bin": {
@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/moonad/formality-core#readme",
   "dependencies": {
-    "formality-net": "^0.1.10",
     "xhr-request-promise": "^0.1.2"
   }
 }

@@ -1,7 +1,7 @@
 // ~~ Compiles Formality Core to Formality Net ~~
 
 const {Var, App, Lam, Num, Op1, Op2, Ite, Par, Fst, Snd, gen_name, erase} = require("./fm-lang.js");
-const {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, NOD, OP1, OP2, NUM, ITE, PTR, FOR} = require("formality-net");
+const {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, NOD, OP1, OP2, NUM, ITE, PTR, FOR} = require("./fm-net.js");
 
 const op_kind = {
    0 : "+"   , "+"   : 0  ,
