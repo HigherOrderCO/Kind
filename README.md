@@ -1,4 +1,4 @@
-## Formality-JavaScript
+## Formality.js
 
 Main repository for the JavaScript implementation of the Formality language.
 
