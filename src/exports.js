@@ -30,6 +30,7 @@ fm.lang.norm = function norm(term, defs, mode = "DEBUG", opts, stats = {}) {
       }
       return fm.to_net.decompile(net);
     case "TYPE":
+      fm.lang.boxcheck(term, defs);
       return fm.core.norm(fm.lang.typecheck(term, null, defs), {}, {weak: false, unbox: true});
   }
 }
@@ -40,9 +41,6 @@ fm.lang.exec = function exec(name, defs, mode = "OPTIMAL_LAZY", opts, stats = {}
     name = defs[name][1].name;
   }
   var term = defs[name] || fm.lang.Ref(name);
-  if (opts.boxcheck) {
-    fm.lang.boxcheck(term, defs);
-  }
   var result = fm.lang.norm(term, defs, mode, opts, stats);
   return result;
 }

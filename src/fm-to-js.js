@@ -42,9 +42,9 @@ const compile = (term, defs, vars) => {
         case ".!" : return (~ num1) >>> 0;
         case ".>>": return (num0 >>> num1) >>> 0;
         case ".<<": return (num0 << num1) >>> 0;
-        case ">"  : return (num0 > num1) >>> 0;
-        case "<"  : return (num0 < num1) >>> 0;
-        case "===": return (num0 === num1) >>> 0;
+        case ".>" : return (num0 > num1) >>> 0;
+        case ".<" : return (num0 < num1) >>> 0;
+        case ".=" : return (num0 === num1) >>> 0;
       }
     case "Ite":
       var cond = compile(term.cond, defs, vars);

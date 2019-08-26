@@ -138,9 +138,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     return chr => set[chr] === 1;
   }
 
-  var is_native_op = {"+":1,"-":1,"*":1,"/":1,"%":1,"^":1,"**":1,".&":1,".|":1,".^":1,".!":1,".>>":1,".<<":1,">":1,"<":1,"===":1};
-  var op_inits     = "+-*/%^.=<>";
-  var is_op_init   = build_charset("+-*/%^.=<>");
+  var is_native_op = {"+":1,"-":1,"*":1,"/":1,"%":1,"^":1,"**":1,".&":1,".|":1,".^":1,".!":1,".>>":1,".<<":1,".>":1,".<":1,".=":1};
+  var op_inits     = "+-*/%^.=";
+  var is_op_init   = build_charset("+-*/%^.=");
   var is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@/");
   var is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@+*/%^!<>=&|");
   var is_space     = build_charset(" \t\n\r;");
@@ -408,9 +408,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
 
     // Take
-    else if (match("-#(")) {
+    else if (match("<")) {
       var expr = parse_term(nams);
-      var skip = parse_exact(")");
+      var skip = parse_exact(">");
       parsed = Tak(expr);
     }
 
@@ -554,32 +554,17 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
 
     // Reflexivity
-    else if (match("refl<")) {
+    else if (match("refl(~")) {
       var expr = parse_term(nams);
-      var skip = parse_exact(">");
+      var skip = parse_exact(")");
       parsed = Rfl(expr);
     }
 
     // Symmetry
-    else if (match("sym<")) {
+    else if (match("sym(~")) {
       var prof = parse_term(nams);
-      var skip = parse_exact(">");
-      parsed = Sym(prof);
-    }
-
-    // Rewrite
-    else if (match("rewrite<")) {
-      var prof = parse_term(nams);
-      var skip = parse_exact(">");
-      var skip = parse_exact("{");
-      var name = parse_string();
-      var skip = parse_exact("in");
-      var type = parse_term(nams.concat([name]));
-      var skip = parse_exact("}");
-      var skip = parse_exact("(");
-      var expr = parse_term(nams);
       var skip = parse_exact(")");
-      parsed = Rwt(name, type, prof, expr);
+      parsed = Sym(prof);
     }
 
     // Annotation
@@ -605,9 +590,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
 
     // New
-    else if (match("new<")) {
+    else if (match("new(~")) {
       var type = parse_term(nams);
-      var skip = parse_exact(">");
+      var skip = parse_exact(")");
       var expr = parse_term(nams);
       parsed = New(type, expr);
     }
@@ -668,15 +653,14 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
     // Applications
     var applier = null;
-    while ((applier = code[idx]), applier === "(" || applier === "<") {
+    while ((applier = code[idx]), applier === "(") {
       var skip = match_here(applier);
       var term = parsed;
       while (idx < code.length) {
-        var eras = applier === "<" || match("~");
+        var eras = match("~");
         var argm = parse_term(nams);
         var term = App(term, argm, eras);
-        if (applier === "<" && match(">")) break;
-        if (applier === "(" && match(")")) break;
+        if (match(")")) break;
         parse_exact(",");
       }
       parsed = term;
@@ -696,6 +680,17 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         var term = App(App(App(base_ref("cons"), type, true), list[i], false), term, false);
       }
       parsed = term;
+    }
+
+    // Rewrite
+    if (match_here(" ::")) {
+      var skip = parse_exact("rewrite");
+      var name = parse_string();
+      var skip = parse_exact("in");
+      var type = parse_term(nams.concat([name]));
+      var skip = parse_exact("with");
+      var prof = parse_term(nams);
+      parsed = Rwt(name, type, prof, parsed);
     }
 
     // Operators
@@ -767,21 +762,21 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       var adt_typs = [null];
 
       // Datatype parameters
-      if (match("<")) {
+      if (match("{")) {
         while (idx < code.length) {
           var eras = false;
           var name = parse_string();
           var skip = parse_exact(":");
           var type = await parse_term(adt_pram.map((([name,type]) => name)));
           adt_pram.push([name, type, eras]);
-          if (match(">")) break; else parse_exact(",");
+          if (match("}")) break; else parse_exact(",");
         }
       }
 
       // Datatype indices
       var adt_nams = adt_nams.concat(adt_pram.map(([name,type]) => name));
       var adt_typs = adt_typs.concat(adt_pram.map(([name,type]) => type));
-      if (match("{")) {
+      if (match("(")) {
         while (idx < code.length) {
           //var eras = match("~");
           var eras = false;
@@ -789,7 +784,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           var skip = parse_exact(":");
           var type = await parse_term(adt_nams.concat(adt_indx.map((([name,type]) => name))));
           adt_indx.push([name, type, eras]);
-          if (match("}")) break; else parse_exact(",");
+          if (match(")")) break; else parse_exact(",");
         }
       }
 
@@ -815,8 +810,11 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         // Constructor type (auto-filled)
         } else {
           var ctor_indx = [];
-          while (match("&")) {
-            ctor_indx.push(await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name))));
+          if (match("(")) {
+            while (idx < code.length) {
+              ctor_indx.push(await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name))));
+              if (match(")")) break; else parse_exact(",");
+            }
           }
           var ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
           for (var p = 0; p < adt_pram.length; ++p) {
@@ -999,6 +997,19 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
           // Builds the objects for each keep
           var keep_infos = [];
+          if (recur) {
+            var moti_type = ref(name + ".moti");
+            for (var i = 0; i < lv0_names.length; ++i) {
+              var moti_type = App(moti_type, Var(-1 + names.length + rec_names.length + rec_idx_n.length + lv0_imp_n.length + lv0_dup_n.length + lv0_names.length - i), false);
+            }
+            var moti_type = App(moti_type, Var(-1 + names.length + rec_names.length + rec_idx_n.length), false);
+            keep_infos.push({
+              name: name,
+              orig: Var(-1 + names.length + rec_names.length),
+              term: Var(-1 + names.length + rec_names.length),
+              type: moti_type
+            });
+          }
           for (var i = 0; i < keeps.length; ++i) {
             keep_infos[i] = {
               name: names[keeps[i]],
@@ -1011,6 +1022,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           // Builds the initial motive
           var moti = type;
           var moti = shift(moti, rec_idx_n.length, names.length); // Adds recur variable
+          if (recur) { // Adjusts recur index to step(n)
+            var moti = replace(names.length + rec_names.length + rec_idx_n.length - 1, App(ref("step"), Var(names.length + 1), false), moti);
+          }
 
           // Builds the case-tree by matching projected terms
           var term = await (async function parse_case_tree(idx, projs, keeps, moti, branch, nams) {
@@ -1035,9 +1049,6 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
               }
               var term_moti = replace(projs[i].orig[1].index + 1, Var(0), term_moti);
               var term_moti = Lam("self", null, term_moti, false);
-              if (recur) {
-                var term_moti = replace(nams.length - 1, App(ref("step"), Var(nams.length - 1), false), term_moti);
-              }
 
               // Builds the application term
               var term = Use(projs[idx].term);
@@ -1209,7 +1220,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           var type = lv0_headers(1, Box(type), true);
           var term = lv0_headers(0, Put(term), true);
           defs[file+"/"+name] = Ann(type, term, false);
-          unbx[file+"/"+name] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
+          unbx[file+"/"+name] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
 
         // Builds a recursive, non-boxed definition
         } else if (!boxed && recur) {
@@ -1248,26 +1259,18 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           var type = All(rec_depth, base_ref("Ind"), lv0_headers(1, Box(subst(type, Var(lv0_names.length + lv0_dup_n.length + lv0_imp_n.length), 0)), true), false);
           var term = App(base_ref("ind"), Var(lv0_names.length + lv0_dup_n.length + lv0_imp_n.length), false);
           var term = App(term, ind_moti, true);
-          var term = App(term, Put(ind_step), false);
-          var term = App(term, Put(ind_base), false);
+          var term = App(term, ind_step, false);
+          var term = App(term, ind_base, false);
           var term = Lam(rec_depth, null, lv0_headers(0, term, true), false);
 
           defs[file+"/"+name+".moti"] = Ann(moti_type, moti_term, false);
           defs[file+"/"+name+".step"] = Ann(step_type, step_term, false);
           defs[file+"/"+name+".base"] = Ann(base_type, base_term, false);
           defs[file+"/"+name]         = Ann(type, term, false);
-          unbx[file+"/"+name+".moti"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: false};
-          unbx[file+"/"+name+".step"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
-          unbx[file+"/"+name+".base"] = {arity: lv0_names.length, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length, boxed: true};
-          unbx[file+"/"+name]         = {arity: lv0_names.length + 1, depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length + 1, boxed: true};
-          //console.log("built", name+".moti : " + show(moti_type));
-          //console.log("built", name+".moti = " + show(moti_term));
-          //console.log("built", name+".step : " + show(step_type));
-          //console.log("built", name+".step = " + show(step_term));
-          //console.log("built", name+".base : " + show(base_type));
-          //console.log("built", name+".base = " + show(base_term));
-          //console.log("built", name+"      : " + show(type));
-          //console.log("built", name+"      = " + show(term));
+          unbx[file+"/"+name+".moti"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
+          unbx[file+"/"+name+".step"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
+          unbx[file+"/"+name+".base"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
+          unbx[file+"/"+name]         = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length + 1};
         }
 
       // Untyped definition
@@ -1286,49 +1289,27 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     for (var path in unbx) {
       var info = unbx[path];
       var term = defs[path];
-      ["expr", "type"].forEach(field => {
-        var lens = {term, field};
-        for (var i = 0; i < info.depth; ++i) {
-          var lens = {term: lens.term[1][lens.field], field: "body"};
-        }
-
-        var unbox = [];
-        lens.term[1][lens.field] = rewrite(lens.term[1][lens.field], (term, scope) => {
-          var args = [];
-          var func = term;
-          while (func[0] === "App") {
-            args.push(func[0].argm);
-            func = func[1].func;
+      var lens = {term, field: "expr"};
+      for (var i = 0; i < info.depth; ++i) {
+        var lens = {term: lens.term[1][lens.field], field: "body"};
+      }
+      var unbox = [];
+      lens.term[1][lens.field] = rewrite(lens.term[1][lens.field], (term, scope, erased) => {
+        if (term[0] === "Tak" && !erased) {
+          for (var i = 0; i < scope.length; ++i) {
+            term = subst(term, Num(0), 0);
           }
-          if (func[0] === "Ref" && unbx[func[1].name] && unbx[func[1].name].boxed) {
-            var func_info = unbx[func[1].name];
-            if (func[1].name !== path && func_info.arity === args.length) {
-              var unboxable = true;
-              for (var i = 0; i < scope.length; ++i) {
-                if (uses(term, scope.length - i - 1) > 0) {
-                  var unboxable = false;
-                  //error("Couldn't auto-unbox reference to '" + func[1].name + "' inside '" + name + "'.\n"
-                    //+ "It uses the level_1 variable '" + scope[i] + "' inside a level_0 argument.");
-                }
-              }
-              if (unboxable) {
-                for (var i = 0; i < scope.length; ++i) {
-                  term = subst(term, Num(0), 0);
-                }
-                unbox.push([func[1].name, term, args]);
-                return Ref("$TMP$" + (unbox.length - 1));
-              }
-            }
-          };
-        });
-        for (var i = unbox.length - 1; i >= 0; --i) {
-          lens.term[1][lens.field] = Dup(unbox[i][0], unbox[i][1], shift(lens.term[1][lens.field], 1, 0));
+          unbox.push(["k" + unbox.length, term[1].expr]);
+          return Ref("$TMP$" + (unbox.length - 1));
         }
-        lens.term[1][lens.field] = rewrite(lens.term[1][lens.field], (term, scope) => {
-          if (term[0] === "Ref" && term[1].name.slice(0,5) === "$TMP$") {
-            return Var(-1 + scope.length - Number(term[1].name.slice(5)));
-          }
-        });
+      });
+      for (var i = unbox.length - 1; i >= 0; --i) {
+        lens.term[1][lens.field] = Dup(unbox[i][0], unbox[i][1], shift(lens.term[1][lens.field], 1, 0));
+      }
+      lens.term[1][lens.field] = rewrite(lens.term[1][lens.field], (term, scope) => {
+        if (term[0] === "Ref" && term[1].name.slice(0,5) === "$TMP$") {
+          return Var(-1 + scope.length - Number(term[1].name.slice(5)));
+        }
       });
     }
   }
@@ -1487,10 +1468,10 @@ const replace_refs = ([ctor, term], renamer, depth = 0) => {
   }
 }
 
-const rewrite = ([ctor, term], rewriter, scope = [], only_once = false) => {
-  var rewritten = rewriter([ctor, term], scope);
+const rewrite = ([ctor, term], rewriter, scope = [], erased = false, only_once = false) => {
+  var rewritten = rewriter([ctor, term], scope, erased);
   if (rewritten) {
-    return only_once ? rewritten : rewrite(rewritten, rewriter, scope, only_once);
+    return only_once ? rewritten : rewrite(rewritten, rewriter, scope, erased, only_once);
   } else {
     switch (ctor) {
       case "Var":
@@ -1498,38 +1479,38 @@ const rewrite = ([ctor, term], rewriter, scope = [], only_once = false) => {
       case "Typ":
         return Typ();
       case "Tid":
-        var expr = rewrite(term.expr, rewriter, scope, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, true, only_once);
         return Tid(expr);
       case "All":
         var name = term.name;
-        var bind = rewrite(term.bind, rewriter, scope, only_once);
-        var body = rewrite(term.body, rewriter, scope.concat([name]), only_once);
+        var bind = rewrite(term.bind, rewriter, scope, true, only_once);
+        var body = rewrite(term.body, rewriter, scope.concat([name]), true, only_once);
         var eras = term.eras;
         return All(name, bind, body, eras);
       case "Lam":
         var name = term.name;
-        var bind = term.bind && rewrite(term.bind, rewriter, scope, only_once);
-        var body = rewrite(term.body, rewriter, scope.concat([name]), only_once);
+        var bind = term.bind && rewrite(term.bind, rewriter, scope, true, only_once);
+        var body = rewrite(term.body, rewriter, scope.concat([name]), erased, only_once);
         var eras = term.eras;
         return Lam(name, bind, body, eras);
       case "App":
-        var func = rewrite(term.func, rewriter, scope, only_once);
-        var argm = rewrite(term.argm, rewriter, scope, only_once);
+        var func = rewrite(term.func, rewriter, scope, erased, only_once);
+        var argm = rewrite(term.argm, rewriter, scope, term.eras || erased, only_once);
         var eras = term.eras;
         return App(func, argm, term.eras);
       case "Box":
-        var expr = rewrite(term.expr, rewriter, scope, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, true, only_once);
         return Box(expr);
       case "Put":
-        var expr = rewrite(term.expr, rewriter, scope, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, erased, only_once);
         return Put(expr);
       case "Tak":
-        var expr = rewrite(term.expr, rewriter, scope, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, true, only_once);
         return Tak(expr);
       case "Dup":
         var name = term.name;
-        var expr = rewrite(term.expr, rewriter, scope, only_once);
-        var body = rewrite(term.body, rewriter, scope.concat([name]), only_once);
+        var expr = rewrite(term.expr, rewriter, scope, erased, only_once);
+        var body = rewrite(term.body, rewriter, scope.concat([name]), erased, only_once);
         return Dup(name, expr, body);
       case "Wrd":
         return Wrd();
@@ -1539,85 +1520,85 @@ const rewrite = ([ctor, term], rewriter, scope = [], only_once = false) => {
       case "Op1":
       case "Op2":
         var func = term.func;
-        var num0 = rewrite(term.num0, rewriter, scope, only_once);
-        var num1 = rewrite(term.num1, rewriter, scope, only_once);
+        var num0 = rewrite(term.num0, rewriter, scope, erased, only_once);
+        var num1 = rewrite(term.num1, rewriter, scope, erased, only_once);
         return Op2(func, num0, num1);
       case "Ite":
-        var cond = rewrite(term.cond, rewriter, scope, only_once);
-        var pair = rewrite(term.pair, rewriter, scope, only_once);
+        var cond = rewrite(term.cond, rewriter, scope, erased, only_once);
+        var pair = rewrite(term.pair, rewriter, scope, erased, only_once);
         return Ite(cond, pair);
       case "Cpy":
         var name = term.name;
-        var numb = rewrite(term.numb, rewriter, scope, only_once);
-        var body = rewrite(term.body, rewriter, scope.concat([name]), only_once);
+        var numb = rewrite(term.numb, rewriter, scope, erased, only_once);
+        var body = rewrite(term.body, rewriter, scope.concat([name]), erased, only_once);
         return Cpy(name, numb, body);
       case "Sig":
         var name = term.name;
-        var typ0 = rewrite(term.typ0, rewriter, scope, only_once);
-        var typ1 = rewrite(term.typ1, rewriter, scope.concat([name]), only_once);
+        var typ0 = rewrite(term.typ0, rewriter, scope, true, only_once);
+        var typ1 = rewrite(term.typ1, rewriter, scope.concat([name]), true, only_once);
         var eras = term.eras;
         return Sig(name, typ0, typ1, eras);
       case "Par":
-        var val0 = rewrite(term.val0, rewriter, scope, only_once);
-        var val1 = rewrite(term.val1, rewriter, scope, only_once);
+        var val0 = rewrite(term.val0, rewriter, scope, term.eras === 1 || erased, only_once);
+        var val1 = rewrite(term.val1, rewriter, scope, term.eras === 1 || erased, only_once);
         var eras = term.eras;
         return Par(val0, val1, eras);
       case "Fst":
-        var pair = rewrite(term.pair, rewriter, scope, only_once);
+        var pair = rewrite(term.pair, rewriter, scope, erased, only_once);
         var eras = term.eras;
         return Fst(pair, eras);
       case "Snd":
-        var pair = rewrite(term.pair, rewriter, scope, only_once);
+        var pair = rewrite(term.pair, rewriter, scope, erased, only_once);
         var eras = term.eras;
         return Snd(pair, eras);
       case "Prj":
         var nam0 = term.nam0;
         var nam1 = term.nam1;
-        var pair = rewrite(term.pair, rewriter, scope, only_once);
-        var body = rewrite(term.body, rewriter, scope.concat([nam0, nam1]), only_once);
+        var pair = rewrite(term.pair, rewriter, scope, erased, only_once);
+        var body = rewrite(term.body, rewriter, scope.concat([nam0, nam1]), erased, only_once);
         var eras = term.eras;
         return Prj(nam0, nam1, pair, body, eras);
       case "Eql":
-        var val0 = rewrite(term.val0, rewriter, scope, only_once);
-        var val1 = rewrite(term.val1, rewriter, scope, only_once);
+        var val0 = rewrite(term.val0, rewriter, scope, true, only_once);
+        var val1 = rewrite(term.val1, rewriter, scope, true, only_once);
         return Eql(val0, val1);
       case "Rfl":
-        var expr = rewrite(term.expr, rewriter, scope, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, true, only_once);
         return Rfl(expr);
       case "Sym":
-        var prof = rewrite(term.prof, rewriter, scope, only_once);
+        var prof = rewrite(term.prof, rewriter, scope, true, only_once);
         return Sym(prof);
       case "Rwt":
         var name = term.name;
-        var type = rewrite(term.type, rewriter, scope.concat([name]), only_once);
-        var prof = rewrite(term.prof, rewriter, scope, only_once);
-        var expr = rewrite(term.expr, rewriter, scope, only_once);
+        var type = rewrite(term.type, rewriter, scope.concat([name]), true, only_once);
+        var prof = rewrite(term.prof, rewriter, scope, true, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, erased, only_once);
         return Rwt(name, type, prof, expr);
       case "Slf":
         var name = term.name;
-        var type = rewrite(term.type, rewriter, scope.concat([name]), only_once);
+        var type = rewrite(term.type, rewriter, scope.concat([name]), true, only_once);
         return Slf(name, type);
       case "New":
-        var type = rewrite(term.type, rewriter, scope, only_once);
-        var expr = rewrite(term.expr, rewriter, scope, only_once);
+        var type = rewrite(term.type, rewriter, scope, true, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, erased, only_once);
         return New(type, expr);
       case "Use":
-        var expr = rewrite(term.expr, rewriter, scope, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, erased, only_once);
         return Use(expr);
       case "Ann":
-        var type = rewrite(term.type, rewriter, scope, only_once);
-        var expr = rewrite(term.expr, rewriter, scope, only_once);
+        var type = rewrite(term.type, rewriter, scope, true, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, erased, only_once);
         var done = term.done;
         return Ann(type, expr, done);
       case "Log":
-        var msge = rewrite(term.msge, rewriter, scope, only_once);
-        var expr = rewrite(term.expr, rewriter, scope, only_once);
+        var msge = rewrite(term.msge, rewriter, scope, true, only_once);
+        var expr = rewrite(term.expr, rewriter, scope, erased, only_once);
         return Log(msge, expr);
       case "Ref":
         var name = term.name;
         var eras = term.eras;
         var file = term.file;
-        return Ref(name, eras, file);
+        return Ref(name, eras, eras || erased, file);
     }
   }
 }

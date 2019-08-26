@@ -40,7 +40,6 @@ try {
   console.log("-f shows full names of references");
   console.log("-m disable logging");
   console.log("-h hides interaction net stats");
-  console.log("-u disables stratification (termination) checks");
   console.log("-p prints net as JSON");
   console.log("-v displays the version");
   process.exit();
@@ -111,7 +110,6 @@ if (args.v) {
       }
 
       var opts = {
-        boxcheck: !args.u,
         erased: !args.T,
         unbox: !args.B,
         weak: !!args.W,

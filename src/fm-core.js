@@ -12,7 +12,7 @@
 // - App: an application `f(a)`, optionally erased
 // - Box: a boxed type, `!A`
 // - Put: a boxed value, `#a`
-// - Tak: unboxes a boxed value, `-#a`
+// - Tak: unboxes a boxed value, `<>a`
 // - Dup: copies a boxed value, `dup x = a; b`
 // - Wrd: type of a native number
 // - Num: value of a native number
@@ -56,7 +56,7 @@ const Snd = (pair, eras)                   => ["Snd", {pair, eras},             
 const Prj = (nam0, nam1, pair, body, eras) => ["Prj", {nam0, nam1, pair, body, eras}, MEMO && ("pj" + eras + pair[2] + body[2])];
 const Eql = (val0, val1)                   => ["Eql", {val0, val1},                   MEMO && ("eq" + val0[2] + val1[2])];
 const Rfl = (expr)                         => ["Rfl", {expr},                         MEMO && "*"];
-const Sym = (prof)                         => ["Sym", {prof},                         MEMO && prof[2]];
+const Sym = (prof)                         => ["Sym", {prof},                         MEMO && "*"];
 const Rwt = (name, type, prof, expr)       => ["Rwt", {name, type, prof, expr},       MEMO && expr[2]];
 const Slf = (name, type)                   => ["Slf", {name, type},                   MEMO && ("sf" + type[2])];
 const New = (type, expr)                   => ["New", {type, expr},                   MEMO && expr[2]];
@@ -160,7 +160,7 @@ const show = ([ctor, args], nams = [], opts = {}) => {
         text = (term[1].func[0] === "App" ? ", " : "") + (term[1].eras ? "~" : "") + show(term[1].argm, nams, opts) + text;
         term = term[1].func;
       }
-      if (term[0] === "Ref" || term[0] === "Var") {
+      if (term[0] === "Ref" || term[0] === "Var" || term[0] === "Tak") {
         var func = show(term, nams, opts);
       } else {
         var func = "(" + show(term,nams, opts) + ")";
@@ -174,12 +174,12 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       return "#" + expr;
     case "Tak":
       var expr = show(args.expr, nams, opts);
-      return "-#(" + expr + ")";
+      return "<" + expr + ">";
     case "Dup":
       var name = args.name;
       var expr = show(args.expr, nams, opts);
       if (args.body[0] === "Var" && args.body[1].index === 0) {
-        return "-#(" + expr + ")";
+        return "<" + expr + ">";
       } else {
         var body = show(args.body, nams.concat([name]), opts);
         return "dup " + name + " = " + expr + "; " + body;
@@ -193,11 +193,11 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       var func = args.func;
       var num0 = show(args.num0, nams, opts);
       var num1 = show(args.num1, nams, opts);
-      return "(" + num0 + " " + func + " " + num1 + ")";
+      return num0 + " " + func + " " + num1;
     case "Ite":
       var cond = show(args.cond, nams, opts);
       var pair = show(args.pair, nams, opts);
-      return "(if " + cond + " " + pair + ")";
+      return "if " + cond + " " + pair;
     case "Cpy":
       var name = args.name;
       var numb = show(args.numb, nams, opts);
@@ -240,19 +240,19 @@ const show = ([ctor, args], nams = [], opts = {}) => {
     case "Eql":
       var val0 = show(args.val0, nams, opts);
       var val1 = show(args.val1, nams, opts);
-      return "(" + val0 + " == " + val1 + ")";
+      return val0 + " == " + val1;
     case "Rfl":
       var expr = show(args.expr, nams, opts);
-      return "refl<" + expr + ">";
+      return "refl(~" + expr + ")";
     case "Sym":
       var prof = show(args.prof, nams, opts);
-      return "sym(" + prof + ")";
+      return "sym(~" + prof + ")";
     case "Rwt":
       var name = args.name;
       var type = show(args.type, nams.concat([name]), opts);
       var prof = show(args.prof, nams, opts);
       var expr = show(args.expr, nams, opts);
-      return "rewrite<" + prof + ">{" + name + " in " + type + "}(" + expr + ")";
+      return expr + " :: rewrite " + name + " in " + type + " with " + prof;
     case "Slf":
       var name = args.name;
       var type = show(args.type, nams.concat([name]), opts);
@@ -260,7 +260,7 @@ const show = ([ctor, args], nams = [], opts = {}) => {
     case "New":
       var type = show(args.type, nams, opts);
       var expr = show(args.expr, nams, opts);
-      return "new<" + type + "> " + expr;
+      return "new(~" + type + ") " + expr;
     case "Use":
       var expr = show(args.expr, nams, opts);
       return "%" + expr;
@@ -584,10 +584,10 @@ const norm = (term, defs = {}, opts) => {
   };
   const take = (expr, names) => {
     var expr = reduce(expr, names);
-    // -# #a ~> a
+    // <> #a ~> a
     if (expr[0] === "Put") {
       return reduce(expr[1].expr, names);
-    // -# (dup x = a; b) ~> dup x = a; -# b
+    // <> (dup x = a; b) ~> dup x = a; <> b
     } else if (expr[0] === "Dup"){
       return Dup(expr[1].name, expr[1].expr, x => weak_reduce(Tak(expr[1].body(x)), names_ext(expr[1].name, names)));
     } else {
@@ -637,9 +637,9 @@ const norm = (term, defs = {}, opts) => {
         case ".!" : return Num((~ num1[1].numb) >>> 0);
         case ".>>": return Num((num0[1].numb >>> num1[1].numb) >>> 0);
         case ".<<": return Num((num0[1].numb << num1[1].numb) >>> 0);
-        case ">"  : return Num((num0[1].numb > num1[1].numb ? 1 : 0) >>> 0);
-        case "<"  : return Num((num0[1].numb < num1[1].numb ? 1 : 0) >>> 0);
-        case "===": return Num((num0[1].numb === num1[1].numb ? 1 : 0) >>> 0);
+        case ".>" : return Num((num0[1].numb > num1[1].numb ? 1 : 0) >>> 0);
+        case ".<" : return Num((num0[1].numb < num1[1].numb ? 1 : 0) >>> 0);
+        case ".=" : return Num((num0[1].numb === num1[1].numb ? 1 : 0) >>> 0);
         default   : throw "[RUNTIME-ERROR]\nUnknown primitive: " + func + ".";
       }
     } else {
@@ -904,7 +904,7 @@ const erase = (term) => {
     case "Rfl":
       return Put(Num(0));
     case "Sym":
-      return erase(term.prof);
+      return Put(Num(0));
     case "Rwt":
       return erase(term.expr);
     case "Slf":
@@ -941,10 +941,10 @@ const equal = (a, b, defs) => {
 
         // Gets whnfs with and without dereferencing
         // Note: can't use weak:true because it won't give opportunity to eta...
-        var ax = norm(a, {}, {weak: true, unbox: true});
-        var bx = norm(b, {}, {weak: true, unbox: true});
-        var ay = norm(a, defs, {weak: true, unbox: true});
-        var by = norm(b, defs, {weak: true, unbox: true});
+        var ax = norm(a, {}, {weak: true, undup: true});
+        var bx = norm(b, {}, {weak: true, undup: true});
+        var ay = norm(a, defs, {weak: true, undup: true});
+        var by = norm(b, defs, {weak: true, undup: true});
 
         // Optimization: if hashes are equal, then a == b prematurely
         if (a[2] === b[2] || ax[2] === bx[2] || ay[2] === by[2]) {
@@ -1277,7 +1277,8 @@ const ctx_names = (ctx) => {
 };
 
 
-const typecheck = (() => {
+const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
+  var type_memo = {};
 
   const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
     const TERM = (term) => {
@@ -1295,8 +1296,8 @@ const typecheck = (() => {
     const MATCH = (a, b, ctx) => {
       if (!equal(a, b, defs)) {
         throw ERROR("Type mismatch."
-          + "\n- Found type... " + TERM(norm(a, {}, {weak: false, unbox: true}))
-          + "\n- Instead of... " + TERM(norm(b, {}, {weak: false, unbox: true})));
+          + "\n- Found type... " + TERM(norm(a, {}, {weak: false, undup: true}))
+          + "\n- Instead of... " + TERM(norm(b, {}, {weak: false, undup: true})));
       }
     };
 
@@ -1554,9 +1555,10 @@ const typecheck = (() => {
       case "Ref":
         if (!defs[term[1].name]) {
           ERROR("Undefined reference: `" + term[1].name + "`.");
-        } else {
-          type = typecheck(defs[term[1].name], null, defs, ctx, [term, ctx]);
+        } else if (!type_memo[term[1].name]) {
+          type_memo[term[1].name] = typecheck(defs[term[1].name], null, defs, ctx, [term, ctx]);
         }
+        type = type_memo[term[1].name]
         break;
       default:
         throw "TODO: type checker for " + term[0] + ".";
@@ -1567,8 +1569,8 @@ const typecheck = (() => {
     return type;
   };
 
-  return typecheck;
-})();
+  return typecheck(term, expect, defs, ctx, inside);
+};
 
 module.exports = {
   Var,
