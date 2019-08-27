@@ -53,8 +53,10 @@ const {
 
 // Usng eval prevents being catched by Webpack
 const fs = typeof window === "object" ? null : eval('require("fs")');
+const ls = typeof window === "object" ? window.localStorage : null;
 const path = typeof window === "object" ? null : eval('require("path")');
 const xhr = require("xhr-request-promise");
+const version = require("./../package.json").version;
 
 // :::::::::::::
 // :: Parsing ::
@@ -62,6 +64,8 @@ const xhr = require("xhr-request-promise");
 
 // Converts a string to a term
 const parse = async (file, code, tokenify, root = true, loaded = {}) => {
+  var init_parse = Date.now();
+
   async function do_import(import_file) {
     if (import_file.indexOf("@") === -1) {
       local_imports[import_file] = true;
@@ -1788,11 +1792,11 @@ const load_file = (() => {
         var cached_file_path = path.join(cache_dir_path, file + ".fm");
         var local_file_path = path.join(process.cwd(), file + ".fm");
       }
-      var has_cached = fs && fs.existsSync(cached_file_path);
-      var has_local = fs && fs.existsSync(local_file_path);
-      if (has_cached || has_local) {
+      var has_cached_fs = fs && fs.existsSync(cached_file_path);
+      var has_local_fs = fs && fs.existsSync(local_file_path);
+      if (has_cached_fs || has_local_fs) {
         loading[file] = new Promise((resolve, reject) => {
-          fs.readFile(has_cached ? cached_file_path : local_file_path, "utf8", (err, code) => {
+          fs.readFile(has_cached_fs ? cached_file_path : local_file_path, "utf8", (err, code) => {
             if (err) {
               reject(err);
             } else {
@@ -1801,19 +1805,27 @@ const load_file = (() => {
           })
         });
       } else {
-        loading[file] = post("load_file", {file}).then(code => new Promise((resolve, reject) => {
-          if (fs && code) {
-            if (!fs.existsSync(cache_dir_path)) {
-              console.log("Downloading libraries to `fm_modules`. This may take a while...");
-              fs.mkdirSync(cache_dir_path);
-              fs.writeFile(cached_file_path, code, (err, ok) => resolve(code));
-            } else if (!fs.existsSync(cached_file_path)) {
-              fs.writeFile(cached_file_path, code, (err, ok) => resolve(code));
-            } else {
-              resolve(code);
+        var cached_ls = ls && ls.getItem("FPM@" + version + "/" + file);
+        if (cached_ls) {
+          loading[file] = Promise.resolve(cached_ls);
+        } else {
+          loading[file] = post("load_file", {file}).then(code => new Promise((resolve, reject) => {
+            if (code) {
+              if (fs && !fs.existsSync(cache_dir_path)) {
+                console.log("Downloading files to `fm_modules`. This may take a while...");
+                fs.mkdirSync(cache_dir_path);
+                fs.writeFile(cached_file_path, code, (err, ok) => resolve(code));
+              } else if (fs && !fs.existsSync(cached_file_path)) {
+                fs.writeFile(cached_file_path, code, (err, ok) => resolve(code));
+              } else if (ls) {
+                ls.setItem("FPM@" + version + "/" + file, code);
+                resolve(code);
+              } else {
+                resolve(code);
+              }
             }
-          }
-        }));
+          }));
+        }
       }
     }
     return loading[file];
@@ -1869,4 +1881,5 @@ module.exports = {
   save_file,
   load_file,
   find_term,
+  version,
 };

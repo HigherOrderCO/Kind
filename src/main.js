@@ -73,7 +73,7 @@ async function upload(file, global_path = {}) {
 }
 
 if (args.v) {
-  console.log(require("./../package.json").version);
+  console.log(fm.lang.version);
   process.exit();
 } else if (args.S || args.s) {
   var file_name = main;
