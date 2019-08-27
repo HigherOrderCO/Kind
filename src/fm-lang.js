@@ -316,7 +316,10 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
             }
           }
           term = Ref(ref_path(name), false);
-          if (tokens) tokens[tokens.length - 1][0] = "ref";
+          if (tokens) {
+            tokens[tokens.length - 1][0] = "ref";
+            tokens[tokens.length - 1][2] = term[1].name;
+          }
         }
       } else {
         term = Var(nams.length - i - 1);
@@ -704,7 +707,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         var op_init = op_inits[i];
         if (match_here(op_init)) {
           matched = true;
+          if (tokens) tokens.pop();
           var func = op_init + parse_string_here(x => !is_space(x));
+          if (tokens) tokens.push(["txt", ""]);
           var argm = parse_term(nams);
           if (is_native_op[func]) {
             parsed = Op2(func, parsed, argm);
@@ -857,6 +862,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       // Parses definition name
       if (tokens) tokens.push(["def", ""]);
       var name = parse_name();
+      if (tokens) tokens[tokens.length - 1][2] = file+"/"+name;
       if (tokens) tokens.push(["txt", ""]);
 
       // If name is empty, stop
