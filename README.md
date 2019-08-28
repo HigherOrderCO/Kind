@@ -10,6 +10,29 @@ An efficient proof-gramming language. It aims to be:
 
 Check the [official documentation](https://docs.formality-lang.org) and browse our [base-libraries](https://github.com/moonad/Formality-Base)!
 
+## Examples
+
+- [Bools](https://github.com/moonad/Formality-Base/blob/master/Data.Bool.fm) and some theorems (DeMorgan's laws).
+
+- A bunch of common [List](https://github.com/moonad/Formality-Base/blob/master/Data.List.fm) functions.
+
+- [Monads.](https://github.com/moonad/Formality-Base/blob/master/Control.Monad.fm) (The FP view, not a monoid in the category of endofunctors!)
+
+- A vector (i.e., list with statically-known-length):
+
+    ```javascript
+    T Vector {A : Type} (len : Nat)
+    | vcons {len  : Nat, head : A, tail : Vector(A, len)} (succ(len))
+    | vnil                                                (zero)
+
+    // Removes the first element
+    vtail : {~T : Type, ~len : Nat, vector : Vector(T, succ(len))} -> Vector(T, len)
+      case/Vector vector
+      | vcons => tail
+      | vnil  => vnil(~T)
+      : Vector(T, pred(len))
+    ```
+
 ## Usage
 
 Multiple implementations (Haskell, Rust, Go, etc.) will be available in a future. Right now, you can already use the JavaScript one. Install it via `npm` with:
