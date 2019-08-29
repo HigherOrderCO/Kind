@@ -752,7 +752,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
     // Import
     } else if (match("import")) {
+      if (tokens) tokens.push(["imp", ""]);
       var impf = parse_string();
+      if (tokens) tokens.push(["txt", ""]);
       var qual = match("as") ? parse_string() : null;
       var open = match("open");
       qual_imports[qual || impf] = impf;
