@@ -12,7 +12,12 @@ fm.lang.norm = function norm(term, defs, mode = "DEBUG", opts, stats = {}) {
   switch (mode) {
     case "DEBUG":
       var erased = (opts.erased ? fm.lang.erase : (x=>x))(term);
-      return fm.core.norm(erased, defs, {weak: opts.weak, unbox: opts.unbox, logging: opts.logging});
+      try {
+        var normal = fm.core.norm(erased, defs, {weak: opts.weak, unbox: opts.unbox, logging: opts.logging});
+      } catch (e) {
+        var normal = fm.core.norm(erased, defs, {weak: true, unbox: opts.unbox, logging: opts.logging});
+      }
+      return normal;
     case "JAVASCRIPT":
       return fm.to_js.decompile(fm.to_js.compile(fm.lang.erase(term, defs), defs));
     case "OPTIMAL":
