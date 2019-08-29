@@ -119,6 +119,17 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     return result;
   }
 
+  function define(path, term) {
+    if (root) {
+      var name = path.replace(new RegExp("^\\w*\/"), "");
+      if (defs[ref_path(name)]) {
+        error("Attempted to re-define '" + name + "', which already points to '" + ref_path(name) + "'.\n"
+            + "Formality can't have ambiguous names (shadowing) on global definitions.");
+      }
+    }
+    defs[path] = term;
+  }
+
   function ref(str) {
     return Ref(ref_path(str));
   }
@@ -838,9 +849,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         adt_ctor.push([ctor_name, ctor_flds, ctor_type]);
       }
       var adt = {adt_pram, adt_indx, adt_ctor, adt_name};
-      defs[file+"/"+adt_name] = derive_adt_type(file, adt);
+      define(file+"/"+adt_name, derive_adt_type(file, adt));
       for (var c = 0; c < adt_ctor.length; ++c) {
-        defs[file+"/"+adt_ctor[c][0]] = derive_adt_ctor(file, adt, c);
+        define(file+"/"+adt_ctor[c][0], derive_adt_ctor(file, adt, c));
       }
       adts[file+"/"+adt_name] = adt;
 
@@ -1225,13 +1236,13 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
         // Builds a non-recursive, non-boxed definition
         if (!recur && !boxed) {
-          defs[file+"/"+name] = Ann(type, term, false);
+          define(file+"/"+name, Ann(type, term, false));
 
         // Builds a non-recursive, boxed definition
         } else if (!recur && boxed) {
           var type = lv0_headers(1, Box(type), true);
           var term = lv0_headers(0, Put(term), true);
-          defs[file+"/"+name] = Ann(type, term, false);
+          define(file+"/"+name, Ann(type, term, false));
           unbx[file+"/"+name] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
 
         // Builds a recursive, non-boxed definition
@@ -1275,10 +1286,10 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           var term = App(term, ind_base, false);
           var term = Lam(rec_depth, null, lv0_headers(0, term, true), false);
 
-          defs[file+"/"+name+".moti"] = Ann(moti_type, moti_term, false);
-          defs[file+"/"+name+".step"] = Ann(step_type, step_term, false);
-          defs[file+"/"+name+".base"] = Ann(base_type, base_term, false);
-          defs[file+"/"+name]         = Ann(type, term, false);
+          define(file+"/"+name+".moti", Ann(moti_type, moti_term, false));
+          define(file+"/"+name+".step", Ann(step_type, step_term, false));
+          define(file+"/"+name+".base", Ann(base_type, base_term, false));
+          define(file+"/"+name, Ann(type, term, false));
           unbx[file+"/"+name+".moti"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
           unbx[file+"/"+name+".step"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
           unbx[file+"/"+name+".base"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
@@ -1288,7 +1299,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       // Untyped definition
       } else {
         var term = await parse_term([]);
-        defs[file+"/"+name] = term;
+        define(file+"/"+name, term);
       }
     }
 
