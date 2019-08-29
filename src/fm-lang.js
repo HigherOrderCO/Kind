@@ -751,7 +751,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       enlarge[mini] = full;
 
     // Import
-    } else if (match("import")) {
+    } else if (match("import ")) {
       if (tokens) tokens.push(["imp", ""]);
       var impf = parse_string();
       if (tokens) tokens.push(["txt", ""]);
