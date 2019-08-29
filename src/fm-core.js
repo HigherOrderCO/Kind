@@ -1152,6 +1152,9 @@ const boxcheck = (term, defs = {}, ctx = []) => {
         check(term.pair, defs, ctx, seen);
         break;
       case "Cpy":
+        if (!is_at_level(term.body, 0)) {
+          throw "[ERROR]\nCopy variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], ctx);
+        }
         check(term.numb, defs, ctx, seen);
         check(term.body, defs, ctx.concat([term.name]), seen);
         break;
