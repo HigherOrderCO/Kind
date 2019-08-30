@@ -1212,6 +1212,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         if (type[0] === "Typ") {
           var term = Tid(term);
         }
+        var type = Tid(type);
 
         // Fills foralls and lambdas of arguments
         for (var i = names.length - 1; i >= 0; --i) {

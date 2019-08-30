@@ -18,7 +18,7 @@ try {
   console.log("");
   console.log("Evaluation modes (default: -d):");
   console.log("-d <file>/<term> debug (using HOAS interpreter)");
-  console.log("  -T don't erase types");
+  console.log("  -X don't erase types");
   console.log("  -B don't erase boxes");
   console.log("  -W stop on weak head normal form");
   console.log("-o <file>/<term> optimal (using interaction nets, lazy)");
