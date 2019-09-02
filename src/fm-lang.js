@@ -94,6 +94,16 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     return true;
   }
 
+  function find_name_in_imports(name) {
+    var found = [];
+    for (var open_import in open_imports) {
+      if (defs[open_import + "/" + name]) {
+        found.push(open_import + "/" + name);
+      }
+    }
+    return found;
+  }
+
   function ref_path(str) {
     var result = (function () {
       if (str.indexOf("/") === -1) {
@@ -101,20 +111,38 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       } else {
         var [str_file, str_name] = str.split("/");
       }
-      if (!str_file && defs[file + "/" + str_name]) {
-        return file + "/" + str_name;
-      }
-      if (qual_imports[str_file]) {
-        return qual_imports[str_file] + "/" + str_name;
-      }
-      if (!str_file) {
-        for (var open_import in open_imports) {
-          if (defs[open_import + "/" + str_name]) {
-            return open_import + "/" + str_name;
+      // If the reference includes the file...
+      if (str_file) {
+        // If it points to a qualified import, expand it
+        if (qual_imports[str_file]) {
+          return qual_imports[str_file] + "/" + str_name;
+        // Otherwise, return an undefined reference, as written
+        } else {
+          return str_file + "/" + str_name;
+        }
+      // Otherwise, if the reference is missing the file...
+      } else {
+        // If there is a local definition with that name, point to it
+        if (defs[file + "/" + str_name]) {
+          return file + "/" + str_name;
+        }
+        // Otherwise, if there are many defs with that name, it is ambiguous
+        var found = find_name_in_imports(str_name);
+        if (found.length > 1) {
+          var err_str = "Ambiguous reference: '" + str + "' could refer to:";
+          for (var i = 0; i < found.length; ++i) {
+            err_str += "\n- " + found[i];
           }
+          err_str += "\nType its full name to prevent this error.";
+          error(err_str);
+        }
+        // Otherwise, if there is exactly 1 open def with that name, point to it
+        if (found.length === 1) {
+          return found[0];
         }
       }
-      return str_file ? str_file + "/" + str_name : file + "/" + str_name;
+      // Otherwise, return an undefined reference to hte same file 
+      return file + "/" + str_name;
     })();
     return result;
   }
@@ -122,9 +150,13 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
   function define(path, term) {
     if (root) {
       var name = path.replace(new RegExp("^\\w*\/"), "");
-      if (defs[ref_path(name)]) {
-        error("Attempted to re-define '" + name + "', which already points to '" + ref_path(name) + "'.\n"
-            + "Formality can't have ambiguous names (shadowing) on global definitions.");
+      var found = find_name_in_imports(name);
+      if (found.length > 0) {
+        var err_str = "Attempted to re-define '" + name + "', which is already defined as:";
+        for (var i = 0; i < found.length; ++i) {
+          err_str += "\n- " + found[i];
+        }
+        error(err_str);
       }
     }
     defs[path] = term;
@@ -768,10 +800,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       if (tokens) tokens.push(["txt", ""]);
       var qual = match("as") ? parse_string() : null;
       var open = match("open");
-      qual_imports[qual || impf] = impf;
-      if (open) {
-        open_imports[impf] = true;
-      }
+      if (qual) qual_imports[qual] = impf;
+      qual_imports[impf] = impf;
+      open_imports[impf] = true;
       await do_import(impf);
 
     // Datatypes
