@@ -71,8 +71,12 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       local_imports[import_file] = true;
     }
     if (!loaded[import_file]) {
-      var file_code = await load_file(import_file);
-      loaded[import_file] = await parse(import_file, file_code, tokenify, false, loaded);
+      try {
+        var file_code = await load_file(import_file);
+        loaded[import_file] = await parse(import_file, file_code, tokenify, false, loaded);
+      } catch (e) {
+        error(e);
+      }
     }
     var {defs: file_defs
       , unbx: file_unbx
@@ -269,10 +273,10 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     var excuses = [
       "My parse-robot brain isn't perfect, sorry.",
       "What? If you can't get this right, don't expect me to!",
-      "Like you, I'm doing my best, ok?",
+      "I'm doing my best, ok?",
       "I hope you figure it out!",
       "I can't help any further. But I can pray for you!",
-      "I could be more precise, but unlike you, I'm not good enough.",
+      "I with I could be more precise...",
       "Hey, at least I'm showing a location. I'm looking at you, type-checker...",
       "Why programming needs to be so hard?",
       "I hope this doesn't affect your deadlines!",
