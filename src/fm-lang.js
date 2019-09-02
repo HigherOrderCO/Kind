@@ -1837,7 +1837,7 @@ const post = (func, body) => {
 };
 
 const save_file = (file, code) => post("save_file", {file, code});
-const find_term = (term) => post("find_term", {term});
+const load_file_parents = (file) => post("load_file_parents", {file});
 const load_file = (() => {
   var loading = {};
   return (file) => {
@@ -1935,6 +1935,6 @@ module.exports = {
   //derive_dependent_match,
   save_file,
   load_file,
-  find_term,
+  load_file_parents,
   version,
 };

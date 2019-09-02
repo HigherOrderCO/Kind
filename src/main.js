@@ -28,13 +28,10 @@ try {
   console.log("Type-checking modes:");
   console.log("-t <file>/<term> performs a type check");
   console.log("");
-  console.log("FM-Lab:");
-  console.log("-s <file> saves a file to FM-Lab"); 
-  console.log("");
-  console.log("Note:");
-  console.log("- <file> is the file name, without '.fm'.");
-  console.log("- <term> is the term name.");
-  console.log("- use @ instead of <term> to print all terms");
+  console.log("FPM:");
+  console.log("-s <file> saves a file to FPM");
+  console.log("-l <file> downloads a file from FPM");
+  console.log("-i <file> shows list of FPM files that import <file>");
   console.log("");
   console.log("Options:");
   console.log("-f shows full names of references");
@@ -42,6 +39,11 @@ try {
   console.log("-h hides interaction net stats");
   console.log("-p prints net as JSON");
   console.log("-v displays the version");
+  console.log("");
+  console.log("Notes:");
+  console.log("- <file> is the file name, without '.fm'.");
+  console.log("- <term> is the term name.");
+  console.log("- use @ instead of <term> to print all terms");
   process.exit();
 }
 
@@ -72,19 +74,30 @@ async function upload(file, global_path = {}) {
   return global_path[file];
 }
 
-if (args.v) {
-  console.log(fm.lang.version);
-  process.exit();
-} else if (args.S || args.s) {
-  var file_name = main;
-  if (file_name.slice(-3) === ".fm") {
-    file_name = file_name.slice(0, -3);
-  }
-  upload(file_name).then(() => process.exit());
+(async () => {
+  if (args.v) {
+    console.log(fm.lang.version);
+    process.exit();
 
-} else {
+  } else if (args.i) {
+    try {
+      console.log((await fm.lang.load_file_parents(main)).map(file => "- " + file).join("\n"));
+    } catch (e) {
+      console.log("Couldn't load global file '" + main + "'.");
+    }
 
-  (async () => {
+  } else if (args.l) {
+    console.log(fs.writeFileSync(main + ".fm", await fm.lang.load_file(main)));
+    console.log("Downloaded file as `" + main + ".fm`!");
+
+  } else if (args.S || args.s) {
+    var file_name = main;
+    if (file_name.slice(-3) === ".fm") {
+      file_name = file_name.slice(0, -3);
+    }
+    upload(file_name).then(() => process.exit());
+
+  } else {
     try {
       var mode
         = args.d ? "DEBUG"
@@ -168,5 +181,5 @@ if (args.v) {
       console.log(e);
       //console.log(e.toString());
     }
-  })();
-}
+  }
+})()
