@@ -680,10 +680,10 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
       var skip = parse_exact(":");
       var moti = parse_term(nams.concat(adt_indx.map(([name,type]) => name)).concat(["self"]));
-      for (var i = 0; i < adt_indx.length; ++i) {
+      var moti = Lam("self", null, moti, false);
+      for (var i = adt_indx.length - 1; i >= 0; --i) {
         var moti = Lam(adt_indx[i][0], null, moti, false);
       }
-      var moti = Lam("self", null, moti, false);
 
       var term = Use(term);
       var term = App(term, moti, true);
