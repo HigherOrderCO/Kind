@@ -21,16 +21,34 @@ Check the [official documentation](https://docs.formality-lang.org) and browse o
 - A vector (i.e., list with statically-known-length):
 
     ```javascript
-    T Vector {A : Type} (len : Nat)
-    | vcons {len  : Nat, head : A, tail : Vector(A, len)} (succ(len))
-    | vnil                                                (zero)
+    // A filler for unreachable cases
+    T Whatever
+    | whatever
 
-    // Removes the first element
+    // A natural number
+    T Nat
+    | succ {pred : Nat}
+    | zero
+
+    // A list with statically-known length
+    T Vector {A : Type} (len : Nat)
+    | vcons {len : Nat, head : A, tail : Vector(A, len)} (succ(len))
+    | vnil                                               (zero)
+
+    // Removes the first element of a non-empty vector
     vtail : {~T : Type, ~len : Nat, vector : Vector(T, succ(len))} -> Vector(T, len)
+
+      // Pattern-matches a vector, returns its tail
       case/Vector vector
       | vcons => tail
-      | vnil  => vnil(~T)
-      : Vector(T, pred(len))
+      | vnil  => whatever // unreachable
+
+      // The dependent return type of the pattern match is specialized for each
+      // case, then generalized for the return type of the whole expression
+      : case/Nat len
+        | succ => Vector(T, pred) // if len > 0, demand a vector of `pred(len)` elems
+        | zero => Whatever        // if len = 0, demand whatever
+        : Type
     ```
 
 ## Usage
