@@ -63,7 +63,7 @@ async function upload(file, global_path = {}) {
       var g_path = await upload(imp_file, global_path);
       var [g_name, g_vers] = g_path.split("@");
       //console.log(file, "replace", "`import " + imp_file + " *`", "by", "`import " + g_name + "@" + g_vers + " as " + imp_file + "`");
-      var code = code.replace(new RegExp("import " + imp_file + " *\n")  , "import " + g_name + "@" + g_vers + " as " + imp_file + "\n");
+      var code = code.replace(new RegExp("import " + imp_file + " *\n")  , "import " + g_name + "@" + g_vers + "\n");
       var code = code.replace(new RegExp("import " + imp_file + " *open"), "import " + g_name + "@" + g_vers + " open");
       var code = code.replace(new RegExp("import " + imp_file + " *as")  , "import " + g_name + "@" + g_vers + " as");
     }
