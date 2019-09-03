@@ -1,5 +1,7 @@
 # Formality
 
+![](docs/images/formality-logo.png)
+
 An efficient proof-gramming language. It aims to be:
 
 - **Fast:** no garbage-collection, optimal beta-reduction and a massively parallel GPU compiler make it fast.
@@ -62,9 +64,17 @@ $ npm i -g formality-lang
 Or via `nix` with:
 
 ```
-$ git clone https://gitlab.com/moonad/Formality-JavaScript.git
-$ cd Formality-JavaScript
+$ nix-env -f '<nixpkgs>' -iA nodePackages.node2nix
+$ node2nix --nodejs-12
+$ nix-env -f default.nix formality-lang
+```
+
+If `nodejs-12` is not in your `nixpkgs` channel, then build from unstable with:
+
+```
+$ node2nix --nodejs-12
 $ nix-channel add https://nixos.org/channels/nixpkgs-unstable unstable
+$ sed -i 's/nixpkgs/unstable/g' default.nix
 $ nix-env -f default.nix formality-lang
 ```
 
