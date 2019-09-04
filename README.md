@@ -55,7 +55,10 @@ Check the [official documentation](https://docs.formality-lang.org) and browse o
 
 ## Usage
 
-Multiple implementations (Haskell, Rust, Go, etc.) will be available in a future. Right now, you can already use the JavaScript one. Install it via `npm` with:
+Multiple implementations (Haskell, Rust, Go, etc.) will be available in a
+future. Right now, you can already use the JavaScript one (requires Node v0.12).
+
+Install it via `npm` with:
 
 ```
 $ npm i -g formality-lang
