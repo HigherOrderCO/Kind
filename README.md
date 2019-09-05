@@ -10,7 +10,7 @@ An efficient proof-gramming language. It aims to be:
 
 - **Portable:** the full language is implemented in a 400-LOC runtime, making it easily available everywhere.
 
-Check the [official documentation](https://docs.formality-lang.org) and browse our [base-libraries](https://github.com/moonad/Formality-Base)!
+Check the [official documentation](https://docs.formality-lang.org), browse our [base-libraries](https://github.com/moonad/Formality-Base) and come hang out with us [on Telegram](https://t.me/formality_lang)
 
 ## Examples
 
