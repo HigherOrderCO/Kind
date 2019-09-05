@@ -549,6 +549,20 @@ const subst_many = (term, vals, depth) => {
 // :: Evaluation ::
 // ::::::::::::::::
 
+// This is repeated on `fm-net.js` for keeping both files import-free.
+let arrbuf = new ArrayBuffer(4);
+var u32buf = new Uint32Array(arrbuf);
+var f32buf = new Float32Array(arrbuf);
+const put_float_on_word = num => {
+  f32buf[0] = num;
+  return u32buf[0];
+};
+const get_float_on_word = num => {
+  u32buf[0] = num;
+  return f32buf[0];
+};
+
+
 // Reduces a term to normal form or head normal form
 // Opts: weak, unbox, logging, eta
 const norm = (term, defs = {}, opts) => {
@@ -630,7 +644,6 @@ const norm = (term, defs = {}, opts) => {
         case "/"  : return Num((num0[1].numb / num1[1].numb) >>> 0);
         case "%"  : return Num((num0[1].numb % num1[1].numb) >>> 0);
         case "^"  : return Num((num0[1].numb ** num1[1].numb) >>> 0);
-        case "**" : return Num((num0[1].numb ** (num1[1].numb / (2 ** 32))) >>> 0);
         case ".&" : return Num((num0[1].numb & num1[1].numb) >>> 0);
         case ".|" : return Num((num0[1].numb | num1[1].numb) >>> 0);
         case ".^" : return Num((num0[1].numb ^ num1[1].numb) >>> 0);
@@ -640,6 +653,14 @@ const norm = (term, defs = {}, opts) => {
         case ".>" : return Num((num0[1].numb > num1[1].numb ? 1 : 0) >>> 0);
         case ".<" : return Num((num0[1].numb < num1[1].numb ? 1 : 0) >>> 0);
         case ".=" : return Num((num0[1].numb === num1[1].numb ? 1 : 0) >>> 0);
+        case "+f" : return Num(put_float_on_word(get_float_on_word(num0[1].numb) + get_float_on_word(num1[1].numb)));
+        case "-f" : return Num(put_float_on_word(get_float_on_word(num0[1].numb) - get_float_on_word(num1[1].numb)));
+        case "*f" : return Num(put_float_on_word(get_float_on_word(num0[1].numb) * get_float_on_word(num1[1].numb)));
+        case "/f" : return Num(put_float_on_word(get_float_on_word(num0[1].numb) / get_float_on_word(num1[1].numb)));
+        case "%f" : return Num(put_float_on_word(get_float_on_word(num0[1].numb) % get_float_on_word(num1[1].numb)));
+        case "^f" : return Num(put_float_on_word(get_float_on_word(num0[1].numb) ** get_float_on_word(num1[1].numb)));
+        case ".f" : return Num(put_float_on_word(num1[1].numb));
+        case ".u" : return Num(get_float_on_word(num1[1].numb) >>> 0);
         default   : throw "[RUNTIME-ERROR]\nUnknown primitive: " + func + ".";
       }
     } else {
@@ -1279,7 +1300,6 @@ const ctx_names = (ctx) => {
   return names.reverse();
 };
 
-
 const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
   var type_memo = {};
 
@@ -1607,6 +1627,8 @@ module.exports = {
   Ann,
   Log,
   Ref,
+  put_float_on_word,
+  get_float_on_word,
   show,
   shift,
   subst,

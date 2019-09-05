@@ -7,6 +7,19 @@ const Numeric = (numb) => numb + 0x100000000;
 const numb_of = (numb) => numb - 0x100000000;
 const type_of = (ptrn) => ptrn >= 0x100000000 ? NUM : PTR;
 
+// Float conversions
+let arrbuf = new ArrayBuffer(4);
+var u32buf = new Uint32Array(arrbuf);
+var f32buf = new Float32Array(arrbuf);
+const put_float_on_word = num => {
+  f32buf[0] = num;
+  return u32buf[0];
+};
+const get_float_on_word = num => {
+  u32buf[0] = num;
+  return f32buf[0];
+};
+
 // PtrNum types
 const PTR = 0;
 const NUM = 1;
@@ -148,16 +161,23 @@ class Net {
           case  3: var res = Numeric((fst / snd) >>> 0); break;
           case  4: var res = Numeric((fst % snd) >>> 0); break;
           case  5: var res = Numeric((fst ** snd) >>> 0); break;
-          case  6: var res = Numeric((fst ** (snd / (2 ** 32)) >>> 0)); break;
-          case  7: var res = Numeric((fst & snd) >>> 0); break;
-          case  8: var res = Numeric((fst | snd) >>> 0); break;
-          case  9: var res = Numeric((fst ^ snd) >>> 0); break;
-          case 10: var res = Numeric((~snd) >>> 0); break;
-          case 11: var res = Numeric((fst >>> snd) >>> 0); break;
-          case 12: var res = Numeric((fst << snd) >>> 0); break;
-          case 13: var res = Numeric((fst > snd ? 1 : 0) >>> 0); break;
-          case 14: var res = Numeric((fst < snd ? 1 : 0) >>> 0); break;
-          case 15: var res = Numeric((fst == snd ? 1 : 0) >>> 0); break;
+          case  6: var res = Numeric((fst & snd) >>> 0); break;
+          case  7: var res = Numeric((fst | snd) >>> 0); break;
+          case  8: var res = Numeric((fst ^ snd) >>> 0); break;
+          case  9: var res = Numeric((~snd) >>> 0); break;
+          case 10: var res = Numeric((fst >>> snd) >>> 0); break;
+          case 11: var res = Numeric((fst << snd) >>> 0); break;
+          case 12: var res = Numeric((fst > snd ? 1 : 0) >>> 0); break;
+          case 13: var res = Numeric((fst < snd ? 1 : 0) >>> 0); break;
+          case 14: var res = Numeric((fst == snd ? 1 : 0) >>> 0); break;
+          case 15: var res = Numeric(put_float_on_word(get_float_on_word(fst) + get_float_on_word(snd))); break;
+          case 16: var res = Numeric(put_float_on_word(get_float_on_word(fst) - get_float_on_word(snd))); break;
+          case 17: var res = Numeric(put_float_on_word(get_float_on_word(fst) * get_float_on_word(snd))); break;
+          case 18: var res = Numeric(put_float_on_word(get_float_on_word(fst) / get_float_on_word(snd))); break;
+          case 19: var res = Numeric(put_float_on_word(get_float_on_word(fst) % get_float_on_word(snd))); break;
+          case 20: var res = Numeric(put_float_on_word(get_float_on_word(fst) ** get_float_on_word(snd))); break;
+          case 21: var res = Numeric(put_float_on_word(snd)); break;
+          case 22: var res = Numeric(get_float_on_word(snd) >>> 0); break;
           default: throw "[ERROR]\nInvalid interaction.";
         }
         this.link_ports(dst, res);

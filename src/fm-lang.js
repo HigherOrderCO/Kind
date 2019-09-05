@@ -34,6 +34,8 @@ const {
   Ann,
   Log,
   Ref,
+  get_float_on_word,
+  put_float_on_word,
   show,
   shift,
   subst,
@@ -189,12 +191,13 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     return chr => set[chr] === 1;
   }
 
-  var is_native_op = {"+":1,"-":1,"*":1,"/":1,"%":1,"^":1,"**":1,".&":1,".|":1,".^":1,".!":1,".>>":1,".<<":1,".>":1,".<":1,".=":1};
+  var is_native_op = {"+":1,"-":1,"*":1,"/":1,"%":1,"^":1,".&":1,".|":1,".^":1,".!":1,".>>":1,".<<":1,".>":1,".<":1,".=":1,"+f":1,"-f":1,"*f":1,"/f":1,"%f":1,"^f":1,".f":1,".u":1};
   var op_inits     = "+-*/%^.=";
   var is_op_init   = build_charset("+-*/%^.=");
   var is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@/");
   var is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@+*/%^!<>=&|");
-  var is_space     = build_charset(" \t\n\r;");
+  var is_spacy     = build_charset(" \t\n\r;");
+  var is_space     = build_charset(" ");
   var is_newline   = build_charset("\n");
 
   function next() {
@@ -210,21 +213,21 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     idx += 1;
   }
 
-  function skip_spaces() {
+  function skip_spaces(is_space = is_spacy) {
     while (idx < code.length && is_space(code[idx])) {
       next();
     }
   }
 
-  function next_char() {
-    skip_spaces();
+  function next_char(is_space = is_spacy) {
+    skip_spaces(is_space);
     while (code.slice(idx, idx + 2) === "//") {
       if (tokens) tokens.push(["cmm", ""]);
       while (code[idx] !== "\n" && idx < code.length) {
         next();
       }
       if (tokens) tokens.push(["txt", ""]);
-      skip_spaces();
+      skip_spaces(is_space);
     }
   }
 
@@ -245,10 +248,21 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
-  function match(string) {
-    next_char();
+  function match(string, is_space = is_spacy) {
+    next_char(is_space);
     return match_here(string);
   }
+
+  function match_op_init(is_space = is_spacy) {
+    for (var i = 0; i < op_inits.length; ++i) {
+      var op_init = op_inits[i];
+      if (match(op_init, is_space)) {
+        return op_init;
+      }
+    };
+    return null;
+  };
+
 
   function is_sigma(string) {
     var i = idx;
@@ -337,8 +351,18 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     if (tokens) tokens.push(["???", ""]);
     var name = parse_name();
     var numb = Number(name);
+    // Not a var but a number
     if (!isNaN(numb)) {
-      term = ind_num ? build_ind(name) : Num(numb >>> 0);
+      // Inductive
+      if (ind_num) {
+        var term = build_ind(name);
+      // Float
+      } else if (name.indexOf(".") !== -1) {
+        var term = Num(put_float_on_word(numb));
+      // Uint
+      } else {
+        var term = Num(numb >>> 0);
+      }
       if (tokens) tokens[tokens.length - 1][0] = "num";
     } else {
       var skip = 0;
@@ -379,6 +403,8 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
   function parse_term(nams) {
     var parsed;
+
+    // First parsing phase (terms)
 
     // Parenthesis
     if (match("(")) {
@@ -694,81 +720,93 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       parsed = term;
     }
 
+    // Unary operators
+    else if (match(".!(")) {
+      var argm = parse_term(nams);
+      var skip = parse_exact(")");
+      parsed = Op2(".!", Num(0), argm);
+    }
+    else if (match(".f(")) {
+      var argm = parse_term(nams);
+      var skip = parse_exact(")");
+      parsed = Op2(".f", Num(0), argm);
+    }
+    else if (match(".u(")) {
+      var argm = parse_term(nams);
+      var skip = parse_exact(")");
+      parsed = Op2(".u", Num(0), argm);
+    }
+
     // Variable / Reference
     else {
       parsed = parse_var(nams, false);
     }
 
-    // Apply to Ind
+    // Second parsing phase ("glued" parses)
     if (match_here("*")) {
       var term = parse_var(nams, true);
       parsed = App(parsed, term, false);
     }
 
-    // Applications
-    var applier = null;
-    while ((applier = code[idx]), applier === "(") {
-      var skip = match_here(applier);
-      var term = parsed;
-      while (idx < code.length) {
-        var eras = match("~");
-        var argm = parse_term(nams);
-        var term = App(term, argm, eras);
-        if (match(")")) break;
-        parse_exact(",");
-      }
-      parsed = term;
-    }
-
-    // List
-    while (match_here("$")) {
-      var type = parsed;
-      var list = [];
-      var skip = parse_exact("[");
-      while (idx < code.length && !match("]")) {
-        list.push(parse_term(nams));
-        if (match("]")) break; else parse_exact(",");
-      }
-      var term = App(base_ref("nil"), type, true);
-      for (var i = list.length - 1; i >= 0; --i) {
-        var term = App(App(App(base_ref("cons"), type, true), list[i], false), term, false);
-      }
-      parsed = term;
-    }
-
-    // Rewrite
-    if (match_here(" ::")) {
-      var skip = parse_exact("rewrite");
-      var name = parse_string();
-      var skip = parse_exact("in");
-      var type = parse_term(nams.concat([name]));
-      var skip = parse_exact("with");
-      var prof = parse_term(nams);
-      parsed = Rwt(name, type, prof, parsed);
-    }
-
-    // Operators
-    while (match_here(" ")) {
-      var matched = false;
-      for (var i = 0; i < op_inits.length; ++i) {
-        var op_init = op_inits[i];
-        if (match_here(op_init)) {
-          matched = true;
-          if (tokens) tokens.pop();
-          var func = op_init + parse_string_here(x => !is_space(x));
-          if (tokens) tokens.push(["txt", ""]);
+    // Third parsing phase (operators)
+    var matched_op_init = null;
+    var matched = true;
+    while (matched) {
+      // Applications
+      if (matched = match("(", is_space)) {
+        var term = parsed;
+        while (idx < code.length) {
+          var eras = match("~");
           var argm = parse_term(nams);
-          if (is_native_op[func]) {
-            parsed = Op2(func, parsed, argm);
-          } else if (func === "->") {
-            parsed = All("", parsed, shift(argm, 1, 0), false);
-          } else if (func === "==") {
-            parsed = Eql(parsed, argm);
-          } else {
-            parsed = App(App(ref(func), parsed, false), argm, false);
-          }
+          var term = App(term, argm, eras);
+          if (match(")")) break;
+          parse_exact(",");
         }
-        if (matched) break;
+        parsed = term;
+      }
+
+      // List
+      else if (matched = match("$", is_space)) {
+        var type = parsed;
+        var list = [];
+        var skip = parse_exact("[");
+        while (idx < code.length && !match("]")) {
+          list.push(parse_term(nams));
+          if (match("]")) break; else parse_exact(",");
+        }
+        var term = App(base_ref("nil"), type, true);
+        for (var i = list.length - 1; i >= 0; --i) {
+          var term = App(App(App(base_ref("cons"), type, true), list[i], false), term, false);
+        }
+        parsed = term;
+      }
+
+      // Rewrite
+      else if (matched = match("::", is_space)) {
+        var skip = parse_exact("rewrite");
+        var name = parse_string();
+        var skip = parse_exact("in");
+        var type = parse_term(nams.concat([name]));
+        var skip = parse_exact("with");
+        var prof = parse_term(nams);
+        parsed = Rwt(name, type, prof, parsed);
+      }
+
+      // Operators
+      else if (matched = !!(matched_op_init = match_op_init(is_space))) {
+        if (tokens) tokens.pop();
+        var func = matched_op_init + parse_string_here(x => !is_space(x));
+        if (tokens) tokens.push(["txt", ""]);
+        var argm = parse_term(nams);
+        if (is_native_op[func]) {
+          parsed = Op2(func, parsed, argm);
+        } else if (func === "->") {
+          parsed = All("", parsed, shift(argm, 1, 0), false);
+        } else if (func === "==") {
+          parsed = Eql(parsed, argm);
+        } else {
+          parsed = App(App(ref(func), parsed, false), argm, false);
+        }
       }
     }
 
