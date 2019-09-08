@@ -1514,9 +1514,9 @@ const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
         type = subst(type, Fst(term[1].pair, term[1].eras), 0);
         break;
       case "Eql":
-        var val0_t = norm(typecheck(term[1].val0, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
-        var val1_t = norm(typecheck(term[1].val1, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
-        MATCH(val0_t, val1_t, ctx);
+        //var val0_t = norm(typecheck(term[1].val0, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        //var val1_t = norm(typecheck(term[1].val1, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        //MATCH(val0_t, val1_t, ctx);
         type = Typ();
         break;
       case "Rfl":
