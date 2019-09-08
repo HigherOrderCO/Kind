@@ -1,5 +1,7 @@
 # Formality
 
+![](docs/images/formality-logo.png)
+
 An efficient proof-gramming language. It aims to be:
 
 - **Fast:** no garbage-collection, optimal beta-reduction and a massively parallel GPU compiler make it fast.
@@ -8,7 +10,7 @@ An efficient proof-gramming language. It aims to be:
 
 - **Portable:** the full language is implemented in a 400-LOC runtime, making it easily available everywhere.
 
-Check the [official documentation](https://docs.formality-lang.org) and browse our [base-libraries](https://github.com/moonad/Formality-Base)!
+Check the [official documentation](https://docs.formality-lang.org), browse our [base-libraries](https://github.com/moonad/Formality-Base) and come hang out with us [on Telegram](https://t.me/formality_lang)
 
 ## Examples
 
@@ -53,7 +55,10 @@ Check the [official documentation](https://docs.formality-lang.org) and browse o
 
 ## Usage
 
-Multiple implementations (Haskell, Rust, Go, etc.) will be available in a future. Right now, you can already use the JavaScript one. Install it via `npm` with:
+Multiple implementations (Haskell, Rust, Go, etc.) will be available in a
+future. Right now, you can already use the JavaScript one (requires Node v0.12).
+
+Install it via `npm` with:
 
 ```
 $ npm i -g formality-lang
@@ -62,9 +67,17 @@ $ npm i -g formality-lang
 Or via `nix` with:
 
 ```
-$ git clone https://gitlab.com/moonad/Formality-JavaScript.git
-$ cd Formality-JavaScript
+$ nix-env -f '<nixpkgs>' -iA nodePackages.node2nix
+$ node2nix --nodejs-12
+$ nix-env -f default.nix formality-lang
+```
+
+If `nodejs-12` is not in your `nixpkgs` channel, then build from unstable with:
+
+```
+$ node2nix --nodejs-12
 $ nix-channel add https://nixos.org/channels/nixpkgs-unstable unstable
+$ sed -i 's/nixpkgs/unstable/g' default.nix
 $ nix-env -f default.nix formality-lang
 ```
 
