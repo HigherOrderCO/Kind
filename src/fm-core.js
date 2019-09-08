@@ -1077,7 +1077,7 @@ const uses = ([ctor, term], depth = 0) => {
     case "Snd": return uses(term.pair, depth);
     case "Prj": return uses(term.pair, depth) + uses(term.body, depth + 2);
     case "Eql": return 0;
-    case "Rfl": return uses(term.expr, depth);
+    case "Rfl": return 0;
     case "Sym": return 0;
     case "Rwt": return 0;
     case "Slf": return 0;
