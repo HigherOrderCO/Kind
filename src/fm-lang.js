@@ -437,7 +437,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
     // Hole
     else if (match("?")) {
-      var name = parse_string();
+      var name = parse_string_here();
       parsed = Hol(name);
     }
 
@@ -1721,6 +1721,7 @@ const rewrite = ([ctor, term], rewriter, scope = [], erased = false, only_once =
         var expr = rewrite(term.expr, rewriter, scope, erased, only_once);
         return Log(msge, expr);
       case "Hol":
+        var name = term.name;
         return Hol(name);
       case "Ref":
         var name = term.name;
