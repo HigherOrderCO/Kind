@@ -1,6 +1,6 @@
 # Formality
 
-![](docs/images/formality-logo.png)
+![](docs/images/formality-banner-white.png)
 
 An efficient proof-gramming language. It aims to be:
 
@@ -84,3 +84,4 @@ $ nix-env -f default.nix formality-lang
 It can be used from the terminal with the `fm` command, or as a library with `require("formality-lang")`.
 
 ![Interaction-Net compilation](docs/images/inet-simulation.gif)
+*[Elementary Affine Net (EA-Net)](https://github.com/moonad/Formality/blob/master/docs/EA-Net.md) simulation*
