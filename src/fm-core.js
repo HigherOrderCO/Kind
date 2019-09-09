@@ -31,6 +31,7 @@
 // - Rwt: rewrite equal terms in types, `rwt e <x @ (P x)> a`
 // - Ann: an explicit type annotaion, `: A a`
 // - Log: debug-prints a term during evaluation
+// - Hol: a type-hole
 // - Ref: a reference to a global def
 var MEMO  = true;
 const Var = (index)                        => ["Var", {index},                        MEMO && ("^" + index)];
@@ -63,6 +64,7 @@ const New = (type, expr)                   => ["New", {type, expr},             
 const Use = (expr)                         => ["Use", {expr},                         MEMO && expr[2]];
 const Ann = (type, expr, done)             => ["Ann", {type, expr, done},             MEMO && expr[2]];
 const Log = (msge, expr)                   => ["Log", {msge, expr},                   MEMO && expr[2]];
+const Hol = (name)                         => ["Hol", {name},                         MEMO && "*"];
 const Ref = (name, eras)                   => ["Ref", {name, eras},                   MEMO && ("{" + name + "}")];
 
 // :::::::::::::::::::::
@@ -305,6 +307,8 @@ const show = ([ctor, args], nams = [], opts = {}) => {
     case "Log":
       var expr = show(args.expr, nams, opts);
       return expr;
+    case "Hol":
+      return "?" + args.name;
     case "Ref":
       return !opts.full_refs ? args.name.replace(new RegExp(".*/", "g"), "") : args.name;
   }
@@ -437,6 +441,9 @@ const shift = ([ctor, term], inc, depth) => {
       var msge = shift(term.msge, inc, depth);
       var expr = shift(term.expr, inc, depth);
       return Log(msge, expr);
+    case "Hol":
+      var name = term.name;
+      return Hol(name);
     case "Ref":
       return Ref(term.name, term.eras);
   }
@@ -565,6 +572,9 @@ const subst = ([ctor, term], val, depth) => {
       var msge = subst(term.msge, val, depth);
       var expr = subst(term.expr, val, depth);
       return Log(msge, expr);
+    case "Hol":
+      var name = term.name;
+      return Hol(name);
     case "Ref":
       var name = term.name;
       return Ref(name, term.eras);
@@ -624,7 +634,7 @@ const norm = (term, defs = {}, opts) => {
       return Dup(func[1].name, func[1].expr, x => weak_reduce(App(func[1].body(x), argm, eras), names_ext(func[1].name, names)));
     // (|a b) ~> ⊥
     } else if (func[0] === "Put") {
-      throw "[RUNTIME-ERROR]\nCan't apply a boxed value.";
+      throw "[NORMALIZATION-ERROR]\nCan't apply a boxed value.";
     } else {
       return App(func, weak_reduce(argm, names), eras);
     }
@@ -651,7 +661,7 @@ const norm = (term, defs = {}, opts) => {
       return Dup(expr[1].name, expr[1].expr, x => weak_reduce(Dup(name, expr[1].body(x), x => body(x)), names_ext(name, expr[1].name)));
     // dup x = {y} b; c ~> ⊥
     } else if (expr[0] === "Lam") {
-      throw "[RUNTIME-ERROR]\nCan't duplicate a lambda.";
+      throw "[NORMALIZATION-ERROR]\nCan't duplicate a lambda.";
     } else {
       if (opts.undup) {
         return reduce(body(Tak(expr)), names);
@@ -694,7 +704,7 @@ const norm = (term, defs = {}, opts) => {
         case "^f" : return Num(put_float_on_word(get_float_on_word(num0[1].numb) ** get_float_on_word(num1[1].numb)));
         case ".f" : return Num(put_float_on_word(num1[1].numb));
         case ".u" : return Num(get_float_on_word(num1[1].numb) >>> 0);
-        default   : throw "[RUNTIME-ERROR]\nUnknown primitive: " + func + ".";
+        default   : throw "[NORMALIZATION-ERROR]\nUnknown primitive: " + func + ".";
       }
     } else {
       return Op1(func, num0, num1);
@@ -790,6 +800,7 @@ const norm = (term, defs = {}, opts) => {
       case "Use": return Use(unquote(term.expr, vars));
       case "Ann": return Ann(unquote(term.type, vars), unquote(term.expr, vars), term.done);
       case "Log": return Log(unquote(term.msge, vars), unquote(term.expr, vars));
+      case "Hol": return Hol(term.name);
       case "Ref": return Ref(term.name, term.eras);
     }
   };
@@ -826,6 +837,7 @@ const norm = (term, defs = {}, opts) => {
       case "Use": return reduce(term.expr, names);
       case "Ann": return reduce(term.expr, names);
       case "Log": return log(term.msge, term.expr, names);
+      case "Hol": return Hol(term.name);
       case "Ref": return dereference(term.name, term.eras, names);
     }
   };
@@ -865,6 +877,7 @@ const norm = (term, defs = {}, opts) => {
       case "Use": return Use(quote(term.expr, depth));
       case "Ann": return Ann(quote(term.type, depth), quote(term.expr, depth), term.done);
       case "Log": return Log(quote(term.msge, depth), quote(term.expr, depth));
+      case "Hol": return Hol(term.name);
       case "Ref": return Ref(term.name, term.eras);
     }
   };
@@ -889,7 +902,7 @@ const erase = (term) => {
       return All(term.name, erase(term.bind), erase(term.body), term.eras);
     case "Lam":
       if (term.eras) {
-        return erase(subst(term.body, Put(Num(0)), 0));
+        return erase(subst(term.body, Put(Hol(term.name)), 0));
       } else {
         return Lam(term.name, null, erase(term.body), term.eras);
       }
@@ -931,7 +944,7 @@ const erase = (term) => {
       }
     case "Fst":
       if (term.eras === 1) {
-        return Put(Num(0));
+        return Put(Hol(""));
       } else if (term.eras === 2) {
         return erase(term.pair);
       } else {
@@ -941,7 +954,7 @@ const erase = (term) => {
       if (term.eras === 1) {
         return erase(term.pair);
       } else if (term.eras === 2) {
-        return Put(Num(0));
+        return Put(Hol(""));
       } else {
         return Snd(erase(term.pair), term.eras);
       }
@@ -956,9 +969,9 @@ const erase = (term) => {
     case "Eql":
       return Eql(erase(term.val0), erase(term.val1));
     case "Rfl":
-      return Put(Num(0));
+      return Put(Hol(""));
     case "Sym":
-      return Put(Num(0));
+      return Put(Hol(""));
     case "Rwt":
       return erase(term.expr);
     case "Slf":
@@ -971,6 +984,8 @@ const erase = (term) => {
       return erase(term.expr);
     case "Log":
       return Log(erase(term.msge), erase(term.expr));
+    case "Hol":
+      return Hol("");
     case "Ref":
       return Ref(term.name, true);
   }
@@ -1047,6 +1062,7 @@ const equal = (a, b, defs) => {
           case "New-New": y = Eqs(ay[1].expr, by[1].expr); break;
           case "Use-Use": y = Eqs(ay[1].expr, by[1].expr); break;
           case "Log-Log": y = Eqs(ay[1].expr, by[1].expr); break;
+          case "Hol-Hol": y = Val(true); break;
           case "Ann-Ann": y = Eqs(ay[1].expr, by[1].expr); break;
           default:        y = Val(false); break;
         }
@@ -1118,6 +1134,7 @@ const uses = ([ctor, term], depth = 0) => {
     case "Use": return uses(term.expr, depth);
     case "Ann": return uses(term.expr, depth);
     case "Log": return uses(term.expr, depth);
+    case "Hol": return 0;
     case "Ref": return 0;
   }
 }
@@ -1156,6 +1173,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "New": return is_at_level(term.expr, at_level, depth, level);
     case "Use": return is_at_level(term.expr, at_level, depth, level);
     case "Log": return is_at_level(term.expr, at_level, depth, level);
+    case "Hol": return true;
     case "Ref": return true;
   }
 }
@@ -1260,6 +1278,8 @@ const boxcheck = (term, defs = {}, ctx = []) => {
       case "Log":
         check(term.expr, defs, ctx, seen);
         break;
+      case "Hol":
+        break;
       case "Ref":
         if (!defs[term.name]) {
           throw "[ERROR]\nUndefined reference: `" + term.name + "`.";
@@ -1333,7 +1353,7 @@ const ctx_names = (ctx) => {
   return names.reverse();
 };
 
-const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
+const typecheck = (term, expect, defs, ctx = ctx_new, inside = null, debug = true) => {
   var type_memo = {};
 
   const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
@@ -1606,7 +1626,36 @@ const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
         type = term[1].type;
         break;
       case "Log":
-        type = typecheck(term[1].expr, type, defs, ctx, [term, ctx]);
+        if (debug) {
+          var msgv = term[1].msge;
+          try {
+            var msgt = norm(typecheck(msgv, null, defs, ctx, [term, ctx]), {}, {unbox: true, weak: false});
+          } catch (e) {
+            var msgt = Hol("");
+          }
+          console.log("[LOG]");
+          console.log("Term: " + show(msgv, ctx_names(ctx)));
+          console.log("Type: " + show(msgt, ctx_names(ctx)) + "\n");
+        }
+        type = typecheck(term[1].expr, expect, defs, ctx, inside);
+        break;
+      case "Hol":
+        var msg = "";
+        msg += "[ERROR]\n";
+        msg += "Hole found" + (term[1].name ? ": '" + term[1].name + "'" : "") + ".\n";
+        if (expect) {
+          msg += "- With goal... " + TERM(norm(expect, {}, {unbox: true, weak: false}), ctx_names(ctx)) + "\n";
+          if (inside) {
+            msg += "- Inside of... " + CODE(show(inside[0], ctx_names(inside[1]))) + "\n";
+          }
+        }
+        msg += "- With context:\n" + ctx_str(ctx, defs) + "\n";
+        if (debug && expect) {
+          console.log(msg);
+          type = expect;
+        } else {
+          throw msg;
+        }
         break;
       case "Ref":
         if (!defs[term[1].name]) {
@@ -1659,6 +1708,7 @@ module.exports = {
   Use,
   Ann,
   Log,
+  Hol,
   Ref,
   put_float_on_word,
   get_float_on_word,

@@ -33,6 +33,7 @@ const {
   Use,
   Ann,
   Log,
+  Hol,
   Ref,
   get_float_on_word,
   put_float_on_word,
@@ -436,7 +437,8 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
     // Hole
     else if (match("?")) {
-      parsed = Num(0); // TODO: a proper HOLE constructor
+      var name = parse_string();
+      parsed = Hol(name);
     }
 
     // Lambdas and Forall
@@ -1577,6 +1579,9 @@ const replace_refs = ([ctor, term], renamer, depth = 0) => {
       var msge = replace_refs(term.msge, renamer, depth);
       var expr = replace_refs(term.expr, renamer, depth);
       return Log(msge, expr);
+    case "Hol":
+      var name = term.name;
+      return Hol(name);
     case "Ref":
       var new_name = renamer(term.name, depth);
       if (typeof new_name === "string") {
@@ -1715,6 +1720,8 @@ const rewrite = ([ctor, term], rewriter, scope = [], erased = false, only_once =
         var msge = rewrite(term.msge, rewriter, scope, true, only_once);
         var expr = rewrite(term.expr, rewriter, scope, erased, only_once);
         return Log(msge, expr);
+      case "Hol":
+        return Hol(name);
       case "Ref":
         var name = term.name;
         var eras = term.eras;
@@ -1908,6 +1915,7 @@ const load_file = (() => {
         var cache_dir_path = path.join(process.cwd(), "fm_modules");
         var cached_file_path = path.join(cache_dir_path, file + ".fm");
         var local_file_path = path.join(process.cwd(), file + ".fm");
+        var version_file_path = path.join(cache_dir_path, "version");
       }
       var has_cached_fs = fs && fs.existsSync(cached_file_path);
       var has_local_fs = fs && fs.existsSync(local_file_path);
@@ -1928,10 +1936,15 @@ const load_file = (() => {
         } else {
           loading[file] = post("load_file", {file}).then(code => new Promise((resolve, reject) => {
             if (code) {
-              if (fs && !fs.existsSync(cache_dir_path)) {
+              if (fs &&
+                (  !fs.existsSync(cache_dir_path)
+                || !fs.existsSync(version_file_path)
+                || fs.readFileSync(version_file_path, "utf8") !== fm.lang.version)) {
                 console.log("Downloading files to `fm_modules`. This may take a while...");
                 fs.mkdirSync(cache_dir_path);
-                fs.writeFile(cached_file_path, code, (err, ok) => resolve(code));
+                fs.writeFile(version_file_path, fm.lang.version, (err, ok) => {
+                  fs.writeFile(cached_file_path, code, (err, ok) => { resolve(code) })
+                });
               } else if (fs && !fs.existsSync(cached_file_path)) {
                 fs.writeFile(cached_file_path, code, (err, ok) => resolve(code));
               } else if (ls) {
@@ -1979,6 +1992,7 @@ module.exports = {
   Use,
   Ann,
   Log,
+  Hol,
   Ref,
   shift,
   subst,

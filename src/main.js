@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
+if (typeof TextEncoder === "undefined") {
+  console.log("Node.js version not supported. Update your Node.js to use Formality.");
+  process.exit();
+}
+
 var fs = require("fs");
 var path = require("path");
 var fm = require("./..");

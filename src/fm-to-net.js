@@ -1,6 +1,6 @@
 // ~~ Compiles Formality Core to Formality Net ~~
 
-const {Var, App, Lam, Num, Op1, Op2, Ite, Par, Fst, Snd, gen_name, erase} = require("./fm-lang.js");
+const {Var, App, Lam, Num, Op1, Op2, Ite, Par, Fst, Snd, Hol, gen_name, erase} = require("./fm-lang.js");
 const {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, NOD, OP1, OP2, NUM, ITE, PTR, FOR} = require("./fm-net.js");
 
 const op_kind = {
@@ -139,6 +139,8 @@ const compile = (term, defs = {}) => {
         return get_var(var_ptrs[var_ptrs.length - term[1].index - 1]);
       case "Ref":
         return build_net(defs[term[1].name] ? erase(defs[term[1].name]) : Num(0), net, var_ptrs, level);
+      case "Hol":
+        throw "[ERROR]\nCan't compile a hole.";
       default:
         return build_net(Lam("", null, Var(0), false), net, var_ptrs, level);
     }
