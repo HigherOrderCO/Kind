@@ -1909,14 +1909,31 @@ const save_file = (file, code) => post("save_file", {file, code});
 const load_file_parents = (file) => post("load_file_parents", {file});
 const load_file = (() => {
   var loading = {};
+  var warned = false;
   return (file) => {
     if (!loading[file]) {
+
       if (fs) {
         var cache_dir_path = path.join(process.cwd(), "fm_modules");
         var cached_file_path = path.join(cache_dir_path, file + ".fm");
         var local_file_path = path.join(process.cwd(), file + ".fm");
         var version_file_path = path.join(cache_dir_path, "version");
+        var has_cache_dir = fs.existsSync(cache_dir_path);
+        var has_version_file = has_cache_dir && fs.existsSync(version_file_path);
+        var correct_version = has_version_file && fs.readFileSync(version_file_path, "utf8") === version;
+        if (!has_cache_dir || !has_version_file || !correct_version) {
+          if (has_cache_dir) {
+            var files = fs.readdirSync(cache_dir_path);
+            for (var i = 0; i < files.length; ++i) {
+              fs.unlinkSync(path.join(cache_dir_path, files[i]));
+            }
+            fs.rmdirSync(cache_dir_path);
+          }
+          fs.mkdirSync(cache_dir_path);
+          fs.writeFileSync(version_file_path, version);
+        }
       }
+
       var has_cached_fs = fs && fs.existsSync(cached_file_path);
       var has_local_fs = fs && fs.existsSync(local_file_path);
       if (has_cached_fs || has_local_fs) {
@@ -1929,6 +1946,7 @@ const load_file = (() => {
             }
           })
         });
+
       } else {
         var cached_ls = ls && ls.getItem("FPM@" + version + "/" + file);
         if (cached_ls) {
@@ -1936,16 +1954,11 @@ const load_file = (() => {
         } else {
           loading[file] = post("load_file", {file}).then(code => new Promise((resolve, reject) => {
             if (code) {
-              if (fs &&
-                (  !fs.existsSync(cache_dir_path)
-                || !fs.existsSync(version_file_path)
-                || fs.readFileSync(version_file_path, "utf8") !== fm.lang.version)) {
-                console.log("Downloading files to `fm_modules`. This may take a while...");
-                fs.mkdirSync(cache_dir_path);
-                fs.writeFile(version_file_path, fm.lang.version, (err, ok) => {
-                  fs.writeFile(cached_file_path, code, (err, ok) => { resolve(code) })
-                });
-              } else if (fs && !fs.existsSync(cached_file_path)) {
+              if (fs && !fs.existsSync(cached_file_path)) {
+                if (!warned) {
+                  warned = true;
+                  console.log("Downloading files to `fm_modules`. This may take a while...");
+                }
                 fs.writeFile(cached_file_path, code, (err, ok) => resolve(code));
               } else if (ls) {
                 ls.setItem("FPM@" + version + "/" + file, code);
