@@ -266,7 +266,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
   function is_sigma(string) {
     var i = idx;
-    while (i < code.length && code[i] === "~" || is_name_char(code[i])) { ++i; }
+    while (i < code.length && (code[i] === "~" || code[i] === " ") || is_name_char(code[i])) { ++i; }
     while (i < code.length && is_space(code[i])) { ++i; }
     return code[i] === ":";
   }
@@ -445,9 +445,12 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       var names = [];
       var types = [];
       while (idx < code.length) {
-        erass.push(match("~"));
-        names.push(parse_string());
-        types.push(match(":") ? parse_term(nams.concat(names.slice(0,-1))) : null);
+        var eras = match("~");
+        var name = parse_string();
+        var type = match(":") ? parse_term(nams.concat(names)) : null;
+        erass.push(eras);
+        names.push(name);
+        types.push(type);
         if (match("}")) break; else parse_exact(",");
       }
       var isall = match("->");
@@ -567,26 +570,47 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
     // Sigma / Pair
     else if (match("[")) {
+      if (match("]")) {
+        error("Empty pair.");
+      }
       // Sigma
       if (is_sigma()) {
-        var era1 = match("~");
-        var name = parse_string();
-        var skip = parse_exact(":");
-        var typ0 = parse_term(nams);
-        var skip = parse_exact(",");
-        var era2 = match("~");
-        var typ1 = parse_term(nams.concat([name]));
+        var erass = [];
+        var names = [];
+        var types = [];
+        while (idx < code.length && is_sigma()) {
+          var era1 = match("~");
+          var name = parse_string();
+          var skip = parse_exact(":");
+          var type = parse_term(nams.concat(names));
+          var era2 = match("~");
+          erass.push(era1 ? 1 : era2 ? 2 : 0);
+          names.push(name);
+          types.push(type);
+          if (!era2) parse_exact(",");
+        }
+        parsed = parse_term(nams.concat(names));
         var skip = parse_exact("]");
-        parsed = Sig(name, typ0, typ1, era1 ? 1 : era2 ? 2 : 0);
+        for (var i = names.length - 1; i >= 0; --i) {
+          parsed = Sig(names[i], types[i], parsed, erass[i]);
+        }
       // Pair
       } else {
-        var era1 = match("~");
-        var val0 = parse_term(nams);
-        var skip = parse_exact(",");
-        var era2 = match("~");
-        var val1 = parse_term(nams);
-        var skip = parse_exact("]");
-        parsed = Par(val0, val1, era1 ? 1 : era2 ? 2 : 0);
+        var erass = [];
+        var terms = [];
+        while (idx < code.length) {
+          var era1 = match("~");
+          var term = parse_term(nams);
+          var era2 = match("~");
+          erass.push(era1 ? 1 : era2 ? 2 : 0);
+          terms.push(term);
+          if (match("]")) break;
+          if (!era2) parse_exact(",");
+        }
+        parsed = terms.pop();
+        for (var i = terms.length - 1; i >= 0; --i) {
+          parsed = Par(terms[i], parsed, erass[i]);
+        }
       }
     }
 

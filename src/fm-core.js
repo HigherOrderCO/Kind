@@ -204,23 +204,56 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       var body = show(args.body, nams.concat([name]), opts);
       return "cpy " + name + " = " + numb + "; " + body;
     case "Sig":
-      var era1 = args.eras === 1 ? "~" : "";
-      var era2 = args.eras === 2 ? "~" : "";
-      var name = args.name;
-      var typ0 = show(args.typ0, nams, opts);
-      var typ1 = show(args.typ1, nams.concat([name]), opts);
-      return "[" + era1 + name + (name.length > 0 ? " " : "") + ": " + typ0 + ", " + era2 + typ1 + "]";
-    case "Par":
-      var text = print_output([ctor, args]);
-      if (text !== null) {
-        return text;
-      } else {
-        var era1 = args.eras === 1 ? "~" : "";
-        var era2 = args.eras === 2 ? "~" : "";
-        var val0 = show(args.val0, nams, opts);
-        var val1 = show(args.val1, nams, opts);
-        return "[" + era1 + val0 + ", " + era2 + val1 + "]";
+      var term = [ctor, args];
+      var erase = [];
+      var names = [];
+      var types = [];
+      while (term[0] === "Sig") {
+        erase.push(term[1].eras);
+        names.push(term[1].name);
+        types.push(show(term[1].typ0, nams.concat(names.slice(0,-1)), opts));
+        term = term[1].typ1;
       }
+      var text = "[";
+      for (var i = 0; i < names.length; ++i) {
+        text += erase[i] === 1 ? "~" : "";
+        text += names[i] + " : " + types[i];
+        text += erase[i] === 2 ? " ~ " : ", ";
+      }
+      text += show(term, nams.concat(names), opts);
+      text += "]";
+      return text;
+    case "Par":
+      var output;
+      var term  = [ctor, args];
+      var erase = [];
+      var terms = [];
+      while (term[0] === "Par") {
+        if (output = print_output(term)) {
+          break;
+        } else {
+          erase.push(term[1].eras);
+          terms.push(show(term[1].val0, nams, opts));
+          term = term[1].val1;
+        }
+      }
+      if (terms.length > 0) {
+        var text = "[";
+      }
+      for (var i = 0; i < terms.length; ++i) {
+        text += erase[i] === 1 ? "~" : "";
+        text += terms[i];
+        text += erase[i] === 2 ? " ~ " : ", ";
+      }
+      if (output) {
+        text += output;
+      } else {
+        text += show(term, nams, opts);
+      }
+      if (terms.length > 0) {
+        text += "]";
+      }
+      return text;
     case "Fst":
       var pair = show(args.pair, nams, opts);
       var eras = args.eras > 0 ? "~" : "";
