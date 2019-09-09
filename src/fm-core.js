@@ -751,7 +751,7 @@ const norm = (term, defs = {}, opts) => {
       case "Eql": return Eql(unquote(term.val0, vars), unquote(term.val1, vars));
       case "Rfl": return Rfl(unquote(term.expr, vars));
       case "Sym": return Sym(unquote(term.prof, vars));
-      case "Rwt": return Rwt(term.name, unquote(term.type, vars), unquote(term.prof, vars), unquote(term.expr, vars));
+      case "Rwt": return Rwt(term.name, x => unquote(term.type, [x].concat(vars)), unquote(term.prof, vars), unquote(term.expr, vars));
       case "Slf": return Slf(term.name, x => unquote(term.type, [x].concat(vars)));
       case "New": return New(unquote(term.type, vars), unquote(term.expr, vars));
       case "Use": return Use(unquote(term.expr, vars));
@@ -826,7 +826,7 @@ const norm = (term, defs = {}, opts) => {
       case "Eql": return Eql(quote(term.val0, depth), quote(term.val1, depth));
       case "Rfl": return Rfl(quote(term.expr, depth));
       case "Sym": return Sym(quote(term.prof, depth));
-      case "Rwt": return Rwt(term.name, quote(term.type, depth + 1), quote(term.prof, depth), quote(term.expr, depth));
+      case "Rwt": return Rwt(term.name, quote(term.type(Var(depth)), depth + 1), quote(term.prof, depth), quote(term.expr, depth));
       case "Slf": return Slf(term.name, quote(term.type(Var(depth)), depth + 1));
       case "New": return New(quote(term.type, depth), quote(term.expr, depth));
       case "Use": return Use(quote(term.expr, depth));
