@@ -12,9 +12,9 @@ An optimal compilation target for functional programming languages. It is:
 
 5. **Terminating:** computations are guaranteed to halt.
 
-6. **Portable:** soon-to-be implemented in [FM-NET](../FM-Net), a portable, 400-LOC runtime.
+6. **Portable:** soon-to-be implemented in [FM-NET](./FM-Net), a portable, 400-LOC runtime.
 
-This repository includes a reference implementation in [JavaScript](https://github.com/moonad/Formality-JavaScript/tree/master/FM-Core). We're working in specifications/formalizations, and low-level (LLVM/CUDA) backends.
+This repository includes a reference implementation in [JavaScript](https://github.com/moonad/Formality-JavaScript/blob/master/src/fm-core.js). We're working in specifications/formalizations, and low-level (LLVM/CUDA) backends.
 
 ## Example
 
