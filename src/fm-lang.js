@@ -969,7 +969,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     // Definitions or end-of-file
     } else {
       // Parses box annotation
-      var boxed = match("!");
+      var boxed = match("#");
 
       // Parses definition name
       if (tokens) tokens.push(["def", ""]);
