@@ -1067,7 +1067,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           while (idx < code.length) {
             var arg_proj = match("case ");
             var arg_eras = match("~");
-            var arg_halt = match("*");
+            var arg_halt = match("halt");
             var arg_name = parse_string();
             var arg_skip = parse_exact(":");
             var arg_type = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_idx_n).concat(names));
@@ -1308,8 +1308,8 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         }
 
         // Parses the halting case
-        if (recur && basex === null && !match("*")) {
-          error("The bounded-recursive (inductive) definition '" + name + "' needs a halting (base) case. Provide it using `*`.");
+        if (recur && basex === null && !match("halt:")) {
+          error("The bounded-recursive (inductive) definition '" + name + "' needs a halting (base) case. Provide it using `halt:`.");
         }
         if (recur && basex !== null) {
           var base = Var(-1 + names.length - basex);
