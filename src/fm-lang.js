@@ -1145,12 +1145,12 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
             });
           }
           for (var i = 0; i < keeps.length; ++i) {
-            keep_infos[i] = {
+            keep_infos.push({
               name: names[keeps[i]],
               orig: Var(-1 + names.length - keeps[i]),
               term: Var(-1 + names.length - keeps[i]),
               type: shift(types[keeps[i]], names.length - keeps[i], 0)
-            };
+            });
           }
 
           // Builds the initial motive
