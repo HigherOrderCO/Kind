@@ -241,6 +241,8 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       }
       if (terms.length > 0) {
         var text = "[";
+      } else {
+        var text = "";
       }
       for (var i = 0; i < terms.length; ++i) {
         text += erase[i] === 1 ? "~" : "";
