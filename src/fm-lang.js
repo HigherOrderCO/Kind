@@ -684,13 +684,6 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       parsed = Sym(prof);
     }
 
-    // Annotation
-    else if (match(":")) {
-      var type = parse_term(nams);
-      var expr = parse_term(nams);
-      parsed = Ann(type, expr, false);
-    }
-
     // Logging
     else if (match("log(")) {
       var msge = parse_term(nams);
@@ -818,15 +811,23 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         parsed = term;
       }
 
-      // Rewrite
+      // Rewrite / Annotation
       else if (matched = match("::", is_space)) {
-        var skip = parse_exact("rewrite");
-        var name = parse_string();
-        var skip = parse_exact("in");
-        var type = parse_term(nams.concat([name]));
-        var skip = parse_exact("with");
-        var prof = parse_term(nams);
-        parsed = Rwt(name, type, prof, parsed);
+        // Rewrite
+        if (match("rewrite ")) {
+          var name = parse_string();
+          var skip = parse_exact("in");
+          var type = parse_term(nams.concat([name]));
+          var skip = parse_exact("with");
+          var prof = parse_term(nams);
+          parsed = Rwt(name, type, prof, parsed);
+        }
+
+        // Annotation
+        else {
+          var type = parse_term(nams);
+          parsed = Ann(type, parsed, false);
+        }
       }
 
       // Operators
