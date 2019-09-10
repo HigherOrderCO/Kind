@@ -1,5 +1,3 @@
-# Formality
-
 ![](docs/images/formality-banner-white.png)
 
 An efficient proof-gramming language. It aims to be:

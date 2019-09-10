@@ -6,7 +6,7 @@ A simple, efficient proof language, and the underlying type-theory behind [Forma
 
 EA-TT "downgrades" the Calculus of Constructions with affine lambdas, and then extends it with elementary duplications, [Self-Types](http://homepage.divms.uiowa.edu/~astump/papers/fu-stump-rta-tlca-14.pdf), type-level recursion and type-in-type. Thanks to its underlying logic, EA-TT is terminating regardless of types, allowing it to have powerful type-level features. This gives us a minimal, consistent proof language capable of inductive reasoning through λ-encodings, in contrast to other theories such as CoIC, which include a complex native datatype system.
 
-Check the [spec](spec.md), [examples](main.eatt), and [this post](https://medium.com/@maiavictor/introduction-to-formality-part-1-7ae5b02422ec), where we port some Agda proofs to EA-TT!
+Check the [spec](https://github.com/moonad/Formality-JavaScript/blob/master/src/theory/EA-TT/ea-tt.js), [examples](https://github.com/moonad/Formality-JavaScript/blob/master/src/theory/EA-TT/main.eatt), and [this post](https://medium.com/@maiavictor/introduction-to-formality-part-1-7ae5b02422ec), where we port some Agda proofs to EA-TT!
 
 ## Usage
 
