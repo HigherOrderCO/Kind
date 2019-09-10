@@ -1,6 +1,4 @@
-# Formality
-
-![](docs/images/formality-logo.png)
+![](docs/images/formality-banner-white.png)
 
 An efficient proof-gramming language. It aims to be:
 
@@ -10,7 +8,7 @@ An efficient proof-gramming language. It aims to be:
 
 - **Portable:** the full language is implemented in a 400-LOC runtime, making it easily available everywhere.
 
-Check the [official documentation](https://docs.formality-lang.org), browse our [base-libraries](https://github.com/moonad/Formality-Base) and come hang out with us [on Telegram](https://t.me/formality_lang)
+Check the [official documentation](https://docs.formality-lang.org), browse our [base-libraries](https://github.com/moonad/Formality-Base) and come hang out with us [on Telegram](https://t.me/formality_lang).
 
 ## Examples
 
@@ -24,8 +22,8 @@ Check the [official documentation](https://docs.formality-lang.org), browse our 
 
     ```javascript
     // A filler for unreachable cases
-    T Whatever
-    | whatever
+    T Unit
+    | unit
 
     // A natural number
     T Nat
@@ -82,5 +80,8 @@ $ nix-env -f default.nix formality-lang
 ```
 
 It can be used from the terminal with the `fm` command, or as a library with `require("formality-lang")`.
+
+---
+*[Interaction net](https://github.com/moonad/Formality/blob/master/docs/EA-Net.md) simulation*
 
 ![Interaction-Net compilation](docs/images/inet-simulation.gif)
