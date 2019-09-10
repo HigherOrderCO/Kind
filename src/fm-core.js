@@ -960,9 +960,9 @@ const erase = (term) => {
       }
     case "Prj":
       if (term.eras === 1) {
-        return erase(subst_many(term.body, [Num(7), erase(term.pair)], 0));
+        return erase(subst_many(term.body, [Hol(""), erase(term.pair)], 0));
       } else if (term.eras === 2) {
-        return erase(subst_many(term.body, [erase(term.pair), Num(7)], 0));
+        return erase(subst_many(term.body, [erase(term.pair), Hol("")], 0));
       } else {
         return Prj(term.nam0, term.nam1, erase(term.pair), erase(term.body), term.eras);
       }

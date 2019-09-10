@@ -647,16 +647,27 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     // Projection
     else if (match("get ")) {
       var skip = parse_exact("[");
-      var era1 = match("~");
-      var nam0 = parse_string();
-      var skip = parse_exact(",");
-      var era2 = match("~");
-      var nam1 = parse_string();
-      var skip = parse_exact("]");
+      var erass = [];
+      var names = [];
+      while (idx < code.length) {
+        var era1 = match("~");
+        var name = parse_string();
+        var era2 = match("~");
+        erass.push(era1 ? 1 : era2 ? 2 : 0);
+        names.push(name);
+        if (match("]")) break;
+        if (!era2) parse_exact(",");
+      }
       var skip = parse_exact("=");
       var pair = parse_term(nams);
-      var body = parse_term(nams.concat([nam0, nam1]));
-      parsed = Prj(nam0, nam1, pair, body, era1 ? 1 : era2 ? 2 : 0);
+      parsed = parse_term(nams.concat(names));
+      for (var i = names.length - 2; i >= 0; --i) {
+        var nam1 = names[i];
+        var nam2 = i === names.length - 2 ? names[i + 1] : "aux";
+        var expr = i === 0 ? pair : Var(0);
+        var body = i === 0 ? parsed : shift(parsed, 1, 2);
+        parsed = Prj(nam1, nam2, expr, body, erass[i]);
+      }
     }
 
     // Reflexivity
