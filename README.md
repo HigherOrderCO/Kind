@@ -22,8 +22,8 @@ Check the [official documentation](https://docs.formality-lang.org), browse our 
 
     ```javascript
     // A filler for unreachable cases
-    T Whatever
-    | whatever
+    T Unit
+    | unit
 
     // A natural number
     T Nat
@@ -81,5 +81,7 @@ $ nix-env -f default.nix formality-lang
 
 It can be used from the terminal with the `fm` command, or as a library with `require("formality-lang")`.
 
-![Interaction-Net compilation](docs/images/inet-simulation.gif)
+---
 *[Interaction net](https://github.com/moonad/Formality/blob/master/docs/EA-Net.md) simulation*
+
+![Interaction-Net compilation](docs/images/inet-simulation.gif)
