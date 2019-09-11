@@ -86,6 +86,6 @@ $ nix-env -f default.nix formality-lang
 It can be used from the terminal with the `fm` command, or as a library with `require("formality-lang")`.
 
 ---
-*[Interaction net](https://github.com/moonad/Formality/blob/master/docs/EA-Net.md) simulation*
+*Formality is fully compiled to a [400-LOC](https://github.com/moonad/Formality/blob/master/src/fm-net.js) [Interaction-Net Runtime]http://docs.formality-lang.org/en/latest/runtime/Formality-Net.html).*
 
 ![Interaction-Net compilation](docs/images/inet-simulation.gif)
