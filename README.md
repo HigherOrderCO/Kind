@@ -35,21 +35,25 @@ Check the [official documentation](https://docs.formality-lang.org), browse our 
     | vcons {len : Nat, head : A, tail : Vector(A, len)} (succ(len))
     | vnil                                               (zero)
 
-    // Removes the first element of a non-empty vector
+    // A type-safe "tail" that removes the first element of a *non-empty* vector
     vtail : {~T : Type, ~len : Nat, vector : Vector(T, succ(len))} -> Vector(T, len)
 
-      // Pattern-matches a vector, returns its tail
+      // Pattern-matches the vector, returns its tail
       case/Vector vector
       | vcons => tail
-      | vnil  => whatever // unreachable
+      | vnil  => unit // unreachable
 
-      // The dependent return type of the pattern match is specialized for each
-      // case, then generalized for the return type of the whole expression
+      // Adjusts the type demanded on each branch based on the vector's possible lengths
       : case/Nat len
         | succ => Vector(T, pred) // if len > 0, demand a vector of `pred(len)` elems
-        | zero => Whatever        // if len = 0, demand whatever
+        | zero => Unit            // if len = 0, demand whatever
         : Type
+        
+      // Now, since the length of the vector we matched is `succ(len)`, this match
+      // returns a `Vector(T, pred(succ(len)))`, which is just `Vector(T, len)`!
     ```
+    
+    (Save as `vector.fm` and check it with `fm -t vector/vtail`!)
 
 ## Usage
 
