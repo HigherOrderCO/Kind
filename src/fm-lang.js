@@ -78,7 +78,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         var file_code = await load_file(import_file);
         loaded[import_file] = await parse(import_file, file_code, tokenify, false, loaded);
       } catch (e) {
-        error(e);
+        throw e;
       }
     }
     var {defs: file_defs
