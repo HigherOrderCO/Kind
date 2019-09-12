@@ -10,7 +10,7 @@ fm.lang.norm = function norm(term, defs, mode = "DEBUG", opts, stats = {}) {
   var erase = opts.erased ? fm.lang.erase : (x => x);
   switch (mode) {
     case "DEBUG":
-      var erased = (opts.erased ? fm.lang.erase : (x=>x))(term);
+      var erased = erase(term);
       try {
         var normal = fm.core.norm(erased, defs, {weak: opts.weak, unbox: opts.unbox, logging: opts.logging});
       } catch (e) {
@@ -35,7 +35,7 @@ fm.lang.norm = function norm(term, defs, mode = "DEBUG", opts, stats = {}) {
       return fm.to_net.decompile(net);
     case "TYPE":
       fm.lang.boxcheck(term, defs);
-      return fm.core.norm(fm.lang.typecheck(term, null, defs), {}, {weak: false, unbox: true});
+      return fm.core.norm(erase(fm.lang.typecheck(term, null, defs)), {}, {weak: false, unbox: true});
   }
 }
 
