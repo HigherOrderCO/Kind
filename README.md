@@ -66,21 +66,16 @@ Install it via `npm` with:
 $ npm i -g formality-lang
 ```
 
-Or via `nix` with:
+Or via `nix`, using [`node2nix`](https://github.com/svanderburg/node2nix#installation), we can also install Formality using the Nix package manager:
 
 ```
-$ nix-env -f '<nixpkgs>' -iA nodePackages.node2nix
+$ git clone git@github.com:moonad/Formality.git
+$ cd Formality
+$ nix-channel --add https://nixos.org/channels/nixpkgs-unstable unstable
+$ nix-env -f '<unstable>' -iA nodePackages.node2nix
 $ node2nix --nodejs-12
-$ nix-env -f default.nix formality-lang
-```
-
-If `nodejs-12` is not in your `nixpkgs` channel, then build from unstable with:
-
-```
-$ node2nix --nodejs-12
-$ nix-channel add https://nixos.org/channels/nixpkgs-unstable unstable
 $ sed -i 's/nixpkgs/unstable/g' default.nix
-$ nix-env -f default.nix formality-lang
+$ nix-env -f default.nix -iA package
 ```
 
 It can be used from the terminal with the `fm` command, or as a library with `require("formality-lang")`.
