@@ -1,3 +1,7 @@
+## NOTE: this is outdated!
+
+This covers advanced λ-encoding subjects that aren't needed to use Formality anymore. You can still read it if you want to learn those encodings. But if you just want to use Formality, check https://docs.formality-lang.org/ instead.
+
 # Formality-Core Tutorial
 
 This tutorial aims to teach how to be effective developing Formality-Core code, assuming experience in functional programming languages, in special Haskell. Formality-Core is a minimal language based on elementary affine logic, making it compatible with optimal reductions. It can be seen as the GHC Core to the upcoming Formality language. Its minimalism, the lack of a type system, and its unusual boxed duplication system, makes it a very bare-bones language that isn't easy to work with directly, demanding that the programmer learns some delicate techniques to be productive.
@@ -59,7 +63,7 @@ not :: Bool -> Bool
 not = \ a ->
   let case_True  = False in
   let case_False = True in
-  (case a of { True -> case_True; False -> case_True })
+  (case a of { True -> case_True; False -> case_False })
 ```
 
 Once a Haskell program is in this shape, translating it to Formality-Core is straigthforward: we just have to adjust the syntax, and convert the `case_of_` expression to an application of the matched value (`a`) to each case (`case_True`, `case_False`).

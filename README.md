@@ -1,4 +1,4 @@
-![](docs/images/formality-banner-white.png)
+![](archive/images/formality-banner-white.png)
 
 An efficient proof-gramming language. It aims to be:
 
@@ -82,6 +82,6 @@ It can be used from the terminal with the `fm` command, or as a library with `re
 
 ---
 
-![Interaction-Net compilation](docs/images/inet-simulation.gif)
+![Interaction-Net compilation](archive/images/inet-simulation.gif)
 
 *Formality is fully compiled to a [400-LOC](https://github.com/moonad/Formality/blob/master/src/fm-net.js) [Interaction-Net Runtime](http://docs.formality-lang.org/en/latest/runtime/Formality-Net.html).*

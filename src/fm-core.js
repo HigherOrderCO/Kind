@@ -1676,7 +1676,15 @@ const typecheck = (term, expect, defs, ctx = ctx_new, inside = null, debug = tru
     return type;
   };
 
-  return typecheck(term, expect, defs, ctx, inside);
+  try {
+    return typecheck(term, expect, defs, ctx, inside);
+  } catch (e) {
+    if (typeof e === "string") {
+      throw e;
+    } else {
+      throw "Sorry, the type-checker couldn't handle your input.";
+    }
+  }
 };
 
 module.exports = {

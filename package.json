@@ -1,6 +1,6 @@
 {
   "name": "formality-lang",
-  "version": "0.3.117",
+  "version": "0.3.119",
   "description": "",
   "main": "src/exports.js",
   "bin": {
