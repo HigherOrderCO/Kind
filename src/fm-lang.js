@@ -67,8 +67,7 @@ const version = require("./../package.json").version;
 
 // Converts a string to a term
 const parse = async (file, code, tokenify, root = true, loaded = {}) => {
-  var init_parse = Date.now();
-
+  // Imports a local/global file, merging its definitions
   async function do_import(import_file) {
     if (import_file.indexOf("@") === -1) {
       local_imports[import_file] = true;
@@ -101,6 +100,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     return true;
   }
 
+  // Finds all imports with a given name
   function find_name_in_imports(name) {
     var found = [];
     for (var open_import in open_imports) {
@@ -111,6 +111,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     return found;
   }
 
+  // Attempts to resolve a name into a full path
   function ref_path(str) {
     var result = (function () {
       if (str.indexOf("/") === -1) {
@@ -154,6 +155,24 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     return result;
   }
 
+  // Makes a ref given a name
+  function ref(str) {
+    return Ref(ref_path(str));
+  }
+
+  // Attempts to make a `ref` to a known base-lib term
+  function base_ref(str) {
+    var path = ref_path(str);
+    if (defs[path]) {
+      return Ref(path);
+    } else {
+      error("Attempted to use a syntax-sugar which requires `" + str + "` to be in scope, but it isn't.\n"
+          + "To solve that, add `import Base@0 open` to the start of your file.\n"
+          + "See http://docs.formality-lang.org/en/latest/language/Hello,-world!.html for more info.");
+    }
+  }
+
+  // Defines a top-level term
   function define(path, term) {
     if (root) {
       var name = path.replace(new RegExp("^\\w*\/"), "");
@@ -169,21 +188,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     defs[path] = term;
   }
 
-  function ref(str) {
-    return Ref(ref_path(str));
-  }
-
-  function base_ref(str) {
-    var path = ref_path(str);
-    if (defs[path]) {
-      return Ref(path);
-    } else {
-      error("Attempted to use a syntax-sugar which requires `" + str + "` to be in scope, but it isn't.\n"
-          + "To solve that, add `import Base@0 open` to the start of your file.\n"
-          + "See http://docs.formality-lang.org/en/latest/language/Hello,-world!.html for more info.");
-    }
-  }
-
+  // Builds a lookup table
   function build_charset(chars) {
     var set = {};
     for (var i = 0; i < chars.length; ++i) {
@@ -192,15 +197,17 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     return chr => set[chr] === 1;
   }
 
-  var is_native_op = {"+":1,"-":1,"*":1,"/":1,"%":1,"^":1,".&":1,".|":1,".^":1,".!":1,".>>":1,".<<":1,".>":1,".<":1,".=":1,"+f":1,"-f":1,"*f":1,"/f":1,"%f":1,"^f":1,".f":1,".u":1};
-  var op_inits     = "+-*/%^.=";
-  var is_op_init   = build_charset("+-*/%^.=");
-  var is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@/");
-  var is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@+*/%^!<>=&|");
-  var is_spacy     = build_charset(" \t\n\r;");
-  var is_space     = build_charset(" ");
-  var is_newline   = build_charset("\n");
+  // Some handy lookup tables
+  const is_native_op = {"+":1,"-":1,"*":1,"/":1,"%":1,"^":1,".&":1,".|":1,".^":1,".!":1,".>>":1,".<<":1,".>":1,".<":1,".=":1,"+f":1,"-f":1,"*f":1,"/f":1,"%f":1,"^f":1,".f":1,".u":1};
+  const op_inits     = "+-*/%^.=";
+  const is_op_init   = build_charset("+-*/%^.=");
+  const is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@/");
+  const is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@+*/%^!<>=&|");
+  const is_spacy     = build_charset(" \t\n\r;");
+  const is_space     = build_charset(" ");
+  const is_newline   = build_charset("\n");
 
+  // Advances the cursor 1 step forward
   function next() {
     if (tokens) {
       tokens[tokens.length - 1][1] += code[idx];
@@ -214,12 +221,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     idx += 1;
   }
 
-  function skip_spaces(is_space = is_spacy) {
-    while (idx < code.length && is_space(code[idx])) {
-      next();
-    }
-  }
-
+  // Advances the cursor until it finds a parseable char, skipping spaces and comments
   function next_char(is_space = is_spacy) {
     skip_spaces(is_space);
     while (code.slice(idx, idx + 2) === "//") {
@@ -232,6 +234,14 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Skips space chars
+  function skip_spaces(is_space = is_spacy) {
+    while (idx < code.length && is_space(code[idx])) {
+      next();
+    }
+  }
+
+  // Attempts to match a specific string
   function match_here(string) {
     if (code.slice(idx, idx + 2) === "//") {
       return false;
@@ -249,11 +259,13 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Skips spaces, calls `match_here`
   function match(string, is_space = is_spacy) {
     next_char(is_space);
     return match_here(string);
   }
 
+  // Attempts to match a character that is a valid operator initiator
   function match_op_init(is_space = is_spacy) {
     for (var i = 0; i < op_inits.length; ++i) {
       var op_init = op_inits[i];
@@ -264,13 +276,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     return null;
   };
 
-  function is_sigma(string) {
-    var i = idx;
-    while (i < code.length && (code[i] === "~" || code[i] === " ") || is_name_char(code[i])) { ++i; }
-    while (i < code.length && is_space(code[i])) { ++i; }
-    return code[i] === ":";
-  }
-
+  // Throws a parse error at this location
   function error(error_message) {
     var part = "";
     var text = "";
@@ -301,6 +307,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     throw text;
   }
 
+  // Constructs an Ind
   function build_ind(name) {
     var numb = name === "" ? Math.pow(2,48) - 1 : Number(name);
     var bits = numb.toString(2);
@@ -315,6 +322,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     return term;
   }
 
+  // Parses an exact string, errors if it isn't there
   function parse_exact(string) {
     if (!match(string)) {
       var text = "";
@@ -323,6 +331,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses characters until `fn` is false
   function parse_string_here(fn = is_name_char) {
     var name = "";
     while (idx < code.length && fn(code[idx])) {
@@ -332,11 +341,13 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     return name;
   }
 
+  // Skips spaces and calls parse_string_here
   function parse_string(fn = is_name_char) {
     next_char();
     return parse_string_here(fn);
   }
 
+  // Parses an alphanumeric name
   function parse_name() {
     if (is_op_init(code[idx])) {
       match(code[idx]);
@@ -592,6 +603,12 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
   // Parses a sigma, `[x : A, P(x)]`, or a pair, `[t, u]`
   function parse_sig_or_par(nams) {
+    function is_sigma(string) {
+      var i = idx;
+      while (i < code.length && (code[i] === "~" || code[i] === " ") || is_name_char(code[i])) { ++i; }
+      while (i < code.length && is_space(code[i])) { ++i; }
+      return code[i] === ":";
+    }
     if (match("[")) {
       if (match("]")) {
         error("Empty pair.");
@@ -639,6 +656,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a fst accessor, `fst(t)`
   function parse_fst(nams) {
     if (match("fst(")) {
       var pair = parse_term(nams);
@@ -647,6 +665,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses an erased fst accessor, `~fst(t)`
   function parse_fst_era(nams) {
     if (match("~fst(")) {
       var pair = parse_term(nams);
@@ -655,6 +674,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a snd accessor, `snd(t)`
   function parse_snd(nams) {
     if (match("snd(")) {
       var pair = parse_term(nams);
@@ -663,6 +683,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses an erased snd accessor, `~snd(t)`
   function parse_snd_era(nams) {
     if (match("~snd(")) {
       var pair = parse_term(nams);
@@ -671,6 +692,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a projection, `get [x, y] = t`
   function parse_get(nams) {
     if (match("get ")) {
       var skip = parse_exact("[");
@@ -699,6 +721,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses refl, `refl(~t)`
   function parse_rfl(nams) {
     if (match("refl(~")) {
       var expr = parse_term(nams);
@@ -707,6 +730,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses sym, `sym(~t)`
   function parse_sym(nams) {
     if (match("sym(~")) {
       var prof = parse_term(nams);
@@ -715,6 +739,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses log, `log(t)`
   function parse_log(nams) {
     if (match("log(")) {
       var msge = parse_term(nams);
@@ -724,6 +749,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a self type, `$x P(x)` 
   function parse_slf(nams) {
     if (match("$")) {
       var name = parse_string();
@@ -732,6 +758,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a self intro, `new(A) t`
   function parse_new(nams) {
     if (match("new(~")) {
       var type = parse_term(nams);
@@ -741,6 +768,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a self elim, `%t`
   function parse_use(nams) {
     if (match("%")) {
       var expr = parse_term(nams);
@@ -748,6 +776,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a case expression, `case/T | A => <term> | B => <term> : <term>`
   function parse_case(nams) {
     if (match("case/")) {
       var adt_name = parse_string();
@@ -786,6 +815,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a Word bitwise-not, `.!(t)`
   function parse_op2_not(nams) {
     if (match(".!(")) {
       var argm = parse_term(nams);
@@ -794,6 +824,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a Word to uint-to-float conversion, `.f(t)`
   function parse_op2_float(nams) {
     if (match(".f(")) {
       var argm = parse_term(nams);
@@ -802,6 +833,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a Word float-to-uint conversion, `.u(t)`
   function parse_op2_uint(nams) {
     if (match(".u(")) {
       var argm = parse_term(nams);
@@ -810,6 +842,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses an application to an Ind, `t*N`
   function parse_app_ind(parsed, nams) {
     if (match_here("*")) {
       var term = parse_atom(nams, true);
@@ -817,6 +850,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses an application, `f(x, y, z...)`
   function parse_app(parsed, nams) {
     if (match("(", is_space)) {
       var term = parsed;
@@ -831,6 +865,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a list literal, `A$[t, u, v, ...]`
   function parse_list_literal(parsed, nams) {
     if (match("$", is_space)) {
       var type = parsed;
@@ -848,6 +883,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a rewrite, `t :: rewrite x in P(x) with u`
   function parse_rwt(parsed, nams) {
     if (match("::", is_space)) {
       // Rewrite
@@ -868,6 +904,11 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses operators, including:
+  // - Word operators: `t + u`, `t * u`, etc.
+  // - Arrow notation: `A -> B`
+  // - Equality: `t == u`
+  // - User-defined operators: `t .foo u`
   function parse_ops(parsed, nams) {
     var matched_op_init = null;
     if (matched_op_init = match_op_init(is_space)) {
@@ -887,6 +928,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a term
   function parse_term(nams) {
     var parsed;
 
@@ -946,30 +988,20 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     return parsed;
   }
 
-  var open_imports = {};
-  var qual_imports = {};
-  var local_imports = {};
-  var file_version = {};
-  var tokens = tokenify ? [["txt",""]] : null;
-  var idx = 0;
-  var row = 0;
-  var col = 0;
-  var defs = {};
-  var adts = {};
-  var unbx = {};
-  var enlarge = {};
-  while (idx < code.length) {
-    next_char();
-
-    // Shorten
+  // Parses a top-level alias
+  async function do_parse_alias() {
     if (match("alias")) {
       var full = parse_string();
       var skip = parse_exact("as");
       var mini = parse_string();
       enlarge[mini] = full;
+      return true;
+    }
+  }
 
-    // Import
-    } else if (match("import ")) {
+  // Parses a top-level import
+  async function do_parse_import() {
+    if (match("import ")) {
       if (tokens) tokens.push(["imp", ""]);
       var impf = parse_string();
       if (tokens) tokens.push(["txt", ""]);
@@ -979,9 +1011,16 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       qual_imports[impf] = impf;
       open_imports[impf] = true;
       await do_import(impf);
+      return true;
+    }
+  }
 
-    // Datatypes
-    } else if (match("T ")) {
+  // Parses a top-level datatype:
+  // T name {param0 : A, ...} (index0 : B, ...)
+  // | ctor0 {field0 : C, ...} (index0, ...)
+  // | ctor1 {field0 : C, ...} (index0, ...)
+  async function do_parse_datatype() {
+    if (match("T ")) {
       var adt_pram = [];
       var adt_indx = [];
       var adt_ctor = [];
@@ -1061,8 +1100,13 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       }
       adts[file+"/"+adt_name] = adt;
 
-    // Prints active definitions
-    } else if (match("?defs")) {
+      return true;
+    }
+  }
+
+  // Parses a top-level `?defs` util
+  async function do_parse_defs_util() {
+    if (match("?defs")) {
       var filt = match("/") ? parse_string(x => x !== "/") : "";
       var regx = new RegExp(filt, "i");
       console.log("Definitions:");
@@ -1071,451 +1115,482 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           console.log("- " + def);
         }
       }
-      parsed = parse_term([]);
+      return true;
+    }
+  }
 
-    // Definitions or end-of-file
-    } else {
-      // Parses box annotation
-      var boxed = match("#");
+  // Parses a top-level definition, including:
+  //
+  // - Untyped definitions:
+  // 
+  //   name <term>
+  //
+  // - Typed definitions:
+  //
+  //    name : {arg0 : A, arg1 : B, ...} -> RetType
+  //      <term>
+  //
+  // - Boxed definitions:
+  //
+  //    #name : {par0 : T, par1 : U} -> !{arg0 : A, arg1 : B} -> RetType
+  //      <term>
+  //
+  // - Recursive definitions:
+  //
+  //    #name*N : {par0 : T, par1 : U} -> !{arg0 : A, arg1 : B} -> RetType
+  //      <term>
+  //    halt: <term>
+  //
+  // - Cased arguments:
+  //
+  //    name : {case arg0 : A, case arg1 : B} -> RetType
+  //    | Aa Ba => <term>
+  //    | Aa Bb => <term>
+  //    | Ab Ba => <term>
+  //    | Ab Bb => <term>
+  //
+  // And so on...
+  async function do_parse_def() {
+    // Parses box annotation
+    var boxed = match("#");
 
-      // Parses definition name
-      if (tokens) tokens.push(["def", ""]);
-      var name = parse_name();
-      if (tokens) tokens[tokens.length - 1][2] = file+"/"+name;
-      if (tokens) tokens.push(["txt", ""]);
+    // Parses definition name
+    if (tokens) tokens.push(["def", ""]);
+    var name = parse_name();
+    if (tokens) tokens[tokens.length - 1][2] = file+"/"+name;
+    if (tokens) tokens.push(["txt", ""]);
 
-      // If name is empty, stop
-      if (name.length === 0) break;
+    // If name is empty, stop
+    if (name.length === 0) return false;
 
-      // Parses recursion depth name
-      var recur     = match_here("*");
-      var rec_depth = recur ? parse_string() : null;
-      var rec_idx_n = recur ? [rec_depth] : [];
-      var rec_names = recur ? [name] : [];
+    // Parses recursion depth name
+    var recur     = match_here("*");
+    var rec_depth = recur ? parse_string() : null;
+    var rec_idx_n = recur ? [rec_depth] : [];
+    var rec_names = recur ? [name] : [];
 
-      var typed = match(":");
+    var typed = match(":");
 
-      // Typed definition
-      if (typed) {
+    // Typed definition
+    if (typed) {
 
-        // Parses level 0 argument names and types
-        var lv0_erass = [];
-        var lv0_names = [];
-        var lv0_boxed = [];
-        var lv0_dup_n = [];
-        var lv0_dup_t = [];
-        var lv0_dup_i = [];
-        var lv0_types = [];
-        if (boxed && match("{")) {
-          var count = 0;
-          while (idx < code.length) {
-            var arg_eras = match("~");
-            var arg_name = parse_string();
-            var arg_skip = parse_exact(":");
-            var arg_boxd = match("!");
-            var arg_type = await parse_term(lv0_names);
-            lv0_erass.push(arg_eras);
-            lv0_names.push(arg_name);
-            lv0_boxed.push(arg_boxd);
-            if (arg_boxd) {
-              lv0_dup_n.push(arg_name);
-              lv0_dup_t.push(null);
-              lv0_dup_i.push(count);
-            }
-            lv0_types.push(arg_type);
-            if (match("}")) break; else parse_exact(",");
-            ++count;
+      // Parses level 0 argument names and types
+      var lv0_erass = [];
+      var lv0_names = [];
+      var lv0_boxed = [];
+      var lv0_dup_n = [];
+      var lv0_dup_t = [];
+      var lv0_dup_i = [];
+      var lv0_types = [];
+      if (boxed && match("{")) {
+        var count = 0;
+        while (idx < code.length) {
+          var arg_eras = match("~");
+          var arg_name = parse_string();
+          var arg_skip = parse_exact(":");
+          var arg_boxd = match("!");
+          var arg_type = await parse_term(lv0_names);
+          lv0_erass.push(arg_eras);
+          lv0_names.push(arg_name);
+          lv0_boxed.push(arg_boxd);
+          if (arg_boxd) {
+            lv0_dup_n.push(arg_name);
+            lv0_dup_t.push(null);
+            lv0_dup_i.push(count);
           }
-          var skip = parse_exact("->");
+          lv0_types.push(arg_type);
+          if (match("}")) break; else parse_exact(",");
+          ++count;
         }
-
-        // Parses extra level_0 duplications
-        var lv0_imp_n = [];
-        var lv0_imp_t = [];
-        var lv0_imp_v = [];
-        while (match("dup ")) {
-          var dup_name = parse_string();
-          var dup_skip = parse_exact("=");
-          var dup_expr = parse_term(lv0_names.concat(lv0_imp_n));
-          lv0_imp_n.push(dup_name);
-          lv0_imp_t.push(null);
-          lv0_imp_v.push(dup_expr);
-        }
-
-        // Checks if it is properly boxed
-        if ((recur || boxed) && !match("!")) {
-          error((recur ? "Recursive definition" : "Definition") + " `" + name + "` must be boxed. Annotate its type with a `!`.");
-        }
-
-        // Parses argument names and types
-        var erass = [];
-        var names = [];
-        var projs = [];
-        var keeps = [];
-        var wordn = [];
-        var wordt = [];
-        var wordi = [];
-        var types = [];
-        var basex = null;
-        if (match("{")) {
-          var count = 0;
-          while (idx < code.length) {
-            var arg_proj = match("case ");
-            var arg_eras = match("~");
-            var arg_halt = match("halt");
-            var arg_name = parse_string();
-            var arg_skip = parse_exact(":");
-            var arg_type = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_idx_n).concat(names));
-            erass.push(arg_eras);
-            names.push(arg_name);
-            types.push(arg_type);
-            basex = arg_halt ? count : basex;
-            if (arg_proj) {
-              projs.push(count);
-            } else if (!arg_eras) {
-              keeps.push(count);
-            }
-            if (arg_type[0] === "Wrd") {
-              wordn.push(arg_name);
-              wordt.push(Wrd());
-              wordi.push(count);
-            };
-            if (match("}")) break; else parse_exact(",");
-            ++count;
-          }
-          var skip = parse_exact("->");
-        }
-        var type = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_idx_n).concat(names));
-
-        // Parses the definition body
-        var body_nams = lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_idx_n).concat(rec_names).concat(names);
-
-        // Case-tree syntax
-        if (projs.length > 0) {
-
-          // Finds the ADTs from annotated types
-          var proj_adts = [];
-          for (var i = 0; i < projs.length; ++i) {
-            var proj_type = types[projs[i]];
-            while (proj_type[0] === "App") {
-              proj_type = erase(proj_type[1].func);
-            }
-            var adt_name = proj_type[0] === "Ref" ? ref_path(proj_type[1].name) : null;
-            if (adts[adt_name]) {
-              proj_adts[i] = adts[adt_name];
-            } else {
-              error("Couldn't find the datatype of the `" + names[projs[i]] + "` argument of the `" + name + "` function.\n"
-                  + "This is a language limitation. Consider removing type alises, or using the case expression instead.");
-            }
-          }
-
-          // Builds the objects for each proj
-          var proj_names = [];
-          var proj_terms = [];
-          var proj_types = [];
-          var proj_infos = [];
-          for (var i = 0; i < projs.length; ++i) {
-            proj_infos[i] = {
-              name: names[projs[i]],
-              orig: Var(-1 + names.length - projs[i]),
-              term: Var(-1 + names.length - projs[i]),
-              type: shift(types[projs[i]], names.length - projs[i], 0),
-              adt: proj_adts[i]
-            };
-          }
-
-          // Builds the objects for each keep
-          var keep_infos = [];
-          if (recur) {
-            var moti_type = ref(name + ".moti");
-            for (var i = 0; i < lv0_names.length; ++i) {
-              var moti_type = App(moti_type, Var(-1 + names.length + rec_names.length + rec_idx_n.length + lv0_imp_n.length + lv0_dup_n.length + lv0_names.length - i), false);
-            }
-            var moti_type = App(moti_type, Var(-1 + names.length + rec_names.length + rec_idx_n.length), false);
-            keep_infos.push({
-              name: name,
-              orig: Var(-1 + names.length + rec_names.length),
-              term: Var(-1 + names.length + rec_names.length),
-              type: moti_type
-            });
-          }
-          for (var i = 0; i < keeps.length; ++i) {
-            keep_infos.push({
-              name: names[keeps[i]],
-              orig: Var(-1 + names.length - keeps[i]),
-              term: Var(-1 + names.length - keeps[i]),
-              type: shift(types[keeps[i]], names.length - keeps[i], 0)
-            });
-          }
-
-          // Builds the initial motive
-          var moti = type;
-          var moti = shift(moti, rec_idx_n.length, names.length); // Adds recur variable
-          if (recur) { // Adjusts recur index to step(n)
-            var moti = replace(names.length + rec_names.length + rec_idx_n.length - 1, App(ref("step"), Var(names.length + 1), false), moti);
-          }
-
-          // Builds the case-tree by matching projected terms
-          var term = await (async function parse_case_tree(idx, projs, keeps, moti, branch, nams) {
-            // We still have values to project
-            if (idx < projs.length) {
-
-              // Gets the projected dataype
-              var {adt_name, adt_pram, adt_indx, adt_ctor} = projs[idx].adt;
-              if (adt_indx.length > 0) {
-                error("The case-tree syntax isn't compatible with the indexed datatype '" + adt_name + "' yet."
-                    + "Use the @ syntax to write the '" + name + "' function instead.");
-              }
-
-              // Builds the application motive
-              var term_moti = shift(moti, adt_indx.length + 1 + projs.length - (idx + 1) + keeps.length, 0);
-              for (var i = keeps.length - 1; i >= 0; --i) {
-                var term_moti = All(keeps[i].name, shift(keeps[i].type, 1 + projs.length - (idx + 1) + i, 0), term_moti, false);
-              }
-              for (var i = projs.length - 1; i > idx; --i) {
-                var term_moti = replace(projs[i].orig[1].index + 1 + i - (idx + 1) + 1, Var(0), term_moti);
-                var term_moti = All(projs[i].name, shift(projs[i].type, 1 + i - (idx + 1), 0), term_moti, false);
-              }
-              var term_moti = replace(projs[i].orig[1].index + 1, Var(0), term_moti);
-              var term_moti = Lam("self", null, term_moti, false);
-
-              // Builds the application term
-              var term = Use(projs[idx].term);
-              var term = App(term, term_moti, true);
-
-              // Builds each applied case
-              for (var ctor_n = 0; ctor_n < adt_ctor.length; ++ctor_n) {
-                // Adjusts scope to enter case
-                var fldn = adt_ctor[ctor_n][1].map((([name,type,eras]) => projs[idx].name + "." + name));
-                var fldt = adt_ctor[ctor_n][1].map((([name,type,eras]) => type));
-                var prjn = projs.slice(idx + 1).map(({name}) => name);
-                var kepn = keeps.map(({name}) => name);
-                var newn = [].concat(fldn).concat(prjn).concat(kepn);
-
-                // Adjusts keeps to enter case
-                var new_keeps = [];
-                for (var i = 0; i < keeps.length; ++i) {
-                  new_keeps.push({
-                    name: keeps[i].name,
-                    term: Var(-1 + keeps.length - i),
-                    orig: shift(keeps[i].orig, newn.length, 0),
-                    type: shift(keeps[i].type, newn.length, 0)
-                  });
-                }
-
-                // Adjusts projs to enter case
-                var new_projs = [];
-                for (var i = 0; i < projs.length; ++i) {
-                  new_projs.push({
-                    name: projs[i].name,
-                    term: i < idx
-                      ? shift(projs[i].term, newn.length, 0)
-                      : Var(-1 + kepn.length + prjn.length - (i - (idx + 1))),
-                    orig: shift(projs[i].orig, newn.length, 0),
-                    type: shift(projs[i].type, newn.length, 0),
-                    adt: projs[i].adt
-                  });
-                }
-
-                // Builds the substitution list for ADT parameters
-                var adtt = projs[idx].type;
-                var pram = [];
-                while (adtt[0] === "App") {
-                  pram.push(adtt[1].argm);
-                  adtt = adtt[1].func;
-                }
-                if (pram.length !== adt_pram.length) {
-                  error("Couldn't build parameter list for argument `" + projs[idx].name + "` of function `" + name + "`.\n"
-                      + "This is a language limitation. Consider removing type alises, or using the case expression instead.");
-                }
-                var subs = [ref(adt_name)].concat(pram.reverse());
-
-                // Add constructor fields to keeps
-                for (var i = 0; i < fldn.length; ++i) {
-                  var field_type = fldt[i];
-                  var field_type = subst_many(field_type, subs, i);
-                  var field_type = shift(field_type, newn.length, 0);
-                  new_keeps.push({
-                    name: fldn[i],
-                    term: Var(-1 + newn.length - i),
-                    orig: Var(-1 + newn.length - i),
-                    type: field_type
-                  });
-                }
-
-                // Adjusts motive to enter case
-                var new_moti = shift(moti, newn.length, 0);
-
-                // Builds the case body recursively
-                var argm = await parse_case_tree(idx + 1, new_projs, new_keeps, new_moti, branch.concat([ctor_n]), nams.concat(newn));
-
-                // Substitutes the open form of the projected value
-                var self = ref(adt_ctor[ctor_n][0]);
-                for (var i = 0; i < fldn.length; ++i) {
-                  self = App(self, Var(-1 + kepn.length + prjn.length + fldn.length - i), false);
-                }
-                var argm = replace(projs[idx].orig[1].index + newn.length, self, argm);
-
-                // Wraps keeps, projs and field lambdas
-                for (var i = kepn.length - 1; i >= 0; --i) {
-                  argm = Lam(kepn[i], null, argm, false);
-                }
-                for (var i = prjn.length - 1; i >= 0; --i) {
-                  argm = Lam(prjn[i], null, argm, false);
-                }
-                for (var i = fldn.length - 1; i >= 0; --i) {
-                  argm = Lam(fldn[i], null, argm, false);
-                }
-                var term = App(term, argm, false);
-              }
-
-              // Applies term to each proj and keep
-              for (var i = idx + 1; i < projs.length; ++i) {
-                var term = App(term, projs[i].term, false);
-              }
-              for (var i = 0; i < keeps.length; ++i) {
-                var term = App(term, keeps[i].term, false);
-              }
-
-              return term;
-            } else {
-              // Parses the case line
-              var skip = parse_exact("|");
-              for (var i = 0; i < branch.length; ++i) {
-                var skip = parse_exact(projs[i].adt.adt_ctor[branch[i]][0]);
-              }
-              var skip = parse_exact("=>");
-
-              // Parses the case term
-              var term = parse_term(nams);
-
-              return term;
-            }
-          })(0, proj_infos, keep_infos, moti, [], body_nams);
-
-        } else {
-          var term = await parse_term(body_nams.concat(wordn));
-
-          // Fills numeric copies
-          for (var i = wordn.length - 1; i >= 0; --i) {
-            var term = Cpy(wordn[i], Var(-1 + names.length + i - wordi[i]), term);
-          }
-        }
-
-        // Parses the halting case
-        if (recur && basex === null && !match("halt:")) {
-          error("The bounded-recursive (inductive) definition '" + name + "' needs a halting (base) case. Provide it using `halt:`.");
-        }
-        if (recur && basex !== null) {
-          var base = Var(-1 + names.length - basex);
-        } else if (recur) {
-          var base = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(names));
-        } else {
-          var base = null;
-        }
-
-        // Fills type wrapper
-        if (type[0] === "Typ") {
-          var term = Tid(term);
-        }
-        var type = Tid(type);
-
-        // Fills foralls and lambdas of arguments
-        for (var i = names.length - 1; i >= 0; --i) {
-          var type = All(names[i], types[i], type, erass[i]);
-          var term = Lam(names[i], null    , term, erass[i]);
-          var base = base && Lam(names[i], null    , base, erass[i]);
-        }
-
-        // Aux function to add level 0 headers
-        const lv0_headers = (is_type, term, eras = true) => {
-          for (var i = lv0_imp_n.length - 1; i >= 0; --i) {
-            var term = Dup(lv0_imp_n[i], lv0_imp_v[i], term);
-          }
-          for (var i = lv0_dup_n.length - 1; i >= 0; --i) {
-            var term = Dup(lv0_dup_n[i], Var(-1 + lv0_names.length + i - lv0_dup_i[i]), term);
-          }
-          for (var i = lv0_names.length - 1; i >= 0; --i) {
-            var term = (is_type ? All : Lam)(lv0_names[i], is_type ? (lv0_boxed[i] ? Box : (x=>x))(lv0_types[i]) : null, term, eras && lv0_erass[i]);
-          }
-          return term;
-        }
-
-        // Builds a non-recursive, non-boxed definition
-        if (!recur && !boxed) {
-          define(file+"/"+name, Ann(type, term, false));
-
-        // Builds a non-recursive, boxed definition
-        } else if (!recur && boxed) {
-          var type = lv0_headers(1, Box(type), true);
-          var term = lv0_headers(0, Put(term), true);
-          define(file+"/"+name, Ann(type, term, false));
-          unbx[file+"/"+name] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
-
-        // Builds a recursive, non-boxed definition
-        } else if (!boxed && recur) {
-          error("Bounded-recursive (inductive) definition `" + name + "` must be boxed. Add a '!' before its name.");
-
-        // Builds a recursive, boxed definition
-        } else if (boxed && recur) {
-          // Builds the motive
-          var moti_type = lv0_headers(1, All(rec_depth, base_ref("Ind"), Typ(), false), false);
-          var moti_term = lv0_headers(0, Lam(rec_depth, null, type, false), false);
-
-          // Builds the step case
-          var step_typ0 = type;
-          var step_typ1 = shift(subst(shift(type, 1, 1), App(base_ref("step"), Var(0), false), 0), 1, 0);
-          var step_type = lv0_headers(1, Box(All(rec_depth, base_ref("Ind"), All(name, step_typ0, step_typ1, false), true)), true);
-          var step_term = lv0_headers(0, Put(Lam(rec_depth, null, Lam(name, null, term, false), true)), true);
-
-          // Builds the base case
-          var base_type = lv0_headers(1, Box(subst(type, base_ref("base"), 0)), true);
-          var base_term = lv0_headers(0, Put(base), true);
-
-          // Builds the recursive function
-          var ind_moti = ref(name+".moti");
-          var ind_step = ref(name+".step");
-          var ind_base = ref(name+".base");
-          for (var i = 0, c = 0; i < lv0_names.length; ++i) {
-            if (lv0_boxed[i]) {
-              var vari = Put(Var(-1 + lv0_imp_n.length + lv0_dup_n.length - (c++)));
-            } else {
-              var vari = Var(-1 + lv0_imp_n.length + lv0_dup_n.length + lv0_names.length - i);
-            }
-            ind_moti = App(ind_moti, vari, false);
-            ind_step = App(ind_step, vari, lv0_erass[i]);
-            ind_base = App(ind_base, vari, lv0_erass[i]);
-          }
-          var type = All(rec_depth, base_ref("Ind"), lv0_headers(1, Box(subst(type, Var(lv0_names.length + lv0_dup_n.length + lv0_imp_n.length), 0)), true), false);
-          var term = App(base_ref("ind"), Var(lv0_names.length + lv0_dup_n.length + lv0_imp_n.length), false);
-          var term = App(term, ind_moti, true);
-          var term = App(term, ind_step, false);
-          var term = App(term, ind_base, false);
-          var term = Lam(rec_depth, null, lv0_headers(0, term, true), false);
-
-          define(file+"/"+name+".moti", Ann(moti_type, moti_term, false));
-          define(file+"/"+name+".step", Ann(step_type, step_term, false));
-          define(file+"/"+name+".base", Ann(base_type, base_term, false));
-          define(file+"/"+name, Ann(type, term, false));
-          unbx[file+"/"+name+".moti"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
-          unbx[file+"/"+name+".step"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
-          unbx[file+"/"+name+".base"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
-          unbx[file+"/"+name]         = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length + 1};
-        }
-
-      // Untyped definition
-      } else {
-        var term = await parse_term([]);
-        define(file+"/"+name, term);
+        var skip = parse_exact("->");
       }
+
+      // Parses extra level_0 duplications
+      var lv0_imp_n = [];
+      var lv0_imp_t = [];
+      var lv0_imp_v = [];
+      while (match("dup ")) {
+        var dup_name = parse_string();
+        var dup_skip = parse_exact("=");
+        var dup_expr = parse_term(lv0_names.concat(lv0_imp_n));
+        lv0_imp_n.push(dup_name);
+        lv0_imp_t.push(null);
+        lv0_imp_v.push(dup_expr);
+      }
+
+      // Checks if it is properly boxed
+      if ((recur || boxed) && !match("!")) {
+        error((recur ? "Recursive definition" : "Definition") + " `" + name + "` must be boxed. Annotate its type with a `!`.");
+      }
+
+      // Parses argument names and types
+      var erass = [];
+      var names = [];
+      var projs = [];
+      var keeps = [];
+      var wordn = [];
+      var wordt = [];
+      var wordi = [];
+      var types = [];
+      var basex = null;
+      if (match("{")) {
+        var count = 0;
+        while (idx < code.length) {
+          var arg_proj = match("case ");
+          var arg_eras = match("~");
+          var arg_halt = match("halt");
+          var arg_name = parse_string();
+          var arg_skip = parse_exact(":");
+          var arg_type = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_idx_n).concat(names));
+          erass.push(arg_eras);
+          names.push(arg_name);
+          types.push(arg_type);
+          basex = arg_halt ? count : basex;
+          if (arg_proj) {
+            projs.push(count);
+          } else if (!arg_eras) {
+            keeps.push(count);
+          }
+          if (arg_type[0] === "Wrd") {
+            wordn.push(arg_name);
+            wordt.push(Wrd());
+            wordi.push(count);
+          };
+          if (match("}")) break; else parse_exact(",");
+          ++count;
+        }
+        var skip = parse_exact("->");
+      }
+      var type = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_idx_n).concat(names));
+
+      // Parses the definition body
+      var body_nams = lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_idx_n).concat(rec_names).concat(names);
+
+      // Case-tree syntax
+      if (projs.length > 0) {
+
+        // Finds the ADTs from annotated types
+        var proj_adts = [];
+        for (var i = 0; i < projs.length; ++i) {
+          var proj_type = types[projs[i]];
+          while (proj_type[0] === "App") {
+            proj_type = erase(proj_type[1].func);
+          }
+          var adt_name = proj_type[0] === "Ref" ? ref_path(proj_type[1].name) : null;
+          if (adts[adt_name]) {
+            proj_adts[i] = adts[adt_name];
+          } else {
+            error("Couldn't find the datatype of the `" + names[projs[i]] + "` argument of the `" + name + "` function.\n"
+                + "This is a language limitation. Consider removing type alises, or using the case expression instead.");
+          }
+        }
+
+        // Builds the objects for each proj
+        var proj_names = [];
+        var proj_terms = [];
+        var proj_types = [];
+        var proj_infos = [];
+        for (var i = 0; i < projs.length; ++i) {
+          proj_infos[i] = {
+            name: names[projs[i]],
+            orig: Var(-1 + names.length - projs[i]),
+            term: Var(-1 + names.length - projs[i]),
+            type: shift(types[projs[i]], names.length - projs[i], 0),
+            adt: proj_adts[i]
+          };
+        }
+
+        // Builds the objects for each keep
+        var keep_infos = [];
+        if (recur) {
+          var moti_type = ref(name + ".moti");
+          for (var i = 0; i < lv0_names.length; ++i) {
+            var moti_type = App(moti_type, Var(-1 + names.length + rec_names.length + rec_idx_n.length + lv0_imp_n.length + lv0_dup_n.length + lv0_names.length - i), false);
+          }
+          var moti_type = App(moti_type, Var(-1 + names.length + rec_names.length + rec_idx_n.length), false);
+          keep_infos.push({
+            name: name,
+            orig: Var(-1 + names.length + rec_names.length),
+            term: Var(-1 + names.length + rec_names.length),
+            type: moti_type
+          });
+        }
+        for (var i = 0; i < keeps.length; ++i) {
+          keep_infos.push({
+            name: names[keeps[i]],
+            orig: Var(-1 + names.length - keeps[i]),
+            term: Var(-1 + names.length - keeps[i]),
+            type: shift(types[keeps[i]], names.length - keeps[i], 0)
+          });
+        }
+
+        // Builds the initial motive
+        var moti = type;
+        var moti = shift(moti, rec_idx_n.length, names.length); // Adds recur variable
+        if (recur) { // Adjusts recur index to step(n)
+          var moti = replace(names.length + rec_names.length + rec_idx_n.length - 1, App(ref("step"), Var(names.length + 1), false), moti);
+        }
+
+        // Builds the case-tree by matching projected terms
+        var term = await (async function parse_case_tree(idx, projs, keeps, moti, branch, nams) {
+          // We still have values to project
+          if (idx < projs.length) {
+
+            // Gets the projected dataype
+            var {adt_name, adt_pram, adt_indx, adt_ctor} = projs[idx].adt;
+            if (adt_indx.length > 0) {
+              error("The case-tree syntax isn't compatible with the indexed datatype '" + adt_name + "' yet."
+                  + "Use the @ syntax to write the '" + name + "' function instead.");
+            }
+
+            // Builds the application motive
+            var term_moti = shift(moti, adt_indx.length + 1 + projs.length - (idx + 1) + keeps.length, 0);
+            for (var i = keeps.length - 1; i >= 0; --i) {
+              var term_moti = All(keeps[i].name, shift(keeps[i].type, 1 + projs.length - (idx + 1) + i, 0), term_moti, false);
+            }
+            for (var i = projs.length - 1; i > idx; --i) {
+              var term_moti = replace(projs[i].orig[1].index + 1 + i - (idx + 1) + 1, Var(0), term_moti);
+              var term_moti = All(projs[i].name, shift(projs[i].type, 1 + i - (idx + 1), 0), term_moti, false);
+            }
+            var term_moti = replace(projs[i].orig[1].index + 1, Var(0), term_moti);
+            var term_moti = Lam("self", null, term_moti, false);
+
+            // Builds the application term
+            var term = Use(projs[idx].term);
+            var term = App(term, term_moti, true);
+
+            // Builds each applied case
+            for (var ctor_n = 0; ctor_n < adt_ctor.length; ++ctor_n) {
+              // Adjusts scope to enter case
+              var fldn = adt_ctor[ctor_n][1].map((([name,type,eras]) => projs[idx].name + "." + name));
+              var fldt = adt_ctor[ctor_n][1].map((([name,type,eras]) => type));
+              var prjn = projs.slice(idx + 1).map(({name}) => name);
+              var kepn = keeps.map(({name}) => name);
+              var newn = [].concat(fldn).concat(prjn).concat(kepn);
+
+              // Adjusts keeps to enter case
+              var new_keeps = [];
+              for (var i = 0; i < keeps.length; ++i) {
+                new_keeps.push({
+                  name: keeps[i].name,
+                  term: Var(-1 + keeps.length - i),
+                  orig: shift(keeps[i].orig, newn.length, 0),
+                  type: shift(keeps[i].type, newn.length, 0)
+                });
+              }
+
+              // Adjusts projs to enter case
+              var new_projs = [];
+              for (var i = 0; i < projs.length; ++i) {
+                new_projs.push({
+                  name: projs[i].name,
+                  term: i < idx
+                    ? shift(projs[i].term, newn.length, 0)
+                    : Var(-1 + kepn.length + prjn.length - (i - (idx + 1))),
+                  orig: shift(projs[i].orig, newn.length, 0),
+                  type: shift(projs[i].type, newn.length, 0),
+                  adt: projs[i].adt
+                });
+              }
+
+              // Builds the substitution list for ADT parameters
+              var adtt = projs[idx].type;
+              var pram = [];
+              while (adtt[0] === "App") {
+                pram.push(adtt[1].argm);
+                adtt = adtt[1].func;
+              }
+              if (pram.length !== adt_pram.length) {
+                error("Couldn't build parameter list for argument `" + projs[idx].name + "` of function `" + name + "`.\n"
+                    + "This is a language limitation. Consider removing type alises, or using the case expression instead.");
+              }
+              var subs = [ref(adt_name)].concat(pram.reverse());
+
+              // Add constructor fields to keeps
+              for (var i = 0; i < fldn.length; ++i) {
+                var field_type = fldt[i];
+                var field_type = subst_many(field_type, subs, i);
+                var field_type = shift(field_type, newn.length, 0);
+                new_keeps.push({
+                  name: fldn[i],
+                  term: Var(-1 + newn.length - i),
+                  orig: Var(-1 + newn.length - i),
+                  type: field_type
+                });
+              }
+
+              // Adjusts motive to enter case
+              var new_moti = shift(moti, newn.length, 0);
+
+              // Builds the case body recursively
+              var argm = await parse_case_tree(idx + 1, new_projs, new_keeps, new_moti, branch.concat([ctor_n]), nams.concat(newn));
+
+              // Substitutes the open form of the projected value
+              var self = ref(adt_ctor[ctor_n][0]);
+              for (var i = 0; i < fldn.length; ++i) {
+                self = App(self, Var(-1 + kepn.length + prjn.length + fldn.length - i), false);
+              }
+              var argm = replace(projs[idx].orig[1].index + newn.length, self, argm);
+
+              // Wraps keeps, projs and field lambdas
+              for (var i = kepn.length - 1; i >= 0; --i) {
+                argm = Lam(kepn[i], null, argm, false);
+              }
+              for (var i = prjn.length - 1; i >= 0; --i) {
+                argm = Lam(prjn[i], null, argm, false);
+              }
+              for (var i = fldn.length - 1; i >= 0; --i) {
+                argm = Lam(fldn[i], null, argm, false);
+              }
+              var term = App(term, argm, false);
+            }
+
+            // Applies term to each proj and keep
+            for (var i = idx + 1; i < projs.length; ++i) {
+              var term = App(term, projs[i].term, false);
+            }
+            for (var i = 0; i < keeps.length; ++i) {
+              var term = App(term, keeps[i].term, false);
+            }
+
+            return term;
+          } else {
+            // Parses the case line
+            var skip = parse_exact("|");
+            for (var i = 0; i < branch.length; ++i) {
+              var skip = parse_exact(projs[i].adt.adt_ctor[branch[i]][0]);
+            }
+            var skip = parse_exact("=>");
+
+            // Parses the case term
+            var term = parse_term(nams);
+
+            return term;
+          }
+        })(0, proj_infos, keep_infos, moti, [], body_nams);
+
+      } else {
+        var term = await parse_term(body_nams.concat(wordn));
+
+        // Fills numeric copies
+        for (var i = wordn.length - 1; i >= 0; --i) {
+          var term = Cpy(wordn[i], Var(-1 + names.length + i - wordi[i]), term);
+        }
+      }
+
+      // Parses the halting case
+      if (recur && basex === null && !match("halt:")) {
+        error("The bounded-recursive (inductive) definition '" + name + "' needs a halting (base) case. Provide it using `halt:`.");
+      }
+      if (recur && basex !== null) {
+        var base = Var(-1 + names.length - basex);
+      } else if (recur) {
+        var base = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(names));
+      } else {
+        var base = null;
+      }
+
+      // Fills type wrapper
+      if (type[0] === "Typ") {
+        var term = Tid(term);
+      }
+      var type = Tid(type);
+
+      // Fills foralls and lambdas of arguments
+      for (var i = names.length - 1; i >= 0; --i) {
+        var type = All(names[i], types[i], type, erass[i]);
+        var term = Lam(names[i], null    , term, erass[i]);
+        var base = base && Lam(names[i], null    , base, erass[i]);
+      }
+
+      // Aux function to add level 0 headers
+      const lv0_headers = (is_type, term, eras = true) => {
+        for (var i = lv0_imp_n.length - 1; i >= 0; --i) {
+          var term = Dup(lv0_imp_n[i], lv0_imp_v[i], term);
+        }
+        for (var i = lv0_dup_n.length - 1; i >= 0; --i) {
+          var term = Dup(lv0_dup_n[i], Var(-1 + lv0_names.length + i - lv0_dup_i[i]), term);
+        }
+        for (var i = lv0_names.length - 1; i >= 0; --i) {
+          var term = (is_type ? All : Lam)(lv0_names[i], is_type ? (lv0_boxed[i] ? Box : (x=>x))(lv0_types[i]) : null, term, eras && lv0_erass[i]);
+        }
+        return term;
+      }
+
+      // Builds a non-recursive, non-boxed definition
+      if (!recur && !boxed) {
+        define(file+"/"+name, Ann(type, term, false));
+
+      // Builds a non-recursive, boxed definition
+      } else if (!recur && boxed) {
+        var type = lv0_headers(1, Box(type), true);
+        var term = lv0_headers(0, Put(term), true);
+        define(file+"/"+name, Ann(type, term, false));
+        unbx[file+"/"+name] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
+
+      // Builds a recursive, non-boxed definition
+      } else if (!boxed && recur) {
+        error("Bounded-recursive (inductive) definition `" + name + "` must be boxed. Add a '!' before its name.");
+
+      // Builds a recursive, boxed definition
+      } else if (boxed && recur) {
+        // Builds the motive
+        var moti_type = lv0_headers(1, All(rec_depth, base_ref("Ind"), Typ(), false), false);
+        var moti_term = lv0_headers(0, Lam(rec_depth, null, type, false), false);
+
+        // Builds the step case
+        var step_typ0 = type;
+        var step_typ1 = shift(subst(shift(type, 1, 1), App(base_ref("step"), Var(0), false), 0), 1, 0);
+        var step_type = lv0_headers(1, Box(All(rec_depth, base_ref("Ind"), All(name, step_typ0, step_typ1, false), true)), true);
+        var step_term = lv0_headers(0, Put(Lam(rec_depth, null, Lam(name, null, term, false), true)), true);
+
+        // Builds the base case
+        var base_type = lv0_headers(1, Box(subst(type, base_ref("base"), 0)), true);
+        var base_term = lv0_headers(0, Put(base), true);
+
+        // Builds the recursive function
+        var ind_moti = ref(name+".moti");
+        var ind_step = ref(name+".step");
+        var ind_base = ref(name+".base");
+        for (var i = 0, c = 0; i < lv0_names.length; ++i) {
+          if (lv0_boxed[i]) {
+            var vari = Put(Var(-1 + lv0_imp_n.length + lv0_dup_n.length - (c++)));
+          } else {
+            var vari = Var(-1 + lv0_imp_n.length + lv0_dup_n.length + lv0_names.length - i);
+          }
+          ind_moti = App(ind_moti, vari, false);
+          ind_step = App(ind_step, vari, lv0_erass[i]);
+          ind_base = App(ind_base, vari, lv0_erass[i]);
+        }
+        var type = All(rec_depth, base_ref("Ind"), lv0_headers(1, Box(subst(type, Var(lv0_names.length + lv0_dup_n.length + lv0_imp_n.length), 0)), true), false);
+        var term = App(base_ref("ind"), Var(lv0_names.length + lv0_dup_n.length + lv0_imp_n.length), false);
+        var term = App(term, ind_moti, true);
+        var term = App(term, ind_step, false);
+        var term = App(term, ind_base, false);
+        var term = Lam(rec_depth, null, lv0_headers(0, term, true), false);
+
+        define(file+"/"+name+".moti", Ann(moti_type, moti_term, false));
+        define(file+"/"+name+".step", Ann(step_type, step_term, false));
+        define(file+"/"+name+".base", Ann(base_type, base_term, false));
+        define(file+"/"+name, Ann(type, term, false));
+        unbx[file+"/"+name+".moti"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
+        unbx[file+"/"+name+".step"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
+        unbx[file+"/"+name+".base"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
+        unbx[file+"/"+name]         = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length + 1};
+      }
+
+    // Untyped definition
+    } else {
+      var term = await parse_term([]);
+      define(file+"/"+name, term);
     }
 
-    next_char();
+    return true;
   }
 
   // When a reference to a boxed definiton is used inside a boxed definition,
   // automatically unbox it by appending `dup ref = ref; ...` to the term
-  if (root) {
+  function perform_auto_unboxing() {
     for (var path in unbx) {
       var info = unbx[path];
       var term = defs[path];
@@ -1544,7 +1619,41 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
-  return {defs, adts, unbx, tokens, local_imports, qual_imports, open_imports};
+  // Parses all definitions
+  var open_imports = {};
+  var qual_imports = {};
+  var local_imports = {};
+  var file_version = {};
+  var tokens = tokenify ? [["txt",""]] : null;
+  var idx = 0;
+  var row = 0;
+  var col = 0;
+  var defs = {};
+  var adts = {};
+  var unbx = {};
+  var enlarge = {};
+  while (idx < code.length) {
+    next_char();
+    if (await do_parse_alias());
+    else if (await do_parse_import());
+    else if (await do_parse_datatype());
+    else if (await do_parse_defs_util());
+    else if (!(await do_parse_def())) break;
+    next_char();
+  }
+  if (root) {
+    perform_auto_unboxing();
+  }
+
+  return {
+    defs,
+    adts,
+    unbx,
+    tokens,
+    local_imports,
+    qual_imports,
+    open_imports
+  };
 }
 
 // :::::::::::
