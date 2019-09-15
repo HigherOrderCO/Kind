@@ -128,7 +128,7 @@ async function upload(file, global_path = {}) {
       }
 
       var opts = {
-        erased: !args.T,
+        erased: !args.X,
         unbox: !args.B,
         weak: !!args.W,
         strict: !!args.O,
