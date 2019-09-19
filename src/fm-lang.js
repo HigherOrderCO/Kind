@@ -1320,7 +1320,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
             name: names[keeps[i]],
             orig: Var(-1 + names.length - keeps[i]),
             term: Var(-1 + names.length - keeps[i]),
-            type: shift(types[keeps[i]], names.length - keeps[i], 0)
+            type: shift(shift(types[keeps[i]], names.length - keeps[i], 0), recur ? 1 : 0, names.length)
           });
         }
 
