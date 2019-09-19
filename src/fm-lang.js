@@ -1599,15 +1599,19 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         var lens = {term: lens.term[1][lens.field], field: "body"};
       }
       var unbox = [];
-      lens.term[1][lens.field] = rewrite(lens.term[1][lens.field], (term, scope, erased) => {
-        if (term[0] === "Tak" && !erased) {
-          for (var i = 0; i < scope.length; ++i) {
-            term = subst(term, Num(0), 0);
+      function go(term) {
+        return rewrite(term, (term, scope, erased) => {
+          if (term[0] === "Tak" && !erased) {
+            term = Tak(go(term[1].expr));
+            for (var i = 0; i < scope.length; ++i) {
+              term = subst(term, Num(0), 0);
+            }
+            unbox.push(["k" + unbox.length, term[1].expr]);
+            return Ref("$TMP$" + (unbox.length - 1));
           }
-          unbox.push(["k" + unbox.length, term[1].expr]);
-          return Ref("$TMP$" + (unbox.length - 1));
-        }
-      });
+        })
+      };
+      lens.term[1][lens.field] = go(lens.term[1][lens.field]);
       for (var i = unbox.length - 1; i >= 0; --i) {
         lens.term[1][lens.field] = Dup(unbox[i][0], unbox[i][1], shift(lens.term[1][lens.field], 1, 0));
       }
