@@ -1563,7 +1563,11 @@ const typecheck = (term, expect, defs, ctx = ctx_new, inside = null, debug = tru
         }
         var ex_ctx = ctx_ext(term[1].nam0, pair_t[1].typ0, ctx);
         var ex_ctx = ctx_ext(term[1].nam1, pair_t[1].typ1, ex_ctx);
-        type = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
+        try {
+          type = typecheck(term[1].body, shift(expect, 2, 0), defs, ex_ctx, [term, ctx]);
+        } catch (e) {
+          type = typecheck(term[1].body, null, defs, ex_ctx, [term, ctx]);
+        }
         type = subst(type, Snd(shift(term[1].pair, 1, 0), term[1].eras), 0);
         type = subst(type, Fst(term[1].pair, term[1].eras), 0);
         break;
