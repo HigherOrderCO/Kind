@@ -363,6 +363,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     if (tokens) tokens.push(["???", ""]);
     var name = parse_name();
     var numb = Number(name);
+    if (name.length === 0 && !ind_num) {
+      error("Unexpected symbol.");
+    }
     // Not a var but a number
     if (!isNaN(numb)) {
       // Inductive
@@ -1007,6 +1010,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       if (tokens) tokens.push(["txt", ""]);
       var qual = match("as") ? parse_string() : null;
       var open = match("open");
+      if (open) {
+        error("The `open` keyword is obsolete. Remove it.");
+      }
       if (qual) qual_imports[qual] = impf;
       qual_imports[impf] = impf;
       open_imports[impf] = true;
@@ -1157,6 +1163,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     // Parses definition name
     if (tokens) tokens.push(["def", ""]);
     var name = parse_name();
+    if (name.length === 0) {
+      error("Expected a definition.");
+    }
     if (tokens) tokens[tokens.length - 1][2] = file+"/"+name;
     if (tokens) tokens.push(["txt", ""]);
 
