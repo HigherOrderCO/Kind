@@ -1207,8 +1207,7 @@ const boxcheck = (term, defs = {}, ctx = []) => {
         check(term.expr, defs, ctx, seen);
         break;
       case "Tak":
-        check(term.expr, defs, ctx, seen);
-        break;
+        throw "[ERROR]\nAttempted to unbox term in a computational posititon:\n" + show([ctor, term], ctx);
       case "Dup":
         if (!is_at_level(term.body, 1)) {
           throw "[ERROR]\nDuplication variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], ctx);
