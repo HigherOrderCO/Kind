@@ -25,15 +25,15 @@
 // - Fst: extracts 1st value of a dependent pair, `fst p`, or of a dependent intersection, `~fst p`
 // - Snd: extracts 2nd value of a dependent pair, `snd p`, or of a dependent intersection, `~snd p`
 // - Prj: projects a dependent pair, `get [x , y] = a; b`, or a dependent intersection, `get [x ~ y] = a; b`
-// - Eql: erased untyped equality type, `<a = b>`
+// - Eql: erased untyped equality type, `a == b`
 // - Rfl: reflexivity, i.e., a proof that a value is equal to itself, `$a`
-// - Sym: symmetry of equality, `sym e`
-// - Rwt: rewrite equal terms in types, `rwt e <x @ (P x)> a`
+// - Sym: symmetry of equality, `sym(~e)`
+// - Cng: congruence of equality, `cong(~f, ~x)`
+// - Rwt: rewrite equal terms in types, `term :: rewrite x in P(x) with e`
 // - Ann: an explicit type annotaion, `: A a`
 // - Log: debug-prints a term during evaluation
 // - Hol: a type-hole
 // - Ref: a reference to a global def
-var MEMO  = true;
 const Var = (index)                        => ["Var", {index},                        MEMO && ("^" + index)];
 const Typ = ()                             => ["Typ", {},                             MEMO && ("ty")];
 const Tid = (expr)                         => ["Tid", {expr},                         MEMO && expr[2]];
@@ -58,6 +58,7 @@ const Prj = (nam0, nam1, pair, body, eras) => ["Prj", {nam0, nam1, pair, body, e
 const Eql = (val0, val1)                   => ["Eql", {val0, val1},                   MEMO && ("eq" + val0[2] + val1[2])];
 const Rfl = (expr)                         => ["Rfl", {expr},                         MEMO && "*"];
 const Sym = (prof)                         => ["Sym", {prof},                         MEMO && "*"];
+const Cng = (func, prof)                   => ["Cng", {func, prof},                   MEMO && "*"];
 const Rwt = (name, type, prof, expr)       => ["Rwt", {name, type, prof, expr},       MEMO && expr[2]];
 const Slf = (name, type)                   => ["Slf", {name, type},                   MEMO && ("sf" + type[2])];
 const New = (type, expr)                   => ["New", {type, expr},                   MEMO && expr[2]];
@@ -66,255 +67,7 @@ const Ann = (type, expr, done)             => ["Ann", {type, expr, done},       
 const Log = (msge, expr)                   => ["Log", {msge, expr},                   MEMO && expr[2]];
 const Hol = (name)                         => ["Hol", {name},                         MEMO && "*"];
 const Ref = (name, eras)                   => ["Ref", {name, eras},                   MEMO && ("{" + name + "}")];
-
-// :::::::::::::::::::::
-// :: Stringification ::
-// :::::::::::::::::::::
-
-// Converts a term to a string
-const show = ([ctor, args], nams = [], opts = {}) => {
-  const print_output = (term) => {
-    try {
-      if (term[1].val0[1].numb === 0x53484f57) {
-        term = term[1].val1;
-        var nums = [];
-        while (term[1].body[1].body[0] !== "Var") {
-          term = term[1].body[1].body;
-          nums.push(term[1].func[1].argm[1].numb);
-          term = term[1].argm;
-        }
-        return new TextDecoder("utf-8").decode(new Uint8Array(new Uint32Array(nums).buffer));
-      } else {
-        return null;
-      }
-    } catch (e) {
-      return null;
-    }
-  }
-  switch (ctor) {
-    case "Var":
-      var name = nams[nams.length - args.index - 1];
-      if (!name) {
-        return "^" + args.index;
-      } else {
-        var suff = "";
-        for (var i = 0; i < args.index; ++i) {
-          if (nams[nams.length - i - 1] === name) {
-            var suff = suff + "^";
-          }
-        }
-        return name + suff;
-      }
-    case "Typ":
-      return "Type";
-    case "Tid":
-      var expr = show(args.expr, nams, opts);
-      return "type(" + expr + ")";
-    case "All":
-      var term = [ctor, args];
-      var erase = [];
-      var names = [];
-      var types = [];
-      while (term[0] === "All") {
-        erase.push(term[1].eras);
-        names.push(term[1].name);
-        types.push(show(term[1].bind, nams.concat(names.slice(0,-1)), opts));
-        term = term[1].body;
-      }
-      var text = "{";
-      for (var i = 0; i < names.length; ++i) {
-        text += erase[i] ? "~" : "";
-        text += names[i] + (names[i].length > 0 ? " : " : ":") + types[i];
-        text += i < names.length - 1 ? ", " : "";
-      }
-      text += "} -> ";
-      text += show(term, nams.concat(names), opts);
-      return text;
-    case "Lam":
-      var term = [ctor, args];
-      var numb = null;
-      var erase = [];
-      var names = [];
-      var types = [];
-      while (term[0] === "Lam") {
-        erase.push(term[1].eras);
-        names.push(term[1].name);
-        types.push(term[1].bind ? show(term[1].bind, nams.concat(names.slice(0,-1)), opts) : null);
-        term = term[1].body;
-      }
-      var text = "{";
-      for (var i = 0; i < names.length; ++i) {
-        text += erase[i] ? "~" : "";
-        text += names[i] + (types[i] !== null ? " : " + types[i] : "");
-        text += i < names.length - 1 ? ", " : "";
-      }
-      text += "} => ";
-      if (numb !== null) {
-        text += "%" + Number(numb);
-      } else {
-        text += show(term, nams.concat(names), opts);
-      }
-      return text;
-    case "App":
-      var text = ")";
-      var term = [ctor, args];
-      while (term[0] === "App") {
-        text = (term[1].func[0] === "App" ? ", " : "") + (term[1].eras ? "~" : "") + show(term[1].argm, nams, opts) + text;
-        term = term[1].func;
-      }
-      if (term[0] === "Ref" || term[0] === "Var" || term[0] === "Tak") {
-        var func = show(term, nams, opts);
-      } else {
-        var func = "(" + show(term,nams, opts) + ")";
-      }
-      return func + "(" + text;
-    case "Box":
-      var expr = show(args.expr, nams, opts);
-      return "!" + expr;
-    case "Put":
-      var expr = show(args.expr, nams, opts);
-      return "#" + expr;
-    case "Tak":
-      var expr = show(args.expr, nams, opts);
-      return "<" + expr + ">";
-    case "Dup":
-      var name = args.name;
-      var expr = show(args.expr, nams, opts);
-      if (args.body[0] === "Var" && args.body[1].index === 0) {
-        return "<" + expr + ">";
-      } else {
-        var body = show(args.body, nams.concat([name]), opts);
-        return "dup " + name + " = " + expr + "; " + body;
-      }
-    case "Wrd":
-      return "Word";
-    case "Num":
-      return args.numb.toString();
-    case "Op1":
-    case "Op2":
-      var func = args.func;
-      var num0 = show(args.num0, nams, opts);
-      var num1 = show(args.num1, nams, opts);
-      return num0 + " " + func + " " + num1;
-    case "Ite":
-      var cond = show(args.cond, nams, opts);
-      var pair = show(args.pair, nams, opts);
-      return "if " + cond + " " + pair;
-    case "Cpy":
-      var name = args.name;
-      var numb = show(args.numb, nams, opts);
-      var body = show(args.body, nams.concat([name]), opts);
-      return "cpy " + name + " = " + numb + "; " + body;
-    case "Sig":
-      var term = [ctor, args];
-      var erase = [];
-      var names = [];
-      var types = [];
-      while (term[0] === "Sig") {
-        erase.push(term[1].eras);
-        names.push(term[1].name);
-        types.push(show(term[1].typ0, nams.concat(names.slice(0,-1)), opts));
-        term = term[1].typ1;
-      }
-      var text = "[";
-      for (var i = 0; i < names.length; ++i) {
-        text += erase[i] === 1 ? "~" : "";
-        text += names[i] + " : " + types[i];
-        text += erase[i] === 2 ? " ~ " : ", ";
-      }
-      text += show(term, nams.concat(names), opts);
-      text += "]";
-      return text;
-    case "Par":
-      var output;
-      var term  = [ctor, args];
-      var erase = [];
-      var terms = [];
-      while (term[0] === "Par") {
-        if (output = print_output(term)) {
-          break;
-        } else {
-          erase.push(term[1].eras);
-          terms.push(show(term[1].val0, nams, opts));
-          term = term[1].val1;
-        }
-      }
-      if (terms.length > 0) {
-        var text = "[";
-      } else {
-        var text = "";
-      }
-      for (var i = 0; i < terms.length; ++i) {
-        text += erase[i] === 1 ? "~" : "";
-        text += terms[i];
-        text += erase[i] === 2 ? " ~ " : ", ";
-      }
-      if (output) {
-        text += output;
-      } else {
-        text += show(term, nams, opts);
-      }
-      if (terms.length > 0) {
-        text += "]";
-      }
-      return text;
-    case "Fst":
-      var pair = show(args.pair, nams, opts);
-      var eras = args.eras > 0 ? "~" : "";
-      return eras + "fst(" + pair + ")";
-    case "Snd":
-      var pair = show(args.pair, nams, opts);
-      var eras = args.eras > 0 ? "~" : "";
-      return eras + "snd(" + pair + ")";
-    case "Prj":
-      var nam0 = args.nam0;
-      var nam1 = args.nam1;
-      var pair = show(args.pair, nams, opts);
-      var body = show(args.body, nams.concat([nam0, nam1]), opts);
-      var era1 = args.eras === 1 ? "~" : "";
-      var era2 = args.eras === 2 ? "~" : "";
-      return "get [" + era1 + nam0 + "," + era2 + nam1 + "] = " + pair + "; " + body;
-    case "Eql":
-      var val0 = show(args.val0, nams, opts);
-      var val1 = show(args.val1, nams, opts);
-      return val0 + " == " + val1;
-    case "Rfl":
-      var expr = show(args.expr, nams, opts);
-      return "refl(~" + expr + ")";
-    case "Sym":
-      var prof = show(args.prof, nams, opts);
-      return "sym(~" + prof + ")";
-    case "Rwt":
-      var name = args.name;
-      var type = show(args.type, nams.concat([name]), opts);
-      var prof = show(args.prof, nams, opts);
-      var expr = show(args.expr, nams, opts);
-      return expr + " :: rewrite " + name + " in " + type + " with " + prof;
-    case "Slf":
-      var name = args.name;
-      var type = show(args.type, nams.concat([name]), opts);
-      return "$" + name + " " + type;
-    case "New":
-      var type = show(args.type, nams, opts);
-      var expr = show(args.expr, nams, opts);
-      return "new(~" + type + ") " + expr;
-    case "Use":
-      var expr = show(args.expr, nams, opts);
-      return "%" + expr;
-    case "Ann":
-      var expr = show(args.expr, nams, opts);
-      //var type = show(args.type, nams, opts);
-      //return "\n: " + type + "\n= " + expr;
-      return expr;
-    case "Log":
-      var expr = show(args.expr, nams, opts);
-      return expr;
-    case "Hol":
-      return "?" + args.name;
-    case "Ref":
-      return !opts.full_refs ? args.name.replace(new RegExp(".*/", "g"), "") : args.name;
-  }
-};
+var MEMO  = true;
 
 // ::::::::::::::::::
 // :: Substitution ::
@@ -417,6 +170,10 @@ const shift = ([ctor, term], inc, depth) => {
     case "Sym":
       var prof = shift(term.prof, inc, depth);
       return Sym(prof);
+    case "Cng":
+      var func = shift(term.func, inc, depth);
+      var prof = shift(term.prof, inc, depth);
+      return Cng(func, prof);
     case "Rwt":
       var name = term.name;
       var type = shift(term.type, inc, depth + 1);
@@ -548,6 +305,10 @@ const subst = ([ctor, term], val, depth) => {
     case "Sym":
       var prof = subst(term.prof, val, depth);
       return Sym(prof);
+    case "Cng":
+      var func = subst(term.func, val, depth);
+      var prof = subst(term.prof, val, depth);
+      return Cng(func, prof);
     case "Rwt":
       var name = term.name;
       var type = subst(term.type, val && shift(val, 1, 0), depth + 1);
@@ -796,6 +557,7 @@ const norm = (term, defs = {}, opts) => {
       case "Eql": return Eql(unquote(term.val0, vars), unquote(term.val1, vars));
       case "Rfl": return Rfl(unquote(term.expr, vars));
       case "Sym": return Sym(unquote(term.prof, vars));
+      case "Cng": return Cng(unquote(term.func, vars), unquote(term.prof, vars));
       case "Rwt": return Rwt(term.name, x => unquote(term.type, [x].concat(vars)), unquote(term.prof, vars), unquote(term.expr, vars));
       case "Slf": return Slf(term.name, x => unquote(term.type, [x].concat(vars)));
       case "New": return New(unquote(term.type, vars), unquote(term.expr, vars));
@@ -833,6 +595,7 @@ const norm = (term, defs = {}, opts) => {
       case "Eql": return Eql(weak_reduce(term.val0, names), weak_reduce(term.val1, names));
       case "Rfl": return Rfl(weak_reduce(term.expr, names));
       case "Sym": return reduce(term.prof, names);
+      case "Cng": return reduce(term.prof, names);
       case "Rwt": return reduce(term.expr, names);
       case "Slf": return Slf(term.name, x => weak_reduce(term.type(x), names_ext(term.name, names)));
       case "New": return reduce(term.expr, names);
@@ -873,6 +636,7 @@ const norm = (term, defs = {}, opts) => {
       case "Eql": return Eql(quote(term.val0, depth), quote(term.val1, depth));
       case "Rfl": return Rfl(quote(term.expr, depth));
       case "Sym": return Sym(quote(term.prof, depth));
+      case "Cng": return Cng(quote(term.func, depth), quote(term.prof, depth));
       case "Rwt": return Rwt(term.name, quote(term.type(Var(depth)), depth + 1), quote(term.prof, depth), quote(term.expr, depth));
       case "Slf": return Slf(term.name, quote(term.type(Var(depth)), depth + 1));
       case "New": return New(quote(term.type, depth), quote(term.expr, depth));
@@ -974,6 +738,8 @@ const erase = (term) => {
       return Put(Hol(""));
     case "Sym":
       return Put(Hol(""));
+    case "Cng":
+      return Put(Hol(""));
     case "Rwt":
       return erase(term.expr);
     case "Slf":
@@ -1059,6 +825,7 @@ const equal = (a, b, defs) => {
           case "Eql-Eql": y = And(Eqs(ay[1].val0, by[1].val0), Eqs(ay[1].val1, by[1].val1)); break;
           case "Rfl-Rfl": y = Eqs(ay[1].expr, by[1].expr); break;
           case "Sym-Sym": y = Eqs(ay[1].prof, by[1].prof); break;
+          case "Cng-Cng": y = And(Eqs(ay[1].term, by[1].term), Eqs(ay[1].prof, by[1].prof)); break;
           case "Rwt-Rwt": y = And(And(Eqs(ay[1].prof, by[1].prof), Eqs(ay[1].type, by[1].type)), Eqs(ay[1].expr, by[1].expr)); break;
           case "Slf-Slf": y = Eqs(ay[1].type, by[1].type); break;
           case "New-New": y = Eqs(ay[1].expr, by[1].expr); break;
@@ -1130,6 +897,7 @@ const uses = ([ctor, term], depth = 0) => {
     case "Eql": return 0;
     case "Rfl": return 0;
     case "Sym": return 0;
+    case "Cng": return 0;
     case "Rwt": return 0;
     case "Slf": return 0;
     case "New": return uses(term.expr, depth);
@@ -1170,6 +938,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Eql": return true;
     case "Rfl": return true;
     case "Sym": return true;
+    case "Cng": return true;
     case "Rwt": return true;
     case "Slf": return true;
     case "New": return is_at_level(term.expr, at_level, depth, level);
@@ -1181,7 +950,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
 }
 
 // Checks if a term is stratified
-const boxcheck = (term, defs = {}, ctx = []) => {
+const boxcheck = show => (term, defs = {}, ctx = []) => {
   const check = ([ctor, term], defs = {}, ctx = [], seen = {}) => {
     switch (ctor) {
       case "All":
@@ -1263,6 +1032,8 @@ const boxcheck = (term, defs = {}, ctx = []) => {
         break;
       case "Sym":
         break;
+      case "Cng":
+        break;
       case "Rwt":
         break;
       case "Ann":
@@ -1330,7 +1101,7 @@ const ctx_get = (i, ctx) => {
   return [ctx.name, shift(ctx.type, i + 1, 0)];
 };
 
-const ctx_str = (ctx, defs) => {
+const ctx_str = show => (ctx, defs) => {
   var txt = [];
   var idx = 0;
   var max_len = 0;
@@ -1354,8 +1125,9 @@ const ctx_names = (ctx) => {
   return names.reverse();
 };
 
-const typecheck = (term, expect, defs, ctx = ctx_new, inside = null, debug = true) => {
+const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, debug = true) => {
   var type_memo = {};
+  var ctx_str_ = ctx_str(show);
 
   const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
     const TERM = (term) => {
@@ -1367,7 +1139,7 @@ const typecheck = (term, expect, defs, ctx = ctx_new, inside = null, debug = tru
         + "\n- When checking " + TERM(term)
         + (inside ? "\n- On expression " + CODE(show(inside[0], ctx_names(inside[1]))) : "")
         //+ (inside ? "\n- On expression " + JSON.stringify(inside[0]) + " | " + JSON.stringify(ctx_names(inside[1])) : "")
-        + (ctx !== null ? "\n- With the following context:\n" + ctx_str(ctx, defs) : "");
+        + (ctx !== null ? "\n- With the following context:\n" + ctx_str_(ctx, defs) : "");
     };
 
     const MATCH = (a, b, ctx) => {
@@ -1587,6 +1359,13 @@ const typecheck = (term, expect, defs, ctx = ctx_new, inside = null, debug = tru
         }
         type = Eql(prof_t[1].val1, prof_t[1].val0);
         break;
+      case "Cng":
+        var prof_t = norm(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        if (prof_t[0] !== "Eql") {
+          ERROR("Attempted to use cong with an invalid equality proof.");
+        }
+        type = Eql(App(term[1].func, prof_t[1].val0, false), App(term[1].func, prof_t[1].val1, false));
+        break;
       case "Rwt":
         var prof_t = norm(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (prof_t[0] !== "Eql") {
@@ -1650,11 +1429,12 @@ const typecheck = (term, expect, defs, ctx = ctx_new, inside = null, debug = tru
         msg += "Hole found" + (term[1].name ? ": '" + term[1].name + "'" : "") + ".\n";
         if (expect) {
           msg += "- With goal... " + TERM(norm(expect, {}, {unbox: true, weak: false}), ctx_names(ctx)) + "\n";
-          if (inside) {
-            msg += "- Inside of... " + CODE(show(inside[0], ctx_names(inside[1]))) + "\n";
-          }
+          //if (inside) {
+            //msg += "- Inside of... " + CODE(show(inside[0], ctx_names(inside[1]))) + "\n";
+          //}
         }
-        msg += "- With context:\n" + ctx_str(ctx, defs) + "\n";
+        var cstr = ctx_str_(ctx, defs);
+        msg += "- With context:\n" + (cstr.length > 0 ? cstr + "\n" : "");
         if (debug && expect) {
           console.log(msg);
           type = expect;
@@ -1685,6 +1465,7 @@ const typecheck = (term, expect, defs, ctx = ctx_new, inside = null, debug = tru
     if (typeof e === "string") {
       throw e;
     } else {
+      console.log(e);
       throw "Sorry, the type-checker couldn't handle your input.";
     }
   }
@@ -1715,6 +1496,7 @@ module.exports = {
   Eql,
   Rfl,
   Sym,
+  Cng,
   Rwt,
   Slf,
   New,
@@ -1725,7 +1507,6 @@ module.exports = {
   Ref,
   put_float_on_word,
   get_float_on_word,
-  show,
   shift,
   subst,
   subst_many,
