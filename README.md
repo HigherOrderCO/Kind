@@ -14,46 +14,28 @@ Check the [official documentation](https://docs.formality-lang.org), browse our 
 
 - [Bools](https://github.com/moonad/Formality-Base/blob/master/Data.Bool.fm) and some theorems (DeMorgan's laws).
 
-- A bunch of common [List](https://github.com/moonad/Formality-Base/blob/master/Data.List.fm) functions.
-
 - [Monads.](https://github.com/moonad/Formality-Base/blob/master/Control.Monad.fm) (The FP view, not a monoid in the category of endofunctors!)
 
-- A vector (i.e., list with statically-known-length):
+- A snippet from [Data.Vector](https://github.com/moonad/Formality-Base/blob/master/Data.List.fm):
 
     ```javascript
-    // A filler for unreachable cases
-    T Unit
-    | unit
-
-    // A natural number
-    T Nat
-    | succ {pred : Nat}
-    | zero
-
-    // A list with statically-known length
+    // A vector is a list with a statically known length
     T Vector {A : Type} (len : Nat)
     | vcons {len : Nat, head : A, tail : Vector(A, len)} (succ(len))
     | vnil                                               (zero)
 
-    // A type-safe "tail" that removes the first element of a *non-empty* vector
-    vtail : {~T : Type, ~len : Nat, vector : Vector(T, succ(len))} -> Vector(T, len)
+    // (...)
 
-      // Pattern-matches the vector, returns its tail
-      case/Vector vector
-      | vcons => tail
-      | vnil  => unit // unreachable
-
-      // Adjusts the type demanded on each branch based on the vector's possible lengths
-      : case/Nat len
-        | succ => Vector(T, pred) // if len > 0, demand a vector of `pred(len)` elems
-        | zero => Unit            // if len = 0, demand whatever
-        : Type
-        
-      // Now, since the length of the vector we matched is `succ(len)`, this match
-      // returns a `Vector(T, pred(succ(len)))`, which is just `Vector(T, len)`!
+    // A type-safe "head" that returns the first element of a non-empty vector
+    // - On the `vcons` case, return the vector's head
+    // - On the `vnil` case, prove it is unreachable, since `xs.len > 0`
+    vhead : {~T : Type, ~n : Nat, xs : Vector(T, succ(n))} -> T
+      case/Vector xs
+      note e : xs.len is succ(n)
+      | vcons => xs.head
+      | vnil  => absurd(zero_isnt_succ(~n, ~e), ~T) 
+      : T
     ```
-    
-    (Save as `vector.fm` and check it with `fm -t vector/vtail`!)
 
 ## Usage
 

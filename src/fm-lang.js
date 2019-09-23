@@ -1075,26 +1075,15 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       }
       var {adt_name, adt_pram, adt_indx, adt_ctor} = adts[ref_path(adt_name)];
 
-      // Parses 'with' expressions
-      var withs = [];
-      while (match("with ")) {
-        var with_name = parse_string();
-        var with_indx = null;
-        for (var i = 0; i < adt_indx.length; ++i) {
-          if (term_name + "." + adt_indx[i][0] === with_name) {
-            with_indx = i;
-          }
-        }
-        if (with_indx === null) {
-          var msg = "The term \x1b[2m" + show(term, nams) + "\x1b[0m has no index named '" + with_name + "'. Its indexes are:\n";
-          for( var i = 0; i < adt_indx.length; ++i) {
-            msg += "- " + term_name + "." + adt_indx[i][0] + (i < adt_indx.length - 1 ? "\n" : "");
-          }
-          error(msg);
-        }
-        var with_skip = parse_exact("==");
-        var with_term = parse_term(nams);
-        withs.push([with_name, with_indx, with_term]);
+      // Parses 'note' expressions
+      var notes = [];
+      while (match("note ")) {
+        var note_name = parse_string();
+        var note_skip = parse_exact(":");
+        var note_val0 = parse_term(nams.concat([term_name]).concat(adt_indx.map(([name,type]) => term_name + "." + name)).concat([term_name]));
+        var note_skip = parse_exact("is");
+        var note_val1 = parse_term(nams);
+        notes.push([note_name, note_val0, note_val1]);
       }
 
       // Parses 'move' expressions
@@ -1124,15 +1113,13 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         var ctors = adt_ctor[c][1];
         cses[c] = parse_term(nams
           .concat(adt_ctor[c][1].map(([name,type]) => term_name + "." + name))
-          .concat(withs.map(([name,indx,term]) => name + ".equal"))
-          .concat([term_name + ".equal"])
+          .concat(notes.map(([name,val0]) => name))
           .concat(moves.map(([name,term,type]) => name)));
         for (var i = moves.length - 1; i >= 0; --i) {
           cses[c] = Lam(moves[i][0], null, cses[c], false);
         }
-        cses[c] = Lam(term_name + ".equal", null, cses[c], true);
-        for (var i = withs.length - 1; i >= 0; --i) {
-          cses[c] = Lam(withs[i][0] + ".equal", null, cses[c], true);
+        for (var i = notes.length - 1; i >= 0; --i) {
+          cses[c] = Lam(notes[i][0], null, cses[c], true);
         }
         for (var i = 0; i < ctors.length; ++i) {
           cses[c] = Lam(term_name + "." + ctors[ctors.length - i - 1][0], null, cses[c], ctors[ctors.length - i - 1][2]);
@@ -1144,15 +1131,13 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       var moti = parse_term(nams
         .concat(adt_indx.map(([name,type]) => term_name + "." + name))
         .concat([term_name])
-        .concat(withs.map(([name,indx,term]) => name + ".equal"))
-        .concat([term_name + ".equal"])
+        .concat(notes.map(([name,term]) => name))
         .concat(moves.map(([name,term,type]) => name)));
       for (var i = moves.length - 1; i >= 0; --i) {
-        var moti = All(moves[i][0], shift(moves[i][2], adt_indx.length + 1 + withs.length + 1 + i, 0), moti, false);
+        var moti = All(moves[i][0], shift(moves[i][2], adt_indx.length + notes.length + 1 + i, 0), moti, false);
       }
-      var moti = All(term_name + ".equal", Eql(shift(term, adt_indx.length + 1 + withs.length, 0), Var(withs.length)), moti, true);
-      for (var i = withs.length - 1; i >= 0; --i) {
-        var moti = All(withs[i][0] + ".equal", Eql(shift(withs[i][2], adt_indx.length + 1 + i, 0), Var(-1 + adt_indx.length + 1 - i + withs[i][1])), moti, true);
+      for (var i = notes.length - 1; i >= 0; --i) {
+        var moti = All(notes[i][0], Eql(notes[i][1], shift(notes[i][2], adt_indx.length + 1 + i, 0)), moti, true);
       }
       var moti = Lam(term_name, null, moti, false);
       for (var i = adt_indx.length - 1; i >= 0; --i) {
@@ -1166,10 +1151,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       for (var i = 0; i < cses.length; ++i) {
         var term = App(term, cses[i], false);
       }
-      for (var i = 0; i < withs.length; ++i) {
-        var term = App(term, Rfl(withs[i][2]), true);
+      for (var i = 0; i < notes.length; ++i) {
+        var term = App(term, Rfl(notes[i][2]), true);
       }
-      var term = App(term, Rfl(targ), true);
       for (var i = 0; i < moves.length; ++i) {
         var term = App(term, moves[i][1], false);
       }
