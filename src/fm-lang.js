@@ -1960,6 +1960,11 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
             for (var i = 0; i < scope.length; ++i) {
               term = subst(term, Num(0), 0);
             }
+            for (var i = 0; i < unbox.length; ++i) {
+              if (equal(term[1].expr, unbox[i][1])) {
+                return Ref("$TMP$" + (unbox.length - 1)); // share identical unbox
+              }
+            }
             unbox.push(["k" + unbox.length, term[1].expr]);
             return Ref("$TMP$" + (unbox.length - 1));
           }
