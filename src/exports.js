@@ -5,9 +5,8 @@ var fm = module.exports = {
   to_net: require("./fm-to-net.js"),
 };
 
-// TODO: move to FM-Lang
-fm.lang.exec = function exec(name, defs, mode = "OPTIMAL_LAZY", opts, stats = {}) {
-  // TODO: move to FM-Lang
+// All-in-one convenience export
+fm.exec = function exec(name, defs, mode = "DEBUG", opts, stats = {}) {
   function norm(term, defs, mode = "DEBUG", opts, stats = {}) {
     var erase = opts.erased ? fm.lang.erase : (x => x);
     switch (mode) {
@@ -38,6 +37,12 @@ fm.lang.exec = function exec(name, defs, mode = "OPTIMAL_LAZY", opts, stats = {}
       case "TYPE":
         fm.lang.boxcheck(term, defs);
         return fm.lang.norm(erase(fm.lang.typecheck(term, null, defs)), {}, {weak: false, unbox: true});
+      case "NONE":
+        if (term[0] === "Ref") {
+          return erase(defs[term[1].name]);
+        } else {
+          return erase(term);
+        }
     }
   }
   if (defs[name] && defs[name][0] === "Ref" && !defs[defs[name][1].name]) {
@@ -47,3 +52,4 @@ fm.lang.exec = function exec(name, defs, mode = "OPTIMAL_LAZY", opts, stats = {}
   var result = norm(term, defs, mode, opts, stats);
   return result;
 }
+

@@ -26,6 +26,7 @@ try {
   console.log("  -X don't erase types");
   console.log("  -B don't erase boxes");
   console.log("  -W stop on weak head normal form");
+  console.log("  -0 don't normalize anything");
   console.log("-o <file>/<term> optimal (using interaction nets, lazy)");
   console.log("-O <file>/<term> optimal (using interaction nets, strict)");
   console.log("-j <file>/<term> JavaScript (using native functions)");
@@ -110,6 +111,7 @@ async function upload(file, global_path = {}) {
         : args.O ? "OPTIMAL"
         : args.j ? "JAVASCRIPT"
         : args.t ? "TYPE"
+        : args[0] ? "NONE"
         : "DEBUG";
       var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
@@ -163,7 +165,7 @@ async function upload(file, global_path = {}) {
           }
           try {
             if (defs[nams[i]]) {
-              var term = fm.lang.exec(nams[i], defs, mode, opts, stats);
+              var term = fm.exec(nams[i], defs, mode, opts, stats);
               console.log(init + fm.lang.show(term, [], {full_refs: !!args.f}));
             } else {
               console.log(init + "Definition not found: " + nams[i]);

@@ -614,6 +614,24 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a term that demands a name
+  function parse_named_term(nams) {
+    // Parses matched term
+    var term = parse_term(nams);
+
+    // If no name given, attempts to infer it from term
+    if (match("as")) {
+      var name = parse_string();
+    } else if (term[0] === "Var" && term[1].__name) {
+      var name = term[1].__name;
+    } else {
+      error("The term \x1b[2m" + show(term, nams) + "\x1b[0m requires an explicit name.\n"
+          + "Provide it with the 'as' keyword. Example: \x1b[2m" + show(term, nams) + " as x\x1b[0m");
+    }
+
+    return [name, term]
+  }
+
   // Parses a variable, a reference, or numbers
   function parse_atom(nams, ind_num = false) {
     var term = null;
@@ -1055,19 +1073,8 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       // Parses ADT name
       var adt_name = parse_string();
 
-      // Parses matched term
-      var term = parse_term(nams);
-
-      // Parses matched name
-      if (match("as ")) {
-        var term_name = parse_string();
-      } else if (term[0] === "Var" && term[1].__name) {
-        var term_name = term[1].__name;
-      } else {
-        error("The matched term \x1b[2m" + show(term, nams) + "\x1b[0m requires an explicit name.\n"
-            + "Provide one using the 'as' keyword.\n"
-            + "For example: \x1b[2mcase/" + adt_name + " " + show(term, nams) + " as x\x1b[0m");
-      }
+      // Parses matched name, if available
+      var [term_name, term] = parse_named_term(nams);
 
       // Finds ADT
       if (!adt_name || !adts[ref_path(adt_name)]) {
@@ -1075,33 +1082,32 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       }
       var {adt_name, adt_pram, adt_indx, adt_ctor} = adts[ref_path(adt_name)];
 
-      // Parses 'note' expressions
+      // Parses 'note' and 'move' expressions
       var notes = [];
-      while (match("note ")) {
-        var note_name = parse_string();
-        var note_skip = parse_exact(":");
-        var note_val0 = parse_term(nams.concat([term_name]).concat(adt_indx.map(([name,type]) => term_name + "." + name)).concat([term_name]));
-        var note_skip = parse_exact("is");
-        var note_val1 = parse_term(nams);
-        notes.push([note_name, note_val0, note_val1]);
-      }
-
-      // Parses 'move' expressions
-      var moves = [];
-      while (match("move ")) {
-        var move_term = parse_term(nams);
-        var move_skip = parse_exact(":");
-        var move_type = parse_term(nams);
-        if (match("as ")) {
-          var move_name = parse_string();
-        } else if (move_term[0] === "Var" && move_term[1].__name) {
-          var move_name = move_term[1].__name;
+        var moves = [];
+      while (match("+")) {
+        if (match("note")) {
+          var note_name = parse_string();
+          var note_skip = parse_exact(":");
+          var note_val0 = parse_term(nams
+            .concat(adt_indx.map(([name,type]) => term_name + "." + name))
+            .concat([term_name])
+            .concat(notes.map(([name,val0,val1]) => name)));
+          var note_skip = parse_exact("is");
+          var note_val1 = parse_term(nams);
+          notes.push([note_name, note_val0, note_val1]);
+        } else if (match("move")) {
+          var [move_name, move_term] = parse_named_term(nams);
+          var move_skip = parse_exact(":");
+          var move_type = parse_term(nams
+            .concat(adt_indx.map(([name,type]) => term_name + "." + name))
+            .concat([term_name])
+            .concat(notes.map(([name,val0,val1]) => name))
+            .concat(moves.map(([name,term,type]) => name)));
+          moves.push([move_name, move_term, move_type]);
         } else {
-          error("The moved term \x1b[2m" + show(move_term, nams) + "\x1b[0m requires an explicit name.\n"
-              + "Provide one using the 'as' keyword.\n"
-              + "For example: move \x1b[2mcase/" + show(move_term, nams) + " : " + show(move_type, nams) + " as x\x1b[0m");
+          error("Expected a `note` or a `move`.");
         }
-        moves.push([move_name, move_term, move_type]);
       }
 
       // Parses matched cases
@@ -1134,7 +1140,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         .concat(notes.map(([name,term]) => name))
         .concat(moves.map(([name,term,type]) => name)));
       for (var i = moves.length - 1; i >= 0; --i) {
-        var moti = All(moves[i][0], shift(moves[i][2], adt_indx.length + notes.length + 1 + i, 0), moti, false);
+        var moti = All(moves[i][0], moves[i][2], moti, false);
       }
       for (var i = notes.length - 1; i >= 0; --i) {
         var moti = All(notes[i][0], Eql(notes[i][1], shift(notes[i][2], adt_indx.length + 1 + i, 0)), moti, true);
