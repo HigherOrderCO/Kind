@@ -2599,7 +2599,7 @@ module.exports = {
   shift,
   subst,
   subst_many,
-  norm,
+  norm: norm(show),
   erase,
   equal,
   boxcheck: boxcheck(show),
