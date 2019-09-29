@@ -708,6 +708,15 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses the type identity
+  function parse_tid(nams) {
+    if (match("type(")) {
+      var expr = parse_term(nams);
+      var skip = parse_exact(")");
+      return Tid(expr);
+    }
+  }
+
   // Parses the `?scope?` utility
   function parse_scope(nams) {
     if (match("?scope?")) {
@@ -1288,6 +1297,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     // Parses base term
     if (parsed = parse_parens(nams));
     else if (parsed = parse_typ(nams));
+    else if (parsed = parse_tid(nams));
     else if (parsed = parse_scope(nams));
     else if (parsed = parse_hol(nams));
     else if (parsed = parse_lam_or_all(nams));
