@@ -481,13 +481,28 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
   // Advances the cursor until it finds a parseable char, skipping spaces and comments
   function next_char(is_space = is_spacy) {
     skip_spaces(is_space);
-    while (code.slice(idx, idx + 2) === "//") {
-      if (tokens) tokens.push(["cmm", ""]);
-      while (code[idx] !== "\n" && idx < code.length) {
+    var head = code.slice(idx, idx + 2);
+    // Skips comments
+    while (head === "//" || head === "/*") {
+      // Single-line comments
+      if (head === "//") {
+        if (tokens) tokens.push(["cmm", ""]);
+        while (code[idx] !== "\n" && idx < code.length) {
+          next();
+        }
+        next();
+      // Multi-line comments (docs)
+      } else {
+        if (tokens) tokens.push(["doc", ""]);
+        while (code.slice(idx, idx + 2) !== "*/" && idx < code.length) {
+          next();
+        }
+        next();
         next();
       }
       if (tokens) tokens.push(["txt", ""]);
       skip_spaces(is_space);
+      var head = code.slice(idx, idx + 2);
     }
   }
 
