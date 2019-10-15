@@ -2,7 +2,7 @@ const fmc = require("./fm-lang.js");
 
 // Converts a Formality-Core Term to a native JavaScript function
 const compile = (term, defs, vars) => {
-  var [ctor, term] = term();
+  var [ctor, term] = term;
   switch (ctor) {
     case "Var":
       for (var i = 0; i < term.index; ++i) {

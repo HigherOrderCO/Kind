@@ -32,6 +32,7 @@ const {
   Rfl,
   Sym,
   Cng,
+  Eta,
   Rwt,
   Slf,
   New,
@@ -275,6 +276,9 @@ const show = ([ctor, args], nams = [], opts = {}) => {
     case "Eql":
       var val0 = show(args.val0, nams, opts);
       var val1 = show(args.val1, nams, opts);
+      if (args.val0[0] === "Lam" || args.val0[1] === "Op2") {
+        val0 = "(" + val0 + ")";
+      }
       return val0 + " == " + val1;
     case "Rfl":
       var expr = show(args.expr, nams, opts);
@@ -286,6 +290,9 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       var func = show(args.func, nams, opts);
       var prof = show(args.prof, nams, opts);
       return "cong(~" + func + ", ~" + prof + ")";
+    case "Eta":
+      var expr = show(args.expr, nams, opts);
+      return "eta(~" + expr + ")";
     case "Rwt":
       var name = args.name;
       var type = show(args.type, nams.concat([name]), opts);
@@ -1054,6 +1061,15 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses eta, `eta(~t)`
+  function parse_eta(nams) {
+    if (match("eta(~")) {
+      var expr = parse_term(nams);
+      var skip = parse_exact(")");
+      return Eta(expr);
+    }
+  }
+
   // Parses log, `log(t)`
   function parse_log(nams) {
     if (match("log(")) {
@@ -1336,6 +1352,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     else if (parsed = parse_rfl(nams));
     else if (parsed = parse_sym(nams));
     else if (parsed = parse_cng(nams));
+    else if (parsed = parse_eta(nams));
     else if (parsed = parse_log(nams));
     else if (parsed = parse_slf(nams));
     else if (parsed = parse_new(nams));
@@ -2167,6 +2184,9 @@ const replace_refs = ([ctor, term], renamer, depth = 0) => {
       var func = replace_refs(term.func, renamer, depth);
       var prof = replace_refs(term.prof, renamer, depth);
       return Cng(func, prof);
+    case "Eta":
+      var expr = replace_refs(term.expr, renamer, depth);
+      return Eta(expr);
     case "Rwt":
       var name = term.name;
       var type = replace_refs(term.type, renamer, depth + 1);
@@ -2312,6 +2332,9 @@ const rewrite = ([ctor, term], rewriter, scope = [], erased = false, only_once =
         var func = rewrite(term.func, rewriter, scope, true, only_once);
         var prof = rewrite(term.prof, rewriter, scope, true, only_once);
         return Cng(func, prof);
+      case "Eta":
+        var expr = rewrite(term.expr, rewriter, scope, true, only_once);
+        return Eta(expr);
       case "Rwt":
         var name = term.name;
         var type = rewrite(term.type, rewriter, scope.concat([name]), true, only_once);
@@ -2619,6 +2642,7 @@ module.exports = {
   Rfl,
   Sym,
   Cng,
+  Eta,
   Rwt,
   Slf,
   New,

@@ -59,6 +59,7 @@ const Eql = (val0, val1)                   => ["Eql", {val0, val1},             
 const Rfl = (expr)                         => ["Rfl", {expr},                         MEMO && "*"];
 const Sym = (prof)                         => ["Sym", {prof},                         MEMO && "*"];
 const Cng = (func, prof)                   => ["Cng", {func, prof},                   MEMO && "*"];
+const Eta = (expr)                         => ["Eta", {expr},                         MEMO && "*"];
 const Rwt = (name, type, prof, expr)       => ["Rwt", {name, type, prof, expr},       MEMO && expr[2]];
 const Slf = (name, type)                   => ["Slf", {name, type},                   MEMO && ("sf" + type[2])];
 const New = (type, expr)                   => ["New", {type, expr},                   MEMO && expr[2]];
@@ -174,6 +175,9 @@ const shift = ([ctor, term], inc, depth) => {
       var func = shift(term.func, inc, depth);
       var prof = shift(term.prof, inc, depth);
       return Cng(func, prof);
+    case "Eta":
+      var expr = shift(term.expr, inc, depth);
+      return Eta(expr);
     case "Rwt":
       var name = term.name;
       var type = shift(term.type, inc, depth + 1);
@@ -309,6 +313,9 @@ const subst = ([ctor, term], val, depth) => {
       var func = subst(term.func, val, depth);
       var prof = subst(term.prof, val, depth);
       return Cng(func, prof);
+    case "Eta":
+      var term = subst(term.expr, val, depth);
+      return Eta(term);
     case "Rwt":
       var name = term.name;
       var type = subst(term.type, val && shift(val, 1, 0), depth + 1);
@@ -559,6 +566,7 @@ const norm = show => {
         case "Rfl": return Rfl(unquote(term.expr, vars));
         case "Sym": return Sym(unquote(term.prof, vars));
         case "Cng": return Cng(unquote(term.func, vars), unquote(term.prof, vars));
+        case "Eta": return Eta(unquote(term.expr, vars));
         case "Rwt": return Rwt(term.name, x => unquote(term.type, [x].concat(vars)), unquote(term.prof, vars), unquote(term.expr, vars));
         case "Slf": return Slf(term.name, x => unquote(term.type, [x].concat(vars)));
         case "New": return New(unquote(term.type, vars), unquote(term.expr, vars));
@@ -597,6 +605,7 @@ const norm = show => {
         case "Rfl": return Rfl(weak_reduce(term.expr, names));
         case "Sym": return reduce(term.prof, names);
         case "Cng": return reduce(term.prof, names);
+        case "Eta": return Eta(weak_reduce(term.expr, names));
         case "Rwt": return reduce(term.expr, names);
         case "Slf": return Slf(term.name, x => weak_reduce(term.type(x), names_ext(term.name, names)));
         case "New": return reduce(term.expr, names);
@@ -638,6 +647,7 @@ const norm = show => {
         case "Rfl": return Rfl(quote(term.expr, depth));
         case "Sym": return Sym(quote(term.prof, depth));
         case "Cng": return Cng(quote(term.func, depth), quote(term.prof, depth));
+        case "Eta": return Eta(quote(term.expr, depth));
         case "Rwt": return Rwt(term.name, quote(term.type(Var(depth)), depth + 1), quote(term.prof, depth), quote(term.expr, depth));
         case "Slf": return Slf(term.name, quote(term.type(Var(depth)), depth + 1));
         case "New": return New(quote(term.type, depth), quote(term.expr, depth));
@@ -743,6 +753,8 @@ const erase = (term) => {
       return Put(Hol(""));
     case "Cng":
       return Put(Hol(""));
+    case "Eta":
+      return Put(Hol(""));
     case "Rwt":
       return erase(term.expr);
     case "Slf":
@@ -829,6 +841,7 @@ const equal = (a, b, defs) => {
           case "Rfl-Rfl": y = Eqs(ay[1].expr, by[1].expr); break;
           case "Sym-Sym": y = Eqs(ay[1].prof, by[1].prof); break;
           case "Cng-Cng": y = And(Eqs(ay[1].term, by[1].term), Eqs(ay[1].prof, by[1].prof)); break;
+          case "Eta-Eta": y = Eqs(ay[1].expr, by[1].expr); break;
           case "Rwt-Rwt": y = And(And(Eqs(ay[1].prof, by[1].prof), Eqs(ay[1].type, by[1].type)), Eqs(ay[1].expr, by[1].expr)); break;
           case "Slf-Slf": y = Eqs(ay[1].type, by[1].type); break;
           case "New-New": y = Eqs(ay[1].expr, by[1].expr); break;
@@ -900,6 +913,7 @@ const uses = ([ctor, term], depth = 0) => {
     case "Eql": return 0;
     case "Rfl": return 0;
     case "Sym": return 0;
+    case "Eta": return 0;
     case "Cng": return 0;
     case "Rwt": return 0;
     case "Slf": return 0;
@@ -942,6 +956,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Rfl": return true;
     case "Sym": return true;
     case "Cng": return true;
+    case "Eta": return true;
     case "Rwt": return true;
     case "Slf": return true;
     case "New": return is_at_level(term.expr, at_level, depth, level);
@@ -1036,6 +1051,8 @@ const boxcheck = show => (term, defs = {}, ctx = []) => {
       case "Sym":
         break;
       case "Cng":
+        break;
+      case "Eta":
         break;
       case "Rwt":
         break;
@@ -1362,6 +1379,16 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         }
         type = Eql(prof_t[1].val1, prof_t[1].val0);
         break;
+      case "Eta":
+        var expr_t = norm(show)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        if (expr_t[0] === "Sig") {
+          type = Eql(term[1].expr, Par(Fst(term[1].expr, expr_t[1].eras), Snd(term[1].expr, expr_t[1].eras), expr_t[1].eras));
+        } else if (expr_t[0] === "All") {
+          type = Eql(term[1].expr, Lam("x", null, App(shift(term[1].expr, 1, 0), Var(0), false), false));
+        } else {
+          ERROR("Invalid use of eta.");
+        }
+        break;
       case "Cng":
         var prof_t = norm(show)(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (prof_t[0] !== "Eql") {
@@ -1500,6 +1527,7 @@ module.exports = {
   Rfl,
   Sym,
   Cng,
+  Eta,
   Rwt,
   Slf,
   New,
