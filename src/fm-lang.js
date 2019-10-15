@@ -969,37 +969,37 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
   // Parses a fst accessor, `fst(t)`
   function parse_fst(nams) {
     if (match("fst(")) {
-      var pair = parse_term(nams);
-      var skip = parse_exact(")");
-      return Fst(pair, 0);
+      var eras = 0;
+    } else if (match("~fst(")) {
+      var eras = 1;
+    } else if (match("fst~(")) {
+      var eras = 2;
+    } else if (match("~fst~(")) {
+      var eras = 3;
+    } else {
+      return;
     }
-  }
-
-  // Parses an erased fst accessor, `~fst(t)`
-  function parse_fst_era(nams) {
-    if (match("~fst(")) {
-      var pair = parse_term(nams);
-      var skip = parse_exact(")");
-      return Fst(pair, 2);
-    }
+    var pair = parse_term(nams);
+    var skip = parse_exact(")");
+    return Fst(pair, eras);
   }
 
   // Parses a snd accessor, `snd(t)`
   function parse_snd(nams) {
     if (match("snd(")) {
-      var pair = parse_term(nams);
-      var skip = parse_exact(")");
-      return Snd(pair, 0);
+      var eras = 0;
+    } else if (match("~snd(")) {
+      var eras = 1;
+    } else if (match("snd~(")) {
+      var eras = 2;
+    } else if (match("~snd~(")) {
+      var eras = 3;
+    } else {
+      return;
     }
-  }
-
-  // Parses an erased snd accessor, `~snd(t)`
-  function parse_snd_era(nams) {
-    if (match("~snd(")) {
-      var pair = parse_term(nams);
-      var skip = parse_exact(")");
-      return Snd(pair, 1);
-    }
+    var pair = parse_term(nams);
+    var skip = parse_exact(")");
+    return Snd(pair, eras);
   }
 
   // Parses a projection, `get [x, y] = t`
@@ -1345,9 +1345,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     else if (parsed = parse_cpy(nams));
     else if (parsed = parse_sig_or_par(nams));
     else if (parsed = parse_fst(nams));
-    else if (parsed = parse_fst_era(nams));
     else if (parsed = parse_snd(nams));
-    else if (parsed = parse_snd_era(nams));
     else if (parsed = parse_get(nams));
     else if (parsed = parse_rfl(nams));
     else if (parsed = parse_sym(nams));
