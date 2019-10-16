@@ -431,7 +431,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       return Ref(path);
     } else {
       error("Attempted to use a syntax-sugar which requires `" + str + "` to be in scope, but it isn't.\n"
-          + "To solve that, add `import Base@0 open` to the start of your file.\n"
+          + "To solve that, add `import Base@0` to the start of your file.\n"
           + "See http://docs.formality-lang.org/en/latest/language/Hello,-world!.html for more info.");
     }
   }
