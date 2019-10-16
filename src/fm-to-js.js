@@ -1,4 +1,4 @@
-const fmc = require("./fm-lang.js");
+const fm = require("./fm-lang.js");
 
 // Converts a Formality-Core Term to a native JavaScript function
 const compile = (term, defs, vars) => {
@@ -72,7 +72,7 @@ const compile = (term, defs, vars) => {
     case "Log":
       return compile(term.expr, defs, vars);
     case "Ref":
-      return compile(fmc.erase(defs[term.name]), defs, vars);
+      return compile(fm.erase(defs[term.name]), defs, vars);
   }
 };
 
@@ -80,30 +80,30 @@ const compile = (term, defs, vars) => {
 const decompile = (func) => {
   return (function go(term, depth) {
     function APP(variable) {
-      return function FMC_DECOMPILE_GET(arg){
+      return function FM_DECOMPILE_GET(arg){
         if (arg === null) {
           return variable;
         } else {
-          return APP(d => fmc.App(variable(d), go(arg, d)));
+          return APP(d => fm.App(variable(d), go(arg, d), false));
         }
       };
     };
     function VAR(d) {
-      return fmc.Var(d - 1 - depth);
+      return fm.Var(d - 1 - depth);
     };
-    if (typeof term === "function" && term.name === "FMC_DECOMPILE_GET") {
+    if (typeof term === "function" && term.name === "FM_DECOMPILE_GET") {
       return term(null)(depth);
     } else if (typeof term === "object") {
       var val0 = go(term[0], depth);
       var val1 = go(term[1], depth);
-      return fmc.Par(val0, val1);
+      return fm.Par(val0, val1);
     } else if (typeof term === "number") {
-      return fmc.Num(term);
+      return fm.Num(term);
     } else if (typeof term === "function") {
       var body = go(term(APP(VAR)), depth + 1);
-      return fmc.Lam(fmc.gen_name(depth), body);
+      return fm.Lam(fm.gen_name(depth), null, body, false);
     } else if (typeof term === "string") {
-      throw "[ERROR]\nThis native JS function can't be decompiled to FMC:\n\n"
+      throw "[ERROR]\nThis native JS function can't be decompiled to Formality:\n\n"
         + func.toString()
         + "\n\nIt possibly uses numeric operators on free variables, which can't be decompiled yet.";
     } else {
