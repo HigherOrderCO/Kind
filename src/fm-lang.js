@@ -34,6 +34,7 @@ const {
   Cng,
   Eta,
   Rwt,
+  Cst,
   Slf,
   New,
   Use,
@@ -259,12 +260,20 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       return text;
     case "Fst":
       var pair = show(args.pair, nams, opts);
-      var eras = args.eras > 0 ? "~" : "";
-      return eras + "fst(" + pair + ")";
+      switch (args.eras) {
+        case 0: return "fst(" + pair + ")";
+        case 1: return "~fst(" + pair + ")";
+        case 2: return "fst~(" + pair + ")";
+        case 3: return "~fst~(" + pair + ")";
+      }
     case "Snd":
       var pair = show(args.pair, nams, opts);
-      var eras = args.eras > 0 ? "~" : "";
-      return eras + "snd(" + pair + ")";
+      switch (args.eras) {
+        case 0: return "snd(" + pair + ")";
+        case 1: return "~snd(" + pair + ")";
+        case 2: return "snd~(" + pair + ")";
+        case 3: return "~snd~(" + pair + ")";
+      }
     case "Prj":
       var nam0 = args.nam0;
       var nam1 = args.nam1;
@@ -299,6 +308,11 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       var prof = show(args.prof, nams, opts);
       var expr = show(args.expr, nams, opts);
       return expr + " :: rewrite " + name + " in " + type + " with " + prof;
+    case "Cst":
+      var prof = show(args.prof, nams);
+      var val0 = show(args.val0, nams);
+      var val1 = show(args.val1, nams);
+      return "cast(~" + prof + ", ~" + val0 + ", " + val1 + ")";
     case "Slf":
       var name = args.name;
       var type = show(args.type, nams.concat([name]), opts);
@@ -1070,6 +1084,20 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a cast
+  function parse_cst(nams) {
+    if (match("cast(~")) {
+      var prof = parse_term(nams);
+      var skip = parse_exact(",");
+      var skip = parse_exact("~");
+      var val0 = parse_term(nams);
+      var skip = parse_exact(",");
+      var val1 = parse_term(nams);
+      var skip = parse_exact(")");
+      return Cst(prof, val0, val1);
+    }
+  }
+
   // Parses log, `log(t)`
   function parse_log(nams) {
     if (match("log(")) {
@@ -1351,6 +1379,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     else if (parsed = parse_sym(nams));
     else if (parsed = parse_cng(nams));
     else if (parsed = parse_eta(nams));
+    else if (parsed = parse_cst(nams));
     else if (parsed = parse_log(nams));
     else if (parsed = parse_slf(nams));
     else if (parsed = parse_new(nams));
@@ -2191,6 +2220,11 @@ const replace_refs = ([ctor, term], renamer, depth = 0) => {
       var prof = replace_refs(term.prof, renamer, depth);
       var expr = replace_refs(term.expr, renamer, depth);
       return Rwt(name, type, prof, expr);
+    case "Cst":
+      var prof = replace_refs(term.prof, renamer, depth);
+      var val0 = replace_refs(term.val0, renamer, depth);
+      var val1 = replace_refs(term.val1, renamer, depth);
+      return Cst(prof, val0, val1);
     case "Slf":
       var name = term.name;
       var type = replace_refs(term.type, renamer, depth + 1);
@@ -2339,6 +2373,11 @@ const rewrite = ([ctor, term], rewriter, scope = [], erased = false, only_once =
         var prof = rewrite(term.prof, rewriter, scope, true, only_once);
         var expr = rewrite(term.expr, rewriter, scope, erased, only_once);
         return Rwt(name, type, prof, expr);
+      case "Cst":
+        var prof = rewrite(term.prof, rewriter, scope, true, only_once);
+        var val0 = rewrite(term.val0, rewriter, scope, true, only_once);
+        var val1 = rewrite(term.val1, rewriter, scope, erased, only_once);
+        return Cst(prof, val0, val1);
       case "Slf":
         var name = term.name;
         var type = rewrite(term.type, rewriter, scope.concat([name]), true, only_once);
@@ -2642,6 +2681,7 @@ module.exports = {
   Cng,
   Eta,
   Rwt,
+  Cst,
   Slf,
   New,
   Use,
