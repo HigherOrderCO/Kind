@@ -535,7 +535,9 @@ const norm = show => {
       if (opts.logging) {
         var nams = names_arr(names).reverse();
       }
-      console.log(show(quote(msge, 0), names || []));
+      if (show) {
+        console.log(show(quote(msge, 0), names || []));
+      }
       return expr;
     };
     const unquote = (term, vars, names) => {
@@ -793,10 +795,10 @@ const equal = show => (a, b, defs) => {
 
         // Gets whnfs with and without dereferencing
         // Note: can't use weak:true because it won't give opportunity to eta...
-        var ax = norm(show)(a, {}, {weak: true, undup: true});
-        var bx = norm(show)(b, {}, {weak: true, undup: true});
-        var ay = norm(show)(a, defs, {weak: true, undup: true});
-        var by = norm(show)(b, defs, {weak: true, undup: true});
+        var ax = norm(null)(a, {}, {weak: true, undup: true});
+        var bx = norm(null)(b, {}, {weak: true, undup: true});
+        var ay = norm(null)(a, defs, {weak: true, undup: true});
+        var by = norm(null)(b, defs, {weak: true, undup: true});
 
         // Optimization: if hashes are equal, then a == b prematurely
         if (a[2] === b[2] || ax[2] === bx[2] || ay[2] === by[2]) {
@@ -1127,7 +1129,7 @@ const ctx_str = show => (ctx, defs) => {
   for (var c = ctx; c !== null; c = c.rest) {
     var name = c.name;
     var type = c.type;
-    txt.push("- " + PADR(max_len, " ", c.name) + " : " + show(norm(show)(type, {}, {weak: false, unbox: true}), ctx_names(c.rest)));
+    txt.push("- " + PADR(max_len, " ", c.name) + " : " + show(norm(null)(type, {}, {weak: false, unbox: true}), ctx_names(c.rest)));
   }
   return txt.reverse().join("\n");
 };
@@ -1143,7 +1145,8 @@ const ctx_names = (ctx) => {
 
 const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, debug = true) => {
   var type_memo = {};
-  var ctx_str_ = ctx_str(show);
+  var ctx_str_  = ctx_str(show);
+  var hide_hole = {};
 
   const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
     const TERM = (term) => {
@@ -1159,14 +1162,14 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
     };
 
     const MATCH = (a, b, ctx) => {
-      if (!equal(show)(a, b, defs)) {
+      if (!equal(null)(a, b, defs)) {
         throw ERROR("Type mismatch."
-          + "\n- Found type... " + TERM(norm(show)(a, {}, {weak: false, undup: true}))
-          + "\n- Instead of... " + TERM(norm(show)(b, {}, {weak: false, undup: true})));
+          + "\n- Found type... " + TERM(norm(null)(a, {}, {weak: false, undup: true}))
+          + "\n- Instead of... " + TERM(norm(null)(b, {}, {weak: false, undup: true})));
       }
     };
 
-    var expect_nf = expect ? norm(show)(expect, defs, {undup: true, weak: true}) : null;
+    var expect_nf = expect ? norm(null)(expect, defs, {undup: true, weak: true}) : null;
     var type;
     switch (term[0]) {
       case "Var":
@@ -1214,7 +1217,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         type = term_t;
         break;
       case "App":
-        var func_t = norm(show)(typecheck(term[1].func, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var func_t = norm(null)(typecheck(term[1].func, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (func_t[0] !== "All") {
           ERROR("Attempted to apply a value that isn't a function.");
         }
@@ -1228,7 +1231,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         if (expect_nf !== null && expect_nf[0] !== "Typ") {
           ERROR("The annotated type of a box (" + TERM(Box(Ref("A"))) + ") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
         }
-        var expr_t = norm(show)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var expr_t = norm(null)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         MATCH(expr_t, Typ(), ctx);
         type = Typ();
         break;
@@ -1241,14 +1244,14 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         type = Box(term_t);
         break;
       case "Tak":
-        var expr_t = norm(show)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var expr_t = norm(null)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (expr_t[0] !== "Box") {
           ERROR("Unboxed duplication.");
         }
         type = expr_t[1].expr;
         break;
       case "Dup":
-        var expr_t = norm(show)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var expr_t = norm(null)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (expr_t[0] !== "Box") {
           ERROR("Unboxed duplication.");
         }
@@ -1272,12 +1275,12 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         type = Wrd();
         break;
       case "Ite":
-        var cond_t = norm(show)(typecheck(term[1].cond, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var cond_t = norm(null)(typecheck(term[1].cond, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (cond_t[0] !== "Wrd") {
           ERROR("Attempted to use if on a non-numeric value.");
         }
         var pair_t = expect_nf ? Sig("x", expect_nf, shift(expect_nf, 1, 0), 0) : null;
-        var pair_t = norm(show)(typecheck(term[1].pair, pair_t, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var pair_t = norm(null)(typecheck(term[1].pair, pair_t, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (pair_t[0] !== "Sig") {
           ERROR("The body of an if must be a pair.");
         }
@@ -1289,7 +1292,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         type = expect_nf || typ0_v;
         break;
       case "Cpy":
-        var numb_t = norm(show)(typecheck(term[1].numb, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var numb_t = norm(null)(typecheck(term[1].numb, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (numb_t[0] !== "Wrd") {
           ERROR("Atempted to copy a non-numeric value.");
         }
@@ -1308,7 +1311,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         break;
       case "Par":
         if (expect_nf && expect_nf[0] !== "Sig") {
-          ERROR("Annotated type of a pair (" + TERM(Par(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".\n- Annotated type is " + TERM(norm(show)(expect_nf, defs, {undup: true, weak: true})));
+          ERROR("Annotated type of a pair (" + TERM(Par(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".\n- Annotated type is " + TERM(norm(null)(expect_nf, defs, {undup: true, weak: true})));
         }
         if (expect_nf && expect_nf[1].eras !== term[1].eras) {
           ERROR("Mismatched erasure.");
@@ -1322,7 +1325,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         type = expect_nf || Sig("x", val0_t, val1_t, term[1].eras);
         break;
       case "Fst":
-        var pair_t = norm(show)(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var pair_t = norm(null)(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (pair_t[0] !== "Sig") {
           ERROR("Attempted to extract the first element of a term that isn't a pair.");
         }
@@ -1332,7 +1335,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         type = pair_t[1].typ0;
         break;
       case "Snd":
-        var pair_t = norm(show)(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var pair_t = norm(null)(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (pair_t[0] !== "Sig") {
           ERROR("Attempted to extract the second element of a term that isn't a pair.");
         }
@@ -1342,7 +1345,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         type = subst(pair_t[1].typ1, Fst(term[1].pair, term[1].eras), 0);
         break;
       case "Prj":
-        var pair_t = norm(show)(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var pair_t = norm(null)(typecheck(term[1].pair, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (pair_t[0] !== "Sig") {
           ERROR("Attempted to project the elements of a term that isn't a pair.");
         }
@@ -1360,8 +1363,8 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         type = subst(type, Fst(term[1].pair, term[1].eras), 0);
         break;
       case "Eql":
-        //var val0_t = norm(show)(typecheck(term[1].val0, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
-        //var val1_t = norm(show)(typecheck(term[1].val1, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        //var val0_t = norm(null)(typecheck(term[1].val0, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        //var val1_t = norm(null)(typecheck(term[1].val1, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         //MATCH(val0_t, val1_t, ctx);
         type = Typ();
         break;
@@ -1369,14 +1372,14 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         type = Eql(term[1].expr, term[1].expr);
         break;
       case "Sym":
-        var prof_t = norm(show)(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var prof_t = norm(null)(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (prof_t[0] !== "Eql") {
           ERROR("Attempted to use sym with an invalid equality proof.");
         }
         type = Eql(prof_t[1].val1, prof_t[1].val0);
         break;
       case "Eta":
-        var expr_t = norm(show)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var expr_t = norm(null)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (expr_t[0] === "Sig") {
           type = Eql(term[1].expr, Par(Fst(term[1].expr, expr_t[1].eras), Snd(term[1].expr, expr_t[1].eras), expr_t[1].eras));
         } else if (expr_t[0] === "All") {
@@ -1386,14 +1389,14 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         }
         break;
       case "Cng":
-        var prof_t = norm(show)(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var prof_t = norm(null)(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (prof_t[0] !== "Eql") {
           ERROR("Attempted to use cong with an invalid equality proof.");
         }
         type = Eql(App(term[1].func, prof_t[1].val0, false), App(term[1].func, prof_t[1].val1, false));
         break;
       case "Rwt":
-        var prof_t = norm(show)(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var prof_t = norm(null)(typecheck(term[1].prof, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (prof_t[0] !== "Eql") {
           ERROR("Attempted to use rwt with an invalid equality proof.");
         }
@@ -1408,7 +1411,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         MATCH(type_t, Typ(), ctx);
         return Typ();
       case "New":
-        var type = norm(show)(term[1].type, defs, {undup: true, weak: true});
+        var type = norm(null)(term[1].type, defs, {undup: true, weak: true});
         if (type[0] !== "Slf") {
           ERROR("Attempted to make an instance of a type that isn't self.");
         }
@@ -1417,7 +1420,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         type = term[1].type;
         break;
       case "Use":
-        var expr_t = norm(show)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        var expr_t = norm(null)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (expr_t[0] !== "Slf") {
           ERROR("Attempted to use a value that isn't a self type.");
         }
@@ -1439,7 +1442,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         if (debug) {
           var msgv = term[1].msge;
           try {
-            var msgt = norm(show)(typecheck(msgv, null, defs, ctx, [term, ctx]), {}, {unbox: true, weak: false});
+            var msgt = norm(null)(typecheck(msgv, null, defs, ctx, [term, ctx]), {}, {unbox: true, weak: false});
           } catch (e) {
             var msgt = Hol("");
           }
@@ -1451,21 +1454,21 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         break;
       case "Hol":
         var msg = "";
-        msg += "[ERROR]\n";
-        msg += "Hole found" + (term[1].name ? ": '" + term[1].name + "'" : "") + ".\n";
+        msg += "Hole found" + (term[1].name ? ": '" + term[1].name + "'" : "") + "\n";
         if (expect) {
-          msg += "- With goal... " + TERM(norm(show)(expect, {}, {unbox: true, weak: false}), ctx_names(ctx)) + "\n";
+          msg += "- With goal... " + TERM(norm(null)(expect, {}, {unbox: true, weak: false}), ctx_names(ctx)) + "\n";
           //if (inside) {
             //msg += "- Inside of... " + CODE(show(inside[0], ctx_names(inside[1]))) + "\n";
           //}
         }
         var cstr = ctx_str_(ctx, defs);
         msg += "- With context:\n" + (cstr.length > 0 ? cstr + "\n" : "");
-        if (debug && expect) {
+        if (debug && !hide_hole[term[1].name]) {
           console.log(msg);
+          hide_hole[term[1].name] = true;
+        }
+        if (expect) {
           type = expect;
-        } else {
-          throw msg;
         }
         break;
       case "Ref":
