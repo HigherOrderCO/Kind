@@ -2007,7 +2007,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
               term = subst(term, Num(0), 0);
             }
             for (var i = 0; i < unbox.length; ++i) {
-              if (equal(term[1].expr, unbox[i][1])) {
+              if (equal(show)(term[1].expr, unbox[i][1])) {
                 return Ref("$TMP$" + (unbox.length - 1)); // share identical unbox
               }
             }

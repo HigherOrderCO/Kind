@@ -778,7 +778,7 @@ const erase = (term) => {
 // :: Equality ::
 // ::::::::::::::
 
-const equal = (a, b, defs) => {
+const equal = show => (a, b, defs) => {
   const Eqs = (a, b)    => ["Eqs", {a, b}];
   const Bop = (v, x, y) => ["Bop", {v, x, y}];
   const And = (x,y)     => Bop(false, x, y);
@@ -793,10 +793,10 @@ const equal = (a, b, defs) => {
 
         // Gets whnfs with and without dereferencing
         // Note: can't use weak:true because it won't give opportunity to eta...
-        var ax = norm(x=>x)(a, {}, {weak: true, undup: true});
-        var bx = norm(x=>x)(b, {}, {weak: true, undup: true});
-        var ay = norm(x=>x)(a, defs, {weak: true, undup: true});
-        var by = norm(x=>x)(b, defs, {weak: true, undup: true});
+        var ax = norm(show)(a, {}, {weak: true, undup: true});
+        var bx = norm(show)(b, {}, {weak: true, undup: true});
+        var ay = norm(show)(a, defs, {weak: true, undup: true});
+        var by = norm(show)(b, defs, {weak: true, undup: true});
 
         // Optimization: if hashes are equal, then a == b prematurely
         if (a[2] === b[2] || ax[2] === bx[2] || ay[2] === by[2]) {
@@ -1102,10 +1102,6 @@ const CODE = (str)  => {
   return "\x1b[2m" + str + "\x1b[0m";
 };
 
-const DENON = (a, defs) => {
-  return norm(x=>x)(erase(a), defs);
-};
-
 const ctx_new = null;
 
 const ctx_ext = (name, type, ctx) => {
@@ -1163,7 +1159,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
     };
 
     const MATCH = (a, b, ctx) => {
-      if (!equal(a, b, defs)) {
+      if (!equal(show)(a, b, defs)) {
         throw ERROR("Type mismatch."
           + "\n- Found type... " + TERM(norm(show)(a, {}, {weak: false, undup: true}))
           + "\n- Instead of... " + TERM(norm(show)(b, {}, {weak: false, undup: true})));
@@ -1287,7 +1283,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         }
         var typ0_v = pair_t[1].typ0;
         var typ1_v = subst(pair_t[1].typ1, Typ(), 0);
-        if (!equal(typ0_v, typ1_v, defs)) {
+        if (!equal(show)(typ0_v, typ1_v, defs)) {
           ERROR("Both branches of if must have the same type.");
         }
         type = expect_nf || typ0_v;
