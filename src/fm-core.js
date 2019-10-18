@@ -935,7 +935,7 @@ const uses = ([ctor, term], depth = 0) => {
     case "Sym": return 0;
     case "Eta": return 0;
     case "Cng": return 0;
-    case "Rwt": return 0;
+    case "Rwt": return uses(term.expr, depth) && uses(term.prof, depth);
     case "Cst": return uses(term.val1, depth);
     case "Slf": return 0;
     case "New": return uses(term.expr, depth);
@@ -978,7 +978,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Sym": return true;
     case "Cng": return true;
     case "Eta": return true;
-    case "Rwt": return true;
+    case "Rwt": return is_at_level(term.expr, at_level, depth, level) && is_at_level(term.prof, at_level, depth, level);
     case "Cst": return is_at_level(term.val1, at_level, depth, level);
     case "Slf": return true;
     case "New": return is_at_level(term.expr, at_level, depth, level);
@@ -1077,6 +1077,8 @@ const boxcheck = show => (term, defs = {}, ctx = []) => {
       case "Eta":
         break;
       case "Rwt":
+        check(term.expr, defs, ctx, seen);
+        check(term.prof, defs, ctx, seen);
         break;
       case "Cst":
         check(term.val1, defs, ctx, seen);
