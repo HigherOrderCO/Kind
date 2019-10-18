@@ -53,12 +53,31 @@ try {
   process.exit();
 }
 
+// Create loader with local files for development and with fm_modules filesystem cache
+let warned_about_dowloading = false
+
+const with_download_warning = (loader) => async (file) => {
+  if(!warned_about_dowloading) {
+    console.log("Downloading files to `fm_modules`. This may take a while...");
+    warned_about_dowloading = true;
+  }
+
+  return await loader(file)
+}
+
+const loader = [
+  with_download_warning,
+  fm.forall.with_file_system_cache,
+  fm.forall.with_local_files
+].reduce((loader, mod) => mod(loader), fm.forall.load_file)
+
+
 async function upload(file, global_path = {}) {
   if (!global_path[file]) {
     var code = fs.readFileSync(file + ".fm", "utf8");
 
     try {
-      var local_imports = (await fm.lang.parse(file, code)).local_imports;
+      var local_imports = (await fm.lang.parse(file, code, false, loader)).local_imports;
     } catch (e) {
       console.log(e.toString());
       process.exit();
@@ -74,7 +93,7 @@ async function upload(file, global_path = {}) {
       var code = code.replace(new RegExp("import " + imp_file + " *as")  , "import " + g_name + "@" + g_vers + " as");
     }
 
-    global_path[file] = await fm.lang.save_file(file, code);
+    global_path[file] = await fm.forall.save_file(file, code);
     console.log("Saved `" + file + "` as `" + global_path[file] + "`!");
   }
   return global_path[file];
@@ -87,13 +106,13 @@ async function upload(file, global_path = {}) {
 
   } else if (args.i) {
     try {
-      console.log((await fm.lang.load_file_parents(main)).map(file => "- " + file).join("\n"));
+      console.log((await fm.forall.load_file_parents(main)).map(file => "- " + file).join("\n"));
     } catch (e) {
       console.log("Couldn't load global file '" + main + "'.");
     }
 
   } else if (args.l) {
-    console.log(fs.writeFileSync(main + ".fm", await fm.lang.load_file(main)));
+    console.log(fs.writeFileSync(main + ".fm", await fm.forall.load_file(main)));
     console.log("Downloaded file as `" + main + ".fm`!");
 
   } else if (args.S || args.s) {
@@ -122,7 +141,7 @@ async function upload(file, global_path = {}) {
         console.log("Couldn't find local file `" + file + ".fm`.");
         process.exit();
       }
-      var defs = (await fm.lang.parse(file, code)).defs;
+      var defs = (await fm.lang.parse(file, code, false, loader)).defs;
 
       var nams = [file + "/" + name];
       if (name === "@") {
