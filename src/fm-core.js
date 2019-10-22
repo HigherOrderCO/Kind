@@ -990,112 +990,136 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
 }
 
 // Checks if a term is stratified
-const boxcheck = show => (term, defs = {}, ctx = []) => {
-  const check = ([ctor, term], defs = {}, ctx = [], seen = {}) => {
+const boxcheck = show => (term, defs = {}) => {
+  const check = ([ctor, term], eras = false, ctx = [], ctx_eras = [], seen = {}) => {
     switch (ctor) {
+      case "Var":
+        if (!eras && ctx_eras[ctx_eras.length - term.index - 1]) {
+          throw "[ERROR]\nUse of erased variable `" + ctx[ctx.length - term.index - 1] + "` in non-erased position.";
+        }
+        break;
       case "All":
         break;
       case "Lam":
-        if (uses(term.body) > 1) {
+        if (!eras && uses(term.body) > 1) {
           throw "[ERROR]\nLambda variable `" + term.name + "` used more than once in:\n" + show([ctor, term], ctx);
         }
-        if (!is_at_level(term.body, 0)) {
+        if (!eras && !is_at_level(term.body, 0)) {
           throw "[ERROR]\nLambda variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], ctx);
         }
-        check(term.body, defs, ctx.concat([term.name]), seen);
+        check(term.body, eras, ctx.concat([term.name]), ctx_eras.concat([term.eras]), seen);
         break;
       case "App":
-        check(term.func, defs, ctx, seen);
-        if (!term.eras) {
-          check(term.argm, defs, ctx, seen);
+        check(term.func, eras, ctx, ctx_eras, seen);
+        if (term.eras !== 2) {
+          check(term.argm, eras || !!term.eras, ctx, ctx_eras, seen);
         }
         break;
       case "Box":
         break;
       case "Put":
-        check(term.expr, defs, ctx, seen);
+        check(term.expr, eras, ctx, ctx_eras, seen);
         break;
       case "Tak":
-        throw "[ERROR]\nAttempted to unbox term in a computational posititon:\n" + show([ctor, term], ctx);
+        if (!eras) {
+          throw "[ERROR]\nAttempted to unbox term in a computational posititon:\n" + show([ctor, term], ctx);
+        }
+        break;
       case "Dup":
-        if (!is_at_level(term.body, 1)) {
+        if (!eras && !is_at_level(term.body, 1)) {
           throw "[ERROR]\nDuplication variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], ctx);
         }
-        check(term.expr, defs, ctx, seen);
-        check(term.body, defs, ctx.concat([term.name]), seen);
+        check(term.expr, eras, ctx, ctx_eras, seen);
+        check(term.body, eras, ctx.concat([term.name]), ctx_eras.concat([false]), seen);
         break;
       case "Op1":
       case "Op2":
-        check(term.num0, defs, ctx, seen);
-        check(term.num1, defs, ctx, seen);
+        check(term.num0, eras, ctx, ctx_eras, seen);
+        check(term.num1, eras, ctx, ctx_eras, seen);
         break;
       case "Ite":
-        check(term.cond, defs, ctx, seen);
-        check(term.pair, defs, ctx, seen);
+        check(term.cond, eras, ctx, ctx_eras, seen);
+        check(term.pair, eras, ctx, ctx_eras, seen);
         break;
       case "Cpy":
-        if (!is_at_level(term.body, 0)) {
+        if (!eras && !is_at_level(term.body, 0)) {
           throw "[ERROR]\nCopy variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], ctx);
         }
-        check(term.numb, defs, ctx, seen);
-        check(term.body, defs, ctx.concat([term.name]), seen);
+        check(term.numb, eras, ctx, ctx_eras, seen);
+        check(term.body, eras, ctx.concat([term.name]), ctx_eras.concat([false]), seen);
         break;
       case "Sig":
         break;
       case "Par":
-        if (term.eras !== 1) check(term.val0, defs, ctx, seen);
-        if (term.eras !== 2) check(term.val1, defs, ctx, seen);
+        var eras0 = term.eras === 1;
+        var eras1 = term.eras === 2;
+        check(term.val0, eras || eras0, ctx, ctx_eras, seen);
+        check(term.val1, eras || eras1, ctx, ctx_eras, seen);
         break;
       case "Fst":
-        check(term.pair, defs, ctx, seen);
+        var eras0 = term.eras === 1;
+        if (eras0) {
+          throw "[ERROR]\nAttempted to extract erased first element.";
+        }
+        check(term.pair, eras, ctx, ctx_eras, seen);
         break;
       case "Snd":
-        check(term.pair, defs, ctx, seen);
+        var eras1 = term.eras === 2;
+        if (eras1) {
+          throw "[ERROR]\nAttempted to extract erased second element.";
+        }
+        check(term.pair, eras, ctx, ctx_eras, seen);
         break;
       case "Prj":
+        var eras0 = term.eras === 1;
+        var eras1 = term.eras === 2;
         var uses0 = uses(term.body, 1);
         var uses1 = uses(term.body, 0);
         var isat0 = is_at_level(term.body, 0, 1);
         var isat1 = is_at_level(term.body, 0, 0);
-        if (uses0 > 1 || uses1 > 1) {
+        if (!eras && (uses0 > 1 || uses1 > 1)) {
           throw "[ERROR]\nProjection variable `" + (uses0 > 1 ? term.nam0 : term.nam1) + "` used more than once in:\n" + show([ctor, term], ctx);
         }
-        if (!isat0 || !isat1) {
+        if (!eras && (!isat0 || !isat1)) {
           throw "[ERROR]\nProjection variable `" + (!isat0 ? term.nam0 : term.nam1) + "` used inside a box in:\n" + show([ctor, term], ctx);
         }
-        check(term.pair, defs, ctx, seen);
-        check(term.body, defs, ctx.concat([term.nam0, term.nam1]), seen);
+        check(term.pair, eras, ctx, ctx_eras, seen);
+        check(term.body, eras, ctx.concat([term.nam0, term.nam1]), ctx_eras.concat([eras0, eras1]), seen);
         break;
       case "Eql":
         break;
       case "Rfl":
+        check(term.expr, true, ctx, ctx_eras, seen);
         break;
       case "Sym":
+        check(term.prof, eras, ctx, ctx_eras, seen);
         break;
       case "Cng":
+        check(term.func, true, ctx, ctx_eras, seen);
+        check(term.prof, eras, ctx, ctx_eras, seen);
         break;
       case "Eta":
         break;
       case "Rwt":
-        check(term.expr, defs, ctx, seen);
-        check(term.prof, defs, ctx, seen);
+        check(term.expr, eras, ctx, ctx_eras, seen);
+        check(term.prof, eras, ctx, ctx_eras, seen);
         break;
       case "Cst":
-        check(term.val1, defs, ctx, seen);
+        check(term.val1, eras, ctx, ctx_eras, seen);
         break;
       case "Ann":
-        check(term.expr, defs, ctx, seen);
+        check(term.expr, eras, ctx, ctx_eras, seen);
         break;
       case "Slf":
         break;
       case "New":
-        check(term.expr, defs, ctx, seen);
+        check(term.expr, eras, ctx, ctx_eras, seen);
         break;
       case "Use":
-        check(term.expr, defs, ctx, seen);
+        check(term.expr, eras, ctx, ctx_eras, seen);
         break;
       case "Log":
-        check(term.expr, defs, ctx, seen);
+        check(term.expr, eras, ctx, ctx_eras, seen);
         break;
       case "Hol":
         break;
@@ -1103,15 +1127,15 @@ const boxcheck = show => (term, defs = {}, ctx = []) => {
         if (!defs[term.name]) {
           throw "[ERROR]\nUndefined reference: `" + term.name + "`.";
         } else if (!seen[term.name]) {
-          check(defs[term.name], defs, ctx, {...seen, [term.name]: true});
+          check(defs[term.name], eras, ctx, ctx_eras, {...seen, [term.name]: true});
           break;
-        } else if (seen[term.name]) {
-          throw "[ERROR]\nRecursive occurrence of '" + term.name + "' in a computational position.";
+        } else if (!eras && seen[term.name]) {
+          throw "[ERROR]\nRecursive occurrence of '" + term.name + "'.";
           break;
         }
     }
   };
-  return check(term, defs, ctx);
+  return check(term, false, [], []);
 }
 
 // :::::::::::::::::::
@@ -1249,7 +1273,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         }
         typecheck(term[1].argm, func_t[1].bind, defs, ctx, [term, ctx]);
         if (func_t[1].eras !== term[1].eras) {
-          ERROR("Erasure doesn't match.");
+          ERROR("Mismatched erasure.");
         }
         type = subst(func_t[1].body, Ann(func_t[1].bind, term[1].argm, false), 0);
         break;
@@ -1483,6 +1507,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
           try {
             var msgt = norm(null)(typecheck(msgv, null, defs, ctx, [term, ctx]), {}, {unbox: true, weak: false});
           } catch (e) {
+            console.log(e);
             var msgt = Hol("");
           }
           console.log("[LOG]");

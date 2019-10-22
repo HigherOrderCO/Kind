@@ -290,11 +290,11 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       return "refl(~" + expr + ")";
     case "Sym":
       var prof = show(args.prof, nams, opts);
-      return "sym(~" + prof + ")";
+      return "sym(" + prof + ")";
     case "Cng":
       var func = show(args.func, nams, opts);
       var prof = show(args.prof, nams, opts);
-      return "cong(~" + func + ", ~" + prof + ")";
+      return "cong(~" + func + ", " + prof + ")";
     case "Eta":
       var expr = show(args.expr, nams, opts);
       return "eta(~" + expr + ")";
@@ -1049,7 +1049,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
 
   // Parses sym, `sym(~t)`
   function parse_sym(nams) {
-    if (match("sym(~")) {
+    if (match("sym(")) {
       var prof = parse_term(nams);
       var skip = parse_exact(")");
       return Sym(prof);
@@ -1061,7 +1061,6 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     if (match("cong(~")) {
       var func = parse_term(nams);
       var skip = parse_exact(",");
-      var skip = parse_exact("~");
       var prof = parse_term(nams);
       var skip = parse_exact(")");
       return Cng(func, prof);
@@ -1186,7 +1185,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
           cses[c] = Lam(moves[i][0], null, cses[c], false);
         }
         for (var i = notes.length - 1; i >= 0; --i) {
-          cses[c] = Lam(notes[i][0], null, cses[c], true);
+          cses[c] = Lam(notes[i][0], null, cses[c], false);
         }
         for (var i = 0; i < ctors.length; ++i) {
           cses[c] = Lam(term_name + "." + ctors[ctors.length - i - 1][0], null, cses[c], ctors[ctors.length - i - 1][2]);
@@ -1204,8 +1203,9 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
         var moti = All(moves[i][0], moves[i][2], moti, false);
       }
       for (var i = notes.length - 1; i >= 0; --i) {
-        var moti = All(notes[i][0], Eql(notes[i][1], shift(notes[i][2], adt_indx.length + 1 + i, 0)), moti, true);
+        var moti = All(notes[i][0], Eql(notes[i][1], shift(notes[i][2], adt_indx.length + 1 + i, 0)), moti, false);
       }
+      var moti = Tid(moti);
       var moti = Lam(term_name, null, moti, false);
       for (var i = adt_indx.length - 1; i >= 0; --i) {
         var moti = Lam(term_name + "." + adt_indx[i][0], null, moti, false);
@@ -1219,7 +1219,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
         var term = App(term, cses[i], false);
       }
       for (var i = 0; i < notes.length; ++i) {
-        var term = App(term, Rfl(notes[i][2]), true);
+        var term = App(term, Rfl(notes[i][2]), false);
       }
       for (var i = 0; i < moves.length; ++i) {
         var term = App(term, moves[i][1], false);
