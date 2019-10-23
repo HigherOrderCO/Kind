@@ -71,23 +71,25 @@ const loader = [
   fm.forall.with_local_files
 ].reduce((loader, mod) => mod(loader), fm.forall.load_file)
 
+async function local_imports_or_exit(file, code) {
+  try {
+    const {open_imports} = await fm.lang.parse(file, code, false, loader);
+    return Object.keys(open_imports).filter((name) => name.indexOf("@") === -1)
+  } catch (e) {
+    console.log(e.toString());
+    process.exit();
+  }
+}
 
 async function upload(file, global_path = {}) {
   if (!global_path[file]) {
     var code = fs.readFileSync(file + ".fm", "utf8");
 
-    try {
-      var local_imports = (await fm.lang.parse(file, code, false, loader)).local_imports;
-    } catch (e) {
-      console.log(e.toString());
-      process.exit();
-    }
-    //console.log(file, local_imports);
+    const local_imports = await local_imports_or_exit(file, code);
 
     for (var imp_file in local_imports) {
       var g_path = await upload(imp_file, global_path);
       var [g_name, g_vers] = g_path.split("@");
-      //console.log(file, "replace", "`import " + imp_file + " *`", "by", "`import " + g_name + "@" + g_vers + " as " + imp_file + "`");
       var code = code.replace(new RegExp("import " + imp_file + " *\n")  , "import " + g_name + "@" + g_vers + "\n");
       var code = code.replace(new RegExp("import " + imp_file + " *open"), "import " + g_name + "@" + g_vers + " open");
       var code = code.replace(new RegExp("import " + imp_file + " *as")  , "import " + g_name + "@" + g_vers + " as");
