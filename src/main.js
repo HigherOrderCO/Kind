@@ -53,28 +53,49 @@ try {
   process.exit();
 }
 
+// Create loader with local files for development and with fm_modules filesystem cache
+let warned_about_dowloading = false
+
+const with_download_warning = (loader) => async (file) => {
+  if(!warned_about_dowloading) {
+    console.log("Downloading files to `fm_modules`. This may take a while...");
+    warned_about_dowloading = true;
+  }
+
+  return await loader(file)
+}
+
+const loader = [
+  with_download_warning,
+  fm.forall.with_file_system_cache,
+  fm.forall.with_local_files
+].reduce((loader, mod) => mod(loader), fm.forall.load_file)
+
+async function local_imports_or_exit(file, code) {
+  try {
+    const {open_imports} = await fm.lang.parse(file, code, false, loader);
+    return Object.keys(open_imports).filter((name) => name.indexOf("@") === -1)
+  } catch (e) {
+    console.log(e.toString());
+    process.exit();
+  }
+}
+
 async function upload(file, global_path = {}) {
   if (!global_path[file]) {
     var code = fs.readFileSync(file + ".fm", "utf8");
 
-    try {
-      var local_imports = (await fm.lang.parse(file, code)).local_imports;
-    } catch (e) {
-      console.log(e.toString());
-      process.exit();
-    }
-    //console.log(file, local_imports);
+    const local_imports = await local_imports_or_exit(file, code);
 
-    for (var imp_file in local_imports) {
+    for (var imp_file of local_imports) {
       var g_path = await upload(imp_file, global_path);
       var [g_name, g_vers] = g_path.split("@");
-      //console.log(file, "replace", "`import " + imp_file + " *`", "by", "`import " + g_name + "@" + g_vers + " as " + imp_file + "`");
       var code = code.replace(new RegExp("import " + imp_file + " *\n")  , "import " + g_name + "@" + g_vers + "\n");
       var code = code.replace(new RegExp("import " + imp_file + " *open"), "import " + g_name + "@" + g_vers + " open");
       var code = code.replace(new RegExp("import " + imp_file + " *as")  , "import " + g_name + "@" + g_vers + " as");
     }
 
-    global_path[file] = await fm.lang.save_file(file, code);
+    global_path[file] = await fm.forall.save_file(file, code);
     console.log("Saved `" + file + "` as `" + global_path[file] + "`!");
   }
   return global_path[file];
@@ -87,13 +108,13 @@ async function upload(file, global_path = {}) {
 
   } else if (args.i) {
     try {
-      console.log((await fm.lang.load_file_parents(main)).map(file => "- " + file).join("\n"));
+      console.log((await fm.forall.load_file_parents(main)).map(file => "- " + file).join("\n"));
     } catch (e) {
       console.log("Couldn't load global file '" + main + "'.");
     }
 
   } else if (args.l) {
-    console.log(fs.writeFileSync(main + ".fm", await fm.lang.load_file(main)));
+    console.log(fs.writeFileSync(main + ".fm", await fm.forall.load_file(main)));
     console.log("Downloaded file as `" + main + ".fm`!");
 
   } else if (args.S || args.s) {
@@ -105,14 +126,6 @@ async function upload(file, global_path = {}) {
 
   } else {
     try {
-      var mode
-        = args.d ? "DEBUG"
-        : args.o ? "OPTIMAL"
-        : args.O ? "OPTIMAL"
-        : args.j ? "JAVASCRIPT"
-        : args.t ? "TYPE"
-        : args[0] ? "NONE"
-        : "DEBUG";
       var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
       var [file, name] = main.indexOf("/") === -1 ? [main, "main"] : main.split("/");
@@ -122,7 +135,7 @@ async function upload(file, global_path = {}) {
         console.log("Couldn't find local file `" + file + ".fm`.");
         process.exit();
       }
-      var defs = (await fm.lang.parse(file, code)).defs;
+      var defs = (await fm.lang.parse(file, code, false, loader)).defs;
 
       var nams = [file + "/" + name];
       if (name === "@") {
@@ -165,7 +178,16 @@ async function upload(file, global_path = {}) {
           }
           try {
             if (defs[nams[i]]) {
-              var term = fm.exec(nams[i], defs, mode, opts, stats);
+
+              var term
+                = args.d ? fm.exec.debug_reduce(nams[i], defs, opts)
+                : args.o ? fm.exec.optimal_reduce(nams[i], defs, {...opts, stats})
+                : args.O ? fm.exec.optimal_reduce(nams[i], defs, {...opts, stats})
+                : args.j ? fm.exec.beta_reduce(nams[i], defs, opts)
+                : args.t ? fm.exec.type(nams[i], defs, opts)
+                : args[0] ? (args.X ? term : fm.lang.erase(term))
+                : fm.exec.debug_reduce(nams[i], defs, opts);
+
               console.log(init + fm.lang.show(term, [], {full_refs: !!args.f}));
             } else {
               console.log(init + "Definition not found: " + nams[i]);
@@ -178,7 +200,7 @@ async function upload(file, global_path = {}) {
               //console.log(e.toString());
             }
           }
-          if (args.p || (mode.slice(0,3) === "OPT" && !args.h)) {
+          if (args.p || ((args.o || args.O) && !args.h)) {
             console.log(JSON.stringify(stats));
           }
         }

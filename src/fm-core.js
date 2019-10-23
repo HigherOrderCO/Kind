@@ -321,8 +321,8 @@ const subst = ([ctor, term], val, depth) => {
       var prof = subst(term.prof, val, depth);
       return Cng(func, prof);
     case "Eta":
-      var term = subst(term.expr, val, depth);
-      return Eta(term);
+      var new_term = subst(term.expr, val, depth);
+      return Eta(new_term);
     case "Rwt":
       var name = term.name;
       var type = subst(term.type, val && shift(val, 1, 0), depth + 1);

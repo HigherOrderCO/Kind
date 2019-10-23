@@ -60,11 +60,7 @@ const {
   ctx_names,
 } = require("./fm-core.js");
 
-// Usng eval prevents being catched by Webpack
-const fs = typeof window === "object" ? null : eval('require("fs")');
-const ls = typeof window === "object" ? window.localStorage : null;
-const path = typeof window === "object" ? null : eval('require("path")');
-const xhr = require("xhr-request-promise");
+const { load_file } = require("./forall");
 const version = require("./../package.json").version;
 
 // :::::::::::::::::::::
@@ -344,16 +340,13 @@ const show = ([ctor, args], nams = [], opts = {}) => {
 // :::::::::::::
 
 // Converts a string to a term
-const parse = async (file, code, tokenify, root = true, loaded = {}) => {
+const parse = async (file, code, tokenify, loader = load_file, root = true, loaded = {}) => {
   // Imports a local/global file, merging its definitions
   async function do_import(import_file) {
-    if (import_file.indexOf("@") === -1) {
-      local_imports[import_file] = true;
-    }
     if (!loaded[import_file]) {
       try {
-        var file_code = await load_file(import_file);
-        loaded[import_file] = await parse(import_file, file_code, tokenify, false, loaded);
+        var file_code = await loader(import_file);
+        loaded[import_file] = await parse(import_file, file_code, tokenify, loader, false, loaded);
       } catch (e) {
         throw e;
       }
@@ -427,7 +420,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           return found[0];
         }
       }
-      // Otherwise, return an undefined reference to hte same file 
+      // Otherwise, return an undefined reference to hte same file
       return file + "/" + str_name;
     })();
     return result;
@@ -1107,7 +1100,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
-  // Parses a self type, `$x P(x)` 
+  // Parses a self type, `$x P(x)`
   function parse_slf(nams) {
     if (match("$")) {
       var name = parse_string();
@@ -1548,7 +1541,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
   // Parses a top-level definition, including:
   //
   // - Untyped definitions:
-  // 
+  //
   //   name <term>
   //
   // - Typed definitions:
@@ -2060,7 +2053,6 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
   // Parses all definitions
   var open_imports = {};
   var qual_imports = {};
-  var local_imports = {};
   var file_version = {};
   var tokens = tokenify ? [["txt",""]] : null;
   var idx = 0;
@@ -2088,7 +2080,6 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     adts,
     unbx,
     tokens,
-    local_imports,
     qual_imports,
     open_imports
   };
@@ -2421,10 +2412,10 @@ const replace = (idx, val, term) => {
 // :::::::::::::::::::
 
 // Syntax sugars for datatypes. They transform a statement like:
-// 
+//
 //   data ADT <p0 : Param0, p1 : Param1...> {i0 : Index0, i1 : Index1}
-//   | ctr0 {ctr_fld0 : Ctr0_Fld0, ctr0_fld1 : Ctr0_Fld1, ...} : Cr0Type 
-//   | ctr1 {ctr_fld0 : Ctr0_Fld0, ctr0_fld1 : Ctr0_Fld1, ...} : Cr0Type 
+//   | ctr0 {ctr_fld0 : Ctr0_Fld0, ctr0_fld1 : Ctr0_Fld1, ...} : Cr0Type
+//   | ctr1 {ctr_fld0 : Ctr0_Fld0, ctr0_fld1 : Ctr0_Fld1, ...} : Cr0Type
 //   | ...
 //
 // on its corresponding self-encoded datatype:
@@ -2438,12 +2429,12 @@ const replace = (idx, val, term) => {
 //     {ctr1 : {ctr1_fld0 : Ctr1_Fld0, ctr1_fld1 : Ctr1_Fld1, ...} -> (Ctr0Type[ADT <- P] (ADT.ctr1 Param0 Param1... ctr1_fld1 ctr0_fld1 ...))} ->
 //     ... ->
 //     (P i0 i1... self)
-//  
+//
 //   def ADT.ctr0
 //   = {~p0 : Param0, ~p1 : Param1, ..., ctr0_fld0 : Ctr0_Fld0, ctr1_fld1 : Ctr1_Fld1, ...} =>
 //     : Ctr0Type
 //     @ Ctr0Type
-//       {~P, ctr0, ctr1, ...} => 
+//       {~P, ctr0, ctr1, ...} =>
 //       (ctr0 ctr0_fld0 ctr0_fld1 ...)
 //
 //   (...)
@@ -2479,7 +2470,7 @@ const derive_adt_type = (file, {adt_pram, adt_indx, adt_ctor, adt_name}) => {
             } else {
               var wit_t = Ref(file+"/"+adt_name);
               for (var P = 0; P < adt_pram.length; ++P) {
-                wit_t = App(wit_t, Var(-1 + i + 1 + i + adt_pram.length - P), adt_pram[P][2]); 
+                wit_t = App(wit_t, Var(-1 + i + 1 + i + adt_pram.length - P), adt_pram[P][2]);
               }
               for (var I = 0; I < i; ++I) {
                 wit_t = App(wit_t, Var(-1 + i - I), adt_indx[I][2]);
@@ -2527,7 +2518,7 @@ const derive_adt_type = (file, {adt_pram, adt_indx, adt_ctor, adt_name}) => {
             // ... (P i0 i1... self)
             var ret = Var(adt_ctor.length + 1 - 1);
             for (var i = 0; i < adt_indx.length; ++i) {
-              var ret = App(ret, Var(adt_ctor.length + 1 + 1 + adt_indx.length - i - 1), adt_indx[i][2]); 
+              var ret = App(ret, Var(adt_ctor.length + 1 + 1 + adt_indx.length - i - 1), adt_indx[i][2]);
             }
             var ret = App(ret, Var(adt_ctor.length + 1 + 1 - 1), false);
             return ret;
@@ -2569,90 +2560,6 @@ const derive_adt_ctor = (file, {adt_pram, adt_indx, adt_ctor, adt_name}, c) => {
     }
   })(0, adt_indx.length, 0);
 }
-
-const post = (func, body) => {
-  return xhr("http://moonad.org/api/" + func,
-    { method: "POST"
-    , json: true
-    , body})
-    .then(res => {
-      if (res[0] === "ok") {
-        return res[1];
-      } else {
-        throw res[1];
-      }
-    });
-};
-
-const save_file = (file, code) => post("save_file", {file, code});
-const load_file_parents = (file) => post("load_file_parents", {file});
-const load_file = (() => {
-  var loading = {};
-  var warned = false;
-  return (file) => {
-    if (!loading[file]) {
-
-      if (fs) {
-        var cache_dir_path = path.join(process.cwd(), "fm_modules");
-        var cached_file_path = path.join(cache_dir_path, file + ".fm");
-        var local_file_path = path.join(process.cwd(), file + ".fm");
-        var version_file_path = path.join(cache_dir_path, "version");
-        var has_cache_dir = fs.existsSync(cache_dir_path);
-        var has_version_file = has_cache_dir && fs.existsSync(version_file_path);
-        var correct_version = has_version_file && fs.readFileSync(version_file_path, "utf8") === version;
-        if (!has_cache_dir || !has_version_file || !correct_version) {
-          if (has_cache_dir) {
-            var files = fs.readdirSync(cache_dir_path);
-            for (var i = 0; i < files.length; ++i) {
-              fs.unlinkSync(path.join(cache_dir_path, files[i]));
-            }
-            fs.rmdirSync(cache_dir_path);
-          }
-          fs.mkdirSync(cache_dir_path);
-          fs.writeFileSync(version_file_path, version);
-        }
-      }
-
-      var has_cached_fs = fs && fs.existsSync(cached_file_path);
-      var has_local_fs = fs && fs.existsSync(local_file_path);
-      if (has_cached_fs || has_local_fs) {
-        loading[file] = new Promise((resolve, reject) => {
-          fs.readFile(has_cached_fs ? cached_file_path : local_file_path, "utf8", (err, code) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(code);
-            }
-          })
-        });
-
-      } else {
-        var cached_ls = ls && ls.getItem("FPM@" + version + "/" + file);
-        if (cached_ls) {
-          loading[file] = Promise.resolve(cached_ls);
-        } else {
-          loading[file] = post("load_file", {file}).then(code => new Promise((resolve, reject) => {
-            if (code) {
-              if (fs && !fs.existsSync(cached_file_path)) {
-                if (!warned) {
-                  warned = true;
-                  console.log("Downloading files to `fm_modules`. This may take a while...");
-                }
-                fs.writeFile(cached_file_path, code, (err, ok) => resolve(code));
-              } else if (ls) {
-                ls.setItem("FPM@" + version + "/" + file, code);
-                resolve(code);
-              } else {
-                resolve(code);
-              }
-            }
-          }));
-        }
-      }
-    }
-    return loading[file];
-  };
-})();
 
 module.exports = {
   Var,
@@ -2704,8 +2611,5 @@ module.exports = {
   derive_adt_type,
   derive_adt_ctor,
   //derive_dependent_match,
-  save_file,
-  load_file,
-  load_file_parents,
   version,
 };
