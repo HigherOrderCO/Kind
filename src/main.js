@@ -87,7 +87,7 @@ async function upload(file, global_path = {}) {
 
     const local_imports = await local_imports_or_exit(file, code);
 
-    for (var imp_file in local_imports) {
+    for (var imp_file of local_imports) {
       var g_path = await upload(imp_file, global_path);
       var [g_name, g_vers] = g_path.split("@");
       var code = code.replace(new RegExp("import " + imp_file + " *\n")  , "import " + g_name + "@" + g_vers + "\n");
