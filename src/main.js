@@ -105,14 +105,14 @@ async function upload(file, global_path = {}) {
 
   } else {
     try {
-      var mode
-        = args.d ? "DEBUG"
-        : args.o ? "OPTIMAL"
-        : args.O ? "OPTIMAL"
-        : args.j ? "JAVASCRIPT"
-        : args.t ? "TYPE"
-        : args[0] ? "NONE"
-        : "DEBUG";
+      var command
+        = args.d ? "REDUCE_DEBUG"
+        : args.o ? "REDUCE_OPTIMAL"
+        : args.O ? "REDUCE_OPTIMAL"
+        : args.j ? "REDUCE_NATIVE"
+        : args.t ? "TYPECHECK"
+        : args[0] ? "GET"
+        : "REDUCE_DEBUG";
       var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
       var [file, name] = main.indexOf("/") === -1 ? [main, "main"] : main.split("/");
@@ -134,7 +134,8 @@ async function upload(file, global_path = {}) {
         unbox: !args.B,
         weak: !!args.W,
         strict: !!args.O,
-        logging: !args.m
+        logging: !args.m,
+        defs: defs
       };
 
       var nam_size = 0;
@@ -152,6 +153,7 @@ async function upload(file, global_path = {}) {
           input_net: args.p ? null : undefined,
           output_net: args.p ? null : undefined
         };
+        opts.stats = stats;
 
         if (nams[i][0] !== "$" && nams[i][0] !== "@") {
           if (nams.length > 1) {
@@ -165,7 +167,7 @@ async function upload(file, global_path = {}) {
           }
           try {
             if (defs[nams[i]]) {
-              var term = fm.exec(nams[i], defs, mode, opts, stats);
+              var term = fm.lang.run(command, nams[i], opts);
               console.log(init + fm.lang.show(term, [], {full_refs: !!args.f}));
             } else {
               console.log(init + "Definition not found: " + nams[i]);
@@ -173,12 +175,13 @@ async function upload(file, global_path = {}) {
           } catch (e) {
             if (nams.length > 1) {
               console.log("\x1b[31m" + init + "error\x1b[0m");
+              console.log(e);
             } else {
               console.log(e);
               //console.log(e.toString());
             }
           }
-          if (args.p || (mode.slice(0,3) === "OPT" && !args.h)) {
+          if (args.p || (command === "REDUCE_OPTIMAL" && !args.h)) {
             console.log(JSON.stringify(stats));
           }
         }

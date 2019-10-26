@@ -1,24 +1,15 @@
 // ~~ Formality Interaction Net System ~~
 
+// Float conversions
+const {put_float_on_word, get_float_on_word} = require("./fm-word.js");
+
+// Base types
 const Pointer = (addr, port) => (addr << 2) + (port & 3);
 const addr_of = (ptr) => ptr >>> 2;
 const slot_of = (ptr) => ptr & 3;
 const Numeric = (numb) => numb + 0x100000000;
 const numb_of = (numb) => numb - 0x100000000;
 const type_of = (ptrn) => ptrn >= 0x100000000 ? NUM : PTR;
-
-// Float conversions
-let arrbuf = new ArrayBuffer(4);
-var u32buf = new Uint32Array(arrbuf);
-var f32buf = new Float32Array(arrbuf);
-const put_float_on_word = num => {
-  f32buf[0] = num;
-  return u32buf[0];
-};
-const get_float_on_word = num => {
-  u32buf[0] = num;
-  return f32buf[0];
-};
 
 // PtrNum types
 const PTR = 0;

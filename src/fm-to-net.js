@@ -1,32 +1,32 @@
 // ~~ Compiles Formality Core to Formality Net ~~
 
-const {Var, App, Lam, Num, Op1, Op2, Ite, Par, Fst, Snd, Hol, gen_name, erase} = require("./fm-lang.js");
+const {Var, App, Lam, Num, Op1, Op2, Ite, Par, Fst, Snd, Hol, erase} = require("./fm-core.js");
 const {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, NOD, OP1, OP2, NUM, ITE, PTR, FOR} = require("./fm-net.js");
 
 const op_kind = {
-   0 : "+"   , "+"   :  0 ,
-   1 : "-"   , "-"   :  1 ,
-   2 : "*"   , "*"   :  2 ,
-   3 : "/"   , "/"   :  3 ,
-   4 : "%"   , "%"   :  4 ,
-   5 : "^"   , "^"   :  5 ,
-   6 : ".&"  , ".&"  :  6 ,
-   7 : ".|"  , ".|"  :  7 ,
-   8 : ".^"  , ".^"  :  8 ,
-   9 : ".!"  , ".!"  :  9 ,
-  10 : ".>>" , ".>>" : 10 ,
-  11 : ".<<" , ".<<" : 11 ,
-  12 : ".>"  , ".>"  : 12 ,
-  13 : ".<"  , ".<"  : 13 ,
-  14 : ".="  , ".="  : 14 ,
-  15 : "+f"  , "+f"  : 15 ,
-  16 : "-f"  , "-f"  : 16 ,
-  17 : "*f"  , "*f"  : 17 ,
-  18 : "/f"  , "/f"  : 18 ,
-  19 : "%f"  , "%f"  : 19 ,
-  20 : "^f"  , "^f"  : 20 ,
-  21 : ".f"  , ".f"  : 21 ,
-  22 : ".u"  , ".u"  : 22 ,
+   0 : ".+."  , ".+."  : 0 ,
+   1 : ".-."  , ".-."  : 1 ,
+   2 : ".*."  , ".*."  : 2 ,
+   3 : "./."  , "./."  : 3 ,
+   4 : ".%."  , ".%."  : 4 ,
+   5 : ".^."  , ".^."  : 5 ,
+   6 : ".&."  , ".&."  : 6 ,
+   7 : ".|."  , ".|."  : 7 ,
+   8 : ".#."  , ".#."  : 8 ,
+   9 : ".!."  , ".!."  : 9 ,
+  10 : ".>>." , ".>>." : 10 ,
+  11 : ".<<." , ".<<." : 11 ,
+  12 : ".>."  , ".>."  : 12 ,
+  13 : ".<."  , ".<."  : 13 ,
+  14 : ".==." , ".==." : 14 ,
+  15 : ".++." , ".++." : 15 ,
+  16 : ".--." , ".--." : 16 ,
+  17 : ".**." , ".**." : 17 ,
+  18 : ".//." , ".//." : 18 ,
+  19 : ".%%." , ".%%." : 19 ,
+  20 : ".^^." , ".^^." : 20 ,
+  21 : ".f."  , ".f."  : 21 ,
+  22 : ".u."  , ".u."  : 22 ,
 };
 
 const compile = (term, defs = {}) => {
@@ -141,6 +141,8 @@ const compile = (term, defs = {}) => {
         return build_net(defs[term[1].name] ? erase(defs[term[1].name]) : Num(0), net, var_ptrs, level);
       case "Hol":
         throw "[ERROR]\nCan't compile a hole.";
+      case "Utv":
+        throw "[ERROR]\nCan't compile an unrestricted term.";
       default:
         return build_net(Lam("", null, Var(0), false), net, var_ptrs, level);
     }
@@ -184,7 +186,7 @@ const decompile = (net) => {
               var_ptrs.push(Pointer(addr, 1));
               var body = build_term(net, net.enter_port(Pointer(addr, 2)), var_ptrs, dup_exit);
               var_ptrs.pop();
-              return Lam(gen_name(var_ptrs.length), null, body, false);
+              return Lam("x" + var_ptrs.length, null, body, false);
             case 1:
               for (var index = 0; index < var_ptrs.length; ++index) {
                 if (var_ptrs[var_ptrs.length - index - 1] === ptrn) {

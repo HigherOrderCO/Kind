@@ -7,57 +7,22 @@
 // You've been warned (:
 
 const {
-  Var,
-  Typ,
-  Tid,
-  All,
-  Lam,
-  App,
-  Box,
-  Put,
-  Tak,
-  Dup,
-  Wrd,
-  Num,
-  Op1,
-  Op2,
-  Ite,
-  Cpy,
-  Sig,
-  Par,
-  Fst,
-  Snd,
-  Prj,
-  Eql,
-  Rfl,
-  Sym,
-  Cng,
-  Eta,
-  Rwt,
-  Cst,
-  Slf,
-  New,
-  Use,
-  Ann,
-  Log,
-  Hol,
-  Ref,
-  get_float_on_word,
-  put_float_on_word,
+  Var, Typ, Tid, Utt, Utv, Ute, All, Lam,
+  App, Box, Put, Tak, Dup, Wrd, Num, Op1,
+  Op2, Ite, Cpy, Sig, Par, Fst, Snd, Prj,
+  Slf, New, Use, Ann, Log, Hol, Ref,
+  reduce: core_reduce,
+  typecheck: core_typecheck,
+  ctx_ext,
+  ctx_get,
+  ctx_names,
+  ctx_new,
+  ctx_str,
+  equal,
+  erase,
   shift,
   subst,
   subst_many,
-  norm,
-  erase,
-  equal,
-  uses,
-  boxcheck,
-  typecheck,
-  ctx_new,
-  ctx_ext,
-  ctx_get,
-  ctx_str,
-  ctx_names,
 } = require("./fm-core.js");
 
 // Usng eval prevents being catched by Webpack
@@ -66,6 +31,10 @@ const ls = typeof window === "object" ? window.localStorage : null;
 const path = typeof window === "object" ? null : eval('require("path")');
 const xhr = require("xhr-request-promise");
 const version = require("./../package.json").version;
+const to_net = require("./fm-to-net.js");
+const to_js = require("./fm-to-js.js");
+const net = require("./fm-net.js");
+const {put_float_on_word, get_float_on_word} = require("./fm-word.js");
 
 // :::::::::::::::::::::
 // :: Stringification ::
@@ -109,7 +78,16 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       return "Type";
     case "Tid":
       var expr = show(args.expr, nams, opts);
-      return "type(" + expr + ")";
+      return "&" + expr;
+    case "Utt":
+      var expr = show(args.expr, nams, opts);
+      return "-" + expr;
+    case "Utv":
+      var expr = show(args.expr, nams, opts);
+      return "%" + expr;
+    case "Ute":
+      var expr = show(args.expr, nams, opts);
+      return "+" + expr;
     case "All":
       var term = [ctor, args];
       var erase = [];
@@ -132,14 +110,13 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       return text;
     case "Lam":
       var term = [ctor, args];
-      var numb = null;
       var erase = [];
       var names = [];
       var types = [];
       while (term[0] === "Lam") {
         erase.push(term[1].eras);
         names.push(term[1].name);
-        types.push(term[1].bind ? show(term[1].bind, nams.concat(names.slice(0,-1)), opts) : null);
+        types.push(term[1].bind && term[1].bind[0] !== "Hol" ? show(term[1].bind, nams.concat(names.slice(0,-1)), opts) : null);
         term = term[1].body;
       }
       var text = "{";
@@ -149,11 +126,7 @@ const show = ([ctor, args], nams = [], opts = {}) => {
         text += i < names.length - 1 ? ", " : "";
       }
       text += "} => ";
-      if (numb !== null) {
-        text += "%" + Number(numb);
-      } else {
-        text += show(term, nams.concat(names), opts);
-      }
+      text += show(term, nams.concat(names), opts);
       return text;
     case "App":
       var text = ")";
@@ -176,12 +149,12 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       return "#" + expr;
     case "Tak":
       var expr = show(args.expr, nams, opts);
-      return "<" + expr + ">";
+      return "$" + expr;
     case "Dup":
       var name = args.name;
       var expr = show(args.expr, nams, opts);
       if (args.body[0] === "Var" && args.body[1].index === 0) {
-        return "<" + expr + ">";
+        return "$" + expr;
       } else {
         var body = show(args.body, nams.concat([name]), opts);
         return "dup " + name + " = " + expr + "; " + body;
@@ -282,48 +255,17 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       var era1 = args.eras === 1 ? "~" : "";
       var era2 = args.eras === 2 ? "~" : "";
       return "get [" + era1 + nam0 + "," + era2 + nam1 + "] = " + pair + "; " + body;
-    case "Eql":
-      var val0 = show(args.val0, nams, opts);
-      var val1 = show(args.val1, nams, opts);
-      if (args.val0[0] === "Lam" || args.val0[1] === "Op2") {
-        val0 = "(" + val0 + ")";
-      }
-      return val0 + " == " + val1;
-    case "Rfl":
-      var expr = show(args.expr, nams, opts);
-      return "refl(~" + expr + ")";
-    case "Sym":
-      var prof = show(args.prof, nams, opts);
-      return "sym(" + prof + ")";
-    case "Cng":
-      var func = show(args.func, nams, opts);
-      var prof = show(args.prof, nams, opts);
-      return "cong(~" + func + ", " + prof + ")";
-    case "Eta":
-      var expr = show(args.expr, nams, opts);
-      return "eta(~" + expr + ")";
-    case "Rwt":
-      var name = args.name;
-      var type = show(args.type, nams.concat([name]), opts);
-      var prof = show(args.prof, nams, opts);
-      var expr = show(args.expr, nams, opts);
-      return expr + " :: rewrite " + name + " in " + type + " with " + prof;
-    case "Cst":
-      var prof = show(args.prof, nams);
-      var val0 = show(args.val0, nams);
-      var val1 = show(args.val1, nams);
-      return "cast(~" + prof + ", ~" + val0 + ", " + val1 + ")";
     case "Slf":
       var name = args.name;
       var type = show(args.type, nams.concat([name]), opts);
-      return "$" + name + " " + type;
+      return "${" + name + "} " + type;
     case "New":
       var type = show(args.type, nams, opts);
       var expr = show(args.expr, nams, opts);
       return "new(~" + type + ") " + expr;
     case "Use":
       var expr = show(args.expr, nams, opts);
-      return "%" + expr;
+      return "use(" + expr + ")";
     case "Ann":
       var expr = show(args.expr, nams, opts);
       //var type = show(args.type, nams, opts);
@@ -453,17 +395,27 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
   // Defines a top-level term
   function define(path, term) {
     if (root) {
-      var name = path.replace(new RegExp("^\\w*\/"), "");
+      var name = path.replace(new RegExp("^[\\w.]*\/"), "");
       var found = find_name_in_imports(name);
-      if (found.length > 0) {
-        var err_str = "Attempted to re-define '" + name + "', which is already defined as:";
-        for (var i = 0; i < found.length; ++i) {
-          err_str += "\n- " + found[i];
+      if (found.length > 0 || defs[ref_path(name)]) {
+        var err_str = "Attempted to re-define '" + name + "', which is already defined";
+        if (found.length > 0) {
+          err_str += " as:";
+          for (var i = 0; i < found.length; ++i) {
+            err_str += "\n- " + found[i];
+          }
+        } else {
+          err_str += " on this file.";
         }
         error(err_str);
       }
     }
     defs[path] = term;
+  }
+
+  // Creates a new hole name
+  function new_hole_name() {
+    return "_" + (hole_count++) + "_";
   }
 
   // Builds a lookup table
@@ -476,9 +428,32 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
   }
 
   // Some handy lookup tables
-  const is_native_op = {"+":1,"-":1,"*":1,"/":1,"%":1,"^":1,".&":1,".|":1,".^":1,".!":1,".>>":1,".<<":1,".>":1,".<":1,".=":1,"+f":1,"-f":1,"*f":1,"/f":1,"%f":1,"^f":1,".f":1,".u":1};
-  const op_inits     = "+-*/%^.=";
-  const is_op_init   = build_charset("+-*/%^.=");
+  const is_native_op =
+    { ".+."  : 1
+    , ".-."  : 1
+    , ".*."  : 1
+    , "./."  : 1
+    , ".%."  : 1
+    , ".^."  : 1
+    , ".&."  : 1
+    , ".|."  : 1
+    , ".#."  : 1
+    , ".!."  : 1
+    , ".>>." : 1
+    , ".<<." : 1
+    , ".>."  : 1
+    , ".<."  : 1
+    , ".==." : 1
+    , ".++." : 1
+    , ".--." : 1
+    , ".**." : 1
+    , ".//." : 1
+    , ".%%." : 1
+    , ".^^." : 1
+    , ".f."  : 1
+    , ".u."  : 1};
+  const op_inits     = ["<", ">", ".", "->", "="];
+  const is_op_init   = str => { for (var k of op_inits) if (str === k || str[0] === k) return str; return null; };
   const is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@/");
   const is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@+*/%^!<>=&|");
   const is_spacy     = build_charset(" \t\n\r;");
@@ -642,9 +617,10 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
   // Parses an alphanumeric name
   function parse_name() {
-    if (is_op_init(code[idx])) {
-      match(code[idx]);
-      return code[idx - 1] + parse_string_here(is_op_char);
+    var op_init = null;
+    if (op_init = is_op_init(code[idx] + (code[idx+1] || " "))) {
+      match(op_init);
+      return op_init + parse_string_here(is_op_char);
     } else {
       return parse_string();
     }
@@ -661,8 +637,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     } else if (term[0] === "Var" && term[1].__name) {
       var name = term[1].__name;
     } else {
-      error("The term \x1b[2m" + show(term, nams) + "\x1b[0m requires an explicit name.\n"
-          + "Provide it with the 'as' keyword. Example: \x1b[2m" + show(term, nams) + " as x\x1b[0m");
+      var name = "self";
+      //error("The term \x1b[2m" + show(term, nams) + "\x1b[0m requires an explicit name.\n"
+          //+ "Provide it with the 'as' keyword. Example: \x1b[2m" + show(term, nams) + " as x\x1b[0m");
     }
 
     return [name, term]
@@ -744,12 +721,35 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
-  // Parses the type identity
+  // Parses a type-level identity, `~A`
   function parse_tid(nams) {
-    if (match("type(")) {
+    if (match("&")) {
       var expr = parse_term(nams);
-      var skip = parse_exact(")");
       return Tid(expr);
+    }
+  }
+
+  // Parses an unrestricted type, `-A`
+  function parse_utt(nams) {
+    if (match("-")) {
+      var expr = parse_term(nams);
+      return Utt(expr);
+    }
+  }
+
+  // Parses an unrestricted term, `%t`
+  function parse_utv(nams) {
+    if (match("%")) {
+      var expr = parse_term(nams);
+      return Utv(expr);
+    }
+  }
+
+  // Parses an unrestricted elim, `+t`
+  function parse_ute(nams) {
+    if (match("+")) {
+      var expr = parse_term(nams);
+      return Ute(expr);
     }
   }
 
@@ -768,6 +768,14 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
   function parse_hol(nams) {
     if (match("?")) {
       var name = parse_string_here();
+      if (name === "") {
+        name = new_hole_name();
+      }
+      if (used_hole_name[name]) {
+        error("Reused hole name: " + name);
+      } else {
+        used_hole_name[name] = true;
+      }
       return Hol(name);
     }
   }
@@ -781,7 +789,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       while (idx < code.length) {
         var eras = match("~");
         var name = parse_string();
-        var type = match(":") ? parse_term(nams.concat(names)) : null;
+        var type = match(":") ? parse_term(nams.concat(names)) : Hol(new_hole_name());
         erass.push(eras);
         names.push(name);
         types.push(type);
@@ -831,11 +839,10 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
-  // Parses an unboxing, `<t>`
+  // Parses an unboxing, `^t`
   function parse_tak(nams) {
-    if (match("<")) {
+    if (match("$")) {
       var expr = parse_term(nams);
-      var skip = parse_exact(">");
       return Tak(expr);
     }
   }
@@ -1045,58 +1052,6 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
-  // Parses refl, `refl(~t)`
-  function parse_rfl(nams) {
-    if (match("refl(~")) {
-      var expr = parse_term(nams);
-      var skip = parse_exact(")");
-      return Rfl(expr);
-    }
-  }
-
-  // Parses sym, `sym(~t)`
-  function parse_sym(nams) {
-    if (match("sym(")) {
-      var prof = parse_term(nams);
-      var skip = parse_exact(")");
-      return Sym(prof);
-    }
-  }
-
-  // Parses cong, `cong(~f, ~e)`
-  function parse_cng(nams) {
-    if (match("cong(~")) {
-      var func = parse_term(nams);
-      var skip = parse_exact(",");
-      var prof = parse_term(nams);
-      var skip = parse_exact(")");
-      return Cng(func, prof);
-    }
-  }
-
-  // Parses eta, `eta(~t)`
-  function parse_eta(nams) {
-    if (match("eta(~")) {
-      var expr = parse_term(nams);
-      var skip = parse_exact(")");
-      return Eta(expr);
-    }
-  }
-
-  // Parses a cast
-  function parse_cst(nams) {
-    if (match("cast(~")) {
-      var prof = parse_term(nams);
-      var skip = parse_exact(",");
-      var skip = parse_exact("~");
-      var val0 = parse_term(nams);
-      var skip = parse_exact(",");
-      var val1 = parse_term(nams);
-      var skip = parse_exact(")");
-      return Cst(prof, val0, val1);
-    }
-  }
-
   // Parses log, `log(t)`
   function parse_log(nams) {
     if (match("log(")) {
@@ -1109,8 +1064,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
   // Parses a self type, `$x P(x)` 
   function parse_slf(nams) {
-    if (match("$")) {
+    if (match("${")) {
       var name = parse_string();
+      var skip = parse_exact("}");
       var type = parse_term(nams.concat([name]));
       return Slf(name, type);
     }
@@ -1128,8 +1084,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
   // Parses a self elim, `%t`
   function parse_use(nams) {
-    if (match("%")) {
+    if (match("use(")) {
       var expr = parse_term(nams);
+      var skip = parse_exact(")");
       return Use(expr);
     }
   }
@@ -1149,32 +1106,16 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       }
       var {adt_name, adt_pram, adt_indx, adt_ctor} = adts[ref_path(adt_name)];
 
-      // Parses 'note' and 'move' expressions
-      var notes = [];
-        var moves = [];
+      // Parses 'move' expressions
+      var moves = [];
       while (match("+")) {
-        if (match("note")) {
-          var note_name = parse_string();
-          var note_skip = parse_exact(":");
-          var note_val0 = parse_term(nams
-            .concat(adt_indx.map(([name,type]) => term_name + "." + name))
-            .concat([term_name])
-            .concat(notes.map(([name,val0,val1]) => name)));
-          var note_skip = parse_exact("is");
-          var note_val1 = parse_term(nams);
-          notes.push([note_name, note_val0, note_val1]);
-        } else if (match("move")) {
-          var [move_name, move_term] = parse_named_term(nams);
-          var move_skip = parse_exact(":");
-          var move_type = parse_term(nams
-            .concat(adt_indx.map(([name,type]) => term_name + "." + name))
-            .concat([term_name])
-            .concat(notes.map(([name,val0,val1]) => name))
-            .concat(moves.map(([name,term,type]) => name)));
-          moves.push([move_name, move_term, move_type]);
-        } else {
-          error("Expected a `note` or a `move`.");
-        }
+        var [move_name, move_term] = parse_named_term(nams);
+        var move_skip = parse_exact(":");
+        var move_type = parse_term(nams
+          .concat(adt_indx.map(([name,type]) => term_name + "." + name))
+          .concat([term_name])
+          .concat(moves.map(([name,term,type]) => name)));
+        moves.push([move_name, move_term, move_type]);
       }
 
       // Parses matched cases
@@ -1186,13 +1127,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         var ctors = adt_ctor[c][1];
         cses[c] = parse_term(nams
           .concat(adt_ctor[c][1].map(([name,type]) => term_name + "." + name))
-          .concat(notes.map(([name,val0]) => name))
           .concat(moves.map(([name,term,type]) => name)));
         for (var i = moves.length - 1; i >= 0; --i) {
           cses[c] = Lam(moves[i][0], null, cses[c], false);
-        }
-        for (var i = notes.length - 1; i >= 0; --i) {
-          cses[c] = Lam(notes[i][0], null, cses[c], false);
         }
         for (var i = 0; i < ctors.length; ++i) {
           cses[c] = Lam(term_name + "." + ctors[ctors.length - i - 1][0], null, cses[c], ctors[ctors.length - i - 1][2]);
@@ -1200,17 +1137,16 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       }
 
       // Parses matched motive
-      var skip = parse_exact(":");
-      var moti = parse_term(nams
-        .concat(adt_indx.map(([name,type]) => term_name + "." + name))
-        .concat([term_name])
-        .concat(notes.map(([name,term]) => name))
-        .concat(moves.map(([name,term,type]) => name)));
+      if (match(":")) {
+        var moti = parse_term(nams
+          .concat(adt_indx.map(([name,type]) => term_name + "." + name))
+          .concat([term_name])
+          .concat(moves.map(([name,term,type]) => name)));
+      } else {
+        moti = Hol(new_hole_name());
+      }
       for (var i = moves.length - 1; i >= 0; --i) {
         var moti = All(moves[i][0], moves[i][2], moti, false);
-      }
-      for (var i = notes.length - 1; i >= 0; --i) {
-        var moti = All(notes[i][0], Eql(notes[i][1], shift(notes[i][2], adt_indx.length + 1 + i, 0)), moti, false);
       }
       var moti = Tid(moti);
       var moti = Lam(term_name, null, moti, false);
@@ -1224,9 +1160,6 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       var term = App(term, moti, true);
       for (var i = 0; i < cses.length; ++i) {
         var term = App(term, cses[i], false);
-      }
-      for (var i = 0; i < notes.length; ++i) {
-        var term = App(term, Rfl(notes[i][2]), false);
       }
       for (var i = 0; i < moves.length; ++i) {
         var term = App(term, moves[i][1], false);
@@ -1245,21 +1178,21 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
-  // Parses a Word to uint-to-float conversion, `.f(t)`
+  // Parses a Word to uint-to-float conversion, `.f.(t)`
   function parse_op2_float(nams) {
-    if (match(".f(")) {
+    if (match(".f.(")) {
       var argm = parse_term(nams);
       var skip = parse_exact(")");
-      return Op2(".f", Num(0), argm);
+      return Op2(".f.", Num(0), argm);
     }
   }
 
-  // Parses a Word float-to-uint conversion, `.u(t)`
+  // Parses a Word float-to-uint conversion, `.u.(t)`
   function parse_op2_uint(nams) {
-    if (match(".u(")) {
+    if (match(".u.(")) {
       var argm = parse_term(nams);
       var skip = parse_exact(")");
-      return Op2(".u", Num(0), argm);
+      return Op2(".u.", Num(0), argm);
     }
   }
 
@@ -1276,11 +1209,16 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     if (match("(", is_space)) {
       var term = parsed;
       while (idx < code.length) {
-        var eras = match("~");
-        var argm = parse_term(nams);
-        var term = App(term, argm, eras);
-        if (match(")")) break;
-        parse_exact(",");
+        if (match("_")) {
+          var term = App(term, Hol(new_hole_name()), true);
+          if (match(")")) break;
+        } else {
+          var eras = match("~");
+          var argm = parse_term(nams);
+          var term = App(term, argm, eras);
+          if (match(")")) break;
+          parse_exact(",");
+        }
       }
       return term;
     }
@@ -1304,24 +1242,15 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
-  // Parses a rewrite, `t :: rewrite x in P(x) with u`
-  function parse_rwt(parsed, nams) {
+  // Parses an annotation `t :: T`
+  function parse_ann(parsed, nams) {
     if (match("::", is_space)) {
-      // Rewrite
-      if (match("rewrite ")) {
-        var name = parse_string();
-        var skip = parse_exact("in");
-        var type = parse_term(nams.concat([name]));
-        var skip = parse_exact("with");
-        var prof = parse_term(nams);
-        return Rwt(name, type, prof, parsed);
-      }
-
-      // Annotation
-      else {
+      //if (match("Type")) {
+        //return Tid(parsed);
+      //} else {
         var type = parse_term(nams);
         return Ann(type, parsed, false);
-      }
+      //}
     }
   }
 
@@ -1341,8 +1270,6 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         return Op2(func, parsed, argm);
       } else if (func === "->") {
         return All("", parsed, shift(argm, 1, 0), false);
-      } else if (func === "==") {
-        return Eql(parsed, argm);
       } else {
         return App(App(ref(func), parsed, false), argm, false);
       }
@@ -1357,6 +1284,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     if (parsed = parse_parens(nams));
     else if (parsed = parse_typ(nams));
     else if (parsed = parse_tid(nams));
+    else if (parsed = parse_slf(nams));
+    else if (parsed = parse_new(nams));
+    else if (parsed = parse_use(nams));
     else if (parsed = parse_scope(nams));
     else if (parsed = parse_hol(nams));
     else if (parsed = parse_lam_or_all(nams));
@@ -1375,15 +1305,10 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     else if (parsed = parse_fst(nams));
     else if (parsed = parse_snd(nams));
     else if (parsed = parse_get(nams));
-    else if (parsed = parse_rfl(nams));
-    else if (parsed = parse_sym(nams));
-    else if (parsed = parse_cng(nams));
-    else if (parsed = parse_eta(nams));
-    else if (parsed = parse_cst(nams));
+    else if (parsed = parse_utt(nams));
+    else if (parsed = parse_utv(nams));
+    else if (parsed = parse_ute(nams));
     else if (parsed = parse_log(nams));
-    else if (parsed = parse_slf(nams));
-    else if (parsed = parse_new(nams));
-    else if (parsed = parse_use(nams));
     else if (parsed = parse_case(nams));
     else if (parsed = parse_op2_not(nams));
     else if (parsed = parse_op2_float(nams));
@@ -1401,7 +1326,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     while (new_parsed) {
       if      (new_parsed = parse_app(parsed, nams));
       else if (new_parsed = parse_list_literal(parsed, nams));
-      else if (new_parsed = parse_rwt(parsed, nams));
+      else if (new_parsed = parse_ann(parsed, nams));
       else if (new_parsed = parse_ops(parsed, nams));
       if (new_parsed) {
         parsed = new_parsed;
@@ -1459,8 +1384,11 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         while (idx < code.length) {
           var eras = false;
           var name = parse_string();
-          var skip = parse_exact(":");
-          var type = await parse_term(adt_pram.map((([name,type]) => name)));
+          if (match(":")) {
+            var type = await parse_term(adt_pram.map((([name,type]) => name)));
+          } else {
+            var type = Hol(new_hole_name());
+          }
           adt_pram.push([name, type, eras]);
           if (match("}")) break; else parse_exact(",");
         }
@@ -1474,8 +1402,11 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           //var eras = match("~");
           var eras = false;
           var name = parse_string();
-          var skip = parse_exact(":");
-          var type = await parse_term(adt_nams.concat(adt_indx.map((([name,type]) => name))));
+          if (match(":")) {
+            var type = await parse_term(adt_nams.concat(adt_indx.map((([name,type]) => name))));
+          } else {
+            var type = Hol(new_hole_name());
+          }
           adt_indx.push([name, type, eras]);
           if (match(")")) break; else parse_exact(",");
         }
@@ -1491,8 +1422,11 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           while (idx < code.length) {
             var eras = match("~");
             var name = parse_string();
-            var skip = parse_exact(":");
-            var type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
+            if (match(":")) {
+              var type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
+            } else {
+              var type = Hol(new_hole_name());
+            }
             ctor_flds.push([name, type, eras]);
             if (match("}")) break; else parse_exact(",");
           }
@@ -1583,6 +1517,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     // Parses definition name
     if (tokens) tokens.push(["def", ""]);
     var name = parse_name();
+
     if (name.length === 0) {
       error("Expected a definition.");
     }
@@ -1616,9 +1551,13 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         while (idx < code.length) {
           var arg_eras = match("~");
           var arg_name = parse_string();
-          var arg_skip = parse_exact(":");
-          var arg_boxd = match("!");
-          var arg_type = await parse_term(lv0_names);
+          if (match(":")) {
+            var arg_boxd = match("!");
+            var arg_type = await parse_term(lv0_names);
+          } else {
+            var arg_boxd = false;
+            var arg_type = Hol(new_hole_name());
+          }
           lv0_erass.push(arg_eras);
           lv0_names.push(arg_name);
           lv0_boxed.push(arg_boxd);
@@ -1669,8 +1608,11 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           var arg_eras = match("~");
           var arg_halt = match("halt");
           var arg_name = parse_string();
-          var arg_skip = parse_exact(":");
-          var arg_type = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_idx_n).concat(names));
+          if (match(":")) {
+            var arg_type = await parse_term(lv0_names.concat(lv0_dup_n).concat(lv0_imp_n).concat(rec_idx_n).concat(names));
+          } else {
+            var arg_type = Hol(new_hole_name());
+          }
           erass.push(arg_eras);
           names.push(arg_name);
           types.push(arg_type);
@@ -1736,7 +1678,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           for (var i = 0; i < lv0_names.length; ++i) {
             var moti_type = App(moti_type, Var(-1 + names.length + rec_names.length + rec_idx_n.length + lv0_imp_n.length + lv0_dup_n.length + lv0_names.length - i), false);
           }
-          var moti_type = App(moti_type, Var(-1 + names.length + rec_names.length + rec_idx_n.length), false);
+          var moti_type = App(moti_type, Ute(Var(-1 + names.length + rec_names.length + rec_idx_n.length)), false);
           keep_infos.push({
             name: name,
             orig: Var(-1 + names.length + rec_names.length),
@@ -1757,7 +1699,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         var moti = type;
         var moti = shift(moti, rec_idx_n.length, names.length); // Adds recur variable
         if (recur) { // Adjusts recur index to step(n)
-          var moti = replace(names.length + rec_names.length + rec_idx_n.length - 1, App(ref("step"), Var(names.length + 1), false), moti);
+          var moti = replace(names.length + rec_names.length + rec_idx_n.length - 1, App(ref("step"), Ute(Var(names.length + 1)), false), moti);
         }
 
         // Builds the case-tree by matching projected terms
@@ -1781,6 +1723,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
               var term_moti = replace(projs[i].orig[1].index + 1 + i - (idx + 1) + 1, Var(0), term_moti);
               var term_moti = All(projs[i].name, shift(projs[i].type, 1 + i - (idx + 1), 0), term_moti, false);
             }
+            var term_moti = Tid(term_moti);
             var term_moti = replace(projs[i].orig[1].index + 1, Var(0), term_moti);
             var term_moti = Lam(projs[idx].name, null, term_moti, false);
 
@@ -1928,8 +1871,8 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
       // Fills foralls and lambdas of arguments
       for (var i = names.length - 1; i >= 0; --i) {
         var type = All(names[i], types[i], type, erass[i]);
-        var term = Lam(names[i], null    , term, erass[i]);
-        var base = base && Lam(names[i], null    , base, erass[i]);
+        var term = Lam(names[i], null, term, erass[i]);
+        var base = base && Lam(names[i], null, base, erass[i]);
       }
 
       // Aux function to add level 0 headers
@@ -1968,9 +1911,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         var moti_term = lv0_headers(0, Lam(rec_depth, null, type, false), false);
 
         // Builds the step case
-        var step_typ0 = type;
-        var step_typ1 = shift(subst(shift(type, 1, 1), App(base_ref("step"), Var(0), false), 0), 1, 0);
-        var step_type = lv0_headers(1, Box(All(rec_depth, base_ref("Ind"), All(name, step_typ0, step_typ1, false), true)), true);
+        var step_typ0 = subst(shift(type, 1, 1), Ute(Var(0)), 0);
+        var step_typ1 = shift(subst(shift(type, 1, 1), App(base_ref("step"), Ute(Var(0)), false), 0), 1, 0);
+        var step_type = lv0_headers(1, Box(All(rec_depth, Utt(base_ref("Ind")), All(name, step_typ0, step_typ1, false), true)), true);
         var step_term = lv0_headers(0, Put(Lam(rec_depth, null, Lam(name, null, term, false), true)), true);
 
         // Builds the base case
@@ -1987,6 +1930,12 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           } else {
             var vari = Var(-1 + lv0_imp_n.length + lv0_dup_n.length + lv0_names.length - i);
           }
+          if (lv0_types[i][0] === "Typ") {
+            var vari = Tid(vari);
+          }
+          if (lv0_types[i][0] === "Utt") {
+            var vari = Utv(Ute(vari));
+          }
           ind_moti = App(ind_moti, vari, false);
           ind_step = App(ind_step, vari, lv0_erass[i]);
           ind_base = App(ind_base, vari, lv0_erass[i]);
@@ -2002,6 +1951,21 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         define(file+"/"+name+".step", Ann(step_type, step_term, false));
         define(file+"/"+name+".base", Ann(base_type, base_term, false));
         define(file+"/"+name, Ann(type, term, false));
+        //console.log("add.moti");
+        //console.log(show(moti_type));
+        //console.log(show(moti_term));
+        //console.log("");
+        //console.log("add.step");
+        //console.log(show(step_type));
+        //console.log(show(step_term));
+        //console.log("");
+        //console.log("add.base");
+        //console.log(show(base_type));
+        //console.log(show(base_term));
+        //console.log("");
+        //console.log("add");
+        //console.log(show(type));
+        //console.log(show(term));
         unbx[file+"/"+name+".moti"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
         unbx[file+"/"+name+".step"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
         unbx[file+"/"+name+".base"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
@@ -2036,7 +2000,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
               term = subst(term, Num(0), 0);
             }
             for (var i = 0; i < unbox.length; ++i) {
-              if (equal(show)(term[1].expr, unbox[i][1])) {
+              if (equal(term[1].expr, unbox[i][1], {show})) {
                 return Ref("$TMP$" + (unbox.length - 1)); // share identical unbox
               }
             }
@@ -2062,6 +2026,8 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
   var qual_imports = {};
   var local_imports = {};
   var file_version = {};
+  var used_hole_name = {};
+  var hole_count = 0;
   var tokens = tokenify ? [["txt",""]] : null;
   var idx = 0;
   var row = 0;
@@ -2120,6 +2086,15 @@ const replace_refs = ([ctor, term], renamer, depth = 0) => {
     case "Tid":
       var expr = replace_refs(term.expr, renamer, depth);
       return Tid(expr);
+    case "Utt":
+      var expr = replace_refs(term.expr, renames, depth);
+      return Utt(expr);
+    case "Utv":
+      var expr = replace_refs(term.expr, renames, depth);
+      return Utv(expr);
+    case "Ute":
+      var expr = replace_refs(term.expr, renames, depth);
+      return Ute(expr);
     case "All":
       var name = term.name;
       var bind = replace_refs(term.bind, renamer, depth);
@@ -2197,34 +2172,6 @@ const replace_refs = ([ctor, term], renamer, depth = 0) => {
       var body = replace_refs(term.body, renamer, depth + 2);
       var eras = term.eras;
       return Prj(nam0, nam1, pair, body, eras);
-    case "Eql":
-      var val0 = replace_refs(term.val0, renamer, depth);
-      var val1 = replace_refs(term.val1, renamer, depth);
-      return Eql(val0, val1);
-    case "Rfl":
-      var expr = replace_refs(term.expr, renamer, depth);
-      return Rfl(expr);
-    case "Sym":
-      var prof = replace_refs(term.prof, renamer, depth);
-      return Sym(prof);
-    case "Cng":
-      var func = replace_refs(term.func, renamer, depth);
-      var prof = replace_refs(term.prof, renamer, depth);
-      return Cng(func, prof);
-    case "Eta":
-      var expr = replace_refs(term.expr, renamer, depth);
-      return Eta(expr);
-    case "Rwt":
-      var name = term.name;
-      var type = replace_refs(term.type, renamer, depth + 1);
-      var prof = replace_refs(term.prof, renamer, depth);
-      var expr = replace_refs(term.expr, renamer, depth);
-      return Rwt(name, type, prof, expr);
-    case "Cst":
-      var prof = replace_refs(term.prof, renamer, depth);
-      var val0 = replace_refs(term.val0, renamer, depth);
-      var val1 = replace_refs(term.val1, renamer, depth);
-      return Cst(prof, val0, val1);
     case "Slf":
       var name = term.name;
       var type = replace_refs(term.type, renamer, depth + 1);
@@ -2273,6 +2220,15 @@ const rewrite = ([ctor, term], rewriter, scope = [], erased = false, only_once =
       case "Tid":
         var expr = rewrite(term.expr, rewriter, scope, true, only_once);
         return Tid(expr);
+      case "Utt":
+        var expr = rewrite(term.expr, rewriter, scope, true, only_once);
+        return Utt(expr);
+      case "Utv":
+        var expr = rewrite(term.expr, rewriter, scope, true, only_once);
+        return Utv(expr);
+      case "Ute":
+        var expr = rewrite(term.expr, rewriter, scope, true, only_once);
+        return Ute(expr);
       case "All":
         var name = term.name;
         var bind = rewrite(term.bind, rewriter, scope, true, only_once);
@@ -2350,34 +2306,6 @@ const rewrite = ([ctor, term], rewriter, scope = [], erased = false, only_once =
         var body = rewrite(term.body, rewriter, scope.concat([nam0, nam1]), erased, only_once);
         var eras = term.eras;
         return Prj(nam0, nam1, pair, body, eras);
-      case "Eql":
-        var val0 = rewrite(term.val0, rewriter, scope, true, only_once);
-        var val1 = rewrite(term.val1, rewriter, scope, true, only_once);
-        return Eql(val0, val1);
-      case "Rfl":
-        var expr = rewrite(term.expr, rewriter, scope, true, only_once);
-        return Rfl(expr);
-      case "Sym":
-        var prof = rewrite(term.prof, rewriter, scope, true, only_once);
-        return Sym(prof);
-      case "Cng":
-        var func = rewrite(term.func, rewriter, scope, true, only_once);
-        var prof = rewrite(term.prof, rewriter, scope, true, only_once);
-        return Cng(func, prof);
-      case "Eta":
-        var expr = rewrite(term.expr, rewriter, scope, true, only_once);
-        return Eta(expr);
-      case "Rwt":
-        var name = term.name;
-        var type = rewrite(term.type, rewriter, scope.concat([name]), true, only_once);
-        var prof = rewrite(term.prof, rewriter, scope, true, only_once);
-        var expr = rewrite(term.expr, rewriter, scope, erased, only_once);
-        return Rwt(name, type, prof, expr);
-      case "Cst":
-        var prof = rewrite(term.prof, rewriter, scope, true, only_once);
-        var val0 = rewrite(term.val0, rewriter, scope, true, only_once);
-        var val1 = rewrite(term.val1, rewriter, scope, erased, only_once);
-        return Cst(prof, val0, val1);
       case "Slf":
         var name = term.name;
         var type = rewrite(term.type, rewriter, scope.concat([name]), true, only_once);
@@ -2561,7 +2489,12 @@ const derive_adt_ctor = (file, {adt_pram, adt_indx, adt_ctor, adt_name}, c) => {
         } else {
           var sel = Var(-1 + adt_ctor.length - c);
           for (var F = 0; F < adt_ctor[c][1].length; ++F) {
-            var sel = App(sel, Var(-1 + adt_ctor.length + 1 + adt_ctor[c][1].length - F), adt_ctor[c][1][F][2]);
+            var fld = Var(-1 + adt_ctor.length + 1 + adt_ctor[c][1].length - F);
+            // Unrestricted field
+            if (adt_ctor[c][1][F][1][0] === "Utt") {
+              var fld = Utv(Ute(fld));
+            }
+            var sel = App(sel, fld, adt_ctor[c][1][F][2]);
           }
           return sel;
         }
@@ -2654,58 +2587,95 @@ const load_file = (() => {
   };
 })();
 
+const reduce = (term, opts) => {
+  return core_reduce(term, {...opts, show});
+};
+
+const typecheck = (term, expect, opts) => {
+  return core_typecheck(term, expect, {...opts, show});
+};
+
+// Evaluates a term to normal form in different modes
+// run : String -> String -> Opts -> Term
+const run = (mode, term, opts = {}) => {
+  var eras = opts.erased  ? erase : (x => x);
+  var defs = opts.defs || {};
+  if (typeof term === "string") {
+    term = defs[term] || Ref(term);
+  }
+
+  switch (mode) {
+
+    case "REDUCE_DEBUG":
+      term = eras(term);
+      try {
+        term = reduce(term, opts);
+      } catch (e) {
+        term = reduce(term, {...opts, weak: true});
+      }
+      break;
+
+    case "REDUCE_NATIVE":
+      term = eras(term);
+      term = to_js.decompile(to_js.compile(term, defs));
+      break;
+
+    case "REDUCE_OPTIMAL":
+      var net = to_net.compile(erase(term), defs);
+      if (opts.stats && opts.stats.input_net === null) {
+        opts.stats.input_net = JSON.parse(JSON.stringify(net));
+      }
+      if (opts.strict) {
+        var new_stats = net.reduce_strict(opts.stats || {});
+      } else {
+        var new_stats = net.reduce_lazy(opts.stats || {});
+      }
+      if (opts.stats && opts.stats.output_net !== undefined) {
+        opts.stats.output_net = JSON.parse(JSON.stringify(net));
+      }
+      term = to_net.decompile(net);
+      break;
+
+    case "TYPECHECK":
+      term = typecheck(term, null, opts);
+      //term = eras(term);
+      //term = reduce(term, {...opts, weak: false, unbox: true});
+      break;
+
+    case "NOTHING":
+      if (term[0] === "Ref") {
+        term = defs[term[1].name];
+        term = eras(term);
+      } else {
+        term = eras(term);
+      }
+      break;
+  }
+
+  return term;
+};
+
 module.exports = {
-  Var,
-  Typ,
-  All,
-  Lam,
-  App,
-  Box,
-  Put,
-  Tak,
-  Dup,
-  Wrd,
-  Num,
-  Op1,
-  Op2,
-  Ite,
-  Cpy,
-  Sig,
-  Par,
-  Fst,
-  Snd,
-  Prj,
-  Eql,
-  Rfl,
-  Sym,
-  Cng,
-  Eta,
-  Rwt,
-  Cst,
-  Slf,
-  New,
-  Use,
-  Ann,
-  Log,
-  Hol,
-  Ref,
-  shift,
-  subst,
-  subst_many,
-  norm: norm(show),
-  erase,
-  equal,
-  boxcheck: boxcheck(show),
-  typecheck: typecheck(show),
-  parse,
-  gen_name,
-  show,
-  replace_refs,
-  derive_adt_type,
+  Var, Typ, Tid, Utt, Utv, Ute, All, Lam,
+  App, Box, Put, Tak, Dup, Wrd, Num, Op1,
+  Op2, Ite, Cpy, Sig, Par, Fst, Snd, Prj,
+  Slf, New, Use, Ann, Log, Hol, Ref,
   derive_adt_ctor,
-  //derive_dependent_match,
-  save_file,
+  derive_adt_type,
+  equal,
+  erase,
+  gen_name,
   load_file,
   load_file_parents,
+  parse,
+  reduce,
+  replace_refs,
+  run,
+  save_file,
+  shift,
+  show,
+  subst,
+  subst_many,
+  typecheck,
   version,
 };

@@ -1,7 +1,7 @@
-const fm = require("./fm-lang.js");
+const fm = require("./fm-core.js");
 
 // Converts a Formality-Core Term to a native JavaScript function
-const compile = (term, defs, vars) => {
+const compile = (term, opts, vars = null) => {
   var [ctor, term] = term;
   switch (ctor) {
     case "Var":
@@ -10,69 +10,78 @@ const compile = (term, defs, vars) => {
       }
       return vars[0];
     case "Lam":
-      return x => compile(term.body, defs, [x, vars]);
+      return x => compile(term.body, opts, [x, vars]);
     case "App":
-      var func = compile(term.func, defs, vars);
-      var argm = compile(term.argm, defs, vars);
+      var func = compile(term.func, opts, vars);
+      var argm = compile(term.argm, opts, vars);
       return func(argm);
     case "Put":
-      return compile(term.expr, defs, vars);
+      return compile(term.expr, opts, vars);
     case "Dup": 
-      var expr = compile(term.expr, defs, vars);
-      var body = x => compile(term.body, defs, [x,vars]);
+      var expr = compile(term.expr, opts, vars);
+      var body = x => compile(term.body, opts, [x,vars]);
       return body(expr);
     case "Num":
       return term.numb;
     case "Op1":
     case "Op2":
       var func = term.func;
-      var num0 = compile(term.num0, defs, vars);
-      var num1 = compile(term.num1, defs, vars);
+      var num0 = compile(term.num0, opts, vars);
+      var num1 = compile(term.num1, opts, vars);
       switch (func) {
-        case "+"  : return (num0 + num1) >>> 0;
-        case "-"  : return (num0 - num1) >>> 0;
-        case "*"  : return (num0 * num1) >>> 0;
-        case "/"  : return (num0 / num1) >>> 0;
-        case "%"  : return (num0 % num1) >>> 0;
-        case "^"  : return (num0 ** num1) >>> 0;
-        case ".&" : return (num0 & num1) >>> 0;
-        case ".|" : return (num0 | num1) >>> 0;
-        case ".^" : return (num0 ^ num1) >>> 0;
-        case ".!" : return (~ num1) >>> 0;
-        case ".>>": return (num0 >>> num1) >>> 0;
-        case ".<<": return (num0 << num1) >>> 0;
-        case ".>" : return (num0 > num1) >>> 0;
-        case ".<" : return (num0 < num1) >>> 0;
-        case ".=" : return (num0 === num1) >>> 0;
+        case ".+."  : return (num0 + num1) >>> 0;
+        case ".-."  : return (num0 - num1) >>> 0;
+        case ".*."  : return (num0 * num1) >>> 0;
+        case "./."  : return (num0 / num1) >>> 0;
+        case ".%."  : return (num0 % num1) >>> 0;
+        case ".^."  : return (num0 ** num1) >>> 0;
+        case ".&."  : return (num0 & num1) >>> 0;
+        case ".|."  : return (num0 | num1) >>> 0;
+        case ".#."  : return (num0 ^ num1) >>> 0;
+        case ".!."  : return (~ num1) >>> 0;
+        case ".>>." : return (num0 >>> num1) >>> 0;
+        case ".<<." : return (num0 << num1) >>> 0;
+        case ".>."  : return (num0 > num1) >>> 0;
+        case ".<."  : return (num0 < num1) >>> 0;
+        case ".==." : return (num0 === num1) >>> 0;
+        case ".++." : return fm.put_float_on_word(fm.get_float_on_word(num0) + fm.get_float_on_word(num1));
+        case ".--." : return fm.put_float_on_word(fm.get_float_on_word(num0) - fm.get_float_on_word(num1));
+        case ".**." : return fm.put_float_on_word(fm.get_float_on_word(num0) * fm.get_float_on_word(num1));
+        case ".//." : return fm.put_float_on_word(fm.get_float_on_word(num0) / fm.get_float_on_word(num1));
+        case ".%%." : return fm.put_float_on_word(fm.get_float_on_word(num0) % fm.get_float_on_word(num1));
+        case ".^^." : return fm.put_float_on_word(fm.get_float_on_word(num0) ^ fm.get_float_on_word(num1));
+        case ".f."  : return fm.put_float_on_word(num1);
+        case ".u."  : return fm.get_float_on_word(num1 >>> 0);
+        default: throw "TODO: implement operator "
       }
     case "Ite":
-      var cond = compile(term.cond, defs, vars);
-      var pair = compile(term.pair, defs, vars);
+      var cond = compile(term.cond, opts, vars);
+      var pair = compile(term.pair, opts, vars);
       return cond ? pair[0] : pair[1];
     case "Cpy":
-      var numb = compile(term.numb, defs, vars);
-      var body = x => compile(term.body, defs, [x,vars]);
+      var numb = compile(term.numb, opts, vars);
+      var body = x => compile(term.body, opts, [x,vars]);
       return body(numb);
     case "Par":
-      var val0 = compile(term.val0, defs, vars);
-      var val1 = compile(term.val1, defs, vars);
+      var val0 = compile(term.val0, opts, vars);
+      var val1 = compile(term.val1, opts, vars);
       return [val0, val1];
     case "Fst":
-      var pair = compile(term.pair, defs, vars);
+      var pair = compile(term.pair, opts, vars);
       return pair[0];
     case "Snd":
-      var pair = compile(term.pair, defs, vars);
+      var pair = compile(term.pair, opts, vars);
       return pair[1];
     case "Prj":
       var nam0 = term.nam0;
       var nam1 = term.nam1;
-      var pair = compile(term.pair, defs, vars);
-      var body = (x,y) => compile(term.body, defs, [y,[x,vars]]);
+      var pair = compile(term.pair, opts, vars);
+      var body = (x,y) => compile(term.body, opts, [y,[x,vars]]);
       return body(pair[0], pair[1]);
     case "Log":
-      return compile(term.expr, defs, vars);
+      return compile(term.expr, opts, vars);
     case "Ref":
-      return compile(fm.erase(defs[term.name]), defs, vars);
+      return compile(fm.erase((opts.defs||{})[term.name]), opts, vars);
   }
 };
 
@@ -101,7 +110,7 @@ const decompile = (func) => {
       return fm.Num(term);
     } else if (typeof term === "function") {
       var body = go(term(APP(VAR)), depth + 1);
-      return fm.Lam(fm.gen_name(depth), null, body, false);
+      return fm.Lam("x" + depth, null, body, false);
     } else if (typeof term === "string") {
       throw "[ERROR]\nThis native JS function can't be decompiled to Formality:\n\n"
         + func.toString()
