@@ -38,9 +38,12 @@
 const Var = (index)                        => ["Var", {index},                        MEMO && ("^" + index)];
 const Typ = ()                             => ["Typ", {},                             MEMO && ("ty")];
 const Tid = (expr)                         => ["Tid", {expr},                         MEMO && expr[2]];
-const All = (name, bind, body, eras)       => ["All", {name, bind, body, eras},       MEMO && ("al" + (eras?"-":"") + bind[2] + body[2])];
-const Lam = (name, bind, body, eras)       => ["Lam", {name, bind, body, eras},       MEMO && ("lm" + (eras?"-":"") + body[2])];
-const App = (func, argm, eras)             => ["App", {func, argm, eras},             MEMO && ("ap" + (eras?"-":"") + func[2] + argm[2])];
+const Utt = (expr)                         => ["Utt", {expr},                         MEMO && "-" + expr[2]];
+const Utv = (expr)                         => ["Utv", {expr},                         MEMO && expr[2]];
+const Ute = (expr)                         => ["Ute", {expr},                         MEMO && expr[2]];
+const All = (name, bind, body, eras)       => ["All", {name, bind, body, eras},       MEMO && ("al" + (eras?"~":"") + bind[2] + body[2])];
+const Lam = (name, bind, body, eras)       => ["Lam", {name, bind, body, eras},       MEMO && ("lm" + (eras?"~":"") + body[2])];
+const App = (func, argm, eras)             => ["App", {func, argm, eras},             MEMO && ("ap" + (eras?"~":"") + func[2] + argm[2])];
 const Box = (expr)                         => ["Box", {expr},                         MEMO && ("bx" + expr[2])];
 const Put = (expr)                         => ["Put", {expr},                         MEMO && ("pt" + expr[2])];
 const Tak = (expr)                         => ["Tak", {expr},                         MEMO && ("tk" + expr[2])];
@@ -86,6 +89,15 @@ const shift = ([ctor, term], inc, depth) => {
     case "Tid":
       var expr = shift(term.expr, inc, depth);
       return Tid(expr);
+    case "Utt":
+      var expr = shift(term.expr, inc, depth);
+      return Utt(expr);
+    case "Utv":
+      var expr = shift(term.expr, inc, depth);
+      return Utv(expr);
+    case "Ute":
+      var expr = shift(term.expr, inc, depth);
+      return Ute(expr);
     case "All":
       var name = term.name;
       var bind = shift(term.bind, inc, depth);
@@ -229,6 +241,15 @@ const subst = ([ctor, term], val, depth) => {
     case "Tid":
       var expr = subst(term.expr, val, depth);
       return Tid(expr);
+    case "Utt":
+      var expr = subst(term.expr, val, depth);
+      return Utt(expr);
+    case "Utv":
+      var expr = subst(term.expr, val, depth);
+      return Utv(expr);
+    case "Ute":
+      var expr = subst(term.expr, val, depth);
+      return Ute(expr);
     case "All":
       var name = term.name;
       var bind = subst(term.bind, val, depth);
@@ -464,30 +485,30 @@ const norm = show => {
       var num0 = reduce(num0, names);
       if (num0[0] === "Num") {
         switch (func) {
-          case "+"  : return Num((num0[1].numb + num1[1].numb) >>> 0);
-          case "-"  : return Num((num0[1].numb - num1[1].numb) >>> 0);
-          case "*"  : return Num((num0[1].numb * num1[1].numb) >>> 0);
-          case "/"  : return Num((num0[1].numb / num1[1].numb) >>> 0);
-          case "%"  : return Num((num0[1].numb % num1[1].numb) >>> 0);
-          case "^"  : return Num((num0[1].numb ** num1[1].numb) >>> 0);
-          case ".&" : return Num((num0[1].numb & num1[1].numb) >>> 0);
-          case ".|" : return Num((num0[1].numb | num1[1].numb) >>> 0);
-          case ".^" : return Num((num0[1].numb ^ num1[1].numb) >>> 0);
-          case ".!" : return Num((~ num1[1].numb) >>> 0);
-          case ".>>": return Num((num0[1].numb >>> num1[1].numb) >>> 0);
-          case ".<<": return Num((num0[1].numb << num1[1].numb) >>> 0);
-          case ".>" : return Num((num0[1].numb > num1[1].numb ? 1 : 0) >>> 0);
-          case ".<" : return Num((num0[1].numb < num1[1].numb ? 1 : 0) >>> 0);
-          case ".=" : return Num((num0[1].numb === num1[1].numb ? 1 : 0) >>> 0);
-          case "+f" : return Num(put_float_on_word(get_float_on_word(num0[1].numb) + get_float_on_word(num1[1].numb)));
-          case "-f" : return Num(put_float_on_word(get_float_on_word(num0[1].numb) - get_float_on_word(num1[1].numb)));
-          case "*f" : return Num(put_float_on_word(get_float_on_word(num0[1].numb) * get_float_on_word(num1[1].numb)));
-          case "/f" : return Num(put_float_on_word(get_float_on_word(num0[1].numb) / get_float_on_word(num1[1].numb)));
-          case "%f" : return Num(put_float_on_word(get_float_on_word(num0[1].numb) % get_float_on_word(num1[1].numb)));
-          case "^f" : return Num(put_float_on_word(get_float_on_word(num0[1].numb) ** get_float_on_word(num1[1].numb)));
-          case ".f" : return Num(put_float_on_word(num1[1].numb));
-          case ".u" : return Num(get_float_on_word(num1[1].numb) >>> 0);
-          default   : throw "[NORMALIZATION-ERROR]\nUnknown primitive: " + func + ".";
+          case ".+."  : return Num((num0[1].numb + num1[1].numb) >>> 0);
+          case ".-."  : return Num((num0[1].numb - num1[1].numb) >>> 0);
+          case ".*."  : return Num((num0[1].numb * num1[1].numb) >>> 0);
+          case "./."  : return Num((num0[1].numb / num1[1].numb) >>> 0);
+          case ".%."  : return Num((num0[1].numb % num1[1].numb) >>> 0);
+          case ".^."  : return Num((num0[1].numb ** num1[1].numb) >>> 0);
+          case ".&."  : return Num((num0[1].numb & num1[1].numb) >>> 0);
+          case ".|."  : return Num((num0[1].numb | num1[1].numb) >>> 0);
+          case ".#."  : return Num((num0[1].numb ^ num1[1].numb) >>> 0);
+          case ".!."  : return Num((~ num1[1].numb) >>> 0);
+          case ".>>." : return Num((num0[1].numb >>> num1[1].numb) >>> 0);
+          case ".<<." : return Num((num0[1].numb << num1[1].numb) >>> 0);
+          case ".>."  : return Num((num0[1].numb > num1[1].numb ? 1 : 0) >>> 0);
+          case ".<."  : return Num((num0[1].numb < num1[1].numb ? 1 : 0) >>> 0);
+          case ".==." : return Num((num0[1].numb === num1[1].numb ? 1 : 0) >>> 0);
+          case ".++." : return Num(put_float_on_word(get_float_on_word(num0[1].numb) + get_float_on_word(num1[1].numb)));
+          case ".--." : return Num(put_float_on_word(get_float_on_word(num0[1].numb) - get_float_on_word(num1[1].numb)));
+          case ".**." : return Num(put_float_on_word(get_float_on_word(num0[1].numb) * get_float_on_word(num1[1].numb)));
+          case ".//." : return Num(put_float_on_word(get_float_on_word(num0[1].numb) / get_float_on_word(num1[1].numb)));
+          case ".%%." : return Num(put_float_on_word(get_float_on_word(num0[1].numb) % get_float_on_word(num1[1].numb)));
+          case ".^^." : return Num(put_float_on_word(get_float_on_word(num0[1].numb) ** get_float_on_word(num1[1].numb)));
+          case ".f."  : return Num(put_float_on_word(num1[1].numb));
+          case ".u."  : return Num(get_float_on_word(num1[1].numb) >>> 0);
+          default     : throw "[NORMALIZATION-ERROR]\nUnknown primitive: " + func + ".";
         }
       } else {
         return Op1(func, num0, num1);
@@ -558,6 +579,9 @@ const norm = show => {
         case "Var": return vars[term.index] || Var(vars.length - term.index - 1);
         case "Typ": return Typ();
         case "Tid": return Tid(unquote(term.expr, vars));
+        case "Utt": return Utt(unquote(term.expr, vars));
+        case "Utv": return Utv(unquote(term.expr, vars));
+        case "Ute": return Ute(unquote(term.expr, vars));
         case "All": return All(term.name, unquote(term.bind, vars), x => unquote(term.body, [x].concat(vars)), term.eras);
         case "Lam": return Lam(term.name, term.bind && unquote(term.bind, vars), x => unquote(term.body, [x].concat(vars)), term.eras);
         case "App": return App(unquote(term.func, vars), unquote(term.argm, vars), term.eras);
@@ -598,6 +622,9 @@ const norm = show => {
         case "Var": return Var(term.index);
         case "Typ": return Typ();
         case "Tid": return reduce(term.expr, names);
+        case "Utt": return Utt(reduce(term.expr, names));
+        case "Utv": return reduce(term.expr, names);
+        case "Ute": return reduce(term.expr, names);
         case "All": return All(term.name, weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(term.name, names)), term.eras);
         case "Lam": return Lam(term.name, term.bind && weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(term.name, names)), term.eras);
         case "App": return apply(term.func, term.argm, term.eras, names);
@@ -641,6 +668,9 @@ const norm = show => {
         case "Var": return Var(depth - 1 - term.index);
         case "Typ": return Typ();
         case "Tid": return Tid(quote(term.expr, depth));
+        case "Utt": return Utt(quote(term.expr, depth));
+        case "Utv": return Utv(quote(term.expr, depth));
+        case "Ute": return Ute(quote(term.expr, depth));
         case "All": return All(term.name, quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras);
         case "Lam": return Lam(term.name, term.bind && quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras);
         case "App": return App(quote(term.func, depth), quote(term.argm, depth), term.eras);
@@ -693,6 +723,12 @@ const erase = (term) => {
     case "Typ":
       return Typ();
     case "Tid":
+      return erase(term.expr);
+    case "Utt":
+      return Utt(erase(term.expr));
+    case "Utv":
+      return erase(term.expr);
+    case "Ute":
       return erase(term.expr);
     case "All":
       return All(term.name, erase(term.bind), erase(term.body), term.eras);
@@ -838,6 +874,9 @@ const equal = show => (a, b, defs) => {
           case "Var-Var": y = Val(ay[1].index === by[1].index); break;
           case "Typ-Typ": y = Val(true); break;
           case "Tid-Tid": y = Eqs(ay[1].expr, by[1].expr); break;
+          case "Utt-Utt": y = Eqs(ay[1].expr, by[1].expr); break;
+          case "Utv-Utv": y = Eqs(ay[1].expr, by[1].expr); break;
+          case "Ute-Ute": y = Eqs(ay[1].expr, by[1].expr); break;
           case "All-All": y = And(And(Eqs(ay[1].bind, by[1].bind), Eqs(ay[1].body, by[1].body)), Val(ay[1].eras === by[1].eras)); break;
           case "Lam-Lam": y = And(Eqs(ay[1].body, by[1].body), Val(ay[1].eras === by[1].eras)); break;
           case "App-App": y = And(And(Eqs(ay[1].func, by[1].func), Eqs(ay[1].argm, by[1].argm)), Val(ay[1].eras === by[1].eras)); break;
@@ -901,20 +940,22 @@ const equal = show => (a, b, defs) => {
   return tree[1].v;
 }
 
-
 // ::::::::::::::::::::
 // :: Stratification ::
 // ::::::::::::::::::::
 
-// How many times a variable was used in computational positions
+// How many times a variable was used in proof-relevant positions
 const uses = ([ctor, term], depth = 0) => {
   switch (ctor) {
     case "Var": return term.index === depth ? 1 : 0;
     case "Typ": return 0;
     case "Tid": return 0;
+    case "Utt": return 0;
+    case "Utv": return 0;
+    case "Ute": return 0;
     case "All": return 0;
     case "Lam": return uses(term.body, depth + 1);
-    case "App": return uses(term.func, depth) + (term.eras ? 0 : uses(term.argm, depth));
+    case "App": return uses(term.func, depth) + uses(term.argm, depth);
     case "Box": return 0;
     case "Put": return uses(term.expr, depth);
     case "Tak": return uses(term.expr, depth);
@@ -926,7 +967,7 @@ const uses = ([ctor, term], depth = 0) => {
     case "Ite": return uses(term.cond, depth) + uses(term.pair, depth);
     case "Cpy": return uses(term.numb, depth) + uses(term.body, depth + 1);
     case "Sig": return 0;
-    case "Par": return (term.eras === 1 ? 0 : uses(term.val0, depth)) + (term.eras === 2 ? 0 : uses(term.val1, depth));
+    case "Par": return uses(term.val0, depth) + uses(term.val1, depth);
     case "Fst": return uses(term.pair, depth);
     case "Snd": return uses(term.pair, depth);
     case "Prj": return uses(term.pair, depth) + uses(term.body, depth + 2);
@@ -953,9 +994,12 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Var": return term.index !== depth || level === at_level;
     case "Typ": return true;
     case "Tid": return true;
+    case "Utt": return true;
+    case "Utv": return true;
+    case "Ute": return true;
     case "All": return true;
     case "Lam": return is_at_level(term.body, at_level, depth + 1, level);
-    case "App": return is_at_level(term.func, at_level, depth, level) && (term.eras ? true : is_at_level(term.argm, at_level, depth, level));
+    case "App": return is_at_level(term.func, at_level, depth, level) && is_at_level(term.argm, at_level, depth, level);
     case "Box": return true;
     case "Put": return is_at_level(term.expr, at_level, depth, level + 1);
     case "Tak": return false;
@@ -967,7 +1011,7 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
     case "Ite": return is_at_level(term.cond, at_level, depth, level) && is_at_level(term.pair, at_level, depth, level);
     case "Cpy": return is_at_level(term.numb, at_level, depth, level) && is_at_level(term.body, at_level, depth + 1, level);
     case "Sig": return true;
-    case "Par": return (term.eras === 1 || is_at_level(term.val0, at_level, depth, level)) && (term.eras === 2 || is_at_level(term.val1, at_level, depth, level));
+    case "Par": return is_at_level(term.val0, at_level, depth, level) && is_at_level(term.val1, at_level, depth, level);
     case "Fst": return is_at_level(term.pair, at_level, depth, level);
     case "Snd": return is_at_level(term.pair, at_level, depth, level);
     case "Prj": return is_at_level(term.pair, at_level, depth, level) && is_at_level(term.body, at_level, depth + 2, level);
@@ -991,84 +1035,94 @@ const is_at_level = ([ctor, term], at_level, depth = 0, level = 0) => {
 
 // Checks if a term is stratified
 const boxcheck = show => (term, defs = {}) => {
-  const check = ([ctor, term], eras = false, ctx = [], ctx_eras = [], seen = {}) => {
+  const check = ([ctor, term], ctx = [], ctx_eras = [], seen = {}) => {
     switch (ctor) {
       case "Var":
-        if (!eras && ctx_eras[ctx_eras.length - term.index - 1]) {
-          throw "[ERROR]\nUse of erased variable `" + ctx[ctx.length - term.index - 1] + "` in non-erased position.";
+        if (ctx_eras[ctx_eras.length - term.index - 1]) {
+          throw "[ERROR]\nUse of erased variable `" + ctx[ctx.length - term.index - 1] + "` in proof-relevant position.";
         }
         break;
       case "All":
         break;
       case "Lam":
-        if (!eras && uses(term.body) > 1) {
+        if (uses(term.body) > 1) {
           throw "[ERROR]\nLambda variable `" + term.name + "` used more than once in:\n" + show([ctor, term], ctx);
         }
-        if (!eras && !is_at_level(term.body, 0)) {
+        if (!is_at_level(term.body, 0)) {
           throw "[ERROR]\nLambda variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], ctx);
         }
-        check(term.body, eras, ctx.concat([term.name]), ctx_eras.concat([term.eras]), seen);
+        check(term.body, ctx.concat([term.name]), ctx_eras.concat([term.eras]), seen);
         break;
       case "App":
-        check(term.func, eras, ctx, ctx_eras, seen);
-        if (term.eras !== 2) {
-          check(term.argm, eras || !!term.eras, ctx, ctx_eras, seen);
-        }
+        check(term.func, ctx, ctx_eras, seen);
+        check(term.argm, ctx, ctx_eras, seen);
+        break;
+      case "Tid":
+        break;
+      case "Utt":
+        break;
+      case "Utv":
+        break;
+      case "Ute":
+        throw "[ERROR]\nAttempted to use an unrestricted term in a proof-relevant position:\n" + show([ctor, term], ctx);
         break;
       case "Box":
         break;
       case "Put":
-        check(term.expr, eras, ctx, ctx_eras, seen);
+        check(term.expr, ctx, ctx_eras, seen);
         break;
       case "Tak":
-        if (!eras) {
-          throw "[ERROR]\nAttempted to unbox term in a computational posititon:\n" + show([ctor, term], ctx);
-        }
+        throw "[ERROR]\nAttempted to unbox term in a proof-relevant posititon:\n" + show([ctor, term], ctx)
+          + "\n"
+          + "\nDid you forget to prepend `#` to the name of your definition? Example:"
+          + "\n"
+          + "\n    #my_term : !MyType"
+          + "\n      my_body"
+          + "\n"
+          + "\nThis makes a boxed definition, allowing Formality to auto-unbox terms for you.";
         break;
       case "Dup":
-        if (!eras && !is_at_level(term.body, 1)) {
+        if (!is_at_level(term.body, 1)) {
           throw "[ERROR]\nDuplication variable `" + term.name + "` must always have exactly 1 enclosing box on the body of:\n" + show([ctor, term], ctx);
         }
-        check(term.expr, eras, ctx, ctx_eras, seen);
-        check(term.body, eras, ctx.concat([term.name]), ctx_eras.concat([false]), seen);
+        check(term.expr, ctx, ctx_eras, seen);
+        check(term.body, ctx.concat([term.name]), ctx_eras.concat([false]), seen);
         break;
       case "Op1":
       case "Op2":
-        check(term.num0, eras, ctx, ctx_eras, seen);
-        check(term.num1, eras, ctx, ctx_eras, seen);
+        check(term.num0, ctx, ctx_eras, seen);
+        check(term.num1, ctx, ctx_eras, seen);
         break;
       case "Ite":
-        check(term.cond, eras, ctx, ctx_eras, seen);
-        check(term.pair, eras, ctx, ctx_eras, seen);
+        check(term.cond, ctx, ctx_eras, seen);
+        check(term.pair, ctx, ctx_eras, seen);
         break;
       case "Cpy":
-        if (!eras && !is_at_level(term.body, 0)) {
+        if (!is_at_level(term.body, 0)) {
           throw "[ERROR]\nCopy variable `" + term.name + "` used inside a box in:\n" + show([ctor, term], ctx);
         }
-        check(term.numb, eras, ctx, ctx_eras, seen);
-        check(term.body, eras, ctx.concat([term.name]), ctx_eras.concat([false]), seen);
+        check(term.numb, ctx, ctx_eras, seen);
+        check(term.body, ctx.concat([term.name]), ctx_eras.concat([false]), seen);
         break;
       case "Sig":
         break;
       case "Par":
-        var eras0 = term.eras === 1;
-        var eras1 = term.eras === 2;
-        check(term.val0, eras || eras0, ctx, ctx_eras, seen);
-        check(term.val1, eras || eras1, ctx, ctx_eras, seen);
+        check(term.val0, ctx, ctx_eras, seen);
+        check(term.val1, ctx, ctx_eras, seen);
         break;
       case "Fst":
         var eras0 = term.eras === 1;
         if (eras0) {
           throw "[ERROR]\nAttempted to extract erased first element.";
         }
-        check(term.pair, eras, ctx, ctx_eras, seen);
+        check(term.pair, ctx, ctx_eras, seen);
         break;
       case "Snd":
         var eras1 = term.eras === 2;
         if (eras1) {
           throw "[ERROR]\nAttempted to extract erased second element.";
         }
-        check(term.pair, eras, ctx, ctx_eras, seen);
+        check(term.pair, ctx, ctx_eras, seen);
         break;
       case "Prj":
         var eras0 = term.eras === 1;
@@ -1077,49 +1131,49 @@ const boxcheck = show => (term, defs = {}) => {
         var uses1 = uses(term.body, 0);
         var isat0 = is_at_level(term.body, 0, 1);
         var isat1 = is_at_level(term.body, 0, 0);
-        if (!eras && (uses0 > 1 || uses1 > 1)) {
+        if (uses0 > 1 || uses1 > 1) {
           throw "[ERROR]\nProjection variable `" + (uses0 > 1 ? term.nam0 : term.nam1) + "` used more than once in:\n" + show([ctor, term], ctx);
         }
-        if (!eras && (!isat0 || !isat1)) {
+        if (!isat0 || !isat1) {
           throw "[ERROR]\nProjection variable `" + (!isat0 ? term.nam0 : term.nam1) + "` used inside a box in:\n" + show([ctor, term], ctx);
         }
-        check(term.pair, eras, ctx, ctx_eras, seen);
-        check(term.body, eras, ctx.concat([term.nam0, term.nam1]), ctx_eras.concat([eras0, eras1]), seen);
+        check(term.pair, ctx, ctx_eras, seen);
+        check(term.body, ctx.concat([term.nam0, term.nam1]), ctx_eras.concat([eras0, eras1]), seen);
         break;
       case "Eql":
         break;
       case "Rfl":
-        check(term.expr, true, ctx, ctx_eras, seen);
+        check(term.expr, ctx, ctx_eras, seen);
         break;
       case "Sym":
-        check(term.prof, eras, ctx, ctx_eras, seen);
+        check(term.prof, ctx, ctx_eras, seen);
         break;
       case "Cng":
-        check(term.func, true, ctx, ctx_eras, seen);
-        check(term.prof, eras, ctx, ctx_eras, seen);
+        check(term.func, ctx, ctx_eras, seen);
+        check(term.prof, ctx, ctx_eras, seen);
         break;
       case "Eta":
         break;
       case "Rwt":
-        check(term.expr, eras, ctx, ctx_eras, seen);
-        check(term.prof, eras, ctx, ctx_eras, seen);
+        check(term.expr, ctx, ctx_eras, seen);
+        check(term.prof, ctx, ctx_eras, seen);
         break;
       case "Cst":
-        check(term.val1, eras, ctx, ctx_eras, seen);
+        check(term.val1, ctx, ctx_eras, seen);
         break;
       case "Ann":
-        check(term.expr, eras, ctx, ctx_eras, seen);
+        check(term.expr, ctx, ctx_eras, seen);
         break;
       case "Slf":
         break;
       case "New":
-        check(term.expr, eras, ctx, ctx_eras, seen);
+        check(term.expr, ctx, ctx_eras, seen);
         break;
       case "Use":
-        check(term.expr, eras, ctx, ctx_eras, seen);
+        check(term.expr, ctx, ctx_eras, seen);
         break;
       case "Log":
-        check(term.expr, eras, ctx, ctx_eras, seen);
+        check(term.expr, ctx, ctx_eras, seen);
         break;
       case "Hol":
         break;
@@ -1127,15 +1181,15 @@ const boxcheck = show => (term, defs = {}) => {
         if (!defs[term.name]) {
           throw "[ERROR]\nUndefined reference: `" + term.name + "`.";
         } else if (!seen[term.name]) {
-          check(defs[term.name], eras, ctx, ctx_eras, {...seen, [term.name]: true});
+          check(defs[term.name], ctx, ctx_eras, {...seen, [term.name]: true});
           break;
-        } else if (!eras && seen[term.name]) {
+        } else if (seen[term.name]) {
           throw "[ERROR]\nRecursive occurrence of '" + term.name + "'.";
           break;
         }
     }
   };
-  return check(term, false, [], []);
+  return check(term, [], []);
 }
 
 // :::::::::::::::::::
@@ -1198,7 +1252,6 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
   var hide_hole = {};
 
   const typecheck = (term, expect, defs, ctx = ctx_new, inside = null) => {
-    //console.log("....",show(term,ctx_names(ctx)));
     const TERM = (term) => {
       return CODE(show(term, ctx_names(ctx)));
     };
@@ -1238,9 +1291,32 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         MATCH(expr_t, Typ(), ctx);
         type = Typ();
         break;
+      case "Utt":
+        if (expect_nf !== null && expect_nf[0] !== "Typ") {
+          ERROR("The annotated type of an unrestricted type (example: " + TERM(Utt(Ref("A"))) + ") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
+        }
+        var expr_t = norm(null)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        MATCH(expr_t, Typ(), ctx);
+        type = Typ();
+        break;
+      case "Utv":
+        if (expect_nf !== null && expect_nf[0] !== "Utt") {
+          ERROR("The annotated type of an unrestricted term (example: " + TERM(Utv(Ref("x"))) + ") isn't an unrestricted type (example: " + TERM(Utt(Ref("A"))) + ").\n- Annotated type is " + TERM(expect_nf));
+        }
+        var expr_t = expect_nf && expect_nf[0] === "Utt" ? expect_nf[1].expr : null;
+        var term_t = typecheck(term[1].expr, expr_t, defs, ctx, [term, ctx]);
+        type = Utt(term_t);
+        break;
+      case "Ute":
+        var expr_t = norm(null)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
+        if (expr_t[0] !== "Utt") {
+          ERROR("Expected an unrestricted type (example: " + TERM(Utt(Ref("A"))) + ").\n- Found type... " + TERM(norm(null)(expr_t, {}, {weak: false, undup: true})) + ".");
+        }
+        type = expr_t[1].expr;
+        break;
       case "All":
         if (expect_nf && expect_nf[0] !== "Typ") {
-          ERROR("The annotated type of a forall (" + TERM(All("x", Ref("A"), Ref("B"), false)) +") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
+          ERROR("The annotated type of a forall (example: " + TERM(All("x", Ref("A"), Ref("B"), false)) +") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
         }
         var bind_t = typecheck(term[1].bind, null, defs, ctx, [term, ctx]);
         var ex_ctx = ctx_ext(term[1].name, term[1].bind, ctx);
@@ -1255,7 +1331,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
           ERROR("Can't infer non-annotated lambda.");
         }
         if (bind_v === null && expect_nf !== null) {
-          ERROR("The annotated type of a lambda (" + TERM(Lam("x",null,Ref("f"),false)) + ") isn't forall (" + TERM(All("x", Ref("A"), Ref("B"), false)) + ").\n- Annotated type is " + TERM(expect_nf));
+          ERROR("The annotated type of a lambda (example: " + TERM(Lam("x",null,Ref("f"),false)) + ") isn't forall (example: " + TERM(All("x", Ref("A"), Ref("B"), false)) + ").\n- Annotated type is " + TERM(expect_nf));
         }
         var ex_ctx = ctx_ext(term[1].name, bind_v, ctx);
         var body_t = typecheck(term[1].body, expect_nf && expect_nf[0] === "All" ? expect_nf[1].body : null, defs, ex_ctx, [term, ctx]);
@@ -1279,7 +1355,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         break;
       case "Box":
         if (expect_nf !== null && expect_nf[0] !== "Typ") {
-          ERROR("The annotated type of a box (" + TERM(Box(Ref("A"))) + ") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
+          ERROR("The annotated type of a box (example: " + TERM(Box(Ref("A"))) + ") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
         }
         var expr_t = norm(null)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         MATCH(expr_t, Typ(), ctx);
@@ -1287,7 +1363,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         break;
       case "Put":
         if (expect_nf !== null && expect_nf[0] !== "Box") {
-          ERROR("The annotated type of a put (" + TERM(Put(Ref("x"))) + ") isn't a box (" + TERM(Box(Ref("A"))) + ").\n- Annotated type is " + TERM(expect_nf));
+          ERROR("The annotated type of a put (example: " + TERM(Put(Ref("x"))) + ") isn't a box (example: " + TERM(Box(Ref("A"))) + ").\n- Annotated type is " + TERM(expect_nf));
         }
         var expr_t = expect_nf && expect_nf[0] === "Box" ? expect_nf[1].expr : null;
         var term_t = typecheck(term[1].expr, expr_t, defs, ctx, [term, ctx]);
@@ -1296,14 +1372,14 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
       case "Tak":
         var expr_t = norm(null)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (expr_t[0] !== "Box") {
-          ERROR("Unboxed duplication.");
+          ERROR("Expected a boxed type (example: " + TERM(Box(Ref("A"))) + ").\n- Found type... " + TERM(norm(null)(expr_t, {}, {weak: false, undup: true})) + ".");
         }
         type = expr_t[1].expr;
         break;
       case "Dup":
         var expr_t = norm(null)(typecheck(term[1].expr, null, defs, ctx, [term, ctx]), defs, {undup: true, weak: true});
         if (expr_t[0] !== "Box") {
-          ERROR("Unboxed duplication.");
+          ERROR("Expected a boxed type (example: " + TERM(Box(Ref("A"))) + ").\n- Found type... " + TERM(norm(null)(expr_t, {}, {weak: false, undup: true})) + ".");
         }
         var unboxd = Tak(term[1].expr);
         var term_t = typecheck(subst(term[1].body, Tak(term[1].expr), 0), expect_nf, defs, ctx, [term, ctx]);
@@ -1318,7 +1394,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
       case "Op1":
       case "Op2":
         if (expect_nf !== null && expect_nf[0] !== "Wrd") {
-          ERROR("The annotated type of a numeric operation (" + TERM(Op2(term[1].func, Ref("x"), Ref("y"))) + ") isn't " + TERM(Wrd()) + ".\n- Annotated type is " + TERM(expect_nf));
+          ERROR("The annotated type of a numeric operation (example: " + TERM(Op2(term[1].func, Ref("x"), Ref("y"))) + ") isn't " + TERM(Wrd()) + ".\n- Annotated type is " + TERM(expect_nf));
         }
         typecheck(term[1].num0, Wrd(), defs, ctx, [term, ctx]);
         typecheck(term[1].num1, Wrd(), defs, ctx, [term, ctx]);
@@ -1350,7 +1426,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         break;
       case "Sig":
         if (expect_nf && expect_nf[0] !== "Typ") {
-          ERROR("The annotated type of a sigma (" + TERM(Sig("x", Ref("A"), Ref("B"))) + ") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
+          ERROR("The annotated type of a sigma (example: " + TERM(Sig("x", Ref("A"), Ref("B"))) + ") isn't " + TERM(Typ()) + ".\n- Annotated type is " + TERM(expect_nf));
         }
         var typ0_t = typecheck(term[1].typ0, null, defs, ctx, [term, ctx]);
         var ex_ctx = ctx_ext(term[1].name, term[1].typ0, ctx);
@@ -1361,7 +1437,7 @@ const typecheck = show => (term, expect, defs, ctx = ctx_new, inside = null, deb
         break;
       case "Par":
         if (expect_nf && expect_nf[0] !== "Sig") {
-          ERROR("Annotated type of a pair (" + TERM(Par(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".\n- Annotated type is " + TERM(norm(null)(expect_nf, defs, {undup: true, weak: true})));
+          ERROR("Annotated type of a pair (example: " + TERM(Par(Ref("a"),Ref("b"))) + ") isn't " + TERM(Sig("x", Ref("A"), Ref("B"))) + ".\n- Annotated type is " + TERM(norm(null)(expect_nf, defs, {undup: true, weak: true})));
         }
         if (expect_nf && expect_nf[1].eras !== term[1].eras) {
           ERROR("Mismatched erasure.");
@@ -1568,6 +1644,9 @@ module.exports = {
   Var,
   Typ,
   Tid,
+  Utt,
+  Utv,
+  Ute,
   All,
   Lam,
   App,

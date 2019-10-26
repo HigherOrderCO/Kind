@@ -29,21 +29,30 @@ const compile = (term, defs, vars) => {
       var num0 = compile(term.num0, defs, vars);
       var num1 = compile(term.num1, defs, vars);
       switch (func) {
-        case "+"  : return (num0 + num1) >>> 0;
-        case "-"  : return (num0 - num1) >>> 0;
-        case "*"  : return (num0 * num1) >>> 0;
-        case "/"  : return (num0 / num1) >>> 0;
-        case "%"  : return (num0 % num1) >>> 0;
-        case "^"  : return (num0 ** num1) >>> 0;
-        case ".&" : return (num0 & num1) >>> 0;
-        case ".|" : return (num0 | num1) >>> 0;
-        case ".^" : return (num0 ^ num1) >>> 0;
-        case ".!" : return (~ num1) >>> 0;
-        case ".>>": return (num0 >>> num1) >>> 0;
-        case ".<<": return (num0 << num1) >>> 0;
-        case ".>" : return (num0 > num1) >>> 0;
-        case ".<" : return (num0 < num1) >>> 0;
-        case ".=" : return (num0 === num1) >>> 0;
+        case ".+."  : return (num0 + num1) >>> 0;
+        case ".-."  : return (num0 - num1) >>> 0;
+        case ".*."  : return (num0 * num1) >>> 0;
+        case "./."  : return (num0 / num1) >>> 0;
+        case ".%."  : return (num0 % num1) >>> 0;
+        case ".^."  : return (num0 ** num1) >>> 0;
+        case ".&."  : return (num0 & num1) >>> 0;
+        case ".|."  : return (num0 | num1) >>> 0;
+        case ".#."  : return (num0 ^ num1) >>> 0;
+        case ".!."  : return (~ num1) >>> 0;
+        case ".>>." : return (num0 >>> num1) >>> 0;
+        case ".<<." : return (num0 << num1) >>> 0;
+        case ".>."  : return (num0 > num1) >>> 0;
+        case ".<."  : return (num0 < num1) >>> 0;
+        case ".==." : return (num0 === num1) >>> 0;
+        case ".++." : return fm.put_float_on_word(fm.get_float_on_word(num0) + fm.get_float_on_word(num1));
+        case ".--." : return fm.put_float_on_word(fm.get_float_on_word(num0) - fm.get_float_on_word(num1));
+        case ".**." : return fm.put_float_on_word(fm.get_float_on_word(num0) * fm.get_float_on_word(num1));
+        case ".//." : return fm.put_float_on_word(fm.get_float_on_word(num0) / fm.get_float_on_word(num1));
+        case ".%%." : return fm.put_float_on_word(fm.get_float_on_word(num0) % fm.get_float_on_word(num1));
+        case ".^^." : return fm.put_float_on_word(fm.get_float_on_word(num0) ^ fm.get_float_on_word(num1));
+        case ".f."  : return fm.put_float_on_word(num1);
+        case ".u."  : return fm.get_float_on_word(num1 >>> 0);
+        default: throw "TODO: implement operator "
       }
     case "Ite":
       var cond = compile(term.cond, defs, vars);

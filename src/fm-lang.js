@@ -10,6 +10,9 @@ const {
   Var,
   Typ,
   Tid,
+  Utt,
+  Utv,
+  Ute,
   All,
   Lam,
   App,
@@ -109,7 +112,16 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       return "Type";
     case "Tid":
       var expr = show(args.expr, nams, opts);
-      return "type(" + expr + ")";
+      return expr + " ::Type";
+    case "Utt":
+      var expr = show(args.expr, nams, opts);
+      return "-" + expr;
+    case "Utv":
+      var expr = show(args.expr, nams, opts);
+      return "%" + expr;
+    case "Ute":
+      var expr = show(args.expr, nams, opts);
+      return "+" + expr;
     case "All":
       var term = [ctor, args];
       var erase = [];
@@ -132,7 +144,6 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       return text;
     case "Lam":
       var term = [ctor, args];
-      var numb = null;
       var erase = [];
       var names = [];
       var types = [];
@@ -149,11 +160,7 @@ const show = ([ctor, args], nams = [], opts = {}) => {
         text += i < names.length - 1 ? ", " : "";
       }
       text += "} => ";
-      if (numb !== null) {
-        text += "%" + Number(numb);
-      } else {
-        text += show(term, nams.concat(names), opts);
-      }
+      text += show(term, nams.concat(names), opts);
       return text;
     case "App":
       var text = ")";
@@ -176,12 +183,12 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       return "#" + expr;
     case "Tak":
       var expr = show(args.expr, nams, opts);
-      return "<" + expr + ">";
+      return "$" + expr;
     case "Dup":
       var name = args.name;
       var expr = show(args.expr, nams, opts);
       if (args.body[0] === "Var" && args.body[1].index === 0) {
-        return "<" + expr + ">";
+        return "$" + expr;
       } else {
         var body = show(args.body, nams.concat([name]), opts);
         return "dup " + name + " = " + expr + "; " + body;
@@ -316,14 +323,14 @@ const show = ([ctor, args], nams = [], opts = {}) => {
     case "Slf":
       var name = args.name;
       var type = show(args.type, nams.concat([name]), opts);
-      return "$" + name + " " + type;
+      return "${" + name + "} " + type;
     case "New":
       var type = show(args.type, nams, opts);
       var expr = show(args.expr, nams, opts);
       return "new(~" + type + ") " + expr;
     case "Use":
       var expr = show(args.expr, nams, opts);
-      return "%" + expr;
+      return "use(" + expr + ")";
     case "Ann":
       var expr = show(args.expr, nams, opts);
       //var type = show(args.type, nams, opts);
@@ -476,9 +483,32 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
   }
 
   // Some handy lookup tables
-  const is_native_op = {"+":1,"-":1,"*":1,"/":1,"%":1,"^":1,".&":1,".|":1,".^":1,".!":1,".>>":1,".<<":1,".>":1,".<":1,".=":1,"+f":1,"-f":1,"*f":1,"/f":1,"%f":1,"^f":1,".f":1,".u":1};
-  const op_inits     = "+-*/%^.=";
-  const is_op_init   = build_charset("+-*/%^.=");
+  const is_native_op =
+    { ".+."  : 1
+    , ".-."  : 1
+    , ".*."  : 1
+    , "./."  : 1
+    , ".%."  : 1
+    , ".^."  : 1
+    , ".&."  : 1
+    , ".|."  : 1
+    , ".#."  : 1
+    , ".!."  : 1
+    , ".>>." : 1
+    , ".<<." : 1
+    , ".>."  : 1
+    , ".<."  : 1
+    , ".==." : 1
+    , ".++." : 1
+    , ".--." : 1
+    , ".**." : 1
+    , ".//." : 1
+    , ".%%." : 1
+    , ".^^." : 1
+    , ".f."  : 1
+    , ".u."  : 1};
+  const op_inits     = ["<", ">", ".", "->", "=="];
+  const is_op_init   = str => { for (var k of op_inits) if (str === k) return true; return false; };
   const is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@/");
   const is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@+*/%^!<>=&|");
   const is_spacy     = build_charset(" \t\n\r;");
@@ -642,7 +672,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
   // Parses an alphanumeric name
   function parse_name() {
-    if (is_op_init(code[idx])) {
+    if (is_op_init(code[idx] + (code[idx+1] || " "))) {
       match(code[idx]);
       return code[idx - 1] + parse_string_here(is_op_char);
     } else {
@@ -693,6 +723,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     } else {
       var skip = 0;
       while (match_here("^")) {
+      T(P) 
         skip += 1;
       }
       for (var i = nams.length - 1; i >= 0; --i) {
@@ -744,12 +775,27 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
-  // Parses the type identity
-  function parse_tid(nams) {
-    if (match("type(")) {
+  // Parses an unrestricted type, `-A`
+  function parse_utt(nams) {
+    if (match("-")) {
       var expr = parse_term(nams);
-      var skip = parse_exact(")");
-      return Tid(expr);
+      return Utt(expr);
+    }
+  }
+
+  // Parses an unrestricted term, `%t`
+  function parse_utv(nams) {
+    if (match("%")) {
+      var expr = parse_term(nams);
+      return Utv(expr);
+    }
+  }
+
+  // Parses an unrestricted elim, `+t`
+  function parse_ute(nams) {
+    if (match("+")) {
+      var expr = parse_term(nams);
+      return Ute(expr);
     }
   }
 
@@ -831,11 +877,10 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
-  // Parses an unboxing, `<t>`
+  // Parses an unboxing, `^t`
   function parse_tak(nams) {
-    if (match("<")) {
+    if (match("$")) {
       var expr = parse_term(nams);
-      var skip = parse_exact(">");
       return Tak(expr);
     }
   }
@@ -1109,8 +1154,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
   // Parses a self type, `$x P(x)` 
   function parse_slf(nams) {
-    if (match("$")) {
+    if (match("${")) {
       var name = parse_string();
+      var skip = parse_exact("}");
       var type = parse_term(nams.concat([name]));
       return Slf(name, type);
     }
@@ -1128,8 +1174,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
   // Parses a self elim, `%t`
   function parse_use(nams) {
-    if (match("%")) {
+    if (match("use(")) {
       var expr = parse_term(nams);
+      var skip = parse_exact(")");
       return Use(expr);
     }
   }
@@ -1151,7 +1198,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
 
       // Parses 'note' and 'move' expressions
       var notes = [];
-        var moves = [];
+      var moves = [];
       while (match("+")) {
         if (match("note")) {
           var note_name = parse_string();
@@ -1304,7 +1351,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
-  // Parses a rewrite, `t :: rewrite x in P(x) with u`
+  // Parses an annotation `t :: T`,
+  // a rewrite, `t :: rewrite x in P(x) with u`, 
+  // a type-id, `t :: Type`
   function parse_rwt(parsed, nams) {
     if (match("::", is_space)) {
       // Rewrite
@@ -1315,6 +1364,10 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         var skip = parse_exact("with");
         var prof = parse_term(nams);
         return Rwt(name, type, prof, parsed);
+      }
+
+      else if (match("Type")) {
+        return Tid(parsed);
       }
 
       // Annotation
@@ -1356,7 +1409,9 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     // Parses base term
     if (parsed = parse_parens(nams));
     else if (parsed = parse_typ(nams));
-    else if (parsed = parse_tid(nams));
+    else if (parsed = parse_slf(nams));
+    else if (parsed = parse_new(nams));
+    else if (parsed = parse_use(nams));
     else if (parsed = parse_scope(nams));
     else if (parsed = parse_hol(nams));
     else if (parsed = parse_lam_or_all(nams));
@@ -1380,10 +1435,10 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     else if (parsed = parse_cng(nams));
     else if (parsed = parse_eta(nams));
     else if (parsed = parse_cst(nams));
+    else if (parsed = parse_utt(nams));
+    else if (parsed = parse_utv(nams));
+    else if (parsed = parse_ute(nams));
     else if (parsed = parse_log(nams));
-    else if (parsed = parse_slf(nams));
-    else if (parsed = parse_new(nams));
-    else if (parsed = parse_use(nams));
     else if (parsed = parse_case(nams));
     else if (parsed = parse_op2_not(nams));
     else if (parsed = parse_op2_float(nams));
@@ -1736,7 +1791,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
           for (var i = 0; i < lv0_names.length; ++i) {
             var moti_type = App(moti_type, Var(-1 + names.length + rec_names.length + rec_idx_n.length + lv0_imp_n.length + lv0_dup_n.length + lv0_names.length - i), false);
           }
-          var moti_type = App(moti_type, Var(-1 + names.length + rec_names.length + rec_idx_n.length), false);
+          var moti_type = App(moti_type, Ute(Var(-1 + names.length + rec_names.length + rec_idx_n.length)), false);
           keep_infos.push({
             name: name,
             orig: Var(-1 + names.length + rec_names.length),
@@ -1781,6 +1836,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
               var term_moti = replace(projs[i].orig[1].index + 1 + i - (idx + 1) + 1, Var(0), term_moti);
               var term_moti = All(projs[i].name, shift(projs[i].type, 1 + i - (idx + 1), 0), term_moti, false);
             }
+            var term_moti = Tid(term_moti);
             var term_moti = replace(projs[i].orig[1].index + 1, Var(0), term_moti);
             var term_moti = Lam(projs[idx].name, null, term_moti, false);
 
@@ -1970,7 +2026,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         // Builds the step case
         var step_typ0 = type;
         var step_typ1 = shift(subst(shift(type, 1, 1), App(base_ref("step"), Var(0), false), 0), 1, 0);
-        var step_type = lv0_headers(1, Box(All(rec_depth, base_ref("Ind"), All(name, step_typ0, step_typ1, false), true)), true);
+        var step_type = lv0_headers(1, Box(All(rec_depth, Utt(base_ref("Ind")), All(name, step_typ0, step_typ1, false), true)), true);
         var step_term = lv0_headers(0, Put(Lam(rec_depth, null, Lam(name, null, term, false), true)), true);
 
         // Builds the base case
@@ -2002,6 +2058,21 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
         define(file+"/"+name+".step", Ann(step_type, step_term, false));
         define(file+"/"+name+".base", Ann(base_type, base_term, false));
         define(file+"/"+name, Ann(type, term, false));
+        //console.log("add.moti");
+        //console.log(show(moti_type));
+        //console.log(show(moti_term));
+        //console.log("");
+        //console.log("add.step");
+        //console.log(show(step_type));
+        //console.log(show(step_term));
+        //console.log("");
+        //console.log("add.base");
+        //console.log(show(base_type));
+        //console.log(show(base_term));
+        //console.log("");
+        //console.log("add");
+        //console.log(show(type));
+        //console.log(show(term));
         unbx[file+"/"+name+".moti"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
         unbx[file+"/"+name+".step"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
         unbx[file+"/"+name+".base"] = {depth: lv0_names.length + lv0_dup_n.length + lv0_imp_n.length};
@@ -2120,6 +2191,15 @@ const replace_refs = ([ctor, term], renamer, depth = 0) => {
     case "Tid":
       var expr = replace_refs(term.expr, renamer, depth);
       return Tid(expr);
+    case "Utt":
+      var expr = replace_refs(term.expr, renames, depth);
+      return Utt(expr);
+    case "Utv":
+      var expr = replace_refs(term.expr, renames, depth);
+      return Utv(expr);
+    case "Ute":
+      var expr = replace_refs(term.expr, renames, depth);
+      return Ute(expr);
     case "All":
       var name = term.name;
       var bind = replace_refs(term.bind, renamer, depth);
@@ -2273,6 +2353,15 @@ const rewrite = ([ctor, term], rewriter, scope = [], erased = false, only_once =
       case "Tid":
         var expr = rewrite(term.expr, rewriter, scope, true, only_once);
         return Tid(expr);
+      case "Utt":
+        var expr = rewrite(term.expr, rewriter, scope, true, only_once);
+        return Utt(expr);
+      case "Utv":
+        var expr = rewrite(term.expr, rewriter, scope, true, only_once);
+        return Utv(expr);
+      case "Ute":
+        var expr = rewrite(term.expr, rewriter, scope, true, only_once);
+        return Ute(expr);
       case "All":
         var name = term.name;
         var bind = rewrite(term.bind, rewriter, scope, true, only_once);
