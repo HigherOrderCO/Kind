@@ -1276,6 +1276,14 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a free variable
+  function parse_var(nams) {
+    if (match("^")) {
+      var idx = Number(parse_name());
+      return Var(idx);
+    }
+  }
+
   // Parses a term
   function parse_term(nams) {
     var parsed;
@@ -1313,6 +1321,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
     else if (parsed = parse_op2_not(nams));
     else if (parsed = parse_op2_float(nams));
     else if (parsed = parse_op2_uint(nams));
+    else if (parsed = parse_var(nams));
     else     parsed = parse_atom(nams, false);
 
     // Parses glued operators
@@ -2000,7 +2009,7 @@ const parse = async (file, code, tokenify, root = true, loaded = {}) => {
               term = subst(term, Num(0), 0);
             }
             for (var i = 0; i < unbox.length; ++i) {
-              if (equal(term[1].expr, unbox[i][1], {show})) {
+              if (equal(term[1].expr, unbox[i][1], 0, {show})) {
                 return Ref("$TMP$" + (unbox.length - 1)); // share identical unbox
               }
             }
@@ -2194,7 +2203,8 @@ const replace_refs = ([ctor, term], renamer, depth = 0) => {
       return Log(msge, expr);
     case "Hol":
       var name = term.name;
-      return Hol(name);
+      var mapf = term.mapf;
+      return Hol(name, mapf);
     case "Ref":
       var new_name = renamer(term.name, depth);
       if (typeof new_name === "string") {
@@ -2328,7 +2338,8 @@ const rewrite = ([ctor, term], rewriter, scope = [], erased = false, only_once =
         return Log(msge, expr);
       case "Hol":
         var name = term.name;
-        return Hol(name);
+        var mapf = term.mapf;
+        return Hol(name, mapf);
       case "Ref":
         var name = term.name;
         var eras = term.eras;

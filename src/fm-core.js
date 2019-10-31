@@ -58,7 +58,7 @@ const New = (type, expr)                   => ["New", {type, expr},             
 const Use = (expr)                         => ["Use", {expr},                         MEMO && expr[2]];
 const Ann = (type, expr, done)             => ["Ann", {type, expr, done},             MEMO && expr[2]];
 const Log = (msge, expr)                   => ["Log", {msge, expr},                   MEMO && expr[2]];
-const Hol = (name)                         => ["Hol", {name},                         MEMO && ("{?" + name + "?}")];
+const Hol = (name, mapf = (x=>x))          => ["Hol", {name, mapf},                   MEMO && ("{?" + name + "?}")];
 const Ref = (name, eras)                   => ["Ref", {name, eras},                   MEMO && ("{" + name + "}")];
 var MEMO  = true;
 
@@ -103,7 +103,7 @@ const shift = (term, inc, depth) => {
       case "Use": return Use(f(t.expr, i, d));
       case "Ann": return Ann(f(t.type, i, d), f(t.expr, i, d), t.done);
       case "Log": return Log(f(t.msge, i, d), f(t.expr, i, d));
-      case "Hol": return Hol(t.name);
+      case "Hol": return Hol(t.name, x => f(t.mapf(x), i, d));
       case "Ref": return Ref(t.name, t.eras);
     }
   }
@@ -145,7 +145,7 @@ const subst = (term, val, depth) => {
       case "Use": return Use(f(t.expr, v, d));
       case "Ann": return Ann(f(t.type, v, d), f(t.expr, v, d), t.done);
       case "Log": return Log(f(t.msge, v, d), f(t.expr, v, d));
-      case "Hol": return Hol(t.name);
+      case "Hol": return Hol(t.name, x => f(t.mapf(x), v, d));
       case "Ref": return Ref(t.name, t.eras);
     }
   }
@@ -170,14 +170,34 @@ const {put_float_on_word, get_float_on_word} = require("./fm-word.js");
 // Opts: weak, unbox, logging, eta
 const reduce = (term, opts = {}) => {
   const names_new = null;
-  const names_ext = (name, rest) => opts.logging ? {name, rest} : rest;
-  const names_arr = names => names ? [names.name].concat(names_arr(names.rest)) : [];
+  const names_ext = (bind, name, rest) => {
+    return {bind, name, rest};
+  }
+  const names_get = (i, names) => {
+    for (var k = 0; k < i; ++k) {
+      names = names ? names.rest : null;
+    }
+    return names ? {bind: names.bind, name: names.name} : null;
+  };
+  const names_len = (names) => {
+    for (var i = 0; names; ++i) {
+      names = names.rest;
+    }
+    return i;
+  };
+  const names_arr = names => {
+    return names ? [names.name].concat(names_arr(names.rest)) : [];
+  };
+  const names_var = (i, names) => {
+    const got = names_get(i, names);
+    return got ? got.bind : Var(names_len(names) - i - 1);
+  };
   const apply = (func, argm, eras, names) => {
     var func = reduce(func, names);
     if (func[0] === "Lam") {
       return reduce(func[1].body(argm), names);
     } else if (func[0] === "Dup") {
-      return Dup(func[1].name, func[1].expr, x => weak_reduce(App(func[1].body(x), argm, eras), names_ext(func[1].name, names)));
+      return Dup(func[1].name, func[1].expr, x => weak_reduce(App(func[1].body(x), argm, eras), names_ext(x, func[1].name, names)));
     } else {
       return App(func, weak_reduce(argm, names), eras);
     }
@@ -187,7 +207,7 @@ const reduce = (term, opts = {}) => {
     if (expr[0] === "Put") {
       return reduce(expr[1].expr, names);
     } else if (expr[0] === "Dup"){
-      return Dup(expr[1].name, expr[1].expr, x => weak_reduce(Tak(expr[1].body(x)), names_ext(expr[1].name, names)));
+      return Dup(expr[1].name, expr[1].expr, x => weak_reduce(Tak(expr[1].body(x)), names_ext(x, expr[1].name, names)));
     } else {
       return Tak(expr);
     }
@@ -197,27 +217,27 @@ const reduce = (term, opts = {}) => {
     if (expr[0] === "Put") {
       return reduce(body(expr[1].expr), names);
     } else if (expr[0] === "Dup") {
-      return Dup(expr[1].name, expr[1].expr, x => weak_reduce(Dup(name, expr[1].body(x), x => body(x)), names_ext(name, expr[1].name)));
+      return Dup(expr[1].name, expr[1].expr, x => weak_reduce(Dup(name, expr[1].body(x), x => body(x)), names_ext(x, name, expr[1].name)));
     } else {
       if (opts.undup) {
         return reduce(body(Tak(expr)), names);
       } else {
-        return Dup(name, expr, x => weak_reduce(body(x), names_ext(name, names)));
+        return Dup(name, expr, x => weak_reduce(body(x), names_ext(x, name, names)));
       }
     }
   };
   const dereference = (name, eras, names) => {
     if ((opts.defs||{})[name]) {
-      return reduce(unquote(eras ? erase((opts.defs||{})[name]) : (opts.defs||{})[name], []), names_new);
+      return reduce(unquote(eras ? erase((opts.defs||{})[name]) : (opts.defs||{})[name]), names_new);
     } else {
       return Ref(name, eras);
     }
   };
-  const unhole = (name) => {
+  const unhole = (name, mapf, names) => {
     if (opts.holes && opts.holes[name]) {
-      return reduce(unquote(opts.holes[name], []), names_new);
+      return reduce(unquote(mapf(opts.holes[name]), names), names_new);
     } else {
-      return Hol(name);
+      return Hol(name, mapf);
     }
   };
   const op1 = (func, num0, num1, names) => {
@@ -274,7 +294,7 @@ const reduce = (term, opts = {}) => {
     if (numb[0] === "Num") {
       return reduce(body(numb), names);
     } else {
-      return Cpy(name, numb, x => weak_reduce(body(x), names_ext(name, names)));
+      return Cpy(name, numb, x => weak_reduce(body(x), names_ext(x, name, names)));
     }
   };
   const first = (pair, eras, names) => {
@@ -298,7 +318,7 @@ const reduce = (term, opts = {}) => {
     if (pair[0] === "Par") {
       return reduce(body(pair[1].val0, pair[1].val1), names);
     } else {
-      return Prj(nam0, nam1, pair, (x,y) => weak_reduce(body(x,y), names_ext(nam0, names_ext(nam1, names))), eras);
+      return Prj(nam0, nam1, pair, (x,y) => weak_reduce(body(x,y), names_ext(x, nam0, names_ext(y, nam1, names))), eras);
     }
   };
   //const restrict = (expr, names) => {
@@ -324,43 +344,43 @@ const reduce = (term, opts = {}) => {
       var nams = names_arr(names).reverse();
     }
     if (opts.show) {
-      console.log(opts.show(quote(msge, 0), names || []));
+      console.log(opts.show(quote(msge, 0), names || null));
     }
     return expr;
   };
-  const unquote = (term, vars, names) => {
+  const unquote = (term, names = null) => {
     var [ctor, term] = term;
     switch (ctor) {
-      case "Var": return vars[term.index] || Var(vars.length - term.index - 1);
+      case "Var": return names_var(term.index, names);
       case "Typ": return Typ();
-      case "Tid": return Tid(unquote(term.expr, vars));
-      case "Utt": return Utt(unquote(term.expr, vars));
-      case "Utv": return Utv(unquote(term.expr, vars));
-      case "Ute": return Ute(unquote(term.expr, vars));
-      case "All": return All(term.name, unquote(term.bind, vars), x => unquote(term.body, [x].concat(vars)), term.eras);
-      case "Lam": return Lam(term.name, term.bind && unquote(term.bind, vars), x => unquote(term.body, [x].concat(vars)), term.eras);
-      case "App": return App(unquote(term.func, vars), unquote(term.argm, vars), term.eras);
-      case "Box": return Box(unquote(term.expr, vars));
-      case "Put": return Put(unquote(term.expr, vars));
-      case "Tak": return Tak(unquote(term.expr, vars));
-      case "Dup": return Dup(term.name, unquote(term.expr, vars), x => unquote(term.body, [x].concat(vars)));
+      case "Tid": return Tid(unquote(term.expr, names));
+      case "Utt": return Utt(unquote(term.expr, names));
+      case "Utv": return Utv(unquote(term.expr, names));
+      case "Ute": return Ute(unquote(term.expr, names));
+      case "All": return All(term.name, unquote(term.bind, names), x => unquote(term.body, names_ext(x, null, names)), term.eras);
+      case "Lam": return Lam(term.name, term.bind && unquote(term.bind, names), x => unquote(term.body, names_ext(x, null, names)), term.eras);
+      case "App": return App(unquote(term.func, names), unquote(term.argm, names), term.eras);
+      case "Box": return Box(unquote(term.expr, names));
+      case "Put": return Put(unquote(term.expr, names));
+      case "Tak": return Tak(unquote(term.expr, names));
+      case "Dup": return Dup(term.name, unquote(term.expr, names), x => unquote(term.body, names_ext(x, null, names)));
       case "Wrd": return Wrd();
       case "Num": return Num(term.numb);
-      case "Op1": return Op1(term.func, unquote(term.num0, vars), unquote(term.num1, vars));
-      case "Op2": return Op2(term.func, unquote(term.num0, vars), unquote(term.num1, vars));
-      case "Ite": return Ite(unquote(term.cond, vars), unquote(term.pair, vars));
-      case "Cpy": return Cpy(term.name, unquote(term.numb, vars), x => unquote(term.body, [x].concat(vars)));
-      case "Sig": return Sig(term.name, unquote(term.typ0, vars), x => unquote(term.typ1, [x].concat(vars)), term.eras);
-      case "Par": return Par(unquote(term.val0, vars), unquote(term.val1, vars), term.eras);
-      case "Fst": return Fst(unquote(term.pair, vars), term.eras);
-      case "Snd": return Snd(unquote(term.pair, vars), term.eras);
-      case "Prj": return Prj(term.nam0, term.nam1, unquote(term.pair, vars), (x,y) => unquote(term.body, [y,x].concat(vars)), term.eras);
-      case "Slf": return Slf(term.name, x => unquote(term.type, [x].concat(vars)));
-      case "New": return New(unquote(term.type, vars), unquote(term.expr, vars));
-      case "Use": return Use(unquote(term.expr, vars));
-      case "Ann": return Ann(unquote(term.type, vars), unquote(term.expr, vars), term.done);
-      case "Log": return Log(unquote(term.msge, vars), unquote(term.expr, vars));
-      case "Hol": return Hol(term.name);
+      case "Op1": return Op1(term.func, unquote(term.num0, names), unquote(term.num1, names));
+      case "Op2": return Op2(term.func, unquote(term.num0, names), unquote(term.num1, names));
+      case "Ite": return Ite(unquote(term.cond, names), unquote(term.pair, names));
+      case "Cpy": return Cpy(term.name, unquote(term.numb, names), x => unquote(term.body, names_ext(x, null, names)));
+      case "Sig": return Sig(term.name, unquote(term.typ0, names), x => unquote(term.typ1, names_ext(x, null, names)), term.eras);
+      case "Par": return Par(unquote(term.val0, names), unquote(term.val1, names), term.eras);
+      case "Fst": return Fst(unquote(term.pair, names), term.eras);
+      case "Snd": return Snd(unquote(term.pair, names), term.eras);
+      case "Prj": return Prj(term.nam0, term.nam1, unquote(term.pair, names), (x,y) => unquote(term.body, names_ext(x, null, names_ext(y, null, names)), term.eras));
+      case "Slf": return Slf(term.name, x => unquote(term.type, names_ext(x, null, names)));
+      case "New": return New(unquote(term.type, names), unquote(term.expr, names));
+      case "Use": return Use(unquote(term.expr, names));
+      case "Ann": return Ann(unquote(term.type, names), unquote(term.expr, names), term.done);
+      case "Log": return Log(unquote(term.msge, names), unquote(term.expr, names));
+      case "Hol": return Hol(term.name, term.mapf);
       case "Ref": return Ref(term.name, term.eras);
     }
   };
@@ -373,8 +393,8 @@ const reduce = (term, opts = {}) => {
       case "Utt": return Utt(reduce(term.expr, names));
       case "Utv": return reduce(term.expr, names);
       case "Ute": return reduce(term.expr, names);
-      case "All": return All(term.name, weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(term.name, names)), term.eras);
-      case "Lam": return Lam(term.name, term.bind && weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(term.name, names)), term.eras);
+      case "All": return All(term.name, weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(x, term.name, names)), term.eras);
+      case "Lam": return Lam(term.name, term.bind && weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(x, term.name, names)), term.eras);
       case "App": return apply(term.func, term.argm, term.eras, names);
       case "Box": return Box(weak_reduce(term.expr, names));
       case "Put": return opts.unbox ? reduce(term.expr, names) : Put(weak_reduce(term.expr, names));
@@ -386,17 +406,17 @@ const reduce = (term, opts = {}) => {
       case "Op2": return op2(term.func, term.num0, term.num1, names);
       case "Ite": return if_then_else(term.cond, term.pair, names);
       case "Cpy": return copy(term.name, term.numb, term.body, names);
-      case "Sig": return Sig(term.name, weak_reduce(term.typ0, names), x => weak_reduce(term.typ1(x), names_ext(term.name, names)), term.eras);
+      case "Sig": return Sig(term.name, weak_reduce(term.typ0, names), x => weak_reduce(term.typ1(x), names_ext(x, term.name, names)), term.eras);
       case "Par": return Par(weak_reduce(term.val0, names), weak_reduce(term.val1, names), term.eras);
       case "Fst": return first(term.pair, term.eras, names);
       case "Snd": return second(term.pair, term.eras, names);
       case "Prj": return project(term.nam0, term.nam1, term.pair, term.body, term.eras, names);
-      case "Slf": return Slf(term.name, x => weak_reduce(term.type(x), names_ext(term.name, names)));
+      case "Slf": return Slf(term.name, x => weak_reduce(term.type(x), names_ext(x, term.name, names)));
       case "New": return reduce(term.expr, names);
       case "Use": return reduce(term.expr, names);
       case "Ann": return reduce(term.expr, names);
       case "Log": return log(term.msge, term.expr, names);
-      case "Hol": return unhole(term.name);
+      case "Hol": return unhole(term.name, term.mapf, names);
       case "Ref": return dereference(term.name, term.eras, names);
     }
   };
@@ -432,7 +452,7 @@ const reduce = (term, opts = {}) => {
       case "Use": return Use(quote(term.expr, depth));
       case "Ann": return Ann(quote(term.type, depth), quote(term.expr, depth), term.done);
       case "Log": return Log(quote(term.msge, depth), quote(term.expr, depth));
-      case "Hol": return Hol(term.name);
+      case "Hol": return Hol(term.name, term.mapf);
       case "Ref": return Ref(term.name, term.eras);
     }
   };
@@ -440,7 +460,7 @@ const reduce = (term, opts = {}) => {
     return opts.weak ? term : reduce(term, names);
   };
   MEMO = false;
-  var unquoted = unquote(term, []);
+  var unquoted = unquote(term);
   var reduced = reduce(unquoted);
   MEMO = true;
   var quoted = quote(reduced, 0);
@@ -484,7 +504,7 @@ const erase = (term) => {
     case "Use": return f(t.expr);
     case "Ann": return f(t.expr);
     case "Log": return Log(f(t.msge), f(t.expr));
-    case "Hol": return Hol(t.name);
+    case "Hol": return Hol(t.name, t.mapf);
     case "Ref": return Ref(t.name, true);
   }
 }
@@ -494,8 +514,8 @@ const erase = (term) => {
 // ::::::::::::::
 
 // equal : Term -> Term -> Opts -> Bool
-const equal = (a, b, opts) => {
-  const Eqs = (a, b)    => ["Eqs", {a, b}];
+const equal = (a, b, d, opts) => {
+  const Eqs = (a, b, d) => ["Eqs", {a, b, d}];
   const Bop = (v, x, y) => ["Bop", {v, x, y}];
   const And = (x,y)     => Bop(false, x, y);
   const Or  = (x,y)     => Bop(true, x, y);
@@ -505,7 +525,7 @@ const equal = (a, b, opts) => {
     switch (node[0]) {
       // An equality test
       case "Eqs":
-        var {a, b} = node[1];
+        var {a, b, d} = node[1];
 
         // Gets whnfs with and without dereferencing
         // Note: can't use weak:true because it won't give opportunity to eta...
@@ -524,8 +544,8 @@ const equal = (a, b, opts) => {
         if (ax[0] === "Ref" && bx[0] === "Ref" && ax[1].name === bx[1].name) {
           x = Val(true);
         } else if (ax[0] === "App" && bx[0] === "App") {
-          var func = Eqs(ax[1].func, bx[1].func);
-          var argm = Eqs(ax[1].argm, bx[1].argm);
+          var func = Eqs(ax[1].func, bx[1].func, d);
+          var argm = Eqs(ax[1].argm, bx[1].argm, d);
           x = Bop(false, func, argm);
         }
 
@@ -534,40 +554,40 @@ const equal = (a, b, opts) => {
         switch (ay[0] + "-" + by[0]) {
           case "Var-Var": y = Val(ay[1].index === by[1].index); break;
           case "Typ-Typ": y = Val(true); break;
-          case "Tid-Tid": y = Eqs(ay[1].expr, by[1].expr); break;
-          case "Utt-Utt": y = Eqs(ay[1].expr, by[1].expr); break;
-          case "Utv-Utv": y = Eqs(ay[1].expr, by[1].expr); break;
-          case "Ute-Ute": y = Eqs(ay[1].expr, by[1].expr); break;
-          case "All-All": y = And(And(Eqs(ay[1].bind, by[1].bind), Eqs(ay[1].body, by[1].body)), Val(ay[1].eras === by[1].eras)); break;
-          case "Lam-Lam": y = And(Eqs(ay[1].body, by[1].body), Val(ay[1].eras === by[1].eras)); break;
-          case "App-App": y = And(And(Eqs(ay[1].func, by[1].func), Eqs(ay[1].argm, by[1].argm)), Val(ay[1].eras === by[1].eras)); break;
-          case "Box-Box": y = Eqs(ay[1].expr, by[1].expr); break;
-          case "Put-Put": y = Eqs(ay[1].expr, by[1].expr); break;
-          case "Tak-Tak": y = Eqs(ay[1].expr, by[1].expr); break;
-          case "Dup-Dup": y = And(Eqs(ay[1].expr, by[1].expr), Eqs(ay[1].body, by[1].body)); break;
+          case "Tid-Tid": y = Eqs(ay[1].expr, by[1].expr, d); break;
+          case "Utt-Utt": y = Eqs(ay[1].expr, by[1].expr, d); break;
+          case "Utv-Utv": y = Eqs(ay[1].expr, by[1].expr, d); break;
+          case "Ute-Ute": y = Eqs(ay[1].expr, by[1].expr, d); break;
+          case "All-All": y = And(And(Eqs(ay[1].bind, by[1].bind, d), Eqs(ay[1].body, by[1].body, d+1)), Val(ay[1].eras === by[1].eras)); break;
+          case "Lam-Lam": y = And(Eqs(ay[1].body, by[1].body, d+1), Val(ay[1].eras === by[1].eras)); break;
+          case "App-App": y = And(And(Eqs(ay[1].func, by[1].func, d), Eqs(ay[1].argm, by[1].argm, d)), Val(ay[1].eras === by[1].eras)); break;
+          case "Box-Box": y = Eqs(ay[1].expr, by[1].expr, d); break;
+          case "Put-Put": y = Eqs(ay[1].expr, by[1].expr, d); break;
+          case "Tak-Tak": y = Eqs(ay[1].expr, by[1].expr, d); break;
+          case "Dup-Dup": y = And(Eqs(ay[1].expr, by[1].expr, d), Eqs(ay[1].body, by[1].body, d+1)); break;
           case "Wrd-Wrd": y = Val(true); break;
           case "Num-Num": y = Val(ay[1].numb === by[1].numb); break;
-          case "Op1-Op1": y = And(Val(ay[1].func === by[1].func), And(Eqs(ay[1].num0, by[1].num0), Val(ay[1].num1[1].numb === ay[1].num1[1].numb))); break;
-          case "Op2-Op2": y = And(Val(ay[1].func === by[1].func), And(Eqs(ay[1].num0, by[1].num0), Eqs(ay[1].num1, by[1].num1))); break;
-          case "Ite-Ite": y = And(Eqs(ay[1].cond, by[1].cond), Eqs(ay[1].pair, by[1].pair)); break;
-          case "Cpy-Cpy": y = And(Eqs(ay[1].numb, by[1].numb), Eqs(ay[1].body, by[1].body)); break;
-          case "Sig-Sig": y = And(Eqs(ay[1].typ0, by[1].typ0), Eqs(ay[1].typ1, by[1].typ1)); break;
-          case "Par-Par": y = And(Eqs(ay[1].val0, by[1].val0), Eqs(ay[1].val1, by[1].val1)); break;
-          case "Fst-Fst": y = And(Eqs(ay[1].pair, by[1].pair), Val(ay[1].eras === by[1].eras)); break;
-          case "Snd-Snd": y = And(Eqs(ay[1].pair, by[1].pair), Val(ay[1].eras === by[1].eras)); break;
-          case "Prj-Prj": y = And(Eqs(ay[1].pair, by[1].pair), Eqs(ay[1].body, by[1].body)); break;
-          case "Slf-Slf": y = Eqs(ay[1].type, by[1].type); break;
-          case "New-New": y = Eqs(ay[1].expr, by[1].expr); break;
-          case "Use-Use": y = Eqs(ay[1].expr, by[1].expr); break;
-          case "Log-Log": y = Eqs(ay[1].expr, by[1].expr); break;
-          case "Ann-Ann": y = Eqs(ay[1].expr, by[1].expr); break;
+          case "Op1-Op1": y = And(Val(ay[1].func === by[1].func), And(Eqs(ay[1].num0, by[1].num0, d), Val(ay[1].num1[1].numb === ay[1].num1[1].numb))); break;
+          case "Op2-Op2": y = And(Val(ay[1].func === by[1].func), And(Eqs(ay[1].num0, by[1].num0, d), Eqs(ay[1].num1, by[1].num1, d))); break;
+          case "Ite-Ite": y = And(Eqs(ay[1].cond, by[1].cond, d), Eqs(ay[1].pair, by[1].pair, d)); break;
+          case "Cpy-Cpy": y = And(Eqs(ay[1].numb, by[1].numb, d), Eqs(ay[1].body, by[1].body, d+1)); break;
+          case "Sig-Sig": y = And(Eqs(ay[1].typ0, by[1].typ0, d), Eqs(ay[1].typ1, by[1].typ1, d+1)); break;
+          case "Par-Par": y = And(Eqs(ay[1].val0, by[1].val0, d), Eqs(ay[1].val1, by[1].val1, d)); break;
+          case "Fst-Fst": y = And(Eqs(ay[1].pair, by[1].pair, d), Val(ay[1].eras === by[1].eras)); break;
+          case "Snd-Snd": y = And(Eqs(ay[1].pair, by[1].pair, d), Val(ay[1].eras === by[1].eras)); break;
+          case "Prj-Prj": y = And(Eqs(ay[1].pair, by[1].pair, d), Eqs(ay[1].body, by[1].body, d+2)); break;
+          case "Slf-Slf": y = Eqs(ay[1].type, by[1].type, d+1); break;
+          case "New-New": y = Eqs(ay[1].expr, by[1].expr, d); break;
+          case "Use-Use": y = Eqs(ay[1].expr, by[1].expr, d); break;
+          case "Log-Log": y = Eqs(ay[1].expr, by[1].expr, d); break;
+          case "Ann-Ann": y = Eqs(ay[1].expr, by[1].expr, d); break;
           default:
             if (ay[0] === "Hol" && opts.holes && !opts.holes[ay[1].name]) {
-              opts.holes[ay[1].name] = by;
-              y = Eqs(ay, by);
+              opts.holes[ay[1].name] = shift(by, opts.hole_depth[ay[1].name] - d, 0);
+              y = Eqs(ay, by, d);
             } else if (by[0] === "Hol" && opts.holes && !opts.holes[by[1].name]) {
-              opts.holes[by[1].name] = ay;
-              y = Eqs(ay, by);
+              opts.holes[by[1].name] = shift(ay, opts.hole_depth[by[1].name] - d, 0);
+              y = Eqs(ay, by, d);
             } else {
               y = Val(false);
             }
@@ -595,7 +615,7 @@ const equal = (a, b, opts) => {
   }
 
   // Expands the search tree until it finds an answer
-  var tree = Eqs(erase(a), erase(b));
+  var tree = Eqs(erase(a), erase(b), d);
   while (tree[0] !== "Val") {
     var tree = step(tree);
   }
@@ -610,6 +630,7 @@ const typecheck = (term, expect, opts = {}) => {
   var type_memo    = {};
   var hole_msg     = {};
   var holes        = {};
+  var hole_depth   = {};
   var filled_holes = false;
 
   const pad_right = (len, chr, str) => {
@@ -661,8 +682,8 @@ const typecheck = (term, expect, opts = {}) => {
       var name = c.name;
       var type = c.type;
       txt.push("- " + pad_right(max_len, " ", c.name) + " : "
-        + opts.show(reduce(type, {defs: {}, undup: true})
-        , ctx_names(c.rest)));
+        + opts.show(reduce(type, {defs: {}, undup: true}) , ctx_names(c.rest)));
+        //+ (c.term ? " = " + opts.show(reduce(c.term, {defs: {}, undup: true}), ctx_names(c.rest)) : ""));
     }
     return txt.reverse().join("\n");
   };
@@ -717,25 +738,22 @@ const typecheck = (term, expect, opts = {}) => {
       default: return false;
     }
   };
-
+  
   const format = (ctx, term) => {
     return opts.show ? highlight(opts.show(display_normal(term), ctx_names(ctx))) : "?";
   };
 
   // Checks and returns the type of a term
   const typecheck = (term, expect, ctx = ctx_new, affine = true, lvel = 0, inside = null) => {
-
     const do_error = (str)  => {
       throw "[ERROR]\n" + str
         + "\n- When checking " + format(ctx, term)
-        //+ (inside ? "\n- On expression " + highlight(show(inside[0], ctx_names(inside[1]))) : "")
+        //+ (inside ? "\n- On expression " + highlight(opts.show(inside[0], ctx_names(inside[1]))) : "")
         + (ctx !== null ? "\n- With the following context:\n" + ctx_str(ctx) : "");
     };
 
     const do_match = (a, b) => {
-      var a = ctx_subst(ctx, a);
-      var b = ctx_subst(ctx, b);
-      if (!equal(a, b, {defs: opts.defs, holes})) {
+      if (!equal(a, b, ctx_names(ctx).length, {show: opts.show, defs: opts.defs, holes, hole_depth})) {
         do_error("Type mismatch."
           + "\n- Found type... " + format(ctx, a)
           + "\n- Instead of... " + format(ctx, b));
@@ -837,13 +855,12 @@ const typecheck = (term, expect, opts = {}) => {
               + ").\n- Annotated type is "
               + format(ctx, expect_nf));
           }
+          var bind_t = typecheck(bind_v, Typ(), ctx, false, lvel, ctx);
           var ex_ctx = ctx_ext(term[1].name, null, bind_v, term[1].eras, false, lvel, ctx);
           var body_t = typecheck(term[1].body, expect_nf && expect_nf[0] === "All" ? expect_nf[1].body : null, ex_ctx, affine, lvel, [term, ctx]);
+          var body_T = typecheck(body_t, Typ(), ex_ctx, false, lvel, ctx);
           var term_t = All(term[1].name, bind_v, body_t, term[1].eras);
-          if (term_t[1].eras !== term[1].eras) {
-            do_error("Mismatched erasure.");
-          }
-          typecheck(term_t, Typ(), ctx, false, lvel, [term, ctx]);
+          //typecheck(term_t, Typ(), ctx, false, lvel, [term, ctx]);
           type = term_t;
           break;
         case "App":
@@ -937,7 +954,7 @@ const typecheck = (term, expect, opts = {}) => {
           }
           var typ0_v = pair_t[1].typ0;
           var typ1_v = subst(pair_t[1].typ1, Typ(), 0);
-          if (!equal(typ0_v, typ1_v, {defs: opts.defs, holes})) {
+          if (!equal(typ0_v, typ1_v, ctx_names(ctx).length, {defs: opts.defs, holes, hole_depth})) {
             do_error("Both branches of if must have the same type.");
           }
           type = expect_nf || typ0_v;
@@ -1081,7 +1098,11 @@ const typecheck = (term, expect, opts = {}) => {
           type = typecheck(term[1].expr, expect, ctx, affine, lvel, inside);
           break;
         case "Hol":
-          hole_msg[term[1].name] = {ctx, name: term[1].name, expect};
+          if (!hole_msg[term[1].name]) {
+            hole_msg[term[1].name] = {ctx, name: term[1].name, expect};
+            hole_depth[term[1].name] = ctx_names(ctx).length;
+            term[1].mapf = x => x;
+          }
           if (expect) {
             type = expect;
           } else {
