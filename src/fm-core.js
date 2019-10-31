@@ -682,7 +682,7 @@ const typecheck = (term, expect, opts = {}) => {
       var name = c.name;
       var type = c.type;
       txt.push("- " + pad_right(max_len, " ", c.name) + " : "
-        + opts.show(reduce(type, {defs: {}, undup: true}) , ctx_names(c.rest)));
+        + opts.show(reduce(type, {defs: {}, undup: true, holes}) , ctx_names(c.rest)));
         //+ (c.term ? " = " + opts.show(reduce(c.term, {defs: {}, undup: true}), ctx_names(c.rest)) : ""));
     }
     return txt.reverse().join("\n");
