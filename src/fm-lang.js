@@ -2529,8 +2529,10 @@ const run = (mode, term, opts = {}) => {
 
   try {
     var [prog, type] = typecheck(term, null, opts);
+    var error = null;
   } catch (e) {
     var [prog, type] = [null, null];
+    var error = e;
   }
 
   // If user is requesting erased and term is well-typed, 
@@ -2568,9 +2570,11 @@ const run = (mode, term, opts = {}) => {
       break;
 
     case "TYPECHECK":
-      term = type;
-      //term = eras(term);
-      //term = reduce(term, {...opts, weak: false, unbox: true});
+      if (error) {
+        throw error;
+      } else {
+        term = type;
+      }
       break;
   }
 
