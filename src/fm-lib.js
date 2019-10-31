@@ -5,4 +5,5 @@ var fm = module.exports = {
   net    : require("./fm-net"),
   to_js  : require("./fm-to-js"),
   to_net : require("./fm-to-net"),
+  forall : require("./forall"),
 };

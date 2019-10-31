@@ -4,10 +4,25 @@ const core = require("./fm-core");
 
 // For now, we are converting the terms from and to JS-compiled Formality
 // In the future we may convert from and to directly the Formality Core AST
-module.exports = {
-  to: (val) => to_js.decompile(json.to(val)),
-  from: (term) => json.from(to_js.compile(term))
+const to = (val) => to_js.decompile(json.to(val));
+const from = (term) => json.from(to_js.compile(term));
+
+const call = (term_or_name, defs, argument, opts = {}) => {
+  const term =
+    typeof term_or_name === 'string'
+      ? defs[term_or_name] || Ref(term_or_name)
+      : term_or_name;
+
+  lang.typecheck(term, json_to_json_type_term, defs);
+
+  const argument_term = to(argument);
+  const default_reducer = term => lang.run("OPTIMAL", term, {defs});
+  const reducer = opts.reducer || default_reducer;
+  const app_term = lang.App(term, argument_term, false);
+  return from(reducer(app_term));
 }
+
+module.exports = { to, from, call }
 
 // A Mapper is responsible for mapping between JS and Formality types.
 // It's basically two functions, to and from. To converts from JS to FormalityJS and from does the
