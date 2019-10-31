@@ -891,6 +891,9 @@ const typecheck = (term, expect, opts = {}) => {
             do_error("Attempted to apply a value that isn't a function.");
           }
           var [argm_c, argm_t] = typecheck(term[1].argm, func_t[1].bind, ctx, affine, lvel, [term, ctx]);
+          if (func_t[1].eras !== term[1].eras) {
+            do_error("Mismatched erasure.");
+          }
           prog = func_t[1].eras ? func_c : App(func_c, argm_c, false);
           type = subst(func_t[1].body, Ann(func_t[1].bind, term[1].argm, false), 0);
           break;
@@ -1034,6 +1037,9 @@ const typecheck = (term, expect, opts = {}) => {
             var val1_t = shift(val1_t, 1, 0);
           }
           var eras = expect_nf ? expect_nf[1].eras : term[1].eras;
+          if (term[1].eras !== eras) {
+            do_error("Mismatched erasure.");
+          }
           prog = eras === 1 ? val1_c : eras === 2 ? val0_c : Par(val0_c, val1_c, eras);
           type = expect_nf || Sig("x", val0_t, val1_t, term[1].eras);
           break;
@@ -1045,6 +1051,9 @@ const typecheck = (term, expect, opts = {}) => {
           var pair_t = weak_normal(pair_t);
           if (pair_t[0] !== "Sig") {
             do_error("Attempted to extract the first element of a term that isn't a pair.");
+          }
+          if (term[1].eras !== pair_t[1].eras) {
+            do_error("Mismatched erasure.");
           }
           prog = pair_t[1].eras === 1 ? Num(0) : pair_t[1].eras === 2 ? pair_c : Fst(pair_c, pair_t[1].eras);
           type = pair_t[1].typ0;
@@ -1058,6 +1067,9 @@ const typecheck = (term, expect, opts = {}) => {
           if (pair_t[0] !== "Sig") {
             do_error("Attempted to extract the second element of a term that isn't a pair.");
           }
+          if (term[1].eras !== pair_t[1].eras) {
+            do_error("Mismatched erasure.");
+          }
           prog = pair_t[1].eras === 1 ? pair_c : pair_t[1].eras === 2 ? Num(0) : Snd(pair_c, pair_t[1].eras);
           type = subst(pair_t[1].typ1, Fst(term[1].pair, term[1].eras), 0);
           break;
@@ -1066,6 +1078,9 @@ const typecheck = (term, expect, opts = {}) => {
           var pair_t = weak_normal(pair_t);
           if (pair_t[0] !== "Sig") {
             do_error("Attempted to project the elements of a term that isn't a pair.");
+          }
+          if (term[1].eras !== pair_t[1].eras) {
+            do_error("Mismatched erasure.");
           }
           var ex_ctx = ctx_ext(term[1].nam0, null, pair_t[1].typ0, pair_t[1].eras === 1, false, lvel, ctx);
           var ex_ctx = ctx_ext(term[1].nam1, null, pair_t[1].typ1, pair_t[1].eras === 2, false, lvel, ex_ctx);
