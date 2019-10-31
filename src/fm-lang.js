@@ -1206,7 +1206,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
       var term = parsed;
       while (idx < code.length) {
         if (match("_")) {
-          var term = App(term, Hol(new_hole_name()), true);
+          var term = App(term, Hol(new_hole_name()), false);
           if (match(")")) break;
         } else {
           var eras = match("~");
