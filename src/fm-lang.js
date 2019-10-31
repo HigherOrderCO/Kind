@@ -1715,8 +1715,8 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
             // Gets the projected dataype
             var {adt_name, adt_pram, adt_indx, adt_ctor} = projs[idx].adt;
             if (adt_indx.length > 0) {
-              error("The case-tree syntax isn't compatible with the indexed datatype '" + adt_name + "' yet."
-                  + "Use the @ syntax to write the '" + name + "' function instead.");
+              error("The case argument syntax isn't compatible with the indexed datatype '" + adt_name + "' yet.\n"
+                  + "Use a case expression to write the body of the '" + name + "' function instead.");
             }
 
             // Builds the application motive
@@ -2521,16 +2521,25 @@ const typecheck = (term, expect, opts) => {
 // Evaluates a term to normal form in different modes
 // run : String -> (String | Term) -> Opts -> Term
 const run = (mode, term, opts = {}) => {
-  var eras = opts.erased  ? erase : (x => x);
+  var eras = opts.erased ? erase : (x => x);
   var defs = opts.defs || {};
   if (typeof term === "string") {
     term = defs[term] || Ref(term);
   }
 
+  try {
+    var [prog, type] = typecheck(term, null, opts);
+  } catch (e) {
+    var [prog, type] = [null, null];
+  }
+
+  // If user is requesting erased and term is well-typed, 
+  // then replace term by prog, since it has filled holes
+  var term = opts.erased ? prog || term : term;
+
   switch (mode) {
 
     case "REDUCE_DEBUG":
-      term = eras(term);
       try {
         term = reduce(term, opts);
       } catch (e) {
@@ -2539,12 +2548,11 @@ const run = (mode, term, opts = {}) => {
       break;
 
     case "REDUCE_NATIVE":
-      term = eras(term);
       term = to_js.decompile(to_js.compile(term, defs));
       break;
 
     case "REDUCE_OPTIMAL":
-      var net = to_net.compile(erase(term), defs);
+      var net = to_net.compile(term, defs);
       if (opts.stats && opts.stats.input_net === null) {
         opts.stats.input_net = JSON.parse(JSON.stringify(net));
       }
@@ -2560,18 +2568,9 @@ const run = (mode, term, opts = {}) => {
       break;
 
     case "TYPECHECK":
-      term = typecheck(term, null, opts);
+      term = type;
       //term = eras(term);
       //term = reduce(term, {...opts, weak: false, unbox: true});
-      break;
-
-    case "NOTHING":
-      if (term[0] === "Ref") {
-        term = defs[term[1].name];
-        term = eras(term);
-      } else {
-        term = eras(term);
-      }
       break;
   }
 
