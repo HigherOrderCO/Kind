@@ -721,7 +721,7 @@ const typecheck = (term, expect, opts = {}) => {
 
   const subst_holes = (term) => {
     return reduce(term, {
-      defs: opts.defs, holes, defs: {}, undup: true, weak: false,
+      defs: opts.defs, holes, defs: {}, weak: false,
       no_app: 1, no_tak: 1, no_dup: 1, no_ref: 1,
       no_op1: 1, no_op2: 1, no_ite: 1, no_cpy: 1,
       no_fst: 1, no_snd: 1, no_prf: 1});
