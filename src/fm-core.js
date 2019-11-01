@@ -1090,7 +1090,7 @@ const typecheck = (term, expect, opts = {}) => {
             var [body_c, body_t] = typecheck(term[1].body, null, ex_ctx, affine, lvel, [term, ctx]);
           }
           prog = pair_t[1].eras === 1 ? subst_many(body_c, [Num(0), pair_c])
-               : pair_t[1].eras === 2 ? subst_name(body_c, [pair_c, Num(0)])
+               : pair_t[1].eras === 2 ? subst_many(body_c, [pair_c, Num(0)])
                : Prj(term[1].nam0, term[1].nam1, pair_c, body_c, pair_t[1].eras); 
           type = subst(subst(body_t, Snd(shift(term[1].pair, 1, 0), term[1].eras), 0), Fst(term[1].pair, term[1].eras), 0);
           break;
