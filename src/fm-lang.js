@@ -573,17 +573,20 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
 
   // Constructs an Ind
   function build_ind(name) {
-    var numb = name === "" ? Math.pow(2,48) - 1 : Number(name);
-    var bits = numb.toString(2);
-    var bits = bits === "0" ? "" : bits;
-    var term = base_ref("base");
-    for (var i = 0; i < bits.length; ++i) {
-      term = App(base_ref("twice"), term, false);
-      if (bits[i] === "1") {
-        term = App(base_ref("step"), term, false);
+    if (!defs["*"+name]) {
+      var numb = name === "" ? Math.pow(2,48) - 1 : Number(name);
+      var bits = numb.toString(2);
+      var bits = bits === "0" ? "" : bits;
+      var term = base_ref("base");
+      for (var i = 0; i < bits.length; ++i) {
+        term = App(base_ref("twice"), term, false);
+        if (bits[i] === "1") {
+          term = App(base_ref("step"), term, false);
+        }
       }
+      define("*"+name, term);
     }
-    return term;
+    return Ref("*"+name, false);
   }
 
   // Parses an exact string, errors if it isn't there
@@ -888,12 +891,15 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
   function parse_nat_literal(nams) {
     if (match("0n")) {
       var name = parse_string();
-      var numb = Number(name);
-      var term = base_ref("zero");
-      for (var i = 0; i < numb; ++i) {
-        term = App(base_ref("succ"), term, false);
+      if (!defs["0n" + name]) {
+        var numb = Number(name);
+        var term = base_ref("zero");
+        for (var i = 0; i < numb; ++i) {
+          term = App(base_ref("succ"), term, false);
+        }
+        define("0n" + name, term);
       }
-      return term;
+      return defs["0n" + name];
     }
   }
 
