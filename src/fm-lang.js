@@ -122,7 +122,7 @@ const show = ([ctor, args], nams = [], opts = {}) => {
         text += names[i] + (types[i] !== null ? " : " + types[i] : "");
         text += i < names.length - 1 ? ", " : "";
       }
-      text += "} => ";
+      text += "} ";
       text += show(term, nams.concat(names), opts);
       return text;
     case "App":
