@@ -417,7 +417,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
 
   // Creates a new hole name
   function new_hole_name() {
-    return "_" + (hole_count++) + "_";
+    return "h" + (hole_count++);
   }
 
   // Builds a lookup table
@@ -769,7 +769,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
       } else {
         used_hole_name[name] = true;
       }
-      return Hol(name, x => x, loc(idx - init));
+      return Hol(name, loc(idx - init));
     }
   }
 
@@ -2226,8 +2226,7 @@ const replace_refs = ([ctor, term, hash, loc], renamer, depth = 0) => {
       return Log(msge, expr, loc);
     case "Hol":
       var name = term.name;
-      var mapf = term.mapf;
-      return Hol(name, mapf, loc);
+      return Hol(name, loc);
     case "Ref":
       var new_name = renamer(term.name, depth);
       if (typeof new_name === "string") {
@@ -2361,8 +2360,7 @@ const rewrite = ([ctor, term, hash, loc], rewriter, scope = [], erased = false, 
         return Log(msge, expr, loc);
       case "Hol":
         var name = term.name;
-        var mapf = term.mapf;
-        return Hol(name, mapf, loc);
+        return Hol(name, loc);
       case "Ref":
         var name = term.name;
         var eras = term.eras;

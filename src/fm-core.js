@@ -58,7 +58,7 @@ const New = (type, expr, loc)                   => ["New", {type, expr},        
 const Use = (expr, loc)                         => ["Use", {expr},                         MEMO && expr[2]                                   , loc];
 const Ann = (type, expr, done, loc)             => ["Ann", {type, expr, done},             MEMO && expr[2]                                   , loc];
 const Log = (msge, expr, loc)                   => ["Log", {msge, expr},                   MEMO && expr[2]                                   , loc];
-const Hol = (name, mapf = (x=>x), loc)          => ["Hol", {name, mapf},                   MEMO && ("{?" + name + "?}")                      , loc];
+const Hol = (name, loc)                         => ["Hol", {name},                         MEMO && ("{?" + name + "?}")                      , loc];
 const Ref = (name, eras, loc)                   => ["Ref", {name, eras},                   MEMO && ("{" + name + "}")                        , loc];
 var MEMO  = true;
 
@@ -103,7 +103,7 @@ const shift = (term, inc, depth) => {
       case "Use": return Use(f(t.expr, i, d), l);
       case "Ann": return Ann(f(t.type, i, d), f(t.expr, i, d), t.done, l);
       case "Log": return Log(f(t.msge, i, d), f(t.expr, i, d), l);
-      case "Hol": return Hol(t.name, x => f(t.mapf(x), i, d), l);
+      case "Hol": return Hol(t.name, l);
       case "Ref": return Ref(t.name, t.eras, l);
     }
   }
@@ -145,7 +145,7 @@ const subst = (term, val, depth) => {
       case "Use": return Use(f(t.expr, v, d), l);
       case "Ann": return Ann(f(t.type, v, d), f(t.expr, v, d), t.done, l);
       case "Log": return Log(f(t.msge, v, d), f(t.expr, v, d), l);
-      case "Hol": return Hol(t.name, x => f(t.mapf(x), v, d), l);
+      case "Hol": return Hol(t.name, l);
       case "Ref": return Ref(t.name, t.eras, l);
     }
   }
@@ -231,13 +231,6 @@ const reduce = (term, opts = {}) => {
       return reduce(unquote(eras ? erase((opts.defs||{})[name]) : (opts.defs||{})[name]), names_new);
     } else {
       return Ref(name, eras);
-    }
-  };
-  const unhole = (name, mapf, names) => {
-    if (!opts.no_hol && opts.holes && opts.holes[name]) {
-      return reduce(unquote(mapf(opts.holes[name]), names), names_new);
-    } else {
-      return Hol(name, mapf);
     }
   };
   const op1 = (func, num0, num1, names) => {
@@ -380,7 +373,7 @@ const reduce = (term, opts = {}) => {
       case "Use": return Use(unquote(term.expr, names));
       case "Ann": return Ann(unquote(term.type, names), unquote(term.expr, names), term.done);
       case "Log": return Log(unquote(term.msge, names), unquote(term.expr, names));
-      case "Hol": return Hol(term.name, term.mapf);
+      case "Hol": return Hol(term.name);
       case "Ref": return Ref(term.name, term.eras);
     }
   };
@@ -416,7 +409,7 @@ const reduce = (term, opts = {}) => {
       case "Use": return reduce(term.expr, names);
       case "Ann": return reduce(term.expr, names);
       case "Log": return log(term.msge, term.expr, names);
-      case "Hol": return unhole(term.name, term.mapf, names);
+      case "Hol": return Hol(term.name);
       case "Ref": return dereference(term.name, term.eras, names);
     }
   };
@@ -452,7 +445,7 @@ const reduce = (term, opts = {}) => {
       case "Use": return Use(quote(term.expr, depth));
       case "Ann": return Ann(quote(term.type, depth), quote(term.expr, depth), term.done);
       case "Log": return Log(quote(term.msge, depth), quote(term.expr, depth));
-      case "Hol": return Hol(term.name, term.mapf);
+      case "Hol": return Hol(term.name);
       case "Ref": return Ref(term.name, term.eras);
     }
   };
@@ -476,8 +469,8 @@ const erase = (term) => {
     case "Typ": return Typ();
     case "Tid": return f(t.expr);
     case "Utt": return Utt(f(t.expr));
-    case "Utv": return Utv(f(t.expr));
-    case "Ute": return Ute(f(t.expr));
+    case "Utv": return f(t.expr);
+    case "Ute": return f(t.expr);
     case "All": return All(t.name, f(t.bind), f(t.body), t.eras);
     case "Lam": return t.eras ? f(subst(t.body, e, 0)) : Lam(t.name, null, f(t.body), t.eras);
     case "App": return t.eras ? f(t.func)              : App(f(t.func), f(t.argm), t.eras);
@@ -504,7 +497,7 @@ const erase = (term) => {
     case "Use": return f(t.expr);
     case "Ann": return f(t.expr);
     case "Log": return f(t.expr);
-    case "Hol": return Hol(t.name, t.mapf);
+    case "Hol": return Hol(t.name);
     case "Ref": return Ref(t.name, true);
   }
 }
@@ -529,10 +522,10 @@ const equal = (a, b, d, opts) => {
 
         // Gets whnfs with and without dereferencing
         // Note: can't use weak:true because it won't give opportunity to eta...
-        var ax = reduce(a, {show: null, defs: opts.defs, holes: opts.holes, weak: true, undup: true, defs: {}});
-        var bx = reduce(b, {show: null, defs: opts.defs, holes: opts.holes, weak: true, undup: true, defs: {}});
-        var ay = reduce(a, {show: null, defs: opts.defs, holes: opts.holes, weak: true, undup: true});
-        var by = reduce(b, {show: null, defs: opts.defs, holes: opts.holes, weak: true, undup: true});
+        var ax = reduce(a, {show: null, defs: opts.defs, weak: true, undup: true, defs: {}});
+        var bx = reduce(b, {show: null, defs: opts.defs, weak: true, undup: true, defs: {}});
+        var ay = reduce(a, {show: null, defs: opts.defs, weak: true, undup: true});
+        var by = reduce(b, {show: null, defs: opts.defs, weak: true, undup: true});
 
         // Optimization: if hashes are equal, then a == b prematurely
         if (a[2] === b[2] || ax[2] === bx[2] || ay[2] === by[2]) {
@@ -582,12 +575,10 @@ const equal = (a, b, d, opts) => {
           case "Log-Log": y = Eqs(ay[1].expr, by[1].expr, d); break;
           case "Ann-Ann": y = Eqs(ay[1].expr, by[1].expr, d); break;
           default:
-            if (ay[0] === "Hol" && opts.holes && !opts.holes[ay[1].name]) {
-              opts.holes[ay[1].name] = shift(by, opts.hole_depth[ay[1].name] - d, 0);
-              y = Eqs(ay, by, d);
-            } else if (by[0] === "Hol" && opts.holes && !opts.holes[by[1].name]) {
-              opts.holes[by[1].name] = shift(ay, opts.hole_depth[by[1].name] - d, 0);
-              y = Eqs(ay, by, d);
+            if (ay[0] === "Hol") {
+              y = Val(true);
+            } else if (by[0] === "Hol") {
+              y = Val(true);
             } else {
               y = Val(false);
             }
@@ -632,12 +623,10 @@ const {marked_code, random_excuse} = require("./fm-error.js");
 // copy of the term with holes filled and adjustments made).
 // typecheck : Term -> Term -> Opts -> [Term, Term]
 const typecheck = (term, expect, opts = {}) => {
-  var prog_memo    = {};
-  var type_memo    = {};
-  var hole_msg     = {};
-  var holes        = {};
-  var hole_depth   = {};
-  var filled_holes = false;
+  //var prog_memo  = {};
+  var type_memo  = {};
+  var hole_msg   = {};
+  var hole_depth = {};
 
   const pad_right = (len, chr, str) => {
     while (str.length < len) {
@@ -687,7 +676,7 @@ const typecheck = (term, expect, opts = {}) => {
     for (var c = ctx; c !== null; c = c.rest) {
       var name = c.name;
       var type = c.type;
-      var tstr = opts.show(reduce(type, {defs: {}, undup: true, holes}) , ctx_names(c.rest));
+      var tstr = opts.show(reduce(type, {defs: {}, undup: true}) , ctx_names(c.rest));
       txt.push("\x1b[2m- " + pad_right(max_len, " ", c.name) + " : " + tstr + "\x1b[0m");
     }
     return txt.reverse().join("\n");
@@ -713,19 +702,11 @@ const typecheck = (term, expect, opts = {}) => {
   };
 
   const weak_normal = (term) => {
-    return reduce(term, {defs: opts.defs, holes, undup: true, weak: true});
+    return reduce(term, {defs: opts.defs, undup: true, weak: true});
   };
 
   const display_normal = (term) => {
-    return reduce(term, {defs: opts.defs, holes, defs: {}, undup: true, weak: false});
-  };
-
-  const subst_holes = (term) => {
-    return reduce(term, {
-      defs: opts.defs, holes, defs: {}, weak: false,
-      no_app: 1, no_tak: 1, no_dup: 1, no_ref: 1,
-      no_op1: 1, no_op2: 1, no_ite: 1, no_cpy: 1,
-      no_fst: 1, no_snd: 1, no_prf: 1});
+    return reduce(term, {defs: opts.defs, defs: {}, undup: true, weak: false});
   };
 
   // Checks if a Ref is recursive
@@ -773,7 +754,7 @@ const typecheck = (term, expect, opts = {}) => {
     };
 
     const do_match = (a, b) => {
-      if (!equal(a, b, ctx_names(ctx).length, {show: opts.show, defs: opts.defs, holes, hole_depth})) {
+      if (!equal(a, b, ctx_names(ctx).length, {show: opts.show, defs: opts.defs, hole_depth})) {
         do_error("Type mismatch."
           + "\n- Found type... " + format(ctx, a)
           + "\n- Instead of... " + format(ctx, b));
@@ -782,428 +763,422 @@ const typecheck = (term, expect, opts = {}) => {
 
     var expect_nf = expect ? weak_normal(expect) : null;
 
-    var type, prog;
-    try {
-      switch (term[0]) {
-        case "Var":
-          var got = ctx_get(term[1].index, ctx, affine);
-          if (got) {
-            if (affine) {
-              if (got.eras) {
-                do_error("Use of erased variable `" + got.name + "` in proof-relevant position.");
-              }
-              if (got.uses > 0 && !got.many) {
-                do_error("Use of affine variable `" + got.name + "` more than once in proof-relevant position.");
-              }
-              if (got.lvel !== lvel) {
-                do_error("Use of variable `" + got.name + "` would change its level in proof-relevant position.");
-              }
-            }
-            prog = Var(term[1].index);
-            type = got.type;
-          } else {
-            do_error("Unbound variable.");
-          }
-          break;
-        case "Typ":
-          prog = Num(0);
-          type = Typ();
-          break;
-        case "Tid":
-          var [expr_c, expr_t] = typecheck(term[1].expr, Typ(), ctx, false, lvel, [term, ctx]);
-          prog = expr_c;
-          type = Typ();
-          break;
-        case "Utt":
-          if (expect_nf !== null && expect_nf[0] !== "Typ") {
-            do_error("The inferred type of an unrestricted type (example: "
-              + format(ctx, Utt(Ref("A"))) + ") isn't "
-              + format(ctx, Typ())
-              + ".\n- Inferred type is " + format(ctx, expect_nf));
-          }
-          var [expr_c, expr_t] = typecheck(term[1].expr, Typ(), ctx, false, lvel, [term, ctx]);
-          prog = expr_c;
-          type = Typ();
-          break;
-        case "Utv":
-          if (expect_nf !== null && expect_nf[0] !== "Utt") {
-            do_error("The inferred type of an unrestricted term (example: "
-              + format(ctx, Utv(Ref("x")))
-              + ") isn't an unrestricted type (example: "
-              + format(ctx, Utt(Ref("A")))
-              + ").\n- Inferred type is "
-              + format(ctx, expect_nf));
-          }
-          var expr_t = expect_nf && expect_nf[0] === "Utt" ? expect_nf[1].expr : null;
-          var [expr_c, expr_t] = typecheck(term[1].expr, expr_t, ctx, false, lvel, [term, ctx]);
-          prog = expr_c;
-          type = Utt(expr_t);
-          break;
-        case "Ute":
+    var type;
+    //try {
+    switch (term[0]) {
+      case "Var":
+        var got = ctx_get(term[1].index, ctx, affine);
+        if (got) {
           if (affine) {
-            do_error( 
-              "Attempted to use an unrestricted term in a proof-relevant position:\n"
-              + opts.show([ctor, term], ctx));
-          }
-          var [expr_c, expr_t] = typecheck(term[1].expr, null, ctx, false, lvel, [term, ctx]);
-          var expr_t = weak_normal(expr_t);
-          if (expr_t[0] !== "Utt") {
-            do_error("Expected an unrestricted type (example: "
-              + format(ctx, Utt(Ref("A")))
-              + ").\n- Found type... "
-              + format(ctx, expr_t));
-          }
-          prog = expr_c;
-          type = expr_t[1].expr;
-          break;
-        case "All":
-          if (expect_nf && expect_nf[0] !== "Typ") {
-            do_error("The inferred type of a forall (example: "
-              + format(ctx, All("x", Ref("A"), Ref("B"), false))
-              + ") isn't "
-              + format(ctx, Typ())
-              + ".\n- Inferred type is "
-              + format(ctx, expect_nf));
-          }
-          var [bind_c, bind_t] = typecheck(term[1].bind, Typ(), ctx, false, lvel, [term, ctx]);
-          var ex_ctx           = ctx_ext(term[1].name, null, term[1].bind, term[1].eras, false, lvel, ctx);
-          var [body_c, body_t] = typecheck(term[1].body, Typ(), ex_ctx, false, lvel, [term, ctx]);
-          prog = Num(0);
-          type = Typ();
-          break;
-        case "Lam":
-          var bind_v = expect_nf && expect_nf[0] === "All" ? expect_nf[1].bind : term[1].bind;
-          if (bind_v === null && expect_nf === null) {
-            do_error("Can't infer non-annotated lambda.");
-          }
-          if (bind_v === null && expect_nf !== null) {
-            do_error("The inferred type of a lambda (example: "
-              + format(ctx, Lam("x",null,Ref("f"),false))
-              + ") isn't forall (example: "
-              + format(ctx, All("x", Ref("A"), Ref("B"), false))
-              + ").\n- Inferred type is "
-              + format(ctx, expect_nf));
-          }
-          var [bind_c, bind_t] = typecheck(bind_v, Typ(), ctx, false, lvel, ctx);
-          var ex_ctx           = ctx_ext(term[1].name, null, bind_v, term[1].eras, false, lvel, ctx);
-          var [body_c, body_t] = typecheck(term[1].body, expect_nf && expect_nf[0] === "All" ? expect_nf[1].body : null, ex_ctx, affine, lvel, [term, ctx]);
-          var [body_T, body_T] = typecheck(body_t, Typ(), ex_ctx, false, lvel, ctx);
-          prog = term[1].eras ? subst(body_c, Num(0), 0) : Lam(term[1].name, null, body_c, false);
-          type = All(term[1].name, bind_v, body_t, term[1].eras);
-          break;
-        case "App":
-          var [func_c, func_t] = typecheck(term[1].func, null, ctx, affine, lvel, [term, ctx]);
-          var func_t = weak_normal(func_t);
-          if (func_t[0] !== "All") {
-            do_error("Attempted to apply a value that isn't a function.");
-          }
-          var [argm_c, argm_t] = typecheck(term[1].argm, func_t[1].bind, ctx, affine, lvel, [term, ctx]);
-          if (func_t[1].eras !== term[1].eras) {
-            do_error("Mismatched erasure.");
-          }
-          prog = func_t[1].eras ? func_c : App(func_c, argm_c, false);
-          type = subst(func_t[1].body, Ann(func_t[1].bind, term[1].argm, false), 0);
-          break;
-        case "Box":
-          if (expect_nf !== null && expect_nf[0] !== "Typ") {
-            do_error("The inferred type of a box (example: "
-              + format(ctx, Box(Ref("A")))
-              + ") isn't "
-              + format(ctx, Typ())
-              + ".\n- Inferred type is "
-              + format(ctx, expect_nf));
-          }
-          var [expr_c, expr_t] = typecheck(term[1].expr, Typ(), ctx, affine, lvel, [term, ctx]);
-          var expr_t = weak_normal(expr_t);
-          prog = Box(expr_c);
-          type = Typ();
-          break;
-        case "Put":
-          if (expect_nf !== null && expect_nf[0] !== "Box") {
-            do_error("The inferred type of a boxed value (example: "
-              + format(ctx, Put(Ref("x")))
-              + ") isn't a box (example: "
-              + format(ctx, Box(Ref("A")))
-              + ").\n- Inferred type is "
-              + format(ctx, expect_nf));
-          }
-          var expr_t = expect_nf && expect_nf[0] === "Box" ? expect_nf[1].expr : null;
-          var [term_c, term_t] = typecheck(term[1].expr, expr_t, ctx, affine, lvel + 1, [term, ctx]);
-          prog = Put(term_c);
-          type = Box(term_t);
-          break;
-        case "Tak":
-          var [expr_c, expr_t] = typecheck(term[1].expr, null, ctx, affine, lvel - 1, [term, ctx]);
-          var expr_t = weak_normal(expr_t);
-          if (expr_t[0] !== "Box") {
-            do_error("Expected a boxed type (example: "
-              + format(ctx, Box(Ref("A")))
-              + ").\n- Found type... "
-              + format(ctx, expr_t));
-          }
-          prog = Tak(expr_c);
-          type = expr_t[1].expr;
-          break;
-        case "Dup":
-          var [expr_c, expr_t] = typecheck(term[1].expr, null, ctx, affine, lvel, [term, ctx]);
-          var expr_t = weak_normal(expr_t);
-          if (expr_t[0] !== "Box") {
-            do_error("Expected a boxed type (example: "
-              + format(ctx, Box(Ref("A")))
-              + ").\n- Found type... "
-              + format(ctx, expr_t));
-          }
-          var ex_ctx = ctx_ext(term[1].name, Tak(term[1].expr), expr_t[1].expr, false, true, lvel + 1, ctx);
-          var [body_c, body_t] = typecheck(term[1].body, expect_nf && shift(expect_nf, 1, 0), ex_ctx, affine, lvel, [term, ctx]);
-          prog = Dup(term[1].name, expr_c, body_c);
-          type = subst(body_t, Tak(term[1].expr), 0);
-          break;
-        case "Wrd":
-          prog = Num(0);
-          type = Typ();
-          break;
-        case "Num":
-          prog = Num(term[1].numb);
-          type = Wrd();
-          break;
-        case "Op1":
-        case "Op2":
-          if (expect_nf !== null && expect_nf[0] !== "Wrd") {
-            do_error("The inferred type of a numeric operation (example: "
-              + format(ctx, Op2(term[1].func, Ref("x"), Ref("y")))
-              + ") isn't "
-              + format(ctx, Wrd())
-              + ".\n- Inferred type is "
-              + format(ctx, expect_nf));
-          }
-          var [num0_c, num0_t] = typecheck(term[1].num0, Wrd(), ctx, affine, lvel, [term, ctx]);
-          var [num1_c, num1_t] = typecheck(term[1].num1, Wrd(), ctx, affine, lvel, [term, ctx]);
-          prog = term[0] === "Op1" ? Op1(term[1].func, num0_c, num1_c) : Op2(term[1].func, num0_c, num1_c);
-          type = Wrd();
-          break;
-        case "Ite":
-          var [cond_c, cond_t] = typecheck(term[1].cond, null, ctx, affine, lvel, [term, ctx]);
-          var cond_t = weak_normal(cond_t);
-          if (cond_t[0] !== "Wrd") {
-            do_error("Attempted to use if on a non-numeric value.");
-          }
-          var pair_t = expect_nf ? Sig("x", expect_nf, shift(expect_nf, 1, 0), 0) : null;
-          var [pair_c, pair_t] = typecheck(term[1].pair, pair_t, ctx, affine, lvel, [term, ctx]);
-          var pair_t = weak_normal(pair_t);
-          if (pair_t[0] !== "Sig") {
-            do_error("The body of an if must be a pair.");
-          }
-          var typ0_v = pair_t[1].typ0;
-          var typ1_v = subst(pair_t[1].typ1, Typ(), 0);
-          if (!equal(typ0_v, typ1_v, ctx_names(ctx).length, {defs: opts.defs, holes, hole_depth})) {
-            do_error("Both branches of if must have the same type.");
-          }
-          prog = Ite(cond_c, pair_c);
-          type = expect_nf || typ0_v;
-          break;
-        case "Cpy":
-          var [numb_c, numb_t] = typecheck(term[1].numb, null, ctx, affine, lvel, [term, ctx]);
-          var numb_t = weak_normal(numb_t);
-          if (numb_t[0] !== "Wrd") {
-            do_error("Atempted to copy a non-numeric value.");
-          }
-          var ex_ctx = ctx_ext(term[1].name, term[1].numb, Wrd(), false, true, lvel, ctx);
-          var [body_c, body_t] = typecheck(term[1].body, expect_nf && shift(expect_nf, 1, 0), ex_ctx, affine, lvel, [term, ctx]);
-          prog = Cpy(term[1].name, numb_c, body_c);
-          type = subst(body_t, term[1].numb, 0);
-          break;
-        case "Sig":
-          if (expect_nf && expect_nf[0] !== "Typ") {
-            do_error("The inferred type of a sigma (example: "
-              + format(ctx, Sig("x", Ref("A"), Ref("B")))
-              + ") isn't "
-              + format(ctx, Typ())
-              + ".\n- Inferred type is "
-              + format(ctx, expect_nf));
-          }
-          var [typ0_c, typ0_t] = typecheck(term[1].typ0, Typ(), ctx, false, lvel, [term, ctx]);
-          var ex_ctx = ctx_ext(term[1].name, null, term[1].typ0, false, false, lvel, ctx);
-          var [typ1_c, typ1_t] = typecheck(term[1].typ1, Typ(), ex_ctx, false, lvel, [term, ctx]);
-          prog = Num(0);
-          type = Typ();
-          break;
-        case "Par":
-          if (expect_nf && expect_nf[0] !== "Sig") {
-            do_error("Inferred type of a pair (example: "
-              + format(ctx, Par(Ref("a"),Ref("b")))
-              + ") isn't "
-              + format(ctx, Sig("x", Ref("A"), Ref("B")))
-              + ".\n- Inferred type is "
-              + format(ctx, expect_nf));
-          }
-          var [val0_c, val0_t] = typecheck(term[1].val0, expect_nf && expect_nf[1].typ0, ctx, affine, lvel, [term, ctx]);
-          if (expect_nf) {
-            var [val1_c, val1_t] = typecheck(term[1].val1, subst(expect_nf[1].typ1, val0_c, 0), ctx, affine, lvel, [term, ctx]);
-          } else {
-            var [val1_c, val1_t] = typecheck(term[1].val1, null, ctx, affine, lvel, [term, ctx]);
-            var val1_t = shift(val1_t, 1, 0);
-          }
-          var eras = expect_nf ? expect_nf[1].eras : term[1].eras;
-          if (term[1].eras !== eras) {
-            do_error("Mismatched erasure.");
-          }
-          prog = eras === 1 ? val1_c : eras === 2 ? val0_c : Par(val0_c, val1_c, eras);
-          type = expect_nf || Sig("x", val0_t, val1_t, term[1].eras);
-          break;
-        case "Fst":
-          if (term[1].eras === 1) {
-            do_error("Attempted to extract erased first element.");
-          }
-          var [pair_c, pair_t] = typecheck(term[1].pair, null, ctx, affine, lvel, [term, ctx]);
-          var pair_t = weak_normal(pair_t);
-          if (pair_t[0] !== "Sig") {
-            do_error("Attempted to extract the first element of a term that isn't a pair.");
-          }
-          if (term[1].eras !== pair_t[1].eras) {
-            do_error("Mismatched erasure.");
-          }
-          prog = pair_t[1].eras === 1 ? Num(0) : pair_t[1].eras === 2 ? pair_c : Fst(pair_c, pair_t[1].eras);
-          type = pair_t[1].typ0;
-          break;
-        case "Snd":
-          if (term[1].eras === 2) {
-            do_error("Attempted to extract erased second element.");
-          }
-          var [pair_c, pair_t] = typecheck(term[1].pair, null, ctx, affine, lvel, [term, ctx]);
-          var pair_t = weak_normal(pair_t);
-          if (pair_t[0] !== "Sig") {
-            do_error("Attempted to extract the second element of a term that isn't a pair.");
-          }
-          if (term[1].eras !== pair_t[1].eras) {
-            do_error("Mismatched erasure.");
-          }
-          prog = pair_t[1].eras === 1 ? pair_c : pair_t[1].eras === 2 ? Num(0) : Snd(pair_c, pair_t[1].eras);
-          type = subst(pair_t[1].typ1, Fst(term[1].pair, term[1].eras), 0);
-          break;
-        case "Prj":
-          var [pair_c, pair_t] = typecheck(term[1].pair, null, ctx, affine, lvel, [term, ctx]);
-          var pair_t = weak_normal(pair_t);
-          if (pair_t[0] !== "Sig") {
-            do_error("Attempted to project the elements of a term that isn't a pair.");
-          }
-          if (term[1].eras !== pair_t[1].eras) {
-            do_error("Mismatched erasure.");
-          }
-          var ex_ctx = ctx_ext(term[1].nam0, null, pair_t[1].typ0, pair_t[1].eras === 1, false, lvel, ctx);
-          var ex_ctx = ctx_ext(term[1].nam1, null, pair_t[1].typ1, pair_t[1].eras === 2, false, lvel, ex_ctx);
-          try {
-            var [body_c, body_t] = typecheck(term[1].body, shift(expect, 2, 0), ex_ctx, affine, lvel, [term, ctx]);
-          } catch (e) {
-            var [body_c, body_t] = typecheck(term[1].body, null, ex_ctx, affine, lvel, [term, ctx]);
-          }
-          prog = pair_t[1].eras === 1 ? subst_many(body_c, [Num(0), pair_c])
-               : pair_t[1].eras === 2 ? subst_many(body_c, [pair_c, Num(0)])
-               : Prj(term[1].nam0, term[1].nam1, pair_c, body_c, pair_t[1].eras); 
-          type = subst(subst(body_t, Snd(shift(term[1].pair, 1, 0), term[1].eras), 0), Fst(term[1].pair, term[1].eras), 0);
-          break;
-        case "Slf":
-          var ex_ctx = ctx_ext(term[1].name, null, term, false, false, lvel, ctx);
-          var [type_c, type_t] = typecheck(term[1].type, Typ(), ex_ctx, false, lvel, [term, ctx]);
-          prog = Num(0);
-          type = Typ();
-          break;
-        case "New":
-          var ttyp = weak_normal(term[1].type);
-          if (ttyp[0] !== "Slf") {
-            do_error("Attempted to make an instance of a type that isn't self.");
-          }
-          var [ttyp_c, ttyp_t] = typecheck(ttyp, null, ctx, false, lvel, [term, ctx]);
-          var [expr_c, expr_t] = typecheck(term[1].expr, subst(ttyp[1].type, Ann(ttyp, term, true), 0), ctx, affine, lvel, [term, ctx]);
-          prog = expr_c;
-          type = term[1].type;
-          break;
-        case "Use":
-          var [expr_c, expr_t] = typecheck(term[1].expr, null, ctx, affine, lvel, [term, ctx]);
-          var expr_t = weak_normal(expr_t);
-          if (expr_t[0] !== "Slf") {
-            do_error("Attempted to use a value that isn't a self type.");
-          }
-          prog = expr_c;
-          type = subst(expr_t[1].type, term[1].expr, 0);
-          break;
-        case "Ann":
-          if (!term[1].done) {
-            term[1].done = true;
-            try {
-              var [expr_c, expr_t] = typecheck(term[1].expr, term[1].type, ctx, affine, lvel, [term, ctx]);
-              if (term[1].expr[0] === "Ref" && is_recursive((opts.defs||{})[term[1].expr[1].name], term[1].expr[1].name)) {
-                do_error("Recursive occurrence of '" + term[1].name + "'.");
-              }
-              prog = expr_c;
-              type = term[1].type;
-            } catch (e) {
-              term[1].done = false;
-              throw e;
+            if (got.eras) {
+              do_error("Use of erased variable `" + got.name + "` in proof-relevant position.");
             }
-          } else {
-            prog = term[1].expr;
-            type = term[1].type;
+            if (got.uses > 0 && !got.many) {
+              do_error("Use of affine variable `" + got.name + "` more than once in proof-relevant position.");
+            }
+            if (got.lvel !== lvel) {
+              do_error("Use of variable `" + got.name + "` would change its level in proof-relevant position.");
+            }
           }
-          break;
-        case "Log":
-          var msge_v = term[1].msge;
+          //prog = Var(term[1].index);
+          type = got.type;
+        } else {
+          do_error("Unbound variable.");
+        }
+        break;
+      case "Typ":
+        //prog = Num(0);
+        type = Typ();
+        break;
+      case "Tid":
+        var expr_t = typecheck(term[1].expr, Typ(), ctx, false, lvel, [term, ctx]);
+        //prog = Tid(expr_c);
+        type = Typ();
+        break;
+      case "Utt":
+        if (expect_nf !== null && expect_nf[0] !== "Typ") {
+          do_error("The inferred type of an unrestricted type (example: "
+            + format(ctx, Utt(Ref("A"))) + ") isn't "
+            + format(ctx, Typ())
+            + ".\n- Inferred type is " + format(ctx, expect_nf));
+        }
+        var expr_t = typecheck(term[1].expr, Typ(), ctx, false, lvel, [term, ctx]);
+        //prog = Utt(expr_c);
+        type = Typ();
+        break;
+      case "Utv":
+        if (expect_nf !== null && expect_nf[0] !== "Utt") {
+          do_error("The inferred type of an unrestricted term (example: "
+            + format(ctx, Utv(Ref("x")))
+            + ") isn't an unrestricted type (example: "
+            + format(ctx, Utt(Ref("A")))
+            + ").\n- Inferred type is "
+            + format(ctx, expect_nf));
+        }
+        var expr_t = expect_nf && expect_nf[0] === "Utt" ? expect_nf[1].expr : null;
+        var expr_t = typecheck(term[1].expr, expr_t, ctx, false, lvel, [term, ctx]);
+        //prog = Utv(expr_c);
+        type = Utt(expr_t);
+        break;
+      case "Ute":
+        if (affine) {
+          do_error("Attempted to use an unrestricted term in a proof-relevant position");
+        }
+        var expr_t = typecheck(term[1].expr, null, ctx, false, lvel, [term, ctx]);
+        var expr_t = weak_normal(expr_t);
+        if (expr_t[0] !== "Utt") {
+          do_error("Expected an unrestricted type (example: "
+            + format(ctx, Utt(Ref("A")))
+            + ").\n- Found type... "
+            + format(ctx, expr_t));
+        }
+        //prog = Ute(expr_c);
+        type = expr_t[1].expr;
+        break;
+      case "All":
+        if (expect_nf && expect_nf[0] !== "Typ") {
+          do_error("The inferred type of a forall (example: "
+            + format(ctx, All("x", Ref("A"), Ref("B"), false))
+            + ") isn't "
+            + format(ctx, Typ())
+            + ".\n- Inferred type is "
+            + format(ctx, expect_nf));
+        }
+        var bind_t = typecheck(term[1].bind, Typ(), ctx, false, lvel, [term, ctx]);
+        var ex_ctx = ctx_ext(term[1].name, null, term[1].bind, term[1].eras, false, lvel, ctx);
+        var body_t = typecheck(term[1].body, Typ(), ex_ctx, false, lvel, [term, ctx]);
+        //prog = All(term[1].name, bind_c, body_c, term[1].eras);
+        type = Typ();
+        break;
+      case "Lam":
+        var bind_v = expect_nf && expect_nf[0] === "All" ? expect_nf[1].bind : term[1].bind;
+        if (bind_v === null && expect_nf === null) {
+          do_error("Can't infer non-annotated lambda.");
+        }
+        if (bind_v === null && expect_nf !== null) {
+          do_error("The inferred type of a lambda (example: "
+            + format(ctx, Lam("x",null,Ref("f"),false))
+            + ") isn't forall (example: "
+            + format(ctx, All("x", Ref("A"), Ref("B"), false))
+            + ").\n- Inferred type is "
+            + format(ctx, expect_nf));
+        }
+        var bind_t = typecheck(bind_v, Typ(), ctx, false, lvel, ctx);
+        var ex_ctx = ctx_ext(term[1].name, null, bind_v, term[1].eras, false, lvel, ctx);
+        var body_t = typecheck(term[1].body, expect_nf && expect_nf[0] === "All" ? expect_nf[1].body : null, ex_ctx, affine, lvel, [term, ctx]);
+        var body_T = typecheck(body_t, Typ(), ex_ctx, false, lvel, ctx);
+        //prog = Lam(term[1].name, bind_c, body_c, term[1].eras);
+        type = All(term[1].name, bind_v, body_t, term[1].eras);
+        break;
+      case "App":
+        var func_t = typecheck(term[1].func, null, ctx, affine, lvel, [term, ctx]);
+        var func_t = weak_normal(func_t);
+        if (func_t[0] !== "All") {
+          do_error("Attempted to apply a value that isn't a function.");
+        }
+        var argm_t = typecheck(term[1].argm, func_t[1].bind, ctx, affine, lvel, [term, ctx]);
+        if (func_t[1].eras !== term[1].eras) {
+          do_error("Mismatched erasure.");
+        }
+        //prog = App(func_c, argm_c, func_t[1].eras);
+        type = subst(func_t[1].body, Ann(func_t[1].bind, term[1].argm, false), 0);
+        break;
+      case "Box":
+        if (expect_nf !== null && expect_nf[0] !== "Typ") {
+          do_error("The inferred type of a box (example: "
+            + format(ctx, Box(Ref("A")))
+            + ") isn't "
+            + format(ctx, Typ())
+            + ".\n- Inferred type is "
+            + format(ctx, expect_nf));
+        }
+        var expr_t = typecheck(term[1].expr, Typ(), ctx, affine, lvel, [term, ctx]);
+        var expr_t = weak_normal(expr_t);
+        //prog = Box(expr_c);
+        type = Typ();
+        break;
+      case "Put":
+        if (expect_nf !== null && expect_nf[0] !== "Box") {
+          do_error("The inferred type of a boxed value (example: "
+            + format(ctx, Put(Ref("x")))
+            + ") isn't a box (example: "
+            + format(ctx, Box(Ref("A")))
+            + ").\n- Inferred type is "
+            + format(ctx, expect_nf));
+        }
+        var expr_t = expect_nf && expect_nf[0] === "Box" ? expect_nf[1].expr : null;
+        var term_t = typecheck(term[1].expr, expr_t, ctx, affine, lvel + 1, [term, ctx]);
+        //prog = Put(term_c);
+        type = Box(term_t);
+        break;
+      case "Tak":
+        var expr_t = typecheck(term[1].expr, null, ctx, affine, lvel - 1, [term, ctx]);
+        var expr_t = weak_normal(expr_t);
+        if (expr_t[0] !== "Box") {
+          do_error("Expected a boxed type (example: "
+            + format(ctx, Box(Ref("A")))
+            + ").\n- Found type... "
+            + format(ctx, expr_t));
+        }
+        //prog = Tak(expr_c);
+        type = expr_t[1].expr;
+        break;
+      case "Dup":
+        var expr_t = typecheck(term[1].expr, null, ctx, affine, lvel, [term, ctx]);
+        var expr_t = weak_normal(expr_t);
+        if (expr_t[0] !== "Box") {
+          do_error("Expected a boxed type (example: "
+            + format(ctx, Box(Ref("A")))
+            + ").\n- Found type... "
+            + format(ctx, expr_t));
+        }
+        var ex_ctx = ctx_ext(term[1].name, Tak(term[1].expr), expr_t[1].expr, false, true, lvel + 1, ctx);
+        var body_t = typecheck(term[1].body, expect_nf && shift(expect_nf, 1, 0), ex_ctx, affine, lvel, [term, ctx]);
+        //prog = Dup(term[1].name, expr_c, body_c);
+        type = subst(body_t, Tak(term[1].expr), 0);
+        break;
+      case "Wrd":
+        //prog = Wrd();
+        type = Typ();
+        break;
+      case "Num":
+        //prog = Num(term[1].numb);
+        type = Wrd();
+        break;
+      case "Op1":
+      case "Op2":
+        if (expect_nf !== null && expect_nf[0] !== "Wrd") {
+          do_error("The inferred type of a numeric operation (example: "
+            + format(ctx, Op2(term[1].func, Ref("x"), Ref("y")))
+            + ") isn't "
+            + format(ctx, Wrd())
+            + ".\n- Inferred type is "
+            + format(ctx, expect_nf));
+        }
+        var num0_t = typecheck(term[1].num0, Wrd(), ctx, affine, lvel, [term, ctx]);
+        var num1_t = typecheck(term[1].num1, Wrd(), ctx, affine, lvel, [term, ctx]);
+        //prog = term[0] === "Op1" ? Op1(term[1].func, num0_c, num1_c) : Op2(term[1].func, num0_c, num1_c);
+        type = Wrd();
+        break;
+      case "Ite":
+        var cond_t = typecheck(term[1].cond, null, ctx, affine, lvel, [term, ctx]);
+        var cond_t = weak_normal(cond_t);
+        if (cond_t[0] !== "Wrd") {
+          do_error("Attempted to use if on a non-numeric value.");
+        }
+        var pair_t = expect_nf ? Sig("x", expect_nf, shift(expect_nf, 1, 0), 0) : null;
+        var pair_t = typecheck(term[1].pair, pair_t, ctx, affine, lvel, [term, ctx]);
+        var pair_t = weak_normal(pair_t);
+        if (pair_t[0] !== "Sig") {
+          do_error("The body of an if must be a pair.");
+        }
+        var typ0_v = pair_t[1].typ0;
+        var typ1_v = subst(pair_t[1].typ1, Typ(), 0);
+        if (!equal(typ0_v, typ1_v, ctx_names(ctx).length, {defs: opts.defs, hole_depth})) {
+          do_error("Both branches of if must have the same type.");
+        }
+        //prog = Ite(cond_c, pair_c);
+        type = expect_nf || typ0_v;
+        break;
+      case "Cpy":
+        var numb_t = typecheck(term[1].numb, null, ctx, affine, lvel, [term, ctx]);
+        var numb_t = weak_normal(numb_t);
+        if (numb_t[0] !== "Wrd") {
+          do_error("Atempted to copy a non-numeric value.");
+        }
+        var ex_ctx = ctx_ext(term[1].name, term[1].numb, Wrd(), false, true, lvel, ctx);
+        var body_t = typecheck(term[1].body, expect_nf && shift(expect_nf, 1, 0), ex_ctx, affine, lvel, [term, ctx]);
+        //prog = Cpy(term[1].name, numb_c, body_c);
+        type = subst(body_t, term[1].numb, 0);
+        break;
+      case "Sig":
+        if (expect_nf && expect_nf[0] !== "Typ") {
+          do_error("The inferred type of a sigma (example: "
+            + format(ctx, Sig("x", Ref("A"), Ref("B")))
+            + ") isn't "
+            + format(ctx, Typ())
+            + ".\n- Inferred type is "
+            + format(ctx, expect_nf));
+        }
+        var typ0_t = typecheck(term[1].typ0, Typ(), ctx, false, lvel, [term, ctx]);
+        var ex_ctx = ctx_ext(term[1].name, null, term[1].typ0, false, false, lvel, ctx);
+        var typ1_t = typecheck(term[1].typ1, Typ(), ex_ctx, false, lvel, [term, ctx]);
+        //prog = Sig(term[1].name, typ0_c, typ1_c, term[1].eras);
+        type = Typ();
+        break;
+      case "Par":
+        if (expect_nf && expect_nf[0] !== "Sig") {
+          do_error("Inferred type of a pair (example: "
+            + format(ctx, Par(Ref("a"),Ref("b")))
+            + ") isn't "
+            + format(ctx, Sig("x", Ref("A"), Ref("B")))
+            + ".\n- Inferred type is "
+            + format(ctx, expect_nf));
+        }
+        var val0_t = typecheck(term[1].val0, expect_nf && expect_nf[1].typ0, ctx, affine, lvel, [term, ctx]);
+        if (expect_nf) {
+          var val1_t = typecheck(term[1].val1, subst(expect_nf[1].typ1, val0_c, 0), ctx, affine, lvel, [term, ctx]);
+        } else {
+          var val1_t = typecheck(term[1].val1, null, ctx, affine, lvel, [term, ctx]);
+          var val1_t = shift(val1_t, 1, 0);
+        }
+        var eras = expect_nf ? expect_nf[1].eras : term[1].eras;
+        if (term[1].eras !== eras) {
+          do_error("Mismatched erasure.");
+        }
+        //prog = Par(val0_c, val1_c, eras);
+        type = expect_nf || Sig("x", val0_t, val1_t, term[1].eras);
+        break;
+      case "Fst":
+        if (term[1].eras === 1) {
+          do_error("Attempted to extract erased first element.");
+        }
+        var pair_t = typecheck(term[1].pair, null, ctx, affine, lvel, [term, ctx]);
+        var pair_t = weak_normal(pair_t);
+        if (pair_t[0] !== "Sig") {
+          do_error("Attempted to extract the first element of a term that isn't a pair.");
+        }
+        if (term[1].eras !== pair_t[1].eras) {
+          do_error("Mismatched erasure.");
+        }
+        //prog = Fst(pair_c, pair_t[1].eras);
+        type = pair_t[1].typ0;
+        break;
+      case "Snd":
+        if (term[1].eras === 2) {
+          do_error("Attempted to extract erased second element.");
+        }
+        var pair_t = typecheck(term[1].pair, null, ctx, affine, lvel, [term, ctx]);
+        var pair_t = weak_normal(pair_t);
+        if (pair_t[0] !== "Sig") {
+          do_error("Attempted to extract the second element of a term that isn't a pair.");
+        }
+        if (term[1].eras !== pair_t[1].eras) {
+          do_error("Mismatched erasure.");
+        }
+        //prog = Snd(pair_c, pair_t[1].eras);
+        type = subst(pair_t[1].typ1, Fst(term[1].pair, term[1].eras), 0);
+        break;
+      case "Prj":
+        var pair_t = typecheck(term[1].pair, null, ctx, affine, lvel, [term, ctx]);
+        var pair_t = weak_normal(pair_t);
+        if (pair_t[0] !== "Sig") {
+          do_error("Attempted to project the elements of a term that isn't a pair.");
+        }
+        if (term[1].eras !== pair_t[1].eras) {
+          do_error("Mismatched erasure.");
+        }
+        var ex_ctx = ctx_ext(term[1].nam0, null, pair_t[1].typ0, pair_t[1].eras === 1, false, lvel, ctx);
+        var ex_ctx = ctx_ext(term[1].nam1, null, pair_t[1].typ1, pair_t[1].eras === 2, false, lvel, ex_ctx);
+        try {
+          var body_t = typecheck(term[1].body, shift(expect, 2, 0), ex_ctx, affine, lvel, [term, ctx]);
+        } catch (e) {
+          var body_t = typecheck(term[1].body, null, ex_ctx, affine, lvel, [term, ctx]);
+        }
+        //prog = Prj(term[1].nam0, term[1].nam1, pair_c, body_c, pair_t[1].eras); 
+        type = subst(subst(body_t, Snd(shift(term[1].pair, 1, 0), term[1].eras), 0), Fst(term[1].pair, term[1].eras), 0);
+        break;
+      case "Slf":
+        var ex_ctx = ctx_ext(term[1].name, null, term, false, false, lvel, ctx);
+        var type_t = typecheck(term[1].type, Typ(), ex_ctx, false, lvel, [term, ctx]);
+        //prog = Slf(term[1].name, type_c);
+        type = Typ();
+        break;
+      case "New":
+        var ttyp = weak_normal(term[1].type);
+        if (ttyp[0] !== "Slf") {
+          do_error("Attempted to make an instance of a type that isn't self.");
+        }
+        var ttyp_t = typecheck(ttyp, null, ctx, false, lvel, [term, ctx]);
+        var expr_t = typecheck(term[1].expr, subst(ttyp[1].type, Ann(ttyp, term, true), 0), ctx, affine, lvel, [term, ctx]);
+        //prog = New(ttyp_c, expr_c);
+        type = term[1].type;
+        break;
+      case "Use":
+        var expr_t = typecheck(term[1].expr, null, ctx, affine, lvel, [term, ctx]);
+        var expr_t = weak_normal(expr_t);
+        if (expr_t[0] !== "Slf") {
+          do_error("Attempted to use a value that isn't a self type.");
+        }
+        //prog = Use(expr_c);
+        type = subst(expr_t[1].type, term[1].expr, 0);
+        break;
+      case "Ann":
+        if (!term[1].done) {
+          term[1].done = true;
           try {
-            var [msge_c, msge_t] = typecheck(msge_v, null, ctx, false, lvel, [term, ctx]);
-            var msge_t = display_normal(erase(msge_t));
+            //var [ttyp_c, ttyp_t] = typecheck(term[1].ttyp, Typ(), ctx, affine, lvel, [term, ctx]);
+            var expr_t = typecheck(term[1].expr, term[1].type, ctx, affine, lvel, [term, ctx]);
+            if (term[1].expr[0] === "Ref" && is_recursive((opts.defs||{})[term[1].expr[1].name], term[1].expr[1].name)) {
+              do_error("Recursive occurrence of '" + term[1].name + "'.");
+            }
+            //prog = Ann(term[1].type, expr_c);
+            type = term[1].type;
           } catch (e) {
-            console.log(e);
-            var msge_t = Hol("");
+            term[1].done = false;
+            throw e;
           }
-          if (!opts.no_logs) {
-            console.log("[LOG]");
-            console.log("Term: " + opts.show(msge_v, ctx_names(ctx)));
-            console.log("Type: " + opts.show(msge_t, ctx_names(ctx)) + "\n");
-          }
-          var [expr_c, expr_t] = typecheck(term[1].expr, expect, ctx, affine, lvel, inside);
-          prog = expr_c;
-          type = expr_t;
-          break;
-        case "Hol":
-          var mapf_v = term[1].mapf;
-          if (!hole_msg[term[1].name]) {
-            hole_msg[term[1].name] = {ctx, name: term[1].name, expect};
-            hole_depth[term[1].name] = ctx_names(ctx).length;
-            var mapf_v = x => x;
-            term[1].mapf = mapf_v;
-          }
-          if (expect) {
-            prog = Hol(term[1].name, mapf_v);
-            type = expect;
-          } else {
-            throw new Error("Untyped hole.");
-          }
-          break;
-        case "Ref":
-          if (!(opts.defs||{})[term[1].name]) {
-            do_error("Undefined reference: `" + term[1].name + "`.");
-          } else if (!type_memo[term[1].name]) {
-            var [dref_c, dref_t] = typecheck((opts.defs||{})[term[1].name], null, ctx, affine, lvel, [term, ctx]);
-            prog_memo[term[1].name] = dref_c;
-            type_memo[term[1].name] = dref_t;
-          }
-          type = type_memo[term[1].name];
-          prog = prog_memo[term[1].name];
-          break;
-        default:
-          throw "TODO: type checker for " + term[0] + ".";
-      }
-    } catch (e) {
+        } else {
+          //prog = term[1].expr;
+          type = term[1].type;
+        }
+        break;
+      case "Log":
+        var msge_v = term[1].msge;
+        try {
+          var msge_t = typecheck(msge_v, null, ctx, false, lvel, [term, ctx]);
+          var msge_t = display_normal(erase(msge_t));
+        } catch (e) {
+          console.log(e);
+          var msge_t = Hol("");
+        }
+        if (!opts.no_logs) {
+          console.log("[LOG]");
+          console.log("Term: " + opts.show(msge_v, ctx_names(ctx)));
+          console.log("Type: " + opts.show(msge_t, ctx_names(ctx)) + "\n");
+        }
+        var expr_t = typecheck(term[1].expr, expect, ctx, affine, lvel, inside);
+        //prog = Log(msge_c || msge_v, expr_c);
+        type = expr_t;
+        break;
+      case "Hol":
+        if (!hole_msg[term[1].name]) {
+          hole_msg[term[1].name] = {ctx, name: term[1].name, expect};
+          hole_depth[term[1].name] = ctx_names(ctx).length;
+        }
+        if (expect) {
+          //prog = Hol(term[1].name);
+          type = expect;
+        } else {
+          throw new Error("Untyped hole.");
+        }
+        break;
+      case "Ref":
+        if (!(opts.defs||{})[term[1].name]) {
+          do_error("Undefined reference: `" + term[1].name + "`.");
+        } else if (!type_memo[term[1].name]) {
+          var dref_t = typecheck((opts.defs||{})[term[1].name], null, ctx, affine, lvel, [term, ctx]);
+          prog_memo[term[1].name] = dref_c;
+          type_memo[term[1].name] = dref_t;
+        }
+        //prog = prog_memo[term[1].name];
+        type = type_memo[term[1].name];
+        break;
+      default:
+        throw "TODO: type checker for " + term[0] + ".";
+    }
+    //} catch (e) {
       // If there is a "use of" type error, yet this term is a Type or
       // unrestricted, then we allow it to pass. TODO: improve code.
-      if (typeof e === "string" && affine && e.indexOf("\nUse of") !== -1) {
-        var [prog, type] = typecheck(term, expect, ctx, false, lvel, inside);
-        if (!(type[0] === "Typ" || type[0] === "Utt")) {
-          throw e;
-        }
-      } else {
-        throw e;
-      }
-    }
+      //if (typeof e === "string" && affine && e.indexOf("\nUse of") !== -1) {
+        //var [prog, type] = typecheck(term, expect, ctx, false, lvel, inside);
+        //if (!(type[0] === "Typ" || type[0] === "Utt")) {
+          //throw e;
+        //}
+      //} else {
+        //throw e;
+      //}
+    //}
     if (expect) {
       do_match(type, expect);
     }
@@ -1214,8 +1189,7 @@ const typecheck = (term, expect, opts = {}) => {
     // Type-checks the term
     var [prog, type] = typecheck(term, expect);
 
-    // Afterwards, checks if we have unsolved holes
-    var has_unsolved_holes = false;
+    // Afterwards, prints hole msgs
     for (var hole_name in hole_msg) {
       var info = hole_msg[hole_name];
       var msg = "";
@@ -1223,29 +1197,18 @@ const typecheck = (term, expect, opts = {}) => {
       if (info.expect) {
         msg += "- With goal... " + format(info.ctx, info.expect) + "\n";
       }
-      if (!holes[hole_name]) {
-        has_unsolved_holes = true;
-        msg += "- Couldn't solve it.\n";
-      } else {
-        msg += "- Solved as... " + format(info.ctx, holes[hole_name]) + "\n";
-      }
       var cstr = ctx_str(info.ctx);
       msg += "- With context:\n" + (cstr.length > 0 ? cstr + "\n" : "");
-      if (!opts.no_logs && hole_name[0] !== "_") {
+      if (!opts.no_logs) {
         console.log(msg);
       }
     }
 
-    // If we do have unsolved holes, throw
-    if (has_unsolved_holes) {
-      throw "Unsolved holes.";
-    }
-
     // If so, normalize it to an user-friendly form and return
-    prog = subst_holes(prog);
+    //prog = display_normal(prog);
     type = display_normal(type);
 
-    return [prog, type];
+    return [null, type];
 
   // In case there is an error, adjust and throw
   } catch (e) {
