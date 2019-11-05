@@ -34,11 +34,11 @@ const compile = (term, opts, vars = null) => {
         case ".*."  : return num0 * num1;
         case "./."  : return num0 / num1;
         case ".%."  : return num0 % num1;
-        case ".^."  : return num0 ** num1;
+        case ".**." : return num0 ** num1;
         case ".&."  : return num0 & num1;
         case ".|."  : return num0 | num1;
-        case ".#."  : return num0 ^ num1;
-        case ".!."  : return ~ num1;
+        case ".^."  : return num0 ^ num1;
+        case ".~."  : return ~ num1;
         case ".>>." : return num0 >>> num1;
         case ".<<." : return num0 << num1;
         case ".>."  : return num0 > num1;

@@ -234,22 +234,22 @@ const reduce = (term, opts = {}) => {
     var num0 = reduce(num0, names);
     if (!opts.no_op1 && num0[0] === "Val") {
       switch (func) {
-        case ".+."  : return Val(num0[1].numb + num1[1].numb);
-        case ".-."  : return Val(num0[1].numb - num1[1].numb);
-        case ".*."  : return Val(num0[1].numb * num1[1].numb);
-        case "./."  : return Val(num0[1].numb / num1[1].numb);
-        case ".%."  : return Val(num0[1].numb % num1[1].numb);
-        case ".^."  : return Val(num0[1].numb ** num1[1].numb);
-        case ".&."  : return Val((num0[1].numb & num1[1].numb) >>> 0);
-        case ".|."  : return Val((num0[1].numb | num1[1].numb) >>> 0);
-        case ".#."  : return Val((num0[1].numb ^ num1[1].numb) >>> 0);
-        case ".!."  : return Val(~ num1[1].numb);
-        case ".>>." : return Val((num0[1].numb >>> num1[1].numb));
-        case ".<<." : return Val((num0[1].numb << num1[1].numb));
-        case ".>."  : return Val(num0[1].numb > num1[1].numb ? 1 : 0);
-        case ".<."  : return Val(num0[1].numb < num1[1].numb ? 1 : 0);
-        case ".==." : return Val(num0[1].numb === num1[1].numb ? 1 : 0);
-        default     : throw "[NORMALIZATION-ERROR]\nUnknown primitive: " + func + ".";
+        case ".+."   : return Val(num0[1].numb + num1[1].numb);
+        case ".-."   : return Val(num0[1].numb - num1[1].numb);
+        case ".*."   : return Val(num0[1].numb * num1[1].numb);
+        case "./."   : return Val(num0[1].numb / num1[1].numb);
+        case ".%."   : return Val(num0[1].numb % num1[1].numb);
+        case ".**."  : return Val(num0[1].numb ** num1[1].numb);
+        case ".&."   : return Val((num0[1].numb & num1[1].numb) >>> 0);
+        case ".|."   : return Val((num0[1].numb | num1[1].numb) >>> 0);
+        case ".^."   : return Val((num0[1].numb ^ num1[1].numb) >>> 0);
+        case ".~."   : return Val(~ num1[1].numb);
+        case ".>>>." : return Val((num0[1].numb >>> num1[1].numb));
+        case ".<<."  : return Val((num0[1].numb << num1[1].numb));
+        case ".>."   : return Val(num0[1].numb > num1[1].numb ? 1 : 0);
+        case ".<."   : return Val(num0[1].numb < num1[1].numb ? 1 : 0);
+        case ".==."  : return Val(num0[1].numb === num1[1].numb ? 1 : 0);
+        default      : throw "[NORMALIZATION-ERROR]\nUnknown primitive: " + func + ".";
       }
     } else {
       return Op1(func, num0, num1);
