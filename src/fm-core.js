@@ -823,7 +823,9 @@ const typecheck = (term, expect, opts = {}) => {
         break;
       case "Ute":
         if (affine) {
-          do_error("Attempted to use an unrestricted term in a proof-relevant position");
+          do_error("Attempted to unrestrict a term (ex: "
+            + format(ctx, Ute(Ref("+x")))
+            + ") in a proof-relevant position.");
         }
         var expr_t = typecheck(term[1].expr, null, ctx, false, lvel, [term, ctx]);
         var expr_t = weak_normal(expr_t);

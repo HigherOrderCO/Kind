@@ -435,7 +435,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     , ".*."   : 1
     , "./."   : 1
     , ".%."   : 1
-    , ".^."   : 1
+    , ".**."  : 1
     , ".&."   : 1
     , ".|."   : 1
     , ".^."   : 1
