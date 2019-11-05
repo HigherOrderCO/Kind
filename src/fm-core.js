@@ -1095,7 +1095,7 @@ const typecheck = (term, expect, opts = {}) => {
             //var [ttyp_c, ttyp_t] = typecheck(term[1].ttyp, Typ(), ctx, affine, lvel, [term, ctx]);
             var expr_t = typecheck(term[1].expr, term[1].type, ctx, affine, lvel, [term, ctx]);
             if (term[1].expr[0] === "Ref" && is_recursive((opts.defs||{})[term[1].expr[1].name], term[1].expr[1].name)) {
-              do_error("Recursive occurrence of '" + term[1].name + "'.");
+              do_error("Recursive occurrence of '" + term[1].expr[1].name + "'.");
             }
             type = term[1].type;
           } catch (e) {
