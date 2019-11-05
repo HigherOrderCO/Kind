@@ -8,7 +8,7 @@
 
 const {
   Var, Typ, Tid, Utt, Utv, Ute, All, Lam,
-  App, Box, Put, Tak, Dup, Wrd, Num, Op1,
+  App, Box, Put, Tak, Dup, Num, Val, Op1,
   Op2, Ite, Cpy, Sig, Par, Fst, Snd, Prj,
   Slf, New, Use, Ann, Log, Hol, Ref,
   reduce: core_reduce,
@@ -30,7 +30,6 @@ const to_net = require("./fm-to-net.js");
 const to_js = require("./fm-to-js.js");
 const net = require("./fm-net.js");
 const {load_file} = require("./forall.js");
-const {put_float_on_word, get_float_on_word} = require("./fm-word.js");
 const {marked_code, random_excuse} = require("./fm-error.js");
 
 // :::::::::::::::::::::
@@ -156,9 +155,9 @@ const show = ([ctor, args], nams = [], opts = {}) => {
         var body = show(args.body, nams.concat([name]), opts);
         return "dup " + name + " = " + expr + "; " + body;
       }
-    case "Wrd":
-      return "Word";
     case "Num":
+      return "Num";
+    case "Val":
       return args.numb.toString();
     case "Op1":
     case "Op2":
@@ -647,12 +646,9 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
       // Inductive
       if (ind_num) {
         var term = build_ind(name);
-      // Float
-      } else if (name.indexOf(".") !== -1) {
-        var term = Num(put_float_on_word(numb), loc(name.length));
-      // Uint
+      // Number
       } else {
-        var term = Num(numb >>> 0, loc(name.length));
+        var term = Val(numb, loc(name.length));
       }
       if (tokens) tokens[tokens.length - 1][0] = "num";
     } else {
@@ -668,7 +664,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
       }
       if (i === -1) {
         if (is_native_op[name]) {
-          term = Lam("x", Wrd(), Lam("y", Wrd(), Op2(name, Var(1), Var(0)), false), false);
+          term = Lam("x", Num(), Lam("y", Num(), Op2(name, Var(1), Var(0)), false), false);
           if (tokens) tokens[tokens.length - 1][0] = "nop";
         } else {
           for (var mini in enlarge) {
@@ -852,10 +848,10 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     }
   }
 
-  // Parses the type of words, `Word`
+  // Parses the type of numbers, `Number`
   function parse_wrd(nams) {
-    if (match("Word")) {
-      return Wrd(loc(4));
+    if (match("Num")) {
+      return Num(loc(4));
     }
   }
 
@@ -875,9 +871,9 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
         bytes.push(0);
       }
       var nums = new Uint32Array(new Uint8Array(bytes).buffer);
-      var term = App(base_ref("nil"), Wrd(), true);
+      var term = App(base_ref("nil"), Num(), true);
       for (var i = nums.length - 1; i >= 0; --i) {
-        var term = App(App(App(base_ref("cons"), Wrd(), true), Num(nums[i]), false), term, false);
+        var term = App(App(App(base_ref("cons"), Num(), true), Val(nums[i]), false), term, false);
       }
       return Ann(base_ref("String"), term, false, loc(idx - init));
     }
@@ -920,7 +916,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     }
   }
 
-  // Parses a Word copy, `cpy x = t; u`
+  // Parses a Number copy, `cpy x = t; u`
   function parse_cpy(nams) {
     var init = idx;
     if (match("cpy ")) {
@@ -1183,33 +1179,13 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     }
   }
 
-  // Parses a Word bitwise-not, `.!(t)`
+  // Parses a Number bitwise-not, `.!.(t)`
   function parse_op2_not(nams) {
     var init = idx;
     if (match(".!.(")) {
       var argm = parse_term(nams);
       var skip = parse_exact(")");
-      return Op2(".!", Num(0), argm, loc(idx - init));
-    }
-  }
-
-  // Parses a Word to uint-to-float conversion, `.f.(t)`
-  function parse_op2_float(nams) {
-    var init = idx;
-    if (match(".f.(")) {
-      var argm = parse_term(nams);
-      var skip = parse_exact(")");
-      return Op2(".f.", Num(0), argm, loc(idx - init));
-    }
-  }
-
-  // Parses a Word float-to-uint conversion, `.u.(t)`
-  function parse_op2_uint(nams) {
-    var init = idx;
-    if (match(".u.(")) {
-      var argm = parse_term(nams);
-      var skip = parse_exact(")");
-      return Op2(".u.", Num(0), argm, loc(idx - init));
+      return Op2(".!.", Val(0), argm, loc(idx - init));
     }
   }
 
@@ -1276,10 +1252,9 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
   }
 
   // Parses operators, including:
-  // - Word operators: `t + u`, `t * u`, etc.
+  // - Numeric operators: `t .+. u`, `t .*. u`, etc.
   // - Arrow notation: `A -> B`
-  // - Equality: `t == u`
-  // - User-defined operators: `t .foo u`
+  // - User-defined operators: `t .foo. u`
   function parse_ops(parsed, nams) {
     var init = idx;
     var matched_op_init = null;
@@ -1342,8 +1317,6 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     else if (parsed = parse_log(nams));
     else if (parsed = parse_case(nams));
     else if (parsed = parse_op2_not(nams));
-    else if (parsed = parse_op2_float(nams));
-    else if (parsed = parse_op2_uint(nams));
     else if (parsed = parse_var(nams));
     else     parsed = parse_atom(nams, false);
 
@@ -1654,9 +1627,9 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
           } else if (!arg_eras) {
             keeps.push(count);
           }
-          if (arg_type[0] === "Wrd") {
+          if (arg_type[0] === "Num") {
             wordn.push(arg_name);
-            wordt.push(Wrd());
+            wordt.push(Num());
             wordi.push(count);
           };
           if (match("}")) break; else parse_exact(",");
@@ -2029,7 +2002,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
           if (term[0] === "Tak" && !erased) {
             term = Tak(go(term[1].expr));
             for (var i = 0; i < scope.length; ++i) {
-              term = subst(term, Num(0), 0);
+              term = subst(term, Val(0), 0);
             }
             for (var i = 0; i < unbox.length; ++i) {
               if (equal(term[1].expr, unbox[i][1], 0, {show})) {
@@ -2158,11 +2131,11 @@ const replace_refs = ([ctor, term, hash, loc], renamer, depth = 0) => {
       var expr = replace_refs(term.expr, renamer, depth);
       var body = replace_refs(term.body, renamer, depth + 1);
       return Dup(name, expr, body, loc);
-    case "Wrd":
-      return Wrd(loc);
     case "Num":
+      return Num(loc);
+    case "Val":
       var numb = term.numb;
-      return Num(numb, loc);
+      return Val(numb, loc);
     case "Op1":
     case "Op2":
       var func = term.func;
@@ -2292,11 +2265,11 @@ const rewrite = ([ctor, term, hash, loc], rewriter, scope = [], erased = false, 
         var expr = rewrite(term.expr, rewriter, scope, erased, only_once);
         var body = rewrite(term.body, rewriter, scope.concat([name]), erased, only_once);
         return Dup(name, expr, body, loc);
-      case "Wrd":
-        return Wrd(loc);
       case "Num":
+        return Num(loc);
+      case "Val":
         var numb = term.numb;
-        return Num(numb, loc);
+        return Val(numb, loc);
       case "Op1":
       case "Op2":
         var func = term.func;
@@ -2552,33 +2525,27 @@ const run = (mode, term, opts = {}) => {
     term = defs[term] || Ref(term);
   }
 
-  try {
-    var [prog, type] = typecheck(term, null, opts);
-    var error = null;
-  } catch (e) {
-    var [prog, type] = [null, null];
-    var error = e;
-  }
-
-  // If user is requesting erased and term is well-typed, 
-  // then replace term by prog, since it has filled holes
-  var term = opts.erased ? prog || term : term;
-
   switch (mode) {
 
     case "REDUCE_DEBUG":
+      term = eras(term);
       try {
+        opts.unbox = true;
+        opts.undup = true;
         term = reduce(term, opts);
       } catch (e) {
         term = reduce(term, {...opts, weak: true});
       }
       break;
 
+    case "REDUCE_DEBUG":
     case "REDUCE_NATIVE":
+      term = eras(term);
       term = to_js.decompile(to_js.compile(term, defs));
       break;
 
     case "REDUCE_OPTIMAL":
+      term = eras(term);
       var net = to_net.compile(term, defs);
       if (opts.stats && opts.stats.input_net === null) {
         opts.stats.input_net = JSON.parse(JSON.stringify(net));
@@ -2595,11 +2562,7 @@ const run = (mode, term, opts = {}) => {
       break;
 
     case "TYPECHECK":
-      if (error) {
-        throw error;
-      } else {
-        term = type;
-      }
+      term = typecheck(term, null, opts);
       break;
   }
 
@@ -2608,7 +2571,7 @@ const run = (mode, term, opts = {}) => {
 
 module.exports = {
   Var, Typ, Tid, Utt, Utv, Ute, All, Lam,
-  App, Box, Put, Tak, Dup, Wrd, Num, Op1,
+  App, Box, Put, Tak, Dup, Num, Val, Op1,
   Op2, Ite, Cpy, Sig, Par, Fst, Snd, Prj,
   Slf, New, Use, Ann, Log, Hol, Ref,
   derive_adt_ctor,

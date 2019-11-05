@@ -1,16 +1,5 @@
 // ~~ Formality Interaction Net System ~~
 
-// Float conversions
-const {put_float_on_word, get_float_on_word} = require("./fm-word.js");
-
-// Base types
-const Pointer = (addr, port) => (addr << 2) + (port & 3);
-const addr_of = (ptr) => ptr >>> 2;
-const slot_of = (ptr) => ptr & 3;
-const Numeric = (numb) => numb + 0x100000000;
-const numb_of = (numb) => numb - 0x100000000;
-const type_of = (ptrn) => ptrn >= 0x100000000 ? NUM : PTR;
-
 // PtrNum types
 const PTR = 0;
 const NUM = 1;
@@ -20,6 +9,16 @@ const NOD = 0;
 const OP1 = 1;
 const OP2 = 2;
 const ITE = 3;
+
+// Base types
+const Pointer = (addr, port) => ({typ: PTR, val: (addr << 2) + (port & 3)});
+const addr_of = (ptrn) => ptrn.val >>> 2;
+const slot_of = (ptrn) => ptrn.val & 3;
+const Numeric = (numb) => ({typ: NUM, val: numb});
+const numb_of = (ptrn) => ptrn.val;
+const type_of = (ptrn) => ptrn.typ;
+const ptrn_eq = (a, b) => a.typ === b.typ && a.val === b.val;
+const ptrn_st = a => a.typ + ":" + a.val;
 
 class Net {
   // A net stores nodes (this.nodes), reclaimable memory addrs (this.freed) and active pairs (this.redex)
@@ -76,13 +75,14 @@ class Net {
       this.nodes[addr * 4 + slot] = numb_of(ptrn);
       this.nodes[addr * 4 + 3] = this.nodes[addr * 4 + 3] | (1 << slot);
     } else {
-      this.nodes[addr * 4 + slot] = ptrn;
+      this.nodes[addr * 4 + slot] = (addr_of(ptrn) << 2) + (slot_of(ptrn) & 3);
       this.nodes[addr * 4 + 3] = this.nodes[addr * 4 + 3] & ~(1 << slot);
     }
   }
 
   get_port(addr, slot) {
-    return this.nodes[addr * 4 + slot] + (this.is_numeric(addr, slot) ? 0x100000000 : 0);
+    var val = this.nodes[addr * 4 + slot];
+    return !this.is_numeric(addr, slot) ? Pointer(val >>> 2, val & 3) : Numeric(val);
   }
 
   type_of(addr) {
@@ -125,7 +125,7 @@ class Net {
   unlink_port(a_ptrn) {
     if (type_of(a_ptrn) === PTR) {
       var b_ptrn = this.enter_port(a_ptrn);
-      if (type_of(b_ptrn) === PTR && this.enter_port(b_ptrn) === a_ptrn) {
+      if (type_of(b_ptrn) === PTR && ptrn_eq(this.enter_port(b_ptrn), a_ptrn)) {
         this.set_port(addr_of(a_ptrn), slot_of(a_ptrn), a_ptrn);
         this.set_port(addr_of(b_ptrn), slot_of(b_ptrn), b_ptrn);
       }
@@ -146,29 +146,21 @@ class Net {
         var fst = numb_of(b_ptrn);
         var snd = numb_of(this.enter_port(Pointer(a_addr, 1)));
         switch (a_kind) {
-          case  0: var res = Numeric((fst + snd) >>> 0); break;
-          case  1: var res = Numeric((fst - snd) >>> 0); break;
-          case  2: var res = Numeric((fst * snd) >>> 0); break;
-          case  3: var res = Numeric((fst / snd) >>> 0); break;
-          case  4: var res = Numeric((fst % snd) >>> 0); break;
-          case  5: var res = Numeric((fst ** snd) >>> 0); break;
-          case  6: var res = Numeric((fst & snd) >>> 0); break;
-          case  7: var res = Numeric((fst | snd) >>> 0); break;
-          case  8: var res = Numeric((fst ^ snd) >>> 0); break;
-          case  9: var res = Numeric((~snd) >>> 0); break;
-          case 10: var res = Numeric((fst >>> snd) >>> 0); break;
-          case 11: var res = Numeric((fst << snd) >>> 0); break;
-          case 12: var res = Numeric((fst > snd ? 1 : 0) >>> 0); break;
-          case 13: var res = Numeric((fst < snd ? 1 : 0) >>> 0); break;
-          case 14: var res = Numeric((fst == snd ? 1 : 0) >>> 0); break;
-          case 15: var res = Numeric(put_float_on_word(get_float_on_word(fst) + get_float_on_word(snd))); break;
-          case 16: var res = Numeric(put_float_on_word(get_float_on_word(fst) - get_float_on_word(snd))); break;
-          case 17: var res = Numeric(put_float_on_word(get_float_on_word(fst) * get_float_on_word(snd))); break;
-          case 18: var res = Numeric(put_float_on_word(get_float_on_word(fst) / get_float_on_word(snd))); break;
-          case 19: var res = Numeric(put_float_on_word(get_float_on_word(fst) % get_float_on_word(snd))); break;
-          case 20: var res = Numeric(put_float_on_word(get_float_on_word(fst) ** get_float_on_word(snd))); break;
-          case 21: var res = Numeric(put_float_on_word(snd)); break;
-          case 22: var res = Numeric(get_float_on_word(snd) >>> 0); break;
+          case  0: var res = Numeric(fst + snd); break;
+          case  1: var res = Numeric(fst - snd); break;
+          case  2: var res = Numeric(fst * snd); break;
+          case  3: var res = Numeric(fst / snd); break;
+          case  4: var res = Numeric(fst % snd); break;
+          case  5: var res = Numeric(fst ** snd); break;
+          case  6: var res = Numeric(fst & snd); break;
+          case  7: var res = Numeric(fst | snd); break;
+          case  8: var res = Numeric(fst ^ snd); break;
+          case  9: var res = Numeric(~snd); break;
+          case 10: var res = Numeric(fst >>> snd); break;
+          case 11: var res = Numeric(fst << snd); break;
+          case 12: var res = Numeric(fst > snd ? 1 : 0); break;
+          case 13: var res = Numeric(fst < snd ? 1 : 0); break;
+          case 14: var res = Numeric(fst === snd ? 1 : 0); break;
           default: throw "[ERROR]\nInvalid interaction.";
         }
         this.link_ports(dst, res);
@@ -332,7 +324,11 @@ class Net {
         }
       } else {
         if (slot_of(prev) === 0 && (type_of(next) === NUM || slot_of(next) === 0)) {
-          this.rewrite(addr_of(prev));
+          try {
+            this.rewrite(addr_of(prev));
+          } catch (e) {
+            return;
+          }
           stats.rewrites += 1;
           stats.max_len = Math.max(stats.max_len, this.nodes.length / 4);
           do { prev = back.pop(); } while (type_of(prev) !== PTR);
@@ -428,7 +424,7 @@ class Net {
         text += pointer(this.get_port(i, 0)) + " ";
         text += pointer(this.get_port(i, 1)) + " ";
         text += pointer(this.get_port(i, 2)) + "]";
-        text += "..." + this.is_numeric(i,0) + " " + this.is_numeric(i,1) + " " + this.is_numeric(i,2);
+        text += " ... " + this.is_numeric(i,0) + " " + this.is_numeric(i,1) + " " + this.is_numeric(i,2);
         text += "\n";
       }
     }
@@ -436,4 +432,4 @@ class Net {
   }
 }
 
-module.exports = {Pointer, addr_of, slot_of, Numeric, numb_of, type_of, Net, NUM, PTR, NOD, OP1, OP2, ITE};
+module.exports = {Pointer, addr_of, slot_of, Numeric, numb_of, type_of, ptrn_eq, ptrn_st, Net, NUM, PTR, NOD, OP1, OP2, ITE};

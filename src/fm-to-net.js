@@ -1,7 +1,7 @@
 // ~~ Compiles Formality Core to Formality Net ~~
 
-const {Var, App, Lam, Num, Op1, Op2, Ite, Par, Fst, Snd, Hol, erase} = require("./fm-core.js");
-const {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, NOD, OP1, OP2, NUM, ITE, PTR, FOR} = require("./fm-net.js");
+const {Var, App, Lam, Val, Op1, Op2, Ite, Par, Fst, Snd, Hol, erase} = require("./fm-core.js");
+const {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, ptrn_eq, ptrn_st, NOD, OP1, OP2, NUM, ITE, PTR, FOR} = require("./fm-net.js");
 
 const op_kind = {
    0 : ".+."  , ".+."  : 0 ,
@@ -19,14 +19,6 @@ const op_kind = {
   12 : ".>."  , ".>."  : 12 ,
   13 : ".<."  , ".<."  : 13 ,
   14 : ".==." , ".==." : 14 ,
-  15 : ".++." , ".++." : 15 ,
-  16 : ".--." , ".--." : 16 ,
-  17 : ".**." , ".**." : 17 ,
-  18 : ".//." , ".//." : 18 ,
-  19 : ".%%." , ".%%." : 19 ,
-  20 : ".^^." , ".^^." : 20 ,
-  21 : ".f."  , ".f."  : 21 ,
-  22 : ".u."  , ".u."  : 22 ,
 };
 
 const compile = (term, defs = {}) => {
@@ -35,11 +27,11 @@ const compile = (term, defs = {}) => {
       if (type_of(ptrn) === NUM) {
         return ptrn;
       } else {
-        if (net.enter_port(ptrn) === ptrn) {
+        if (ptrn_eq(net.enter_port(ptrn), ptrn)) {
           return ptrn;
         } else {
           var dups_ptrn = net.enter_port(ptrn);
-          var dup_addr = net.alloc_node(NOD, level_of[ptrn] + 1);
+          var dup_addr = net.alloc_node(NOD, level_of[ptrn_st(ptrn)] + 1);
           net.link_ports(Pointer(dup_addr, 0), ptrn);
           net.link_ports(Pointer(dup_addr, 1), dups_ptrn);
           return Pointer(dup_addr, 2);
@@ -49,7 +41,7 @@ const compile = (term, defs = {}) => {
     switch (term[0]) {
       case "Dup":
         var expr_ptr = build_net(term[1].expr, net, var_ptrs, level);
-        level_of[expr_ptr] = level;
+        level_of[ptrn_st(expr_ptr)] = level;
         var_ptrs.push(expr_ptr);
         var body_ptr = build_net(term[1].body, net, var_ptrs, level);
         var_ptrs.pop();
@@ -60,7 +52,7 @@ const compile = (term, defs = {}) => {
       case "Lam":
         var lam_addr = net.alloc_node(NOD, 0);
         net.link_ports(Pointer(lam_addr, 1), Pointer(lam_addr, 1));
-        level_of[Pointer(lam_addr, 1)] = level;
+        level_of[ptrn_st(Pointer(lam_addr, 1))] = level;
         var_ptrs.push(Pointer(lam_addr, 1));
         var body_ptr = build_net(term[1].body, net, var_ptrs, level);
         var_ptrs.pop();
@@ -73,11 +65,11 @@ const compile = (term, defs = {}) => {
         var argm_ptr = build_net(term[1].argm, net, var_ptrs, level);
         net.link_ports(Pointer(app_addr, 1), argm_ptr)
         return Pointer(app_addr, 2);
-      case "Num":
-        return Numeric(term[1].numb >>> 0);
+      case "Val":
+        return Numeric(term[1].numb);
       case "Op1":
         var op1_addr = net.alloc_node(OP1, op_kind[term[1].func]);
-        net.link_ports(Numeric(term[1].num1()[1].numb), Pointer(op1_addr, 1));
+        net.link_ports(Numeric(term[1].num1[1].numb), Pointer(op1_addr, 1));
         var num0_ptr = build_net(term[1].num0, net, var_ptrs, level);
         net.link_ports(num0_ptr, Pointer(op1_addr, 0));
         return Pointer(op1_addr, 2);
@@ -109,8 +101,8 @@ const compile = (term, defs = {}) => {
         return Pointer(snd_addr, 2);
       case "Prj":
         var prj_addr = net.alloc_node(NOD, 0xFFFF);
-        level_of[Pointer(prj_addr, 1)] = level;
-        level_of[Pointer(prj_addr, 2)] = level;
+        level_of[ptrn_st(Pointer(prj_addr, 1))] = level;
+        level_of[ptrn_st(Pointer(prj_addr, 2))] = level;
         var pair_ptr = build_net(term[1].pair, net, var_ptrs, level);
         var_ptrs.push(Pointer(prj_addr, 1));
         var_ptrs.push(Pointer(prj_addr, 2));
@@ -128,7 +120,7 @@ const compile = (term, defs = {}) => {
         return Pointer(ite_addr, 2);
       case "Cpy":
         var numb_ptr = build_net(term[1].numb, net, var_ptrs, level);
-        level_of[numb_ptr] = 0xFFFE;
+        level_of[ptrn_st(numb_ptr)] = 0xFFFE;
         var_ptrs.push(numb_ptr);
         var body_ptr = build_net(term[1].body, net, var_ptrs, level);
         var_ptrs.pop();
@@ -138,7 +130,7 @@ const compile = (term, defs = {}) => {
       case "Var":
         return get_var(var_ptrs[var_ptrs.length - term[1].index - 1]);
       case "Ref":
-        return build_net(defs[term[1].name] ? erase(defs[term[1].name]) : Num(0), net, var_ptrs, level);
+        return build_net(defs[term[1].name] ? erase(defs[term[1].name]) : Val(0), net, var_ptrs, level);
       case "Hol":
         throw "[ERROR]\nCan't compile a hole.";
       case "Utv":
@@ -161,8 +153,8 @@ const compile = (term, defs = {}) => {
       var b_addr = addr_of(b_ptrn);
       var a_p0 = Pointer(a_addr, 0);
       var b_p0 = Pointer(b_addr, 0);
-      var a_ok = net.enter_port(a_p0) === b_p0;
-      var b_ok = net.enter_port(b_p0) === a_p0;
+      var a_ok = ptrn_eq(net.enter_port(a_p0), b_p0);
+      var b_ok = ptrn_eq(net.enter_port(b_p0), a_p0);
       return a_ok && b_ok;
     } else {
       return true;
@@ -174,7 +166,7 @@ const compile = (term, defs = {}) => {
 const decompile = (net) => {
   const build_term = (net, ptrn, var_ptrs, dup_exit) => {
     if (type_of(ptrn) === NUM) {
-      return Num(numb_of(ptrn));
+      return Val(numb_of(ptrn));
     } else {
       var addr = addr_of(ptrn);
       var type = net.type_of(addr);
@@ -189,7 +181,7 @@ const decompile = (net) => {
               return Lam("x" + var_ptrs.length, null, body, false);
             case 1:
               for (var index = 0; index < var_ptrs.length; ++index) {
-                if (var_ptrs[var_ptrs.length - index - 1] === ptrn) {
+                if (ptrn_eq(var_ptrs[var_ptrs.length - index - 1], ptrn)) {
                   return Var(index);
                 }
               }
@@ -227,7 +219,7 @@ const decompile = (net) => {
         }
       } else if (type === OP1) {
         var num0 = build_term(net, net.enter_port(Pointer(addr, 0)), var_ptrs, dup_exit);
-        var num1 = Num(numb_of(net.enter_port(Pointer(addr, 1))));
+        var num1 = Val(numb_of(net.enter_port(Pointer(addr, 1))));
         return Op1(op_kind[kind], num0, num1);
       } else if (type === OP2) {
         var num0 = build_term(net, net.enter_port(Pointer(addr, 1)), var_ptrs, dup_exit);

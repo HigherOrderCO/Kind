@@ -21,7 +21,7 @@ const compile = (term, opts, vars = null) => {
       var expr = compile(term.expr, opts, vars);
       var body = x => compile(term.body, opts, [x,vars]);
       return body(expr);
-    case "Num":
+    case "Val":
       return term.numb;
     case "Op1":
     case "Op2":
@@ -29,29 +29,20 @@ const compile = (term, opts, vars = null) => {
       var num0 = compile(term.num0, opts, vars);
       var num1 = compile(term.num1, opts, vars);
       switch (func) {
-        case ".+."  : return (num0 + num1) >>> 0;
-        case ".-."  : return (num0 - num1) >>> 0;
-        case ".*."  : return (num0 * num1) >>> 0;
-        case "./."  : return (num0 / num1) >>> 0;
-        case ".%."  : return (num0 % num1) >>> 0;
-        case ".^."  : return (num0 ** num1) >>> 0;
-        case ".&."  : return (num0 & num1) >>> 0;
-        case ".|."  : return (num0 | num1) >>> 0;
-        case ".#."  : return (num0 ^ num1) >>> 0;
-        case ".!."  : return (~ num1) >>> 0;
-        case ".>>." : return (num0 >>> num1) >>> 0;
-        case ".<<." : return (num0 << num1) >>> 0;
-        case ".>."  : return (num0 > num1) >>> 0;
-        case ".<."  : return (num0 < num1) >>> 0;
-        case ".==." : return (num0 === num1) >>> 0;
-        case ".++." : return fm.put_float_on_word(fm.get_float_on_word(num0) + fm.get_float_on_word(num1));
-        case ".--." : return fm.put_float_on_word(fm.get_float_on_word(num0) - fm.get_float_on_word(num1));
-        case ".**." : return fm.put_float_on_word(fm.get_float_on_word(num0) * fm.get_float_on_word(num1));
-        case ".//." : return fm.put_float_on_word(fm.get_float_on_word(num0) / fm.get_float_on_word(num1));
-        case ".%%." : return fm.put_float_on_word(fm.get_float_on_word(num0) % fm.get_float_on_word(num1));
-        case ".^^." : return fm.put_float_on_word(fm.get_float_on_word(num0) ^ fm.get_float_on_word(num1));
-        case ".f."  : return fm.put_float_on_word(num1);
-        case ".u."  : return fm.get_float_on_word(num1 >>> 0);
+        case ".+."  : return num0 + num1;
+        case ".-."  : return num0 - num1;
+        case ".*."  : return num0 * num1;
+        case "./."  : return num0 / num1;
+        case ".%."  : return num0 % num1;
+        case ".^."  : return num0 ** num1;
+        case ".&."  : return num0 & num1;
+        case ".|."  : return num0 | num1;
+        case ".#."  : return num0 ^ num1;
+        case ".!."  : return ~ num1;
+        case ".>>." : return num0 >>> num1;
+        case ".<<." : return num0 << num1;
+        case ".>."  : return num0 > num1;
+        case ".<."  : return num0 < num1;
         default: throw "TODO: implement operator "
       }
     case "Ite":
@@ -107,7 +98,7 @@ const decompile = (func) => {
       var val1 = go(term[1], depth);
       return fm.Par(val0, val1);
     } else if (typeof term === "number") {
-      return fm.Num(term);
+      return fm.Val(term);
     } else if (typeof term === "function") {
       var body = go(term(APP(VAR)), depth + 1);
       return fm.Lam("x" + depth, null, body, false);
