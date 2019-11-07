@@ -744,7 +744,7 @@ const typecheck = (term, expect, opts = {}) => {
   };
 
   // Checks and returns the type of a term
-  const typecheck = (term, expect, ctx = ctx_new, affine = true, lvel = 0, inside = null) => {
+  const typecheck = (term, expect, ctx = ctx_new, affine = true, lvel = 0) => {
     const do_error = (str)  => {
       var err_msg = "";
       err_msg += "[ERROR]\n" + str;
@@ -767,10 +767,18 @@ const typecheck = (term, expect, opts = {}) => {
       }
     };
 
-    var expect_nf = expect ? weak_normal(expect) : null;
+    if (expect) {
+      var expect_nf = weak_normal(expect);
+      if (expect[0] === "Typ" || expect[0] === "Utt") {
+        affine = false;
+      }
+    } else {
+      var expect_nf = null;
+    }
+
+    var ctx_arg = ctx_cpy(ctx);
 
     var type;
-    //try {
     switch (term[0]) {
       case "Var":
         var got = ctx_get(term[1].index, ctx, affine);
@@ -1094,7 +1102,6 @@ const typecheck = (term, expect, opts = {}) => {
           term[1].done = true;
           found_anns.push(term);
           try {
-            //var [ttyp_c, ttyp_t] = typecheck(term[1].ttyp, Typ(), ctx, affine, lvel, [term, ctx]);
             var expr_t = typecheck(term[1].expr, term[1].type, ctx, affine, lvel, [term, ctx]);
             if (term[1].expr[0] === "Ref" && is_recursive((opts.defs||{})[term[1].expr[1].name], term[1].expr[1].name)) {
               do_error("Recursive occurrence of '" + term[1].expr[1].name + "'.");
@@ -1122,7 +1129,7 @@ const typecheck = (term, expect, opts = {}) => {
           console.log("Term: " + opts.show(msge_v, ctx_names(ctx)));
           console.log("Type: " + opts.show(msge_t, ctx_names(ctx)) + "\n");
         }
-        var expr_t = typecheck(term[1].expr, expect, ctx, affine, lvel, inside);
+        var expr_t = typecheck(term[1].expr, expect, ctx, affine, lvel);
         type = expr_t;
         break;
       case "Hol":
@@ -1148,20 +1155,18 @@ const typecheck = (term, expect, opts = {}) => {
       default:
         throw "TODO: type checker for " + term[0] + ".";
     }
-    //} catch (e) {
-      // If there is a "use of" type error, yet this term is a Type or
-      // unrestricted, then we allow it to pass. TODO: improve code.
-      //if (typeof e === "string" && affine && e.indexOf("\nUse of") !== -1) {
-        //var [prog, type] = typecheck(term, expect, ctx, false, lvel, inside);
-        //if (!(type[0] === "Typ" || type[0] === "Utt")) {
-          //throw e;
-        //}
-      //} else {
-        //throw e;
-      //}
-    //}
     if (expect) {
-      do_match(type, expect);
+      var type_nf = weak_normal(type);
+      // Fill an Utv
+      if (expect_nf[0] === "Utt" && type_nf[0] !== "Utt") {
+        return typecheck(Utv(term), expect_nf, ctx_arg, affine, lvel)
+      }
+      // Fill an Ute
+      if (expect_nf[0] !== "Utt" && type_nf[0] === "Utt") {
+        return typecheck(Ute(term), expect_nf, ctx_arg, affine, lvel)
+      }
+      // Check if inferred and expected types match
+      do_match(type_nf, expect_nf);
     }
     return type;
   };
