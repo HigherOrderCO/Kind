@@ -608,7 +608,8 @@ const equal = (a, b, d, opts) => {
 const {marked_code, random_excuse} = require("./fm-error.js");
 
 // Type-checks a term and returns both its type and its program (an erased
-// copy of the term with holes filled and adjustments made).
+// copy of the term with holes filled and adjustments made). Does NOT check
+// termination, so a well-typed term may be bottom. Use haltcheck for that.
 // typecheck : Term -> Term -> Opts -> [Term, Term]
 const typecheck = (term, expect, opts = {}) => {
   var type_memo  = {};
@@ -715,30 +716,6 @@ const typecheck = (term, expect, opts = {}) => {
     return reduce(term, {defs: opts.defs, defs: {}, undup: true, weak: false});
   };
 
-  // Checks if a Ref is recursive
-  const is_recursive = (term, name) => {
-    switch (term[0]) {
-      case "Lam": return is_recursive(term[1].body, name);
-      case "App": return is_recursive(term[1].func, name) || is_recursive(term[1].argm, name);
-      case "Put": return is_recursive(term[1].expr, name);
-      case "Dup": return is_recursive(term[1].expr, name) || is_recursive(term[1].body, name);
-      case "Op1": return is_recursive(term[1].num0, name) || is_recursive(term[1].num1, name);
-      case "Op2": return is_recursive(term[1].num0, name) || is_recursive(term[1].num1, name);
-      case "Ite": return is_recursive(term[1].cond, name) || is_recursive(term[1].pair, name);
-      case "Cpy": return is_recursive(term[1].numb, name) || is_recursive(term[1].body, name);
-      case "Par": return is_recursive(term[1].val0, name) || is_recursive(term[1].val1, name);
-      case "Fst": return is_recursive(term[1].pair, name);
-      case "Snd": return is_recursive(term[1].pair, name);
-      case "Prj": return is_recursive(term[1].pair, name) || is_recursive(term[1].body, name);
-      case "Ann": return is_recursive(term[1].expr, name);
-      case "New": return is_recursive(term[1].expr, name);
-      case "Use": return is_recursive(term[1].expr, name);
-      case "Log": return is_recursive(term[1].expr, name);
-      case "Ref": return term[1].name === name;
-      default: return false;
-    }
-  };
-  
   const format = (ctx, term) => {
     return opts.show ? highlight(opts.show(display_normal(term), ctx_names(ctx))) : "?";
   };
@@ -1103,9 +1080,9 @@ const typecheck = (term, expect, opts = {}) => {
           found_anns.push(term);
           try {
             var expr_t = typecheck(term[1].expr, term[1].type, ctx, affine, lvel, [term, ctx]);
-            if (term[1].expr[0] === "Ref" && is_recursive((opts.defs||{})[term[1].expr[1].name], term[1].expr[1].name)) {
-              do_error("Recursive occurrence of '" + term[1].expr[1].name + "'.");
-            }
+            //if (term[1].expr[0] === "Ref" && is_recursive((opts.defs||{})[term[1].expr[1].name], term[1].expr[1].name)) {
+              //do_error("Recursive occurrence of '" + term[1].expr[1].name + "'.");
+            //}
             type = term[1].type;
           } catch (e) {
             term[1].done = false;
@@ -1211,6 +1188,40 @@ const typecheck = (term, expect, opts = {}) => {
   }
 };
 
+// Checks if a well-typed term terminates. Since well-typed terms must be
+// elementary affine, the only way they can fail to halt is through recursion.
+// This conservative check excludes any kind of recursion. Further work may be
+// done to identify and allow well-founded recursion.
+const haltcheck = (term, defs, seen = {}) => {
+  switch (term[0]) {
+    case "Utv": return haltcheck(term[1].expr, defs, seen);
+    case "Ute": return haltcheck(term[1].expr, defs, seen);
+    case "Lam": return haltcheck(term[1].body, defs, seen);
+    case "App": return haltcheck(term[1].func, defs, seen) && (term[1].eras ? true : haltcheck(term[1].argm, defs, seen));
+    case "Put": return haltcheck(term[1].expr, defs, seen);
+    case "Dup": return haltcheck(term[1].expr, defs, seen) && haltcheck(term[1].body, defs, seen);
+    case "Op1": return haltcheck(term[1].num0, defs, seen) && haltcheck(term[1].num1, defs, seen);
+    case "Op2": return haltcheck(term[1].num0, defs, seen) && haltcheck(term[1].num1, defs, seen);
+    case "Ite": return haltcheck(term[1].cond, defs, seen) && haltcheck(term[1].pair, defs, seen);
+    case "Cpy": return haltcheck(term[1].numb, defs, seen) && haltcheck(term[1].body, defs, seen);
+    case "Par": return (term[1].eras === 1 ? true : haltcheck(term[1].val0, defs, seen)) && (term[1].eras === 2 ? true : haltcheck(term[1].val1, defs, seen));
+    case "Fst": return haltcheck(term[1].pair, defs, seen);
+    case "Snd": return haltcheck(term[1].pair, defs, seen);
+    case "Prj": return haltcheck(term[1].pair, defs, seen) && haltcheck(term[1].body, defs, seen);
+    case "Ann": return haltcheck(term[1].expr, defs, seen);
+    case "New": return haltcheck(term[1].expr, defs, seen);
+    case "Use": return haltcheck(term[1].expr, defs, seen);
+    case "Log": return haltcheck(term[1].expr, defs, seen);
+    case "Ref":
+      if (seen[term[1].name]) {
+        return false;
+      } else {
+        return haltcheck(defs[term[1].name], defs, {...seen, [term[1].name]: true});
+      }
+    default: return true;
+  }
+};
+
 module.exports = {
   Var, Typ, Tid, Utt, Utv, Ute, All, Lam,
   App, Box, Put, Tak, Dup, Num, Val, Op1,
@@ -1223,4 +1234,5 @@ module.exports = {
   subst,
   subst_many,
   typecheck,
+  haltcheck,
 };

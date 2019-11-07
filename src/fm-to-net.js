@@ -22,6 +22,7 @@ const op_kind = {
 };
 
 const compile = (term, defs = {}) => {
+  const ref_ptrs = {};
   const build_net = (term, net, var_ptrs, level) => {
     const get_var = (ptrn) => {
       if (type_of(ptrn) === NUM) {
@@ -129,12 +130,36 @@ const compile = (term, defs = {}) => {
         return build_net(term[1].expr, net, var_ptrs, level);
       case "Var":
         return get_var(var_ptrs[var_ptrs.length - term[1].index - 1]);
-      case "Ref":
-        return build_net(defs[term[1].name] ? erase(defs[term[1].name]) : Val(0), net, var_ptrs, level);
       case "Hol":
         throw "[ERROR]\nCan't compile a hole.";
       case "Utv":
         throw "[ERROR]\nCan't compile an unrestricted term.";
+      case "Ref":
+        var ref_ptrn = ref_ptrs[term[1].name];
+        // First time seeing this ref
+        if (!ref_ptrn) {
+          // Create a dup node for it and recurse
+          var dup_addr = net.alloc_node(NOD, 0xFFFD);
+          var ref_ptrn = Pointer(dup_addr, 1);
+          ref_ptrs[term[1].name] = ref_ptrn;
+          var dref = erase(defs[term[1].name]);
+          var dref_ptr = build_net(dref, net, var_ptrs, level);
+          net.link_ports(Pointer(dup_addr, 0), dref_ptr);
+          return Pointer(dup_addr, 2);
+        // Already created the dup node for this ref
+        } else {
+          // First use: just connect to the port 1 of the dup node
+          if (ptrn_eq(net.enter_port(ref_ptrn), ref_ptrn)) {
+            return ref_ptrn;
+          // Other uses: extend with another dup node and connect
+          } else {
+            var dups_ptrn = net.enter_port(ref_ptrn);
+            var dup_addr = net.alloc_node(NOD, 0xFFFD);
+            net.link_ports(Pointer(dup_addr, 0), ref_ptrn);
+            net.link_ports(Pointer(dup_addr, 1), dups_ptrn);
+            return Pointer(dup_addr, 2);
+          }
+        }
       default:
         return build_net(Lam("", null, Var(0), false), net, var_ptrs, level);
     }
@@ -160,6 +185,17 @@ const compile = (term, defs = {}) => {
       return true;
     }
   });
+  // Optimization: if a ref is only used once, remove the unecessary dup node
+  for (var name in ref_ptrs) {
+    var ref_ptrn = ref_ptrs[name];
+    if (ptrn_eq(net.enter_port(ref_ptrn), ref_ptrn)) {
+      var dup_addr = addr_of(ref_ptrn);
+      var ref_ptrn = net.enter_port(Pointer(dup_addr, 0));
+      var loc_ptrn = net.enter_port(Pointer(dup_addr, 2));
+      net.link_ports(ref_ptrn, loc_ptrn);
+      net.free_node(dup_addr);
+    }
+  }
   return net;
 };
 

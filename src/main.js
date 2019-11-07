@@ -188,7 +188,16 @@ async function upload(file, global_path = {}) {
           try {
             if (defs[nams[i]]) {
               var term = fm.lang.run(command, nams[i], opts);
-              console.log(init + fm.lang.show(term, [], {full_refs: !!args.f}));
+              var text = init + fm.lang.show(term, [], {full_refs: !!args.f});
+              if (command === "TYPECHECK") {
+                if (fm.lang.haltcheck(defs[nams[i]], defs)) {
+                  console.log("\x1b[32m" + text + " ✔\x1b[0m"); // Green
+                } else {
+                  console.log("\x1b[33m" + text + " ⚠\x1b[0m"); // Green
+                }
+              } else {
+                console.log(text);
+              }
             } else {
               console.log(init + "Definition not found: " + nams[i]);
             }

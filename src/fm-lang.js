@@ -13,6 +13,7 @@ const {
   Slf, New, Use, Ann, Log, Hol, Ref,
   reduce: core_reduce,
   typecheck: core_typecheck,
+  haltcheck,
   ctx_ext,
   ctx_get,
   ctx_names,
@@ -2580,5 +2581,6 @@ module.exports = {
   subst,
   subst_many,
   typecheck,
+  haltcheck,
   version,
 };
