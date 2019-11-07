@@ -2522,15 +2522,11 @@ const run = (mode, term, opts = {}) => {
 
     case "REDUCE_DEBUG":
       term = eras(term);
-      if (haltcheck(term, defs)) {
-        try {
-          opts.unbox = true;
-          opts.undup = true;
-          term = reduce(term, opts);
-        } catch (e) {
-          term = reduce(term, {...opts, weak: true});
-        }
-      } else {
+      try {
+        opts.unbox = true;
+        opts.undup = true;
+        term = reduce(term, opts);
+      } catch (e) {
         term = reduce(term, {...opts, weak: true});
       }
       break;
