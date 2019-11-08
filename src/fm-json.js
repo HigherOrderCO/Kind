@@ -22,8 +22,6 @@ const call = (term_or_name, defs, argument, opts = {}) => {
   return from(reducer(app_term));
 }
 
-module.exports = { to, from, call }
-
 // A Mapper is responsible for mapping between JS and Formality types.
 // It's basically two functions, to and from. To converts from JS to FormalityJS and from does the
 // other way around.
@@ -35,14 +33,9 @@ const word = {
   from: (x) => x
 }
 
-const float = {
-  to: core.put_float_on_word,
-  from: core.get_float_on_word
-}
-
 const js_number = {
-  to: (val) => (js_number) => js_number(float.to(val)),
-  from: (enc) => enc(float.from)
+  to: (val) => (js_number) => js_number(val),
+  from: (enc) => enc
 }
 
 const list = (type) => ({
@@ -110,3 +103,5 @@ const json = {
 // Object to keyword list conversion
 const obj_to_kw = (obj) => Object.keys(obj).map((key) => [key.toString(), obj[key]])
 const kw_to_obj = (kw) => kw.reduce((obj, [k, v]) => ({[k]: v, ...obj}), {})
+
+module.exports = { to, from, native_to: json.to, native_from: json.from, call }
