@@ -1,77 +1,77 @@
 'use strict';
-const fs = require('fs');
 const ops = require('./ops');
 
-// Comparison
-const EQ     = 0
-const NE     = 1
-const LT_S   = 2
-const LT_U   = 3
-const GT_S   = 4
-const GT_U   = 5
-const LE_S   = 6
-const LE_U   = 7
-const GE_S   = 8
-const GE_U   = 9
+// i64 Comparison
+const EQ     = 0  // equality
+const NE     = 1  // not-equal
+const LT_S   = 2  // signed less-than
+const LT_U   = 3  // unsigned less-than
+const GT_S   = 4  // signed greater-than
+const GT_U   = 5  // unsigned greater-than
+const LE_S   = 6  // signed less-than-or-equal
+const LE_U   = 7  // unsigned less-than-or-equal
+const GE_S   = 8  // signed greater-than-or-equal
+const GE_U   = 9  // unsigned greater-than-or-equal
 
-// Bitwise
-const CLZ    = 10
-const CTZ    = 11
-const POPCNT = 12
+// Bit counting
+const CLZ    = 10 // count leading zeros, unary
+const CTZ    = 11 // count trailing zeros, unary
+const POPCNT = 12 // count number of 1 bits, unary
 
-const SHL    = 13
-const SHR    = 14
-const SHR_S  = 15
-const ROTL   = 16
-const ROTR   = 17
+// Bit shifting
+const SHL    = 13 // shift left
+const SHR    = 14 // unsigned shift right
+const SHR_S  = 15 // signed shift right
+const ROTL   = 16 // rotate left
+const ROTR   = 17 // rotate right
 
-const AND    = 18
-const OR     = 19
-const XOR    = 20
+// Bitwise logic
+const AND    = 18 // bitwise and
+const OR     = 19 // bitwise or
+const XOR    = 20 // bitwise xor
 
-// Arithmetic
-const ADD    = 21
-const SUB    = 22
-const MUL    = 23
-const DIV_S  = 24
-const DIV_U  = 25
-const REM_S  = 26
-const REM_U  = 27
+// i64 Arithmetic
+const ADD    = 21 // addition
+const SUB    = 22 // subtraction
+const MUL    = 23 // multiplication
+const DIV_S  = 24 // signed division
+const DIV_U  = 25 // unsigned division
+const REM_S  = 26 // signed remainder
+const REM_U  = 27 // unsigned remainder
 
 // Floating point
-const FABS    = 28
-const FNEG    = 29
-const FCEIL   = 30
-const FFLOOR  = 31
-const FTRUNC  = 32
-const FNRST   = 33
-const FSQRT   = 34
-const FADD    = 35
-const FSUB    = 36
-const FMUL    = 37
-const FDIV    = 38
-const FMIN    = 39
-const FMAX    = 40
-const FCPYSGN = 41
+const FABS    = 28 // absolute value, unary
+const FNEG    = 29 // negation, unary
+const FCEIL   = 30 // round upward, unary
+const FFLOOR  = 31 // round downward, unary
+const FTRUNC  = 32 // truncate, unary
+const FNRST   = 33 // round to nearest, unary
+const FSQRT   = 34 // square-root, unary
+const FADD    = 35 // addition
+const FSUB    = 36 // subtraction
+const FMUL    = 37 // multiplication
+const FDIV    = 38 // division
+const FMIN    = 39 // minimum
+const FMAX    = 40 // maximum
+const FCPYSGN = 41 // copy sign value of first arg and sign of second arg
 
-const FEQ = 42
-const FNE = 43
-const FLT = 44
-const FGT = 45
-const FLE = 46
-const FGE = 47
+// Floating point comparison, returns i64 0 or 1
+const FEQ     = 42 // equality
+const FNE     = 43 // not-equal
+const FLT     = 44 // less-than
+const FGT     = 45 // greater-than
+const FLE     = 46 // less-than-or-equal
+const FGE     = 47 // greater-than-or-equal
 
 // Conversion
-const EXT32_S = 48
-const FTOS  = 49  // These two conversions can trap if the float
-const FTOU  = 50  // doesn't correspond to an i64, like if it's NaN or Infinity
-const STOF  = 51
-const UTOF  = 52
+// FTOS and FTOU trap on f64s that don't map to i64s, e.g. NaN or Infinity
+const EXT32_S = 48 // signed extension of 32 bit numbers to 64 bit
+const FTOS    = 49 // f64 to signed i64
+const FTOU    = 50 // f64 to unsigned i64
+const STOF    = 51 // signed i64 to f64
+const UTOF    = 52 // unsigned i64 to f64
 
-// [ port0 : 64, port1 : 64, port2 : 64
-// , label : 32, node type : 8
-// , port0_type : 8, port1 type : 8, port2 type : 8].
-
+// u32Pair from f64
 function from_f64(f) {
   var x  = new Float64Array(1)
   x[0] = f
@@ -81,6 +81,7 @@ function from_f64(f) {
   return y
   }
 
+// u32Pair to f64
 function to_f64(u) {
   var x  = new Uint32Array(2)
   x[0] = u[0] >>> 0
@@ -89,10 +90,12 @@ function to_f64(u) {
   return (y[0])
   }
 
+// show 32 bits of a number
 function b32(n) {
   return (n >>> 0).toString(2).padStart(32, '0');
 }
 
+// show 32 bits of an f64
 function showFloatBits(f) {
   var x  = new Float64Array(1)
   x[0] = f
@@ -100,6 +103,7 @@ function showFloatBits(f) {
   return (b32(y[0]) + b32(y[1]))
   }
 
+// make u32 pair from a signed integer
 function from_s32(x) {
   if (x <= 0)
     return [x, ~0]
