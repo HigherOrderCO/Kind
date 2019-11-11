@@ -446,7 +446,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     , ".>."   : 1
     , ".<."   : 1
     , ".==."  : 1};
-  const op_inits     = ["<", ">", ".", "->", "="];
+  const op_inits     = [".", "->"];
   const is_op_init   = str => { for (var k of op_inits) if (str === k || str[0] === k) return str; return null; };
   const is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@/");
   const is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@+*/%^!<>=&|");
@@ -1213,10 +1213,11 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
   }
 
   // Parses a list literal, `A$[t, u, v, ...]`
-  function parse_list_literal(parsed, nams) {
+  function parse_list_literal(nams) {
     var init = idx;
-    if (match("$", is_space)) {
-      var type = parsed;
+    if (match("<", is_space)) {
+      var type = parse_term(nams);
+      var skip = parse_exact(">");
       var list = [];
       var skip = parse_exact("[");
       while (idx < code.length && !match("]")) {
@@ -1311,6 +1312,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     else if (parsed = parse_case(nams));
     else if (parsed = parse_op2_not(nams));
     else if (parsed = parse_var(nams));
+    else if (parsed = parse_list_literal(nams));
     else     parsed = parse_atom(nams, false);
 
     // Parses glued operators
@@ -1323,7 +1325,6 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     var new_parsed = true;
     while (new_parsed) {
       if      (new_parsed = parse_app(parsed, nams));
-      else if (new_parsed = parse_list_literal(parsed, nams));
       else if (new_parsed = parse_ann(parsed, nams));
       else if (new_parsed = parse_ops(parsed, nams));
       if (new_parsed) {
