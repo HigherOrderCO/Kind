@@ -8,7 +8,7 @@ An efficient proof-gramming language. It aims to be:
 
 - **Portable:** the full language is implemented in a 400-LOC runtime, making it easily available everywhere.
 
-Check the [official documentation](https://docs.formality-lang.org), browse our [base-libraries](https://github.com/moonad/Formality-Base) and come hang out with us [on Telegram](https://t.me/formality_lang).
+Check the [official documentation](DOCUMENTATION.md), browse our [base-libraries](https://github.com/moonad/Formality-Base) and come hang out with us [on Telegram](https://t.me/formality_lang).
 
 ## Examples
 
@@ -20,21 +20,19 @@ Check the [official documentation](https://docs.formality-lang.org), browse our 
 
     ```javascript
     // A vector is a list with a statically known length
-    T Vector {A : Type} (len : Nat)
-    | vcons {len : Nat, head : A, tail : Vector(A, len)} (succ(len))
-    | vnil                                               (zero)
+    T Vector<A> (len : -Nat)
+    | vnil                                                : Vector(A, zero)
+    | vcons(~len : -Nat, head : A, tail : Vector(A, len)) : Vector(A, succ(len))
 
     // (...)
 
     // A type-safe "head" that returns the first element of a non-empty vector
-    // - On the `vcons` case, return the vector's head
-    // - On the `vnil` case, prove it is unreachable, since `xs.len > 0`
-    vhead : {~T : Type, ~n : Nat, xs : Vector(T, succ(n))} -> T
-      case/Vector xs
-      note e : xs.len is succ(n)
+    vhead(~A, ~len : -Nat, xs : Vector(A, succ(len))) : A
+      case xs
+      + refl(~Nat, ~succ(len)) as e : Equal(Nat, xs.len, succ(len))
+      | vnil  => absurd(zero_isnt_succ(~len, e), ~A) // provably unreachable!
       | vcons => xs.head
-      | vnil  => absurd(zero_isnt_succ(~n, ~e), ~T) 
-      : T
+      : A
     ```
 
 ## Usage
