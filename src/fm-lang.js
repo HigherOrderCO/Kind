@@ -49,7 +49,11 @@ const show = ([ctor, args], nams = [], opts = {}) => {
           nums.push(term[1].func[1].argm[1].numb);
           term = term[1].argm;
         }
-        return new TextDecoder("utf-8").decode(new Uint8Array(new Uint32Array(nums).buffer));
+        var str = "";
+        for (var i = 0; i < nums.length; ++i) {
+          str += String.fromCharCode(nums[i]);
+        }
+        return str;
       } else {
         return null;
       }
@@ -553,7 +557,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
 
   // Constructs an Ind
   function build_ind(name) {
-    if (!defs["*"+name]) {
+    if (!defs[name+"i"]) {
       var numb = name === "" ? Math.pow(2,48) - 1 : Number(name);
       var bits = numb.toString(2);
       var bits = bits === "0" ? "" : bits;
@@ -564,9 +568,22 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
           term = App(base_ref("step"), term, false);
         }
       }
-      define("*"+name, term);
+      define(name+"i", term);
     }
-    return Ref("*"+name, false, loc(name.length + 1));
+    return Ref(name+"i", false, loc(name.length + 1));
+  }
+
+  // Constructs a nat
+  function build_nat(name) {
+    if (!defs[name+"n"]) {
+      var term = base_ref("zero");
+      var numb = Number(name);
+      for (var i = 0; i < numb; ++i) {
+        term = App(base_ref("succ"), term, false);
+      }
+      define(name+"n", term);
+    }
+    return Ref(name+"n", false, loc(name.length + 1));
   }
 
   // Constructs a nat
@@ -819,10 +836,10 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
       }
       var parsed = parse_term(nams.concat(names));
       for (var i = names.length - 1; i >= 0; --i) {
-        var ctr = isall ? All : Lam;
-        parsed = ctr(names[i], types[i], parsed, erass[i], loc(idx - init));
-        if (isall && !types[i]) {
-          error("Parse error: invalid forall.");
+        if (isall) {
+          parsed = All(names[i], types[i] || Typ(), parsed, erass[i], loc(idx - init));
+        } else {
+          parsed = Lam(names[i], types[i] || Typ(), parsed, erass[i], loc(idx - init));
         }
       }
       return parsed;
@@ -897,11 +914,10 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
         next();
       }
       next();
-      var bytes = [].slice.call(new TextEncoder("utf-8").encode(text), 0);
-      while (bytes.length % 4 !== 0) {
-        bytes.push(0);
+      var nums = [];
+      for (var i = 0; i < text.length; ++i) {
+        nums.push(text.charCodeAt(i));
       }
-      var nums = new Uint32Array(new Uint8Array(bytes).buffer);
       var term = App(base_ref("nil"), Num(), true);
       for (var i = nums.length - 1; i >= 0; --i) {
         var term = App(App(App(base_ref("cons"), Num(), true), Val(nums[i]), false), term, false);
@@ -910,30 +926,15 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     }
   }
 
-  // Parses a nat literal, `0n123`
-  //function parse_nat_literal(nams) {
-    //function is_num() {
-      //// TODO: this is ugly, improve
-      //var i = idx;
-      //if (code[i] === "n")                            { ++i; } // skips `n`
-      //if (!is_name_char(code[i])) return false;                // finds number-char
-      //while (i < code.length && is_num_char(code[i])) { ++i; } // skips nums
-      //if (!is_name_char(code[i])) return true;                 // finds non-name-char
-      //return false;
-    //}
-    //if (is_num() && match("n")) {
-      //var name = parse_string();
-      //return build_nat(name);
-    //}
-  //}
-
-  // Parses an ind literal, `*123`
-  //function parse_ind_literal(nams) {
-    //if (match("*")) {
-      //var name = parse_string();
-      //return build_ind(name);
-    //}
-  //}
+  // Parses a char literal, `'x'`
+  function parse_chr(nams) {
+    var init = idx;
+    if (match("'")) {
+      var name = parse_name();
+      var skip = parse_exact("'");
+      return Val(name.charCodeAt(0));
+    }
+  }
 
   // Parses an if-then-else, `if: t else: u`
   function parse_ite(nams) {
@@ -1349,6 +1350,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     else if (parsed = parse_let(nams));
     else if (parsed = parse_wrd(nams));
     else if (parsed = parse_str(nams));
+    else if (parsed = parse_chr(nams));
     else if (parsed = parse_ite(nams));
     else if (parsed = parse_cpy(nams));
     else if (parsed = parse_sig_or_par(nams));
