@@ -1144,7 +1144,7 @@ const typecheck = (term, expect, opts = {}) => {
         return typecheck(Ute(term), expect_nf, ctx_arg, affine, lvel)
       }
       // Check if inferred and expected types match
-      do_match(type_nf, expect_nf);
+      do_match(type, expect);
     }
     return type;
   };
