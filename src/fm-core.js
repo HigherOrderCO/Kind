@@ -484,7 +484,7 @@ const erase = (term) => {
     case "New": return f(t.expr);
     case "Use": return f(t.expr);
     case "Ann": return f(t.expr);
-    case "Log": return f(t.expr);
+    case "Log": return Log(f(t.msge), f(t.expr));
     case "Hol": return Hol(t.name);
     case "Ref": return Ref(t.name, true);
   }
@@ -764,7 +764,7 @@ const typecheck = (term, expect, opts = {}) => {
             if (got.eras) {
               do_error("Use of erased variable `" + got.name + "` in proof-relevant position.");
             }
-            if (got.uses > 0 && !got.many) {
+            if (got.uses > 0 && !got.many && !(expect_nf !== null && expect_nf[0] === "Num")) {
               do_error("Use of affine variable `" + got.name + "` more than once in proof-relevant position.");
             }
             if (got.lvel !== lvel) {
@@ -1079,6 +1079,7 @@ const typecheck = (term, expect, opts = {}) => {
           term[1].done = true;
           found_anns.push(term);
           try {
+            var type_t = typecheck(term[1].type, Typ(), ctx, affine, lvel, [term, ctx]);
             var expr_t = typecheck(term[1].expr, term[1].type, ctx, affine, lvel, [term, ctx]);
             //if (term[1].expr[0] === "Ref" && is_recursive((opts.defs||{})[term[1].expr[1].name], term[1].expr[1].name)) {
               //do_error("Recursive occurrence of '" + term[1].expr[1].name + "'.");
