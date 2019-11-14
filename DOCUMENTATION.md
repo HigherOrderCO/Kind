@@ -4,7 +4,7 @@ Table of contents
 - [Motivation](#motivation)
 - [Installation](#installation)
 - [Introduction](#introduction)
-- [Primitives](#core-features)
+- [Primitives](#primitives)
     - [Let](#let)
     - [Number](#number)
     - [Pair](#pair)
@@ -625,7 +625,8 @@ Note that this is only automatic if Formality can infer the expected type of
 the hole's location. Otherwise, you must give it an explicit annotation, as in
 `?hole :: MyType`.
 
-#### Log
+Log
+------
 
 Another handy feature is `log(x)`. When running a program, it will print the
 normal form of `x`, similarly to haskell's `console.log` and haskell's `print`,
@@ -1645,12 +1646,12 @@ theory. It is based on elementary terms are just annotated versions of the
 Elementary Affine Calculus (EAC), which is itself a terminating subset
 of the lambda-calculus with great computational characteristics. In particular,
 EAC is compatible with the most efficient version of the optimal reduction
-algorithm [citation]. This is important because, while asymptically optimal,
+algorithm [citation]. This is important because, while asymptotically optimal,
 most implementations of the algorithm carry an extra, significant constant
 overhead caused by a book-keeping machinery. This made them too slow in
-practice, decreasing interest on the area. By relying on EAC, we can avoid the
+practice, decreasing interest in the area. By relying on EAC, we can avoid the
 book-keeping overhead, making it much faster than all alternatives. Below is a
-table comparing the amount of native operations (graph rewrites) required to
+table comparing the number of native operations (graph rewrites) required to
 reduce λ-terms in other implementations and Formality:
 
  Term | GeomOpt | GeomImpl | YALE | IntComb | Formality
@@ -1663,7 +1664,7 @@ reduce λ-terms in other implementations and Formality:
 223II |    1750 |     1046 |  213 |     869 |        69
  44II |    3456 |     2816 |  148 |    2447 |        89
 
-Not only Formality requires orders of magnitue less native operations, but its
+Not only Formality requires orders of magnitude less native operations, but its
 native operations are much simpler.
 
 Unlike most proof languages, Formality doesn't include a datatype system, since
@@ -1673,7 +1674,7 @@ discovered that type preservation does not hold in Coq due to its treatment of
 coinductive datatypes [citation], and both Coq and Agda were found to be
 incompatible with Homotopy Type Theory due to the K-axiom, used by native
 pattern-matching on dependent datatypes [citation]. Instead, Formality relies
-on lambda encodings, an alternative to a datatype system that use plain lambdas
+on lambda encodings, an alternative to a datatype system that uses plain lambdas
 to encode arbitrary data. While attractive, this approach wasn't adopted in
 practical type theories for several reasons:
 
@@ -1965,11 +1966,11 @@ true_isnt_false(e : Id(Bool, true, false)) -> Empty
 That much type-level power comes at a cost: if Formality was based on the
 conventional lambda calculus, it wouldn't be sound. Since it is based on EAC,
 a terminating untyped language, its normalization is completely independent
-from types, so it is impossible to derive paradoxes by exploiting
+of types, so it is impossible to derive paradoxes by exploiting
 non-terminating computations. A good exercise is attempting to write `λx. (x x)
 λx. (x x)` on EAC, which is impossible. The tradeoff is that EAC is
 considerably less computationally powerful than the lambda calculus, imposing
-severe restriction on how terms can be duplicated. This limitation isn't very
+a severe restriction on how terms can be duplicated. This limitation isn't very
 problematic in practice since the language is still capable of implementing any
 algorithm a normal programming language, but doing so involves a resource-usage
 discipline that can be annoying to users. Formality is currently being
@@ -2034,7 +2035,7 @@ that lambdas can't substitute inside boxes. The third condition says that you
 can't unbox, or add boxes, to a term by duplicating it. Stratified FM-Calc terms
 are strongly normalizing. Proof: 
 
-- Define the level of a term as the amount of boxes surrounding it.
+- Define the level of a term as the number of boxes surrounding it.
 
 - Define the number of redex in a level by counting its reducible apps/dups.
 
@@ -2083,7 +2084,7 @@ nodes, ERA, CON, OP1, OP2, ITE, NUM.
   ports and an operation id. They are used for numeric operations such as
   addition and multiplication.
 
-- `ITE` has 3 ports and an integer label. It is used for if-then-else, and is
+- `ITE` has 3 ports and an integer label. It is used for if-then-else and is
   required to enable number-based branching.
 
 Note that the position of the port matters. The port on top is called the `main`
@@ -2121,7 +2122,7 @@ cases can't happen on valid FM-Calc programs.
 
 #### Duplication
 
-When different nodes collide, they "pass through" each other, duplicating
+When different nodes collide, they "pass-through" each other, duplicating
 themselves in the process. This allows, for example, `CON` nodes with a label
 `>1` to be used to perform deep copies of any term, with `dup x = val; ...`. It
 can copy lambdas and applications because they are represented with `CON` nodes
@@ -2136,7 +2137,7 @@ substitution case, destroying each other and connecting neighbors, which isn't
 correct. That's why FMC's box system is necessary: to prevent concurrent
 duplication processes to interfere with each other by ensuring that, whenever
 you duplicate a term with `dup x = val; ...`, all the duplication `CON` nodes of
-`val` will have a labels higher than the one used by that `dup`.
+`val` will have labels higher than the one used by that `dup`.
 
 #### If-Then-Else
 
@@ -2178,12 +2179,12 @@ nodes, as follows:
   whether its ports are pointers or unboxed numbers (3 bits), and the label
   (26 bits).
 
-- `ERA`: is stored inside other nodes and do not use any extra space. An `ERA`
-  node is represented by a pointer port which points to itself. That's because
+- `ERA`: is stored inside other nodes and does not use any extra space. An `ERA`
+  node is represented by a pointer port that points to itself. That's because
   `ERA`'s rewrite rules coincide with what we'd get if we allowed ports to point
   to themselves.
 
-- `NUM`: is stored inside other nodes and do not use any extra space. A `NUM`
+- `NUM`: is stored inside other nodes and does not use any extra space. A `NUM`
   node is represented by a numeric port. In order to know if a port is a number
   or a pointer, each node reserves 3 bits of its last uint to store that
   information.
@@ -2270,7 +2271,7 @@ target port. Then, until we get back to the root, do as follows:
    weak-head normal form reduction, stop. Otherwise, start walking towards each
    auxiliary port (either recursively, or in parallel).
 
-3. If we're walking towards root, halt.
+3. If we're walking towards the root, halt.
 
 This is a rough pseudocode:
 
