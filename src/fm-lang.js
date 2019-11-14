@@ -449,7 +449,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     , ".==."  : 1
   };
 
-  const op_inits     = [".", "->"];
+  const op_inits     = [".", "=", "->"];
   const is_op_init   = str => { for (var k of op_inits) if (str === k || str[0] === k) return str; return null; };
   const is_num_char  = build_charset("0123456789");
   const is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@/");
