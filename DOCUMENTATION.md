@@ -1333,7 +1333,7 @@ Proofs
 ======
 
 Types in Formality can be used to express mathematical theorems. This allows us
-to statically prove invariants about our programs, making them unflawless. In a
+to statically prove invariants about our programs, making them flawless. In a
 way, proofs can be seen as a generalization of tests. With tests, we can assert
 that specific expressions have the values we expect. For example, consider the
 program below:
