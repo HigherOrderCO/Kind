@@ -62,12 +62,12 @@ Fast and portable "by design"
  possible. For example, it has affine lambdas, allowing it to be
  garbage-collection-free. It has a strongly confluent interaction-net runtime,
  allowing it to be evaluated in massively parallel architectures. It doesn’t
- require bruijn bookkeeping, making it the fastest “closure chunker” around. It
- is lazy, it has a clear cost model for blockchains, it has a minuscle ([448
+ require De Bruijn bookkeeping, making it the fastest “closure chunker” around. It
+ is lazy, it has a clear cost model for blockchains, it has a minuscule ([448
  LOC](https://github.com/moonad/Formality/blob/master/src/fm-net.js)) runtime
  that can easily be ported to multiple platforms. Right now, Formality’s
  compiler isn’t as mature as the ones found in decades-old languages, but it
- has endless room for improvements, since the language is fast “by design”.
+ has endless room for improvements since the language is fast “by design”.
 
 An elegant underlying Type Theory
 ---------------------------------
@@ -77,15 +77,15 @@ elegant, powerful type-level features that would be otherwise impossible
 without causing logical inconsistencies. For example, instead of built-in
 datatypes, we rely on [Self
 Types](https://www.semanticscholar.org/paper/Self-Types-for-Dependently-Typed-Lambda-Encodings-Fu-Stump/652f673e13b889e0fd7adbd480c2fdf290621f66),
-which allow us to implement inductive families with native lambdas. As history
+which allows us to implement inductive families with native lambdas. As history
 tells, having elegant foundations often pays back. We've not only managed to
 port several proofs from other assistants, but found techniques to [emulate
 Coq's structural
 recursion](https://github.com/moonad/Formality-Base/commit/b777d806c6fa37f2ce306fbe87b3ed267152b90c),
-to perform large eliminations, and even an hypothetical encoding of [higher
+to perform large eliminations, and even a hypothetical encoding of [higher
 inductive
 types](https://github.com/moonad/Formality-Base/blob/master/Example.HigherInductiveType.fm);
-and we've barely began exploring the system.
+and we've barely begun exploring the system.
 
 An optimal high-order evaluator
 -------------------------------
@@ -97,7 +97,7 @@ high-level feel with a Rust-like low-level performance curve. For example,
 Haskell's stream fusion, a hard-coded, important optimization, happens
 naturally, [at
 runtime](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07),
-on Formality. This also allow us to explore new ways to develop algorithms,
+on Formality. This also allows us to explore new ways to develop algorithms,
 such as this "impossibly efficient" [exp-mod
 implementation](https://medium.com/@maiavictor/calling-a-function-a-googol-times-53933c072e3a).
 Who knows if this may lead to new breakthroughs in complexity theory?
@@ -173,7 +173,7 @@ Type mismatch.
   5|
 ```
 
-Because `7` is a Number, but the `print` function expects a `String`. Since
+Because `7` is a `Number`, but the `print` function expects a `String`. Since
 Formality is a proof language, types can be seen as theorems and well-typed
 terms can be seen a proof. So, for example, this is a proof that `2 == 2`:
 
@@ -263,7 +263,7 @@ less-than | `x .<. y` | `x < y ? 1 : 0`
 equals | `x .==. y` | `x === y ? 1 : 0`
 
 There is no operator precedence: parenthesis are always placed on the right.
-That means `3 * 10 + 1` is parsed as `3 * (10 + 1)`. If you want the
+That means `3 .*. 10 .+. 1` is parsed as `3 .*. (10 .+. 1)`. If you want the
 multiplication to occur first, you must be explicit:
 
 ```haskell
@@ -275,7 +275,7 @@ There is also `if`, which allows branching with a `Number` condition.
 
 syntax | description
 --- | ---
-`if n: a else: b` | If `n .= 0`, evaluates to `b`, else, evaluates to `a`
+`if n: a else: b` | If `n .==. 0`, evaluates to `b`, else, evaluates to `a`
 
 Usage is straightforward:
 
@@ -452,7 +452,7 @@ main : Number
 
 
 Formality functions are **affine**, which means you can't use a variable more
-than once. For example, the program below isn't allowed, because `b` is used
+than once. For example, the program below isn't allowed, because `x` is used
 twice:
 
 ```haskell
@@ -543,7 +543,7 @@ lambdas, as will be explained later.
 Annotation
 ----------
 
-You can also explictly annotate the type of a term:
+You can also explicitly annotate the type of a term:
 
 syntax | description
 --- | ---
@@ -768,7 +768,7 @@ T Suit
 
 print_suit(suit : Suit) : Output
   case suit
-  | clubs    => print("First rule: you do not talk about Fight Club.")
+  | clubs    => print("First rule: you do not talk about the Fight Club.")
   | diamonds => print("Queen shines more than diamond.")
   | hearts   => print("You always had mine.")
   | spades   => print("The only card I need is the Ace of Spades! \m/")
