@@ -377,8 +377,8 @@ Lambda
 
 syntax | description
 --- | ---
-`{x : A, y : B, z : C, ...} -> D` | Function type with args `x : A`, `y : B`, `z : C`, returning `D`
-`{x, y, z, ...} body` | A function that receives the arguments `x`, `y`, `z` and returns `body`
+`(x : A, y : B, z : C, ...) -> D` | Function type with args `x : A`, `y : B`, `z : C`, returning `D`
+`(x, y, z, ...) => body` | A function that receives the arguments `x`, `y`, `z` and returns `body`
 `f(x, y, z, ...)` | Applies the function `f` to the arguments `x`, `y`, `z` (curried)
 
 Formality functions are curried anonymous expressions, like Haskell's lambdas.
@@ -558,7 +558,7 @@ This is useful when the type-checker can't infer the type of an expression.
 
 ```haskell
 main : Number
-  (({x, y} x .+. y) :: Number -> Number -> Number)(40, 2)
+  (((x, y) => x .+. y) :: Number -> Number -> Number)(40, 2)
 ```
 
 It is also important for dependent pairs:
