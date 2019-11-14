@@ -522,28 +522,8 @@ same_numbers_0 : SameNumbers
 Here, on the `SameNums` type, we have access to `self`, which is the pair being
 typed. So, whenever you instantiate it, you must provide a proof that its first
 and second elements are equal. Of course, in this case, this effect could be
-achieved with dependent pairs, but what is interesting is that Self allows us
-to do crazy things such as type-level systems of equations:
-
-```haskell 
-// -- a = b + 1
-// -- b = a * 2
-Equations : Type
-  ${self}
-  [: [a : Number, Equal(Number, %(a .*. 2), fst(snd(use(self))))],
-     [b : Number, Equal(Number, b, %(fst(fst(use(self))) .+. 1))]]
-  
-// -- Solution: a = 1, b = 2
-solution : Equations
-  let a = 1
-  let b = 2
-  new(~Equations)
-  [[a, refl(~Number, ~2)],
-   [b, refl(~Number, ~2)]]
-```
-
-And, most notably, it allows us to encode inductive datatypes with plain
-lambdas, as will be explained later.
+achieved with dependent pairs, but what is interesting is that it allows us to
+do us to encode inductive datatypes with lambdas, as will be explained later.
 
 Annotation
 ----------
