@@ -1570,14 +1570,14 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
   }
 
   function save_parse_state() {
-    return {idx, row, col, tokens_length: tokens.length};
+    return {idx, row, col, tokens_length: tokens && tokens.length};
   }
 
   function load_parse_state(state) {
     idx = state.idx;
     row = state.row;
     col = state.col;
-    while (tokens.length > state.tokens_length) {
+    while (state.tokens_length && tokens.length > state.tokens_length) {
       tokens.pop();
     }
   }
