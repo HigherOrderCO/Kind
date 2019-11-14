@@ -24,6 +24,9 @@ Table of contents
     - [Motive](#motive)
     - [Indices](#indies)
     - [Encoding](#encoding)
+- [Advanced](#advanced)
+    - [Stratification](#stratification)
+    - [Proofs](#proofs)
 
 
 **NOTE: this documentation is outdated -- it is being updated literally right now!**
@@ -903,6 +906,10 @@ soon. Until then, type-checking recursive functions will raise a warning,
 signaling that Formality is unsure if your program halts. If you can't wait,
 you can use inductive datatypes such as `INat` from Base instead.
 
+Note: while you can use recursive calls as much as you want, it is wise to
+treat them as normal variables and use `move` to pass them to branches. This
+can be a major optimization in some cases.
+
 Polymorphism
 ------------
 
@@ -1222,3 +1229,368 @@ Formality to not evaluate fully since `Bool` is recursive. While you probably
 won't need to deal with self-encodings yourself, knowing how they work is
 valuable, since it allows you to express types not covered by the built-in
 syntax.
+
+Advanced
+========
+
+Stratification
+--------------
+
+Formality lambdas are affine. This makes it a very efficient functional
+language, compatible with optimal sharing, parallel evaluators and so on. But
+this limits is power. To enable controlled duplication, Formality introduces
+boxes and `dup`, which performs a deep copy of a value, as long as you respect
+the stratification condition.
+
+#### The Stratification Condition
+
+Without restriction, `dup` would allow for nontermination. For example, this:
+
+```haskell
+main
+  let f = (x) =>
+    dup x = x
+    x(#x)
+  f(#f)
+```
+
+Would loop forever, which should never happen in a terminating language. To
+prevent it, Formality enforces the following invariant:
+
+> The level of a term can never change during the program evaluation.
+
+Where the level of a term is the number of boxes "wrapping" it. Here are a few
+examples:
+
+```haskell
+["a", #"b", "c", #["d", #"e"], ##"f"]
+```
+
+- The string `"a"` isn't wrapped by any box. It is on `level 0`.
+
+- The string `"b"` is wrapped by one box. It is on `level 1`.
+
+- The string `"c"` isn't wrapped by any box. It is on `level 0`.
+
+- The string `"d"` is wrapped by one box. It is on `level 1`.
+
+- The string `"e"` is wrapped by two boxes (one indirect). It is on `level 2`. 
+
+- The string `"f"` is wrapped by two boxes. It is on `level 2`. 
+
+The type of the program above is:
+
+```haskell
+[:String, :!String, :String, :![:String, !String], !!String]
+```
+
+#### Examples
+
+Stratification is imposed globally, forbidding certain programs. For example:
+
+```haskell
+box(x : Word) : !Word 
+  # x
+```
+
+This isn't allowed because, otherwise, we would be able to increase the level
+of a word. Similarly, this:
+
+```haskell
+main : [:Word, Word]
+  dup x = #42
+  [x, x]
+```
+
+Isn't allowed too, because `42` would jump from `level 1` to `level 0` during
+runtime. But this:
+
+```haskell
+main : ![:Word, Word]
+  dup x = #42
+  # [x, x]
+```
+
+Is fine, because `42` remains on `level 1` after being copied. And this:
+
+```haskell
+main : [:!Word, !Word]
+  dup x = #42
+  [#x, #x]
+```
+
+Is fine too, for the same reason.
+
+Note that, while stratification prevents non-terminating terms arising from the
+use of `dup`, it doesn't prevent non-terminating recursive calls. Well-founded
+recursion is still a work in progress, and recursive programes raise a warning.
+
+Proofs
+======
+
+Types in Formality can be used to express mathematical theorems. This allow us
+to statically prove invariants about our programs, making them unflawless. In a
+way, proofs can be seen as a generalization of tests. With tests, we can assert
+that specific expressions have the values we expect. For example, consider the
+program below:
+
+```javascript
+// Recursively doubles a number
+function mul2(n) {
+  if (n <= 0) {
+    return 0;
+  } else {
+    return 2 + mul2(n - 1.01);
+  }
+}
+
+// Tests
+it("Works for 10", () => {
+  console.assert(mul2(10) === 20);
+})
+
+
+it("Works for 44", () => {
+  console.assert(mul2(44) === 88);
+});
+
+it("Works for 17", () => {
+  console.assert(mul2(17) === 34);
+});
+
+it("Works for 12", () => {
+  console.assert(mul2(12) === 24);
+});
+
+it("Works for 20", () => {
+  console.assert(mul2(20) === 40);
+});
+```
+
+The problem with testing is that they only give you partial confidence. No
+matter how many tests you write, there could be still some input which causes
+your function to misbehave. In this example, `mul2(200)` returns `398`, so
+the implementation is incorrect, despite all tests passing. With formal proofs,
+you can write tests too:
+
+```javascript
+import Base@0
+
+mul2(n : Number) : Number
+  if n .<. 0 .|. n .==. 0:
+    0
+  else:
+    2 .+. mul2(n .-. 1.01)
+
+it_works_for_10 : Equal(Number, 10, 20)
+  refl(~Number, ~20)
+
+it_works_for_44 : Equal(Number, 44, 88)
+  refl(~Number, ~88)
+
+it_works_for_17 : Equal(Number, 17, 34)
+  refl(~Number, ~34)
+
+it_works_for_12 : Equal(Number, 12, 24)
+  refl(~Number, ~24)
+
+it_works_for_20 : Equal(Number, 20, 40)
+  refl(~Number, ~40)
+```
+
+Here, we're using `Equal` to make theorems like `10 == 20` or `44 == 88`. Since
+those are true by reduction, we can complete the proofs with `refl`. And there
+you go, we just emulated a test suite checked on compilation. But with proofs,
+you can go further: you can prove that a property holds for every possible
+input, not just a few. To explain, let's first re-implement `mul2` for `Nat`,
+which allows us to use a `case` with a `motive`, a key technique of formal
+verification:
+
+```javascript
+import Base@0
+
+mul2(n : Nat) : Nat
+  case n
+  | zero => zero
+  | succ => succ(succ(mul2(n.pred)))
+  : Nat
+```
+
+Before proving more general properties, we can add a few tests to be sure:
+
+```javascript
+it_works_for_0 : Equal(Nat, mul2(0n), 0n)
+  refl(~Nat, ~0n)
+
+it_works_for_1 : Equal(Nat, mul2(1n), 2n)
+  refl(~Nat, ~2n)
+
+it_works_for_2 : Equal(Nat, mul2(2n), 4n)
+  refl(~Nat, ~4n)
+```
+
+Since those tests pass, we can prove more general statements. What can be said
+about `mul2`? Well, for one, we know that the double of `x` should be equal to
+`x + x`. To prove that fact, we start by writing the type of our invariant:
+
+```javascript
+it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+  ?a
+```
+
+The difference here is that, now, our "test" includes a variable: `n`, which
+can be any `Nat`. As such, it will only "pass" if we manage to convince
+Formality that the `n * 2 == n + n` theorem holds for every natural number. But
+how can we do that? We can start by type-checking the program above to see what
+the checker has to say:
+
+```javascript
+Found hole: 'a'.
+- With goal... Equal(Nat, mul2(n), add(n, n))
+- With context:
+- n : Nat
+
+(n : Nat) -> Equal(Nat, mul2(n), add(n, n)) ✔
+```
+
+This is telling us that the theorem is correct as long as we can replace `?a`
+with a proof that `Equal(Nat, mul2(n), add(n, n))`. So, essentially, Formality
+is just telling us that we need to prove what we claimed to be true, which
+isn't very helpful. So, how can we do it? Let's try to copy the previous
+examples and just use `refl`:
+
+```javascript
+it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+  refl(~Nat, ~mul2(n))
+```
+
+This time, though, it doesn't work. Formality gives us the following error:
+
+```javascript
+Type mismatch.
+- Found type... Equal(Nat, mul2(n), mul2(n))
+- Instead of... Equal(Nat, mul2(n), add(n, n))
+- When checking refl(~Nat, ~mul2(n))
+```
+
+That's because `refl(~Nat, ~mul2(n))` proves that `mul2(n) == mul2(n)`, but not
+that `mul2(n) == add(n, n)`. The problem is that, unlike on the previous tests,
+the equation now has a variable, `n`, which causes both sides to get stuck, so
+they can't become equal by reduction, and the compiler can't be sure if they're
+really the same thing. But there is a way to help it: we can inspect the value
+of `n` with a case expression.
+
+```javascript
+Found hole: 'a'.
+- With goal... Equal(Nat, mul2(zero), add(zero, zero))
+- With context:
+- n : Nat
+
+Found hole: 'b'.
+- With goal... Equal(Nat, mul2(succ(n.pred)), add(succ(n.pred), succ(n.pred)))
+- With context:
+- n      : Nat
+- n.pred : Nat
+
+(n : Nat) -> Equal(Nat, mul2(n), add(n, n)) ✔
+```
+
+Now, we have two holes. The first one is now asking a proof that `0 * 2 == 0 *
+0`; notice how that was specialized to the value of `n` on the branch? That's
+very important, because now both sides get unstuck and evaluate to `0 == 0`.
+This allows us to prove that branch with `refl`:
+
+```javascript
+it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+  case n
+  | zero => refl(~Nat, ~zero)
+  | succ => ?b
+  : Equal(Nat, mul2(n), add(n, n))
+```
+
+Now, we only have one hole:
+
+```
+Found hole: 'b'.
+- With goal... Equal(Nat, mul2(succ(n.pred)), add(succ(n.pred), succ(n.pred)))
+- With context:
+- n      : Nat
+- n.pred : Nat
+```
+
+This demands a proof that `2 * (1 + p) == (1 + p) + (1 + p)`, which reduces to
+`1 + 1 + 2 * p == 1 + 1 + p + p`. Since this is a recursive branch, though, it
+is almost always a good idea to apply the function recursively to the
+predecessor. That's the mathematical equivalent of applying the inductive
+hypothesis. Let's do that and `log` it to see what we get:
+
+```javascript
+it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+  case n
+  | zero => refl(~Nat, ~zero)
+  | succ =>
+    let ind_hyp = it_works_for_add(n.pred)
+    log(ind_hyp)
+    ?a
+  : Equal(Nat, mul2(n), add(n, n))
+```
+
+This outputs:
+
+```
+[LOG]
+Term: it_works_for_add(n.pred)
+Type: Equal(Nat, mul2(n.pred), add(n.pred, n.pred))
+```
+
+In other words, we gained "for free" a proof that `2 * p == p + p`, so we just
+need to manipulate it to become `1 + 1 + 2 * p == 1 + 1 + p + p`. That's easy:
+we just need to add `2` to both sides. This can be done with the `cong`
+function from the Base library:
+
+```javascript
+it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+  case n
+  | zero => refl(~Nat, ~zero)
+  | succ =>
+    let ind_hyp = it_works_for_add(n.pred)
+    let new_hyp = cong(~Nat, ~Nat, ~mul2(n.pred), ~add(n.pred, n.pred), ~(x : Nat) => succ(succ(x)), ind_hyp)
+    log(new_hyp)
+    ?a
+  : Equal(Nat, mul2(n), add(n, n))
+```
+
+Note that `cong` is a little bit verbose since it needs you to provide both
+sides of the equality you want to alter. Don't let this scare you, though, you
+can literally just copy-paste. In a future, Formality will be able to fill
+those bureaucratic bits for you. Let's log `new_hyp` to see what we have:
+
+```
+[LOG]
+Term: cong(~Nat, ~Nat, ~mul2(n.pred), ~add(n.pred, n.pred), ~(x : Nat) => succ(succ(x)), it_works_for_add(n.pred))
+Type: Equal(Nat, succ(succ(mul2(n.pred))), succ(succ(add(n.pred, n.pred))))
+```
+
+As you can see, `new_hyp : 1 + 1 + 2 * p == 1 + 1 + p + p`... which is exactly
+what our goal reduces to. As such, we can complete this branch with it:
+
+```javascript
+it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+  case n
+  | zero => refl(~Nat, ~zero)
+  | succ =>
+    let ind_hyp = it_works_for_add(n.pred)
+    let new_hyp = cong(~Nat, ~Nat, ~mul2(n.pred), ~add(n.pred, n.pred), ~(x : Nat) => succ(succ(x)), ind_hyp)
+    new_hyp
+  : Equal(Nat, mul2(n), add(n, n))
+```
+
+And done! Our program passes the type-checker now, which means we've proven
+that `2 * n == n + n` for all `n`. This is really cool, because it is as if
+we've written infinitely many tests for `mul2`: there isn't a single value of
+`n` for which it could return anything other than `n + n`. Of course, we could
+just have defined `mul2(n)` as `add(n,n)` to begin with, but what if addition
+itself was incorrect? The fact that `mul2` and `add` match despite being
+very different functions mutually reinforces their correctness.
+
+

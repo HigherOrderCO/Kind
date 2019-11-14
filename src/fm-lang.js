@@ -839,7 +839,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
         if (isall) {
           parsed = All(names[i], types[i] || Typ(), parsed, erass[i], loc(idx - init));
         } else {
-          parsed = Lam(names[i], types[i] || Typ(), parsed, erass[i], loc(idx - init));
+          parsed = Lam(names[i], types[i] || null, parsed, erass[i], loc(idx - init));
         }
       }
       return parsed;
