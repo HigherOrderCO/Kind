@@ -22,11 +22,16 @@ Table of contents
     - [Recursion](#recursion)
     - [Polymorphism](#polymorphism)
     - [Motive](#motive)
-    - [Indices](#indies)
+    - [Indices](#indices)
     - [Encoding](#encoding)
 - [Advanced](#advanced)
     - [Stratification](#stratification)
     - [Proofs](#proofs)
+- [Theory](#theory)
+    - [Formality Core](#formality-core)
+    - [Formality Calculus](#formality-calculus)
+    - [Formality Net](#formality-net)
+    - [Compilation](#compilation)
 
 
 Motivation
@@ -63,7 +68,7 @@ Fast and portable "by design"
  garbage-collection-free. It has a strongly confluent interaction-net runtime,
  allowing it to be evaluated in massively parallel architectures. It doesn’t
  require De Bruijn bookkeeping, making it the fastest “closure chunker” around. It
- is lazy, it has a clear cost model for blockchains, it has a minuscule ([448
+ is lazy, it has a clear cost model for blockchains, it has a minuscule ([435
  LOC](https://github.com/moonad/Formality/blob/master/src/fm-net.js)) runtime
  that can easily be ported to multiple platforms. Right now, Formality’s
  compiler isn’t as mature as the ones found in decades-old languages, but it
@@ -253,7 +258,7 @@ division | `x ./. y` | `x / y`
 modulus | `x .%. y` | `x % y`
 exponentiation | `x .**. y` | `x ** y`
 bitwise-and | `x .&. y` | `x & y`
-bitwise-or | `x .|. y` | `x | y`
+bitwise-or | `x .\|. y` | `x \| y`
 bitwise-xor | `x .^. y` | `x ^ y`
 bitwise-not | `.~.(y)` | `~y`
 bitwise-right-shift | `x .>>>. y` | `x >>> y`
@@ -275,7 +280,7 @@ There is also `if`, which allows branching with a `Number` condition.
 
 syntax | description
 --- | ---
-`if n: a else: b` | If `n .==. 0`, evaluates to `b`, else, evaluates to `a`
+`if n: a else: b` | If `n` is `0`, evaluates to `b`, else, evaluates to `a`
 
 Usage is straightforward:
 
@@ -372,8 +377,8 @@ Lambda
 
 syntax | description
 --- | ---
-`{x : A, y : B, z : C, ...} -> D` | Function type with args `x : A`, `y : B`, `z : C`, returning `D`
-`{x, y, z, ...} body` | A function that receives the arguments `x`, `y`, `z` and returns `body`
+`(x : A, y : B, z : C, ...) -> D` | Function type with args `x : A`, `y : B`, `z : C`, returning `D`
+`(x, y, z, ...) => body` | A function that receives the arguments `x`, `y`, `z` and returns `body`
 `f(x, y, z, ...)` | Applies the function `f` to the arguments `x`, `y`, `z` (curried)
 
 Formality functions are curried anonymous expressions, like Haskell's lambdas.
@@ -452,17 +457,17 @@ main : Number
 
 
 Formality functions are **affine**, which means you can't use a variable more
-than once. For example, the program below isn't allowed, because `x` is used
+than once. For example, the program below isn't allowed, because `b` is used
 twice:
 
 ```haskell
 import Base@0
 
-foo(x : Bool) : Bool
-  or(x, x)
+self_or(b : Bool) : Bool
+  or(b, b)
 
 main : Bool
-  foo(true)
+  self_or(true)
 ```
 
 Multiple ways to circumvent this limitation will be explained through this
@@ -498,7 +503,7 @@ syntax | description
 --- | ---
 `${self} T(self)` | `T` is a type that can access its own value
 `new(~T) t` | Constructs an instance of a `T` with value `t`
-`(%t)` | Consumes a self-type `t`, giving its type access to its value
+`use(t)` | Consumes a self-type `t`, giving its type access to its value
 
 Self Types allow a type to access *its own value*. For example, suppose that
 you wanted to create a pair of identical numbers. It could be done as:
@@ -620,7 +625,7 @@ Note that this is only automatic if Formality can infer the expected type of
 the hole's location. Otherwise, you must give it an explicit annotation, as in
 `?hole :: MyType`.
 
-## Log
+#### Log
 
 Another handy feature is `log(x)`. When running a program, it will print the
 normal form of `x`, similarly to haskell's `console.log` and haskell's `print`,
@@ -655,7 +660,7 @@ Since it coincides with the goal, you can complete the program above with it:
 ```haskell
 import Base@0
 
-main : {f : Bool -> Nat} -> Nat
+main(f : Bool -> Nat) : Nat
   f(true)
 ```
 
@@ -1056,8 +1061,8 @@ develop mathematical proofs in Formality. Let's go through some examples.
 #### Example: proving equalities
 
 Formality's base libraries include a type for equality proofs called `Equal`.
-For example, `Equal(Num, 2, 2)` is the statement that `2` is equal `2`. It is
-not a proof: you can write `Equal(Num, 2, 3)`, which is the statement that `2`
+For example, `Equal(Number, 2, 2)` is the statement that `2` is equal `2`. It is
+not a proof: you can write `Equal(Number, 2, 3)`, which is the statement that `2`
 is equal to `3`.  To prove an equality, you can use `refl(~A, ~x)`, which, for
 any `x : A`, proves `Equal(A, x, x)`. In other words, `refl` is a proof that
 every value is equal to itself. As such, we can prove that `true` is equal to
@@ -1205,7 +1210,7 @@ with "Self Types". For example, the `Bool` datatype desugars to:
 ```haskell
 Bool : Type
   ${self}
-  ( ~P    : {x : Bool} -> Type
+  ( ~P    : Bool -> Type
   , true  : P(true)
   , false : P(false)
   ) -> P(self)
@@ -1217,7 +1222,7 @@ false : Bool
   new(~Bool) (~P, true, false) => false
 
 case_of(b : Bool, ~P : Bool -> Type, t : P(true), f : P(false)) : P(b)
-  (use(b))(~P, t, f)
+  use(b)(~P, t, f)
 ```
 
 Here, `${self} ...`, `new(~T) val` and `use(b)` are the type, introduction, and
@@ -1438,7 +1443,7 @@ double of any `n` is equal to `x .+. x`. We start by writing the type of our
 invariant:
 
 ```haskell
-it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
   ?a
 ```
 
@@ -1463,7 +1468,7 @@ Formality is asking us to to prove what we claimed to be true. Let's try to do
 it with a `refl`:
 
 ```haskell
-it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
   refl(~Nat, ~mul2(n))
 ```
 
@@ -1484,7 +1489,7 @@ We need to "unstuck" the equation by inspecting the value of `n` with a case
 expression.
 
 ```haskell
-it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
   case n
   | zero => ?a
   | succ => ?b
@@ -1515,7 +1520,7 @@ on the branch?  That's very important, because now both sides evaluate to
 `zero`.  This allows us to prove that case with a `refl`!
 
 ```haskell
-it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
   case n
   | zero => refl(~Nat, ~zero)
   | succ => ?b
@@ -1543,11 +1548,11 @@ theorems about recursive datatypes like `Nat`. Let's do that and `log` it to
 see what we get:
 
 ```haskell
-it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
   case n
   | zero => refl(~Nat, ~zero)
   | succ =>
-    let ind_hyp = it_works_for_add(n.pred)
+    let ind_hyp = it_works_for_all_n(n.pred)
     log(ind_hyp)
     ?a
   : Equal(Nat, mul2(n), add(n, n))
@@ -1557,7 +1562,7 @@ This outputs:
 
 ```haskell
 [LOG]
-Term: it_works_for_add(n.pred)
+Term: it_works_for_all_n(n.pred)
 Type: Equal(Nat, mul2(n.pred), add(n.pred, n.pred))
 ```
 
@@ -1570,11 +1575,11 @@ add `succ(succ(...))` to both sides of the equation. This can be done with the
 function, and applies the function to both sides of the equality. Like this:
 
 ```haskell
-it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
   case n
   | zero => refl(~Nat, ~zero)
   | succ =>
-    let ind_hyp = it_works_for_add(n.pred)
+    let ind_hyp = it_works_for_all_n(n.pred)
     let add_two = (x : Nat) => succ(succ(x))
     let new_hyp = cong(~Nat, ~Nat, ~mul2(n.pred), ~add(n.pred, n.pred), ~add_two, ind_hyp)
     log(new_hyp)
@@ -1590,7 +1595,7 @@ we have now:
 
 ```haskell
 [LOG]
-Term: cong(~Nat, ~Nat, ~mul2(n.pred), ~add(n.pred, n.pred), ~(x : Nat) => succ(succ(x)), it_works_for_add(n.pred))
+Term: cong(~Nat, ~Nat, ~mul2(n.pred), ~add(n.pred, n.pred), ~(x : Nat) => succ(succ(x)), it_works_for_all_n(n.pred))
 Type: Equal(Nat, succ(succ(mul2(n.pred))), succ(succ(add(n.pred, n.pred))))
 ```
 
@@ -1598,11 +1603,11 @@ As you can see, `new_hyp` has the same type as our goal As such, we can
 complete this branch with it:
 
 ```haskell
-it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
   case n
   | zero => refl(~Nat, ~zero)
   | succ =>
-    let ind_hyp = it_works_for_add(n.pred)
+    let ind_hyp = it_works_for_all_n(n.pred)
     let add_two = (x : Nat) => succ(succ(x))
     let new_hyp = cong(~Nat, ~Nat, ~mul2(n.pred), ~add(n.pred, n.pred), ~add_two, ind_hyp)
     new_hyp
