@@ -21,8 +21,8 @@ Table of contents
     - [Move](#move)
     - [Recursion](#recursion)
     - [Polymorphism](#polymorphism)
-    - [Motive](#motive)
     - [Indices](#indies)
+    - [Motive](#motive)
     - [Encoding](#encoding)
 - [Advanced](#advanced)
     - [Stratification](#stratification)
@@ -63,7 +63,7 @@ Fast and portable "by design"
  garbage-collection-free. It has a strongly confluent interaction-net runtime,
  allowing it to be evaluated in massively parallel architectures. It doesn’t
  require bruijn bookkeeping, making it the fastest “closure chunker” around. It
- is lazy, it has a clear cost model for blockchains, it has a minuscle ([448
+ is lazy, it has a clear cost model for blockchains, it has a minuscle ([435
  LOC](https://github.com/moonad/Formality/blob/master/src/fm-net.js)) runtime
  that can easily be ported to multiple platforms. Right now, Formality’s
  compiler isn’t as mature as the ones found in decades-old languages, but it
@@ -458,11 +458,11 @@ twice:
 ```haskell
 import Base@0
 
-foo(x : Bool) : Bool
-  or(x, x)
+self_or(b : Bool) : Bool
+  or(b, b)
 
 main : Bool
-  foo(true)
+  self_or(true)
 ```
 
 Multiple ways to circumvent this limitation will be explained through this
@@ -675,7 +675,7 @@ Since it coincides with the goal, you can complete the program above with it:
 ```haskell
 import Base@0
 
-main : {f : Bool -> Nat} -> Nat
+main(f : Bool -> Nat) : Nat
   f(true)
 ```
 
@@ -1222,7 +1222,7 @@ with "Self Types". For example, the `Bool` datatype desugars to:
 ```haskell
 Bool : Type
   ${self}
-  ( ~P    : {x : Bool} -> Type
+  ( ~P    : Bool -> Type
   , true  : P(true)
   , false : P(false)
   ) -> P(self)
