@@ -21,8 +21,8 @@ Table of contents
     - [Move](#move)
     - [Recursion](#recursion)
     - [Polymorphism](#polymorphism)
-    - [Motive](#motive)
     - [Indices](#indices)
+    - [Motive](#motive)
     - [Encoding](#encoding)
 - [Advanced](#advanced)
     - [Stratification](#stratification)
@@ -1158,20 +1158,26 @@ a proof that `1` is equal to `2`, we can make an element of type `Empty`. Can
 you prove this?
 
 An interesting thing about `Empty` is that it can be used to prove that a
-theorem is false by implementing a function that receives the theorem as its
-input and uses it to derive `Empty`. Formality's base libraries exports many
-common theorems to help you with absurd proofs. For example, `absurd : (e :
-Empty, ~P : Type) -> P` allows you to prove any theorem from an `e : Empty`.
-Similarly, `true_isnt_false : (e : Equal(Bool, true, false)) -> Empty` allows
-you to turn a proof that `true` is `false` into a proof of `Empty`. Another
-useful function is `cong`, which allows us to apply a function to both sides of
-an equation. You can check how those proofs are implemented by browing our
-[base libraries](https://github.com/moonad/formality-base).
+theorem is false by implementing a function that receives it as the input and
+uses it to derive `Empty`. Our base libraries export many functions to help
+you with that. For example:
 
-Those building blocks allow you to prove more complicate absurdities without
-needing to pattern-match directly, by manipulating equations with higher level
-functions. For example, here is a proof that `"dogs"` and `"horses"` are
-different strings:
+- [`absurd`](https://github.com/moonad/Formality-Base/blob/master/Empty.fm):
+  allows you to prove any theorem from an `e : Empty`.
+
+- [`true_isnt_false`](https://github.com/moonad/Formality-Base/blob/master/Bool.fm):
+  allows you to turn a proof that `true` is `false` into a proof of `Empty`.
+
+- [`cong`](https://github.com/moonad/Formality-Base/blob/master/Equal.fm):
+  allows you to apply a function to both sides of an equation.
+
+- [`rewrite`](https://github.com/moonad/Formality-Base/blob/master/Equal.fm):
+  allows you to rewrite provably equal expressions inside types.
+
+
+Those building blocks allow you to prove more complicate absurdities  by
+manipulating equations with higher level functions. For example, here is a
+proof that `"dogs"` and `"horses"` are different strings:
 
 ```haskell
 main(input : Equal(String, "dogs", "horses")) : Empty
