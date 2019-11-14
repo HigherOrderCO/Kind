@@ -951,43 +951,51 @@ arguments. That gives us a lot of type-level power and is one of the reasons
 Formality is a great proof language. For example:
 
 ```haskell
-T IsEven (x : Number)
-| make_even(half : Number) : IsEven(half .*. 2)
+T IsEven (x : Nat)
+| make_even(half : Nat) : IsEven(mul(2n, half))
 ```
 
-This datatype has one index, `x`, of type `Number`. Its constructor, `is_even`,
-has one field, `half : Number`. When you write `make_even(3)`, the number `3`
+This datatype has one index, `n`, of type `Nat`. Its constructor, `is_even`,
+has one field, `half : Nat`. When you write `make_even(3n)`, the number `3n`
 is multiplied by two and moved to the type-level, resulting in a value of type
-`IsEven(6)`. This makes it impossible to create a value of type `IsEven(5)`,
-because you'd need a `x` such that `x .*. 2` is `5`, but that's impossible.
+`IsEven(6n)`. This makes it impossible to create a value of type `IsEven(5n)`,
+because you'd need a `n` such that `mul(2n, n)` is `5n`, but that's impossible.
 To visualize this, see the code below:
 
 ```haskell
-even_0 : IsEven(0)
-  make_even(0)
+even_0n : IsEven(0n)
+  make_even(0n)
 
-even_2 : IsEven(2)
-  make_even(1)
+even_2n : IsEven(2n)
+  make_even(1n)
 
-even_4 : IsEven(4)
-  make_even(2)
+even_4n : IsEven(4n)
+  make_even(2n)
 
-even_6 : IsEven(6)
-  make_even(3)
+even_6n : IsEven(6n)
+  make_even(3n)
 ```
 
-This allows us, for example, to create a `div2` function that can only receive
+This allows us, for example, to create a `half` function that can only receive
 even values:
 
 ```haskell
-div2(x : Number, ~x_is_even : IsEven(x)) : Number
-  x ./. 2
+div2(n : Nat) : Nat
+  case n
+  | zero => zero
+  | succ => case n.pred as np
+    | zero => zero
+    | succ => succ(div2(np.pred))
+    : Nat
+  : Nat
 
-main : Number
-  div2(10, ~make_even(5))
+half(n : Nat, ~is_even : IsEven(n)) : Nat
+  div2(n)
 ```
 
-You can't call `div2` on odd values because you can't construct an `IsEven` for them.
+You can't call `half` on odd values because you can't construct an `IsEven` for
+them. An good exercise might be to implement a proof of `Equal(Nat,
+double(half(n, ~ie)), n)`. Why this is possible for `half`, but not for `div2`?
 
 Another example is the Vector, which is a `List` with a statically known length:
 
