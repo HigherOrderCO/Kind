@@ -12,25 +12,33 @@ Check the [official documentation](DOCUMENTATION.md), browse our [base-libraries
 
 ## Examples
 
-- [Bools](https://github.com/moonad/Formality-Base/blob/master/Data.Bool.fm) and some theorems (DeMorgan's laws).
+- Adding all numbers of a list:
 
-- [Monads.](https://github.com/moonad/Formality-Base/blob/master/Control.Monad.fm) (The FP view, not a monoid in the category of endofunctors!)
+    ```haskell
+    sum(xs : List(Number)) : Number
+      case xs
+      | nil  => 0
+      | cons => xs.head .+. sum(xs.tail)
+      : Number
+    ```
 
-- A snippet from [Data.Vector](https://github.com/moonad/Formality-Base/blob/master/Data.List.fm):
+- A proof that negating a bool twice returns the same bool:
 
-    ```javascript
-    // A vector is a list with a statically known length
-    T Vector<A> (len : -Nat)
-    | vnil                                                : Vector(A, zero)
-    | vcons(~len : -Nat, head : A, tail : Vector(A, len)) : Vector(A, succ(len))
+    ```haskell
+    not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
+      case b
+      | true  => refl(~Bool, ~true)
+      | false => refl(~Bool, ~false)
+      : Equal(Bool, not(not(b)), b)
+    ```
 
-    // (...)
+- Extracting the first element of a provably non-empty vector:
 
-    // A type-safe "head" that returns the first element of a non-empty vector
+    ```haskell
     vhead(~A, ~len : -Nat, xs : Vector(A, succ(len))) : A
       case xs
       + refl(~Nat, ~succ(len)) as e : Equal(Nat, xs.len, succ(len))
-      | vnil  => absurd(zero_isnt_succ(~len, e), ~A) // provably unreachable!
+      | vnil  => absurd(zero_isnt_succ(~len, e), ~A) // -- unreachable!
       | vcons => xs.head
       : A
     ```
