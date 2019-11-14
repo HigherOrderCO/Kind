@@ -4,7 +4,7 @@ Table of contents
 - [Motivation](#motivation)
 - [Installation](#installation)
 - [Introduction](#introduction)
-- [Primitives](#core-features)
+- [Primitives](#primitives)
     - [Let](#let)
     - [Number](#number)
     - [Pair](#pair)
@@ -21,8 +21,8 @@ Table of contents
     - [Move](#move)
     - [Recursion](#recursion)
     - [Polymorphism](#polymorphism)
-    - [Indices](#indies)
     - [Motive](#motive)
+    - [Indices](#indices)
     - [Encoding](#encoding)
 - [Advanced](#advanced)
     - [Stratification](#stratification)
@@ -67,12 +67,12 @@ Fast and portable "by design"
  possible. For example, it has affine lambdas, allowing it to be
  garbage-collection-free. It has a strongly confluent interaction-net runtime,
  allowing it to be evaluated in massively parallel architectures. It doesn’t
- require bruijn bookkeeping, making it the fastest “closure chunker” around. It
- is lazy, it has a clear cost model for blockchains, it has a minuscle ([435
+ require De Bruijn bookkeeping, making it the fastest “closure chunker” around. It
+ is lazy, it has a clear cost model for blockchains, it has a minuscule ([435
  LOC](https://github.com/moonad/Formality/blob/master/src/fm-net.js)) runtime
  that can easily be ported to multiple platforms. Right now, Formality’s
  compiler isn’t as mature as the ones found in decades-old languages, but it
- has endless room for improvements, since the language is fast “by design”.
+ has endless room for improvements since the language is fast “by design”.
 
 An elegant underlying Type Theory
 ---------------------------------
@@ -82,15 +82,15 @@ elegant, powerful type-level features that would be otherwise impossible
 without causing logical inconsistencies. For example, instead of built-in
 datatypes, we rely on [Self
 Types](https://www.semanticscholar.org/paper/Self-Types-for-Dependently-Typed-Lambda-Encodings-Fu-Stump/652f673e13b889e0fd7adbd480c2fdf290621f66),
-which allow us to implement inductive families with native lambdas. As history
+which allows us to implement inductive families with native lambdas. As history
 tells, having elegant foundations often pays back. We've not only managed to
 port several proofs from other assistants, but found techniques to [emulate
 Coq's structural
 recursion](https://github.com/moonad/Formality-Base/commit/b777d806c6fa37f2ce306fbe87b3ed267152b90c),
-to perform large eliminations, and even an hypothetical encoding of [higher
+to perform large eliminations, and even a hypothetical encoding of [higher
 inductive
 types](https://github.com/moonad/Formality-Base/blob/master/Example.HigherInductiveType.fm);
-and we've barely began exploring the system.
+and we've barely begun exploring the system.
 
 An optimal high-order evaluator
 -------------------------------
@@ -102,7 +102,7 @@ high-level feel with a Rust-like low-level performance curve. For example,
 Haskell's stream fusion, a hard-coded, important optimization, happens
 naturally, [at
 runtime](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07),
-on Formality. This also allow us to explore new ways to develop algorithms,
+on Formality. This also allows us to explore new ways to develop algorithms,
 such as this "impossibly efficient" [exp-mod
 implementation](https://medium.com/@maiavictor/calling-a-function-a-googol-times-53933c072e3a).
 Who knows if this may lead to new breakthroughs in complexity theory?
@@ -178,7 +178,7 @@ Type mismatch.
   5|
 ```
 
-Because `7` is a Number, but the `print` function expects a `String`. Since
+Because `7` is a `Number`, but the `print` function expects a `String`. Since
 Formality is a proof language, types can be seen as theorems and well-typed
 terms can be seen a proof. So, for example, this is a proof that `2 == 2`:
 
@@ -268,7 +268,7 @@ less-than | `x .<. y` | `x < y ? 1 : 0`
 equals | `x .==. y` | `x === y ? 1 : 0`
 
 There is no operator precedence: parenthesis are always placed on the right.
-That means `3 * 10 + 1` is parsed as `3 * (10 + 1)`. If you want the
+That means `3 .*. 10 .+. 1` is parsed as `3 .*. (10 .+. 1)`. If you want the
 multiplication to occur first, you must be explicit:
 
 ```haskell
@@ -280,7 +280,7 @@ There is also `if`, which allows branching with a `Number` condition.
 
 syntax | description
 --- | ---
-`if n: a else: b` | If `n .= 0`, evaluates to `b`, else, evaluates to `a`
+`if n: a else: b` | If `n` is `0`, evaluates to `b`, else, evaluates to `a`
 
 Usage is straightforward:
 
@@ -528,7 +528,7 @@ do us to encode inductive datatypes with lambdas, as will be explained later.
 Annotation
 ----------
 
-You can also explictly annotate the type of a term:
+You can also explicitly annotate the type of a term:
 
 syntax | description
 --- | ---
@@ -625,7 +625,8 @@ Note that this is only automatic if Formality can infer the expected type of
 the hole's location. Otherwise, you must give it an explicit annotation, as in
 `?hole :: MyType`.
 
-#### Log
+Log
+------
 
 Another handy feature is `log(x)`. When running a program, it will print the
 normal form of `x`, similarly to haskell's `console.log` and haskell's `print`,
@@ -790,7 +791,7 @@ main : Output
   print(get_name(john))
 ```
 
-As you can see, fields can be accessed inside `case` expressions . Notice that
+As you can see, fields can be accessed inside `case` expressions. Notice that
 `p.name` is not a field accessor, but just a single variable: the `.` is part
 of its name. When Formality doesn't know the name of the matched value, you
 must must explicitly name it using the `as` keyword:
@@ -865,7 +866,7 @@ T Foo
 | foo(bar : Foo)
 
 T Bar
-| bar(foo : Bar}
+| bar(foo : Bar)
 ```
 
 Recursive functions can be written as usual:
@@ -917,7 +918,7 @@ having to write multiple `Pair` definitions.
 
 Each polymorphic variable adds an implicit, erased argument to each
 constructor, so, instead of `pair(true, 7)`, you need to write `pair(~Bool,
-~Number, true, 7)`. In a future, this verbosity will be prevented with implicit
+~Number, true, 7)`. In the future, this verbosity will be prevented with implicit
 arguments.
 
 One of the most popular polymorphic types is the linked `List`:
@@ -946,7 +947,7 @@ Indices
 
 Indices are like polymorphic variables, except that, rather than constant
 types, they are **computed values** that can depend on each constructor's
-arguments. That gives us a lot of type-level power, and is one of the reasons
+arguments. That gives us a lot of type-level power and is one of the reasons
 Formality is a great proof language. For example:
 
 ```haskell
@@ -991,25 +992,25 @@ You can't call `div2` on odd values because you can't construct an `IsEven` for 
 Another example is the Vector, which is a `List` with a statically known length:
 
 ```haskell
-T Vector<A> (len : Nat)
-| vcons {~len : Nat, head : A, tail : Vector(A, len)} : Vector(A, succ(len))
+T Vector<A> (len : -Nat)
 | vnil                                                : Vector(A, zero)
+| vcons(~len : -Nat, head : A, tail : Vector(A, len)) : Vector(A, succ(len))
 ```
 
 Every time you add an element to a Vector, the length on its type increases:
 
 ```haskell
-main : Vector(String, 0n3)
-   vcons(~String, ~0n2, "ichi",
-   vcons(~String, ~0n1, "ni",
-   vcons(~String, ~0n0, "san",
+main : Vector(String, 3n)
+   vcons(~String, ~2n, "ichi",
+   vcons(~String, ~1n, "ni",
+   vcons(~String, ~0n, "san",
    vnil(~String))))
 ```
 
 This has many applications such as creating a type-safe `vhead` function that
 can't be called on non-empty vectors.
 
-As a last example, this define a list with all elements being true:
+As the last example, this defines a list with all elements being true:
 
 ```haskell
 import Base@0
@@ -1019,9 +1020,9 @@ T AllTrue (xs : List(Bool))
 | al_cons (xs : List(Bool), tt : AllTrue(xs)) : AllTrue(cons(~Bool, true, xs))
 ```
 
-It says that the empty list is a list of trues (`at_nil`), and that appending
+It says that the empty list is a list of trues (`at_nil`) and that appending
 true to a list of trues is still a list of trues (`at_cons`). You can make all
-sorts of specifications using indexed datatypes, making them extremelly
+sorts of specifications using indexed datatypes, making them extremely
 powerful.
 
 Motive
@@ -1061,8 +1062,8 @@ develop mathematical proofs in Formality. Let's go through some examples.
 #### Example: proving equalities
 
 Formality's base libraries include a type for equality proofs called `Equal`.
-For example, `Equal(Num, 2, 2)` is the statement that `2` is equal `2`. It is
-not a proof: you can write `Equal(Num, 2, 3)`, which is the statement that `2`
+For example, `Equal(Number, 2, 2)` is the statement that `2` is equal `2`. It is
+not a proof: you can write `Equal(Number, 2, 3)`, which is the statement that `2`
 is equal to `3`.  To prove an equality, you can use `refl(~A, ~x)`, which, for
 any `x : A`, proves `Equal(A, x, x)`. In other words, `refl` is a proof that
 every value is equal to itself. As such, we can prove that `true` is equal to
@@ -1141,7 +1142,7 @@ wtf(e : Empty) : ?
 Simple: we can replace `?` with anything, and the program will check. That's
 because, technically, we proved all the cases, so the case expression just
 returns the motive directly, allowing us to write anything on it! That can be
-used derive any theorem given a value of type Empty:
+used to derive any theorem given a value of type Empty:
 
 ```haskell
 import Base@0
@@ -1332,7 +1333,7 @@ recursion is still a work in progress, and recursive programes raise a warning.
 Proofs
 ======
 
-Types in Formality can be used to express mathematical theorems. This allow us
+Types in Formality can be used to express mathematical theorems. This allows us
 to statically prove invariants about our programs, making them flawless. In a
 way, proofs can be seen as a generalization of tests. With tests, we can assert
 that specific expressions have the values we expect. For example, consider the
@@ -1439,7 +1440,7 @@ it_works_for_2 : Equal(Nat, mul2(2n), 4n)
 ```
 
 Since those pass, we can now try to prove the more general statement that the
-double of any `n` is equal to `x + x`. We start by writing the type of our
+double of any `n` is equal to `x .+. x`. We start by writing the type of our
 invariant:
 
 ```haskell
@@ -1589,7 +1590,7 @@ it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
 
 Note that `cong` is a little bit verbose since it needs you to provide both
 sides of the equality you want to alter. Don't let this scare you, though, you
-can literally just copy-paste from the goal. In a future, Formality will be
+can literally just copy-paste from the goal. In the future, Formality will be
 able to fill those bureaucratic bits for you. Let's log `new_hyp` to see what
 we have now:
 
@@ -1617,7 +1618,7 @@ it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
 And done! Since we've proven our theorem for both possible values of `n`
 (`zero` or `succ(n.pred)`), then we've proven it for every `n`. And that's how
 most proofs are done. Proving an equation is often just a game of "opening"
-variables with `case` expressions so that the sides gets unstuck, until we're
+variables with `case` expressions so that the sides gets unstuck until we're
 able to finish the proof with a `refl`, or with an inductive hypothesis.
 
 The cool thing is, since our program passes the type-checker now, that means
@@ -1630,11 +1631,11 @@ reinforces the correctness of them both, mutually.
 An interesting point to note is that proofs are often much longer than
 theorems. In this example, the theorem had just one line, but the proof had 8.
 Proofs are laborious to write and require a set of advanced programming skills.
-But, once they're done, they're undeniably correct. This is extremelly
+But, once they're done, they're undeniably correct. This is extremely
 valuable. For example, think of a huge smart-contract: its code could be big
 and complex, but, as long as its developers publish proofs of a few essential
 properties, users can trust it won't go wrong. In a way, proofs can be seen as
-trustless correctness assets, in the sense you can use them to convince people
+trustless correctness assets, in the sense, you can use them to convince people
 that your code is correct without needing them to trust you.
 
 Theory
@@ -1645,12 +1646,12 @@ theory. It is based on elementary terms are just annotated versions of the
 Elementary Affine Calculus (EAC), which is itself a terminating subset
 of the lambda-calculus with great computational characteristics. In particular,
 EAC is compatible with the most efficient version of the optimal reduction
-algorithm [citation]. This is important because, while asymptically optimal,
+algorithm [citation]. This is important because, while asymptotically optimal,
 most implementations of the algorithm carry an extra, significant constant
 overhead caused by a book-keeping machinery. This made them too slow in
-practice, decreasing interest on the area. By relying on EAC, we can avoid the
+practice, decreasing interest in the area. By relying on EAC, we can avoid the
 book-keeping overhead, making it much faster than all alternatives. Below is a
-table comparing the amount of native operations (graph rewrites) required to
+table comparing the number of native operations (graph rewrites) required to
 reduce λ-terms in other implementations and Formality:
 
  Term | GeomOpt | GeomImpl | YALE | IntComb | Formality
@@ -1663,7 +1664,7 @@ reduce λ-terms in other implementations and Formality:
 223II |    1750 |     1046 |  213 |     869 |        69
  44II |    3456 |     2816 |  148 |    2447 |        89
 
-Not only Formality requires orders of magnitue less native operations, but its
+Not only Formality requires orders of magnitude less native operations, but its
 native operations are much simpler.
 
 Unlike most proof languages, Formality doesn't include a datatype system, since
@@ -1673,7 +1674,7 @@ discovered that type preservation does not hold in Coq due to its treatment of
 coinductive datatypes [citation], and both Coq and Agda were found to be
 incompatible with Homotopy Type Theory due to the K-axiom, used by native
 pattern-matching on dependent datatypes [citation]. Instead, Formality relies
-on lambda encodings, an alternative to a datatype system that use plain lambdas
+on lambda encodings, an alternative to a datatype system that uses plain lambdas
 to encode arbitrary data. While attractive, this approach wasn't adopted in
 practical type theories for several reasons:
 
@@ -1965,11 +1966,11 @@ true_isnt_false(e : Id(Bool, true, false)) -> Empty
 That much type-level power comes at a cost: if Formality was based on the
 conventional lambda calculus, it wouldn't be sound. Since it is based on EAC,
 a terminating untyped language, its normalization is completely independent
-from types, so it is impossible to derive paradoxes by exploiting
+of types, so it is impossible to derive paradoxes by exploiting
 non-terminating computations. A good exercise is attempting to write `λx. (x x)
 λx. (x x)` on EAC, which is impossible. The tradeoff is that EAC is
 considerably less computationally powerful than the lambda calculus, imposing
-severe restriction on how terms can be duplicated. This limitation isn't very
+a severe restriction on how terms can be duplicated. This limitation isn't very
 problematic in practice since the language is still capable of implementing any
 algorithm a normal programming language, but doing so involves a resource-usage
 discipline that can be annoying to users. Formality is currently being
@@ -2034,7 +2035,7 @@ that lambdas can't substitute inside boxes. The third condition says that you
 can't unbox, or add boxes, to a term by duplicating it. Stratified FM-Calc terms
 are strongly normalizing. Proof: 
 
-- Define the level of a term as the amount of boxes surrounding it.
+- Define the level of a term as the number of boxes surrounding it.
 
 - Define the number of redex in a level by counting its reducible apps/dups.
 
@@ -2083,7 +2084,7 @@ nodes, ERA, CON, OP1, OP2, ITE, NUM.
   ports and an operation id. They are used for numeric operations such as
   addition and multiplication.
 
-- `ITE` has 3 ports and an integer label. It is used for if-then-else, and is
+- `ITE` has 3 ports and an integer label. It is used for if-then-else and is
   required to enable number-based branching.
 
 Note that the position of the port matters. The port on top is called the `main`
@@ -2121,7 +2122,7 @@ cases can't happen on valid FM-Calc programs.
 
 #### Duplication
 
-When different nodes collide, they "pass through" each other, duplicating
+When different nodes collide, they "pass-through" each other, duplicating
 themselves in the process. This allows, for example, `CON` nodes with a label
 `>1` to be used to perform deep copies of any term, with `dup x = val; ...`. It
 can copy lambdas and applications because they are represented with `CON` nodes
@@ -2136,7 +2137,7 @@ substitution case, destroying each other and connecting neighbors, which isn't
 correct. That's why FMC's box system is necessary: to prevent concurrent
 duplication processes to interfere with each other by ensuring that, whenever
 you duplicate a term with `dup x = val; ...`, all the duplication `CON` nodes of
-`val` will have a labels higher than the one used by that `dup`.
+`val` will have labels higher than the one used by that `dup`.
 
 #### If-Then-Else
 
@@ -2178,12 +2179,12 @@ nodes, as follows:
   whether its ports are pointers or unboxed numbers (3 bits), and the label
   (26 bits).
 
-- `ERA`: is stored inside other nodes and do not use any extra space. An `ERA`
-  node is represented by a pointer port which points to itself. That's because
+- `ERA`: is stored inside other nodes and does not use any extra space. An `ERA`
+  node is represented by a pointer port that points to itself. That's because
   `ERA`'s rewrite rules coincide with what we'd get if we allowed ports to point
   to themselves.
 
-- `NUM`: is stored inside other nodes and do not use any extra space. A `NUM`
+- `NUM`: is stored inside other nodes and does not use any extra space. A `NUM`
   node is represented by a numeric port. In order to know if a port is a number
   or a pointer, each node reserves 3 bits of its last uint to store that
   information.
@@ -2270,7 +2271,7 @@ target port. Then, until we get back to the root, do as follows:
    weak-head normal form reduction, stop. Otherwise, start walking towards each
    auxiliary port (either recursively, or in parallel).
 
-3. If we're walking towards root, halt.
+3. If we're walking towards the root, halt.
 
 This is a rough pseudocode:
 
@@ -2340,4 +2341,3 @@ This process allows us to create as many `CON` nodes as needed to duplicate
 pairs/projections). Note that this process is capable of duplicating λ-bound
 variables, but this isn't safe in practice, and won't happen in well-typed
 inputs.
-
