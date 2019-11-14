@@ -1174,15 +1174,17 @@ functions. For example, here is a proof that `"dogs"` and `"horses"` are
 different strings:
 
 ```haskell
-main(e0 : Equal(String, "dogs", "horses")) : Empty
+main(input : Equal(String, "dogs", "horses")) : Empty
+  -- e0 : Equal(String, "dogs", "horses")
+  let e0 = input
 
-  // -- e1 : Equal(Nat, n4, n6)
+  -- e1 : Equal(Nat, n4, n6)
   let e1 = cong(~String, ~Nat, ~"dogs", ~"horses", ~length(~Char), e0)
 
-  // -- e2 : Equal(Bool, true, false)
+  -- e2 : Equal(Bool, true, false)
   let e2 = cong(~Nat, ~Bool, ~4n, ~6n, ~nat_equals(4n), e1)
 
-  // -- e3 : Empty
+  -- e3 : Empty
   let e3 = true_isnt_false(e2)
 
    e3

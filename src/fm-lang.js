@@ -477,9 +477,9 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     skip_spaces(is_space);
     var head = code.slice(idx, idx + 2);
     // Skips comments
-    while (head === "//" || head === "/*") {
+    while (head === "//" || head === "--" || head === "/*" || head === "{-") {
       // Single-line comments
-      if (head === "//") {
+      if (head === "//" || head === "--") {
         if (tokens) tokens.push(["cmm", ""]);
         while (code[idx] !== "\n" && idx < code.length) {
           next();
@@ -488,7 +488,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
       // Multi-line comments (docs)
       } else {
         if (tokens) tokens.push(["doc", ""]);
-        while (code.slice(idx, idx + 2) !== "*/" && idx < code.length) {
+        while (code.slice(idx, idx + 2) !== "*/" && code.slice(idx, idx + 2) !== "-}" && idx < code.length) {
           next();
         }
         next();
@@ -509,7 +509,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
 
   // Attempts to match a specific string
   function match_here(string) {
-    if (code.slice(idx, idx + 2) === "//") {
+    if (code.slice(idx, idx + 2) === "//" || code.slice(idx, idx + 2) === "--") {
       return false;
     } else {
       var sliced = code.slice(idx, idx + string.length);
