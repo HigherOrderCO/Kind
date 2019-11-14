@@ -517,28 +517,8 @@ same_numbers_0 : SameNumbers
 Here, on the `SameNums` type, we have access to `self`, which is the pair being
 typed. So, whenever you instantiate it, you must provide a proof that its first
 and second elements are equal. Of course, in this case, this effect could be
-achieved with dependent pairs, but what is interesting is that Self allows us
-to do crazy things such as type-level systems of equations:
-
-```haskell 
-// -- a = b + 1
-// -- b = a * 2
-Equations : Type
-  ${self}
-  [: [a : Number, Equal(Number, %(a .*. 2), fst(snd(use(self))))],
-     [b : Number, Equal(Number, b, %(fst(fst(use(self))) .+. 1))]]
-  
-// -- Solution: a = 1, b = 2
-solution : Equations
-  let a = 1
-  let b = 2
-  new(~Equations)
-  [[a, refl(~Number, ~2)],
-   [b, refl(~Number, ~2)]]
-```
-
-And, most notably, it allows us to encode inductive datatypes with plain
-lambdas, as will be explained later.
+achieved with dependent pairs, but what is interesting is that it allows us to
+do us to encode inductive datatypes with lambdas, as will be explained later.
 
 Annotation
 ----------
@@ -1076,19 +1056,20 @@ develop mathematical proofs in Formality. Let's go through some examples.
 #### Example: proving equalities
 
 Formality's base libraries include a type for equality proofs called `Equal`.
-For example, `Equal(Number, 2, 2)` is the statement that `2 == 2`. It is not a
-proof: you can write `Equal(Number, 2, 3)`, which is the statement that `2 == 3`.
-To prove an equality, you can use `refl(~A, ~x)`, which, for any `x : A`,
-proves `Equal(A, x, x)`. In other words, `refl` is a proof that every value is
-equal to itself. As such, we can prove that `true == true` like this:
+For example, `Equal(Num, 2, 2)` is the statement that `2` is equal `2`. It is
+not a proof: you can write `Equal(Num, 2, 3)`, which is the statement that `2`
+is equal to `3`.  To prove an equality, you can use `refl(~A, ~x)`, which, for
+any `x : A`, proves `Equal(A, x, x)`. In other words, `refl` is a proof that
+every value is equal to itself. As such, we can prove that `true` is equal to
+`true` like this:
 
 ```haskell
 true_is_true : Equal(Bool, true, true)
   refl(~Bool, ~true)
 ```
 
-Now, suppose you want to prove that, for any boolean `b`, `not(not(b)) == b`.
-This can be stated as such:
+Now, suppose you want to prove that, for any boolean `b`, `not(not(b))` is
+equal to `b`. This can be stated as such:
 
 ```haskell
 import Base@0
@@ -1164,10 +1145,11 @@ one_is_two(e : Empty) : Equal(Number, 1, 2)
   case e : Equal(Number, 1, 2)
 ```
 
-In other words, if we managed to call `one_is_two`, we'd have a proof that `1
-== 2`. Of course, we can't call it, because there is no way to construct a
-value of type `Empty`. Interestingly, the opposite holds too: given `1 == 2`,
-we can make an element of type `Empty`. Can you prove this?
+In other words, if we managed to call `one_is_two`, we'd have a proof that `1`
+is equal to `2`. Of course, we can't call it, because there is no way to
+construct a value of type `Empty`. Interestingly, the opposite holds too: given
+a proof that `1` is equal to `2`, we can make an element of type `Empty`. Can
+you prove this?
 
 #### Example: avoiding unreachable branches
 
@@ -1185,12 +1167,13 @@ main : Number
 
 Here, we're matching against `true`, so we know the `false` case is
 unreachable, but we still need to fill it with some number. With motives, we
-can avoid that. The idea is that we will send, to each branch, a proof that `x
-== true`. On the `true` branch, it will be specialized to `true == true`, which
-is useless... but, on the `false` branch, it will be specialized to `false ==
-true`. Since this is wrong, we can use it to derive `Empty`. Once we have
-`Empty`, we can fill the branch with `absurd`, a function from the Base library
-with allows us to prove any type if we have `Empty`.
+can avoid that. The idea is that we will send, to each branch, a proof that
+`Equal(Bool, x, true)`. On the `true` branch, it will be specialized to
+`Equal(Bool, true, true)`, which is useless... but, on the `false` branch, it
+will be specialized to `Equal(Bool, false, true)`. Since this is wrong, we can
+use it to derive `Empty`. Once we have `Empty`, we can fill the branch with
+`absurd`, a function from the Base library with allows us to prove any type if
+we have `Empty`.
 
 ```haskell
 import Base@0
@@ -1383,12 +1366,13 @@ it("Works for 20", () => {
 });
 ```
 
-It allows us to test our implementatio of `mul2` by checking if an invariant,
-`n * 2 == n + n`, holds for specific values of `n`.  The problem with this
-approach is that it only gives us partial confidence. No matter how many tests
-we write, there could be still some input which causes our function to
-misbehave. In this example, `mul2(200)` returns `398`, which is different from
-`200 + 200`. The the implementation is incorrect, despite all tests passing!
+It allows us to test our implementatio of `mul2` by checking if the invariant
+that `n * 2` is equal to `n + n` holds for specific values of `n`. The problem
+with this approach is that it only gives us partial confidence. No matter how
+many tests we write, there could be still some input which causes our function
+to misbehave. In this example, `mul2(200)` returns `398`, which is different
+from `200 + 200`. The the implementation is incorrect, despite all tests
+passing!
 
 
 With formal proofs, we can write tests too:
@@ -1418,10 +1402,10 @@ it_works_for_20 : Equal(Number, mul2(20), 40)
   refl(~Number, ~40)
 ```
 
-Here, we're using `Equal` to make theorems like `mul2(10) == 20` or `mul2(44)
-== 88`. Since those are true by reduction, we can complete the proofs with
-`refl`. With that, we just implemented a type-level test suite! But with
-proofs, we can go further: we can prove that a general property holds for every
+Here, we're using `Equal` to make assert that `mul2(10)` is equal to `20` and
+so on. Since those are true by reduction, we can complete the proofs with
+`refl`. This essentially implements a type-level test suite. But with proofs,
+we can go further: we can prove that a general property holds for every
 possible input, not just a few. To explain, let's first re-implement `mul2` for
 `Nat`, which allows us to write a `case` with a `motive`, an essential proof
 technique:
@@ -1460,9 +1444,9 @@ it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
 
 As you can see, this is just like a test, except that it includes a variable,
 `n`, which can be any `Nat`. As such, it will only "pass" if we manage to
-convince Formality that the `n .*. 2 == n .+. n` holds for every `n`, not just a
-few. To do it, we can start by type-checking the program above and seeing what
-Formality has to say:
+convince Formality that `Equal(Nat, mul2(n), add(n, n))` holds for every `n`,
+not just a few. To do it, we can start by type-checking the program above and
+seeing what Formality has to say:
 
 ```haskell
 Found hole: 'a'.
@@ -1492,11 +1476,12 @@ Type mismatch.
 - When checking refl(~Nat, ~mul2(n))
 ```
 
-That's because `refl(~Nat, ~mul2(n))` is a proof that `mul2(n) == mul2(n)`, but
-not that `mul2(n) == add(n, n)`. The problem is that, unlike on the previous
-tests, the equation now has a variable, `n`, which causes both sides to get
-"stuck", so they don't become equal by mere reduction. We need to "unstuck" the
-equation by inspecting the value of `n` with a case expression.
+That's because `refl(~Nat, ~mul2(n))` is a proof that `Equal(Nat, mul2(n),
+mul2(n))`, but not that `Equal(Nat, mul2(n), add(n, n))`. The problem is that,
+unlike on the previous tests, the equation now has a variable, `n`, which
+causes both sides to get "stuck", so they don't become equal by mere reduction.
+We need to "unstuck" the equation by inspecting the value of `n` with a case
+expression.
 
 ```haskell
 it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
@@ -1524,10 +1509,10 @@ Found hole: 'b'.
 ```
 
 Notice that, now, we have two holes, one for each possible value of `n` (`zero`
-or `succ(n.pred)`). The first hole is now asking a proof that `0 * 2 == 0 + 0`.
-See how it was specialized to the value of `n` on the branch?  That's very
-important, because now both sides evaluate to `0`. This allows us to prove that
-case with a `refl`!
+or `succ(n.pred)`). The first hole is now asking a proof that `Equal(Nat,
+mul2(zero), add(zero, zero))`.  See how it was specialized to the value of `n`
+on the branch?  That's very important, because now both sides evaluate to
+`zero`.  This allows us to prove that case with a `refl`!
 
 ```haskell
 it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
@@ -1547,8 +1532,10 @@ Found hole: 'b'.
 - n.pred : Nat
 ```
 
-This demands a proof that `2 * (1 + p) == (1 + p) + (1 + p)`, which reduces to
-`1 + 1 + 2 * p == 1 + 1 + p + p`. This looks... complex. But, since this is a
+This demands a proof that `Equal(Nat, mul2(succ(n.pred)), add(succ(n.pred),
+succ(n.pred)))`. Due to the way `mul2` and `add` are defined, this reduces to
+`Equal(Nat, succ(succ(mul2(n.pred))), succ(succ(add(n.pred, succ(n.pred)))))`,
+so that's what we need to prove. This looks... complex. But, since we're in a
 recursive branch, there is a cool thing we can do: call the function
 recursively to the predecessor of `n`. That's the mathematical equivalent of
 applying the inductive hypothesis, and it is almost always the key to proving
@@ -1574,10 +1561,13 @@ Term: it_works_for_add(n.pred)
 Type: Equal(Nat, mul2(n.pred), add(n.pred, n.pred))
 ```
 
-In other words, we gained "for free" a proof that `2 * p == p + p`, so we just
-need to manipulate it to become `1 + 1 + 2 * p == 1 + 1 + p + p`. That sounds
-possible: all we need to do is add `2` to both sides! This can be done with the
-`cong` function from the Base library:
+In other words, we gained "for free" a proof, `ind_hyp`, that `Equal(Nat,
+mul2(n.pred), add(n.pred, n.pred))`! Now, remember that our goal is `Equal(Nat,
+succ(succ(mul2(n.pred))), succ(succ(add(n.pred, succ(n.pred)))))`. Take a
+moment to observe that, to turn `ind_hyp` into our goal, all we need to do is
+add `succ(succ(...))` to both sides of the equation. This can be done with the
+`cong` function from the Base library. That function accepts an equality and a
+function, and applies the function to both sides of the equality. Like this:
 
 ```haskell
 it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
@@ -1604,8 +1594,8 @@ Term: cong(~Nat, ~Nat, ~mul2(n.pred), ~add(n.pred, n.pred), ~(x : Nat) => succ(s
 Type: Equal(Nat, succ(succ(mul2(n.pred))), succ(succ(add(n.pred, n.pred))))
 ```
 
-As you can see, `new_hyp` has type `1 + 1 + 2 * p == 1 + 1 + p + p`... which is
-exactly what our goal reduces to! As such, we can complete this branch with it:
+As you can see, `new_hyp` has the same type as our goal As such, we can
+complete this branch with it:
 
 ```haskell
 it_works_for_add(n : Nat) : Equal(Nat, mul2(n), add(n, n))
@@ -1625,12 +1615,12 @@ most proofs are done. Proving an equation is often just a game of "opening"
 variables with `case` expressions so that the sides gets unstuck until we're
 able to finish the proof with a `refl`, or with an inductive hypothesis.
 
-The cool thing is since our program passes the type-checker now, that means
-we've proven that `2 * n == n + n` for all `n`. This is an extreme validation
-that our implementation of `mul2` is correct: it is as if we've written
-infinite tests, one for each `n`. Not only that, but the fact that `mul2` and
-`add` match perfectly despite being very different functions reinforce the
-correctness of them both, mutually.
+The cool thing is, since our program passes the type-checker now, that means
+we've proven that `2 * n` is equal to `n + n` for all `n`. This is an extreme
+validation that our implementation of `mul2` is correct: it is as if we've
+written infinite tests, one for each `n`. Not only that, but the fact that
+`mul2` and `add` match perfectly despite being very different functions
+reinforces the correctness of them both, mutually.
 
 An interesting point to note is that proofs are often much longer than
 theorems. In this example, the theorem had just one line, but the proof had 8.
