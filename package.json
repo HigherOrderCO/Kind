@@ -8,7 +8,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile_wat_files": "wat2wasm src/ops.wat -o src/ops.wasm && node tools/wasm2js.js src/ops.wasm"
+    "build_fmn": "emcc -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s EXTRA_EXPORTED_RUNTIME_METHODS='[\"cwrap\"]' -I src/nodes.h -I src/fm-net.h src/fm-net.c -o src/fm-net-c.wasm",
+    "build_wasm": "wat2wasm src/ops.wat -o src/ops.wasm && node tools/wasm2js.js src/ops.wasm && node tools/wasm2js2.js src/fm-net-c.wasm",
+    "build_wat": "wasm2wast src/fm-net-c.wasm -o fm-net-c.wat"
   },
   "repository": {
     "type": "git",

@@ -1,5 +1,6 @@
 'use strict';
 const ops = require('./ops');
+const fmn = require('./fm-net-c')
 
 // i64 Comparison
 const EQ     = 0  // equality
@@ -76,16 +77,16 @@ function from_f64(f) {
   var x  = new Float64Array(1)
   x[0] = f
   var y = new Uint32Array(x.buffer)
-  y[0] = y[0] >>> 0
-  y[1] = y[1] >>> 0
+  y[0] = y[0]
+  y[1] = y[1]
   return y
   }
 
 // u32Pair to f64
 function to_f64(u) {
   var x  = new Uint32Array(2)
-  x[0] = u[0] >>> 0
-  x[1] = u[1] >>> 0
+  x[0] = u[0]
+  x[1] = u[1]
   var y = new Float64Array(x.buffer)
   return (y[0])
   }
@@ -106,9 +107,9 @@ function showFloatBits(f) {
 // make u32 pair from a signed integer
 function from_s32(x) {
   if (x <= 0)
-    return [x, ~0]
+    return [x >>> 0, ~0 >>> 0]
   else
-    return [x, 0]
+    return [x >>> 0, 0 >>> 0]
 }
 
 // apply : {fn : i32, x : [i32, i32], y : [i32, i32]} -> [i32, i32]
@@ -279,4 +280,131 @@ function check_tests() {
   else
     console.error('\x1b[31m%s\x1b[0m',"TESTING: Test #" + bad + " failed")
 }
+
 check_tests();
+
+function check_fmn() {
+  function is(f,a,b,y) {
+    let x0 = f(a[0],a[1],b[0],b[1])
+    let x1 = global.tempRet0;
+    global.tempRet0 = 0
+//    console.log("x0: " + x0);
+//    console.log("x1: " + x1);
+    return (x0 >>> 0 == y[0] >>> 0) && (x1 >>> 0 == y[1]);
+  };
+  function isf(f,a,b,y) {
+    return (f(a,b) == y)
+  };
+
+  function isc(f,a,b,y) {
+    let x0 = f(a,b)
+    let x1 = global.tempRet0;
+    global.tempRet0 = 0
+    return (x0 >>> 0 == y[0] >>> 0) && (x1 >>> 0 == y[1] >>> 0);
+  }
+
+  function isc2(f,a,b,y) {
+    return (f(a[0],a[1],b[0],b[1]) == y)
+  }
+
+  const tests =
+  [ is(fmn.__rotl,[5,6],[32,0],[6,5])
+  , is(fmn.__eq,[0,0],[0,0], [1,0])
+  , is(fmn.__eq,[1,0],[1,0], [1,0])
+  , is(fmn.__eq,[1,0],[0,1], [0,0])
+  , is(fmn.__ne,[0,0],[1,0], [1,0])
+  , is(fmn.__ne,[0,0],[0,0], [0,0])
+  , is(fmn.__ne,[1,0],[1,0], [0,0])
+  , is(fmn.__ne,[1,0],[0,1], [1,0])
+  , is(fmn.__lt_s, from_s32(0), from_s32(1), [1,0])
+  , is(fmn.__lt_s, from_s32(-1), from_s32(1), [1,0])
+  , is(fmn.__lt_s, from_s32(-2), from_s32(-2), [0,0])
+  , is(fmn.__lt_s, from_s32(-2), from_s32(-1), [1,0])
+  , is(fmn.__lt_s, from_s32(-1), from_s32(-2), [0,0])
+  , is(fmn.__lt_s, from_s32(1), from_s32(0), [0,0])
+  , is(fmn.__lt_u, [1,0], [2,0], [1,0])
+  , is(fmn.__lt_u, [2,0], [0,0], [0,0])
+  , is(fmn.__gt_s, from_s32(0), from_s32(1), [0,0])
+  , is(fmn.__gt_s, from_s32(-1), from_s32(1), [0,0])
+  , is(fmn.__gt_s, from_s32(-2), from_s32(-1), [0,0])
+  , is(fmn.__gt_s, from_s32(-2), from_s32(-2), [0,0])
+  , is(fmn.__gt_s, from_s32(-1), from_s32(-2), [1,0])
+  , is(fmn.__gt_s, from_s32(1), from_s32(0), [1,0])
+  , is(fmn.__gt_u, [2,0], [1,0], [1,0])
+  , is(fmn.__gt_u, [0,0], [1,0], [0,0])
+  , is(fmn.__le_s, from_s32(0), from_s32(1), [1,0])
+  , is(fmn.__le_s, from_s32(-1), from_s32(1), [1,0])
+  , is(fmn.__le_s, from_s32(-2), from_s32(-1), [1,0])
+  , is(fmn.__le_s, from_s32(-2), from_s32(-2), [1,0])
+  , is(fmn.__le_s, from_s32(-1), from_s32(-2), [0,0])
+  , is(fmn.__le_s, from_s32(1), from_s32(0), [0,0])
+  , is(fmn.__le_s, from_s32(1), from_s32(0), [0,0])
+  , is(fmn.__le_u, [2,0], [1,0], [0,0])
+  , is(fmn.__le_u, [0,0], [1,0], [1,0])
+  , is(fmn.__ge_s, from_s32(0), from_s32(1), [0,0])
+  , is(fmn.__ge_s, from_s32(-1), from_s32(1), [0,0])
+  , is(fmn.__ge_s, from_s32(-2), from_s32(-2), [1,0])
+  , is(fmn.__ge_s, from_s32(-2), from_s32(-1), [0,0])
+  , is(fmn.__ge_s, from_s32(-1), from_s32(-2), [1,0])
+  , is(fmn.__ge_s, from_s32(1), from_s32(0), [1,0])
+  , is(fmn.__ge_u, [2,0], [1,0], [1,0])
+  , is(fmn.__ge_u, [0,0], [1,0], [0,0])
+  , is(fmn.__clz, [0,0], [0,0], [64,0])
+  , is(fmn.__clz, [0,0], [4,0], [61,0])
+  , is(fmn.__ctz, [0,0], [0,0], [64,0])
+  , is(fmn.__ctz, [0,0], [0,1], [32,0])
+  , is(fmn.__ctz, [0,0], [4,0], [2,0])
+  , is(fmn.__popcnt, [0,0], [5,0], [2,0])
+  , is(fmn.__shl, [4,0], [1,0], [8,0])
+  , is(fmn.__shr, [4,0], [1,0], [2,0])
+  , is(fmn.__shr_s, [4,0], [1,0], [2,0])
+  , is(fmn.__shr_s, from_s32(-256), [1,0], [-128 >>> 0, -1 >>> 0])
+  , is(fmn.__rotl, [256,0], [1,0], [512, 0])
+  , is(fmn.__rotr, [256,0], [1,0], [128, 0])
+  , is(fmn.__rotr, [256,0], [1,0], [128, 0])
+  , is(fmn.__and, [1,0], [1,0], [1,0])
+  , is(fmn.__or, [1,0], [1,0], [1,0])
+  , is(fmn.__xor, [1,0], [1,0], [0,0])
+  , is(fmn.__add, [1,1], [0xFFFFFFFF,1], [0,3])
+  , is(fmn.__sub, [0,3], [0xFFFFFFFF,1], [1,1])
+  , is(fmn.__div_u, [0,1], [65536,0], [65536,0])
+  , is(fmn.__div_s, from_s32(-65536), from_s32(-256), [256,0])
+  , is(fmn.__rem_u, [25,1], [65536,0], [25,0])
+  , is(fmn.__rem_s, from_s32(-65537), from_s32(-256), from_s32(-1))
+  , isf(fmn.__fabs, 0, -100, 100)
+  , isf(fmn.__fneg, 0, -1, 1)
+  , isf(fmn.__fneg, 0, 1, -1)
+  , isf(fmn.__fceil, 0, 100.1, 101)
+  , isf(fmn.__ffloor, 0, 100.9, 100)
+  , isf(fmn.__fnrst, 0, 100.6, 101)
+  , isf(fmn.__fsqrt, 0, 100, 10)
+  , isf(fmn.__fadd, 100.1, 100.5, 200.6)
+  , isf(fmn.__fsub, 200.6, 100.1, 100.5)
+  , isf(fmn.__fmul, 200.6, 2, 401.2)
+  , isf(fmn.__fdiv, 401.2, 2, 200.6)
+  , isf(fmn.__fmin, 100.1, 100.5, 100.1)
+  , isf(fmn.__fmax, 100.1, 100.5, 100.5)
+  , isf(fmn.__fcpysgn, -100.1, 100.5, 100.1)
+  , isf(fmn.__feq, 100.1, 100.1, 1)
+  , isf(fmn.__fne, 100.1, 100.0, 1)
+  , isf(fmn.__fne, NaN, NaN, 1)
+  , isf(fmn.__fne, NaN, 1, 1)
+  , isf(fmn.__fne, 1, 1, 0)
+  , isf(fmn.__flt, 100.1, 100.0, 0)
+  , isf(fmn.__fgt, 100.1, 100.0, 1)
+  , isf(fmn.__fle, 100.1, 100.1, 1)
+  , isf(fmn.__fge, 100.1, 100.1, 1)
+  , isc(fmn.__ftos, 0, -1, [-1,-1])
+  , isc(fmn.__ftou, 0, 1, [1,0])
+  , isc2(fmn.__stof, [0,0], [-1,-1], -1)
+  , isc2(fmn.__utof, [0,0], [1,0], 1)
+  ];
+
+  let bad = tests.indexOf(false)
+  if (tests.reduce((x,y) => x && y,true))
+    console.log('\x1b[32m%s\x1b[0m', "FM-NET-C TESTING: All tests pass");
+  else
+    console.error('\x1b[31m%s\x1b[0m',"FM-NET-C TESTING: Test #" + bad + " failed")
+}
+
+check_fmn();
