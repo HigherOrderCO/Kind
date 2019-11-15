@@ -26,7 +26,9 @@ const {fs, path, async_read_file, async_write_file} = (
 // load_file receives the name of the file and returns the code asyncronously
 //
 // load_file(file: String) -> Promise<String>
-const load_file = (file) => post("load_file", {file});
+const load_file = (file) => {
+  return post("load_file", {file});
+};
 
 // save_file receives the file name without the version, the code, and returns, asynchronously
 // the saved global file name (with the version after the @).

@@ -288,7 +288,11 @@ const show = ([ctor, args], nams = [], opts = {}) => {
 // :::::::::::::
 
 // Converts a string to a term
-const parse = async (file, code, tokenify, loader = load_file, root = true, loaded = {}) => {
+const parse = async (code, opts, root = true, loaded = {}) => {
+  const file = opts.file || "main";
+  const loader = opts.loader || load_file;
+  const tokenify = opts.tokenify;
+
   // Imports a local/global file, merging its definitions
   async function do_import(import_file) {
     if (import_file.indexOf("@") === -1) {
@@ -297,7 +301,7 @@ const parse = async (file, code, tokenify, loader = load_file, root = true, load
     if (!loaded[import_file]) {
       try {
         var file_code = await loader(import_file);
-        loaded[import_file] = await parse(import_file, file_code, tokenify, loader, false, loaded);
+        loaded[import_file] = await parse(file_code, {file: import_file, tokenify, loader}, false, loaded);
       } catch (e) {
         throw e;
       }

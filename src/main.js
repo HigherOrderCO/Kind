@@ -67,7 +67,7 @@ const loader = [
 
 async function local_imports_or_exit(file, code) {
   try {
-    const {open_imports} = await fm.lang.parse(file, code, false, loader);
+    const {open_imports} = await fm.lang.parse(code, {file, tokenify: false, loader});
     return Object.keys(open_imports).filter((name) => name.indexOf("@") === -1)
   } catch (e) {
     console.log(e.toString());
@@ -137,7 +137,7 @@ async function upload(file, global_path = {}) {
         console.log("Couldn't find local file `" + file + ".fm`.");
         process.exit();
       }
-      var defs = (await fm.lang.parse(file, code, false, loader)).defs;
+      var defs = (await fm.lang.parse(code, {file, tokenify: false, loader})).defs;
 
       var nams = [file + "/" + name];
       if (name === "@") {
