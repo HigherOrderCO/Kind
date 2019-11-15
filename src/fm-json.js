@@ -39,33 +39,29 @@ const js_number = {
 }
 
 const list = (type) => ({
-  to: (val) => (cons) => (nil) => (
-    val.length == 0
-      ? nil
-      : cons(type.to(val[0]))(list(type).to(val.slice(1)))
-  ),
+  to: (val) => (nil) => (cons) => val.length == 0 ? nil : cons(type.to(val[0]))(list(type).to(val.slice(1))),
   from: (val) => {
-    const cons = (head) => (tail) => [type.from(head)].concat(list(type).from(tail))
-    const nil = []
-
-    return val(cons)(nil)
+    const cons = (head) => (tail) => [type.from(head)].concat(list(type).from(tail));
+    const nil = [];
+    return val(nil)(cons);
   }
 })
 
 const string = {
   to: (str) => {
-    let bytes = Array.from(new TextEncoder("utf-8").encode(str));
-    while (bytes.length % 4 !== 0) {
-      bytes.push(0);
+    var nums = [];
+    for (var i = 0; i < str.length; ++i) {
+      nums.push(str.charCodeAt(i));
     }
-    const nums = new Uint32Array(new Uint8Array(bytes).buffer)
-    return list(word).to(nums)
+    return list(word).to(nums);
   },
   from: (enc) => {
     const nums = list(word).from(enc);
-    const bytes = new Uint8Array(new Uint32Array(nums).buffer)
-    const str = new TextDecoder("utf-8").decode(bytes)
-    return str.replace(/\0*$/, '')
+    var str = "";
+    for (var i = 0; i < nums.length; ++i) {
+      str += String.fromCharCode(nums[i]);
+    }
+    return str;
   }
 }
 
@@ -78,30 +74,29 @@ const pair = (tfst, tsnd) => ({
 const json = {
   to: (val) => (j_null) => (j_number) => (j_string) => (j_list) => (j_object) => {
     if(val === null) {
-      return j_null
+      return j_null;
     } else if(typeof val === "number") {
-      return j_number(js_number.to(val))
+      return j_number(js_number.to(val));
     } else if(typeof val === "string") {
-      return j_string(string.to(val))
+      return j_string(string.to(val));
     } else if (Array.isArray(val)) {
-      return j_list(list(json).to(val))
+      return j_list(list(json).to(val));
     } else {
-      return j_object(list(pair(string, json)).to(obj_to_kw(val)))
+      return j_object(list(pair(string, json)).to(obj_to_kw(val)));
     }
   },
   from: (enc) => {
-    const j_null = null
-    const j_number = js_number.from
-    const j_string = string.from
-    const j_list = list(json).from
-    const j_object = (o) => kw_to_obj(list(pair(string, json)).from(o))
-
-    return enc(j_null)(j_number)(j_string)(j_list)(j_object)
+    const j_null = null;
+    const j_number = js_number.from;
+    const j_string = string.from;
+    const j_list = list(json).from;
+    const j_object = (o) => kw_to_obj(list(pair(string, json)).from(o));
+    return enc(j_null)(j_number)(j_string)(j_list)(j_object);
   }
 }
 
 // Object to keyword list conversion
-const obj_to_kw = (obj) => Object.keys(obj).map((key) => [key.toString(), obj[key]])
-const kw_to_obj = (kw) => kw.reduce((obj, [k, v]) => ({[k]: v, ...obj}), {})
+const obj_to_kw = (obj) => Object.keys(obj).map((key) => [key.toString(), obj[key]]);
+const kw_to_obj = (kw) => kw.reduce((obj, [k, v]) => ({[k]: v, ...obj}), {});
 
-module.exports = { to, from, native_to: json.to, native_from: json.from, call }
+module.exports = { to, from, native_to: json.to, native_from: json.from, call };
