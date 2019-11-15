@@ -465,7 +465,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   // Advances the cursor 1 step forward
   function next() {
     if (tokens) {
-      tokens[tokens.length - 1][1] += code[idx];
+      tokens[tokens.length - 1][1] += code[idx] || "";
     }
     if (is_newline(code[idx])) {
       row += 1;
