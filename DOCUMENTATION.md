@@ -145,7 +145,7 @@ Introduction
 This is the "Hello, World!" in Formality:
 
 ```haskell
-import Base@0
+import Base#
 
 main : Output
   print("Hello, world!")
@@ -171,7 +171,7 @@ Type mismatch.
 - Instead of... String
 - When checking 7
 - On line 4, col 9, file hello.fm:
-  1| import Base@0
+  1| import Base#
   2|
   3| main : Output
   4|   print(7)
@@ -183,7 +183,7 @@ Formality is a proof language, types can be seen as theorems and well-typed
 terms can be seen a proof. So, for example, this is a proof that `2 == 2`:
 
 ```haskell
-import Base@0
+import Base#
 
 two_is_two : Equal(Number, 2, 2)
   refl(~Number, ~2)
@@ -206,7 +206,7 @@ Let
 Allows you to give local names to terms.
 
 ```haskell
-import Base@0
+import Base#
 
 main : Output
   let hello = "Hello, world!"
@@ -216,7 +216,7 @@ main : Output
 `let` expressions can be infinitely nested.
 
 ```haskell
-import Base@0
+import Base#
 
 main : Output
   let output =
@@ -285,7 +285,7 @@ syntax | description
 Usage is straightforward:
 
 ```haskell
-import Base@0
+import Base#
 
 main : Output
   let age = 30
@@ -336,7 +336,7 @@ main : Number
 Nesting to the left:
 
 ```haskell
-import Base@0
+import Base#
 
 main : [:[:Number, Number], String]
   [[1, 2], "Hello World!"]
@@ -461,7 +461,7 @@ than once. For example, the program below isn't allowed, because `b` is used
 twice:
 
 ```haskell
-import Base@0
+import Base#
 
 self_or(b : Bool) : Bool
   or(b, b)
@@ -603,7 +603,7 @@ type expected on the hole location, its context (scope variables), and possibly
 a value, if Formality can fill it for you. For example, the program below:
 
 ```haskell
-import Base@0
+import Base#
 
 main(x : Bool) : Bool
   or(true, ?a)
@@ -635,7 +635,7 @@ the normal-form and the type of `x`. This is useful when you want to know what
 type an expression would have inside certain context. For example:
 
 ```haskell
-import Base@0
+import Base#
 
 main(f : Bool -> Nat) : Nat
   log(f(true))
@@ -659,7 +659,7 @@ This tells you that, inside the body of `main`, the type of `f(true)` is `Nat`.
 Since it coincides with the goal, you can complete the program above with it:
 
 ```haskell
-import Base@0
+import Base#
 
 main(f : Bool -> Nat) : Nat
   f(true)
@@ -676,7 +676,7 @@ The `import` statement can be used to include local files. For example, save an
 contents:
 
 ```haskell
-import Base@0
+import Base#
 
 everything : String
   "42"
@@ -685,7 +685,7 @@ everything : String
 Then save a `test.fm` file as:
 
 ```haskell
-import Base@0
+import Base#
 import Answers
 
 main : Output
@@ -699,7 +699,7 @@ If multiple imports have conflicting names, you can disambiguate with
 
 
 ```haskell
-import Base@0
+import Base#
 import Answers as A
 
 main : Output
@@ -708,21 +708,21 @@ main : Output
 
 Formality also has a file-based package manager. You can use it to share files
 with other people. A file can be saved globally with `fm -s file`. This will
-give it a unique name with a version, such as `file@7`. Once given a unique
-name, the file contents will never change, so `file@7` will always refer to
+give it a unique name with a version, such as `file#7u3k`. Once given a unique
+name, the file contents will never change, so `file#7u3k` will always refer to
 that exact file. As soon as it is saved globally, you can import it from any
 other computer. For example, remove `Answers.fm` and change `hello.fm` to:
 
 ```haskell
-import Base@0
-import Answers@0
+import Base#
+import Answers#xxxx
 
 main : Output
   print(everything)
 ```
 
-This will load `Answers@0.fm` inside the `fm_modules` directory and load it.
-Any import ending with `@N` refers to a unique, immutable, permanent global
+This will load `Answers#xxxx.fm` inside the `fm_modules` directory and load it.
+Any import ending with `#id` refers to a unique, immutable, permanent global
 file. That prevents the infamous "dependency hell", and is useful for many
 applications.
 
@@ -744,7 +744,7 @@ Basics
 Datatypes can be defined and used as follows:
 
 ```haskell
-import Base@0
+import Base#
 
 T Suit
 | clubs
@@ -776,7 +776,7 @@ Fields
 Datatype constructors can have fields, allowing them to store values:
 
 ```haskell
-import Base@0
+import Base#
 
 T Person
 | person(age : Number, name : String)
@@ -810,7 +810,7 @@ Since Formality functions are affine, you can't use an argument more than once.
 So, for example, the function below isn't allowed:
 
 ```haskell
-import Base@0
+import Base#
 
 main(a : Bool, b : Bool) : Bool
   case a
@@ -823,7 +823,7 @@ But, since we used `b` in two different branches, we don't need to copy it:
 we can instead tell Formality to move it to each branch with a `+`:
 
 ```haskell
-import Base@0
+import Base#
 
 main(a : Bool, b : Bool) : Bool
   case a
@@ -836,7 +836,7 @@ main(a : Bool, b : Bool) : Bool
 Under the hoods, this just adds an extra lambda on each branch:
 
 ```haskell
-import Base@0
+import Base#
 
 main(a : Bool, b : Bool) : Bool
   (case a
@@ -899,7 +899,7 @@ Polymorphism allows us to create multiple instances of the same datatype with
 different contained types.
 
 ```haskell
-import Base@0
+import Base#
 
 T Pair<A, B>
 | pair(x : A, y : B)
@@ -1021,7 +1021,7 @@ can't be called on non-empty vectors.
 As the last example, this defines a list with all elements being true:
 
 ```haskell
-import Base@0
+import Base#
 
 T AllTrue (xs : List(Bool))
 | at_nil                                      : AllTrue(nil(~Bool))
@@ -1040,7 +1040,7 @@ In Formality, the type returned by a case expression can depend on the matched
 value by using it on the motive. For example:
 
 ```haskell
-import Base@0
+import Base#
 
 CaseType(x : Bool) : Type
   case x
@@ -1086,7 +1086,7 @@ Now, suppose you want to prove that, for any boolean `b`, `not(not(b))` is
 equal to `b`. This can be stated as such:
 
 ```haskell
-import Base@0
+import Base#
 
 not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
   ?a
@@ -1099,7 +1099,7 @@ dependent motives help: if you pattern-match on `b`, Formality will specialize
 the equation for both specific values of `b`, that is, `true` and `false`:
 
 ```haskell
-import Base@0
+import Base#
 
 not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
   case b
@@ -1116,7 +1116,7 @@ Once you prove the theorem for both possible cases of `b`, then Formality
 returns the motive generalized for `b` itself:
 
 ```haskell
-import Base@0
+import Base#
 
 not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
   case b
@@ -1141,7 +1141,7 @@ accept it as a function argument. So, what happens if we pattern match against
 it?
 
 ```haskell
-import Base@0
+import Base#
 
 wtf(e : Empty) : ?
   case e : ?
@@ -1153,7 +1153,7 @@ returns the motive directly, allowing us to write anything on it! That can be
 used to derive any theorem given a value of type Empty:
 
 ```haskell
-import Base@0
+import Base#
 
 one_is_two(e : Empty) : Equal(Number, 1, 2)
   case e : Equal(Number, 1, 2)
@@ -1209,7 +1209,7 @@ main(input : Equal(String, "dogs", "horses")) : Empty
 Notice the program below:
 
 ```haskell
-import Base@0
+import Base#
 
 main : Number
   case true
@@ -1228,7 +1228,7 @@ will be specialized to `Equal(Bool, false, true)`. We can then use
 number:
 
 ```haskell
-import Base@0
+import Base#
 
 main : Number
   case true as x
@@ -1275,7 +1275,7 @@ case_of(b : Bool, ~P : Bool -> Type, t : P(true), f : P(false)) : P(b)
 Here, `${self} ...`, `new(~T) val` and `use(b)` are the type, introduction, and
 elimination of Self Types, respectively. You can see how any datatype is
 encoded under the hoods by asking `fm` to evaluate its type, as in, `fm
-Data.Bool@0/Bool -W` (inside the `fm_modules` directory). The `-W` flag asks
+Data.Bool#/Bool -W` (inside the `fm_modules` directory). The `-W` flag asks
 Formality to not evaluate fully since `Bool` is recursive. While you probably
 won't need to deal with self-encodings yourself, knowing how they work is
 valuable, since it allows you to express types not covered by the built-in
@@ -1430,7 +1430,7 @@ passing!
 With formal proofs, we can write tests too:
 
 ```haskell
-import Base@0
+import Base#
 
 mul2(n : Number) : Number
   if n .<. 0 .|. n .==. 0:
@@ -1463,7 +1463,7 @@ possible input, not just a few. To explain, let's first re-implement `mul2` for
 technique:
 
 ```haskell
-import Base@0
+import Base#
 
 mul2(n : Nat) : Nat
   case n

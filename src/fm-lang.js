@@ -295,7 +295,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
 
   // Imports a local/global file, merging its definitions
   async function do_import(import_file) {
-    if (import_file.indexOf("@") === -1) {
+    if (import_file.indexOf("#") === -1) {
       local_imports[import_file] = true;
     }
     if (!loaded[import_file]) {
@@ -394,8 +394,8 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       return Ref(path, false, loc(str.length));
     } else {
       error("Attempted to use a syntax-sugar which requires `" + str + "` to be in scope, but it isn't.\n"
-          + "To solve that, add `import Base@0` to the start of your file.\n"
-          + "See http://docs.formality-lang.org/en/latest/language/Hello,-world!.html for more info.");
+          + "To solve that, add `import Base#` at the start of your file. This imports the official base libs.\n"
+          + "See https://github.com/moonad/Formality/blob/master/DOCUMENTATION.md for more info.");
     }
   }
 
@@ -456,8 +456,8 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   const op_inits     = [".", "=", "->"];
   const is_op_init   = str => { for (var k of op_inits) if (str === k || str[0] === k) return str; return null; };
   const is_num_char  = build_charset("0123456789");
-  const is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@/");
-  const is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-@+*/%^!<>=&|");
+  const is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#-@/");
+  const is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#-@+*/%^!<>=&|");
   const is_spacy     = build_charset(" \t\n\r;");
   const is_space     = build_charset(" ");
   const is_newline   = build_charset("\n");

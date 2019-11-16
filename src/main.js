@@ -68,7 +68,7 @@ const loader = [
 async function local_imports_or_exit(file, code) {
   try {
     const {open_imports} = await fm.lang.parse(code, {file, tokenify: false, loader});
-    return Object.keys(open_imports).filter((name) => name.indexOf("@") === -1)
+    return Object.keys(open_imports).filter((name) => name.indexOf("#") === -1)
   } catch (e) {
     console.log(e.toString());
     process.exit();
@@ -83,10 +83,10 @@ async function upload(file, global_path = {}) {
 
     for (var imp_file of local_imports) {
       var g_path = await upload(imp_file, global_path);
-      var [g_name, g_vers] = g_path.split("@");
-      var code = code.replace(new RegExp("import " + imp_file + " *\n")  , "import " + g_name + "@" + g_vers + "\n");
-      var code = code.replace(new RegExp("import " + imp_file + " *open"), "import " + g_name + "@" + g_vers + " open");
-      var code = code.replace(new RegExp("import " + imp_file + " *as")  , "import " + g_name + "@" + g_vers + " as");
+      var [g_name, g_vers] = g_path.split("#");
+      var code = code.replace(new RegExp("import " + imp_file + " *\n")  , "import " + g_name + "#" + g_vers + "\n");
+      var code = code.replace(new RegExp("import " + imp_file + " *open"), "import " + g_name + "#" + g_vers + " open");
+      var code = code.replace(new RegExp("import " + imp_file + " *as")  , "import " + g_name + "#" + g_vers + " as");
     }
 
     global_path[file] = await fm.forall.save_file(file, code);
