@@ -1278,28 +1278,24 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     var init = idx;
     if (match("<", is_space)) {
       var type = parse_term(nams);
-      if (match(":")) {
-        var ktyp = parse_term(nams);
-        var type = Sig("", ktyp, type, false);
-        var skip = parse_exact(">");
-        var skip = parse_exact("{");
+      var skip = parse_exact(">");
+      if (match("{")) {
         var list = [];
         while (idx < code.length && !match("}")) {
           var mkey = parse_term(nams);
           var skip = parse_exact(":");
           var mval = parse_term(nams);
-          list.push(Par(mkey, mval, false));
+          list.push(Par(mkey, mval, 0));
           if (match("}")) break; else parse_exact(",");
         }
-      } else {
-        var skip = parse_exact(">");
+      } else if (match("[")) {
         var list = [];
-        if (match("[")) {
-          while (idx < code.length && !match("]")) {
-            list.push(parse_term(nams));
-            if (match("]")) break; else parse_exact(",");
-          }
+        while (idx < code.length && !match("]")) {
+          list.push(parse_term(nams));
+          if (match("]")) break; else parse_exact(",");
         }
+      } else {
+        error("Unexpected symbol. Expected `{` or `[` to start list literal.");
       }
       var term = App(base_ref("nil"), type, true, loc(idx - init));
       for (var i = list.length - 1; i >= 0; --i) {
