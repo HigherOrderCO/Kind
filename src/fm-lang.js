@@ -196,7 +196,7 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       var text = "[";
       for (var i = 0; i < names.length; ++i) {
         text += erase[i] === 1 ? "~" : "";
-        text += names[i] + " : " + types[i];
+        text += names[i] + (names[i] ? " " : "") + ": " + types[i];
         text += erase[i] === 2 ? " ~ " : ", ";
       }
       text += show(term, nams.concat(names), opts);
@@ -577,6 +577,19 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     return Ref(name+"i", false, loc(name.length + 1));
   }
 
+  // Constructs a string
+  function build_str(text, init) {
+    var nums = [];
+    for (var i = 0; i < text.length; ++i) {
+      nums.push(text.charCodeAt(i));
+    }
+    var term = App(base_ref("nil"), Num(), true);
+    for (var i = nums.length - 1; i >= 0; --i) {
+      var term = App(App(App(base_ref("cons"), Num(), true), Val(nums[i]), false), term, false);
+    }
+    return Ann(base_ref("String"), term, false, loc(idx - init));
+  }
+
   // Constructs a nat
   function build_nat(name) {
     if (!defs[name+"n"]) {
@@ -918,15 +931,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
         next();
       }
       next();
-      var nums = [];
-      for (var i = 0; i < text.length; ++i) {
-        nums.push(text.charCodeAt(i));
-      }
-      var term = App(base_ref("nil"), Num(), true);
-      for (var i = nums.length - 1; i >= 0; --i) {
-        var term = App(App(App(base_ref("cons"), Num(), true), Val(nums[i]), false), term, false);
-      }
-      return Ann(base_ref("String"), term, false, loc(idx - init));
+      return build_str(text);
     }
   }
 
@@ -1273,12 +1278,28 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     var init = idx;
     if (match("<", is_space)) {
       var type = parse_term(nams);
-      var skip = parse_exact(">");
-      var list = [];
-      var skip = parse_exact("[");
-      while (idx < code.length && !match("]")) {
-        list.push(parse_term(nams));
-        if (match("]")) break; else parse_exact(",");
+      if (match(":")) {
+        var ktyp = parse_term(nams);
+        var type = Sig("", ktyp, type, false);
+        var skip = parse_exact(">");
+        var skip = parse_exact("{");
+        var list = [];
+        while (idx < code.length && !match("}")) {
+          var mkey = parse_term(nams);
+          var skip = parse_exact(":");
+          var mval = parse_term(nams);
+          list.push(Par(mkey, mval, false));
+          if (match("}")) break; else parse_exact(",");
+        }
+      } else {
+        var skip = parse_exact(">");
+        var list = [];
+        if (match("[")) {
+          while (idx < code.length && !match("]")) {
+            list.push(parse_term(nams));
+            if (match("]")) break; else parse_exact(",");
+          }
+        }
       }
       var term = App(base_ref("nil"), type, true, loc(idx - init));
       for (var i = list.length - 1; i >= 0; --i) {
