@@ -939,7 +939,8 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   function parse_chr(nams) {
     var init = idx;
     if (match("'")) {
-      var name = parse_name();
+      var name = code[idx];
+      next();
       var skip = parse_exact("'");
       return Val(name.charCodeAt(0));
     }
