@@ -453,7 +453,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     , ".==."  : 1
   };
 
-  const op_inits     = [".", "=", "->"];
+  const op_inits     = [".", "->"];
   const is_op_init   = str => { for (var k of op_inits) if (str === k || str[0] === k) return str; return null; };
   const is_num_char  = build_charset("0123456789");
   const is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#-@/");
@@ -1305,6 +1305,32 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     }
   }
 
+  // Parses the do notation
+  function parse_do_notation(nams) {
+    var init = idx;
+    if (match("do<", is_space)) {
+      var type = parse_term(nams);
+      var skip = parse_exact(">");
+      var bind = match("with") ? parse_name() : "bind";
+      function parse_do_statement(nams) {
+        if (match("bind")) {
+          var name = parse_name();
+          var skip = parse_exact(":");
+          var vtyp = parse_term(nams);
+          var skip = parse_exact("=");
+          var call = parse_term(nams);
+          var body = parse_do_statement(nams.concat([name]));
+          return App(App(App(App(base_ref(bind), vtyp, true), type, true), call, false), Lam(name, null, body, false), false);
+        } else {
+          var term = parse_term(nams);
+          return term;
+        }
+      };
+      var result = parse_do_statement(nams);
+      return result;
+    }
+  }
+
   // Parses an annotation `t :: T`
   function parse_ann(parsed, init, nams) {
     if (match("::", is_space)) {
@@ -1386,6 +1412,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     else if (parsed = parse_op2_not(nams));
     else if (parsed = parse_var(nams));
     else if (parsed = parse_list_literal(nams));
+    else if (parsed = parse_do_notation(nams));
     else     parsed = parse_atom(nams);
 
     // Parses spaced operators
