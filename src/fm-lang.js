@@ -559,17 +559,84 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     throw text;
   }
 
-  // Constructs an Ind
-  function build_ind(name) {
+  // Constructs an INat adder. Example:
+  //   15s(n : INat) : INat
+  //     new(~INat) (~P, iz, s1) =>
+  //     dup iz = iz
+  //     dup s1 = s1
+  //     dup s2 = # (~n : -INat, i : P(n)) => s1(~1s(n), s1(~n, i))
+  //     dup s4 = # (~n : -INat, i : P(n)) => s2(~2s(n), s2(~n, i))
+  //     dup s8 = # (~n : -INat, i : P(n)) => s4(~4s(n), s4(~n, i))
+  //     dup nn = use(n)(~(x) => P(x), #iz, #s1)
+  //     # s8(~4s(2s(1s(n))), s4(~2s(1s(n)), s2(~1s(n), s1(~n, nn))))
+  // This exists for the sake of being able to create INats without using
+  // `mul2` and `succ`, thus without requiring runtime reductions, but this
+  // seems to be too heavy for the type-checker. A reduce-before-compiling
+  // primitive would be a better way to achieve this, I believe.
+  function build_inat_adder(name) {
+    if (!defs[name+"s"]) {
+      var numb = name === "" ? Math.pow(2,48) - 1 : Number(name);
+      var bits = numb.toString(2);
+
+      if (numb === 0) {
+        return Lam("n", base_ref("INat"), Var(0), false);
+      }
+
+      var term = Var(0);
+
+      var sucs = bits.length;
+      for (var i = 0; i < sucs; ++i) {
+        if (bits[sucs - i - 1] === "1") {
+          var indx = Var(1 + sucs + 1 + 3);
+          for (var j = 0; j < i; ++j) {
+            if (bits[sucs - j - 1] === "1") {
+              var indx = App(build_inat_adder(String(2**j)), indx, false);
+            }
+          }
+          var term = App(App(Var(-1 + 1 + sucs - i), indx, true), term, false);
+        }
+      }
+
+      var term = Put(term);
+      var moti = Lam("x", null, App(Var(-1 + 1 + sucs + 1 + 3), Var(0), false), false);
+      var term = Dup("nn", App(App(App(Use(Var(-1 + sucs + 1 + 3 + 1)), moti, true), Put(Var(-1 + sucs + 1)), false), Put(Var(-1 + sucs)), false), term);
+
+      for (var i = 0; i < sucs; ++i) {
+        if (i === sucs - 1) {
+          var term = Dup("s1", Var(1), term);
+        } else {
+          var expr = App(App(Var(2), Var(1), true), Var(0), false);
+          var expr = App(App(Var(2), App(build_inat_adder(String(2**(sucs-i-1-1))), Var(1), false), true), expr, false);
+          var expr = Lam("i", App(Var(-1 + 1 + (sucs - i - 1) + 1 + 3), Var(0), false), expr, false)
+          var expr = Lam("n", Utt(base_ref("INat")), expr, true);
+          var expr = Put(expr);
+          var term = Dup("s" + (2 ** (sucs - i - 1)), expr, term);
+        }
+      }
+
+      var term = Dup("iz", Var(1), term);
+      var term = Lam("s1", null, term, false);
+      var term = Lam("iz", null, term, false);
+      var term = Lam("P", null, term, true);
+      var term = New(base_ref("INat"), term);
+      var term = Lam("n", base_ref("INat"), term, false);
+
+      define(name+"s", Ann(All("n", base_ref("INat"), base_ref("INat"), false), term));
+    }
+    return Ref(name+"s", false, loc(name.length + 1));
+  }
+
+  // Constructs an INat
+  function build_inat(name) {
     if (!defs[name+"i"]) {
       var numb = name === "" ? Math.pow(2,48) - 1 : Number(name);
       var bits = numb.toString(2);
       var bits = bits === "0" ? "" : bits;
-      var term = base_ref("base");
+      var term = base_ref("izero");
       for (var i = 0; i < bits.length; ++i) {
-        term = App(base_ref("twice"), term, false);
+        term = App(base_ref("imul2"), term, false);
         if (bits[i] === "1") {
-          term = App(base_ref("step"), term, false);
+          term = App(base_ref("isucc"), term, false);
         }
       }
       define(name+"i", term);
@@ -577,7 +644,22 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     return Ref(name+"i", false, loc(name.length + 1));
   }
 
+
+  // Constructs an IBits
+  // This is not currently used due to type-checking performance. Improve?
+  function build_ibits(name) {
+    if (!defs[name+"p"]) {
+      var term = base_ref("ibe");
+      for (var i = 0; i < name.length; ++i) {
+        var term = App(base_ref(name[name.length - i - 1] === "0" ? "ib0" : "ib1"), term, false); 
+      }
+      define(name+"p", term);
+    }
+    return Ref(name+"p", false, loc(name.length + 1));
+  }
+
   // Constructs a string
+  // TODO: construct directly, without calling cons/nil?
   function build_str(text, init) {
     var nums = [];
     for (var i = 0; i < text.length; ++i) {
@@ -676,7 +758,11 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     // Not a var but a number
     if (!isNaN(numb)) {
       if (last === "i") {
-        var term = build_ind(name.slice(0,-1));
+        var term = build_inat(name.slice(0,-1));
+      } else if (last === "s") {
+        var term = build_inat_adder(name.slice(0,-1));
+      } else if (last === "p") {
+        var term = build_ibits(name.slice(0,-1));
       } else if (last === "n") {
         var term = build_nat(name.slice(0,-1));
       } else {
