@@ -592,19 +592,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
 
   // Constructs a nat
   function build_nat(name) {
-    if (!defs[name+"n"]) {
-      var term = base_ref("zero");
-      var numb = Number(name);
-      for (var i = 0; i < numb; ++i) {
-        term = App(base_ref("succ"), term, false);
-      }
-      define(name+"n", term);
-    }
-    return Ref(name+"n", false, loc(name.length + 1));
-  }
-
-  // Constructs a nat
-  function build_nat(name) {
     if (!defs["n"+name]) {
       var term = base_ref("zero");
       var numb = Number(name);
@@ -1569,9 +1556,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   //      <body>
   //
   async function do_parse_def() {
-    // Parses box annotation
-    var boxed = match("#");
-
     // Parses definition name
     if (tokens) tokens.push(["def", ""]);
     var name = parse_name();
