@@ -742,10 +742,11 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       var name = parse_string();
     } else if (term[0] === "Var" && term[1].__name) {
       var name = term[1].__name;
+    } else if (term[0] === "Ref") {
+      var name = term[1].name.slice(term[1].name.indexOf("/")+1);
     } else {
-      var name = "self";
-      //error("The term \x1b[2m" + show(term, nams) + "\x1b[0m requires an explicit name.\n"
-          //+ "Provide it with the 'as' keyword. Example: \x1b[2m" + show(term, nams) + " as x\x1b[0m");
+      error("The term \x1b[2m" + show(term, nams) + "\x1b[0m requires an explicit name.\n"
+          + "Provide it with the 'as' keyword. Example: \x1b[2m" + show(term, nams) + " as x\x1b[0m");
     }
 
     return [name, term]
