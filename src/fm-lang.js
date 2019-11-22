@@ -574,7 +574,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   // seems to be too heavy for the type-checker. A reduce-before-compiling
   // primitive would be a better way to achieve this, I believe.
   function build_inat_adder(name) {
-    if (!defs[name+"s"]) {
+    if (!defs[name+"z"]) {
       var numb = name === "" ? Math.pow(2,48) - 1 : Number(name);
       var bits = numb.toString(2);
 
@@ -610,7 +610,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
           var expr = Lam("i", App(Var(-1 + 1 + (sucs - i - 1) + 1 + 3), Var(0), false), expr, false)
           var expr = Lam("n", Utt(base_ref("INat")), expr, true);
           var expr = Put(expr);
-          var term = Dup("s" + (2 ** (sucs - i - 1)), expr, term);
+          var term = Dup("z" + (2 ** (sucs - i - 1)), expr, term);
         }
       }
 
@@ -621,9 +621,9 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       var term = New(base_ref("INat"), term);
       var term = Lam("n", base_ref("INat"), term, false);
 
-      define(name+"s", Ann(All("n", base_ref("INat"), base_ref("INat"), false), term));
+      define(name+"z", Ann(All("n", base_ref("INat"), base_ref("INat"), false), term));
     }
-    return Ref(name+"s", false, loc(name.length + 1));
+    return Ref(name+"z", false, loc(name.length + 1));
   }
 
   // Constructs an INat
@@ -648,14 +648,14 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   // Constructs an IBits
   // This is not currently used due to type-checking performance. Improve?
   function build_ibits(name) {
-    if (!defs[name+"p"]) {
+    if (!defs[name+"s"]) {
       var term = base_ref("ibe");
       for (var i = 0; i < name.length; ++i) {
         var term = App(base_ref(name[name.length - i - 1] === "0" ? "ib0" : "ib1"), term, false); 
       }
-      define(name+"p", term);
+      define(name+"s", term);
     }
-    return Ref(name+"p", false, loc(name.length + 1));
+    return Ref(name+"s", false, loc(name.length + 1));
   }
 
   // Constructs a string
@@ -759,9 +759,9 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     if (!isNaN(numb)) {
       if (last === "i") {
         var term = build_inat(name.slice(0,-1));
-      } else if (last === "s") {
+      } else if (last === "z") {
         var term = build_inat_adder(name.slice(0,-1));
-      } else if (last === "p") {
+      } else if (last === "s") {
         var term = build_ibits(name.slice(0,-1));
       } else if (last === "n") {
         var term = build_nat(name.slice(0,-1));
