@@ -1941,7 +1941,7 @@ const run = (mode, term, opts = {}) => {
     case "REDUCE_DEBUG":
     case "REDUCE_NATIVE":
       term = eras(term);
-      term = to_js.decompile(to_js.compile(term, defs));
+      term = to_js.decompile(to_js.compile(term, {defs}));
       break;
 
     case "REDUCE_OPTIMAL":

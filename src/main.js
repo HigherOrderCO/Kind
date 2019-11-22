@@ -29,6 +29,9 @@ try {
   console.log("Type-checking modes:");
   console.log("-t <file>/<term> performs a type check");
   console.log("");
+  console.log("Compilation modes:");
+  console.log("-J <file>/<term> compiles to JavaScript code");
+  console.log("");
   console.log("FPM:");
   console.log("-s <file> saves a file to FPM");
   console.log("-l <file> downloads a file from FPM");
@@ -120,14 +123,6 @@ async function upload(file, global_path = {}) {
 
   } else {
     try {
-      var command
-        = args.d ? "REDUCE_DEBUG"
-        : args.o ? "REDUCE_OPTIMAL"
-        : args.O ? "REDUCE_OPTIMAL"
-        : args.j ? "REDUCE_NATIVE"
-        : args.t ? "TYPECHECK"
-        : args[0] ? "GET"
-        : "REDUCE_DEBUG";
       var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
 
       var [file, name] = main.indexOf("/") === -1 ? [main, "main"] : main.split("/");
@@ -139,76 +134,91 @@ async function upload(file, global_path = {}) {
       }
       var defs = (await fm.lang.parse(code, {file, tokenify: false, loader})).defs;
 
-      var nams = [file + "/" + name];
-      if (name === "@") {
-        nams = Object.keys(defs).sort();
-      }
+      if (args.J) {
+        console.log(fm.to_js.compile_to_code(fm.lang.erase(defs[file+"/"+name]), {defs}));
+        return;
 
-      var opts = {
-        erased: !args.X,
-        unbox: !args.B,
-        weak: !!args.W,
-        strict: !!args.O,
-        logging: !args.m,
-        defs: defs
-      };
+      } else {
+        var command
+          = args.d ? "REDUCE_DEBUG"
+          : args.o ? "REDUCE_OPTIMAL"
+          : args.O ? "REDUCE_OPTIMAL"
+          : args.j ? "REDUCE_NATIVE"
+          : args.t ? "TYPECHECK"
+          : args[0] ? "GET"
+          : "REDUCE_DEBUG";
 
-      var nam_size = 0;
-      for (var def in defs) {
-        if (def[0] !== "$" && def[0] !== "@") {
-          nam_size = Math.max(nam_size, def.length);
+        var nams = [file + "/" + name];
+        if (name === "@") {
+          nams = Object.keys(defs).sort();
         }
-      }
 
-      for (var i = 0; i < nams.length; ++i) {
-        var stats = {
-          rewrites: 0,
-          loops: 0,
-          max_len: 0,
-          input_net: args.p ? null : undefined,
-          output_net: args.p ? null : undefined
+        var opts = {
+          erased: !args.X,
+          unbox: !args.B,
+          weak: !!args.W,
+          strict: !!args.O,
+          logging: !args.m,
+          defs: defs
         };
-        opts.stats = stats;
 
-        if (nams[i][0] !== "$" && nams[i][0] !== "@") {
-          if (nams.length > 1) {
-            var init = nams[i];
-            while (init.length < nam_size) {
-              init += " ";
-            }
-            init += " : ";
-          } else {
-            var init = "";
+        var nam_size = 0;
+        for (var def in defs) {
+          if (def[0] !== "$" && def[0] !== "@") {
+            nam_size = Math.max(nam_size, def.length);
           }
-          try {
-            if (defs[nams[i]]) {
-              var term = fm.lang.run(command, nams[i], opts);
-              var text = init + fm.lang.show(term, [], {full_refs: !!args.f});
-              if (command === "TYPECHECK") {
-                if (fm.lang.haltcheck(defs[nams[i]], defs)) {
-                  console.log("\x1b[32m" + text + " ✔\x1b[0m"); // Green
+        }
+
+        for (var i = 0; i < nams.length; ++i) {
+          var stats = {
+            rewrites: 0,
+            loops: 0,
+            max_len: 0,
+            input_net: args.p ? null : undefined,
+            output_net: args.p ? null : undefined
+          };
+          opts.stats = stats;
+
+          if (nams[i][0] !== "$" && nams[i][0] !== "@") {
+            if (nams.length > 1) {
+              var init = nams[i];
+              while (init.length < nam_size) {
+                init += " ";
+              }
+              init += " : ";
+            } else {
+              var init = "";
+            }
+            try {
+              if (defs[nams[i]]) {
+                var term = fm.lang.run(command, nams[i], opts);
+                var text = init + fm.lang.show(term, [], {full_refs: !!args.f});
+                if (command === "TYPECHECK") {
+                  if (fm.lang.haltcheck(defs[nams[i]], defs)) {
+                    console.log("\x1b[32m" + text + " ✔\x1b[0m"); // Green
+                  } else {
+                    console.log("\x1b[33m" + text + " ⚠\x1b[0m"); // Green
+                  }
                 } else {
-                  console.log("\x1b[33m" + text + " ⚠\x1b[0m"); // Green
+                  console.log(text);
                 }
               } else {
-                console.log(text);
+                console.log(init + "Definition not found: " + nams[i]);
               }
-            } else {
-              console.log(init + "Definition not found: " + nams[i]);
+            } catch (e) {
+              if (nams.length > 1) {
+                console.log("\x1b[31m" + init + "error\x1b[0m");
+              } else {
+                console.log(e);
+                //console.log(e.toString());
+              }
             }
-          } catch (e) {
-            if (nams.length > 1) {
-              console.log("\x1b[31m" + init + "error\x1b[0m");
-            } else {
-              console.log(e);
-              //console.log(e.toString());
+            if (args.p || (command === "REDUCE_OPTIMAL" && !args.h)) {
+              console.log(JSON.stringify(stats));
             }
           }
-          if (args.p || (command === "REDUCE_OPTIMAL" && !args.h)) {
-            console.log(JSON.stringify(stats));
-          }
-        }
 
+        }
       }
     } catch (e) {
       console.log(e);
