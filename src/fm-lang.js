@@ -455,7 +455,8 @@ const parse = async (code, opts, root = true, loaded = {}) => {
 
   const op_inits     = [".", "->"];
   const is_op_init   = str => { for (var k of op_inits) if (str === k || str[0] === k) return str; return null; };
-  const is_num_char  = build_charset("0123456789abcdefABCDEF");
+  const is_num_char  = build_charset("0123456789");
+  const is_hex_char  = build_charset("0123456789abcdefABCDEF");
   const is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#-@/");
   const is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#-@+*/%^!<>=&|");
   const is_spacy     = build_charset(" \t\n\r;");
@@ -607,7 +608,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
         } else {
           var expr = App(App(Var(2), Var(1), true), Var(0), false);
           var expr = App(App(Var(2), App(build_inat_adder(String(2**(sucs-i-1-1))), Var(1), false), true), expr, false);
-          var expr = Lam("i", App(Var(-1 + 1 + (sucs - i - 1) + 1 + 3), Var(0), false), expr, false)
+          var expr = Lam("N", App(Var(-1 + 1 + (sucs - i - 1) + 1 + 3), Var(0), false), expr, false)
           var expr = Lam("n", Utt(base_ref("INat")), expr, true);
           var expr = Put(expr);
           var term = Dup("z" + (2 ** (sucs - i - 1)), expr, term);
@@ -628,7 +629,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
 
   // Constructs an INat
   function build_inat(name) {
-    if (!defs[name+"i"]) {
+    if (!defs[name+"N"]) {
       var numb = name === "" ? Math.pow(2,48) - 1 : Number(name);
       var bits = numb.toString(2);
       var bits = bits === "0" ? "" : bits;
@@ -639,23 +640,33 @@ const parse = async (code, opts, root = true, loaded = {}) => {
           term = App(base_ref("isucc"), term, false);
         }
       }
-      define(name+"i", term);
+      define(name+"N", term);
     }
-    return Ref(name+"i", false, loc(name.length + 1));
+    return Ref(name+"N", false, loc(name.length + 1));
   }
 
+  // Constructs a Bits
+  function build_bits(name) {
+    if (!defs[name+"b"]) {
+      var term = base_ref("be");
+      for (var i = 0; i < name.length; ++i) {
+        var term = App(base_ref(name[name.length - i - 1] === "0" ? "b0" : "b1"), term, false); 
+      }
+      define(name+"b", term);
+    }
+    return Ref(name+"b", false, loc(name.length + 1));
+  }
 
   // Constructs an IBits
-  // This is not currently used due to type-checking performance. Improve?
   function build_ibits(name) {
-    if (!defs[name+"s"]) {
+    if (!defs[name+"B"]) {
       var term = base_ref("ibe");
       for (var i = 0; i < name.length; ++i) {
         var term = App(base_ref(name[name.length - i - 1] === "0" ? "ib0" : "ib1"), term, false); 
       }
-      define(name+"s", term);
+      define(name+"B", term);
     }
-    return Ref(name+"s", false, loc(name.length + 1));
+    return Ref(name+"B", false, loc(name.length + 1));
   }
 
   // Constructs a string
@@ -745,30 +756,27 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     var term = null;
     if (tokens) tokens.push(["???", ""]);
     var name = parse_name();
-    var last = name[name.length - 1];
-    if (is_num_char(name[0])) {
-      var numb = Number(is_num_char(last) ? name : name.slice(0, -1));
-    } else {
-      var numb = NaN;
-    }
     if (name.length === 0) {
       next();
       error("Unexpected symbol.");
     }
-    // Not a var but a number
-    if (!isNaN(numb)) {
-      if (last === "i") {
-        var term = build_inat(name.slice(0,-1));
-      } else if (last === "z") {
-        var term = build_inat_adder(name.slice(0,-1));
-      } else if (last === "s") {
-        var term = build_ibits(name.slice(0,-1));
-      } else if (last === "n") {
-        var term = build_nat(name.slice(0,-1));
-      } else {
-        var term = Val(numb, loc(name.length));
-      }
-      if (tokens) tokens[tokens.length - 1][0] = "num";
+    var last = name[name.length - 1];
+    var is_hex = name.slice(0, 2) === "0x";
+    var is_bin = name.slice(0, 2) === "0b";
+    var is_num = !isNaN(Number(name)) && !/[a-zA-Z]/.test(last);
+    var is_lit = name.length > 1 && !isNaN(Number(name.slice(0,-1))) && /[a-zA-Z]/.test(last);
+    if (is_hex || is_bin || is_num) {
+      var term = Val(Number(name), loc(name.length));
+    } else if (is_lit && last === "N") {
+      var term = build_inat(name.slice(0,-1));
+    } else if (is_lit && last === "n") {
+      var term = build_nat(name.slice(0,-1));
+    } else if (is_lit && last === "z") {
+      var term = build_inat_adder(name.slice(0,-1));
+    } else if (is_lit && last === "B") {
+      var term = build_ibits(name.slice(0,-1));
+    } else if (is_lit && last === "b") {
+      var term = build_bits(name.slice(0,-1));
     } else {
       // Parses bruijn index
       var skip = 0;
