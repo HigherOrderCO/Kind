@@ -182,12 +182,12 @@ const subst_holes = (term, hole_value) => {
       case "Fst": return Fst(f(t.pair, hv), t.eras, l);
       case "Snd": return Snd(f(t.pair, hv), t.eras, l);
       case "Prj": return Prj(t.nam0, t.nam1, f(t.pair, hv), f(t.body, hv), t.eras, l);
-      case "Slf": return Slf(t.name, hv);
+      case "Slf": return Slf(t.name, f(t.type, hv), l);
       case "New": return New(f(t.type, hv), f(t.expr, hv), l);
       case "Use": return Use(f(t.expr, hv), l);
       case "Ann": return Ann(f(t.type, hv), f(t.expr, hv), t.done, l);
       case "Log": return Log(f(t.msge, hv), f(t.expr, hv), l);
-      case "Hol": return hv[t.name] || Hol(t.name, l);
+      case "Hol": return hv[t.name] ? f(hv[t.name], hv) : Hol(t.name, l);
       case "Ref": return Ref(t.name, t.eras, l);
     }
   }
@@ -1297,6 +1297,7 @@ module.exports = {
   shift,
   subst,
   subst_many,
+  subst_holes,
   typecheck,
   haltcheck,
 };

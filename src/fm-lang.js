@@ -24,6 +24,7 @@ const {
   shift,
   subst,
   subst_many,
+  subst_holes,
 } = require("./fm-core.js");
 
 const version = require("./../package.json").version;
@@ -2002,6 +2003,7 @@ module.exports = {
   show,
   subst,
   subst_many,
+  subst_holes,
   typecheck,
   haltcheck,
   version,
