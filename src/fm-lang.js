@@ -117,7 +117,9 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       while (term[0] === "Lam") {
         erase.push(term[1].eras);
         names.push(term[1].name);
-        types.push(term[1].bind && term[1].bind[0] !== "Hol" ? show(term[1].bind, nams.concat(names.slice(0,-1)), opts) : null);
+        types.push(term[1].bind && term[1].bind[0] !== "Hol"
+          ? show(term[1].bind, nams.concat(names.slice(0,-1)), opts)
+          : null);
         term = term[1].body;
       }
       var text = "(";
@@ -1281,15 +1283,16 @@ const parse = async (code, opts, root = true, loaded = {}) => {
 
           // Parses matched motive
           var moti_init = idx;
-          try {
-            var moti_skip = parse_exact(":");
-          } catch (e) {
+          if (match(":")) {
+            var moti_term = parse_term(nams
+              .concat(adt_indx.map(([name,type]) => term_name + "." + name))
+              .concat([term_name])
+              .concat(moves.map(([name,term,type]) => name)));
+          } else if (match(";") || adt_ctor.length > 0) {
+            var moti_term = Hol(new_hole_name());
+          } else {
             throw "WRONG_ADT";
           }
-          var moti_term = parse_term(nams
-            .concat(adt_indx.map(([name,type]) => term_name + "." + name))
-            .concat([term_name])
-            .concat(moves.map(([name,term,type]) => name)));
           var moti_loc = loc(idx - moti_init);
           for (var i = moves.length - 1; i >= 0; --i) {
             var moti_term = All(moves[i][0], moves[i][2], moti_term, false, moves[i][3]);
@@ -1360,8 +1363,12 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   function parse_list_literal(nams) {
     var init = idx;
     if (match("<", is_space)) {
-      var type = parse_term(nams);
-      var skip = parse_exact(">");
+      if (match(">")) {
+        var type = Hol(new_hole_name());
+      } else {
+        var type = parse_term(nams);
+        var skip = parse_exact(">");
+      }
       if (match("{")) {
         var list = [];
         while (idx < code.length && !match("}")) {

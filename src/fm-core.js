@@ -151,6 +151,48 @@ const subst = (term, val, depth) => {
   }
 }
 
+// subst_holes : Maybe(Term) -> Map(String,Term) -> Maybe(Term)
+const subst_holes = (term, hole_value) => {
+  if  (!term) {
+    return null;
+  } else {
+    const [f, [c, t, h, l], hv] = [subst_holes, term, hole_value];
+    switch (c) {
+      case "Var": return Var(t.index)
+      case "Typ": return Typ(l);
+      case "Tid": return Tid(f(t.expr, hv), l);
+      case "Utt": return Utt(f(t.expr, hv), l);
+      case "Utv": return Utv(f(t.expr, hv), l);
+      case "Ute": return Ute(f(t.expr, hv), l);
+      case "All": return All(t.name, f(t.bind, hv), f(t.body, hv), t.eras, l);
+      case "Lam": return Lam(t.name, f(t.bind, hv), f(t.body, hv), t.eras, l);
+      case "App": return App(f(t.func, hv), f(t.argm, hv), t.eras, l);
+      case "Box": return Box(f(t.expr, hv), l);
+      case "Put": return Put(f(t.expr, hv), l);
+      case "Tak": return Tak(f(t.expr, hv), l);
+      case "Dup": return Dup(t.name, f(t.expr, hv), f(t.body, hv), l);
+      case "Num": return Num(l);
+      case "Val": return Val(t.numb, l);
+      case "Op1": return Op1(t.func, f(t.num0, hv), f(t.num1, hv), l);
+      case "Op2": return Op2(t.func, f(t.num0, hv), f(t.num1, hv), l);
+      case "Ite": return Ite(f(t.cond, hv), f(t.pair, hv), l);
+      case "Cpy": return Cpy(t.name, f(t.numb, hv), f(t.body, hv), l);
+      case "Sig": return Sig(t.name, f(t.typ0, hv), f(t.typ1, hv),  t.eras, l);
+      case "Par": return Par(f(t.val0, hv), f(t.val1, hv), t.eras, l);
+      case "Fst": return Fst(f(t.pair, hv), t.eras, l);
+      case "Snd": return Snd(f(t.pair, hv), t.eras, l);
+      case "Prj": return Prj(t.nam0, t.nam1, f(t.pair, hv), f(t.body, hv), t.eras, l);
+      case "Slf": return Slf(t.name, hv);
+      case "New": return New(f(t.type, hv), f(t.expr, hv), l);
+      case "Use": return Use(f(t.expr, hv), l);
+      case "Ann": return Ann(f(t.type, hv), f(t.expr, hv), t.done, l);
+      case "Log": return Log(f(t.msge, hv), f(t.expr, hv), l);
+      case "Hol": return hv[t.name] || Hol(t.name, l);
+      case "Ref": return Ref(t.name, t.eras, l);
+    }
+  }
+}
+
 // subst_many : Term -> [Term] -> Nat -> Term
 const subst_many = (term, vals, depth) => {
   for (var i = 0; i < vals.length; ++i) {
@@ -451,7 +493,7 @@ const reduce = (term, opts = {}) => {
 
 // erase : Term -> Term
 const erase = (term) => {
-  const [f,[c,t],e] = [erase, term, Put(Hol(""))];
+  const [f,[c,t],e] = [erase, term, Put(Hol("<erased>"))];
   switch (c) {
     case "Var": return Var(t.index);
     case "Typ": return Typ();
@@ -563,9 +605,17 @@ const equal = (a, b, d, opts) => {
           case "Log-Log": y = Eqs(ay[1].expr, by[1].expr, d); break;
           case "Ann-Ann": y = Eqs(ay[1].expr, by[1].expr, d); break;
           default:
-            if (ay[0] === "Hol") {
-              y = Val(true);
-            } else if (by[0] === "Hol") {
+            var hole = ay[0] === "Hol" ? ay : by[0] === "Hol" ? by : null;
+            var expr = ay[0] === "Hol" ? by : by[0] === "Hol" ? ay : null;
+            if (hole) {
+              var expr_s = shift(expr, opts.hole_depth[hole[1].name] - d, 0);
+              var hole_v = opts.hole_value[hole[1].name];
+              var hole_d = opts.hole_depth[hole[1].name];
+              if (hole_v === undefined) {
+                opts.hole_value[hole[1].name] = expr_s;
+              } else if (hole_v !== null && !equal(hole_v, expr_s, hole_d, opts)) {
+                opts.hole_value[hole[1].name] = null;
+              }
               y = Val(true);
             } else {
               y = Val(false);
@@ -613,7 +663,9 @@ const {marked_code, random_excuse} = require("./fm-error.js");
 // typecheck : Term -> Term -> Opts -> [Term, Term]
 const typecheck = (term, expect, opts = {}) => {
   var type_memo  = {};
-  var hole_msg   = {};
+  var hole_value = {};
+  var hole_error = {};
+  var hole_local = {};
   var hole_depth = {};
   var found_anns = [];
 
@@ -720,6 +772,14 @@ const typecheck = (term, expect, opts = {}) => {
     return opts.show ? highlight(opts.show(display_normal(term), ctx_names(ctx))) : "?";
   };
 
+  const register_hole = (ctx, term) => {
+    if (!hole_error[term[1].name]) {
+      hole_error[term[1].name] = {ctx, name: term[1].name, expect};
+      hole_local[term[1].name] = term[3];
+      hole_depth[term[1].name] = ctx_names(ctx).length;
+    }
+  };
+
   // Checks and returns the type of a term
   const typecheck = (term, expect, ctx = ctx_new, affine = true, lvel = 0) => {
     const do_error = (str)  => {
@@ -737,7 +797,7 @@ const typecheck = (term, expect, opts = {}) => {
     };
 
     const do_match = (a, b) => {
-      if (!equal(a, b, ctx_names(ctx).length, {show: opts.show, defs: opts.defs, hole_depth})) {
+      if (!equal(a, b, ctx_names(ctx).length, {show: opts.show, defs: opts.defs, hole_depth, hole_value})) {
         do_error("Type mismatch."
           + "\n- Found type... " + format(ctx, a)
           + "\n- Instead of... " + format(ctx, b));
@@ -951,7 +1011,7 @@ const typecheck = (term, expect, opts = {}) => {
         }
         var typ0_v = pair_t[1].typ0;
         var typ1_v = subst(pair_t[1].typ1, Typ(), 0);
-        if (!equal(typ0_v, typ1_v, ctx_names(ctx).length, {defs: opts.defs, hole_depth})) {
+        if (!equal(typ0_v, typ1_v, ctx_names(ctx).length, {defs: opts.defs, hole_depth, hole_value})) {
           do_error("Both branches of if must have the same type.");
         }
         type = expect_nf || typ0_v;
@@ -1111,15 +1171,8 @@ const typecheck = (term, expect, opts = {}) => {
         type = expr_t;
         break;
       case "Hol":
-        if (!hole_msg[term[1].name]) {
-          hole_msg[term[1].name] = {ctx, name: term[1].name, expect};
-          hole_depth[term[1].name] = ctx_names(ctx).length;
-        }
-        if (expect) {
-          type = expect;
-        } else {
-          throw new Error("Untyped hole.");
-        }
+        register_hole(ctx, term);
+        type = expect || Hol(term[1].name + "_type");
         break;
       case "Ref":
         if (!(opts.defs||{})[term[1].name]) {
@@ -1154,17 +1207,27 @@ const typecheck = (term, expect, opts = {}) => {
     var type = typecheck(term, expect);
 
     // Afterwards, prints hole msgs
-    for (var hole_name in hole_msg) {
-      var info = hole_msg[hole_name];
-      var msg = "";
-      msg += "Found hole" + (info.name ? ": '" + info.name + "'" : "") + ".\n";
-      if (info.expect) {
-        msg += "- With goal... " + format(info.ctx, info.expect) + "\n";
-      }
-      var cstr = ctx_str(info.ctx);
-      msg += "- With context:\n" + (cstr.length > 0 ? cstr + "\n" : "");
-      if (!opts.no_logs) {
-        console.log(msg);
+    for (var hole_name in hole_error) {
+      if (!hole_value[hole_name]) {
+        var info = hole_error[hole_name];
+        var msg = "";
+        msg += "Unsolved hole" + (info.name ? ": '" + info.name + "'" : "") + ".\n";
+        if (info.expect) {
+          msg += "- With goal... " + format(info.ctx, info.expect) + "\n";
+        }
+        if (hole_value[hole_name]) {
+          msg += "- Solved as... " + format(info.ctx, hole_value[hole_name]) + "\n";
+        }
+        var cstr = ctx_str(info.ctx);
+        msg += "- With context:\n" + (cstr.length > 0 ? cstr + "\n" : "");
+        //if (hole_local[hole_name]) {
+          //msg += "\n- On line " + (hole_local[hole_name].row+1) + ", col " + (hole_local[hole_name].col) + ", file \x1b[4m" + hole_local[hole_name].file + ".fm\x1b[0m:";
+          //msg += "\n" + marked_code(hole_local[hole_name]);
+        //}
+        if (!opts.no_logs) {
+          console.log(msg);
+        }
+
       }
     }
 
@@ -1176,7 +1239,7 @@ const typecheck = (term, expect, opts = {}) => {
       found_anns[i][1].done = false;
     }
 
-    return type;
+    return subst_holes(type, hole_value);
 
   // In case there is an error, adjust and throw
   } catch (e) {
