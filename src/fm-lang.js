@@ -425,7 +425,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
 
   // Creates a new hole name
   function new_hole_name() {
-    return "h" + (hole_count++);
+    return file + "/hole" + (hole_count++) + "_line" + row;
   }
 
   // Builds a lookup table
