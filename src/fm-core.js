@@ -1041,7 +1041,7 @@ const typecheck = (term, expect, opts = {}) => {
         type = Typ();
         break;
       case "Par":
-        if (expect_nf && expect_nf[0] !== "Sig") {
+        if (expect_nf && expect_nf[0] !== "Sig" && expect_nf[0] !== "Hol") {
           do_error("Inferred type of a pair (example: "
             + format(ctx, Par(Ref("a"),Ref("b")))
             + ") isn't "
@@ -1056,7 +1056,7 @@ const typecheck = (term, expect, opts = {}) => {
           var val1_t = typecheck(term[1].val1, null, ctx, affine, lvel, [term, ctx]);
           var val1_t = shift(val1_t, 1, 0);
         }
-        var eras = expect_nf ? expect_nf[1].eras : term[1].eras;
+        var eras = expect_nf && expect_nf[0] === "Sig" ? expect_nf[1].eras : term[1].eras;
         if (term[1].eras !== eras) {
           do_error("Mismatched erasure.");
         }
