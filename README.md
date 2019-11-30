@@ -34,11 +34,11 @@ Check the [official documentation](DOCUMENTATION.md), browse our [base-libraries
 - Extracting the first element of a list statically checked to be non-empty:
 
     ```haskell
-    // Returns the first element of a statically-checked non-empty list
+    -- Returns the first element of a statically-checked non-empty list
     safe_head(A; xs: List(A), e: length(_ xs) != 0n) : A
       case xs
       + e : length(_ xs) != 0n
-      | nil  => absurd(e(refl(__)), _) // provably unreachable!
+      | nil  => absurd(e(refl(__)), _) -- provably unreachable!
       | cons => xs.head
     ```
 
