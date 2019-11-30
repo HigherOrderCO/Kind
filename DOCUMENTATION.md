@@ -1089,13 +1089,15 @@ develop mathematical proofs in Formality. Let's go through some examples.
 
 #### Example: proving equalities
 
-Formality's base libraries include a type for equality proofs called `Equal`.
-For example, `Equal(Number, 2, 2)` is the statement that `2` is equal `2`. It is
-not a proof: you can write `Equal(Number, 2, 3)`, which is the statement that
-`2` is equal to `3`, but not a proof.  To prove an equality, you must use
-`refl(A; x;)`, which, for any `x : A`, proves `Equal(A, x, x)`. In other words,
-`refl` is a proof that every value is equal to itself. As such, we can prove
-that `true` is equal to `true` like this:
+Formality's base libraries include a type for equality
+proofs called `Equal`.  For example, `Equal(Number, 2, 2)`
+is the statement that `2` is equal `2`. It is not a proof:
+you can write `Equal(Number, 2, 3)`, which is just the
+**statement** that `2` is equal to `3`.  To prove an
+equality, you must use `refl(A; x;)`, which, for any `x :
+A`, proves `Equal(A, x, x)`. In other words, `refl` is a
+proof that every value is equal to itself. As such, we can
+prove that `true` is equal to `true` like this:
 
 ```haskell
 true_is_true : Equal(Bool, true, true)
@@ -1160,7 +1162,7 @@ not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
 ```
 
 This proof wouldn't be possible without using `b` on the motive. With syntax
-sugars, that proof can be written as:
+sugars, it can be written as:
 
 ```haskell
 main(b : Bool) : not(not(b)) == b
@@ -1235,10 +1237,10 @@ import Base#
 
 main : "dogs" != "horses"
   (input) =>
-  let e0 = input                         // "dogs" == "horses"
-  let e1 = cong(____ length(_); e0)      // n4 == n6
-  let e2 = cong(____ nat_equals(4n); e1) // true == false
-  let e3 = true_isnt_false(e2)           // Empty
+  let e0 = input                         -- "dogs" == "horses"
+  let e1 = cong(____ length(_); e0)      -- n4 == n6
+  let e2 = cong(____ nat_equals(4n); e1) -- true == false
+  let e3 = true_isnt_false(e2)           -- Empty
   e3
 ```
 
@@ -1454,7 +1456,7 @@ it("Works for 20", () => {
 });
 ```
 
-It allows us to test our implementatio of `mul2` by checking if the invariant
+It allows us to test our implementation of `mul2` by checking if the invariant
 that `n * 2` is equal to `n + n` holds for specific values of `n`. The problem
 with this approach is that it only gives us partial confidence. No matter how
 many tests we write, there could be still some input which causes our function
@@ -1490,13 +1492,15 @@ it_works_for_20 : mul2(20) == 40
   refl(__)
 ```
 
-Here, we're using `==` to make assert that `mul2(10)` is equal to `20` and
-so on. Since those are true by reduction, we can complete the proofs with
-`refl`. This essentially implements a type-level test suite. But with proofs,
-we can go further: we can prove that a general property holds for every
-possible input, not just a few. To explain, let's first re-implement `mul2` for
-`Nat`, which allows us to write a `case` with a `motive`, an essential proof
-technique:
+Here, we're using `==` to make an assertion that `mul2(10)`
+is equal to `20` and so on. Since those are true by
+reduction, we can complete the proofs with `refl`. This
+essentially implements a type-level test suite. But with
+proofs, we can go further: we can prove that a general
+property holds for every possible input, not just a few. To
+explain, let's first re-implement `mul2` for `Nat`, which
+will posteriorly allows us to write a `case` with a
+`motive`, an essential proof technique:
 
 ```haskell
 import Base#
@@ -1658,7 +1662,7 @@ function, and applies the function to both sides of the equality. Like this:
 ```haskell
 it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
   case n
-  | zero => refl(Nat; zero;)
+  | zero => refl(__)
   | succ =>
     let ind_hyp = it_works_for_all_n(n.pred)
     let add_two = (x : Nat) => succ(succ(x))
@@ -1730,7 +1734,7 @@ it_works_for_2 : mul2(2n) == 4n
 -- using symbolic manipulation and inductive reasoning
 it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
   case n
-  | zero => refl(Nat; zero;)
+  | zero => refl(__)
   | succ =>
     let ind_hyp = it_works_for_all_n(n.pred)
     let add_two = (x : Nat) => succ(succ(x))
