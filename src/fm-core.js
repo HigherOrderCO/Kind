@@ -151,48 +151,6 @@ const subst = (term, val, depth) => {
   }
 }
 
-// subst_holes : Maybe(Term) -> Map(String,Term) -> Maybe(Term)
-const subst_holes = (term, hole_value) => {
-  if  (!term) {
-    return null;
-  } else {
-    const [f, [c, t, h, l], hv] = [subst_holes, term, hole_value];
-    switch (c) {
-      case "Var": return Var(t.index)
-      case "Typ": return Typ(l);
-      case "Tid": return Tid(f(t.expr, hv), l);
-      case "Utt": return Utt(f(t.expr, hv), l);
-      case "Utv": return Utv(f(t.expr, hv), l);
-      case "Ute": return Ute(f(t.expr, hv), l);
-      case "All": return All(t.name, f(t.bind, hv), f(t.body, hv), t.eras, l);
-      case "Lam": return Lam(t.name, f(t.bind, hv), f(t.body, hv), t.eras, l);
-      case "App": return App(f(t.func, hv), f(t.argm, hv), t.eras, l);
-      case "Box": return Box(f(t.expr, hv), l);
-      case "Put": return Put(f(t.expr, hv), l);
-      case "Tak": return Tak(f(t.expr, hv), l);
-      case "Dup": return Dup(t.name, f(t.expr, hv), f(t.body, hv), l);
-      case "Num": return Num(l);
-      case "Val": return Val(t.numb, l);
-      case "Op1": return Op1(t.func, f(t.num0, hv), f(t.num1, hv), l);
-      case "Op2": return Op2(t.func, f(t.num0, hv), f(t.num1, hv), l);
-      case "Ite": return Ite(f(t.cond, hv), f(t.pair, hv), l);
-      case "Cpy": return Cpy(t.name, f(t.numb, hv), f(t.body, hv), l);
-      case "Sig": return Sig(t.name, f(t.typ0, hv), f(t.typ1, hv),  t.eras, l);
-      case "Par": return Par(f(t.val0, hv), f(t.val1, hv), t.eras, l);
-      case "Fst": return Fst(f(t.pair, hv), t.eras, l);
-      case "Snd": return Snd(f(t.pair, hv), t.eras, l);
-      case "Prj": return Prj(t.nam0, t.nam1, f(t.pair, hv), f(t.body, hv), t.eras, l);
-      case "Slf": return Slf(t.name, f(t.type, hv), l);
-      case "New": return New(f(t.type, hv), f(t.expr, hv), l);
-      case "Use": return Use(f(t.expr, hv), l);
-      case "Ann": return Ann(f(t.type, hv), f(t.expr, hv), t.done, l);
-      case "Log": return Log(f(t.msge, hv), f(t.expr, hv), l);
-      case "Hol": return hv[t.name] ? f(hv[t.name], hv) : Hol(t.name, l);
-      case "Ref": return Ref(t.name, t.eras, l);
-    }
-  }
-}
-
 // subst_many : Term -> [Term] -> Nat -> Term
 const subst_many = (term, vals, depth) => {
   for (var i = 0; i < vals.length; ++i) {
@@ -267,9 +225,21 @@ const reduce = (term, opts = {}) => {
   };
   const dereference = (name, eras, names) => {
     if (!opts.no_ref && (opts.defs||{})[name]) {
-      return reduce(unquote(eras ? erase((opts.defs||{})[name]) : (opts.defs||{})[name]), names_new);
+      var value = (opts.defs||{})[name];
+      var value = eras ? erase(value) : value;
+      return reduce(unquote(value), names_new);
     } else {
       return Ref(name, eras);
+    }
+  };
+  const unhole = (name, names) => {
+    if (!opts.no_hol && opts.holes && opts.holes[name] && opts.holes[name].value) {
+      var depth = (opts.depth || 0) + names_len(names);
+      var value = opts.holes[name].value;
+      var value = shift(value, depth - opts.holes[name].depth, 0);
+      return reduce(unquote(value, names), names);
+    } else {
+      return Hol(name);
     }
   };
   const op1 = (func, num0, num1, names) => {
@@ -345,22 +315,46 @@ const reduce = (term, opts = {}) => {
       return Prj(nam0, nam1, pair, (x,y) => weak_reduce(body(x,y), names_ext(y, nam0, names_ext(x, nam1, names))), eras);
     }
   };
-  //const restrict = (expr, names) => {
-    //var expr = reduce(expr, names);
-    //if (expr[0] === "Utv") {
-      //return reduce(expr[1].expr, names);
-    //} else {
-      //return Ute(expr);
-    //}
-  //};
-  //const unrestrict = (expr, names) => {
-    //var expr = reduce(expr, names);
-    //if (expr[0] === "Ute") {
-      //return reduce(expr[1].expr, names);
-    //} else {
-      //return Ute(expr);
-    //}
-  //};
+  const restrict = (expr, names) => {
+    var expr = reduce(expr, names);
+    if (!opts.no_utv && expr[0] === "Utv") {
+      return reduce(expr[1].expr, names);
+    } else {
+      return Ute(expr);
+    }
+  };
+  const unrestrict = (expr, names) => {
+    var expr = reduce(expr, names);
+    if (!opts.no_ute && expr[0] === "Ute") {
+      return reduce(expr[1].expr, names);
+    } else {
+      return Ute(expr);
+    }
+  };
+  const use = (expr, names) => {
+    var expr = reduce(expr, names);
+    if (!opts.no_use && expr[0] === "New") {
+      return reduce(expr[1].expr, names);
+    } else {
+      return Use(expr);
+    }
+  };
+  const ann = (type, expr, names) => {
+    var expr = reduce(expr, names);
+    if (!opts.no_ann) {
+      return expr;
+    } else {
+      return Ann(weak_reduce(type, names), expr);
+    }
+  };
+  const tid = (expr, names) => {
+    var expr = reduce(expr, names);
+    if (!opts.no_tid) {
+      return expr;
+    } else {
+      return Tid(expr);
+    }
+  };
   const log = (msge, expr, names) => {
     var msge = reduce(msge, names);
     var expr = reduce(expr, names);
@@ -413,10 +407,10 @@ const reduce = (term, opts = {}) => {
     switch (ctor) {
       case "Var": return Var(term.index);
       case "Typ": return Typ();
-      case "Tid": return reduce(term.expr, names);
+      case "Tid": return tid(term.expr, names);
       case "Utt": return Utt(reduce(term.expr, names));
-      case "Utv": return reduce(term.expr, names);
-      case "Ute": return reduce(term.expr, names);
+      case "Utv": return restrict(term.expr, names);
+      case "Ute": return unrestrict(term.expr, names);
       case "All": return All(term.name, weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(x, term.name, names)), term.eras);
       case "Lam": return Lam(term.name, term.bind && weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(x, term.name, names)), term.eras);
       case "App": return apply(term.func, term.argm, term.eras, names);
@@ -436,11 +430,11 @@ const reduce = (term, opts = {}) => {
       case "Snd": return second(term.pair, term.eras, names);
       case "Prj": return project(term.nam0, term.nam1, term.pair, term.body, term.eras, names);
       case "Slf": return Slf(term.name, x => weak_reduce(term.type(x), names_ext(x, term.name, names)));
-      case "New": return reduce(term.expr, names);
-      case "Use": return reduce(term.expr, names);
-      case "Ann": return reduce(term.expr, names);
+      case "New": return New(weak_reduce(term.type, names), weak_reduce(term.expr, names));
+      case "Use": return use(term.expr, names);
+      case "Ann": return ann(term.type, term.expr, names);
       case "Log": return log(term.msge, term.expr, names);
-      case "Hol": return Hol(term.name);
+      case "Hol": return unhole(term.name, names);
       case "Ref": return dereference(term.name, term.eras, names);
     }
   };
@@ -538,6 +532,7 @@ const erase = (term) => {
 
 // equal : Term -> Term -> Opts -> Bool
 const equal = (a, b, d, opts) => {
+
   const Eqs = (a, b, d) => ["Eqs", {a, b, d}];
   const Bop = (v, x, y) => ["Bop", {v, x, y}];
   const And = (x,y)     => Bop(false, x, y);
@@ -549,13 +544,17 @@ const equal = (a, b, d, opts) => {
       // An equality test
       case "Eqs":
         var {a, b, d} = node[1];
-
         // Gets whnfs with and without dereferencing
-        // Note: can't use weak:true because it won't give opportunity to eta...
-        var ax = reduce(a, {show: null, defs: opts.defs, weak: true, undup: true, defs: {}});
-        var bx = reduce(b, {show: null, defs: opts.defs, weak: true, undup: true, defs: {}});
-        var ay = reduce(a, {show: null, defs: opts.defs, weak: true, undup: true});
-        var by = reduce(b, {show: null, defs: opts.defs, weak: true, undup: true});
+        const reduce_opts = {
+          weak: true,
+          undup: true,
+          holes: opts.holes,
+          depth: d
+        };
+        var ax = reduce(a, reduce_opts);
+        var bx = reduce(b, reduce_opts);
+        var ay = reduce(a, {...reduce_opts, defs: opts.defs});
+        var by = reduce(b, {...reduce_opts, defs: opts.defs});
 
         // Optimization: if hashes are equal, then a == b prematurely
         if (a[2] === b[2] || ax[2] === bx[2] || ay[2] === by[2]) {
@@ -566,10 +565,24 @@ const equal = (a, b, d, opts) => {
         var x = null;
         if (ax[0] === "Ref" && bx[0] === "Ref" && ax[1].name === bx[1].name) {
           x = Val(true);
+        } else if (ax[0] === "Hol" || bx[0] === "Hol") {
+          var hole = ax[0] === "Hol" ? ax : bx[0] === "Hol" ? bx : null;
+          var expr = ax[0] === "Hol" ? bx : bx[0] === "Hol" ? ax : null;
+          if (hole && opts.holes[hole[1].name]) {
+            var expr_s = shift(expr, opts.holes[hole[1].name].depth - d, 0);
+            var hole_v = opts.holes[hole[1].name].value;
+            var hole_d = opts.holes[hole[1].name].depth;
+            if (hole_v === undefined) {
+              opts.holes[hole[1].name].value = expr_s;
+            } else if (hole_v !== null && !equal(hole_v, expr_s, hole_d, opts)) {
+              opts.holes[hole[1].name].value = null;
+            }
+            x = Val(true);
+          }
         } else if (ax[0] === "App" && bx[0] === "App") {
           var func = Eqs(ax[1].func, bx[1].func, d);
           var argm = Eqs(ax[1].argm, bx[1].argm, d);
-          x = Bop(false, func, argm);
+          x = And(func, argm);
         }
 
         // If whnfs are equal and fields are equal, then a == b
@@ -604,22 +617,7 @@ const equal = (a, b, d, opts) => {
           case "Use-Use": y = Eqs(ay[1].expr, by[1].expr, d); break;
           case "Log-Log": y = Eqs(ay[1].expr, by[1].expr, d); break;
           case "Ann-Ann": y = Eqs(ay[1].expr, by[1].expr, d); break;
-          default:
-            var hole = ay[0] === "Hol" ? ay : by[0] === "Hol" ? by : null;
-            var expr = ay[0] === "Hol" ? by : by[0] === "Hol" ? ay : null;
-            if (hole) {
-              var expr_s = shift(expr, opts.hole_depth[hole[1].name] - d, 0);
-              var hole_v = opts.hole_value[hole[1].name];
-              var hole_d = opts.hole_depth[hole[1].name];
-              if (hole_v === undefined) {
-                opts.hole_value[hole[1].name] = expr_s;
-              } else if (hole_v !== null && !equal(hole_v, expr_s, hole_d, opts)) {
-                opts.hole_value[hole[1].name] = null;
-              }
-              y = Val(true);
-            } else {
-              y = Val(false);
-            }
+          default:        y = Val(false);
         }
 
         return x ? Bop(true, x, y) : y;
@@ -651,24 +649,43 @@ const equal = (a, b, d, opts) => {
   return tree[1].v;
 }
 
-// :::::::::::::::::::
-// :: Type Checking ::
-// :::::::::::::::::::
+// ::::::::::::::
+// :: Contexts ::
+// ::::::::::::::
 
-const {marked_code, random_excuse} = require("./fm-error.js");
+const ctx_new = {length: 0};
 
-// Type-checks a term and returns both its type and its program (an erased
-// copy of the term with holes filled and adjustments made). Does NOT check
-// termination, so a well-typed term may be bottom. Use haltcheck for that.
-// typecheck : Term -> Term -> Opts -> [Term, Term]
-const typecheck = (term, expect, opts = {}) => {
-  var type_memo  = {};
-  var hole_value = {};
-  var hole_error = {};
-  var hole_local = {};
-  var hole_depth = {};
-  var found_anns = [];
+const ctx_ext = (name, term, type, eras, many, lvel, ctx) => {
+  return {name, term, type, eras, many, lvel, uses: 0, length: ctx.length + 1, rest: ctx};
+};
 
+const ctx_get = (i, ctx, use) => {
+  if (i < 0) {
+    return null;
+  }
+  for (var k = 0; k < i; ++k) {
+    if (ctx.rest.length === 0) {
+      return null;
+    } else {
+      ctx = ctx.rest;
+    }
+  }
+  var got = {
+    name: ctx.name,
+    term: ctx.term ? shift(ctx.term, i + 1, 0) : Var(i),
+    type: shift(ctx.type, i + 1, 0),
+    eras: ctx.eras,
+    many: ctx.many,
+    uses: ctx.uses,
+    lvel: ctx.lvel,
+  };
+  if (use) {
+    ctx.uses += 1;
+  }
+  return got;
+};
+
+const ctx_str = (ctx, show) => {
   const pad_right = (len, chr, str) => {
     while (str.length < len) {
       str += chr;
@@ -676,107 +693,114 @@ const typecheck = (term, expect, opts = {}) => {
     return str;
   };
 
-  const highlight = (str)  => {
-    return "\x1b[2m" + str + "\x1b[0m";
-  };
+  var txt = [];
+  var idx = 0;
+  var max_len = 0;
+  for (var c = ctx; c.length > 0; c = c.rest) {
+    max_len = Math.max(c.name.length, max_len);
+  }
+  var depth = 0;
+  for (var c = ctx; c.length > 0; c = c.rest) {
+    var name = c.name;
+    var type = c.type;
+    var tstr = show(type, ctx_names(c.rest));
+    txt.push("\x1b[2m- " + pad_right(max_len, " ", c.name) + " : " + tstr + "\x1b[0m");
+    depth += 1;
+  }
+  return txt.reverse().join("\n");
+};
 
-  const ctx_new = null;
+const ctx_names = (ctx) => {
+  var names = [];
+  while (ctx.length > 0) {
+    names.push(ctx.name);
+    ctx = ctx.rest;
+  }
+  return names.reverse();
+};
 
-  const ctx_ext = (name, term, type, eras, many, lvel, ctx) => {
-    return {name, term, type, eras, many, lvel, uses: 0, rest: ctx};
-  };
-
-  const ctx_get = (i, ctx, use) => {
-    if (i < 0) return null;
-    for (var k = 0; k < i; ++k) {
-      if (!ctx.rest) return null;
-      ctx = ctx.rest;
-    }
-    var got = {
+const ctx_cpy = ctx => {
+  if (ctx.length === 0) {
+    return ctx_new;
+  } else {
+    return {
       name: ctx.name,
-      term: ctx.term ? shift(ctx.term, i + 1, 0) : Var(i),
-      type: shift(ctx.type, i + 1, 0),
+      term: ctx.term,
+      type: ctx.type,
       eras: ctx.eras,
       many: ctx.many,
       uses: ctx.uses,
       lvel: ctx.lvel,
+      length: ctx.length,
+      rest: ctx_cpy(ctx.rest)
+    }
+  }
+};
+
+const ctx_subst = (ctx, term) => {
+  var vals = [];
+  for (var c = ctx, i = 0; c.length > 0; c = c.rest, ++i) {
+    vals.push(c.term ? shift(c.term, i + 1, 0) : Var(i));
+  }
+  var term = shift(term, vals.length, vals.length);
+  var term = subst_many(term, vals.reverse(), 0)
+  return term;
+};
+
+// :::::::::::::::::::
+// :: Type Checking ::
+// :::::::::::::::::::
+
+const {marked_code, random_excuse} = require("./fm-error.js");
+
+// Type-checks a term and returns both its type and its
+// program (an erased copy of the term with holes filled and
+// adjustments made). Does NOT check termination, so a
+// well-typed term may be bottom. Use haltcheck for that.
+// This function mutates the `opts.defs` object, filling
+// holes with their resolved values.
+// typecheck : Term -> Term -> Opts -> [Term, Term]
+const typecheck = (name, expect, opts = {}) => {
+  var holes = {};
+  var types = {};
+  var anns  = [];
+
+  const weak_normal = (term, depth) => {
+    return reduce(term, {holes, undup: true, weak: true, depth, defs: opts.defs});
+  };
+
+  const display_normal = (term, depth) => {
+    return reduce(term, {holes, undup: true, weak: false, depth});
+  };
+
+  const subst_holes = (term, depth) => {
+    return reduce(term, {defs: opts.defs, defs: {}, holes, depth, weak: false,
+      no_app:1, no_tak:1, no_dup:1, no_ref:1,
+      no_op1:1, no_op2:1, no_ite:1, no_cpy:1,
+      no_fst:1, no_snd:1, no_prj:1, no_utv:1,
+      no_ute:1, no_use:1, no_ann:1, no_tid:1});
+  };
+
+  const show = (term, names = []) => {
+    const highlight = (str)  => {
+      return "\x1b[2m" + str + "\x1b[0m";
     };
-    if (use) {
-      ctx.uses += 1;
-    }
-    return got;
-  };
-
-  const ctx_str = (ctx) => {
-    var txt = [];
-    var idx = 0;
-    var max_len = 0;
-    for (var c = ctx; c !== null; c = c.rest) {
-      max_len = Math.max(c.name.length, max_len);
-    }
-    for (var c = ctx; c !== null; c = c.rest) {
-      var name = c.name;
-      var type = c.type;
-      var tstr = opts.show(reduce(type, {defs: {}, undup: true}) , ctx_names(c.rest));
-      txt.push("\x1b[2m- " + pad_right(max_len, " ", c.name) + " : " + tstr + "\x1b[0m");
-    }
-    return txt.reverse().join("\n");
-  };
-
-  const ctx_names = (ctx) => {
-    var names = [];
-    while (ctx !== null) {
-      names.push(ctx.name);
-      ctx = ctx.rest;
-    }
-    return names.reverse();
-  };
-
-
-  const ctx_cpy = ctx => {
-    if (ctx === null) {
-      return null;
+    if (opts.show) {
+      return highlight(opts.show(display_normal(term, names.length), names));
     } else {
-      return {
-        name: ctx.name,
-        term: ctx.term,
-        type: ctx.type,
-        eras: ctx.eras,
-        many: ctx.many,
-        uses: ctx.uses,
-        lvel: ctx.lvel,
-        rest: ctx_cpy(ctx.rest)
-      }
+      return "?";
     }
   };
 
-  const ctx_subst = (ctx, term) => {
-    var vals = [];
-    for (var c = ctx, i = 0; c !== null; c = c.rest, ++i) {
-      vals.push(c.term ? shift(c.term, i + 1, 0) : Var(i));
-    }
-    var term = shift(term, vals.length, vals.length);
-    var term = subst_many(term, vals.reverse(), 0)
-    return term;
-  };
-
-  const weak_normal = (term) => {
-    return reduce(term, {defs: opts.defs, undup: true, weak: true});
-  };
-
-  const display_normal = (term) => {
-    return reduce(term, {defs: opts.defs, defs: {}, undup: true, weak: false});
-  };
-
-  const format = (ctx, term) => {
-    return opts.show ? highlight(opts.show(display_normal(term), ctx_names(ctx))) : "?";
-  };
-
-  const register_hole = (ctx, term) => {
-    if (!hole_error[term[1].name]) {
-      hole_error[term[1].name] = {ctx, name: term[1].name, expect};
-      hole_local[term[1].name] = term[3];
-      hole_depth[term[1].name] = ctx_names(ctx).length;
+  const register_hole = (ctx, term, expect) => {
+    if (!holes[term[1].name]) {
+      holes[term[1].name] = {
+        error: {ctx, name: term[1].name, expect},
+        //local: term[3],
+        local: null,
+        depth: ctx.length,
+        value: undefined,
+      };
     }
   };
 
@@ -785,9 +809,9 @@ const typecheck = (term, expect, opts = {}) => {
     const do_error = (str)  => {
       var err_msg = "";
       err_msg += "[ERROR]\n" + str;
-      err_msg += "\n- When checking " + format(ctx, term)
-      if (ctx !== null) {
-        err_msg += "\n- With context:\n" + ctx_str(ctx);
+      err_msg += "\n- When checking " + show(term, ctx_names(ctx))
+      if (ctx.length > 0) {
+        err_msg += "\n- With context:\n" + ctx_str(ctx, show);
       }
       if (term[3]) {
         err_msg += "\n- On line " + (term[3].row+1) + ", col " + (term[3].col) + ", file \x1b[4m" + term[3].file + ".fm\x1b[0m:";
@@ -797,15 +821,15 @@ const typecheck = (term, expect, opts = {}) => {
     };
 
     const do_match = (a, b) => {
-      if (!equal(a, b, ctx_names(ctx).length, {show: opts.show, defs: opts.defs, hole_depth, hole_value})) {
+      if (!equal(a, b, ctx.length, {show: opts.show, defs: opts.defs, holes})) {
         do_error("Type mismatch."
-          + "\n- Found type... " + format(ctx, a)
-          + "\n- Instead of... " + format(ctx, b));
+          + "\n- Found type... " + show(a, ctx_names(ctx))
+          + "\n- Instead of... " + show(b, ctx_names(ctx)));
       }
     };
 
     if (expect) {
-      var expect_nf = weak_normal(expect);
+      var expect_nf = weak_normal(expect, ctx.length);
       if (expect[0] === "Typ" || expect[0] === "Utt") {
         affine = false;
       }
@@ -846,9 +870,9 @@ const typecheck = (term, expect, opts = {}) => {
       case "Utt":
         if (expect_nf !== null && expect_nf[0] !== "Typ") {
           do_error("The inferred type of an unrestricted type (example: "
-            + format(ctx, Utt(Ref("A"))) + ") isn't "
-            + format(ctx, Typ())
-            + ".\n- Inferred type is " + format(ctx, expect_nf));
+            + show(Utt(Ref("A")), ctx_names(ctx)) + ") isn't "
+            + show(Typ(), ctx_names(ctx))
+            + ".\n- Inferred type is " + show(expect_nf, ctx_names(ctx)));
         }
         var expr_t = typecheck(term[1].expr, Typ(), ctx, false, lvel, [term, ctx]);
         type = Typ();
@@ -856,11 +880,11 @@ const typecheck = (term, expect, opts = {}) => {
       case "Utv":
         if (expect_nf !== null && expect_nf[0] !== "Utt") {
           do_error("The inferred type of an unrestricted term (example: "
-            + format(ctx, Utv(Ref("x")))
+            + show(Utv(Ref("x")), ctx_names(ctx))
             + ") isn't an unrestricted type (example: "
-            + format(ctx, Utt(Ref("A")))
+            + show(Utt(Ref("A")), ctx_names(ctx))
             + ").\n- Inferred type is "
-            + format(ctx, expect_nf));
+            + show(expect_nf, ctx_names(ctx)));
         }
         var expr_t = expect_nf && expect_nf[0] === "Utt" ? expect_nf[1].expr : null;
         var expr_t = typecheck(term[1].expr, expr_t, ctx, false, lvel, [term, ctx]);
@@ -869,27 +893,27 @@ const typecheck = (term, expect, opts = {}) => {
       case "Ute":
         if (affine) {
           do_error("Attempted to unrestrict a term (ex: "
-            + format(ctx, Ute(Ref("+x")))
+            + show(Ute(Ref("+x")), ctx_names(ctx))
             + ") in a proof-relevant position.");
         }
         var expr_t = typecheck(term[1].expr, null, ctx, false, lvel, [term, ctx]);
-        var expr_t = weak_normal(expr_t);
+        var expr_t = weak_normal(expr_t, ctx.length);
         if (expr_t[0] !== "Utt") {
           do_error("Expected an unrestricted type (example: "
-            + format(ctx, Utt(Ref("A")))
+            + show(Utt(Ref("A")), ctx_names(ctx))
             + ").\n- Found type... "
-            + format(ctx, expr_t));
+            + show(expr_t, ctx_names(ctx)));
         }
         type = expr_t[1].expr;
         break;
       case "All":
         if (expect_nf && expect_nf[0] !== "Typ") {
           do_error("The inferred type of a forall (example: "
-            + format(ctx, All("x", Ref("A"), Ref("B"), false))
+            + show(All("x", Ref("A"), Ref("B"), false), ctx_names(ctx))
             + ") isn't "
-            + format(ctx, Typ())
+            + show(Typ(), ctx_names(ctx))
             + ".\n- Inferred type is "
-            + format(ctx, expect_nf));
+            + show(expect_nf, ctx_names(ctx)));
         }
         var bind_t = typecheck(term[1].bind, Typ(), ctx, false, lvel, [term, ctx]);
         var ex_ctx = ctx_ext(term[1].name, null, term[1].bind, term[1].eras, false, lvel, ctx);
@@ -903,11 +927,11 @@ const typecheck = (term, expect, opts = {}) => {
         }
         if (bind_v === null && expect_nf !== null) {
           do_error("The inferred type of a lambda (example: "
-            + format(ctx, Lam("x",null,Ref("f"),false))
+            + show(Lam("x",null,Ref("f"),false), ctx_names(ctx))
             + ") isn't forall (example: "
-            + format(ctx, All("x", Ref("A"), Ref("B"), false))
+            + show(All("x", Ref("A"), Ref("B"), false), ctx_names(ctx))
             + ").\n- Inferred type is "
-            + format(ctx, expect_nf));
+            + show(expect_nf, ctx_names(ctx)));
         }
         var bind_t = typecheck(bind_v, Typ(), ctx, false, lvel, ctx);
         var ex_ctx = ctx_ext(term[1].name, null, bind_v, term[1].eras, false, lvel, ctx);
@@ -917,7 +941,10 @@ const typecheck = (term, expect, opts = {}) => {
         break;
       case "App":
         var func_t = typecheck(term[1].func, null, ctx, affine, lvel, [term, ctx]);
-        var func_t = weak_normal(func_t);
+        var func_t = weak_normal(func_t, ctx.length);
+        if (func_t[0] === "Utt" && !affine) {
+          func_t = func_t[1].expr;
+        }
         if (func_t[0] !== "All") {
           do_error("Attempted to apply a value that isn't a function.");
         }
@@ -930,24 +957,24 @@ const typecheck = (term, expect, opts = {}) => {
       case "Box":
         if (expect_nf !== null && expect_nf[0] !== "Typ") {
           do_error("The inferred type of a box (example: "
-            + format(ctx, Box(Ref("A")))
+            + show(Box(Ref("A")), ctx_names(ctx))
             + ") isn't "
-            + format(ctx, Typ())
+            + show(Typ(), ctx_names(ctx))
             + ".\n- Inferred type is "
-            + format(ctx, expect_nf));
+            + show(expect_nf, ctx_names(ctx)));
         }
         var expr_t = typecheck(term[1].expr, Typ(), ctx, affine, lvel, [term, ctx]);
-        var expr_t = weak_normal(expr_t);
+        var expr_t = weak_normal(expr_t, ctx.length);
         type = Typ();
         break;
       case "Put":
         if (expect_nf !== null && expect_nf[0] !== "Box") {
           do_error("The inferred type of a boxed value (example: "
-            + format(ctx, Put(Ref("x")))
+            + show(Put(Ref("x")), ctx_names(ctx))
             + ") isn't a box (example: "
-            + format(ctx, Box(Ref("A")))
+            + show(Box(Ref("A")), ctx_names(ctx))
             + ").\n- Inferred type is "
-            + format(ctx, expect_nf));
+            + show(expect_nf, ctx_names(ctx)));
         }
         var expr_t = expect_nf && expect_nf[0] === "Box" ? expect_nf[1].expr : null;
         var term_t = typecheck(term[1].expr, expr_t, ctx, affine, lvel + 1, [term, ctx]);
@@ -955,23 +982,23 @@ const typecheck = (term, expect, opts = {}) => {
         break;
       case "Tak":
         var expr_t = typecheck(term[1].expr, null, ctx, affine, lvel - 1, [term, ctx]);
-        var expr_t = weak_normal(expr_t);
+        var expr_t = weak_normal(expr_t, ctx.length);
         if (expr_t[0] !== "Box") {
           do_error("Expected a boxed type (example: "
-            + format(ctx, Box(Ref("A")))
+            + show(Box(Ref("A")), ctx_names(ctx))
             + ").\n- Found type... "
-            + format(ctx, expr_t));
+            + show(expr_t, ctx_names(ctx)));
         }
         type = expr_t[1].expr;
         break;
       case "Dup":
         var expr_t = typecheck(term[1].expr, null, ctx, affine, lvel, [term, ctx]);
-        var expr_t = weak_normal(expr_t);
+        var expr_t = weak_normal(expr_t, ctx.length);
         if (expr_t[0] !== "Box") {
           do_error("Expected a boxed type (example: "
-            + format(ctx, Box(Ref("A")))
+            + show(Box(Ref("A")), ctx_names(ctx))
             + ").\n- Found type... "
-            + format(ctx, expr_t));
+            + show(expr_t, ctx_names(ctx)));
         }
         var ex_ctx = ctx_ext(term[1].name, Tak(term[1].expr), expr_t[1].expr, false, true, lvel + 1, ctx);
         var body_t = typecheck(term[1].body, expect_nf && shift(expect_nf, 1, 0), ex_ctx, affine, lvel, [term, ctx]);
@@ -987,11 +1014,11 @@ const typecheck = (term, expect, opts = {}) => {
       case "Op2":
         if (expect_nf !== null && expect_nf[0] !== "Num") {
           do_error("The inferred type of a numeric operation (example: "
-            + format(ctx, Op2(term[1].func, Ref("x"), Ref("y")))
+            + show(Op2(term[1].func, Ref("x"), Ref("y")), ctx_names(ctx))
             + ") isn't "
-            + format(ctx, Num())
+            + show(Num(), ctx_names(ctx))
             + ".\n- Inferred type is "
-            + format(ctx, expect_nf));
+            + show(expect_nf, ctx_names(ctx)));
         }
         var num0_t = typecheck(term[1].num0, Num(), ctx, affine, lvel, [term, ctx]);
         var num1_t = typecheck(term[1].num1, Num(), ctx, affine, lvel, [term, ctx]);
@@ -999,26 +1026,26 @@ const typecheck = (term, expect, opts = {}) => {
         break;
       case "Ite":
         var cond_t = typecheck(term[1].cond, null, ctx, affine, lvel, [term, ctx]);
-        var cond_t = weak_normal(cond_t);
+        var cond_t = weak_normal(cond_t, ctx.length);
         if (cond_t[0] !== "Num") {
           do_error("Attempted to use if on a non-numeric value.");
         }
         var pair_t = expect_nf ? Sig("x", expect_nf, shift(expect_nf, 1, 0), 0) : null;
         var pair_t = typecheck(term[1].pair, pair_t, ctx, affine, lvel, [term, ctx]);
-        var pair_t = weak_normal(pair_t);
+        var pair_t = weak_normal(pair_t, ctx.length);
         if (pair_t[0] !== "Sig") {
           do_error("The body of an if must be a pair.");
         }
         var typ0_v = pair_t[1].typ0;
         var typ1_v = subst(pair_t[1].typ1, Typ(), 0);
-        if (!equal(typ0_v, typ1_v, ctx_names(ctx).length, {defs: opts.defs, hole_depth, hole_value})) {
+        if (!equal(typ0_v, typ1_v, ctx.length, {defs: opts.defs, holes})) {
           do_error("Both branches of if must have the same type.");
         }
         type = expect_nf || typ0_v;
         break;
       case "Cpy":
         var numb_t = typecheck(term[1].numb, null, ctx, affine, lvel, [term, ctx]);
-        var numb_t = weak_normal(numb_t);
+        var numb_t = weak_normal(numb_t, ctx.length);
         if (numb_t[0] !== "Num") {
           do_error("Atempted to copy a non-numeric value.");
         }
@@ -1029,11 +1056,11 @@ const typecheck = (term, expect, opts = {}) => {
       case "Sig":
         if (expect_nf && expect_nf[0] !== "Typ") {
           do_error("The inferred type of a sigma (example: "
-            + format(ctx, Sig("x", Ref("A"), Ref("B")))
+            + show(Sig("x", Ref("A"), Ref("B")), ctx_names(ctx))
             + ") isn't "
-            + format(ctx, Typ())
+            + show(Typ(), ctx_names(ctx))
             + ".\n- Inferred type is "
-            + format(ctx, expect_nf));
+            + show(expect_nf, ctx_names(ctx)));
         }
         var typ0_t = typecheck(term[1].typ0, Typ(), ctx, false, lvel, [term, ctx]);
         var ex_ctx = ctx_ext(term[1].name, null, term[1].typ0, false, false, lvel, ctx);
@@ -1043,11 +1070,11 @@ const typecheck = (term, expect, opts = {}) => {
       case "Par":
         if (expect_nf && expect_nf[0] !== "Sig" && expect_nf[0] !== "Hol") {
           do_error("Inferred type of a pair (example: "
-            + format(ctx, Par(Ref("a"),Ref("b")))
+            + show(Par(Ref("a"),Ref("b")), ctx_names(ctx))
             + ") isn't "
-            + format(ctx, Sig("x", Ref("A"), Ref("B")))
+            + show(Sig("x", Ref("A"), Ref("B")), ctx_names(ctx))
             + ".\n- Inferred type is "
-            + format(ctx, expect_nf));
+            + show(expect_nf, ctx_names(ctx)));
         }
         var val0_t = typecheck(term[1].val0, expect_nf && expect_nf[1].typ0, ctx, affine, lvel, [term, ctx]);
         if (expect_nf) {
@@ -1067,7 +1094,7 @@ const typecheck = (term, expect, opts = {}) => {
           do_error("Attempted to extract erased first element.");
         }
         var pair_t = typecheck(term[1].pair, null, ctx, affine, lvel, [term, ctx]);
-        var pair_t = weak_normal(pair_t);
+        var pair_t = weak_normal(pair_t, ctx.length);
         if (pair_t[0] !== "Sig") {
           do_error("Attempted to extract the first element of a term that isn't a pair.");
         }
@@ -1081,7 +1108,7 @@ const typecheck = (term, expect, opts = {}) => {
           do_error("Attempted to extract erased second element.");
         }
         var pair_t = typecheck(term[1].pair, null, ctx, affine, lvel, [term, ctx]);
-        var pair_t = weak_normal(pair_t);
+        var pair_t = weak_normal(pair_t, ctx.length);
         if (pair_t[0] !== "Sig") {
           do_error("Attempted to extract the second element of a term that isn't a pair.");
         }
@@ -1092,7 +1119,7 @@ const typecheck = (term, expect, opts = {}) => {
         break;
       case "Prj":
         var pair_t = typecheck(term[1].pair, null, ctx, affine, lvel, [term, ctx]);
-        var pair_t = weak_normal(pair_t);
+        var pair_t = weak_normal(pair_t, ctx.length);
         if (pair_t[0] !== "Sig") {
           do_error("Attempted to project the elements of a term that isn't a pair.");
         }
@@ -1118,7 +1145,7 @@ const typecheck = (term, expect, opts = {}) => {
         type = Typ();
         break;
       case "New":
-        var ttyp = weak_normal(term[1].type);
+        var ttyp = weak_normal(term[1].type, ctx.length);
         if (ttyp[0] !== "Slf") {
           do_error("Attempted to make an instance of a type that isn't self.");
         }
@@ -1128,7 +1155,7 @@ const typecheck = (term, expect, opts = {}) => {
         break;
       case "Use":
         var expr_t = typecheck(term[1].expr, null, ctx, affine, lvel, [term, ctx]);
-        var expr_t = weak_normal(expr_t);
+        var expr_t = weak_normal(expr_t, ctx.length);
         if (expr_t[0] !== "Slf") {
           do_error("Attempted to use a value that isn't a self type.");
         }
@@ -1137,7 +1164,7 @@ const typecheck = (term, expect, opts = {}) => {
       case "Ann":
         if (!term[1].done) {
           term[1].done = true;
-          found_anns.push(term);
+          anns.push(term);
           try {
             var type_t = typecheck(term[1].type, Typ(), ctx, affine, lvel, [term, ctx]);
             var expr_t = typecheck(term[1].expr, term[1].type, ctx, affine, lvel, [term, ctx]);
@@ -1157,7 +1184,7 @@ const typecheck = (term, expect, opts = {}) => {
         var msge_v = term[1].msge;
         try {
           var msge_t = typecheck(msge_v, null, ctx, false, lvel, [term, ctx]);
-          var msge_t = display_normal(erase(msge_t));
+          var msge_t = display_normal(erase(msge_t), ctx.length);
         } catch (e) {
           console.log(e);
           var msge_t = Hol("");
@@ -1171,59 +1198,65 @@ const typecheck = (term, expect, opts = {}) => {
         type = expr_t;
         break;
       case "Hol":
-        register_hole(ctx, term);
+        register_hole(ctx, term, expect);
         type = expect || Hol(term[1].name + "_type");
         break;
       case "Ref":
         if (!(opts.defs||{})[term[1].name]) {
           do_error("Undefined reference: `" + term[1].name + "`.");
-        } else if (!type_memo[term[1].name]) {
-          var dref_t = typecheck((opts.defs||{})[term[1].name], null, ctx, affine, lvel, [term, ctx]);
-          type_memo[term[1].name] = dref_t;
+        } else if (!types[term[1].name]) {
+          var dref_t = typecheck((opts.defs||{})[term[1].name], null, ctx_new, affine, lvel, [term, ctx]);
+          if (!types[term[1].name]) {
+            var dref_t = subst_holes(dref_t, 0);
+            opts.defs[term[1].name] = subst_holes(opts.defs[term[1].name], 0);
+            types[term[1].name] = dref_t;
+          }
         }
-        type = type_memo[term[1].name];
+        type = types[term[1].name];
         break;
       default:
         throw "TODO: type checker for " + term[0] + ".";
     }
     if (expect) {
-      var type_nf = weak_normal(type);
-      // Fill an Utv
-      if (expect_nf[0] === "Utt" && type_nf[0] !== "Utt") {
-        return typecheck(Utv(term), expect_nf, ctx_arg, affine, lvel)
+      var type_nf = weak_normal(type, ctx.length);
+      try {
+        do_match(type, expect);
+      } catch (e) {
+        // Fill an Utv
+        if (expect_nf[0] === "Utt" && type_nf[0] !== "Utt") {
+          return typecheck(Utv(term), expect_nf, ctx_arg, affine, lvel)
+        }
+        // Fill an Ute
+        if (expect_nf[0] !== "Utt" && type_nf[0] === "Utt") {
+          return typecheck(Ute(term), expect_nf, ctx_arg, affine, lvel)
+        }
+        throw e;
       }
-      // Fill an Ute
-      if (expect_nf[0] !== "Utt" && type_nf[0] === "Utt") {
-        return typecheck(Ute(term), expect_nf, ctx_arg, affine, lvel)
-      }
-      // Check if inferred and expected types match
-      do_match(type, expect);
     }
     return type;
   };
 
   try {
     // Type-checks the term
-    var type = typecheck(term, expect);
+    
+    var type = typecheck(Ref(name, false), expect);
 
     // Afterwards, prints hole msgs
-    for (var hole_name in hole_error) {
-      if (!hole_value[hole_name]) {
-        var info = hole_error[hole_name];
+    for (var hole_name in holes) {
+      if (!holes[hole_name].value || hole_name[0] === "_") {
+        var info = holes[hole_name].error;
         var msg = "";
-        msg += "Unsolved hole" + (info.name ? ": '" + info.name + "'" : "") + ".\n";
+        msg += "Found hole" + (info.name ? ": '" + info.name + "'" : "") + ".\n";
         if (info.expect) {
-          msg += "- With goal... " + format(info.ctx, info.expect) + "\n";
+          msg += "- With goal... " + show(info.expect, ctx_names(info.ctx)) + "\n";
         }
-        if (hole_value[hole_name]) {
-          msg += "- Solved as... " + format(info.ctx, hole_value[hole_name]) + "\n";
+        if (holes[hole_name].value) {
+          msg += "- Solved as... " + show(holes[hole_name].value, ctx_names(info.ctx)) + "\n";
+        } else {
+          msg += "- Couldn't find a solution.\n";
         }
-        var cstr = ctx_str(info.ctx);
+        var cstr = ctx_str(info.ctx, show);
         msg += "- With context:\n" + (cstr.length > 0 ? cstr + "\n" : "");
-        //if (hole_local[hole_name]) {
-          //msg += "\n- On line " + (hole_local[hole_name].row+1) + ", col " + (hole_local[hole_name].col) + ", file \x1b[4m" + hole_local[hole_name].file + ".fm\x1b[0m:";
-          //msg += "\n" + marked_code(hole_local[hole_name]);
-        //}
         if (!opts.no_logs) {
           console.log(msg);
         }
@@ -1232,14 +1265,14 @@ const typecheck = (term, expect, opts = {}) => {
     }
 
     // If so, normalize it to an user-friendly form and return
-    type = display_normal(type);
+    type = display_normal(type, 0);
 
     // Cleans side-effects
-    for (var i = 0; i < found_anns.length; ++i) {
-      found_anns[i][1].done = false;
-    }
+    //for (var i = 0; i < anns.length; ++i) {
+      //anns[i][1].done = false;
+    //}
 
-    return subst_holes(type, hole_value);
+    return type;
 
   // In case there is an error, adjust and throw
   } catch (e) {
@@ -1297,7 +1330,6 @@ module.exports = {
   shift,
   subst,
   subst_many,
-  subst_holes,
   typecheck,
   haltcheck,
 };
