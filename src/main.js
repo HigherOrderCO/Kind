@@ -74,9 +74,6 @@ const loader = fm.forall.with_local_files(base_loader)
 // Create a forall checker that uses file system cache when downloading files for checking uploads.
 const forall_checker = fm.forall.checker(base_loader)
 
-// Creates a local checker to check nested files before uploading
-const local_checker = fm.forall.checker(loader)
-
 async function local_imports_or_exit(file, code) {
   try {
     const {open_imports} = await fm.lang.parse(code, {file, tokenify: false, loader});
@@ -90,11 +87,6 @@ async function local_imports_or_exit(file, code) {
 async function upload(file, global_path = {}) {
   if (!global_path[file]) {
     var code = fs.readFileSync(file + ".fm", "utf8");
-
-    if(!(await local_checker(code))){
-      console.error(`${file} does not pass forall requirements.`)
-      throw "Forall Check failed"
-    }
 
     const local_imports = await local_imports_or_exit(file, code);
 
