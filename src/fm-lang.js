@@ -30,7 +30,7 @@ const version = require("./../package.json").version;
 const to_net = require("./fm-to-net.js");
 const to_js = require("./fm-to-js.js");
 const net = require("./fm-net.js");
-const {load_file} = require("./forall.js");
+const {load_file} = require("./forall/loaders.js");
 const {marked_code, random_excuse} = require("./fm-error.js");
 
 // :::::::::::::::::::::
@@ -650,7 +650,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     if (!defs[name+"b"]) {
       var term = base_ref("be");
       for (var i = 0; i < name.length; ++i) {
-        var term = App(base_ref(name[name.length - i - 1] === "0" ? "b0" : "b1"), term, false); 
+        var term = App(base_ref(name[name.length - i - 1] === "0" ? "b0" : "b1"), term, false);
       }
       define(name+"b", term);
     }
@@ -662,7 +662,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     if (!defs[name+"B"]) {
       var term = base_ref("ibe");
       for (var i = 0; i < name.length; ++i) {
-        var term = App(base_ref(name[name.length - i - 1] === "0" ? "ib0" : "ib1"), term, false); 
+        var term = App(base_ref(name[name.length - i - 1] === "0" ? "ib0" : "ib1"), term, false);
       }
       define(name+"B", term);
     }
@@ -794,7 +794,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
         term = Var(nams.length - i - 1, loc(name.length));
         term[1].__name = name;
         if (tokens) tokens[tokens.length - 1][0] = "var";
-      // Inline binary operator 
+      // Inline binary operator
       } else if (is_native_op[name]) {
           term = Lam("x", Num(), Lam("y", Num(), Op2(name, Var(1), Var(0)), false), false);
           if (tokens) tokens[tokens.length - 1][0] = "nop";

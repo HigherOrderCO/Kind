@@ -1,11 +1,6 @@
-// This module is responsible for loading and publishing files from the Forall repository
-// For now this is using the deprecated moonad.org/api repository, but will be updated to the newer
-// Forall API once the service is deployed and ready to be used.
-//
-// This also exports a few "loader decorators" to enable caching depending on the environment
+// Decorators of the loader function for caching and other functionality
 
-const xhr = require("xhr-request-promise");
-const version = require("./../package.json").version;
+const version = require("../../package.json").version;
 
 // Load file related things only on node
 const {fs, path, async_read_file, async_write_file} = (
@@ -23,31 +18,13 @@ const {fs, path, async_read_file, async_write_file} = (
   }
 )()
 
-// load_file receives the name of the file and returns the code asyncronously
-//
-// load_file(file: String) -> Promise<String>
-const load_file = (file) => {
-  return post("load_file", {file});
-};
-
-// save_file receives the file name without the version, the code, and returns, asynchronously
-// the saved global file name (with the version after the @).
-//
-// save_file(file: String, code: String) -> Promise<String>
-const save_file = (file, code) => post("save_file", {file, code});
-
-// Receives a file name and returns a list of parents for that file
-//
-// load_file_parents(file: String) -> Promise<String[]>
-const load_file_parents = (file) => post("load_file_parents", {file});
-
-// Transforms a file loader in order to add local file system cache.
-// It receives the file loader and optionally, a path to save the files
-//
-// with_file_system_cache(
-//   loader: String -> Promise<String>,
-//   cache_dir_path?: String
-// ) -> Promise<String>
+/**
+ * Transforms a file loader in order to add local file system cache.
+ * @param {Function} loader - A file loader, a function of signature string -> Promise<string>
+ * @param {string|undefined} cache_dir_path - Overrides the path where files are saved, defaulting
+ * to "fm_modules".
+ * @returns {Function} - The decorated file loader, with signature string -> Promise<string>
+ */
 const with_file_system_cache = (loader, cache_dir_path) => async (file) => {
   const dir_path = cache_dir_path || get_default_fs_cache_path();
   setup_cache_dir(dir_path);
@@ -63,13 +40,13 @@ const with_file_system_cache = (loader, cache_dir_path) => async (file) => {
   return code;
 }
 
-// Transforms a file loader in order to add local files for development.
-// It receives the file loader and optionally, a path where the files are
-//
-// with_local_files(
-//   loader: String -> Promise<String>,
-//   local_dir_path?: String
-// ) -> Promise<String>
+/**
+ * Transforms a file loader in order to add local files for development.
+ * @param {Function} loader - A file loader, a function of signature string -> Promise<string>
+ * @param {string|undefined} local_dir_path - Overrides the path where local files are loaded from,
+ * defaults to current directory (".")
+ * @returns {Function} - The decorated file loader, with signature string -> Promise<string>
+ */
 const with_local_files = (loader, local_dir_path) => async (file) => {
   const dir_path = local_dir_path || process.cwd();
   const local_file_path = path.join(dir_path, file + ".fm");
@@ -82,14 +59,13 @@ const with_local_files = (loader, local_dir_path) => async (file) => {
   return await loader(file);
 }
 
-// Transforms a file loader in order to add local file system cache.
-// It receives the file loader and optionally, a prefix for the local storage key
-// defaulting to `FPM@${FM_VERSION}/`
-//
-// with_local_storage_cache(
-//   loader: String -> Promise<String>,
-//   prefix?: String
-// ) -> Promise<String>
+/**
+ * Transforms a file loader in order to add local storage cache, useful when running on Browsers.
+ * @param {Function} loader - A file loader, a function of signature string -> Promise<string>
+ * @param {string|undefined} prefix - Overrides the local storage key prefix for saving files,
+ * defaults to `FPM@${FM_VERSION}/`
+ * @returns {Function} - The decorated file loader, with signature string -> Promise<string>
+ */
 const with_local_storage_cache = (loader, prefix = `FPM@${version}/`) => async (file) => {
   const cached = window.localStorage.getItem(prefix + file)
   if(cached) {
@@ -104,15 +80,10 @@ const with_local_storage_cache = (loader, prefix = `FPM@${version}/`) => async (
 }
 
 module.exports = {
-  load_file_parents,
-  load_file,
-  save_file,
   with_file_system_cache,
   with_local_files,
-  with_local_storage_cache,
+  with_local_storage_cache
 }
-
-// Utils not exported
 
 const get_default_fs_cache_path = () => path.join(process.cwd(), "fm_modules");
 
@@ -133,18 +104,3 @@ const setup_cache_dir = (cache_dir_path) => {
     fs.writeFileSync(version_file_path, version);
   }
 }
-
-// The current API is just a simple RPC, so this function helps a lot
-const post = (func, body) => {
-  return xhr("http://moonad.org/api/" + func,
-    { method: "POST"
-    , json: true
-    , body})
-    .then(res => {
-      if (res[0] === "ok") {
-        return res[1];
-      } else {
-        throw res[1];
-      }
-    });
-};

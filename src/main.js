@@ -62,11 +62,20 @@ const with_download_warning = (loader) => async (file) => {
   return await loader(file)
 }
 
-const loader = [
+// Setup a loader that is used either for checking files for publishing as well as a base for dev
+const base_loader = [
   with_download_warning,
-  fm.forall.with_file_system_cache,
-  fm.forall.with_local_files
+  fm.forall.with_file_system_cache
 ].reduce((loader, mod) => mod(loader), fm.forall.load_file)
+
+// Adds local files to the default loader so it is possible to do local development
+const loader = fm.forall.with_local_files(base_loader)
+
+// Create a forall checker that uses file system cache when downloading files for checking uploads.
+const forall_checker = fm.forall.checker(base_loader)
+
+// Creates a local checker to check nested files before uploading
+const local_checker = fm.forall.checker(loader)
 
 async function local_imports_or_exit(file, code) {
   try {
@@ -82,18 +91,47 @@ async function upload(file, global_path = {}) {
   if (!global_path[file]) {
     var code = fs.readFileSync(file + ".fm", "utf8");
 
-    const local_imports = await local_imports_or_exit(file, code);
-
-    for (var imp_file of local_imports) {
-      var g_path = await upload(imp_file, global_path);
-      var [g_name, g_vers] = g_path.split("#");
-      var code = code.replace(new RegExp("import " + imp_file + " *\n")  , "import " + g_name + "#" + g_vers + "\n");
-      var code = code.replace(new RegExp("import " + imp_file + " *open"), "import " + g_name + "#" + g_vers + " open");
-      var code = code.replace(new RegExp("import " + imp_file + " *as")  , "import " + g_name + "#" + g_vers + " as");
+    if(!(await local_checker(code))){
+      console.error(`${file} does not pass forall requirements.`)
+      throw "Forall Check failed"
     }
 
-    global_path[file] = await fm.forall.save_file(file, code);
-    console.log("Saved `" + file + "` as `" + global_path[file] + "`!");
+    const local_imports = await local_imports_or_exit(file, code);
+
+    let file_replacements = {}
+
+    for (var imp_file of local_imports) {
+      var ref = await upload(imp_file, global_path);
+      var ref_name = fm.forall.format_name(ref)
+      file_replacements[imp_file] = ref_name;
+    }
+
+    const new_code =
+      ( await fm.lang.parse(code, {loader, tokenify: true})
+      ).tokens
+      .map(([ctr, content]) => {
+        if(ctr === "imp" && file_replacements[content]) {
+          return file_replacements[content];
+        }
+
+        if(ctr === "ref" && content.indexOf("/") >= 0) {
+          const [file, term] = content.split("/")
+          if(file_replacements[file]) {
+            return `${file_replacements[file]}/${term}`
+          }
+        }
+
+        return content
+      })
+      .join("")
+
+    try {
+      global_path[file] = await fm.forall.save_file(file, new_code, {checker: forall_checker});
+      console.log("Saved `" + file + "` as `" + fm.forall.format_name(global_path[file]) + "`!");
+    } catch (e) {
+      console.error(`Could not save ${file} to Forall.`, e)
+      throw(e);
+    }
   }
   return global_path[file];
 }
@@ -119,7 +157,7 @@ async function upload(file, global_path = {}) {
     if (file_name.slice(-3) === ".fm") {
       file_name = file_name.slice(0, -3);
     }
-    upload(file_name).then(() => process.exit());
+    upload(file_name).then(() => process.exit()).catch(() => process.exit());
 
   } else {
     try {
