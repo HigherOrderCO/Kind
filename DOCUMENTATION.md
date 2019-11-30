@@ -626,6 +626,23 @@ Note that this is only automatic if Formality can infer the expected type of
 the hole's location. Otherwise, you must give it an explicit annotation, as in
 `?hole :: MyType`.
 
+When formality can infer the value of a hole for you, you don't need to complete
+it; you can leave a `?` in your code. For example, below:
+
+```haskell
+main : List(Number)
+  cons(?; 1, nil(?;))
+```
+
+We don't need to write `Number`, since Formality can infer that. We can leave it
+as `?`. Since erased arguments are often inferrable, a `_` can be used as a
+shortcut for `?;`, as in:
+
+```haskell
+main : List(Number)
+  cons(_ 1, nil(_))
+```
+
 Log
 ------
 
@@ -767,9 +784,10 @@ main : Output
 
 The program above creates a datatype, `Suit`, with 4 possible values. In
 Formality, we call those values **constructors**. It then pattern-matches a
-suit and outputs a different sentence depending on it. Notice that the `case`
-expression requires you to annotate the returned type: that's called the
-**motive**, and is very useful when theorem proving.
+suit and outputs a different sentence depending on it. Notice that on this
+`case` expression, we annotated the return type, `: Output`. That's not
+always necessary, but it is very important for theorem proving. The annotated
+type of a case expression is called its **motive**.
 
 Fields
 ------
@@ -785,7 +803,6 @@ T Person
 get_name(p : Person) : String
   case p
   | person => p.name
-  : String
 
 main : Output
   let john = person(26, "John")
@@ -801,7 +818,6 @@ must must explicitly name it using the `as` keyword:
 main(p : Person) : Number
   case person(26, "John") as john
   | person => john.age
-  : Number
 ```
 
 Move
@@ -817,7 +833,6 @@ main(a : Bool, b : Bool) : Bool
   case a
   | true  => b
   | false => not(b)
-  : Bool
 ```
 
 But, since we used `b` in two different branches, we don't need to copy it:
@@ -831,7 +846,6 @@ main(a : Bool, b : Bool) : Bool
   + b : Bool
   | true  => b
   | false => not(b)
-  : Bool
 ```
 
 Under the hoods, this just adds an extra lambda on each branch:
@@ -841,9 +855,8 @@ import Base#
 
 main(a : Bool, b : Bool) : Bool
   (case a
-  | true  => (b) => b
-  | false => (b) => not(b)
-  : Bool -> Bool)(b)
+  | true  => (b : Bool) => b
+  | false => (b : Bool) => not(b))(b)
 ```
 
 Recursion
@@ -910,17 +923,15 @@ main : Number
 
   case a
   | pair => a.y
-  : Number
 ```
 
 The `<A, B>` syntax after the datatype declares two polymorphic Type variables,
 `A` and `B`, allowing us to create pairs with different contained types without
 having to write multiple `Pair` definitions. 
 
-Each polymorphic variable adds an implicit, erased argument to each
-constructor, so, instead of `pair(true, 7)`, you need to write `pair(Bool;
-Number; true, 7)`. In the future, this verbosity will be prevented with implicit
-arguments.
+Each polymorphic variable adds an implicit, erased argument to each constructor,
+so, instead of `pair(true, 7)`, you must write `pair(Bool; Number; true, 7)`;
+or, with holes, `pair(__ true, 7)`.
 
 One of the most popular polymorphic types is the linked `List`:
 
@@ -930,17 +941,27 @@ T List<A>
 | cons(head : A, tail : List(A))
 
 main : List(Number)
-  cons(Number; 1,
-  cons(Number; 2,
-  cons(Number; 3,
-    nil(Number;))))
+  cons(_ 1, cons(_ 2, cons(_ 3, nil(_))))
 ```
 
-Since it is so popular, there is a built-in syntax-sugar for it:
+Notice we used holes to avoid having to write `Number` repeatedly. Since lists
+are so common, it is part of the Base library, and there is a built-in
+syntax-sugar for them:
 
 ```haskell
+import Base#
+
 main : List(Number)
   <Number>[1, 2, 3]
+```
+
+Or, if the type can be inferred:
+
+```haskell
+import Base#
+
+main : List(Number)
+  <>[1, 2, 3]
 ```
 
 Indices
@@ -952,6 +973,8 @@ arguments. That gives us a lot of type-level power and is one of the reasons
 Formality is a great proof language. For example:
 
 ```haskell
+import Base#
+
 T IsEven (x : Nat)
 | make_even(half : Nat) : IsEven(mul(2n, half))
 ```
@@ -998,22 +1021,18 @@ You can't call `half` on odd values because you can't construct an `IsEven` for
 them. An good exercise might be to implement a proof of `Equal(Nat,
 double(half(n, ie;)), n)`. Why this is possible for `half`, but not for `div2`?
 
-Another example is the Vector, which is a `List` with a statically known length:
-
-```haskell
-T Vector<A> (len : -Nat)
-| vnil                                               : Vector(A, zero)
-| vcons(len : -Nat; head : A, tail : Vector(A, len)) : Vector(A, succ(len))
-```
-
+Another example is the Vector, which is a `List` with a statically known length.
 Every time you add an element to a Vector, the length on its type increases:
 
 ```haskell
+import Base#
+
+T Vector<A> (len: -Nat)
+| vnil : Vector(A, zero)
+| vcons(len; head: A, tail: Vector(A, len)) : Vector(A, succ(len))
+
 main : Vector(String, 3n)
-   vcons(String; ~2n; "ichi",
-   vcons(String; ~1n; "ni",
-   vcons(String; ~0n; "san",
-   vnil(String;))))
+   vcons(__ "A", vcons(__ "B", vcons(__ "C", vnil(_))))
 ```
 
 This has many applications such as creating a type-safe `vhead` function that
@@ -1030,15 +1049,16 @@ T AllTrue (xs : List(Bool))
 ```
 
 It says that the empty list is a list of trues (`at_nil`) and that appending
-true to a list of trues is still a list of trues (`at_cons`). You can make all
-sorts of specifications using indexed datatypes, making them extremely
-powerful.
+true to a list of trues is still a list of trues (`at_cons`). It is impossible
+to create a `AllTrue(list)` with a false element. You can make all sorts of
+specifications using indexed datatypes, making them extremely powerful.
 
 Motive
 ------
 
-In Formality, the type returned by a case expression can depend on the matched
-value by using it on the motive. For example:
+Until now, we've almost always omitted the type annotation of case expressions;
+that is, its motive. But motives are important when you want the return type of
+a case expression to depend on the matched value. For example:
 
 ```haskell
 import Base#
@@ -1047,7 +1067,6 @@ CaseType(x : Bool) : Type
   case x
   | true  => Number
   | false => String
-  : Type
 
 main : Number
   case true as x
@@ -1072,19 +1091,32 @@ develop mathematical proofs in Formality. Let's go through some examples.
 
 Formality's base libraries include a type for equality proofs called `Equal`.
 For example, `Equal(Number, 2, 2)` is the statement that `2` is equal `2`. It is
-not a proof: you can write `Equal(Number, 2, 3)`, which is the statement that `2`
-is equal to `3`.  To prove an equality, you can use `refl(A; x;)`, which, for
-any `x : A`, proves `Equal(A, x, x)`. In other words, `refl` is a proof that
-every value is equal to itself. As such, we can prove that `true` is equal to
-`true` like this:
+not a proof: you can write `Equal(Number, 2, 3)`, which is the statement that
+`2` is equal to `3`, but not a proof.  To prove an equality, you must use
+`refl(A; x;)`, which, for any `x : A`, proves `Equal(A, x, x)`. In other words,
+`refl` is a proof that every value is equal to itself. As such, we can prove
+that `true` is equal to `true` like this:
 
 ```haskell
 true_is_true : Equal(Bool, true, true)
   refl(Bool; true;)
 ```
 
-Now, suppose you want to prove that, for any boolean `b`, `not(not(b))` is
-equal to `b`. This can be stated as such:
+Note that holes can often be used to avoid writing the arguments of `refl`.
+Moreover, Formality includes a syntax sugar for `Equal`, `a == b`, which
+expands to `Equal(?, a, b)`. As such, the program above can be written as:
+
+```haskell
+true_is_true : true == true
+  refl(__)
+```
+
+A natural question is: if the only way to prove an equality is by using `refl`,
+which proves that an element is equal to itself, then what is the point? The
+insight is that, with motives, we can prove that two expressions are equal even
+when they're not literally identical. For example, suppose you want to prove
+that, for any boolean `b`, `not(not(b))` is equal to `b`. This can be stated as
+such:
 
 ```haskell
 import Base#
@@ -1093,11 +1125,12 @@ not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
   ?a
 ```
 
-But here you can't use `refl(Bool; b;)`, because it'd be `Equal(Bool, b, b)`
-instead of `Equal(Bool, not(not(b)), b)`. The problem is that the function call
-is stuck on a variable, `b`, causing both sides to be different. That's when
-dependent motives help: if you pattern-match on `b`, Formality will specialize
-the equation for both specific values of `b`, that is, `true` and `false`:
+But here you can't use `refl(Bool; b;)`, because that'd be a proof of
+`Equal(Bool, b, b)`, not of `Equal(Bool, not(not(b)), b)`. The sides aren't
+identical! The problem is that the function call is stuck on a variable, `b`,
+causing both sides to be different. That's when dependent motives help: if you
+pattern-match on `b`, Formality will specialize the equation for both specific
+values of `b`, that is, `true` and `false`:
 
 ```haskell
 import Base#
@@ -1126,7 +1159,16 @@ not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
   : Equal(Bool, not(not(b)), b)
 ```
 
-This proof wouldn't be possible without using `b` on the motive.
+This proof wouldn't be possible without using `b` on the motive. With syntax
+sugars, that proof can be written as:
+
+```haskell
+main(b : Bool) : not(not(b)) == b
+  case b
+  | true  => refl(__)
+  | false => refl(__)
+  : not(not(b)) == b
+```
 
 #### Example: proving absurds
 
@@ -1189,20 +1231,15 @@ manipulating equations with higher level functions. For example, here is a
 proof that `"dogs"` and `"horses"` are different strings:
 
 ```haskell
-main(input : Equal(String, "dogs", "horses")) : Empty
-  -- e0 : Equal(String, "dogs", "horses")
-  let e0 = input
+import Base#
 
-  -- e1 : Equal(Nat, n4, n6)
-  let e1 = cong(String; Nat; "dogs"; "horses"; length(Char;); e0)
-
-  -- e2 : Equal(Bool, true, false)
-  let e2 = cong(Nat; Bool; 4n; 6n; nat_equals(4n); e1)
-
-  -- e3 : Empty
-  let e3 = true_isnt_false(e2)
-
-   e3
+main : "dogs" != "horses"
+  (input) =>
+  let e0 = input                         // "dogs" == "horses"
+  let e1 = cong(____ length(_); e0)      // n4 == n6
+  let e2 = cong(____ nat_equals(4n); e1) // true == false
+  let e3 = true_isnt_false(e2)           // Empty
+  e3
 ```
 
 #### Example: avoiding unreachable branches
@@ -1216,7 +1253,6 @@ main : Number
   case true
   | true  => 10
   | false => ?
-  : Number
 ```
 
 Here, we're matching against `true`, so we know the `false` case is
@@ -1233,10 +1269,9 @@ import Base#
 
 main : Number
   case true as x
-  + refl(Bool; true;) as e : Equal(Bool, x, true)
+  + refl(__) as e : Equal(Bool, x, true)
   | true  => 10
-  | false => absurd(false_isnt_true(e), Number;)
-  : Number
+  | false => absurd(false_isnt_true(e), _)
 ```
 
 (Remember that `+` is a shorthand for adding an extra variable to the motive.)
@@ -1439,23 +1474,23 @@ mul2(n : Number) : Number
   else
     2 .+. mul2(n .-. 1.01)
 
-it_works_for_10 : Equal(Number, mul2(10), 20)
-  refl(Number; 20;)
+it_works_for_10 : mul2(10) == 20
+  refl(__)
 
-it_works_for_44 : Equal(Number, mul2(44), 88)
-  refl(Number; 88;)
+it_works_for_44 : mul2(44) == 88
+  refl(__)
 
-it_works_for_17 : Equal(Number, mul2(17), 34)
-  refl(Number; 34;)
+it_works_for_17 : mul2(17) == 34
+  refl(__)
 
-it_works_for_12 : Equal(Number, mul2(12), 24)
-  refl(Number; 24;)
+it_works_for_12 : mul2(12) == 24
+  refl(__)
 
-it_works_for_20 : Equal(Number, mul2(20), 40)
-  refl(Number; 40;)
+it_works_for_20 : mul2(20) == 40
+  refl(__)
 ```
 
-Here, we're using `Equal` to make assert that `mul2(10)` is equal to `20` and
+Here, we're using `==` to make assert that `mul2(10)` is equal to `20` and
 so on. Since those are true by reduction, we can complete the proofs with
 `refl`. This essentially implements a type-level test suite. But with proofs,
 we can go further: we can prove that a general property holds for every
@@ -1470,20 +1505,19 @@ mul2(n : Nat) : Nat
   case n
   | zero => zero
   | succ => succ(succ(mul2(n.pred)))
-  : Nat
 ```
 
 Let's start by adding a few tests just to be sure:
 
 ```haskell
-it_works_for_0 : Equal(Nat, mul2(0n), 0n)
-  refl(Nat; 0n;)
+it_works_for_0 : mul2(0n) == 0n
+  refl(__)
 
-it_works_for_1 : Equal(Nat, mul2(1n), 2n)
-  refl(Nat; 2n;)
+it_works_for_1 : mul2(1n) == 2n
+  refl(__)
 
-it_works_for_2 : Equal(Nat, mul2(2n), 4n)
-  refl(Nat; 4n;)
+it_works_for_2 : mul2(2n) == 4n
+  refl(__)
 ```
 
 Since those pass, we can now try to prove the more general statement that the
@@ -1491,13 +1525,13 @@ double of any `n` is equal to `x .+. x`. We start by writing the type of our
 invariant:
 
 ```haskell
-it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
   ?a
 ```
 
 As you can see, this is just like a test, except that it includes a variable,
 `n`, which can be any `Nat`. As such, it will only "pass" if we manage to
-convince Formality that `Equal(Nat, mul2(n), add(n, n))` holds for every `n`,
+convince Formality that `mul2(n) == add(n, n)` holds for every `n`,
 not just a few. To do it, we can start by type-checking the program above and
 seeing what Formality has to say:
 
@@ -1511,37 +1545,35 @@ Found hole: 'a'.
 ```
 
 This is telling us that our theorem is correct as long as we can replace the
-hole `?a` with a proof that `Equal(Nat, mul2(n), add(n, n))`. In other words,
+hole `?a` with a proof that `mul2(n) == add(n, n)`. In other words,
 Formality is asking us to to prove what we claimed to be true. Let's try to do
 it with a `refl`:
 
 ```haskell
-it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
-  refl(Nat; mul2(n);)
+it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
+  refl(__)
 ```
 
 This time, it doesn't work, and we get the following error:
 
 ```haskell
 Type mismatch.
-- Found type... Equal(Nat, mul2(n), mul2(n))
+- Found type... Equal(Nat, add(n, n), add(n, n))
 - Instead of... Equal(Nat, mul2(n), add(n, n))
-- When checking refl(Nat; mul2(n);)
 ```
 
-That's because `refl(Nat; mul2(n);)` is a proof that `Equal(Nat, mul2(n),
-mul2(n))`, but not that `Equal(Nat, mul2(n), add(n, n))`. The problem is that,
-unlike on the previous tests, the equation now has a variable, `n`, which
-causes both sides to get "stuck", so they don't become equal by mere reduction.
-We need to "unstuck" the equation by inspecting the value of `n` with a case
-expression.
+That's because `refl` proves that a value is equal to itself, but `mul2(n)` and
+`add(n, n)` are different expressions. The problem is that, unlike on the
+previous tests, the equation now has a variable, `n`, which causes both sides to
+get "stuck", so they don't become identical by mere reduction. We need to
+"unstuck" the equation by inspecting the value of `n` with a case expression.
 
 ```haskell
-it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
   case n
   | zero => ?a
   | succ => ?b
-  : Equal(Nat, mul2(n), add(n, n))
+  : mul2(n) == add(n, n)
 ```
 
 Let's type-check it again:
@@ -1549,16 +1581,16 @@ Let's type-check it again:
 ```haskell
 Found hole: 'a'.
 - With goal... Equal(Nat, mul2(zero), add(zero, zero))
+- Couldn't find a solution.
 - With context:
 - n : Nat
 
 Found hole: 'b'.
 - With goal... Equal(Nat, mul2(succ(n.pred)), add(succ(n.pred), succ(n.pred)))
+- Couldn't find a solution.
 - With context:
 - n      : Nat
 - n.pred : Nat
-
-(n : Nat) -> Equal(Nat, mul2(n), add(n, n)) ✔
 ```
 
 Notice that, now, we have two holes, one for each possible value of `n` (`zero`
@@ -1568,11 +1600,11 @@ on the branch?  That's very important, because now both sides evaluate to
 `zero`.  This allows us to prove that case with a `refl`!
 
 ```haskell
-it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
   case n
-  | zero => refl(Nat; zero;)
+  | zero => refl(__)
   | succ => ?b
-  : Equal(Nat, mul2(n), add(n, n))
+  : mul2(n) == add(n, n)
 ```
 
 Now, we only have one hole:
@@ -1580,6 +1612,7 @@ Now, we only have one hole:
 ```haskell
 Found hole: 'b'.
 - With goal... Equal(Nat, mul2(succ(n.pred)), add(succ(n.pred), succ(n.pred)))
+- Couldn't find a solution.
 - With context:
 - n      : Nat
 - n.pred : Nat
@@ -1596,14 +1629,14 @@ theorems about recursive datatypes like `Nat`. Let's do that and `log` it to
 see what we get:
 
 ```haskell
-it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
   case n
-  | zero => refl(Nat; zero;)
+  | zero => refl(__)
   | succ =>
     let ind_hyp = it_works_for_all_n(n.pred)
     log(ind_hyp)
     ?a
-  : Equal(Nat, mul2(n), add(n, n))
+  : mul2(n) == add(n, n)
 ```
 
 This outputs:
@@ -1623,43 +1656,39 @@ add `succ(succ(...))` to both sides of the equation. This can be done with the
 function, and applies the function to both sides of the equality. Like this:
 
 ```haskell
-it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
   case n
   | zero => refl(Nat; zero;)
   | succ =>
     let ind_hyp = it_works_for_all_n(n.pred)
     let add_two = (x : Nat) => succ(succ(x))
-    let new_hyp = cong(Nat; Nat; mul2(n.pred); add(n.pred, n.pred); add_two; ind_hyp)
+    let new_hyp = cong(____ add_two; ind_hyp)
     log(new_hyp)
     ?a
-  : Equal(Nat, mul2(n), add(n, n))
+  : mul2(n) == add(n, n)
 ```
 
-Note that `cong` is a little bit verbose since it needs you to provide both
-sides of the equality you want to alter. Don't let this scare you, though, you
-can literally just copy-paste from the goal. In the future, Formality will be
-able to fill those bureaucratic bits for you. Let's log `new_hyp` to see what
-we have now:
+Let's log `new_hyp` to see what we have now:
 
 ```haskell
 [LOG]
-Term: cong(Nat; Nat; mul2(n.pred); add(n.pred; n.pred), (x : Nat) => succ(succ(x)); it_works_for_all_n(n.pred))
+Term: cong(?_a/line24_11; ?_a/line24_12; ?_a/line24_13; ?_a/line24_14; (x : Nat) => succ(succ(x)); it_works_for_all_n(n.pred))
 Type: Equal(Nat, succ(succ(mul2(n.pred))), succ(succ(add(n.pred, n.pred))))
 ```
 
-As you can see, `new_hyp` has the same type as our goal As such, we can
+As you can see, `new_hyp` has the same type as our goal! As such, we can
 complete this branch with it:
 
 ```haskell
 it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
   case n
-  | zero => refl(Nat; zero;)
+  | zero => refl(__)
   | succ =>
     let ind_hyp = it_works_for_all_n(n.pred)
     let add_two = (x : Nat) => succ(succ(x))
-    let new_hyp = cong(Nat; Nat; mul2(n.pred); add(n.pred; n.pred), add_two; ind_hyp)
+    let new_hyp = cong(____ add_two; ind_hyp)
     new_hyp
-  : Equal(Nat, mul2(n), add(n, n))
+  : mul2(n) == add(n, n)
 ```
 
 And done! Since we've proven our theorem for both possible values of `n`
@@ -1673,7 +1702,42 @@ we've proven that `2 * n` is equal to `n + n` for all `n`. This is an extreme
 validation that our implementation of `mul2` is correct: it is as if we've
 written infinite tests, one for each `n`. Not only that, but the fact that
 `mul2` and `add` match perfectly despite being very different functions
-reinforces the correctness of them both, mutually.
+reinforces the correctness of them both, mutually. Here is the complete file
+with our implementation and its correctness proof:
+
+```haskell
+import Base#
+
+-- Multiplies a number by two
+mul2(n : Nat) : Nat
+  case n
+  | zero => zero
+  | succ => succ(succ(mul2(n.pred)))
+
+-- Tests that it works as expected for `n = 0`
+it_works_for_0 : mul2(0n) == 0n
+  refl(__)
+
+-- Tests that it works as expected for `n = 2`
+it_works_for_1 : mul2(1n) == 2n
+  refl(__)
+
+-- Tests that it works as expected for `n = 4`
+it_works_for_2 : mul2(2n) == 4n
+  refl(__)
+
+-- Proves that it works as expected for any `n` up to infinity
+-- using symbolic manipulation and inductive reasoning
+it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
+  case n
+  | zero => refl(Nat; zero;)
+  | succ =>
+    let ind_hyp = it_works_for_all_n(n.pred)
+    let add_two = (x : Nat) => succ(succ(x))
+    let new_hyp = cong(____ add_two; ind_hyp)
+    new_hyp
+  : mul2(n) == add(n, n)
+```
 
 An interesting point to note is that proofs are often much longer than
 theorems. In this example, the theorem had just one line, but the proof had 8.

@@ -19,28 +19,27 @@ Check the [official documentation](DOCUMENTATION.md), browse our [base-libraries
       case xs
       | nil  => 0
       | cons => xs.head .+. sum(xs.tail)
-      : Number
     ```
 
 - A proof that negating a bool twice returns the same bool:
 
     ```haskell
-    not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
+    not_not_is_same(b : Bool) : not(not(b)) == b
       case b
-      | true  => refl(~Bool, ~true)
-      | false => refl(~Bool, ~false)
-      : Equal(Bool, not(not(b)), b)
+      | true  => refl(__)
+      | false => refl(__)
+      : not(not(b)) == b
     ```
 
-- Extracting the first element of a provably non-empty vector:
+- Extracting the first element of a list statically checked to be non-empty:
 
     ```haskell
-    vhead(~A, ~len : -Nat, xs : Vector(A, succ(len))) : A
+    // Returns the first element of a statically-checked non-empty list
+    safe_head(A; xs: List(A), e: length(_ xs) != 0n) : A
       case xs
-      + refl(~Nat, ~succ(len)) as e : Equal(Nat, xs.len, succ(len))
-      | vnil  => absurd(zero_isnt_succ(~len, e), ~A) // -- unreachable!
-      | vcons => xs.head
-      : A
+      + e : length(_ xs) != 0n
+      | nil  => absurd(e(refl(__)), _) // provably unreachable!
+      | cons => xs.head
     ```
 
 ## Usage

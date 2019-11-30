@@ -1633,7 +1633,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
             if (match(":")) {
               var type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
             } else {
-              var type = Typ();
+              var type = Hol(new_hole_name());
             }
             var eras = match(";");
             var skip = match(",");
