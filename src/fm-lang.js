@@ -24,7 +24,6 @@ const {
   shift,
   subst,
   subst_many,
-  subst_holes,
 } = require("./fm-core.js");
 
 const version = require("./../package.json").version;
@@ -118,7 +117,7 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       while (term[0] === "Lam") {
         erase.push(term[1].eras);
         names.push(term[1].name);
-        types.push(term[1].bind && term[1].bind[0] !== "Hol"
+        types.push(term[1].bind
           ? show(term[1].bind, nams.concat(names.slice(0,-1)), opts)
           : null);
         term = term[1].body;
@@ -274,8 +273,9 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       var expr = show(args.expr, nams, opts);
       return "use(" + expr + ")";
     case "Ann":
+      var type = show(args.type, nams, opts);
       var expr = show(args.expr, nams, opts);
-      return expr;
+      return expr + " :: " + type;
     case "Log":
       var expr = show(args.expr, nams, opts);
       return expr;
@@ -456,13 +456,11 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     , ".==."  : 1
   };
 
-  const op_inits     = [".", "->"];
-  const is_op_init   = str => { for (var k of op_inits) if (str === k || str[0] === k) return str; return null; };
   const is_num_char  = build_charset("0123456789");
   const is_hex_char  = build_charset("0123456789abcdefABCDEF");
   const is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#-@/");
   const is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#-@+*/%^!<>=&|");
-  const is_spacy     = build_charset(" \t\n\r;");
+  const is_spacy     = build_charset(" \t\n\r");
   const is_space     = build_charset(" ");
   const is_newline   = build_charset("\n");
 
@@ -533,22 +531,20 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     }
   }
 
-  // Skips spaces, calls `match_here`
+  // If next non-space char is string, consume it
+  // Otherwise, don't affect the state
+  // TODO: avoid save_parse_state
   function match(string, is_space = is_spacy) {
+    var state = save_parse_state();
     next_char(is_space);
-    return match_here(string);
+    var matched = match_here(string);
+    if (matched) {
+      return true;
+    } else {
+      load_parse_state(state);
+      return false;
+    }
   }
-
-  // Attempts to match a character that is a valid operator initiator
-  function match_op_init(is_space = is_spacy) {
-    for (var i = 0; i < op_inits.length; ++i) {
-      var op_init = op_inits[i];
-      if (match(op_init, is_space)) {
-        return op_init;
-      }
-    };
-    return null;
-  };
 
   // Throws a parse error at this location
   function error(error_message) {
@@ -726,10 +722,8 @@ const parse = async (code, opts, root = true, loaded = {}) => {
 
   // Parses an alphanumeric name
   function parse_name() {
-    var op_init = null;
-    if (op_init = is_op_init(code[idx] + (code[idx+1] || " "))) {
-      match(op_init);
-      return op_init + parse_string_here(is_op_char);
+    if (match(".")) {
+      return "." + parse_string_here(is_op_char);
     } else {
       return parse_string();
     }
@@ -939,7 +933,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       var parsed = parse_term(nams.concat(names));
       for (var i = names.length - 1; i >= 0; --i) {
         if (isall) {
-          parsed = All(names[i], types[i] || Typ(), parsed, erass[i], loc(idx - init));
+          parsed = All(names[i], types[i] || Hol(new_hole_name()), parsed, erass[i], loc(idx - init));
         } else {
           parsed = Lam(names[i], types[i] || null, parsed, erass[i], loc(idx - init));
         }
@@ -955,6 +949,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       var name = parse_string();
       var skip = parse_exact("=");
       var expr = parse_term(nams);
+      var skip = match(";");
       var body = parse_term(nams.concat([name]));
       return Dup(name, expr, body, loc(idx - init));
     }
@@ -993,6 +988,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       var name = parse_string();
       var skip = parse_exact("=");
       var copy = parse_term(nams);
+      var skip = match(";");
       var body = parse_term(nams.concat([name]));
       return subst(body, copy, 0);
     }
@@ -1036,9 +1032,9 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     var init = idx;
     if (match("if ")) {
       var cond = parse_term(nams);
-      var skip = match("then:") || parse_exact(":");
+      var skip = parse_exact("then ");
       var val0 = parse_term(nams);
-      var skip = parse_exact("else:");
+      var skip = parse_exact("else ");
       var val1 = parse_term(nams);
       return Ite(cond, Par(val0, val1, 0), loc(idx - init));
     }
@@ -1051,6 +1047,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       var name = parse_string();
       var skip = parse_exact("=");
       var numb = parse_term(nams);
+      var skip = match(";");
       var body = parse_term(nams.concat([name]));
       return Cpy(name, numb, body, loc(idx - init));
     }
@@ -1172,6 +1169,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       }
       var skip = parse_exact("=");
       var pair = parse_term(nams);
+      var skip = match(";");
       var parsed = parse_term(nams.concat(names));
       for (var i = names.length - 2; i >= 0; --i) {
         var nam1 = names[i];
@@ -1330,6 +1328,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     }
   }
 
+
   // Parses a Number bitwise-not, `.!.(t)`
   function parse_op2_not(nams) {
     var init = idx;
@@ -1422,15 +1421,41 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     }
   }
 
-  // Parses an annotation `t :: T`
+  // Parses an annotation `t :: T` and a rewrite `t :: rewrite P(.) with e`
   function parse_ann(parsed, init, nams) {
     if (match("::", is_space)) {
-      //if (match("Type")) {
-        //return Tid(parsed);
-      //} else {
+      if (match("rewrite", is_space)) {
+        var type = parse_term(nams.concat(["."]));
+        var skip = parse_exact("with");
+        var prof = parse_term(nams);
+        var term = base_ref("rewrite");
+        var term = App(term, Hol(new_hole_name()), true);
+        var term = App(term, Hol(new_hole_name()), true);
+        var term = App(term, Hol(new_hole_name()), true);
+        var term = App(term, prof, false);
+        var term = App(term, Lam("_", null, type, false), true);
+        var term = App(term, parsed, false);
+        return term;
+      } else {
         var type = parse_term(nams);
         return Ann(type, parsed, false, loc(idx - init));
-      //}
+      }
+    }
+  }
+
+  // Parses an equality, `a == b`
+  function parse_eql(parsed, init, nams) {
+    if (match("==", is_space)) {
+      var rgt = parse_term(nams);
+      return App(App(App(base_ref("Equal"), Hol(new_hole_name()), false), parsed, false), rgt, false);
+    }
+  }
+
+  // Parses an arrow, `A -> B`
+  function parse_arr(parsed, init, nams) {
+    if (match("->", is_space)) {
+      var rett = parse_term(nams.concat("_"));
+      return All("_", parsed, rett, false, loc(idx - init));
     }
   }
 
@@ -1439,16 +1464,13 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   // - Arrow notation: `A -> B`
   // - User-defined operators: `t .foo. u`
   function parse_ops(parsed, init, nams) {
-    var matched_op_init = null;
-    if (matched_op_init = match_op_init(is_space)) {
+    if (match(".", is_space)) {
       if (tokens) tokens.pop();
-      var func = matched_op_init + parse_string_here(x => !is_space(x));
+      var func = "." + parse_string_here(x => !is_space(x));
       if (tokens) tokens.push(["txt", ""]);
       var argm = parse_term(nams);
       if (is_native_op[func]) {
         return Op2(func, parsed, argm, loc(idx - init));
-      } else if (func === "->") {
-        return All("", parsed, shift(argm, 1, 0), false, loc(idx - init));
       } else {
         return App(App(ref(func), parsed, false), argm, false, loc(idx - init));
       }
@@ -1511,6 +1533,8 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     while (new_parsed) {
       if      (new_parsed = parse_app(parsed, init, nams));
       else if (new_parsed = parse_ann(parsed, init, nams));
+      else if (new_parsed = parse_arr(parsed, init, nams));
+      else if (new_parsed = parse_eql(parsed, init, nams));
       else if (new_parsed = parse_ops(parsed, init, nams));
       if (new_parsed) {
         parsed = new_parsed;
@@ -1579,7 +1603,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
           if (match(":")) {
             var type = await parse_term(adt_nams.concat(adt_indx.map((([name,type]) => name))));
           } else {
-            var type = Hol(new_hole_name());
+            var type = Typ();
           }
           adt_indx.push([name, type, eras]);
           if (match(")")) break; else parse_exact(",");
@@ -1599,7 +1623,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
             if (match(":")) {
               var type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
             } else {
-              var type = Hol(new_hole_name());
+              var type = Typ();
             }
             ctor_flds.push([name, type, eras]);
             if (match(")")) break; else parse_exact(",");
@@ -1680,7 +1704,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       while (idx < code.length) {
         var arg_eras = match("~");
         var arg_name = parse_string();
-        var arg_type = match(":") ? await parse_term(names) : Typ();
+        var arg_type = match(":") ? await parse_term(names) : Hol(new_hole_name());
         erass.push(arg_eras);
         names.push(arg_name);
         types.push(arg_type);
@@ -1691,6 +1715,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
 
     // Parses return type, if any
     var type = match(":") ? await parse_term(names) : null;
+    var skip = match(";");
     var term = await parse_term(names);
 
     // Fills foralls and lambdas of arguments
@@ -1929,8 +1954,8 @@ const reduce = (term, opts) => {
   return core_reduce(term, {...opts, show});
 };
 
-const typecheck = (term, expect, opts) => {
-  return core_typecheck(term, expect, {...opts, show});
+const typecheck = (name, expect, opts) => {
+  return core_typecheck(name, expect, {...opts, show});
 };
 
 // Evaluates a term to normal form in different modes
@@ -1939,11 +1964,10 @@ const run = (mode, term, opts = {}) => {
   var eras = opts.erased ? erase : (x => x);
   var defs = opts.defs || {};
   if (typeof term === "string") {
-    term = defs[term] || Ref(term);
+    term = Ref(term);
   }
 
   switch (mode) {
-
     case "REDUCE_DEBUG":
       term = eras(term);
       try {
@@ -1979,7 +2003,10 @@ const run = (mode, term, opts = {}) => {
       break;
 
     case "TYPECHECK":
-      term = typecheck(term, null, opts);
+      if (term[0] !== "Ref") {
+        throw "Can only type-check Ref.";
+      }
+      term = typecheck(term[1].name, null, opts);
       break;
   }
 
@@ -2003,7 +2030,6 @@ module.exports = {
   show,
   subst,
   subst_many,
-  subst_holes,
   typecheck,
   haltcheck,
   version,
