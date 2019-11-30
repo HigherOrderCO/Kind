@@ -347,6 +347,14 @@ const reduce = (term, opts = {}) => {
       return Ann(weak_reduce(type, names), expr);
     }
   };
+  const tid = (expr, names) => {
+    var expr = reduce(expr, names);
+    if (!opts.no_tid) {
+      return expr;
+    } else {
+      return Tid(expr);
+    }
+  };
   const log = (msge, expr, names) => {
     var msge = reduce(msge, names);
     var expr = reduce(expr, names);
@@ -399,7 +407,7 @@ const reduce = (term, opts = {}) => {
     switch (ctor) {
       case "Var": return Var(term.index);
       case "Typ": return Typ();
-      case "Tid": return reduce(term.expr, names);
+      case "Tid": return tid(term.expr, names);
       case "Utt": return Utt(reduce(term.expr, names));
       case "Utv": return restrict(term.expr, names);
       case "Ute": return unrestrict(term.expr, names);
@@ -770,7 +778,7 @@ const typecheck = (name, expect, opts = {}) => {
       no_app:1, no_tak:1, no_dup:1, no_ref:1,
       no_op1:1, no_op2:1, no_ite:1, no_cpy:1,
       no_fst:1, no_snd:1, no_prj:1, no_utv:1,
-      no_ute:1, no_use:1, no_ann:1});
+      no_ute:1, no_use:1, no_ann:1, no_tid:1});
   };
 
   const show = (term, names = []) => {
@@ -1197,10 +1205,12 @@ const typecheck = (name, expect, opts = {}) => {
         if (!(opts.defs||{})[term[1].name]) {
           do_error("Undefined reference: `" + term[1].name + "`.");
         } else if (!types[term[1].name]) {
-          var dref_t = typecheck((opts.defs||{})[term[1].name], null, ctx, affine, lvel, [term, ctx]);
-          var dref_t = subst_holes(dref_t, ctx.length);
-          opts.defs[term[1].name] = subst_holes(opts.defs[term[1].name], ctx.length);
-          types[term[1].name] = dref_t;
+          var dref_t = typecheck((opts.defs||{})[term[1].name], null, ctx_new, affine, lvel, [term, ctx]);
+          if (!types[term[1].name]) {
+            var dref_t = subst_holes(dref_t, 0);
+            opts.defs[term[1].name] = subst_holes(opts.defs[term[1].name], 0);
+            types[term[1].name] = dref_t;
+          }
         }
         type = types[term[1].name];
         break;

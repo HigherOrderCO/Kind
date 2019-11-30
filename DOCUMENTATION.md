@@ -185,17 +185,17 @@ terms can be seen a proof. So, for example, this is a proof that `2 == 2`:
 ```haskell
 import Base#
 
-two_is_two : Equal(Number, 2, 2)
-  refl(~Number, ~2)
+main : Equal(Number, 2, 2)
+  refl(__)
 ```
 
 Running it with `fm -t file/two_is_two` will output `Equal(Number, 2, 2) ✔`,
 which means Formality is convinced that two is equal to two. Of course, that is
 obvious, but it could be something much more important such as
-`OnlyOwnerCanWithdrawal(owner, contract) ✔`. How proofs can be used to make
-your programs safer will be explored later. Let's now go through all of
-Formality's primitives. Don't worry: since it is designed to be a very simple
-language, there aren't many!
+`OnlyOwnerCanWithdrawal(owner, contract) ✔`. How proofs can be used to make your
+programs safer will be explored later. Let's now go through all of Formality's
+primitives. Don't worry: since it is designed to be a very simple language,
+there aren't many!
 
 Primitives
 ==========
@@ -280,7 +280,7 @@ There is also `if`, which allows branching with a `Number` condition.
 
 syntax | description
 --- | ---
-`if n: a else: b` | If `n` is `0`, evaluates to `b`, else, evaluates to `a`
+`if n then a else b` | If `n` is `0`, evaluates to `b`, else, evaluates to `a`
 
 Usage is straightforward:
 
@@ -290,9 +290,9 @@ import Base#
 main : Output
   let age = 30
 
-  if age .<. 18:
+  if age .<. 18 then
     print("Boring teenager.")
-  else:
+  else
     print("Respect your elders!")
 ```
 
@@ -368,7 +368,7 @@ Note that the first element of a pair can be named, allowing the type of the
 second element can depend on the value of the first. Example: 
 
 ```javascript
-main : [x : Number, (if x: Number else: Bool)]
+main : [x : Number, (if x then Number else Bool)]
   [0, true] // if you change 0 to 1, the second element must be a Number.
 ```
 
@@ -545,10 +545,10 @@ It is also important for dependent pairs:
 
 ```haskell
 dependent_pair
-   [1, 2] :: [x : Number, if x: Number else: Bool]
+   [1, 2] :: [x : Number, if x then Number else Bool]
 ```
 
-This gives the `[1, 2]` pair the type `[x : Number, if x: Number else: Bool]`,
+This gives the `[1, 2]` pair the type `[x : Number, if x then Number else Bool]`,
 which is more refined than the `[: Number, Number]` type that would be inferred
 otherwise.
 
@@ -1433,9 +1433,9 @@ With formal proofs, we can write tests too:
 import Base#
 
 mul2(n : Number) : Number
-  if n .<. 0 .|. n .==. 0:
+  if n .<. 0 .|. n .==. 0 then
     0
-  else:
+  else
     2 .+. mul2(n .-. 1.01)
 
 it_works_for_10 : Equal(Number, mul2(10), 20)
