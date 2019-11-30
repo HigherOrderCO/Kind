@@ -185,17 +185,17 @@ terms can be seen a proof. So, for example, this is a proof that `2 == 2`:
 ```haskell
 import Base#
 
-two_is_two : Equal(Number, 2, 2)
-  refl(~Number, ~2)
+main : Equal(Number, 2, 2)
+  refl(__)
 ```
 
 Running it with `fm -t file/two_is_two` will output `Equal(Number, 2, 2) ✔`,
 which means Formality is convinced that two is equal to two. Of course, that is
 obvious, but it could be something much more important such as
-`OnlyOwnerCanWithdrawal(owner, contract) ✔`. How proofs can be used to make
-your programs safer will be explored later. Let's now go through all of
-Formality's primitives. Don't worry: since it is designed to be a very simple
-language, there aren't many!
+`OnlyOwnerCanWithdrawal(owner, contract) ✔`. How proofs can be used to make your
+programs safer will be explored later. Let's now go through all of Formality's
+primitives. Don't worry: since it is designed to be a very simple language,
+there aren't many!
 
 Primitives
 ==========
@@ -280,7 +280,7 @@ There is also `if`, which allows branching with a `Number` condition.
 
 syntax | description
 --- | ---
-`if n: a else: b` | If `n` is `0`, evaluates to `b`, else, evaluates to `a`
+`if n then a else b` | If `n` is `0`, evaluates to `b`, else, evaluates to `a`
 
 Usage is straightforward:
 
@@ -290,9 +290,9 @@ import Base#
 main : Output
   let age = 30
 
-  if age .<. 18:
+  if age .<. 18 then
     print("Boring teenager.")
-  else:
+  else
     print("Respect your elders!")
 ```
 
@@ -368,7 +368,7 @@ Note that the first element of a pair can be named, allowing the type of the
 second element can depend on the value of the first. Example: 
 
 ```javascript
-main : [x : Number, (if x: Number else: Bool)]
+main : [x : Number, (if x then Number else Bool)]
   [0, true] // if you change 0 to 1, the second element must be a Number.
 ```
 
@@ -441,14 +441,14 @@ main
   ((x, y) => x .+. y)(40, 2)
 ```
 
-Lambdas and applications can be erased with a `~`, which causes them to vanish
+Lambdas and applications can be erased with a `;`, which causes them to vanish
 from the compiled output. This is useful, for example, to write polymorphic
 functions without extra runtime costs. For example, on the code below, `foo` is
 compiled to `(x) => x`, and `main` is compiled to `foo(42)`. The first argument
 disappears from the runtime.
 
 ```haskell
-foo(~T : Type, x : T) : T
+foo(T : Type; x : T) : T
   x
 
 main : Number
@@ -502,7 +502,7 @@ which allow us to implement inductive datatypes with λ-encodings:
 syntax | description
 --- | ---
 `${self} T(self)` | `T` is a type that can access its own value
-`new(~T) t` | Constructs an instance of a `T` with value `t`
+`new(T) t` | Constructs an instance of a `T` with value `t`
 `use(t)` | Consumes a self-type `t`, giving its type access to its value
 
 Self Types allow a type to access *its own value*. For example, suppose that
@@ -516,7 +516,7 @@ SameNumbers : Type
   , Equal(Number, fst(use(self)), fst(snd(use(self))))]
 
 same_numbers_0 : SameNumbers 
-  new(~SameNumbers) [0, 0, refl(~Number, ~0)]
+  new(SameNumbers) [0, 0, refl(Number; 0;)]
 ```
 
 Here, on the `SameNums` type, we have access to `self`, which is the pair being
@@ -545,10 +545,10 @@ It is also important for dependent pairs:
 
 ```haskell
 dependent_pair
-   [1, 2] :: [x : Number, if x: Number else: Bool]
+   [1, 2] :: [x : Number, if x then Number else Bool]
 ```
 
-This gives the `[1, 2]` pair the type `[x : Number, if x: Number else: Bool]`,
+This gives the `[1, 2]` pair the type `[x : Number, if x then Number else Bool]`,
 which is more refined than the `[: Number, Number]` type that would be inferred
 otherwise.
 
@@ -571,7 +571,7 @@ example, while the `List(Number)` type represents a finite list of words, the
 
 ```javascript
 ones : -List(Number)
-  cons(~Number, 1, ones)
+  cons(Number; 1, ones)
 ```
 
 Note that nonterminating terms can't be compiled to interaction nets, and can't
@@ -595,12 +595,13 @@ with self-types.
 Hole
 ----
 
-Formality also features holes, which are very useful for development and
-debugging. A hole can be used to fill a part of your program that you don't
-want to implement yet. It can be written anywhere as `?name`, with the name
-being optional. If you give it a name, it will cause Formality to print the
-type expected on the hole location, its context (scope variables), and possibly
-a value, if Formality can fill it for you. For example, the program below:
+Formality also features holes, which are very useful for development, debugging
+and cleaning up type annotations from your code. A hole can be used to fill a
+part of your program that you don't want to implement yet. It can be written
+anywhere as `?name`, with the name being optional. If you give it a name, it
+will cause Formality to print the type expected on the hole location, its
+context (scope variables), and possibly a value, if Formality can fill it for
+you. For example, the program below:
 
 ```haskell
 import Base#
@@ -905,7 +906,7 @@ T Pair<A, B>
 | pair(x : A, y : B)
 
 main : Number
-  let a = pair(~Bool, ~Number, true, 7)
+  let a = pair(Bool; Number; true, 7)
 
   case a
   | pair => a.y
@@ -917,8 +918,8 @@ The `<A, B>` syntax after the datatype declares two polymorphic Type variables,
 having to write multiple `Pair` definitions. 
 
 Each polymorphic variable adds an implicit, erased argument to each
-constructor, so, instead of `pair(true, 7)`, you need to write `pair(~Bool,
-~Number, true, 7)`. In the future, this verbosity will be prevented with implicit
+constructor, so, instead of `pair(true, 7)`, you need to write `pair(Bool;
+Number; true, 7)`. In the future, this verbosity will be prevented with implicit
 arguments.
 
 One of the most popular polymorphic types is the linked `List`:
@@ -929,10 +930,10 @@ T List<A>
 | cons(head : A, tail : List(A))
 
 main : List(Number)
-  cons(~Number, 1,
-  cons(~Number, 2,
-  cons(~Number, 3,
-    nil(~Number))))
+  cons(Number; 1,
+  cons(Number; 2,
+  cons(Number; 3,
+    nil(Number;))))
 ```
 
 Since it is so popular, there is a built-in syntax-sugar for it:
@@ -989,30 +990,30 @@ div2(n : Nat) : Nat
     : Nat
   : Nat
 
-half(n : Nat, ~is_even : IsEven(n)) : Nat
+half(n : Nat, is_even : IsEven(n);) : Nat
   div2(n)
 ```
 
 You can't call `half` on odd values because you can't construct an `IsEven` for
 them. An good exercise might be to implement a proof of `Equal(Nat,
-double(half(n, ~ie)), n)`. Why this is possible for `half`, but not for `div2`?
+double(half(n, ie;)), n)`. Why this is possible for `half`, but not for `div2`?
 
 Another example is the Vector, which is a `List` with a statically known length:
 
 ```haskell
 T Vector<A> (len : -Nat)
-| vnil                                                : Vector(A, zero)
-| vcons(~len : -Nat, head : A, tail : Vector(A, len)) : Vector(A, succ(len))
+| vnil                                               : Vector(A, zero)
+| vcons(len : -Nat; head : A, tail : Vector(A, len)) : Vector(A, succ(len))
 ```
 
 Every time you add an element to a Vector, the length on its type increases:
 
 ```haskell
 main : Vector(String, 3n)
-   vcons(~String, ~2n, "ichi",
-   vcons(~String, ~1n, "ni",
-   vcons(~String, ~0n, "san",
-   vnil(~String))))
+   vcons(String; ~2n; "ichi",
+   vcons(String; ~1n; "ni",
+   vcons(String; ~0n; "san",
+   vnil(String;))))
 ```
 
 This has many applications such as creating a type-safe `vhead` function that
@@ -1024,8 +1025,8 @@ As the last example, this defines a list with all elements being true:
 import Base#
 
 T AllTrue (xs : List(Bool))
-| at_nil                                      : AllTrue(nil(~Bool))
-| al_cons (xs : List(Bool), tt : AllTrue(xs)) : AllTrue(cons(~Bool, true, xs))
+| at_nil                                      : AllTrue(nil(Bool;))
+| al_cons (xs : List(Bool), tt : AllTrue(xs)) : AllTrue(cons(Bool; true, xs))
 ```
 
 It says that the empty list is a list of trues (`at_nil`) and that appending
@@ -1072,14 +1073,14 @@ develop mathematical proofs in Formality. Let's go through some examples.
 Formality's base libraries include a type for equality proofs called `Equal`.
 For example, `Equal(Number, 2, 2)` is the statement that `2` is equal `2`. It is
 not a proof: you can write `Equal(Number, 2, 3)`, which is the statement that `2`
-is equal to `3`.  To prove an equality, you can use `refl(~A, ~x)`, which, for
+is equal to `3`.  To prove an equality, you can use `refl(A; x;)`, which, for
 any `x : A`, proves `Equal(A, x, x)`. In other words, `refl` is a proof that
 every value is equal to itself. As such, we can prove that `true` is equal to
 `true` like this:
 
 ```haskell
 true_is_true : Equal(Bool, true, true)
-  refl(~Bool, ~true)
+  refl(Bool; true;)
 ```
 
 Now, suppose you want to prove that, for any boolean `b`, `not(not(b))` is
@@ -1092,7 +1093,7 @@ not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
   ?a
 ```
 
-But here you can't use `refl(~Bool, ~b)`, because it'd be `Equal(Bool, b, b)`
+But here you can't use `refl(Bool; b;)`, because it'd be `Equal(Bool, b, b)`
 instead of `Equal(Bool, not(not(b)), b)`. The problem is that the function call
 is stuck on a variable, `b`, causing both sides to be different. That's when
 dependent motives help: if you pattern-match on `b`, Formality will specialize
@@ -1120,8 +1121,8 @@ import Base#
 
 not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
   case b
-  | true  => refl(~Bool, ~true)
-  | false => refl(~Bool, ~false)
+  | true  => refl(Bool; true;)
+  | false => refl(Bool; false;)
   : Equal(Bool, not(not(b)), b)
 ```
 
@@ -1193,10 +1194,10 @@ main(input : Equal(String, "dogs", "horses")) : Empty
   let e0 = input
 
   -- e1 : Equal(Nat, n4, n6)
-  let e1 = cong(~String, ~Nat, ~"dogs", ~"horses", ~length(~Char), e0)
+  let e1 = cong(String; Nat; "dogs"; "horses"; length(Char;); e0)
 
   -- e2 : Equal(Bool, true, false)
-  let e2 = cong(~Nat, ~Bool, ~4n, ~6n, ~nat_equals(4n), e1)
+  let e2 = cong(Nat; Bool; 4n; 6n; nat_equals(4n); e1)
 
   -- e3 : Empty
   let e3 = true_isnt_false(e2)
@@ -1232,9 +1233,9 @@ import Base#
 
 main : Number
   case true as x
-  + refl(~Bool, ~true) as e : Equal(Bool, x, true)
+  + refl(Bool; true;) as e : Equal(Bool, x, true)
   | true  => 10
-  | false => absurd(false_isnt_true(e), ~Number)
+  | false => absurd(false_isnt_true(e), Number;)
   : Number
 ```
 
@@ -1256,23 +1257,23 @@ with "Self Types". For example, the `Bool` datatype desugars to:
 
 ```haskell
 Bool : Type
-  ${self}
-  ( ~P    : Bool -> Type
-  , true  : P(true)
-  , false : P(false)
+  ${self} (
+    P     : Bool -> Type;
+    true  : P(true),
+    false : P(false)
   ) -> P(self)
 
 true : Bool
-  new(~Bool) (~P, true, false) => true
+  new(Bool) (P; true, false) => true
 
 false : Bool
-  new(~Bool) (~P, true, false) => false
+  new(Bool) (P; true, false) => false
 
-case_of(b : Bool, ~P : Bool -> Type, t : P(true), f : P(false)) : P(b)
-  use(b)(~P, t, f)
+case_of(b : Bool, P : Bool -> Type; t : P(true), f : P(false)) : P(b)
+  use(b)(P; t, f)
 ```
 
-Here, `${self} ...`, `new(~T) val` and `use(b)` are the type, introduction, and
+Here, `${self} ...`, `new(T) val` and `use(b)` are the type, introduction, and
 elimination of Self Types, respectively. You can see how any datatype is
 encoded under the hoods by asking `fm` to evaluate its type, as in, `fm
 Data.Bool#/Bool -W` (inside the `fm_modules` directory). The `-W` flag asks
@@ -1433,25 +1434,25 @@ With formal proofs, we can write tests too:
 import Base#
 
 mul2(n : Number) : Number
-  if n .<. 0 .|. n .==. 0:
+  if n .<. 0 .|. n .==. 0 then
     0
-  else:
+  else
     2 .+. mul2(n .-. 1.01)
 
 it_works_for_10 : Equal(Number, mul2(10), 20)
-  refl(~Number, ~20)
+  refl(Number; 20;)
 
 it_works_for_44 : Equal(Number, mul2(44), 88)
-  refl(~Number, ~88)
+  refl(Number; 88;)
 
 it_works_for_17 : Equal(Number, mul2(17), 34)
-  refl(~Number, ~34)
+  refl(Number; 34;)
 
 it_works_for_12 : Equal(Number, mul2(12), 24)
-  refl(~Number, ~24)
+  refl(Number; 24;)
 
 it_works_for_20 : Equal(Number, mul2(20), 40)
-  refl(~Number, ~40)
+  refl(Number; 40;)
 ```
 
 Here, we're using `Equal` to make assert that `mul2(10)` is equal to `20` and
@@ -1476,13 +1477,13 @@ Let's start by adding a few tests just to be sure:
 
 ```haskell
 it_works_for_0 : Equal(Nat, mul2(0n), 0n)
-  refl(~Nat, ~0n)
+  refl(Nat; 0n;)
 
 it_works_for_1 : Equal(Nat, mul2(1n), 2n)
-  refl(~Nat, ~2n)
+  refl(Nat; 2n;)
 
 it_works_for_2 : Equal(Nat, mul2(2n), 4n)
-  refl(~Nat, ~4n)
+  refl(Nat; 4n;)
 ```
 
 Since those pass, we can now try to prove the more general statement that the
@@ -1516,7 +1517,7 @@ it with a `refl`:
 
 ```haskell
 it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
-  refl(~Nat, ~mul2(n))
+  refl(Nat; mul2(n);)
 ```
 
 This time, it doesn't work, and we get the following error:
@@ -1525,10 +1526,10 @@ This time, it doesn't work, and we get the following error:
 Type mismatch.
 - Found type... Equal(Nat, mul2(n), mul2(n))
 - Instead of... Equal(Nat, mul2(n), add(n, n))
-- When checking refl(~Nat, ~mul2(n))
+- When checking refl(Nat; mul2(n);)
 ```
 
-That's because `refl(~Nat, ~mul2(n))` is a proof that `Equal(Nat, mul2(n),
+That's because `refl(Nat; mul2(n);)` is a proof that `Equal(Nat, mul2(n),
 mul2(n))`, but not that `Equal(Nat, mul2(n), add(n, n))`. The problem is that,
 unlike on the previous tests, the equation now has a variable, `n`, which
 causes both sides to get "stuck", so they don't become equal by mere reduction.
@@ -1569,7 +1570,7 @@ on the branch?  That's very important, because now both sides evaluate to
 ```haskell
 it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
   case n
-  | zero => refl(~Nat, ~zero)
+  | zero => refl(Nat; zero;)
   | succ => ?b
   : Equal(Nat, mul2(n), add(n, n))
 ```
@@ -1597,7 +1598,7 @@ see what we get:
 ```haskell
 it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
   case n
-  | zero => refl(~Nat, ~zero)
+  | zero => refl(Nat; zero;)
   | succ =>
     let ind_hyp = it_works_for_all_n(n.pred)
     log(ind_hyp)
@@ -1624,11 +1625,11 @@ function, and applies the function to both sides of the equality. Like this:
 ```haskell
 it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
   case n
-  | zero => refl(~Nat, ~zero)
+  | zero => refl(Nat; zero;)
   | succ =>
     let ind_hyp = it_works_for_all_n(n.pred)
     let add_two = (x : Nat) => succ(succ(x))
-    let new_hyp = cong(~Nat, ~Nat, ~mul2(n.pred), ~add(n.pred, n.pred), ~add_two, ind_hyp)
+    let new_hyp = cong(Nat; Nat; mul2(n.pred); add(n.pred, n.pred); add_two; ind_hyp)
     log(new_hyp)
     ?a
   : Equal(Nat, mul2(n), add(n, n))
@@ -1642,7 +1643,7 @@ we have now:
 
 ```haskell
 [LOG]
-Term: cong(~Nat, ~Nat, ~mul2(n.pred), ~add(n.pred, n.pred), ~(x : Nat) => succ(succ(x)), it_works_for_all_n(n.pred))
+Term: cong(Nat; Nat; mul2(n.pred); add(n.pred; n.pred), (x : Nat) => succ(succ(x)); it_works_for_all_n(n.pred))
 Type: Equal(Nat, succ(succ(mul2(n.pred))), succ(succ(add(n.pred, n.pred))))
 ```
 
@@ -1652,11 +1653,11 @@ complete this branch with it:
 ```haskell
 it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
   case n
-  | zero => refl(~Nat, ~zero)
+  | zero => refl(Nat; zero;)
   | succ =>
     let ind_hyp = it_works_for_all_n(n.pred)
     let add_two = (x : Nat) => succ(succ(x))
-    let new_hyp = cong(~Nat, ~Nat, ~mul2(n.pred), ~add(n.pred, n.pred), ~add_two, ind_hyp)
+    let new_hyp = cong(Nat; Nat; mul2(n.pred); add(n.pred; n.pred), add_two; ind_hyp)
     new_hyp
   : Equal(Nat, mul2(n), add(n, n))
 ```
@@ -1771,7 +1772,7 @@ term ::=
 
   -- Selfies
   ${name} term           -- self type
-  new(~term) term        -- self term
+  new(term) term         -- self term
   use(term)              -- self elimination
 
   -- Language
@@ -1829,7 +1830,7 @@ Our typing rules are:
 
 Γ, |- t : A[x <- t]    Γ |- ${x} A : Type
 ----------------------------------------- self term
-Γ |- new(~${x} A) t : ${x} A
+Γ |- new(${x} A) t : ${x} A
 
 Γ |- t : ${x} A
 ----------------------- self elimination
@@ -1859,10 +1860,10 @@ Nat : Type
   ) -> P(self)
 
 succ : (n : Nat) -> Nat
-  new(~Nat) (P, succ, zero) => succ(n, use(n)(P, succ, zero))
+  new(Nat) (P, succ, zero) => succ(n, use(n)(P, succ, zero))
 
 zero : Nat
-  new(~Nat) (P, succ, zero) => zero
+  new(Nat) (P, succ, zero) => zero
 
 nat_ind : (n : Nat, P : Nat -> Type, s : (n : Nat, i : P(n)) -> P(succ(n)), z : P(zero)) -> P(n)
   (n) => use(n)
@@ -1881,19 +1882,19 @@ encoded). We could have a non-recursive (Scott encoded) `Nat` as:
 
 ```javascript
 Nat Type
-  ${self}
-  ( ~P   : Nat -> Type
-  , succ : (n : Nat) -> P(succ(n))
-  , zero : P(zero)
+  ${self} (
+    P    : Nat -> Type;
+    succ : (n : Nat) -> P(succ(n)),
+    zero : P(zero)
   ) -> P(self)
 
 succ(n : Nat) -> Nat
-  new(~Nat) (~P, succ, zero) => succ(n)
+  new(Nat) (P; succ, zero) => succ(n)
 
 zero Nat
-  new(~Nat) (~P, succ, zero) => zero
+  new(Nat) (P; succ, zero) => zero
 
-nat_ind(n : Nat, ~P : Nat -> Type, s : (n : Nat, i : P(n)) -> P(succ(n)), z : P(zero)) -> P(n)
+nat_ind(n : Nat, P : Nat -> Type; s : (n : Nat, i : P(n)) -> P(succ(n)), z : P(zero)) -> P(n)
   (n) => use(n)
 ```
 
@@ -1902,19 +1903,19 @@ Even simpler types include Bool:
 
 ```
 Bool Type
-  ${self}
-  ( ~P    : Bool -> Type
-  , true  : P(true)
-  , false : P(false)
+  ${self} (
+    P     : Bool -> Type;
+    true  : P(true),
+    false : P(false)
   ) -> P(self)
 
 true Bool
-  new(~Bool) (~P, true, false) => true
+  new(Bool) (P; true, false) => true
 
 false Bool
-  new(~Bool) (~P, true, false) => false
+  new(Bool) (P; true, false) => false
 
-bool_induction(b : Bool, ~P : Bool -> Type, t : P(true), f : P(false)) -> P(b)
+bool_induction(b : Bool, P : Bool -> Type; t : P(true), f : P(false)) -> P(b)
   (b) => use(b)
 ```
 
@@ -1923,14 +1924,14 @@ Unit:
 ```
 Unit Type
   ${self}
-  ( ~P    : Unit -> Type
-  , unit  : P(unit)
+  ( P     : Unit -> Type;
+    unit  : P(unit)
   ) -> P(self)
 
 unit Unit
-  new(~Unit) (~P, unit) => unit
+  new(Unit) (P; unit) => unit
 
-unit_induction(b : Unit, ~P : Unit -> Type, u : P(unit)) -> P(u)
+unit_induction(b : Unit, P : Unit -> Type; u : P(unit)) -> P(u)
   (u) => use(u)
 ```
 
@@ -1938,11 +1939,11 @@ And Empty:
 
 ```
 Empty Type
-  ${self}
-  ( ~P : Empty -> Type
+  ${self} (
+    P : Empty -> Type;
   ) -> P(self)
 
-empty_induction(b : Empty, ~P : Empty -> Type) -> P(b)
+empty_induction(b : Empty, P : Empty -> Type;) -> P(b)
   (e) => use(e)
 ```
 
@@ -1954,18 +1955,18 @@ datatype seen on traditional proof languages. For example, Vector (a List with
 statistically known length) can, too, be encoded as its dependent elimination:
 
 ```
-Vector(~A : Type, len : Nat) -> Type
-  ${self}
-  ( ~P    : (len : Nat) -> Vector(A, len) -> Type
-  , vcons : (~len : Nat, x : A, xs : Vector(A, len)) -> P(succ(len), vcons(~A, ~len, x, xs))
-  , vnil  : P(zero, vnil(~A))
+Vector(A : Type; len : Nat) -> Type
+  ${self} (
+    P     : (len : Nat) -> Vector(A, len) -> Type;
+    vcons : (len : Nat; x : A, xs : Vector(A, len)) -> P(succ(len), vcons(A; len; x, xs)),
+    vnil  : P(zero, vnil(A;)),
   ) -> P(len, self)
 
-vcons(~A : Type, ~len : Nat, head : A, tail : Vector(A, len)) -> Vector(A, succ(len))
-  new(~Vector(A, succ(len))) (~P, vcons, vnil) => vcons(~len, head, tail)
+vcons(A : Type; len : Nat; head : A, tail : Vector(A, len)) -> Vector(A, succ(len))
+  new(Vector(A, succ(len))) (P; vcons, vnil) => vcons(len; head, tail)
 
-vnil(~A : Type) -> Vector(A, zero)
-  new(~Vector(A, zero)) (~P, vcons, vnil) => vnil
+vnil(A : Type;) -> Vector(A, zero)
+  new(Vector(A, zero)) (P; vcons, vnil) => vnil
 ```
 
 And an identity type for propositional equality is just the J axiom wrapped by
@@ -1973,13 +1974,13 @@ a self type:
 
 ```
 Id(A : Type, a : A, b : A) -> Type
-  ${self}
-  ( ~P   : (b : A, eq : Id(A, a, b)) -> Type
-  , refl : P(a, refl(~A, ~a))
+  ${self} (
+    P    : (b : A, eq : Id(A, a, b)) -> Type;
+    refl : P(a, refl(A; a;))
   ) -> P(b, self)
 
-refl(~A : Type, ~a : A) -> Id(A, a, a)
-  new(~Id(A, a, a)) (~P, refl) => refl
+refl(A : Type; a : A;) -> Id(A, a, a)
+  new(Id(A, a, a)) (P; refl) => refl
 ```
 
 We're also able to express datatypes that traditional proof languages can't.
@@ -1988,25 +1989,25 @@ provided cases are equal, can be written as:
 
 ```
 Interval Type
-  ${self}
-  ( ~P : (i : Interval) -> Type
-  , I0 : P(i0)
-  , I1 : P(i1)
-  , SG : I0 == I1
+  ${self} (
+    P  : (i : Interval) -> Type;
+    I0 : P(i0),
+    I1 : P(i1),
+    SG : I0 == I1
   ) -> P(self)
 
 i0 Interval
-  new(~Interval) (~P, i0, i1, sg) => i0
+  new(Interval) (P; i0, i1, sg) => i0
 
 i1 Interval
-  new(~Interval) (~P, i0, i1, sg) => i1
+  new(Interval) (P; i0, i1, sg) => i1
 ```
 
 And we can easily prove troublesome theorems like `0 != 1`: 
 
 ```
 true_isnt_false(e : Id(Bool, true, false)) -> Empty
-  use(e)(~{b, e.b} use(e.b)(~{b}Type, Unit, Empty), unit)
+  use(e)((b, e.b) => use(e.b)((b) => Type; Unit, Empty); unit)
 ```
 
 That much type-level power comes at a cost: if Formality was based on the

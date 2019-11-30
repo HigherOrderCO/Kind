@@ -102,9 +102,9 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       }
       var text = "(";
       for (var i = 0; i < names.length; ++i) {
-        text += erase[i] ? "~" : "";
+        var not_last = i < names.length - 1;
         text += names[i] + (names[i].length > 0 ? " : " : ":") + types[i];
-        text += i < names.length - 1 ? ", " : "";
+        text += erase[i] ? (not_last ? "; " : ";") : not_last ? ", " : "";
       }
       text += ") -> ";
       text += show(term, nams.concat(names), opts);
@@ -124,9 +124,9 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       }
       var text = "(";
       for (var i = 0; i < names.length; ++i) {
-        text += erase[i] ? "~" : "";
+        var not_last = i < names.length - 1;
         text += names[i] + (types[i] !== null ? " : " + types[i] : "");
-        text += i < names.length - 1 ? ", " : "";
+        text += erase[i] ? (not_last ? "; " : ";") : not_last ? ", " : "";
       }
       text += ") => ";
       text += show(term, nams.concat(names), opts);
@@ -134,12 +134,13 @@ const show = ([ctor, args], nams = [], opts = {}) => {
     case "App":
       var text = ")";
       var term = [ctor, args];
+      var last = true;
       while (term[0] === "App") {
-        text = (term[1].func[0] === "App" ? ", " : "")
-             + (term[1].eras ? "~" : "")
-             + show(term[1].argm, nams, opts)
+        text = show(term[1].argm, nams, opts)
+             + (term[1].eras ? (!last ? "; " : ";") : !last ? ", " : "")
              + text;
         term = term[1].func;
+        last = false;
       }
       if (term[0] === "Ref" || term[0] === "Var" || term[0] === "Tak") {
         var func = show(term, nams, opts);
@@ -268,7 +269,7 @@ const show = ([ctor, args], nams = [], opts = {}) => {
     case "New":
       var type = show(args.type, nams, opts);
       var expr = show(args.expr, nams, opts);
-      return "new(~" + type + ") " + expr;
+      return "new(" + type + ") " + expr;
     case "Use":
       var expr = show(args.expr, nams, opts);
       return "use(" + expr + ")";
@@ -425,7 +426,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
 
   // Creates a new hole name
   function new_hole_name() {
-    return file + "/hole" + (hole_count++) + "_line" + row;
+    return "_" + file + "/line" + row + "_" + (hole_count++);
   }
 
   // Builds a lookup table
@@ -897,12 +898,13 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       var i = idx;
       if (i < code.length && code[i] === "(")          { ++i; } // skips `(`
       while (i < code.length && is_space(code[i]))     { ++i; } // skips ` `
-      if (code[i] === "~")                             { ++i; } // skips `~`
+      //if (code[i] === "~")                             { ++i; } // skips `~`
       while (i < code.length && is_space(code[i]))     { ++i; } // skips ` `
       while (i < code.length && is_name_char(code[i])) { ++i; } // skips `x`
       while (i < code.length && is_space(code[i]))     { ++i; } // skips ` `
       if (code[i] === ":")                             { ++i; } // skips `:`
       if (code[i] === " ") return true;                         // found ` `
+      if (code[i] === ";") return true;                         // found `,`
       if (code[i] === ",") return true;                         // found `,`
       while (i < code.length && is_space(code[i]))     { ++i; } // skips ` `
       if (code[i] === ")")                             { ++i; } // skips `)`
@@ -917,14 +919,14 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       var names = [];
       var types = [];
       while (idx < code.length) {
-        var eras = match("~");
         var name = parse_string();
         var type = match(":") ? parse_term(nams.concat(names)) : null;
+        var eras = match(";");
+        var skip = match(",");
         erass.push(eras);
         names.push(name);
         types.push(type);
         if (match(")")) break;
-        else parse_exact(",");
       }
       var isall = match("->");
       if (!isall) {
@@ -1032,9 +1034,9 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     var init = idx;
     if (match("if ")) {
       var cond = parse_term(nams);
-      var skip = parse_exact("then ");
+      var skip = parse_exact("then");
       var val0 = parse_term(nams);
-      var skip = parse_exact("else ");
+      var skip = parse_exact("else");
       var val1 = parse_term(nams);
       return Ite(cond, Par(val0, val1, 0), loc(idx - init));
     }
@@ -1207,7 +1209,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   // Parses a self intro, `new(A) t`
   function parse_new(nams) {
     var init = idx;
-    if (match("new(~")) {
+    if (match("new(")) {
       var type = parse_term(nams);
       var skip = parse_exact(")");
       var expr = parse_term(nams);
@@ -1348,11 +1350,11 @@ const parse = async (code, opts, root = true, loaded = {}) => {
           var term = App(term, Hol(new_hole_name()), true, loc(idx - init));
           if (match(")")) break;
         } else {
-          var eras = match("~");
           var argm = parse_term(nams);
+          var eras = match(";");
           var term = App(term, argm, eras, loc(idx - init));
+          var skip = match(",");
           if (match(")")) break;
-          parse_exact(",");
         }
       }
       return term;
@@ -1451,6 +1453,14 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     }
   }
 
+  // Parses an non-equality, `a != b`
+  function parse_dif(parsed, init, nams) {
+    if (match("!=", is_space)) {
+      var rgt = parse_term(nams);
+      return App(base_ref("Not"), App(App(App(base_ref("Equal"), Hol(new_hole_name()), false), parsed, false), rgt, false), false);
+    }
+  }
+
   // Parses an arrow, `A -> B`
   function parse_arr(parsed, init, nams) {
     if (match("->", is_space)) {
@@ -1535,6 +1545,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       else if (new_parsed = parse_ann(parsed, init, nams));
       else if (new_parsed = parse_arr(parsed, init, nams));
       else if (new_parsed = parse_eql(parsed, init, nams));
+      else if (new_parsed = parse_dif(parsed, init, nams));
       else if (new_parsed = parse_ops(parsed, init, nams));
       if (new_parsed) {
         parsed = new_parsed;
@@ -1618,15 +1629,16 @@ const parse = async (code, opts, root = true, loaded = {}) => {
         var ctor_flds = [];
         if (match("(")) {
           while (idx < code.length) {
-            var eras = match("~");
             var name = parse_string();
             if (match(":")) {
               var type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
             } else {
               var type = Typ();
             }
+            var eras = match(";");
+            var skip = match(",");
             ctor_flds.push([name, type, eras]);
-            if (match(")")) break; else parse_exact(",");
+            if (match(")")) break;
           }
         }
         // Constructor type (written)
@@ -1702,14 +1714,14 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     var types = [];
     if (match_here("(")) {
       while (idx < code.length) {
-        var arg_eras = match("~");
         var arg_name = parse_string();
         var arg_type = match(":") ? await parse_term(names) : Hol(new_hole_name());
+        var arg_eras = match(";");
+        var arg_skip = match(",");
         erass.push(arg_eras);
         names.push(arg_name);
         types.push(arg_type);
         if (match(")")) break;
-        else parse_exact(",");
       }
     }
 

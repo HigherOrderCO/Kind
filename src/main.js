@@ -208,6 +208,7 @@ async function upload(file, global_path = {}) {
             } catch (e) {
               if (nams.length > 1) {
                 console.log("\x1b[31m" + init + "error\x1b[0m");
+                console.log(e);
               } else {
                 console.log(e);
                 //console.log(e.toString());
