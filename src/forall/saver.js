@@ -65,7 +65,7 @@ function checker(loader = load_file) {
 
   const typechecks = (name, defs) => {
     try {
-      lang.typecheck(defs[name], null, {no_logs: true, defs})
+      lang.typecheck(name, null, {no_logs: true, defs})
       return true;
     } catch(e) {
       return false;
