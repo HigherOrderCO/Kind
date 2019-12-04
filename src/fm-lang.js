@@ -532,17 +532,40 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     }
   }
 
+  // Seeks next non-whitespace, non-comment
+  function seek(is_space = is_spacy) {
+    var i = idx;
+    while (i < code.length) {
+      // Skips spaces
+      if (is_space(code[i])) {
+        ++i;
+      // Skips comments
+      } else if (code.slice(i, i + 2) === "//" || code.slice(i, i + 2) === "--") {
+        while (i < code.length && code[i] !== "\n") {
+          ++i;
+        };
+      // Done
+      } else {
+        break;
+      }
+    }
+    return i;
+  }
+
+  // Checks if next non-whitespace, non-comment matches
+  function next_is(string, is_space = is_spacy) {
+    var i = seek(is_space);
+    return code.slice(i, i + string.length) === string;
+  }
+
   // If next non-space char is string, consume it
   // Otherwise, don't affect the state
-  // TODO: avoid save_parse_state
   function match(string, is_space = is_spacy) {
-    var state = save_parse_state();
-    next_char(is_space);
-    var matched = match_here(string);
-    if (matched) {
+    if (next_is(string, is_space)) {
+      next_char(is_space);
+      match_here(string);
       return true;
     } else {
-      load_parse_state(state);
       return false;
     }
   }
@@ -1399,23 +1422,56 @@ const parse = async (code, opts, root = true, loaded = {}) => {
 
   // Parses the do notation
   function parse_do_notation(nams) {
+    function is_bind() {
+      // TODO: this is ugly, improve
+      var i = idx;
+      while (i < code.length && is_spacy(code[i]))     { ++i; } // skips ` `
+      while (i < code.length && is_name_char(code[i])) { ++i; } // skips `x`
+      while (i < code.length && is_spacy(code[i]))     { ++i; } // skips ` `
+      if (code[i] === ":") return true;                         // found `:`
+      if (code[i] === "=") return true;                         // found `=`
+      return false;
+    }
     var init = idx;
-    if (match("do<", is_space)) {
-      var type = parse_term(nams);
-      var skip = parse_exact(">");
-      var bind = match("with") ? parse_name() : "bind";
+    var typed = false;
+    if (match("{", is_space) || (typed = match("{<", is_space))) {
+      if (typed) {
+        var type = parse_term(nams);
+        var skip = parse_exact(">");
+      } else {
+        var type = Hol(new_hole_name());
+      }
       function parse_do_statement(nams) {
-        if (match("bind")) {
+        if (match("var")) {
           var name = parse_name();
-          var skip = parse_exact(":");
-          var vtyp = parse_term(nams);
+          if (match(":")) {
+            var vtyp = parse_term(nams);
+          } else {
+            var vtyp = Hol(new_hole_name());
+          }
           var skip = parse_exact("=");
           var call = parse_term(nams);
+          var skip = match(";");
           var body = parse_do_statement(nams.concat([name]));
-          return App(App(App(App(base_ref(bind), vtyp, true), type, true), call, false), Lam(name, null, body, false), false);
+          return App(App(App(App(base_ref("bind"), vtyp, true), type, true), call, false), Lam(name, null, body, false), false);
+        } else if (match("throw;")) {
+          var skip = parse_exact("}");
+          return App(base_ref("throw"), Hol(new_hole_name()), true);
+        } else if (match("return ")) {
+          var term = parse_term(nams);
+          var skip = match(";");
+          var skip = parse_exact("}");
+          return App(App(base_ref("return"), Hol(new_hole_name()), true), term, false);
         } else {
           var term = parse_term(nams);
-          return term;
+          var skip = match(";");
+          if (match("}")) {
+            return term;
+          } else {
+            var body = parse_do_statement(nams.concat([name]));
+            var vtyp = Hol(new_hole_name());
+            return App(App(App(App(base_ref("bind"), vtyp, true), type, true), term, false), Lam(name, null, body, false), false);
+          }
         }
       };
       var result = parse_do_statement(nams);
