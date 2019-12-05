@@ -28,6 +28,7 @@ const {
 
 const version = require("./../package.json").version;
 const to_net = require("./fm-to-net.js");
+const runtime = require("./fm-runtime.js");
 const to_js = require("./fm-to-js.js");
 const net = require("./fm-net.js");
 const {load_file} = require("./forall.js");
@@ -2027,14 +2028,15 @@ const typecheck = (name, expect, opts) => {
 };
 
 // Evaluates a term to normal form in different modes
-// run : String -> (String | Term) -> Opts -> Term
-const run = (mode, term, opts = {}) => {
+// run : String -> String -> Opts -> Term
+const run = (mode, name, opts = {}) => {
   var eras = opts.erased ? erase : (x => x);
   var defs = opts.defs || {};
   if (typeof term === "string") {
-    term = Ref(term);
+    throw "Second argument of run must be the term's name.";
   }
 
+  var term = Ref(name);
   switch (mode) {
     case "REDUCE_DEBUG":
       term = eras(term);
@@ -2068,6 +2070,15 @@ const run = (mode, term, opts = {}) => {
         opts.stats.output_net = JSON.parse(JSON.stringify(net));
       }
       term = to_net.decompile(net);
+      break;
+
+    case "REDUCE_FAST":
+      var {rt_defs, rt_rfid} = runtime.compile(defs);
+      var {rt_term, stats} = runtime.reduce(rt_defs[rt_rfid[name]], rt_defs);
+      term = runtime.decompile(rt_term);
+      for (var key in stats) {
+        opts.stats[key] = stats[key];
+      }
       break;
 
     case "TYPECHECK":
