@@ -90,7 +90,9 @@ fm_reduce(Term *defs[], uint32_t ptr, uint32_t *mem)
 			ref = defs[next >> 4];
 			for (i = 0; i < ref->len; ++i) {
 				tmp = ref->mem[i];
-				mem[pos + i] = tmp + ((tmp != -1 && (tmp & 0xf) != REF) ? pos << 4 : 0);
+				if (tmp != -1 && (tmp & 0xf) != REF)
+					tmp += pos << 4;
+				mem[pos + i] = tmp;
 			}
 			mem_len += ref->len;
 			subs = ref->ptr + (pos << 4);
@@ -120,7 +122,7 @@ fm_reduce(Term *defs[], uint32_t ptr, uint32_t *mem)
 
 		if (subs != -1) {
 			if (back_len > 0) {
-				frame = &back[back_len - 1];
+				frame = &back[--back_len];
 				mem[(frame->ptr >> 4) + frame->side] = subs;
 				next = frame->ptr;
 				depth = frame->depth;
@@ -137,9 +139,9 @@ fm_reduce(Term *defs[], uint32_t ptr, uint32_t *mem)
 					frame->side = 1;
 					depth = frame->depth;
 					next = mem[(frame->ptr >> 4) + 1];
-				} else {
-					--back_len;
+					break;
 				}
+				--back_len;
 			}
 		}
 	}
