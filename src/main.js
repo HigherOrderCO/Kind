@@ -23,6 +23,7 @@ try {
   console.log("  -W stop on weak head normal form");
   console.log("  -0 don't normalize anything");
   console.log("-r <file>/<term> optimal (using the new runtime, lazy)");
+  console.log("-w <file>/<term> optimal (using the new runtime, lazy, WASM)");
   console.log("-o <file>/<term> optimal (using interaction nets, lazy)");
   console.log("-O <file>/<term> optimal (using interaction nets, strict)");
   console.log("-j <file>/<term> JavaScript (using native functions)");
@@ -146,6 +147,7 @@ async function upload(file, global_path = {}) {
           : args.O ? "REDUCE_OPTIMAL"
           : args.j ? "REDUCE_NATIVE"
           : args.r ? "REDUCE_FAST"
+          : args.w ? "REDUCE_FAST_WASM"
           : args.t ? "TYPECHECK"
           : args[0] ? "GET"
           : "REDUCE_DEBUG";
@@ -172,7 +174,7 @@ async function upload(file, global_path = {}) {
         }
 
         for (var i = 0; i < nams.length; ++i) {
-          var stats = args.r ? {} : {
+          var stats = args.r || args.w ? {} : {
             rewrites: 0,
             loops: 0,
             max_len: 0,
