@@ -31,7 +31,11 @@ Table of contents
 
 **Note: this documentation is slightly outdated after the
 December 6, 2019 update. Some examples here may not work. It
-will be reviewed and updated next week.**
+will be reviewed and updated next week. If you like learning
+by example, please ignore this docs and check
+[Base.fm](https://github.com/moonad/Base.fm); the code there
+is very representative and, if you already know FP, browsing
+it is the fastest way to pick up the language.**
 
 Motivation
 ==========
