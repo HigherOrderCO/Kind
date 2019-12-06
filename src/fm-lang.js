@@ -8,9 +8,8 @@
 
 const {
   Var, Typ, Tid, Utt, Utv, Ute, All, Lam,
-  App, Box, Put, Tak, Dup, Num, Val, Op1,
-  Op2, Ite, Cpy, Sig, Par, Fst, Snd, Prj,
-  Slf, New, Use, Ann, Log, Hol, Ref,
+  App, Num, Val, Op1, Op2, Ite, Cpy, Slf,
+  New, Use, Ann, Log, Hol, Ref,
   reduce: core_reduce,
   typecheck: core_typecheck,
   haltcheck,
@@ -149,24 +148,6 @@ const show = ([ctor, args], nams = [], opts = {}) => {
         var func = "(" + show(term,nams, opts) + ")";
       }
       return func + "(" + text;
-    case "Box":
-      var expr = show(args.expr, nams, opts);
-      return "!" + expr;
-    case "Put":
-      var expr = show(args.expr, nams, opts);
-      return "#" + expr;
-    case "Tak":
-      var expr = show(args.expr, nams, opts);
-      return "$" + expr;
-    case "Dup":
-      var name = args.name;
-      var expr = show(args.expr, nams, opts);
-      if (args.body[0] === "Var" && args.body[1].index === 0) {
-        return "$" + expr;
-      } else {
-        var body = show(args.body, nams.concat([name]), opts);
-        return "dup " + name + " = " + expr + "; " + body;
-      }
     case "Num":
       return "Number";
     case "Val":
@@ -186,83 +167,6 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       var numb = show(args.numb, nams, opts);
       var body = show(args.body, nams.concat([name]), opts);
       return "cpy " + name + " = " + numb + "; " + body;
-    case "Sig":
-      var term = [ctor, args];
-      var erase = [];
-      var names = [];
-      var types = [];
-      while (term[0] === "Sig") {
-        erase.push(term[1].eras);
-        names.push(term[1].name);
-        types.push(show(term[1].typ0, nams.concat(names.slice(0,-1)), opts));
-        term = term[1].typ1;
-      }
-      var text = "[";
-      for (var i = 0; i < names.length; ++i) {
-        text += erase[i] === 1 ? "~" : "";
-        text += names[i] + (names[i] ? " " : "") + ": " + types[i];
-        text += erase[i] === 2 ? " ~ " : ", ";
-      }
-      text += show(term, nams.concat(names), opts);
-      text += "]";
-      return text;
-    case "Par":
-      var output;
-      var term  = [ctor, args];
-      var erase = [];
-      var terms = [];
-      while (term[0] === "Par") {
-        if (output = print_output(term)) {
-          break;
-        } else {
-          erase.push(term[1].eras);
-          terms.push(show(term[1].val0, nams, opts));
-          term = term[1].val1;
-        }
-      }
-      if (terms.length > 0) {
-        var text = "[";
-      } else {
-        var text = "";
-      }
-      for (var i = 0; i < terms.length; ++i) {
-        text += erase[i] === 1 ? "~" : "";
-        text += terms[i];
-        text += erase[i] === 2 ? " ~ " : ", ";
-      }
-      if (output) {
-        text += output;
-      } else {
-        text += show(term, nams, opts);
-      }
-      if (terms.length > 0) {
-        text += "]";
-      }
-      return text;
-    case "Fst":
-      var pair = show(args.pair, nams, opts);
-      switch (args.eras) {
-        case 0: return "fst(" + pair + ")";
-        case 1: return "~fst(" + pair + ")";
-        case 2: return "fst~(" + pair + ")";
-        case 3: return "~fst~(" + pair + ")";
-      }
-    case "Snd":
-      var pair = show(args.pair, nams, opts);
-      switch (args.eras) {
-        case 0: return "snd(" + pair + ")";
-        case 1: return "~snd(" + pair + ")";
-        case 2: return "snd~(" + pair + ")";
-        case 3: return "~snd~(" + pair + ")";
-      }
-    case "Prj":
-      var nam0 = args.nam0;
-      var nam1 = args.nam1;
-      var pair = show(args.pair, nams, opts);
-      var body = show(args.body, nams.concat([nam0, nam1]), opts);
-      var era1 = args.eras === 1 ? "~" : "";
-      var era2 = args.eras === 2 ? "~" : "";
-      return "get [" + era1 + nam0 + "," + era2 + nam1 + "] = " + pair + "; " + body;
     case "Slf":
       var name = args.name;
       var type = show(args.type, nams.concat([name]), opts);
@@ -968,46 +872,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     }
   }
 
-  // Parses a duplication, `dup x = t; u`
-  function parse_dup(nams) {
-    var init = idx;
-    if (match("dup ")) {
-      var name = parse_string();
-      var skip = parse_exact("=");
-      var expr = parse_term(nams);
-      var skip = match(";");
-      var body = parse_term(nams.concat([name]));
-      return Dup(name, expr, body, loc(idx - init));
-    }
-  }
-
-  // Parses a boxed type, `!A`
-  function parse_box(nams) {
-    var init = idx;
-    if (match("!")) {
-      var expr = parse_term(nams);
-      return Box(expr, loc(idx - init));
-    }
-  }
-
-  // Parses a boxed term, `#t`
-  function parse_put(nams) {
-    var init = idx;
-    if (match("#")) {
-      var expr = parse_term(nams);
-      return Put(expr, loc(idx - init));
-    }
-  }
-
-  // Parses an unboxing, `^t`
-  function parse_tak(nams) {
-    var init = idx;
-    if (match("$")) {
-      var expr = parse_term(nams);
-      return Tak(expr, loc(idx - init));
-    }
-  }
-
   // Parses a let, `let x = t; u`
   function parse_let(nams) {
     if (match("let ")) {
@@ -1115,7 +979,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
         var parsed = parse_term(nams.concat(names));
         var skip = parse_exact("]");
         for (var i = names.length - 1; i >= 0; --i) {
-          var parsed = Sig(names[i], types[i], parsed, erass[i], loc(idx - init));
+          var parsed = App(App(base_ref("Pair"), types[i], false), Lam(names[i], null, parsed, false), false);
         }
       // Pair
       } else {
@@ -1132,49 +996,14 @@ const parse = async (code, opts, root = true, loaded = {}) => {
         }
         var parsed = terms.pop();
         for (var i = terms.length - 1; i >= 0; --i) {
-          var parsed = Par(terms[i], parsed, erass[i], loc(idx - init));
+          var apps = App(base_ref("pair"), Hol(new_hole_name()), true);
+          var apps = App(apps, Hol(new_hole_name()), true);
+          var parsed = App(App(apps, terms[i], false), parsed, false);
+          console.log(show(parsed));
         }
       }
       return parsed;
     }
-  }
-
-  // Parses a fst accessor, `fst(t)`
-  function parse_fst(nams) {
-    var init = idx;
-    if (match("fst(")) {
-      var eras = 0;
-    } else if (match("~fst(")) {
-      var eras = 1;
-    } else if (match("fst~(")) {
-      var eras = 2;
-    } else if (match("~fst~(")) {
-      var eras = 3;
-    } else {
-      return;
-    }
-    var pair = parse_term(nams);
-    var skip = parse_exact(")");
-    return Fst(pair, eras, loc(idx - init));
-  }
-
-  // Parses a snd accessor, `snd(t)`
-  function parse_snd(nams) {
-    var init = idx;
-    if (match("snd(")) {
-      var eras = 0;
-    } else if (match("~snd(")) {
-      var eras = 1;
-    } else if (match("snd~(")) {
-      var eras = 2;
-    } else if (match("~snd~(")) {
-      var eras = 3;
-    } else {
-      return;
-    }
-    var pair = parse_term(nams);
-    var skip = parse_exact(")");
-    return Snd(pair, eras, loc(idx - init));
   }
 
   // Parses a projection, `get [x, y] = t`
@@ -1570,10 +1399,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     else if (parsed = parse_use(nams));
     else if (parsed = parse_scope(nams));
     else if (parsed = parse_hol(nams));
-    else if (parsed = parse_dup(nams));
-    else if (parsed = parse_box(nams));
-    else if (parsed = parse_put(nams));
-    else if (parsed = parse_tak(nams));
     else if (parsed = parse_let(nams));
     else if (parsed = parse_wrd(nams));
     else if (parsed = parse_str(nams));
@@ -1581,8 +1406,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     else if (parsed = parse_ite(nams));
     else if (parsed = parse_cpy(nams));
     else if (parsed = parse_sig_or_par(nams));
-    else if (parsed = parse_fst(nams));
-    else if (parsed = parse_snd(nams));
     else if (parsed = parse_get(nams));
     else if (parsed = parse_utt(nams));
     else if (parsed = parse_utv(nams));
@@ -2094,9 +1917,8 @@ const run = (mode, name, opts = {}) => {
 
 module.exports = {
   Var, Typ, Tid, Utt, Utv, Ute, All, Lam,
-  App, Box, Put, Tak, Dup, Num, Val, Op1,
-  Op2, Ite, Cpy, Sig, Par, Fst, Snd, Prj,
-  Slf, New, Use, Ann, Log, Hol, Ref,
+  App, Num, Val, Op1, Op2, Ite, Cpy, Slf,
+  New, Use, Ann, Log, Hol, Ref,
   derive_adt_ctor,
   derive_adt_type,
   equal,

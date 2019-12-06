@@ -10,56 +10,39 @@
 // - All: the dependent function type, `{x : A} -> B`, optionally erased
 // - Lam: a lambda, `{x} => B`, optionally erased/annotated
 // - App: an application `f(a)`, optionally erased
-// - Box: a boxed type, `!A`
-// - Put: a boxed value, `#a`
-// - Tak: unboxes a boxed value, `<>a`
-// - Dup: copies a boxed value, `dup x = a; b`
-// - Dbl: type of a native number
+// - Num: type of a native number
 // - Val: value of a native number
 // - Op1: partially applied binary numeric operation, `|n + k|`, with `k` fixed
 // - Op2: binary numeric operation, `|x + y|`
 // - Ite: if-then-else, `if n p`,  with a numeric conditional `n`, and two branches in a pair `p`
 // - Cpy: copies a number, `cpy x = a; b`
 // - Sig: type of a dependent pair, `[x : A, B(x)]`, or of a subset type, `[x : A ~ B(x)]`
-// - Par: value of a dependent pair, `[a, b]`, or of a dependent intersection `[a ~ b]`
-// - Fst: extracts 1st value of a dependent pair, `fst p`, or of a dependent intersection, `~fst p`
-// - Snd: extracts 2nd value of a dependent pair, `snd p`, or of a dependent intersection, `~snd p`
-// - Prj: projects a dependent pair, `get [x , y] = a; b`, or a dependent intersection, `get [x ~ y] = a; b`
 // - Ann: an explicit type annotaion, `: A a`
 // - Log: debug-prints a term during evaluation
 // - Hol: a type-hole
 // - Ref: a reference to a global def
-const Var = (index, loc)                          => ["Var", {index},                        MEMO && ("^" + index)                             , loc];
-const Typ = (loc)                                 => ["Typ", {},                             MEMO && ("ty")                                    , loc];
-const Tid = (expr, loc)                           => ["Tid", {expr},                         MEMO && expr[2]                                   , loc];
-const Utt = (expr, loc)                           => ["Utt", {expr},                         MEMO && ("ut" + expr[2])                          , loc];
-const Utv = (expr, loc)                           => ["Utv", {expr},                         MEMO && ("uv" + expr[2])                          , loc];
-const Ute = (expr, loc)                           => ["Ute", {expr},                         MEMO && ("ue" + expr[2])                          , loc];
-const All = (name, bind, body, eras, loc)         => ["All", {name, bind, body, eras},       MEMO && ("al" + (eras?"~":"") + bind[2] + body[2]), loc];
-const Lam = (name, bind, body, eras, loc)         => ["Lam", {name, bind, body, eras},       MEMO && ("lm" + (eras?"~":"") + body[2])          , loc];
-const App = (func, argm, eras, loc)               => ["App", {func, argm, eras},             MEMO && ("ap" + (eras?"~":"") + func[2] + argm[2]), loc];
-const Box = (expr, loc)                           => ["Box", {expr},                         MEMO && ("bx" + expr[2])                          , loc];
-const Put = (expr, loc)                           => ["Put", {expr},                         MEMO && ("pt" + expr[2])                          , loc];
-const Tak = (expr, loc)                           => ["Tak", {expr},                         MEMO && ("tk" + expr[2])                          , loc];
-const Dup = (name, expr, body, loc)               => ["Dup", {name, expr, body},             MEMO && ("dp" + expr[2] + body[2])                , loc];
-const Num = (loc)                                 => ["Num", {},                             MEMO && ("wd")                                    , loc];
-const Val = (numb, loc)                           => ["Val", {numb},                         MEMO && ("[" + numb + "]")                        , loc];
-const Op1 = (func, num0, num1, loc)               => ["Op1", {func, num0, num1},             MEMO && ("o1" + func + num0[2] + num1[2])         , loc];
-const Op2 = (func, num0, num1, loc)               => ["Op2", {func, num0, num1},             MEMO && ("o2" + func + num0[2] + num1[2])         , loc];
-const Ite = (cond, pair, loc)                     => ["Ite", {cond, pair},                   MEMO && ("ie" + cond[2] + pair[2])                , loc];
-const Cpy = (name, numb, body, loc)               => ["Cpy", {name, numb, body},             MEMO && ("cy" + numb[2] + body[2])                , loc];
-const Sig = (name, typ0, typ1, eras, loc)         => ["Sig", {name, typ0, typ1, eras},       MEMO && ("sg" + eras + typ0[2] + typ1[2])         , loc];
-const Par = (val0, val1, eras, loc)               => ["Par", {val0, val1, eras},             MEMO && ("pr" + eras + val0[2] + val1[2])         , loc];
-const Fst = (pair, eras=0, loc)                   => ["Fst", {pair, eras},                   MEMO && ("ft" + eras + pair[2])                   , loc];
-const Snd = (pair, eras=0, loc)                   => ["Snd", {pair, eras},                   MEMO && ("sd" + eras + pair[2])                   , loc];
-const Prj = (nam0, nam1, pair, body, eras=0, loc) => ["Prj", {nam0, nam1, pair, body, eras}, MEMO && ("pj" + eras + pair[2] + body[2])         , loc];
-const Slf = (name, type, loc)                     => ["Slf", {name, type},                   MEMO && ("sf" + type[2])                          , loc];
-const New = (type, expr, loc)                     => ["New", {type, expr},                   MEMO && expr[2]                                   , loc];
-const Use = (expr, loc)                           => ["Use", {expr},                         MEMO && expr[2]                                   , loc];
-const Ann = (type, expr, done, loc)               => ["Ann", {type, expr, done},             MEMO && expr[2]                                   , loc];
-const Log = (msge, expr, loc)                     => ["Log", {msge, expr},                   MEMO && expr[2]                                   , loc];
-const Hol = (name, loc)                           => ["Hol", {name},                         MEMO && ("{?" + name + "?}")                      , loc];
-const Ref = (name, eras, loc)                     => ["Ref", {name, eras},                   MEMO && ("{" + name + "}")                        , loc];
+const Var = (index, loc)                  => ["Var", {index},                  MEMO && ("^" + index)                             , loc];
+const Typ = (loc)                         => ["Typ", {},                       MEMO && ("ty")                                    , loc];
+const Tid = (expr, loc)                   => ["Tid", {expr},                   MEMO && expr[2]                                   , loc];
+const Utt = (expr, loc)                   => ["Utt", {expr},                   MEMO && ("ut" + expr[2])                          , loc];
+const Utv = (expr, loc)                   => ["Utv", {expr},                   MEMO && ("uv" + expr[2])                          , loc];
+const Ute = (expr, loc)                   => ["Ute", {expr},                   MEMO && ("ue" + expr[2])                          , loc];
+const All = (name, bind, body, eras, loc) => ["All", {name, bind, body, eras}, MEMO && ("al" + (eras?"~":"") + bind[2] + body[2]), loc];
+const Lam = (name, bind, body, eras, loc) => ["Lam", {name, bind, body, eras}, MEMO && ("lm" + (eras?"~":"") + body[2])          , loc];
+const App = (func, argm, eras, loc)       => ["App", {func, argm, eras},       MEMO && ("ap" + (eras?"~":"") + func[2] + argm[2]), loc];
+const Num = (loc)                         => ["Num", {},                       MEMO && ("wd")                                    , loc];
+const Val = (numb, loc)                   => ["Val", {numb},                   MEMO && ("[" + numb + "]")                        , loc];
+const Op1 = (func, num0, num1, loc)       => ["Op1", {func, num0, num1},       MEMO && ("o1" + func + num0[2] + num1[2])         , loc];
+const Op2 = (func, num0, num1, loc)       => ["Op2", {func, num0, num1},       MEMO && ("o2" + func + num0[2] + num1[2])         , loc];
+const Ite = (cond, pair, loc)             => ["Ite", {cond, pair},             MEMO && ("ie" + cond[2] + pair[2])                , loc];
+const Cpy = (name, numb, body, loc)       => ["Cpy", {name, numb, body},       MEMO && ("cy" + numb[2] + body[2])                , loc];
+const Slf = (name, type, loc)             => ["Slf", {name, type},             MEMO && ("sf" + type[2])                          , loc];
+const New = (type, expr, loc)             => ["New", {type, expr},             MEMO && expr[2]                                   , loc];
+const Use = (expr, loc)                   => ["Use", {expr},                   MEMO && expr[2]                                   , loc];
+const Ann = (type, expr, done, loc)       => ["Ann", {type, expr, done},       MEMO && expr[2]                                   , loc];
+const Log = (msge, expr, loc)             => ["Log", {msge, expr},             MEMO && expr[2]                                   , loc];
+const Hol = (name, loc)                   => ["Hol", {name},                   MEMO && ("{?" + name + "?}")                      , loc];
+const Ref = (name, eras, loc)             => ["Ref", {name, eras},             MEMO && ("{" + name + "}")                        , loc];
 var MEMO  = true;
 
 // ::::::::::::::::::
@@ -83,21 +66,12 @@ const shift = (term, inc, depth) => {
       case "All": return All(t.name, f(t.bind, i, d), f(t.body, i, d+1), t.eras, l);
       case "Lam": return Lam(t.name, f(t.bind, i, d), f(t.body, i, d+1), t.eras, l);
       case "App": return App(f(t.func, i, d), f(t.argm, i, d), t.eras, l);
-      case "Box": return Box(f(t.expr, i, d), l);
-      case "Put": return Put(f(t.expr, i, d), l);
-      case "Tak": return Tak(f(t.expr, i, d), l);
-      case "Dup": return Dup(t.name, f(t.expr, i, d), f(t.body, i, d+1), l);
       case "Num": return Num(l);
       case "Val": return Val(t.numb, l);
       case "Op1": return Op1(t.func, f(t.num0, i, d), f(t.num1, i, d), l);
       case "Op2": return Op2(t.func, f(t.num0, i, d), f(t.num1, i, d), l);
       case "Ite": return Ite(f(t.cond, i, d), f(t.pair, i, d), l);
       case "Cpy": return Cpy(t.name, f(t.numb, i, d), f(t.body, i, d+1), l);
-      case "Sig": return Sig(t.name, f(t.typ0, i, d), f(t.typ1, i, d+1),  t.eras, l);
-      case "Par": return Par(f(t.val0, i, d), f(t.val1, i, d), t.eras, l);
-      case "Fst": return Fst(f(t.pair, i, d), t.eras, l);
-      case "Snd": return Snd(f(t.pair, i, d), t.eras, l);
-      case "Prj": return Prj(t.nam0, t.nam1, f(t.pair, i,  d), f(t.body, i, d+2), t.eras, l);
       case "Slf": return Slf(t.name, f(t.type, i, d+1), l);
       case "New": return New(f(t.type, i, d), f(t.expr, i, d), l);
       case "Use": return Use(f(t.expr, i, d), l);
@@ -125,21 +99,12 @@ const subst = (term, val, depth) => {
       case "All": return All(t.name, f(t.bind, v, d), f(t.body, s(v,1,0), d+1), t.eras, l);
       case "Lam": return Lam(t.name, f(t.bind, v, d), f(t.body, s(v,1,0), d+1), t.eras, l);
       case "App": return App(f(t.func, v, d), f(t.argm, v, d), t.eras, l);
-      case "Box": return Box(f(t.expr, v, d), l);
-      case "Put": return Put(f(t.expr, v, d), l);
-      case "Tak": return Tak(f(t.expr, v, d), l);
-      case "Dup": return Dup(t.name, f(t.expr, v, d), f(t.body, s(v,1,0), d+1), l);
       case "Num": return Num(l);
       case "Val": return Val(t.numb, l);
       case "Op1": return Op1(t.func, f(t.num0, v, d), f(t.num1, v, d), l);
       case "Op2": return Op2(t.func, f(t.num0, v, d), f(t.num1, v, d), l);
       case "Ite": return Ite(f(t.cond, v, d), f(t.pair, v, d), l);
       case "Cpy": return Cpy(t.name, f(t.numb, v, d), f(t.body, s(v,1,0), d+1), l);
-      case "Sig": return Sig(t.name, f(t.typ0, v, d), f(t.typ1, s(v,1,0), d+1),  t.eras, l);
-      case "Par": return Par(f(t.val0, v, d), f(t.val1, v, d), t.eras, l);
-      case "Fst": return Fst(f(t.pair, v, d), t.eras, l);
-      case "Snd": return Snd(f(t.pair, v, d), t.eras, l);
-      case "Prj": return Prj(t.nam0, t.nam1, f(t.pair, v, d), f(t.body, s(v,2,0), d+2), t.eras, l);
       case "Slf": return Slf(t.name, f(t.type, s(v,1,0), d+1), l);
       case "New": return New(f(t.type, v, d), f(t.expr, v, d), l);
       case "Use": return Use(f(t.expr, v, d), l);
@@ -197,30 +162,6 @@ const reduce = (term, opts = {}) => {
       return Dup(func[1].name, func[1].expr, x => weak_reduce(App(func[1].body(x), argm, eras), names_ext(x, func[1].name, names)));
     } else {
       return App(func, weak_reduce(argm, names), eras);
-    }
-  };
-  const take = (expr, names) => {
-    var expr = reduce(expr, names);
-    if (!opts.no_tak && expr[0] === "Put") {
-      return reduce(expr[1].expr, names);
-    } else if (!opts.no_tak && expr[0] === "Dup"){
-      return Dup(expr[1].name, expr[1].expr, x => weak_reduce(Tak(expr[1].body(x)), names_ext(x, expr[1].name, names)));
-    } else {
-      return Tak(expr);
-    }
-  };
-  const duplicate = (name, expr, body, names) => {
-    var expr = reduce(expr, names);
-    if (!opts.dup && expr[0] === "Put") {
-      return reduce(body(expr[1].expr), names);
-    } else if (!opts.no_dup && expr[0] === "Dup") {
-      return Dup(expr[1].name, expr[1].expr, x => weak_reduce(Dup(name, expr[1].body(x), x => body(x)), names_ext(x, name, expr[1].name)));
-    } else {
-      if (opts.undup) {
-        return reduce(body(Tak(expr)), names);
-      } else {
-        return Dup(name, expr, x => weak_reduce(body(x), names_ext(x, name, names)));
-      }
     }
   };
   const dereference = (name, eras, names) => {
@@ -378,21 +319,12 @@ const reduce = (term, opts = {}) => {
       case "All": return All(term.name, unquote(term.bind, names), x => unquote(term.body, names_ext(x, null, names)), term.eras);
       case "Lam": return Lam(term.name, term.bind && unquote(term.bind, names), x => unquote(term.body, names_ext(x, null, names)), term.eras);
       case "App": return App(unquote(term.func, names), unquote(term.argm, names), term.eras);
-      case "Box": return Box(unquote(term.expr, names));
-      case "Put": return Put(unquote(term.expr, names));
-      case "Tak": return Tak(unquote(term.expr, names));
-      case "Dup": return Dup(term.name, unquote(term.expr, names), x => unquote(term.body, names_ext(x, null, names)));
       case "Num": return Num();
       case "Val": return Val(term.numb);
       case "Op1": return Op1(term.func, unquote(term.num0, names), unquote(term.num1, names));
       case "Op2": return Op2(term.func, unquote(term.num0, names), unquote(term.num1, names));
       case "Ite": return Ite(unquote(term.cond, names), unquote(term.pair, names));
       case "Cpy": return Cpy(term.name, unquote(term.numb, names), x => unquote(term.body, names_ext(x, null, names)));
-      case "Sig": return Sig(term.name, unquote(term.typ0, names), x => unquote(term.typ1, names_ext(x, null, names)), term.eras);
-      case "Par": return Par(unquote(term.val0, names), unquote(term.val1, names), term.eras);
-      case "Fst": return Fst(unquote(term.pair, names), term.eras);
-      case "Snd": return Snd(unquote(term.pair, names), term.eras);
-      case "Prj": return Prj(term.nam0, term.nam1, unquote(term.pair, names), (x,y) => unquote(term.body, names_ext(y, null, names_ext(x, null, names)), term.eras));
       case "Slf": return Slf(term.name, x => unquote(term.type, names_ext(x, null, names)));
       case "New": return New(unquote(term.type, names), unquote(term.expr, names));
       case "Use": return Use(unquote(term.expr, names));
@@ -414,21 +346,12 @@ const reduce = (term, opts = {}) => {
       case "All": return All(term.name, weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(x, term.name, names)), term.eras);
       case "Lam": return Lam(term.name, term.bind && weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(x, term.name, names)), term.eras);
       case "App": return apply(term.func, term.argm, term.eras, names);
-      case "Box": return Box(weak_reduce(term.expr, names));
-      case "Put": return opts.unbox ? reduce(term.expr, names) : Put(weak_reduce(term.expr, names));
-      case "Tak": return opts.unbox ? reduce(term.expr, names) : take(weak_reduce(term.expr, names), names);
-      case "Dup": return opts.unbox ? reduce(term.body(term.expr), names) : duplicate(term.name, term.expr, term.body, names);
       case "Num": return Num();
       case "Val": return Val(term.numb);
       case "Op1": return op1(term.func, term.num0, term.num1, names);
       case "Op2": return op2(term.func, term.num0, term.num1, names);
       case "Ite": return if_then_else(term.cond, term.pair, names);
       case "Cpy": return opts.unbox ? reduce(term.body(term.numb), names) : copy(term.name, term.numb, term.body, names);
-      case "Sig": return Sig(term.name, weak_reduce(term.typ0, names), x => weak_reduce(term.typ1(x), names_ext(x, term.name, names)), term.eras);
-      case "Par": return Par(weak_reduce(term.val0, names), weak_reduce(term.val1, names), term.eras);
-      case "Fst": return first(term.pair, term.eras, names);
-      case "Snd": return second(term.pair, term.eras, names);
-      case "Prj": return project(term.nam0, term.nam1, term.pair, term.body, term.eras, names);
       case "Slf": return Slf(term.name, x => weak_reduce(term.type(x), names_ext(x, term.name, names)));
       case "New": return New(weak_reduce(term.type, names), weak_reduce(term.expr, names));
       case "Use": return use(term.expr, names);
@@ -450,21 +373,12 @@ const reduce = (term, opts = {}) => {
       case "All": return All(term.name, quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras);
       case "Lam": return Lam(term.name, term.bind && quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras);
       case "App": return App(quote(term.func, depth), quote(term.argm, depth), term.eras);
-      case "Box": return Box(quote(term.expr, depth));
-      case "Put": return Put(quote(term.expr, depth));
-      case "Tak": return Tak(quote(term.expr, depth));
-      case "Dup": return Dup(term.name, quote(term.expr, depth), quote(term.body(Var(depth)), depth + 1));
       case "Num": return Num();
       case "Val": return Val(term.numb);
       case "Op1": return Op1(term.func, quote(term.num0, depth), quote(term.num1, depth));
       case "Op2": return Op2(term.func, quote(term.num0, depth), quote(term.num1, depth));
       case "Ite": return Ite(quote(term.cond, depth), quote(term.pair, depth));
       case "Cpy": return Cpy(term.name, quote(term.numb, depth), quote(term.body(Var(depth)), depth + 1));
-      case "Sig": return Sig(term.name, quote(term.typ0, depth), quote(term.typ1(Var(depth)), depth + 1), term.eras);
-      case "Par": return Par(quote(term.val0, depth), quote(term.val1, depth), term.eras);
-      case "Fst": return Fst(quote(term.pair, depth), term.eras);
-      case "Snd": return Snd(quote(term.pair, depth), term.eras);
-      case "Prj": return Prj(term.nam0, term.nam1, quote(term.pair, depth), quote(term.body(Var(depth), Var(depth + 1)), depth + 2), term.eras);
       case "Slf": return Slf(term.name, quote(term.type(Var(depth)), depth + 1));
       case "New": return New(quote(term.type, depth), quote(term.expr, depth));
       case "Use": return Use(quote(term.expr, depth));
@@ -487,7 +401,7 @@ const reduce = (term, opts = {}) => {
 
 // erase : Term -> Term
 const erase = (term) => {
-  const [f,[c,t],e] = [erase, term, Put(Hol("<erased>"))];
+  const [f,[c,t],e] = [erase, term, Hol("<erased>")];
   switch (c) {
     case "Var": return Var(t.index);
     case "Typ": return Typ();
@@ -498,24 +412,12 @@ const erase = (term) => {
     case "All": return All(t.name, f(t.bind), f(t.body), t.eras);
     case "Lam": return t.eras ? f(subst(t.body, e, 0)) : Lam(t.name, null, f(t.body), t.eras);
     case "App": return t.eras ? f(t.func)              : App(f(t.func), f(t.argm), t.eras);
-    case "Box": return Box(f(t.expr));
-    case "Put": return Put(f(t.expr));
-    case "Tak": return Tak(f(t.expr));
-    case "Dup": return Dup(t.name, f(t.expr), f(t.body));
     case "Num": return Num();
     case "Val": return Val(t.numb);
     case "Op1": return Op1(t.func, f(t.num0), f(t.num1));
     case "Op2": return Op2(t.func, f(t.num0), f(t.num1));
     case "Ite": return Ite(f(t.cond), f(t.pair));
     case "Cpy": return Cpy(t.name, f(t.numb), f(t.body));
-    case "Sig": return Sig(t.name, f(t.typ0), f(t.typ1), t.eras);
-    case "Par": return (t.eras === 1 ? f(t.val1) : t.eras === 2 ? f(t.val0) : Par(f(t.val0), f(t.val1), t.eras));
-    case "Fst": return (t.eras === 1 ? e         : t.eras === 2 ? f(t.pair) : Fst(f(t.pair), t.eras));
-    case "Snd": return (t.eras === 1 ? f(t.pair) : t.eras === 2 ? e         : Snd(f(t.pair), t.eras));
-    case "Prj": return (
-      t.eras === 1 ? f(subst_many(t.body, [e, f(t.pair)]), 0) :
-      t.eras === 2 ? f(subst_many(t.body, [f(t.pair), e]), 0) :
-      Prj(t.nam0, t.nam1, f(t.pair), f(t.body), t.eras));
     case "Slf": return Slf(t.name, f(t.type));
     case "New": return f(t.expr);
     case "Use": return f(t.expr);
@@ -597,21 +499,12 @@ const equal = (a, b, d, opts) => {
           case "All-All": y = And(And(Eqs(ay[1].bind, by[1].bind, d), Eqs(ay[1].body, by[1].body, d+1)), Val(ay[1].eras === by[1].eras)); break;
           case "Lam-Lam": y = And(Eqs(ay[1].body, by[1].body, d+1), Val(ay[1].eras === by[1].eras)); break;
           case "App-App": y = And(And(Eqs(ay[1].func, by[1].func, d), Eqs(ay[1].argm, by[1].argm, d)), Val(ay[1].eras === by[1].eras)); break;
-          case "Box-Box": y = Eqs(ay[1].expr, by[1].expr, d); break;
-          case "Put-Put": y = Eqs(ay[1].expr, by[1].expr, d); break;
-          case "Tak-Tak": y = Eqs(ay[1].expr, by[1].expr, d); break;
-          case "Dup-Dup": y = And(Eqs(ay[1].expr, by[1].expr, d), Eqs(ay[1].body, by[1].body, d+1)); break;
           case "Num-Num": y = Val(true); break;
           case "Val-Val": y = Val(ay[1].numb === by[1].numb); break;
           case "Op1-Op1": y = And(Val(ay[1].func === by[1].func), And(Eqs(ay[1].num0, by[1].num0, d), Val(ay[1].num1[1].numb === ay[1].num1[1].numb))); break;
           case "Op2-Op2": y = And(Val(ay[1].func === by[1].func), And(Eqs(ay[1].num0, by[1].num0, d), Eqs(ay[1].num1, by[1].num1, d))); break;
           case "Ite-Ite": y = And(Eqs(ay[1].cond, by[1].cond, d), Eqs(ay[1].pair, by[1].pair, d)); break;
           case "Cpy-Cpy": y = And(Eqs(ay[1].numb, by[1].numb, d), Eqs(ay[1].body, by[1].body, d+1)); break;
-          case "Sig-Sig": y = And(Eqs(ay[1].typ0, by[1].typ0, d), Eqs(ay[1].typ1, by[1].typ1, d+1)); break;
-          case "Par-Par": y = And(Eqs(ay[1].val0, by[1].val0, d), Eqs(ay[1].val1, by[1].val1, d)); break;
-          case "Fst-Fst": y = And(Eqs(ay[1].pair, by[1].pair, d), Val(ay[1].eras === by[1].eras)); break;
-          case "Snd-Snd": y = And(Eqs(ay[1].pair, by[1].pair, d), Val(ay[1].eras === by[1].eras)); break;
-          case "Prj-Prj": y = And(Eqs(ay[1].pair, by[1].pair, d), Eqs(ay[1].body, by[1].body, d+2)); break;
           case "Slf-Slf": y = Eqs(ay[1].type, by[1].type, d+1); break;
           case "New-New": y = Eqs(ay[1].expr, by[1].expr, d); break;
           case "Use-Use": y = Eqs(ay[1].expr, by[1].expr, d); break;
@@ -775,10 +668,9 @@ const typecheck = (name, expect, opts = {}) => {
 
   const subst_holes = (term, depth) => {
     return reduce(term, {defs: opts.defs, defs: {}, holes, depth, weak: false,
-      no_app:1, no_tak:1, no_dup:1, no_ref:1,
-      no_op1:1, no_op2:1, no_ite:1, no_cpy:1,
-      no_fst:1, no_snd:1, no_prj:1, no_utv:1,
-      no_ute:1, no_use:1, no_ann:1, no_tid:1});
+      no_app:1, no_ref:1, no_op1:1, no_op2:1,
+      no_ite:1, no_cpy:1, no_utv:1, no_ute:1,
+      no_use:1, no_ann:1, no_tid:1});
   };
 
   const show = (term, names = []) => {
@@ -954,56 +846,6 @@ const typecheck = (name, expect, opts = {}) => {
         }
         type = subst(func_t[1].body, Ann(func_t[1].bind, term[1].argm, false), 0);
         break;
-      case "Box":
-        if (expect_nf !== null && expect_nf[0] !== "Typ") {
-          do_error("The inferred type of a box (example: "
-            + show(Box(Ref("A")), ctx_names(ctx))
-            + ") isn't "
-            + show(Typ(), ctx_names(ctx))
-            + ".\n- Inferred type is "
-            + show(expect_nf, ctx_names(ctx)));
-        }
-        var expr_t = typecheck(term[1].expr, Typ(), ctx, affine, lvel, [term, ctx]);
-        var expr_t = weak_normal(expr_t, ctx.length);
-        type = Typ();
-        break;
-      case "Put":
-        if (expect_nf !== null && expect_nf[0] !== "Box") {
-          do_error("The inferred type of a boxed value (example: "
-            + show(Put(Ref("x")), ctx_names(ctx))
-            + ") isn't a box (example: "
-            + show(Box(Ref("A")), ctx_names(ctx))
-            + ").\n- Inferred type is "
-            + show(expect_nf, ctx_names(ctx)));
-        }
-        var expr_t = expect_nf && expect_nf[0] === "Box" ? expect_nf[1].expr : null;
-        var term_t = typecheck(term[1].expr, expr_t, ctx, affine, lvel + 1, [term, ctx]);
-        type = Box(term_t);
-        break;
-      case "Tak":
-        var expr_t = typecheck(term[1].expr, null, ctx, affine, lvel - 1, [term, ctx]);
-        var expr_t = weak_normal(expr_t, ctx.length);
-        if (expr_t[0] !== "Box") {
-          do_error("Expected a boxed type (example: "
-            + show(Box(Ref("A")), ctx_names(ctx))
-            + ").\n- Found type... "
-            + show(expr_t, ctx_names(ctx)));
-        }
-        type = expr_t[1].expr;
-        break;
-      case "Dup":
-        var expr_t = typecheck(term[1].expr, null, ctx, affine, lvel, [term, ctx]);
-        var expr_t = weak_normal(expr_t, ctx.length);
-        if (expr_t[0] !== "Box") {
-          do_error("Expected a boxed type (example: "
-            + show(Box(Ref("A")), ctx_names(ctx))
-            + ").\n- Found type... "
-            + show(expr_t, ctx_names(ctx)));
-        }
-        var ex_ctx = ctx_ext(term[1].name, Tak(term[1].expr), expr_t[1].expr, false, true, lvel + 1, ctx);
-        var body_t = typecheck(term[1].body, expect_nf && shift(expect_nf, 1, 0), ex_ctx, affine, lvel, [term, ctx]);
-        type = subst(body_t, Tak(term[1].expr), 0);
-        break;
       case "Num":
         type = Typ();
         break;
@@ -1042,102 +884,6 @@ const typecheck = (name, expect, opts = {}) => {
           do_error("Both branches of if must have the same type.");
         }
         type = expect_nf || typ0_v;
-        break;
-      case "Cpy":
-        var numb_t = typecheck(term[1].numb, null, ctx, affine, lvel, [term, ctx]);
-        var numb_t = weak_normal(numb_t, ctx.length);
-        if (numb_t[0] !== "Num") {
-          do_error("Atempted to copy a non-numeric value.");
-        }
-        var ex_ctx = ctx_ext(term[1].name, term[1].numb, Num(), false, true, lvel, ctx);
-        var body_t = typecheck(term[1].body, expect_nf && shift(expect_nf, 1, 0), ex_ctx, affine, lvel, [term, ctx]);
-        type = subst(body_t, term[1].numb, 0);
-        break;
-      case "Sig":
-        if (expect_nf && expect_nf[0] !== "Typ") {
-          do_error("The inferred type of a sigma (example: "
-            + show(Sig("x", Ref("A"), Ref("B")), ctx_names(ctx))
-            + ") isn't "
-            + show(Typ(), ctx_names(ctx))
-            + ".\n- Inferred type is "
-            + show(expect_nf, ctx_names(ctx)));
-        }
-        var typ0_t = typecheck(term[1].typ0, Typ(), ctx, false, lvel, [term, ctx]);
-        var ex_ctx = ctx_ext(term[1].name, null, term[1].typ0, false, false, lvel, ctx);
-        var typ1_t = typecheck(term[1].typ1, Typ(), ex_ctx, false, lvel, [term, ctx]);
-        type = Typ();
-        break;
-      case "Par":
-        if (expect_nf && expect_nf[0] !== "Sig" && expect_nf[0] !== "Hol") {
-          do_error("Inferred type of a pair (example: "
-            + show(Par(Ref("a"),Ref("b")), ctx_names(ctx))
-            + ") isn't "
-            + show(Sig("x", Ref("A"), Ref("B")), ctx_names(ctx))
-            + ".\n- Inferred type is "
-            + show(expect_nf, ctx_names(ctx)));
-        }
-        var val0_t = typecheck(term[1].val0, expect_nf && expect_nf[1].typ0, ctx, affine, lvel, [term, ctx]);
-        if (expect_nf) {
-          var val1_t = typecheck(term[1].val1, subst(expect_nf[1].typ1, term[1].val0, 0), ctx, affine, lvel, [term, ctx]);
-        } else {
-          var val1_t = typecheck(term[1].val1, null, ctx, affine, lvel, [term, ctx]);
-          var val1_t = shift(val1_t, 1, 0);
-        }
-        var eras = expect_nf && expect_nf[0] === "Sig" ? expect_nf[1].eras : term[1].eras;
-        if (term[1].eras !== eras) {
-          do_error("Mismatched erasure.");
-        }
-        type = expect_nf || Sig("x", val0_t, val1_t, term[1].eras);
-        break;
-      case "Fst":
-        if (term[1].eras === 1) {
-          do_error("Attempted to extract erased first element.");
-        }
-        var pair_t = typecheck(term[1].pair, null, ctx, affine, lvel, [term, ctx]);
-        var pair_t = weak_normal(pair_t, ctx.length);
-        if (pair_t[0] !== "Sig") {
-          do_error("Attempted to extract the first element of a term that isn't a pair.");
-        }
-        if (term[1].eras !== pair_t[1].eras) {
-          do_error("Mismatched erasure.");
-        }
-        type = pair_t[1].typ0;
-        break;
-      case "Snd":
-        if (term[1].eras === 2) {
-          do_error("Attempted to extract erased second element.");
-        }
-        var pair_t = typecheck(term[1].pair, null, ctx, affine, lvel, [term, ctx]);
-        var pair_t = weak_normal(pair_t, ctx.length);
-        if (pair_t[0] !== "Sig") {
-          do_error("Attempted to extract the second element of a term that isn't a pair.");
-        }
-        if (term[1].eras !== pair_t[1].eras) {
-          do_error("Mismatched erasure.");
-        }
-        type = subst(pair_t[1].typ1, Fst(term[1].pair, term[1].eras), 0);
-        break;
-      case "Prj":
-        var pair_t = typecheck(term[1].pair, null, ctx, affine, lvel, [term, ctx]);
-        var pair_t = weak_normal(pair_t, ctx.length);
-        if (pair_t[0] !== "Sig") {
-          do_error("Attempted to project the elements of a term that isn't a pair.");
-        }
-        if (term[1].eras !== pair_t[1].eras) {
-          do_error("Mismatched erasure.");
-        }
-        var ex_ctx = ctx_ext(term[1].nam0, null, pair_t[1].typ0, pair_t[1].eras === 1, false, lvel, ctx);
-        var ex_ctx = ctx_ext(term[1].nam1, null, pair_t[1].typ1, pair_t[1].eras === 2, false, lvel, ex_ctx);
-        try {
-          var tp_ctx = ctx_cpy(ex_ctx);
-          var body_t = typecheck(term[1].body, shift(expect, 2, 0), tp_ctx, affine, lvel, [term, ctx]);
-          var ex_ctx = tp_ctx;
-        } catch (e) {
-          var tp_ctx = ctx_cpy(ex_ctx);
-          var body_t = typecheck(term[1].body, null, ex_ctx, affine, lvel, [term, ctx]);
-          var ex_ctx = tp_ctx;
-        }
-        type = subst(subst(body_t, Snd(shift(term[1].pair, 1, 0), term[1].eras), 0), Fst(term[1].pair, term[1].eras), 0);
         break;
       case "Slf":
         var ex_ctx = ctx_ext(term[1].name, null, term, false, false, lvel, ctx);
@@ -1320,10 +1066,10 @@ const haltcheck = (term, defs, seen = {}) => {
 };
 
 module.exports = {
-  Var, Typ, Tid, Utt, Utv, Ute, All, Lam,
-  App, Box, Put, Tak, Dup, Num, Val, Op1,
-  Op2, Ite, Cpy, Sig, Par, Fst, Snd, Prj,
-  Slf, New, Use, Ann, Log, Hol, Ref,
+  Var, Typ, Tid, Utt, Utv, Ute,
+  All, Lam, App, Num, Val, Op1,
+  Op2, Ite, Cpy, Slf, New, Use,
+  Ann, Log, Hol, Ref,
   equal,
   erase,
   reduce,
