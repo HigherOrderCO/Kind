@@ -27,8 +27,8 @@ typedef struct {
 
 typedef struct {
 	uint32_t ptr;
-	uint32_t depth : 31;
 	uint32_t side : 1;
+	uint32_t depth : 31;
 } Frame;
 
 typedef struct {
