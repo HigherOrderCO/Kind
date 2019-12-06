@@ -107,7 +107,7 @@ such as this "impossibly efficient" [exp-mod
 implementation](https://medium.com/@maiavictor/calling-a-function-a-googol-times-53933c072e3a).
 Who knows if this may lead to new breakthroughs in complexity theory?
 
-![](https://github.com/moonad/formality/raw/master/archive/images/inet-simulation.gif)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/inet-simulation.gif)
 
 Installation
 ============
@@ -2182,7 +2182,7 @@ being the main one, plus a list of "rewrite rules" that are activated whenever
 two nodes are connected by their main ports. Our system includes 6 types of
 nodes, ERA, CON, OP1, OP2, ITE, NUM.
 
-![](https://raw.githubusercontent.com/moonad/Formality/master/archive/images/fm-net-node-types.png)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/fm-net-node-types.png)
 
 - `CON` has 3 ports and an integer label. It is used to represent lambdas,
   applications, boxes (implicitly) and duplications. Since FM-Core is based on
@@ -2213,7 +2213,7 @@ In order to perform computations, FM-Net has a set of rewrite rules that are
 triggered whenever two nodes are connected by their main ports. This is an
 extensive list of those rules:
 
-![](https://raw.githubusercontent.com/moonad/Formality/master/archive/images/fm-net-rewrite-rules.png)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/fm-net-rewrite-rules.png)
 
 Note that, while there are many rules (since we need to know what to do on each
 combination of a node), most of those have the same "shape" (such as OP2-OP2,
@@ -2334,7 +2334,7 @@ example, in the graph below, B-C and D-E are redexes. If we reduce them in
 parallel, both threads will attempt to read/write from C's and D's `aux0` and
 `aux1` ports, potentially causing synchronization errors.
 
-![](https://github.com/MaiaVictor/absal-ex/raw/master/img/sk_problem_2x.png)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/Absal/sk_problem_2x.png)
 
 This can be avoided through locks, or by performing rewrites in two steps. On
 the first step, each thread reads/writes the ports of its own active pair as
@@ -2343,7 +2343,7 @@ its own node into a "redirector" which points to where the neighbor was supposed
 to point. For example, substitution and duplication would be performed as
 follows:
 
-![](https://github.com/MaiaVictor/absal-ex/blob/master/img/sk_local_rewrites_2x.png?raw=true)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/Absal/sk_local_rewrites_2x.png)
 
 Notice that `P`, `Q`, `R` and `S` (neighbor ports) weren't touched: they keep
 pointing to the same ports, but now those ports point to where they should point
@@ -2351,7 +2351,7 @@ to. Then, a second parallel step is performed. This time, we spawn a thread for
 each neighbor port and walk through the graph until we find a non-redirector
 node. We then point that neighbor to it. Here is a full example:
 
-![](https://github.com/MaiaVictor/absal-ex/raw/master/img/sk_local_rewrites_ex_2x.png)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/Absal/sk_local_rewrites_ex_2x.png)
 
 Notice, for example, the port `C` of the node `A`. It is on the neighborhoods of
 a redex (`B-C`), but isn't a redex itself. On the first step, two threads
@@ -2432,7 +2432,7 @@ erased, turning it into FM-Calc, which is then compiled to FM-Net. The process
 of compiling FM-Calc to FM-Net can be defined by the following function
 `k_b(net)`:
 
-![](https://raw.githubusercontent.com/moonad/Formality/master/archive/images/fm-net-compilation.png)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/fm-net-compilation.png)
 
 This function recursively walks through a term, creating nodes and "temporary
 variables" (`x_b`) in the process. It also keeps track of the number of boxes it
