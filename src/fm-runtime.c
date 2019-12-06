@@ -83,6 +83,7 @@ fm_reduce(Term *defs[], uint32_t ptr, uint32_t *mem)
 				back[back_len++] = (Frame){next, 0, depth};
 				next = func;
 			}
+			break;
 		case REF:
 			++stats.copy;
 			pos = mem_len;
