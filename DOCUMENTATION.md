@@ -297,8 +297,8 @@ runtime.
 foo(T : Type; x : T) : T
   x
 
-main : Number
-  foo(~String, "Hello, world!")
+main : String
+  foo(String; "Hello, world!")
 ```
 
 
