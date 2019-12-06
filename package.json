@@ -1,6 +1,6 @@
 {
   "name": "formality-lang",
-  "version": "0.1.204",
+  "version": "0.1.205",
   "description": "",
   "main": "src/fm-lib.js",
   "bin": {

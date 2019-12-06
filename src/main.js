@@ -71,7 +71,7 @@ async function run_CLI() {
     var {name, defs} = await load_code();
     var term = defs[name];
     var term = fm.core.erase(term);
-    var code = fm.js.compile(term, {defs});
+    var code = fm.js.compile(term, defs);
     console.log(code);
   
   // Evaluates on debug mode
