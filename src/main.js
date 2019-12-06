@@ -6,69 +6,148 @@ var fm = require("./..");
 
 try {
   var argv = [].slice.call(process.argv, 2);
-  if (argv.length === 0 || argv[0] === "--help") throw "";
+  if (argv.length === 0 || argv[0] === "--help" || argv[0] === "-h") throw "";
   var main = argv.filter(str => str[0] !== "-")[0] || "main/main";
   var args = {};
-  argv.filter(str => str[0] === "-").map(str => str.slice(1)).join("").split("").forEach(c => args[c] = 1);
+  argv.filter(str => str[0] === "-")
+      .map(str => str.slice(1))
+      .join("")
+      .split("")
+      .forEach(c => args[c] = 1);
 } catch (e) {
   if (e) console.log(e);
-  console.log("Formality");
+  console.log("Formality-Lang v" + fm.version);
   console.log("");
-  console.log("Usage: fm [options] [args]");
-  console.log("");
-  console.log("Evaluation modes (default: -d):");
-  console.log("-d <file>/<term> debug (using HOAS interpreter)");
-  console.log("  -X don't erase types");
-  console.log("  -B don't erase boxes");
-  console.log("  -W stop on weak head normal form");
-  console.log("  -0 don't normalize anything");
-  console.log("-r <file>/<term> optimal (using the new runtime, lazy)");
-  console.log("-w <file>/<term> optimal (using the new runtime, lazy, WASM)");
-  console.log("-o <file>/<term> optimal (using interaction nets, lazy)");
-  console.log("-O <file>/<term> optimal (using interaction nets, strict)");
-  console.log("-j <file>/<term> JavaScript (using native functions)");
-  console.log("");
-  console.log("Type-checking modes:");
-  console.log("-t <file>/<term> performs a type check");
-  console.log("");
-  console.log("Compilation modes:");
-  console.log("-J <file>/<term> compiles to JavaScript code");
-  console.log("");
-  console.log("FPM:");
-  console.log("-s <file> saves a file to FPM");
-  console.log("-l <file> downloads a file from FPM");
-  console.log("-i <file> shows list of FPM files that import <file>");
+  console.log("Commands:");
+  console.log("$ fm -d <file>/<term> | evaluates (debug)");
+  console.log("$ fm -o <file>/<term> | evaluates (fast)");
+  console.log("$ fm -c <file>/<term> | evaluates (fast, C WASM)");
+  console.log("$ fm -t <file>/<term> | type-checks");
+  console.log("$ fm -t <file>/@      | type-checks (all)");
+  console.log("$ fm -j <file>/<term> | compiles to JS");
+  console.log("$ fm -s <file>        | saves to FPM");
+  console.log("$ fm -l <file>        | loads from FPM");
+  console.log("$ fm -i <file>        | shows cited_by");
+  console.log("$ fm -v <file>        | shows version");
   console.log("");
   console.log("Options:");
-  console.log("-f shows full names of references");
+  console.log("-x don't erase types");
+  console.log("-w stop on weak head normal form");
   console.log("-m disable logging");
-  console.log("-h hides interaction net stats");
-  console.log("-p prints net as JSON");
-  console.log("-v displays the version");
-  console.log("");
-  console.log("Notes:");
-  console.log("- <file> is the file name, without '.fm'.");
-  console.log("- <term> is the term name.");
-  console.log("- use @ instead of <term> to print all terms");
   process.exit();
 }
-// Create loader with local files for development and with fm_modules filesystem cache
-let warned_about_dowloading = false
 
+async function run_CLI() {
+
+  //Print version
+  if (args.v) {
+    console.log(fm.version);
+    process.exit();
+
+  // Download file from FPM
+  } else if (args.l) {
+    var file_data = await fm.loader.load_file(main);
+    console.log(fs.writeFileSync(main + ".fm", file_data));
+    console.log("Downloaded file as `" + main + ".fm`!");
+
+  // Save file to FPM
+  } else if (args.S || args.s) {
+    var file_name = main;
+    if (file_name.slice(-3) === ".fm") {
+      file_name = file_name.slice(0, -3);
+    }
+    upload(file_name).then(() => process.exit());
+
+  // Show file cited_by
+  } else if (args.i) {
+    try {
+      var cited_by = await fm.loader.load_file_parents(main);
+      console.log(cited_by.map(file => "- " + file).join("\n"));
+    } catch (e) {
+      console.log("Couldn't load global file '" + main + "'.");
+    }
+
+  // Compile to JavaScript
+  } else if (args.j) {
+    var {name, defs} = await load_code();
+    var term = defs[name];
+    var term = fm.core.erase(term);
+    var code = fm.js.compile(term, {defs});
+    console.log(code);
+  
+  // Evaluates on debug mode
+  } else if (args.d) {
+    var {name, defs} = await load_code();
+    var term = defs[name];
+    var term = !args.x ? fm.core.erase(term) : term;
+    var opts = {defs, weak: args.w, logs: !!args.m};
+    var term = fm.core.reduce(term, defs,opts);
+    console.log(fm.lang.show(term));
+
+  // Evaluates on fast mode
+  } else if (args.o) {
+    var {name, defs} = await load_code();
+    var {rt_defs, rt_rfid} = fm.runtime.compile(defs);
+    var rt_term = rt_defs[rt_rfid[name]];
+    var {rt_term,stats} = fm.runtime.reduce(rt_term, rt_defs);
+    var term = fm.runtime.decompile(rt_term);
+    console.log(fm.lang.show(term));
+    console.log(JSON.stringify(stats));
+
+  // Evaluates on fast mode (WASM)
+  } else if (args.c) {
+    var {name, defs} = await load_code();
+    var {rt_defs, rt_rfid} = fm.runtime.compile(defs);
+    var {rt_term, stats} = fm.runtime_wasm.reduce(Object.values(rt_defs), rt_rfid[name]);
+    var term = fm.runtime.decompile(rt_term);
+    console.log(fm.lang.show(term));
+    console.log(JSON.stringify(stats));
+
+  // Type-checks
+  } else if (args.t) {
+    var {name, defs} = await load_code();
+    var all = name === "@";
+    var names = all ? Object.keys(defs).sort() : [name];
+    names.forEach((name) => {
+      try {
+        var opts = {logs: !!args.m};
+        var head = all ? "- " + name + " : " : "";
+        var type = fm.core.typecheck(name, null, defs, opts);
+        var halt = fm.core.haltcheck(name, defs);
+        if (halt) {
+          console.log("\x1b[32m" + head + fm.lang.show(type) + " ✔\x1b[0m");
+        } else {
+          console.log("\x1b[33m" + head + fm.lang.show(type) + " ⚠\x1b[0m");
+        }
+      } catch (e) {
+        if (!all) {
+          console.log(e);
+          process.exit(1);
+        } else {
+          console.log("\x1b[31m" + head + "error\x1b[0m");
+        }
+      }
+    });
+  } else {
+    console.log("Command not found. Type `fm` for help.");
+  }
+};
+
+// Create loader with local files for development and with fm_modules filesystem cache
+let warned_about_dowloading = false;
 const with_download_warning = (loader) => async (file) => {
-  if(!warned_about_dowloading) {
+  if (!warned_about_dowloading) {
     console.log("Downloading files to `fm_modules`. This may take a while...");
     warned_about_dowloading = true;
-  }
-
-  return await loader(file)
+  };
+  return await loader(file);
 }
 
 const loader = [
   with_download_warning,
-  fm.forall.with_file_system_cache,
-  fm.forall.with_local_files
-].reduce((loader, mod) => mod(loader), fm.forall.load_file)
+  fm.loader.with_file_system_cache,
+  fm.loader.with_local_files
+].reduce((loader, mod) => mod(loader), fm.loader.load_file)
 
 async function local_imports_or_exit(file, code) {
   try {
@@ -76,10 +155,11 @@ async function local_imports_or_exit(file, code) {
     return Object.keys(open_imports).filter((name) => name.indexOf("#") === -1)
   } catch (e) {
     console.log(e.toString());
-    process.exit();
+    process.exit(1);
   }
-}
+};
 
+// TODO: this doesn't properly replace local refs. Improve.
 async function upload(file, global_path = {}) {
   if (!global_path[file]) {
     var code = fs.readFileSync(file + ".fm", "utf8");
@@ -94,140 +174,37 @@ async function upload(file, global_path = {}) {
       var code = code.replace(new RegExp("import " + imp_file + " *as")  , "import " + g_name + "#" + g_vers + " as");
     }
 
-    global_path[file] = await fm.forall.save_file(file, code);
+    global_path[file] = await fm.loader.save_file(file, code);
     console.log("Saved `" + file + "` as `" + global_path[file] + "`!");
   }
   return global_path[file];
-}
+};
 
-(async () => {
-  if (args.v) {
-    console.log(fm.lang.version);
-    process.exit();
+// Loads a file, parses it, returns term name and defs
+async function load_code() {
+  var [file, name] = main.indexOf("/") === -1 ? [main, "main"] : main.split("/");
 
-  } else if (args.i) {
-    try {
-      console.log((await fm.forall.load_file_parents(main)).map(file => "- " + file).join("\n"));
-    } catch (e) {
-      console.log("Couldn't load global file '" + main + "'.");
-    }
-
-  } else if (args.l) {
-    console.log(fs.writeFileSync(main + ".fm", await fm.forall.load_file(main)));
-    console.log("Downloaded file as `" + main + ".fm`!");
-
-  } else if (args.S || args.s) {
-    var file_name = main;
-    if (file_name.slice(-3) === ".fm") {
-      file_name = file_name.slice(0, -3);
-    }
-    upload(file_name).then(() => process.exit());
-
-  } else {
-    try {
-      var BOLD = str => "\x1b[4m" + str + "\x1b[0m";
-
-      var [file, name] = main.indexOf("/") === -1 ? [main, "main"] : main.split("/");
-      try {
-        var code = fs.readFileSync("./" + file + ".fm", "utf8");
-      } catch(e) {
-        console.log("Couldn't find local file `" + file + ".fm`.");
-        process.exit();
-      }
-      var defs = (await fm.lang.parse(code, {file, tokenify: false, loader})).defs;
-
-      if (args.J) {
-        console.log(fm.to_js.compile_to_code(fm.lang.erase(defs[file+"/"+name]), {defs}));
-        return;
-
-      } else {
-        var command
-          = args.d ? "REDUCE_DEBUG"
-          : args.o ? "REDUCE_OPTIMAL"
-          : args.O ? "REDUCE_OPTIMAL"
-          : args.j ? "REDUCE_NATIVE"
-          : args.r ? "REDUCE_FAST"
-          : args.w ? "REDUCE_FAST_WASM"
-          : args.t ? "TYPECHECK"
-          : args[0] ? "GET"
-          : "REDUCE_DEBUG";
-
-        var nams = [file + "/" + name];
-        if (name === "@") {
-          nams = Object.keys(defs).sort();
-        }
-
-        var opts = {
-          erased: !args.X,
-          unbox: !args.B,
-          weak: !!args.W,
-          strict: !!args.O,
-          logging: !args.m,
-          defs: defs
-        };
-
-        var nam_size = 0;
-        for (var def in defs) {
-          if (def[0] !== "$" && def[0] !== "@") {
-            nam_size = Math.max(nam_size, def.length);
-          }
-        }
-
-        for (var i = 0; i < nams.length; ++i) {
-          var stats = args.r || args.w ? {} : {
-            rewrites: 0,
-            loops: 0,
-            max_len: 0,
-            input_net: args.p ? null : undefined,
-            output_net: args.p ? null : undefined
-          };
-          opts.stats = stats;
-
-          if (nams[i][0] !== "$" && nams[i][0] !== "@") {
-            if (nams.length > 1) {
-              var init = nams[i];
-              while (init.length < nam_size) {
-                init += " ";
-              }
-              init += " : ";
-            } else {
-              var init = "";
-            }
-            try {
-              if (defs[nams[i]]) {
-                var term = fm.lang.run(command, nams[i], opts);
-                var text = init + fm.lang.show(term, [], {full_refs: !!args.f});
-                if (command === "TYPECHECK") {
-                  if (fm.lang.haltcheck(defs[nams[i]], defs)) {
-                    console.log("\x1b[32m" + text + " ✔\x1b[0m"); // Green
-                  } else {
-                    console.log("\x1b[33m" + text + " ⚠\x1b[0m"); // Green
-                  }
-                } else {
-                  console.log(text);
-                }
-              } else {
-                console.log(init + "Definition not found: " + nams[i]);
-              }
-            } catch (e) {
-              if (nams.length > 1) {
-                console.log("\x1b[31m" + init + "error\x1b[0m");
-                console.log(e);
-              } else {
-                console.log(e);
-                //console.log(e.toString());
-              }
-            }
-            if (args.p || (command === "REDUCE_OPTIMAL" && !args.h) || (command === "REDUCE_FAST" && !args.h)) {
-              console.log(JSON.stringify(stats));
-            }
-          }
-
-        }
-      }
-    } catch (e) {
-      console.log(e);
-      //console.log(e.toString());
-    }
+  try {
+    var code = fs.readFileSync("./" + file + ".fm", "utf8");
+  } catch(e) {
+    console.log("Couldn't find local file `" + file + ".fm`.");
+    process.exit(1);
   }
-})()
+
+  try {
+    var defs = (await fm.lang.parse(code, {file, tokenify: false, loader})).defs;
+    if (name !== "@" && !defs[file+"/"+name]) {
+      console.log(defs[name]);
+      throw "Definition not found: `" + file + "/" + name + "`.";
+    }
+  } catch (e) {
+    console.log(e);
+    process.exit(1);
+  }
+  var name = name === "@" ? "@" : file + "/" + name;
+
+  return {name, defs};
+};
+
+// Runs CLI
+run_CLI();

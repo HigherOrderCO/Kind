@@ -7,32 +7,14 @@
 // You've been warned (:
 
 const {
-  Var, Typ, Tid, Utt, Utv, Ute, All, Lam,
-  App, Box, Put, Tak, Dup, Num, Val, Op1,
-  Op2, Ite, Cpy, Sig, Par, Fst, Snd, Prj,
-  Slf, New, Use, Ann, Log, Hol, Ref,
-  reduce: core_reduce,
-  typecheck: core_typecheck,
-  haltcheck,
-  ctx_ext,
-  ctx_get,
-  ctx_names,
-  ctx_new,
-  ctx_str,
-  equal,
-  erase,
-  shift,
+  Var, Typ, Tid, Utt,
+  Utv, Ute, All, Lam,
+  App, Slf, New, Use,
+  Ann, Log, Hol, Ref,
   subst,
   subst_many,
 } = require("./fm-core.js");
-
-const version = require("./../package.json").version;
-const to_net = require("./fm-to-net.js");
-const runtime = require("./fm-runtime.js");
-const runtime_wasm = require("./fm-runtime-wasm.js");
-const to_js = require("./fm-to-js.js");
-const net = require("./fm-net.js");
-const {load_file} = require("./forall.js");
+const {load_file} = require("./fm-loader.js");
 const {marked_code, random_excuse} = require("./fm-error.js");
 
 // :::::::::::::::::::::
@@ -41,28 +23,42 @@ const {marked_code, random_excuse} = require("./fm-error.js");
 
 // Converts a term to a string
 const show = ([ctor, args], nams = [], opts = {}) => {
-  const print_output = (term) => {
-    try {
-      if (term[1].val0[1].numb === 0x53484f57) {
-        term = term[1].val1;
-        var nums = [];
-        while (term[1].body[1].body[0] !== "Var") {
-          term = term[1].body[1].body;
-          nums.push(term[1].func[1].argm[1].numb);
-          term = term[1].argm;
-        }
-        var str = "";
-        for (var i = 0; i < nums.length; ++i) {
-          str += String.fromCharCode(nums[i]);
-        }
-        return str;
-      } else {
-        return null;
+  const format = (term) => {
+    function read_bits(term) {
+      var bits = [];
+      //λbe.λb0.λb1.(b0 ...)
+      var term = term[1].body[1].body[1].body;
+      while (term[0] !== "Var") {
+        bits.push(term[1].func[1].index === 1 ? 0 : 1);
+        term = term[1].argm[1].body[1].body[1].body;
       }
+      return parseInt(bits.join(""), 2);
+    }
+    function read_nums(term) {
+      var nums = [];
+      while (term[1].body[1].body[0] !== "Var") {
+        term = term[1].body[1].body;
+        nums.push(read_bits(term[1].func[1].argm));
+        term = term[1].argm;
+      }
+      return nums;
+    }
+    try {
+      var nums = read_nums(term);
     } catch (e) {
       return null;
     }
+    var str = "";
+    for (var i = 0; i < nums.length; ++i) {
+      str += String.fromCharCode(nums[i]);
+    }
+    if (str.length > 0) {
+      return '"' + str + '"';
+    } else {
+      return null;
+    }
   }
+
   switch (ctor) {
     case "Var":
       var name = nams[nams.length - args.index - 1];
@@ -87,7 +83,7 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       return "-" + expr;
     case "Utv":
       var expr = show(args.expr, nams, opts);
-      return "%" + expr;
+      return "<" + expr + ">";
     case "Ute":
       var expr = show(args.expr, nams, opts);
       return "+" + expr;
@@ -113,26 +109,31 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       return text;
     case "Lam":
       var term = [ctor, args];
-      var erase = [];
-      var names = [];
-      var types = [];
-      while (term[0] === "Lam") {
-        erase.push(term[1].eras);
-        names.push(term[1].name);
-        types.push(term[1].bind
-          ? show(term[1].bind, nams.concat(names.slice(0,-1)), opts)
-          : null);
-        term = term[1].body;
+      var formatted = format(term);
+      if (formatted) {
+        return formatted;
+      } else {
+        var erase = [];
+        var names = [];
+        var types = [];
+        while (term[0] === "Lam") {
+          erase.push(term[1].eras);
+          names.push(term[1].name);
+          types.push(term[1].bind
+            ? show(term[1].bind, nams.concat(names.slice(0,-1)), opts)
+            : null);
+          term = term[1].body;
+        }
+        var text = "(";
+        for (var i = 0; i < names.length; ++i) {
+          var not_last = i < names.length - 1;
+          text += names[i] + (types[i] !== null ? " : " + types[i] : "");
+          text += erase[i] ? (not_last ? "; " : ";") : not_last ? ", " : "";
+        }
+        text += ") => ";
+        text += show(term, nams.concat(names), opts);
+        return text;
       }
-      var text = "(";
-      for (var i = 0; i < names.length; ++i) {
-        var not_last = i < names.length - 1;
-        text += names[i] + (types[i] !== null ? " : " + types[i] : "");
-        text += erase[i] ? (not_last ? "; " : ";") : not_last ? ", " : "";
-      }
-      text += ") => ";
-      text += show(term, nams.concat(names), opts);
-      return text;
     case "App":
       var text = ")";
       var term = [ctor, args];
@@ -150,120 +151,6 @@ const show = ([ctor, args], nams = [], opts = {}) => {
         var func = "(" + show(term,nams, opts) + ")";
       }
       return func + "(" + text;
-    case "Box":
-      var expr = show(args.expr, nams, opts);
-      return "!" + expr;
-    case "Put":
-      var expr = show(args.expr, nams, opts);
-      return "#" + expr;
-    case "Tak":
-      var expr = show(args.expr, nams, opts);
-      return "$" + expr;
-    case "Dup":
-      var name = args.name;
-      var expr = show(args.expr, nams, opts);
-      if (args.body[0] === "Var" && args.body[1].index === 0) {
-        return "$" + expr;
-      } else {
-        var body = show(args.body, nams.concat([name]), opts);
-        return "dup " + name + " = " + expr + "; " + body;
-      }
-    case "Num":
-      return "Number";
-    case "Val":
-      return args.numb.toString();
-    case "Op1":
-    case "Op2":
-      var func = args.func;
-      var num0 = show(args.num0, nams, opts);
-      var num1 = show(args.num1, nams, opts);
-      return num0 + " " + func + " " + num1;
-    case "Ite":
-      var cond = show(args.cond, nams, opts);
-      var pair = show(args.pair, nams, opts);
-      return "if " + cond + " " + pair;
-    case "Cpy":
-      var name = args.name;
-      var numb = show(args.numb, nams, opts);
-      var body = show(args.body, nams.concat([name]), opts);
-      return "cpy " + name + " = " + numb + "; " + body;
-    case "Sig":
-      var term = [ctor, args];
-      var erase = [];
-      var names = [];
-      var types = [];
-      while (term[0] === "Sig") {
-        erase.push(term[1].eras);
-        names.push(term[1].name);
-        types.push(show(term[1].typ0, nams.concat(names.slice(0,-1)), opts));
-        term = term[1].typ1;
-      }
-      var text = "[";
-      for (var i = 0; i < names.length; ++i) {
-        text += erase[i] === 1 ? "~" : "";
-        text += names[i] + (names[i] ? " " : "") + ": " + types[i];
-        text += erase[i] === 2 ? " ~ " : ", ";
-      }
-      text += show(term, nams.concat(names), opts);
-      text += "]";
-      return text;
-    case "Par":
-      var output;
-      var term  = [ctor, args];
-      var erase = [];
-      var terms = [];
-      while (term[0] === "Par") {
-        if (output = print_output(term)) {
-          break;
-        } else {
-          erase.push(term[1].eras);
-          terms.push(show(term[1].val0, nams, opts));
-          term = term[1].val1;
-        }
-      }
-      if (terms.length > 0) {
-        var text = "[";
-      } else {
-        var text = "";
-      }
-      for (var i = 0; i < terms.length; ++i) {
-        text += erase[i] === 1 ? "~" : "";
-        text += terms[i];
-        text += erase[i] === 2 ? " ~ " : ", ";
-      }
-      if (output) {
-        text += output;
-      } else {
-        text += show(term, nams, opts);
-      }
-      if (terms.length > 0) {
-        text += "]";
-      }
-      return text;
-    case "Fst":
-      var pair = show(args.pair, nams, opts);
-      switch (args.eras) {
-        case 0: return "fst(" + pair + ")";
-        case 1: return "~fst(" + pair + ")";
-        case 2: return "fst~(" + pair + ")";
-        case 3: return "~fst~(" + pair + ")";
-      }
-    case "Snd":
-      var pair = show(args.pair, nams, opts);
-      switch (args.eras) {
-        case 0: return "snd(" + pair + ")";
-        case 1: return "~snd(" + pair + ")";
-        case 2: return "snd~(" + pair + ")";
-        case 3: return "~snd~(" + pair + ")";
-      }
-    case "Prj":
-      var nam0 = args.nam0;
-      var nam1 = args.nam1;
-      var pair = show(args.pair, nams, opts);
-      var body = show(args.body, nams.concat([nam0, nam1]), opts);
-      var era1 = args.eras === 1 ? "~" : "";
-      var era2 = args.eras === 2 ? "~" : "";
-      return "get [" + era1 + nam0 + "," + era2 + nam1 + "] = " + pair + "; " + body;
     case "Slf":
       var name = args.name;
       var type = show(args.type, nams.concat([name]), opts);
@@ -695,15 +582,15 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   }
 
   // Constructs a string
-  // TODO: construct directly, without calling cons/nil?
   function build_str(text, init) {
     var nums = [];
     for (var i = 0; i < text.length; ++i) {
       nums.push(text.charCodeAt(i));
     }
-    var term = App(base_ref("nil"), Num(), true);
+    var term = App(base_ref("nil"), base_ref("Bits"), true);
     for (var i = nums.length - 1; i >= 0; --i) {
-      var term = App(App(App(base_ref("cons"), Num(), true), Val(nums[i]), false), term, false);
+      var bits = build_bits(nums[i].toString(2));
+      var term = App(App(App(base_ref("cons"), base_ref("Bits"), true), bits, false), term, false);
     }
     return Ann(base_ref("String"), term, false, loc(idx - init));
   }
@@ -776,7 +663,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   }
 
   // Parses a number, variable, inline operator or reference
-  function parse_atom(nams) {
+  function parse_ref(nams) {
     var term = null;
     if (tokens) tokens.push(["???", ""]);
     var name = parse_name();
@@ -785,13 +672,9 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       error("Unexpected symbol.");
     }
     var last = name[name.length - 1];
-    var is_hex = name.slice(0, 2) === "0x";
-    var is_bin = name.slice(0, 2) === "0b";
     var is_num = !isNaN(Number(name)) && !/[a-zA-Z]/.test(last);
     var is_lit = name.length > 1 && !isNaN(Number(name.slice(0,-1))) && /[a-zA-Z]/.test(last);
-    if (is_hex || is_bin || is_num) {
-      var term = Val(Number(name), loc(name.length));
-    } else if (is_lit && last === "N") {
+    if (is_lit && last === "N") {
       var term = build_inat(name.slice(0,-1));
     } else if (is_lit && last === "n") {
       var term = build_nat(name.slice(0,-1));
@@ -819,10 +702,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
         term = Var(nams.length - i - 1, loc(name.length));
         term[1].__name = name;
         if (tokens) tokens[tokens.length - 1][0] = "var";
-      // Inline binary operator 
-      } else if (is_native_op[name]) {
-          term = Lam("x", Num(), Lam("y", Num(), Op2(name, Var(1), Var(0)), false), false);
-          if (tokens) tokens[tokens.length - 1][0] = "nop";
       // Reference
       } else {
         term = Ref(ref_path(name), false, loc(name.length));
@@ -836,8 +715,8 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     return term;
   }
 
-  // Parses a grouping parens, `(...)`
-  function parse_parens(nams) {
+  // Parses a grouping par, `(...)`
+  function parse_par(nams) {
     if (match("(")) {
       var term = parse_term(nams);
       var skip = parse_exact(")");
@@ -870,11 +749,12 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     }
   }
 
-  // Parses an unrestricted term, `%t`
+  // Parses an unrestricted term, `<t>`
   function parse_utv(nams) {
     var init = idx;
-    if (match("%")) {
+    if (match("<")) {
       var expr = parse_term(nams);
+      var skip = parse_exact(">");
       return Utv(expr, loc(idx - init));
     }
   }
@@ -885,17 +765,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     if (match("+")) {
       var expr = parse_term(nams);
       return Ute(expr, loc(idx - init));
-    }
-  }
-
-  // Parses the `?scope?` utility
-  function parse_scope(nams) {
-    if (match("?scope?")) {
-      console.log("Scope:");
-      for (var i = 0; i < nams.length; ++i) {
-        console.log("- " + nams[i]);
-      }
-      return parse_term(nams);
     }
   }
 
@@ -917,7 +786,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   }
 
   // Parses a lambda `{x : A} t` or a forall `{x : A} -> B`
-  function parse_lam_or_all(nams) {
+  function parse_lam(nams) {
     function is_lam_or_all() {
       // TODO: this is ugly, improve
       var i = idx;
@@ -969,46 +838,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     }
   }
 
-  // Parses a duplication, `dup x = t; u`
-  function parse_dup(nams) {
-    var init = idx;
-    if (match("dup ")) {
-      var name = parse_string();
-      var skip = parse_exact("=");
-      var expr = parse_term(nams);
-      var skip = match(";");
-      var body = parse_term(nams.concat([name]));
-      return Dup(name, expr, body, loc(idx - init));
-    }
-  }
-
-  // Parses a boxed type, `!A`
-  function parse_box(nams) {
-    var init = idx;
-    if (match("!")) {
-      var expr = parse_term(nams);
-      return Box(expr, loc(idx - init));
-    }
-  }
-
-  // Parses a boxed term, `#t`
-  function parse_put(nams) {
-    var init = idx;
-    if (match("#")) {
-      var expr = parse_term(nams);
-      return Put(expr, loc(idx - init));
-    }
-  }
-
-  // Parses an unboxing, `^t`
-  function parse_tak(nams) {
-    var init = idx;
-    if (match("$")) {
-      var expr = parse_term(nams);
-      return Tak(expr, loc(idx - init));
-    }
-  }
-
   // Parses a let, `let x = t; u`
   function parse_let(nams) {
     if (match("let ")) {
@@ -1018,13 +847,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       var skip = match(";");
       var body = parse_term(nams.concat([name]));
       return subst(body, copy, 0);
-    }
-  }
-
-  // Parses the type of numbers, `Number`
-  function parse_wrd(nams) {
-    if (match("Number")) {
-      return Num(loc(4));
     }
   }
 
@@ -1050,162 +872,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       var name = code[idx];
       next();
       var skip = parse_exact("'");
-      return Val(name.charCodeAt(0));
-    }
-  }
-
-  // Parses an if-then-else, `if: t else: u`
-  function parse_ite(nams) {
-    var init = idx;
-    if (match("if ")) {
-      var cond = parse_term(nams);
-      var skip = parse_exact("then");
-      var val0 = parse_term(nams);
-      var skip = parse_exact("else");
-      var val1 = parse_term(nams);
-      return Ite(cond, Par(val0, val1, 0), loc(idx - init));
-    }
-  }
-
-  // Parses a Number copy, `cpy x = t; u`
-  function parse_cpy(nams) {
-    var init = idx;
-    if (match("cpy ")) {
-      var name = parse_string();
-      var skip = parse_exact("=");
-      var numb = parse_term(nams);
-      var skip = match(";");
-      var body = parse_term(nams.concat([name]));
-      return Cpy(name, numb, body, loc(idx - init));
-    }
-  }
-
-  // Parses a sigma, `[x : A, P(x)]`, or a pair, `[t, u]`
-  function parse_sig_or_par(nams) {
-    function is_sigma() {
-      // TODO: this is ugly, improve
-      var i = idx;
-      while (i < code.length && is_space(code[i]))     { ++i; } // skips ` `
-      if (code[i] === "~")                             { ++i; } // skips `~`
-      while (i < code.length && is_space(code[i]))     { ++i; } // skips ` `
-      while (i < code.length && is_name_char(code[i])) { ++i; } // skips `x`
-      while (i < code.length && is_space(code[i]))     { ++i; } // skips ` `
-      return code[i] === ":";                                   // finds `:`
-    }
-    var init = idx;
-    if (match("[")) {
-      if (match("]")) {
-        error("Empty pair.");
-      }
-      // Sigma
-      if (is_sigma()) {
-        var erass = [];
-        var names = [];
-        var types = [];
-        while (idx < code.length && is_sigma()) {
-          var era1 = match("~");
-          var name = parse_string();
-          var skip = parse_exact(":");
-          var type = parse_term(nams.concat(names));
-          var era2 = match("~");
-          erass.push(era1 ? 1 : era2 ? 2 : 0);
-          names.push(name);
-          types.push(type);
-          if (!era2) parse_exact(",");
-        }
-        var parsed = parse_term(nams.concat(names));
-        var skip = parse_exact("]");
-        for (var i = names.length - 1; i >= 0; --i) {
-          var parsed = Sig(names[i], types[i], parsed, erass[i], loc(idx - init));
-        }
-      // Pair
-      } else {
-        var erass = [];
-        var terms = [];
-        while (idx < code.length) {
-          var era1 = match("~");
-          var term = parse_term(nams);
-          var era2 = match("~");
-          erass.push(era1 ? 1 : era2 ? 2 : 0);
-          terms.push(term);
-          if (match("]")) break;
-          if (!era2) parse_exact(",");
-        }
-        var parsed = terms.pop();
-        for (var i = terms.length - 1; i >= 0; --i) {
-          var parsed = Par(terms[i], parsed, erass[i], loc(idx - init));
-        }
-      }
-      return parsed;
-    }
-  }
-
-  // Parses a fst accessor, `fst(t)`
-  function parse_fst(nams) {
-    var init = idx;
-    if (match("fst(")) {
-      var eras = 0;
-    } else if (match("~fst(")) {
-      var eras = 1;
-    } else if (match("fst~(")) {
-      var eras = 2;
-    } else if (match("~fst~(")) {
-      var eras = 3;
-    } else {
-      return;
-    }
-    var pair = parse_term(nams);
-    var skip = parse_exact(")");
-    return Fst(pair, eras, loc(idx - init));
-  }
-
-  // Parses a snd accessor, `snd(t)`
-  function parse_snd(nams) {
-    var init = idx;
-    if (match("snd(")) {
-      var eras = 0;
-    } else if (match("~snd(")) {
-      var eras = 1;
-    } else if (match("snd~(")) {
-      var eras = 2;
-    } else if (match("~snd~(")) {
-      var eras = 3;
-    } else {
-      return;
-    }
-    var pair = parse_term(nams);
-    var skip = parse_exact(")");
-    return Snd(pair, eras, loc(idx - init));
-  }
-
-  // Parses a projection, `get [x, y] = t`
-  function parse_get(nams) {
-    var init = idx;
-    if (match("get ")) {
-      var skip = parse_exact("[");
-      var erass = [];
-      var names = [];
-      while (idx < code.length) {
-        var era1 = match("~");
-        var name = parse_string();
-        var era2 = match("~");
-        erass.push(era1 ? 1 : era2 ? 2 : 0);
-        names.push(name);
-        if (match("]")) break;
-        if (!era2) parse_exact(",");
-      }
-      var skip = parse_exact("=");
-      var pair = parse_term(nams);
-      var skip = match(";");
-      var parsed = parse_term(nams.concat(names));
-      for (var i = names.length - 2; i >= 0; --i) {
-        var nam1 = names[i];
-        var nam2 = i === names.length - 2 ? names[i + 1] : "aux";
-        var expr = i === 0 ? pair : Var(0);
-        var body = i === 0 ? parsed : shift(parsed, 1, 2);
-        var parsed = Prj(nam1, nam2, expr, body, erass[i], loc(idx - init));
-      }
-      return parsed;
+      return build_bits(name.charCodeAt(0).toString(2));
     }
   }
 
@@ -1253,7 +920,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   }
 
   // Parses a case expression, `case/T | A => <term> | B => <term> : <term>`
-  function parse_case(nams) {
+  function parse_cse(nams) {
     if (match("case ")) {
       // Attempts to parse this case expression with each ADTs in scope
       for (var adt_name in adts) {
@@ -1356,64 +1023,54 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   }
 
 
-  // Parses a Number bitwise-not, `.!.(t)`
-  function parse_op2_not(nams) {
-    var init = idx;
-    if (match(".!.(")) {
-      var argm = parse_term(nams);
-      var skip = parse_exact(")");
-      return Op2(".!.", Val(0), argm, loc(idx - init));
-    }
-  }
-
   // Parses an application, `f(x, y, z...)`
   function parse_app(parsed, init, nams) {
-    if (match("(", is_space)) {
+    var unr = match("<", is_space);
+    var app = !unr && match("(", is_space);
+    if (unr || app) {
       var term = parsed;
       while (idx < code.length) {
         if (match("_")) {
           var term = App(term, Hol(new_hole_name()), true, loc(idx - init));
-          if (match(")")) break;
+          if (unr ? match("<") : match(")")) break;
         } else {
           var argm = parse_term(nams);
           var eras = match(";");
           var term = App(term, argm, eras, loc(idx - init));
           var skip = match(",");
-          if (match(")")) break;
+          if (unr ? match(">") : match(")")) break;
         }
       }
       return term;
     }
   }
 
-  // Parses a list literal, `A$[t, u, v, ...]`
-  function parse_list_literal(nams) {
+  // Parses a list literal, `[t, u, v, ...]`
+  function parse_lst(nams) {
     var init = idx;
-    if (match("<", is_space)) {
-      if (match(">")) {
-        var type = Hol(new_hole_name());
-      } else {
-        var type = parse_term(nams);
-        var skip = parse_exact(">");
+    if (match("[", is_space)) {
+      var list = [];
+      while (idx < code.length && !match("]")) {
+        list.push(parse_term(nams));
+        if (match("]")) break; else parse_exact(",");
       }
-      if (match("{")) {
-        var list = [];
-        while (idx < code.length && !match("}")) {
-          var mkey = parse_term(nams);
-          var skip = parse_exact(":");
-          var mval = parse_term(nams);
-          list.push(Par(mkey, mval, 0));
-          if (match("}")) break; else parse_exact(",");
-        }
-      } else if (match("[")) {
-        var list = [];
-        while (idx < code.length && !match("]")) {
-          list.push(parse_term(nams));
-          if (match("]")) break; else parse_exact(",");
-        }
-      } else {
-        error("Unexpected symbol. Expected `{` or `[` to start list literal.");
+      var type = Hol(new_hole_name());
+      var term = App(base_ref("nil"), type, true, loc(idx - init));
+      for (var i = list.length - 1; i >= 0; --i) {
+        var term = App(App(App(base_ref("cons"), type, true), list[i], false), term, false, loc(idx - init));
       }
+      return term;
+    }
+    if (match("{", is_space)) {
+      var list = [];
+      while (idx < code.length && !match("}")) {
+        var mkey = parse_term(nams);
+        var skip = parse_exact(":");
+        var mval = parse_term(nams);
+        list.push(App(App(App(App(base_ref("pair"), Hol(new_hole_name()), true), Hol(new_hole_name()), true), mkey, false), mval, false));
+        if (match("}")) break; else parse_exact(",");
+      }
+      var type = Hol(new_hole_name());
       var term = App(base_ref("nil"), type, true, loc(idx - init));
       for (var i = list.length - 1; i >= 0; --i) {
         var term = App(App(App(base_ref("cons"), type, true), list[i], false), term, false, loc(idx - init));
@@ -1423,7 +1080,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   }
 
   // Parses the do notation
-  function parse_do_notation(nams) {
+  function parse_blk(nams) {
     function is_bind() {
       // TODO: this is ugly, improve
       var i = idx;
@@ -1436,13 +1093,8 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     }
     var init = idx;
     var typed = false;
-    if (match("{", is_space) || (typed = match("{<", is_space))) {
-      if (typed) {
-        var type = parse_term(nams);
-        var skip = parse_exact(">");
-      } else {
-        var type = Hol(new_hole_name());
-      }
+    if (match("do{", is_space) || match("do {", is_space)) {
+      var type = Hol(new_hole_name());
       function parse_do_statement(nams) {
         if (match("var")) {
           var name = parse_name();
@@ -1507,6 +1159,10 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   function parse_eql(parsed, init, nams) {
     if (match("==", is_space)) {
       var rgt = parse_term(nams);
+      return App(App(App(base_ref("Equal"), Hol(new_hole_name()), false), Utv(parsed), false), Utv(rgt), false);
+    }
+    if (match("~~", is_space)) {
+      var rgt = parse_term(nams);
       return App(App(App(base_ref("Equal"), Hol(new_hole_name()), false), parsed, false), rgt, false);
     }
   }
@@ -1514,6 +1170,10 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   // Parses an non-equality, `a != b`
   function parse_dif(parsed, init, nams) {
     if (match("!=", is_space)) {
+      var rgt = parse_term(nams);
+      return App(base_ref("Not"), App(App(App(base_ref("Equal"), Hol(new_hole_name()), false), Utv(parsed), false), Utv(rgt), false), false);
+    }
+    if (match("!~", is_space)) {
       var rgt = parse_term(nams);
       return App(base_ref("Not"), App(App(App(base_ref("Equal"), Hol(new_hole_name()), false), parsed, false), rgt, false), false);
     }
@@ -1537,11 +1197,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       var func = "." + parse_string_here(x => !is_space(x));
       if (tokens) tokens.push(["txt", ""]);
       var argm = parse_term(nams);
-      if (is_native_op[func]) {
-        return Op2(func, parsed, argm, loc(idx - init));
-      } else {
-        return App(App(ref(func), parsed, false), argm, false, loc(idx - init));
-      }
+      return App(App(ref(func), parsed, false), argm, false, loc(idx - init));
     }
   }
 
@@ -1562,39 +1218,26 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     var init = idx;
 
     // Parses base term
-    if (parsed = parse_lam_or_all(nams));
-    else if (parsed = parse_parens(nams));
+    if      (parsed = parse_lam(nams));
+    else if (parsed = parse_par(nams));
     else if (parsed = parse_typ(nams));
     else if (parsed = parse_tid(nams));
     else if (parsed = parse_slf(nams));
     else if (parsed = parse_new(nams));
     else if (parsed = parse_use(nams));
-    else if (parsed = parse_scope(nams));
     else if (parsed = parse_hol(nams));
-    else if (parsed = parse_dup(nams));
-    else if (parsed = parse_box(nams));
-    else if (parsed = parse_put(nams));
-    else if (parsed = parse_tak(nams));
     else if (parsed = parse_let(nams));
-    else if (parsed = parse_wrd(nams));
     else if (parsed = parse_str(nams));
     else if (parsed = parse_chr(nams));
-    else if (parsed = parse_ite(nams));
-    else if (parsed = parse_cpy(nams));
-    else if (parsed = parse_sig_or_par(nams));
-    else if (parsed = parse_fst(nams));
-    else if (parsed = parse_snd(nams));
-    else if (parsed = parse_get(nams));
     else if (parsed = parse_utt(nams));
     else if (parsed = parse_utv(nams));
     else if (parsed = parse_ute(nams));
     else if (parsed = parse_log(nams));
-    else if (parsed = parse_case(nams));
-    else if (parsed = parse_op2_not(nams));
+    else if (parsed = parse_cse(nams));
     else if (parsed = parse_var(nams));
-    else if (parsed = parse_list_literal(nams));
-    else if (parsed = parse_do_notation(nams));
-    else     parsed = parse_atom(nams);
+    else if (parsed = parse_lst(nams));
+    else if (parsed = parse_blk(nams));
+    else    (parsed = parse_ref(nams));
 
     // Parses spaced operators
     var new_parsed = true;
@@ -1605,9 +1248,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       else if (new_parsed = parse_eql(parsed, init, nams));
       else if (new_parsed = parse_dif(parsed, init, nams));
       else if (new_parsed = parse_ops(parsed, init, nams));
-      if (new_parsed) {
-        parsed = new_parsed;
-      }
+      if (new_parsed) parsed = new_parsed;
     }
 
     return parsed;
@@ -1845,22 +1486,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   };
 }
 
-// :::::::::::
-// :: Utils ::
-// :::::::::::
-
-// Generates a name
-const gen_name = (n) => {
-  var str = "";
-  ++n;
-  while (n > 0) {
-    --n;
-    str += String.fromCharCode(97 + n % 26);
-    n = Math.floor(n / 26);
-  }
-  return str;
-};
-
 // :::::::::::::::::::
 // :: Syntax Sugars ::
 // :::::::::::::::::::
@@ -2020,106 +1645,4 @@ const derive_adt_ctor = (file, {adt_pram, adt_indx, adt_ctor, adt_name}, c) => {
   })(0, adt_indx.length, 0);
 }
 
-const reduce = (term, opts) => {
-  return core_reduce(term, {...opts, show});
-};
-
-const typecheck = (name, expect, opts) => {
-  return core_typecheck(name, expect, {...opts, show});
-};
-
-// Evaluates a term to normal form in different modes
-// run : String -> String -> Opts -> Term
-const run = (mode, name, opts = {}) => {
-  var eras = opts.erased ? erase : (x => x);
-  var defs = opts.defs || {};
-  if (typeof term === "string") {
-    throw "Second argument of run must be the term's name.";
-  }
-
-  var term = Ref(name);
-  switch (mode) {
-    case "REDUCE_DEBUG":
-      term = eras(term);
-      try {
-        opts.unbox = true;
-        opts.undup = true;
-        term = reduce(term, opts);
-      } catch (e) {
-        term = reduce(term, {...opts, weak: true});
-      }
-      break;
-
-    case "REDUCE_DEBUG":
-    case "REDUCE_NATIVE":
-      term = eras(term);
-      term = to_js.decompile(to_js.compile(term, {defs}));
-      break;
-
-    case "REDUCE_OPTIMAL":
-      term = eras(term);
-      var net = to_net.compile(term, defs);
-      if (opts.stats && opts.stats.input_net === null) {
-        opts.stats.input_net = JSON.parse(JSON.stringify(net));
-      }
-      if (opts.strict) {
-        var new_stats = net.reduce_strict(opts.stats || {});
-      } else {
-        var new_stats = net.reduce_lazy(opts.stats || {});
-      }
-      if (opts.stats && opts.stats.output_net !== undefined) {
-        opts.stats.output_net = JSON.parse(JSON.stringify(net));
-      }
-      term = to_net.decompile(net);
-      break;
-
-    case "REDUCE_FAST":
-      var {rt_defs, rt_rfid} = runtime.compile(defs);
-      var {rt_term, stats} = runtime.reduce(rt_defs[rt_rfid[name]], rt_defs);
-      term = runtime.decompile(rt_term);
-      for (var key in stats) {
-        opts.stats[key] = stats[key];
-      }
-      break;
-
-    case "REDUCE_FAST_WASM":
-      var {rt_defs, rt_rfid} = runtime.compile(defs);
-      var {rt_term, stats} = runtime_wasm.reduce(Object.values(rt_defs), rt_rfid[name]);
-      term = runtime.decompile(rt_term);
-      for (var key in stats) {
-        opts.stats[key] = stats[key];
-      }
-      break;
-
-    case "TYPECHECK":
-      if (term[0] !== "Ref") {
-        throw "Can only type-check Ref.";
-      }
-      term = typecheck(term[1].name, null, opts);
-      break;
-  }
-
-  return term;
-};
-
-module.exports = {
-  Var, Typ, Tid, Utt, Utv, Ute, All, Lam,
-  App, Box, Put, Tak, Dup, Num, Val, Op1,
-  Op2, Ite, Cpy, Sig, Par, Fst, Snd, Prj,
-  Slf, New, Use, Ann, Log, Hol, Ref,
-  derive_adt_ctor,
-  derive_adt_type,
-  equal,
-  erase,
-  gen_name,
-  parse,
-  reduce,
-  run,
-  shift,
-  show,
-  subst,
-  subst_many,
-  typecheck,
-  haltcheck,
-  version,
-};
+module.exports = {show, parse};

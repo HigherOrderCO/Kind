@@ -9,10 +9,6 @@ enum {
 	LAM,
 	APP,
 	REF,
-	F64,
-	U64,
-	ADD,
-	// TODO: add remaining num operations
 };
 
 typedef struct {
@@ -98,25 +94,7 @@ fm_reduce(Term *defs[], uint32_t ptr, uint32_t *mem)
 			subs = ref->ptr + (pos << 4);
 			break;
 		case VAR:
-		case U64:
 			next = -1;
-			break;
-		case ADD:
-			num0 = mem[next >> 4];
-			num1 = mem[(next >> 4) + 1];
-			if ((num0 & 0xf) == U64) {
-				if ((num1 & 0xf) == U64) {
-					subs = mem_len << 4 | U64;
-					mem[mem_len++] = 0;
-					mem[mem_len++] = mem[(num0 >> 4) + 1] + mem[(num1 >> 4) + 1];
-				} else {
-					back[back_len++] = (Frame){next, 1, depth};
-					next = num1;
-				}
-			} else {
-				back[back_len++] = (Frame){next, 0, depth};
-				next = num0;
-			}
 			break;
 		}
 

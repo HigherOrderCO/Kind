@@ -26,6 +26,7 @@ module.exports = {
       buf[off++] = rt_defs[i].ptr;
       buf[off++] = rt_defs[i].mem.length;
       buf.set(rt_defs[i].mem, off);
+      console.log(rt_defs[i].mem);
       off += rt_defs[i].mem.length;
     }
     const addr_result = heap + off * 4;

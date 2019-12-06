@@ -6,10 +6,7 @@ Table of contents
 - [Introduction](#introduction)
 - [Primitives](#primitives)
     - [Let](#let)
-    - [Number](#number)
-    - [Pair](#pair)
     - [Lambda](#lambda)
-    - [Box](#box)
     - [Self](#self)
     - [Annotation](#annotation)
     - [Hole](#hole)
@@ -25,7 +22,6 @@ Table of contents
     - [Motive](#motive)
     - [Encoding](#encoding)
 - [Advanced](#advanced)
-    - [Stratification](#stratification)
     - [Proofs](#proofs)
 - [Theory](#theory)
     - [Formality Core](#formality-core)
@@ -33,6 +29,9 @@ Table of contents
     - [Formality Net](#formality-net)
     - [Compilation](#compilation)
 
+**Note: this documentation is slightly outdated after the
+December 6, 2019 update. Some examples here may not work. It
+will be reviewed and updated next week.**
 
 Motivation
 ==========
@@ -107,7 +106,7 @@ such as this "impossibly efficient" [exp-mod
 implementation](https://medium.com/@maiavictor/calling-a-function-a-googol-times-53933c072e3a).
 Who knows if this may lead to new breakthroughs in complexity theory?
 
-![](https://github.com/moonad/formality/raw/master/archive/images/inet-simulation.gif)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/inet-simulation.gif)
 
 Installation
 ============
@@ -147,13 +146,13 @@ This is the "Hello, World!" in Formality:
 ```haskell
 import Base#
 
-main : Output
-  print("Hello, world!")
+main : String
+  "Hello, world!"
 ```
 
 A Formality file is just a list of imports followed by a series of top-level
 definitions. Here, we have one top-level definition, `main`, with type
-`Output`, and body `print("Hello, world")`. Save this file as `hello.fm`.
+`String`, and body `"Hello, world"`. Save this file as `hello.fm`.
 
 To run it, type `fm hello/main`. This will evaluate `main` using an interpreter
 in debug mode and output `"Hello, world!"`. You can also use `fm -o hello/main`
@@ -161,216 +160,47 @@ to evaluate it with the interaction-net runtime. This will be faster, but
 you'll lose information like variable names and logs.
 
 To type-check it, type `fm -t hello/main`. This will check if the program's
-type is correct and print `Output ✔`. If the type is incorrect, it will print
-an error message instead. For example, if you change `"Hello, world!"` to `7`,
+type is correct and print `String ✔`. If the type is incorrect, it will print
+an error message instead. For example, if you change `"Hello, world!"` to `true`,
 it will print:
 
 ```haskell
 Type mismatch.
-- Found type... Number
+- Found type... Bool
 - Instead of... String
 - When checking 7
 - On line 4, col 9, file hello.fm:
   1| import Base#
   2|
-  3| main : Output
-  4|   print(7)
+  3| main : String
+  4|   print(true)
   5|
 ```
 
-Because `7` is a `Number`, but the `print` function expects a `String`. Since
-Formality is a proof language, types can be seen as theorems and well-typed
-terms can be seen a proof. So, for example, this is a proof that `2 == 2`:
+Because `true` is a `Bool`, but the `print` function expects
+a `String`. Since Formality is a proof language, types can
+be seen as theorems and well-typed terms can be seen a
+proof. So, for example, this is a proof that `"cat" == "cat"`:
 
 ```haskell
 import Base#
 
-main : Equal(Number, 2, 2)
-  refl(__)
+main : "cat" == "cat"
+  equal(__)
 ```
 
-Running it with `fm -t file/two_is_two` will output `Equal(Number, 2, 2) ✔`,
-which means Formality is convinced that two is equal to two. Of course, that is
-obvious, but it could be something much more important such as
-`OnlyOwnerCanWithdrawal(owner, contract) ✔`. How proofs can be used to make your
-programs safer will be explored later. Let's now go through all of Formality's
-primitives. Don't worry: since it is designed to be a very simple language,
-there aren't many!
+Running it with `fm -t file/cat_is_cat` will output
+`Equal(String, "cat", "cat") ✔`, which means Formality is
+convinced that "cat" is equal to "cat". Of course, that is
+obvious, but it could be something much more important such
+as `OnlyOwnerCanWithdrawal(owner, contract) ✔`. How proofs
+can be used to make your programs safer will be explored
+later. Let's now go through all of Formality's primitives.
+Don't worry: since it is designed to be a very simple
+language, there aren't many!
 
 Primitives
 ==========
-
-Let
----
-
-Allows you to give local names to terms.
-
-```haskell
-import Base#
-
-main : Output
-  let hello = "Hello, world!"
-  print(hello)
-```
-
-`let` expressions can be infinitely nested.
-
-```haskell
-import Base#
-
-main : Output
-  let output =
-    let hello = "Hello, world!"
-    print(hello)
-  output
-```
-
-`let` has no computational effect, it simply performs a parse-time substitution.
-
-Number
-------
-
-A native number, encoded as a 64-bit value. It can be written in decimal, hexadecimal or binary:
-
-```haskell
-number_0 : Number
-  1900
-
-number_1 : Number
-  0x76C
-
-number_2 : Number
-  0b11101101100
-
-number_3 : Number
-  12.3456
-
-```
-
-The numeric operations are:
-
-name | syntax | javascript equivalent
---- | --- | ---
-addition | `x .+. y` | `x + y`
-subtraction | `x .-. y` | `x - y`
-multiplication | `x .*. y` | `x * y`
-division | `x ./. y` | `x / y`
-modulus | `x .%. y` | `x % y`
-exponentiation | `x .**. y` | `x ** y`
-bitwise-and | `x .&. y` | `x & y`
-bitwise-or | `x .\|. y` | `x \| y`
-bitwise-xor | `x .^. y` | `x ^ y`
-bitwise-not | `.~.(y)` | `~y`
-bitwise-right-shift | `x .>>>. y` | `x >>> y`
-bitwise-left-shift | `x .<<. y` | `x << y`
-greater-than | `x .>. y` | `x > y ? 1 : 0`
-less-than | `x .<. y` | `x < y ? 1 : 0`
-equals | `x .==. y` | `x === y ? 1 : 0`
-
-There is no operator precedence: parenthesis are always placed on the right.
-That means `3 .*. 10 .+. 1` is parsed as `3 .*. (10 .+. 1)`. If you want the
-multiplication to occur first, you must be explicit:
-
-```haskell
-main : Number
-  (3 .*. 10) .+. 1
-```
-
-There is also `if`, which allows branching with a `Number` condition.
-
-syntax | description
---- | ---
-`if n then a else b` | If `n` is `0`, evaluates to `b`, else, evaluates to `a`
-
-Usage is straightforward:
-
-```haskell
-import Base#
-
-main : Output
-  let age = 30
-
-  if age .<. 18 then
-    print("Boring teenager.")
-  else
-    print("Respect your elders!")
-```
-
-Pair
-----
-
-Native pairs store two elements of possibly different types.
-
-syntax | description
---- | ---
-`[x : A, B(x)]` | The type of a pair
-`[a, b]` | Creates a pair with elements `a` and `b`
-`fst(p)` | Extracts the first element of a pair
-`snd(p)` | Extracts the second element of a pair
-`get [a, b] = p ...` | Extracts both elements of a pair
-
-Creating:
-
-```haskell
-main : [:Number, Number]
-  [1, 2]
-```
-
-Extracting the first element:
-
-```haskell
-main : Number
-  let pair = [1, 2]
-  fst(pair)
-```
-
-Extracting both elements:
-
-```haskell
-main : Number
-  let pair  = [1, 2]
-  get [a,b] = pair
-  a .+. b
-```
-
-Nesting to the left:
-
-```haskell
-import Base#
-
-main : [:[:Number, Number], String]
-  [[1, 2], "Hello World!"]
-```
-
-Nesting to the right:
-
-```javascript
-main : Number
-  let triple  = [1, 2, 3] // same as [1, [2, 3]]
-  get [x,y,z] = triple
-  x .+. y .+. z
-```
-Erased (first element):
-
-```javascript
-main : [~: Number, Number]
-  [~1, 2] // the number "1" is erased from runtime
-```
-
-Erased (second element):
-
-```javascript
-main : [: Number ~ Number]
-  [1 ~ 2] // the number "2" is erased from runtime
-```
-
-Note that the first element of a pair can be named, allowing the type of the
-second element can depend on the value of the first. Example: 
-
-```javascript
-main : [x : Number, (if x then Number else Bool)]
-  [0, true] // if you change 0 to 1, the second element must be a Number.
-```
 
 Lambda
 ------
@@ -381,78 +211,94 @@ syntax | description
 `(x, y, z, ...) => body` | A function that receives the arguments `x`, `y`, `z` and returns `body`
 `f(x, y, z, ...)` | Applies the function `f` to the arguments `x`, `y`, `z` (curried)
 
-Formality functions are curried anonymous expressions, like Haskell's lambdas.
-There are no multi-argument lambdas. `(x, y, z, ...) => body` is the same as
-`(x) => (y) => (z) => ... body`, which works like JS's `x => y => z => ...
-body` and Haskell's `\ x y z ... -> body`.
+The lambda (also called function) is the only computational
+primitives of Formality. Everything, from booleans, to list,
+to complex algorithms, data structures and mathematical
+proofs are compiled to plain lambdas.
 
-Function calls use `f(x, y, z)` syntax, which is the same as `f(x)(y)(z)...`.
-The type of a function is written as `A -> B -> C -> D`, like on Haskell, but
-it can also be written with names, as `(x : A, y : B, z : C ...) -> D`.
+As on other functional languages, lambdas are curried. `(x,
+y, z, ...) => body` is the same as `(x) => (y) => (z) => ...
+body`, and `f(x, y, z)` is the same as `f(x)(y)(z)...`.
+
+The type of a function is written as `A -> B -> C -> D`,
+like on Haskell, but it can also be written with names, as
+`(x : A, y : B, z : C ...) -> D`.
 
 You can define a top-level function as below:
 
 ```haskell
-adder : Number -> Number -> Number
-  (x, y) => x .+. y
+import Base#
 
-main : Number
-  adder(40, 2)
+same : String -> String
+  (x) => x
+
+main : String
+  same("Hello, world!")
 ```
 
 You can also include the variable names before the `:`:
 
 ```haskell
-adder(x : Number, y : Number) : Number
-  x .+. y
+import Base#
 
-main : Number
-  adder(40, 2)
+same(x : String) : String
+  x
+
+main : String
+  same("Hello, world!")
 ```
 
 Functions can be inlined:
 
 ```haskell
-call(f : Number -> Number, x : Number) : Number
+import Base#
+
+call(f : String -> String, x : String) : String
   f(x)
 
-main : Number
-  call((x) => x .+. 1, 0)
+main : String
+  call((x) => same(x), "Hello, world!")
 ```
 
 If Formality can't infer the type of `x`, you can add it after the name:
 
 ```haskell
-main : Number
-  ((x : Number) => x .+. 1)(0)
+import Base#
+
+main : String
+  ((x : String) => x)("Hello, world!")
 ```
 
 Or after the function, with an explicit annotation (`::`):
 
 ```haskell
-main : Number
-  (((x) => x .+. 1) :: Number -> Number)(0)
+import Base#
+
+main : String
+  (((x) => x) :: String -> String)("Hello, world!")
 ```
 
 Types are optional. This won't type-check, but you can still run it:
 
 ```haskell
 main
-  ((x, y) => x .+. y)(40, 2)
+  ((x) => x)("Hello, world!")
 ```
 
-Lambdas and applications can be erased with a `;`, which causes them to vanish
-from the compiled output. This is useful, for example, to write polymorphic
-functions without extra runtime costs. For example, on the code below, `foo` is
-compiled to `(x) => x`, and `main` is compiled to `foo(42)`. The first argument
-disappears from the runtime.
+Lambdas and applications can be erased with a `;`, which
+causes them to vanish from the compiled output. This is
+useful, for example, to write polymorphic functions without
+extra runtime costs. For example, on the code below, `foo`
+is compiled to `(x) => x`, and `main` is compiled to
+`foo("Hello, world!")`. The first argument disappears from the
+runtime.
 
 ```haskell
 foo(T : Type; x : T) : T
   x
 
-main : Number
-  foo(~Number, 42)
+main : String
+  foo(String; "Hello, world!")
 ```
 
 
@@ -473,24 +319,33 @@ main : Bool
 Multiple ways to circumvent this limitation will be explained through this
 documentation.
 
-Box
+
+Let
 ---
 
-Formality includes primives for performing explicit, deep copies of terms, as long as they're "boxed".
+Allows you to give local names to terms.
 
-syntax | description
---- | ---
-`#t` | Puts term `t` inside a box
-`!T` | The type of a boxed term
-`dup x = t; u` | Unboxes `t` and copies it as `x` inside `u`
-`$t` | Unboxes `t`
+```haskell
+import Base#
 
-To keep Formality compatible with our fast functional runtime, boxes are
-limited by the "stratification condition". It enforces that the number of `#`s
-surrounding a term must never change during reduction. As such, boxes aren't
-very useful for copying data, but are useful to implement user-defined control
-structures like bounded loops and recursion. This all will be explained in more
-details later on.
+main : String
+  let hello = "Hello, world!"
+  print(hello)
+```
+
+`let` expressions can be infinitely nested.
+
+```haskell
+import Base#
+
+main : Output
+  let output =
+    let hello = "Hello, world!"
+    print(hello)
+  output
+```
+
+`let` has no computational effect, it simply performs a parse-time substitution.
 
 Self
 ----
@@ -505,25 +360,9 @@ syntax | description
 `new(T) t` | Constructs an instance of a `T` with value `t`
 `use(t)` | Consumes a self-type `t`, giving its type access to its value
 
-Self Types allow a type to access *its own value*. For example, suppose that
-you wanted to create a pair of identical numbers. It could be done as:
-
-```haskell
-SameNumbers : Type
-  ${self}
-  [ x : Number
-  , y : Number
-  , Equal(Number, fst(use(self)), fst(snd(use(self))))]
-
-same_numbers_0 : SameNumbers 
-  new(SameNumbers) [0, 0, refl(Number; 0;)]
-```
-
-Here, on the `SameNums` type, we have access to `self`, which is the pair being
-typed. So, whenever you instantiate it, you must provide a proof that its first
-and second elements are equal. Of course, in this case, this effect could be
-achieved with dependent pairs, but what is interesting is that it allows us to
-do us to encode inductive datatypes with lambdas, as will be explained later.
+Self Types allow a type to access *its own value*. This
+allows us to do us to encode inductive datatypes with
+lambdas, as will be explained later.
 
 Annotation
 ----------
@@ -537,20 +376,9 @@ syntax | description
 This is useful when the type-checker can't infer the type of an expression.
 
 ```haskell
-main : Number
-  (((x, y) => x .+. y) :: Number -> Number -> Number)(40, 2)
+main : String
+  (((x) => x) :: String -> String)("Hello, world!")
 ```
-
-It is also important for dependent pairs:
-
-```haskell
-dependent_pair
-   [1, 2] :: [x : Number, if x then Number else Bool]
-```
-
-This gives the `[1, 2]` pair the type `[x : Number, if x then Number else Bool]`,
-which is more refined than the `[: Number, Number]` type that would be inferred
-otherwise.
 
 Nontermination
 --------------
@@ -559,19 +387,21 @@ Formality has first-class nontermination, which disables the termination
 checker in delimited sections of your programs.
 
 syntax | description
------- | ---------------------------------------
+------ | ----------------------------------------
 -A     | `A` is a nonterminating term of type `A`
-%t     | Converts `t` to an nonterminating term
-+t     | Converts `t` to a terminating term
+<t>    | Converts `t : A` to `t : -A`
++t     | Converts `t : -A` to `t : A`
 
-Nonterminating terms can have unrestricted recursion, as well as ignore the
-limitations imposed by affine lambdas and stratified duplications. So, for
-example, while the `List(Number)` type represents a finite list of words, the
-`-List(Number)` type can be infinite:
+Inside `<...>` (that is, on nonterminating terms), you can
+use unrestricted recursion, as well as ignore the
+limitations imposed by affine lambdas and stratified
+duplications. So, for example, while the `List(Bool)` type
+represents a finite list of words, the `-List(Bool)` type
+can be infinite:
 
 ```javascript
-ones : -List(Number)
-  cons(Number; 1, ones)
+trues : -List(Bool)
+  <cons(Bool; true, +trues)>
 ```
 
 Note that nonterminating terms can't be compiled to interaction nets, and can't
@@ -630,17 +460,17 @@ When formality can infer the value of a hole for you, you don't need to complete
 it; you can leave a `?` in your code. For example, below:
 
 ```haskell
-main : List(Number)
-  cons(?; 1, nil(?;))
+main : List(Bool)
+  cons(?; true, nil(?;))
 ```
 
-We don't need to write `Number`, since Formality can infer that. We can leave it
+We don't need to write `Bool`, since Formality can infer that. We can leave it
 as `?`. Since erased arguments are often inferrable, a `_` can be used as a
 shortcut for `?;`, as in:
 
 ```haskell
-main : List(Number)
-  cons(_ 1, nil(_))
+main : List(Bool)
+  cons(_ true, nil(_))
 ```
 
 Log
@@ -798,7 +628,7 @@ Datatype constructors can have fields, allowing them to store values:
 import Base#
 
 T Person
-| person(age : Number, name : String)
+| person(age : Nat, name : String)
 
 get_name(p : Person) : String
   case p
@@ -815,8 +645,8 @@ of its name. When Formality doesn't know the name of the matched value, you
 must must explicitly name it using the `as` keyword:
 
 ```haskell
-main(p : Person) : Number
-  case person(26, "John") as john
+main(p : Person) : Nat
+  case person(26n, "John") as john
   | person => john.age
 ```
 
@@ -915,14 +745,15 @@ different contained types.
 ```haskell
 import Base#
 
-T Pair<A, B>
-| pair(x : A, y : B)
+// Imported from Base
+// T Pair<A, B>
+// | pair(fst : A, snd : B)
 
-main : Number
-  let a = pair(Bool; Number; true, 7)
+main : Nat
+  let a = pair(Bool; Nat; true, 7n)
 
   case a
-  | pair => a.y
+  | pair => a.snd
 ```
 
 The `<A, B>` syntax after the datatype declares two polymorphic Type variables,
@@ -930,29 +761,30 @@ The `<A, B>` syntax after the datatype declares two polymorphic Type variables,
 having to write multiple `Pair` definitions. 
 
 Each polymorphic variable adds an implicit, erased argument to each constructor,
-so, instead of `pair(true, 7)`, you must write `pair(Bool; Number; true, 7)`;
+so, instead of `pair(true, 7)`, you must write `pair(Bool; Nat; true, 7)`;
 or, with holes, `pair(__ true, 7)`.
 
 One of the most popular polymorphic types is the linked `List`:
 
 ```haskell
-T List<A>
-| nil
-| cons(head : A, tail : List(A))
+// Imported from Base
+// T List<A>
+// | nil
+// | cons(head : A, tail : List(A))
 
-main : List(Number)
-  cons(_ 1, cons(_ 2, cons(_ 3, nil(_))))
+main : List(Nat)
+  cons(_ 1n, cons(_ 2n, cons(_ 3n, nil(_))))
 ```
 
-Notice we used holes to avoid having to write `Number` repeatedly. Since lists
+Notice we used holes to avoid having to write `Nat` repeatedly. Since lists
 are so common, it is part of the Base library, and there is a built-in
 syntax-sugar for them:
 
 ```haskell
 import Base#
 
-main : List(Number)
-  <Number>[1, 2, 3]
+main : List(Nat)
+  [1n, 2n, 3n]
 ```
 
 Or, if the type can be inferred:
@@ -960,8 +792,8 @@ Or, if the type can be inferred:
 ```haskell
 import Base#
 
-main : List(Number)
-  <>[1, 2, 3]
+main : List(Nat)
+  [1n, 2n, 3n]
 ```
 
 Indices
@@ -1065,12 +897,12 @@ import Base#
 
 CaseType(x : Bool) : Type
   case x
-  | true  => Number
+  | true  => Nat
   | false => String
 
-main : Number
+main : Nat
   case true as x
-  | true  => 42
+  | true  => 42n
   | false => "hello"
   : CaseType(x)
 ```
@@ -1078,9 +910,9 @@ main : Number
 The way this works is that, in order to check if a `case` expression is
 well-typed, Formality first specializes the return type for the specific value
 of each branch. For example, on the `true` case, `CaseType(true)` returns
-`Number`, so we can write `42`. On the `false` case, `CaseType(false)` returns
+`Nat`, so we can write `42`. On the `false` case, `CaseType(false)` returns
 `String`, so we can write `"hello"`. Finally, the whole expression returns
-`CaseType(x)`, which, in this case, is `Number`, because `x` is `true`.
+`CaseType(x)`, which, in this case, is `Nat`, because `x` is `true`.
 
 In other words, this means that, if we prove a theorem for every specific
 possible value of `x`, then this theorem holds for `x` itself. This mechanism
@@ -1090,30 +922,30 @@ develop mathematical proofs in Formality. Let's go through some examples.
 #### Example: proving equalities
 
 Formality's base libraries include a type for equality
-proofs called `Equal`.  For example, `Equal(Number, 2, 2)`
+proofs called `Equal`.  For example, `Equal(Nat, <2n>, <2n>)`
 is the statement that `2` is equal `2`. It is not a proof:
-you can write `Equal(Number, 2, 3)`, which is just the
+you can write `Equal(Nat, <2n>, <3n>)`, which is just the
 **statement** that `2` is equal to `3`.  To prove an
-equality, you must use `refl(A; x;)`, which, for any `x :
-A`, proves `Equal(A, x, x)`. In other words, `refl` is a
+equality, you must use `equal(A; x;)`, which, for any `x :
+A`, proves `Equal(A, <x>, <x>)`. In other words, `equal` is a
 proof that every value is equal to itself. As such, we can
 prove that `true` is equal to `true` like this:
 
 ```haskell
-true_is_true : Equal(Bool, true, true)
-  refl(Bool; true;)
+true_is_true : Equal(Bool, <true>, <true>)
+  equal(Bool; <true>;)
 ```
 
-Note that holes can often be used to avoid writing the arguments of `refl`.
+Note that holes can often be used to avoid writing the arguments of `equal`.
 Moreover, Formality includes a syntax sugar for `Equal`, `a == b`, which
-expands to `Equal(?, a, b)`. As such, the program above can be written as:
+expands to `Equal(?, <a>, <b>)`. As such, the program above can be written as:
 
 ```haskell
 true_is_true : true == true
-  refl(__)
+  equal(__)
 ```
 
-A natural question is: if the only way to prove an equality is by using `refl`,
+A natural question is: if the only way to prove an equality is by using `equal`,
 which proves that an element is equal to itself, then what is the point? The
 insight is that, with motives, we can prove that two expressions are equal even
 when they're not literally identical. For example, suppose you want to prove
@@ -1127,8 +959,8 @@ not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
   ?a
 ```
 
-But here you can't use `refl(Bool; b;)`, because that'd be a proof of
-`Equal(Bool, b, b)`, not of `Equal(Bool, not(not(b)), b)`. The sides aren't
+But here you can't use `equal(Bool; <b>;)`, because that'd be a proof of
+`Equal(Bool, <b>, <b>)`, not of `Equal(Bool, <not(not(b))>, <b>)`. The sides aren't
 identical! The problem is that the function call is stuck on a variable, `b`,
 causing both sides to be different. That's when dependent motives help: if you
 pattern-match on `b`, Formality will specialize the equation for both specific
@@ -1137,28 +969,28 @@ values of `b`, that is, `true` and `false`:
 ```haskell
 import Base#
 
-not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
+not_not_is_same(b : Bool) : Equal(Bool, <not(not(b))>, <b>)
   case b
   | true  => ?a
   | false => ?b
-  : Equal(Bool, not(not(b)), b)
+  : Equal(Bool, <not(not(b))>, <b>)
 ```
 
-So, on the `true` case, it asks you to prove `Equal(Bool, not(not(true)),
-true)`, because `b` was specialized to true on that branch. Since
-`not(not(true))` reduces to `true`, you only need to prove `Equal(Bool, true,
-true)`, which can be done with `refl`. The same holds for the `false` case.
+So, on the `true` case, it asks you to prove `Equal(Bool, <not(not(true))>,
+<true>)`, because `b` was specialized to true on that branch. Since
+`not(not(true))` reduces to `true`, you only need to prove `Equal(Bool, <true>,
+<true>)`, which can be done with `equal`. The same holds for the `false` case.
 Once you prove the theorem for both possible cases of `b`, then Formality
 returns the motive generalized for `b` itself:
 
 ```haskell
 import Base#
 
-not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
+not_not_is_same(b : Bool) : Equal(Bool, <not(not(b))>, <b>)
   case b
-  | true  => refl(Bool; true;)
-  | false => refl(Bool; false;)
-  : Equal(Bool, not(not(b)), b)
+  | true  => equal(Bool; <true>;)
+  | false => equal(Bool; <false>;)
+  : Equal(Bool, <not(not(b))>, <b>)
 ```
 
 This proof wouldn't be possible without using `b` on the motive. With syntax
@@ -1167,8 +999,8 @@ sugars, it can be written as:
 ```haskell
 main(b : Bool) : not(not(b)) == b
   case b
-  | true  => refl(__)
-  | false => refl(__)
+  | true  => equal(__)
+  | false => equal(__)
   : not(not(b)) == b
 ```
 
@@ -1200,8 +1032,8 @@ used to derive any theorem given a value of type Empty:
 ```haskell
 import Base#
 
-one_is_two(e : Empty) : Equal(Number, 1, 2)
-  case e : Equal(Number, 1, 2)
+one_is_two(e : Empty) : Equal(Nat, <1n>, <2n>)
+  case e : Equal(Nat, <1n>, <2n>)
 ```
 
 In other words, if we managed to call `one_is_two`, we'd have a proof that `1`
@@ -1221,7 +1053,7 @@ you with that. For example:
 - [`true_isnt_false`](https://github.com/moonad/Formality-Base/blob/master/Bool.fm):
   allows you to turn a proof that `true` is `false` into a proof of `Empty`.
 
-- [`cong`](https://github.com/moonad/Formality-Base/blob/master/Equal.fm):
+- [`apply`](https://github.com/moonad/Formality-Base/blob/master/Equal.fm):
   allows you to apply a function to both sides of an equation.
 
 - [`rewrite`](https://github.com/moonad/Formality-Base/blob/master/Equal.fm):
@@ -1238,8 +1070,8 @@ import Base#
 main : "dogs" != "horses"
   (input) =>
   let e0 = input                         -- "dogs" == "horses"
-  let e1 = cong(____ length(_); e0)      -- n4 == n6
-  let e2 = cong(____ nat_equals(4n); e1) -- true == false
+  let e1 = apply(____ length(_); e0)     -- n4 == n6
+  let e2 = apply(____ nat_equal(4n); e1) -- true == false
   let e3 = true_isnt_false(e2)           -- Empty
   e3
 ```
@@ -1251,9 +1083,9 @@ Notice the program below:
 ```haskell
 import Base#
 
-main : Number
+main : Nat
   case true
-  | true  => 10
+  | true  => 10n
   | false => ?
 ```
 
@@ -1269,10 +1101,10 @@ number:
 ```haskell
 import Base#
 
-main : Number
+main : Nat
   case true as x
   + refl(__) as e : Equal(Bool, x, true)
-  | true  => 10
+  | true  => 10n
   | false => absurd(false_isnt_true(e), _)
 ```
 
@@ -1318,101 +1150,6 @@ Formality to not evaluate fully since `Bool` is recursive. While you probably
 won't need to deal with self-encodings yourself, knowing how they work is
 valuable, since it allows you to express types not covered by the built-in
 syntax.
-
-Advanced
-========
-
-Stratification
---------------
-
-Formality's lambdas are affine. This makes it a very efficient functional
-language, compatible with optimal sharing, parallel evaluators and so on. But
-this limits is power. To enable controlled duplication, Formality introduces
-boxes and `dup`, which performs a deep copy of a value, as long as you respect
-the stratification condition.
-
-#### The Stratification Condition
-
-Without restriction, `dup` would allow for nontermination. For example, this:
-
-```haskell
-main
-  let f = (x) =>
-    dup x = x
-    x(#x)
-  f(#f)
-```
-
-Would loop forever, which should never happen in a terminating language. To
-prevent it, Formality enforces the following invariant:
-
-> The level of a term can never change during the program evaluation.
-
-Where the level of a term is the number of boxes "wrapping" it. Here are a few
-examples:
-
-```haskell
-["a", #"b", "c", #["d", #"e"], ##"f"]
-```
-
-- The string `"a"` isn't wrapped by any box. It is on `level 0`.
-
-- The string `"b"` is wrapped by one box. It is on `level 1`.
-
-- The string `"c"` isn't wrapped by any box. It is on `level 0`.
-
-- The string `"d"` is wrapped by one box. It is on `level 1`.
-
-- The string `"e"` is wrapped by two boxes (one indirect). It is on `level 2`. 
-
-- The string `"f"` is wrapped by two boxes. It is on `level 2`. 
-
-The type of the program above is:
-
-```haskell
-[:String, :!String, :String, :![:String, !String], !!String]
-```
-
-#### Examples
-
-Stratification is imposed globally, forbidding certain programs. For example:
-
-```haskell
-box(x : Word) : !Word 
-  # x
-```
-
-This isn't allowed because, otherwise, we would be able to increase the level
-of a word. Similarly, this:
-
-```haskell
-main : [:Word, Word]
-  dup x = #42
-  [x, x]
-```
-
-Isn't allowed too, because `42` would jump from `level 1` to `level 0` during
-runtime. But this:
-
-```haskell
-main : ![:Word, Word]
-  dup x = #42
-  # [x, x]
-```
-
-Is fine, because `42` remains on `level 1` after being copied. And this:
-
-```haskell
-main : [:!Word, !Word]
-  dup x = #42
-  [#x, #x]
-```
-
-Is fine too, for the same reason.
-
-Note that, while stratification prevents non-terminating terms arising from the
-use of `dup`, it doesn't prevent non-terminating recursive calls. Well-founded
-recursion is still a work in progress, and recursive programes raise a warning.
 
 Proofs
 ======
@@ -1491,6 +1228,8 @@ it_works_for_12 : mul2(12) == 24
 it_works_for_20 : mul2(20) == 40
   refl(__)
 ```
+
+> TODO: this section is outdated after the removal of Numbers; update
 
 Here, we're using `==` to make an assertion that `mul2(10)`
 is equal to `20` and so on. Since those are true by
@@ -2182,7 +1921,7 @@ being the main one, plus a list of "rewrite rules" that are activated whenever
 two nodes are connected by their main ports. Our system includes 6 types of
 nodes, ERA, CON, OP1, OP2, ITE, NUM.
 
-![](https://raw.githubusercontent.com/moonad/Formality/master/archive/images/fm-net-node-types.png)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/fm-net-node-types.png)
 
 - `CON` has 3 ports and an integer label. It is used to represent lambdas,
   applications, boxes (implicitly) and duplications. Since FM-Core is based on
@@ -2213,7 +1952,7 @@ In order to perform computations, FM-Net has a set of rewrite rules that are
 triggered whenever two nodes are connected by their main ports. This is an
 extensive list of those rules:
 
-![](https://raw.githubusercontent.com/moonad/Formality/master/archive/images/fm-net-rewrite-rules.png)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/fm-net-rewrite-rules.png)
 
 Note that, while there are many rules (since we need to know what to do on each
 combination of a node), most of those have the same "shape" (such as OP2-OP2,
@@ -2334,7 +2073,7 @@ example, in the graph below, B-C and D-E are redexes. If we reduce them in
 parallel, both threads will attempt to read/write from C's and D's `aux0` and
 `aux1` ports, potentially causing synchronization errors.
 
-![](https://github.com/MaiaVictor/absal-ex/raw/master/img/sk_problem_2x.png)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/Absal/sk_problem_2x.png)
 
 This can be avoided through locks, or by performing rewrites in two steps. On
 the first step, each thread reads/writes the ports of its own active pair as
@@ -2343,7 +2082,7 @@ its own node into a "redirector" which points to where the neighbor was supposed
 to point. For example, substitution and duplication would be performed as
 follows:
 
-![](https://github.com/MaiaVictor/absal-ex/blob/master/img/sk_local_rewrites_2x.png?raw=true)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/Absal/sk_local_rewrites_2x.png)
 
 Notice that `P`, `Q`, `R` and `S` (neighbor ports) weren't touched: they keep
 pointing to the same ports, but now those ports point to where they should point
@@ -2351,7 +2090,7 @@ to. Then, a second parallel step is performed. This time, we spawn a thread for
 each neighbor port and walk through the graph until we find a non-redirector
 node. We then point that neighbor to it. Here is a full example:
 
-![](https://github.com/MaiaVictor/absal-ex/raw/master/img/sk_local_rewrites_ex_2x.png)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/Absal/sk_local_rewrites_ex_2x.png)
 
 Notice, for example, the port `C` of the node `A`. It is on the neighborhoods of
 a redex (`B-C`), but isn't a redex itself. On the first step, two threads
@@ -2432,7 +2171,7 @@ erased, turning it into FM-Calc, which is then compiled to FM-Net. The process
 of compiling FM-Calc to FM-Net can be defined by the following function
 `k_b(net)`:
 
-![](https://raw.githubusercontent.com/moonad/Formality/master/archive/images/fm-net-compilation.png)
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/fm-net-compilation.png)
 
 This function recursively walks through a term, creating nodes and "temporary
 variables" (`x_b`) in the process. It also keeps track of the number of boxes it
