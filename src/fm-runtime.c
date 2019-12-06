@@ -89,7 +89,7 @@ fm_reduce(Term *defs[], uint32_t ptr, uint32_t *mem)
 			}
 			break;
 		case REF:
-			++stats.copy;
+			stats.copy += ref->len;
 			pos = mem_len;
 			ref = defs[next >> 4];
 			for (i = 0; i < ref->len; ++i) {
