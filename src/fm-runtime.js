@@ -11,9 +11,6 @@ const VAR = 0;
 const LAM = 1;
 const APP = 2;
 const REF = 3;
-const F64 = 4;
-const U64 = 5;
-const ADD = 6; // TODO: add remaining num operations
 
 // Pointer: includes constructor type and address
 const NIL     = 0xFFFFFFFF;
@@ -50,15 +47,6 @@ function compile(defs) {
         rt_defs[rt_rfid[name]][pos+0] = go(name, pos+0, term[1].func, depth);
         rt_defs[rt_rfid[name]][pos+1] = go(name, pos+1, term[1].argm, depth);
         return New(APP, pos);
-      case "Val":
-        rt_defs[rt_rfid[name]].push(NIL, Math.floor(Math.abs(term[1].numb) % (2**32)));
-        return New(U64, pos);
-      case "Op1":
-      case "Op2":
-        rt_defs[rt_rfid[name]].push(NIL, NIL);
-        rt_defs[rt_rfid[name]][pos+0] = go(name, pos+0, term[1].num0, depth);
-        rt_defs[rt_rfid[name]][pos+1] = go(name, pos+1, term[1].num1, depth);
-        return New(ADD, pos);
       case "Ref":
         return New(REF, rt_rfid[term[1].name]);
     }
@@ -105,12 +93,6 @@ function decompile(rt_term, dep = 0) {
         return core.Ref("R"+addr_of(ptr), false);
       case VAR:
         return core.Var(dep - addr - 1);
-      case U64:
-        return core.Val(mem[addr+1]);
-      case ADD:
-        var num0 = decompile({mem, ptr: mem[addr+0]}, dep);
-        var num1 = decompile({mem, ptr: mem[addr+1]}, dep);
-        return core.Op2(".+.", num0, num1);
     };
   };
 };
@@ -133,7 +115,6 @@ function collect(rt_term) {
         new_mem[pos+1] = go(mem[addr+1], pos+1);
         return New(LAM, pos);
       case APP:
-      case ADD:
         new_mem.push(NIL, NIL);
         new_mem[pos+0] = go(mem[addr+0], pos+0);
         new_mem[pos+1] = go(mem[addr+1], pos+1);
@@ -143,9 +124,6 @@ function collect(rt_term) {
         return ptr;
       case VAR:
         new_mem[addr] = New(VAR, vpos + 0);
-      case U64:
-        new_mem.push(mem[addr+0], mem[addr+1]);
-        return New(U64, pos);
     };
   };
   return {mem:new_mem, ptr:go(ptr, 0)};
@@ -235,25 +213,9 @@ function reduce(rt_term, rt_defs) {
 
       // If it is a variable or number stop
       case VAR:
-      case U64:
         var next = NIL;
         break;
 
-      // If it is a numeric operation, perform it
-      case ADD:
-        var num0 = mem[addr_of(next) + 0];
-        var num1 = mem[addr_of(next) + 1];
-        if (ctor_of(num0) === U64 && ctor_of(num1) === U64) {
-          mem.push(0, mem[addr_of(num0)+1] + mem[addr_of(num1)+1]);
-          var subs = New(U64, mem.length - 2);
-        } else if (ctor_of(num0) === U64) {
-          back.push([next,1,deph]);
-          var next = num1;
-        } else {
-          back.push([next,0,deph]);
-          var next = num0;
-        }
-        break;
     }
 
     // If we performed a reduction, connect the new value to
