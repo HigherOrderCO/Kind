@@ -1,8 +1,16 @@
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 
-// print a string and a number
-void debug(const char *msg, uint32_t num);
+#if DEBUG
+void debug_str(const char *msg);
+void debug_mem(uint32_t *ptr, uint32_t len);
+static void debug(const char *fmt, ...);
+#else
+# define debug_str(msg)
+# define debug_mem(ptr, len)
+# define debug(fmt, ...)
+#endif
 
 enum {
 	VAR,
@@ -130,3 +138,64 @@ fm_reduce(Term *defs[], uint32_t ptr, uint32_t *mem)
 		.stats = stats,
 	};
 }
+
+#if DEBUG
+static char *
+stpcpy(char *dst, const char *src)
+{
+	while ((*dst = *src++))
+		++dst;
+	return dst;
+}
+
+// very simplified printf
+static void debug(const char *fmt, ...)
+{
+	va_list ap;
+	char *dst, *p, buf[256];
+	int32_t d;
+	uint32_t n;
+
+	va_start(ap, fmt);
+	for (dst = buf; *fmt; ++fmt) {
+		if (*fmt == '%') {
+			switch (*++fmt) {
+			case '%':
+				*dst++ = '%';
+				break;
+			case 's':
+				dst = stpcpy(dst, va_arg(ap, const char *));
+				break;
+			case 'd':
+				d = va_arg(ap, int32_t);
+				if (d < 0) {
+					*dst++ = '-';
+					d = -d;
+				}
+				for (n = 10; n <= d; n *= 10, ++dst)
+					;
+				for (p = dst; n > 1; --p, d /= 10, n /= 10)
+					*p = '0' + d % 10;
+				++dst;
+				break;
+			case 'x':
+				d = va_arg(ap, int32_t);
+				if (d < 0) {
+					*dst++ = '-';
+					d = -d;
+				}
+				for (n = 0xf; n <= d; n <<= 4, ++dst)
+					;
+				for (p = dst; n > 1; --p, d >>= 4, n >>= 4)
+					*p = ((d & 0xf) < 10 ? '0' : 'a' - 10) + (d & 0xf);
+				++dst;
+				break;
+			}
+		} else {
+			*dst++ = *fmt;
+		}
+	}
+	*dst++ = '\0';
+	debug_str(buf);
+}
+#endif

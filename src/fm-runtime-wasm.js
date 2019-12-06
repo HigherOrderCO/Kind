@@ -3,18 +3,19 @@ const src = require("./fm-runtime-wasm-src.js");
 const wasm = new WebAssembly.Module(Buffer.from(src, 'base64'));
 const textdec = new TextDecoder()
 
-const RESULT_SIZE = 4;
-
 module.exports = {
   reduce: function(rt_defs, id) {
     const mem = new WebAssembly.Memory({initial: 100});
     const instance = new WebAssembly.Instance(wasm, {
       env: {
         memory: mem,
-        debug: function(msg, num) {
-          const bytes = new Uint8Array(mem.buffer, msg)
-          console.log(textdec.decode(bytes.slice(0, bytes.indexOf(0))), num)
-        }
+        debug_mem: function(ptr, len) {
+          console.log(new Uint32Array(mem.buffer, ptr, len));
+        },
+        debug_str: function(msg) {
+          const bytes = new Uint8Array(mem.buffer, msg);
+          console.log(textdec.decode(bytes.slice(0, bytes.indexOf(0))));
+        },
       },
     });
     const heap = instance.exports.__heap_base.value;
