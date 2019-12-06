@@ -711,10 +711,10 @@ Mutual recursion is allowed:
 
 ```haskell
 T Foo
-| foo(bar : Foo)
+| foo(bar : Bar)
 
 T Bar
-| bar(foo : Bar)
+| bar(foo : Foo)
 ```
 
 Recursive functions can be written as usual:
