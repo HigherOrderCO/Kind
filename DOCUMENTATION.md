@@ -796,7 +796,7 @@ Or, if the type can be inferred:
 ```haskell
 import Base#
 
-main : List(Nat)
+main : List(?)
   [1n, 2n, 3n]
 ```
 
