@@ -112,6 +112,7 @@ async function run_CLI() {
       } catch (e) {
         if (!all) {
           console.log(e);
+          process.exit(1);
         } else {
           console.log("\x1b[31m" + head + "error\x1b[0m");
         }
@@ -144,7 +145,7 @@ async function local_imports_or_exit(file, code) {
     return Object.keys(open_imports).filter((name) => name.indexOf("#") === -1)
   } catch (e) {
     console.log(e.toString());
-    process.exit();
+    process.exit(1);
   }
 };
 
@@ -177,7 +178,7 @@ async function load_code() {
     var code = fs.readFileSync("./" + file + ".fm", "utf8");
   } catch(e) {
     console.log("Couldn't find local file `" + file + ".fm`.");
-    process.exit();
+    process.exit(1);
   }
 
   try {
@@ -188,7 +189,7 @@ async function load_code() {
     }
   } catch (e) {
     console.log(e);
-    process.exit();
+    process.exit(1);
   }
   var name = name === "@" ? "@" : file + "/" + name;
 
