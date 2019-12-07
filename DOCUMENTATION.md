@@ -505,7 +505,7 @@ checker in delimited sections of your programs.
 | syntax | description                              |
 |--------|------------------------------------------|
 | -A     | `A` is a nonterminating term of type `A` |
-| <t>    | Converts `t : A` to `t : -A`             |
+| \<t\>  | Converts `t : A` to `t : -A`             |
 | +t     | Converts `t : -A` to `t : A`             |
 
 Inside `<...>` (that is, on nonterminating terms), you can
