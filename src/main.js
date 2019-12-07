@@ -20,7 +20,8 @@ try {
   console.log("");
   console.log("Commands:");
   console.log("$ fm -d <file>/<term> | evaluates (debug)");
-  console.log("$ fm -o <file>/<term> | evaluates (fast)");
+  console.log("$ fm -f <file>/<term> | evaluates (fast)");
+  console.log("$ fm -o <file>/<term> | evaluates (optimal)");
   console.log("$ fm -t <file>/<term> | type-checks");
   console.log("$ fm -t <file>/@      | type-checks (all)");
   console.log("$ fm -j <file>/<term> | compiles to JS");
@@ -84,12 +85,22 @@ async function run_CLI() {
     console.log(fm.lang.show(term));
 
   // Evaluates on fast mode
-  } else if (args.o) {
+  } else if (args.f) {
     var {name, defs} = await load_code();
     var {rt_defs, rt_rfid} = fm.runtime.compile(defs);
     var rt_term = rt_defs[rt_rfid[name]];
     var {rt_term,stats} = fm.runtime.reduce(rt_term, rt_defs);
     var term = fm.runtime.decompile(rt_term);
+    console.log(fm.lang.show(term));
+    console.log(JSON.stringify(stats));
+
+  // Evaluates on optimal mode
+  } else if (args.o) {
+    var {name, defs} = await load_code();
+    var net = fm.to_net.compile(defs[name], defs);
+    var stats = {loops:0, rewrites:0, max_len:0};
+    net.reduce_lazy(stats);
+    var term = fm.to_net.decompile(net);
     console.log(fm.lang.show(term));
     console.log(JSON.stringify(stats));
 
