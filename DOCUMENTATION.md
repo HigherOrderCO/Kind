@@ -29,18 +29,22 @@ Table of contents
     - [Formality Net](#formality-net)
     - [Compilation](#compilation)
 
-**Note: this documentation is slightly outdated after the
-December 6, 2019 update. Some examples here may not work. It
-will be reviewed and updated next week. If you like learning
-by example, please ignore this docs and check
-[Base.fm](https://github.com/moonad/Base.fm); the code there
-is very representative and, if you already know FP, browsing
-it is the fastest way to pick up the language.**
+**Note: If you like learning by example, please ignore this docs and check
+[Base.fm](https://github.com/moonad/Base.fm); the code there is very
+representative and, if you already know FP, browsing it is the fastest way to
+pick up the language.**
 
 Motivation
 ==========
 
-> Knowing mathematics and programming might one day be one... it fills you with determination.
+> "In the Truth Mines though, the tags weren't just references; they included
+> complete statements of the particular definitions, axioms, or theorems the
+> objects represented. The Mines were self-contained: every mathematical result
+> that fleshers and their descendants had ever proven was on display in its
+> entirety. The library's exegesis was helpful - but the truths themselves were
+> all there."
+>
+> *Diaspora*, Greg Egan
 
 Formality exists to fill a hole in the current market: there aren't many
 languages featuring *theorem proving* that are simple, user-friendly and
@@ -49,33 +53,34 @@ efficient. To accomplish that goal, we rely on several design philosophies:
 An accessible syntax
 --------------------
 
-Proof languages often have complex syntaxes that make them needlessly
-inaccessible, as if the subject wasn’t hard enough already. Coq, for example,
-uses 3 different languages with different rules and an overall heavy syntax.
-Agda is clean and beautiful, but relies heavily on unicode and agda-mode,
-making it essentially unusable outside of EMACs, which is arguably a “hardcore”
-editor. Formality aims to keep a simple, familiar syntax that is much closer to
-common languages like Python and JavaScript. A regular TypeScript developer
-should, for example, be able to read our
-[Functor](https://github.com/moonad/Formality-Base/blob/master/Control.Functor.fm)
-formalization without extensive training. While we may not be quite there,
-we’re making fast progress towards that goal.
+Proof languages often have complex syntaxes that make an already difficult
+subject even more inaccessible. Coq, for example,
+uses 3 different languages with completely different rules and tons of reserved
+words and special tokens.  Agda is clean and beautiful, but relies heavily on
+unicode and agda-mode, making it essentially unusable outside of EMACs, which is
+arguably a “hardcore” editor.
+
+Formality aims to keep a simple, familiar syntax that is much closer to common
+languages like Python and JavaScript. A regular TypeScript developer should, for
+example, be able to read our [natural
+number](https://github.com/moonad/Base.fm/blob/master/Nat.fm) formalization
+without prior knowledge.
 
 Fast and portable "by design"
 -----------------------------
 
- Some languages are inherently slow, by design. JavaScript, for example, is
- slower than C: all things equal, its mandatory garbage collector will be an
- unavoidable disadvantage. Formality is meant to be as fast as theoretically
- possible. For example, it has affine lambdas, allowing it to be
- garbage-collection-free. It has a strongly confluent interaction-net runtime,
- allowing it to be evaluated in massively parallel architectures. It doesn’t
- require De Bruijn bookkeeping, making it the fastest “closure chunker” around. It
- is lazy, it has a clear cost model for blockchains, it has a minuscule ([435
- LOC](https://github.com/moonad/Formality/blob/master/src/fm-net.js)) runtime
- that can easily be ported to multiple platforms. Right now, Formality’s
- compiler isn’t as mature as the ones found in decades-old languages, but it
- has endless room for improvements since the language is fast “by design”.
+Some languages are inherently slow, by design. JavaScript, for example, is
+slower than C: all things equal, its mandatory garbage collector will be an
+unavoidable disadvantage. Formality is meant to be as fast as theoretically
+possible. For example, it has affine lambdas, allowing it to be
+run without garbage-collection. It has a strongly confluent interaction-net
+runtime, allowing it to be evaluated in massively parallel architectures. It
+doesn’t require De Bruijn bookkeeping, making it the fastest “closure chunker”
+around. It is lazy, it has a clear cost model for blockchains, it has a small
+([435 LOC](https://github.com/moonad/Formality/blob/master/src/fm-runtime.js))
+runtime that can easily be ported to multiple platforms. Right now, Formality’s
+compiler isn’t as mature as the ones found in decades-old languages, but it has
+lots of room for improvement.
 
 An elegant underlying Type Theory
 ---------------------------------
@@ -85,15 +90,7 @@ elegant, powerful type-level features that would be otherwise impossible
 without causing logical inconsistencies. For example, instead of built-in
 datatypes, we rely on [Self
 Types](https://www.semanticscholar.org/paper/Self-Types-for-Dependently-Typed-Lambda-Encodings-Fu-Stump/652f673e13b889e0fd7adbd480c2fdf290621f66),
-which allows us to implement inductive families with native lambdas. As history
-tells, having elegant foundations often pays back. We've not only managed to
-port several proofs from other assistants, but found techniques to [emulate
-Coq's structural
-recursion](https://github.com/moonad/Formality-Base/commit/b777d806c6fa37f2ce306fbe87b3ed267152b90c),
-to perform large eliminations, and even a hypothetical encoding of [higher
-inductive
-types](https://github.com/moonad/Formality-Base/blob/master/Example.HigherInductiveType.fm);
-and we've barely begun exploring the system.
+which allows us to implement inductive families with native lambdas.
 
 An optimal high-order evaluator
 -------------------------------
@@ -136,10 +133,10 @@ $ sed -i 's/nixpkgs/unstable/g' default.nix
 $ nix-env -f default.nix -iA package
 ```
 
-This should be all you need. In order to test if it worked, type `fm` on the
-terminal. If you see Formality's command-line options, then it has been
-successfully installed in your system. If you have any problem during this
-process, please [open an issue](https://github.com/moonad/Formality/issues).
+In order to test if it worked, type `fm` on the terminal. If you see Formality's
+command-line options, then it has been successfully installed in your system. If
+you have any problem during this process, please [open an
+issue](https://github.com/moonad/Formality/issues).
 
 
 Introduction
@@ -148,6 +145,7 @@ Introduction
 This is the "Hello, World!" in Formality:
 
 ```haskell
+-- HelloWorld.fm
 import Base#
 
 main : String
@@ -156,81 +154,130 @@ main : String
 
 A Formality file is just a list of imports followed by a series of top-level
 definitions. Here, we have one top-level definition, `main`, with type
-`String`, and body `"Hello, world"`. Save this file as `hello.fm`.
+`String`, and body `"Hello, world"`. Save this file as `HelloWorld.fm`.
 
-To run it, type `fm hello/main`. This will evaluate `main` using an interpreter
-in debug mode and output `"Hello, world!"`. You can also use `fm -o hello/main`
-to evaluate it with the interaction-net runtime. This will be faster, but
-you'll lose information like variable names and logs.
-
-To type-check it, type `fm -t hello/main`. This will check if the program's
-type is correct and print `String ✔`. If the type is incorrect, it will print
-an error message instead. For example, if you change `"Hello, world!"` to `true`,
-it will print:
+To run it, type
 
 ```haskell
+$ fm -d HelloWorld/main
+"Hello, world!"
+```
+
+This will evaluate `main` using an interpreter in debug mode and output `"Hello,
+world!"`
+
+You can also use
+
+```haskell
+$ fm -o HelloWorld
+"Hello, world!"
+{"beta":114,"copy":1294}
+```
+
+to evaluate it with our fast runtime, but you'll lose information like variable
+names and logs. `HelloWorld/main` and `HelloWorld` are synonymous.
+
+To type-check:
+
+```haskell
+fm -t HelloWorld
+String ✔
+```
+
+This will check if the program's type is correct. If the type is incorrect, it
+will print
+an error message instead.
+
+For example, if you change `"Hello, world!"` to `true`:
+
+```haskell
+[ERROR]
 Type mismatch.
 - Found type... Bool
 - Instead of... String
-- When checking 7
-- On line 4, col 9, file hello.fm:
-  1| import Base#
-  2|
-  3| main : String
-  4|   print(true)
-  5|
+- When checking true
+- On line 4, col 6, file HelloWorld.fm:
+   1| import Base#
+   2|
+   3| main : String
+   4|   true
+   5|
 ```
 
-Because `true` is a `Bool`, but the `print` function expects
-a `String`. Since Formality is a proof language, types can
-be seen as theorems and well-typed terms can be seen a
-proof. So, for example, this is a proof that `"cat" == "cat"`:
+Because `true` is a `Bool`, but the `main` expression expects
+a `String`.
+
+Since Formality is a proof language, a type can
+be seen a theorems and well-typed term can be seen its
+proof.
+
+For example, this is a proof that `"cat" == "cat"`:
 
 ```haskell
+-- CatIsCat.fm
 import Base#
 
 main : "cat" == "cat"
   equal(__)
 ```
 
-Running it with `fm -t file/cat_is_cat` will output
-`Equal(String, "cat", "cat") ✔`, which means Formality is
-convinced that "cat" is equal to "cat". Of course, that is
-obvious, but it could be something much more important such
-as `OnlyOwnerCanWithdrawal(owner, contract) ✔`. How proofs
-can be used to make your programs safer will be explored
-later. Let's now go through all of Formality's primitives.
-Don't worry: since it is designed to be a very simple
+Save this file as `CatIsCat.fm` and run:
+
+```haskell
+$ fm -t file/cat_is_cat
+Equal(String, "cat", "cat") ✔
+```
+
+This means Formality is convinced that "cat" is equal to "cat". Of course, that
+is obvious, but it could be something much more important such as
+`OnlyOwnerCanMakeWithdrawal(owner, contract) ✔`. How proofs can be used to make
+your programs safer will be explored later. Let's now go through all of
+Formality's primitives.  Don't worry: since it is designed to be a very simple
 language, there aren't many!
 
 Primitives
 ==========
 
+Type
+----
+
+A type is some collection of values.The `:` symbol means "has type/is of type":
+
+```javascript
+"cat" : String
+true : Bool
+1n : Nat
+```
+
+This means "`"cat"` is a `String`, `true` is a `Bool` (boolean) and `1n` is a
+`Nat` (natural number).
+
 Lambda
 ------
 
-syntax | description
---- | ---
-`(x : A, y : B, z : C, ...) -> D` | Function type with args `x : A`, `y : B`, `z : C`, returning `D`
-`(x, y, z, ...) => body` | A function that receives the arguments `x`, `y`, `z` and returns `body`
-`f(x, y, z, ...)` | Applies the function `f` to the arguments `x`, `y`, `z` (curried)
+| syntax                     | description                                     |
+|----------------------------|-------------------------------------------------|
+| `(x : A, y : B, ...) -> D` | Function type from `x : A`, `y : B` to `D`      |
+| `(x, y, ...) => body `     | Lambda with binding `x`, `y` over `body`        |
+| `f(x, y, ...)`             | Applies the function `f` to  arguments `x`, `y` |
 
-The lambda (also called function) is the only computational
-primitives of Formality. Everything, from booleans, to list,
-to complex algorithms, data structures and mathematical
-proofs are compiled to plain lambdas.
+The lambda (also called function) is the only computational primitive of
+Formality. Everything, from booleans, to list, to complex algorithms, data
+structures and mathematical proofs are compiled to lambdas. Technically,
+Formality's lambdas are affine lambdas, so variables bound in a lambda can be
+used at most once (this is not as restrictive as it might sound at first).
 
-As on other functional languages, lambdas are curried. `(x,
-y, z, ...) => body` is the same as `(x) => (y) => (z) => ...
-body`, and `f(x, y, z)` is the same as `f(x)(y)(z)...`.
+As in other functional languages, lambdas are curried. `(x, y, z, ...) => body`
+is the same as `(x) => (y) => (z) => ...  body`, and `f(x, y, z)` is the same as
+`f(x)(y)(z)...`.
 
-The type of a function is written as `A -> B -> C -> D`,
-like on Haskell, but it can also be written with names, as
-`(x : A, y : B, z : C ...) -> D`.
+The type of a function is written as `A -> B -> C -> D`, like in Haskell, but it
+can also be written with names, as `(x : A, y : B, z : C ...) -> D`.
 
-You can define a top-level function as below:
+You can define a top-level function as follows:
 
 ```haskell
+-- SameWorld.fm
 import Base#
 
 same : String -> String
@@ -238,6 +285,17 @@ same : String -> String
 
 main : String
   same("Hello, world!")
+```
+
+Try type-checking and running:
+
+```haskell
+$ fm -t SameWorld
+String ✔
+$ fm -t SameWorld/same
+(_ : String) -> String ✔
+$ fm -d SameWorld
+"Hello, World"
 ```
 
 You can also include the variable names before the `:`:
@@ -285,32 +343,56 @@ main : String
 Types are optional. This won't type-check, but you can still run it:
 
 ```haskell
+import Base#
+
 main
   ((x) => x)("Hello, world!")
 ```
 
-Lambdas and applications can be erased with a `;`, which
-causes them to vanish from the compiled output. This is
-useful, for example, to write polymorphic functions without
-extra runtime costs. For example, on the code below, `foo`
-is compiled to `(x) => x`, and `main` is compiled to
-`foo("Hello, world!")`. The first argument disappears from the
-runtime.
+```haskell
+$ fm -t SameWorld
+Can't infer non-annotated lambda.
+- When checking (x) => x
+- On line 5, col 11, file SameWorld.fm:
+   1| -- SameWorld.fm
+   2| import Base#
+   3|
+   4| main
+   5|   ((x) => x)("Hello, world!")
+   6|
+
+$ fm -d SameWorld
+"Hello, World"
+```
+
+Lambdas and applications can be erased with a `;`, which causes them to vanish
+from the compiled output. This is useful, for example, to write polymorphic
+functions without extra runtime costs. For example, on the code below, `foo` is
+compiled to `(x) => x`, and `main` is compiled to `foo("Hello, world!")`. The
+first argument disappears from the runtime.
 
 ```haskell
-foo(T : Type; x : T) : T
+-- EraseWorld.fm
+import Base#
+
+eraser(T : Type; x : T) : T
   x
 
 main : String
-  foo(String; "Hello, world!")
+  eraser(String; "Hello, world!")
 ```
 
+```haskell
+$ fm -t EraseWorld/eraser
+(T : Type; x : T) -> T ✔
+```
 
 Formality functions are **affine**, which means you can't use a variable more
 than once. For example, the program below isn't allowed, because `b` is used
 twice:
 
 ```haskell
+-- SelfOr.fm
 import Base#
 
 self_or(b : Bool) : Bool
@@ -320,9 +402,40 @@ main : Bool
   self_or(true)
 ```
 
-Multiple ways to circumvent this limitation will be explained through this
-documentation.
+```haskell
+$ fm -t SelfOr
+[ERROR]
+Use of affine variable `b` more than once in affine position.
+- When checking b
+- With context:
+- b : Bool
+- On line 4, col 9, file SelfOr.fm:
+   1| import Base#
+   2|
+   3| self_or(b : Bool) : Bool
+   4|   or(b, b)
+   5|
+   6| main : Bool
+   7|   self_or(true)
+   8|
+```
 
+Multiple ways to work with this limitation will be explained through this
+documentation. Here's one:
+
+```haskell
+-- SelfOr.fm
+import Base#
+
+self_or(b : Bool) : Bool
+  case copy_bool(b) as bs | pair =>
+  or(bs.fst, bs.snd)
+
+main(x : Bool) : Bool
+  self_or(true)
+```
+
+**Note: This syntax is ugly and will be sugared over soon**
 
 Let
 ---
@@ -345,7 +458,7 @@ import Base#
 main : Output
   let output =
     let hello = "Hello, world!"
-    print(hello)
+    hello
   output
 ```
 
@@ -358,24 +471,23 @@ Formality also has [Self
 Types](http://homepage.divms.uiowa.edu/~astump/papers/fu-stump-rta-tlca-14.pdf),
 which allow us to implement inductive datatypes with λ-encodings:
 
-syntax | description
---- | ---
-`${self} T(self)` | `T` is a type that can access its own value
-`new(T) t` | Constructs an instance of a `T` with value `t`
-`use(t)` | Consumes a self-type `t`, giving its type access to its value
+| syntax            | description                                              |
+|-------------------|----------------------------------------------------------|
+| `${self} T(self)` | `T` is a type that can access its own value              |
+| `new(T) t`        | Constructs an instance of a `T` with value `t`           |
+| `use(t)`          | Consumes self-type `t`, so its type can access its value |
 
-Self Types allow a type to access *its own value*. This
-allows us to do us to encode inductive datatypes with
-lambdas, as will be explained later.
+Self Types allow a type to access *its own value*. This allows us to do us to
+encode inductive datatypes with lambdas, as will be explained later
 
 Annotation
 ----------
 
 You can also explicitly annotate the type of a term:
 
-syntax | description
---- | ---
-`term :: Type` | Annotates `term` with type `Type`
+| syntax         | description                       |
+|----------------|-----------------------------------|
+| `term :: Type` | Annotates `term` with type `Type` |
 
 This is useful when the type-checker can't infer the type of an expression.
 
@@ -390,11 +502,11 @@ Nontermination
 Formality has first-class nontermination, which disables the termination
 checker in delimited sections of your programs.
 
-syntax | description
------- | ----------------------------------------
--A     | `A` is a nonterminating term of type `A`
-<t>    | Converts `t : A` to `t : -A`
-+t     | Converts `t : -A` to `t : A`
+| syntax | description                              |
+|--------|------------------------------------------|
+| -A     | `A` is a nonterminating term of type `A` |
+| <t>    | Converts `t : A` to `t : -A`             |
+| +t     | Converts `t : -A` to `t : A`             |
 
 Inside `<...>` (that is, on nonterminating terms), you can
 use unrestricted recursion, as well as ignore the
@@ -403,7 +515,7 @@ duplications. So, for example, while the `List(Bool)` type
 represents a finite list of words, the `-List(Bool)` type
 can be infinite:
 
-```javascript
+```haskell
 trues : -List(Bool)
   <cons(Bool; true, +trues)>
 ```
@@ -438,6 +550,7 @@ context (scope variables), and possibly a value, if Formality can fill it for
 you. For example, the program below:
 
 ```haskell
+-- Hole.fm
 import Base#
 
 main(x : Bool) : Bool
@@ -447,6 +560,7 @@ main(x : Bool) : Bool
 Will output:
 
 ```haskell
+$ fm -t Hole
 Found hole: 'a'.
 - With goal... Bool
 - With context:
@@ -487,6 +601,7 @@ the normal-form and the type of `x`. This is useful when you want to know what
 type an expression would have inside certain context. For example:
 
 ```haskell
+-- Log.fm
 import Base#
 
 main(f : Bool -> Nat) : Nat
@@ -497,6 +612,7 @@ main(f : Bool -> Nat) : Nat
 Type-checking the program above will cause Formality to output:
 
 ```haskell
+$ fm -t Log
 [LOG]
 Term: f(true)
 Type: Nat
@@ -524,27 +640,29 @@ Import
 ------
 
 The `import` statement can be used to include local files. For example, save an
-`Answers.fm` file in the same directory as `hello.fm`, with the following
+`Answers.fm` file in the same directory as `HelloWorld.fm`, with the following
 contents:
 
 ```haskell
+-- Answers.fm
 import Base#
 
 everything : String
   "42"
 ```
 
-Then save a `test.fm` file as:
+Then save a `Test.fm` file as:
 
 ```haskell
+-- Test.fm
 import Base#
 import Answers
 
-main : Output
-  print(everything)
+main : String
+  everything
 ```
 
-And run it with `fm test/main`. You should see `42`.
+And run it with `fm -d Test/main`. You should see `"42"`.
 
 If multiple imports have conflicting names, you can disambiguate with
 `File/name`, or with a qualified import, using `as`:
@@ -563,14 +681,14 @@ with other people. A file can be saved globally with `fm -s file`. This will
 give it a unique name with a version, such as `file#7u3k`. Once given a unique
 name, the file contents will never change, so `file#7u3k` will always refer to
 that exact file. As soon as it is saved globally, you can import it from any
-other computer. For example, remove `Answers.fm` and change `hello.fm` to:
+other computer. For example, remove `Answers.fm` and change `HelloWorld.fm` to:
 
 ```haskell
 import Base#
 import Answers#xxxx
 
 main : Output
-  print(everything)
+  everything
 ```
 
 This will load `Answers#xxxx.fm` inside the `fm_modules` directory and load it.
@@ -579,8 +697,8 @@ file. That prevents the infamous "dependency hell", and is useful for many
 applications.
 
 Right now, global imports are uploaded to our servers, but, in the future,
-they'll upload files to decentralized storage such as IPFS/Swarm, and give it a
-unique name using Ethereum's naming system.
+they'll upload files to decentralized storage such as IPFS/Swarm, and given a
+unique name using the Ethereum Name Service.
 
 Datatypes
 =========
@@ -604,22 +722,22 @@ T Suit
 | hearts
 | spades
 
-print_suit(suit : Suit) : Output
+print_suit(suit : Suit) : String
   case suit
   | clubs    => print("First rule: you do not talk about Fight Club.")
   | diamonds => print("Queen shines more than diamond.")
   | hearts   => print("You always had mine.")
   | spades   => print("The only card I need is the Ace of Spades! \m/")
-  : Output
+  : String
 
-main : Output
+main : String
   print_suit(spades)
 ```
 
 The program above creates a datatype, `Suit`, with 4 possible values. In
 Formality, we call those values **constructors**. It then pattern-matches a
 suit and outputs a different sentence depending on it. Notice that on this
-`case` expression, we annotated the return type, `: Output`. That's not
+`case` expression, we annotated the return type, `: String`. That's not
 always necessary, but it is very important for theorem proving. The annotated
 type of a case expression is called its **motive**.
 
@@ -638,8 +756,8 @@ get_name(p : Person) : String
   case p
   | person => p.name
 
-main : Output
-  let john = person(26, "John")
+main : String
+  let john = person(27n, "John")
   print(get_name(john))
 ```
 
@@ -650,7 +768,7 @@ must must explicitly name it using the `as` keyword:
 
 ```haskell
 main(p : Person) : Nat
-  case person(26n, "John") as john
+  case person(27n, "John") as john
   | person => john.age
 ```
 
@@ -730,11 +848,10 @@ mul2(n : Nat) : Nat
 With one caveat: recursive occurrences must be applied to structurally smaller
 values, in order to prevent nontermination. Right now, though, while
 Formality's termination checker can prevent loops such as `λx.(x x) λx.(x x)`
-from being constructed (for example, through Russel's paradox), it still
+from being constructed (for example, through Russell's paradox), it still
 can't prevent loops from recursive calls. This feature is to be developed
 soon. Until then, type-checking recursive functions will raise a warning,
-signaling that Formality is unsure if your program halts. If you can't wait,
-you can use inductive datatypes such as `INat` from Base instead.
+signaling that Formality is unsure if your program halts.
 
 Note: while you can use recursive calls as much as you want, it is wise to
 treat them as normal variables and use `move` to pass them to branches. This
@@ -755,7 +872,6 @@ import Base#
 
 main : Nat
   let a = pair(Bool; Nat; true, 7n)
-
   case a
   | pair => a.snd
 ```
@@ -791,15 +907,6 @@ main : List(Nat)
   [1n, 2n, 3n]
 ```
 
-Or, if the type can be inferred:
-
-```haskell
-import Base#
-
-main : List(Nat)
-  [1n, 2n, 3n]
-```
-
 Indices
 -------
 
@@ -813,16 +920,7 @@ import Base#
 
 T IsEven (x : Nat)
 | make_even(half : Nat) : IsEven(mul(2n, half))
-```
 
-This datatype has one index, `n`, of type `Nat`. Its constructor, `is_even`,
-has one field, `half : Nat`. When you write `make_even(3n)`, the number `3n`
-is multiplied by two and moved to the type-level, resulting in a value of type
-`IsEven(6n)`. This makes it impossible to create a value of type `IsEven(5n)`,
-because you'd need a `n` such that `mul(2n, n)` is `5n`, but that's impossible.
-To visualize this, see the code below:
-
-```haskell
 even_0n : IsEven(0n)
   make_even(0n)
 
@@ -835,6 +933,12 @@ even_4n : IsEven(4n)
 even_6n : IsEven(6n)
   make_even(3n)
 ```
+
+This datatype has one index, `n`, of type `Nat`. Its constructor, `is_even`,
+has one field, `half : Nat`. When you write `make_even(3n)`, the number `3n`
+is multiplied by two and moved to the type-level, resulting in a value of type
+`IsEven(6n)`. This makes it impossible to create a value of type `IsEven(5n)`,
+because you'd need a `n` such that `mul(2n, n)` is `5n`, but that's impossible.
 
 This allows us, for example, to create a `half` function that can only receive
 even values:
@@ -1018,8 +1122,8 @@ T Empty
 
 This code isn't incomplete, the datatype has zero constructors. This means it
 is impossible to construct a term `t` with type `Empty`, but we can still
-accept it as a function argument. So, what happens if we pattern match against
-it?
+accept it as the type of a function argument. So, what happens if we pattern
+match against it?
 
 ```haskell
 import Base#
@@ -1080,6 +1184,15 @@ main : "dogs" != "horses"
   e3
 ```
 
+The `x != y` is a syntax sugar for `Not(Equal(?, x, y)`, where `Not` is a
+function to `Empty`:
+
+```haskell
+Not(P) : Type
+  (x : P) -> Empty
+```
+
+
 #### Example: avoiding unreachable branches
 
 Notice the program below:
@@ -1101,13 +1214,13 @@ can avoid that. The idea is that we will send, to each branch, a proof that
 will be specialized to `Equal(Bool, false, true)`. We can then use
 `false_isnt_true` and `absurd` to fill the branch without ever providing a
 number:
-
+equal
 ```haskell
 import Base#
 
 main : Nat
   case true as x
-  + refl(__) as e : Equal(Bool, x, true)
+  + equal(__) as e : x == true
   | true  => 10n
   | false => absurd(false_isnt_true(e), _)
 ```
@@ -1129,9 +1242,10 @@ lambdas. To be specific, a datatype is encoded as is own inductive hypothesis,
 with "Self Types". For example, the `Bool` datatype desugars to:
 
 ```haskell
+-- SelfBool.fm
 Bool : Type
-  ${self} (
-    P     : Bool -> Type;
+  ${self} 
+  ( P     : Bool -> Type;
     true  : P(true),
     false : P(false)
   ) -> P(self)
@@ -1148,21 +1262,26 @@ case_of(b : Bool, P : Bool -> Type; t : P(true), f : P(false)) : P(b)
 
 Here, `${self} ...`, `new(T) val` and `use(b)` are the type, introduction, and
 elimination of Self Types, respectively. You can see how any datatype is
-encoded under the hoods by asking `fm` to evaluate its type, as in, `fm
-Data.Bool#/Bool -W` (inside the `fm_modules` directory). The `-W` flag asks
-Formality to not evaluate fully since `Bool` is recursive. While you probably
-won't need to deal with self-encodings yourself, knowing how they work is
-valuable, since it allows you to express types not covered by the built-in
-syntax.
+encoded under the hood by asking `fm` to weakly evaluate its type: 
+
+```haskell
+$ fm -dw SelfBool/Bool
+${self} (P : (_ : Bool) -> Type; true : P(true), false : P(false)) -> P(self)
+```
+
+
+The `-w` flag asks Formality to not evaluate fully since `Bool` is recursive.
+While you probably won't need to deal with self-encodings yourself, knowing how
+they work is valuable, since it allows you to express types not covered by the
+built-in syntax.
 
 Proofs
 ======
 
 Types in Formality can be used to express mathematical theorems. This allows us
-to statically prove invariants about our programs, making them flawless. In a
-way, proofs can be seen as a generalization of tests. With tests, we can assert
-that specific expressions have the values we expect. For example, consider the
-program below:
+to statically prove invariants about our programs. In a way, proofs can be seen
+as a generalization of tests. With tests, we can assert that specific
+expressions have the values we expect. For example, consider the program below:
 
 ```javascript
 // Recursively doubles a number
@@ -1218,26 +1337,26 @@ mul2(n : Number) : Number
     2 .+. mul2(n .-. 1.01)
 
 it_works_for_10 : mul2(10) == 20
-  refl(__)
+  equal(__)
 
 it_works_for_44 : mul2(44) == 88
-  refl(__)
+  equal(__)
 
 it_works_for_17 : mul2(17) == 34
-  refl(__)
+  equal(__)
 
 it_works_for_12 : mul2(12) == 24
-  refl(__)
+  equal(__)
 
 it_works_for_20 : mul2(20) == 40
-  refl(__)
+  equal(__)
 ```
 
 > TODO: this section is outdated after the removal of Numbers; update
 
 Here, we're using `==` to make an assertion that `mul2(10)`
 is equal to `20` and so on. Since those are true by
-reduction, we can complete the proofs with `refl`. This
+reduction, we can complete the proofs with `equal`. This
 essentially implements a type-level test suite. But with
 proofs, we can go further: we can prove that a general
 property holds for every possible input, not just a few. To
@@ -1258,13 +1377,13 @@ Let's start by adding a few tests just to be sure:
 
 ```haskell
 it_works_for_0 : mul2(0n) == 0n
-  refl(__)
+  equal(__)
 
 it_works_for_1 : mul2(1n) == 2n
-  refl(__)
+  equal(__)
 
 it_works_for_2 : mul2(2n) == 4n
-  refl(__)
+  equal(__)
 ```
 
 Since those pass, we can now try to prove the more general statement that the
@@ -1294,11 +1413,11 @@ Found hole: 'a'.
 This is telling us that our theorem is correct as long as we can replace the
 hole `?a` with a proof that `mul2(n) == add(n, n)`. In other words,
 Formality is asking us to to prove what we claimed to be true. Let's try to do
-it with a `refl`:
+it with a `equal`:
 
 ```haskell
 it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
-  refl(__)
+  equal(__)
 ```
 
 This time, it doesn't work, and we get the following error:
@@ -1309,7 +1428,7 @@ Type mismatch.
 - Instead of... Equal(Nat, mul2(n), add(n, n))
 ```
 
-That's because `refl` proves that a value is equal to itself, but `mul2(n)` and
+That's because `equal` proves that a value is equal to itself, but `mul2(n)` and
 `add(n, n)` are different expressions. The problem is that, unlike on the
 previous tests, the equation now has a variable, `n`, which causes both sides to
 get "stuck", so they don't become identical by mere reduction. We need to
@@ -1344,12 +1463,12 @@ Notice that, now, we have two holes, one for each possible value of `n` (`zero`
 or `succ(n.pred)`). The first hole is now asking a proof that `Equal(Nat,
 mul2(zero), add(zero, zero))`.  See how it was specialized to the value of `n`
 on the branch?  That's very important, because now both sides evaluate to
-`zero`.  This allows us to prove that case with a `refl`!
+`zero`.  This allows us to prove that case with a `equal`!
 
 ```haskell
 it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
   case n
-  | zero => refl(__)
+  | zero => equal(__)
   | succ => ?b
   : mul2(n) == add(n, n)
 ```
@@ -1378,7 +1497,7 @@ see what we get:
 ```haskell
 it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
   case n
-  | zero => refl(__)
+  | zero => equal(__)
   | succ =>
     let ind_hyp = it_works_for_all_n(n.pred)
     log(ind_hyp)
@@ -1405,7 +1524,7 @@ function, and applies the function to both sides of the equality. Like this:
 ```haskell
 it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
   case n
-  | zero => refl(__)
+  | zero => equal(__)
   | succ =>
     let ind_hyp = it_works_for_all_n(n.pred)
     let add_two = (x : Nat) => succ(succ(x))
@@ -1429,7 +1548,7 @@ complete this branch with it:
 ```haskell
 it_works_for_all_n(n : Nat) : Equal(Nat, mul2(n), add(n, n))
   case n
-  | zero => refl(__)
+  | zero => equal(__)
   | succ =>
     let ind_hyp = it_works_for_all_n(n.pred)
     let add_two = (x : Nat) => succ(succ(x))
@@ -1442,7 +1561,7 @@ And done! Since we've proven our theorem for both possible values of `n`
 (`zero` or `succ(n.pred)`), then we've proven it for every `n`. And that's how
 most proofs are done. Proving an equation is often just a game of "opening"
 variables with `case` expressions so that the sides gets unstuck until we're
-able to finish the proof with a `refl`, or with an inductive hypothesis.
+able to finish the proof with a `equal`, or with an inductive hypothesis.
 
 The cool thing is, since our program passes the type-checker now, that means
 we've proven that `2 * n` is equal to `n + n` for all `n`. This is an extreme
@@ -1463,21 +1582,21 @@ mul2(n : Nat) : Nat
 
 -- Tests that it works as expected for `n = 0`
 it_works_for_0 : mul2(0n) == 0n
-  refl(__)
+  equal(__)
 
 -- Tests that it works as expected for `n = 2`
 it_works_for_1 : mul2(1n) == 2n
-  refl(__)
+  equal(__)
 
 -- Tests that it works as expected for `n = 4`
 it_works_for_2 : mul2(2n) == 4n
-  refl(__)
+  equal(__)
 
 -- Proves that it works as expected for any `n` up to infinity
 -- using symbolic manipulation and inductive reasoning
 it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
   case n
-  | zero => refl(__)
+  | zero => equal(__)
   | succ =>
     let ind_hyp = it_works_for_all_n(n.pred)
     let add_two = (x : Nat) => succ(succ(x))
@@ -1787,11 +1906,11 @@ a self type:
 Id(A : Type, a : A, b : A) -> Type
   ${self} (
     P    : (b : A, eq : Id(A, a, b)) -> Type;
-    refl : P(a, refl(A; a;))
+    equal : P(a, equal(A; a;))
   ) -> P(b, self)
 
-refl(A : Type; a : A;) -> Id(A, a, a)
-  new(Id(A, a, a)) (P; refl) => refl
+equal(A : Type; a : A;) -> Id(A, a, a)
+  new(Id(A, a, a)) (P; equal) => equal
 ```
 
 We're also able to express datatypes that traditional proof languages can't.
