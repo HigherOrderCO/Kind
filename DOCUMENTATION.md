@@ -1029,14 +1029,12 @@ develop mathematical proofs in Formality. Let's go through some examples.
 
 #### Example: proving equalities
 
-Formality's base libraries include a type for equality
-proofs called `Equal`.  For example, `Equal(Nat, <2n>, <2n>)`
-is the statement that `2` is equal `2`. It is not a proof:
-you can write `Equal(Nat, <2n>, <3n>)`, which is just the
-**statement** that `2` is equal to `3`.  To prove an
-equality, you must use `equal(A; x;)`, which, for any `x :
-A`, proves `Equal(A, <x>, <x>)`. In other words, `equal` is a
-proof that every value is equal to itself. As such, we can
+Formality's base libraries include a type for equality proofs called `Equal`.
+For example, `Equal(Nat, <2n>, <2n>)` is the statement that `2` is equal `2`. It
+is not a proof: you can write `Equal(Nat, <2n>, <3n>)`, which is just the
+**statement** that `2` is equal to `3`.  To prove an equality, you must use
+`equal(A; x;)`, which, for any `x : A`, proves `Equal(A, <x>, <x>)`. In other
+words, `equal` is a proof that every value is equal to itself. As such, we can
 prove that `true` is equal to `true` like this:
 
 ```haskell
@@ -1244,7 +1242,7 @@ with "Self Types". For example, the `Bool` datatype desugars to:
 ```haskell
 -- SelfBool.fm
 Bool : Type
-  ${self} 
+  ${self}
   ( P     : Bool -> Type;
     true  : P(true),
     false : P(false)
@@ -1289,80 +1287,49 @@ function mul2(n) {
   if (n <= 0) {
     return 0;
   } else {
-    return 2 + mul2(n - 1.01);
+    return 2 + mul2(n - 1);
   }
 }
 
 // Tests
-it("Works for 10", () => {
-  console.assert(mul2(10) === 20);
+it("Works for 1", () => {
+  console.assert(mul2(1) === 2);
 })
 
 
-it("Works for 44", () => {
-  console.assert(mul2(44) === 88);
+it("Works for 2", () => {
+  console.assert(mul2(2) === 4);
 });
 
-it("Works for 17", () => {
-  console.assert(mul2(17) === 34);
+it("Works for 4", () => {
+  console.assert(mul2(4) === 8);
 });
 
-it("Works for 12", () => {
-  console.assert(mul2(12) === 24);
-});
-
-it("Works for 20", () => {
-  console.assert(mul2(20) === 40);
-});
 ```
 
 It allows us to test our implementation of `mul2` by checking if the invariant
 that `n * 2` is equal to `n + n` holds for specific values of `n`. The problem
 with this approach is that it only gives us partial confidence. No matter how
 many tests we write, there could be still some input which causes our function
-to misbehave. In this example, `mul2(200)` returns `398`, which is different
-from `200 + 200`. The the implementation is incorrect, despite all tests
-passing!
+to misbehave.
 
-
-With formal proofs, we can write tests too:
-
-```haskell
-import Base#
-
-mul2(n : Number) : Number
-  if n .<. 0 .|. n .==. 0 then
-    0
-  else
-    2 .+. mul2(n .-. 1.01)
-
-it_works_for_10 : mul2(10) == 20
-  equal(__)
-
-it_works_for_44 : mul2(44) == 88
-  equal(__)
-
-it_works_for_17 : mul2(17) == 34
-  equal(__)
-
-it_works_for_12 : mul2(12) == 24
-  equal(__)
-
-it_works_for_20 : mul2(20) == 40
-  equal(__)
+```javascript
+function mul2(n) {
+  if (n <= 0) {
+    return 0;
+  } else {
+    if (n == 200) { return 398 }
+    else { return 2 + mul2(n - 1);
+    }
+  }
+}
 ```
 
-> TODO: this section is outdated after the removal of Numbers; update
+In this example, `mul2(200)` returns `398`, which is different
+from `200 + 200`. The the implementation is incorrect, despite all the previous
+tests passing!
 
-Here, we're using `==` to make an assertion that `mul2(10)`
-is equal to `20` and so on. Since those are true by
-reduction, we can complete the proofs with `equal`. This
-essentially implements a type-level test suite. But with
-proofs, we can go further: we can prove that a general
-property holds for every possible input, not just a few. To
-explain, let's first re-implement `mul2` for `Nat`, which
-will posteriorly allows us to write a `case` with a
-`motive`, an essential proof technique:
+With formal proofs, we can write tests too:
 
 ```haskell
 import Base#
@@ -1371,11 +1338,7 @@ mul2(n : Nat) : Nat
   case n
   | zero => zero
   | succ => succ(succ(mul2(n.pred)))
-```
 
-Let's start by adding a few tests just to be sure:
-
-```haskell
 it_works_for_0 : mul2(0n) == 0n
   equal(__)
 
@@ -1386,9 +1349,16 @@ it_works_for_2 : mul2(2n) == 4n
   equal(__)
 ```
 
-Since those pass, we can now try to prove the more general statement that the
-double of any `n` is equal to `x .+. x`. We start by writing the type of our
-invariant:
+
+Here, we're using `==` to make an assertion that `mul2(1)`
+is equal to `2` and so on. Since those are true by
+reduction, we can complete the proofs with `equal`. This
+essentially implements a type-level test suite. But with
+proofs, we can go further: we can prove that a general
+property holds for every possible input, not just a few.
+
+We can try to prove the more general statement that the double of any `n` is
+equal to `add(x,x)`. We start by writing the type of our invariant:
 
 ```haskell
 it_works_for_all_n(n : Nat) : mul2(n) == add(n, n)
@@ -1695,12 +1665,7 @@ term ::=
   (name : term) => term -- lambda term
   term(term)            -- lambda application
 
-  -- Boxes
-  ! term                -- boxed type
-  # term                -- boxed term
-  dup name = term; term -- boxed duplication
-
-  -- Selfies
+  -- Self-Types
   ${name} term           -- self type
   new(term) term         -- self term
   use(term)              -- self elimination
@@ -1738,21 +1703,7 @@ Our typing rules are:
 ----------------------------------- lambda application
 Γ |- f(a) : B[x <- a]
 
--- Boxes
-
-Γ |- A : Type
--------------- boxed type
-Γ |- !A : Type
-
-Γ |- t : A
------------- boxed term
-Γ |- #A : !A
-
-Γ |- t : !A    Γ, x : A |- u : B
--------------------------------- boxed duplication
-Γ |- dup x = t; u : B
-
--- Selfies
+-- Self-Types
 
 Γ, s : ${x} A |- A : Type
 ----------------------- self type
@@ -1975,60 +1926,25 @@ term ::=
   (name) => term        -- lambda term
   term(term)            -- lambda application
 
-  -- Boxes
-  # term                -- boxed term
-  dup name = term; term -- boxed duplication
-
   -- Language
   name                  -- variable
 ```
 
 The actual implementation of FM-Calc also features numbers and pairs, which are
 omitted here for simplicity.  The first 3 constructors are the usual
-λ-calculus. The last two introduce boxes, which just wrap terms, and
-duplications, which copies the contents of a box. The FM-Calc has the following
-reduction rules:
+λ-calculus. The FM-Calc has the following reduction rules:
 
 ```
 1. application: ((x) => a)(b) ~> [b/x]a
-2. duplication: dup x = #a; b ~> [a/x]b
-3. appdup-swap: ((dup x = a; b) c) ~> dup x = a; (b c)
-4. dupdup-swap: dup x = (dup y = a; b); c ~> dup y = a; dup x = b; c
 ```
 
-The first rule is the usual beta-reduction. The second rule allows us to copy
-the contents of a box. The last two are just permutations, allowing inner
-`dup`s to be exposed. An FM-Calc term is said to be stratified when it follows the
+The first rule is the usual beta-reduction. An FM-Calc term is said to be stratified when it follows the
 following conditions:
 
 1. Lambda-bound variables can only be used at most once.
 
-2. There must be exactly 0 boxes between a variable bound by a lambda and its occurrence.
-
-3. There must be exactly 1 box between a variable bound by a duplication and its occurrence.
-
-The first condition says that lambdas must be affine. The second condition says
-that lambdas can't substitute inside boxes. The third condition says that you
-can't unbox, or add boxes, to a term by duplicating it. Stratified FM-Calc terms
-are strongly normalizing. Proof: 
 
 - Define the level of a term as the number of boxes surrounding it.
-
-- Define the number of redex in a level by counting its reducible apps/dups.
-
-- Prove that level is reduction-invariant.
-
-- Prove that applications reduce the number of redexes in a level.
-
-- Prove that duplications reduce the number of redexes in a level.
-
-- Prove that reduction eventually consumes all redexes on level 0.
-
-- Prove that, if level N is normalized, reduction eventually consumes all redexes on level N+1. 
-
-TODO: include the formalization of this proof (being developed on the
-[Formality-Agda](https://github.com/moonad/formality-agda) repository).
-
 TODO: mention impressive performance results obtained by runtime fusion:
 
 - https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07
