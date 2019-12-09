@@ -22,6 +22,7 @@ try {
   console.log("$ fm -d <file>/<term> | evaluates (debug-mode)");
   console.log("$ fm -o <file>/<term> | evaluates (optimal-mode)");
   console.log("$ fm -f <file>/<term> | evaluates (fast-mode)");
+  console.log("$ fm -c <file>/<term> | evaluates (fast-mode, C WASM)");
   console.log("$ fm -t <file>/<term> | type-checks");
   console.log("$ fm -t <file>/@      | type-checks (all)");
   console.log("$ fm -j <file>/<term> | compiles to JS");
@@ -92,6 +93,15 @@ async function run_CLI() {
     //const ctor_of = ptr => ptr & 0b1111;
     //const addr_of = ptr => ptr >>> 4;
     var {rt_term,stats} = fm.fast.reduce(rt_term, rt_defs);
+    var term = fm.fast.decompile(rt_term);
+    console.log(fm.lang.show(term));
+    console.log(JSON.stringify(stats));
+
+  // Evaluates on fast mode (WASM)
+  } else if (args.c) {
+    var {name, defs} = await load_code();
+    var {rt_defs, rt_rfid} = fm.fast.compile(defs);
+    var {rt_term, stats} = fm.wasm.reduce(Object.values(rt_defs), rt_rfid[name]);
     var term = fm.fast.decompile(rt_term);
     console.log(fm.lang.show(term));
     console.log(JSON.stringify(stats));
