@@ -7,8 +7,7 @@
 // You've been warned (:
 
 const {
-  Var, Typ, Tid, Utt,
-  Utv, Ute, All, Lam,
+  Var, Typ, All, Lam,
   App, Slf, New, Use,
   Ann, Log, Hol, Ref,
   subst,
@@ -75,18 +74,6 @@ const show = ([ctor, args], nams = [], opts = {}) => {
       }
     case "Typ":
       return "Type";
-    case "Tid":
-      var expr = show(args.expr, nams, opts);
-      return "&" + expr;
-    case "Utt":
-      var expr = show(args.expr, nams, opts);
-      return "-" + expr;
-    case "Utv":
-      var expr = show(args.expr, nams, opts);
-      return "<" + expr + ">";
-    case "Ute":
-      var expr = show(args.expr, nams, opts);
-      return "+" + expr;
     case "All":
       var term = [ctor, args];
       var erase = [];
@@ -327,27 +314,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     return chr => set[chr] === 1;
   }
 
-  // Some handy lookup tables
-  const is_native_op =
-    { ".+."   : 1
-    , ".-."   : 1
-    , ".*."   : 1
-    , "./."   : 1
-    , ".%."   : 1
-    , ".**."  : 1
-    , ".&."   : 1
-    , ".|."   : 1
-    , ".^."   : 1
-    , ".~."   : 1
-    , ".>>>." : 1
-    , ".<<."  : 1
-    , ".>."   : 1
-    , ".<."   : 1
-    , ".==."  : 1
-  };
-
-  const is_num_char  = build_charset("0123456789");
-  const is_hex_char  = build_charset("0123456789abcdefABCDEF");
   const is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#-@/");
   const is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#-@+*/%^!<>=&|");
   const is_spacy     = build_charset(" \t\n\r");
@@ -521,7 +487,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
           var expr = App(App(Var(2), Var(1), true), Var(0), false);
           var expr = App(App(Var(2), App(build_inat_adder(String(2**(sucs-i-1-1))), Var(1), false), true), expr, false);
           var expr = Lam("N", App(Var(-1 + 1 + (sucs - i - 1) + 1 + 3), Var(0), false), expr, false)
-          var expr = Lam("n", Utt(base_ref("INat")), expr, true);
+          var expr = Lam("n", base_ref("INat"), expr, true);
           var expr = Put(expr);
           var term = Dup("z" + (2 ** (sucs - i - 1)), expr, term);
         }
@@ -728,43 +694,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   function parse_typ(nams) {
     if (match("Type")) {
       return Typ(loc(4));
-    }
-  }
-
-  // Parses a type-level identity, `~A`
-  function parse_tid(nams) {
-    var init = idx;
-    if (match("&")) {
-      var expr = parse_term(nams);
-      return Tid(expr, loc(idx - init));
-    }
-  }
-
-  // Parses an unrestricted type, `-A`
-  function parse_utt(nams) {
-    var init = idx;
-    if (match("-")) {
-      var expr = parse_term(nams);
-      return Utt(expr, loc(idx - init));
-    }
-  }
-
-  // Parses an unrestricted term, `<t>`
-  function parse_utv(nams) {
-    var init = idx;
-    if (match("<")) {
-      var expr = parse_term(nams);
-      var skip = parse_exact(">");
-      return Utv(expr, loc(idx - init));
-    }
-  }
-
-  // Parses an unrestricted elim, `+t`
-  function parse_ute(nams) {
-    var init = idx;
-    if (match("+")) {
-      var expr = parse_term(nams);
-      return Ute(expr, loc(idx - init));
     }
   }
 
@@ -990,7 +919,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
           for (var i = moves.length - 1; i >= 0; --i) {
             var moti_term = All(moves[i][0], moves[i][2], moti_term, false, moves[i][3]);
           }
-          var moti_term = Tid(moti_term, moti_loc);
+          var moti_term = moti_term;
           var moti_term = Lam(term_name, null, moti_term, false, moti_loc);
           for (var i = adt_indx.length - 1; i >= 0; --i) {
             var moti_term = Lam(term_name + "." + adt_indx[i][0], null, moti_term, false, moti_loc);
@@ -1159,10 +1088,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   function parse_eql(parsed, init, nams) {
     if (match("==", is_space)) {
       var rgt = parse_term(nams);
-      return App(App(App(base_ref("Equal"), Hol(new_hole_name()), false), Utv(parsed), false), Utv(rgt), false);
-    }
-    if (match("~~", is_space)) {
-      var rgt = parse_term(nams);
       return App(App(App(base_ref("Equal"), Hol(new_hole_name()), false), parsed, false), rgt, false);
     }
   }
@@ -1170,10 +1095,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   // Parses an non-equality, `a != b`
   function parse_dif(parsed, init, nams) {
     if (match("!=", is_space)) {
-      var rgt = parse_term(nams);
-      return App(base_ref("Not"), App(App(App(base_ref("Equal"), Hol(new_hole_name()), false), Utv(parsed), false), Utv(rgt), false), false);
-    }
-    if (match("!~", is_space)) {
       var rgt = parse_term(nams);
       return App(base_ref("Not"), App(App(App(base_ref("Equal"), Hol(new_hole_name()), false), parsed, false), rgt, false), false);
     }
@@ -1221,7 +1142,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     if      (parsed = parse_lam(nams));
     else if (parsed = parse_par(nams));
     else if (parsed = parse_typ(nams));
-    else if (parsed = parse_tid(nams));
     else if (parsed = parse_slf(nams));
     else if (parsed = parse_new(nams));
     else if (parsed = parse_use(nams));
@@ -1229,9 +1149,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     else if (parsed = parse_let(nams));
     else if (parsed = parse_str(nams));
     else if (parsed = parse_chr(nams));
-    else if (parsed = parse_utt(nams));
-    else if (parsed = parse_utv(nams));
-    else if (parsed = parse_ute(nams));
     else if (parsed = parse_log(nams));
     else if (parsed = parse_cse(nams));
     else if (parsed = parse_var(nams));
@@ -1632,10 +1549,6 @@ const derive_adt_ctor = (file, {adt_pram, adt_indx, adt_ctor, adt_name}, c) => {
           var sel = Var(-1 + adt_ctor.length - c);
           for (var F = 0; F < adt_ctor[c][1].length; ++F) {
             var fld = Var(-1 + adt_ctor.length + 1 + adt_ctor[c][1].length - F);
-            // Unrestricted field
-            if (adt_ctor[c][1][F][1][0] === "Utt") {
-              var fld = Utv(Ute(fld));
-            }
             var sel = App(sel, fld, adt_ctor[c][1][F][2]);
           }
           return sel;

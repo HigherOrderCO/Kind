@@ -34,7 +34,8 @@ const compile = (term, defs = {}) => {
           return ptrn;
         } else {
           var dups_ptrn = net.enter_port(ptrn);
-          var dup_addr = net.alloc_node(NOD, level_of[ptrn_st(ptrn)] + 1);
+          //var dup_addr = net.alloc_node(NOD, level_of[ptrn_st(ptrn)] + 1);
+          var dup_addr = net.alloc_node(NOD, Math.floor(Math.random()*(2**24)) + 1);
           net.link_ports(Pointer(dup_addr, 0), ptrn);
           net.link_ports(Pointer(dup_addr, 1), dups_ptrn);
           return Pointer(dup_addr, 2);

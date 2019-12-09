@@ -19,9 +19,9 @@ try {
   console.log("Formality-Lang v" + fm.version);
   console.log("");
   console.log("Commands:");
-  console.log("$ fm -d <file>/<term> | evaluates (debug)");
-  console.log("$ fm -f <file>/<term> | evaluates (fast)");
-  console.log("$ fm -o <file>/<term> | evaluates (optimal)");
+  console.log("$ fm -d <file>/<term> | evaluates (debug-mode)");
+  console.log("$ fm -o <file>/<term> | evaluates (optimal-mode)");
+  console.log("$ fm -f <file>/<term> | evaluates (fast-mode)");
   console.log("$ fm -t <file>/<term> | type-checks");
   console.log("$ fm -t <file>/@      | type-checks (all)");
   console.log("$ fm -j <file>/<term> | compiles to JS");
@@ -87,20 +87,22 @@ async function run_CLI() {
   // Evaluates on fast mode
   } else if (args.f) {
     var {name, defs} = await load_code();
-    var {rt_defs, rt_rfid} = fm.runtime.compile(defs);
+    var {rt_defs, rt_rfid} = fm.fast.compile(defs);
     var rt_term = rt_defs[rt_rfid[name]];
-    var {rt_term,stats} = fm.runtime.reduce(rt_term, rt_defs);
-    var term = fm.runtime.decompile(rt_term);
+    //const ctor_of = ptr => ptr & 0b1111;
+    //const addr_of = ptr => ptr >>> 4;
+    var {rt_term,stats} = fm.fast.reduce(rt_term, rt_defs);
+    var term = fm.fast.decompile(rt_term);
     console.log(fm.lang.show(term));
     console.log(JSON.stringify(stats));
 
   // Evaluates on optimal mode
   } else if (args.o) {
     var {name, defs} = await load_code();
-    var net = fm.to_net.compile(defs[name], defs);
+    var net = fm.optimal.compile(fm.core.Ref(name), defs);
     var stats = {loops:0, rewrites:0, max_len:0};
     net.reduce_lazy(stats);
-    var term = fm.to_net.decompile(net);
+    var term = fm.optimal.decompile(net);
     console.log(fm.lang.show(term));
     console.log(JSON.stringify(stats));
 
@@ -114,12 +116,7 @@ async function run_CLI() {
         var opts = {logs: !!args.m};
         var head = all ? "- " + name + " : " : "";
         var type = fm.core.typecheck(name, null, defs, opts);
-        var halt = fm.core.haltcheck(name, defs);
-        if (halt) {
-          console.log("\x1b[32m" + head + fm.lang.show(type) + " ✔\x1b[0m");
-        } else {
-          console.log("\x1b[33m" + head + fm.lang.show(type) + " ⚠\x1b[0m");
-        }
+        console.log("\x1b[32m" + head + fm.lang.show(type) + " ✔\x1b[0m");
       } catch (e) {
         if (!all) {
           console.log(e);
@@ -195,7 +192,6 @@ async function load_code() {
   try {
     var defs = (await fm.lang.parse(code, {file, tokenify: false, loader})).defs;
     if (name !== "@" && !defs[file+"/"+name]) {
-      console.log(defs[name]);
       throw "Definition not found: `" + file + "/" + name + "`.";
     }
   } catch (e) {
