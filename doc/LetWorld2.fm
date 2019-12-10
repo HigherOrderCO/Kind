@@ -1,0 +1,9 @@
+-- LetWorld2.fm
+import Base#
+
+main : String
+  let output =
+    let hello = "Hello, world!"
+    hello
+  output
+

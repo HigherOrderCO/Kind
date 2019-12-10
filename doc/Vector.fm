@@ -1,0 +1,9 @@
+-- Vector.fm
+import Base#
+
+T Vector<A> (len: Nat)
+| vnil : Vector(A, zero)
+| vcons(len; head: A, tail: Vector(A, len)) : Vector(A, succ(len))
+
+main : Vector(String, 3n)
+   vcons(__ "A", vcons(__ "B", vcons(__ "C", vnil(_))))

@@ -1,0 +1,5 @@
+-- LoopEmpty.fm
+import Base#
+
+main : Empty
+  main

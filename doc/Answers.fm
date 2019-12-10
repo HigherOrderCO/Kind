@@ -1,0 +1,5 @@
+-- Answers.fm
+import Base#
+
+everything : String
+  "42"

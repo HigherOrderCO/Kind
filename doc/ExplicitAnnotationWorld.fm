@@ -1,0 +1,5 @@
+-- ExplicitAnnotationWorld.fm
+import Base#
+
+main : String
+  (((x) => x) :: String -> String)("Hello, world!")

@@ -1,0 +1,5 @@
+-- OneIsTwo.fm
+import Base#
+
+OneIsTwo(e : Empty) : Equal(Nat, 1n, 2n)
+  case e : Equal(Nat, 1n, 2n)

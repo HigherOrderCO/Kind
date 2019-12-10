@@ -1,0 +1,6 @@
+-- Log.fm
+import Base#
+
+main(n: Nat) : Nat
+  log(?b)
+  ?a

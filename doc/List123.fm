@@ -1,0 +1,10 @@
+-- List123.fm
+import Base#
+// Imported from Base
+// T List<A>
+// | nil
+// | cons(head : A, tail : List(A))
+
+main : List(Nat)
+  cons(_ 1n, cons(_ 2n, cons(_ 3n, nil(_))))
+
