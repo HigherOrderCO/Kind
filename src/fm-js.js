@@ -23,9 +23,9 @@ const compile = (term, defs = {}, depth = 0) => {
         if (!seen[term.name]) {
           seen[term.name] = true;
           var dref = go(fm.erase(defs[term.name]), depth);
-          code += "  var "+name+" = "+dref+";\n";
+          code += "  var _"+name+" = "+dref+";\n";
         }
-        return name;
+        return "_"+name;
     }
   })(term, 0);
   return "(function(){\n"+code+"  return "+result+";\n})()";

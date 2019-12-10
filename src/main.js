@@ -113,7 +113,7 @@ async function run_CLI() {
     var names = all ? Object.keys(defs).sort() : [name];
     names.forEach((name) => {
       try {
-        var opts = {logs: !!args.m};
+        var opts = {logs: !args.m};
         var head = all ? "- " + name + " : " : "";
         var type = fm.core.typecheck(name, null, defs, opts);
         console.log("\x1b[32m" + head + fm.lang.show(type) + " ✔\x1b[0m");

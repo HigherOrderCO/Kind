@@ -619,8 +619,8 @@ const typecheck = (name, expect, defs = {}, opts = {}) => {
         }
         if (opts.logs) {
           console.log("[LOG]");
-          console.log("Term: " + opts.print(msge_v, ctx_names(ctx)));
-          console.log("Type: " + opts.print(msge_t, ctx_names(ctx)) + "\n");
+          console.log("Term: " + print(msge_v, ctx_names(ctx)));
+          console.log("Type: " + print(msge_t, ctx_names(ctx)) + "\n");
         }
         var expr_t = typecheck(term[1].expr, expect, ctx, erased);
         type = expr_t;
