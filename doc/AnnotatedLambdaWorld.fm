@@ -1,0 +1,5 @@
+-- AnnotatedLambdaWorld.fm
+import Base#
+
+main : String
+  ((x : String) => x)("Hello, world!")

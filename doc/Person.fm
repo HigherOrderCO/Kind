@@ -1,0 +1,13 @@
+-- Person.fm
+import Base#
+
+T Person
+| person(age : Nat, name : String)
+
+getName(p : Person) : String
+  case p
+  | person => p.name
+
+main : String
+  let john = person(27n, "John")
+  print(getName(john))

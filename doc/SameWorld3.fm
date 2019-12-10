@@ -1,0 +1,11 @@
+-- SameWorld3.fm
+import Base#
+
+callF(f : String -> String, x : String) : String
+  f(x)
+
+same(x : String) : String
+  x
+
+main : String
+  callF((x) => same(x), "Hello, world!")

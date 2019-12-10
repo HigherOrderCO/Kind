@@ -1,0 +1,8 @@
+-- EraseWorld.fm
+import Base#
+
+eraser(T : Type; x : T) : T
+  x
+
+main : String
+  eraser(String; "Hello, world!")

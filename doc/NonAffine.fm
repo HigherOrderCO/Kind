@@ -1,0 +1,7 @@
+-- NonAffine.fm
+import Base#
+
+main(a : Bool, b : Bool) : Bool
+  case a
+  | true  => b
+  | false => not(b)

@@ -1,0 +1,11 @@
+-- Polymorphism.fm
+import Base#
+
+-- Imported from Base
+-- T Pair<A, B>
+-- | pair(fst : A, snd : B)
+
+main : Nat
+  let a = pair(Bool; Nat; true, 7n)
+  case a
+  | pair => a.snd

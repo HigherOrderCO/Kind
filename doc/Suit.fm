@@ -1,0 +1,19 @@
+-- Suit.fm
+import Base#
+
+T Suit
+| clubs
+| diamonds
+| hearts
+| spades
+
+printSuit(suit : Suit) : String
+  case suit
+  | clubs    => print("First rule: you do not talk about Fight Club.")
+  | diamonds => print("Queen shines more than diamond.")
+  | hearts   => print("You always had mine.")
+  | spades   => print("The only card I need is the Ace of Spades! \m/")
+  : String
+
+main : String
+  printSuit(spades)
