@@ -1,0 +1,17 @@
+-- TrueIsTrue.fm
+import Base#
+
+true_is_true : Equal(Bool, true, true)
+  equal(__)
+
+not_not_is_same(b : Bool) : Equal(Bool, not(not(b)), b)
+  case b
+  | true  => equal(Bool; true;)
+  | false => equal(Bool; false;)
+  : Equal(Bool, not(not(b)), b)
+
+main(b : Bool) : not(not(b)) == b
+  case b
+  | true  => equal(__)
+  | false => equal(__)
+  : not(not(b)) == b

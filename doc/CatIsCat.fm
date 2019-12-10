@@ -1,0 +1,5 @@
+-- CatIsCat.fm
+import Base#
+
+main : "cat" == "cat"
+  equal(__)

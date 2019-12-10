@@ -1,0 +1,13 @@
+-- CaseType.fm
+import Base#
+
+CaseType(x : Bool) : Type
+  case x
+  | true  => Nat
+  | false => String
+
+main : Nat
+  case true as x
+  | true  => 42n
+  | false => "hello"
+  : CaseType(x)

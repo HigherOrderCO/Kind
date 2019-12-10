@@ -1,0 +1,8 @@
+-- Move.fm
+import Base#
+
+main(a : Bool, b : Bool) : Bool
+  case a
+  + b : Bool
+  | true  => b
+  | false => not(b)

@@ -1,0 +1,29 @@
+-- IsEven.fm
+import Base#
+
+T IsEven (x : Nat)
+| isEven(half : Nat) : IsEven(mul(2n, half))
+
+even_0n : IsEven(0n)
+  isEven(0n)
+
+even_2n : IsEven(2n)
+  isEven(1n)
+
+even_4n : IsEven(4n)
+  isEven(2n)
+
+even_6n : IsEven(6n)
+  isEven(3n)
+
+div2(n : Nat) : Nat
+  case n
+  | zero => zero
+  | succ => case n.pred as np
+    | zero => zero
+    | succ => succ(div2(np.pred))
+    : Nat
+  : Nat
+
+half(n : Nat, is_even : IsEven(n);) : Nat
+  div2(n)
