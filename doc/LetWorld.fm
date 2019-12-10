@@ -1,0 +1,5 @@
+import Base#
+
+main : String
+  let hello = "Hello, world!"
+  print(hello)

@@ -1,0 +1,6 @@
+-- Alias.fm
+import Base#
+import Answers as A
+
+main : Output
+  print(A/everything)

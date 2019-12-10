@@ -1,0 +1,5 @@
+-- HelloWorld.fm
+import Base#
+
+main : String
+  "Hello, world!"

@@ -1,0 +1,8 @@
+import Base#
+
+same(x : String) : String
+  x
+
+main : String
+  same("Hello, world!")
+

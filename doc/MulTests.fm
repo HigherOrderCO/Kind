@@ -1,0 +1,26 @@
+-- MulTests.fm
+import Base#
+
+mul2(n : Nat) : Nat
+  case n
+  | zero => zero
+  | succ => succ(succ(mul2(n.pred)))
+
+worksFor0 : mul2(0n) == 0n
+  equal(__)
+
+worksFor1 : mul2(1n) == 2n
+  equal(__)
+
+worksFor2 : mul2(2n) == 4n
+  equal(__)
+
+worksForAllN(n : Nat) : Equal(Nat, mul2(n), add(n, n))
+  case n
+  | zero => equal(__)
+  | succ =>
+    let indHyp = worksForAllN(n.pred)
+    let addTwo = (x : Nat) => succ(succ(x))
+    let newHyp = apply(____ addTwo; indHyp)
+    newHyp
+  : mul2(n) == add(n, n)

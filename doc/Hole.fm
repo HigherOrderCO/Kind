@@ -1,0 +1,11 @@
+-- Hole.fm
+import Base#
+
+main(x : Bool) : Bool
+  or(true, ?a)
+
+ex2 : List(Bool)
+  cons(?; true, nil(?;))
+
+ex3 : List(Bool)
+  cons(_ true, nil(_))

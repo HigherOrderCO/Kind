@@ -1,0 +1,6 @@
+-- AllTrue.fm
+import Base#
+
+T AllTrue (xs : List(Bool))
+| at_nil                                      : AllTrue(nil(Bool;))
+| al_cons (xs : List(Bool), tt : AllTrue(xs)) : AllTrue(cons(Bool; true, xs))

@@ -1,0 +1,8 @@
+-- SameWorld.fm
+import Base#
+
+same : String -> String
+  (x) => x
+
+main : String
+  same("Hello, world!")
