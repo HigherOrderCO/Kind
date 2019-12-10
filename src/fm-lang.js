@@ -11,6 +11,7 @@ const {
   App, Slf, New, Use,
   Ann, Log, Hol, Ref,
   subst,
+  shift,
   subst_many,
 } = require("./fm-core.js");
 const {load_file} = require("./fm-loader.js");
@@ -682,7 +683,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   }
 
   // Parses a grouping par, `(...)`
-  function parse_par(nams) {
+  function parse_grp(nams) {
     if (match("(")) {
       var term = parse_term(nams);
       var skip = parse_exact(")");
@@ -802,6 +803,87 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       next();
       var skip = parse_exact("'");
       return build_bits(name.charCodeAt(0).toString(2));
+    }
+  }
+
+  // Parses an if-then-else, `if: t else: u`
+  function parse_ite(nams) {
+    var init = idx;
+    if (match("if ")) {
+      var cond = parse_term(nams);
+      var skip = parse_exact("then");
+      var if_t = parse_term(nams);
+      var skip = parse_exact("else");
+      var if_f = parse_term(nams);
+      var moti = Lam("", null, Hol(new_hole_name()), false);
+      return App(App(App(Use(cond), moti, true), if_t, false), if_f, false);
+    }
+  }
+
+  // Parses a pair type `#{A,B}` or value `#[a,b]`
+  function parse_par(nams) {
+    var init = idx;
+    // Pair
+    if (match("#{")) {
+      var types = [];
+      while (idx < code.length) {
+        var type = parse_term(nams);
+        types.push(type);
+        if (match("}")) break;
+        parse_exact(",");
+      }
+      var parsed = types.pop();
+      for (var i = types.length - 1; i >= 0; --i) {
+        var parsed = App(App(base_ref("Pair"), types[i], false), parsed, false);
+      }
+      return parsed;
+    }
+    // pair
+    if (match("#[")) {
+      var erass = [];
+      var terms = [];
+      while (idx < code.length) {
+        var term = parse_term(nams);
+        terms.push(term);
+        if (match("]")) break;
+        parse_exact(",");
+      }
+      var parsed = terms.pop();
+      for (var i = terms.length - 1; i >= 0; --i) {
+        var apps = App(base_ref("pair"), Hol(new_hole_name()), true);
+        var apps = App(apps, Hol(new_hole_name()), true);
+        var parsed = App(App(apps, terms[i], false), parsed, false);
+      }
+      return parsed;
+    }
+  }
+
+  // Parses a pair projection, `get [x, y] = t`
+  function parse_get(nams) {
+    var init = idx;
+    if (match("get ")) {
+      var skip = parse_exact("#[");
+      var names = [];
+      while (idx < code.length) {
+        var name = parse_string();
+        names.push(name);
+        if (match("]")) break;
+        parse_exact(",");
+      }
+      var skip = parse_exact("=");
+      var pair = parse_term(nams);
+      var skip = match(";");
+      var parsed = parse_term(nams.concat(names));
+      for (var i = names.length - 2; i >= 0; --i) {
+        var nam1 = names[i];
+        var nam2 = i === names.length - 2 ? names[i + 1] : "aux";
+        var expr = i === 0 ? pair : Var(0);
+        var body = i === 0 ? parsed : shift(parsed, 1, 2);
+        var parsed = App(App(Use(expr),
+          Lam("", null, Hol(new_hole_name()), false), true),
+          Lam(nam1, null, Lam(nam2, null, body, false), false), false);
+      }
+      return parsed;
     }
   }
 
@@ -1140,7 +1222,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
 
     // Parses base term
     if      (parsed = parse_lam(nams));
-    else if (parsed = parse_par(nams));
+    else if (parsed = parse_grp(nams));
     else if (parsed = parse_typ(nams));
     else if (parsed = parse_slf(nams));
     else if (parsed = parse_new(nams));
@@ -1149,6 +1231,9 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     else if (parsed = parse_let(nams));
     else if (parsed = parse_str(nams));
     else if (parsed = parse_chr(nams));
+    else if (parsed = parse_ite(nams));
+    else if (parsed = parse_par(nams));
+    else if (parsed = parse_get(nams));
     else if (parsed = parse_log(nams));
     else if (parsed = parse_cse(nams));
     else if (parsed = parse_var(nams));
