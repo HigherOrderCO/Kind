@@ -10,6 +10,7 @@ const {
   Var, Typ, All, Lam,
   App, Slf, New, Use,
   Ann, Log, Hol, Ref,
+  Num, Val, Op1, Op2, Ite,
   subst,
   shift,
   subst_many,
@@ -24,21 +25,21 @@ const {marked_code, random_excuse} = require("./fm-error.js");
 // Converts a term to a string
 const show = ([ctor, args], nams = [], opts = {}) => {
   const format = (term) => {
-    function read_bits(term) {
-      var bits = [];
-      //λbe.λb0.λb1.(b0 ...)
-      var term = term[1].body[1].body[1].body;
-      while (term[0] !== "Var") {
-        bits.push(term[1].func[1].index === 1 ? 0 : 1);
-        term = term[1].argm[1].body[1].body[1].body;
-      }
-      return parseInt(bits.join(""), 2);
-    }
+    //function read_bits(term) {
+      //var bits = [];
+      ////λbe.λb0.λb1.(b0 ...)
+      //var term = term[1].body[1].body[1].body;
+      //while (term[0] !== "Var") {
+        //bits.push(term[1].func[1].index === 1 ? 0 : 1);
+        //term = term[1].argm[1].body[1].body[1].body;
+      //}
+      //return parseInt(bits.join(""), 2);
+    //}
     function read_nums(term) {
       var nums = [];
       while (term[1].body[1].body[0] !== "Var") {
         term = term[1].body[1].body;
-        nums.push(read_bits(term[1].func[1].argm));
+        nums.push(term[1].func[1].argm[1].numb);
         term = term[1].argm;
       }
       return nums;
@@ -51,6 +52,9 @@ const show = ([ctor, args], nams = [], opts = {}) => {
     var str = "";
     for (var i = 0; i < nums.length; ++i) {
       str += String.fromCharCode(nums[i]);
+      if (/[\x00-\x08\x0E-\x1F\x80-\xFF]/.test(str[str.length-1])) {
+        return null; // non-printable; TODO: use a tag instead
+      }
     }
     if (str.length > 0) {
       return '"' + str + '"';
@@ -139,6 +143,21 @@ const show = ([ctor, args], nams = [], opts = {}) => {
         var func = "(" + show(term,nams, opts) + ")";
       }
       return func + "(" + text;
+    case "Num":
+      return "Number";
+    case "Val":
+      return args.numb.toString();
+    case "Op1":
+    case "Op2":
+      var func = args.func;
+      var num0 = show(args.num0, nams, opts);
+      var num1 = show(args.num1, nams, opts);
+      return num0 + " " + func + " " + num1;
+    case "Ite":
+      var cond = show(args.cond, nams, opts);
+      var if_t = show(args.if_t, nams, opts);
+      var if_f = show(args.if_f, nams, opts);
+      return "if " + cond + " then " + if_t + " else " + if_f;
     case "Slf":
       var name = args.name;
       var type = show(args.type, nams.concat([name]), opts);
@@ -315,6 +334,27 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     return chr => set[chr] === 1;
   }
 
+  // Some handy lookup tables
+  const is_native_op =
+    { ".+."   : 1
+    , ".-."   : 1
+    , ".*."   : 1
+    , "./."   : 1
+    , ".%."   : 1
+    , ".**."  : 1
+    , ".&."   : 1
+    , ".|."   : 1
+    , ".^."   : 1
+    , ".~."   : 1
+    , ".>>>." : 1
+    , ".<<."  : 1
+    , ".>."   : 1
+    , ".<."   : 1
+    , ".==."  : 1
+  };
+
+  const is_num_char  = build_charset("0123456789");
+  const is_hex_char  = build_charset("0123456789abcdefABCDEF");
   const is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#-@/");
   const is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#-@+*/%^!<>=&|");
   const is_spacy     = build_charset(" \t\n\r");
@@ -529,7 +569,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     if (!defs[name+"b"]) {
       var term = base_ref("be");
       for (var i = 0; i < name.length; ++i) {
-        var term = App(base_ref(name[name.length - i - 1] === "0" ? "b0" : "b1"), term, false); 
+        var term = App(base_ref(name[name.length - i - 1] === "0" ? "b0" : "b1"), term, false);
       }
       define(name+"b", term);
     }
@@ -541,7 +581,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     if (!defs[name+"B"]) {
       var term = base_ref("ibe");
       for (var i = 0; i < name.length; ++i) {
-        var term = App(base_ref(name[name.length - i - 1] === "0" ? "ib0" : "ib1"), term, false); 
+        var term = App(base_ref(name[name.length - i - 1] === "0" ? "ib0" : "ib1"), term, false);
       }
       define(name+"B", term);
     }
@@ -554,10 +594,11 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     for (var i = 0; i < text.length; ++i) {
       nums.push(text.charCodeAt(i));
     }
-    var term = App(base_ref("nil"), base_ref("Bits"), true);
+    var term = App(base_ref("nil"), Num(), true);
     for (var i = nums.length - 1; i >= 0; --i) {
-      var bits = build_bits(nums[i].toString(2));
-      var term = App(App(App(base_ref("cons"), base_ref("Bits"), true), bits, false), term, false);
+      //var bits = build_bits(nums[i].toString(2));
+      var bits = Val(nums[i]);
+      var term = App(App(App(base_ref("cons"), Num(), true), bits, false), term, false);
     }
     return Ann(base_ref("String"), term, false, loc(idx - init));
   }
@@ -639,9 +680,13 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       error("Unexpected symbol.");
     }
     var last = name[name.length - 1];
+    var is_hex = name.slice(0, 2) === "0x";
+    var is_bin = name.slice(0, 2) === "0b";
     var is_num = !isNaN(Number(name)) && !/[a-zA-Z]/.test(last);
     var is_lit = name.length > 1 && !isNaN(Number(name.slice(0,-1))) && /[a-zA-Z]/.test(last);
-    if (is_lit && last === "N") {
+    if (is_hex || is_bin || is_num) {
+      var term = Val(Number(name), loc(name.length));
+    } else if (is_lit && last === "N") {
       var term = build_inat(name.slice(0,-1));
     } else if (is_lit && last === "n") {
       var term = build_nat(name.slice(0,-1));
@@ -669,6 +714,10 @@ const parse = async (code, opts, root = true, loaded = {}) => {
         term = Var(nams.length - i - 1, loc(name.length));
         term[1].__name = name;
         if (tokens) tokens[tokens.length - 1][0] = "var";
+      // Inline binary operator
+      } else if (is_native_op[name]) {
+        term = Lam("x", Num(), Lam("y", Num(), Op2(name, Var(1), Var(0)), false), false);
+        if (tokens) tokens[tokens.length - 1][0] = "nop";
       // Reference
       } else {
         term = Ref(ref_path(name), false, loc(name.length));
@@ -768,6 +817,13 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     }
   }
 
+  // Parses the type of numbers, `Number`
+  function parse_num(nams) {
+    if (match("Number")) {
+      return Num(loc(4));
+    }
+  }
+
   // Parses a let, `let x = t; u`
   function parse_let(nams) {
     if (match("let ")) {
@@ -802,21 +858,20 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       var name = code[idx];
       next();
       var skip = parse_exact("'");
-      return build_bits(name.charCodeAt(0).toString(2));
+      return Val(name.charCodeAt(0));
     }
   }
 
-  // Parses an if-then-else, `if: t else: u`
+  // Parses an if-then-else, `if then t else u`
   function parse_ite(nams) {
     var init = idx;
     if (match("if ")) {
       var cond = parse_term(nams);
       var skip = parse_exact("then");
-      var if_t = parse_term(nams);
+      var val0 = parse_term(nams);
       var skip = parse_exact("else");
-      var if_f = parse_term(nams);
-      var moti = Lam("", null, Hol(new_hole_name()), false);
-      return App(App(App(Use(cond), moti, true), if_t, false), if_f, false);
+      var val1 = parse_term(nams);
+      return Ite(cond, val0, val1, loc(idx - init));
     }
   }
 
@@ -1033,6 +1088,15 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     }
   }
 
+  // Parses a Number bitwise-not, `.!.(t)`
+  function parse_op2_not(nams) {
+    var init = idx;
+    if (match(".!.(")) {
+      var argm = parse_term(nams);
+      var skip = parse_exact(")");
+      return Op2(".!.", Val(0), argm, loc(idx - init));
+    }
+  }
 
   // Parses an application, `f(x, y, z...)`
   function parse_app(parsed, init, nams) {
@@ -1200,7 +1264,11 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       var func = "." + parse_string_here(x => !is_space(x));
       if (tokens) tokens.push(["txt", ""]);
       var argm = parse_term(nams);
-      return App(App(ref(func), parsed, false), argm, false, loc(idx - init));
+      if (is_native_op[func]) {
+        return Op2(func, parsed, argm, loc(idx - init));
+      } else {
+        return App(App(ref(func), parsed, false), argm, false, loc(idx - init));
+      }
     }
   }
 
@@ -1229,6 +1297,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     else if (parsed = parse_use(nams));
     else if (parsed = parse_hol(nams));
     else if (parsed = parse_let(nams));
+    else if (parsed = parse_num(nams));
     else if (parsed = parse_str(nams));
     else if (parsed = parse_chr(nams));
     else if (parsed = parse_ite(nams));

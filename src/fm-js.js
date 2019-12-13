@@ -16,6 +16,36 @@ const compile = (term, defs = {}, depth = 0) => {
         var func = go(term.func, depth);
         var argm = go(term.argm, depth);
         return func+"("+argm+")";
+    case "Val":
+      return term.numb;
+    case "Op1":
+    case "Op2":
+      var func = term.func;
+      var num0 = compile(term.num0, opts, vars);
+      var num1 = compile(term.num1, opts, vars);
+      switch (func) {
+        case ".+."   : return num0 + num1;
+        case ".-."   : return num0 - num1;
+        case ".*."   : return num0 * num1;
+        case "./."   : return num0 / num1;
+        case ".%."   : return num0 % num1;
+        case ".**."  : return num0 ** num1;
+        case ".&."   : return num0 & num1;
+        case ".|."   : return num0 | num1;
+        case ".^."   : return num0 ^ num1;
+        case ".~."   : return ~ num1;
+        case ".>>>." : return num0 >>> num1;
+        case ".<<."  : return num0 << num1;
+        case ".>."   : return num0 > num1;
+        case ".<."   : return num0 < num1;
+        case ".==."  : return num0 === num1 ? 1 : 0;
+        default: throw "TODO: implement operator "
+      }
+    case "Ite":
+      var cond = compile(term.cond, opts, vars);
+      var if_t = compile(term.if_t, opts, vars);
+      var if_f = compile(term.if_f, opts, vars);
+      return cond ? if_t : if_f;
       case "Log":
         return go(term.expr, depth);
       case "Ref":

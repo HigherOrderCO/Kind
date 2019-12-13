@@ -13,6 +13,11 @@ const App = (func, argm, eras, loc)       => ["App", {func, argm, eras},       M
 const Slf = (name, type, loc)             => ["Slf", {name, type},             MEMO && ("sf" + type[2])                          , loc];
 const New = (type, expr, loc)             => ["New", {type, expr},             MEMO && expr[2]                                   , loc];
 const Use = (expr, loc)                   => ["Use", {expr},                   MEMO && expr[2]                                   , loc];
+const Num = (loc)                         => ["Num", {},                       MEMO && ("wd")                                    , loc];
+const Val = (numb, loc)                   => ["Val", {numb},                   MEMO && ("[" + numb + "]")                        , loc];
+const Op1 = (func, num0, num1, loc)       => ["Op1", {func, num0, num1},       MEMO && ("o1" + func + num0[2] + num1[2])         , loc];
+const Op2 = (func, num0, num1, loc)       => ["Op2", {func, num0, num1},       MEMO && ("o2" + func + num0[2] + num1[2])         , loc];
+const Ite = (cond, if_t, if_f, loc)       => ["Ite", {cond, if_t, if_f},       MEMO && ("ie" + cond[2] + if_t[2] + if_f[2])      , loc];
 const Ann = (type, expr, done, loc)       => ["Ann", {type, expr, done},       MEMO && expr[2]                                   , loc];
 const Log = (msge, expr, loc)             => ["Log", {msge, expr},             MEMO && expr[2]                                   , loc];
 const Hol = (name, loc)                   => ["Hol", {name},                   MEMO && ("{?" + name + "?}")                      , loc];
@@ -36,6 +41,11 @@ const shift = (term, inc, depth) => {
       case "All": return All(t.name, f(t.bind, i, d), f(t.body, i, d+1), t.eras, l);
       case "Lam": return Lam(t.name, f(t.bind, i, d), f(t.body, i, d+1), t.eras, l);
       case "App": return App(f(t.func, i, d), f(t.argm, i, d), t.eras, l);
+      case "Num": return Num(l);
+      case "Val": return Val(t.numb, l);
+      case "Op1": return Op1(t.func, f(t.num0, i, d), f(t.num1, i, d), l);
+      case "Op2": return Op2(t.func, f(t.num0, i, d), f(t.num1, i, d), l);
+      case "Ite": return Ite(f(t.cond, i, d), f(t.if_t, i, d), f(t.if_f, i, d), l);
       case "Slf": return Slf(t.name, f(t.type, i, d+1), l);
       case "New": return New(f(t.type, i, d), f(t.expr, i, d), l);
       case "Use": return Use(f(t.expr, i, d), l);
@@ -59,6 +69,11 @@ const subst = (term, val, depth) => {
       case "All": return All(t.name, f(t.bind, v, d), f(t.body, s(v,1,0), d+1), t.eras, l);
       case "Lam": return Lam(t.name, f(t.bind, v, d), f(t.body, s(v,1,0), d+1), t.eras, l);
       case "App": return App(f(t.func, v, d), f(t.argm, v, d), t.eras, l);
+      case "Num": return Num(l);
+      case "Val": return Val(t.numb, l);
+      case "Op1": return Op1(t.func, f(t.num0, v, d), f(t.num1, v, d), l);
+      case "Op2": return Op2(t.func, f(t.num0, v, d), f(t.num1, v, d), l);
+      case "Ite": return Ite(f(t.cond, v, d), f(t.if_t, v, d), f(t.if_f, v, d), l);
       case "Slf": return Slf(t.name, f(t.type, s(v,1,0), d+1), l);
       case "New": return New(f(t.type, v, d), f(t.expr, v, d), l);
       case "Use": return Use(f(t.expr, v, d), l);
@@ -123,6 +138,47 @@ const reduce = (term, defs, opts = {}) => {
       return App(func, weak_reduce(argm, names), eras);
     }
   };
+  const op1 = (func, num0, num1, names) => {
+    var num0 = reduce(num0, names);
+    if (!opts.no_op1 && num0[0] === "Val") {
+      switch (func) {
+        case ".+."   : return Val(num0[1].numb + num1[1].numb);
+        case ".-."   : return Val(num0[1].numb - num1[1].numb);
+        case ".*."   : return Val(num0[1].numb * num1[1].numb);
+        case "./."   : return Val(num0[1].numb / num1[1].numb);
+        case ".%."   : return Val(num0[1].numb % num1[1].numb);
+        case ".**."  : return Val(num0[1].numb ** num1[1].numb);
+        case ".&."   : return Val((num0[1].numb & num1[1].numb) >>> 0);
+        case ".|."   : return Val((num0[1].numb | num1[1].numb) >>> 0);
+        case ".^."   : return Val((num0[1].numb ^ num1[1].numb) >>> 0);
+        case ".~."   : return Val(~ num1[1].numb);
+        case ".>>>." : return Val((num0[1].numb >>> num1[1].numb));
+        case ".<<."  : return Val((num0[1].numb << num1[1].numb));
+        case ".>."   : return Val(num0[1].numb > num1[1].numb ? 1 : 0);
+        case ".<."   : return Val(num0[1].numb < num1[1].numb ? 1 : 0);
+        case ".==."  : return Val(num0[1].numb === num1[1].numb ? 1 : 0);
+        default      : throw "[NORMALIZATION-ERROR]\nUnknown primitive: " + func + ".";
+      }
+    } else {
+      return Op1(func, num0, num1);
+    }
+  };
+  const op2 = (func, num0, num1, names) => {
+    var num1 = reduce(num1, names);
+    if (!opts.no_op2 && num1[0] === "Val") {
+      return reduce(Op1(func, num0, num1, null), names);
+    } else {
+      return Op2(func, weak_reduce(num0, names), num1);
+    }
+  };
+  const if_then_else = (cond, if_t, if_f, names) => {
+    var cond = reduce(cond, names);
+    if (!opts.no_ite && cond[0] === "Val") {
+      return cond[1].numb > 0 ? reduce(if_t, names) : reduce(if_f, names);
+    } else {
+      return Ite(cond, weak_reduce(if_t, names), weak_reduce(if_f, names));
+    }
+  };
   const dereference = (name, eras, names) => {
     if (!opts.no_ref && defs[name]) {
       var value = defs[name];
@@ -140,22 +196,6 @@ const reduce = (term, defs, opts = {}) => {
       return reduce(unquote(value, names), names);
     } else {
       return Hol(name);
-    }
-  };
-  const restrict = (expr, names) => {
-    var expr = reduce(expr, names);
-    if (!opts.no_utv && expr[0] === "Utv") {
-      return reduce(expr[1].expr, names);
-    } else {
-      return Utv(expr);
-    }
-  };
-  const unrestrict = (expr, names) => {
-    var expr = reduce(expr, names);
-    if (!opts.no_ute && expr[0] === "Ute") {
-      return reduce(expr[1].expr, names);
-    } else {
-      return Ute(expr);
     }
   };
   const use = (expr, names) => {
@@ -192,6 +232,11 @@ const reduce = (term, defs, opts = {}) => {
       case "All": return All(term.name, unquote(term.bind, names), x => unquote(term.body, names_ext(x, null, names)), term.eras);
       case "Lam": return Lam(term.name, term.bind && unquote(term.bind, names), x => unquote(term.body, names_ext(x, null, names)), term.eras);
       case "App": return App(unquote(term.func, names), unquote(term.argm, names), term.eras);
+      case "Num": return Num();
+      case "Val": return Val(term.numb);
+      case "Op1": return Op1(term.func, unquote(term.num0, names), unquote(term.num1, names));
+      case "Op2": return Op2(term.func, unquote(term.num0, names), unquote(term.num1, names));
+      case "Ite": return Ite(unquote(term.cond, names), unquote(term.if_t, names), unquote(term.if_f, names));
       case "Slf": return Slf(term.name, x => unquote(term.type, names_ext(x, null, names)));
       case "New": return New(unquote(term.type, names), unquote(term.expr, names));
       case "Use": return Use(unquote(term.expr, names));
@@ -209,6 +254,11 @@ const reduce = (term, defs, opts = {}) => {
       case "All": return All(term.name, weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(x, term.name, names)), term.eras);
       case "Lam": return Lam(term.name, term.bind && weak_reduce(term.bind, names), x => weak_reduce(term.body(x), names_ext(x, term.name, names)), term.eras);
       case "App": return apply(term.func, term.argm, term.eras, names);
+      case "Num": return Num();
+      case "Val": return Val(term.numb);
+      case "Op1": return op1(term.func, term.num0, term.num1, names);
+      case "Op2": return op2(term.func, term.num0, term.num1, names);
+      case "Ite": return if_then_else(term.cond, term.if_t, term.if_f, names);
       case "Slf": return Slf(term.name, x => weak_reduce(term.type(x), names_ext(x, term.name, names)));
       case "New": return New(weak_reduce(term.type, names), weak_reduce(term.expr, names));
       case "Use": return use(term.expr, names);
@@ -226,6 +276,11 @@ const reduce = (term, defs, opts = {}) => {
       case "All": return All(term.name, quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras);
       case "Lam": return Lam(term.name, term.bind && quote(term.bind, depth), quote(term.body(Var(depth)), depth + 1), term.eras);
       case "App": return App(quote(term.func, depth), quote(term.argm, depth), term.eras);
+      case "Num": return Num();
+      case "Val": return Val(term.numb);
+      case "Op1": return Op1(term.func, quote(term.num0, depth), quote(term.num1, depth));
+      case "Op2": return Op2(term.func, quote(term.num0, depth), quote(term.num1, depth));
+      case "Ite": return Ite(quote(term.cond, depth), quote(term.if_t, depth), quote(term.if_f, depth));
       case "Slf": return Slf(term.name, quote(term.type(Var(depth)), depth + 1));
       case "New": return New(quote(term.type, depth), quote(term.expr, depth));
       case "Use": return Use(quote(term.expr, depth));
@@ -256,6 +311,11 @@ const erase = (term) => {
     case "All": return All(t.name, f(t.bind), f(t.body), t.eras);
     case "Lam": return t.eras ? f(subst(t.body, e, 0)) : Lam(t.name, null, f(t.body), t.eras);
     case "App": return t.eras ? f(t.func)              : App(f(t.func), f(t.argm), t.eras);
+    case "Num": return Num();
+    case "Val": return Val(t.numb);
+    case "Op1": return Op1(t.func, f(t.num0), f(t.num1));
+    case "Op2": return Op2(t.func, f(t.num0), f(t.num1));
+    case "Ite": return Ite(f(t.cond), f(t.if_t), f(t.if_f));
     case "Slf": return Slf(t.name, f(t.type));
     case "New": return f(t.expr);
     case "Use": return f(t.expr);
@@ -329,6 +389,11 @@ const equal = (a, b, depth, defs={}, opts={}) => {
           case "All-All": y = And(And(Eqs(ay[1].bind, by[1].bind, d), Eqs(ay[1].body, by[1].body, d+1)), Val(ay[1].eras === by[1].eras)); break;
           case "Lam-Lam": y = And(Eqs(ay[1].body, by[1].body, d+1), Val(ay[1].eras === by[1].eras)); break;
           case "App-App": y = And(And(Eqs(ay[1].func, by[1].func, d), Eqs(ay[1].argm, by[1].argm, d)), Val(ay[1].eras === by[1].eras)); break;
+          case "Num-Num": y = Val(true); break;
+          case "Val-Val": y = Val(ay[1].numb === by[1].numb); break;
+          case "Op1-Op1": y = And(Val(ay[1].func === by[1].func), And(Eqs(ay[1].num0, by[1].num0, d), Val(ay[1].num1[1].numb === ay[1].num1[1].numb))); break;
+          case "Op2-Op2": y = And(Val(ay[1].func === by[1].func), And(Eqs(ay[1].num0, by[1].num0, d), Eqs(ay[1].num1, by[1].num1, d))); break;
+          case "Ite-Ite": y = And(Eqs(ay[1].cond, by[1].cond, d), Eqs(ay[1].if_t, by[1].if_t, d), Eqs(ay[1].if_f, by[1].if_f, d)); break;
           case "Slf-Slf": y = Eqs(ay[1].type, by[1].type, d+1); break;
           case "New-New": y = Eqs(ay[1].expr, by[1].expr, d); break;
           case "Use-Use": y = Eqs(ay[1].expr, by[1].expr, d); break;
@@ -453,9 +518,8 @@ const typecheck = (name, expect, defs = {}, opts = {}) => {
 
   const subst_holes = (term, depth) => {
     return reduce(term, {}, {holes, depth, weak: false,
-      no_app:1, no_ref:1, no_op1:1, no_op2:1,
-      no_ite:1, no_cpy:1, no_utv:1, no_ute:1,
-      no_use:1, no_ann:1, no_tid:1});
+      no_app:1, no_ref:1, no_op1:1,
+      no_op2:1, no_use:1, no_ann:1});
   };
 
   const print = (term, names = []) => {
@@ -479,8 +543,6 @@ const typecheck = (name, expect, defs = {}, opts = {}) => {
 
   // Checks and returns the type of a term
   const typecheck = (term, expect, ctx = ctx_new, erased = false) => {
-    //console.log("checking", print(term,ctx_names(ctx)), term);
-    //console.log("typecheck", show(term, ctx_names(ctx)));
     const do_error = (str)  => {
       var err_msg = "";
       err_msg += "[ERROR]\n" + str;
@@ -569,6 +631,36 @@ const typecheck = (name, expect, defs = {}, opts = {}) => {
           do_error("Mismatched erasure.");
         }
         type = subst(func_t[1].body, Ann(func_t[1].bind, term[1].argm, false), 0);
+        break;
+      case "Num":
+        type = Typ();
+        break;
+      case "Val":
+        type = Num();
+        break;
+      case "Op1":
+      case "Op2":
+        //if (expect_nf !== null && expect_nf[0] !== "Num") {
+          //do_error("The inferred type of a numeric operation (example: "
+            //+ print(Op2(term[1].func, Ref("x"), Ref("y")), ctx_names(ctx))
+            //+ ") isn't "
+            //+ print(Num(), ctx_names(ctx))
+            //+ ".\n- Inferred type is "
+            //+ print(expect_nf, ctx_names(ctx)));
+        //}
+        var num0_t = typecheck(term[1].num0, Num(), ctx, erased);
+        var num1_t = typecheck(term[1].num1, Num(), ctx, erased);
+        type = Num();
+        break;
+      case "Ite":
+        var cond_t = typecheck(term[1].cond, null, ctx, erased);
+        var cond_t = weak_normal(cond_t, ctx.length);
+        if (cond_t[0] !== "Num") {
+          do_error("Attempted to use if on a non-numeric value.");
+        }
+        var if_t_t = typecheck(term[1].if_t, expect_nf, ctx, erased);
+        var if_t_f = typecheck(term[1].if_f, if_t_t, ctx, erased);
+        type = expect_nf || if_t_t;
         break;
       case "Slf":
         var ex_ctx = ctx_ext(term[1].name, null, term, false, ctx);
@@ -701,6 +793,7 @@ module.exports = {
   Var, Typ, All, Lam,
   App, Slf, New, Use,
   Ann, Log, Hol, Ref,
+  Num, Val, Op1, Op2, Ite,
   equal,
   erase,
   reduce,

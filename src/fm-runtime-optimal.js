@@ -119,16 +119,14 @@ const compile = (term, defs = {}) => {
         var ite_addr = net.alloc_node(ITE, 0xFFFF);
         var cond_ptr = build_net(term[1].cond, net, var_ptrs, level);
         net.link_ports(Pointer(ite_addr, 0), cond_ptr);
-        var pair_ptr = build_net(term[1].pair, net, var_ptrs, level);
+        var if_t_ptr = build_net(term[1].if_t, net, var_ptrs, level);
+        var if_f_ptr = build_net(term[1].if_f, net, var_ptrs, level);
+        var par_addr = net.alloc_node(NOD, 0xFFFF);
+        net.link_ports(Pointer(par_addr, 1), if_t_ptr);
+        net.link_ports(Pointer(par_addr, 2), if_f_ptr);
+        var pair_ptr = Pointer(par_addr, 0);
         net.link_ports(Pointer(ite_addr, 1), pair_ptr);
         return Pointer(ite_addr, 2);
-      case "Cpy":
-        var numb_ptr = build_net(term[1].numb, net, var_ptrs, level);
-        level_of[ptrn_st(numb_ptr)] = 0xFFFE;
-        var_ptrs.push(numb_ptr);
-        var body_ptr = build_net(term[1].body, net, var_ptrs, level);
-        var_ptrs.pop();
-        return body_ptr;
       case "Log":
         return build_net(term[1].expr, net, var_ptrs, level);
       case "Var":
