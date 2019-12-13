@@ -23,6 +23,7 @@ try {
   console.log("$ fm -o <file>/<term> | evaluates (optimal-mode)");
   console.log("$ fm -f <file>/<term> | evaluates (fast-mode)");
   console.log("$ fm -c <file>/<term> | evaluates (fast-mode, C WASM)");
+  console.log("$ fm -e <file>/<term> | evaluates (fast-mode, EVM)");
   console.log("$ fm -t <file>/<term> | type-checks");
   console.log("$ fm -t <file>/@      | type-checks (all)");
   console.log("$ fm -j <file>/<term> | compiles to JS");
@@ -102,6 +103,15 @@ async function run_CLI() {
     var {name, defs} = await load_code();
     var {rt_defs, rt_rfid} = fm.fast.compile(defs);
     var {rt_term, stats} = fm.wasm.reduce(Object.values(rt_defs), rt_rfid[name]);
+    var term = fm.fast.decompile(rt_term);
+    console.log(fm.lang.show(term));
+    console.log(JSON.stringify(stats));
+
+  // Evaluates on fast mode (EVM)
+  } else if (args.e) {
+    var {name, defs} = await load_code();
+    var {rt_defs, rt_rfid} = fm.fast.compile(defs);
+    var {rt_term, stats} = fm.evm.reduce(Object.values(rt_defs), rt_rfid[name]);
     var term = fm.fast.decompile(rt_term);
     console.log(fm.lang.show(term));
     console.log(JSON.stringify(stats));
