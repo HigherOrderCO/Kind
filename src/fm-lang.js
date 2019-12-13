@@ -656,7 +656,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     var term = parse_term(nams);
 
     // If no name given, attempts to infer it from term
-    if (match("as")) {
+    if (match("as ")) {
       var name = parse_string();
     } else if (term[0] === "Var" && term[1].__name) {
       var name = term[1].__name;
@@ -1331,7 +1331,7 @@ const parse = async (code, opts, root = true, loaded = {}) => {
       if (tokens) tokens.push(["imp", ""]);
       var impf = parse_string();
       if (tokens) tokens.push(["txt", ""]);
-      var qual = match("as") ? parse_string() : null;
+      var qual = match("as ") ? parse_string() : null;
       var open = match("open");
       if (open) {
         error("The `open` keyword is obsolete. Remove it.");
