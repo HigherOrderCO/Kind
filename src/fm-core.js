@@ -640,6 +640,8 @@ const typecheck = (name, expect, defs = {}, opts = {}) => {
             defs[term[1].name] = subst_holes(defs[term[1].name], 0);
             if (defs[term[1].name][0] === "Ann") {
               defs[term[1].name][1].done = true;
+            } else {
+              defs[term[1].name] = Ann(dref_t, defs[term[1].name], true);
             }
             types[term[1].name] = dref_t;
           }
