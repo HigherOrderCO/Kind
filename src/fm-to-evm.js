@@ -1,7 +1,8 @@
-var fm = require(".");
-var BN = require('bn.js')
-var VM = require('ethereumjs-vm').default
+import * as fm from "./index.js";
+import BN from "bn.js";
+import VM from "ethereumjs-vm";
 var vm = new VM();
+
 (async() => {
 
 const STOP         = 0x00;

@@ -4,13 +4,14 @@
 //
 // This also exports a few "loader decorators" to enable caching depending on the environment
 
-const xhr = require("xhr-request-promise");
-const version = require("./../package.json").version;
+import xhr from "xhr-request-promise";
+import version from "./version.js";
 
 // load_file receives the name of the file and returns the code asyncronously
 //
 // load_file(file: String) -> Promise<String>
 const load_file = (file) => {
+  console.log("Loading file", file);
   return post("load_file", {file});
 };
 
@@ -79,21 +80,49 @@ else {
     throw "Only available when running in Browser"
   };
 
-  const {promisify} = eval('require("util")');
-  const path = eval('require("path")');
-  const fs = eval('require("fs")');
-  const async_read_file = promisify(fs.readFile)
-  const async_write_file = promisify(fs.writeFile)
+  const fs_promise = import("fs");
+  const path_promise = import("path");
+  const util_promise = import("util");
+
+  const imports = (async () => {
+    const fs = await fs_promise;
+    const path = await path_promise;
+    const {promisify} = await util_promise;
+
+    const async_read_file = promisify(fs.readFile)
+    const async_write_file = promisify(fs.writeFile)
+
+    return {fs, path, async_read_file, async_write_file};
+  })();
 
   with_file_system_cache = (loader, cache_dir_path) => async (file) => {
-    const dir_path = cache_dir_path || get_default_fs_cache_path();
-    setup_cache_dir(dir_path);
+    const {fs, path, async_read_file, async_write_file} = await imports;
+
+    const dir_path = cache_dir_path || path.join(process.cwd(), "fm_modules");
+
+    // Setup Cache dir
+    const version_file_path = path.join(dir_path, "version");
+    const has_cache_dir = fs.existsSync(dir_path);
+    const has_version_file = has_cache_dir && fs.existsSync(version_file_path);
+    const correct_version = has_version_file && fs.readFileSync(version_file_path, "utf8") === version;
+    if (!has_cache_dir || !has_version_file || !correct_version) {
+      if (has_cache_dir) {
+        const files = fs.readdirSync(dir_path);
+        for (var i = 0; i < files.length; ++i) {
+          fs.unlinkSync(path.join(dir_path, files[i]));
+        }
+        fs.rmdirSync(dir_path);
+      }
+      fs.mkdirSync(dir_path);
+      fs.writeFileSync(version_file_path, version);
+    }
+
     const cached_file_path = path.join(dir_path, file + ".fm");
     if(fs.existsSync(cached_file_path)) {
       return await async_read_file(cached_file_path, "utf8");
     }
-
-    const code = await loader(file)
+    
+    const code = await loader(file);
 
     await async_write_file(cached_file_path, code, "utf8");
 
@@ -101,6 +130,7 @@ else {
   }
 
   with_local_files = (loader, local_dir_path) => async (file) => {
+    const {fs, path, async_read_file} = await imports;
     const dir_path = local_dir_path || process.cwd();
     const local_file_path = path.join(dir_path, file + ".fm");
     const has_local_file = fs.existsSync(local_file_path);
@@ -111,29 +141,10 @@ else {
 
     return await loader(file);
   }
-  
-  const get_default_fs_cache_path = () => path.join(process.cwd(), "fm_modules");
 
-  const setup_cache_dir = (cache_dir_path) => {
-    var version_file_path = path.join(cache_dir_path, "version");
-    var has_cache_dir = fs.existsSync(cache_dir_path);
-    var has_version_file = has_cache_dir && fs.existsSync(version_file_path);
-    var correct_version = has_version_file && fs.readFileSync(version_file_path, "utf8") === version;
-    if (!has_cache_dir || !has_version_file || !correct_version) {
-      if (has_cache_dir) {
-        var files = fs.readdirSync(cache_dir_path);
-        for (var i = 0; i < files.length; ++i) {
-          fs.unlinkSync(path.join(cache_dir_path, files[i]));
-        }
-        fs.rmdirSync(cache_dir_path);
-      }
-      fs.mkdirSync(cache_dir_path);
-      fs.writeFileSync(version_file_path, version);
-    }
-  }
 }
 
-module.exports = {
+export {
   load_file_parents,
   load_file,
   save_file,

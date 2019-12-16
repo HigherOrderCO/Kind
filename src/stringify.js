@@ -163,4 +163,4 @@ const show = ([ctor, args], nams = [], opts = {}) => {
   }
 };
 
-module.exports = show;
+export default show;

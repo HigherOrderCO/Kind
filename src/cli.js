@@ -1,8 +1,7 @@
 #!/usr/bin/env node --max-old-space-size=8192
 
-var fs = require("fs");
-var path = require("path");
-var fm = require(".");
+import fs from "fs";
+import * as fm from "./index.js";
 
 try {
   var argv = [].slice.call(process.argv, 2);

@@ -1,7 +1,7 @@
 // ~~ Formality Core Language ~~
 
-const {marked_code, random_excuse} = require("./errors");
-const stringify = require("./stringify");
+import {marked_code, random_excuse} from "./errors.js";
+import stringify from "./stringify.js";
 
 // ::::::::::
 // :: Term ::
@@ -950,7 +950,7 @@ const is_terminating = (term, defs, seen = {}) => {
   }
 };
 
-module.exports = {
+export {
   Var, Typ, All, Lam,
   App, Slf, New, Use,
   Ann, Log, Hol, Ref,

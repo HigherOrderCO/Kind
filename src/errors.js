@@ -39,4 +39,4 @@ function random_excuse() {
   return excuses[Math.floor(Math.random() * excuses.length)];
 }
 
-module.exports = {marked_code, random_excuse};
+export {marked_code, random_excuse};

@@ -6,7 +6,7 @@
 // hard transformations of terms, Bruijn-index shifts, crazy parsing flows.
 // You've been warned (:
 
-const {
+import {
   Var, Typ, All, Lam,
   App, Slf, New, Use,
   Ann, Log, Hol, Ref,
@@ -14,10 +14,10 @@ const {
   subst,
   shift,
   subst_many,
-} = require("./core.js");
-const {load_file} = require("./loader.js");
-const {marked_code, random_excuse} = require("./errors.js");
-const stringify = require("./stringify");
+} from "./core.js";
+import {load_file} from "./loader.js";
+import {marked_code, random_excuse} from "./errors.js";
+import stringify from "./stringify.js";
 
 // :::::::::::::
 // :: Parsing ::
@@ -1393,6 +1393,8 @@ const parse = async (code, opts, root = true, loaded = {}) => {
   };
 }
 
+export default parse;
+
 // :::::::::::::::::::
 // :: Syntax Sugars ::
 // :::::::::::::::::::
@@ -1547,5 +1549,3 @@ const derive_adt_ctor = (file, {adt_pram, adt_indx, adt_ctor, adt_name}, c) => {
     }
   })(0, adt_indx.length, 0);
 }
-
-module.exports = parse;

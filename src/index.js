@@ -1,11 +1,11 @@
-var fm = module.exports = {
-  core      : require("./core"),
-  stringify : require("./stringify"),
-  parse     : require("./parse"),
-  fast      : require("./runtime-fast"),
-  optimal   : require("./runtime-optimal"),
-  js        : require("./fm-to-js"),
-  net       : require("./fm-net"),
-  loader    : require("./loader"),
-  version   : require("./../package.json").version
-};
+import * as core from "./core.js";
+import stringify from "./stringify.js";
+import parse from "./parse.js";
+import * as fast from "./runtime-fast.js";
+import * as optimal from "./runtime-optimal.js";
+import * as js from "./fm-to-js.js"; 
+import * as net from "./fm-net.js";
+import * as loader from "./loader.js";
+import version from "./version.js";
+
+export {core, stringify, parse, fast, optimal, js, net, loader, version};

@@ -1,8 +1,13 @@
 // ~~ Compiles Formality Core to Formality Net ~~
 // TODO: remove num-ops and pairs
 
-const {Var, App, Lam, Val, Op1, Op2, Ite, Par, Fst, Snd, Hol, erase} = require("./core.js");
-const {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, ptrn_eq, ptrn_st, NOD, OP1, OP2, NUM, ITE, PTR, FOR} = require("./fm-net.js");
+import {Var, App, Lam, Val, Op1, Op2, Ite, Hol, erase} from "./core.js";
+import {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, ptrn_eq, ptrn_st, NOD, OP1, OP2, NUM, ITE} from "./fm-net.js";
+
+// TODO: Remove Fst, Snd and Par from this code, for now, I'm just making it compile
+const Fst = () => {};
+const Snd = () => {};
+const Par = () => {};
 
 const op_kind = {
    0 : ".+."   , ".+."   : 0 ,
@@ -283,4 +288,4 @@ const norm = (term, defs, lazy) => {
   return norm_with_stats(term, defs, lazy).norm;
 };
 
-module.exports = {compile, decompile, norm_with_stats, norm};
+export {compile, decompile, norm_with_stats, norm};

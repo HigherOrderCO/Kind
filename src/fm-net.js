@@ -433,4 +433,4 @@ class Net {
   }
 }
 
-module.exports = {Pointer, addr_of, slot_of, Numeric, numb_of, type_of, ptrn_eq, ptrn_st, Net, NUM, PTR, NOD, OP1, OP2, ITE};
+export {Pointer, addr_of, slot_of, Numeric, numb_of, type_of, ptrn_eq, ptrn_st, Net, NUM, PTR, NOD, OP1, OP2, ITE};

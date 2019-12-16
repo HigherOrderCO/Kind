@@ -1,5 +1,5 @@
-var core = require("./core");
-const stringify = require("./stringify");
+import * as core from "./core.js";
+import stringify from "./stringify.js";
 
 // Formality's runtime works by compiling normal Terms to a
 // Runtime Terms (RtTerm), reducing, and decompiling back.
@@ -265,7 +265,7 @@ function reduce(rt_term, rt_defs) {
   return {rt_term: {mem, ptr: root}, stats};
 };
 
-module.exports = {
+export {
   VAR, LAM, APP, REF,
   NIL,
   New,

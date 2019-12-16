@@ -3,6 +3,7 @@
   "version": "0.1.217",
   "description": "",
   "main": "src/index.js",
+  "type": "module",
   "bin": {
     "fm": "src/cli.js"
   },
