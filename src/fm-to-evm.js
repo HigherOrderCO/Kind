@@ -1,4 +1,4 @@
-var fm = require("./..");
+var fm = require(".");
 var BN = require('bn.js')
 var VM = require('ethereumjs-vm').default
 var vm = new VM();

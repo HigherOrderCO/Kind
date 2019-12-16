@@ -219,7 +219,7 @@ const reduce = (term, defs, opts = {}) => {
     var expr = reduce(expr, names);
     if (opts.logs) {
       var nams = names_arr(names).reverse();
-      var show = require("./fm-lang").show;
+      var show = require("./lang").show;
       console.log(show(quote(msge, 0), names || null));
     }
     return expr;
@@ -498,7 +498,7 @@ const ctx_names = (ctx) => {
 // :: Type Checking ::
 // :::::::::::::::::::
 
-const {marked_code, random_excuse} = require("./fm-error.js");
+const {marked_code, random_excuse} = require("./errors.js");
 
 // Checks if a term is well-typed. Does NOT check
 // termination and affinity. Those will be separate.
@@ -523,7 +523,7 @@ const typecheck = (name, expect, defs = {}, opts = {}) => {
   };
 
   const print = (term, names = []) => {
-    var show = require("./fm-lang").show;
+    var show = require("./lang").show;
     var term = display_normal(term, names.length);
     var text = show(term, names);
     var text = "\x1b[2m" + text + "\x1b[0m";

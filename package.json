@@ -2,9 +2,9 @@
   "name": "formality-lang",
   "version": "0.1.215",
   "description": "",
-  "main": "src/fm-lib.js",
+  "main": "src/index.js",
   "bin": {
-    "fm": "src/main.js"
+    "fm": "src/cli.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

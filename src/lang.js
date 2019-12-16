@@ -14,9 +14,9 @@ const {
   subst,
   shift,
   subst_many,
-} = require("./fm-core.js");
-const {load_file} = require("./fm-loader.js");
-const {marked_code, random_excuse} = require("./fm-error.js");
+} = require("./core.js");
+const {load_file} = require("./loader.js");
+const {marked_code, random_excuse} = require("./errors.js");
 
 // :::::::::::::::::::::
 // :: Stringification ::

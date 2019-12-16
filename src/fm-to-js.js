@@ -1,4 +1,4 @@
-const fm = require("./fm-core.js");
+const fm = require("./core.js");
 
 // Converts a Formality-Core Term to a native JavaScript function
 const compile = (term, defs = {}, depth = 0) => {
