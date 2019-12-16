@@ -1,6 +1,6 @@
 {
   "name": "formality-lang",
-  "version": "0.1.216",
+  "version": "0.1.217",
   "description": "",
   "main": "src/fm-lib.js",
   "bin": {
@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/moonad/formality-core#readme",
   "dependencies": {
-    "ethereumjs-vm": "^4.1.1",
     "xhr-request-promise": "^0.1.2"
   }
 }
