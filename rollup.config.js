@@ -15,15 +15,18 @@ const external = ["bn.js", "ethereumjs-vm", "xhr-request-promise", "path", "util
 export default [
   {
     input: src_files,
+    sourcemap: true,
     plugins: [replaceVersion],
     external,
     output: [
       {
-        dir: 'dist/cjs',
+        preserveModules: true,
+        dir: 'cjs',
         format: 'cjs'
       },
       {
-        dir: 'dist/esm',
+        preserveModules: true,
+        dir: 'esm',
         format: 'esm'
       }
     ]
@@ -35,7 +38,7 @@ export default [
     output: { 
       format: "umd",
       name: "formality",
-      file: "dist/formality.umd.js"
+      file: "umd/formality.umd.js"
     }
   }
 ]
