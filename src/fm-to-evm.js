@@ -228,7 +228,7 @@ var ADDR_OF = [PUSH1, 0x4, SHR];
 var CTOR_OF = [PUSH1, 0x0F, AND];
 var NIL     = [PUSH4, 0xFF, 0xFF, 0xFF, 0xFF];
 
-const {defs} = await fm.lang.parse(`
+const {defs} = await fm.parse(`
 T Bool
 | true
 | false
@@ -444,7 +444,7 @@ vm.runCode({
   console.log('Returned : ' + results.returnValue.toString('hex'))
   console.log('gasUsed  : ' + results.gasUsed.toString())
   console.log("lastMem  : " + JSON.stringify(mem));
-  console.log("term     : " + fm.lang.show(fm.fast.decompile({mem,ptr:mem[0]})));
+  console.log("term     : " + fm.stringify(fm.fast.decompile({mem,ptr:mem[0]})));
 }).catch(err => console.log('Error    : ' + err))
 
 vm.on('step', function(data) {
@@ -452,7 +452,7 @@ vm.on('step', function(data) {
   //console.log(pad(4,"0",String(data.pc))
     //+ " " + pad(8," ",data.opcode.name)
     //+ " | " + data.stack
-    //+ " --- " + fm.lang.show(fm.fast.decompile({mem,ptr:mem[0]})));
+    //+ " --- " + fm.stringify(fm.fast.decompile({mem,ptr:mem[0]})));
 })
 
 function get_mem(mem) {

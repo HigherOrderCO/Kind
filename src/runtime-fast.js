@@ -1,4 +1,5 @@
-var core = require("./core.js");
+var core = require("./core");
+const stringify = require("./stringify");
 
 // Formality's runtime works by compiling normal Terms to a
 // Runtime Terms (RtTerm), reducing, and decompiling back.
@@ -136,7 +137,7 @@ function collect(rt_term) {
 // that got substituted in a function that doesn't use its
 // bound variable.
 function reduce(rt_term, rt_defs) {
-  const view = ptr => require("./lang.js/index.js").show(decompile({mem:mem.slice(0), ptr}, 0));
+  const view = ptr => stringify(decompile({mem:mem.slice(0), ptr}, 0));
 
   var {mem, ptr: root} = rt_term;
   var stats = {beta: 0, copy: 0}; // reduction costs
