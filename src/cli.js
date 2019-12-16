@@ -2,7 +2,7 @@
 
 var fs = require("fs");
 var path = require("path");
-var fm = require("./..");
+var fm = require(".");
 
 try {
   var argv = [].slice.call(process.argv, 2);
@@ -84,7 +84,7 @@ async function run_CLI() {
     var term = !args.x ? fm.core.erase(term) : term;
     var opts = {defs, weak: args.w, logs: !!args.m};
     var term = fm.core.reduce(term, defs,opts);
-    console.log(fm.lang.show(term));
+    console.log(fm.stringify(term));
 
   // Evaluates on fast mode
   } else if (args.f) {
@@ -95,7 +95,7 @@ async function run_CLI() {
     //const addr_of = ptr => ptr >>> 4;
     var {rt_term,stats} = fm.fast.reduce(rt_term, rt_defs);
     var term = fm.fast.decompile(rt_term);
-    console.log(fm.lang.show(term));
+    console.log(fm.stringify(term));
     console.log(JSON.stringify(stats));
 
   // Evaluates on fast mode (WASM)
@@ -123,7 +123,7 @@ async function run_CLI() {
     var stats = {loops:0, rewrites:0, max_len:0};
     net.reduce_lazy(stats);
     var term = fm.optimal.decompile(net);
-    console.log(fm.lang.show(term));
+    console.log(fm.stringify(term));
     console.log(JSON.stringify(stats));
 
   // Type-checks
@@ -142,7 +142,7 @@ async function run_CLI() {
         var affi = fm.core.is_affine(fm.core.Ref(name), defs);
         //var elem = fm.core.is_elementary(fm.core.Ref(name), defs);
         var halt = fm.core.is_terminating(fm.core.Ref(name), defs);
-        var str = "\x1b[32m" + head + fm.lang.show(type) + " ✔\x1b[0m";
+        var str = "\x1b[32m" + head + fm.stringify(type) + " ✔\x1b[0m";
         str += " | " + (affi ? right : wrong)("affine") + " | ";
         str += (affi ? right : maybe)("elementary") + " | ";
         str += (halt ? right : maybe)("terminating");
@@ -179,7 +179,7 @@ const loader = [
 
 async function local_imports_or_exit(file, code) {
   try {
-    const {open_imports} = await fm.lang.parse(code, {file, tokenify: false, loader});
+    const {open_imports} = await fm.parse(code, {file, tokenify: false, loader});
     return Object.keys(open_imports).filter((name) => name.indexOf("#") === -1)
   } catch (e) {
     console.log(e.toString());
@@ -220,7 +220,7 @@ async function load_code() {
   }
 
   try {
-    var defs = (await fm.lang.parse(code, {file, tokenify: false, loader})).defs;
+    var defs = (await fm.parse(code, {file, tokenify: false, loader})).defs;
     if (name !== "@" && !defs[file+"/"+name]) {
       throw "Definition not found: `" + file + "/" + name + "`.";
     }

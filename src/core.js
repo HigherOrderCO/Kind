@@ -1,5 +1,8 @@
 // ~~ Formality Core Language ~~
 
+const {marked_code, random_excuse} = require("./errors");
+const stringify = require("./stringify");
+
 // ::::::::::
 // :: Term ::
 // ::::::::::
@@ -219,8 +222,7 @@ const reduce = (term, defs, opts = {}) => {
     var expr = reduce(expr, names);
     if (opts.logs) {
       var nams = names_arr(names).reverse();
-      var show = require("./fm-lang").show;
-      console.log(show(quote(msge, 0), names || null));
+      console.log(stringify(quote(msge, 0), names || null));
     }
     return expr;
   };
@@ -461,7 +463,7 @@ const ctx_get = (i, ctx, use) => {
   return got;
 };
 
-const ctx_str = (ctx, show) => {
+const ctx_str = (ctx, print) => {
   const pad_right = (len, chr, str) => {
     while (str.length < len) {
       str += chr;
@@ -478,7 +480,7 @@ const ctx_str = (ctx, show) => {
   for (var c = ctx; c.length > 0; c = c.rest) {
     var name = c.name;
     var type = c.type;
-    var tstr = show(type, ctx_names(c.rest));
+    var tstr = print(type, ctx_names(c.rest));
     txt.push("\x1b[2m- " + pad_right(max_len, " ", c.name) + " : " + tstr + "\x1b[0m");
     depth += 1;
   }
@@ -497,8 +499,6 @@ const ctx_names = (ctx) => {
 // :::::::::::::::::::
 // :: Type Checking ::
 // :::::::::::::::::::
-
-const {marked_code, random_excuse} = require("./fm-error.js");
 
 // Checks if a term is well-typed. Does NOT check
 // termination and affinity. Those will be separate.
@@ -523,9 +523,8 @@ const typecheck = (name, expect, defs = {}, opts = {}) => {
   };
 
   const print = (term, names = []) => {
-    var show = require("./fm-lang").show;
     var term = display_normal(term, names.length);
-    var text = show(term, names);
+    var text = stringify(term, names);
     var text = "\x1b[2m" + text + "\x1b[0m";
     return text;
   };

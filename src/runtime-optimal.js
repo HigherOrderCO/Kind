@@ -1,7 +1,7 @@
 // ~~ Compiles Formality Core to Formality Net ~~
 // TODO: remove num-ops and pairs
 
-const {Var, App, Lam, Val, Op1, Op2, Ite, Par, Fst, Snd, Hol, erase} = require("./fm-core.js");
+const {Var, App, Lam, Val, Op1, Op2, Ite, Par, Fst, Snd, Hol, erase} = require("./core.js");
 const {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, ptrn_eq, ptrn_st, NOD, OP1, OP2, NUM, ITE, PTR, FOR} = require("./fm-net.js");
 
 const op_kind = {
