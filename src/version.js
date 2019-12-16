@@ -1,3 +1,3 @@
-// TODO: Add rollup to import json file
-const version = "0.1.217";
+// This should be replaced by rollup
+const version = "__VERSION__";
 export default version;
