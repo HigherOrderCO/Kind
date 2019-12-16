@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/moonad/formality-core#readme",
   "dependencies": {
+    "ethereumjs-vm": "^4.1.1",
     "xhr-request-promise": "^0.1.2"
   }
 }

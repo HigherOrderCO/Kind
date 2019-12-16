@@ -124,6 +124,7 @@ function collect(rt_term) {
         return ptr;
       case VAR:
         new_mem[addr] = New(VAR, vpos + 0);
+        return NIL;
     };
   };
   return {mem:new_mem, ptr:go(ptr, 0)};
@@ -135,38 +136,39 @@ function collect(rt_term) {
 // that got substituted in a function that doesn't use its
 // bound variable.
 function reduce(rt_term, rt_defs) {
+  const view = ptr => require("./fm-lang.js").show(decompile({mem:mem.slice(0), ptr}, 0));
+
   var {mem, ptr: root} = rt_term;
   var stats = {beta: 0, copy: 0}; // reduction costs
   var back = []; // nodes we passed through
-  var next = root; // next node to visit
-  var deph = 0; // number of surrounding lambdas
+
+  back.push([rt_term.ptr, 0, 0]);
+
   var collect_length = mem.length * 8; // when to collect garbage
 
   // While there is a node to visit
-  while (next !== NIL) {
+  while (back.length > 0) {
+    var [next,side,deph] = back[back.length - 1];
+
     // If needed, do garbage collection
     if (mem.length > collect_length) {
       var {mem, ptr: root} = collect({mem, ptr: root});
-      var back = [];
-      var next = root;
+      var back = [[root, 0, 0]];
       var collect_length = mem.length * 8;
       continue;
     }
 
     // Pattern-matches the next node
-    var subs = NIL;
-    var side = 0;
     switch (ctor_of(next)) {
       
       // If it is a lambda, continue towards its body
       case LAM:
-        back.push([next,1,deph]);
         var vari = mem[addr_of(next) + 0];
         if (vari !== NIL) {
           mem[addr_of(vari)] = New(VAR, deph);
         }
-        var deph = deph + 1;
-        var next = mem[addr_of(next) + 1];
+        back[back.length-1][1] = 1;
+        back.push([mem[addr_of(next) + 1], 0, deph + 1]); 
         break;
 
       // If its an application, either do a beta-reduction,
@@ -176,24 +178,38 @@ function reduce(rt_term, rt_defs) {
         // Lam-App (beta) reduction
         if (ctor_of(func) === LAM) {
           stats.beta += 1;
+
           // Substitutes variable by argument
-          var argm = mem[addr_of(next) + 1];
           var vari = mem[addr_of(func) + 0];
           if (vari !== NIL) {
+            var argm = mem[addr_of(next) + 1];
             mem[addr_of(vari)] = argm;
           }
+
           // Connects parent to body
-          var subs = mem[addr_of(func) + 1];
+          var subs = mem[addr_of(func) + 1]; 
+
+          back.pop();
+
+          if (back.length > 0) {
+            var back_to = back[back.length - 1];
+            mem[addr_of(back_to[0]) + back_to[1]] = subs;
+            back[back.length-1][1] = 0;
+          } else {
+            var root = subs;
+            back.push([subs, 0, 0]);
+          }
+
         // Continues on func
         } else {
-          back.push([next,0,deph]);
-          var next = func;
+          back.push([func,0,deph]);
         }
         break;
 
       // If it is a reference, copies its code to the
       // memory, correctly shifting variable pointers
       case REF:
+        mem.push(NIL);
         var pos = mem.length; // memory position to copy
         var ref = rt_defs[addr_of(next)]; // term to copy
         var ref_mem = ref.mem;
@@ -208,42 +224,40 @@ function reduce(rt_term, rt_defs) {
             mem.push(ref_mem[i]);
           }
         }
+
+        back.pop();
+
         var subs = New(ctor_of(ref.ptr), addr_of(ref.ptr) + pos); 
+
+        if (back.length > 0) {
+          var back_to = back[back.length - 1];
+          mem[addr_of(back_to[0]) + back_to[1]] = subs;
+          back[back.length-1][1] = 0;
+        } else {
+          var root = subs;
+          back.push([subs, 0, 0]);
+        }
         break;
 
       // If it is a variable or number stop
       case VAR:
-        var next = NIL;
+        back.pop();
+
+        // If we've reached weak normal form, move up and
+        // continue on the arguments of applications
+        while (back.length > 0) {
+          var [back_term, back_side, back_deph] = back[back.length - 1];
+          if (ctor_of(back_term) === APP && back_side === 0) {
+            back[back.length - 1][1] = 1;
+            back.push([mem[addr_of(back_term) + 1], 0, back_deph]);
+            break;
+          } else {
+            back.pop();
+          }
+        }
+
         break;
 
-    }
-
-    // If we performed a reduction, connect the new value to
-    // the parent, and go back to it
-    if (subs !== NIL) {
-      if (back.length > 0) {
-        var back_to = back[back.length - 1];
-        mem[addr_of(back_to[0]) + back_to[1]] = subs;
-        var next = back.pop()[0];
-        var deph = back_to[2];
-      } else {
-        var root = subs;
-        var next = subs;
-      }
-    }
-
-    // If we've reached weak normal form, move up and
-    // continue on the arguments of applications
-    if (next === NIL) {
-      while (back.length > 0) {
-        var [back_term, back_side, back_deph] = back.pop();
-        if (ctor_of(back_term) === APP && back_side === 0) {
-          back.push([back_term, 1]);
-          var deph = back_deph;
-          var next = mem[addr_of(back_term) + 1];
-          break;
-        }
-      }
     }
   };
 
@@ -251,8 +265,13 @@ function reduce(rt_term, rt_defs) {
 };
 
 module.exports = {
+  VAR, LAM, APP, REF,
+  NIL,
+  New,
+  ctor_of,
+  addr_of,
   compile,
   decompile,
   collect,
-  reduce
+  reduce,
 };
