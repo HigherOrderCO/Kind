@@ -1,5 +1,8 @@
 import fs from "fs";
 import replace from '@rollup/plugin-replace';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
+import builtins from 'builtin-modules';
 
 const src_files = fs
   .readdirSync("./src/")
@@ -24,5 +27,15 @@ export default [
         format: 'esm'
       }
     ]
+  },
+  {
+    input: "src/index.js",
+    plugins: [replaceVersion, resolve({mainFields: ['module', 'main', 'browser']}), commonjs()],
+    external: builtins,
+    output: { 
+      format: "umd",
+      name: "formality",
+      file: "dist/formality.umd.js"
+    }
   }
 ]
