@@ -789,6 +789,168 @@ const typecheck = (name, expect, defs = {}, opts = {}) => {
   }
 };
 
+// :::::::::::::::::::::::
+// :: Affinity Checking ::
+// :::::::::::::::::::::::
+
+const uses = (term, depth) => {
+  switch (term[0]) {
+    case "Var": return term[1].index === depth ? 1 : 0;
+    case "Lam":
+      var body = uses(term[1].body, depth + 1);
+      return body;
+    case "App":
+      var func = uses(term[1].func, depth);
+      var argm = term[1].eras ? 0 : uses(term[1].argm, depth);
+      return func + argm;
+    case "Op1":
+      var num0 = uses(term[1].num0, depth);
+      var num1 = uses(term[1].num1, depth);
+      return num0 + num1;
+    case "Op2":
+      var num0 = uses(term[1].num0, depth);
+      var num1 = uses(term[1].num1, depth);
+      return num0 + num1;
+    case "Ite":
+      var cond = uses(term[1].cond, depth);
+      var if_t = uses(term[1].if_t, depth);
+      var if_f = uses(term[1].if_f, depth);
+      return cond + if_t + if_f;
+    case "New":
+      var expr = uses(term[1].expr, depth);
+      return expr;
+    case "Use":
+      var expr = uses(term[1].expr, depth);
+      return expr;
+    case "Ann":
+      var expr = uses(term[1].expr, depth);
+      return expr;
+    case "Log":
+      var expr = uses(term[1].expr, depth);
+      return expr;
+    default:
+      return 0;
+  }
+};
+
+const is_affine = (term, defs, seen = {}) => {
+  switch (term[0]) {
+    case "Lam":
+      var self = uses(term[1].body, 0) <= 1;
+      var body = is_affine(term[1].body, defs, seen);
+      return self && body;
+    case "App":
+      var func = is_affine(term[1].func, defs, seen);
+      var argm = term[1].eras ? true : is_affine(term[1].argm, defs, seen);
+      return func && argm;
+    case "Op1":
+      var num0 = is_affine(term[1].num0, defs, seen);
+      var num1 = is_affine(term[1].num1, defs, seen);
+      return num0 && num1;
+    case "Op2":
+      var num0 = is_affine(term[1].num0, defs, seen);
+      var num1 = is_affine(term[1].num1, defs, seen);
+      return num0 && num1;
+    case "Ite":
+      var cond = is_affine(term[1].cond, defs, seen);
+      var if_t = is_affine(term[1].if_t, defs, seen);
+      var if_f = is_affine(term[1].if_t, defs, seen);
+      return cond && if_t && if_f;
+    case "New":
+      var expr = is_affine(term[1].expr, defs, seen);
+      return expr;
+    case "Use":
+      var expr = is_affine(term[1].expr, defs, seen);
+      return expr;
+    case "Ann":
+      var expr = is_affine(term[1].expr, defs, seen);
+      return expr;
+    case "Log":
+      var expr = is_affine(term[1].expr, defs, seen);
+      return expr;
+    case "Ref":
+      if (seen[term[1].name]) {
+        return true;
+      } else {
+        var seen = {...seen, [term[1].name]: true};
+        return is_affine(defs[term[1].name], defs, seen);
+      }
+    default:
+      return true;
+  }
+};
+
+// ::::::::::::::::::::::::
+// :: Elementarity Check ::
+// ::::::::::::::::::::::::
+
+// TODO: this should check if a term is typeable in EAL and,
+// thus, compatible with bookkeeping free optimal
+// reductions. Previously, we used box annotations, allowing
+// the programmer to evidence the complexity class, but the
+// system was considered too inconvenient. Since the problem
+// of infering boxes has been proven to be solveable
+// quickly, I've removed box annotations in favor of a box
+// inferencer, but it must be done. 
+
+function is_elementary(term) {
+  return false;
+};
+
+// ::::::::::::::::::::::::::
+// :: Termination Checking ::
+// ::::::::::::::::::::::::::
+
+// TODO: right now, this only verifies if recursion is used.
+// Checking for structural recursion would allow more
+// programs to pass the termination check.
+
+const is_terminating = (term, defs, seen = {}) => {
+  switch (term[0]) {
+    case "Lam":
+      var body = is_terminating(term[1].body, defs, seen);
+      return body;
+    case "App":
+      var func = is_terminating(term[1].func, defs, seen);
+      var argm = term[1].eras || is_terminating(term[1].argm, defs, seen);
+      return func && argm;
+    case "Op1":
+      var num0 = is_terminating(term[1].num0, defs, seen);
+      var num1 = is_terminating(term[1].num1, defs, seen);
+      return num0 && num1;
+    case "Op2":
+      var num0 = is_terminating(term[1].num0, defs, seen);
+      var num1 = is_terminating(term[1].num1, defs, seen);
+      return num0 && num1;
+    case "Ite":
+      var cond = is_terminating(term[1].cond, defs, seen);
+      var if_t = is_terminating(term[1].if_t, defs, seen);
+      var if_f = is_terminating(term[1].if_f, defs, seen);
+      return cond && if_t && if_f;
+    case "Ann":
+      var expr = is_terminating(term[1].expr, defs, seen);
+      return expr;
+    case "New":
+      var expr = is_terminating(term[1].expr, defs, seen);
+      return expr;
+    case "Use":
+      var expr = is_terminating(term[1].expr, defs, seen);
+      return expr;
+    case "Log":
+      var expr = is_terminating(term[1].expr, defs, seen);
+      return expr;
+    case "Ref":
+      if (seen[term[1].name]) {
+        return false;
+      } else {
+        var seen = {...seen, [term[1].name]: true};
+        return is_terminating(defs[term[1].name], defs, seen);
+      }
+    default:
+      return true;
+  }
+};
+
 module.exports = {
   Var, Typ, All, Lam,
   App, Slf, New, Use,
@@ -801,4 +963,8 @@ module.exports = {
   subst,
   subst_many,
   typecheck,
+  uses,
+  is_affine,
+  is_elementary,
+  is_terminating,
 };

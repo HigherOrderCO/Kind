@@ -133,10 +133,20 @@ async function run_CLI() {
     var names = all ? Object.keys(defs).sort() : [name];
     names.forEach((name) => {
       try {
+        var right = (x) => "\x1b[32m" + x + " ✔\x1b[0m";
+        var maybe = (x) => "\x1b[33m" + x + " ?\x1b[0m";
+        var wrong = (x) => "\x1b[31m" + x + " ✗\x1b[0m";
         var opts = {logs: !args.m};
         var head = all ? "- " + name + " : " : "";
         var type = fm.core.typecheck(name, null, defs, opts);
-        console.log("\x1b[32m" + head + fm.lang.show(type) + " ✔\x1b[0m");
+        var affi = fm.core.is_affine(fm.core.Ref(name), defs);
+        //var elem = fm.core.is_elementary(fm.core.Ref(name), defs);
+        var halt = fm.core.is_terminating(fm.core.Ref(name), defs);
+        var str = "\x1b[32m" + head + fm.lang.show(type) + " ✔\x1b[0m";
+        str += " | " + (affi ? right : wrong)("affine") + " | ";
+        str += (affi ? right : maybe)("elementary") + " | ";
+        str += (halt ? right : maybe)("terminating");
+        console.log(str);
       } catch (e) {
         if (!all) {
           console.log(e);
