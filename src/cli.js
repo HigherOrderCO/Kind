@@ -132,27 +132,30 @@ async function run_CLI() {
     var all = name === "@";
     var names = all ? Object.keys(defs).sort() : [name];
     names.forEach((name) => {
+      var right = (x) => "\x1b[32m" + x + " ✔\x1b[0m";
+      var maybe = (x) => "\x1b[33m" + x + " ?\x1b[0m";
+      var wrong = (x) => "\x1b[31m" + x + " ✗\x1b[0m";
+
       try {
-        var right = (x) => "\x1b[32m" + x + " ✔\x1b[0m";
-        var maybe = (x) => "\x1b[33m" + x + " ?\x1b[0m";
-        var wrong = (x) => "\x1b[31m" + x + " ✗\x1b[0m";
         var opts = {logs: !args.m};
-        var head = all ? "- " + name + " : " : "";
+        var head = all ? "" + name + " : " : "";
         var type = fm.core.typecheck(name, null, defs, opts);
         var affi = fm.core.is_affine(fm.core.Ref(name), defs);
         //var elem = fm.core.is_elementary(fm.core.Ref(name), defs);
         var halt = fm.core.is_terminating(fm.core.Ref(name), defs);
-        var str = "\x1b[32m" + head + fm.stringify(type) + " ✔\x1b[0m";
-        str += " | " + (affi ? right : wrong)("affine") + " | ";
+        var str = right(head + fm.stringify(type));
+        str += "\n| "
+        str += (affi ? right : wrong)("affine") + " | ";
         str += (affi ? right : maybe)("elementary") + " | ";
-        str += (halt ? right : maybe)("terminating");
+        str += (halt ? right : maybe)("terminating") + " |";
+        str += "\n";
         console.log(str);
       } catch (e) {
         if (!all) {
           console.log(e);
           process.exit(1);
         } else {
-          console.log("\x1b[31m" + head + "error\x1b[0m");
+          console.log(wrong(head + "error")+"\n");
         }
       }
     });
