@@ -1,5 +1,7 @@
 import fs from "fs";
 import * as fm from "./index.js";
+import with_local_files from "./fs-local";
+import with_file_system_cache from "./fs-cache";
 
 export default async function run() {
   try {
@@ -172,8 +174,8 @@ const with_download_warning = (loader) => async (file) => {
 
 const loader = [
   with_download_warning,
-  fm.loader.with_file_system_cache,
-  fm.loader.with_local_files
+  with_file_system_cache,
+  with_local_files
 ].reduce((loader, mod) => mod(loader), fm.loader.load_file)
 
 async function local_imports_or_exit(file, code) {

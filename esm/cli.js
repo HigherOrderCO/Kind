@@ -4,12 +4,16 @@ import stringify from './stringify.js';
 import { h as erase, r as reduce, t as typecheck, k as is_affine, R as Ref, m as is_terminating } from './core-e930ae7b.js';
 import 'xhr-request-promise';
 import version from './version.js';
-import { a as load_file, l as load_file_parents, w as with_file_system_cache, b as with_local_files, s as save_file } from './loader-97daf9f8.js';
+import { a as load_file, l as load_file_parents, s as save_file } from './loader-72e91ba3.js';
 import parse from './parse.js';
 import { d as compile$1, r as reduce$1, e as decompile } from './runtime-fast-45710fb0.js';
 import './fm-net-b5947aee.js';
 import { c as compile$2, d as decompile$1 } from './runtime-optimal-7d371ce5.js';
 import { c as compile } from './fm-to-js-01192387.js';
+import 'path';
+import 'util';
+import with_local_files from './fs-local.js';
+import with_file_system_cache from './fs-cache.js';
 
 async function run() {
   try {

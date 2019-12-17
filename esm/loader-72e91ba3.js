@@ -1,11 +1,7 @@
-// This module is responsible for loading and publishing files from the Forall repository
-// For now this is using the deprecated moonad.org/api repository, but will be updated to the newer
-// Forall API once the service is deployed and ready to be used.
-//
-// This also exports a few "loader decorators" to enable caching depending on the environment
+import xhr from 'xhr-request-promise';
+import './version.js';
 
-import xhr from "xhr-request-promise";
-import version from "./version.js";
+// This module is responsible for loading and publishing files from the Forall repository
 
 // load_file receives the name of the file and returns the code asyncronously
 //
@@ -26,12 +22,6 @@ const save_file = (file, code) => post("save_file", {file, code});
 // load_file_parents(file: String) -> Promise<String[]>
 const load_file_parents = (file) => post("load_file_parents", {file});
 
-export {
-  load_file_parents,
-  load_file,
-  save_file
-}
-
 // The current API is just a simple RPC, so this function helps a lot
 const post = (func, body) => {
   return xhr("http://moonad.org/api/" + func,
@@ -46,3 +36,12 @@ const post = (func, body) => {
       }
     });
 };
+
+var loader = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  load_file_parents: load_file_parents,
+  load_file: load_file,
+  save_file: save_file
+});
+
+export { load_file as a, loader as b, load_file_parents as l, save_file as s };

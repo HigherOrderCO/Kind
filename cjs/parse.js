@@ -5,7 +5,7 @@ var stringify = require('./stringify.js');
 var core = require('./core-d72ddc22.js');
 require('xhr-request-promise');
 require('./version.js');
-var loader = require('./loader-04d65ab6.js');
+var loader = require('./loader-9724b96e.js');
 
 // WARNING: here shall be dragons!
 

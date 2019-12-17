@@ -16,17 +16,14 @@ const external = ["bn.js", "ethereumjs-vm", "xhr-request-promise", "path", "util
 export default [
   {
     input: src_files,
-    sourcemap: true,
     plugins: [replaceVersion],
     external,
     output: [
       {
-        preserveModules: true,
         dir: 'cjs',
         format: 'cjs'
       },
       {
-        preserveModules: true,
         dir: 'esm',
         format: 'esm'
       }

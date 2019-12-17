@@ -8,12 +8,16 @@ var stringify = require('./stringify.js');
 var core = require('./core-d72ddc22.js');
 require('xhr-request-promise');
 var version = require('./version.js');
-var loader$1 = require('./loader-04d65ab6.js');
+var loader$1 = require('./loader-9724b96e.js');
 var parse = require('./parse.js');
 var runtimeFast = require('./runtime-fast-0c0e8a8d.js');
 require('./fm-net-4e316c61.js');
 var runtimeOptimal = require('./runtime-optimal-a2bb9ca1.js');
 var fmToJs = require('./fm-to-js-0b7407a9.js');
+require('path');
+require('util');
+var fsLocal = require('./fs-local.js');
+var fsCache = require('./fs-cache.js');
 
 async function run() {
   try {
@@ -184,8 +188,8 @@ const with_download_warning = (loader) => async (file) => {
 
 const loader = [
   with_download_warning,
-  loader$1.with_file_system_cache,
-  loader$1.with_local_files
+  fsCache,
+  fsLocal
 ].reduce((loader, mod) => mod(loader), loader$1.load_file);
 
 async function local_imports_or_exit(file, code) {

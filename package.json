@@ -4,6 +4,7 @@
   "description": "",
   "main": "cjs/index.js",
   "module": "esm/index.js",
+  "type": "module",
   "files": [
     "cjs",
     "esm",
@@ -15,7 +16,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf esm csj umd && rollup -c rollup.config.js",
+    "build": "rimraf esm cjs umd && rollup -c rollup.config.js",
     "prepublishOnly": "npm run build"
   },
   "repository": {
