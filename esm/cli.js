@@ -1,19 +1,15 @@
-'use strict';
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var fs = _interopDefault(require('fs'));
-require('./errors.js');
-var stringify = require('./stringify.js');
-var core = require('./core-d72ddc22.js');
-require('xhr-request-promise');
-var version = require('./version.js');
-var loader$1 = require('./loader-04d65ab6.js');
-var parse = require('./parse.js');
-var runtimeFast = require('./runtime-fast-0c0e8a8d.js');
-require('./fm-net-4e316c61.js');
-var runtimeOptimal = require('./runtime-optimal-a2bb9ca1.js');
-var fmToJs = require('./fm-to-js-73571a8e.js');
+import fs from 'fs';
+import './errors.js';
+import stringify from './stringify.js';
+import { h as erase, r as reduce, t as typecheck, k as is_affine, R as Ref, m as is_terminating } from './core-e930ae7b.js';
+import 'xhr-request-promise';
+import version from './version.js';
+import { a as load_file, l as load_file_parents, w as with_file_system_cache, b as with_local_files, s as save_file } from './loader-97daf9f8.js';
+import parse from './parse.js';
+import { d as compile$1, r as reduce$1, e as decompile } from './runtime-fast-45710fb0.js';
+import './fm-net-b5947aee.js';
+import { c as compile$2, d as decompile$1 } from './runtime-optimal-7d371ce5.js';
+import { c as compile } from './fm-to-js-ed975676.js';
 
 async function run() {
   try {
@@ -58,7 +54,7 @@ async function run() {
 
   // Download file from FPM
   } else if (args.l) {
-    var file_data = await loader$1.load_file(main);
+    var file_data = await load_file(main);
     console.log(fs.writeFileSync(main + ".fm", file_data));
     console.log("Downloaded file as `" + main + ".fm`!");
 
@@ -73,7 +69,7 @@ async function run() {
   // Show file cited_by
   } else if (args.i) {
     try {
-      var cited_by = await loader$1.load_file_parents(main);
+      var cited_by = await load_file_parents(main);
       console.log(cited_by.map(file => "- " + file).join("\n"));
     } catch (e) {
       console.log("Couldn't load global file '" + main + "'.");
@@ -83,28 +79,28 @@ async function run() {
   } else if (args.j) {
     var {name, defs} = await load_code();
     var term = defs[name];
-    var term = core.erase(term);
-    var code = fmToJs.compile(term, defs);
+    var term = erase(term);
+    var code = compile(term, defs);
     console.log(code);
   
   // Evaluates on debug mode
   } else if (args.d) {
     var {name, defs} = await load_code();
     var term = defs[name];
-    var term = !args.x ? core.erase(term) : term;
+    var term = !args.x ? erase(term) : term;
     var opts = {defs, weak: args.w, logs: !!args.m};
-    var term = core.reduce(term, defs,opts);
+    var term = reduce(term, defs,opts);
     console.log(stringify(term));
 
   // Evaluates on fast mode
   } else if (args.f) {
     var {name, defs} = await load_code();
-    var {rt_defs, rt_rfid} = runtimeFast.compile(defs);
+    var {rt_defs, rt_rfid} = compile$1(defs);
     var rt_term = rt_defs[rt_rfid[name]];
     //const ctor_of = ptr => ptr & 0b1111;
     //const addr_of = ptr => ptr >>> 4;
-    var {rt_term,stats} = runtimeFast.reduce(rt_term, rt_defs);
-    var term = runtimeFast.decompile(rt_term);
+    var {rt_term,stats} = reduce$1(rt_term, rt_defs);
+    var term = decompile(rt_term);
     console.log(stringify(term));
     console.log(JSON.stringify(stats));
 
@@ -129,10 +125,10 @@ async function run() {
   // Evaluates on optimal mode
   } else if (args.o) {
     var {name, defs} = await load_code();
-    var net = runtimeOptimal.compile(core.Ref(name), defs);
+    var net = compile$2(Ref(name), defs);
     var stats = {loops:0, rewrites:0, max_len:0};
     net.reduce_lazy(stats);
-    var term = runtimeOptimal.decompile(net);
+    var term = decompile$1(net);
     console.log(stringify(term));
     console.log(JSON.stringify(stats));
 
@@ -149,10 +145,10 @@ async function run() {
       try {
         var opts = {logs: !args.m};
         var head = all ? "" + name + " : " : "";
-        var type = core.typecheck(name, null, defs, opts);
-        var affi = core.is_affine(core.Ref(name), defs);
+        var type = typecheck(name, null, defs, opts);
+        var affi = is_affine(Ref(name), defs);
         //var elem = fm.core.is_elementary(fm.core.Ref(name), defs);
-        var halt = core.is_terminating(core.Ref(name), defs);
+        var halt = is_terminating(Ref(name), defs);
         var str = right(head + stringify(type));
         str += "\n| ";
         str += (affi ? right : wrong)("affine") + " | ";
@@ -184,9 +180,9 @@ const with_download_warning = (loader) => async (file) => {
 
 const loader = [
   with_download_warning,
-  loader$1.with_file_system_cache,
-  loader$1.with_local_files
-].reduce((loader, mod) => mod(loader), loader$1.load_file);
+  with_file_system_cache,
+  with_local_files
+].reduce((loader, mod) => mod(loader), load_file);
 
 async function local_imports_or_exit(file, code) {
   try {
@@ -212,7 +208,7 @@ async function upload(file, global_path = {}) {
       var code = code.replace(new RegExp("import " + imp_file + " *as")  , "import " + g_name + "#" + g_vers + " as");
     }
 
-    global_path[file] = await loader$1.save_file(file, code);
+    global_path[file] = await save_file(file, code);
     console.log("Saved `" + file + "` as `" + global_path[file] + "`!");
   }
   return global_path[file];
@@ -242,4 +238,4 @@ async function load_code() {
   return {name, defs};
 }
 
-module.exports = run;
+export default run;

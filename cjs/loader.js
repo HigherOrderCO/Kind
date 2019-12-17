@@ -4,7 +4,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 require('xhr-request-promise');
 require('./version.js');
-var loader$1 = require('./loader-69b5c99c.js');
+var loader$1 = require('./loader-04d65ab6.js');
 
 
 

@@ -1,20 +1,16 @@
-'use strict';
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-require('./errors.js');
-var stringify = require('./stringify.js');
-require('./core-d72ddc22.js');
-require('xhr-request-promise');
-require('./version.js');
-require('./loader-04d65ab6.js');
-var parse = require('./parse.js');
-var runtimeFast = require('./runtime-fast-0c0e8a8d.js');
-require('./fm-net-4e316c61.js');
-require('./runtime-optimal-a2bb9ca1.js');
-require('./fm-to-js-73571a8e.js');
-var BN = _interopDefault(require('bn.js'));
-var VM = _interopDefault(require('ethereumjs-vm'));
+import './errors.js';
+import stringify from './stringify.js';
+import './core-e930ae7b.js';
+import 'xhr-request-promise';
+import './version.js';
+import './loader-97daf9f8.js';
+import parse from './parse.js';
+import { d as compile, e as decompile, a as New, N as NIL, R as REF, c as ctor_of, b as addr_of } from './runtime-fast-45710fb0.js';
+import './fm-net-b5947aee.js';
+import './runtime-optimal-7d371ce5.js';
+import './fm-to-js-ed975676.js';
+import BN from 'bn.js';
+import VM from 'ethereumjs-vm';
 
 var vm = new VM();
 
@@ -212,7 +208,7 @@ var SWITCH = (value, cases) => {
 
 var ADDR_OF = [PUSH1, 0x4, SHR];
 var CTOR_OF = [PUSH1, 0x0F, AND];
-var NIL     = [PUSH4, 0xFF, 0xFF, 0xFF, 0xFF];
+var NIL$1     = [PUSH4, 0xFF, 0xFF, 0xFF, 0xFF];
 
 const {defs} = await parse(`
 T Bool
@@ -236,7 +232,7 @@ negate(xs : List(Bool)) : List(Bool)
 main negate([true, true, false, false, true, true, false, false])
 `, {});
 
-const {rt_defs, rt_rfid} = runtimeFast.compile(defs);
+const {rt_defs, rt_rfid} = compile(defs);
 
 var term = rt_defs[rt_rfid["main/main"]];
 
@@ -298,7 +294,7 @@ var code = [
         GET([DUP3, ADDR_OF]),
 
         // if (vari !== NIL)
-        IF([DUP1, NIL, EQ], [POP], [
+        IF([DUP1, NIL$1, EQ], [POP], [
           // mem[addr_of(vari)] = New(VAR, deph);
           ADDR_OF, DUP2, NUM(4), SHL, SET([SWAP1]),
         ]),
@@ -326,7 +322,7 @@ var code = [
           GET([DUP1, ADDR_OF]),
 
           // if (vari !== NIL)
-          IF([DUP1, NIL, EQ, ISZERO], [
+          IF([DUP1, NIL$1, EQ, ISZERO], [
             //[NUM(99990006),POP],
             // var argm = mem[addr_of(next) + 1];
             GET([DUP5, ADDR_OF, PUSH1, 1, ADD]),
@@ -369,7 +365,7 @@ var code = [
         //[NUM(99990009),POP],
 
         // mem.push(0);
-        NIL, MSIZE, MSTORE,
+        NIL$1, MSIZE, MSTORE,
 
         // var add_val = mem.length;
         MSIZE, PUSH1, 1, SHR,
@@ -379,10 +375,10 @@ var code = [
           var ref = rt_defs[key];
           return flat([
             ref.mem.map(ref_term => {
-              var ref_ctor = runtimeFast.ctor_of(ref_term);
-              var ref_addr = runtimeFast.addr_of(ref_term);
-              var ref_numb = NUM(runtimeFast.New(ref_ctor, ref_addr));
-              if (ref_term !== runtimeFast.NIL && ref_ctor !== runtimeFast.REF) {
+              var ref_ctor = ctor_of(ref_term);
+              var ref_addr = addr_of(ref_term);
+              var ref_numb = NUM(New(ref_ctor, ref_addr));
+              if (ref_term !== NIL && ref_ctor !== REF) {
                 var ref_numb = [DUP1, ref_numb, ADD];
               } else {
                 var ref_numb = [ref_numb];
@@ -430,7 +426,7 @@ vm.runCode({
   console.log('Returned : ' + results.returnValue.toString('hex'));
   console.log('gasUsed  : ' + results.gasUsed.toString());
   console.log("lastMem  : " + JSON.stringify(mem));
-  console.log("term     : " + stringify(runtimeFast.decompile({mem,ptr:mem[0]})));
+  console.log("term     : " + stringify(decompile({mem,ptr:mem[0]})));
 }).catch(err => console.log('Error    : ' + err));
 
 vm.on('step', function(data) {
