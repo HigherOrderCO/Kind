@@ -4,14 +4,19 @@
   "description": "",
   "main": "cjs/index.js",
   "module": "esm/index.js",
-  "files": ["cjs", "esm", "umd", "bin"],
+  "files": [
+    "cjs",
+    "esm",
+    "umd",
+    "bin"
+  ],
   "bin": {
-    "fm": "bin/cli.js"
+    "fm": "bin/fm.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf esm csj umd && rollup -c rollup.config.js",
-    "prepublish": "npm run build"
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
