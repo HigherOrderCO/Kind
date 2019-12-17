@@ -1,14 +1,14 @@
 'use strict';
 
+require('./core-7abfb2a4.js');
 require('./stringify.js');
-require('./core-d72ddc22.js');
 require('./version.js');
 require('./loader-595fcc0c.js');
 require('./parse.js');
-var runtimeFast = require('./runtime-fast-04ae2407.js');
+var runtimeFast = require('./runtime-fast-dcae5953.js');
 require('./fm-net-4e316c61.js');
-require('./runtime-optimal-a2bb9ca1.js');
-require('./fm-to-js-4eba1a3c.js');
+require('./runtime-optimal-5c91731a.js');
+require('./fm-to-js-3bd74f20.js');
 
 function compile(name, defs) {
   const STOP         = 0x00;

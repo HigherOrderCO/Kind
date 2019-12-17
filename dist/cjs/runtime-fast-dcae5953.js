@@ -1,7 +1,7 @@
 'use strict';
 
+var core = require('./core-7abfb2a4.js');
 require('./stringify.js');
-var core = require('./core-d72ddc22.js');
 
 // Formality's runtime works by compiling normal Terms to a
 // Runtime Terms (RtTerm), reducing, and decompiling back.

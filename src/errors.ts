@@ -1,4 +1,11 @@
-function marked_code(loc) {
+interface Loc {
+  code: string;
+  row: number;
+  idx: number;
+  len: number;
+}
+
+function marked_code(loc: Loc): string {
   var text = "";
   var idx = 0;
   var lines = loc.code.split("\n");
@@ -6,7 +13,8 @@ function marked_code(loc) {
   var to_line = Math.min(loc.row + 4, lines.length - 1);
   for (var line = 0; line < lines.length; ++line) {
     var write = line >= from_line && line <= to_line;
-    if (write) text += "\x1b[2m" + ("    " + (line + 1)).slice(-4) + "| \x1b[0m";
+    if (write)
+      text += "\x1b[2m" + ("    " + (line + 1)).slice(-4) + "| \x1b[0m";
     for (var i = 0; i < lines[line].length; ++i) {
       if (idx >= loc.idx && idx < loc.idx + loc.len) {
         if (write) text += "\x1b[31m\x1b[4m" + lines[line][i] + "\x1b[0m";
@@ -22,7 +30,7 @@ function marked_code(loc) {
   return text;
 }
 
-function random_excuse() {
+function random_excuse(): string {
   var excuses = [
     "My parse-robot brain isn't perfect, sorry.",
     "What? If you can't get this right, don't expect me to!",
@@ -39,4 +47,4 @@ function random_excuse() {
   return excuses[Math.floor(Math.random() * excuses.length)];
 }
 
-export {marked_code, random_excuse};
+export { Loc, marked_code, random_excuse };

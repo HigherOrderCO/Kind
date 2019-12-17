@@ -1,6 +1,6 @@
 'use strict';
 
-var core = require('./core-d72ddc22.js');
+var core = require('./core-7abfb2a4.js');
 
 // Converts a Formality-Core Term to a native JavaScript function
 const compile = (term, defs = {}, depth = 0) => {

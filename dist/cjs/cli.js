@@ -3,18 +3,18 @@
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var fs = _interopDefault(require('fs'));
+var core = require('./core-7abfb2a4.js');
 require('./errors.js');
 var stringify = require('./stringify.js');
-var core = require('./core-d72ddc22.js');
 require('xhr-request-promise');
 var version = require('./version.js');
 var loader$1 = require('./loader-595fcc0c.js');
 var parse = require('./parse.js');
-var runtimeFast = require('./runtime-fast-04ae2407.js');
+var runtimeFast = require('./runtime-fast-dcae5953.js');
 require('./fm-net-4e316c61.js');
-var runtimeOptimal = require('./runtime-optimal-a2bb9ca1.js');
-var fmToJs = require('./fm-to-js-4eba1a3c.js');
-var fmToEvm = require('./fm-to-evm-0a4691f2.js');
+var runtimeOptimal = require('./runtime-optimal-5c91731a.js');
+var fmToJs = require('./fm-to-js-3bd74f20.js');
+var fmToEvm = require('./fm-to-evm-131104e4.js');
 require('path');
 require('util');
 var fsLocal = require('./fs-local.js');

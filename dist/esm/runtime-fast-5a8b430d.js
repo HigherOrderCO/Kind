@@ -1,5 +1,5 @@
+import { h as erase, R as Ref, V as Var, a as App, L as Lam } from './core-4b5403b3.js';
 import './stringify.js';
-import { h as erase, R as Ref, V as Var, a as App, L as Lam } from './core-e930ae7b.js';
 
 // Formality's runtime works by compiling normal Terms to a
 // Runtime Terms (RtTerm), reducing, and decompiling back.

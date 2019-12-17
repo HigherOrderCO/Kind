@@ -1,6 +1,6 @@
 'use strict';
 
-var core = require('./core-d72ddc22.js');
+var core = require('./core-7abfb2a4.js');
 var fmNet = require('./fm-net-4e316c61.js');
 
 // ~~ Compiles Formality Core to Formality Net ~~

@@ -3,7 +3,8 @@
 // :::::::::::::::::::::
 
 // Converts a term to a string
-const show = ([ctor, args], nams = [], opts = {}) => {
+const show = (term, nams = [], opts = {}) => {
+  let [ctor, args] = term;
   const format = (term) => {
     //function read_bits(term) {
       //var bits = [];

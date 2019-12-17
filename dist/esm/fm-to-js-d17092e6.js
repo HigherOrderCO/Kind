@@ -1,4 +1,4 @@
-import { h as erase } from './core-e930ae7b.js';
+import { h as erase } from './core-4b5403b3.js';
 
 // Converts a Formality-Core Term to a native JavaScript function
 const compile = (term, defs = {}, depth = 0) => {

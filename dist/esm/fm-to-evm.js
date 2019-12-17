@@ -1,12 +1,12 @@
+import './core-4b5403b3.js';
 import './errors.js';
 import './stringify.js';
-import './core-e930ae7b.js';
 import 'xhr-request-promise';
 import './version.js';
 import './loader-cd5b319a.js';
 import './parse.js';
-import './runtime-fast-0ba6ea84.js';
+import './runtime-fast-5a8b430d.js';
 import './fm-net-b5947aee.js';
-import './runtime-optimal-7d371ce5.js';
-import './fm-to-js-5ecf87cf.js';
-export { c as compile } from './fm-to-evm-e8e8db43.js';
+import './runtime-optimal-5452ea14.js';
+import './fm-to-js-d17092e6.js';
+export { c as compile } from './fm-to-evm-ae242544.js';

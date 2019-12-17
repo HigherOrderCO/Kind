@@ -2,9 +2,9 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+var core = require('./core-7abfb2a4.js');
 require('./errors.js');
 require('./stringify.js');
-var core = require('./core-d72ddc22.js');
 
 
 
