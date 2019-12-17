@@ -6,6 +6,8 @@
 //   loader: String -> Promise<String>,
 //   prefix?: String
 // ) -> Promise<String>
+import version from "./version";
+
 const with_local_storage_cache = (loader, prefix = `FPM@${version}/`) => async (file) => {
   const cached = window.localStorage.getItem(prefix + file)
   if(cached) {
