@@ -9,7 +9,7 @@ import parse from './parse.js';
 import { d as compile$1, r as reduce$1, e as decompile } from './runtime-fast-45710fb0.js';
 import './fm-net-b5947aee.js';
 import { c as compile$2, d as decompile$1 } from './runtime-optimal-7d371ce5.js';
-import { c as compile } from './fm-to-js-ed975676.js';
+import { c as compile } from './fm-to-js-01192387.js';
 
 async function run() {
   try {
