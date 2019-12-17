@@ -4,7 +4,7 @@ import stringify from './stringify.js';
 import { h as erase, r as reduce, t as typecheck, k as is_affine, R as Ref, m as is_terminating } from './core-e930ae7b.js';
 import 'xhr-request-promise';
 import version from './version.js';
-import { a as load_file, l as load_file_parents, s as save_file } from './loader-705f5616.js';
+import { a as load_file, l as load_file_parents, s as save_file } from './loader-f51382c4.js';
 import parse from './parse.js';
 import { d as compile$1, r as reduce$1, e as decompile } from './runtime-fast-45710fb0.js';
 import './fm-net-b5947aee.js';

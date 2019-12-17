@@ -7,7 +7,7 @@ var stringify = require('./stringify.js');
 var core = require('./core-d72ddc22.js');
 require('xhr-request-promise');
 var version = require('./version.js');
-var loader = require('./loader-46ee13ef.js');
+var loader = require('./loader-72398fec.js');
 var parse = require('./parse.js');
 var runtimeFast = require('./runtime-fast-0c0e8a8d.js');
 var fmNet = require('./fm-net-4e316c61.js');
