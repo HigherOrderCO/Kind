@@ -21,14 +21,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/moonad/formality-core.git"
+    "url": "git+https://github.com/moonad/formality.git"
   },
   "author": "Victor Maia",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/moonad/formality-core/issues"
+    "url": "https://github.com/moonad/formality/issues"
   },
-  "homepage": "https://github.com/moonad/formality-core#readme",
+  "homepage": "https://github.com/moonad/formality#readme",
   "dependencies": {
     "xhr-request-promise": "^0.1.2"
   },
