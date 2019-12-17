@@ -2079,7 +2079,7 @@
   };
 
   // This should be replaced by rollup
-  const version = "0.1.219";
+  const version = "0.1.220";
 
   // This module is responsible for loading and publishing files from the Forall repository
 

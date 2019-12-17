@@ -1,4 +1,5 @@
 import fs from 'fs';
+import version from './version.js';
 import path from 'path';
 import { promisify } from 'util';
 

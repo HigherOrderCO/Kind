@@ -3,6 +3,7 @@
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var fs = _interopDefault(require('fs'));
+var version = require('./version.js');
 var path = _interopDefault(require('path'));
 var util = require('util');
 

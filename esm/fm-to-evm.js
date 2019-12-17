@@ -3,7 +3,7 @@ import stringify from './stringify.js';
 import './core-e930ae7b.js';
 import 'xhr-request-promise';
 import './version.js';
-import './loader-72e91ba3.js';
+import './loader-705f5616.js';
 import parse from './parse.js';
 import { d as compile, e as decompile, a as New, N as NIL, R as REF, c as ctor_of, b as addr_of } from './runtime-fast-45710fb0.js';
 import './fm-net-b5947aee.js';

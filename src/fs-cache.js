@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import {promisify} from "util";
+import version from "./version";
 
 const async_read_file = promisify(fs.readFile);
 const async_write_file = promisify(fs.writeFile);
