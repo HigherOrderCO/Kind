@@ -1,6 +1,6 @@
 'use strict';
 
 // This should be replaced by rollup
-const version = "0.1.221";
+const version = "0.1.222";
 
 module.exports = version;

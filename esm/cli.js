@@ -4,12 +4,13 @@ import stringify from './stringify.js';
 import { h as erase, r as reduce, t as typecheck, k as is_affine, R as Ref, m as is_terminating } from './core-e930ae7b.js';
 import 'xhr-request-promise';
 import version from './version.js';
-import { a as load_file, l as load_file_parents, s as save_file } from './loader-f51382c4.js';
+import { a as load_file, l as load_file_parents, s as save_file } from './loader-8afd8c46.js';
 import parse from './parse.js';
-import { d as compile$1, r as reduce$1, e as decompile } from './runtime-fast-45710fb0.js';
+import { d as compile$2, r as reduce$1, e as decompile } from './runtime-fast-45710fb0.js';
 import './fm-net-b5947aee.js';
-import { c as compile$2, d as decompile$1 } from './runtime-optimal-7d371ce5.js';
+import { c as compile$3, d as decompile$1 } from './runtime-optimal-7d371ce5.js';
 import { c as compile } from './fm-to-js-01192387.js';
+import { c as compile$1 } from './fm-to-evm-ca883238.js';
 import 'path';
 import 'util';
 import with_local_files from './fs-local.js';
@@ -34,15 +35,14 @@ async function run() {
     console.log("$ fm -d <file>/<term> | evaluates (debug-mode)");
     console.log("$ fm -o <file>/<term> | evaluates (optimal-mode)");
     console.log("$ fm -f <file>/<term> | evaluates (fast-mode)");
-    //console.log("$ fm -c <file>/<term> | evaluates (fast-mode, C WASM)");
-    //console.log("$ fm -e <file>/<term> | evaluates (fast-mode, EVM)");
     console.log("$ fm -t <file>/<term> | type-checks");
     console.log("$ fm -t <file>/@      | type-checks (all)");
-    console.log("$ fm -j <file>/<term> | compiles to JS");
     console.log("$ fm -s <file>        | saves to FPM");
     console.log("$ fm -l <file>        | loads from FPM");
     console.log("$ fm -i <file>        | shows cited_by");
     console.log("$ fm -v <file>        | shows version");
+    console.log("$ fm -J <file>/<term> | compiles to JS");
+    console.log("$ fm -E <file>/<term> | compiles to EVM");
     console.log("");
     console.log("Options:");
     console.log("-x don't erase types");
@@ -80,13 +80,24 @@ async function run() {
     }
 
   // Compile to JavaScript
-  } else if (args.j) {
+  } else if (args.J) {
     var {name, defs} = await load_code(main);
     var term = defs[name];
     var term = erase(term);
     var code = compile(term, defs);
     console.log(code);
-  
+
+  // Compiles to EVM
+  } else if (args.E) {
+    var {name, defs} = await load_code(main);
+    var code = compile$1(name, defs);
+    console.log(code);
+    console.log(
+      "\nNotes:" +
+      "\n- Run this EVM bytecode to reduce the input term." +
+      "\n- The final memory will store the result, in Formality binary." +
+      "\n- A monadic interop for deployable contracts is in development.");
+
   // Evaluates on debug mode
   } else if (args.d) {
     var {name, defs} = await load_code(main);
@@ -99,7 +110,7 @@ async function run() {
   // Evaluates on fast mode
   } else if (args.f) {
     var {name, defs} = await load_code(main);
-    var {rt_defs, rt_rfid} = compile$1(defs);
+    var {rt_defs, rt_rfid} = compile$2(defs);
     var rt_term = rt_defs[rt_rfid[name]];
     //const ctor_of = ptr => ptr & 0b1111;
     //const addr_of = ptr => ptr >>> 4;
@@ -117,19 +128,10 @@ async function run() {
     //console.log(fm.lang.show(term));
     //console.log(JSON.stringify(stats));
 
-  // Evaluates on fast mode (EVM)
-  //} else if (args.e) {
-    //var {name, defs} = await load_code(main);
-    //var {rt_defs, rt_rfid} = fm.fast.compile(defs);
-    //var {rt_term, stats} = fm.evm.reduce(Object.values(rt_defs), rt_rfid[name]);
-    //var term = fm.fast.decompile(rt_term);
-    //console.log(fm.lang.show(term));
-    //console.log(JSON.stringify(stats));
-
   // Evaluates on optimal mode
   } else if (args.o) {
     var {name, defs} = await load_code(main);
-    var net = compile$2(Ref(name), defs);
+    var net = compile$3(Ref(name), defs);
     var stats = {loops:0, rewrites:0, max_len:0};
     net.reduce_lazy(stats);
     var term = decompile$1(net);
