@@ -6,6 +6,7 @@ import builtins from 'builtin-modules';
 
 const src_files = fs
   .readdirSync("./src/")
+  .filter((x) => x.endsWith(".js"))
   .map((x) => `src/${x}`);
 const version = JSON.parse(fs.readFileSync("./package.json")).version;
 

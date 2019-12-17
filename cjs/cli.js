@@ -81,7 +81,7 @@ async function run() {
 
   // Compile to JavaScript
   } else if (args.j) {
-    var {name, defs} = await load_code();
+    var {name, defs} = await load_code(main);
     var term = defs[name];
     var term = core.erase(term);
     var code = fmToJs.compile(term, defs);
@@ -89,7 +89,7 @@ async function run() {
   
   // Evaluates on debug mode
   } else if (args.d) {
-    var {name, defs} = await load_code();
+    var {name, defs} = await load_code(main);
     var term = defs[name];
     var term = !args.x ? core.erase(term) : term;
     var opts = {defs, weak: args.w, logs: !!args.m};
@@ -98,7 +98,7 @@ async function run() {
 
   // Evaluates on fast mode
   } else if (args.f) {
-    var {name, defs} = await load_code();
+    var {name, defs} = await load_code(main);
     var {rt_defs, rt_rfid} = runtimeFast.compile(defs);
     var rt_term = rt_defs[rt_rfid[name]];
     //const ctor_of = ptr => ptr & 0b1111;
@@ -110,7 +110,7 @@ async function run() {
 
   // Evaluates on fast mode (WASM)
   //} else if (args.c) {
-    //var {name, defs} = await load_code();
+    //var {name, defs} = await load_code(main);
     //var {rt_defs, rt_rfid} = fm.fast.compile(defs);
     //var {rt_term, stats} = fm.wasm.reduce(Object.values(rt_defs), rt_rfid[name]);
     //var term = fm.fast.decompile(rt_term);
@@ -119,7 +119,7 @@ async function run() {
 
   // Evaluates on fast mode (EVM)
   //} else if (args.e) {
-    //var {name, defs} = await load_code();
+    //var {name, defs} = await load_code(main);
     //var {rt_defs, rt_rfid} = fm.fast.compile(defs);
     //var {rt_term, stats} = fm.evm.reduce(Object.values(rt_defs), rt_rfid[name]);
     //var term = fm.fast.decompile(rt_term);
@@ -128,7 +128,7 @@ async function run() {
 
   // Evaluates on optimal mode
   } else if (args.o) {
-    var {name, defs} = await load_code();
+    var {name, defs} = await load_code(main);
     var net = runtimeOptimal.compile(core.Ref(name), defs);
     var stats = {loops:0, rewrites:0, max_len:0};
     net.reduce_lazy(stats);
@@ -138,7 +138,7 @@ async function run() {
 
   // Type-checks
   } else if (args.t) {
-    var {name, defs} = await load_code();
+    var {name, defs} = await load_code(main);
     var all = name === "@";
     var names = all ? Object.keys(defs).sort() : [name];
     names.forEach((name) => {
@@ -218,7 +218,7 @@ async function upload(file, global_path = {}) {
   return global_path[file];
 }
 // Loads a file, parses it, returns term name and defs
-async function load_code() {
+async function load_code(main) {
   var [file, name] = main.indexOf("/") === -1 ? [main, "main"] : main.split("/");
 
   try {
