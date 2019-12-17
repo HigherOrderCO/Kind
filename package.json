@@ -1,6 +1,6 @@
 {
   "name": "formality-lang",
-  "version": "0.1.226",
+  "version": "0.1.227",
   "description": "",
   "main": "cjs/index.js",
   "module": "esm/index.js",
