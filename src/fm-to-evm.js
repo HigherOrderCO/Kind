@@ -210,14 +210,11 @@ function compile(name, defs) {
       block_code.push(code);
       block_size = Math.max(block_size, code.length);
     }
-    //console.log("BLOCK SIZE", block_size);
     var code = [value, NUM(block_size), MUL, PCOF(block_name[0]), ADD, JUMP];
     for (var i = 0; i < block_code.length; ++i) {
       code.push(BLOCK(block_size, block_code[i]));
     }
     code.push(DEST(break_name));
-    //console.log("block_size", block_size);
-    //console.log("...", code);
     return code;
   };
 
@@ -225,38 +222,15 @@ function compile(name, defs) {
   var CTOR_OF = [PUSH1, 0x0F, AND];
   var NIL     = [PUSH4, 0xFF, 0xFF, 0xFF, 0xFF];
 
-  //const {defs} = await fm.parse(`
-  //T Bool
-  //| true
-  //| false
-
-  //T List<A>
-  //| nil
-  //| cons(head : A, tail : List(A))
-
-  //not(b: Bool) : Bool
-    //case b
-    //| true  => false
-    //| false => true
-
-  //negate(xs : List(Bool)) : List(Bool)
-    //case xs
-    //| nil  => nil(_)
-    //| cons => cons(_ not(xs.head), negate(xs.tail))
-
-  //main negate([true, true, false, false, true, true, false, false])
-  //`, {});
-
-  var {rt_defs, rt_rfid} = fm.fast.compile(defs);
-  var term = rt_defs[rt_rfid[name]];
+  var {rt_defs, rt_rfid, rt_term} = fm.fast.compile(defs, name);
 
   var code = [
-    LOAD_NUMS(term.mem),
+    LOAD_NUMS(rt_term.mem),
 
     NUM(0xFFFFFFFF), // stack end
 
     // back.push(root); back.push(0); back.push(0);
-    NUM(term.ptr),
+    NUM(rt_term.ptr),
     //NUM(fm.fast.New(fm.fast.REF, Object.keys(rt_defs).length - 1)), // next
     NUM(0), // side
     NUM(0), // deph

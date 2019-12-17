@@ -97,11 +97,8 @@ export default async function run() {
   // Evaluates on fast mode
   } else if (args.f) {
     var {name, defs} = await load_code(main);
-    var {rt_defs, rt_rfid} = fm.fast.compile(defs);
-    var rt_term = rt_defs[rt_rfid[name]];
-    //const ctor_of = ptr => ptr & 0b1111;
-    //const addr_of = ptr => ptr >>> 4;
-    var {rt_term,stats} = fm.fast.reduce(rt_term, rt_defs);
+    var {rt_defs, rt_rfid, rt_term} = fm.fast.compile(defs, name);
+    var {rt_term, stats} = fm.fast.reduce(rt_term, rt_defs);
     var term = fm.fast.decompile(rt_term);
     console.log(fm.stringify(term));
     console.log(JSON.stringify(stats));

@@ -20,9 +20,10 @@ const ctor_of = ptr => ptr & 0b1111;
 const addr_of = ptr => ptr >>> 4;
 
 // Compiles a Term to a RtTerm. Returns:
-// - rt_rfid : Map(String, RefId) -- a map from term names to RefIds
 // - rf_defs : Map(RefId, RtTerm) -- a map from RefIds to RtTerms
-function compile(defs) {
+// - rt_rfid : Map(String, RefId) -- a map from term names to RefIds
+// - rt_term : RtTerm             -- the compiled term
+function compile(defs, name) {
   var rt_defs = {};
   var rt_rfid = {};
   var rt_bind = {};
@@ -53,21 +54,59 @@ function compile(defs) {
     }
     return NIL;
   };
-  for (var name in defs) {
-    rt_rfid[name] = next_id++;
+  function reach(term) {
+    var [ctor, term] = term;
+    switch (ctor) {
+      case "Var":
+        break;
+      case "Lam":
+        reach(term.body);
+        break;
+      case "App":
+        reach(term.func);
+        reach(term.argm);
+        break;
+      case "Val":
+        break;
+      case "Op1":
+      case "Op2":
+        reach(term.num0);
+        reach(term.num1);
+        break;
+      case "Ite":
+        reach(term.cond);
+        reach(term.if_t);
+        reach(term.if_f);
+        break;
+      case "Log":
+        reach(term.expr);
+        break;
+      case "Ref":
+        if (!reachable[term.name]) {
+          reachable[term.name] = true;
+          reach(core.erase(defs[term.name]));
+        }
+        break;
+    }
+  };
+  var reachable = {[name]:true};
+  reach(core.erase(defs[name]));
+  for (var def_name in reachable) {
+    rt_rfid[def_name] = next_id++;
   }
-  for (var name in defs) {
-    rt_defs[rt_rfid[name]] = [];
-    rt_bind[rt_rfid[name]] = {};
-    var root = go(name, 0, core.erase(defs[name]), 0);
+  for (var def_name in reachable) {
+    rt_defs[rt_rfid[def_name]] = [];
+    rt_bind[rt_rfid[def_name]] = {};
+    var root = go(def_name, 0, core.erase(defs[def_name]), 0);
     if (root) {
-      rt_defs[rt_rfid[name]] = {
-        mem: rt_defs[rt_rfid[name]],
+      rt_defs[rt_rfid[def_name]] = {
+        mem: rt_defs[rt_rfid[def_name]],
         ptr: root
       };
     }
   }
-  return {rt_defs, rt_rfid};
+  var rt_term = rt_defs[rt_rfid[name]];
+  return {rt_defs, rt_rfid, rt_term};
 };
 
 // Recovers a Term from a RtTerm

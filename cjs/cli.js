@@ -8,13 +8,13 @@ var stringify = require('./stringify.js');
 var core = require('./core-d72ddc22.js');
 require('xhr-request-promise');
 var version = require('./version.js');
-var loader$1 = require('./loader-650615c3.js');
+var loader$1 = require('./loader-879518f9.js');
 var parse = require('./parse.js');
-var runtimeFast = require('./runtime-fast-0c0e8a8d.js');
+var runtimeFast = require('./runtime-fast-04ae2407.js');
 require('./fm-net-4e316c61.js');
 var runtimeOptimal = require('./runtime-optimal-a2bb9ca1.js');
 var fmToJs = require('./fm-to-js-0b7407a9.js');
-var fmToEvm = require('./fm-to-evm-4ff4e335.js');
+var fmToEvm = require('./fm-to-evm-62d61be6.js');
 require('path');
 require('util');
 var fsLocal = require('./fs-local.js');
@@ -98,7 +98,7 @@ async function run() {
     console.log(code);
     console.log(
       "\nNotes:" +
-      "\n- Run this EVM bytecode to reduce the input term." +
+      "\n- Run this EVM bytecode to evaluate the input term." +
       "\n- The final memory will store the result, in Formality binary." +
       "\n- A monadic interop for deployable contracts is in development.");
 
@@ -114,11 +114,8 @@ async function run() {
   // Evaluates on fast mode
   } else if (args.f) {
     var {name, defs} = await load_code(main);
-    var {rt_defs, rt_rfid} = runtimeFast.compile(defs);
-    var rt_term = rt_defs[rt_rfid[name]];
-    //const ctor_of = ptr => ptr & 0b1111;
-    //const addr_of = ptr => ptr >>> 4;
-    var {rt_term,stats} = runtimeFast.reduce(rt_term, rt_defs);
+    var {rt_defs, rt_rfid, rt_term} = runtimeFast.compile(defs, name);
+    var {rt_term, stats} = runtimeFast.reduce(rt_term, rt_defs);
     var term = runtimeFast.decompile(rt_term);
     console.log(stringify(term));
     console.log(JSON.stringify(stats));

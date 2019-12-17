@@ -4,13 +4,13 @@ import stringify from './stringify.js';
 import { h as erase, r as reduce, t as typecheck, k as is_affine, R as Ref, m as is_terminating } from './core-e930ae7b.js';
 import 'xhr-request-promise';
 import version from './version.js';
-import { a as load_file, l as load_file_parents, s as save_file } from './loader-8afd8c46.js';
+import { a as load_file, l as load_file_parents, s as save_file } from './loader-e8a33366.js';
 import parse from './parse.js';
-import { d as compile$2, r as reduce$1, e as decompile } from './runtime-fast-45710fb0.js';
+import { d as compile$2, r as reduce$1, e as decompile } from './runtime-fast-0ba6ea84.js';
 import './fm-net-b5947aee.js';
 import { c as compile$3, d as decompile$1 } from './runtime-optimal-7d371ce5.js';
 import { c as compile } from './fm-to-js-01192387.js';
-import { c as compile$1 } from './fm-to-evm-ca883238.js';
+import { c as compile$1 } from './fm-to-evm-6203ae95.js';
 import 'path';
 import 'util';
 import with_local_files from './fs-local.js';
@@ -94,7 +94,7 @@ async function run() {
     console.log(code);
     console.log(
       "\nNotes:" +
-      "\n- Run this EVM bytecode to reduce the input term." +
+      "\n- Run this EVM bytecode to evaluate the input term." +
       "\n- The final memory will store the result, in Formality binary." +
       "\n- A monadic interop for deployable contracts is in development.");
 
@@ -110,11 +110,8 @@ async function run() {
   // Evaluates on fast mode
   } else if (args.f) {
     var {name, defs} = await load_code(main);
-    var {rt_defs, rt_rfid} = compile$2(defs);
-    var rt_term = rt_defs[rt_rfid[name]];
-    //const ctor_of = ptr => ptr & 0b1111;
-    //const addr_of = ptr => ptr >>> 4;
-    var {rt_term,stats} = reduce$1(rt_term, rt_defs);
+    var {rt_defs, rt_rfid, rt_term} = compile$2(defs, name);
+    var {rt_term, stats} = reduce$1(rt_term, rt_defs);
     var term = decompile(rt_term);
     console.log(stringify(term));
     console.log(JSON.stringify(stats));

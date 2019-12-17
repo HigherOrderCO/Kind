@@ -2079,7 +2079,7 @@
   };
 
   // This should be replaced by rollup
-  const version = "0.1.222";
+  const version = "0.1.224";
 
   // This module is responsible for loading and publishing files from the Forall repository
 
@@ -3641,9 +3641,10 @@
   const addr_of = ptr => ptr >>> 4;
 
   // Compiles a Term to a RtTerm. Returns:
-  // - rt_rfid : Map(String, RefId) -- a map from term names to RefIds
   // - rf_defs : Map(RefId, RtTerm) -- a map from RefIds to RtTerms
-  function compile(defs) {
+  // - rt_rfid : Map(String, RefId) -- a map from term names to RefIds
+  // - rt_term : RtTerm             -- the compiled term
+  function compile(defs, name) {
     var rt_defs = {};
     var rt_rfid = {};
     var rt_bind = {};
@@ -3673,21 +3674,58 @@
           return New$1(REF, rt_rfid[term[1].name]);
       }
       return NIL;
-    }  for (var name in defs) {
-      rt_rfid[name] = next_id++;
+    }  function reach(term) {
+      var [ctor, term] = term;
+      switch (ctor) {
+        case "Var":
+          break;
+        case "Lam":
+          reach(term.body);
+          break;
+        case "App":
+          reach(term.func);
+          reach(term.argm);
+          break;
+        case "Val":
+          break;
+        case "Op1":
+        case "Op2":
+          reach(term.num0);
+          reach(term.num1);
+          break;
+        case "Ite":
+          reach(term.cond);
+          reach(term.if_t);
+          reach(term.if_f);
+          break;
+        case "Log":
+          reach(term.expr);
+          break;
+        case "Ref":
+          if (!reachable[term.name]) {
+            reachable[term.name] = true;
+            reach(erase(defs[term.name]));
+          }
+          break;
+      }
+    }  var reachable = {[name]:true};
+    reach(erase(defs[name]));
+    for (var def_name in reachable) {
+      rt_rfid[def_name] = next_id++;
     }
-    for (var name in defs) {
-      rt_defs[rt_rfid[name]] = [];
-      rt_bind[rt_rfid[name]] = {};
-      var root = go(name, 0, erase(defs[name]), 0);
+    for (var def_name in reachable) {
+      rt_defs[rt_rfid[def_name]] = [];
+      rt_bind[rt_rfid[def_name]] = {};
+      var root = go(def_name, 0, erase(defs[def_name]), 0);
       if (root) {
-        rt_defs[rt_rfid[name]] = {
-          mem: rt_defs[rt_rfid[name]],
+        rt_defs[rt_rfid[def_name]] = {
+          mem: rt_defs[rt_rfid[def_name]],
           ptr: root
         };
       }
     }
-    return {rt_defs, rt_rfid};
+    var rt_term = rt_defs[rt_rfid[name]];
+    return {rt_defs, rt_rfid, rt_term};
   }
   // Recovers a Term from a RtTerm
   function decompile(rt_term, dep = 0) {
@@ -4879,14 +4917,11 @@
         block_code.push(code);
         block_size = Math.max(block_size, code.length);
       }
-      //console.log("BLOCK SIZE", block_size);
       var code = [value, NUM(block_size), MUL, PCOF(block_name[0]), ADD, JUMP];
       for (var i = 0; i < block_code.length; ++i) {
         code.push(BLOCK(block_size, block_code[i]));
       }
       code.push(DEST(break_name));
-      //console.log("block_size", block_size);
-      //console.log("...", code);
       return code;
     };
 
@@ -4894,38 +4929,15 @@
     var CTOR_OF = [PUSH1, 0x0F, AND];
     var NIL$1     = [PUSH4, 0xFF, 0xFF, 0xFF, 0xFF];
 
-    //const {defs} = await fm.parse(`
-    //T Bool
-    //| true
-    //| false
-
-    //T List<A>
-    //| nil
-    //| cons(head : A, tail : List(A))
-
-    //not(b: Bool) : Bool
-      //case b
-      //| true  => false
-      //| false => true
-
-    //negate(xs : List(Bool)) : List(Bool)
-      //case xs
-      //| nil  => nil(_)
-      //| cons => cons(_ not(xs.head), negate(xs.tail))
-
-    //main negate([true, true, false, false, true, true, false, false])
-    //`, {});
-
-    var {rt_defs, rt_rfid} = compile(defs);
-    var term = rt_defs[rt_rfid[name]];
+    var {rt_defs, rt_rfid, rt_term} = compile(defs, name);
 
     var code = [
-      LOAD_NUMS(term.mem),
+      LOAD_NUMS(rt_term.mem),
 
       NUM(0xFFFFFFFF), // stack end
 
       // back.push(root); back.push(0); back.push(0);
-      NUM(term.ptr),
+      NUM(rt_term.ptr),
       //NUM(fm.fast.New(fm.fast.REF, Object.keys(rt_defs).length - 1)), // next
       NUM(0), // side
       NUM(0), // deph

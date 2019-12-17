@@ -3,7 +3,7 @@ import stringify from './stringify.js';
 import { T as Typ, H as Hol, V as Var, a as App, L as Lam, j as subst_many, b as Ann, S as Slf, A as All, R as Ref, N as New, e as Val, f as Op2, d as Num, i as subst, I as Ite, s as shift, U as Use, c as Log } from './core-e930ae7b.js';
 import 'xhr-request-promise';
 import './version.js';
-import { a as load_file } from './loader-8afd8c46.js';
+import { a as load_file } from './loader-e8a33366.js';
 
 // WARNING: here shall be dragons!
 
