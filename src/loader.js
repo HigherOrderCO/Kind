@@ -11,7 +11,6 @@ import version from "./version.js";
 //
 // load_file(file: String) -> Promise<String>
 const load_file = (file) => {
-  console.log("Loading file", file);
   return post("load_file", {file});
 };
 
