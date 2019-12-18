@@ -1,24 +1,20 @@
-'use strict';
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var fs = _interopDefault(require('fs'));
-require('./errors.js');
-var stringify = require('./stringify.js');
-var core = require('./core-d72ddc22.js');
-require('xhr-request-promise');
-var version = require('./version.js');
-var loader$1 = require('./loader-dd2a6f3e.js');
-var parse = require('./parse.js');
-var runtimeFast = require('./runtime-fast-04ae2407.js');
-require('./fm-net-4e316c61.js');
-var runtimeOptimal = require('./runtime-optimal-a2bb9ca1.js');
-var fmToJs = require('./fm-to-js-4eba1a3c.js');
-var fmToEvm = require('./fm-to-evm-0a452f9c.js');
-require('path');
-require('util');
-var fsLocal = require('./fs-local.js');
-var fsCache = require('./fs-cache.js');
+import fs from 'fs';
+import './errors.js';
+import stringify from './stringify.js';
+import { h as erase, r as reduce, t as typecheck, k as is_affine, R as Ref, m as is_terminating } from './core-e930ae7b.js';
+import 'xhr-request-promise';
+import version from './version.js';
+import { a as load_file, l as load_file_parents, s as save_file } from './loader-cd5b319a.js';
+import parse from './parse.js';
+import { d as compile$2, r as reduce$1, e as decompile } from './runtime-fast-0ba6ea84.js';
+import './fm-net-b5947aee.js';
+import { c as compile$3, d as decompile$1 } from './runtime-optimal-7d371ce5.js';
+import { c as compile } from './fm-to-js-5ecf87cf.js';
+import { c as compile$1 } from './fm-to-evm-e8e8db43.js';
+import 'path';
+import 'util';
+import with_local_files from './fs-local.js';
+import with_file_system_cache from './fs-cache.js';
 
 async function run() {
   try {
@@ -62,7 +58,7 @@ async function run() {
 
   // Download file from FPM
   } else if (args.l) {
-    var file_data = await loader$1.load_file(main);
+    var file_data = await load_file(main);
     console.log(fs.writeFileSync(main + ".fm", file_data));
     console.log("Downloaded file as `" + main + ".fm`!");
 
@@ -77,7 +73,7 @@ async function run() {
   // Show file cited_by
   } else if (args.i) {
     try {
-      var cited_by = await loader$1.load_file_parents(main);
+      var cited_by = await load_file_parents(main);
       console.log(cited_by.map(file => "- " + file).join("\n"));
     } catch (e) {
       console.log("Couldn't load global file '" + main + "'.");
@@ -87,14 +83,14 @@ async function run() {
   } else if (args.J) {
     var {name, defs} = await load_code(main);
     var term = defs[name];
-    var term = core.erase(term);
-    var code = fmToJs.compile(term, defs);
+    var term = erase(term);
+    var code = compile(term, defs);
     console.log(code);
 
   // Compiles to EVM
   } else if (args.E) {
     var {name, defs} = await load_code(main);
-    var code = fmToEvm.compile(name, defs);
+    var code = compile$1(name, defs);
     console.log(code);
     console.log(
       "\nNotes:" +
@@ -106,17 +102,17 @@ async function run() {
   } else if (args.d) {
     var {name, defs} = await load_code(main);
     var term = defs[name];
-    var term = !args.x ? core.erase(term) : term;
+    var term = !args.x ? erase(term) : term;
     var opts = {defs, weak: args.w, logs: !!args.m};
-    var term = core.reduce(term, defs,opts);
+    var term = reduce(term, defs,opts);
     console.log(stringify(term));
 
   // Evaluates on fast mode
   } else if (args.f) {
     var {name, defs} = await load_code(main);
-    var {rt_defs, rt_rfid, rt_term} = runtimeFast.compile(defs, name);
-    var {rt_term, stats} = runtimeFast.reduce(rt_term, rt_defs);
-    var term = runtimeFast.decompile(rt_term);
+    var {rt_defs, rt_rfid, rt_term} = compile$2(defs, name);
+    var {rt_term, stats} = reduce$1(rt_term, rt_defs);
+    var term = decompile(rt_term);
     console.log(stringify(term));
     console.log(JSON.stringify(stats));
 
@@ -132,10 +128,10 @@ async function run() {
   // Evaluates on optimal mode
   } else if (args.o) {
     var {name, defs} = await load_code(main);
-    var net = runtimeOptimal.compile(core.Ref(name), defs);
+    var net = compile$3(Ref(name), defs);
     var stats = {loops:0, rewrites:0, max_len:0};
     net.reduce_lazy(stats);
-    var term = runtimeOptimal.decompile(net);
+    var term = decompile$1(net);
     console.log(stringify(term));
     console.log(JSON.stringify(stats));
 
@@ -152,10 +148,10 @@ async function run() {
       try {
         var opts = {logs: !args.m};
         var head = all ? "" + name + " : " : "";
-        var type = core.typecheck(name, null, defs, opts);
-        var affi = core.is_affine(core.Ref(name), defs);
+        var type = typecheck(name, null, defs, opts);
+        var affi = is_affine(Ref(name), defs);
         //var elem = fm.core.is_elementary(fm.core.Ref(name), defs);
-        var halt = core.is_terminating(core.Ref(name), defs);
+        var halt = is_terminating(Ref(name), defs);
         var str = right(head + stringify(type));
         str += "\n| ";
         str += (affi ? right : wrong)("affine") + " | ";
@@ -187,9 +183,9 @@ const with_download_warning = (loader) => async (file) => {
 
 const loader = [
   with_download_warning,
-  fsCache,
-  fsLocal
-].reduce((loader, mod) => mod(loader), loader$1.load_file);
+  with_file_system_cache,
+  with_local_files
+].reduce((loader, mod) => mod(loader), load_file);
 
 async function local_imports_or_exit(file, code) {
   try {
@@ -215,7 +211,7 @@ async function upload(file, global_path = {}) {
       var code = code.replace(new RegExp("import " + imp_file + " *as")  , "import " + g_name + "#" + g_vers + " as");
     }
 
-    global_path[file] = await loader$1.save_file(file, code);
+    global_path[file] = await save_file(file, code);
     console.log("Saved `" + file + "` as `" + global_path[file] + "`!");
   }
   return global_path[file];
@@ -245,4 +241,4 @@ async function load_code(main) {
   return {name, defs};
 }
 
-module.exports = run;
+export default run;

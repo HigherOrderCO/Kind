@@ -20,11 +20,11 @@ export default [
     external,
     output: [
       {
-        dir: 'cjs',
+        dir: 'dist/cjs',
         format: 'cjs'
       },
       {
-        dir: 'esm',
+        dir: 'dist/esm',
         format: 'esm'
       }
     ]
@@ -36,7 +36,7 @@ export default [
     output: { 
       format: "umd",
       name: "formality",
-      file: "umd/formality.umd.js"
+      file: "dist/formality.umd.js"
     }
   }
 ]
