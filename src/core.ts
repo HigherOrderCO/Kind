@@ -17,60 +17,60 @@ function Ctr<C, D>(name: C, data: D, memo: Memo, loc?: Loc): CtrT<C, D> {
   return [name, data, MEMO ? memo : null, loc];
 }
 
-type VarT = CtrT<"Var", { index: number }>;
-type TypT = CtrT<"Typ", {}>;
-type AllT<T, B> = CtrT<
-  "All",
-  { name: string; bind: T; body: B; eras: boolean }
->;
-type LamT<T, B> = CtrT<
-  "Lam",
-  { name: string; bind: T; body: B; eras: boolean }
->;
-type AppT<T> = CtrT<"App", { func: T; argm: T; eras: boolean }>;
-type SlfT<T> = CtrT<"Slf", { name: string; type: T }>;
-type NewT<T> = CtrT<"New", { type: T; expr: T }>;
-type UseT<T> = CtrT<"Use", { expr: T }>;
-type NumT = CtrT<"Num", {}>;
-type ValT = CtrT<"Val", { numb: number }>;
-type Op1T<T> = CtrT<"Op1", { func: string; num0: T; num1: T }>;
-type Op2T<T> = CtrT<"Op2", { func: string; num0: T; num1: T }>;
-type IteT<T> = CtrT<"Ite", { cond: T; if_t: T; if_f: T }>;
-type AnnT<T> = CtrT<"Ann", { type: T; expr: T; done: boolean }>;
-type LogT<T> = CtrT<"Log", { msge: T; expr: T }>;
-type HolT = CtrT<"Hol", { name: string }>;
-type RefT = CtrT<"Ref", { name: string; eras: boolean }>;
+interface VarData { index: number };
+interface TypData {};
+interface AllData<T, B> {name: string; bind: T; body: B; eras: boolean};
+interface LamData<T, B> {name: string; bind: T; body: B; eras: boolean};
+interface AppData<T> { func: T; argm: T; eras: boolean };
+interface SlfData<T> { name: string; type: T };
+interface NewData<T> { type: T; expr: T };
+interface UseData<T> { expr: T };
+interface NumData {};
+interface ValData { numb: number };
+interface Op1Data<T> { func: string; num0: T; num1: T };
+interface Op2Data<T> { func: string; num0: T; num1: T };
+interface IteData<T> { cond: T; if_t: T; if_f: T };
+interface AnnData<T> { type: T; expr: T; done: boolean };
+interface LogData<T> { msge: T; expr: T };
+interface HolData { name: string };
+interface RefData { name: string; eras: boolean };
+
+interface VarT extends CtrT<"Var", VarData> {};
+interface TypT extends CtrT<"Typ", TypData> {};
+interface AllT<T, B> extends CtrT<"All", AllData<T, B>> {};
+interface LamT<T, B> extends CtrT<"Lam", LamData<T, B>> {};
+interface AppT<T> extends CtrT<"App", AppData<T>> {};
+interface SlfT<T> extends CtrT<"Slf", SlfData<T>> {};
+interface NewT<T> extends CtrT<"New", NewData<T>> {};
+interface UseT<T> extends CtrT<"Use", UseData<T>> {};
+interface NumT extends CtrT<"Num", NumData> {};
+interface ValT extends CtrT<"Val", ValData> {};
+interface Op1T<T> extends CtrT<"Op1", Op1Data<T>> {};
+interface Op2T<T> extends CtrT<"Op2", Op2Data<T>> {};
+interface IteT<T> extends CtrT<"Ite", IteData<T>> {};
+interface AnnT<T> extends CtrT<"Ann", AnnData<T>> {};
+interface LogT<T> extends CtrT<"Log", LogData<T>> {};
+interface HolT extends CtrT<"Hol", HolData> {};
+interface RefT extends CtrT<"Ref", RefData> {};
 
 type Term =
   | VarT
   | TypT
-  | AllTerm
-  | LamTerm
-  | AppTerm
-  | SlfTerm
-  | NewTerm
-  | UseTerm
+  | AllT<Term, Term>
+  | LamT<Term, Term>
+  | AppT<Term>
+  | SlfT<Term>
+  | NewT<Term>
+  | UseT<Term>
   | NumT
   | ValT
-  | Op1Term
-  | Op2Term
-  | IteTerm
-  | AnnTerm
-  | LogTerm
+  | Op1T<Term>
+  | Op2T<Term>
+  | IteT<Term>
+  | AnnT<Term>
+  | LogT<Term>
   | HolT
   | RefT;
-
-interface AllTerm extends AllT<Term, Term> {}
-interface LamTerm extends LamT<Term, Term> {}
-interface AppTerm extends AppT<Term> {}
-interface SlfTerm extends SlfT<Term> {}
-interface NewTerm extends NewT<Term> {}
-interface UseTerm extends UseT<Term> {}
-interface Op1Term extends Op1T<Term> {}
-interface Op2Term extends Op2T<Term> {}
-interface IteTerm extends IteT<Term> {}
-interface AnnTerm extends AnnT<Term> {}
-interface LogTerm extends LogT<Term> {}
 
 const Var = (index: number, loc?: Loc): VarT =>
   Ctr("Var", { index }, "^" + index, loc);
@@ -341,35 +341,23 @@ const subst_many = (term: Term, vals: Term[], depth: number): Term => {
 type HOASTerm =
   | VarT
   | TypT
-  | AllHTerm
-  | LamHTerm
-  | AppHTerm
-  | SlfHTerm
-  | NewHTerm
-  | UseHTerm
+  | AllT<HOASTerm, HOAS>
+  | LamT<HOASTerm, HOAS>
+  | AppT<HOASTerm>
+  | SlfT<HOAS>
+  | NewT<HOASTerm>
+  | UseT<HOASTerm>
   | NumT
   | ValT
-  | Op1HTerm
-  | Op2HTerm
-  | IteHTerm
-  | AnnHTerm
-  | LogHTerm
+  | Op1T<HOASTerm>
+  | Op2T<HOASTerm>
+  | IteT<HOASTerm>
+  | AnnT<HOASTerm>
+  | LogT<HOASTerm>
   | HolT
   | RefT;
 
 type HOAS = (t: HOASTerm) => HOASTerm;
-
-interface AllHTerm extends AllT<HOASTerm, HOAS> {}
-interface LamHTerm extends LamT<HOASTerm, HOAS> {}
-interface AppHTerm extends AppT<HOASTerm> {}
-interface SlfHTerm extends SlfT<HOAS> {}
-interface NewHTerm extends NewT<HOASTerm> {}
-interface UseHTerm extends UseT<HOASTerm> {}
-interface Op1HTerm extends Op1T<HOASTerm> {}
-interface Op2HTerm extends Op2T<HOASTerm> {}
-interface IteHTerm extends IteT<HOASTerm> {}
-interface AnnHTerm extends AnnT<HOASTerm> {}
-interface LogHTerm extends LogT<HOASTerm> {}
 
 const names_new = null;
 
@@ -420,7 +408,7 @@ const reduce = (term: Term, defs, opts: any = {}) => {
     num0: HOASTerm,
     num1: HOASTerm,
     names
-  ): ValT | Op1HTerm => {
+  ): ValT | Op1T<HOASTerm> => {
     var num0 = reduce(num0, names);
     if (!opts.no_op1 && num0[0] === "Val" && num1[0] === "Val") {
       switch (func) {
@@ -1293,7 +1281,7 @@ const typecheck = (name: string, expect: Term | null, defs: Defs = {}, opts: Typ
         type = Typ();
         break;
       case "New":
-        var ttyp = weak_normal(term[1].type, ctx.length) as NewTerm | SlfTerm;
+        var ttyp = weak_normal(term[1].type, ctx.length) as NewT<Term> | SlfT<Term>;
         if (ttyp[0] !== "Slf") {
           do_error("Attempted to make an instance of a type that isn't self.");
         }
