@@ -1577,10 +1577,29 @@ const is_terminating = (term: Term, defs: Defs, seen: Seen = {}): boolean => {
 };
 
 export {
+  // Types
   Term,
   Defs,
   TypecheckOpts,
   EqualOpts,
+  VarT,
+  TypT,
+  AllT,
+  LamT,
+  AppT,
+  SlfT,
+  NewT,
+  UseT,
+  NumT,
+  ValT,
+  Op1T,
+  Op2T,
+  IteT,
+  AnnT,
+  LogT,
+  HolT,
+  RefT,
+  // Constructors
   Var,
   Typ,
   All,
@@ -1598,6 +1617,7 @@ export {
   Op1,
   Op2,
   Ite,
+  // Other functions
   equal,
   erase,
   reduce,
