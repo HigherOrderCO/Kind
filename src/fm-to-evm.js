@@ -1,4 +1,4 @@
-import * as fm from "./index.js";
+import * as fast from "./runtime-fast";
 
 function compile(name, defs) {
   const STOP         = 0x00;
@@ -222,7 +222,7 @@ function compile(name, defs) {
   var CTOR_OF = [PUSH1, 0x0F, AND];
   var NIL     = [PUSH4, 0xFF, 0xFF, 0xFF, 0xFF];
 
-  var {rt_defs, rt_rfid, rt_term} = fm.fast.compile(defs, name);
+  var {rt_defs, rt_rfid, rt_term} = fast.compile(defs, name);
 
   var code = [
     LOAD_NUMS(rt_term.mem),
@@ -231,7 +231,7 @@ function compile(name, defs) {
 
     // back.push(root); back.push(0); back.push(0);
     NUM(rt_term.ptr),
-    //NUM(fm.fast.New(fm.fast.REF, Object.keys(rt_defs).length - 1)), // next
+    //NUM(fast.New(fast.REF, Object.keys(rt_defs).length - 1)), // next
     NUM(0), // side
     NUM(0), // deph
 
@@ -363,10 +363,10 @@ function compile(name, defs) {
             var ref = rt_defs[key];
             return flat([
               ref.mem.map(ref_term => {
-                var ref_ctor = fm.fast.ctor_of(ref_term);
-                var ref_addr = fm.fast.addr_of(ref_term);
-                var ref_numb = NUM(fm.fast.New(ref_ctor, ref_addr));
-                if (ref_term !== fm.fast.NIL && ref_ctor !== fm.fast.REF) {
+                var ref_ctor = fast.ctor_of(ref_term);
+                var ref_addr = fast.addr_of(ref_term);
+                var ref_numb = NUM(fast.New(ref_ctor, ref_addr));
+                if (ref_term !== fast.NIL && ref_ctor !== fast.REF) {
                   var ref_numb = [DUP1, ref_numb, ADD];
                 } else {
                   var ref_numb = [ref_numb];
@@ -400,7 +400,7 @@ function compile(name, defs) {
       ]),
 
     ]),
-    
+
     STOP,
   ];
 
@@ -423,7 +423,7 @@ export {compile};
   //console.log('Returned : ' + results.returnValue.toString('hex'))
   //console.log('gasUsed  : ' + results.gasUsed.toString())
   //console.log("lastMem  : " + JSON.stringify(mem));
-  //console.log("term     : " + fm.stringify(fm.fast.decompile({mem,ptr:mem[0]})));
+  //console.log("term     : " + fm.stringify(fast.decompile({mem,ptr:mem[0]})));
 //}).catch(err => console.log('Error    : ' + err))
 
 //vm.on('step', function(data) {
@@ -431,7 +431,7 @@ export {compile};
   ////console.log(pad(4,"0",String(data.pc))
     ////+ " " + pad(8," ",data.opcode.name)
     ////+ " | " + data.stack
-    ////+ " --- " + fm.stringify(fm.fast.decompile({mem,ptr:mem[0]})));
+    ////+ " --- " + fm.stringify(fast.decompile({mem,ptr:mem[0]})));
 //})
 
 //var get_mem = (mem) => {
