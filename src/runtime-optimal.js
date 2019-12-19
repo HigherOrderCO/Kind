@@ -1,7 +1,7 @@
 // ~~ Compiles Formality Core to Formality Net ~~
 // TODO: remove num-ops and pairs
 
-import {Var, App, Lam, Val, Op1, Op2, Ite, Hol, erase} from "./core.js";
+import {Var, App, Lam, Val, Op1, Op2, Ite, Hol, erase} from "./core";
 import {Net, Pointer, Numeric, addr_of, slot_of, type_of, numb_of, ptrn_eq, ptrn_st, NOD, OP1, OP2, NUM, ITE} from "./fm-net.js";
 
 // TODO: Remove Fst, Snd and Par from this code, for now, I'm just making it compile

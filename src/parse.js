@@ -14,10 +14,10 @@ import {
   subst,
   shift,
   subst_many,
-} from "./core.js";
-import {load_file} from "./loader.js";
-import {marked_code, random_excuse} from "./errors.js";
-import stringify from "./stringify.js";
+} from "./core";
+import {load_file} from "./loader";
+import {marked_code, random_excuse} from "./errors";
+import stringify from "./stringify";
 
 // :::::::::::::
 // :: Parsing ::

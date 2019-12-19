@@ -1,11 +1,11 @@
-import * as core from "./core.js";
-import stringify from "./stringify.js";
+import * as core from "./core";
+import stringify from "./stringify";
 
 // Formality's runtime works by compiling normal Terms to a
 // Runtime Terms (RtTerm), reducing, and decompiling back.
 // A RtTerm is a map `{mem:[U32], ptr:U32}` containing the
 // term data in a compressed form. It exists in a context of
-// top-level defs, `rt_defs`, of type `Map(RefId, RtTerm)`. 
+// top-level defs, `rt_defs`, of type `Map(RefId, RtTerm)`.
 
 // RtTerm constructors
 const VAR = 0;
@@ -119,7 +119,7 @@ function decompile(rt_term, dep = 0) {
     var addr = addr_of(ptr);
     switch (ctor) {
       case LAM:
-        var vari = mem[addr+0]; 
+        var vari = mem[addr+0];
         if (vari !== NIL) {
           mem[addr_of(vari)] = New(VAR, dep);
         }
@@ -200,7 +200,7 @@ function reduce(rt_term, rt_defs) {
 
     // Pattern-matches the next node
     switch (ctor_of(next)) {
-      
+
       // If it is a lambda, continue towards its body
       case LAM:
         var vari = mem[addr_of(next) + 0];
@@ -208,7 +208,7 @@ function reduce(rt_term, rt_defs) {
           mem[addr_of(vari)] = New(VAR, deph);
         }
         back[back.length-1][1] = 1;
-        back.push([mem[addr_of(next) + 1], 0, deph + 1]); 
+        back.push([mem[addr_of(next) + 1], 0, deph + 1]);
         break;
 
       // If its an application, either do a beta-reduction,
@@ -227,7 +227,7 @@ function reduce(rt_term, rt_defs) {
           }
 
           // Connects parent to body
-          var subs = mem[addr_of(func) + 1]; 
+          var subs = mem[addr_of(func) + 1];
 
           back.pop();
 
@@ -267,7 +267,7 @@ function reduce(rt_term, rt_defs) {
 
         back.pop();
 
-        var subs = New(ctor_of(ref.ptr), addr_of(ref.ptr) + pos); 
+        var subs = New(ctor_of(ref.ptr), addr_of(ref.ptr) + pos);
 
         if (back.length > 0) {
           var back_to = back[back.length - 1];

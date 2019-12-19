@@ -1,5 +1,5 @@
 import fs from "fs";
-import * as fm from "./index.js";
+import * as fm from "./index";
 import with_local_files from "./fs-local";
 import with_file_system_cache from "./fs-cache";
 
