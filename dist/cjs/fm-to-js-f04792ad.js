@@ -1,4 +1,6 @@
-import { h as erase } from './core-4b5403b3.js';
+'use strict';
+
+var core = require('./core-088a2546.js');
 
 // Converts a Formality-Core Term to a native JavaScript function
 const compile = (term, defs = {}, depth = 0) => {
@@ -52,7 +54,7 @@ const compile = (term, defs = {}, depth = 0) => {
       var name = term.name.replace(/\./g,"_").replace(/\//g,"$").replace(/#/g,"$");
       if (!seen[term.name]) {
         seen[term.name] = true;
-        var dref = go(erase(defs[term.name]), depth);
+        var dref = go(core.erase(defs[term.name]), depth);
         code += "  var _"+name+" = "+dref+";\n";
       }
       return "_"+name;
@@ -66,4 +68,5 @@ var fmToJs = /*#__PURE__*/Object.freeze({
   compile: compile
 });
 
-export { compile as c, fmToJs as f };
+exports.compile = compile;
+exports.fmToJs = fmToJs;

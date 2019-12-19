@@ -1,4 +1,4 @@
-import { e as Val, a as App, V as Var, L as Lam, O as Op1, f as Op2, I as Ite, h as erase } from './core-4b5403b3.js';
+import { e as Val, a as App, V as Var, L as Lam, O as Op1, f as Op2, I as Ite, h as erase } from './core-3f5ed69f.js';
 import { P as Pointer, c as Net, f as NOD, t as type_of, d as NUM, a as addr_of, p as ptrn_eq, n as numb_of, s as slot_of, O as OP1, g as OP2, I as ITE, b as ptrn_st, N as Numeric } from './fm-net-b5947aee.js';
 
 // ~~ Compiles Formality Core to Formality Net ~~

@@ -1,31 +1,8 @@
-import { marked_code } from './errors.js';
-import stringify from './stringify.js';
+'use strict';
 
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
-
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
-
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
-***************************************************************************** */
-
-var __assign = function() {
-    __assign = Object.assign || function __assign(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
+var _tslib = require('./_tslib-cfb3c16c.js');
+var errors = require('./errors.js');
+var stringify = require('./stringify.js');
 
 // ~~ Formality Core Language ~~
 // Global variable for enalbing
@@ -783,7 +760,7 @@ var typecheck = function (name, expect, defs, opts) {
                         ", file \x1b[4m" +
                         term[3].file +
                         ".fm\x1b[0m:";
-                err_msg += "\n" + marked_code(term[3]);
+                err_msg += "\n" + errors.marked_code(term[3]);
             }
             throw err_msg;
         };
@@ -1115,7 +1092,7 @@ var is_affine = function (term, defs, seen) {
                 return true;
             }
             else {
-                var seen = __assign(__assign({}, seen), (_a = {}, _a[term[1].name] = true, _a));
+                var seen = _tslib.__assign(_tslib.__assign({}, seen), (_a = {}, _a[term[1].name] = true, _a));
                 return is_affine(defs[term[1].name], defs, seen);
             }
         default:
@@ -1183,7 +1160,7 @@ var is_terminating = function (term, defs, seen) {
                 return false;
             }
             else {
-                var seen = __assign(__assign({}, seen), (_a = {}, _a[term[1].name] = true, _a));
+                var seen = _tslib.__assign(_tslib.__assign({}, seen), (_a = {}, _a[term[1].name] = true, _a));
                 return is_terminating(defs[term[1].name], defs, seen);
             }
         default:
@@ -1192,35 +1169,63 @@ var is_terminating = function (term, defs, seen) {
 };
 
 var core = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    Var: Var,
-    Typ: Typ,
-    All: All,
-    Lam: Lam,
-    App: App,
-    Slf: Slf,
-    New: New,
-    Use: Use,
-    Ann: Ann,
-    Log: Log,
-    Hol: Hol,
-    Ref: Ref,
-    Num: Num,
-    Val: Val,
-    Op1: Op1,
-    Op2: Op2,
-    Ite: Ite,
-    equal: equal,
-    erase: erase,
-    reduce: reduce,
-    shift: shift,
-    subst: subst,
-    subst_many: subst_many,
-    typecheck: typecheck,
-    uses: uses,
-    is_affine: is_affine,
-    is_elementary: is_elementary,
-    is_terminating: is_terminating
+  __proto__: null,
+  Var: Var,
+  Typ: Typ,
+  All: All,
+  Lam: Lam,
+  App: App,
+  Slf: Slf,
+  New: New,
+  Use: Use,
+  Ann: Ann,
+  Log: Log,
+  Hol: Hol,
+  Ref: Ref,
+  Num: Num,
+  Val: Val,
+  Op1: Op1,
+  Op2: Op2,
+  Ite: Ite,
+  equal: equal,
+  erase: erase,
+  reduce: reduce,
+  shift: shift,
+  subst: subst,
+  subst_many: subst_many,
+  typecheck: typecheck,
+  uses: uses,
+  is_affine: is_affine,
+  is_elementary: is_elementary,
+  is_terminating: is_terminating
 });
 
-export { All as A, Hol as H, Ite as I, Lam as L, New as N, Op1 as O, Ref as R, Slf as S, Typ as T, Use as U, Var as V, App as a, Ann as b, Log as c, Num as d, Val as e, Op2 as f, equal as g, erase as h, subst as i, subst_many as j, is_affine as k, is_elementary as l, is_terminating as m, core as n, reduce as r, shift as s, typecheck as t, uses as u };
+exports.All = All;
+exports.Ann = Ann;
+exports.App = App;
+exports.Hol = Hol;
+exports.Ite = Ite;
+exports.Lam = Lam;
+exports.Log = Log;
+exports.New = New;
+exports.Num = Num;
+exports.Op1 = Op1;
+exports.Op2 = Op2;
+exports.Ref = Ref;
+exports.Slf = Slf;
+exports.Typ = Typ;
+exports.Use = Use;
+exports.Val = Val;
+exports.Var = Var;
+exports.core = core;
+exports.equal = equal;
+exports.erase = erase;
+exports.is_affine = is_affine;
+exports.is_elementary = is_elementary;
+exports.is_terminating = is_terminating;
+exports.reduce = reduce;
+exports.shift = shift;
+exports.subst = subst;
+exports.subst_many = subst_many;
+exports.typecheck = typecheck;
+exports.uses = uses;

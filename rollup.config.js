@@ -32,7 +32,7 @@ export default [
   },
   {
     input: "src/index.ts",
-    plugins: [typescript(), replaceVersion, resolve({mainFields: ['module', 'main', 'browser']}), commonjs()],
+    plugins: [replaceVersion, resolve({mainFields: ['module', 'main', 'browser']}), commonjs(), typescript()],
     external: builtins,
     output: {
       format: "umd",

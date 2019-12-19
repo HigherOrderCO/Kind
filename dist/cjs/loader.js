@@ -3,8 +3,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 require('xhr-request-promise');
-require('./version.js');
-var loader$1 = require('./loader-595fcc0c.js');
+var loader$1 = require('./loader-9d5b5b47.js');
 
 
 

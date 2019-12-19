@@ -1,5 +1,7 @@
-import { h as erase, R as Ref, V as Var, a as App, L as Lam } from './core-4b5403b3.js';
-import './stringify.js';
+'use strict';
+
+require('./stringify.js');
+var core = require('./core-088a2546.js');
 
 // Formality's runtime works by compiling normal Terms to a
 // Runtime Terms (RtTerm), reducing, and decompiling back.
@@ -83,19 +85,19 @@ function compile(defs, name) {
       case "Ref":
         if (!reachable[term.name]) {
           reachable[term.name] = true;
-          reach(erase(defs[term.name]));
+          reach(core.erase(defs[term.name]));
         }
         break;
     }
   }  var reachable = {[name]:true};
-  reach(erase(defs[name]));
+  reach(core.erase(defs[name]));
   for (var def_name in reachable) {
     rt_rfid[def_name] = next_id++;
   }
   for (var def_name in reachable) {
     rt_defs[rt_rfid[def_name]] = [];
     rt_bind[rt_rfid[def_name]] = {};
-    var root = go(def_name, 0, erase(defs[def_name]), 0);
+    var root = go(def_name, 0, core.erase(defs[def_name]), 0);
     if (root) {
       rt_defs[rt_rfid[def_name]] = {
         mem: rt_defs[rt_rfid[def_name]],
@@ -110,7 +112,7 @@ function compile(defs, name) {
 function decompile(rt_term, dep = 0) {
   var {mem, ptr} = rt_term;
   if (ptr === NIL) {
-    return Ref("*");
+    return core.Ref("*");
   } else {
     var ctor = ctor_of(ptr);
     var addr = addr_of(ptr);
@@ -121,15 +123,15 @@ function decompile(rt_term, dep = 0) {
           mem[addr_of(vari)] = New(VAR, dep);
         }
         var body = decompile({mem, ptr: mem[addr+1]}, dep+1);
-        return Lam("v"+dep, null, body, false);
+        return core.Lam("v"+dep, null, body, false);
       case APP:
         var func = decompile({mem, ptr: mem[addr+0]}, dep);
         var argm = decompile({mem, ptr: mem[addr+1]}, dep);
-        return App(func, argm, false);
+        return core.App(func, argm, false);
       case REF:
-        return Ref("R"+addr_of(ptr), false);
+        return core.Ref("R"+addr_of(ptr), false);
       case VAR:
-        return Var(dep - addr - 1);
+        return core.Var(dep - addr - 1);
     }  }}
 // Removes garbage from the memory
 function collect(rt_term) {
@@ -309,4 +311,16 @@ var runtimeFast = /*#__PURE__*/Object.freeze({
   reduce: reduce
 });
 
-export { APP as A, LAM as L, NIL as N, REF as R, VAR as V, New as a, addr_of as b, ctor_of as c, compile as d, decompile as e, collect as f, runtimeFast as g, reduce as r };
+exports.APP = APP;
+exports.LAM = LAM;
+exports.NIL = NIL;
+exports.New = New;
+exports.REF = REF;
+exports.VAR = VAR;
+exports.addr_of = addr_of;
+exports.collect = collect;
+exports.compile = compile;
+exports.ctor_of = ctor_of;
+exports.decompile = decompile;
+exports.reduce = reduce;
+exports.runtimeFast = runtimeFast;

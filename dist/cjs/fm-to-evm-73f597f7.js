@@ -1,12 +1,6 @@
-import './core-4b5403b3.js';
-import './stringify.js';
-import './version.js';
-import './loader-cd5b319a.js';
-import './parse.js';
-import { d as compile$1, a as New, N as NIL, R as REF, c as ctor_of, b as addr_of } from './runtime-fast-5a8b430d.js';
-import './fm-net-b5947aee.js';
-import './runtime-optimal-5452ea14.js';
-import './fm-to-js-d17092e6.js';
+'use strict';
+
+var runtimeFast = require('./runtime-fast-6aa65b08.js');
 
 function compile(name, defs) {
   const STOP         = 0x00;
@@ -198,9 +192,9 @@ function compile(name, defs) {
 
   var ADDR_OF = [PUSH1, 0x4, SHR];
   var CTOR_OF = [PUSH1, 0x0F, AND];
-  var NIL$1     = [PUSH4, 0xFF, 0xFF, 0xFF, 0xFF];
+  var NIL     = [PUSH4, 0xFF, 0xFF, 0xFF, 0xFF];
 
-  var {rt_defs, rt_rfid, rt_term} = compile$1(defs, name);
+  var {rt_defs, rt_rfid, rt_term} = runtimeFast.compile(defs, name);
 
   var code = [
     LOAD_NUMS(rt_term.mem),
@@ -209,7 +203,7 @@ function compile(name, defs) {
 
     // back.push(root); back.push(0); back.push(0);
     NUM(rt_term.ptr),
-    //NUM(fm.fast.New(fm.fast.REF, Object.keys(rt_defs).length - 1)), // next
+    //NUM(fast.New(fast.REF, Object.keys(rt_defs).length - 1)), // next
     NUM(0), // side
     NUM(0), // deph
 
@@ -260,7 +254,7 @@ function compile(name, defs) {
           GET([DUP3, ADDR_OF]),
 
           // if (vari !== NIL)
-          IF([DUP1, NIL$1, EQ], [POP], [
+          IF([DUP1, NIL, EQ], [POP], [
             // mem[addr_of(vari)] = New(VAR, deph);
             ADDR_OF, DUP2, NUM(4), SHL, SET([SWAP1]),
           ]),
@@ -288,7 +282,7 @@ function compile(name, defs) {
             GET([DUP1, ADDR_OF]),
 
             // if (vari !== NIL)
-            IF([DUP1, NIL$1, EQ, ISZERO], [
+            IF([DUP1, NIL, EQ, ISZERO], [
               //[NUM(99990006),POP],
               // var argm = mem[addr_of(next) + 1];
               GET([DUP5, ADDR_OF, PUSH1, 1, ADD]),
@@ -331,7 +325,7 @@ function compile(name, defs) {
           //[NUM(99990009),POP],
 
           // mem.push(0);
-          NIL$1, MSIZE, MSTORE,
+          NIL, MSIZE, MSTORE,
 
           // var add_val = mem.length;
           MSIZE, PUSH1, 1, SHR,
@@ -341,10 +335,10 @@ function compile(name, defs) {
             var ref = rt_defs[key];
             return flat([
               ref.mem.map(ref_term => {
-                var ref_ctor = ctor_of(ref_term);
-                var ref_addr = addr_of(ref_term);
-                var ref_numb = NUM(New(ref_ctor, ref_addr));
-                if (ref_term !== NIL && ref_ctor !== REF) {
+                var ref_ctor = runtimeFast.ctor_of(ref_term);
+                var ref_addr = runtimeFast.addr_of(ref_term);
+                var ref_numb = NUM(runtimeFast.New(ref_ctor, ref_addr));
+                if (ref_term !== runtimeFast.NIL && ref_ctor !== runtimeFast.REF) {
                   var ref_numb = [DUP1, ref_numb, ADD];
                 } else {
                   var ref_numb = [ref_numb];
@@ -378,7 +372,7 @@ function compile(name, defs) {
       ]),
 
     ]),
-    
+
     STOP,
   ];
 
@@ -398,7 +392,7 @@ function compile(name, defs) {
   //console.log('Returned : ' + results.returnValue.toString('hex'))
   //console.log('gasUsed  : ' + results.gasUsed.toString())
   //console.log("lastMem  : " + JSON.stringify(mem));
-  //console.log("term     : " + fm.stringify(fm.fast.decompile({mem,ptr:mem[0]})));
+  //console.log("term     : " + fm.stringify(fast.decompile({mem,ptr:mem[0]})));
 //}).catch(err => console.log('Error    : ' + err))
 
 //vm.on('step', function(data) {
@@ -406,7 +400,7 @@ function compile(name, defs) {
   ////console.log(pad(4,"0",String(data.pc))
     ////+ " " + pad(8," ",data.opcode.name)
     ////+ " | " + data.stack
-    ////+ " --- " + fm.stringify(fm.fast.decompile({mem,ptr:mem[0]})));
+    ////+ " --- " + fm.stringify(fast.decompile({mem,ptr:mem[0]})));
 //})
 
 //var get_mem = (mem) => {
@@ -427,4 +421,5 @@ var fmToEvm = /*#__PURE__*/Object.freeze({
   compile: compile
 });
 
-export { compile as c, fmToEvm as f };
+exports.compile = compile;
+exports.fmToEvm = fmToEvm;

@@ -1,11 +1,11 @@
 'use strict';
 
-var core = require('./core-7abfb2a4.js');
+require('./_tslib-cfb3c16c.js');
 var errors = require('./errors.js');
 var stringify = require('./stringify.js');
+var core = require('./core-088a2546.js');
 require('xhr-request-promise');
-require('./version.js');
-var loader = require('./loader-595fcc0c.js');
+var loader = require('./loader-9d5b5b47.js');
 
 // WARNING: here shall be dragons!
 

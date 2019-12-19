@@ -2,18 +2,12 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-require('./core-7abfb2a4.js');
+require('./_tslib-cfb3c16c.js');
 require('./errors.js');
 require('./stringify.js');
-require('xhr-request-promise');
-require('./version.js');
-require('./loader-595fcc0c.js');
-require('./parse.js');
-require('./runtime-fast-dcae5953.js');
-require('./fm-net-4e316c61.js');
-require('./runtime-optimal-5c91731a.js');
-require('./fm-to-js-3bd74f20.js');
-var fmToEvm = require('./fm-to-evm-131104e4.js');
+require('./core-088a2546.js');
+require('./runtime-fast-6aa65b08.js');
+var fmToEvm = require('./fm-to-evm-73f597f7.js');
 
 
 
