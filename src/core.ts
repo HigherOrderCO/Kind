@@ -1578,6 +1578,7 @@ const is_terminating = (term: Term, defs: Defs, seen: Seen = {}): boolean => {
 
 export {
   Term,
+  Defs,
   TypecheckOpts,
   EqualOpts,
   Var,
