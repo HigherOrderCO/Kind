@@ -101,7 +101,7 @@ export default async function run() {
   } else if (args.f) {
     var { name, defs } = await load_code(main);
     var { rt_defs, rt_term: rt_term_orig } = fm.fast.compile(defs, name);
-    var { rt_term, fast_stats } = fm.fast.reduce(rt_term_orig, rt_defs);
+    var { rt_term, stats: fast_stats } = fm.fast.reduce(rt_term_orig, rt_defs);
     term = fm.fast.decompile(rt_term);
     console.log(fm.stringify(term));
     console.log(JSON.stringify(fast_stats));

@@ -12,7 +12,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf dist && rollup -c rollup.config.js",
+    "build": "rimraf dist && gulp build",
     "prepublishOnly": "npm run build"
   },
   "repository": {

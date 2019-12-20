@@ -13,17 +13,43 @@ const LAM = 1;
 const APP = 2;
 const REF = 3;
 
+type Ctor = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15;
+type Ptr = number;
+type Addr = number;
+type Id = number;
+
+interface Term {
+  mem: number[];
+  ptr: Ptr;
+}
+
+interface Stats {
+  beta: number;
+  copy: number;
+}
+
+interface CompileResult {
+  rt_defs: Record<Id, Term>;
+  rt_rfid: Record<string, Id>;
+  rt_term: Term;
+}
+
+interface ReduceResult {
+  rt_term: Term;
+  stats: Stats;
+}
+
 // Pointer: includes constructor type and address
-const NIL     = 0xFFFFFFFF;
-const New     = (ctor, addr) => (ctor + (addr << 4)) >>> 0;
-const ctor_of = ptr => ptr & 0b1111;
-const addr_of = ptr => ptr >>> 4;
+const NIL = 0xffffffff;
+const New = (ctor: Ctor, addr: Addr): Ptr => (ctor + (addr << 4)) >>> 0;
+const ctor_of = (ptr: Ptr): Ctor => (ptr & 0b1111) as Ctor;
+const addr_of = (ptr: Ptr): Addr => ptr >>> 4;
 
 // Compiles a Term to a RtTerm. Returns:
 // - rf_defs : Map(RefId, RtTerm) -- a map from RefIds to RtTerms
 // - rt_rfid : Map(String, RefId) -- a map from term names to RefIds
 // - rt_term : RtTerm             -- the compiled term
-function compile(defs, name) {
+function compile(defs: core.Defs, name: string): CompileResult {
   var rt_defs = {};
   var rt_rfid = {};
   var rt_bind = {};
@@ -42,18 +68,33 @@ function compile(defs, name) {
       case "Lam":
         rt_bind[rt_rfid[name]][depth] = pos;
         rt_defs[rt_rfid[name]].push(NIL, NIL);
-        rt_defs[rt_rfid[name]][pos+1] = go(name, pos+1, term[1].body, depth + 1);
+        rt_defs[rt_rfid[name]][pos + 1] = go(
+          name,
+          pos + 1,
+          term[1].body,
+          depth + 1
+        );
         return New(LAM, pos);
       case "App":
         rt_defs[rt_rfid[name]].push(NIL, NIL);
-        rt_defs[rt_rfid[name]][pos+0] = go(name, pos+0, term[1].func, depth);
-        rt_defs[rt_rfid[name]][pos+1] = go(name, pos+1, term[1].argm, depth);
+        rt_defs[rt_rfid[name]][pos + 0] = go(
+          name,
+          pos + 0,
+          term[1].func,
+          depth
+        );
+        rt_defs[rt_rfid[name]][pos + 1] = go(
+          name,
+          pos + 1,
+          term[1].argm,
+          depth
+        );
         return New(APP, pos);
       case "Ref":
         return New(REF, rt_rfid[term[1].name]);
     }
     return NIL;
-  };
+  }
   function reach(term) {
     var [ctor, term] = term;
     switch (ctor) {
@@ -88,8 +129,8 @@ function compile(defs, name) {
         }
         break;
     }
-  };
-  var reachable = {[name]:true};
+  }
+  var reachable = { [name]: true };
   reach(core.erase(defs[name]));
   for (var def_name in reachable) {
     rt_rfid[def_name] = next_id++;
@@ -106,12 +147,12 @@ function compile(defs, name) {
     }
   }
   var rt_term = rt_defs[rt_rfid[name]];
-  return {rt_defs, rt_rfid, rt_term};
-};
+  return { rt_defs, rt_rfid, rt_term };
+}
 
 // Recovers a Term from a RtTerm
-function decompile(rt_term, dep = 0) {
-  var {mem, ptr} = rt_term;
+function decompile(rt_term: Term, dep = 0): core.Term {
+  var { mem, ptr } = rt_term;
   if (ptr === NIL) {
     return core.Ref("*");
   } else {
@@ -119,45 +160,45 @@ function decompile(rt_term, dep = 0) {
     var addr = addr_of(ptr);
     switch (ctor) {
       case LAM:
-        var vari = mem[addr+0];
+        var vari = mem[addr + 0];
         if (vari !== NIL) {
           mem[addr_of(vari)] = New(VAR, dep);
         }
-        var body = decompile({mem, ptr: mem[addr+1]}, dep+1);
-        return core.Lam("v"+dep, null, body, false);
+        var body = decompile({ mem, ptr: mem[addr + 1] }, dep + 1);
+        return core.Lam("v" + dep, null, body, false);
       case APP:
-        var func = decompile({mem, ptr: mem[addr+0]}, dep);
-        var argm = decompile({mem, ptr: mem[addr+1]}, dep);
+        var func = decompile({ mem, ptr: mem[addr + 0] }, dep);
+        var argm = decompile({ mem, ptr: mem[addr + 1] }, dep);
         return core.App(func, argm, false);
       case REF:
-        return core.Ref("R"+addr_of(ptr), false);
+        return core.Ref("R" + addr_of(ptr), false);
       case VAR:
         return core.Var(dep - addr - 1);
-    };
-  };
-};
+    }
+  }
+}
 
 // Removes garbage from the memory
-function collect(rt_term) {
-  var {mem, ptr} = rt_term;
+function collect(rt_term: Term): Term {
+  var { mem, ptr } = rt_term;
   var new_mem = [];
   function go(ptr, vpos) {
     var ctor = ctor_of(ptr);
     var addr = addr_of(ptr);
-    var pos  = new_mem.length;
+    var pos = new_mem.length;
     switch (ctor) {
       case LAM:
-        var vari = mem[addr+0];
+        var vari = mem[addr + 0];
         if (vari !== NIL) {
-          mem[addr_of(mem[addr+0])] = New(VAR, pos);
+          mem[addr_of(mem[addr + 0])] = New(VAR, pos);
         }
         new_mem.push(NIL, NIL);
-        new_mem[pos+1] = go(mem[addr+1], pos+1);
+        new_mem[pos + 1] = go(mem[addr + 1], pos + 1);
         return New(LAM, pos);
       case APP:
         new_mem.push(NIL, NIL);
-        new_mem[pos+0] = go(mem[addr+0], pos+0);
-        new_mem[pos+1] = go(mem[addr+1], pos+1);
+        new_mem[pos + 0] = go(mem[addr + 0], pos + 0);
+        new_mem[pos + 1] = go(mem[addr + 1], pos + 1);
         return New(ctor, pos);
       case REF:
         new_mem.push(NIL, NIL);
@@ -165,22 +206,22 @@ function collect(rt_term) {
       case VAR:
         new_mem[addr] = New(VAR, vpos + 0);
         return NIL;
-    };
-  };
-  return {mem:new_mem, ptr:go(ptr, 0)};
-};
+    }
+  }
+  return { mem: new_mem, ptr: go(ptr, 0) };
+}
 
 // Reduces a RtTerm to normal form. This implements a lazy
 // evaluation strategy. It uses a global garbage collector,
 // but that could be replaced by merely collecting terms
 // that got substituted in a function that doesn't use its
 // bound variable.
-function reduce(rt_term, rt_defs) {
-  const view = ptr => stringify(decompile({mem:mem.slice(0), ptr}, 0));
+function reduce(rt_term: Term, rt_defs: Record<Id, Term>): ReduceResult {
+  const view = ptr => stringify(decompile({ mem: mem.slice(0), ptr }, 0));
 
-  var {mem, ptr: root} = rt_term;
-  var stats = {beta: 0, copy: 0}; // reduction costs
-  var back = []; // nodes we passed through
+  var { mem, ptr: root } = rt_term;
+  var stats: Stats = { beta: 0, copy: 0 }; // reduction costs
+  var back: [Ptr, number, number][] = []; // nodes we passed through
 
   back.push([rt_term.ptr, 0, 0]);
 
@@ -188,26 +229,25 @@ function reduce(rt_term, rt_defs) {
 
   // While there is a node to visit
   while (back.length > 0) {
-    var [next,side,deph] = back[back.length - 1];
+    var [next, side, deph] = back[back.length - 1];
 
     // If needed, do garbage collection
     if (mem.length > collect_length) {
-      var {mem, ptr: root} = collect({mem, ptr: root});
-      var back = [[root, 0, 0]];
+      var { mem, ptr: root } = collect({ mem, ptr: root });
+      back = [[root, 0, 0]];
       var collect_length = mem.length * 8;
       continue;
     }
 
     // Pattern-matches the next node
     switch (ctor_of(next)) {
-
       // If it is a lambda, continue towards its body
       case LAM:
         var vari = mem[addr_of(next) + 0];
         if (vari !== NIL) {
           mem[addr_of(vari)] = New(VAR, deph);
         }
-        back[back.length-1][1] = 1;
+        back[back.length - 1][1] = 1;
         back.push([mem[addr_of(next) + 1], 0, deph + 1]);
         break;
 
@@ -234,15 +274,15 @@ function reduce(rt_term, rt_defs) {
           if (back.length > 0) {
             var back_to = back[back.length - 1];
             mem[addr_of(back_to[0]) + back_to[1]] = subs;
-            back[back.length-1][1] = 0;
+            back[back.length - 1][1] = 0;
           } else {
             var root = subs;
             back.push([subs, 0, 0]);
           }
 
-        // Continues on func
+          // Continues on func
         } else {
-          back.push([func,0,deph]);
+          back.push([func, 0, deph]);
         }
         break;
 
@@ -272,7 +312,7 @@ function reduce(rt_term, rt_defs) {
         if (back.length > 0) {
           var back_to = back[back.length - 1];
           mem[addr_of(back_to[0]) + back_to[1]] = subs;
-          back[back.length-1][1] = 0;
+          back[back.length - 1][1] = 0;
         } else {
           var root = subs;
           back.push([subs, 0, 0]);
@@ -297,15 +337,17 @@ function reduce(rt_term, rt_defs) {
         }
 
         break;
-
     }
-  };
+  }
 
-  return {rt_term: {mem, ptr: root}, stats};
-};
+  return { rt_term: { mem, ptr: root }, stats };
+}
 
 export {
-  VAR, LAM, APP, REF,
+  VAR,
+  LAM,
+  APP,
+  REF,
   NIL,
   New,
   ctor_of,
@@ -313,5 +355,5 @@ export {
   compile,
   decompile,
   collect,
-  reduce,
+  reduce
 };
