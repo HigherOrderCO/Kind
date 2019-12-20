@@ -590,7 +590,7 @@ Log
 ------
 
 Another handy feature is `log(x)`. When running a program, it will print the
-normal form of `x`, similarly to haskell's `console.log` and haskell's `print`,
+normal form of `x`, similarly to JavaScript's `console.log` and haskell's `print`,
 but for anything (not only strings). When type-checking a program, it tells you
 the normal-form and the type of `x`. This is useful when you want to know what
 type an expression would have inside certain context. For example:
