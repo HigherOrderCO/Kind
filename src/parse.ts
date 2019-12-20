@@ -14,17 +14,49 @@ import {
   subst,
   shift,
   subst_many,
+  Term,
+  Defs,
 } from "./core";
-import {load_file} from "./loader";
+import {load_file, Loader} from "./loader";
 import {marked_code, random_excuse} from "./errors";
-import stringify from "./stringify";
+import {show as stringify} from "./stringify";
 
 // :::::::::::::
 // :: Parsing ::
 // :::::::::::::
 
+export interface Opts {
+  file?: string;
+  loader?: Loader;
+  tokenify?: boolean;
+}
+
+export type TokenType = "???" | "cmm" | "def" | "doc" | "imp" | "sym" | "txt" | "var" | "nop" | "ref";
+export type Token = [TokenType, string] | [TokenType, string, string];
+
+export interface Adt {
+  adt_pram: [string, Term, boolean][];
+  adt_indx: [string, Term, boolean][];
+  adt_ctor: [string, [string, Term, boolean][], Term][];
+  adt_name: string;
+}
+
+export interface Parsed {
+  defs: Defs;
+  adts: Record<string, Adt>;
+  tokens: Token[];
+  local_imports: Record<string, boolean>;
+  qual_imports: Record<string, string>;
+  open_imports: Record<string, boolean>;
+}
+
 // Converts a string to a term
-export const parse = async (code, opts, root = true, loaded = {}) => {
+export const parse = async (
+  code: string,
+  opts: Opts,
+  root = true,
+  loaded: Record<string, any> = {}
+): Promise<Parsed> => {
   const file = opts.file || "main";
   const loader = opts.loader || load_file;
   const tokenify = opts.tokenify;
@@ -315,80 +347,13 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
     throw text;
   }
 
-  // Constructs an INat adder. Example:
-  //   15s(n : INat) : INat
-  //     new(~INat) (~P, iz, s1) =>
-  //     dup iz = iz
-  //     dup s1 = s1
-  //     dup s2 = # (~n : -INat, i : P(n)) => s1(~1s(n), s1(~n, i))
-  //     dup s4 = # (~n : -INat, i : P(n)) => s2(~2s(n), s2(~n, i))
-  //     dup s8 = # (~n : -INat, i : P(n)) => s4(~4s(n), s4(~n, i))
-  //     dup nn = use(n)(~(x) => P(x), #iz, #s1)
-  //     # s8(~4s(2s(1s(n))), s4(~2s(1s(n)), s2(~1s(n), s1(~n, nn))))
-  // This exists for the sake of being able to create INats without using
-  // `mul2` and `succ`, thus without requiring runtime reductions, but this
-  // seems to be too heavy for the type-checker. A reduce-before-compiling
-  // primitive would be a better way to achieve this, I believe.
-  function build_inat_adder(name) {
-    if (!defs[name+"z"]) {
-      var numb = name === "" ? Math.pow(2,48) - 1 : Number(name);
-      var bits = numb.toString(2);
-
-      if (numb === 0) {
-        return Lam("n", base_ref("INat"), Var(0), false);
-      }
-
-      var term = Var(0);
-
-      var sucs = bits.length;
-      for (var i = 0; i < sucs; ++i) {
-        if (bits[sucs - i - 1] === "1") {
-          var indx = Var(1 + sucs + 1 + 3);
-          for (var j = 0; j < i; ++j) {
-            if (bits[sucs - j - 1] === "1") {
-              var indx = App(build_inat_adder(String(2**j)), indx, false);
-            }
-          }
-          var term = App(App(Var(-1 + 1 + sucs - i), indx, true), term, false);
-        }
-      }
-
-      var term = Put(term);
-      var moti = Lam("x", null, App(Var(-1 + 1 + sucs + 1 + 3), Var(0), false), false);
-      var term = Dup("nn", App(App(App(Use(Var(-1 + sucs + 1 + 3 + 1)), moti, true), Put(Var(-1 + sucs + 1)), false), Put(Var(-1 + sucs)), false), term);
-
-      for (var i = 0; i < sucs; ++i) {
-        if (i === sucs - 1) {
-          var term = Dup("s1", Var(1), term);
-        } else {
-          var expr = App(App(Var(2), Var(1), true), Var(0), false);
-          var expr = App(App(Var(2), App(build_inat_adder(String(2**(sucs-i-1-1))), Var(1), false), true), expr, false);
-          var expr = Lam("N", App(Var(-1 + 1 + (sucs - i - 1) + 1 + 3), Var(0), false), expr, false)
-          var expr = Lam("n", base_ref("INat"), expr, true);
-          var expr = Put(expr);
-          var term = Dup("z" + (2 ** (sucs - i - 1)), expr, term);
-        }
-      }
-
-      var term = Dup("iz", Var(1), term);
-      var term = Lam("s1", null, term, false);
-      var term = Lam("iz", null, term, false);
-      var term = Lam("P", null, term, true);
-      var term = New(base_ref("INat"), term);
-      var term = Lam("n", base_ref("INat"), term, false);
-
-      define(name+"z", Ann(All("n", base_ref("INat"), base_ref("INat"), false), term));
-    }
-    return Ref(name+"z", false, loc(name.length + 1));
-  }
-
   // Constructs an INat
   function build_inat(name) {
     if (!defs[name+"N"]) {
       var numb = name === "" ? Math.pow(2,48) - 1 : Number(name);
       var bits = numb.toString(2);
       var bits = bits === "0" ? "" : bits;
-      var term = base_ref("izero");
+      var term: Term = base_ref("izero");
       for (var i = 0; i < bits.length; ++i) {
         term = App(base_ref("imul2"), term, false);
         if (bits[i] === "1") {
@@ -403,9 +368,9 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
   // Constructs a Bits
   function build_bits(name) {
     if (!defs[name+"b"]) {
-      var term = base_ref("be");
+      var term: Term = base_ref("be");
       for (var i = 0; i < name.length; ++i) {
-        var term = App(base_ref(name[name.length - i - 1] === "0" ? "b0" : "b1"), term, false);
+        term = App(base_ref(name[name.length - i - 1] === "0" ? "b0" : "b1"), term, false);
       }
       define(name+"b", term);
     }
@@ -415,9 +380,9 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
   // Constructs an IBits
   function build_ibits(name) {
     if (!defs[name+"B"]) {
-      var term = base_ref("ibe");
+      var term: Term = base_ref("ibe");
       for (var i = 0; i < name.length; ++i) {
-        var term = App(base_ref(name[name.length - i - 1] === "0" ? "ib0" : "ib1"), term, false);
+        term = App(base_ref(name[name.length - i - 1] === "0" ? "ib0" : "ib1"), term, false);
       }
       define(name+"B", term);
     }
@@ -425,16 +390,16 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
   }
 
   // Constructs a string
-  function build_str(text, init) {
+  function build_str(text, init = 0) {
     var nums = [];
     for (var i = 0; i < text.length; ++i) {
       nums.push(text.charCodeAt(i));
     }
-    var term = App(base_ref("nil"), Num(), true);
+    var term: Term = App(base_ref("nil"), Num(), true);
     for (var i = nums.length - 1; i >= 0; --i) {
       //var bits = build_bits(nums[i].toString(2));
       var bits = Val(nums[i]);
-      var term = App(App(App(base_ref("cons"), Num(), true), bits, false), term, false);
+      term = App(App(App(base_ref("cons"), Num(), true), bits, false), term, false);
     }
     return Ann(base_ref("String"), term, false, loc(idx - init));
   }
@@ -442,7 +407,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
   // Constructs a nat
   function build_nat(name) {
     if (!defs["n"+name]) {
-      var term = base_ref("zero");
+      var term: Term = base_ref("zero");
       var numb = Number(name);
       for (var i = 0; i < numb; ++i) {
         term = App(base_ref("succ"), term, false);
@@ -487,17 +452,18 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
   }
 
   // Parses a term that demands a name
-  function parse_named_term(nams) {
+  function parse_named_term(nams): [string, Term] {
     // Parses matched term
     var term = parse_term(nams);
 
     // If no name given, attempts to infer it from term
+    var name: string;
     if (match("as ")) {
-      var name = parse_string();
-    } else if (term[0] === "Var" && term[1].__name) {
-      var name = term[1].__name;
+      name = parse_string();
+    } else if (term[0] === "Var" && (term[1] as any).__name) {
+      name = (term[1] as any).__name;
     } else if (term[0] === "Ref") {
-      var name = term[1].name.slice(term[1].name.indexOf("/")+1);
+      name = term[1].name.slice(term[1].name.indexOf("/")+1);
     } else {
       error("The term \x1b[2m" + stringify(term, nams) + "\x1b[0m requires an explicit name.\n"
           + "Provide it with the 'as' keyword. Example: \x1b[2m" + stringify(term, nams) + " as x\x1b[0m");
@@ -508,7 +474,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
 
   // Parses a number, variable, inline operator or reference
   function parse_ref(nams) {
-    var term = null;
+    var term: Term | null = null;
     if (tokens) tokens.push(["???", ""]);
     var name = parse_name();
     if (name.length === 0) {
@@ -521,17 +487,15 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
     var is_num = !isNaN(Number(name)) && !/[a-zA-Z]/.test(last);
     var is_lit = name.length > 1 && !isNaN(Number(name.slice(0,-1))) && /[a-zA-Z]/.test(last);
     if (is_hex || is_bin || is_num) {
-      var term = Val(Number(name), loc(name.length));
+      term = Val(Number(name), loc(name.length));
     } else if (is_lit && last === "N") {
-      var term = build_inat(name.slice(0,-1));
+      term = build_inat(name.slice(0,-1));
     } else if (is_lit && last === "n") {
-      var term = build_nat(name.slice(0,-1));
-    } else if (is_lit && last === "z") {
-      var term = build_inat_adder(name.slice(0,-1));
+      term = build_nat(name.slice(0,-1));
     } else if (is_lit && last === "B") {
-      var term = build_ibits(name.slice(0,-1));
+      term = build_ibits(name.slice(0,-1));
     } else if (is_lit && last === "b") {
-      var term = build_bits(name.slice(0,-1));
+      term = build_bits(name.slice(0,-1));
     } else {
       // Parses bruijn index
       var skip = 0;
@@ -548,7 +512,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
       // Variable
       if (i !== -1) {
         term = Var(nams.length - i - 1, loc(name.length));
-        term[1].__name = name;
+        (term[1] as any).__name = name;
         if (tokens) tokens[tokens.length - 1][0] = "var";
       // Inline binary operator
       } else if (is_native_op[name]) {
@@ -571,7 +535,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
   function parse_grp(nams) {
     if (match("(")) {
       var term = parse_term(nams);
-      var skip = parse_exact(")");
+      parse_exact(")");
       return term;
     }
   }
@@ -631,7 +595,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
         var name = parse_string();
         var type = match(":") ? parse_term(nams.concat(names)) : null;
         var eras = match(";");
-        var skip = match(",");
+        match(",");
         erass.push(eras);
         names.push(name);
         types.push(type);
@@ -639,7 +603,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
       }
       var isall = match("->");
       if (!isall) {
-        var skip = parse_exact("=>");
+        parse_exact("=>");
       }
       var parsed = parse_term(nams.concat(names));
       for (var i = names.length - 1; i >= 0; --i) {
@@ -664,9 +628,9 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
   function parse_let(nams) {
     if (match("let ")) {
       var name = parse_string();
-      var skip = parse_exact("=");
+      parse_exact("=");
       var copy = parse_term(nams);
-      var skip = match(";");
+      match(";");
       var body = parse_term(nams.concat([name]));
       return subst(body, copy, 0);
     }
@@ -693,7 +657,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
     if (match("'")) {
       var name = code[idx];
       next();
-      var skip = parse_exact("'");
+      parse_exact("'");
       return Val(name.charCodeAt(0));
     }
   }
@@ -703,9 +667,9 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
     var init = idx;
     if (match("if ")) {
       var cond = parse_term(nams);
-      var skip = parse_exact("then");
+      parse_exact("then");
       var val0 = parse_term(nams);
-      var skip = parse_exact("else");
+      parse_exact("else");
       var val1 = parse_term(nams);
       return Ite(cond, val0, val1, loc(idx - init));
     }
@@ -714,6 +678,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
   // Parses a pair type `#{A,B}` or value `#[a,b]`
   function parse_par(nams) {
     var init = idx;
+    var parsed: Term;
     // Pair
     if (match("#{")) {
       var types = [];
@@ -723,9 +688,9 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
         if (match("}")) break;
         parse_exact(",");
       }
-      var parsed = types.pop();
+      parsed = types.pop();
       for (var i = types.length - 1; i >= 0; --i) {
-        var parsed = App(App(base_ref("Pair"), types[i], false), parsed, false);
+        parsed = App(App(base_ref("Pair"), types[i], false), parsed, false);
       }
       return parsed;
     }
@@ -739,11 +704,11 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
         if (match("]")) break;
         parse_exact(",");
       }
-      var parsed = terms.pop();
+      parsed = terms.pop();
       for (var i = terms.length - 1; i >= 0; --i) {
         var apps = App(base_ref("pair"), Hol(new_hole_name()), true);
         var apps = App(apps, Hol(new_hole_name()), true);
-        var parsed = App(App(apps, terms[i], false), parsed, false);
+        parsed = App(App(apps, terms[i], false), parsed, false);
       }
       return parsed;
     }
@@ -752,8 +717,9 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
   // Parses a pair projection, `get [x, y] = t`
   function parse_get(nams) {
     var init = idx;
+    var parsed: Term;
     if (match("get ")) {
-      var skip = parse_exact("#[");
+      parse_exact("#[");
       var names = [];
       while (idx < code.length) {
         var name = parse_string();
@@ -761,16 +727,16 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
         if (match("]")) break;
         parse_exact(",");
       }
-      var skip = parse_exact("=");
+      parse_exact("=");
       var pair = parse_term(nams);
-      var skip = match(";");
-      var parsed = parse_term(nams.concat(names));
+      match(";");
+      parsed = parse_term(nams.concat(names));
       for (var i = names.length - 2; i >= 0; --i) {
         var nam1 = names[i];
         var nam2 = i === names.length - 2 ? names[i + 1] : "aux";
         var expr = i === 0 ? pair : Var(0);
         var body = i === 0 ? parsed : shift(parsed, 1, 2);
-        var parsed = App(App(Use(expr),
+        parsed = App(App(Use(expr),
           Lam("", null, Hol(new_hole_name()), false), true),
           Lam(nam1, null, Lam(nam2, null, body, false), false), false);
       }
@@ -783,7 +749,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
     var init = idx;
     if (match("log(")) {
       var msge = parse_term(nams);
-      var skip = parse_exact(")");
+      parse_exact(")");
       var expr = parse_term(nams);
       return Log(msge, expr, loc(idx - init));
     }
@@ -794,7 +760,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
     var init = idx;
     if (match("${")) {
       var name = parse_string();
-      var skip = parse_exact("}");
+      parse_exact("}");
       var type = parse_term(nams.concat([name]));
       return Slf(name, type, loc(idx - init));
     }
@@ -805,7 +771,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
     var init = idx;
     if (match("new(")) {
       var type = parse_term(nams);
-      var skip = parse_exact(")");
+      parse_exact(")");
       var expr = parse_term(nams);
       return New(type, expr, loc(idx - init));
     }
@@ -816,7 +782,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
     var init = idx;
     if (match("use(")) {
       var expr = parse_term(nams);
-      var skip = parse_exact(")");
+      parse_exact(")");
       return Use(expr, loc(idx - init));
     }
   }
@@ -857,9 +823,9 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
           for (var c = 0; c < adt_ctor.length; ++c) {
             var init = idx;
             try {
-              var skip = parse_exact("|");
-              var skip = parse_exact(adt_ctor[c][0]);
-              var skip = parse_exact("=>");
+              parse_exact("|");
+              parse_exact(adt_ctor[c][0]);
+              parse_exact("=>");
             } catch (e) {
               throw "WRONG_ADT";
             }
@@ -878,35 +844,36 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
 
           // Parses matched motive
           var moti_init = idx;
+          var moti_term: Term;
           if (match(":")) {
-            var moti_term = parse_term(nams
+            moti_term = parse_term(nams
               .concat(adt_indx.map(([name,type]) => term_name + "." + name))
               .concat([term_name])
               .concat(moves.map(([name,term,type]) => name)));
           } else if (match(";") || adt_ctor.length > 0) {
-            var moti_term = Hol(new_hole_name());
+            moti_term = Hol(new_hole_name());
           } else {
             throw "WRONG_ADT";
           }
           var moti_loc = loc(idx - moti_init);
           for (var i = moves.length - 1; i >= 0; --i) {
-            var moti_term = All(moves[i][0], moves[i][2], moti_term, false, moves[i][3]);
+            moti_term = All(moves[i][0], moves[i][2], moti_term, false, moves[i][3]);
           }
-          var moti_term = moti_term;
-          var moti_term = Lam(term_name, null, moti_term, false, moti_loc);
+          moti_term = moti_term;
+          moti_term = Lam(term_name, null, moti_term, false, moti_loc);
           for (var i = adt_indx.length - 1; i >= 0; --i) {
-            var moti_term = Lam(term_name + "." + adt_indx[i][0], null, moti_term, false, moti_loc);
+            moti_term = Lam(term_name + "." + adt_indx[i][0], null, moti_term, false, moti_loc);
           }
 
           // Builds the matched term using self-elim ("Use")
           var targ = term;
-          var term = Use(term);
-          var term = App(term, moti_term, true, moti_loc);
+          term = Use(term);
+          term = App(term, moti_term, true, moti_loc);
           for (var i = 0; i < case_term.length; ++i) {
-            var term = App(term, case_term[i], false, case_loc[i]);
+            term = App(term, case_term[i], false, case_loc[i]);
           }
           for (var i = 0; i < moves.length; ++i) {
-            var term = App(term, moves[i][1], false, moves[i][3]);
+            term = App(term, moves[i][1], false, moves[i][3]);
           }
 
           return term;
@@ -929,7 +896,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
     var init = idx;
     if (match(".!.(")) {
       var argm = parse_term(nams);
-      var skip = parse_exact(")");
+      parse_exact(")");
       return Op2(".!.", Val(0), argm, loc(idx - init));
     }
   }
@@ -938,17 +905,18 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
   function parse_app(parsed, init, nams) {
     var unr = match("<", is_space);
     var app = !unr && match("(", is_space);
+    var term: Term;
     if (unr || app) {
-      var term = parsed;
+      term = parsed;
       while (idx < code.length) {
         if (match("_")) {
-          var term = App(term, Hol(new_hole_name()), true, loc(idx - init));
+          term = App(term, Hol(new_hole_name()), true, loc(idx - init));
           if (unr ? match("<") : match(")")) break;
         } else {
           var argm = parse_term(nams);
           var eras = match(";");
-          var term = App(term, argm, eras, loc(idx - init));
-          var skip = match(",");
+          term = App(term, argm, eras, loc(idx - init));
+          match(",");
           if (unr ? match(">") : match(")")) break;
         }
       }
@@ -976,7 +944,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
       var list = [];
       while (idx < code.length && !match("}")) {
         var mkey = parse_term(nams);
-        var skip = parse_exact(":");
+        parse_exact(":");
         var mval = parse_term(nams);
         list.push(App(App(App(App(base_ref("pair"), Hol(new_hole_name()), true), Hol(new_hole_name()), true), mkey, false), mval, false));
         if (match("}")) break; else parse_exact(",");
@@ -1006,35 +974,36 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
     var typed = false;
     if (match("do{", is_space) || match("do {", is_space)) {
       var type = Hol(new_hole_name());
-      function parse_do_statement(nams) {
+      const parse_do_statement = (nams) => {
+        var vtyp: Term;
         if (match("var")) {
           var name = parse_name();
           if (match(":")) {
-            var vtyp = parse_term(nams);
+            vtyp = parse_term(nams);
           } else {
-            var vtyp = Hol(new_hole_name());
+            vtyp = Hol(new_hole_name());
           }
-          var skip = parse_exact("=");
+          parse_exact("=");
           var call = parse_term(nams);
-          var skip = match(";");
+          match(";");
           var body = parse_do_statement(nams.concat([name]));
           return App(App(App(App(base_ref("bind"), vtyp, true), type, true), call, false), Lam(name, null, body, false), false);
         } else if (match("throw;")) {
-          var skip = parse_exact("}");
+          parse_exact("}");
           return App(base_ref("throw"), Hol(new_hole_name()), true);
         } else if (match("return ")) {
           var term = parse_term(nams);
-          var skip = match(";");
-          var skip = parse_exact("}");
+          match(";");
+          parse_exact("}");
           return App(App(base_ref("return"), Hol(new_hole_name()), true), term, false);
         } else {
           var term = parse_term(nams);
-          var skip = match(";");
+          match(";");
           if (match("}")) {
             return term;
           } else {
             var body = parse_do_statement(nams.concat([name]));
-            var vtyp = Hol(new_hole_name());
+            vtyp = Hol(new_hole_name());
             return App(App(App(App(base_ref("bind"), vtyp, true), type, true), term, false), Lam(name, null, body, false), false);
           }
         }
@@ -1049,15 +1018,15 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
     if (match("::", is_space)) {
       if (match("rewrite", is_space)) {
         var type = parse_term(nams.concat(["."]));
-        var skip = parse_exact("with");
+        parse_exact("with");
         var prof = parse_term(nams);
-        var term = base_ref("rewrite");
-        var term = App(term, Hol(new_hole_name()), true);
-        var term = App(term, Hol(new_hole_name()), true);
-        var term = App(term, Hol(new_hole_name()), true);
-        var term = App(term, prof, false);
-        var term = App(term, Lam("_", null, type, false), true);
-        var term = App(term, parsed, false);
+        var term: Term = base_ref("rewrite");
+        term = App(term, Hol(new_hole_name()), true);
+        term = App(term, Hol(new_hole_name()), true);
+        term = App(term, Hol(new_hole_name()), true);
+        term = App(term, prof, false);
+        term = App(term, Lam("_", null, type, false), true);
+        term = App(term, parsed, false);
         return term;
       } else {
         var type = parse_term(nams);
@@ -1118,43 +1087,43 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
   }
 
   // Parses a term
-  function parse_term(nams) {
-    var parsed;
+  function parse_term(nams): Term {
+    var parsed: Term;
 
     skip_spaces();
     var init = idx;
 
     // Parses base term
-    if      (parsed = parse_lam(nams));
-    else if (parsed = parse_grp(nams));
-    else if (parsed = parse_typ(nams));
-    else if (parsed = parse_slf(nams));
-    else if (parsed = parse_new(nams));
-    else if (parsed = parse_use(nams));
-    else if (parsed = parse_hol(nams));
-    else if (parsed = parse_let(nams));
-    else if (parsed = parse_num(nams));
-    else if (parsed = parse_str(nams));
-    else if (parsed = parse_chr(nams));
-    else if (parsed = parse_ite(nams));
-    else if (parsed = parse_par(nams));
-    else if (parsed = parse_get(nams));
-    else if (parsed = parse_log(nams));
-    else if (parsed = parse_cse(nams));
-    else if (parsed = parse_var(nams));
-    else if (parsed = parse_lst(nams));
-    else if (parsed = parse_blk(nams));
-    else    (parsed = parse_ref(nams));
+    if      (parsed = parse_lam(nams)) {}
+    else if (parsed = parse_grp(nams)) {}
+    else if (parsed = parse_typ(nams)) {}
+    else if (parsed = parse_slf(nams)) {}
+    else if (parsed = parse_new(nams)) {}
+    else if (parsed = parse_use(nams)) {}
+    else if (parsed = parse_hol(nams)) {}
+    else if (parsed = parse_let(nams)) {}
+    else if (parsed = parse_num(nams)) {}
+    else if (parsed = parse_str(nams)) {}
+    else if (parsed = parse_chr(nams)) {}
+    else if (parsed = parse_ite(nams)) {}
+    else if (parsed = parse_par(nams)) {}
+    else if (parsed = parse_get(nams)) {}
+    else if (parsed = parse_log(nams)) {}
+    else if (parsed = parse_cse(nams)) {}
+    else if (parsed = parse_var(nams)) {}
+    else if (parsed = parse_lst(nams)) {}
+    else if (parsed = parse_blk(nams)) {}
+    else if (parsed = parse_ref(nams)) {}
 
     // Parses spaced operators
-    var new_parsed = true;
+    var new_parsed: Term | true | null = true;
     while (new_parsed) {
-      if      (new_parsed = parse_app(parsed, init, nams));
-      else if (new_parsed = parse_ann(parsed, init, nams));
-      else if (new_parsed = parse_arr(parsed, init, nams));
-      else if (new_parsed = parse_eql(parsed, init, nams));
-      else if (new_parsed = parse_dif(parsed, init, nams));
-      else if (new_parsed = parse_ops(parsed, init, nams));
+      if      (new_parsed = parse_app(parsed, init, nams)){}
+      else if (new_parsed = parse_ann(parsed, init, nams)){}
+      else if (new_parsed = parse_arr(parsed, init, nams)){}
+      else if (new_parsed = parse_eql(parsed, init, nams)){}
+      else if (new_parsed = parse_dif(parsed, init, nams)){}
+      else if (new_parsed = parse_ops(parsed, init, nams)){}
       if (new_parsed) parsed = new_parsed;
     }
 
@@ -1196,12 +1165,13 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
       // Datatype parameters
       if (match("<")) {
         while (idx < code.length) {
-          var eras = false;
-          var name = parse_string();
+          let eras = false;
+          let name = parse_string();
+          let type: Term;
           if (match(":")) {
-            var type = await parse_term(adt_pram.map((([name,type]) => name)));
+            type = await parse_term(adt_pram.map((([name,type]) => name)));
           } else {
-            var type = Typ();
+            type = Typ();
           }
           adt_pram.push([name, type, eras]);
           if (match(">")) break;
@@ -1215,12 +1185,13 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
       if (match("(")) {
         while (idx < code.length) {
           //var eras = match("~");
-          var eras = false;
-          var name = parse_string();
+          let eras = false;
+          let name = parse_string();
+          let type: Term
           if (match(":")) {
-            var type = await parse_term(adt_nams.concat(adt_indx.map((([name,type]) => name))));
+            type = await parse_term(adt_nams.concat(adt_indx.map((([name,type]) => name))));
           } else {
-            var type = Typ();
+            type = Typ();
           }
           adt_indx.push([name, type, eras]);
           if (match(")")) break; else parse_exact(",");
@@ -1233,23 +1204,26 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
         var ctor_name = parse_string();
         // Constructor fields
         var ctor_flds = [];
+        var ctor_type: Term;
         if (match("(")) {
           while (idx < code.length) {
-            var name = parse_string();
+            let name = parse_string();
+            let type: Term;
+            let eras: boolean
             if (match(":")) {
-              var type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
+              type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
             } else {
-              var type = Hol(new_hole_name());
+              type = Hol(new_hole_name());
             }
-            var eras = match(";");
-            var skip = match(",");
+            eras = match(";");
+            match(",");
             ctor_flds.push([name, type, eras]);
             if (match(")")) break;
           }
         }
         // Constructor type (written)
         if (match(":")) {
-          var ctor_type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
+          ctor_type = parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
         // Constructor type (auto-filled)
         } else {
           var ctor_indx = [];
@@ -1259,7 +1233,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
               //if (match(")")) break; else parse_exact(",");
             //}
           //}
-          var ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
+          ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
           for (var p = 0; p < adt_pram.length; ++p) {
             ctor_type = App(ctor_type, Var(-1 + ctor_flds.length + adt_pram.length - p), false);
           }
@@ -1332,14 +1306,14 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
     }
 
     // Parses return type, if any
-    var type = match(":") ? await parse_term(names) : null;
-    var skip = match(";");
-    var term = await parse_term(names);
+    var type: Term | null = match(":") ? await parse_term(names) : null;
+    match(";");
+    var term: Term = await parse_term(names);
 
     // Fills foralls and lambdas of arguments
     for (var i = names.length - 1; i >= 0; --i) {
-      var type = type && All(names[i], types[i], type, erass[i]);
-      var term = Lam(names[i], type ? null : types[i], term, erass[i]);
+      type = type && All(names[i], types[i], type, erass[i]);
+      term = Lam(names[i], type ? null : types[i], term, erass[i]);
     }
 
     // Defines the top-level term
@@ -1368,7 +1342,7 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
   var file_version = {};
   var used_hole_name = {};
   var hole_count = 0;
-  var tokens = tokenify ? [["txt",""]] : null;
+  var tokens: Token[] = tokenify ? [["txt",""]] : null;
   var idx = 0;
   var row = 0;
   var col = 0;
@@ -1376,9 +1350,9 @@ export const parse = async (code, opts, root = true, loaded = {}) => {
   var adts = {};
   while (idx < code.length) {
     next_char();
-    if (await do_parse_import());
-    else if (await do_parse_datatype());
-    else if (await do_parse_defs_util());
+    if      (await do_parse_import()){}
+    else if (await do_parse_datatype()){}
+    else if (await do_parse_defs_util()){}
     else if (!(await do_parse_def())) break;
     next_char();
   }
@@ -1431,7 +1405,7 @@ const derive_adt_type = (file, {adt_pram, adt_indx, adt_ctor, adt_name}) => {
       return Lam(adt_pram[p][0], adt_pram[p][1], adt_arg(p + 1, i), adt_pram[p][2]);
     // ... {i0 : Index0, i1 : Index...} ...
     } else if (i < adt_indx.length) {
-      var substs = [Ref(file+"/"+adt_name)];
+      var substs: Term[] = [Ref(file+"/"+adt_name)];
       for (var P = 0; P < p; ++P) {
         substs.push(Var(-1 + i + p - P));
       }
@@ -1447,14 +1421,14 @@ const derive_adt_type = (file, {adt_pram, adt_indx, adt_ctor, adt_name}) => {
           (function motive(i) {
             // ... {i0 : Index0, i1 : Index1...} ...
             if (i < adt_indx.length) {
-              var substs = [Ref(file+"/"+adt_name)];
+              var substs: Term[] = [Ref(file+"/"+adt_name)];
               for (var P = 0; P < p; ++P) {
                 substs.push(Var(-1 + i + 1 + adt_indx.length + p - P));
               }
               return All(adt_indx[i][0], subst_many(adt_indx[i][1], substs, i), motive(i + 1), adt_indx[i][2]);
             // ... {wit : (ADT i0 i1...)} -> Type ...
             } else {
-              var wit_t = Ref(file+"/"+adt_name);
+              var wit_t: Term = Ref(file+"/"+adt_name);
               for (var P = 0; P < adt_pram.length; ++P) {
                 wit_t = App(wit_t, Var(-1 + i + 1 + i + adt_pram.length - P), adt_pram[P][2]);
               }
@@ -1474,26 +1448,26 @@ const derive_adt_type = (file, {adt_pram, adt_indx, adt_ctor, adt_name}) => {
               }
               // ... {ctrX_fldX : CtrX_FldX, ctrX_fld1 : CtrX_Fld1, ...} -> ...
               if (j < adt_ctor[i][1].length) {
-                var sub = [Ref(file+"/"+adt_name)].concat(subst_prams);
-                var typ = subst_many(adt_ctor[i][1][j][1], sub, j);
+                let sub = [Ref(file+"/"+adt_name)].concat(subst_prams);
+                let typ = subst_many(adt_ctor[i][1][j][1], sub, j);
                 return All(adt_ctor[i][1][j][0], typ, field(j + 1), adt_ctor[i][1][j][2]);
               // ... (CtrXType[ADT <- P] (ADT.ctrX ParamX Param1... ctrX_fldX ctrX_fld1 ...)) -> ...
               } else {
-                var typ = adt_ctor[i][2];
-                var sub = [Var(-1 + j + i + 1)].concat(subst_prams);
-                var typ = subst_many(adt_ctor[i][2], sub, j);
-                var rem = typ;
+                let typ = adt_ctor[i][2];
+                let sub = [Var(-1 + j + i + 1)].concat(subst_prams);
+                typ = subst_many(adt_ctor[i][2], sub, j);
+                let rem = typ;
                 for (var I = 0; I < adt_indx.length; ++I) {
                   rem = rem[1].func;
                 }
                 rem[0] = "Var";
                 rem[1] = {index: -1 + i + j + 1};
-                var wit = Ref(file+"/"+adt_ctor[i][0]);
+                let wit: Term = Ref(file+"/"+adt_ctor[i][0]);
                 for (var P = 0; P < adt_pram.length; ++P) {
-                  var wit = App(wit, Var(-1 + j + i + 1 + 1 + adt_indx.length + adt_pram.length - P), true);
+                  wit = App(wit, Var(-1 + j + i + 1 + 1 + adt_indx.length + adt_pram.length - P), true);
                 }
                 for (var F = 0; F < adt_ctor[i][1].length; ++F) {
-                  var wit = App(wit, Var(-1 + j - F), adt_ctor[i][1][F][2]);
+                  wit = App(wit, Var(-1 + j - F), adt_ctor[i][1][F][2]);
                 }
                 return App(typ, wit, false);
               }
@@ -1502,11 +1476,11 @@ const derive_adt_type = (file, {adt_pram, adt_indx, adt_ctor, adt_name}) => {
             false);
           } else {
             // ... (P i0 i1... self)
-            var ret = Var(adt_ctor.length + 1 - 1);
+            let ret: Term = Var(adt_ctor.length + 1 - 1);
             for (var i = 0; i < adt_indx.length; ++i) {
-              var ret = App(ret, Var(adt_ctor.length + 1 + 1 + adt_indx.length - i - 1), adt_indx[i][2]);
+              ret = App(ret, Var(adt_ctor.length + 1 + 1 + adt_indx.length - i - 1), adt_indx[i][2]);
             }
-            var ret = App(ret, Var(adt_ctor.length + 1 + 1 - 1), false);
+            ret = App(ret, Var(adt_ctor.length + 1 + 1 - 1), false);
             return ret;
           }
         })(0),
@@ -1517,7 +1491,7 @@ const derive_adt_type = (file, {adt_pram, adt_indx, adt_ctor, adt_name}) => {
 
 const derive_adt_ctor = (file, {adt_pram, adt_indx, adt_ctor, adt_name}, c) => {
   return (function arg(p, i, f) {
-    var substs = [Ref(file+"/"+adt_name)];
+    var substs: Term[] = [Ref(file+"/"+adt_name)];
     for (var P = 0; P < p; ++P) {
       substs.push(Var(-1 + f + p - P));
     }
@@ -1536,10 +1510,10 @@ const derive_adt_ctor = (file, {adt_pram, adt_indx, adt_ctor, adt_name}, c) => {
           return Lam(adt_ctor[k][0], null, opt(k + 1), false);
         // (ctrX ctrX_fld0 ctrX_fld1 ...)
         } else {
-          var sel = Var(-1 + adt_ctor.length - c);
+          let sel: Term = Var(-1 + adt_ctor.length - c);
           for (var F = 0; F < adt_ctor[c][1].length; ++F) {
-            var fld = Var(-1 + adt_ctor.length + 1 + adt_ctor[c][1].length - F);
-            var sel = App(sel, fld, adt_ctor[c][1][F][2]);
+            let fld = Var(-1 + adt_ctor.length + 1 + adt_ctor[c][1].length - F);
+            sel = App(sel, fld, adt_ctor[c][1][F][2]);
           }
           return sel;
         }
