@@ -772,9 +772,7 @@ const erase = (term: Term): Term => {
   }
 };
 
-interface Defs {
-  [key: string]: Term
-};
+type Defs = Record<string, Term>;
 
 // ::::::::::::::
 // :: Equality ::
@@ -941,7 +939,7 @@ const equal = (
             break;
         }
 
-        return x ? Bop(true, x, y) : y;
+        return x ? Or(x, y) : y;
 
       // A binary operation (or / and)
       case "Bop":
@@ -1576,6 +1574,20 @@ const is_terminating = (term: Term, defs: Defs, seen: Seen = {}): boolean => {
   }
 };
 
+// Define public constructors as specialized for Term only versions
+
+const PAll: (name: string, bind: Term, body: Term, eras?: boolean, loc?: Loc) => AllT<Term, Term> = All;
+const PLam: (name: string, bind: Term, body: Term, eras?: boolean, loc?: Loc) => LamT<Term, Term> = Lam;
+const PApp: (func: Term, argm: Term, eras?: boolean, loc?: Loc) => AppT<Term> = App;
+const PSlf: (name: string, type: Term, loc?: Loc) => SlfT<Term> = Slf;
+const PNew: (type: Term, expr: Term, loc?: Loc) => NewT<Term> = New;
+const PUse: (expr: Term, loc?: Loc) => UseT<Term> = Use;
+const POp1: (func: string, num0: Term, num1: Term, loc?: Loc) => Op1T<Term> = Op1;
+const POp2: (func: string, num0: Term, num1: Term, loc?: Loc) => Op2T<Term> = Op2;
+const PIte: (cond: Term, if_t: Term, if_f: Term, loc?: Loc) => IteT<Term> = Ite;
+const PAnn: (type: Term, expr: Term, done?: boolean, loc?: Loc) => AnnT<Term> = Ann;
+const PLog: (msge: Term, expr: Term, loc?: Loc) => LogT<Term> = Log;
+
 export {
   // Types
   Term,
@@ -1602,21 +1614,21 @@ export {
   // Constructors
   Var,
   Typ,
-  All,
-  Lam,
-  App,
-  Slf,
-  New,
-  Use,
-  Ann,
-  Log,
+  PAll as All,
+  PLam as Lam,
+  PApp as App,
+  PSlf as Slf,
+  PNew as New,
+  PUse as Use,
+  PAnn as Ann,
+  PLog as Log,
   Hol,
   Ref,
   Num,
   Val,
-  Op1,
-  Op2,
-  Ite,
+  POp1 as Op1,
+  POp2 as Op2,
+  PIte as Ite,
   // Other functions
   equal,
   erase,

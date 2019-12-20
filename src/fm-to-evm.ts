@@ -65,7 +65,7 @@ function compile(name, defs) {
   };
 
   var build = (code) => {
-    var code = flat(code);
+    code = flat(code);
     var to = {};
     var at = {};
     for (var i = 0; i < code.length; ++i) {
@@ -93,7 +93,7 @@ function compile(name, defs) {
   };
 
   var BLOCK = (len, arr) => {
-    var arr = flat(arr);
+    arr = flat(arr);
     while (arr.length < len) {
       arr.push(0);
     }
@@ -367,9 +367,9 @@ function compile(name, defs) {
                 var ref_addr = fast.addr_of(ref_term);
                 var ref_numb = NUM(fast.New(ref_ctor, ref_addr));
                 if (ref_term !== fast.NIL && ref_ctor !== fast.REF) {
-                  var ref_numb = [DUP1, ref_numb, ADD];
+                  ref_numb = [DUP1, ref_numb, ADD];
                 } else {
-                  var ref_numb = [ref_numb];
+                  ref_numb = [ref_numb];
                 }
                 return [ref_numb, MSIZE, MSTORE];
               }),
@@ -404,9 +404,7 @@ function compile(name, defs) {
     STOP,
   ];
 
-  var code = build(code);
-
-  return code.toString("hex");
+  return build(code).toString("hex");
 };
 
 export {compile};
