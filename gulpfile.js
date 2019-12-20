@@ -1,13 +1,19 @@
-var gulp = require('gulp');
-var ts = require('gulp-typescript');
-var replace = require('gulp-replace');
-var version = require("./package.json").version;
+var gulp = require('gulp')
+var ts = require('gulp-typescript')
+var replace = require('gulp-replace')
+var version = require('./package.json').version
+var merge2 = require('merge2')
 
-var tsProject = ts.createProject('tsconfig.json');
+var tsProject = ts.createProject('tsconfig.json')
 
-gulp.task('build', function () {
-  return gulp.src('src/**/*.ts')
-    .pipe(replace("__FORMALITY_VERSION__", version))
-    .pipe(tsProject())
-    .pipe(gulp.dest('dist/'));
-})
+gulp.task('build', gulp.series(
+  function build_ts() {
+    return gulp
+      .src(['src/**/*.js', 'src/**/*.ts'])
+      .pipe(replace('__FORMALITY_VERSION__', version))
+      .pipe(tsProject())
+      .pipe(gulp.dest('dist/'))
+  }, function copy_d_ts() {
+    return gulp.src('src/**/*.d.ts').pipe(gulp.dest('dist/'));
+  })
+);

@@ -1,6 +1,5 @@
 import { Loader } from "./loader";
 import { Defs, Term } from "./core";
-import parse_impl from "./parse-impl";
 
 interface Opts {
   file?: string;
@@ -27,9 +26,7 @@ interface Parsed {
   open_imports: Record<string, boolean>;
 }
 
-type ParseFn = (code: string, opts: Opts) => Promise<Parsed>;
-
-const parse = parse_impl as ParseFn;
+declare function parse(code: string, opts: Opts): Promise<Parsed>;
 
 export default parse;
-export { Opts, Parsed };
+export { Opts, Parsed, Adt, TokenType, Token };
