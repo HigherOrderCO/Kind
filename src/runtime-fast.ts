@@ -1,5 +1,5 @@
 import * as core from "./core";
-import stringify from "./stringify";
+import { show as stringify } from "./stringify";
 
 // Formality's runtime works by compiling normal Terms to a
 // Runtime Terms (RtTerm), reducing, and decompiling back.

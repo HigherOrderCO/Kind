@@ -1,7 +1,7 @@
 // ~~ Formality Core Language ~~
 
 import { Loc, marked_code, random_excuse } from "./errors";
-import stringify from "./stringify";
+import { show as stringify } from "./stringify";
 
 // ::::::::::
 // :: Term ::

@@ -2,7 +2,6 @@ var gulp = require('gulp')
 var ts = require('gulp-typescript')
 var replace = require('gulp-replace')
 var version = require('./package.json').version
-var merge2 = require('merge2')
 
 var tsProject = ts.createProject('tsconfig.json')
 

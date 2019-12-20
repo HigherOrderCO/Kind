@@ -1,4 +1,4 @@
-import version from "./version";
+import { version } from "./version";
 import { Loader } from "./loader";
 
 /**
@@ -9,7 +9,7 @@ import { Loader } from "./loader";
  * Defaults to "FPM@" + current version of Formality to burn cache if Formality itself updates.
  * @returns The transformed loader.
  */
-const with_local_storage_cache = (
+export const with_local_storage_cache = (
   loader: Loader,
   prefix = `FPM@${version}/`
 ): Loader => async file => {
@@ -24,5 +24,3 @@ const with_local_storage_cache = (
 
   return code;
 };
-
-export default with_local_storage_cache;

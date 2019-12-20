@@ -28,5 +28,4 @@ interface Parsed {
 
 declare function parse(code: string, opts: Opts): Promise<Parsed>;
 
-export default parse;
-export { Opts, Parsed, Adt, TokenType, Token };
+export { Opts, Parsed, Adt, TokenType, Token, parse };

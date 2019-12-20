@@ -8,7 +8,7 @@ interface Opts {
   full_refs?: boolean;
 }
 
-const show = (term: Term, nams: string[] = [], opts: Opts = {}) => {
+export const show = (term: Term, nams: string[] = [], opts: Opts = {}) => {
   const format = (term: Term): string => {
     //function read_bits(term) {
     //var bits = [];
@@ -178,5 +178,3 @@ const show = (term: Term, nams: string[] = [], opts: Opts = {}) => {
         : term[1].name;
   }
 };
-
-export default show;

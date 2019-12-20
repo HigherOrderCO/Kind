@@ -24,7 +24,7 @@ import stringify from "./stringify";
 // :::::::::::::
 
 // Converts a string to a term
-const parse = async (code, opts, root = true, loaded = {}) => {
+export const parse = async (code, opts, root = true, loaded = {}) => {
   const file = opts.file || "main";
   const loader = opts.loader || load_file;
   const tokenify = opts.tokenify;
@@ -1392,8 +1392,6 @@ const parse = async (code, opts, root = true, loaded = {}) => {
     open_imports
   };
 }
-
-export default parse;
 
 // :::::::::::::::::::
 // :: Syntax Sugars ::

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { promisify } from "util";
-import version from "./version";
+import { version } from "./version";
 import { Loader } from "./loader";
 
 const async_read_file = promisify(fs.readFile);
@@ -15,7 +15,7 @@ const async_write_file = promisify(fs.writeFile);
  * Defaults to "./fm_modules".
  * @returns The transformed loader.
  */
-const with_file_system_cache = (
+export const with_file_system_cache = (
   loader: Loader,
   cache_dir_path?: string
 ): Loader => async file => {
@@ -50,5 +50,3 @@ const with_file_system_cache = (
 
   return code;
 };
-
-export default with_file_system_cache;

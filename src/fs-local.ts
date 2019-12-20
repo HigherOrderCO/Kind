@@ -17,7 +17,7 @@ const async_read_file = promisify(fs.readFile);
  * @param local_dir_path Where to look for local files.
  * @returns The transformed loader.
  */
-const with_local_files = (
+export const with_local_files = (
   loader: Loader,
   local_dir_path?: string
 ): Loader => async file => {
@@ -31,5 +31,3 @@ const with_local_files = (
 
   return await loader(file);
 };
-
-export default with_local_files;

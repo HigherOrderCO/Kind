@@ -1,10 +1,10 @@
 import fs from "fs";
 import * as fm from "./index";
-import with_local_files from "./fs-local";
-import with_file_system_cache from "./fs-cache";
+import { with_local_files } from "./fs-local";
+import { with_file_system_cache } from "./fs-cache";
 import { Defs } from "./core";
 
-export default async function run() {
+export async function run() {
   try {
     var argv = [].slice.call(process.argv, 2);
     if (argv.length === 0 || argv[0] === "--help" || argv[0] === "-h") throw "";
