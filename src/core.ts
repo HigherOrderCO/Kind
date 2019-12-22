@@ -72,11 +72,15 @@ type Term =
   | HolT
   | RefT;
 
+// A variable
 const Var = (index: number, loc?: Loc): VarT =>
   Ctr("Var", { index }, "^" + index, loc);
 
-const Typ = (loc?: Loc): TypT => Ctr("Typ", {}, "ty", loc);
+// The type of types
+const Typ = (loc?: Loc): TypT =>
+  Ctr("Typ", {}, "ty", loc);
 
+// The dependent function type
 const All = <T, B>(
   name: string,
   bind: T,
@@ -91,6 +95,7 @@ const All = <T, B>(
     loc
   );
 
+// A dependent function
 const Lam = <T, B>(
   name: string,
   bind: T,
@@ -105,6 +110,7 @@ const Lam = <T, B>(
     loc
   );
 
+// A dependent function application
 const App = <T>(func: T, argm: T, eras: boolean = false, loc?: Loc): AppT<T> =>
   Ctr(
     "App",
@@ -113,38 +119,50 @@ const App = <T>(func: T, argm: T, eras: boolean = false, loc?: Loc): AppT<T> =>
     loc
   );
 
+// The self type
 const Slf = <T>(name: string, type: T, loc?: Loc): SlfT<T> =>
   Ctr("Slf", { name, type }, "sf" + type[2], loc);
 
+// The self type introduction
 const New = <T>(type: T, expr: T, loc?: Loc): NewT<T> =>
   Ctr("New", { type, expr }, expr[2], loc);
 
+// The self type elimination
 const Use = <T>(expr: T, loc?: Loc): UseT<T> =>
   Ctr("Use", { expr }, expr[2], loc);
 
+// The number type
 const Num = (loc?: Loc): NumT => Ctr("Num", {}, "wd", loc);
 
+// A number
 const Val = (numb: number, loc?: Loc): ValT =>
   Ctr("Val", { numb }, "[" + numb + "]", loc);
 
+// A numeric unary operation
 const Op1 = <T>(func: string, num0: T, num1: T, loc?: Loc): Op1T<T> =>
   Ctr("Op1", { func, num0, num1 }, "o1" + func + num0[2] + num1[2], loc);
 
+// A numeric binary operation
 const Op2 = <T>(func: string, num0: T, num1: T, loc?: Loc): Op2T<T> =>
   Ctr("Op2", { func, num0, num1 }, "o2" + func + num0[2] + num1[2], loc);
 
+// An if-then-else
 const Ite = <T>(cond: T, if_t: T, if_f: T, loc?: Loc): IteT<T> =>
   Ctr("Ite", { cond, if_t, if_f }, "ie" + cond[2] + if_t[2] + if_f[2], loc);
 
+// An inline annotation
 const Ann = <T>(type: T, expr: T, done: boolean = false, loc?: Loc): AnnT<T> =>
   Ctr("Ann", { type, expr, done }, expr[2], loc);
 
+// Logs a message for debugging
 const Log = <T>(msge: T, expr: T, loc?: Loc): LogT<T> =>
   Ctr("Log", { msge, expr }, expr[2], loc);
 
+// A hole
 const Hol = (name: string, loc?: Loc): HolT =>
   Ctr("Hol", { name }, "{?" + name + "?}", loc);
 
+// A reference
 const Ref = (name: string, eras: boolean = false, loc?: Loc): RefT =>
   Ctr("Ref", { name, eras }, "{" + name + "}", loc);
 
@@ -154,170 +172,233 @@ const Ref = (name: string, eras: boolean = false, loc?: Loc): RefT =>
 
 // Shifts a term
 // shift : Maybe(Term) -> Nat -> Nat -> Maybe(Term)
-const shift = (term: Term | null, inc: number, depth: number): Term | null => {
+const shift = (term: Term | null, inc: number, dep: number): Term | null => {
   if (!term) {
     return null;
   } else {
-    const [f, i, d] = [shift, inc, depth];
     switch (term[0]) {
       case "Var":
-        return Var(
-          term[1].index < d ? term[1].index : term[1].index + i,
-          term[3]
-        );
+        // Bound variable (keep)
+        if (term[1].index < dep) {
+          return Var(term[1].index, term[3]);
+        // Free variable (shift)
+        } else {
+          return Var(term[1].index + inc, term[3]);
+        }
       case "Typ":
         return Typ(term[3]);
-      case "All":
-        return All(
-          term[1].name,
-          shift(term[1].bind, i, d),
-          shift(term[1].body, i, d + 1),
-          term[1].eras,
-          term[3]
-        );
-      case "Lam":
-        return Lam(
-          term[1].name,
-          shift(term[1].bind, i, d),
-          shift(term[1].body, i, d + 1),
-          term[1].eras,
-          term[3]
-        );
-      case "App":
-        return App(
-          f(term[1].func, i, d),
-          shift(term[1].argm, i, d),
-          term[1].eras,
-          term[3]
-        );
-      case "Num":
-        return Num(term[3]);
-      case "Val":
-        return Val(term[1].numb, term[3]);
-      case "Op1":
-        return Op1(
-          term[1].func,
-          shift(term[1].num0, i, d),
-          shift(term[1].num1, i, d),
-          term[3]
-        );
-      case "Op2":
-        return Op2(
-          term[1].func,
-          shift(term[1].num0, i, d),
-          shift(term[1].num1, i, d),
-          term[3]
-        );
-      case "Ite":
-        return Ite(
-          f(term[1].cond, i, d),
-          shift(term[1].if_t, i, d),
-          shift(term[1].if_f, i, d),
-          term[3]
-        );
-      case "Slf":
-        return Slf(term[1].name, shift(term[1].type, i, d + 1), term[3]);
-      case "New":
-        return New(f(term[1].type, i, d), shift(term[1].expr, i, d), term[3]);
-      case "Use":
-        return Use(f(term[1].expr, i, d), term[3]);
-      case "Ann":
-        return Ann(
-          f(term[1].type, i, d),
-          shift(term[1].expr, i, d),
-          term[1].done,
-          term[3]
-        );
-      case "Log":
-        return Log(f(term[1].msge, i, d), shift(term[1].expr, i, d), term[3]);
-      case "Hol":
-        return Hol(term[1].name, term[3]);
-      case "Ref":
-        return Ref(term[1].name, term[1].eras, term[3]);
+      case "All": {
+        let name = term[1].name;
+        let bind = shift(term[1].bind, inc, dep);
+        let body = shift(term[1].body, inc, dep + 1);
+        let eras = term[1].eras;
+        let loc  = term[3];
+        return All(name, bind, body, eras, loc);
+      }
+      case "Lam": {
+        let name = term[1].name;
+        let bind = shift(term[1].bind, inc, dep);
+        let body = shift(term[1].body, inc, dep + 1);
+        let eras = term[1].eras;
+        let loc  = term[3];
+        return Lam(name, bind, body, eras, loc);
+      }
+      case "App": {
+        let func = shift(term[1].func, inc, dep);
+        let argm = shift(term[1].argm, inc, dep);
+        let eras = term[1].eras;
+        let loc  = term[3];
+        return App(func, argm, eras, loc);
+      }
+      case "Num": {
+        let loc = term[3];
+        return Num(loc);
+      }
+      case "Val": {
+        let numb = term[1].numb;
+        let loc  = term[3];
+        return Val(numb, loc);
+      }
+      case "Op1": {
+        let func = term[1].func;
+        let num0 = shift(term[1].num0, inc, dep);
+        let num1 = shift(term[1].num1, inc, dep);
+        let loc  = term[3];
+        return Op1(func, num0, num1, loc);
+      }
+      case "Op2": {
+        let func = term[1].func;
+        let num0 = shift(term[1].num0, inc, dep);
+        let num1 = shift(term[1].num1, inc, dep);
+        let loc  = term[3];
+        return Op2(func, num0, num1, loc);
+      }
+      case "Ite": {
+        let cond = shift(term[1].cond, inc, dep);
+        let if_t = shift(term[1].if_t, inc, dep);
+        let if_f = shift(term[1].if_f, inc, dep);
+        let loc  = term[3];
+        return Ite(cond, if_t, if_f, loc);
+      }
+      case "Slf": {
+        let name = term[1].name;
+        let type = shift(term[1].type, inc, dep + 1);
+        let loc  = term[3];
+        return Slf(name, type, loc);
+      }
+      case "New": {
+        let type = shift(term[1].type, inc, dep);
+        let expr = shift(term[1].expr, inc, dep);
+        let loc  = term[3];
+        return New(type, expr, loc);
+      }
+      case "Use": {
+        let expr = shift(term[1].expr, inc, dep);
+        let loc  = term[3];
+        return Use(expr, loc);
+      }
+      case "Ann": {
+        let type = shift(term[1].type, inc, dep);
+        let expr = shift(term[1].expr, inc, dep);
+        let done = term[1].done;
+        let loc  = term[3];
+        return Ann(type, expr, done, loc);
+      }
+      case "Log": {
+        let msge = shift(term[1].msge, inc, dep);
+        let expr = shift(term[1].expr, inc, dep);
+        return Log(msge, expr);
+      }
+      case "Hol": {
+        let name = term[1].name;
+        let loc  = term[3];
+        return Hol(name, loc);
+      }
+      case "Ref": {
+        let name = term[1].name;
+        let eras = term[1].eras;
+        let loc  = term[3];
+        return Ref(name, eras, loc);
+      }
     }
   }
 };
 
 // shift : Maybe(Term) -> Term -> Nat -> Maybe(Term)
-const subst = (term: Term | null, val: Term, depth: number): Term | null => {
+const subst = (term: Term | null, val: Term, dep: number): Term | null => {
   if (!term) {
     return null;
   } else {
-    const [s, f, v, d] = [shift, subst, val, depth];
     switch (term[0]) {
       case "Var":
-        return d === term[1].index
-          ? v
-          : Var(term[1].index - (term[1].index > d ? 1 : 0), term[3]);
-      case "Typ":
-        return Typ(term[3]);
-      case "All":
-        return All(
-          term[1].name,
-          f(term[1].bind, v, d),
-          f(term[1].body, s(v, 1, 0), d + 1),
-          term[1].eras,
-          term[3]
-        );
-      case "Lam":
-        return Lam(
-          term[1].name,
-          f(term[1].bind, v, d),
-          f(term[1].body, s(v, 1, 0), d + 1),
-          term[1].eras,
-          term[3]
-        );
-      case "App":
-        return App(
-          f(term[1].func, v, d),
-          f(term[1].argm, v, d),
-          term[1].eras,
-          term[3]
-        );
-      case "Num":
-        return Num(term[3]);
-      case "Val":
-        return Val(term[1].numb, term[3]);
-      case "Op1":
-        return Op1(
-          term[1].func,
-          f(term[1].num0, v, d),
-          f(term[1].num1, v, d),
-          term[3]
-        );
-      case "Op2":
-        return Op2(
-          term[1].func,
-          f(term[1].num0, v, d),
-          f(term[1].num1, v, d),
-          term[3]
-        );
-      case "Ite":
-        return Ite(
-          f(term[1].cond, v, d),
-          f(term[1].if_t, v, d),
-          f(term[1].if_f, v, d),
-          term[3]
-        );
-      case "Slf":
-        return Slf(term[1].name, f(term[1].type, s(v, 1, 0), d + 1), term[3]);
-      case "New":
-        return New(f(term[1].type, v, d), f(term[1].expr, v, d), term[3]);
-      case "Use":
-        return Use(f(term[1].expr, v, d), term[3]);
-      case "Ann":
-        return Ann(
-          f(term[1].type, v, d),
-          f(term[1].expr, v, d),
-          term[1].done,
-          term[3]
-        );
-      case "Log":
-        return Log(f(term[1].msge, v, d), f(term[1].expr, v, d), term[3]);
-      case "Hol":
-        return Hol(term[1].name, term[3]);
-      case "Ref":
-        return Ref(term[1].name, term[1].eras, term[3]);
+        // Match (substitute)
+        if (dep === term[1].index) {
+          return val;
+        // Bound (keep)
+        } else if (term[1].index < dep) {
+          return Var(term[1].index, term[3]);
+        // Free (unshift)
+        } else {
+          return Var(term[1].index - 1, term[3]);
+        }
+      case "Typ": {
+        let loc = term[3];
+        return Typ(loc);
+      }
+      case "All": {
+        let name = term[1].name;
+        let bind = subst(term[1].bind, val, dep);
+        let body = subst(term[1].body, shift(val,1,0), dep+1);
+        let eras = term[1].eras;
+        let loc  = term[3];
+        return All(name, bind, body, eras, loc);
+      }
+      case "Lam": {
+        let name = term[1].name;
+        let bind = subst(term[1].bind, val, dep);
+        let body = subst(term[1].body, shift(val,1,0), dep+1);
+        let eras = term[1].eras;
+        let loc  = term[3];
+        return Lam(name, bind, body, eras, loc);
+      }
+      case "App": {
+        let func = subst(term[1].func, val, dep);
+        let argm = subst(term[1].argm, val, dep);
+        let eras = term[1].eras;
+        let loc  = term[3];
+        return App(func, argm, eras, loc);
+      }
+      case "Num": {
+        let loc = term[3];
+        return Num(loc);
+      }
+      case "Val": {
+        let numb = term[1].numb;
+        let loc  = term[3];
+        return Val(numb, loc);
+      }
+      case "Op1": {
+        let func = term[1].func;
+        let num0 = subst(term[1].num0, val, dep);
+        let num1 = subst(term[1].num1, val, dep);
+        let loc  = term[3];
+        return Op1(func, num0, num1, loc);
+      }
+      case "Op2": {
+        let func = term[1].func;
+        let num0 = subst(term[1].num0, val, dep);
+        let num1 = subst(term[1].num1, val, dep);
+        let loc  = term[3];
+        return Op2(func, num0, num1, loc);
+      }
+      case "Ite": {
+        let cond = subst(term[1].cond, val, dep);
+        let if_t = subst(term[1].if_t, val, dep);
+        let if_f = subst(term[1].if_f, val, dep);
+        let loc  = term[3];
+        return Ite(cond, if_t, if_f, loc);
+      }
+      case "Slf": {
+        let name = term[1].name;
+        let type = subst(term[1].type, shift(val, 1, 0), dep + 1);
+        let loc  = term[3];
+        return Slf(name, type, loc);
+      }
+      case "New": {
+        let type = subst(term[1].type, val, dep);
+        let expr = subst(term[1].expr, val, dep);
+        let loc  = term[3];
+        return New(type, expr, loc);
+      }
+      case "Use": {
+        let expr = subst(term[1].expr, val, dep);
+        let loc  = term[3];
+        return Use(expr, loc);
+      }
+      case "Ann": {
+        let type = subst(term[1].type, val, dep);
+        let expr = subst(term[1].expr, val, dep);
+        let done = term[1].done;
+        let loc  = term[3];
+        return Ann(type, expr, done, loc);
+      }
+      case "Log": {
+        let msge = subst(term[1].msge, val, dep);
+        let expr = subst(term[1].expr, val, dep);
+        let loc  = term[3];
+        return Log(msge, expr, loc);
+      }
+      case "Hol": {
+        let name = term[1].name;
+        let loc  = term[3];
+        return Hol(name, loc);
+      }
+      case "Ref": {
+        let name = term[1].name;
+        let eras = term[1].eras;
+        let loc  = term[3];
+        return Ref(name, eras, loc);
+      }
     }
   }
 };
@@ -729,42 +810,41 @@ const reduce = (term: Term, defs, opts: any = {}) => {
 
 // erase : Term -> Term
 const erase = (term: Term): Term => {
-  const [f, e] = [erase, Hol("<erased>")];
   switch (term[0]) {
     case "Var":
       return Var(term[1].index);
     case "Typ":
       return Typ();
     case "All":
-      return All(term[1].name, f(term[1].bind), f(term[1].body), term[1].eras);
+      return All(term[1].name, erase(term[1].bind), erase(term[1].body), term[1].eras);
     case "Lam":
       return term[1].eras
-        ? f(subst(term[1].body, e, 0))
-        : Lam(term[1].name, null, f(term[1].body), term[1].eras);
+        ? erase(subst(term[1].body, Hol("<erased>"), 0))
+        : Lam(term[1].name, null, erase(term[1].body), term[1].eras);
     case "App":
       return term[1].eras
-        ? f(term[1].func)
-        : App(f(term[1].func), f(term[1].argm), term[1].eras);
+        ? erase(term[1].func)
+        : App(erase(term[1].func), erase(term[1].argm), term[1].eras);
     case "Num":
       return Num();
     case "Val":
       return Val(term[1].numb);
     case "Op1":
-      return Op1(term[1].func, f(term[1].num0), f(term[1].num1));
+      return Op1(term[1].func, erase(term[1].num0), erase(term[1].num1));
     case "Op2":
-      return Op2(term[1].func, f(term[1].num0), f(term[1].num1));
+      return Op2(term[1].func, erase(term[1].num0), erase(term[1].num1));
     case "Ite":
-      return Ite(f(term[1].cond), f(term[1].if_t), f(term[1].if_f));
+      return Ite(erase(term[1].cond), erase(term[1].if_t), erase(term[1].if_f));
     case "Slf":
-      return Slf(term[1].name, f(term[1].type));
+      return Slf(term[1].name, erase(term[1].type));
     case "New":
-      return f(term[1].expr);
+      return erase(term[1].expr);
     case "Use":
-      return f(term[1].expr);
+      return erase(term[1].expr);
     case "Ann":
-      return f(term[1].expr);
+      return erase(term[1].expr);
     case "Log":
-      return Log(f(term[1].msge), f(term[1].expr));
+      return Log(erase(term[1].msge), erase(term[1].expr));
     case "Hol":
       return Hol(term[1].name);
     case "Ref":
