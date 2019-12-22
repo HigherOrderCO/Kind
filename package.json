@@ -1,14 +1,11 @@
 {
   "name": "formality-lang",
-  "version": "0.1.227",
+  "version": "0.1.228",
   "description": "",
-  "main": "cjs/index.js",
-  "module": "esm/index.js",
-  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "cjs",
-    "esm",
-    "umd",
+    "dist",
     "bin"
   ],
   "bin": {
@@ -16,7 +13,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf esm cjs umd && rollup -c rollup.config.js",
+    "build": "rimraf dist && gulp build",
     "prepublishOnly": "npm run build"
   },
   "repository": {
@@ -30,13 +27,15 @@
   },
   "homepage": "https://github.com/moonad/formality",
   "dependencies": {
+    "tslib": "^1.10.0",
     "xhr-request-promise": "^0.1.2"
   },
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "^6.0.0",
-    "@rollup/plugin-replace": "^2.2.1",
+    "@types/node": "^12.12.21",
+    "gulp": "^4.0.2",
+    "gulp-replace": "^1.0.0",
+    "gulp-typescript": "^6.0.0-alpha.1",
     "rimraf": "^3.0.0",
-    "rollup": "^1.27.13",
-    "rollup-plugin-commonjs": "^10.1.0"
+    "typescript": "^3.7.3"
   }
 }
