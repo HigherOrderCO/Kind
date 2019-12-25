@@ -220,8 +220,8 @@ Type mismatch.
 Because `true` is a `Bool`, but the `main` expression expects
 a `String`.
 
-Since Formality is a proof language, a type can be seen a theorems and
-well-typed term can be seen its proof.
+Since Formality is a proof language, a type can be seen as a theorem and a
+well-typed term can be seen as its proof.
 
 **Note: This is currently only true for terminating expressions.  Nontermination
 allows for inconsistency, meaning nonterminating expressions can be used to
