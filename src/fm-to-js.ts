@@ -5,7 +5,7 @@ const compile = (name: string, defs: core.Defs = {}): string => {
   var seen = {};
   var code = "";
   var js_name = function(str) {
-    return str
+    return "_" + str
       .replace(/\./g, "_")
       .replace(/\//g, "$")
       .replace(/#/g, "$");
@@ -75,9 +75,9 @@ const compile = (name: string, defs: core.Defs = {}): string => {
         if (!seen[term[1].name]) {
           seen[term[1].name] = true;
           var dref = go(core.erase(defs[term[1].name]), depth);
-          code += "  var _" + name + " = " + dref + ";\n";
+          code += "  var " + name + " = " + dref + ";\n";
         }
-        return "_" + name;
+        return name;
     }
   };
 
