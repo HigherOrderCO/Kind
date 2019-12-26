@@ -87,7 +87,7 @@ const compile = (name: string, defs: core.Defs = {}): string => {
       var js_defs = [];
       for (var def_name in defs) {
         if (def_name.slice(0, file.length) === file) {
-          go(defs[def_name], 0);
+          go(core.Ref(def_name), 0);
           js_defs.push([
             def_name.slice(file.length),
             js_name(def_name)
