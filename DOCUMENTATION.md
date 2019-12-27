@@ -189,7 +189,7 @@ you can run with:
 ```haskell
 $ fm -o HelloWorld
 "Hello, world!"
-{"loops":20934,"rewrites":1017,"max_len":615}
+{"loops":1953,"rewrites":146,"max_len":161}
 ```
 
 It evaluates your term using [interaction
@@ -206,9 +206,10 @@ Type-Checking
 
 To type-check a term, type:
 
-```haskell
-fm -t HelloWorld
-String ✔
+```shell
+$ fm -t HelloWorld
+String ✔ 𝒜 ℰ ℋ
+Note: 𝒜 = affine, ℰ = elementary, ℋ = halting
 ```
 
 This will check if the program's type is correct. If the type is incorrect, it
@@ -216,7 +217,7 @@ will print an error message instead.
 
 For example, if you change `"Hello, world!"` to `true`:
 
-```haskell
+```shell
 [ERROR]
 Type mismatch.
 - Found type... Bool
@@ -278,7 +279,7 @@ just the λ-calculus with numbers - it is very easy to
 compile it to multiple targets. For example, let's compile
 the following library to JavaScript:
 
-```javascript
+```haskell
 twice(n: Number)
   n .*. 2
 
@@ -319,7 +320,7 @@ Export that function as a JS module, `lib.js`, and use it as:
 const {twice, length, sum} = require("./lib.js");
 
 console.log("Double of 2:", twice(2));
-console.log("Length of the [3,4] vector:", length(3)(4));
+console.log("Length of the [3,4] vector:", length2(3)(4));
 console.log("Summation from 0 til 10 is:", sum(10));
 ```
 
@@ -545,9 +546,10 @@ Try type-checking and running:
 
 ```haskell
 $ fm -t SameWorld
-String ✔ | affine ✔ | elementary ✔ | terminating ✔
+String ✔ 𝒜 ℰ ℋ
+Note: 𝒜 = affine, ℰ = elementary, ℋ = halting
 $ fm -t SameWorld/same
-(_ : String) -> String ✔ | affine ✔ | elementary ✔ | terminating ✔
+(_ : String) -> String ✔ 𝒜 ℰ ℋ
 $ fm -d SameWorld
 "Hello, World"
 ```
@@ -643,11 +645,13 @@ main : String
   eraser(String; "Hello, world!")
 ```
 
-```haskell
+```shell
 $ fm -t EraseWorld
-String ✔ | affine ✔ | elementary ✔ | terminating ✔
+String ✔ 𝒜 ℰ ℋ
+Note: 𝒜 = affine, ℰ = elementary, ℋ = halting
 $ fm -t EraseWorld/eraser
-(T : Type; x : T) -> T ✔ | affine ✔ | elementary ✔ | terminating ✔
+(T : Type; x : T) -> T ✔ 𝒜 ℰ ℋ
+Note: 𝒜 = affine, ℰ = elementary, ℋ = halting
 ```
 
 The first argument disappears from the runtime
@@ -829,7 +833,7 @@ Found hole: 'a'.
 - With context:
 - x : Bool
 
-(x : Bool) -> Bool ✔ | affine ✔ | elementary ✔ | terminating ✔
+(x : Bool) -> Bool ✔ 𝒜 ℰ ℋ
 ```
 
 This tells you that, on the location of the hole, you should have a `Bool`.
@@ -886,7 +890,7 @@ Found hole: 'a'.
 - With context:
 - f : (_ : Bool) -> Nat
 
-(f : (_ : Bool) -> Nat) -> Nat ✔ | affine ✔ | elementary ✔ | terminating ✔
+(f : (_ : Bool) -> Nat) -> Nat ✔ 𝒜 ℰ ℋ
 ```
 
 This tells you that, inside the body of `main`, the type of `f(true)` is `Nat`.
@@ -1660,7 +1664,7 @@ Found hole: 'a'.
 - With context:
 - n : Nat
 
-(n : Nat) -> Equal(Nat, mul2(n), add(n, n)) ✔ | affine ✔ | elementary ✔ | terminating ✔
+(n : Nat) -> Equal(Nat, mul2(n), add(n, n)) ✔ 𝒜 ℰ ℋ
 ```
 
 This is telling us that our theorem is correct as long as we can replace the
