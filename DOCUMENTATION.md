@@ -42,14 +42,7 @@ pick up the language.**
 Motivation
 ==========
 
-> "In the Truth Mines though, the tags weren't just references; they included
-> complete statements of the particular definitions, axioms, or theorems the
-> objects represented. The Mines were self-contained: every mathematical result
-> that fleshers and their descendants had ever proven was on display in its
-> entirety. The library's exegesis was helpful - but the truths themselves were
-> all there."
->
-> *Diaspora*, Greg Egan
+> Knowing mathematics and programming might one day be one... fills you with determination.
 
 Formality exists to fill a hole in the current market: there aren't many
 languages featuring *theorem proving* that are simple, user-friendly and
@@ -113,6 +106,15 @@ implementation](https://medium.com/@maiavictor/calling-a-function-a-googol-times
 Who knows if this may lead to new breakthroughs in complexity theory?
 
 ![](https://raw.githubusercontent.com/moonad/Assets/master/images/inet-simulation.gif)
+
+> "In the Truth Mines though, the tags weren't just references; they included
+> complete statements of the particular definitions, axioms, or theorems the
+> objects represented. The Mines were self-contained: every mathematical result
+> that fleshers and their descendants had ever proven was on display in its
+> entirety. The library's exegesis was helpful - but the truths themselves were
+> all there."
+>
+> *Diaspora*, Greg Egan
 
 Installation
 ============
