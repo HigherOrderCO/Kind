@@ -1004,12 +1004,31 @@ export const parse = async (
           } else {
             var body = parse_do_statement(nams.concat([name]));
             vtyp = Hol(new_hole_name());
-            return App(App(App(App(base_ref("bind"), vtyp, true), type, true), term, false), Lam(name, null, body, false), false);
+            return App(App(App(App(base_ref("bind"), vtyp, true), type, true), term, false), Lam("x", null, body, false), false);
           }
         }
       };
       var result = parse_do_statement(nams);
       return result;
+    }
+  }
+
+  // Parses an effectful for-loop
+  function parse_for(nams) {
+    if (match("for ")) {
+      var name = parse_string();
+      var skip = parse_exact("=");
+      var val0 = parse_term(nams);
+      var skip = parse_exact("~");
+      var val1 = parse_term(nams);
+      var body = parse_term(nams.concat([name]));
+      var func = Lam(name, null, body, false);
+      var term: Term;
+      term = base_ref("for");
+      term = App(term, val0, false);
+      term = App(term, val1, false);
+      term = App(term, func, false);
+      return term;
     }
   }
 
@@ -1113,6 +1132,7 @@ export const parse = async (
     else if (parsed = parse_var(nams)) {}
     else if (parsed = parse_lst(nams)) {}
     else if (parsed = parse_blk(nams)) {}
+    else if (parsed = parse_for(nams)) {}
     else if (parsed = parse_ref(nams)) {}
 
     // Parses spaced operators

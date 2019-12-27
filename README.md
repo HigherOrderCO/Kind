@@ -59,9 +59,8 @@ $ git clone git@github.com:moonad/Formality.git
 $ cd Formality
 $ nix-channel --add https://nixos.org/channels/nixpkgs-unstable unstable
 $ nix-env -f '<unstable>' -iA nodePackages.node2nix
-$ node2nix --nodejs-12
-$ sed -i 's/nixpkgs/unstable/g' default.nix
-$ nix-env -f default.nix -iA package
+$ node2nix -d -i package.json --nodejs-12
+$ nix-env -i -f override.nix
 ```
 
 It can be used from the terminal with the `fm` command, or as a library with `require("formality-lang")`.

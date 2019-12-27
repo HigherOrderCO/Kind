@@ -4,9 +4,14 @@ Table of contents
 - [Motivation](#motivation)
 - [Installation](#installation)
 - [Introduction](#introduction)
+    - [Evaluation](#evaluation)
+    - [Type-Checking](#type-checking)
+    - [Compilation](#compilation)
+    - [Effects](#effects)
 - [Primitives](#primitives)
     - [Let](#let)
     - [Lambda](#lambda)
+    - [Number](#number)
     - [Self](#self)
     - [Annotation](#annotation)
     - [Hole](#hole)
@@ -27,7 +32,7 @@ Table of contents
     - [Formality Core](#formality-core)
     - [Formality Calculus](#formality-calculus)
     - [Formality Net](#formality-net)
-    - [Compilation](#compilation)
+    - [Compilation](#net-compilation)
 
 **Note: If you like learning by example, please ignore this docs and check
 [Base.fm](https://github.com/moonad/Base.fm); the code there is very
@@ -128,9 +133,8 @@ $ git clone git@github.com:moonad/Formality.git
 $ cd Formality
 $ nix-channel --add https://nixos.org/channels/nixpkgs-unstable unstable
 $ nix-env -f '<unstable>' -iA nodePackages.node2nix
-$ node2nix --nodejs-12
-$ sed -i 's/nixpkgs/unstable/g' default.nix
-$ nix-env -f default.nix -iA package
+$ node2nix -d -i package.json --nodejs-12
+$ nix-env -i -f override.nix
 ```
 
 In order to test if it worked, type `fm` on the terminal. If you see Formality's
@@ -142,6 +146,9 @@ issue](https://github.com/moonad/Formality/issues).
 Introduction
 ============
 
+Evaluation
+----------
+
 This is the "Hello, World!" in Formality:
 
 ```haskell
@@ -152,21 +159,18 @@ main : String
   "Hello, world!"
 ```
 
-A Formality file is just a list of imports followed by a series of top-level
-definitions. Here, we have one top-level definition, `main`, with type
-`String`, and body `"Hello, world"`. Save this file as `HelloWorld.fm`.
-
-To run it, type
+A Formality file is just a list of imports followed by a
+series of top-level definitions. Here, we have one top-level
+definition, `main`, with type `String`, and body `"Hello,
+world"`. Save this file as `HelloWorld.fm`.  To run it, type
 
 ```haskell
 $ fm -d HelloWorld/main
 "Hello, world!"
 ```
 
-This will evaluate `main` using an interpreter in debug mode and output `"Hello,
-world!"`
-
-You can also use
+This will evaluate `main` using an interpreter in debug mode
+and output `"Hello, world!"`. If your term is affine, try:
 
 ```haskell
 $ fm -f HelloWorld
@@ -174,10 +178,13 @@ $ fm -f HelloWorld
 {"beta":114,"copy":1294}
 ```
 
-to evaluate it with our fast affine runtime, but you'll lose information like variable
-names and logs. `HelloWorld/main` and `HelloWorld` are synonymous.
+to evaluate it with our fast runtime, but you'll lose
+information like variable names and logs. Affine terms are
+those that never use a lambda-bound variable more than once.
+The type-checker will inform you if your term is allowed.
 
-Formality also has an optimal interaction net runtime that you can run with:
+Formality also has an optimal interaction net runtime that
+you can run with:
 
 ```haskell
 $ fm -o HelloWorld
@@ -185,13 +192,19 @@ $ fm -o HelloWorld
 {"loops":20934,"rewrites":1017,"max_len":615}
 ```
 
-**Note: The affine and optimal runtimes are currently unsafe on some
-non-stratified terms (terms containing certain forms of variable duplication)
-and may diverge from the correct HOAS runtime (`fm -d`).
-We are in the process of implementing a stratification checker to warn the user
-if this will occur and fallback gracefully on another reduction strategy.**
+It evaluates your term using [interaction
+combinators](https://arxiv.org/pdf/0906.0380.pdf), making it
+suitable for innovative optimizations such as runtime
+fusion, as explained on [this post](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07).
+The optimal evaluator can only be used on elementary terms,
+that is, terms that only use lambda-bound variable more than
+once in a controlled manner. The type-checker will inform
+you if that's the case.
 
-To type-check:
+Type-Checking
+-------------
+
+To type-check a term, type:
 
 ```haskell
 fm -t HelloWorld
@@ -220,45 +233,260 @@ Type mismatch.
 Because `true` is a `Bool`, but the `main` expression expects
 a `String`.
 
-Since Formality is a proof language, a type can be seen a theorems and
-well-typed term can be seen its proof.
-
-**Note: This is currently only true for terminating expressions.  Nontermination
-allows for inconsistency, meaning nonterminating expressions can be used to
-prove any result. We are in the process of implementing a termination checker to
-detect such cases.**
-
-For example, this is a proof that `"cat" == "cat"`:
+Type-checking not only gives you a guarantee that your
+program won't runtime errors or segfault, but, since
+Formality has an expressive type-system, it can give you
+arbitrarily complex statical assurances about your program's
+behavior. In fact, Formality duals as a proof language, in
+the sense you can write and prove mathematical theorems
+using its type system. For example, this proves `2 == 2`:
 
 ```haskell
--- CatIsCat.fm
+-- TwoIsTwo.fm
 import Base#
 
-main : "cat" == "cat"
+main : 2 == 2
   equal(__)
 ```
 
-Save this file as `CatIsCat.fm` and run:
+Save this file as `TwoIsTwo.fm` and run:
 
 ```haskell
-$ fm -t CatIsCat/main
-Equal(String, cons(Number; 99, cons(Number; 97, cons(Number; 116, nil(Number;)))), cons(Number; 99, cons(Number; 97, cons(Number; 116, nil(Number;)))))
+$ fm -t TwoIsTwo/main
+Equal(Number, 2, 2)
 ```
 
-**Note: We currently have pretty-printing for `String` (which is implemented as
-a list of codepoints) at term level, but not at the type-level, when we do, this
-message should look like:***
+The fact this program type-checks means Formality
+mechanically checked a mathematical proof that 2 is equal to
+2. Note that proofs can only be trusted if they are
+terminating; otherwise, one could derive logical paradoxes.
+The type-checker will let you know if that is the case, but
+it might not be always able to tell due to the halting
+problem.
 
-```haskell
-Equal(String, "cat", "cat") ✔
+Of course, proving that `2 == 2` is not interesting, but one
+could prove more important theorems such as
+`OnlyOwnerCanMakeWithdrawal(owner, contract) ✔`. How proofs
+can be used to make your programs safer will be explored
+later.
+
+Compilation
+-----------
+
+Since Formality's core language is extremelly simple - it is
+just the λ-calculus with numbers - it is very easy to
+compile it to multiple targets. For example, let's compile
+the following library to JavaScript:
+
+```javascript
+twice(n: Number)
+  n .*. 2
+
+length(x: Number, y: Number) : Number
+  ((x .**. 2) .+. (y .**. 2)) .**. 0.5
+
+sum(n : Number) : Number
+  if n .==. 0 then
+    0
+  else
+    n .+. sum(n .-. 1)
 ```
 
-This means Formality is convinced that "cat" is equal to "cat". Of course, that
-is obvious, but it could be something much more important such as
-`OnlyOwnerCanMakeWithdrawal(owner, contract) ✔`. How proofs can be used to make
-your programs safer will be explored later. Let's now go through all of
-Formality's primitives.  Don't worry: since it is designed to be a very simple
-language, there aren't many!
+Save it as `lib.fm` and type:
+
+```
+fm -J lib/@
+```
+
+This will output:
+
+```
+(function(){
+  var _lib$twice = (_0=>(_0*2));
+  var _lib$length = (_0=>(_1=>(((_0**2)+(_1**2))**0.5)));
+  var _lib$sum = (_0=>((_0===0? 1 : 0)?0:(_0+_lib$sum((_0-1)))));
+  return {
+    'twice':_lib$twice,
+    'length':_lib$length,
+    'sum':_lib$sum
+  };
+})()
+```
+
+Export that function as a JS module, `lib.js`, and use it as:
+
+```
+const {twice, length, sum} = require("./lib.js");
+
+console.log("Double of 2:", twice(2));
+console.log("Length of the [3,4] vector:", length(3)(4));
+console.log("Summation from 0 til 10 is:", sum(10));
+```
+
+Note that the default compiler uses native functions. The
+advantage is that this makes interop extremelly easy. The
+disadvantage is that it relies on the performance of those
+functions. Alternatively, you could load the Formality
+program in an interaction net (or other) runtime inside the
+target language.
+
+You can also compile a Formality program to Ethereum. Save
+the following program as `example.fm`:
+
+```
+import Base#
+
+main
+  double(7n)
+```
+
+And type:
+
+```
+fm -E example/main
+```
+
+This will output:
+
+```
+6013600060051b526043600160051b5263ffffffff6002600060005b8063ffffffff1415156107fb5782600f166101f00261003601565b5050505b8063ffffffff1415156100795782600f1660021482151661005d57505050610074565b600191508260041c60010160051b5160008261007a565b61003a565b5b6107f6560000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005b8260041c60051b518063ffffffff1461024a5760041c8160041b9060051b5261024c565b505b90506001908260041c60010160051b516000826001016107f65600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005b8260041c60051b5180600f1660011461043157600082610497565b8060041c60051b518063ffffffff141561044b575061045f565b8460041c60010160051b519060041c60051b525b60041c60010160051b51925050508163ffffffff1415610486578060005260006000610496565b8360041c830160051b5290506000905b5b6107f65600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005b63ffffffff59525960011c8360041c60550261061e01565b601359526043595260026107c756000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005b80604001595280602201595280604201595280606101595263ffffffff5952602359528060d0015952806082015952603359528060a2015952603359528060c20159526013595263ffffffff595260016107c7565b80603001595280602101595263ffffffff595263ffffffff595260016107c756000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005b80607001595280602101595263ffffffff595280604101595280606001595280606201595263ffffffff595263ffffffff595260016107c7560000000000000000000000000000000000000000000000000000005b60335952806022015952603359528060420159526033595280606201595260335952806082015952603359528060a2015952603359528060c20159526033595260235952600200000000000000000000000000005b01925050508163ffffffff14156107e55780600052600060006107f5565b8360041c830160051b5290506000905b5b61001b565b00
+```
+
+Which is an EVM bytecode that evaluates the `main` function.
+When that program is done running, it leaves, on Ethereum's
+memory, a buffer representing the normal form of the input
+program. Since the EVM is a very resource-scarse
+environment, this compiler uses our fastest runtime, which
+only accepts affine terms. Each function application
+(beta-reduction) uses roughly 200 gas, which is surprisingly
+low: only about 25x more than a native MULMOD operation! 
+
+Right now, this compiler only performs the computations on
+the EVM, it doesn't do any contract interaction. It also
+doesn't feature Number, since Ethereum doesn't have doubles.
+In a future, contract interaction will be added to this
+compiler, and 64-bit uints will be added to the language,
+allowing us to use Ethereum's native 256-bit uint.
+
+Effects
+-------
+
+So far, we only explained how to evaluate pure terms. But
+how do we run actual programs that interact with the real
+world? One way is to use Formality to export a module in a
+common programming language, such as JavaScript, and then
+use that language as a bridge to the real world. This
+approach is being used to develop
+[TaelinArena](https://github.com/moonad/TaelinArena), an
+online game. Another way is to model your effects using a
+datatype (this will be explained later) and then write an
+interpreter for it. This is what Haskell does by default
+with its `IO` type. Formality's base-lib features a default
+`IO` type, with a standard interpreter. For example:
+
+```javascript
+import Base#
+
+main : IO(Unit)
+  print("Hello, world!")
+```
+
+Save the program above as `main.fm`. If you run it with `fm
+-d main/main`, you'll see:
+
+```
+(exec, pure) => exec((putstr, getstr) => putstr("Hello, world"), (x, exec, pure) => pure((unit) => unit))
+```
+
+Which isn't what you expected. That's because `-d` evaluates
+a pure program. In this case, this pure program is a
+"recipe" for the evaluation of an effectful program. To run
+it with the effects, type `fm -r main/main` instead. This
+will output:
+
+```
+Hello, world!
+```
+
+The fun thing about IO is that it allows you to interact
+with the external world and get an user input. For example,
+this program:
+
+```javascript
+import Base#
+
+main : IO(Unit)
+  do {
+    var name = question("What is your name?")
+    print(concat(_ "Hello, ", name))
+  }
+```
+
+Asks the user name and then greets him. This program:
+
+```javascript
+import Base#
+
+main : IO(Unit)
+  for i = 0~100
+    print(number_to_string(10, i))
+```
+
+Prints all numbers from 0 til 100. And this program:
+
+```javascript
+import Base#
+
+program(count : Number) : IO(Unit)
+  do {
+    // Prints instructions
+    print("Commands:")
+    print("- [i] increments by 1")
+    print("- [d] decreases by 1")
+    print("- [r] resets")
+    print("- (other) quits")
+    print("")
+    print(concat(_ "Count: ", number_to_string(10, count)))
+    print("")
+
+    // Gets the user command
+    var cmd = question("Enter your command:")
+    let key = head(_ 0, cmd)
+
+    // Increases
+    if key .==. 'i' then
+      program(count .+. 1)
+
+    // Decreases
+    else if key .==. 'd' then
+      program(count .-. 1)
+
+    // Reset
+    else if key .==. 'r' then
+      program(0)
+
+    // Quits
+    else do {
+      print("Bye!")
+      return unit
+    }
+  }
+
+main : IO(Unit)
+  program(0)
+```
+
+Allows the user to interactively increment and decrement a
+counter.
+
+Like on Haskell, effects are performed monadically, i.e.,
+they're "pure programs that describe impure programs". The
+`do{}`, `for` and `return` used on those examples are
+syntax-sugars that become calls to functions on the
+[IO.fm](https://github.com/moonad/Base.fm/blob/master/IO.fm)
+file of Formality's base library. Explaining how this works
+in more details is out of the scope of this guide for now,
+but a tutorial might be added in a future.
 
 Primitives
 ==========
@@ -272,10 +500,11 @@ A type is some collection of values. The `:` symbol means "has type/is of type":
 "cat" : String
 true : Bool
 1n : Nat
+7 : Number
 ```
 
-This means `"cat"` is a `String`, `true` is a `Bool` (boolean) and `1n` is a
-`Nat` (natural number).
+This means `"cat"` is a `String`, `true` is a `Bool` (boolean), `1n` is a
+`Nat` (natural number) and `7` is a `Number` (native double).
 
 Lambda
 ------
@@ -442,6 +671,75 @@ $ fm -d EraseWorld/no_eraser
 (T,x) => x
 ```
 
+Number
+------
+
+A native number, encoded as a 64-bit value. It can be written in decimal, hexadecimal or binary:
+
+```haskell
+number_0 : Number
+  1900
+
+number_1 : Number
+  0x76C
+
+number_2 : Number
+  0b11101101100
+
+number_3 : Number
+  12.3456
+
+```
+
+The numeric operations are:
+
+name | syntax | javascript equivalent
+--- | --- | ---
+addition | `x .+. y` | `x + y`
+subtraction | `x .-. y` | `x - y`
+multiplication | `x .*. y` | `x * y`
+division | `x ./. y` | `x / y`
+modulus | `x .%. y` | `x % y`
+exponentiation | `x .**. y` | `x ** y`
+bitwise-and | `x .&. y` | `x & y`
+bitwise-or | `x .\|. y` | `x \| y`
+bitwise-xor | `x .^. y` | `x ^ y`
+bitwise-not | `.~.(y)` | `~y`
+bitwise-right-shift | `x .>>>. y` | `x >>> y`
+bitwise-left-shift | `x .<<. y` | `x << y`
+greater-than | `x .>. y` | `x > y ? 1 : 0`
+less-than | `x .<. y` | `x < y ? 1 : 0`
+equals | `x .==. y` | `x === y ? 1 : 0`
+
+There is no operator precedence: parenthesis are always placed on the right.
+That means `3 .*. 10 .+. 1` is parsed as `3 .*. (10 .+. 1)`. If you want the
+multiplication to occur first, you must be explicit:
+
+```haskell
+main : Number
+  (3 .*. 10) .+. 1
+```
+
+There is also `if`, which allows branching with a `Number` condition.
+
+syntax | description
+--- | ---
+`if n then a else b` | If `n` is `0`, evaluates to `b`, else, evaluates to `a`
+
+Usage is straightforward:
+
+```haskell
+import Base#
+
+main : Output
+  let age = 30
+
+  if age .<. 18 then
+    print("Boring teenager.")
+  else
+    print("Respect your elders!")
+```
+
 Let
 ---
 
@@ -502,36 +800,6 @@ This is useful when the type-checker can't infer the type of an expression.
 main : String
   (((x) => x) :: String -> String)("Hello, world!")
 ```
-
-Nontermination
---------------
-
-Nonterminating code is compatible with the fast-affine runtime, but can't be
-compiled to interaction nets. Nonterminating expressions also can't be
-interpreted as mathematical proofs, as they can be used to create paradoxes,
-allowing you to inhabit a type with a loop:
-
-```haskell
--- LoopEmpty.fm
-main : Empty
-  main
-```
-
-```haskell
-$ fm -t LoopEmpty
-Empty ✔
-```
-
-These paradoxes can be detected via a termination checker (**In development**).
-
-One powerful aspect of Formality is that you can still prove theorems about
-nonterminating programs, as long as the proofs themselves are terminating. This
-idea was first explored in ["A dependently typed language with
-nontermination"](https://www.cis.upenn.edu/~sweirich/papers/sjoberg-thesis.pdf).
-Nonterminating terms are also very useful when you have a function argument
-that will only be used inside a type such as the `Nat` index of a Vector, and
-they also play an important role in the implementation of inductive datatypes
-with self-types.
 
 Hole
 ----
@@ -2189,8 +2457,8 @@ can be executed in parallel like the one on the strict version. This would allow
 the algorithm to have many threads walking through the graph at the same time.
 Again, caution must be taken to avoid conflicts.
 
-Compilation
------------
+Net-Compilation
+---------------
 
 The process of compiling a Formality program to an interaction net can be
 summarized as:

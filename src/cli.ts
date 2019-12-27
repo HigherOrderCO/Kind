@@ -3,6 +3,7 @@ import * as fm from "./index";
 import { with_local_files } from "./fs-local";
 import { with_file_system_cache } from "./fs-cache";
 import { Defs } from "./core";
+import { run_io } from "./io";
 
 export async function run() {
   try {
@@ -30,8 +31,10 @@ export async function run() {
     console.log("$ fm -l <file>        | loads from FPM");
     console.log("$ fm -i <file>        | shows cited_by");
     console.log("$ fm -v <file>        | shows version");
-    console.log("$ fm -J <file>/<term> | compiles to JS");
-    console.log("$ fm -E <file>/<term> | compiles to EVM");
+    console.log("$ fm -J <file>/<term> | compiles term to JS");
+    console.log("$ fm -J <file>/@      | compiles file to JS");
+    console.log("$ fm -E <file>/<term> | compiles term to EVM");
+    console.log("$ fm -r <file>/<term> | runs IO term");
     console.log("");
     console.log("Options:");
     console.log("-x don't erase types");
@@ -45,13 +48,13 @@ export async function run() {
     console.log(fm.version);
     process.exit();
 
-    // Download file from FPM
+  // Download file from FPM
   } else if (args.l) {
     var file_data = await fm.loader.load_file(main);
     console.log(fs.writeFileSync(main + ".fm", file_data));
     console.log("Downloaded file as `" + main + ".fm`!");
 
-    // Save file to FPM
+  // Save file to FPM
   } else if (args.S || args.s) {
     var file_name = main;
     if (file_name.slice(-3) === ".fm") {
@@ -59,7 +62,7 @@ export async function run() {
     }
     upload(file_name).then(() => process.exit());
 
-    // Show file cited_by
+  // Show file cited_by
   } else if (args.i) {
     try {
       var cited_by = await fm.loader.load_file_parents(main);
@@ -68,15 +71,13 @@ export async function run() {
       console.log("Couldn't load global file '" + main + "'.");
     }
 
-    // Compile to JavaScript
+  // Compile to JavaScript
   } else if (args.J) {
     var { name, defs } = await load_code(main);
-    var term = defs[name];
-    term = fm.core.erase(term);
-    var code = fm.js.compile(term, defs);
+    var code = fm.js.compile(name, defs);
     console.log(code);
 
-    // Compiles to EVM
+  // Compiles to EVM
   } else if (args.E) {
     var { name, defs } = await load_code(main);
     var code = fm.evm.compile(name, defs);
@@ -88,7 +89,12 @@ export async function run() {
         "\n- A monadic interop for deployable contracts is in development."
     );
 
-    // Evaluates on debug mode
+  // Runs IO
+  } else if (args.r) {
+    var { name, defs } = await load_code(main);
+    run_io(name, defs);
+
+  // Evaluates on debug mode
   } else if (args.d) {
     var { name, defs } = await load_code(main);
     var term = defs[name];
@@ -97,7 +103,7 @@ export async function run() {
     var term = fm.core.reduce(term, defs, opts);
     console.log(fm.stringify(term));
 
-    // Evaluates on fast mode
+  // Evaluates on fast mode
   } else if (args.f) {
     var { name, defs } = await load_code(main);
     var { rt_defs, rt_term: rt_term_orig } = fm.fast.compile(defs, name);
@@ -115,7 +121,7 @@ export async function run() {
     //console.log(fm.lang.show(term));
     //console.log(JSON.stringify(stats));
 
-    // Evaluates on optimal mode
+  // Evaluates on optimal mode
   } else if (args.o) {
     var { name, defs } = await load_code(main);
     var net = fm.optimal.compile(fm.core.Ref(name), defs);
@@ -125,15 +131,15 @@ export async function run() {
     console.log(fm.stringify(term));
     console.log(JSON.stringify(opt_stats));
 
-    // Type-checks
+  // Type-checks
   } else if (args.t) {
     var { name, defs } = await load_code(main);
-    var all = name === "@";
+    var all = name[name.length - 1] === "@";
     var names = all ? Object.keys(defs).sort() : [name];
     names.forEach(name => {
-      var right = x => "\x1b[32m" + x + " ✔\x1b[0m";
-      var maybe = x => "\x1b[33m" + x + " ?\x1b[0m";
-      var wrong = x => "\x1b[31m" + x + " ✗\x1b[0m";
+      var right = x => "\x1b[32m" + x + "\x1b[0m";
+      var maybe = x => "\x1b[33m" + x + "\x1b[0m";
+      var wrong = x => "\x1b[31m" + x + "\x1b[0m";
 
       try {
         var opts = { logs: !args.m };
@@ -142,22 +148,22 @@ export async function run() {
         var affi = fm.core.is_affine(fm.core.Ref(name), defs);
         //var elem = fm.core.is_elementary(fm.core.Ref(name), defs);
         var halt = fm.core.is_terminating(fm.core.Ref(name), defs);
-        var str = right(head + fm.stringify(type));
-        str += "\n| ";
-        str += (affi ? right : wrong)("affine") + " | ";
-        str += (affi ? right : maybe)("elementary") + " | ";
-        str += (halt ? right : maybe)("terminating") + " |";
-        str += "\n";
+        var str = "\x1b[32m" + (head + fm.stringify(type)) + " ✔\x1b[0m";
+        str += " ";
+        str += (affi ? right : wrong)("𝒜") + " ";
+        str += (affi ? right : maybe)("ℰ") + " ";
+        str += (halt ? right : maybe)("ℋ");
         console.log(str);
       } catch (e) {
         if (!all) {
           console.log(e);
           process.exit(1);
         } else {
-          console.log(wrong(head + "error") + "\n");
+          console.log("\x1b[31m" + (head + "error") + " ✗\x1b[0m" + "\n");
         }
       }
     });
+    console.log("\x1b[2mNote: 𝒜 = affine, ℰ = elementary, ℋ = halting\x1b[0m");
   } else {
     console.log("Command not found. Type `fm` for help.");
   }
@@ -244,7 +250,7 @@ async function load_code(main): Promise<{ name: string; defs: Defs }> {
     console.log(e);
     process.exit(1);
   }
-  name = name === "@" ? "@" : file + "/" + name;
+  name = file + "/" + name;
 
   return { name, defs: defs as Defs };
 }

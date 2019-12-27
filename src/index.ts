@@ -7,6 +7,7 @@ import * as js from "./fm-to-js";
 import * as evm from "./fm-to-evm";
 import * as net from "./fm-net";
 import * as loader from "./loader";
+import * as io from "./io";
 import { version } from "./version";
 
 export { core, stringify, parse, fast, optimal, js, evm, net, loader, version };
