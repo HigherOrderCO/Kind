@@ -2,3 +2,8 @@
 node_modules/
 dist/
 package-lock.json
+
+# auto generated node2nix files
+default.nix
+node-env.nix
+node-packages.nix
