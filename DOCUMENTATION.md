@@ -320,7 +320,7 @@ Export that function as a JS module, `lib.js`, and use it as:
 const {twice, length, sum} = require("./lib.js");
 
 console.log("Double of 2:", twice(2));
-console.log("Length of the [3,4] vector:", length2(3)(4));
+console.log("Length of the [3,4] vector:", length(3)(4));
 console.log("Summation from 0 til 10 is:", sum(10));
 ```
 
