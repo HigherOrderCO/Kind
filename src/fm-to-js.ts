@@ -101,7 +101,7 @@ const compile = (name: string, defs: core.Defs = {}): string => {
         + "  };\n"
         + "})()";
   } else {
-    var result = go(defs[name], 0);
+    var result = go(core.Ref(name), 0);
     return "(function(){\n"
       + code
       + "  return " + result
