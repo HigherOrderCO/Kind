@@ -170,21 +170,7 @@ $ fm -d HelloWorld/main
 ```
 
 This will evaluate `main` using an interpreter in debug mode
-and output `"Hello, world!"`. If your term is affine, try:
-
-```haskell
-$ fm -f HelloWorld
-"Hello, world!"
-{"beta":114,"copy":1294}
-```
-
-to evaluate it with our fast runtime, but you'll lose
-information like variable names and logs. Affine terms are
-those that never use a lambda-bound variable more than once.
-The type-checker will inform you if your term is allowed.
-
-Formality also has an optimal interaction net runtime that
-you can run with:
+and output `"Hello, world!"`. If your term is elementary, try:
 
 ```haskell
 $ fm -o HelloWorld
@@ -195,11 +181,25 @@ $ fm -o HelloWorld
 It evaluates your term using [interaction
 combinators](https://arxiv.org/pdf/0906.0380.pdf), making it
 suitable for innovative optimizations such as runtime
-fusion, as explained on [this post](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07).
+fusion, as explained on [this
+post](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07).
 The optimal evaluator can only be used on elementary terms,
 that is, terms that only use lambda-bound variable more than
 once in a controlled manner. The type-checker will inform
-you if that's the case.
+you if that's the case. If your terms is affine, i.e.,
+doesn't use lambda-bound variables more than once at all,
+you can use the fast evaluator:
+
+```haskell
+$ fm -f HelloWorld
+"Hello, world!"
+{"beta":114,"copy":1294}
+```
+
+It is like the optimal evaluator, but much faster in
+programs that don't use a lot of sharing (variable
+duplication). The fast evaluator doesn't support numbers
+currently.
 
 Type-Checking
 -------------
