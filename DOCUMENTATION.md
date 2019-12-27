@@ -276,7 +276,7 @@ the following library to JavaScript:
 twice(n: Number)
   n .*. 2
 
-length(x: Number, y: Number) : Number
+vector_size(x: Number, y: Number) : Number
   ((x .**. 2) .+. (y .**. 2)) .**. 0.5
 
 sum(n : Number) : Number
@@ -297,11 +297,11 @@ This will output:
 ```javascript
 (function(){
   var _lib$twice = (_0=>(_0*2));
-  var _lib$length = (_0=>(_1=>(((_0**2)+(_1**2))**0.5)));
+  var _lib$vector_size = (_0=>(_1=>(((_0**2)+(_1**2))**0.5)));
   var _lib$sum = (_0=>((_0===0? 1 : 0)?0:(_0+_lib$sum((_0-1)))));
   return {
     'twice':_lib$twice,
-    'length':_lib$length,
+    'vector_size':_lib$vector_size,
     'sum':_lib$sum
   };
 })()
@@ -310,10 +310,10 @@ This will output:
 Export that function as a JS module, `lib.js`, and use it as:
 
 ```javascript
-const {twice, length, sum} = require("./lib.js");
+const {twice, vector_size, sum} = require("./lib.js");
 
 console.log("Double of 2:", twice(2));
-console.log("Length of the [3,4] vector:", length(3)(4));
+console.log("Length of the [3,4] vector:", vector_size(3)(4));
 console.log("Summation from 0 til 10 is:", sum(10));
 ```
 
