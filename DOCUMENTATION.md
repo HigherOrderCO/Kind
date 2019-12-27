@@ -7,6 +7,7 @@ Table of contents
 - [Primitives](#primitives)
     - [Let](#let)
     - [Lambda](#lambda)
+    - [Number](#number)
     - [Self](#self)
     - [Annotation](#annotation)
     - [Hole](#hole)
@@ -152,21 +153,18 @@ main : String
   "Hello, world!"
 ```
 
-A Formality file is just a list of imports followed by a series of top-level
-definitions. Here, we have one top-level definition, `main`, with type
-`String`, and body `"Hello, world"`. Save this file as `HelloWorld.fm`.
-
-To run it, type
+A Formality file is just a list of imports followed by a
+series of top-level definitions. Here, we have one top-level
+definition, `main`, with type `String`, and body `"Hello,
+world"`. Save this file as `HelloWorld.fm`.  To run it, type
 
 ```haskell
 $ fm -d HelloWorld/main
 "Hello, world!"
 ```
 
-This will evaluate `main` using an interpreter in debug mode and output `"Hello,
-world!"`
-
-You can also use
+This will evaluate `main` using an interpreter in debug mode
+and output `"Hello, world!"`. If your term is affine, try:
 
 ```haskell
 $ fm -f HelloWorld
@@ -174,10 +172,13 @@ $ fm -f HelloWorld
 {"beta":114,"copy":1294}
 ```
 
-to evaluate it with our fast affine runtime, but you'll lose information like variable
-names and logs. `HelloWorld/main` and `HelloWorld` are synonymous.
+to evaluate it with our fast runtime, but you'll lose
+information like variable names and logs. Affine terms are
+those that never use a lambda-bound variable more than once.
+The type-checker will inform you if your term is allowed.
 
-Formality also has an optimal interaction net runtime that you can run with:
+Formality also has an optimal interaction net runtime that
+you can run with:
 
 ```haskell
 $ fm -o HelloWorld
@@ -185,11 +186,14 @@ $ fm -o HelloWorld
 {"loops":20934,"rewrites":1017,"max_len":615}
 ```
 
-**Note: The affine and optimal runtimes are currently unsafe on some
-non-stratified terms (terms containing certain forms of variable duplication)
-and may diverge from the correct HOAS runtime (`fm -d`).
-We are in the process of implementing a stratification checker to warn the user
-if this will occur and fallback gracefully on another reduction strategy.**
+It evaluates your term using [interaction
+combinators](https://arxiv.org/pdf/0906.0380.pdf), making it
+suitable for innovative optimizations such as runtime
+fusion, as explained on [this post](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07).
+The optimal evaluator can only be used on elementary terms,
+that is, terms that only use lambda-bound variable more than
+once in a controlled manner. The type-checker will inform
+you if that's the case.
 
 To type-check:
 
@@ -223,37 +227,30 @@ a `String`.
 Since Formality is a proof language, a type can be seen as a theorem and a
 well-typed term can be seen as its proof.
 
-**Note: This is currently only true for terminating expressions.  Nontermination
-allows for inconsistency, meaning nonterminating expressions can be used to
-prove any result. We are in the process of implementing a termination checker to
-detect such cases.**
+**Note: This is currently only true for terminating
+expressions.  Nontermination allows for inconsistency,
+meaning nonterminating expressions can be used to prove any
+result. We are in the process of implementing a termination
+checker to detect such cases.**
 
-For example, this is a proof that `"cat" == "cat"`:
+For example, this is a proof that `2 == 2`:
 
 ```haskell
--- CatIsCat.fm
+-- TwoIsTwo.fm
 import Base#
 
-main : "cat" == "cat"
+main : 2 == 2
   equal(__)
 ```
 
-Save this file as `CatIsCat.fm` and run:
+Save this file as `TwoIsTwo.fm` and run:
 
 ```haskell
-$ fm -t file/cat_is_cat
-Equal(String, cons(Bits; 1100011b, cons(Bits; 1100001b, cons(Bits; 1110100b, nil(Bits;)))), cons(Bits; 1100011b, cons(Bits; 1100001b, cons(Bits; 1110100b, nil(Bits;)))))
+$ fm -t file/two_is_two
+Equal(Number, 2, 2)
 ```
 
-**Note: We currently have pretty-printing for `String` (which is implemented as
-a list of codepoints) at term level, but not at the type-level, when we do, this
-message should look like:***
-
-```haskell
-Equal(String, "cat", "cat") ✔
-```
-
-This means Formality is convinced that "cat" is equal to "cat". Of course, that
+This means Formality is convinced that 2 is equal to 2. Of course, that
 is obvious, but it could be something much more important such as
 `OnlyOwnerCanMakeWithdrawal(owner, contract) ✔`. How proofs can be used to make
 your programs safer will be explored later. Let's now go through all of
@@ -266,16 +263,17 @@ Primitives
 Type
 ----
 
-A type is some collection of values.The `:` symbol means "has type/is of type":
+A type is some collection of values. The `:` symbol means "has type/is of type":
 
 ```javascript
 "cat" : String
 true : Bool
 1n : Nat
+7 : Number
 ```
 
-This means "`"cat"` is a `String`, `true` is a `Bool` (boolean) and `1n` is a
-`Nat` (natural number).
+This means "`"cat"` is a `String`, `true` is a `Bool` (boolean), `1n` is a
+`Nat` (natural number) and `7` is a `Number` (native double).
 
 Lambda
 ------
@@ -442,6 +440,75 @@ $ fm -d EraseWorld/no_eraser
 (T,x) => x
 ```
 
+Number
+------
+
+A native number, encoded as a 64-bit value. It can be written in decimal, hexadecimal or binary:
+
+```haskell
+number_0 : Number
+  1900
+
+number_1 : Number
+  0x76C
+
+number_2 : Number
+  0b11101101100
+
+number_3 : Number
+  12.3456
+
+```
+
+The numeric operations are:
+
+name | syntax | javascript equivalent
+--- | --- | ---
+addition | `x .+. y` | `x + y`
+subtraction | `x .-. y` | `x - y`
+multiplication | `x .*. y` | `x * y`
+division | `x ./. y` | `x / y`
+modulus | `x .%. y` | `x % y`
+exponentiation | `x .**. y` | `x ** y`
+bitwise-and | `x .&. y` | `x & y`
+bitwise-or | `x .\|. y` | `x \| y`
+bitwise-xor | `x .^. y` | `x ^ y`
+bitwise-not | `.~.(y)` | `~y`
+bitwise-right-shift | `x .>>>. y` | `x >>> y`
+bitwise-left-shift | `x .<<. y` | `x << y`
+greater-than | `x .>. y` | `x > y ? 1 : 0`
+less-than | `x .<. y` | `x < y ? 1 : 0`
+equals | `x .==. y` | `x === y ? 1 : 0`
+
+There is no operator precedence: parenthesis are always placed on the right.
+That means `3 .*. 10 .+. 1` is parsed as `3 .*. (10 .+. 1)`. If you want the
+multiplication to occur first, you must be explicit:
+
+```haskell
+main : Number
+  (3 .*. 10) .+. 1
+```
+
+There is also `if`, which allows branching with a `Number` condition.
+
+syntax | description
+--- | ---
+`if n then a else b` | If `n` is `0`, evaluates to `b`, else, evaluates to `a`
+
+Usage is straightforward:
+
+```haskell
+import Base#
+
+main : Output
+  let age = 30
+
+  if age .<. 18 then
+    print("Boring teenager.")
+  else
+    print("Respect your elders!")
+```
+
 Let
 ---
 
@@ -485,7 +552,7 @@ which allow us to implement inductive datatypes with λ-encodings:
 | `use(t)`          | Consumes self-type `t`, so its type can access its value |
 
 Self Types allow a type to access *its own value*. This allows us to do us to
-encode inductive datatypes with lambdas, as will be explained later
+encode inductive datatypes with lambdas, as will be explained later.
 
 Annotation
 ----------
@@ -502,36 +569,6 @@ This is useful when the type-checker can't infer the type of an expression.
 main : String
   (((x) => x) :: String -> String)("Hello, world!")
 ```
-
-Nontermination
---------------
-
-Nonterminating code is compatible with the fast-affine runtime, but can't be
-compiled to interaction nets. Nonterminating expressions also can't be
-interpreted as mathematical proofs, as they can be used to create paradoxes,
-allowing you to inhabit a type with a loop:
-
-```haskell
--- LoopEmpty.fm
-main : Empty
-  main
-```
-
-```haskell
-$ fm -t LoopEmpty
-Empty ✔
-```
-
-These paradoxes can be detected via a termination checker (**In development**).
-
-One powerful aspect of Formality is that you can still prove theorems about
-nonterminating programs, as long as the proofs themselves are terminating. This
-idea was first explored in ["A dependently typed language with
-nontermination"](https://www.cis.upenn.edu/~sweirich/papers/sjoberg-thesis.pdf).
-Nonterminating terms are also very useful when you have a function argument
-that will only be used inside a type such as the `Nat` index of a Vector, and
-they also play an important role in the implementation of inductive datatypes
-with self-types.
 
 Hole
 ----
