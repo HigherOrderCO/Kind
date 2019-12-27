@@ -175,7 +175,7 @@ and output `"Hello, world!"`. If your term is elementary, try:
 ```haskell
 $ fm -o HelloWorld
 "Hello, world!"
-{"loops":20934,"rewrites":1017,"max_len":615}
+{"loops":1953,"rewrites":146,"max_len":161}
 ```
 
 It evaluates your term using [interaction
@@ -198,9 +198,10 @@ Type-Checking
 
 To type-check a term, type:
 
-```haskell
-fm -t HelloWorld
-String ✔
+```shell
+$ fm -t HelloWorld
+String ✔ 𝒜 ℰ ℋ
+Note: 𝒜 = affine, ℰ = elementary, ℋ = halting
 ```
 
 This will check if the program's type is correct. If the type is incorrect, it
@@ -209,7 +210,7 @@ will print an error message instead.
 For example, if you change `"Hello, world!"` to `true`, you
 get:
 
-```haskell
+```shell
 [ERROR]
 Type mismatch.
 - Found type... Bool
@@ -245,7 +246,7 @@ main : 2 == 2
 Save this file as `TwoIsTwo.fm` and run:
 
 ```haskell
-$ fm -t file/two_is_two
+$ fm -t TwoIsTwo/main
 Equal(Number, 2, 2)
 ```
 
@@ -275,7 +276,7 @@ the following library to JavaScript:
 twice(n: Number)
   n .*. 2
 
-length(x: Number, y: Number) : Number
+vector_size(x: Number, y: Number) : Number
   ((x .**. 2) .+. (y .**. 2)) .**. 0.5
 
 sum(n : Number) : Number
@@ -296,11 +297,11 @@ This will output:
 ```javascript
 (function(){
   var _lib$twice = (_0=>(_0*2));
-  var _lib$length = (_0=>(_1=>(((_0**2)+(_1**2))**0.5)));
+  var _lib$vector_size = (_0=>(_1=>(((_0**2)+(_1**2))**0.5)));
   var _lib$sum = (_0=>((_0===0? 1 : 0)?0:(_0+_lib$sum((_0-1)))));
   return {
     'twice':_lib$twice,
-    'length':_lib$length,
+    'vector_size':_lib$vector_size,
     'sum':_lib$sum
   };
 })()
@@ -309,10 +310,10 @@ This will output:
 Export that function as a JS module, `lib.js`, and use it as:
 
 ```javascript
-const {twice, length, sum} = require("./lib.js");
+const {twice, vector_size, sum} = require("./lib.js");
 
 console.log("Double of 2:", twice(2));
-console.log("Length of the [3,4] vector:", length(3)(4));
+console.log("Length of the [3,4] vector:", vector_size(3)(4));
 console.log("Summation from 0 til 10 is:", sum(10));
 ```
 
@@ -496,7 +497,7 @@ true : Bool
 7 : Number
 ```
 
-This means "`"cat"` is a `String`, `true` is a `Bool` (boolean), `1n` is a
+This means `"cat"` is a `String`, `true` is a `Bool` (boolean), `1n` is a
 `Nat` (natural number) and `7` is a `Number` (native double).
 
 Lambda
@@ -510,7 +511,7 @@ Lambda
 
 The lambda (also called function) is the only computational primitive of
 Formality. Everything, from booleans, to list, to complex algorithms, data
-structures and mathematical proofs are compiled to lambdas. Technically,
+structures, and mathematical proofs are compiled to lambdas. Technically,
 Formality's lambdas are affine lambdas, so variables bound in a lambda can be
 used at most once (this is not as restrictive as it might sound at first).
 
@@ -538,9 +539,10 @@ Try type-checking and running:
 
 ```haskell
 $ fm -t SameWorld
-String ✔
+String ✔ 𝒜 ℰ ℋ
+Note: 𝒜 = affine, ℰ = elementary, ℋ = halting
 $ fm -t SameWorld/same
-(_ : String) -> String ✔
+(_ : String) -> String ✔ 𝒜 ℰ ℋ
 $ fm -d SameWorld
 "Hello, World"
 ```
@@ -604,7 +606,7 @@ main
   ((x) => x)("Hello, world!")
 ```
 
-```haskell
+```shell
 $ fm -t UntypedWorld
 Can't infer non-annotated lambda.
 - When checking (x) => x
@@ -636,11 +638,13 @@ main : String
   eraser(String; "Hello, world!")
 ```
 
-```haskell
+```shell
 $ fm -t EraseWorld
-String ✔
+String ✔ 𝒜 ℰ ℋ
+Note: 𝒜 = affine, ℰ = elementary, ℋ = halting
 $ fm -t EraseWorld/eraser
-(T : Type; x : T) -> T ✔
+(T : Type; x : T) -> T ✔ 𝒜 ℰ ℋ
+Note: 𝒜 = affine, ℰ = elementary, ℋ = halting
 ```
 
 The first argument disappears from the runtime
@@ -775,7 +779,7 @@ which allow us to implement inductive datatypes with λ-encodings:
 | `new(T) t`        | Constructs an instance of a `T` with value `t`           |
 | `use(t)`          | Consumes self-type `t`, so its type can access its value |
 
-Self Types allow a type to access *its own value*. This allows us to do us to
+Self Types allow a type to access *its own value*. This allows us to do
 encode inductive datatypes with lambdas, as will be explained later.
 
 Annotation
@@ -822,7 +826,7 @@ Found hole: 'a'.
 - With context:
 - x : Bool
 
-(x : Bool) -> Bool ✔
+(x : Bool) -> Bool ✔ 𝒜 ℰ ℋ
 ```
 
 This tells you that, on the location of the hole, you should have a `Bool`.
@@ -851,7 +855,7 @@ Log
 ------
 
 Another handy feature is `log(x)`. When running a program, it will print the
-normal form of `x`, similarly to JavaScript's `console.log` and haskell's `print`,
+normal form of `x`, similarly to JavaScript's `console.log` and Haskell's `print`,
 but for anything (not only strings). When type-checking a program, it tells you
 the normal-form and the type of `x`. This is useful when you want to know what
 type an expression would have inside certain context. For example:
@@ -867,7 +871,7 @@ main(f : Bool -> Nat) : Nat
 
 Type-checking the program above will cause Formality to output:
 
-```haskell
+```shell
 $ fm -t Log
 [LOG]
 Term: f(true)
@@ -875,10 +879,12 @@ Type: Nat
 
 Found hole: 'a'.
 - With goal... Nat
+- Couldn't find a solution.
 - With context:
-- f : (:Bool) -> Nat
-```
+- f : (_ : Bool) -> Nat
 
+(f : (_ : Bool) -> Nat) -> Nat ✔ 𝒜 ℰ ℋ
+```
 
 This tells you that, inside the body of `main`, the type of `f(true)` is `Nat`.
 Since it coincides with the goal, you can complete the program above with it:
@@ -954,8 +960,8 @@ file. That prevents the infamous "dependency hell", and is useful for many
 applications.
 
 Right now, global imports are uploaded to our servers, but, in the future,
-they'll upload files to decentralized storage such as IPFS/Swarm, and given a
-unique name using the Ethereum Name Service.
+they'll upload files to decentralized storage such as [IPFS](https://ipfs.io)/[Swarm](https://ethersphere.github.io/swarm-home/), and given a
+unique name using the [Ethereum Name Service](https://ens.domains).
 
 Datatypes
 =========
@@ -997,7 +1003,7 @@ Formality, we call those values **constructors**. It then pattern-matches a
 suit and outputs a different sentence depending on it. Notice that on this
 `case` expression, we annotated the return type, `: String`. That's not
 always necessary, but it is very important for theorem proving. The annotated
-type of a case expression is called its **motive**.
+type of a case expression is called its [**motive**](#motive).
 
 Fields
 ------
@@ -1023,7 +1029,7 @@ main : String
 As you can see, fields can be accessed inside `case` expressions. Notice that
 `p.name` is not a field accessor, but just a single variable: the `.` is part
 of its name. When Formality doesn't know the name of the matched value, you
-must must explicitly name it using the `as` keyword:
+must explicitly name it using the `as` keyword:
 
 ```haskell
 main(p : Person) : Nat
@@ -1035,7 +1041,7 @@ Move
 ----
 
 Since Formality expressions can be incompatible with some reductions strategies
-if they're not affine, sometimes you don't want to  an argument more than once.
+if they're not affine, sometimes you don't want to use an argument more than once.
 
 For example, the function below uses `b` in different branches:
 
@@ -1132,7 +1138,7 @@ different contained types.
 -- Polymorphism.fm
 import Base#
 
--- Imported from Base
+--  Imported from Base
 -- T Pair<A, B>
 -- | pair(fst : A, snd : B)
 
@@ -1155,10 +1161,10 @@ One of the most popular polymorphic types is the linked `List`:
 ```haskell
 import Base#
 -- List123.fm
-// Imported from Base
-// T List<A>
-// | nil
-// | cons(head : A, tail : List(A))
+-- Imported from Base
+-- T List<A>
+-- | nil
+-- | cons(head : A, tail : List(A))
 
 main : List(Nat)
   cons(_ 1n, cons(_ 2n, cons(_ 3n, nil(_))))
@@ -1231,8 +1237,8 @@ You can't call `half` on odd values because you can't construct an `IsEven` for
 them. An good exercise might be to implement a proof of `Equal(Nat,
 double(half(n, ie;)), n)`. Why this is possible for `half`, but not for `div2`?
 
-Another example is the Vector, which is a `List` with a statically known length.
-Every time you add an element to a Vector, the length on its type increases:
+Another example is the `Vector`, which is a `List` with a statically known length.
+Every time you add an element to a `Vector`, the length on its type increases:
 
 ```haskell
 -- Vector.fm
@@ -1305,7 +1311,7 @@ develop mathematical proofs in Formality. Let's go through some examples.
 Formality's base libraries include a type for equality proofs called `Equal`.
 For example, `Equal(Nat, 2n, 2n)` is the statement that `2` is equal `2`. It
 is not a proof: you can write `Equal(Nat, 2n, 3n)`, which is just the
-**statement** that `2` is equal to `3`.  To prove an equality, you must use
+**statement** that `2` is equal to `3`. To prove an equality, you must use
 `equal(A; x;)`, which, for any `x : A`, proves `Equal(A, x, x)`. In other
 words, `equal` is a proof that every value is equal to itself. As such, we can
 prove that `true` is equal to `true` like this:
@@ -1441,7 +1447,7 @@ you with that. For example:
   allows you to rewrite provably equal expressions inside types.
 
 
-Those building blocks allow you to prove more complicate absurdities  by
+Those building blocks allow you to prove more complicate absurdities by
 manipulating equations with higher level functions. For example, here is a
 proof that `"dogs"` and `"horses"` are different strings:
 
@@ -1593,15 +1599,14 @@ function mul2(n) {
   if (n <= 0) {
     return 0;
   } else {
-    if (n == 200) { return 398 }
-    else { return 2 + mul2(n - 1);
-    }
+    if (n == 200) { return 398; }
+    else { return 2 + mul2(n - 1); }
   }
 }
 ```
 
 In this example, `mul2(200)` returns `398`, which is different
-from `200 + 200`. The the implementation is incorrect, despite all the previous
+from `200 + 200`. The implementation is incorrect, despite all the previous
 tests passing!
 
 With formal proofs, we can write tests too:
@@ -1646,18 +1651,18 @@ convince Formality that `mul2(n) == add(n, n)` holds for every `n`,
 not just a few. To do it, we can start by type-checking the program above and
 seeing what Formality has to say:
 
-```haskell
+```shell
 Found hole: 'a'.
 - With goal... Equal(Nat, mul2(n), add(n, n))
 - With context:
 - n : Nat
 
-(n : Nat) -> Equal(Nat, mul2(n), add(n, n)) ✔
+(n : Nat) -> Equal(Nat, mul2(n), add(n, n)) ✔ 𝒜 ℰ ℋ
 ```
 
 This is telling us that our theorem is correct as long as we can replace the
 hole `?a` with a proof that `mul2(n) == add(n, n)`. In other words,
-Formality is asking us to to prove what we claimed to be true. Let's try to do
+Formality is asking us to prove what we claimed to be true. Let's try to do
 it with a `equal`:
 
 ```haskell
@@ -1667,7 +1672,7 @@ worksForAllN(n : Nat) : mul2(n) == add(n, n)
 
 This time, it doesn't work, and we get the following error:
 
-```haskell
+```shell
 Type mismatch.
 - Found type... Equal(Nat, add(n, n), add(n, n))
 - Instead of... Equal(Nat, mul2(n), add(n, n))
@@ -1706,9 +1711,9 @@ Found hole: 'b'.
 
 Notice that, now, we have two holes, one for each possible value of `n` (`zero`
 or `succ(n.pred)`). The first hole is now asking a proof that `Equal(Nat,
-mul2(zero), add(zero, zero))`.  See how it was specialized to the value of `n`
-on the branch?  That's very important, because now both sides evaluate to
-`zero`.  This allows us to prove that case with a `equal`!
+mul2(zero), add(zero, zero))`. See how it was specialized to the value of `n`
+on the branch? That's very important, because now both sides evaluate to
+`zero`. This allows us to prove that case with a `equal`!
 
 ```haskell
 worksForAllN(n : Nat) : mul2(n) == add(n, n)
@@ -1752,7 +1757,7 @@ worksForAllN(n : Nat) : mul2(n) == add(n, n)
 
 This outputs:
 
-```haskell
+```shell
 [LOG]
 Term: worksForAllN(n.pred)
 Type: Equal(Nat, mul2(n.pred), add(n.pred, n.pred))
@@ -1855,9 +1860,7 @@ An interesting point to note is that proofs are often much longer than
 theorems. In this example, the theorem had just one line, but the proof had 8.
 Proofs are laborious to write and require a set of advanced programming skills.
 But, once they're done, they're undeniably correct (assuming the proof
-terminates). This is extremely
-valuable. For example, think of a huge smart-contract: its code could be big
-and complex, but, as long as its developers publish proofs of a few essential
+terminates). This is extremely valuable. For example, think of a huge smart-contract: its code could be big and complex, but, as long as its developers publish proofs of a few essential
 properties, users can trust it won't go wrong. In a way, proofs can be seen as
 trustless correctness assets, in the sense, you can use them to convince people
 that your code is correct without needing them to trust you.
