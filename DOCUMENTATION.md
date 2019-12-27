@@ -170,21 +170,7 @@ $ fm -d HelloWorld/main
 ```
 
 This will evaluate `main` using an interpreter in debug mode
-and output `"Hello, world!"`. If your term is affine, try:
-
-```haskell
-$ fm -f HelloWorld
-"Hello, world!"
-{"beta":114,"copy":1294}
-```
-
-to evaluate it with our fast runtime, but you'll lose
-information like variable names and logs. Affine terms are
-those that never use a lambda-bound variable more than once.
-The type-checker will inform you if your term is allowed.
-
-Formality also has an optimal interaction net runtime that
-you can run with:
+and output `"Hello, world!"`. If your term is elementary, try:
 
 ```haskell
 $ fm -o HelloWorld
@@ -195,11 +181,17 @@ $ fm -o HelloWorld
 It evaluates your term using [interaction
 combinators](https://arxiv.org/pdf/0906.0380.pdf), making it
 suitable for innovative optimizations such as runtime
-fusion, as explained on [this post](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07).
+fusion, as explained on [this
+post](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07).
 The optimal evaluator can only be used on elementary terms,
 that is, terms that only use lambda-bound variable more than
 once in a controlled manner. The type-checker will inform
-you if that's the case.
+you if that's the case. If your terms is affine, i.e.,
+doesn't use lambda-bound variables more than once at all,
+you can use the fast evaluator with `-f`. It is like the
+optimal evaluator, but much faster in programs that don't
+use a lot of sharing (variable duplication). The fast
+evaluator doesn't support numbers (thus strings) currently.
 
 Type-Checking
 -------------
@@ -215,7 +207,8 @@ Note: 𝒜 = affine, ℰ = elementary, ℋ = halting
 This will check if the program's type is correct. If the type is incorrect, it
 will print an error message instead.
 
-For example, if you change `"Hello, world!"` to `true`:
+For example, if you change `"Hello, world!"` to `true`, you
+get:
 
 ```shell
 [ERROR]
@@ -235,12 +228,12 @@ Because `true` is a `Bool`, but the `main` expression expects
 a `String`.
 
 Type-checking not only gives you a guarantee that your
-program won't runtime errors or segfault, but, since
-Formality has an expressive type-system, it can give you
-arbitrarily complex statical assurances about your program's
-behavior. In fact, Formality duals as a proof language, in
-the sense you can write and prove mathematical theorems
-using its type system. For example, this proves `2 == 2`:
+program won't have runtime errors or segfault, but, since
+Formality has an expressive type-system, it can also give
+you arbitrarily complex statical assurances about your
+program's behavior. In fact, Formality can be used to write
+and prove mathematical theorems through its type system. For
+example, this proves `2 == 2`:
 
 ```haskell
 -- TwoIsTwo.fm
@@ -301,7 +294,7 @@ fm -J lib/@
 
 This will output:
 
-```
+```javascript
 (function(){
   var _lib$twice = (_0=>(_0*2));
   var _lib$length = (_0=>(_1=>(((_0**2)+(_1**2))**0.5)));
@@ -316,7 +309,7 @@ This will output:
 
 Export that function as a JS module, `lib.js`, and use it as:
 
-```
+```javascript
 const {twice, length, sum} = require("./lib.js");
 
 console.log("Double of 2:", twice(2));
@@ -325,7 +318,7 @@ console.log("Summation from 0 til 10 is:", sum(10));
 ```
 
 Note that the default compiler uses native functions. The
-advantage is that this makes interop extremelly easy. The
+advantage is that this makes interop very easy. The
 disadvantage is that it relies on the performance of those
 functions. Alternatively, you could load the Formality
 program in an interaction net (or other) runtime inside the
@@ -334,7 +327,7 @@ target language.
 You can also compile a Formality program to Ethereum. Save
 the following program as `example.fm`:
 
-```
+```haskell
 import Base#
 
 main
@@ -382,10 +375,10 @@ approach is being used to develop
 online game. Another way is to model your effects using a
 datatype (this will be explained later) and then write an
 interpreter for it. This is what Haskell does by default
-with its `IO` type. Formality's base-lib features a default
-`IO` type, with a standard interpreter. For example:
+with its `IO` type. Formality's base-lib features a similar
+one. For example:
 
-```javascript
+```haskell
 import Base#
 
 main : IO(Unit)
@@ -401,7 +394,7 @@ Save the program above as `main.fm`. If you run it with `fm
 
 Which isn't what you expected. That's because `-d` evaluates
 a pure program. In this case, this pure program is a
-"recipe" for the evaluation of an effectful program. To run
+"recipe" for the evaluation of an effectful one. To run
 it with the effects, type `fm -r main/main` instead. This
 will output:
 
@@ -410,10 +403,10 @@ Hello, world!
 ```
 
 The fun thing about IO is that it allows you to interact
-with the external world and get an user input. For example,
+with the external world and get user inputs. For example,
 this program:
 
-```javascript
+```haskell
 import Base#
 
 main : IO(Unit)
@@ -423,7 +416,7 @@ main : IO(Unit)
   }
 ```
 
-Asks the user name and then greets him. This program:
+Asks the user's name and then greets him. This program:
 
 ```javascript
 import Base#
@@ -433,14 +426,14 @@ main : IO(Unit)
     print(number_to_string(10, i))
 ```
 
-Prints all numbers from 0 til 100. And this program:
+Prints all numbers from `0` til `100`. And this program:
 
-```javascript
+```haskell
 import Base#
 
 program(count : Number) : IO(Unit)
   do {
-    // Prints instructions
+    -- Prints instructions
     print("Commands:")
     print("- [i] increments by 1")
     print("- [d] decreases by 1")
@@ -450,23 +443,23 @@ program(count : Number) : IO(Unit)
     print(concat(_ "Count: ", number_to_string(10, count)))
     print("")
 
-    // Gets the user command
+    -- Gets the user command
     var cmd = question("Enter your command:")
     let key = head(_ 0, cmd)
 
-    // Increases
+    -- Increases
     if key .==. 'i' then
       program(count .+. 1)
 
-    // Decreases
+    -- Decreases
     else if key .==. 'd' then
       program(count .-. 1)
 
-    // Reset
+    -- Reset
     else if key .==. 'r' then
       program(0)
 
-    // Quits
+    -- Quits
     else do {
       print("Bye!")
       return unit

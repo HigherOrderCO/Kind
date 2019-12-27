@@ -1151,7 +1151,7 @@ const typecheck = (name: string, expect: Term | null, defs: Defs = {}, opts: Typ
   };
 
   const display_normal = (term, depth) => {
-    return reduce(term, {}, { holes, weak: false });
+    return reduce(term, {}, { holes, weak: false, depth });
   };
 
   const subst_holes = (term, depth) => {
