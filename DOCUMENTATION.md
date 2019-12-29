@@ -34,11 +34,6 @@ Table of contents
     - [Formality Net](#formality-net)
     - [Compilation](#net-compilation)
 
-**Note: If you like learning by example, please ignore this docs and check
-[Base.fm](https://github.com/moonad/Base.fm); the code there is very
-representative and, if you already know FP, browsing it is the fastest way to
-pick up the language.**
-
 Motivation
 ==========
 
