@@ -753,7 +753,7 @@ Usage is straightforward:
 ```haskell
 import Base#
 
-main : Output
+main : IO(Unit)
   let age = 30
 
   if age .<. 18 then
@@ -968,7 +968,7 @@ If multiple imports have conflicting names, you can disambiguate with
 import Base#
 import Answers as A
 
-main : Output
+main : String
   A/everything
 ```
 
