@@ -188,12 +188,13 @@ post](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorit
 The optimal evaluator can only be used on elementary terms,
 that is, terms that only use lambda-bound variable more than
 once in a controlled manner. The type-checker will inform
-you if that's the case. If your terms is affine, i.e.,
-doesn't use lambda-bound variables more than once at all,
-you can use the fast evaluator with `-f`. It is like the
-optimal evaluator, but much faster in programs that don't
-use a lot of sharing (variable duplication). The fast
-evaluator doesn't support numbers (thus strings) currently.
+you if that's the case by appending a `ℰ` to its type. If
+your terms is affine (`𝒜`), i.e., doesn't use lambda-bound
+variables more than once at all, you can use the fast
+evaluator with `-f`. It is like the optimal evaluator, but
+much faster in programs that don't use a lot of sharing
+(variable duplication). The fast evaluator doesn't support
+numbers (thus strings) currently.
 
 Type-Checking
 -------------
@@ -203,7 +204,6 @@ To type-check a term, type:
 ```shell
 $ fm -t HelloWorld
 String ✔ 𝒜 ℰ ℋ
-Note: 𝒜 = affine, ℰ = elementary, ℋ = halting
 ```
 
 This will check if the program's type is correct. If the type is incorrect, it
@@ -256,9 +256,9 @@ The fact this program type-checks means Formality
 mechanically checked a mathematical proof that 2 is equal to
 2. Note that proofs can only be trusted if they are
 terminating; otherwise, one could derive logical paradoxes.
-The type-checker will let you know if that is the case, but
-it might not be always able to tell due to the halting
-problem.
+The type-checker will let you know if that is the case by
+appending a `ℋ` to its type, but it might not be always able
+to tell due to the halting problem.
 
 Of course, proving that `2 == 2` is not interesting, but one
 could prove more important theorems such as
@@ -511,11 +511,10 @@ Lambda
 | `(x, y, ...) => body `     | Lambda with binding `x`, `y` over `body`        |
 | `f(x, y, ...)`             | Applies the function `f` to  arguments `x`, `y` |
 
-The lambda (also called function) is the only computational primitive of
-Formality. Everything, from booleans, to list, to complex algorithms, data
-structures, and mathematical proofs are compiled to lambdas. Technically,
-Formality's lambdas are affine lambdas, so variables bound in a lambda can be
-used at most once (this is not as restrictive as it might sound at first).
+Excluding numbers, lambdas (also called function) are the
+only computational primitive of Formality. Everything, from
+booleans, to list, to complex algorithms, data structures,
+and mathematical proofs are compiled to lambdas.
 
 As in other functional languages, lambdas are curried. `(x, y, z, ...) => body`
 is the same as `(x) => (y) => (z) => ...  body`, and `f(x, y, z)` is the same as
@@ -542,9 +541,10 @@ Try type-checking and running:
 ```haskell
 $ fm -t SameWorld
 String ✔ 𝒜 ℰ ℋ
-Note: 𝒜 = affine, ℰ = elementary, ℋ = halting
+
 $ fm -t SameWorld/same
 (_ : String) -> String ✔ 𝒜 ℰ ℋ
+
 $ fm -d SameWorld
 "Hello, World"
 ```
@@ -643,10 +643,9 @@ main : String
 ```shell
 $ fm -t EraseWorld
 String ✔ 𝒜 ℰ ℋ
-Note: 𝒜 = affine, ℰ = elementary, ℋ = halting
+
 $ fm -t EraseWorld/eraser
 (T : Type; x : T) -> T ✔ 𝒜 ℰ ℋ
-Note: 𝒜 = affine, ℰ = elementary, ℋ = halting
 ```
 
 The first argument disappears from the runtime
@@ -1121,14 +1120,28 @@ mul2(n : Nat) : Nat
   : Nat
 ```
 
-**Note: recursive occurrences must be applied to structurally smaller
-values, in order to prevent nontermination. This will be detected via the
-upcoming termination checker, but is currently left up to the programmer**
+Note: when writing mathematical proofs, you must make sure
+your program terminates, otherwise, one can derive logical
+paradoxes. Right now, Formality's termination checker is
+very limited, but it will be improved.
 
+While you can use recursive calls as much as you want, it is
+wise to treat them as normal variables and use `+` to pass
+them to branches. This can be a major optimization in some
+cases. For example, when compiling to JavaScript, case-of
+expressions become raw function applications (`val(case_a,
+case_b, case_c)`). Since JS isn't lazy, every branch is
+evaluated. If you use recursion on each branch, this will
+make your JS program exponential. Using `+` prevents that:
 
-While you can use recursive calls as much as you want, it is wise to treat them
-as normal variables and use `move` to pass them to branches. This can be a major
-optimization in some cases.
+```haskell
+mul2(n : Nat) : Nat
+  case n
+  + mul2 : Nat -> Nat
+  | zero => zero
+  | succ => succ(succ(mul2(n.pred)))
+  : Nat
+```
 
 Polymorphism
 ------------

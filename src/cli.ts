@@ -163,7 +163,6 @@ export async function run() {
         }
       }
     });
-    console.log("\x1b[2mNote: 𝒜 = affine, ℰ = elementary, ℋ = halting\x1b[0m");
   } else {
     console.log("Command not found. Type `fm` for help.");
   }
