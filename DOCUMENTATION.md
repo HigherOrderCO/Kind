@@ -46,18 +46,18 @@ efficient. To accomplish that goal, we rely on several design philosophies:
 An accessible syntax
 --------------------
 
-Proof languages often have complex syntaxes that make an already difficult
-subject even more inaccessible. Coq, for example,
-uses 3 different languages with completely different rules and tons of reserved
-words and special tokens.  Agda is clean and beautiful, but relies heavily on
-unicode and agda-mode, making it essentially unusable outside of EMACs, which is
-arguably a “hardcore” editor.
-
-Formality aims to keep a simple, familiar syntax that is much closer to common
-languages like Python and JavaScript. A regular TypeScript developer should, for
-example, be able to read our [natural
-number](https://github.com/moonad/Base.fm/blob/master/Nat.fm) formalization
-without prior knowledge.
+Proof languages often have complex syntaxes that make an
+already difficult subject even more inaccessible. Coq, for
+example, uses 3 different languages with completely
+different rules and tons of reserved words and special
+tokens.  Agda is clean and beautiful, but relies heavily on
+unicode and agda-mode, making it essentially unusable
+outside of EMACs, which is arguably a “hardcore” editor.
+Formality aims to keep a simple, familiar syntax that is
+much closer to common languages like Python and JavaScript.
+A regular TypeScript developer should, for example, be able
+to read our [natural number](https://github.com/moonad/Base.fm/blob/master/Nat.fm)
+formalization without prior knowledge.
 
 Fast and portable "by design"
 -----------------------------
@@ -70,7 +70,7 @@ run without garbage-collection. It has a strongly confluent interaction-net
 runtime, allowing it to be evaluated in massively parallel architectures. It
 doesn’t require De Bruijn bookkeeping, making it the fastest “closure chunker”
 around. It is lazy, it has a clear cost model for blockchains, it has a small
-([435 LOC](https://github.com/moonad/Formality/blob/master/src/fm-runtime.js))
+([600 LOC](https://github.com/moonad/Formality/blob/master/src/fm-net.ts))
 runtime that can easily be ported to multiple platforms. Right now, Formality’s
 compiler isn’t as mature as the ones found in decades-old languages, but it has
 lots of room for improvement.
@@ -78,12 +78,29 @@ lots of room for improvement.
 An elegant underlying Type Theory
 ---------------------------------
 
-Formality's unique approach to termination is conjectured to allow it to have
-elegant, powerful type-level features that would be otherwise impossible
-without causing logical inconsistencies. For example, instead of built-in
-datatypes, we rely on [Self
-Types](https://www.semanticscholar.org/paper/Self-Types-for-Dependently-Typed-Lambda-Encodings-Fu-Stump/652f673e13b889e0fd7adbd480c2fdf290621f66),
-which allows us to implement inductive families with native lambdas.
+Formality's unique approach to termination is conjectured to
+allow it to have elegant, powerful type-level features that
+would be otherwise impossible without causing logical
+inconsistencies. For example, instead of a complex system of
+built-in datatypes, we rely on [Self Types](https://www.semanticscholar.org/paper/Self-Types-for-Dependently-Typed-Lambda-Encodings-Fu-Stump/652f673e13b889e0fd7adbd480c2fdf290621f66),
+which allows us to implement inductive families with native
+lambdas. That makes the core theory an order of magnitude
+simpler, allowing for a short standard and encouraging
+independent implementations.
+
+```
+Γ |- A:Type   Γ,x:A |- B:Type              Γ, s : ${x}A |- A:Type
+------------------------------ λ-type      ---------------------- $-type
+Γ |- (x:A)->B : Type                       Γ |- ${x}A : Type
+                                            
+Γ |- A:Type   Γ,x:A |- t:B                 Γ |- t:A[x<-t]   Γ |- ${x}A : Type
+--------------------------- λ-intr         ---------------------------------- $-intr
+Γ |- (x:A)=>t : (x:A)->B                   Γ |- new(${x}A) t : ${x}A
+                                            
+Γ |- f : (x:A)->B    Γ |- a:A              Γ |- t : ${x} A
+----------------------------- λ-elim       ----------------------- $-elim
+Γ |- f(a) : B[x<-a]                        Γ |- use(t) : A[x <- t]
+```
 
 An optimal high-order evaluator
 -------------------------------
@@ -93,8 +110,7 @@ Clojure's, JavaScript's and other closure implementations. This makes it
 extremely fast at evaluating high-order programs, combining a Haskell-like
 high-level feel with a Rust-like low-level performance curve. For example,
 Haskell's stream fusion, a hard-coded, important optimization, happens
-naturally, [at
-runtime](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07),
+naturally, [at runtime](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07),
 on Formality. This also allows us to explore new ways to develop algorithms,
 such as this "impossibly efficient" [exp-mod
 implementation](https://medium.com/@maiavictor/calling-a-function-a-googol-times-53933c072e3a).
@@ -170,7 +186,7 @@ This will evaluate `main` using an interpreter in debug mode
 and output `"Hello, world!"`. If your term is elementary, try:
 
 ```haskell
-$ fm -o HelloWorld
+$ fm -o HelloWorld/main
 "Hello, world!"
 {"loops":1953,"rewrites":146,"max_len":161}
 ```
@@ -179,17 +195,23 @@ It evaluates your term using [interaction
 combinators](https://arxiv.org/pdf/0906.0380.pdf), making it
 suitable for innovative optimizations such as runtime
 fusion, as explained on [this
-post](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07).
-The optimal evaluator can only be used on elementary terms,
-that is, terms that only use lambda-bound variable more than
-once in a controlled manner. The type-checker will inform
-you if that's the case by appending a `ℰ` to its type. If
-your terms is affine (`𝒜`), i.e., doesn't use lambda-bound
+post](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07),
+as well as not needing a garbage collector, being highly
+parallelizable, and having great computational
+characteristics in general. Elementary terms are those that
+only use lambda-bound variables more than once in a
+controlled manner. The type-checker will inform you if
+that's the case by appending a `ℰ` to its type. Right now,
+it might not always be able to tell; the elementarity
+checker is still ongoing work.
+
+If your terms is affine, i.e., doesn't use lambda-bound
 variables more than once at all, you can use the fast
 evaluator with `-f`. It is like the optimal evaluator, but
 much faster in programs that don't use a lot of sharing
-(variable duplication). The fast evaluator doesn't support
-numbers (thus strings) currently.
+(variable duplication). The type-checker will inform you if
+that's the case by appending a `𝒜` to its type. The fast
+evaluator doesn't support numbers (thus strings) currently.
 
 Type-Checking
 -------------
@@ -225,12 +247,12 @@ Because `true` is a `Bool`, but the `main` expression expects
 a `String`.
 
 Type-checking not only gives you a guarantee that your
-program won't have runtime errors or segfault, but, since
-Formality has an expressive type-system, it can also give
-you arbitrarily complex statical assurances about your
-program's behavior. In fact, Formality can be used to write
-and prove mathematical theorems through its type system. For
-example, this proves `2 == 2`:
+program won't have runtime errors, but, since Formality has
+an expressive type-system, it can also give you arbitrarily
+complex statical assurances about your program's behavior.
+In fact, Formality can be used to write and prove
+mathematical theorems through its type system. For example,
+this proves `2 == 2`:
 
 ```haskell
 -- TwoIsTwo.fm
@@ -244,7 +266,7 @@ Save this file as `TwoIsTwo.fm` and run:
 
 ```haskell
 $ fm -t TwoIsTwo/main
-Equal(Number, 2, 2)
+Equal(Number, 2, 2) ✔ 𝒜 ℰ ℋ
 ```
 
 The fact this program type-checks means Formality
@@ -253,13 +275,11 @@ mechanically checked a mathematical proof that 2 is equal to
 terminating; otherwise, one could derive logical paradoxes.
 The type-checker will let you know if that is the case by
 appending a `ℋ` to its type, but it might not be always able
-to tell due to the halting problem.
-
-Of course, proving that `2 == 2` is not interesting, but one
-could prove more important theorems such as
-`OnlyOwnerCanMakeWithdrawal(owner, contract) ✔`. How proofs
-can be used to make your programs safer will be explored
-later.
+to tell due to the halting problem. Of course, proving that
+`2 == 2` is not interesting, but one could prove more
+important theorems such as `CantBeDrained(contract) ✔`. How
+proofs can be used to make your programs safer will be
+explored later.
 
 Compilation
 -----------
@@ -319,7 +339,12 @@ advantage is that this makes interop very easy. The
 disadvantage is that it relies on the performance of those
 functions. Alternatively, you could load the Formality
 program in an interaction net (or other) runtime inside the
-target language.
+target language. In a future, we'll have compilers to
+several common languages such as Python, Ruby, Lua, Go. It
+is very easy to compile Formality to a new target, specially
+if it has high-order functions. 
+
+### Ethereum
 
 You can also compile a Formality program to Ethereum. Save
 the following program as `example.fm`:
@@ -346,9 +371,9 @@ This will output:
 Which is an EVM bytecode that evaluates the `main` function.
 When that program is done running, it leaves, on Ethereum's
 memory, a buffer representing the normal form of the input
-program. Since the EVM is a very resource-scarse
+program. Since the EVM is a very resource-scarce
 environment, this compiler uses our fastest runtime, which
-only accepts affine terms. Each function application
+only accepts affine terms (`𝒜`). Each function application
 (beta-reduction) uses roughly 200 gas, which is surprisingly
 low: only about 25x more than a native MULMOD operation! 
 
@@ -775,8 +800,12 @@ which allow us to implement inductive datatypes with λ-encodings:
 | `new(T) t`        | Constructs an instance of a `T` with value `t`           |
 | `use(t)`          | Consumes self-type `t`, so its type can access its value |
 
-Self Types allow a type to access *its own value*. This allows us to do
-encode inductive datatypes with lambdas, as will be explained later.
+Self Types allow a type to access *its own value*. This
+allows us to do encode inductive datatypes with lambdas.
+Since the language features syntax-sugars for those, you
+probably won't need to use self-types directly, but it gives
+us some interesting type-level powers, as will be explained
+later.
 
 Annotation
 ----------
@@ -793,6 +822,10 @@ This is useful when the type-checker can't infer the type of an expression.
 main : String
   (((x) => x) :: String -> String)("Hello, world!")
 ```
+
+Note that an inline annotation uses `::` instead of `:`.
+That's to distinguish it from top-level and case-expression
+annotations.
 
 Hole
 ----
@@ -1036,10 +1069,11 @@ main(p : Person) : Nat
 Move
 ----
 
-Since Formality expressions can be incompatible with some reductions strategies
-if they're not affine, sometimes you don't want to use an argument more than once.
-
-For example, the function below uses `b` in different branches:
+Since Formality expressions can be incompatible with some
+reductions strategies if they're not elementary (`ℰ`) or
+affine (`𝒜`), sometimes you don't want to use an argument
+more than once. For example, the function below uses `b` in
+different branches:
 
 ```haskell
 -- NonAffine.fm
@@ -1051,13 +1085,9 @@ main(a : Bool, b : Bool) : Bool
   | false => not(b)
 ```
 
-This risks divergence in the fast-affine and optimal runtimes and the
-stratification checker may complain about it:
-
-**Todo: add stratification checker error message**
-
-But, since we used `b` in two different branches, we don't need to copy it:
-we can instead tell Formality to move it to each branch with a `+`:
+But, since we used `b` in two different branches, we don't
+need to copy it. We can, instead, tell Formality to move it
+to each branch with a `+`:
 
 ```haskell
 -- Move.fm
@@ -1070,6 +1100,9 @@ main(a : Bool, b : Bool) : Bool
   | false => not(b)
 ```
 
+This additional line can turn several exponential programs
+into elementary or even affine.
+
 Under the hood, this just adds an extra lambda on each branch:
 
 ```haskell
@@ -1080,6 +1113,10 @@ main(a : Bool, b : Bool) : Bool
   | true  => (b : Bool) => b
   | false => (b : Bool) => not(b))(b)
 ```
+
+We recommend using `+` whenever possible, since it almost
+always improves the performance of your programs, even in
+compile targets that don't require affinity or elementarity.
 
 Recursion
 ---------
@@ -1996,7 +2033,7 @@ they can be inferred and write `(x0) => t` instead.  Our typing rules are:
 -- Self-Types
 
 Γ, s : ${x} A |- A : Type
------------------------ self type
+------------------------- self type
 Γ |- ${x} A : Type
 
 Γ, |- t : A[x <- t]    Γ |- ${x} A : Type
