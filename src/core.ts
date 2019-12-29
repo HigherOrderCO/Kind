@@ -852,6 +852,11 @@ const erase = (term: Term): Term => {
   }
 };
 
+// Erases a reference and then reduces it
+const normal = (name: string, defs, opts: any = {}) => {
+  return reduce(erase(Ref(name)), defs, opts);
+};
+
 type Defs = Record<string, Term>;
 
 // ::::::::::::::
@@ -1713,6 +1718,7 @@ export {
   equal,
   erase,
   reduce,
+  normal,
   shift,
   subst,
   subst_many,
