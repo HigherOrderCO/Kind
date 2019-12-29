@@ -53,7 +53,7 @@ export interface Parsed {
 // Converts a string to a term
 export const parse = async (
   code: string,
-  opts: Opts,
+  opts: Opts = {},
   root = true,
   loaded: Record<string, any> = {}
 ): Promise<Parsed> => {
