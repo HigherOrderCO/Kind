@@ -68,27 +68,12 @@ function compile(defs: core.Defs, name: string): CompileResult {
       case "Lam":
         rt_bind[rt_rfid[name]][depth] = pos;
         rt_defs[rt_rfid[name]].push(NIL, NIL);
-        rt_defs[rt_rfid[name]][pos + 1] = go(
-          name,
-          pos + 1,
-          term[1].body,
-          depth + 1
-        );
+        rt_defs[rt_rfid[name]][pos + 1] = go(name, pos + 1, term[1].body, depth + 1);
         return New(LAM, pos);
       case "App":
         rt_defs[rt_rfid[name]].push(NIL, NIL);
-        rt_defs[rt_rfid[name]][pos + 0] = go(
-          name,
-          pos + 0,
-          term[1].func,
-          depth
-        );
-        rt_defs[rt_rfid[name]][pos + 1] = go(
-          name,
-          pos + 1,
-          term[1].argm,
-          depth
-        );
+        rt_defs[rt_rfid[name]][pos + 0] = go(name, pos + 0, term[1].func, depth);
+        rt_defs[rt_rfid[name]][pos + 1] = go(name, pos + 1, term[1].argm, depth);
         return New(APP, pos);
       case "Ref":
         return New(REF, rt_rfid[term[1].name]);
@@ -132,10 +117,11 @@ function compile(defs: core.Defs, name: string): CompileResult {
   }
   var reachable = { [name]: true };
   reach(core.erase(defs[name]));
-  for (var def_name in reachable) {
+  var names = Object.keys(reachable).reverse();
+  for (var def_name of names) {
     rt_rfid[def_name] = next_id++;
   }
-  for (var def_name in reachable) {
+  for (var def_name of names) {
     rt_defs[rt_rfid[def_name]] = [];
     rt_bind[rt_rfid[def_name]] = {};
     var root = go(def_name, 0, core.erase(defs[def_name]), 0);
@@ -165,7 +151,7 @@ function decompile(rt_term: Term, dep = 0): core.Term {
           mem[addr_of(vari)] = New(VAR, dep);
         }
         var body = decompile({ mem, ptr: mem[addr + 1] }, dep + 1);
-        return core.Lam("v" + dep, null, body, false);
+        return core.Lam("x" + dep, null, body, false);
       case APP:
         var func = decompile({ mem, ptr: mem[addr + 0] }, dep);
         var argm = decompile({ mem, ptr: mem[addr + 1] }, dep);
@@ -343,6 +329,14 @@ function reduce(rt_term: Term, rt_defs: Record<Id, Term>): ReduceResult {
   return { rt_term: { mem, ptr: root }, stats };
 }
 
+// Normalizes a Formality term on fast-mode
+const normal = (name: string, defs: core.Defs = {}): {term: core.Term, stats: Stats} => {
+  var { rt_defs, rt_term: rt_term_orig } = compile(defs, name);
+  var { rt_term, stats } = reduce(rt_term_orig, rt_defs);
+  var term : core.Term = decompile(rt_term);
+  return {term, stats};
+};
+
 export {
   VAR,
   LAM,
@@ -355,5 +349,7 @@ export {
   compile,
   decompile,
   collect,
-  reduce
+  reduce,
+  Stats,
+  normal
 };

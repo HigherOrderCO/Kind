@@ -37,15 +37,15 @@ const ptrn_eq = (a: Port, b: Port): boolean =>
 const ptrn_st = (a: Port): string => a.typ + ":" + a.val;
 
 interface Stats {
-  loops: number;
-  rewrites: number;
-  max_len: number;
+  loop: number;
+  rwts: number;
+  mlen: number;
 }
 
 const init_stats = (fields?: Partial<Stats>): Stats => ({
-  loops: 0,
-  rewrites: 0,
-  max_len: 0,
+  loop: 0,
+  rwts: 0,
+  mlen: 0,
   ...fields
 });
 
@@ -179,7 +179,7 @@ class Net {
     }
   }
 
-  // Rewrites an active pair
+  // rwts an active pair
   rewrite(a_addr) {
     var a_ptrn = Pointer(a_addr, 0);
     var b_ptrn = this.get_port(a_addr, 0);
@@ -405,23 +405,23 @@ class Net {
     }
   }
 
-  // Rewrites active pairs until none is left, reducing the graph to normal form.
+  // rwts active pairs until none is left, reducing the graph to normal form.
   // This could be performed in parallel and doesn't need GC.
   reduce_strict(stats: Stats) {
-    var rewrites = 0;
-    var loops = 0;
-    var max_len = 0;
+    var rwts = 0;
+    var loop = 0;
+    var mlen = 0;
     while (this.redex.length > 0) {
       for (var i = 0, l = this.redex.length; i < l; ++i) {
         this.rewrite(this.redex.pop());
-        stats.max_len = Math.max(stats.max_len, this.nodes.length / 4);
-        ++stats.rewrites;
+        stats.mlen = Math.max(stats.mlen, this.nodes.length / 4);
+        ++stats.rwts;
       }
-      ++stats.loops;
+      ++stats.loop;
     }
   }
 
-  // Rewrites active pairs until none is left, reducing the graph to normal form.
+  // rwts active pairs until none is left, reducing the graph to normal form.
   // This avoids unecessary computations, but is sequential and would need GC.
   reduce_lazy(stats: Stats) {
     this.find_redex = false;
@@ -431,7 +431,7 @@ class Net {
     var next = this.enter_port(prev);
     var rwts = 0;
     while (true) {
-      ++stats.loops;
+      ++stats.loop;
       if (
         type_of(next) === PortType.PTR &&
         (addr_of(next) === 0 || this.is_free(addr_of(next)))
@@ -452,8 +452,8 @@ class Net {
           } catch (e) {
             return;
           }
-          stats.rewrites += 1;
-          stats.max_len = Math.max(stats.max_len, this.nodes.length / 4);
+          stats.rwts += 1;
+          stats.mlen = Math.max(stats.mlen, this.nodes.length / 4);
           do {
             prev = back.pop();
           } while (type_of(prev) !== PortType.PTR);

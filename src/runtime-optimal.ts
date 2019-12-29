@@ -234,20 +234,17 @@ const decompile = (net: Net): Term => {
   return build_term(net, net.enter_port(Pointer(0, 1)), [], []);
 };
 
-const norm_with_stats = (term: Term, defs: Defs = {}, lazy = true): {norm: Term, stats: Stats} => {
-  var net = compile(term, defs);
+// Normalizes a Formality term on optimal-mode
+const normal = (name: string, defs: Defs = {}, lazy = true): {term: Term, stats: Stats} => {
+  var net = compile(defs[name], defs);
   var stats = init_stats()
   if(lazy) {
     net.reduce_lazy(stats)
   } else {
     net.reduce_strict(stats);
   }
-  var norm = decompile(net);
-  return {norm, stats};
+  var term = decompile(net);
+  return {term, stats};
 };
 
-const norm = (term: Term, defs: Defs, lazy = true): Term => {
-  return norm_with_stats(term, defs, lazy).norm;
-};
-
-export {compile, decompile, norm_with_stats, norm};
+export {compile, decompile, normal};

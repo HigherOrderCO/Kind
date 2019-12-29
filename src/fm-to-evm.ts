@@ -242,7 +242,7 @@ function compile(name, defs) {
       SWITCH([DUP3, CTOR_OF], [
         // case VAR
         [
-          //[NUM(99990000),POP],
+          [NUM(99990000),POP],
 
           // back.pop(); back.pop(); back.pop();
           POP, POP, POP,
@@ -251,7 +251,7 @@ function compile(name, defs) {
           WHILE([DUP1, NUM(0xFFFFFFFF), EQ, ISZERO], [
             // if (ctor_of(back[2]) === APP && back[1] === 0)
             IF([DUP3, CTOR_OF, PUSH1, 2, EQ, DUP3, ISZERO, AND], [
-              //[NUM(99990001),POP],
+              [NUM(99990001),POP],
               // back[1] = 1;
               PUSH1, 1, SWAP2, POP,
 
@@ -276,7 +276,7 @@ function compile(name, defs) {
 
         // case LAM
         [
-          //[NUM(99990002),POP],
+          [NUM(99990002),POP],
 
           // var vari = mem[addr_of(next)]
           GET([DUP3, ADDR_OF]),
@@ -295,32 +295,32 @@ function compile(name, defs) {
 
         // case APP
         [
-          //[NUM(99990003),POP],
+          [NUM(99990003),POP],
 
           // var func = mem[addr_of(next)]
           GET([DUP3, ADDR_OF]),
 
           // if (ctor_of(func) === LAM)
-          //[NUM(99990004),POP],
+          [NUM(99990004),POP],
 
           IF([DUP1, CTOR_OF, PUSH1, 1, EQ], [
-            //[NUM(99990005),POP],
+            [NUM(99990005),POP],
 
             // var vari = mem[addr_of(func) + 0];
             GET([DUP1, ADDR_OF]),
 
             // if (vari !== NIL)
             IF([DUP1, NIL, EQ, ISZERO], [
-              //[NUM(99990006),POP],
+              [NUM(99990006),POP],
               // var argm = mem[addr_of(next) + 1];
               GET([DUP5, ADDR_OF, PUSH1, 1, ADD]),
               // mem[addr_of(vari)] = argm
               SET([SWAP1, ADDR_OF]),
             ], [
-              //[NUM(99990007),POP],
+              [NUM(99990007),POP],
               POP
             ]),
-            //[NUM(99990008),POP],
+            [NUM(99990008),POP],
 
             // var subs = mem[addr_of(func) + 1];
             GET([ADDR_OF, PUSH1, 1, ADD]),
@@ -350,7 +350,7 @@ function compile(name, defs) {
 
         // case REF
         [
-          //[NUM(99990009),POP],
+          [NUM(99990009),POP],
 
           // mem.push(0);
           NIL, MSIZE, MSTORE,
@@ -407,40 +407,19 @@ function compile(name, defs) {
   return build(code).toString("hex");
 };
 
-export {compile};
+// Receives the final EVM memory as an array of bytes,
+// returns the normalized Formality term.
+function decompile(evm_mem) {
+  var mem = [];
+  for (var i = 0; i < evm_mem.length / 32; ++i) {
+    var num
+      = (evm_mem[i * 32 + 28] << 24)
+      + (evm_mem[i * 32 + 29] << 16)
+      + (evm_mem[i * 32 + 30] << 8)
+      + (evm_mem[i * 32 + 31]);
+    mem.push(num);
+  }
+  return fast.decompile({mem, ptr:mem[0]});
+}
 
-// TODO: install ethereumjs-vm on dev dependencies, move
-// this to a test, test that reducing on EVM gives the same
-// result as reducing on fast mode
-
-//vm.runCode({
-  //gasLimit: new BN(0xffffffff),
-  //code,
-//}).then(results => {
-  //var mem = get_mem(results.runState.memory._store);
-  //console.log('Returned : ' + results.returnValue.toString('hex'))
-  //console.log('gasUsed  : ' + results.gasUsed.toString())
-  //console.log("lastMem  : " + JSON.stringify(mem));
-  //console.log("term     : " + fm.stringify(fast.decompile({mem,ptr:mem[0]})));
-//}).catch(err => console.log('Error    : ' + err))
-
-//vm.on('step', function(data) {
-  //var mem = get_mem(data.memory);
-  ////console.log(pad(4,"0",String(data.pc))
-    ////+ " " + pad(8," ",data.opcode.name)
-    ////+ " | " + data.stack
-    ////+ " --- " + fm.stringify(fast.decompile({mem,ptr:mem[0]})));
-//})
-
-//var get_mem = (mem) => {
-  //var arr = [];
-  //for (var i = 0; i < mem.length / 32; ++i) {
-    //var num
-      //= (mem[i * 32 + 28] << 24)
-      //+ (mem[i * 32 + 29] << 16)
-      //+ (mem[i * 32 + 30] << 8)
-      //+ (mem[i * 32 + 31]);
-    //arr.push(num);
-  //}
-  //return arr;
-//};
+export {compile, decompile};

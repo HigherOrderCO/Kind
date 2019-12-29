@@ -125,7 +125,7 @@ export async function run() {
   } else if (args.o) {
     var { name, defs } = await load_code(main);
     var net = fm.optimal.compile(fm.core.Ref(name), defs);
-    var opt_stats = { loops: 0, rewrites: 0, max_len: 0 };
+    var opt_stats = { loop: 0, rwts: 0, mlen: 0 };
     net.reduce_lazy(opt_stats);
     term = fm.optimal.decompile(net);
     console.log(fm.stringify(term));
