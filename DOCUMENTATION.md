@@ -384,6 +384,10 @@ In a future, contract interaction will be added to this
 compiler, and 64-bit uints will be added to the language,
 allowing us to use Ethereum's native 256-bit uint.
 
+For more information, check [this Medium
+post](https://medium.com/@maiavictor/compiling-formality-to-the-evm-99aec75677dd),
+and browse [this repository](https://github.com/moonad/formality-evm-example).
+
 Effects
 -------
 
