@@ -1050,7 +1050,7 @@ export const parse = async (
         term = App(term, Hol(new_hole_name()), true);
         term = App(term, Hol(new_hole_name()), true);
         term = App(term, prof, false);
-        term = App(term, Lam("_", null, type, false), true);
+        term = App(term, Lam("", null, type, false), true);
         term = App(term, parsed, false);
         return term;
       } else {
@@ -1080,7 +1080,7 @@ export const parse = async (
   function parse_arr(parsed, init, nams) {
     if (match("->", is_space)) {
       var rett = parse_term(nams.concat("_"));
-      return All("_", parsed, rett, false, loc(idx - init));
+      return All("", parsed, rett, false, loc(idx - init));
     }
   }
 
@@ -1334,7 +1334,13 @@ export const parse = async (
     // Parses return type, if any
     var type: Term | null = match(":") ? await parse_term(names) : null;
     match(";");
-    var term: Term = await parse_term(names);
+
+    // Parses the term
+    if (name[0] === "@") {
+      var term: Term = Hol(name);
+    } else {
+      var term: Term = await parse_term(names);
+    }
 
     // Fills foralls and lambdas of arguments
     for (var i = names.length - 1; i >= 0; --i) {
@@ -1343,7 +1349,7 @@ export const parse = async (
     }
 
     // Defines the top-level term
-    define(file+"/"+name, type ? Ann(type, term, false) : term);
+    define(file+"/"+name, type ? Ann(type, term, name[0] === "@") : term);
 
     return true;
   }

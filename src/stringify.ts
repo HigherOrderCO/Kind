@@ -83,7 +83,7 @@ export const show = (term: Term, nams: string[] = [], opts: Opts = {}) => {
       var text = "(";
       for (var i = 0; i < names.length; ++i) {
         var not_last = i < names.length - 1;
-        text += names[i] + (names[i].length > 0 ? " : " : ":") + types[i];
+        text += names[i] + (names[i].length > 0 ? ": " : ":") + types[i];
         text += erase[i] ? (not_last ? "; " : ";") : not_last ? ", " : "";
       }
       text += ") -> ";
@@ -111,7 +111,7 @@ export const show = (term: Term, nams: string[] = [], opts: Opts = {}) => {
         var text = "(";
         for (var i = 0; i < names.length; ++i) {
           var not_last = i < names.length - 1;
-          text += names[i] + (types[i] !== null ? " : " + types[i] : "");
+          text += names[i] + (types[i] !== null ? ": " + types[i] : "");
           text += erase[i] ? (not_last ? "; " : ";") : not_last ? ", " : "";
         }
         text += ") => ";

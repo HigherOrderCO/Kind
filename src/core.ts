@@ -1368,7 +1368,7 @@ const typecheck = (name: string, expect: Term | null, defs: Defs = {}, opts: Typ
         }
         var if_t_t = typecheck(term[1].if_t, expect_nf, ctx, erased);
         var if_t_f = typecheck(term[1].if_f, if_t_t, ctx, erased);
-        type = expect_nf || if_t_t;
+        type = if_t_t;
         break;
       case "Slf":
         var ex_ctx = ctx_ext(term[1].name, null, term, false, ctx);
