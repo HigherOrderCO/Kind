@@ -238,6 +238,24 @@ class Net {
           case 14:
             var res = Numeric(fst === snd ? 1 : 0);
             break;
+          case 15:
+            var res = Numeric(Math.sin(snd));
+            break;
+          case 16:
+            var res = Numeric(Math.cos(snd));
+            break;
+          case 17:
+            var res = Numeric(Math.tan(snd));
+            break;
+          case 18:
+            var res = Numeric(Math.asin(snd));
+            break;
+          case 19:
+            var res = Numeric(Math.acos(snd));
+            break;
+          case 20:
+            var res = Numeric(Math.atan(snd));
+            break;
           default:
             throw "[ERROR]\nInvalid interaction.";
         }

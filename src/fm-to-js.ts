@@ -60,6 +60,18 @@ const compile = (name: string, defs: core.Defs = {}): string => {
             return "(" + num0 + "<" + num1 + ")";
           case ".==.":
             return "(" + num0 + "===" + num1 + "? 1 : 0)";
+          case ".sin.":
+            return "Math.sin(" + num1 + ")";
+          case ".cos.":
+            return "Math.cos(" + num1 + ")";
+          case ".tan.":
+            return "Math.tan(" + num1 + ")";
+          case ".asin.":
+            return "Math.asin(" + num1 + ")";
+          case ".acos.":
+            return "Math.acos(" + num1 + ")";
+          case ".atan.":
+            return "Math.atan(" + num1 + ")";
           default:
             throw "TODO: implement operator ";
         }

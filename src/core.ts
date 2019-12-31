@@ -523,6 +523,18 @@ const reduce = (term: Term, defs, opts: any = {}) => {
           return Val(num0[1].numb < num1[1].numb ? 1 : 0);
         case ".==.":
           return Val(num0[1].numb === num1[1].numb ? 1 : 0);
+        case ".sin.":
+          return Val(Math.sin(num1[1].numb));
+        case ".cos.":
+          return Val(Math.cos(num1[1].numb));
+        case ".tan.":
+          return Val(Math.tan(num1[1].numb));
+        case ".asin.":
+          return Val(Math.asin(num1[1].numb));
+        case ".acos.":
+          return Val(Math.acos(num1[1].numb));
+        case ".atan.":
+          return Val(Math.atan(num1[1].numb));
         default:
           throw "[NORMALIZATION-ERROR]\nUnknown primitive: " + func + ".";
       }
