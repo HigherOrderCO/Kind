@@ -42,7 +42,7 @@ export { Loader, load_file_parents, load_file, save_file };
 
 // The current API is just a simple RPC, so this function helps a lot
 const post = (func, body) => {
-  return xhr("http://moonad.org/api/" + func, {
+  return xhr("https://forall.fm/api/" + func, {
     method: "POST",
     json: true,
     body
