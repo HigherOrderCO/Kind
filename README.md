@@ -69,4 +69,4 @@ It can be used from the terminal with the `fm` command, or as a library with `re
 
 ![Interaction-Net compilation](https://raw.githubusercontent.com/moonad/Assets/master/images/inet-simulation.gif)
 
-*Formality is fully compiled to a [400-LOC](https://github.com/moonad/Formality/blob/master/src/fm-net.js) [Interaction-Net Runtime](http://docs.formality-lang.org/en/latest/runtime/Formality-Net.html).*
+*Formality can be fully compiled to a [600-LOC](https://github.com/moonad/Formality/blob/master/src/fm-net.ts) [Interaction-Net Runtime](https://github.com/moonad/Formality/blob/master/DOCUMENTATION.md#formality-net).*

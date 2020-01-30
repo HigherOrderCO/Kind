@@ -88,19 +88,7 @@ lambdas. That makes the core theory an order of magnitude
 simpler, allowing for a short standard and encouraging
 independent implementations.
 
-```
-Γ |- A:Type   Γ,x:A |- B:Type              Γ, s : ${x}A |- A:Type
------------------------------- λ-type      ---------------------- $-type
-Γ |- (x:A)->B : Type                       Γ |- ${x}A : Type
-                                            
-Γ |- A:Type   Γ,x:A |- t:B                 Γ |- t:A[x<-t]   Γ |- ${x}A : Type
---------------------------- λ-intr         ---------------------------------- $-intr
-Γ |- (x:A)=>t : (x:A)->B                   Γ |- new(${x}A) t : ${x}A
-                                            
-Γ |- f : (x:A)->B    Γ |- a:A              Γ |- t : ${x} A
------------------------------ λ-elim       ----------------------- $-elim
-Γ |- f(a) : B[x<-a]                        Γ |- use(t) : A[x <- t]
-```
+![fm](https://user-images.githubusercontent.com/144776/71642417-62686b80-2cb3-11ea-9bd1-37c1e829d05d.png)
 
 An optimal high-order evaluator
 -------------------------------
