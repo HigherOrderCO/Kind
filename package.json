@@ -1,6 +1,6 @@
 {
   "name": "formality-lang",
-  "version": "0.1.243",
+  "version": "0.1.245",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

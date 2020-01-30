@@ -856,7 +856,10 @@ export const parse = async (
             var init = idx;
             try {
               parse_exact("|");
-              parse_exact(adt_ctor[c][0] + " ");
+              parse_exact(adt_ctor[c][0]);
+              if (!match_here("\n") && !match_here(" ")) {
+                throw "";
+              }
               match("=>");
             } catch (e) {
               throw "WRONG_ADT";
