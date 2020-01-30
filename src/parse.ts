@@ -602,8 +602,7 @@ export const parse = async (
       while (i < code.length && is_space(code[i]))     { ++i; } // skips ` `
       if (code[i] === ")")                             { ++i; } // skips `)`
       while (i < code.length && is_space(code[i]))     { ++i; } // skips ` `
-      if (code[i] === "=")                             { ++i; } // skips `=`
-      if (code[i] === ">") return true;                         // finds `>`
+      if (code.slice(i,i+2) === "=>") return true;              // finds `>`
       return false;
     }
     var init = idx;
@@ -857,7 +856,10 @@ export const parse = async (
             var init = idx;
             try {
               parse_exact("|");
-              parse_exact(adt_ctor[c][0] + " ");
+              parse_exact(adt_ctor[c][0]);
+              if (!match_here("\n") && !match_here(" ")) {
+                throw "";
+              }
               match("=>");
             } catch (e) {
               throw "WRONG_ADT";
@@ -1117,6 +1119,48 @@ export const parse = async (
     }
   }
 
+  // Parses mappers
+  function parse_map(parsed, init, nams) {
+    if (match("<=")) {
+      var ctor = parse_name();
+      var skip = parse_exact("(");
+      for (var adt_name in adts) {
+        var adt = adts[adt_name];
+        if (adt.adt_ctor.length === 1 && adt.adt_ctor[0][0] === ctor) {
+          var adt_indx = adt.adt_indx;
+          var adt_ctor = adt.adt_ctor;
+          var fields = adt_ctor[0][1].map(([n,x,y])=>n);
+          var maps = {};
+          while (idx < code.length && !match(")")) {
+            var mkey = parse_string();
+            var skip = parse_exact("=");
+            var mval = parse_term(nams.concat(fields));
+            maps[mkey] = mval;
+            if (match(")")) break; else parse_exact(",");
+          }
+          var term : Term = base_ref(ctor);
+          for (var i = 0; i < adt_ctor[0][1].length; ++i) {
+            var field_name = adt_ctor[0][1][i][0];
+            var field_var = Var(adt_ctor[0][1].length-i-1);
+            var field = maps[field_name] || field_var;
+            term = App(term, field, false);
+          }
+          for (var i = adt_ctor[0][1].length - 1; i >= 0; --i) {
+            term = Lam(adt_ctor[0][1][i][0], null, term, false);
+          }
+          var moti : Term = Hol(new_hole_name());
+          moti = Lam("", null, moti, false);
+          for (var i = adt_indx.length - 1; i >= 0; --i) {
+            moti = Lam(adt_indx[i][0], null, moti, false);
+          }
+          term = App(App(Use(parsed),moti,true),term,false);
+          return term;
+        }
+      };
+      error("Invalid assignment attempt.");
+    };
+  }
+
   // Parses a free variable
   function parse_var(nams) {
     var init = idx;
@@ -1165,6 +1209,7 @@ export const parse = async (
       else if (new_parsed = parse_arr(parsed, init, nams)){}
       else if (new_parsed = parse_eql(parsed, init, nams)){}
       else if (new_parsed = parse_dif(parsed, init, nams)){}
+      else if (new_parsed = parse_map(parsed, init, nams)){}
       else if (new_parsed = parse_ops(parsed, init, nams)){}
       if (new_parsed) parsed = new_parsed;
     }
