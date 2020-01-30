@@ -1007,7 +1007,7 @@ T Suit
 | hearts
 | spades
 
-printSuit(suit : Suit) : String
+suitMessage(suit : Suit) : String
   case suit
   | clubs    => "First rule: you do not talk about Fight Club."
   | diamonds => "Queen shines more than diamond."
@@ -1016,7 +1016,7 @@ printSuit(suit : Suit) : String
   : String
 
 main : IO(Unit)
-  print(printSuit(spades))
+  print(suitMessage(spades))
 ```
 
 The program above creates a datatype, `Suit`, with 4 possible values. In
@@ -1182,8 +1182,8 @@ import Base#
 
 main : Nat
   let a = pair(Bool; Nat; true, 7n)
-  case a | 
-  pair a.snd
+  case a | pair 
+  a.snd
 ```
 
 The `<A, B>` syntax after the datatype declares two polymorphic Type variables,
