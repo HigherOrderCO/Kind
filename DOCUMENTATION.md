@@ -279,16 +279,16 @@ the following library to JavaScript:
 
 ```haskell
 twice(n: Number)
-  n .*. 2
+  n * 2
 
 vector_size(x: Number, y: Number) : Number
-  ((x .**. 2) .+. (y .**. 2)) .**. 0.5
+  ((x ** 2) + (y ** 2)) ** 0.5
 
 sum(n : Number) : Number
-  if n .==. 0 then
+  if n === 0 then
     0
   else
-    n .+. sum(n .-. 1)
+    n + sum(n - 1)
 ```
 
 Save it as `lib.fm` and type:
@@ -440,7 +440,7 @@ main : IO(Unit)
     print(number_to_string(10, i))
 ```
 
-Prints all numbers from `0` til `100`. And this program:
+Prints all numbers from `0` til `99`. And this program:
 
 ```haskell
 import Base#
@@ -462,15 +462,15 @@ program(count : Number) : IO(Unit)
     let key = head(_ 0, cmd)
 
     -- Increases
-    if key .==. 'i' then
-      program(count .+. 1)
+    if key === 'i' then
+      program(count + 1)
 
     -- Decreases
-    else if key .==. 'd' then
-      program(count .-. 1)
+    else if key === 'd' then
+      program(count - 1)
 
     -- Reset
-    else if key .==. 'r' then
+    else if key === 'r' then
       program(0)
 
     -- Quits
@@ -705,29 +705,29 @@ The numeric operations are:
 
 name | syntax | javascript equivalent
 --- | --- | ---
-addition | `x .+. y` | `x + y`
-subtraction | `x .-. y` | `x - y`
-multiplication | `x .*. y` | `x * y`
-division | `x ./. y` | `x / y`
-modulus | `x .%. y` | `x % y`
-exponentiation | `x .**. y` | `x ** y`
-bitwise-and | `x .&. y` | `x & y`
-bitwise-or | `x .\|. y` | `x \| y`
-bitwise-xor | `x .^. y` | `x ^ y`
-bitwise-not | `.~.(y)` | `~y`
-bitwise-right-shift | `x .>>>. y` | `x >>> y`
-bitwise-left-shift | `x .<<. y` | `x << y`
-greater-than | `x .>. y` | `x > y ? 1 : 0`
-less-than | `x .<. y` | `x < y ? 1 : 0`
-equals | `x .==. y` | `x === y ? 1 : 0`
+addition | `x + y` | `x + y`
+subtraction | `x - y` | `x - y`
+multiplication | `x * y` | `x * y`
+division | `x / y` | `x / y`
+modulus | `x % y` | `x % y`
+exponentiation | `x ** y` | `x ** y`
+bitwise-and | `x && y` | `x & y`
+bitwise-or | `x || y` | `x \| y`
+bitwise-xor | `x ^ y` | `x ^ y`
+bitwise-not | `~(y)` | `~y`
+bitwise-right-shift | `x >>> y` | `x >>> y`
+bitwise-left-shift | `x << y` | `x << y`
+greater-than | `x > y` | `x > y ? 1 : 0`
+less-than | `x < y` | `x < y ? 1 : 0`
+equals | `x === y` | `x === y ? 1 : 0`
 
 There is no operator precedence: parenthesis are always placed on the right.
-That means `3 .*. 10 .+. 1` is parsed as `3 .*. (10 .+. 1)`. If you want the
+That means `3 * 10 + 1` is parsed as `3 * (10 + 1)`. If you want the
 multiplication to occur first, you must be explicit:
 
 ```haskell
 main : Number
-  (3 .*. 10) .+. 1
+  (3 * 10) + 1
 ```
 
 There is also `if`, which allows branching with a `Number` condition.
@@ -741,10 +741,10 @@ Usage is straightforward:
 ```haskell
 import Base#
 
-main : Output
+main : IO(Unit)
   let age = 30
 
-  if age .<. 18 then
+  if age < 18 then
     print("Boring teenager.")
   else
     print("Respect your elders!")
@@ -902,9 +902,9 @@ Found hole: 'a'.
 - With goal... Nat
 - Couldn't find a solution.
 - With context:
-- f : (_ : Bool) -> Nat
+- f : (: Bool) -> Nat
 
-(f : (_ : Bool) -> Nat) -> Nat ✔ 𝒜 ℰ ℋ
+(f : (: Bool) -> Nat) -> Nat ✔ 𝒜 ℰ ℋ
 ```
 
 This tells you that, inside the body of `main`, the type of `f(true)` is `Nat`.
@@ -1009,20 +1009,20 @@ T Suit
 
 printSuit(suit : Suit) : String
   case suit
-  | clubs    => print("First rule: you do not talk about Fight Club.")
-  | diamonds => print("Queen shines more than diamond.")
-  | hearts   => print("You always had mine.")
-  | spades   => print("The only card I need is the Ace of Spades! \m/")
+  | clubs    => "First rule: you do not talk about Fight Club."
+  | diamonds => "Queen shines more than diamond."
+  | hearts   => "You always had mine."
+  | spades   => "The only card I need is the Ace of Spades! \m/"
   : String
 
-main : String
-  printSuit(spades)
+main : IO(Unit)
+  print(printSuit(spades))
 ```
 
 The program above creates a datatype, `Suit`, with 4 possible values. In
 Formality, we call those values **constructors**. It then pattern-matches a
 suit and outputs a different sentence depending on it. Notice that on this
-`case` expression, we annotated the return type, `: String`. That's not
+`case` expression, we annotated the return type, `: IO(Unit)`. That's not
 always necessary, but it is very important for theorem proving. The annotated
 type of a case expression is called its [**motive**](#motive).
 
@@ -1039,10 +1039,9 @@ T Person
 | person(age : Nat, name : String)
 
 getName(p : Person) : String
-  case p
-  | person => p.name
+  case p | person p.name
 
-main : String
+main : IO(Unit)
   let john = person(27n, "John")
   print(getName(john))
 ```
@@ -1054,8 +1053,8 @@ must explicitly name it using the `as` keyword:
 
 ```haskell
 main(p : Person) : Nat
-  case person(27n, "John") as john
-  | person => john.age
+  case person(27n, "John") as john | person 
+  john.age
 ```
 
 Move
@@ -1079,7 +1078,7 @@ main(a : Bool, b : Bool) : Bool
 
 But, since we used `b` in two different branches, we don't
 need to copy it. We can, instead, tell Formality to move it
-to each branch with a `+`:
+to each branch with the keyword `with`:
 
 ```haskell
 -- Move.fm
@@ -1087,7 +1086,7 @@ import Base#
 
 main(a : Bool, b : Bool) : Bool
   case a
-  + b : Bool
+  with b : Bool
   | true  => b
   | false => not(b)
 ```
@@ -1161,7 +1160,7 @@ make your JS program exponential. Using `+` prevents that:
 ```haskell
 mul2(n : Nat) : Nat
   case n
-  + mul2 : Nat -> Nat
+  with mul2 : Nat -> Nat
   | zero => zero
   | succ => succ(succ(mul2(n.pred)))
   : Nat
@@ -1183,8 +1182,8 @@ import Base#
 
 main : Nat
   let a = pair(Bool; Nat; true, 7n)
-  case a
-  | pair => a.snd
+  case a | 
+  pair a.snd
 ```
 
 The `<A, B>` syntax after the datatype declares two polymorphic Type variables,
@@ -1283,7 +1282,7 @@ Every time you add an element to a `Vector`, the length on its type increases:
 -- Vector.fm
 import Base#
 
-T Vector<A> (len: Nat)
+T Vector{A} (len: Nat)
 | vnil : Vector(A, zero)
 | vcons(len; head: A, tail: Vector(A, len)) : Vector(A, succ(len))
 
@@ -1538,12 +1537,12 @@ import Base#
 
 main : Nat
   case true as x
-  + equal(__) as e : x == true
+  with equal(__) as e : x == true
   | true  => 10n
   | false => absurd(false_isnt_true(e), _)
 ```
 
-(Remember that `+` is a shorthand for adding an extra variable to the motive.)
+(Remember that `with` is a shorthand for adding an extra variable to the motive.)
 
 Of course, in this example we could just have written any number, but, in some
 cases, such as on the `nil` branch of a `head` function, we simply don't have
