@@ -602,8 +602,7 @@ export const parse = async (
       while (i < code.length && is_space(code[i]))     { ++i; } // skips ` `
       if (code[i] === ")")                             { ++i; } // skips `)`
       while (i < code.length && is_space(code[i]))     { ++i; } // skips ` `
-      if (code[i] === "=")                             { ++i; } // skips `=`
-      if (code[i] === ">") return true;                         // finds `>`
+      if (code.slice(i,i+2) === "=>") return true;              // finds `>`
       return false;
     }
     var init = idx;
