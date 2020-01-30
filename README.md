@@ -18,7 +18,7 @@ Check the [official documentation](DOCUMENTATION.md), browse our [base-libraries
     sum(xs : List(Number)) : Number
       case xs
       | nil  => 0
-      | cons => xs.head .+. sum(xs.tail)
+      | cons => xs.head + sum(xs.tail)
     ```
 
 - A proof that negating a bool twice returns the same bool:
@@ -26,8 +26,8 @@ Check the [official documentation](DOCUMENTATION.md), browse our [base-libraries
     ```haskell
     not_not_is_same(b : Bool) : not(not(b)) == b
       case b
-      | true  => refl(__)
-      | false => refl(__)
+      | true  => equal(__)
+      | false => equal(__)
       : not(not(b)) == b
     ```
 
@@ -36,8 +36,8 @@ Check the [official documentation](DOCUMENTATION.md), browse our [base-libraries
     ```haskell
     safe_head(A; xs: List(A), e: length(_ xs) != 0n) : A
       case xs
-      + e : length(_ xs) != 0n
-      | nil  => absurd(e(refl(__)), _) -- provably unreachable!
+      with e : length(_ xs) != 0n
+      | nil  => absurd(e(equal(__)), _) -- provably unreachable!
       | cons => xs.head
     ```
 
