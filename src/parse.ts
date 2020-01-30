@@ -194,46 +194,49 @@ export const parse = async (
   }
 
   // Builds a lookup table
-  function build_charset(chars) {
-    var set = {};
+  function build_charset(chars)
+  : [((chr: any) => boolean), Array<string>] {
+    var charset = {};
     for (var i = 0; i < chars.length; ++i) {
-      set[chars[i]] = 1;
+      charset[chars[i]] = 1;
     }
-    return chr => set[chr] === 1;
+    var query = chr => charset[chr] === 1;
+    var array = Object.keys(charset);
+    return [query, array];
   }
 
   // Some handy lookup tables
   const is_native_op =
-    { ".+."    : 1
-    , ".-."    : 1
-    , ".*."    : 1
-    , "./."    : 1
-    , ".%."    : 1
-    , ".**."   : 1
-    , ".&."    : 1
-    , ".|."    : 1
-    , ".^."    : 1
-    , ".~."    : 1
-    , ".>>>."  : 1
-    , ".<<."   : 1
-    , ".>."    : 1
-    , ".<."    : 1
-    , ".==."   : 1
-    , ".sin."  : 1
-    , ".cos."  : 1
-    , ".tan."  : 1
-    , ".asin." : 1
-    , ".acos." : 1
-    , ".atan." : 1
+    { "+"    : 1
+    , "-"    : 1
+    , "*"    : 1
+    , "\\"   : 1
+    , "%"    : 1
+    , "**"   : 1
+    , "&&"   : 1
+    , "||"   : 1
+    , "^"    : 1
+    , "~"    : 1
+    , ">>>"  : 1
+    , "<<"   : 1
+    , ">"    : 1
+    , "<"    : 1
+    , "==="  : 1
+    , "sin"  : 1
+    , "cos"  : 1
+    , "tan"  : 1
+    , "asin" : 1
+    , "acos" : 1
+    , "atan" : 1
   };
 
-  const is_num_char  = build_charset("0123456789");
-  const is_hex_char  = build_charset("0123456789abcdefABCDEF");
-  const is_name_char = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#-@/");
-  const is_op_char   = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#-@+*/%^!<>=&|");
-  const is_spacy     = build_charset(" \t\n\r");
-  const is_space     = build_charset(" ");
-  const is_newline   = build_charset("\n");
+  const [is_num_char, num_chars]   = build_charset("0123456789");
+  const [is_hex_char, hex_chars]   = build_charset("0123456789abcdefABCDEF");
+  const [is_name_char, name_chars] = build_charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.#@/");
+  const [is_op_char, op_chars]     = build_charset("-+*%^!<>=&|\\");
+  const [is_spacy, spacys]         = build_charset(" \t\n\r");
+  const [is_space, spaces]         = build_charset(" ");
+  const [is_newline, newlines]     = build_charset("\n");
 
   // Advances the cursor 1 step forward
   function next() {
@@ -450,11 +453,22 @@ export const parse = async (
 
   // Parses an alphanumeric name
   function parse_name() {
-    if (match(".")) {
-      return "." + parse_string_here(is_op_char);
+    if (match("-")) {
+      return "-" + parse_string();
     } else {
-      return parse_string();
+      return parse_op() || parse_string();
     }
+  }
+
+  // Parses an operator name
+  function parse_op() {
+    for (var str of op_chars) {
+      // Prevents parsing case "|" as operator
+      if (str === "|" ? next_is("||") : next_is(str)) {
+        return parse_string(is_op_char);
+      }
+    }
+    return null;
   }
 
   // Parses a term that demands a name
@@ -793,6 +807,19 @@ export const parse = async (
     }
   }
 
+  // Parses unary operators
+  function parse_una(nams) {
+    var init = idx;
+    var fns = ["sin","cos","tan","asin","acos","atan","~"];
+    for (var fn of fns) {
+      if (match(fn+"(")) {
+        var expr = parse_term(nams);
+        parse_exact(")");
+        return Op2(fn, Val(0), expr, loc(idx - init));
+      }
+    }
+  }
+
   // Parses a case expression, `case/T | A => <term> | B => <term> : <term>`
   function parse_cse(nams) {
     if (match("case ")) {
@@ -812,7 +839,7 @@ export const parse = async (
 
           // Parses 'move' expressions
           var moves = [];
-          while (match("+")) {
+          while (match("with ")) {
             var move_init = idx;
             var [move_name, move_term] = parse_named_term(nams);
             var move_skip = parse_exact(":");
@@ -830,8 +857,8 @@ export const parse = async (
             var init = idx;
             try {
               parse_exact("|");
-              parse_exact(adt_ctor[c][0]);
-              parse_exact("=>");
+              parse_exact(adt_ctor[c][0] + " ");
+              match("=>");
             } catch (e) {
               throw "WRONG_ADT";
             }
@@ -897,33 +924,22 @@ export const parse = async (
     }
   }
 
-  // Parses a Number bitwise-not, `.!.(t)`
-  function parse_op2_not(nams) {
-    var init = idx;
-    if (match(".!.(")) {
-      var argm = parse_term(nams);
-      parse_exact(")");
-      return Op2(".!.", Val(0), argm, loc(idx - init));
-    }
-  }
-
   // Parses an application, `f(x, y, z...)`
   function parse_app(parsed, init, nams) {
-    var unr = match("<", is_space);
-    var app = !unr && match("(", is_space);
+    var app = match("(", is_space);
     var term: Term;
-    if (unr || app) {
+    if (app) {
       term = parsed;
       while (idx < code.length) {
         if (match("_")) {
           term = App(term, Hol(new_hole_name()), true, loc(idx - init));
-          if (unr ? match("<") : match(")")) break;
+          if (match(")")) break;
         } else {
           var argm = parse_term(nams);
           var eras = match(";");
           term = App(term, argm, eras, loc(idx - init));
           match(",");
-          if (unr ? match(">") : match(")")) break;
+          if (match(")")) break;
         }
       }
       return term;
@@ -1062,7 +1078,7 @@ export const parse = async (
 
   // Parses an equality, `a == b`
   function parse_eql(parsed, init, nams) {
-    if (match("==", is_space)) {
+    if (match("== ", is_space)) {
       var rgt = parse_term(nams);
       return App(App(App(base_ref("Equal"), Hol(new_hole_name()), false), parsed, false), rgt, false);
     }
@@ -1070,7 +1086,7 @@ export const parse = async (
 
   // Parses an non-equality, `a != b`
   function parse_dif(parsed, init, nams) {
-    if (match("!=", is_space)) {
+    if (match("!= ", is_space)) {
       var rgt = parse_term(nams);
       return App(base_ref("Not"), App(App(App(base_ref("Equal"), Hol(new_hole_name()), false), parsed, false), rgt, false), false);
     }
@@ -1085,19 +1101,18 @@ export const parse = async (
   }
 
   // Parses operators, including:
-  // - Numeric operators: `t .+. u`, `t .*. u`, etc.
-  // - Arrow notation: `A -> B`
-  // - User-defined operators: `t .foo. u`
+  // - Numeric operators: `t + u`, `t * u`, etc.
+  // - User-defined operators: `t +foo u`
   function parse_ops(parsed, init, nams) {
-    if (match(".", is_space)) {
+    var op = parse_op();
+    if (op) {
       if (tokens) tokens.pop();
-      var func = "." + parse_string_here(x => !is_space(x));
       if (tokens) tokens.push(["txt", ""]);
       var argm = parse_term(nams);
-      if (is_native_op[func]) {
-        return Op2(func, parsed, argm, loc(idx - init));
-      } else {
-        return App(App(ref(func), parsed, false), argm, false, loc(idx - init));
+      if (is_native_op[op]) {
+        return Op2(op, parsed, argm, loc(idx - init));
+      } else if (op !== "|") { // `|` can't be a op
+        return App(App(ref(op), parsed, false), argm, false, loc(idx - init));
       }
     }
   }
@@ -1136,6 +1151,7 @@ export const parse = async (
     else if (parsed = parse_log(nams)) {}
     else if (parsed = parse_cse(nams)) {}
     else if (parsed = parse_var(nams)) {}
+    else if (parsed = parse_una(nams)) {}
     else if (parsed = parse_lst(nams)) {}
     else if (parsed = parse_blk(nams)) {}
     else if (parsed = parse_for(nams)) {}
@@ -1189,7 +1205,7 @@ export const parse = async (
       var adt_typs = [null];
 
       // Datatype parameters
-      if (match("<")) {
+      if (match("{")) {
         while (idx < code.length) {
           let eras = false;
           let name = parse_string();
@@ -1200,7 +1216,7 @@ export const parse = async (
             type = Typ();
           }
           adt_pram.push([name, type, eras]);
-          if (match(">")) break;
+          if (match("}")) break;
           else parse_exact(",");
         }
       }

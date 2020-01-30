@@ -493,47 +493,47 @@ const reduce = (term: Term, defs, opts: any = {}) => {
     var num0 = reduce(num0, names);
     if (!opts.no_op1 && num0[0] === "Val" && num1[0] === "Val") {
       switch (func) {
-        case ".+.":
+        case "+":
           return Val(num0[1].numb + num1[1].numb);
-        case ".-.":
+        case "-":
           return Val(num0[1].numb - num1[1].numb);
-        case ".*.":
+        case "*":
           return Val(num0[1].numb * num1[1].numb);
-        case "./.":
+        case "\\":
           return Val(num0[1].numb / num1[1].numb);
-        case ".%.":
+        case "%":
           return Val(num0[1].numb % num1[1].numb);
-        case ".**.":
+        case "**":
           return Val(num0[1].numb ** num1[1].numb);
-        case ".&.":
+        case "&&":
           return Val((num0[1].numb & num1[1].numb) >>> 0);
-        case ".|.":
+        case "||":
           return Val((num0[1].numb | num1[1].numb) >>> 0);
-        case ".^.":
+        case "^":
           return Val((num0[1].numb ^ num1[1].numb) >>> 0);
-        case ".~.":
+        case "~":
           return Val(~num1[1].numb);
-        case ".>>>.":
+        case ">>>":
           return Val(num0[1].numb >>> num1[1].numb);
-        case ".<<.":
+        case "<<":
           return Val(num0[1].numb << num1[1].numb);
-        case ".>.":
+        case ">":
           return Val(num0[1].numb > num1[1].numb ? 1 : 0);
-        case ".<.":
+        case "<":
           return Val(num0[1].numb < num1[1].numb ? 1 : 0);
-        case ".==.":
+        case "===":
           return Val(num0[1].numb === num1[1].numb ? 1 : 0);
-        case ".sin.":
+        case "sin":
           return Val(Math.sin(num1[1].numb));
-        case ".cos.":
+        case "cos":
           return Val(Math.cos(num1[1].numb));
-        case ".tan.":
+        case "tan":
           return Val(Math.tan(num1[1].numb));
-        case ".asin.":
+        case "asin":
           return Val(Math.asin(num1[1].numb));
-        case ".acos.":
+        case "acos":
           return Val(Math.acos(num1[1].numb));
-        case ".atan.":
+        case "atan":
           return Val(Math.atan(num1[1].numb));
         default:
           throw "[NORMALIZATION-ERROR]\nUnknown primitive: " + func + ".";

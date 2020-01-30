@@ -30,47 +30,47 @@ const compile = (name: string, defs: core.Defs = {}): string => {
         var num0 = go(term[1].num0, depth);
         var num1 = go(term[1].num1, depth);
         switch (func) {
-          case ".+.":
+          case "+":
             return "(" + num0 + "+" + num1 + ")";
-          case ".-.":
+          case "-":
             return "(" + num0 + "-" + num1 + ")";
-          case ".*.":
+          case "*":
             return "(" + num0 + "*" + num1 + ")";
-          case "./.":
+          case "\\":
             return "(" + num0 + "/" + num1 + ")";
-          case ".%.":
+          case "%":
             return "(" + num0 + "%" + num1 + ")";
-          case ".**.":
+          case "**":
             return "(" + num0 + "**" + num1 + ")";
-          case ".&.":
+          case "&&":
             return "(" + num0 + "&" + num1 + ")";
-          case ".|.":
+          case "||":
             return "(" + num0 + "|" + num1 + ")";
-          case ".^.":
+          case "^":
             return "(" + num0 + "^" + num1 + ")";
-          case ".~.":
+          case "~":
             return "(~" + num1 + ")";
-          case ".>>>.":
+          case ">>>":
             return "(" + num0 + ">>>" + num1 + ")";
-          case ".<<.":
+          case "<<":
             return "(" + num0 + "<<" + num1 + ")";
-          case ".>.":
+          case ">":
             return "(" + num0 + ">" + num1 + ")";
-          case ".<.":
+          case "<":
             return "(" + num0 + "<" + num1 + ")";
-          case ".==.":
+          case "===":
             return "(" + num0 + "===" + num1 + "? 1 : 0)";
-          case ".sin.":
+          case "sin":
             return "Math.sin(" + num1 + ")";
-          case ".cos.":
+          case "cos":
             return "Math.cos(" + num1 + ")";
-          case ".tan.":
+          case "tan":
             return "Math.tan(" + num1 + ")";
-          case ".asin.":
+          case "asin":
             return "Math.asin(" + num1 + ")";
-          case ".acos.":
+          case "acos":
             return "Math.acos(" + num1 + ")";
-          case ".atan.":
+          case "atan":
             return "Math.atan(" + num1 + ")";
           default:
             throw "TODO: implement operator ";
