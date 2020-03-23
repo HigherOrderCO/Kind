@@ -8,15 +8,16 @@ aren't many programming languages featuring theorem proving that are 1. simple,
 
 **Simplicity** makes it easy to understand and implement. We accomplish that by
 building the whole language on top of a minimal type-theory based on self-types
-that can be understood and implemented by a regular developer in a working day.
+that can be understood and implemented by a developer in a work day.
 
 **Efficiency** is required if we want the language to be used for production
 software. We accomplish that by compiling Formality to a massively parallel,
 non-garbage-collected, Lévy-optimal functional runtime.
 
 **Accessibility** makes it usable by regular developers, not just experts. We
-accomplish it by translating advanced concepts to a familiar syntaxes that
-resembles popular languages and takes inspiration from the [Zen of Python](https://www.python.org/dev/peps/pep-0020/).
+accomplish it by translating advanced concepts to familiar syntaxes that
+resembles popular languages and takes inspiration from the [Zen of
+Python](https://www.python.org/dev/peps/pep-0020/).
 
 ## 0. Table of Contents
 
@@ -662,7 +663,7 @@ def parse_mod(code, indx):
 
 Stringification is much simpler than parsing.
 
-##### 1.1.1.0. JavaScript:
+##### 1.1.2.0. JavaScript:
 
 ```javascript
 // Stringifier
@@ -722,7 +723,7 @@ function stringify_mod(mod) {
 };
 ```
 
-##### 1.1.1.1. Python
+##### 1.1.2.1. Python
 
 ```python
 # Stringifier
@@ -776,7 +777,7 @@ def stringify_mod(mod):
         return "";
 ```
 
-##### 1.1.1.2. Haskell
+##### 1.1.2.2. Haskell
 
 ```haskell
 -- TODO
