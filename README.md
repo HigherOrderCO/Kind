@@ -77,10 +77,10 @@ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 References and variables are desambiguated based on context. The syntax of a
 `Module` is defined as follows:
 
-syntax                   | variant | meaning
------------------------- | ------- | -------
-<term> : <term> <module> | Def     | a top-level definition
-<eof>                    | Eof     | the end of a module
+syntax                     | variant | meaning
+-------------------------- | ------- | -------
+`<term> : <term> <module>` | Def     | a top-level definition
+`<eof>                     | Eof     | the end of a module
 
 Modules coincide with files, so, the end of a module should be parsed as the end
 of the file. Whitespaces (newline, tab and space) are ignored. Here is an
@@ -436,7 +436,7 @@ function parse_mod(code, indx) {
     var [indx, term] = parse_trm(code, space(code, indx));
     return Def(name, type, term, parse_mod(code, indx));
   } catch (e) {
-    return Eof;
+    return Eof();
   }
 };
 ```
@@ -446,3 +446,109 @@ In Python:
 ```
 # TODO
 ```
+
+### 1.1.2. Stringification
+
+Stringification is much simpler than parsing. In JavaScript:
+
+```javascript
+// Stringifier
+// ===========
+
+function stringify_trm(term) {
+  switch (term.ctor) {
+    case "Var":
+      return term.name;
+    case "Typ":
+      return "Type";
+    case "All": 
+      var name = term.name;
+      var bind = stringify_trm(term.bind);
+      var body = stringify_trm(term.body);
+      var eras = term.eras ? ";" : "";
+      return "("+name+" : "+bind+eras+") -> "+body;
+    case "Lam": 
+      var name = term.name;
+      var body = stringify_trm(term.body);
+      var eras = term.eras ? ";" : "";
+      return "("+name+eras+") => "+body;
+    case "App":
+      var func = stringify_trm(term.func);
+      var argm = stringify_trm(term.argm);
+      return func+"("+argm+")";
+    case "Slf":
+      var name = term.name;
+      var type = stringify_trm(term.type);
+      return "#{"+name+"} "+type;
+    case "Ins":
+      var type = stringify_trm(term.type);
+      var term = stringify_trm(term.term);
+      return "#inst{"+type+"} "+term;
+    case "Eli":
+      var term = stringify_trm(term.term);
+      return "#elim{"+term+"}";
+    case "Ann":
+      var term = stringify_trm(term.term);
+      var type = stringify_trm(term.type);
+      return term+" :: "+type;
+  }
+};
+
+function stringify_mod(mod) {
+  switch (mod.ctor) {
+    case "Def":
+      var name = mod.name;
+      var type = stringify_trm(mod.type);
+      var term = stringify_trm(mod.term);
+      var defs = stringify_mod(mod.defs);
+      return name + " : " + type + "\n  " + term + "\n\n" + defs;
+    case "Eof":
+      return "";
+  }
+};
+```
+
+### 1.1.X. Exporting
+
+```javascript
+module.exports = {
+  Var,
+  Typ,
+  All,
+  Lam,
+  App,
+  Slf,
+  Ins,
+  Eli,
+  Ann,
+  Def,
+  Eof,
+  is_space,
+  is_blank,
+  is_name,
+  first_valid,
+  drop_while,
+  space,
+  blank,
+  parse_str,
+  parse_opt,
+  parse_nam,
+  parse_par,
+  parse_all,
+  parse_lam,
+  parse_typ,
+  parse_var,
+  parse_slf,
+  parse_ins,
+  parse_eli,
+  parse_app,
+  parse_ann,
+  parse_trm,
+  parse_mod,
+  stringify_trm,
+  stringify_mod,
+};
+```
+
+
+
