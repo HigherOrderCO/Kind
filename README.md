@@ -20,20 +20,17 @@ resembles popular languages and takes inspiration from the [Zen of Python](https
 
 ## 0. Table of Contents
 
-This paper is split in 5 sections:
-
-1. [Formality-Core](#formality-core): our minimal core, specified and
-   implemented in Haskell, Python and JavaScript.
-
-2. Formality-Lang: the user-facing language, specified and implemented in
-   Formality-Core.
-
-3. Formality-Comp, the efficient runtime, specified and implemented in
-   Formality-Core.
-
-4. Examples: example programs and proofs, compilation and interop.
-
-5. Problems: two open problems will be related and discussed.
+- [0. Table of Contents](#table-of-contents)
+- [1. Formality-Core](#formality-core)
+    - [1.0. Syntax definition](#syntax-definition)
+    - [1.1. Syntax implementation](#syntax-implementation)
+        - [1.1.0. AST](#AST)
+        - [1.1.1. Parser](#parser)
+        - [1.1.2. Stringifier](#stringifier)
+- [2. Formality-Lang](#formality-lang)
+- [3. Formality-Comp](#formality-comp)
+- [4. Examples](#examples)
+- [5. Problems](#problems)
 
 ## 1. Formality-Core
 
@@ -44,7 +41,7 @@ Core is the set of axioms from which all of mathematics derive. On this
 section, we'll specify and implement it in 3 popular languages: Haskell, Python
 and JavaScript.
 
-### Syntax definition
+### 1.0. Syntax definition
 
 Formality-Core programs are split as modules (`Module`), each module containing
 a number of definitions, each definition containing 2 expressions (`Term`) for
@@ -106,7 +103,9 @@ A) -> A` type and a `(A) => (a) => a` a value. That value consists of a function
 (`{A} => ...`), that returns a function (`(f) => ...`), that returns a function
 (`(x) => ...`), that returns `f` applied two times to `x`.
 
-### Syntax implementation
+### 1.1. Syntax implementation
+
+#### 1.1.0. AST
 
 In JavaScript, each variant of a term is implemented as a separate function that
 returns a JSON determining which variant it is (in a field we call `ctor`), plus
@@ -208,6 +207,8 @@ def Def(name, type, term, defs):
 def Eof():
     return {"ctor": "Eof"}
 ```
+
+### 1.1.1. Parsing
 
 Parsing is done through a combination of small backtracking parsers that receive
 the code to be parsed and return either a pair with the leftover code and parsed
