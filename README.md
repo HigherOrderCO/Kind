@@ -25,8 +25,17 @@ resembles popular languages and takes inspiration from the [Zen of Python](https
     - [1.0. Syntax definition](#10-syntax-definition)
     - [1.1. Syntax implementation](#11-syntax-implementation)
         - [1.1.0. AST](#110-AST)
+          - [1.1.0.0. JavaScript](#1100-JavaScript)
+          - [1.1.0.1. Python](#1101-Python)
+          - [1.1.0.2. Haskell](#1102-Haskell)
         - [1.1.1. Parser](#111-parser)
+          - [1.1.1.0. JavaScript](#1110-JavaScript)
+          - [1.1.1.1. Python](#1111-Python)
+          - [1.1.1.2. Haskell](#1112-Haskell)
         - [1.1.2. Stringifier](#112-stringifier)
+          - [1.1.2.0. JavaScript](#1120-JavaScript)
+          - [1.1.2.1. Python](#1121-Python)
+          - [1.1.2.2. Haskell](#1122-Haskell)
 - [2. Formality-Lang](#2-formality-lang)
 - [3. Formality-Comp](#3-formality-comp)
 - [4. Examples](#4-examples)
@@ -107,11 +116,13 @@ A) -> A` type and a `(A) => (a) => a` a value. That value consists of a function
 
 #### 1.1.0. AST
 
-In JavaScript, each variant of a term is implemented as a separate function that
-returns a JSON determining which variant it is (in a field we call `ctor`), plus
-its contents (in separate fields). For example, `(a) => a`, is a function (the
-`Lam` variant) with a variable (the `Var` variant), as is represented as
-`{"ctor": "Lam", "body": {"ctor": "Var", "name": "a"}}`.
+For the abstract syntax tree (AST), each variant of a term is implemented as a
+separate function that returns a JSON determining which variant it is (in a
+field we call `ctor`), plus its contents (in separate fields). For example, `(a)
+=> a`, is a function (the `Lam` variant) with a variable (the `Var` variant), as
+is represented as `{"ctor": "Lam", "body": {"ctor": "Var", "name": "a"}}`.
+
+##### 1.1.0.0. JavaScript
 
 ```javascript
 // Term
@@ -165,7 +176,7 @@ function Eof() {
 };
 ```
 
-Python follows a similar structure:
+##### 1.1.0.1. Python
 
 ```python
 # Term
@@ -208,7 +219,13 @@ def Eof():
     return {"ctor": "Eof"}
 ```
 
-### 1.1.1. Parser
+##### 1.1.0.2. Haskell
+
+```haskell
+-- TODO
+```
+
+#### 1.1.1. Parser
 
 Parsing is done through a combination of small backtracking parsers that receive
 the code to be parsed and return either a pair with the leftover code and parsed
@@ -217,7 +234,9 @@ first, a base term is parsed, including the variants `Var`, `Typ`, `All`, `Lam`,
 `Slf`, `Ins` and `Eli`. Afterwards, the term is extended by postfix parsers,
 including the variants `App` and `Ann`. Note that, to avoid ambiguities, postfix
 parsers must be on the same line as the base parser. The code below should be
-considered specifications, up to the tiniest details. In JavaScript:
+considered specifications, up to the tiniest details.
+
+##### 1.1.1.0. JavaScript:
 
 ```javascript
 // Parser
@@ -441,15 +460,23 @@ function parse_mod(code, indx) {
 };
 ```
 
-In Python:
+##### 1.1.1.1. Python:
 
-```
+```python
 # TODO
 ```
 
-### 1.1.2. Stringifier
+##### 1.1.1.2. Haskell:
 
-Stringification is much simpler than parsing. In JavaScript:
+```haskell
+-- TODO
+```
+
+#### 1.1.2. Stringifier
+
+Stringification is much simpler than parsing.
+
+##### 1.1.1.0. JavaScript:
 
 ```javascript
 // Stringifier
@@ -506,6 +533,18 @@ function stringify_mod(mod) {
       return "";
   }
 };
+```
+
+##### 1.1.1.1. Python
+
+```python
+# TODO
+```
+
+##### 1.1.1.2. Haskell
+
+```haskell
+-- TODO
 ```
 
 ### 1.1.X. Exporting
