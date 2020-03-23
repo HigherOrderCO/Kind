@@ -20,17 +20,17 @@ resembles popular languages and takes inspiration from the [Zen of Python](https
 
 ## 0. Table of Contents
 
-- [0. Table of Contents](#table-of-contents)
-- [1. Formality-Core](#formality-core)
-    - [1.0. Syntax definition](#syntax-definition)
-    - [1.1. Syntax implementation](#syntax-implementation)
-        - [1.1.0. AST](#AST)
-        - [1.1.1. Parser](#parser)
-        - [1.1.2. Stringifier](#stringifier)
-- [2. Formality-Lang](#formality-lang)
-- [3. Formality-Comp](#formality-comp)
-- [4. Examples](#examples)
-- [5. Problems](#problems)
+- [0. Table of Contents](#0-table-of-contents)
+- [1. Formality-Core](#1-formality-core)
+    - [1.0. Syntax definition](#10-syntax-definition)
+    - [1.1. Syntax implementation](#11-syntax-implementation)
+        - [1.1.0. AST](#110-AST)
+        - [1.1.1. Parser](#111-parser)
+        - [1.1.2. Stringifier](#112-stringifier)
+- [2. Formality-Lang](#2-formality-lang)
+- [3. Formality-Comp](#3-formality-comp)
+- [4. Examples](#4-examples)
+- [5. Problems](#5-problems)
 
 ## 1. Formality-Core
 
@@ -208,7 +208,7 @@ def Eof():
     return {"ctor": "Eof"}
 ```
 
-### 1.1.1. Parsing
+### 1.1.1. Parser
 
 Parsing is done through a combination of small backtracking parsers that receive
 the code to be parsed and return either a pair with the leftover code and parsed
@@ -447,7 +447,7 @@ In Python:
 # TODO
 ```
 
-### 1.1.2. Stringification
+### 1.1.2. Stringifier
 
 Stringification is much simpler than parsing. In JavaScript:
 
