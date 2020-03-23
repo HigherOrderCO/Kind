@@ -1,10 +1,8 @@
 # Term
+# ====
 
 def Var(name):
     return {"ctor": "Var", "name": name}
-
-def Ref(name):
-    return {"ctor": "Ref", "name": name}
 
 def Typ():
     return {"ctor": "Typ"}
@@ -15,22 +13,27 @@ def All(name, bind, body, eras):
 def Lam(name, body, eras):
     return {"ctor": "Lam", "name": name, "body": body, "eras": eras}
 
-def Slf(name, expr):
-    return {"ctor": "Slf", "name": name, "expr": expr}
+def App(func, argm, eras):
+    return {"ctor": "App", "func": func, "argm": argm, "eras": eras}
 
-def Ins(expr):
-    return {"ctor": "Slf", "expr": expr}
+def Slf(name, type):
+    return {"ctor": "Slf", "name": name, "type": type}
 
-def Eli(expr):
-    return {"ctor": "Eli", "expr": expr}
+def Ins(type, term):
+    return {"ctor": "Slf", "type": type, "term": term}
 
-def Ann(type, expr, done):
-    return {"ctor": "Typ", "expr": expr, "done": done}
+def Eli(term):
+    return {"ctor": "Eli", "term": term}
+
+def Ann(term, type, done):
+    return {"ctor": "Typ", "term": term, "type": type, "done": done}
 
 # Module
+# ======
 
-def Def(name, ttyp, tval, defs):
-    return {"ctor": "Def", "name": name, "ttyp": ttyp, "tval": tval, "defs": defs}
+def Def(name, type, term, defs):
+    return {"ctor": "Def", "name": name, "type": type, "term": term, "defs": defs}
 
 def Eof():
     return {"ctor": "Eof"}
+
