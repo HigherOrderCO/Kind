@@ -1,6 +1,6 @@
-var fmc = require("./formality_core.js");
+from formality_core import *
 
-var code = `
+code = """
   Bool : Type
     (A : Type;) -> (t : A) -> (f : A) -> A
 
@@ -9,6 +9,6 @@ var code = `
 
   false : Bool
     (A;) => (t) => (f) => f
-`;
+"""
 
-console.log(fmc.stringify_mod(fmc.parse_mod(code, 0)));
+print stringify_mod(parse_mod(code, 0))

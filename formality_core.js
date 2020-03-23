@@ -151,7 +151,7 @@ function parse_all(code, indx) {
   var [indx, name] = parse_nam(code, space(code, indx));
   var [indx, skip] = parse_str(":", code, space(code, indx));
   var [indx, bind] = parse_trm(code, indx);
-  var [indx, eras] = parse_opt(";", code, space(indx, indx));
+  var [indx, eras] = parse_opt(";", code, space(code, indx));
   var [indx, skip] = parse_str(")", code, space(code, indx));
   var [indx, skip] = parse_str("->", code, space(code, indx));
   var [indx, body] = parse_trm(code, indx);
@@ -162,7 +162,7 @@ function parse_all(code, indx) {
 function parse_lam(code, indx) {
   var [indx, skip] = parse_str("(", code, space(code, indx));
   var [indx, name] = parse_nam(code, space(code, indx));
-  var [indx, eras] = parse_opt(";", code, space(indx, indx));
+  var [indx, eras] = parse_opt(";", code, space(code, indx));
   var [indx, skip] = parse_str(")", code, space(code, indx));
   var [indx, skip] = parse_str("=>", code, space(code, indx));
   var [indx, body] = parse_trm(code, indx);
@@ -170,7 +170,7 @@ function parse_lam(code, indx) {
 };
 
 // Parses the type of types, `Type`
-function parse_typ(code, indx, vars) {
+function parse_typ(code, indx) {
   var [indx, skip] = parse_str("Type", code, space(code, indx));
   return [indx, Typ()];
 };
@@ -208,7 +208,7 @@ function parse_eli(code, indx) {
 };
 
 // Parses an application, `<term>(<term>)`
-function parse_app(code, indx, func, eras) {
+function parse_app(code, indx, func) {
   var [indx, skip] = parse_str("(", code, blank(code, indx));
   var [indx, argm] = parse_trm(code, indx);
   var [indx, eras] = parse_opt(";", code, indx);
@@ -291,7 +291,8 @@ function stringify_trm(term) {
     case "App":
       var func = stringify_trm(term.func);
       var argm = stringify_trm(term.argm);
-      return func+"("+argm+")";
+      var eras = term.eras ? ";" : "";
+      return "("+func+")("+argm+eras+")";
     case "Slf":
       var name = term.name;
       var type = stringify_trm(term.type);
