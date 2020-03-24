@@ -3,12 +3,12 @@ Formality
 
 Formality is a proof and programming language, as well as a standard format for
 algorithms and proofs. It exists to fill a hole in the current market: there
-aren't many programming languages featuring theorem proving that are 1. simple,
-2. efficient and 3. accessible.
+aren't many programming languages featuring theorem proving that are 1.
+portable, 2. efficient, 3. accessible.
 
-**Simplicity** makes it easy to understand and implement. We accomplish that by
-building the whole language on top of a minimal type-theory based on self-types
-that can be understood and implemented by a developer in a work day.
+**Portability** makes it available everywhere, like a JSON of code. We
+accomplish that by bootstrapping: we design a minimal core that can be quickly
+implemented anywhere, and build the rest of the language on top of it.
 
 **Efficiency** is required if we want the language to be used for production
 software. We accomplish that by compiling Formality to a massively parallel,
