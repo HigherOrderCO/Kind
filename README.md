@@ -23,20 +23,26 @@ Python](https://www.python.org/dev/peps/pep-0020/).
 
 - [0. Table of Contents](#0-table-of-contents)
 - [1. Formality-Core](#1-formality-core)
-    - [1.0. Syntax definition](#10-syntax-definition)
-    - [1.1. Syntax implementation](#11-syntax-implementation)
-        - [1.1.0. AST](#110-AST)
+    - [1.0. Definition](#10-definition)
+        - [1.0.0. Syntax](#100-syntax)
+        - [1.0.1. Evaluation](#101-evaluation)
+    - [1.1. Implementation](#11-implementation)
+        - [1.1.0. Terms and Modules](#110-terms-and-modules)
           - [1.1.0.0. JavaScript](#1100-JavaScript)
           - [1.1.0.1. Python](#1101-Python)
           - [1.1.0.2. Haskell](#1102-Haskell)
-        - [1.1.1. Parser](#111-parser)
+        - [1.1.1. Parsing](#111-parsing)
           - [1.1.1.0. JavaScript](#1110-JavaScript)
           - [1.1.1.1. Python](#1111-Python)
           - [1.1.1.2. Haskell](#1112-Haskell)
-        - [1.1.2. Stringifier](#112-stringifier)
+        - [1.1.2. Stringification](#112-stringification)
           - [1.1.2.0. JavaScript](#1120-JavaScript)
           - [1.1.2.1. Python](#1121-Python)
           - [1.1.2.2. Haskell](#1122-Haskell)
+        - [1.1.3. Evaluation](#113-evaluation)
+          - [1.1.3.0. JavaScript](#1130-JavaScript)
+          - [1.1.3.1. Python](#1131-Python)
+          - [1.1.3.2. Haskell](#1132-Haskell)
 - [2. Formality-Lang](#2-formality-lang)
 - [3. Formality-Comp](#3-formality-comp)
 - [4. Examples](#4-examples)
@@ -51,7 +57,9 @@ Core is the set of axioms from which all of mathematics derive. On this
 section, we'll specify and implement it in 3 popular languages: Haskell, Python
 and JavaScript.
 
-### 1.0. Syntax definition
+### 1.0. Definition
+
+#### 1.0.0. Syntax
 
 Formality-Core programs are split as modules (`Module`), each module containing
 a number of definitions, each definition containing 2 expressions (`Term`) for
@@ -113,15 +121,43 @@ A) -> A` type and a `(A) => (a) => a` a value. That value consists of a function
 (`{A} => ...`), that returns a function (`(f) => ...`), that returns a function
 (`(x) => ...`), that returns `f` applied two times to `x`.
 
-### 1.1. Syntax implementation
+#### 1.1.3. Evaluation
 
-#### 1.1.0. AST
+Evaluating Formality-Core programs means applying functions repeatedly until
+there is nothing left to do. That is a pure operation that can't output messages
+nor write files to disk; instead, it merely transforms an expression into
+another, not unlike calling `eval` in a JavaScript expression containing only
+numbers and arithmetic operations.
 
-For the abstract syntax tree (AST), each variant of a term is implemented as a
-separate function that returns a JSON determining which variant it is (in a
-field we call `ctor`), plus its contents (in separate fields). For example, `(a)
-=> a`, is a function (the `Lam` variant) with a variable (the `Var` variant), as
-is represented as `{"ctor": "Lam", "body": {"ctor": "Var", "name": "a"}}`.
+Formality-Core is, essentially, the Lambda Calculus, which is just a fancy name
+for the subset of JavaScript and Python that has only functions. Its first
+primitive operation, the beta reduction, is, again, a fancy name, for "function
+application". To be precise, it says that, to evaluate a term in the shape `((x)
+=> <body>)(<argm>)`, one must make sure that `<argm>` doesn't have any variable
+named `x`, replace every occurrence of `x` by `<argm>` in `<body>` and return
+`<body>. The second primitive operation, dereference, merely substitutes
+references to top-level definitions by their values.
+
+For example, this program: `(k) => ((x) => (t) => t(x)(x))((y) => y)` is
+evaluated to `(k) => (t) => t((y) => y)((y) => y)` after one beta-reduction.
+Since there are no more beta-reductions left, the evaluation is complete, or in
+"normal form". If that process isn't clear, a separate study of the Lambda
+Calculus might be helpful.
+
+Formality-Core doesn't define any evaluation order or strategy. It could be
+evaluated strictly as in JavaScripy and Python, lazily as in Haskell, or
+optimally through interaction nets. This subject will be covered on the
+Formality-Comp section.
+
+### 1.1. Implementation
+
+#### 1.1.0. Terms and Modules
+
+Each variant of a term is implemented as a separate function that returns a JSON
+determining which variant it is (in a field we call `ctor`), plus its contents
+(in separate fields). For example, `(a) => a`, is a function (the `Lam` variant)
+with a variable (the `Var` variant), as is represented as `{"ctor": "Lam",
+"body": {"ctor": "Var", "name": "a"}}`.
 
 ##### 1.1.0.0. JavaScript
 
@@ -226,7 +262,7 @@ def Eof():
 -- TODO
 ```
 
-#### 1.1.1. Parser
+#### 1.1.1. Parsing
 
 Parsing is done through a combination of small backtracking parsers that receive
 the code to be parsed and return either a pair with the leftover code and parsed
@@ -240,17 +276,12 @@ considered specifications, up to the tiniest details.
 ##### 1.1.1.0. JavaScript:
 
 ```javascript
-// Parser
-// ======
+// Parse
+// =====
 
 // Is this a space character?
 function is_space(chr) {
   return chr === " " || chr === "\t" || chr === "\n";
-};
-
-// Is this a blank (space but not newline) character?
-function is_blank(chr) {
-  return chr === " " || chr === "\t";
 };
 
 // Is this a name-valid character?
@@ -285,11 +316,6 @@ function drop_while(cond, code, indx) {
 // Drop spaces
 function space(code, indx) {
   return drop_while(is_space, code, indx);
-};
-
-// Skips blanks (spaces and newlines)
-function blank(code, indx) {
-  return drop_while(is_blank, code, indx);
 };
 
 // Drops spaces and parses an exact string
@@ -401,16 +427,16 @@ function parse_eli(code, indx) {
 
 // Parses an application, `<term>(<term>)`
 function parse_app(code, indx, func) {
-  var [indx, skip] = parse_str("(", code, blank(code, indx));
+  var [indx, skip] = parse_str("(", code, indx);
   var [indx, argm] = parse_trm(code, indx);
-  var [indx, eras] = parse_opt(";", code, indx);
+  var [indx, eras] = parse_opt(";", code, space(code, indx));
   var [indx, skip] = parse_str(")", code, space(code, indx));
   return [indx, App(func, argm, eras)];
 };
 
 // Parses an annotation, `<term> :: <term>`
 function parse_ann(code, indx, term) {
-  var [indx, skip] = parse_str("::", code, blank(code, indx));
+  var [indx, skip] = parse_str("::", code, space(code, indx));
   var [indx, type] = parse_trm(code, indx);
   return [indx, Ann(term, type, false)];
 };
@@ -464,16 +490,12 @@ function parse_mod(code, indx) {
 ##### 1.1.1.1. Python:
 
 ```python
-# Parser
-# ======
+# Parse
+# =====
 
 # Is this a space character?
 def is_space(val):
     return val == " " or val == "\t" or val == "\n"
-
-# Is this a blank (space but not newline) character?
-def is_blank(val):
-    return val == " " or val == "\t"
 
 # Is this a name-valid character?
 def is_name(val):
@@ -501,10 +523,6 @@ def drop_while(cond, code, indx):
 # Drop spaces
 def space(code, indx):
     return drop_while(is_space, code, indx)
-
-# Skips blanks (spaces and newlines)
-def blank(code, indx):
-    return drop_while(is_blank, code, indx)
 
 # Drops spaces and parses an exact string
 def parse_str(str, code, indx):
@@ -600,15 +618,15 @@ def parse_eli(code, indx):
 
 # Parses an application, `<term>(<term>)`
 def parse_app(code, indx, func):
-    [indx, skip] = parse_str("(", code, blank(code, indx))
+    [indx, skip] = parse_str("(", code, indx)
     [indx, argm] = parse_trm(code, indx)
-    [indx, eras] = parse_opt(";", code, indx)
+    [indx, eras] = parse_opt(";", code, space(code, indx))
     [indx, skip] = parse_str(")", code, space(code, indx))
     return [indx, App(func, argm, eras)]
 
 # Parses an annotation, `<term> :: <term>`
 def parse_ann(code, indx, term):
-    [indx, skip] = parse_str("::", code, blank(code, indx))
+    [indx, skip] = parse_str("::", code, space(code, indx))
     [indx, type] = parse_trm(code, indx)
     return [indx, Ann(term, type, False)]
 
@@ -659,15 +677,17 @@ def parse_mod(code, indx):
 -- TODO
 ```
 
-#### 1.1.2. Stringifier
+#### 1.1.2. Stringification
 
-Stringification is much simpler than parsing.
+Stringification is considerably simpler than parsing. It simply requires us to
+recursively scan the term and convert variants to their respective textual
+representations.
 
 ##### 1.1.2.0. JavaScript:
 
 ```javascript
-// Stringifier
-// ===========
+// Stringify
+// =========
 
 function stringify_trm(term) {
   switch (term.ctor) {
@@ -726,8 +746,8 @@ function stringify_mod(mod) {
 ##### 1.1.2.1. Python
 
 ```python
-# Stringifier
-# ===========
+# Stringify
+# =========
 
 def stringify_trm(term):
     if term["ctor"] == "Var":
@@ -783,6 +803,258 @@ def stringify_mod(mod):
 -- TODO
 ```
 
+### 1.1.3. Evaluation
+
+The reference implementation of evaluation uses the high-order abstract syntax
+strategy. That is, the syntax tree, previously stored as a JSON, is converted
+into a representation that uses functions on binders. For example, the term 
+`((a) => (b) => b(a))(x => x)`, which would be represented as:
+
+```json
+{
+  ctor: "App",
+  func: {
+    ctor: "Lam"
+    name: "a",
+    body: {
+      ctor: "Lam",
+      name: "b",
+      body: {
+        ctor: "App",
+        func: {ctor: "Var", name: "a"},
+        argm: {ctor: "Var", name: "b"}
+      }
+    }
+  },
+  func: {
+    ctor: "Lam"
+    name: "x",
+    body: {ctor: "Var", name: "x"}
+  }
+}
+```
+
+Is converted into a new "high-order" format by replacing variables by native functions:
+    
+```json
+{
+  ctor: "App",
+  func: {
+    ctor: "Lam"
+    name: "a",
+    body: a => {
+      ctor: "Lam",
+      name: "b",
+      body: b => {
+        ctor: "App",
+        func: a,
+        argm: b
+      }
+    }
+  },
+  func: {
+    ctor: "Lam"
+    name: "x",
+    body: x => x
+  }
+}
+```
+
+That format is then evaluated by finding redexes, that is, sub-terms in the shape:
+
+```json
+{ctor: "App", func: {ctor: "Lam", body: x => <BODY>}, argm: <ARGM>}
+```
+
+And replacing them by `(x => <BODY>)(<ARGM>)`. Since this process uses native
+functions under the hoods, it is both fast and simple to implement. Note there
+are other ways to evaluate Formality-Core terms; this is just the one used on
+the reference code.
+
+We'll need 7 new functions: `find`, which searches a variable in a module,
+`to_high_order` and `to_low_order`, which convert a term between the formats
+described above, and `normalize_high_order` and `reduce_high_order`, which finds
+and rewrites redexes on high-order terms, with and without going under binders,
+respectivelly, and `normalize` and `reduce`, the same functions for the low
+order formats.
+
+##### 1.1.3.0. JavaScript
+
+```javascript
+// Evaluation
+// ==========
+
+function find(name, defs) {
+  switch (defs.ctor) {
+    case "Def":
+      if (name === defs.name) {
+        return {name: defs.name, type: defs.type, term: defs.term};
+      } else {
+        return find(name, defs.defs);
+      }
+    case "Eof":
+      return null;
+  };
+};
+
+function to_high_order(term, vars) {
+  switch (term.ctor) {
+    case "Var":
+      var got = find(term.name, vars);
+      if (got) {
+        return got.term;
+      } else {
+        return Var(term.name);
+      }
+    case "Typ":
+      return Typ();
+    case "All": 
+      var name = term.name;
+      var bind = to_high_order(term.bind, vars);
+      var body = x => to_high_order(term.body, Def(term.name, bind, x, vars));
+      var eras = term.eras;
+      return All(name, bind, body, eras);
+    case "Lam": 
+      var name = term.name;
+      var body = x => to_high_order(term.body, Def(term.name, bind, x, vars));
+      var eras = term.eras;
+      return Lam(name, body, eras);
+    case "App":
+      var func = to_high_order(term.func, vars);
+      var argm = to_high_order(term.argm, vars);
+      var eras = term.eras;
+      return App(func, argm, eras);
+    case "Slf":
+      var name = term.name;
+      var type = x => to_high_order(term.type, Def(term.name, bind, x, vars));
+      return Slf(name, type)
+    case "Ins":
+      var type = to_high_order(term.type, vars);
+      var term = to_high_order(term.term, vars);
+      return Ins(type, term);
+    case "Eli":
+      var term = to_high_order(term.term, vars);
+      return Eli(term);
+    case "Ann":
+      var term = to_high_order(term.term, vars);
+      var type = to_high_order(term.type, vars);
+      return Ann(term, type);
+  }
+};
+
+function to_low_order(term, depth) {
+  switch (term.ctor) {
+    case "Var":
+      return Var(term.name);
+    case "Typ":
+      return Typ();
+    case "All": 
+      var name = "x" + depth;
+      var bind = to_low_order(term.bind, depth);
+      var body = to_low_order(term.body(Var(name)), depth + 1);
+      var eras = term.eras;
+      return All(name, bind, body, eras);
+    case "Lam": 
+      var name = "x" + depth;
+      var body = to_low_order(term.body(Var(name)), depth + 1);
+      var eras = term.eras;
+      return Lam(name, body, eras);
+    case "App":
+      var func = to_low_order(term.func, depth);
+      var argm = to_low_order(term.argm, depth);
+      var eras = term.eras;
+      return App(func, argm, eras);
+    case "Slf":
+      var name = "x" + depth;
+      var type = to_low_order(term.type(Var(name)), depth + 1);
+      return Slf(name, type);
+    case "Ins":
+      var type = to_low_order(term.type, depth);
+      var term = to_low_order(term.term, depth);
+      return Ins(type, term);
+    case "Eli":
+      var term = to_low_order(term.term, depth);
+      return Eli(term);
+    case "Ann":
+      var term = to_low_order(term.term, depth);
+      var type = to_low_order(term.type, depth);
+      return Ann(term, type);
+  }
+};
+
+function reduce_high_order(term) {
+  switch (term.ctor) {
+    case "Var":
+      return Var(term.name);
+    case "Typ":
+      return Typ();
+    case "Lam":
+      var name = term.name;
+      var body = term.body;
+      var eras = term.eras;
+      return Lam(name, body, eras);
+    case "App":
+      var func = reduce_high_order(term.func);
+      switch (func.ctor) {
+        case "Lam":
+          return reduce_high_order(func.body(term.argm));
+        default:
+          return App(func, reduce_high_order(term.argm));
+      };
+    case "Slf":
+      var name = term.name;
+      var type = term.type;
+      return Slf(name, type);
+    case "Ins":
+      return reduce_high_order(term.term);
+    case "Eli":
+      return reduce_high_order(term.term);
+    case "Ann":
+      return reduce_high_order(term.term);
+  };
+};
+
+function normalize_high_order(term) {
+  switch (term.ctor) {
+    case "Var":
+      return Var(term.name);
+    case "Typ":
+      return Typ();
+    case "Lam":
+      var name = term.name;
+      var body = x => normalize_high_order(term.body(x));
+      var eras = term.eras;
+      return Lam(name, body, eras);
+    case "App":
+      var func = reduce_high_order(term.func);
+      switch (func.ctor) {
+        case "Lam":
+          return normalize_high_order(func.body(term.argm));
+        default:
+          return App(func, normalize_high_order(term.argm));
+      };
+    case "Slf":
+      var name = term.name;
+      var type = normalize_high_order(term.type);
+      return Slf(name, type);
+    case "Ins":
+      return normalize_high_order(term.term);
+    case "Eli":
+      return normalize_high_order(term.term);
+    case "Ann":
+      return normalize_high_order(term.term);
+  };
+};
+
+function reduce(term) {
+  return to_low_order(reduce_high_order(to_high_order(term, Eof())), 0);
+};
+
+function normalize(term) {
+  return to_low_order(normalize_high_order(to_high_order(term, Eof())), 0);
+};
+```
+
 ### 1.1.X. Exporting
 
 ```javascript
@@ -799,12 +1071,10 @@ module.exports = {
   Def,
   Eof,
   is_space,
-  is_blank,
   is_name,
   first_valid,
   drop_while,
   space,
-  blank,
   parse_str,
   parse_opt,
   parse_nam,
@@ -822,6 +1092,13 @@ module.exports = {
   parse_mod,
   stringify_trm,
   stringify_mod,
+  find,
+  to_high_order,
+  to_low_order,
+  reduce_high_order,
+  normalize_high_order,
+  reduce,
+  normalize,
 };
 ```
 

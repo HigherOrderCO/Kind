@@ -37,16 +37,12 @@ def Def(name, type, term, defs):
 def Eof():
     return {"ctor": "Eof"}
 
-# Parser
-# ======
+# Parse
+# =====
 
 # Is this a space character?
 def is_space(val):
     return val == " " or val == "\t" or val == "\n"
-
-# Is this a blank (space but not newline) character?
-def is_blank(val):
-    return val == " " or val == "\t"
 
 # Is this a name-valid character?
 def is_name(val):
@@ -74,10 +70,6 @@ def drop_while(cond, code, indx):
 # Drop spaces
 def space(code, indx):
     return drop_while(is_space, code, indx)
-
-# Skips blanks (spaces and newlines)
-def blank(code, indx):
-    return drop_while(is_blank, code, indx)
 
 # Drops spaces and parses an exact string
 def parse_str(str, code, indx):
@@ -173,15 +165,15 @@ def parse_eli(code, indx):
 
 # Parses an application, `<term>(<term>)`
 def parse_app(code, indx, func):
-    [indx, skip] = parse_str("(", code, blank(code, indx))
+    [indx, skip] = parse_str("(", code, indx)
     [indx, argm] = parse_trm(code, indx)
-    [indx, eras] = parse_opt(";", code, indx)
+    [indx, eras] = parse_opt(";", code, space(code, indx))
     [indx, skip] = parse_str(")", code, space(code, indx))
     return [indx, App(func, argm, eras)]
 
 # Parses an annotation, `<term> :: <term>`
 def parse_ann(code, indx, term):
-    [indx, skip] = parse_str("::", code, blank(code, indx))
+    [indx, skip] = parse_str("::", code, space(code, indx))
     [indx, type] = parse_trm(code, indx)
     return [indx, Ann(term, type, False)]
 
@@ -225,8 +217,8 @@ def parse_mod(code, indx):
     except:
         return Eof()
 
-# Stringifier
-# ===========
+# Stringify
+# =========
 
 def stringify_trm(term):
     if term["ctor"] == "Var":

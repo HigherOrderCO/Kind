@@ -48,17 +48,12 @@ function Eof() {
   return {ctor: "Eof"};
 };
 
-// Parser
-// ======
+// Parse
+// =====
 
 // Is this a space character?
 function is_space(chr) {
   return chr === " " || chr === "\t" || chr === "\n";
-};
-
-// Is this a blank (space but not newline) character?
-function is_blank(chr) {
-  return chr === " " || chr === "\t";
 };
 
 // Is this a name-valid character?
@@ -93,11 +88,6 @@ function drop_while(cond, code, indx) {
 // Drop spaces
 function space(code, indx) {
   return drop_while(is_space, code, indx);
-};
-
-// Skips blanks (spaces and newlines)
-function blank(code, indx) {
-  return drop_while(is_blank, code, indx);
 };
 
 // Drops spaces and parses an exact string
@@ -209,16 +199,16 @@ function parse_eli(code, indx) {
 
 // Parses an application, `<term>(<term>)`
 function parse_app(code, indx, func) {
-  var [indx, skip] = parse_str("(", code, blank(code, indx));
+  var [indx, skip] = parse_str("(", code, indx);
   var [indx, argm] = parse_trm(code, indx);
-  var [indx, eras] = parse_opt(";", code, indx);
+  var [indx, eras] = parse_opt(";", code, space(code, indx));
   var [indx, skip] = parse_str(")", code, space(code, indx));
   return [indx, App(func, argm, eras)];
 };
 
 // Parses an annotation, `<term> :: <term>`
 function parse_ann(code, indx, term) {
-  var [indx, skip] = parse_str("::", code, blank(code, indx));
+  var [indx, skip] = parse_str("::", code, space(code, indx));
   var [indx, type] = parse_trm(code, indx);
   return [indx, Ann(term, type, false)];
 };
@@ -268,8 +258,8 @@ function parse_mod(code, indx) {
   }
 };
 
-// Stringifier
-// ===========
+// Stringify
+// =========
 
 function stringify_trm(term) {
   switch (term.ctor) {
@@ -324,6 +314,179 @@ function stringify_mod(mod) {
   }
 };
 
+// Evaluation
+// ==========
+
+function find(name, defs) {
+  switch (defs.ctor) {
+    case "Def":
+      if (name === defs.name) {
+        return {name: defs.name, type: defs.type, term: defs.term};
+      } else {
+        return find(name, defs.defs);
+      }
+    case "Eof":
+      return null;
+  };
+};
+
+function to_high_order(term, vars) {
+  switch (term.ctor) {
+    case "Var":
+      var got = find(term.name, vars);
+      if (got) {
+        return got.term;
+      } else {
+        return Var(term.name);
+      }
+    case "Typ":
+      return Typ();
+    case "All": 
+      var name = term.name;
+      var bind = to_high_order(term.bind, vars);
+      var body = x => to_high_order(term.body, Def(term.name, bind, x, vars));
+      var eras = term.eras;
+      return All(name, bind, body, eras);
+    case "Lam": 
+      var name = term.name;
+      var body = x => to_high_order(term.body, Def(term.name, bind, x, vars));
+      var eras = term.eras;
+      return Lam(name, body, eras);
+    case "App":
+      var func = to_high_order(term.func, vars);
+      var argm = to_high_order(term.argm, vars);
+      var eras = term.eras;
+      return App(func, argm, eras);
+    case "Slf":
+      var name = term.name;
+      var type = x => to_high_order(term.type, Def(term.name, bind, x, vars));
+      return Slf(name, type)
+    case "Ins":
+      var type = to_high_order(term.type, vars);
+      var term = to_high_order(term.term, vars);
+      return Ins(type, term);
+    case "Eli":
+      var term = to_high_order(term.term, vars);
+      return Eli(term);
+    case "Ann":
+      var term = to_high_order(term.term, vars);
+      var type = to_high_order(term.type, vars);
+      return Ann(term, type);
+  }
+};
+
+function to_low_order(term, depth) {
+  switch (term.ctor) {
+    case "Var":
+      return Var(term.name);
+    case "Typ":
+      return Typ();
+    case "All": 
+      var name = "x" + depth;
+      var bind = to_low_order(term.bind, depth);
+      var body = to_low_order(term.body(Var(name)), depth + 1);
+      var eras = term.eras;
+      return All(name, bind, body, eras);
+    case "Lam": 
+      var name = "x" + depth;
+      var body = to_low_order(term.body(Var(name)), depth + 1);
+      var eras = term.eras;
+      return Lam(name, body, eras);
+    case "App":
+      var func = to_low_order(term.func, depth);
+      var argm = to_low_order(term.argm, depth);
+      var eras = term.eras;
+      return App(func, argm, eras);
+    case "Slf":
+      var name = "x" + depth;
+      var type = to_low_order(term.type(Var(name)), depth + 1);
+      return Slf(name, type);
+    case "Ins":
+      var type = to_low_order(term.type, depth);
+      var term = to_low_order(term.term, depth);
+      return Ins(type, term);
+    case "Eli":
+      var term = to_low_order(term.term, depth);
+      return Eli(term);
+    case "Ann":
+      var term = to_low_order(term.term, depth);
+      var type = to_low_order(term.type, depth);
+      return Ann(term, type);
+  }
+};
+
+function reduce_high_order(term) {
+  switch (term.ctor) {
+    case "Var":
+      return Var(term.name);
+    case "Typ":
+      return Typ();
+    case "Lam":
+      var name = term.name;
+      var body = term.body;
+      var eras = term.eras;
+      return Lam(name, body, eras);
+    case "App":
+      var func = reduce_high_order(term.func);
+      switch (func.ctor) {
+        case "Lam":
+          return reduce_high_order(func.body(term.argm));
+        default:
+          return App(func, reduce_high_order(term.argm));
+      };
+    case "Slf":
+      var name = term.name;
+      var type = term.type;
+      return Slf(name, type);
+    case "Ins":
+      return reduce_high_order(term.term);
+    case "Eli":
+      return reduce_high_order(term.term);
+    case "Ann":
+      return reduce_high_order(term.term);
+  };
+};
+
+function normalize_high_order(term) {
+  switch (term.ctor) {
+    case "Var":
+      return Var(term.name);
+    case "Typ":
+      return Typ();
+    case "Lam":
+      var name = term.name;
+      var body = x => normalize_high_order(term.body(x));
+      var eras = term.eras;
+      return Lam(name, body, eras);
+    case "App":
+      var func = reduce_high_order(term.func);
+      switch (func.ctor) {
+        case "Lam":
+          return normalize_high_order(func.body(term.argm));
+        default:
+          return App(func, normalize_high_order(term.argm));
+      };
+    case "Slf":
+      var name = term.name;
+      var type = normalize_high_order(term.type);
+      return Slf(name, type);
+    case "Ins":
+      return normalize_high_order(term.term);
+    case "Eli":
+      return normalize_high_order(term.term);
+    case "Ann":
+      return normalize_high_order(term.term);
+  };
+};
+
+function reduce(term) {
+  return to_low_order(reduce_high_order(to_high_order(term, Eof())), 0);
+};
+
+function normalize(term) {
+  return to_low_order(normalize_high_order(to_high_order(term, Eof())), 0);
+};
+
 module.exports = {
   Var,
   Typ,
@@ -337,12 +500,10 @@ module.exports = {
   Def,
   Eof,
   is_space,
-  is_blank,
   is_name,
   first_valid,
   drop_while,
   space,
-  blank,
   parse_str,
   parse_opt,
   parse_nam,
@@ -360,5 +521,12 @@ module.exports = {
   parse_mod,
   stringify_trm,
   stringify_mod,
+  find,
+  to_high_order,
+  to_low_order,
+  reduce_high_order,
+  normalize_high_order,
+  reduce,
+  normalize,
 };
 
