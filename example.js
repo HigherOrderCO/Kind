@@ -14,8 +14,9 @@ var code = `
   not : (b : Bool) -> Bool
     (A;) => (t) => (f) => b(Bool;)(f)(t)
 
-  main : TempTest
-    ((f) => (x) => f(f(x)))((f) => (x) => f(f(x)))
+  main : Test
+    ((A) => (B) => (C) => (x) => (y) => (z) => y)
+    :: (A : Type) -> (B : Type) -> (C : Type) -> (x : A) -> (y : B) -> (z : C) -> A
 `;
 
 // Parses module
@@ -25,4 +26,7 @@ var module = fmc.parse_mod(code, 0);
 console.log(fmc.stringify_mod(module));
 
 // Reduces `main` to normal form
-console.log(fmc.stringify_trm(fmc.normalize(fmc.find("main", module).term)));
+var main = fmc.find(module, x => x.name === "main").value.term;
+
+console.log(fmc.stringify_trm(fmc.normalize(main)));
+console.log(fmc.stringify_trm(fmc.typecheck(main)));

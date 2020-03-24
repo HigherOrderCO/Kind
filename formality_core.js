@@ -1,8 +1,12 @@
 // Term
 // ====
 
-function Var(name) {
-  return {ctor: "Var", name};
+function Var(indx) {
+  return {ctor: "Var", indx};
+};
+
+function Ref(name) {
+  return {ctor: "Ref", name};
 };
 
 function Typ() {
@@ -25,31 +29,52 @@ function Slf(name, type) {
   return {ctor: "Slf", name, type};
 };
 
-function Ins(type, term) {
-  return {ctor: "Ins", type, term};
+function Ins(type, expr) {
+  return {ctor: "Ins", type, expr};
 };
 
-function Eli(term) {
-  return {ctor: "Eli", term};
+function Eli(expr) {
+  return {ctor: "Eli", expr};
 };
 
-function Ann(term, type, done) {
-  return {ctor: "Ann", term, type, done};
+function Ann(expr, type, done) {
+  return {ctor: "Ann", expr, type, done};
+};
+
+// List
+// ====
+
+function Ext(head, tail) {
+  return {ctor: "Ext", head, tail};
+};
+
+function Nil() {
+  return {ctor: "Nil"};
 };
 
 // Module
 // ======
 
-function Def(name, type, term, defs) {
-  return {ctor: "Def", name, type, term, defs};
+function Def(name, type, term) {
+  return {ctor: "Def", name, type, term};
 };
 
-function Eof() {
-  return {ctor: "Eof"};
-};
+// Parsing
+// =======
 
-// Parse
-// =====
+// Finds a value in a list
+function find(list, cond, indx = 0) {
+  switch (list.ctor) {
+    case "Ext":
+      if (cond(list.head, indx)) {
+        return {value: list.head, index: indx};
+      } else {
+        return find(list.tail, cond, indx + 1);
+      }
+    case "Nil":
+      return null;
+  };
+};
 
 // Is this a space character?
 function is_space(chr) {
@@ -111,16 +136,12 @@ function parse_opt(chr, code, indx) {
 };
 
 // Parses a valid name, non-empty
-function parse_nam(code, indx, len = 0) {
-  if (indx < code.length) {
-    var chr = code[indx];
-    if (is_name(chr)) {
-      var [indx, name] = parse_nam(code, indx + 1, len + 1);
-      return [indx, chr + name];
-    } else {
-      return [indx, ""];
-    }
-  } else if (len > 0) {
+function parse_nam(code, indx, size = 0) {
+  if (indx < code.length && is_name(code[indx])) {
+    var head = code[indx];
+    var [indx, tail] = parse_nam(code, indx + 1, size + 1);
+    return [indx, head + tail];
+  } else if (size > 0) {
     return [indx, ""];
   } else {
     throw new Error();
@@ -128,103 +149,108 @@ function parse_nam(code, indx, len = 0) {
 };
 
 // Parses a parenthesis, `(<term>)`
-function parse_par(code, indx) {
+function parse_par(code, indx, vars) {
   var [indx, skip] = parse_str("(", code, space(code, indx));
-  var [indx, term] = parse_trm(code, indx);
+  var [indx, term] = parse_trm(code, indx, vars);
   var [indx, skip] = parse_str(")", code, space(code, indx));
   return [indx, term];
 };
 
 // Parses a dependent function type, `(<name> : <term>) => <term>`
-function parse_all(code, indx) {
+function parse_all(code, indx, vars) {
   var [indx, skip] = parse_str("(", code, space(code, indx));
   var [indx, name] = parse_nam(code, space(code, indx));
   var [indx, skip] = parse_str(":", code, space(code, indx));
-  var [indx, bind] = parse_trm(code, indx);
+  var [indx, bind] = parse_trm(code, indx, vars);
   var [indx, eras] = parse_opt(";", code, space(code, indx));
   var [indx, skip] = parse_str(")", code, space(code, indx));
   var [indx, skip] = parse_str("->", code, space(code, indx));
-  var [indx, body] = parse_trm(code, indx);
+  var [indx, body] = parse_trm(code, indx, Ext(name, vars));
   return [indx, All(name, bind, body, eras)];
 };
 
 // Parses a dependent function value, `(<name>) => <term>`
-function parse_lam(code, indx) {
+function parse_lam(code, indx, vars) {
   var [indx, skip] = parse_str("(", code, space(code, indx));
   var [indx, name] = parse_nam(code, space(code, indx));
   var [indx, eras] = parse_opt(";", code, space(code, indx));
   var [indx, skip] = parse_str(")", code, space(code, indx));
   var [indx, skip] = parse_str("=>", code, space(code, indx));
-  var [indx, body] = parse_trm(code, indx);
+  var [indx, body] = parse_trm(code, indx, Ext(name, vars));
   return [indx, Lam(name, body, eras)];
 };
 
 // Parses the type of types, `Type`
-function parse_typ(code, indx) {
+function parse_typ(code, indx, vars) {
   var [indx, skip] = parse_str("Type", code, space(code, indx));
   return [indx, Typ()];
 };
 
 // Parses variables, `<name>`
-function parse_var(code, indx) {
+function parse_var(code, indx, vars) {
   var [indx, name] = parse_nam(code, space(code, indx));
-  return [indx, Var(name)];
+  var got = find(vars, (x,i) => x === name);
+  if (got) {
+    return [indx, Var(got.index)];
+  } else {
+    return [indx, Ref(name)];
+  };
 };
 
 // Parses a self type, `#{<name>} <term>`
-function parse_slf(code, indx) {
+function parse_slf(code, indx, vars) {
   var [indx, skip] = parse_str("#{", code, space(code, indx));
   var [indx, name] = parse_nam(code, space(code, indx));
   var [indx, skip] = parse_str("}", code, space(code, indx));
-  var [indx, type] = parse_trm(code, indx);
+  var [indx, type] = parse_trm(code, indx, Ext(name, vars));
   return [indx, Slf(name, type)];
 };
 
 // Parses a self instantiation, `#inst{<term>}`
-function parse_ins(code, indx) {
+function parse_ins(code, indx, vars) {
   var [indx, skip] = parse_str("#inst{", code, space(code, indx));
-  var [indx, type] = parse_trm(code, indx);
+  var [indx, type] = parse_trm(code, indx, vars);
   var [indx, skip] = parse_str("}", code, space(code, indx));
-  var [indx, term] = parse_trm(code, indx);
-  return [indx, Ins(type, term)];
+  var [indx, expr] = parse_trm(code, indx, vars);
+  return [indx, Ins(type, expr)];
 };
 
 // Parses a self elimination, `#elim{<term>}`
-function parse_eli(code, indx) {
+function parse_eli(code, indx, vars) {
   var [indx, skip] = parse_str("#elim{", code, space(code, indx));
-  var [indx, term] = parse_trm(code, indx);
+  var [indx, expr] = parse_trm(code, indx, vars);
   var [indx, skip] = parse_str("}", code, space(code, indx));
-  return [indx, Eli(term)];
+  return [indx, Eli(expr)];
 };
 
 // Parses an application, `<term>(<term>)`
-function parse_app(code, indx, func) {
+function parse_app(code, indx, func, vars) {
   var [indx, skip] = parse_str("(", code, indx);
-  var [indx, argm] = parse_trm(code, indx);
+  var [indx, argm] = parse_trm(code, indx, vars);
   var [indx, eras] = parse_opt(";", code, space(code, indx));
   var [indx, skip] = parse_str(")", code, space(code, indx));
   return [indx, App(func, argm, eras)];
 };
 
 // Parses an annotation, `<term> :: <term>`
-function parse_ann(code, indx, term) {
+function parse_ann(code, indx, expr, vars) {
   var [indx, skip] = parse_str("::", code, space(code, indx));
-  var [indx, type] = parse_trm(code, indx);
-  return [indx, Ann(term, type, false)];
+  var [indx, type] = parse_trm(code, indx, vars);
+  return [indx, Ann(expr, type, false)];
 };
 
 // Parses a term
-function parse_trm(code, indx) {
+function parse_trm(code, indx, vars = Nil()) {
   // Parses the base term, trying each variant once
   var base_parse = first_valid([
-    () => parse_all(code, indx),
-    () => parse_lam(code, indx),
-    () => parse_par(code, indx),
-    () => parse_typ(code, indx),
-    () => parse_slf(code, indx),
-    () => parse_ins(code, indx),
-    () => parse_eli(code, indx),
-    () => parse_var(code, indx),
+    () => parse_all(code, indx, vars),
+    () => parse_lam(code, indx, vars),
+    () => parse_par(code, indx, vars),
+    () => parse_typ(code, indx, vars),
+    () => parse_slf(code, indx, vars),
+    () => parse_ins(code, indx, vars),
+    () => parse_eli(code, indx, vars),
+    () => parse_var(code, indx, vars),
   ]);
 
   // Parses postfix extensions, trying each variant repeatedly
@@ -232,8 +258,8 @@ function parse_trm(code, indx) {
   while (true) {
     var [indx, term] = post_parse;
     post_parse = first_valid([
-      () => parse_app(code, indx, term),
-      () => parse_ann(code, indx, term),
+      () => parse_app(code, indx, term, vars),
+      () => parse_ann(code, indx, term, vars),
     ]);
     if (!post_parse) {
       return base_parse;
@@ -250,106 +276,197 @@ function parse_mod(code, indx) {
   try {
     var [indx, name] = parse_nam(code, space(code, indx));
     var [indx, skip] = parse_str(":", code, space(code, indx));
-    var [indx, type] = parse_trm(code, space(code, indx));
-    var [indx, term] = parse_trm(code, space(code, indx));
-    return Def(name, type, term, parse_mod(code, indx));
+    var [indx, type] = parse_trm(code, space(code, indx), Nil());
+    var [indx, term] = parse_trm(code, space(code, indx), Nil());
+    return Ext(Def(name, type, term), parse_mod(code, indx));
   } catch (e) {
-    return Eof();
+    return Nil();
   }
 };
 
-// Stringify
-// =========
+// Stringification
+// ===============
 
-function stringify_trm(term) {
+function stringify_trm(term, vars = Nil()) {
   switch (term.ctor) {
     case "Var":
+      var got = find(vars, (x,i) => i === term.indx);
+      if (got) {
+        return got.value;
+      } else {
+        return "#" + term.indx;
+      };
+    case "Ref":
       return term.name;
     case "Typ":
       return "Type";
     case "All": 
       var name = term.name;
-      var bind = stringify_trm(term.bind);
-      var body = stringify_trm(term.body);
+      var bind = stringify_trm(term.bind, vars);
+      var body = stringify_trm(term.body, Ext(name, vars));
       var eras = term.eras ? ";" : "";
       return "("+name+" : "+bind+eras+") -> "+body;
     case "Lam": 
       var name = term.name;
-      var body = stringify_trm(term.body);
+      var body = stringify_trm(term.body, Ext(name, vars));
       var eras = term.eras ? ";" : "";
       return "("+name+eras+") => "+body;
     case "App":
-      var func = stringify_trm(term.func);
-      var argm = stringify_trm(term.argm);
+      var func = stringify_trm(term.func, vars);
+      var argm = stringify_trm(term.argm, vars);
       var eras = term.eras ? ";" : "";
       return "("+func+")("+argm+eras+")";
     case "Slf":
       var name = term.name;
-      var type = stringify_trm(term.type);
+      var type = stringify_trm(term.type, Ext(name, vars));
       return "#{"+name+"} "+type;
     case "Ins":
-      var type = stringify_trm(term.type);
-      var term = stringify_trm(term.term);
-      return "#inst{"+type+"} "+term;
+      var type = stringify_trm(term.type, vars);
+      var expr = stringify_trm(term.expr, vars);
+      return "#inst{"+type+"} "+expr;
     case "Eli":
-      var term = stringify_trm(term.term);
-      return "#elim{"+term+"}";
+      var expr = stringify_trm(term.expr, vars);
+      return "#elim{"+expr+"}";
     case "Ann":
-      var term = stringify_trm(term.term);
-      var type = stringify_trm(term.type);
-      return term+" :: "+type;
+      var expr = stringify_trm(term.expr, vars);
+      var type = stringify_trm(term.type, vars);
+      return expr+" :: "+type;
   }
 };
 
 function stringify_mod(mod) {
   switch (mod.ctor) {
-    case "Def":
-      var name = mod.name;
-      var type = stringify_trm(mod.type);
-      var term = stringify_trm(mod.term);
-      var defs = stringify_mod(mod.defs);
+    case "Ext":
+      var name = mod.head.name;
+      var type = stringify_trm(mod.head.type, Nil());
+      var term = stringify_trm(mod.head.term, Nil());
+      var defs = stringify_mod(mod.tail);
       return name + " : " + type + "\n  " + term + "\n\n" + defs;
-    case "Eof":
+    case "Nil":
       return "";
   }
+};
+
+// Substitution
+// ============
+
+function shift(term, inc, dep) {
+  switch (term.ctor) {
+    case "Var":
+      if (term.indx < dep) {
+        return Var(term.indx);
+      } else {
+        return Var(term.indx + inc);
+      }
+    case "Ref":
+      return Ref(term.name);
+    case "Typ":
+      return Typ();
+    case "All":
+      var name = term.name;
+      var bind = shift(term.bind, inc, dep);
+      var body = shift(term.body, inc, dep + 1);
+      var eras = term.eras;
+      return All(name, bind, body, eras);
+    case "Lam":
+      var name = term.name;
+      var body = shift(term.body, inc, dep + 1);
+      var eras = term.eras;
+      return Lam(name, body, eras);
+    case "App":
+      var func = shift(term.func, inc, dep);
+      var argm = subst(term.argm, inc, dep);
+      var eras = term.eras;
+      return App(func, argm, eras);
+    case "Slf":
+      var name = term.name;
+      var type = shift(term.type, inc, dep + 1);
+      return Slf(name, type);
+    case "Ins":
+      var name = term.name;
+      var type = shift(term.type, inc, dep);
+      var expr = shift(term.expr, inc, dep);
+      return Ins(name, type, expr);
+    case "Ann":
+      var expr = shift(term.expr, inc, dep); 
+      var type = shift(term.type, inc, dep);
+      var done = term.done;
+      return Ann(expr, type, done);
+  };
+};
+
+function subst(term, val, dep) {
+  switch (term.ctor) {
+    case "Var":
+      if (term.indx < dep) {
+        return Var(term.indx);
+      } else if (term.indx === dep) {
+        return val;
+      } else {
+        return Var(term.indx - 1);
+      }
+    case "Ref":
+      return Ref(term.name);
+    case "Typ":
+      return Typ();
+    case "All":
+      var name = term.name;
+      var bind = subst(term.bind, val, dep);
+      var body = subst(term.body, shift(val,1,0), dep + 1);
+      var eras = term.eras;
+      return All(name, bind, body, eras);
+    case "Lam":
+      var name = term.name;
+      var body = subst(term.body, shift(val,1,0), dep + 1);
+      var eras = term.eras;
+      return Lam(name, body, eras);
+    case "App":
+      var func = subst(term.func, val, dep);
+      var argm = subst(term.argm, val, dep);
+      var eras = term.eras;
+      return App(func, argm, eras);
+    case "Slf":
+      var name = term.name;
+      var type = subst(term.type, shift(val,1,0), dep + 1);
+      return Slf(name, type);
+    case "Ins":
+      var name = term.name;
+      var type = subst(term.type, val, dep);
+      var expr = subst(term.expr, val, dep);
+      return Ins(name, type, term);
+    case "Ann":
+      var expr = subst(term.expr, val, dep); 
+      var type = subst(term.type, val, dep);
+      var done = term.done;
+      return Ann(expr, type, done);
+  };
 };
 
 // Evaluation
 // ==========
 
-function find(name, defs) {
-  switch (defs.ctor) {
-    case "Def":
-      if (name === defs.name) {
-        return {name: defs.name, type: defs.type, term: defs.term};
-      } else {
-        return find(name, defs.defs);
-      }
-    case "Eof":
-      return null;
-  };
-};
-
-function to_high_order(term, vars) {
+function to_high_order(term, vars = Nil()) {
   switch (term.ctor) {
     case "Var":
-      var got = find(term.name, vars);
+      var got = find(vars, (x,i) => i === term.indx);
       if (got) {
-        return got.term;
+        return got.value;
       } else {
-        return Var(term.name);
+        return Var(term.indx);
       }
+    case "Ref":
+      return Ref(term.name);
     case "Typ":
       return Typ();
     case "All": 
       var name = term.name;
       var bind = to_high_order(term.bind, vars);
-      var body = x => to_high_order(term.body, Def(term.name, bind, x, vars));
+      var body = x => to_high_order(term.body, Ext(x, vars));
       var eras = term.eras;
       return All(name, bind, body, eras);
     case "Lam": 
       var name = term.name;
-      var body = x => to_high_order(term.body, Def(term.name, bind, x, vars));
+      var body = x => to_high_order(term.body, Ext(x, vars));
       var eras = term.eras;
       return Lam(name, body, eras);
     case "App":
@@ -359,37 +476,43 @@ function to_high_order(term, vars) {
       return App(func, argm, eras);
     case "Slf":
       var name = term.name;
-      var type = x => to_high_order(term.type, Def(term.name, bind, x, vars));
+      var type = x => to_high_order(term.type, Ext(x, vars));
       return Slf(name, type)
     case "Ins":
       var type = to_high_order(term.type, vars);
-      var term = to_high_order(term.term, vars);
-      return Ins(type, term);
+      var expr = to_high_order(term.expr, vars);
+      return Ins(type, expr);
     case "Eli":
-      var term = to_high_order(term.term, vars);
-      return Eli(term);
+      var expr = to_high_order(term.expr, vars);
+      return Eli(expr);
     case "Ann":
-      var term = to_high_order(term.term, vars);
+      var expr = to_high_order(term.expr, vars);
       var type = to_high_order(term.type, vars);
-      return Ann(term, type);
+      return Ann(expr, type);
   }
 };
 
-function to_low_order(term, depth) {
+function to_low_order(term, depth = 0) {
   switch (term.ctor) {
     case "Var":
-      return Var(term.name);
+      if (term.indx < depth) {
+        return Var(depth - term.indx - 1);
+      } else {
+        return Var(term.indx);
+      }
+    case "Ref":
+      return Ref(term.name);
     case "Typ":
       return Typ();
     case "All": 
       var name = "x" + depth;
       var bind = to_low_order(term.bind, depth);
-      var body = to_low_order(term.body(Var(name)), depth + 1);
+      var body = to_low_order(term.body(Var(depth)), depth + 1);
       var eras = term.eras;
       return All(name, bind, body, eras);
-    case "Lam": 
+    case "Lam":
       var name = "x" + depth;
-      var body = to_low_order(term.body(Var(name)), depth + 1);
+      var body = to_low_order(term.body(Var(depth)), depth + 1);
       var eras = term.eras;
       return Lam(name, body, eras);
     case "App":
@@ -399,28 +522,36 @@ function to_low_order(term, depth) {
       return App(func, argm, eras);
     case "Slf":
       var name = "x" + depth;
-      var type = to_low_order(term.type(Var(name)), depth + 1);
+      var type = to_low_order(term.type(Var(depth)), depth + 1);
       return Slf(name, type);
     case "Ins":
       var type = to_low_order(term.type, depth);
-      var term = to_low_order(term.term, depth);
-      return Ins(type, term);
+      var expr = to_low_order(term.expr, depth);
+      return Ins(type, expr);
     case "Eli":
-      var term = to_low_order(term.term, depth);
-      return Eli(term);
+      var expr = to_low_order(term.expr, depth);
+      return Eli(expr);
     case "Ann":
-      var term = to_low_order(term.term, depth);
+      var expr = to_low_order(term.expr, depth);
       var type = to_low_order(term.type, depth);
-      return Ann(term, type);
+      return Ann(expr, type);
   }
 };
 
 function reduce_high_order(term) {
   switch (term.ctor) {
     case "Var":
-      return Var(term.name);
+      return Var(term.indx);
+    case "Ref":
+      return Ref(term.name);
     case "Typ":
       return Typ();
+    case "All":
+      var name = term.name;
+      var bind = term.bind;
+      var body = term.body;
+      var eras = term.eras;
+      return All(name, bind, body, eras);
     case "Lam":
       var name = term.name;
       var body = term.body;
@@ -439,20 +570,28 @@ function reduce_high_order(term) {
       var type = term.type;
       return Slf(name, type);
     case "Ins":
-      return reduce_high_order(term.term);
+      return reduce_high_order(term.expr);
     case "Eli":
-      return reduce_high_order(term.term);
+      return reduce_high_order(term.expr);
     case "Ann":
-      return reduce_high_order(term.term);
+      return reduce_high_order(term.expr);
   };
 };
 
 function normalize_high_order(term) {
   switch (term.ctor) {
     case "Var":
-      return Var(term.name);
+      return Var(term.indx);
+    case "Ref":
+      return Ref(term.name);
     case "Typ":
       return Typ();
+    case "All":
+      var name = term.name;
+      var bind = normalize_high_order(term.bind);
+      var body = x => normalize_high_order(term.body(x));
+      var eras = term.eras;
+      return All(name, bind, body, eras);
     case "Lam":
       var name = term.name;
       var body = x => normalize_high_order(term.body(x));
@@ -471,20 +610,90 @@ function normalize_high_order(term) {
       var type = normalize_high_order(term.type);
       return Slf(name, type);
     case "Ins":
-      return normalize_high_order(term.term);
+      return normalize_high_order(term.expr);
     case "Eli":
-      return normalize_high_order(term.term);
+      return normalize_high_order(term.expr);
     case "Ann":
-      return normalize_high_order(term.term);
+      return normalize_high_order(term.expr);
   };
 };
 
 function reduce(term) {
-  return to_low_order(reduce_high_order(to_high_order(term, Eof())), 0);
+  return to_low_order(reduce_high_order(to_high_order(term, Nil())), 0);
 };
 
 function normalize(term) {
-  return to_low_order(normalize_high_order(to_high_order(term, Eof())), 0);
+  return to_low_order(normalize_high_order(to_high_order(term, Nil())), 0);
+};
+
+// Type-Checking
+// =============
+
+function typecheck(term, type = null, ctx = Nil()) {
+  var type = type ? reduce(type) : null;
+  switch (term.ctor) {
+    case "Var":
+      var got = find(ctx, (x,i) => i === term.indx);
+      if (got) {
+        return shift(got.value, got.index + 1, 0);
+      } else {
+        throw new Error();
+      }
+    case "Typ":
+      return Typ();
+    case "All":
+      var bind_typ = typecheck(term.bind, Typ(), ctx);
+      var body_ctx = Ext(term.bind, ctx);
+      var body_typ = typecheck(term.body, Typ(), body_ctx);
+      return Typ();
+    case "Lam":
+      switch (type.ctor) {
+        case "All":
+          var body_ctx = Ext(type.bind, ctx);
+          var body_typ = typecheck(term.body, type.body, body_ctx);
+          return All(term.name, type.bind, body_typ, term.eras);
+        default:
+          throw "Lambda has a non-function type.";
+      }
+    case "App":
+      var func_typ = reduce(typecheck(term.func, null, defs, ctx));
+      switch (func_typ.ctor) {
+        case "All":
+          var argm_typ = typecheck(term.argm, func_typ.bind, ctx);
+          var term_typ = reduce(subst(func_typ, term.argm));
+          return term_typ;
+        default:
+          throw "Non-function application.";
+      };
+    case "Slf":
+      var type_ctx = Ext(term, ctx);
+      var type_typ = typecheck(term.type, typ, ctx);
+      return Typ();
+    case "Ins":
+      var term_typ = reduce(term.type);
+      switch (term_typ.ctor) {
+        case "Slf":
+          var self_typ = subst(term_typ.type, Ann(term.type, term, true), 0);
+          var expr_typ = typecheck(term.expr, self_typ, ctx);
+          return term.type;
+        default:
+          throw "Non-self instantiation.";
+      };
+    case "Eli":
+      var expr_typ = reduce(typecheck(term.expr, null, ctx));
+      switch (expr_typ.ctor) {
+        case "Slf":
+          return subst(expr_typ.type, term.expr, 0);
+        default:
+          throw "Non-self elimination.";
+      };
+    case "Ann":
+      if (term.done) {
+        return term.type;
+      } else {
+        return typecheck(term.expr, term.type, ctx);
+      }
+  };
 };
 
 module.exports = {
@@ -497,8 +706,9 @@ module.exports = {
   Ins,
   Eli,
   Ann,
+  Ext,
+  Nil,
   Def,
-  Eof,
   is_space,
   is_name,
   first_valid,
@@ -522,11 +732,13 @@ module.exports = {
   stringify_trm,
   stringify_mod,
   find,
+  shift,
+  subst,
   to_high_order,
   to_low_order,
   reduce_high_order,
   normalize_high_order,
   reduce,
   normalize,
+  typecheck,
 };
-
