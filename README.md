@@ -131,18 +131,18 @@ numbers and arithmetic operations.
 
 Formality-Core is, essentially, the Lambda Calculus, which is just a fancy name
 for the subset of JavaScript and Python that has only functions. Its first
-primitive operation, the beta reduction, is, again, a fancy name, for "function
-application". To be precise, it says that, to evaluate a term in the shape `((x)
-=> <body>)(<argm>)`, one must make sure that `<argm>` doesn't have any variable
-named `x`, replace every occurrence of `x` by `<argm>` in `<body>` and return
-`<body>. The second primitive operation, dereference, merely substitutes
+primitive operation is the beta reduction, which is just a fancy name for
+"function application". It says that, to evaluate a term in the shape `((x) => <body>)(<argm>)`,
+one must 1. make sure that `<argm>` doesn't have any variable
+named `x`, 2. replace every occurrence of `x` by `<argm>` in `<body>`, 3. return
+`<body>`. The second primitive operation, dereference, merely substitutes
 references to top-level definitions by their values.
 
 For example, this program: `(k) => ((x) => (t) => t(x)(x))((y) => y)` is
 evaluated to `(k) => (t) => t((y) => y)((y) => y)` after one beta-reduction.
-Since there are no more beta-reductions left, the evaluation is complete, or in
-"normal form". If that process isn't clear, a separate study of the Lambda
-Calculus might be helpful.
+Since there are no more beta-reductions left, the evaluation is complete: the
+term is in "normal form". If that process isn't clear, a separate study of the
+Lambda Calculus might be helpful.
 
 Formality-Core doesn't define any evaluation order or strategy. It could be
 evaluated strictly as in JavaScripy and Python, lazily as in Haskell, or
@@ -806,77 +806,92 @@ def stringify_mod(mod):
 ### 1.1.3. Evaluation
 
 The reference implementation of evaluation uses the high-order abstract syntax
-strategy. That is, the syntax tree, previously stored as a JSON, is converted
+strategy. That is, the syntax tree, usually stored as a JSON, is converted
 into a representation that uses functions on binders. For example, the term 
 `((a) => (b) => b(a))(x => x)`, which would be represented as:
 
 ```json
 {
-  ctor: "App",
-  func: {
-    ctor: "Lam"
-    name: "a",
-    body: {
-      ctor: "Lam",
-      name: "b",
-      body: {
-        ctor: "App",
-        func: {ctor: "Var", name: "a"},
-        argm: {ctor: "Var", name: "b"}
+  "ctor": "App",
+  "func": {
+    "ctor": "Lam",
+    "name": "a",
+    "body": {
+      "ctor": "Lam",
+      "name": "b",
+      "body": {
+        "ctor": "App",
+        "func": {"ctor": "Var", "name": "b"},
+        "argm": {"ctor": "Var", "name": "a"}
       }
     }
   },
-  func: {
-    ctor: "Lam"
-    name: "x",
-    body: {ctor: "Var", name: "x"}
+  "func": {
+    "ctor": "Lam",
+    "name": "x",
+    "body": {"ctor": "Var", "name": "x"}
   }
 }
 ```
 
 Is converted into a new "high-order" format by replacing variables by native functions:
     
-```json
+```
 {
-  ctor: "App",
-  func: {
-    ctor: "Lam"
-    name: "a",
-    body: a => {
-      ctor: "Lam",
-      name: "b",
-      body: b => {
-        ctor: "App",
-        func: a,
-        argm: b
+  "ctor": "App",
+  "func": {
+    "ctor": "Lam",
+    "name": "a",
+    "body": a => {
+      "ctor": "Lam",
+      "name": "b",
+      "body": b => {
+        "ctor": "App",
+        "func": b,
+        "argm": a
       }
     }
   },
-  func: {
-    ctor: "Lam"
-    name: "x",
-    body: x => x
+  "func": {
+    "ctor": "Lam",
+    "name": "x",
+    "body": x => x
   }
 }
 ```
 
 That format is then evaluated by finding redexes, that is, sub-terms in the shape:
 
-```json
-{ctor: "App", func: {ctor: "Lam", body: x => <BODY>}, argm: <ARGM>}
+```
+{"ctor": "App", "func": {"ctor": "Lam", "body": x => <BODY>}, "argm": <ARGM>}
 ```
 
-And replacing them by `(x => <BODY>)(<ARGM>)`. Since this process uses native
-functions under the hoods, it is both fast and simple to implement. Note there
-are other ways to evaluate Formality-Core terms; this is just the one used on
-the reference code.
+And replacing them by `(x => <BODY>)(<ARGM>)`. This results in:
+
+```
+{
+  "ctor": "Lam",
+  "name": "b",
+  "body": b => {
+    "ctor": "App",
+    "func": b,
+    "argm": {"ctor": "Lam", "name": "x", "body": x => x}
+  }
+}
+```
+
+Which can then be converted back to a low-order term corresponding to `(b) =>
+b((x) => x)`, the normal form (result) of this example input. Since this process
+uses native functions under the hoods, it is both fast and simple to implement.
+Note there are other ways to evaluate Formality-Core terms; this is just the one
+used on the reference code.
 
 We'll need 7 new functions: `find`, which searches a variable in a module,
-`to_high_order` and `to_low_order`, which convert a term between the formats
+`to_high_order` and `to_low_order`, which converts a term between the formats
 described above, and `normalize_high_order` and `reduce_high_order`, which finds
 and rewrites redexes on high-order terms, with and without going under binders,
-respectivelly, and `normalize` and `reduce`, the same functions for the low
-order formats.
+respectivelly, and `normalize` and `reduce`, the same functions for the
+low-order formats.
 
 ##### 1.1.3.0. JavaScript
 
