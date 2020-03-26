@@ -240,7 +240,7 @@ function parse_ann(code, indx, expr, vars) {
 };
 
 // Parses a term
-function parse_trm(code, indx, vars = Nil()) {
+function parse_trm(code, indx = 0, vars = Nil()) {
   // Parses the base term, trying each variant once
   var base_parse = first_valid([
     () => parse_all(code, indx, vars),

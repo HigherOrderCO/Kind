@@ -199,7 +199,7 @@ def parse_ann(code, indx, expr, vars):
     return [indx, Ann(expr, type, False)]
 
 # Parses a term
-def parse_trm(code, indx, vars = Nil()):
+def parse_trm(code, indx = 0, vars = Nil()):
     # Parses the base term, trying each variant once
     base_parse = first_valid([
         [parse_all, [code, indx, vars]],
