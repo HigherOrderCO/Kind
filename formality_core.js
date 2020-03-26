@@ -1,3 +1,5 @@
+const uf = require('@manubb/union-find');
+
 // Term
 // ====
 
@@ -41,6 +43,9 @@ function Ann(expr, type, done) {
   return {ctor: "Ann", expr, type, done};
 };
 
+function Bound(indx) {
+    return {ctor: "Bound", indx };
+};
 // List
 // ====
 
@@ -300,13 +305,13 @@ function stringify_trm(term, vars = Nil()) {
       return term.name;
     case "Typ":
       return "Type";
-    case "All": 
+    case "All":
       var name = term.name;
       var bind = stringify_trm(term.bind, vars);
       var body = stringify_trm(term.body, Ext(name, vars));
       var eras = term.eras ? ";" : "";
       return "("+name+" : "+bind+eras+") -> "+body;
-    case "Lam": 
+    case "Lam":
       var name = term.name;
       var body = stringify_trm(term.body, Ext(name, vars));
       var eras = term.eras ? ";" : "";
@@ -388,10 +393,12 @@ function shift(term, inc, dep) {
       var expr = shift(term.expr, inc, dep);
       return Ins(name, type, expr);
     case "Ann":
-      var expr = shift(term.expr, inc, dep); 
+      var expr = shift(term.expr, inc, dep);
       var type = shift(term.type, inc, dep);
       var done = term.done;
       return Ann(expr, type, done);
+    case "Bound":
+      return Bound(term.indx);
   };
 };
 
@@ -435,10 +442,12 @@ function subst(term, val, dep) {
       var expr = subst(term.expr, val, dep);
       return Ins(name, type, term);
     case "Ann":
-      var expr = subst(term.expr, val, dep); 
+      var expr = subst(term.expr, val, dep);
       var type = subst(term.type, val, dep);
       var done = term.done;
       return Ann(expr, type, done);
+    case "Bound":
+      return Bound(term.indx);
   };
 };
 
@@ -458,13 +467,13 @@ function to_high_order(term, vars = Nil()) {
       return Ref(term.name);
     case "Typ":
       return Typ();
-    case "All": 
+    case "All":
       var name = term.name;
       var bind = to_high_order(term.bind, vars);
       var body = x => to_high_order(term.body, Ext(x, vars));
       var eras = term.eras;
       return All(name, bind, body, eras);
-    case "Lam": 
+    case "Lam":
       var name = term.name;
       var body = x => to_high_order(term.body, Ext(x, vars));
       var eras = term.eras;
@@ -489,6 +498,8 @@ function to_high_order(term, vars = Nil()) {
       var expr = to_high_order(term.expr, vars);
       var type = to_high_order(term.type, vars);
       return Ann(expr, type);
+    case "Bound":
+      return Bound(term.indx);
   }
 };
 
@@ -504,7 +515,7 @@ function to_low_order(term, depth = 0) {
       return Ref(term.name);
     case "Typ":
       return Typ();
-    case "All": 
+    case "All":
       var name = "x" + depth;
       var bind = to_low_order(term.bind, depth);
       var body = to_low_order(term.body(Var(depth)), depth + 1);
@@ -535,6 +546,8 @@ function to_low_order(term, depth = 0) {
       var expr = to_low_order(term.expr, depth);
       var type = to_low_order(term.type, depth);
       return Ann(expr, type);
+    case "Bound":
+      return Bound(term.indx);
   }
 };
 
@@ -575,6 +588,50 @@ function reduce_high_order(term) {
       return reduce_high_order(term.expr);
     case "Ann":
       return reduce_high_order(term.expr);
+    case "Bound":
+      return Bound(term.indx);
+  };
+};
+
+function reduce_high_order(term) {
+  switch (term.ctor) {
+    case "Var":
+      return Var(term.indx);
+    case "Ref":
+      return Ref(term.name);
+    case "Typ":
+      return Typ();
+    case "All":
+      var name = term.name;
+      var bind = term.bind;
+      var body = term.body;
+      var eras = term.eras;
+      return All(name, bind, body, eras);
+    case "Lam":
+      var name = term.name;
+      var body = term.body;
+      var eras = term.eras;
+      return Lam(name, body, eras);
+    case "App":
+      var func = reduce_high_order(term.func);
+      switch (func.ctor) {
+        case "Lam":
+          return reduce_high_order(func.body(term.argm));
+        default:
+          return App(func, reduce_high_order(term.argm));
+      };
+    case "Slf":
+      var name = term.name;
+      var type = term.type;
+      return Slf(name, type);
+    case "Ins":
+      return reduce_high_order(term.expr);
+    case "Eli":
+      return reduce_high_order(term.expr);
+    case "Ann":
+      return reduce_high_order(term.expr);
+    case "Bound":
+      return Bound(term.indx);
   };
 };
 
@@ -615,6 +672,8 @@ function normalize_high_order(term) {
       return normalize_high_order(term.expr);
     case "Ann":
       return normalize_high_order(term.expr);
+    case "Bound":
+      return Bound(term.indx);
   };
 };
 
@@ -625,6 +684,99 @@ function reduce(term) {
 function normalize(term) {
   return to_low_order(normalize_high_order(to_high_order(term, Nil())), 0);
 };
+
+// Equality of terms
+const equivalent = (map, x, y) => {
+    if (map[x] && map[y]) return uf.find(map[x]) === uf.find(map[y]);
+    return x === y;
+}
+
+const equate = (map, x, y) => {
+    if (!map[x]) map[x] = uf.makeSet();
+    if (!map[y]) map[y] = uf.makeSet();
+    uf.union(map[x], map[y]);
+}
+
+const equate_terms = (map, term1, term2) => {
+    equate(map, JSON.stringify(term1), JSON.stringify(term2));
+}
+
+const bind_free_vars = (term, initial_depth) => {
+    const go = (term, depth) => {
+        switch (term.ctor) {
+        case "Var": {
+            if (term.index < depth){
+                return term;
+            }
+            var f_index = term.index - depth;
+            return Bound(initial_depth - 1 - f_index);
+        }
+        case "Ref": return Ref(term.name);
+        case "Typ": return Typ();
+        case "All": return All(term.name, go(term.bind, depth), go(term.body, depth+1), term.eras);
+        case "Lam": return Lam(term.name, go(term.bind, depth), go(term.body, depth+1), term.eras);
+        case "App": return App(go(term.func, depth), go(term.argm, depth), term.eras);
+        case "Slf": return Slf(term.name, go(term.type, depth+1));
+        case "Ins": return Ins(term.type, go(term.expr, depth));
+        case "Eli": return Eli(go(term.expr, depth));
+        case "Ann": return Ann(go(term.expr, depth), go(term.type, depth), term.done);
+        default:    return term;
+        }
+    }
+    return go(term, 0);
+}
+
+const equivalent_terms = (map, term1, term2) => {
+    if(equivalent(map, JSON.stringify(term1), JSON.stringify(term2))) return true;
+    switch (term1.ctor + term2.ctor) {
+    case "AllAll": return equivalent_terms(map, term1.bind, term2.bind) && equivalent_terms(map, term1.body, term2.body)
+    case "LamLam": return equivalent_terms(map, term1.body, term2.body)
+    case "AppApp": return equivalent_terms(map, term1.func, term2.func) && equivalent_terms(map, term1.argm, term2.argm)
+    case "SlfSlf": return equivalent_terms(map, term1.type, term2.type)
+    case "InsIns": return equivalent_terms(map, term1.expr, term2.expr)
+    case "EliEli": return equivalent_terms(map, term1.expr, term2.expr)
+    case "AnnAnn": return equivalent_terms(map, term1.expr, term2.expr)
+    default:       return false;
+    }
+}
+
+const same_node = (term1, term2, path) => {
+    switch (term1.ctor + term2.ctor) {
+    case "AllAll": return [[term1.bind, term2.bind, path], [subst(term1.body, Bound(path), 0), subst(term2.body, Bound(path), 0), path+1]]
+    case "LamLam": return [[subst(term1.body, Bound(path), 0), subst(term2.body, Bound(path), 0), path+1]]
+    case "AppApp": return [[term1.func, term2.func, path], [term1.argm, term2.argm, path]]
+    case "SlfSlf": return [[subst(term1.type, Bound(path), 0), subst(term2.type, Bound(path), 0), path+1]]
+    case "InsIns": return [[term1.expr, term2.expr, path]]
+    case "EliEli": return [[term1.expr, term2.expr, path]]
+    case "AnnAnn": return [[term1.expr, term2.expr, path]]
+    default:       return [];
+    }
+}
+
+const equal = (a, b, dep = 0) => {
+    var map = {};
+    const go = (list) => {
+        if (list.length === 0) {
+            return true;
+        }
+        let [a0, b0, path] = list[0];
+        let a1 = reduce(a0);
+        let b1 = reduce(b0);
+        let eq = equivalent_terms(map, a1, b1);
+        equate_terms(map, a0, a1);
+        equate_terms(map, b0, b1);
+        equate_terms(map, a1, b1);
+        if (eq) return go(list.slice(1));
+        else {
+            let result = same_node(a1, b1, path);
+            if (result.length == 0) { return false; }
+            return go (list.slice(1).concat(result));
+        }
+    }
+    return go([[a, b, dep]]);
+}
+exports.equal = equal;
+
 
 // Type-Checking
 // =============
