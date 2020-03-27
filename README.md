@@ -64,9 +64,9 @@ syntax                        | variant | meaning
 `(<var>;) => <term>`          | Lam     | dependent function value (erased)
 `<term>(<term>)`              | App     | dependent function application
 `<term>(<term>;)`             | App     | dependent function application (erased)
-`#{<name>} <term>`            | Slf     | self type
-`#inst{<term>} <term>`        | Ins     | self value
-`#elim{<term>}`               | Eli     | self elimination
+`${<name>} <term>`            | Slf     | self type
+`$inst{<term>} <term>`        | Ins     | self value
+`$elim{<term>}`               | Eli     | self elimination
 `<term> :: <term>`            | Ann     | inline annotation
 `(<term>)`                    | -       | parenthesis
 

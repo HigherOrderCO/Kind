@@ -14,10 +14,19 @@ var code = `
   not : (b : Bool) -> Bool
     (A;) => (t) => (f) => b(Bool;)(f)(t)
 
-  main : Test
-    ((A) => (B) => (C) => (x) => (y) => (z) => y)
-    :: (A : Type) -> (B : Type) -> (C : Type) -> (x : A) -> (y : B) -> (z : C) -> A
+  Nat : Type
+    (A : Type;) -> (z : A) -> (s : (x : Nat) -> A) -> A
+
+  succ : (n : Nat) -> Nat
+    (n) => (A;) => (z) => (s) => s(n)
+
+  zero : Nat
+    (A;) => (z) => (s) => z
+
+  main : Nat
+    succ(zero)
 `;
+
 
 // Parses module
 var module = fmc.parse_mod(code, 0);
@@ -26,7 +35,6 @@ var module = fmc.parse_mod(code, 0);
 console.log(fmc.stringify_mod(module));
 
 // Reduces `main` to normal form
-var main = fmc.find(module, x => x.name === "main").value.term;
-
-console.log(fmc.stringify_trm(fmc.normalize(main)));
-console.log(fmc.stringify_trm(fmc.typecheck(main)));
+var name = "true";
+console.log(fmc.stringify_trm(fmc.normalize(module[name].term, module)));
+console.log(fmc.stringify_trm(fmc.typecheck(module[name].term, module[name].type, module)));
