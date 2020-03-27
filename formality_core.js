@@ -16,9 +16,9 @@ function Typ() {
   return {ctor: "Typ", hash};
 };
 
-function All(name, bind, body, eras) {
+function All(self, name, bind, body, eras) {
   var hash = hash_two(4, hash_two(bind.hash, body.hash));
-  return {ctor: "All", name, bind, body, eras, hash};
+  return {ctor: "All", self, name, bind, body, eras, hash};
 };
 
 function Lam(name, body, eras) {
@@ -29,21 +29,6 @@ function Lam(name, body, eras) {
 function App(func, argm, eras) {
   var hash = hash_two(6, hash_two(func.hash, argm.hash));
   return {ctor: "App", func, argm, eras, hash};
-};
-
-function Slf(name, type) {
-  var hash = hash_two(7, type.hash);
-  return {ctor: "Slf", name, type, hash};
-};
-
-function Ins(type, expr) {
-  var hash = hash_two(8, hash_two(type.hash, expr.hash));
-  return {ctor: "Ins", type, expr, hash};
-};
-
-function Eli(expr) {
-  var hash = hash_two(9, expr.hash);
-  return {ctor: "Eli", expr, hash};
 };
 
 function Ann(expr, type, done) {
@@ -161,15 +146,16 @@ function parse_par(code, indx, vars) {
 
 // Parses a dependent function type, `(<name> : <term>) => <term>`
 function parse_all(code, indx, vars) {
-  var [indx, skip] = parse_str("(", code, space(code, indx));
+  var [indx, self] = parse_nam(code, space(code, indx), 1);
+  var [indx, skip] = parse_str("(", code, indx);
   var [indx, name] = parse_nam(code, space(code, indx));
   var [indx, skip] = parse_str(":", code, space(code, indx));
-  var [indx, bind] = parse_trm(code, indx, vars);
+  var [indx, bind] = parse_trm(code, indx, Ext(self, vars));
   var [indx, eras] = parse_opt(";", code, space(code, indx));
   var [indx, skip] = parse_str(")", code, space(code, indx));
   var [indx, skip] = parse_str("->", code, space(code, indx));
-  var [indx, body] = parse_trm(code, indx, Ext(name, vars));
-  return [indx, All(name, bind, body, eras)];
+  var [indx, body] = parse_trm(code, indx, Ext(name, Ext(self, vars)));
+  return [indx, All(self, name, bind, body, eras)];
 };
 
 // Parses a dependent function value, `(<name>) => <term>`
@@ -200,32 +186,6 @@ function parse_var(code, indx, vars) {
   };
 };
 
-// Parses a self type, `#{<name>} <term>`
-function parse_slf(code, indx, vars) {
-  var [indx, skip] = parse_str("${", code, space(code, indx));
-  var [indx, name] = parse_nam(code, space(code, indx));
-  var [indx, skip] = parse_str("}", code, space(code, indx));
-  var [indx, type] = parse_trm(code, indx, Ext(name, vars));
-  return [indx, Slf(name, type)];
-};
-
-// Parses a self instantiation, `#inst{<term>}`
-function parse_ins(code, indx, vars) {
-  var [indx, skip] = parse_str("$inst{", code, space(code, indx));
-  var [indx, type] = parse_trm(code, indx, vars);
-  var [indx, skip] = parse_str("}", code, space(code, indx));
-  var [indx, expr] = parse_trm(code, indx, vars);
-  return [indx, Ins(type, expr)];
-};
-
-// Parses a self elimination, `#elim{<term>}`
-function parse_eli(code, indx, vars) {
-  var [indx, skip] = parse_str("$elim{", code, space(code, indx));
-  var [indx, expr] = parse_trm(code, indx, vars);
-  var [indx, skip] = parse_str("}", code, space(code, indx));
-  return [indx, Eli(expr)];
-};
-
 // Parses an application, `<term>(<term>)`
 function parse_app(code, indx, func, vars) {
   var [indx, skip] = parse_str("(", code, indx);
@@ -250,9 +210,6 @@ function parse_trm(code, indx = 0, vars = Nil()) {
     () => parse_lam(code, indx, vars),
     () => parse_par(code, indx, vars),
     () => parse_typ(code, indx, vars),
-    () => parse_slf(code, indx, vars),
-    () => parse_ins(code, indx, vars),
-    () => parse_eli(code, indx, vars),
     () => parse_var(code, indx, vars),
   ]);
 
@@ -308,11 +265,12 @@ function stringify_trm(term, vars = Nil()) {
     case "Typ":
       return "Type";
     case "All":
+      var self = term.self;
       var name = term.name;
-      var bind = stringify_trm(term.bind, vars);
-      var body = stringify_trm(term.body, Ext(name, vars));
+      var bind = stringify_trm(term.bind, Ext(self, vars));
+      var body = stringify_trm(term.body, Ext(name, Ext(self, vars)));
       var eras = term.eras ? ";" : "";
-      return "("+name+" : "+bind+eras+") -> "+body;
+      return self+"("+name+" : "+bind+eras+") -> "+body;
     case "Lam":
       var name = term.name;
       var body = stringify_trm(term.body, Ext(name, vars));
@@ -323,17 +281,6 @@ function stringify_trm(term, vars = Nil()) {
       var argm = stringify_trm(term.argm, vars);
       var eras = term.eras ? ";" : "";
       return "("+func+")("+argm+eras+")";
-    case "Slf":
-      var name = term.name;
-      var type = stringify_trm(term.type, Ext(name, vars));
-      return "${"+name+"} "+type;
-    case "Ins":
-      var type = stringify_trm(term.type, vars);
-      var expr = stringify_trm(term.expr, vars);
-      return "$inst{"+type+"} "+expr;
-    case "Eli":
-      var expr = stringify_trm(term.expr, vars);
-      return "$elim{"+expr+"}";
     case "Ann":
       var expr = stringify_trm(term.expr, vars);
       var type = stringify_trm(term.type, vars);
@@ -367,11 +314,12 @@ function shift(term, inc, dep) {
     case "Typ":
       return Typ();
     case "All":
+      var self = term.self;
       var name = term.name;
-      var bind = shift(term.bind, inc, dep);
-      var body = shift(term.body, inc, dep + 1);
+      var bind = shift(term.bind, inc, dep + 1);
+      var body = shift(term.body, inc, dep + 2);
       var eras = term.eras;
-      return All(name, bind, body, eras);
+      return All(self, name, bind, body, eras);
     case "Lam":
       var name = term.name;
       var body = shift(term.body, inc, dep + 1);
@@ -379,18 +327,9 @@ function shift(term, inc, dep) {
       return Lam(name, body, eras);
     case "App":
       var func = shift(term.func, inc, dep);
-      var argm = subst(term.argm, inc, dep);
+      var argm = shift(term.argm, inc, dep);
       var eras = term.eras;
       return App(func, argm, eras);
-    case "Slf":
-      var name = term.name;
-      var type = shift(term.type, inc, dep + 1);
-      return Slf(name, type);
-    case "Ins":
-      var name = term.name;
-      var type = shift(term.type, inc, dep);
-      var expr = shift(term.expr, inc, dep);
-      return Ins(name, type, expr);
     case "Ann":
       var expr = shift(term.expr, inc, dep);
       var type = shift(term.type, inc, dep);
@@ -414,11 +353,12 @@ function subst(term, val, dep) {
     case "Typ":
       return Typ();
     case "All":
+      var self = term.self;
       var name = term.name;
-      var bind = subst(term.bind, val, dep);
-      var body = subst(term.body, shift(val,1,0), dep + 1);
+      var bind = subst(term.bind, shift(val,1,0), dep + 1);
+      var body = subst(term.body, shift(val,2,0), dep + 2);
       var eras = term.eras;
-      return All(name, bind, body, eras);
+      return All(self, name, bind, body, eras);
     case "Lam":
       var name = term.name;
       var body = subst(term.body, shift(val,1,0), dep + 1);
@@ -429,15 +369,6 @@ function subst(term, val, dep) {
       var argm = subst(term.argm, val, dep);
       var eras = term.eras;
       return App(func, argm, eras);
-    case "Slf":
-      var name = term.name;
-      var type = subst(term.type, shift(val,1,0), dep + 1);
-      return Slf(name, type);
-    case "Ins":
-      var name = term.name;
-      var type = subst(term.type, val, dep);
-      var expr = subst(term.expr, val, dep);
-      return Ins(name, type, term);
     case "Ann":
       var expr = subst(term.expr, val, dep);
       var type = subst(term.type, val, dep);
@@ -463,11 +394,12 @@ function to_high_order(term, vars = Nil()) {
     case "Typ":
       return Typ();
     case "All":
+      var self = term.self;
       var name = term.name;
-      var bind = to_high_order(term.bind, vars);
-      var body = x => to_high_order(term.body, Ext(x, vars));
+      var bind = s => to_high_order(term.bind, Ext(s, vars));
+      var body = (s,x) => to_high_order(term.body, Ext(x, Ext(s, vars)));
       var eras = term.eras;
-      return All(name, bind, body, eras);
+      return All(self, name, bind, body, eras);
     case "Lam":
       var name = term.name;
       var body = x => to_high_order(term.body, Ext(x, vars));
@@ -478,17 +410,6 @@ function to_high_order(term, vars = Nil()) {
       var argm = to_high_order(term.argm, vars);
       var eras = term.eras;
       return App(func, argm, eras);
-    case "Slf":
-      var name = term.name;
-      var type = x => to_high_order(term.type, Ext(x, vars));
-      return Slf(name, type)
-    case "Ins":
-      var type = to_high_order(term.type, vars);
-      var expr = to_high_order(term.expr, vars);
-      return Ins(type, expr);
-    case "Eli":
-      var expr = to_high_order(term.expr, vars);
-      return Eli(expr);
     case "Ann":
       var expr = to_high_order(term.expr, vars);
       var type = to_high_order(term.type, vars);
@@ -509,11 +430,12 @@ function to_low_order(term, depth = 0) {
     case "Typ":
       return Typ();
     case "All":
-      var name = "x" + depth;
-      var bind = to_low_order(term.bind, depth);
-      var body = to_low_order(term.body(Var(depth)), depth + 1);
+      var self = "x" + depth;
+      var name = "x" + (depth + 1);
+      var bind = to_low_order(term.bind(Var(depth)), depth + 1);
+      var body = to_low_order(term.body(Var(depth), Var(depth+1)), depth + 2);
       var eras = term.eras;
-      return All(name, bind, body, eras);
+      return All(self, name, bind, body, eras);
     case "Lam":
       var name = "x" + depth;
       var body = to_low_order(term.body(Var(depth)), depth + 1);
@@ -524,17 +446,6 @@ function to_low_order(term, depth = 0) {
       var argm = to_low_order(term.argm, depth);
       var eras = term.eras;
       return App(func, argm, eras);
-    case "Slf":
-      var name = "x" + depth;
-      var type = to_low_order(term.type(Var(depth)), depth + 1);
-      return Slf(name, type);
-    case "Ins":
-      var type = to_low_order(term.type, depth);
-      var expr = to_low_order(term.expr, depth);
-      return Ins(type, expr);
-    case "Eli":
-      var expr = to_low_order(term.expr, depth);
-      return Eli(expr);
     case "Ann":
       var expr = to_low_order(term.expr, depth);
       var type = to_low_order(term.type, depth);
@@ -555,11 +466,12 @@ function reduce_high_order(term, module) {
     case "Typ":
       return Typ();
     case "All":
+      var self = term.self;
       var name = term.name;
       var bind = term.bind;
       var body = term.body;
       var eras = term.eras;
-      return All(name, bind, body, eras);
+      return All(self, name, bind, body, eras);
     case "Lam":
       var name = term.name;
       var body = term.body;
@@ -577,14 +489,6 @@ function reduce_high_order(term, module) {
             return App(func, reduce_high_order(term.argm, module));
         };
       };
-    case "Slf":
-      var name = term.name;
-      var type = term.type;
-      return Slf(name, type);
-    case "Ins":
-      return reduce_high_order(term.expr, module);
-    case "Eli":
-      return reduce_high_order(term.expr, module);
     case "Ann":
       return reduce_high_order(term.expr, module);
   };
@@ -600,11 +504,12 @@ function normalize_high_order(term, module) {
     case "Typ":
       return Typ();
     case "All":
+      var self = norm.self;
       var name = norm.name;
-      var bind = normalize_high_order(norm.bind, module);
-      var body = x => normalize_high_order(norm.body(x), module);
+      var bind = s => normalize_high_order(norm.bind(s), module);
+      var body = (s,x) => normalize_high_order(norm.body(s,x), module);
       var eras = norm.eras;
-      return All(name, bind, body, eras);
+      return All(self, name, bind, body, eras);
     case "Lam":
       var name = norm.name;
       var body = x => {
@@ -616,14 +521,6 @@ function normalize_high_order(term, module) {
       var func = normalize_high_order(norm.func, module);
       var argm = normalize_high_order(norm.argm, module);
       return App(func, argm);
-    case "Slf":
-      var name = norm.name;
-      var type = x => normalize_high_order(norm.type(x), module);
-      return Slf(name, type);
-    case "Ins":
-      return normalize_high_order(norm.expr, module);
-    case "Eli":
-      return normalize_high_order(norm.expr, module);
     case "Ann":
       return normalize_high_order(norm.expr, module);
   };
@@ -707,9 +604,6 @@ function equate(map, x, y) {
       //case "All": return All(term.name, go(term.bind, depth), go(term.body, depth+1), term.eras);
       //case "Lam": return Lam(term.name, go(term.bind, depth), go(term.body, depth+1), term.eras);
       //case "App": return App(go(term.func, depth), go(term.argm, depth), term.eras);
-      //case "Slf": return Slf(term.name, go(term.type, depth+1));
-      //case "Ins": return Ins(term.type, go(term.expr, depth));
-      //case "Eli": return Eli(go(term.expr, depth));
       //case "Ann": return Ann(go(term.expr, depth), go(term.type, depth), term.done);
       //default:    return term;
     //}
@@ -718,40 +612,28 @@ function equate(map, x, y) {
 //};
 
 // Checks if two terms are identical (without reductions).
-function is_identical(map, term1, term2) {
-  if (is_equivalent(map, term1.hash, term2.hash)) {
+function identical(map, a, b) {
+  if (is_equivalent(map, a.hash, b.hash)) {
     return true;
   } else {
     // FIXME Won't this branch always return false?
-    switch (term1.ctor + term2.ctor) {
+    switch (a.ctor + b.ctor) {
       case "AllAll":
-        var bind_id = is_identical(map, term1.bind, term2.bind);
-        var body_id = is_identical(map, term1.body, term2.body);
+        var bind_id = identical(map, a.bind, b.bind);
+        var body_id = identical(map, a.body, b.body);
         var ret = bind_id && body_id;
         break;
       case "LamLam":
-        var body_id = is_identical(map, term1.body, term2.body);
+        var body_id = identical(map, a.body, b.body);
         var ret = body_id;
         break;
       case "AppApp":
-        var func_id = is_identical(map, term1.func, term2.func);
-        var argm_id = is_identical(map, term1.argm, term2.argm);
+        var func_id = identical(map, a.func, b.func);
+        var argm_id = identical(map, a.argm, b.argm);
         var ret = func_id && argm_id;
         break;
-      case "SlfSlf":
-        var type_id = is_identical(map, term1.type, term2.type);
-        var ret = type_id;
-        break;
-      case "InsIns":
-        var expr_id = is_identical(map, term1.expr, term2.expr);
-        var ret = expr_id;
-        break;
-      case "EliEli":
-        var expr_id = is_identical(map, term1.expr, term2.expr);
-        var ret = expr_id;
-        break;
       case "AnnAnn":
-        var expr_id = is_identical(map, term1.expr, term2.expr);
+        var expr_id = identical(map, a.expr, b.expr);
         var ret = expr_id;
         break;
       default:
@@ -762,94 +644,46 @@ function is_identical(map, term1, term2) {
   }
 };
 
-function same_node(term1, term2, path) {
-  switch (term1.ctor + term2.ctor) {
-    case "AllAll":
-      var bind_same = [
-        term1.bind,
-        term2.bind,
-        path
-      ];
-      var body_same = [
-        subst(term1.body, Ref("$"+path), 0),
-        subst(term2.body, Ref("$"+path), 0),
-        path+1
-      ];
-      return [bind_same, body_same];
-    case "LamLam":
-      var body_same = [
-        subst(term1.body, Ref("$"+path), 0),
-        subst(term2.body, Ref("$"+path), 0),
-        path+1
-      ];
-      return [body_same]
-    case "AppApp":
-      var func_same = [
-        term1.func,
-        term2.func,
-        path
-      ];
-      var argm_same = [
-        term1.argm,
-        term2.argm,
-        path
-      ];
-      return [func_same, argm_same];
-    case "SlfSlf":
-      var type_same = [
-        subst(term1.type, Ref("$"+path), 0),
-        subst(term2.type, Ref("$"+path), 0),
-        path + 1
-      ];
-      return [type_same]
-    case "InsIns":
-      var expr_same = [
-        term1.expr,
-        term2.expr,
-        path
-      ];
-      return [expr_same];
-    case "EliEli":
-      var expr_same = [
-        term1.expr,
-        term2.expr,
-        path
-      ];
-      return [expr_same];
-    case "AnnAnn":
-      var expr_same = [
-        term1.expr,
-        term2.expr,
-        path
-      ];
-      return [expr_same];
-    default:
-      return null;
-  }
-};
-
 function equal(a, b, module, dep = 0) {
   var map = {};
   var vis = [[a, b, dep]];
   var idx = 0;
   while (idx < vis.length) {
-    let [a0, b0, path] = vis[idx];
+    let [a0, b0, depth] = vis[idx];
     let a1 = reduce(a0, module);
     let b1 = reduce(b0, module);
-    let eq = is_identical(map, a1, b1);
+    let id = identical(map, a1, b1);
     equate(map, a0.hash, a1.hash);
     equate(map, b0.hash, b1.hash);
     equate(map, a1.hash, b1.hash);
-    if (!eq) {
-      let result = same_node(a1, b1, path);
-      if (!result) {
-        return false;
-      } else {
-        for (var i = 0; i < result.length; ++i) {
-          vis.push(result[i]);
-        };
+    if (!id) {
+      switch (a1.ctor + b1.ctor) {
+        case "AllAll":
+          var a_bind = subst(a1.bind, Ref(depth + 0), 0);
+          var b_bind = subst(b1.bind, Ref(depth + 0), 0);
+          var a_body = subst(a1.body, Ref(depth + 1), 1);
+          var a_body = subst(a_body, Ref(depth + 0), 0);
+          var b_body = subst(b1.body, Ref(depth + 1), 1);
+          var b_body = subst(b_body, Ref(depth + 0), 0);
+          vis.push([a_bind, b_bind, depth + 1]);
+          vis.push([a_body, b_body, depth + 2]);
+          break;
+        case "LamLam":
+          var a_body = subst(a1.body, Ref(depth + 0), 0);
+          var b_body = subst(b1.body, Ref(depth + 0), 0);
+          vis.push([a_body, b_body, depth + 1]);
+          break;
+        case "AppApp":
+          vis.push([a1.func, b1.func, depth]);
+          vis.push([a1.argm, b1.argm, depth]);
+          break;
+        case "AnnAnn":
+          vis.push([a1.expr, b1.expr, depth]);
+          break;
+        default:
+          return false;
       }
-    }
+    };
     idx += 1;
   };
   return true;
@@ -858,81 +692,59 @@ function equal(a, b, module, dep = 0) {
 // Type-Checking
 // =============
 
-function typecheck(term, type = null, module, ctx = Nil()) {
-  var typv = type ? reduce(type, module) : null;
+function typeinfer(term, module, ctx = Nil()) {
+  //console.log("infer", stringify_trm(term));
+  //console.log("-----");
   switch (term.ctor) {
     case "Var":
       var got = find(ctx, (x,i) => i === term.indx);
       if (got) {
-        infr = shift(got.value, got.index + 1, 0);
+        return shift(got.value, got.index + 1, 0);
       } else {
-        throw new Error();
+        throw new Error("Unbound varible.");
       }
-      break;
-    case "Ref":
-      var got = module[term.name];
-      if (got) {
-        infr = got.type;
-      } else {
-        throw "Undefined reference: '" + term.name + "'.";
-      };
-      break;
     case "Typ":
-      infr = Typ();
-      break;
+      return Typ();
+    case "App":
+      var func_typ = reduce(typeinfer(term.func, module, ctx), module);
+      switch (func_typ.ctor) {
+        case "All":
+          var expe_typ = subst(func_typ.bind, term.func, 0);
+          typecheck(term.argm, expe_typ, module, ctx);
+          var term_typ = func_typ.body;
+          var term_typ = subst(term_typ, shift(term.func, 1, 0), 1);
+          var term_typ = subst(term_typ, shift(term.argm, 0, 0), 0);
+          var term_typ = reduce(term_typ, module);
+          return term_typ;
+        default:
+          throw new Error("Non-function application.");
+      };
     case "All":
-      var bind_typ = typecheck(term.bind, Typ(), module, ctx);
-      var body_ctx = Ext(term.bind, ctx);
-      var body_typ = typecheck(term.body, Typ(), module, body_ctx);
-      infr = Typ();
-      break;
+      var self_typ = Ann(term, Typ(), true);
+      var bind_ctx = Ext(self_typ, ctx);
+      var bind_typ = typecheck(term.bind, Typ(), module, bind_ctx);
+      var body_ctx = Ext(term.bind, Ext(self_typ, ctx));
+      typecheck(term.body, Typ(), module, body_ctx);
+      return Typ();
+  }
+};
+
+function typecheck(term, type, module, ctx = Nil()) {
+  //console.log("check", stringify_trm(term));
+  //console.log("typed", stringify_trm(type));
+  //console.log("-----");
+  var typv = reduce(type, module);
+  switch (term.ctor) {
     case "Lam":
-      if (typv && typv.ctor === "All") {
-        var body_ctx = Ext(typv.bind, ctx);
-        var body_typ = typecheck(term.body, typv.body, module, body_ctx);
-        infr = All(term.name, typv.bind, body_typ, term.eras);
+      if (typv.ctor === "All") {
+        var self_typ = Ann(typv, Typ(), true);
+        var bind_typ = subst(typv.bind, term, 0);
+        var body_typ = subst(typv.body, shift(term, 1, 0), 1);
+        var body_ctx = Ext(bind_typ, ctx);
+        typecheck(term.body, body_typ, module, body_ctx);
       } else {
         throw "Lambda has a non-function type.";
       }
-      break;
-    case "App":
-      var func_typ = reduce(typecheck(term.func, null, module, ctx));
-      switch (func_typ.ctor) {
-        case "All":
-          var argm_typ = typecheck(term.argm, func_typ.bind, module, ctx);
-          var term_typ = reduce(subst(func_typ.body, term.argm, 0), module);
-          infr = term_typ;
-          break;
-        default:
-          throw "Non-function application.";
-      };
-      break;
-    case "Slf":
-      var type_ctx = Ext(term, ctx);
-      var type_typ = typecheck(term.type, typ, module, ctx);
-      infr = Typ();
-      break;
-    case "Ins":
-      var term_typ = reduce(term.type);
-      switch (term_typ.ctor) {
-        case "Slf":
-          var self_typ = subst(term_typ.type, Ann(term.type, term, true), 0);
-          var expr_typ = typecheck(term.expr, self_typ, module, ctx);
-          infr = term.type;
-          break;
-        default:
-          throw "Non-self instantiation.";
-      };
-      break;
-    case "Eli":
-      var expr_typ = reduce(typecheck(term.expr, null, module, ctx));
-      switch (expr_typ.ctor) {
-        case "Slf":
-          infr = subst(expr_typ.type, term.expr, 0);
-          break;
-        default:
-          throw "Non-self elimination.";
-      };
       break;
     case "Ann":
       if (term.done) {
@@ -941,8 +753,19 @@ function typecheck(term, type = null, module, ctx = Nil()) {
         infr = typecheck(term.expr, term.type, module, ctx);
       }
       break;
+    default:
+      var infr = typeinfer(term, module, ctx);
+      //console.log("=",stringify_trm(type));
+      //console.log("=",stringify_trm(infr));
+      //console.log("?", equal(type, infr, module));
+      if (!equal(type, infr, module)) {
+        var type_str = stringify_trm(type);
+        var infr_str = stringify_trm(infr);
+        throw new Error("Expected `"+type_str+"`, got `"+infr_str+"`.");
+      }
+      break;
   };
-  return type || infr;
+  return type;
 };
 
 // Hashing
@@ -1010,9 +833,6 @@ module.exports = {
   All,
   Lam,
   App,
-  Slf,
-  Ins,
-  Eli,
   Ann,
   Ext,
   Nil,
@@ -1029,9 +849,6 @@ module.exports = {
   parse_lam,
   parse_typ,
   parse_var,
-  parse_slf,
-  parse_ins,
-  parse_eli,
   parse_app,
   parse_ann,
   parse_trm,
@@ -1047,6 +864,7 @@ module.exports = {
   normalize_high_order,
   reduce,
   normalize,
+  typeinfer,
   typecheck,
   equal,
 };

@@ -3,30 +3,17 @@ var fmc = require("./formality_core.js");
 // Base code
 var code = `
   Bool : Type
-    (A : Type;) -> (t : A) -> (f : A) -> A
+    self(P : (x : Bool) -> Type;) -> (t : P(true)) -> (f : P(false)) -> P(self)
 
   true : Bool
-    (A;) => (t) => (f) => t
+    (P;) => (t) => (f) => t
 
   false : Bool
-    (A;) => (t) => (f) => f
+    (P;) => (t) => (f) => f
 
-  not : (b : Bool) -> Bool
-    (A;) => (t) => (f) => b(Bool;)(f)(t)
-
-  Nat : Type
-    (A : Type;) -> (z : A) -> (s : (x : Nat) -> A) -> A
-
-  succ : (n : Nat) -> Nat
-    (n) => (A;) => (z) => (s) => s(n)
-
-  zero : Nat
-    (A;) => (z) => (s) => z
-
-  main : Nat
-    succ(zero)
+  elim : (b : Bool) -> (P : (x : Bool) -> Type;) -> (t : P(true)) -> (f : P(false)) -> P(b)
+    (b) => (P;) => (t) => (f) => b(P;)(t)(f)
 `;
-
 
 // Parses module
 var module = fmc.parse_mod(code, 0);
@@ -35,6 +22,7 @@ var module = fmc.parse_mod(code, 0);
 console.log(fmc.stringify_mod(module));
 
 // Reduces `main` to normal form
-var name = "true";
-console.log(fmc.stringify_trm(fmc.normalize(module[name].term, module)));
-console.log(fmc.stringify_trm(fmc.typecheck(module[name].term, module[name].type, module)));
+var name = "elim";
+console.log("term:", fmc.stringify_trm(module[name].term));
+console.log("norm:", fmc.stringify_trm(fmc.normalize(module[name].term, module)));
+console.log("type:", fmc.stringify_trm(fmc.typecheck(module[name].term, module[name].type, module)));
