@@ -615,10 +615,9 @@ function bind_free_vars(term, initial_depth) {
       return All(eras, self, name, bind, body);
     case "Lam":
       var name = term.name;
-      var bind = go(term.bind, depth);
       var body = go(term.body, depth+1);
       var eras = term.eras;
-      return Lam(eras, name, bind, body);
+      return Lam(eras, name, body);
     case "App":
       var func = go(term.func, depth);
       var argm = go(term.argm, depth);
