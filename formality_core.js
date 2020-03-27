@@ -566,7 +566,7 @@ function disjoint_set_union(node1, node2) {
   }
 };
 
-// Checks if `x` and `y` are on the same equality set
+// Checks if `x` and `y` are on the same equivalence class
 function is_equivalent(map, x, y) {
   if (map[x] && map[y]) {
     return disjoint_set_find(map[x]) === disjoint_set_find(map[y]);
@@ -575,7 +575,7 @@ function is_equivalent(map, x, y) {
   }
 };
 
-// Merges the equality sets of `x` and `y`
+// Merges the equivalence classes of `x` and `y`
 function equate(map, x, y) {
   if (!map[x]) {
     map[x] = new_disjoint_set();
@@ -586,52 +586,51 @@ function equate(map, x, y) {
   disjoint_set_union(map[x], map[y]);
 };
 
-// FIXME Is this used?
-//function bind_free_vars(term, initial_depth) {
-  //function go(term, depth) {
-    //switch (term.ctor) {
-      //case "Var": {
-        //if (term.index < depth){
-          //return term;
-        //}
-        //var f_index = term.index - depth;
-        //return Bnd(initial_depth - 1 - f_index);
-      //}
-      //case "Ref": return Ref(term.name);
-      //case "Typ": return Typ();
-      //case "All": return All(term.name, go(term.bind, depth), go(term.body, depth+1), term.eras);
-      //case "Lam": return Lam(term.name, go(term.bind, depth), go(term.body, depth+1), term.eras);
-      //case "App": return App(go(term.func, depth), go(term.argm, depth), term.eras);
-      //case "Ann": return Ann(go(term.expr, depth), go(term.type, depth), term.done);
-      //default:    return term;
-    //}
-  //}
-  //return go(term, 0);
-//};
+// Replaces all free variables of a subterm with a reference to the depth of the quantificator it is bound
+function bind_free_vars(term, initial_depth) {
+  function go(term, depth) {
+    switch (term.ctor) {
+      case "Var": {
+        if (term.index < depth){
+          return term;
+        }
+        var f_index = term.index - depth;
+        return Ref(initial_depth - 1 - f_index);
+      }
+      case "Ref": return Ref(term.name);
+      case "Typ": return Typ();
+      case "All": return All(term.name, go(term.bind, depth), go(term.body, depth+1), term.eras);
+      case "Lam": return Lam(term.name, go(term.bind, depth), go(term.body, depth+1), term.eras);
+      case "App": return App(go(term.func, depth), go(term.argm, depth), term.eras);
+      case "Ann": return Ann(go(term.expr, depth), go(term.type, depth), term.done);
+      default:    return term;
+    }
+  }
+  return go(term, 0);
+};
 
-// Checks if two terms are identical (without reductions).
-function identical(map, a, b) {
+// Recursively checks if two terms are congruent
+function congruent_terms(map, a, b) {
   if (is_equivalent(map, a.hash, b.hash)) {
     return true;
   } else {
-    // FIXME Won't this branch always return false?
     switch (a.ctor + b.ctor) {
       case "AllAll":
-        var bind_id = identical(map, a.bind, b.bind);
-        var body_id = identical(map, a.body, b.body);
+        var bind_id = congruent_terms(map, a.bind, b.bind);
+        var body_id = congruent_terms(map, a.body, b.body);
         var ret = bind_id && body_id;
         break;
       case "LamLam":
-        var body_id = identical(map, a.body, b.body);
+        var body_id = congruent_terms(map, a.body, b.body);
         var ret = body_id;
         break;
       case "AppApp":
-        var func_id = identical(map, a.func, b.func);
-        var argm_id = identical(map, a.argm, b.argm);
+        var func_id = congruent_terms(map, a.func, b.func);
+        var argm_id = congruent_terms(map, a.argm, b.argm);
         var ret = func_id && argm_id;
         break;
       case "AnnAnn":
-        var expr_id = identical(map, a.expr, b.expr);
+        var expr_id = congruent_terms(map, a.expr, b.expr);
         var ret = expr_id;
         break;
       default:
@@ -650,7 +649,7 @@ function equal(a, b, module, dep = 0) {
     let [a0, b0, depth] = vis[idx];
     let a1 = reduce(a0, module);
     let b1 = reduce(b0, module);
-    let id = identical(map, a1, b1);
+    let id = congruent_terms(map, a1, b1);
     equate(map, a0.hash, a1.hash);
     equate(map, b0.hash, b1.hash);
     equate(map, a1.hash, b1.hash);
