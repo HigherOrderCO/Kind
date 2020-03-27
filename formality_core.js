@@ -181,6 +181,8 @@ function parse_var(code, indx, vars) {
   var got = find(vars, (x,i) => x === name);
   if (got) {
     return [indx, Var(got.index)];
+  } else if (!isNaN(Number(name))) {
+    return [indx, Var(Number(name))];
   } else {
     return [indx, Ref(name)];
   };
@@ -380,14 +382,14 @@ function subst(term, val, dep) {
 // Evaluation
 // ==========
 
-function to_high_order(term, vars = Nil()) {
+function to_high_order(term, vars = Nil(), depth = 0) {
   switch (term.ctor) {
     case "Var":
       var got = find(vars, (x,i) => i === term.indx);
       if (got) {
         return got.value;
       } else {
-        return Var(term.indx);
+        return Var(depth - term.indx - 1);
       }
     case "Ref":
       return Ref(term.name);
@@ -396,23 +398,23 @@ function to_high_order(term, vars = Nil()) {
     case "All":
       var self = term.self;
       var name = term.name;
-      var bind = s => to_high_order(term.bind, Ext(s, vars));
-      var body = (s,x) => to_high_order(term.body, Ext(x, Ext(s, vars)));
+      var bind = s => to_high_order(term.bind, Ext(s, vars), depth + 1);
+      var body = (s,x) => to_high_order(term.body, Ext(x, Ext(s, vars)), depth + 2);
       var eras = term.eras;
       return All(self, name, bind, body, eras);
     case "Lam":
       var name = term.name;
-      var body = x => to_high_order(term.body, Ext(x, vars));
+      var body = x => to_high_order(term.body, Ext(x, vars), depth + 1);
       var eras = term.eras;
       return Lam(name, body, eras);
     case "App":
-      var func = to_high_order(term.func, vars);
-      var argm = to_high_order(term.argm, vars);
+      var func = to_high_order(term.func, vars, depth);
+      var argm = to_high_order(term.argm, vars, depth);
       var eras = term.eras;
       return App(func, argm, eras);
     case "Ann":
-      var expr = to_high_order(term.expr, vars);
-      var type = to_high_order(term.type, vars);
+      var expr = to_high_order(term.expr, vars, depth);
+      var type = to_high_order(term.type, vars, depth);
       return Ann(expr, type);
   }
 };
@@ -420,24 +422,20 @@ function to_high_order(term, vars = Nil()) {
 function to_low_order(term, depth = 0) {
   switch (term.ctor) {
     case "Var":
-      if (term.indx < depth) {
-        return Var(depth - term.indx - 1);
-      } else {
-        return Var(term.indx);
-      }
+      return Var(depth - term.indx - 1);
     case "Ref":
       return Ref(term.name);
     case "Typ":
       return Typ();
     case "All":
-      var self = "x" + depth;
-      var name = "x" + (depth + 1);
+      var self = term.self;
+      var name = term.name;
       var bind = to_low_order(term.bind(Var(depth)), depth + 1);
       var body = to_low_order(term.body(Var(depth), Var(depth+1)), depth + 2);
       var eras = term.eras;
       return All(self, name, bind, body, eras);
     case "Lam":
-      var name = "x" + depth;
+      var name = term.name;
       var body = to_low_order(term.body(Var(depth)), depth + 1);
       var eras = term.eras;
       return Lam(name, body, eras);
@@ -692,8 +690,8 @@ function equal(a, b, module, dep = 0) {
 // Type-Checking
 // =============
 
-function typeinfer(term, module, ctx = Nil()) {
-  //console.log("infer", stringify_trm(term));
+function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
+  //console.log("infer", stringify_trm(term, nam));
   //console.log("-----");
   switch (term.ctor) {
     case "Var":
@@ -706,11 +704,11 @@ function typeinfer(term, module, ctx = Nil()) {
     case "Typ":
       return Typ();
     case "App":
-      var func_typ = reduce(typeinfer(term.func, module, ctx), module);
+      var func_typ = reduce(typeinfer(term.func, module, ctx, nam), module);
       switch (func_typ.ctor) {
         case "All":
           var expe_typ = subst(func_typ.bind, term.func, 0);
-          typecheck(term.argm, expe_typ, module, ctx);
+          typecheck(term.argm, expe_typ, module, ctx, nam);
           var term_typ = func_typ.body;
           var term_typ = subst(term_typ, shift(term.func, 1, 0), 1);
           var term_typ = subst(term_typ, shift(term.argm, 0, 0), 0);
@@ -722,16 +720,18 @@ function typeinfer(term, module, ctx = Nil()) {
     case "All":
       var self_typ = Ann(term, Typ(), true);
       var bind_ctx = Ext(self_typ, ctx);
-      var bind_typ = typecheck(term.bind, Typ(), module, bind_ctx);
+      var bind_nam = Ext(term.self, nam);
+      var bind_typ = typecheck(term.bind, Typ(), module, bind_ctx, bind_nam);
       var body_ctx = Ext(term.bind, Ext(self_typ, ctx));
-      typecheck(term.body, Typ(), module, body_ctx);
+      var body_nam = Ext(term.name, Ext(term.self, nam));
+      typecheck(term.body, Typ(), module, body_ctx, body_nam);
       return Typ();
   }
 };
 
-function typecheck(term, type, module, ctx = Nil()) {
-  //console.log("check", stringify_trm(term));
-  //console.log("typed", stringify_trm(type));
+function typecheck(term, type, module, ctx = Nil(), nam = Nil()) {
+  //console.log("check", stringify_trm(term, nam));
+  //console.log("typed", stringify_trm(type, nam));
   //console.log("-----");
   var typv = reduce(type, module);
   switch (term.ctor) {
@@ -740,8 +740,9 @@ function typecheck(term, type, module, ctx = Nil()) {
         var self_typ = Ann(typv, Typ(), true);
         var bind_typ = subst(typv.bind, term, 0);
         var body_typ = subst(typv.body, shift(term, 1, 0), 1);
+        var body_nam = Ext(typv.name, nam);
         var body_ctx = Ext(bind_typ, ctx);
-        typecheck(term.body, body_typ, module, body_ctx);
+        typecheck(term.body, body_typ, module, body_ctx, body_nam);
       } else {
         throw "Lambda has a non-function type.";
       }
@@ -750,17 +751,18 @@ function typecheck(term, type, module, ctx = Nil()) {
       if (term.done) {
         infr = term.type;
       } else {
-        infr = typecheck(term.expr, term.type, module, ctx);
+        infr = typecheck(term.expr, term.type, module, ctx, nam);
       }
       break;
     default:
-      var infr = typeinfer(term, module, ctx);
+      var infr = typeinfer(term, module, ctx, nam);
       //console.log("=",stringify_trm(type));
       //console.log("=",stringify_trm(infr));
       //console.log("?", equal(type, infr, module));
       if (!equal(type, infr, module)) {
         var type_str = stringify_trm(type);
         var infr_str = stringify_trm(infr);
+        //console.log(JSON.stringify(nam));
         throw new Error("Expected `"+type_str+"`, got `"+infr_str+"`.");
       }
       break;
