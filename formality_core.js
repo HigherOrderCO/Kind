@@ -586,24 +586,45 @@ function equate(map, x, y) {
   disjoint_set_union(map[x], map[y]);
 };
 
-// Replaces all free variables of a subterm with a reference to the depth of the quantificator it is bound
+// Replaces all free variables of a subterm with a reference
+// to the depth of the quantificator it is bound
 function bind_free_vars(term, initial_depth) {
   function go(term, depth) {
     switch (term.ctor) {
-      case "Var": {
-        if (term.index < depth){
-          return term;
-        }
-        var f_index = term.index - depth;
-        return Ref(initial_depth - 1 - f_index);
+    case "Var":
+      if (term.index < depth){
+        return Var(term.index);
+      } else {
+        return Ref(initial_depth - 1 - (term.index - depth));
       }
-      case "Ref": return Ref(term.name);
-      case "Typ": return Typ();
-      case "All": return All(term.name, go(term.bind, depth), go(term.body, depth+1), term.eras);
-      case "Lam": return Lam(term.name, go(term.bind, depth), go(term.body, depth+1), term.eras);
-      case "App": return App(go(term.func, depth), go(term.argm, depth), term.eras);
-      case "Ann": return Ann(go(term.expr, depth), go(term.type, depth), term.done);
-      default:    return term;
+    case "Ref":
+      return Ref(term.name);
+    case "Typ":
+      return Typ();
+    case "All":
+      var self = term.self;
+      var name = term.name;
+      var bind = go(term.bind, depth);
+      var body = go(term.body, depth+1);
+      var eras = term.eras;
+      return All(self, name, bind, body, eras);
+    case "Lam":
+      var name = term.name;
+      var bind = go(term.bind, depth);
+      var body = go(term.body, depth+1);
+      var eras = term.eras;
+      return Lam(name, bind, body, eras);
+    case "App":
+      var func = go(term.func, depth);
+      var argm = go(term.argm, depth);
+      var eras = term.eras;
+      return App(func, argm, eras);
+    case "Ann":
+      var expr = go(term.expr, depth);
+      var type = go(term.type, depth);
+      var done = term.done;
+      return Ann(expr, type, done);
+    default:    return term;
     }
   }
   return go(term, 0);
