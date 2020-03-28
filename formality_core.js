@@ -34,9 +34,9 @@ function App(eras, func, argm) {
   return {ctor: "App", hash, eras, func, argm};
 };
 
-function Ann(done, type, expr) {
+function Ann(done, expr, type) {
   var hash = hash_two(10, hash_two(expr.hash, type.hash));
-  return {ctor: "Ann", hash, done, type, expr};
+  return {ctor: "Ann", hash, done, expr, type};
 };
 
 // List
@@ -234,7 +234,7 @@ function parse_app(code, indx, func, vars) {
 function parse_ann(code, indx, expr, vars) {
   var [indx, skip] = parse_str("::", code, next(code, indx));
   var [indx, type] = parse_trm(code, indx, vars);
-  return [indx, Ann(false, type, expr)];
+  return [indx, Ann(false, expr, type)];
 };
 
 // Parses a term
@@ -369,7 +369,7 @@ function shift(term, inc, dep) {
       var expr = shift(term.expr, inc, dep);
       var type = shift(term.type, inc, dep);
       var done = term.done;
-      return Ann(done, type, expr);
+      return Ann(done, expr, type);
   };
 };
 
@@ -408,7 +408,7 @@ function subst(term, val, dep) {
       var expr = subst(term.expr, val, dep);
       var type = subst(term.type, val, dep);
       var done = term.done;
-      return Ann(done, type, expr);
+      return Ann(done, expr, type);
   };
 };
 
@@ -448,7 +448,7 @@ function to_high_order(term, vars = Nil(), depth = 0) {
     case "Ann":
       var expr = to_high_order(term.expr, vars, depth);
       var type = to_high_order(term.type, vars, depth);
-      return Ann(term.done, type, expr);
+      return Ann(term.done, expr, type);
   }
 };
 
@@ -480,7 +480,7 @@ function to_low_order(term, depth = 0) {
     case "Ann":
       var expr = to_low_order(term.expr, depth);
       var type = to_low_order(term.type, depth);
-      return Ann(term.done, type, expr);
+      return Ann(term.done, expr, type);
   }
 };
 
@@ -657,7 +657,7 @@ function bind_free_vars(term, initial_depth) {
       var expr = go(term.expr, depth);
       var type = go(term.type, depth);
       var done = term.done;
-      return Ann(done, type, expr);
+      return Ann(done, expr, type);
     default:    return term;
     }
   }
@@ -779,7 +779,7 @@ function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
           throw new Error("Non-function application.");
       };
     case "All":
-      var self_typ = Ann(term, Typ(), true);
+      var self_typ = Ann(true, term, Typ());
       var bind_ctx = Ext(self_typ, ctx);
       var bind_nam = Ext(term.self, nam);
       var bind_typ = typecheck(term.bind, Typ(), module, bind_ctx, bind_nam);
@@ -798,7 +798,7 @@ function typecheck(term, type, module, ctx = Nil(), nam = Nil()) {
   switch (term.ctor) {
     case "Lam":
       if (typv.ctor === "All") {
-        var self_typ = Ann(typv, Typ(), true);
+        var self_typ = Ann(true, typv, Typ());
         var bind_typ = subst(typv.bind, term, 0);
         var body_typ = subst(typv.body, shift(term, 1, 0), 1);
         var body_nam = Ext(typv.name, nam);
