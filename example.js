@@ -42,6 +42,6 @@ console.log(fmc.stringify_mod(module));
 
 // Reduces `main` to normal form
 var name = "succ";
-console.log("term:", fmc.stringify_trm(module[name].term));
-console.log("norm:", fmc.stringify_trm(fmc.normalize(module[name].term, module)));
-console.log("type:", fmc.stringify_trm(fmc.typecheck(module[name].term, module[name].type, module)));
+//console.log("term:", fmc.stringify_trm(module[name].term));
+//console.log("norm:", fmc.stringify_trm(fmc.normalize(module[name].term, module)));
+//console.log("type:", fmc.stringify_trm(fmc.typecheck(module[name].term, module[name].type, module)));
