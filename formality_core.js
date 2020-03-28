@@ -1,14 +1,17 @@
 // Term
 // ====
 
+// precedence for ctor arguments:
+// hash, eras/done, self, name, bind/type/func, body/argm/expr, indx
+
 function Var(indx) {
   var hash = hash_two(1, indx);
-  return {ctor: "Var", indx, hash};
+  return {ctor: "Var", hash, indx};
 };
 
 function Ref(name) {
   var hash = hash_two(2, hash_str(name));
-  return {ctor: "Ref", name, hash};
+  return {ctor: "Ref", hash, name};
 };
 
 function Typ() {
@@ -16,24 +19,24 @@ function Typ() {
   return {ctor: "Typ", hash};
 };
 
-function All(self, name, bind, body, eras) {
+function All(eras, self, name, bind, body) {
   var hash = hash_two(4, hash_two(bind.hash, body.hash));
-  return {ctor: "All", self, name, bind, body, eras, hash};
+  return {ctor: "All", hash, eras, self, name, bind, body};
 };
 
-function Lam(name, body, eras) {
+function Lam(eras, name, body) {
   var hash = hash_two(5, body.hash);
-  return {ctor: "Lam", name, body, eras, hash};
+  return {ctor: "Lam", hash, eras, name, body};
 };
 
-function App(func, argm, eras) {
+function App(eras, func, argm) {
   var hash = hash_two(6, hash_two(func.hash, argm.hash));
-  return {ctor: "App", func, argm, eras, hash};
+  return {ctor: "App", hash, eras, func, argm};
 };
 
-function Ann(expr, type, done) {
+function Ann(done, type, expr) {
   var hash = hash_two(10, hash_two(expr.hash, type.hash));
-  return {ctor: "Ann", expr, type, hash, done};
+  return {ctor: "Ann", hash, done, type, expr};
 };
 
 // List
@@ -155,7 +158,7 @@ function parse_all(code, indx, vars) {
   var [indx, skip] = parse_str(")", code, space(code, indx));
   var [indx, skip] = parse_str("->", code, space(code, indx));
   var [indx, body] = parse_trm(code, indx, Ext(name, Ext(self, vars)));
-  return [indx, All(self, name, bind, body, eras)];
+  return [indx, All(eras, self, name, bind, body)];
 };
 
 // Parses a dependent function value, `(<name>) => <term>`
@@ -166,7 +169,7 @@ function parse_lam(code, indx, vars) {
   var [indx, skip] = parse_str(")", code, space(code, indx));
   var [indx, skip] = parse_str("=>", code, space(code, indx));
   var [indx, body] = parse_trm(code, indx, Ext(name, vars));
-  return [indx, Lam(name, body, eras)];
+  return [indx, Lam(eras, name, body)];
 };
 
 // Parses the type of types, `Type`
@@ -194,14 +197,14 @@ function parse_app(code, indx, func, vars) {
   var [indx, argm] = parse_trm(code, indx, vars);
   var [indx, eras] = parse_opt(";", code, space(code, indx));
   var [indx, skip] = parse_str(")", code, space(code, indx));
-  return [indx, App(func, argm, eras)];
+  return [indx, App(eras, func, argm)];
 };
 
 // Parses an annotation, `<term> :: <term>`
 function parse_ann(code, indx, expr, vars) {
   var [indx, skip] = parse_str("::", code, space(code, indx));
   var [indx, type] = parse_trm(code, indx, vars);
-  return [indx, Ann(expr, type, false)];
+  return [indx, Ann(false, type, expr)];
 };
 
 // Parses a term
@@ -321,22 +324,22 @@ function shift(term, inc, dep) {
       var bind = shift(term.bind, inc, dep + 1);
       var body = shift(term.body, inc, dep + 2);
       var eras = term.eras;
-      return All(self, name, bind, body, eras);
+      return All(eras, self, name, bind, body);
     case "Lam":
       var name = term.name;
       var body = shift(term.body, inc, dep + 1);
       var eras = term.eras;
-      return Lam(name, body, eras);
+      return Lam(eras, name, body);
     case "App":
       var func = shift(term.func, inc, dep);
       var argm = shift(term.argm, inc, dep);
       var eras = term.eras;
-      return App(func, argm, eras);
+      return App(eras, func, argm);
     case "Ann":
       var expr = shift(term.expr, inc, dep);
       var type = shift(term.type, inc, dep);
       var done = term.done;
-      return Ann(expr, type, done);
+      return Ann(done, type, expr);
   };
 };
 
@@ -360,22 +363,22 @@ function subst(term, val, dep) {
       var bind = subst(term.bind, shift(val,1,0), dep + 1);
       var body = subst(term.body, shift(val,2,0), dep + 2);
       var eras = term.eras;
-      return All(self, name, bind, body, eras);
+      return All(eras, self, name, bind, body);
     case "Lam":
       var name = term.name;
       var body = subst(term.body, shift(val,1,0), dep + 1);
       var eras = term.eras;
-      return Lam(name, body, eras);
+      return Lam(eras, name, body);
     case "App":
       var func = subst(term.func, val, dep);
       var argm = subst(term.argm, val, dep);
       var eras = term.eras;
-      return App(func, argm, eras);
+      return App(eras, func, argm);
     case "Ann":
       var expr = subst(term.expr, val, dep);
       var type = subst(term.type, val, dep);
       var done = term.done;
-      return Ann(expr, type, done);
+      return Ann(done, type, expr);
   };
 };
 
@@ -401,21 +404,21 @@ function to_high_order(term, vars = Nil(), depth = 0) {
       var bind = s => to_high_order(term.bind, Ext(s, vars), depth + 1);
       var body = (s,x) => to_high_order(term.body, Ext(x, Ext(s, vars)), depth + 2);
       var eras = term.eras;
-      return All(self, name, bind, body, eras);
+      return All(eras, self, name, bind, body);
     case "Lam":
       var name = term.name;
       var body = x => to_high_order(term.body, Ext(x, vars), depth + 1);
       var eras = term.eras;
-      return Lam(name, body, eras);
+      return Lam(eras, name, body);
     case "App":
       var func = to_high_order(term.func, vars, depth);
       var argm = to_high_order(term.argm, vars, depth);
       var eras = term.eras;
-      return App(func, argm, eras);
+      return App(eras, func, argm);
     case "Ann":
       var expr = to_high_order(term.expr, vars, depth);
       var type = to_high_order(term.type, vars, depth);
-      return Ann(expr, type);
+      return Ann(term.done, type, expr);
   }
 };
 
@@ -433,21 +436,21 @@ function to_low_order(term, depth = 0) {
       var bind = to_low_order(term.bind(Var(depth)), depth + 1);
       var body = to_low_order(term.body(Var(depth), Var(depth+1)), depth + 2);
       var eras = term.eras;
-      return All(self, name, bind, body, eras);
+      return All(eras, self, name, bind, body);
     case "Lam":
       var name = term.name;
       var body = to_low_order(term.body(Var(depth)), depth + 1);
       var eras = term.eras;
-      return Lam(name, body, eras);
+      return Lam(eras, name, body);
     case "App":
       var func = to_low_order(term.func, depth);
       var argm = to_low_order(term.argm, depth);
       var eras = term.eras;
-      return App(func, argm, eras);
+      return App(eras, func, argm);
     case "Ann":
       var expr = to_low_order(term.expr, depth);
       var type = to_low_order(term.type, depth);
-      return Ann(expr, type);
+      return Ann(term.done, type, expr);
   }
 };
 
@@ -469,22 +472,23 @@ function reduce_high_order(term, module) {
       var bind = term.bind;
       var body = term.body;
       var eras = term.eras;
-      return All(self, name, bind, body, eras);
+      return All(eras, self, name, bind, body);
     case "Lam":
       var name = term.name;
       var body = term.body;
       var eras = term.eras;
-      return eras ? body(Ref("<erased>")) : Lam(name, body, eras);
+      return eras ? body(Ref("<erased>")) : Lam(eras, name, body);
     case "App":
       var func = reduce_high_order(term.func, module);
-      if (term.eras) {
+      var eras = term.eras
+      if (eras) {
         return func;
       } else {
         switch (func.ctor) {
           case "Lam":
             return reduce_high_order(func.body(term.argm), module);
           default:
-            return App(func, reduce_high_order(term.argm, module));
+            return App(eras, func, reduce_high_order(term.argm, module));
         };
       };
     case "Ann":
@@ -507,18 +511,19 @@ function normalize_high_order(term, module) {
       var bind = s => normalize_high_order(norm.bind(s), module);
       var body = (s,x) => normalize_high_order(norm.body(s,x), module);
       var eras = norm.eras;
-      return All(self, name, bind, body, eras);
+      return All(eras, self, name, bind, body);
     case "Lam":
       var name = norm.name;
       var body = x => {
         return normalize_high_order(norm.body(x), module);
       };
       var eras = norm.eras;
-      return Lam(name, body, eras);
+      return Lam(eras,name, body);
     case "App":
       var func = normalize_high_order(norm.func, module);
       var argm = normalize_high_order(norm.argm, module);
-      return App(func, argm);
+      var eras = norm.eras;
+      return App(eras,func, argm);
     case "Ann":
       return normalize_high_order(norm.expr, module);
   };
@@ -607,23 +612,22 @@ function bind_free_vars(term, initial_depth) {
       var bind = go(term.bind, depth);
       var body = go(term.body, depth+1);
       var eras = term.eras;
-      return All(self, name, bind, body, eras);
+      return All(eras, self, name, bind, body);
     case "Lam":
       var name = term.name;
-      var bind = go(term.bind, depth);
       var body = go(term.body, depth+1);
       var eras = term.eras;
-      return Lam(name, bind, body, eras);
+      return Lam(eras, name, body);
     case "App":
       var func = go(term.func, depth);
       var argm = go(term.argm, depth);
       var eras = term.eras;
-      return App(func, argm, eras);
+      return App(eras,func, argm);
     case "Ann":
       var expr = go(term.expr, depth);
       var type = go(term.type, depth);
       var done = term.done;
-      return Ann(expr, type, done);
+      return Ann(done, type, expr);
     default:    return term;
     }
   }
