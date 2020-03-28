@@ -332,7 +332,11 @@ function stringify_trm(term, vars = Nil()) {
       var func = stringify_trm(term.func, vars);
       var argm = stringify_trm(term.argm, vars);
       var eras = term.eras ? ";" : "";
-      return "("+func+")("+argm+eras+")";
+      if (term.func.ctor === "Lam" || term.func.ctor === "All") {
+        return "("+func+")("+argm+eras+")";
+      } else {
+        return func+"("+argm+eras+")";
+      }
     case "Let":
       var name = term.name;
       var expr = stringify_trm(term.expr, vars);
