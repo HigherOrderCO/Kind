@@ -148,7 +148,7 @@ function parse_str(str, code, indx) {
   } else if (indx < code.length && code[indx] === str[0]) {
     return parse_str(str.slice(1), code, indx+1);
   } else {
-    throw new Error("Expected `" + str + "`, found `" + code.slice(indx,indx+16) + "`.");
+    throw "Expected `" + str + "`, found `" + code.slice(indx,indx+16) + "`.";
   };
 };
 
@@ -170,7 +170,7 @@ function parse_nam(code, indx, size = 0) {
   } else if (size > 0) {
     return [indx, ""];
   } else {
-    throw new Error();
+    throw "Invalid name.";
   }
 };
 
@@ -819,14 +819,14 @@ function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
       if (got) {
         return shift(got.value, got.index + 1, 0);
       } else {
-        throw new Error("Unbound varible.");
+        throw "Unbound varible.";
       }
     case "Ref":
       var got = module[term.name];
       if (got) {
         return got.type;
       } else {
-        throw new Error("Undefined reference '" + term.name + "'.");
+        throw "Undefined reference '" + term.name + "'.";
       }
     case "Typ":
       return Typ();
@@ -842,7 +842,7 @@ function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
           var term_typ = reduce(term_typ, module);
           return term_typ;
         default:
-          throw new Error("Non-function application.");
+          throw "Non-function application.";
       };
     case "Let":
       var term_val = subst(term.body, term.expr, 0);
@@ -890,7 +890,7 @@ function typecheck(term, type, module, ctx = Nil(), nam = Nil()) {
       if (!equal(type, infr, module)) {
         var type_str = stringify_trm(type, nam);
         var infr_str = stringify_trm(infr, nam);
-        throw new Error("Expected `"+type_str+"`, got `"+infr_str+"`.");
+        throw "Expected `"+type_str+"`, got `"+infr_str+"`.";
       }
       break;
   };

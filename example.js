@@ -49,7 +49,7 @@ var code = `
   main : Nat
     let n = succ(succ(zero))
     let f = double
-    double(n)
+    f(n)
 `;
 
 // Parses module
