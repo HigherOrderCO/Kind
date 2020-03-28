@@ -59,6 +59,3 @@ for (var name in module) {
   }
   console.log("");
 };
-
-// FIXME true === false ?
-console.log(fmc.equal(module.true.term, module.false.term, module));
