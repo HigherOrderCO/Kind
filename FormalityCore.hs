@@ -13,10 +13,14 @@ import           Control.Monad
 
 import           Prelude             hiding (all, mod)
 
-type Name = String
-type Done = Bool
-type Eras = Bool
+-- Formality-Core types
+-- ====================
 
+type Name = String
+type Done = Bool   -- Annotation flag
+type Eras = Bool   -- Erasure mark
+
+-- Formality-Core terms
 data Term
   = Var Int                       -- Variable
   | Ref Name                      -- Reference
@@ -25,15 +29,19 @@ data Term
   | Lam Eras Name Term            -- Lambda
   | App Eras Term Term            -- Application
   | Ann Bool Term Term            -- Type annotation
-  deriving (Eq, Show, Ord)
 
-data Def = Def { _name :: Name, _type :: Term, _term :: Term } deriving Show
+-- Formality-Core expression definitions
+data Def = Def { _name :: Name, _type :: Term, _term :: Term }
 
-type Module = M.Map Name Def
+-- Formality-Core modules
+newtype Module = Module { _defs :: M.Map Name Def }
 
+-- "femtoparsec" parser combinator library
+-- =======================================
+
+-- a parser of things is function from strings to
+-- perhaps a pair of a string and a thing
 data Parser a = Parser { runParser :: String -> Maybe (String, a) }
-
-type Vars = [Name]
 
 instance Functor Parser where
   fmap f p = Parser $ \i -> case runParser p i of
@@ -58,16 +66,6 @@ instance Monad Parser where
     Just (i', a) -> runParser (f a) i'
     Nothing      -> Nothing
 
-instance MonadPlus Parser where
-  mzero = empty
-  mplus = (<|>)
-
-isSpace :: Char -> Bool
-isSpace c = c `elem` " \t\n"
-
-isName :: Char -> Bool
-isName c = c `elem` (['0'..'9'] ++ ['a'..'z'] ++ ['A'..'Z'] ++ "_")
-
 choice :: [Parser a] -> Parser a
 choice = asum
 
@@ -87,51 +85,68 @@ satisfy f = Parser $ \i -> case i of
 anyChar :: Parser Char
 anyChar = satisfy (const True)
 
-whitespace :: Parser ()
-whitespace = takeWhile1P isSpace >> return ()
-
-lineComment :: Parser ()
-lineComment = sym "//" >> takeWhileP (/= '\n') >> return ()
-
 manyTill :: Parser a -> Parser end -> Parser [a]
 manyTill p end = go
   where
     go = ([] <$ end) <|> ((:) <$> p <*> go)
-
-blockComment :: Parser ()
-blockComment = string "/*" >> manyTill anyChar (string "*/") >> return ()
 
 skipMany :: Parser a -> Parser ()
 skipMany p = go
   where
     go = (p *> go) <|> pure ()
 
--- space and comment consumer
-space :: Parser ()
-space = skipMany $ choice [whitespace, lineComment, blockComment]
-
 string :: String -> Parser String
 string str = Parser $ \i -> case stripPrefix str i of
   Just i' -> Just (i', str)
   Nothing -> Nothing
 
+-- Formality-Core parser
+-- =====================
+
+-- is a space character
+isSpace :: Char -> Bool
+isSpace c = c `elem` " \t\n"
+
+-- is a name character
+isName :: Char -> Bool
+isName c = c `elem` (['0'..'9'] ++ ['a'..'z'] ++ ['A'..'Z'] ++ "_")
+
+-- consume whitespace
+whitespace :: Parser ()
+whitespace = takeWhile1P isSpace >> return ()
+
+-- parse // line comments
+lineComment :: Parser ()
+lineComment = sym "//" >> takeWhileP (/= '\n') >> return ()
+
+-- parse `/* */` block comments
+blockComment :: Parser ()
+blockComment = string "/*" >> manyTill anyChar (string "*/") >> return ()
+
+-- space and comment consumer
+space :: Parser ()
+space = skipMany $ choice [whitespace, lineComment, blockComment]
+
+
+-- parse a symbol (literal string followed by whitespace or comments)
 sym :: String -> Parser String
 sym s = string s <* space
 
+-- parse an optional character
 opt :: Char -> Parser Bool
 opt c = isJust <$> optional (string (c:[]))
 
+-- parse a valid name, non-empty
 nam :: Parser String
-nam = do
-  n <- takeWhileP isName
-  case n of
-    "" -> empty
-    _  -> return n
+nam = takeWhile1P isName
 
-par :: Vars -> Parser Term
+-- Parses a parenthesis, `(<term>)`
+par :: [Name] -> Parser Term
 par vs = string "(" >> space >> trm vs <* space <* string ")"
 
-all :: Vars -> Parser Term
+-- Parses a dependent function type, `(<name> : <term>) => <term>`
+-- optionally with a self-type: `<name>(<name> : <term>) => <term>`
+all :: [Name] -> Parser Term
 all vs = do
   s <- maybe "" id <$> (optional nam)
   n <- sym "(" >> nam <* space
@@ -140,31 +155,38 @@ all vs = do
   b <- sym "->" >> trm (n : vs)
   return $ All e s n t b
 
-lam :: Vars -> Parser Term
+-- Parses a dependent function value, `(<name>) => <term>`
+lam :: [Name] -> Parser Term
 lam vs = do
   n <- sym "(" >> nam <* space
   e <- opt ';' <* space <* sym ")"
   b <- sym "=>" >> trm (n : vs)
   return $ Lam e n b
 
-var :: Vars -> Parser Term
-var vs = (\n -> maybe (Ref n) Var (elemIndex n vs)) <$> nam
-
+-- Parses the type of types, `Type`
 typ :: Parser Term
 typ = string "Type" >> return Typ
 
-app :: Vars -> Term -> Parser Term
+-- Parses variables, `<name>`
+var :: [Name] -> Parser Term
+var vs = (\n -> maybe (Ref n) Var (elemIndex n vs)) <$> nam
+
+-- Parses a sequence applications `<term>(<term>)...(<term>)`.
+-- note that this parser differs from the JS parser due to Haskell's laziness
+app :: [Name] -> Term -> Parser Term
 app vs f = foldl (\t (a,e) -> App e t a) f <$> (some $ arg vs)
   where
   arg vs = (,) <$> (sym "(" >> trm vs) <*> (opt ';' <* space <* string ")")
 
-ann :: Vars -> Term -> Parser Term
+-- Parses an annotation, `<term> :: <term>`
+ann :: [Name] -> Term -> Parser Term
 ann vs x = do
   space >> sym "::"
   t <- trm vs
   return $ Ann False t x
 
-trm :: Vars -> Parser Term
+-- Parses a term
+trm :: [Name] -> Parser Term
 trm vs = do
   t <- choice [all vs, lam vs, typ, var vs, par vs]
   t <- app vs t <|> return t
@@ -173,11 +195,13 @@ trm vs = do
 parseTerm :: String -> Maybe Term
 parseTerm str = snd <$> runParser (trm []) str
 
+-- Parses a definition
 def :: Parser Def
 def = Def <$> (nam <* space) <*> (sym ":" >> trm []) <*> (space >> trm [])
 
+-- Parses a module
 mod :: Parser Module
-mod = M.fromList <$> fmap (\d -> (_name d, d)) <$> many (def <* space)
+mod = Module . M.fromList <$> fmap (\d -> (_name d, d)) <$> many (def <* space)
 
 testString1 = intercalate "\n"
   [ "identity : (A : Type) -> (a : A) -> A"
@@ -190,32 +214,41 @@ testString1 = intercalate "\n"
   , "(A) => (f) => (x) => f(f(x))"
   ]
 
-stringifyTerm :: Term -> String
-stringifyTerm t = go [] t
-  where
-  cat = concat
-  sem e = if e then ";" else ""
-  go :: Vars -> Term -> String
-  go vs t = case t of
-    Var i         -> vs !! i
-    Ref n         -> n
-    Typ           -> "Type"
-    All e s n h b -> cat [s,"(", n, " : ", go vs h, sem e,") -> ", go (n:vs) b]
-    Lam e n b     -> cat ["(", n, sem e, ") => ", go (n:vs) b]
-    App e f a     -> case f of
-      (Ref n) -> cat [n, "(", go vs a, sem e, ")"]
-      (Var i) -> cat [vs !! i, "(", go vs a, sem e, ")"]
-      f       -> cat ["(", go vs f, ")(", go vs a, sem e, ")"]
-    Ann d x y     -> cat [go vs y, " :: ", go vs x]
+-- Stringification, or, pretty-printing
+-- ===================================
 
-stringifyDef :: Def -> String
-stringifyDef (Def n t d) =
-  concat [n," : ", stringifyTerm t, "\n", stringifyTerm d]
+instance Show Term where
+  show t = go [] t 
+    where
+      cat = concat
+      sem e = if e then ";" else ""
+      go :: [Name] -> Term -> String
+      go vs t = case t of
+        Var i         -> vs !! i
+        Ref n         -> n
+        Typ           -> "Type"
+        All e s n h b -> cat [s,"(",n," : ",go vs h,sem e,") -> ",go (n:vs) b]
+        Lam e n b     -> cat ["(",n,sem e,") => ",go (n:vs) b]
+        App e f a     -> case f of
+          (Ref n) -> cat [n,"(",go vs a,sem e,")"]
+          (Var i) -> cat [vs !! i,"(",go vs a,sem e,")"]
+          f       -> cat ["(", go vs f,")(",go vs a,sem e,")"]
+        Ann d x y     -> cat [go vs y," :: ",go vs x]
 
-stringifyMod :: Module -> String
-stringifyMod = foldl (\s d -> s ++ stringifyDef d ++ "\n\n") ""
+instance Show Def where
+  show (Def n t d) = concat [n," : ", show t, "\n", show d]
+
+instance Show Module where
+  show (Module m)  = go $ snd <$> (M.toList m)
+    where
+      go []     = ""
+      go [d]    = show d
+      go (d:ds) = show d ++ "\n\n" ++ go ds
 
 -- Substitution
+-- ============
+
+-- shift all indices by an increment above a depth in a term
 shift :: Int -> Int -> Term -> Term
 shift inc dep term = let go x = shift inc dep x in case term of
   Var i         -> Var (if i < dep then i else (i + inc))
@@ -241,6 +274,9 @@ subst v dep term =
   App e f a     -> App e (go f) (go a)
   Ann d t x     -> Ann d (go t) (go x)
 
+-- Evaluation
+-- ==========
+
 -- Erase computationally irrelevant terms
 erase :: Term -> Term
 erase term = let go = erase in case term of
@@ -254,7 +290,7 @@ erase term = let go = erase in case term of
 
 -- lookup the value of an expression in a module
 deref :: Name -> Module -> Term
-deref n defs = maybe (Ref n) _term (M.lookup n defs)
+deref n (Module defs) = maybe (Ref n) _term (M.lookup n defs)
 
 -- lower-order interpreter
 evalTerm :: Term -> Module -> Term
@@ -273,6 +309,7 @@ evalTerm term mod = go term
       x     -> go x
     _           -> term
 
+-- Higher Order Abstract Syntax terms
 data TermH
   = VarH Int
   | RefH Name
@@ -282,6 +319,7 @@ data TermH
   | AppH Eras TermH TermH
   | AnnH Bool TermH TermH
 
+-- convert lower-order terms to higher order terms
 toTermH :: Term -> TermH
 toTermH t = go [] t
   where
@@ -295,6 +333,7 @@ toTermH t = go [] t
       App e f a     -> AppH e (go vs f) (go vs a)
       Ann d t x     -> AnnH d (go vs t) (go vs x)
 
+-- convert higher-order terms to lower-order terms
 fromTermH :: TermH -> Term
 fromTermH t = go 0 t
   where
@@ -309,6 +348,7 @@ fromTermH t = go 0 t
       AppH e f a     -> App e (go dep f) (go dep a)
       AnnH d t x     -> Ann d (go dep t) (go dep x)
 
+-- HOAS reduction
 reduceTermH :: Module -> TermH -> TermH
 reduceTermH defs t = go t
   where
@@ -325,6 +365,11 @@ reduceTermH defs t = go t
       AnnH d t x     -> go x
       _              -> t
 
+-- convert term to higher order and reduce
+reduce :: Module -> Term -> Term
+reduce defs = fromTermH . reduceTermH defs . toTermH
+
+-- HOAS normalization
 normalizeTermH :: Module -> TermH -> TermH
 normalizeTermH defs t = go t
   where
@@ -336,11 +381,12 @@ normalizeTermH defs t = go t
       AnnH d t x   -> go x
       _            -> t
 
-reduce :: Module -> Term -> Term
-reduce defs = fromTermH . reduceTermH defs . toTermH
-
+-- convert term to higher order and normalize
 normalize :: Module -> Term -> Term
 normalize defs = fromTermH . normalizeTermH defs . toTermH
+
+-- Term Equality
+-- =============
 
 type Hash = Int
 
@@ -353,7 +399,6 @@ data TermE
   | LamE Hash Eras Name Term            -- Lambda
   | AppE Hash Eras Term Term            -- Application
   | AnnE Hash Bool Term Term            -- Type annotation
-  deriving (Eq, Show, Ord)
 
 -- adapted from https://hackage.haskell.org/package/union-find
 data Points a = Points !Int (IM.IntMap (Elem a)) deriving Show
@@ -397,48 +442,4 @@ descriptor ps p = find ps p (\_ _ a -> a)
 
 equivalent :: Points a -> Int -> Int -> Bool
 equivalent ps p1 p2 = find ps p1 $ \i1 _ _ -> find ps p2 $ \i2 _ _ -> i1 == i2
-
-
---function bind_free_vars(term, initial_depth) {
---  function go(term, depth) {
---    switch (term.ctor) {
---    case "Var":
---      if (term.index < depth){
---        return Var(term.index);
---      } else {
---        return Ref(initial_depth - 1 - (term.index - depth));
---      }
---    case "Ref":
---      return Ref(term.name);
---    case "Typ":
---      return Typ();
---    case "All":
---      var self = term.self;
---      var name = term.name;
---      var bind = go(term.bind, depth);
---      var body = go(term.body, depth+1);
---      var eras = term.eras;
---      return All(eras, self, name, bind, body);
---    case "Lam":
---      var name = term.name;
---      var body = go(term.body, depth+1);
---      var eras = term.eras;
---      return Lam(eras, name, body);
---    case "App":
---      var func = go(term.func, depth);
---      var argm = go(term.argm, depth);
---      var eras = term.eras;
---      return App(eras,func, argm);
---    case "Ann":
---      var expr = go(term.expr, depth);
---      var type = go(term.type, depth);
---      var done = term.done;
---      return Ann(done, expr, type);
---    default:    return term;
---    }
---  }
---  return go(term, 0);
---};
-
-
 
