@@ -25,19 +25,29 @@ var code = `
 
   succ : (n : Nat) -> Nat
     (n) => (P;) => (z) => (s) => s(n)
-
+    
   double : (n : Nat) -> Nat
-    (n) => n((x) => Nat;)(zero)((pred) => pred)
+    (n) => n((x) => Nat;)(zero)((pred) => succ(succ(double(pred))))
 
-  elim : (b : Bool) ->
-         (P : (x : Bool) -> Type;) ->
-         (t : P(true)) ->
-         (f : P(false)) ->
-         P(b)
+  case_bool
+    : (b : Bool) ->
+      (P : (x : Bool) -> Type;) ->
+      (t : P(true)) ->
+      (f : P(false)) ->
+      P(b)
     (b) => (P;) => (t) => (f) => b(P;)(t)(f)
 
+  fold_nat
+    : (n : Nat) ->
+      (P : (n : Nat) -> Type) ->
+      (z : P(zero)) ->
+      (s : (n : Nat) -> (i : P(n)) -> P(succ(n))) ->
+      P(n)
+    (n) => (P) => (z) => (s) =>
+      n(P;)(z)((pred) => s(pred)(fold_nat(pred)(P;)(z)(s)))
+
   main : Nat
-    double(zero)
+    succ(zero)
 `;
 
 // Parses module

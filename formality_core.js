@@ -818,8 +818,8 @@ function typecheck(term, type, module, ctx = Nil(), nam = Nil()) {
     default:
       var infr = typeinfer(term, module, ctx, nam);
       if (!equal(type, infr, module)) {
-        var type_str = stringify_trm(type);
-        var infr_str = stringify_trm(infr);
+        var type_str = stringify_trm(type, nam);
+        var infr_str = stringify_trm(infr, nam);
         throw new Error("Expected `"+type_str+"`, got `"+infr_str+"`.");
       }
       break;
