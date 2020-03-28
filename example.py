@@ -1,4 +1,4 @@
-from formality_core import *
+from FormalityCore import *
 
 code = """
   Bool : Type

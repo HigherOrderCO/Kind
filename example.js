@@ -1,4 +1,4 @@
-var fmc = require("./formality_core.js");
+var fmc = require("./FormalityCore.js");
 
 // Base code
 var code = `
