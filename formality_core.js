@@ -34,8 +34,13 @@ function App(eras, func, argm) {
   return {ctor: "App", hash, eras, func, argm};
 };
 
+function Let(name, expr, body) {
+  var hash = hash_two(7, hash_two(expr.hash, body.hash));
+  return {ctor: "Let", hash, name, expr, body};
+};
+
 function Ann(done, expr, type) {
-  var hash = hash_two(10, hash_two(expr.hash, type.hash));
+  var hash = hash_two(8, hash_two(expr.hash, type.hash));
   return {ctor: "Ann", hash, done, expr, type};
 };
 
@@ -143,7 +148,7 @@ function parse_str(str, code, indx) {
   } else if (indx < code.length && code[indx] === str[0]) {
     return parse_str(str.slice(1), code, indx+1);
   } else {
-    throw new Error("Expected `" + str + "`, found `" + code.slice(indx,indx+16) + "`.");
+    throw "Expected `" + str + "`, found `" + code.slice(indx,indx+16) + "`.";
   };
 };
 
@@ -165,7 +170,7 @@ function parse_nam(code, indx, size = 0) {
   } else if (size > 0) {
     return [indx, ""];
   } else {
-    throw new Error();
+    throw "Invalid name.";
   }
 };
 
@@ -200,6 +205,17 @@ function parse_lam(code, indx, vars) {
   var [indx, skip] = parse_str("=>", code, next(code, indx));
   var [indx, body] = parse_trm(code, indx, Ext(name, vars));
   return [indx, Lam(eras, name, body)];
+};
+
+// Parses a local definition, `let x = val; body`
+function parse_let(code, indx, vars) {
+  var [indx, skip] = parse_str("let ", code, next(code, indx));
+  var [indx, name] = parse_nam(code, next(code, indx));
+  var [indx, skip] = parse_str("=", code, next(code, indx));
+  var [indx, expr] = parse_trm(code, indx, vars);
+  var [indx, skip] = parse_opt(";", code, next(code, indx));
+  var [indx, body] = parse_trm(code, indx, Ext(name, vars));
+  return [indx, Let(name, expr, body)];
 };
 
 // Parses the type of types, `Type`
@@ -243,6 +259,7 @@ function parse_trm(code, indx = 0, vars = Nil()) {
   var base_parse = first_valid([
     () => parse_all(code, indx, vars),
     () => parse_lam(code, indx, vars),
+    () => parse_let(code, indx, vars),
     () => parse_par(code, indx, vars),
     () => parse_typ(code, indx, vars),
     () => parse_var(code, indx, vars),
@@ -316,6 +333,11 @@ function stringify_trm(term, vars = Nil()) {
       var argm = stringify_trm(term.argm, vars);
       var eras = term.eras ? ";" : "";
       return "("+func+")("+argm+eras+")";
+    case "Let":
+      var name = term.name;
+      var expr = stringify_trm(term.expr, vars);
+      var body = stringify_trm(term.body, Ext(name, vars));
+      return "let "+name+" = "+expr+"; "+body;
     case "Ann":
       var expr = stringify_trm(term.expr, vars);
       var type = stringify_trm(term.type, vars);
@@ -365,6 +387,11 @@ function shift(term, inc, dep) {
       var argm = shift(term.argm, inc, dep);
       var eras = term.eras;
       return App(eras, func, argm);
+    case "Let":
+      var name = term.name;
+      var expr = shift(term.expr, inc, dep);
+      var body = shift(term.body, inc, dep + 1);
+      return Let(name, expr, body);
     case "Ann":
       var expr = shift(term.expr, inc, dep);
       var type = shift(term.type, inc, dep);
@@ -404,6 +431,11 @@ function subst(term, val, dep) {
       var argm = subst(term.argm, val, dep);
       var eras = term.eras;
       return App(eras, func, argm);
+    case "Let":
+      var name = term.name;
+      var expr = subst(term.expr, val, dep);
+      var body = subst(term.body, shift(val,1,0), dep + 1);
+      return Let(name, expr, body);
     case "Ann":
       var expr = subst(term.expr, val, dep);
       var type = subst(term.type, val, dep);
@@ -445,6 +477,11 @@ function to_high_order(term, vars = Nil(), depth = 0) {
       var argm = to_high_order(term.argm, vars, depth);
       var eras = term.eras;
       return App(eras, func, argm);
+    case "Let":
+      var name = term.name;
+      var expr = to_high_order(term.expr, vars, depth);
+      var body = x => to_high_order(term.body, Ext(x, vars), depth + 1);
+      return Let(name, expr, body);
     case "Ann":
       var expr = to_high_order(term.expr, vars, depth);
       var type = to_high_order(term.type, vars, depth);
@@ -477,6 +514,11 @@ function to_low_order(term, depth = 0) {
       var argm = to_low_order(term.argm, depth);
       var eras = term.eras;
       return App(eras, func, argm);
+    case "Let":
+      var name = term.name;
+      var expr = to_low_order(term.expr, depth);
+      var body = to_low_order(term.body(Var(depth)), depth + 1);
+      return Let(name, expr, body);
     case "Ann":
       var expr = to_low_order(term.expr, depth);
       var type = to_low_order(term.type, depth);
@@ -521,6 +563,11 @@ function reduce_high_order(term, module) {
             return App(eras, func, reduce_high_order(term.argm, module));
         };
       };
+    case "Let":
+      var name = term.name;
+      var expr = term.expr;
+      var body = term.body;
+      return reduce_high_order(body(expr), module);
     case "Ann":
       return reduce_high_order(term.expr, module);
   };
@@ -544,9 +591,7 @@ function normalize_high_order(term, module) {
       return All(eras, self, name, bind, body);
     case "Lam":
       var name = norm.name;
-      var body = x => {
-        return normalize_high_order(norm.body(x), module);
-      };
+      var body = x => normalize_high_order(norm.body(x), module);
       var eras = norm.eras;
       return Lam(eras,name, body);
     case "App":
@@ -554,6 +599,11 @@ function normalize_high_order(term, module) {
       var argm = normalize_high_order(norm.argm, module);
       var eras = norm.eras;
       return App(eras,func, argm);
+    case "Let":
+      var name = norm.name;
+      var expr = normalize_high_order(norm.expr, module);
+      var body = x => normalize_high_order(norm.body(x), module);
+      return Let(name, expr, body);
     case "Ann":
       return normalize_high_order(norm.expr, module);
   };
@@ -653,6 +703,11 @@ function bind_free_vars(term, initial_depth) {
       var argm = go(term.argm, depth);
       var eras = term.eras;
       return App(eras,func, argm);
+    case "Let":
+      var name = term.name;
+      var expr = go(term.expr, depth);
+      var body = go(term.body, depth+1);
+      return Let(name, expr, body);
     case "Ann":
       var expr = go(term.expr, depth);
       var type = go(term.type, depth);
@@ -683,6 +738,11 @@ function congruent_terms(map, a, b) {
         var func_id = congruent_terms(map, a.func, b.func);
         var argm_id = congruent_terms(map, a.argm, b.argm);
         var ret = func_id && argm_id;
+        break;
+      case "LetLet":
+        var expr_id = congruent_terms(map, a.expr, b.expr);
+        var body_id = congruent_terms(map, a.body, b.body);
+        var ret = expr_id && body_id;
         break;
       case "AnnAnn":
         var expr_id = congruent_terms(map, a.expr, b.expr);
@@ -729,6 +789,12 @@ function equal(a, b, module, dep = 0) {
           vis.push([a1.func, b1.func, depth]);
           vis.push([a1.argm, b1.argm, depth]);
           break;
+        case "LetLet":
+          var a_body = subst(a1.body, Ref("%" + depth + 0), 0);
+          var b_body = subst(b1.body, Ref("%" + depth + 0), 0);
+          vis.push([a1.expr, b1.expr, depth]);
+          vis.push([a_body, b_body, depth + 1]);
+          break;
         case "AnnAnn":
           vis.push([a1.expr, b1.expr, depth]);
           break;
@@ -753,14 +819,14 @@ function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
       if (got) {
         return shift(got.value, got.index + 1, 0);
       } else {
-        throw new Error("Unbound varible.");
+        throw "Unbound varible.";
       }
     case "Ref":
       var got = module[term.name];
       if (got) {
         return got.type;
       } else {
-        throw new Error("Undefined reference '" + term.name + "'.");
+        throw "Undefined reference '" + term.name + "'.";
       }
     case "Typ":
       return Typ();
@@ -776,8 +842,12 @@ function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
           var term_typ = reduce(term_typ, module);
           return term_typ;
         default:
-          throw new Error("Non-function application.");
+          throw "Non-function application.";
       };
+    case "Let":
+      var term_val = subst(term.body, term.expr, 0);
+      var term_typ = typeinfer(term_val, module, ctx, nam);
+      return term_typ;
     case "All":
       var self_typ = Ann(true, term, Typ());
       var bind_ctx = Ext(self_typ, ctx);
@@ -820,7 +890,7 @@ function typecheck(term, type, module, ctx = Nil(), nam = Nil()) {
       if (!equal(type, infr, module)) {
         var type_str = stringify_trm(type, nam);
         var infr_str = stringify_trm(infr, nam);
-        throw new Error("Expected `"+type_str+"`, got `"+infr_str+"`.");
+        throw "Expected `"+type_str+"`, got `"+infr_str+"`.";
       }
       break;
   };
@@ -888,10 +958,12 @@ function hash_str(a) {
 
 module.exports = {
   Var,
+  Ref,
   Typ,
   All,
   Lam,
   App,
+  Let,
   Ann,
   Ext,
   Nil,

@@ -47,7 +47,9 @@ var code = `
       n(P;)(z)((pred) => s(pred)(fold_nat(pred)(P;)(z)(s)))
 
   main : Nat
-    succ(zero)
+    let n = succ(succ(zero))
+    let f = double
+    f(n)
 `;
 
 // Parses module
