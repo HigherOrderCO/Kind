@@ -730,6 +730,13 @@ function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
       } else {
         throw new Error("Unbound varible.");
       }
+    case "Ref":
+      var got = module[term.name];
+      if (got) {
+        return got.type;
+      } else {
+        throw new Error("Undefined reference '" + term.name + "'.");
+      }
     case "Typ":
       return Typ();
     case "App":
@@ -785,13 +792,9 @@ function typecheck(term, type, module, ctx = Nil(), nam = Nil()) {
       break;
     default:
       var infr = typeinfer(term, module, ctx, nam);
-      //console.log("=",stringify_trm(type));
-      //console.log("=",stringify_trm(infr));
-      //console.log("?", equal(type, infr, module));
       if (!equal(type, infr, module)) {
         var type_str = stringify_trm(type);
         var infr_str = stringify_trm(infr);
-        //console.log(JSON.stringify(nam));
         throw new Error("Expected `"+type_str+"`, got `"+infr_str+"`.");
       }
       break;
