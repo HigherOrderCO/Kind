@@ -478,79 +478,34 @@ mathematical theorems about the behavior of our programs. Of course, all this
 power is optional: one can use Formality as TypeScript by simply writting less
 precise types.
 
-As complex as it looks, type-checking Formality-COre expressions is actually
-surprisingly simple; arguably orders of magnitude simpler than doing so for
-TypeScript. Here is the type-checker from the JavaScript reference
-implementation:
+Formality's type system is brief and can be described in one page:
 
 ```javascript
-function typecheck(term, type = null, ctx = Nil()) {
-  var type = type ? reduce(type) : null;
-  switch (term.ctor) {
-    case "Var":
-      var got = find(ctx, (x,i) => i === term.indx);
-      if (got) {
-        return shift(got.value, got.index + 1, 0);
-      } else {
-        throw new Error();
-      }
-    case "Typ":
-      return Typ();
-    case "All":
-      var bind_typ = typecheck(term.bind, Typ(), ctx);
-      var body_ctx = Ext(term.bind, ctx);
-      var body_typ = typecheck(term.body, Typ(), body_ctx);
-      return Typ();
-    case "Lam":
-      switch (type.ctor) {
-        case "All":
-          var body_ctx = Ext(type.bind, ctx);
-          var body_typ = typecheck(term.body, type.body, body_ctx);
-          return All(term.name, type.bind, body_typ, term.eras);
-        default:
-          throw "Lambda has a non-function type.";
-      }
-    case "App":
-      var func_typ = reduce(typecheck(term.func, null, defs, ctx));
-      switch (func_typ.ctor) {
-        case "All":
-          var argm_typ = typecheck(term.argm, func_typ.bind, ctx);
-          var term_typ = reduce(subst(func_typ, term.argm));
-          return term_typ;
-        default:
-          throw "Non-function application.";
-      };
-    case "Slf":
-      var type_ctx = Ext(term, ctx);
-      var type_typ = typecheck(term.type, typ, ctx);
-      return Typ();
-    case "Ins":
-      var term_typ = reduce(term.type);
-      switch (term_typ.ctor) {
-        case "Slf":
-          var self_typ = subst(term_typ.type, Ann(term.type, term, true), 0);
-          var expr_typ = typecheck(term.expr, self_typ, ctx);
-          return term.type;
-        default:
-          throw "Non-self instantiation.";
-      };
-    case "Eli":
-      var expr_typ = reduce(typecheck(term.expr, null, ctx));
-      switch (expr_typ.ctor) {
-        case "Slf":
-          return subst(expr_typ.type, term.expr, 0);
-        default:
-          throw "Non-self elimination.";
-      };
-    case "Ann":
-      if (term.done) {
-        return term.type;
-      } else {
-        return typecheck(term.expr, term.type, ctx);
-      }
-  };
-};
+x : T ∈ ctx
+------------ variable
+ctx |- x : T
+
+∅
+----------- type in type
+Type : Type
+
+ctx, s : self        |- A : Type
+ctx, s : self, x : A |- B : Type
+-------------------------------- self dependent function type
+s(x : A) -> B : Type
+
+ctx, x : A[s <- self] |- t : B
+------------------------------ self dependent function value
+(x) => t : x(x : A) -> B
+
+ctx |- x : A[s <- f]
+ctx |- f : s(x : A) -> B
+------------------------ self dependent function application
+f(x) : B[s <- f][x <- a]
 ```
+
+TODO: explain those typing rules in a way that is clear and understandable by
+someone with no type theory background.
 
 (... to be continued ...)
 
