@@ -73,12 +73,12 @@ case_bool
 
 fold_nat
   : (n : Nat) ->
-    (P : (n : Nat) -> Type) ->
+    (P : (n : Nat) -> Type;) ->
     (z : P(zero)) ->
     (s : (n : Nat) -> (i : P(n)) -> P(succ(n))) ->
     P(n)
-  (n) => (P) => (z) => (s) =>
-    n(P;)(z)((pred) => s(pred)(fold_nat(pred)(P;)(z)(s)))
+  (n) => (P;) => (z) => (s) =>
+  n(P;)(z)((pred) => s(pred)(fold_nat(pred)(P;)(z)(s)))
 
 main : Word(succ(succ(zero)))
   w0(succ(zero))(w1(zero)(we))

@@ -844,6 +844,7 @@ function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
           var term_typ = subst(term_typ, shift(term.func, 1, 0), 1);
           var term_typ = subst(term_typ, shift(term.argm, 0, 0), 0);
           var term_typ = reduce(term_typ, module);
+          if (term.eras !== func_typ.eras) throw "Mismatched erasure.";
           return term_typ;
         default:
           throw "Non-function application.";
@@ -872,6 +873,7 @@ function typecheck(term, type, module, ctx = Nil(), nam = Nil()) {
   switch (term.ctor) {
     case "Lam":
       if (typv.ctor === "All") {
+        if (term.eras !== typv.eras) throw "Mismatched erasure.";
         var self_typ = Ann(true, typv, Typ());
         var bind_typ = subst(typv.bind, term, 0);
         var body_typ = subst(typv.body, shift(term, 1, 0), 1);
