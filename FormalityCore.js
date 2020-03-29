@@ -349,6 +349,18 @@ function stringify_trm(term, vars = Nil()) {
   }
 };
 
+function stringify_ctx(ctx, nam, len = 0) {
+  switch (ctx.ctor) {
+    case "Ext":
+      var name = nam.head;
+      var type = stringify_trm(ctx.head, nam.tail);
+      var rest = stringify_ctx(ctx.tail, nam.tail, len + 1);
+      return "- " + name + " : " + type + "\n" + rest;
+    case "Nil":
+      return "";
+  };
+};
+
 function stringify_mod(mod) {
   var text = "";
   for (var name in mod) {
@@ -894,9 +906,15 @@ function typecheck(term, type, module, ctx = Nil(), nam = Nil()) {
     default:
       var infr = typeinfer(term, module, ctx, nam);
       if (!equal(type, infr, module)) {
-        var type_str = stringify_trm(type, nam);
-        var infr_str = stringify_trm(infr, nam);
-        throw "Expected `"+type_str+"`, got `"+infr_str+"`.";
+        var type_str = stringify_trm(reduce(type, {}), nam);
+        var infr_str = stringify_trm(reduce(infr, {}), nam);
+        var term_str = stringify_trm(reduce(term, {}), nam);
+        var err = "\n";
+        var err = err + "Found type... \x1b[2m"+infr_str+"\x1b[0m\n";
+        var err = err + "Instead of... \x1b[2m"+type_str+"\x1b[0m\n";
+        var err = err + "When checking \x1b[2m"+term_str+"\x1b[0m\n";
+        var err = err + stringify_ctx(ctx, nam);
+        throw err;
       }
       break;
   };
@@ -994,6 +1012,7 @@ module.exports = {
   parse_mod,
   stringify_trm,
   stringify_mod,
+  stringify_ctx,
   find,
   shift,
   subst,
