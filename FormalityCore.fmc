@@ -30,6 +30,12 @@ zero : Nat
 succ : (n : Nat) -> Nat
   (n) => (P;) => (z) => (s) => s(n)
 
+pred : (n : Nat) -> Nat
+  (n) =>
+  let case_zero = zero
+  let case_succ = (pred) => pred
+  n((self) => Nat;)(case_zero)(case_succ)
+
 fold_nat
   : (n : Nat) ->
     (P : (n : Nat) -> Type;) ->
@@ -113,26 +119,28 @@ winc : (size: Nat) -> (word: Word(size)) -> Word(size)
   let motive  = (size) => (word) => Word(size)
   word(motive;)(case_we)(case_w0)(case_w1)
 
-wfun : (size: Nat) -> (a: Word(size)) -> (b: Word(size)) -> (c: Bool) -> Word(size)
-  (size) => (a) => (b) => (c) =>
-  let case_a_we = (b) =>
-    let case_b_we = we
-    let case_b_w0 = (b_size;) => (b_pred) => we
-    let case_b_w1 = (b_size;) => (b_pred) => we
-    let case_b_ty = (b_size) => (b_word) => Word(zero)
-    b(case_b_ty;)(case_b_we)(case_b_w0)(case_b_w1)
+wfun : (size: Nat;) -> (a: Word(size)) -> (b: Word(size)) -> (c: Bool) -> Word(size)
+  (size;) => (a) => (b) => (c) =>
+  let case_a_we = (b) => we
   let case_a_w0 = (a_size;) => (a_pred) => (b) =>
-    let case_b_we = w0(a_size;)(a_pred)
-    let case_b_w0 = (b_size;) => (b_pred) => w0(a_size;)(a_pred)
-    let case_b_w1 = (b_size;) => (b_pred) => w0(a_size;)(a_pred)
-    let case_b_ty = (b_size) => (b_word) => Word(succ(a_size))
-    b(case_b_ty;)(case_b_we)(case_b_w0)(case_b_w1)
+    let case_b_we = (a_pred) =>
+      we
+    let case_b_w0 = (b_size;) => (b_pred) => (a_pred) =>
+      w0(b_size;)(wfun(b_size;)(a_pred)(b_pred)(c))
+    let case_b_w1 = (b_size;) => (b_pred) => (a_pred) =>
+      w0(b_size;)(wfun(b_size;)(a_pred)(b_pred)(c))
+    let case_b_ty = (b_size) => (b_word) =>
+      (a_pred : Word(pred(b_size))) -> Word(b_size)
+    b(case_b_ty;)(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
   let case_a_w1 = (a_size;) => (a_pred) => (b) =>
-    let case_b_we = w1(a_size;)(a_pred)
-    let case_b_w0 = (b_size;) => (b_pred) => w1(a_size;)(a_pred)
-    let case_b_w1 = (b_size;) => (b_pred) => w1(a_size;)(a_pred)
-    let case_b_ty = (b_size) => (b_word) => Word(succ(a_size))
-    b(case_b_ty;)(case_b_we)(case_b_w0)(case_b_w1)
+    let case_b_we = (a_pred) => we
+    let case_b_w0 = (b_size;) => (b_pred) => (a_pred) =>
+      w1(b_size;)(wfun(b_size;)(a_pred)(b_pred)(c))
+    let case_b_w1 = (b_size;) => (b_pred) => (a_pred) =>
+      w1(b_size;)(wfun(b_size;)(a_pred)(b_pred)(c))
+    let case_b_ty = (b_size) => (b_word) =>
+      (a_pred : Word(pred(b_size))) -> Word(b_size)
+    b(case_b_ty;)(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
   let case_a_ty = (a_size) => (a_word) => (b : Word(a_size)) -> Word(a_size)
   a(case_a_ty;)(case_a_we)(case_a_w0)(case_a_w1)(b)
 
