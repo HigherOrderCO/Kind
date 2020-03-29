@@ -1,0 +1,121 @@
+Bool : Type
+  self(P : (x : Bool) -> Type;) ->
+  (t : P(true)) ->
+  (f : P(false)) ->
+  P(self)
+
+true : Bool
+  (P;) => (t) => (f) => t
+
+false : Bool
+  (P;) => (t) => (f) => f
+
+case_bool
+  : (b : Bool) ->
+    (P : (x : Bool) -> Type;) ->
+    (t : P(true)) ->
+    (f : P(false)) ->
+    P(b)
+  (b) => (P;) => (t) => (f) => b(P;)(t)(f)
+  
+Nat : Type
+  self(P : (x : Nat) -> Type;) ->
+  (z : P(zero)) ->
+  (s : (pred : Nat) -> P(succ(pred))) ->
+  P(self)
+
+zero : Nat
+  (P;) => (z) => (s) => z
+
+succ : (n : Nat) -> Nat
+  (n) => (P;) => (z) => (s) => s(n)
+
+fold_nat
+  : (n : Nat) ->
+    (P : (n : Nat) -> Type;) ->
+    (z : P(zero)) ->
+    (s : (n : Nat) -> (i : P(n)) -> P(succ(n))) ->
+    P(n)
+  (n) => (P;) => (z) => (s) =>
+  n(P;)(z)((pred) => s(pred)(fold_nat(pred)(P;)(z)(s)))
+
+double : (n : Nat) -> Nat
+  (n) => n((x) => Nat;)(zero)((pred) => succ(succ(double(pred))))
+
+Bits : Type
+  self(P : (x : Bits) -> Type;) ->
+  (be : P(be)) ->
+  (b0 : (pred : Bits) -> P(b0(pred))) ->
+  (b1 : (pred : Bits) -> P(b1(pred))) ->
+  P(self)
+
+be : Bits
+  (P;) => (be) => (b0) => (b1) => be
+
+b0 : (bs : Bits) -> Bits
+  (bs) => (P;) => (be) => (b0) => (b1) => b0(bs)
+
+b1 : (bs : Bits) -> Bits
+  (bs) => (P;) => (be) => (b0) => (b1) => b1(bs)
+
+Word : (size : Nat) -> Type
+  (size) =>
+  self(P : (size: Nat) -> (x : Word(size)) -> Type;) ->
+  (we : P(zero)(we)) ->
+  (w0 : (size : Nat;) -> (pred : Word(size)) -> P(succ(size))(w0(size;)(pred))) ->
+  (w1 : (size : Nat;) -> (pred : Word(size)) -> P(succ(size))(w1(size;)(pred))) ->
+  P(size)(self)
+
+we : Word(zero)
+  (P;) => (we) => (w0) => (w1) =>
+  we
+
+w0 : (size : Nat;) -> (wo : Word(size)) -> Word(succ(size))
+  (size;) => (wo) => (P;) => (we) => (w0) => (w1) =>
+  w0(size;)(wo)
+
+w1 : (size : Nat;) -> (wo : Word(size)) -> Word(succ(size))
+  (size;) => (wo) => (P;) => (we) => (w0) => (w1) =>
+  w1(size;)(wo)
+
+winc
+  : (size : Nat) ->
+    (word : Word(size)) -> 
+    Word(size)
+  (size) => (word) =>
+  let case_we = we
+  let case_w0 = (size;) => (pred) => w1(size;)(pred)
+  let case_w1 = (size;) => (pred) => w0(size;)(winc(size)(pred))
+  let motive  = (size) => (word) => Word(size)
+  word(motive;)(case_we)(case_w0)(case_w1)
+
+n0 : Nat
+  zero
+
+n1 : Nat
+  succ(n0)
+
+n2 : Nat
+  succ(n1)
+
+n3 : Nat
+  succ(n2)
+
+n4 : Nat
+  succ(n3)
+
+n5 : Nat
+  succ(n4)
+
+n6 : Nat
+  succ(n5)
+
+n7 : Nat
+  succ(n6)
+
+n8 : Nat
+  succ(n7)
+
+main : Word(n4)
+  let w0000 = w0(n3;)(w0(n2;)(w0(n1;)(w0(n0;)(we))))
+  winc(n4)(winc(n4)(winc(n4)(winc(n4)(w0000))))
