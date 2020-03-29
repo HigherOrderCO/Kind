@@ -349,16 +349,19 @@ function stringify_trm(term, vars = Nil()) {
   }
 };
 
-function stringify_ctx(ctx, nam, len = 0) {
-  switch (ctx.ctor) {
-    case "Ext":
-      var name = nam.head;
-      var type = stringify_trm(ctx.head, nam.tail);
-      var rest = stringify_ctx(ctx.tail, nam.tail, len + 1);
-      return "- " + name + " : " + type + "\n" + rest;
-    case "Nil":
-      return "";
+function stringify_ctx(ctx, nam) {
+  function stringify_ctx(ctx, nam, len = 0) {
+    switch (ctx.ctor) {
+      case "Ext":
+        var name = nam.head;
+        var type = stringify_trm(ctx.head, nam.tail);
+        var rest = stringify_ctx(ctx.tail, nam.tail, len + 1);
+        return "- " + name + " : " + type + "\n" + rest;
+      case "Nil":
+        return "";
+    };
   };
+  return stringify_ctx(ctx, nam, 0).slice(0,-1).split("\n").reverse().join("\n");
 };
 
 function stringify_mod(mod) {
@@ -889,7 +892,7 @@ function typecheck(term, type, module, ctx = Nil(), nam = Nil()) {
         var self_typ = Ann(true, typv, Typ());
         var bind_typ = subst(typv.bind, term, 0);
         var body_typ = subst(typv.body, shift(term, 1, 0), 1);
-        var body_nam = Ext(typv.name, nam);
+        var body_nam = Ext(term.name, nam);
         var body_ctx = Ext(bind_typ, ctx);
         typecheck(term.body, body_typ, module, body_ctx, body_nam);
       } else {
