@@ -775,18 +775,18 @@ function equal(a, b, module, dep = 0) {
     if (!id) {
       switch (a1.ctor + b1.ctor) {
         case "AllAll":
-          var a_bind = subst(a1.bind, Ref("%" + depth + 0), 0);
-          var b_bind = subst(b1.bind, Ref("%" + depth + 0), 0);
-          var a_body = subst(a1.body, Ref("%" + depth + 1), 1);
-          var a_body = subst(a_body, Ref("%" + depth + 0), 0);
-          var b_body = subst(b1.body, Ref("%" + depth + 1), 1);
-          var b_body = subst(b_body, Ref("%" + depth + 0), 0);
+          var a_bind = subst(a1.bind, Ref("%" + (depth + 0)), 0);
+          var b_bind = subst(b1.bind, Ref("%" + (depth + 0)), 0);
+          var a_body = subst(a1.body, Ref("%" + (depth + 1)), 1);
+          var a_body = subst(a_body, Ref("%" + (depth + 0)), 0);
+          var b_body = subst(b1.body, Ref("%" + (depth + 1)), 1);
+          var b_body = subst(b_body, Ref("%" + (depth + 0)), 0);
           vis.push([a_bind, b_bind, depth + 1]);
           vis.push([a_body, b_body, depth + 2]);
           break;
         case "LamLam":
-          var a_body = subst(a1.body, Ref("%" + depth + 0), 0);
-          var b_body = subst(b1.body, Ref("%" + depth + 0), 0);
+          var a_body = subst(a1.body, Ref("%" + (depth + 0)), 0);
+          var b_body = subst(b1.body, Ref("%" + (depth + 0)), 0);
           vis.push([a_body, b_body, depth + 1]);
           break;
         case "AppApp":
@@ -794,8 +794,8 @@ function equal(a, b, module, dep = 0) {
           vis.push([a1.argm, b1.argm, depth]);
           break;
         case "LetLet":
-          var a_body = subst(a1.body, Ref("%" + depth + 0), 0);
-          var b_body = subst(b1.body, Ref("%" + depth + 0), 0);
+          var a_body = subst(a1.body, Ref("%" + (depth + 0)), 0);
+          var b_body = subst(b1.body, Ref("%" + (depth + 0)), 0);
           vis.push([a1.expr, b1.expr, depth]);
           vis.push([a_body, b_body, depth + 1]);
           break;
