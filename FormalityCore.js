@@ -187,7 +187,7 @@ function parse_all(code, indx, vars) {
   var [indx, self] = parse_nam(code, next(code, indx), 1);
   var [indx, skip] = parse_str("(", code, indx);
   var [indx, name] = parse_nam(code, next(code, indx), 1);
-  var [indx, skip] = parse_opt(":", code, next(code, indx));
+  var [indx, skip] = parse_str(":", code, next(code, indx));
   var [indx, bind] = parse_trm(code, indx, Ext(self, vars));
   var [indx, eras] = parse_opt(";", code, next(code, indx));
   var [indx, skip] = parse_str(")", code, next(code, indx));
@@ -267,10 +267,10 @@ function parse_trm(code, indx = 0, vars = Nil()) {
   var base_parse = first_valid([
     () => parse_all(code, indx, vars),
     () => parse_lam(code, indx, vars),
+    () => parse_fun(code, indx, vars),
     () => parse_let(code, indx, vars),
     () => parse_par(code, indx, vars),
     () => parse_typ(code, indx, vars),
-    //() => parse_arr(code, indx, vars),
     () => parse_var(code, indx, vars),
   ]);
 
