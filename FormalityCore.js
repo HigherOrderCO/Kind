@@ -152,6 +152,17 @@ function parse_str(str, code, indx) {
   };
 };
 
+// Parses one of two strings
+function parse_one(ch0, ch1, code, indx) {
+  try {
+    var [indx, str] = parse_str(ch0, code, indx);
+    return [indx, 0];
+  } catch (e) {
+    var [indx, str] = parse_str(ch1, code, indx);
+    return [indx, 1];
+  }
+};
+
 // Parses an optional character
 function parse_opt(chr, code, indx) {
   if (code[indx] === chr) {
@@ -185,26 +196,24 @@ function parse_par(code, indx, vars) {
 // Parses a dependent function type, `(<name> : <term>) -> <term>`
 function parse_all(code, indx, vars) {
   var [indx, self] = parse_nam(code, next(code, indx), 1);
-  var [indx, skip] = parse_str("(", code, indx);
+  var [indx, eras] = parse_one("(", "{", code, indx);
   var [indx, name] = parse_nam(code, next(code, indx), 1);
   var [indx, skip] = parse_str(":", code, next(code, indx));
   var [indx, bind] = parse_trm(code, indx, Ext(self, vars));
-  var [indx, eras] = parse_opt(";", code, next(code, indx));
-  var [indx, skip] = parse_str(")", code, next(code, indx));
+  var [indx, skip] = parse_one(")", "}", code, next(code, indx));
   var [indx, skip] = parse_str("->", code, next(code, indx));
   var [indx, body] = parse_trm(code, indx, Ext(name, Ext(self, vars)));
-  return [indx, All(eras, self, name, bind, body)];
+  return [indx, All(eras === 1, self, name, bind, body)];
 };
 
 // Parses a dependent function value, `(<name>) => <term>`
 function parse_lam(code, indx, vars) {
-  var [indx, skip] = parse_str("(", code, next(code, indx));
+  var [indx, eras] = parse_one("(", "{", code, next(code, indx));
   var [indx, name] = parse_nam(code, next(code, indx), 1);
-  var [indx, eras] = parse_opt(";", code, next(code, indx));
-  var [indx, skip] = parse_str(")", code, next(code, indx));
+  var [indx, skip] = parse_one(")", "}", code, next(code, indx));
   var [indx, skip] = parse_str("=>", code, next(code, indx));
   var [indx, body] = parse_trm(code, indx, Ext(name, vars));
-  return [indx, Lam(eras, name, body)];
+  return [indx, Lam(eras === 1, name, body)];
 };
 
 // Parses a local definition, `let x = val; body`
@@ -239,11 +248,10 @@ function parse_var(code, indx, vars) {
 
 // Parses an application, `<term>(<term>)`
 function parse_app(code, indx, func, vars) {
-  var [indx, skip] = parse_str("(", code, indx);
+  var [indx, eras] = parse_one("(", "{", code, indx);
   var [indx, argm] = parse_trm(code, indx, vars);
-  var [indx, eras] = parse_opt(";", code, next(code, indx));
-  var [indx, skip] = parse_str(")", code, next(code, indx));
-  return [indx, App(eras, func, argm)];
+  var [indx, skip] = parse_one(")", "}", code, next(code, indx));
+  return [indx, App(eras === 1, func, argm)];
 };
 
 // Parses a non-dependent function type, `<term> -> <term>`
@@ -329,23 +337,26 @@ function stringify_trm(term, vars = Nil()) {
     case "All":
       var self = term.self;
       var name = term.name;
+      var lpar = term.eras ? "{" : "(";
       var bind = stringify_trm(term.bind, Ext(self, vars));
+      var rpar = term.eras ? "}" : ")";
       var body = stringify_trm(term.body, Ext(name, Ext(self, vars)));
-      var eras = term.eras ? ";" : "";
-      return self+"("+name+" : "+bind+eras+") -> "+body;
+      return self+lpar+name+" : "+bind+rpar+" -> "+body;
     case "Lam":
       var name = term.name;
+      var lpar = term.eras ? "{" : "(";
       var body = stringify_trm(term.body, Ext(name, vars));
-      var eras = term.eras ? ";" : "";
-      return "("+name+eras+") => "+body;
+      var rpar = term.eras ? "}" : ")";
+      return lpar+name+rpar+" => "+body;
     case "App":
       var func = stringify_trm(term.func, vars);
+      var lpar = term.eras ? "{" : "(";
       var argm = stringify_trm(term.argm, vars);
-      var eras = term.eras ? ";" : "";
+      var rpar = term.eras ? "}" : ")";
       if (term.func.ctor === "Lam" || term.func.ctor === "All") {
-        return "("+func+")("+argm+eras+")";
+        return "("+func+")"+lpar+argm+rpar;
       } else {
-        return func+"("+argm+eras+")";
+        return func+lpar+argm+rpar;
       }
     case "Let":
       var name = term.name;
