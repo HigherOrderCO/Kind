@@ -487,15 +487,22 @@ function to_high_order(term, vars = Nil(), depth = 0) {
       var eras = term.eras;
       return All(eras, self, name, bind, body);
     case "Lam":
-      var name = term.name;
-      var body = x => to_high_order(term.body, Ext(x, vars), depth + 1);
-      var eras = term.eras;
-      return Lam(eras, name, body);
+      if (term.eras) {
+        var body = subst(term.body, Ref("<erased>"), 0);
+        return to_high_order(body, vars, depth);
+      } else {
+        var name = term.name;
+        var body = x => to_high_order(term.body, Ext(x, vars), depth + 1);
+        return Lam(false, name, body);
+      };
     case "App":
-      var func = to_high_order(term.func, vars, depth);
-      var argm = to_high_order(term.argm, vars, depth);
-      var eras = term.eras;
-      return App(eras, func, argm);
+      if (term.eras) {
+        return to_high_order(term.func, vars, depth);
+      } else {
+        var func = to_high_order(term.func, vars, depth);
+        var argm = to_high_order(term.argm, vars, depth);
+        return App(false, func, argm);
+      }
     case "Let":
       var name = term.name;
       var expr = to_high_order(term.expr, vars, depth);
@@ -526,13 +533,11 @@ function to_low_order(term, depth = 0) {
     case "Lam":
       var name = term.name;
       var body = to_low_order(term.body(Var(depth)), depth + 1);
-      var eras = term.eras;
-      return Lam(eras, name, body);
+      return Lam(false, name, body);
     case "App":
       var func = to_low_order(term.func, depth);
       var argm = to_low_order(term.argm, depth);
-      var eras = term.eras;
-      return App(eras, func, argm);
+      return App(false, func, argm);
     case "Let":
       var name = term.name;
       var expr = to_low_order(term.expr, depth);
@@ -567,20 +572,14 @@ function reduce_high_order(term, module) {
     case "Lam":
       var name = term.name;
       var body = term.body;
-      var eras = term.eras;
-      return eras ? body(Ref("<erased>")) : Lam(eras, name, body);
+      return Lam(false, name, body);
     case "App":
       var func = reduce_high_order(term.func, module);
-      var eras = term.eras
-      if (eras) {
-        return func;
-      } else {
-        switch (func.ctor) {
-          case "Lam":
-            return reduce_high_order(func.body(term.argm), module);
-          default:
-            return App(eras, func, reduce_high_order(term.argm, module));
-        };
+      switch (func.ctor) {
+        case "Lam":
+          return reduce_high_order(func.body(term.argm), module);
+        default:
+          return App(false, func, reduce_high_order(term.argm, module));
       };
     case "Let":
       var name = term.name;
@@ -611,13 +610,11 @@ function normalize_high_order(term, module) {
     case "Lam":
       var name = norm.name;
       var body = x => normalize_high_order(norm.body(x), module);
-      var eras = norm.eras;
-      return Lam(eras,name, body);
+      return Lam(false, name, body);
     case "App":
       var func = normalize_high_order(norm.func, module);
       var argm = normalize_high_order(norm.argm, module);
-      var eras = norm.eras;
-      return App(eras,func, argm);
+      return App(false, func, argm);
     case "Let":
       var name = norm.name;
       var expr = normalize_high_order(norm.expr, module);
