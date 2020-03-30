@@ -178,7 +178,96 @@ wadd : (size: Nat;) -> (a: Word(size)) -> (b: Word(size)) -> (c: Bool) -> Word(s
 
   a(case_a_ty;)(case_a_we)(case_a_w0)(case_a_w1)(b)
 
-main : Word(n4)
+Term : Type
+  self(P: (x: Term) -> Type;) ->
+  (var:
+    (hash: Bits) ->
+    (indx: Nat) ->
+    P(var(indx))) ->
+  (ref:
+    (hash: Bits) ->
+    (name: Bits) ->
+    P(ref(name))) ->
+  (typ:
+    (hash: Bits) ->
+    P(typ)) ->
+  (all:
+    (hash: Bits) ->
+    (eras: Bool) ->
+    (self: Bits) ->
+    (name: Bits) ->
+    (bind: Term) ->
+    (body: Term) ->
+    P(all(eras)(self)(name)(bind)(body))) ->
+  (lam:
+    (hash: Bits) ->
+    (eras: Bool) ->
+    (name: Bits) ->
+    (body: Term) ->
+    P(lam(eras)(name)(body))) ->
+  (app:
+    (hash: Bits) ->
+    (eras: Bool) ->
+    (func: Term) ->
+    (argm: Term) ->
+    P(app(eras)(func)(argm))) ->
+  (lit:
+    (hash: Bits) ->
+    (name: Bits) ->
+    (expr: Term) ->
+    (body: Term) ->
+    P(lit(name)(expr)(body))) ->
+  (ann:
+    (hash: Bits) ->
+    (done: Bool) ->
+    (expr: Term) ->
+    (type: Term) ->
+    P(ann(done)(expr)(type))) ->
+  P(self)
+
+var : (indx: Nat) -> Term
+  (indx)=>
+  (;) => (var) => () => () => () => () => () => () => () =>
+  var(be)(indx)
+
+ref : (name: Bits) -> Term
+  (name)=>
+  (;) => () => (ref) => () => () => () => () => () => () =>
+  ref(be)(name)
+
+typ : Term
+  (;) => () => () => (typ) => () => () => () => () => () =>
+  typ(be)
+
+all : (eras: Bool) -> (self: Bits) -> (name: Bits) -> (bind: Term) -> (body: Term) -> Term
+  (eras) => (self) => (name) => (bind) => (body) =>
+  (;) => () => () => () => (all) => () => () => () => () =>
+  all(be)(eras)(self)(name)(bind)(body)
+
+lam : (eras: Bool) -> (name: Bits) -> (body: Term) -> Term
+  (eras) => (name) => (body) =>
+  (;) => () => () => () => () => (lam) => () => () => () =>
+  lam(be)(eras)(name)(body)
+
+app : (eras: Bool) -> (func: Term) -> (argm: Term) -> Term
+  (eras) => (func) => (argm) =>
+  (;) => () => () => () => () => () => (app) => () => () =>
+  app(be)(eras)(func)(argm)
+
+lit : (name: Bits) -> (expr: Term) -> (body: Term) -> Term
+  (name) => (expr) => (body) =>
+  (;) => () => () => () => () => () => () => (lit) => () =>
+  lit(be)(name)(expr)(body)
+
+ann : (done: Bool) -> (expr: Term) -> (type: Term) -> Term
+  (done) => (expr) => (type) =>
+  (;) => () => () => () => () => () => () => () => (ann) =>
+  ann(be)(done)(expr)(type)
+
+example_0 : Word(n4)
   let w0011 = w1(n3;)(w1(n2;)(w0(n1;)(w0(n0;)(we))))
   let w0101 = w1(n3;)(w0(n2;)(w1(n1;)(w0(n0;)(we))))
   wadd(n4;)(w0011)(w0101)(false) // 3 + 5 == 8
+
+main : Term
+  typ
