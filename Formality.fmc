@@ -21,6 +21,21 @@ case_bool
     P(b)
   (b) => (P;) => (t) => (f) => b(P;)(t)(f)
   
+// Bit
+// ===
+
+Bit : Type
+  self(P: (x: Bool) -> Type;) ->
+  (t: P(t0)) ->
+  (f: P(t1)) ->
+  P(self)
+
+t0: Bit
+  (P;) => (t0) => (t1) => t0
+
+t1: Bit
+  (P;) => (t0) => (t1) => t1
+
 // Nat
 // ===
 
@@ -80,6 +95,81 @@ n7: Nat
 
 n8: Nat
   succ(n7)
+
+n9: Nat
+  succ(n8)
+
+n9: Nat
+  succ(n8)
+
+n10: Nat
+  succ(n9)
+
+n11: Nat
+  succ(n10)
+
+n12: Nat
+  succ(n11)
+
+n13: Nat
+  succ(n12)
+
+n14: Nat
+  succ(n13)
+
+n15: Nat
+  succ(n14)
+
+n16: Nat
+  succ(n15)
+
+n17: Nat
+  succ(n16)
+
+n18: Nat
+  succ(n17)
+
+n19: Nat
+  succ(n18)
+
+n20: Nat
+  succ(n19)
+
+n21: Nat
+  succ(n20)
+
+n22: Nat
+  succ(n21)
+
+n23: Nat
+  succ(n22)
+
+n24: Nat
+  succ(n23)
+
+n25: Nat
+  succ(n24)
+
+n26: Nat
+  succ(n25)
+
+n27: Nat
+  succ(n26)
+
+n28: Nat
+  succ(n27)
+
+n29: Nat
+  succ(n28)
+
+n30: Nat
+  succ(n29)
+
+n31: Nat
+  succ(n30)
+
+n32: Nat
+  succ(n31)
 
 // Pair
 // ====
@@ -342,6 +432,313 @@ ann: (done: Bool) -> (expr: Term) -> (type: Term) -> Term
   (done) => (expr) => (type) =>
   (;) => () => () => () => () => () => () => () => (ann) =>
   ann(be)(done)(expr)(type)
+
+// Characters
+
+Char: Type
+  Word(n32)
+
+ascii: (:Bit)->(:Bit)->(:Bit)->(:Bit)->(:Bit)->(:Bit)->(:Bit)->(:Bit)->Char
+  (a) => (b) => (c) => (d) => (e) => (f) => (g) => (h) =>
+  let ty = (size: Nat;) -> (wo: Word(size)) -> Word(succ(size))
+  let wA = a(() => ty;)(w0)(w1)
+  let wB = b(() => ty;)(w0)(w1)
+  let wC = c(() => ty;)(w0)(w1)
+  let wD = d(() => ty;)(w0)(w1)
+  let wE = e(() => ty;)(w0)(w1)
+  let wF = f(() => ty;)(w0)(w1)
+  let wG = g(() => ty;)(w0)(w1)
+  let wH = h(() => ty;)(w0)(w1)
+  wH(n31;)(wG(n30;)(wF(n29;)(wE(n28;)(wD(n27;)(wC(n26;)(wB(n25;)(wA(n24;)(
+  w0(n23;)(w0(n22;)(w0(n21;)(w0(n20;)(w0(n19;)(w0(n18;)(w0(n17;)(w0(n16;)(
+  w0(n15;)(w0(n14;)(w0(n13;)(w0(n12;)(w0(n11;)(w0(n10;)(w0(n9 ;)(w0(n8 ;)(
+  w0(n7 ;)(w0(n6 ;)(w0(n5 ;)(w0(n4 ;)(w0(n3 ;)(w0(n2 ;)(w0(n1 ;)(w0(n0 ;)(
+  we))))))))))))))))))))))))))))))))
+
+char_space : Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t0)(t0)
+
+char_exclamation: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t0)(t1)
+
+char_quotation: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t1)(t0)
+
+char_number: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t1)(t1)
+
+char_dollar: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t0)(t0)
+
+char_percent: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t0)(t1)
+
+char_ampersand: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t1)(t0)
+
+char_apostrophe: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t1)(t1)
+
+char_left_parenthesis: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t0)
+
+char_right_parenthesis: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t1)
+
+char_asterisk: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t0)
+
+char_plus: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t1)
+
+char_comma: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t0)(t0)
+
+char_hyphen: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t0)(t1)
+
+char_period: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t1)(t0)
+
+char_slash: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t1)(t1)
+
+char_0: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t0)(t0)
+
+char_1: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t0)(t1)
+
+char_2: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t1)(t0)
+
+char_3: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t1)(t1)
+
+char_4: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t0)(t0)
+
+char_5: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t0)(t1)
+
+char_6: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t1)(t0)
+
+char_7: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t1)(t1)
+
+char_8: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t0)
+
+char_9: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t1)
+
+char_colon: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t0)
+
+char_semicolon: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t1)
+
+char_less_than: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t0)
+
+char_equals: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t1)
+
+char_greater_than: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t0)
+
+char_question: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t1)
+
+char_at: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t0)
+
+char_A: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t1)
+
+char_B: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t1)(t0)
+
+char_C: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t1)(t1)
+
+char_D: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t0)(t0)
+
+char_E: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t0)(t1)
+
+char_F: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t1)(t0)
+
+char_G: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t1)(t1)
+
+char_H: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t0)(t0)
+
+char_I: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t0)(t1)
+
+char_J: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t1)(t0)
+
+char_K: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t1)(t1)
+
+char_L: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t0)(t0)
+
+char_M: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t0)(t1)
+
+char_N: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t1)(t0)
+
+char_O: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t1)(t1)
+
+char_P: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t0)(t0)
+
+char_Q: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t0)(t1)
+
+char_R: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t1)(t0)
+
+char_S: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t1)(t1)
+
+char_T: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t0)(t0)
+
+char_U: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t0)(t1)
+
+char_V: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t1)(t0)
+
+char_W: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t1)(t1)
+
+char_X: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t0)(t0)
+
+char_Y: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t0)(t1)
+
+char_Z: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t1)(t0)
+
+char_left_bracket: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t1)(t1)
+
+char_backslash: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t0)(t0)
+
+char_right_bracket: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t0)(t1)
+
+char_caret: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t1)(t0)
+
+char_underscore: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t1)(t1)
+
+char_backtick: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t0)(t0)
+
+char_a: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t0)(t1)
+
+char_b: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t1)(t0)
+
+char_c: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t1)(t1)
+
+char_d: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t0)(t0)
+
+char_e: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t0)(t1)
+
+char_f: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t1)(t0)
+
+char_g: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t1)(t1)
+
+char_h: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t0)(t0)
+
+char_i: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t0)(t1)
+
+char_j: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t1)(t0)
+
+char_k: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t1)(t1)
+
+char_l: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t0)(t0)
+
+char_m: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t0)(t1)
+
+char_n: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t1)(t0)
+
+char_o: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t1)(t1)
+
+char_p: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t0)(t0)
+
+char_q: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t0)(t1)
+
+char_r: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t1)(t0)
+
+char_s: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t1)(t1)
+
+char_t: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t0)(t0)
+
+char_u: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t0)(t1)
+
+char_v: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t1)(t0)
+
+char_w: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t1)(t1)
+
+char_x: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t0)(t0)
+
+char_y: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t0)(t1)
+
+char_z: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t0)
+
+char_left_brace: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t1)
+
+char_bar: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t0)
+
+char_right_brace: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t1)
+
+char_tilde: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t0)
 
 // Parsing
 // =======
