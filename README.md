@@ -53,28 +53,26 @@ for its type and one for its value, each expression containing a number of
 variables, references and other terms. The syntax of a `Term` is defined as
 follows:
 
-syntax                        | variant | meaning
------------------------------ | ------- | -------
-`<name>`                      | Var     | a variable
-`<name>`                      | Ref     | a reference
-`Type`                        | Typ     | type of types
-`(<var> : <term>) -> <term>`  | All     | dependent function type
-`(<var> : <term>;) -> <term>` | All     | dependent function type (erased)
-`(<var>) => <term>`           | Lam     | dependent function value
-`(<var>;) => <term>`          | Lam     | dependent function value (erased)
-`<term>(<term>)`              | App     | dependent function application
-`<term>(<term>;)`             | App     | dependent function application (erased)
-`${<name>} <term>`            | Slf     | self type
-`$inst{<term>} <term>`        | Ins     | self value
-`$elim{<term>}`               | Eli     | self elimination
-`<term> :: <term>`            | Ann     | inline annotation
-`(<term>)`                    | -       | parenthesis
+syntax                      | variant | meaning
+--------------------------- | ------- | -------
+`NAME`                      | Var     | a variable
+`NAME`                      | Ref     | a reference
+`Type`                      | Typ     | type of types
+`TERM -> TERM`              | All     | function type (simple)
+`NAME(NAME : TERM) -> TERM` | All     | function type (dependent)
+`NAME<NAME : TERM> -> TERM` | All     | function type (erased)
+`(NAME) => TERM`            | Lam     | dependent function value
+`<NAME> => TERM`            | Lam     | dependent function value (erased)
+`TERM(TERM)`                | App     | dependent function application
+`TERM<TERM>`                | App     | dependent function application (erased)
+`TERM :: TERM`              | Ann     | inline annotation
+`(TERM)`                    | -       | parenthesis
 
 So, for example, `Type` is a valid term of variant `Typ`, `(A : Type) -> Type`
 is a valid term of variant `All` containing a two valid terms of variant `Typ`,
 `foo(bar)` is a valid term of variant `App` containing two valid terms of
-variant `Ref`. References and variables are both parsed as `<name>`, and
-desambiguated based on context. The syntax for a `<name>` is defined as a
+variant `Ref`. References and variables are both parsed as `NAME`, and
+desambiguated based on context. The syntax for a `NAME` is defined as a
 sequence of ASCII characters on the following set: 
 
 ```
@@ -96,49 +94,62 @@ fields, and an additional "ctor" field to track the selected variant.
 
 ```python
 def Var(indx):
-    return {"ctor": "Var", "indx": indx}
+    return {
+      "ctor": "Var",
+      "indx": indx}
 
 def Ref(name):
-    return {"ctor": "Ref", "name": name}
+    return {
+      "ctor": "Ref",
+      "name": name}
 
 def Typ():
-    return {"ctor": "Typ"}
+    return {
+      "ctor": "Typ"}
 
-def All(name, bind, body, eras):
-    return {"ctor": "All", "name": name, "bind": bind, "body": body, "eras": eras}
+def All(eras, self, name, bind, body):
+    return {
+      "ctor": "All",
+      "eras": eras,
+      "self": self,
+      "name": name,
+      "bind": bind,
+      "body": body}
 
-def Lam(name, body, eras):
-    return {"ctor": "Lam", "name": name, "body": body, "eras": eras}
+def Lam(eras, name, body):
+    return {
+      "ctor": "Lam",
+      "eras": eras,
+      "name": name,
+      "body": body}
 
-def App(func, argm, eras):
-    return {"ctor": "App", "func": func, "argm": argm, "eras": eras}
-
-def Slf(name, type):
-    return {"ctor": "Slf", "name": name, "type": type}
-
-def Ins(type, term):
-    return {"ctor": "Slf", "type": type, "expr": expr}
-
-def Eli(expr):
-    return {"ctor": "Eli", "expr": expr}
+def App(eras, func, argm):
+    return {
+      "ctor": "App",
+      "eras": eras,
+      "func": func,
+      "argm": argm}
 
 def Ann(expr, type, done):
-    return {"ctor": "Typ", "expr": expr, "type": type, "done": done}
+    return {
+      "ctor": "Typ",
+      "done": done,
+      "expr": expr,
+      "type": type}
 ```
 
-The `Var` variant represents a variable bound by a function value (`Lam`), a
-function type (`All`), or a self type (`Slf`). It stores a number representing
-how many binders there are between its location and the location where it is
-bound. 
+The `Var` variant represents a variable bound by a function value (`Lam`) or
+function type (`All`). It stores a number representing how many binders there
+are between its location and the location where it is bound. 
 
 The `Ref` variant represents a reference, which is the usage of a top-level
 definition. The `name` field stores the name of the referenced definition.
 
 The `All` variant represents a function type, also known as an universal
-quantification, or "forall". The `name` field stores its bound variable name,
-the `bind` field stores the type of its argument, the `body` field stores
-its return type, and the `eras` field represents its computational relevance
-(more on that later).
+quantification, or "forall". The `self` field stores a name for the typed term.
+`name` field stores its bound variable name, the `bind` field stores the type of
+its argument, the `body` field stores its return type, and the `eras` field
+represents its computational relevance (more on that later).
 
 The `Lam` variant represents a pure function, also known as a lambda. The `name`
 field stores its bound variable name, the `body` field stores its returned
@@ -146,16 +157,6 @@ expression, and the `eras` field represents its computational relevance.
 
 The `App` variant represents a function application. The `func` field stores the
 function to be applied, and the `argm` field stores the argument. 
-
-The `Slf` variant represents a self type. The `name` field stores its bound
-variable name and the `type` field stores a type that can refer to itself. Self
-types will be explained in more details later.
-
-The `Ins` variant represents a self value. The `type` field stores the type of
-that value and the `expr` field represents the value itself.
-
-The `Eli` variant represents the use, or inspection, of a self value. The `expr`
-field stores the value to be inspected.
 
 The `Ann` variant represents an inline type annotation. The `expr` field
 represents the annotated expression, and the `type` field represents its type.
@@ -240,7 +241,7 @@ The syntax of a `Module` is defined as follows:
 
 syntax                     | variant | meaning
 -------------------------- | ------- | -------
-`<term> : <term> <module>` | Def     | a top-level definition
+`TERM : TERM <module>` | Def     | a top-level definition
 `<eof>`                    | Eof     | the end of a module
 
 Modules often coincide with files, so, the end of a module should be parsed as
@@ -248,19 +249,19 @@ the end of the file. Whitespaces (newlines, tabs and spaces) are ignored. Here
 is an example module:
 
 ```
-identity : (A : Type) -> (a : A) -> A
-  (A) => (a) => a
+identity: <A: Type> -> A -> A
+  <A> => (a) => a
 
-const : (A : Type) -> (a : A) -> (b : B) -> B
-  (A) => (a) => (b) => B
+const: <A: Type> -> <B : Type> -> A -> B -> B
+  <A> => (a) => (b) => B
 
-apply_twice : (A : Type) -> (f : (x : A) -> A) -> (x : A) -> A
-  (A) => (f) => (x) => f(f(x))
+twice: <A: Type> -> (A -> A) -> A -> A
+  <A> => (f) => (x) => f(f(x))
 ```
 
 This module declares 3 top-level definitions, `identity`, `const` and
-`apply_twice`. The last definition has `(A : Type) -> (f : (x : A) -> A) -> (x : A) -> A`
-type and a `(A) => (a) => a` a value. That value consists of a function
+`apply_twice`. The last definition has `<A: Type> -> (A -> A) -> A -> A`
+type and a `(A) => (a) => a` value. That value consists of an erased function
 (`{A} => ...`), that returns a function (`(f) => ...`), that returns a function
 (`(x) => ...`), that returns `f` applied two times to `x`.
 
@@ -269,17 +270,25 @@ term)` unions. That is, in Python:
 
 ```python
 def Ext(head, tail):
-    return {"ctor": "Ext", "head": head, "tail": tail}
+    return {
+      "ctor": "Ext",
+      "head": head,
+      "tail": tail}
 
 def Nil():
-    return {"ctor": "Nil"}
+    return {
+      "ctor": "Nil"}
 
 def Def(name, type, term):
-    return {"ctor": "Def", "name": name, "type": type, "term": term}
+    return {
+      "ctor": "Def",
+      "name": name,
+      "type": type,
+      "term": term}
 ```
 
 Here, `Nil` and `Ext` are list constructors. `Nil()` represents an empty list,
-and `Ext(x, xs)` represents the list `xs` extended with the `x` value.
+and `Ext(x)(xs)` represents the list `xs` extended with the `x` value.
 
 #### 1.0.1. Evaluation
 

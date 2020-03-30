@@ -196,11 +196,11 @@ function parse_par(code, indx, vars) {
 // Parses a dependent function type, `(<name> : <term>) -> <term>`
 function parse_all(code, indx, vars) {
   var [indx, self] = parse_nam(code, next(code, indx), 1);
-  var [indx, eras] = parse_one("(", "{", code, indx);
+  var [indx, eras] = parse_one("(", "<", code, indx);
   var [indx, name] = parse_nam(code, next(code, indx), 1);
   var [indx, skip] = parse_str(":", code, next(code, indx));
   var [indx, bind] = parse_trm(code, indx, Ext(self, vars));
-  var [indx, skip] = parse_one(")", "}", code, next(code, indx));
+  var [indx, skip] = parse_one(")", ">", code, next(code, indx));
   var [indx, skip] = parse_str("->", code, next(code, indx));
   var [indx, body] = parse_trm(code, indx, Ext(name, Ext(self, vars)));
   return [indx, All(eras === 1, self, name, bind, body)];
@@ -208,9 +208,9 @@ function parse_all(code, indx, vars) {
 
 // Parses a dependent function value, `(<name>) => <term>`
 function parse_lam(code, indx, vars) {
-  var [indx, eras] = parse_one("(", "{", code, next(code, indx));
+  var [indx, eras] = parse_one("(", "<", code, next(code, indx));
   var [indx, name] = parse_nam(code, next(code, indx), 1);
-  var [indx, skip] = parse_one(")", "}", code, next(code, indx));
+  var [indx, skip] = parse_one(")", ">", code, next(code, indx));
   var [indx, skip] = parse_str("=>", code, next(code, indx));
   var [indx, body] = parse_trm(code, indx, Ext(name, vars));
   return [indx, Lam(eras === 1, name, body)];
@@ -248,9 +248,9 @@ function parse_var(code, indx, vars) {
 
 // Parses an application, `<term>(<term>)`
 function parse_app(code, indx, func, vars) {
-  var [indx, eras] = parse_one("(", "{", code, indx);
+  var [indx, eras] = parse_one("(", "<", code, indx);
   var [indx, argm] = parse_trm(code, indx, vars);
-  var [indx, skip] = parse_one(")", "}", code, next(code, indx));
+  var [indx, skip] = parse_one(")", ">", code, next(code, indx));
   return [indx, App(eras === 1, func, argm)];
 };
 
@@ -336,23 +336,24 @@ function stringify_trm(term, vars = Nil()) {
       return "Type";
     case "All":
       var self = term.self;
+      var lpar = term.name === "" ? "" : (term.eras ? "<" : "(");
       var name = term.name;
-      var lpar = term.eras ? "{" : "(";
+      var colo = term.name === "" ? "" : ": ";
       var bind = stringify_trm(term.bind, Ext(self, vars));
-      var rpar = term.eras ? "}" : ")";
+      var rpar = term.name === "" ? "" : (term.eras ? ">" : ")");
       var body = stringify_trm(term.body, Ext(name, Ext(self, vars)));
-      return self+lpar+name+" : "+bind+rpar+" -> "+body;
+      return self+lpar+name+colo+bind+rpar+" -> "+body;
     case "Lam":
       var name = term.name;
-      var lpar = term.eras ? "{" : "(";
+      var lpar = term.eras ? "<" : "(";
       var body = stringify_trm(term.body, Ext(name, vars));
-      var rpar = term.eras ? "}" : ")";
+      var rpar = term.eras ? ">" : ")";
       return lpar+name+rpar+" => "+body;
     case "App":
       var func = stringify_trm(term.func, vars);
-      var lpar = term.eras ? "{" : "(";
+      var lpar = term.eras ? "<" : "(";
       var argm = stringify_trm(term.argm, vars);
-      var rpar = term.eras ? "}" : ")";
+      var rpar = term.eras ? ">" : ")";
       if (term.func.ctor === "Lam" || term.func.ctor === "All") {
         return "("+func+")"+lpar+argm+rpar;
       } else {

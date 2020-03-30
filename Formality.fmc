@@ -2,98 +2,96 @@
 // ====
 
 Bool : Type
-  self{P: Bool -> Type} ->
+  self<P: Bool -> Type> ->
   P(true) ->
   P(false) ->
   P(self)
 
 true: Bool
-  {} => (t) => (f) => t
+  <> => (t) => (f) => t
 
 false: Bool
-  {} => (t) => (f) => f
+  <> => (t) => (f) => f
 
-case_bool : (b: Bool) -> {P: Bool -> Type} -> P(true) -> P(false) -> P(b)
-  (b) => {P} => (t) => (f) =>
-  b{P}(t)(f)
+case_bool : (b: Bool) -> <P: Bool -> Type> -> P(true) -> P(false) -> P(b)
+  (b) => <P> => (t) => (f) =>
+  b<P>(t)(f)
 
 or: Bool -> Bool -> Bool
   (a) => (b) =>
-  let case_a_tru = (b){()=>Bool}(true)(true)
-  let case_a_fal = (b){()=>Bool}(true)(false)
-  let case_a_mot = () => Bool
-  a{case_a_mot}(case_a_tru)(case_a_fal)
+  let case_a_tru = (b)<()=>Bool>(true)(true)
+  let case_a_fal = (b)<()=>Bool>(true)(false)
+  a<()=>Bool>(case_a_tru)(case_a_fal)
 
 and: Bool -> Bool -> Bool
   (a) => (b) =>
-  let case_a_tru = (b){() => Bool}(true)(false)
-  let case_a_fal = (b){() => Bool}(false)(false)
-  let case_a_mot = () => Bool
-  a{case_a_mot}(case_a_tru)(case_a_fal)
+  let case_a_tru = (b)<()=>Bool>(true)(false)
+  let case_a_fal = (b)<()=>Bool>(false)(false)
+  a<()=>Bool>(case_a_tru)(case_a_fal)
   
 // Cmp
 
 Cmp : Type
-  self{P: Cmp -> Type} ->
+  self<P: Cmp -> Type> ->
   P(ltn) ->
   P(eql) ->
   P(gtn) ->
   P(self)
 
 ltn: Cmp
-  {} => (ltn) => (eql) => (gtn) => ltn
+  <> => (ltn) => (eql) => (gtn) => ltn
 
 eql: Cmp
-  {} => (ltn) => (eql) => (gtn) => eql
+  <> => (ltn) => (eql) => (gtn) => eql
 
 gtn: Cmp
-  {} => (ltn) => (eql) => (gtn) => gtn
+  <> => (ltn) => (eql) => (gtn) => gtn
 
 // Bit
 // ===
 
 Bit : Type
-  self{P: Bit -> Type} ->
+  self<P: Bit -> Type> ->
   P(t0) ->
   P(t1) ->
   P(self)
 
 t0: Bit
-  {} => (t0) => (t1) => t0
+  <> => (t0) => (t1) => t0
 
 t1: Bit
-  {} => (t0) => (t1) => t1
+  <> => (t0) => (t1) => t1
 
 // Nat
 // ===
 
 Nat: Type
-  self{P: (x: Nat) -> Type} ->
+  self<P: (x: Nat) -> Type> ->
   (P(zero)) ->
   ((pred: Nat) -> P(succ(pred))) ->
   P(self)
 
 zero: Nat
-  {} => (z) => (s) => z
+  <> => (z) => (s) => z
 
 succ: Nat -> Nat
-  (n) => {} => (z) => (s) => s(n)
+  (n) => <> => (z) => (s) => s(n)
 
 pred: Nat -> Nat
   (n) =>
   let case_zero = zero
   let case_succ = (pred) => pred
-  n{()=>Nat}(case_zero)(case_succ)
+  n<()=>Nat>(case_zero)(case_succ)
 
-fold_nat : (n: Nat) -> {P: Nat -> Type} -> P(zero) -> ((n:Nat) -> P(n) -> P(succ(n))) -> P(n)
-  (n) => {P} => (z) => (s) =>
-  n{P}(z)((pred) => s(pred)(fold_nat(pred){P}(z)(s)))
+fold_nat : (n: Nat) -> <P: Nat -> Type> -> P(zero) -> ((n:Nat) -> P(n) -> P(succ(n))) -> P(n)
+  (n) => <P> => (z) => (s) =>
+  n<P>(z)((pred) => s(pred)(fold_nat(pred)<P>(z)(s)))
 
 double: Nat -> Nat
   (n) => 
   let case_zero = zero
   let case_succ = (pred) => succ(succ(double(pred)))
-  n{() => Nat}(case_zero)(case_succ)
+  n<() => Nat>(case_zero)(case_succ)
 
 n0: Nat
   zero
@@ -202,13 +200,13 @@ n32: Nat
 
 Pair: Type -> Type -> Type
   (A) => (B) =>
-  self{P: Pair(A)(B) -> Type} ->
-  (pair: (a: A) -> (b: B) -> P(pair{A}{B}(a)(b))) ->
+  self<P: Pair(A)(B) -> Type> ->
+  (pair: (a: A) -> (b: B) -> P(pair<A><B>(a)(b))) ->
   P(self)
 
-pair: {A: Type} -> {B: Type} -> A -> B -> Pair(A)(B)
-  {} => {} => (a) => (b) =>
-  {} => (pair) =>
+pair: <A: Type> -> <B: Type> -> A -> B -> Pair(A)(B)
+  <> => <> => (a) => (b) =>
+  <> => (pair) =>
   pair(a)(b)
 
 // Maybe
@@ -216,207 +214,181 @@ pair: {A: Type} -> {B: Type} -> A -> B -> Pair(A)(B)
 
 Maybe: Type -> Type
   (A) =>
-  self{P: Maybe(A) -> Type} ->
-  (P(none{A})) ->
-  ((value: A) -> P(some{A}(value))) ->
+  self<P: Maybe(A) -> Type> ->
+  (P(none<A>)) ->
+  ((value: A) -> P(some<A>(value))) ->
   P(self)
 
-none: {A: Type} -> Maybe(A)
-  {} =>
-  {} => (none) => () => none
+none: <A: Type> -> Maybe(A)
+  <> =>
+  <> => (none) => () => none
 
-some: {A: Type} -> A -> Maybe(A)
-  {} => (value) =>
-  {} => () => (some) => some(value)
+some: <A: Type> -> A -> Maybe(A)
+  <> => (value) =>
+  <> => () => (some) => some(value)
 
 // List
 // ====
 
 List: (A: Type) -> Type
   (A) =>
-  self{P: (x: List(A)) -> Type} ->
-  (nil: P(nil{A})) ->
-  (ext: (head: A) -> (tail: List(A)) -> P(ext{A}(head)(tail))) ->
+  self<P: (x: List(A)) -> Type> ->
+  (nil: P(nil<A>)) ->
+  (ext: (head: A) -> (tail: List(A)) -> P(ext<A>(head)(tail))) ->
   P(self)
 
-nil: {A: Type} -> List(A)
-  {A} =>
-  {} => (nil) => () => nil
+nil: <A: Type> -> List(A)
+  <A> =>
+  <> => (nil) => () => nil
 
-ext: {A: Type} -> (:A) -> (:List(A)) -> List(A)
-  {A} => (head) => (tail) =>
-  {} => () => (ext) => ext(head)(tail)
+ext: <A: Type> -> (:A) -> (:List(A)) -> List(A)
+  <A> => (head) => (tail) =>
+  <> => () => (ext) => ext(head)(tail)
 
-find
-  : {A: Type} ->
-    (list: List(A)) ->
-    (cond: (:A) -> (:Nat) -> Bool) ->
-    (indx: Nat) ->
-    Maybe(Pair(A)(Nat))
-  {A} => (list) => (cond) => (indx) =>
-  let case_nil = none{Pair(A)(Nat)}
+find : <A: Type> -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
+  <A> => (list) => (cond) => (indx) =>
+  let case_nil = none<Pair(A)(Nat)>
   let case_ext = (head) => (tail) =>
-    let case_true  = some{Pair(A)(Nat)}(pair{A}{Nat}(head)(indx))
-    let case_false = find{A}(tail)(cond)(succ(indx))
-    cond(head)(indx){() => Maybe(Pair(A)(Nat))}(case_true)(case_false)
-  list{() => Maybe(Pair(A)(Nat))}(case_nil)(case_ext)
+    let case_true  = some<Pair(A)(Nat)>(pair<A><Nat>(head)(indx))
+    let case_false = find<A>(tail)(cond)(succ(indx))
+    cond(head)(indx)<() => Maybe(Pair(A)(Nat))>(case_true)(case_false)
+  list<() => Maybe(Pair(A)(Nat))>(case_nil)(case_ext)
 
 // Bits
 // ====
 
 Bits: Type
-  self{P: (x: Bits) -> Type} ->
-  (be: P(be)) ->
-  (b0: (pred: Bits) -> P(b0(pred))) ->
-  (b1: (pred: Bits) -> P(b1(pred))) ->
+  self<P: Bits -> Type> ->
+  (P(be)) ->
+  ((pred: Bits) -> P(b0(pred))) ->
+  ((pred: Bits) -> P(b1(pred))) ->
   P(self)
 
 be: Bits
-  {P} => (be) => (b0) => (b1) => be
+  <P> => (be) => (b0) => (b1) => be
 
 b0: (bs: Bits) -> Bits
-  (bs) => {P} => (be) => (b0) => (b1) => b0(bs)
+  (bs) => <P> => (be) => (b0) => (b1) => b0(bs)
 
 b1: (bs: Bits) -> Bits
-  (bs) => {P} => (be) => (b0) => (b1) => b1(bs)
+  (bs) => <P> => (be) => (b0) => (b1) => b1(bs)
 
 // Word
 // ====
 
-Word: (size: Nat) -> Type
+Word: Nat -> Type
   (size) =>
-  self{P: (size: Nat) -> (x: Word(size)) -> Type} ->
-  (we: P(zero)(we)) ->
-  (w0: {size: Nat} -> (pred: Word(size)) -> P(succ(size))(w0{size}(pred))) ->
-  (w1: {size: Nat} -> (pred: Word(size)) -> P(succ(size))(w1{size}(pred))) ->
+  self<P: (size: Nat) -> Word(size) -> Type> ->
+  (P(zero)(we)) ->
+  (<size: Nat> -> (pred: Word(size)) -> P(succ(size))(w0<size>(pred))) ->
+  (<size: Nat> -> (pred: Word(size)) -> P(succ(size))(w1<size>(pred))) ->
   P(size)(self)
 
 we: Word(zero)
-  {P} => (we) => (w0) => (w1) =>
+  <P> => (we) => (w0) => (w1) =>
   we
 
-w0: {size: Nat} -> (wo: Word(size)) -> Word(succ(size))
-  {size} => (wo) => {P} => (we) => (w0) => (w1) =>
-  w0{size}(wo)
+w0: <size: Nat> -> Word(size) -> Word(succ(size))
+  <size> => (wo) => <P> => (we) => (w0) => (w1) =>
+  w0<size>(wo)
 
-w1: {size: Nat} -> (wo: Word(size)) -> Word(succ(size))
-  {size} => (wo) => {P} => (we) => (w0) => (w1) =>
-  w1{size}(wo)
+w1: <size: Nat> -> Word(size) -> Word(succ(size))
+  <size> => (wo) => <P> => (we) => (w0) => (w1) =>
+  w1<size>(wo)
 
-word_inc: (size: Nat) -> (word: Word(size)) -> Word(size)
-  (size) => (word) =>
+word_inc: <size: Nat> -> Word(size) -> Word(size)
+  <size> => (word) =>
   let case_we = we
-  let case_w0 = {size} => (pred) => w1{size}(pred)
-  let case_w1 = {size} => (pred) => w0{size}(word_inc(size)(pred))
+  let case_w0 = <size> => (pred) => w1<size>(pred)
+  let case_w1 = <size> => (pred) => w0<size>(word_inc<size>(pred))
   let motive  = (size) => (word) => Word(size)
-  word{motive}(case_we)(case_w0)(case_w1)
+  word<motive>(case_we)(case_w0)(case_w1)
 
-word_add: {size: Nat} -> (a: Word(size)) -> (b: Word(size)) -> (c: Bool) -> Word(size)
-  {size} => (a) => (b) => (c) =>
-
+word_add: <size: Nat> -> Word(size) -> Word(size) -> Bool -> Word(size)
+  <size> => (a) => (b) => (c) =>
   let case_a_we = (b) => we
-
-  let case_a_w0 = {a_size} => (a_pred) => (b) =>
+  let case_a_w0 = <a_size> => (a_pred) => (b) =>
     let case_b_we = (a_pred) =>
       we
-
-    let case_b_w0 = {b_size} => (b_pred) => (a_pred) =>
-      // word_add (w0 a_pred) (w0 b_pred) true
-      let case_c_tr = w1{b_size}(word_add{b_size}(a_pred)(b_pred)(false))
-      // word_add (w0 a_pred) (w0 b_pred) false
-      let case_c_fa = w0{b_size}(word_add{b_size}(a_pred)(b_pred)(false))
+    let case_b_w0 = <b_size> => (b_pred) => (a_pred) =>
+      let case_c_tr = w1<b_size>(word_add<b_size>(a_pred)(b_pred)(false))
+      let case_c_fa = w0<b_size>(word_add<b_size>(a_pred)(b_pred)(false))
       let case_c_ty = (c_bool) => Word(succ(b_size))
-      c{case_c_ty}(case_c_tr)(case_c_fa)
-
-    let case_b_w1 = {b_size} => (b_pred) => (a_pred) =>
-      // word_add (w0 a_pred) (w1 b_pred) true
-      let case_c_tr = w0{b_size}(word_add{b_size}(a_pred)(b_pred)(true))
-      // word_add (w0 a_pred) (w1 b_pred) false
-      let case_c_fa = w1{b_size}(word_add{b_size}(a_pred)(b_pred)(false))
+      c<case_c_ty>(case_c_tr)(case_c_fa)
+    let case_b_w1 = <b_size> => (b_pred) => (a_pred) =>
+      let case_c_tr = w0<b_size>(word_add<b_size>(a_pred)(b_pred)(true))
+      let case_c_fa = w1<b_size>(word_add<b_size>(a_pred)(b_pred)(false))
       let case_c_ty = (c_bool) => Word(succ(b_size))
-      c{case_c_ty}(case_c_tr)(case_c_fa)
-
+      c<case_c_ty>(case_c_tr)(case_c_fa)
     let case_b_ty = (b_size) => (b_word) =>
-      (a_pred: Word(pred(b_size))) -> Word(b_size)
-
-    b{case_b_ty}(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
-
-  let case_a_w1 = {a_size} => (a_pred) => (b) =>
+      Word(pred(b_size)) -> Word(b_size)
+    b<case_b_ty>(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
+  let case_a_w1 = <a_size> => (a_pred) => (b) =>
     let case_b_we = (a_pred) => we
-
-    let case_b_w0 = {b_size} => (b_pred) => (a_pred) =>
-      // word_add (w1 a_pred) (w0 b_pred) true
-      let case_c_tr = w0{b_size}(word_add{b_size}(a_pred)(b_pred)(true))
-      // word_add (w1 a_pred) (w0 b_pred) false
-      let case_c_fa = w1{b_size}(word_add{b_size}(a_pred)(b_pred)(false))
+    let case_b_w0 = <b_size> => (b_pred) => (a_pred) =>
+      let case_c_tr = w0<b_size>(word_add<b_size>(a_pred)(b_pred)(true))
+      let case_c_fa = w1<b_size>(word_add<b_size>(a_pred)(b_pred)(false))
       let case_c_ty = (c_bool) => Word(succ(b_size))
-      c{case_c_ty}(case_c_tr)(case_c_fa)
-
-    let case_b_w1 = {b_size} => (b_pred) => (a_pred) =>
-      // word_add (w1 a_pred) (w1 b_pred) true
-      let case_c_tr = w1{b_size}(word_add{b_size}(a_pred)(b_pred)(true))
-      // word_add (w1 a_pred) (w1 b_pred) false
-      let case_c_fa = w0{b_size}(word_add{b_size}(a_pred)(b_pred)(true))
+      c<case_c_ty>(case_c_tr)(case_c_fa)
+    let case_b_w1 = <b_size> => (b_pred) => (a_pred) =>
+      let case_c_tr = w1<b_size>(word_add<b_size>(a_pred)(b_pred)(true))
+      let case_c_fa = w0<b_size>(word_add<b_size>(a_pred)(b_pred)(true))
       let case_c_ty = (c_bool) => Word(succ(b_size))
-      c{case_c_ty}(case_c_tr)(case_c_fa)
-
+      c<case_c_ty>(case_c_tr)(case_c_fa)
     let case_b_ty = (b_size) => (b_word) =>
-      (a_pred: Word(pred(b_size))) -> Word(b_size)
-
-    b{case_b_ty}(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
-
+      Word(pred(b_size)) -> Word(b_size)
+    b<case_b_ty>(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
   let case_a_ty = (a_size) => (a_word) =>
-    (b: Word(a_size)) -> Word(a_size)
+    Word(a_size) -> Word(a_size)
+  a<case_a_ty>(case_a_we)(case_a_w0)(case_a_w1)(b)
 
-  a{case_a_ty}(case_a_we)(case_a_w0)(case_a_w1)(b)
-
-word_cmp_aux : {size:Nat} -> (:Word(size)) -> (:Word(size)) -> (:Cmp) -> Cmp
-  {size} => (a) => (b) => (c) =>
+word_cmp_aux : <size: Nat> -> Word(size) -> Word(size) -> Cmp -> Cmp
+  <size> => (a) => (b) => (c) =>
   let case_a_we = (b) => c
-  let case_a_w0 = {a_size} => (a_pred) => (b) =>
+  let case_a_w0 = <a_size> => (a_pred) => (b) =>
     let case_b_we = (a_pred) => c
-    let case_b_w0 = {b_size} => (b_pred) => (a_pred) => word_cmp_aux{b_size}(a_pred)(b_pred)(c)
-    let case_b_w1 = {b_size} => (b_pred) => (a_pred) => word_cmp_aux{b_size}(a_pred)(b_pred)(ltn)
-    let case_b_ty = (b_size) => (b_word) => (a_pred: Word(pred(b_size))) -> Cmp
-    b{case_b_ty}(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
-  let case_a_w1 = {a_size} => (a_pred) => (b) =>
+    let case_b_w0 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(c)
+    let case_b_w1 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(ltn)
+    let case_b_ty = (b_size) => (b_word) => Word(pred(b_size)) -> Cmp
+    b<case_b_ty>(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
+  let case_a_w1 = <a_size> => (a_pred) => (b) =>
     let case_b_we = (a_pred) => c
-    let case_b_w0 = {b_size} => (b_pred) => (a_pred) => word_cmp_aux{b_size}(a_pred)(b_pred)(gtn)
-    let case_b_w1 = {b_size} => (b_pred) => (a_pred) => word_cmp_aux{b_size}(a_pred)(b_pred)(c)
-    let case_b_ty = (b_size) => (b_word) => (a_pred: Word(pred(b_size))) -> Cmp
-    b{case_b_ty}(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
+    let case_b_w0 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(gtn)
+    let case_b_w1 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(c)
+    let case_b_ty = (b_size) => (b_word) => Word(pred(b_size)) -> Cmp
+    b<case_b_ty>(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
   let case_a_ty = (a_size) => (a_word) =>
-    (b: Word(a_size)) -> Cmp
-  a{case_a_ty}(case_a_we)(case_a_w0)(case_a_w1)(b)
+    Word(a_size) -> Cmp
+  a<case_a_ty>(case_a_we)(case_a_w0)(case_a_w1)(b)
 
-word_cmp : {size:Nat} -> (:Word(size)) -> (:Word(size)) -> Cmp
-  {size} => (a) => (b) =>
-  word_cmp_aux{size}(a)(b)(eql)
+word_cmp : <size: Nat> -> Word(size) -> Word(size) -> Cmp
+  <size> => (a) => (b) =>
+  word_cmp_aux<size>(a)(b)(eql)
 
 // a < b
-word_ltn : {size:Nat} -> (:Word(size)) -> (:Word(size)) -> Bool
-  {size} => (a) => (b) =>
-  word_cmp{size}(a)(b){() => Bool}(true)(false)(false)
+word_ltn : <size:Nat> -> Word(size) -> Word(size) -> Bool
+  <size> => (a) => (b) =>
+  word_cmp<size>(a)(b)<() => Bool>(true)(false)(false)
 
 // a <= b
-word_lte : {size:Nat} -> (:Word(size)) -> (:Word(size)) -> Bool
-  {size} => (a) => (b) =>
-  word_cmp{size}(a)(b){() => Bool}(true)(true)(false)
+word_lte : <size:Nat> -> Word(size) -> Word(size) -> Bool
+  <size> => (a) => (b) =>
+  word_cmp<size>(a)(b)<() => Bool>(true)(true)(false)
 
 // a == b
-word_eql : {size:Nat} -> (:Word(size)) -> (:Word(size)) -> Bool
-  {size} => (a) => (b) =>
-  word_cmp{size}(a)(b){() => Bool}(false)(true)(false)
+word_eql : <size:Nat> -> Word(size) -> Word(size) -> Bool
+  <size> => (a) => (b) =>
+  word_cmp<size>(a)(b)<() => Bool>(false)(true)(false)
 
 // a >= b
-word_gte : {size:Nat} -> (:Word(size)) -> (:Word(size)) -> Bool
-  {size} => (a) => (b) =>
-  word_cmp{size}(a)(b){() => Bool}(false)(true)(true)
+word_gte : <size:Nat> -> Word(size) -> Word(size) -> Bool
+  <size> => (a) => (b) =>
+  word_cmp<size>(a)(b)<() => Bool>(false)(true)(true)
 
 // a > b
-word_gtn : {size:Nat} -> Word(size) -> Word(size) -> Bool
-  {size} => (a) => (b) =>
-  word_cmp{size}(a)(b){() => Bool}(false)(false)(true)
+word_gtn : <size:Nat> -> Word(size) -> Word(size) -> Bool
+  <size> => (a) => (b) =>
+  word_cmp<size>(a)(b)<() => Bool>(false)(false)(true)
 
 // Uint32
 // ======
@@ -424,14 +396,11 @@ word_gtn : {size:Nat} -> Word(size) -> Word(size) -> Bool
 U32 : Type
   Word(n32)
 
-//u32_inc : (:U32) -> U32
-  //word_inc
-
 // Term
 // ====
 
 Term: Type
-  self{P: (x: Term) -> Type} ->
+  self<P: Term -> Type> ->
   (var:
     (hash: Bits) ->
     (indx: Nat) ->
@@ -477,43 +446,43 @@ Term: Type
     P(ann(done)(expr)(type))) ->
   P(self)
 
-var: (indx: Nat) -> Term
+var: Nat -> Term
   (indx)=>
-  {} => (var) => () => () => () => () => () => () => () =>
+  <> => (var) => () => () => () => () => () => () => () =>
   var(be)(indx)
 
-ref: (name: Bits) -> Term
+ref: Bits -> Term
   (name)=>
-  {} => () => (ref) => () => () => () => () => () => () =>
+  <> => () => (ref) => () => () => () => () => () => () =>
   ref(be)(name)
 
 typ: Term
-  {} => () => () => (typ) => () => () => () => () => () =>
+  <> => () => () => (typ) => () => () => () => () => () =>
   typ(be)
 
-all: (:Bool) -> (:Bits) -> (:Bits) -> (:Term) -> (:Term) -> Term
+all: Bool -> Bits -> Bits -> Term -> Term -> Term
   (eras) => (self) => (name) => (bind) => (body) =>
-  {} => () => () => () => (all) => () => () => () => () =>
+  <> => () => () => () => (all) => () => () => () => () =>
   all(be)(eras)(self)(name)(bind)(body)
 
-lam: (:Bool) -> (:Bits) -> (:Term) -> Term
+lam: Bool -> Bits -> Term -> Term
   (eras) => (name) => (body) =>
-  {} => () => () => () => () => (lam) => () => () => () =>
+  <> => () => () => () => () => (lam) => () => () => () =>
   lam(be)(eras)(name)(body)
 
-app: (:Bool) -> (:Term) -> (:Term) -> Term
+app: Bool -> Term -> Term -> Term
   (eras) => (func) => (argm) =>
-  {} => () => () => () => () => () => (app) => () => () =>
+  <> => () => () => () => () => () => (app) => () => () =>
   app(be)(eras)(func)(argm)
 
-lit: (:Bits) -> (:Term) -> (:Term) -> Term
+lit: Bits -> Term -> Term -> Term
   (name) => (expr) => (body) =>
-  {} => () => () => () => () => () => () => (lit) => () =>
+  <> => () => () => () => () => () => () => (lit) => () =>
   lit(be)(name)(expr)(body)
 
-ann: (done: Bool) -> (expr: Term) -> (type: Term) -> Term
+ann: Bool -> Term -> Term -> Term
   (done) => (expr) => (type) =>
-  {} => () => () => () => () => () => () => () => (ann) =>
+  <> => () => () => () => () => () => () => () => (ann) =>
   ann(be)(done)(expr)(type)
 
 // Characters
@@ -521,21 +490,21 @@ ann: (done: Bool) -> (expr: Term) -> (type: Term) -> Term
 Char: Type
   Word(n32)
 
-ascii: (:Bit)->(:Bit)->(:Bit)->(:Bit)->(:Bit)->(:Bit)->(:Bit)->(:Bit)->Char
+ascii: Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Char
   (a) => (b) => (c) => (d) => (e) => (f) => (g) => (h) =>
-  let ty = {size: Nat} -> (wo: Word(size)) -> Word(succ(size))
-  let wA = a{() => ty}(w0)(w1)
-  let wB = b{() => ty}(w0)(w1)
-  let wC = c{() => ty}(w0)(w1)
-  let wD = d{() => ty}(w0)(w1)
-  let wE = e{() => ty}(w0)(w1)
-  let wF = f{() => ty}(w0)(w1)
-  let wG = g{() => ty}(w0)(w1)
-  let wH = h{() => ty}(w0)(w1)
-  wH{n31}(wG{n30}(wF{n29}(wE{n28}(wD{n27}(wC{n26}(wB{n25}(wA{n24}(
-  w0{n23}(w0{n22}(w0{n21}(w0{n20}(w0{n19}(w0{n18}(w0{n17}(w0{n16}(
-  w0{n15}(w0{n14}(w0{n13}(w0{n12}(w0{n11}(w0{n10}(w0{n9 }(w0{n8 }(
-  w0{n7 }(w0{n6 }(w0{n5 }(w0{n4 }(w0{n3 }(w0{n2 }(w0{n1 }(w0{n0 }(
+  let ty = <size: Nat> -> Word(size) -> Word(succ(size))
+  let wA = a<()=>ty>(w0)(w1)
+  let wB = b<()=>ty>(w0)(w1)
+  let wC = c<()=>ty>(w0)(w1)
+  let wD = d<()=>ty>(w0)(w1)
+  let wE = e<()=>ty>(w0)(w1)
+  let wF = f<()=>ty>(w0)(w1)
+  let wG = g<()=>ty>(w0)(w1)
+  let wH = h<()=>ty>(w0)(w1)
+  wH<n31>(wG<n30>(wF<n29>(wE<n28>(wD<n27>(wC<n26>(wB<n25>(wA<n24>(
+  w0<n23>(w0<n22>(w0<n21>(w0<n20>(w0<n19>(w0<n18>(w0<n17>(w0<n16>(
+  w0<n15>(w0<n14>(w0<n13>(w0<n12>(w0<n11>(w0<n10>(w0<n9 >(w0<n8 >(
+  w0<n7 >(w0<n6 >(w0<n5 >(w0<n4 >(w0<n3 >(w0<n2 >(w0<n1 >(w0<n0 >(
   we))))))))))))))))))))))))))))))))
 
 char_tab : Char
@@ -832,31 +801,30 @@ char_tilde: Char
 // Parsing
 // =======
 
-is_space: (:Char) -> Bool
+is_space: Char -> Bool
   (c) =>
-    let is_spc = word_eql{n32}(c)(char_space)
-    let is_tab = word_eql{n32}(c)(char_tab)
-    let is_lin = word_eql{n32}(c)(char_newline)
+    let is_spc = word_eql<n32>(c)(char_space)
+    let is_tab = word_eql<n32>(c)(char_tab)
+    let is_lin = word_eql<n32>(c)(char_newline)
     or(is_spc)(or(is_tab)(is_lin))
 
-is_name: (:Char) -> Bool
+is_name: Char -> Bool
   (c) =>
-    let is_num = and(word_gte{n32}(c)(char_0))(word_lte{n32}(c)(char_9))
-    let is_low = and(word_gte{n32}(c)(char_a))(word_lte{n32}(c)(char_z))
-    let is_upp = and(word_gte{n32}(c)(char_A))(word_lte{n32}(c)(char_Z))
-    let is_und = word_eql{n32}(c)(char_underscore)
+    let is_num = and(word_gte<n32>(c)(char_0))(word_lte<n32>(c)(char_9))
+    let is_low = and(word_gte<n32>(c)(char_a))(word_lte<n32>(c)(char_z))
+    let is_upp = and(word_gte<n32>(c)(char_A))(word_lte<n32>(c)(char_Z))
+    let is_und = word_eql<n32>(c)(char_underscore)
     or(is_num)(or(is_low)(or(is_upp)(is_und)))
   
-
 // Main
 // ====
 
 example_0: Word(n4)
-  let w0011 = w1{n3}(w1{n2}(w0{n1}(w0{n0}(we))))
-  let w0101 = w1{n3}(w0{n2}(w1{n1}(w0{n0}(we))))
-  word_add{n4}(w0011)(w0101)(false) // 3 + 5 == 8
+  let w0011 = w1<n3>(w1<n2>(w0<n1>(w0<n0>(we))))
+  let w0101 = w1<n3>(w0<n2>(w1<n1>(w0<n0>(we))))
+  word_add<n4>(w0011)(w0101)(false) // 3 + 5 == 8
 
 main : Cmp
-  let w0011 = w1{n3}(w1{n2}(w0{n1}(w0{n0}(we))))
-  let w0101 = w1{n3}(w0{n2}(w1{n1}(w0{n0}(we))))
-  word_cmp{n4}(w0011)(w0101)
+  let w0011 = w1<n3>(w1<n2>(w0<n1>(w0<n0>(we))))
+  let w0101 = w1<n3>(w0<n2>(w1<n1>(w0<n0>(we))))
+  word_cmp<n4>(w0011)(w0101)
