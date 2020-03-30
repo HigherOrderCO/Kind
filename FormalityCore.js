@@ -182,12 +182,12 @@ function parse_par(code, indx, vars) {
   return [indx, term];
 };
 
-// Parses a dependent function type, `(<name> : <term>) => <term>`
+// Parses a dependent function type, `(<name> : <term>) -> <term>`
 function parse_all(code, indx, vars) {
   var [indx, self] = parse_nam(code, next(code, indx), 1);
   var [indx, skip] = parse_str("(", code, indx);
   var [indx, name] = parse_nam(code, next(code, indx), 1);
-  var [indx, skip] = parse_str(":", code, next(code, indx));
+  var [indx, skip] = parse_opt(":", code, next(code, indx));
   var [indx, bind] = parse_trm(code, indx, Ext(self, vars));
   var [indx, eras] = parse_opt(";", code, next(code, indx));
   var [indx, skip] = parse_str(")", code, next(code, indx));
@@ -246,6 +246,14 @@ function parse_app(code, indx, func, vars) {
   return [indx, App(eras, func, argm)];
 };
 
+// Parses a non-dependent function type, `<term> -> <term>`
+function parse_arr(code, indx, bind, vars) {
+  var [indx, eras] = parse_opt(";", code, next(code, indx));
+  var [indx, skip] = parse_str("->", code, next(code, indx));
+  var [indx, body] = parse_trm(code, indx, Ext("", Ext("", vars)));
+  return [indx, All(eras, "", "", shift(bind,1,0), body)];
+};
+
 // Parses an annotation, `<term> :: <term>`
 function parse_ann(code, indx, expr, vars) {
   var [indx, skip] = parse_str("::", code, next(code, indx));
@@ -262,6 +270,7 @@ function parse_trm(code, indx = 0, vars = Nil()) {
     () => parse_let(code, indx, vars),
     () => parse_par(code, indx, vars),
     () => parse_typ(code, indx, vars),
+    //() => parse_arr(code, indx, vars),
     () => parse_var(code, indx, vars),
   ]);
 
@@ -271,6 +280,7 @@ function parse_trm(code, indx = 0, vars = Nil()) {
     var [indx, term] = post_parse;
     post_parse = first_valid([
       () => parse_app(code, indx, term, vars),
+      () => parse_arr(code, indx, term, vars),
       () => parse_ann(code, indx, term, vars),
     ]);
     if (!post_parse) {
