@@ -186,7 +186,7 @@ function parse_par(code, indx, vars) {
 function parse_all(code, indx, vars) {
   var [indx, self] = parse_nam(code, next(code, indx), 1);
   var [indx, skip] = parse_str("(", code, indx);
-  var [indx, name] = parse_nam(code, next(code, indx));
+  var [indx, name] = parse_nam(code, next(code, indx), 1);
   var [indx, skip] = parse_str(":", code, next(code, indx));
   var [indx, bind] = parse_trm(code, indx, Ext(self, vars));
   var [indx, eras] = parse_opt(";", code, next(code, indx));
@@ -199,7 +199,7 @@ function parse_all(code, indx, vars) {
 // Parses a dependent function value, `(<name>) => <term>`
 function parse_lam(code, indx, vars) {
   var [indx, skip] = parse_str("(", code, next(code, indx));
-  var [indx, name] = parse_nam(code, next(code, indx));
+  var [indx, name] = parse_nam(code, next(code, indx), 1);
   var [indx, eras] = parse_opt(";", code, next(code, indx));
   var [indx, skip] = parse_str(")", code, next(code, indx));
   var [indx, skip] = parse_str("=>", code, next(code, indx));
