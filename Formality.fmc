@@ -35,6 +35,24 @@ and: (:Bool) -> (:Bool) -> Bool
   let case_a_mot = () => Bool
   a(case_a_mot;)(case_a_tru)(case_a_fal)
   
+// Cmp
+
+Cmp : Type
+  self(P: (x: Cmp) -> Type;) ->
+  (ltn: P(ltn)) ->
+  (eql: P(eql)) ->
+  (gtn: P(gtn)) ->
+  P(self)
+
+ltn: Cmp
+  (P;) => (ltn) => (eql) => (gtn) => ltn
+
+eql: Cmp
+  (P;) => (ltn) => (eql) => (gtn) => eql
+
+gtn: Cmp
+  (P;) => (ltn) => (eql) => (gtn) => gtn
+
 // Bit
 // ===
 
@@ -377,9 +395,28 @@ word_eql : (size:Nat;) -> (:Word(size)) -> (:Word(size)) -> Bool
     (b: Word(a_size)) -> Bool
   a(case_a_ty;)(case_a_we)(case_a_w0)(case_a_w1)(b)
 
-word_cmp : (size:Nat;) -> (:Word(size)) -> (:Word(size)) -> Bool
+word_cmp_aux : (size:Nat;) -> (:Word(size)) -> (:Word(size)) -> (:Cmp) -> Cmp
+  (size;) => (a) => (b) => (c) =>
+  let case_a_we = (b) => c
+  let case_a_w0 = (a_size;) => (a_pred) => (b) =>
+    let case_b_we = (a_pred) => c
+    let case_b_w0 = (b_size;) => (b_pred) => (a_pred) => word_cmp_aux(b_size;)(a_pred)(b_pred)(c)
+    let case_b_w1 = (b_size;) => (b_pred) => (a_pred) => word_cmp_aux(b_size;)(a_pred)(b_pred)(ltn)
+    let case_b_ty = (b_size) => (b_word) => (a_pred: Word(pred(b_size))) -> Cmp
+    b(case_b_ty;)(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
+  let case_a_w1 = (a_size;) => (a_pred) => (b) =>
+    let case_b_we = (a_pred) => c
+    let case_b_w0 = (b_size;) => (b_pred) => (a_pred) => word_cmp_aux(b_size;)(a_pred)(b_pred)(gtn)
+    let case_b_w1 = (b_size;) => (b_pred) => (a_pred) => word_cmp_aux(b_size;)(a_pred)(b_pred)(c)
+    let case_b_ty = (b_size) => (b_word) => (a_pred: Word(pred(b_size))) -> Cmp
+    b(case_b_ty;)(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
+  let case_a_ty = (a_size) => (a_word) =>
+    (b: Word(a_size)) -> Cmp
+  a(case_a_ty;)(case_a_we)(case_a_w0)(case_a_w1)(b)
+
+word_cmp : (size:Nat;) -> (:Word(size)) -> (:Word(size)) -> Cmp
   (size;) => (a) => (b) =>
-  Type // TODO
+  word_cmp_aux(size;)(a)(b)(eql)
 
 // Term
 // ====
@@ -801,5 +838,7 @@ example_0: Word(n4)
   let w0101 = w1(n3;)(w0(n2;)(w1(n1;)(w0(n0;)(we))))
   wadd(n4;)(w0011)(w0101)(false) // 3 + 5 == 8
 
-main : Term
-  app(true)(typ)(typ)
+main : Cmp
+  let w0011 = w1(n3;)(w1(n2;)(w0(n1;)(w0(n0;)(we))))
+  let w0101 = w1(n3;)(w0(n2;)(w1(n1;)(w0(n0;)(we))))
+  word_cmp(n4;)(w0011)(w0101)
