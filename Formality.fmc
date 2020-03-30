@@ -20,6 +20,20 @@ case_bool
     (f: P(false)) ->
     P(b)
   (b) => (P;) => (t) => (f) => b(P;)(t)(f)
+
+or: (:Bool) -> (:Bool) -> Bool
+  (a) => (b) =>
+  let case_a_tru = (b)(() => Bool;)(true)(true)
+  let case_a_fal = (b)(() => Bool;)(true)(false)
+  let case_a_mot = () => Bool
+  a(case_a_mot;)(case_a_tru)(case_a_fal)
+
+and: (:Bool) -> (:Bool) -> Bool
+  (a) => (b) =>
+  let case_a_tru = (b)(() => Bool;)(true)(false)
+  let case_a_fal = (b)(() => Bool;)(false)(false)
+  let case_a_mot = () => Bool
+  a(case_a_mot;)(case_a_tru)(case_a_fal)
   
 // Bit
 // ===
@@ -344,6 +358,29 @@ wadd: (size: Nat;) -> (a: Word(size)) -> (b: Word(size)) -> (c: Bool) -> Word(si
 
   a(case_a_ty;)(case_a_we)(case_a_w0)(case_a_w1)(b)
 
+word_eql : (size:Nat;) -> (:Word(size)) -> (:Word(size)) -> Bool
+  (size;) => (a) => (b) =>
+  let case_a_we = (b) => true
+  let case_a_w0 = (a_size;) => (a_pred) => (b) =>
+    let case_b_we = (a_pred) => false
+    let case_b_w0 = (b_size;) => (b_pred) => (a_pred) => word_eql(b_size;)(a_pred)(b_pred)
+    let case_b_w1 = (b_size;) => (b_pred) => (a_pred) => false
+    let case_b_ty = (b_size) => (b_word) => (a_pred: Word(pred(b_size))) -> Bool
+    b(case_b_ty;)(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
+  let case_a_w1 = (a_size;) => (a_pred) => (b) =>
+    let case_b_we = (a_pred) => false
+    let case_b_w0 = (b_size;) => (b_pred) => (a_pred) => false
+    let case_b_w1 = (b_size;) => (b_pred) => (a_pred) => word_eql(b_size;)(a_pred)(b_pred)
+    let case_b_ty = (b_size) => (b_word) => (a_pred: Word(pred(b_size))) -> Bool
+    b(case_b_ty;)(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
+  let case_a_ty = (a_size) => (a_word) =>
+    (b: Word(a_size)) -> Bool
+  a(case_a_ty;)(case_a_we)(case_a_w0)(case_a_w1)(b)
+
+word_cmp : (size:Nat;) -> (:Word(size)) -> (:Word(size)) -> Bool
+  (size;) => (a) => (b) =>
+  Type // TODO
+
 // Term
 // ====
 
@@ -455,6 +492,12 @@ ascii: (:Bit)->(:Bit)->(:Bit)->(:Bit)->(:Bit)->(:Bit)->(:Bit)->(:Bit)->Char
   w0(n7 ;)(w0(n6 ;)(w0(n5 ;)(w0(n4 ;)(w0(n3 ;)(w0(n2 ;)(w0(n1 ;)(w0(n0 ;)(
   we))))))))))))))))))))))))))))))))
 
+char_tab : Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t1)
+
+char_newline : Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t0)
+
 char_space : Char
   ascii(t0)(t0)(t1)(t0)(t0)(t0)(t0)(t0)
 
@@ -479,10 +522,10 @@ char_ampersand: Char
 char_apostrophe: Char
   ascii(t0)(t0)(t1)(t0)(t0)(t1)(t1)(t1)
 
-char_left_parenthesis: Char
+char_left_parens: Char
   ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t0)
 
-char_right_parenthesis: Char
+char_right_parens: Char
   ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t1)
 
 char_asterisk: Char
@@ -742,6 +785,16 @@ char_tilde: Char
 
 // Parsing
 // =======
+
+is_space: (:Char) -> Bool
+  (c) =>
+    let is_spc = word_eql(n32;)(c)(char_space)
+    let is_tab = word_eql(n32;)(c)(char_tab)
+    let is_lin = word_eql(n32;)(c)(char_newline)
+    or(is_spc)(or(is_tab)(is_lin))
+
+// Main
+// ====
 
 example_0: Word(n4)
   let w0011 = w1(n3;)(w1(n2;)(w0(n1;)(w0(n0;)(we))))
