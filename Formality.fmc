@@ -2,129 +2,128 @@
 // ====
 
 Bool: Type
-  self<P: Bool -> Type> ->
+  self{P: Bool -> Type} ->
   P(true) ->
   P(false) ->
   P(self)
 
 true: Bool
-  <> => (t) => (f) => t
+  {} => (t) => (f) => t
 
 false: Bool
-  <> => (t) => (f) => f
+  {} => (t) => (f) => f
 
-case_bool : (b: Bool) -> <P: Bool -> Type> -> P(true) -> P(false) -> P(b)
-  (b) => <P> => (t) => (f) =>
-  b<P>(t)(f)
+case_bool : (b: Bool) -> {P: Bool -> Type} -> P(true) -> P(false) -> P(b)
+  (b) => {P} => (t) => (f) => b{P}(t)(f)
 
 not: Bool -> Bool
   (a) =>
   let case_t = false
   let case_f = true
-  a<()=>Bool>(case_t)(case_f)
+  a{()=>Bool}(case_t)(case_f)
 
 or: Bool -> Bool -> Bool
   (a) => (b) =>
-  let case_a_tru = (b)<()=>Bool>(true)(true)
-  let case_a_fal = (b)<()=>Bool>(true)(false)
-  a<()=>Bool>(case_a_tru)(case_a_fal)
+  let case_a_tru = (b){() => Bool}(true)(true)
+  let case_a_fal = (b){() => Bool}(true)(false)
+  a{()=>Bool}(case_a_tru)(case_a_fal)
 
 and: Bool -> Bool -> Bool
   (a) => (b) =>
-  let case_a_tru = (b)<()=>Bool>(true)(false)
-  let case_a_fal = (b)<()=>Bool>(false)(false)
-  a<()=>Bool>(case_a_tru)(case_a_fal)
+  let case_a_tru = (b){()=>Bool}(true)(false)
+  let case_a_fal = (b){()=>Bool}(false)(false)
+  a{()=>Bool}(case_a_tru)(case_a_fal)
   
 // Cmp
 
 Cmp : Type
-  self<P: Cmp -> Type> ->
+  self{P: Cmp -> Type} ->
   P(ltn) ->
   P(eql) ->
   P(gtn) ->
   P(self)
 
 ltn: Cmp
-  <> => (ltn) => (eql) => (gtn) => ltn
+  {} => (ltn) => (eql) => (gtn) => ltn
 
 eql: Cmp
-  <> => (ltn) => (eql) => (gtn) => eql
+  {} => (ltn) => (eql) => (gtn) => eql
 
 gtn: Cmp
-  <> => (ltn) => (eql) => (gtn) => gtn
+  {} => (ltn) => (eql) => (gtn) => gtn
 
 // Bit
 // ===
 
 Bit : Type
-  self<P: Bit -> Type> ->
+  self{P: Bit -> Type} ->
   P(t0) ->
   P(t1) ->
   P(self)
 
 t0: Bit
-  <> => (t0) => (t1) => t0
+  {} => (t0) => (t1) => t0
 
 t1: Bit
-  <> => (t0) => (t1) => t1
+  {} => (t0) => (t1) => t1
 
 // Nat
 // ===
 
 Nat: Type
-  self<P: (x: Nat) -> Type> ->
+  self{P: (x: Nat) -> Type} ->
   (P(zero)) ->
   ((pred: Nat) -> P(succ(pred))) ->
   P(self)
 
 zero: Nat
-  <> => (z) => (s) => z
+  {} => (z) => (s) => z
 
 succ: Nat -> Nat
-  (n) => <> => (z) => (s) => s(n)
+  (n) => {} => (z) => (s) => s(n)
 
 pred: Nat -> Nat
   (n) =>
   let case_zero = zero
   let case_succ = (pred) => pred
-  n<()=>Nat>(case_zero)(case_succ)
+  n{()=>Nat}(case_zero)(case_succ)
 
-fold_nat : (n: Nat) -> <P: Nat -> Type> -> P(zero) -> ((n:Nat) -> P(n) -> P(succ(n))) -> P(n)
-  (n) => <P> => (z) => (s) =>
-  n<P>(z)((pred) => s(pred)(fold_nat(pred)<P>(z)(s)))
+fold_nat : (n: Nat) -> {P: Nat -> Type} -> P(zero) -> ((n:Nat) -> P(n) -> P(succ(n))) -> P(n)
+  (n) => {P} => (z) => (s) =>
+  n{P}(z)((pred) => s(pred)(fold_nat(pred){P}(z)(s)))
 
 double: Nat -> Nat
   (n) => 
   let case_zero = zero
   let case_succ = (pred) => succ(succ(double(pred)))
-  n<() => Nat>(case_zero)(case_succ)
+  n{() => Nat}(case_zero)(case_succ)
 
 nat_cmp: Nat -> Nat -> Cmp
   (a) => (b) =>
   let case_a_zero =
     let case_b_zero = eql
     let case_b_succ = (b_pred) => ltn
-    b<()=>Cmp>(case_b_zero)(case_b_succ)
+    b{()=>Cmp}(case_b_zero)(case_b_succ)
   let case_a_succ = (a_pred) =>
     let case_b_zero = gtn
     let case_b_succ = (b_pred) => nat_cmp(a_pred)(b_pred)
-    b<()=>Cmp>(case_b_zero)(case_b_succ)
-  a<()=>Cmp>(case_a_zero)(case_a_succ)
+    b{()=>Cmp}(case_b_zero)(case_b_succ)
+  a{()=>Cmp}(case_a_zero)(case_a_succ)
 
 nat_ltn: Nat -> Nat -> Bool
-  (a) => (b) => nat_cmp(a)(b)<()=>Bool>(true)(false)(false)
+  (a) => (b) => nat_cmp(a)(b){()=>Bool}(true)(false)(false)
 
 nat_lte: Nat -> Nat -> Bool
-  (a) => (b) => nat_cmp(a)(b)<()=>Bool>(true)(true)(false)
+  (a) => (b) => nat_cmp(a)(b){()=>Bool}(true)(true)(false)
 
 nat_eql: Nat -> Nat -> Bool
-  (a) => (b) => nat_cmp(a)(b)<()=>Bool>(false)(true)(false)
+  (a) => (b) => nat_cmp(a)(b){()=>Bool}(false)(true)(false)
 
 nat_gte: Nat -> Nat -> Bool
-  (a) => (b) => nat_cmp(a)(b)<()=>Bool>(false)(true)(true)
+  (a) => (b) => nat_cmp(a)(b){()=>Bool}(false)(true)(true)
 
 nat_gtn: Nat -> Nat -> Bool
-  (a) => (b) => nat_cmp(a)(b)<()=>Bool>(false)(false)(true)
+  (a) => (b) => nat_cmp(a)(b){()=>Bool}(false)(false)(true)
 
 n0: Nat
   zero
@@ -233,13 +232,13 @@ n32: Nat
 
 Pair: Type -> Type -> Type
   (A) => (B) =>
-  self<P: Pair(A)(B) -> Type> ->
-  (pair: (a: A) -> (b: B) -> P(pair<A><B>(a)(b))) ->
+  self{P: Pair(A)(B) -> Type} ->
+  (pair: (a: A) -> (b: B) -> P(pair{A}{B}(a)(b))) ->
   P(self)
 
-pair: <A: Type> -> <B: Type> -> A -> B -> Pair(A)(B)
-  <> => <> => (a) => (b) =>
-  <> => (pair) =>
+pair: {A: Type} -> {B: Type} -> A -> B -> Pair(A)(B)
+  {} => {} => (a) => (b) =>
+  {} => (pair) =>
   pair(a)(b)
 
 // Maybe
@@ -247,250 +246,250 @@ pair: <A: Type> -> <B: Type> -> A -> B -> Pair(A)(B)
 
 Maybe: Type -> Type
   (A) =>
-  self<P: Maybe(A) -> Type> ->
-  (P(none<A>)) ->
-  ((value: A) -> P(some<A>(value))) ->
+  self{P: Maybe(A) -> Type} ->
+  (P(none{A})) ->
+  ((value: A) -> P(some{A}(value))) ->
   P(self)
 
-none: <A: Type> -> Maybe(A)
-  <> =>
-  <> => (none) => () => none
+none: {A: Type} -> Maybe(A)
+  {} =>
+  {} => (none) => () => none
 
-some: <A: Type> -> A -> Maybe(A)
-  <> => (value) =>
-  <> => () => (some) => some(value)
+some: {A: Type} -> A -> Maybe(A)
+  {} => (value) =>
+  {} => () => (some) => some(value)
 
 // List
 // ====
 
 List: (A: Type) -> Type
   (A) =>
-  self<P: (x: List(A)) -> Type> ->
-  (nil: P(nil<A>)) ->
-  (ext: (head: A) -> (tail: List(A)) -> P(ext<A>(head)(tail))) ->
+  self{P: (x: List(A)) -> Type} ->
+  (nil: P(nil{A})) ->
+  (ext: (head: A) -> (tail: List(A)) -> P(ext{A}(head)(tail))) ->
   P(self)
 
-nil: <A: Type> -> List(A)
-  <A> =>
-  <> => (nil) => () => nil
+nil: {A: Type} -> List(A)
+  {A} =>
+  {} => (nil) => () => nil
 
-ext: <A: Type> -> (:A) -> (:List(A)) -> List(A)
-  <A> => (head) => (tail) =>
-  <> => () => (ext) => ext(head)(tail)
+ext: {A: Type} -> (:A) -> (:List(A)) -> List(A)
+  {A} => (head) => (tail) =>
+  {} => () => (ext) => ext(head)(tail)
 
-find: <A: Type> -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
-  <A> => (list) => (cond) => (indx) =>
-  let case_nil = none<Pair(A)(Nat)>
+find: {A: Type} -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
+  {A} => (list) => (cond) => (indx) =>
+  let case_nil = none{Pair(A)(Nat)}
   let case_ext = (head) => (tail) =>
-    let case_true  = some<Pair(A)(Nat)>(pair<A><Nat>(head)(indx))
-    let case_false = find<A>(tail)(cond)(succ(indx))
-    cond(head)(indx)<() => Maybe(Pair(A)(Nat))>(case_true)(case_false)
-  list<() => Maybe(Pair(A)(Nat))>(case_nil)(case_ext)
+    let case_true  = some{Pair(A)(Nat)}(pair{A}{Nat}(head)(indx))
+    let case_false = find{A}(tail)(cond)(succ(indx))
+    cond(head)(indx){() => Maybe(Pair(A)(Nat))}(case_true)(case_false)
+  list{() => Maybe(Pair(A)(Nat))}(case_nil)(case_ext)
 
-take: <A: Type> -> Nat -> List(A) -> List(A)
-  <A> => (n) => (list) =>
-  let case_nil = nil<A>
+take: {A: Type} -> Nat -> List(A) -> List(A)
+  {A} => (n) => (list) =>
+  let case_nil = nil{A}
   let case_ext = (head) => (tail) =>
-    let case_zero = nil<A>
-    let case_succ = (pred) => ext<A>(head)(take<A>(pred)(tail))
-    n<()=>List(A)>(case_zero)(case_succ)
-  list<()=>List(A)>(case_nil)(case_ext)
+    let case_zero = nil{A}
+    let case_succ = (pred) => ext{A}(head)(take{A}(pred)(tail))
+    n{()=>List(A)}(case_zero)(case_succ)
+  list{()=>List(A)}(case_nil)(case_ext)
 
-drop: <A: Type> -> Nat -> List(A) -> List(A)
-  <A> => (n) => (list) =>
-  let case_nil = nil<A>
+drop: {A: Type} -> Nat -> List(A) -> List(A)
+  {A} => (n) => (list) =>
+  let case_nil = nil{A}
   let case_ext = (head) => (tail) =>
     let case_zero = tail
-    let case_succ = (pred) => drop<A>(pred)(tail)
-    n<()=>List(A)>(case_zero)(case_succ)
-  list<()=>List(A)>(case_nil)(case_ext)
+    let case_succ = (pred) => drop{A}(pred)(tail)
+    n{()=>List(A)}(case_zero)(case_succ)
+  list{()=>List(A)}(case_nil)(case_ext)
 
-is_empty: <A: Type> -> List(A) -> Bool
-  <A> => (list) =>
+is_empty: {A: Type} -> List(A) -> Bool
+  {A} => (list) =>
   let case_nil = true
   let case_ext = (head) => (tail) => false
-  list<() => Bool>(case_nil)(case_ext)
+  list{() => Bool}(case_nil)(case_ext)
 
-zip_with: <A: Type> -> <B: Type> -> <C: Type> -> (A -> B -> C) -> List(A) -> List(B) -> List(C)
-  <A> => <B> => <C> => (fn) => (as) => (bs) =>
-  let case_a_nil = nil<C>
+zip_with: {A: Type} -> {B: Type} -> {C: Type} -> (A -> B -> C) -> List(A) -> List(B) -> List(C)
+  {A} => {B} => {C} => (fn) => (as) => (bs) =>
+  let case_a_nil = nil{C}
   let case_a_ext = (a_head) => (a_tail) =>
-    let case_b_nil = nil<C>
+    let case_b_nil = nil{C}
     let case_b_ext = (b_head) => (b_tail) =>
       let head = fn(a_head)(b_head)
-      let tail = zip_with<A><B><C>(fn)(a_tail)(b_tail)
-      ext<C>(head)(tail)
-    bs<()=>List(C)>(case_b_nil)(case_b_ext)
-  as<()=>List(C)>(case_a_nil)(case_a_ext)
+      let tail = zip_with{A}{B}{C}(fn)(a_tail)(b_tail)
+      ext{C}(head)(tail)
+    bs{()=>List(C)}(case_b_nil)(case_b_ext)
+  as{()=>List(C)}(case_a_nil)(case_a_ext)
 
-all_satisfy: <A: Type> -> (A -> Bool) -> List(A) -> Bool
-  <A> => (cond) => (list) =>
+all_satisfy: {A: Type} -> (A -> Bool) -> List(A) -> Bool
+  {A} => (cond) => (list) =>
   let case_nil = true
   let case_ext = (head) => (tail) =>
-    let case_t = all_satisfy<A>(cond)(tail)
+    let case_t = all_satisfy{A}(cond)(tail)
     let case_f = false
-    cond(head)<()=>Bool>(case_t)(case_f)
-  list<()=>Bool>(case_nil)(case_ext)
+    cond(head){()=>Bool}(case_t)(case_f)
+  list{()=>Bool}(case_nil)(case_ext)
 
-any_satisfy: <A: Type> -> (A -> Bool) -> List(A) -> Bool
-  <A> => (cond) => (list) =>
+any_satisfy: {A: Type} -> (A -> Bool) -> List(A) -> Bool
+  {A} => (cond) => (list) =>
   let case_nil = false
   let case_ext = (head) => (tail) =>
     let case_t = true
-    let case_f = any_satisfy<A>(cond)(tail)
-    cond(head)<()=>Bool>(case_t)(case_f)
-  list<()=>Bool>(case_nil)(case_ext)
+    let case_f = any_satisfy{A}(cond)(tail)
+    cond(head){()=>Bool}(case_t)(case_f)
+  list{()=>Bool}(case_nil)(case_ext)
 
 all_true: List(Bool) -> Bool
-  (list) => all_satisfy<Bool>((x) => x)(list)
+  (list) => all_satisfy{Bool}((x) => x)(list)
 
 any_true: List(Bool) -> Bool
-  (list) => any_satisfy<Bool>((x) => x)(list)
+  (list) => any_satisfy{Bool}((x) => x)(list)
 
-list_len: <A: Type> -> List(A) -> Nat
-  <A> => (list) =>
+list_len: {A: Type} -> List(A) -> Nat
+  {A} => (list) =>
   let case_nil = zero
-  let case_ext = (head) => (tail) => succ(list_len<A>(tail))
-  list<()=>Nat>(case_nil)(case_ext)
+  let case_ext = (head) => (tail) => succ(list_len{A}(tail))
+  list{()=>Nat}(case_nil)(case_ext)
 
 // Bits
 // ====
 
 Bits: Type
-  self<P: Bits -> Type> ->
+  self{P: Bits -> Type} ->
   (P(be)) ->
   ((pred: Bits) -> P(b0(pred))) ->
   ((pred: Bits) -> P(b1(pred))) ->
   P(self)
 
 be: Bits
-  <P> => (be) => (b0) => (b1) => be
+  {P} => (be) => (b0) => (b1) => be
 
 b0: (bs: Bits) -> Bits
-  (bs) => <P> => (be) => (b0) => (b1) => b0(bs)
+  (bs) => {P} => (be) => (b0) => (b1) => b0(bs)
 
 b1: (bs: Bits) -> Bits
-  (bs) => <P> => (be) => (b0) => (b1) => b1(bs)
+  (bs) => {P} => (be) => (b0) => (b1) => b1(bs)
 
 // Word
 // ====
 
 Word: Nat -> Type
   (size) =>
-  self<P: (size: Nat) -> Word(size) -> Type> ->
+  self{P: (size: Nat) -> Word(size) -> Type} ->
   (P(zero)(we)) ->
-  (<size: Nat> -> (pred: Word(size)) -> P(succ(size))(w0<size>(pred))) ->
-  (<size: Nat> -> (pred: Word(size)) -> P(succ(size))(w1<size>(pred))) ->
+  ({size: Nat} -> (pred: Word(size)) -> P(succ(size))(w0{size}(pred))) ->
+  ({size: Nat} -> (pred: Word(size)) -> P(succ(size))(w1{size}(pred))) ->
   P(size)(self)
 
 we: Word(zero)
-  <P> => (we) => (w0) => (w1) =>
+  {P} => (we) => (w0) => (w1) =>
   we
 
-w0: <size: Nat> -> Word(size) -> Word(succ(size))
-  <size> => (wo) => <P> => (we) => (w0) => (w1) =>
-  w0<size>(wo)
+w0: {size: Nat} -> Word(size) -> Word(succ(size))
+  {size} => (wo) => {P} => (we) => (w0) => (w1) =>
+  w0{size}(wo)
 
-w1: <size: Nat> -> Word(size) -> Word(succ(size))
-  <size> => (wo) => <P> => (we) => (w0) => (w1) =>
-  w1<size>(wo)
+w1: {size: Nat} -> Word(size) -> Word(succ(size))
+  {size} => (wo) => {P} => (we) => (w0) => (w1) =>
+  w1{size}(wo)
 
-word_inc: <size: Nat> -> Word(size) -> Word(size)
-  <size> => (word) =>
+word_inc: {size: Nat} -> Word(size) -> Word(size)
+  {size} => (word) =>
   let case_we = we
-  let case_w0 = <size> => (pred) => w1<size>(pred)
-  let case_w1 = <size> => (pred) => w0<size>(word_inc<size>(pred))
+  let case_w0 = {size} => (pred) => w1{size}(pred)
+  let case_w1 = {size} => (pred) => w0{size}(word_inc{size}(pred))
   let motive  = (size) => (word) => Word(size)
-  word<motive>(case_we)(case_w0)(case_w1)
+  word{motive}(case_we)(case_w0)(case_w1)
 
-word_add_aux: <size: Nat> -> Word(size) -> Word(size) -> Bool -> Word(size)
-  <size> => (a) => (b) => (c) =>
+word_add_aux: {size: Nat} -> Word(size) -> Word(size) -> Bool -> Word(size)
+  {size} => (a) => (b) => (c) =>
   let case_a_we = (b) => we
-  let case_a_w0 = <a_size> => (a_pred) => (b) =>
+  let case_a_w0 = {a_size} => (a_pred) => (b) =>
     let case_b_we = (a_pred) =>
       we
-    let case_b_w0 = <b_size> => (b_pred) => (a_pred) =>
-      let case_c_tr = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
-      let case_c_fa = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
+    let case_b_w0 = {b_size} => (b_pred) => (a_pred) =>
+      let case_c_tr = w1{b_size}(word_add_aux{b_size}(a_pred)(b_pred)(false))
+      let case_c_fa = w0{b_size}(word_add_aux{b_size}(a_pred)(b_pred)(false))
       let case_c_ty = (c_bool) => Word(succ(b_size))
-      c<case_c_ty>(case_c_tr)(case_c_fa)
-    let case_b_w1 = <b_size> => (b_pred) => (a_pred) =>
-      let case_c_tr = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
-      let case_c_fa = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
+      c{case_c_ty}(case_c_tr)(case_c_fa)
+    let case_b_w1 = {b_size} => (b_pred) => (a_pred) =>
+      let case_c_tr = w0{b_size}(word_add_aux{b_size}(a_pred)(b_pred)(true))
+      let case_c_fa = w1{b_size}(word_add_aux{b_size}(a_pred)(b_pred)(false))
       let case_c_ty = (c_bool) => Word(succ(b_size))
-      c<case_c_ty>(case_c_tr)(case_c_fa)
+      c{case_c_ty}(case_c_tr)(case_c_fa)
     let case_b_ty = (b_size) => (b_word) =>
       Word(pred(b_size)) -> Word(b_size)
-    b<case_b_ty>(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
-  let case_a_w1 = <a_size> => (a_pred) => (b) =>
+    b{case_b_ty}(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
+  let case_a_w1 = {a_size} => (a_pred) => (b) =>
     let case_b_we = (a_pred) => we
-    let case_b_w0 = <b_size> => (b_pred) => (a_pred) =>
-      let case_c_tr = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
-      let case_c_fa = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
+    let case_b_w0 = {b_size} => (b_pred) => (a_pred) =>
+      let case_c_tr = w0{b_size}(word_add_aux{b_size}(a_pred)(b_pred)(true))
+      let case_c_fa = w1{b_size}(word_add_aux{b_size}(a_pred)(b_pred)(false))
       let case_c_ty = (c_bool) => Word(succ(b_size))
-      c<case_c_ty>(case_c_tr)(case_c_fa)
-    let case_b_w1 = <b_size> => (b_pred) => (a_pred) =>
-      let case_c_tr = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
-      let case_c_fa = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
+      c{case_c_ty}(case_c_tr)(case_c_fa)
+    let case_b_w1 = {b_size} => (b_pred) => (a_pred) =>
+      let case_c_tr = w1{b_size}(word_add_aux{b_size}(a_pred)(b_pred)(true))
+      let case_c_fa = w0{b_size}(word_add_aux{b_size}(a_pred)(b_pred)(true))
       let case_c_ty = (c_bool) => Word(succ(b_size))
-      c<case_c_ty>(case_c_tr)(case_c_fa)
+      c{case_c_ty}(case_c_tr)(case_c_fa)
     let case_b_ty = (b_size) => (b_word) =>
       Word(pred(b_size)) -> Word(b_size)
-    b<case_b_ty>(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
+    b{case_b_ty}(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
   let case_a_ty = (a_size) => (a_word) =>
     Word(a_size) -> Word(a_size)
-  a<case_a_ty>(case_a_we)(case_a_w0)(case_a_w1)(b)
+  a{case_a_ty}(case_a_we)(case_a_w0)(case_a_w1)(b)
 
-word_add: <size: Nat> -> Word(size) -> Word(size) -> Word(size)
-  <size> => (a) => (b) => word_add_aux<size>(a)(b)(false)
+word_add: {size: Nat} -> Word(size) -> Word(size) -> Word(size)
+  {size} => (a) => (b) => word_add_aux{size}(a)(b)(false)
 
-word_cmp_aux: <size: Nat> -> Word(size) -> Word(size) -> Cmp -> Cmp
-  <size> => (a) => (b) => (c) =>
+word_cmp_aux: {size: Nat} -> Word(size) -> Word(size) -> Cmp -> Cmp
+  {size} => (a) => (b) => (c) =>
   let case_a_we = (b) => c
-  let case_a_w0 = <a_size> => (a_pred) => (b) =>
+  let case_a_w0 = {a_size} => (a_pred) => (b) =>
     let case_b_we = (a_pred) => c
-    let case_b_w0 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(c)
-    let case_b_w1 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(ltn)
+    let case_b_w0 = {b_size} => (b_pred) => (a_pred) => word_cmp_aux{b_size}(a_pred)(b_pred)(c)
+    let case_b_w1 = {b_size} => (b_pred) => (a_pred) => word_cmp_aux{b_size}(a_pred)(b_pred)(ltn)
     let case_b_ty = (b_size) => (b_word) => Word(pred(b_size)) -> Cmp
-    b<case_b_ty>(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
-  let case_a_w1 = <a_size> => (a_pred) => (b) =>
+    b{case_b_ty}(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
+  let case_a_w1 = {a_size} => (a_pred) => (b) =>
     let case_b_we = (a_pred) => c
-    let case_b_w0 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(gtn)
-    let case_b_w1 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(c)
+    let case_b_w0 = {b_size} => (b_pred) => (a_pred) => word_cmp_aux{b_size}(a_pred)(b_pred)(gtn)
+    let case_b_w1 = {b_size} => (b_pred) => (a_pred) => word_cmp_aux{b_size}(a_pred)(b_pred)(c)
     let case_b_ty = (b_size) => (b_word) => Word(pred(b_size)) -> Cmp
-    b<case_b_ty>(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
+    b{case_b_ty}(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
   let case_a_ty = (a_size) => (a_word) =>
     Word(a_size) -> Cmp
-  a<case_a_ty>(case_a_we)(case_a_w0)(case_a_w1)(b)
+  a{case_a_ty}(case_a_we)(case_a_w0)(case_a_w1)(b)
 
-word_cmp: <size: Nat> -> Word(size) -> Word(size) -> Cmp
-  <size> => (a) => (b) =>
-  word_cmp_aux<size>(a)(b)(eql)
+word_cmp: {size: Nat} -> Word(size) -> Word(size) -> Cmp
+  {size} => (a) => (b) =>
+  word_cmp_aux{size}(a)(b)(eql)
 
-// a < b
-word_ltn: <size:Nat> -> Word(size) -> Word(size) -> Bool
-  <size> => (a) => (b) =>
-  word_cmp<size>(a)(b)<() => Bool>(true)(false)(false)
+// a { b
+word_ltn: {size:Nat} -> Word(size) -> Word(size) -> Bool
+  {size} => (a) => (b) =>
+  word_cmp{size}(a)(b){() => Bool}(true)(false)(false)
 
-// a <= b
-word_lte: <size:Nat> -> Word(size) -> Word(size) -> Bool
-  <size> => (a) => (b) =>
-  word_cmp<size>(a)(b)<() => Bool>(true)(true)(false)
+// a {= b
+word_lte: {size:Nat} -> Word(size) -> Word(size) -> Bool
+  {size} => (a) => (b) =>
+  word_cmp{size}(a)(b){() => Bool}(true)(true)(false)
 
 // a == b
-word_eql: <size:Nat> -> Word(size) -> Word(size) -> Bool
-  <size> => (a) => (b) =>
-  word_cmp<size>(a)(b)<() => Bool>(false)(true)(false)
+word_eql: {size:Nat} -> Word(size) -> Word(size) -> Bool
+  {size} => (a) => (b) =>
+  word_cmp{size}(a)(b){() => Bool}(false)(true)(false)
 
-// a >= b
-word_gte: <size:Nat> -> Word(size) -> Word(size) -> Bool
-  <size> => (a) => (b) =>
-  word_cmp<size>(a)(b)<() => Bool>(false)(true)(true)
+// a }= b
+word_gte: {size:Nat} -> Word(size) -> Word(size) -> Bool
+  {size} => (a) => (b) =>
+  word_cmp{size}(a)(b){() => Bool}(false)(true)(true)
 
-// a > b
-word_gtn: <size:Nat> -> Word(size) -> Word(size) -> Bool
-  <size> => (a) => (b) =>
-  word_cmp<size>(a)(b)<() => Bool>(false)(false)(true)
+// a } b
+word_gtn: {size:Nat} -> Word(size) -> Word(size) -> Bool
+  {size} => (a) => (b) =>
+  word_cmp{size}(a)(b){() => Bool}(false)(false)(true)
 
 // Uint32
 // ======
@@ -499,36 +498,36 @@ U32: Type
   Word(n32)
 
 u32_inc: U32 -> U32
-  word_inc<n32>
+  word_inc{n32}
 
 u32_add: U32 -> U32 -> U32
-  word_add<n32>
+  word_add{n32}
 
-// a < b
+// a { b
 u32_ltn: U32 -> U32 -> Bool
-  word_ltn<n32>
+  word_ltn{n32}
 
-// a <= b
+// a {= b
 u32_lte: U32 -> U32 -> Bool
-  word_lte<n32>
+  word_lte{n32}
 
 // a == b
 u32_eql: U32 -> U32 -> Bool
-  word_eql<n32>
+  word_eql{n32}
 
-// a >= b
+// a }= b
 u32_gte: U32 -> U32 -> Bool
-  word_gte<n32>
+  word_gte{n32}
 
-// a > b
+// a } b
 u32_gtn: U32 -> U32 -> Bool
-  word_gtn<n32>
+  word_gtn{n32}
 
 // Term
 // ====
 
 Term: Type
-  self<P: Term -> Type> ->
+  self{P: Term -> Type} ->
   (var:
     (hash: Bits) ->
     (indx: Nat) ->
@@ -576,41 +575,41 @@ Term: Type
 
 var: Nat -> Term
   (indx)=>
-  <> => (var) => () => () => () => () => () => () => () =>
+  {} => (var) => () => () => () => () => () => () => () =>
   var(be)(indx)
 
 ref: Bits -> Term
   (name)=>
-  <> => () => (ref) => () => () => () => () => () => () =>
+  {} => () => (ref) => () => () => () => () => () => () =>
   ref(be)(name)
 
 typ: Term
-  <> => () => () => (typ) => () => () => () => () => () =>
+  {} => () => () => (typ) => () => () => () => () => () =>
   typ(be)
 
 all: Bool -> Bits -> Bits -> Term -> Term -> Term
   (eras) => (self) => (name) => (bind) => (body) =>
-  <> => () => () => () => (all) => () => () => () => () =>
+  {} => () => () => () => (all) => () => () => () => () =>
   all(be)(eras)(self)(name)(bind)(body)
 
 lam: Bool -> Bits -> Term -> Term
   (eras) => (name) => (body) =>
-  <> => () => () => () => () => (lam) => () => () => () =>
+  {} => () => () => () => () => (lam) => () => () => () =>
   lam(be)(eras)(name)(body)
 
 app: Bool -> Term -> Term -> Term
   (eras) => (func) => (argm) =>
-  <> => () => () => () => () => () => (app) => () => () =>
+  {} => () => () => () => () => () => (app) => () => () =>
   app(be)(eras)(func)(argm)
 
 lit: Bits -> Term -> Term -> Term
   (name) => (expr) => (body) =>
-  <> => () => () => () => () => () => () => (lit) => () =>
+  {} => () => () => () => () => () => () => (lit) => () =>
   lit(be)(name)(expr)(body)
 
 ann: Bool -> Term -> Term -> Term
   (done) => (expr) => (type) =>
-  <> => () => () => () => () => () => () => () => (ann) =>
+  {} => () => () => () => () => () => () => () => (ann) =>
   ann(be)(done)(expr)(type)
 
 // Characters
@@ -620,19 +619,19 @@ Char: Type
 
 ascii: Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Char
   (a) => (b) => (c) => (d) => (e) => (f) => (g) => (h) =>
-  let ty = <size: Nat> -> Word(size) -> Word(succ(size))
-  let wA = a<()=>ty>(w0)(w1)
-  let wB = b<()=>ty>(w0)(w1)
-  let wC = c<()=>ty>(w0)(w1)
-  let wD = d<()=>ty>(w0)(w1)
-  let wE = e<()=>ty>(w0)(w1)
-  let wF = f<()=>ty>(w0)(w1)
-  let wG = g<()=>ty>(w0)(w1)
-  let wH = h<()=>ty>(w0)(w1)
-  wH<n31>(wG<n30>(wF<n29>(wE<n28>(wD<n27>(wC<n26>(wB<n25>(wA<n24>(
-  w0<n23>(w0<n22>(w0<n21>(w0<n20>(w0<n19>(w0<n18>(w0<n17>(w0<n16>(
-  w0<n15>(w0<n14>(w0<n13>(w0<n12>(w0<n11>(w0<n10>(w0<n9 >(w0<n8 >(
-  w0<n7 >(w0<n6 >(w0<n5 >(w0<n4 >(w0<n3 >(w0<n2 >(w0<n1 >(w0<n0 >(
+  let ty = {size: Nat} -> Word(size) -> Word(succ(size))
+  let wA = a{()=>ty}(w0)(w1)
+  let wB = b{()=>ty}(w0)(w1)
+  let wC = c{()=>ty}(w0)(w1)
+  let wD = d{()=>ty}(w0)(w1)
+  let wE = e{()=>ty}(w0)(w1)
+  let wF = f{()=>ty}(w0)(w1)
+  let wG = g{()=>ty}(w0)(w1)
+  let wH = h{()=>ty}(w0)(w1)
+  wH{n31}(wG{n30}(wF{n29}(wE{n28}(wD{n27}(wC{n26}(wB{n25}(wA{n24}(
+  w0{n23}(w0{n22}(w0{n21}(w0{n20}(w0{n19}(w0{n18}(w0{n17}(w0{n16}(
+  w0{n15}(w0{n14}(w0{n13}(w0{n12}(w0{n11}(w0{n10}(w0{n9 }(w0{n8 }(
+  w0{n7 }(w0{n6 }(w0{n5 }(w0{n4 }(w0{n3 }(w0{n2 }(w0{n1 }(w0{n0 }(
   we))))))))))))))))))))))))))))))))
 
 char_tab : Char
@@ -934,8 +933,8 @@ String : Type
 
 string_eql : String -> String -> Bool
   (a) => (b) =>
-  let eql_len = nat_eql(list_len<Char>(a))(list_len<Char>(b))
-  let eql_val = all_satisfy<Bool>((x)=>x)(zip_with<Char><Char><Bool>(u32_eql)(a)(b))
+  let eql_len = nat_eql(list_len{Char}(a))(list_len{Char}(b))
+  let eql_val = all_satisfy{Bool}((x)=>x)(zip_with{Char}{Char}{Bool}(u32_eql)(a)(b))
   and(eql_len)(eql_val)
 
 // Parsing
@@ -943,36 +942,36 @@ string_eql : String -> String -> Bool
 
 is_space: Char -> Bool
   (c) =>
-    let is_spc = word_eql<n32>(c)(char_space)
-    let is_tab = word_eql<n32>(c)(char_tab)
-    let is_lin = word_eql<n32>(c)(char_newline)
+    let is_spc = word_eql{n32}(c)(char_space)
+    let is_tab = word_eql{n32}(c)(char_tab)
+    let is_lin = word_eql{n32}(c)(char_newline)
     or(is_spc)(or(is_tab)(is_lin))
 
 is_name: Char -> Bool
   (c) =>
-    let is_num = and(word_gte<n32>(c)(char_0))(word_lte<n32>(c)(char_9))
-    let is_low = and(word_gte<n32>(c)(char_a))(word_lte<n32>(c)(char_z))
-    let is_upp = and(word_gte<n32>(c)(char_A))(word_lte<n32>(c)(char_Z))
-    let is_und = word_eql<n32>(c)(char_underscore)
+    let is_num = and(word_gte{n32}(c)(char_0))(word_lte{n32}(c)(char_9))
+    let is_low = and(word_gte{n32}(c)(char_a))(word_lte{n32}(c)(char_z))
+    let is_upp = and(word_gte{n32}(c)(char_A))(word_lte{n32}(c)(char_Z))
+    let is_und = word_eql{n32}(c)(char_underscore)
     or(is_num)(or(is_low)(or(is_upp)(is_und)))
 
-first_valid: <A: Type> -> List(Maybe(A)) -> Maybe(A)
-  <A> => (list) =>
-  let case_nil = none<A>
+first_valid: {A: Type} -> List(Maybe(A)) -> Maybe(A)
+  {A} => (list) =>
+  let case_nil = none{A}
   let case_ext = (head) => (tail) =>
-    let case_none = first_valid<A>(tail)
-    let case_some = (value) => some<A>(value)
-    head<()=>Maybe(A)>(case_none)(case_some)
-  list<()=>Maybe(A)>(case_nil)(case_ext)
+    let case_none = first_valid{A}(tail)
+    let case_some = (value) => some{A}(value)
+    head{()=>Maybe(A)}(case_none)(case_some)
+  list{()=>Maybe(A)}(case_nil)(case_ext)
 
 drop_while: (Char -> Bool) -> String -> String
   (cond) => (code) =>
-  let case_nil = nil<Char>
+  let case_nil = nil{Char}
   let case_ext = (head) => (tail) =>
     let case_t = drop_while(cond)(tail)
     let case_f = tail
-    cond(head)<()=>String>(case_t)(case_f)
-  code<()=>String>(case_nil)(case_ext)
+    cond(head){()=>String}(case_t)(case_f)
+  code{()=>String}(case_nil)(case_ext)
 
 drop_spaces: String -> String
   drop_while(is_space)
@@ -983,15 +982,15 @@ drop_comment: String -> String
   let code = drop_spaces(code)
   // Removes "// ... \n"
   let code = 
-    let fst2 = take<Char>(n2)(code)
-    let sla2 = ext<Char>(char_slash)(ext<Char>(char_slash)(nil<Char>))
+    let fst2 = take{Char}(n2)(code)
+    let sla2 = ext{Char}(char_slash)(ext{Char}(char_slash)(nil{Char}))
     let case_t =
-      let code = drop<Char>(n2)(code)
+      let code = drop{Char}(n2)(code)
       let code = drop_while((x) => not(u32_eql(char_newline)(x)))(code)
       code
     let case_f =
       code
-    string_eql(fst2)(sla2)<()=>String>(case_t)(case_f)
+    string_eql(fst2)(sla2){()=>String}(case_t)(case_f)
   code
 
 // TODO: remove many comments (not just one)
@@ -1001,44 +1000,44 @@ next: String -> String
 Parsed : (A: Type) -> Type
   (A) => Maybe(Pair(String)(A))
 
-parsed: <A: Type> -> String -> A -> Parsed(A)
-  <A> => (code) => (val) =>
-  some<Pair(String)(A)>(pair<String><A>(code)(val))
+parsed: {A: Type} -> String -> A -> Parsed(A)
+  {A} => (code) => (val) =>
+  some{Pair(String)(A)}(pair{String}{A}(code)(val))
 
-noparse: <A: Type> -> Parsed(A)
-  <A> => none<Pair(String)(A)>
+noparse: {A: Type} -> Parsed(A)
+  {A} => none{Pair(String)(A)}
 
 chain
-  : <A: Type> ->
-    <B: Type> ->
+  : {A: Type} ->
+    {B: Type} ->
     (x: Parsed(A)) ->
     (f: String -> A -> Parsed(B)) ->
     Parsed(B)
-  <A> => <B> => (x) => (f) =>
-  let case_none = noparse<B>
-  let case_some = (value) => value<()=>Parsed(B)>(f)
-  x<()=>Parsed(B)>(case_none)(case_some)
+  {A} => {B} => (x) => (f) =>
+  let case_none = noparse{B}
+  let case_some = (value) => value{()=>Parsed(B)}(f)
+  x{()=>Parsed(B)}(case_none)(case_some)
 
 parse_str: String -> String -> Parsed(String)
   (str) => (code) =>
-  let case_str_nil = parsed<String>(code)(str)
+  let case_str_nil = parsed{String}(code)(str)
   let case_str_ext = (str_head) => (str_tail) =>
-    let case_code_nil = noparse<String>
+    let case_code_nil = noparse{String}
     let case_code_ext = (code_head) => (code_tail) =>
       let case_t = parse_str(str_tail)(code_tail)
-      let case_f = noparse<String>
-      u32_eql(code_head)(str_head)<()=>Parsed(String)>(case_t)(case_f)
-    code<()=>Parsed(String)>(case_code_nil)(case_code_ext)
-  str<()=>Parsed(String)>(case_str_nil)(case_str_ext)
+      let case_f = noparse{String}
+      u32_eql(code_head)(str_head){()=>Parsed(String)}(case_t)(case_f)
+    code{()=>Parsed(String)}(case_code_nil)(case_code_ext)
+  str{()=>Parsed(String)}(case_str_nil)(case_str_ext)
 
 parse_one_aux: List(String) -> String -> Nat -> Maybe(Pair(String)(Nat))
   (strs) => (code) => (indx) =>
-  let case_nil = noparse<Nat>
+  let case_nil = noparse{Nat}
   let case_ext = (head) => (tail) =>
     let case_none = parse_one_aux(tail)(code)(succ(indx))
-    let case_some = (value) => value<()=>Parsed(Nat)>((code)=>()=>parsed<Nat>(code)(indx))
-    parse_str(head)(code)<()=>Maybe(Pair(String)(Nat))>(case_none)(case_some)
-  strs<()=>Parsed(Nat)>(case_nil)(case_ext)
+    let case_some = (value) => value{()=>Parsed(Nat)}((code)=>()=>parsed{Nat}(code)(indx))
+    parse_str(head)(code){()=>Maybe(Pair(String)(Nat))}(case_none)(case_some)
+  strs{()=>Parsed(Nat)}(case_nil)(case_ext)
 
 parse_one: List(String) -> String -> Maybe(Pair(String)(Nat))
   (strs) => (code) =>
@@ -1047,32 +1046,32 @@ parse_one: List(String) -> String -> Maybe(Pair(String)(Nat))
 parse_nam_aux: String -> Pair(String)(String)
   (code) =>
   let Ret = Pair(String)(String)
-  let ret = pair<String><String>
-  let case_nil = ret(code)(nil<Char>)
+  let ret = pair{String}{String}
+  let case_nil = ret(code)(nil{Char})
   let case_ext = (head) => (tail) =>
     let case_t =
-      let case_pair = (code) => (rest) => ret(code)(ext<Char>(head)(rest))
-      parse_nam_aux(tail)<()=>Ret>(case_pair)
-    let case_f = ret(code)(nil<Char>)
-    is_name(head)<()=>Ret>(case_t)(case_f)
-  code<()=>Ret>(case_nil)(case_ext)
+      let case_pair = (code) => (rest) => ret(code)(ext{Char}(head)(rest))
+      parse_nam_aux(tail){()=>Ret}(case_pair)
+    let case_f = ret(code)(nil{Char})
+    is_name(head){()=>Ret}(case_t)(case_f)
+  code{()=>Ret}(case_nil)(case_ext)
 
 parse_nam: String -> Bool -> Maybe(Pair(String)(String))
   (code) => (allow_empty) =>
   let case_pair = (code) => (name) =>
-    let case_t = parsed<String>(code)(name)
-    let case_f = noparse<String>
-    let valid = or(allow_empty)(not(is_empty<Char>(name)))
-    valid<() => Parsed(String)>(case_t)(case_f)
-  parse_nam_aux(code)<()=>Parsed(String)>(case_pair)
+    let case_t = parsed{String}(code)(name)
+    let case_f = noparse{String}
+    let valid = or(allow_empty)(not(is_empty{Char}(name)))
+    valid{() => Parsed(String)}(case_t)(case_f)
+  parse_nam_aux(code){()=>Parsed(String)}(case_pair)
 
 // Main
 // ====
 
 example_0: Word(n4)
-  let w0011 = w1<n3>(w1<n2>(w0<n1>(w0<n0>(we))))
-  let w0101 = w1<n3>(w0<n2>(w1<n1>(w0<n0>(we))))
-  word_add<n4>(w0011)(w0101) // 3 + 5 == 8
+  let w0011 = w1{n3}(w1{n2}(w0{n1}(w0{n0}(we))))
+  let w0101 = w1{n3}(w0{n2}(w1{n1}(w0{n0}(we))))
+  word_add{n4}(w0011)(w0101) // 3 + 5 == 8
 
 main : Bool
   nat_eql(n9)(n8)
