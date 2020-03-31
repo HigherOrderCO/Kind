@@ -102,7 +102,7 @@ add: Nat -> Nat -> Nat
   (n) => (m) =>
   let case_zero = m
   let case_succ = (a_pred) => succ(add(a_pred)(m))
-  n<() => Nat>(case_zero)(case_succ)
+  n{() => Nat}(case_zero)(case_succ)
 
 nat_cmp: Nat -> Nat -> Cmp
   (a) => (b) =>
@@ -376,6 +376,12 @@ concat : {A: Type} -> List(A) -> List(A) -> List(A)
   let case_cons = (head) => (tail) => cons{A}(head)(concat{A}(tail)(bs))
   as{() => List(A)}(case_nil)(case_cons)
 
+concatList : {A: Type} -> List(List(A)) -> List(A)
+ {A} => (as) =>
+ let case_nil = nil{A}
+ let case_cons = (head) => (tail) => concat{A}(head)(concatList{A}(tail))
+ as{() => List(A)}(case_nil)(case_cons)
+
 sing : {A : Type} -> (x : A) -> List(A)
   {A} => (x) => cons{A}(x)(nil{A})
 
@@ -537,11 +543,11 @@ u32_inc: U32 -> U32
 u32_add: U32 -> U32 -> U32
   word_add{n32}
 
-// a { b
+// a < b
 u32_ltn: U32 -> U32 -> Bool
   word_ltn{n32}
 
-// a {= b
+// a <= b
 u32_lte: U32 -> U32 -> Bool
   word_lte{n32}
 
@@ -549,11 +555,11 @@ u32_lte: U32 -> U32 -> Bool
 u32_eql: U32 -> U32 -> Bool
   word_eql{n32}
 
-// a }= b
+// a >= b
 u32_gte: U32 -> U32 -> Bool
   word_gte{n32}
 
-// a } b
+// a > b
 u32_gtn: U32 -> U32 -> Bool
   word_gtn{n32}
 
@@ -837,8 +843,8 @@ parsing
 
 LPAR: String sing{Char}(_lpar  )                           // "("
 RPAR: String sing{Char}(_rpar  )                           // ")"
-LSIG: String sing{Char}(_lt    )                           // "<"
-RSIG: String sing{Char}(_gt    )                           // ">"
+LSIG: String sing{Char}(_lbrace)                           // "{"
+RSIG: String sing{Char}(_rbrace)                           // "}"
 COLO: String sing{Char}(_colon )                           // ":"
 COLS: String cons{Char}(_colon )(sing{Char}(_colon))       // "::"
 ARR0: String cons{Char}(_dash  )(sing{Char}(_gt))          // "->"
@@ -850,6 +856,7 @@ TYPS: String                                               // Type
   cons{Char}(_T)( cons{Char}(_y)( cons{Char}(_p)( sing{Char}(_e))))
 LETS: String                                               // "let "
   cons{Char}(_l)(cons{Char}(_e)(cons{Char}(_t)(sing{Char}(_space))))
+SPAC : String sing{Char}(_space)                           // " "
 
 is_space: Char -> Bool
   (c) =>
@@ -958,15 +965,49 @@ parse_nam: String -> Bool -> Maybe(Pair(String)(String))
 // Stringify
 // =========
 
-// stringify_trm_go : List(String) -> Term -> String
-//   (vs) => (t) => sing{Char}(char_u)
-//   let go  = stringify_trm.go
-//   let cat = concat{String}
-//   let era = (e) => (str) => e{() => String}(cat("{",cat(str,"}")))(cat("(",cat(str,")")))
-//   t({() => String})("%var")("%ref")("%typ")("%all")("%lam")("%app")("%lit")("%ann")
-//
-// stringify_trm : Term -> String
-//   (t) => stringify_trm_go(nil{String}, t)
+nest : Bool -> String -> String
+  (b) => (str) =>
+  let cat = concat{Char}
+  let _true  = cat(LSIG)(cat(str)(RSIG))
+  let _false = cat(LPAR)(cat(str)(RPAR))
+  b{() => String}(_true)(_false)
+
+ERR : String
+  cons{Char}(_hash)(cons{Char}(_E)(cons{Char}(_R)(sing{Char}(_R))))
+
+stringify_term_go : List(String) -> Term -> String
+  (vs) => (term) =>
+  let go   = stringify_trm_go
+  let cat  = concat{Char}
+  let cats = concatList{Char}
+  let ext  = cons{String}
+  let cns  = cons{Char}
+  let sng  = sing{String}
+  let _var = () => (indx) =>
+    let res = find{String}(vs)(() => (i) => nat_eql(indx)(i))
+    res{() => String}(ERR)((x) => fst{String}{Nat}(x))
+  let _ref = () => (nam) => nam
+  let _typ = () => TYPS
+  let _all = () => (e) => (s) => (n) => (h) => (b) =>
+   let head = nest(e)(cats(ext(n)(ext(SPAC)(ext(COLO)(ext(SPAC)(sng(go(vs)(h))))))))
+   let body = sng(go(ext(n)(vs))(b))
+   cats(ext(s)(ext(head)(ext(SPAC)(ext(ARR0)(ext(SPAC)(body))))))
+  let _lam = () => (e) => (n) => (b) =>
+   let head = nest(e)(n)
+   let body = sng(go(ext(n)(vs))(b))
+   cats(ext(head)(ext(SPAC)(ext(ARR1)(ext(SPAC)(body)))))
+  let _app = () => (e) => (f) => (a) => 
+    let func = nest(false)(go(vs)(f))
+    let argm = nest(e)(go(vs)(a))
+    cats(ext(func)(sng(argm)))
+  let _let = () => (n) => (x) => (b) => 
+    cats(ext(LETS)(ext(n)(ext(EQLS)(ext(SPAC)(sng(go(ext(n)(vs))(b)))))))
+  let _ann = () => () => (x) => (t) =>
+    cats(ext(go(vs)(x))(ext(SPAC)(ext(COLS)(ext(SPAC)(sng(go(vs)(t)))))))
+  term{() => String}(_var)(_ref)(_typ)(_all)(_lam)(_app)(_let)(_ann)
+
+stringify_term : Term -> String
+  (t) => stringify_term_go(nil{String})(t)
 
 parse_par: String -> List(String) -> Parsed(Term)
   (code) => (vars) =>
@@ -1071,7 +1112,7 @@ shift: Term -> Nat -> Nat -> Term
   let case_var = (hash) => (indx) =>
     let case_t = var(indx)
     let case_f = var(add(inc)(indx))
-    nat_ltn(indx)(dep)<() => Term>(case_t)(case_f)
+    nat_ltn(indx)(dep){() => Term}(case_t)(case_f)
   let case_ref = (hash) => (name) =>
     ref(name)
   let case_typ = (hash) =>
@@ -1103,7 +1144,7 @@ shift: Term -> Nat -> Nat -> Term
     let expr = shift(expr)(inc)(dep)
     let type = shift(expr)(inc)(dep)
     ann(done)(expr)(type)
-  term<()=>Term>(case_var)(case_ref)(case_typ)(case_all)(case_lam)(case_app)(case_lit)(case_ann)
+  term{()=>Term}(case_var)(case_ref)(case_typ)(case_all)(case_lam)(case_app)(case_lit)(case_ann)
 
 subst: Term -> Term -> Nat -> Term
   (term) => (val) => (dep) =>
@@ -1111,7 +1152,7 @@ subst: Term -> Term -> Nat -> Term
     let case_ltn = var(indx)
     let case_eql = val
     let case_gtn = var(pred(indx))
-    nat_cmp(indx)(dep)<() => Term>(case_ltn)(case_eql)(case_gtn)
+    nat_cmp(indx)(dep){() => Term}(case_ltn)(case_eql)(case_gtn)
   let case_ref = (hash) => (name) =>
     ref(name)
   let case_typ = (hash) =>
@@ -1143,7 +1184,7 @@ subst: Term -> Term -> Nat -> Term
     let expr = subst(expr)(val)(dep)
     let type = subst(expr)(val)(dep)
     ann(done)(expr)(type)
-  term<()=>Term>(case_var)(case_ref)(case_typ)(case_all)(case_lam)(case_app)(case_lit)(case_ann)
+  term{()=>Term}(case_var)(case_ref)(case_typ)(case_all)(case_lam)(case_app)(case_lit)(case_ann)
 
 // Main
 // ====
