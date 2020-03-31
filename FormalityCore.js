@@ -163,15 +163,6 @@ function parse_one(ch0, ch1, code, indx) {
   }
 };
 
-// Parses an optional character
-function parse_opt(chr, code, indx) {
-  if (code[indx] === chr) {
-    return [indx + 1, true];
-  } else {
-    return [indx, false];
-  }
-};
-
 // Parses a valid name, non-empty
 function parse_nam(code, indx, size = 0) {
   if (indx < code.length && is_name(code[indx])) {
@@ -222,7 +213,6 @@ function parse_let(code, indx, vars) {
   var [indx, name] = parse_nam(code, next(code, indx));
   var [indx, skip] = parse_str("=", code, next(code, indx));
   var [indx, expr] = parse_trm(code, indx, vars);
-  var [indx, skip] = parse_opt(";", code, next(code, indx));
   var [indx, body] = parse_trm(code, indx, Ext(name, vars));
   return [indx, Let(name, expr, body)];
 };
@@ -256,10 +246,9 @@ function parse_app(code, indx, func, vars) {
 
 // Parses a non-dependent function type, `<term> -> <term>`
 function parse_arr(code, indx, bind, vars) {
-  var [indx, eras] = parse_opt(";", code, next(code, indx));
   var [indx, skip] = parse_str("->", code, next(code, indx));
   var [indx, body] = parse_trm(code, indx, Ext("", Ext("", vars)));
-  return [indx, All(eras, "", "", shift(bind,1,0), body)];
+  return [indx, All(false, "", "", shift(bind,1,0), body)];
 };
 
 // Parses an annotation, `<term> :: <term>`
@@ -1025,7 +1014,6 @@ module.exports = {
   drop_comment,
   next,
   parse_str,
-  parse_opt,
   parse_nam,
   parse_par,
   parse_all,
