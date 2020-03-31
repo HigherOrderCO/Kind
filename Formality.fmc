@@ -99,17 +99,32 @@ double: Nat -> Nat
   let case_succ = (pred) => succ(succ(double(pred)))
   n<() => Nat>(case_zero)(case_succ)
 
-nat_eql: Nat -> Nat -> Bool
+nat_cmp: Nat -> Nat -> Cmp
   (a) => (b) =>
   let case_a_zero =
-    let case_b_zero = true
-    let case_b_succ = (b_pred) => false
-    b<()=>Bool>(case_b_zero)(case_b_succ)
+    let case_b_zero = eql
+    let case_b_succ = (b_pred) => ltn
+    b<()=>Cmp>(case_b_zero)(case_b_succ)
   let case_a_succ = (a_pred) =>
-    let case_b_zero = false
-    let case_b_succ = (b_pred) => nat_eql(a_pred)(b_pred)
-    b<()=>Bool>(case_b_zero)(case_b_succ)
-  a<()=>Bool>(case_a_zero)(case_a_succ)
+    let case_b_zero = gtn
+    let case_b_succ = (b_pred) => nat_cmp(a_pred)(b_pred)
+    b<()=>Cmp>(case_b_zero)(case_b_succ)
+  a<()=>Cmp>(case_a_zero)(case_a_succ)
+
+nat_ltn: Nat -> Nat -> Bool
+  (a) => (b) => nat_cmp(a)(b)<()=>Bool>(true)(false)(false)
+
+nat_lte: Nat -> Nat -> Bool
+  (a) => (b) => nat_cmp(a)(b)<()=>Bool>(true)(true)(false)
+
+nat_eql: Nat -> Nat -> Bool
+  (a) => (b) => nat_cmp(a)(b)<()=>Bool>(false)(true)(false)
+
+nat_gte: Nat -> Nat -> Bool
+  (a) => (b) => nat_cmp(a)(b)<()=>Bool>(false)(true)(true)
+
+nat_gtn: Nat -> Nat -> Bool
+  (a) => (b) => nat_cmp(a)(b)<()=>Bool>(false)(false)(true)
 
 n0: Nat
   zero
@@ -289,6 +304,12 @@ drop: <A: Type> -> Nat -> List(A) -> List(A)
     let case_succ = (pred) => drop<A>(pred)(tail)
     n<()=>List(A)>(case_zero)(case_succ)
   list<()=>List(A)>(case_nil)(case_ext)
+
+is_empty: <A: Type> -> List(A) -> Bool
+  <A> => (list) =>
+  let case_nil = true
+  let case_ext = (head) => (tail) => false
+  list<() => Bool>(case_nil)(case_ext)
 
 zip_with: <A: Type> -> <B: Type> -> <C: Type> -> (A -> B -> C) -> List(A) -> List(B) -> List(C)
   <A> => <B> => <C> => (fn) => (as) => (bs) =>
@@ -989,6 +1010,44 @@ parse_str: String -> String -> Maybe(Pair(String)(String))
       u32_eql(code_head)(str_head)<()=>Maybe(Pair(String)(String))>(case_t)(case_f)
     code<()=>Maybe(Pair(String)(String))>(case_code_nil)(case_code_ext)
   str<()=>Maybe(Pair(String)(String))>(case_str_nil)(case_str_ext)
+
+parse_one_aux: List(String) -> String -> Nat -> Maybe(Pair(String)(Nat))
+  (strs) => (code) => (indx) =>
+  let case_nil = none<Pair(String)(Nat)>
+  let case_ext = (head) => (tail) =>
+    let case_none = parse_one_aux(tail)(code)(succ(indx))
+    let case_some = (value) =>
+      let case_pair = (code) => (str) =>
+        some<Pair(String)(Nat)>(pair<String><Nat>(code)(indx))
+      value<()=>Maybe(Pair(String)(Nat))>(case_pair)
+    parse_str(head)(code)<()=>Maybe(Pair(String)(Nat))>(case_none)(case_some)
+  strs<()=>Maybe(Pair(String)(Nat))>(case_nil)(case_ext)
+
+parse_one: List(String) -> String -> Maybe(Pair(String)(Nat))
+  (strs) => (code) =>
+  parse_one_aux(strs)(code)(zero)
+
+parse_nam_aux: String -> Pair(String)(String)
+  (code) =>
+  let case_nil = pair<String><String>(code)(nil<Char>)
+  let case_ext = (head) => (tail) =>
+    let case_t =
+      let case_pair = (code) => (rest) =>
+        pair<String><String>(code)(ext<Char>(head)(rest))
+      parse_nam_aux(tail)<()=>Pair(String)(String)>(case_pair)
+    let case_f =
+      pair<String><String>(code)(nil<Char>)
+    is_name(head)<()=>Pair(String)(String)>(case_t)(case_f)
+  code<()=>Pair(String)(String)>(case_nil)(case_ext)
+
+parse_nam: String -> Bool -> Maybe(Pair(String)(String))
+  (code) => (allow_empty) =>
+  let case_pair = (code) => (name) =>
+    let case_t = some<Pair(String)(String)>(pair<String><String>(code)(name))
+    let case_f = none<Pair(String)(String)>
+    let valid = or(allow_empty)(not(is_empty<Char>(name)))
+    valid<() => Maybe(Pair(String)(String))>(case_t)(case_f)
+  parse_nam_aux(code)<() => Maybe(Pair(String)(String))>(case_pair)
 
 // Main
 // ====
