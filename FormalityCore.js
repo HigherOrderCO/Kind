@@ -878,10 +878,12 @@ function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
           var term_typ = subst(term_typ, shift(term.func, 1, 0), 1);
           var term_typ = subst(term_typ, shift(term.argm, 0, 0), 0);
           var term_typ = reduce(term_typ, module);
-          if (term.eras !== func_typ.eras) throw "Mismatched erasure.";
+          if (term.eras !== func_typ.eras) {
+            throw "Mismatched erasure: " + stringify_trm(term, nam);
+          };
           return term_typ;
         default:
-          throw "Non-function application.";
+          throw "Non-function application: " + stringify_trm(term, nam);
       };
     case "Let":
       var term_val = subst(term.body, term.expr, 0);
@@ -907,7 +909,9 @@ function typecheck(term, type, module, ctx = Nil(), nam = Nil()) {
   switch (term.ctor) {
     case "Lam":
       if (typv.ctor === "All") {
-        if (term.eras !== typv.eras) throw "Mismatched erasure.";
+        if (term.eras !== typv.eras) {
+          throw "Mismatched erasure: " + stringify_trm(term, nam);
+        };
         var self_typ = Ann(true, typv, Typ());
         var bind_typ = subst(typv.bind, term, 0);
         var body_typ = subst(typv.body, shift(term, 1, 0), 1);
@@ -915,7 +919,7 @@ function typecheck(term, type, module, ctx = Nil(), nam = Nil()) {
         var body_ctx = Ext(bind_typ, ctx);
         typecheck(term.body, body_typ, module, body_ctx, body_nam);
       } else {
-        throw "Lambda has a non-function type.";
+        throw "Lambda has a non-function type: " + stringify_trm(term, nam);
       }
       break;
     case "Ann":
