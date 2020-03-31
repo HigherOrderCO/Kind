@@ -829,19 +829,21 @@ parsing
   let case_some = (value) => value{() => Parsed(B)}(f)
   x{() => Parsed(B)}(case_none)(case_some)
 
-LPAR: String sing{Char}(_lpar ) // "("
-RPAR: String sing{Char}(_rpar ) // ")"
-LSIG: String sing{Char}(_lt   ) // "<"
-RSIG: String sing{Char}(_gt   ) // ">"
-COLO: String sing{Char}(_colon) // ":"
-COLS: String cons{Char}(_colon)(sing{Char}(_colon)(nil{Char})) // "::"
-ARR0: String cons{Char}(_dash )(sing{Char}(_gt))               // "->"
-ARR1: String cons{Char}(_hyphen)(sing{Char}(_equal))           // "=>"
-LETS: String cons{Char}(_l)( cons{Char}(_e)( cons{Char}(_t)( sing{Char}(_space)) // "let "
-EQLS: String sing{Char}(_equals) // "="
-TYPS: String cons{Char}(_T)( cons{Char}(_y)( cons{Char}(_p)( sing{Char}(_e)))) // Type
+LPAR: String sing{Char}(_lpar  )                           // "("
+RPAR: String sing{Char}(_rpar  )                           // ")"
+LSIG: String sing{Char}(_lt    )                           // "<"
+RSIG: String sing{Char}(_gt    )                           // ">"
+COLO: String sing{Char}(_colon )                           // ":"
+COLS: String cons{Char}(_colon )(sing{Char}(_colon))       // "::"
+ARR0: String cons{Char}(_dash  )(sing{Char}(_gt))          // "->"
+ARR1: String cons{Char}(_hyphen)(sing{Char}(_equal))       // "=>"
+EQLS: String sing{Char}(_equals)                           // "="
 OPEN: List(String) cons{String}(LPAR)( sing{String}(LSIG)) // ["(","{"]
 CLOS: List(String) cons{String}(LPAR)( sing{String}(LSIG)) // [")","}"]
+TYPS: String                                               // Type
+  cons{Char}(_T)( cons{Char}(_y)( cons{Char}(_p)( sing{Char}(_e))))
+LETS: String                                               // "let "
+  cons{Char}(_l)(cons{Char}(_e)(cons{Char}(_t)(sing{Char}(_space))))
 
 is_space: Char -> Bool
   (c) =>
