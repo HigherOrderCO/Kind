@@ -264,7 +264,6 @@ function parse_trm(code, indx = 0, vars = Nil()) {
   var base_parse = first_valid([
     () => parse_all(code, indx, vars),
     () => parse_lam(code, indx, vars),
-    () => parse_fun(code, indx, vars),
     () => parse_let(code, indx, vars),
     () => parse_par(code, indx, vars),
     () => parse_typ(code, indx, vars),
