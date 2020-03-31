@@ -242,6 +242,14 @@ pair: <A: Type> -> <B: Type> -> A -> B -> Pair(A)(B)
   <> => (pair) =>
   pair(a)(b)
 
+fst: <A: Type> -> <B: Type> -> Pair(A)(B) -> A
+  <A> => <B> => (pair) =>
+  pair<() => A>((a) => (b) => a)
+
+snd: <A: Type> -> <B: Type> -> Pair(A)(B) -> B
+  <A> => <B> => (pair) =>
+  pair<() => B>((a) => (b) => b)
+
 // Maybe
 // =====
 
@@ -278,14 +286,18 @@ ext: <A: Type> -> (:A) -> (:List(A)) -> List(A)
   <A> => (head) => (tail) =>
   <> => () => (ext) => ext(head)(tail)
 
-find: <A: Type> -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
+find_aux: <A: Type> -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
   <A> => (list) => (cond) => (indx) =>
   let case_nil = none<Pair(A)(Nat)>
   let case_ext = (head) => (tail) =>
     let case_true  = some<Pair(A)(Nat)>(pair<A><Nat>(head)(indx))
-    let case_false = find<A>(tail)(cond)(succ(indx))
+    let case_false = find_aux<A>(tail)(cond)(succ(indx))
     cond(head)(indx)<() => Maybe(Pair(A)(Nat))>(case_true)(case_false)
   list<() => Maybe(Pair(A)(Nat))>(case_nil)(case_ext)
+
+find: <A: Type> -> List(A) -> (A -> Nat -> Bool) -> Maybe(Pair(A)(Nat))
+  <A> => (list) => (cond) =>
+  find_aux<A>(list)(cond)(zero)
 
 take: <A: Type> -> Nat -> List(A) -> List(A)
   <A> => (n) => (list) =>
@@ -498,6 +510,13 @@ word_gtn: <size:Nat> -> Word(size) -> Word(size) -> Bool
 U32: Type
   Word(n32)
 
+u32_0: U32
+  w0<n31>(w0<n30>(w0<n29>(w0<n28>(w0<n27>(w0<n26>(w0<n25>(w0<n24>(
+  w0<n23>(w0<n22>(w0<n21>(w0<n20>(w0<n19>(w0<n18>(w0<n17>(w0<n16>(
+  w0<n15>(w0<n14>(w0<n13>(w0<n12>(w0<n11>(w0<n10>(w0<n9 >(w0<n8 >(
+  w0<n7 >(w0<n6 >(w0<n5 >(w0<n4 >(w0<n3 >(w0<n2 >(w0<n1 >(w0<n0 >(
+  we))))))))))))))))))))))))))))))))
+
 u32_inc: U32 -> U32
   word_inc<n32>
 
@@ -524,96 +543,8 @@ u32_gte: U32 -> U32 -> Bool
 u32_gtn: U32 -> U32 -> Bool
   word_gtn<n32>
 
-// Term
+// Char
 // ====
-
-Term: Type
-  self<P: Term -> Type> ->
-  (var:
-    (hash: Bits) ->
-    (indx: Nat) ->
-    P(var(indx))) ->
-  (ref:
-    (hash: Bits) ->
-    (name: Bits) ->
-    P(ref(name))) ->
-  (typ:
-    (hash: Bits) ->
-    P(typ)) ->
-  (all:
-    (hash: Bits) ->
-    (eras: Bool) ->
-    (self: Bits) ->
-    (name: Bits) ->
-    (bind: Term) ->
-    (body: Term) ->
-    P(all(eras)(self)(name)(bind)(body))) ->
-  (lam:
-    (hash: Bits) ->
-    (eras: Bool) ->
-    (name: Bits) ->
-    (body: Term) ->
-    P(lam(eras)(name)(body))) ->
-  (app:
-    (hash: Bits) ->
-    (eras: Bool) ->
-    (func: Term) ->
-    (argm: Term) ->
-    P(app(eras)(func)(argm))) ->
-  (lit:
-    (hash: Bits) ->
-    (name: Bits) ->
-    (expr: Term) ->
-    (body: Term) ->
-    P(lit(name)(expr)(body))) ->
-  (ann:
-    (hash: Bits) ->
-    (done: Bool) ->
-    (expr: Term) ->
-    (type: Term) ->
-    P(ann(done)(expr)(type))) ->
-  P(self)
-
-var: Nat -> Term
-  (indx)=>
-  <> => (var) => () => () => () => () => () => () => () =>
-  var(be)(indx)
-
-ref: Bits -> Term
-  (name)=>
-  <> => () => (ref) => () => () => () => () => () => () =>
-  ref(be)(name)
-
-typ: Term
-  <> => () => () => (typ) => () => () => () => () => () =>
-  typ(be)
-
-all: Bool -> Bits -> Bits -> Term -> Term -> Term
-  (eras) => (self) => (name) => (bind) => (body) =>
-  <> => () => () => () => (all) => () => () => () => () =>
-  all(be)(eras)(self)(name)(bind)(body)
-
-lam: Bool -> Bits -> Term -> Term
-  (eras) => (name) => (body) =>
-  <> => () => () => () => () => (lam) => () => () => () =>
-  lam(be)(eras)(name)(body)
-
-app: Bool -> Term -> Term -> Term
-  (eras) => (func) => (argm) =>
-  <> => () => () => () => () => () => (app) => () => () =>
-  app(be)(eras)(func)(argm)
-
-lit: Bits -> Term -> Term -> Term
-  (name) => (expr) => (body) =>
-  <> => () => () => () => () => () => () => (lit) => () =>
-  lit(be)(name)(expr)(body)
-
-ann: Bool -> Term -> Term -> Term
-  (done) => (expr) => (type) =>
-  <> => () => () => () => () => () => () => () => (ann) =>
-  ann(be)(done)(expr)(type)
-
-// Characters
 
 Char: Type
   Word(n32)
@@ -728,7 +659,7 @@ char_semicolon: Char
 char_less_than: Char
   ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t0)
 
-char_equals: Char
+char_equal: Char
   ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t1)
 
 char_greater_than: Char
@@ -938,6 +869,95 @@ string_eql : String -> String -> Bool
   let eql_val = all_satisfy<Bool>((x)=>x)(zip_with<Char><Char><Bool>(u32_eql)(a)(b))
   and(eql_len)(eql_val)
 
+// Term
+// ====
+
+Term: Type
+  self<P: Term -> Type> ->
+  (var:
+    (hash: U32) ->
+    (indx: Nat) ->
+    P(var(indx))) ->
+  (ref:
+    (hash: U32) ->
+    (name: String) ->
+    P(ref(name))) ->
+  (typ:
+    (hash: U32) ->
+    P(typ)) ->
+  (all:
+    (hash: U32) ->
+    (eras: Bool) ->
+    (self: String) ->
+    (name: String) ->
+    (bind: Term) ->
+    (body: Term) ->
+    P(all(eras)(self)(name)(bind)(body))) ->
+  (lam:
+    (hash: U32) ->
+    (eras: Bool) ->
+    (name: String) ->
+    (body: Term) ->
+    P(lam(eras)(name)(body))) ->
+  (app:
+    (hash: U32) ->
+    (eras: Bool) ->
+    (func: Term) ->
+    (argm: Term) ->
+    P(app(eras)(func)(argm))) ->
+  (lit:
+    (hash: U32) ->
+    (name: String) ->
+    (expr: Term) ->
+    (body: Term) ->
+    P(lit(name)(expr)(body))) ->
+  (ann:
+    (hash: U32) ->
+    (done: Bool) ->
+    (expr: Term) ->
+    (type: Term) ->
+    P(ann(done)(expr)(type))) ->
+  P(self)
+
+var: Nat -> Term
+  (indx)=>
+  <> => (var) => () => () => () => () => () => () => () =>
+  var(u32_0)(indx)
+
+ref: String -> Term
+  (name)=>
+  <> => () => (ref) => () => () => () => () => () => () =>
+  ref(u32_0)(name)
+
+typ: Term
+  <> => () => () => (typ) => () => () => () => () => () =>
+  typ(u32_0)
+
+all: Bool -> String -> String -> Term -> Term -> Term
+  (eras) => (self) => (name) => (bind) => (body) =>
+  <> => () => () => () => (all) => () => () => () => () =>
+  all(u32_0)(eras)(self)(name)(bind)(body)
+
+lam: Bool -> String -> Term -> Term
+  (eras) => (name) => (body) =>
+  <> => () => () => () => () => (lam) => () => () => () =>
+  lam(u32_0)(eras)(name)(body)
+
+app: Bool -> Term -> Term -> Term
+  (eras) => (func) => (argm) =>
+  <> => () => () => () => () => () => (app) => () => () =>
+  app(u32_0)(eras)(func)(argm)
+
+lit: String -> Term -> Term -> Term
+  (name) => (expr) => (body) =>
+  <> => () => () => () => () => () => () => (lit) => () =>
+  lit(u32_0)(name)(expr)(body)
+
+ann: Bool -> Term -> Term -> Term
+  (done) => (expr) => (type) =>
+  <> => () => () => () => () => () => () => () => (ann) =>
+  ann(u32_0)(done)(expr)(type)
+
 // Parsing
 // =======
 
@@ -1008,7 +1028,7 @@ parsed: <A: Type> -> String -> A -> Parsed(A)
 noparse: <A: Type> -> Parsed(A)
   <A> => none<Pair(String)(A)>
 
-chain
+parsing
   : <A: Type> ->
     <B: Type> ->
     (x: Parsed(A)) ->
@@ -1020,29 +1040,29 @@ chain
   x<()=>Parsed(B)>(case_none)(case_some)
 
 parse_str: String -> String -> Parsed(String)
-  (str) => (code) =>
+  (code) => (str) =>
   let case_str_nil = parsed<String>(code)(str)
   let case_str_ext = (str_head) => (str_tail) =>
     let case_code_nil = noparse<String>
     let case_code_ext = (code_head) => (code_tail) =>
-      let case_t = parse_str(str_tail)(code_tail)
+      let case_t = parse_str(code_tail)(str_tail)
       let case_f = noparse<String>
       u32_eql(code_head)(str_head)<()=>Parsed(String)>(case_t)(case_f)
     code<()=>Parsed(String)>(case_code_nil)(case_code_ext)
   str<()=>Parsed(String)>(case_str_nil)(case_str_ext)
 
-parse_one_aux: List(String) -> String -> Nat -> Maybe(Pair(String)(Nat))
-  (strs) => (code) => (indx) =>
+parse_one_aux: String -> List(String) -> Nat -> Maybe(Pair(String)(Nat))
+  (code) => (strs) => (indx) =>
   let case_nil = noparse<Nat>
   let case_ext = (head) => (tail) =>
-    let case_none = parse_one_aux(tail)(code)(succ(indx))
+    let case_none = parse_one_aux(code)(tail)(succ(indx))
     let case_some = (value) => value<()=>Parsed(Nat)>((code)=>()=>parsed<Nat>(code)(indx))
-    parse_str(head)(code)<()=>Maybe(Pair(String)(Nat))>(case_none)(case_some)
+    parse_str(code)(head)<()=>Maybe(Pair(String)(Nat))>(case_none)(case_some)
   strs<()=>Parsed(Nat)>(case_nil)(case_ext)
 
-parse_one: List(String) -> String -> Maybe(Pair(String)(Nat))
-  (strs) => (code) =>
-  parse_one_aux(strs)(code)(zero)
+parse_one: String -> List(String) -> Maybe(Pair(String)(Nat))
+  (code) => (strs) =>
+  parse_one_aux(code)(strs)(zero)
 
 parse_nam_aux: String -> Pair(String)(String)
   (code) =>
@@ -1065,6 +1085,80 @@ parse_nam: String -> Bool -> Maybe(Pair(String)(String))
     let valid = or(allow_empty)(not(is_empty<Char>(name)))
     valid<() => Parsed(String)>(case_t)(case_f)
   parse_nam_aux(code)<()=>Parsed(String)>(case_pair)
+
+parse_par: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  let lpar = ext<Char>(char_left_parens)(nil<Char>) // "("
+  let rpar = ext<Char>(char_right_parens)(nil<Char>) // ")"
+  parsing<String><Term>(parse_str(next(code))(lpar))((code) => (skip) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(vars))((code) => (term) =>
+  parsing<String><Term>(parse_str(next(code))(rpar))((code) => (skip) =>
+  parsed<Term>(code)(term))))
+
+parse_all: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  let lpar = ext<Char>(char_left_parens)(nil<Char>) // "("
+  let rpar = ext<Char>(char_right_parens)(nil<Char>) // ")"
+  let lsig = ext<Char>(char_less_than)(nil<Char>) // "<"
+  let rsig = ext<Char>(char_greater_than)(nil<Char>) // ">"
+  let lprs = ext<String>(lpar)(ext<String>(lsig)(nil<String>)) // ["(","<"]
+  let rprs = ext<String>(lpar)(ext<String>(lsig)(nil<String>)) // [")",">"]
+  let colo = ext<Char>(char_colon)(nil<Char>) // ":"
+  let arro = ext<Char>(char_hyphen)(ext<Char>(char_greater_than)(nil<Char>)) // "->"
+  parsing<String><Term>(parse_nam(next(code))(true))((code) => (self) =>
+  parsing<Nat   ><Term>(parse_one(     code )(lprs))((code) => (eras) =>
+  parsing<String><Term>(parse_nam(next(code))(true))((code) => (name) =>
+  parsing<String><Term>(parse_str(next(code))(colo))((code) => (skip) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(ext<String>(self)(vars)))((code) => (bind) =>
+  parsing<Nat   ><Term>(parse_one(next(code))(rprs))((code) => (skip) =>
+  parsing<String><Term>(parse_str(next(code))(arro))((code) => (skip) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(ext<String>(name)(ext<String>(self)(vars))))((code) => (body) =>
+  parsed<Term>(code)(all(nat_eql(eras)(n1))(self)(name)(bind)(body))))))))))
+
+parse_lam: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  let lpar = ext<Char>(char_left_parens)(nil<Char>) // "("
+  let rpar = ext<Char>(char_right_parens)(nil<Char>) // ")"
+  let lsig = ext<Char>(char_less_than)(nil<Char>) // "<"
+  let rsig = ext<Char>(char_greater_than)(nil<Char>) // ">"
+  let lprs = ext<String>(lpar)(ext<String>(lsig)(nil<String>)) // ["(","<"]
+  let rprs = ext<String>(lpar)(ext<String>(lsig)(nil<String>)) // [")",">"]
+  let arro = ext<Char>(char_hyphen)(ext<Char>(char_equal)(nil<Char>)) // "=>"
+  parsing<Nat   ><Term>(parse_one(next(code))(lprs))((code) => (eras) =>
+  parsing<String><Term>(parse_nam(next(code))(true))((code) => (name) =>
+  parsing<Nat   ><Term>(parse_one(next(code))(rprs))((code) => (skip) =>
+  parsing<String><Term>(parse_str(next(code))(arro))((code) => (skip) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(ext<String>(name)(vars)))((code) => (body) =>
+  parsed<Term>(code)(lam(nat_eql(eras)(n1))(name)(body)))))))
+
+parse_let: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  let lets = ext<Char>(char_l)(ext<Char>(char_e)(ext<Char>(char_t)(ext<Char>(char_space)(nil<Char>)))) // "let "
+  let eqls = ext<Char>(char_equal)(nil<Char>) // "="
+  parsing<String><Term>(parse_str(next(code))(lets))((code) => (skip) =>
+  parsing<String><Term>(parse_nam(next(code))(false))((code) => (name) =>
+  parsing<String><Term>(parse_str(next(code))(eqls))((code) => (skip) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(vars))((code) => (expr) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(ext<String>(name)(vars)))((code) => (body) =>
+  parsed<Term>(code)(lit(name)(expr)(body)))))))
+
+parse_typ: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  let typs = ext<Char>(char_T)(ext<Char>(char_y)(ext<Char>(char_p)(ext<Char>(char_e)(nil<Char>)))) // "Type"
+  parsing<String><Term>(parse_str(next(code))(typs))((code) => (skip) =>
+  parsed<Term>(code)(typ))
+
+parse_var: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  parsing<String><Term>(parse_nam(next(code))(false))((code) => (name) =>
+  let got = find<String>(vars)((x) => (i) => string_eql(x)(name))
+  let case_none = parsed<Term>(code)(ref(name))
+  let case_some = (value) => parsed<Term>(code)(var(snd<String><Nat>(value)))
+  got<() => Parsed(Term)>(case_none)(case_some))
+
+parse_trm: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  Type // TODO
 
 // Main
 // ====
