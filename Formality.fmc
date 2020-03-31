@@ -1,7 +1,7 @@
 // Bool
 // ====
 
-Bool : Type
+Bool: Type
   self<P: Bool -> Type> ->
   P(true) ->
   P(false) ->
@@ -16,6 +16,12 @@ false: Bool
 case_bool : (b: Bool) -> <P: Bool -> Type> -> P(true) -> P(false) -> P(b)
   (b) => <P> => (t) => (f) =>
   b<P>(t)(f)
+
+not: Bool -> Bool
+  (a) =>
+  let case_t = false
+  let case_f = true
+  a<()=>Bool>(case_t)(case_f)
 
 or: Bool -> Bool -> Bool
   (a) => (b) =>
@@ -92,6 +98,18 @@ double: Nat -> Nat
   let case_zero = zero
   let case_succ = (pred) => succ(succ(double(pred)))
   n<() => Nat>(case_zero)(case_succ)
+
+nat_eql: Nat -> Nat -> Bool
+  (a) => (b) =>
+  let case_a_zero =
+    let case_b_zero = true
+    let case_b_succ = (b_pred) => false
+    b<()=>Bool>(case_b_zero)(case_b_succ)
+  let case_a_succ = (a_pred) =>
+    let case_b_zero = false
+    let case_b_succ = (b_pred) => nat_eql(a_pred)(b_pred)
+    b<()=>Bool>(case_b_zero)(case_b_succ)
+  a<()=>Bool>(case_a_zero)(case_a_succ)
 
 n0: Nat
   zero
@@ -245,7 +263,7 @@ ext: <A: Type> -> (:A) -> (:List(A)) -> List(A)
   <A> => (head) => (tail) =>
   <> => () => (ext) => ext(head)(tail)
 
-find : <A: Type> -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
+find: <A: Type> -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
   <A> => (list) => (cond) => (indx) =>
   let case_nil = none<Pair(A)(Nat)>
   let case_ext = (head) => (tail) =>
@@ -253,6 +271,66 @@ find : <A: Type> -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
     let case_false = find<A>(tail)(cond)(succ(indx))
     cond(head)(indx)<() => Maybe(Pair(A)(Nat))>(case_true)(case_false)
   list<() => Maybe(Pair(A)(Nat))>(case_nil)(case_ext)
+
+take: <A: Type> -> Nat -> List(A) -> List(A)
+  <A> => (n) => (list) =>
+  let case_nil = nil<A>
+  let case_ext = (head) => (tail) =>
+    let case_zero = nil<A>
+    let case_succ = (pred) => ext<A>(head)(take<A>(pred)(tail))
+    n<()=>List(A)>(case_zero)(case_succ)
+  list<()=>List(A)>(case_nil)(case_ext)
+
+drop: <A: Type> -> Nat -> List(A) -> List(A)
+  <A> => (n) => (list) =>
+  let case_nil = nil<A>
+  let case_ext = (head) => (tail) =>
+    let case_zero = tail
+    let case_succ = (pred) => drop<A>(pred)(tail)
+    n<()=>List(A)>(case_zero)(case_succ)
+  list<()=>List(A)>(case_nil)(case_ext)
+
+zip_with: <A: Type> -> <B: Type> -> <C: Type> -> (A -> B -> C) -> List(A) -> List(B) -> List(C)
+  <A> => <B> => <C> => (fn) => (as) => (bs) =>
+  let case_a_nil = nil<C>
+  let case_a_ext = (a_head) => (a_tail) =>
+    let case_b_nil = nil<C>
+    let case_b_ext = (b_head) => (b_tail) =>
+      let head = fn(a_head)(b_head)
+      let tail = zip_with<A><B><C>(fn)(a_tail)(b_tail)
+      ext<C>(head)(tail)
+    bs<()=>List(C)>(case_b_nil)(case_b_ext)
+  as<()=>List(C)>(case_a_nil)(case_a_ext)
+
+all_satisfy: <A: Type> -> (A -> Bool) -> List(A) -> Bool
+  <A> => (cond) => (list) =>
+  let case_nil = true
+  let case_ext = (head) => (tail) =>
+    let case_t = all_satisfy<A>(cond)(tail)
+    let case_f = false
+    cond(head)<()=>Bool>(case_t)(case_f)
+  list<()=>Bool>(case_nil)(case_ext)
+
+any_satisfy: <A: Type> -> (A -> Bool) -> List(A) -> Bool
+  <A> => (cond) => (list) =>
+  let case_nil = false
+  let case_ext = (head) => (tail) =>
+    let case_t = true
+    let case_f = any_satisfy<A>(cond)(tail)
+    cond(head)<()=>Bool>(case_t)(case_f)
+  list<()=>Bool>(case_nil)(case_ext)
+
+all_true: List(Bool) -> Bool
+  (list) => all_satisfy<Bool>((x) => x)(list)
+
+any_true: List(Bool) -> Bool
+  (list) => any_satisfy<Bool>((x) => x)(list)
+
+list_len: <A: Type> -> List(A) -> Nat
+  <A> => (list) =>
+  let case_nil = zero
+  let case_ext = (head) => (tail) => succ(list_len<A>(tail))
+  list<()=>Nat>(case_nil)(case_ext)
 
 // Bits
 // ====
@@ -304,20 +382,20 @@ word_inc: <size: Nat> -> Word(size) -> Word(size)
   let motive  = (size) => (word) => Word(size)
   word<motive>(case_we)(case_w0)(case_w1)
 
-word_add: <size: Nat> -> Word(size) -> Word(size) -> Bool -> Word(size)
+word_add_aux: <size: Nat> -> Word(size) -> Word(size) -> Bool -> Word(size)
   <size> => (a) => (b) => (c) =>
   let case_a_we = (b) => we
   let case_a_w0 = <a_size> => (a_pred) => (b) =>
     let case_b_we = (a_pred) =>
       we
     let case_b_w0 = <b_size> => (b_pred) => (a_pred) =>
-      let case_c_tr = w1<b_size>(word_add<b_size>(a_pred)(b_pred)(false))
-      let case_c_fa = w0<b_size>(word_add<b_size>(a_pred)(b_pred)(false))
+      let case_c_tr = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
+      let case_c_fa = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
       let case_c_ty = (c_bool) => Word(succ(b_size))
       c<case_c_ty>(case_c_tr)(case_c_fa)
     let case_b_w1 = <b_size> => (b_pred) => (a_pred) =>
-      let case_c_tr = w0<b_size>(word_add<b_size>(a_pred)(b_pred)(true))
-      let case_c_fa = w1<b_size>(word_add<b_size>(a_pred)(b_pred)(false))
+      let case_c_tr = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
+      let case_c_fa = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
       let case_c_ty = (c_bool) => Word(succ(b_size))
       c<case_c_ty>(case_c_tr)(case_c_fa)
     let case_b_ty = (b_size) => (b_word) =>
@@ -326,13 +404,13 @@ word_add: <size: Nat> -> Word(size) -> Word(size) -> Bool -> Word(size)
   let case_a_w1 = <a_size> => (a_pred) => (b) =>
     let case_b_we = (a_pred) => we
     let case_b_w0 = <b_size> => (b_pred) => (a_pred) =>
-      let case_c_tr = w0<b_size>(word_add<b_size>(a_pred)(b_pred)(true))
-      let case_c_fa = w1<b_size>(word_add<b_size>(a_pred)(b_pred)(false))
+      let case_c_tr = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
+      let case_c_fa = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
       let case_c_ty = (c_bool) => Word(succ(b_size))
       c<case_c_ty>(case_c_tr)(case_c_fa)
     let case_b_w1 = <b_size> => (b_pred) => (a_pred) =>
-      let case_c_tr = w1<b_size>(word_add<b_size>(a_pred)(b_pred)(true))
-      let case_c_fa = w0<b_size>(word_add<b_size>(a_pred)(b_pred)(true))
+      let case_c_tr = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
+      let case_c_fa = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
       let case_c_ty = (c_bool) => Word(succ(b_size))
       c<case_c_ty>(case_c_tr)(case_c_fa)
     let case_b_ty = (b_size) => (b_word) =>
@@ -342,7 +420,10 @@ word_add: <size: Nat> -> Word(size) -> Word(size) -> Bool -> Word(size)
     Word(a_size) -> Word(a_size)
   a<case_a_ty>(case_a_we)(case_a_w0)(case_a_w1)(b)
 
-word_cmp_aux : <size: Nat> -> Word(size) -> Word(size) -> Cmp -> Cmp
+word_add: <size: Nat> -> Word(size) -> Word(size) -> Word(size)
+  <size> => (a) => (b) => word_add_aux<size>(a)(b)(false)
+
+word_cmp_aux: <size: Nat> -> Word(size) -> Word(size) -> Cmp -> Cmp
   <size> => (a) => (b) => (c) =>
   let case_a_we = (b) => c
   let case_a_w0 = <a_size> => (a_pred) => (b) =>
@@ -361,40 +442,66 @@ word_cmp_aux : <size: Nat> -> Word(size) -> Word(size) -> Cmp -> Cmp
     Word(a_size) -> Cmp
   a<case_a_ty>(case_a_we)(case_a_w0)(case_a_w1)(b)
 
-word_cmp : <size: Nat> -> Word(size) -> Word(size) -> Cmp
+word_cmp: <size: Nat> -> Word(size) -> Word(size) -> Cmp
   <size> => (a) => (b) =>
   word_cmp_aux<size>(a)(b)(eql)
 
 // a < b
-word_ltn : <size:Nat> -> Word(size) -> Word(size) -> Bool
+word_ltn: <size:Nat> -> Word(size) -> Word(size) -> Bool
   <size> => (a) => (b) =>
   word_cmp<size>(a)(b)<() => Bool>(true)(false)(false)
 
 // a <= b
-word_lte : <size:Nat> -> Word(size) -> Word(size) -> Bool
+word_lte: <size:Nat> -> Word(size) -> Word(size) -> Bool
   <size> => (a) => (b) =>
   word_cmp<size>(a)(b)<() => Bool>(true)(true)(false)
 
 // a == b
-word_eql : <size:Nat> -> Word(size) -> Word(size) -> Bool
+word_eql: <size:Nat> -> Word(size) -> Word(size) -> Bool
   <size> => (a) => (b) =>
   word_cmp<size>(a)(b)<() => Bool>(false)(true)(false)
 
 // a >= b
-word_gte : <size:Nat> -> Word(size) -> Word(size) -> Bool
+word_gte: <size:Nat> -> Word(size) -> Word(size) -> Bool
   <size> => (a) => (b) =>
   word_cmp<size>(a)(b)<() => Bool>(false)(true)(true)
 
 // a > b
-word_gtn : <size:Nat> -> Word(size) -> Word(size) -> Bool
+word_gtn: <size:Nat> -> Word(size) -> Word(size) -> Bool
   <size> => (a) => (b) =>
   word_cmp<size>(a)(b)<() => Bool>(false)(false)(true)
 
 // Uint32
 // ======
 
-U32 : Type
+U32: Type
   Word(n32)
+
+u32_inc: U32 -> U32
+  word_inc<n32>
+
+u32_add: U32 -> U32 -> U32
+  word_add<n32>
+
+// a < b
+u32_ltn: U32 -> U32 -> Bool
+  word_ltn<n32>
+
+// a <= b
+u32_lte: U32 -> U32 -> Bool
+  word_lte<n32>
+
+// a == b
+u32_eql: U32 -> U32 -> Bool
+  word_eql<n32>
+
+// a >= b
+u32_gte: U32 -> U32 -> Bool
+  word_gte<n32>
+
+// a > b
+u32_gtn: U32 -> U32 -> Bool
+  word_gtn<n32>
 
 // Term
 // ====
@@ -798,6 +905,18 @@ char_right_brace: Char
 char_tilde: Char
   ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t0)
 
+// String
+// ======
+
+String : Type
+  List(Char)
+
+string_eql : String -> String -> Bool
+  (a) => (b) =>
+  let eql_len = nat_eql(list_len<Char>(a))(list_len<Char>(b))
+  let eql_val = all_satisfy<Bool>((x)=>x)(zip_with<Char><Char><Bool>(u32_eql)(a)(b))
+  and(eql_len)(eql_val)
+
 // Parsing
 // =======
 
@@ -815,16 +934,69 @@ is_name: Char -> Bool
     let is_upp = and(word_gte<n32>(c)(char_A))(word_lte<n32>(c)(char_Z))
     let is_und = word_eql<n32>(c)(char_underscore)
     or(is_num)(or(is_low)(or(is_upp)(is_und)))
-  
+
+first_valid: <A: Type> -> List(Maybe(A)) -> Maybe(A)
+  <A> => (list) =>
+  let case_nil = none<A>
+  let case_ext = (head) => (tail) =>
+    let case_none = first_valid<A>(tail)
+    let case_some = (value) => some<A>(value)
+    head<()=>Maybe(A)>(case_none)(case_some)
+  list<()=>Maybe(A)>(case_nil)(case_ext)
+
+drop_while: (Char -> Bool) -> String -> String
+  (cond) => (code) =>
+  let case_nil = nil<Char>
+  let case_ext = (head) => (tail) =>
+    let case_t = drop_while(cond)(tail)
+    let case_f = tail
+    cond(head)<()=>String>(case_t)(case_f)
+  code<()=>String>(case_nil)(case_ext)
+
+drop_spaces: String -> String
+  drop_while(is_space)
+
+// TODO: /* multi-line comment */
+drop_comment: String -> String
+  (code) =>
+  let code = drop_spaces(code)
+  // Removes "// ... \n"
+  let code = 
+    let fst2 = take<Char>(n2)(code)
+    let sla2 = ext<Char>(char_slash)(ext<Char>(char_slash)(nil<Char>))
+    let case_t =
+      let code = drop<Char>(n2)(code)
+      let code = drop_while((x) => not(u32_eql(char_newline)(x)))(code)
+      code
+    let case_f =
+      code
+    string_eql(fst2)(sla2)<()=>String>(case_t)(case_f)
+  code
+
+// TODO: remove many comments (not just one)
+next: String -> String
+  (code) => drop_comment(code)
+
+parse_str: String -> String -> Maybe(Pair(String)(String))
+  (str) => (code) =>
+  let R = Pair(String)(String)
+  let case_str_nil = some<Pair(String)(String)>(pair<String><String>(code)(str))
+  let case_str_ext = (str_head) => (str_tail) =>
+    let case_code_nil = none<Pair(String)(String)>
+    let case_code_ext = (code_head) => (code_tail) =>
+      let case_t = parse_str(str_tail)(code_tail)
+      let case_f = none<Pair(String)(String)>
+      u32_eql(code_head)(str_head)<()=>Maybe(Pair(String)(String))>(case_t)(case_f)
+    code<()=>Maybe(Pair(String)(String))>(case_code_nil)(case_code_ext)
+  str<()=>Maybe(Pair(String)(String))>(case_str_nil)(case_str_ext)
+
 // Main
 // ====
 
 example_0: Word(n4)
   let w0011 = w1<n3>(w1<n2>(w0<n1>(w0<n0>(we))))
   let w0101 = w1<n3>(w0<n2>(w1<n1>(w0<n0>(we))))
-  word_add<n4>(w0011)(w0101)(false) // 3 + 5 == 8
+  word_add<n4>(w0011)(w0101) // 3 + 5 == 8
 
-main : Cmp
-  let w0011 = w1<n3>(w1<n2>(w0<n1>(w0<n0>(we))))
-  let w0101 = w1<n3>(w0<n2>(w1<n1>(w0<n0>(we))))
-  word_cmp<n4>(w0011)(w0101)
+main : Bool
+  nat_eql(n9)(n8)
