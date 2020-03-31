@@ -241,6 +241,14 @@ pair: {A: Type} -> {B: Type} -> A -> B -> Pair(A)(B)
   {} => (pair) =>
   pair(a)(b)
 
+fst: {A: Type} -> {B: Type} -> Pair(A)(B) -> A
+  {A} => {B} => (pair) =>
+  pair{() => A}((a) => (b) => a)
+
+snd: {A: Type} -> {B: Type} -> Pair(A)(B) -> B
+  {A} => {B} => (pair) =>
+  pair{() => B}((a) => (b) => b)
+
 // Maybe
 // =====
 
@@ -277,14 +285,18 @@ cons: {A: Type} -> (:A) -> (:List(A)) -> List(A)
   {A} => (head) => (tail) =>
   {} => () => (cons) => cons(head)(tail)
 
-find: {A: Type} -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
+find_aux: {A: Type} -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
   {A} => (list) => (cond) => (indx) =>
   let case_nil = none{Pair(A)(Nat)}
   let case_cons = (head) => (tail) =>
     let case_true  = some{Pair(A)(Nat)}(pair{A}{Nat}(head)(indx))
-    let case_false = find{A}(tail)(cond)(succ(indx))
+    let case_false = find_aux{A}(tail)(cond)(succ(indx))
     cond(head)(indx){() => Maybe(Pair(A)(Nat))}(case_true)(case_false)
   list{() => Maybe(Pair(A)(Nat))}(case_nil)(case_cons)
+
+find: {A: Type} -> List(A) -> (A -> Nat -> Bool) -> Maybe(Pair(A)(Nat))
+  {A} => (list) => (cond) =>
+  find_aux{A}(list)(cond)(zero)
 
 take: {A: Type} -> Nat -> List(A) -> List(A)
   {A} => (n) => (list) =>
@@ -475,12 +487,12 @@ word_cmp: {size: Nat} -> Word(size) -> Word(size) -> Cmp
   {size} => (a) => (b) =>
   word_cmp_aux{size}(a)(b)(eql)
 
-// a > b
+// a } b
 word_ltn: {size:Nat} -> Word(size) -> Word(size) -> Bool
   {size} => (a) => (b) =>
   word_cmp{size}(a)(b){() => Bool}(true)(false)(false)
 
-// a <= b
+// a {= b
 word_lte: {size:Nat} -> Word(size) -> Word(size) -> Bool
   {size} => (a) => (b) =>
   word_cmp{size}(a)(b){() => Bool}(true)(true)(false)
@@ -490,12 +502,12 @@ word_eql: {size:Nat} -> Word(size) -> Word(size) -> Bool
   {size} => (a) => (b) =>
   word_cmp{size}(a)(b){() => Bool}(false)(true)(false)
 
-// a >= b
+// a }= b
 word_gte: {size:Nat} -> Word(size) -> Word(size) -> Bool
   {size} => (a) => (b) =>
   word_cmp{size}(a)(b){() => Bool}(false)(true)(true)
 
-// a > b
+// a } b
 word_gtn: {size:Nat} -> Word(size) -> Word(size) -> Bool
   {size} => (a) => (b) =>
   word_cmp{size}(a)(b){() => Bool}(false)(false)(true)
@@ -505,6 +517,13 @@ word_gtn: {size:Nat} -> Word(size) -> Word(size) -> Bool
 
 U32: Type
   Word(n32)
+
+u32_0: U32
+  w0{n31}(w0{n30}(w0{n29}(w0{n28}(w0{n27}(w0{n26}(w0{n25}(w0{n24}(
+  w0{n23}(w0{n22}(w0{n21}(w0{n20}(w0{n19}(w0{n18}(w0{n17}(w0{n16}(
+  w0{n15}(w0{n14}(w0{n13}(w0{n12}(w0{n11}(w0{n10}(w0{n9 }(w0{n8 }(
+  w0{n7 }(w0{n6 }(w0{n5 }(w0{n4 }(w0{n3 }(w0{n2 }(w0{n1 }(w0{n0 }(
+  we))))))))))))))))))))))))))))))))
 
 u32_inc: U32 -> U32
   word_inc{n32}
@@ -532,96 +551,8 @@ u32_gte: U32 -> U32 -> Bool
 u32_gtn: U32 -> U32 -> Bool
   word_gtn{n32}
 
-// Term
+// Char
 // ====
-
-Term: Type
-  self{P: Term -> Type} ->
-  (var:
-    (hash: Bits) ->
-    (indx: Nat) ->
-    P(var(indx))) ->
-  (ref:
-    (hash: Bits) ->
-    (name: Bits) ->
-    P(ref(name))) ->
-  (typ:
-    (hash: Bits) ->
-    P(typ)) ->
-  (all:
-    (hash: Bits) ->
-    (eras: Bool) ->
-    (self: Bits) ->
-    (name: Bits) ->
-    (bind: Term) ->
-    (body: Term) ->
-    P(all(eras)(self)(name)(bind)(body))) ->
-  (lam:
-    (hash: Bits) ->
-    (eras: Bool) ->
-    (name: Bits) ->
-    (body: Term) ->
-    P(lam(eras)(name)(body))) ->
-  (app:
-    (hash: Bits) ->
-    (eras: Bool) ->
-    (func: Term) ->
-    (argm: Term) ->
-    P(app(eras)(func)(argm))) ->
-  (lit:
-    (hash: Bits) ->
-    (name: Bits) ->
-    (expr: Term) ->
-    (body: Term) ->
-    P(lit(name)(expr)(body))) ->
-  (ann:
-    (hash: Bits) ->
-    (done: Bool) ->
-    (expr: Term) ->
-    (type: Term) ->
-    P(ann(done)(expr)(type))) ->
-  P(self)
-
-var: Nat -> Term
-  (indx)=>
-  {} => (var) => () => () => () => () => () => () => () =>
-  var(be)(indx)
-
-ref: Bits -> Term
-  (name)=>
-  {} => () => (ref) => () => () => () => () => () => () =>
-  ref(be)(name)
-
-typ: Term
-  {} => () => () => (typ) => () => () => () => () => () =>
-  typ(be)
-
-all: Bool -> Bits -> Bits -> Term -> Term -> Term
-  (eras) => (self) => (name) => (bind) => (body) =>
-  {} => () => () => () => (all) => () => () => () => () =>
-  all(be)(eras)(self)(name)(bind)(body)
-
-lam: Bool -> Bits -> Term -> Term
-  (eras) => (name) => (body) =>
-  {} => () => () => () => () => (lam) => () => () => () =>
-  lam(be)(eras)(name)(body)
-
-app: Bool -> Term -> Term -> Term
-  (eras) => (func) => (argm) =>
-  {} => () => () => () => () => () => (app) => () => () =>
-  app(be)(eras)(func)(argm)
-
-lit: Bits -> Term -> Term -> Term
-  (name) => (expr) => (body) =>
-  {} => () => () => () => () => () => () => (lit) => () =>
-  lit(be)(name)(expr)(body)
-
-ann: Bool -> Term -> Term -> Term
-  (done) => (expr) => (type) =>
-  {} => () => () => () => () => () => () => () => (ann) =>
-  ann(be)(done)(expr)(type)
-
-// Characters
 
 Char: Type
   Word(n32)
@@ -704,9 +635,9 @@ _8     : Char ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t0) // '8'
 _9     : Char ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t1) // '9'
 _colon : Char ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t0) // ':'
 _semi  : Char ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t1) // ';'
-_lt    : Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t0) // '<'
+_lt    : Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t0) // '{'
 _equals: Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t1) // '='
-_gt    : Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t0) // '>'
+_gt    : Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t0) // '}'
 _quest : Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t1) // '?'
 _commat: Char ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t0) // '@'
 _A     : Char ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t1) // 'A'
@@ -785,22 +716,146 @@ string_eql : String -> String -> Bool
   let eql_val = all_satisfy{Bool}((x)=>x)(zip_with{Char}{Char}{Bool}(u32_eql)(a)(b))
   and(eql_len)(eql_val)
 
+// Term
+// ====
+
+Term: Type
+  self{P: Term -> Type} ->
+  (var:
+    (hash: U32) ->
+    (indx: Nat) ->
+    P(var(indx))) ->
+  (ref:
+    (hash: U32) ->
+    (name: String) ->
+    P(ref(name))) ->
+  (typ:
+    (hash: U32) ->
+    P(typ)) ->
+  (all:
+    (hash: U32) ->
+    (eras: Bool) ->
+    (self: String) ->
+    (name: String) ->
+    (bind: Term) ->
+    (body: Term) ->
+    P(all(eras)(self)(name)(bind)(body))) ->
+  (lam:
+    (hash: U32) ->
+    (eras: Bool) ->
+    (name: String) ->
+    (body: Term) ->
+    P(lam(eras)(name)(body))) ->
+  (app:
+    (hash: U32) ->
+    (eras: Bool) ->
+    (func: Term) ->
+    (argm: Term) ->
+    P(app(eras)(func)(argm))) ->
+  (lit:
+    (hash: U32) ->
+    (name: String) ->
+    (expr: Term) ->
+    (body: Term) ->
+    P(lit(name)(expr)(body))) ->
+  (ann:
+    (hash: U32) ->
+    (done: Bool) ->
+    (expr: Term) ->
+    (type: Term) ->
+    P(ann(done)(expr)(type))) ->
+  P(self)
+
+var: Nat -> Term
+  (indx)=>
+  {} => (var) => () => () => () => () => () => () => () =>
+  var(u32_0)(indx)
+
+ref: String -> Term
+  (name)=>
+  {} => () => (ref) => () => () => () => () => () => () =>
+  ref(u32_0)(name)
+
+typ: Term
+  {} => () => () => (typ) => () => () => () => () => () =>
+  typ(u32_0)
+
+all: Bool -> String -> String -> Term -> Term -> Term
+  (eras) => (self) => (name) => (bind) => (body) =>
+  {} => () => () => () => (all) => () => () => () => () =>
+  all(u32_0)(eras)(self)(name)(bind)(body)
+
+lam: Bool -> String -> Term -> Term
+  (eras) => (name) => (body) =>
+  {} => () => () => () => () => (lam) => () => () => () =>
+  lam(u32_0)(eras)(name)(body)
+
+app: Bool -> Term -> Term -> Term
+  (eras) => (func) => (argm) =>
+  {} => () => () => () => () => () => (app) => () => () =>
+  app(u32_0)(eras)(func)(argm)
+
+lit: String -> Term -> Term -> Term
+  (name) => (expr) => (body) =>
+  {} => () => () => () => () => () => () => (lit) => () =>
+  lit(u32_0)(name)(expr)(body)
+
+ann: Bool -> Term -> Term -> Term
+  (done) => (expr) => (type) =>
+  {} => () => () => () => () => () => () => () => (ann) =>
+  ann(u32_0)(done)(expr)(type)
+
 // Parsing
 // =======
 
+Parsed : (A: Type) -> Type
+  (A) => Maybe(Pair(String)(A))
+
+parsed: {A: Type} -> String -> A -> Parsed(A)
+  {A} => (code) => (val) =>
+  some{Pair(String)(A)}(pair{String}{A}(code)(val))
+
+noparse: {A: Type} -> Parsed(A)
+  {A} => none{Pair(String)(A)}
+
+parsing
+  : {A: Type} ->
+    {B: Type} ->
+    (x: Parsed(A)) ->
+    (f: String -> A -> Parsed(B)) ->
+    Parsed(B)
+  {A} => {B} => (x) => (f) =>
+  let case_none = noparse{B}
+  let case_some = (value) => value{() => Parsed(B)}(f)
+  x{() => Parsed(B)}(case_none)(case_some)
+
+LPAR: String sing{Char}(_lpar ) // "("
+RPAR: String sing{Char}(_rpar ) // ")"
+LSIG: String sing{Char}(_lt   ) // "<"
+RSIG: String sing{Char}(_gt   ) // ">"
+COLO: String sing{Char}(_colon) // ":"
+COLS: String cons{Char}(_colon)(sing{Char}(_colon)(nil{Char})) // "::"
+ARR0: String cons{Char}(_dash )(sing{Char}(_gt))               // "->"
+ARR1: String cons{Char}(_hyphen)(sing{Char}(_equal))           // "=>"
+LETS: String cons{Char}(_l)( cons{Char}(_e)( cons{Char}(_t)( sing{Char}(_space)) // "let "
+EQLS: String sing{Char}(_equals) // "="
+TYPS: String cons{Char}(_T)( cons{Char}(_y)( cons{Char}(_p)( sing{Char}(_e)))) // Type
+OPEN: List(String) cons{String}(LPAR)( sing{String}(LSIG)) // ["(","{"]
+CLOS: List(String) cons{String}(LPAR)( sing{String}(LSIG)) // [")","}"]
+
 is_space: Char -> Bool
   (c) =>
-    let is_spc = word_eql{n32}(c)(char_space)
-    let is_tab = word_eql{n32}(c)(char_tab)
-    let is_lin = word_eql{n32}(c)(char_newline)
+    let is_spc = word_eql{n32}(c)(_space)
+    let is_tab = word_eql{n32}(c)(_HT)
+    let is_lin = word_eql{n32}(c)(_LF)
     or(is_spc)(or(is_tab)(is_lin))
 
 is_name: Char -> Bool
   (c) =>
-    let is_num = and(word_gte{n32}(c)(char_0))(word_lte{n32}(c)(char_9))
-    let is_low = and(word_gte{n32}(c)(char_a))(word_lte{n32}(c)(char_z))
-    let is_upp = and(word_gte{n32}(c)(char_A))(word_lte{n32}(c)(char_Z))
-    let is_und = word_eql{n32}(c)(char_underscore)
+    let is_num = and(word_gte{n32}(c)(_0))(word_lte{n32}(c)(_9))
+    let is_low = and(word_gte{n32}(c)(_a))(word_lte{n32}(c)(_z))
+    let is_upp = and(word_gte{n32}(c)(_A))(word_lte{n32}(c)(_Z))
+    let is_und = word_eql{n32}(c)(_lowbar)
     or(is_num)(or(is_low)(or(is_upp)(is_und)))
 
 first_valid: {A: Type} -> List(Maybe(A)) -> Maybe(A)
@@ -831,10 +886,10 @@ drop_comment: String -> String
   // Removes "// ... \n"
   let code = 
     let fst2 = take{Char}(n2)(code)
-    let sla2 = cons{Char}(char_slash)(cons{Char}(char_slash)(nil{Char}))
+    let sla2 = cons{Char}(_sol)(cons{Char}(_sol)(nil{Char}))
     let case_t =
       let code = drop{Char}(n2)(code)
-      let code = drop_while((x) => not(u32_eql(char_newline)(x)))(code)
+      let code = drop_while((x) => not(u32_eql(_newline)(x)))(code)
       code
     let case_f =
       code
@@ -845,51 +900,30 @@ drop_comment: String -> String
 ncons: String -> String
   (code) => drop_comment(code)
 
-Parsed : (A: Type) -> Type
-  (A) => Maybe(Pair(String)(A))
-
-parsed: {A: Type} -> String -> A -> Parsed(A)
-  {A} => (code) => (val) =>
-  some{Pair(String)(A)}(pair{String}{A}(code)(val))
-
-noparse: {A: Type} -> Parsed(A)
-  {A} => none{Pair(String)(A)}
-
-chain
-  : {A: Type} ->
-    {B: Type} ->
-    (x: Parsed(A)) ->
-    (f: String -> A -> Parsed(B)) ->
-    Parsed(B)
-  {A} => {B} => (x) => (f) =>
-  let case_none = noparse{B}
-  let case_some = (value) => value{() => Parsed(B)}(f)
-  x{() => Parsed(B)}(case_none)(case_some)
-
 parse_str: String -> String -> Parsed(String)
-  (str) => (code) =>
+  (code) => (str) =>
   let case_str_nil = parsed{String}(code)(str)
   let case_str_cons = (str_head) => (str_tail) =>
     let case_code_nil = noparse{String}
     let case_code_cons = (code_head) => (code_tail) =>
-      let case_t = parse_str(str_tail)(code_tail)
+      let case_t = parse_str(code_tail)(str_tail)
       let case_f = noparse{String}
       u32_eql(code_head)(str_head){() => Parsed(String)}(case_t)(case_f)
     code{() => Parsed(String)}(case_code_nil)(case_code_cons)
   str{() => Parsed(String)}(case_str_nil)(case_str_cons)
 
-parse_one_aux: List(String) -> String -> Nat -> Maybe(Pair(String)(Nat))
-  (strs) => (code) => (indx) =>
+parse_one_aux: String -> List(String) -> Nat -> Maybe(Pair(String)(Nat))
+  (code) => (strs) => (indx) =>
   let case_nil = noparse{Nat}
   let case_cons = (head) => (tail) =>
-    let case_none = parse_one_aux(tail)(code)(succ(indx))
+    let case_none = parse_one_aux(code)(tail)(succ(indx))
     let case_some = (value) => value{() => Parsed(Nat)}((code)=>() => parsed{Nat}(code)(indx))
-    parse_str(head)(code){() => Maybe(Pair(String)(Nat))}(case_none)(case_some)
+    parse_str(code)(head){() => Maybe(Pair(String)(Nat))}(case_none)(case_some)
   strs{() => Parsed(Nat)}(case_nil)(case_cons)
 
-parse_one: List(String) -> String -> Maybe(Pair(String)(Nat))
-  (strs) => (code) =>
-  parse_one_aux(strs)(code)(zero)
+parse_one: String -> List(String) -> Maybe(Pair(String)(Nat))
+  (code) => (strs) =>
+  parse_one_aux(code)(strs)(zero)
 
 parse_nam_aux: String -> Pair(String)(String)
   (code) =>
@@ -926,6 +960,105 @@ parse_nam: String -> Bool -> Maybe(Pair(String)(String))
 // stringify_trm : Term -> String
 //   (t) => stringify_trm_go(nil{String}, t)
 
+parse_par: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  parsing{String}{Term}(parse_str(ncons(code))(LPAR))((code) => (skip) =>
+  parsing{Term  }{Term}(parse_trm(ncons(code))(vars))((code) => (term) =>
+  parsing{String}{Term}(parse_str(ncons(code))(RPAR))((code) => (skip) =>
+  parsed{Term}(code)(term))))
+
+parse_all: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  parsing{String}{Term}(parse_nam(ncons(code))(true))((code) => (self) =>
+  parsing{Nat   }{Term}(parse_one(     code )(OPEN))((code) => (eras) =>
+  parsing{String}{Term}(parse_nam(ncons(code))(true))((code) => (name) =>
+  parsing{String}{Term}(parse_str(ncons(code))(COLO))((code) => (skip) =>
+  parsing{Term  }{Term}(parse_trm(ncons(code))(cons{String}(self)(vars)))((code) => (bind) =>
+  parsing{Nat   }{Term}(parse_one(ncons(code))(CLOS))((code) => (skip) =>
+  parsing{String}{Term}(parse_str(ncons(code))(ARR0))((code) => (skip) =>
+  parsing{Term  }{Term}(parse_trm(ncons(code))(cons{String}(name)(cons{String}(self)(vars))))((code) => (body) =>
+  parsed{Term}(code)(all(nat_eql(eras)(n1))(self)(name)(bind)(body))))))))))
+
+parse_lam: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  parsing{Nat   }{Term}(parse_one(ncons(code))(OPEN))((code) => (eras) =>
+  parsing{String}{Term}(parse_nam(ncons(code))(true))((code) => (name) =>
+  parsing{Nat   }{Term}(parse_one(ncons(code))(CLOS))((code) => (skip) =>
+  parsing{String}{Term}(parse_str(ncons(code))(ARR1))((code) => (skip) =>
+  parsing{Term  }{Term}(parse_trm(ncons(code))(cons{String}(name)(vars)))((code) => (body) =>
+  parsed{Term}(code)(lam(nat_eql(eras)(n1))(name)(body)))))))
+
+parse_let: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  parsing{String}{Term}(parse_str(ncons(code))(LETS))((code) => (skip) =>
+  parsing{String}{Term}(parse_nam(ncons(code))(false))((code) => (name) =>
+  parsing{String}{Term}(parse_str(ncons(code))(EQLS))((code) => (skip) =>
+  parsing{Term  }{Term}(parse_trm(ncons(code))(vars))((code) => (expr) =>
+  parsing{Term  }{Term}(parse_trm(ncons(code))(cons{String}(name)(vars)))((code) => (body) =>
+  parsed{Term}(code)(lit(name)(expr)(body)))))))
+
+parse_typ: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  parsing{String}{Term}(parse_str(ncons(code))(TYPS))((code) => (skip) =>
+  parsed{Term}(code)(typ))
+
+parse_var: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  parsing{String}{Term}(parse_nam(ncons(code))(false))((code) => (name) =>
+  let got = find{String}(vars)((x) => (i) => string_eql(x)(name))
+  let case_none = parsed{Term}(code)(ref(name))
+  let case_some = (value) => parsed{Term}(code)(var(snd{String}{Nat}(value)))
+  got{() => Parsed(Term)}(case_none)(case_some))
+
+parse_app: String -> Term -> List(String) -> Parsed(Term)
+  (code) => (func) => (vars) =>
+  parsing{Nat }{Term}(parse_one(ncons(code))(OPEN))((code) => (eras) =>
+  parsing{Term}{Term}(parse_trm(ncons(code))(vars))((code) => (argm) =>
+  parsing{Nat }{Term}(parse_one(ncons(code))(CLOS))((code) => (skip) =>
+  parsed{Term}(code)(app(nat_eql(eras)(n1))(func)(argm)))))
+
+parse_arr: String -> Term -> List(String) -> Parsed(Term)
+  (code) => (bind) => (vars) =>
+  parsing{String}{Term}(parse_str(ncons(code))(ARR0))((code) => (skip) =>
+  parsing{Term  }{Term}(parse_trm(ncons(code))(cons{String}(nil{Char})(cons{String}(nil{Char})(vars))))((code) => (body) =>
+  parsed{Term}(code)(all(false)(nil{Char})(nil{Char})(shift(bind)(n1)(n0))(body))))
+
+parse_ann: String -> Term -> List(String) -> Parsed(Term)
+  (code) => (expr) => (vars) =>
+  parsing{String}{Term}(parse_str(ncons(code))(COLS))((code) => (skip) =>
+  parsing{Term  }{Term}(parse_trm(ncons(code))(vars))((code) => (type) =>
+  parsed{Term}(code)(ann(false)(expr)(type))))
+
+parse_pst: String -> Term -> List(String) -> Parsed(Term)
+  (code) => (term) => (vars) =>
+  let post_parse = first_valid{Pair(String)(Term)}(
+    cons{Parsed(Term)}(parse_app(code)(term)(vars))(
+    cons{Parsed(Term)}(parse_arr(code)(term)(vars))(
+    cons{Parsed(Term)}(parse_ann(code)(term)(vars))(
+    nil{Parsed(Term)}))))
+  let case_none = parsed{Term}(code)(term)
+  let case_some = (value) =>
+    let case_pair = (code) => (term) => parse_pst(code)(term)(vars)
+    value{() => Parsed(Term)}(case_pair)
+  post_parse{() => Parsed(Term)}(case_none)(case_some)
+
+parse_trm: String -> List(String) -> Parsed(Term)
+  (code) => (vars) =>
+  let base_parse = first_valid{Pair(String)(Term)}(
+    cons{Parsed(Term)}(parse_all(code)(vars))(
+    cons{Parsed(Term)}(parse_lam(code)(vars))(
+    cons{Parsed(Term)}(parse_let(code)(vars))(
+    cons{Parsed(Term)}(parse_par(code)(vars))(
+    cons{Parsed(Term)}(parse_typ(code)(vars))(
+    cons{Parsed(Term)}(parse_var(code)(vars))(
+    nil{Parsed(Term)})))))))
+  parsing{Term}{Term}(base_parse)((code) => (term) =>
+    parse_pst(code)(term)(vars))
+
+shift: Term -> Nat -> Nat -> Term
+  (term) => (inc) => (dep) =>
+  Type
+
 // Main
 // ====
 
@@ -934,5 +1067,5 @@ example_0: Word(n4)
   let w0101 = w1{n3}(w0{n2}(w1{n1}(w0{n0}(we))))
   word_add{n4}(w0011)(w0101) // 3 + 5 == 8
 
-main : Bool
+main: Bool
   nat_eql(n9)(n8)
