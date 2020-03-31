@@ -998,30 +998,47 @@ drop_comment: String -> String
 next: String -> String
   (code) => drop_comment(code)
 
-parse_str: String -> String -> Maybe(Pair(String)(String))
+Parsed : (A: Type) -> Type
+  (A) => Maybe(Pair(String)(A))
+
+parsed: <A: Type> -> String -> A -> Parsed(A)
+  <A> => (code) => (val) =>
+  some<Pair(String)(A)>(pair<String><A>(code)(val))
+
+noparse: <A: Type> -> Parsed(A)
+  <A> => none<Pair(String)(A)>
+
+chain
+  : <A: Type> ->
+    <B: Type> ->
+    (x: Parsed(A)) ->
+    (f: String -> A -> Parsed(B)) ->
+    Parsed(B)
+  <A> => <B> => (x) => (f) =>
+  let case_none = noparse<B>
+  let case_some = (value) => value<()=>Parsed(B)>(f)
+  x<()=>Parsed(B)>(case_none)(case_some)
+
+parse_str: String -> String -> Parsed(String)
   (str) => (code) =>
-  let R = Pair(String)(String)
-  let case_str_nil = some<Pair(String)(String)>(pair<String><String>(code)(str))
+  let case_str_nil = parsed<String>(code)(str)
   let case_str_ext = (str_head) => (str_tail) =>
-    let case_code_nil = none<Pair(String)(String)>
+    let case_code_nil = noparse<String>
     let case_code_ext = (code_head) => (code_tail) =>
       let case_t = parse_str(str_tail)(code_tail)
-      let case_f = none<Pair(String)(String)>
-      u32_eql(code_head)(str_head)<()=>Maybe(Pair(String)(String))>(case_t)(case_f)
-    code<()=>Maybe(Pair(String)(String))>(case_code_nil)(case_code_ext)
-  str<()=>Maybe(Pair(String)(String))>(case_str_nil)(case_str_ext)
+      let case_f = noparse<String>
+      u32_eql(code_head)(str_head)<()=>Parsed(String)>(case_t)(case_f)
+    code<()=>Parsed(String)>(case_code_nil)(case_code_ext)
+  str<()=>Parsed(String)>(case_str_nil)(case_str_ext)
 
 parse_one_aux: List(String) -> String -> Nat -> Maybe(Pair(String)(Nat))
   (strs) => (code) => (indx) =>
-  let case_nil = none<Pair(String)(Nat)>
+  let case_nil = noparse<Nat>
   let case_ext = (head) => (tail) =>
     let case_none = parse_one_aux(tail)(code)(succ(indx))
-    let case_some = (value) =>
-      let case_pair = (code) => (str) =>
-        some<Pair(String)(Nat)>(pair<String><Nat>(code)(indx))
-      value<()=>Maybe(Pair(String)(Nat))>(case_pair)
+    let case_some = (value) => value<()=>Parsed(Nat)>((code)=>()=>parsed<Nat>(code)(indx))
     parse_str(head)(code)<()=>Maybe(Pair(String)(Nat))>(case_none)(case_some)
-  strs<()=>Maybe(Pair(String)(Nat))>(case_nil)(case_ext)
+  strs<()=>Parsed(Nat)>(case_nil)(case_ext)
 
 parse_one: List(String) -> String -> Maybe(Pair(String)(Nat))
   (strs) => (code) =>
@@ -1029,25 +1046,25 @@ parse_one: List(String) -> String -> Maybe(Pair(String)(Nat))
 
 parse_nam_aux: String -> Pair(String)(String)
   (code) =>
-  let case_nil = pair<String><String>(code)(nil<Char>)
+  let Ret = Pair(String)(String)
+  let ret = pair<String><String>
+  let case_nil = ret(code)(nil<Char>)
   let case_ext = (head) => (tail) =>
     let case_t =
-      let case_pair = (code) => (rest) =>
-        pair<String><String>(code)(ext<Char>(head)(rest))
-      parse_nam_aux(tail)<()=>Pair(String)(String)>(case_pair)
-    let case_f =
-      pair<String><String>(code)(nil<Char>)
-    is_name(head)<()=>Pair(String)(String)>(case_t)(case_f)
-  code<()=>Pair(String)(String)>(case_nil)(case_ext)
+      let case_pair = (code) => (rest) => ret(code)(ext<Char>(head)(rest))
+      parse_nam_aux(tail)<()=>Ret>(case_pair)
+    let case_f = ret(code)(nil<Char>)
+    is_name(head)<()=>Ret>(case_t)(case_f)
+  code<()=>Ret>(case_nil)(case_ext)
 
 parse_nam: String -> Bool -> Maybe(Pair(String)(String))
   (code) => (allow_empty) =>
   let case_pair = (code) => (name) =>
-    let case_t = some<Pair(String)(String)>(pair<String><String>(code)(name))
-    let case_f = none<Pair(String)(String)>
+    let case_t = parsed<String>(code)(name)
+    let case_f = noparse<String>
     let valid = or(allow_empty)(not(is_empty<Char>(name)))
-    valid<() => Maybe(Pair(String)(String))>(case_t)(case_f)
-  parse_nam_aux(code)<() => Maybe(Pair(String)(String))>(case_pair)
+    valid<() => Parsed(String)>(case_t)(case_f)
+  parse_nam_aux(code)<()=>Parsed(String)>(case_pair)
 
 // Main
 // ====
