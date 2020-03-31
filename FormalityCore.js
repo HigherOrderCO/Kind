@@ -142,23 +142,23 @@ function next(code, indx) {
 };
 
 // Drops spaces and parses an exact string
-function parse_str(str, code, indx) {
+function parse_str(code, indx, str) {
   if (str.length === 0) {
     return [indx, str];
   } else if (indx < code.length && code[indx] === str[0]) {
-    return parse_str(str.slice(1), code, indx+1);
+    return parse_str(code, indx+1, str.slice(1));
   } else {
     throw "Expected `" + str + "`, found `" + code.slice(indx,indx+16) + "`.";
   };
 };
 
 // Parses one of two strings
-function parse_one(ch0, ch1, code, indx) {
+function parse_one(code, indx, ch0, ch1) {
   try {
-    var [indx, str] = parse_str(ch0, code, indx);
+    var [indx, str] = parse_str(code, indx, ch0);
     return [indx, 0];
   } catch (e) {
-    var [indx, str] = parse_str(ch1, code, indx);
+    var [indx, str] = parse_str(code, indx, ch1);
     return [indx, 1];
   }
 };
@@ -178,40 +178,40 @@ function parse_nam(code, indx, size = 0) {
 
 // Parses a parenthesis, `(<term>)`
 function parse_par(code, indx, vars) {
-  var [indx, skip] = parse_str("(", code, next(code, indx));
+  var [indx, skip] = parse_str(code, next(code, indx), "(");
   var [indx, term] = parse_trm(code, indx, vars);
-  var [indx, skip] = parse_str(")", code, next(code, indx));
+  var [indx, skip] = parse_str(code, next(code, indx), ")");
   return [indx, term];
 };
 
 // Parses a dependent function type, `(<name> : <term>) -> <term>`
 function parse_all(code, indx, vars) {
   var [indx, self] = parse_nam(code, next(code, indx), 1);
-  var [indx, eras] = parse_one("(", "<", code, indx);
+  var [indx, eras] = parse_one(code, indx, "(", "<");
   var [indx, name] = parse_nam(code, next(code, indx), 1);
-  var [indx, skip] = parse_str(":", code, next(code, indx));
+  var [indx, skip] = parse_str(code, next(code, indx), ":");
   var [indx, bind] = parse_trm(code, indx, Ext(self, vars));
-  var [indx, skip] = parse_one(")", ">", code, next(code, indx));
-  var [indx, skip] = parse_str("->", code, next(code, indx));
+  var [indx, skip] = parse_one(code, next(code, indx), ")", ">");
+  var [indx, skip] = parse_str(code, next(code, indx), "->");
   var [indx, body] = parse_trm(code, indx, Ext(name, Ext(self, vars)));
   return [indx, All(eras === 1, self, name, bind, body)];
 };
 
 // Parses a dependent function value, `(<name>) => <term>`
 function parse_lam(code, indx, vars) {
-  var [indx, eras] = parse_one("(", "<", code, next(code, indx));
+  var [indx, eras] = parse_one(code, next(code, indx), "(", "<");
   var [indx, name] = parse_nam(code, next(code, indx), 1);
-  var [indx, skip] = parse_one(")", ">", code, next(code, indx));
-  var [indx, skip] = parse_str("=>", code, next(code, indx));
+  var [indx, skip] = parse_one(code, next(code, indx), ")", ">");
+  var [indx, skip] = parse_str(code, next(code, indx), "=>");
   var [indx, body] = parse_trm(code, indx, Ext(name, vars));
   return [indx, Lam(eras === 1, name, body)];
 };
 
 // Parses a local definition, `let x = val; body`
 function parse_let(code, indx, vars) {
-  var [indx, skip] = parse_str("let ", code, next(code, indx));
+  var [indx, skip] = parse_str(code, next(code, indx), "let ");
   var [indx, name] = parse_nam(code, next(code, indx));
-  var [indx, skip] = parse_str("=", code, next(code, indx));
+  var [indx, skip] = parse_str(code, next(code, indx), "=");
   var [indx, expr] = parse_trm(code, indx, vars);
   var [indx, body] = parse_trm(code, indx, Ext(name, vars));
   return [indx, Let(name, expr, body)];
@@ -219,7 +219,7 @@ function parse_let(code, indx, vars) {
 
 // Parses the type of types, `Type`
 function parse_typ(code, indx, vars) {
-  var [indx, skip] = parse_str("Type", code, next(code, indx));
+  var [indx, skip] = parse_str(code, next(code, indx), "Type");
   return [indx, Typ()];
 };
 
@@ -238,22 +238,22 @@ function parse_var(code, indx, vars) {
 
 // Parses an application, `<term>(<term>)`
 function parse_app(code, indx, func, vars) {
-  var [indx, eras] = parse_one("(", "<", code, indx);
+  var [indx, eras] = parse_one(code, indx, "(", "<");
   var [indx, argm] = parse_trm(code, indx, vars);
-  var [indx, skip] = parse_one(")", ">", code, next(code, indx));
+  var [indx, skip] = parse_one(code, next(code, indx), ")", ">");
   return [indx, App(eras === 1, func, argm)];
 };
 
 // Parses a non-dependent function type, `<term> -> <term>`
 function parse_arr(code, indx, bind, vars) {
-  var [indx, skip] = parse_str("->", code, next(code, indx));
+  var [indx, skip] = parse_str(code, next(code, indx), "->");
   var [indx, body] = parse_trm(code, indx, Ext("", Ext("", vars)));
   return [indx, All(false, "", "", shift(bind,1,0), body)];
 };
 
 // Parses an annotation, `<term> :: <term>`
 function parse_ann(code, indx, expr, vars) {
-  var [indx, skip] = parse_str("::", code, next(code, indx));
+  var [indx, skip] = parse_str(code, next(code, indx), "::");
   var [indx, type] = parse_trm(code, indx, vars);
   return [indx, Ann(false, expr, type)];
 };
@@ -296,7 +296,7 @@ function parse_mod(code, indx) {
   function parse_defs(code, indx) {
     try {
       var [indx, name] = parse_nam(code, next(code, indx));
-      var [indx, skip] = parse_str(":", code, next(code, indx));
+      var [indx, skip] = parse_str(code, next(code, indx), ":");
       var [indx, type] = parse_trm(code, next(code, indx), Nil());
       var [indx, term] = parse_trm(code, next(code, indx), Nil());
       module[name] = {type, term};
