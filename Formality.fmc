@@ -33,7 +33,7 @@ and: Bool -> Bool -> Bool
   let case_a_tru = (b){()=>Bool}(true)(false)
   let case_a_fal = (b){()=>Bool}(false)(false)
   a{()=>Bool}(case_a_tru)(case_a_fal)
-  
+
 // Cmp
 
 Cmp : Type
@@ -266,79 +266,79 @@ List: (A: Type) -> Type
   (A) =>
   self{P: (x: List(A)) -> Type} ->
   (nil: P(nil{A})) ->
-  (ext: (head: A) -> (tail: List(A)) -> P(ext{A}(head)(tail))) ->
+  (cons: (head: A) -> (tail: List(A)) -> P(cons{A}(head)(tail))) ->
   P(self)
 
 nil: {A: Type} -> List(A)
   {A} =>
   {} => (nil) => () => nil
 
-ext: {A: Type} -> (:A) -> (:List(A)) -> List(A)
+cons: {A: Type} -> (:A) -> (:List(A)) -> List(A)
   {A} => (head) => (tail) =>
-  {} => () => (ext) => ext(head)(tail)
+  {} => () => (cons) => cons(head)(tail)
 
 find: {A: Type} -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
   {A} => (list) => (cond) => (indx) =>
   let case_nil = none{Pair(A)(Nat)}
-  let case_ext = (head) => (tail) =>
+  let case_cons = (head) => (tail) =>
     let case_true  = some{Pair(A)(Nat)}(pair{A}{Nat}(head)(indx))
     let case_false = find{A}(tail)(cond)(succ(indx))
     cond(head)(indx){() => Maybe(Pair(A)(Nat))}(case_true)(case_false)
-  list{() => Maybe(Pair(A)(Nat))}(case_nil)(case_ext)
+  list{() => Maybe(Pair(A)(Nat))}(case_nil)(case_cons)
 
 take: {A: Type} -> Nat -> List(A) -> List(A)
   {A} => (n) => (list) =>
   let case_nil = nil{A}
-  let case_ext = (head) => (tail) =>
+  let case_cons = (head) => (tail) =>
     let case_zero = nil{A}
-    let case_succ = (pred) => ext{A}(head)(take{A}(pred)(tail))
+    let case_succ = (pred) => cons{A}(head)(take{A}(pred)(tail))
     n{()=>List(A)}(case_zero)(case_succ)
-  list{()=>List(A)}(case_nil)(case_ext)
+  list{()=>List(A)}(case_nil)(case_cons)
 
 drop: {A: Type} -> Nat -> List(A) -> List(A)
   {A} => (n) => (list) =>
   let case_nil = nil{A}
-  let case_ext = (head) => (tail) =>
+  let case_cons = (head) => (tail) =>
     let case_zero = tail
     let case_succ = (pred) => drop{A}(pred)(tail)
     n{()=>List(A)}(case_zero)(case_succ)
-  list{()=>List(A)}(case_nil)(case_ext)
+  list{()=>List(A)}(case_nil)(case_cons)
 
 is_empty: {A: Type} -> List(A) -> Bool
   {A} => (list) =>
   let case_nil = true
-  let case_ext = (head) => (tail) => false
-  list{() => Bool}(case_nil)(case_ext)
+  let case_cons = (head) => (tail) => false
+  list{() => Bool}(case_nil)(case_cons)
 
 zip_with: {A: Type} -> {B: Type} -> {C: Type} -> (A -> B -> C) -> List(A) -> List(B) -> List(C)
   {A} => {B} => {C} => (fn) => (as) => (bs) =>
   let case_a_nil = nil{C}
-  let case_a_ext = (a_head) => (a_tail) =>
+  let case_a_cons = (a_head) => (a_tail) =>
     let case_b_nil = nil{C}
-    let case_b_ext = (b_head) => (b_tail) =>
+    let case_b_cons = (b_head) => (b_tail) =>
       let head = fn(a_head)(b_head)
       let tail = zip_with{A}{B}{C}(fn)(a_tail)(b_tail)
-      ext{C}(head)(tail)
-    bs{()=>List(C)}(case_b_nil)(case_b_ext)
-  as{()=>List(C)}(case_a_nil)(case_a_ext)
+      cons{C}(head)(tail)
+    bs{()=>List(C)}(case_b_nil)(case_b_cons)
+  as{()=>List(C)}(case_a_nil)(case_a_cons)
 
 all_satisfy: {A: Type} -> (A -> Bool) -> List(A) -> Bool
   {A} => (cond) => (list) =>
   let case_nil = true
-  let case_ext = (head) => (tail) =>
+  let case_cons = (head) => (tail) =>
     let case_t = all_satisfy{A}(cond)(tail)
     let case_f = false
     cond(head){()=>Bool}(case_t)(case_f)
-  list{()=>Bool}(case_nil)(case_ext)
+  list{()=>Bool}(case_nil)(case_cons)
 
 any_satisfy: {A: Type} -> (A -> Bool) -> List(A) -> Bool
   {A} => (cond) => (list) =>
   let case_nil = false
-  let case_ext = (head) => (tail) =>
+  let case_cons = (head) => (tail) =>
     let case_t = true
     let case_f = any_satisfy{A}(cond)(tail)
     cond(head){()=>Bool}(case_t)(case_f)
-  list{()=>Bool}(case_nil)(case_ext)
+  list{()=>Bool}(case_nil)(case_cons)
 
 all_true: List(Bool) -> Bool
   (list) => all_satisfy{Bool}((x) => x)(list)
@@ -349,8 +349,14 @@ any_true: List(Bool) -> Bool
 list_len: {A: Type} -> List(A) -> Nat
   {A} => (list) =>
   let case_nil = zero
-  let case_ext = (head) => (tail) => succ(list_len{A}(tail))
-  list{()=>Nat}(case_nil)(case_ext)
+  let case_cons = (head) => (tail) => succ(list_len{A}(tail))
+  list{()=>Nat}(case_nil)(case_cons)
+
+concat : {A: Type} -> List(A) -> List(A) -> List(A)
+  {A} => (as) => (bs) =>
+  let case_nil = bs
+  let case_cons = (head) => (tail) => cons{A}(head)(concat{A}(tail)(bs))
+  as(case_nil)(case_cons)
 
 // Bits
 // ====
@@ -466,22 +472,22 @@ word_cmp: {size: Nat} -> Word(size) -> Word(size) -> Cmp
   {size} => (a) => (b) =>
   word_cmp_aux{size}(a)(b)(eql)
 
-// a { b
+// a > b
 word_ltn: {size:Nat} -> Word(size) -> Word(size) -> Bool
   {size} => (a) => (b) =>
   word_cmp{size}(a)(b){() => Bool}(true)(false)(false)
 
-// a {= b
+// a <= b
 word_lte: {size:Nat} -> Word(size) -> Word(size) -> Bool
   {size} => (a) => (b) =>
   word_cmp{size}(a)(b){() => Bool}(true)(true)(false)
-
+'
 // a == b
 word_eql: {size:Nat} -> Word(size) -> Word(size) -> Bool
   {size} => (a) => (b) =>
   word_cmp{size}(a)(b){() => Bool}(false)(true)(false)
 
-// a }= b
+// a >= b
 word_gte: {size:Nat} -> Word(size) -> Word(size) -> Bool
   {size} => (a) => (b) =>
   word_cmp{size}(a)(b){() => Bool}(false)(true)(true)
