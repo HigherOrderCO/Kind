@@ -7,7 +7,8 @@ fs.readFile('Formality.fmc', `utf8`,(err,data) => {
   {
     var module = fmc.parse_mod(data, 0);
     // Normalizes and type-checks all terms
-    for (var name in module) {
+
+    function check(name) {
       console.log("name:", name);
       console.log("term:", fmc.stringify_trm(module[name].term));
       try {
@@ -20,8 +21,16 @@ fs.readFile('Formality.fmc', `utf8`,(err,data) => {
       } catch (e) {
         console.log("type:", e);
       }
-      console.log("");
+        console.log("");
     };
+
+    var nam = process.argv[2];
+
+    if (nam === "@") {
+      for (var name in module) {
+        check(name)
+      };
+    } else { check(nam); };
   }});
 
 

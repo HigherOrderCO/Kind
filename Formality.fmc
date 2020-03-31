@@ -20,19 +20,19 @@ not: Bool -> Bool
   (a) =>
   let case_t = false
   let case_f = true
-  a{()=>Bool}(case_t)(case_f)
+  a{() => Bool}(case_t)(case_f)
 
 or: Bool -> Bool -> Bool
   (a) => (b) =>
   let case_a_tru = (b){() => Bool}(true)(true)
   let case_a_fal = (b){() => Bool}(true)(false)
-  a{()=>Bool}(case_a_tru)(case_a_fal)
+  a{() => Bool}(case_a_tru)(case_a_fal)
 
 and: Bool -> Bool -> Bool
   (a) => (b) =>
-  let case_a_tru = (b){()=>Bool}(true)(false)
-  let case_a_fal = (b){()=>Bool}(false)(false)
-  a{()=>Bool}(case_a_tru)(case_a_fal)
+  let case_a_tru = (b){() => Bool}(true)(false)
+  let case_a_fal = (b){() => Bool}(false)(false)
+  a{() => Bool}(case_a_tru)(case_a_fal)
 
 // Cmp
 
@@ -86,7 +86,7 @@ pred: Nat -> Nat
   (n) =>
   let case_zero = zero
   let case_succ = (pred) => pred
-  n{()=>Nat}(case_zero)(case_succ)
+  n{() => Nat}(case_zero)(case_succ)
 
 fold_nat : (n: Nat) -> {P: Nat -> Type} -> P(zero) -> ((n:Nat) -> P(n) -> P(succ(n))) -> P(n)
   (n) => {P} => (z) => (s) =>
@@ -103,27 +103,27 @@ nat_cmp: Nat -> Nat -> Cmp
   let case_a_zero =
     let case_b_zero = eql
     let case_b_succ = (b_pred) => ltn
-    b{()=>Cmp}(case_b_zero)(case_b_succ)
+    b{() => Cmp}(case_b_zero)(case_b_succ)
   let case_a_succ = (a_pred) =>
     let case_b_zero = gtn
     let case_b_succ = (b_pred) => nat_cmp(a_pred)(b_pred)
-    b{()=>Cmp}(case_b_zero)(case_b_succ)
-  a{()=>Cmp}(case_a_zero)(case_a_succ)
+    b{() => Cmp}(case_b_zero)(case_b_succ)
+  a{() => Cmp}(case_a_zero)(case_a_succ)
 
 nat_ltn: Nat -> Nat -> Bool
-  (a) => (b) => nat_cmp(a)(b){()=>Bool}(true)(false)(false)
+  (a) => (b) => nat_cmp(a)(b){() => Bool}(true)(false)(false)
 
 nat_lte: Nat -> Nat -> Bool
-  (a) => (b) => nat_cmp(a)(b){()=>Bool}(true)(true)(false)
+  (a) => (b) => nat_cmp(a)(b){() => Bool}(true)(true)(false)
 
 nat_eql: Nat -> Nat -> Bool
-  (a) => (b) => nat_cmp(a)(b){()=>Bool}(false)(true)(false)
+  (a) => (b) => nat_cmp(a)(b){() => Bool}(false)(true)(false)
 
 nat_gte: Nat -> Nat -> Bool
-  (a) => (b) => nat_cmp(a)(b){()=>Bool}(false)(true)(true)
+  (a) => (b) => nat_cmp(a)(b){() => Bool}(false)(true)(true)
 
 nat_gtn: Nat -> Nat -> Bool
-  (a) => (b) => nat_cmp(a)(b){()=>Bool}(false)(false)(true)
+  (a) => (b) => nat_cmp(a)(b){() => Bool}(false)(false)(true)
 
 n0: Nat
   zero
@@ -292,8 +292,8 @@ take: {A: Type} -> Nat -> List(A) -> List(A)
   let case_cons = (head) => (tail) =>
     let case_zero = nil{A}
     let case_succ = (pred) => cons{A}(head)(take{A}(pred)(tail))
-    n{()=>List(A)}(case_zero)(case_succ)
-  list{()=>List(A)}(case_nil)(case_cons)
+    n{() => List(A)}(case_zero)(case_succ)
+  list{() => List(A)}(case_nil)(case_cons)
 
 drop: {A: Type} -> Nat -> List(A) -> List(A)
   {A} => (n) => (list) =>
@@ -301,8 +301,8 @@ drop: {A: Type} -> Nat -> List(A) -> List(A)
   let case_cons = (head) => (tail) =>
     let case_zero = tail
     let case_succ = (pred) => drop{A}(pred)(tail)
-    n{()=>List(A)}(case_zero)(case_succ)
-  list{()=>List(A)}(case_nil)(case_cons)
+    n{() => List(A)}(case_zero)(case_succ)
+  list{() => List(A)}(case_nil)(case_cons)
 
 is_empty: {A: Type} -> List(A) -> Bool
   {A} => (list) =>
@@ -319,8 +319,8 @@ zip_with: {A: Type} -> {B: Type} -> {C: Type} -> (A -> B -> C) -> List(A) -> Lis
       let head = fn(a_head)(b_head)
       let tail = zip_with{A}{B}{C}(fn)(a_tail)(b_tail)
       cons{C}(head)(tail)
-    bs{()=>List(C)}(case_b_nil)(case_b_cons)
-  as{()=>List(C)}(case_a_nil)(case_a_cons)
+    bs{() => List(C)}(case_b_nil)(case_b_cons)
+  as{() => List(C)}(case_a_nil)(case_a_cons)
 
 all_satisfy: {A: Type} -> (A -> Bool) -> List(A) -> Bool
   {A} => (cond) => (list) =>
@@ -328,8 +328,8 @@ all_satisfy: {A: Type} -> (A -> Bool) -> List(A) -> Bool
   let case_cons = (head) => (tail) =>
     let case_t = all_satisfy{A}(cond)(tail)
     let case_f = false
-    cond(head){()=>Bool}(case_t)(case_f)
-  list{()=>Bool}(case_nil)(case_cons)
+    cond(head){() => Bool}(case_t)(case_f)
+  list{() => Bool}(case_nil)(case_cons)
 
 any_satisfy: {A: Type} -> (A -> Bool) -> List(A) -> Bool
   {A} => (cond) => (list) =>
@@ -337,8 +337,8 @@ any_satisfy: {A: Type} -> (A -> Bool) -> List(A) -> Bool
   let case_cons = (head) => (tail) =>
     let case_t = true
     let case_f = any_satisfy{A}(cond)(tail)
-    cond(head){()=>Bool}(case_t)(case_f)
-  list{()=>Bool}(case_nil)(case_cons)
+    cond(head){() => Bool}(case_t)(case_f)
+  list{() => Bool}(case_nil)(case_cons)
 
 all_true: List(Bool) -> Bool
   (list) => all_satisfy{Bool}((x) => x)(list)
@@ -350,13 +350,16 @@ list_len: {A: Type} -> List(A) -> Nat
   {A} => (list) =>
   let case_nil = zero
   let case_cons = (head) => (tail) => succ(list_len{A}(tail))
-  list{()=>Nat}(case_nil)(case_cons)
+  list{() => Nat}(case_nil)(case_cons)
 
 concat : {A: Type} -> List(A) -> List(A) -> List(A)
   {A} => (as) => (bs) =>
   let case_nil = bs
   let case_cons = (head) => (tail) => cons{A}(head)(concat{A}(tail)(bs))
-  as(case_nil)(case_cons)
+  as{() => List(A)}(case_nil)(case_cons)
+
+sing : {A : Type} -> (x : A) -> List(A)
+  {A} => (x) => cons{A}(x)(nil{A})
 
 // Bits
 // ====
@@ -481,7 +484,7 @@ word_ltn: {size:Nat} -> Word(size) -> Word(size) -> Bool
 word_lte: {size:Nat} -> Word(size) -> Word(size) -> Bool
   {size} => (a) => (b) =>
   word_cmp{size}(a)(b){() => Bool}(true)(true)(false)
-'
+
 // a == b
 word_eql: {size:Nat} -> Word(size) -> Word(size) -> Bool
   {size} => (a) => (b) =>
@@ -492,7 +495,7 @@ word_gte: {size:Nat} -> Word(size) -> Word(size) -> Bool
   {size} => (a) => (b) =>
   word_cmp{size}(a)(b){() => Bool}(false)(true)(true)
 
-// a } b
+// a > b
 word_gtn: {size:Nat} -> Word(size) -> Word(size) -> Bool
   {size} => (a) => (b) =>
   word_cmp{size}(a)(b){() => Bool}(false)(false)(true)
@@ -626,310 +629,149 @@ Char: Type
 ascii: Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Char
   (a) => (b) => (c) => (d) => (e) => (f) => (g) => (h) =>
   let ty = {size: Nat} -> Word(size) -> Word(succ(size))
-  let wA = a{()=>ty}(w0)(w1)
-  let wB = b{()=>ty}(w0)(w1)
-  let wC = c{()=>ty}(w0)(w1)
-  let wD = d{()=>ty}(w0)(w1)
-  let wE = e{()=>ty}(w0)(w1)
-  let wF = f{()=>ty}(w0)(w1)
-  let wG = g{()=>ty}(w0)(w1)
-  let wH = h{()=>ty}(w0)(w1)
+  let wA = a{() => ty}(w0)(w1)
+  let wB = b{() => ty}(w0)(w1)
+  let wC = c{() => ty}(w0)(w1)
+  let wD = d{() => ty}(w0)(w1)
+  let wE = e{() => ty}(w0)(w1)
+  let wF = f{() => ty}(w0)(w1)
+  let wG = g{() => ty}(w0)(w1)
+  let wH = h{() => ty}(w0)(w1)
   wH{n31}(wG{n30}(wF{n29}(wE{n28}(wD{n27}(wC{n26}(wB{n25}(wA{n24}(
   w0{n23}(w0{n22}(w0{n21}(w0{n20}(w0{n19}(w0{n18}(w0{n17}(w0{n16}(
   w0{n15}(w0{n14}(w0{n13}(w0{n12}(w0{n11}(w0{n10}(w0{n9 }(w0{n8 }(
   w0{n7 }(w0{n6 }(w0{n5 }(w0{n4 }(w0{n3 }(w0{n2 }(w0{n1 }(w0{n0 }(
   we))))))))))))))))))))))))))))))))
 
-char_tab : Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t1)
-
-char_newline : Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t0)
-
-char_space : Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t0)(t0)
-
-char_exclamation: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t0)(t1)
-
-char_quotation: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t1)(t0)
-
-char_number: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t1)(t1)
-
-char_dollar: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t0)(t0)
-
-char_percent: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t0)(t1)
-
-char_ampersand: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t1)(t0)
-
-char_apostrophe: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t1)(t1)
-
-char_left_parens: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t0)
-
-char_right_parens: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t1)
-
-char_asterisk: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t0)
-
-char_plus: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t1)
-
-char_comma: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t0)(t0)
-
-char_hyphen: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t0)(t1)
-
-char_period: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t1)(t0)
-
-char_slash: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t1)(t1)
-
-char_0: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t0)(t0)
-
-char_1: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t0)(t1)
-
-char_2: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t1)(t0)
-
-char_3: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t1)(t1)
-
-char_4: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t0)(t0)
-
-char_5: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t0)(t1)
-
-char_6: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t1)(t0)
-
-char_7: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t1)(t1)
-
-char_8: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t0)
-
-char_9: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t1)
-
-char_colon: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t0)
-
-char_semicolon: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t1)
-
-char_less_than: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t0)
-
-char_equals: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t1)
-
-char_greater_than: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t0)
-
-char_question: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t1)
-
-char_at: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t0)
-
-char_A: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t1)
-
-char_B: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t1)(t0)
-
-char_C: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t1)(t1)
-
-char_D: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t0)(t0)
-
-char_E: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t0)(t1)
-
-char_F: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t1)(t0)
-
-char_G: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t1)(t1)
-
-char_H: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t0)(t0)
-
-char_I: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t0)(t1)
-
-char_J: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t1)(t0)
-
-char_K: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t1)(t1)
-
-char_L: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t0)(t0)
-
-char_M: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t0)(t1)
-
-char_N: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t1)(t0)
-
-char_O: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t1)(t1)
-
-char_P: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t0)(t0)
-
-char_Q: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t0)(t1)
-
-char_R: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t1)(t0)
-
-char_S: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t1)(t1)
-
-char_T: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t0)(t0)
-
-char_U: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t0)(t1)
-
-char_V: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t1)(t0)
-
-char_W: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t1)(t1)
-
-char_X: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t0)(t0)
-
-char_Y: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t0)(t1)
-
-char_Z: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t1)(t0)
-
-char_left_bracket: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t1)(t1)
-
-char_backslash: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t0)(t0)
-
-char_right_bracket: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t0)(t1)
-
-char_caret: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t1)(t0)
-
-char_underscore: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t1)(t1)
-
-char_backtick: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t0)(t0)
-
-char_a: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t0)(t1)
-
-char_b: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t1)(t0)
-
-char_c: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t1)(t1)
-
-char_d: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t0)(t0)
-
-char_e: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t0)(t1)
-
-char_f: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t1)(t0)
-
-char_g: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t1)(t1)
-
-char_h: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t0)(t0)
-
-char_i: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t0)(t1)
-
-char_j: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t1)(t0)
-
-char_k: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t1)(t1)
-
-char_l: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t0)(t0)
-
-char_m: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t0)(t1)
-
-char_n: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t1)(t0)
-
-char_o: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t1)(t1)
-
-char_p: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t0)(t0)
-
-char_q: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t0)(t1)
-
-char_r: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t1)(t0)
-
-char_s: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t1)(t1)
-
-char_t: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t0)(t0)
-
-char_u: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t0)(t1)
-
-char_v: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t1)(t0)
-
-char_w: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t1)(t1)
-
-char_x: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t0)(t0)
-
-char_y: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t0)(t1)
-
-char_z: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t0)
-
-char_left_brace: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t1)
-
-char_bar: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t0)
-
-char_right_brace: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t1)
-
-char_tilde: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t0)
+// ASCII characters
+_NUL   : Char ascii(t0)(t0)(t0)(t0)(t0)(t0)(t0)(t0) // \NUL
+_SOH   : Char ascii(t0)(t0)(t0)(t0)(t0)(t0)(t0)(t1) // \SOH
+_STX   : Char ascii(t0)(t0)(t0)(t0)(t0)(t0)(t1)(t0) // \STX
+_ETX   : Char ascii(t0)(t0)(t0)(t0)(t0)(t0)(t1)(t1) // \ETX
+_EOT   : Char ascii(t0)(t0)(t0)(t0)(t0)(t1)(t0)(t0) // \EOT
+_ENQ   : Char ascii(t0)(t0)(t0)(t0)(t0)(t1)(t0)(t1) // \ENQ
+_ACK   : Char ascii(t0)(t0)(t0)(t0)(t0)(t1)(t1)(t0) // \ACK
+_BEL   : Char ascii(t0)(t0)(t0)(t0)(t0)(t1)(t1)(t1) // \BEL
+_BS    : Char ascii(t0)(t0)(t0)(t0)(t1)(t0)(t0)(t0) // \BS
+_HT    : Char ascii(t0)(t0)(t0)(t0)(t1)(t0)(t0)(t1) // \HT
+_LF    : Char ascii(t0)(t0)(t0)(t0)(t1)(t0)(t1)(t0) // \LF
+_VT    : Char ascii(t0)(t0)(t0)(t0)(t1)(t0)(t1)(t1) // \VT
+_FF    : Char ascii(t0)(t0)(t0)(t0)(t1)(t1)(t0)(t0) // \FF
+_CR    : Char ascii(t0)(t0)(t0)(t0)(t1)(t1)(t0)(t1) // \CR
+_SO    : Char ascii(t0)(t0)(t0)(t0)(t1)(t1)(t1)(t0) // \SO
+_SI    : Char ascii(t0)(t0)(t0)(t0)(t1)(t1)(t1)(t1) // \S 
+_DLE   : Char ascii(t0)(t0)(t0)(t1)(t0)(t0)(t0)(t0) // \DLE
+_DC1   : Char ascii(t0)(t0)(t0)(t1)(t0)(t0)(t0)(t1) // \DC1
+_DC2   : Char ascii(t0)(t0)(t0)(t1)(t0)(t0)(t1)(t0) // \DC2
+_DC3   : Char ascii(t0)(t0)(t0)(t1)(t0)(t0)(t1)(t1) // \DC3
+_DC4   : Char ascii(t0)(t0)(t0)(t1)(t0)(t1)(t0)(t0) // \DC4
+_NAK   : Char ascii(t0)(t0)(t0)(t1)(t0)(t1)(t0)(t1) // \NAK
+_SYN   : Char ascii(t0)(t0)(t0)(t1)(t0)(t1)(t1)(t0) // \SYN
+_ETB   : Char ascii(t0)(t0)(t0)(t1)(t0)(t1)(t1)(t1) // \ETB
+_CAN   : Char ascii(t0)(t0)(t0)(t1)(t1)(t0)(t0)(t0) // \CAN
+_EM    : Char ascii(t0)(t0)(t0)(t1)(t1)(t0)(t0)(t1) // \EM
+_SUB   : Char ascii(t0)(t0)(t0)(t1)(t1)(t0)(t1)(t0) // \SUB
+_ESC   : Char ascii(t0)(t0)(t0)(t1)(t1)(t0)(t1)(t1) // \ESC
+_FS    : Char ascii(t0)(t0)(t0)(t1)(t1)(t1)(t0)(t0) // \FS
+_GS    : Char ascii(t0)(t0)(t0)(t1)(t1)(t1)(t0)(t1) // \GS
+_RS    : Char ascii(t0)(t0)(t0)(t1)(t1)(t1)(t1)(t0) // \RS
+_US    : Char ascii(t0)(t0)(t0)(t1)(t1)(t1)(t1)(t1) // \US
+_space : Char ascii(t0)(t0)(t1)(t0)(t0)(t0)(t0)(t0) // ' '
+_excl  : Char ascii(t0)(t0)(t1)(t0)(t0)(t0)(t0)(t1) // '!'
+_quot  : Char ascii(t0)(t0)(t1)(t0)(t0)(t0)(t1)(t0) // '"'
+_hash  : Char ascii(t0)(t0)(t1)(t0)(t0)(t0)(t1)(t1) // '#'
+_dollar: Char ascii(t0)(t0)(t1)(t0)(t0)(t1)(t0)(t0) // '$'
+_percnt: Char ascii(t0)(t0)(t1)(t0)(t0)(t1)(t0)(t1) // '%'
+_amp   : Char ascii(t0)(t0)(t1)(t0)(t0)(t1)(t1)(t0) // '&'
+_apos  : Char ascii(t0)(t0)(t1)(t0)(t0)(t1)(t1)(t1) // "'"
+_lpar  : Char ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t0) // '('
+_rpar  : Char ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t1) // ')'
+_ast   : Char ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t0) // '*'
+_plus  : Char ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t1) // '+'
+_comma : Char ascii(t0)(t0)(t1)(t0)(t1)(t1)(t0)(t0) // ','
+_dash  : Char ascii(t0)(t0)(t1)(t0)(t1)(t1)(t0)(t1) // '-'
+_period: Char ascii(t0)(t0)(t1)(t0)(t1)(t1)(t1)(t0) // '.'
+_sol   : Char ascii(t0)(t0)(t1)(t0)(t1)(t1)(t1)(t1) // '/'
+_0     : Char ascii(t0)(t0)(t1)(t1)(t0)(t0)(t0)(t0) // '0'
+_1     : Char ascii(t0)(t0)(t1)(t1)(t0)(t0)(t0)(t1) // '1'
+_2     : Char ascii(t0)(t0)(t1)(t1)(t0)(t0)(t1)(t0) // '2'
+_3     : Char ascii(t0)(t0)(t1)(t1)(t0)(t0)(t1)(t1) // '3'
+_4     : Char ascii(t0)(t0)(t1)(t1)(t0)(t1)(t0)(t0) // '4'
+_5     : Char ascii(t0)(t0)(t1)(t1)(t0)(t1)(t0)(t1) // '5'
+_6     : Char ascii(t0)(t0)(t1)(t1)(t0)(t1)(t1)(t0) // '6'
+_7     : Char ascii(t0)(t0)(t1)(t1)(t0)(t1)(t1)(t1) // '7'
+_8     : Char ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t0) // '8'
+_9     : Char ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t1) // '9'
+_colon : Char ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t0) // ':'
+_semi  : Char ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t1) // ';'
+_lt    : Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t0) // '<'
+_equals: Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t1) // '='
+_gt    : Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t0) // '>'
+_quest : Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t1) // '?'
+_commat: Char ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t0) // '@'
+_A     : Char ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t1) // 'A'
+_B     : Char ascii(t0)(t1)(t0)(t0)(t0)(t0)(t1)(t0) // 'B'
+_C     : Char ascii(t0)(t1)(t0)(t0)(t0)(t0)(t1)(t1) // 'C'
+_D     : Char ascii(t0)(t1)(t0)(t0)(t0)(t1)(t0)(t0) // 'D'
+_E     : Char ascii(t0)(t1)(t0)(t0)(t0)(t1)(t0)(t1) // 'E'
+_F     : Char ascii(t0)(t1)(t0)(t0)(t0)(t1)(t1)(t0) // 'F'
+_G     : Char ascii(t0)(t1)(t0)(t0)(t0)(t1)(t1)(t1) // 'G'
+_H     : Char ascii(t0)(t1)(t0)(t0)(t1)(t0)(t0)(t0) // 'H'
+_I     : Char ascii(t0)(t1)(t0)(t0)(t1)(t0)(t0)(t1) // 'I'
+_J     : Char ascii(t0)(t1)(t0)(t0)(t1)(t0)(t1)(t0) // 'J'
+_K     : Char ascii(t0)(t1)(t0)(t0)(t1)(t0)(t1)(t1) // 'K'
+_L     : Char ascii(t0)(t1)(t0)(t0)(t1)(t1)(t0)(t0) // 'L'
+_M     : Char ascii(t0)(t1)(t0)(t0)(t1)(t1)(t0)(t1) // 'M'
+_N     : Char ascii(t0)(t1)(t0)(t0)(t1)(t1)(t1)(t0) // 'N'
+_O     : Char ascii(t0)(t1)(t0)(t0)(t1)(t1)(t1)(t1) // 'O'
+_P     : Char ascii(t0)(t1)(t0)(t1)(t0)(t0)(t0)(t0) // 'P'
+_Q     : Char ascii(t0)(t1)(t0)(t1)(t0)(t0)(t0)(t1) // 'Q'
+_R     : Char ascii(t0)(t1)(t0)(t1)(t0)(t0)(t1)(t0) // 'R'
+_S     : Char ascii(t0)(t1)(t0)(t1)(t0)(t0)(t1)(t1) // 'S'
+_T     : Char ascii(t0)(t1)(t0)(t1)(t0)(t1)(t0)(t0) // 'T'
+_U     : Char ascii(t0)(t1)(t0)(t1)(t0)(t1)(t0)(t1) // 'U'
+_V     : Char ascii(t0)(t1)(t0)(t1)(t0)(t1)(t1)(t0) // 'V'
+_W     : Char ascii(t0)(t1)(t0)(t1)(t0)(t1)(t1)(t1) // 'W'
+_X     : Char ascii(t0)(t1)(t0)(t1)(t1)(t0)(t0)(t0) // 'X'
+_Y     : Char ascii(t0)(t1)(t0)(t1)(t1)(t0)(t0)(t1) // 'Y'
+_Z     : Char ascii(t0)(t1)(t0)(t1)(t1)(t0)(t1)(t0) // 'Z'
+_lbrack: Char ascii(t0)(t1)(t0)(t1)(t1)(t0)(t1)(t1) // '['
+_bsol  : Char ascii(t0)(t1)(t0)(t1)(t1)(t1)(t0)(t0) // '\\'
+_rbrack: Char ascii(t0)(t1)(t0)(t1)(t1)(t1)(t0)(t1) // ']'
+_caret : Char ascii(t0)(t1)(t0)(t1)(t1)(t1)(t1)(t0) // '^'
+_lowbar: Char ascii(t0)(t1)(t0)(t1)(t1)(t1)(t1)(t1) // '_'
+_grave : Char ascii(t0)(t1)(t1)(t0)(t0)(t0)(t0)(t0) // '`'
+_a     : Char ascii(t0)(t1)(t1)(t0)(t0)(t0)(t0)(t1) // 'a'
+_b     : Char ascii(t0)(t1)(t1)(t0)(t0)(t0)(t1)(t0) // 'b'
+_c     : Char ascii(t0)(t1)(t1)(t0)(t0)(t0)(t1)(t1) // 'c'
+_d     : Char ascii(t0)(t1)(t1)(t0)(t0)(t1)(t0)(t0) // 'd'
+_e     : Char ascii(t0)(t1)(t1)(t0)(t0)(t1)(t0)(t1) // 'e'
+_f     : Char ascii(t0)(t1)(t1)(t0)(t0)(t1)(t1)(t0) // 'f'
+_g     : Char ascii(t0)(t1)(t1)(t0)(t0)(t1)(t1)(t1) // 'g'
+_h     : Char ascii(t0)(t1)(t1)(t0)(t1)(t0)(t0)(t0) // 'h'
+_i     : Char ascii(t0)(t1)(t1)(t0)(t1)(t0)(t0)(t1) // 'i'
+_j     : Char ascii(t0)(t1)(t1)(t0)(t1)(t0)(t1)(t0) // 'j'
+_k     : Char ascii(t0)(t1)(t1)(t0)(t1)(t0)(t1)(t1) // 'k'
+_l     : Char ascii(t0)(t1)(t1)(t0)(t1)(t1)(t0)(t0) // 'l'
+_m     : Char ascii(t0)(t1)(t1)(t0)(t1)(t1)(t0)(t1) // 'm'
+_n     : Char ascii(t0)(t1)(t1)(t0)(t1)(t1)(t1)(t0) // 'n'
+_o     : Char ascii(t0)(t1)(t1)(t0)(t1)(t1)(t1)(t1) // 'o'
+_p     : Char ascii(t0)(t1)(t1)(t1)(t0)(t0)(t0)(t0) // 'p'
+_q     : Char ascii(t0)(t1)(t1)(t1)(t0)(t0)(t0)(t1) // 'q'
+_r     : Char ascii(t0)(t1)(t1)(t1)(t0)(t0)(t1)(t0) // 'r'
+_s     : Char ascii(t0)(t1)(t1)(t1)(t0)(t0)(t1)(t1) // 's'
+_t     : Char ascii(t0)(t1)(t1)(t1)(t0)(t1)(t0)(t0) // 't'
+_u     : Char ascii(t0)(t1)(t1)(t1)(t0)(t1)(t0)(t1) // 'u'
+_v     : Char ascii(t0)(t1)(t1)(t1)(t0)(t1)(t1)(t0) // 'v'
+_w     : Char ascii(t0)(t1)(t1)(t1)(t0)(t1)(t1)(t1) // 'w'
+_x     : Char ascii(t0)(t1)(t1)(t1)(t1)(t0)(t0)(t0) // 'x'
+_y     : Char ascii(t0)(t1)(t1)(t1)(t1)(t0)(t0)(t1) // 'y'
+_z     : Char ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t0) // 'z'
+_lbrace: Char ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t1) // '{'
+_vert  : Char ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t0) // '|'
+_rbrace: Char ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t1) // '}'
+_tilde : Char ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t0) // '~'
+_DEL   : Char ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t1) // \DEL
 
 // String
 // ======
@@ -964,20 +806,20 @@ is_name: Char -> Bool
 first_valid: {A: Type} -> List(Maybe(A)) -> Maybe(A)
   {A} => (list) =>
   let case_nil = none{A}
-  let case_ext = (head) => (tail) =>
+  let case_cons = (head) => (tail) =>
     let case_none = first_valid{A}(tail)
     let case_some = (value) => some{A}(value)
-    head{()=>Maybe(A)}(case_none)(case_some)
-  list{()=>Maybe(A)}(case_nil)(case_ext)
+    head{() => Maybe(A)}(case_none)(case_some)
+  list{() => Maybe(A)}(case_nil)(case_cons)
 
 drop_while: (Char -> Bool) -> String -> String
   (cond) => (code) =>
   let case_nil = nil{Char}
-  let case_ext = (head) => (tail) =>
+  let case_cons = (head) => (tail) =>
     let case_t = drop_while(cond)(tail)
     let case_f = tail
-    cond(head){()=>String}(case_t)(case_f)
-  code{()=>String}(case_nil)(case_ext)
+    cond(head){() => String}(case_t)(case_f)
+  code{() => String}(case_nil)(case_cons)
 
 drop_spaces: String -> String
   drop_while(is_space)
@@ -989,18 +831,18 @@ drop_comment: String -> String
   // Removes "// ... \n"
   let code = 
     let fst2 = take{Char}(n2)(code)
-    let sla2 = ext{Char}(char_slash)(ext{Char}(char_slash)(nil{Char}))
+    let sla2 = cons{Char}(char_slash)(cons{Char}(char_slash)(nil{Char}))
     let case_t =
       let code = drop{Char}(n2)(code)
       let code = drop_while((x) => not(u32_eql(char_newline)(x)))(code)
       code
     let case_f =
       code
-    string_eql(fst2)(sla2){()=>String}(case_t)(case_f)
+    string_eql(fst2)(sla2){() => String}(case_t)(case_f)
   code
 
 // TODO: remove many comments (not just one)
-next: String -> String
+ncons: String -> String
   (code) => drop_comment(code)
 
 Parsed : (A: Type) -> Type
@@ -1021,29 +863,29 @@ chain
     Parsed(B)
   {A} => {B} => (x) => (f) =>
   let case_none = noparse{B}
-  let case_some = (value) => value{()=>Parsed(B)}(f)
-  x{()=>Parsed(B)}(case_none)(case_some)
+  let case_some = (value) => value{() => Parsed(B)}(f)
+  x{() => Parsed(B)}(case_none)(case_some)
 
 parse_str: String -> String -> Parsed(String)
   (str) => (code) =>
   let case_str_nil = parsed{String}(code)(str)
-  let case_str_ext = (str_head) => (str_tail) =>
+  let case_str_cons = (str_head) => (str_tail) =>
     let case_code_nil = noparse{String}
-    let case_code_ext = (code_head) => (code_tail) =>
+    let case_code_cons = (code_head) => (code_tail) =>
       let case_t = parse_str(str_tail)(code_tail)
       let case_f = noparse{String}
-      u32_eql(code_head)(str_head){()=>Parsed(String)}(case_t)(case_f)
-    code{()=>Parsed(String)}(case_code_nil)(case_code_ext)
-  str{()=>Parsed(String)}(case_str_nil)(case_str_ext)
+      u32_eql(code_head)(str_head){() => Parsed(String)}(case_t)(case_f)
+    code{() => Parsed(String)}(case_code_nil)(case_code_cons)
+  str{() => Parsed(String)}(case_str_nil)(case_str_cons)
 
 parse_one_aux: List(String) -> String -> Nat -> Maybe(Pair(String)(Nat))
   (strs) => (code) => (indx) =>
   let case_nil = noparse{Nat}
-  let case_ext = (head) => (tail) =>
+  let case_cons = (head) => (tail) =>
     let case_none = parse_one_aux(tail)(code)(succ(indx))
-    let case_some = (value) => value{()=>Parsed(Nat)}((code)=>()=>parsed{Nat}(code)(indx))
-    parse_str(head)(code){()=>Maybe(Pair(String)(Nat))}(case_none)(case_some)
-  strs{()=>Parsed(Nat)}(case_nil)(case_ext)
+    let case_some = (value) => value{() => Parsed(Nat)}((code)=>() => parsed{Nat}(code)(indx))
+    parse_str(head)(code){() => Maybe(Pair(String)(Nat))}(case_none)(case_some)
+  strs{() => Parsed(Nat)}(case_nil)(case_cons)
 
 parse_one: List(String) -> String -> Maybe(Pair(String)(Nat))
   (strs) => (code) =>
@@ -1054,13 +896,13 @@ parse_nam_aux: String -> Pair(String)(String)
   let Ret = Pair(String)(String)
   let ret = pair{String}{String}
   let case_nil = ret(code)(nil{Char})
-  let case_ext = (head) => (tail) =>
+  let case_cons = (head) => (tail) =>
     let case_t =
-      let case_pair = (code) => (rest) => ret(code)(ext{Char}(head)(rest))
-      parse_nam_aux(tail){()=>Ret}(case_pair)
+      let case_pair = (code) => (rest) => ret(code)(cons{Char}(head)(rest))
+      parse_nam_aux(tail){() => Ret}(case_pair)
     let case_f = ret(code)(nil{Char})
-    is_name(head){()=>Ret}(case_t)(case_f)
-  code{()=>Ret}(case_nil)(case_ext)
+    is_name(head){() => Ret}(case_t)(case_f)
+  code{() => Ret}(case_nil)(case_cons)
 
 parse_nam: String -> Bool -> Maybe(Pair(String)(String))
   (code) => (allow_empty) =>
@@ -1069,7 +911,20 @@ parse_nam: String -> Bool -> Maybe(Pair(String)(String))
     let case_f = noparse{String}
     let valid = or(allow_empty)(not(is_empty{Char}(name)))
     valid{() => Parsed(String)}(case_t)(case_f)
-  parse_nam_aux(code){()=>Parsed(String)}(case_pair)
+  parse_nam_aux(code){() => Parsed(String)}(case_pair)
+
+// Stringify
+// =========
+
+// stringify_trm_go : List(String) -> Term -> String
+//   (vs) => (t) => sing{Char}(char_u)
+//   let go  = stringify_trm.go
+//   let cat = concat{String}
+//   let era = (e) => (str) => e{() => String}(cat("{",cat(str,"}")))(cat("(",cat(str,")")))
+//   t({() => String})("%var")("%ref")("%typ")("%all")("%lam")("%app")("%lit")("%ann")
+//
+// stringify_trm : Term -> String
+//   (t) => stringify_trm_go(nil{String}, t)
 
 // Main
 // ====
