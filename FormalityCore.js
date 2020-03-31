@@ -403,21 +403,21 @@ function shift(term, inc, dep) {
     case "Typ":
       return Typ();
     case "All":
+      var eras = term.eras;
       var self = term.self;
       var name = term.name;
       var bind = shift(term.bind, inc, dep + 1);
       var body = shift(term.body, inc, dep + 2);
-      var eras = term.eras;
       return All(eras, self, name, bind, body);
     case "Lam":
+      var eras = term.eras;
       var name = term.name;
       var body = shift(term.body, inc, dep + 1);
-      var eras = term.eras;
       return Lam(eras, name, body);
     case "App":
+      var eras = term.eras;
       var func = shift(term.func, inc, dep);
       var argm = shift(term.argm, inc, dep);
-      var eras = term.eras;
       return App(eras, func, argm);
     case "Let":
       var name = term.name;
@@ -447,21 +447,21 @@ function subst(term, val, dep) {
     case "Typ":
       return Typ();
     case "All":
+      var eras = term.eras;
       var self = term.self;
       var name = term.name;
       var bind = subst(term.bind, shift(val,1,0), dep + 1);
       var body = subst(term.body, shift(val,2,0), dep + 2);
-      var eras = term.eras;
       return All(eras, self, name, bind, body);
     case "Lam":
+      var eras = term.eras;
       var name = term.name;
       var body = subst(term.body, shift(val,1,0), dep + 1);
-      var eras = term.eras;
       return Lam(eras, name, body);
     case "App":
+      var eras = term.eras;
       var func = subst(term.func, val, dep);
       var argm = subst(term.argm, val, dep);
-      var eras = term.eras;
       return App(eras, func, argm);
     case "Let":
       var name = term.name;
@@ -493,11 +493,11 @@ function to_high_order(term, vars = Nil(), depth = 0) {
     case "Typ":
       return Typ();
     case "All":
+      var eras = term.eras;
       var self = term.self;
       var name = term.name;
       var bind = s => to_high_order(term.bind, Ext(s, vars), depth + 1);
       var body = (s,x) => to_high_order(term.body, Ext(x, Ext(s, vars)), depth + 2);
-      var eras = term.eras;
       return All(eras, self, name, bind, body);
     case "Lam":
       if (term.eras) {
@@ -537,11 +537,11 @@ function to_low_order(term, depth = 0) {
     case "Typ":
       return Typ();
     case "All":
+      var eras = term.eras;
       var self = term.self;
       var name = term.name;
       var bind = to_low_order(term.bind(Var(depth)), depth + 1);
       var body = to_low_order(term.body(Var(depth), Var(depth+1)), depth + 2);
-      var eras = term.eras;
       return All(eras, self, name, bind, body);
     case "Lam":
       var name = term.name;
@@ -576,11 +576,11 @@ function reduce_high_order(term, module) {
     case "Typ":
       return Typ();
     case "All":
+      var eras = term.eras;
       var self = term.self;
       var name = term.name;
       var bind = term.bind;
       var body = term.body;
-      var eras = term.eras;
       return All(eras, self, name, bind, body);
     case "Lam":
       var name = term.name;
@@ -614,11 +614,11 @@ function normalize_high_order(term, module) {
     case "Typ":
       return Typ();
     case "All":
+      var eras = norm.eras;
       var self = norm.self;
       var name = norm.name;
       var bind = s => normalize_high_order(norm.bind(s), module);
       var body = (s,x) => normalize_high_order(norm.body(s,x), module);
-      var eras = norm.eras;
       return All(eras, self, name, bind, body);
     case "Lam":
       var name = norm.name;
@@ -716,21 +716,21 @@ function bind_free_vars(term, initial_depth) {
     case "Typ":
       return Typ();
     case "All":
+      var eras = term.eras;
       var self = term.self;
       var name = term.name;
       var bind = go(term.bind, depth);
       var body = go(term.body, depth+1);
-      var eras = term.eras;
       return All(eras, self, name, bind, body);
     case "Lam":
+      var eras = term.eras;
       var name = term.name;
       var body = go(term.body, depth+1);
-      var eras = term.eras;
       return Lam(eras, name, body);
     case "App":
+      var eras = term.eras;
       var func = go(term.func, depth);
       var argm = go(term.argm, depth);
-      var eras = term.eras;
       return App(eras,func, argm);
     case "Let":
       var name = term.name;

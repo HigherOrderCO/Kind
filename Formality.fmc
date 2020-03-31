@@ -98,6 +98,12 @@ double: Nat -> Nat
   let case_succ = (pred) => succ(succ(double(pred)))
   n{() => Nat}(case_zero)(case_succ)
 
+add: Nat -> Nat -> Nat
+  (n) => (m) =>
+  let case_zero = m
+  let case_succ = (a_pred) => succ(add(a_pred)(m))
+  n<() => Nat>(case_zero)(case_succ)
+
 nat_cmp: Nat -> Nat -> Cmp
   (a) => (b) =>
   let case_a_zero =
@@ -1057,9 +1063,87 @@ parse_trm: String -> List(String) -> Parsed(Term)
   parsing{Term}{Term}(base_parse)((code) => (term) =>
     parse_pst(code)(term)(vars))
 
+// Substitution
+// ============
+
 shift: Term -> Nat -> Nat -> Term
   (term) => (inc) => (dep) =>
-  Type
+  let case_var = (hash) => (indx) =>
+    let case_t = var(indx)
+    let case_f = var(add(inc)(indx))
+    nat_ltn(indx)(dep)<() => Term>(case_t)(case_f)
+  let case_ref = (hash) => (name) =>
+    ref(name)
+  let case_typ = (hash) =>
+    typ
+  let case_all = (hash) => (eras) => (self) => (name) => (bind) => (body) =>
+    let eras = eras
+    let self = self
+    let name = name
+    let bind = shift(bind)(inc)(succ(dep))
+    let body = shift(body)(inc)(succ(succ(dep)))
+    all(eras)(self)(name)(bind)(body)
+  let case_lam = (hash) => (eras) => (name) => (body) =>
+    let eras = eras
+    let name = name
+    let body = shift(body)(inc)(succ(dep))
+    lam(eras)(name)(body)
+  let case_app = (hash) => (eras) => (func) => (argm) =>
+    let eras = eras
+    let func = shift(func)(inc)(dep)
+    let argm = shift(argm)(inc)(dep)
+    app(eras)(func)(argm)
+  let case_lit = (hash) => (name) => (expr) => (body) =>
+    let name = name
+    let expr = shift(expr)(inc)(dep)
+    let body = shift(expr)(inc)(succ(dep))
+    lit(name)(expr)(body)
+  let case_ann = (hash) => (done) => (expr) => (type) =>
+    let done = done
+    let expr = shift(expr)(inc)(dep)
+    let type = shift(expr)(inc)(dep)
+    ann(done)(expr)(type)
+  term<()=>Term>(case_var)(case_ref)(case_typ)(case_all)(case_lam)(case_app)(case_lit)(case_ann)
+
+subst: Term -> Term -> Nat -> Term
+  (term) => (val) => (dep) =>
+  let case_var = (hash) => (indx) =>
+    let case_ltn = var(indx)
+    let case_eql = val
+    let case_gtn = var(pred(indx))
+    nat_cmp(indx)(dep)<() => Term>(case_ltn)(case_eql)(case_gtn)
+  let case_ref = (hash) => (name) =>
+    ref(name)
+  let case_typ = (hash) =>
+    typ
+  let case_all = (hash) => (eras) => (self) => (name) => (bind) => (body) =>
+    let eras = eras
+    let self = self
+    let name = name
+    let bind = subst(bind)(shift(val)(n1)(n0))(succ(dep))
+    let body = subst(body)(shift(val)(n2)(n0))(succ(succ(dep)))
+    all(eras)(self)(name)(bind)(body)
+  let case_lam = (hash) => (eras) => (name) => (body) =>
+    let eras = eras
+    let name = name
+    let body = subst(body)(shift(val)(n1)(n0))(succ(dep))
+    lam(eras)(name)(body)
+  let case_app = (hash) => (eras) => (func) => (argm) =>
+    let eras = eras
+    let func = subst(func)(val)(dep)
+    let argm = subst(argm)(val)(dep)
+    app(eras)(func)(argm)
+  let case_lit = (hash) => (name) => (expr) => (body) =>
+    let name = name
+    let expr = subst(expr)(val)(dep)
+    let body = subst(expr)(shift(val)(n1)(n0))(succ(dep))
+    lit(name)(expr)(body)
+  let case_ann = (hash) => (done) => (expr) => (type) =>
+    let done = done
+    let expr = subst(expr)(val)(dep)
+    let type = subst(expr)(val)(dep)
+    ann(done)(expr)(type)
+  term<()=>Term>(case_var)(case_ref)(case_typ)(case_all)(case_lam)(case_app)(case_lit)(case_ann)
 
 // Main
 // ====
