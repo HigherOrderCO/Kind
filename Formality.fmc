@@ -13,26 +13,26 @@ true: Bool
 false: Bool
   <> => (t) => (f) => f
 
-case_bool : (b: Bool) -> <P: Bool -> Type> -> P(true) -> P(false) -> P(b)
+_bool : (b: Bool) -> <P: Bool -> Type> -> P(true) -> P(false) -> P(b)
   (b) => <P> => (t) => (f) => b<P>(t)(f)
 
 not: Bool -> Bool
   (a) =>
-  let case_t = false
-  let case_f = true
-  a<() => Bool>(case_t)(case_f)
+  let _t = false
+  let _f = true
+  a<() => Bool>(_t)(_f)
 
 or: Bool -> Bool -> Bool
   (a) => (b) =>
-  let case_a_tru = (b)<() => Bool>(true)(true)
-  let case_a_fal = (b)<() => Bool>(true)(false)
-  a<() => Bool>(case_a_tru)(case_a_fal)
+  let _a_tru = (b)<() => Bool>(true)(true)
+  let _a_fal = (b)<() => Bool>(true)(false)
+  a<() => Bool>(_a_tru)(_a_fal)
 
 and: Bool -> Bool -> Bool
   (a) => (b) =>
-  let case_a_tru = (b)<() => Bool>(true)(false)
-  let case_a_fal = (b)<() => Bool>(false)(false)
-  a<() => Bool>(case_a_tru)(case_a_fal)
+  let _a_tru = (b)<() => Bool>(true)(false)
+  let _a_fal = (b)<() => Bool>(false)(false)
+  a<() => Bool>(_a_tru)(_a_fal)
 
 // Cmp
 
@@ -84,9 +84,9 @@ succ: Nat -> Nat
 
 pred: Nat -> Nat
   (n) =>
-  let case_zero = zero
-  let case_succ = (pred) => pred
-  n<() => Nat>(case_zero)(case_succ)
+  let _zero = zero
+  let _succ = (pred) => pred
+  n<() => Nat>(_zero)(_succ)
 
 fold_nat : (n: Nat) -> <P: Nat -> Type> -> P(zero) -> ((n:Nat) -> P(n) -> P(succ(n))) -> P(n)
   (n) => <P> => (z) => (s) =>
@@ -94,33 +94,33 @@ fold_nat : (n: Nat) -> <P: Nat -> Type> -> P(zero) -> ((n:Nat) -> P(n) -> P(succ
 
 double: Nat -> Nat
   (n) => 
-  let case_zero = zero
-  let case_succ = (pred) => succ(succ(double(pred)))
-  n<() => Nat>(case_zero)(case_succ)
+  let _zero = zero
+  let _succ = (pred) => succ(succ(double(pred)))
+  n<() => Nat>(_zero)(_succ)
 
 add: Nat -> Nat -> Nat
   (n) => (m) =>
-  let case_zero = m
-  let case_succ = (n_pred) => succ(add(n_pred)(m))
-  n<() => Nat>(case_zero)(case_succ)
+  let _zero = m
+  let _succ = (n_pred) => succ(add(n_pred)(m))
+  n<() => Nat>(_zero)(_succ)
 
 sub: Nat -> Nat -> Nat
   (n) => (m) =>
-  let case_zero = n
-  let case_succ = (m_pred) => sub(pred(n))(m_pred)
-  m<() => Nat>(case_zero)(case_succ)
+  let _zero = n
+  let _succ = (m_pred) => sub(pred(n))(m_pred)
+  m<() => Nat>(_zero)(_succ)
 
 nat_cmp: Nat -> Nat -> Cmp
   (a) => (b) =>
-  let case_a_zero =
-    let case_b_zero = eql
-    let case_b_succ = (b_pred) => ltn
-    b<() => Cmp>(case_b_zero)(case_b_succ)
-  let case_a_succ = (a_pred) =>
-    let case_b_zero = gtn
-    let case_b_succ = (b_pred) => nat_cmp(a_pred)(b_pred)
-    b<() => Cmp>(case_b_zero)(case_b_succ)
-  a<() => Cmp>(case_a_zero)(case_a_succ)
+  let _a_zero =
+    let _b_zero = eql
+    let _b_succ = (b_pred) => ltn
+    b<() => Cmp>(_b_zero)(_b_succ)
+  let _a_succ = (a_pred) =>
+    let _b_zero = gtn
+    let _b_succ = (b_pred) => nat_cmp(a_pred)(b_pred)
+    b<() => Cmp>(_b_zero)(_b_succ)
+  a<() => Cmp>(_a_zero)(_a_succ)
 
 nat_ltn: Nat -> Nat -> Bool
   (a) => (b) => nat_cmp(a)(b)<() => Bool>(true)(false)(false)
@@ -299,12 +299,12 @@ cons: <A: Type> -> (:A) -> (:List(A)) -> List(A)
 
 find_aux: <A: Type> -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
   <A> => (list) => (cond) => (indx) =>
-  let case_nil = none<Pair(A)(Nat)>
-  let case_cons = (head) => (tail) =>
-    let case_true  = some<Pair(A)(Nat)>(pair<A><Nat>(head)(indx))
-    let case_false = find_aux<A>(tail)(cond)(succ(indx))
-    cond(head)(indx)<() => Maybe(Pair(A)(Nat))>(case_true)(case_false)
-  list<() => Maybe(Pair(A)(Nat))>(case_nil)(case_cons)
+  let _nil = none<Pair(A)(Nat)>
+  let _cons = (head) => (tail) =>
+    let _true  = some<Pair(A)(Nat)>(pair<A><Nat>(head)(indx))
+    let _false = find_aux<A>(tail)(cond)(succ(indx))
+    cond(head)(indx)<() => Maybe(Pair(A)(Nat))>(_true)(_false)
+  list<() => Maybe(Pair(A)(Nat))>(_nil)(_cons)
 
 find: <A: Type> -> List(A) -> (A -> Nat -> Bool) -> Maybe(Pair(A)(Nat))
   <A> => (list) => (cond) =>
@@ -312,57 +312,57 @@ find: <A: Type> -> List(A) -> (A -> Nat -> Bool) -> Maybe(Pair(A)(Nat))
 
 take: <A: Type> -> Nat -> List(A) -> List(A)
   <A> => (n) => (list) =>
-  let case_nil = nil<A>
-  let case_cons = (head) => (tail) =>
-    let case_zero = nil<A>
-    let case_succ = (pred) => cons<A>(head)(take<A>(pred)(tail))
-    n<() => List(A)>(case_zero)(case_succ)
-  list<() => List(A)>(case_nil)(case_cons)
+  let _nil = nil<A>
+  let _cons = (head) => (tail) =>
+    let _zero = nil<A>
+    let _succ = (pred) => cons<A>(head)(take<A>(pred)(tail))
+    n<() => List(A)>(_zero)(_succ)
+  list<() => List(A)>(_nil)(_cons)
 
 drop: <A: Type> -> Nat -> List(A) -> List(A)
   <A> => (n) => (list) =>
-  let case_nil = nil<A>
-  let case_cons = (head) => (tail) =>
-    let case_zero = tail
-    let case_succ = (pred) => drop<A>(pred)(tail)
-    n<() => List(A)>(case_zero)(case_succ)
-  list<() => List(A)>(case_nil)(case_cons)
+  let _nil = nil<A>
+  let _cons = (head) => (tail) =>
+    let _zero = tail
+    let _succ = (pred) => drop<A>(pred)(tail)
+    n<() => List(A)>(_zero)(_succ)
+  list<() => List(A)>(_nil)(_cons)
 
 is_empty: <A: Type> -> List(A) -> Bool
   <A> => (list) =>
-  let case_nil = true
-  let case_cons = (head) => (tail) => false
-  list<() => Bool>(case_nil)(case_cons)
+  let _nil = true
+  let _cons = (head) => (tail) => false
+  list<() => Bool>(_nil)(_cons)
 
 zip_with: <A: Type> -> <B: Type> -> <C: Type> -> (A -> B -> C) -> List(A) -> List(B) -> List(C)
   <A> => <B> => <C> => (fn) => (as) => (bs) =>
-  let case_a_nil = nil<C>
-  let case_a_cons = (a_head) => (a_tail) =>
-    let case_b_nil = nil<C>
-    let case_b_cons = (b_head) => (b_tail) =>
+  let _a_nil = nil<C>
+  let _a_cons = (a_head) => (a_tail) =>
+    let _b_nil = nil<C>
+    let _b_cons = (b_head) => (b_tail) =>
       let head = fn(a_head)(b_head)
       let tail = zip_with<A><B><C>(fn)(a_tail)(b_tail)
       cons<C>(head)(tail)
-    bs<() => List(C)>(case_b_nil)(case_b_cons)
-  as<() => List(C)>(case_a_nil)(case_a_cons)
+    bs<() => List(C)>(_b_nil)(_b_cons)
+  as<() => List(C)>(_a_nil)(_a_cons)
 
 all_satisfy: <A: Type> -> (A -> Bool) -> List(A) -> Bool
   <A> => (cond) => (list) =>
-  let case_nil = true
-  let case_cons = (head) => (tail) =>
-    let case_t = all_satisfy<A>(cond)(tail)
-    let case_f = false
-    cond(head)<() => Bool>(case_t)(case_f)
-  list<() => Bool>(case_nil)(case_cons)
+  let _nil = true
+  let _cons = (head) => (tail) =>
+    let _t = all_satisfy<A>(cond)(tail)
+    let _f = false
+    cond(head)<() => Bool>(_t)(_f)
+  list<() => Bool>(_nil)(_cons)
 
 any_satisfy: <A: Type> -> (A -> Bool) -> List(A) -> Bool
   <A> => (cond) => (list) =>
-  let case_nil = false
-  let case_cons = (head) => (tail) =>
-    let case_t = true
-    let case_f = any_satisfy<A>(cond)(tail)
-    cond(head)<() => Bool>(case_t)(case_f)
-  list<() => Bool>(case_nil)(case_cons)
+  let _nil = false
+  let _cons = (head) => (tail) =>
+    let _t = true
+    let _f = any_satisfy<A>(cond)(tail)
+    cond(head)<() => Bool>(_t)(_f)
+  list<() => Bool>(_nil)(_cons)
 
 all_true: List(Bool) -> Bool
   (list) => all_satisfy<Bool>((x) => x)(list)
@@ -372,21 +372,21 @@ any_true: List(Bool) -> Bool
 
 list_len: <A: Type> -> List(A) -> Nat
   <A> => (list) =>
-  let case_nil = zero
-  let case_cons = (head) => (tail) => succ(list_len<A>(tail))
-  list<() => Nat>(case_nil)(case_cons)
+  let _nil = zero
+  let _cons = (head) => (tail) => succ(list_len<A>(tail))
+  list<() => Nat>(_nil)(_cons)
 
 concat : <A: Type> -> List(A) -> List(A) -> List(A)
   <A> => (as) => (bs) =>
-  let case_nil = bs
-  let case_cons = (head) => (tail) => cons<A>(head)(concat<A>(tail)(bs))
-  as<() => List(A)>(case_nil)(case_cons)
+  let _nil = bs
+  let _cons = (head) => (tail) => cons<A>(head)(concat<A>(tail)(bs))
+  as<() => List(A)>(_nil)(_cons)
 
 concatList : <A: Type> -> List(List(A)) -> List(A)
  <A> => (as) =>
- let case_nil = nil<A>
- let case_cons = (head) => (tail) => concat<A>(head)(concatList<A>(tail))
- as<() => List(A)>(case_nil)(case_cons)
+ let _nil = nil<A>
+ let _cons = (head) => (tail) => concat<A>(head)(concatList<A>(tail))
+ as<() => List(A)>(_nil)(_cons)
 
 sing : <A : Type> -> (x : A) -> List(A)
   <A> => (x) => cons<A>(x)(nil<A>)
@@ -435,71 +435,71 @@ w1: <size: Nat> -> Word(size) -> Word(succ(size))
 
 word_inc: <size: Nat> -> Word(size) -> Word(size)
   <size> => (word) =>
-  let case_we = we
-  let case_w0 = <size> => (pred) => w1<size>(pred)
-  let case_w1 = <size> => (pred) => w0<size>(word_inc<size>(pred))
+  let _we = we
+  let _w0 = <size> => (pred) => w1<size>(pred)
+  let _w1 = <size> => (pred) => w0<size>(word_inc<size>(pred))
   let motive  = (size) => (word) => Word(size)
-  word<motive>(case_we)(case_w0)(case_w1)
+  word<motive>(_we)(_w0)(_w1)
 
 word_add_aux: <size: Nat> -> Word(size) -> Word(size) -> Bool -> Word(size)
   <size> => (a) => (b) => (c) =>
-  let case_a_we = (b) => we
-  let case_a_w0 = <a_size> => (a_pred) => (b) =>
-    let case_b_we = (a_pred) =>
+  let _a_we = (b) => we
+  let _a_w0 = <a_size> => (a_pred) => (b) =>
+    let _b_we = (a_pred) =>
       we
-    let case_b_w0 = <b_size> => (b_pred) => (a_pred) =>
-      let case_c_tr = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
-      let case_c_fa = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
-      let case_c_ty = (c_bool) => Word(succ(b_size))
-      c<case_c_ty>(case_c_tr)(case_c_fa)
-    let case_b_w1 = <b_size> => (b_pred) => (a_pred) =>
-      let case_c_tr = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
-      let case_c_fa = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
-      let case_c_ty = (c_bool) => Word(succ(b_size))
-      c<case_c_ty>(case_c_tr)(case_c_fa)
-    let case_b_ty = (b_size) => (b_word) =>
+    let _b_w0 = <b_size> => (b_pred) => (a_pred) =>
+      let _c_tr = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
+      let _c_fa = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
+      let _c_ty = (c_bool) => Word(succ(b_size))
+      c<_c_ty>(_c_tr)(_c_fa)
+    let _b_w1 = <b_size> => (b_pred) => (a_pred) =>
+      let _c_tr = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
+      let _c_fa = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
+      let _c_ty = (c_bool) => Word(succ(b_size))
+      c<_c_ty>(_c_tr)(_c_fa)
+    let _b_ty = (b_size) => (b_word) =>
       Word(pred(b_size)) -> Word(b_size)
-    b<case_b_ty>(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
-  let case_a_w1 = <a_size> => (a_pred) => (b) =>
-    let case_b_we = (a_pred) => we
-    let case_b_w0 = <b_size> => (b_pred) => (a_pred) =>
-      let case_c_tr = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
-      let case_c_fa = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
-      let case_c_ty = (c_bool) => Word(succ(b_size))
-      c<case_c_ty>(case_c_tr)(case_c_fa)
-    let case_b_w1 = <b_size> => (b_pred) => (a_pred) =>
-      let case_c_tr = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
-      let case_c_fa = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
-      let case_c_ty = (c_bool) => Word(succ(b_size))
-      c<case_c_ty>(case_c_tr)(case_c_fa)
-    let case_b_ty = (b_size) => (b_word) =>
+    b<_b_ty>(_b_we)(_b_w0)(_b_w1)(a_pred)
+  let _a_w1 = <a_size> => (a_pred) => (b) =>
+    let _b_we = (a_pred) => we
+    let _b_w0 = <b_size> => (b_pred) => (a_pred) =>
+      let _c_tr = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
+      let _c_fa = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(false))
+      let _c_ty = (c_bool) => Word(succ(b_size))
+      c<_c_ty>(_c_tr)(_c_fa)
+    let _b_w1 = <b_size> => (b_pred) => (a_pred) =>
+      let _c_tr = w1<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
+      let _c_fa = w0<b_size>(word_add_aux<b_size>(a_pred)(b_pred)(true))
+      let _c_ty = (c_bool) => Word(succ(b_size))
+      c<_c_ty>(_c_tr)(_c_fa)
+    let _b_ty = (b_size) => (b_word) =>
       Word(pred(b_size)) -> Word(b_size)
-    b<case_b_ty>(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
-  let case_a_ty = (a_size) => (a_word) =>
+    b<_b_ty>(_b_we)(_b_w0)(_b_w1)(a_pred)
+  let _a_ty = (a_size) => (a_word) =>
     Word(a_size) -> Word(a_size)
-  a<case_a_ty>(case_a_we)(case_a_w0)(case_a_w1)(b)
+  a<_a_ty>(_a_we)(_a_w0)(_a_w1)(b)
 
 word_add: <size: Nat> -> Word(size) -> Word(size) -> Word(size)
   <size> => (a) => (b) => word_add_aux<size>(a)(b)(false)
 
 word_cmp_aux: <size: Nat> -> Word(size) -> Word(size) -> Cmp -> Cmp
   <size> => (a) => (b) => (c) =>
-  let case_a_we = (b) => c
-  let case_a_w0 = <a_size> => (a_pred) => (b) =>
-    let case_b_we = (a_pred) => c
-    let case_b_w0 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(c)
-    let case_b_w1 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(ltn)
-    let case_b_ty = (b_size) => (b_word) => Word(pred(b_size)) -> Cmp
-    b<case_b_ty>(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
-  let case_a_w1 = <a_size> => (a_pred) => (b) =>
-    let case_b_we = (a_pred) => c
-    let case_b_w0 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(gtn)
-    let case_b_w1 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(c)
-    let case_b_ty = (b_size) => (b_word) => Word(pred(b_size)) -> Cmp
-    b<case_b_ty>(case_b_we)(case_b_w0)(case_b_w1)(a_pred)
-  let case_a_ty = (a_size) => (a_word) =>
+  let _a_we = (b) => c
+  let _a_w0 = <a_size> => (a_pred) => (b) =>
+    let _b_we = (a_pred) => c
+    let _b_w0 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(c)
+    let _b_w1 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(ltn)
+    let _b_ty = (b_size) => (b_word) => Word(pred(b_size)) -> Cmp
+    b<_b_ty>(_b_we)(_b_w0)(_b_w1)(a_pred)
+  let _a_w1 = <a_size> => (a_pred) => (b) =>
+    let _b_we = (a_pred) => c
+    let _b_w0 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(gtn)
+    let _b_w1 = <b_size> => (b_pred) => (a_pred) => word_cmp_aux<b_size>(a_pred)(b_pred)(c)
+    let _b_ty = (b_size) => (b_word) => Word(pred(b_size)) -> Cmp
+    b<_b_ty>(_b_we)(_b_w0)(_b_w1)(a_pred)
+  let _a_ty = (a_size) => (a_word) =>
     Word(a_size) -> Cmp
-  a<case_a_ty>(case_a_we)(case_a_w0)(case_a_w1)(b)
+  a<_a_ty>(_a_we)(_a_w0)(_a_w1)(b)
 
 word_cmp: <size: Nat> -> Word(size) -> Word(size) -> Cmp
   <size> => (a) => (b) =>
@@ -843,9 +843,9 @@ parsing
     (f: String -> A -> Parsed(B)) ->
     Parsed(B)
   <A> => <B> => (x) => (f) =>
-  let case_none = noparse<B>
-  let case_some = (value) => value<() => Parsed(B)>(f)
-  x<() => Parsed(B)>(case_none)(case_some)
+  let _none = noparse<B>
+  let _some = (value) => value<() => Parsed(B)>(f)
+  x<() => Parsed(B)>(_none)(_some)
 
 LPAR: String sing<Char>(_lpar  )                           // "("
 RPAR: String sing<Char>(_rpar  )                           // ")"
@@ -881,21 +881,21 @@ is_name: Char -> Bool
 
 first_valid: <A: Type> -> List(Maybe(A)) -> Maybe(A)
   <A> => (list) =>
-  let case_nil = none<A>
-  let case_cons = (head) => (tail) =>
-    let case_none = first_valid<A>(tail)
-    let case_some = (value) => some<A>(value)
-    head<() => Maybe(A)>(case_none)(case_some)
-  list<() => Maybe(A)>(case_nil)(case_cons)
+  let _nil = none<A>
+  let _cons = (head) => (tail) =>
+    let _none = first_valid<A>(tail)
+    let _some = (value) => some<A>(value)
+    head<() => Maybe(A)>(_none)(_some)
+  list<() => Maybe(A)>(_nil)(_cons)
 
 drop_while: (Char -> Bool) -> String -> String
   (cond) => (code) =>
-  let case_nil = nil<Char>
-  let case_cons = (head) => (tail) =>
-    let case_t = drop_while(cond)(tail)
-    let case_f = tail
-    cond(head)<() => String>(case_t)(case_f)
-  code<() => String>(case_nil)(case_cons)
+  let _nil = nil<Char>
+  let _cons = (head) => (tail) =>
+    let _t = drop_while(cond)(tail)
+    let _f = tail
+    cond(head)<() => String>(_t)(_f)
+  code<() => String>(_nil)(_cons)
 
 drop_spaces: String -> String
   drop_while(is_space)
@@ -908,13 +908,13 @@ drop_comment: String -> String
   let code = 
     let fst2 = take<Char>(n2)(code)
     let sla2 = cons<Char>(_sol)(cons<Char>(_sol)(nil<Char>))
-    let case_t =
+    let _t =
       let code = drop<Char>(n2)(code)
       let code = drop_while((x) => not(u32_eql(_LF)(x)))(code)
       code
-    let case_f =
+    let _f =
       code
-    string_eql(fst2)(sla2)<() => String>(case_t)(case_f)
+    string_eql(fst2)(sla2)<() => String>(_t)(_f)
   code
 
 // TODO: remove many comments (not just one)
@@ -923,24 +923,24 @@ ncons: String -> String
 
 parse_str: String -> String -> Parsed(String)
   (code) => (str) =>
-  let case_str_nil = parsed<String>(code)(str)
-  let case_str_cons = (str_head) => (str_tail) =>
-    let case_code_nil = noparse<String>
-    let case_code_cons = (code_head) => (code_tail) =>
-      let case_t = parse_str(code_tail)(str_tail)
-      let case_f = noparse<String>
-      u32_eql(code_head)(str_head)<() => Parsed(String)>(case_t)(case_f)
-    code<() => Parsed(String)>(case_code_nil)(case_code_cons)
-  str<() => Parsed(String)>(case_str_nil)(case_str_cons)
+  let _str_nil = parsed<String>(code)(str)
+  let _str_cons = (str_head) => (str_tail) =>
+    let _code_nil = noparse<String>
+    let _code_cons = (code_head) => (code_tail) =>
+      let _t = parse_str(code_tail)(str_tail)
+      let _f = noparse<String>
+      u32_eql(code_head)(str_head)<() => Parsed(String)>(_t)(_f)
+    code<() => Parsed(String)>(_code_nil)(_code_cons)
+  str<() => Parsed(String)>(_str_nil)(_str_cons)
 
 parse_one_aux: String -> List(String) -> Nat -> Maybe(Pair(String)(Nat))
   (code) => (strs) => (indx) =>
-  let case_nil = noparse<Nat>
-  let case_cons = (head) => (tail) =>
-    let case_none = parse_one_aux(code)(tail)(succ(indx))
-    let case_some = (value) => value<() => Parsed(Nat)>((code)=>() => parsed<Nat>(code)(indx))
-    parse_str(code)(head)<() => Maybe(Pair(String)(Nat))>(case_none)(case_some)
-  strs<() => Parsed(Nat)>(case_nil)(case_cons)
+  let _nil = noparse<Nat>
+  let _cons = (head) => (tail) =>
+    let _none = parse_one_aux(code)(tail)(succ(indx))
+    let _some = (value) => value<() => Parsed(Nat)>((code)=>() => parsed<Nat>(code)(indx))
+    parse_str(code)(head)<() => Maybe(Pair(String)(Nat))>(_none)(_some)
+  strs<() => Parsed(Nat)>(_nil)(_cons)
 
 parse_one: String -> List(String) -> Maybe(Pair(String)(Nat))
   (code) => (strs) =>
@@ -950,23 +950,23 @@ parse_nam_aux: String -> Pair(String)(String)
   (code) =>
   let Ret = Pair(String)(String)
   let ret = pair<String><String>
-  let case_nil = ret(code)(nil<Char>)
-  let case_cons = (head) => (tail) =>
-    let case_t =
-      let case_pair = (code) => (rest) => ret(code)(cons<Char>(head)(rest))
-      parse_nam_aux(tail)<() => Ret>(case_pair)
-    let case_f = ret(code)(nil<Char>)
-    is_name(head)<() => Ret>(case_t)(case_f)
-  code<() => Ret>(case_nil)(case_cons)
+  let _nil = ret(code)(nil<Char>)
+  let _cons = (head) => (tail) =>
+    let _t =
+      let _pair = (code) => (rest) => ret(code)(cons<Char>(head)(rest))
+      parse_nam_aux(tail)<() => Ret>(_pair)
+    let _f = ret(code)(nil<Char>)
+    is_name(head)<() => Ret>(_t)(_f)
+  code<() => Ret>(_nil)(_cons)
 
 parse_nam: String -> Bool -> Maybe(Pair(String)(String))
   (code) => (allow_empty) =>
-  let case_pair = (code) => (name) =>
-    let case_t = parsed<String>(code)(name)
-    let case_f = noparse<String>
+  let _pair = (code) => (name) =>
+    let _t = parsed<String>(code)(name)
+    let _f = noparse<String>
     let valid = or(allow_empty)(not(is_empty<Char>(name)))
-    valid<() => Parsed(String)>(case_t)(case_f)
-  parse_nam_aux(code)<() => Parsed(String)>(case_pair)
+    valid<() => Parsed(String)>(_t)(_f)
+  parse_nam_aux(code)<() => Parsed(String)>(_pair)
 
 // Stringify
 // =========
@@ -1061,9 +1061,9 @@ parse_var: String -> List(String) -> Parsed(Term)
   (code) => (vars) =>
   parsing<String><Term>(parse_nam(ncons(code))(false))((code) => (name) =>
   let got = find<String>(vars)((x) => (i) => string_eql(x)(name))
-  let case_none = parsed<Term>(code)(ref(name))
-  let case_some = (value) => parsed<Term>(code)(var(snd<String><Nat>(value)))
-  got<() => Parsed(Term)>(case_none)(case_some))
+  let _none = parsed<Term>(code)(ref(name))
+  let _some = (value) => parsed<Term>(code)(var(snd<String><Nat>(value)))
+  got<() => Parsed(Term)>(_none)(_some))
 
 parse_app: String -> Term -> List(String) -> Parsed(Term)
   (code) => (func) => (vars) =>
@@ -1091,11 +1091,11 @@ parse_pst: String -> Term -> List(String) -> Parsed(Term)
     cons<Parsed(Term)>(parse_arr(code)(term)(vars))(
     cons<Parsed(Term)>(parse_ann(code)(term)(vars))(
     nil<Parsed(Term)>))))
-  let case_none = parsed<Term>(code)(term)
-  let case_some = (value) =>
-    let case_pair = (code) => (term) => parse_pst(code)(term)(vars)
-    value<() => Parsed(Term)>(case_pair)
-  post_parse<() => Parsed(Term)>(case_none)(case_some)
+  let _none = parsed<Term>(code)(term)
+  let _some = (value) =>
+    let _pair = (code) => (term) => parse_pst(code)(term)(vars)
+    value<() => Parsed(Term)>(_pair)
+  post_parse<() => Parsed(Term)>(_none)(_some)
 
 parse_trm: String -> List(String) -> Parsed(Term)
   (code) => (vars) =>
@@ -1115,82 +1115,82 @@ parse_trm: String -> List(String) -> Parsed(Term)
 
 shift: Term -> Nat -> Nat -> Term
   (term) => (inc) => (dep) =>
-  let case_var = (hash) => (indx) =>
-    let case_t = var(indx)
-    let case_f = var(add(inc)(indx))
-    nat_ltn(indx)(dep)<() => Term>(case_t)(case_f)
-  let case_ref = (hash) => (name) =>
+  let _var = (hash) => (indx) =>
+    let _t = var(indx)
+    let _f = var(add(inc)(indx))
+    nat_ltn(indx)(dep)<() => Term>(_t)(_f)
+  let _ref = (hash) => (name) =>
     ref(name)
-  let case_typ = (hash) =>
+  let _typ = (hash) =>
     typ
-  let case_all = (hash) => (eras) => (self) => (name) => (bind) => (body) =>
+  let _all = (hash) => (eras) => (self) => (name) => (bind) => (body) =>
     let eras = eras
     let self = self
     let name = name
     let bind = shift(bind)(inc)(succ(dep))
     let body = shift(body)(inc)(succ(succ(dep)))
     all(eras)(self)(name)(bind)(body)
-  let case_lam = (hash) => (eras) => (name) => (body) =>
+  let _lam = (hash) => (eras) => (name) => (body) =>
     let eras = eras
     let name = name
     let body = shift(body)(inc)(succ(dep))
     lam(eras)(name)(body)
-  let case_app = (hash) => (eras) => (func) => (argm) =>
+  let _app = (hash) => (eras) => (func) => (argm) =>
     let eras = eras
     let func = shift(func)(inc)(dep)
     let argm = shift(argm)(inc)(dep)
     app(eras)(func)(argm)
-  let case_lit = (hash) => (name) => (expr) => (body) =>
+  let _lit = (hash) => (name) => (expr) => (body) =>
     let name = name
     let expr = shift(expr)(inc)(dep)
     let body = shift(expr)(inc)(succ(dep))
     lit(name)(expr)(body)
-  let case_ann = (hash) => (done) => (expr) => (type) =>
+  let _ann = (hash) => (done) => (expr) => (type) =>
     let done = done
     let expr = shift(expr)(inc)(dep)
     let type = shift(expr)(inc)(dep)
     ann(done)(expr)(type)
-  term<()=>Term>(case_var)(case_ref)(case_typ)(case_all)(case_lam)(case_app)(case_lit)(case_ann)
+  term<()=>Term>(_var)(_ref)(_typ)(_all)(_lam)(_app)(_lit)(_ann)
 
 subst: Term -> Term -> Nat -> Term
   (term) => (val) => (dep) =>
-  let case_var = (hash) => (indx) =>
-    let case_ltn = var(indx)
-    let case_eql = val
-    let case_gtn = var(pred(indx))
-    nat_cmp(indx)(dep)<() => Term>(case_ltn)(case_eql)(case_gtn)
-  let case_ref = (hash) => (name) =>
+  let _var = (hash) => (indx) =>
+    let _ltn = var(indx)
+    let _eql = val
+    let _gtn = var(pred(indx))
+    nat_cmp(indx)(dep)<() => Term>(_ltn)(_eql)(_gtn)
+  let _ref = (hash) => (name) =>
     ref(name)
-  let case_typ = (hash) =>
+  let _typ = (hash) =>
     typ
-  let case_all = (hash) => (eras) => (self) => (name) => (bind) => (body) =>
+  let _all = (hash) => (eras) => (self) => (name) => (bind) => (body) =>
     let eras = eras
     let self = self
     let name = name
     let bind = subst(bind)(shift(val)(n1)(n0))(succ(dep))
     let body = subst(body)(shift(val)(n2)(n0))(succ(succ(dep)))
     all(eras)(self)(name)(bind)(body)
-  let case_lam = (hash) => (eras) => (name) => (body) =>
+  let _lam = (hash) => (eras) => (name) => (body) =>
     let eras = eras
     let name = name
     let body = subst(body)(shift(val)(n1)(n0))(succ(dep))
     lam(eras)(name)(body)
-  let case_app = (hash) => (eras) => (func) => (argm) =>
+  let _app = (hash) => (eras) => (func) => (argm) =>
     let eras = eras
     let func = subst(func)(val)(dep)
     let argm = subst(argm)(val)(dep)
     app(eras)(func)(argm)
-  let case_lit = (hash) => (name) => (expr) => (body) =>
+  let _lit = (hash) => (name) => (expr) => (body) =>
     let name = name
     let expr = subst(expr)(val)(dep)
     let body = subst(expr)(shift(val)(n1)(n0))(succ(dep))
     lit(name)(expr)(body)
-  let case_ann = (hash) => (done) => (expr) => (type) =>
+  let _ann = (hash) => (done) => (expr) => (type) =>
     let done = done
     let expr = subst(expr)(val)(dep)
     let type = subst(expr)(val)(dep)
     ann(done)(expr)(type)
-  term<()=>Term>(case_var)(case_ref)(case_typ)(case_all)(case_lam)(case_app)(case_lit)(case_ann)
+  term<()=>Term>(_var)(_ref)(_typ)(_all)(_lam)(_app)(_lit)(_ann)
 
 // Evaluation
 // ==========
@@ -1260,77 +1260,77 @@ hlit: HTerm -> (HTerm -> HTerm) -> HTerm
 
 to_high_order: Term -> List(HTerm) -> Nat -> HTerm
   (term) => (vars) => (depth) =>
-  let case_var = (hash) => (indx) =>
+  let _var = (hash) => (indx) =>
     let got = find<HTerm>(vars)((x) => (i) => nat_eql(i)(indx))
-    let case_none = hvar(sub(succ(indx))(depth))(false)
-    let case_some = (value) => fst<HTerm><Nat>(value)
-    got<() => HTerm>(case_none)(case_some)
-  let case_ref = (hash) => (name) =>
+    let _none = hvar(sub(succ(indx))(depth))(false)
+    let _some = (value) => fst<HTerm><Nat>(value)
+    got<() => HTerm>(_none)(_some)
+  let _ref = (hash) => (name) =>
     href(name)
-  let case_typ = (hash) =>
+  let _typ = (hash) =>
     htyp
-  let case_all = (hash) => (eras) => (self) => (name) => (bind) => (body) =>
+  let _all = (hash) => (eras) => (self) => (name) => (bind) => (body) =>
     let eras = eras
     let bind = (s) => to_high_order(bind)(cons<HTerm>(s)(vars))(succ(depth))
     let body = (s) => (x) => to_high_order(body)(cons<HTerm>(x)(cons<HTerm>(s)(vars)))(succ(succ(depth)))
     hall(eras)(bind)(body)
-  let case_lam = (hash) => (eras) => (name) => (body) =>
-    let case_t =
+  let _lam = (hash) => (eras) => (name) => (body) =>
+    let _t =
       let body = subst(body)(ref(nil<Char>))(n0)
       to_high_order(body)(vars)(depth)
-    let case_f =
+    let _f =
       let body = (x) => to_high_order(body)(cons<HTerm>(x)(vars))(succ(depth))
       hlam(body)
-    eras<() => HTerm>(case_t)(case_f)
-  let case_app = (hash) => (eras) => (func) => (argm) =>
-    let case_t =
+    eras<() => HTerm>(_t)(_f)
+  let _app = (hash) => (eras) => (func) => (argm) =>
+    let _t =
       to_high_order(func)(vars)(depth)
-    let case_f =
+    let _f =
       let func = to_high_order(func)(vars)(depth)
       let argm = to_high_order(argm)(vars)(depth)
       happ(func)(argm)
-    eras<() => HTerm>(case_t)(case_f)
-  let case_lit = (hash) => (name) => (expr) => (body) =>
+    eras<() => HTerm>(_t)(_f)
+  let _lit = (hash) => (name) => (expr) => (body) =>
     let expr = to_high_order(expr)(vars)(depth)
     let body = (x) => to_high_order(body)(cons<HTerm>(x)(vars))(succ(depth))
     hlit(expr)(body)
-  let case_ann = (hash) => (done) => (expr) => (type) =>
+  let _ann = (hash) => (done) => (expr) => (type) =>
     to_high_order(expr)(vars)(depth)
-  term<() => HTerm>(case_var)(case_ref)(case_typ)(case_all)(case_lam)(case_app)(case_lit)(case_ann)
+  term<() => HTerm>(_var)(_ref)(_typ)(_all)(_lam)(_app)(_lit)(_ann)
 
 to_low_order: HTerm -> Nat -> Term
   (hterm) => (depth) =>
-  let case_hvar = (indx) => (posi) =>
-    let case_t = var(sub(sub(depth)(indx))(n1))
-    let case_f = var(sub(add(depth)(indx))(n1))
-    posi<() => Term>(case_t)(case_f)
-  let case_href = (name) =>
+  let _hvar = (indx) => (posi) =>
+    let _t = var(sub(sub(depth)(indx))(n1))
+    let _f = var(sub(add(depth)(indx))(n1))
+    posi<() => Term>(_t)(_f)
+  let _href = (name) =>
     ref(name)
-  let case_htyp =
+  let _htyp =
     typ
-  let case_hall = (eras) => (bind) => (body) =>
+  let _hall = (eras) => (bind) => (body) =>
     let eras = eras
     let self = nil<Char> // TODO
     let name = nil<Char> // TODO
     let bind = to_low_order(bind(hvar(depth)(true)))(succ(depth))
     let body = to_low_order(body(hvar(depth)(true))(hvar(succ(depth))(true)))(succ(succ(depth)))
     all(eras)(self)(name)(bind)(body)
-  let case_hlam = (body) =>
+  let _hlam = (body) =>
     let eras = false
     let name = nil<Char> // TODO
     let body = to_low_order(body(hvar(depth)(true)))(succ(depth))
     lam(eras)(name)(body)
-  let case_happ = (func) => (argm) =>
+  let _happ = (func) => (argm) =>
     let eras = false
     let func = to_low_order(func)(depth)
     let argm = to_low_order(argm)(depth)
     app(eras)(func)(argm)
-  let case_hlit = (expr) => (body) =>
+  let _hlit = (expr) => (body) =>
     let name = nil<Char> // TODO
     let expr = to_low_order(expr)(depth)
     let body = to_low_order(body(hvar(depth)(true)))(succ(depth))
     lit(name)(expr)(body)
-  hterm<() => Term>(case_hvar)(case_href)(case_htyp)(case_hall)(case_hlam)(case_happ)(case_hlit)
+  hterm<() => Term>(_hvar)(_href)(_htyp)(_hall)(_hlam)(_happ)(_hlit)
 
 // Main
 // ====
