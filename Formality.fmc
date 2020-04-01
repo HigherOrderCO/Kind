@@ -873,20 +873,22 @@ parsing
   let _some = (value) value<() Parsed(B)>(f)
   x<() Parsed(B)>(_none)(_some)
 
-LPAR: String       str(_lpar)                                      // "("
-RPAR: String       str(_rpar  )                                    // ")"
-LSIG: String       str(_lbrace)                                    // "<"
-RSIG: String       str(_rbrace)                                    // ">"
-COLO: String       str(_colon )                                    // ":"
-COLS: String       ext(_colon)(str(_colon))                        // "::"
-ARR0: String       ext(_dash)(str(_gt))                            // "->"
-ARR1: String       ext(_equals)(str(_gt))                          // "=>"
-EQLS: String       str(_equals)                                    // "="
-TYPS: String       ext(_T)(ext(_y)(ext(_p)(single<Char>(_e))))     // Type
-LETS: String       ext(_l)(ext(_e)(ext(_t)(single<Char>(_space)))) // "let "
-SPAC: String       str(_space)                                     // " "
-OPEN: List(String) exts(LPAR)(strs(LSIG))                          // ["(","<"]
-CLOS: List(String) exts(LPAR)(strs(LSIG))                          // [")",">"]
+LPAR: String str(_lpar)                                      // "("
+RPAR: String str(_rpar  )                                    // ")"
+LSIG: String str(_lbrace)                                    // "<"
+RSIG: String str(_rbrace)                                    // ">"
+DASH: String str(_dash)                                      // "-"
+PIPE: String str(_vert)                                      // "|"
+COLO: String str(_colon)                                     // ":"
+SEMI: String str(_semi)                                      // ";"
+COLS: String ext(_colon)(str(_colon))                        // "::"
+ARR0: String ext(_dash)(str(_gt))                            // "->"
+EQLS: String str(_equals)                                    // "="
+TYPS: String ext(_T)(ext(_y)(ext(_p)(single<Char>(_e))))     // Type
+LETS: String ext(_l)(ext(_e)(ext(_t)(single<Char>(_space)))) // "let "
+SPAC: String str(_space)                                     // " "
+OPEN: Pair(String)(String) pair<String><String>(LPAR)(LSIG)  // ["(","<"]
+CLOS: Pair(String)(String) pair<String><String>(RPAR)(RSIG)  // [")",">"]
 
 is_space: Char -> Bool
   (c)
@@ -919,7 +921,7 @@ drop_while: (Char -> Bool) -> String -> String
   | (head) (tail)
     cond(head)<() String>
     | drop_while(cond)(tail);
-    | tail;;
+    | cons<Char>(head)(tail);;
 
 drop_spaces: String -> String
   drop_while(is_space)
@@ -939,34 +941,31 @@ drop_comment: String -> String
     | code;
   code
 
-// TODO: remove many comments (not just one)
+// TODO: remove comments
 next: String -> String
-  (code) drop_comment(code)
+  (code) drop_spaces(code)
 
 parse_str: String -> String -> Parsed(String)
   (code) (str)
   str<() Parsed(String)>
   | parsed<String>(code)(str);
   | (str_head) (str_tail)
-    let _code_nil = noparse<String>
-    let _code_cons = (code_head) (code_tail)
-      let _t = parse_str(code_tail)(str_tail)
-      let _f = noparse<String>
-      u32_eql(code_head)(str_head)<() Parsed(String)>(_t)(_f)
-    code<() Parsed(String)>(_code_nil)(_code_cons);
+    code<() Parsed(String)>
+    | noparse<String>;
+    | (code_head) (code_tail)
+      u32_eql(code_head)(str_head)<() Parsed(String)>
+      | parse_str(code_tail)(str_tail);
+      | noparse<String>;;;
 
-parse_one_aux: String -> List(String) -> Nat -> Maybe(Pair(String)(Nat))
-  (code) (strs) (indx)
-  strs<() Parsed(Nat)>
-  | noparse<Nat>;
-  | (head) (tail)
-    let _none = parse_one_aux(code)(tail)(succ(indx))
-    let _some = (value) value<() Parsed(Nat)>((code) () parsed<Nat>(code)(indx))
-    parse_str(code)(head)<() Maybe(Pair(String)(Nat))>(_none)(_some);
-
-parse_one: String -> List(String) -> Maybe(Pair(String)(Nat))
-  (code) (strs)
-  parse_one_aux(code)(strs)(zero)
+parse_opt: String -> Pair(String)(String) -> Parsed(Bool)
+  (code) (opts)
+  opts<() Parsed(Bool)>
+  | (ch0) (ch1)
+    parse_str(ch0)(code)<() Parsed(Bool)>
+    | parse_str(ch1)(code)<() Parsed(Bool)>
+      | noparse<Bool>;
+      | (got) got<() Parsed(Bool)>((code) (skip) parsed<Bool>(code)(true));;
+    | (got) got<() Parsed(Bool)>((code) (skip) parsed<Bool>(code)(false));;
 
 parse_nam_aux: String -> Pair(String)(String)
   (code)
@@ -1019,7 +1018,7 @@ stringify_trm_go : List(String) -> Term -> String
   |-lam- () (e) (n) (b)
     let head = nest(e)(n)
     let body = go(exts(n)(vs))(b)
-    cat_list(exts(head)(exts(sp(ARR1))(strs(body))));
+    cat_list(exts(head)(strs(body)));
   |-app- () (e) (f) (a)
     let func = nest(false)(go(vs)(f))
     let argm = nest(e)(go(vs)(a))
@@ -1042,29 +1041,36 @@ parse_par: String -> List(String) -> Parsed(Term)
   parsing<String><Term>(parse_str(next(code))(RPAR)) | (code) (skip)
   parsed<Term>(code)(term);;;
 
+parse_com: String -> List(String) -> Parsed(Term)
+  (code) (vars)
+  parsing<String><Term>(parse_str(next(code))(DASH))  | (code) (skip)
+  parsing<String><Term>(parse_nam(     code )(false)) | (code) (name)
+  parsing<String><Term>(parse_str(next(code))(DASH))  | (code) (skip)
+  parsing<Term  ><Term>(parse_trm(next(code))(vars))  | (code) (term)
+  parsed<Term>(code)(term);;;;
+
 parse_all: String -> List(String) -> Parsed(Term)
   (code) (vars)
   parsing<String><Term>(parse_nam(next(code))(true)) | (code) (self)
-  parsing<Nat   ><Term>(parse_one(     code )(OPEN)) | (code) (eras)
+  parsing<Bool  ><Term>(parse_opt(     code )(OPEN)) | (code) (eras)
   parsing<String><Term>(parse_nam(next(code))(true)) | (code) (name)
   parsing<String><Term>(parse_str(next(code))(COLO)) | (code) (skip)
   let vars = cons<String>(self)(vars)
   parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (bind)
-  parsing<Nat   ><Term>(parse_one(next(code))(CLOS)) | (code) (skip)
+  parsing<Bool  ><Term>(parse_opt(next(code))(CLOS)) | (code) (skip)
   parsing<String><Term>(parse_str(next(code))(ARR0)) | (code) (skip)
   let vars = cons<String>(name)(vars)
   parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
-  parsed<Term>(code)(all(nat_eql(eras)(n1))(self)(name)(bind)(body));;;;;;;;
+  parsed<Term>(code)(all(eras)(self)(name)(bind)(body));;;;;;;;
 
 parse_lam: String -> List(String) -> Parsed(Term)
   (code) (vars)
-  parsing<Nat   ><Term>(parse_one(next(code))(OPEN)) | (code) (eras)
+  parsing<Bool  ><Term>(parse_opt(next(code))(OPEN)) | (code) (eras)
   parsing<String><Term>(parse_nam(next(code))(true)) | (code) (name)
-  parsing<Nat   ><Term>(parse_one(next(code))(CLOS)) | (code) (skip)
-  parsing<String><Term>(parse_str(next(code))(ARR1)) | (code) (skip)
+  parsing<Bool  ><Term>(parse_opt(next(code))(CLOS)) | (code) (skip)
   let vars = cons<String>(name)(vars)
   parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
-  parsed<Term>(code)(lam(nat_eql(eras)(n1))(name)(body));;;;;
+  parsed<Term>(code)(lam(eras)(name)(body));;;;
 
 parse_let: String -> List(String) -> Parsed(Term)
   (code) (vars)
@@ -1090,10 +1096,17 @@ parse_var: String -> List(String) -> Parsed(Term)
 
 parse_app: String -> Term -> List(String) -> Parsed(Term)
   (code) (func) (vars)
-  parsing<Nat ><Term>(parse_one(next(code))(OPEN)) | (code) (eras)
+  parsing<Bool><Term>(parse_opt(next(code))(OPEN)) | (code) (eras)
   parsing<Term><Term>(parse_trm(next(code))(vars)) | (code) (argm)
-  parsing<Nat ><Term>(parse_one(next(code))(CLOS)) | (code) (skip)
-  parsed<Term>(code)(app(nat_eql(eras)(n1))(func)(argm));;;
+  parsing<Bool><Term>(parse_opt(next(code))(CLOS)) | (code) (skip)
+  parsed<Term>(code)(app(eras)(func)(argm));;;
+
+parse_pip: String -> Term -> List(String) -> Parsed(Term)
+  (code) (func) (vars)
+  parsing<String><Term>(parse_str(next(code))(PIPE)) | (code) (skip)
+  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (argm)
+  parsing<String><Term>(parse_str(next(code))(SEMI)) | (code) (skip)
+  parsed<Term>(code)(app(false)(func)(argm));;;
 
 parse_arr: String -> Term -> List(String) -> Parsed(Term)
   (code) (bind) (vars)
@@ -1113,9 +1126,10 @@ parse_pst: String -> Term -> List(String) -> Parsed(Term)
   (code) (term) (vars)
   let post_parse = first_valid<Pair(String)(Term)>(
     cons<Parsed(Term)>(parse_app(code)(term)(vars))(
+    cons<Parsed(Term)>(parse_pip(code)(term)(vars))(
     cons<Parsed(Term)>(parse_arr(code)(term)(vars))(
     cons<Parsed(Term)>(parse_ann(code)(term)(vars))(
-    nil<Parsed(Term)>))))
+    nil<Parsed(Term)>)))))
   post_parse<() Parsed(Term)>
   | parsed<Term>(code)(term);
   | (value)
@@ -1129,14 +1143,15 @@ parse_trm: String -> List(String) -> Parsed(Term)
     cons<Parsed(Term)>(parse_lam(code)(vars))(
     cons<Parsed(Term)>(parse_let(code)(vars))(
     cons<Parsed(Term)>(parse_par(code)(vars))(
+    cons<Parsed(Term)>(parse_com(code)(vars))(
     cons<Parsed(Term)>(parse_typ(code)(vars))(
     cons<Parsed(Term)>(parse_var(code)(vars))(
-    nil<Parsed(Term)>)))))))
+    nil<Parsed(Term)>))))))))
   parsing<Term><Term>(base_parse)((code) (term)
     parse_pst(code)(term)(vars))
 
-//// Substitution
-//// ============
+// Substitution
+// ============
 
 shift: Term -> Nat -> Nat -> Term
   (term) (inc) (dep)
@@ -1359,5 +1374,8 @@ example_0: Word(n4)
   let w0101 = w1<n3>(w0<n2>(w1<n1>(w0<n0>(we))))
   word_add<n4>(w0011)(w0101) // 3 + 5 == 8
 
-main: String
-  drop<Char>(n1)(ARR1)
+main: String -> String
+  (code)
+  parse_trm(code)(nil<String>)<() String>
+  | nil<Char>;
+  | (parsed) parsed<() String>((code) (term) stringify_trm(term));
