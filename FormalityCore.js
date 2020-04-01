@@ -80,7 +80,8 @@ function is_space(chr) {
 // Is this a name-valid character?
 function is_name(chr) {
   var val = chr.charCodeAt(0);
-  return (val >= 48 && val < 58)   // 0-9
+  return (val >= 46 && val < 47)   // .
+      || (val >= 48 && val < 58)   // 0-9
       || (val >= 65 && val < 91)   // A-Z
       || (val >= 95 && val < 96)   // _
       || (val >= 97 && val < 123); // a-z
@@ -184,6 +185,14 @@ function parse_par(code, indx, vars) {
   return [indx, term];
 };
 
+// Parses an inline comment, `-<name>- <term>`
+function parse_com(code, indx, vars) {
+  var [indx, skip] = parse_str(code, next(code, indx), "-");
+  var [indx, name] = parse_nam(code, indx);
+  var [indx, term] = parse_trm(code, next(code, indx), vars);
+  return [indx, term];
+};
+
 // Parses a dependent function type, `(<name> : <term>) -> <term>`
 function parse_all(code, indx, vars) {
   var [indx, self] = parse_nam(code, next(code, indx), 1);
@@ -202,7 +211,6 @@ function parse_lam(code, indx, vars) {
   var [indx, eras] = parse_opt(code, next(code, indx), "(", "<");
   var [indx, name] = parse_nam(code, next(code, indx), 1);
   var [indx, skip] = parse_str(code, next(code, indx), eras ? ">" : ")")
-  var [indx, skip] = parse_str(code, next(code, indx), "=>");
   var [indx, body] = parse_trm(code, indx, Ext(name, vars));
   return [indx, Lam(eras, name, body)];
 };
@@ -247,7 +255,6 @@ function parse_app(code, indx, func, vars) {
 // Parses a multi-line application, `<term> |<name> <term>;`
 function parse_pip(code, indx, func, vars) {
   var [indx, skip] = parse_str(code, next(code, indx), "|");
-  var [indx, skip] = parse_nam(code, indx, 1);
   var [indx, argm] = parse_trm(code, indx, vars);
   var [indx, skip] = parse_str(code, next(code, indx), ";");
   return [indx, App(false, func, argm)];
@@ -275,6 +282,7 @@ function parse_trm(code, indx = 0, vars = Nil()) {
     () => parse_lam(code, indx, vars),
     () => parse_let(code, indx, vars),
     () => parse_par(code, indx, vars),
+    () => parse_com(code, indx, vars),
     () => parse_typ(code, indx, vars),
     () => parse_var(code, indx, vars),
   ]);
