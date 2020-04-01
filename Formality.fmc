@@ -551,11 +551,11 @@ u32_inc: U32 -> U32
 u32_add: U32 -> U32 -> U32
   word_add{n32}
 
-// a { b
+// a < b
 u32_ltn: U32 -> U32 -> Bool
   word_ltn{n32}
 
-// a {= b
+// a <= b
 u32_lte: U32 -> U32 -> Bool
   word_lte{n32}
 
@@ -563,11 +563,11 @@ u32_lte: U32 -> U32 -> Bool
 u32_eql: U32 -> U32 -> Bool
   word_eql{n32}
 
-// a }= b
+// a >= b
 u32_gte: U32 -> U32 -> Bool
   word_gte{n32}
 
-// a } b
+// a > b
 u32_gtn: U32 -> U32 -> Bool
   word_gtn{n32}
 
