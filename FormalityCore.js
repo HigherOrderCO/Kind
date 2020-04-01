@@ -252,7 +252,7 @@ function parse_app(code, indx, func, vars) {
   return [indx, App(eras, func, argm)];
 };
 
-// Parses a multi-line application, `<term> |<name> <term>;`
+// Parses a multi-line application, `<term> | <term>;`
 function parse_pip(code, indx, func, vars) {
   var [indx, skip] = parse_str(code, next(code, indx), "|");
   var [indx, argm] = parse_trm(code, indx, vars);
