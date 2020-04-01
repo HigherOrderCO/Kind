@@ -1,6 +1,7 @@
 var fmc = require("./FormalityCore.js");
 var code = `
 Bool : Type
+<<<<<<< HEAD
   self{P : (x : Bool) -> Type} ->
   (t : P(true)) ->
   (f : P(false)) ->
@@ -65,7 +66,7 @@ double : (n : Nat) -> Nat
 
 case_bool
   : (b : Bool) ->
-    (P : (x : Bool) -> Type;) ->
+    <P : (x : Bool) -> Type> ->
     (t : P(true)) ->
     (f : P(false)) ->
     P(b)
@@ -73,7 +74,7 @@ case_bool
 
 fold_nat
   : (n : Nat) ->
-    (P : (n : Nat) -> Type;) ->
+    {P : (n : Nat) -> Type} ->
     (z : P(zero)) ->
     (s : (n : Nat) -> (i : P(n)) -> P(succ(n))) ->
     P(n)
