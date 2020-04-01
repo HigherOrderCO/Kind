@@ -2,148 +2,148 @@
 // ====
 
 Bool: Type
-  self<P: Bool -> Type> ->
+  self{P: Bool -> Type} ->
   P(true) ->
   P(false) ->
   P(self)
 
 true: Bool
-  <> (t) (f) t
+  {} (t) (f) t
 
 false: Bool
-  <> (t) (f) f
+  {} (t) (f) f
 
-case_bool: (b: Bool) -> <P: Bool -> Type> -> P(true) -> P(false) -> P(b)
-  (b) <P> (t) (f) b<P>(t)(f)
+case_bool: (b: Bool) -> {P: Bool -> Type} -> P(true) -> P(false) -> P(b)
+  (b) {P} (t) (f) b{P}(t)(f)
 
 not: Bool -> Bool
   (a)
-  a<() Bool>
+  a{() Bool}
   | false;
   | true;
 
 or: Bool -> Bool -> Bool
   (a) (b)
-  a<() Bool>
-  | b<() Bool>
+  a{() Bool}
+  | b{() Bool}
     | true;
     | true;;
-  | b<() Bool>
+  | b{() Bool}
     | true;
     | false;;
 
 and: Bool -> Bool -> Bool
   (a) (b)
-  a<() Bool>
-  | b<() Bool>
+  a{() Bool}
+  | b{() Bool}
     | true;
     | false;;
-  | b<() Bool>
+  | b{() Bool}
     | false;
     | false;;
 
 // Cmp
 
 Cmp : Type
-  self<P: Cmp -> Type> ->
+  self{P: Cmp -> Type} ->
   P(ltn) ->
   P(eql) ->
   P(gtn) ->
   P(self)
 
 ltn: Cmp
-  <> (ltn) (eql) (gtn) ltn
+  {} (ltn) (eql) (gtn) ltn
 
 eql: Cmp
-  <> (ltn) (eql) (gtn) eql
+  {} (ltn) (eql) (gtn) eql
 
 gtn: Cmp
-  <> (ltn) (eql) (gtn) gtn
+  {} (ltn) (eql) (gtn) gtn
 
 // Bit
 // ===
 
 Bit : Type
-  self<P: Bit -> Type> ->
+  self{P: Bit -> Type} ->
   P(t0) ->
   P(t1) ->
   P(self)
 
 t0: Bit
-  <> (t0) (t1) t0
+  {} (t0) (t1) t0
 
 t1: Bit
-  <> (t0) (t1) t1
+  {} (t0) (t1) t1
 
 // Nat
 // ===
 
 Nat: Type
-  self<P: (x: Nat) -> Type> ->
+  self{P: (x: Nat) -> Type} ->
   (zero: P(zero)) ->
   (succ: (pred: Nat) -> P(succ(pred))) ->
   P(self)
 
 zero: Nat
-  <> (z) (s) z
+  {} (z) (s) z
 
 succ: Nat -> Nat
   (n)
-  <> (z) (s) s(n)
+  {} (z) (s) s(n)
 
 pred: Nat -> Nat
   (n)
-  n<() Nat>
+  n{() Nat}
   | zero;
   | (n.pred) n.pred;
 
-fold_nat : (n: Nat) -> <P: Nat -> Type> -> P(zero) -> ((n:Nat) -> P(n) -> P(succ(n))) -> P(n)
-  (n) <P> (z) (s)
-  n<P>(z)((pred) s(pred)(fold_nat(pred)<P>(z)(s)))
+fold_nat : (n: Nat) -> {P: Nat -> Type} -> P(zero) -> ((n:Nat) -> P(n) -> P(succ(n))) -> P(n)
+  (n) {P} (z) (s)
+  n{P}(z)((pred) s(pred)(fold_nat(pred){P}(z)(s)))
 
 double: Nat -> Nat
   (n)
-  n<() Nat>
+  n{() Nat}
   | zero;
   | (n.pred) succ(succ(double(n.pred)));
 
 add: Nat -> Nat -> Nat
   (n) (m)
-  n<() Nat>
+  n{() Nat}
   | m;
   | (n.pred) succ(add(n.pred)(m));
 
 sub: Nat -> Nat -> Nat
   (n) (m)
-  m<() Nat>
+  m{() Nat}
   | n;
   | (m.pred) sub(pred(n))(m.pred);
 
 nat_cmp: Nat -> Nat -> Cmp
   (a) (b)
-  a<() Cmp>
-  | b<() Cmp>
+  a{() Cmp}
+  | b{() Cmp}
     | eql;
     | (b.pred) ltn;;
   | (a.pred)
-    b<() Cmp>
+    b{() Cmp}
     | gtn;
     | (b.pred) nat_cmp(a.pred)(b.pred);;
 
 nat_ltn: Nat -> Nat -> Bool
-  (a) (b) nat_cmp(a)(b)<() Bool>(true)(false)(false)
+  (a) (b) nat_cmp(a)(b){() Bool}(true)(false)(false)
 
 nat_lte: Nat -> Nat -> Bool
-  (a) (b) nat_cmp(a)(b)<() Bool>(true)(true)(false)
+  (a) (b) nat_cmp(a)(b){() Bool}(true)(true)(false)
 
 nat_eql: Nat -> Nat -> Bool
-  (a) (b) nat_cmp(a)(b)<() Bool>(false)(true)(false)
+  (a) (b) nat_cmp(a)(b){() Bool}(false)(true)(false)
 
 nat_gte: Nat -> Nat -> Bool
-  (a) (b) nat_cmp(a)(b)<() Bool>(false)(true)(true)
+  (a) (b) nat_cmp(a)(b){() Bool}(false)(true)(true)
 
 nat_gtn: Nat -> Nat -> Bool
-  (a) (b) nat_cmp(a)(b)<() Bool>(false)(false)(true)
+  (a) (b) nat_cmp(a)(b){() Bool}(false)(false)(true)
 
 n0: Nat
   zero
@@ -252,285 +252,285 @@ n32: Nat
 
 Pair: Type -> Type -> Type
   (A) (B)
-  self<P: Pair(A)(B) -> Type> ->
-  (pair: (a: A) -> (b: B) -> P(pair<A><B>(a)(b))) ->
+  self{P: Pair(A)(B) -> Type} ->
+  (pair: (a: A) -> (b: B) -> P(pair{A}{B}(a)(b))) ->
   P(self)
 
-pair: <A: Type> -> <B: Type> -> A -> B -> Pair(A)(B)
-  <> <> (a) (b)
-  <> (pair)
+pair: {A: Type} -> {B: Type} -> A -> B -> Pair(A)(B)
+  {} {} (a) (b)
+  {} (pair)
   pair(a)(b)
 
-fst: <A: Type> -> <B: Type> -> Pair(A)(B) -> A
-  <A> <B> (pair)
-  pair<() A>((a) (b) a)
+fst: {A: Type} -> {B: Type} -> Pair(A)(B) -> A
+  {A} {B} (pair)
+  pair{() A}((a) (b) a)
 
-snd: <A: Type> -> <B: Type> -> Pair(A)(B) -> B
-  <A> <B> (pair)
-  pair<() B>((a) (b) b)
+snd: {A: Type} -> {B: Type} -> Pair(A)(B) -> B
+  {A} {B} (pair)
+  pair{() B}((a) (b) b)
 
 // Maybe
 // =====
 
 Maybe: Type -> Type
   (A)
-  self<P: Maybe(A) -> Type> ->
-  (none: P(none<A>)) ->
-  (some: (value: A) -> P(some<A>(value))) ->
+  self{P: Maybe(A) -> Type} ->
+  (none: P(none{A})) ->
+  (some: (value: A) -> P(some{A}(value))) ->
   P(self)
 
-none: <A: Type> -> Maybe(A)
-  <>
-  <> (none) () none
+none: {A: Type} -> Maybe(A)
+  {}
+  {} (none) () none
 
-some: <A: Type> -> A -> Maybe(A)
-  <> (value)
-  <> () (some) some(value)
+some: {A: Type} -> A -> Maybe(A)
+  {} (value)
+  {} () (some) some(value)
 
 // List
 // ====
 
 List: (A: Type) -> Type
   (A)
-  self<P: (x: List(A)) -> Type> ->
-  (nil: P(nil<A>)) ->
-  (cons: (head: A) -> (tail: List(A)) -> P(cons<A>(head)(tail))) ->
+  self{P: (x: List(A)) -> Type} ->
+  (nil: P(nil{A})) ->
+  (cons: (head: A) -> (tail: List(A)) -> P(cons{A}(head)(tail))) ->
   P(self)
 
-nil: <A: Type> -> List(A)
-  <A>
-  <> (nil) () nil
+nil: {A: Type} -> List(A)
+  {A}
+  {} (nil) () nil
 
-cons: <A: Type> -> (:A) -> (:List(A)) -> List(A)
-  <A> (head) (tail)
-  <> () (cons) cons(head)(tail)
+cons: {A: Type} -> (:A) -> (:List(A)) -> List(A)
+  {A} (head) (tail)
+  {} () (cons) cons(head)(tail)
 
-find_aux: <A: Type> -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
-  <A> (list) (cond) (indx)
-  list<() Maybe(Pair(A)(Nat))>
-  | none<Pair(A)(Nat)>;
+find_aux: {A: Type} -> List(A) -> (A -> Nat -> Bool) -> Nat -> Maybe(Pair(A)(Nat))
+  {A} (list) (cond) (indx)
+  list{() Maybe(Pair(A)(Nat))}
+  | none{Pair(A)(Nat)};
   | (head) (tail)
-    cond(head)(indx)<() Maybe(Pair(A)(Nat))>
-    | some<Pair(A)(Nat)>(pair<A><Nat>(head)(indx));
-    | find_aux<A>(tail)(cond)(succ(indx));;
+    cond(head)(indx){() Maybe(Pair(A)(Nat))}
+    | some{Pair(A)(Nat)}(pair{A}{Nat}(head)(indx));
+    | find_aux{A}(tail)(cond)(succ(indx));;
 
-find: <A: Type> -> List(A) -> (A -> Nat -> Bool) -> Maybe(Pair(A)(Nat))
-  <A> (list) (cond)
-  find_aux<A>(list)(cond)(zero)
+find: {A: Type} -> List(A) -> (A -> Nat -> Bool) -> Maybe(Pair(A)(Nat))
+  {A} (list) (cond)
+  find_aux{A}(list)(cond)(zero)
 
-take: <A: Type> -> Nat -> List(A) -> List(A)
-  <A> (n) (list)
-  list<() List(A)>
-  | nil<A>;
+take: {A: Type} -> Nat -> List(A) -> List(A)
+  {A} (n) (list)
+  list{() List(A)}
+  | nil{A};
   | (head) (tail)
-    n<() List(A)>
-    | nil<A>;
-    | (pred) cons<A>(head)(take<A>(pred)(tail));;
+    n{() List(A)}
+    | nil{A};
+    | (pred) cons{A}(head)(take{A}(pred)(tail));;
 
-drop: <A: Type> -> Nat -> List(A) -> List(A)
-  <A> (n) (list)
-  n<() List(A)>
+drop: {A: Type} -> Nat -> List(A) -> List(A)
+  {A} (n) (list)
+  n{() List(A)}
   | list;
   | (pred)
-    list<() List(A)>
-    | nil<A>;
-    | (head) (tail) drop<A>(pred)(tail);;
+    list{() List(A)}
+    | nil{A};
+    | (head) (tail) drop{A}(pred)(tail);;
 
-is_empty: <A: Type> -> List(A) -> Bool
-  <A> (list)
-  list<() Bool>
+is_empty: {A: Type} -> List(A) -> Bool
+  {A} (list)
+  list{() Bool}
   | true;
   | (head) (tail) false;
 
-zip_with: <A: Type> -> <B: Type> -> <C: Type> -> (A -> B -> C) -> List(A) -> List(B) -> List(C)
-  <A> <B> <C> (fn) (as) (bs)
-  as<() List(C)>
-  | nil<C>;
+zip_with: {A: Type} -> {B: Type} -> {C: Type} -> (A -> B -> C) -> List(A) -> List(B) -> List(C)
+  {A} {B} {C} (fn) (as) (bs)
+  as{() List(C)}
+  | nil{C};
   | (a.head) (a.tail)
-    bs<() List(C)>
-    | nil<C>;
+    bs{() List(C)}
+    | nil{C};
     | (b.head) (b.tail)
       let head = fn(a.head)(b.head)
-      let tail = zip_with<A><B><C>(fn)(a.tail)(b.tail)
-      cons<C>(head)(tail);;
+      let tail = zip_with{A}{B}{C}(fn)(a.tail)(b.tail)
+      cons{C}(head)(tail);;
 
-all_satisfy: <A: Type> -> (A -> Bool) -> List(A) -> Bool
-  <A> (cond) (list)
-  list<() Bool>
+all_satisfy: {A: Type} -> (A -> Bool) -> List(A) -> Bool
+  {A} (cond) (list)
+  list{() Bool}
   | true;
   | (head) (tail)
-    cond(head)<() Bool>
-    | all_satisfy<A>(cond)(tail);
+    cond(head){() Bool}
+    | all_satisfy{A}(cond)(tail);
     | false;;
 
-any_satisfy: <A: Type> -> (A -> Bool) -> List(A) -> Bool
-  <A> (cond) (list)
-  list<() Bool>
+any_satisfy: {A: Type} -> (A -> Bool) -> List(A) -> Bool
+  {A} (cond) (list)
+  list{() Bool}
   | false;
   | (head) (tail)
-    cond(head)<() Bool>
+    cond(head){() Bool}
     | true;
-    | any_satisfy<A>(cond)(tail);;
+    | any_satisfy{A}(cond)(tail);;
 
 all_true: List(Bool) -> Bool
-  (list) all_satisfy<Bool>((x) x)(list)
+  (list) all_satisfy{Bool}((x) x)(list)
 
 any_true: List(Bool) -> Bool
-  (list) any_satisfy<Bool>((x) x)(list)
+  (list) any_satisfy{Bool}((x) x)(list)
 
-list_len: <A: Type> -> List(A) -> Nat
-  <A> (list)
-  list<() Nat>
+list_len: {A: Type} -> List(A) -> Nat
+  {A} (list)
+  list{() Nat}
   | zero;
   | (head) (tail)
-    succ(list_len<A>(tail));
+    succ(list_len{A}(tail));
 
-concat: <A: Type> -> List(A) -> List(A) -> List(A)
-  <A> (as) (bs)
-  as<() List(A)>
+concat: {A: Type} -> List(A) -> List(A) -> List(A)
+  {A} (as) (bs)
+  as{() List(A)}
   | bs;
   | (head) (tail)
-    cons<A>(head)(concat<A>(tail)(bs));
+    cons{A}(head)(concat{A}(tail)(bs));
 
-flatten : <A: Type> -> List(List(A)) -> List(A)
-  <A> (as)
-  as<() List(A)>
-  | nil<A>;
+flatten : {A: Type} -> List(List(A)) -> List(A)
+  {A} (as)
+  as{() List(A)}
+  | nil{A};
   | (head) (tail)
-    concat<A>(head)(flatten<A>(tail));
+    concat{A}(head)(flatten{A}(tail));
 
-single : <A : Type> -> (x : A) -> List(A)
-  <A> (x) cons<A>(x)(nil<A>)
+single : {A : Type} -> (x : A) -> List(A)
+  {A} (x) cons{A}(x)(nil{A})
 
 // Bits
 // ====
 
 Bits: Type
-  self<P: Bits -> Type> ->
+  self{P: Bits -> Type} ->
   (be: P(be)) ->
   (b0: (pred: Bits) -> P(b0(pred))) ->
   (b1: (pred: Bits) -> P(b1(pred))) ->
   P(self)
 
 be: Bits
-  <P> (be) (b0) (b1) be
+  {P} (be) (b0) (b1) be
 
 b0: (bs: Bits) -> Bits
-  (bs) <P> (be) (b0) (b1) b0(bs)
+  (bs) {P} (be) (b0) (b1) b0(bs)
 
 b1: (bs: Bits) -> Bits
-  (bs) <P> (be) (b0) (b1) b1(bs)
+  (bs) {P} (be) (b0) (b1) b1(bs)
 
 // Word
 // ====
 
 Word: Nat -> Type
   (size)
-  self<P: (size: Nat) -> Word(size) -> Type> ->
+  self{P: (size: Nat) -> Word(size) -> Type} ->
   (we: P(zero)(we)) ->
-  (w0: <size: Nat> -> (pred: Word(size)) -> P(succ(size))(w0<size>(pred))) ->
-  (w1: <size: Nat> -> (pred: Word(size)) -> P(succ(size))(w1<size>(pred))) ->
+  (w0: {size: Nat} -> (pred: Word(size)) -> P(succ(size))(w0{size}(pred))) ->
+  (w1: {size: Nat} -> (pred: Word(size)) -> P(succ(size))(w1{size}(pred))) ->
   P(size)(self)
 
 we: Word(zero)
-  <P> (we) (w0) (w1)
+  {P} (we) (w0) (w1)
   we
 
-w0: <size: Nat> -> Word(size) -> Word(succ(size))
-  <size> (wo) <P> (we) (w0) (w1)
-  w0<size>(wo)
+w0: {size: Nat} -> Word(size) -> Word(succ(size))
+  {size} (wo) {P} (we) (w0) (w1)
+  w0{size}(wo)
 
-w1: <size: Nat> -> Word(size) -> Word(succ(size))
-  <size> (wo) <P> (we) (w0) (w1)
-  w1<size>(wo)
+w1: {size: Nat} -> Word(size) -> Word(succ(size))
+  {size} (wo) {P} (we) (w0) (w1)
+  w1{size}(wo)
 
-word_inc: <size: Nat> -> Word(size) -> Word(size)
-  <size> (word)
-  word<(size) () Word(size)>
+word_inc: {size: Nat} -> Word(size) -> Word(size)
+  {size} (word)
+  word{(size) () Word(size)}
   | we;
-  | <size> (pred) w1<size>(pred);
-  | <size> (pred) w0<size>(word_inc<size>(pred));
+  | {size} (pred) w1{size}(pred);
+  | {size} (pred) w0{size}(word_inc{size}(pred));
 
-word_add_aux: <size: Nat> -> Word(size) -> Word(size) -> Bool -> Word(size)
-  <size> (a) (b) (c)
-  ( a<(a.size) () Word(a.size) -> Word(a.size)>
+word_add_aux: {size: Nat} -> Word(size) -> Word(size) -> Bool -> Word(size)
+  {size} (a) (b) (c)
+  ( a{(a.size) () Word(a.size) -> Word(a.size)}
   | (b) we;
-  | <a.size> (a.pred) (b)
-    ( b<(b.size) () Word(pred(b.size)) -> Word(b.size)>
+  | {a.size} (a.pred) (b)
+    ( b{(b.size) () Word(pred(b.size)) -> Word(b.size)}
     | (a.pred)
       we;
-    | <b.size> (b.pred) (a.pred)
-      c<() Word(succ(b.size))>
-      | w1<b.size>(word_add_aux<b.size>(a.pred)(b.pred)(false));  // a=0 b=0 c=0
-      | w0<b.size>(word_add_aux<b.size>(a.pred)(b.pred)(false));; // a=0 b=0 c=1
-    | <b.size> (b.pred) (a.pred)
-      c<() Word(succ(b.size))>
-      | w0<b.size>(word_add_aux<b.size>(a.pred)(b.pred)(true));   // a=0 b=1 c=0
-      | w1<b.size>(word_add_aux<b.size>(a.pred)(b.pred)(false));  // a=0 b=1 c=1
+    | {b.size} (b.pred) (a.pred)
+      c{() Word(succ(b.size))}
+      | w1{b.size}(word_add_aux{b.size}(a.pred)(b.pred)(false));  // a=0 b=0 c=0
+      | w0{b.size}(word_add_aux{b.size}(a.pred)(b.pred)(false));; // a=0 b=0 c=1
+    | {b.size} (b.pred) (a.pred)
+      c{() Word(succ(b.size))}
+      | w0{b.size}(word_add_aux{b.size}(a.pred)(b.pred)(true));   // a=0 b=1 c=0
+      | w1{b.size}(word_add_aux{b.size}(a.pred)(b.pred)(false));  // a=0 b=1 c=1
     ;)(a.pred);
-  | <a.size> (a.pred) (b)
-    ( b<(b.size) () Word(pred(b.size)) -> Word(b.size)>
+  | {a.size} (a.pred) (b)
+    ( b{(b.size) () Word(pred(b.size)) -> Word(b.size)}
     | (a.pred) we;
-    | <b.size> (b.pred) (a.pred)
-      c<() Word(succ(b.size))>
-      | w0<b.size>(word_add_aux<b.size>(a.pred)(b.pred)(true));   // a=1 b=0 c=0
-      | w1<b.size>(word_add_aux<b.size>(a.pred)(b.pred)(false));; // a=1 b=0 c=1
-    | <b.size> (b.pred) (a.pred)
-      c<() Word(succ(b.size))>
-      | w1<b.size>(word_add_aux<b.size>(a.pred)(b.pred)(true));   // a=1 b=1 c=0
-      | w0<b.size>(word_add_aux<b.size>(a.pred)(b.pred)(true));   // a=1 b=1 c=1
+    | {b.size} (b.pred) (a.pred)
+      c{() Word(succ(b.size))}
+      | w0{b.size}(word_add_aux{b.size}(a.pred)(b.pred)(true));   // a=1 b=0 c=0
+      | w1{b.size}(word_add_aux{b.size}(a.pred)(b.pred)(false));; // a=1 b=0 c=1
+    | {b.size} (b.pred) (a.pred)
+      c{() Word(succ(b.size))}
+      | w1{b.size}(word_add_aux{b.size}(a.pred)(b.pred)(true));   // a=1 b=1 c=0
+      | w0{b.size}(word_add_aux{b.size}(a.pred)(b.pred)(true));   // a=1 b=1 c=1
     ;)(a.pred)
   ;)(b)
 
-word_add: <size: Nat> -> Word(size) -> Word(size) -> Word(size)
-  <size> (a) (b) word_add_aux<size>(a)(b)(false)
+word_add: {size: Nat} -> Word(size) -> Word(size) -> Word(size)
+  {size} (a) (b) word_add_aux{size}(a)(b)(false)
 
-word_cmp_aux: <size: Nat> -> Word(size) -> Word(size) -> Cmp -> Cmp
-  <size> (a) (b) (c)
-  ( a<(a.size) () Word(a.size) -> Cmp>
+word_cmp_aux: {size: Nat} -> Word(size) -> Word(size) -> Cmp -> Cmp
+  {size} (a) (b) (c)
+  ( a{(a.size) () Word(a.size) -> Cmp}
   | (b) c;
-  | <a.size> (a.pred) (b)
-    ( b<(b.size) () Word(pred(b.size)) -> Cmp>
+  | {a.size} (a.pred) (b)
+    ( b{(b.size) () Word(pred(b.size)) -> Cmp}
     | (a.pred) c;
-    | <b.size> (b.pred) (a.pred) word_cmp_aux<b.size>(a.pred)(b.pred)(c);
-    | <b.size> (b.pred) (a.pred) word_cmp_aux<b.size>(a.pred)(b.pred)(ltn)
+    | {b.size} (b.pred) (a.pred) word_cmp_aux{b.size}(a.pred)(b.pred)(c);
+    | {b.size} (b.pred) (a.pred) word_cmp_aux{b.size}(a.pred)(b.pred)(ltn)
     ; )(a.pred);
-  | <a.size> (a.pred) (b)
-    ( b<(b.size) () Word(pred(b.size)) -> Cmp>
+  | {a.size} (a.pred) (b)
+    ( b{(b.size) () Word(pred(b.size)) -> Cmp}
     | (a.pred) c;
-    | <b.size> (b.pred) (a.pred) word_cmp_aux<b.size>(a.pred)(b.pred)(gtn);
-    | <b.size> (b.pred) (a.pred) word_cmp_aux<b.size>(a.pred)(b.pred)(c)
+    | {b.size} (b.pred) (a.pred) word_cmp_aux{b.size}(a.pred)(b.pred)(gtn);
+    | {b.size} (b.pred) (a.pred) word_cmp_aux{b.size}(a.pred)(b.pred)(c)
     ; )(a.pred)
   ; )(b)
 
-word_cmp: <size: Nat> -> Word(size) -> Word(size) -> Cmp
-  <size> (a) (b)
-  word_cmp_aux<size>(a)(b)(eql)
+word_cmp: {size: Nat} -> Word(size) -> Word(size) -> Cmp
+  {size} (a) (b)
+  word_cmp_aux{size}(a)(b)(eql)
 
 // a > b
-word_ltn: <size:Nat> -> Word(size) -> Word(size) -> Bool
-  <size> (a) (b)
-  word_cmp<size>(a)(b)<() Bool>(true)(false)(false)
+word_ltn: {size:Nat} -> Word(size) -> Word(size) -> Bool
+  {size} (a) (b)
+  word_cmp{size}(a)(b){() Bool}(true)(false)(false)
 
 // a <= b
-word_lte: <size:Nat> -> Word(size) -> Word(size) -> Bool
-  <size> (a) (b)
-  word_cmp<size>(a)(b)<() Bool>(true)(true)(false)
+word_lte: {size:Nat} -> Word(size) -> Word(size) -> Bool
+  {size} (a) (b)
+  word_cmp{size}(a)(b){() Bool}(true)(true)(false)
 
 // a == b
-word_eql: <size:Nat> -> Word(size) -> Word(size) -> Bool
-  <size> (a) (b)
-  word_cmp<size>(a)(b)<() Bool>(false)(true)(false)
+word_eql: {size:Nat} -> Word(size) -> Word(size) -> Bool
+  {size} (a) (b)
+  word_cmp{size}(a)(b){() Bool}(false)(true)(false)
 
 // a >= b
-word_gte: <size:Nat> -> Word(size) -> Word(size) -> Bool
-  <size> (a) (b)
-  word_cmp<size>(a)(b)<() Bool>(false)(true)(true)
+word_gte: {size:Nat} -> Word(size) -> Word(size) -> Bool
+  {size} (a) (b)
+  word_cmp{size}(a)(b){() Bool}(false)(true)(true)
 
 // a > b
-word_gtn: <size:Nat> -> Word(size) -> Word(size) -> Bool
-  <size> (a) (b)
-  word_cmp<size>(a)(b)<() Bool>(false)(false)(true)
+word_gtn: {size:Nat} -> Word(size) -> Word(size) -> Bool
+  {size} (a) (b)
+  word_cmp{size}(a)(b){() Bool}(false)(false)(true)
 
 // Uint32
 // ======
@@ -539,37 +539,37 @@ U32: Type
   Word(n32)
 
 u32_0: U32
-  w0<n31>(w0<n30>(w0<n29>(w0<n28>(w0<n27>(w0<n26>(w0<n25>(w0<n24>(
-  w0<n23>(w0<n22>(w0<n21>(w0<n20>(w0<n19>(w0<n18>(w0<n17>(w0<n16>(
-  w0<n15>(w0<n14>(w0<n13>(w0<n12>(w0<n11>(w0<n10>(w0<n9 >(w0<n8 >(
-  w0<n7 >(w0<n6 >(w0<n5 >(w0<n4 >(w0<n3 >(w0<n2 >(w0<n1 >(w0<n0 >(
+  w0{n31}(w0{n30}(w0{n29}(w0{n28}(w0{n27}(w0{n26}(w0{n25}(w0{n24}(
+  w0{n23}(w0{n22}(w0{n21}(w0{n20}(w0{n19}(w0{n18}(w0{n17}(w0{n16}(
+  w0{n15}(w0{n14}(w0{n13}(w0{n12}(w0{n11}(w0{n10}(w0{n9 }(w0{n8 }(
+  w0{n7 }(w0{n6 }(w0{n5 }(w0{n4 }(w0{n3 }(w0{n2 }(w0{n1 }(w0{n0 }(
   we))))))))))))))))))))))))))))))))
 
 u32_inc: U32 -> U32
-  word_inc<n32>
+  word_inc{n32}
 
 u32_add: U32 -> U32 -> U32
-  word_add<n32>
+  word_add{n32}
 
-// a < b
+// a { b
 u32_ltn: U32 -> U32 -> Bool
-  word_ltn<n32>
+  word_ltn{n32}
 
-// a <= b
+// a {= b
 u32_lte: U32 -> U32 -> Bool
-  word_lte<n32>
+  word_lte{n32}
 
 // a == b
 u32_eql: U32 -> U32 -> Bool
-  word_eql<n32>
+  word_eql{n32}
 
-// a >= b
+// a }= b
 u32_gte: U32 -> U32 -> Bool
-  word_gte<n32>
+  word_gte{n32}
 
-// a > b
+// a } b
 u32_gtn: U32 -> U32 -> Bool
-  word_gtn<n32>
+  word_gtn{n32}
 
 // Char
 // ====
@@ -579,19 +579,19 @@ Char: Type
 
 ascii: Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Char
   (a) (b) (c) (d) (e) (f) (g) (h)
-  let ty = <size: Nat> -> Word(size) -> Word(succ(size))
-  let wA = a<() ty>(w0)(w1)
-  let wB = b<() ty>(w0)(w1)
-  let wC = c<() ty>(w0)(w1)
-  let wD = d<() ty>(w0)(w1)
-  let wE = e<() ty>(w0)(w1)
-  let wF = f<() ty>(w0)(w1)
-  let wG = g<() ty>(w0)(w1)
-  let wH = h<() ty>(w0)(w1)
-  wH<n31>(wG<n30>(wF<n29>(wE<n28>(wD<n27>(wC<n26>(wB<n25>(wA<n24>(
-  w0<n23>(w0<n22>(w0<n21>(w0<n20>(w0<n19>(w0<n18>(w0<n17>(w0<n16>(
-  w0<n15>(w0<n14>(w0<n13>(w0<n12>(w0<n11>(w0<n10>(w0<n9 >(w0<n8 >(
-  w0<n7 >(w0<n6 >(w0<n5 >(w0<n4 >(w0<n3 >(w0<n2 >(w0<n1 >(w0<n0 >(
+  let ty = {size: Nat} -> Word(size) -> Word(succ(size))
+  let wA = a{() ty}(w0)(w1)
+  let wB = b{() ty}(w0)(w1)
+  let wC = c{() ty}(w0)(w1)
+  let wD = d{() ty}(w0)(w1)
+  let wE = e{() ty}(w0)(w1)
+  let wF = f{() ty}(w0)(w1)
+  let wG = g{() ty}(w0)(w1)
+  let wH = h{() ty}(w0)(w1)
+  wH{n31}(wG{n30}(wF{n29}(wE{n28}(wD{n27}(wC{n26}(wB{n25}(wA{n24}(
+  w0{n23}(w0{n22}(w0{n21}(w0{n20}(w0{n19}(w0{n18}(w0{n17}(w0{n16}(
+  w0{n15}(w0{n14}(w0{n13}(w0{n12}(w0{n11}(w0{n10}(w0{n9 }(w0{n8 }(
+  w0{n7 }(w0{n6 }(w0{n5 }(w0{n4 }(w0{n3 }(w0{n2 }(w0{n1 }(w0{n0 }(
   we))))))))))))))))))))))))))))))))
 
 
@@ -603,15 +603,15 @@ String: Type
 
 string_eql: String -> String -> Bool
   (a) (b)
-  let eql_len = nat_eql(list_len<Char>(a))(list_len<Char>(b))
-  let eql_val = all_satisfy<Bool>((x) x)(zip_with<Char><Char><Bool>(u32_eql)(a)(b))
+  let eql_len = nat_eql(list_len{Char}(a))(list_len{Char}(b))
+  let eql_val = all_satisfy{Bool}((x) x)(zip_with{Char}{Char}{Bool}(u32_eql)(a)(b))
   and(eql_len)(eql_val)
 
 // Term
 // ====
 
 Term: Type
-  self<P: Term -> Type> ->
+  self{P: Term -> Type} ->
   (var:
     (hash: U32) ->
     (indx: Nat) ->
@@ -659,41 +659,41 @@ Term: Type
 
 var: Nat -> Term
   (indx)
-  <> (var) () () () () () () ()
+  {} (var) () () () () () () ()
   var(u32_0)(indx)
 
 ref: String -> Term
   (name)
-  <> () (ref) () () () () () ()
+  {} () (ref) () () () () () ()
   ref(u32_0)(name)
 
 typ: Term
-  <> () () (typ) () () () () ()
+  {} () () (typ) () () () () ()
   typ(u32_0)
 
 all: Bool -> String -> String -> Term -> Term -> Term
   (eras) (self) (name) (bind) (body)
-  <> () () () (all) () () () ()
+  {} () () () (all) () () () ()
   all(u32_0)(eras)(self)(name)(bind)(body)
 
 lam: Bool -> String -> Term -> Term
   (eras) (name) (body)
-  <> () () () () (lam) () () ()
+  {} () () () () (lam) () () ()
   lam(u32_0)(eras)(name)(body)
 
 app: Bool -> Term -> Term -> Term
   (eras) (func) (argm)
-  <> () () () () () (app) () ()
+  {} () () () () () (app) () ()
   app(u32_0)(eras)(func)(argm)
 
 lit: String -> Term -> Term -> Term
   (name) (expr) (body)
-  <> () () () () () () (lit) ()
+  {} () () () () () () (lit) ()
   lit(u32_0)(name)(expr)(body)
 
 ann: Bool -> Term -> Term -> Term
   (done) (expr) (type)
-  <> () () () () () () () (ann)
+  {} () () () () () () () (ann)
   ann(u32_0)(done)(expr)(type)
 
 // Parsing
@@ -702,55 +702,55 @@ ann: Bool -> Term -> Term -> Term
 Parsed : (A: Type) -> Type
   (A) Maybe(Pair(String)(A))
 
-parsed: <A: Type> -> String -> A -> Parsed(A)
-  <A> (code) (val)
-  some<Pair(String)(A)>(pair<String><A>(code)(val))
+parsed: {A: Type} -> String -> A -> Parsed(A)
+  {A} (code) (val)
+  some{Pair(String)(A)}(pair{String}{A}(code)(val))
 
-noparse: <A: Type> -> Parsed(A)
-  <A> none<Pair(String)(A)>
+noparse: {A: Type} -> Parsed(A)
+  {A} none{Pair(String)(A)}
 
 parsing
-  : <A: Type> ->
-    <B: Type> ->
+  : {A: Type} ->
+    {B: Type} ->
     (x: Parsed(A)) ->
     (f: String -> A -> Parsed(B)) ->
     Parsed(B)
-  <A> <B> (x) (f)
-  let _none = noparse<B>
-  let _some = (value) value<() Parsed(B)>(f)
-  x<() Parsed(B)>(_none)(_some)
+  {A} {B} (x) (f)
+  let _none = noparse{B}
+  let _some = (value) value{() Parsed(B)}(f)
+  x{() Parsed(B)}(_none)(_some)
 
 
 is_space: Char -> Bool
   (c)
-    let is_spc = word_eql<n32>(c)(_space)
-    let is_tab = word_eql<n32>(c)(_HT)
-    let is_lin = word_eql<n32>(c)(_LF)
+    let is_spc = word_eql{n32}(c)(_space)
+    let is_tab = word_eql{n32}(c)(_HT)
+    let is_lin = word_eql{n32}(c)(_LF)
     or(is_spc)(or(is_tab)(is_lin))
 
 is_name: Char -> Bool
   (c)
-    let is_num = and(word_gte<n32>(c)(_0))(word_lte<n32>(c)(_9))
-    let is_low = and(word_gte<n32>(c)(_a))(word_lte<n32>(c)(_z))
-    let is_upp = and(word_gte<n32>(c)(_A))(word_lte<n32>(c)(_Z))
-    let is_und = word_eql<n32>(c)(_lowbar)
+    let is_num = and(word_gte{n32}(c)(_0))(word_lte{n32}(c)(_9))
+    let is_low = and(word_gte{n32}(c)(_a))(word_lte{n32}(c)(_z))
+    let is_upp = and(word_gte{n32}(c)(_A))(word_lte{n32}(c)(_Z))
+    let is_und = word_eql{n32}(c)(_lowbar)
     or(is_num)(or(is_low)(or(is_upp)(is_und)))
 
-first_valid: <A: Type> -> List(Maybe(A)) -> Maybe(A)
-  <A> (list)
-  list<() Maybe(A)>
-  | none<A>;
+first_valid: {A: Type} -> List(Maybe(A)) -> Maybe(A)
+  {A} (list)
+  list{() Maybe(A)}
+  | none{A};
   | (head) (tail)
-    head<() Maybe(A)>
-    | first_valid<A>(tail);
-    | (value) some<A>(value);;
+    head{() Maybe(A)}
+    | first_valid{A}(tail);
+    | (value) some{A}(value);;
 
 drop_while: (Char -> Bool) -> String -> String
   (cond) (code)
-  code<() String>
-  | nil<Char>;
+  code{() String}
+  | nil{Char};
   | (head) (tail)
-    cond(head)<() String>
+    cond(head){() String}
     | drop_while(cond)(tail);
     | tail;;
 
@@ -760,15 +760,15 @@ drop_spaces: String -> String
 // TODO: /* multi-line comment */
 drop_comment: String -> String
   (code)
-  let cons = cons<Char>
-  let nil  = nil<Char>
+  let cons = cons{Char}
+  let nil  = nil{Char}
   let code = drop_spaces(code)
   // Removes "// ... \n"
   let code = 
-    let fst2 = take<Char>(n2)(code)
+    let fst2 = take{Char}(n2)(code)
     let sla2 = cons(_sol)(cons(_sol)(nil))
-    string_eql(fst2)(sla2)<() String>
-    | let code = drop<Char>(n2)(code)
+    string_eql(fst2)(sla2){() String}
+    | let code = drop{Char}(n2)(code)
       let code = drop_while((x) not(u32_eql(_LF)(x)))(code)
       code;
     | code;
@@ -780,24 +780,24 @@ next: String -> String
 
 parse_str: String -> String -> Parsed(String)
   (code) (str)
-  str<() Parsed(String)>
-  | parsed<String>(code)(str);
+  str{() Parsed(String)}
+  | parsed{String}(code)(str);
   | (str_head) (str_tail)
-    let _code_nil = noparse<String>
+    let _code_nil = noparse{String}
     let _code_cons = (code_head) (code_tail)
       let _t = parse_str(code_tail)(str_tail)
-      let _f = noparse<String>
-      u32_eql(code_head)(str_head)<() Parsed(String)>(_t)(_f)
-    code<() Parsed(String)>(_code_nil)(_code_cons);
+      let _f = noparse{String}
+      u32_eql(code_head)(str_head){() Parsed(String)}(_t)(_f)
+    code{() Parsed(String)}(_code_nil)(_code_cons);
 
 parse_one_aux: String -> List(String) -> Nat -> Maybe(Pair(String)(Nat))
   (code) (strs) (indx)
-  strs<() Parsed(Nat)>
-  | noparse<Nat>;
+  strs{() Parsed(Nat)}
+  | noparse{Nat};
   | (head) (tail)
     let _none = parse_one_aux(code)(tail)(succ(indx))
-    let _some = (value) value<() Parsed(Nat)>((code) () parsed<Nat>(code)(indx))
-    parse_str(code)(head)<() Maybe(Pair(String)(Nat))>(_none)(_some);
+    let _some = (value) value{() Parsed(Nat)}((code) () parsed{Nat}(code)(indx))
+    parse_str(code)(head){() Maybe(Pair(String)(Nat))}(_none)(_some);
 
 parse_one: String -> List(String) -> Maybe(Pair(String)(Nat))
   (code) (strs)
@@ -805,51 +805,51 @@ parse_one: String -> List(String) -> Maybe(Pair(String)(Nat))
 
 parse_nam_aux: String -> Pair(String)(String)
   (code)
-  let cons = cons<Char>
-  let nil = nil<Char>
+  let cons = cons{Char}
+  let nil = nil{Char}
   let Ret = Pair(String)(String)
-  let ret = pair<String><String>
-  code<() Ret>
+  let ret = pair{String}{String}
+  code{() Ret}
   | ret(code)(nil);
   | (head) (tail)
-    is_name(head)<() Ret>
+    is_name(head){() Ret}
     | let _pair = (code) (rest) ret(code)(cons(head)(rest))
-      parse_nam_aux(tail)<() Ret>(_pair);
+      parse_nam_aux(tail){() Ret}(_pair);
     | ret(code)(nil);;
 
 parse_nam: String -> Bool -> Maybe(Pair(String)(String))
   (code) (allow_empty)
-  parse_nam_aux(code)<() Parsed(String)>
+  parse_nam_aux(code){() Parsed(String)}
   | (code) (name)
-    or(allow_empty)(not(is_empty<Char>(name)))<() Parsed(String)>
-    | parsed<String>(code)(name);
-    | noparse<String>;;
+    or(allow_empty)(not(is_empty{Char}(name))){() Parsed(String)}
+    | parsed{String}(code)(name);
+    | noparse{String};;
 
 // Stringification
 // ===============
 
 nest : Bool -> String -> String
   (b) (s)
-  b<() String>
-  | concat<Char>(LSIG)(concat<Char>(s)(RSIG));
-  | concat<Char>(LPAR)(concat<Char>(s)(RPAR));
+  b{() String}
+  | concat{Char}(LSIG)(concat{Char}(s)(RSIG));
+  | concat{Char}(LPAR)(concat{Char}(s)(RPAR));
 
 sp : String -> String
-  (s) flatten<Char>(cons<String>(SPAC)(cons<String>(s)(single<String>(SPAC))))
+  (s) flatten{Char}(cons{String}(SPAC)(cons{String}(s)(single{String}(SPAC))))
 
 ERR : String
-  cons<Char>(_hash)(cons<Char>(_E)(cons<Char>(_R)(single<Char>(_R))))
+  cons{Char}(_hash)(cons{Char}(_E)(cons{Char}(_R)(single{Char}(_R))))
 
 stringify_trm_go : List(String) -> Term -> String
   (vs) (term)
   let go      = stringify_trm_go
-  let cons    = cons<String>
-  let single  = single<String>
-  let flatten = flatten<Char>
-  term<() String>
+  let cons    = cons{String}
+  let single  = single{String}
+  let flatten = flatten{Char}
+  term{() String}
   |-var- () (indx)
-    let res = find<String>(vs)(() (i) nat_eql(indx)(i))
-    res<() String>(ERR)((x) fst<String><Nat>(x));
+    let res = find{String}(vs)(() (i) nat_eql(indx)(i))
+    res{() String}(ERR)((x) fst{String}{Nat}(x));
   |-ref- () (nam) nam;
   |-typ- () TYPS;
   |-all- () (e) (s) (n) (h) (b)
@@ -870,109 +870,109 @@ stringify_trm_go : List(String) -> Term -> String
     flatten(cons(go(vs)(x))(cons(sp(COLS))(single(go(vs)(t)))));
 
 stringify_trm : Term -> String
-  (t) stringify_trm_go(nil<String>)(t)
+  (t) stringify_trm_go(nil{String})(t)
 
 // Parsing
 // =======
 
 parse_par: String -> List(String) -> Parsed(Term)
   (code) (vars)
-  parsing<String><Term>(parse_str(next(code))(LPAR)) | (code) (skip)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (term)
-  parsing<String><Term>(parse_str(next(code))(RPAR)) | (code) (skip)
-  parsed<Term>(code)(term);;;
+  parsing{String}{Term}(parse_str(next(code))(LPAR)) | (code) (skip)
+  parsing{Term  }{Term}(parse_trm(next(code))(vars)) | (code) (term)
+  parsing{String}{Term}(parse_str(next(code))(RPAR)) | (code) (skip)
+  parsed{Term}(code)(term);;;
 
 parse_all: String -> List(String) -> Parsed(Term)
   (code) (vars)
-  parsing<String><Term>(parse_nam(next(code))(true)) | (code) (self)
-  parsing<Nat   ><Term>(parse_one(     code )(OPEN)) | (code) (eras)
-  parsing<String><Term>(parse_nam(next(code))(true)) | (code) (name)
-  parsing<String><Term>(parse_str(next(code))(COLO)) | (code) (skip)
-  let vars = cons<String>(self)(vars)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (bind)
-  parsing<Nat   ><Term>(parse_one(next(code))(CLOS)) | (code) (skip)
-  parsing<String><Term>(parse_str(next(code))(ARR0)) | (code) (skip)
-  let vars = cons<String>(name)(vars)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
-  parsed<Term>(code)(all(nat_eql(eras)(n1))(self)(name)(bind)(body));;;;;;;;
+  parsing{String}{Term}(parse_nam(next(code))(true)) | (code) (self)
+  parsing{Nat   }{Term}(parse_one(     code )(OPEN)) | (code) (eras)
+  parsing{String}{Term}(parse_nam(next(code))(true)) | (code) (name)
+  parsing{String}{Term}(parse_str(next(code))(COLO)) | (code) (skip)
+  let vars = cons{String}(self)(vars)
+  parsing{Term  }{Term}(parse_trm(next(code))(vars)) | (code) (bind)
+  parsing{Nat   }{Term}(parse_one(next(code))(CLOS)) | (code) (skip)
+  parsing{String}{Term}(parse_str(next(code))(ARR0)) | (code) (skip)
+  let vars = cons{String}(name)(vars)
+  parsing{Term  }{Term}(parse_trm(next(code))(vars)) | (code) (body)
+  parsed{Term}(code)(all(nat_eql(eras)(n1))(self)(name)(bind)(body));;;;;;;;
 
 parse_lam: String -> List(String) -> Parsed(Term)
   (code) (vars)
-  parsing<Nat   ><Term>(parse_one(next(code))(OPEN)) | (code) (eras)
-  parsing<String><Term>(parse_nam(next(code))(true)) | (code) (name)
-  parsing<Nat   ><Term>(parse_one(next(code))(CLOS)) | (code) (skip)
-  parsing<String><Term>(parse_str(next(code))(ARR1)) | (code) (skip)
-  let vars = cons<String>(name)(vars)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
-  parsed<Term>(code)(lam(nat_eql(eras)(n1))(name)(body));;;;;
+  parsing{Nat   }{Term}(parse_one(next(code))(OPEN)) | (code) (eras)
+  parsing{String}{Term}(parse_nam(next(code))(true)) | (code) (name)
+  parsing{Nat   }{Term}(parse_one(next(code))(CLOS)) | (code) (skip)
+  parsing{String}{Term}(parse_str(next(code))(ARR1)) | (code) (skip)
+  let vars = cons{String}(name)(vars)
+  parsing{Term  }{Term}(parse_trm(next(code))(vars)) | (code) (body)
+  parsed{Term}(code)(lam(nat_eql(eras)(n1))(name)(body));;;;;
 
 parse_let: String -> List(String) -> Parsed(Term)
   (code) (vars)
-  parsing<String><Term>(parse_str(next(code))(LETS))  | (code) (skip)
-  parsing<String><Term>(parse_nam(next(code))(false)) | (code) (name)
-  parsing<String><Term>(parse_str(next(code))(EQLS))  | (code) (skip)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars))  | (code) (expr)
-  let vars = cons<String>(name)(vars)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars))  | (code) (body)
-  parsed<Term>(code)(lit(name)(expr)(body));;;;;
+  parsing{String}{Term}(parse_str(next(code))(LETS))  | (code) (skip)
+  parsing{String}{Term}(parse_nam(next(code))(false)) | (code) (name)
+  parsing{String}{Term}(parse_str(next(code))(EQLS))  | (code) (skip)
+  parsing{Term  }{Term}(parse_trm(next(code))(vars))  | (code) (expr)
+  let vars = cons{String}(name)(vars)
+  parsing{Term  }{Term}(parse_trm(next(code))(vars))  | (code) (body)
+  parsed{Term}(code)(lit(name)(expr)(body));;;;;
 
 parse_typ: String -> List(String) -> Parsed(Term)
   (code) (vars)
-  parsing<String><Term>(parse_str(next(code))(TYPS)) | (code) (skip)
-  parsed<Term>(code)(typ);
+  parsing{String}{Term}(parse_str(next(code))(TYPS)) | (code) (skip)
+  parsed{Term}(code)(typ);
 
 parse_var: String -> List(String) -> Parsed(Term)
   (code) (vars)
-  parsing<String><Term>(parse_nam(next(code))(false)) | (code) (name)
-  find<String>(vars)((x) (i) string_eql(x)(name))<() Parsed(Term)>
-  | parsed<Term>(code)(ref(name));
-  | (value) parsed<Term>(code)(var(snd<String><Nat>(value)));;
+  parsing{String}{Term}(parse_nam(next(code))(false)) | (code) (name)
+  find{String}(vars)((x) (i) string_eql(x)(name)){() Parsed(Term)}
+  | parsed{Term}(code)(ref(name));
+  | (value) parsed{Term}(code)(var(snd{String}{Nat}(value)));;
 
 parse_app: String -> Term -> List(String) -> Parsed(Term)
   (code) (func) (vars)
-  parsing<Nat ><Term>(parse_one(next(code))(OPEN)) | (code) (eras)
-  parsing<Term><Term>(parse_trm(next(code))(vars)) | (code) (argm)
-  parsing<Nat ><Term>(parse_one(next(code))(CLOS)) | (code) (skip)
-  parsed<Term>(code)(app(nat_eql(eras)(n1))(func)(argm));;;
+  parsing{Nat }{Term}(parse_one(next(code))(OPEN)) | (code) (eras)
+  parsing{Term}{Term}(parse_trm(next(code))(vars)) | (code) (argm)
+  parsing{Nat }{Term}(parse_one(next(code))(CLOS)) | (code) (skip)
+  parsed{Term}(code)(app(nat_eql(eras)(n1))(func)(argm));;;
 
 parse_arr: String -> Term -> List(String) -> Parsed(Term)
   (code) (bind) (vars)
-  parsing<String><Term>(parse_str(next(code))(ARR0)) | (code) (skip)
-  let vars = cons<String>(nil<Char>)(cons<String>(nil<Char>)(vars))
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
-  let term = all(false)(nil<Char>)(nil<Char>)(shift(bind)(n1)(n0))(body)
-  parsed<Term>(code)(term);;
+  parsing{String}{Term}(parse_str(next(code))(ARR0)) | (code) (skip)
+  let vars = cons{String}(nil{Char})(cons{String}(nil{Char})(vars))
+  parsing{Term  }{Term}(parse_trm(next(code))(vars)) | (code) (body)
+  let term = all(false)(nil{Char})(nil{Char})(shift(bind)(n1)(n0))(body)
+  parsed{Term}(code)(term);;
 
 parse_ann: String -> Term -> List(String) -> Parsed(Term)
   (code) (expr) (vars)
-  parsing<String><Term>(parse_str(next(code))(COLS)) | (code) (skip)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (type)
-  parsed<Term>(code)(ann(false)(expr)(type));;
+  parsing{String}{Term}(parse_str(next(code))(COLS)) | (code) (skip)
+  parsing{Term  }{Term}(parse_trm(next(code))(vars)) | (code) (type)
+  parsed{Term}(code)(ann(false)(expr)(type));;
 
 parse_pst: String -> Term -> List(String) -> Parsed(Term)
   (code) (term) (vars)
-  let post_parse = first_valid<Pair(String)(Term)>(
-    cons<Parsed(Term)>(parse_app(code)(term)(vars))(
-    cons<Parsed(Term)>(parse_arr(code)(term)(vars))(
-    cons<Parsed(Term)>(parse_ann(code)(term)(vars))(
-    nil<Parsed(Term)>))))
-  post_parse<() Parsed(Term)>
-  | parsed<Term>(code)(term);
+  let post_parse = first_valid{Pair(String)(Term)}(
+    cons{Parsed(Term)}(parse_app(code)(term)(vars))(
+    cons{Parsed(Term)}(parse_arr(code)(term)(vars))(
+    cons{Parsed(Term)}(parse_ann(code)(term)(vars))(
+    nil{Parsed(Term)}))))
+  post_parse{() Parsed(Term)}
+  | parsed{Term}(code)(term);
   | (value)
-    value<() Parsed(Term)>
+    value{() Parsed(Term)}
     | (code) (term) parse_pst(code)(term)(vars);;
 
 parse_trm: String -> List(String) -> Parsed(Term)
   (code) (vars)
-  let base_parse = first_valid<Pair(String)(Term)>(
-    cons<Parsed(Term)>(parse_all(code)(vars))(
-    cons<Parsed(Term)>(parse_lam(code)(vars))(
-    cons<Parsed(Term)>(parse_let(code)(vars))(
-    cons<Parsed(Term)>(parse_par(code)(vars))(
-    cons<Parsed(Term)>(parse_typ(code)(vars))(
-    cons<Parsed(Term)>(parse_var(code)(vars))(
-    nil<Parsed(Term)>)))))))
-  parsing<Term><Term>(base_parse)((code) (term)
+  let base_parse = first_valid{Pair(String)(Term)}(
+    cons{Parsed(Term)}(parse_all(code)(vars))(
+    cons{Parsed(Term)}(parse_lam(code)(vars))(
+    cons{Parsed(Term)}(parse_let(code)(vars))(
+    cons{Parsed(Term)}(parse_par(code)(vars))(
+    cons{Parsed(Term)}(parse_typ(code)(vars))(
+    cons{Parsed(Term)}(parse_var(code)(vars))(
+    nil{Parsed(Term)})))))))
+  parsing{Term}{Term}(base_parse)((code) (term)
     parse_pst(code)(term)(vars))
 
 //// Substitution
@@ -980,9 +980,9 @@ parse_trm: String -> List(String) -> Parsed(Term)
 
 shift: Term -> Nat -> Nat -> Term
   (term) (inc) (dep)
-  term<() Term>
+  term{() Term}
   | (hash) (indx)
-    nat_ltn(indx)(dep)<() Term>
+    nat_ltn(indx)(dep){() Term}
     | var(indx);
     | var(add(inc)(indx));;
   | (hash) (name)
@@ -1019,9 +1019,9 @@ shift: Term -> Nat -> Nat -> Term
 
 subst: Term -> Term -> Nat -> Term
   (term) (val) (dep)
-  term<() Term>
+  term{() Term}
   | (hash) (indx)
-    nat_cmp(indx)(dep)<() Term>
+    nat_cmp(indx)(dep){() Term}
     | var(indx);
     | val;
     | var(pred(indx));;
@@ -1061,7 +1061,7 @@ subst: Term -> Term -> Nat -> Term
 // ==========
 
 HTerm: Type
-  self<P: HTerm -> Type> ->
+  self{P: HTerm -> Type} ->
   (hvar:
     (indx: Nat) ->
     (posi: Bool) ->
@@ -1091,78 +1091,78 @@ HTerm: Type
 
 hvar: Nat -> Bool -> HTerm
   (indx) (posi)
-  <> (hvar) () () () () () ()
+  {} (hvar) () () () () () ()
   hvar(indx)(posi)
 
 href: String -> HTerm
   (name)
-  <> () (href) () () () () ()
+  {} () (href) () () () () ()
   href(name)
 
 htyp: HTerm
-  <> () () (htyp) () () () ()
+  {} () () (htyp) () () () ()
   htyp
 
 hall: Bool -> (HTerm -> HTerm) -> (HTerm -> HTerm -> HTerm) -> HTerm
   (eras) (bind) (body)
-  <> () () () (hall) () () ()
+  {} () () () (hall) () () ()
   hall(eras)(bind)(body)
 
 hlam: (HTerm -> HTerm) -> HTerm
   (body)
-  <> () () () () (hlam) () ()
+  {} () () () () (hlam) () ()
   hlam(body)
 
 happ: HTerm -> HTerm -> HTerm
   (func) (argm)
-  <> () () () () () (happ) ()
+  {} () () () () () (happ) ()
   happ(func)(argm)
 
 hlit: HTerm -> (HTerm -> HTerm) -> HTerm
   (expr) (body)
-  <> () () () () () () (hlit)
+  {} () () () () () () (hlit)
   hlit(expr)(body)
 
 to_high_order: Term -> List(HTerm) -> Nat -> HTerm
   (term) (vars) (depth)
-  term<() HTerm>
+  term{() HTerm}
   | (hash) (indx)
-    find<HTerm>(vars)((x) (i) nat_eql(i)(indx))<() HTerm>
+    find{HTerm}(vars)((x) (i) nat_eql(i)(indx)){() HTerm}
     | hvar(sub(succ(indx))(depth))(false);
-    | (value) fst<HTerm><Nat>(value);;
+    | (value) fst{HTerm}{Nat}(value);;
   | (hash) (name)
     href(name);
   | (hash)
     htyp;
   | (hash) (eras) (self) (name) (bind) (body)
     let eras = eras
-    let bind = (s) to_high_order(bind)(cons<HTerm>(s)(vars))(succ(depth))
-    let body = (s) (x) to_high_order(body)(cons<HTerm>(x)(cons<HTerm>(s)(vars)))(succ(succ(depth)))
+    let bind = (s) to_high_order(bind)(cons{HTerm}(s)(vars))(succ(depth))
+    let body = (s) (x) to_high_order(body)(cons{HTerm}(x)(cons{HTerm}(s)(vars)))(succ(succ(depth)))
     hall(eras)(bind)(body);
   | (hash) (eras) (name) (body)
-    eras<() HTerm>
-    | let body = subst(body)(ref(nil<Char>))(n0)
+    eras{() HTerm}
+    | let body = subst(body)(ref(nil{Char}))(n0)
       to_high_order(body)(vars)(depth);
-    | let body = (x) to_high_order(body)(cons<HTerm>(x)(vars))(succ(depth))
+    | let body = (x) to_high_order(body)(cons{HTerm}(x)(vars))(succ(depth))
       hlam(body);;
   | (hash) (eras) (func) (argm)
-    eras<() HTerm>
+    eras{() HTerm}
     | to_high_order(func)(vars)(depth);
     | let func = to_high_order(func)(vars)(depth)
       let argm = to_high_order(argm)(vars)(depth)
       happ(func)(argm);;
   | (hash) (name) (expr) (body)
     let expr = to_high_order(expr)(vars)(depth)
-    let body = (x) to_high_order(body)(cons<HTerm>(x)(vars))(succ(depth))
+    let body = (x) to_high_order(body)(cons{HTerm}(x)(vars))(succ(depth))
     hlit(expr)(body);
   | (hash) (done) (expr) (type)
     to_high_order(expr)(vars)(depth);
 
 to_low_order: HTerm -> Nat -> Term
   (hterm) (depth)
-  hterm<() Term>
+  hterm{() Term}
   | (indx) (posi)
-    posi<() Term>
+    posi{() Term}
     | var(sub(sub(depth)(indx))(n1));
     | var(sub(add(depth)(indx))(n1));;
   | (name)
@@ -1170,14 +1170,14 @@ to_low_order: HTerm -> Nat -> Term
   | typ;
   | (eras) (bind) (body)
     let eras = eras
-    let self = nil<Char> // TODO
-    let name = nil<Char> // TODO
+    let self = nil{Char} // TODO
+    let name = nil{Char} // TODO
     let bind = to_low_order(bind(hvar(depth)(true)))(succ(depth))
     let body = to_low_order(body(hvar(depth)(true))(hvar(succ(depth))(true)))(succ(succ(depth)))
     all(eras)(self)(name)(bind)(body);
   | (body)
     let eras = false
-    let name = nil<Char> // TODO
+    let name = nil{Char} // TODO
     let body = to_low_order(body(hvar(depth)(true)))(succ(depth))
     lam(eras)(name)(body);
   | (func) (argm)
@@ -1186,7 +1186,7 @@ to_low_order: HTerm -> Nat -> Term
     let argm = to_low_order(argm)(depth)
     app(eras)(func)(argm);
   | (expr) (body)
-    let name = nil<Char> // TODO
+    let name = nil{Char} // TODO
     let expr = to_low_order(expr)(depth)
     let body = to_low_order(body(hvar(depth)(true)))(succ(depth))
     lit(name)(expr)(body);
@@ -1195,12 +1195,12 @@ to_low_order: HTerm -> Nat -> Term
 // ====
 
 example_0: Word(n4)
-  let w0011 = w1<n3>(w1<n2>(w0<n1>(w0<n0>(we))))
-  let w0101 = w1<n3>(w0<n2>(w1<n1>(w0<n0>(we))))
-  word_add<n4>(w0011)(w0101) // 3 + 5 == 8
+  let w0011 = w1{n3}(w1{n2}(w0{n1}(w0{n0}(we))))
+  let w0101 = w1{n3}(w0{n2}(w1{n1}(w0{n0}(we))))
+  word_add{n4}(w0011)(w0101) // 3 + 5 == 8
 
 main: String
-  drop<Char>(n1)(ARR1)
+  drop{Char}(n1)(ARR1)
 
 // Appendix A: Character Constants
 
@@ -1451,11 +1451,11 @@ _y: Char                                  // 'y'
   ascii(t0)(t1)(t1)(t1)(t1)(t0)(t0)(t1)
 _z: Char                                  // 'z'
   ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t0)
-_lbrace: Char                             // '<'
+_lbrace: Char                             // '{'
   ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t1)
 _vert: Char                               // '|'
   ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t0)
-_rbrace: Char                             // '>'
+_rbrace: Char                             // '}'
   ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t1)
 _tilde: Char                              // '~'
   ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t0)
@@ -1464,30 +1464,30 @@ _DEL: Char                                // \DEL
 
 // Appendix B: String Constants
 LPAR: String                                      // "("
-  single<Char>(_lpar)
+  single{Char}(_lpar)
 RPAR: String                                      // ")"
-  single<Char>(_rpar  )
-LSIG: String                                      // "<"
-  single<Char>(_lbrace)
-RSIG: String                                      // ">"
-  single<Char>(_rbrace)
+  single{Char}(_rpar  )
+LSIG: String                                      // "{"
+  single{Char}(_lbrace)
+RSIG: String                                      // "}"
+  single{Char}(_rbrace)
 COLO: String                                      // ":"
-  single<Char>(_colon )
+  single{Char}(_colon )
 COLS: String                                      // "::"
-  cons<Char>(_colon)(single<Char>(_colon))
+  cons{Char}(_colon)(single{Char}(_colon))
 ARR0: String                                      // "->"
-  cons<Char>(_dash)(single<Char>(_gt))
-ARR1: String                                      // "=>"
-  cons<Char>(_equals)(single<Char>(_gt))
+  cons{Char}(_dash)(single{Char}(_gt))
+ARR1: String                                      // "=}"
+  cons{Char}(_equals)(single{Char}(_gt))
 EQLS: String                                      // "="
-  single<Char>(_equals)
+  single{Char}(_equals)
 TYPS: String                                      // Type
-  cons<Char>(_T)(cons<Char>(_y)(cons<Char>(_p)(single<Char>(_e))))
+  cons{Char}(_T)(cons{Char}(_y)(cons{Char}(_p)(single{Char}(_e))))
 LETS: String                                      // "let "
-  cons<Char>(_l)(cons<Char>(_e)(cons<Char>(_t)(single<Char>(_space))))
+  cons{Char}(_l)(cons{Char}(_e)(cons{Char}(_t)(single{Char}(_space))))
 SPAC: String                                      // " "
-  single<Char>(_space)
-OPEN: List(String)                                // ["(","<"]
-  cons<String>(LPAR)(single<String>(LSIG))
-CLOS: List(String)                                // [")",">"]
-  cons<String>(LPAR)(single<String>(LSIG))
+  single{Char}(_space)
+OPEN: List(String)                                // ["(","{"]
+  cons{String}(LPAR)(single{String}(LSIG))
+CLOS: List(String)                                // [")","}"]
+  cons{String}(LPAR)(single{String}(LSIG))
