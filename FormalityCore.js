@@ -189,6 +189,7 @@ function parse_par(code, indx, vars) {
 function parse_com(code, indx, vars) {
   var [indx, skip] = parse_str(code, next(code, indx), "-");
   var [indx, name] = parse_nam(code, indx);
+  var [indx, skip] = parse_str(code, next(code, indx), "-");
   var [indx, term] = parse_trm(code, next(code, indx), vars);
   return [indx, term];
 };
