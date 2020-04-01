@@ -382,11 +382,11 @@ concat : <A: Type> -> List(A) -> List(A) -> List(A)
   let _cons = (head) => (tail) => cons<A>(head)(concat<A>(tail)(bs))
   as<() => List(A)>(_nil)(_cons)
 
-concatList : <A: Type> -> List(List(A)) -> List(A)
- <A> => (as) =>
- let _nil = nil<A>
- let _cons = (head) => (tail) => concat<A>(head)(concatList<A>(tail))
- as<() => List(A)>(_nil)(_cons)
+concat_list : <A: Type> -> List(List(A)) -> List(A)
+  <A> => (as) =>
+  let _nil = nil<A>
+  let _cons = (head) => (tail) => concat<A>(head)(concat_list<A>(tail))
+  as<() => List(A)>(_nil)(_cons)
 
 sing : <A : Type> -> (x : A) -> List(A)
   <A> => (x) => cons<A>(x)(nil<A>)
@@ -734,6 +734,30 @@ string_eql : String -> String -> Bool
   let eql_val = all_satisfy<Bool>((x)=>x)(zip_with<Char><Char><Bool>(u32_eql)(a)(b))
   and(eql_len)(eql_val)
 
+ext : Char -> String -> String
+  (c) => (str) => cons<Char>(c)(str)
+
+end : String
+  nil<Char>
+
+exts : String -> List(String) -> List(String)
+  (s) => (strs) => cons<String>(s)(strs)
+
+ends : List(String)
+  nil<String>
+
+str : Char -> String
+  (c) => sing<Char>(c)
+
+strs : String -> List(String)
+  (s) => sing<String>(s)
+
+cat : String -> String -> String
+  concat<Char>
+
+cat_list : List(String) -> String
+  concat_list<Char>
+
 // Term
 // ====
 
@@ -847,22 +871,34 @@ parsing
   let _some = (value) => value<() => Parsed(B)>(f)
   x<() => Parsed(B)>(_none)(_some)
 
-LPAR: String sing<Char>(_lpar  )                           // "("
-RPAR: String sing<Char>(_rpar  )                           // ")"
-LSIG: String sing<Char>(_lbrace)                           // "<"
-RSIG: String sing<Char>(_rbrace)                           // ">"
-COLO: String sing<Char>(_colon )                           // ":"
-COLS: String cons<Char>(_colon )(sing<Char>(_colon))       // "::"
-ARR0: String cons<Char>(_dash  )(sing<Char>(_gt))          // "->"
-ARR1: String cons<Char>(_equals)(sing<Char>(_gt))          // "=>"
-EQLS: String sing<Char>(_equals)                           // "="
-OPEN: List(String) cons<String>(LPAR)( sing<String>(LSIG)) // ["(","<"]
-CLOS: List(String) cons<String>(LPAR)( sing<String>(LSIG)) // [")",">"]
-TYPS: String                                               // Type
-  cons<Char>(_T)( cons<Char>(_y)( cons<Char>(_p)( sing<Char>(_e))))
-LETS: String                                               // "let "
-  cons<Char>(_l)(cons<Char>(_e)(cons<Char>(_t)(sing<Char>(_space))))
-SPAC : String sing<Char>(_space)                           // " "
+LPAR: String                                        // "("
+  str(_lpar)
+RPAR: String                                        // ")"
+  str(_rpar  )
+LSIG: String                                        // "<"
+  str(_lbrace)
+RSIG: String                                        // ">"
+  str(_rbrace)
+COLO: String                                        // ":"
+  str(_colon )
+COLS: String                                        // "::"
+  ext(_colon)(str(_colon))
+ARR0: String                                        // "->"
+  ext(_dash)(str(_gt))
+ARR1: String                                        // "=>"
+  ext(_equals)(str(_gt))
+EQLS: String                                        // "="
+  str(_equals)
+OPEN: List(String)                                  // ["(","<"]
+  exts(LPAR)(strs(LSIG))
+CLOS: List(String)                                  // [")",">"]
+  exts(LPAR)(strs(LSIG))
+TYPS: String                                        // Type
+  ext(_T)( ext(_y)( ext(_p)( sing<Char>(_e))))
+LETS: String                                        // "let "
+  ext(_l)(ext(_e)(ext(_t)(sing<Char>(_space))))
+SPAC : String                                       // " "
+  str(_space)
 
 is_space: Char -> Bool
   (c) =>
@@ -907,7 +943,7 @@ drop_comment: String -> String
   // Removes "// ... \n"
   let code = 
     let fst2 = take<Char>(n2)(code)
-    let sla2 = cons<Char>(_sol)(cons<Char>(_sol)(nil<Char>))
+    let sla2 = ext(_sol)(ext(_sol)(end))
     let _t =
       let code = drop<Char>(n2)(code)
       let code = drop_while((x) => not(u32_eql(_LF)(x)))(code)
@@ -950,12 +986,12 @@ parse_nam_aux: String -> Pair(String)(String)
   (code) =>
   let Ret = Pair(String)(String)
   let ret = pair<String><String>
-  let _nil = ret(code)(nil<Char>)
+  let _nil = ret(code)(end)
   let _cons = (head) => (tail) =>
     let _t =
-      let _pair = (code) => (rest) => ret(code)(cons<Char>(head)(rest))
+      let _pair = (code) => (rest) => ret(code)(ext(head)(rest))
       parse_nam_aux(tail)<() => Ret>(_pair)
-    let _f = ret(code)(nil<Char>)
+    let _f = ret(code)(end)
     is_name(head)<() => Ret>(_t)(_f)
   code<() => Ret>(_nil)(_cons)
 
@@ -972,44 +1008,41 @@ parse_nam: String -> Bool -> Maybe(Pair(String)(String))
 // =========
 
 nest : Bool -> String -> String
-  (b) => (str) =>
-  let cat = concat<Char>
-  let _true  = cat(LSIG)(cat(str)(RSIG))
-  let _false = cat(LPAR)(cat(str)(RPAR))
+  (b) => (s) =>
+  let _true  = cat(LSIG)(cat(s)(RSIG))
+  let _false = cat(LPAR)(cat(s)(RPAR))
   b<() => String>(_true)(_false)
 
+sp : String -> String
+  (s) => cat_list(exts(SPAC)(exts(s)(strs(SPAC))))
+
 ERR : String
-  cons<Char>(_hash)(cons<Char>(_E)(cons<Char>(_R)(sing<Char>(_R))))
+  ext(_hash)(ext(_E)(ext(_R)(str(_R))))
 
 stringify_trm_go : List(String) -> Term -> String
   (vs) => (term) =>
   let go   = stringify_trm_go
-  let cat  = concat<Char>
-  let cats = concatList<Char>
-  let ext  = cons<String>
-  let cns  = cons<Char>
-  let sng  = sing<String>
   let _var = () => (indx) =>
     let res = find<String>(vs)(() => (i) => nat_eql(indx)(i))
     res<() => String>(ERR)((x) => fst<String><Nat>(x))
   let _ref = () => (nam) => nam
   let _typ = () => TYPS
   let _all = () => (e) => (s) => (n) => (h) => (b) =>
-   let head = nest(e)(cats(ext(n)(ext(SPAC)(ext(COLO)(ext(SPAC)(sng(go(vs)(h))))))))
-   let body = sng(go(ext(n)(vs))(b))
-   cats(ext(s)(ext(head)(ext(SPAC)(ext(ARR0)(ext(SPAC)(body))))))
+    let body = go(exts(n)(vs))(b)
+    let head = nest(e)(cat_list(exts(n)(exts(sp(COLO))(strs(go(vs)(h))))))
+    cat_list(exts(s)(exts(head)(exts(sp(ARR0))(strs(body)))))
   let _lam = () => (e) => (n) => (b) =>
-   let head = nest(e)(n)
-   let body = sng(go(ext(n)(vs))(b))
-   cats(ext(head)(ext(SPAC)(ext(ARR1)(ext(SPAC)(body)))))
-  let _app = () => (e) => (f) => (a) => 
+    let head = nest(e)(n)
+    let body = go(exts(n)(vs))(b)
+    cat_list(exts(head)(exts(sp(ARR1))(strs(body))))
+  let _app = () => (e) => (f) => (a) =>
     let func = nest(false)(go(vs)(f))
     let argm = nest(e)(go(vs)(a))
-    cats(ext(func)(sng(argm)))
-  let _let = () => (n) => (x) => (b) => 
-    cats(ext(LETS)(ext(n)(ext(EQLS)(ext(SPAC)(sng(go(ext(n)(vs))(b)))))))
+    cat_list(exts(func)(strs(argm)))
+  let _let = () => (n) => (x) => (b) =>
+    cat_list(exts(LETS)(exts(n)(exts(sp(EQLS))(strs(go(exts(n)(vs))(b))))))
   let _ann = () => () => (x) => (t) =>
-    cats(ext(go(vs)(x))(ext(SPAC)(ext(COLS)(ext(SPAC)(sng(go(vs)(t)))))))
+    cat_list(exts(go(vs)(x))(exts(sp(COLS))(strs(go(vs)(t)))))
   term<() => String>(_var)(_ref)(_typ)(_all)(_lam)(_app)(_let)(_ann)
 
 stringify_trm : Term -> String
