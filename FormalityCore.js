@@ -153,13 +153,13 @@ function parse_str(code, indx, str) {
 };
 
 // Parses one of two strings
-function parse_one(code, indx, ch0, ch1) {
+function parse_opt(code, indx, ch0, ch1) {
   try {
     var [indx, str] = parse_str(code, indx, ch0);
-    return [indx, 0];
+    return [indx, false];
   } catch (e) {
     var [indx, str] = parse_str(code, indx, ch1);
-    return [indx, 1];
+    return [indx, true];
   }
 };
 
@@ -187,26 +187,24 @@ function parse_par(code, indx, vars) {
 // Parses a dependent function type, `(<name> : <term>) -> <term>`
 function parse_all(code, indx, vars) {
   var [indx, self] = parse_nam(code, next(code, indx), 1);
-  var [indx, eras] = parse_one(code, indx, "(", "<");
+  var [indx, eras] = parse_opt(code, indx, "(", "<");
   var [indx, name] = parse_nam(code, next(code, indx), 1);
   var [indx, skip] = parse_str(code, next(code, indx), ":");
   var [indx, bind] = parse_trm(code, indx, Ext(self, vars));
-  let close_chr    = eras === 0 ? ")" : ">"
-  var [indx, skip] = parse_str(code, next(code, indx), close_chr)
+  var [indx, skip] = parse_str(code, next(code, indx), eras ? ">" : ")")
   var [indx, skip] = parse_str(code, next(code, indx), "->");
   var [indx, body] = parse_trm(code, indx, Ext(name, Ext(self, vars)));
-  return [indx, All(eras === 1, self, name, bind, body)];
+  return [indx, All(eras, self, name, bind, body)];
 };
 
 // Parses a dependent function value, `(<name>) => <term>`
 function parse_lam(code, indx, vars) {
-  var [indx, eras] = parse_one(code, next(code, indx), "(", "<");
+  var [indx, eras] = parse_opt(code, next(code, indx), "(", "<");
   var [indx, name] = parse_nam(code, next(code, indx), 1);
-  let close_chr    = eras === 0 ? ")" : ">"
-  var [indx, skip] = parse_str(code, next(code, indx), close_chr)
+  var [indx, skip] = parse_str(code, next(code, indx), eras ? ">" : ")")
   var [indx, skip] = parse_str(code, next(code, indx), "=>");
   var [indx, body] = parse_trm(code, indx, Ext(name, vars));
-  return [indx, Lam(eras === 1, name, body)];
+  return [indx, Lam(eras, name, body)];
 };
 
 // Parses a local definition, `let x = val; body`
@@ -238,13 +236,21 @@ function parse_var(code, indx, vars) {
   };
 };
 
-// Parses an application, `<term>(<term>)`
+// Parses a single-line application, `<term>(<term>)`
 function parse_app(code, indx, func, vars) {
-  var [indx, eras] = parse_one(code, indx, "(", "<");
+  var [indx, eras] = parse_opt(code, indx, "(", "<");
   var [indx, argm] = parse_trm(code, indx, vars);
-  let close_chr    = eras === 0 ? ")" : ">"
-  var [indx, skip] = parse_str(code, next(code, indx), close_chr);
-  return [indx, App(eras === 1, func, argm)];
+  var [indx, skip] = parse_str(code, next(code, indx), eras ? ">" : ")");
+  return [indx, App(eras, func, argm)];
+};
+
+// Parses a multi-line application, `<term> |<name> <term>;`
+function parse_pip(code, indx, func, vars) {
+  var [indx, skip] = parse_str(code, next(code, indx), "|");
+  var [indx, skip] = parse_nam(code, indx, 1);
+  var [indx, argm] = parse_trm(code, indx, vars);
+  var [indx, skip] = parse_str(code, next(code, indx), ";");
+  return [indx, App(false, func, argm)];
 };
 
 // Parses a non-dependent function type, `<term> -> <term>`
@@ -279,6 +285,7 @@ function parse_trm(code, indx = 0, vars = Nil()) {
     var [indx, term] = post_parse;
     post_parse = first_valid([
       () => parse_app(code, indx, term, vars),
+      () => parse_pip(code, indx, term, vars),
       () => parse_arr(code, indx, term, vars),
       () => parse_ann(code, indx, term, vars),
     ]);
@@ -1019,6 +1026,7 @@ module.exports = {
   parse_typ,
   parse_var,
   parse_app,
+  parse_pip,
   parse_ann,
   parse_trm,
   parse_mod,
