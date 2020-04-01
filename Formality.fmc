@@ -329,12 +329,12 @@ take: <A: Type> -> Nat -> List(A) -> List(A)
 
 drop: <A: Type> -> Nat -> List(A) -> List(A)
   <A> (n) (list)
-  list<() List(A)>
-  | nil<A>;
-  | (head) (tail)
-    n<() List(A)>
-    | tail;
-    | (pred) drop<A>(pred)(tail);;
+  n<() List(A)>
+  | list;
+  | (pred)
+    list<() List(A)>
+    | nil<A>;
+    | (head) (tail) drop<A>(pred)(tail);;
 
 is_empty: <A: Type> -> List(A) -> Bool
   <A> (list)
@@ -1359,5 +1359,5 @@ example_0: Word(n4)
   let w0101 = w1<n3>(w0<n2>(w1<n1>(w0<n0>(we))))
   word_add<n4>(w0011)(w0101) // 3 + 5 == 8
 
-main: Bool
-  true
+main: String
+  drop<Char>(n1)(ARR1)
