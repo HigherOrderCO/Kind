@@ -293,7 +293,7 @@ function parse_trm(code, indx = 0, vars = Nil()) {
 };
 
 // Parses a module
-function parse_mod(code, indx) {
+function parse_mod(code, indx = 0) {
   var module = {};
   function parse_defs(code, indx) {
     try {
