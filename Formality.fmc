@@ -854,7 +854,7 @@ RSIG: String sing{Char}(_rbrace)                           // "}"
 COLO: String sing{Char}(_colon )                           // ":"
 COLS: String cons{Char}(_colon )(sing{Char}(_colon))       // "::"
 ARR0: String cons{Char}(_dash  )(sing{Char}(_gt))          // "->"
-ARR1: String cons{Char}(_hyphen)(sing{Char}(_equal))       // "=>"
+ARR1: String cons{Char}(_equals)(sing{Char}(_gt))          // "=>"
 EQLS: String sing{Char}(_equals)                           // "="
 OPEN: List(String) cons{String}(LPAR)( sing{String}(LSIG)) // ["(","{"]
 CLOS: List(String) cons{String}(LPAR)( sing{String}(LSIG)) // [")","}"]
@@ -910,7 +910,7 @@ drop_comment: String -> String
     let sla2 = cons{Char}(_sol)(cons{Char}(_sol)(nil{Char}))
     let case_t =
       let code = drop{Char}(n2)(code)
-      let code = drop_while((x) => not(u32_eql(_newline)(x)))(code)
+      let code = drop_while((x) => not(u32_eql(_LF)(x)))(code)
       code
     let case_f =
       code
@@ -981,7 +981,7 @@ nest : Bool -> String -> String
 ERR : String
   cons{Char}(_hash)(cons{Char}(_E)(cons{Char}(_R)(sing{Char}(_R))))
 
-stringify_term_go : List(String) -> Term -> String
+stringify_trm_go : List(String) -> Term -> String
   (vs) => (term) =>
   let go   = stringify_trm_go
   let cat  = concat{Char}
@@ -1012,8 +1012,8 @@ stringify_term_go : List(String) -> Term -> String
     cats(ext(go(vs)(x))(ext(SPAC)(ext(COLS)(ext(SPAC)(sng(go(vs)(t)))))))
   term{() => String}(_var)(_ref)(_typ)(_all)(_lam)(_app)(_let)(_ann)
 
-stringify_term : Term -> String
-  (t) => stringify_term_go(nil{String})(t)
+stringify_trm : Term -> String
+  (t) => stringify_trm_go(nil{String})(t)
 
 parse_par: String -> List(String) -> Parsed(Term)
   (code) => (vars) =>
