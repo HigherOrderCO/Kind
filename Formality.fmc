@@ -101,8 +101,14 @@ double: Nat -> Nat
 add: Nat -> Nat -> Nat
   (n) => (m) =>
   let case_zero = m
-  let case_succ = (a_pred) => succ(add(a_pred)(m))
+  let case_succ = (n_pred) => succ(add(n_pred)(m))
   n{() => Nat}(case_zero)(case_succ)
+
+sub: Nat -> Nat -> Nat
+  (n) => (m) =>
+  let case_zero = n
+  let case_succ = (m_pred) => sub(pred(n))(m_pred)
+  m{() => Nat}(case_zero)(case_succ)
 
 nat_cmp: Nat -> Nat -> Cmp
   (a) => (b) =>
@@ -1185,6 +1191,146 @@ subst: Term -> Term -> Nat -> Term
     let type = subst(expr)(val)(dep)
     ann(done)(expr)(type)
   term{()=>Term}(case_var)(case_ref)(case_typ)(case_all)(case_lam)(case_app)(case_lit)(case_ann)
+
+// Evaluation
+// ==========
+
+HTerm: Type
+  self{P: HTerm -> Type} ->
+  (hvar:
+    (indx: Nat) ->
+    (posi: Bool) ->
+    P(hvar(indx)(posi))) ->
+  (href:
+    (name: String) ->
+    P(href(name))) ->
+  (htyp:
+    P(htyp)) ->
+  (hall:
+    (eras: Bool) ->
+    (bind: HTerm -> HTerm) ->
+    (body: HTerm -> HTerm -> HTerm) ->
+    P(hall(eras)(bind)(body))) ->
+  (hlam:
+    (body: HTerm -> HTerm) ->
+    P(hlam(body))) ->
+  (happ:
+    (func: HTerm) ->
+    (argm: HTerm) ->
+    P(happ(func)(argm))) ->
+  (hlit:
+    (expr: HTerm) ->
+    (body: HTerm -> HTerm) ->
+    P(hlit(expr)(body))) ->
+  P(self)
+
+hvar: Nat -> Bool -> HTerm
+  (indx) => (posi) =>
+  {} => (hvar) => () => () => () => () => () => () =>
+  hvar(indx)(posi)
+
+href: String -> HTerm
+  (name) =>
+  {} => () => (href) => () => () => () => () => () =>
+  href(name)
+
+htyp: HTerm
+  {} => () => () => (htyp) => () => () => () => () =>
+  htyp
+
+hall: Bool -> (HTerm -> HTerm) -> (HTerm -> HTerm -> HTerm) -> HTerm
+  (eras) => (bind) => (body) =>
+  {} => () => () => () => (hall) => () => () => () =>
+  hall(eras)(bind)(body)
+
+hlam: (HTerm -> HTerm) -> HTerm
+  (body) =>
+  {} => () => () => () => () => (hlam) => () => () =>
+  hlam(body)
+
+happ: HTerm -> HTerm -> HTerm
+  (func) => (argm) =>
+  {} => () => () => () => () => () => (happ) => () =>
+  happ(func)(argm)
+
+hlit: HTerm -> (HTerm -> HTerm) -> HTerm
+  (expr) => (body) =>
+  {} => () => () => () => () => () => () => (hlit) =>
+  hlit(expr)(body)
+
+to_high_order: Term -> List(HTerm) -> Nat -> HTerm
+  (term) => (vars) => (depth) =>
+  let case_var = (hash) => (indx) =>
+    let got = find{HTerm}(vars)((x) => (i) => nat_eql(i)(indx))
+    let case_none = hvar(sub(succ(indx))(depth))(false)
+    let case_some = (value) => fst{HTerm}{Nat}(value)
+    got{() => HTerm}(case_none)(case_some)
+  let case_ref = (hash) => (name) =>
+    href(name)
+  let case_typ = (hash) =>
+    htyp
+  let case_all = (hash) => (eras) => (self) => (name) => (bind) => (body) =>
+    let eras = eras
+    let bind = (s) => to_high_order(bind)(cons{HTerm}(s)(vars))(succ(depth))
+    let body = (s) => (x) => to_high_order(body)(cons{HTerm}(x)(cons{HTerm}(s)(vars)))(succ(succ(depth)))
+    hall(eras)(bind)(body)
+  let case_lam = (hash) => (eras) => (name) => (body) =>
+    let case_t =
+      let body = subst(body)(ref(nil{Char}))(n0)
+      to_high_order(body)(vars)(depth)
+    let case_f =
+      let body = (x) => to_high_order(body)(cons{HTerm}(x)(vars))(succ(depth))
+      hlam(body)
+    eras{() => HTerm}(case_t)(case_f)
+  let case_app = (hash) => (eras) => (func) => (argm) =>
+    let case_t =
+      to_high_order(func)(vars)(depth)
+    let case_f =
+      let func = to_high_order(func)(vars)(depth)
+      let argm = to_high_order(argm)(vars)(depth)
+      happ(func)(argm)
+    eras{() => HTerm}(case_t)(case_f)
+  let case_lit = (hash) => (name) => (expr) => (body) =>
+    let expr = to_high_order(expr)(vars)(depth)
+    let body = (x) => to_high_order(body)(cons{HTerm}(x)(vars))(succ(depth))
+    hlit(expr)(body)
+  let case_ann = (hash) => (done) => (expr) => (type) =>
+    to_high_order(expr)(vars)(depth)
+  term{() => HTerm}(case_var)(case_ref)(case_typ)(case_all)(case_lam)(case_app)(case_lit)(case_ann)
+
+to_low_order: HTerm -> Nat -> Term
+  (hterm) => (depth) =>
+  let case_hvar = (indx) => (posi) =>
+    let case_t = var(sub(sub(depth)(indx))(n1))
+    let case_f = var(sub(add(depth)(indx))(n1))
+    posi{() => Term}(case_t)(case_f)
+  let case_href = (name) =>
+    ref(name)
+  let case_htyp =
+    typ
+  let case_hall = (eras) => (bind) => (body) =>
+    let eras = eras
+    let self = nil{Char} // TODO
+    let name = nil{Char} // TODO
+    let bind = to_low_order(bind(hvar(depth)(true)))(succ(depth))
+    let body = to_low_order(body(hvar(depth)(true))(hvar(succ(depth))(true)))(succ(succ(depth)))
+    all(eras)(self)(name)(bind)(body)
+  let case_hlam = (body) =>
+    let eras = false
+    let name = nil{Char} // TODO
+    let body = to_low_order(body(hvar(depth)(true)))(succ(depth))
+    lam(eras)(name)(body)
+  let case_happ = (func) => (argm) =>
+    let eras = false
+    let func = to_low_order(func)(depth)
+    let argm = to_low_order(argm)(depth)
+    app(eras)(func)(argm)
+  let case_hlit = (expr) => (body) =>
+    let name = nil{Char} // TODO
+    let expr = to_low_order(expr)(depth)
+    let body = to_low_order(body(hvar(depth)(true)))(succ(depth))
+    lit(name)(expr)(body)
+  hterm{() => Term}(case_hvar)(case_href)(case_htyp)(case_hall)(case_hlam)(case_happ)(case_hlit)
 
 // Main
 // ====

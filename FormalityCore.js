@@ -522,9 +522,7 @@ function to_high_order(term, vars = Nil(), depth = 0) {
       var body = x => to_high_order(term.body, Ext(x, vars), depth + 1);
       return Let(name, expr, body);
     case "Ann":
-      var expr = to_high_order(term.expr, vars, depth);
-      var type = to_high_order(term.type, vars, depth);
-      return Ann(term.done, expr, type);
+      return to_high_order(term.expr, vars, depth);
   }
 };
 
@@ -557,9 +555,7 @@ function to_low_order(term, depth = 0) {
       var body = to_low_order(term.body(Var(depth)), depth + 1);
       return Let(name, expr, body);
     case "Ann":
-      var expr = to_low_order(term.expr, depth);
-      var type = to_low_order(term.type, depth);
-      return Ann(term.done, expr, type);
+      throw "Unreachable.";
   }
 };
 
