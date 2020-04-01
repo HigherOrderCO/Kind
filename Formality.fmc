@@ -954,7 +954,7 @@ drop_comment: String -> String
   code
 
 // TODO: remove many comments (not just one)
-ncons: String -> String
+next: String -> String
   (code) => drop_comment(code)
 
 parse_str: String -> String -> Parsed(String)
@@ -1050,49 +1050,49 @@ stringify_trm : Term -> String
 
 parse_par: String -> List(String) -> Parsed(Term)
   (code) => (vars) =>
-  parsing<String><Term>(parse_str(ncons(code))(LPAR))((code) => (skip) =>
-  parsing<Term  ><Term>(parse_trm(ncons(code))(vars))((code) => (term) =>
-  parsing<String><Term>(parse_str(ncons(code))(RPAR))((code) => (skip) =>
+  parsing<String><Term>(parse_str(next(code))(LPAR))((code) => (skip) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(vars))((code) => (term) =>
+  parsing<String><Term>(parse_str(next(code))(RPAR))((code) => (skip) =>
   parsed<Term>(code)(term))))
 
 parse_all: String -> List(String) -> Parsed(Term)
   (code) => (vars) =>
-  parsing<String><Term>(parse_nam(ncons(code))(true))((code) => (self) =>
+  parsing<String><Term>(parse_nam(next(code))(true))((code) => (self) =>
   parsing<Nat   ><Term>(parse_one(     code )(OPEN))((code) => (eras) =>
-  parsing<String><Term>(parse_nam(ncons(code))(true))((code) => (name) =>
-  parsing<String><Term>(parse_str(ncons(code))(COLO))((code) => (skip) =>
-  parsing<Term  ><Term>(parse_trm(ncons(code))(cons<String>(self)(vars)))((code) => (bind) =>
-  parsing<Nat   ><Term>(parse_one(ncons(code))(CLOS))((code) => (skip) =>
-  parsing<String><Term>(parse_str(ncons(code))(ARR0))((code) => (skip) =>
-  parsing<Term  ><Term>(parse_trm(ncons(code))(cons<String>(name)(cons<String>(self)(vars))))((code) => (body) =>
+  parsing<String><Term>(parse_nam(next(code))(true))((code) => (name) =>
+  parsing<String><Term>(parse_str(next(code))(COLO))((code) => (skip) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(cons<String>(self)(vars)))((code) => (bind) =>
+  parsing<Nat   ><Term>(parse_one(next(code))(CLOS))((code) => (skip) =>
+  parsing<String><Term>(parse_str(next(code))(ARR0))((code) => (skip) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(cons<String>(name)(cons<String>(self)(vars))))((code) => (body) =>
   parsed<Term>(code)(all(nat_eql(eras)(n1))(self)(name)(bind)(body))))))))))
 
 parse_lam: String -> List(String) -> Parsed(Term)
   (code) => (vars) =>
-  parsing<Nat   ><Term>(parse_one(ncons(code))(OPEN))((code) => (eras) =>
-  parsing<String><Term>(parse_nam(ncons(code))(true))((code) => (name) =>
-  parsing<Nat   ><Term>(parse_one(ncons(code))(CLOS))((code) => (skip) =>
-  parsing<String><Term>(parse_str(ncons(code))(ARR1))((code) => (skip) =>
-  parsing<Term  ><Term>(parse_trm(ncons(code))(cons<String>(name)(vars)))((code) => (body) =>
+  parsing<Nat   ><Term>(parse_one(next(code))(OPEN))((code) => (eras) =>
+  parsing<String><Term>(parse_nam(next(code))(true))((code) => (name) =>
+  parsing<Nat   ><Term>(parse_one(next(code))(CLOS))((code) => (skip) =>
+  parsing<String><Term>(parse_str(next(code))(ARR1))((code) => (skip) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(cons<String>(name)(vars)))((code) => (body) =>
   parsed<Term>(code)(lam(nat_eql(eras)(n1))(name)(body)))))))
 
 parse_let: String -> List(String) -> Parsed(Term)
   (code) => (vars) =>
-  parsing<String><Term>(parse_str(ncons(code))(LETS))((code) => (skip) =>
-  parsing<String><Term>(parse_nam(ncons(code))(false))((code) => (name) =>
-  parsing<String><Term>(parse_str(ncons(code))(EQLS))((code) => (skip) =>
-  parsing<Term  ><Term>(parse_trm(ncons(code))(vars))((code) => (expr) =>
-  parsing<Term  ><Term>(parse_trm(ncons(code))(cons<String>(name)(vars)))((code) => (body) =>
+  parsing<String><Term>(parse_str(next(code))(LETS))((code) => (skip) =>
+  parsing<String><Term>(parse_nam(next(code))(false))((code) => (name) =>
+  parsing<String><Term>(parse_str(next(code))(EQLS))((code) => (skip) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(vars))((code) => (expr) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(cons<String>(name)(vars)))((code) => (body) =>
   parsed<Term>(code)(lit(name)(expr)(body)))))))
 
 parse_typ: String -> List(String) -> Parsed(Term)
   (code) => (vars) =>
-  parsing<String><Term>(parse_str(ncons(code))(TYPS))((code) => (skip) =>
+  parsing<String><Term>(parse_str(next(code))(TYPS))((code) => (skip) =>
   parsed<Term>(code)(typ))
 
 parse_var: String -> List(String) -> Parsed(Term)
   (code) => (vars) =>
-  parsing<String><Term>(parse_nam(ncons(code))(false))((code) => (name) =>
+  parsing<String><Term>(parse_nam(next(code))(false))((code) => (name) =>
   let got = find<String>(vars)((x) => (i) => string_eql(x)(name))
   let _none = parsed<Term>(code)(ref(name))
   let _some = (value) => parsed<Term>(code)(var(snd<String><Nat>(value)))
@@ -1100,21 +1100,21 @@ parse_var: String -> List(String) -> Parsed(Term)
 
 parse_app: String -> Term -> List(String) -> Parsed(Term)
   (code) => (func) => (vars) =>
-  parsing<Nat ><Term>(parse_one(ncons(code))(OPEN))((code) => (eras) =>
-  parsing<Term><Term>(parse_trm(ncons(code))(vars))((code) => (argm) =>
-  parsing<Nat ><Term>(parse_one(ncons(code))(CLOS))((code) => (skip) =>
+  parsing<Nat ><Term>(parse_one(next(code))(OPEN))((code) => (eras) =>
+  parsing<Term><Term>(parse_trm(next(code))(vars))((code) => (argm) =>
+  parsing<Nat ><Term>(parse_one(next(code))(CLOS))((code) => (skip) =>
   parsed<Term>(code)(app(nat_eql(eras)(n1))(func)(argm)))))
 
 parse_arr: String -> Term -> List(String) -> Parsed(Term)
   (code) => (bind) => (vars) =>
-  parsing<String><Term>(parse_str(ncons(code))(ARR0))((code) => (skip) =>
-  parsing<Term  ><Term>(parse_trm(ncons(code))(cons<String>(nil<Char>)(cons<String>(nil<Char>)(vars))))((code) => (body) =>
+  parsing<String><Term>(parse_str(next(code))(ARR0))((code) => (skip) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(cons<String>(nil<Char>)(cons<String>(nil<Char>)(vars))))((code) => (body) =>
   parsed<Term>(code)(all(false)(nil<Char>)(nil<Char>)(shift(bind)(n1)(n0))(body))))
 
 parse_ann: String -> Term -> List(String) -> Parsed(Term)
   (code) => (expr) => (vars) =>
-  parsing<String><Term>(parse_str(ncons(code))(COLS))((code) => (skip) =>
-  parsing<Term  ><Term>(parse_trm(ncons(code))(vars))((code) => (type) =>
+  parsing<String><Term>(parse_str(next(code))(COLS))((code) => (skip) =>
+  parsing<Term  ><Term>(parse_trm(next(code))(vars))((code) => (type) =>
   parsed<Term>(code)(ann(false)(expr)(type))))
 
 parse_pst: String -> Term -> List(String) -> Parsed(Term)
