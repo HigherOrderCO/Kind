@@ -191,7 +191,8 @@ function parse_all(code, indx, vars) {
   var [indx, name] = parse_nam(code, next(code, indx), 1);
   var [indx, skip] = parse_str(code, next(code, indx), ":");
   var [indx, bind] = parse_trm(code, indx, Ext(self, vars));
-  var [indx, skip] = parse_one(code, next(code, indx), ")", ">");
+  let close_chr    = eras === 0 ? ")" : ">"
+  var [indx, skip] = parse_str(code, next(code, indx), close_chr)
   var [indx, skip] = parse_str(code, next(code, indx), "->");
   var [indx, body] = parse_trm(code, indx, Ext(name, Ext(self, vars)));
   return [indx, All(eras === 1, self, name, bind, body)];
@@ -201,7 +202,8 @@ function parse_all(code, indx, vars) {
 function parse_lam(code, indx, vars) {
   var [indx, eras] = parse_one(code, next(code, indx), "(", "<");
   var [indx, name] = parse_nam(code, next(code, indx), 1);
-  var [indx, skip] = parse_one(code, next(code, indx), ")", ">");
+  let close_chr    = eras === 0 ? ")" : ">"
+  var [indx, skip] = parse_str(code, next(code, indx), close_chr)
   var [indx, skip] = parse_str(code, next(code, indx), "=>");
   var [indx, body] = parse_trm(code, indx, Ext(name, vars));
   return [indx, Lam(eras === 1, name, body)];
@@ -240,7 +242,8 @@ function parse_var(code, indx, vars) {
 function parse_app(code, indx, func, vars) {
   var [indx, eras] = parse_one(code, indx, "(", "<");
   var [indx, argm] = parse_trm(code, indx, vars);
-  var [indx, skip] = parse_one(code, next(code, indx), ")", ">");
+  let close_chr    = eras === 0 ? ")" : ">"
+  var [indx, skip] = parse_str(code, next(code, indx), close_chr);
   return [indx, App(eras === 1, func, argm)];
 };
 
