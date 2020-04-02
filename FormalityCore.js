@@ -902,6 +902,7 @@ function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
       typecheck(term.body, Typ(), module, body_ctx, body_nam);
       return Typ();
   }
+  throw "Can't infer type of: " + stringify_trm(term, nam);
 };
 
 function typecheck(term, type, module, ctx = Nil(), nam = Nil()) {
