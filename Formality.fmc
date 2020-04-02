@@ -981,8 +981,8 @@ parse_opt: String -> Pair(String)(String) -> Parsed(Bool)
   (code) (opts)
   opts<() Parsed(Bool)>
   | (ch0) (ch1)
-    parse_str(ch0)(code)<() Parsed(Bool)>
-    | parse_str(ch1)(code)<() Parsed(Bool)>
+    parse_str(code)(ch1)<() Parsed(Bool)>
+    | parse_str(code)(ch0)<() Parsed(Bool)>
       | noparse<Bool>;
       | (got) got<() Parsed(Bool)>((code) (skip) parsed<Bool>(code)(true));;
     | (got) got<() Parsed(Bool)>((code) (skip) parsed<Bool>(code)(false));;
@@ -1086,12 +1086,11 @@ parse_all: String -> List(String) -> Parsed(Term)
 parse_lam: String -> List(String) -> Parsed(Term)
   (code) (vars)
   parsing<Bool  ><Term>(parse_opt(next(code))(OPEN)) | (code) (eras)
-  parsed<Term>(code)(typ);
-  //parsing<String><Term>(parse_nam(next(code))(true)) | (code) (name)
-  //parsing<Bool  ><Term>(parse_opt(next(code))(CLOS)) | (code) (skip)
-  //let vars = cons<String>(name)(vars)
-  //parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
-  //parsed<Term>(code)(lam(eras)(name)(body));;;;
+  parsing<String><Term>(parse_nam(next(code))(true)) | (code) (name)
+  parsing<Bool  ><Term>(parse_opt(next(code))(CLOS)) | (code) (skip)
+  let vars = cons<String>(name)(vars)
+  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
+  parsed<Term>(code)(lam(eras)(name)(body));;;;
 
 parse_let: String -> List(String) -> Parsed(Term)
   (code) (vars)

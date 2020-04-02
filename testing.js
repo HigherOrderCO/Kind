@@ -116,7 +116,8 @@ function module_to_js(module) {
 
 var module = fmc.parse_mod(code);
 var jscode = module_to_js(module);
-var func = eval(jscode).main;
-var argm = string_to_lambda("(x) Type");
+
+var func = eval(jscode).example_1;
+var argm = string_to_lambda("(f) (x) f(f(x))");
 
 console.log(lambda_to_string(func(argm)));
