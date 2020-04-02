@@ -844,7 +844,7 @@ nest : Bool -> String -> String
   (b) (s)
   let cat = concat<Char>
   b<() String>
-  | cat(LSIG)(cat(s)(RSIG));
+  | cat(LT)(cat(s)(GT));
   | cat(LPAR)(cat(s)(RPAR));
 
 sp : String -> String
@@ -858,6 +858,7 @@ stringify_trm_go : List(String) -> Term -> String
   let go = stringify_trm_go
   let cons    = cons<String>
   let flatten = flatten<Char>
+  let space   = single<Char>(_space)
   let single  = single<String>
   term<() String>
   |-var- () (indx)
@@ -872,9 +873,20 @@ stringify_trm_go : List(String) -> Term -> String
   |-lam- () (e) (n) (b)
     let head = nest(e)(n)
     let body = go(cons(n)(vs))(b)
-    flatten(cons(head)(single(body)));
+    flatten(cons(head)(cons(space)(single(body))));
   |-app- () (e) (f) (a)
-    let func = nest(false)(go(vs)(f))
+    let fref = go(vs)(f)
+    let fpar = nest(false)(fref)
+    let func =
+      f<() String>
+      |-var- () () fref;
+      |-ref- () () fref;
+      |-typ- () fpar;
+      |-all- () () () () () () fref;
+      |-lam- () () () () fpar;
+      |-app- () () () () fpar;
+      |-lit- () () () () fpar;
+      |-ann- () () () () fpar;
     let argm = nest(e)(go(vs)(a))
     flatten(cons(func)(single(argm)));
   |-lit- () (n) (x) (b)
@@ -1737,7 +1749,7 @@ _y: Char
 _z: Char
   ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t0)
 
-// '<'
+// '{'
 _lbrace: Char
   ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t1)
 
@@ -1745,7 +1757,7 @@ _lbrace: Char
 _vert: Char
   ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t0)
 
-// '>'
+// '}'
 _rbrace: Char
   ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t1)
 
@@ -1754,7 +1766,7 @@ _tilde: Char
   ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t0)
 
 // \DEL
-_Ds_EL: Char
+_DEL: Char
   ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t1)
 
 // Appendix B: String Constants
@@ -1765,7 +1777,7 @@ LPAR: String
 
 // ")"
 RPAR: String
-  single<Char>(_rpar  )
+  single<Char>(_rpar)
 
 // "{"
 LSIG: String
@@ -1775,13 +1787,21 @@ LSIG: String
 RSIG: String
   single<Char>(_rbrace)
 
+// "<"
+LT: String
+  single<Char>(_lt)
+
+// ">"
+GT: String
+  single<Char>(_gt)
+
 // ":"
 COLO: String
-  single<Char>(_colon )
+  single<Char>(_colon)
 
 // ":"
 SEMI: String
-  single<Char>(_semi )
+  single<Char>(_semi)
 
 // "-"
 DASH: String
@@ -1817,8 +1837,8 @@ SPAC: String
 
 // ["(","{"]
 OPEN: Pair(String)(String)
-  pair<String><String>(LPAR)(LSIG)
+  pair<String><String>(LT)(LPAR)
 
 // [")","}']
 CLOS: Pair(String)(String)
-  pair<String><String>(RPAR)(RSIG)
+  pair<String><String>(GT)(RPAR)

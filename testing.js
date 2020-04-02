@@ -118,6 +118,6 @@ var module = fmc.parse_mod(code);
 var jscode = module_to_js(module);
 
 var func = eval(jscode).example_1;
-var argm = string_to_lambda("(f) (x) f(f(x))");
+var argm = string_to_lambda("<f> <x> f(f<x>)");
 
 console.log(lambda_to_string(func(argm)));
