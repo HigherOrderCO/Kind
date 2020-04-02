@@ -1,3 +1,17 @@
+// Equality
+// ========
+
+Equal: (A: Type) -> A -> A -> Type
+  (A) (a) (b)
+  self<P: (b: A) -> Equal(A)(a)(b) -> Type> ->
+  (equal: P(a)(equal<A><a>)) ->
+  P(b)(self)
+
+equal: <A: Type> -> <a: A> -> Equal(A)(a)(a)
+  <A> <a>
+  <P> (equal)
+  equal
+
 // Bool
 // ====
 
@@ -118,6 +132,12 @@ sub: Nat -> Nat -> Nat
   m<() Nat>
   | n;
   | (m.pred) sub(pred(n))(m.pred);
+
+mul: Nat -> Nat -> Nat
+  (n) (m)
+  n<() Nat>
+  | n0;
+  | (n.pred) add(m)(mul(n.pred)(m));
 
 nat_cmp: Nat -> Nat -> Cmp
   (a) (b)
@@ -1066,11 +1086,12 @@ parse_all: String -> List(String) -> Parsed(Term)
 parse_lam: String -> List(String) -> Parsed(Term)
   (code) (vars)
   parsing<Bool  ><Term>(parse_opt(next(code))(OPEN)) | (code) (eras)
-  parsing<String><Term>(parse_nam(next(code))(true)) | (code) (name)
-  parsing<Bool  ><Term>(parse_opt(next(code))(CLOS)) | (code) (skip)
-  let vars = cons<String>(name)(vars)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
-  parsed<Term>(code)(lam(eras)(name)(body));;;;
+  parsed<Term>(code)(typ);
+  //parsing<String><Term>(parse_nam(next(code))(true)) | (code) (name)
+  //parsing<Bool  ><Term>(parse_opt(next(code))(CLOS)) | (code) (skip)
+  //let vars = cons<String>(name)(vars)
+  //parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
+  //parsed<Term>(code)(lam(eras)(name)(body));;;;
 
 parse_let: String -> List(String) -> Parsed(Term)
   (code) (vars)
@@ -1374,8 +1395,14 @@ example_0: Word(n4)
   let w0101 = w1<n3>(w0<n2>(w1<n1>(w0<n0>(we))))
   word_add<n4>(w0011)(w0101) // 3 + 5 == 8
 
-main: String -> String
+example_1: String -> String
   (code)
   parse_trm(code)(nil<String>)<() String>
   | nil<Char>;
   | (parsed) parsed<() String>((code) (term) stringify_trm(term));
+
+example_2: Equal(Nat)(mul(n8)(n4))(n32)
+  equal<Nat><n32>
+
+main: Bool
+  not(true)
