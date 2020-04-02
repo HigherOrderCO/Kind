@@ -614,135 +614,6 @@ ascii: Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Char
   w0<n7 >(w0<n6 >(w0<n5 >(w0<n4 >(w0<n3 >(w0<n2 >(w0<n1 >(w0<n0 >(
   we))))))))))))))))))))))))))))))))
 
-// ASCII characters
-_NUL    : Char ascii(t0)(t0)(t0)(t0)(t0)(t0)(t0)(t0) // \NUL
-_SOH    : Char ascii(t0)(t0)(t0)(t0)(t0)(t0)(t0)(t1) // \SOH
-_STX    : Char ascii(t0)(t0)(t0)(t0)(t0)(t0)(t1)(t0) // \STX
-_ETX    : Char ascii(t0)(t0)(t0)(t0)(t0)(t0)(t1)(t1) // \ETX
-_EOT    : Char ascii(t0)(t0)(t0)(t0)(t0)(t1)(t0)(t0) // \EOT
-_ENQ    : Char ascii(t0)(t0)(t0)(t0)(t0)(t1)(t0)(t1) // \ENQ
-_ACK    : Char ascii(t0)(t0)(t0)(t0)(t0)(t1)(t1)(t0) // \ACK
-_BEL    : Char ascii(t0)(t0)(t0)(t0)(t0)(t1)(t1)(t1) // \BEL
-_BS     : Char ascii(t0)(t0)(t0)(t0)(t1)(t0)(t0)(t0) // \BS
-_HT     : Char ascii(t0)(t0)(t0)(t0)(t1)(t0)(t0)(t1) // \HT
-_LF     : Char ascii(t0)(t0)(t0)(t0)(t1)(t0)(t1)(t0) // \LF
-_VT     : Char ascii(t0)(t0)(t0)(t0)(t1)(t0)(t1)(t1) // \VT
-_FF     : Char ascii(t0)(t0)(t0)(t0)(t1)(t1)(t0)(t0) // \FF
-_CR     : Char ascii(t0)(t0)(t0)(t0)(t1)(t1)(t0)(t1) // \CR
-_SO     : Char ascii(t0)(t0)(t0)(t0)(t1)(t1)(t1)(t0) // \SO
-_SI     : Char ascii(t0)(t0)(t0)(t0)(t1)(t1)(t1)(t1) // \S 
-_DLE    : Char ascii(t0)(t0)(t0)(t1)(t0)(t0)(t0)(t0) // \DLE
-_DC1    : Char ascii(t0)(t0)(t0)(t1)(t0)(t0)(t0)(t1) // \DC1
-_DC2    : Char ascii(t0)(t0)(t0)(t1)(t0)(t0)(t1)(t0) // \DC2
-_DC3    : Char ascii(t0)(t0)(t0)(t1)(t0)(t0)(t1)(t1) // \DC3
-_DC4    : Char ascii(t0)(t0)(t0)(t1)(t0)(t1)(t0)(t0) // \DC4
-_NAK    : Char ascii(t0)(t0)(t0)(t1)(t0)(t1)(t0)(t1) // \NAK
-_SYN    : Char ascii(t0)(t0)(t0)(t1)(t0)(t1)(t1)(t0) // \SYN
-_ETB    : Char ascii(t0)(t0)(t0)(t1)(t0)(t1)(t1)(t1) // \ETB
-_CAN    : Char ascii(t0)(t0)(t0)(t1)(t1)(t0)(t0)(t0) // \CAN
-_EM     : Char ascii(t0)(t0)(t0)(t1)(t1)(t0)(t0)(t1) // \EM
-_SUB    : Char ascii(t0)(t0)(t0)(t1)(t1)(t0)(t1)(t0) // \SUB
-_ESC    : Char ascii(t0)(t0)(t0)(t1)(t1)(t0)(t1)(t1) // \ESC
-_FS     : Char ascii(t0)(t0)(t0)(t1)(t1)(t1)(t0)(t0) // \FS
-_GS     : Char ascii(t0)(t0)(t0)(t1)(t1)(t1)(t0)(t1) // \GS
-_RS     : Char ascii(t0)(t0)(t0)(t1)(t1)(t1)(t1)(t0) // \RS
-_US     : Char ascii(t0)(t0)(t0)(t1)(t1)(t1)(t1)(t1) // \US
-_space  : Char ascii(t0)(t0)(t1)(t0)(t0)(t0)(t0)(t0) // ' '
-_excl   : Char ascii(t0)(t0)(t1)(t0)(t0)(t0)(t0)(t1) // '!'
-_quot   : Char ascii(t0)(t0)(t1)(t0)(t0)(t0)(t1)(t0) // '"'
-_hash   : Char ascii(t0)(t0)(t1)(t0)(t0)(t0)(t1)(t1) // '#'
-_dollar : Char ascii(t0)(t0)(t1)(t0)(t0)(t1)(t0)(t0) // '$'
-_percnt : Char ascii(t0)(t0)(t1)(t0)(t0)(t1)(t0)(t1) // '%'
-_amp    : Char ascii(t0)(t0)(t1)(t0)(t0)(t1)(t1)(t0) // '&'
-_apos   : Char ascii(t0)(t0)(t1)(t0)(t0)(t1)(t1)(t1) // "'"
-_lpar   : Char ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t0) // '('
-_rpar   : Char ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t1) // ')'
-_ast    : Char ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t0) // '*'
-_plus   : Char ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t1) // '+'
-_comma  : Char ascii(t0)(t0)(t1)(t0)(t1)(t1)(t0)(t0) // ','
-_dash   : Char ascii(t0)(t0)(t1)(t0)(t1)(t1)(t0)(t1) // '-'
-_period : Char ascii(t0)(t0)(t1)(t0)(t1)(t1)(t1)(t0) // '.'
-_sol    : Char ascii(t0)(t0)(t1)(t0)(t1)(t1)(t1)(t1) // '/'
-_0      : Char ascii(t0)(t0)(t1)(t1)(t0)(t0)(t0)(t0) // '0'
-_1      : Char ascii(t0)(t0)(t1)(t1)(t0)(t0)(t0)(t1) // '1'
-_2      : Char ascii(t0)(t0)(t1)(t1)(t0)(t0)(t1)(t0) // '2'
-_3      : Char ascii(t0)(t0)(t1)(t1)(t0)(t0)(t1)(t1) // '3'
-_4      : Char ascii(t0)(t0)(t1)(t1)(t0)(t1)(t0)(t0) // '4'
-_5      : Char ascii(t0)(t0)(t1)(t1)(t0)(t1)(t0)(t1) // '5'
-_6      : Char ascii(t0)(t0)(t1)(t1)(t0)(t1)(t1)(t0) // '6'
-_7      : Char ascii(t0)(t0)(t1)(t1)(t0)(t1)(t1)(t1) // '7'
-_8      : Char ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t0) // '8'
-_9      : Char ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t1) // '9'
-_colon  : Char ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t0) // ':'
-_semi   : Char ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t1) // ';'
-_lt     : Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t0) // '<'
-_equals : Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t1) // '='
-_gt     : Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t0) // '>'
-_quest  : Char ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t1) // '?'
-_commat : Char ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t0) // '@'
-_A      : Char ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t1) // 'A'
-_B      : Char ascii(t0)(t1)(t0)(t0)(t0)(t0)(t1)(t0) // 'B'
-_C      : Char ascii(t0)(t1)(t0)(t0)(t0)(t0)(t1)(t1) // 'C'
-_D      : Char ascii(t0)(t1)(t0)(t0)(t0)(t1)(t0)(t0) // 'D'
-_E      : Char ascii(t0)(t1)(t0)(t0)(t0)(t1)(t0)(t1) // 'E'
-_F      : Char ascii(t0)(t1)(t0)(t0)(t0)(t1)(t1)(t0) // 'F'
-_G      : Char ascii(t0)(t1)(t0)(t0)(t0)(t1)(t1)(t1) // 'G'
-_H      : Char ascii(t0)(t1)(t0)(t0)(t1)(t0)(t0)(t0) // 'H'
-_I      : Char ascii(t0)(t1)(t0)(t0)(t1)(t0)(t0)(t1) // 'I'
-_J      : Char ascii(t0)(t1)(t0)(t0)(t1)(t0)(t1)(t0) // 'J'
-_K      : Char ascii(t0)(t1)(t0)(t0)(t1)(t0)(t1)(t1) // 'K'
-_L      : Char ascii(t0)(t1)(t0)(t0)(t1)(t1)(t0)(t0) // 'L'
-_M      : Char ascii(t0)(t1)(t0)(t0)(t1)(t1)(t0)(t1) // 'M'
-_N      : Char ascii(t0)(t1)(t0)(t0)(t1)(t1)(t1)(t0) // 'N'
-_O      : Char ascii(t0)(t1)(t0)(t0)(t1)(t1)(t1)(t1) // 'O'
-_P      : Char ascii(t0)(t1)(t0)(t1)(t0)(t0)(t0)(t0) // 'P'
-_Q      : Char ascii(t0)(t1)(t0)(t1)(t0)(t0)(t0)(t1) // 'Q'
-_R      : Char ascii(t0)(t1)(t0)(t1)(t0)(t0)(t1)(t0) // 'R'
-_S      : Char ascii(t0)(t1)(t0)(t1)(t0)(t0)(t1)(t1) // 'S'
-_T      : Char ascii(t0)(t1)(t0)(t1)(t0)(t1)(t0)(t0) // 'T'
-_U      : Char ascii(t0)(t1)(t0)(t1)(t0)(t1)(t0)(t1) // 'U'
-_V      : Char ascii(t0)(t1)(t0)(t1)(t0)(t1)(t1)(t0) // 'V'
-_W      : Char ascii(t0)(t1)(t0)(t1)(t0)(t1)(t1)(t1) // 'W'
-_X      : Char ascii(t0)(t1)(t0)(t1)(t1)(t0)(t0)(t0) // 'X'
-_Y      : Char ascii(t0)(t1)(t0)(t1)(t1)(t0)(t0)(t1) // 'Y'
-_Z      : Char ascii(t0)(t1)(t0)(t1)(t1)(t0)(t1)(t0) // 'Z'
-_lbrack : Char ascii(t0)(t1)(t0)(t1)(t1)(t0)(t1)(t1) // '['
-_bsol   : Char ascii(t0)(t1)(t0)(t1)(t1)(t1)(t0)(t0) // '\\'
-_rbrack : Char ascii(t0)(t1)(t0)(t1)(t1)(t1)(t0)(t1) // ']'
-_caret  : Char ascii(t0)(t1)(t0)(t1)(t1)(t1)(t1)(t0) // '^'
-_lowbar : Char ascii(t0)(t1)(t0)(t1)(t1)(t1)(t1)(t1) // '_'
-_grave  : Char ascii(t0)(t1)(t1)(t0)(t0)(t0)(t0)(t0) // '`'
-_a      : Char ascii(t0)(t1)(t1)(t0)(t0)(t0)(t0)(t1) // 'a'
-_b      : Char ascii(t0)(t1)(t1)(t0)(t0)(t0)(t1)(t0) // 'b'
-_c      : Char ascii(t0)(t1)(t1)(t0)(t0)(t0)(t1)(t1) // 'c'
-_d      : Char ascii(t0)(t1)(t1)(t0)(t0)(t1)(t0)(t0) // 'd'
-_e      : Char ascii(t0)(t1)(t1)(t0)(t0)(t1)(t0)(t1) // 'e'
-_f      : Char ascii(t0)(t1)(t1)(t0)(t0)(t1)(t1)(t0) // 'f'
-_g      : Char ascii(t0)(t1)(t1)(t0)(t0)(t1)(t1)(t1) // 'g'
-_h      : Char ascii(t0)(t1)(t1)(t0)(t1)(t0)(t0)(t0) // 'h'
-_i      : Char ascii(t0)(t1)(t1)(t0)(t1)(t0)(t0)(t1) // 'i'
-_j      : Char ascii(t0)(t1)(t1)(t0)(t1)(t0)(t1)(t0) // 'j'
-_k      : Char ascii(t0)(t1)(t1)(t0)(t1)(t0)(t1)(t1) // 'k'
-_l      : Char ascii(t0)(t1)(t1)(t0)(t1)(t1)(t0)(t0) // 'l'
-_m      : Char ascii(t0)(t1)(t1)(t0)(t1)(t1)(t0)(t1) // 'm'
-_n      : Char ascii(t0)(t1)(t1)(t0)(t1)(t1)(t1)(t0) // 'n'
-_o      : Char ascii(t0)(t1)(t1)(t0)(t1)(t1)(t1)(t1) // 'o'
-_p      : Char ascii(t0)(t1)(t1)(t1)(t0)(t0)(t0)(t0) // 'p'
-_q      : Char ascii(t0)(t1)(t1)(t1)(t0)(t0)(t0)(t1) // 'q'
-_r      : Char ascii(t0)(t1)(t1)(t1)(t0)(t0)(t1)(t0) // 'r'
-_s      : Char ascii(t0)(t1)(t1)(t1)(t0)(t0)(t1)(t1) // 's'
-_t      : Char ascii(t0)(t1)(t1)(t1)(t0)(t1)(t0)(t0) // 't'
-_u      : Char ascii(t0)(t1)(t1)(t1)(t0)(t1)(t0)(t1) // 'u'
-_v      : Char ascii(t0)(t1)(t1)(t1)(t0)(t1)(t1)(t0) // 'v'
-_w      : Char ascii(t0)(t1)(t1)(t1)(t0)(t1)(t1)(t1) // 'w'
-_x      : Char ascii(t0)(t1)(t1)(t1)(t1)(t0)(t0)(t0) // 'x'
-_y      : Char ascii(t0)(t1)(t1)(t1)(t1)(t0)(t0)(t1) // 'y'
-_z      : Char ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t0) // 'z'
-_lbrace : Char ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t1) // '<'
-_vert   : Char ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t0) // '|'
-_rbrace : Char ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t1) // '>'
-_tilde  : Char ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t0) // '~'
-_DEL    : Char ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t1) // \DEL
 
 // String
 // ======
@@ -755,30 +626,6 @@ string_eql: String -> String -> Bool
   let eql_len = nat_eql(list_len<Char>(a))(list_len<Char>(b))
   let eql_val = all_satisfy<Bool>((x) x)(zip_with<Char><Char><Bool>(u32_eql)(a)(b))
   and(eql_len)(eql_val)
-
-ext: Char -> String -> String
-  (c) (str) cons<Char>(c)(str)
-
-end: String
-  nil<Char>
-
-exts: String -> List(String) -> List(String)
-  (s) (strs) cons<String>(s)(strs)
-
-ends: List(String)
-  nil<String>
-
-str: Char -> String
-  (c) single<Char>(c)
-
-strs: String -> List(String)
-  (s) single<String>(s)
-
-cat: String -> String -> String
-  concat<Char>
-
-cat_list: List(String) -> String
-  flatten<Char>
 
 // Term
 // ====
@@ -893,23 +740,6 @@ parsing
   let _some = (value) value<() Parsed(B)>(f)
   x<() Parsed(B)>(_none)(_some)
 
-LPAR: String str(_lpar)                                      // "("
-RPAR: String str(_rpar  )                                    // ")"
-LSIG: String str(_lbrace)                                    // "<"
-RSIG: String str(_rbrace)                                    // ">"
-DASH: String str(_dash)                                      // "-"
-PIPE: String str(_vert)                                      // "|"
-COLO: String str(_colon)                                     // ":"
-SEMI: String str(_semi)                                      // ";"
-COLS: String ext(_colon)(str(_colon))                        // "::"
-ARR0: String ext(_dash)(str(_gt))                            // "->"
-EQLS: String str(_equals)                                    // "="
-TYPS: String ext(_T)(ext(_y)(ext(_p)(single<Char>(_e))))     // Type
-LETS: String ext(_l)(ext(_e)(ext(_t)(single<Char>(_space)))) // "let "
-SPAC: String str(_space)                                     // " "
-OPEN: Pair(String)(String) pair<String><String>(LPAR)(LSIG)  // ["(","<"]
-CLOS: Pair(String)(String) pair<String><String>(RPAR)(RSIG)  // [")",">"]
-
 is_space: Char -> Bool
   (c)
     let is_spc = word_eql<n32>(c)(_space)
@@ -953,7 +783,7 @@ drop_comment: String -> String
   // Removes "// ... \n"
   let code = 
     let fst2 = take<Char>(n2)(code)
-    let sla2 = ext(_sol)(ext(_sol)(end))
+    let sla2 = cons<Char>(_sol)(cons<Char>(_sol)(nil<Char>))
     string_eql(fst2)(sla2)<() String>
     | let code = drop<Char>(n2)(code)
       let code = drop_while((x) not(u32_eql(_LF)(x)))(code)
@@ -992,12 +822,12 @@ parse_nam_aux: String -> Pair(String)(String)
   let Ret = Pair(String)(String)
   let ret = pair<String><String>
   code<() Ret>
-  | ret(code)(end);
+  | ret(code)(nil<Char>);
   | (head) (tail)
     is_name(head)<() Ret>
-    | let _pair = (code) (rest) ret(code)(ext(head)(rest))
+    | let _pair = (code) (rest) ret(code)(cons<Char>(head)(rest))
       parse_nam_aux(tail)<() Ret>(_pair);
-    | ret(code)(end);;
+    | ret(code)(nil<Char>);;
 
 parse_nam: String -> Bool -> Maybe(Pair(String)(String))
   (code) (allow_empty)
@@ -1012,19 +842,23 @@ parse_nam: String -> Bool -> Maybe(Pair(String)(String))
 
 nest : Bool -> String -> String
   (b) (s)
+  let cat = concat<Char>
   b<() String>
   | cat(LSIG)(cat(s)(RSIG));
   | cat(LPAR)(cat(s)(RPAR));
 
 sp : String -> String
-  (s) cat_list(exts(SPAC)(exts(s)(strs(SPAC))))
+  (s) flatten<Char>(cons<String>(SPAC)(cons<String>(s)(single<String>(SPAC))))
 
 ERR : String
-  ext(_hash)(ext(_E)(ext(_R)(str(_R))))
+  cons<Char>(_hash)(cons<Char>(_E)(cons<Char>(_R)(single<Char>(_R))))
 
 stringify_trm_go : List(String) -> Term -> String
   (vs) (term)
   let go = stringify_trm_go
+  let cons    = cons<String>
+  let flatten = flatten<Char>
+  let single  = single<String>
   term<() String>
   |-var- () (indx)
     let res = find<String>(vs)(() (i) nat_eql(indx)(i))
@@ -1032,21 +866,21 @@ stringify_trm_go : List(String) -> Term -> String
   |-ref- () (nam) nam;
   |-typ- () TYPS;
   |-all- () (e) (s) (n) (h) (b)
-    let body = go(exts(n)(vs))(b)
-    let head = nest(e)(cat_list(exts(n)(exts(sp(COLO))(strs(go(vs)(h))))))
-    cat_list(exts(s)(exts(head)(exts(sp(ARR0))(strs(body)))));
+    let body = go(cons(n)(vs))(b)
+    let head = nest(e)(flatten(cons(n)(cons(sp(COLO))(single(go(vs)(h))))))
+    flatten(cons(s)(cons(head)(cons(sp(ARR0))(single(body)))));
   |-lam- () (e) (n) (b)
     let head = nest(e)(n)
-    let body = go(exts(n)(vs))(b)
-    cat_list(exts(head)(strs(body)));
+    let body = go(cons(n)(vs))(b)
+    flatten(cons(head)(single(body)));
   |-app- () (e) (f) (a)
     let func = nest(false)(go(vs)(f))
     let argm = nest(e)(go(vs)(a))
-    cat_list(exts(func)(strs(argm)));
+    flatten(cons(func)(single(argm)));
   |-lit- () (n) (x) (b)
-    cat_list(exts(LETS)(exts(n)(exts(sp(EQLS))(strs(go(exts(n)(vs))(b))))));
+    flatten(cons(LETS)(cons(n)(cons(sp(EQLS))(single(go(cons(n)(vs))(b))))));
   |-ann- () () (x) (t)
-    cat_list(exts(go(vs)(x))(exts(sp(COLS))(strs(go(vs)(t)))));
+    flatten(cons(go(vs)(x))(cons(sp(COLS))(single(go(vs)(t)))));
 
 stringify_trm : Term -> String
   (t) stringify_trm_go(nil<String>)(t)
@@ -1405,3 +1239,586 @@ example_2: Equal(Nat)(mul(n8)(n4))(n32)
 
 main: Bool
   not(true)
+
+// Appendix A: Character Constants
+
+// ASCII characters
+
+
+// \NUL
+_NUL: Char
+  ascii(t0)(t0)(t0)(t0)(t0)(t0)(t0)(t0)
+
+// \SOH
+_SOH: Char
+  ascii(t0)(t0)(t0)(t0)(t0)(t0)(t0)(t1)
+
+// \STX
+_STX: Char
+  ascii(t0)(t0)(t0)(t0)(t0)(t0)(t1)(t0)
+
+// \ETX
+_ETX: Char
+  ascii(t0)(t0)(t0)(t0)(t0)(t0)(t1)(t1)
+
+// \EOT
+_EOT: Char
+  ascii(t0)(t0)(t0)(t0)(t0)(t1)(t0)(t0)
+
+// \ENQ
+_ENQ: Char
+  ascii(t0)(t0)(t0)(t0)(t0)(t1)(t0)(t1)
+
+// \ACK
+_ACK: Char
+  ascii(t0)(t0)(t0)(t0)(t0)(t1)(t1)(t0)
+
+// \BEL
+_BEL: Char
+  ascii(t0)(t0)(t0)(t0)(t0)(t1)(t1)(t1)
+
+// \BS
+_BS: Char
+  ascii(t0)(t0)(t0)(t0)(t1)(t0)(t0)(t0)
+
+// \HT
+_HT: Char
+  ascii(t0)(t0)(t0)(t0)(t1)(t0)(t0)(t1)
+
+// \LF
+_LF: Char
+  ascii(t0)(t0)(t0)(t0)(t1)(t0)(t1)(t0)
+
+// \VT
+_VT: Char
+  ascii(t0)(t0)(t0)(t0)(t1)(t0)(t1)(t1)
+
+// \FF
+_FF: Char
+  ascii(t0)(t0)(t0)(t0)(t1)(t1)(t0)(t0)
+
+// \CR
+_CR: Char
+  ascii(t0)(t0)(t0)(t0)(t1)(t1)(t0)(t1)
+
+// \SO
+_SO: Char
+  ascii(t0)(t0)(t0)(t0)(t1)(t1)(t1)(t0)
+
+// \S 
+_SI: Char
+  ascii(t0)(t0)(t0)(t0)(t1)(t1)(t1)(t1)
+
+// \DLE
+_DLE: Char
+  ascii(t0)(t0)(t0)(t1)(t0)(t0)(t0)(t0)
+
+// \DC1
+_DC1: Char
+  ascii(t0)(t0)(t0)(t1)(t0)(t0)(t0)(t1)
+
+// \DC2
+_DC2: Char
+  ascii(t0)(t0)(t0)(t1)(t0)(t0)(t1)(t0)
+
+// \DC3
+_DC3: Char
+  ascii(t0)(t0)(t0)(t1)(t0)(t0)(t1)(t1)
+
+// \DC4
+_DC4: Char
+  ascii(t0)(t0)(t0)(t1)(t0)(t1)(t0)(t0)
+
+// \NAK
+_NAK: Char
+  ascii(t0)(t0)(t0)(t1)(t0)(t1)(t0)(t1)
+
+// \SYN
+_SYN: Char
+  ascii(t0)(t0)(t0)(t1)(t0)(t1)(t1)(t0)
+
+// \ETB
+_ETB: Char
+  ascii(t0)(t0)(t0)(t1)(t0)(t1)(t1)(t1)
+
+// \CAN
+_CAN: Char
+  ascii(t0)(t0)(t0)(t1)(t1)(t0)(t0)(t0)
+
+// \EM
+_EM: Char
+  ascii(t0)(t0)(t0)(t1)(t1)(t0)(t0)(t1)
+
+// \SUB
+_SUB: Char
+  ascii(t0)(t0)(t0)(t1)(t1)(t0)(t1)(t0)
+
+// \ESC
+_ESC: Char
+  ascii(t0)(t0)(t0)(t1)(t1)(t0)(t1)(t1)
+
+// \FS
+_FS: Char
+  ascii(t0)(t0)(t0)(t1)(t1)(t1)(t0)(t0)
+
+// \GS
+_GS: Char
+  ascii(t0)(t0)(t0)(t1)(t1)(t1)(t0)(t1)
+
+// \RS
+_RS: Char
+  ascii(t0)(t0)(t0)(t1)(t1)(t1)(t1)(t0)
+
+// \US
+_US: Char
+  ascii(t0)(t0)(t0)(t1)(t1)(t1)(t1)(t1)
+
+// ' '
+_space: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t0)(t0)
+
+// '!'
+_excl: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t0)(t1)
+
+// '"'
+_quot: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t1)(t0)
+
+// '#'
+_hash: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t1)(t1)
+
+// '$'
+_dollar: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t0)(t0)
+
+// '%'
+_percnt: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t0)(t1)
+
+// '&'
+_amp: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t1)(t0)
+
+// '\''
+_apos: Char
+  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t1)(t1)
+
+// '('
+_lpar: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t0)
+
+// ')'
+_rpar: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t1)
+
+// '*'
+_ast: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t0)
+
+// '+'
+_plus: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t1)
+
+// ','
+_comma: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t0)(t0)
+
+// '-'
+_dash: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t0)(t1)
+
+// '.'
+_period: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t1)(t0)
+
+// '/'
+_sol: Char
+  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t1)(t1)
+
+// '0'
+_0: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t0)(t0)
+
+// '1'
+_1: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t0)(t1)
+
+// '2'
+_2: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t1)(t0)
+
+// '3'
+_3: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t1)(t1)
+
+// '4'
+_4: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t0)(t0)
+
+// '5'
+_5: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t0)(t1)
+
+// '6'
+_6: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t1)(t0)
+
+// '7'
+_7: Char
+  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t1)(t1)
+
+// '8'
+_8: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t0)
+
+// '9'
+_9: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t1)
+
+// ':'
+_colon: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t0)
+
+// ';'
+_semi: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t1)
+
+// '<'
+_lt: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t0)
+
+// '='
+_equals: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t1)
+
+// '>'
+_gt: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t0)
+
+// '?'
+_quest: Char
+  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t1)
+
+// '@'
+_commat: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t0)
+
+// 'A'
+_A: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t1)
+
+// 'B'
+_B: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t1)(t0)
+
+// 'C'
+_C: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t1)(t1)
+
+// 'D'
+_D: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t0)(t0)
+
+// 'E'
+_E: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t0)(t1)
+
+// 'F'
+_F: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t1)(t0)
+
+// 'G'
+_G: Char
+  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t1)(t1)
+
+// 'H'
+_H: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t0)(t0)
+
+// 'I'
+_I: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t0)(t1)
+
+// 'J'
+_J: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t1)(t0)
+
+// 'K'
+_K: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t1)(t1)
+
+// 'L'
+_L: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t0)(t0)
+
+// 'M'
+_M: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t0)(t1)
+
+// 'N'
+_N: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t1)(t0)
+
+// 'O'
+_O: Char
+  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t1)(t1)
+
+// 'P'
+_P: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t0)(t0)
+
+// 'Q'
+_Q: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t0)(t1)
+
+// 'R'
+_R: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t1)(t0)
+
+// 'S'
+_S: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t1)(t1)
+
+// 'T'
+_T: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t0)(t0)
+
+// 'U'
+_U: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t0)(t1)
+
+// 'V'
+_V: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t1)(t0)
+
+// 'W'
+_W: Char
+  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t1)(t1)
+
+// 'X'
+_X: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t0)(t0)
+
+// 'Y'
+_Y: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t0)(t1)
+
+// 'Z'
+_Z: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t1)(t0)
+
+// '['
+_lbrack: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t1)(t1)
+
+// '\\'
+_bsol: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t0)(t0)
+
+// ']'
+_rbrack: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t0)(t1)
+
+// '^'
+_caret: Char
+  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t1)(t0)
+
+// '_'
+_lowbar: Char 
+  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t1)(t1)
+
+// '`'
+_grave: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t0)(t0)
+
+// 'a'
+_a: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t0)(t1)
+
+// 'b'
+_b: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t1)(t0)
+
+// 'c'
+_c: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t1)(t1)
+
+// 'd'
+_d: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t0)(t0)
+
+// 'e'
+_e: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t0)(t1)
+
+// 'f'
+_f: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t1)(t0)
+
+// 'g'
+_g: Char
+  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t1)(t1)
+
+// 'h'
+_h: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t0)(t0)
+
+// 'i'
+_i: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t0)(t1)
+
+// 'j'
+_j: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t1)(t0)
+
+// 'k'
+_k: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t1)(t1)
+
+// 'l'
+_l: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t0)(t0)
+
+// 'm'
+_m: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t0)(t1)
+
+// 'n'
+_n: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t1)(t0)
+
+// 'o'
+_o: Char
+  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t1)(t1)
+
+// 'p'
+_p: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t0)(t0)
+
+// 'q'
+_q: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t0)(t1)
+
+// 'r'
+_r: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t1)(t0)
+
+// 's'
+_s: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t1)(t1)
+
+// 't'
+_t: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t0)(t0)
+
+// 'u'
+_u: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t0)(t1)
+
+// 'v'
+_v: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t1)(t0)
+
+// 'w'
+_w: Char
+  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t1)(t1)
+
+// 'x'
+_x: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t0)(t0)
+
+// 'y'
+_y: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t0)(t1)
+
+// 'z'
+_z: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t0)
+
+// '<'
+_lbrace: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t1)
+
+// '|'
+_vert: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t0)
+
+// '>'
+_rbrace: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t1)
+
+// '~'
+_tilde: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t0)
+
+// \DEL
+_Ds_EL: Char
+  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t1)
+
+// Appendix B: String Constants
+
+// "("
+LPAR: String
+  single<Char>(_lpar)
+
+// ")"
+RPAR: String
+  single<Char>(_rpar  )
+
+// "{"
+LSIG: String
+  single<Char>(_lbrace)
+
+// "}"
+RSIG: String
+  single<Char>(_rbrace)
+
+// ":"
+COLO: String
+  single<Char>(_colon )
+
+// ":"
+SEMI: String
+  single<Char>(_semi )
+
+// "-"
+DASH: String
+  single<Char>(_dash)
+
+// "|"
+PIPE: String
+ single<Char>(_vert)
+
+// "::"
+COLS: String
+  cons<Char>(_colon)(single<Char>(_colon))
+
+// "->"
+ARR0: String
+  cons<Char>(_dash)(single<Char>(_gt))
+
+// "="
+EQLS: String
+  single<Char>(_equals)
+
+// Type
+TYPS: String
+  cons<Char>(_T)(cons<Char>(_y)(cons<Char>(_p)(single<Char>(_e))))
+
+// "let "
+LETS: String
+  cons<Char>(_l)(cons<Char>(_e)(cons<Char>(_t)(single<Char>(_space))))
+
+// " "
+SPAC: String
+  single<Char>(_space)
+
+// ["(","{"]
+OPEN: Pair(String)(String)
+  pair<String><String>(LPAR)(LSIG)
+
+// [")","}']
+CLOS: Pair(String)(String)
+  pair<String><String>(RPAR)(RSIG)
