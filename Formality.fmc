@@ -536,7 +536,7 @@ ufind_aux: <A: Type> -> <B: Type> ->
     let elem = found.val
     elem<() Maybe(B)>
     | (elem.rank) (elem.val) some<B>(k(path)(elem.rank)(elem.val));
-    | (elem.path) ufind_aux<A><B>(map)(path)(k);;
+    | (elem.path) ufind_aux<A><B>(map)(elem.path)(k);;
 
 ufind: <A: Type> -> <B: Type> ->
        (:UPoints(A)) -> (:Bits) ->
