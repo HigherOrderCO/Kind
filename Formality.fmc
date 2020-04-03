@@ -1838,5 +1838,8 @@ example_1: String -> String
 example_2: Equal(Nat)(mul(n8)(n4))(n32)
   equal<Nat><n32>
 
+foo: Bool
+  not((x) x)
+
 main: Bool
-  not(true)
+  not(n3)

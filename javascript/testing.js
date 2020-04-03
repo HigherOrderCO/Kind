@@ -1,6 +1,6 @@
 var fmc = require("./FormalityCore.js");
 var fs = require("fs");
-var code = fs.readFileSync("./Formality.fmc", "utf8");
+var code = fs.readFileSync("./../Formality.fmc", "utf8");
 
 // Parses module
 //var module = fmc.parse_mod(code, 0);
