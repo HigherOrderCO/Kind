@@ -1838,8 +1838,9 @@ example_1: String -> String
 example_2: Equal(Nat)(mul(n8)(n4))(n32)
   equal<Nat><n32>
 
-foo: Bool
-  not((x) x)
-
 main: (x : Bool) -> Bool
-  (x) not(n3)
+  (x) not(not(true))
+
+foo : String
+  let ss = ((s) s) :: String -> String
+  ss(SPAC)

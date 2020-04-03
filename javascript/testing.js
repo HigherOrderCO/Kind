@@ -2,14 +2,14 @@ var fmc = require("./FormalityCore.js");
 var fs = require("fs");
 var code = fs.readFileSync("./../Formality.fmc", "utf8");
 
-// Parses module
-//var module = fmc.parse_mod(code, 0);
+// Parses file
+//var file = fmc.parse_mod(code, 0);
 
 //// Normalizes and type-checks all terms
-//for (var name in module) {
+//for (var name in file) {
   //console.log("name:", name);
   //try {
-    //console.log("type:", fmc.stringify_trm(fmc.typecheck(module[name].term, module[name].type, module)));
+    //console.log("type:", fmc.stringify_trm(fmc.typecheck(file[name].term, file[name].type, file)));
   //} catch (e) {
     //console.log("type:", e);
   //}
@@ -103,21 +103,21 @@ function term_to_js(term, vars = fmc.Nil(), depth = 0) {
   }
 };
 
-function module_to_js(module) {
+function file_to_js(file) {
   var code = "(function(){\n";
   code += "  var ref = (name) => got[name] || (got[name] = lib[name]());\n";
   code += "  var got = {};\n";
   code += "  var lib = {};\n";
-  for (var name in module) {
-    code += "  lib." + name + " = () => " + term_to_js(module[name].term) + ";\n";
+  for (var name in file) {
+    code += "  lib." + name + " = () => " + term_to_js(file[name].term) + ";\n";
   };
   code += "  return ref;\n";
   code += "})()";
   return code;
 };
 
-var module = fmc.parse_mod(code);
-var jscode = module_to_js(module);
+var file = fmc.parse_mod(code);
+var jscode = file_to_js(file);
 var func = eval(jscode)("example_1");
 var argm = string_to_lambda("(A : Type) -> (y : A) -> A");
 

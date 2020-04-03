@@ -251,7 +251,7 @@ function parse_var(code, indx, vars) {
 };
 
 // Parses a single-line application, `<term>(<term>)`
-function parse_app(code, indx, func, vars) {
+function parse_app(code, indx, from, func, vars) {
   var from = indx;
   var [indx, eras] = parse_opt(code, indx, "(", "<");
   var [indx, argm] = parse_trm(code, indx, vars);
@@ -260,7 +260,7 @@ function parse_app(code, indx, func, vars) {
 };
 
 // Parses a multi-line application, `<term> | <term>;`
-function parse_pip(code, indx, func, vars) {
+function parse_pip(code, indx, from, func, vars) {
   var from = indx;
   var [indx, skip] = parse_str(code, next(code, indx), "|");
   var [indx, argm] = parse_trm(code, indx, vars);
@@ -269,7 +269,7 @@ function parse_pip(code, indx, func, vars) {
 };
 
 // Parses a non-dependent function type, `<term> -> <term>`
-function parse_arr(code, indx, bind, vars) {
+function parse_arr(code, indx, from, bind, vars) {
   var from = indx;
   var [indx, skip] = parse_str(code, next(code, indx), "->");
   var [indx, body] = parse_trm(code, indx, Ext("", Ext("", vars)));
@@ -277,8 +277,7 @@ function parse_arr(code, indx, bind, vars) {
 };
 
 // Parses an annotation, `<term> :: <term>`
-function parse_ann(code, indx, expr, vars) {
-  var from = indx;
+function parse_ann(code, indx, from, expr, vars) {
   var [indx, skip] = parse_str(code, next(code, indx), "::");
   var [indx, type] = parse_trm(code, indx, vars);
   return [indx, Ann(false, expr, type, {from,to:indx})];
@@ -286,6 +285,8 @@ function parse_ann(code, indx, expr, vars) {
 
 // Parses a term
 function parse_trm(code, indx = 0, vars = Nil()) {
+  var from = indx;
+
   // Parses the base term, trying each variant once
   var base_parse = first_valid([
     () => parse_all(code, indx, vars),
@@ -302,10 +303,10 @@ function parse_trm(code, indx = 0, vars = Nil()) {
   while (true) {
     var [indx, term] = post_parse;
     post_parse = first_valid([
-      () => parse_app(code, indx, term, vars),
-      () => parse_pip(code, indx, term, vars),
-      () => parse_arr(code, indx, term, vars),
-      () => parse_ann(code, indx, term, vars),
+      () => parse_app(code, indx, from, term, vars),
+      () => parse_pip(code, indx, from, term, vars),
+      () => parse_arr(code, indx, from, term, vars),
+      () => parse_ann(code, indx, from, term, vars),
     ]);
     if (!post_parse) {
       return base_parse;
@@ -317,21 +318,21 @@ function parse_trm(code, indx = 0, vars = Nil()) {
   return null;
 };
 
-// Parses a module
+// Parses a file
 function parse_mod(code, indx = 0) {
-  var module = {};
+  var file = {};
   function parse_defs(code, indx) {
     try {
       var [indx, name] = parse_nam(code, next(code, indx));
       var [indx, skip] = parse_str(code, next(code, indx), ":");
       var [indx, type] = parse_trm(code, next(code, indx), Nil());
       var [indx, term] = parse_trm(code, next(code, indx), Nil());
-      module[name] = {type, term};
+      file[name] = {type, term};
       parse_defs(code, indx);
     } catch (e) {}
   }
   parse_defs(code, indx);
-  return module;
+  return file;
 };
 
 // Stringification
@@ -607,13 +608,13 @@ function to_low_order(term, depth = 0) {
   }
 };
 
-function reduce_high_order(term, module) {
+function reduce_high_order(term, file) {
   switch (term.ctor) {
     case "Var":
       return Var(term.indx, term.locs);
     case "Ref":
-      if (module[term.name]) {
-        return reduce_high_order(to_high_order(module[term.name].term), module);
+      if (file[term.name]) {
+        return reduce_high_order(to_high_order(file[term.name].term), file);
       } else {
         return Ref(term.name, term.locs);
       }
@@ -633,26 +634,26 @@ function reduce_high_order(term, module) {
       var locs = term.locs;
       return Lam(false, name, body, locs);
     case "App":
-      var func = reduce_high_order(term.func, module);
+      var func = reduce_high_order(term.func, file);
       switch (func.ctor) {
         case "Lam":
-          return reduce_high_order(func.body(term.argm), module);
+          return reduce_high_order(func.body(term.argm), file);
         default:
-          return App(false, func, reduce_high_order(term.argm, module), term.locs);
+          return App(false, func, reduce_high_order(term.argm, file), term.locs);
       };
     case "Let":
       var name = term.name;
       var expr = term.expr;
       var body = term.body;
       var locs = term.locs;
-      return reduce_high_order(body(expr), module);
+      return reduce_high_order(body(expr), file);
     case "Ann":
-      return reduce_high_order(term.expr, module);
+      return reduce_high_order(term.expr, file);
   };
 };
 
-function normalize_high_order(term, module) {
-  var norm = reduce_high_order(term, module);
+function normalize_high_order(term, file) {
+  var norm = reduce_high_order(term, file);
   switch (norm.ctor) {
     case "Var":
       return Var(norm.indx, norm.locs);
@@ -664,37 +665,37 @@ function normalize_high_order(term, module) {
       var eras = norm.eras;
       var self = norm.self;
       var name = norm.name;
-      var bind = s => normalize_high_order(norm.bind(s), module);
-      var body = (s,x) => normalize_high_order(norm.body(s,x), module);
+      var bind = s => normalize_high_order(norm.bind(s), file);
+      var body = (s,x) => normalize_high_order(norm.body(s,x), file);
       var locs = norm.locs;
       return All(eras, self, name, bind, body, locs);
     case "Lam":
       var name = norm.name;
-      var body = x => normalize_high_order(norm.body(x), module);
+      var body = x => normalize_high_order(norm.body(x), file);
       var locs = norm.locs;
       return Lam(false, name, body, locs);
     case "App":
-      var func = normalize_high_order(norm.func, module);
-      var argm = normalize_high_order(norm.argm, module);
+      var func = normalize_high_order(norm.func, file);
+      var argm = normalize_high_order(norm.argm, file);
       var locs = norm.locs;
       return App(false, func, argm, locs);
     case "Let":
       var name = norm.name;
-      var expr = normalize_high_order(norm.expr, module);
-      var body = x => normalize_high_order(norm.body(x), module);
+      var expr = normalize_high_order(norm.expr, file);
+      var body = x => normalize_high_order(norm.body(x), file);
       var locs = norm.locs;
       return Let(name, expr, body, locs);
     case "Ann":
-      return normalize_high_order(norm.expr, module);
+      return normalize_high_order(norm.expr, file);
   };
 };
 
-function reduce(term, module) {
-  return to_low_order(reduce_high_order(to_high_order(term, Nil()), module), 0);
+function reduce(term, file) {
+  return to_low_order(reduce_high_order(to_high_order(term, Nil()), file), 0);
 };
 
-function normalize(term, module) {
-  return to_low_order(normalize_high_order(to_high_order(term, Nil()), module), 0);
+function normalize(term, file) {
+  return to_low_order(normalize_high_order(to_high_order(term, Nil()), file), 0);
 };
 
 // Equality
@@ -842,14 +843,14 @@ function congruent_terms(map, a, b) {
   }
 };
 
-function equal(a, b, module, dep = 0) {
+function equal(a, b, file, dep = 0) {
   var map = {};
   var vis = [[a, b, dep]];
   var idx = 0;
   while (idx < vis.length) {
     let [a0, b0, depth] = vis[idx];
-    let a1 = reduce(a0, module);
-    let b1 = reduce(b0, module);
+    let a1 = reduce(a0, file);
+    let b1 = reduce(b0, file);
     let id = congruent_terms(map, a1, b1);
     equate(map, a0.hash, a1.hash);
     equate(map, b0.hash, b1.hash);
@@ -952,7 +953,7 @@ function stringify_err(err, code) {
 // Type-Checking
 // =============
 
-function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
+function typeinfer(term, file, ctx = Nil(), nam = Nil()) {
   //console.log("infer", stringify_trm(term, nam));
   //console.log("-----");
   switch (term.ctor) {
@@ -964,7 +965,7 @@ function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
         throw Err(term.locs, ctx, nam, "Unbound varible.");
       }
     case "Ref":
-      var got = module[term.name];
+      var got = file[term.name];
       if (got) {
         return got.type;
       } else {
@@ -973,15 +974,15 @@ function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
     case "Typ":
       return Typ();
     case "App":
-      var func_typ = reduce(typeinfer(term.func, module, ctx, nam), module);
+      var func_typ = reduce(typeinfer(term.func, file, ctx, nam), file);
       switch (func_typ.ctor) {
         case "All":
           var expe_typ = subst(func_typ.bind, term.func, 0);
-          typecheck(term.argm, expe_typ, module, ctx, nam);
+          typecheck(term.argm, expe_typ, file, ctx, nam);
           var term_typ = func_typ.body;
           var term_typ = subst(term_typ, shift(term.func, 1, 0), 1);
           var term_typ = subst(term_typ, shift(term.argm, 0, 0), 0);
-          var term_typ = reduce(term_typ, module);
+          var term_typ = reduce(term_typ, file);
           if (func_typ.ctor === "All" && term.eras !== func_typ.eras) {
             throw Err(term.locs, ctx, nam, "Mismatched erasure.");
           };
@@ -991,26 +992,32 @@ function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
       };
     case "Let":
       var term_val = subst(term.body, term.expr, 0);
-      var term_typ = typeinfer(term_val, module, ctx, nam);
+      var term_typ = typeinfer(term_val, file, ctx, nam);
       return term_typ;
     case "All":
       var self_typ = Ann(true, term, Typ());
       var bind_ctx = Ext(self_typ, ctx);
       var bind_nam = Ext(term.self, nam);
-      var bind_typ = typecheck(term.bind, Typ(), module, bind_ctx, bind_nam);
+      var bind_typ = typecheck(term.bind, Typ(), file, bind_ctx, bind_nam);
       var body_ctx = Ext(term.bind, Ext(self_typ, ctx));
       var body_nam = Ext(term.name, Ext(term.self, nam));
-      typecheck(term.body, Typ(), module, body_ctx, body_nam);
+      typecheck(term.body, Typ(), file, body_ctx, body_nam);
       return Typ();
+    case "Ann":
+      if (term.done) {
+        return term.type;
+      } else {
+        return typecheck(term.expr, term.type, file, ctx, nam);
+      }
   }
   throw Err(term.locs, ctx, nam, "Can't infer type.");
 };
 
-function typecheck(term, type, module, ctx = Nil(), nam = Nil(), code) {
+function typecheck(term, type, file, ctx = Nil(), nam = Nil(), code) {
   //console.log("check", stringify_trm(term, nam));
   //console.log("typed", stringify_trm(type, nam));
   //console.log("-----");
-  var typv = reduce(type, module);
+  var typv = reduce(type, file);
   switch (term.ctor) {
     case "Lam":
       if (typv.ctor === "All") {
@@ -1022,21 +1029,14 @@ function typecheck(term, type, module, ctx = Nil(), nam = Nil(), code) {
         if (term.eras !== typv.eras) {
           throw Err(term.locs, ctx, nam, "Type mismatch.");
         };
-        typecheck(term.body, body_typ, module, body_ctx, body_nam);
+        typecheck(term.body, body_typ, file, body_ctx, body_nam);
       } else {
         throw Err(term.locs, ctx, nam, "Lambda has a non-function type.");
       }
       break;
-    case "Ann":
-      if (term.done) {
-        infr = term.type;
-      } else {
-        infr = typecheck(term.expr, term.type, module, ctx, nam);
-      }
-      break;
     default:
-      var infr = typeinfer(term, module, ctx, nam);
-      if (!equal(type, infr, module)) {
+      var infr = typeinfer(term, file, ctx, nam);
+      if (!equal(type, infr, file)) {
         var type_str = stringify_trm(reduce(type, {}), nam);
         var infr_str = stringify_trm(reduce(infr, {}), nam);
         throw Err(term.locs, ctx, nam,
