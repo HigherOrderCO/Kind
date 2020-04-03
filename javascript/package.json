@@ -1,10 +1,10 @@
 {
-  "name": "formality-temporary",
-  "version": "0.1.28",
+  "name": "formality-core",
+  "version": "0.2.0",
   "description": "Formality language, temporary package for the next version",
   "main": "FormalityCore.js",
   "bin": {
-    "fmt": "cli.js"
+    "fmc": "cli.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
