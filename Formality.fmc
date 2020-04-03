@@ -421,6 +421,65 @@ b0: (bs: Bits) -> Bits
 b1: (bs: Bits) -> Bits
   (bs) <P> (be) (b0) (b1) b1(bs)
 
+// Map
+// ===
+
+Map: (A: Type) -> Type
+  (A)
+  self<P: (x: Map(A)) -> Type> ->
+  (empty: P(empty<A>)) ->
+  (multi: (val: Maybe(A)) -> (lft: Map(A)) -> (rgt: Map(A)) -> P(multi<A>(val)(lft)(rgt))) ->
+  P(self)
+
+empty: <A: Type> -> Map(A)
+  <A>
+  <> (empty) () empty
+
+multi: <A: Type> -> (:Maybe(A)) -> (:Map(A)) -> (:Map(A)) -> Map(A)
+  <A> (val) (lft) (rgt)
+  <> () (multi) multi(val)(lft)(rgt)
+
+singleton_map: <A: Type> -> (:A) -> Map(A)
+  <A> (x)
+  multi<A>(some<A>(x))(empty<A>)(empty<A>)
+
+lookup: <A: Type> -> (:Bits) -> (:Map(A)) -> Maybe(A)
+  <A> (bits) (map)
+  let lookup_type = <A: Type> -> (:Bits) -> (:Map(A)) -> Maybe(A)
+  bits<() (:Map(A)) -> (:lookup_type) -> Maybe(A)>
+  | (map) () map<() Maybe(A)>
+    | none<A>;
+    | (map.val) () () map.val;
+  ;
+  | (bits.pred) (map) (lookup) map<() Maybe(A)>
+    | none<A>;
+    | () (map.lft) () lookup<A>(bits.pred)(map.lft);
+  ;
+  | (bits.pred) (map) (lookup) map<() Maybe(A)>
+    | none<A>;
+    | () () (map.rgt) lookup<A>(bits.pred)(map.rgt);
+  ;(map)(lookup)
+
+insert: <A: Type> -> (:Bits) -> (:A) -> (:Map(A)) -> Map(A)
+  <A> (bits) (val) (map)
+  let insert_type = <A: Type> -> (:Bits) -> (:A) -> (:Map(A)) -> Map(A)
+  bits<() (:A) -> (:Map(A)) -> (:insert_type) -> Map(A)>
+  | () (map) () map<() (:Maybe(A)) -> Map(A)>
+    | (val) multi<A>(val)(empty<A>)(empty<A>);
+    | () (map.lft) (map.rgt) (val) multi<A>(val)(map.lft)(map.rgt)
+    ;(some<A>(val))
+  ;
+  | (bits.pred) (val) (map) (insert) map<() (:(:Map(A)) -> Map(A)) -> Map(A)>
+    | (insert) multi<A>(none<A>)(insert(empty<A>))(empty<A>);
+    | (map.val) (map.lft) (map.rgt) (insert) multi<A>(map.val)(insert(map.lft))(map.rgt)
+    ;(insert<A>(bits.pred)(val))
+  ;
+  | (bits.pred) (val) (map) (insert) map<() (:(:Map(A)) -> Map(A)) -> Map(A)>
+    | (insert) multi<A>(none<A>)(empty<A>)(insert(empty<A>));
+    | (map.val) (map.lft) (map.rgt) (insert) multi<A>(map.val)(map.lft)(insert(map.rgt))
+    ;(insert<A>(bits.pred)(val))
+  ;(val)(map)(insert)
+
 // Word
 // ====
 
