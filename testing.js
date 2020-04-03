@@ -72,7 +72,7 @@ function term_to_js(term, vars = fmc.Nil(), depth = 0) {
       }
     case "Ref":
       if (!term.name) throw "aff";
-      return "lib."+term.name;
+      return "ref('"+term.name+"')";
     case "Typ":
       return "null";
     case "All":
@@ -105,19 +105,20 @@ function term_to_js(term, vars = fmc.Nil(), depth = 0) {
 
 function module_to_js(module) {
   var code = "(function(){\n";
+  code += "  var ref = (name) => got[name] || (got[name] = lib[name]());\n";
+  code += "  var got = {};\n";
   code += "  var lib = {};\n";
   for (var name in module) {
-    code += "  lib." + name + " = " + term_to_js(module[name].term) + ";\n";
+    code += "  lib." + name + " = () => " + term_to_js(module[name].term) + ";\n";
   };
-  code += "  return lib;\n";
+  code += "  return ref;\n";
   code += "})()";
   return code;
 };
 
 var module = fmc.parse_mod(code);
 var jscode = module_to_js(module);
-
-var func = eval(jscode).example_1;
-var argm = string_to_lambda("(f) (x) f(f(x))");
+var func = eval(jscode)("example_1");
+var argm = string_to_lambda("(A : Type) -> (y : A) -> A");
 
 console.log(lambda_to_string(func(argm)));
