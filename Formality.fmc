@@ -421,6 +421,13 @@ b0: (bs: Bits) -> Bits
 b1: (bs: Bits) -> Bits
   (bs) <P> (be) (b0) (b1) b1(bs)
 
+next_bits: (:Bits) -> Bits
+  (x)
+  x<() Bits>
+  | b0(be);
+  | (x.pred) b1(x.pred);
+  | (x.pred) b0(next_bits(x.pred));
+
 // Map
 // ===
 
@@ -479,6 +486,64 @@ insert: <A: Type> -> (:Bits) -> (:A) -> (:Map(A)) -> Map(A)
     | (map.val) (map.lft) (map.rgt) (insert) multi<A>(map.val)(map.lft)(insert(map.rgt))
     ;(insert<A>(bits.pred)(val))
   ;(val)(map)(insert)
+
+// Union-Find
+// ==========
+UElem: (A: Type) -> Type
+  (A)
+  self<P: (x: UElem(A)) -> Type> ->
+  (uelem: (rank: Nat) -> (val: A) -> P(uelem<A>(rank)(val))) ->
+  (ulink: (path: Bits) -> P(ulink<A>(path))) ->
+  P(self)
+
+uelem: <A: Type> -> (:Nat) -> (:A) -> UElem(A)
+  <A> (rank) (val)
+  <> (uelem) () uelem(rank)(val)
+
+ulink: <A: Type> -> (:Bits) -> UElem(A)
+  <A> (path)
+  <> () (ulink) ulink(path)
+
+UPoints: (A: Type) -> Type
+  (A)
+  self<P: (x: UPoints(A)) -> Type> ->
+  (upoints: (last: Bits) -> (map: Map(UElem(A))) -> P(upoints<A>(last)(map))) ->
+  P(self)
+
+upoints: <A: Type> -> (:Bits) -> (:Map(UElem(A))) -> UPoints(A)
+  <A> (last) (map)
+  <> (upoints) upoints(last)(map)
+
+new_points: <A: Type> -> UPoints(A)
+  <A> upoints<A>(be)(empty<UElem(A)>)
+
+fresh: <A: Type> -> (:UPoints(A)) -> (:A) -> Pair(UPoints(A))(Bits)
+  <A> (uf) (a)
+  uf<() Pair(UPoints(A))(Bits)>
+  | (uf.last) (uf.map)
+    let new_map = insert<UElem(A)>(uf.last)(uelem<A>(zero)(a))(uf.map)
+    let new_uf = upoints<A>(next_bits(uf.last))(new_map)
+    pair<UPoints(A)><Bits>(new_uf)(uf.last);
+
+ufind_aux: <A: Type> -> <B: Type> ->
+          (:Map(UElem(A))) -> (:Bits) ->
+          (:(:Bits) -> (:Nat) -> (:A) -> B) -> Maybe(B)
+  <A> <B> (map) (path) (k)
+  let found = lookup<UElem(A)>(path)(map)
+  found<() Maybe(B)>
+  | none<B>;
+  | (found.val)
+    let elem = found.val
+    elem<() Maybe(B)>
+    | (elem.rank) (elem.val) some<B>(k(path)(elem.rank)(elem.val));
+    | (elem.path) ufind_aux<A><B>(map)(path)(k);;
+
+ufind: <A: Type> -> <B: Type> ->
+       (:UPoints(A)) -> (:Bits) ->
+       (:(:Bits) -> (:Nat) -> (:A) -> B) -> Maybe(B)
+  <A> <B> (uf) (path) (k)
+  uf<() Maybe(B)>
+  | () (uf.map) ufind_aux<A><B>(uf.map)(path)(k);
 
 // Word
 // ====
