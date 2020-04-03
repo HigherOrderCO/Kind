@@ -402,7 +402,7 @@ function stringify_ctx(ctx, nam) {
     };
   };
   stringify_ctx(ctx, nam, 0);
-  return lines.reverse().join("\n") + (lines.length > 0 ? "\n" : "");
+  return lines.reverse().join("\n") + "\n";
 };
 
 function stringify_mod(mod) {
@@ -941,7 +941,10 @@ function stringify_err(err, code) {
   var index = 0;
   var str = "";
   str += err.msg+"\n";
-  str += stringify_ctx(err.ctx, err.nam);
+  if (err.ctx.ctor !== "Nil") {
+    str += "With context:\n";
+    str += "\x1b[2m"+stringify_ctx(err.ctx, err.nam)+"\x1b[0m";
+  };
   str += highlight_code(code, err.loc.from, err.loc.to);
   return str;
 };
@@ -979,7 +982,7 @@ function typeinfer(term, module, ctx = Nil(), nam = Nil()) {
           var term_typ = subst(term_typ, shift(term.func, 1, 0), 1);
           var term_typ = subst(term_typ, shift(term.argm, 0, 0), 0);
           var term_typ = reduce(term_typ, module);
-          if (term.eras !== func_typ.eras) {
+          if (func_typ.ctor === "All" && term.eras !== func_typ.eras) {
             throw Err(term.locs, ctx, nam, "Mismatched erasure.");
           };
           return term_typ;
@@ -1011,14 +1014,14 @@ function typecheck(term, type, module, ctx = Nil(), nam = Nil(), code) {
   switch (term.ctor) {
     case "Lam":
       if (typv.ctor === "All") {
-        if (term.eras !== typv.eras) {
-          throw Err(term.locs, ctx, nam, "Mismatched erasure.");
-        };
         var self_typ = Ann(true, typv, Typ());
         var bind_typ = subst(typv.bind, term, 0);
         var body_typ = subst(typv.body, shift(term, 1, 0), 1);
         var body_nam = Ext(term.name, nam);
         var body_ctx = Ext(bind_typ, ctx);
+        if (term.eras !== typv.eras) {
+          throw Err(term.locs, ctx, nam, "Type mismatch.");
+        };
         typecheck(term.body, body_typ, module, body_ctx, body_nam);
       } else {
         throw Err(term.locs, ctx, nam, "Lambda has a non-function type.");

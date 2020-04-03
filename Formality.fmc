@@ -1841,5 +1841,5 @@ example_2: Equal(Nat)(mul(n8)(n4))(n32)
 foo: Bool
   not((x) x)
 
-main: Bool
-  not(n3)
+main: (x : Bool) -> Bool
+  (x) not(n3)
