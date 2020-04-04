@@ -627,6 +627,67 @@ string_eql: String -> String -> Bool
   let eql_val = all_satisfy<Bool>((x) x)(zip_with<Char><Char><Bool>(u32_eql)(a)(b))
   and(eql_len)(eql_val)
 
+// Map
+// ===
+
+Map: (A: Type) -> Type
+  (A)
+  self<P: Map(A) -> Type> ->
+  (empty:
+    P(empty<A>)) ->
+  (multi:
+    (val: Maybe(A)) ->
+    (lft: Map(A)) ->
+    (rgt: Map(A)) ->
+    P(multi<A>(val)(lft)(rgt))) ->
+  P(self)
+
+empty: <A: Type> -> Map(A)
+  <>
+  <> (empty) ()
+  empty
+
+multi: <A: Type> -> Maybe(A) -> Map(A) -> Map(A) -> Map(A)
+  <> (val) (lft) (rgt)
+  <> () (multi)
+  multi(val)(lft)(rgt)
+
+insert: <A: Type> -> Bits -> A -> Map(A) -> Map(A)
+  <A> (bits) (val) (map)
+  bits<() Map(A)>
+  | map<() Map(A)>
+    | multi<A>(some<A>(val))(empty<A>)(empty<A>);
+    | (map.val) (map.lft) (map.rgt)
+      multi<A>(some<A>(val))(map.lft)(map.rgt);;
+  | (bits.pred)
+    map<() Map(A)>
+    | multi<A>(none<A>)(insert<A>(bits.pred)(val)(empty<A>))(empty<A>);
+    | (map.val) (map.lft) (map.rgt)
+      multi<A>(map.val)(insert<A>(bits.pred)(val)(map.lft))(map.rgt);;
+  | (bits.pred)
+    map<() Map(A)>
+    | multi<A>(none<A>)(empty<A>)(insert<A>(bits.pred)(val)(empty<A>));
+    | (map.val) (map.lft) (map.rgt)
+      multi<A>(map.val)(map.lft)(insert<A>(bits.pred)(val)(map.rgt));;
+
+lookup: <A: Type> -> Bits -> Map(A) -> Maybe(A)
+  <A> (bits) (map)
+  bits<() Maybe(A)>
+  | map<() Maybe(A)>
+    | none<A>;
+    | (map.val) (map.lft) (map.rgt)
+      map.val;;
+  | (bits.pred)
+    map<() Maybe(A)>
+    | none<A>;
+    | (map.val) (map.lft) (map.rgt)
+      lookup<A>(bits.pred)(map.lft);;
+  | (bits.pred)
+    map<() Maybe(A)>
+    | none<A>;
+    | (map.val) (map.lft) (map.rgt)
+      lookup<A>(bits.pred)(map.rgt);;
+
 // Term
 // ====
 
