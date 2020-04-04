@@ -1037,8 +1037,8 @@ function typecheck(term, type, file, ctx = Nil(), nam = Nil(), code) {
     default:
       var infr = typeinfer(term, file, ctx, nam);
       if (!equal(type, infr, file)) {
-        var type_str = stringify_trm(reduce(type, {}), nam);
-        var infr_str = stringify_trm(reduce(infr, {}), nam);
+        var type_str = stringify_trm(normalize(type, {}), nam);
+        var infr_str = stringify_trm(normalize(infr, {}), nam);
         throw Err(term.locs, ctx, nam,
           "Found type... \x1b[2m"+infr_str+"\x1b[0m\n" +
           "Instead of... \x1b[2m"+type_str+"\x1b[0m");
