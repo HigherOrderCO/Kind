@@ -422,6 +422,18 @@ flatten : <A: Type> -> List(List(A)) -> List(A)
 single : <A : Type> -> (x : A) -> List(A)
   <A> (x) cons<A>(x)(nil<A>)
 
+Concat: (A : Type) -> Type
+  (A) List(A) -> List(A)
+
+list_to_concat: <A: Type> -> (xs: List(A)) -> Concat(A)
+  <A> (xs)
+  xs<() Concat(A)>
+  | (ys) ys;
+  | (head) (tail) (ys) cons<A>(head)(list_to_concat<A>(tail)(ys));
+
+concat_to_list: <A: Type> -> (xs: Concat(A)) -> List(A)
+  <A> (xs) xs(nil<A>)
+
 // Bits
 // ====
 
@@ -913,47 +925,46 @@ sp : String -> String
 
 ERR : String
   cons<Char>(_hash)(cons<Char>(_E)(cons<Char>(_R)(single<Char>(_R))))
-
 stringify_trm_go : List(String) -> Term -> String
-  (vs) (term)
+  (vars) (term)
   let go = stringify_trm_go
   let cons    = cons<String>
   let flatten = flatten<Char>
   let space   = single<Char>(_space)
   let single  = single<String>
   term<() String>
-  |-var- () (indx)
-    let res = find<String>(vs)(() (i) nat_eql(indx)(i))
+  |{-var-} () (indx) 
+    let res = find<String>(vars)(() (i) nat_eql(indx)(i))
     res<() String>(ERR)((x) fst<String><Nat>(x));
-  |-ref- () (nam) nam;
-  |-typ- () TYPS;
-  |-all- () (e) (s) (n) (h) (b)
-    let body = go(cons(n)(cons(s)(vs)))(b)
-    let head = nest(e)(flatten(cons(n)(cons(sp(COLO))(single(go(cons(s)(vs))(h))))))
+  |{-ref-} () (nam) nam;
+  |{-typ-} () TYPS;
+  |{-all-} () (e) (s) (n) (h) (b)
+    let body = go(cons(n)(cons(s)(vars)))(b)
+    let head = nest(e)(flatten(cons(n)(cons(sp(COLO))(single(go(cons(s)(vars))(h))))))
     flatten(cons(s)(cons(head)(cons(sp(ARR0))(single(body)))));
-  |-lam- () (e) (n) (b)
+  |{-lam-} () (e) (n) (b)
     let head = nest(e)(n)
-    let body = go(cons(n)(vs))(b)
+    let body = go(cons(n)(vars))(b)
     flatten(cons(head)(cons(space)(single(body))));
-  |-app- () (e) (f) (a)
-    let fref = go(vs)(f)
+  |{-app-} () (e) (f) (a)
+    let fref = go(vars)(f)
     let fpar = nest(false)(fref)
     let func =
       f<() String>
-      |-var- () () fref;
-      |-ref- () () fref;
-      |-typ- () fpar;
-      |-all- () () () () () () fref;
-      |-lam- () () () () fpar;
-      |-app- () () () () fpar;
-      |-lit- () () () () fpar;
-      |-ann- () () () () fpar;
-    let argm = nest(e)(go(vs)(a))
+      |{-var-} () () fref;
+      |{-ref-} () () fref;
+      |{-typ-} () fpar;
+      |{-all-} () () () () () () fref;
+      |{-lam-} () () () () fpar;
+      |{-app-} () () () () fpar;
+      |{-lit-} () () () () fpar;
+      |{-ann-} () () () () fpar;
+    let argm = nest(e)(go(vars)(a))
     flatten(cons(func)(single(argm)));
-  |-lit- () (n) (x) (b)
-    flatten(cons(LETS)(cons(n)(cons(sp(EQLS))(single(go(cons(n)(vs))(b))))));
-  |-ann- () () (x) (t)
-    flatten(cons(go(vs)(x))(cons(sp(COLS))(single(go(vs)(t)))));
+  |{-lit-} () (n) (x) (b)
+    flatten(cons(LETS)(cons(n)(cons(sp(EQLS))(single(go(cons(n)(vars))(b))))));
+  |{-ann-} () () (x) (t)
+    flatten(cons(go(vars)(x))(cons(sp(COLS))(single(go(vars)(t)))));
 
 stringify_trm : Term -> String
   (t) stringify_trm_go(nil<String>)(t)
@@ -1902,6 +1913,9 @@ example_2: Equal(Nat)(mul(n8)(n4))(n32)
 main: (x : Bool) -> Bool
   (x) not(not(true))
 
-foo : String
-  let ss = ((s) s) :: String -> String
-  ss(SPAC)
+// foo : String
+//   let ss = ((s) s) :: String -> String
+//   ss(SPAC)
+
+foo : <A : Type> -> (f : (a : A) -> A) -> (x : A) -> A
+  <> (f) (x) f(x)

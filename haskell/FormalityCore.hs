@@ -147,7 +147,7 @@ isSpace c = c `elem` " \t\n"
 
 -- is a name character
 isName :: Char -> Bool
-isName c = c `elem` (['0'..'9'] ++ ['a'..'z'] ++ ['A'..'Z'] ++ "_")
+isName c = c `elem` (['0'..'9'] ++ ['a'..'z'] ++ ['A'..'Z'] ++ "_" ++ ".")
 
 -- consume whitespace
 whitespace :: Parser ()
@@ -155,16 +155,23 @@ whitespace = takeWhile1P isSpace >> return ()
 
 -- parse // line comments
 lineComment :: Parser ()
-lineComment = sym "//" >> takeWhileP (/= '\n') >> return ()
+lineComment = 
+  choice 
+    [ sym "//" >> takeWhileP (/= '\n') >> return ()
+    , sym "--" >> takeWhileP (/= '\n') >> return ()
+    ]
 
 -- parse `/* */` block comments
 blockComment :: Parser ()
-blockComment = string "/*" >> manyTill anyChar (string "*/") >> return ()
+blockComment = 
+  choice
+    [ string "/*" >> manyTill anyChar (string "*/") >> return ()
+    , string "{-" >> manyTill anyChar (string "-}") >> return ()
+    ]
 
 -- space and comment consumer
 space :: Parser ()
 space = skipMany $ choice [whitespace, lineComment, blockComment]
-
 
 -- parse a symbol (literal string followed by whitespace or comments)
 sym :: String -> Parser String
@@ -187,18 +194,20 @@ par vs = string "(" >> space >> trm vs <* space <* string ")"
 all :: [Name] -> Parser TermP
 all vs = do
   s <- maybe "" id <$> (optional nam)
-  n <- sym "(" >> nam <* space
+  e <- (string "(" >> return False) <|> (string "<" >> return True)
+  n <- maybe "" id <$> (optional nam <* space)
   t <- sym ":" >> trm vs <* space
-  e <- opt ';' <* space <* sym ")"
+  (if e then sym ">" else sym ")")
   b <- sym "->" >> trm (n : vs)
   return $ AllP e s n t b
 
 -- Parses a dependent function value, `(<name>) => <term>`
 lam :: [Name] -> Parser TermP
 lam vs = do
-  n <- sym "(" >> nam <* space
-  e <- opt ';' <* space <* sym ")"
-  b <- sym "=>" >> trm (n : vs)
+  e <- (string "(" >> return False) <|> (string "<" >> return True)
+  n <- maybe "" id <$> (space >> (optional nam) <* space)
+  (if e then sym ">" else sym ")")
+  b <- trm (n : vs)
   return $ LamP e n b
 
 -- Parses the type of types, `Type`
@@ -223,7 +232,10 @@ app :: [Name] -> TermP -> Parser TermP
 app vs f = foldl (\t (a,e) -> AppP e t a) f <$> (some $ arg vs)
   where
   arg vs = choice
-    [ (,) <$> (sym "(" >> trm vs) <*> (opt ';' <* space <* string ")")
+    [ do
+      e <- (string "(" >> return False) <|> (string "<" >> return True)
+      t <- space >> trm vs <* space <* (if e then string ">" else string ")")
+      return (t,e)
     , (,False) <$> (space >> sym "|" >> trm vs <* space <* string ";")
     ]
 
@@ -244,7 +256,8 @@ ann vs x = do
 trm :: [Name] -> Parser TermP
 trm vs = do
   t <- choice [all vs, lam vs, let_ vs, typ, var vs, par vs]
-  t <- app vs t <|> arr vs t <|> return t
+  t <- app vs t <|> return t
+  t <- arr vs t <|> return t
   ann vs t <|> return t
 
 parseTerm :: String -> Maybe TermP
@@ -259,6 +272,11 @@ mod :: Parser ModuleP
 mod = ModuleP . M.fromList <$> fmap (\d -> (_nameP d, d)) <$> defs
   where
    defs = (space >> many (def <* space))
+
+testMod :: IO (Maybe (String, ModuleP))
+testMod = do
+  a <- readFile "test.fm"
+  return $ runParser mod a
 
 testString1 = intercalate "\n"
   [ "identity : (A : Type) -> (a : A) -> A"

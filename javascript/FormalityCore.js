@@ -115,14 +115,21 @@ function drop_spaces(code, indx) {
 // Drops comment
 function drop_comment(code, indx) {
   var indx = drop_spaces(code, indx);
-  if (code.slice(indx, indx + 2) === "//") {
+  var pref = code.slice(indx, indx + 2)
+  if (pref === "//" || pref === "--") {
     while (indx < code.length && code[indx] !== "\n") {
       ++indx;
     }
     indx += 1;
   }
-  if (code.slice(indx, indx + 2) === "/*") {
+  if (pref === "/*") {
     while (indx < code.length && code.slice(indx, indx+2) !== "*/") {
+      ++indx;
+    }
+    indx += 2;
+  }
+  if (code.slice(indx, indx + 2) === "{-") {
+    while (indx < code.length && code.slice(indx, indx+2) !== "-}") {
       ++indx;
     }
     indx += 2;
@@ -182,15 +189,6 @@ function parse_par(code, indx, vars) {
   var [indx, skip] = parse_str(code, next(code, indx), "(");
   var [indx, term] = parse_trm(code, indx, vars);
   var [indx, skip] = parse_str(code, next(code, indx), ")");
-  return [indx, term];
-};
-
-// Parses an inline comment, `-<name>- <term>`
-function parse_com(code, indx, vars) {
-  var [indx, skip] = parse_str(code, next(code, indx), "-");
-  var [indx, name] = parse_nam(code, indx);
-  var [indx, skip] = parse_str(code, next(code, indx), "-");
-  var [indx, term] = parse_trm(code, next(code, indx), vars);
   return [indx, term];
 };
 
@@ -293,7 +291,6 @@ function parse_trm(code, indx = 0, vars = Nil()) {
     () => parse_lam(code, indx, vars),
     () => parse_let(code, indx, vars),
     () => parse_par(code, indx, vars),
-    () => parse_com(code, indx, vars),
     () => parse_typ(code, indx, vars),
     () => parse_var(code, indx, vars),
   ]);
