@@ -287,6 +287,18 @@ some: <A: Type> -> A -> Maybe(A)
   <> (value)
   <> () (some) some(value)
 
+from_maybe: <A: Type> -> A -> Maybe(A) -> A
+  <A> (a) (m)
+  m<() A>
+  | a;
+  | (m.val) m.val;
+
+maybe_bind: <A: Type> -> <B: Type> -> Maybe(A) -> (A -> Maybe(B)) -> Maybe(B)
+  <A> <B> (m) (f)
+  m<() Maybe(B)>
+  | none<B>;
+  | (m.val) f(m.val);
+
 // List
 // ====
 
@@ -421,6 +433,25 @@ b0: (bs: Bits) -> Bits
 b1: (bs: Bits) -> Bits
   (bs) <P> (be) (b0) (b1) b1(bs)
 
+equal_bits: Bits -> Bits -> Bool
+  (bs1)
+  bs1<() Bits -> Bool>
+  | (bs2) bs2<() Bool>
+    | true;
+    | () false;
+    | () false;
+  ;
+  | (bs1.pred) (bs2) bs2<() Bool>
+    | false;
+    | (bs2.pred) equal_bits(bs1.pred)(bs2.pred);
+    | () false;
+  ;
+  | (bs1.pred) (bs2) bs2<() Bool>
+    | false;
+    | () false;
+    | (bs2.pred) equal_bits(bs1.pred)(bs2.pred);
+  ;
+
 next_bits: (:Bits) -> Bits
   (x)
   x<() Bits>
@@ -489,61 +520,65 @@ insert: <A: Type> -> (:Bits) -> (:A) -> (:Map(A)) -> Map(A)
 
 // Union-Find
 // ==========
-UElem: (A: Type) -> Type
-  (A)
-  self<P: (x: UElem(A)) -> Type> ->
-  (uelem: (rank: Nat) -> (val: A) -> P(uelem<A>(rank)(val))) ->
-  (ulink: (path: Bits) -> P(ulink<A>(path))) ->
+UElem: Type
+  self<P: (x: UElem) -> Type> ->
+  (uelem: (rank: Nat) -> P(uelem(rank))) ->
+  (ulink: (path: Bits) -> P(ulink(path))) ->
   P(self)
 
-uelem: <A: Type> -> (:Nat) -> (:A) -> UElem(A)
-  <A> (rank) (val)
-  <> (uelem) () uelem(rank)(val)
+uelem: Nat -> UElem
+  (rank)
+  <> (uelem) () uelem(rank)
 
-ulink: <A: Type> -> (:Bits) -> UElem(A)
-  <A> (path)
+ulink: Bits -> UElem
+  (path)
   <> () (ulink) ulink(path)
 
-UPoints: (A: Type) -> Type
-  (A)
-  self<P: (x: UPoints(A)) -> Type> ->
-  (upoints: (last: Bits) -> (map: Map(UElem(A))) -> P(upoints<A>(last)(map))) ->
+UPoints: Type
+  self<P: (x: UPoints) -> Type> ->
+  (upoints: (last: Bits) -> (map: Map(UElem)) -> P(upoints(last)(map))) ->
   P(self)
 
-upoints: <A: Type> -> (:Bits) -> (:Map(UElem(A))) -> UPoints(A)
-  <A> (last) (map)
+upoints: Bits -> Map(UElem) -> UPoints
+  (last) (map)
   <> (upoints) upoints(last)(map)
 
-new_points: <A: Type> -> UPoints(A)
-  <A> upoints<A>(be)(empty<UElem(A)>)
+new_points: UPoints
+  upoints(be)(empty<UElem>)
 
-fresh: <A: Type> -> (:UPoints(A)) -> (:A) -> Pair(UPoints(A))(Bits)
-  <A> (uf) (a)
-  uf<() Pair(UPoints(A))(Bits)>
+fresh: UPoints -> Pair(UPoints)(Bits)
+  (uf)
+  uf<() Pair(UPoints)(Bits)>
   | (uf.last) (uf.map)
-    let new_map = insert<UElem(A)>(uf.last)(uelem<A>(zero)(a))(uf.map)
-    let new_uf = upoints<A>(next_bits(uf.last))(new_map)
-    pair<UPoints(A)><Bits>(new_uf)(uf.last);
+    let new_map = insert<UElem>(uf.last)(uelem(zero))(uf.map)
+    let new_uf = upoints(next_bits(uf.last))(new_map)
+    pair<UPoints><Bits>(new_uf)(uf.last);
 
-ufind_aux: <A: Type> -> <B: Type> ->
-          (:Map(UElem(A))) -> (:Bits) ->
-          (:(:Bits) -> (:Nat) -> (:A) -> B) -> Maybe(B)
-  <A> <B> (map) (path) (k)
-  let found = lookup<UElem(A)>(path)(map)
+ufind_aux: <B: Type> ->
+           Map(UElem) -> Bits->
+           (Bits -> Nat -> B) -> Maybe(B)
+  <B> (map) (path) (k)
+  let found = lookup<UElem>(path)(map)
   found<() Maybe(B)>
   | none<B>;
   | (found.val)
     let elem = found.val
     elem<() Maybe(B)>
-    | (elem.rank) (elem.val) some<B>(k(path)(elem.rank)(elem.val));
-    | (elem.path) ufind_aux<A><B>(map)(elem.path)(k);;
+    | (elem.rank) some<B>(k(path)(elem.rank));
+    | (elem.path) ufind_aux<B>(map)(elem.path)(k);;
 
-ufind: <A: Type> -> <B: Type> ->
-       (:UPoints(A)) -> (:Bits) ->
-       (:(:Bits) -> (:Nat) -> (:A) -> B) -> Maybe(B)
-  <A> <B> (uf) (path) (k)
+ufind: <B: Type> ->
+       UPoints -> Bits ->
+       (Bits -> Nat -> B) -> Maybe(B)
+  <B> (uf) (path) (k)
   uf<() Maybe(B)>
-  | () (uf.map) ufind_aux<A><B>(uf.map)(path)(k);
+  | () (uf.map) ufind_aux<B>(uf.map)(path)(k);
+
+ufind_default: <B: Type> -> B ->
+       UPoints -> Bits ->
+       (Bits -> Nat -> B) -> B
+  <B> (b) (uf) (path) (k)
+  from_maybe<B>(b)(ufind<B>(uf)(path)(k))
 
 // Word
 // ====
