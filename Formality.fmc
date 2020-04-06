@@ -374,6 +374,20 @@ zip_with: <A: Type> -> <B: Type> -> <C: Type> -> (A -> B -> C) -> List(A) -> Lis
       let tail = zip_with<A><B><C>(fn)(a.tail)(b.tail)
       cons<C>(head)(tail);;
 
+map: <A: Type> -> <B: Type> -> (A -> B) -> List(A) -> List(B)
+  <A> <B> (fn) (list)
+  list<() List(B)>
+  | nil<B>;
+  | (list.head) (list.tail)
+    cons<B>(fn(list.head))(map<A><B>(fn)(list.tail));
+
+fold: <A: Type> -> <B: Type> -> B -> (A -> B -> B) -> List(A) -> B
+  <A> <B> (nil) (cons) (list)
+  list<() B>
+  | nil;
+  | (list.head) (list.tail)
+    cons(list.head)(fold<A><B>(nil)(cons)(list.tail));
+
 all_satisfy: <A: Type> -> (A -> Bool) -> List(A) -> Bool
   <A> (cond) (list)
   list<() Bool>
@@ -452,6 +466,13 @@ b0: (bs: Bits) -> Bits
 
 b1: (bs: Bits) -> Bits
   (bs) <P> (be) (b0) (b1) b1(bs)
+
+bits_concat: Bits -> Bits -> Bits
+  (a) (b)
+  a<() Bits>
+  | b;
+  | (a.pred) b0(bits_concat(a.pred)(b));
+  | (a.pred) b1(bits_concat(a.pred)(b));
 
 // Word
 // ====
@@ -564,6 +585,13 @@ word_gtn: <size:Nat> -> Word(size) -> Word(size) -> Bool
   <size> (a) (b)
   word_cmp<size>(a)(b)<() Bool>(false)(false)(true)
 
+word_to_bits: <size: Nat> -> Word(size) -> Bits
+  <size> (a)
+  a<() () Bits>
+  | be;
+  | <size> (pred) b0(word_to_bits<size>(pred));
+  | <size> (pred) b1(word_to_bits<size>(pred));
+
 // Uint32
 // ======
 
@@ -639,6 +667,9 @@ string_eql: String -> String -> Bool
   let eql_val = all_satisfy<Bool>((x) x)(zip_with<Char><Char><Bool>(u32_eql)(a)(b))
   and(eql_len)(eql_val)
 
+string_to_bits: String -> Bits
+  fold<Char><Bits>(be)((chr) (res) bits_concat(word_to_bits<n32>(chr))(res))
+
 // Map
 // ===
 
@@ -699,6 +730,12 @@ lookup: <A: Type> -> Bits -> Map(A) -> Maybe(A)
     | none<A>;
     | (map.val) (map.lft) (map.rgt)
       lookup<A>(bits.pred)(map.rgt);;
+
+map_maybe: <A: Type> -> <B: Type> -> (A -> B) -> Maybe(A) -> Maybe(B)
+  <A> <B> (fn) (maybe)
+  maybe<() Maybe(B)>
+  | none<B>;
+  | (value) some<B>(fn(value));
 
 // Term
 // ====
@@ -789,10 +826,28 @@ ann: Bool -> Term -> Term -> Term
   <> () () () () () () () (ann)
   ann(u32_0)(done)(expr)(type)
 
+// Definitions
+// ===========
+
+File: Type
+  Map(Pair(Type)(Term))
+
+get_def: File -> String -> Maybe(Pair(Type)(Term))
+  (file) (name)
+  lookup<Pair(Type)(Term)>(string_to_bits(name))(file)
+
+get_type: File -> String -> Maybe(Type)
+  (file) (name)
+  map_maybe<Pair(Type)(Term)><Type>(fst<Type><Term>)(get_def(file)(name))
+
+get_term: File -> String -> Maybe(Term)
+  (file) (name)
+  map_maybe<Pair(Type)(Term)><Term>(snd<Type><Term>)(get_def(file)(name))
+
 // Parsing
 // =======
 
-Parsed : (A: Type) -> Type
+Parsed: (A: Type) -> Type
   (A) Maybe(Pair(String)(A))
 
 parsed: <A: Type> -> String -> A -> Parsed(A)
@@ -925,6 +980,7 @@ sp : String -> String
 
 ERR : String
   cons<Char>(_hash)(cons<Char>(_E)(cons<Char>(_R)(single<Char>(_R))))
+
 stringify_trm_go : List(String) -> Term -> String
   (vars) (term)
   let go = stringify_trm_go
