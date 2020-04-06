@@ -978,7 +978,6 @@ function typeinfer(term, file, ctx = Nil(), nam = Nil()) {
           var term_typ = func_typ.body;
           var term_typ = subst(term_typ, shift(term.func, 1, 0), 1);
           var term_typ = subst(term_typ, shift(term.argm, 0, 0), 0);
-          var term_typ = reduce(term_typ, file);
           if (func_typ.ctor === "All" && term.eras !== func_typ.eras) {
             throw Err(term.locs, ctx, nam, "Mismatched erasure.");
           };
