@@ -829,20 +829,23 @@ ann: Bool -> Term -> Term -> Term
 // Definitions
 // ===========
 
+Def: Type
+  Pair(Term)(Term)
+
 File: Type
-  Map(Pair(Type)(Term))
+  Map(Def)
 
-get_def: File -> String -> Maybe(Pair(Type)(Term))
+get_def: File -> String -> Maybe(Def)
   (file) (name)
-  lookup<Pair(Type)(Term)>(string_to_bits(name))(file)
+  lookup<Def>(string_to_bits(name))(file)
 
-get_type: File -> String -> Maybe(Type)
+get_type: File -> String -> Maybe(Term)
   (file) (name)
-  map_maybe<Pair(Type)(Term)><Type>(fst<Type><Term>)(get_def(file)(name))
+  map_maybe<Def><Term>(fst<Term><Term>)(get_def(file)(name))
 
 get_term: File -> String -> Maybe(Term)
   (file) (name)
-  map_maybe<Pair(Type)(Term)><Term>(snd<Type><Term>)(get_def(file)(name))
+  map_maybe<Def><Term>(snd<Term><Term>)(get_def(file)(name))
 
 // Parsing
 // =======
@@ -981,9 +984,9 @@ sp : String -> String
 ERR : String
   cons<Char>(_hash)(cons<Char>(_E)(cons<Char>(_R)(single<Char>(_R))))
 
-stringify_trm_go : List(String) -> Term -> String
+stringify_term_go : List(String) -> Term -> String
   (vars) (term)
-  let go = stringify_trm_go
+  let go = stringify_term_go
   let cons    = cons<String>
   let flatten = flatten<Char>
   let space   = single<Char>(_space)
@@ -1022,8 +1025,8 @@ stringify_trm_go : List(String) -> Term -> String
   |{-ann-} () () (x) (t)
     flatten(cons(go(vars)(x))(cons(sp(COLS))(single(go(vars)(t)))));
 
-stringify_trm : Term -> String
-  (t) stringify_trm_go(nil<String>)(t)
+stringify_term : Term -> String
+  (t) stringify_term_go(nil<String>)(t)
 
 // Parsing
 // =======
@@ -1031,7 +1034,7 @@ stringify_trm : Term -> String
 parse_par: String -> List(String) -> Parsed(Term)
   (code) (vars)
   parsing<String><Term>(parse_str(next(code))(LPAR)) | (code) (skip)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (term)
+  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (term)
   parsing<String><Term>(parse_str(next(code))(RPAR)) | (code) (skip)
   parsed<Term>(code)(term);;;
 
@@ -1040,7 +1043,7 @@ parse_com: String -> List(String) -> Parsed(Term)
   parsing<String><Term>(parse_str(next(code))(DASH))  | (code) (skip)
   parsing<String><Term>(parse_nam(     code )(false)) | (code) (name)
   parsing<String><Term>(parse_str(next(code))(DASH))  | (code) (skip)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars))  | (code) (term)
+  parsing<Term  ><Term>(parse_term(next(code))(vars))  | (code) (term)
   parsed<Term>(code)(term);;;;
 
 parse_all: String -> List(String) -> Parsed(Term)
@@ -1050,11 +1053,11 @@ parse_all: String -> List(String) -> Parsed(Term)
   parsing<String><Term>(parse_nam(next(code))(true)) | (code) (name)
   parsing<String><Term>(parse_str(next(code))(COLO)) | (code) (skip)
   let vars = cons<String>(self)(vars)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (bind)
+  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (bind)
   parsing<Bool  ><Term>(parse_opt(next(code))(CLOS)) | (code) (skip)
   parsing<String><Term>(parse_str(next(code))(ARR0)) | (code) (skip)
   let vars = cons<String>(name)(vars)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
+  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (body)
   parsed<Term>(code)(all(eras)(self)(name)(bind)(body));;;;;;;;
 
 parse_lam: String -> List(String) -> Parsed(Term)
@@ -1063,7 +1066,7 @@ parse_lam: String -> List(String) -> Parsed(Term)
   parsing<String><Term>(parse_nam(next(code))(true)) | (code) (name)
   parsing<Bool  ><Term>(parse_opt(next(code))(CLOS)) | (code) (skip)
   let vars = cons<String>(name)(vars)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
+  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (body)
   parsed<Term>(code)(lam(eras)(name)(body));;;;
 
 parse_let: String -> List(String) -> Parsed(Term)
@@ -1071,9 +1074,9 @@ parse_let: String -> List(String) -> Parsed(Term)
   parsing<String><Term>(parse_str(next(code))(LETS))  | (code) (skip)
   parsing<String><Term>(parse_nam(next(code))(false)) | (code) (name)
   parsing<String><Term>(parse_str(next(code))(EQLS))  | (code) (skip)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars))  | (code) (expr)
+  parsing<Term  ><Term>(parse_term(next(code))(vars))  | (code) (expr)
   let vars = cons<String>(name)(vars)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars))  | (code) (body)
+  parsing<Term  ><Term>(parse_term(next(code))(vars))  | (code) (body)
   parsed<Term>(code)(lit(name)(expr)(body));;;;;
 
 parse_typ: String -> List(String) -> Parsed(Term)
@@ -1091,14 +1094,14 @@ parse_var: String -> List(String) -> Parsed(Term)
 parse_app: String -> Term -> List(String) -> Parsed(Term)
   (code) (func) (vars)
   parsing<Bool><Term>(parse_opt(next(code))(OPEN)) | (code) (eras)
-  parsing<Term><Term>(parse_trm(next(code))(vars)) | (code) (argm)
+  parsing<Term><Term>(parse_term(next(code))(vars)) | (code) (argm)
   parsing<Bool><Term>(parse_opt(next(code))(CLOS)) | (code) (skip)
   parsed<Term>(code)(app(eras)(func)(argm));;;
 
 parse_pip: String -> Term -> List(String) -> Parsed(Term)
   (code) (func) (vars)
   parsing<String><Term>(parse_str(next(code))(PIPE)) | (code) (skip)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (argm)
+  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (argm)
   parsing<String><Term>(parse_str(next(code))(SEMI)) | (code) (skip)
   parsed<Term>(code)(app(false)(func)(argm));;;
 
@@ -1106,14 +1109,14 @@ parse_arr: String -> Term -> List(String) -> Parsed(Term)
   (code) (bind) (vars)
   parsing<String><Term>(parse_str(next(code))(ARR0)) | (code) (skip)
   let vars = cons<String>(nil<Char>)(cons<String>(nil<Char>)(vars))
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
+  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (body)
   let term = all(false)(nil<Char>)(nil<Char>)(shift(bind)(n1)(n0))(body)
   parsed<Term>(code)(term);;
 
 parse_ann: String -> Term -> List(String) -> Parsed(Term)
   (code) (expr) (vars)
   parsing<String><Term>(parse_str(next(code))(COLS)) | (code) (skip)
-  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (type)
+  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (type)
   parsed<Term>(code)(ann(false)(expr)(type));;
 
 parse_pst: String -> Term -> List(String) -> Parsed(Term)
@@ -1130,7 +1133,7 @@ parse_pst: String -> Term -> List(String) -> Parsed(Term)
     value<() Parsed(Term)>
     | (code) (term) parse_pst(code)(term)(vars);;
 
-parse_trm: String -> List(String) -> Parsed(Term)
+parse_term: String -> List(String) -> Parsed(Term)
   (code) (vars)
   let base_parse = first_valid<Pair(String)(Term)>(
     cons<Parsed(Term)>(parse_all(code)(vars))(
@@ -1143,6 +1146,24 @@ parse_trm: String -> List(String) -> Parsed(Term)
     nil<Parsed(Term)>))))))))
   parsing<Term><Term>(base_parse)((code) (term)
     parse_pst(code)(term)(vars))
+
+parse_file_aux: String -> File -> Parsed(File)
+  (code) (file)
+  let vars = nil<String>
+  let next = 
+    parsing<String><File>(parse_nam( next(code))(false)) | (code) (name)
+    parsing<String><File>(parse_str( next(code))(COLO))  | (code) (name)
+    parsing<Term  ><File>(parse_term(next(code))(vars))  | (code) (type)
+    parsing<Term  ><File>(parse_term(next(code))(vars))  | (code) (term)
+    let defn = pair<Term><Term>(type)(term)
+    let file = insert<Def>(string_to_bits(name))(defn)(file)
+    parsed<File>(code)(file);;;;
+  next<() Parsed(File)>
+  | parsed<File>(code)(file);
+  | (p) p<() Parsed(File)> | (code) (file) parse_file_aux(code)(file);;
+
+parse_file: String -> Parsed(File)
+  (code) parse_file_aux(code)(empty<Def>)
 
 // Substitution
 // ============
@@ -1959,9 +1980,9 @@ example_0: Word(n4)
 
 example_1: String -> String
   (code)
-  parse_trm(code)(nil<String>)<() String>
+  parse_term(code)(nil<String>)<() String>
   | nil<Char>;
-  | (parsed) parsed<() String>((code) (term) stringify_trm(term));
+  | (parsed) parsed<() String>((code) (term) stringify_term(term));
 
 example_2: Equal(Nat)(mul(n8)(n4))(n32)
   equal<Nat><n32>
