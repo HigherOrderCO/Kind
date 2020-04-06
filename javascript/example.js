@@ -90,19 +90,19 @@ process.argv.forEach((val,index) => {
 });
 
 // Parses file
-var file = fmc.parse_mod(code, 0);
+var file = fmc.parse_file(code, 0);
 
 // Normalizes and type-checks all terms
 for (var name in file) {
   console.log("name:", name);
-  console.log("term:", fmc.stringify_trm(file[name].term));
+  console.log("term:", fmc.stringify_term(file[name].term));
   try {
-    console.log("norm:", fmc.stringify_trm(fmc.normalize(file[name].term, file)));
+    console.log("norm:", fmc.stringify_term(fmc.normalize(file[name].term, file)));
   } catch (e) {
-    console.log("norm:", fmc.stringify_trm(fmc.reduce(file[name].term, file)));
+    console.log("norm:", fmc.stringify_term(fmc.reduce(file[name].term, file)));
   }
   try {
-    console.log("type:", fmc.stringify_trm(fmc.typecheck(file[name].term, file[name].type, file)));
+    console.log("type:", fmc.stringify_term(fmc.typecheck(file[name].term, file[name].type, file)));
   } catch (e) {
     console.log("type:", e);
   }

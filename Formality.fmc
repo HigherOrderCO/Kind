@@ -1969,9 +1969,5 @@ example_2: Equal(Nat)(mul(n8)(n4))(n32)
 main: (x : Bool) -> Bool
   (x) not(not(true))
 
-// foo : String
-//   let ss = ((s) s) :: String -> String
-//   ss(SPAC)
-
 foo : <A : Type> -> (f : (a : A) -> A) -> (x : A) -> A
   <> (f) (x) f(x)

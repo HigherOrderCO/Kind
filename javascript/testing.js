@@ -3,13 +3,13 @@ var fs = require("fs");
 var code = fs.readFileSync("./../Formality.fmc", "utf8");
 
 // Parses file
-//var file = fmc.parse_mod(code, 0);
+//var file = fmc.parse_file(code, 0);
 
 //// Normalizes and type-checks all terms
 //for (var name in file) {
   //console.log("name:", name);
   //try {
-    //console.log("type:", fmc.stringify_trm(fmc.typecheck(file[name].term, file[name].type, file)));
+    //console.log("type:", fmc.stringify_term(fmc.typecheck(file[name].term, file[name].type, file)));
   //} catch (e) {
     //console.log("type:", e);
   //}
@@ -116,7 +116,7 @@ function file_to_js(file) {
   return code;
 };
 
-var file = fmc.parse_mod(code);
+var file = fmc.parse_file(code);
 var jscode = file_to_js(file);
 var func = eval(jscode)("example_1");
 var argm = string_to_lambda("(A : Type) -> (y : A) -> A");

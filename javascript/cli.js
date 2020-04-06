@@ -21,7 +21,7 @@ var errors = [];
 
 // Normalizes and type-checks all terms
 console.log("\033[4m\x1b[1mType-checking " + file + ":\x1b[0m");
-var module = fmc.parse_mod(code, 0);
+var module = fmc.parse_file(code, 0);
 var max_len = 0;
 for (var name in module) {
   max_len = Math.max(name.length, max_len);
@@ -32,7 +32,7 @@ for (var name in module) {
     show_name = show_name + " ";
   }
   try {
-    console.log(show_name + " : " + fmc.stringify_trm(fmc.typecheck(module[name].term, module[name].type, module)));
+    console.log(show_name + " : " + fmc.stringify_term(fmc.typecheck(module[name].term, module[name].type, module)));
   } catch (err) {
     console.log(show_name + " : " + "\x1b[31merror\x1b[0m");
     errors.push([name, err]);
@@ -54,7 +54,7 @@ if (errors.length > 0) {
 console.log("");
 console.log("\033[4m\x1b[1mEvaluating `main`:\x1b[0m");
 try {
-  console.log(fmc.stringify_trm(fmc.normalize(module.main.term, module)));
+  console.log(fmc.stringify_term(fmc.normalize(module.main.term, module)));
 } catch (e) {
   console.log("Error.");
 }
