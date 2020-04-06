@@ -1273,45 +1273,36 @@ HTerm: Type
     (func: HTerm) ->
     (argm: HTerm) ->
     P(happ(func)(argm))) ->
-  (hlit:
-    (expr: HTerm) ->
-    (body: HTerm -> HTerm) ->
-    P(hlit(expr)(body))) ->
   P(self)
 
 hvar: Nat -> Bool -> HTerm
   (indx) (posi)
-  <> (hvar) () () () () () ()
+  <> (hvar) () () () () ()
   hvar(indx)(posi)
 
 href: String -> HTerm
   (name)
-  <> () (href) () () () () ()
+  <> () (href) () () () ()
   href(name)
 
 htyp: HTerm
-  <> () () (htyp) () () () ()
+  <> () () (htyp) () () ()
   htyp
 
 hall: Bool -> (HTerm -> HTerm) -> (HTerm -> HTerm -> HTerm) -> HTerm
   (eras) (bind) (body)
-  <> () () () (hall) () () ()
+  <> () () () (hall) () ()
   hall(eras)(bind)(body)
 
 hlam: (HTerm -> HTerm) -> HTerm
   (body)
-  <> () () () () (hlam) () ()
+  <> () () () () (hlam) ()
   hlam(body)
 
 happ: HTerm -> HTerm -> HTerm
   (func) (argm)
-  <> () () () () () (happ) ()
+  <> () () () () () (happ)
   happ(func)(argm)
-
-hlit: HTerm -> (HTerm -> HTerm) -> HTerm
-  (expr) (body)
-  <> () () () () () () (hlit)
-  hlit(expr)(body)
 
 to_high_order: Term -> List(HTerm) -> Nat -> HTerm
   (term) (vars) (depth)
@@ -1344,7 +1335,7 @@ to_high_order: Term -> List(HTerm) -> Nat -> HTerm
   | (hash) (name) (expr) (body)
     let expr = to_high_order(expr)(vars)(depth)
     let body = (x) to_high_order(body)(cons<HTerm>(x)(vars))(succ(depth))
-    hlit(expr)(body);
+    (body :: HTerm -> HTerm)(expr);
   | (hash) (done) (expr) (type)
     to_high_order(expr)(vars)(depth);
 
@@ -1375,11 +1366,59 @@ to_low_order: HTerm -> Nat -> Term
     let func = to_low_order(func)(depth)
     let argm = to_low_order(argm)(depth)
     app(eras)(func)(argm);
-  | (expr) (body)
-    let name = nil<Char> // TODO
-    let expr = to_low_order(expr)(depth)
-    let body = to_low_order(body(hvar(depth)(true)))(succ(depth))
-    lit(name)(expr)(body);
+
+reduce_high_order: HTerm -> File -> HTerm
+  (term) (file)
+  term<() HTerm>
+  | (term.indx) (term.posi)
+    hvar(term.indx)(term.posi);
+  | (term.name)
+    get_term(file)(term.name)<() HTerm>
+    | href(term.name);
+    | (ref_term)
+      let ref_term = to_high_order(ref_term)(nil<HTerm>)(zero)
+      reduce_high_order(ref_term)(file);;
+  | htyp;
+  | (term.eras) (term.bind) (term.body)
+    hall(term.eras)(term.bind)(term.body);
+  | (term.body)
+    hlam(term.body);
+  | (term.func) (term.argm)
+    let func = reduce_high_order(term.func)(file)
+    func<() HTerm>
+    | (func.indx) (func.posi)
+      happ(func)(hvar(func.indx)(func.posi));
+    | (func.name)
+      happ(func)(href(func.name));
+    | htyp;
+    | (func.eras) (func.bind) (func.body)
+      happ(func)(hall(func.eras)(func.bind)(func.body));
+    | (func.body)
+      reduce_high_order(func.body(term.argm))(file);
+    | (func.func) (func.argm)
+      happ(func)(happ(func.func)(func.argm));;
+
+normalize_high_order: HTerm -> File -> HTerm
+  (term) (file)
+  let norm = reduce_high_order(term)(file)
+  norm<() HTerm>
+  | (norm.indx) (norm.posi)
+    hvar(norm.indx)(norm.posi);
+  | (norm.name)
+    href(norm.name);
+  | htyp;
+  | (norm.eras) (norm.bind) (norm.body)
+    let eras = norm.eras
+    let bind = (s) normalize_high_order(norm.bind(s))(file)
+    let body = (s) (x) normalize_high_order(norm.body(s)(x))(file)
+    hall(eras)(bind)(body);
+  | (norm.body)
+    let body = (x) normalize_high_order(norm.body(x))(file)
+    hlam(body);
+  | (norm.func) (norm.argm)
+    let func = normalize_high_order(norm.func)(file)
+    let argm = normalize_high_order(norm.argm)(file)
+    happ(func)(argm);
 
 // Constants
 // =========
