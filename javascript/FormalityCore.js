@@ -940,7 +940,9 @@ function stringify_err(err, code) {
     str += "With context:\n";
     str += "\x1b[2m"+stringify_ctx(err.ctx, err.nam)+"\x1b[0m";
   };
-  str += highlight_code(code, err.loc.from, err.loc.to);
+  if (err.loc) {
+    str += highlight_code(code, err.loc.from, err.loc.to);
+  };
   return str;
 };
 
