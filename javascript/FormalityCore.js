@@ -250,7 +250,6 @@ function parse_var(code, indx, vars) {
 
 // Parses a single-line application, `<term>(<term>)`
 function parse_app(code, indx, from, func, vars) {
-  var from = indx;
   var [indx, eras] = parse_opt(code, indx, "(", "<");
   var [indx, argm] = parse_term(code, indx, vars);
   var [indx, skip] = parse_str(code, next(code, indx), eras ? ">" : ")");
@@ -259,7 +258,6 @@ function parse_app(code, indx, from, func, vars) {
 
 // Parses a multi-line application, `<term> | <term>;`
 function parse_pip(code, indx, from, func, vars) {
-  var from = indx;
   var [indx, skip] = parse_str(code, next(code, indx), "|");
   var [indx, argm] = parse_term(code, indx, vars);
   var [indx, skip] = parse_str(code, next(code, indx), ";");
@@ -268,7 +266,6 @@ function parse_pip(code, indx, from, func, vars) {
 
 // Parses a non-dependent function type, `<term> -> <term>`
 function parse_arr(code, indx, from, bind, vars) {
-  var from = indx;
   var [indx, skip] = parse_str(code, next(code, indx), "->");
   var [indx, body] = parse_term(code, indx, Ext("", Ext("", vars)));
   return [indx, All(false, "", "", shift(bind,1,0), body, {from,to:indx})];
