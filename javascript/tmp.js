@@ -120,8 +120,23 @@ var file = fmc.parse_file(code);
 var jscode = file_to_js(file);
 var func = eval(jscode)("main");
 var argm = string_to_lambda(`
+  foo : Bar
+    foo(foo)
+
+  foo : Bar
+    foo(foo)
+
+  foo : Bar
+    foo(foo)
+
+  foo : Bar
+    foo(foo)
+
+  foo : Bar
+    foo(foo)
+
   main : NoType
-    ((f) (x) f(f(x)))((f) (x) f(f(x)))
+    ((f) (x) f(f(f(x))))((f) (x) f(f(f(x))))
 `);
 
 console.log(lambda_to_string(func(argm)));
