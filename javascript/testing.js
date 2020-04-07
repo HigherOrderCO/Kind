@@ -118,7 +118,10 @@ function file_to_js(file) {
 
 var file = fmc.parse_file(code);
 var jscode = file_to_js(file);
-var func = eval(jscode)("example_1");
-var argm = string_to_lambda("(A : Type) -> (y : A) -> A");
+var func = eval(jscode)("main");
+var argm = string_to_lambda(`
+  main : NoType
+    ((f) (x) f(f(x)))((f) (x) f(f(x)))
+`);
 
 console.log(lambda_to_string(func(argm)));

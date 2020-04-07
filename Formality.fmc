@@ -670,6 +670,12 @@ string_eql: String -> String -> Bool
 string_to_bits: String -> Bits
   fold<Char><Bits>(be)((chr) (res) bits_concat(word_to_bits<n32>(chr))(res))
 
+nat_to_string: Nat -> String
+  (n)
+  n<() String>
+  | cons<Char>(_z)(nil<Char>);
+  | (pred) cons<Char>(_s)(nat_to_string(pred));
+
 // Map
 // ===
 
@@ -1093,9 +1099,9 @@ parse_var: String -> List(String) -> Parsed(Term)
 
 parse_app: String -> Term -> List(String) -> Parsed(Term)
   (code) (func) (vars)
-  parsing<Bool><Term>(parse_opt(next(code))(OPEN)) | (code) (eras)
+  parsing<Bool><Term>(parse_opt(      code )(OPEN)) | (code) (eras)
   parsing<Term><Term>(parse_term(next(code))(vars)) | (code) (argm)
-  parsing<Bool><Term>(parse_opt(next(code))(CLOS)) | (code) (skip)
+  parsing<Bool><Term>(parse_opt( next(code))(CLOS)) | (code) (skip)
   parsed<Term>(code)(app(eras)(func)(argm));;;
 
 parse_pip: String -> Term -> List(String) -> Parsed(Term)
@@ -1152,11 +1158,12 @@ parse_file_aux: String -> File -> Parsed(File)
   let vars = nil<String>
   let next = 
     parsing<String><File>(parse_nam( next(code))(false)) | (code) (name)
-    parsing<String><File>(parse_str( next(code))(COLO))  | (code) (name)
+    parsing<String><File>(parse_str( next(code))(COLO))  | (code) (skip)
     parsing<Term  ><File>(parse_term(next(code))(vars))  | (code) (type)
     parsing<Term  ><File>(parse_term(next(code))(vars))  | (code) (term)
     let defn = pair<Term><Term>(type)(term)
     let file = insert<Def>(string_to_bits(name))(defn)(file)
+    //let file = insert<Def>(string_to_bits(name))(pair<Term><Term>(typ)(typ))(file)
     parsed<File>(code)(file);;;;
   next<() Parsed(File)>
   | parsed<File>(code)(file);
@@ -1351,14 +1358,14 @@ to_low_order: HTerm -> Nat -> Term
   | typ;
   | (eras) (bind) (body)
     let eras = eras
-    let self = nil<Char> // TODO
-    let name = nil<Char> // TODO
+    let self = nat_to_string(depth) // TODO
+    let name = nat_to_string(succ(depth)) // TODO
     let bind = to_low_order(bind(hvar(depth)(true)))(succ(depth))
     let body = to_low_order(body(hvar(depth)(true))(hvar(succ(depth))(true)))(succ(succ(depth)))
     all(eras)(self)(name)(bind)(body);
   | (body)
     let eras = false
-    let name = nil<Char> // TODO
+    let name = nat_to_string(depth) // TODO
     let body = to_low_order(body(hvar(depth)(true)))(succ(depth))
     lam(eras)(name)(body);
   | (func) (argm)
@@ -1387,16 +1394,16 @@ reduce_high_order: HTerm -> File -> HTerm
     let func = reduce_high_order(term.func)(file)
     func<() HTerm>
     | (func.indx) (func.posi)
-      happ(func)(hvar(func.indx)(func.posi));
+      happ(hvar(func.indx)(func.posi))(reduce_high_order(term.argm)(file));
     | (func.name)
-      happ(func)(href(func.name));
+      happ(href(func.name))(reduce_high_order(term.argm)(file));
     | htyp;
     | (func.eras) (func.bind) (func.body)
-      happ(func)(hall(func.eras)(func.bind)(func.body));
+      happ(hall(func.eras)(func.bind)(func.body))(reduce_high_order(term.argm)(file));
     | (func.body)
       reduce_high_order(func.body(term.argm))(file);
     | (func.func) (func.argm)
-      happ(func)(happ(func.func)(func.argm));;
+      happ(happ(func.func)(func.argm))(reduce_high_order(term.argm)(file));;
 
 normalize_high_order: HTerm -> File -> HTerm
   (term) (file)
@@ -1420,6 +1427,18 @@ normalize_high_order: HTerm -> File -> HTerm
     let argm = normalize_high_order(norm.argm)(file)
     happ(func)(argm);
 
+reduce: Term -> File -> Term
+  (term) (file)
+  let hterm = to_high_order(term)(nil<HTerm>)(zero)
+  let hterm = reduce_high_order(hterm)(file)
+  to_low_order(hterm)(zero)
+
+normalize: Term -> File -> Term
+  (term) (file)
+  let hterm = to_high_order(term)(nil<HTerm>)(zero)
+  let hterm = normalize_high_order(hterm)(file)
+  to_low_order(hterm)(zero)
+  
 // Constants
 // =========
 
@@ -1997,6 +2016,14 @@ TYPS: String
 LETS: String
   cons<Char>(_l)(cons<Char>(_e)(cons<Char>(_t)(single<Char>(_space))))
 
+// "main"
+MAIN: String
+  cons<Char>(_m) |
+  cons<Char>(_a) |
+  cons<Char>(_i) |
+  cons<Char>(_n) |
+  nil<Char>;;;;
+
 // " "
 SPAC: String
   single<Char>(_space)
@@ -2026,8 +2053,18 @@ example_1: String -> String
 example_2: Equal(Nat)(mul(n8)(n4))(n32)
   equal<Nat><n32>
 
-main: (x : Bool) -> Bool
-  (x) not(not(true))
+// Parses a Formality-Core source, evaluates and prints 'main'
+main: String -> String
+  (code)
+  parse_file(code)<() String>
+  | ERR;
+  | (parsed)
+    let file = snd<String><File>(parsed)
+    get_term(file)(MAIN)<() String>
+    | ERR;
+    //| (term) stringify_term(term);;
+    | (term) stringify_term(normalize(term)(file));;
+    //| (term) stringify_term(to_low_order(to_high_order(term)(nil<HTerm>)(zero))(zero));;
 
 foo : <A : Type> -> (f : (a : A) -> A) -> (x : A) -> A
   <> (f) (x) f(x)
