@@ -765,8 +765,8 @@ function bind_free_vars(term, initial_depth) {
       var eras = term.eras;
       var self = term.self;
       var name = term.name;
-      var bind = go(term.bind, depth);
-      var body = go(term.body, depth+1);
+      var bind = go(term.bind, depth+1);
+      var body = go(term.body, depth+2);
       var locs = term.locs;
       return All(eras, self, name, bind, body, locs);
     case "Lam":
@@ -839,7 +839,7 @@ function congruent_terms(map, a, b) {
 
 function equal(a, b, file, dep = 0) {
   var map = {};
-  var vis = [[a, b, dep]];
+  var vis = [[bind_free_vars(a, dep), bind_free_vars(b, dep), dep]];
   var idx = 0;
   while (idx < vis.length) {
     let [a0, b0, depth] = vis[idx];
@@ -1031,7 +1031,7 @@ function typecheck(term, type, file, ctx = Nil(), nam = Nil(), code) {
       break;
     default:
       var infr = typeinfer(term, file, ctx, nam);
-      if (!equal(type, infr, file)) {
+      if (!equal(type, infr, file, ctx.length)) {
         var type_str = stringify_term(normalize(type, {}), nam);
         var infr_str = stringify_term(normalize(infr, {}), nam);
         throw Err(term.locs, ctx, nam,
