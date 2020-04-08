@@ -512,126 +512,6 @@ next_bits: (:Bits) -> Bits
   | (x.pred) b1(x.pred);
   | (x.pred) b0(next_bits(x.pred));
 
-// Map
-// ===
-
-Map: (A: Type) -> Type
-  (A)
-  self<P: (x: Map(A)) -> Type> ->
-  (empty: P(empty<A>)) ->
-  (multi: (val: Maybe(A)) -> (lft: Map(A)) -> (rgt: Map(A)) -> P(multi<A>(val)(lft)(rgt))) ->
-  P(self)
-
-empty: <A: Type> -> Map(A)
-  <A>
-  <> (empty) () empty
-
-multi: <A: Type> -> (:Maybe(A)) -> (:Map(A)) -> (:Map(A)) -> Map(A)
-  <A> (val) (lft) (rgt)
-  <> () (multi) multi(val)(lft)(rgt)
-
-singleton_map: <A: Type> -> (:A) -> Map(A)
-  <A> (x)
-  multi<A>(some<A>(x))(empty<A>)(empty<A>)
-
-lookup: <A: Type> -> (:Bits) -> (:Map(A)) -> Maybe(A)
-  <A> (bits) (map)
-  let lookup_type = <A: Type> -> (:Bits) -> (:Map(A)) -> Maybe(A)
-  bits<() (:Map(A)) -> (:lookup_type) -> Maybe(A)>
-  | (map) () map<() Maybe(A)>
-    | none<A>;
-    | (map.val) () () map.val;
-  ;
-  | (bits.pred) (map) (lookup) map<() Maybe(A)>
-    | none<A>;
-    | () (map.lft) () lookup<A>(bits.pred)(map.lft);
-  ;
-  | (bits.pred) (map) (lookup) map<() Maybe(A)>
-    | none<A>;
-    | () () (map.rgt) lookup<A>(bits.pred)(map.rgt);
-  ;(map)(lookup)
-
-insert: <A: Type> -> (:Bits) -> (:A) -> (:Map(A)) -> Map(A)
-  <A> (bits) (val) (map)
-  let insert_type = <A: Type> -> (:Bits) -> (:A) -> (:Map(A)) -> Map(A)
-  bits<() (:A) -> (:Map(A)) -> (:insert_type) -> Map(A)>
-  | () (map) () map<() (:Maybe(A)) -> Map(A)>
-    | (val) multi<A>(val)(empty<A>)(empty<A>);
-    | () (map.lft) (map.rgt) (val) multi<A>(val)(map.lft)(map.rgt)
-    ;(some<A>(val))
-  ;
-  | (bits.pred) (val) (map) (insert) map<() (:(:Map(A)) -> Map(A)) -> Map(A)>
-    | (insert) multi<A>(none<A>)(insert(empty<A>))(empty<A>);
-    | (map.val) (map.lft) (map.rgt) (insert) multi<A>(map.val)(insert(map.lft))(map.rgt)
-    ;(insert<A>(bits.pred)(val))
-  ;
-  | (bits.pred) (val) (map) (insert) map<() (:(:Map(A)) -> Map(A)) -> Map(A)>
-    | (insert) multi<A>(none<A>)(empty<A>)(insert(empty<A>));
-    | (map.val) (map.lft) (map.rgt) (insert) multi<A>(map.val)(map.lft)(insert(map.rgt))
-    ;(insert<A>(bits.pred)(val))
-  ;(val)(map)(insert)
-
-// Union-Find
-// ==========
-UNode: Type
-  self<P: (x: UNode) -> Type> ->
-  (uroot: (rank: Nat) -> P(uroot(rank))) ->
-  (ulink: (parent: Bits) -> P(ulink(parent))) ->
-  P(self)
-
-uroot: Nat -> UNode
-  (rank)
-  <> (uroot) () uroot(rank)
-
-ulink: Bits -> UNode
-  (parent)
-  <> () (ulink) ulink(parent)
-
-UFind: Type
-  Map(UNode)
-
-uempty : UFind
-  empty<UNode>
-
-new_unode: UFind -> Bits -> UFind
-  (uf) (path) insert<UNode>(path)(uroot(zero))(uf)
-
-ufind: <B: Type> -> UFind -> Bits -> (Bits -> Nat -> B) -> Maybe(B)
-  <B> (uf) (path) (k)
-  let found = lookup<UNode>(path)(uf)
-  found<() Maybe(B)>
-  | none<B>;
-  | (found.val)
-    let node = found.val
-    node<() Maybe(B)>
-    | (node.rank)   some<B>(k(path)(node.rank));
-    | (node.parent) ufind<B>(uf)(node.parent)(k);
-  ;
-
-union: UFind -> Bits -> Bits -> Maybe(UFind)
-  (uf) (path1) (path2)
-  let m = ufind<Maybe(UFind)>(uf)(path1)(
-    (root_path1) (rank1)
-    ufind<UFind>(uf)(path2)(
-      (root_path2) (rank2)
-      equal_bits(root_path1)(root_path2)<() UFind>
-      | uf;
-      | nat_cmp(rank1)(rank2)<() UFind>
-        | let uf = insert<UNode>(root_path1)(ulink(root_path2))(uf)
-          uf;
-        | let uf = insert<UNode>(root_path1)(ulink(root_path2))(uf)
-          let uf = insert<UNode>(root_path2)(uroot(succ(rank2)))(uf)
-          uf;
-        | let uf = insert<UNode>(root_path1)(uroot(rank2))(uf)
-          let uf = insert<UNode>(root_path2)(ulink(root_path1))(uf)
-          uf;
-      ;
-      )
-    )
-    m<() Maybe(UFind)>
-    | none<UFind>;
-    | (m.val) m.val;
-
 // Word
 // ====
 
@@ -900,6 +780,128 @@ map_maybe: <A: Type> -> <B: Type> -> (A -> B) -> Maybe(A) -> Maybe(B)
   maybe<() Maybe(B)>
   | none<B>;
   | (value) some<B>(fn(value));
+
+// Updates a value, return a function of it and the map. (Affine)
+query: <A: Type> -> (A -> Pair(A)(A)) -> Bits -> Map(A) -> Pair(Map(A))(Maybe(A))
+  <A> (cpy) (bits) (map)
+  let rec = query<A>
+  let RecType = (A -> Pair(A)(A)) -> Bits -> Map(A) -> Pair(Map(A))(Maybe(A))
+  bits<() RecType -> (A -> Pair(A)(A)) -> Map(A) -> Pair(Map(A))(Maybe(A))>
+  | (rec) (cpy) (map) map<() Pair(Map(A))(Maybe(A))>
+    | let map = empty<A>
+      let val = none<A>
+      pair<Map(A)><Maybe(A)>(map)(val)
+    ;
+    | (map.val) (map.lft) (map.rgt)
+      let mval = map.val
+      mval<() Map(A) -> Map(A) -> Pair(Map(A))(Maybe(A))>
+      | (map.lft) (map.rgt)
+        let map = multi<A>(none<A>)(map.lft)(map.rgt)
+        let val = none<A>
+        pair<Map(A)><Maybe(A)>(map)(val)
+      ;
+      | (mval.value) (map.lft) (map.rgt)
+        let p = cpy(mval.value)
+        p<() Pair(Map(A))(Maybe(A))>
+        | (p.fst) (p.snd)
+          let map = multi<A>(some<A>(p.fst))(map.lft)(map.rgt)
+          let val = some<A>(p.snd)
+          pair<Map(A)><Maybe(A)>(map)(val)
+        ;
+      ;(map.lft)(map.rgt)
+    ;
+  ;
+  | (bits.pred) (rec) (cpy) (map)
+    map<() Pair(Map(A))(Maybe(A))>
+    | let map = empty<A>
+      let val = none<A>
+      pair<Map(A)><Maybe(A)>(map)(val)
+    ;
+    | (map.val) (map.lft) (map.rgt)
+      let p = rec(cpy)(bits.pred)(map.lft)
+      p<() Pair(Map(A))(Maybe(A))>
+      | (p.fst) (p.snd)
+        let map = multi<A>(map.val)(p.fst)(map.rgt)
+        let val = p.snd
+        pair<Map(A)><Maybe(A)>(map)(val)
+      ;
+    ;
+  ;
+  | (bits.pred) (rec) (cpy) (map)
+    map<() Pair(Map(A))(Maybe(A))>
+    | let map = empty<A>
+      let val = none<A>
+      pair<Map(A)><Maybe(A)>(map)(val)
+    ;
+    | (map.val) (map.lft) (map.rgt)
+      let p = rec(cpy)(bits.pred)(map.rgt)
+      p<() Pair(Map(A))(Maybe(A))>
+      | (p.fst) (p.snd)
+        let map = multi<A>(map.val)(map.lft)(p.fst)
+        let val = p.snd
+        pair<Map(A)><Maybe(A)>(map)(val)
+      ;
+    ;
+  ;(rec)(cpy)(map)
+
+// Union-Find
+// ==========
+UNode: Type
+  self<P: (x: UNode) -> Type> ->
+  (uroot: (rank: Nat) -> P(uroot(rank))) ->
+  (ulink: (parent: Bits) -> P(ulink(parent))) ->
+  P(self)
+
+uroot: Nat -> UNode
+  (rank)
+  <> (uroot) () uroot(rank)
+
+ulink: Bits -> UNode
+  (parent)
+  <> () (ulink) ulink(parent)
+
+UFind: Type
+  Map(UNode)
+
+uempty : UFind
+  empty<UNode>
+
+new_unode: UFind -> Bits -> UFind
+  (uf) (path) insert<UNode>(path)(uroot(zero))(uf)
+
+ufind: <B: Type> -> UFind -> Bits -> (Bits -> Nat -> B) -> Maybe(B)
+  <B> (uf) (path) (k)
+  let found = lookup<UNode>(path)(uf)
+  found<() Maybe(B)>
+  | none<B>;
+  | (found.val)
+    let node = found.val
+    node<() Maybe(B)>
+    | (node.rank)   some<B>(k(path)(node.rank));
+    | (node.parent) ufind<B>(uf)(node.parent)(k);;
+
+union: UFind -> Bits -> Bits -> Maybe(UFind)
+  (uf) (path1) (path2)
+  let m = ufind<Maybe(UFind)>(uf)(path1)(
+    (root_path1) (rank1)
+    ufind<UFind>(uf)(path2)(
+      (root_path2) (rank2)
+      equal_bits(root_path1)(root_path2)<() UFind>
+      | uf;
+      | nat_cmp(rank1)(rank2)<() UFind>
+        | let uf = insert<UNode>(root_path1)(ulink(root_path2))(uf)
+          uf;
+        | let uf = insert<UNode>(root_path1)(ulink(root_path2))(uf)
+          let uf = insert<UNode>(root_path2)(uroot(succ(rank2)))(uf)
+          uf;
+        | let uf = insert<UNode>(root_path1)(uroot(rank2))(uf)
+          let uf = insert<UNode>(root_path2)(ulink(root_path1))(uf)
+          uf;;
+      )
+    )
+    m<() Maybe(UFind)>
+    | none<UFind>;
+    | (m.val) m.val;
 
 // Term
 // ====
