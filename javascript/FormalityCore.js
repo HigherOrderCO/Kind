@@ -986,9 +986,11 @@ function typeinfer(term, file, ctx = Nil(), nam = Nil()) {
           throw Err(term.locs, ctx, nam, "Non-function application.");
       };
     case "Let":
-      var term_val = subst(term.body, term.expr, 0);
-      var term_typ = typeinfer(term_val, file, ctx, nam);
-      return term_typ;
+      var expr_typ = typeinfer(term.expr, file, ctx, nam);
+      var body_nam = Ext(term.name, nam);
+      var body_ctx = Ext(expr_typ, ctx);
+      var body_typ = typeinfer(term.body, file, body_ctx, body_nam);
+      return subst(body_typ, term.expr, 0);
     case "All":
       var self_typ = Ann(true, term, Typ());
       var bind_ctx = Ext(self_typ, ctx);

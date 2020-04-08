@@ -639,15 +639,14 @@ Char: Type
 
 ascii: Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Char
   (a) (b) (c) (d) (e) (f) (g) (h)
-  let ty = <size: Nat> -> Word(size) -> Word(succ(size))
-  let wA = a<() ty>(w0)(w1)
-  let wB = b<() ty>(w0)(w1)
-  let wC = c<() ty>(w0)(w1)
-  let wD = d<() ty>(w0)(w1)
-  let wE = e<() ty>(w0)(w1)
-  let wF = f<() ty>(w0)(w1)
-  let wG = g<() ty>(w0)(w1)
-  let wH = h<() ty>(w0)(w1)
+  let wA = a<() <size: Nat> -> Word(size) -> Word(succ(size))>(w0)(w1)
+  let wB = b<() <size: Nat> -> Word(size) -> Word(succ(size))>(w0)(w1)
+  let wC = c<() <size: Nat> -> Word(size) -> Word(succ(size))>(w0)(w1)
+  let wD = d<() <size: Nat> -> Word(size) -> Word(succ(size))>(w0)(w1)
+  let wE = e<() <size: Nat> -> Word(size) -> Word(succ(size))>(w0)(w1)
+  let wF = f<() <size: Nat> -> Word(size) -> Word(succ(size))>(w0)(w1)
+  let wG = g<() <size: Nat> -> Word(size) -> Word(succ(size))>(w0)(w1)
+  let wH = h<() <size: Nat> -> Word(size) -> Word(succ(size))>(w0)(w1)
   wH<n31>(wG<n30>(wF<n29>(wE<n28>(wD<n27>(wC<n26>(wB<n25>(wA<n24>(
   w0<n23>(w0<n22>(w0<n21>(w0<n20>(w0<n19>(w0<n18>(w0<n17>(w0<n16>(
   w0<n15>(w0<n14>(w0<n13>(w0<n12>(w0<n11>(w0<n10>(w0<n9 >(w0<n8 >(
@@ -873,9 +872,9 @@ parsing
     (f: String -> A -> Parsed(B)) ->
     Parsed(B)
   <A> <B> (x) (f)
-  let _none = noparse<B>
-  let _some = (value) value<() Parsed(B)>(f)
-  x<() Parsed(B)>(_none)(_some)
+  x<() Parsed(B)>
+  | noparse<B>;
+  | (value) value<() Parsed(B)>(f);
 
 is_space: Char -> Bool
   (c)
@@ -956,14 +955,13 @@ parse_opt: String -> Pair(String)(String) -> Parsed(Bool)
 
 parse_nam_aux: String -> Pair(String)(String)
   (code)
-  let Ret = Pair(String)(String)
   let ret = pair<String><String>
-  code<() Ret>
+  code<() Pair(String)(String)>
   | ret(code)(nil<Char>);
   | (head) (tail)
-    is_name(head)<() Ret>
-    | let _pair = (code) (rest) ret(code)(cons<Char>(head)(rest))
-      parse_nam_aux(tail)<() Ret>(_pair);
+    is_name(head)<() Pair(String)(String)>
+    | parse_nam_aux(tail)<() Pair(String)(String)>
+      | (code) (rest) ret(code)(cons<Char>(head)(rest));;
     | ret(code)(nil<Char>);;
 
 parse_nam: String -> Bool -> Maybe(Pair(String)(String))
@@ -1323,16 +1321,14 @@ to_high_order: Term -> List(HTerm) -> Nat -> HTerm
   | (hash)
     htyp;
   | (hash) (eras) (self) (name) (bind) (body)
-    let eras = eras
-    let bind = (s) to_high_order(bind)(cons<HTerm>(s)(vars))(succ(depth))
-    let body = (s) (x) to_high_order(body)(cons<HTerm>(x)(cons<HTerm>(s)(vars)))(succ(succ(depth)))
-    hall(eras)(bind)(body);
+    hall
+    | eras;
+    | (s) to_high_order(bind)(cons<HTerm>(s)(vars))(succ(depth));
+    | (s) (x) to_high_order(body)(cons<HTerm>(x)(cons<HTerm>(s)(vars)))(succ(succ(depth)));;
   | (hash) (eras) (name) (body)
     eras<() HTerm>
-    | let body = subst(body)(ref(nil<Char>))(n0)
-      to_high_order(body)(vars)(depth);
-    | let body = (x) to_high_order(body)(cons<HTerm>(x)(vars))(succ(depth))
-      hlam(body);;
+    | to_high_order(subst(body)(ref(nil<Char>))(n0))(vars)(depth);
+    | hlam((x) to_high_order(body)(cons<HTerm>(x)(vars))(succ(depth)));;
   | (hash) (eras) (func) (argm)
     eras<() HTerm>
     | to_high_order(func)(vars)(depth);
@@ -1341,8 +1337,8 @@ to_high_order: Term -> List(HTerm) -> Nat -> HTerm
       happ(func)(argm);;
   | (hash) (name) (expr) (body)
     let expr = to_high_order(expr)(vars)(depth)
-    let body = (x) to_high_order(body)(cons<HTerm>(x)(vars))(succ(depth))
-    (body :: HTerm -> HTerm)(expr);
+    let body = ((x) to_high_order(body)(cons<HTerm>(x)(vars))(succ(depth))) :: HTerm -> HTerm
+    body(expr);
   | (hash) (done) (expr) (type)
     to_high_order(expr)(vars)(depth);
 
@@ -1415,13 +1411,12 @@ normalize_high_order: HTerm -> File -> HTerm
     href(norm.name);
   | htyp;
   | (norm.eras) (norm.bind) (norm.body)
-    let eras = norm.eras
-    let bind = (s) normalize_high_order(norm.bind(s))(file)
-    let body = (s) (x) normalize_high_order(norm.body(s)(x))(file)
-    hall(eras)(bind)(body);
+    hall
+    | norm.eras;
+    | (s) normalize_high_order(norm.bind(s))(file);
+    | (s) (x) normalize_high_order(norm.body(s)(x))(file);;
   | (norm.body)
-    let body = (x) normalize_high_order(norm.body(x))(file)
-    hlam(body);
+    hlam((x) normalize_high_order(norm.body(x))(file));
   | (norm.func) (norm.argm)
     let func = normalize_high_order(norm.func)(file)
     let argm = normalize_high_order(norm.argm)(file)
