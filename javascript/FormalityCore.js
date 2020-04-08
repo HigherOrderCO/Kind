@@ -171,6 +171,16 @@ function parse_opt(code, indx, ch0, ch1) {
   }
 };
 
+// Parses one of two strings
+function parse_may(code, indx, str) {
+  try {
+    var [indx, skip] = parse_str(code, indx, str);
+    return [indx, true];
+  } catch (e) {
+    return [indx, false];
+  }
+};
+
 // Parses a valid name, non-empty
 function parse_nam(code, indx, size = 0) {
   if (indx < code.length && is_name(code[indx])) {
@@ -320,8 +330,10 @@ function parse_file(code, indx = 0) {
       var [indx, name] = parse_nam(code, next(code, indx));
       var [indx, skip] = parse_str(code, next(code, indx), ":");
       var [indx, type] = parse_term(code, next(code, indx), Nil());
+      var [indx, loop] = parse_may(code, drop_spaces(code, indx), "//loop//");
+      var [indx, prim] = parse_may(code, drop_spaces(code, indx), "//prim//");
       var [indx, term] = parse_term(code, next(code, indx), Nil());
-      file[name] = {type, term};
+      file[name] = {type, term, meta: {loop,prim}};
       parse_defs(code, indx);
     } catch (e) {}
   }
@@ -986,9 +998,11 @@ function typeinfer(term, file, ctx = Nil(), nam = Nil()) {
           throw Err(term.locs, ctx, nam, "Non-function application.");
       };
     case "Let":
-      var term_val = subst(term.body, term.expr, 0);
-      var term_typ = typeinfer(term_val, file, ctx, nam);
-      return term_typ;
+      var expr_typ = typeinfer(term.expr, file, ctx, nam);
+      var body_nam = Ext(term.name, nam);
+      var body_ctx = Ext(expr_typ, ctx);
+      var body_typ = typeinfer(term.body, file, body_ctx, body_nam);
+      return subst(body_typ, term.expr, 0);
     case "All":
       var self_typ = Ann(true, term, Typ());
       var bind_ctx = Ext(self_typ, ctx);
