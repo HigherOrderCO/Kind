@@ -171,6 +171,16 @@ function parse_opt(code, indx, ch0, ch1) {
   }
 };
 
+// Parses one of two strings
+function parse_may(code, indx, str) {
+  try {
+    var [indx, skip] = parse_str(code, indx, str);
+    return [indx, true];
+  } catch (e) {
+    return [indx, false];
+  }
+};
+
 // Parses a valid name, non-empty
 function parse_nam(code, indx, size = 0) {
   if (indx < code.length && is_name(code[indx])) {
@@ -320,8 +330,10 @@ function parse_file(code, indx = 0) {
       var [indx, name] = parse_nam(code, next(code, indx));
       var [indx, skip] = parse_str(code, next(code, indx), ":");
       var [indx, type] = parse_term(code, next(code, indx), Nil());
+      var [indx, loop] = parse_may(code, drop_spaces(code, indx), "//loop//");
+      var [indx, prim] = parse_may(code, drop_spaces(code, indx), "//prim//");
       var [indx, term] = parse_term(code, next(code, indx), Nil());
-      file[name] = {type, term};
+      file[name] = {type, term, meta: {loop,prim}};
       parse_defs(code, indx);
     } catch (e) {}
   }

@@ -15,7 +15,7 @@ equal: <A: Type> -> <a: A> -> Equal(A)(a)(a)
 // Bool
 // ====
 
-Bool: Type
+Bool: Type //prim//
   self<P: Bool -> Type> ->
   P(true) ->
   P(false) ->
@@ -30,13 +30,20 @@ false: Bool
 _bool : (b: Bool) -> <P: Bool -> Type> -> P(true) -> P(false) -> P(b)
   (b) <P> (t) (f) b<P>(t)(f)
 
-not: Bool -> Bool
+bool_not: Bool -> Bool //prim//
   (a)
   a<() Bool>
   | false;
   | true;
 
-or: Bool -> Bool -> Bool
+bool_notf: Bool -> Bool
+  (a)
+  <P> (t) (f)
+  a<(self) P(bool_notf(self))>
+  | f;
+  | t;
+
+bool_or: Bool -> Bool -> Bool //prim//
   (a) (b)
   a<() Bool>
   | b<() Bool>
@@ -46,7 +53,7 @@ or: Bool -> Bool -> Bool
     | true;
     | false;;
 
-and: Bool -> Bool -> Bool
+bool_and: Bool -> Bool -> Bool //prim//
   (a) (b)
   a<() Bool>
   | b<() Bool>
@@ -92,8 +99,8 @@ t1: Bit
 // Nat
 // ===
 
-Nat: Type
-  self<P: (x: Nat) -> Type> ->
+Nat: Type //prim//
+  self<P: Nat -> Type> ->
   (zero: P(zero)) ->
   (succ: (pred: Nat) -> P(succ(pred))) ->
   P(self)
@@ -121,23 +128,23 @@ double: Nat -> Nat
   | zero;
   | (n.pred) succ(succ(double(n.pred)));
 
-add: Nat -> Nat -> Nat
+nat_add: Nat -> Nat -> Nat //prim//
   (n) (m)
   n<() Nat>
   | m;
-  | (n.pred) succ(add(n.pred)(m));
+  | (n.pred) nat_add(n.pred)(succ(m));
 
-sub: Nat -> Nat -> Nat
+nat_sub: Nat -> Nat -> Nat //prim//
   (n) (m)
   m<() Nat>
   | n;
-  | (m.pred) sub(pred(n))(m.pred);
+  | (m.pred) nat_sub(pred(n))(m.pred);
 
-mul: Nat -> Nat -> Nat
+nat_mul: Nat -> Nat -> Nat //prim//
   (n) (m)
   n<() Nat>
   | n0;
-  | (n.pred) add(m)(mul(n.pred)(m));
+  | (n.pred) nat_add(m)(nat_mul(n.pred)(m));
 
 nat_cmp: Nat -> Nat -> Cmp
   (a) (b)
@@ -164,6 +171,15 @@ nat_gte: Nat -> Nat -> Bool
 
 nat_gtn: Nat -> Nat -> Bool
   (a) (b) nat_cmp(a)(b)<() Bool>(false)(false)(true)
+
+nat_sum_go: Nat -> Nat -> Nat //loop//
+  (n) (r)
+  n<() Nat>
+  | r;
+  | (n.pred) nat_sum_go(n.pred)(nat_add(n)(r));
+
+nat_sum: Nat -> Nat
+  (n) nat_sum_go(n)(zero)
 
 n0: Nat
   zero
@@ -595,47 +611,79 @@ word_to_bits: <size: Nat> -> Word(size) -> Bits
 // Uint32
 // ======
 
-U32: Type
-  Word(n32)
+U32: Type //prim//
+  self<P: U32 -> Type> ->
+  (u32: (a: Word(n32)) -> P(u32(a))) ->
+  P(self)
+
+u32: Word(n32) -> U32
+  (a)
+  <> (u32) u32(a)
 
 u32_0: U32
-  w0<n31>(w0<n30>(w0<n29>(w0<n28>(w0<n27>(w0<n26>(w0<n25>(w0<n24>(
-  w0<n23>(w0<n22>(w0<n21>(w0<n20>(w0<n19>(w0<n18>(w0<n17>(w0<n16>(
-  w0<n15>(w0<n14>(w0<n13>(w0<n12>(w0<n11>(w0<n10>(w0<n9 >(w0<n8 >(
-  w0<n7 >(w0<n6 >(w0<n5 >(w0<n4 >(w0<n3 >(w0<n2 >(w0<n1 >(w0<n0 >(
-  we))))))))))))))))))))))))))))))))
+  u32(
+    w0<n31>(w0<n30>(w0<n29>(w0<n28>(w0<n27>(w0<n26>(w0<n25>(w0<n24>(
+    w0<n23>(w0<n22>(w0<n21>(w0<n20>(w0<n19>(w0<n18>(w0<n17>(w0<n16>(
+    w0<n15>(w0<n14>(w0<n13>(w0<n12>(w0<n11>(w0<n10>(w0<n9 >(w0<n8 >(
+    w0<n7 >(w0<n6 >(w0<n5 >(w0<n4 >(w0<n3 >(w0<n2 >(w0<n1 >(w0<n0 >(
+    we)))))))))))))))))))))))))))))))))
 
 u32_inc: U32 -> U32
-  word_inc<n32>
+  (a)
+  a<() U32> | (a_val)
+  u32(word_inc<n32>(a_val));
 
 u32_add: U32 -> U32 -> U32
-  word_add<n32>
+  (a) (b)
+  a<() U32> | (a_val)
+  b<() U32> | (b_val)
+  u32(word_add<n32>(a_val)(b_val));;
 
 // a < b
 u32_ltn: U32 -> U32 -> Bool
-  word_ltn<n32>
+  (a) (b)
+  a<() Bool> | (a_val)
+  b<() Bool> | (b_val)
+  word_ltn<n32>(a_val)(b_val);;
 
 // a <= b
 u32_lte: U32 -> U32 -> Bool
-  word_lte<n32>
+  (a) (b)
+  a<() Bool> | (a_val)
+  b<() Bool> | (b_val)
+  word_lte<n32>(a_val)(b_val);;
 
 // a == b
 u32_eql: U32 -> U32 -> Bool
-  word_eql<n32>
+  (a) (b)
+  a<() Bool> | (a_val)
+  b<() Bool> | (b_val)
+  word_eql<n32>(a_val)(b_val);;
 
 // a >= b
 u32_gte: U32 -> U32 -> Bool
-  word_gte<n32>
+  (a) (b)
+  a<() Bool> | (a_val)
+  b<() Bool> | (b_val)
+  word_gte<n32>(a_val)(b_val);;
 
 // a > b
 u32_gtn: U32 -> U32 -> Bool
-  word_gtn<n32>
+  (a) (b)
+  a<() Bool> | (a_val)
+  b<() Bool> | (b_val)
+  word_gtn<n32>(a_val)(b_val);;
+
+u32_to_bits: U32 -> Bits
+  (a)
+  a<() Bits> | (a_val)
+  word_to_bits<n32>(a_val);
 
 // Char
 // ====
 
 Char: Type
-  Word(n32)
+  U32
 
 ascii: Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Char
   (a) (b) (c) (d) (e) (f) (g) (h)
@@ -647,33 +695,71 @@ ascii: Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Char
   let wF = f<() <size: Nat> -> Word(size) -> Word(succ(size))>(w0)(w1)
   let wG = g<() <size: Nat> -> Word(size) -> Word(succ(size))>(w0)(w1)
   let wH = h<() <size: Nat> -> Word(size) -> Word(succ(size))>(w0)(w1)
-  wH<n31>(wG<n30>(wF<n29>(wE<n28>(wD<n27>(wC<n26>(wB<n25>(wA<n24>(
-  w0<n23>(w0<n22>(w0<n21>(w0<n20>(w0<n19>(w0<n18>(w0<n17>(w0<n16>(
-  w0<n15>(w0<n14>(w0<n13>(w0<n12>(w0<n11>(w0<n10>(w0<n9 >(w0<n8 >(
-  w0<n7 >(w0<n6 >(w0<n5 >(w0<n4 >(w0<n3 >(w0<n2 >(w0<n1 >(w0<n0 >(
-  we))))))))))))))))))))))))))))))))
-
+  u32(
+    wH<n31>(wG<n30>(wF<n29>(wE<n28>(wD<n27>(wC<n26>(wB<n25>(wA<n24>(
+    w0<n23>(w0<n22>(w0<n21>(w0<n20>(w0<n19>(w0<n18>(w0<n17>(w0<n16>(
+    w0<n15>(w0<n14>(w0<n13>(w0<n12>(w0<n11>(w0<n10>(w0<n9 >(w0<n8 >(
+    w0<n7 >(w0<n6 >(w0<n5 >(w0<n4 >(w0<n3 >(w0<n2 >(w0<n1 >(w0<n0 >(
+    we)))))))))))))))))))))))))))))))))
 
 // String
 // ======
 
-String: Type
-  List(Char)
+String: Type //prim//
+  self<P: String -> Type> ->
+  (string_nil: P(string_nil)) ->
+  (string_cons: (head: Char) -> (tail: String) -> P(string_cons(head)(tail))) ->
+  P(self)
+
+string_nil: String
+  <> (string_nil) () string_nil
+
+string_cons: Char -> String -> String
+  (head) (tail)
+  <> () (string_cons) string_cons(head)(tail)
+
+string_take: Nat -> String -> String
+  (n) (list)
+  list<() String>
+  | string_nil;
+  | (head) (tail)
+    n<() String>
+    | string_nil;
+    | (pred) string_cons(head)(string_take(pred)(tail));;
+
+string_drop: Nat -> String -> String
+  (n) (list)
+  n<() String>
+  | list;
+  | (pred)
+    list<() String>
+    | string_nil;
+    | (head) (tail) string_drop(pred)(tail);;
 
 string_eql: String -> String -> Bool
   (a) (b)
-  let eql_len = nat_eql(list_len<Char>(a))(list_len<Char>(b))
-  let eql_val = all_satisfy<Bool>((x) x)(zip_with<Char><Char><Bool>(u32_eql)(a)(b))
-  and(eql_len)(eql_val)
+  a<() Bool>
+  | b<() Bool>
+    | true;
+    | (b.head) (b.tail) false;;
+  | (a.head) (a.tail)
+    b<() Bool>
+    | false;
+    | (b.head) (b.tail)
+      bool_and(u32_eql(a.head)(b.head))(string_eql(a.tail)(b.tail));;
 
 string_to_bits: String -> Bits
-  fold<Char><Bits>(be)((chr) (res) bits_concat(word_to_bits<n32>(chr))(res))
+  (str)
+  str<() Bits>
+  | be;
+  | (str.head) (str.tail)
+    bits_concat(u32_to_bits(str.head))(string_to_bits(str.tail));
 
 nat_to_string: Nat -> String
   (n)
   n<() String>
-  | cons<Char>(_z)(nil<Char>);
-  | (pred) cons<Char>(_s)(nat_to_string(pred));
+  | string_cons(_z)(string_nil);
+  | (n.pred) string_cons(_s)(nat_to_string(n.pred));
 
 // Map
 // ===
@@ -878,18 +964,18 @@ parsing
 
 is_space: Char -> Bool
   (c)
-    let is_spc = word_eql<n32>(c)(_space)
-    let is_tab = word_eql<n32>(c)(_HT)
-    let is_lin = word_eql<n32>(c)(_LF)
-    or(is_spc)(or(is_tab)(is_lin))
+    let is_spc = u32_eql(c)(_space)
+    let is_tab = u32_eql(c)(_HT)
+    let is_lin = u32_eql(c)(_LF)
+    bool_or(is_spc)(bool_or(is_tab)(is_lin))
 
 is_name: Char -> Bool
   (c)
-    let is_num = and(word_gte<n32>(c)(_0))(word_lte<n32>(c)(_9))
-    let is_low = and(word_gte<n32>(c)(_a))(word_lte<n32>(c)(_z))
-    let is_upp = and(word_gte<n32>(c)(_A))(word_lte<n32>(c)(_Z))
-    let is_und = word_eql<n32>(c)(_lowbar)
-    or(is_num)(or(is_low)(or(is_upp)(is_und)))
+    let is_num = bool_and(u32_gte(c)(_0))(u32_lte(c)(_9))
+    let is_low = bool_and(u32_gte(c)(_a))(u32_lte(c)(_z))
+    let is_upp = bool_and(u32_gte(c)(_A))(u32_lte(c)(_Z))
+    let is_und = u32_eql(c)(_lowbar)
+    bool_or(is_num)(bool_or(is_low)(bool_or(is_upp)(is_und)))
 
 first_valid: <A: Type> -> List(Maybe(A)) -> Maybe(A)
   <A> (list)
@@ -903,11 +989,11 @@ first_valid: <A: Type> -> List(Maybe(A)) -> Maybe(A)
 drop_while: (Char -> Bool) -> String -> String
   (cond) (code)
   code<() String>
-  | nil<Char>;
+  | string_nil;
   | (head) (tail)
     cond(head)<() String>
     | drop_while(cond)(tail);
-    | cons<Char>(head)(tail);;
+    | string_cons(head)(tail);;
 
 drop_spaces: String -> String
   drop_while(is_space)
@@ -918,11 +1004,11 @@ drop_comment: String -> String
   let code = drop_spaces(code)
   // Removes "// ... \n"
   let code = 
-    let fst2 = take<Char>(n2)(code)
-    let sla2 = cons<Char>(_sol)(cons<Char>(_sol)(nil<Char>))
+    let fst2 = string_take(n2)(code)
+    let sla2 = string_cons(_sol)(string_cons(_sol)(string_nil))
     string_eql(fst2)(sla2)<() String>
-    | let code = drop<Char>(n2)(code)
-      let code = drop_while((x) not(u32_eql(_LF)(x)))(code)
+    | let code = string_drop(n2)(code)
+      let code = drop_while((x) bool_not(u32_eql(_LF)(x)))(code)
       code;
     | code;
   code
@@ -957,18 +1043,18 @@ parse_nam_aux: String -> Pair(String)(String)
   (code)
   let ret = pair<String><String>
   code<() Pair(String)(String)>
-  | ret(code)(nil<Char>);
+  | ret(code)(string_nil);
   | (head) (tail)
     is_name(head)<() Pair(String)(String)>
     | parse_nam_aux(tail)<() Pair(String)(String)>
-      | (code) (rest) ret(code)(cons<Char>(head)(rest));;
-    | ret(code)(nil<Char>);;
+      | (code) (rest) ret(code)(string_cons(head)(rest));;
+    | ret(code)(string_nil);;
 
 parse_nam: String -> Bool -> Maybe(Pair(String)(String))
   (code) (allow_empty)
   parse_nam_aux(code)<() Parsed(String)>
   | (code) (name)
-    or(allow_empty)(not(is_empty<Char>(name)))<() Parsed(String)>
+    bool_or(allow_empty)(bool_not(is_empty<Char>(name)))<() Parsed(String)>
     | parsed<String>(code)(name);
     | noparse<String>;;
 
@@ -986,14 +1072,14 @@ sp : String -> String
   (s) flatten<Char>(cons<String>(SPAC)(cons<String>(s)(single<String>(SPAC))))
 
 ERR : String
-  cons<Char>(_hash)(cons<Char>(_E)(cons<Char>(_R)(single<Char>(_R))))
+  string_cons(_hash)(string_cons(_E)(string_cons(_R)(string_cons(_R)(string_nil))))
 
 stringify_term_go : List(String) -> Term -> String
   (vars) (term)
   let go = stringify_term_go
   let cons    = cons<String>
   let flatten = flatten<Char>
-  let space   = single<Char>(_space)
+  let space   = string_cons(_space)(string_nil)
   let single  = single<String>
   term<() String>
   |{-var-} () (indx) 
@@ -1112,9 +1198,9 @@ parse_pip: String -> Term -> List(String) -> Parsed(Term)
 parse_arr: String -> Term -> List(String) -> Parsed(Term)
   (code) (bind) (vars)
   parsing<String><Term>(parse_str(next(code))(ARR0)) | (code) (skip)
-  let vars = cons<String>(nil<Char>)(cons<String>(nil<Char>)(vars))
+  let vars = cons<String>(string_nil)(cons<String>(string_nil)(vars))
   parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (body)
-  let term = all(false)(nil<Char>)(nil<Char>)(shift(bind)(n1)(n0))(body)
+  let term = all(false)(string_nil)(string_nil)(shift(bind)(n1)(n0))(body)
   parsed<Term>(code)(term);;
 
 parse_ann: String -> Term -> List(String) -> Parsed(Term)
@@ -1179,7 +1265,7 @@ shift: Term -> Nat -> Nat -> Term
   | (hash) (indx)
     nat_ltn(indx)(dep)<() Term>
     | var(indx);
-    | var(add(inc)(indx));;
+    | var(nat_add(inc)(indx));;
   | (hash) (name)
     ref(name);
   | (hash)
@@ -1314,7 +1400,7 @@ to_high_order: Term -> List(HTerm) -> Nat -> HTerm
   term<() HTerm>
   | (hash) (indx)
     find<HTerm>(vars)((x) (i) nat_eql(i)(indx))<() HTerm>
-    | hvar(sub(succ(indx))(depth))(false);
+    | hvar(nat_sub(succ(indx))(depth))(false);
     | (value) fst<HTerm><Nat>(value);;
   | (hash) (name)
     href(name);
@@ -1327,7 +1413,7 @@ to_high_order: Term -> List(HTerm) -> Nat -> HTerm
     | (s) (x) to_high_order(body)(cons<HTerm>(x)(cons<HTerm>(s)(vars)))(succ(succ(depth)));;
   | (hash) (eras) (name) (body)
     eras<() HTerm>
-    | to_high_order(subst(body)(ref(nil<Char>))(n0))(vars)(depth);
+    | to_high_order(subst(body)(ref(string_nil))(n0))(vars)(depth);
     | hlam((x) to_high_order(body)(cons<HTerm>(x)(vars))(succ(depth)));;
   | (hash) (eras) (func) (argm)
     eras<() HTerm>
@@ -1347,8 +1433,8 @@ to_low_order: HTerm -> Nat -> Term
   hterm<() Term>
   | (indx) (posi)
     posi<() Term>
-    | var(sub(sub(depth)(indx))(n1));
-    | var(sub(add(depth)(indx))(n1));;
+    | var(nat_sub(nat_sub(depth)(indx))(n1));
+    | var(nat_sub(nat_add(depth)(indx))(n1));;
   | (name)
     ref(name);
   | typ;
@@ -1949,79 +2035,93 @@ _tilde: Char
 _DEL: Char
   ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t1)
 
-// Appendix B: String Constants
-
 // "("
 LPAR: String
-  single<Char>(_lpar)
+  string_cons(_lpar)(string_nil)
 
 // ")"
 RPAR: String
-  single<Char>(_rpar)
+  string_cons(_rpar)(string_nil)
 
 // "{"
 LSIG: String
-  single<Char>(_lbrace)
+  string_cons(_lbrace)(string_nil)
 
 // "}"
 RSIG: String
-  single<Char>(_rbrace)
+  string_cons(_rbrace)(string_nil)
 
 // "<"
 LT: String
-  single<Char>(_lt)
+  string_cons(_lt)(string_nil)
 
 // ">"
 GT: String
-  single<Char>(_gt)
+  string_cons(_gt)(string_nil)
 
 // ":"
 COLO: String
-  single<Char>(_colon)
+  string_cons(_colon)(string_nil)
 
 // ":"
 SEMI: String
-  single<Char>(_semi)
+  string_cons(_semi)(string_nil)
 
 // "-"
 DASH: String
-  single<Char>(_dash)
+  string_cons(_dash)(string_nil)
 
 // "|"
 PIPE: String
- single<Char>(_vert)
+ string_cons(_vert)(string_nil)
 
 // "::"
 COLS: String
-  cons<Char>(_colon)(single<Char>(_colon))
+  string_cons(_colon)(string_cons(_colon)(string_nil))
 
 // "->"
 ARR0: String
-  cons<Char>(_dash)(single<Char>(_gt))
+  string_cons(_dash)(string_cons(_gt)(string_nil))
 
 // "="
 EQLS: String
-  single<Char>(_equals)
+  string_cons(_equals)(string_nil)
 
 // Type
 TYPS: String
-  cons<Char>(_T)(cons<Char>(_y)(cons<Char>(_p)(single<Char>(_e))))
+  string_cons(_T)(string_cons(_y)(string_cons(_p)(string_cons(_e)(string_nil))))
 
 // "let "
 LETS: String
-  cons<Char>(_l)(cons<Char>(_e)(cons<Char>(_t)(single<Char>(_space))))
+  string_cons(_l)(string_cons(_e)(string_cons(_t)(string_cons(_space)(string_nil))))
 
 // "main"
 MAIN: String
-  cons<Char>(_m) |
-  cons<Char>(_a) |
-  cons<Char>(_i) |
-  cons<Char>(_n) |
-  nil<Char>;;;;
+  string_cons(_m) |
+  string_cons(_a) |
+  string_cons(_i) |
+  string_cons(_n) |
+  string_nil;;;;
+
+// "Hello, world!"
+HELLO_WORLD: String
+  string_cons(_H) |
+  string_cons(_e) |
+  string_cons(_l) |
+  string_cons(_l) |
+  string_cons(_o) |
+  string_cons(_space) |
+  string_cons(_w) |
+  string_cons(_o) |
+  string_cons(_r) |
+  string_cons(_l) |
+  string_cons(_d) |
+  string_cons(_excl) |
+  string_nil;;;;;;;;;;;;
 
 // " "
 SPAC: String
-  single<Char>(_space)
+  string_cons(_space)(string_nil)
 
 // ["(","{"]
 OPEN: Pair(String)(String)
@@ -2034,32 +2134,29 @@ CLOS: Pair(String)(String)
 // Main
 // ====
 
-example_0: Word(n4)
-  let w0011 = w1<n3>(w1<n2>(w0<n1>(w0<n0>(we))))
-  let w0101 = w1<n3>(w0<n2>(w1<n1>(w0<n0>(we))))
-  word_add<n4>(w0011)(w0101) // 3 + 5 == 8
+// A simple "Hello, world!"
+example_0: String
+  string_drop(n6)(HELLO_WORLD)
 
-example_1: String -> String
-  (code)
-  parse_term(code)(nil<String>)<() String>
-  | nil<Char>;
-  | (parsed) parsed<() String>((code) (term) stringify_term(term));
+// Adding Uint32 values
+example_1: U32
+  let num = u32(
+    w1<n31>(w0<n30>(w1<n29>(w1<n28>(w0<n27>(w0<n26>(w0<n25>(w0<n24>(
+    w0<n23>(w0<n22>(w0<n21>(w0<n20>(w0<n19>(w0<n18>(w0<n17>(w0<n16>(
+    w0<n15>(w0<n14>(w0<n13>(w0<n12>(w0<n11>(w0<n10>(w0<n9 >(w0<n8 >(
+    w0<n7 >(w0<n6 >(w0<n5 >(w0<n4 >(w0<n3 >(w0<n2 >(w0<n1 >(w0<n0 >(
+    we)))))))))))))))))))))))))))))))))
+  u32_add(num)(num)
 
-example_2: Equal(Nat)(mul(n8)(n4))(n32)
-  equal<Nat><n32>
+// Testing tail-call optimization to create a huge number
+example_2: Nat
+  let n100  = nat_mul(n10)(n10)
+  let n1k   = nat_mul(n10)(n100)
+  let n10k  = nat_mul(n10)(n1k)
+  let n100k = nat_mul(n10)(n10k)
+  let n1m   = nat_mul(n10)(n100k)
+  let n10m  = nat_mul(n10)(n1m)
+  nat_sum(n10m)
 
-// Parses a Formality-Core source, evaluates and prints 'main'
-main: String -> String
-  (code)
-  parse_file(code)<() String>
-  | ERR;
-  | (parsed)
-    let file = snd<String><File>(parsed)
-    get_term(file)(MAIN)<() String>
-    | ERR;
-    | (term) stringify_term(normalize(term)(file));;
-    //| (term) stringify_term(term);;
-    //| (term) stringify_term(to_low_order(to_high_order(term)(nil<HTerm>)(zero))(zero));;
-
-foo : <A : Type> -> (A -> A) -> A -> A
-  <> (f) (x) f(x)
+main: Nat
+  example_2

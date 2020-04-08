@@ -8,10 +8,10 @@ var file = args.pop();
 var opts = args.reduce((arg,opts) => opts[arg] = 1, {});
 
 if (!file) {
-  console.log("Formality-Lang");
+  console.log("Formality-Core");
   console.log("");
-  console.log("Commands:");
-  console.log("$ fm <file> | type-checks definitions");
+  console.log("Usage:");
+  console.log("$ fmc <file> | type-checks definitions");
   process.exit();
 }
 
