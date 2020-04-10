@@ -3,9 +3,9 @@
 
 Equal: (A: Type) -> A -> A -> Type
   (A) (a) (b)
-  self<P: (b: A) -> Equal(A)(a)(b) -> Type> ->
+  equal_value<P: (b: A) -> Equal(A)(a)(b) -> Type> ->
   (equal: P(a)(equal<A><a>)) ->
-  P(b)(self)
+  P(b)(equal_value)
 
 equal: <A: Type> -> <a: A> -> Equal(A)(a)(a)
   <A> <a>
@@ -16,10 +16,10 @@ equal: <A: Type> -> <a: A> -> Equal(A)(a)(a)
 // ====
 
 Bool: Type //prim//
-  self<P: Bool -> Type> ->
+  bool_value<P: Bool -> Type> ->
   P(true) ->
   P(false) ->
-  P(self)
+  P(bool_value)
 
 true: Bool
   <> (t) (f) t
@@ -66,11 +66,11 @@ bool_and: Bool -> Bool -> Bool //prim//
 // Cmp
 
 Cmp : Type
-  self<P: Cmp -> Type> ->
+  cmp_value<P: Cmp -> Type> ->
   P(ltn) ->
   P(eql) ->
   P(gtn) ->
-  P(self)
+  P(cmp_value)
 
 ltn: Cmp
   <> (ltn) (eql) (gtn) ltn
@@ -85,25 +85,25 @@ gtn: Cmp
 // ===
 
 Bit : Type
-  self<P: Bit -> Type> ->
-  P(t0) ->
-  P(t1) ->
-  P(self)
+  bit_value<P: Bit -> Type> ->
+  P(o) ->
+  P(i) ->
+  P(bit_value)
 
-t0: Bit
-  <> (t0) (t1) t0
+o: Bit
+  <> (o) (i) o
 
-t1: Bit
-  <> (t0) (t1) t1
+i: Bit
+  <> (o) (i) i
 
 // Nat
 // ===
 
 Nat: Type //prim//
-  self<P: Nat -> Type> ->
+  nat_value<P: Nat -> Type> ->
   (zero: P(zero)) ->
   (succ: (pred: Nat) -> P(succ(pred))) ->
-  P(self)
+  P(nat_value)
 
 zero: Nat
   <> (z) (s) z
@@ -288,9 +288,9 @@ n32: Nat
 
 Pair: Type -> Type -> Type
   (A) (B)
-  self<P: Pair(A)(B) -> Type> ->
+  pair_value<P: Pair(A)(B) -> Type> ->
   (pair: (a: A) -> (b: B) -> P(pair<A><B>(a)(b))) ->
-  P(self)
+  P(pair_value)
 
 pair: <A: Type> -> <B: Type> -> A -> B -> Pair(A)(B)
   <> <> (a) (b)
@@ -310,10 +310,10 @@ snd: <A: Type> -> <B: Type> -> Pair(A)(B) -> B
 
 Maybe: Type -> Type
   (A)
-  self<P: Maybe(A) -> Type> ->
+  maybe_value<P: Maybe(A) -> Type> ->
   (none: P(none<A>)) ->
   (some: (value: A) -> P(some<A>(value))) ->
-  P(self)
+  P(maybe_value)
 
 none: <A: Type> -> Maybe(A)
   <>
@@ -340,10 +340,10 @@ maybe_bind: <A: Type> -> <B: Type> -> Maybe(A) -> (A -> Maybe(B)) -> Maybe(B)
 
 List: (A: Type) -> Type
   (A)
-  self<P: (x: List(A)) -> Type> ->
+  list_value<P: (x: List(A)) -> Type> ->
   (nil: P(nil<A>)) ->
   (cons: (head: A) -> (tail: List(A)) -> P(cons<A>(head)(tail))) ->
-  P(self)
+  P(list_value)
 
 nil: <A: Type> -> List(A)
   <A>
@@ -480,11 +480,11 @@ concat_to_list: <A: Type> -> (xs: Concat(A)) -> List(A)
 // ====
 
 Bits: Type
-  self<P: Bits -> Type> ->
+  bits_value<P: Bits -> Type> ->
   (be: P(be)) ->
   (b0: (pred: Bits) -> P(b0(pred))) ->
   (b1: (pred: Bits) -> P(b1(pred))) ->
-  P(self)
+  P(bits_value)
 
 be: Bits
   <P> (be) (b0) (b1) be
@@ -533,11 +533,11 @@ next_bits: (:Bits) -> Bits
 
 Word: Nat -> Type
   (size)
-  self<P: (size: Nat) -> Word(size) -> Type> ->
+  word_value<P: (size: Nat) -> Word(size) -> Type> ->
   (we: P(zero)(we)) ->
   (w0: <size: Nat> -> (pred: Word(size)) -> P(succ(size))(w0<size>(pred))) ->
   (w1: <size: Nat> -> (pred: Word(size)) -> P(succ(size))(w1<size>(pred))) ->
-  P(size)(self)
+  P(size)(word_value)
 
 we: Word(zero)
   <P> (we) (w0) (w1)
@@ -650,9 +650,9 @@ word_to_bits: <size: Nat> -> Word(size) -> Bits
 // ======
 
 U32: Type //prim//
-  self<P: U32 -> Type> ->
+  u32_value<P: U32 -> Type> ->
   (u32: (a: Word(n32)) -> P(u32(a))) ->
-  P(self)
+  P(u32_value)
 
 u32: Word(n32) -> U32
   (a)
@@ -744,10 +744,10 @@ ascii: Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Char
 // ======
 
 String: Type //prim//
-  self<P: String -> Type> ->
+  string_value<P: String -> Type> ->
   (string_nil: P(string_nil)) ->
   (string_cons: (head: Char) -> (tail: String) -> P(string_cons(head)(tail))) ->
-  P(self)
+  P(string_value)
 
 string_nil: String
   <> (string_nil) () string_nil
@@ -793,6 +793,26 @@ string_to_bits: String -> Bits
   | (str.head) (str.tail)
     bits_concat(u32_to_bits(str.head))(string_to_bits(str.tail));
 
+string_is_empty: String -> Bool
+  (str)
+  str<() Bool>
+  | true;
+  | (head) (tail) false;
+
+string_concat: String -> String -> String
+  (as) (bs)
+  as<() String>
+  | bs;
+  | (head) (tail)
+    string_cons(head)(string_concat(tail)(bs));
+
+string_flatten: List(String) -> String
+  (as)
+  as<() String>
+  | string_nil;
+  | (head) (tail)
+    string_concat(head)(string_flatten(tail));
+
 nat_to_string: Nat -> String
   (n)
   n<() String>
@@ -804,7 +824,7 @@ nat_to_string: Nat -> String
 
 Map: (A: Type) -> Type
   (A)
-  self<P: Map(A) -> Type> ->
+  map_value<P: Map(A) -> Type> ->
   (empty:
     P(empty<A>)) ->
   (multi:
@@ -812,7 +832,7 @@ Map: (A: Type) -> Type
     (lft: Map(A)) ->
     (rgt: Map(A)) ->
     P(multi<A>(val)(lft)(rgt))) ->
-  P(self)
+  P(map_value)
 
 empty: <A: Type> -> Map(A)
   <>
@@ -992,7 +1012,7 @@ union: UFind -> Bits -> Bits -> Maybe(UFind)
 // ====
 
 Term: Type
-  self<P: Term -> Type> ->
+  term_value<P: Term -> Type> ->
   (var:
     (hash: U32) ->
     (indx: Nat) ->
@@ -1036,7 +1056,7 @@ Term: Type
     (expr: Term) ->
     (type: Term) ->
     P(ann(done)(expr)(type))) ->
-  P(self)
+  P(term_value)
 
 var: Nat -> Term
   (indx)
@@ -1214,31 +1234,29 @@ parse_nam: String -> Bool -> Maybe(Pair(String)(String))
   (code) (allow_empty)
   parse_nam_aux(code)<() Parsed(String)>
   | (code) (name)
-    bool_or(allow_empty)(bool_not(is_empty<Char>(name)))<() Parsed(String)>
+    bool_or(allow_empty)(bool_not(string_is_empty(name)))<() Parsed(String)>
     | parsed<String>(code)(name);
     | noparse<String>;;
 
 // Stringification
 // ===============
 
-nest : Bool -> String -> String
+nest: Bool -> String -> String
   (b) (s)
-  let cat = concat<Char>
   b<() String>
-  | cat(LT)(cat(s)(GT));
-  | cat(LPAR)(cat(s)(RPAR));
+  | string_concat(LT)(string_concat(s)(GT));
+  | string_concat(LPAR)(string_concat(s)(RPAR));
 
-sp : String -> String
-  (s) flatten<Char>(cons<String>(SPAC)(cons<String>(s)(single<String>(SPAC))))
+sp: String -> String
+  (s) string_flatten(cons<String>(SPAC)(cons<String>(s)(single<String>(SPAC))))
 
-ERR : String
+ERR: String
   string_cons(_hash)(string_cons(_E)(string_cons(_R)(string_cons(_R)(string_nil))))
 
-stringify_term_go : List(String) -> Term -> String
+stringify_trm : List(String) -> Term -> String
   (vars) (term)
-  let go = stringify_term_go
+  let go = stringify_trm
   let cons    = cons<String>
-  let flatten = flatten<Char>
   let space   = string_cons(_space)(string_nil)
   let single  = single<String>
   term<() String>
@@ -1249,12 +1267,12 @@ stringify_term_go : List(String) -> Term -> String
   |{-typ-} () TYPS;
   |{-all-} () (e) (s) (n) (h) (b)
     let body = go(cons(n)(cons(s)(vars)))(b)
-    let head = nest(e)(flatten(cons(n)(cons(sp(COLO))(single(go(cons(s)(vars))(h))))))
-    flatten(cons(s)(cons(head)(cons(sp(ARR0))(single(body)))));
+    let head = nest(e)(string_flatten(cons(n)(cons(sp(COLO))(single(go(cons(s)(vars))(h))))))
+    string_flatten(cons(s)(cons(head)(cons(sp(ARR0))(single(body)))));
   |{-lam-} () (e) (n) (b)
     let head = nest(e)(n)
     let body = go(cons(n)(vars))(b)
-    flatten(cons(head)(cons(space)(single(body))));
+    string_flatten(cons(head)(cons(space)(single(body))));
   |{-app-} () (e) (f) (a)
     let fref = go(vars)(f)
     let fpar = nest(false)(fref)
@@ -1269,14 +1287,14 @@ stringify_term_go : List(String) -> Term -> String
       |{-lit-} () () () () fpar;
       |{-ann-} () () () () fpar;
     let argm = nest(e)(go(vars)(a))
-    flatten(cons(func)(single(argm)));
+    string_flatten(cons(func)(single(argm)));
   |{-lit-} () (n) (x) (b)
-    flatten(cons(LETS)(cons(n)(cons(sp(EQLS))(single(go(cons(n)(vars))(b))))));
+    string_flatten(cons(LETS)(cons(n)(cons(sp(EQLS))(single(go(cons(n)(vars))(b))))));
   |{-ann-} () () (x) (t)
-    flatten(cons(go(vars)(x))(cons(sp(COLS))(single(go(vars)(t)))));
+    string_flatten(cons(go(vars)(x))(cons(sp(COLS))(single(go(vars)(t)))));
 
 stringify_term : Term -> String
-  (t) stringify_term_go(nil<String>)(t)
+  (t) stringify_trm(nil<String>)(t)
 
 // Parsing
 // =======
@@ -1284,7 +1302,7 @@ stringify_term : Term -> String
 parse_par: String -> List(String) -> Parsed(Term)
   (code) (vars)
   parsing<String><Term>(parse_str(next(code))(LPAR)) | (code) (skip)
-  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (term)
+  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (term)
   parsing<String><Term>(parse_str(next(code))(RPAR)) | (code) (skip)
   parsed<Term>(code)(term);;;
 
@@ -1293,7 +1311,7 @@ parse_com: String -> List(String) -> Parsed(Term)
   parsing<String><Term>(parse_str(next(code))(DASH))  | (code) (skip)
   parsing<String><Term>(parse_nam(     code )(false)) | (code) (name)
   parsing<String><Term>(parse_str(next(code))(DASH))  | (code) (skip)
-  parsing<Term  ><Term>(parse_term(next(code))(vars))  | (code) (term)
+  parsing<Term  ><Term>(parse_trm(next(code))(vars))  | (code) (term)
   parsed<Term>(code)(term);;;;
 
 parse_all: String -> List(String) -> Parsed(Term)
@@ -1303,11 +1321,11 @@ parse_all: String -> List(String) -> Parsed(Term)
   parsing<String><Term>(parse_nam(next(code))(true)) | (code) (name)
   parsing<String><Term>(parse_str(next(code))(COLO)) | (code) (skip)
   let vars = cons<String>(self)(vars)
-  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (bind)
+  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (bind)
   parsing<Bool  ><Term>(parse_opt(next(code))(CLOS)) | (code) (skip)
   parsing<String><Term>(parse_str(next(code))(ARR0)) | (code) (skip)
   let vars = cons<String>(name)(vars)
-  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (body)
+  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
   parsed<Term>(code)(all(eras)(self)(name)(bind)(body));;;;;;;;
 
 parse_lam: String -> List(String) -> Parsed(Term)
@@ -1316,7 +1334,7 @@ parse_lam: String -> List(String) -> Parsed(Term)
   parsing<String><Term>(parse_nam(next(code))(true)) | (code) (name)
   parsing<Bool  ><Term>(parse_opt(next(code))(CLOS)) | (code) (skip)
   let vars = cons<String>(name)(vars)
-  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (body)
+  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
   parsed<Term>(code)(lam(eras)(name)(body));;;;
 
 parse_let: String -> List(String) -> Parsed(Term)
@@ -1324,9 +1342,9 @@ parse_let: String -> List(String) -> Parsed(Term)
   parsing<String><Term>(parse_str(next(code))(LETS))  | (code) (skip)
   parsing<String><Term>(parse_nam(next(code))(false)) | (code) (name)
   parsing<String><Term>(parse_str(next(code))(EQLS))  | (code) (skip)
-  parsing<Term  ><Term>(parse_term(next(code))(vars))  | (code) (expr)
+  parsing<Term  ><Term>(parse_trm(next(code))(vars))  | (code) (expr)
   let vars = cons<String>(name)(vars)
-  parsing<Term  ><Term>(parse_term(next(code))(vars))  | (code) (body)
+  parsing<Term  ><Term>(parse_trm(next(code))(vars))  | (code) (body)
   parsed<Term>(code)(lit(name)(expr)(body));;;;;
 
 parse_typ: String -> List(String) -> Parsed(Term)
@@ -1344,14 +1362,14 @@ parse_var: String -> List(String) -> Parsed(Term)
 parse_app: String -> Term -> List(String) -> Parsed(Term)
   (code) (func) (vars)
   parsing<Bool><Term>(parse_opt(      code )(OPEN)) | (code) (eras)
-  parsing<Term><Term>(parse_term(next(code))(vars)) | (code) (argm)
+  parsing<Term><Term>(parse_trm(next(code))(vars)) | (code) (argm)
   parsing<Bool><Term>(parse_opt( next(code))(CLOS)) | (code) (skip)
   parsed<Term>(code)(app(eras)(func)(argm));;;
 
 parse_pip: String -> Term -> List(String) -> Parsed(Term)
   (code) (func) (vars)
   parsing<String><Term>(parse_str(next(code))(PIPE)) | (code) (skip)
-  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (argm)
+  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (argm)
   parsing<String><Term>(parse_str(next(code))(SEMI)) | (code) (skip)
   parsed<Term>(code)(app(false)(func)(argm));;;
 
@@ -1359,14 +1377,14 @@ parse_arr: String -> Term -> List(String) -> Parsed(Term)
   (code) (bind) (vars)
   parsing<String><Term>(parse_str(next(code))(ARR0)) | (code) (skip)
   let vars = cons<String>(string_nil)(cons<String>(string_nil)(vars))
-  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (body)
+  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (body)
   let term = all(false)(string_nil)(string_nil)(shift(bind)(n1)(n0))(body)
   parsed<Term>(code)(term);;
 
 parse_ann: String -> Term -> List(String) -> Parsed(Term)
   (code) (expr) (vars)
   parsing<String><Term>(parse_str(next(code))(COLS)) | (code) (skip)
-  parsing<Term  ><Term>(parse_term(next(code))(vars)) | (code) (type)
+  parsing<Term  ><Term>(parse_trm(next(code))(vars)) | (code) (type)
   parsed<Term>(code)(ann(false)(expr)(type));;
 
 parse_pst: String -> Term -> List(String) -> Parsed(Term)
@@ -1383,7 +1401,7 @@ parse_pst: String -> Term -> List(String) -> Parsed(Term)
     value<() Parsed(Term)>
     | (code) (term) parse_pst(code)(term)(vars);;
 
-parse_term: String -> List(String) -> Parsed(Term)
+parse_trm: String -> List(String) -> Parsed(Term)
   (code) (vars)
   let base_parse = first_valid<Pair(String)(Term)>(
     cons<Parsed(Term)>(parse_all(code)(vars))(
@@ -1401,10 +1419,10 @@ parse_file_aux: String -> File -> Parsed(File)
   (code) (file)
   let vars = nil<String>
   let next = 
-    parsing<String><File>(parse_nam( next(code))(false)) | (code) (name)
-    parsing<String><File>(parse_str( next(code))(COLO))  | (code) (skip)
-    parsing<Term  ><File>(parse_term(next(code))(vars))  | (code) (type)
-    parsing<Term  ><File>(parse_term(next(code))(vars))  | (code) (term)
+    parsing<String><File>(parse_nam(next(code))(false)) | (code) (name)
+    parsing<String><File>(parse_str(next(code))(COLO))  | (code) (skip)
+    parsing<Term  ><File>(parse_trm(next(code))(vars))  | (code) (type)
+    parsing<Term  ><File>(parse_trm(next(code))(vars))  | (code) (term)
     let defn = pair<Term><Term>(type)(term)
     let file = insert<Def>(string_to_bits(name))(defn)(file)
     //let file = insert<Def>(string_to_bits(name))(pair<Term><Term>(typ)(typ))(file)
@@ -1412,6 +1430,9 @@ parse_file_aux: String -> File -> Parsed(File)
   next<() Parsed(File)>
   | parsed<File>(code)(file);
   | (p) p<() Parsed(File)> | (code) (file) parse_file_aux(code)(file);;
+ 
+parse_term: String -> Parsed(Term)
+  (code) parse_trm(code)(nil<String>)
 
 parse_file: String -> Parsed(File)
   (code) parse_file_aux(code)(empty<Def>)
@@ -1502,7 +1523,7 @@ subst: Term -> Term -> Nat -> Term
 // ==========
 
 HTerm: Type
-  self<P: HTerm -> Type> ->
+  hterm_value<P: HTerm -> Type> ->
   (hvar:
     (indx: Nat) ->
     (posi: Bool) ->
@@ -1524,7 +1545,7 @@ HTerm: Type
     (func: HTerm) ->
     (argm: HTerm) ->
     P(happ(func)(argm))) ->
-  P(self)
+  P(hterm_value)
 
 hvar: Nat -> Bool -> HTerm
   (indx) (posi)
@@ -1685,515 +1706,515 @@ normalize: Term -> File -> Term
 
 // \NUL
 _NUL: Char
-  ascii(t0)(t0)(t0)(t0)(t0)(t0)(t0)(t0)
+  ascii(o)(o)(o)(o)(o)(o)(o)(o)
 
 // \SOH
 _SOH: Char
-  ascii(t0)(t0)(t0)(t0)(t0)(t0)(t0)(t1)
+  ascii(o)(o)(o)(o)(o)(o)(o)(i)
 
 // \STX
 _STX: Char
-  ascii(t0)(t0)(t0)(t0)(t0)(t0)(t1)(t0)
+  ascii(o)(o)(o)(o)(o)(o)(i)(o)
 
 // \ETX
 _ETX: Char
-  ascii(t0)(t0)(t0)(t0)(t0)(t0)(t1)(t1)
+  ascii(o)(o)(o)(o)(o)(o)(i)(i)
 
 // \EOT
 _EOT: Char
-  ascii(t0)(t0)(t0)(t0)(t0)(t1)(t0)(t0)
+  ascii(o)(o)(o)(o)(o)(i)(o)(o)
 
 // \ENQ
 _ENQ: Char
-  ascii(t0)(t0)(t0)(t0)(t0)(t1)(t0)(t1)
+  ascii(o)(o)(o)(o)(o)(i)(o)(i)
 
 // \ACK
 _ACK: Char
-  ascii(t0)(t0)(t0)(t0)(t0)(t1)(t1)(t0)
+  ascii(o)(o)(o)(o)(o)(i)(i)(o)
 
 // \BEL
 _BEL: Char
-  ascii(t0)(t0)(t0)(t0)(t0)(t1)(t1)(t1)
+  ascii(o)(o)(o)(o)(o)(i)(i)(i)
 
 // \BS
 _BS: Char
-  ascii(t0)(t0)(t0)(t0)(t1)(t0)(t0)(t0)
+  ascii(o)(o)(o)(o)(i)(o)(o)(o)
 
 // \HT
 _HT: Char
-  ascii(t0)(t0)(t0)(t0)(t1)(t0)(t0)(t1)
+  ascii(o)(o)(o)(o)(i)(o)(o)(i)
 
 // \LF
 _LF: Char
-  ascii(t0)(t0)(t0)(t0)(t1)(t0)(t1)(t0)
+  ascii(o)(o)(o)(o)(i)(o)(i)(o)
 
 // \VT
 _VT: Char
-  ascii(t0)(t0)(t0)(t0)(t1)(t0)(t1)(t1)
+  ascii(o)(o)(o)(o)(i)(o)(i)(i)
 
 // \FF
 _FF: Char
-  ascii(t0)(t0)(t0)(t0)(t1)(t1)(t0)(t0)
+  ascii(o)(o)(o)(o)(i)(i)(o)(o)
 
 // \CR
 _CR: Char
-  ascii(t0)(t0)(t0)(t0)(t1)(t1)(t0)(t1)
+  ascii(o)(o)(o)(o)(i)(i)(o)(i)
 
 // \SO
 _SO: Char
-  ascii(t0)(t0)(t0)(t0)(t1)(t1)(t1)(t0)
+  ascii(o)(o)(o)(o)(i)(i)(i)(o)
 
 // \S 
 _SI: Char
-  ascii(t0)(t0)(t0)(t0)(t1)(t1)(t1)(t1)
+  ascii(o)(o)(o)(o)(i)(i)(i)(i)
 
 // \DLE
 _DLE: Char
-  ascii(t0)(t0)(t0)(t1)(t0)(t0)(t0)(t0)
+  ascii(o)(o)(o)(i)(o)(o)(o)(o)
 
 // \DC1
 _DC1: Char
-  ascii(t0)(t0)(t0)(t1)(t0)(t0)(t0)(t1)
+  ascii(o)(o)(o)(i)(o)(o)(o)(i)
 
 // \DC2
 _DC2: Char
-  ascii(t0)(t0)(t0)(t1)(t0)(t0)(t1)(t0)
+  ascii(o)(o)(o)(i)(o)(o)(i)(o)
 
 // \DC3
 _DC3: Char
-  ascii(t0)(t0)(t0)(t1)(t0)(t0)(t1)(t1)
+  ascii(o)(o)(o)(i)(o)(o)(i)(i)
 
 // \DC4
 _DC4: Char
-  ascii(t0)(t0)(t0)(t1)(t0)(t1)(t0)(t0)
+  ascii(o)(o)(o)(i)(o)(i)(o)(o)
 
 // \NAK
 _NAK: Char
-  ascii(t0)(t0)(t0)(t1)(t0)(t1)(t0)(t1)
+  ascii(o)(o)(o)(i)(o)(i)(o)(i)
 
 // \SYN
 _SYN: Char
-  ascii(t0)(t0)(t0)(t1)(t0)(t1)(t1)(t0)
+  ascii(o)(o)(o)(i)(o)(i)(i)(o)
 
 // \ETB
 _ETB: Char
-  ascii(t0)(t0)(t0)(t1)(t0)(t1)(t1)(t1)
+  ascii(o)(o)(o)(i)(o)(i)(i)(i)
 
 // \CAN
 _CAN: Char
-  ascii(t0)(t0)(t0)(t1)(t1)(t0)(t0)(t0)
+  ascii(o)(o)(o)(i)(i)(o)(o)(o)
 
 // \EM
 _EM: Char
-  ascii(t0)(t0)(t0)(t1)(t1)(t0)(t0)(t1)
+  ascii(o)(o)(o)(i)(i)(o)(o)(i)
 
 // \SUB
 _SUB: Char
-  ascii(t0)(t0)(t0)(t1)(t1)(t0)(t1)(t0)
+  ascii(o)(o)(o)(i)(i)(o)(i)(o)
 
 // \ESC
 _ESC: Char
-  ascii(t0)(t0)(t0)(t1)(t1)(t0)(t1)(t1)
+  ascii(o)(o)(o)(i)(i)(o)(i)(i)
 
 // \FS
 _FS: Char
-  ascii(t0)(t0)(t0)(t1)(t1)(t1)(t0)(t0)
+  ascii(o)(o)(o)(i)(i)(i)(o)(o)
 
 // \GS
 _GS: Char
-  ascii(t0)(t0)(t0)(t1)(t1)(t1)(t0)(t1)
+  ascii(o)(o)(o)(i)(i)(i)(o)(i)
 
 // \RS
 _RS: Char
-  ascii(t0)(t0)(t0)(t1)(t1)(t1)(t1)(t0)
+  ascii(o)(o)(o)(i)(i)(i)(i)(o)
 
 // \US
 _US: Char
-  ascii(t0)(t0)(t0)(t1)(t1)(t1)(t1)(t1)
+  ascii(o)(o)(o)(i)(i)(i)(i)(i)
 
 // ' '
 _space: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t0)(t0)
+  ascii(o)(o)(i)(o)(o)(o)(o)(o)
 
 // '!'
 _excl: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t0)(t1)
+  ascii(o)(o)(i)(o)(o)(o)(o)(i)
 
 // '"'
 _quot: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t1)(t0)
+  ascii(o)(o)(i)(o)(o)(o)(i)(o)
 
 // '#'
 _hash: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t0)(t1)(t1)
+  ascii(o)(o)(i)(o)(o)(o)(i)(i)
 
 // '$'
 _dollar: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t0)(t0)
+  ascii(o)(o)(i)(o)(o)(i)(o)(o)
 
 // '%'
 _percnt: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t0)(t1)
+  ascii(o)(o)(i)(o)(o)(i)(o)(i)
 
 // '&'
 _amp: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t1)(t0)
+  ascii(o)(o)(i)(o)(o)(i)(i)(o)
 
 // '\''
 _apos: Char
-  ascii(t0)(t0)(t1)(t0)(t0)(t1)(t1)(t1)
+  ascii(o)(o)(i)(o)(o)(i)(i)(i)
 
 // '('
 _lpar: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t0)
+  ascii(o)(o)(i)(o)(i)(o)(o)(o)
 
 // ')'
 _rpar: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t0)(t1)
+  ascii(o)(o)(i)(o)(i)(o)(o)(i)
 
 // '*'
 _ast: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t0)
+  ascii(o)(o)(i)(o)(i)(o)(i)(o)
 
 // '+'
 _plus: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t0)(t1)(t1)
+  ascii(o)(o)(i)(o)(i)(o)(i)(i)
 
 // ','
 _comma: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t0)(t0)
+  ascii(o)(o)(i)(o)(i)(i)(o)(o)
 
 // '-'
 _dash: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t0)(t1)
+  ascii(o)(o)(i)(o)(i)(i)(o)(i)
 
 // '.'
 _period: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t1)(t0)
+  ascii(o)(o)(i)(o)(i)(i)(i)(o)
 
 // '/'
 _sol: Char
-  ascii(t0)(t0)(t1)(t0)(t1)(t1)(t1)(t1)
+  ascii(o)(o)(i)(o)(i)(i)(i)(i)
 
 // '0'
 _0: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t0)(t0)
+  ascii(o)(o)(i)(i)(o)(o)(o)(o)
 
 // '1'
 _1: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t0)(t1)
+  ascii(o)(o)(i)(i)(o)(o)(o)(i)
 
 // '2'
 _2: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t1)(t0)
+  ascii(o)(o)(i)(i)(o)(o)(i)(o)
 
 // '3'
 _3: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t0)(t1)(t1)
+  ascii(o)(o)(i)(i)(o)(o)(i)(i)
 
 // '4'
 _4: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t0)(t0)
+  ascii(o)(o)(i)(i)(o)(i)(o)(o)
 
 // '5'
 _5: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t0)(t1)
+  ascii(o)(o)(i)(i)(o)(i)(o)(i)
 
 // '6'
 _6: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t1)(t0)
+  ascii(o)(o)(i)(i)(o)(i)(i)(o)
 
 // '7'
 _7: Char
-  ascii(t0)(t0)(t1)(t1)(t0)(t1)(t1)(t1)
+  ascii(o)(o)(i)(i)(o)(i)(i)(i)
 
 // '8'
 _8: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t0)
+  ascii(o)(o)(i)(i)(i)(o)(o)(o)
 
 // '9'
 _9: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t0)(t1)
+  ascii(o)(o)(i)(i)(i)(o)(o)(i)
 
 // ':'
 _colon: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t0)
+  ascii(o)(o)(i)(i)(i)(o)(i)(o)
 
 // ';'
 _semi: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t0)(t1)(t1)
+  ascii(o)(o)(i)(i)(i)(o)(i)(i)
 
 // '<'
 _lt: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t0)
+  ascii(o)(o)(i)(i)(i)(i)(o)(o)
 
 // '='
 _equals: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t0)(t1)
+  ascii(o)(o)(i)(i)(i)(i)(o)(i)
 
 // '>'
 _gt: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t0)
+  ascii(o)(o)(i)(i)(i)(i)(i)(o)
 
 // '?'
 _quest: Char
-  ascii(t0)(t0)(t1)(t1)(t1)(t1)(t1)(t1)
+  ascii(o)(o)(i)(i)(i)(i)(i)(i)
 
 // '@'
 _commat: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t0)
+  ascii(o)(i)(o)(o)(o)(o)(o)(o)
 
 // 'A'
 _A: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t0)(t1)
+  ascii(o)(i)(o)(o)(o)(o)(o)(i)
 
 // 'B'
 _B: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t1)(t0)
+  ascii(o)(i)(o)(o)(o)(o)(i)(o)
 
 // 'C'
 _C: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t0)(t1)(t1)
+  ascii(o)(i)(o)(o)(o)(o)(i)(i)
 
 // 'D'
 _D: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t0)(t0)
+  ascii(o)(i)(o)(o)(o)(i)(o)(o)
 
 // 'E'
 _E: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t0)(t1)
+  ascii(o)(i)(o)(o)(o)(i)(o)(i)
 
 // 'F'
 _F: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t1)(t0)
+  ascii(o)(i)(o)(o)(o)(i)(i)(o)
 
 // 'G'
 _G: Char
-  ascii(t0)(t1)(t0)(t0)(t0)(t1)(t1)(t1)
+  ascii(o)(i)(o)(o)(o)(i)(i)(i)
 
 // 'H'
 _H: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t0)(t0)
+  ascii(o)(i)(o)(o)(i)(o)(o)(o)
 
 // 'I'
 _I: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t0)(t1)
+  ascii(o)(i)(o)(o)(i)(o)(o)(i)
 
 // 'J'
 _J: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t1)(t0)
+  ascii(o)(i)(o)(o)(i)(o)(i)(o)
 
 // 'K'
 _K: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t0)(t1)(t1)
+  ascii(o)(i)(o)(o)(i)(o)(i)(i)
 
 // 'L'
 _L: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t0)(t0)
+  ascii(o)(i)(o)(o)(i)(i)(o)(o)
 
 // 'M'
 _M: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t0)(t1)
+  ascii(o)(i)(o)(o)(i)(i)(o)(i)
 
 // 'N'
 _N: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t1)(t0)
+  ascii(o)(i)(o)(o)(i)(i)(i)(o)
 
 // 'O'
 _O: Char
-  ascii(t0)(t1)(t0)(t0)(t1)(t1)(t1)(t1)
+  ascii(o)(i)(o)(o)(i)(i)(i)(i)
 
 // 'P'
 _P: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t0)(t0)
+  ascii(o)(i)(o)(i)(o)(o)(o)(o)
 
 // 'Q'
 _Q: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t0)(t1)
+  ascii(o)(i)(o)(i)(o)(o)(o)(i)
 
 // 'R'
 _R: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t1)(t0)
+  ascii(o)(i)(o)(i)(o)(o)(i)(o)
 
 // 'S'
 _S: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t0)(t1)(t1)
+  ascii(o)(i)(o)(i)(o)(o)(i)(i)
 
 // 'T'
 _T: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t0)(t0)
+  ascii(o)(i)(o)(i)(o)(i)(o)(o)
 
 // 'U'
 _U: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t0)(t1)
+  ascii(o)(i)(o)(i)(o)(i)(o)(i)
 
 // 'V'
 _V: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t1)(t0)
+  ascii(o)(i)(o)(i)(o)(i)(i)(o)
 
 // 'W'
 _W: Char
-  ascii(t0)(t1)(t0)(t1)(t0)(t1)(t1)(t1)
+  ascii(o)(i)(o)(i)(o)(i)(i)(i)
 
 // 'X'
 _X: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t0)(t0)
+  ascii(o)(i)(o)(i)(i)(o)(o)(o)
 
 // 'Y'
 _Y: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t0)(t1)
+  ascii(o)(i)(o)(i)(i)(o)(o)(i)
 
 // 'Z'
 _Z: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t1)(t0)
+  ascii(o)(i)(o)(i)(i)(o)(i)(o)
 
 // '['
 _lbrack: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t0)(t1)(t1)
+  ascii(o)(i)(o)(i)(i)(o)(i)(i)
 
 // '\\'
 _bsol: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t0)(t0)
+  ascii(o)(i)(o)(i)(i)(i)(o)(o)
 
 // ']'
 _rbrack: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t0)(t1)
+  ascii(o)(i)(o)(i)(i)(i)(o)(i)
 
 // '^'
 _caret: Char
-  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t1)(t0)
+  ascii(o)(i)(o)(i)(i)(i)(i)(o)
 
 // '_'
 _lowbar: Char 
-  ascii(t0)(t1)(t0)(t1)(t1)(t1)(t1)(t1)
+  ascii(o)(i)(o)(i)(i)(i)(i)(i)
 
 // '`'
 _grave: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t0)(t0)
+  ascii(o)(i)(i)(o)(o)(o)(o)(o)
 
 // 'a'
 _a: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t0)(t1)
+  ascii(o)(i)(i)(o)(o)(o)(o)(i)
 
 // 'b'
 _b: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t1)(t0)
+  ascii(o)(i)(i)(o)(o)(o)(i)(o)
 
 // 'c'
 _c: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t0)(t1)(t1)
+  ascii(o)(i)(i)(o)(o)(o)(i)(i)
 
 // 'd'
 _d: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t0)(t0)
+  ascii(o)(i)(i)(o)(o)(i)(o)(o)
 
 // 'e'
 _e: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t0)(t1)
+  ascii(o)(i)(i)(o)(o)(i)(o)(i)
 
 // 'f'
 _f: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t1)(t0)
+  ascii(o)(i)(i)(o)(o)(i)(i)(o)
 
 // 'g'
 _g: Char
-  ascii(t0)(t1)(t1)(t0)(t0)(t1)(t1)(t1)
+  ascii(o)(i)(i)(o)(o)(i)(i)(i)
 
 // 'h'
 _h: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t0)(t0)
+  ascii(o)(i)(i)(o)(i)(o)(o)(o)
 
 // 'i'
 _i: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t0)(t1)
+  ascii(o)(i)(i)(o)(i)(o)(o)(i)
 
 // 'j'
 _j: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t1)(t0)
+  ascii(o)(i)(i)(o)(i)(o)(i)(o)
 
 // 'k'
 _k: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t0)(t1)(t1)
+  ascii(o)(i)(i)(o)(i)(o)(i)(i)
 
 // 'l'
 _l: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t0)(t0)
+  ascii(o)(i)(i)(o)(i)(i)(o)(o)
 
 // 'm'
 _m: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t0)(t1)
+  ascii(o)(i)(i)(o)(i)(i)(o)(i)
 
 // 'n'
 _n: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t1)(t0)
+  ascii(o)(i)(i)(o)(i)(i)(i)(o)
 
 // 'o'
 _o: Char
-  ascii(t0)(t1)(t1)(t0)(t1)(t1)(t1)(t1)
+  ascii(o)(i)(i)(o)(i)(i)(i)(i)
 
 // 'p'
 _p: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t0)(t0)
+  ascii(o)(i)(i)(i)(o)(o)(o)(o)
 
 // 'q'
 _q: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t0)(t1)
+  ascii(o)(i)(i)(i)(o)(o)(o)(i)
 
 // 'r'
 _r: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t1)(t0)
+  ascii(o)(i)(i)(i)(o)(o)(i)(o)
 
 // 's'
 _s: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t0)(t1)(t1)
+  ascii(o)(i)(i)(i)(o)(o)(i)(i)
 
 // 't'
 _t: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t0)(t0)
+  ascii(o)(i)(i)(i)(o)(i)(o)(o)
 
 // 'u'
 _u: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t0)(t1)
+  ascii(o)(i)(i)(i)(o)(i)(o)(i)
 
 // 'v'
 _v: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t1)(t0)
+  ascii(o)(i)(i)(i)(o)(i)(i)(o)
 
 // 'w'
 _w: Char
-  ascii(t0)(t1)(t1)(t1)(t0)(t1)(t1)(t1)
+  ascii(o)(i)(i)(i)(o)(i)(i)(i)
 
 // 'x'
 _x: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t0)(t0)
+  ascii(o)(i)(i)(i)(i)(o)(o)(o)
 
 // 'y'
 _y: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t0)(t1)
+  ascii(o)(i)(i)(i)(i)(o)(o)(i)
 
 // 'z'
 _z: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t0)
+  ascii(o)(i)(i)(i)(i)(o)(i)(o)
 
 // '{'
 _lbrace: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t0)(t1)(t1)
+  ascii(o)(i)(i)(i)(i)(o)(i)(i)
 
 // '|'
 _vert: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t0)
+  ascii(o)(i)(i)(i)(i)(i)(o)(o)
 
 // '}'
 _rbrace: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t0)(t1)
+  ascii(o)(i)(i)(i)(i)(i)(o)(i)
 
 // '~'
 _tilde: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t0)
+  ascii(o)(i)(i)(i)(i)(i)(i)(o)
 
 // \DEL
 _DEL: Char
-  ascii(t0)(t1)(t1)(t1)(t1)(t1)(t1)(t1)
+  ascii(o)(i)(i)(i)(i)(i)(i)(i)
 
 // "("
 LPAR: String
@@ -2318,5 +2339,21 @@ example_2: Nat
   let n10m  = nat_mul(n10)(n1m)
   nat_sum(n10m)
 
-main: Nat
-  example_2
+// Exports
+// =======
+
+Exports: Type
+  <P: Type> ->
+  (export: <A: Type> -> (x: A) -> (xs: P) -> P) ->
+  (module: P) ->
+  P
+
+main: Exports
+  <P> (export) (module)
+  ( export<Term -> String               >(stringify_term)
+  | export<File -> String -> Maybe(Term)>(get_term)
+  | export<File -> String -> Maybe(Term)>(get_type)
+  | export<Term -> File -> Term         >(normalize)
+  | export<String -> Parsed(File)       >(parse_file)
+  | export<String -> Parsed(Term)       >(parse_term)
+  | module;;;;;;)
