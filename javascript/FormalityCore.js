@@ -819,33 +819,27 @@ function congruent_terms(map, a, b) {
   } else {
     switch (a.ctor + b.ctor) {
       case "AllAll":
-        var bind_id = congruent_terms(map, a.bind, b.bind);
-        var body_id = congruent_terms(map, a.body, b.body);
-        var ret = bind_id && body_id;
-        break;
+        return a.eras === b.eras
+          && congruent_terms(map, a.bind, b.bind)
+          && congruent_terms(map, a.body, b.body);
       case "LamLam":
-        var body_id = congruent_terms(map, a.body, b.body);
-        var ret = body_id;
+        return a.eras === b.eras
+          && congruent_terms(map, a.body, b.body);
         break;
       case "AppApp":
-        var func_id = congruent_terms(map, a.func, b.func);
-        var argm_id = congruent_terms(map, a.argm, b.argm);
-        var ret = func_id && argm_id;
+        return a.eras === b.eras
+          && congruent_terms(map, a.func, b.func)
+          && congruent_terms(map, a.argm, b.argm);
         break;
       case "LetLet":
-        var expr_id = congruent_terms(map, a.expr, b.expr);
-        var body_id = congruent_terms(map, a.body, b.body);
-        var ret = expr_id && body_id;
+        return congruent_terms(map, a.expr, b.expr)
+          && congruent_terms(map, a.body, b.body);
         break;
       case "AnnAnn":
-        var expr_id = congruent_terms(map, a.expr, b.expr);
-        var ret = expr_id;
-        break;
+        return congruent_terms(map, a.expr, b.expr);
       default:
-        var ret = false;
-        break;
+        return false;
     }
-    return ret;
   }
 };
 
@@ -864,6 +858,7 @@ function equal(a, b, file, dep = 0) {
     if (!id) {
       switch (a1.ctor + b1.ctor) {
         case "AllAll":
+          if (a1.eras !== b1.eras) return false;
           var a_bind = subst(a1.bind, Ref("%" + (depth + 0)), 0);
           var b_bind = subst(b1.bind, Ref("%" + (depth + 0)), 0);
           var a_body = subst(a1.body, Ref("%" + (depth + 1)), 1);
@@ -874,11 +869,13 @@ function equal(a, b, file, dep = 0) {
           vis.push([a_body, b_body, depth + 2]);
           break;
         case "LamLam":
+          if (a1.eras !== b1.eras) return false;
           var a_body = subst(a1.body, Ref("%" + (depth + 0)), 0);
           var b_body = subst(b1.body, Ref("%" + (depth + 0)), 0);
           vis.push([a_body, b_body, depth + 1]);
           break;
         case "AppApp":
+          if (a1.eras !== b1.eras) return false;
           vis.push([a1.func, b1.func, depth]);
           vis.push([a1.argm, b1.argm, depth]);
           break;

@@ -39,6 +39,17 @@ module.exports = function fmc_to_js(file) {
     string_eql : "a=>b=>a===b",
   };
 
+  function prim_of(type) {
+    for (var prim in prim_types) {
+      //console.log("try", prim, fmc.stringify_term(type));
+      if (fmc.equal(type, fmc.Ref(prim), file)) {
+        //console.log("got");
+        return prim;
+      }
+    };
+    return null;
+  };
+
   function sorted_def_names(file) {
     var seen = {};
     var refs = [];
@@ -115,10 +126,9 @@ module.exports = function fmc_to_js(file) {
               throw fmc.Err(term.locs, ctx, nam, "Mismatched erasure.");
             };
             var code = func_cmp.code;
-            for (var prim in prim_types) {
-              if (fmc.equal(func_typ, fmc.Ref(prim), file)) {
-                code = "elim_"+prim.toLowerCase()+"("+code+")";
-              }
+            var func_typ_prim = prim_of(func_typ);
+            if (func_typ_prim) {
+              code = "elim_"+func_typ_prim.toLowerCase()+"("+code+")";
             };
             if (!term.eras) {
               code = code+"("+argm_cmp.code+")";
@@ -185,10 +195,9 @@ module.exports = function fmc_to_js(file) {
           } else {
             code = "("+make_name(term.name)+"=>"+body_cmp.code+")";
           }
-          for (var prim in prim_types) {
-            if (fmc.equal(type, fmc.Ref(prim), file)) {
-              code = "inst_"+prim.toLowerCase()+"("+code+")";
-            };
+          var type_prim = prim_of(type);
+          if (type_prim) {
+            code = "inst_"+type_prim.toLowerCase()+"("+code+")";
           };
         } else {
           throw fmc.Err(term.locs, ctx, nam, "Lambda has a non-function type.");
