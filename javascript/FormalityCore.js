@@ -171,6 +171,16 @@ function parse_opt(code, indx, ch0, ch1) {
   }
 };
 
+// Parses one of two strings
+function parse_may(code, indx, str) {
+  try {
+    var [indx, skip] = parse_str(code, indx, str);
+    return [indx, true];
+  } catch (e) {
+    return [indx, false];
+  }
+};
+
 // Parses a valid name, non-empty
 function parse_nam(code, indx, size = 0) {
   if (indx < code.length && is_name(code[indx])) {
@@ -320,8 +330,10 @@ function parse_file(code, indx = 0) {
       var [indx, name] = parse_nam(code, next(code, indx));
       var [indx, skip] = parse_str(code, next(code, indx), ":");
       var [indx, type] = parse_term(code, next(code, indx), Nil());
+      var [indx, loop] = parse_may(code, drop_spaces(code, indx), "//loop//");
+      var [indx, prim] = parse_may(code, drop_spaces(code, indx), "//prim//");
       var [indx, term] = parse_term(code, next(code, indx), Nil());
-      file[name] = {type, term};
+      file[name] = {type, term, meta: {loop,prim}};
       parse_defs(code, indx);
     } catch (e) {}
   }
@@ -807,33 +819,28 @@ function congruent_terms(map, a, b) {
   } else {
     switch (a.ctor + b.ctor) {
       case "AllAll":
-        var bind_id = congruent_terms(map, a.bind, b.bind);
-        var body_id = congruent_terms(map, a.body, b.body);
-        var ret = bind_id && body_id;
-        break;
+        return a.eras === b.eras
+          && a.self === b.self
+          && congruent_terms(map, a.bind, b.bind)
+          && congruent_terms(map, a.body, b.body);
       case "LamLam":
-        var body_id = congruent_terms(map, a.body, b.body);
-        var ret = body_id;
+        return a.eras === b.eras
+          && congruent_terms(map, a.body, b.body);
         break;
       case "AppApp":
-        var func_id = congruent_terms(map, a.func, b.func);
-        var argm_id = congruent_terms(map, a.argm, b.argm);
-        var ret = func_id && argm_id;
+        return a.eras === b.eras
+          && congruent_terms(map, a.func, b.func)
+          && congruent_terms(map, a.argm, b.argm);
         break;
       case "LetLet":
-        var expr_id = congruent_terms(map, a.expr, b.expr);
-        var body_id = congruent_terms(map, a.body, b.body);
-        var ret = expr_id && body_id;
+        return congruent_terms(map, a.expr, b.expr)
+          && congruent_terms(map, a.body, b.body);
         break;
       case "AnnAnn":
-        var expr_id = congruent_terms(map, a.expr, b.expr);
-        var ret = expr_id;
-        break;
+        return congruent_terms(map, a.expr, b.expr);
       default:
-        var ret = false;
-        break;
+        return false;
     }
-    return ret;
   }
 };
 
@@ -852,6 +859,8 @@ function equal(a, b, file, dep = 0) {
     if (!id) {
       switch (a1.ctor + b1.ctor) {
         case "AllAll":
+          if (a1.eras !== b1.eras) return false;
+          if (a1.self !== b1.self) return false;
           var a_bind = subst(a1.bind, Ref("%" + (depth + 0)), 0);
           var b_bind = subst(b1.bind, Ref("%" + (depth + 0)), 0);
           var a_body = subst(a1.body, Ref("%" + (depth + 1)), 1);
@@ -862,11 +871,13 @@ function equal(a, b, file, dep = 0) {
           vis.push([a_body, b_body, depth + 2]);
           break;
         case "LamLam":
+          if (a1.eras !== b1.eras) return false;
           var a_body = subst(a1.body, Ref("%" + (depth + 0)), 0);
           var b_body = subst(b1.body, Ref("%" + (depth + 0)), 0);
           vis.push([a_body, b_body, depth + 1]);
           break;
         case "AppApp":
+          if (a1.eras !== b1.eras) return false;
           vis.push([a1.func, b1.func, depth]);
           vis.push([a1.argm, b1.argm, depth]);
           break;
@@ -986,9 +997,11 @@ function typeinfer(term, file, ctx = Nil(), nam = Nil()) {
           throw Err(term.locs, ctx, nam, "Non-function application.");
       };
     case "Let":
-      var term_val = subst(term.body, term.expr, 0);
-      var term_typ = typeinfer(term_val, file, ctx, nam);
-      return term_typ;
+      var expr_typ = typeinfer(term.expr, file, ctx, nam);
+      var body_nam = Ext(term.name, nam);
+      var body_ctx = Ext(expr_typ, ctx);
+      var body_typ = typeinfer(term.body, file, body_ctx, body_nam);
+      return subst(body_typ, term.expr, 0);
     case "All":
       var self_typ = Ann(true, term, Typ());
       var bind_ctx = Ext(self_typ, ctx);
