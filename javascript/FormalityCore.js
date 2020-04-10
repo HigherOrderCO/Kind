@@ -820,6 +820,7 @@ function congruent_terms(map, a, b) {
     switch (a.ctor + b.ctor) {
       case "AllAll":
         return a.eras === b.eras
+          && a.self === b.self
           && congruent_terms(map, a.bind, b.bind)
           && congruent_terms(map, a.body, b.body);
       case "LamLam":
@@ -859,6 +860,7 @@ function equal(a, b, file, dep = 0) {
       switch (a1.ctor + b1.ctor) {
         case "AllAll":
           if (a1.eras !== b1.eras) return false;
+          if (a1.self !== b1.self) return false;
           var a_bind = subst(a1.bind, Ref("%" + (depth + 0)), 0);
           var b_bind = subst(b1.bind, Ref("%" + (depth + 0)), 0);
           var a_body = subst(a1.body, Ref("%" + (depth + 1)), 1);

@@ -41,9 +41,7 @@ module.exports = function fmc_to_js(file) {
 
   function prim_of(type) {
     for (var prim in prim_types) {
-      //console.log("try", prim, fmc.stringify_term(type));
       if (fmc.equal(type, fmc.Ref(prim), file)) {
-        //console.log("got");
         return prim;
       }
     };

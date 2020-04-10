@@ -3,9 +3,9 @@
 
 Equal: (A: Type) -> A -> A -> Type
   (A) (a) (b)
-  self<P: (b: A) -> Equal(A)(a)(b) -> Type> ->
+  equal_value<P: (b: A) -> Equal(A)(a)(b) -> Type> ->
   (equal: P(a)(equal<A><a>)) ->
-  P(b)(self)
+  P(b)(equal_value)
 
 equal: <A: Type> -> <a: A> -> Equal(A)(a)(a)
   <A> <a>
@@ -16,10 +16,10 @@ equal: <A: Type> -> <a: A> -> Equal(A)(a)(a)
 // ====
 
 Bool: Type //prim//
-  self<P: Bool -> Type> ->
+  bool_value<P: Bool -> Type> ->
   P(true) ->
   P(false) ->
-  P(self)
+  P(bool_value)
 
 true: Bool
   <> (t) (f) t
@@ -66,11 +66,11 @@ bool_and: Bool -> Bool -> Bool //prim//
 // Cmp
 
 Cmp : Type
-  self<P: Cmp -> Type> ->
+  cmp_value<P: Cmp -> Type> ->
   P(ltn) ->
   P(eql) ->
   P(gtn) ->
-  P(self)
+  P(cmp_value)
 
 ltn: Cmp
   <> (ltn) (eql) (gtn) ltn
@@ -85,10 +85,10 @@ gtn: Cmp
 // ===
 
 Bit : Type
-  self<P: Bit -> Type> ->
+  bit_value<P: Bit -> Type> ->
   P(o) ->
   P(i) ->
-  P(self)
+  P(bit_value)
 
 o: Bit
   <> (o) (i) o
@@ -100,10 +100,10 @@ i: Bit
 // ===
 
 Nat: Type //prim//
-  self<P: Nat -> Type> ->
+  nat_value<P: Nat -> Type> ->
   (zero: P(zero)) ->
   (succ: (pred: Nat) -> P(succ(pred))) ->
-  P(self)
+  P(nat_value)
 
 zero: Nat
   <> (z) (s) z
@@ -288,9 +288,9 @@ n32: Nat
 
 Pair: Type -> Type -> Type
   (A) (B)
-  self<P: Pair(A)(B) -> Type> ->
+  pair_value<P: Pair(A)(B) -> Type> ->
   (pair: (a: A) -> (b: B) -> P(pair<A><B>(a)(b))) ->
-  P(self)
+  P(pair_value)
 
 pair: <A: Type> -> <B: Type> -> A -> B -> Pair(A)(B)
   <> <> (a) (b)
@@ -310,10 +310,10 @@ snd: <A: Type> -> <B: Type> -> Pair(A)(B) -> B
 
 Maybe: Type -> Type
   (A)
-  self<P: Maybe(A) -> Type> ->
+  maybe_value<P: Maybe(A) -> Type> ->
   (none: P(none<A>)) ->
   (some: (value: A) -> P(some<A>(value))) ->
-  P(self)
+  P(maybe_value)
 
 none: <A: Type> -> Maybe(A)
   <>
@@ -328,10 +328,10 @@ some: <A: Type> -> A -> Maybe(A)
 
 List: (A: Type) -> Type
   (A)
-  self<P: (x: List(A)) -> Type> ->
+  list_value<P: (x: List(A)) -> Type> ->
   (nil: P(nil<A>)) ->
   (cons: (head: A) -> (tail: List(A)) -> P(cons<A>(head)(tail))) ->
-  P(self)
+  P(list_value)
 
 nil: <A: Type> -> List(A)
   <A>
@@ -468,11 +468,11 @@ concat_to_list: <A: Type> -> (xs: Concat(A)) -> List(A)
 // ====
 
 Bits: Type
-  self<P: Bits -> Type> ->
+  bits_value<P: Bits -> Type> ->
   (be: P(be)) ->
   (b0: (pred: Bits) -> P(b0(pred))) ->
   (b1: (pred: Bits) -> P(b1(pred))) ->
-  P(self)
+  P(bits_value)
 
 be: Bits
   <P> (be) (b0) (b1) be
@@ -495,11 +495,11 @@ bits_concat: Bits -> Bits -> Bits
 
 Word: Nat -> Type
   (size)
-  self<P: (size: Nat) -> Word(size) -> Type> ->
+  word_value<P: (size: Nat) -> Word(size) -> Type> ->
   (we: P(zero)(we)) ->
   (w0: <size: Nat> -> (pred: Word(size)) -> P(succ(size))(w0<size>(pred))) ->
   (w1: <size: Nat> -> (pred: Word(size)) -> P(succ(size))(w1<size>(pred))) ->
-  P(size)(self)
+  P(size)(word_value)
 
 we: Word(zero)
   <P> (we) (w0) (w1)
@@ -612,9 +612,9 @@ word_to_bits: <size: Nat> -> Word(size) -> Bits
 // ======
 
 U32: Type //prim//
-  self<P: U32 -> Type> ->
+  u32_value<P: U32 -> Type> ->
   (u32: (a: Word(n32)) -> P(u32(a))) ->
-  P(self)
+  P(u32_value)
 
 u32: Word(n32) -> U32
   (a)
@@ -706,10 +706,10 @@ ascii: Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Bit -> Char
 // ======
 
 String: Type //prim//
-  self<P: String -> Type> ->
+  string_value<P: String -> Type> ->
   (string_nil: P(string_nil)) ->
   (string_cons: (head: Char) -> (tail: String) -> P(string_cons(head)(tail))) ->
-  P(self)
+  P(string_value)
 
 string_nil: String
   <> (string_nil) () string_nil
@@ -755,6 +755,26 @@ string_to_bits: String -> Bits
   | (str.head) (str.tail)
     bits_concat(u32_to_bits(str.head))(string_to_bits(str.tail));
 
+string_is_empty: String -> Bool
+  (str)
+  str<() Bool>
+  | true;
+  | (head) (tail) false;
+
+string_concat: String -> String -> String
+  (as) (bs)
+  as<() String>
+  | bs;
+  | (head) (tail)
+    string_cons(head)(string_concat(tail)(bs));
+
+string_flatten: List(String) -> String
+  (as)
+  as<() String>
+  | string_nil;
+  | (head) (tail)
+    string_concat(head)(string_flatten(tail));
+
 nat_to_string: Nat -> String
   (n)
   n<() String>
@@ -766,7 +786,7 @@ nat_to_string: Nat -> String
 
 Map: (A: Type) -> Type
   (A)
-  self<P: Map(A) -> Type> ->
+  map_value<P: Map(A) -> Type> ->
   (empty:
     P(empty<A>)) ->
   (multi:
@@ -774,7 +794,7 @@ Map: (A: Type) -> Type
     (lft: Map(A)) ->
     (rgt: Map(A)) ->
     P(multi<A>(val)(lft)(rgt))) ->
-  P(self)
+  P(map_value)
 
 empty: <A: Type> -> Map(A)
   <>
@@ -832,7 +852,7 @@ map_maybe: <A: Type> -> <B: Type> -> (A -> B) -> Maybe(A) -> Maybe(B)
 // ====
 
 Term: Type
-  self<P: Term -> Type> ->
+  term_value<P: Term -> Type> ->
   (var:
     (hash: U32) ->
     (indx: Nat) ->
@@ -876,7 +896,7 @@ Term: Type
     (expr: Term) ->
     (type: Term) ->
     P(ann(done)(expr)(type))) ->
-  P(self)
+  P(term_value)
 
 var: Nat -> Term
   (indx)
@@ -1054,31 +1074,29 @@ parse_nam: String -> Bool -> Maybe(Pair(String)(String))
   (code) (allow_empty)
   parse_nam_aux(code)<() Parsed(String)>
   | (code) (name)
-    bool_or(allow_empty)(bool_not(is_empty<Char>(name)))<() Parsed(String)>
+    bool_or(allow_empty)(bool_not(string_is_empty(name)))<() Parsed(String)>
     | parsed<String>(code)(name);
     | noparse<String>;;
 
 // Stringification
 // ===============
 
-nest : Bool -> String -> String
+nest: Bool -> String -> String
   (b) (s)
-  let cat = concat<Char>
   b<() String>
-  | cat(LT)(cat(s)(GT));
-  | cat(LPAR)(cat(s)(RPAR));
+  | string_concat(LT)(string_concat(s)(GT));
+  | string_concat(LPAR)(string_concat(s)(RPAR));
 
-sp : String -> String
-  (s) flatten<Char>(cons<String>(SPAC)(cons<String>(s)(single<String>(SPAC))))
+sp: String -> String
+  (s) string_flatten(cons<String>(SPAC)(cons<String>(s)(single<String>(SPAC))))
 
-ERR : String
+ERR: String
   string_cons(_hash)(string_cons(_E)(string_cons(_R)(string_cons(_R)(string_nil))))
 
 stringify_trm : List(String) -> Term -> String
   (vars) (term)
   let go = stringify_trm
   let cons    = cons<String>
-  let flatten = flatten<Char>
   let space   = string_cons(_space)(string_nil)
   let single  = single<String>
   term<() String>
@@ -1089,12 +1107,12 @@ stringify_trm : List(String) -> Term -> String
   |{-typ-} () TYPS;
   |{-all-} () (e) (s) (n) (h) (b)
     let body = go(cons(n)(cons(s)(vars)))(b)
-    let head = nest(e)(flatten(cons(n)(cons(sp(COLO))(single(go(cons(s)(vars))(h))))))
-    flatten(cons(s)(cons(head)(cons(sp(ARR0))(single(body)))));
+    let head = nest(e)(string_flatten(cons(n)(cons(sp(COLO))(single(go(cons(s)(vars))(h))))))
+    string_flatten(cons(s)(cons(head)(cons(sp(ARR0))(single(body)))));
   |{-lam-} () (e) (n) (b)
     let head = nest(e)(n)
     let body = go(cons(n)(vars))(b)
-    flatten(cons(head)(cons(space)(single(body))));
+    string_flatten(cons(head)(cons(space)(single(body))));
   |{-app-} () (e) (f) (a)
     let fref = go(vars)(f)
     let fpar = nest(false)(fref)
@@ -1109,11 +1127,11 @@ stringify_trm : List(String) -> Term -> String
       |{-lit-} () () () () fpar;
       |{-ann-} () () () () fpar;
     let argm = nest(e)(go(vars)(a))
-    flatten(cons(func)(single(argm)));
+    string_flatten(cons(func)(single(argm)));
   |{-lit-} () (n) (x) (b)
-    flatten(cons(LETS)(cons(n)(cons(sp(EQLS))(single(go(cons(n)(vars))(b))))));
+    string_flatten(cons(LETS)(cons(n)(cons(sp(EQLS))(single(go(cons(n)(vars))(b))))));
   |{-ann-} () () (x) (t)
-    flatten(cons(go(vars)(x))(cons(sp(COLS))(single(go(vars)(t)))));
+    string_flatten(cons(go(vars)(x))(cons(sp(COLS))(single(go(vars)(t)))));
 
 stringify_term : Term -> String
   (t) stringify_trm(nil<String>)(t)
@@ -1345,7 +1363,7 @@ subst: Term -> Term -> Nat -> Term
 // ==========
 
 HTerm: Type
-  self<P: HTerm -> Type> ->
+  hterm_value<P: HTerm -> Type> ->
   (hvar:
     (indx: Nat) ->
     (posi: Bool) ->
@@ -1367,7 +1385,7 @@ HTerm: Type
     (func: HTerm) ->
     (argm: HTerm) ->
     P(happ(func)(argm))) ->
-  P(self)
+  P(hterm_value)
 
 hvar: Nat -> Bool -> HTerm
   (indx) (posi)
@@ -2172,21 +2190,10 @@ Exports: Type
 
 main: Exports
   <P> (export) (module)
-  export<Term -> String>(stringify_term)
-  | export<String -> Parsed(File)>(parse_file)
-  | export<String -> Parsed(Term)>(parse_term)
-  | module;;;
-
-  //<P> 
-  //(t) t(
-  //(code)
-  //parse_file(code)<() String>
-  //| ERR;
-  //| (parsed)
-    //let file = snd<String><File>(parsed)
-    //get_term(file)(MAIN)<() String>
-    //| ERR;
-    //| (term)
-      //stringify_term(normalize(term)(file));;
-    ////| (term) stringify_term(term);;
-    ////| (term) stringify_term(to_low_order(to_high_order(term)(nil<HTerm>)(zero))(zero));;
+  ( export<Term -> String               >(stringify_term)
+  | export<File -> String -> Maybe(Term)>(get_term)
+  | export<File -> String -> Maybe(Term)>(get_type)
+  | export<Term -> File -> Term         >(normalize)
+  | export<String -> Parsed(File)       >(parse_file)
+  | export<String -> Parsed(Term)       >(parse_term)
+  | module;;;;;;)
