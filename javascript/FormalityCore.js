@@ -371,7 +371,7 @@ function stringify_term(term, vars = Nil()) {
       var lpar = term.eras ? "<" : "(";
       var body = stringify_term(term.body, Ext(name, vars));
       var rpar = term.eras ? ">" : ")";
-      return lpar+name+rpar+" => "+body;
+      return lpar+name+rpar+" "+body;
     case "App":
       var func = stringify_term(term.func, vars);
       var lpar = term.eras ? "<" : "(";

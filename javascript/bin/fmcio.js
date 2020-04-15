@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 var fs = require("fs");
-var fmc = require("./FormalityCore.js");
-var fmcjs = require("./Compiler.js");
+var fmc = require("./../FormalityCore.js");
+var fmcjs = require("./../Compiler.js");
 
 var args = [].slice.call(process.argv, 2);
 var file = args.pop();

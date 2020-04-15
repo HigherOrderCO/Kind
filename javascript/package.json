@@ -1,12 +1,12 @@
 {
   "name": "formality-core",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "description": "Formality language, temporary package for the next version",
   "main": "FormalityCore.js",
   "bin": {
-    "fmc": "fmc.js",
-    "fmcjs": "fmcjs.js",
-    "fmcio": "fmcio.js"
+    "fmc": "bin/fmc.js",
+    "fmcjs": "bin/fmcjs.js",
+    "fmcio": "bin/fmcio.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
