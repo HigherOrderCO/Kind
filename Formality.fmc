@@ -890,8 +890,8 @@ map_maybe: <A: Type> -> <B: Type> -> (A -> B) -> Maybe(A) -> Maybe(B)
 query: <A: Type> -> (A -> Pair(A)(A)) -> Bits -> Map(A) -> Pair(Map(A))(Maybe(A))
   <A> (cpy) (bits) (map)
   let rec = query<A>
-  let RecType = (A -> Pair(A)(A)) -> Bits -> Map(A) -> Pair(Map(A))(Maybe(A))
-  bits<() RecType -> (A -> Pair(A)(A)) -> Map(A) -> Pair(Map(A))(Maybe(A))>
+  bits<() ((A -> Pair(A)(A)) -> Bits -> Map(A) -> Pair(Map(A))(Maybe(A)))
+           -> (A -> Pair(A)(A)) -> Map(A) -> Pair(Map(A))(Maybe(A))>
   | (rec) (cpy) (map) map<() Pair(Map(A))(Maybe(A))>
     | let map = empty<A>
       let val = none<A>
@@ -952,10 +952,10 @@ query: <A: Type> -> (A -> Pair(A)(A)) -> Bits -> Map(A) -> Pair(Map(A))(Maybe(A)
 // Union-Find
 // ==========
 UNode: Type
-  self<P: (x: UNode) -> Type> ->
+  unode_value<P: (x: UNode) -> Type> ->
   (uroot: (rank: Nat) -> P(uroot(rank))) ->
   (ulink: (parent: Bits) -> P(ulink(parent))) ->
-  P(self)
+  P(unode_value)
 
 uroot: Nat -> UNode
   (rank)
