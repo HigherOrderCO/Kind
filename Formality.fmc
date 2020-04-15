@@ -2356,4 +2356,5 @@ main: Exports
   | export<Term -> File -> Term         >(normalize)
   | export<String -> Parsed(File)       >(parse_file)
   | export<String -> Parsed(Term)       >(parse_term)
-  | module;;;;;;)
+  | export<U32                          >(u32_inc(u32_inc(u32_0)))
+  | module;;;;;;;)
