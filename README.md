@@ -18,7 +18,7 @@ code, making it extremelly portable. It is the underlying core behind the
 ### 1. Usage
 
 Formality-Core has multiple reference implementations. Currently, the easiest to
-install is the JavaScript one. First, [install `npm`](https://www.npmjs.com/get-npm)
+install uses JavaScript. First, [install `npm`](https://www.npmjs.com/get-npm)
 in your system. Then, on the command line, type: `npm -g formality-core`. If all
 goes well, the language should be accessible via the `fmc` command. To test it,
 save the following file as `hello.fmc`:
@@ -40,7 +40,7 @@ Evaluating `main`:
 (x) x
 ```
 
-You can also compile it to JavaScript with `fmcjs hello`.
+You can also compile `.fmc` files to JavaScript with `fmcjs hello`.
 
 ### 2. Syntax
 
@@ -80,31 +80,33 @@ MODULE ::=
 A Term has 8 constructors, or variants:
 
 - The `Var` variant represents a variable bound by a function value (`Lam`) or
-function type (`All`). It stores a number representing how many binders there
-are between its location and the location where it is bound. 
+  function type (`All`). It stores a number representing how many binders there
+  are between its location and the location where it is bound. That number is
+  called its Bruijn index.
 
-- The `Ref` variant represents a reference, which is the usage of a top-level
-definition. The `name` field stores the name of the referenced definition.
+- The `Ref` variant represents a reference, which represents a use of a
+  top-level definition. The `name` field stores the name of the definition.
 
-- The `Typ` variant represents the type of a function type. Formality-Core doesn't
-feature an universe of types: logical consistency is meant to be recovered in a
-separate inference step (more on that later).
+- The `Typ` variant represents the type of a type. Formality-Core doesn't
+  feature universes: logical consistency is meant to be recovered in a separate
+  inference step (more on that later).
 
 - The `All` variant represents a function type, also known as an universal
-quantification, or "forall". The `self` field stores a name for the typed term.
-`name` field stores its bound variable name, the `bind` field stores the type of
-its argument, the `body` field stores its return type, and the `eras` field
-represents its computational relevance (more on that later).
+  quantification, or "forall". The `self` field stores a name for the typed
+  term. The `name` field stores its bound variable name. The `bind` field stores
+  the type of its argument. The `body` field stores its return type. The `eras`
+  field represents its computational relevance (more on that later).
 
-- The `Lam` variant represents a pure function, also known as a lambda. The `name`
-field stores its bound variable name, the `body` field stores its returned
-expression, and the `eras` field represents its computational relevance.
+- The `Lam` variant represents an anonymous function, also known as a lambda.
+  The `name` field stores its bound variable name. The `body` field stores its
+  returned expression. The `eras` field represents its computational relevance.
 
-- The `App` variant represents a function application. The `func` field stores the
-function to be applied, and the `argm` field stores the argument. 
+- The `App` variant represents a function application. The `func` field stores
+  the function to be applied. The `argm` field stores the argument. The `eras`
+  field represents its computational relevance.
 
 - The `Ann` variant represents an inline type annotation. The `expr` field
-represents the annotated expression, and the `type` field represents its type.
+  represents the annotated expression. The `type` field represents its type.
 
 An example term is `fn(x: Bool) -> Bool`, which is a function type that calls
 itself `fn`. It receives a `Bool`, locally called `x`, and returns another
@@ -163,8 +165,8 @@ not: Bool -> Bool
 ```
 
 In this example, `id` is a top-level definition with the `<A: Type> -> A -> A`
-type and the `<A> => (a) => a` value. In reference implementations, we use JSON
-to represent files and terms. For illustration, below is the internal
+type and the `<A> (a) a` value. In reference implementations, we use JSON to
+represent files and terms. For illustration, below is the internal
 representation of the value of the `Bool` definition above:
 
 ```javascript
@@ -221,16 +223,14 @@ representation of the value of the `Bool` definition above:
 }
 ```
 
-Notice that variables are represented using Bruijn indices. When in doubt,
-consider the reference parsers.
+When in doubt about syntax, the reference parsers should be considered.
 
 ### 3. Evaluation
 
 Computationally, Formality-Core is just the lambda calculus. As such, its main
 operation is the beta-reduction. It says that the evaluation of a function
 application `((x) <body>)(<argm>)` is the function's `<body>`, with all
-occurrences of `x` replaced by `<argm>` in a name capture avoiding manner. This
-can be written down as:
+occurrences of `x` replaced by `<argm>`. This can be written down as:
 
 ```
 ((x) f)(a)
@@ -264,9 +264,8 @@ false                      -- subst `f` by `true`
 Substitution is a delicate operation due to name capture. For example, a naive
 attempt of evaluating the `(x) ((a) (x) a)(x)` term would result in `(x) (x) x`,
 which is incorrect, since the occurrence of `x` refers to the outer lambda, but,
-after substitution, it accidentally refers to the innermost lambda. To avoid
-this, we use Bruijn indices in internal representations, as well as shifting
-operations.
+after substitution, it accidentally refers to the inner lambda. This must be
+somehow avoided. In reference implementations, we use Bruijn indices an shifts.
 
 Formality-Core doesn't define any evaluation order. It could be evaluated
 strictly as in JavaScripy and Python, lazily as in Haskell, or optimally through
@@ -320,7 +319,7 @@ time, that the function is never called with anything other than an `Int`.
 
 In Formality, types and programs coexist in the same level, there isn't a
 distinction between them. Types can can be stored in lists, returned from
-functions and so on. This flexibility allowing programmers to state and prove
+functions and so on. This flexibility allows programmers to state and prove
 arbitrarily complex invariants about the runtime behavior of their programs; it
 is the reason it can be seen as a proof language.
 
@@ -368,11 +367,10 @@ function safe_div(a: Number, b: Number): Number {
 ```
 
 Since here `a` and `b` have the static `Number` type, we don't need to check
-them at runtime, and calling `safe_div` with a `String` results in a nice
-compile-time error report. But we still need to check that `b` is larger than
-`0`. One might wonder if it is possible to move that check to compile-time too.
-That's precisely what dependent types do: statically verify that runtime values
-respect certain expectations. In Formality-Core, we can write:
+that at runtime. Moreover, calling `safe_div` with a `String` results in a nice
+compile-time error. Problem is, we still need to check that `b` is larger than
+`0`. Is it possible to perform that check at runtime too? Indeed, that's
+precisely what dependent types do. In Formality-Core, we can write:
 
 ```
 safe_div : (a: Number) -> (b: Number) -> NonZero(b) -> Number
@@ -381,7 +379,10 @@ safe_div : (a: Number) -> (b: Number) -> NonZero(b) -> Number
 
 Here, `NonZero(a)` represents a symbolic proof that `b` isn't zero. In order to
 call `safe_div`, the compiler would demand us to assert that this is true by,
-for example, using `if b != 0` **before** calling `safe_div`.
+for example, using `if b != 0` before calling `safe_div`. In another words, the
+type-system is Turing complete, allowing all sorts of invariants to be
+symbolically enforced at compile time. That's what makes it suitable as a proof
+language.
 
 Formality's type system is brief and can be described compactly as:
 
