@@ -1,6 +1,6 @@
 var fmc = require("./FormalityCore.js");
 
-module.exports = function fmc_to_js(file) {
+module.exports = function fmc_to_js(file, main) {
   function make_name(str) {
     return "$" + str.replace(/\./g,"$");
   };
@@ -25,18 +25,18 @@ module.exports = function fmc_to_js(file) {
   };
 
   var prim_funcs = {
-    nat_add    : "a=>b=>a+b",
-    nat_sub    : "a=>b=>a-b",
-    nat_mul    : "a=>b=>a*b",
-    nat_ltn    : "a=>b=>a<b",
-    nat_lte    : "a=>b=>a<=b",
-    nat_eql    : "a=>b=>a===b",
-    nat_gte    : "a=>b=>a>=b",
-    nat_gtn    : "a=>b=>a>b",
-    bool_not   : "a=>!a",
-    bool_and   : "a=>b=>a&&b",
-    bool_or    : "a=>b=>a||b",
-    string_eql : "a=>b=>a===b",
+    "Nat.add"    : "a=>b=>a+b",
+    "Nat.sub"    : "a=>b=>a-b",
+    "Nat.mul"    : "a=>b=>a*b",
+    "Nat.ltn"    : "a=>b=>a<b",
+    "Nat.lte"    : "a=>b=>a<=b",
+    "Nat.eql"    : "a=>b=>a===b",
+    "Nat.gte"    : "a=>b=>a>=b",
+    "Nat.gtn"    : "a=>b=>a>b",
+    "Bool.not"   : "a=>!a",
+    "Bool.and"   : "a=>b=>a&&b",
+    "Bool.or"    : "a=>b=>a||b",
+    "String.eql" : "a=>b=>a===b",
   };
 
   function prim_of(type) {
@@ -76,7 +76,7 @@ module.exports = function fmc_to_js(file) {
           break;
       };
     };
-    go(file.main.term);
+    go(file[main].term);
     return refs;
   };
 
@@ -246,7 +246,7 @@ module.exports = function fmc_to_js(file) {
     }
   };
 
-  var defs = sorted_def_names(file).concat("main");
+  var defs = sorted_def_names(file).concat(main);
   var code = "(function (){\n";
   for (var prim in prim_types) {
     code += "  var inst_"+prim.toLowerCase()+" = "+prim_types[prim].inst + ";\n";
@@ -279,7 +279,7 @@ module.exports = function fmc_to_js(file) {
         expr = "'ERROR'";
       };
     };
-    code += "  var $"+name+" = "+expr+";\n";
+    code += "  var "+make_name(name)+" = "+expr+";\n";
     exps.push(name);
   };
   code += "  return {\n";

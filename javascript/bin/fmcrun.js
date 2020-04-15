@@ -16,5 +16,5 @@ if (!defs[main]) {
   console.log("Term '" + main + "' not found.");
 } else {
   var js_code = fmcjs(defs, main);
-  console.log(js_code);
+  console.log(eval(js_code)[main]);
 };

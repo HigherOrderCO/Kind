@@ -5,7 +5,8 @@ Formality-Core is minimal programming language that features dependent types and
 inductive reasoning. It can be used as a lightweight interchange format for
 algorithms and proofs. Its reference implementation has about 1000 lines of
 code, making it extremelly portable. It is the underlying core behind the
-[Formality](https://github.com/moonad/formality) language.
+[Formality](https://github.com/moonad/formality) language, and the foundation of
+the [Moonad](https://github.com/moonad/Moonad) project.
 
 ## 0. Table of Contents
 
@@ -24,7 +25,7 @@ goes well, the language should be accessible via the `fmc` command. To test it,
 save the following file as `hello.fmc`:
 
 ```
-hello : <A: Type> -> A -> A
+main : <A: Type> -> A -> A
   <A> (x) x
 ```
 

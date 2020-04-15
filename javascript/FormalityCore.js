@@ -204,7 +204,7 @@ function parse_par(code, indx, vars) {
 
 // Parses a dependent function type, `(<name> : <term>) -> <term>`
 function parse_all(code, indx, vars) {
-  var from = indx;
+  var from = next(code, indx);
   var [indx, self] = parse_nam(code, next(code, indx), 1);
   var [indx, eras] = parse_opt(code, indx, "(", "<");
   var [indx, name] = parse_nam(code, next(code, indx), 1);
@@ -218,7 +218,7 @@ function parse_all(code, indx, vars) {
 
 // Parses a dependent function value, `(<name>) => <term>`
 function parse_lam(code, indx, vars) {
-  var from = indx;
+  var from = next(code, indx);
   var [indx, eras] = parse_opt(code, next(code, indx), "(", "<");
   var [indx, name] = parse_nam(code, next(code, indx), 1);
   var [indx, skip] = parse_str(code, next(code, indx), eras ? ">" : ")")
@@ -228,7 +228,7 @@ function parse_lam(code, indx, vars) {
 
 // Parses a local definition, `let x = val; body`
 function parse_let(code, indx, vars) {
-  var from = indx;
+  var from = next(code, indx);
   var [indx, skip] = parse_str(code, next(code, indx), "let ");
   var [indx, name] = parse_nam(code, next(code, indx));
   var [indx, skip] = parse_str(code, next(code, indx), "=");
@@ -239,14 +239,14 @@ function parse_let(code, indx, vars) {
 
 // Parses the type of types, `Type`
 function parse_typ(code, indx, vars) {
-  var from = indx;
+  var from = next(code, indx);
   var [indx, skip] = parse_str(code, next(code, indx), "Type");
   return [indx, Typ({from,to:indx})];
 };
 
 // Parses variables, `<name>`
 function parse_var(code, indx, vars) {
-  var from = indx;
+  var from = next(code, indx);
   var [indx, name] = parse_nam(code, next(code, indx));
   var got = find(vars, (x,i) => x === name);
   if (got) {
@@ -290,7 +290,7 @@ function parse_ann(code, indx, from, expr, vars) {
 
 // Parses a term
 function parse_term(code, indx = 0, vars = Nil()) {
-  var from = indx;
+  var from = next(code, indx);
 
   // Parses the base term, trying each variant once
   var base_parse = first_valid([
@@ -323,8 +323,8 @@ function parse_term(code, indx = 0, vars = Nil()) {
 };
 
 // Parses a file
-function parse_file(code, indx = 0) {
-  var file = {};
+function parse_defs(code, indx = 0) {
+  var defs = {};
   function parse_defs(code, indx) {
     try {
       var [indx, name] = parse_nam(code, next(code, indx));
@@ -333,12 +333,12 @@ function parse_file(code, indx = 0) {
       var [indx, loop] = parse_may(code, drop_spaces(code, indx), "//loop//");
       var [indx, prim] = parse_may(code, drop_spaces(code, indx), "//prim//");
       var [indx, term] = parse_term(code, next(code, indx), Nil());
-      file[name] = {type, term, meta: {loop,prim}};
+      defs[name] = {type, term, meta: {loop,prim}};
       parse_defs(code, indx);
     } catch (e) {}
   }
   parse_defs(code, indx);
-  return file;
+  return defs;
 };
 
 // Stringification
@@ -913,15 +913,20 @@ function Err(loc, ctx, nam, msg) {
 
 function highlight_code(code, from, to) {
   var lines = [""];
-  var from_line = 0;
+  var from_line = null;
   var to_line = 0;
+  var err_line = 0;
+  lines.push("\x1b[2m     1| \x1b[0m");
   for (var i = 0; i < code.length; ++i) {
     if (code[i] === "\n") {
-      var line_num_str = ("      "+(lines.length+1)).slice(-6);
+      var line_num_str = ("      "+(lines.length)).slice(-6);
       lines.push("\x1b[2m" + line_num_str + "| \x1b[0m");
     } else {
       var chr = code[i];
       if (from <= i && i < to) {
+        if (from_line === null) {
+          err_line = lines.length - 1;
+        }
         var chr = "\x1b[4m\x1b[31m" + chr + "\x1b[0m";
       } else {
         var chr = "\x1b[2m" + chr + "\x1b[0m";
@@ -929,15 +934,15 @@ function highlight_code(code, from, to) {
       lines[lines.length - 1] += chr;
     };
     if (i === from) {
-      from_line = lines.length;
+      from_line = lines.length - 1;
     };
     if (i === to) {
-      to_line = lines.length;
+      to_line = lines.length - 1;
     };
   };
   from_line = Math.max(from_line - 4, 0);
   to_line = Math.min(to_line + 3, lines.length - 1);
-  var err = "On line " + from_line + ":\n";
+  var err = "On line " + err_line + ":\n";
   var err = err + lines.slice(from_line, to_line).join("\n");
   return err;
 };
@@ -1144,7 +1149,7 @@ module.exports = {
   parse_pip,
   parse_ann,
   parse_term,
-  parse_file,
+  parse_defs,
   stringify_term,
   stringify_file,
   stringify_ctx,
