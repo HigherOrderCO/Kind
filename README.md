@@ -24,7 +24,7 @@ goes well, the language should be accessible via the `fmc` command. To test it,
 save the following file as `hello.fmc`:
 
 ```
-hello : <A: Type> -> A -> A
+main : <A: Type> -> A -> A
   <A> (x) x
 ```
 
