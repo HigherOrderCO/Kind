@@ -1,14 +1,11 @@
 Formality-Core
 ==============
 
-Formality is a minimal programming language featuring inductive datatypes that is:
-
-**Portable:** its reference implementation has only about 1000 lines of code.
-
-**Efficient:** it compiles to a massively parallel, non-garbage-collected,
-Lévy-optimal runtime.
-
-**Accessible:** it has a non-obscure syntax that resembles popular languages.
+Formality-Core is minimal programming language that features dependent types and
+inductive reasoning. It can be used as a lightweight interchange format for
+algorithms and proofs. Its reference implementation has about 1000 lines of
+code, making it extremelly portable. It is the underlying core behind the
+[Formality](https://github.com/moonad/formality) language.
 
 ## 0. Table of Contents
 
@@ -239,6 +236,29 @@ can be written down as:
 ((x) f)(a)
 ---------- beta-reduction
 f[x <- a]
+```
+
+Before evaluating a term, erased lambdas `<x> t` are replaced by `t` and erased
+applications `f<x>` are replaced by `f`. During evaluation, top-level
+definitions, addressed by the `Ref` variant, are dereferenced as their
+respective values. Beta-reductions and dereferences are applied repeatedly until
+there is nothing else to do. For example, the `main` term below:
+
+```javascript
+main: Bool
+  not(true)
+```
+
+Using the `Bool`, `not` and `true` defined previously, is evaluated as:
+
+```
+not(true)
+((b) b(false)(true))(true) -- deref `not`
+true(false)(true)          -- subst `b` by `true`
+((t) (f) t)(false)(true)   -- deref `true`
+((f) false)(true)          -- subst `t` by `false`
+false                      -- subst `f` by `true`
+(t) (f) f                  -- deref `false`
 ```
 
 Substitution is a delicate operation due to name capture. For example, a naive
