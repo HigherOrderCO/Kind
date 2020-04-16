@@ -181,6 +181,30 @@ nat_sum_go: Nat -> Nat -> Nat //loop//
 nat_sum: Nat -> Nat
   (n) nat_sum_go(n)(zero)
 
+nat_sub_rem: Nat -> Nat -> Either(Nat)(Nat)
+  (n) (m)
+  m<() Either(Nat)(Nat)>
+  | left<Nat><Nat>(n);
+  | (m.pred) n<() Either(Nat)(Nat)>
+    | right<Nat><Nat>(succ(m.pred));
+    | (n.pred) nat_sub_rem(n.pred)(m.pred);;
+
+nat_div_mod_aux: Nat -> Nat -> Nat -> Pair(Nat)(Nat)
+  (n) (m) (d)
+  let p = nat_sub_rem(n)(m)
+  p<() Pair(Nat)(Nat)>
+  | (p.value) nat_div_mod_aux(p.value)(m)(succ(d));
+  | (p.value) pair<Nat><Nat>(d)(n);
+
+nat_div_mod: Nat -> Nat -> Pair(Nat)(Nat)
+  (n) (m) nat_div_mod_aux(n)(m)(zero)
+
+nat_mod: Nat -> Nat -> Nat
+  (n) (m) snd<Nat><Nat>(nat_div_mod(n)(m))
+
+nat_div: Nat -> Nat -> Nat
+  (n) (m) fst<Nat><Nat>(nat_div_mod(n)(m))
+
 n0: Nat
   zero
 
@@ -304,6 +328,26 @@ fst: <A: Type> -> <B: Type> -> Pair(A)(B) -> A
 snd: <A: Type> -> <B: Type> -> Pair(A)(B) -> B
   <A> <B> (pair)
   pair<() B>((a) (b) b)
+
+// Either
+// ======
+
+Either: Type -> Type -> Type
+  (A) (B)
+  either_value<P: Either(A)(B) -> Type> ->
+  (left: (value: A) -> P(left<A><B>(value))) ->
+  (right: (value: B) -> P(right<A><B>(value))) ->
+  P(either_value)
+
+left: <A: Type> -> <B: Type> -> A -> Either(A)(B)
+  <> <> (a)
+  <> (left) ()
+  left(a)
+
+right: <A: Type> -> <B: Type> -> B -> Either(A)(B)
+  <> <> (b)
+  <> () (right)
+  right(b)
 
 // Maybe
 // =====
