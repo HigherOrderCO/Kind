@@ -22,17 +22,17 @@ Formality-Core has multiple reference implementations. Currently, the easiest to
 install uses JavaScript. First, [install `npm`](https://www.npmjs.com/get-npm)
 in your system. Then, on the command line, type: `npm -g formality-core`. If all
 goes well, the language should be accessible via the `fmc` command. To test it,
-save the following file as `hello.fmc`:
+save the following file as `main.fmc`:
 
 ```
 main : <A: Type> -> A -> A
   <A> (x) x
 ```
 
-And type `fmc hello`. This should output:
+And type `fmc main`. This should output:
 
 ```
-Type-checking hello.fmc:
+Type-checking main.fmc:
 main : <A: Type> -> A -> A
 
 All terms check.
@@ -41,7 +41,7 @@ Evaluating `main`:
 (x) x
 ```
 
-You can also compile `.fmc` files to JavaScript with `fmcjs hello`.
+You can also compile `.fmc` files to JavaScript with `fmcjs main`.
 
 ### 2. Syntax
 
