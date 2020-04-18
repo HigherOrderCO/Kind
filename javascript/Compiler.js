@@ -242,7 +242,7 @@ module.exports = function fmc_to_js(file, main) {
 
   for (var prim in prim_funcs) {
     if (!file[prim] || !file[prim].meta.prim) {
-      delete prim_types[prim];
+      delete prim_funcs[prim];
     }
   };
 
