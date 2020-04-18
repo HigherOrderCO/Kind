@@ -43,6 +43,21 @@ Evaluating `main`:
 
 You can also compile `.fmc` files to JavaScript with `fmcjs main`.
 
+Since Formality-Core is so simple, it doesn't come with built-in functions you
+would expect, and it doesn't have a standard library. But you're welcome to
+clone the [`Moonad` repository](https://github.com/moonad/moonad), as it has
+many common data structures and algorithms. Try, for example:
+
+```
+git clone https://github.com/moonad/moonad
+cd moonad
+fmcrun Example.u32_add
+```
+
+This will run a simple addition of 32-bit unsigned integers, formalized in
+Formaliy-Core in the `U32.*.fmc` files. Also feel encouraged to contribute with
+your code there. Anything is welcome!
+
 ### 2. Syntax
 
 Formality-Core programs are split as modules (`Module`), each containing a
