@@ -11,7 +11,7 @@ function load(dir = ".", ext = ".fmc", parse_defs = fmc.parse_defs) {
     var result = {files: {}, defs: {}};
     for (var file of files) {
       var file_code = fs.readFileSync(file, "utf8");
-      var file_defs = parse_defs(file_code);
+      var file_defs = parse_defs(file_code, 0, file);
       for (var name in file_defs) {
         if (result.defs[name]) {
           console.log("Redefinition of '" + name + "' in '" + file + "'.");
