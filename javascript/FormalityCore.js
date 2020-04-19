@@ -759,6 +759,10 @@ function equate(map, x, y) {
   disjoint_set_union(map[x], map[y]);
 };
 
+function Bound(a) {
+  return Ref("%" + a);
+  };
+
 // Replaces all free variables of a subterm with a reference
 // to the depth of the quantificator it is bound
 function bind_free_vars(term, initial_depth) {
@@ -768,7 +772,7 @@ function bind_free_vars(term, initial_depth) {
       if (term.indx < depth){
         return Var(term.indx, term.locs);
       } else {
-        return Ref(initial_depth - 1 - (term.indx - depth));
+        return Bound(initial_depth - 1 - (term.indx - depth));
       }
     case "Ref":
       return Ref(term.name, term.locs);
@@ -862,19 +866,19 @@ function equal(a, b, file, dep = 0) {
         case "AllAll":
           if (a1.eras !== b1.eras) return false;
           if (a1.self !== b1.self) return false;
-          var a_bind = subst(a1.bind, Ref("%" + (depth + 0)), 0);
-          var b_bind = subst(b1.bind, Ref("%" + (depth + 0)), 0);
-          var a_body = subst(a1.body, Ref("%" + (depth + 1)), 1);
-          var a_body = subst(a_body, Ref("%" + (depth + 0)), 0);
-          var b_body = subst(b1.body, Ref("%" + (depth + 1)), 1);
-          var b_body = subst(b_body, Ref("%" + (depth + 0)), 0);
+          var a_bind = subst(a1.bind, Bound(depth + 0), 0);
+          var b_bind = subst(b1.bind, Bound(depth + 0), 0);
+          var a_body = subst(a1.body, Bound(depth + 1), 1);
+          var a_body = subst(a_body, Bound(depth + 0), 0);
+          var b_body = subst(b1.body, Bound(depth + 1), 1);
+          var b_body = subst(b_body, Bound(depth + 0), 0);
           vis.push([a_bind, b_bind, depth + 1]);
           vis.push([a_body, b_body, depth + 2]);
           break;
         case "LamLam":
           if (a1.eras !== b1.eras) return false;
-          var a_body = subst(a1.body, Ref("%" + (depth + 0)), 0);
-          var b_body = subst(b1.body, Ref("%" + (depth + 0)), 0);
+          var a_body = subst(a1.body, Bound(depth + 0), 0);
+          var b_body = subst(b1.body, Bound(depth + 0), 0);
           vis.push([a_body, b_body, depth + 1]);
           break;
         case "AppApp":
@@ -883,8 +887,8 @@ function equal(a, b, file, dep = 0) {
           vis.push([a1.argm, b1.argm, depth]);
           break;
         case "LetLet":
-          var a_body = subst(a1.body, Ref("%" + (depth + 0)), 0);
-          var b_body = subst(b1.body, Ref("%" + (depth + 0)), 0);
+          var a_body = subst(a1.body, Bound(depth + 0), 0);
+          var b_body = subst(b1.body, Bound(depth + 0), 0);
           vis.push([a1.expr, b1.expr, depth]);
           vis.push([a_body, b_body, depth + 1]);
           break;
