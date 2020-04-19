@@ -332,8 +332,9 @@ function parse_defs(code, indx = 0) {
       var [indx, type] = parse_term(code, next(code, indx), Nil());
       var [indx, loop] = parse_may(code, drop_spaces(code, indx), "//loop//");
       var [indx, prim] = parse_may(code, drop_spaces(code, indx), "//prim//");
+      var [indx, data] = parse_may(code, drop_spaces(code, indx), "//data//");
       var [indx, term] = parse_term(code, next(code, indx), Nil());
-      defs[name] = {type, term, meta: {loop,prim}};
+      defs[name] = {type, term, meta: {loop,prim,data}};
       parse_defs(code, indx);
     } catch (e) {}
   }

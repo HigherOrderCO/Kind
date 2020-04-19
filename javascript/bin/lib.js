@@ -1,6 +1,6 @@
 var fs = require("fs");
 var fmc = require("./../FormalityCore.js");
-var fmcjs = require("./../Compiler.js");
+var cmp = require("./../Compiler.js");
 
 function load(dir = ".", ext = ".fmc", parse_defs = fmc.parse_defs) {
   var files = fs.readdirSync(dir).filter(file => file.slice(-ext.length) === ext);
@@ -78,17 +78,26 @@ function run(main = "main", dir, ext, parse) {
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
-    console.log(eval(fmcjs(defs, main))[main]);
+    console.log(eval(cmp.js(defs, main))[main]);
   };
 };
 
-function compile(main = "main", dir, ext, parse) {
+function js(main = "main", dir, ext, parse) {
   var {defs} = load(dir, ext, parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
-    console.log(fmcjs(defs, main));
+    console.log(cmp.js(defs, main));
   };
 };
 
-module.exports = {load, report, run, compile};
+function hs(main = "main", dir, ext, parse) {
+  var {defs} = load(dir, ext, parse);
+  if (!defs[main]) {
+    console.log("Term '" + main + "' not found.");
+  } else {
+    console.log(cmp.hs(defs, main));
+  };
+};
+
+module.exports = {load, report, run, js, hs};

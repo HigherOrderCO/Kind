@@ -41,7 +41,8 @@ Evaluating `main`:
 (x) x
 ```
 
-You can also compile `.fmc` files to JavaScript with `fmcjs main`.
+You can also compile `.fmc` files to JavaScript with `fmcjs main`, or to Haskell
+with `fmchs` main.
 
 Since Formality-Core is so simple, it doesn't come with built-in functions you
 would expect, and it doesn't have a standard library. But you're welcome to

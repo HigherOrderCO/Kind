@@ -1,11 +1,12 @@
 {
   "name": "formality-core",
-  "version": "0.2.19",
+  "version": "0.2.20",
   "description": "Formality language, temporary package for the next version",
   "main": "FormalityCore.js",
   "bin": {
     "fmc": "bin/fmc.js",
     "fmcjs": "bin/fmcjs.js",
+    "fmchs": "bin/fmchs.js",
     "fmcrun": "bin/fmcrun.js"
   },
   "scripts": {

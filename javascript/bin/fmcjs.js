@@ -1,3 +1,3 @@
 #!/usr/bin/env node
 
-require("./lib.js").compile(process.argv[2]);
+require("./lib.js").js(process.argv[2]);
