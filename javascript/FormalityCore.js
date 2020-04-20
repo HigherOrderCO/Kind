@@ -288,6 +288,29 @@ function parse_ann(code, indx, from, expr, vars) {
   return [indx, Ann(false, expr, type, {from,to:indx})];
 };
 
+// Parses a string literal, "foo"
+function parse_lit(code, indx) {
+  var from = next(code, indx);
+  var [indx, skip] = parse_str(code, next(code, indx), "\"");
+  return (function go(indx, slit) {
+    if (indx < code.length) {
+      if (code[indx] !== "\"") {
+        var cod = code.charCodeAt(indx);
+        var chr = Ref("Char.new");
+        for (var i = 15; i >= 0; --i) {
+          chr = App(false, chr, Ref((cod >>> i) & 1 ? "Bit.1" : "Bit.0"));
+        };
+        var [indx, slit] = go(indx + 1, slit);
+        return [indx, App(false, App(false, Ref("String.cons"), chr), slit, {from,to:indx})];
+      } else {
+        return [indx+1, Ref("String.nil")];
+      }
+    } else {
+      throw "Invalid string literal.";
+    }
+  })(indx);
+};
+
 // Parses a term
 function parse_term(code, indx = 0, vars = Nil()) {
   var from = next(code, indx);
@@ -299,6 +322,7 @@ function parse_term(code, indx = 0, vars = Nil()) {
     () => parse_let(code, indx, vars),
     () => parse_par(code, indx, vars),
     () => parse_typ(code, indx, vars),
+    () => parse_lit(code, indx),
     () => parse_var(code, indx, vars),
   ]);
 
