@@ -768,7 +768,7 @@ function bind_free_vars(term, initial_depth) {
       if (term.indx < depth){
         return Var(term.indx, term.locs);
       } else {
-        return Ref(initial_depth - 1 - (term.indx - depth));
+        return Ref("%" + (initial_depth - 1 - (term.indx - depth)));
       }
     case "Ref":
       return Ref(term.name, term.locs);
