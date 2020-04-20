@@ -7,12 +7,18 @@
 var fmc = require("./FormalityCore.js");
 
 module.exports = {
+  
+  // JavaScript compiler
   js: function(file, main) {
     function make_name(str) {
       return "$" + str.replace(/\./g,"$");
     };
 
     var prim_types = {
+      Unit: {
+        inst: "x=>x(1)",
+        elim: "x=>v=>v",
+      },
       Bool: {
         inst: "x=>x(true)(false)",
         elim: "x=>t=>f=>x?t:f",
@@ -253,12 +259,23 @@ module.exports = {
       }
     };
 
+    var isio = fmc.equal(file[main].type, fmc.App(false, fmc.Ref("IO"), fmc.Ref("Unit")), file);
     var defs = sorted_def_names(file).concat(main);
-    var code = "(function (){\n";
+    var code = "";
+    code += "module.exports = (function (){\n";
     for (var prim in prim_types) {
       code += "  var inst_"+prim.toLowerCase()+" = "+prim_types[prim].inst + ";\n";
       code += "  var elim_"+prim.toLowerCase()+" = "+prim_types[prim].elim + ";\n";
     };
+    if (isio) {
+      code += "  var rdl = require('readline').createInterface({input:process.stdin,output:process.stdout});\n";
+      code += "  var run = (p) => {\n";
+      code += "    var case_end = (val) => Promise.resolve(val);\n";
+      code += "    var case_log = (str) => (nxt) => new Promise((res,_) => (console.log(str), run(nxt(1)).then(res)));\n";
+      code += "    var case_inp = (nxt) => new Promise((res,_) => rdl.question('', (line) => run(nxt(line)).then(res)));\n";
+      code += "    return p(case_end)(case_log)(case_inp);\n";
+      code += "  };\n";
+    }
     var exps = [];
     compile_def: for (var name of defs) {
       var meta = {...file[name].meta, name, vars: []};
@@ -290,33 +307,45 @@ module.exports = {
       exps.push(name);
     };
     code += "  return {\n";
+    if (isio) {
+      code += "    '$main$': ()=>run("+make_name(main)+"),\n"
+    };
     for (var name of exps) {
       code += "    '"+name+"': "+make_name(name)+",\n";
     };
     code += "  };\n";
-    code += "})()";
+    code += "})();";
+    if (isio) {
+      code += "\nmodule.exports['$main$']().then(() => process.exit());";
+    };
     return code;
   },
+
+  // Haskell compiler
   hs: function(file, main) {
     function make_name(str) {
       return "_" + str.replace(/\./g,"_");
     };
 
     var prim_types = {
+      Unit: {
+        inst: "(\\x->())",
+        elim: "(\\x->(\\t->t))",
+      },
       Bool: {
-        inst: "(\\x->(app (app x True) False))",
+        inst: "(\\x->((x$True)$False))",
         elim: "(\\x->(\\t->(\\f->(if x then t else f))))",
       },
       Nat: {
-        inst: "\\x->((app (app x 0) (\\p->1+p)) :: Integer)",
-        elim: "(\\x->(\\z->(\\s->(if x == 0 then z else app s (x - 1)))))",
+        inst: "\\x->(((x$0)$(\\p->1+p)) :: Integer)",
+        elim: "(\\x->(\\z->(\\s->(if x == 0 then z else s$(x-1)))))",
       },
       U32: {
-        inst: "\\x->(app x (\\w->let r x k = (app (app (app x 0) (\\p->r p (k*2))) (\\p->k+(r p (k*2)))) in r w 1)) :: Word32",
-        elim: "(\\x->(\\u->(app u (let r i = unsafeCoerce (\\we->(\\w0->(\\w1->(if i == 32 then we else (app (case ((shiftR x i) .&. 1) :: Word32 of { 0 -> w0; 1 -> w1 }) (r (i + 1))))))) in (r 0)))))",
+        inst: "\\x->(x$(\\w->let r x k = (((x$0)$(\\p->r p (k*2)))$(\\p->k+(r p (k*2)))) in r w 1)) :: Word32",
+        elim: "(\\x->(\\u->(u$(let r i = unsafeCoerce (\\we->(\\w0->(\\w1->(if i == 32 then we else ((case ((shiftR x i) .&. 1) :: Word32 of { 0 -> w0; 1 -> w1 })$(r (i + 1))))))) in (r 0)))))",
       },
       String: {
-        inst: "(\\x->(app (app x []) (\\h->(\\t->(fromEnum (h :: Word32)):t))) :: String)",
+        inst: "(\\x->((x$[])$(\\h->(\\t->(fromEnum (h :: Word32)):t))) :: String)",
         elim: "(\\x->(\\n->(\\c->(case x of { [] -> n; (h : t) -> c ((toEnum h) :: Char) t}))))",
       },
     };
@@ -426,7 +455,7 @@ module.exports = {
                 code = "elim_"+func_typ_prim.toLowerCase()+"("+code+")";
               };
               if (!term.eras) {
-                code = "(app "+code+" "+argm_cmp.code+")";
+                code = "("+code+"$"+argm_cmp.code+")";
               }
               return {code, type: term_typ};
             default:
@@ -492,7 +521,7 @@ module.exports = {
             }
             var type_prim = prim_of(type);
             if (type_prim) {
-              code = "(app inst_"+type_prim.toLowerCase()+" "+code+")";
+              code = "(inst_"+type_prim.toLowerCase()+"$"+code+")";
             };
           } else {
             throw fmc.Err(term.locs, ctx, nam, "Lambda has a non-function type.");
@@ -544,10 +573,21 @@ module.exports = {
     };
 
     var defs = sorted_def_names(file).concat(main);
-    var code = "import Unsafe.Coerce\n";
+    var isio = fmc.equal(file[main].type, fmc.App(false, fmc.Ref("IO"), fmc.Ref("Unit")), file);
+
+    var code = "";
+    code += "import Prelude hiding (($))\n";
+    code += "import Unsafe.Coerce\n";
     code += "import Data.Word\n";
     code += "import Data.Bits\n";
-    code += "app = (\\a-> (\\b-> unsafeCoerce (a b)))\n";
+    code += "($) = (\\a->(\\b->(unsafeCoerce (a b))))\n";
+    if (isio) {
+      code += "run = (\\p->\n";
+      code += "  let case_end = (\\val->val) in\n";
+      code += "  let case_log = (\\str->(\\nxt->(putStrLn$str)>>=(\\u->run (nxt$())))) in\n";
+      code += "  let case_inp = (\\nxt->(getLine>>=(\\l->run (nxt$l)))) in\n";
+      code += "  (((p$case_end)$case_log)$case_inp))\n";
+    };
     for (var prim in prim_types) {
       code += "inst_"+prim.toLowerCase()+" = "+prim_types[prim].inst + "\n";
       code += "elim_"+prim.toLowerCase()+" = "+prim_types[prim].elim + "\n";
@@ -582,12 +622,10 @@ module.exports = {
       code += make_name(name)+" = "+expr+"\n";
       exps.push(name);
     };
-    //code += "  return {\n";
-    //for (var name of exps) {
-      //code += "    '"+name+"': "+make_name(name)+",\n";
-    //};
-    //code += "  };\n";
-    //code += "})()";
+    if (isio) {
+      code += "main :: IO()\n";
+      code += "main = run "+make_name(name)+"\n";
+    }
     return code;
   }
 };

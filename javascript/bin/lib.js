@@ -73,15 +73,6 @@ function report(main = "main", dir, ext, parse) {
   };
 };
 
-function run(main = "main", dir, ext, parse) {
-  var {defs} = load(dir, ext, parse);
-  if (!defs[main]) {
-    console.log("Term '" + main + "' not found.");
-  } else {
-    console.log(eval(cmp.js(defs, main))[main]);
-  };
-};
-
 function js(main = "main", dir, ext, parse) {
   var {defs} = load(dir, ext, parse);
   if (!defs[main]) {
@@ -100,4 +91,13 @@ function hs(main = "main", dir, ext, parse) {
   };
 };
 
-module.exports = {load, report, run, js, hs};
+function run(main = "main", dir, ext, parse) {
+  var {defs} = load(dir, ext, parse);
+  if (!defs[main]) {
+    console.log("Term '" + main + "' not found.");
+  } else {
+    eval(cmp.js(defs, main));
+  };
+};
+
+module.exports = {load, report, run, js, hs, run};
