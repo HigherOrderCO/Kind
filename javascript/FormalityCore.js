@@ -409,6 +409,25 @@ function parse_defs(code, indx = 0) {
 // Stringification
 // ===============
 
+function stringify_lit(term) {
+  try {
+    if (term.name === "String.nil") {
+      return "";
+    } else if (term.func.func.name === "String.cons") {
+      var val = 0;
+      var chr = term.func.argm;
+      for (var i = 0; i < 16; ++i) {
+        val = chr.argm.name === "Bit.1" ? val | (1 << i) : val;
+        chr = chr.func;
+      };
+      return String.fromCharCode(val) + stringify_lit(term.argm);
+    }
+  } catch (e) {
+    console.log(e);
+    throw null;
+  }
+};
+
 function stringify_term(term, vars = Nil()) {
   switch (term.ctor) {
     case "Var":
@@ -453,9 +472,13 @@ function stringify_term(term, vars = Nil()) {
       var body = stringify_term(term.body, Ext(name, vars));
       return "let "+name+" = "+expr+"; "+body;
     case "Ann":
-      var expr = stringify_term(term.expr, vars);
-      var type = stringify_term(term.type, vars);
-      return expr+" :: "+type;
+      try {
+        return '"' + stringify_lit(term.expr) + '"';
+      } catch (e) {
+        var expr = stringify_term(term.expr, vars);
+        var type = stringify_term(term.type, vars);
+        return expr+" :: "+type;
+      };
   }
 };
 
@@ -1211,6 +1234,7 @@ module.exports = {
   parse_ann,
   parse_term,
   parse_defs,
+  stringify_lit,
   stringify_term,
   stringify_file,
   stringify_ctx,

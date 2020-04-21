@@ -24,42 +24,6 @@ function equal(a, b, file) {
   return fmc.equal(a, b, file);
 };
 
-// Char.new(Bit.0)(Bit.1)(Bit.0)...
-function recover_char_literal(term) {
-  var chr = 0;
-  for (var i = 0; i < 16; ++i) {
-    if (term.argm.name === "Bit.0") {
-      term = term.func;
-    } else if (term.argm.name === "Bit.1") {
-      chr = chr | (1 << i);
-      term = term.func;
-    } else {
-      throw null;
-    }
-  };
-  if (term.name !== "Char.new") {
-    throw null;
-  };
-  return String.fromCharCode(chr);
-};
-
-// App (App String.cons chr0) (App (App String.cons chr1) String.nil)
-function recover_string_literal(a) {
-  try {
-    if ( a.ctor === "App"
-      && a.func.ctor === "App"
-      && a.func.func.name === "String.cons") {
-      return recover_char_literal(a.func.argm) + recover_string_literal(a.argm);
-    } else if (a.ctor === "Ref" && a.name === "String.nil") {
-      return "";
-    } else {
-      throw null;
-    }
-  } catch (e) {
-    throw null;
-  }
-};
-
 module.exports = {
   // JavaScript compiler
   js: function(file, main) {
@@ -266,26 +230,18 @@ module.exports = {
             type: fmc.Typ(),
           };
         case "Ann":
-          if (term.done) {
-            return {
-              code: "null",
-              type: term.type,
-            };
-          } else {
+          try {
+            var code = '"' + fmc.stringify_lit(term.expr) + '"';
+            var type = fmc.Ref("String");
+            return {code, type};
+          } catch (e) {
             return check(term.expr, term.type, file, {}, ctx, nam);
-          }
+          };
       }
       throw fmc.Err(term.locs, ctx, nam, "Can't infer type.");
     };
 
     function check(term, type, file, met = {}, ctx = fmc.Nil(), nam = fmc.Nil()) {
-      if (equal(type, fmc.Ref("String"), file)) {
-        try {
-          var code = '"' + recover_string_literal(term) + '"';
-          var type = fmc.Ref("String");
-          return {code, type};
-        } catch (e) {};
-      };
 
       if (equal(type, fmc.Typ(), file)) {
         var code = "(void 0)";
@@ -616,27 +572,18 @@ module.exports = {
             type: fmc.Typ(),
           };
         case "Ann":
-          if (term.done) {
-            return {
-              code: "()",
-              type: term.type,
-            };
-          } else {
+          try {
+            var code = '"' + fmc.stringify_lit(term.expr) + '"';
+            var type = fmc.Ref("String");
+            return {code, type};
+          } catch (e) {
             return check(term.expr, term.type, file, {}, ctx, nam);
-          }
+          };
       }
       throw fmc.Err(term.locs, ctx, nam, "Can't infer type.");
     };
 
     function check(term, type, file, met = {}, ctx = fmc.Nil(), nam = fmc.Nil()) {
-
-      if (equal(type, fmc.Ref("String"), file)) {
-        try {
-          var code = '"' + recover_string_literal(term) + '"';
-          var type = fmc.Ref("String");
-          return {code, type};
-        } catch (e) {};
-      };
 
       if (equal(type, fmc.Typ(), file)) {
         var code = "()";
