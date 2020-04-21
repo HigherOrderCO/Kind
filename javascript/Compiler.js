@@ -24,6 +24,42 @@ function equal(a, b, file) {
   return fmc.equal(a, b, file);
 };
 
+// Char.new(Bit.0)(Bit.1)(Bit.0)...
+function recover_char_literal(term) {
+  var chr = 0;
+  for (var i = 0; i < 16; ++i) {
+    if (term.argm.name === "Bit.0") {
+      term = term.func;
+    } else if (term.argm.name === "Bit.1") {
+      chr = chr | (1 << i);
+      term = term.func;
+    } else {
+      throw null;
+    }
+  };
+  if (term.name !== "Char.new") {
+    throw null;
+  };
+  return String.fromCharCode(chr);
+};
+
+// App (App String.cons chr0) (App (App String.cons chr1) String.nil)
+function recover_string_literal(a) {
+  try {
+    if ( a.ctor === "App"
+      && a.func.ctor === "App"
+      && a.func.func.name === "String.cons") {
+      return recover_char_literal(a.func.argm) + recover_string_literal(a.argm);
+    } else if (a.ctor === "Ref" && a.name === "String.nil") {
+      return "";
+    } else {
+      throw null;
+    }
+  } catch (e) {
+    throw null;
+  }
+};
+
 module.exports = {
   // JavaScript compiler
   js: function(file, main) {
@@ -44,6 +80,10 @@ module.exports = {
         inst: "x=>x(0n)(p=>1n+p)",
         elim: "x=>z=>s=>x===0n?z:s(x-1n)",
       },
+      Bits: {
+        inst: "x=>x('')(p=>'0'+p)(p=>'1'+p)",
+        elim: "x=>be=>b0=>b1=>(x.length?(x[0]==='0'?b0(x.slice(1)):b1(x.slice(1))):be)",
+      },
       U16: {
         inst: "x=>x(w=>(function R(x,k){return x(0)(p=>R(p,k*2))(p=>k+R(p,k*2))})(w,1))",
         elim: "x=>u=>u((function R(i){return we=>w0=>w1=>i===16?we:((x>>>i)&1?w1:w0)(R(i+1))})(0))",
@@ -51,6 +91,10 @@ module.exports = {
       U32: {
         inst: "x=>x(w=>(function R(x,k){return x(0)(p=>R(p,k*2))(p=>k+R(p,k*2))})(w,1))",
         elim: "x=>u=>u((function R(i){return we=>w0=>w1=>i===32?we:((x>>>i)&1?w1:w0)(R(i+1))})(0))",
+      },
+      F64: {
+        inst: "x=>x(w=>(function R(x,i){return x(0)(p=>R(p,i+1))(p=>F64_set(R(p,i+1),i))})(w,0))",
+        elim: "x=>u=>u((function R(i){return we=>w0=>w1=>i===64?we:(F64_get(x,i)?w1:w0)(R(i+1))})(0))",
       },
       String: {
         inst: "x=>x('')(h=>t=>String.fromCharCode(h)+t)",
@@ -85,6 +129,19 @@ module.exports = {
       "U16.eql"     : "a=>b=>a===b",
       "U16.gte"     : "a=>b=>a>b",
       "U16.gtn"     : "a=>b=>a>=b",
+      "F64.add"     : "a=>b=>a+b",
+      "F64.sub"     : "a=>b=>a-b",
+      "F64.mul"     : "a=>b=>a*b",
+      "F64.div"     : "a=>b=>a/b",
+      "F64.mod"     : "a=>b=>a%b",
+      "F64.pow"     : "a=>b=>a**b",
+      "F64.log"     : "a=>Math.log(a)",
+      "F64.cos"     : "a=>Math.cos(a)",
+      "F64.sin"     : "a=>Math.sin(a)",
+      "F64.tan"     : "a=>Math.tan(a)",
+      "F64.acos"    : "a=>Math.acos(a)",
+      "F64.asin"    : "a=>Math.asin(a)",
+      "F64.atan"    : "a=>Math.aan(a)",
       "Bool.not"    : "a=>!a",
       "Bool.and"    : "a=>b=>a&&b",
       "Bool.or"     : "a=>b=>a||b",
@@ -222,9 +279,20 @@ module.exports = {
     };
 
     function check(term, type, file, met = {}, ctx = fmc.Nil(), nam = fmc.Nil()) {
-      //console.log("check", stringify_term(term, nam));
-      //console.log("typed", stringify_term(type, nam));
-      //console.log("-----");
+      if (equal(type, fmc.Ref("String"), file)) {
+        try {
+          var code = '"' + recover_string_literal(term) + '"';
+          var type = fmc.Ref("String");
+          return {code, type};
+        } catch (e) {};
+      };
+
+      if (equal(type, fmc.Typ(), file)) {
+        var code = "(void 0)";
+        var type = fmc.Typ();
+        return {code, type};
+      };
+
       var typv = fmc.reduce(type, file);
       var code = null;
       switch (term.ctor) {
@@ -280,9 +348,6 @@ module.exports = {
             code = opt_code;
           };
       };
-      if (equal(type, fmc.Typ(), file)) {
-        var code = "(void 0)";
-      };
       return {code, type};
     };
 
@@ -302,6 +367,10 @@ module.exports = {
     var defs = sorted_def_names(file).concat(main);
     var code = "";
     code += "module.exports = (function (){\n";
+    code += "  var F64 = new Float64Array(1);\n";
+    code += "  var U32 = new Uint32Array(F64.buffer);\n";
+    code += "  var F64_get = (x,i)=>((F64[0]=x),(i<32?(U32[0]>>>i)&1:(U32[1]>>>(i-32)&1)));\n";
+    code += "  var F64_set = (x,i)=>((F64[0]=x),(i<32?(U32[0]=U32[0]|(1<<i)):(U32[1]=U32[1]|(1<<(i-32)))),F64[0]);\n";
     for (var prim in prim_types) {
       code += "  var inst_"+prim.toLowerCase()+" = "+prim_types[prim].inst + ";\n";
       code += "  var elim_"+prim.toLowerCase()+" = "+prim_types[prim].elim + ";\n";
@@ -356,6 +425,8 @@ module.exports = {
     code += "})();";
     if (isio) {
       code += "\nmodule.exports['$main$']().then(() => process.exit());";
+    } else {
+      code += "\nconsole.log(module.exports['"+main+"']);";
     };
     return code;
   },
@@ -388,8 +459,8 @@ module.exports = {
         elim: "(\\x->(\\u->(u$(let r i = unsafeCoerce (\\we->(\\w0->(\\w1->(if i == 16 then we else ((case ((shiftR x i) .&. 1) :: Word16 of { 0 -> w0; 1 -> w1 })$(r (i + 1))))))) in (r 0)))))",
       },
       String: {
-        inst: "(\\x->((x$[])$(\\h->(\\t->(fromEnum (h :: Word16)):t))) :: String)",
-        elim: "(\\x->(\\n->(\\c->(case x of { [] -> n; (h : t) -> c ((toEnum h) :: Char) t}))))",
+        inst: "(\\x->((x$[])$(\\h->(\\t->(toEnum (fromIntegral h) :: Char):t))) :: String)",
+        elim: "(\\x->(\\n->(\\c->(case (x::String) of {[]->n;(h:t)->c (fromIntegral(fromEnum h)::Word16)t}))))",
       },
     };
 
@@ -558,6 +629,21 @@ module.exports = {
     };
 
     function check(term, type, file, met = {}, ctx = fmc.Nil(), nam = fmc.Nil()) {
+
+      if (equal(type, fmc.Ref("String"), file)) {
+        try {
+          var code = '"' + recover_string_literal(term) + '"';
+          var type = fmc.Ref("String");
+          return {code, type};
+        } catch (e) {};
+      };
+
+      if (equal(type, fmc.Typ(), file)) {
+        var code = "()";
+        var type = fmc.Typ();
+        return {code, type};
+      };
+
       //console.log("check", stringify_term(term, nam));
       //console.log("typed", stringify_term(type, nam));
       //console.log("-----");
@@ -616,9 +702,7 @@ module.exports = {
             //code = opt_code;
           //};
       };
-      if (equal(type, fmc.Typ(), file)) {
-        var code = "()";
-      };
+
       return {code, type};
     };
 
