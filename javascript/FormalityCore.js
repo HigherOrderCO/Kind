@@ -337,7 +337,8 @@ function parse_lit(code, indx, err) {
 
 // Parses a term
 function parse_term(code, indx = 0, vars = Nil(), err) {
-  var indx = from = next(code, indx);
+  var indx = next(code, indx);
+  var from = indx;
 
   // Parses the base term, trying each variant once
   var base_parse = first_valid([
