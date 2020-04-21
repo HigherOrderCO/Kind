@@ -314,7 +314,7 @@ function parse_ann(code, indx, from, expr, vars, err) {
 function parse_lit(code, indx, err) {
   var from = next(code, indx);
   var [indx, skip] = parse_str(code, next(code, indx), "\"");
-  return (function go(indx, slit) {
+  var [indx, slit] = (function go(indx, slit) {
     if (indx < code.length) {
       if (code[indx] !== "\"") {
         var cod = code.charCodeAt(indx);
@@ -323,7 +323,7 @@ function parse_lit(code, indx, err) {
           chr = App(false, chr, Ref((cod >>> i) & 1 ? "Bit.1" : "Bit.0"));
         };
         var [indx, slit] = go(indx + 1, slit);
-        return [indx, App(false, App(false, Ref("String.cons"), chr), slit, {from,to:indx})];
+        return [indx, App(false, App(false, Ref("String.cons"), chr), slit)];
       } else {
         return [indx+1, Ref("String.nil")];
       }
@@ -333,6 +333,7 @@ function parse_lit(code, indx, err) {
       throw null;
     }
   })(indx);
+  return [indx, Ann(true, slit, Ref("String"), {from,to:indx})];
 };
 
 // Parses a term
