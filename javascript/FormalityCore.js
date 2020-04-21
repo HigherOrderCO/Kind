@@ -1005,6 +1005,7 @@ function highlight_code(code, from, to) {
   };
   from_line = Math.max(from_line - 4, 0);
   to_line = Math.min(to_line + 3, lines.length - 1);
+  err_line = err_line || (lines.length - 2);
   var err = "On line " + err_line + ":\n";
   var err = err + lines.slice(from_line, to_line).join("\n");
   return err;
