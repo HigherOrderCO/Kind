@@ -4,7 +4,7 @@ Formality-Core
 Formality-Core is minimal programming language that features dependent types and
 inductive reasoning. It can be used as a lightweight interchange format for
 algorithms and proofs. Its reference implementation has about 1000 lines of
-code, making it extremelly portable. It is the underlying core behind the
+code, making it extremely portable. It is the underlying core behind the
 [Formality](https://github.com/moonad/formality) language, and the foundation of
 the [Moonad](https://github.com/moonad/Moonad) project.
 
