@@ -42,34 +42,36 @@ module.exports = {
     };
 
     var prim_funcs = {
-      "Nat.add"    : "a=>b=>a+b",
-      "Nat.sub"    : "a=>b=>a-b",
-      "Nat.mul"    : "a=>b=>a*b",
-      "Nat.ltn"    : "a=>b=>a<b",
-      "Nat.lte"    : "a=>b=>a<=b",
-      "Nat.eql"    : "a=>b=>a===b",
-      "Nat.gte"    : "a=>b=>a>=b",
-      "Nat.gtn"    : "a=>b=>a>b",
-      "U32.add"    : "a=>b=>a+b",
-      "U32.sub"    : "a=>b=>a-b",
-      "U32.mul"    : "a=>b=>a*b",
-      "U32.ltn"    : "a=>b=>a<b",
-      "U32.lte"    : "a=>b=>a<=b",
-      "U32.eql"    : "a=>b=>a===b",
-      "U32.gte"    : "a=>b=>a>b",
-      "U32.gtn"    : "a=>b=>a>=b",
-      "U16.add"    : "a=>b=>a+b",
-      "U16.sub"    : "a=>b=>a-b",
-      "U16.mul"    : "a=>b=>a*b",
-      "U16.ltn"    : "a=>b=>a<b",
-      "U16.lte"    : "a=>b=>a<=b",
-      "U16.eql"    : "a=>b=>a===b",
-      "U16.gte"    : "a=>b=>a>b",
-      "U16.gtn"    : "a=>b=>a>=b",
-      "Bool.not"   : "a=>!a",
-      "Bool.and"   : "a=>b=>a&&b",
-      "Bool.or"    : "a=>b=>a||b",
-      "String.eql" : "a=>b=>a===b",
+      "Nat.add"     : "a=>b=>a+b",
+      "Nat.sub"     : "a=>b=>(a-b>=0n?a-b : 0n)",
+      "Nat.mul"     : "a=>b=>a*b",
+      "Nat.div"     : "a=>b=>a/b",
+      "Nat.div_mod" : "a=>b=>t=>t(a/b)(a%b)",
+      "Nat.ltn"     : "a=>b=>a<b",
+      "Nat.lte"     : "a=>b=>a<=b",
+      "Nat.eql"     : "a=>b=>a===b",
+      "Nat.gte"     : "a=>b=>a>=b",
+      "Nat.gtn"     : "a=>b=>a>b",
+      "U32.add"     : "a=>b=>a+b",
+      "U32.sub"     : "a=>b=>a-b",
+      "U32.mul"     : "a=>b=>a*b",
+      "U32.ltn"     : "a=>b=>a<b",
+      "U32.lte"     : "a=>b=>a<=b",
+      "U32.eql"     : "a=>b=>a===b",
+      "U32.gte"     : "a=>b=>a>b",
+      "U32.gtn"     : "a=>b=>a>=b",
+      "U16.add"     : "a=>b=>a+b",
+      "U16.sub"     : "a=>b=>a-b",
+      "U16.mul"     : "a=>b=>a*b",
+      "U16.ltn"     : "a=>b=>a<b",
+      "U16.lte"     : "a=>b=>a<=b",
+      "U16.eql"     : "a=>b=>a===b",
+      "U16.gte"     : "a=>b=>a>b",
+      "U16.gtn"     : "a=>b=>a>=b",
+      "Bool.not"    : "a=>!a",
+      "Bool.and"    : "a=>b=>a&&b",
+      "Bool.or"     : "a=>b=>a||b",
+      "String.eql"  : "a=>b=>a===b",
     };
 
     function prim_of(type) {
@@ -219,7 +221,7 @@ module.exports = {
             if (term.eras !== typv.eras) {
               throw fmc.Err(term.locs, ctx, nam, "Type mismatch.");
             };
-            var body_met = {...met, vars: met.vars && met.vars.concat(term.name)};
+            var body_met = {...met, vars: met.vars && (term.eras ? met.vars : met.vars.concat(term.name))};
             var body_cmp = check(term.body, body_typ, file, body_met, body_ctx, body_nam);
             if (term.eras) {
               code = body_cmp.code;
@@ -375,34 +377,37 @@ module.exports = {
     };
 
     var prim_funcs = {
-      "Nat.add"    : "(\\a->(\\b->((a+b)::Integer)))",
-      "Nat.sub"    : "(\\a->(\\b->((a-b)::Integer)))",
-      "Nat.mul"    : "(\\a->(\\b->((a*b)::Integer)))",
-      "Nat.ltn"    : "(\\a->(\\b->((a<b)::Integer)))",
-      "Nat.lte"    : "(\\a->(\\b->((a<=b)::Integer)))",
-      "Nat.eql"    : "(\\a->(\\b->((a==b)::Integer)))",
-      "Nat.gte"    : "(\\a->(\\b->((a>=b)::Integer)))",
-      "Nat.gtn"    : "(\\a->(\\b->((a>b)::Integer)))",
-      "U32.add"    : "(\\a->(\\b->(a+b)::Word32))",
-      "U32.sub"    : "(\\a->(\\b->(a-b)::Word32))",
-      "U32.mul"    : "(\\a->(\\b->(a*b)::Word32))",
-      "U32.ltn"    : "(\\a->(\\b->(a<b)::Word32))",
-      "U32.lte"    : "(\\a->(\\b->(a<=b)::Word32))",
-      "U32.eql"    : "(\\a->(\\b->(a==b)::Word32))",
-      "U32.gte"    : "(\\a->(\\b->(a>b)::Word32))",
-      "U32.gtn"    : "(\\a->(\\b->(a>=b)::Word32))",
-      "U16.add"    : "(\\a->(\\b->(a+b)::Word16))",
-      "U16.sub"    : "(\\a->(\\b->(a-b)::Word16))",
-      "U16.mul"    : "(\\a->(\\b->(a*b)::Word16))",
-      "U16.ltn"    : "(\\a->(\\b->(a<b)::Word16))",
-      "U16.lte"    : "(\\a->(\\b->(a<=b)::Word16))",
-      "U16.eql"    : "(\\a->(\\b->(a==b)::Word16))",
-      "U16.gte"    : "(\\a->(\\b->(a>b)::Word16))",
-      "U16.gtn"    : "(\\a->(\\b->(a>=b)::Word16))",
-      "Bool.not"   : "(\\a->((not a)::Bool))",
-      "Bool.and"   : "(\\a->(\\b->((a&&b)::Bool)))",
-      "Bool.or"    : "(\\a->(\\b->((a||b)::Bool)))",
-      "String.eql" : "(\\a->(\\b->((a==b)::String)))",
+      "Nat.add"     : "(\\a->(\\b->((a+b)::Integer)))",
+      "Nat.sub"     : "(\\a->(\\b->((max (a-b) 0)::Integer)))",
+      "Nat.mul"     : "(\\a->(\\b->((a*b)::Integer)))",
+      "Nat.div"     : "(\\a->(\\b->((a `div` b)::Integer)))",
+      "Nat.mod"     : "(\\a->(\\b->((a `mod` b)::Integer)))",
+      "Nat.div_mod" : "(\\a->(\\b->(\\t->((t$((a `div` b) :: Integer))$((a `mod` b) ::Integer)))))",
+      "Nat.ltn"     : "(\\a->(\\b->((a<b)::Integer)))",
+      "Nat.lte"     : "(\\a->(\\b->((a<=b)::Integer)))",
+      "Nat.eql"     : "(\\a->(\\b->((a==b)::Integer)))",
+      "Nat.gte"     : "(\\a->(\\b->((a>=b)::Integer)))",
+      "Nat.gtn"     : "(\\a->(\\b->((a>b)::Integer)))",
+      "U32.add"     : "(\\a->(\\b->(a+b)::Word32))",
+      "U32.sub"     : "(\\a->(\\b->(a-b)::Word32))",
+      "U32.mul"     : "(\\a->(\\b->(a*b)::Word32))",
+      "U32.ltn"     : "(\\a->(\\b->(a<b)::Word32))",
+      "U32.lte"     : "(\\a->(\\b->(a<=b)::Word32))",
+      "U32.eql"     : "(\\a->(\\b->(a==b)::Word32))",
+      "U32.gte"     : "(\\a->(\\b->(a>b)::Word32))",
+      "U32.gtn"     : "(\\a->(\\b->(a>=b)::Word32))",
+      "U16.add"     : "(\\a->(\\b->(a+b)::Word16))",
+      "U16.sub"     : "(\\a->(\\b->(a-b)::Word16))",
+      "U16.mul"     : "(\\a->(\\b->(a*b)::Word16))",
+      "U16.ltn"     : "(\\a->(\\b->(a<b)::Word16))",
+      "U16.lte"     : "(\\a->(\\b->(a<=b)::Word16))",
+      "U16.eql"     : "(\\a->(\\b->(a==b)::Word16))",
+      "U16.gte"     : "(\\a->(\\b->(a>b)::Word16))",
+      "U16.gtn"     : "(\\a->(\\b->(a>=b)::Word16))",
+      "Bool.not"    : "(\\a->((not a)::Bool))",
+      "Bool.and"    : "(\\a->(\\b->((a&&b)::Bool)))",
+      "Bool.or"     : "(\\a->(\\b->((a||b)::Bool)))",
+      "String.eql"  : "(\\a->(\\b->((a==b)::String)))",
     };
 
     function prim_of(type) {
@@ -507,7 +512,7 @@ module.exports = {
           var body_nam = fmc.Ext(term.name, nam);
           var body_cmp = infer(term.body, file, body_ctx, body_nam);
           return {
-            code: "let "+make_name(term.name)+" = "+expr_cmp.code+" in "+body_cmp.code,
+            code: "(\\"+make_name(term.name)+"->"+body_cmp.code+")("+expr_cmp.code+")",
             type: fmc.subst(body_cmp.type, term.expr, 0),
           };
         case "All":
