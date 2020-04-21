@@ -88,12 +88,16 @@ function is_name(chr) {
 };
 
 // Returns the first function that doesn't throw, or null
-function first_valid(fns) {
+function first_valid(fns, err) {
   for (var i = 0; i < fns.length; ++i) {
     try {
-      return fns[i]();
+      return fns[i][3]();
     } catch (e) {
-      continue;
+      if (e === null || !err) {
+        continue;
+      } else {
+        throw e;
+      }
     }
   };
   return null;
@@ -149,32 +153,43 @@ function next(code, indx) {
   };
 };
 
+function parse_error(code, indx, expected, err) {
+  if (err) {
+    var expec = expected.replace(/\n/g, "<newline>");
+    var found = (code[indx] || "<end-of-file>").replace(/\n/g, "<newline>");
+    throw ( "Parse error: expected "+expec+", found '"+found+"'.\n"
+          + highlight_code(code, indx, indx+1));
+  } else {
+    throw null;
+  }
+};
+
 // Drops spaces and parses an exact string
-function parse_str(code, indx, str) {
+function parse_str(code, indx, str, err = false) {
   if (str.length === 0) {
     return [indx, str];
   } else if (indx < code.length && code[indx] === str[0]) {
-    return parse_str(code, indx+1, str.slice(1));
+    return parse_str(code, indx+1, str.slice(1), err);
   } else {
-    throw "Expected `" + str + "`, found `" + code.slice(indx,indx+16) + "`.";
+    parse_error(code, indx, "'"+str+"'", err);
   };
 };
 
 // Parses one of two strings
-function parse_opt(code, indx, ch0, ch1) {
+function parse_one(code, indx, ch0, ch1, err) {
   try {
-    var [indx, str] = parse_str(code, indx, ch0);
+    var [indx, str] = parse_str(code, indx, ch0, false);
     return [indx, false];
   } catch (e) {
-    var [indx, str] = parse_str(code, indx, ch1);
+    var [indx, str] = parse_str(code, indx, ch1, err);
     return [indx, true];
   }
 };
 
-// Parses one of two strings
-function parse_may(code, indx, str) {
+// Parses an optional string
+function parse_opt(code, indx, str, err) {
   try {
-    var [indx, skip] = parse_str(code, indx, str);
+    var [indx, skip] = parse_str(code, indx, str, false);
     return [indx, true];
   } catch (e) {
     return [indx, false];
@@ -182,114 +197,121 @@ function parse_may(code, indx, str) {
 };
 
 // Parses a valid name, non-empty
-function parse_nam(code, indx, size = 0) {
+function parse_nam(code, indx, size = 0, err = false) {
   if (indx < code.length && is_name(code[indx])) {
     var head = code[indx];
-    var [indx, tail] = parse_nam(code, indx + 1, size + 1);
+    var [indx, tail] = parse_nam(code, indx + 1, size + 1, err);
     return [indx, head + tail];
   } else if (size > 0) {
     return [indx, ""];
   } else {
-    throw "Invalid name.";
+    if (err) {
+      throw parse_error(code, indx, "a name", err);
+    } else {
+      throw null;
+    }
   }
 };
 
 // Parses a parenthesis, `(<term>)`
-function parse_par(code, indx, vars) {
-  var [indx, skip] = parse_str(code, next(code, indx), "(");
-  var [indx, term] = parse_term(code, indx, vars);
-  var [indx, skip] = parse_str(code, next(code, indx), ")");
+function parse_par(code, indx, vars, err = false) {
+  var [indx, skip] = parse_str(code, next(code, indx), "(", false);
+  var [indx, term] = parse_term(code, indx, vars, err);
+  var [indx, skip] = parse_str(code, next(code, indx), ")", err);
   return [indx, term];
 };
 
 // Parses a dependent function type, `(<name> : <term>) -> <term>`
-function parse_all(code, indx, vars) {
+function parse_all(code, indx, vars, err = false) {
   var from = next(code, indx);
-  var [indx, self] = parse_nam(code, next(code, indx), 1);
-  var [indx, eras] = parse_opt(code, indx, "(", "<");
-  var [indx, name] = parse_nam(code, next(code, indx), 1);
-  var [indx, skip] = parse_str(code, next(code, indx), ":");
-  var [indx, bind] = parse_term(code, indx, Ext(self, vars));
-  var [indx, skip] = parse_str(code, next(code, indx), eras ? ">" : ")")
-  var [indx, skip] = parse_str(code, next(code, indx), "->");
-  var [indx, body] = parse_term(code, indx, Ext(name, Ext(self, vars)));
+  var [indx, self] = parse_nam(code, next(code, indx), 1, false);
+  var [indx, eras] = parse_one(code, indx, "(", "<", false);
+  var [indx, name] = parse_nam(code, next(code, indx), 1, false);
+  var [indx, skip] = parse_str(code, next(code, indx), ":", false);
+  var [indx, bind] = parse_term(code, indx, Ext(self, vars), err);
+  var [indx, skip] = parse_str(code, next(code, indx), eras ? ">" : ")", err)
+  var [indx, skip] = parse_str(code, next(code, indx), "->", err);
+  var [indx, body] = parse_term(code, indx, Ext(name, Ext(self, vars)), err);
   return [indx, All(eras, self, name, bind, body, {from,to:indx})];
 };
 
 // Parses a dependent function value, `(<name>) => <term>`
-function parse_lam(code, indx, vars) {
+function parse_lam(code, indx, vars, err = false) {
   var from = next(code, indx);
-  var [indx, eras] = parse_opt(code, next(code, indx), "(", "<");
-  var [indx, name] = parse_nam(code, next(code, indx), 1);
-  var [indx, skip] = parse_str(code, next(code, indx), eras ? ">" : ")")
-  var [indx, body] = parse_term(code, indx, Ext(name, vars));
+  var [indx, eras] = parse_one(code, next(code, indx), "(", "<", false);
+  var [indx, name] = parse_nam(code, next(code, indx), 1, false);
+  var [indx, skip] = parse_str(code, next(code, indx), eras ? ">" : ")", false)
+  var [indx, body] = parse_term(code, indx, Ext(name, vars), err);
   return [indx, Lam(eras, name, body, {from,to:indx})];
 };
 
 // Parses a local definition, `let x = val; body`
-function parse_let(code, indx, vars) {
+function parse_let(code, indx, vars, err = false) {
   var from = next(code, indx);
-  var [indx, skip] = parse_str(code, next(code, indx), "let ");
-  var [indx, name] = parse_nam(code, next(code, indx));
-  var [indx, skip] = parse_str(code, next(code, indx), "=");
-  var [indx, expr] = parse_term(code, indx, vars);
-  var [indx, body] = parse_term(code, indx, Ext(name, vars));
+  var [indx, skip] = parse_str(code, next(code, indx), "let ", false);
+  var [indx, name] = parse_nam(code, next(code, indx), 0, err);
+  var [indx, skip] = parse_str(code, next(code, indx), "=", err);
+  var [indx, expr] = parse_term(code, indx, vars, err);
+  var [indx, skip] = parse_opt(code, indx, ";", err);
+  var [indx, body] = parse_term(code, indx, Ext(name, vars), err);
   return [indx, Let(name, expr, body, {from,to:indx})];
 };
 
 // Parses the type of types, `Type`
-function parse_typ(code, indx, vars) {
+function parse_typ(code, indx, vars, err = false) {
   var from = next(code, indx);
-  var [indx, skip] = parse_str(code, next(code, indx), "Type");
+  var [indx, skip] = parse_str(code, next(code, indx), "Type", false);
   return [indx, Typ({from,to:indx})];
 };
 
 // Parses variables, `<name>`
-function parse_var(code, indx, vars) {
+function parse_var(code, indx, vars, err = false) {
   var from = next(code, indx);
-  var [indx, name] = parse_nam(code, next(code, indx));
+  var [indx, name] = parse_nam(code, next(code, indx), 0, false);
   var got = find(vars, (x,i) => x === name);
   if (got) {
     return [indx, Var(got.index, {from,to:indx})];
   } else if (!isNaN(Number(name))) {
     return [indx, Var(Number(name), {from,to:indx})];
+  } else if (name.length === 0) {
+    parse_error(code, indx, "a variable", err);
   } else {
     return [indx, Ref(name, {from,to:indx})];
   };
 };
 
 // Parses a single-line application, `<term>(<term>)`
-function parse_app(code, indx, from, func, vars) {
-  var [indx, eras] = parse_opt(code, indx, "(", "<");
-  var [indx, argm] = parse_term(code, indx, vars);
-  var [indx, skip] = parse_str(code, next(code, indx), eras ? ">" : ")");
+function parse_app(code, indx, from, func, vars, err) {
+  var [indx, eras] = parse_one(code, indx, "(", "<", false);
+  var [indx, argm] = parse_term(code, indx, vars, err);
+  var [indx, skip] = parse_str(code, next(code, indx), eras ? ">" : ")", err);
   return [indx, App(eras, func, argm, {from,to:indx})];
 };
 
 // Parses a multi-line application, `<term> | <term>;`
-function parse_pip(code, indx, from, func, vars) {
-  var [indx, skip] = parse_str(code, next(code, indx), "|");
-  var [indx, argm] = parse_term(code, indx, vars);
-  var [indx, skip] = parse_str(code, next(code, indx), ";");
+function parse_pip(code, indx, from, func, vars, err) {
+  var [indx, skip] = parse_str(code, next(code, indx), "|", false);
+  var [indx, argm] = parse_term(code, indx, vars, err);
+  var [indx, skip] = parse_str(code, next(code, indx), ";", err);
   return [indx, App(false, func, argm, {from,to:indx})];
 };
 
 // Parses a non-dependent function type, `<term> -> <term>`
-function parse_arr(code, indx, from, bind, vars) {
-  var [indx, skip] = parse_str(code, next(code, indx), "->");
-  var [indx, body] = parse_term(code, indx, Ext("", Ext("", vars)));
+function parse_arr(code, indx, from, bind, vars, err) {
+  var [indx, skip] = parse_str(code, next(code, indx), "->", false);
+  var [indx, body] = parse_term(code, indx, Ext("", Ext("", vars)), err);
   return [indx, All(false, "", "", shift(bind,1,0), body, {from,to:indx})];
 };
 
 // Parses an annotation, `<term> :: <term>`
-function parse_ann(code, indx, from, expr, vars) {
-  var [indx, skip] = parse_str(code, next(code, indx), "::");
-  var [indx, type] = parse_term(code, indx, vars);
+function parse_ann(code, indx, from, expr, vars, err) {
+  var [indx, skip] = parse_str(code, next(code, indx), "::", false);
+  var [indx, type] = parse_term(code, indx, vars, err);
   return [indx, Ann(false, expr, type, {from,to:indx})];
 };
 
 // Parses a string literal, "foo"
-function parse_lit(code, indx) {
+function parse_lit(code, indx, err) {
   var from = next(code, indx);
   var [indx, skip] = parse_str(code, next(code, indx), "\"");
   return (function go(indx, slit) {
@@ -305,41 +327,47 @@ function parse_lit(code, indx) {
       } else {
         return [indx+1, Ref("String.nil")];
       }
-    } else {
+    } else if (err) {
       throw "Invalid string literal.";
+    } else {
+      throw null;
     }
   })(indx);
 };
 
 // Parses a term
-function parse_term(code, indx = 0, vars = Nil()) {
-  var from = next(code, indx);
+function parse_term(code, indx = 0, vars = Nil(), err) {
+  var indx = from = next(code, indx);
 
   // Parses the base term, trying each variant once
   var base_parse = first_valid([
-    () => parse_all(code, indx, vars),
-    () => parse_lam(code, indx, vars),
-    () => parse_let(code, indx, vars),
-    () => parse_par(code, indx, vars),
-    () => parse_typ(code, indx, vars),
-    () => parse_lit(code, indx),
-    () => parse_var(code, indx, vars),
-  ]);
+    ["all", code, indx, () => parse_all(code, indx, vars, err)],
+    ["lam", code, indx, () => parse_lam(code, indx, vars, err)],
+    ["let", code, indx, () => parse_let(code, indx, vars, err)],
+    ["par", code, indx, () => parse_par(code, indx, vars, err)],
+    ["typ", code, indx, () => parse_typ(code, indx, vars, err)],
+    ["lit", code, indx, () => parse_lit(code, indx, err)],
+    ["var", code, indx, () => parse_var(code, indx, vars, err)],
+  ], err);
 
-  // Parses postfix extensions, trying each variant repeatedly
-  var post_parse = base_parse;
-  while (true) {
-    var [indx, term] = post_parse;
-    post_parse = first_valid([
-      () => parse_app(code, indx, from, term, vars),
-      () => parse_pip(code, indx, from, term, vars),
-      () => parse_arr(code, indx, from, term, vars),
-      () => parse_ann(code, indx, from, term, vars),
-    ]);
-    if (!post_parse) {
-      return base_parse;
-    } else {
-      base_parse = post_parse;
+  if (!base_parse && err) {
+    parse_error(code, indx, "a term", err);
+  } else {
+    // Parses postfix extensions, trying each variant repeatedly
+    var post_parse = base_parse;
+    while (true) {
+      var [indx, term] = post_parse;
+      post_parse = first_valid([
+        ["app", code, indx, () => parse_app(code, indx, from, term, vars, err)],
+        ["pip", code, indx, () => parse_pip(code, indx, from, term, vars, err)],
+        ["arr", code, indx, () => parse_arr(code, indx, from, term, vars, err)],
+        ["ann", code, indx, () => parse_ann(code, indx, from, term, vars, err)],
+      ], err);
+      if (!post_parse) {
+        return base_parse;
+      } else {
+        base_parse = post_parse;
+      }
     }
   }
 
@@ -350,17 +378,27 @@ function parse_term(code, indx = 0, vars = Nil()) {
 function parse_defs(code, indx = 0) {
   var defs = {};
   function parse_defs(code, indx) {
+    var indx = next(code, indx);
     try {
-      var [indx, name] = parse_nam(code, next(code, indx));
-      var [indx, skip] = parse_str(code, next(code, indx), ":");
-      var [indx, type] = parse_term(code, next(code, indx), Nil());
-      var [indx, loop] = parse_may(code, drop_spaces(code, indx), "//loop//");
-      var [indx, prim] = parse_may(code, drop_spaces(code, indx), "//prim//");
-      var [indx, data] = parse_may(code, drop_spaces(code, indx), "//data//");
-      var [indx, term] = parse_term(code, next(code, indx), Nil());
-      defs[name] = {type, term, meta: {loop,prim,data}};
-      parse_defs(code, indx);
-    } catch (e) {}
+      if (indx === code.length) {
+        return;
+      } else {
+        var [indx, name] = parse_nam(code, next(code, indx), 0, true);
+        var [indx, skip] = parse_str(code, next(code, indx), ":", true);
+        var [indx, type] = parse_term(code, next(code, indx), Nil(), true);
+        var [indx, loop] = parse_opt(code, drop_spaces(code, indx), "//loop//");
+        var [indx, prim] = parse_opt(code, drop_spaces(code, indx), "//prim//");
+        var [indx, data] = parse_opt(code, drop_spaces(code, indx), "//data//");
+        var [indx, term] = parse_term(code, next(code, indx), Nil(), true);
+        var [indx, skip] = parse_str(code, drop_while(c=>c===" ", code, indx), "\n", true);
+        defs[name] = {type, term, meta: {loop,prim,data}};
+        parse_defs(code, indx);
+      };
+    } catch (e) {
+      if (e !== null) {
+        throw e;
+      }
+    }
   }
   parse_defs(code, indx);
   return defs;
@@ -938,9 +976,9 @@ function Err(loc, ctx, nam, msg) {
 
 function highlight_code(code, from, to) {
   var lines = [""];
-  var from_line = null;
-  var to_line = 0;
-  var err_line = 0;
+  var from_line = 0;
+  var to_line = Infinity;
+  var err_line = null;
   lines.push("\x1b[2m     1| \x1b[0m");
   for (var i = 0; i < code.length; ++i) {
     if (code[i] === "\n") {
@@ -949,7 +987,7 @@ function highlight_code(code, from, to) {
     } else {
       var chr = code[i];
       if (from <= i && i < to) {
-        if (from_line === null) {
+        if (err_line === null) {
           err_line = lines.length - 1;
         }
         var chr = "\x1b[4m\x1b[31m" + chr + "\x1b[0m";
@@ -991,8 +1029,6 @@ function stringify_err(err, code) {
 // =============
 
 function typeinfer(term, file, ctx = Nil(), nam = Nil()) {
-  //console.log("infer", stringify_term(term, nam));
-  //console.log("-----");
   switch (term.ctor) {
     case "Var":
       var got = find(ctx, (x,i) => i === term.indx);
@@ -1052,9 +1088,6 @@ function typeinfer(term, file, ctx = Nil(), nam = Nil()) {
 };
 
 function typecheck(term, type, file, ctx = Nil(), nam = Nil(), code) {
-  //console.log("check", stringify_term(term, nam));
-  //console.log("typed", stringify_term(type, nam));
-  //console.log("-----");
   var typv = reduce(type, file);
   switch (term.ctor) {
     case "Lam":

@@ -11,7 +11,13 @@ function load(dir = ".", ext = ".fmc", parse_defs = fmc.parse_defs) {
     var result = {files: {}, defs: {}};
     for (var file of files) {
       var file_code = fs.readFileSync(file, "utf8");
-      var file_defs = parse_defs(file_code, 0, file);
+      try {
+        var file_defs = parse_defs(file_code, 0, file);
+      } catch (err) {
+        console.log("\n\x1b[1mInside '\x1b[4m"+file+"\x1b[0m'"
+                  + "\x1b[1m:\x1b[0m\n" + err);
+        process.exit();
+      }
       for (var name in file_defs) {
         if (result.defs[name]) {
           console.log("Redefinition of '" + name + "' in '" + file + "'.");
