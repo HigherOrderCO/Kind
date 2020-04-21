@@ -981,12 +981,12 @@ function highlight_code(code, from, to) {
   var to_line = Infinity;
   var err_line = null;
   lines.push("\x1b[2m     1| \x1b[0m");
-  for (var i = 0; i < code.length; ++i) {
+  for (var i = 0; i < code.length + 1; ++i) {
     if (code[i] === "\n") {
       var line_num_str = ("      "+(lines.length)).slice(-6);
       lines.push("\x1b[2m" + line_num_str + "| \x1b[0m");
     } else {
-      var chr = code[i];
+      var chr = code[i] || "<eof>";
       if (from <= i && i < to) {
         if (err_line === null) {
           err_line = lines.length - 1;
