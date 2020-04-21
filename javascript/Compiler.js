@@ -6,8 +6,25 @@
 
 var fmc = require("./FormalityCore.js");
 
+// Dirty optimization to avoid calling `equal` sometimes. This offers a small
+// speed-up because `equal` calls `bind_free_vars` and `reduce` before starting,
+// which requires a `O(N)` pass on the term. This isn't slow, but it accumulates
+// because the compiler must call `equal` many times to detect primitive vals.
+// This wouldn't be necessary if `equal` accepted terms on the format it uses
+// internally. Might be improved in a future.
+function equal(a, b, file) {
+  while (a.ctor === "Ref") a = file[a.name].term;
+  while (b.ctor === "Ref") b = file[b.name].term;
+  if (a.ctor === "All" && b.ctor === "Typ") return false;
+  if (a.ctor === "Typ" && b.ctor === "All") return false;
+  if (a.ctor === "All" && b.ctor === "All") {
+    if ((a.self || b.self) && a.self !== b.self) return false;
+    if ((a.self && b.self) && a.self === b.self) return true;
+  };
+  return fmc.equal(a, b, file);
+};
+
 module.exports = {
-  
   // JavaScript compiler
   js: function(file, main) {
     function make_name(str) {
@@ -76,7 +93,7 @@ module.exports = {
 
     function prim_of(type) {
       for (var prim in prim_types) {
-        if (fmc.equal(type, fmc.Ref(prim), file)) {
+        if (equal(type, fmc.Ref(prim), file)) {
           return prim;
         }
       };
@@ -238,13 +255,13 @@ module.exports = {
           break;
         default:
           var term_cmp = infer(term, file, ctx, nam);
-          if (!fmc.equal(type, term_cmp.type, file)) {
-            var type_str = fmc.stringify_term(fmc.normalize(type, {}), nam);
-            var tcmp_str = fmc.stringify_term(fmc.normalize(term_cmp.type, {}), nam);
-            throw fmc.Err(term.locs, ctx, nam,
-              "Found type... \x1b[2m"+tcmp_str+"\x1b[0m\n" +
-              "Instead of... \x1b[2m"+type_str+"\x1b[0m");
-          }
+          //if (!equal(type, term_cmp.type, file)) {
+            //var type_str = fmc.stringify_term(fmc.normalize(type, {}), nam);
+            //var tcmp_str = fmc.stringify_term(fmc.normalize(term_cmp.type, {}), nam);
+            //throw fmc.Err(term.locs, ctx, nam,
+              //"Found type... \x1b[2m"+tcmp_str+"\x1b[0m\n" +
+              //"Instead of... \x1b[2m"+type_str+"\x1b[0m");
+          //}
           var code = term_cmp.code;
 
           // Tail-call Optimization
@@ -263,7 +280,7 @@ module.exports = {
             code = opt_code;
           };
       };
-      if (fmc.equal(type, fmc.Typ(), file)) {
+      if (equal(type, fmc.Typ(), file)) {
         var code = "(void 0)";
       };
       return {code, type};
@@ -281,7 +298,7 @@ module.exports = {
       }
     };
 
-    var isio = fmc.equal(file[main].type, fmc.App(false, fmc.Ref("IO"), fmc.Ref("Unit")), file);
+    var isio = equal(file[main].type, fmc.App(false, fmc.Ref("IO"), fmc.Ref("Unit")), file);
     var defs = sorted_def_names(file).concat(main);
     var code = "";
     code += "module.exports = (function (){\n";
@@ -316,7 +333,7 @@ module.exports = {
       if (!expr) {
         try {
           var comp = check(file[name].term, file[name].type, file, meta);
-          if (fmc.equal(comp.type, fmc.Typ(), file)) {
+          if (equal(comp.type, fmc.Typ(), file)) {
             continue;
           } else {
             expr = comp.code;
@@ -412,7 +429,7 @@ module.exports = {
 
     function prim_of(type) {
       for (var prim in prim_types) {
-        if (fmc.equal(type, fmc.Ref(prim), file)) {
+        if (equal(type, fmc.Ref(prim), file)) {
           return prim;
         }
       };
@@ -574,7 +591,7 @@ module.exports = {
           break;
         default:
           var term_cmp = infer(term, file, ctx, nam);
-          if (!fmc.equal(type, term_cmp.type, file)) {
+          if (!equal(type, term_cmp.type, file)) {
             var type_str = fmc.stringify_term(fmc.normalize(type, {}), nam);
             var tcmp_str = fmc.stringify_term(fmc.normalize(term_cmp.type, {}), nam);
             throw fmc.Err(term.locs, ctx, nam,
@@ -599,7 +616,7 @@ module.exports = {
             //code = opt_code;
           //};
       };
-      if (fmc.equal(type, fmc.Typ(), file)) {
+      if (equal(type, fmc.Typ(), file)) {
         var code = "()";
       };
       return {code, type};
@@ -618,7 +635,7 @@ module.exports = {
     };
 
     var defs = sorted_def_names(file).concat(main);
-    var isio = fmc.equal(file[main].type, fmc.App(false, fmc.Ref("IO"), fmc.Ref("Unit")), file);
+    var isio = equal(file[main].type, fmc.App(false, fmc.Ref("IO"), fmc.Ref("Unit")), file);
 
     var code = "";
     code += "import Prelude hiding (($))\n";
@@ -655,7 +672,7 @@ module.exports = {
       if (!expr) {
         try {
           var comp = check(file[name].term, file[name].type, file, meta);
-          if (fmc.equal(comp.type, fmc.Typ(), file)) {
+          if (equal(comp.type, fmc.Typ(), file)) {
             continue;
           } else {
             expr = comp.code;
