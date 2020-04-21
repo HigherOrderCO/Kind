@@ -421,64 +421,65 @@ function stringify_lit(term) {
         chr = chr.func;
       };
       return String.fromCharCode(val) + stringify_lit(term.argm);
+    } else {
+      throw null;
     }
   } catch (e) {
-    console.log(e);
     throw null;
   }
 };
 
 function stringify_term(term, vars = Nil()) {
-  switch (term.ctor) {
-    case "Var":
-      var got = find(vars, (x,i) => i === term.indx);
-      if (got) {
-        return got.value;
-      } else {
-        return "#" + term.indx;
-      };
-    case "Ref":
-      return term.name;
-    case "Typ":
-      return "Type";
-    case "All":
-      var self = term.self;
-      var lpar = term.name === "" ? "" : (term.eras ? "<" : "(");
-      var name = term.name;
-      var colo = term.name === "" ? "" : ": ";
-      var bind = stringify_term(term.bind, Ext(self, vars));
-      var rpar = term.name === "" ? "" : (term.eras ? ">" : ")");
-      var body = stringify_term(term.body, Ext(name, Ext(self, vars)));
-      return self+lpar+name+colo+bind+rpar+" -> "+body;
-    case "Lam":
-      var name = term.name;
-      var lpar = term.eras ? "<" : "(";
-      var body = stringify_term(term.body, Ext(name, vars));
-      var rpar = term.eras ? ">" : ")";
-      return lpar+name+rpar+" "+body;
-    case "App":
-      var func = stringify_term(term.func, vars);
-      var lpar = term.eras ? "<" : "(";
-      var argm = stringify_term(term.argm, vars);
-      var rpar = term.eras ? ">" : ")";
-      if (term.func.ctor === "Lam" || term.func.ctor === "All") {
-        return "("+func+")"+lpar+argm+rpar;
-      } else {
-        return func+lpar+argm+rpar;
-      }
-    case "Let":
-      var name = term.name;
-      var expr = stringify_term(term.expr, vars);
-      var body = stringify_term(term.body, Ext(name, vars));
-      return "let "+name+" = "+expr+"; "+body;
-    case "Ann":
-      try {
-        return '"' + stringify_lit(term.expr) + '"';
-      } catch (e) {
+  try {
+    return '"' + stringify_lit(term) + '"';
+  } catch (e) {
+    switch (term.ctor) {
+      case "Var":
+        var got = find(vars, (x,i) => i === term.indx);
+        if (got) {
+          return got.value;
+        } else {
+          return "#" + term.indx;
+        };
+      case "Ref":
+        return term.name;
+      case "Typ":
+        return "Type";
+      case "All":
+        var self = term.self;
+        var lpar = term.name === "" ? "" : (term.eras ? "<" : "(");
+        var name = term.name;
+        var colo = term.name === "" ? "" : ": ";
+        var bind = stringify_term(term.bind, Ext(self, vars));
+        var rpar = term.name === "" ? "" : (term.eras ? ">" : ")");
+        var body = stringify_term(term.body, Ext(name, Ext(self, vars)));
+        return self+lpar+name+colo+bind+rpar+" -> "+body;
+      case "Lam":
+        var name = term.name;
+        var lpar = term.eras ? "<" : "(";
+        var body = stringify_term(term.body, Ext(name, vars));
+        var rpar = term.eras ? ">" : ")";
+        return lpar+name+rpar+" "+body;
+      case "App":
+        var func = stringify_term(term.func, vars);
+        var lpar = term.eras ? "<" : "(";
+        var argm = stringify_term(term.argm, vars);
+        var rpar = term.eras ? ">" : ")";
+        if (term.func.ctor === "Lam" || term.func.ctor === "All") {
+          return "("+func+")"+lpar+argm+rpar;
+        } else {
+          return func+lpar+argm+rpar;
+        }
+      case "Let":
+        var name = term.name;
+        var expr = stringify_term(term.expr, vars);
+        var body = stringify_term(term.body, Ext(name, vars));
+        return "let "+name+" = "+expr+"; "+body;
+      case "Ann":
         var expr = stringify_term(term.expr, vars);
         var type = stringify_term(term.type, vars);
         return expr+" :: "+type;
-      };
+    }
   }
 };
 
