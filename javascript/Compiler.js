@@ -21,7 +21,7 @@ function equal(a, b, file) {
     if ((a.self || b.self) && a.self !== b.self) return false;
     if ((a.self && b.self) && a.self === b.self) return true;
   };
-  return fmc.equal(a, b, file);
+  return fmc.equal(a, b, file)[0];
 };
 
 module.exports = {
