@@ -230,11 +230,17 @@ module.exports = {
             type: fmc.Typ(),
           };
         case "Ann":
-          try {
-            var code = '"' + fmc.stringify_lit(term.expr) + '"';
+          var chr_lit = fmc.stringify_chr(term.expr);
+          var str_lit = fmc.stringify_str(term.expr);
+          if (chr_lit) {
+            var code = chr_lit.charCodeAt(0);
+            var type = fmc.Ref("Char");
+            return {code, type};
+          } else if (str_lit) {
+            var code = '"' + str_lit + '"';
             var type = fmc.Ref("String");
             return {code, type};
-          } catch (e) {
+          } else {
             return check(term.expr, term.type, file, {}, ctx, nam);
           };
       }
@@ -572,6 +578,20 @@ module.exports = {
             type: fmc.Typ(),
           };
         case "Ann":
+          var chr_lit = fmc.stringify_chr(term.expr);
+          var str_lit = fmc.stringify_str(term.expr);
+          if (chr_lit) {
+            var code = ("("+chr_lit.charCodeAt(0)+"::Word16)");
+            var type = fmc.Ref("Char");
+            return {code, type};
+          } else if (str_lit) {
+            var code = '"'+str_lit+'"';
+            var type = fmc.Ref("String");
+            return {code, type};
+          } else {
+            return check(term.expr, term.type, file, {}, ctx, nam);
+          };
+
           try {
             var code = '"' + fmc.stringify_lit(term.expr) + '"';
             var type = fmc.Ref("String");

@@ -48,11 +48,11 @@ function Ann(done, expr, type, locs = null) {
 // ====
 
 function Nil() {
-  return {ctor: "Nil"};
+  return {ctor: "Nil", length: 0};
 };
 
 function Ext(head, tail) {
-  return {ctor: "Ext", head, tail};
+  return {ctor: "Ext", head, tail, length: tail.length + 1};
 };
 
 // Parsing
@@ -169,11 +169,11 @@ function parse_error(code, indx, expected, err) {
 };
 
 // Drops spaces and parses an exact string
-function parse_str(code, indx, str, err = false) {
+function parse_txt(code, indx, str, err = false) {
   if (str.length === 0) {
     return [indx, str];
   } else if (indx < code.length && code[indx] === str[0]) {
-    return parse_str(code, indx+1, str.slice(1), err);
+    return parse_txt(code, indx+1, str.slice(1), err);
   } else {
     return parse_error(code, indx, "'"+str+"'", err);
   };
@@ -181,11 +181,11 @@ function parse_str(code, indx, str, err = false) {
 
 // Parses one of two strings
 function parse_one(code, indx, ch0, ch1, err) {
-  var parsed_fst = parse_str(code, indx, ch0, false);
+  var parsed_fst = parse_txt(code, indx, ch0, false);
   if (parsed_fst) {
     return [parsed_fst[0], false];
   } else {
-    var parsed_snd = parse_str(code, indx, ch1, err);
+    var parsed_snd = parse_txt(code, indx, ch1, err);
     if (parsed_snd) {
       return [parsed_snd[0], true];
     } else {
@@ -196,7 +196,7 @@ function parse_one(code, indx, ch0, ch1, err) {
 
 // Parses an optional string
 function parse_opt(code, indx, str, err) {
-  var parsed = parse_str(code, indx, str, false);
+  var parsed = parse_txt(code, indx, str, false);
   if (parsed) {
     return [parsed[0], true];
   } else {
@@ -224,9 +224,9 @@ function parse_nam(code, indx, size = 0, err = false) {
 // Parses a parenthesis, `(<term>)`
 function parse_par(code, indx, vars, err = false) {
   return (
-    chain(parse_str(code, next(code, indx), "(", false), (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), "(", false), (indx, skip) =>
     chain(parse_term(code, indx, vars, err),             (indx, term) =>
-    chain(parse_str(code, next(code, indx), ")", err),   (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), ")", err),   (indx, skip) =>
     [indx, term]))));
 };
 
@@ -237,10 +237,10 @@ function parse_all(code, indx, vars, err = false) {
     chain(parse_nam(code, next(code, indx), 1, false), (indx, self) =>
     chain(parse_one(code, indx, "(", "<", false),                   (indx, eras) =>
     chain(parse_nam(code, next(code, indx), 1, false),              (indx, name) =>
-    chain(parse_str(code, next(code, indx), ":", false),            (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), ":", false),            (indx, skip) =>
     chain(parse_term(code, indx, Ext(self, vars), err),             (indx, bind) =>
-    chain(parse_str(code, next(code, indx), eras ? ">" : ")", err), (indx, skip) =>
-    chain(parse_str(code, next(code, indx), "->", err),             (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), eras ? ">" : ")", err), (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), "->", err),             (indx, skip) =>
     chain(parse_term(code, indx, Ext(name, Ext(self, vars)), err),  (indx, body) =>
     [indx, All(eras, self, name, bind, body, {from,to:indx})])))))))));
 };
@@ -251,7 +251,7 @@ function parse_lam(code, indx, vars, err = false) {
   return (
     chain(parse_one(code, next(code, indx), "(", "<", false),         (indx, eras) =>
     chain(parse_nam(code, next(code, indx), 1, false),                (indx, name) =>
-    chain(parse_str(code, next(code, indx), eras ? ">" : ")", false), (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), eras ? ">" : ")", false), (indx, skip) =>
     chain(parse_term(code, indx, Ext(name, vars), err),               (indx, body) =>
     [indx, Lam(eras, name, body, {from,to:indx})])))));
 };
@@ -260,9 +260,9 @@ function parse_lam(code, indx, vars, err = false) {
 function parse_let(code, indx, vars, err = false) {
   var from = next(code, indx);
   return (
-    chain(parse_str(code, next(code, indx), "let ", false), (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), "let ", false), (indx, skip) =>
     chain(parse_nam(code, next(code, indx), 0, err),        (indx, name) =>
-    chain(parse_str(code, next(code, indx), "=", err),      (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), "=", err),      (indx, skip) =>
     chain(parse_term(code, indx, vars, err),                (indx, expr) =>
     chain(parse_opt(code, indx, ";", err),                  (indx, skip) =>
     chain(parse_term(code, indx, Ext(name, vars), err),     (indx, body) =>
@@ -273,7 +273,7 @@ function parse_let(code, indx, vars, err = false) {
 function parse_typ(code, indx, vars, err = false) {
   var from = next(code, indx);
   return (
-    chain(parse_str(code, next(code, indx), "Type", false), (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), "Type", false), (indx, skip) =>
     [indx, Typ({from,to:indx})]));
 };
 
@@ -299,23 +299,23 @@ function parse_app(code, indx, from, func, vars, err) {
   return (
     chain(parse_one(code, indx, "(", "<", false),                   (indx, eras) =>
     chain(parse_term(code, indx, vars, err),                        (indx, argm) =>
-    chain(parse_str(code, next(code, indx), eras ? ">" : ")", err), (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), eras ? ">" : ")", err), (indx, skip) =>
     [indx, App(eras, func, argm, {from,to:indx})]))));
 };
 
 // Parses a multi-line application, `<term> | <term>;`
 function parse_pip(code, indx, from, func, vars, err) {
   return (
-    chain(parse_str(code, next(code, indx), "|", false), (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), "|", false), (indx, skip) =>
     chain(parse_term(code, indx, vars, err), (indx, argm) =>
-    chain(parse_str(code, next(code, indx), ";", err), (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), ";", err), (indx, skip) =>
     [indx, App(false, func, argm, {from,to:indx})]))));
 };
 
 // Parses a non-dependent function type, `<term> -> <term>`
 function parse_arr(code, indx, from, bind, vars, err) {
   return (
-    chain(parse_str(code, next(code, indx), "->", false), (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), "->", false), (indx, skip) =>
     chain(parse_term(code, indx, Ext("", Ext("", vars)), err), (indx, body) =>
     [indx, All(false, "", "", shift(bind,1,0), body, {from,to:indx})])));
 };
@@ -323,24 +323,41 @@ function parse_arr(code, indx, from, bind, vars, err) {
 // Parses an annotation, `<term> :: <term>`
 function parse_ann(code, indx, from, expr, vars, err) {
   return (
-    chain(parse_str(code, next(code, indx), "::", false), (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), "::", false), (indx, skip) =>
     chain(parse_term(code, indx, vars, err), (indx, type) =>
     [indx, Ann(false, expr, type, {from,to:indx})])));
 };
 
-// Parses a string literal, "foo"
-function parse_lit(code, indx, err) {
+// Turns a character into a term
+function make_chr(chr) {
+  var cod = chr.charCodeAt(0);
+  var chr = Ref("Char.new");
+  for (var i = 15; i >= 0; --i) {
+    chr = App(false, chr, Ref((cod >>> i) & 1 ? "Bit.1" : "Bit.0"));
+  };
+  return chr;
+};
+
+// Parses a char literal, 'f'
+function parse_chr(code, indx, err) {
   var from = next(code, indx);
   return (
-    chain(parse_str(code, next(code, indx), "\""), (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), "'"), (indx, skip) =>
+    chain([indx+1, code[indx]],                   (indx, clit) =>
+    chain(parse_txt(code, next(code, indx), "'"), (indx, skip) =>
+    [indx, Ann(true, make_chr(clit), Ref("Char"), {from,to:indx})]
+    ))));
+};
+
+// Parses a string literal, "foo"
+function parse_str(code, indx, err) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, next(code, indx), "\""), (indx, skip) =>
     chain((function go(indx, slit) {
       if (indx < code.length) {
         if (code[indx] !== "\"") {
-          var cod = code.charCodeAt(indx);
-          var chr = Ref("Char.new");
-          for (var i = 15; i >= 0; --i) {
-            chr = App(false, chr, Ref((cod >>> i) & 1 ? "Bit.1" : "Bit.0"));
-          };
+          var chr = make_chr(code[indx]);
           var [indx, slit] = go(indx + 1, slit);
           return [indx, App(false, App(false, Ref("String.cons"), chr), slit)];
         } else {
@@ -367,7 +384,8 @@ function parse_term(code, indx = 0, vars = Nil(), err) {
     () => parse_let(code, indx, vars, err),
     () => parse_par(code, indx, vars, err),
     () => parse_typ(code, indx, vars, err),
-    () => parse_lit(code, indx, err),
+    () => parse_chr(code, indx, err),
+    () => parse_str(code, indx, err),
     () => parse_var(code, indx, vars, err),
   ], err);
 
@@ -404,13 +422,13 @@ function parse_defs(code, indx = 0) {
       return;
     } else {
       chain(parse_nam(code, next(code, indx), 0, true), (indx, name) =>
-      chain(parse_str(code, next(code, indx), ":", true), (indx, skip) =>
+      chain(parse_txt(code, next(code, indx), ":", true), (indx, skip) =>
       chain(parse_term(code, next(code, indx), Nil(), true), (indx, type) =>
       chain(parse_opt(code, drop_spaces(code, indx), "//loop//"), (indx, loop) =>
       chain(parse_opt(code, drop_spaces(code, indx), "//prim//"), (indx, prim) =>
       chain(parse_opt(code, drop_spaces(code, indx), "//data//"), (indx, data) =>
       chain(parse_term(code, next(code, indx), Nil(), true), (indx, term) =>
-      chain(parse_str(code, drop_while(c=>c===" ", code, indx), "\n", true), (indx, skip) => {
+      chain(parse_txt(code, drop_while(c=>c===" ", code, indx), "\n", true), (indx, skip) => {
         defs[name] = {type, term, meta: {loop,prim,data}};
         parse_defs(code, indx);
       }))))))));
@@ -423,30 +441,54 @@ function parse_defs(code, indx = 0) {
 // Stringification
 // ===============
 
-function stringify_lit(term) {
-  try {
-    if (term.name === "String.nil") {
-      return "";
-    } else if (term.func.func.name === "String.cons") {
-      var val = 0;
-      var chr = term.func.argm;
-      for (var i = 0; i < 16; ++i) {
-        val = chr.argm.name === "Bit.1" ? val | (1 << i) : val;
+function stringify_chr(chr) {
+  var val = 0;
+  for (var i = 0; i < 16; ++i) {
+    if (chr.ctor === "App" && chr.argm.ctor === "Ref") {
+      if (chr.argm.name === "Bit.0") {
+        val = val;
         chr = chr.func;
-      };
-      return String.fromCharCode(val) + stringify_lit(term.argm);
+      } else if (chr.argm.name === "Bit.1") {
+        val = val | (1 << i);
+        chr = chr.func;
+      } else {
+        return null;
+      }
     } else {
-      throw null;
+      return null;
     }
-  } catch (e) {
-    throw null;
+  };
+  if (chr.ctor === "Ref" && chr.name === "Char.new") {
+    return String.fromCharCode(val);
+  } else {
+    return null;
+  };
+};
+
+function stringify_str(term) {
+  if (term.ctor === "Ref" && term.name === "String.nil") {
+    return "";
+  } else if (term.ctor === "App"
+    && term.func.ctor === "App"
+    && term.func.func.ctor === "Ref"
+    && term.func.func.name === "String.cons") {
+    var chr = stringify_chr(term.func.argm);
+    if (chr !== null) {
+      return chr + stringify_str(term.argm);
+    } else {
+      return null;
+    }
   }
 };
 
 function stringify_term(term, vars = Nil()) {
-  try {
-    return '"' + stringify_lit(term) + '"';
-  } catch (e) {
+  var chr_lit = stringify_chr(term);
+  var str_lit = stringify_str(term);
+  if (chr_lit) {
+    return "'"+chr_lit+"'";
+  } else if (str_lit) {
+    return "\""+str_lit+"\"";
+  } else {
     switch (term.ctor) {
       case "Var":
         var got = find(vars, (x,i) => i === term.indx);
@@ -863,56 +905,57 @@ function equate(map, x, y) {
 
 // Replaces all free variables of a subterm with a reference
 // to the depth of the quantificator it is bound
-function bind_free_vars(term, initial_depth) {
-  function go(term, depth) {
+function bind_free_vars(term, ini_nam, ini_dep) {
+  return (function go(term, dep) {
     switch (term.ctor) {
-    case "Var":
-      if (term.indx < depth){
-        return Var(term.indx, term.locs);
-      } else {
-        return Ref("%" + (initial_depth - 1 - (term.indx - depth)));
-      }
-    case "Ref":
-      return Ref(term.name, term.locs);
-    case "Typ":
-      return Typ();
-    case "All":
-      var eras = term.eras;
-      var self = term.self;
-      var name = term.name;
-      var bind = go(term.bind, depth+1);
-      var body = go(term.body, depth+2);
-      var locs = term.locs;
-      return All(eras, self, name, bind, body, locs);
-    case "Lam":
-      var eras = term.eras;
-      var name = term.name;
-      var body = go(term.body, depth+1);
-      var locs = term.locs;
-      return Lam(eras, name, body, locs);
-    case "App":
-      var eras = term.eras;
-      var func = go(term.func, depth);
-      var argm = go(term.argm, depth);
-      var locs = term.locs;
-      return App(eras,func, argm, locs);
-    case "Let":
-      var name = term.name;
-      var expr = go(term.expr, depth);
-      var body = go(term.body, depth+1);
-      var locs = term.locs;
-      return Let(name, expr, body, locs);
-    case "Ann":
-      var expr = go(term.expr, depth);
-      var type = go(term.type, depth);
-      var done = term.done;
-      var locs = term.locs;
-      return Ann(done, expr, type, locs);
-    default:
-      return term;
+      case "Var":
+        if (term.indx < dep){
+          return Var(term.indx, term.locs);
+        } else {
+          var name = find(ini_nam, (x,i) => dep + i === term.indx);
+          var name = name ? name.value : "?";
+          return Ref(name+"#"+(ini_dep+dep-term.indx-1));
+        }
+      case "Ref":
+        return Ref(term.name, term.locs);
+      case "Typ":
+        return Typ();
+      case "All":
+        var eras = term.eras;
+        var self = term.self;
+        var name = term.name;
+        var bind = go(term.bind, dep+1);
+        var body = go(term.body, dep+2);
+        var locs = term.locs;
+        return All(eras, self, name, bind, body, locs);
+      case "Lam":
+        var eras = term.eras;
+        var name = term.name;
+        var body = go(term.body, dep+1);
+        var locs = term.locs;
+        return Lam(eras, name, body, locs);
+      case "App":
+        var eras = term.eras;
+        var func = go(term.func, dep);
+        var argm = go(term.argm, dep);
+        var locs = term.locs;
+        return App(eras,func, argm, locs);
+      case "Let":
+        var name = term.name;
+        var expr = go(term.expr, dep);
+        var body = go(term.body, dep+1);
+        var locs = term.locs;
+        return Let(name, expr, body, locs);
+      case "Ann":
+        var expr = go(term.expr, dep);
+        var type = go(term.type, dep);
+        var done = term.done;
+        var locs = term.locs;
+        return Ann(done, expr, type, locs);
+      default:
+        return term;
     }
-  }
-  return go(term, 0);
+  })(term, 0);
 };
 
 // Recursively checks if two terms are congruent
@@ -947,12 +990,12 @@ function congruent_terms(map, a, b) {
   }
 };
 
-function equal(a, b, file, dep = 0) {
+function equal(a, b, file, nam = Nil(), dep = 0) {
   var map = {};
-  var vis = [[bind_free_vars(a, dep), bind_free_vars(b, dep), dep]];
+  var vis = [[bind_free_vars(a, nam, dep), bind_free_vars(b, nam, dep), dep]];
   var idx = 0;
   while (idx < vis.length) {
-    let [a0, b0, depth] = vis[idx];
+    let [a0, b0, dep] = vis[idx];
     let a1 = reduce(a0, file);
     let b1 = reduce(b0, file);
     let id = congruent_terms(map, a1, b1);
@@ -964,34 +1007,34 @@ function equal(a, b, file, dep = 0) {
         case "AllAll":
           if (a1.eras !== b1.eras) return [false,a1,b1];
           if (a1.self !== b1.self) return [false,a1,b1];
-          var a_bind = subst(a1.bind, Ref("%" + (depth + 0)), 0);
-          var b_bind = subst(b1.bind, Ref("%" + (depth + 0)), 0);
-          var a_body = subst(a1.body, Ref("%" + (depth + 1)), 1);
-          var a_body = subst(a_body, Ref("%" + (depth + 0)), 0);
-          var b_body = subst(b1.body, Ref("%" + (depth + 1)), 1);
-          var b_body = subst(b_body, Ref("%" + (depth + 0)), 0);
-          vis.push([a_bind, b_bind, depth + 1]);
-          vis.push([a_body, b_body, depth + 2]);
+          var a_bind = subst(a1.bind, Ref(a1.self+"#"+(dep+0)), 0);
+          var b_bind = subst(b1.bind, Ref(a1.self+"#"+(dep+0)), 0);
+          var a_body = subst(a1.body, Ref(a1.name+"#"+(dep+1)), 1);
+          var a_body = subst(a_body, Ref(a1.self+"#"+(dep+0)), 0);
+          var b_body = subst(b1.body, Ref(a1.name+"#"+(dep+1)), 1);
+          var b_body = subst(b_body, Ref(a1.self+"#"+(dep+0)), 0);
+          vis.push([a_bind, b_bind, dep+1]);
+          vis.push([a_body, b_body, dep+2]);
           break;
         case "LamLam":
           if (a1.eras !== b1.eras) return [false,a1,b1];
-          var a_body = subst(a1.body, Ref("%" + (depth + 0)), 0);
-          var b_body = subst(b1.body, Ref("%" + (depth + 0)), 0);
-          vis.push([a_body, b_body, depth + 1]);
+          var a_body = subst(a1.body, Ref(a1.name+"#"+(dep+0)), 0);
+          var b_body = subst(b1.body, Ref(a1.name+"#"+(dep+0)), 0);
+          vis.push([a_body, b_body, dep+1]);
           break;
         case "AppApp":
           if (a1.eras !== b1.eras) return [false,a1,b1];
-          vis.push([a1.func, b1.func, depth]);
-          vis.push([a1.argm, b1.argm, depth]);
+          vis.push([a1.func, b1.func, dep]);
+          vis.push([a1.argm, b1.argm, dep]);
           break;
         case "LetLet":
-          var a_body = subst(a1.body, Ref("%" + (depth + 0)), 0);
-          var b_body = subst(b1.body, Ref("%" + (depth + 0)), 0);
-          vis.push([a1.expr, b1.expr, depth]);
-          vis.push([a_body, b_body, depth + 1]);
+          var a_body = subst(a1.body, Ref("#" + (dep+0)), 0);
+          var b_body = subst(b1.body, Ref("#" + (dep+0)), 0);
+          vis.push([a1.expr, b1.expr, dep]);
+          vis.push([a_body, b_body, dep+1]);
           break;
         case "AnnAnn":
-          vis.push([a1.expr, b1.expr, depth]);
+          vis.push([a1.expr, b1.expr, dep]);
           break;
         default:
           return [false,a1,b1];
@@ -1148,8 +1191,7 @@ function typecheck(term, type, file, ctx = Nil(), nam = Nil(), code) {
       break;
     default:
       var infr = typeinfer(term, file, ctx, nam);
-      var [eq,type1,infr1] = equal(type,infr,file,ctx.length);
-
+      var [eq, type1, infr1] = equal(type, infr, file, nam, ctx.length);
       if (!eq) {
         var type1_str = stringify_term(normalize(type1, {}), nam);
         var infr1_str = stringify_term(normalize(infr1, {}), nam);
@@ -1158,9 +1200,8 @@ function typecheck(term, type, file, ctx = Nil(), nam = Nil(), code) {
         throw Err(term.locs, ctx, nam,
           "Found type... \x1b[2m"+infr0_str+"\x1b[0m\n" +
           "Instead of... \x1b[2m"+type0_str+"\x1b[0m\n" +
-          "\n" +
           "Reduced to... \x1b[2m"+infr1_str+"\x1b[0m\n" +
-          "Instead of... \x1b[2m"+type1_str+"\x1b[0m\n");
+          "Instead of... \x1b[2m"+type1_str+"\x1b[0m");
       }
       break;
   };
@@ -1244,6 +1285,8 @@ module.exports = {
   drop_spaces,
   drop_comment,
   next,
+  parse_txt,
+  parse_chr,
   parse_str,
   parse_nam,
   parse_par,
@@ -1256,7 +1299,8 @@ module.exports = {
   parse_ann,
   parse_term,
   parse_defs,
-  stringify_lit,
+  stringify_chr,
+  stringify_str,
   stringify_term,
   stringify_file,
   stringify_ctx,
