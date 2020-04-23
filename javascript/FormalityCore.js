@@ -962,8 +962,8 @@ function equal(a, b, file, dep = 0) {
     if (!id) {
       switch (a1.ctor + b1.ctor) {
         case "AllAll":
-          if (a1.eras !== b1.eras) return false;
-          if (a1.self !== b1.self) return false;
+          if (a1.eras !== b1.eras) return [false,a1,b1];
+          if (a1.self !== b1.self) return [false,a1,b1];
           var a_bind = subst(a1.bind, Ref("%" + (depth + 0)), 0);
           var b_bind = subst(b1.bind, Ref("%" + (depth + 0)), 0);
           var a_body = subst(a1.body, Ref("%" + (depth + 1)), 1);
@@ -974,13 +974,13 @@ function equal(a, b, file, dep = 0) {
           vis.push([a_body, b_body, depth + 2]);
           break;
         case "LamLam":
-          if (a1.eras !== b1.eras) return false;
+          if (a1.eras !== b1.eras) return [false,a1,b1];
           var a_body = subst(a1.body, Ref("%" + (depth + 0)), 0);
           var b_body = subst(b1.body, Ref("%" + (depth + 0)), 0);
           vis.push([a_body, b_body, depth + 1]);
           break;
         case "AppApp":
-          if (a1.eras !== b1.eras) return false;
+          if (a1.eras !== b1.eras) return [false,a1,b1];
           vis.push([a1.func, b1.func, depth]);
           vis.push([a1.argm, b1.argm, depth]);
           break;
@@ -994,12 +994,12 @@ function equal(a, b, file, dep = 0) {
           vis.push([a1.expr, b1.expr, depth]);
           break;
         default:
-          return false;
+          return [false,a1,b1];
       }
     };
     idx += 1;
   };
-  return true;
+  return [true,a,b];
 };
 
 // Errors
@@ -1148,12 +1148,19 @@ function typecheck(term, type, file, ctx = Nil(), nam = Nil(), code) {
       break;
     default:
       var infr = typeinfer(term, file, ctx, nam);
-      if (!equal(type, infr, file, ctx.length)) {
-        var type_str = stringify_term(normalize(type, {}), nam);
-        var infr_str = stringify_term(normalize(infr, {}), nam);
+      var [eq,type1,infr1] = equal(type,infr,file,ctx.length);
+
+      if (!eq) {
+        var type1_str = stringify_term(normalize(type1, {}), nam);
+        var infr1_str = stringify_term(normalize(infr1, {}), nam);
+        var type0_str = stringify_term(normalize(type, {}), nam);
+        var infr0_str = stringify_term(normalize(infr, {}), nam);
         throw Err(term.locs, ctx, nam,
-          "Found type... \x1b[2m"+infr_str+"\x1b[0m\n" +
-          "Instead of... \x1b[2m"+type_str+"\x1b[0m");
+          "Found type... \x1b[2m"+infr0_str+"\x1b[0m\n" +
+          "Instead of... \x1b[2m"+type0_str+"\x1b[0m\n" +
+          "\n" +
+          "Reduced to... \x1b[2m"+infr1_str+"\x1b[0m\n" +
+          "Instead of... \x1b[2m"+type1_str+"\x1b[0m\n");
       }
       break;
   };
