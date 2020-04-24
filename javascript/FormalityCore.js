@@ -1119,7 +1119,7 @@ function typeinfer(term, file, ctx = Nil(), nam = Nil()) {
       if (got) {
         return shift(got.value, got.index + 1, 0);
       } else {
-        throw Err(term.locs, ctx, nam, "Unbound varible.");
+        throw Err(term.locs, ctx, nam, "Unbound variable.");
       }
     case "Ref":
       var got = file[term.name];
