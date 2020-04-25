@@ -127,7 +127,7 @@ module.exports = {
       "U64.eql"     : "a=>b=>(a===b)",
       "U64.gte"     : "a=>b=>(a>=b)",
       "U64.gtn"     : "a=>b=>(a>b)",
-      "U64.shr"     : "a=>b=>(a>>>b)&0xFFFFFFFFFFFFFFFFn",
+      "U64.shr"     : "a=>b=>(a>>b)&0xFFFFFFFFFFFFFFFFn",
       "U64.shl"     : "a=>b=>(a<<b)&0xFFFFFFFFFFFFFFFFn",
       "U64.and"     : "a=>b=>a&b",
       "U64.or"      : "a=>b=>a|b",

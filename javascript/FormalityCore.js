@@ -441,6 +441,7 @@ function parse_defs(code, indx = 0) {
 // Stringification
 // ===============
 
+// Stringifies a character literal
 function stringify_chr(chr) {
   var val = 0;
   for (var i = 0; i < 16; ++i) {
@@ -465,6 +466,7 @@ function stringify_chr(chr) {
   };
 };
 
+// Stringifies a string literal
 function stringify_str(term) {
   if (term.ctor === "Ref" && term.name === "String.nil") {
     return "";
@@ -481,13 +483,44 @@ function stringify_str(term) {
   }
 };
 
+// Stringifies a 'Debug.display' message
+function stringify_bug(term) {
+  if (term.ctor === "Lam" && term.name === "Debug.display") {
+    try {
+      term = term.body.argm.body.body;
+      var str = "";
+      while (term.ctor !== "Var") {
+        var val = 0;
+        var chr = term.func.argm.body.argm;
+        for (var i = 0; i < 16; ++i) {
+          chr = chr.body.body.body;
+          if (chr.func.indx === 0) {
+            val = val | (1 << i);
+          }
+          chr = chr.argm;
+        }
+        term = term.argm.body.body;
+        str += String.fromCharCode(val);
+      }
+      return str;
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+};
+
+// Stringifies a term
 function stringify_term(term, vars = Nil()) {
   var chr_lit = stringify_chr(term);
   var str_lit = stringify_str(term);
+  var bug_lit = stringify_bug(term);
   if (chr_lit) {
     return "'"+chr_lit+"'";
   } else if (str_lit) {
     return "\""+str_lit+"\"";
+  } else if (bug_lit) {
+    return bug_lit;
   } else {
     switch (term.ctor) {
       case "Var":
@@ -539,6 +572,7 @@ function stringify_term(term, vars = Nil()) {
   }
 };
 
+// Stringifies a context
 function stringify_ctx(ctx, nam) {
   var lines = [];
   function stringify_ctx(ctx, nam, len = 0) {
@@ -557,6 +591,7 @@ function stringify_ctx(ctx, nam) {
   return lines.reverse().join("\n") + "\n";
 };
 
+// Stringifies all terms of a file
 function stringify_file(mod) {
   var text = "";
   for (var name in mod) {

@@ -73,7 +73,6 @@ function report(main = "main", dir, ext, parse) {
     try {
       console.log(fmc.stringify_term(fmc.normalize(defs[main].term, defs)));
     } catch (e) {
-      console.log(e);
       console.log("Error.");
     }
   };
