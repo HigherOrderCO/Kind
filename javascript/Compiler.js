@@ -45,8 +45,8 @@ module.exports = {
         elim: "x=>z=>s=>x===0n?z:s(x-1n)",
       },
       Bits: {
-        inst: "x=>x('')(p=>'0'+p)(p=>'1'+p)",
-        elim: "x=>be=>b0=>b1=>(x.length?(x[0]==='0'?b0(x.slice(1)):b1(x.slice(1))):be)",
+        inst: "x=>x('')(p=>p+'0')(p=>p+'1')",
+        elim: "x=>be=>b0=>b1=>(x.length?(x[x.length-1]==='0'?b0(x.slice(0,-1)):b1(x.slice(0,-1))):be)",
       },
       U16: {
         inst: "x=>x(w=>(function R(x,k){return x(0)(p=>R(p,k*2))(p=>k+R(p,k*2))})(w,1))",
