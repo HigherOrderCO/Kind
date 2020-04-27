@@ -1029,14 +1029,17 @@ function equal(a, b, file, nam = Nil(), dep = 0) {
   var map = {};
   var vis = [[bind_free_vars(a, nam, dep), bind_free_vars(b, nam, dep), dep]];
   var idx = 0;
+  var eq  = {};
   while (idx < vis.length) {
     let [a0, b0, dep] = vis[idx];
     let a1 = reduce(a0, file);
     let b1 = reduce(b0, file);
-    let id = congruent_terms(map, a1, b1);
-    equate(map, a0.hash, a1.hash);
-    equate(map, b0.hash, b1.hash);
-    equate(map, a1.hash, b1.hash);
+    var hs = b1.hash + "-" + a1.hash;
+    let id = eq[hs] || congruent_terms(map, a1, b1);
+    eq[hs] = true;
+    //equate(map, a0.hash, a1.hash);
+    //equate(map, b0.hash, b1.hash);
+    //equate(map, a1.hash, b1.hash);
     if (!id) {
       switch (a1.ctor + b1.ctor) {
         case "AllAll":
