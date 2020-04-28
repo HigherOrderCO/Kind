@@ -1,20 +1,170 @@
-Formality-Core
-==============
+Formality
+=========
 
-Formality-Core is minimal programming language that features dependent types and
-inductive reasoning. It can be used as a lightweight interchange format for
-algorithms and proofs. Its reference implementation has about 1000 lines of
-code, making it extremely portable. It is the underlying core behind the
-[Formality](https://github.com/moonad/formality) language, and the foundation of
-the [Moonad](https://github.com/moonad/Moonad) project.
+Formality is a minimal programming language featuring theorem proving. Its
+implementation is orders of magnitude smaller than proof assistants such as
+Agda, Idris, HOL/Isabelle and Lean, but it is no less powerful: a rich system of
+inductive datatypes is derived from a set of simple primitives. In this paper,
+we implement and formalize it in itself, including its syntax, an efficient
+high-order bidirectional type-checker, a fast equality decision for
+equirecursive terms and a type-directed compiler capable of recovering efficient
+datatypes from internal encodings. This document serves to demonstrate those
+techniques, and to serve as a specification of the language to facilitate
+auditing and independent implementations.
 
-## 0. Table of Contents
+Table of Contents
+=================
 
-- [0. Table of Contents](#0-table-of-contents)
+- [0. Table of Contents](#0-motivation)
+  - [0.0. Modern proof assistants are complex](#00-modern-proof-assistants-are-complex)
+  - [0.1. A simpler alternative](#01-a-simpler-alternative)
+  - [0.2. The cost of consistency](#02-the-cost-of-consistency)
+  - [0.3. Formality's take on consistency](#03-formality's-take-on-consistency)
 - [1. Usage](#1-usage)
 - [2. Syntax](#2-syntax)
 - [3. Evaluation](#3-evaluation)
 - [4. Type-System](#4-type-system)
+
+
+0. Motivation
+=============
+
+For a long time, mathematicians have wondered what is the minimal set of axioms
+capable of serving as a foundation for all of mathematics. Gödel's
+incompleteness theorems demonstrated that no such a thing exists: any axiomatic
+system capable of modelling basic arithmetic is either inconsistent or limited,
+in the sense it has true statements that can't be proven. This doesn't
+invalidate the original intent of the question, though: one can still look for a
+minimal set of axioms capable of serving as a **practical** foundation for
+mathematics.
+
+0.0. Modern proof asistants are complex
+---------------------------------------
+
+Within the field of type theory, mathematical proofs and theorems are
+represented by functional programs and their associated types. This is called
+the Curry-Howard correspondence, and is the basis of modern proof assistants
+such as Agda, Idris, Coq and HOL/Isabelle. Sadly, those are complex software
+with monolithic implementations that are hard to audit and reason about. We're
+interested in a simpler alternative: a fully-featured proof assistant that can
+be turned into a small standard that is easy to analyze and implement
+independently.
+
+Under that perspective, one may be interested on the Calculus of Constructions
+(CoC), a small type theory that easily fits 1000 lines of code in a modern
+programming language. Sadly, that and similar languages aren't capable of
+deriving mathematical induction, an important proof technique without which any
+non-trivial theorem isn't proveable. Moreover, it isn't capable of expressing
+efficient (constant space and time) pattern-matching, without which functional
+programming isn't viable. The usual solution to both problems is to supplement
+CoC with a native datatype system, but this results in the complexity explosion
+that is seen on the mentioned languages.
+
+0.1. A simpler alternative
+--------------------------
+
+A simple, clever alternative was proposed by Aaron Stump. With just one
+additional primitive, the "self type", coupled with mutually recursive
+definitions, one can easily derive induction for lambda encodings, i.e., a way
+to represent datatypes with native lambdas, subsuming the need for a separate
+implementation. This also solves the efficiency problem, as we're able to
+pattern-match in constant time with certain lambda encodings. The problem with
+that solution is that providing a semantics and, thus, proving the consistency
+of the resulting system becomes extremely hard.
+
+Aaron Stump moved on from self types towards a very similar solution based on
+dependent intersections. The idea is theat, instead of relying on mutual
+recursion, inductive datatypes can refer to themselves in simplified, erased
+forms. This results in a comparably small language that is much easier to
+provide a semantics for, which Aaron Stump called Cedille-Core. In exchange,
+programming on it is hard. The simple task of defining a datatypes with
+efficient pattern-matching and recursion becomes a complex task involving
+non-trivial type-level manipulations and many intermediate proofs. While doable,
+programming in Cedille-Core without a supplementary language to do all that work
+for you is not practical.
+
+0.2. The cost of consistency
+----------------------------
+
+Formality has a different take on consistency that comes from the realization
+that consistency isn't hard, it is complex. The reason is that consistency
+demands termination, which, due to the halting problem, simply can't be
+implemented without either forbidding a program that is "important to someone",
+or by making the language extremelly more complex.
+
+For example, there is a very easy way to make a proof language consistent:
+disable recursion and non-affine lambdas. This would be sound even with
+self-types, type-level recursion or other "dangerous" features such as Type in
+Type. The proof is trivial: as long as types are preservation, consistency
+follows from termination, which is clear since only thing you can do is create
+datatypes and pattern-match on them a constant amount of times. But that
+language would be utterly useless and nobody would want to use it.
+
+To make it more attractive, one could extend it with more computing power, but
+each attempt to do so would result in an increase in implementation complexity.
+For example, we could add non-affine lambdas, but that would require an universe
+of types (`Type0 : Type1 : Type2...`), in order to avoid Girard's paradox. We
+could add recursion, but that would require complex checks for well-foundedness
+and positivity in order to avoid loops. We could add corecursion and the
+associated guards. At that point, we'd have an extremely complex core language,
+and there would still be perfectly valid programs that aren't admissible, such
+as high-order abstract syntax, which is extremely useful for interpreters.
+
+In other words, consistency is complex because the natural state of languages is
+to be inconsistent. Processes always finds a way to loop, and there are
+infinitely many creative ways to express them. Since there is no general purpose
+termination check to avoid all of them, the only way to build an expressive,
+consistent proof assistant is by adding safe features, one by one, and proving
+that nothing broke so far.  In other words, consistency is nothing but a
+white-list of programming styles. That list carries a lot of information and,
+thus, necessarily reflects on the complexity of the language implementation.
+Cedille makes self types consistent by adding complexity (hiding it under
+dependent intersections). Coq makes recursion consistent by adding complexity.
+
+Not only that, consistency is not a property of a term, but rather of a set of
+terms. For example, in Agda, one is able to implement a function that returns
+two copies of its input (`λx -> pair x x`), but not a high-order evaluator the
+λ-calculus (as in, HOAS, not PHOAS). But in an hypothetical language with
+structural recursion and only affine lambdas, one could implement such HOAS
+evaluator, but not the copying function. Both languages are consistent, so both
+terms are admissible in a consistent language, but not together! In other words,
+forcing a language to be consistent necessarily excludes certain proofs that
+would be perfectly sensible in some context.
+
+0.3. Formality's take on consistency
+------------------------------------
+
+Because of the reasons above, Formality's take on consistency is to be
+inconsistent by default, with opt-in consistency. As a programming language,
+this allows it to feel very similar to Haskell. Algebraic datatypes,
+pattern-matching, recursion, infinite lists, monads, lenses; every tool that a
+Haskeller adores is available or easy to implement. Other than some added
+boilerplate, writing a program in Formality should not be inherently harder than
+doing so in Haskell, making it very flexible and powerful.
+
+As a proof assistant, it can still be used to aid someone's theorem proving
+tasks by automating type-checking. Then, if one is interested in making sure a
+proof isn't paradoxal, then he/she simply uses a separate termination checker.
+Ultimately, the result is the same, with the added benefit that one may combine
+programs that wouldn't be allowed in traditional proof assistants into a proof
+that turns out to be valid in some context. Not only that, we may pick different
+termination checkers for different purposes: for example, by restricting
+ourselves to Elementary Affine Logic, we're able to compile our programs to
+optimal interaction net runtimes.
+
+In practice, this is nothing more than a separation of concerns that allows
+Formality's core to remain simple and powerful, while making theorem proving
+more flexible. For all that, I consider mixing consistency and type checker an
+engineering mistake that makes a language inherently worse, and that having both
+separate is always desirable.
+
+
+---
+
+WIP
+
+---
+
 
 ### 1. Usage
 
