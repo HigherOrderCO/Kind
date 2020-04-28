@@ -856,7 +856,7 @@ function typecheck(term, type, defs, ctx = Nil(), locs = null) {
         throw Err(locs, ctx,
           "Found type... \x1b[2m"+infr0_str+"\x1b[0m\n" +
           "Instead of... \x1b[2m"+type0_str+"\x1b[0m\n" +
-          "Reduced to... \x1b[2m"+infr1_str+"\x1b[0m\n" +
+          "Differs at... \x1b[2m"+infr1_str+"\x1b[0m\n" +
           "Instead of... \x1b[2m"+type1_str+"\x1b[0m");
       }
       break;
