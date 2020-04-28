@@ -468,9 +468,13 @@ function stringify(term) {
         var body = stringify(term.body(Var(name+"#")));
         return "let "+name+" = "+expr+"; "+body;
       case "Ann":
-        var expr = stringify(term.expr);
-        var type = stringify(term.type);
-        return expr+" :: "+type;
+        if (term.done) {
+          return stringify(term.expr);
+        } else {
+          var expr = stringify(term.expr);
+          var type = stringify(term.type);
+          return expr+" :: "+type;
+        }
       case "Loc":
         var expr = stringify(term.expr);
         return expr;
