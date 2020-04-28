@@ -543,7 +543,7 @@ function reduce(term, defs) {
           case "Lam":
             return reduce(func.body(term.argm), defs);
           default:
-            return App(eras, func, reduce(term.argm, defs));
+            return App(eras, func, term.argm);
         };
       };
     case "Let":
