@@ -1377,13 +1377,13 @@ function to_old(term, dep = 0) {
       var self = term.self;
       var name = term.name;
       var bind = to_old(term.bind, dep + 1);
-      var body = to_old(term.body, dep + 2);
+      var body = to_old(term.body(fmc.Var(dep), fmc.Var(dep+1)), dep + 2);
       var locs = term.locs;
       return old.All(eras, self, name, bind, body, locs);
     case "Lam":
       var eras = term.eras;
       var name = term.name;
-      var body = to_old(term.body, dep + 1);
+      var body = to_old(term.body(fmc.Var(dep)), dep + 1);
       var locs = term.locs;
       return old.Lam(eras, name, body, locs);
     case "App":
@@ -1395,7 +1395,7 @@ function to_old(term, dep = 0) {
     case "Let":
       var name = term.name;
       var expr = to_old(term.expr, dep);
-      var body = to_old(term.body, dep + 1);
+      var body = to_old(term.body(fmc.Var(dep)), dep + 1);
       var locs = term.locs;
       return old.Let(name, expr, body, locs);
     case "Ann":
@@ -1404,6 +1404,8 @@ function to_old(term, dep = 0) {
       var done = term.done;
       var locs = term.locs;
       return old.Ann(done, expr, type, locs);
+    case "Loc":
+      return to_old(term.expr, dep);
   };
 };
 

@@ -16,6 +16,7 @@ function load(dir = ".", ext = ".fmc", parse_defs = fmc.parse_defs) {
       } catch (err) {
         console.log("\n\x1b[1mInside '\x1b[4m"+file+"\x1b[0m'"
                   + "\x1b[1m:\x1b[0m\n" + err);
+        //console.log(err);
         process.exit();
       }
       for (var name in file_defs) {
@@ -48,7 +49,7 @@ function report(main = "main", dir, ext, parse) {
       show_name = show_name + " ";
     }
     try {
-      console.log(show_name + " : " + fmc.stringify_term(fmc.typecheck(defs[name].term, defs[name].type, defs)));
+      console.log(show_name + " : " + fmc.stringify(fmc.typecheck(defs[name].term, defs[name].type, defs)));
     } catch (err) {
       console.log(show_name + " : " + "\x1b[31merror\x1b[0m");
       errors.push([name, err]);
@@ -71,7 +72,7 @@ function report(main = "main", dir, ext, parse) {
     console.log("");
     console.log("\033[4m\x1b[1mEvaluating `main`:\x1b[0m");
     try {
-      console.log(fmc.stringify_term(fmc.normalize(defs[main].term, defs)));
+      console.log(fmc.stringify(fmc.normalize(defs[main].term, defs)));
     } catch (e) {
       console.log("Error.");
     }
