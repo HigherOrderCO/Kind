@@ -600,17 +600,23 @@ function normalize(term, defs) {
 function hash(term, dep = 0) {
   switch (term.ctor) {
     case "Var":
-      return "#"+term.indx.split("#")[1];
+      var indx = Number(term.indx.split("#")[1]);
+      if (indx < 0) {
+        return "^"+(dep+indx);
+      }
+      else{
+        return "#"+indx;
+      }
     case "Ref":
       return "$" + term.name;
     case "Typ":
       return "Type";
     case "All":
       var bind = hash(term.bind, dep);
-      var body = hash(term.body(Var("#"+dep), Var("#"+(dep+1))), dep+2);
+      var body = hash(term.body(Var("#"+(-dep-1)), Var("#"+(-dep-2))), dep+2);
       return "∀" + bind + body;
     case "Lam":
-      var body = hash(term.body(Var("#"+dep)), dep+1);
+      var body = hash(term.body(Var("#"+(-dep-1))), dep+1);
       return "λ" + body;
     case "App":
       var func = hash(term.func, dep);
@@ -618,7 +624,7 @@ function hash(term, dep = 0) {
       return "@" + func + argm;
     case "Let":
       var expr = hash(term.expr, dep);
-      var body = hash(term.body(Var("#"+dep)), dep+1);
+      var body = hash(term.body(Var("#"+(-dep-1))), dep+1);
       return "$" + expr + body;
     case "Ann":
       var expr = hash(term.expr, dep);
