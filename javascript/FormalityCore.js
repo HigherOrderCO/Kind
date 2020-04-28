@@ -753,7 +753,6 @@ function stringify_err(err, code) {
 // =============
 
 function typeinfer(term, defs, ctx = Nil(), locs = null) {
-  //console.log("typeinfer", term.ctor);
   switch (term.ctor) {
     case "Var":
       return Var(term.indx);

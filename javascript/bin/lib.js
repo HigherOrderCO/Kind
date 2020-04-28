@@ -59,7 +59,7 @@ function report(main = "main", dir, ext, parse) {
 
   if (errors.length > 0) {
     console.log("\033[4m\x1b[1mFound " + errors.length + " type error(s):\x1b[0m");
-    for (var i = 0; i < errors.length; ++i) {
+    for (var i = errors.length - 1; i >= 0; --i) {
       var err_msg = fmc.stringify_err(errors[i][1], files[errors[i][0]]);
       console.log("\n\x1b[1mInside \x1b[4m" + errors[i][0]
         + "\x1b[0m\x1b[1m:\x1b[0m\n" + err_msg); 
