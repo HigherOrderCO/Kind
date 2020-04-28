@@ -809,7 +809,6 @@ function typeinfer(term, defs, ctx = Nil(), locs = null) {
     case "Loc":
       return typeinfer(term.expr, defs, ctx, {from: term.from, upto: term.upto});
   }
-  console.log("->", term);
   throw Err(locs, ctx, "Can't infer type.");
 };
 
