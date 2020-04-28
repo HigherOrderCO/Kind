@@ -585,10 +585,7 @@ function normalize(term, defs) {
       var argm = normalize(norm.argm, defs);
       return App(eras, func, argm);
     case "Let":
-      var name = norm.name;
-      var expr = normalize(norm.expr, defs);
-      var body = x => normalize(norm.body(x), defs);
-      return Let(name, expr, body);
+      return normalize(term.body(term.expr));;
     case "Ann":
       return normalize(norm.expr, defs);
     case "Loc":
