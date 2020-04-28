@@ -836,8 +836,15 @@ function typecheck(term, type, defs, ctx = Nil(), locs = null) {
         throw Err(locs, ctx, "Lambda has a non-function type.");
       }
       break;
+    case "Let":
+      var expr_typ = typeinfer(term.expr, defs, ctx);
+      var expr_var = Ann(true, Var(term.name+"#"+ctx.size), expr_typ);
+      var body_ctx = push({name:term.name,type:expr_var.type}, ctx);
+      typecheck(term.body(expr_var), type, defs, body_ctx);
+      break;
     case "Loc":
-      return typecheck(term.expr, type, defs, ctx, {from: term.from, upto: term.upto});
+      typecheck(term.expr, type, defs, ctx, {from: term.from, upto: term.upto});
+      break;
     default:
       var infr = typeinfer(term, defs, ctx);
       var [eq, type1, infr1] = equal(type, infr, defs, ctx.size);
