@@ -573,26 +573,22 @@ function normalize(term, defs) {
       var name = norm.name;
       var bind = normalize(norm.bind, defs);
       var body = (s,x) => normalize(norm.body(s,x), defs);
-      var locs = norm.locs;
-      return All(eras, self, name, bind, body, locs);
+      return All(eras, self, name, bind, body);
     case "Lam":
       var eras = norm.eras;
       var name = norm.name;
       var body = x => normalize(norm.body(x), defs);
-      var locs = norm.locs;
-      return Lam(eras, name, body, locs);
+      return Lam(eras, name, body);
     case "App":
       var eras = norm.eras;
       var func = normalize(norm.func, defs);
       var argm = normalize(norm.argm, defs);
-      var locs = norm.locs;
-      return App(eras, func, argm, locs);
+      return App(eras, func, argm);
     case "Let":
       var name = norm.name;
       var expr = normalize(norm.expr, defs);
       var body = x => normalize(norm.body(x), defs);
-      var locs = norm.locs;
-      return Let(name, expr, body, locs);
+      return Let(name, expr, body);
     case "Ann":
       return normalize(norm.expr, defs);
     case "Loc":
