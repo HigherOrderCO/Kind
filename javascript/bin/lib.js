@@ -2,15 +2,15 @@ var fs = require("fs");
 var fmc = require("./../FormalityCore.js");
 var cmp = require("./../Compiler.js");
 
-function load(dir = ".", ext = ".fmc", parse_defs = fmc.parse_defs, must_throw_error) {
+function error(msg, exit_code) {
+  console.log(msg);
+  process.exit(exit_code || 0);
+};
+
+function load(dir = ".", ext = ".fmc", parse_defs = fmc.parse_defs, exit_code = 0) {
   var files = fs.readdirSync(dir).filter(file => file.slice(-ext.length) === ext);
   if (files.length === 0) {
-    console.log("No local " + ext + " file found.");
-    if (must_throw_error){
-      process.exit(1);
-    } else {
-      process.exit();
-    } 
+    error("No local " + ext + " file found.", exit_code);
   } else {
     var result = {files: {}, defs: {}};
     for (var file of files) {
@@ -18,23 +18,13 @@ function load(dir = ".", ext = ".fmc", parse_defs = fmc.parse_defs, must_throw_e
       try {
         var file_defs = parse_defs(file_code, 0, file);
       } catch (err) {
-        console.log("\n\x1b[1mInside '\x1b[4m"+file+"\x1b[0m'"
-                  + "\x1b[1m:\x1b[0m\n" + err);
-        //console.log(err);
-        if (must_throw_error){
-          process.exit(1);
-        } else {
-          process.exit();
-        }
+        error("\n\x1b[1mInside '\x1b[4m"+file+"\x1b[0m'"
+             + "\x1b[1m:\x1b[0m\n" + err
+             , exit_code);
       }
       for (var name in file_defs) {
         if (result.defs[name]) {
-          console.log("Redefinition of '" + name + "' in '" + file + "'.");
-          if (must_throw_error){
-            process.exit(1);
-          } else {
-            process.exit();
-          }
+          error("Redefinition of '" + name + "' in '" + file + "'.", exit_code);
         } else {
           result.defs[name] = file_defs[name];
           result.files[name] = file_code;
@@ -46,9 +36,9 @@ function load(dir = ".", ext = ".fmc", parse_defs = fmc.parse_defs, must_throw_e
 };
 
 function report(main = "main", dir, ext, parse) {
-  const must_throw_error = process.argv[2] === "--github";
+  var exit_code = main === "--github" ? 1 : 0;
 
-  var {defs, files} = load(dir, ext, parse, must_throw_error);
+  var {defs, files} = load(dir, ext, parse, exit_code);
 
   // Normalizes and type-checks all terms
   console.log("\033[4m\x1b[1mType-checking:\x1b[0m");
@@ -77,24 +67,19 @@ function report(main = "main", dir, ext, parse) {
       var err_msg = fmc.stringify_err(errors[i][1], files[errors[i][0]]);
       console.log("\n\x1b[1mInside \x1b[4m" + errors[i][0]
         + "\x1b[0m\x1b[1m:\x1b[0m\n" + err_msg);
-      if (must_throw_error){
-        process.exit(1);
-      }
     };
+    error("", exit_code);
   } else {
     console.log("\033[4m\x1b[1mAll terms check.\x1b[0m");
   };
 
   if (defs[main]) {
     console.log("");
-    console.log("\033[4m\x1b[1mEvaluating `main`:\x1b[0m");
+    console.log("\033[4m\x1b[1mEvaluating main:\x1b[0m");
     try {
       console.log(fmc.stringify(fmc.normalize(defs[main].term, defs)));
     } catch (e) {
-      console.log("Error.");
-      if (must_throw_error){
-        process.exit(1);
-      }
+      error("Error.", exit_code);
     }
   };
 };
@@ -103,9 +88,6 @@ function js(main = "main", dir, ext, parse) {
   var {defs} = load(dir, ext, parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
-    if (must_throw_error){
-      process.exit(1);
-    }
   } else {
     console.log(cmp.js(defs, main));
   };
@@ -115,9 +97,6 @@ function hs(main = "main", dir, ext, parse) {
   var {defs} = load(dir, ext, parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
-    if (must_throw_error){
-      process.exit(1);
-    }
   } else {
     console.log(cmp.hs(defs, main));
   };
@@ -127,9 +106,6 @@ function run(main = "main", dir, ext, parse) {
   var {defs} = load(dir, ext, parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
-    if (must_throw_error){
-      process.exit(1);
-    }
   } else {
     eval(cmp.js(defs, main));
   };
