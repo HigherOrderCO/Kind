@@ -17,22 +17,17 @@ const Loc = (from,upto,expr)           => ({ctor:"Loc",from,upto,expr});
 const Nil = ()          => ({ctor:"Nil",size: 0});
 const Ext = (head,tail) => ({ctor:"Ext",head,tail,size:tail.size+1});
 
-// Pushes a value to the end of the list
-function push(val, list) {
-  switch (list.ctor) {
-    case "Nil": return Ext(val, Nil());
-    case "Ext": return Ext(list.head, push(val, list.tail));
-  }
-};
-
-// Finds last value satisfying `cond` in a list
-function find(list, cond, indx = 0, got = null) {
+// Finds first value satisfying `cond` in a list
+function find(list, cond, indx = 0) {
   switch (list.ctor) {
     case "Nil":
-      return got;
+      return null;
     case "Ext":
-      var got = cond(list.head, indx) ? {value:list.head, index:indx} : got;
-      return find(list.tail, cond, indx + 1, got);
+      if (cond(list.head, indx)) {
+        return {value:list.head, index:indx};
+      } else {
+        return find(list.tail, cond, indx + 1);
+      };
   };
 };
 
@@ -171,7 +166,7 @@ function parse_all(code, indx, err = false) {
     chain(parse(code, indx, err),                                   (indx, body) =>
     [indx, xs => {
       var tbind = bind(xs);
-      var tbody = (s,x) => body(push([name,x],push([self,s],xs)));
+      var tbody = (s,x) => body(Ext([name,x],Ext([self,s],xs)));
       return Loc(from, indx, All(eras, self, name, tbind, tbody));
     }])))))))));
 };
@@ -185,7 +180,7 @@ function parse_lam(code, indx, err = false) {
     chain(parse_txt(code, next(code, indx), eras ? ">" : ")", false), (indx, skip) =>
     chain(parse(code, indx, err),              (indx, body) =>
     [indx, xs => {
-      var tbody = (x) => body(push([name,x],xs));
+      var tbody = (x) => body(Ext([name,x],xs));
       return Loc(from, indx, Lam(eras, name, tbody));
     }])))));
 };
@@ -201,7 +196,7 @@ function parse_let(code, indx, err = false) {
     chain(parse_opt(code, indx, ";", err),                  (indx, skip) =>
     chain(parse(code, indx, err),    (indx, body) =>
     [indx, xs => {
-      var tbody = (x) => body(push([name,x],xs));
+      var tbody = (x) => body(Ext([name,x],xs));
       return Loc(from, indx, Let(name, expr(xs), tbody));
     }])))))));
 };
@@ -254,7 +249,7 @@ function parse_arr(code, indx, from, bind, err) {
     chain(parse(code, indx, err),                         (indx, body) =>
     [indx, xs => {
       var tbind = bind(xs);
-      var tbody = (s,x) => body(push(["",x],push(["",s],xs)));
+      var tbody = (s,x) => body(Ext(["",x],Ext(["",s],xs)));
       return Loc(from, indx, All(false, "", "", tbind, tbody));
     }])));
 };
@@ -483,15 +478,16 @@ function stringify(term) {
 };
 
 // Stringifies a context
-function stringify_ctx(ctx, up_ctx = Nil()) {
+function stringify_ctx(ctx, text = "") {
   switch (ctx.ctor) {
     case "Ext":
       var name = ctx.head.name;
-      var type = stringify(ctx.head.type, up_ctx);
-      var tail = stringify_ctx(ctx.tail, push({name}, up_ctx));
-      return "- " + name + " : " + type + "\n" + tail;
+      var type = stringify(ctx.head.type, ctx.tail);
+      var text = "- " + name + " : " + type + "\n" + text;
+      return stringify_ctx(ctx.tail, text);
+      return ;
     case "Nil":
-      return "";
+      return text;
   };
 };
 
@@ -793,14 +789,14 @@ function typeinfer(term, defs, ctx = Nil(), locs = null) {
     case "Let":
       var expr_typ = typeinfer(term.expr, defs, ctx);
       var expr_var = Ann(true, Var(term.name+"#"+ctx.size), expr_typ);
-      var body_ctx = push({name:term.name,type:expr_var.type}, ctx);
+      var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
       var body_typ = typeinfer(term.body(expr_var), defs, body_ctx);
       return body_typ;
     case "All":
       var self_var = Ann(true, Var(term.self+"#"+ctx.size), term);
       var name_var = Ann(true, Var(term.name+"#"+(ctx.size+1)), term.bind);
-      var body_ctx = push({name:term.self,type:self_var.type}, ctx);
-      var body_ctx = push({name:term.name,type:name_var.type}, body_ctx);
+      var body_ctx = Ext({name:term.self,type:self_var.type}, ctx);
+      var body_ctx = Ext({name:term.name,type:name_var.type}, body_ctx);
       typecheck(term.bind, Typ(), defs, ctx);
       typecheck(term.body(self_var,name_var), Typ(), defs, body_ctx);
       return Typ();
@@ -830,7 +826,7 @@ function typecheck(term, type, defs, ctx = Nil(), locs = null) {
         if (term.eras !== typv.eras) {
           throw Err(locs, ctx, "Type mismatch.");
         };
-        var body_ctx = push({name:term.name,type:name_var.type}, ctx);
+        var body_ctx = Ext({name:term.name,type:name_var.type}, ctx);
         typecheck(term.body(name_var), body_typ, defs, body_ctx);
       } else {
         throw Err(locs, ctx, "Lambda has a non-function type.");
@@ -839,7 +835,7 @@ function typecheck(term, type, defs, ctx = Nil(), locs = null) {
     case "Let":
       var expr_typ = typeinfer(term.expr, defs, ctx);
       var expr_var = Ann(true, Var(term.name+"#"+ctx.size), expr_typ);
-      var body_ctx = push({name:term.name,type:expr_var.type}, ctx);
+      var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
       typecheck(term.body(expr_var), type, defs, body_ctx);
       break;
     case "Loc":
