@@ -834,7 +834,7 @@ function typecheck(term, type, defs, ctx = Nil(), locs = null) {
       break;
     case "Let":
       var expr_typ = typeinfer(term.expr, defs, ctx);
-      var expr_var = Ann(true, Var(term.name+"#"+ctx.size), expr_typ);
+      var expr_var = Ann(true, term.expr, expr_typ);
       var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
       typecheck(term.body(expr_var), type, defs, body_ctx);
       break;
