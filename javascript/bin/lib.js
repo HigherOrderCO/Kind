@@ -49,6 +49,7 @@ function report(main = "main", dir, ext, parse) {
       show_name = show_name + " ";
     }
     try {
+      fmc.typecheck(defs[name].type, fmc.Typ(), defs);
       console.log(show_name + " : " + fmc.stringify(fmc.typecheck(defs[name].term, defs[name].type, defs)));
     } catch (err) {
       console.log(show_name + " : " + "\x1b[31merror\x1b[0m");

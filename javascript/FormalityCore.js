@@ -178,7 +178,7 @@ function parse_lam(code, indx, err = false) {
     chain(parse_one(code, next(code, indx), "(", "<", false),         (indx, eras) =>
     chain(parse_nam(code, next(code, indx), 1, false),                (indx, name) =>
     chain(parse_txt(code, next(code, indx), eras ? ">" : ")", false), (indx, skip) =>
-    chain(parse(code, indx, err),              (indx, body) =>
+    chain(parse(code, indx, err),                                     (indx, body) =>
     [indx, xs => {
       var tbody = (x) => body(Ext([name,x],xs));
       return Loc(from, indx, Lam(eras, name, tbody));
