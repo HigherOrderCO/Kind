@@ -357,11 +357,11 @@ function parse_defs(code, indx = 0) {
     } else {
       chain(parse_nam(code, next(code, indx), 0, true),           (indx, name) =>
       chain(parse_txt(code, next(code, indx), ":", true),         (indx, skip) =>
-      chain(parse(code, next(code, indx), Nil(), true),           (indx, type) =>
+      chain(parse(code, next(code, indx), true),                  (indx, type) =>
       chain(parse_opt(code, drop_spaces(code, indx), "//loop//"), (indx, loop) =>
       chain(parse_opt(code, drop_spaces(code, indx), "//prim//"), (indx, prim) =>
       chain(parse_opt(code, drop_spaces(code, indx), "//data//"), (indx, data) =>
-      chain(parse(code, next(code, indx), Nil(), true),           (indx, term) => {
+      chain(parse(code, next(code, indx), true),                  (indx, term) => {
         defs[name] = {type: type(Nil()), term: term(Nil()), meta: {loop,prim,data}};
         parse_defs(code, indx);
       })))))));
