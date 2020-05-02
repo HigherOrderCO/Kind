@@ -1684,7 +1684,7 @@ module.exports = {
             var type = old.Ref("Char");
             return {code, type};
           } else if (str_lit) {
-            var code = '"' + str_lit + '"';
+            var code = '`' + str_lit + '`';
             var type = old.Ref("String");
             return {code, type};
           } else {
