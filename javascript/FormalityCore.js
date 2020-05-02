@@ -636,62 +636,50 @@ function hash(term, dep = 0) {
 };
 
 // Are two terms equal?
-function equal(a, b, defs, dep = 0) {
-  var map = {};
-  var vis = [[a, b, dep]];
-  var idx = 0;
-  var eql = {};
-  while (idx < vis.length) {
-    let [a0, b0, dep] = vis[idx];
-    let a1 = reduce(a0, defs);
-    let b1 = reduce(b0, defs);
-    var ah = hash(a1);
-    var bh = hash(b1);
-    var id = ah + "==" + bh;
-    if (ah !== bh && !eql[id]) {
-      eql[id] = true;
-      switch (a1.ctor + b1.ctor) {
-        case "AllAll":
-          if (a1.eras !== b1.eras) return [false,a1,b1];
-          if (a1.self !== b1.self) return [false,a1,b1];
-          var a1_bind = a1.bind;
-          var b1_bind = b1.bind;
-          var a1_body = a1.body(Var("#"+(dep)), Var("#"+(dep+1)));
-          var b1_body = b1.body(Var("#"+(dep)), Var("#"+(dep+1)));
-          vis.push([a1_bind, b1_bind, dep]);
-          vis.push([a1_body, b1_body, dep+2]);
-          break;
-        case "LamLam":
-          if (a1.eras !== b1.eras) return [false,a1,b1];
-          var a1_body = a1.body(Var("#"+(dep)));
-          var b1_body = b1.body(Var("#"+(dep)));
-          vis.push([a1_body, b1_body, dep+1]);
-          break;
-        case "AppApp":
-          if (a1.eras !== b1.eras) return [false,a1,b1];
-          vis.push([a1.func, b1.func, dep]);
-          vis.push([a1.argm, b1.argm, dep]);
-          break;
-        case "LetLet":
-          var a1_body = a1.body(Var("#"+(dep)));
-          var b1_body = b1.body(Var("#"+(dep)));
-          vis.push([a1.expr, b1.expr, dep]);
-          vis.push([a1_body, b1_body, dep+1]);
-          break;
-        case "AnnAnn":
-          vis.push([a1.expr, b1.expr, dep]);
-          break;
-        case "LocLoc":
-          vis.push([a1.expr, b1.expr, dep]);
-          break;
-        default:
-          return [false,a1,b1];
-      }
-    };
-    idx += 1;
+function equal(a, b, defs, dep = 0, eql = {}) {
+  let a1 = reduce(a, defs);
+  let b1 = reduce(b, defs);
+  var ah = hash(a1);
+  var bh = hash(b1);
+  var id = ah + "==" + bh;
+  if (ah === bh || eql[id]) {
+    return true;
+  } else {
+    eql[id] = true;
+    switch (a1.ctor + b1.ctor) {
+      case "AllAll":
+        var a1_body = a1.body(Var("#"+(dep)), Var("#"+(dep+1)));
+        var b1_body = b1.body(Var("#"+(dep)), Var("#"+(dep+1)));
+        return a1.eras === b1.eras
+            && a1.self === b1.self
+            && equal(a1.bind, b1.bind, defs, dep+0, eql)
+            && equal(a1_body, b1_body, defs, dep+2, eql);
+      case "LamLam":
+        if (a1.eras !== b1.eras) return [false,a1,b1];
+        var a1_body = a1.body(Var("#"+(dep)));
+        var b1_body = b1.body(Var("#"+(dep)));
+        return a1.eras === b1.eras
+            && equal(a1_body, b1_body, defs, dep+1, eql);
+      case "AppApp":
+        return a1.eras === b1.eras
+            && equal(a1.func, b1.func, defs, dep, eql)
+            && equal(a1.argm, b1.argm, defs, dep, eql);
+      case "LetLet":
+        var a1_body = a1.body(Var("#"+(dep)));
+        var b1_body = b1.body(Var("#"+(dep)));
+        vis.push([a1.expr, b1.expr, dep]);
+        vis.push([a1_body, b1_body, dep+1]);
+        return equal(a1.expr, b1.expr, defs, dep+0, eql)
+            && equal(a1_body, b1_body, defs, dep+1, eql);
+      case "AnnAnn":
+        return equal(a1.expr, b1.expr, defs, dep, eql);
+      case "LocLoc":
+        return equal(a1.expr, b1.expr, defs, dep, eql);
+      default:
+        return false;
+    }
   };
-  return [true,a,b];
-};
+}
 
 // Errors
 // ======
@@ -843,17 +831,13 @@ function typecheck(term, type, defs, ctx = Nil(), locs = null) {
       break;
     default:
       var infr = typeinfer(term, defs, ctx);
-      var [eq, type1, infr1] = equal(type, infr, defs, ctx.size);
+      var eq = equal(type, infr, defs, ctx.size);
       if (!eq) {
         var type0_str = stringify(normalize(type, {}), ctx);
         var infr0_str = stringify(normalize(infr, {}), ctx);
-        var type1_str = stringify(normalize(type1, {}), ctx);
-        var infr1_str = stringify(normalize(infr1, {}), ctx);
         throw Err(locs, ctx,
           "Found type... \x1b[2m"+infr0_str+"\x1b[0m\n" +
-          "Instead of... \x1b[2m"+type0_str+"\x1b[0m\n" +
-          "Reduced to... \x1b[2m"+infr1_str+"\x1b[0m\n" +
-          "Instead of... \x1b[2m"+type1_str+"\x1b[0m");
+          "Instead of... \x1b[2m"+type0_str+"\x1b[0m\n");
       }
       break;
   };
