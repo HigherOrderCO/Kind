@@ -776,7 +776,7 @@ function typeinfer(term, defs, ctx = Nil(), locs = null) {
       };
     case "Let":
       var expr_typ = typeinfer(term.expr, defs, ctx);
-      var expr_var = Ann(true, Var(term.name+"#"+ctx.size), expr_typ);
+      var expr_var = Ann(true, term.expr, expr_typ);
       var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
       var body_typ = typeinfer(term.body(expr_var), defs, body_ctx);
       return body_typ;
