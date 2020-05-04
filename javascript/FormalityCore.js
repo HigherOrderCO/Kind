@@ -201,6 +201,21 @@ function parse_let(code, indx, err = false) {
     }])))))));
 };
 
+// Parses a monadic application, `use a = x; y` ~> `x((a) y)`
+function parse_use(code, indx, err = false) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, next(code, indx), "use "), (indx, skip) =>
+    chain(parse_nam(code, next(code, indx), 0, err), (indx, name) =>
+    chain(parse_txt(code, next(code, indx), "="),    (indx, skip) =>
+    chain(parse(code, indx, err),                    (indx, func) =>
+    chain(parse(code, indx, err),                    (indx, body) =>
+    [indx, xs => {
+      var tbody = (x) => body(Ext([name,x],xs));
+      return Loc(from, indx, App(false, func(xs), Lam(false, name, tbody)));
+    }]))))));
+};
+
 // Parses the type of types, `Type`
 function parse_typ(code, indx, err = false) {
   var from = next(code, indx);
@@ -316,6 +331,7 @@ function parse(code, indx = 0, err) {
     () => parse_all(code, indx, err),
     () => parse_lam(code, indx, err),
     () => parse_let(code, indx, err),
+    () => parse_use(code, indx, err),
     () => parse_par(code, indx, err),
     () => parse_typ(code, indx, err),
     () => parse_chr(code, indx, err),
