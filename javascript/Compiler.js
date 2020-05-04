@@ -1484,7 +1484,9 @@ module.exports = {
     var prim_funcs = {
       "Bool.not"    : "a=>!a",
       "Bool.and"    : "a=>b=>a&&b",
+      "Bool.if"     : "x=>ct=>cf=>x?ct:cf",
       "Bool.or"     : "a=>b=>a||b",
+      "Debug.log"   : "a=>b=>(console.log(a),b())",
       "Nat.add"     : "a=>b=>a+b",
       "Nat.sub"     : "a=>b=>a-b<=0n?0n:a-b",
       "Nat.mul"     : "a=>b=>a*b",
