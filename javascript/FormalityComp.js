@@ -1819,7 +1819,6 @@ module.exports = {
             expr = comp.code;
           }
         } catch (e) {
-          console.log(e);
           expr = "'ERROR'";
         };
       };

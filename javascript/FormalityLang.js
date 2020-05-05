@@ -555,7 +555,6 @@ function stringify_err(err, code) {
   var index = 0;
   var str = "";
   str += err.msg+"\n";
-  console.log(err);
   if (err.ctx.ctor !== "Nil") {
     str += "With context:\n";
     str += "\x1b[2m"+stringify_ctx(err.ctx)+"\x1b[0m";

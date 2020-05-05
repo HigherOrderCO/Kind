@@ -52,8 +52,9 @@ function report(main = "main", dir, ext, parse) {
       show_name = show_name + " ";
     }
     try {
-      fm.core.typecheck(defs[name].type, fm.core.Typ(), defs);
-      console.log(show_name + " : " + fm.lang.stringify(fm.core.typecheck(defs[name].term, defs[name].type, defs)));
+      var type_typ = fm.core.typecheck(defs[name].type, fm.core.Typ(), defs, fm.lang.stringify);
+      var term_typ = fm.core.typecheck(defs[name].term, defs[name].type, defs, fm.lang.stringify);
+      console.log(show_name + " : " + fm.lang.stringify(term_typ));
     } catch (err) {
       console.log(show_name + " : " + "\x1b[31merror\x1b[0m");
       errors.push([name, err]);
