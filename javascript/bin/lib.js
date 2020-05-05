@@ -1,13 +1,12 @@
 var fs = require("fs");
-var fmc = require("./../FormalityCore.js");
-var cmp = require("./../Compiler.js");
+var fm = require("./../Formality.js");
 
 function error(msg, exit_code) {
   console.log(msg);
   process.exit(exit_code || 0);
 };
 
-function load(dir = ".", ext = ".fmc", parse_defs = fmc.parse_defs, exit_code = 0) {
+function load(dir = ".", ext = ".fmc", parse_defs = fm.lang.parse_defs, exit_code = 0) {
   var files = fs.readdirSync(dir).filter(file => file.slice(-ext.length) === ext);
   if (files.length === 0) {
     error("No local " + ext + " file found.", exit_code);
@@ -53,8 +52,8 @@ function report(main = "main", dir, ext, parse) {
       show_name = show_name + " ";
     }
     try {
-      fmc.typecheck(defs[name].type, fmc.Typ(), defs);
-      console.log(show_name + " : " + fmc.stringify(fmc.typecheck(defs[name].term, defs[name].type, defs)));
+      fm.core.typecheck(defs[name].type, fm.core.Typ(), defs);
+      console.log(show_name + " : " + fm.lang.stringify(fm.core.typecheck(defs[name].term, defs[name].type, defs)));
     } catch (err) {
       console.log(show_name + " : " + "\x1b[31merror\x1b[0m");
       errors.push([name, err]);
@@ -65,7 +64,7 @@ function report(main = "main", dir, ext, parse) {
   if (errors.length > 0) {
     console.log("\033[4m\x1b[1mFound " + errors.length + " type error(s):\x1b[0m");
     for (var i = errors.length - 1; i >= 0; --i) {
-      var err_msg = fmc.stringify_err(errors[i][1], files[errors[i][0]]);
+      var err_msg = fm.lang.stringify_err(errors[i][1], files[errors[i][0]]);
       console.log("\n\x1b[1mInside \x1b[4m" + errors[i][0]
         + "\x1b[0m\x1b[1m:\x1b[0m\n" + err_msg);
     };
@@ -78,7 +77,7 @@ function report(main = "main", dir, ext, parse) {
     console.log("");
     console.log("\033[4m\x1b[1mEvaluating main:\x1b[0m");
     try {
-      console.log(fmc.stringify(fmc.normalize(defs[main].term, defs)));
+      console.log(fm.lang.stringify(fm.core.normalize(defs[main].term, defs)));
     } catch (e) {
       error("Error.", exit_code);
     }
@@ -90,7 +89,7 @@ function js(main = "main", dir, ext, parse) {
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
-    console.log(cmp.js(defs, main));
+    console.log(fm.comp.js(defs, main));
   };
 };
 
@@ -99,7 +98,7 @@ function hs(main = "main", dir, ext, parse) {
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
-    console.log(cmp.hs(defs, main));
+    console.log(fm.comp.hs(defs, main));
   };
 };
 
@@ -108,7 +107,7 @@ function run(main = "main", dir, ext, parse) {
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
-    eval(cmp.js(defs, main));
+    eval(fm.comp.js(defs, main));
   };
 };
 
