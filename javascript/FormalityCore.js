@@ -26,7 +26,13 @@ function reduce(term, defs) {
       return Var(term.indx);
     case "Ref":
       if (defs[term.name]) {
-        return reduce(defs[term.name].term, defs);
+        var got = defs[term.name].term;
+        if (got.ctor === "Loc" && got.expr.ctor === "Ref" && got.expr.name === term.name) {
+          // Avoids reducing black-holes (stack overflow) to improve some errors
+          return got;
+        } else {
+          return reduce(got, defs);
+        };
       } else {
         return Ref(term.name);
       }
@@ -41,7 +47,7 @@ function reduce(term, defs) {
       return All(eras, self, name, bind, body);
     case "Lam":
       if (term.eras) {
-        return reduce(term.body(Ref("<erased>")), defs);
+        return reduce(term.body(Lam(false, "", x => x)), defs);
       } else {
         var eras = term.eras;
         var name = term.name;
@@ -298,7 +304,7 @@ function typecheck(term, type, defs, show = null, ctx = Nil(), locs = null) {
         var infr0_str = show(normalize(infr, {}), ctx);
         throw Err(locs, ctx,
           "Found type... \x1b[2m"+infr0_str+"\x1b[0m\n" +
-          "Instead of... \x1b[2m"+type0_str+"\x1b[0m\n");
+          "Instead of... \x1b[2m"+type0_str+"\x1b[0m");
       }
       break;
   };

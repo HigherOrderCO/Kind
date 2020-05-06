@@ -553,14 +553,18 @@ function highlight_code(code, from, to) {
 
 function stringify_err(err, code) {
   var index = 0;
-  var str = "";
-  str += err.msg+"\n";
-  if (err.ctx.ctor !== "Nil") {
-    str += "With context:\n";
-    str += "\x1b[2m"+stringify_ctx(err.ctx)+"\x1b[0m";
-  };
-  if (err.loc && code) {
-    str += highlight_code(code, err.loc.from, err.loc.upto);
+  if (!err.ctx) {
+    return "Undecidable.";
+  } else {
+    var str = "";
+    str += err.msg+"\n";
+    if (err.ctx.ctor !== "Nil") {
+      str += "With context:\n";
+      str += "\x1b[2m"+stringify_ctx(err.ctx)+"\x1b[0m";
+    };
+    if (err.loc && code) {
+      str += highlight_code(code, err.loc.from, err.loc.upto);
+    };
   };
   return str;
 };
