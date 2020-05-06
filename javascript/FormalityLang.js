@@ -461,7 +461,7 @@ function stringify(term) {
         var lpar = term.eras ? "<" : "(";
         var argm = stringify(term.argm);
         var rpar = term.eras ? ">" : ")";
-        if (term.func.ctor === "Lam" || term.func.ctor === "All") {
+        if (func[0] === "(") {
           return "("+func+")"+lpar+argm+rpar;
         } else {
           return func+lpar+argm+rpar;
