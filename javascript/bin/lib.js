@@ -69,8 +69,7 @@ function report(main = "main", dir, ext, parse) {
       fmc_code += fm.core.stringify(defs[name].type) + "\n  ";
       fmc_code += fm.core.stringify(defs[name].term) + "\n\n";
     };
-    var fmc_file = "_"+process.cwd().split("/").slice(-1)[0].toLowerCase()+"_.fmc";
-    fs.writeFileSync(fmc_file, fmc_code);
+    fs.writeFileSync(".fmc", fmc_code);
   };
 
   if (errors.length > 0) {
