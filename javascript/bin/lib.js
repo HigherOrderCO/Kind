@@ -6,7 +6,7 @@ function error(msg, exit_code) {
   process.exit(exit_code || 0);
 };
 
-function load(dir = ".", ext = ".fmc", parse_defs = fm.lang.parse_defs, exit_code = 0) {
+function load(dir = ".", ext = ".fm", parse_defs = fm.lang.parse, exit_code = 0) {
   var files = fs.readdirSync(dir).filter(file => file.slice(-ext.length) === ext);
   if (files.length === 0) {
     error("No local " + ext + " file found.", exit_code);
@@ -36,8 +36,9 @@ function load(dir = ".", ext = ".fmc", parse_defs = fm.lang.parse_defs, exit_cod
 
 function report(main = "main", dir, ext, parse) {
   var exit_code = main === "--github" ? 1 : 0;
-
   var {defs, files} = load(dir, ext, parse, exit_code);
+
+  var fmc_code = "";
 
   // Normalizes and type-checks all terms
   console.log("\033[4m\x1b[1mType-checking:\x1b[0m");
@@ -61,6 +62,15 @@ function report(main = "main", dir, ext, parse) {
     }
   };
   console.log("");
+
+  if (errors.length === 0) {
+    for (var name in defs) {
+      fmc_code += name + ": ";
+      fmc_code += fm.core.stringify(defs[name].type) + "\n  ";
+      fmc_code += fm.core.stringify(defs[name].term) + "\n\n";
+    };
+    fs.writeFileSync("_main_.fmc", fmc_code);
+  };
 
   if (errors.length > 0) {
     console.log("\033[4m\x1b[1mFound " + errors.length + " type error(s):\x1b[0m");
