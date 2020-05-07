@@ -8,24 +8,11 @@ var {
   typeinfer,
   typecheck,
   equal,
+  find,
 } = require("./FormalityCore.js");
 
 // Parsing
 // =======
-
-// Finds first value satisfying `cond` in a list
-function find(list, cond, indx = 0) {
-  switch (list.ctor) {
-    case "Nil":
-      return null;
-    case "Ext":
-      if (cond(list.head, indx)) {
-        return {value:list.head, index:indx};
-      } else {
-        return find(list.tail, cond, indx + 1);
-      };
-  };
-};
 
 // Is this a space character?
 function is_space(chr) {
@@ -140,7 +127,7 @@ function parse_nam(code, indx, size = 0, err = false) {
 function parse_par(code, indx, err = false) {
   return (
     chain(parse_txt(code, next(code, indx), "(", false), (indx, skip) =>
-    chain(parse(code, indx, err),                        (indx, term) =>
+    chain(parse_trm(code, indx, err),                    (indx, term) =>
     chain(parse_txt(code, next(code, indx), ")", err),   (indx, skip) =>
     [indx, term]))));
 };
@@ -153,10 +140,10 @@ function parse_all(code, indx, err = false) {
     chain(parse_one(code, indx, "(", "<", false),                   (indx, eras) =>
     chain(parse_nam(code, next(code, indx), 1, false),              (indx, name) =>
     chain(parse_txt(code, next(code, indx), ":", false),            (indx, skip) =>
-    chain(parse(code, indx, err),                                   (indx, bind) =>
+    chain(parse_trm(code, indx, err),                               (indx, bind) =>
     chain(parse_txt(code, next(code, indx), eras ? ">" : ")", err), (indx, skip) =>
     chain(parse_txt(code, next(code, indx), "->", err),             (indx, skip) =>
-    chain(parse(code, indx, err),                                   (indx, body) =>
+    chain(parse_trm(code, indx, err),                               (indx, body) =>
     [indx, xs => {
       var tbind = bind(xs);
       var tbody = (s,x) => body(Ext([name,x],Ext([self,s],xs)));
@@ -171,7 +158,7 @@ function parse_lam(code, indx, err = false) {
     chain(parse_one(code, next(code, indx), "(", "<", false),         (indx, eras) =>
     chain(parse_nam(code, next(code, indx), 1, false),                (indx, name) =>
     chain(parse_txt(code, next(code, indx), eras ? ">" : ")", false), (indx, skip) =>
-    chain(parse(code, indx, err),                                     (indx, body) =>
+    chain(parse_trm(code, indx, err),                                 (indx, body) =>
     [indx, xs => {
       var tbody = (x) => body(Ext([name,x],xs));
       return Loc(from, indx, Lam(eras, name, tbody));
@@ -185,9 +172,9 @@ function parse_let(code, indx, err = false) {
     chain(parse_txt(code, next(code, indx), "let ", false), (indx, skip) =>
     chain(parse_nam(code, next(code, indx), 0, err),        (indx, name) =>
     chain(parse_txt(code, next(code, indx), "=", err),      (indx, skip) =>
-    chain(parse(code, indx, err),                           (indx, expr) =>
+    chain(parse_trm(code, indx, err),                       (indx, expr) =>
     chain(parse_opt(code, indx, ";", err),                  (indx, skip) =>
-    chain(parse(code, indx, err),    (indx, body) =>
+    chain(parse_trm(code, indx, err),(indx, body) =>
     [indx, xs => {
       var tbody = (x) => body(Ext([name,x],xs));
       return Loc(from, indx, Let(name, expr(xs), tbody));
@@ -201,8 +188,8 @@ function parse_use(code, indx, err = false) {
     chain(parse_txt(code, next(code, indx), "use "), (indx, skip) =>
     chain(parse_nam(code, next(code, indx), 0, err), (indx, name) =>
     chain(parse_txt(code, next(code, indx), "="),    (indx, skip) =>
-    chain(parse(code, indx, err),                    (indx, func) =>
-    chain(parse(code, indx, err),                    (indx, body) =>
+    chain(parse_trm(code, indx, err),                (indx, func) =>
+    chain(parse_trm(code, indx, err),                (indx, body) =>
     [indx, xs => {
       var tbody = (x) => body(Ext([name,x],xs));
       return Loc(from, indx, App(false, func(xs), Lam(false, name, tbody)));
@@ -236,7 +223,7 @@ function parse_var(code, indx, err = false) {
 function parse_app(code, indx, from, func, err) {
   return (
     chain(parse_one(code, indx, "(", "<", false),                   (indx, eras) =>
-    chain(parse(code, indx, err),                                   (indx, argm) =>
+    chain(parse_trm(code, indx, err),                               (indx, argm) =>
     chain(parse_txt(code, next(code, indx), eras ? ">" : ")", err), (indx, skip) =>
     [indx, xs => Loc(from, indx, App(eras, func(xs), argm(xs)))]))));
 };
@@ -245,7 +232,7 @@ function parse_app(code, indx, from, func, err) {
 function parse_pip(code, indx, from, func, err) {
   return (
     chain(parse_txt(code, next(code, indx), "|", false), (indx, skip) =>
-    chain(parse(code, indx, err),                        (indx, argm) =>
+    chain(parse_trm(code, indx, err),                    (indx, argm) =>
     chain(parse_txt(code, next(code, indx), ";", err),   (indx, skip) =>
     [indx, xs => Loc(from, indx, App(false, func(xs), argm(xs)))]))));
 };
@@ -254,7 +241,7 @@ function parse_pip(code, indx, from, func, err) {
 function parse_arr(code, indx, from, bind, err) {
   return (
     chain(parse_txt(code, next(code, indx), "->", false), (indx, skip) =>
-    chain(parse(code, indx, err),                         (indx, body) =>
+    chain(parse_trm(code, indx, err),                     (indx, body) =>
     [indx, xs => {
       var tbind = bind(xs);
       var tbody = (s,x) => body(Ext(["",x],Ext(["",s],xs)));
@@ -266,7 +253,7 @@ function parse_arr(code, indx, from, bind, err) {
 function parse_ann(code, indx, from, expr, err) {
   return (
     chain(parse_txt(code, next(code, indx), "::", false), (indx, skip) =>
-    chain(parse(code, indx, err), (indx, type) =>
+    chain(parse_trm(code, indx, err),                     (indx, type) =>
     [indx, xs => Loc(from, indx, Ann(false, expr(xs), type(xs)))])));
 };
 
@@ -315,7 +302,7 @@ function parse_str(code, indx, err) {
 };
 
 // Parses a term
-function parse(code, indx = 0, err) {
+function parse_trm(code, indx = 0, err) {
   var indx = next(code, indx);
   var from = indx;
 
@@ -357,7 +344,7 @@ function parse(code, indx = 0, err) {
 };
 
 // Parses a defs
-function parse_defs(code, indx = 0) {
+function parse(code, indx = 0) {
   var defs = {};
   function parse_defs(code, indx) {
     var indx = next(code, indx);
@@ -366,11 +353,11 @@ function parse_defs(code, indx = 0) {
     } else {
       chain(parse_nam(code, next(code, indx), 0, true),           (indx, name) =>
       chain(parse_txt(code, next(code, indx), ":", true),         (indx, skip) =>
-      chain(parse(code, next(code, indx), true),                  (indx, type) =>
+      chain(parse_trm(code, next(code, indx), true),              (indx, type) =>
       chain(parse_opt(code, drop_spaces(code, indx), "//loop//"), (indx, loop) =>
       chain(parse_opt(code, drop_spaces(code, indx), "//prim//"), (indx, prim) =>
       chain(parse_opt(code, drop_spaces(code, indx), "//data//"), (indx, data) =>
-      chain(parse(code, next(code, indx), true),                  (indx, term) => {
+      chain(parse_trm(code, next(code, indx), true),              (indx, term) => {
         defs[name] = {type: type(Nil()), term: term(Nil()), meta: {loop,prim,data}};
         parse_defs(code, indx);
       })))))));
@@ -570,7 +557,6 @@ function stringify_err(err, code) {
 };
 
 module.exports = {
-  find,
   is_space,
   is_name,
   choose,
@@ -597,8 +583,8 @@ module.exports = {
   make_chr,
   parse_chr,
   parse_str,
+  parse_trm,
   parse,
-  parse_defs,
   stringify_chr,
   stringify_str,
   stringify,

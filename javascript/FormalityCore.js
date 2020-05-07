@@ -17,6 +17,162 @@ const Loc = (from,upto,expr)           => ({ctor:"Loc",from,upto,expr});
 const Nil = ()          => ({ctor:"Nil",size: 0});
 const Ext = (head,tail) => ({ctor:"Ext",head,tail,size:tail.size+1});
 
+// Finds first value satisfying `cond` in a list
+function find(list, cond, indx = 0) {
+  switch (list.ctor) {
+    case "Nil":
+      return null;
+    case "Ext":
+      if (cond(list.head, indx)) {
+        return {value:list.head, index:indx};
+      } else {
+        return find(list.tail, cond, indx + 1);
+      };
+  };
+};
+
+// Syntax
+// ======
+
+function stringify(term) {
+  switch (term.ctor) {
+    case "Var":
+      return term.indx;
+    case "Ref":
+      return term.name;
+    case "Typ":
+      return "*";
+    case "All":
+      var bind = term.eras ? "Π" : "∀";
+      var self = term.self;
+      var name = term.name;
+      var type = stringify(term.bind);
+      var body = stringify(term.body(Var(term.self), Var(term.name)));
+      return bind + self + "(" + name + ":" + type + ") " + body;
+    case "Lam":
+      var bind = term.eras ? "Λ" : "λ";
+      var name = term.name;
+      var body = stringify(term.body(Var(term.name)));
+      return bind + name + " " + body;
+    case "App":
+      var open = term.eras ? "<" : "(";
+      var func = stringify(term.func);
+      var argm = stringify(term.argm);
+      var clos = term.eras ? ">" : ")";
+      return open + func + " " + argm + clos;
+    case "Let":
+      var name = term.name;
+
+      var body = stringify(term.body(Var(term.name)));
+      return "$" + name + "=" + expr + ";" + body;
+    case "Ann":
+      var type = stringify(term.type);
+      var expr = stringify(term.expr);
+      return ":" + type + " " + expr;
+    case "Loc":
+      return stringify(term.expr);
+  };
+};
+
+function parse(code, indx) {
+  var indx = 0;
+  var defs = {};
+  function is_name(chr) {
+    var val = chr.charCodeAt(0);
+    return (val >= 46 && val < 47)   // .
+        || (val >= 48 && val < 58)   // 0-9
+        || (val >= 65 && val < 91)   // A-Z
+        || (val >= 95 && val < 96)   // _
+        || (val >= 97 && val < 123); // a-z
+  };
+  function parse_name() {
+    if (indx < code.length && is_name(code[indx])) {
+      return code[indx++] + parse_name();
+    } else {
+      return "";
+    }
+  };
+  function parse_nuls() {
+    while (code[indx] === " " || code[indx] === "\n") {
+      ++indx;
+    };
+  };
+  function parse_char(chr) {
+    if (indx >= code.length) {
+      throw "Unexpected eof.";
+    } else if (code[indx] !== chr) {
+      throw 'Expected "'+chr+'", found '+JSON.stringify(code[indx])+' at '+indx+'.';
+    }
+    ++indx;
+  };
+  function parse_term() {
+    parse_nuls();
+    var chr = code[indx++];
+    switch (chr) {
+      case "*":
+        return ctx => Typ();
+      case "Π": 
+      case "∀":
+        var eras = chr === "Π";
+        var self = parse_name();
+        var skip = parse_char("(");
+        var name = parse_name();
+        var skip = parse_char(":");
+        var bind = parse_term();
+        var skip = parse_char(")");
+        var body = parse_term();
+        return ctx => All(eras, self, name, bind(ctx), (s,x) => body(Ext([name,x],Ext([self,s],ctx))));
+      case "λ":
+      case "Λ":
+        var eras = chr === "Λ";
+        var name = parse_name();
+        var body = parse_term();
+        return ctx => Lam(eras, name, (x) => body(Ext([name,x],ctx)));
+      case "(":
+      case "<":
+        var eras = chr === "<";
+        var func = parse_term();
+        var argm = parse_term();
+        var skip = parse_char(eras ? ">" : ")");
+        return ctx => App(eras, func(ctx), argm(ctx));
+      case "$":
+        var name = parse_name();
+        var skip = parse_char("=");
+        var expr = parse_term();
+        var skip = parse_char(";");
+        var body = parse_term();
+        return ctx => Let(name, expr(ctx), x => body(Ext([name,x],ctx)));
+      case ":":
+        var type = parse_term();
+        var expr = parse_term();
+        return ctx => Ann(false, expr, type);
+      default:
+        if (is_name(chr)) {
+          var name = chr + parse_name();
+          return ctx => {
+            var got = find(ctx, (x) => x[0] === name);
+            return got ? got.value[1] : Ref(name);
+          };
+        } else {
+          throw "Unexpected symbol: '" + chr + "'.";
+        }
+    };
+  };
+  function parse_defs() {
+    parse_nuls();
+    var name = parse_name();
+    if (name.length > 0) {
+      var skip = parse_char(":");
+      var type = parse_term()(Nil());
+      var term = parse_term()(Nil());
+      defs[name] = {type, term};
+      parse_defs();
+    }
+  };
+  parse_defs();
+  return defs;
+};
+
 // Evaluation
 // ==========
 
@@ -27,8 +183,8 @@ function reduce(term, defs) {
     case "Ref":
       if (defs[term.name]) {
         var got = defs[term.name].term;
+        // Avoids reducing axioms
         if (got.ctor === "Loc" && got.expr.ctor === "Ref" && got.expr.name === term.name) {
-          // Avoids reducing black-holes (stack overflow) to improve some errors
           return got;
         } else {
           return reduce(got, defs);
@@ -214,7 +370,7 @@ function Err(loc, ctx, msg) {
   };
 };
 
-function typeinfer(term, defs, show = null, ctx = Nil(), locs = null) {
+function typeinfer(term, defs, show = stringify, ctx = Nil(), locs = null) {
   switch (term.ctor) {
     case "Var":
       return Var(term.indx);
@@ -269,7 +425,7 @@ function typeinfer(term, defs, show = null, ctx = Nil(), locs = null) {
   throw Err(locs, ctx, "Can't infer type.");
 };
 
-function typecheck(term, type, defs, show = null, ctx = Nil(), locs = null) {
+function typecheck(term, type, defs, show = stringify, ctx = Nil(), locs = null) {
   var typv = reduce(type, defs);
   switch (term.ctor) {
     case "Lam":
@@ -323,6 +479,9 @@ module.exports = {
   Loc,
   Ext,
   Nil,
+  find,
+  stringify,
+  parse,
   reduce,
   normalize,
   Err,
