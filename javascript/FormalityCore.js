@@ -62,7 +62,7 @@ function stringify(term) {
       return open + func + " " + argm + clos;
     case "Let":
       var name = term.name;
-
+      var expr = stringify(term.expr);
       var body = stringify(term.body(Var(term.name)));
       return "$" + name + "=" + expr + ";" + body;
     case "Ann":
