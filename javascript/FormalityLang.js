@@ -168,14 +168,14 @@ function parse_all(code, indx, err = false) {
 function parse_lam(code, indx, err = false) {
   var from = next(code, indx);
   return (
-    chain(parse_one(code, next(code, indx), "(", "<", false),         (indx, eras) =>
-    chain(parse_nam(code, next(code, indx), 1, false),                (indx, name) =>
-    chain(parse_txt(code, next(code, indx), eras ? ">" : ")", false), (indx, skip) =>
-    chain(parse(code, indx, err),                                     (indx, body) =>
+    chain(parse_one(code, next(code, indx), "@", "$", false), (indx, eras) =>
+    chain(parse_nam(code, indx, 1, false),                    (indx, name) =>
+    //chain(parse_txt(code, next(code, indx), eras ? ">" : ")", false), (indx, skip) =>
+    chain(parse(code, indx, err),                             (indx, body) =>
     [indx, xs => {
       var tbody = (x) => body(Ext([name,x],xs));
       return Loc(from, indx, Lam(eras, name, tbody));
-    }])))));
+    }]))));
 };
 
 // Parses a local definition, `let x = val; body`
@@ -186,12 +186,12 @@ function parse_let(code, indx, err = false) {
     chain(parse_nam(code, next(code, indx), 0, err),        (indx, name) =>
     chain(parse_txt(code, next(code, indx), "=", err),      (indx, skip) =>
     chain(parse(code, indx, err),                           (indx, expr) =>
-    chain(parse_opt(code, indx, ";", err),                  (indx, skip) =>
+    //chain(parse_opt(code, indx, ";", err),                  (indx, skip) =>
     chain(parse(code, indx, err),    (indx, body) =>
     [indx, xs => {
       var tbody = (x) => body(Ext([name,x],xs));
       return Loc(from, indx, Let(name, expr(xs), tbody));
-    }])))))));
+    }]))))));
 };
 
 // Parses a monadic application, `use a = x; y` ~> `x((a) y)`
@@ -235,20 +235,20 @@ function parse_var(code, indx, err = false) {
 // Parses a single-line application, `<term>(<term>)`
 function parse_app(code, indx, from, func, err) {
   return (
-    chain(parse_one(code, indx, "(", "<", false),                   (indx, eras) =>
-    chain(parse(code, indx, err),                                   (indx, argm) =>
-    chain(parse_txt(code, next(code, indx), eras ? ">" : ")", err), (indx, skip) =>
+    chain(parse_one(code, next(code, indx), "(", "<", false),         (indx, eras) =>
+    chain(parse(code, indx, false),                                   (indx, argm) =>
+    chain(parse_txt(code, next(code, indx), eras ? ">" : ")", false), (indx, skip) =>
     [indx, xs => Loc(from, indx, App(eras, func(xs), argm(xs)))]))));
 };
 
 // Parses a multi-line application, `<term> | <term>;`
-function parse_pip(code, indx, from, func, err) {
-  return (
-    chain(parse_txt(code, next(code, indx), "|", false), (indx, skip) =>
-    chain(parse(code, indx, err),                        (indx, argm) =>
-    chain(parse_txt(code, next(code, indx), ";", err),   (indx, skip) =>
-    [indx, xs => Loc(from, indx, App(false, func(xs), argm(xs)))]))));
-};
+//function parse_pip(code, indx, from, func, err) {
+  //return (
+    //chain(parse_txt(code, next(code, indx), "|", false), (indx, skip) =>
+    //chain(parse(code, indx, err),                        (indx, argm) =>
+    //chain(parse_txt(code, next(code, indx), ";", err),   (indx, skip) =>
+    //[indx, xs => Loc(from, indx, App(false, func(xs), argm(xs)))]))));
+//};
 
 // Parses a non-dependent function type, `<term> -> <term>`
 function parse_arr(code, indx, from, bind, err) {
@@ -341,7 +341,7 @@ function parse(code, indx = 0, err) {
       var [indx, term] = post_parse;
       post_parse = choose([
         () => parse_app(code, indx, from, term, err),
-        () => parse_pip(code, indx, from, term, err),
+        //() => parse_pip(code, indx, from, term, err),
         () => parse_arr(code, indx, from, term, err),
         () => parse_ann(code, indx, from, term, err),
       ], err);
@@ -583,7 +583,7 @@ module.exports = {
   parse_one,
   parse_opt,
   parse_nam,
-  parse_par,
+  //parse_par,
   parse_all,
   parse_lam,
   parse_let,
@@ -591,7 +591,7 @@ module.exports = {
   parse_typ,
   parse_var,
   parse_app,
-  parse_pip,
+  //parse_pip,
   parse_arr,
   parse_ann,
   make_chr,
