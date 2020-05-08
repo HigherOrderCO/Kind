@@ -38,8 +38,6 @@ function report(main = "main", dir, ext, parse) {
   var exit_code = main === "--github" ? 1 : 0;
   var {defs, files} = load(dir, ext, parse, exit_code);
 
-  var fmc_code = "";
-
   // Normalizes and type-checks all terms
   console.log("\033[4m\x1b[1mType-checking:\x1b[0m");
   var errors = [];
@@ -64,12 +62,20 @@ function report(main = "main", dir, ext, parse) {
   console.log("");
 
   if (errors.length === 0) {
+    var fmc_code = "";
     for (var name in defs) {
       fmc_code += name + ": ";
       fmc_code += fm.core.stringify(defs[name].type) + "\n  ";
       fmc_code += fm.core.stringify(defs[name].term) + "\n\n";
     };
-    fs.writeFileSync(".fmc", fmc_code);
+    fs.writeFileSync(".fmc.", fmc_code);
+    var fm_code = "";
+    for (var name in defs) {
+      fm_code += name + ": ";
+      fm_code += fm.lang.stringify(defs[name].type) + "\n  ";
+      fm_code += fm.lang.stringify(defs[name].term) + "\n\n";
+    };
+    fs.writeFileSync(".fm.", fm_code);
   };
 
   if (errors.length > 0) {

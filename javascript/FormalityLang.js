@@ -301,6 +301,30 @@ function parse_str(code, indx, err) {
     [indx, xs => Loc(from, indx, Ann(true, slit, Ref("String")))])));
 };
 
+// Parses a list literal, `[a, b, c]`
+function parse_lst(code, indx, err) {
+  var from = next(code, indx);
+  function parse_els(code, indx, type) {
+    return chain(parse_opt(code, next(code, indx), "]", false), (indx, done) => {
+      if (done) {
+        return [indx, xs => App(true, Ref("List.nil"), type(xs))];
+      } else {
+        return (
+          chain(parse_trm(code, next(code, indx), err),        (indx, elem) =>
+          chain(parse_opt(code, next(code, indx), ",", false), (indx, skip) =>
+          chain(parse_els(code, next(code, indx), type),       (indx, tail) =>
+          [indx, xs => App(false, App(false, App(true, Ref("List.cons"), type(xs)), elem(xs)), tail(xs))]))));
+      }
+    });
+  };
+  return (
+    chain(parse_txt(code, next(code, indx), "[", false), (indx, skip) =>
+    chain(parse_trm(code, next(code, indx), err),        (indx, type) =>
+    chain(parse_txt(code, next(code, indx), ";", err),   (indx, skip) =>
+    chain(parse_els(code, next(code, indx), type),       (indx, list) =>
+    [indx, xs => Loc(from, indx, list(xs))])))));
+};
+
 // Parses a term
 function parse_trm(code, indx = 0, err) {
   var indx = next(code, indx);
@@ -316,6 +340,7 @@ function parse_trm(code, indx = 0, err) {
     () => parse_typ(code, indx, err),
     () => parse_chr(code, indx, err),
     () => parse_str(code, indx, err),
+    () => parse_lst(code, indx, err),
     () => parse_var(code, indx, err),
   ], err);
 
@@ -370,6 +395,27 @@ function parse(code, indx = 0) {
 // Stringification
 // ===============
 
+function fold(list, nil, cons) {
+  switch (list.ctor) {
+    case "Nil": return nil;
+    case "Ext": return cons(list.head, fold(list.tail, nil, cons));
+  }
+};
+
+function unloc(term) {
+  switch (term.ctor) {
+    case "Var": return term;
+    case "Ref": return term;
+    case "Typ": return term;
+    case "All": return All(term.eras, term.self, term.name, unloc(term.bind), (s, x) => unloc(term.body(s, x)));
+    case "Lam": return Lam(term.eras, term.name, x => unloc(term.body(x)));
+    case "App": return App(term.eras, unloc(term.func), unloc(term.argm));
+    case "Let": return Let(term.name, unloc(term.expr), x => unloc(term.body(x)));
+    case "Ann": return Ann(term.done, unloc(term.expr), unloc(term.type));
+    case "Loc": return unloc(term.expr);
+  };
+};
+
 // Stringifies a character literal
 function stringify_chr(chr) {
   var val = 0;
@@ -412,14 +458,66 @@ function stringify_str(term) {
   }
 };
 
+function match(pattern, term, ret = {}) {
+  if (typeof pattern === "string" && pattern[0] === "$") {
+    ret[pattern.slice(1)] = term;
+    return ret;
+  } else if (typeof pattern === "object" && typeof term === "object") {
+    for (var key in pattern) {
+      if (!match(pattern[key], term[key], ret)) {
+        return null;
+      }
+    }
+    return ret;
+  } else if (typeof pattern === "string" && typeof term === "string") {
+    return pattern === term ? ret : null;
+  } else if (typeof pattern === "boolean" && typeof term === "boolean") {
+    return pattern === term ? ret : null;
+  } else if (typeof pattern === "number" && typeof term === "number") {
+    return pattern === term ? ret : null;
+  } else {
+    return null;
+  }
+};
+
+function matching(term, patterns) {
+  for (var [pattern, then] of patterns) {
+    var got = match(pattern, term);
+    if (got) {
+      return then(got);
+    };
+  };
+  return null;
+};
+
+// List.cons<T>(a)(List.cons<T>(b)(List.nil<T>))
+function stringify_lst(term, type = null, vals = Nil()) {
+  var cons = App(false, App(false, App(true, Ref("List.cons"), "$type"), "$head"), "$tail");
+  var nil  = App(true, Ref("List.nil"), "$type");
+  return matching(term, [
+    [cons, ({type, head, tail}) => {
+      return stringify_lst(tail, type, Ext(head, vals));
+    }],
+    [nil, ({type}) => {
+      return "["
+        + stringify_trm(type) + ";"
+        + (vals.ctor === "Nil" ? "" : " ")
+        + fold(vals, b=>"", (h,t) => b => (b ? "" : ", ")
+        + stringify_trm(h)+t(0))(1)
+        + "]";
+    }]
+  ]);
+};
+
 // Stringifies a term
-function stringify(term) {
-  var chr_lit = stringify_chr(term);
-  var str_lit = stringify_str(term);
-  if (chr_lit) {
-    return "'"+chr_lit+"'";
-  } else if (str_lit) {
-    return "\""+str_lit+"\"";
+function stringify_trm(term) {
+  var lit;
+  if (lit = stringify_chr(term)) {
+    return "'"+lit+"'";
+  } else if (lit = stringify_str(term)) {
+    return "\""+lit+"\"";
+  } else if (lit = stringify_lst(term)) {
+    return lit;
   } else {
     switch (term.ctor) {
       case "Var":
@@ -433,20 +531,20 @@ function stringify(term) {
         var lpar = term.name === "" ? "" : (term.eras ? "<" : "(");
         var name = term.name;
         var colo = term.name === "" ? "" : ": ";
-        var bind = stringify(term.bind);
+        var bind = stringify_trm(term.bind);
         var rpar = term.name === "" ? "" : (term.eras ? ">" : ")");
-        var body = stringify(term.body(Var(self+"#"), Var(name+"#")));
+        var body = stringify_trm(term.body(Var(self+"#"), Var(name+"#")));
         return self+lpar+name+colo+bind+rpar+" -> "+body;
       case "Lam":
         var name = term.name;
         var lpar = term.eras ? "<" : "(";
-        var body = stringify(term.body(Var(name+"#")));
+        var body = stringify_trm(term.body(Var(name+"#")));
         var rpar = term.eras ? ">" : ")";
         return lpar+name+rpar+" "+body;
       case "App":
-        var func = stringify(term.func);
+        var func = stringify_trm(term.func);
         var lpar = term.eras ? "<" : "(";
-        var argm = stringify(term.argm);
+        var argm = stringify_trm(term.argm);
         var rpar = term.eras ? ">" : ")";
         if (func[0] === "(") {
           return "("+func+")"+lpar+argm+rpar;
@@ -455,22 +553,27 @@ function stringify(term) {
         }
       case "Let":
         var name = term.name;
-        var expr = stringify(term.expr);
-        var body = stringify(term.body(Var(name+"#")));
+        var expr = stringify_trm(term.expr);
+        var body = stringify_trm(term.body(Var(name+"#")));
         return "let "+name+" = "+expr+"; "+body;
       case "Ann":
         if (term.done) {
-          return stringify(term.expr);
+          return stringify_trm(term.expr);
         } else {
-          var expr = stringify(term.expr);
-          var type = stringify(term.type);
+          var expr = stringify_trm(term.expr);
+          var type = stringify_trm(term.type);
           return expr+" :: "+type;
         }
       case "Loc":
-        var expr = stringify(term.expr);
+        var expr = stringify_trm(term.expr);
         return expr;
     }
   }
+};
+
+// Stringifies a term
+function stringify(term) {
+  return stringify_trm(unloc(term));
 };
 
 // Stringifies a context
