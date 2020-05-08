@@ -181,20 +181,56 @@ function parse_let(code, indx, err = false) {
     }])))))));
 };
 
-// Parses a monadic application, `use a = x; y` ~> `x((a) y)`
-function parse_use(code, indx, err = false) {
+// Parses a monadic application of 2 args, `use a b = x; y` ~> `x((a) (b) y)`
+function parse_us2(code, indx, err = false) {
   var from = next(code, indx);
   return (
     chain(parse_txt(code, next(code, indx), "use "), (indx, skip) =>
-    chain(parse_nam(code, next(code, indx), 0, err), (indx, name) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam0) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam1) =>
     chain(parse_txt(code, next(code, indx), "="),    (indx, skip) =>
     chain(parse_trm(code, indx, err),                (indx, func) =>
     chain(parse_trm(code, indx, err),                (indx, body) =>
     [indx, xs => {
-      var tbody = (x) => body(Ext([name,x],xs));
-      return Loc(from, indx, App(false, func(xs), Lam(false, name, tbody)));
+      return Loc(from, indx,
+        App(false, func(xs),
+        Lam(false, nam0, (x) =>
+        Lam(false, nam1, (y) =>
+        body(Ext([nam1,y], Ext([nam0,x], xs)))))));
+    }])))))));
+};
+
+// Parses a monadic application of 1 arg, `use a = x; y` ~> `x((a) y)`
+function parse_us1(code, indx, err = false) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, next(code, indx), "use "), (indx, skip) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, name) =>
+    chain(parse_txt(code, next(code, indx), "="),    (indx, skip) =>
+    chain(parse_trm(code, indx, err),                (indx, func) =>
+    chain(parse_trm(code, indx, err),                (indx, body) =>
+    [indx, xs => {
+      return Loc(from, indx,
+        App(false, func(xs),
+        Lam(false, name, (x) =>
+        body(Ext([name,x],xs)))));
     }]))))));
 };
+
+// Parses a monadic application of 0 args, `use x; y` ~> `x(y)`
+function parse_us0(code, indx, err = false) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, next(code, indx), "use "), (indx, skip) =>
+    chain(parse_txt(code, next(code, indx), "="),    (indx, skip) =>
+    chain(parse_trm(code, indx, err),                (indx, func) =>
+    chain(parse_trm(code, indx, err),                (indx, argm) =>
+    [indx, xs => {
+      return Loc(from, indx, App(false, func(xs), argm(xs)));
+    }])))));
+};
+
+// TODO: generic parser for N uses instead of hard-coding N
 
 // Parses the type of types, `Type`
 function parse_typ(code, indx, err = false) {
@@ -335,7 +371,9 @@ function parse_trm(code, indx = 0, err) {
     () => parse_all(code, indx, err),
     () => parse_lam(code, indx, err),
     () => parse_let(code, indx, err),
-    () => parse_use(code, indx, err),
+    () => parse_us2(code, indx, err),
+    () => parse_us1(code, indx, err),
+    () => parse_us0(code, indx, err),
     () => parse_par(code, indx, err),
     () => parse_typ(code, indx, err),
     () => parse_chr(code, indx, err),
@@ -676,7 +714,9 @@ module.exports = {
   parse_all,
   parse_lam,
   parse_let,
-  parse_use,
+  parse_us2,
+  parse_us1,
+  parse_us0,
   parse_typ,
   parse_var,
   parse_app,
