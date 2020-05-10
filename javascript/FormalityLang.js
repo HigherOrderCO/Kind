@@ -236,7 +236,95 @@ function parse_us0(code, indx, err = false) {
     }])))));
 };
 
-// TODO: generic parser for N uses instead of hard-coding N
+// Parses a projection, `get a = x; y` ~> `x<() _>((a) y)`
+function parse_gt1(code, indx, err = false) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, next(code, indx), "get "), (indx, skip) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, name) =>
+    chain(parse_txt(code, next(code, indx), "="),    (indx, skip) =>
+    chain(parse_trm(code, indx, err),                (indx, func) =>
+    chain(parse_trm(code, indx, err),                (indx, body) => {
+      var nam0 = new_name();
+      return [indx, xs => {
+        return Loc(from, indx,
+          App(false, App(true, func(xs), hole(nam0, xs)),
+          Lam(false, name, (x) =>
+          body(Ext([name,x],xs)))));
+      }]
+    }))))));
+};
+
+// Parses a projection of 2 elements, `get = x; y` ~> `x<() _>(y)`
+function parse_gt2(code, indx, err = false) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, next(code, indx), "get "), (indx, skip) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam0) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam1) =>
+    chain(parse_txt(code, next(code, indx), "="),    (indx, skip) =>
+    chain(parse_trm(code, indx, err),                (indx, func) =>
+    chain(parse_trm(code, indx, err),                (indx, body) => {
+      var hol0 = new_name();
+      return [indx, xs => {
+        return Loc(from, indx,
+          App(false, App(true, func(xs), hole(hol0, xs)),
+          Lam(false, nam0, (x) =>
+          Lam(false, nam1, (y) =>
+          body(Ext([nam1,y], Ext([nam0,x], xs)))))));
+      }];
+    })))))));
+};
+
+// Parses a projection of 3 elements, `get = x; y` ~> `x<() _>(y)`
+function parse_gt3(code, indx, err = false) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, next(code, indx), "get "), (indx, skip) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam0) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam1) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam2) =>
+    chain(parse_txt(code, next(code, indx), "="),    (indx, skip) =>
+    chain(parse_trm(code, indx, err),                (indx, func) =>
+    chain(parse_trm(code, indx, err),                (indx, body) => {
+      var hol0 = new_name();
+      return [indx, xs => {
+        return Loc(from, indx,
+          App(false, App(true, func(xs), hole(hol0, xs)),
+          Lam(false, nam0, (x) =>
+          Lam(false, nam1, (y) =>
+          Lam(false, nam2, (z) =>
+          body(Ext([nam2,z], Ext([nam1,y], Ext([nam0,x], xs)))))))));
+      }];
+    }))))))));
+};
+
+// Parses a projection of 3 elements, `get = x; y` ~> `x<() _>(y)`
+function parse_gt4(code, indx, err = false) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, next(code, indx), "get "), (indx, skip) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam0) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam1) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam2) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam3) =>
+    chain(parse_txt(code, next(code, indx), "="),    (indx, skip) =>
+    chain(parse_trm(code, indx, err),                (indx, func) =>
+    chain(parse_trm(code, indx, err),                (indx, body) => {
+      var hol0 = new_name();
+      return [indx, xs => {
+        return Loc(from, indx,
+          App(false, App(true, func(xs), hole(hol0, xs)),
+          Lam(false, nam0, (x) =>
+          Lam(false, nam1, (y) =>
+          Lam(false, nam2, (z) =>
+          Lam(false, nam3, (w) =>
+          body(Ext([nam3,w], Ext([nam2,z], Ext([nam1,y], Ext([nam0,x], xs)))))))))));
+      }];
+    })))))))));
+};
+
+// TODO: generic parser for N uses/gets instead of hard-coding N
 
 // Parses the type of types, `Type`
 function parse_typ(code, indx, err = false) {
@@ -433,6 +521,10 @@ function parse_trm(code, indx = 0, err) {
     () => parse_us2(code, indx, err),
     () => parse_us1(code, indx, err),
     () => parse_us0(code, indx, err),
+    () => parse_gt1(code, indx, err),
+    () => parse_gt2(code, indx, err),
+    () => parse_gt3(code, indx, err),
+    () => parse_gt4(code, indx, err),
     () => parse_par(code, indx, err),
     () => parse_typ(code, indx, err),
     () => parse_chr(code, indx, err),
@@ -668,7 +760,7 @@ function stringify_trm(term) {
         var expr = stringify_trm(term.expr);
         return expr;
       case "Hol":
-        return "?"+term.name+"{"+fold(term.vals,"",(h,t)=>stringify(h)+";"+t)+"}";
+        return "?"+term.name; // +"{"+fold(term.vals,"",(h,t)=>stringify(h)+";"+t)+"}";
     }
   }
 };

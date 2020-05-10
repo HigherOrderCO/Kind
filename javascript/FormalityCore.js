@@ -145,7 +145,7 @@ function parse(code, indx) {
       case ":":
         var type = parse_term();
         var expr = parse_term();
-        return ctx => Ann(false, expr, type);
+        return ctx => Ann(false, expr(ctx), type(ctx));
       default:
         if (is_name(chr)) {
           var name = chr + parse_name();

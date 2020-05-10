@@ -91,7 +91,7 @@ function stringify(term) {
     case "Loc":
       return stringify(term.expr);
     case "Hol":
-      return "?"+term.name+"{"+fold(term.vals,"",(h,t)=>stringify(h)+";"+t)+"}";
+      return "?"+term.name;
   };
 };
 
@@ -166,7 +166,7 @@ function parse(code, indx) {
       case ":":
         var type = parse_term();
         var expr = parse_term();
-        return ctx => Ann(false, expr, type);
+        return ctx => Ann(false, expr(ctx), type(ctx));
       case "?":
         var name = parse_name();
         return ctx => Hol(name, fold(ctx, Nil(), (h,t) => Ext(h[1],t)));
@@ -262,12 +262,6 @@ function reduce(term, defs, hols = {}, erased = false) {
       } else {
         return Hol(term.name, term.vals);
       }
-      //if (hols[term.name]) {
-        //var hole = fold(term.vals, hols[term.name], (f,x) => f(x));
-        //return reduce(hole, defs, hols, eras);
-      //} else {
-        //return Hol(term.name, term.vals);
-      //};
   };
 };
 
@@ -486,6 +480,56 @@ function Err(loc, ctx, msg) {
     loc: loc,
     ctx: ctx,
     msg: msg,
+  };
+};
+
+function fill_holes(term, defs, hols = {}) {
+  if (!term) {
+    console.log(new Error("ue"));
+    process.exit()
+  }
+  //console.log("?", term);
+  switch (term.ctor) {
+    case "Var":
+      return Var(term.indx);
+    case "Ref":
+      return Ref(term.name);
+    case "Typ":
+      return Typ();
+    case "All":
+      var eras = term.eras;
+      var self = term.self;
+      var name = term.name;
+      var bind = fill_holes(term.bind, defs, hols);
+      var body = (s,x) => fill_holes(term.body(s,x), defs, hols);
+      return All(eras, self, name, bind, body);
+    case "Lam":
+      var eras = term.eras;
+      var name = term.name;
+      var body = x => fill_holes(term.body(x), defs, hols);
+      return Lam(eras, name, body);
+    case "App":
+      var eras = term.eras;
+      var func = fill_holes(term.func, defs, hols);
+      var argm = fill_holes(term.argm, defs, hols);
+      return App(eras, func, argm);
+    case "Let":
+      var name = term.name;
+      var expr = fill_holes(term.expr, defs, hols);
+      var body = x => fill_holes(term.body(x), defs, hols);
+      return Let(name, expr, body);
+    case "Ann":
+      var expr = fill_holes(term.expr, defs, hols);
+      var type = fill_holes(term.type, defs, hols);
+      return Ann(false, expr, type);
+    case "Loc":
+      return fill_holes(term.expr, defs, hols);
+    case "Hol":
+      if (hols[term.name]) {
+        return fill_holes(hols[term.name](term.vals), defs, hols);
+      } else {
+        return Hol(term.name, term.vals);
+      }
   };
 };
 
@@ -719,8 +763,8 @@ function typesynth(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
       return done([hols,type])
     })));
   return {
-    term: normalize(term, {}, hols, false),
-    type: normalize(type, {}, hols, false),
+    term: fill_holes(term, {}, hols),
+    type: fill_holes(type, {}, hols),
   };
 };
 
@@ -766,6 +810,7 @@ module.exports = {
   equal,
   Err,
   new_name,
+  fill_holes,
   typeinfer,
   typecheck,
   typesynth,
