@@ -1763,13 +1763,13 @@ module.exports = {
     };
 
     for (var prim in prim_types) {
-      if (!file[prim] || !file[prim].meta.prim) {
+      if (!file[prim]) {
         delete prim_types[prim];
       }
     };
 
     for (var prim in prim_funcs) {
-      if (!file[prim] || !file[prim].meta.prim) {
+      if (!file[prim]) {
         delete prim_funcs[prim];
       }
     };
@@ -1799,6 +1799,7 @@ module.exports = {
     compile_def: for (var name of defs) {
       var meta = {...file[name].meta, name, vars: []};
       var expr = null;
+      meta.loop = name.slice(-4) === ".tco";
       // Compiles primitives operations
       for (var prim in prim_types) {
         if (prim === name) {
@@ -2131,13 +2132,13 @@ module.exports = {
     };
 
     for (var prim in prim_types) {
-      if (!file[prim] || !file[prim].meta.prim) {
+      if (!file[prim]) {
         delete prim_types[prim];
       }
     };
 
     for (var prim in prim_funcs) {
-      if (!file[prim] || !file[prim].meta.prim) {
+      if (!file[prim]) {
         delete prim_funcs[prim];
       }
     };
@@ -2166,6 +2167,7 @@ module.exports = {
     compile_def: for (var name of defs) {
       var meta = {...file[name].meta, name, vars: []};
       var expr = null;
+      meta.tco = name.slice(-4) === ".tco";
       // Compiles primitives operations
       for (var prim in prim_types) {
         if (prim === name) {

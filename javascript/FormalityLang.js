@@ -1,7 +1,7 @@
 var {
   Var, Ref, Typ, All,
   Lam, App, Let, Ann,
-  Loc, Ext, Nil,
+  Loc, Ext, Nil, Hol,
   reduce,
   normalize,
   Err,
@@ -9,7 +9,9 @@ var {
   typecheck,
   equal,
   find,
-} = require("./FormalityCore.js");
+  fold,
+  new_name,
+} = require("./FormalitySynt.js");
 
 // Parsing
 // =======
@@ -71,6 +73,10 @@ function next(code, indx) {
     }
   };
   return indx;
+};
+
+function hole(name, xs) {
+  return Hol(name, fold(xs, Nil(), (h,t) => Ext(h[1],t)));
 };
 
 function parse_error(code, indx, expected, err) {
@@ -240,6 +246,41 @@ function parse_typ(code, indx, err = false) {
     [indx, xs => Loc(from, indx, Typ())]));
 };
 
+// Parses holes, `?a`
+function parse_hol(code, indx, err) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, indx, "?", false),         (indx, skip) =>
+    chain(parse_nam(code, next(code, indx), 0, err), (indx, name) =>
+    [indx, xs => hole(name, xs)])));
+};
+
+// Parses an unnamed hole, `_`
+function parse_und(code, indx, err) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, indx, "_", false), (indx, skip) => {
+      var nam0 = new_name();
+      return [indx, xs => hole(nam0, xs)];
+    }));
+};
+
+// Parses an case expression, `case x` ~> `x<() _>`
+function parse_cse(code, indx, err) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, indx, "case ", false), (indx, skip) =>
+    chain(parse_trm(code, indx, err),            (indx, func) =>
+    chain(parse_txt(code, indx, ":"),            (indx, skip) => {
+      var nam0 = new_name();
+      return [indx, xs => {
+        var tbody = (x) => hole(nam0, Ext(["",x],xs));
+        var ret = Loc(from, indx, App(true, func(xs), Lam(false, "", tbody)))
+        return ret;
+      }];
+    }))));
+};
+
 // Parses variables, `<name>`
 function parse_var(code, indx, err = false) {
   var from = next(code, indx);
@@ -262,6 +303,24 @@ function parse_app(code, indx, from, func, err) {
     chain(parse_trm(code, indx, err),                               (indx, argm) =>
     chain(parse_txt(code, next(code, indx), eras ? ">" : ")", err), (indx, skip) =>
     [indx, xs => Loc(from, indx, App(eras, func(xs), argm(xs)))]))));
+};
+
+// Parses a single-line hole application, `<term>()`
+function parse_ah0(code, indx, from, func, err) {
+  return (
+    chain(parse_txt(code, indx, "()"), (indx, eras) => {
+      var nam0 = new_name();
+      return [indx, xs => Loc(from, indx, App(false, func(xs), hole(nam0, xs)))]
+    }));
+};
+
+// Parses a single-line hole application (erased), `<term>()`
+function parse_ah1(code, indx, from, func, err) {
+  return (
+    chain(parse_txt(code, indx, "<>"), (indx, eras) => {
+      var nam0 = new_name();
+      return [indx, xs => Loc(from, indx, App(true, func(xs), hole(nam0, xs)))]
+    }));
 };
 
 // Parses a multi-line application, `<term> | <term>;`
@@ -379,6 +438,9 @@ function parse_trm(code, indx = 0, err) {
     () => parse_chr(code, indx, err),
     () => parse_str(code, indx, err),
     () => parse_lst(code, indx, err),
+    () => parse_hol(code, indx, err),
+    () => parse_und(code, indx, err),
+    () => parse_cse(code, indx, err),
     () => parse_var(code, indx, err),
   ], err);
 
@@ -390,6 +452,8 @@ function parse_trm(code, indx = 0, err) {
     while (true) {
       var [indx, term] = post_parse;
       post_parse = choose([
+        () => parse_ah0(code, indx, from, term, err),
+        () => parse_ah1(code, indx, from, term, err),
         () => parse_app(code, indx, from, term, err),
         () => parse_pip(code, indx, from, term, err),
         () => parse_arr(code, indx, from, term, err),
@@ -433,13 +497,6 @@ function parse(code, indx = 0) {
 // Stringification
 // ===============
 
-function fold(list, nil, cons) {
-  switch (list.ctor) {
-    case "Nil": return nil;
-    case "Ext": return cons(list.head, fold(list.tail, nil, cons));
-  }
-};
-
 function unloc(term) {
   switch (term.ctor) {
     case "Var": return term;
@@ -451,6 +508,7 @@ function unloc(term) {
     case "Let": return Let(term.name, unloc(term.expr), x => unloc(term.body(x)));
     case "Ann": return Ann(term.done, unloc(term.expr), unloc(term.type));
     case "Loc": return unloc(term.expr);
+    case "Hol": return term;
   };
 };
 
@@ -600,11 +658,17 @@ function stringify_trm(term) {
         } else {
           var expr = stringify_trm(term.expr);
           var type = stringify_trm(term.type);
-          return expr+" :: "+type;
+          if (expr[0] === "(") {
+            return "("+expr+") :: "+type;
+          } else {
+            return expr+" :: "+type;
+          }
         }
       case "Loc":
         var expr = stringify_trm(term.expr);
         return expr;
+      case "Hol":
+        return "?"+term.name+"{"+fold(term.vals,"",(h,t)=>stringify(h)+";"+t)+"}";
     }
   }
 };
@@ -682,7 +746,11 @@ function highlight_code(code, from, to) {
 function stringify_err(err, code) {
   var index = 0;
   if (!err.ctx) {
-    return "Undecidable.";
+    if (__dirname.indexOf("vic/dev") !== -1) {
+      return err;
+    } else {
+      return "Undecidable.";
+    }
   } else {
     var str = "";
     str += err.msg+"\n";

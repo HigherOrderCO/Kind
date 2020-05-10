@@ -1,3 +1,2 @@
 #!/usr/bin/env node
-
-require("./lib").report(process.argv[2]);
+require("./lib")._fmc_(process.argv[2]);

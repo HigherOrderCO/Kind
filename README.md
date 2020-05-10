@@ -9,22 +9,22 @@ Installation
 Formality-Core has multiple reference implementations. Currently, the easiest to
 install uses JavaScript. First, [install `npm`](https://www.npmjs.com/get-npm)
 in your system. Then, on the command line, type: `npm -g formality-core`. If all
-goes well, the language should be accessible via the `fmc` command.
+goes well, the language should be accessible via the `fm` command.
 
 Using
 -----
 
-To use it, save a `.fmc` file. For example, save he file below as `main.fmc`:
+To use it, save a `.fm` file. For example, save the file below as `main.fm`:
 
 ```
 main : <A: Type> -> A -> A
   <A> (x) x
 ```
 
-And type `fmc main`. This should output:
+And type `fm main`. This should output:
 
 ```
-Type-checking main.fmc:
+Type-checking main.fm:
 main : <A: Type> -> A -> A
 
 All terms check.
@@ -33,9 +33,10 @@ Evaluating `main`:
 (x) x
 ```
 
-You can also compile `.fmc` files to JavaScript with `fmcjs main`, or to Haskell
-with `fmchs` main. You can run a script with `fmcio main`. In this case, `main`
-must have an [IO](https://github.com/moonad/Moonad/blob/master/IO.fmc) type.
+You can also compile `.fm` files to JavaScript. First, run `fm` to generate a
+`.fmc`. Then, run `fmcjs main`. You can also compile to Haskell with `fmchs`
+main. You can run a script with `fmcio main`. In this case, `main` must have an
+[IO](https://github.com/moonad/Moonad/blob/master/IO.fmc) type.
 
 Contributing
 ------------

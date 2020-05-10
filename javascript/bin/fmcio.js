@@ -1,3 +1,2 @@
 #!/usr/bin/env node
-
-require("./lib.js").run(process.argv[2]);
+require("./lib.js")._io_(process.argv[2]);

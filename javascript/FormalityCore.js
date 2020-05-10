@@ -262,7 +262,7 @@ function normalize(term, defs) {
       var argm = normalize(norm.argm, defs);
       return App(eras, func, argm);
     case "Let":
-      return normalize(term.body(term.expr));;
+      return normalize(norm.body(norm.expr));;
     case "Ann":
       return normalize(norm.expr, defs);
     case "Loc":
@@ -413,11 +413,10 @@ function typeinfer(term, defs, show = stringify, ctx = Nil(), locs = null) {
       typecheck(term.body(self_var,name_var), Typ(), defs, show, body_ctx);
       return Typ();
     case "Ann":
-      if (term.done) {
-        return term.type;
-      } else {
-        return typecheck(term.expr, term.type, defs, show, ctx);
+      if (!term.done) {
+        typecheck(term.expr, term.type, defs, show, ctx);
       }
+      return term.type;
     case "Loc":
       var locs = {from: term.from, upto: term.upto};
       return typeinfer(term.expr, defs, show, ctx, locs);
@@ -464,7 +463,7 @@ function typecheck(term, type, defs, show = stringify, ctx = Nil(), locs = null)
       }
       break;
   };
-  return type;
+  return {term,type};
 };
 
 module.exports = {
