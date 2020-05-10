@@ -302,6 +302,65 @@ function normalize(term, defs, hols = {}, erased = false) {
   };
 };
 
+// Prepares a term to be stored on .fmc source
+// - Fills holes
+// - Applies static function calls (necessary for inference)
+// - Remove done Anns
+function canonicalize(term, hols = {}) {
+  switch (term.ctor) {
+    case "Var":
+      return Var(term.indx);
+    case "Ref":
+      return Ref(term.name);
+    case "Typ":
+      return Typ();
+    case "All":
+      var eras = term.eras;
+      var self = term.self;
+      var name = term.name;
+      var bind = canonicalize(term.bind, hols);
+      var body = (s,x) => canonicalize(term.body(s,x), hols);
+      return All(eras, self, name, bind, body);
+    case "Lam":
+      var eras = term.eras;
+      var name = term.name;
+      var body = x => canonicalize(term.body(x), hols);
+      return Lam(eras, name, body);
+    case "App":
+      var eras = term.eras;
+      var func = canonicalize(term.func, hols);
+      var argm = canonicalize(term.argm, hols);
+      switch (func.ctor) {
+        case "Lam":
+          return canonicalize(func.body(term.argm), hols);
+        default:
+          return App(eras, func, argm);
+      };
+    case "Let":
+      var name = term.name;
+      var expr = canonicalize(term.expr, hols);
+      var body = x => canonicalize(term.body(x), hols);
+      return Let(name, expr, body);
+    case "Ann":
+      if (term.done === true) {
+        return canonicalize(term.expr, hols);
+      } else {
+        var expr = canonicalize(term.expr, hols);
+        var type = canonicalize(term.type, hols);
+        return Ann(false, expr, type);
+      }
+    case "Loc":
+      return canonicalize(term.expr, hols);
+    case "Hol":
+      if (hols[term.name]) {
+        return canonicalize(hols[term.name](term.vals), hols);
+      } else {
+        return Hol(term.name, term.vals);
+      }
+  };
+};
+
+
 // Equality
 // ========
 
@@ -480,56 +539,6 @@ function Err(loc, ctx, msg) {
     loc: loc,
     ctx: ctx,
     msg: msg,
-  };
-};
-
-function fill_holes(term, defs, hols = {}) {
-  if (!term) {
-    console.log(new Error("ue"));
-    process.exit()
-  }
-  //console.log("?", term);
-  switch (term.ctor) {
-    case "Var":
-      return Var(term.indx);
-    case "Ref":
-      return Ref(term.name);
-    case "Typ":
-      return Typ();
-    case "All":
-      var eras = term.eras;
-      var self = term.self;
-      var name = term.name;
-      var bind = fill_holes(term.bind, defs, hols);
-      var body = (s,x) => fill_holes(term.body(s,x), defs, hols);
-      return All(eras, self, name, bind, body);
-    case "Lam":
-      var eras = term.eras;
-      var name = term.name;
-      var body = x => fill_holes(term.body(x), defs, hols);
-      return Lam(eras, name, body);
-    case "App":
-      var eras = term.eras;
-      var func = fill_holes(term.func, defs, hols);
-      var argm = fill_holes(term.argm, defs, hols);
-      return App(eras, func, argm);
-    case "Let":
-      var name = term.name;
-      var expr = fill_holes(term.expr, defs, hols);
-      var body = x => fill_holes(term.body(x), defs, hols);
-      return Let(name, expr, body);
-    case "Ann":
-      var expr = fill_holes(term.expr, defs, hols);
-      var type = fill_holes(term.type, defs, hols);
-      return Ann(false, expr, type);
-    case "Loc":
-      return fill_holes(term.expr, defs, hols);
-    case "Hol":
-      if (hols[term.name]) {
-        return fill_holes(hols[term.name](term.vals), defs, hols);
-      } else {
-        return Hol(term.name, term.vals);
-      }
   };
 };
 
@@ -763,8 +772,8 @@ function typesynth(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
       return done([hols,type])
     })));
   return {
-    term: fill_holes(term, {}, hols),
-    type: fill_holes(type, {}, hols),
+    term: canonicalize(term, hols),
+    type: canonicalize(type, hols),
   };
 };
 
@@ -806,11 +815,11 @@ module.exports = {
   parse,
   reduce,
   normalize,
+  canonicalize,
   hash,
   equal,
   Err,
   new_name,
-  fill_holes,
   typeinfer,
   typecheck,
   typesynth,
