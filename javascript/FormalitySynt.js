@@ -389,14 +389,14 @@ function equal(a, b, defs, hols, dep = 0, rec = {}) {
       default:
         if (a1.ctor === "Hol") {
           if (hols) {
-            hols[a1.name] = (vals) => b1;
+            hols[a1.name] = (vals) => b;
           }
           throw null;
           //console.log("set0", a1.name, stringify(b1));
           //return true;
         } else if (b1.ctor === "Hol") {
           if (hols) {
-            hols[b1.name] = (vals) => a1;
+            hols[b1.name] = (vals) => a;
           }
           //console.log("set1", b1.name, stringify(a1));
           throw null;
