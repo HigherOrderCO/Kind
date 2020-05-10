@@ -586,7 +586,7 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
             var hols = {...hols, [func_typ.name]: (vals) => {
               var all_bind = Hol(nam0, vals);
               var all_body = (s,x) => Hol(nam1, Ext(x, Ext(s, vals)));
-              var all_term = All(term.eras, "s", "x", all_bind, all_body);
+              var all_term = All(term.eras, "", "x", all_bind, all_body);
               return all_term;
             }};
             return deep([[typeinfer, [term, defs, show, hols, ctx, locs]]], done);
@@ -645,7 +645,7 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
         var hols = {...hols, [typv.name]: (vals) => {
           var all_bind = Hol(nam0, vals);
           var all_body = (s,x) => Hol(nam1, Ext(x, Ext(s, vals)));
-          var all_term = All(term.eras, "s", "x", all_bind, all_body);
+          var all_term = All(term.eras, "", "x", all_bind, all_body);
           return all_term;
         }};
         return deep([[typecheck, [term, type, defs, show, hols, ctx, locs]]], done);
