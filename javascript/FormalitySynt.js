@@ -56,7 +56,7 @@ function fold(list, nil, cons) {
 function stringify(term) {
   switch (term.ctor) {
     case "Var":
-      return term.indx;
+      return term.indx.split("#")[0];
     case "Ref":
       return term.name;
     case "Typ":
@@ -66,12 +66,12 @@ function stringify(term) {
       var self = term.self;
       var name = term.name;
       var type = stringify(term.bind);
-      var body = stringify(term.body(Var(term.self), Var(term.name)));
+      var body = stringify(term.body(Var(term.self+"#"), Var(term.name+"#")));
       return bind + self + "(" + name + ":" + type + ") " + body;
     case "Lam":
       var bind = term.eras ? "Λ" : "λ";
       var name = term.name;
-      var body = stringify(term.body(Var(term.name)));
+      var body = stringify(term.body(Var(term.name+"#")));
       return bind + name + " " + body;
     case "App":
       var open = term.eras ? "<" : "(";
@@ -82,7 +82,7 @@ function stringify(term) {
     case "Let":
       var name = term.name;
       var expr = stringify(term.expr);
-      var body = stringify(term.body(Var(term.name)));
+      var body = stringify(term.body(Var(term.name+"#")));
       return "$" + name + "=" + expr + ";" + body;
     case "Ann":
       var type = stringify(term.type);
