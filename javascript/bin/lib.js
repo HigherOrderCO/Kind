@@ -117,7 +117,6 @@ function _fmc_(main = "main", dir) {
 
 function _js_(main = "main", dir, ext, parse) {
   var {defs} = load(dir, ".fmc", fm.core.parse);
-  console.log(defs)
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
