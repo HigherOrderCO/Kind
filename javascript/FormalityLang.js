@@ -460,14 +460,11 @@ function parse_ah1(code, indx, from, func, err) {
 function parse_fun(code, indx, from, func, err) {
   return (
     chain(parse_args(code,parse_trm,indx,err), (indx, [eras,args]) =>
-      { var term = (xs) => {
-          var x = func(xs);
-          for (i = 0; i < args.length; i++) { x = App(eras,x,args[i](xs)); };
-          return Loc(from,indx,x);
-          };
-          return [indx, term];
-      }
-    ));
+      [indx, (xs) => {
+        var x = func(xs);
+        for (i = 0; i < args.length; i++) { x = App(eras,x,args[i](xs)); };
+        return Loc(from,indx,x);
+        }]));
 };
 
 // Parses a multi-line application, `<term> | <term>;`
