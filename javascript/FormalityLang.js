@@ -109,6 +109,27 @@ function parse_one(code, indx, ch0, ch1, err) {
   ]);
 };
 
+function parse_mny(code, indx, parser, err = false) {
+  var parses = [];
+  var parsed = parser(code, indx, err);
+  while (parsed) {
+    var [indx, parse] = parsed;
+    parses.push(parse);
+    var parsed = parser(code, indx, err);
+  };
+  return [indx, parses];
+};
+
+// Parses an optional value
+function parse_may(code, indx, parser, err) {
+  var parsed = parser(code, indx, err);
+  if (parsed) {
+    return parsed;
+  } else {
+    return [indx, null];
+  }
+};
+
 // Parses an optional string
 function parse_opt(code, indx, str, err) {
   return choose([
@@ -353,20 +374,36 @@ function parse_und(code, indx, err) {
     }));
 };
 
-// Parses an case expression, `case x` ~> `x<() _>`
+// Parses an case expression, `case x as t : m;` ~> `x<(t) m>`
 function parse_cse(code, indx, err) {
   var from = next(code, indx);
   return (
-    chain(parse_txt(code, indx, "case ", false), (indx, skip) =>
-    chain(parse_trm(code, indx, err),            (indx, func) =>
-    chain(parse_txt(code, indx, ":"),            (indx, skip) => {
+    chain(parse_txt(code, next(code, indx), "case ", false), (indx, skip) =>
+    chain(parse_trm(code, next(code, indx), err),            (indx, func) =>
+    chain(parse_opt(code, next(code, indx), "as ", err),     (indx, namd) =>
+    chain(parse_nam(code, next(code, indx), 1, err),         (indx, name) =>
+    chain(parse_txt(code, next(code, indx), ":", err),       (indx, skip) => {
+      var parsed_moti = parse_trm(code, indx, false);
+      if (parsed_moti) {
+        var [indx, moti] = parsed_moti;
+        var [indx, skip] = parse_txt(code, next(code, indx), ";", err);
+      } else {
+        var moti = null;
+      }
       var nam0 = new_name();
       return [indx, xs => {
-        var tbody = (x) => hole(nam0, Ext(["",x],xs));
-        var ret = Loc(from, indx, App(true, func(xs), Lam(false, "", tbody)))
-        return ret;
+        var fn = func(xs);
+        if (name === "" && (fn.ctor === "Var" || fn.ctor === "Ref") && fn.name) {
+          name = fn.name;
+        }
+        if (moti) {
+          var tbody = (x) => moti(Ext([name,x],xs));
+        } else {
+          var tbody = (x) => hole(nam0, Ext([name,x],xs));
+        }
+        return Loc(from, indx, App(true, func(xs), Lam(false, name, tbody)));
       }];
-    }))));
+    }))))));
 };
 
 // Parses variables, `<name>`
@@ -508,6 +545,106 @@ function parse_lst(code, indx, err) {
     [indx, xs => Loc(from, indx, list(xs))])))));
 };
 
+//function parse_adr() {
+  //var adt_pram = [];
+  //var adt_indx = [];
+  //var adt_ctor = [];
+  //var adt_name = parse_string();
+  //var adt_nams = [adt_name];
+  //var adt_typs = [null];
+  //return (
+    //chain(parse_txt(code, next(code, indx), "T ", false), (indx, skip) => {
+      //// Datatype parameters
+      //if (match("<")) {
+        //while (idx < code.length) {
+          //let eras = false;
+          //let name = parse_string();
+          //let type: Term;
+          //if (match(":")) {
+            //type = await parse_term(adt_pram.map((([name,type]) => name)));
+          //} else {
+            //type = Typ();
+          //}
+          //adt_pram.push([name, type, eras]);
+          //if (match(">")) break;
+          //else parse_exact(",");
+        //}
+      //}
+
+      //// Datatype indices
+      //var adt_nams = adt_nams.concat(adt_pram.map(([name,type]) => name));
+      //var adt_typs = adt_typs.concat(adt_pram.map(([name,type]) => type));
+      //if (match("(")) {
+        //while (idx < code.length) {
+          ////var eras = match("~");
+          //let eras = false;
+          //let name = parse_string();
+          //let type: Term
+          //if (match(":")) {
+            //type = await parse_term(adt_nams.concat(adt_indx.map((([name,type]) => name))));
+          //} else {
+            //type = Typ();
+          //}
+          //adt_indx.push([name, type, eras]);
+          //if (match(")")) break; else parse_exact(",");
+        //}
+      //}
+
+      //// Datatype constructors
+      //while (match("|")) {
+        //// Constructor name
+        //var ctor_name = parse_string();
+        //// Constructor fields
+        //var ctor_flds = [];
+        //var ctor_type: Term;
+        //if (match("(")) {
+          //while (idx < code.length) {
+            //let name = parse_string();
+            //let type: Term;
+            //let eras: boolean
+            //if (match(":")) {
+              //type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
+            //} else {
+              //type = Hol(new_hole_name());
+            //}
+            //eras = match(";");
+            //match(",");
+            //ctor_flds.push([name, type, eras]);
+            //if (match(")")) break;
+          //}
+        //}
+        //// Constructor type (written)
+        //if (match(":")) {
+          //ctor_type = parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
+        //// Constructor type (auto-filled)
+        //} else {
+          //var ctor_indx = [];
+          ////if (match("(")) {
+            ////while (idx < code.length) {
+              ////ctor_indx.push(await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name))));
+              ////if (match(")")) break; else parse_exact(",");
+            ////}
+          ////}
+          //ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
+          //for (var p = 0; p < adt_pram.length; ++p) {
+            //ctor_type = App(ctor_type, Var(-1 + ctor_flds.length + adt_pram.length - p), false);
+          //}
+          //for (var i = 0; i < ctor_indx.length; ++i) {
+            //ctor_type = App(ctor_type, ctor_indx[i], false);
+          //}
+        //}
+        //adt_ctor.push([ctor_name, ctor_flds, ctor_type]);
+      //}
+      //var adt = {adt_pram, adt_indx, adt_ctor, adt_name};
+      //define(file+"/"+adt_name, derive_adt_type(file, adt));
+      //for (var c = 0; c < adt_ctor.length; ++c) {
+        //define(file+"/"+adt_ctor[c][0], derive_adt_ctor(file, adt, c));
+      //}
+      //adts[file+"/"+adt_name] = adt;
+
+      //return true;
+    //}
+
 // Parses a term
 function parse_trm(code, indx = 0, err) {
   var indx = next(code, indx);
@@ -538,6 +675,8 @@ function parse_trm(code, indx = 0, err) {
 
   if (!base_parse && err) {
     parse_error(code, indx, "a term", err);
+  } else if (!base_parse) {
+    return null;
   } else {
     // Parses postfix extensions, trying each variant repeatedly
     var post_parse = base_parse;
@@ -562,6 +701,25 @@ function parse_trm(code, indx = 0, err) {
   return null;
 };
 
+//function parse_bnd(code, indx, err) {
+  //return (
+    //chain(parse_nam(code, next(code, indx), 1, false),   (indx, name) =>
+    //chain(parse_txt(code, next(code, indx), ":", false), (indx, skip) =>
+    //chain(parse_trm(code, next(code, indx), err),        (indx, type) => 
+    //chain(parse_opt(code, next(code, indx), ",", err),   (indx, skip) => {
+    //return [indx, [name, type]];
+    //})))));
+//};
+
+//function parse_arg(code, indx, err) {
+  //return (
+    //chain(parse_txt(code, next(code, indx), "(", false),     (indx, skip) =>
+    //chain(parse_mny(code, next(code, indx), parse_bnd, err), (indx, bnds) =>
+    //chain(parse_txt(code, next(code, indx), ")", err),       (indx, skip) => {
+    //return [indx, null];
+    //}))));
+//};
+
 // Parses a defs
 function parse(code, indx = 0) {
   var defs = {};
@@ -571,12 +729,17 @@ function parse(code, indx = 0) {
       return;
     } else {
       chain(parse_nam(code, next(code, indx), 0, true),           (indx, name) =>
+      //chain(parse_may(code, next(code, indx), parse_arg, true),   (indx, args) =>
       chain(parse_txt(code, next(code, indx), ":", true),         (indx, skip) =>
       chain(parse_trm(code, next(code, indx), true),              (indx, type) =>
       chain(parse_opt(code, drop_spaces(code, indx), "//loop//"), (indx, loop) =>
       chain(parse_opt(code, drop_spaces(code, indx), "//prim//"), (indx, prim) =>
       chain(parse_opt(code, drop_spaces(code, indx), "//data//"), (indx, data) =>
       chain(parse_trm(code, next(code, indx), true),              (indx, term) => {
+        //if (args) {
+          //console.log("...", name, args);
+          //process.exit();
+        //}
         defs[name] = {type: type(Nil()), term: term(Nil()), meta: {loop,prim,data}};
         parse_defs(code, indx);
       })))))));
