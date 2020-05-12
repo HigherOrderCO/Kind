@@ -138,6 +138,22 @@ function parse_opt(code, indx, str, err) {
   ]);
 };
 
+// Parses comma separated arguments `(x,y,z)` or `<x,y,z>`
+function parse_args(code, parser, indx, err) {
+  var parses = [];
+  var init = parse_one(code, indx, "(", "<", false);
+  if (!init) return null;
+  var [indx,eras] = init;
+  var close = eras ? ">" : ")";
+  while (true) {
+    var [indx, res] = parser(code, next(code, indx), err);
+    parses.push(res);
+    var [indx, end] = parse_one(code, next(code, indx), ",", close, err);
+    if (end) break;
+  };
+  return [indx, [eras, parses]];
+};
+
 // Parses a valid name, non-empty
 function parse_nam(code, indx, size = 0, err = false) {
   if (indx < code.length && is_name(code[indx])) {
@@ -320,7 +336,7 @@ function parse_gt3(code, indx, err = false) {
     }))))))));
 };
 
-// Parses a projection of 3 elements, `get = x; y` ~> `x<() _>(y)`
+// Parses a projection of 4 elements, `get = x; y` ~> `x<() _>(y)`
 function parse_gt4(code, indx, err = false) {
   var from = next(code, indx);
   return (
@@ -421,15 +437,6 @@ function parse_var(code, indx, err = false) {
   });
 };
 
-// Parses a single-line application, `<term>(<term>)`
-function parse_app(code, indx, from, func, err) {
-  return (
-    chain(parse_one(code, indx, "(", "<", false),                   (indx, eras) =>
-    chain(parse_trm(code, indx, err),                               (indx, argm) =>
-    chain(parse_txt(code, next(code, indx), eras ? ">" : ")", err), (indx, skip) =>
-    [indx, xs => Loc(from, indx, App(eras, func(xs), argm(xs)))]))));
-};
-
 // Parses a single-line hole application, `<term>()`
 function parse_ah0(code, indx, from, func, err) {
   return (
@@ -446,6 +453,21 @@ function parse_ah1(code, indx, from, func, err) {
       var nam0 = new_name();
       return [indx, xs => Loc(from, indx, App(true, func(xs), hole(nam0, xs)))]
     }));
+};
+
+
+// Parses a function application `f(x,y,z) ~> f(x)(y)(z)`
+function parse_fun(code, indx, from, func, err) {
+  return (
+    chain(parse_args(code,parse_trm,indx,err), (indx, [eras,args]) =>
+      { var term = (xs) => {
+          var x = func(xs);
+          for (i = 0; i < args.length; i++) { x = App(eras,x,args[i](xs)); };
+          return Loc(from,indx,x);
+          };
+          return [indx, term];
+      }
+    ));
 };
 
 // Parses a multi-line application, `<term> | <term>;`
@@ -685,7 +707,7 @@ function parse_trm(code, indx = 0, err) {
       post_parse = choose([
         () => parse_ah0(code, indx, from, term, err),
         () => parse_ah1(code, indx, from, term, err),
-        () => parse_app(code, indx, from, term, err),
+        () => parse_fun(code, indx, from, term, err),
         () => parse_pip(code, indx, from, term, err),
         () => parse_arr(code, indx, from, term, err),
         () => parse_ann(code, indx, from, term, err),
@@ -710,15 +732,17 @@ function parse_trm(code, indx = 0, err) {
     //return [indx, [name, type]];
     //})))));
 //};
-
-//function parse_arg(code, indx, err) {
-  //return (
-    //chain(parse_txt(code, next(code, indx), "(", false),     (indx, skip) =>
-    //chain(parse_mny(code, next(code, indx), parse_bnd, err), (indx, bnds) =>
-    //chain(parse_txt(code, next(code, indx), ")", err),       (indx, skip) => {
-    //return [indx, null];
-    //}))));
+//
+//function parse_arg(code, p_arg, indx, err) {
+//  return (
+//    chain(parse_txt(code, next(code, indx), "(", false),     (indx, skip) =>
+//    chain(parse_mny(code, next(code, indx), p_arg, err), (indx, bnds) =>
+//    chain(parse_txt(code, next(code, indx), ")", err),   (indx, skip) => {
+//    return [indx, null];
+//    }))));
 //};
+
+
 
 // Parses a defs
 function parse(code, indx = 0) {
@@ -1029,6 +1053,8 @@ module.exports = {
   drop_spaces,
   next,
   parse_error,
+  parse_args,
+  parse_fun,
   parse_txt,
   parse_one,
   parse_opt,
@@ -1042,7 +1068,6 @@ module.exports = {
   parse_us0,
   parse_typ,
   parse_var,
-  parse_app,
   parse_pip,
   parse_arr,
   parse_ann,
