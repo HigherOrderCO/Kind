@@ -118,7 +118,7 @@ function infer(term, defs, ctx = fmc.Nil()) {
       var body_ctx = fmc.Ext({name:term.name,type:expr_var.type}, ctx);
       var body_cod = infer(term.body(expr_var), defs, body_ctx);
       return {
-        comp: Let(term.name, expr_cmp.comp, body_cmp.comp),
+        comp: term.dups ? Let(term.name, expr_cmp.comp, body_cmp.comp) : body_cmp.comp,
         //code: "("+make_name(term.name)+"=>"+body_cmp.code+")("+expr_comp.code+")",
         type: body_cmp.type,
       };
@@ -186,7 +186,7 @@ function check(term, type, defs, ctx = fmc.Nil()) {
       var body_ctx = fmc.Ext({name:term.name,type:expr_var.type}, ctx);
       var body_cmp = check(term.body(expr_var), type, defs, body_ctx);
       return {
-        comp: Let(term.name, expr_cmp.comp, body_cmp.comp),
+        comp: term.dups ? Let(term.name, expr_cmp.comp, body_cmp.comp) : body_cmp.comp,
         //code: "("+make_name(term.name)+"=>"+body_cmp.code+")("+expr_comp.code+")",
         type: body_cmp.type,
       };

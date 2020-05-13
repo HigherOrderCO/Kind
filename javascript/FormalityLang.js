@@ -139,11 +139,11 @@ function parse_opt(code, indx, str, err) {
 };
 
 // Parses comma separated arguments `(x,y,z)` or `<x,y,z>`
-function parse_args(code, parser, indx, err) {
+function parse_args(code, indx, parser, err) {
   var parse_arg = (code, indx, err) =>
     chain(parse_txt(code,next(code,indx),",",err), (indx, skip) =>
     chain(parser(code,indx,err),                   (indx, res) => 
-      [indx, res]));
+    [indx, res]));
   return (
     chain(parse_one(code, indx, "(", "<", false),                  (indx,eras) =>
     chain(parser(code,indx,false),                                 (indx, init) =>
@@ -188,7 +188,7 @@ function parse_all(code, indx, err = false) {
   var from = next(code, indx);
   return (
     chain(parse_nam(code, next(code, indx), 1, false),  (indx, self) =>
-    chain(parse_args(code,parse_bnd,indx,err),          (indx, [eras,binds]) =>
+    chain(parse_args(code, indx, parse_bnd, err),       (indx, [eras,binds]) =>
     chain(parse_txt(code, next(code, indx), "->", err), (indx, skip) =>
     chain(parse_trm(code, indx, err),                   (indx, body) =>
     [indx, xs =>
@@ -208,8 +208,8 @@ function parse_lam(code, indx, err = false) {
   var from = next(code, indx);
   var p_nam = (c,i,e) => parse_nam(c,next(c,i),1,e)
   return (
-    chain(parse_args(code, p_nam, next(code, indx)), (indx, [eras, binds]) =>
-    chain(parse_trm(code, next(code,indx), err),            (indx, body) =>
+    chain(parse_args(code, next(code, indx), p_nam), (indx, [eras, binds]) =>
+    chain(parse_trm(code, next(code,indx), err),     (indx, body) =>
     [indx, (xs) => {
        var fold = (ctx,i) =>
          (i < binds.length - 1)
@@ -223,7 +223,7 @@ function parse_lam(code, indx, err = false) {
 function parse_let(code, indx, err = false) {
   var from = next(code, indx);
   return (
-    chain(parse_one(code, next(code, indx), "let ", "dup ", false), (indx, dups) =>
+    chain(parse_one(code, next(code, indx), "def ", "let ", false), (indx, dups) =>
     chain(parse_nam(code, next(code, indx), 0, err),                (indx, name) =>
     chain(parse_txt(code, next(code, indx), "=", err),              (indx, skip) =>
     chain(parse_trm(code, indx, err),                               (indx, expr) =>
@@ -470,7 +470,7 @@ function parse_ah1(code, indx, from, func, err) {
 // Parses a application `f(x,y,z) ~> f(x)(y)(z)`
 function parse_app(code, indx, from, func, err) {
   return (
-    chain(parse_args(code,parse_trm,indx,err), (indx, [eras,args]) =>
+    chain(parse_args(code,indx,parse_trm,err), (indx, [eras,args]) =>
       [indx, (xs) => {
         var x = func(xs);
         for (i = 0; i < args.length; i++) { x = App(eras,x,args[i](xs)); };
@@ -584,96 +584,99 @@ function parse_lst(code, indx, err) {
   //var adt_typs = [null];
   //return (
     //chain(parse_txt(code, next(code, indx), "T ", false), (indx, skip) => {
+    //chain(parse_args(code, next(code, indx), parse_bnd, 
       //// Datatype parameters
       //if (match("<")) {
-        //while (idx < code.length) {
-          //let eras = false;
-          //let name = parse_string();
-          //let type: Term;
-          //if (match(":")) {
-            //type = await parse_term(adt_pram.map((([name,type]) => name)));
-          //} else {
-            //type = Typ();
-          //}
-          //adt_pram.push([name, type, eras]);
-          //if (match(">")) break;
-          //else parse_exact(",");
-        //}
-      //}
 
-      //// Datatype indices
-      //var adt_nams = adt_nams.concat(adt_pram.map(([name,type]) => name));
-      //var adt_typs = adt_typs.concat(adt_pram.map(([name,type]) => type));
-      //if (match("(")) {
-        //while (idx < code.length) {
-          ////var eras = match("~");
-          //let eras = false;
-          //let name = parse_string();
-          //let type: Term
-          //if (match(":")) {
-            //type = await parse_term(adt_nams.concat(adt_indx.map((([name,type]) => name))));
-          //} else {
-            //type = Typ();
-          //}
-          //adt_indx.push([name, type, eras]);
-          //if (match(")")) break; else parse_exact(",");
-        //}
-      //}
-
-      //// Datatype constructors
-      //while (match("|")) {
-        //// Constructor name
-        //var ctor_name = parse_string();
-        //// Constructor fields
-        //var ctor_flds = [];
-        //var ctor_type: Term;
-        //if (match("(")) {
-          //while (idx < code.length) {
-            //let name = parse_string();
-            //let type: Term;
-            //let eras: boolean
-            //if (match(":")) {
-              //type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
-            //} else {
-              //type = Hol(new_hole_name());
-            //}
-            //eras = match(";");
-            //match(",");
-            //ctor_flds.push([name, type, eras]);
-            //if (match(")")) break;
-          //}
-        //}
-        //// Constructor type (written)
-        //if (match(":")) {
-          //ctor_type = parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
-        //// Constructor type (auto-filled)
-        //} else {
-          //var ctor_indx = [];
-          ////if (match("(")) {
-            ////while (idx < code.length) {
-              ////ctor_indx.push(await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name))));
-              ////if (match(")")) break; else parse_exact(",");
-            ////}
+        ////while (idx < code.length) {
+          ////let eras = false;
+          ////let name = parse_string();
+          ////let type: Term;
+          ////if (match(":")) {
+            ////type = await parse_term(adt_pram.map((([name,type]) => name)));
+          ////} else {
+            ////type = Typ();
           ////}
-          //ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
-          //for (var p = 0; p < adt_pram.length; ++p) {
-            //ctor_type = App(ctor_type, Var(-1 + ctor_flds.length + adt_pram.length - p), false);
-          //}
-          //for (var i = 0; i < ctor_indx.length; ++i) {
-            //ctor_type = App(ctor_type, ctor_indx[i], false);
-          //}
-        //}
-        //adt_ctor.push([ctor_name, ctor_flds, ctor_type]);
-      //}
-      //var adt = {adt_pram, adt_indx, adt_ctor, adt_name};
-      //define(file+"/"+adt_name, derive_adt_type(file, adt));
-      //for (var c = 0; c < adt_ctor.length; ++c) {
-        //define(file+"/"+adt_ctor[c][0], derive_adt_ctor(file, adt, c));
-      //}
-      //adts[file+"/"+adt_name] = adt;
+          ////adt_pram.push([name, type, eras]);
+          ////if (match(">")) break;
+          ////else parse_exact(",");
+        ////}
+      ////}
 
-      //return true;
-    //}
+      ////// Datatype indices
+      ////var adt_nams = adt_nams.concat(adt_pram.map(([name,type]) => name));
+      ////var adt_typs = adt_typs.concat(adt_pram.map(([name,type]) => type));
+      ////if (match("(")) {
+        ////while (idx < code.length) {
+          //////var eras = match("~");
+          ////let eras = false;
+          ////let name = parse_string();
+          ////let type: Term
+          ////if (match(":")) {
+            ////type = await parse_term(adt_nams.concat(adt_indx.map((([name,type]) => name))));
+          ////} else {
+            ////type = Typ();
+          ////}
+          ////adt_indx.push([name, type, eras]);
+          ////if (match(")")) break; else parse_exact(",");
+        ////}
+      ////}
+
+      ////// Datatype constructors
+      ////while (match("|")) {
+        ////// Constructor name
+        ////var ctor_name = parse_string();
+        ////// Constructor fields
+        ////var ctor_flds = [];
+        ////var ctor_type: Term;
+        ////if (match("(")) {
+          ////while (idx < code.length) {
+            ////let name = parse_string();
+            ////let type: Term;
+            ////let eras: boolean
+            ////if (match(":")) {
+              ////type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
+            ////} else {
+              ////type = Hol(new_hole_name());
+            ////}
+            ////eras = match(";");
+            ////match(",");
+            ////ctor_flds.push([name, type, eras]);
+            ////if (match(")")) break;
+          ////}
+        ////}
+        ////// Constructor type (written)
+        ////if (match(":")) {
+          ////ctor_type = parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
+        ////// Constructor type (auto-filled)
+        ////} else {
+          ////var ctor_indx = [];
+          //////if (match("(")) {
+            //////while (idx < code.length) {
+              //////ctor_indx.push(await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name))));
+              //////if (match(")")) break; else parse_exact(",");
+            //////}
+          //////}
+          ////ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
+          ////for (var p = 0; p < adt_pram.length; ++p) {
+            ////ctor_type = App(ctor_type, Var(-1 + ctor_flds.length + adt_pram.length - p), false);
+          ////}
+          ////for (var i = 0; i < ctor_indx.length; ++i) {
+            ////ctor_type = App(ctor_type, ctor_indx[i], false);
+          ////}
+        ////}
+        ////adt_ctor.push([ctor_name, ctor_flds, ctor_type]);
+      ////}
+      ////var adt = {adt_pram, adt_indx, adt_ctor, adt_name};
+      ////define(file+"/"+adt_name, derive_adt_type(file, adt));
+      ////for (var c = 0; c < adt_ctor.length; ++c) {
+        ////define(file+"/"+adt_ctor[c][0], derive_adt_ctor(file, adt, c));
+      ////}
+      ////adts[file+"/"+adt_name] = adt;
+
+      ////return true;
+    ////}
+  ////}
 
 // Parses a term
 function parse_trm(code, indx = 0, err) {
@@ -926,7 +929,7 @@ function stringify_trm(term) {
           return func+lpar+argm+rpar;
         }
       case "Let":
-        var dups = term.dups ? "dup " : "let ";
+        var dups = term.dups ? "let " : "def ";
         var name = term.name;
         var expr = stringify_trm(term.expr);
         var body = stringify_trm(term.body(Var(name+"#")));

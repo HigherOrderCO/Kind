@@ -137,7 +137,6 @@ function js_code(term, name = null) {
     code += "({ctr:'TCO',arg:["+vars.map(js_name).join(",")+"]});";
     code += "while(true){";
     code += "var R="+js_code(term)+";";
-    //tco_code += "console.log(R);";
     code += "if(R.ctr==='TCO')["+vars.map(js_name).join(",")+"]=R.arg;";
     code += "else return R;";
     code += "}}";
