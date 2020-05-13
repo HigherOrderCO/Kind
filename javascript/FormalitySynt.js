@@ -426,7 +426,6 @@ function equal(a, b, defs, hols, dep = 0, rec = {}) {
         var a1_body = a1.body(Var("#"+(dep)), Var("#"+(dep+1)));
         var b1_body = b1.body(Var("#"+(dep)), Var("#"+(dep+1)));
         return a1.eras === b1.eras
-            && a1.self === b1.self
             && equal(a1.bind, b1.bind, defs, hols, dep+0, rec)
             && equal(a1_body, b1_body, defs, hols, dep+2, rec);
       case "LamLam":
