@@ -145,8 +145,8 @@ function parse_args(code, indx, parser, err) {
     chain(parser(code,indx,err),                   (indx, res) => 
     [indx, res]));
   return (
-    chain(parse_one(code, indx, "(", "<", false),                  (indx,eras) =>
-    chain(parser(code,indx,false),                                 (indx, init) =>
+    chain(parse_one(code, indx, "(", "<", false),                  (indx, eras) =>
+    chain(parser(code, indx, false),                               (indx, init) =>
     chain(parse_mny(code, indx, parse_arg, false),                 (indx, parses) =>
     chain(parse_txt(code, next(code,indx), eras ? ">" : ")", err), (indx, skip) =>
     [indx, [eras,[init].concat(parses)]])))));
@@ -473,7 +473,9 @@ function parse_app(code, indx, from, func, err) {
     chain(parse_args(code,indx,parse_trm,err), (indx, [eras,args]) =>
       [indx, (xs) => {
         var x = func(xs);
-        for (i = 0; i < args.length; i++) { x = App(eras,x,args[i](xs)); };
+        for (var i = 0; i < args.length; i++) {
+          x = App(eras,x,args[i](xs));
+        };
         return Loc(from,indx,x);
     }]));
 };
@@ -762,10 +764,6 @@ function parse(code, indx = 0) {
       chain(parse_opt(code, drop_spaces(code, indx), "//prim//"), (indx, prim) =>
       chain(parse_opt(code, drop_spaces(code, indx), "//data//"), (indx, data) =>
       chain(parse_trm(code, next(code, indx), true),              (indx, term) => {
-        //if (args) {
-          //console.log("...", name, args);
-          //process.exit();
-        //}
         defs[name] = {type: type(Nil()), term: term(Nil()), meta: {loop,prim,data}};
         parse_defs(code, indx);
       })))))));
