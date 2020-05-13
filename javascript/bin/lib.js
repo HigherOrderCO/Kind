@@ -1,6 +1,5 @@
 var fs = require("fs");
-var fm = require("./../Formality.js");
-
+var fm = require("./../Formality.js"); 
 function error(msg, exit_code) {
   console.log(msg);
   process.exit(exit_code || 0);
@@ -120,17 +119,19 @@ function _js_(main = "main", dir, ext, parse) {
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
-    console.log(fm.comp.js(defs, main));
+    console.log(fm.tojs.compile(defs, main));
   };
 };
 
 function _hs_(main = "main", dir, ext, parse) {
-  var {defs} = load(dir, ".fmc", fm.core.parse);
-  if (!defs[main]) {
-    console.log("Term '" + main + "' not found.");
-  } else {
-    console.log(fm.comp.hs(defs, main));
-  };
+  console.log("Temporarily disabled.");
+  process.exit();
+  //var {defs} = load(dir, ".fmc", fm.core.parse);
+  //if (!defs[main]) {
+    //console.log("Term '" + main + "' not found.");
+  //} else {
+    //console.log(fm.comp.hs(defs, main));
+  //};
 };
 
 function _io_(main = "main", dir, ext, parse) {
@@ -138,7 +139,7 @@ function _io_(main = "main", dir, ext, parse) {
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
-    eval(fm.comp.js(defs, main));
+    eval(fm.tojs.compile(defs, main));
   };
 };
 
