@@ -7,7 +7,7 @@ const Typ = ()                         => ({ctor:"Typ"});
 const All = (eras,self,name,bind,body) => ({ctor:"All",eras,self,name,bind,body});
 const Lam = (eras,name,body)           => ({ctor:"Lam",eras,name,body});
 const App = (eras,func,argm)           => ({ctor:"App",eras,func,argm});
-const Let = (name,expr,body)           => ({ctor:"Let",name,expr,body});
+const Let = (dups,name,expr,body)      => ({ctor:"Let",dups,name,expr,body});
 const Ann = (done,expr,type)           => ({ctor:"Ann",done,expr,type});
 const Loc = (from,upto,expr)           => ({ctor:"Loc",from,upto,expr});
 
@@ -61,10 +61,11 @@ function stringify(term) {
       var clos = term.eras ? ">" : ")";
       return open + func + " " + argm + clos;
     case "Let":
+      var dups = term.dups ? "$" : "@";
       var name = term.name;
       var expr = stringify(term.expr);
       var body = stringify(term.body(Var(term.name+"#")));
-      return "$" + name + "=" + expr + ";" + body;
+      return dups + name + "=" + expr + ";" + body;
     case "Ann":
       var type = stringify(term.type);
       var expr = stringify(term.expr);
@@ -136,12 +137,14 @@ function parse(code, indx) {
         var skip = parse_char(eras ? ">" : ")");
         return ctx => App(eras, func(ctx), argm(ctx));
       case "$":
+      case "@":
+        var dups = chr === "@";
         var name = parse_name();
         var skip = parse_char("=");
         var expr = parse_term();
         var skip = parse_char(";");
         var body = parse_term();
-        return ctx => Let(name, expr(ctx), x => body(Ext([name,x],ctx)));
+        return ctx => Let(dups, name, expr(ctx), x => body(Ext([name,x],ctx)));
       case ":":
         var type = parse_term();
         var expr = parse_term();
@@ -224,6 +227,7 @@ function reduce(term, defs) {
         };
       };
     case "Let":
+      var dups = term.dups;
       var name = term.name;
       var expr = term.expr;
       var body = term.body;
@@ -262,7 +266,7 @@ function normalize(term, defs) {
       var argm = normalize(norm.argm, defs);
       return App(eras, func, argm);
     case "Let":
-      return normalize(norm.body(norm.expr));;
+      return normalize(norm.body(norm.expr));
     case "Ann":
       return normalize(norm.expr, defs);
     case "Loc":
@@ -400,7 +404,7 @@ function typeinfer(term, defs, show = stringify, ctx = Nil(), locs = null) {
       };
     case "Let":
       var expr_typ = typeinfer(term.expr, defs, show, ctx);
-      var expr_var = Ann(true, term.expr, expr_typ);
+      var expr_var = Ann(true, term.dups ? Var(term.name+"#"+(ctx.size+1)) : term.expr, expr_typ);
       var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
       var body_typ = typeinfer(term.body(expr_var), defs, show, body_ctx);
       return body_typ;
@@ -443,7 +447,7 @@ function typecheck(term, type, defs, show = stringify, ctx = Nil(), locs = null)
       break;
     case "Let":
       var expr_typ = typeinfer(term.expr, defs, show, ctx);
-      var expr_var = Ann(true, term.expr, expr_typ);
+      var expr_var = Ann(true, term.dups ? Var(term.name+"#"+(ctx.size+1)) : term.expr, expr_typ);
       var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
       typecheck(term.body(expr_var), type, defs, show, body_ctx);
       break;

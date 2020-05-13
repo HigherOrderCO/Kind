@@ -219,72 +219,19 @@ function parse_lam(code, indx, err = false) {
     }])));
 };
 
-function to_low_order(term, depth = 0) {
-  switch (term.ctor) {
-    case "Var":
-      return Var(depth - term.indx - 1, term.locs);
-    case "Ref":
-      return Ref(term.name, term.locs);
-    case "Typ":
-      return Typ();
-    case "All":
-      var eras = term.eras;
-      var self = term.self;
-      var name = term.name;
-      var bind = term.bind
-      var body = to_low_order(term.body(Var(depth), Var(depth+1)), depth + 2);
-      var locs = term.locs;
-      return All(eras, self, name, bind, body, locs);
-    case "Lam":
-      var name = term.name;
-      var body = to_low_order(term.body(Var(depth)), depth + 1);
-      var locs = term.locs;
-      return Lam(false, name, body, locs);
-    case "App":
-      var func = to_low_order(term.func, depth);
-      var argm = to_low_order(term.argm, depth);
-      var locs = term.locs;
-      return App(false, func, argm, locs);
-    case "Let":
-      var name = term.name;
-      var expr = to_low_order(term.expr, depth);
-      var body = to_low_order(term.body(Var(depth)), depth + 1);
-      var locs = term.locs;
-      return Let(name, expr, body, locs);
-    case "Ann":
-      throw "Unreachable.";
-  }
-};
-
-
-
-// Parses a dependent function value, `(<name>) => <term>`
-//function parse_lam(code, indx, err = false) {
-//  var from = next(code, indx);
-//  return (
-//    chain(parse_one(code, next(code, indx), "(", "<", false),         (indx, eras) =>
-//    chain(parse_nam(code, next(code, indx), 1, false),                (indx, name) =>
-//    chain(parse_txt(code, next(code, indx), eras ? ">" : ")", false), (indx, skip) =>
-//    chain(parse_trm(code, indx, err),                                 (indx, body) =>
-//    [indx, xs => {
-//      var tbody = (x) => body(Ext([name,x],xs));
-//      return Loc(from, indx, Lam(eras, name, tbody));
-//    }])))));
-//};
-
 // Parses a local definition, `let x = val; body`
 function parse_let(code, indx, err = false) {
   var from = next(code, indx);
   return (
-    chain(parse_txt(code, next(code, indx), "let ", false), (indx, skip) =>
-    chain(parse_nam(code, next(code, indx), 0, err),        (indx, name) =>
-    chain(parse_txt(code, next(code, indx), "=", err),      (indx, skip) =>
-    chain(parse_trm(code, indx, err),                       (indx, expr) =>
-    chain(parse_opt(code, indx, ";", err),                  (indx, skip) =>
+    chain(parse_one(code, next(code, indx), "let ", "dup ", false), (indx, dups) =>
+    chain(parse_nam(code, next(code, indx), 0, err),                (indx, name) =>
+    chain(parse_txt(code, next(code, indx), "=", err),              (indx, skip) =>
+    chain(parse_trm(code, indx, err),                               (indx, expr) =>
+    chain(parse_opt(code, indx, ";", err),                          (indx, skip) =>
     chain(parse_trm(code, indx, err),(indx, body) =>
     [indx, xs => {
       var tbody = (x) => body(Ext([name,x],xs));
-      return Loc(from, indx, Let(name, expr(xs), tbody));
+      return Loc(from, indx, Let(dups, name, expr(xs), tbody));
     }])))))));
 };
 
@@ -836,7 +783,7 @@ function unloc(term) {
     case "All": return All(term.eras, term.self, term.name, unloc(term.bind), (s, x) => unloc(term.body(s, x)));
     case "Lam": return Lam(term.eras, term.name, x => unloc(term.body(x)));
     case "App": return App(term.eras, unloc(term.func), unloc(term.argm));
-    case "Let": return Let(term.name, unloc(term.expr), x => unloc(term.body(x)));
+    case "Let": return Let(term.dups, term.name, unloc(term.expr), x => unloc(term.body(x)));
     case "Ann": return Ann(term.done, unloc(term.expr), unloc(term.type));
     case "Loc": return unloc(term.expr);
     case "Hol": return term;
@@ -979,10 +926,11 @@ function stringify_trm(term) {
           return func+lpar+argm+rpar;
         }
       case "Let":
+        var dups = term.dups ? "dup " : "let ";
         var name = term.name;
         var expr = stringify_trm(term.expr);
         var body = stringify_trm(term.body(Var(name+"#")));
-        return "let "+name+" = "+expr+"; "+body;
+        return dups+name+" = "+expr+"; "+body;
       case "Ann":
         if (term.done) {
           return stringify_trm(term.expr);
@@ -1128,6 +1076,7 @@ module.exports = {
   parse_str,
   parse_trm,
   parse,
+  unloc,
   stringify_chr,
   stringify_str,
   stringify,
@@ -1135,6 +1084,4 @@ module.exports = {
   stringify_defs,
   highlight_code,
   stringify_err,
-  to_low_order,
-  unloc
 };

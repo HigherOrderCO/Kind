@@ -9,7 +9,7 @@ const Typ = ()                         => ({ctor:"Typ"});
 const All = (eras,self,name,bind,body) => ({ctor:"All",eras,self,name,bind,body});
 const Lam = (eras,name,body)           => ({ctor:"Lam",eras,name,body});
 const App = (eras,func,argm)           => ({ctor:"App",eras,func,argm});
-const Let = (name,expr,body)           => ({ctor:"Let",name,expr,body});
+const Let = (dups,name,expr,body)      => ({ctor:"Let",dups,name,expr,body});
 const Ann = (done,expr,type)           => ({ctor:"Ann",done,expr,type});
 const Loc = (from,upto,expr)           => ({ctor:"Loc",from,upto,expr});
 const Hol = (name,vals)                => ({ctor:"Hol",name,vals});
@@ -80,10 +80,11 @@ function stringify(term) {
       var clos = term.eras ? ">" : ")";
       return open + func + " " + argm + clos;
     case "Let":
+      var dups = term.dups ? "@" : "$";
       var name = term.name;
       var expr = stringify(term.expr);
       var body = stringify(term.body(Var(term.name+"#")));
-      return "$" + name + "=" + expr + ";" + body;
+      return dups + name + "=" + expr + ";" + body;
     case "Ann":
       var type = stringify(term.type);
       var expr = stringify(term.expr);
@@ -157,12 +158,14 @@ function parse(code, indx) {
         var skip = parse_char(eras ? ">" : ")");
         return ctx => App(eras, func(ctx), argm(ctx));
       case "$":
+      case "@":
+        var dups = chr === "@";
         var name = parse_name();
         var skip = parse_char("=");
         var expr = parse_term();
         var skip = parse_char(";");
         var body = parse_term();
-        return ctx => Let(name, expr(ctx), x => body(Ext([name,x],ctx)));
+        return ctx => Let(dups, name, expr(ctx), x => body(Ext([name,x],ctx)));
       case ":":
         var type = parse_term();
         var expr = parse_term();
@@ -248,6 +251,7 @@ function reduce(term, defs, hols = {}, erased = false) {
         };
       };
     case "Let":
+      var dups = term.dups;
       var name = term.name;
       var expr = term.expr;
       var body = term.body;
@@ -337,10 +341,11 @@ function canonicalize(term, hols = {}) {
           return App(eras, func, argm);
       };
     case "Let":
+      var dups = term.dups;
       var name = term.name;
       var expr = canonicalize(term.expr, hols);
       var body = x => canonicalize(term.body(x), hols);
-      return Let(name, expr, body);
+      return Let(dups, name, expr, body);
     case "Ann":
       if (term.done === true) {
         return canonicalize(term.expr, hols);
@@ -589,7 +594,7 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
       });
     case "Let":
       return deep([[typeinfer, [term.expr, defs, show, hols, ctx, locs]]], ([hols, expr_typ]) => {
-        var expr_var = Ann(true, term.expr, expr_typ);
+        var expr_var = Ann(true, term.dups ? Var(term.name+"#"+(ctx.size+1)) : term.expr, expr_typ);
         var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
         return deep([[typeinfer, [term.body(expr_var), defs, show, hols, body_ctx, locs]]], ([hols, body_typ]) => {
           return done([hols, body_typ]);
@@ -647,7 +652,7 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
       }
     case "Let":
       return deep([[typeinfer, [term.expr, defs, show, hols, ctx, locs]]], ([hols, expr_typ]) => {
-        var expr_var = Ann(true, term.expr, expr_typ);
+        var expr_var = Ann(true, term.dups ? Var(term.name+"#"+(ctx.size+1)) : term.expr, expr_typ);
         var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
         return deep([[typecheck, [term.body(expr_var), type, defs, show, hols, body_ctx, locs]]], ([hols, _]) => {
           return done([hols, type]);
