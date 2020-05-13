@@ -42,18 +42,18 @@ function _fm_(main = "main", dir, ext, parse = fm.lang.parse, show = fm.lang.str
   // Normalizes and type-checks all terms
   console.log("\033[4m\x1b[1mType-checking:\x1b[0m");
   var errors = [];
-  var max_len = 0;
-  for (var name in defs) {
-    max_len = Math.max(name.length, max_len);
-  };
+  //var max_len = 0;
+  //for (var name in defs) {
+    //max_len = Math.max(name.length, max_len);
+  //};
   for (var name in defs) {
     var show_name = name;
-    while (show_name.length < max_len) {
-      show_name = show_name + " ";
-    }
+    //while (show_name.length < max_len) {
+      //show_name = show_name + " ";
+    //}
     try {
       var {term,type} = check(defs[name].term, defs[name].type, defs, show);
-      console.log(show_name + " : " + show(defs[name].type));
+      console.log(show_name + ": \x1b[2m" + show(defs[name].type) + "\x1b[0m");
       synt[name] = {term, type};
     } catch (err) {
       if (typeof err === "function") err = err();
