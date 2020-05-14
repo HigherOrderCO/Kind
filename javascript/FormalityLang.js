@@ -649,7 +649,6 @@ function parse_trm(code, indx = 0, err) {
   return null;
 };
 
-
 // Parses a sequence of `<x: term, y: term...> (a: term, b: term...) ...`.
 // Returns a list of erasure/bind/term: `[{eras:bool, name:text, term:term}]`.
 function parse_bds(code, indx, err) {
@@ -1063,9 +1062,9 @@ function adt_type_type({name, pars, inds, ctrs}) {
     // {args(1)} = (len) {args(2)}
     // {args(2)} = self(P : {motive(0)}) -> {ctors(0)}
     if (p < pars.length) {
-      return All(false, "", pars[p].name, pars[p].term(ctx), x => args(p + 1, i, Ext([pars[p].name,x], ctx)));
+      return All(false, "", pars[p].name, pars[p].term(ctx), (s,x) => args(p + 1, i, Ext([pars[p].name,x], ctx)));
     } else if (i < inds.length) {
-      return All(false, "", inds[i].name, inds[i].term(ctx), x => args(p, i + 1, Ext([inds[i].name,x], ctx)));
+      return All(false, "", inds[i].name, inds[i].term(ctx), (s,x) => args(p, i + 1, Ext([inds[i].name,x], ctx)));
     } else {
       return Typ();
     }
