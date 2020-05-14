@@ -269,41 +269,48 @@ function reduce(term, defs, hols = {}, erased = false) {
   };
 };
 
-function normalize(term, defs, hols = {}, erased = false) {
+function normalize(term, defs, hols = {}, erased = false, seen = {}) {
   var norm = reduce(term, defs, hols, erased);
-  switch (norm.ctor) {
-    case "Var":
-      return Var(norm.indx);
-    case "Ref":
-      return Ref(norm.name);
-    case "Typ":
-      return Typ();
-    case "All":
-      var eras = norm.eras;
-      var self = norm.self;
-      var name = norm.name;
-      var bind = normalize(norm.bind, defs, hols, erased);
-      var body = (s,x) => normalize(norm.body(s,x), defs, hols, erased);
-      return All(eras, self, name, bind, body);
-    case "Lam":
-      var eras = norm.eras;
-      var name = norm.name;
-      var body = x => normalize(norm.body(x), defs, hols, erased);
-      return Lam(eras, name, body);
-    case "App":
-      var eras = norm.eras;
-      var func = normalize(norm.func, defs, hols, erased);
-      var argm = normalize(norm.argm, defs, hols, erased);
-      return App(eras, func, argm);
-    case "Let":
-      return normalize(norm.body(norm.expr), hols, erased);
-    case "Ann":
-      return normalize(norm.expr, defs, hols, erased);
-    case "Loc":
-      return normalize(norm.expr, defs, hols, erased);
-    case "Hol":
-      return Hol(norm.name, norm.vals);
-  };
+  var term_hash = hash(term);
+  var norm_hash = hash(norm);
+  if (seen[term_hash] || seen[norm_hash]) {
+    return term;
+  } else {
+    var seen = {...seen, [term_hash]: true, [norm_hash]: true};
+    switch (norm.ctor) {
+      case "Var":
+        return Var(norm.indx);
+      case "Ref":
+        return Ref(norm.name);
+      case "Typ":
+        return Typ();
+      case "All":
+        var eras = norm.eras;
+        var self = norm.self;
+        var name = norm.name;
+        var bind = normalize(norm.bind, defs, hols, erased, seen);
+        var body = (s,x) => normalize(norm.body(s,x), defs, hols, erased, seen);
+        return All(eras, self, name, bind, body);
+      case "Lam":
+        var eras = norm.eras;
+        var name = norm.name;
+        var body = x => normalize(norm.body(x), defs, hols, erased, seen);
+        return Lam(eras, name, body);
+      case "App":
+        var eras = norm.eras;
+        var func = normalize(norm.func, defs, hols, erased, seen);
+        var argm = normalize(norm.argm, defs, hols, erased, seen);
+        return App(eras, func, argm);
+      case "Let":
+        return normalize(norm.body(norm.expr), defs, hols, erased, seen);
+      case "Ann":
+        return normalize(norm.expr, defs, hols, erased, seen);
+      case "Loc":
+        return normalize(norm.expr, defs, hols, erased, seen);
+      case "Hol":
+        return Hol(norm.name, norm.vals);
+    };
+  }
 };
 
 // Prepares a term to be stored on .fmc source
@@ -455,9 +462,6 @@ function equal(a, b, defs, hols, dep = 0, rec = {}) {
         } else if (b1.ctor === "Hol") {
           throw [b1.name, a]
         } else {
-          //console.log("FAIL");
-          //console.log("-", stringify(a1));
-          //console.log("-", stringify(b1));
           return false;
         }
     }

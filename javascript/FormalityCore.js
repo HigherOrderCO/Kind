@@ -179,18 +179,17 @@ function parse(code, indx) {
 // Evaluation
 // ==========
 
-function reduce(term, defs) {
+function reduce(term, defs, erased = false) {
   switch (term.ctor) {
     case "Var":
       return Var(term.indx);
     case "Ref":
       if (defs[term.name]) {
         var got = defs[term.name].term;
-        // Avoids reducing axioms
         if (got.ctor === "Loc" && got.expr.ctor === "Ref" && got.expr.name === term.name) {
           return got;
         } else {
-          return reduce(got, defs);
+          return reduce(got, defs, erased);
         };
       } else {
         return Ref(term.name);
@@ -205,8 +204,8 @@ function reduce(term, defs) {
       var body = term.body;
       return All(eras, self, name, bind, body);
     case "Lam":
-      if (term.eras) {
-        return reduce(term.body(Lam(false, "", x => x)), defs);
+      if (erased && term.eras) {
+        return reduce(term.body(Lam(false, "", x => x)), defs, erased);
       } else {
         var eras = term.eras;
         var name = term.name;
@@ -214,14 +213,14 @@ function reduce(term, defs) {
         return Lam(eras, name, body);
       }
     case "App":
-      if (term.eras) {
-        return reduce(term.func, defs);
+      if (erased && term.eras) {
+        return reduce(term.func, defs, erased);
       } else {
         var eras = term.eras;
-        var func = reduce(term.func, defs);
+        var func = reduce(term.func, defs, erased);
         switch (func.ctor) {
           case "Lam":
-            return reduce(func.body(term.argm), defs);
+            return reduce(func.body(term.argm), defs, erased);
           default:
             return App(eras, func, term.argm);
         };
@@ -231,46 +230,54 @@ function reduce(term, defs) {
       var name = term.name;
       var expr = term.expr;
       var body = term.body;
-      return reduce(body(expr), defs);
+      return reduce(body(expr), defs, erased);
     case "Ann":
-      return reduce(term.expr, defs);
+      return reduce(term.expr, defs, erased);
     case "Loc":
-      return reduce(term.expr, defs);
+      return reduce(term.expr, defs, erased);
   };
-};
+}
 
-function normalize(term, defs) {
-  var norm = reduce(term, defs);
-  switch (norm.ctor) {
-    case "Var":
-      return Var(norm.indx);
-    case "Ref":
-      return Ref(norm.name);
-    case "Typ":
-      return Typ();
-    case "All":
-      var eras = norm.eras;
-      var self = norm.self;
-      var name = norm.name;
-      var bind = normalize(norm.bind, defs);
-      var body = (s,x) => normalize(norm.body(s,x), defs);
-      return All(eras, self, name, bind, body);
-    case "Lam":
-      var eras = norm.eras;
-      var name = norm.name;
-      var body = x => normalize(norm.body(x), defs);
-      return Lam(eras, name, body);
-    case "App":
-      var eras = norm.eras;
-      var func = normalize(norm.func, defs);
-      var argm = normalize(norm.argm, defs);
-      return App(eras, func, argm);
-    case "Let":
-      return normalize(norm.body(norm.expr));
-    case "Ann":
-      return normalize(norm.expr, defs);
-    case "Loc":
-      return normalize(norm.expr, defs);
+function normalize(term, defs, erased = false, seen = {}) {
+  var norm = reduce(term, defs, erased);
+  var term_hash = hash(term);
+  var norm_hash = hash(norm);
+  if (seen[term_hash] || seen[norm_hash]) {
+    return term;
+  } else {
+    var seen = {...seen, [term_hash]: true, [norm_hash]: true};
+    var norm = reduce(term, defs, erased);
+    switch (norm.ctor) {
+      case "Var":
+        return Var(norm.indx);
+      case "Ref":
+        return Ref(norm.name);
+      case "Typ":
+        return Typ();
+      case "All":
+        var eras = norm.eras;
+        var self = norm.self;
+        var name = norm.name;
+        var bind = normalize(norm.bind, defs, erased, seen);
+        var body = (s,x) => normalize(norm.body(s,x), defs, erased, seen);
+        return All(eras, self, name, bind, body);
+      case "Lam":
+        var eras = norm.eras;
+        var name = norm.name;
+        var body = x => normalize(norm.body(x), defs, erased, seen);
+        return Lam(eras, name, body);
+      case "App":
+        var eras = norm.eras;
+        var func = normalize(norm.func, defs, erased, seen);
+        var argm = normalize(norm.argm, defs, erased, seen);
+        return App(eras, func, argm);
+      case "Let":
+        return normalize(norm.body(norm.expr), defs, erased, seen);
+      case "Ann":
+        return normalize(norm.expr, defs, erased, seen);
+      case "Loc":
+        return normalize(norm.expr, defs, erased, seen);
+    };
   };
 };
 
@@ -317,44 +324,44 @@ function hash(term, dep = 0) {
 };
 
 // Are two terms equal?
-function equal(a, b, defs, dep = 0, eql = {}) {
+function equal(a, b, defs, dep = 0, seen = {}) {
   let a1 = reduce(a, defs);
   let b1 = reduce(b, defs);
   var ah = hash(a1);
   var bh = hash(b1);
   var id = ah + "==" + bh;
-  if (ah === bh || eql[id]) {
+  if (ah === bh || seen[id]) {
     return true;
   } else {
-    eql[id] = true;
+    seen[id] = true;
     switch (a1.ctor + b1.ctor) {
       case "AllAll":
         var a1_body = a1.body(Var("#"+(dep)), Var("#"+(dep+1)));
         var b1_body = b1.body(Var("#"+(dep)), Var("#"+(dep+1)));
         return a1.eras === b1.eras
-            && equal(a1.bind, b1.bind, defs, dep+0, eql)
-            && equal(a1_body, b1_body, defs, dep+2, eql);
+            && equal(a1.bind, b1.bind, defs, dep+0, seen)
+            && equal(a1_body, b1_body, defs, dep+2, seen);
       case "LamLam":
         if (a1.eras !== b1.eras) return [false,a1,b1];
         var a1_body = a1.body(Var("#"+(dep)));
         var b1_body = b1.body(Var("#"+(dep)));
         return a1.eras === b1.eras
-            && equal(a1_body, b1_body, defs, dep+1, eql);
+            && equal(a1_body, b1_body, defs, dep+1, seen);
       case "AppApp":
         return a1.eras === b1.eras
-            && equal(a1.func, b1.func, defs, dep, eql)
-            && equal(a1.argm, b1.argm, defs, dep, eql);
+            && equal(a1.func, b1.func, defs, dep, seen)
+            && equal(a1.argm, b1.argm, defs, dep, seen);
       case "LetLet":
         var a1_body = a1.body(Var("#"+(dep)));
         var b1_body = b1.body(Var("#"+(dep)));
         vis.push([a1.expr, b1.expr, dep]);
         vis.push([a1_body, b1_body, dep+1]);
-        return equal(a1.expr, b1.expr, defs, dep+0, eql)
-            && equal(a1_body, b1_body, defs, dep+1, eql);
+        return equal(a1.expr, b1.expr, defs, dep+0, seen)
+            && equal(a1_body, b1_body, defs, dep+1, seen);
       case "AnnAnn":
-        return equal(a1.expr, b1.expr, defs, dep, eql);
+        return equal(a1.expr, b1.expr, defs, dep, seen);
       case "LocLoc":
-        return equal(a1.expr, b1.expr, defs, dep, eql);
+        return equal(a1.expr, b1.expr, defs, dep, seen);
       default:
         return false;
     }
