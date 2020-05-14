@@ -52,6 +52,7 @@ var prim_funcs = {
   "Nat.mul"     : "a=>b=>a*b",
   "Nat.div"     : "a=>b=>a/b",
   "Nat.div_mod" : "a=>b=>t=>t(a/b)(a%b)",
+  "Nat.pow"     : "a=>b=>a**b",
   "Nat.ltn"     : "a=>b=>a<b",
   "Nat.lte"     : "a=>b=>a<=b",
   "Nat.eql"     : "a=>b=>a===b",

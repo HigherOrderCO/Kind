@@ -43,7 +43,7 @@ function stringify(term) {
     case "Typ":
       return "*";
     case "All":
-      var bind = term.eras ? "Π" : "∀";
+      var bind = term.eras ? "∀" : "Π";
       var self = term.self;
       var name = term.name;
       var type = stringify(term.bind);
@@ -112,9 +112,9 @@ function parse(code, indx) {
     switch (chr) {
       case "*":
         return ctx => Typ();
-      case "Π": 
       case "∀":
-        var eras = chr === "Π";
+      case "Π":
+        var eras = chr === "∀";
         var self = parse_name();
         var skip = parse_char("(");
         var name = parse_name();
@@ -302,7 +302,7 @@ function hash(term, dep = 0) {
     case "All":
       var bind = hash(term.bind, dep);
       var body = hash(term.body(Var("#"+(-dep-1)), Var("#"+(-dep-2))), dep+2);
-      return "∀" + bind + body;
+      return "Π" + bind + body;
     case "Lam":
       var body = hash(term.body(Var("#"+(-dep-1))), dep+1);
       return "λ" + body;
