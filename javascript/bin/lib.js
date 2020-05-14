@@ -53,7 +53,7 @@ function _fm_(main = "main", dir, ext, parse = fm.lang.parse, show = fm.lang.str
     //}
     try {
       var {term,type} = check(defs[name].term, defs[name].type, defs, show);
-      console.log(show_name + ": \x1b[2m" + show(defs[name].type) + "\x1b[0m");
+      console.log(show_name + ": \x1b[2m" + show(type) + "\x1b[0m");
       synt[name] = {term, type};
     } catch (err) {
       if (typeof err === "function") err = err();

@@ -16,6 +16,19 @@ var {
 // Parsing
 // =======
 
+function get_var(ctx, name, not_found) {
+  var got = find(ctx, (bnd, i) => bnd[0] === name);
+  if (!got) {
+    if (not_found) {
+      return not_found();
+    } else {
+      throw "Unbound: " + name + ".";
+    }
+  } else {
+    return got.value[1];
+  }
+};
+
 // Is this a space character?
 function is_space(chr) {
   return chr === " " || chr === "\t" || chr === "\n";
@@ -109,15 +122,17 @@ function parse_one(code, indx, ch0, ch1, err) {
   ]);
 };
 
-function parse_mny(code, indx, parser, err = false) {
-  var parses = [];
-  var parsed = parser(code, indx, err);
-  while (parsed) {
-    var [indx, parse] = parsed;
-    parses.push(parse);
-    var parsed = parser(code, indx, err);
+function parse_mny(parser) {
+  return function(code, indx, err = false) {
+    var parses = [];
+    var parsed = parser(code, indx, false);
+    while (parsed) {
+      var [indx, parse] = parsed;
+      parses.push(parse);
+      var parsed = parser(code, next(code, indx), false);
+    };
+    return [indx, parses];
   };
-  return [indx, parses];
 };
 
 // Parses an optional value
@@ -139,17 +154,19 @@ function parse_opt(code, indx, str, err) {
 };
 
 // Parses comma separated arguments `(x,y,z)` or `<x,y,z>`
-function parse_args(code, indx, parser, err) {
-  var parse_arg = (code, indx, err) =>
-    chain(parse_txt(code,next(code,indx),",",err), (indx, skip) =>
-    chain(parser(code,indx,err),                   (indx, res) => 
-    [indx, res]));
-  return (
-    chain(parse_one(code, indx, "(", "<", false),                  (indx, eras) =>
-    chain(parser(code, indx, false),                               (indx, init) =>
-    chain(parse_mny(code, indx, parse_arg, false),                 (indx, parses) =>
-    chain(parse_txt(code, next(code,indx), eras ? ">" : ")", err), (indx, skip) =>
-    [indx, [eras,[init].concat(parses)]])))));
+function parse_app_list(parser) {
+  return (code, indx, err) => {
+    var parse_next = (code, indx, err) =>
+      chain(parse_txt(code,next(code,indx),",",err), (indx, skip) =>
+      chain(parser(code,indx,err),                   (indx, res) => 
+      [indx, res]));
+    return (
+      chain(parse_one(code, indx, "(", "<", false),                  (indx, eras) =>
+      chain(parser(code, indx, false),                               (indx, init) =>
+      chain(parse_mny(parse_next)(code, indx, err),                  (indx, parses) =>
+      chain(parse_txt(code, next(code,indx), eras ? ">" : ")", err), (indx, skip) =>
+      [indx, [eras, [init].concat(parses)]])))));
+  };
 };
 
 // parse binder `x: A`
@@ -188,7 +205,7 @@ function parse_all(code, indx, err = false) {
   var from = next(code, indx);
   return (
     chain(parse_nam(code, next(code, indx), 1, false),  (indx, self) =>
-    chain(parse_args(code, indx, parse_bnd, err),       (indx, [eras,binds]) =>
+    chain(parse_app_list(parse_bnd)(code, indx, err),   (indx, [eras,binds]) =>
     chain(parse_txt(code, next(code, indx), "->", err), (indx, skip) =>
     chain(parse_trm(code, indx, err),                   (indx, body) =>
     [indx, xs =>
@@ -208,13 +225,13 @@ function parse_lam(code, indx, err = false) {
   var from = next(code, indx);
   var p_nam = (c,i,e) => parse_nam(c,next(c,i),1,e)
   return (
-    chain(parse_args(code, next(code, indx), p_nam), (indx, [eras, binds]) =>
-    chain(parse_trm(code, next(code,indx), err),     (indx, body) =>
+    chain(parse_app_list(p_nam)(code, next(code, indx), false), (indx, [eras, binds]) =>
+    chain(parse_trm(code, next(code,indx), err), (indx, body) =>
     [indx, (xs) => {
        var fold = (ctx,i) =>
          (i < binds.length - 1)
-         ? Lam(eras,binds[i], (x) => fold(Ext([binds[i],x],ctx),i+1))
-         : Lam(eras,binds[i], (x) => body(Ext([binds[i],x],ctx)))
+         ? Lam(eras, binds[i], (x) => fold(Ext([binds[i],x],ctx),i+1))
+         : Lam(eras, binds[i], (x) => body(Ext([binds[i],x],ctx)))
       return Loc(from, indx, fold(xs,0))
     }])));
 };
@@ -441,8 +458,7 @@ function parse_var(code, indx, err = false) {
       if (name.length === 0) {
         return parse_error(code, indx, "a variable", err);
       } else {
-        var got = find(xs, (x,i) => x[0] === name);
-        return Loc(from, indx, got ? got.value[1] : Ref(name));
+        return Loc(from, indx, get_var(xs, name, () => Ref(name)));
       }
     }];
   });
@@ -470,7 +486,7 @@ function parse_ah1(code, indx, from, func, err) {
 // Parses a application `f(x,y,z) ~> f(x)(y)(z)`
 function parse_app(code, indx, from, func, err) {
   return (
-    chain(parse_args(code,indx,parse_trm,err), (indx, [eras,args]) =>
+    chain(parse_app_list(parse_trm)(code,indx,err), (indx, [eras,args]) =>
       [indx, (xs) => {
         var x = func(xs);
         for (var i = 0; i < args.length; i++) {
@@ -577,109 +593,6 @@ function parse_lst(code, indx, err) {
     [indx, xs => Loc(from, indx, list(xs))])))));
 };
 
-//function parse_adr() {
-  //var adt_pram = [];
-  //var adt_indx = [];
-  //var adt_ctor = [];
-  //var adt_name = parse_string();
-  //var adt_nams = [adt_name];
-  //var adt_typs = [null];
-  //return (
-    //chain(parse_txt(code, next(code, indx), "T ", false), (indx, skip) => {
-    //chain(parse_args(code, next(code, indx), parse_bnd, 
-      //// Datatype parameters
-      //if (match("<")) {
-
-        ////while (idx < code.length) {
-          ////let eras = false;
-          ////let name = parse_string();
-          ////let type: Term;
-          ////if (match(":")) {
-            ////type = await parse_term(adt_pram.map((([name,type]) => name)));
-          ////} else {
-            ////type = Typ();
-          ////}
-          ////adt_pram.push([name, type, eras]);
-          ////if (match(">")) break;
-          ////else parse_exact(",");
-        ////}
-      ////}
-
-      ////// Datatype indices
-      ////var adt_nams = adt_nams.concat(adt_pram.map(([name,type]) => name));
-      ////var adt_typs = adt_typs.concat(adt_pram.map(([name,type]) => type));
-      ////if (match("(")) {
-        ////while (idx < code.length) {
-          //////var eras = match("~");
-          ////let eras = false;
-          ////let name = parse_string();
-          ////let type: Term
-          ////if (match(":")) {
-            ////type = await parse_term(adt_nams.concat(adt_indx.map((([name,type]) => name))));
-          ////} else {
-            ////type = Typ();
-          ////}
-          ////adt_indx.push([name, type, eras]);
-          ////if (match(")")) break; else parse_exact(",");
-        ////}
-      ////}
-
-      ////// Datatype constructors
-      ////while (match("|")) {
-        ////// Constructor name
-        ////var ctor_name = parse_string();
-        ////// Constructor fields
-        ////var ctor_flds = [];
-        ////var ctor_type: Term;
-        ////if (match("(")) {
-          ////while (idx < code.length) {
-            ////let name = parse_string();
-            ////let type: Term;
-            ////let eras: boolean
-            ////if (match(":")) {
-              ////type = await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
-            ////} else {
-              ////type = Hol(new_hole_name());
-            ////}
-            ////eras = match(";");
-            ////match(",");
-            ////ctor_flds.push([name, type, eras]);
-            ////if (match(")")) break;
-          ////}
-        ////}
-        ////// Constructor type (written)
-        ////if (match(":")) {
-          ////ctor_type = parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name)));
-        ////// Constructor type (auto-filled)
-        ////} else {
-          ////var ctor_indx = [];
-          //////if (match("(")) {
-            //////while (idx < code.length) {
-              //////ctor_indx.push(await parse_term(adt_nams.concat(ctor_flds.map(([name,type]) => name))));
-              //////if (match(")")) break; else parse_exact(",");
-            //////}
-          //////}
-          ////ctor_type = Var(-1 + ctor_flds.length + adt_pram.length + 1);
-          ////for (var p = 0; p < adt_pram.length; ++p) {
-            ////ctor_type = App(ctor_type, Var(-1 + ctor_flds.length + adt_pram.length - p), false);
-          ////}
-          ////for (var i = 0; i < ctor_indx.length; ++i) {
-            ////ctor_type = App(ctor_type, ctor_indx[i], false);
-          ////}
-        ////}
-        ////adt_ctor.push([ctor_name, ctor_flds, ctor_type]);
-      ////}
-      ////var adt = {adt_pram, adt_indx, adt_ctor, adt_name};
-      ////define(file+"/"+adt_name, derive_adt_type(file, adt));
-      ////for (var c = 0; c < adt_ctor.length; ++c) {
-        ////define(file+"/"+adt_ctor[c][0], derive_adt_ctor(file, adt, c));
-      ////}
-      ////adts[file+"/"+adt_name] = adt;
-
-      ////return true;
-    ////}
-  ////}
-
 // Parses a term
 function parse_trm(code, indx = 0, err) {
   var indx = next(code, indx);
@@ -736,37 +649,116 @@ function parse_trm(code, indx = 0, err) {
   return null;
 };
 
-//
-//function parse_arg(code, p_arg, indx, err) {
-//  return (
-//    chain(parse_txt(code, next(code, indx), "(", false),     (indx, skip) =>
-//    chain(parse_mny(code, next(code, indx), p_arg, err), (indx, bnds) =>
-//    chain(parse_txt(code, next(code, indx), ")", err),   (indx, skip) => {
-//    return [indx, null];
-//    }))));
-//};
 
+// Parses a sequence of `<x: term, y: term...> (a: term, b: term...) ...`.
+// Returns a list of erasure/bind/term: `[{eras:bool, name:text, term:term}]`.
+function parse_bds(code, indx, err) {
+  var parser = parse_mny(parse_app_list(parse_bnd));
+  return chain(parser(code, next(code, indx), err), (indx, bnds) => {
+    // [(bool,[(string,term)])] -> [(bool,string,term)]
+    var flat_bnds = [];
+    for (var i = 0; i < bnds.length; ++i) {
+      for (var j = 0; j < bnds[i][1].length; ++j) {
+        flat_bnds.push({
+          eras: bnds[i][0],
+          name: bnds[i][1][j][0],
+          term: bnds[i][1][j][1]
+        });
+      }
+    }
+    return [indx, flat_bnds];
+  });
+};
+
+// Parses a sequence of `<term, term...> (term, term...) ...`.
+// Returns a list of erasure/term: `[(bool, term)]`.
+function parse_ars(code, indx, err) {
+  var parser = parse_mny(parse_app_list(parse_trm));
+  return chain(parser(code, next(code, indx), err), (indx, args) => {
+    // [(bool,[term])] -> [(bool, term)]
+    var flat_args = [];
+    for (var i = 0; i < args.length; ++i) {
+      for (var j = 0; j < args[i][1].length; ++j) {
+        flat_args.push({
+          eras: args[i][0], 
+          term: args[i][1][j]
+        });
+      }
+    }
+    return [indx, flat_args];
+  });
+};
+
+function parse_ctr(code, indx, err) {
+  return (
+    chain(parse_txt(code, next(code, indx), "|", false), (indx, skip) =>
+    chain(parse_nam(code, next(code, indx), err), (indx, name) =>
+    chain(parse_bds(code, next(code, indx), err), (indx, fils) =>
+    chain(parse_opt(code, next(code, indx), "~", err), (indx, skip) =>
+    chain(parse_ars(code, next(code, indx), err), (indx, inds) =>
+    chain(parse_txt(code, next(code, indx), ";", err), (indx, skip) =>
+    [indx, {name, fils, inds}]
+    )))))));
+};
+
+function parse_adt(code, indx, err) {
+  return (
+    chain(parse_txt(code, next(code, indx), "T ", false), (indx, skip) =>
+    chain(parse_nam(code, next(code, indx), err), (indx, name) =>
+    chain(parse_bds(code, next(code, indx), err), (indx, pars) =>
+    chain(parse_opt(code, next(code, indx), "~", err), (indx, hasi) => 
+    chain(parse_bds(code, next(code, indx), err), (indx, inds) =>
+    chain(parse_mny(parse_ctr)(code, next(code, indx), err), (indx, ctrs) => {
+    return [indx, {name, pars, inds, ctrs}];
+    })))))));
+};
 
 
 // Parses a defs
 function parse(code, indx = 0) {
+  //var LOG = x => console.log(require("util").inspect(x, {showHidden: false, depth: null}));
   var defs = {};
   function parse_defs(code, indx) {
     var indx = next(code, indx);
     if (indx === code.length) {
       return;
     } else {
-      chain(parse_nam(code, next(code, indx), 0, true),           (indx, name) =>
-      //chain(parse_may(code, next(code, indx), parse_arg, true),   (indx, args) =>
-      chain(parse_txt(code, next(code, indx), ":", true),         (indx, skip) =>
-      chain(parse_trm(code, next(code, indx), true),              (indx, type) =>
-      chain(parse_opt(code, drop_spaces(code, indx), "//loop//"), (indx, loop) =>
-      chain(parse_opt(code, drop_spaces(code, indx), "//prim//"), (indx, prim) =>
-      chain(parse_opt(code, drop_spaces(code, indx), "//data//"), (indx, data) =>
-      chain(parse_trm(code, next(code, indx), true),              (indx, term) => {
-        defs[name] = {type: type(Nil()), term: term(Nil()), meta: {loop,prim,data}};
+      try {
+      // Parses datatype definitions
+      var parsed_adt = parse_adt(code, indx, true);
+      if (parsed_adt) {
+        var [indx, adt] = parsed_adt;
+        //console.log("found", adt.name);
+        //LOG(adt);
+        //console.log(stringify(adt_type_type(adt)));
+        //console.log(stringify(adt_type_term(adt)));
+        defs[adt.name] = {
+          type: adt_type_type(adt),
+          term: adt_type_term(adt),
+        };
+        for (var c = 0; c < adt.ctrs.length; ++c) {
+          //console.log(stringify(adt_ctor_type(adt, c)));
+          //console.log(stringify(adt_ctor_term(adt, c)));
+          defs[adt.name+"."+adt.ctrs[c].name] = {
+            type: adt_ctor_type(adt, c),
+            term: adt_ctor_term(adt, c),
+          };
+        }
         parse_defs(code, indx);
-      })))))));
+      // Parses function definitions
+      } else {
+        chain(parse_nam(code, next(code, indx), 0, true),           (indx, name) =>
+        chain(parse_txt(code, next(code, indx), ":", true),         (indx, skip) =>
+        chain(parse_trm(code, next(code, indx), true),              (indx, type) =>
+        chain(parse_trm(code, next(code, indx), true),              (indx, term) => {
+          defs[name] = {
+            type: type(Nil()),
+            term: term(Nil())
+          };
+          parse_defs(code, indx);
+        }))));
+      };
+      } catch (e) { console.log(e) }
     };
   }
   parse_defs(code, indx);
@@ -1045,6 +1037,187 @@ function stringify_err(err, code) {
   return str;
 };
 
+// Generics
+// ========
+
+// Datatype and constructor derivers. The example goes from:
+//   T Vector <A: Type>                       ~ (len: Nat)
+//   | nil                                    ~ (Nat.zero);
+//   | ext<len: Nat>(x: A, xs: Vector(A,len)) ~ (Nat.succ(len));
+// To:
+//   Vector (A: Type, len: Nat) : Type 
+//     (A, len)
+//     self(P: Nat -> Vector(A, len) -> Type) ->
+//     (nil: P(Nat.zero)(Vector.nil<A>)) ->
+//     (ext: <len: Nat> -> (x: A, xs: Vector(A,len)) -> P(Nat.succ(len))(Vector.ext<A>(len)(x)(xs))) ->
+//     P(len)(self)
+
+function adt_type_type({name, pars, inds, ctrs}) {
+  return (function args(p, i, ctx) {
+    //console.log("args", p, i, pars.length);
+    // {args(0)} = <A> {args(1)}
+    // {args(1)} = (len) {args(2)}
+    // {args(2)} = self(P : {motive(0)}) -> {ctors(0)}
+    if (p < pars.length) {
+      return All(false, "", pars[p].name, pars[p].term(ctx), x => args(p + 1, i, Ext([pars[p].name,x], ctx)));
+    } else if (i < inds.length) {
+      return All(false, "", inds[i].name, inds[i].term(ctx), x => args(p, i + 1, Ext([inds[i].name,x], ctx)));
+    } else {
+      return Typ();
+    }
+  })(0, 0, Nil());
+}
+
+function adt_type_term({name, pars, inds, ctrs}) {
+  return (function args(p, i, ctx) {
+    //console.log("args", p, i, pars.length);
+    // {args(0)} = <A> {args(1)}
+    // {args(1)} = (len) {args(2)}
+    // {args(2)} = self(P : {motive(0)}) -> {ctors(0)}
+    if (p < pars.length) {
+      return Lam(false, pars[p].name, x => args(p + 1, i, Ext([pars[p].name,x], ctx)));
+    } else if (i < inds.length) {
+      return Lam(false, inds[i].name, x => args(p, i + 1, Ext([inds[i].name,x], ctx)));
+    } else {
+      return All(true, "self", "P",
+        // {motive(0)} = (len: Nat) -> {motive(1)}
+        // {motive(1)} = Vector(A, len) -> Type
+        (function motive(i, ctx) {
+          //console.log("motive", i);
+          if (i < inds.length) {
+            return All(false, "", inds[i].name,
+              inds[i].term(ctx),
+              (s,x) => motive(i + 1, Ext([inds[i].name,x], Ext(["",s], ctx))));
+          } else {
+            var slf = Ref(name);
+            for (var P = 0; P < pars.length; ++P) {
+              slf = App(false, slf, get_var(ctx, pars[P].name));
+            }
+            for (var I = 0; I < inds.length; ++I) {
+              slf = App(false, slf, get_var(ctx, inds[I].name));
+            }
+            return All(false, "", "self", slf, (s,x) => Typ());
+          }
+        })(0, ctx),
+        // {ctors(0)} = (nil: {fields(0,0)}) -> {ctors(1)}
+        // {ctors(1)} = (ext: {fields(1,0)}) -> {ctors(2)}
+        // {ctors(2)} = P(len)(self)
+        (s,x) => (function ctors(i, ctx) {
+          //console.log("ctors", i);
+          if (i < ctrs.length) {
+            // {fields(0,0)} = P(Nat.zero)(Vector.nil<A>)
+            // {fields(1,0)} = <len: Nat> ->
+            // {fields(1,1)} = (x: A) ->
+            // {fields(1,2)} = (xs: Vector(A, len)) ->
+            // {fields(1,3)} = P(Nat.succ(len))(Vector.ext<A>(len)(x)(xs))
+            return All(false, "", ctrs[i].name, (function fields(j, ctx) {
+              //console.log("fields", i, j);
+              if (j < ctrs[i].fils.length) {
+                var t_eras = ctrs[i].fils[j].eras;
+                var t_name = ctrs[i].fils[j].name;
+                var t_bind = ctrs[i].fils[j].term(ctx);
+                var t_body = (s,x) => fields(j + 1, Ext([t_name,x], Ext(["",s], ctx)));
+                return All(t_eras, "", t_name, t_bind, t_body);
+              } else {
+                var ret = get_var(ctx, "P");
+                for (var I = 0; I < inds.length; ++I) {
+                  if (I < ctrs[i].inds.length) {
+                    ret = App(ctrs[i].inds[I].eras, ret, ctrs[i].inds[I].term(ctx));
+                  } else {
+                    throw "Insufficient indices for constructor '" + ctrs[i].name + "'.";
+                  }
+                }
+                var slf = Ref(name+"."+ctrs[i].name);
+                for (var P = 0; P < pars.length; ++P) {
+                  slf = App(true, slf, get_var(ctx, pars[P].name));
+                }
+                for (var I = 0; P < inds.length; ++I) {
+                  slf = App(false, slf, get_var(ctx, inds[I].name));
+                }
+                for (var F = 0; F < ctrs[i].fils.length; ++F) {
+                  slf = App(ctrs[i].fils[F].eras, slf, get_var(ctx, ctrs[i].fils[F].name));
+                }
+                ret = App(false, ret, slf);
+                return ret;
+              }
+            })(0, ctx),
+            (s,x) => ctors(i + 1, Ext([ctrs[i].name, s], Ext(["", x], ctx))));
+          } else {
+            var ret = get_var(ctx, "P");
+            for (var I = 0; I < inds.length; ++I) {
+              ret = App(false, ret, get_var(ctx, inds[I].name));
+            }
+            ret = App(false, ret, get_var(ctx, "self"));
+            return ret;
+          }
+        })(0, Ext(["P",x], Ext(["self",s], ctx))));
+    }
+  })(0, 0, Nil());
+};
+
+function adt_ctor_type({name, pars, inds, ctrs}, c) {
+  return (function arg(p, i, f, ctx) {
+    if (p < pars.length) {
+      var t_eras = true;
+      var t_self = "";
+      var t_name = pars[p].name;
+      var t_bind = pars[p].term(ctx);
+      var t_body = (s,x) => arg(p + 1, i, f, Ext([t_name,x],Ext(["",s],ctx)));
+      return All(t_eras, t_self, t_name, t_bind, t_body);
+    } else if (f < ctrs[c].fils.length) {
+      var t_eras = ctrs[c].fils[f].eras;
+      var t_self = "";
+      var t_name = ctrs[c].fils[f].name;
+      var t_bind = ctrs[c].fils[f].term(ctx);
+      var t_body = (s,x) => arg(p, i, f + 1, Ext([t_name,x],Ext(["",s],ctx)));
+      return All(t_eras, t_self, t_name, t_bind, t_body);
+    } else {
+      var type = Ref(name);
+      for (var P = 0; P < pars.length; ++P) {
+        type = App(false, type, get_var(ctx, pars[P].name));
+      }
+      for (var I = 0; I < inds.length; ++I) {
+        type = App(false, type, ctrs[c].inds[I].term(ctx));
+      }
+      return type;
+    }
+  })(0, inds.length, 0, Nil())
+};
+
+function adt_ctor_term({name, pars, inds, ctrs}, c) {
+  return (function arg(p, i, f, ctx) {
+    if (p < pars.length) {
+      var t_eras = true;
+      var t_name = pars[p].name;
+      var t_body = x => arg(p + 1, i, f, Ext([t_name,x],ctx));
+      return Lam(t_eras, t_name, t_body);
+    } else if (f < ctrs[c].fils.length) {
+      var t_eras = ctrs[c].fils[f].eras;
+      var t_name = ctrs[c].fils[f].name;
+      var t_body = x => arg(p, i, f + 1, Ext([t_name,x], ctx));
+      return Lam(t_eras, t_name, t_body);
+    } else {
+      return Lam(true, "P", x => (function opt(k, ctx) {
+        if (k < ctrs.length) {
+          var t_eras = false;
+          var t_name = ctrs[k].name;
+          var t_body = x => opt(k + 1, Ext([t_name,x], ctx));
+          return Lam(t_eras, t_name, t_body);
+        } else {
+          var ret = get_var(ctx, ctrs[c].name);
+          for (var F = 0; F < ctrs[c].fils.length; ++F) {
+            var t_eras = ctrs[c].fils[F].eras;
+            var t_func = ret;
+            var t_argm = get_var(ctx, ctrs[c].fils[F].name);
+            ret = App(t_eras, t_func, t_argm);
+          }
+          return ret;
+        }
+      })(0, Ext(["P",x],ctx)));
+    }
+  })(0, inds.length, 0, Nil());
+}
+
 module.exports = {
   is_space,
   is_name,
@@ -1053,8 +1226,8 @@ module.exports = {
   drop_while,
   drop_spaces,
   next,
+  parse_app_list,
   parse_error,
-  parse_args,
   parse_txt,
   parse_one,
   parse_opt,
