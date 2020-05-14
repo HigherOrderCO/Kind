@@ -143,4 +143,15 @@ function _io_(main = "main", dir, ext, parse) {
   };
 };
 
-module.exports = {load, _fm_, _fmc_, _io_, _js_, _hs_};
+function _x_(main = "main", dir, ext, parse) {
+  var {defs} = load(dir, ".fmc", fm.core.parse);
+  if (!defs[main]) {
+    console.log("Term '" + main + "' not found.");
+  } else {
+    var result = fm.optx.normalize(defs[main].term, defs);
+    console.log(fm.core.stringify(result.term));
+    console.log(JSON.stringify(result.stats));
+  };
+};
+
+module.exports = {load, _fm_, _fmc_, _io_, _js_, _hs_, _x_};

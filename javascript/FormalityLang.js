@@ -437,8 +437,9 @@ function parse_cse(code, indx, err) {
       var nam0 = new_name();
       return [indx, xs => {
         var fn = func(xs);
-        if (name === "" && (fn.ctor === "Var" || fn.ctor === "Ref") && fn.name) {
-          name = fn.name;
+        var vr = reduce(fn, {});
+        if (name === "" && (vr.ctor === "Var" || vr.ctor === "Ref") && vr.indx) {
+          name = vr.indx.split("#")[0];
         }
         if (moti) {
           var tbody = (x) => moti(Ext([name,x],xs));

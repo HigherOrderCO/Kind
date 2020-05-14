@@ -8,7 +8,8 @@
     "fmc": "bin/fmc.js",
     "fmcjs": "bin/fmcjs.js",
     "fmchs": "bin/fmchs.js",
-    "fmcio": "bin/fmcio.js"
+    "fmcio": "bin/fmcio.js",
+    "fmcx": "bin/fmcx.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

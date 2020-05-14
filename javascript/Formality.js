@@ -5,4 +5,6 @@ module.exports = {
   synt: require("./FormalitySynt.js"),
   comp: require("./FormalityComp.js"),
   tojs: require("./FormalityToJS.js"),
+  optx: require("./FormalityOptx.js"),
+  inet: require("./FormalityInet.js"),
 };
