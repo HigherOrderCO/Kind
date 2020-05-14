@@ -1,6 +1,6 @@
 {
   "name": "formality-core",
-  "version": "0.2.93",
+  "version": "0.2.94",
   "description": "Formality language, temporary package for the next version",
   "main": "Formality.js",
   "bin": {

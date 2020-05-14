@@ -749,10 +749,9 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
         try {
           var eq = equal(type, infr, defs, hols, ctx.size);
           if (!eq) {
-            var type0_str = show(normalize(type, {}, hols, false), ctx);
-            var infr0_str = show(normalize(infr, {}, hols, false), ctx);
-            //console.log("...", hols);
             return fail(() => {
+              var type0_str = show(normalize(type, {}, hols, false), ctx);
+              var infr0_str = show(normalize(infr, {}, hols, false), ctx);
               var err_ctx = fold(ctx, Nil(), ({name,type}, ctx) => {
                 var type = normalize(type, {}, hols, false);
                 return Ext({name,type}, ctx);
