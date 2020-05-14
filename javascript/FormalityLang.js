@@ -901,7 +901,11 @@ function stringify_trm(term) {
         var bind = stringify_trm(term.bind);
         var rpar = term.name === "" ? "" : (term.eras ? ">" : ")");
         var body = stringify_trm(term.body(Var(self+"#"), Var(name+"#")));
-        return self+lpar+name+colo+bind+rpar+" -> "+body;
+        if (term.bind.ctor === "All" && name === "") {
+          return self+lpar+name+colo+"("+bind+")"+rpar+" -> "+body;
+        } else {
+          return self+lpar+name+colo+bind+rpar+" -> "+body;
+        }
       case "Lam":
         var name = term.name;
         var lpar = term.eras ? "<" : "(";
