@@ -747,15 +747,16 @@ function parse(code, indx = 0) {
       // Parses function definitions
       } else {
         chain(parse_nam(code, next(code, indx), 0, true),           (indx, name) =>
+        chain(parse_bds(code, next(code, indx), false),             (indx, bnds) =>
         chain(parse_txt(code, next(code, indx), ":", true),         (indx, skip) =>
         chain(parse_trm(code, next(code, indx), true),              (indx, type) =>
         chain(parse_trm(code, next(code, indx), true),              (indx, term) => {
           defs[name] = {
-            type: type(Nil()),
-            term: term(Nil())
+            type: def_type(bnds, type),
+            term: def_term(bnds, term),
           };
           parse_defs(code, indx);
-        }))));
+        })))));
       };
       } catch (e) { console.log(e) }
     };
@@ -1219,7 +1220,35 @@ function adt_ctor_term({name, pars, inds, ctrs}, c) {
       })(0, Ext(["P",x],ctx)));
     }
   })(0, inds.length, 0, Nil());
-}
+};
+
+function def_type(bnds, type) {
+  return (function go(i, ctx) {
+    if (i < bnds.length) {
+      let t_eras = bnds[i].eras;
+      let t_self = "";
+      let t_name = bnds[i].name;
+      let t_type = bnds[i].term(ctx);
+      let t_body = (s,x) => go(i+1, Ext([t_name,x],Ext(["",s],ctx)));
+      return All(t_eras, t_self, t_name, t_type, t_body);
+    } else {
+      return type(ctx);
+    };
+  })(0, Nil());
+};
+
+function def_term(bnds, term) {
+  return (function go(i, ctx) {
+    if (i < bnds.length) {
+      let t_eras = bnds[i].eras;
+      let t_name = bnds[i].name;
+      let t_body = x => go(i+1, Ext([t_name,x],ctx));
+      return Lam(t_eras, t_name, t_body);
+    } else {
+      return term(ctx);
+    };
+  })(0, Nil());
+};
 
 module.exports = {
   is_space,
