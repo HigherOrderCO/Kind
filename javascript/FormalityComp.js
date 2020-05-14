@@ -116,7 +116,7 @@ function infer(term, defs, ctx = fmc.Nil()) {
       var expr_cmp = infer(term.expr, defs, ctx);
       var expr_var = fmc.Ann(true, term.dups ? fmc.Var(term.name+"#"+(ctx.size+1)) : term.expr, expr_cmp.type);
       var body_ctx = fmc.Ext({name:term.name,type:expr_var.type}, ctx);
-      var body_cod = infer(term.body(expr_var), defs, body_ctx);
+      var body_cmp = infer(term.body(expr_var), defs, body_ctx);
       return {
         comp: term.dups ? Let(term.name, expr_cmp.comp, body_cmp.comp) : body_cmp.comp,
         //code: "("+make_name(term.name)+"=>"+body_cmp.code+")("+expr_comp.code+")",
