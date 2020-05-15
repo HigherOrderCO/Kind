@@ -33,7 +33,7 @@ function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
   return result;
 };
 
-function _fm_(main = "main", dir, ext, parse = fm.lang.parse, show = fm.lang.stringify, check = fm.synt.typesynth, norm = fm.synt.normalize) {
+function _fm_(main = "main", dir, ext = ".fm", parse = fm.lang.parse, show = fm.lang.stringify, check = fm.synt.typesynth, norm = fm.synt.normalize) {
   var exit_code = main === "--github" ? 1 : 0;
   var {defs, files} = load(dir, ext, parse, exit_code);
   var synt = {};
@@ -76,21 +76,23 @@ function _fm_(main = "main", dir, ext, parse = fm.lang.parse, show = fm.lang.str
   };
 
   // If there is no error nor unresolved equation, write `.fmc` file
-  if (errors.length === 0) {
-    var fmc_code = "";
+  if (errors.length === 0 && ext === ".fm") {
+    if (!fs.existsSync(".fmc")) fs.mkdirSync(".fmc");
+    if (!fs.existsSync(".fml")) fs.mkdirSync(".fml");
     for (var name in synt) {
-      fmc_code += name + ": ";
-      fmc_code += fm.synt.stringify(synt[name].type) + "\n  ";
-      fmc_code += fm.synt.stringify(synt[name].term) + "\n\n";
+      var code = "";
+      code += name + ": ";
+      code += fm.synt.stringify(synt[name].type) + "\n  ";
+      code += fm.synt.stringify(synt[name].term) + "\n\n";
+      fs.writeFileSync(".fmc/"+name+".fmc", code);
     };
-    fs.writeFileSync(".fmc", fmc_code);
-    var fm_code = "";
     for (var name in synt) {
-      fm_code += name + ": ";
-      fm_code += fm.lang.stringify(synt[name].type) + "\n  ";
-      fm_code += fm.lang.stringify(synt[name].term) + "\n\n";
+      var code = "";
+      code += name + ": ";
+      code += fm.lang.stringify(synt[name].type) + "\n  ";
+      code += fm.lang.stringify(synt[name].term) + "\n\n";
+      fs.writeFileSync(".fml/"+name+".fml", code);
     };
-    fs.writeFileSync(".fml", fm_code);
   };
 
   // If user asked to evaluate main, do it
