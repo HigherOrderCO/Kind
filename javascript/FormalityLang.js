@@ -953,7 +953,9 @@ function stringify_ctx(ctx, text = "") {
     case "Ext":
       var name = ctx.head.name;
       var type = stringify(ctx.head.type, ctx.tail);
-      var text = "- " + name + " : " + type + "\n" + text;
+      if (name.length > 0) {
+        var text = "- " + name + " : " + type + "\n" + text;
+      }
       return stringify_ctx(ctx.tail, text);
       return ;
     case "Nil":
