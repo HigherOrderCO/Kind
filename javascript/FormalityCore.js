@@ -389,7 +389,7 @@ function typeinfer(term, defs, show = stringify, ctx = Nil(), locs = null) {
       if (got) {
         return got.type;
       } else {
-        throw Err(locs, ctx, "Undefined reference '" + term.name + "'.");
+        throw () => Err(locs, ctx, "Undefined reference '" + term.name + "'.");
       }
     case "Typ":
       return Typ();
@@ -402,11 +402,11 @@ function typeinfer(term, defs, show = stringify, ctx = Nil(), locs = null) {
           typecheck(term.argm, func_typ.bind, defs, show, ctx);
           var term_typ = func_typ.body(self_var, name_var);
           if (func_typ.ctor === "All" && term.eras !== func_typ.eras) {
-            throw Err(locs, ctx, "Mismatched erasure.");
+            throw () => Err(locs, ctx, "Mismatched erasure.");
           };
           return term_typ;
         default:
-          throw Err(locs, ctx, "Non-function application.");
+          throw () => Err(locs, ctx, "Non-function application.");
       };
     case "Let":
       var expr_typ = typeinfer(term.expr, defs, show, ctx);
@@ -431,7 +431,7 @@ function typeinfer(term, defs, show = stringify, ctx = Nil(), locs = null) {
       var locs = {from: term.from, upto: term.upto};
       return typeinfer(term.expr, defs, show, ctx, locs);
   }
-  throw Err(locs, ctx, "Can't infer type.");
+  throw () => Err(locs, ctx, "Can't infer type.");
 };
 
 function typecheck(term, type, defs, show = stringify, ctx = Nil(), locs = null) {
@@ -443,12 +443,12 @@ function typecheck(term, type, defs, show = stringify, ctx = Nil(), locs = null)
         var name_var = Ann(true, Var(term.name+"#"+(ctx.size+1)), typv.bind);
         var body_typ = typv.body(self_var, name_var);
         if (term.eras !== typv.eras) {
-          throw Err(locs, ctx, "Type mismatch.");
+          throw () => Err(locs, ctx, "Type mismatch.");
         };
         var body_ctx = Ext({name:term.name,type:name_var.type}, ctx);
         typecheck(term.body(name_var), body_typ, defs, show, body_ctx);
       } else {
-        throw Err(locs, ctx, "Lambda has a non-function type.");
+        throw () => Err(locs, ctx, "Lambda has a non-function type.");
       }
       break;
     case "Let":
@@ -467,7 +467,7 @@ function typecheck(term, type, defs, show = stringify, ctx = Nil(), locs = null)
       if (!eq) {
         var type0_str = show(normalize(type, {}, true), ctx);
         var infr0_str = show(normalize(infr, {}, true), ctx);
-        throw Err(locs, ctx,
+        throw () => Err(locs, ctx,
           "Found type... \x1b[2m"+infr0_str+"\x1b[0m\n" +
           "Instead of... \x1b[2m"+type0_str+"\x1b[0m");
       }

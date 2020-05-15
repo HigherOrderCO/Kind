@@ -56,9 +56,8 @@ function _fm_(main = "main", dir, ext = ".fm", parse = fm.lang.parse, show = fm.
       console.log(show_name + ": \x1b[2m" + show(type) + "\x1b[0m");
       synt[name] = {term, type};
     } catch (err) {
-      if (typeof err === "function") err = err();
       console.log(show_name + " : " + "\x1b[31merror\x1b[0m");
-      errors.push([name, err]);
+      errors.push([name, err()]);
     }
   };
   console.log("");
