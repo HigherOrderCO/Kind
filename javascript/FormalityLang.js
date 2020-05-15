@@ -1013,6 +1013,7 @@ function highlight_code(code, from, to) {
 };
 
 function stringify_err(err, code) {
+  var code = code[code.length-1] !== "\n" ? code+"\n" : code;
   var index = 0;
   if (!err.ctx) {
     if (__dirname.indexOf("vic/dev") !== -1) {
