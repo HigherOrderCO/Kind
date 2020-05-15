@@ -432,21 +432,13 @@ function parse_cse(code, indx, err) {
         var [indx, moti] = parsed_moti;
         var [indx, skip] = parse_txt(code, next(code, indx), ";", err);
       } else {
-        var moti = null;
+        var nam0 = new_name();
+        var moti = (xs) => {
+          return hole(nam0, xs);
+        };
       }
-      var nam0 = new_name();
       return [indx, xs => {
-        var fn = func(xs);
-        var vr = reduce(fn, {});
-        if (name === "" && (vr.ctor === "Var" || vr.ctor === "Ref") && vr.indx) {
-          name = vr.indx.split("#")[0];
-        }
-        if (moti) {
-          var tbody = (x) => moti(Ext([name,x],xs));
-        } else {
-          var tbody = (x) => hole(nam0, Ext([name,x],xs));
-        }
-        return Loc(from, indx, App(true, func(xs), Lam(false, name, tbody)));
+        return Loc(from, indx, App(true, func(xs), moti(xs)));
       }];
     }))))));
 };
