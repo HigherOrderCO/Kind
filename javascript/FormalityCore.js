@@ -325,8 +325,8 @@ function hash(term, dep = 0) {
 
 // Are two terms equal?
 function equal(a, b, defs, dep = 0, seen = {}) {
-  let a1 = reduce(a, defs);
-  let b1 = reduce(b, defs);
+  let a1 = reduce(a, defs, true);
+  let b1 = reduce(b, defs, true);
   var ah = hash(a1);
   var bh = hash(b1);
   var id = ah + "==" + bh;
@@ -465,8 +465,8 @@ function typecheck(term, type, defs, show = stringify, ctx = Nil(), locs = null)
       var infr = typeinfer(term, defs, show, ctx);
       var eq = equal(type, infr, defs, ctx.size);
       if (!eq) {
-        var type0_str = show(normalize(type, {}), ctx);
-        var infr0_str = show(normalize(infr, {}), ctx);
+        var type0_str = show(normalize(type, {}, true), ctx);
+        var infr0_str = show(normalize(infr, {}, true), ctx);
         throw Err(locs, ctx,
           "Found type... \x1b[2m"+infr0_str+"\x1b[0m\n" +
           "Instead of... \x1b[2m"+type0_str+"\x1b[0m");

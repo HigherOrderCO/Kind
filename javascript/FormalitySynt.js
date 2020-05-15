@@ -419,8 +419,8 @@ function hash(term, dep = 0) {
 
 // Are two terms equal?
 function equal(a, b, defs, hols, dep = 0, rec = {}) {
-  let a1 = reduce(a, defs, hols, false);
-  let b1 = reduce(b, defs, hols, false);
+  let a1 = reduce(a, defs, hols, true);
+  let b1 = reduce(b, defs, hols, true);
   var ah = hash(a1);
   var bh = hash(b1);
   var id = ah + "==" + bh;
@@ -750,10 +750,10 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
           var eq = equal(type, infr, defs, hols, ctx.size);
           if (!eq) {
             return fail(() => {
-              var type0_str = show(normalize(type, {}, hols, false), ctx);
-              var infr0_str = show(normalize(infr, {}, hols, false), ctx);
+              var type0_str = show(normalize(type, {}, hols, true), ctx);
+              var infr0_str = show(normalize(infr, {}, hols, true), ctx);
               var err_ctx = fold(ctx, Nil(), ({name,type}, ctx) => {
-                var type = normalize(type, {}, hols, false);
+                var type = normalize(type, {}, hols, true);
                 return Ext({name,type}, ctx);
               });
               return Err(locs, err_ctx,
