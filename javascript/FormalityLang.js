@@ -715,7 +715,6 @@ function parse(code, indx = 0) {
     if (indx === code.length) {
       return;
     } else {
-      try {
       // Parses datatype definitions
       var parsed_adt = parse_adt(code, indx, true);
       if (parsed_adt) {
@@ -751,7 +750,6 @@ function parse(code, indx = 0) {
           parse_defs(code, indx);
         })))));
       };
-      } catch (e) { console.log(e) }
     };
   }
   parse_defs(code, indx);
