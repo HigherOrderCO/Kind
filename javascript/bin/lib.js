@@ -1,8 +1,16 @@
 var fs = require("fs");
 var fm = require("./../Formality.js"); 
+var path = require("path");
 function error(msg, exit_code) {
   console.log(msg);
   process.exit(exit_code || 0);
+};
+
+function clear_dir(dir) {
+  var files = fs.readdirSync(dir);
+  for (var file of files) {
+    fs.unlinkSync(path.join(dir, file));
+  };
 };
 
 function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
@@ -12,7 +20,7 @@ function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
   } else {
     var result = {files: {}, defs: {}};
     for (var file of files) {
-      var file_code = fs.readFileSync(file, "utf8");
+      var file_code = fs.readFileSync(path.join(dir, file), "utf8");
       try {
         var file_defs = parse(file_code, 0, file);
       } catch (err) {
@@ -33,7 +41,9 @@ function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
   return result;
 };
 
-function _fm_(main = "main", dir, ext = ".fm", parse = fm.lang.parse, show = fm.lang.stringify, check = fm.synt.typesynth, norm = fm.synt.normalize) {
+function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show = fm.lang.stringify, check = fm.synt.typesynth, norm = fm.synt.normalize) {
+  if (!fs.existsSync(dir) && ext === ".fmc") dir = ".";
+
   var exit_code = main === "--github" ? 1 : 0;
   var {defs, files} = load(dir, ext, parse, exit_code);
   var synt = {};
@@ -78,6 +88,8 @@ function _fm_(main = "main", dir, ext = ".fm", parse = fm.lang.parse, show = fm.
   if (errors.length === 0 && ext === ".fm") {
     if (!fs.existsSync(".fmc")) fs.mkdirSync(".fmc");
     if (!fs.existsSync(".fml")) fs.mkdirSync(".fml");
+    clear_dir(".fmc");
+    clear_dir(".fml");
     for (var name in synt) {
       var code = "";
       code += name + ": ";
@@ -112,11 +124,11 @@ function _fm_(main = "main", dir, ext = ".fm", parse = fm.lang.parse, show = fm.
 };
 
 function _fmc_(main = "main", dir) {
-  _fm_(main, dir, ".fmc", fm.core.parse, fm.core.stringify, fm.core.typecheck, fm.core.normalize);
+  _fm_(main, "./.fmc", ".fmc", fm.core.parse, fm.core.stringify, fm.core.typecheck, fm.core.normalize);
 };
 
 function _js_(main = "main", dir, ext, parse) {
-  var {defs} = load(dir, ".fmc", fm.core.parse);
+  var {defs} = load("./.fmc", ".fmc", fm.core.parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
@@ -136,7 +148,7 @@ function _hs_(main = "main", dir, ext, parse) {
 };
 
 function _io_(main = "main", dir, ext, parse) {
-  var {defs} = load(dir, ".fmc", fm.core.parse);
+  var {defs} = load("./.fmc", ".fmc", fm.core.parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
@@ -145,7 +157,7 @@ function _io_(main = "main", dir, ext, parse) {
 };
 
 function _x_(main = "main", dir, ext, parse) {
-  var {defs} = load(dir, ".fmc", fm.core.parse);
+  var {defs} = load("./.fmc", ".fmc", fm.core.parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {

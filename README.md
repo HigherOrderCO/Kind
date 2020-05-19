@@ -1,47 +1,65 @@
-Formality-Core
-==============
+![](https://raw.githubusercontent.com/moonad/Assets/master/images/formality-banner-white.png)
 
-A lighweight proof language. [Whitepaper.](https://github.com/moonad/Formality-Core/blob/master/Whitepaper.md)
+An lightweight proof-gramming language. It aims to be:
 
-Installation
-------------
+- **Fast:** no garbage-collection, optimal beta-reduction, massively parallel compilers.
 
-Formality-Core has multiple reference implementations. Currently, the easiest to
-install uses JavaScript. First, [install `npm`](https://www.npmjs.com/get-npm)
-in your system. Then, on the command line, type: `npm -g formality-core`. If all
-goes well, the language should be accessible via the `fm` command.
+- **Secure:** a powerful type system capable of proving mathematical theorems.
 
-Using
------
+- **Portable:** the entire language desugars to a 500 lines core type-theory.
 
-To use it, save a `.fm` file. For example, save the file below as `main.fm`:
+Check the [official documentation](DOCUMENTATION.md), browse our [libraries](https://github.com/moonad/moonad) and come hang out with us [on Telegram](https://t.me/formality_lang).
 
-```
-main : <A: Type> -> A -> A
-  <A> (x) x
-```
+## Examples
 
-And type `fm main`. This should output:
+- Adding all numbers of a list:
 
-```
-Type-checking main.fm:
-main : <A: Type> -> A -> A
+    ```haskell
+    List.sum(xs: List(Nat)) : Nat
+      case xs:
+      | Nat.zero;
+      | (head, tail) Nat.add(head, List.sum(tail));
+    ```
 
-All terms check.
+- A proof that negating a bool twice returns the same bool:
 
-Evaluating `main`:
-(x) x
-```
+    ```haskell
+    Bool.double_negation_theorem(b: Bool): Equal(_, Bool.not(Bool.not(b)), b)
+      case b
+      : (b) Equal(_, Bool.not(Bool.not(b)), b);
+      | Equal.to<_, Bool.true>;
+      | Equal.to<_, Bool.false>;
+    ```
 
-You can also compile `.fm` files to JavaScript. First, run `fm` to generate a
-`.fmc`. Then, run `fmcjs main`. You can also compile to Haskell with `fmchs`
-main. You can run a script with `fmcio main`. In this case, `main` must have an
-[IO](https://github.com/moonad/Moonad/blob/master/IO.fmc) type.
+- Extracting the first element of a list statically checked to be non-empty:
 
-Contributing
-------------
+    ```haskell
+    List.safe_head(A: Type, xs: List(A), not_empty: List.not_empty<A>(xs)) : A
+      case xs : (xs) (e: List.not_empty<A>(xs)) -> A;
+      | (ne) Empty.absurd(ne, A);
+      | (x, xs, ne) x;
+      | not_empty;
+    ```
 
-Since Formality-Core is so simple, it doesn't come with built-in functions you
-would expect, and it doesn't have a standard library. But you're welcome to
-clone the [`Moonad` repository](https://github.com/moonad/moonad), where we're
-building several common data structures and algorithms, and contribute!
+TODO: include examples of Python-looking Formality for non-FP people.
+
+TODO: link the upcoming "Why proof languages matter?" Moonad post.
+
+## Usage
+
+1. Install [npm](https://www.npmjs.com/get-npm) in your system.
+
+2. Install the language with `npm i -g formality-lang`.
+
+3. Clone the Moonad libraries: `http://github.com/moonad/moonad`.
+
+4. Enter the directory with `cd moonad`.
+
+5. Type `fm`.
+
+This will type-check every `.fm` file on the `moonad` directory. For more info
+and commands, check the [docs](DOCUMENTATION.md).
+
+---
+
+![Interaction-Net compilation](https://raw.githubusercontent.com/moonad/Assets/master/images/inet-simulation.gif)
