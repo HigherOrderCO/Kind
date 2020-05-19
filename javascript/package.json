@@ -1,7 +1,7 @@
 {
-  "name": "formality-core",
-  "version": "0.2.105",
-  "description": "Formality language, temporary package for the next version",
+  "name": "formality-lang",
+  "version": "0.4.2",
+  "description": "The Formality proof language",
   "main": "Formality.js",
   "bin": {
     "fm": "bin/fm.js",

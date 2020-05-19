@@ -252,6 +252,50 @@ function parse_let(code, indx, err = false) {
     }])))))));
 };
 
+// Parses a monadic application of 4 args, `use a b c = x; y` ~> `x((a) (b) (c) (d) y)`
+function parse_us4(code, indx, err = false) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, next(code, indx), "use "), (indx, skip) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam0) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam1) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam2) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam3) =>
+    chain(parse_txt(code, next(code, indx), "="),    (indx, skip) =>
+    chain(parse_trm(code, indx, err),                (indx, func) =>
+    chain(parse_trm(code, indx, err),                (indx, body) =>
+    [indx, xs => {
+      return Loc(from, indx,
+        App(false, func(xs),
+        Lam(false, nam0, (x) =>
+        Lam(false, nam1, (y) =>
+        Lam(false, nam2, (z) =>
+        Lam(false, nam3, (w) =>
+        body(Ext([nam3,w], Ext([nam2,z], Ext([nam1,y], Ext([nam0,x], xs)))))))))));
+    }])))))))));
+};
+
+// Parses a monadic application of 3 args, `use a b c = x; y` ~> `x((a) (b) (c) y)`
+function parse_us3(code, indx, err = false) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, next(code, indx), "use "), (indx, skip) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam0) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam1) =>
+    chain(parse_nam(code, next(code, indx), 0),      (indx, nam2) =>
+    chain(parse_txt(code, next(code, indx), "="),    (indx, skip) =>
+    chain(parse_trm(code, indx, err),                (indx, func) =>
+    chain(parse_trm(code, indx, err),                (indx, body) =>
+    [indx, xs => {
+      return Loc(from, indx,
+        App(false, func(xs),
+        Lam(false, nam0, (x) =>
+        Lam(false, nam1, (y) =>
+        Lam(false, nam2, (z) =>
+        body(Ext([nam2,z], Ext([nam1,y], Ext([nam0,x], xs)))))))));
+    }]))))))));
+};
+
 // Parses a monadic application of 2 args, `use a b = x; y` ~> `x((a) (b) y)`
 function parse_us2(code, indx, err = false) {
   var from = next(code, indx);
@@ -443,6 +487,89 @@ function parse_cse(code, indx, err) {
     }))))));
 };
 
+function parse_ite(code, indx, err = false) {
+  var from = next(code, indx);
+  return (
+    chain(parse_txt(code, next(code, indx), "if ", false), (indx, skip) =>
+    chain(parse_trm(code, next(code, indx), err), (indx, cond) =>
+    chain(parse_opt(code, next(code, indx), "then", err), (indx, skip) =>
+    chain(parse_trm(code, next(code, indx), err), (indx, ctru) =>
+    chain(parse_opt(code, next(code, indx), "else", err), (indx, skip) =>
+    chain(parse_trm(code, next(code, indx), err), (indx, cfal) => {
+      var nam0 = new_name();
+      return [indx, xs => {
+        var term = cond(xs);
+        var term = App(true, term, Lam(false, "", x => hole(nam0, Ext(["",x],xs))));
+        var term = App(false, term, ctru(xs));
+        var term = App(false, term, cfal(xs));
+        return term;
+      }];
+    })))))));
+};
+
+function parse_don(code, indx, err = false) {
+  var from = next(code, indx);
+  function parse_stt(bind, done) {
+    return function parse_stt(code, indx, err) {
+      return choose([
+        () => // var x = expr; body
+          chain(parse_txt(code, next(code, indx), "var ", false), (indx, skip) =>
+          chain(parse_nam(code, next(code, indx), 0, err), (indx, name) =>
+          chain(parse_txt(code, next(code, indx), "=", err), (indx, skip) =>
+          chain(parse_trm(code, next(code, indx), err), (indx, expr) =>
+          chain(parse_txt(code, next(code, indx), ";", err), (indx, skip) =>
+          chain(parse_stt(code, next(code, indx), err), (indx, body) => {
+            var nam0 = new_name();
+            var nam1 = new_name();
+            return [indx, xs => {
+              var term = bind(xs);
+              var term = App(true, term, hole(nam0, xs));
+              var term = App(true, term, hole(nam1, xs));
+              var term = App(false, term, expr(xs));
+              var term = App(false, term, Lam(false, name, (x) => body(Ext([name,x],xs))));
+              return term;
+            }];
+          })))))),
+        () => // return expr;
+          chain(parse_txt(code, next(code, indx), "return ", false), (indx, skip) =>
+          chain(parse_trm(code, next(code, indx), err), (indx, expr) =>
+          chain(parse_txt(code, next(code, indx), ";", err), (indx, skip) => {
+            var nam0 = new_name();
+            return [indx, xs => {
+              var term = done(xs);
+              var term = App(true, term, hole(nam0, xs));
+              var term = App(false, term, expr(xs));
+              return term;
+            }];
+          }))),
+        () => // expr; body
+          chain(parse_trm(code, next(code, indx), err), (indx, expr) =>
+          chain(parse_txt(code, next(code, indx), ";", err), (indx, skip) =>
+          chain(parse_stt(code, next(code, indx), err), (indx, body) => {
+            var nam0 = new_name();
+            var nam1 = new_name();
+            return [indx, xs => {
+              var term = bind(xs);
+              var term = App(true, term, hole(nam0, xs));
+              var term = App(true, term, hole(nam1, xs));
+              var term = App(false, term, expr(xs));
+              var term = App(false, term, Lam(false, "", (x) => body(Ext(["",x],xs))));
+              return term;
+            }];
+          }))),
+      ]);
+    };
+  };
+  return (
+    chain(parse_txt(code, next(code, indx), "do "), (indx, skip) =>
+    chain(parse_trm(code, next(code, indx), err), (indx, bind) =>
+    chain(parse_trm(code, next(code, indx), err), (indx, done) =>
+    chain(parse_txt(code, next(code, indx), "{", err), (indx, skip) =>
+    chain(parse_stt(bind,done)(code, next(code, indx), err), (indx, term) =>
+    chain(parse_txt(code, next(code, indx), "}", err), (indx, skip) =>
+    [indx, xs => Loc(from, indx, term(xs))])))))));
+};
+
 // Parses variables, `<name>`
 function parse_var(code, indx, err = false) {
   var from = next(code, indx);
@@ -474,7 +601,6 @@ function parse_ah1(code, indx, from, func, err) {
       return [indx, xs => Loc(from, indx, App(true, func(xs), hole(nam0, xs)))]
     }));
 };
-
 
 // Parses a application `f(x,y,z) ~> f(x)(y)(z)`
 function parse_app(code, indx, from, func, err) {
@@ -596,9 +722,11 @@ function parse_trm(code, indx = 0, err) {
     () => parse_all(code, indx, err),
     () => parse_lam(code, indx, err),
     () => parse_let(code, indx, err),
-    () => parse_us2(code, indx, err),
-    () => parse_us1(code, indx, err),
     () => parse_us0(code, indx, err),
+    () => parse_us1(code, indx, err),
+    () => parse_us2(code, indx, err),
+    () => parse_us3(code, indx, err),
+    () => parse_us4(code, indx, err),
     () => parse_gt1(code, indx, err),
     () => parse_gt2(code, indx, err),
     () => parse_gt3(code, indx, err),
@@ -611,6 +739,8 @@ function parse_trm(code, indx = 0, err) {
     () => parse_hol(code, indx, err),
     () => parse_und(code, indx, err),
     () => parse_cse(code, indx, err),
+    () => parse_ite(code, indx, err),
+    () => parse_don(code, indx, err),
     () => parse_var(code, indx, err),
   ], err);
 
