@@ -688,7 +688,7 @@ function make_chr(chr) {
 
 // Parses a char literal, 'f'
 function parse_chr(code, [indx,tags], err) {
-  var from = next(code, [indx,tags]);
+  var from = next(code, [indx,tags])[0];
   return (
     chain(parse_txt(code, next(code, [indx,tags]), "'"), ([indx,tags], skip) =>
     chain([[indx+1,tags&&Ext(Tag("chr",code[indx]),tags)], code[indx]], ([indx,tags], clit) =>
@@ -699,7 +699,7 @@ function parse_chr(code, [indx,tags], err) {
 
 // Parses a string literal, "foo"
 function parse_str(code, [indx,tags], err) {
-  var from = next(code, [indx,tags]);
+  var from = next(code, [indx,tags])[0];
   return (
     chain(parse_txt(code, next(code, [indx,tags]), "\""), ([indx,tags], skip) =>
     chain((function go([indx,tags], slit) {
@@ -709,7 +709,7 @@ function parse_str(code, [indx,tags], err) {
           var [[indx,tags], slit] = go([indx+1,tags&&Ext(Tag("str",code[indx]),tags)], slit);
           return [[indx,tags], App(false, App(false, Ref("String.cons"), chr), slit)];
         } else {
-          return [[indx+1,code[indx]], Ref("String.nil")];
+          return [[indx+1,tags&&Ext(Tag("txt",'"'),tags)], Ref("String.nil")];
         }
       } else if (err) {
         parse_error(code, indx, "string literal", true);
@@ -869,7 +869,7 @@ function parse_adt(code, [indx,tags], err) {
 
 
 // Parses a defs
-function parse(code, indx = 0, tags = Nil()) {
+function parse(code, indx = 0, tags_list = Nil()) {
   //var LOG = x => console.log(require("util").inspect(x, {showHidden: false, depth: null}));
   var defs = {};
   function parse_defs(code, [indx,tags]) {
@@ -878,6 +878,7 @@ function parse(code, indx = 0, tags = Nil()) {
       return [indx,tags];
     } else {
       // Parses datatype definitions
+      
       var parsed_adt = parse_adt(code, [indx,tags], true);
       if (parsed_adt) {
         var [[indx,tags], adt] = parsed_adt;
@@ -911,20 +912,28 @@ function parse(code, indx = 0, tags = Nil()) {
       };
     };
   };
-  var [indx,tags] = parse_defs(code, [indx,tags]);
-  for (var def in defs) {
-    // This is an innofensive hack to improve tags. Since the parser doesn't
-    // track bound names and, instead, returns a `Ctx -> Term` which then add
-    // the names, we don't have the information of what names are variables and
-    // what names are references. To distinguish without complicating the
-    // parser, I just mutate the tag of a name inside `parse_var`, but, for the
-    // mutation to happen, we must make one recursive pass before returning the
-    // term, so we just call `synt_stringify` here. This mutates to tag of
-    // variables and references from `["nam",name]` to `["var",name]` or
-    // `["ref",name]`, allowing hyperlinking on moonad.org. Since tags aren't
-    // essential, this can be just ignored in pure implementations.
-    synt_stringify(defs[def].term);
-    synt_stringify(defs[def].type);
+  var [indx,tags_list] = parse_defs(code, [indx,tags_list]);
+  var tags = [];
+  if (tags_list) {
+    for (var def in defs) {
+      // This is an innofensive hack to improve tags. Since the parser doesn't
+      // track bound names and, instead, returns a `Ctx -> Term` which then add
+      // the names, we don't have the information of what names are variables and
+      // what names are references. To distinguish without complicating the
+      // parser, I just mutate the tag of a name inside `parse_var`, but, for the
+      // mutation to happen, we must make one recursive pass before returning the
+      // term, so we just call `synt_stringify` here. This mutates to tag of
+      // variables and references from `["nam",name]` to `["var",name]` or
+      // `["ref",name]`, allowing hyperlinking on moonad.org. Since tags aren't
+      // essential, this can be just ignored in pure implementations.
+      synt_stringify(defs[def].term);
+      synt_stringify(defs[def].type);
+    }
+    while (tags_list.ctor === "Ext") {
+      tags.push(tags_list.head);
+      tags_list = tags_list.tail;
+    }
+    tags.reverse();
   }
   return {defs, indx, tags};
 };

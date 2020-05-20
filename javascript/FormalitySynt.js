@@ -17,7 +17,7 @@ const Hol = (name,vals)                => ({ctor:"Hol",name,vals});
 // List
 // ====
 
-const Nil = ()          => ({ctor:"Nil",size: 0});
+const Nil = ()          => ({ctor:"Nil",size:0});
 const Ext = (head,tail) => ({ctor:"Ext",head,tail,size:tail.size+1});
 
 // Finds first value satisfying `cond` in a list
