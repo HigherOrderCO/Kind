@@ -80,7 +80,7 @@ function stringify(term) {
       var clos = term.eras ? ">" : ")";
       return open + func + " " + argm + clos;
     case "Let":
-      var dups = term.dups ? "@" : "$";
+      var dups = term.dups ? "$" : "@";
       var name = term.name;
       var expr = stringify(term.expr);
       var body = stringify(term.body(Var(term.name+"#")));
@@ -159,7 +159,7 @@ function parse(code, indx) {
         return ctx => App(eras, func(ctx), argm(ctx));
       case "$":
       case "@":
-        var dups = chr === "@";
+        var dups = chr === "$";
         var name = parse_name();
         var skip = parse_char("=");
         var expr = parse_term();
@@ -197,7 +197,7 @@ function parse(code, indx) {
     }
   };
   parse_defs();
-  return defs;
+  return {defs};
 };
 
 // Evaluation

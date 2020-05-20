@@ -22,7 +22,8 @@ function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
     for (var file of files) {
       var file_code = fs.readFileSync(path.join(dir, file), "utf8");
       try {
-        var file_defs = parse(file_code, 0, file);
+        var parsed = parse(file_code,0,null);
+        var file_defs = parsed.defs;
       } catch (err) {
         error("\n\x1b[1mInside '\x1b[4m"+file+"\x1b[0m'"
              + "\x1b[1m:\x1b[0m\n" + err
