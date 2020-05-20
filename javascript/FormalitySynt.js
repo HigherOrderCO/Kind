@@ -53,47 +53,106 @@ function fold(list, nil, cons) {
 // Syntax
 // ======
 
+//function stringify(term) {
+//  switch (term.ctor) {
+//    case "Var":
+//      return term.indx.split("#")[0];
+//    case "Ref":
+//      return term.name;
+//    case "Typ":
+//      return "*";
+//    case "All":
+//      var bind = term.eras ? "∀" : "Π";
+//      var self = term.self;
+//      var name = term.name;
+//      var type = stringify(term.bind);
+//      var body = stringify(term.body(Var(term.self+"#"), Var(term.name+"#")));
+//      return bind + self + "(" + name + ":" + type + ") " + body;
+//    case "Lam":
+//      var bind = term.eras ? "Λ" : "λ";
+//      var name = term.name;
+//      var body = stringify(term.body(Var(term.name+"#")));
+//      return bind + name + " " + body;
+//    case "App":
+//      var open = term.eras ? "<" : "(";
+//      var func = stringify(term.func);
+//      var argm = stringify(term.argm);
+//      var clos = term.eras ? ">" : ")";
+//      return open + func + " " + argm + clos;
+//    case "Let":
+//      var dups = term.dups ? "@" : "$";
+//      var name = term.name;
+//      var expr = stringify(term.expr);
+//      var body = stringify(term.body(Var(term.name+"#")));
+//      return dups + name + "=" + expr + ";" + body;
+//    case "Ann":
+//      var type = stringify(term.type);
+//      var expr = stringify(term.expr);
+//      return ":" + type + " " + expr;
+//    case "Loc":
+//      return stringify(term.expr);
+//    case "Hol":
+//      return "?"+term.name;
+//  };
+//};
+
 function stringify(term) {
-  switch (term.ctor) {
-    case "Var":
-      return term.indx.split("#")[0];
-    case "Ref":
-      return term.name;
-    case "Typ":
-      return "*";
-    case "All":
-      var bind = term.eras ? "∀" : "Π";
-      var self = term.self;
-      var name = term.name;
-      var type = stringify(term.bind);
-      var body = stringify(term.body(Var(term.self+"#"), Var(term.name+"#")));
-      return bind + self + "(" + name + ":" + type + ") " + body;
-    case "Lam":
-      var bind = term.eras ? "Λ" : "λ";
-      var name = term.name;
-      var body = stringify(term.body(Var(term.name+"#")));
-      return bind + name + " " + body;
-    case "App":
-      var open = term.eras ? "<" : "(";
-      var func = stringify(term.func);
-      var argm = stringify(term.argm);
-      var clos = term.eras ? ">" : ")";
-      return open + func + " " + argm + clos;
-    case "Let":
-      var dups = term.dups ? "@" : "$";
-      var name = term.name;
-      var expr = stringify(term.expr);
-      var body = stringify(term.body(Var(term.name+"#")));
-      return dups + name + "=" + expr + ";" + body;
-    case "Ann":
-      var type = stringify(term.type);
-      var expr = stringify(term.expr);
-      return ":" + type + " " + expr;
-    case "Loc":
-      return stringify(term.expr);
-    case "Hol":
-      return "?"+term.name;
+  function go(term) {
+    switch (term.ctor) {
+      case "Var":
+        return done(term.indx.split("#")[0]);
+      case "Ref":
+        return done(term.name);
+      case "Typ":
+        return done("*");
+      case "All":
+        var bind = term.eras ? "∀" : "Π";
+        var self = term.self;
+        var name = term.name;
+        var self_var = Var(term.self+"#");
+        var name_var = Var(term.name+"#");
+        return (
+          deep([[go, [term.bind]]], (type) =>
+          deep([[go, [term.body(self_var, name_var)]]], (body) =>
+          done(bind + self + "(" + name + ":" + type + ") " + body))));
+      case "Lam":
+        var bind = term.eras ? "Λ" : "λ";
+        var name = term.name;
+        var name_var = Var(term.name+"#");
+        return (
+          deep([[go, [term.body(name_var)]]], (body) =>
+          done(bind + name + " " + body)));
+      case "App":
+        var open = term.eras ? "<" : "(";
+        var clos = term.eras ? ">" : ")";
+        return (
+          deep([[go, [term.func]]], (func) =>
+          deep([[go, [term.argm]]], (argm) =>
+          done(open + func + " " + argm + clos))));
+      case "Let":
+        var dups = term.dups ? "@" : "$";
+        var name = term.name;
+        var name_var = Var(term.name+"#")
+        return (
+          deep([[go, [term.expr]]], (expr) =>
+          deep([[go, [term.body(name_var)]]], (body) =>
+          done(dups + name + "=" + expr + ";" + body))));
+      case "Ann":
+        return (
+          deep([[go, [term.type]]], (type) =>
+          deep([[go, [term.expr]]], (expr) =>
+          done(":" + type + " " + expr))));
+      case "Loc":
+        return (
+          deep([[go, [term.expr]]], (expr) =>
+          done(expr)));
+      case "Hol":
+        return done("?"+term.name);
+    }
   };
+  var str = exec(() => go(term));
+  console.log("string", str);
+  return str;
 };
 
 function parse(code, indx) {
@@ -371,7 +430,6 @@ function canonicalize(term, hols = {}) {
       }
   };
 };
-
 
 // Equality
 // ========

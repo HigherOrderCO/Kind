@@ -670,15 +670,19 @@ function parse_str(code, indx, err) {
   var from = next(code, indx);
   return (
     chain(parse_txt(code, next(code, indx), "\""), (indx, skip) =>
-    chain((function go(indx, slit) {
+    chain((function go(indx) {
       if (indx < code.length) {
-        if (code[indx] !== "\"") {
-          var chr = make_chr(code[indx]);
-          var [indx, slit] = go(indx + 1, slit);
-          return [indx, App(false, App(false, Ref("String.cons"), chr), slit)];
-        } else {
-          return [indx+1, Ref("String.nil")];
-        }
+        var acc = []
+        while (code[indx] !== "\"") {
+          acc.push(code[indx]);
+          indx++;
+        };
+        var slit = Ref("String.nil")
+        while (acc.length > 0) {
+          var chr = make_chr(acc.pop());
+          slit = App(false, App(false, Ref("String.cons"), chr), slit);
+        };
+        return [indx+1, slit];
       } else if (err) {
         parse_error(code, indx, "string literal", true);
       } else {
