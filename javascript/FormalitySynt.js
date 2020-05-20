@@ -17,7 +17,7 @@ const Hol = (name,vals)                => ({ctor:"Hol",name,vals});
 // List
 // ====
 
-const Nil = ()          => ({ctor:"Nil",size: 0});
+const Nil = ()          => ({ctor:"Nil",size:0});
 const Ext = (head,tail) => ({ctor:"Ext",head,tail,size:tail.size+1});
 
 // Finds first value satisfying `cond` in a list
@@ -151,7 +151,6 @@ function stringify(term) {
     }
   };
   var str = exec(() => go(term));
-  console.log("string", str);
   return str;
 };
 
@@ -218,7 +217,7 @@ function parse(code, indx) {
         return ctx => App(eras, func(ctx), argm(ctx));
       case "$":
       case "@":
-        var dups = chr === "@";
+        var dups = chr === "$";
         var name = parse_name();
         var skip = parse_char("=");
         var expr = parse_term();
@@ -256,7 +255,7 @@ function parse(code, indx) {
     }
   };
   parse_defs();
-  return defs;
+  return {defs};
 };
 
 // Evaluation

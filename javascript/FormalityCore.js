@@ -138,7 +138,7 @@ function parse(code, indx) {
         return ctx => App(eras, func(ctx), argm(ctx));
       case "$":
       case "@":
-        var dups = chr === "@";
+        var dups = chr === "$";
         var name = parse_name();
         var skip = parse_char("=");
         var expr = parse_term();
@@ -173,7 +173,7 @@ function parse(code, indx) {
     }
   };
   parse_defs();
-  return defs;
+  return {defs};
 };
 
 // Evaluation

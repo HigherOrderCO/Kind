@@ -6,10 +6,12 @@ function error(msg, exit_code) {
   process.exit(exit_code || 0);
 };
 
-function clear_dir(dir) {
+function clear_dir(dir, ext) {
   var files = fs.readdirSync(dir);
   for (var file of files) {
-    fs.unlinkSync(path.join(dir, file));
+    if (file.slice(-ext.length) === ext) {
+      fs.unlinkSync(path.join(dir, file));
+    }
   };
 };
 
@@ -22,7 +24,8 @@ function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
     for (var file of files) {
       var file_code = fs.readFileSync(path.join(dir, file), "utf8");
       try {
-        var file_defs = parse(file_code, 0, file);
+        var parsed = parse(file_code,0);
+        var file_defs = parsed.defs;
       } catch (err) {
         error("\n\x1b[1mInside '\x1b[4m"+file+"\x1b[0m'"
              + "\x1b[1m:\x1b[0m\n" + err
@@ -88,8 +91,8 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
   if (errors.length === 0 && ext === ".fm") {
     if (!fs.existsSync(".fmc")) fs.mkdirSync(".fmc");
     if (!fs.existsSync(".fml")) fs.mkdirSync(".fml");
-    clear_dir(".fmc");
-    clear_dir(".fml");
+    clear_dir(".fmc", ".fmc");
+    clear_dir(".fml", ".fml");
     for (var name in synt) {
       var code = "";
       code += name + ": ";
