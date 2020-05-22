@@ -557,5 +557,4 @@ Docs.self_equal_theorem(b: Bool): Bool.IsTrue(Bool.eql(b, b))
 
 ---
 
->>>>>>> 24b14faa81a59f72c52422bc40510716fb5f0c73
 ![Interaction-Net compilation](https://raw.githubusercontent.com/moonad/Assets/master/images/inet-simulation.gif)
