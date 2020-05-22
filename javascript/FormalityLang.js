@@ -704,13 +704,19 @@ function parse_str(code, [indx,tags], err) {
     chain(parse_txt(code, next(code, [indx,tags]), "\""), ([indx,tags], skip) =>
     chain((function go([indx,tags], slit) {
       if (indx < code.length) {
-        if (code[indx] !== "\"") {
-          var chr = make_chr(code[indx]);
-          var [[indx,tags], slit] = go([indx+1,tags&&Ext(Tag("str",code[indx]),tags)], slit);
-          return [[indx,tags], App(false, App(false, Ref("String.cons"), chr), slit)];
-        } else {
-          return [[indx+1,tags&&Ext(Tag("txt",'"'),tags)], Ref("String.nil")];
-        }
+        var acc = []
+        while (code[indx] !== "\"") {
+          acc.push(code[indx]);
+          indx++;
+        };
+        var slit = Ref("String.nil")
+        var stag = tags&&Ext(Tag("txt",'"'),tags);
+        while (acc.length > 0) {
+          var chr = make_chr(acc.pop());
+          slit = App(false, App(false, Ref("String.cons"), chr), slit);
+          stag = stag&&Ext(Tag("str",code[indx]), stag);
+        };
+        return [[indx+1,stag], slit];
       } else if (err) {
         parse_error(code, indx, "string literal", true);
       } else {

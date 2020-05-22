@@ -53,49 +53,6 @@ function fold(list, nil, cons) {
 // Syntax
 // ======
 
-//function stringify(term) {
-//  switch (term.ctor) {
-//    case "Var":
-//      return term.indx.split("#")[0];
-//    case "Ref":
-//      return term.name;
-//    case "Typ":
-//      return "*";
-//    case "All":
-//      var bind = term.eras ? "∀" : "Π";
-//      var self = term.self;
-//      var name = term.name;
-//      var type = stringify(term.bind);
-//      var body = stringify(term.body(Var(term.self+"#"), Var(term.name+"#")));
-//      return bind + self + "(" + name + ":" + type + ") " + body;
-//    case "Lam":
-//      var bind = term.eras ? "Λ" : "λ";
-//      var name = term.name;
-//      var body = stringify(term.body(Var(term.name+"#")));
-//      return bind + name + " " + body;
-//    case "App":
-//      var open = term.eras ? "<" : "(";
-//      var func = stringify(term.func);
-//      var argm = stringify(term.argm);
-//      var clos = term.eras ? ">" : ")";
-//      return open + func + " " + argm + clos;
-//    case "Let":
-//      var dups = term.dups ? "@" : "$";
-//      var name = term.name;
-//      var expr = stringify(term.expr);
-//      var body = stringify(term.body(Var(term.name+"#")));
-//      return dups + name + "=" + expr + ";" + body;
-//    case "Ann":
-//      var type = stringify(term.type);
-//      var expr = stringify(term.expr);
-//      return ":" + type + " " + expr;
-//    case "Loc":
-//      return stringify(term.expr);
-//    case "Hol":
-//      return "?"+term.name;
-//  };
-//};
-
 function stringify(term) {
   function go(term) {
     switch (term.ctor) {
@@ -143,15 +100,12 @@ function stringify(term) {
           deep([[go, [term.expr]]], (expr) =>
           done(":" + type + " " + expr))));
       case "Loc":
-        return (
-          deep([[go, [term.expr]]], (expr) =>
-          done(expr)));
+        return (deep([[go, [term.expr]]], done));
       case "Hol":
         return done("?"+term.name);
     }
   };
-  var str = exec(() => go(term));
-  return str;
+  return (exec(() => go(term)));
 };
 
 function parse(code, indx) {
