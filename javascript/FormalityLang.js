@@ -878,7 +878,6 @@ function parse(code, indx = 0, tags_list = Nil()) {
       return [indx,tags];
     } else {
       // Parses datatype definitions
-      
       var parsed_adt = parse_adt(code, [indx,tags], true);
       if (parsed_adt) {
         var [[indx,tags], adt] = parsed_adt;
@@ -887,8 +886,6 @@ function parse(code, indx = 0, tags_list = Nil()) {
           term: adt_type_term(adt),
         };
         for (var c = 0; c < adt.ctrs.length; ++c) {
-          //console.log(stringify(adt_ctor_type(adt, c)));
-          //console.log(stringify(adt_ctor_term(adt, c)));
           defs[adt.name+"."+adt.ctrs[c].name] = {
             type: adt_ctor_type(adt, c),
             term: adt_ctor_term(adt, c),
@@ -1311,9 +1308,9 @@ function adt_type_term({name, pars, inds, ctrs}) {
                 for (var P = 0; P < pars.length; ++P) {
                   slf = App(true, slf, get_var(ctx, pars[P].name));
                 }
-                for (var I = 0; P < inds.length; ++I) {
-                  slf = App(false, slf, get_var(ctx, inds[I].name));
-                }
+                //for (var I = 0; I < inds.length; ++I) {
+                  //slf = App(false, slf, get_var(ctx, inds[I].name));
+                //}
                 for (var F = 0; F < ctrs[i].fils.length; ++F) {
                   slf = App(ctrs[i].fils[F].eras, slf, get_var(ctx, ctrs[i].fils[F].name));
                 }
