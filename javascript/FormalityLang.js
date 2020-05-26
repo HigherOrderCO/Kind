@@ -259,7 +259,7 @@ function parse_lam(code, [indx,tags], err = false) {
          (i < binds.length - 1)
          ? Lam(eras, binds[i], (x) => fold(Ext([binds[i],x],ctx),i+1))
          : Lam(eras, binds[i], (x) => body(Ext([binds[i],x],ctx)))
-      return Loc(from, [indx,tags], fold(xs,0))
+      return Loc(from, indx, fold(xs,0))
     }])));
 };
 
@@ -594,7 +594,7 @@ function parse_don(code, [indx,tags], err = false) {
     chain(parse_txt(code, next(code, [indx,tags]), "{", err), ([indx,tags], skip) =>
     chain(parse_stt(bind,done)(code, next(code, [indx,tags]), err), ([indx,tags], term) =>
     chain(parse_txt(code, next(code, [indx,tags]), "}", err), ([indx,tags], skip) =>
-    [[indx,tags], xs => Loc(from, [indx,tags], term(xs))])))))));
+    [[indx,tags], xs => Loc(from, indx, term(xs))])))))));
 };
 
 // Parses variables, `<name>`
