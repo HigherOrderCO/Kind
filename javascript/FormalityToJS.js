@@ -112,6 +112,7 @@ var prim_funcs = {
   "F64.div"     : "a=>b=>a/b",
   "F64.mod"     : "a=>b=>a%b",
   "F64.pow"     : "a=>b=>a**b",
+  "F64.cmp"     : "a=>b=>a===b",
   "F64.log"     : "a=>Math.log(a)",
   "F64.cos"     : "a=>Math.cos(a)",
   "F64.sin"     : "a=>Math.sin(a)",
@@ -119,6 +120,7 @@ var prim_funcs = {
   "F64.acos"    : "a=>Math.acos(a)",
   "F64.asin"    : "a=>Math.asin(a)",
   "F64.atan"    : "a=>Math.atan(a)",
+  "F64.parse"   : "a=>Number(a)",
   "String.eql"  : "a=>b=>a===b",
 };
 
