@@ -248,11 +248,12 @@ function parse_all(code, [indx,tags], err = false) {
     }])))))
 };
 
+// Parses a lambda, `(<name>) <term>`
 function parse_lam(code, [indx,tags], err = false) {
   var from = next(code, [indx,tags])[0];
-  var p_nam = (c,i,e) => parse_nam(c,next(c,i),true,e)
+  var pnam = (c,i,e) => parse_nam(c,next(c,i),true,e)
   return (
-    chain(parse_app_list(p_nam)(code, next(code, [indx,tags]), false), ([indx,tags], [eras, binds]) =>
+    chain(parse_app_list(pnam)(code, next(code, [indx,tags]), false), ([indx,tags], [eras, binds]) =>
     chain(parse_trm(code, next(code,[indx,tags]), err), ([indx,tags], body) =>
     [[indx,tags], (xs) => {
        var fold = (ctx,i) =>
@@ -261,6 +262,34 @@ function parse_lam(code, [indx,tags], err = false) {
          : Lam(eras, binds[i], (x) => body(Ext([binds[i],x],ctx)))
       return Loc(from, indx, fold(xs,0))
     }])));
+};
+
+// Parses a named lambda, `<name>(<term>) => <term>`
+function parse_fun(code, [indx,tags], err = false) {
+  var from = next(code, [indx,tags])[0];
+  var pnam = (c,i,e) => parse_nam(c,next(c,i),true,e)
+  return (
+    chain(parse_nam(code, next(code, [indx,tags]), true, false), ([indx,tags], self) =>
+    chain(parse_app_list(pnam)(code, next(code, [indx,tags]), false), ([indx,tags], [eras, binds]) =>
+    chain(parse_txt(code, next(code, [indx,tags]), "=>", false), ([indx,tags], skip) =>
+    chain(parse_trm(code, next(code,[indx,tags]), err), ([indx,tags], body) =>
+    [[indx,tags], (xs) => {
+       var fold = (ctx,i) =>
+         (i < binds.length - 1)
+         ? Lam(eras, binds[i], (x) => fold(Ext([binds[i],x],ctx),i+1))
+         : Lam(eras, binds[i], (x) => body(Ext([binds[i],x],ctx)))
+      return Loc(from, indx, fold(xs,0))
+    }])))));
+};
+
+// Parses an arrow comment, `<name> => <term>`
+function parse_acm(code, [indx,tags], err = false) {
+  var from = next(code, [indx,tags])[0];
+  return (
+    chain(parse_nam(code, next(code, [indx,tags]), true, false), ([indx,tags], self) =>
+    chain(parse_txt(code, next(code, [indx,tags]), "=>", false), ([indx,tags], skip) =>
+    chain(parse_trm(code, next(code,[indx,tags]), err), ([indx,tags], term) =>
+    [[indx,tags], (xs) => Loc(from, indx, term(xs))]))));
 };
 
 // Parses a local definition, `let x = val; body`
@@ -753,6 +782,8 @@ function parse_trm(code, [indx = 0, tags = []], err) {
   var base_parse = choose([
     () => parse_all(code, [indx,tags], err),
     () => parse_lam(code, [indx,tags], err),
+    () => parse_fun(code, [indx,tags], err),
+    () => parse_acm(code, [indx,tags], err),
     () => parse_let(code, [indx,tags], err),
     () => parse_us0(code, [indx,tags], err),
     () => parse_us1(code, [indx,tags], err),

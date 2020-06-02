@@ -24,6 +24,42 @@ var is_prim = {
   String : 1
 };
 
+function as_adt(term, defs) {
+  var term = fmc.reduce(term, defs);
+  if (term.ctor === "All" && term.self !== "") {
+    //console.log("is self");
+    var term = term.body(fmc.Var("self"), fmc.Var("P"));
+    var ctrs = [];
+    while (term.ctor === "All") {
+      //console.log("is all");
+      var ctr = (function go(term, flds) {
+        //console.log("bind", term);
+        if (term.ctor === "All") {
+          return go(term.body(fmc.Var(""), fmc.Var(term.name)), flds.concat(term.name));
+        } else if (term.ctor === "App" && term.func.ctor === "Var" && term.func.indx === "P") {
+          var argm = term.argm;
+          //console.log("wow", argm);
+          while (argm.ctor === "App") {
+            argm = argm.func;
+          };
+          if (argm.ctor === "Ref") {
+            return {name: argm.name, flds: flds};
+          }
+        }
+        return null;
+      })(term.bind, []);
+      if (ctr) {
+        ctrs.push(ctr);
+        term = term.body(fmc.Var(term.self), fmc.Var(term.name));
+      } else {
+        return null;
+      }
+    }
+    return ctrs;
+  }
+  return null;
+};
+
 function dependency_sort(defs, main) {
   var seen = {};
   var refs = [];
@@ -99,14 +135,17 @@ function infer(term, defs, ctx = fmc.Nil()) {
           var argm_cmp = check(term.argm, func_typ.bind, defs, ctx);
           var term_typ = func_typ.body(self_var, name_var);
           var comp = func_cmp.comp;
+
+          var func_typ_adt = as_adt(func_typ, defs);
+          //var func_typ_adt = null;
           var func_typ_prim = prim_of(func_typ, defs);
           if (func_typ_prim) {
             comp = Eli(func_typ_prim, comp);
-            //code = "elim_"+func_typ_prim.toLowerCase()+"("+code+")";
+          } else if (func_typ_adt) {
+            comp = Eli(func_typ_adt, comp);
           };
           if (!term.eras) {
             comp = App(comp, argm_cmp.comp);
-            //code = code+"("+argm_cmp.code+")";
           }
           return {comp, type: term_typ};
         default:
@@ -150,6 +189,7 @@ function check(term, type, defs, ctx = fmc.Nil()) {
   };
 
   var typv = fmc.reduce(type, defs);
+
   if (typv.ctor === "Typ") {
     var comp = Nul();
     var type = fmc.Typ();
@@ -171,11 +211,15 @@ function check(term, type, defs, ctx = fmc.Nil()) {
           comp = Lam(term.name, body_cmp.comp);
           //var code = "("+make_name(term.name)+"=>"+body_cmp.code+")";
         }
+
+        var type_adt = as_adt(type, defs);
+        //var type_adt = null;
         var type_prim = prim_of(type, defs);
         if (type_prim) {
           comp = Ins(type_prim, comp);
-          //code = "inst_"+type_prim.toLowerCase()+"("+code+")";
-        };
+        } else if (type_adt) {
+          comp = Ins(type_adt, comp);
+        }
       } else {
         throw "Lambda has non-function type.";
       }
@@ -203,7 +247,7 @@ function core_to_comp(defs, main) {
   var comp_nams = dependency_sort(defs, main).concat([main]);
   var comp_defs = {};
   for (var name of comp_nams) {
-    // TODO: caution, using fml.unloc on fmc term; consider adding fmc.unloc
+    //TODO: caution, using fml.unloc on fmc term; consider adding fmc.unloc
     comp_defs[name] = check(fml.unloc(defs[name].term), fml.unloc(defs[name].type), defs).comp;
   };
   return {
