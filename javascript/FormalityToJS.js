@@ -240,9 +240,6 @@ function application(func, allow_empty = false) {
 
   // Primitive type elimination
   } else if (func && (allow_empty || args.length > 0) && func.ctor === "Eli") {
-    //console.log("ah", func.prim);
-    //console.log("....", prim_types[func.prim].elim);
-    
     if (typeof func.prim === "string" && prim_types[func.prim]) {
       var type_info = prim_types[func.prim];
     } else if (typeof func.prim === "object") {
@@ -252,26 +249,20 @@ function application(func, allow_empty = false) {
     };
     var {ctag, ctor} = type_info.elim;
     var cnam = type_info.cnam;
-    //console.log("...", ctag, ctor, cnam);
     var res = "(()=>";
     for (var i = args.length; i < ctor.length; ++i) {
       res += ("c"+i)+"=>";
     };
     res += "{";
-    //for (var i = 0; i < args.length; ++i) {
-      //res += "var c"+i+"="+js_code(args[i])+";";
-    //};
     res += "var self="+js_code(func.expr)+";";
     res += "switch("+ctag("self")+"){";
     for (var i = 0; i < ctor.length; ++i) {
       res += "case '"+cnam[i]+"':";
-      //var ret = args[i] || cmp.Var("c"+i);
       var fargs = [];
       for (var j = 0; j < ctor[i].length; ++j) {
         var nam = fresh();
         res += "var "+nam+"="+ctor[i][j]("self")+";"
         fargs.push(cmp.Var(nam));
-        //ret = cmp.App(ret, cmp.Var("f"+j));
       };
       var ret = apply_inline(args[i] || cmp.Var("c"+i), fargs);
       res += "return "+js_code(ret)+";";
@@ -282,18 +273,6 @@ function application(func, allow_empty = false) {
     };
     return res;
   }
-  //Nat: {
-    //inst: [2, [0, "0n"], [1, p => "1n+"+p]],
-    ////elim: [2, x => z => s => x+"===0n?"+z+":"+s+"("+x+"-1n)"],
-    //elim: {
-      //cond: x => x + "=== 0n",
-      //ctor: [
-        //[],
-        //[x => "("+x+"-1n)"],
-      //]
-    //},
-  //},
-
   return null;
 };
 
@@ -418,15 +397,12 @@ function js_code(term, name = null) {
           return "elim_"+term.prim.toLowerCase()+"("+js_code(term.expr)+")";
         } else {
           throw "Internal compiler error. Please report on https://github.com/moonad/formality.";
-          //console.log(term.prim);
-          //return "<adt_eli>"+js_code(term.expr);
         }
       case "Ins":
         if (typeof term.prim === "string") {
           return "inst_"+term.prim.toLowerCase()+"("+js_code(term.expr)+")";
         } else {
           throw "Internal compiler error. Please report on https://github.com/moonad/formality.";
-          //return "<adt_ins>"+js_code(term.expr);
         }
       case "Chr":
         return term.chrx.charCodeAt(0);
@@ -553,37 +529,3 @@ function compile(defs, main) {
 };
 
 module.exports = {compile};
-
-
-//function adt_inst(adt) {
-  //var res = "(x=>x";
-  //for (var {ctor,flds} of adt) {
-    //res += "(";
-    //for (var fld of flds) {
-      //res += fld + "=>";
-    //};
-    //res += "({ctor:'"+ctor;
-    //for (var fld of flds) {
-      //res += ","+fld;
-    //};
-    //res += "}))";
-  //};
-  //res += ")";
-  //return res;
-//};
-
-//function adt_elim(adt) {
-  //var res = "(x=>{switch(x.ctor){";
-  //for (var {ctor,flds} of adt) {
-    //res += "case '"+ctor+"':"+
-  //};
-  //res += "})";
-  //return res;
-//};
-
-//var $FooBar$bar = ($x=>($y=><adt_ins>($foo=>($bar=>$bar($x)($y)))));
-//$x=>$y=>(t=>t(x=>y=>({ctor:"foo",x,y}))(x=>y=>({ctor:"bar",x,y})))
-//x=>{switch(x.ctor){
-
-function adt_elim(adt) {
-};

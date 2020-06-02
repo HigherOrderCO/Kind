@@ -28,18 +28,14 @@ var is_prim = {
 function as_adt(term, defs) {
   var term = fmc.reduce(term, defs);
   if (term.ctor === "All" && term.self !== "") {
-    //console.log("is self");
     var term = term.body(fmc.Var("self"), fmc.Var("P"));
     var ctrs = [];
     while (term.ctor === "All") {
-      //console.log("is all");
       var ctr = (function go(term, flds) {
-        //console.log("bind", term);
         if (term.ctor === "All") {
           return go(term.body(fmc.Var(""), fmc.Var(term.name)), flds.concat(term.name));
         } else if (term.ctor === "App" && term.func.ctor === "Var" && term.func.indx === "P") {
           var argm = term.argm;
-          //console.log("wow", argm);
           while (argm.ctor === "App") {
             argm = argm.func;
           };
@@ -117,7 +113,6 @@ function prim_of(type, defs) {
 // declaration of `x` using a `var` statement.
 
 function infer(term, defs, ctx = fmc.Nil()) {
-  //console.log("infer", term.ctor);
   switch (term.ctor) {
     case "Var":
       return {
@@ -147,7 +142,6 @@ function infer(term, defs, ctx = fmc.Nil()) {
           var comp = func_cmp.comp;
 
           var func_typ_adt = as_adt(func_typ, defs);
-          //var func_typ_adt = null;
           var func_typ_prim = prim_of(func_typ, defs);
           if (func_typ_prim) {
             comp = Eli(func_typ_prim, comp);
@@ -168,7 +162,6 @@ function infer(term, defs, ctx = fmc.Nil()) {
       var body_cmp = infer(term.body(expr_var), defs, body_ctx);
       return {
         comp: term.dups ? Let(term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp) : body_cmp.comp,
-        //code: "("+make_name(term.name)+"=>"+body_cmp.code+")("+expr_comp.code+")",
         type: body_cmp.type,
       };
     case "All":
@@ -226,11 +219,9 @@ function check(term, type, defs, ctx = fmc.Nil()) {
           comp = body_cmp.comp;
         } else {
           comp = Lam(term.name+"$"+(ctx.size+1), body_cmp.comp);
-          //var code = "("+make_name(term.name)+"=>"+body_cmp.code+")";
         }
 
         var type_adt = as_adt(type, defs);
-        //var type_adt = null;
         var type_prim = prim_of(type, defs);
         if (type_prim) {
           comp = Ins(type_prim, comp);
@@ -248,7 +239,6 @@ function check(term, type, defs, ctx = fmc.Nil()) {
       var body_cmp = check(term.body(expr_var), type, defs, body_ctx);
       return {
         comp: term.dups ? Let(term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp) : body_cmp.comp,
-        //code: "("+make_name(term.name)+"=>"+body_cmp.code+")("+expr_comp.code+")",
         type: body_cmp.type,
       };
     case "Loc":
