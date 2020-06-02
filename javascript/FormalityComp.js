@@ -11,6 +11,7 @@ const Eli = (prim,expr)      => ({ctor:"Eli",prim,expr});
 const Ins = (prim,expr)      => ({ctor:"Ins",prim,expr});
 const Chr = (chrx)           => ({ctor:"Chr",chrx});
 const Str = (strx)           => ({ctor:"Str",strx});
+const Nat = (natx)           => ({ctor:"Nat",natx});
 
 var is_prim = {
   Unit   : 1,
@@ -106,12 +107,21 @@ function prim_of(type, defs) {
   return null;
 };
 
+// Note:
+// The name of bound variables get a '$depth$' appended to it. This helps making
+// them unique, but also solves some issues where JavaScript shadowing behavior
+// differs from Formality. For example:
+// `foo = x => y => { var x = x * x; return x; }`
+// Here, calling `foo(2)(2)` would return `NaN`, not `4`, because the outer
+// value of `x` isn't accessible inside the function's body due to the
+// declaration of `x` using a `var` statement.
+
 function infer(term, defs, ctx = fmc.Nil()) {
   //console.log("infer", term.ctor);
   switch (term.ctor) {
     case "Var":
       return {
-        comp: Var(term.indx.split("#")[0]),
+        comp: Var(term.indx.replace("#","$")),
         type: fmc.Var(term.indx),
       };
     case "Ref":
@@ -157,7 +167,7 @@ function infer(term, defs, ctx = fmc.Nil()) {
       var body_ctx = fmc.Ext({name:term.name,type:expr_var.type}, ctx);
       var body_cmp = infer(term.body(expr_var), defs, body_ctx);
       return {
-        comp: term.dups ? Let(term.name, expr_cmp.comp, body_cmp.comp) : body_cmp.comp,
+        comp: term.dups ? Let(term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp) : body_cmp.comp,
         //code: "("+make_name(term.name)+"=>"+body_cmp.code+")("+expr_comp.code+")",
         type: body_cmp.type,
       };
@@ -188,6 +198,13 @@ function check(term, type, defs, ctx = fmc.Nil()) {
     return {comp, type};
   };
 
+  var nat_lit = fml.stringify_nat(term);
+  if (nat_lit) {
+    var comp = Nat(nat_lit);
+    var type = fmc.Ref("Nat");
+    return {comp, type};
+  };
+
   var typv = fmc.reduce(type, defs);
 
   if (typv.ctor === "Typ") {
@@ -208,7 +225,7 @@ function check(term, type, defs, ctx = fmc.Nil()) {
         if (term.eras) {
           comp = body_cmp.comp;
         } else {
-          comp = Lam(term.name, body_cmp.comp);
+          comp = Lam(term.name+"$"+(ctx.size+1), body_cmp.comp);
           //var code = "("+make_name(term.name)+"=>"+body_cmp.code+")";
         }
 
@@ -230,7 +247,7 @@ function check(term, type, defs, ctx = fmc.Nil()) {
       var body_ctx = fmc.Ext({name:term.name,type:expr_var.type}, ctx);
       var body_cmp = check(term.body(expr_var), type, defs, body_ctx);
       return {
-        comp: term.dups ? Let(term.name, expr_cmp.comp, body_cmp.comp) : body_cmp.comp,
+        comp: term.dups ? Let(term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp) : body_cmp.comp,
         //code: "("+make_name(term.name)+"=>"+body_cmp.code+")("+expr_comp.code+")",
         type: body_cmp.type,
       };
@@ -259,7 +276,7 @@ function core_to_comp(defs, main) {
 module.exports = {
   Var, Ref, Nul, Lam,
   App, Let, Eli, Ins,
-  Chr, Str,
+  Chr, Str, Nat,
   is_prim,
   dependency_sort,
   check,

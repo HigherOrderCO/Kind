@@ -637,8 +637,18 @@ function parse_var(code, [indx,tags], err = false) {
       } else {
         if (tags) tag_to_mutate.ctor = "var"; // see comment on parse()
         return Loc(from, indx, get_var(xs, name, () => {
-          if (tags) tag_to_mutate.ctor = "ref"; // see comment on parse()
-          return Ref(name);
+          if (isNaN(Number(name))) {
+            if (tags) tag_to_mutate.ctor = "ref"; // see comment on parse()
+            return Ref(name);
+          } else {
+            if (tags) tag_to_mutate.ctor = "nat"; // see comment on parse()
+            var num = Number(name);
+            var term = Ref("Nat.zero");
+            for (var i = 0; i < num; ++i) {
+              term = App(false, Ref("Nat.succ"), term);
+            };
+            return term;
+          };
         }));
       }
     }];
@@ -1023,6 +1033,22 @@ function stringify_str(term) {
     } else {
       return null;
     }
+  }
+};
+
+// Stringifies a nat literal
+function stringify_nat(term) {
+  if (term.ctor === "Ref" && term.name === "Nat.zero") {
+    return "0";
+  } else if (term.ctor === "App"
+    && term.func.ctor === "Ref"
+    && term.func.name === "Nat.succ") {
+    var pred = stringify_nat(term.argm);
+    if (pred) {
+      return String(1 + Number(pred));
+    }
+  } else {
+    return null;
   }
 };
 
@@ -1489,6 +1515,7 @@ module.exports = {
   unloc,
   stringify_chr,
   stringify_str,
+  stringify_nat,
   stringify,
   stringify_ctx,
   stringify_defs,

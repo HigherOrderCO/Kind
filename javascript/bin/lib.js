@@ -44,7 +44,7 @@ function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
   return result;
 };
 
-function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show = fm.lang.stringify, check = fm.synt.typesynth, norm = fm.synt.normalize) {
+function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show = fm.lang.stringify, check = fm.synt.typesynth, norm = fm.synt.normalize, silent = false) {
   if (!fs.existsSync(dir) && ext === ".fmc") dir = ".";
 
   var exit_code = main === "--github" ? 1 : 0;
@@ -53,7 +53,7 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
   //var hols = {};
 
   // Normalizes and type-checks all terms
-  console.log("\033[4m\x1b[1mType-checking:\x1b[0m");
+  if (!silent) console.log("\033[4m\x1b[1mType-checking:\x1b[0m");
   var errors = [];
   //var max_len = 0;
   //for (var name in defs) {
@@ -66,25 +66,25 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
     //}
     try {
       var {term,type} = check(defs[name].term, defs[name].type, defs, show);
-      console.log(show_name + ": \x1b[2m" + show(type) + "\x1b[0m");
+      if (!silent) console.log(show_name + ": \x1b[2m" + show(type) + "\x1b[0m");
       synt[name] = {term, type};
     } catch (err) {
-      console.log(show_name + " : " + "\x1b[31merror\x1b[0m");
+      if (!silent) console.log(show_name + " : " + "\x1b[31merror\x1b[0m");
       errors.push([name, err()]);
     }
   };
-  console.log("");
+  if (!silent) console.log("");
 
   // If there are errors, prints them
   if (errors.length > 0) {
-    console.log("\033[4m\x1b[1mFound " + errors.length + " type error(s):\x1b[0m");
+    if (!silent) console.log("\033[4m\x1b[1mFound " + errors.length + " type error(s):\x1b[0m");
     for (var i = errors.length - 1; i >= 0; --i) {
       var err_msg = fm.lang.stringify_err(errors[i][1], files[errors[i][0]]);
-      console.log("\n\x1b[1mInside \x1b[4m"+errors[i][0]+"\x1b[0m\x1b[1m:\x1b[0m");
-      console.log(err_msg);
+      if (!silent) console.log("\n\x1b[1mInside \x1b[4m"+errors[i][0]+"\x1b[0m\x1b[1m:\x1b[0m");
+      if (!silent) console.log(err_msg);
     };
   } else {
-    console.log("\033[4m\x1b[1mAll terms check.\x1b[0m");
+    if (!silent) console.log("\033[4m\x1b[1mAll terms check.\x1b[0m");
   };
 
   // If there is no error nor unresolved equation, write `.fmc` file
@@ -110,7 +110,7 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
   };
 
   // If user asked to evaluate main, do it
-  if (synt[main] || defs[main]) {
+  if (!silent && (synt[main] || defs[main])) {
     console.log("");
     console.log("\033[4m\x1b[1mEvaluating main:\x1b[0m");
     try {
@@ -130,7 +130,8 @@ function _fmc_(main = "main", dir) {
   _fm_(main, "./.fmc", ".fmc", fm.core.parse, fm.core.stringify, fm.core.typecheck, fm.core.normalize);
 };
 
-function _js_(main = "main", dir, ext, parse) {
+function _js_(main = "main", dir, ext, parse, show, check, norm) {
+  _fm_(main, dir, ext, parse, show, check, norm, true);
   var {defs} = load("./.fmc", ".fmc", fm.core.parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");

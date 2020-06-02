@@ -5,82 +5,93 @@ const cmp = require("./FormalityComp.js");
 var prim_types = {
   Unit: {
     inst: [[0, "1"]],
-    elim: {ctag: x => x, ctor: [[]]},
+    elim: {ctag: x => 'unit', ctor: [[]]},
+    cnam: ['unit'],
   },
   Bool: {
     inst: [[0, "true"], [0, "false"]],
-    elim: {ctag: x => x+"?0:1", ctor: [[], []]},
+    elim: {ctag: x => x+"?'true':'false'", ctor: [[], []]},
+    cnam: ['true', 'false'],
   },
   Nat: {
     inst: [[0, "0n"], [1, p => "1n+"+p]],
-    elim: {ctag: x => x+"===0n?0:1", ctor: [[], [x => "("+x+"-1n)"]]},
+    elim: {ctag: x => x+"===0n?'zero':'succ'", ctor: [[], [x => "("+x+"-1n)"]]},
+    cnam: ['zero', 'succ'],
   },
   Bits: {
     inst: [[0, "''"], [1, p=>p+"+'0'"], [1, p=>p+"+'1'"]],
     elim: {
-      ctag: x => x+".length===0?0:"+x+"["+x+".length-1]==='0'?1:2",
+      ctag: x => x+".length===0?'be':"+x+"["+x+".length-1]==='0'?'b0':'b1'",
       ctor: [[], [x => x+".slice(0,-1)"], [x => x+".slice(0,-1)"]],
     },
+    cnam: ['be', 'b0', 'b1'],
   },
   U16: {
     inst: [[1, x => "Lam_to_U16("+x+")"]],
     elim: {
-      ctag: x => "0",
+      ctag: x => "'u16'",
       ctor: [[x => "U16_to_Lam("+x+")"]],
-    }
+    },
+    cnam: ['u16'],
   },
   U32: {
     inst: [[1, x => "Lam_to_U32("+x+")"]],
     elim: {
-      ctag: x => "0",
+      ctag: x => "'u32'",
       ctor: [[x => "U32_to_Lam("+x+")"]],
-    }
+    },
+    cnam: ['u32'],
   },
   U64: {
     inst: [[1, x => "Lam_to_U64("+x+")"]],
     elim: {
-      ctag: x => "0",
+      ctag: x => "'u64'",
       ctor: [[x => "U64_to_Lam("+x+")"]],
-    }
+    },
+    cnam: ['u64'],
   },
   F64: {
     inst: [[1, x => "Lam_to_F64("+x+")"]],
     elim: {
-      ctag: x => "0",
+      ctag: x => "'f64'",
       ctor: [[x => "F64_to_Lam("+x+")"]],
     },
+    cnam: ['f64'],
   },
   String: {
     inst: [[0,"''"], [2, h => t => "(String.fromCharCode("+h+")+"+t+")"]],
     elim: {
-      ctag: x => x+".length===0?0:1",
+      ctag: x => x+".length===0?'nil':'cons'",
       ctor: [[], [x => x+".charCodeAt(0)", x => x+".slice(1)"]],
     },
+    cnam: ['nil', 'cons'],
   },
 };
 
 function adt_type(adt) {
   var inst = [];
   var elim = {
-    ctag: x => x+".c",
+    ctag: x => x+"._",
     ctor: [],
   };
+  var cnam = [];
   for (let i = 0; i < adt.length; ++i) {
     inst.push([adt[i].flds.length, (function go(j, ctx) {
       if (j < adt[i].flds.length) {
         return x => go(j + 1, ctx.concat([x]));
       } else {
-        var res = "({c:"+i;
+        var res = "({_:'"+adt[i].name+"'";
         for (var k = 0; k < j; ++k) {
-          res += ",x"+k+":"+ctx[k];
+          res += ",'"+adt[i].flds[k]+"':"+ctx[k];
         };
         res += "})";
         return res;
       };
     })(0, [])]);
-    elim.ctor.push(adt[i].flds.map((n,j) => (x => x+".x"+j)));
+    elim.ctor.push(adt[i].flds.map((n,j) => (x => x+"."+adt[i].flds[j])));
+    cnam.push(adt[i].name);
   };
-  return {inst, elim};
+  return {inst, elim, cnam};
 };
 
 var prim_funcs = {
@@ -93,7 +104,7 @@ var prim_funcs = {
   "Nat.sub"     : [2, a=>b=>`${a}-${b}<=0n?0n:${a}-${b}`],
   "Nat.mul"     : [2, a=>b=>`${a}*${b}`],
   "Nat.div"     : [2, a=>b=>`${a}/${b}`],
-  "Nat.div_mod" : [2, a=>b=>`({c:0,x0:${a}/${b},x1:${a}%${b}})`], // TODO change to proper pair
+  "Nat.div_mod" : [2, a=>b=>`({_:'Pair.new','a':${a}/${b},'b':${a}%${b}})`], // TODO change to proper pair
   "Nat.pow"     : [2, a=>b=>`${a}**${b}`],
   "Nat.ltn"     : [2, a=>b=>`${a}<${b}`],
   "Nat.lte"     : [2, a=>b=>`${a}<=${b}`],
@@ -166,7 +177,7 @@ var prim_funcs = {
 
 var count = 0;
 function fresh() {
-  return ""+(count++);
+  return "$"+(count++);
 };
 
 // Simple substitution, assumes `name` is globally unique.
@@ -182,12 +193,13 @@ function subst(term, name, val) {
   }
 };
   
-// From `(a => b => ... body)(x, y, ...) => body[x <- a][y <- b]...
+// Inlines a list of arguments in lambdas, as much as possible. Example:
+// apply_inline((x) (y) f, [a, b, c, d, e]) = f[x<-a,y<-b](c)(d)(e)
 function apply_inline(term, args) {
   if (term.ctor === "Lam" && args.length > 0) {
     return apply_inline(subst(term.body, term.name, args[0]), args.slice(1));
   } else if (args.length > 0) {
-    return apply_inline(cmp.App(term, args[args.length - 1]), args.slice(0, -1));
+    return apply_inline(cmp.App(term, args[0]), args.slice(1));
   } else {
     return term;
   }
@@ -232,12 +244,15 @@ function application(func, allow_empty = false) {
     //console.log("....", prim_types[func.prim].elim);
     
     if (typeof func.prim === "string" && prim_types[func.prim]) {
-      var {ctag, ctor} = prim_types[func.prim].elim;
+      var type_info = prim_types[func.prim];
     } else if (typeof func.prim === "object") {
-      var {ctag, ctor} = adt_type(func.prim).elim;
+      var type_info = adt_type(func.prim);
     } else {
       return null;
     };
+    var {ctag, ctor} = type_info.elim;
+    var cnam = type_info.cnam;
+    //console.log("...", ctag, ctor, cnam);
     var res = "(()=>";
     for (var i = args.length; i < ctor.length; ++i) {
       res += ("c"+i)+"=>";
@@ -249,12 +264,12 @@ function application(func, allow_empty = false) {
     res += "var self="+js_code(func.expr)+";";
     res += "switch("+ctag("self")+"){";
     for (var i = 0; i < ctor.length; ++i) {
-      res += "case "+i+":";
+      res += "case '"+cnam[i]+"':";
       //var ret = args[i] || cmp.Var("c"+i);
       var fargs = [];
       for (var j = 0; j < ctor[i].length; ++j) {
         var nam = fresh();
-        res += "var $"+nam+"="+ctor[i][j]("self")+";"
+        res += "var "+nam+"="+ctor[i][j]("self")+";"
         fargs.push(cmp.Var(nam));
         //ret = cmp.App(ret, cmp.Var("f"+j));
       };
@@ -342,7 +357,15 @@ function instantiator(inst) {
   return res;
 };
 
-//console.log(app(fmc.App(false, , prim_funcs["Bool.and"]));
+function flatten_lets(term) {
+  var res = "(()=>{";
+  while (term.ctor === "Let") {
+    res += "var "+js_name(term.name)+"="+js_code(term.expr)+";";
+    term = term.body;
+  };
+  res += "return "+js_code(term)+"})()";
+  return res;
+};
 
 var NAME = null;
 function js_code(term, name = null) {
@@ -389,30 +412,34 @@ function js_code(term, name = null) {
       case "App":
         return js_code(term.func)+"("+js_code(term.argm)+")";
       case "Let":
-        return "("+js_name(term.name)+"=>"+js_code(term.body)+")("+js_code(term.expr)+")";
+        return flatten_lets(term);
       case "Eli":
         if (typeof term.prim === "string") {
           return "elim_"+term.prim.toLowerCase()+"("+js_code(term.expr)+")";
         } else {
-          console.log(term.prim);
-          return "<adt_eli>"+js_code(term.expr);
+          throw "Internal compiler error. Please report on https://github.com/moonad/formality.";
+          //console.log(term.prim);
+          //return "<adt_eli>"+js_code(term.expr);
         }
       case "Ins":
         if (typeof term.prim === "string") {
           return "inst_"+term.prim.toLowerCase()+"("+js_code(term.expr)+")";
         } else {
-          return "<adt_ins>"+js_code(term.expr);
+          throw "Internal compiler error. Please report on https://github.com/moonad/formality.";
+          //return "<adt_ins>"+js_code(term.expr);
         }
       case "Chr":
         return term.chrx.charCodeAt(0);
       case "Str":
         return "`"+term.strx+"`";
+      case "Nat":
+        return term.natx+"n";
     };
   };
 };
 
 function js_name(str) {
-  return "$" + str.replace(/\./g,"$");
+  return str.replace(/\./g,"$");
 };
 
 function compile(defs, main) {
@@ -459,10 +486,10 @@ function compile(defs, main) {
   if (isio) {
     code += "  var rdl = require('readline').createInterface({input:process.stdin,output:process.stdout});\n";
     code += "  var run = (p) => {\n";
-    code += "    switch (p.c) {\n";
-    code += "      case 0: return Promise.resolve(p.x0);\n";
-    code += "      case 1: return new Promise((res,_) => (console.log(p.x0), run(p.x1(1)).then(res)));\n";
-    code += "      case 2: return new Promise((res,_) => rdl.question('', (line) => run(p.x0(line)).then(res)));\n";
+    code += "    switch (p._) {\n";
+    code += "      case 'IO.end': return Promise.resolve(p.val);\n";
+    code += "      case 'IO.log': return new Promise((res,_) => (console.log(p.str), run(p.nxt(1)).then(res)));\n";
+    code += "      case 'IO.get': return new Promise((res,_) => rdl.question('', (line) => run(p.nxt(line)).then(res)));\n";
     code += "    }\n";
     code += "  };\n";
     //code += "    var case_end = (val) => Promise.resolve(val);\n";
