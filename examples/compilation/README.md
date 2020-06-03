@@ -20,7 +20,7 @@ efficient representations. Specifically:
 
 - For example, `Nat.add` becomes `+`, `Nat.mul` becomes `*`, etc.
 
-3. If it is a self-encoded JavaScript, convert to a JavaScript object.
+3. If it is a self-encoded datatype, convert to a JavaScript object.
 
 - For example, a `List` becomes `{_:"List.cons", head: _, tail: _}`.
 
