@@ -361,7 +361,7 @@ function recursion(term, name) {
     };
     args.reverse();
     if (func.ctor === "Eli") {
-      //console.log("- Possibly branch safe.");
+      //console.log("- Possibly branch safe.", name, func.prim);
       if (typeof func.prim === "string" && prim_types[func.prim]) {
         var type_info = prim_types[func.prim];
       } else if (typeof func.prim === "object") {
@@ -387,7 +387,7 @@ function recursion(term, name) {
           }
         }
         if (args.length === branches.length) {
-          return branches;
+          return {func, branches};
         }
       }
     }
@@ -406,10 +406,10 @@ function recursion(term, name) {
         check(term.body, tail);
         break;
       case "App":
-        var branches = tail && get_branches(term);
-        if (branches) {
-          check(term.func, tail);
-          for (var branch of branches) {
+        var got = tail && get_branches(term);
+        if (got) {
+          check(got.func, tail);
+          for (var branch of got.branches) {
             check(branch, tail);
           };
         } else {
