@@ -477,6 +477,13 @@ function typecheck(term, type, defs, show = stringify, ctx = Nil(), locs = null)
   return {term,type};
 };
 
+function typesynth(name, defs, show = stringify) {
+  var term = defs[name].term;
+  var type = defs[name].type;
+  defs[name].core = {term, type};
+  return typecheck(term, type, defs, show);
+};
+
 module.exports = {
   Var,
   Ref,
@@ -497,5 +504,6 @@ module.exports = {
   Err,
   typeinfer,
   typecheck,
+  typesynth,
   equal,
 };

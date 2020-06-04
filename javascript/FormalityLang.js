@@ -1,7 +1,7 @@
 var {
   Var, Ref, Typ, All,
   Lam, App, Let, Ann,
-  Loc, Ext, Nil, Hol,
+  Loc, Ext, Nil, Hol, Cse,
   reduce,
   normalize,
   Err,
@@ -157,12 +157,14 @@ function parse_mny(parser) {
 };
 
 // Parses an optional value
-function parse_may(code, [indx,tags], parser, err) {
-  var parsed = parser(code, [indx,tags], err);
-  if (parsed) {
-    return parsed;
-  } else {
-    return [[indx,tags], null];
+function parse_may(parser) {
+  return function(code, [indx,tags], err) {
+    var parsed = parser(code, [indx,tags], err);
+    if (parsed) {
+      return parsed;
+    } else {
+      return [[indx,tags], null];
+    }
   }
 };
 
@@ -521,26 +523,83 @@ function parse_und(code, [indx,tags], err) {
 // Parses an case expression, `case x as t : m;` ~> `x<(t) m>`
 function parse_cse(code, [indx,tags], err) {
   var from = next(code, [indx,tags])[0];
+  function parse_bar(code, [indx, tags], err) {
+    return (
+      chain(parse_txt(code, next(code, [indx,tags]), "|", false), ([indx,tags], skip) =>
+      chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], term) =>
+      chain(parse_txt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) =>
+      [[indx,tags], term]))));
+  };
+  function parse_mot(code, [indx, tags], err) {
+    return (
+      chain(parse_txt(code, next(code, [indx,tags]), ":", false), ([indx,tags], skip) =>
+      chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], moti) => 
+      chain(parse_txt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) =>
+      [[indx,tags], moti]))));
+  };
+  function parse_wth(code, [indx, tags], err) {
+    return (
+      chain(parse_txt(code, next(code, [indx,tags]), "with ", false), ([indx,tags], skip) =>
+      chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
+      chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
+      chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], type) => 
+      chain(parse_txt(code, next(code, [indx,tags]), "=", err), ([indx,tags], skip) =>
+      chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], term) => 
+      chain(parse_txt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) =>
+      [[indx,tags], [name,type,term]]))))))));
+  };
   return (
     chain(parse_txt(code, next(code, [indx,tags]), "case ", false), ([indx,tags], skip) =>
     chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], func) =>
-    chain(parse_opt(code, next(code, [indx,tags]), "as ", err), ([indx,tags], namd) =>
+    chain(parse_opt(code, next(code, [indx,tags]), "as ", err), ([indx,tags], skip) =>
     chain(parse_nam(code, next(code, [indx,tags]), true, err), ([indx,tags], name) =>
-    chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) => {
-      var parsed_moti = parse_trm(code, [indx,tags], false);
-      if (parsed_moti) {
-        var [[indx,tags], moti] = parsed_moti;
-        var [[indx,tags], skip] = parse_txt(code, next(code, [indx,tags]), ";", err);
-      } else {
-        var nam0 = new_name();
-        var moti = (xs) => {
-          return hole(nam0, xs);
-        };
-      }
+    chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
+    chain(parse_mny(parse_wth)(code, [indx,tags], err), ([indx,tags], wths) =>
+    chain(parse_mny(parse_bar)(code, [indx,tags], err), ([indx,tags], bars) =>
+    chain(parse_may(parse_mot)(code, [indx,tags], err), ([indx,tags], moti) => {
+      var uniq_name = new_name();
+      var hole_name = new_name();
+      var self_name = null;
       return [[indx,tags], xs => {
-        return Loc(from, indx, App(true, func(xs), moti(xs)));
+        var func_term = func(xs);
+        if (!self_name) {
+          var func_head = reduce(func_term);
+          if (name) {
+            self_name = name;
+          } else if (func_head.ctor === "Var") {
+            self_name = func_head.indx.split("#")[0];
+          } else if (func_head.ctor === "Ref") {
+            self_name = func_head.name;
+          } else {
+            self_name = "self";
+          }
+        };
+        if (!moti) {
+          moti = xs => hole(hole_name, xs);
+        }
+        var func_moti = xs => (function go(i, xs) {
+          if (i === wths.length) {
+            return moti(xs);
+          } else {
+            var [wnam, wtyp, wter] = wths[i];
+            return All(false, "", wnam, wtyp(xs), (s,x) => go(i+1, Ext([wnam,x],Ext(["",s],xs))));
+          };
+        })(0, xs);
+        var func_bars = bars.map(bar => xs => (function go(i, xs) {
+          if (i === wths.length) {
+            return bar(xs);
+          } else {
+            var [wnam, wtyp, wter] = wths[i];
+            return Lam(false, wnam, (x) => go(i+1, Ext([wnam,x],xs)));
+          };
+        })(0, xs));
+        var term = Cse(self_name+"#"+uniq_name, func_term, [xs, [func_moti].concat(func_bars)]);
+        for (var [wnam, wtyp, wter] of wths) {
+          term = App(false, term, wter(xs));
+        };
+        return term;
       }];
-    }))))));
+    })))))))));
 };
 
 function parse_ite(code, [indx,tags], err = false) {

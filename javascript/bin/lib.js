@@ -44,12 +44,11 @@ function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
   return result;
 };
 
-function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show = fm.lang.stringify, check = fm.synt.typesynth, norm = fm.synt.normalize, silent = false) {
+function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show = fm.lang.stringify, synth = fm.synt.typesynth, norm = fm.synt.normalize, silent = false) {
   if (!fs.existsSync(dir) && ext === ".fmc") dir = ".";
 
   var exit_code = main === "--github" ? 1 : 0;
   var {defs, files} = load(dir, ext, parse, exit_code);
-  var synt = {};
   //var hols = {};
 
   // Normalizes and type-checks all terms
@@ -65,9 +64,8 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
       //show_name = show_name + " ";
     //}
     try {
-      var {term,type} = check(defs[name].term, defs[name].type, defs, show);
+      var {term,type} = synth(name, defs, show);
       if (!silent) console.log(show_name + ": \x1b[2m" + show(type) + "\x1b[0m");
-      synt[name] = {term, type};
     } catch (err) {
       if (!silent) console.log(show_name + " : " + "\x1b[31merror\x1b[0m");
       errors.push([name, err()]);
@@ -93,28 +91,28 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
     if (!fs.existsSync(".fml")) fs.mkdirSync(".fml");
     clear_dir(".fmc", ".fmc");
     clear_dir(".fml", ".fml");
-    for (var name in synt) {
+    for (var name in defs) {
       var code = "";
       code += name + ": ";
-      code += fm.synt.stringify(synt[name].type) + "\n  ";
-      code += fm.synt.stringify(synt[name].term) + "\n\n";
+      code += fm.synt.stringify(defs[name].core.type) + "\n  ";
+      code += fm.synt.stringify(defs[name].core.term) + "\n\n";
       fs.writeFileSync(".fmc/"+name+".fmc", code);
     };
-    for (var name in synt) {
+    for (var name in defs) {
       var code = "";
       code += name + ": ";
-      code += fm.lang.stringify(synt[name].type) + "\n  ";
-      code += fm.lang.stringify(synt[name].term) + "\n\n";
+      code += fm.lang.stringify(defs[name].core.type) + "\n  ";
+      code += fm.lang.stringify(defs[name].core.term) + "\n\n";
       fs.writeFileSync(".fml/"+name+".fml", code);
     };
   };
 
   // If user asked to evaluate main, do it
-  if (!silent && (synt[main] || defs[main])) {
+  if (!silent && defs[main]) {
     console.log("");
     console.log("\033[4m\x1b[1mEvaluating main:\x1b[0m");
     try {
-      console.log(show(fm.synt.normalize((synt[main]||defs[main]).term, synt, {}, true)));
+      console.log(show(fm.synt.normalize(defs[main].core.term, defs, {}, true)));
     } catch (e) {
       error("Error.", exit_code);
     }
@@ -127,11 +125,11 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
 };
 
 function _fmc_(main = "main", dir) {
-  _fm_(main, "./.fmc", ".fmc", fm.core.parse, fm.core.stringify, fm.core.typecheck, fm.core.normalize);
+  _fm_(main, "./.fmc", ".fmc", fm.core.parse, fm.core.stringify, fm.core.typesynth, fm.core.normalize);
 };
 
-function _js_(main = "main", dir, ext, parse, show, check, norm) {
-  _fm_(main, dir, ext, parse, show, check, norm, true);
+function _js_(main = "main", dir, ext, parse, show, synth, norm) {
+  _fm_(main, dir, ext, parse, show, synth, norm, true);
   var {defs} = load("./.fmc", ".fmc", fm.core.parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");

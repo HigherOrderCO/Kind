@@ -424,16 +424,17 @@ Check this:
 
 ```c
 Docs.crazy(b: Bool): Docs.string_or_unit(b)
-  case b: (self) Docs.string_or_unit(self);
+  case b:
   | "I'm a string";
   | Unit.new;
+  : Docs.string_or_unit(b.self);
 ```
 
 This is a boolean function that returns a `String` only if its argument is true,
 otherwise, it returns `Unit.new`. In other words, that function returns
 different types depending on its input. To make this possible, we've made the
-return type depend on `Docs.string_or_unit(self)`, where `self` is the value of
-`b` on each branch. On the first branch, it demands
+return type depend on `Docs.string_or_unit(b.self)`, where `b.self` is the value
+of `b` on each branch. On the first branch, it demands
 `Docs.string_or_unit(Bool.true)`, which is `String`. On the second branch, it
 demands `Docs.string_or_unit(Bool.false)`, which `Unit`. Both branches have the
 correct type, even if they're different!
@@ -550,9 +551,10 @@ Docs.true_theorem: Bool.IsTrue(Bool.true)
   Unit.new
 
 Docs.self_equal_theorem(b: Bool): Bool.IsTrue(Bool.eql(b, b))
-  case b: (b) Bool.IsTrue(Bool.eql(b, b));
+  case b:
   | Unit.new;
   | Unit.new;
+  : Bool.IsTrue(Bool.eql(b.self, b.self));
 ```
 
 ---
