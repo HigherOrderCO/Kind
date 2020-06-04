@@ -151,7 +151,7 @@ monads, usually inside `do` blocks:
 
 ```javascript
 Docs.welcome: IO(Unit)
-  do IO.bind IO.end {
+  do IO {
     var name = IO.query("What is your name?");
     IO.print(String.concat("Welcome, ", name));
     return Unit.new;
