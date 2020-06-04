@@ -14,6 +14,9 @@ const Ann = (done,expr,type)           => ({ctor:"Ann",done,expr,type});
 const Loc = (from,upto,expr)           => ({ctor:"Loc",from,upto,expr});
 const Hol = (name,vals)                => ({ctor:"Hol",name,vals});
 const Cse = (name,func,info)           => ({ctor:"Cse",name,func,info});
+const Nat = (natx)                     => ({ctor:"Nat",natx});
+const Chr = (chrx)                     => ({ctor:"Chr",chrx});
+const Str = (strx)                     => ({ctor:"Str",strx});
 
 // List
 // ====
@@ -96,6 +99,12 @@ function stringify(term) {
       return "?"+term.name;
     case "Cse":
       return "<TODO:stringify.case>";
+    case "Nat":
+      return ""+term.natx;
+    case "Chr":
+      return "'"+term.chrx+"'";
+    case "Str":
+      return '"'+term.strx+'"';
   };
 };
 
@@ -174,12 +183,29 @@ function parse(code, indx, mode = "defs") {
       case "?":
         var name = parse_name();
         return ctx => Hol(name, fold(ctx, Nil(), (h,t) => Ext(h[1],t)));
+      case "'":
+        var chrx = code[indx++];
+        var skip = parse_char("'");
+        return ctx => Chr(chrx);
+      case '"':
+        var strx = "";
+        while (code[indx] !== '"') {
+          strx += code[indx++];
+        }
+        var skip = parse_char('"');
+        return ctx => Str(strx);
       default:
         if (is_name(chr)) {
           var name = chr + parse_name();
           return ctx => {
             var got = find(ctx, (x) => x[0] === name);
-            return got ? got.value[1] : Ref(name);
+            if (got) {
+              return got.value[1];
+            } else if (/^[0-9]*$/.test(name)) {
+              return Nat(BigInt(name));
+            } else {
+              return Ref(name);
+            }
           };
         } else {
           throw "Unexpected symbol: '" + chr + "'.";
@@ -207,8 +233,85 @@ function parse(code, indx, mode = "defs") {
   };
 };
 
+// Derivers
+// ========
+
+function build_cse(term, type) {
+  var tnam = term.name.split("#")[0];
+  var func = term.func;
+  var info = term.info;
+  var indx = 0;
+  var [ctx, args] = info;
+  while (type.ctor === "All") {
+    let csev = args[indx];
+    if (csev) {
+      var bind = type.bind;
+      var argm = (function go(bind, ctx) {
+        if (bind.ctor === "All") {
+          var eras = bind.eras;
+          var name = tnam+"."+bind.name;
+          var body = x => go(bind.body(bind, bind.bind), Ext([name, x], ctx));
+          return Lam(eras, name, body);
+        } else {
+          return csev(ctx);
+        };
+      })(type.bind, ctx);
+    } else {
+      throw "Misformatted case. TODO: improve this error."
+    }
+    func = App(type.eras, func, argm);
+    type = type.body(type, type.bind);
+    indx = indx + 1;
+  };
+  return func;
+};
+
+function build_nat(term) {
+  if (term.natx === 0n) {
+    return Ref("Nat.zero");
+  } else {
+    return App(false, Ref("Nat.succ"), Nat(term.natx - 1n));
+  };
+};
+
+function build_chr(term) {
+  var done = Ref("Char.new");
+  var ccod = term.chrx.charCodeAt(0);
+  for (var i = 0; i < 16; ++i) {
+    done = App(false, done, Ref(((ccod>>>(16-i-1))&1) ? "Bit.1" : "Bit.0"));
+  };
+  return done;
+};
+
+function build_str(term) {
+  if (term.strx.length === 0) {
+    return Ref("String.nil");
+  } else {
+    var chr = build_chr(Chr(term.strx[0]));
+    return App(false, App(false, Ref("String.cons"), chr), Str(term.strx.slice(1)));
+  }
+};
+
 // Evaluation
 // ==========
+
+function unloc(term) {
+  switch (term.ctor) {
+    case "Var": return term;
+    case "Ref": return term;
+    case "Typ": return term;
+    case "All": return All(term.eras, term.self, term.name, unloc(term.bind), (s, x) => unloc(term.body(s, x)));
+    case "Lam": return Lam(term.eras, term.name, x => unloc(term.body(x)));
+    case "App": return App(term.eras, unloc(term.func), unloc(term.argm));
+    case "Let": return Let(term.dups, term.name, unloc(term.expr), x => unloc(term.body(x)));
+    case "Ann": return Ann(term.done, unloc(term.expr), unloc(term.type));
+    case "Loc": return unloc(term.expr);
+    case "Hol": return term;
+    case "Nat": return term;
+    case "Chr": return term;
+    case "Str": return term;
+  };
+};
 
 function reduce(term, defs = {}, hols = {}, erased = false) {
   switch (term.ctor) {
@@ -285,11 +388,17 @@ function reduce(term, defs = {}, hols = {}, erased = false) {
     case "Cse":
       if (hols[term.name]) {
         var typ = hols[term.name];
-        return reduce(build_cases(term, hols[term.name]), defs, hols, erased);
+        return reduce(build_cse(term, hols[term.name]), defs, hols, erased);
       } else {
         //console.log("couldn't find", term.name, stringify(term.func));
         return term;
       };
+    case "Nat":
+      return reduce(build_nat(term), defs, hols, erased);
+    case "Chr":
+      return reduce(build_chr(term), defs, hols, erased);
+    case "Str":
+      return reduce(build_str(term), defs, hols, erased);
   };
 };
 
@@ -335,6 +444,12 @@ function normalize(term, defs, hols = {}, erased = false, seen = {}) {
         return Hol(norm.name, norm.vals);
       case "Cse":
         return Cse(term.name, term.func, term.info);
+      case "Nat":
+        return Nat(term.natx);
+      case "Chr":
+        return Chr(term.chrx);
+      case "Str":
+        return Str(term.strx);
     };
   }
 };
@@ -342,8 +457,9 @@ function normalize(term, defs, hols = {}, erased = false, seen = {}) {
 // Prepares a term to be stored on .fmc source
 // - Fills holes
 // - Applies static function calls (necessary for inference)
-// - Remove done Anns
-function canonicalize(term, hols = {}) {
+// - Removes done Anns
+// - Removes Nat/Str if we're compiling to core
+function canonicalize(term, hols = {}, to_core = false) {
   switch (term.ctor) {
     case "Var":
       return Var(term.indx);
@@ -355,85 +471,87 @@ function canonicalize(term, hols = {}) {
       var eras = term.eras;
       var self = term.self;
       var name = term.name;
-      var bind = canonicalize(term.bind, hols);
-      var body = (s,x) => canonicalize(term.body(s,x), hols);
+      var bind = canonicalize(term.bind, hols, to_core);
+      var body = (s,x) => canonicalize(term.body(s,x), hols, to_core);
       return All(eras, self, name, bind, body);
     case "Lam":
       var eras = term.eras;
       var name = term.name;
-      var body = x => canonicalize(term.body(x), hols);
+      var body = x => canonicalize(term.body(x), hols, to_core);
       return Lam(eras, name, body);
     case "App":
       var eras = term.eras;
-      var func = canonicalize(term.func, hols);
-      var argm = canonicalize(term.argm, hols);
+      var func = canonicalize(term.func, hols, to_core);
+      var argm = canonicalize(term.argm, hols, to_core);
       switch (func.ctor) {
         case "Lam":
-          return canonicalize(func.body(term.argm), hols);
+          return canonicalize(func.body(term.argm), hols, to_core);
         default:
           return App(eras, func, argm);
       };
     case "Let":
       var dups = term.dups;
       var name = term.name;
-      var expr = canonicalize(term.expr, hols);
-      var body = x => canonicalize(term.body(x), hols);
+      var expr = canonicalize(term.expr, hols, to_core);
+      var body = x => canonicalize(term.body(x), hols, to_core);
       return Let(dups, name, expr, body);
     case "Ann":
       if (term.done === true) {
-        return canonicalize(term.expr, hols);
+        return canonicalize(term.expr, hols, to_core);
       } else {
-        var expr = canonicalize(term.expr, hols);
-        var type = canonicalize(term.type, hols);
+        var expr = canonicalize(term.expr, hols, to_core);
+        var type = canonicalize(term.type, hols, to_core);
         return Ann(false, expr, type);
       }
     case "Loc":
-      return canonicalize(term.expr, hols);
+      return canonicalize(term.expr, hols, to_core);
     case "Hol":
       if (hols[term.name]) {
-        return canonicalize(hols[term.name](term.vals), hols);
+        return canonicalize(hols[term.name](term.vals), hols, to_core);
       } else {
         throw "Unfilled hole." + term.name;
       }
     case "Cse":
       if (hols[term.name]) {
-        return canonicalize(build_cases(term, hols[term.name]), hols);
+        return canonicalize(build_cse(term, hols[term.name]), hols, to_core);
       } else {
         throw "Incomplete case.";
       }
-  };
-};
-
-function build_cases(term, type) {
-  var tnam = term.name.split("#")[0];
-  var func = term.func;
-  var info = term.info;
-  var indx = 0;
-  var [ctx, args] = info;
-  while (type.ctor === "All") {
-    let csev = args[indx];
-    if (csev) {
-      var bind = type.bind;
-      var argm = (function go(bind, ctx) {
-        if (bind.ctor === "All") {
-          var eras = bind.eras;
-          var name = tnam+"."+bind.name;
-          var body = x => go(bind.body(bind, bind.bind), Ext([name, x], ctx));
-          return Lam(eras, name, body);
-        } else {
-          return csev(ctx);
-        };
-      })(type.bind, ctx);
+    case "Nat":
+      if (to_core) {
+        var done = Ref("Nat.zero");
+        for (var i = 0n; i < term.natx; i += 1n) {
+          done = App(false, Ref("Nat.succ"), done);
+        }
+        return done;
+      } else {
+        return term;
+      };
+  case "Chr":
+    console.log("canon", term);
+    if (to_core) {
+      var done = Ref("Char.new");
+      var ccod = term.chrx.charCodeAt(0);
+      for (var i = 0; i < 16; ++i) {
+        done = App(false, done, Ref(((ccod>>>(16-i-1))&1) ? "Bit.1" : "Bit.0"));
+      };
+      return done;
     } else {
-      throw "Misformatted case. TODO: improve this error."
+      return term;
+    };
+  case "Str":
+    if (to_core) {
+      var done = Ref("String.nil");
+      for (var i = 0; i < term.strx.length; ++i) {
+        var chr = stringify(Chr(term.strx[term.strx.length-i-1]));
+        done = App(false, App(false, Ref("String.cons"), chr), done);
+      }
+      return done;
+    } else {
+      return term;
     }
-    func = App(type.eras, func, argm);
-    type = type.body(type, type.bind);
-    indx = indx + 1;
   };
-  return func;
 };
-
 
 // Equality
 // ========
@@ -478,6 +596,12 @@ function hash(term, dep = 0) {
       return "?" + term.name;
     case "Cse":
       return "-"+Math.random();
+    case "Nat":
+      return "{"+term.natx+"}";
+    case "Chr":
+      return "'"+term.chrx+"'";
+    case "Str":
+      return '"'+term.strx+'"';
   }
 };
 
@@ -692,10 +816,15 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
       return deep([[typeinfer, [term.func, defs, show, hols, ctx, locs]]], ([hols, func_typ]) => {
         var func_typ = reduce(func_typ, defs, hols, false);
         var hols = {...hols, [term.name]: func_typ};
-        var term_val = build_cases(term, func_typ);
+        var term_val = build_cse(term, func_typ);
         return deep([[typeinfer, [term_val, defs, show, hols, ctx, locs]]], done);
       });
-
+    case "Nat":
+      return done([hols, Ref("Nat")]);
+    case "Chr":
+      return done([hols, Ref("Char")]);
+    case "Str":
+      return done([hols, Ref("String")]);
   };
   return fail(() => Err(locs, ctx, "Can't infer type."));
 };
@@ -864,6 +993,7 @@ function typesynth(name, defs, show = stringify) {
       })));
     var core_term = parse(stringify(canonicalize(term, hols)), 0, "term");
     var core_type = parse(stringify(canonicalize(type, hols)), 0, "term");
+    //console.log("....", name, stringify(term), stringify(canonicalize(term, hols)));
     defs[name].core = {term: core_term, type: core_type};
   }
   return defs[name].core;
@@ -900,12 +1030,18 @@ module.exports = {
   Loc,
   Hol,
   Cse,
+  Nat,
+  Chr,
+  Str,
   Ext,
   Nil,
   find,
   fold,
   stringify,
   parse,
+  build_cse,
+  build_nat,
+  unloc,
   reduce,
   normalize,
   canonicalize,

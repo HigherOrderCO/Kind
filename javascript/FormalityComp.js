@@ -86,6 +86,12 @@ function dependency_sort(defs, main) {
       case "Loc":
         go(term.expr);
         break;
+      case "Nat":
+        break;
+      case "Chr":
+        break;
+      case "Str":
+        break;
       default:
         break;
     };
@@ -173,31 +179,25 @@ function infer(term, defs, ctx = fmc.Nil()) {
       return check(term.expr, term.type, defs, ctx);
     case "Loc":
       return infer(term.expr, defs, ctx);
+    case "Nat":
+      return {
+        comp: Nat(term.natx),
+        type: fmc.Ref("Nat"),
+      };
+    case "Chr":
+      return {
+        comp: Chr(term.chrx),
+        type: fmc.Ref("Char"),
+      };
+    case "Str":
+      return {
+        comp: Str(term.strx),
+        type: fmc.Ref("String"),
+      };
   }
 };
 
 function check(term, type, defs, ctx = fmc.Nil()) {
-  var chr_lit = fml.stringify_chr(term);
-  if (chr_lit) {
-    var comp = Chr(chr_lit);
-    var type = fmc.Ref("Char");
-    return {comp, type};
-  }
-  
-  var str_lit = fml.stringify_str(term);
-  if (str_lit) {
-    var comp = Str(str_lit);
-    var type = fmc.Ref("String");
-    return {comp, type};
-  };
-
-  var nat_lit = fml.stringify_nat(term);
-  if (nat_lit) {
-    var comp = Nat(nat_lit);
-    var type = fmc.Ref("Nat");
-    return {comp, type};
-  };
-
   var typv = fmc.reduce(type, defs);
 
   if (typv.ctor === "Typ") {

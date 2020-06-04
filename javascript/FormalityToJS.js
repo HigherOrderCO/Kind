@@ -404,12 +404,12 @@ function js_code(term, name = null) {
         } else {
           throw "Internal compiler error. Please report on https://github.com/moonad/formality.";
         }
+      case "Nat":
+        return term.natx+"n";
       case "Chr":
         return term.chrx.charCodeAt(0);
       case "Str":
         return "`"+term.strx+"`";
-      case "Nat":
-        return term.natx+"n";
     };
   };
 };

@@ -1,3 +1,4 @@
+var debug = true;
 var fs = require("fs");
 var fm = require("./../Formality.js"); 
 var path = require("path");
@@ -27,6 +28,7 @@ function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
         var parsed = parse(file_code,0);
         var file_defs = parsed.defs;
       } catch (err) {
+        if (debug) console.log(err);
         error("\n\x1b[1mInside '\x1b[4m"+file+"\x1b[0m'"
              + "\x1b[1m:\x1b[0m\n" + err
              , exit_code);
@@ -67,6 +69,7 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
       var {term,type} = synth(name, defs, show);
       if (!silent) console.log(show_name + ": \x1b[2m" + show(type) + "\x1b[0m");
     } catch (err) {
+      if (debug) console.log(err);
       if (!silent) console.log(show_name + " : " + "\x1b[31merror\x1b[0m");
       errors.push([name, err()]);
     }
@@ -86,6 +89,10 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
   };
 
   // If there is no error nor unresolved equation, write `.fmc` file
+  // Right now, though, we're storing nat and string literals on .fmc files, even
+  // though that isn't valid core, for the sake of keeping sizes sane. That means
+  // that, to get actual core files, we need to parse with synt, then stringify
+  // with synt.stringify, setting to_core=true.
   if (errors.length === 0 && ext === ".fm") {
     if (!fs.existsSync(".fmc")) fs.mkdirSync(".fmc");
     if (!fs.existsSync(".fml")) fs.mkdirSync(".fml");
@@ -114,6 +121,7 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
     try {
       console.log(show(fm.synt.normalize(defs[main].core.term, defs, {}, true)));
     } catch (e) {
+      if (debug) console.log(e);
       error("Error.", exit_code);
     }
   };
@@ -125,12 +133,12 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
 };
 
 function _fmc_(main = "main", dir) {
-  _fm_(main, "./.fmc", ".fmc", fm.core.parse, fm.core.stringify, fm.core.typesynth, fm.core.normalize);
+  _fm_(main, "./.fmc", ".fmc", fm.synt.parse, fm.synt.stringify, fm.core.typesynth, fm.core.normalize);
 };
 
 function _js_(main = "main", dir, ext, parse, show, synth, norm) {
   _fm_(main, dir, ext, parse, show, synth, norm, true);
-  var {defs} = load("./.fmc", ".fmc", fm.core.parse);
+  var {defs} = load("./.fmc", ".fmc", fm.synt.parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
@@ -150,7 +158,7 @@ function _hs_(main = "main", dir, ext, parse) {
 };
 
 function _io_(main = "main", dir, ext, parse) {
-  var {defs} = load("./.fmc", ".fmc", fm.core.parse);
+  var {defs} = load("./.fmc", ".fmc", fm.synt.parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
@@ -159,12 +167,12 @@ function _io_(main = "main", dir, ext, parse) {
 };
 
 function _x_(main = "main", dir, ext, parse) {
-  var {defs} = load("./.fmc", ".fmc", fm.core.parse);
+  var {defs} = load("./.fmc", ".fmc", fm.synt.parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
     var result = fm.optx.normalize(defs[main].term, defs);
-    console.log(fm.core.stringify(result.term));
+    console.log(fm.synt.stringify(result.term));
     console.log(JSON.stringify(result.stats));
   };
 };

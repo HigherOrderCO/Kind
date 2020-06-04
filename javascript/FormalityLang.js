@@ -1,7 +1,9 @@
 var {
   Var, Ref, Typ, All,
   Lam, App, Let, Ann,
-  Loc, Ext, Nil, Hol, Cse,
+  Loc, Ext, Nil, Hol,
+  Cse, Nat, Chr, Str,
+  unloc,
   reduce,
   normalize,
   Err,
@@ -696,17 +698,12 @@ function parse_var(code, [indx,tags], err = false) {
       } else {
         if (tags) tag_to_mutate.ctor = "var"; // see comment on parse()
         return Loc(from, indx, get_var(xs, name, () => {
-          if (isNaN(Number(name))) {
+          if (/^[0-9]*$/.test(name)) {
+            if (tags) tag_to_mutate.ctor = "nat"; // see comment on parse()
+            return Nat(BigInt(name));
+          } else {
             if (tags) tag_to_mutate.ctor = "ref"; // see comment on parse()
             return Ref(name);
-          } else {
-            if (tags) tag_to_mutate.ctor = "nat"; // see comment on parse()
-            var num = Number(name);
-            var term = Ref("Nat.zero");
-            for (var i = 0; i < num; ++i) {
-              term = App(false, Ref("Nat.succ"), term);
-            };
-            return term;
           };
         }));
       }
@@ -774,24 +771,14 @@ function parse_ann(code, [indx,tags], from, expr, err) {
     [[indx,tags], xs => Loc(from, indx, Ann(false, expr(xs), type(xs)))])));
 };
 
-// Turns a character into a term
-function make_chr(chr) {
-  var cod = chr.charCodeAt(0);
-  var chr = Ref("Char.new");
-  for (var i = 15; i >= 0; --i) {
-    chr = App(false, chr, Ref((cod >>> i) & 1 ? "Bit.1" : "Bit.0"));
-  };
-  return chr;
-};
-
 // Parses a char literal, 'f'
 function parse_chr(code, [indx,tags], err) {
   var from = next(code, [indx,tags])[0];
   return (
     chain(parse_txt(code, next(code, [indx,tags]), "'"), ([indx,tags], skip) =>
-    chain([[indx+1,tags&&Ext(Tag("chr",code[indx]),tags)], code[indx]], ([indx,tags], clit) =>
+    chain([[indx+1,tags&&Ext(Tag("chr",code[indx]),tags)], code[indx]], ([indx,tags], chrx) =>
     chain(parse_txt(code, next(code, [indx,tags]), "'"), ([indx,tags], skip) =>
-    [[indx,tags], xs => Loc(from, indx, Ann(true, make_chr(clit), Ref("Char")))]
+    [[indx,tags], xs => Loc(from, indx, Ann(true, Chr(chrx), Ref("Char")))]
     ))));
 };
 
@@ -801,19 +788,15 @@ function parse_str(code, [indx,tags], err) {
   return (
     chain(parse_txt(code, next(code, [indx,tags]), "\""), ([indx,tags], skip) =>
     chain((function go([indx,tags], slit) {
-      if (indx < code.length) {
-        if (code[indx] !== "\"") {
-          var chr = make_chr(code[indx]);
-          var [[indx,tags], slit] = go([indx+1,tags&&Ext(Tag("str",code[indx]),tags)], slit);
-          return [[indx,tags], App(false, App(false, Ref("String.cons"), chr), slit)];
+      var strx = "";
+      while (code[indx] !== '"') {
+        if (indx >= code.length) {
+          parse_error(code, indx, "unterminated string literal", true);
         } else {
-          return [[indx+1,tags&&Ext(Tag("txt",'"'),tags)], Ref("String.nil")];
+          strx += code[indx++];
         }
-      } else if (err) {
-        parse_error(code, indx, "string literal", true);
-      } else {
-        return null;
       }
+      return [[indx+1,tags], Str(strx)];
     })([indx,tags]), ([indx,tags], slit) =>
     [[indx,tags], xs => Loc(from, indx, Ann(true, slit, Ref("String")))])));
 };
@@ -1038,21 +1021,6 @@ function parse(code, indx = 0, tags_list = Nil()) {
 // Stringification
 // ===============
 
-function unloc(term) {
-  switch (term.ctor) {
-    case "Var": return term;
-    case "Ref": return term;
-    case "Typ": return term;
-    case "All": return All(term.eras, term.self, term.name, unloc(term.bind), (s, x) => unloc(term.body(s, x)));
-    case "Lam": return Lam(term.eras, term.name, x => unloc(term.body(x)));
-    case "App": return App(term.eras, unloc(term.func), unloc(term.argm));
-    case "Let": return Let(term.dups, term.name, unloc(term.expr), x => unloc(term.body(x)));
-    case "Ann": return Ann(term.done, unloc(term.expr), unloc(term.type));
-    case "Loc": return unloc(term.expr);
-    case "Hol": return term;
-  };
-};
-
 // Stringifies a character literal
 function stringify_chr(chr) {
   var val = 0;
@@ -1231,6 +1199,12 @@ function stringify_trm(term) {
         return expr;
       case "Hol":
         return "?"+term.name; // +"{"+fold(term.vals,"",(h,t)=>stringify(h)+";"+t)+"}";
+      case "Nat":
+        return ""+term.natx;
+      case "Chr":
+        return "'"+term.chrx+"'";
+      case "Str":
+        return '"'+term.strx+'"';
     }
   }
 };
@@ -1566,7 +1540,6 @@ module.exports = {
   parse_pip,
   parse_arr,
   parse_ann,
-  make_chr,
   parse_chr,
   parse_str,
   parse_trm,
