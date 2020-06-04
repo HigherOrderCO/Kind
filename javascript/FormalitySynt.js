@@ -528,7 +528,6 @@ function canonicalize(term, hols = {}, to_core = false) {
         return term;
       };
   case "Chr":
-    console.log("canon", term);
     if (to_core) {
       var done = Ref("Char.new");
       var ccod = term.chrx.charCodeAt(0);

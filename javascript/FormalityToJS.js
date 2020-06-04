@@ -184,6 +184,7 @@ function fresh() {
 function subst(term, name, val) {
   switch (term.ctor) {
     case "Var": return term.name === name ? val : term;
+    case "Ref": return cmp.Ref(term.name);
     case "Lam": return cmp.Lam(term.name, term.name === name ? term.body : subst(term.body, name, val));
     case "App": return cmp.App(subst(term.func, name, val), subst(term.argm, name, val));
     case "Let": return cmp.Let(term.name, subst(term.expr, name, val), term.name === name ? term.body : subst(term.body, name, val));
@@ -234,7 +235,7 @@ function application(func, allow_empty = false) {
   args.reverse();
 
   // Primitive function application
-  if (func && (allow_empty || args.length > 0) && func.ctor === "Var" && prim_funcs[func.name]) {
+  if (func && (allow_empty || args.length > 0) && func.ctor === "Ref" && prim_funcs[func.name]) {
     var [arity, template] = prim_funcs[func.name];
     return build_from_template(arity, template, args);
 
@@ -299,7 +300,7 @@ function instantiation(term) {
         func = func.func;
       };
       args.reverse();
-      if (func.ctor === "Var") {
+      if (func.ctor === "Var" || func.ctor === "Ref") {
         for (var i = 0; i < vars.length; ++i) {
           if (func.name === vars[i]) {
             var [ctor_arity, ctor_template] = templates[i];
@@ -346,19 +347,106 @@ function flatten_lets(term) {
   return res;
 };
 
-var NAME = null;
+// Checks if a function is recursive and tail-safe.
+function recursion(term, name) {
+  // Used by tail-call detection. If this application is the elimination of a
+  // native type, then its arguments are all in tail position.
+  function get_branches(term) {
+    var done = false;
+    var func = term;
+    var args = [];
+    while (func.ctor === "App") {
+      args.push(func.argm);
+      func = func.func;
+    };
+    args.reverse();
+    if (func.ctor === "Eli") {
+      //console.log("- Possibly branch safe.");
+      if (typeof func.prim === "string" && prim_types[func.prim]) {
+        var type_info = prim_types[func.prim];
+      } else if (typeof func.prim === "object") {
+        var type_info = adt_type(func.prim);
+      } else {
+        return null;
+      }
+      if (args.length === type_info.inst.length) {
+        //console.log("- Correct case count.");
+        var branches = [];
+        for (var i = 0; i < args.length; ++i) {
+          var fields = type_info.inst[i][0];
+          var branch = args[i];
+          //console.log("...", i, fields, type_info.inst[i], branch);
+          var arity = 0;
+          while (arity < fields && branch.ctor === "Lam") {
+            arity += 1;
+            branch = branch.body;
+          }
+          if (arity === fields) {
+            //console.log("- Correct field count on branch "+i+".");
+            branches.push(branch);
+          }
+        }
+        if (args.length === branches.length) {
+          return branches;
+        }
+      }
+    }
+    return null;
+  };
+  var args = [];
+  while (term.ctor === "Lam") {
+    args.push(term.name);
+    term = term.body;
+  };
+  var is_recursive = false;
+  var is_tail_safe = true;
+  function check(term, tail) {
+    switch (term.ctor) {
+      case "Lam":
+        check(term.body, tail);
+        break;
+      case "App":
+        var branches = tail && get_branches(term);
+        if (branches) {
+          check(term.func, tail);
+          for (var branch of branches) {
+            check(branch, tail);
+          };
+        } else {
+          check(term.func, tail);
+          check(term.argm, false);
+        };
+        break;
+      case "Let":
+        check(term.expr, tail);
+        check(term.body, tail);
+        break;
+      case "Eli":
+        check(term.expr, tail);
+        break;
+      case "Ins":
+        check(term.expr, tail);
+        break;
+      case "Ref":
+        if (term.name === name) {
+          is_recursive = true;
+          is_tail_safe = is_tail_safe && tail;
+        };
+        break;
+    };
+  };
+  check(term, true);
+  if (is_recursive) {
+    return {tail: is_tail_safe, args};
+  }
+  return null;
+};
+
 function js_code(term, name = null) {
-  if (name) NAME = name;
+  var rec = recursion(term, name);
   var app = application(term);
   var ins = instantiation(term);
-  // Application optimization
-  if (app) {
-    return app;
-  // Instantiation optimization
-  } else if (ins) {
-    return ins;
-  // Tail-call optimization
-  } else if (name && name.slice(-4) === ".tco") {
+  if (rec && rec.tail) {
     var vars = [];
     var code = "";
     while (term.ctor === "Lam") {
@@ -376,6 +464,10 @@ function js_code(term, name = null) {
     code += "else return R;";
     code += "}}";
     return code;
+  } else if (app) {
+    return app;
+  } else if (ins) {
+    return ins;
   } else if (typeof term === "string") {
     return term;
   } else {
@@ -486,7 +578,7 @@ function compile(defs, main) {
     // Generate JS expression
     var expr = null;
     if (used_prim_funcs[name]) {
-      expr = application(cmp.Var(name), true);
+      expr = application(cmp.Ref(name), true);
     } else {
       try {
         var comp = cmps[name];

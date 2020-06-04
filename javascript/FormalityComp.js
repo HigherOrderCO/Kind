@@ -128,7 +128,7 @@ function infer(term, defs, ctx = fmc.Nil()) {
     case "Ref":
       var got_def = defs[term.name];
       return {
-        comp: Var(term.name),
+        comp: Ref(term.name),
         type: got_def.type,
       };
     case "Typ":
