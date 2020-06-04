@@ -142,12 +142,8 @@ function _fmc_(main = "main", dir) {
   function parse(code) {
     var {defs} = fm.synt.parse(code);
     for (var def in defs) {
-      if (def === "Docs.a_string") {
-        console.log(def);
-        console.log(fm.synt.stringify(fm.synt.canonicalize(defs[def].term, {}, true)));
-        defs[def].term = fm.core.parse(fm.synt.stringify(fm.synt.canonicalize(defs[def].term, {}, true)), 0, "term");
-        defs[def].type = fm.core.parse(fm.synt.stringify(fm.synt.canonicalize(defs[def].type, {}, true)), 0, "term");
-      }
+      defs[def].term = fm.core.parse(fm.synt.stringify(fm.synt.canonicalize(defs[def].term, {}, true)), 0, "term");
+      defs[def].type = fm.core.parse(fm.synt.stringify(fm.synt.canonicalize(defs[def].type, {}, true)), 0, "term");
     };
     return {defs};
   };
