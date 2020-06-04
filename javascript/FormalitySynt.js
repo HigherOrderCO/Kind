@@ -321,7 +321,7 @@ function reduce(term, defs = {}, hols = {}, erased = false) {
       if (defs[term.name]) {
         // If reference wasn't synthetized, synthetize it
         if (defs[term.name].core === undefined) {
-          var got = typesynth(term.name, defs, show).term;
+          var got = typesynth(term.name, defs).term;
         // If reference is being synthetized, return its version with holes
         } else if (defs[term.name].core === null) {
           var got = defs[term.name].term;

@@ -1,4 +1,4 @@
-var debug = true;
+var debug = false;
 var fs = require("fs");
 var fm = require("./../Formality.js"); 
 var path = require("path");
@@ -71,7 +71,11 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
     } catch (err) {
       if (debug) console.log(err);
       if (!silent) console.log(show_name + " : " + "\x1b[31merror\x1b[0m");
-      errors.push([name, err()]);
+      if (typeof err === "function") {
+        errors.push([name, err()]);
+      } else {
+        errors.push([name, "Internal error."]);
+      };
     }
   };
   if (!silent) console.log("");
