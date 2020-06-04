@@ -624,9 +624,10 @@ function parse_ite(code, [indx,tags], err = false) {
     })))))));
 };
 
+// Parses the do-notation
 function parse_don(code, [indx,tags], err = false) {
   var from = next(code, [indx,tags])[0];
-  function parse_stt(bind, done) {
+  function parse_stt(mnam) {
     return function parse_stt(code, [indx,tags], err) {
       return choose([
         () => // var x = expr; body
@@ -639,7 +640,7 @@ function parse_don(code, [indx,tags], err = false) {
             var nam0 = new_name();
             var nam1 = new_name();
             return [[indx,tags], xs => {
-              var term = bind(xs);
+              var term = App(false, App(true, Ref("Monad.bind"), Ref(mnam)), Ref(mnam+".monad"));
               var term = App(true, term, hole(nam0, xs));
               var term = App(true, term, hole(nam1, xs));
               var term = App(false, term, expr(xs));
@@ -653,7 +654,7 @@ function parse_don(code, [indx,tags], err = false) {
           chain(parse_txt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) => {
             var nam0 = new_name();
             return [[indx,tags], xs => {
-              var term = done(xs);
+              var term = App(false, App(true, Ref("Monad.pure"), Ref(mnam)), Ref(mnam+".monad"));
               var term = App(true, term, hole(nam0, xs));
               var term = App(false, term, expr(xs));
               return term;
@@ -666,7 +667,7 @@ function parse_don(code, [indx,tags], err = false) {
             var nam0 = new_name();
             var nam1 = new_name();
             return [[indx,tags], xs => {
-              var term = bind(xs);
+              var term = App(false, App(true, Ref("Monad.bind"), Ref(mnam)), Ref(mnam+".monad"));
               var term = App(true, term, hole(nam0, xs));
               var term = App(true, term, hole(nam1, xs));
               var term = App(false, term, expr(xs));
@@ -679,12 +680,11 @@ function parse_don(code, [indx,tags], err = false) {
   };
   return (
     chain(parse_txt(code, next(code, [indx,tags]), "do "), ([indx,tags], skip) =>
-    chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], bind) =>
-    chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], done) =>
+    chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], mnam) =>
     chain(parse_txt(code, next(code, [indx,tags]), "{", err), ([indx,tags], skip) =>
-    chain(parse_stt(bind,done)(code, next(code, [indx,tags]), err), ([indx,tags], term) =>
+    chain(parse_stt(mnam)(code, next(code, [indx,tags]), err), ([indx,tags], term) =>
     chain(parse_txt(code, next(code, [indx,tags]), "}", err), ([indx,tags], skip) =>
-    [[indx,tags], xs => Loc(from, indx, term(xs))])))))));
+    [[indx,tags], xs => Loc(from, indx, term(xs))]))))));
 };
 
 // Parses variables, `<name>`
