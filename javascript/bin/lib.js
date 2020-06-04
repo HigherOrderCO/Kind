@@ -137,7 +137,21 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
 };
 
 function _fmc_(main = "main", dir) {
-  _fm_(main, "./.fmc", ".fmc", fm.synt.parse, fm.synt.stringify, fm.core.typesynth, fm.core.normalize);
+  // Since we're storing fm-synt nat/string literals on .fmc files, in order to
+  // get proper core terms, we parse .fmc using fm.synt and then convert to core
+  function parse(code) {
+    var {defs} = fm.synt.parse(code);
+    for (var def in defs) {
+      if (def === "Docs.a_string") {
+        console.log(def);
+        console.log(fm.synt.stringify(fm.synt.canonicalize(defs[def].term, {}, true)));
+        defs[def].term = fm.core.parse(fm.synt.stringify(fm.synt.canonicalize(defs[def].term, {}, true)), 0, "term");
+        defs[def].type = fm.core.parse(fm.synt.stringify(fm.synt.canonicalize(defs[def].type, {}, true)), 0, "term");
+      }
+    };
+    return {defs};
+  };
+  _fm_(main, "./.fmc", ".fmc", parse, fm.core.stringify, fm.synt.typesynth, fm.synt.normalize);
 };
 
 function _js_(main = "main", dir, ext, parse, show, synth, norm) {

@@ -542,7 +542,7 @@ function canonicalize(term, hols = {}, to_core = false) {
     if (to_core) {
       var done = Ref("String.nil");
       for (var i = 0; i < term.strx.length; ++i) {
-        var chr = stringify(Chr(term.strx[term.strx.length-i-1]));
+        var chr = canonicalize(Chr(term.strx[term.strx.length-i-1]), hols, to_core);
         done = App(false, App(false, Ref("String.cons"), chr), done);
       }
       return done;
@@ -992,7 +992,6 @@ function typesynth(name, defs, show = stringify) {
       })));
     var core_term = parse(stringify(canonicalize(term, hols)), 0, "term");
     var core_type = parse(stringify(canonicalize(type, hols)), 0, "term");
-    //console.log("....", name, stringify(term), stringify(canonicalize(term, hols)));
     defs[name].core = {term: core_term, type: core_type};
   }
   return defs[name].core;
