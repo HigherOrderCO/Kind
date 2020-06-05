@@ -1,8 +1,9 @@
 var {
   Var, Ref, Typ, All,
   Lam, App, Let, Ann,
-  Loc, Ext, Nil, Hol,
-  Cse, Nat, Chr, Str,
+  Loc, Ext, Nil, Wat,
+  Hol, Cse, Nat, Chr,
+  Str,
   unloc,
   reduce,
   normalize,
@@ -503,17 +504,17 @@ function parse_typ(code, [indx,tags], err = false) {
     [[indx,tags], xs => Loc(from, indx, Typ())]));
 };
 
-// Parses holes, `?a`
-function parse_hol(code, [indx,tags], err) {
+// Parses an assumption, `?a`
+function parse_wat(code, [indx,tags], err) {
   var from = next(code, [indx,tags])[0];
   return (
     chain(parse_txt(code, [indx,tags], "?", false), ([indx,tags], skip) =>
     chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
-    [[indx,tags], xs => hole(name, xs)])));
+    [[indx,tags], xs => Wat(name)])));
 };
 
-// Parses an unnamed hole, `_`
-function parse_und(code, [indx,tags], err) {
+// Parses a hole that Formality will try to auto-complete, `_`
+function parse_hol(code, [indx,tags], err) {
   var from = next(code, [indx,tags])[0];
   return (
     chain(parse_txt(code, [indx,tags], "_", false), ([indx,tags], skip) => {
@@ -958,8 +959,8 @@ function parse_trm(code, [indx = 0, tags = []], err) {
     () => parse_chr(code, [indx,tags], err),
     () => parse_str(code, [indx,tags], err),
     () => parse_lst(code, [indx,tags], err),
+    () => parse_wat(code, [indx,tags], err),
     () => parse_hol(code, [indx,tags], err),
-    () => parse_und(code, [indx,tags], err),
     () => parse_cse(code, [indx,tags], err),
     () => parse_ite(code, [indx,tags], err),
     () => parse_don(code, [indx,tags], err),
@@ -1309,7 +1310,9 @@ function stringify_trm(term) {
         var expr = stringify_trm(term.expr);
         return expr;
       case "Hol":
-        return "?"+term.name; // +"{"+fold(term.vals,"",(h,t)=>stringify(h)+";"+t)+"}";
+        return "_"+term.name; // +"{"+fold(term.vals,"",(h,t)=>stringify(h)+";"+t)+"}";
+      case "Wat":
+        return "?"+term.name;
       case "Nat":
         return ""+term.natx;
       case "Chr":
@@ -1335,7 +1338,6 @@ function stringify_ctx(ctx, text = "") {
         var text = "- " + name + " : " + type + "\n" + text;
       }
       return stringify_ctx(ctx.tail, text);
-      return ;
     case "Nil":
       return text;
   };
@@ -1393,7 +1395,9 @@ function highlight_code(code, from, to) {
 };
 
 function stringify_err(err, code) {
-  var code = code[code.length-1] !== "\n" ? code+"\n" : code;
+  if (code) {
+    code = code[code.length-1] !== "\n" ? code+"\n" : code;
+  }
   var index = 0;
   if (!err.ctx) {
     if (__dirname.indexOf("vic/dev") !== -1) {
@@ -1406,7 +1410,11 @@ function stringify_err(err, code) {
     str += err.msg+"\n";
     if (err.ctx.ctor !== "Nil") {
       str += "With context:\n";
-      str += "\x1b[2m"+stringify_ctx(err.ctx)+"\x1b[0m";
+      str += stringify_ctx(err.ctx)
+        .replace(/\n*$/g,"")
+        .split("\n")
+        .map(line => "\x1b[2m"+line+"\x1b[0m")
+        .join("\n");
     };
     if (err.loc && code) {
       str += highlight_code(code, err.loc.from, err.loc.upto);

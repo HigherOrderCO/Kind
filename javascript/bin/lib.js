@@ -56,15 +56,9 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
   // Normalizes and type-checks all terms
   if (!silent) console.log("\033[4m\x1b[1mType-checking:\x1b[0m");
   var errors = [];
-  //var max_len = 0;
-  //for (var name in defs) {
-    //max_len = Math.max(name.length, max_len);
-  //};
+  fm.synt.clear_hole_logs();
   for (var name in defs) {
     var show_name = name;
-    //while (show_name.length < max_len) {
-      //show_name = show_name + " ";
-    //}
     try {
       var {term,type} = synth(name, defs, show);
       if (!silent) console.log(show_name + ": \x1b[2m" + show(type) + "\x1b[0m");
@@ -90,6 +84,18 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
     };
   } else {
     if (!silent) console.log("\033[4m\x1b[1mAll terms check.\x1b[0m");
+  };
+
+  // If there are hole errors, prints them
+  
+  var hole_logs_len = Object.keys(fm.synt.HOLE_LOGS).length;
+  if (!silent && hole_logs_len > 0) {
+    console.log("");
+    console.log("\033[4m\x1b[1mFound " + errors.length + " hole(s):\x1b[0m");
+    for (var hole in fm.synt.HOLE_LOGS) {
+      console.log("");
+      console.log(fm.synt.HOLE_LOGS[hole]);
+    };
   };
 
   // If there is no error nor unresolved equation, write `.fmc` file
@@ -121,7 +127,8 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
   // If user asked to evaluate main, do it
   if (!silent && defs[main]) {
     console.log("");
-    console.log("\033[4m\x1b[1mEvaluating main:\x1b[0m");
+    console.log("\033[4m\x1b[1mReducing '"+main+"':\x1b[0m");
+    console.log("");
     try {
       console.log(show(fm.synt.normalize(defs[main].core.term, defs, {}, true)));
     } catch (e) {

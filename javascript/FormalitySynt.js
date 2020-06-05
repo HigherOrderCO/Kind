@@ -12,6 +12,7 @@ const App = (eras,func,argm)           => ({ctor:"App",eras,func,argm});
 const Let = (dups,name,expr,body)      => ({ctor:"Let",dups,name,expr,body});
 const Ann = (done,expr,type)           => ({ctor:"Ann",done,expr,type});
 const Loc = (from,upto,expr)           => ({ctor:"Loc",from,upto,expr});
+const Wat = (name)                     => ({ctor:"Wat",name});
 const Hol = (name,vals)                => ({ctor:"Hol",name,vals});
 const Cse = (name,func,info)           => ({ctor:"Cse",name,func,info});
 const Nat = (natx)                     => ({ctor:"Nat",natx});
@@ -95,8 +96,10 @@ function stringify(term) {
       return ":" + type + " " + expr;
     case "Loc":
       return stringify(term.expr);
-    case "Hol":
+    case "Wat":
       return "?"+term.name;
+    case "Hol":
+      return "_"+term.name;
     case "Cse":
       return "<TODO:stringify.case>";
     case "Nat":
@@ -181,6 +184,9 @@ function parse(code, indx, mode = "defs") {
         var expr = parse_term();
         return ctx => Ann(false, expr(ctx), type(ctx));
       case "?":
+        var name = parse_name();
+        return ctx => Wat(name);
+      case "_":
         var name = parse_name();
         return ctx => Hol(name, fold(ctx, Nil(), (h,t) => Ext(h[1],t)));
       case "'":
@@ -306,6 +312,7 @@ function unloc(term) {
     case "Let": return Let(term.dups, term.name, unloc(term.expr), x => unloc(term.body(x)));
     case "Ann": return Ann(term.done, unloc(term.expr), unloc(term.type));
     case "Loc": return unloc(term.expr);
+    case "Wat": return term;
     case "Hol": return term;
     case "Nat": return term;
     case "Chr": return term;
@@ -379,6 +386,8 @@ function reduce(term, defs = {}, hols = {}, erased = false) {
       return reduce(term.expr, defs, hols, erased);
     case "Loc":
       return reduce(term.expr, defs, hols, erased);
+    case "Wat":
+      return Wat(term.name);
     case "Hol":
       if (hols[term.name]) {
         return reduce(hols[term.name](term.vals), defs, hols, erased);
@@ -440,6 +449,8 @@ function normalize(term, defs, hols = {}, erased = false, seen = {}) {
         return normalize(norm.expr, defs, hols, erased, seen);
       case "Loc":
         return normalize(norm.expr, defs, hols, erased, seen);
+      case "Wat":
+        return Wat(norm.name);
       case "Hol":
         return Hol(norm.name, norm.vals);
       case "Cse":
@@ -505,17 +516,19 @@ function canonicalize(term, hols = {}, to_core = false) {
       }
     case "Loc":
       return canonicalize(term.expr, hols, to_core);
+    case "Wat":
+      throw () => "Incomplete program.";
     case "Hol":
       if (hols[term.name]) {
         return canonicalize(hols[term.name](term.vals), hols, to_core);
       } else {
-        throw "Unfilled hole." + term.name;
+        throw () => "Unfilled hole: " + term.name + ".";
       }
     case "Cse":
       if (hols[term.name]) {
         return canonicalize(build_cse(term, hols[term.name]), hols, to_core);
       } else {
-        throw "Incomplete case.";
+        throw () => "Incomplete case.";
       }
     case "Nat":
       if (to_core) {
@@ -591,8 +604,10 @@ function hash(term, dep = 0) {
     case "Loc":
       var expr = hash(term.expr, dep);
       return expr;
-    case "Hol":
+    case "Wat":
       return "?" + term.name;
+    case "Hol":
+      return "_" + term.name;
     case "Cse":
       return "-"+Math.random();
     case "Nat":
@@ -947,6 +962,17 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
       } else {
         return done([hols, type]);
       };
+    case "Wat":
+      var ctx = fold(ctx, Nil(), ({name,type}, ctx) => {
+        var type = normalize(type, {}, hols, true);
+        return Ext({name,type}, ctx);
+      });
+      var err = Err(locs, ctx,
+        "\x1b[1mHole \x1b[4m"+term.name+"\x1b[0m\x1b[1m:\x1b[0m\n" +
+        "With type: "+show(normalize(type,{},hols,true),ctx));
+      var msg = require("./FormalityLang.js").stringify_err(err, null).replace(/\n*$/g,"");
+      HOLE_LOGS[term.name] = msg;
+      return done([hols, type]);
     default:
       return deep([[typeinfer, [term, defs, show, hols, ctx, locs]]], ([hols, infr]) => {
         try {
@@ -1016,6 +1042,14 @@ function new_name() {
   return nth_name(name_count++).toUpperCase();
 };
 
+var HOLE_LOGS = {};
+
+function clear_hole_logs() {
+  for (var key in HOLE_LOGS) {
+    delete HOLE_LOGS[key];
+  }
+};
+
 module.exports = {
   Var,
   Ref,
@@ -1026,6 +1060,7 @@ module.exports = {
   Let,
   Ann,
   Loc,
+  Wat,
   Hol,
   Cse,
   Nat,
@@ -1050,4 +1085,6 @@ module.exports = {
   typeinfer,
   typecheck,
   typesynth,
+  HOLE_LOGS,
+  clear_hole_logs,
 };
