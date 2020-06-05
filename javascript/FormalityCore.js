@@ -75,7 +75,7 @@ function stringify(term) {
   };
 };
 
-function parse(code, indx, kind = "defs") {
+function parse(code, indx, mode = "defs") {
   function is_name(chr) {
     var val = chr.charCodeAt(0);
     return (val >= 46 && val < 47)   // .
@@ -171,7 +171,7 @@ function parse(code, indx, kind = "defs") {
     }
   };
   var indx = 0;
-  if (kind === "defs") {
+  if (mode === "defs") {
     var defs = {};
     parse_defs();
     return {defs};

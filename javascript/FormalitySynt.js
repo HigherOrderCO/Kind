@@ -223,8 +223,8 @@ function parse(code, indx, mode = "defs") {
       parse_defs();
     }
   };
+  var indx = 0;
   if (mode === "defs") {
-    var indx = 0;
     var defs = {};
     parse_defs();
     return {defs};
