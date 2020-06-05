@@ -661,9 +661,9 @@ function parse_don(code, [indx,tags], err = false) {
             }];
           }))),
         () => // expr; body
-          chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], expr) =>
-          chain(parse_txt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) =>
-          chain(parse_stt(code, next(code, [indx,tags]), err), ([indx,tags], body) => {
+          chain(parse_trm(code, next(code, [indx,tags]), false), ([indx,tags], expr) =>
+          chain(parse_txt(code, next(code, [indx,tags]), ";", false), ([indx,tags], skip) =>
+          chain(parse_stt(code, next(code, [indx,tags]), false), ([indx,tags], body) => {
             var nam0 = new_name();
             var nam1 = new_name();
             return [[indx,tags], xs => {
@@ -675,6 +675,18 @@ function parse_don(code, [indx,tags], err = false) {
               return term;
             }];
           }))),
+        () => // expr;
+          chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], expr) =>
+          chain(parse_txt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) => {
+            return [[indx,tags], xs => {
+              //var term = App(false, App(true, Ref("Monad.bind"), Ref(mnam)), Ref(mnam+".monad"));
+              //var term = App(true, term, hole(nam0, xs));
+              //var term = App(true, term, hole(nam1, xs));
+              //var term = App(false, term, expr(xs));
+              //body(Ext(["",x],xs))));
+              return expr(xs);
+            }];
+          })),
       ]);
     };
   };
