@@ -197,12 +197,19 @@ function parse_app_list(parser) {
 
 // parse binder `x: A`
 function parse_bnd(code, [indx,tags], err) {
-  return (
-  chain(parse_nam(code, next(code, [indx,tags]), true, false), ([indx,tags], name) =>
-  chain(parse_txt(code, next(code, [indx,tags]), ":", false), ([indx,tags], skip) =>
-  chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], type) => 
-  [[indx,tags], [name, type]]
-  ))));
+  return choose([
+    () => (
+      chain(parse_nam(code, next(code, [indx,tags]), true, false), ([indx,tags], name) =>
+      chain(parse_txt(code, next(code, [indx,tags]), ":", false), ([indx,tags], skip) =>
+      chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], type) => 
+      [[indx,tags], [name, type]]
+      )))),
+    () => (
+      chain(parse_nam(code, next(code, [indx,tags]), true, false), ([indx,tags], name) =>
+      chain(parse_txt(code, next(code, [indx,tags]), ":", false), ([indx,tags], skip) =>
+      [[indx,tags], [name, null]]
+      ))),
+    ]);
 };
 
 // Parses a valid name, non-empty
@@ -1416,6 +1423,7 @@ function stringify_err(err, code) {
         .map(line => "\x1b[2m"+line+"\x1b[0m")
         .join("\n");
     };
+    str += "\n";
     if (err.loc && code) {
       str += highlight_code(code, err.loc.from, err.loc.upto);
     };
