@@ -75,9 +75,7 @@ function stringify(term) {
   };
 };
 
-function parse(code, indx) {
-  var indx = 0;
-  var defs = {};
+function parse(code, indx, mode = "defs") {
   function is_name(chr) {
     var val = chr.charCodeAt(0);
     return (val >= 46 && val < 47)   // .
@@ -172,8 +170,14 @@ function parse(code, indx) {
       parse_defs();
     }
   };
-  parse_defs();
-  return {defs};
+  var indx = 0;
+  if (mode === "defs") {
+    var defs = {};
+    parse_defs();
+    return {defs};
+  } else {
+    return parse_term()(Nil());
+  }
 };
 
 // Evaluation
@@ -291,8 +295,7 @@ function hash(term, dep = 0) {
       var indx = Number(term.indx.split("#")[1]);
       if (indx < 0) {
         return "^"+(dep+indx);
-      }
-      else{
+      } else {
         return "#"+indx;
       }
     case "Ref":
@@ -477,6 +480,13 @@ function typecheck(term, type, defs, show = stringify, ctx = Nil(), locs = null)
   return {term,type};
 };
 
+function typesynth(name, defs, show = stringify) {
+  var term = defs[name].term;
+  var type = defs[name].type;
+  defs[name].core = {term, type};
+  return typecheck(term, type, defs, show);
+};
+
 module.exports = {
   Var,
   Ref,
@@ -497,5 +507,6 @@ module.exports = {
   Err,
   typeinfer,
   typecheck,
+  typesynth,
   equal,
 };
