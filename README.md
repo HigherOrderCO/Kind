@@ -56,30 +56,30 @@ Examples
 - Adding all numbers of a list:
 
     ```haskell
-    List.sum(xs: List(Nat)) : Nat
+    Docs.List.sum(xs: List(Nat)) : Nat
       case xs:
       | Nat.zero;
-      | (head, tail) Nat.add(head, List.sum(tail));
+      | Nat.add(xs.head, Docs.List.sum(xs.tail));
     ```
 
 - A proof that negating a bool twice returns the same bool:
 
     ```haskell
-    Bool.double_negation_theorem(b: Bool): Equal(_, Bool.not(Bool.not(b)), b)
-      case b
-      : (b) Equal(_, Bool.not(Bool.not(b)), b);
+    Docs.Bool.double_negation_theorem(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
+      case b:
       | Equal.to<_, Bool.true>;
       | Equal.to<_, Bool.false>;
+      : Equal(Bool, Bool.not(Bool.not(b.self)), b.self);
     ```
 
 - Extracting the first element of a list statically checked to be non-empty:
 
     ```haskell
-    List.safe_head(A: Type, xs: List(A), not_empty: List.not_empty<A>(xs)) : A
-      case xs : (xs) (e: List.not_empty<A>(xs)) -> A;
-      | (ne) Empty.absurd(ne, A);
-      | (x, xs, ne) x;
-      | not_empty;
+   Docs.List.head<A: Type>(xs: List(A), not_empty: List.not_empty<A>(xs)) : A
+    case xs:
+    with ne : List.not_empty<A>(xs.self) = not_empty;
+    | Empty.absurd(ne, A);
+    | xs.head;
     ```
 
 TODO: include examples of Python-looking Formality for non-FP people.
