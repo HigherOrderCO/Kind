@@ -172,6 +172,8 @@ var prim_funcs = {
   "F64.acos"    : [1, a=>`Math.acos(${a})`],
   "F64.asin"    : [1, a=>`Math.asin(${a})`],
   "F64.atan"    : [1, a=>`Math.atan(${a})`],
+  "F64.parse"   : [1, a=>`Number(${a})`],
+  "F64.cmp"     : [2, a=>b=>`${a}===${b}`],
   "String.eql"  : [2, a=>b=>`${a}===${b}`],
 };
 
