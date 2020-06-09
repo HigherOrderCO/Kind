@@ -1,4 +1,4 @@
-const fmc = require("./FormalityCore.js");
+const fmc = require("./FormalitySynt.js");
 const fml = require("./FormalityLang.js");
 const cmp = require("./FormalityComp.js");
 
@@ -104,7 +104,7 @@ var prim_funcs = {
   "Nat.sub"     : [2, a=>b=>`${a}-${b}<=0n?0n:${a}-${b}`],
   "Nat.mul"     : [2, a=>b=>`${a}*${b}`],
   "Nat.div"     : [2, a=>b=>`${a}/${b}`],
-  "Nat.div_mod" : [2, a=>b=>`({_:'Pair.new','a':${a}/${b},'b':${a}%${b}})`], // TODO change to proper pair
+  "Nat.div_mod" : [2, a=>b=>`({_:'Pair.new','fst':${a}/${b},'snd':${a}%${b}})`], // TODO change to proper pair
   "Nat.pow"     : [2, a=>b=>`${a}**${b}`],
   "Nat.ltn"     : [2, a=>b=>`${a}<${b}`],
   "Nat.lte"     : [2, a=>b=>`${a}<=${b}`],

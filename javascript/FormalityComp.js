@@ -1,4 +1,4 @@
-var fmc = require("./FormalityCore.js");
+var fmc = require("./FormalitySynt.js");
 var fml = require("./FormalityLang.js");
 
 const Var = (name)           => ({ctor:"Var",name});

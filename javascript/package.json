@@ -1,6 +1,6 @@
 {
   "name": "formality-lang",
-  "version": "0.4.27",
+  "version": "0.4.28",
   "description": "The Formality proof language",
   "main": "Formality.js",
   "bin": {
