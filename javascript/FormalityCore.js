@@ -7,7 +7,7 @@ const Typ = ()                         => ({ctor:"Typ"});
 const All = (eras,self,name,bind,body) => ({ctor:"All",eras,self,name,bind,body});
 const Lam = (eras,name,body)           => ({ctor:"Lam",eras,name,body});
 const App = (eras,func,argm)           => ({ctor:"App",eras,func,argm});
-const Let = (dups,name,expr,body)      => ({ctor:"Let",dups,name,expr,body});
+const Let = (name,expr,body)           => ({ctor:"Let",name,expr,body});
 const Ann = (done,expr,type)           => ({ctor:"Ann",done,expr,type});
 const Loc = (from,upto,expr)           => ({ctor:"Loc",from,upto,expr});
 
@@ -34,7 +34,7 @@ function find(list, cond, indx = 0) {
 // Syntax
 // ======
 
-function stringify(term) {
+function stringify(term, depth = 0) {
   switch (term.ctor) {
     case "Var":
       return term.indx.split("#")[0];
@@ -44,34 +44,33 @@ function stringify(term) {
       return "*";
     case "All":
       var bind = term.eras ? "∀" : "Π";
-      var self = term.self;
-      var name = term.name;
-      var type = stringify(term.bind);
-      var body = stringify(term.body(Var(term.self+"#"), Var(term.name+"#")));
+      var self = term.self || ("x"+(depth+0));
+      var name = term.name || ("x"+(depth+1));
+      var type = stringify(term.bind, depth);
+      var body = stringify(term.body(Var(self+"#"), Var(name+"#")), depth+2);
       return bind + self + "(" + name + ":" + type + ") " + body;
     case "Lam":
       var bind = term.eras ? "Λ" : "λ";
-      var name = term.name;
-      var body = stringify(term.body(Var(term.name+"#")));
+      var name = term.name || ("x"+(depth+0));
+      var body = stringify(term.body(Var(name+"#")), depth);
       return bind + name + " " + body;
     case "App":
       var open = term.eras ? "<" : "(";
-      var func = stringify(term.func);
-      var argm = stringify(term.argm);
+      var func = stringify(term.func, depth);
+      var argm = stringify(term.argm, depth);
       var clos = term.eras ? ">" : ")";
       return open + func + " " + argm + clos;
     case "Let":
-      var dups = term.dups ? "$" : "@";
-      var name = term.name;
-      var expr = stringify(term.expr);
-      var body = stringify(term.body(Var(term.name+"#")));
-      return dups + name + "=" + expr + ";" + body;
+      var name = term.name || ("x"+(depth+0));
+      var expr = stringify(term.expr, depth);
+      var body = stringify(term.body(Var(name+"#")), depth+1);
+      return "$" + name + "=" + expr + ";" + body;
     case "Ann":
-      var type = stringify(term.type);
-      var expr = stringify(term.expr);
+      var type = stringify(term.type, depth);
+      var expr = stringify(term.expr, depth);
       return ":" + type + " " + expr;
     case "Loc":
-      return stringify(term.expr);
+      return stringify(term.expr, depth);
   };
 };
 
@@ -135,14 +134,12 @@ function parse(code, indx, mode = "defs") {
         var skip = parse_char(eras ? ">" : ")");
         return ctx => App(eras, func(ctx), argm(ctx));
       case "$":
-      case "@":
-        var dups = chr === "$";
         var name = parse_name();
         var skip = parse_char("=");
         var expr = parse_term();
         var skip = parse_char(";");
         var body = parse_term();
-        return ctx => Let(dups, name, expr(ctx), x => body(Ext([name,x],ctx)));
+        return ctx => Let(name, expr(ctx), x => body(Ext([name,x],ctx)));
       case ":":
         var type = parse_term();
         var expr = parse_term();
@@ -230,7 +227,6 @@ function reduce(term, defs, erased = false) {
         };
       };
     case "Let":
-      var dups = term.dups;
       var name = term.name;
       var expr = term.expr;
       var body = term.body;
@@ -414,7 +410,7 @@ function typeinfer(term, defs, show = stringify, ctx = Nil(), locs = null) {
       };
     case "Let":
       var expr_typ = typeinfer(term.expr, defs, show, ctx);
-      var expr_var = Ann(true, term.dups ? Var(term.name+"#"+(ctx.size+1)) : term.expr, expr_typ);
+      var expr_var = Ann(true, Var(term.name+"#"+(ctx.size+1)), expr_typ);
       var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
       var body_typ = typeinfer(term.body(expr_var), defs, show, body_ctx);
       return body_typ;
@@ -457,7 +453,7 @@ function typecheck(term, type, defs, show = stringify, ctx = Nil(), locs = null)
       break;
     case "Let":
       var expr_typ = typeinfer(term.expr, defs, show, ctx);
-      var expr_var = Ann(true, term.dups ? Var(term.name+"#"+(ctx.size+1)) : term.expr, expr_typ);
+      var expr_var = Ann(true, Var(term.name+"#"+(ctx.size+1)), expr_typ);
       var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
       typecheck(term.body(expr_var), type, defs, show, body_ctx);
       break;
