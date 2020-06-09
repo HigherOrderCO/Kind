@@ -36,8 +36,6 @@ function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
       for (var name in file_defs) {
         if (result.defs[name]) {
           error("Redefinition of '" + name + "' in '" + file + "'.", exit_code);
-        } else if (name.endsWith("dup")){
-          error("Redefinition of '" + name.slice(name, -4) + "' in '" + file + "'.", exit_code);
         } else {
           result.defs[name] = file_defs[name];
           result.files[name] = file_code;
