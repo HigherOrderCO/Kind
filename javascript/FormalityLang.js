@@ -1171,10 +1171,7 @@ function parse(code, indx = 0, tags_list = Nil()) {
           chain(parse_txt(code, next(code, [indx,tags]), ":", true), ([indx,tags], skip) =>
           chain(parse_trm(code, next(code, [indx,tags]), true), ([indx,tags], type) =>
           chain(parse_trm(code, next(code, [indx,tags]), true), ([indx,tags], term) => {
-            defs[name] = {
-              type: def_type(bnds, type),
-              term: def_term(bnds, term),
-            };
+            define(name, def_type(bnds, type), def_term(bnds, term));
             return parse_defs(code, [indx,tags]);
           }))))));
       };
