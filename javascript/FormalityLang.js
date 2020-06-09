@@ -1141,7 +1141,7 @@ function parse(code, indx = 0, tags_list = Nil()) {
   var defs = {};
   function define(name, type, term){
     if (defs[name]){
-      throw "Parse error: redefinition of "+name;
+      throw "Parse error: redefinition of "+name+".";
     } else {
       defs[name] = {
         type: type,
