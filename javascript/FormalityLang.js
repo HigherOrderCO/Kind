@@ -928,28 +928,80 @@ function parse_str(code, [indx,tags], err) {
     [[indx,tags], xs => Loc(from, indx, Ann(true, slit, Ref("String")))])));
 };
 
-// Parses a list literal, `[a, b, c]`
+// Parses a list literal, `[a, b, c]` as a `List(A)`
 function parse_lst(code, [indx,tags], err) {
   var from = next(code, [indx,tags])[0];
-  function parse_els(code, [indx,tags], type) {
+  function parse_els(code, [indx,tags], nam0) {
     return chain(parse_opt(code, next(code, [indx,tags]), "]", false), ([indx,tags], done) => {
       if (done) {
-        return [[indx,tags], xs => App(true, Ref("List.nil"), type(xs))];
+        return [[indx,tags], xs => App(true, Ref("List.nil"), hole(nam0, xs))];
       } else {
         return (
           chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], elem) =>
           chain(parse_opt(code, next(code, [indx,tags]), ",", false), ([indx,tags], skip) =>
-          chain(parse_els(code, next(code, [indx,tags]), type), ([indx,tags], tail) =>
-          [[indx,tags], xs => App(false, App(false, App(true, Ref("List.cons"), type(xs)), elem(xs)), tail(xs))]))));
+          chain(parse_els(code, next(code, [indx,tags]), nam0), ([indx,tags], tail) =>
+          [[indx,tags], xs => {
+            var term = Ref("List.cons");
+            var term = App(true, term, hole(nam0, xs));
+            var term = App(false, term, elem(xs));
+            var term = App(false, term, tail(xs));
+            return term;
+          }]))));
       }
     });
   };
   return (
-    chain(parse_txt(code, next(code, [indx,tags]), "[", false), ([indx,tags], skip) =>
-    chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], type) =>
-    chain(parse_txt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) =>
-    chain(parse_els(code, next(code, [indx,tags]), type), ([indx,tags], list) =>
-    [[indx,tags], xs => Loc(from, indx, list(xs))])))));
+    chain(parse_txt(code, next(code, [indx,tags]), "[", false), ([indx,tags], skip) => {
+      var nam0 = new_name();
+      return chain(parse_els(code, next(code, [indx,tags]), nam0), ([indx,tags], list) =>
+      [[indx,tags], xs => Loc(from, indx, list(xs))])
+    }));
+};
+
+// Parses a map literal, `{a: 1, b: 2, c: 3}` as a `List(Pair(A, B))`
+function parse_map(code, [indx,tags], err) {
+  var from = next(code, [indx,tags])[0];
+  function parse_els(code, [indx,tags], nam0, nam1) {
+    return chain(parse_opt(code, next(code, [indx,tags]), "}", false), ([indx,tags], done) => {
+      if (done) {
+        return [[indx,tags], xs => {
+          var Pair = Ref("Pair");
+          var Pair = App(false, Pair, hole(nam0, xs));
+          var Pair = App(false, Pair, hole(nam1, xs));
+          return App(true, Ref("List.nil"), Pair);
+        }];
+      } else {
+        return (
+          chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], val0) =>
+          chain(parse_opt(code, next(code, [indx,tags]), ":", false), ([indx,tags], skip) =>
+          chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], val1) =>
+          chain(parse_opt(code, next(code, [indx,tags]), ",", false), ([indx,tags], skip) =>
+          chain(parse_els(code, next(code, [indx,tags]), nam0), ([indx,tags], tail) =>
+          [[indx,tags], xs => {
+            var pair = Ref("Pair.new");
+            var pair = App(true, pair, hole(nam0, xs));
+            var pair = App(true, pair, hole(nam1, xs));
+            var pair = App(false, pair, val0(xs));
+            var pair = App(false, pair, val1(xs));
+            var Pair = Ref("Pair");
+            var Pair = App(false, Pair, hole(nam0, xs));
+            var Pair = App(false, Pair, hole(nam1, xs));
+            var term = Ref("List.cons");
+            var term = App(true, term, Pair);
+            var term = App(false, term, pair);
+            var term = App(false, term, tail(xs));
+            return term;
+          }]))))));
+      }
+    });
+  };
+  return (
+    chain(parse_txt(code, next(code, [indx,tags]), "{", false), ([indx,tags], skip) => {
+      var nam0 = new_name();
+      var nam1 = new_name();
+      return chain(parse_els(code, next(code, [indx,tags]), nam0, nam1), ([indx,tags], list) =>
+      [[indx,tags], xs => Loc(from, indx, list(xs))])
+    }));
 };
 
 // Parses a term
@@ -978,6 +1030,7 @@ function parse_trm(code, [indx = 0, tags = []], err) {
     () => parse_chr(code, [indx,tags], err),
     () => parse_str(code, [indx,tags], err),
     () => parse_lst(code, [indx,tags], err),
+    () => parse_map(code, [indx,tags], err),
     () => parse_wat(code, [indx,tags], err),
     () => parse_hol(code, [indx,tags], err),
     () => parse_cse(code, [indx,tags], err),
