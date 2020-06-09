@@ -1148,7 +1148,6 @@ function parse(code, indx = 0, tags_list = Nil()) {
       var parsed_adt = parse_adt(code, [indx,tags], true);
       if (parsed_adt) {
         var [[indx,tags], adt] = parsed_adt;
-        var duplicate = defs[adt.name] ? true : adt.name;
         var adt_name_aux = defs[adt.name] ? adt.name+"@dup" : adt.name;
         var adt_name_posfix = defs[adt.name] ? "@dup" : "";
         defs[adt_name_aux] = {
