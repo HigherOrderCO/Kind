@@ -163,7 +163,7 @@ function _js_(main = "main", dir, ext, parse, show, synth, norm) {
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
-    console.log(fm.tojs.compile(defs, main));
+    console.log(fm.tojs.compile(main, defs));
   };
 };
 
@@ -183,7 +183,7 @@ function _io_(main = "main", dir, ext, parse) {
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
-    eval(fm.tojs.compile(defs, main));
+    eval(fm.tojs.compile(main, defs));
   };
 };
 

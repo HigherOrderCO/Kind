@@ -510,7 +510,7 @@ function js_name(str) {
   return str.replace(/\./g,"$");
 };
 
-function compile(defs, main) {
+function compile(main, defs, only_expression = false) {
   //console.log("compiling ", main);
   var {defs: cmps, nams} = cmp.core_to_comp(defs, main);
 
@@ -526,7 +526,10 @@ function compile(defs, main) {
   // Builds header and initial dependencies
   var isio = fmc.equal(defs[main].type, fmc.App(false, fmc.Ref("IO"), fmc.Ref("Unit")), defs);
   var code = "";
-  code += "module.exports = (function (){\n";
+  if (!only_expression) {
+    code += "module.exports = ";
+  };
+  code += "(function (){\n";
   if (used_prim_types["U16"]) {
     code += "  var Lam_to_U16 = x=>(function R(x,k){return x(0)(p=>R(p,k*2))(p=>k+R(p,k*2))})(x,1);\n";
     code += "  var U16_to_Lam = x=>((function R(i){return we=>w0=>w1=>i===16?we:((x>>>i)&1?w1:w0)(R(i+1))})(0));\n";
@@ -611,10 +614,12 @@ function compile(defs, main) {
   code += "})();";
 
   // Builds last line to call exported main
-  if (isio) {
-    code += "\nmodule.exports['$main$']().then(() => process.exit());";
-  } else {
-    code += "\nconsole.log(module.exports['"+main+"']);";
+  if (!only_expression) {
+    if (isio) {
+      code += "\nmodule.exports['$main$']().then(() => process.exit());";
+    } else {
+      code += "\nconsole.log(module.exports['"+main+"']);";
+    };
   };
 
   return code;
