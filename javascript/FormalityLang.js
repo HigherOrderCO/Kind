@@ -1083,15 +1083,28 @@ function parse(code, indx = 0, tags_list = Nil()) {
       var parsed_adt = parse_adt(code, [indx,tags], true);
       if (parsed_adt) {
         var [[indx,tags], adt] = parsed_adt;
-        defs[adt.name] = {
-          type: adt_type_type(adt),
-          term: adt_type_term(adt),
-        };
-        for (var c = 0; c < adt.ctrs.length; ++c) {
-          defs[adt.name+"."+adt.ctrs[c].name] = {
-            type: adt_ctor_type(adt, c),
-            term: adt_ctor_term(adt, c),
+        if(defs[adt.name]){
+          defs[adt.name+".dup"] = {
+            type: adt_type_type(adt),
+            term: adt_type_term(adt),
           };
+          for (var c = 0; c < adt.ctrs.length; ++c) {
+            defs[adt.name+"."+adt.ctrs[c].name+".dup"] = {
+              type: adt_ctor_type(adt, c),
+              term: adt_ctor_term(adt, c),
+            };
+          }
+        } else {
+          defs[adt.name] = {
+            type: adt_type_type(adt),
+            term: adt_type_term(adt),
+          };
+          for (var c = 0; c < adt.ctrs.length; ++c) {
+            defs[adt.name+"."+adt.ctrs[c].name] = {
+              type: adt_ctor_type(adt, c),
+              term: adt_ctor_term(adt, c),
+            };
+          }
         }
         return parse_defs(code, [indx,tags]);
       // Parses function definitions
