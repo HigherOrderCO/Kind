@@ -324,6 +324,7 @@ function reduce(term, defs = {}, hols = {}, erased = false) {
       return Var(term.indx);
     case "Ref":
       if (defs[term.name]) {
+        defs[term.name].seen = true;
         // If reference wasn't synthetized, synthetize it
         if (defs[term.name].core === undefined) {
           var got = typesynth(term.name, defs).term;
@@ -750,6 +751,7 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
     case "Ref":
       var got = defs[term.name];
       if (got) {
+        got.seen = true;
         if (got.core === undefined) {
           var typ = typesynth(term.name, defs, show).type;
         } else if (defs[term.name].core === null) {
@@ -1001,8 +1003,12 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
 function typesynth(name, defs, show = stringify) {
   if (!defs[name].core) {
     defs[name].core = null;
+    var deps = {};
     var term = defs[name].term;
     var type = defs[name].type;
+    for (var def in defs) {
+      defs[def].seen = false;
+    };
     var [hols,_] = exec(() => 
       deep([[typecheck, [type, Typ(), defs, show, {}, Nil(), null]]], ([hols,_]) =>
       deep([[typecheck, [term, type, defs, show, {}, Nil(), null]]], ([hols,type]) => {
@@ -1013,8 +1019,15 @@ function typesynth(name, defs, show = stringify) {
         }
         return done([hols,type])
       })));
+    for (var def in defs) {
+      if (defs[def].seen) {
+        deps[def] = true;
+        delete defs[def].seen;;
+      };
+    }
     var core_term = parse(stringify(canonicalize(term, hols)), 0, "term");
     var core_type = parse(stringify(canonicalize(type, hols)), 0, "term");
+    defs[name].deps = Object.keys(deps);
     defs[name].core = {term: core_term, type: core_type};
   }
   return defs[name].core;
