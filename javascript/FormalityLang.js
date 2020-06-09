@@ -213,7 +213,7 @@ function parse_bnd(code, [indx,tags], err) {
 };
 
 // Parses a valid name, non-empty
-function parse_nam(code, [indx,tags], allow_empty = false, err = false) {
+function parse_nam(code, [indx,tags], allow_empty = false, err = false, tag = "nam") {
   var nam = "";
   while (indx < code.length) {
     if (is_name(code[indx])) {
@@ -222,7 +222,7 @@ function parse_nam(code, [indx,tags], allow_empty = false, err = false) {
       break;
     }
   }
-  tags = tags&&Ext(Tag("nam",nam),tags);
+  tags = tags&&Ext(Tag(tag,nam),tags);
   if (nam.length > 0 || allow_empty) {
     return [[indx,tags], nam];
   } else {
@@ -1109,7 +1109,7 @@ function parse(code, indx = 0, tags_list = Nil()) {
       // Parses function definitions
       } else {
         return (
-          chain(parse_nam(code, next(code, [indx,tags]), false, true), ([indx,tags], name) =>
+          chain(parse_nam(code, next(code, [indx,tags]), false, true, "def"), ([indx,tags], name) =>
           chain(parse_bds(code, next(code, [indx,tags]), false), ([indx,tags], bnds) =>
           chain(parse_txt(code, next(code, [indx,tags]), ":", true), ([indx,tags], skip) =>
           chain(parse_trm(code, next(code, [indx,tags]), true), ([indx,tags], type) =>
