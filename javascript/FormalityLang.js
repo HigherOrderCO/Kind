@@ -311,7 +311,7 @@ function parse_let(code, [indx,tags], err = false) {
   return (
     chain(parse_one(code, next(code, [indx,tags]), "def ", "let ", false), ([indx,tags], dups) =>
     chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
-    chain(parse_txt(code, next(code, [indx,tags]), "=", err), ([indx,tags], skip) =>
+    chain(parse_opt(code, next(code, [indx,tags]), "=", err), ([indx,tags], skip) =>
     chain(parse_trm(code, [indx,tags], err), ([indx,tags], expr) =>
     chain(parse_opt(code, [indx,tags], ";", err), ([indx,tags], skip) =>
     chain(parse_trm(code, [indx,tags], err), ([indx,tags], body) =>
