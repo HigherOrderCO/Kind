@@ -9,7 +9,7 @@ const Typ = ()                         => ({ctor:"Typ"});
 const All = (eras,self,name,bind,body) => ({ctor:"All",eras,self,name,bind,body});
 const Lam = (eras,name,body)           => ({ctor:"Lam",eras,name,body});
 const App = (eras,func,argm)           => ({ctor:"App",eras,func,argm});
-const Let = (dups,name,expr,body)      => ({ctor:"Let",dups,name,expr,body});
+const Let = (name,expr,body)           => ({ctor:"Let",name,expr,body});
 const Ann = (done,expr,type)           => ({ctor:"Ann",done,expr,type});
 const Loc = (from,upto,expr)           => ({ctor:"Loc",from,upto,expr});
 const Wat = (name)                     => ({ctor:"Wat",name});
@@ -58,7 +58,7 @@ function fold(list, nil, cons) {
 // Syntax
 // ======
 
-function stringify(term) {
+function stringify(term, depth = 0) {
   switch (term.ctor) {
     case "Var":
       return term.indx.split("#")[0];
@@ -70,32 +70,31 @@ function stringify(term) {
       var bind = term.eras ? "∀" : "Π";
       var self = term.self;
       var name = term.name;
-      var type = stringify(term.bind);
-      var body = stringify(term.body(Var(term.self+"#"), Var(term.name+"#")));
+      var type = stringify(term.bind, depth);
+      var body = stringify(term.body(Var(self+"#"), Var(name+"#")), depth + 2);
       return bind + self + "(" + name + ":" + type + ") " + body;
     case "Lam":
       var bind = term.eras ? "Λ" : "λ";
       var name = term.name;
-      var body = stringify(term.body(Var(term.name+"#")));
+      var body = stringify(term.body(Var(name+"#")), depth + 1);
       return bind + name + " " + body;
     case "App":
       var open = term.eras ? "<" : "(";
-      var func = stringify(term.func);
-      var argm = stringify(term.argm);
+      var func = stringify(term.func, depth);
+      var argm = stringify(term.argm, depth);
       var clos = term.eras ? ">" : ")";
       return open + func + " " + argm + clos;
     case "Let":
-      var dups = term.dups ? "$" : "@";
       var name = term.name;
-      var expr = stringify(term.expr);
-      var body = stringify(term.body(Var(term.name+"#")));
-      return dups + name + "=" + expr + ";" + body;
+      var expr = stringify(term.expr, depth);
+      var body = stringify(term.body(Var(name+"#")), depth + 1);
+      return "$" + name + "=" + expr + ";" + body;
     case "Ann":
-      var type = stringify(term.type);
-      var expr = stringify(term.expr);
+      var type = stringify(term.type, depth);
+      var expr = stringify(term.expr, depth);
       return ":" + type + " " + expr;
     case "Loc":
-      return stringify(term.expr);
+      return stringify(term.expr, depth);
     case "Wat":
       return "?"+term.name;
     case "Hol":
@@ -172,13 +171,12 @@ function parse(code, indx, mode = "defs") {
         return ctx => App(eras, func(ctx), argm(ctx));
       case "$":
       case "@":
-        var dups = chr === "$";
         var name = parse_name();
         var skip = parse_char("=");
         var expr = parse_term();
         var skip = parse_char(";");
         var body = parse_term();
-        return ctx => Let(dups, name, expr(ctx), x => body(Ext([name,x],ctx)));
+        return ctx => Let(name, expr(ctx), x => body(Ext([name,x],ctx)));
       case ":":
         var type = parse_term();
         var expr = parse_term();
@@ -309,7 +307,7 @@ function unloc(term) {
     case "All": return All(term.eras, term.self, term.name, unloc(term.bind), (s, x) => unloc(term.body(s, x)));
     case "Lam": return Lam(term.eras, term.name, x => unloc(term.body(x)));
     case "App": return App(term.eras, unloc(term.func), unloc(term.argm));
-    case "Let": return Let(term.dups, term.name, unloc(term.expr), x => unloc(term.body(x)));
+    case "Let": return Let(term.name, unloc(term.expr), x => unloc(term.body(x)));
     case "Ann": return Ann(term.done, unloc(term.expr), unloc(term.type));
     case "Loc": return unloc(term.expr);
     case "Wat": return term;
@@ -377,7 +375,6 @@ function reduce(term, defs = {}, hols = {}, erased = false) {
         };
       };
     case "Let":
-      var dups = term.dups;
       var name = term.name;
       var expr = term.expr;
       var body = term.body;
@@ -501,11 +498,10 @@ function canonicalize(term, hols = {}, to_core = false) {
           return App(eras, func, argm);
       };
     case "Let":
-      var dups = term.dups;
       var name = term.name;
       var expr = canonicalize(term.expr, hols, to_core);
       var body = x => canonicalize(term.body(x), hols, to_core);
-      return Let(dups, name, expr, body);
+      return Let(name, expr, body);
     case "Ann":
       if (term.done === true) {
         return canonicalize(term.expr, hols, to_core);
@@ -573,10 +569,10 @@ function hash(term, dep = 0) {
   switch (term.ctor) {
     case "Var":
       var indx = Number(term.indx.split("#")[1]);
+      //console.log("ue", indx);
       if (indx < 0) {
         return "^"+(dep+indx);
-      }
-      else{
+      } else {
         return "#"+indx;
       }
     case "Ref":
@@ -622,6 +618,7 @@ function hash(term, dep = 0) {
 //var COUNT = 0;
 // Are two terms equal?
 function equal(a, b, defs, hols, dep = 0, rec = {}) {
+  //console.log("eq", stringify(a), stringify(b));
   let a1 = reduce(a, defs, hols, true);
   let b1 = reduce(b, defs, hols, true);
   var ah = hash(a1);
@@ -633,15 +630,15 @@ function equal(a, b, defs, hols, dep = 0, rec = {}) {
     rec[id] = true;
     switch (a1.ctor + b1.ctor) {
       case "AllAll":
-        var a1_body = a1.body(Var("#"+(dep)), Var("#"+(dep+1)));
-        var b1_body = b1.body(Var("#"+(dep)), Var("#"+(dep+1)));
+        var a1_body = a1.body(Var(a1.self+"#"+(dep)), Var(a1.name+"#"+(dep+1)));
+        var b1_body = b1.body(Var(a1.self+"#"+(dep)), Var(a1.name+"#"+(dep+1)));
         return a1.eras === b1.eras
             && equal(a1.bind, b1.bind, defs, hols, dep+0, rec)
             && equal(a1_body, b1_body, defs, hols, dep+2, rec);
       case "LamLam":
         if (a1.eras !== b1.eras) return [false,a1,b1];
-        var a1_body = a1.body(Var("#"+(dep)));
-        var b1_body = b1.body(Var("#"+(dep)));
+        var a1_body = a1.body(Var(a1.name+"#"+(dep)));
+        var b1_body = b1.body(Var(a1.name+"#"+(dep)));
         return a1.eras === b1.eras
             && equal(a1_body, b1_body, defs, hols, dep+1, rec);
       case "AppApp":
@@ -649,8 +646,8 @@ function equal(a, b, defs, hols, dep = 0, rec = {}) {
             && equal(a1.func, b1.func, defs, hols, dep, rec)
             && equal(a1.argm, b1.argm, defs, hols, dep, rec);
       case "LetLet":
-        var a1_body = a1.body(Var("#"+(dep)));
-        var b1_body = b1.body(Var("#"+(dep)));
+        var a1_body = a1.body(Var(a1.name+"#"+(dep)));
+        var b1_body = b1.body(Var(a1.name+"#"+(dep)));
         vis.push([a1.expr, b1.expr, dep]);
         vis.push([a1_body, b1_body, dep+1]);
         return equal(a1.expr, b1.expr, defs, hols, dep+0, rec)
@@ -805,7 +802,7 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
       });
     case "Let":
       return deep([[typeinfer, [term.expr, defs, show, hols, ctx, locs]]], ([hols, expr_typ]) => {
-        var expr_var = Ann(true, term.dups ? Var(term.name+"#"+(ctx.size+1)) : term.expr, expr_typ);
+        var expr_var = Ann(true, Var(term.name+"#"+(ctx.size+1)), expr_typ);
         var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
         return deep([[typeinfer, [term.body(expr_var), defs, show, hols, body_ctx, locs]]], ([hols, body_typ]) => {
           return done([hols, body_typ]);
@@ -873,7 +870,7 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
       }
     case "Let":
       return deep([[typeinfer, [term.expr, defs, show, hols, ctx, locs]]], ([hols, expr_typ]) => {
-        var expr_var = Ann(true, term.dups ? Var(term.name+"#"+(ctx.size+1)) : term.expr, expr_typ);
+        var expr_var = Ann(true, Var(term.name+"#"+(ctx.size+1)), expr_typ);
         var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
         return deep([[typecheck, [term.body(expr_var), type, defs, show, hols, body_ctx, locs]]], ([hols, _]) => {
           return done([hols, type]);
