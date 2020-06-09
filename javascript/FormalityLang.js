@@ -1537,7 +1537,7 @@ function adt_type_term({name, pars, inds, ctrs}) {
     } else if (i < inds.length) {
       return Lam(false, inds[i].name, x => args(p, i + 1, Ext([inds[i].name,x], ctx)));
     } else {
-      return All(true, "self", "P",
+      return All(true, "self_"+name, "P",
         // {motive(0)} = (len: Nat) -> {motive(1)}
         // {motive(1)} = Vector(A, len) -> Type
         (function motive(i, ctx) {
@@ -1605,10 +1605,10 @@ function adt_type_term({name, pars, inds, ctrs}) {
             for (var I = 0; I < inds.length; ++I) {
               ret = App(false, ret, get_var(ctx, inds[I].name));
             }
-            ret = App(false, ret, get_var(ctx, "self"));
+            ret = App(false, ret, get_var(ctx, "self_"+name));
             return ret;
           }
-        })(0, Ext(["P",x], Ext(["self",s], ctx))));
+        })(0, Ext(["P",x], Ext(["self_"+name,s], ctx))));
     }
   })(0, 0, Nil());
 };

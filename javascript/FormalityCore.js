@@ -301,7 +301,7 @@ function hash(term, dep = 0) {
     case "All":
       var bind = hash(term.bind, dep);
       var body = hash(term.body(Var("#"+(-dep-1)), Var("#"+(-dep-2))), dep+2);
-      return "Π" + bind + body;
+      return "Π" + term.self + bind + body;
     case "Lam":
       var body = hash(term.body(Var("#"+(-dep-1))), dep+1);
       return "λ" + body;
