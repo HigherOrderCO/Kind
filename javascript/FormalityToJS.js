@@ -458,9 +458,11 @@ function js_code(term, name = null) {
     code += "var "+js_name(name)+"=";
     code += vars.map(v => js_name(v)+"=>").join("");
     code += "({ctr:'TCO',arg:["+vars.map(js_name).join(",")+"]});";
+    code += "var arg=["+vars.map(js_name).join(",")+"];";
     code += "while(true){";
+    code += "let ["+vars.map(js_name).join(",")+"]=arg;";
     code += "var R="+js_code(term)+";";
-    code += "if(R.ctr==='TCO')["+vars.map(js_name).join(",")+"]=R.arg;";
+    code += "if(R.ctr==='TCO')arg=R.arg;";
     code += "else return R;";
     code += "}}";
     return code;
