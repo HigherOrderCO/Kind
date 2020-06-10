@@ -488,13 +488,13 @@ function js_code(term, name = null) {
         if (typeof term.prim === "string") {
           return "elim_"+term.prim.toLowerCase()+"("+js_code(term.expr)+")";
         } else {
-          throw "Internal compiler error. Please report on https://github.com/moonad/formality.";
+          return "null";
         }
       case "Ins":
         if (typeof term.prim === "string") {
           return "inst_"+term.prim.toLowerCase()+"("+js_code(term.expr)+")";
         } else {
-          throw "Internal compiler error. Please report on https://github.com/moonad/formality.";
+          return "null";
         }
       case "Nat":
         return term.natx+"n";
