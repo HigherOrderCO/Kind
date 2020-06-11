@@ -945,7 +945,7 @@ function parse_str(code, [indx,tags], err) {
           strx += code[indx++];
         }
       }
-      return [[indx+1,tags], Str(strx)];
+      return [[indx+1,tags&&Ext(Tag("str",strx),Ext(Tag("txt",'"'),tags))], Str(strx)];
     })([indx,tags]), ([indx,tags], slit) =>
     [[indx,tags], xs => Loc(from, indx, Ann(true, slit, Ref("String")))])));
 };
