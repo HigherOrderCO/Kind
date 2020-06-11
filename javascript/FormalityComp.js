@@ -25,6 +25,23 @@ var is_prim = {
   String : 1
 };
 
+function stringify(term) {
+  switch (term.ctor) {
+    case "Var": return term.name;
+    case "Ref": return term.name;
+    case "Nul": return "null";
+    case "Lam": return "λ"+term.name+"."+stringify(term.body);
+    case "App": return "("+stringify(term.func)+" "+stringify(term.argm)+")";
+    case "Let": return "$"+term.name+"="+stringify(term.expr)+";"+stringify(term.body);
+    case "Eli": return "-"+stringify(term.expr);
+    case "Ins": return "+"+stringify(term.expr);
+    case "Chr": return "'"+term.chrx+"'";
+    case "Str": return '"'+term.strx+'"';
+    case "Nat": return term.natx;
+    default: return "?";
+  };
+};
+
 function as_adt(term, defs) {
   var term = fmc.reduce(term, defs);
   if (term.ctor === "All" && term.self !== "") {
@@ -267,6 +284,7 @@ module.exports = {
   Var, Ref, Nul, Lam,
   App, Let, Eli, Ins,
   Chr, Str, Nat,
+  stringify,
   is_prim,
   dependency_sort,
   check,

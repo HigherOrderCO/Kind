@@ -361,7 +361,7 @@ function recursion(term, name) {
     };
     args.reverse();
     if (func.ctor === "Eli") {
-      //console.log("- Possibly branch safe.", name, func.prim);
+      //if (DEBUG) console.log("- Possibly branch safe.", name, func.prim);
       if (typeof func.prim === "string" && prim_types[func.prim]) {
         var type_info = prim_types[func.prim];
       } else if (typeof func.prim === "object") {
@@ -370,19 +370,19 @@ function recursion(term, name) {
         return null;
       }
       if (args.length === type_info.inst.length) {
-        //console.log("- Correct case count.");
+        //if (DEBUG) console.log("- Correct case count.");
         var branches = [];
         for (var i = 0; i < args.length; ++i) {
           var fields = type_info.inst[i][0];
           var branch = args[i];
-          //console.log("...", i, fields, type_info.inst[i], branch);
+          //if (DEBUG) console.log("...", i, fields, type_info.inst[i], cmp.stringify(branch));
           var arity = 0;
           while (arity < fields && branch.ctor === "Lam") {
             arity += 1;
             branch = branch.body;
           }
           if (arity === fields) {
-            //console.log("- Correct field count on branch "+i+".");
+            //if (DEBUG) console.log("- Correct field count on branch "+i+".");
             branches.push(branch);
           }
         }
@@ -401,6 +401,7 @@ function recursion(term, name) {
   var is_recursive = false;
   var is_tail_safe = true;
   function check(term, tail) {
+    //if (DEBUG) console.log("check", tail, cmp.stringify(term));
     switch (term.ctor) {
       case "Lam":
         check(term.body, tail);
@@ -408,8 +409,11 @@ function recursion(term, name) {
       case "App":
         var got = tail && get_branches(term);
         if (got) {
-          check(got.func, tail);
+          //if (DEBUG) console.log("- Has branches...");
+          check(got.func, tail && got.branches.length === args.length);
+          //if (DEBUG) console.log("~f "+cmp.stringify(got.func));
           for (var branch of got.branches) {
+            //if (DEBUG) console.log("~b "+cmp.stringify(branch));
             check(branch, tail);
           };
         } else {
@@ -431,6 +435,7 @@ function recursion(term, name) {
         if (term.name === name) {
           is_recursive = true;
           is_tail_safe = is_tail_safe && tail;
+          //if (DEBUG) console.log("- Recurses:", term.name, name, is_recursive, is_tail_safe)
         };
         break;
     };
