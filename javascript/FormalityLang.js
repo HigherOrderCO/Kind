@@ -244,8 +244,8 @@ function parse_all(code, [indx,tags], err = false) {
   var from = next(code, [indx,tags])[0];
   return (
     chain(parse_nam(code, next(code, [indx,tags]), true, false), ([indx,tags], self) =>
-    chain(parse_app_list(parse_bnd)(code, [indx,tags], err), ([indx,tags], [eras,binds]) =>
-    chain(parse_txt(code, next(code, [indx,tags]), "->", err), ([indx,tags], skip) =>
+    chain(parse_app_list(parse_bnd)(code, [indx,tags], false), ([indx,tags], [eras,binds]) =>
+    chain(parse_txt(code, next(code, [indx,tags]), "->", false), ([indx,tags], skip) =>
     chain(parse_trm(code, [indx,tags], err), ([indx,tags], body) =>
     [[indx,tags], xs => {
       var fold = (ctx,i) => {
@@ -263,17 +263,39 @@ function parse_all(code, [indx,tags], err = false) {
 // Parses a lambda, `(<name>) <term>`
 function parse_lam(code, [indx,tags], err = false) {
   var from = next(code, [indx,tags])[0];
-  var pnam = (c,i,e) => parse_nam(c,next(c,i),true,e)
-  var nam0 = new_name();
+  //var pnam = (c,i,e) => parse_nam(c,next(c,i),true,e)
+  function parse_bnd(code, [indx,tags], err) {
+    return (
+      chain(parse_txt(code, next(code,[indx,tags]), ":", err), ([indx,tags],skip) =>
+      chain(parse_trm(code, next(code,[indx,tags]), err), ([indx,tags],bind) =>
+      [[indx,tags],bind])));
+  };
+  function parse_arg(code, [indx,tags], err) {
+    return (
+      chain(parse_nam(code, next(code,[indx,tags]), true, err), ([indx,tags],name) =>
+      chain(parse_may(parse_bnd)(code, next(code, [indx,tags]), err), ([indx,tags], bind) =>
+      [[indx,tags],[name,bind]])));
+  };
   return (
-    chain(parse_app_list(pnam)(code, next(code, [indx,tags]), false), ([indx,tags], [eras, binds]) =>
+    chain(parse_app_list(parse_arg)(code, next(code, [indx,tags]), false), ([indx,tags], [eras, args]) =>
     chain(parse_trm(code, next(code,[indx,tags]), err), ([indx,tags], body) =>
     [[indx,tags], (xs) => {
-       var fold = (ctx,i) =>
-         (i < binds.length - 1)
-         ? Lam(eras, binds[i], (x) => fold(Ext([binds[i],x],ctx),i+1))
-         : Lam(eras, binds[i], (x) => body(Ext([binds[i],x],ctx)))
-      return Loc(from, indx, fold(xs,0));
+       function make(ctx,i) {
+        var lam_eras = eras;
+        var lam_name = args[i][0];
+        var lam_bind = args[i][1];
+        if (i < args.length - 1) {
+          var lam_body = (x) => make(Ext([lam_name,x],ctx),i+1);
+        } else {
+          var lam_body = (x) => body(Ext([lam_name,x],ctx));
+        }
+        if (lam_bind) {
+          return Lam(lam_eras, lam_name, (x) => lam_body(Ann(false, x, lam_bind(ctx))));
+        } else {
+          return Lam(lam_eras, lam_name, lam_body);
+        }
+      };
+      return Loc(from, indx, make(xs, 0));
     }])));
 };
 
