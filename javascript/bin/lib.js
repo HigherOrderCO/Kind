@@ -1,4 +1,4 @@
-var debug = false;
+var debug = true;
 var fs = require("fs");
 var fm = require("./../index.js");
 var path = require("path");
