@@ -150,10 +150,10 @@ native structures whenever possible.
 For a bigger example, run this with `fmio main`:
 
 ```javascript
-welcome: SimpleIO(Unit)
+main: SimpleIO(Unit)
   do SimpleIO {
     var name = SimpleIO.query("What is your name?");
-    SImpleIO.print(String.concat("Welcome, ", name));
+    SimpleIO.print(String.concat("Welcome, ", name));
   }
 ```
 
