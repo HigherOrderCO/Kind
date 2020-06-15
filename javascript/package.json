@@ -1,11 +1,14 @@
 {
   "name": "formality-lang",
-  "version": "0.4.38",
+  "version": "0.4.39",
   "description": "The Formality proof language",
   "browser": "browser.js",
   "main": "index.js",
   "bin": {
     "fm": "bin/fm.js",
+    "fmjs": "bin/fmcjs.js",
+    "fmio": "bin/fmcio.js",
+    "fmx": "bin/fmcx.js",
     "fm2fmc": "bin/fm2fmc.js",
     "fmc": "bin/fmc.js",
     "fmcjs": "bin/fmcjs.js",
