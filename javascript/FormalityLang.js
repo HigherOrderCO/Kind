@@ -1483,7 +1483,7 @@ function highlight_code(code, from, to) {
   to_line = Math.min(to_line + 3, lines.length - 1);
   err_line = err_line || (lines.length - 2);
   var err = "On line " + err_line + ":\n";
-  var err = err + lines.slice(from_line, to_line).join("\n");
+  var err = err + lines.slice(from_line, to_line).join("\n") + "\n";
   return err;
 };
 
@@ -1508,8 +1508,8 @@ function stringify_err(err, code) {
         .split("\n")
         .map(line => "\x1b[2m"+line+"\x1b[0m")
         .join("\n");
+      str += "\n";
     };
-    str += "\n";
     if (err.loc && code) {
       str += highlight_code(code, err.loc.from, err.loc.upto);
     };

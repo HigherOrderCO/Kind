@@ -513,18 +513,18 @@ function canonicalize(term, hols = {}, to_core = false) {
     case "Loc":
       return canonicalize(term.expr, hols, to_core);
     case "Wat":
-      throw () => "Incomplete program.";
+      throw () => Err(null, null, "Incomplete program.");
     case "Hol":
       if (hols[term.name]) {
         return canonicalize(hols[term.name](term.vals), hols, to_core);
       } else {
-        throw () => "Unfilled hole: " + term.name + ".";
+        throw () => Err(null, null, "Unfilled hole: " + term.name + ".");
       }
     case "Cse":
       if (hols[term.name]) {
         return canonicalize(build_cse(term, hols[term.name]), hols, to_core);
       } else {
-        throw () => "Incomplete case.";
+        throw () => Err(null, null, "Incomplete case.");
       }
     case "Nat":
       if (to_core) {
@@ -738,8 +738,8 @@ function exec(fn) {
 
 function Err(loc, ctx, msg) {
   return {
-    loc: loc,
-    ctx: ctx,
+    loc: loc || null,
+    ctx: ctx || Nil(),
     msg: msg,
   };
 };

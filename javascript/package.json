@@ -1,10 +1,12 @@
 {
   "name": "formality-lang",
-  "version": "0.4.34",
+  "version": "0.4.35",
   "description": "The Formality proof language",
-  "main": "Formality.js",
+  "browser": "browser.js",
+  "main": "index.js",
   "bin": {
     "fm": "bin/fm.js",
+    "fm2fmc": "bin/fm2fmc.js",
     "fmc": "bin/fmc.js",
     "fmcjs": "bin/fmcjs.js",
     "fmchs": "bin/fmchs.js",
@@ -13,6 +15,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "xmlhttprequest": "^1.8.0"
   },
   "author": "",
   "license": "MIT"

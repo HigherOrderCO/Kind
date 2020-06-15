@@ -1,6 +1,6 @@
 var debug = false;
 var fs = require("fs");
-var fm = require("./../Formality.js"); 
+var fm = require("./../index.js");
 var path = require("path");
 function error(msg, exit_code) {
   console.log(msg);
@@ -17,7 +17,7 @@ function clear_dir(dir, ext) {
 };
 
 function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
-  var files = fs.readdirSync(dir).filter(file => file.slice(-ext.length) === ext);
+  var files = fs.readdirSync(dir).filter(file => file.slice(-ext.length) === ext && file !== ext);
   if (files.length === 0) {
     error("No local " + ext + " file found.", exit_code);
   } else {
@@ -46,12 +46,18 @@ function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
   return result;
 };
 
-function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show = fm.lang.stringify, synth = fm.synt.typesynth, norm = fm.synt.normalize, silent = false) {
-  if (!fs.existsSync(dir) && ext === ".fmc") dir = ".";
-
+async function _fm_(
+  main   = "main",
+  dir    = ".",
+  ext    = ".fm",
+  parse  = fm.lang.parse,
+  show   = fm.lang.stringify,
+  synth  = fm.load.load_and_typesynth,
+  norm   = fm.synt.normalize,
+  silent = false
+) {
   var exit_code = main === "--github" ? 1 : 0;
   var {defs, files} = load(dir, ext, parse, exit_code);
-  //var hols = {};
 
   // Normalizes and type-checks all terms
   if (!silent) console.log("\033[4m\x1b[1mType-checking:\x1b[0m");
@@ -60,11 +66,11 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
   for (var name in defs) {
     var show_name = name;
     try {
-      var {term,type} = synth(name, defs, show);
+      var {term,type} = await synth(name, defs, show, true);
       if (!silent) console.log(show_name + ": \x1b[2m" + show(type) + "\x1b[0m");
     } catch (err) {
       if (debug) console.log(err);
-      if (!silent) console.log(show_name + " : " + "\x1b[31merror\x1b[0m");
+      if (!silent) console.log(show_name + ": " + "\x1b[31merror\x1b[0m");
       if (typeof err === "function") {
         errors.push([name, err()]);
       } else {
@@ -76,10 +82,10 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
 
   // If there are errors, prints them
   if (errors.length > 0) {
-    if (!silent) console.log("\033[4m\x1b[1mFound " + errors.length + " type error(s):\x1b[0m");
+    if (!silent) console.log("\033[4m\x1b[1mFound " + errors.length + " type error(s):\x1b[0m\n");
     for (var i = errors.length - 1; i >= 0; --i) {
       var err_msg = fm.lang.stringify_err(errors[i][1], files[errors[i][0]]);
-      if (!silent) console.log("\n\x1b[1mInside \x1b[4m"+errors[i][0]+"\x1b[0m\x1b[1m:\x1b[0m");
+      if (!silent) console.log("\x1b[1mInside \x1b[4m"+errors[i][0]+"\x1b[0m\x1b[1m:\x1b[0m");
       if (!silent) console.log(err_msg);
     };
   } else {
@@ -87,48 +93,19 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
   };
 
   // If there are hole errors, prints them
-  
   var hole_logs_len = Object.keys(fm.synt.HOLE_LOGS).length;
   if (!silent && hole_logs_len > 0) {
-    console.log("");
-    console.log("\033[4m\x1b[1mFound " + errors.length + " hole(s):\x1b[0m");
+    console.log("\033[4m\x1b[1mFound " + hole_logs_len + " hole(s):\x1b[0m");
     for (var hole in fm.synt.HOLE_LOGS) {
       console.log("");
       console.log(fm.synt.HOLE_LOGS[hole]);
     };
   };
 
-  // If there is no error nor unresolved equation, write `.fmc` file
-  // Right now, though, we're storing nat and string literals on .fmc files, even
-  // though that isn't valid core, for the sake of keeping sizes sane. That means
-  // that, to get actual core files, we need to parse with synt, then stringify
-  // with synt.stringify, setting to_core=true.
-  if (errors.length === 0 && ext === ".fm") {
-    if (!fs.existsSync(".fmc")) fs.mkdirSync(".fmc");
-    if (!fs.existsSync(".fml")) fs.mkdirSync(".fml");
-    clear_dir(".fmc", ".fmc");
-    clear_dir(".fml", ".fml");
-    for (var name in defs) {
-      var code = "";
-      code += name + ": ";
-      code += fm.synt.stringify(defs[name].core.type) + "\n  ";
-      code += fm.synt.stringify(defs[name].core.term) + "\n\n";
-      fs.writeFileSync(".fmc/"+name+".fmc", code);
-    };
-    for (var name in defs) {
-      var code = "";
-      code += name + ": ";
-      code += fm.lang.stringify(defs[name].core.type) + "\n  ";
-      code += fm.lang.stringify(defs[name].core.term) + "\n\n";
-      fs.writeFileSync(".fml/"+name+".fml", code);
-    };
-  };
-
   // If user asked to evaluate main, do it
-  if (!silent && defs[main]) {
+  if (!silent && defs[main] && defs[main].core) {
     console.log("");
     console.log("\033[4m\x1b[1mReducing '"+main+"':\x1b[0m");
-    console.log("");
     try {
       console.log(show(fm.synt.normalize(defs[main].core.term, defs, {}, true)));
     } catch (e) {
@@ -141,9 +118,16 @@ function _fm_(main = "main", dir = ".", ext = ".fm", parse = fm.lang.parse, show
   if (errors.length > 0) {
     error("", exit_code);
   }
+
+  // Returns core defs
+  var core_defs = {};
+  for (var def in defs) {
+    core_defs[def] = defs[def].core;
+  };
+  return core_defs;
 };
 
-function _fmc_(main = "main", dir) {
+async function _fmc_(main = "main", dir) {
   // Since we're storing fm-synt nat/string literals on .fmc files, in order to
   // get proper core terms, we parse .fmc using fm.synt and then convert to core
   function parse(code) {
@@ -154,12 +138,12 @@ function _fmc_(main = "main", dir) {
     };
     return {defs};
   };
-  _fm_(main, "./.fmc", ".fmc", parse, fm.core.stringify, fm.synt.typesynth, fm.synt.normalize);
+  await _fm_(main, ".", ".fmc", parse, fm.core.stringify, fm.synt.typesynth, fm.synt.normalize);
 };
 
-function _js_(main = "main", dir, ext, parse, show, synth, norm) {
-  _fm_(main, dir, ext, parse, show, synth, norm, true);
-  var {defs} = load("./.fmc", ".fmc", fm.synt.parse);
+async function _js_(main = "main", dir, ext, parse, show, synth, norm) {
+  var defs = await _fm_(main, dir, ext, parse, show, synth, norm, true);
+  //var {defs} = load("./.fmc", ".fmc", fm.synt.parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
@@ -170,16 +154,11 @@ function _js_(main = "main", dir, ext, parse, show, synth, norm) {
 function _hs_(main = "main", dir, ext, parse) {
   console.log("Temporarily disabled.");
   process.exit();
-  //var {defs} = load(dir, ".fmc", fm.core.parse);
-  //if (!defs[main]) {
-    //console.log("Term '" + main + "' not found.");
-  //} else {
-    //console.log(fm.comp.hs(defs, main));
-  //};
 };
 
-function _io_(main = "main", dir, ext, parse) {
-  var {defs} = load("./.fmc", ".fmc", fm.synt.parse);
+async function _io_(main = "main", dir, ext, parse, show, synth, norm) {
+  var defs = await _fm_(main, dir, ext, parse, show, synth, norm, true);
+  //var {defs} = load("./.fmc", ".fmc", fm.synt.parse);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
@@ -187,8 +166,8 @@ function _io_(main = "main", dir, ext, parse) {
   };
 };
 
-function _x_(main = "main", dir, ext, parse) {
-  var {defs} = load("./.fmc", ".fmc", fm.synt.parse);
+async function _x_(main = "main", dir, ext, parse, show, synth, norm) {
+  var defs = await _fm_(main, dir, ext, parse, show, synth, norm, true);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
@@ -198,4 +177,16 @@ function _x_(main = "main", dir, ext, parse) {
   };
 };
 
-module.exports = {load, _fm_, _fmc_, _io_, _js_, _hs_, _x_};
+async function _fm2fmc_(main = "main", dir, ext, parse, show, synth, norm) {
+  var defs = await _fm_(main, dir, ext, parse, show, synth, norm, true);
+  var code = "";
+  for (var name in defs) {
+    code += code !== "" ? "\n\n" : "";
+    code += name + ": ";
+    code += fm.synt.stringify(defs[name].type) + "\n  ";
+    code += fm.synt.stringify(defs[name].term) + "";
+  };
+  console.log(code);
+};
+
+module.exports = {load, _fm_, _fmc_, _io_, _js_, _hs_, _x_, _fm2fmc_};

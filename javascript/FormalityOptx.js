@@ -1,4 +1,4 @@
-const {Var, App, Lam, Ref, Ext, Nil, find} = require("./FormalitySynt.js");
+const {Var, App, Lam, Ref, Ext, Nil, find, canonicalize} = require("./FormalitySynt.js");
 const {Net, Pointer, addr_of, slot_of, numb_of, ptrn_eq, ptrn_st, NOD} = require("./FormalityInet.js");
 
 function erase(term, dep = 0) {
@@ -56,7 +56,7 @@ function erase(term, dep = 0) {
 };
 
 function compile(fm_term, defs = {}) {
-  var term = erase(fm_term);
+  var term = erase(canonicalize(fm_term, {}, true));
   const ref_ptrs = {};
   const build_net = (term, net, var_ptrs, level) => {
     const get_var = (ptrn) => {
