@@ -130,13 +130,13 @@ Introduction
 This is the "Hello, World!" in Formality:
 
 ```javascript
-main: SimpleIO(Unit)
-  SimpleIO.print("Hello, world!")
+main: IO(Unit)
+  IO.print("Hello, world!")
 ```
 
 To run it, save this file `main.fm` and type `fmio main`. This will download
 some dependencies, compile it to JavaScript and run, printing `Hello, world` to
-the console. Here, [`SimpleIO.print`](http://moonad.org/p/0x0000000000000040) is
+the console. Here, [`IO.print`](http://moonad.org/p/0x0000000000000047) is
 just a definition on [moonad.org](http://moonad.org). In Formality, there is no
 such a thing as packages. Instead, once a definition is posted on Moonad, it is
 globally available for all other users. That's because, by philosophy, Formality
@@ -150,16 +150,16 @@ native structures whenever possible.
 For a bigger example, run this with `fmio main`:
 
 ```javascript
-main: SimpleIO(Unit)
-  do SimpleIO {
-    var name = SimpleIO.query("What is your name?");
-    SimpleIO.print(String.concat("Welcome, ", name));
+main: IO(Unit)
+  do IO {
+    var name = IO.query("What is your name?");
+    IO.print(String.concat("Welcome, ", name));
   }
 ```
 
 Since Formality is a pure functional language, it has no built-in notion of
 side-effects (like printing), but we can still **describe** then: that's what
-the `SimpleIO` type does, using monads. But what are monads? Simple, monads are
+the `IO` type does, using monads. But what are monads? Simple, monads are
 just... things that you must not worry about for now. Let's focus on the
 fundamental principles of the language first!
 
