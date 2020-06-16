@@ -152,7 +152,7 @@ For a bigger example, run this with `fmio main`:
 ```javascript
 main: IO(Unit)
   do IO {
-    var name = IO.query("What is your name?");
+    var name = IO.prompt("What is your name?");
     IO.print(String.concat("Welcome, ", name));
   }
 ```
