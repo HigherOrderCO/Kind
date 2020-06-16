@@ -78,7 +78,7 @@ Examples
     List.head<A: Type>(xs: List(A), not_empty: List.not_empty<A>(xs)) : A
       case xs:
       with is_empty : List.not_empty<A>(xs.self) = not_empty;
-      | Empty.absurd(is_empty, A);
+      | Empty.absurd<A>(is_empty);
       | xs.head;
     ```
 
