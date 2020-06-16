@@ -44,7 +44,7 @@ function stringify(term) {
 
 function as_adt(term, defs) {
   var term = fmc.reduce(term, defs);
-  if (term.ctor === "All" && term.self !== "") {
+  if (term.ctor === "All" && term.self.slice(0,5) === "self_") {
     var term = term.body(fmc.Var("self"), fmc.Var("P"));
     var ctrs = [];
     while (term.ctor === "All") {
