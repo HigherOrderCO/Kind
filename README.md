@@ -239,16 +239,16 @@ Both are equivalent.
 
 ### Testing
 
-There are two ways to test a program. We can use `IO` to print values:
+There are two ways to test a program. We can use `SimpleIO` to print values:
 
 ```c
-Docs.bool_test_0: IO(Unit)
-  IO.print(Bool.show(Bool.not(Bool.true)))
+Docs.bool_test_0: SimpleIO(Unit)
+  SimpleIO.print(Bool.show(Bool.not(Bool.true)))
 ```
 
 Run with `fmcio Docs.bool_test_0`. This requires us to be able to stringify
 those values (here, `Bool.show` is defined on `Bool.fm`). An alternative would
-be to just print the values directly, without `IO`:
+be to just print the values directly, without `SimpleIO`:
 
 ```c
 Docs.bool_test_1: Bool
@@ -258,7 +258,7 @@ Docs.bool_test_1: Bool
 Type `fm Docs.bool_test_0`. This will output `(true) (false) false`, which is
 the internal lambda-encoded representation of `Bool.false` (more on that later).
 A last alternative would be to type `fmcio Docs.bool_test_1`. Since the program
-isn't of type `IO`, it will output the compiled JavaScript representation of
+isn't of type `SimpleIO`, it will output the compiled JavaScript representation of
 `Bool.false`. In this case, just `false`, but could be a JS object or function.
 
 A Bool theorem
@@ -411,8 +411,8 @@ On line 32:
     31| Docs.a_plus_0_is_a(a: Nat): Equal(Nat, Nat.add(a, 0), a)
     32|   Equal.to<Nat, a>
     33|
-    34| //Docs.bool_show: IO(Unit)
-    35|   //IO.print(Bool.show(Bool.true))
+    34| //Docs.bool_show: SimpleIO(Unit)
+    35|   //SimpleIO.print(Bool.show(Bool.true))
 ```
 
 That's because `Nat.add` matches on the first argument, which, here, is a

@@ -14,7 +14,7 @@ efficient representations. Specifically:
 
 - Moonad's `U64` and `Nat` becomes a JavaScript `BigNumber`.
 
-- Moonad's `IO(Unit)` becomes a side-effective JavaScript procedure.
+- Moonad's `SimpleIO(Unit)` becomes a side-effective JavaScript procedure.
 
 2. If it is a "known function", convert to a native function.
 
