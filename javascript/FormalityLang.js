@@ -938,17 +938,203 @@ function parse_str(code, [indx,tags], err) {
     chain(parse_txt(code, next(code, [indx,tags]), "\""), ([indx,tags], skip) =>
     chain((function go([indx,tags], slit) {
       var strx = "";
-      while (code[indx] !== '"') {
+      while (true) {
         if (indx >= code.length) {
           parse_error(code, indx, "unterminated string literal", true);
+        } else if (code[indx] == '\\') {
+          var esc = parse_str_esc(code,[indx+1,tags],err)
+          if (esc) {
+            var [[i,t],c] = esc
+            strx += c
+            indx = i
+          } else {
+            parse_error(code, indx, "valid string escape sequence", true);
+          }
+        } else if (code[indx] == '"') {
+          break;
         } else {
           strx += code[indx++];
         }
       }
+      //console.log(strx);
       return [[indx+1,tags&&Ext(Tag("txt",'"'),Ext(Tag("str",strx),tags))], Str(strx)];
     })([indx,tags]), ([indx,tags], slit) =>
     [[indx,tags], xs => Loc(from, indx, Ann(true, slit, Ref("String")))])));
 };
+
+// Parses a string escape sequence, `\n`, `\DEL`, `\xABCDE
+function parse_str_esc(code,[indx,tags],err) {
+  var from = next(code, [indx,tags])[0];
+  return (
+    choose([
+      () => chain(parse_txt(code,[indx,tags],"b",false),([indx,tags],skip) =>
+            [[indx,tags], "\b"]),
+      () => chain(parse_txt(code,[indx,tags],"f",false),([indx,tags],skip) =>
+            [[indx,tags], "\f"]),
+      () => chain(parse_txt(code,[indx,tags],"n",false),([indx,tags], skip) =>
+            [[indx,tags], "\n"]),
+      () => chain(parse_txt(code,[indx,tags],"r",false),([indx,tags],skip) =>
+            [[indx,tags], "\r"]),
+      () => chain(parse_txt(code,[indx,tags],"t",false),([indx,tags],skip) =>
+            [[indx,tags], "\t"]),
+      () => chain(parse_txt(code,[indx,tags],"v",false),([indx,tags],skip) =>
+            [[indx,tags], "\v"]),
+      () => chain(parse_txt(code,[indx,tags],"\\",false),([indx,tags],skip) =>
+            [[indx,tags], "\\"]),
+      () => chain(parse_txt(code,[indx,tags],"\"",false),([indx,tags],skip) =>
+            [[indx,tags], "\""]),
+      () => chain(parse_txt(code,[indx,tags],"0",false),([indx,tags],skip) =>
+            [[indx,tags], "\0"]),
+      () => chain(parse_txt(code,[indx,tags],"&",false),([indx,tags],skip) =>
+            [[indx,tags], ""]),
+      () => chain(parse_txt(code,[indx,tags],"x",false),([indx,tags],skip) =>
+            chain(parse_hex(code,[indx,tags],false),    ([indx,tags],char_code)  =>
+            { return ((char_code <= 0x10FFFF)
+                ?  [[indx,tags], String.fromCodePoint(char_code)] 
+                : null)
+            })),
+      () => chain(parse_txt(code,[indx,tags],"NUL",false),([indx,tags],skip) =>
+            [[indx,tags], "\x00"]),
+      () => chain(parse_txt(code,[indx,tags],"SOH",false),([indx,tags],skip) =>
+            [[indx,tags], "\x01"]),
+      () => chain(parse_txt(code,[indx,tags],"STX",false),([indx,tags],skip) =>
+            [[indx,tags], "\x02"]),
+      () => chain(parse_txt(code,[indx,tags],"ETX",false),([indx,tags],skip) =>
+            [[indx,tags], "\x03"]),
+      () => chain(parse_txt(code,[indx,tags],"EOT",false),([indx,tags],skip) =>
+            [[indx,tags], "\x04"]),
+      () => chain(parse_txt(code,[indx,tags],"ENQ",false),([indx,tags],skip) =>
+            [[indx,tags], "\x05"]),
+      () => chain(parse_txt(code,[indx,tags],"ACK",false),([indx,tags],skip) =>
+            [[indx,tags], "\x06"]),
+      () => chain(parse_txt(code,[indx,tags],"BEL",false),([indx,tags],skip) =>
+            [[indx,tags], "\x07"]),
+      () => chain(parse_txt(code,[indx,tags],"BS",false),([indx,tags],skip) =>
+            [[indx,tags], "\x08"]),
+      () => chain(parse_txt(code,[indx,tags],"HT",false),([indx,tags],skip) =>
+            [[indx,tags], "\x09"]),
+      () => chain(parse_txt(code,[indx,tags],"LF",false),([indx,tags],skip) =>
+            [[indx,tags], "\x0A"]),
+      () => chain(parse_txt(code,[indx,tags],"VT",false),([indx,tags],skip) =>
+            [[indx,tags], "\x0B"]),
+      () => chain(parse_txt(code,[indx,tags],"FF",false),([indx,tags],skip) =>
+            [[indx,tags], "\x0C"]),
+      () => chain(parse_txt(code,[indx,tags],"CR",false),([indx,tags],skip) =>
+            [[indx,tags], "\x0D"]),
+      () => chain(parse_txt(code,[indx,tags],"SO",false),([indx,tags],skip) =>
+            [[indx,tags], "\x0E"]),
+      () => chain(parse_txt(code,[indx,tags],"SI",false),([indx,tags],skip) =>
+            [[indx,tags], "\x0F"]),
+      () => chain(parse_txt(code,[indx,tags],"DLE",false),([indx,tags],skip) =>
+            [[indx,tags], "\x10"]),
+      () => chain(parse_txt(code,[indx,tags],"DC1",false),([indx,tags],skip) =>
+            [[indx,tags], "\x11"]),
+      () => chain(parse_txt(code,[indx,tags],"DC2",false),([indx,tags],skip) =>
+            [[indx,tags], "\x12"]),
+      () => chain(parse_txt(code,[indx,tags],"DC3",false),([indx,tags],skip) =>
+            [[indx,tags], "\x13"]),
+      () => chain(parse_txt(code,[indx,tags],"DC4",false),([indx,tags],skip) =>
+            [[indx,tags], "\x14"]),
+      () => chain(parse_txt(code,[indx,tags],"NAK",false),([indx,tags],skip) =>
+            [[indx,tags], "\x15"]),
+      () => chain(parse_txt(code,[indx,tags],"SYN",false),([indx,tags],skip) =>
+            [[indx,tags], "\x16"]),
+      () => chain(parse_txt(code,[indx,tags],"ETB",false),([indx,tags],skip) =>
+            [[indx,tags], "\x17"]),
+      () => chain(parse_txt(code,[indx,tags],"CAN",false),([indx,tags],skip) =>
+            [[indx,tags], "\x18"]),
+      () => chain(parse_txt(code,[indx,tags],"EM",false),([indx,tags],skip) =>
+            [[indx,tags], "\x19"]),
+      () => chain(parse_txt(code,[indx,tags],"SUB",false),([indx,tags],skip) =>
+            [[indx,tags], "\x1A"]),
+      () => chain(parse_txt(code,[indx,tags],"ESC",false),([indx,tags],skip) =>
+            [[indx,tags], "\x1B"]),
+      () => chain(parse_txt(code,[indx,tags],"FS",false),([indx,tags],skip) =>
+            [[indx,tags], "\x1C"]),
+      () => chain(parse_txt(code,[indx,tags],"GS",false),([indx,tags],skip) =>
+            [[indx,tags], "\x1D"]),
+      () => chain(parse_txt(code,[indx,tags],"RS",false),([indx,tags],skip) =>
+            [[indx,tags], "\1E"]),
+      () => chain(parse_txt(code,[indx,tags],"US",false),([indx,tags],skip) =>
+            [[indx,tags], "\1F"]),
+      () => chain(parse_txt(code,[indx,tags],"SP",false),([indx,tags],skip) =>
+            [[indx,tags], "\20"]),
+      () => chain(parse_txt(code,[indx,tags],"DEL",false),([indx,tags],skip) =>
+            [[indx,tags], "\7F"]),
+    ]));
+}
+
+// parse binary literal
+function parse_bin(code,[indx,tags],err) {
+  var from = next(code, [indx,tags])[0];
+  function dig(code,[indx,tags],err) {
+    return choose([
+    () => parse_txt(code,[indx,tags],'0',err),
+    () => parse_txt(code,[indx,tags],'1',err)],err);
+  };
+  return (
+    chain(dig(code,[indx,tags],err), ([indx,tags],d) =>
+    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) =>
+    [[indx,tags],parseInt(d + ds.reduce((a,v,i) => a + v,""),2)])))
+}
+
+// Parses a decimal number
+function parse_dec(code,[indx,tags],err) {
+  var from = next(code, [indx,tags])[0];
+  function dig(code,[indx,tags],err) {
+    return choose([
+    () => parse_txt(code,[indx,tags],'0',err),
+    () => parse_txt(code,[indx,tags],'1',err),
+    () => parse_txt(code,[indx,tags],'2',err),
+    () => parse_txt(code,[indx,tags],'3',err),
+    () => parse_txt(code,[indx,tags],'4',err),
+    () => parse_txt(code,[indx,tags],'5',err),
+    () => parse_txt(code,[indx,tags],'6',err),
+    () => parse_txt(code,[indx,tags],'7',err),
+    () => parse_txt(code,[indx,tags],'8',err),
+    () => parse_txt(code,[indx,tags],'9',err)],err);
+  };
+  return (
+    chain(dig(code,[indx,tags],err), ([indx,tags],d) =>
+    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) =>
+    [[indx,tags],parseInt(d + ds.reduce((a,v,i) => a + v,""))])))
+}
+
+// Parses a hexadecimal number
+function parse_hex(code,[indx,tags],err) {
+  var from = next(code, [indx,tags])[0];
+  function dig(code,[indx,tags],err) {
+    return choose([
+    () => parse_txt(code,[indx,tags],'0',err),
+    () => parse_txt(code,[indx,tags],'1',err),
+    () => parse_txt(code,[indx,tags],'2',err),
+    () => parse_txt(code,[indx,tags],'3',err),
+    () => parse_txt(code,[indx,tags],'4',err),
+    () => parse_txt(code,[indx,tags],'5',err),
+    () => parse_txt(code,[indx,tags],'6',err),
+    () => parse_txt(code,[indx,tags],'7',err),
+    () => parse_txt(code,[indx,tags],'8',err),
+    () => parse_txt(code,[indx,tags],'9',err),
+    () => parse_txt(code,[indx,tags],'a',err),
+    () => parse_txt(code,[indx,tags],'A',err),
+    () => parse_txt(code,[indx,tags],'b',err),
+    () => parse_txt(code,[indx,tags],'B',err),
+    () => parse_txt(code,[indx,tags],'c',err),
+    () => parse_txt(code,[indx,tags],'C',err),
+    () => parse_txt(code,[indx,tags],'d',err),
+    () => parse_txt(code,[indx,tags],'D',err),
+    () => parse_txt(code,[indx,tags],'e',err),
+    () => parse_txt(code,[indx,tags],'E',err),
+    () => parse_txt(code,[indx,tags],'f',err),
+    () => parse_txt(code,[indx,tags],'F',err)],err);
+  };
+  return (
+    chain(dig(code,[indx,tags],err), ([indx,tags],d) =>
+    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) =>
+    [[indx,tags],parseInt(d + ds.reduce((a,v,i) => a + v,""),16)])))
+}
+
+
 
 // Parses a list literal, `[a, b, c]` as a `List(A)`
 function parse_lst(code, [indx,tags], err) {
@@ -1058,6 +1244,7 @@ function parse_trm(code, [indx = 0, tags = []], err) {
     () => parse_cse(code, [indx,tags], err),
     () => parse_ite(code, [indx,tags], err),
     () => parse_don(code, [indx,tags], err),
+
     () => parse_var(code, [indx,tags], err),
   ], err);
 
@@ -1755,6 +1942,9 @@ module.exports = {
   parse_ann,
   parse_chr,
   parse_str,
+  parse_str_esc,
+  parse_dec,
+  parse_hex,
   parse_trm,
   parse,
   unloc,
