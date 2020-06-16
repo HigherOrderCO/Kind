@@ -531,7 +531,7 @@ function compile(main, defs, only_expression = false) {
   };
 
   // Builds header and initial dependencies
-  var isio = fmc.equal(defs[main].type, fmc.App(false, fmc.Ref("SimpleIO"), fmc.Ref("Unit")), defs);
+  var isio = fmc.equal(defs[main].type, fmc.App(false, fmc.Ref("IO"), fmc.Ref("Unit")), defs);
   var code = "";
   if (!only_expression) {
     code += "module.exports = ";
@@ -565,9 +565,13 @@ function compile(main, defs, only_expression = false) {
     code += "  var rdl = require('readline').createInterface({input:process.stdin,output:process.stdout});\n";
     code += "  var run = (p) => {\n";
     code += "    switch (p._) {\n";
-    code += "      case 'SimpleIO.end': return Promise.resolve(p.val);\n";
-    code += "      case 'SimpleIO.ask': return new Promise((res,_) => rdl.question('', (line) => run(p.then(line)).then(res)));\n";
-    code += "      case 'SimpleIO.say': return new Promise((res,_) => (console.log(p.text), run(p.then(1)).then(res)));\n";
+    code += "      case 'IO.end': return Promise.resolve(p.value);\n";
+    code += "      case 'IO.ask': return new Promise((res, _) => {\n";
+    code += "        switch (p.query) {\n";
+    code += "          case 'print': console.log(p.param); run(p.then(1)).then(res); break;\n";
+    code += "          case 'get_line': rdl.question('', (line) => run(p.then(line)).then(res)); break;\n";
+    code += "         }\n";
+    code += "      });\n";
     code += "    }\n";
     code += "  };\n";
   }
