@@ -422,7 +422,7 @@ function recursion(term, name) {
         };
         break;
       case "Let":
-        check(term.expr, tail);
+        check(term.expr, false);
         check(term.body, tail);
         break;
       case "Eli":
