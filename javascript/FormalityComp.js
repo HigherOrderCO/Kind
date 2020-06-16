@@ -180,11 +180,11 @@ function infer(term, defs, ctx = fmc.Nil()) {
       };
     case "Let":
       var expr_cmp = infer(term.expr, defs, ctx);
-      var expr_var = fmc.Ann(true, term.dups ? fmc.Var(term.name+"#"+(ctx.size+1)) : term.expr, expr_cmp.type);
+      var expr_var = fmc.Ann(true, fmc.Var(term.name+"#"+(ctx.size+1)), expr_cmp.type);
       var body_ctx = fmc.Ext({name:term.name,type:expr_var.type}, ctx);
       var body_cmp = infer(term.body(expr_var), defs, body_ctx);
       return {
-        comp: term.dups ? Let(term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp) : body_cmp.comp,
+        comp: Let(term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp),
         type: body_cmp.type,
       };
     case "All":
@@ -251,11 +251,11 @@ function check(term, type, defs, ctx = fmc.Nil()) {
       return {comp, type};
     case "Let":
       var expr_cmp = infer(term.expr, defs, ctx);
-      var expr_var = fmc.Ann(true, term.dups ? fmc.Var(term.name+"#"+(ctx.size+1)) : term.expr, expr_cmp.type);
+      var expr_var = fmc.Ann(true, fmc.Var(term.name+"#"+(ctx.size+1)), expr_cmp.type);
       var body_ctx = fmc.Ext({name:term.name,type:expr_var.type}, ctx);
       var body_cmp = check(term.body(expr_var), type, defs, body_ctx);
       return {
-        comp: term.dups ? Let(term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp) : body_cmp.comp,
+        comp: Let(term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp),
         type: body_cmp.type,
       };
     case "Loc":

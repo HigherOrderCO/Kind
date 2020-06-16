@@ -36,16 +36,12 @@ function erase(term, dep = 0) {
         };
       }
     case "Let":
-      if (term.dups) {
-        return {
-          ctor: "Let",
-          name: term.name,
-          expr: erase(term.expr, dep),
-          body: erase(term.body({ctor: "Var", indx: dep}), dep + 1),
-        };
-      } else {
-        return erase(term.body(term.expr), dep);
-      }
+      return {
+        ctor: "Let",
+        name: term.name,
+        expr: erase(term.expr, dep),
+        body: erase(term.body({ctor: "Var", indx: dep}), dep + 1),
+      };
     case "Ann":
       return erase(term.expr, dep);
     case "Loc":
