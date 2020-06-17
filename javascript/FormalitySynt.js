@@ -752,7 +752,11 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
       var got = defs[term.name];
       if (got) {
         if (got.core === undefined) {
-          var typ = typesynth(term.name, defs, show).type;
+          try {
+            var typ = typesynth(term.name, defs, show).type;
+          } catch (e) {
+            return fail(() => Err(locs, ctx, e().msg));
+          }
         } else if (defs[term.name].core === null) {
           var typ = defs[term.name].type;
         } else {
