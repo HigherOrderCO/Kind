@@ -404,7 +404,7 @@ function recursion(term, name) {
     //if (DEBUG) console.log("check", tail, cmp.stringify(term));
     switch (term.ctor) {
       case "Lam":
-        check(term.body, tail);
+        check(term.body, false);
         break;
       case "App":
         var got = tail && get_branches(term);
