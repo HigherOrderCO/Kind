@@ -50,7 +50,8 @@ function as_adt(term, defs) {
     while (term.ctor === "All") {
       var ctr = (function go(term, flds) {
         if (term.ctor === "All") {
-          return go(term.body(fmc.Var(""), fmc.Var(term.name)), flds.concat(term.name));
+          var flds = term.eras ? flds : flds.concat(term.name);
+          return go(term.body(fmc.Var(""), fmc.Var(term.name)), flds);
         } else if (term.ctor === "App") {
           var func = term.func;
           while (func.ctor === "App") {
