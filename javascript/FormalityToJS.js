@@ -27,34 +27,34 @@ var prim_types = {
     cnam: ['be', 'b0', 'b1'],
   },
   U16: {
-    inst: [[1, x => "Lam_to_U16("+x+")"]],
+    inst: [[1, x => "word_to_u16("+x+")"]],
     elim: {
       ctag: x => "'u16'",
-      ctor: [[x => "U16_to_Lam("+x+")"]],
+      ctor: [[x => "u16_to_word("+x+")"]],
     },
     cnam: ['u16'],
   },
   U32: {
-    inst: [[1, x => "Lam_to_U32("+x+")"]],
+    inst: [[1, x => "word_to_u32("+x+")"]],
     elim: {
       ctag: x => "'u32'",
-      ctor: [[x => "U32_to_Lam("+x+")"]],
+      ctor: [[x => "u32_to_word("+x+")"]],
     },
     cnam: ['u32'],
   },
   U64: {
-    inst: [[1, x => "Lam_to_U64("+x+")"]],
+    inst: [[1, x => "word_to_u64("+x+")"]],
     elim: {
       ctag: x => "'u64'",
-      ctor: [[x => "U64_to_Lam("+x+")"]],
+      ctor: [[x => "u64_to_word("+x+")"]],
     },
     cnam: ['u64'],
   },
   F64: {
-    inst: [[1, x => "Lam_to_F64("+x+")"]],
+    inst: [[1, x => "word_to_f64("+x+")"]],
     elim: {
       ctag: x => "'f64'",
-      ctor: [[x => "F64_to_Lam("+x+")"]],
+      ctor: [[x => "f64_to_word("+x+")"]],
     },
     cnam: ['f64'],
   },
@@ -65,6 +65,14 @@ var prim_types = {
       ctor: [[], [x => x+".charCodeAt(0)", x => x+".slice(1)"]],
     },
     cnam: ['nil', 'cons'],
+  },
+  Buffer32: {
+    inst: [[2, d => a => "u32array_to_buffer32("+a+")"]],
+    elim: {
+      ctag: x => "'b32'",
+      ctor: [[x => "buffer32_to_depth("+x+")", x => "buffer32_to_u32array("+x+")"]],
+    },
+    cnam: ['b32'],
   },
 };
 
@@ -95,84 +103,91 @@ function adt_type(adt) {
 };
 
 var prim_funcs = {
-  "Bool.not"    : [1, a=>`!${a}`],
-  "Bool.and"    : [2, a=>b=>`${a}&&${b}`],
-  "Bool.if"     : [3, a=>b=>c=>`${a}?${b}:${c}`],
-  "Bool.or"     : [2, a=>b=>`${a}||${b}`],
-  "Debug.log"   : [2, a=>b=>`(console.log(${a}),${b}())`],
-  "Nat.add"     : [2, a=>b=>`${a}+${b}`],
-  "Nat.sub"     : [2, a=>b=>`${a}-${b}<=0n?0n:${a}-${b}`],
-  "Nat.mul"     : [2, a=>b=>`${a}*${b}`],
-  "Nat.div"     : [2, a=>b=>`${a}/${b}`],
-  "Nat.div_mod" : [2, a=>b=>`({_:'Pair.new','fst':${a}/${b},'snd':${a}%${b}})`], // TODO change to proper pair
-  "Nat.pow"     : [2, a=>b=>`${a}**${b}`],
-  "Nat.ltn"     : [2, a=>b=>`${a}<${b}`],
-  "Nat.lte"     : [2, a=>b=>`${a}<=${b}`],
-  "Nat.eql"     : [2, a=>b=>`${a}===${b}`],
-  "Nat.gte"     : [2, a=>b=>`${a}>=${b}`],
-  "Nat.gtn"     : [2, a=>b=>`${a}>${b}`],
-  "U16.add"     : [2, a=>b=>`${a}+${b}`],
-  "U16.sub"     : [2, a=>b=>`Math.max(${a}-${b},0)`],
-  "U16.mul"     : [2, a=>b=>`${a}*${b}`],
-  "U16.div"     : [2, a=>b=>`(${a}/${b})>>>0`],
-  "U16.mod"     : [2, a=>b=>`${a}%${b}`],
-  "U16.pow"     : [2, a=>b=>`(${a}**${b})&0xFFFF`],
-  "U16.ltn"     : [2, a=>b=>`${a}<${b}`],
-  "U16.lte"     : [2, a=>b=>`${a}<=${b}`],
-  "U16.eql"     : [2, a=>b=>`${a}===${b}`],
-  "U16.gte"     : [2, a=>b=>`${a}>=${b}`],
-  "U16.gtn"     : [2, a=>b=>`${a}>${b}`],
-  "U16.shr"     : [2, a=>b=>`${a}>>>${b}`],
-  "U16.shl"     : [2, a=>b=>`${a}<<${b}`],
-  "U16.and"     : [2, a=>b=>`${a}&${b}`],
-  "U16.or"      : [2, a=>b=>`${a}|${b}`],
-  "U16.xor"     : [2, a=>b=>`${a}^${b}`],
-  "U32.add"     : [2, a=>b=>`${a}+${b}`],
-  "U32.sub"     : [2, a=>b=>`Math.max(${a}-${b},0)`],
-  "U32.mul"     : [2, a=>b=>`${a}*${b}`],
-  "U32.div"     : [2, a=>b=>`(${a}/${b})>>>0`],
-  "U32.mod"     : [2, a=>b=>`${a}%${b}`],
-  "U32.pow"     : [2, a=>b=>`(${a}**${b})>>>0`],
-  "U32.ltn"     : [2, a=>b=>`${a}<${b}`],
-  "U32.lte"     : [2, a=>b=>`${a}<=${b}`],
-  "U32.eql"     : [2, a=>b=>`${a}===${b}`],
-  "U32.gte"     : [2, a=>b=>`${a}>=${b}`],
-  "U32.gtn"     : [2, a=>b=>`${a}>${b}`],
-  "U32.shr"     : [2, a=>b=>`${a}>>>${b}`],
-  "U32.shl"     : [2, a=>b=>`${a}<<${b}`],
-  "U32.and"     : [2, a=>b=>`${a}&${b}`],
-  "U32.or"      : [2, a=>b=>`${a}|${b}`],
-  "U32.xor"     : [2, a=>b=>`${a}^${b}`],
-  "U64.add"     : [2, a=>b=>`(${a}+${b})&0xFFFFFFFFFFFFFFFFn`],
-  "U64.sub"     : [2, a=>b=>`${a}-${b}<=0n?0n:a-b`],
-  "U64.mul"     : [2, a=>b=>`(${a}*${b})&0xFFFFFFFFFFFFFFFFn`],
-  "U64.div"     : [2, a=>b=>`${a}/${b}`],
-  "U64.mod"     : [2, a=>b=>`${a}%${b}`],
-  "U64.pow"     : [2, a=>b=>`(${a}**${b})&0xFFFFFFFFFFFFFFFFn`],
-  "U64.ltn"     : [2, a=>b=>`(${a}<${b})`],
-  "U64.lte"     : [2, a=>b=>`(${a}<=${b})`],
-  "U64.eql"     : [2, a=>b=>`(${a}===${b})`],
-  "U64.gte"     : [2, a=>b=>`(${a}>=${b})`],
-  "U64.gtn"     : [2, a=>b=>`(${a}>${b})`],
-  "U64.shr"     : [2, a=>b=>`(${a}>>${b})&0xFFFFFFFFFFFFFFFFn`],
-  "U64.shl"     : [2, a=>b=>`(${a}<<${b})&0xFFFFFFFFFFFFFFFFn`],
-  "U64.and"     : [2, a=>b=>`${a}&${b}`],
-  "U64.or"      : [2, a=>b=>`${a}|${b}`],
-  "U64.xor"     : [2, a=>b=>`${a}^${b}`],
-  "F64.add"     : [2, a=>b=>`${a}+${b}`],
-  "F64.sub"     : [2, a=>b=>`${a}-${b}`],
-  "F64.mul"     : [2, a=>b=>`${a}*${b}`],
-  "F64.div"     : [2, a=>b=>`${a}/${b}`],
-  "F64.mod"     : [2, a=>b=>`${a}%${b}`],
-  "F64.pow"     : [2, a=>b=>`${a}**${b}`],
-  "F64.log"     : [1, a=>`Math.log(${a})`],
-  "F64.cos"     : [1, a=>`Math.cos(${a})`],
-  "F64.sin"     : [1, a=>`Math.sin(${a})`],
-  "F64.tan"     : [1, a=>`Math.tan(${a})`],
-  "F64.acos"    : [1, a=>`Math.acos(${a})`],
-  "F64.asin"    : [1, a=>`Math.asin(${a})`],
-  "F64.atan"    : [1, a=>`Math.atan(${a})`],
-  "String.eql"  : [2, a=>b=>`${a}===${b}`],
+  "Bool.not"       : [1, a=>`!${a}`],
+  "Bool.and"       : [2, a=>b=>`${a}&&${b}`],
+  "Bool.if"        : [3, a=>b=>c=>`${a}?${b}:${c}`],
+  "Bool.or"        : [2, a=>b=>`${a}||${b}`],
+  "Debug.log"      : [2, a=>b=>`(console.log(${a}),${b}())`],
+  "Nat.add"        : [2, a=>b=>`${a}+${b}`],
+  "Nat.sub"        : [2, a=>b=>`${a}-${b}<=0n?0n:${a}-${b}`],
+  "Nat.mul"        : [2, a=>b=>`${a}*${b}`],
+  "Nat.div"        : [2, a=>b=>`${a}/${b}`],
+  "Nat.div_mod"    : [2, a=>b=>`({_:'Pair.new','fst':${a}/${b},'snd':${a}%${b}})`], // TODO change to proper pair
+  "Nat.pow"        : [2, a=>b=>`${a}**${b}`],
+  "Nat.ltn"        : [2, a=>b=>`${a}<${b}`],
+  "Nat.lte"        : [2, a=>b=>`${a}<=${b}`],
+  "Nat.eql"        : [2, a=>b=>`${a}===${b}`],
+  "Nat.gte"        : [2, a=>b=>`${a}>=${b}`],
+  "Nat.gtn"        : [2, a=>b=>`${a}>${b}`],
+  "Nat.to_u16"     : [1, a=>`Number(${a})`],
+  "Nat.to_u32"     : [1, a=>`Number(${a})`],
+  "Nat.to_u64"     : [1, a=>`${a}`],
+  "U16.add"        : [2, a=>b=>`${a}+${b}`],
+  "U16.sub"        : [2, a=>b=>`Math.max(${a}-${b},0)`],
+  "U16.mul"        : [2, a=>b=>`${a}*${b}`],
+  "U16.div"        : [2, a=>b=>`(${a}/${b})>>>0`],
+  "U16.mod"        : [2, a=>b=>`${a}%${b}`],
+  "U16.pow"        : [2, a=>b=>`(${a}**${b})&0xFFFF`],
+  "U16.ltn"        : [2, a=>b=>`${a}<${b}`],
+  "U16.lte"        : [2, a=>b=>`${a}<=${b}`],
+  "U16.eql"        : [2, a=>b=>`${a}===${b}`],
+  "U16.gte"        : [2, a=>b=>`${a}>=${b}`],
+  "U16.gtn"        : [2, a=>b=>`${a}>${b}`],
+  "U16.shr"        : [2, a=>b=>`${a}>>>${b}`],
+  "U16.shl"        : [2, a=>b=>`${a}<<${b}`],
+  "U16.and"        : [2, a=>b=>`${a}&${b}`],
+  "U16.or"         : [2, a=>b=>`${a}|${b}`],
+  "U16.xor"        : [2, a=>b=>`${a}^${b}`],
+  "U32.add"        : [2, a=>b=>`${a}+${b}`],
+  "U32.sub"        : [2, a=>b=>`Math.max(${a}-${b},0)`],
+  "U32.mul"        : [2, a=>b=>`${a}*${b}`],
+  "U32.div"        : [2, a=>b=>`(${a}/${b})>>>0`],
+  "U32.mod"        : [2, a=>b=>`${a}%${b}`],
+  "U32.pow"        : [2, a=>b=>`(${a}**${b})>>>0`],
+  "U32.ltn"        : [2, a=>b=>`${a}<${b}`],
+  "U32.lte"        : [2, a=>b=>`${a}<=${b}`],
+  "U32.eql"        : [2, a=>b=>`${a}===${b}`],
+  "U32.gte"        : [2, a=>b=>`${a}>=${b}`],
+  "U32.gtn"        : [2, a=>b=>`${a}>${b}`],
+  "U32.shr"        : [2, a=>b=>`${a}>>>${b}`],
+  "U32.shl"        : [2, a=>b=>`${a}<<${b}`],
+  "U32.and"        : [2, a=>b=>`${a}&${b}`],
+  "U32.or"         : [2, a=>b=>`${a}|${b}`],
+  "U32.xor"        : [2, a=>b=>`${a}^${b}`],
+  "U64.add"        : [2, a=>b=>`(${a}+${b})&0xFFFFFFFFFFFFFFFFn`],
+  "U64.sub"        : [2, a=>b=>`${a}-${b}<=0n?0n:a-b`],
+  "U64.mul"        : [2, a=>b=>`(${a}*${b})&0xFFFFFFFFFFFFFFFFn`],
+  "U64.div"        : [2, a=>b=>`${a}/${b}`],
+  "U64.mod"        : [2, a=>b=>`${a}%${b}`],
+  "U64.pow"        : [2, a=>b=>`(${a}**${b})&0xFFFFFFFFFFFFFFFFn`],
+  "U64.ltn"        : [2, a=>b=>`(${a}<${b})`],
+  "U64.lte"        : [2, a=>b=>`(${a}<=${b})`],
+  "U64.eql"        : [2, a=>b=>`(${a}===${b})`],
+  "U64.gte"        : [2, a=>b=>`(${a}>=${b})`],
+  "U64.gtn"        : [2, a=>b=>`(${a}>${b})`],
+  "U64.shr"        : [2, a=>b=>`(${a}>>${b})&0xFFFFFFFFFFFFFFFFn`],
+  "U64.shl"        : [2, a=>b=>`(${a}<<${b})&0xFFFFFFFFFFFFFFFFn`],
+  "U64.and"        : [2, a=>b=>`${a}&${b}`],
+  "U64.or"         : [2, a=>b=>`${a}|${b}`],
+  "U64.xor"        : [2, a=>b=>`${a}^${b}`],
+  "F64.add"        : [2, a=>b=>`${a}+${b}`],
+  "F64.sub"        : [2, a=>b=>`${a}-${b}`],
+  "F64.mul"        : [2, a=>b=>`${a}*${b}`],
+  "F64.div"        : [2, a=>b=>`${a}/${b}`],
+  "F64.mod"        : [2, a=>b=>`${a}%${b}`],
+  "F64.pow"        : [2, a=>b=>`${a}**${b}`],
+  "F64.log"        : [1, a=>`Math.log(${a})`],
+  "F64.cos"        : [1, a=>`Math.cos(${a})`],
+  "F64.sin"        : [1, a=>`Math.sin(${a})`],
+  "F64.tan"        : [1, a=>`Math.tan(${a})`],
+  "F64.acos"       : [1, a=>`Math.acos(${a})`],
+  "F64.asin"       : [1, a=>`Math.asin(${a})`],
+  "F64.atan"       : [1, a=>`Math.atan(${a})`],
+  "Buffer32.set"   : [3, a=>b=>c=>`(${c}[${a}]=${b},${c})`],
+  "Buffer32.get"   : [2, a=>b=>`(${b}[${a}])`],
+  "Buffer32.alloc" : [1, a=>`new Uint32Array(2 ** Number(${a}))`],
+  "String.eql"     : [2, a=>b=>`${a}===${b}`],
+  "Equal.cast"     : [1, a=>a],
 };
 
 var count = 0;
@@ -537,30 +552,141 @@ function compile(main, defs, only_expression = false) {
     code += "module.exports = ";
   };
   code += "(function (){\n";
+
   if (used_prim_types["U16"]) {
-    code += "  var Lam_to_U16 = x=>(function R(x,k){return x(0)(p=>R(p,k*2))(p=>k+R(p,k*2))})(x,1);\n";
-    code += "  var U16_to_Lam = x=>((function R(i){return we=>w0=>w1=>i===16?we:((x>>>i)&1?w1:w0)(R(i+1))})(0));\n";
-  };
+    code += [
+      "  function word_to_u16(w) {",
+      "    var u = 0;",
+      "    for (var i = 0; i < 16; ++i) {",
+      "      u = u | (w._ === 'Word.w1' ? 1 << i : 0);",
+      "      w = w.pred;",
+      "    };",
+      "    return u;",
+      "  };",
+      "  function u16_to_word(u) {",
+      "    var w = {_: 'Word.nil'};",
+      "    for (var i = 0; i < 16; ++i) {",
+      "      w = {_: (u >>> (16-i-1)) & 1 ? 'Word.w1' : 'Word.w0', pred: w};",
+      "    };",
+      "    return w;",
+      "  };",
+      ].join("\n");
+  }
+
   if (used_prim_types["U32"]) {
-    code += "  var Lam_to_U32 = x=>(function R(x,k){return x(0)(p=>R(p,k*2))(p=>k+R(p,k*2))})(x,1);\n";
-    code += "  var U32_to_Lam = x=>((function R(i){return we=>w0=>w1=>i===32?we:((x>>>i)&1?w1:w0)(R(i+1))})(0));\n";
+    code += [
+      "  function word_to_u32(w) {",
+      "    var u = 0;",
+      "    for (var i = 0; i < 32; ++i) {",
+      "      u = u | (w._ === 'Word.w1' ? 1 << i : 0);",
+      "      w = w.pred;",
+      "    };",
+      "    return u;",
+      "  };",
+      "  function u32_to_word(u) {",
+      "    var w = {_: 'Word.nil'};",
+      "    for (var i = 0; i < 32; ++i) {",
+      "      w = {_: (u >>> (32-i-1)) & 1 ? 'Word.w1' : 'Word.w0', pred: w};",
+      "    };",
+      "    return w;",
+      "  };",
+      ].join("\n");
   };
+
   if (used_prim_types["U64"]) {
-    code += "  var Lam_to_U64 = x=>(function R(x,k){return x(0n)(p=>R(p,k*2n))(p=>k+R(p,k*2n))})(x,1n);\n";
-    code += "  var U64_to_Lam = x=>((function R(i){return we=>w0=>w1=>i===64n?we:((x>>i)&1n?w1:w0)(R(i+1n))})(0n));\n";
+    code += [
+      "  function word_to_u64(w) {",
+      "    var u = 0n;",
+      "    for (var i = 0n; i < 64n; i += 1n) {",
+      "      u = u | (w._ === 'Word.w1' ? 1n << i : 0n);",
+      "      w = w.pred;",
+      "    };",
+      "    return u;",
+      "  };",
+      "  function u64_to_word(u) {",
+      "    var w = {_: 'Word.nil'};",
+      "    for (var i = 0n; i < 64n; i += 1n) {",
+      "      w = {_: (u >> (64n-i-1n)) & 1n ? 'Word.w1' : 'Word.w0', pred: w};",
+      "    };",
+      "    return w;",
+      "  };",
+      ].join("\n");
   };
+
   if (used_prim_types["F64"]) {
-    code += "  var F64 = new Float64Array(1);\n";
-    code += "  var U32 = new Uint32Array(F64.buffer);\n";
-    code += "  var F64_get = (x,i)=>((F64[0]=x),(i<32?(U32[0]>>>i)&1:(U32[1]>>>(i-32)&1)));\n";
-    code += "  var F64_set = (x,i)=>((F64[0]=x),(i<32?(U32[0]=U32[0]|(1<<i)):(U32[1]=U32[1]|(1<<(i-32)))),F64[0]);\n";
-    code += "  var Lam_to_F64 = x=>(function R(x,i){return x(0)(p=>R(p,i+1))(p=>F64_set(R(p,i+1),i))})(x,0);";
-    code += "  var F64_to_Lam = x=>((function R(i){return we=>w0=>w1=>i===64?we:(F64_get(x,i)?w1:w0)(R(i+1))})(0));";
+    code += [
+      "  var f64 = new Float64Array(1);",
+      "  var u32 = new Uint32Array(f64.buffer);",
+      "  function f64_get_bit(x, i) {",
+      "    f64[0] = x;",
+      "    if (i < 32) {",
+      "      return (u32[0] >>> i) & 1;",
+      "    } else {",
+      "      return (u32[1] >>> (i - 32)) & 1;",
+      "    }",
+      "  };",
+      "  function f64_set_bit(x, i) {",
+      "    f64[0] = x;",
+      "    if (i < 32) {",
+      "      u32[0] = u32[0] | (1 << i);",
+      "    } else {",
+      "      u32[1] = u32[1] | (1 << (i - 32));",
+      "    }",
+      "    return f64[0];",
+      "  };",
+      "  function word_to_f64(w) {",
+      "    var x = 0;",
+      "    for (var i = 0; i < 64; ++i) {",
+      "      x = w._ === 'Word.w1' ? f64_set_bit(x,i) : x;",
+      "      w = w.pred;",
+      "    };",
+      "    return x;",
+      "  };",
+      "  function f64_to_word(x) {",
+      "    var w = {_: 'Word.nil'};",
+      "    for (var i = 0; i < 64; ++i) {",
+      "      w = {_: f64_get_bit(x,64-i-1) ? 'Word.w1' : 'Word.w0', pred: w};",
+      "    };",
+      "    return w;",
+      "  };",
+      ].join("\n");
   };
+
+  if (used_prim_types["Buffer32"]) {
+    code += [
+      "  function u32array_to_buffer32(a) {",
+      "    function go(a, buffer) {",
+      "      switch (a._) {",
+      "        case 'Array.tip': buffer.push(a.value); break;",
+      "        case 'Array.tie': go(a.lft, buffer); go(a.rgt, buffer); break;",
+      "      }",
+      "      return buffer;",
+      "    };",
+      "    return new Uint32Array(go(a, []));",
+      "  };",
+      "  function buffer32_to_u32array(b) {",
+      "    function go(b) {",
+      "      if (b.length === 1) {",
+      "        return {_: 'Array.tip', value: b[0]};",
+      "      } else {",
+      "        var lft = go(b.slice(0,b.length/2));",
+      "        var rgt = go(b.slice(b.length/2));",
+      "        return {_: 'Array.tie', lft, rgt};",
+      "      };",
+      "    };",
+      "    return go(b);",
+      "  };",
+      "  function buffer32_to_depth(b) {",
+      "    return BigInt(Math.log(b.length) / Math.log(2));",
+      "  };",
+    ].join("\n");
+  };
+
   for (var prim in used_prim_types) {
     code += "  var inst_"+prim.toLowerCase()+" = "+instantiator(used_prim_types[prim].inst)+";\n";
     code += "  var elim_"+prim.toLowerCase()+" = "+js_code(cmp.Lam("x", application(cmp.Eli(prim, cmp.Var("x")), true)))+";\n";
   };
+
   if (isio) {
     code += "  var rdl = require('readline').createInterface({input:process.stdin,output:process.stdout});\n";
     code += "  var run = (p) => {\n";
@@ -598,7 +724,7 @@ function compile(main, defs, only_expression = false) {
           expr = js_code(comp, name);
         }
       } catch (e) {
-        console.log(e);
+        //console.log(e);
         expr = "'ERROR'";
       };
     };

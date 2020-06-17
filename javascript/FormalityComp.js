@@ -14,15 +14,16 @@ const Str = (strx)           => ({ctor:"Str",strx});
 const Nat = (natx)           => ({ctor:"Nat",natx});
 
 var is_prim = {
-  Unit   : 1,
-  Bool   : 1,
-  Nat    : 1,
-  Bits   : 1,
-  U16    : 1,
-  U32    : 1,
-  U64    : 1,
-  F64    : 1,
-  String : 1,
+  Unit     : 1,
+  Bool     : 1,
+  Nat      : 1,
+  Bits     : 1,
+  U16      : 1,
+  U32      : 1,
+  U64      : 1,
+  F64      : 1,
+  String   : 1,
+  Buffer32 : 1,
 };
 
 function stringify(term) {
