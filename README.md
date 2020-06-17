@@ -78,7 +78,7 @@ Examples
     List.head<A: Type>(xs: List(A), not_empty: List.not_empty<A>(xs)) : A
       case xs:
       with is_empty : List.not_empty<A>(xs.self) = not_empty;
-      | Empty.absurd(is_empty, A);
+      | Empty.absurd<A>(is_empty);
       | xs.head;
     ```
 
@@ -152,7 +152,7 @@ For a bigger example, run this with `fmio main`:
 ```javascript
 main: IO(Unit)
   do IO {
-    var name = IO.query("What is your name?");
+    var name = IO.prompt("What is your name?");
     IO.print(String.concat("Welcome, ", name));
   }
 ```

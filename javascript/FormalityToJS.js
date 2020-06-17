@@ -546,8 +546,8 @@ function compile(main, defs, only_expression = false) {
     code += "  var U32_to_Lam = x=>((function R(i){return we=>w0=>w1=>i===32?we:((x>>>i)&1?w1:w0)(R(i+1))})(0));\n";
   };
   if (used_prim_types["U64"]) {
-    code += "  var Lam_to_U32 = x=>(function R(x,k){return x(0n)(p=>R(p,k*2n))(p=>k+R(p,k*2n))})(x,1n);\n";
-    code += "  var U32_to_Lam = x=>((function R(i){return we=>w0=>w1=>i===64n?we:((x>>i)&1n?w1:w0)(R(i+1n))})(0n));\n";
+    code += "  var Lam_to_U64 = x=>(function R(x,k){return x(0n)(p=>R(p,k*2n))(p=>k+R(p,k*2n))})(x,1n);\n";
+    code += "  var U64_to_Lam = x=>((function R(i){return we=>w0=>w1=>i===64n?we:((x>>i)&1n?w1:w0)(R(i+1n))})(0n));\n";
   };
   if (used_prim_types["F64"]) {
     code += "  var F64 = new Float64Array(1);\n";

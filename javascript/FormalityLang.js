@@ -1348,6 +1348,16 @@ function parse_adt(code, [indx,tags], err) {
 function parse(code, indx = 0, tags_list = Nil()) {
   //var LOG = x => console.log(require("util").inspect(x, {showHidden: false, depth: null}));
   var defs = {};
+  function define(name, type, term){
+    if (defs[name]){
+      throw "Parse error: redefinition of "+name+".";
+    } else {
+      defs[name] = {
+        type: type,
+        term: term,
+      }
+    }
+  }
   function parse_defs(code, [indx,tags]) {
     var [indx,tags] = next(code, [indx,tags]);
     if (indx === code.length) {
@@ -1357,15 +1367,9 @@ function parse(code, indx = 0, tags_list = Nil()) {
       var parsed_adt = parse_adt(code, [indx,tags], true);
       if (parsed_adt) {
         var [[indx,tags], adt] = parsed_adt;
-        defs[adt.name] = {
-          type: adt_type_type(adt),
-          term: adt_type_term(adt),
-        };
+        define(adt.name, adt_type_type(adt), adt_type_term(adt));
         for (var c = 0; c < adt.ctrs.length; ++c) {
-          defs[adt.name+"."+adt.ctrs[c].name] = {
-            type: adt_ctor_type(adt, c),
-            term: adt_ctor_term(adt, c),
-          };
+          define(adt.name+"."+adt.ctrs[c].name, adt_ctor_type(adt, c), adt_ctor_term(adt, c));
         }
         return parse_defs(code, [indx,tags]);
       // Parses function definitions
@@ -1376,10 +1380,7 @@ function parse(code, indx = 0, tags_list = Nil()) {
           chain(parse_txt(code, next(code, [indx,tags]), ":", true), ([indx,tags], skip) =>
           chain(parse_trm(code, next(code, [indx,tags]), true), ([indx,tags], type) =>
           chain(parse_trm(code, next(code, [indx,tags]), true), ([indx,tags], term) => {
-            defs[name] = {
-              type: def_type(bnds, type),
-              term: def_term(bnds, term),
-            };
+            define(name, def_type(bnds, type), def_term(bnds, term));
             return parse_defs(code, [indx,tags]);
           }))))));
       };

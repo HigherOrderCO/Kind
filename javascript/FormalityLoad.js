@@ -97,7 +97,7 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
               for (var new_def in new_defs) {
                 await load_and_typesynth(new_def, defs, show, debug);
               };
-            } catch (e) {
+            } catch (_) {
               throw e;
             }
           } else {
