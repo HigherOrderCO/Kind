@@ -1000,9 +1000,9 @@ function parse_bin(code,[indx,tags],err) {
       [[indx,tags],b]))))
   };
   return (
-    chain(dig(code,[indx,tags],err),            ([indx,tags],d)  => 
-    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) =>
-    { ds.unshift(d);
+    chain(dig(code,[indx,tags],err), ([indx,tags],d) =>
+    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) => { 
+      ds.unshift(d);
       var [_,num] = ds.reduceRight(([p,a],v) => [p+1n,a + v * 2n**p],[0n,0n]);
       return [[indx,tags], num];
     })))
@@ -1019,9 +1019,9 @@ function parse_dec(code,[indx,tags],err) {
       [[indx,tags],b]))))
   };
   return (
-    chain(dig(code,[indx,tags],err),            ([indx,tags],d)  => 
-    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) =>
-    { ds.unshift(d);
+    chain(dig(code,[indx,tags],err), ([indx,tags],d) =>
+    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) => { 
+      ds.unshift(d);
       var [_,num] = ds.reduceRight(([p,a],v) => [p+1n,a + v * 10n**p],[0n,0n]);
       return [[indx,tags], num];
     })))
@@ -1040,16 +1040,13 @@ function parse_hex(code,[indx,tags],err) {
       [[indx,tags],b]))))
   };
   return (
-    chain(dig(code,[indx,tags],err),            ([indx,tags],d)  => 
-    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) =>
-    { ds.unshift(d);
+    chain(dig(code,[indx,tags],err), ([indx,tags],d) =>
+    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) => { 
+      ds.unshift(d);
       var [_,num] = ds.reduceRight(([p,a],v) => [p+1n,a + v * 16n**p],[0n,0n]);
       return [[indx,tags], num];
     })))
 };
-
-
-
 
 // Parses a list literal, `[a, b, c]` as a `List(A)`
 function parse_lst(code, [indx,tags], err) {
@@ -1349,7 +1346,13 @@ function stringify_chr(chr) {
     }
   };
   if (chr.ctor === "Ref" && chr.name === "Char.new") {
-    return String.fromCharCode(val);
+    if (val == 92) {
+        return "\\\\"
+    } else if (val == 34) {
+        return "\\\""
+    } else {
+      return String.fromCharCode(val);
+    }
   } else {
     return null;
   };
