@@ -927,7 +927,7 @@ function parse_chr(code, [indx,tags], err) {
     chain(parse_txt(code, next(code, [indx,tags]), "'"), ([indx,tags], skip) =>
     chain([[indx+1,tags&&Ext(Tag("chr",code[indx]),tags)], code[indx]], ([indx,tags], chrx) =>
     chain(parse_txt(code, next(code, [indx,tags]), "'"), ([indx,tags], skip) =>
-    [[indx,tags], xs => Loc(from, indx, Ann(true, Chr(chrx), Ref("Char")))]
+    [[indx,tags], xs => Loc(from, indx, Chr(chrx))]
     ))));
 };
 
@@ -959,7 +959,7 @@ function parse_str(code, [indx,tags], err) {
       console.log(strx);
       return [[indx+1,tags&&Ext(Tag("txt",'"'),Ext(Tag("str",strx),tags))], Str(strx)];
     })([indx,tags]), ([indx,tags], slit) =>
-    [[indx,tags], xs => Loc(from, indx, Ann(true, slit, Ref("String")))])));
+    [[indx,tags], xs => Loc(from, indx, slit)])));
 };
 
 // Parses a string escape sequence, `\n`, `\DEL`, `\xABCDE

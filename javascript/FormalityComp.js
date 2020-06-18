@@ -14,15 +14,16 @@ const Str = (strx)           => ({ctor:"Str",strx});
 const Nat = (natx)           => ({ctor:"Nat",natx});
 
 var is_prim = {
-  Unit   : 1,
-  Bool   : 1,
-  Nat    : 1,
-  Bits   : 1,
-  U16    : 1,
-  U32    : 1,
-  U64    : 1,
-  F64    : 1,
-  String : 1
+  Unit     : 1,
+  Bool     : 1,
+  Nat      : 1,
+  Bits     : 1,
+  U16      : 1,
+  U32      : 1,
+  U64      : 1,
+  F64      : 1,
+  String   : 1,
+  Buffer32 : 1,
 };
 
 function stringify(term) {
@@ -50,14 +51,21 @@ function as_adt(term, defs) {
     while (term.ctor === "All") {
       var ctr = (function go(term, flds) {
         if (term.ctor === "All") {
-          return go(term.body(fmc.Var(""), fmc.Var(term.name)), flds.concat(term.name));
-        } else if (term.ctor === "App" && term.func.ctor === "Var" && term.func.indx === "P") {
-          var argm = term.argm;
-          while (argm.ctor === "App") {
-            argm = argm.func;
-          };
-          if (argm.ctor === "Ref") {
-            return {name: argm.name, flds: flds};
+          var flds = term.eras ? flds : flds.concat(term.name);
+          return go(term.body(fmc.Var(""), fmc.Var(term.name)), flds);
+        } else if (term.ctor === "App") {
+          var func = term.func;
+          while (func.ctor === "App") {
+            func = func.func;
+          }
+          if (func.ctor === "Var" && func.indx === "P") {
+            var argm = term.argm;
+            while (argm.ctor === "App") {
+              argm = argm.func;
+            };
+            if (argm.ctor === "Ref") {
+              return {name: argm.name, flds: flds};
+            }
           }
         }
         return null;
@@ -163,7 +171,6 @@ function infer(term, defs, ctx = fmc.Nil()) {
           var argm_cmp = check(term.argm, func_typ.bind, defs, ctx);
           var term_typ = func_typ.body(self_var, name_var);
           var comp = func_cmp.comp;
-
           var func_typ_adt = as_adt(func_typ, defs);
           var func_typ_prim = prim_of(func_typ, defs);
           if (func_typ_prim) {
@@ -237,7 +244,6 @@ function check(term, type, defs, ctx = fmc.Nil()) {
         } else {
           comp = Lam(term.name+"$"+(ctx.size+1), body_cmp.comp);
         }
-
         var type_adt = as_adt(type, defs);
         var type_prim = prim_of(type, defs);
         if (type_prim) {

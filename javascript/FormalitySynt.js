@@ -282,7 +282,7 @@ function build_chr(term) {
   var done = Ref("Char.new");
   var ccod = term.chrx.charCodeAt(0);
   for (var i = 0; i < 16; ++i) {
-    done = App(false, done, Ref(((ccod>>>(16-i-1))&1) ? "Bit.1" : "Bit.0"));
+    done = App(false, done, Ref(((ccod>>>(16-i-1))&1) ? "Bit.b1" : "Bit.b0"));
   };
   return done;
 };
@@ -541,7 +541,7 @@ function canonicalize(term, hols = {}, to_core = false) {
       var done = Ref("Char.new");
       var ccod = term.chrx.charCodeAt(0);
       for (var i = 0; i < 16; ++i) {
-        done = App(false, done, Ref(((ccod>>>(16-i-1))&1) ? "Bit.1" : "Bit.0"));
+        done = App(false, done, Ref(((ccod>>>(16-i-1))&1) ? "Bit.b1" : "Bit.b0"));
       };
       return done;
     } else {
@@ -836,11 +836,25 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
         return deep([[typeinfer, [term_val, defs, show, hols, ctx, locs]]], done);
       });
     case "Nat":
-      return done([hols, Ref("Nat")]);
+      return (
+        deep([[typeinfer, [Ref("Nat"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Nat.zero"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Nat.succ"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        done([hols, Ref("Nat")])))));
     case "Chr":
-      return done([hols, Ref("Char")]);
+      return (
+        deep([[typeinfer, [Ref("Char"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Char.new"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Bit"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Bit.b0"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Bit.b1"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        done([hols, Ref("Char")])))))));
     case "Str":
-      return done([hols, Ref("String")]);
+      return (
+        deep([[typeinfer, [Ref("String"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("String.nil"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("String.cons"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        done([hols, Ref("String")])))));
   };
   return fail(() => Err(locs, ctx, "Can't infer type."));
 };
