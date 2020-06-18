@@ -154,6 +154,7 @@ var prim_funcs = {
   "U32.and"        : [2, a=>b=>`${a}&${b}`],
   "U32.or"         : [2, a=>b=>`${a}|${b}`],
   "U32.xor"        : [2, a=>b=>`${a}^${b}`],
+  "U32.for"        : [4, a=>b=>c=>d=>`u32_for(${a},${b},${c},${d})`],
   "U64.add"        : [2, a=>b=>`(${a}+${b})&0xFFFFFFFFFFFFFFFFn`],
   "U64.sub"        : [2, a=>b=>`${a}-${b}<=0n?0n:a-b`],
   "U64.mul"        : [2, a=>b=>`(${a}*${b})&0xFFFFFFFFFFFFFFFFn`],
@@ -590,6 +591,12 @@ function compile(main, defs, only_expression = false) {
       "    };",
       "    return w;",
       "  };",
+      "  function u32_for(state, from, til, func) {",
+      "    for (var i = from; i < til; ++i) {",
+      "      state = func(i)(state);",
+      "    }",
+      "    return state;",
+      "  };"
       ].join("\n");
   };
 
