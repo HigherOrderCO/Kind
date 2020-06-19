@@ -1217,7 +1217,7 @@ function parse(code, indx = 0, tags_list = Nil()) {
         var [[indx,tags], adt] = parsed_adt;
         define(adt.name, adt_type_type(adt), adt_type_term(adt));
         for (var c = 0; c < adt.ctrs.length; ++c) {
-          define(adt.name+"."+adt.ctrs[c].name, adt_ctor_type(adt, c), adt_ctor_term(adt, c));
+          define(adt.ctrs[c].name, adt_ctor_type(adt, c), adt_ctor_term(adt, c));
         }
         return parse_defs(code, [indx,tags]);
       // Parses function definitions
@@ -1643,7 +1643,7 @@ function adt_type_term({name, pars, inds, ctrs}) {
                     throw "Insufficient indices for constructor '" + ctrs[i].name + "'.";
                   }
                 }
-                var slf = Ref(name+"."+ctrs[i].name);
+                var slf = Ref(ctrs[i].name);
                 for (var P = 0; P < pars.length; ++P) {
                   slf = App(true, slf, get_var(ctx, pars[P].name));
                 }
