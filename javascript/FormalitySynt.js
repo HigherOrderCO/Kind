@@ -104,11 +104,25 @@ function stringify(term, depth = 0) {
     case "Nat":
       return ""+term.natx;
     case "Chr":
-      return "'"+term.chrx+"'";
+      return "'"+print_str(term.chrx)+"'"; 
     case "Str":
-      return '"'+term.strx+'"';
+      return '"'+print_str(term.strx)+'"';
   };
 };
+
+function print_str(str) {
+  var out = ""
+  for (var i = 0; i < str.length; i++) {
+    if (str[i] == '\\' || str[i] == '"' | str[i] == "'") {
+      out += '\\' + str[i];
+    } else if (str[i] >= ' ' && str[i] <= `~`) {
+      out += str[i];
+    } else {
+      out += "\\u{" + str.codePointAt(i).toString(16) + "}";
+    }
+  }
+  return out;
+}
 
 function parse(code, indx, mode = "defs") {
   function is_name(chr) {
@@ -131,11 +145,43 @@ function parse(code, indx, mode = "defs") {
       ++indx;
     };
   };
+  function parse_tokn() {
+    if (indx >= code.length) {
+      throw "Unexpected eof";
+    } else if (code[indx] == '\\') {
+      var esc = code[++indx];
+      switch (esc) {
+        case 'u':
+          indx++;
+          var skip = parse_char('{');
+          var point = ""
+          while (code[indx] !== '}') {
+            if ("0123456789abcdefABCDEF".indexOf(code[indx]) !== -1) {
+              point += code[indx++];
+            } else {
+              throw 'Expected hexadecimal Unicode codepoint", found '+
+                JSON.stringify(code[indx])+' at '+indx+': `'+code.slice(indx)+"`.";
+            }
+          }
+          return String.fromCodePoint(parseInt(point,16));
+        case '\\':
+        case '"':
+        case "'":
+          indx++;
+          return esc;
+        default:
+         throw "Unexpected escape char: '\\" + code[indx+1] + "'.";
+      }
+    } else {
+      return code[indx++];
+    }
+  }
   function parse_char(chr) {
     if (indx >= code.length) {
       throw "Unexpected eof.";
     } else if (code[indx] !== chr) {
-      throw 'Expected "'+chr+'", found '+JSON.stringify(code[indx])+' at '+indx+': `'+code.slice(indx)+"`.";
+      throw 'Expected "'+chr+'", found '+JSON.stringify(code[indx])+' at '
+        +indx+': `'+code.slice(indx)+"`.";
     }
     ++indx;
   };
@@ -188,13 +234,14 @@ function parse(code, indx, mode = "defs") {
         var name = parse_name();
         return ctx => Hol(name, fold(ctx, Nil(), (h,t) => Ext(h[1],t)));
       case "'":
-        var chrx = code[indx++];
+        var chrx = parse_tokn();
         var skip = parse_char("'");
         return ctx => Chr(chrx);
       case '"':
         var strx = "";
+        //console.log(strx);
         while (code[indx] !== '"') {
-          strx += code[indx++];
+          strx += parse_tokn();
         }
         var skip = parse_char('"');
         return ctx => Str(strx);
@@ -1103,4 +1150,5 @@ module.exports = {
   typesynth,
   HOLE_LOGS,
   clear_hole_logs,
+  print_str,
 };

@@ -522,9 +522,9 @@ function js_code(term, name = null) {
       case "Nat":
         return term.natx+"n";
       case "Chr":
-        return term.chrx.charCodeAt(0);
+        return term.chrx.codePointAt(0);
       case "Str":
-        return "`"+term.strx+"`";
+        return '"'+fmc.print_str(term.strx)+'"';
     };
   };
 };
@@ -731,7 +731,7 @@ function compile(main, defs, only_expression = false) {
           expr = js_code(comp, name);
         }
       } catch (e) {
-        //console.log(e);
+        console.log(e);
         expr = "'ERROR'";
       };
     };

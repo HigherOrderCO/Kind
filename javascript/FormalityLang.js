@@ -38,8 +38,13 @@ function get_var(ctx, name, not_found) {
 };
 
 // Is this a space character?
+// Unicode whitespace characters from https://en.wikipedia.org/wiki/Whitespace_character
 function is_space(chr) {
-  return chr === " " || chr === "\t" || chr === "\n";
+  var whitespace = " \t\n\r\v\f\u0085\u00A0\u1680\u2000\u2001\u2002\u2003"  +
+                   "\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u2028\u2029" +
+                   "\u2028\u2029\u202F\u205F\u3000\u180E\u200B\u200C\u200D" +
+                   "\u2060\uFEFF"
+  return (whitespace.indexOf(chr) !== -1)
 };
 
 // Is this a name-valid character?
@@ -956,11 +961,17 @@ function parse_neq(code, [indx,tags], from, expr, err) {
 // Parses a char literal, 'f'
 function parse_chr(code, [indx,tags], err) {
   var from = next(code, [indx,tags])[0];
+  function esc(code,[indx,tags],err) {
+    return (
+    chain(parse_txt(code, [indx,tags], "\\"), ([indx,tags], skip) =>
+    chain(parse_esc(code, [indx,tags], err), ([indx,tags], e) =>
+    [[indx,tags],e])))
+  }
   return (
     chain(parse_txt(code, next(code, [indx,tags]), "'"), ([indx,tags], skip) =>
-    chain([[indx+1,tags&&Ext(Tag("chr",code[indx]),tags)], code[indx]], ([indx,tags], chrx) =>
+    chain(choose([() => esc(code,[indx,tags],err), () => [[indx+1,tags],code[indx]]]), ([indx,tags], chrx) =>
     chain(parse_txt(code, next(code, [indx,tags]), "'"), ([indx,tags], skip) =>
-    [[indx,tags], xs => Loc(from, indx, Chr(chrx))]
+    [[indx,tags&&Ext(Tag("chr",code[indx]),tags)], xs => Loc(from, indx, Chr(chrx))]
     ))));
 };
 
@@ -989,7 +1000,7 @@ function parse_str(code, [indx,tags], err) {
           strx += code[indx++];
         }
       }
-      console.log(strx);
+      //console.log(strx);
       return [[indx+1,tags&&Ext(Tag("txt",'"'),Ext(Tag("str",strx),tags))], Str(strx)];
     })([indx,tags]), ([indx,tags], slit) =>
     [[indx,tags], xs => Loc(from, indx, slit)])));
@@ -997,7 +1008,6 @@ function parse_str(code, [indx,tags], err) {
 
 // Parses a string escape sequence, `\n`, `\DEL`, `\xABCDE
 function parse_esc(code,[indx,tags],err) {
-  var from = next(code, [indx,tags])[0];
   var escs =
     [["b","\b"],    ["f","\f"],    ["n","\n"],    ["r","\r"],    ["t","\t"],
      ["v","\v"],    ["\\","\\"],   ["\"","\""],   ["0","\0"],    ["&",""],
@@ -1007,7 +1017,7 @@ function parse_esc(code,[indx,tags],err) {
      ["SI", "\x0F"],["DLE","\x10"],["DC1","\x11"],["DC2","\x12"],["DC3","\x13"],
      ["DC4","\x14"],["NAK","\x15"],["SYN","\x16"],["ETB","\x17"],["CAN","\x18"],
      ["EM", "\x19"],["SUB","\x1A"],["ESC","\x1B"],["FS", "\x1C"],["GS", "\x1D"],
-     ["RS", "\x1E"],["US", "\x1F"],["SP", "\x20"],["DEL","\x7F"]]
+     ["RS", "\x1E"],["US", "\x1F"],["SP", "\x20"],["DEL","\x7F"],["'","'"]]
   function hex(code,[indx,tags],err) {
     return (
       chain(parse_txt(code,[indx,tags],"x",false),([indx,tags],skip) =>
