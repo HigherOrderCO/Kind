@@ -1025,11 +1025,20 @@ function parse_esc(code,[indx,tags],err) {
       (pnt <= 0x10FFFFn) ? [[indx,tags], String.fromCodePoint(Number(pnt))] : null
     )))
   };
+  function unc(code,[indx,tags],err) {
+    return (
+      chain(parse_txt(code,[indx,tags],"u{",false),([indx,tags],skip) =>
+      chain(parse_hex(code,[indx,tags],false),    ([indx,tags],pnt)  =>
+      chain(parse_txt(code,[indx,tags],"}",false),([indx,tags],skip) =>
+      (pnt <= 0x10FFFFn) ? [[indx,tags], String.fromCodePoint(Number(pnt))] : null
+    ))))
+  };
   return (choose([
       () => choose(escs.map(([a,b]) => () =>
             chain(parse_txt(code,[indx,tags],a,false), ([indx,tags],_) => 
             [[indx,tags],b]))),
-      () => hex(code,[indx,tags],err)
+      () => hex(code,[indx,tags],err),
+      () => unc(code,[indx,tags],err)
     ]));
 };
 
