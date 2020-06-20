@@ -1,7 +1,35 @@
 var fms = require("./FormalitySynt.js");
 var fml = require("./FormalityLang.js");
 
+const version = "1";
 module.exports = ({XMLHttpRequest, fs, localStorage}) => {
+  // On node, create .fmc directory if it doesn't exist
+  if (fs && !fs.existsSync(".fmc")) {
+    fs.mkdirSync(".fmc");
+  }
+
+  // On node, invalidate cache when version changed
+  if (fs && (!fs.existsSync("./.fmc/version","utf8") || fs.readFileSync("./.fmc/version","utf8") !== version)) {
+    var files = fs.readdirSync("./.fmc");
+    for (var file of files) {
+      if (file.slice(-4) === ".fmc") {
+        fs.unlinkSync("./.fmc/"+file);
+      }
+    }
+    fs.writeFileSync("./.fmc/version", version);
+  }
+
+  // On browser, invalidate cache when version changed
+  if (localStorage && localStorage.getItem("./.fmc/version") !== version) {
+    for (var i = 0; i < localStorage.length; i++){
+      var key = localStorage.key(i);
+      if (key.slice(-4) === ".fmc") {
+        localStorage.removeItem(key);
+      }
+    }
+    localStorage.setItem("./.fmc/version", version);
+  }
+
   // Loads a core definition from moonad.org
   function load_code_from_moonad(name) {
     return new Promise((resolve, reject) => {
@@ -79,7 +107,6 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
 
               // Caches deps on disk
               if (fs) {
-                if (!fs.existsSync(".fmc")) fs.mkdirSync(".fmc");
                 fs.writeFileSync(dep_path, dep_code);
               }
 

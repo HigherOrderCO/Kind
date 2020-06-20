@@ -920,6 +920,39 @@ function parse_ann(code, [indx,tags], from, expr, err) {
     [[indx,tags], xs => Loc(from, indx, Ann(false, expr(xs), type(xs)))])));
 };
 
+// Parses an equality, `<term> == <term>`
+function parse_yeq(code, [indx,tags], from, expr, err) {
+  return (
+    chain(parse_txt(code, next(code, [indx,tags]), "==", false), ([indx,tags], skip) =>
+    chain(parse_trm(code, [indx,tags], err), ([indx,tags], eqto) => {
+      var nam0 = new_name();
+      return [[indx,tags], xs => {
+        var term = Ref("Equal");
+        var term = App(false, term, hole(nam0, xs))
+        var term = App(false, term, expr(xs));
+        var term = App(false, term, eqto(xs));
+        return Loc(from, indx, term);
+      }];
+    })));
+};
+
+// Parses a non equality, `<term> != <term>`
+function parse_neq(code, [indx,tags], from, expr, err) {
+  return (
+    chain(parse_txt(code, next(code, [indx,tags]), "!=", false), ([indx,tags], skip) =>
+    chain(parse_trm(code, [indx,tags], err), ([indx,tags], eqto) => {
+      var nam0 = new_name();
+      return [[indx,tags], xs => {
+        var term = Ref("Equal");
+        var term = App(false, term, hole(nam0, xs))
+        var term = App(false, term, expr(xs));
+        var term = App(false, term, eqto(xs));
+        var term = App(false, Ref("Not"), term);
+        return Loc(from, indx, term);
+      }];
+    })));
+};
+
 // Parses a char literal, 'f'
 function parse_chr(code, [indx,tags], err) {
   var from = next(code, [indx,tags])[0];
@@ -1181,6 +1214,8 @@ function parse_trm(code, [indx = 0, tags = []], err) {
         () => parse_pip(code, [indx,tags], from, term, err),
         () => parse_arr(code, [indx,tags], from, term, err),
         () => parse_ann(code, [indx,tags], from, term, err),
+        () => parse_yeq(code, [indx,tags], from, term, err),
+        () => parse_neq(code, [indx,tags], from, term, err),
       ], err);
       if (!post_parse) {
         return base_parse;
@@ -1281,7 +1316,7 @@ function parse(code, indx = 0, tags_list = Nil()) {
         var [[indx,tags], adt] = parsed_adt;
         define(adt.name, adt_type_type(adt), adt_type_term(adt));
         for (var c = 0; c < adt.ctrs.length; ++c) {
-          define(adt.name+"."+adt.ctrs[c].name, adt_ctor_type(adt, c), adt_ctor_term(adt, c));
+          define(adt.ctrs[c].name, adt_ctor_type(adt, c), adt_ctor_term(adt, c));
         }
         return parse_defs(code, [indx,tags]);
       // Parses function definitions
@@ -1713,7 +1748,7 @@ function adt_type_term({name, pars, inds, ctrs}) {
                     throw "Insufficient indices for constructor '" + ctrs[i].name + "'.";
                   }
                 }
-                var slf = Ref(name+"."+ctrs[i].name);
+                var slf = Ref(ctrs[i].name);
                 for (var P = 0; P < pars.length; ++P) {
                   slf = App(true, slf, get_var(ctx, pars[P].name));
                 }

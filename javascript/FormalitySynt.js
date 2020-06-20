@@ -282,7 +282,7 @@ function build_chr(term) {
   var done = Ref("Char.new");
   var ccod = term.chrx.charCodeAt(0);
   for (var i = 0; i < 16; ++i) {
-    done = App(false, done, Ref(((ccod>>>(16-i-1))&1) ? "Bit.b1" : "Bit.b0"));
+    done = App(false, done, Ref(((ccod>>>(16-i-1))&1) ? "Bit.1" : "Bit.0"));
   };
   return done;
 };
@@ -541,7 +541,7 @@ function canonicalize(term, hols = {}, to_core = false) {
       var done = Ref("Char.new");
       var ccod = term.chrx.charCodeAt(0);
       for (var i = 0; i < 16; ++i) {
-        done = App(false, done, Ref(((ccod>>>(16-i-1))&1) ? "Bit.b1" : "Bit.b0"));
+        done = App(false, done, Ref(((ccod>>>(16-i-1))&1) ? "Bit.1" : "Bit.0"));
       };
       return done;
     } else {
@@ -846,8 +846,8 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
         deep([[typeinfer, [Ref("Char"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
         deep([[typeinfer, [Ref("Char.new"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
         deep([[typeinfer, [Ref("Bit"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("Bit.b0"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("Bit.b1"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Bit.0"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Bit.1"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
         done([hols, Ref("Char")])))))));
     case "Str":
       return (
@@ -1027,7 +1027,7 @@ function typesynth(name, defs, show = stringify) {
       deep([[typecheck, [term, type, defs, show, {}, Nil(), null]]], ([hols,type]) => {
         for (var hol in hols) {
           if (hols[hol] === null) {
-            return fail(() => Err(null, ctx, "Unsolved hole: '" + hol + "'."));
+            return fail(() => Err(null, Nil(), "Unsolved hole: '" + hol + "'."));
           }
         }
         return done([hols,type])
