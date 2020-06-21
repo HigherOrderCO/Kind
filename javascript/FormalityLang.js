@@ -1372,6 +1372,20 @@ function stringify_lst(term, type = null, vals = Nil()) {
   ]);
 };
 
+function stringfy_app(term, sep) {
+  switch (term.ctor) {
+    case "App":
+      const func = term.func;
+      const arg = term.argm;
+      switch (func.ctor) {
+        case "App": 
+          return stringfy_app(func, ", ") + stringify_trm(arg) + sep;
+        default:
+          return stringify_trm(term.func) + (term.eras ? "<" : "(") + stringify_trm(term.argm) + sep;
+      }
+  }
+}
+
 // Stringifies a term
 function stringify_trm(term) {
   var lit;
@@ -1409,15 +1423,7 @@ function stringify_trm(term) {
         var rpar = term.eras ? ">" : ")";
         return lpar+name+rpar+" "+body;
       case "App":
-        var func = stringify_trm(term.func);
-        var lpar = term.eras ? "<" : "(";
-        var argm = stringify_trm(term.argm);
-        var rpar = term.eras ? ">" : ")";
-        if (func[0] === "(") {
-          return "("+func+")"+lpar+argm+rpar;
-        } else {
-          return func+lpar+argm+rpar;
-        }
+        return stringfy_app(term, "") + (term.eras ? ">" : ")");
       case "Let":
         var name = term.name;
         var expr = stringify_trm(term.expr);
