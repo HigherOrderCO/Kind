@@ -38,8 +38,13 @@ function get_var(ctx, name, not_found) {
 };
 
 // Is this a space character?
+// Unicode whitespace characters from https://en.wikipedia.org/wiki/Whitespace_character
 function is_space(chr) {
-  return chr === " " || chr === "\t" || chr === "\n";
+  var whitespace = " \t\n\r\v\f\u0085\u00A0\u1680\u2000\u2001\u2002\u2003"  +
+                   "\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u2028\u2029" +
+                   "\u2028\u2029\u202F\u205F\u3000\u180E\u200B\u200C\u200D" +
+                   "\u2060\uFEFF"
+  return (whitespace.indexOf(chr) !== -1)
 };
 
 // Is this a name-valid character?
@@ -956,11 +961,17 @@ function parse_neq(code, [indx,tags], from, expr, err) {
 // Parses a char literal, 'f'
 function parse_chr(code, [indx,tags], err) {
   var from = next(code, [indx,tags])[0];
+  function esc(code,[indx,tags],err) {
+    return (
+    chain(parse_txt(code, [indx,tags], "\\"), ([indx,tags], skip) =>
+    chain(parse_esc(code, [indx,tags], err,false), ([indx,tags], e) =>
+    [[indx,tags],e])))
+  }
   return (
     chain(parse_txt(code, next(code, [indx,tags]), "'"), ([indx,tags], skip) =>
-    chain([[indx+1,tags&&Ext(Tag("chr",code[indx]),tags)], code[indx]], ([indx,tags], chrx) =>
+    chain(choose([() => esc(code,[indx,tags],err), () => [[indx+1,tags],code[indx]]]), ([indx,tags], chrx) =>
     chain(parse_txt(code, next(code, [indx,tags]), "'"), ([indx,tags], skip) =>
-    [[indx,tags], xs => Loc(from, indx, Chr(chrx))]
+    [[indx,tags&&Ext(Tag("chr",code[indx]),tags)], xs => Loc(from, indx, Chr(chrx))]
     ))));
 };
 
@@ -971,16 +982,125 @@ function parse_str(code, [indx,tags], err) {
     chain(parse_txt(code, next(code, [indx,tags]), "\""), ([indx,tags], skip) =>
     chain((function go([indx,tags], slit) {
       var strx = "";
-      while (code[indx] !== '"') {
+      while (true) {
         if (indx >= code.length) {
           parse_error(code, indx, "unterminated string literal", true);
+        } else if (code[indx] == '\\') {
+          var esc = parse_esc(code,[indx+1,tags],err,true)
+          if (esc) {
+            var [[esc_indx,_],esc_char] = esc;
+            strx += esc_char;
+            indx = esc_indx;
+          } else {
+            parse_error(code, indx, "valid string escape sequence", true);
+          }
+        } else if (code[indx] == '"') {
+          break;
         } else {
           strx += code[indx++];
         }
       }
+      //console.log(strx);
       return [[indx+1,tags&&Ext(Tag("txt",'"'),Ext(Tag("str",strx),tags))], Str(strx)];
     })([indx,tags]), ([indx,tags], slit) =>
     [[indx,tags], xs => Loc(from, indx, slit)])));
+};
+
+// Parses a string escape sequence, `\n`, `\DEL`, `\xABCDE
+function parse_esc(code,[indx,tags],err,is_string) {
+  var escs =
+    [["b","\b"],    ["f","\f"],    ["n","\n"],    ["r","\r"],    ["t","\t"],
+     ["v","\v"],    ["\\","\\"],   ["\"","\""],   ["0","\0"],["'","'"],
+     ["NUL","\x00"],["SOH","\x01"],["STX","\x02"],["ETX","\x03"],["EOT","\x04"],
+     ["ENQ","\x05"],["ACK","\x06"],["BEL","\x07"],["BS", "\x08"],["HT", "\x09"],
+     ["LF", "\x0A"],["VT", "\x0B"],["FF", "\x0C"],["CR", "\x0D"],["SO", "\x0E"],
+     ["SI", "\x0F"],["DLE","\x10"],["DC1","\x11"],["DC2","\x12"],["DC3","\x13"],
+     ["DC4","\x14"],["NAK","\x15"],["SYN","\x16"],["ETB","\x17"],["CAN","\x18"],
+     ["EM", "\x19"],["SUB","\x1A"],["ESC","\x1B"],["FS", "\x1C"],["GS", "\x1D"],
+     ["RS", "\x1E"],["US", "\x1F"],["SP", "\x20"],["DEL","\x7F"]]
+  if (is_string) {
+    escs.push(["&",""])
+  }
+  function hex(code,[indx,tags],err) {
+    return (
+      chain(parse_txt(code,[indx,tags],"x",false),([indx,tags],skip) =>
+      chain(parse_hex(code,[indx,tags],false),    ([indx,tags],pnt)  =>
+      (pnt <= 0x10FFFFn) ? [[indx,tags], String.fromCodePoint(Number(pnt))] : null
+    )))
+  };
+  function unc(code,[indx,tags],err) {
+    return (
+      chain(parse_txt(code,[indx,tags],"u{",false),([indx,tags],skip) =>
+      chain(parse_hex(code,[indx,tags],false),    ([indx,tags],pnt)  =>
+      chain(parse_txt(code,[indx,tags],"}",false),([indx,tags],skip) =>
+      (pnt <= 0x10FFFFn) ? [[indx,tags], String.fromCodePoint(Number(pnt))] : null
+    ))))
+  };
+  return (choose([
+      () => choose(escs.map(([a,b]) => () =>
+            chain(parse_txt(code,[indx,tags],a,false), ([indx,tags],_) => 
+            [[indx,tags],b]))),
+      () => hex(code,[indx,tags],err),
+      () => unc(code,[indx,tags],err)
+    ]));
+};
+
+// parse binary literal
+function parse_bin(code,[indx,tags],err) {
+  var from = next(code, [indx,tags])[0];
+  var digs = [['0',0n],['1',1n]]
+  function dig(code,[indx,tags],err) {
+    return (choose(digs.map(([a,b]) => () =>
+      chain(parse_txt(code,[indx,tags],a,err), ([indx,tags],_) =>
+      [[indx,tags],b]))))
+  };
+  return (
+    chain(dig(code,[indx,tags],err), ([indx,tags],d) =>
+    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) => { 
+      ds.unshift(d);
+      var [_,num] = ds.reduceRight(([p,a],v) => [p+1n,a + v * 2n**p],[0n,0n]);
+      return [[indx,tags], num];
+    })))
+}
+
+// Parses a decimal number
+function parse_dec(code,[indx,tags],err) { 
+  var from = next(code, [indx,tags])[0];
+  var digs = [['0',0n],['1',1n],['2',2n],['3',3n],['4',4n],
+              ['5',5n],['6',6n],['7',7n],['8',8n],['9',9n]]
+  function dig(code,[indx,tags],err) {
+    return (choose(digs.map(([a,b]) => () =>
+      chain(parse_txt(code,[indx,tags],a,err), ([indx,tags],_) =>
+      [[indx,tags],b]))))
+  };
+  return (
+    chain(dig(code,[indx,tags],err), ([indx,tags],d) =>
+    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) => { 
+      ds.unshift(d);
+      var [_,num] = ds.reduceRight(([p,a],v) => [p+1n,a + v * 10n**p],[0n,0n]);
+      return [[indx,tags], num];
+    })))
+};
+
+function parse_hex(code,[indx,tags],err) {
+  var from = next(code, [indx,tags])[0];
+  var digs = [['0',0n],['1',1n],['2',2n],['3',3n],['4',4n],
+              ['5',5n],['6',6n],['7',7n],['8',8n],['9',9n],
+              ['a',10n],['b',11n],['c',12n],['d',13n],['e',14n],['f',15n],
+              ['A',10n],['B',11n],['C',12n],['D',13n],['E',14n],['F',15n]
+              ]
+  function dig(code,[indx,tags],err) {
+    return (choose(digs.map(([a,b]) => () =>
+      chain(parse_txt(code,[indx,tags],a,err), ([indx,tags],_) =>
+      [[indx,tags],b]))))
+  };
+  return (
+    chain(dig(code,[indx,tags],err), ([indx,tags],d) =>
+    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) => { 
+      ds.unshift(d);
+      var [_,num] = ds.reduceRight(([p,a],v) => [p+1n,a + v * 16n**p],[0n,0n]);
+      return [[indx,tags], num];
+    })))
 };
 
 // Parses a list literal, `[a, b, c]` as a `List(A)`
@@ -1091,6 +1211,7 @@ function parse_trm(code, [indx = 0, tags = []], err) {
     () => parse_cse(code, [indx,tags], err),
     () => parse_ite(code, [indx,tags], err),
     () => parse_don(code, [indx,tags], err),
+
     () => parse_var(code, [indx,tags], err),
   ], err);
 
@@ -1282,7 +1403,13 @@ function stringify_chr(chr) {
     }
   };
   if (chr.ctor === "Ref" && chr.name === "Char.new") {
-    return String.fromCharCode(val);
+    if (val == 92) {
+        return "\\\\"
+    } else if (val == 34) {
+        return "\\\""
+    } else {
+      return String.fromCharCode(val);
+    }
   } else {
     return null;
   };
@@ -1797,6 +1924,10 @@ module.exports = {
   parse_ann,
   parse_chr,
   parse_str,
+  parse_esc,
+  parse_bin,
+  parse_dec,
+  parse_hex,
   parse_trm,
   parse,
   unloc,
