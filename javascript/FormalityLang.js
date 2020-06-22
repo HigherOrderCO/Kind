@@ -1499,16 +1499,22 @@ function stringify_lst(term, type = null, vals = Nil()) {
   ]);
 };
 
-function stringfy_app(term, sep) {
+function stringify_app(term, sep) {
   switch (term.ctor) {
     case "App":
       const func = term.func;
       const arg = term.argm;
       switch (func.ctor) {
         case "App": 
-          return stringfy_app(func, ", ") + stringify_trm(arg) + sep;
+          return stringify_app(func, ", ") + stringify_trm(arg) + sep;
         default:
-          return stringify_trm(term.func) + (term.eras ? "<" : "(") + stringify_trm(term.argm) + sep;
+          var appf = stringify_trm(term.func)
+          var wrap = appf[0] === "(";
+          var appf = wrap ? "("+appf+")" : appf;
+          var args = (term.eras ? "<" : "(")
+            + stringify_trm(term.argm) + sep
+            + (term.eras ? ">" : ")");
+          return appf + args;
       }
   }
 }
@@ -1550,7 +1556,7 @@ function stringify_trm(term) {
         var rpar = term.eras ? ">" : ")";
         return lpar+name+rpar+" "+body;
       case "App":
-        return stringfy_app(term, "") + (term.eras ? ">" : ")");
+        return stringify_app(term, "");
       case "Let":
         var name = term.name;
         var expr = stringify_trm(term.expr);
