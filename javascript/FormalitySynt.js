@@ -141,7 +141,7 @@ function parse(code, indx, mode = "defs") {
     }
   };
   function parse_nuls() {
-    while (code[indx] === " " || code[indx] === "\n") {
+    while (" \n\r\t\v\f".indexOf(code[indx]) !== -1) {
       ++indx;
     };
   };

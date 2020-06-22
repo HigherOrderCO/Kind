@@ -964,7 +964,7 @@ function parse_chr(code, [indx,tags], err) {
   function esc(code,[indx,tags],err) {
     return (
     chain(parse_txt(code, [indx,tags], "\\"), ([indx,tags], skip) =>
-    chain(parse_esc(code, [indx,tags], err), ([indx,tags], e) =>
+    chain(parse_esc(code, [indx,tags], err,false), ([indx,tags], e) =>
     [[indx,tags],e])))
   }
   return (
@@ -986,7 +986,7 @@ function parse_str(code, [indx,tags], err) {
         if (indx >= code.length) {
           parse_error(code, indx, "unterminated string literal", true);
         } else if (code[indx] == '\\') {
-          var esc = parse_esc(code,[indx+1,tags],err)
+          var esc = parse_esc(code,[indx+1,tags],err,true)
           if (esc) {
             var [[esc_indx,_],esc_char] = esc;
             strx += esc_char;
@@ -1007,17 +1007,20 @@ function parse_str(code, [indx,tags], err) {
 };
 
 // Parses a string escape sequence, `\n`, `\DEL`, `\xABCDE
-function parse_esc(code,[indx,tags],err) {
+function parse_esc(code,[indx,tags],err,is_string) {
   var escs =
     [["b","\b"],    ["f","\f"],    ["n","\n"],    ["r","\r"],    ["t","\t"],
-     ["v","\v"],    ["\\","\\"],   ["\"","\""],   ["0","\0"],    ["&",""],
+     ["v","\v"],    ["\\","\\"],   ["\"","\""],   ["0","\0"],["'","'"],
      ["NUL","\x00"],["SOH","\x01"],["STX","\x02"],["ETX","\x03"],["EOT","\x04"],
      ["ENQ","\x05"],["ACK","\x06"],["BEL","\x07"],["BS", "\x08"],["HT", "\x09"],
      ["LF", "\x0A"],["VT", "\x0B"],["FF", "\x0C"],["CR", "\x0D"],["SO", "\x0E"],
      ["SI", "\x0F"],["DLE","\x10"],["DC1","\x11"],["DC2","\x12"],["DC3","\x13"],
      ["DC4","\x14"],["NAK","\x15"],["SYN","\x16"],["ETB","\x17"],["CAN","\x18"],
      ["EM", "\x19"],["SUB","\x1A"],["ESC","\x1B"],["FS", "\x1C"],["GS", "\x1D"],
-     ["RS", "\x1E"],["US", "\x1F"],["SP", "\x20"],["DEL","\x7F"],["'","'"]]
+     ["RS", "\x1E"],["US", "\x1F"],["SP", "\x20"],["DEL","\x7F"]]
+  if (is_string) {
+    escs.push(["&",""])
+  }
   function hex(code,[indx,tags],err) {
     return (
       chain(parse_txt(code,[indx,tags],"x",false),([indx,tags],skip) =>
