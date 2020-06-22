@@ -1,7 +1,7 @@
 var fms = require("./FormalitySynt.js");
 var fml = require("./FormalityLang.js");
 
-const version = "1";
+const version = require("./package.json").version;
 module.exports = ({XMLHttpRequest, fs, localStorage}) => {
   // On node, create .fmc directory if it doesn't exist
   if (fs && !fs.existsSync(".fmc")) {
