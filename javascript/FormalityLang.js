@@ -1499,26 +1499,6 @@ function stringify_lst(term, type = null, vals = Nil()) {
   ]);
 };
 
-function stringify_app(term, sep) {
-  switch (term.ctor) {
-    case "App":
-      const func = term.func;
-      const arg = term.argm;
-      switch (func.ctor) {
-        case "App": 
-          return stringify_app(func, ", ") + stringify_trm(arg) + sep;
-        default:
-          var appf = stringify_trm(term.func)
-          var wrap = appf[0] === "(";
-          var appf = wrap ? "("+appf+")" : appf;
-          var args = (term.eras ? "<" : "(")
-            + stringify_trm(term.argm) + sep
-            + (term.eras ? ">" : ")");
-          return appf + args;
-      }
-  }
-}
-
 // Stringifies a term
 function stringify_trm(term) {
   var lit;
@@ -1556,7 +1536,25 @@ function stringify_trm(term) {
         var rpar = term.eras ? ">" : ")";
         return lpar+name+rpar+" "+body;
       case "App":
-        return stringify_app(term, "");
+        var args = [];
+        while (term.ctor === "App") {
+          args.push([term.argm, term.eras]);
+          term = term.func;
+        }
+        args.reverse();
+        var text = "";
+        for (var [argm, eras] of args) {
+          var last = text[text.length - 1];
+          if (eras && last === ">" || !eras && last === ")") {
+            text = text.slice(0,-1) + ",";
+          } else {
+            text += eras ? "<" : "(";
+          }
+          text += stringify_trm(argm);
+          text += eras ? ">" : ")";
+        }
+        var func = stringify_trm(term);
+        return (func[0] === "(" ? "("+func+")" : func) + text;
       case "Let":
         var name = term.name;
         var expr = stringify_trm(term.expr);
