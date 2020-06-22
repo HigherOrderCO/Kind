@@ -731,7 +731,7 @@ function compile(main, defs, only_expression = false) {
           expr = js_code(comp, name);
         }
       } catch (e) {
-        console.log(e);
+        //console.log(e);
         expr = "'ERROR'";
       };
     };
