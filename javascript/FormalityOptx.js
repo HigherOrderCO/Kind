@@ -52,7 +52,7 @@ function erase(term, dep = 0) {
 };
 
 function compile(fm_term, defs = {}) {
-  var term = erase(canonicalize(fm_term, {}, true));
+  var term = erase(canonicalize(fm_term, {}, true, false));
   const ref_ptrs = {};
   const build_net = (term, net, var_ptrs, level) => {
     const get_var = (ptrn) => {

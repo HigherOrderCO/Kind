@@ -115,16 +115,21 @@ async function _fm_(
   };
 
   // If there are errors or unresolved equations, exits with an error
-  if (errors.length > 0) {
+  if (!silent && errors.length > 0) {
     error("", exit_code);
   }
 
   // Returns core defs
-  var core_defs = {};
-  for (var def in defs) {
-    core_defs[def] = defs[def].core;
-  };
-  return core_defs;
+  
+  if (errors.length === 0) {
+    var core_defs = {};
+    for (var def in defs) {
+      core_defs[def] = defs[def].core;
+    };
+    return core_defs;
+  } else {
+    return defs;
+  }
 };
 
 async function _fmc_(main = "main", dir) {

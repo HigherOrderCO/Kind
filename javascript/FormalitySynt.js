@@ -514,7 +514,7 @@ function normalize(term, defs, hols = {}, erased = false, seen = {}) {
 // - Applies static function calls (necessary for inference)
 // - Removes done Anns
 // - Removes Nat/Str if we're compiling to core
-function canonicalize(term, hols = {}, to_core = false) {
+function canonicalize(term, hols = {}, to_core = false, inline_lams = true) {
   switch (term.ctor) {
     case "Var":
       return Var(term.indx);
@@ -526,50 +526,49 @@ function canonicalize(term, hols = {}, to_core = false) {
       var eras = term.eras;
       var self = term.self;
       var name = term.name;
-      var bind = canonicalize(term.bind, hols, to_core);
-      var body = (s,x) => canonicalize(term.body(s,x), hols, to_core);
+      var bind = canonicalize(term.bind, hols, to_core, inline_lams);
+      var body = (s,x) => canonicalize(term.body(s,x), hols, to_core, inline_lams);
       return All(eras, self, name, bind, body);
     case "Lam":
       var eras = term.eras;
       var name = term.name;
-      var body = x => canonicalize(term.body(x), hols, to_core);
+      var body = x => canonicalize(term.body(x), hols, to_core, inline_lams);
       return Lam(eras, name, body);
     case "App":
       var eras = term.eras;
-      var func = canonicalize(term.func, hols, to_core);
-      var argm = canonicalize(term.argm, hols, to_core);
-      switch (func.ctor) {
-        case "Lam":
-          return canonicalize(func.body(term.argm), hols, to_core);
-        default:
-          return App(eras, func, argm);
+      var func = canonicalize(term.func, hols, to_core, inline_lams);
+      var argm = canonicalize(term.argm, hols, to_core, inline_lams);
+      if (inline_lams && func.ctor === "Lam") {
+        return canonicalize(func.body(term.argm), hols, to_core, inline_lams);
+      } else {
+        return App(eras, func, argm);
       };
     case "Let":
       var name = term.name;
-      var expr = canonicalize(term.expr, hols, to_core);
-      var body = x => canonicalize(term.body(x), hols, to_core);
+      var expr = canonicalize(term.expr, hols, to_core, inline_lams);
+      var body = x => canonicalize(term.body(x), hols, to_core, inline_lams);
       return Let(name, expr, body);
     case "Ann":
       if (term.done === true) {
-        return canonicalize(term.expr, hols, to_core);
+        return canonicalize(term.expr, hols, to_core, inline_lams);
       } else {
-        var expr = canonicalize(term.expr, hols, to_core);
-        var type = canonicalize(term.type, hols, to_core);
+        var expr = canonicalize(term.expr, hols, to_core, inline_lams);
+        var type = canonicalize(term.type, hols, to_core, inline_lams);
         return Ann(false, expr, type);
       }
     case "Loc":
-      return canonicalize(term.expr, hols, to_core);
+      return canonicalize(term.expr, hols, to_core, inline_lams);
     case "Wat":
       throw () => Err(null, null, "Incomplete program.");
     case "Hol":
       if (hols[term.name]) {
-        return canonicalize(hols[term.name](term.vals), hols, to_core);
+        return canonicalize(hols[term.name](term.vals), hols, to_core, inline_lams);
       } else {
         throw () => Err(null, null, "Unfilled hole: " + term.name + ".");
       }
     case "Cse":
       if (hols[term.name]) {
-        return canonicalize(build_cse(term, hols[term.name]), hols, to_core);
+        return canonicalize(build_cse(term, hols[term.name]), hols, to_core, inline_lams);
       } else {
         throw () => Err(null, null, "Incomplete case.");
       }
@@ -598,7 +597,7 @@ function canonicalize(term, hols = {}, to_core = false) {
     if (to_core) {
       var done = Ref("String.nil");
       for (var i = 0; i < term.strx.length; ++i) {
-        var chr = canonicalize(Chr(term.strx[term.strx.length-i-1]), hols, to_core);
+        var chr = canonicalize(Chr(term.strx[term.strx.length-i-1]), hols, to_core, inline_lams);
         done = App(false, App(false, Ref("String.cons"), chr), done);
       }
       return done;
@@ -616,7 +615,6 @@ function hash(term, dep = 0) {
   switch (term.ctor) {
     case "Var":
       var indx = Number(term.indx.split("#")[1]);
-      //console.log("ue", indx);
       if (indx < 0) {
         return "^"+(dep+indx);
       } else {
