@@ -737,13 +737,29 @@ function parse_don(code, [indx,tags], err = false) {
     [[indx,tags], xs => Loc(from, indx, term(xs))]))))));
 };
 
-function parsed_var(from, [indx,tags], name) {
+function parsed_var(from, [indx,tags], name, sign = true) {
   return xs => {
     if (tags && tags.head) tags.head.ctor = "var";
     return Loc(from, indx, get_var(xs, name, () => {
       if (/^[0-9]*$/.test(name)) {
         if (tags && tags.head) tags.head.ctor = "nat";
         return Nat(BigInt(name));
+      } else if (/^[0-9]*[bsulijfd]$/.test(name)) {
+        var conv = null;
+        switch (name[name.length - 1]) {
+          case "b": conv = "Nat.to_u8"; break;
+          case "s": conv = "Nat.to_u16"; break;
+          case "u": conv = "Nat.to_u32"; break;
+          case "l": conv = "Nat.to_u64"; break;
+        }
+        return App(false, Ref(conv), Nat(BigInt(name.slice(0,-1))));
+      } else if (/^[0-9]*\.[0-9]*$/.test(name)) {
+        var [a,b] = name.split(".");
+        var term = Ref("Nat.to_f64");
+        var term = App(false, term, Ref(sign ? "Bool.true" : "Bool.false"));
+        var term = App(false, term, Nat(BigInt(a)));
+        var term = App(false, term, Nat(BigInt(b)));
+        return term;
       } else {
         if (tags && tags.head) tags.head.ctor = "ref";
         return Ref(name);
@@ -756,14 +772,15 @@ function parsed_var(from, [indx,tags], name) {
 function parse_var(code, [indx,tags], err = false) {
   var from = next(code, [indx,tags])[0];
   return (
+    chain(parse_opt(code, next(code, [indx,tags]), "-", false), ([indx,tags], sign) =>
     chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], name) => {
       if (name.length === 0) {
         return parse_error(code, indx, "a variable", err);
       } else {
         var tag_to_mutate = tags && tags.head;
-        return [[indx,tags], parsed_var(from, [indx,tags], name)]
+        return [[indx,tags], parsed_var(from, [indx,tags], name, sign)]
       };
-    }));
+    })));
 };
 
 // Parses a single-line hole application, `<term>()`
