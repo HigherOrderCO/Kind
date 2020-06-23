@@ -26,7 +26,7 @@ var prim_types = {
     },
     cnam: ['nil', '0', '1'],
   },
-  U16: {
+  U8: {
     inst: [[1, x => "word_to_u8("+x+")"]],
     elim: {
       ctag: x => "'u8'",
@@ -127,10 +127,11 @@ var prim_funcs = {
   "Nat.eql"        : [2, a=>b=>`${a}===${b}`],
   "Nat.gte"        : [2, a=>b=>`${a}>=${b}`],
   "Nat.gtn"        : [2, a=>b=>`${a}>${b}`],
+  "Nat.to_u8"      : [1, a=>`Number(${a})`],
   "Nat.to_u16"     : [1, a=>`Number(${a})`],
   "Nat.to_u32"     : [1, a=>`Number(${a})`],
   "Nat.to_u64"     : [1, a=>`${a}`],
-  "Nat.to_f64"     : [2, a=>b=>c=>`f64_make(${a},${b},${c})`],
+  "Nat.to_f64"     : [3, a=>b=>c=>`f64_make(${a},${b},${c})`],
   "U8.add"         : [2, a=>b=>`(${a}+${b})&0xFF`],
   "U8.sub"         : [2, a=>b=>`Math.max(${a}-${b},0)`],
   "U8.mul"         : [2, a=>b=>`(${a}*${b})&0xFF`],
@@ -277,8 +278,32 @@ function application(func, allow_empty = false) {
 
   // Primitive function application
   if (func && (allow_empty || args.length > 0) && func.ctor === "Ref" && prim_funcs[func.name]) {
-    var [arity, template] = prim_funcs[func.name];
-    return build_from_template(arity, template, args);
+    if (func.name === "Nat.to_u8" && args.length === 1 && args[0].ctor === "Nat") {
+      return String(Number(args[0].natx));
+    } else if (func.name === "Nat.to_u16" && args.length === 1 && args[0].ctor === "Nat") {
+      return String(Number(args[0].natx));
+    } else if (func.name === "Nat.to_u32" && args.length === 1 && args[0].ctor === "Nat") {
+      return String(Number(args[0].natx));
+    } else if (func.name === "Nat.to_u64" && args.length === 1 && args[0].ctor === "Nat") {
+      return String(args[0].natx)+"n";
+    } else if ( func.name === "Nat.to_f64"
+            && args.length === 3
+            && args[0].ctor === "Ref"
+            && ( args[0].name === "Bool.true"
+              || args[0].name === "Bool.false")
+            && args[1].ctor === "Nat"
+            && args[2].ctor === "Nat") {
+      var str = String(Number(args[1].natx));
+      var mag = Number(args[2].natx);
+      while (str.length < mag + 1) {
+        str = "0" + str;
+      }
+      var str = str.slice(0, -mag) + "." + str.slice(-mag);
+      return (args[0].name === "Bool.false" ? "-" : "") + str;
+    } else {
+      var [arity, template] = prim_funcs[func.name];
+      return build_from_template(arity, template, args);
+    }
 
   // Primitive type elimination
   } else if (func && (allow_empty || args.length > 0) && func.ctor === "Eli") {
@@ -579,6 +604,27 @@ function compile(main, defs, only_expression = false) {
   };
   code += "(function (){\n";
 
+  if (used_prim_types["U8"]) {
+    code += [
+      "  function word_to_u8(w) {",
+      "    var u = 0;",
+      "    for (var i = 0; i < 8; ++i) {",
+      "      u = u | (w._ === 'Word.1' ? 1 << i : 0);",
+      "      w = w.pred;",
+      "    };",
+      "    return u;",
+      "  };",
+      "  function u8_to_word(u) {",
+      "    var w = {_: 'Word.nil'};",
+      "    for (var i = 0; i < 8; ++i) {",
+      "      w = {_: (u >>> (8-i-1)) & 1 ? 'Word.1' : 'Word.0', pred: w};",
+      "    };",
+      "    return w;",
+      "  };",
+      ].join("\n");
+    code += "\n";
+  }
+
   if (used_prim_types["U16"]) {
     code += [
       "  function word_to_u16(w) {",
@@ -597,6 +643,7 @@ function compile(main, defs, only_expression = false) {
       "    return w;",
       "  };",
       ].join("\n");
+    code += "\n";
   }
 
   if (used_prim_types["U32"]) {
@@ -623,6 +670,7 @@ function compile(main, defs, only_expression = false) {
       "    return state;",
       "  };"
       ].join("\n");
+    code += "\n";
   };
 
   if (used_prim_types["U64"]) {
@@ -643,6 +691,7 @@ function compile(main, defs, only_expression = false) {
       "    return w;",
       "  };",
       ].join("\n");
+    code += "\n";
   };
 
   if (used_prim_types["F64"]) {
@@ -682,12 +731,10 @@ function compile(main, defs, only_expression = false) {
       "    return w;",
       "  };",
       "  function f64_make(s, a, b) {",
-      "    var a = Number(a);",
-      "    var b = Number(b);",
-      "    var c = b / (10 ** (Math.floor(Math.log(b) / Math.log(10)) + 1));",
-      "    return (s ? 1 : -1) * (a + c);",
+      "    return (s ? 1 : -1) * Number(a) / 10 ** Number(b);",
       "  };",
       ].join("\n");
+    code += "\n";
   };
 
   if (used_prim_types["Buffer32"]) {
@@ -717,7 +764,8 @@ function compile(main, defs, only_expression = false) {
       "  function buffer32_to_depth(b) {",
       "    return BigInt(Math.log(b.length) / Math.log(2));",
       "  };",
-    ].join("\n");
+      ].join("\n");
+    code += "\n";
   };
 
   for (var prim in used_prim_types) {

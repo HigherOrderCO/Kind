@@ -18,6 +18,7 @@ var is_prim = {
   Bool     : 1,
   Nat      : 1,
   Bits     : 1,
+  U8       : 1,
   U16      : 1,
   U32      : 1,
   U64      : 1,

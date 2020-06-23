@@ -757,8 +757,8 @@ function parsed_var(from, [indx,tags], name, sign = true) {
         var [a,b] = name.split(".");
         var term = Ref("Nat.to_f64");
         var term = App(false, term, Ref(sign ? "Bool.true" : "Bool.false"));
-        var term = App(false, term, Nat(BigInt(a)));
-        var term = App(false, term, Nat(BigInt(b)));
+        var term = App(false, term, Nat(BigInt(a + b)));
+        var term = App(false, term, Nat(BigInt(b.length)));
         return term;
       } else {
         if (tags && tags.head) tags.head.ctor = "ref";
@@ -772,13 +772,13 @@ function parsed_var(from, [indx,tags], name, sign = true) {
 function parse_var(code, [indx,tags], err = false) {
   var from = next(code, [indx,tags])[0];
   return (
-    chain(parse_opt(code, next(code, [indx,tags]), "-", false), ([indx,tags], sign) =>
+    chain(parse_opt(code, next(code, [indx,tags]), "-", false), ([indx,tags], negs) =>
     chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], name) => {
       if (name.length === 0) {
         return parse_error(code, indx, "a variable", err);
       } else {
         var tag_to_mutate = tags && tags.head;
-        return [[indx,tags], parsed_var(from, [indx,tags], name, sign)]
+        return [[indx,tags], parsed_var(from, [indx,tags], name, !negs)]
       };
     })));
 };
