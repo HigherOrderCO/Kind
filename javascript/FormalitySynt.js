@@ -100,7 +100,7 @@ function stringify(term, depth = 0) {
     case "Hol":
       return "_"+term.name;
     case "Cse":
-      return "<TODO:stringify.case>";
+      return "<parsing_case>";
     case "Nat":
       return ""+term.natx;
     case "Chr":
@@ -359,6 +359,7 @@ function unloc(term) {
     case "Loc": return unloc(term.expr);
     case "Wat": return term;
     case "Hol": return term;
+    case "Cse": return term;
     case "Nat": return term;
     case "Chr": return term;
     case "Str": return term;

@@ -1594,6 +1594,8 @@ function stringify_trm(term) {
         return expr;
       case "Hol":
         return "_"+term.name; // +"{"+fold(term.vals,"",(h,t)=>stringify(h)+";"+t)+"}";
+      case "Cse":
+        return "<parsing_case>";
       case "Wat":
         return "?"+term.name;
       case "Nat":
