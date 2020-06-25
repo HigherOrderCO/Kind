@@ -180,6 +180,8 @@ var prim_funcs = {
   "U32.and"        : [2, a=>b=>`${a}&${b}`],
   "U32.or"         : [2, a=>b=>`${a}|${b}`],
   "U32.xor"        : [2, a=>b=>`${a}^${b}`],
+  "U32.slice"      : [3, a=>b=>c=>`${c}.slice(${a},${b})`],
+  "U32.read_base"  : [2, a=>b=>`parseInt(${b},${a})`],
   "U32.for"        : [4, a=>b=>c=>d=>`u32_for(${a},${b},${c},${d})`],
   "U64.add"        : [2, a=>b=>`(${a}+${b})&0xFFFFFFFFFFFFFFFFn`],
   "U64.sub"        : [2, a=>b=>`${a}-${b}<=0n?0n:a-b`],
@@ -214,6 +216,7 @@ var prim_funcs = {
   "Buffer32.get"   : [2, a=>b=>`(${b}[${a}])`],
   "Buffer32.alloc" : [1, a=>`new Uint32Array(2 ** Number(${a}))`],
   "String.eql"     : [2, a=>b=>`${a}===${b}`],
+  "String.concat"  : [2, a=>b=>`${a}+${b}`],
   "Equal.cast"     : [1, a=>a],
 };
 
