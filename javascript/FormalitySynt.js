@@ -683,7 +683,6 @@ function equal(a, b, defs, hols, dep = 0, rec = {}) {
             && equal(a1.bind, b1.bind, defs, hols, dep+0, rec)
             && equal(a1_body, b1_body, defs, hols, dep+2, rec);
       case "LamLam":
-        if (a1.eras !== b1.eras) return [false,a1,b1];
         var a1_body = a1.body(Var(a1.name+"#"+(dep)));
         var b1_body = b1.body(Var(a1.name+"#"+(dep)));
         return a1.eras === b1.eras
@@ -695,8 +694,6 @@ function equal(a, b, defs, hols, dep = 0, rec = {}) {
       case "LetLet":
         var a1_body = a1.body(Var(a1.name+"#"+(dep)));
         var b1_body = b1.body(Var(a1.name+"#"+(dep)));
-        vis.push([a1.expr, b1.expr, dep]);
-        vis.push([a1_body, b1_body, dep+1]);
         return equal(a1.expr, b1.expr, defs, hols, dep+0, rec)
             && equal(a1_body, b1_body, defs, hols, dep+1, rec);
       case "AnnAnn":
