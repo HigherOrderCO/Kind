@@ -182,6 +182,7 @@ var prim_funcs = {
   "U32.xor"        : [2, a=>b=>`${a}^${b}`],
   "U32.slice"      : [3, a=>b=>c=>`${c}.slice(${a},${b})`],
   "U32.read_base"  : [2, a=>b=>`parseInt(${b},${a})`],
+  "U32.length"     : [1, a=>`a.length`],
   "U32.for"        : [4, a=>b=>c=>d=>`u32_for(${a},${b},${c},${d})`],
   "U64.add"        : [2, a=>b=>`(${a}+${b})&0xFFFFFFFFFFFFFFFFn`],
   "U64.sub"        : [2, a=>b=>`${a}-${b}<=0n?0n:a-b`],
