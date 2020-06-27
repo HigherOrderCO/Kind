@@ -225,8 +225,8 @@ var prim_funcs = {
   "String.eql"       : [2, a=>b=>`${a}===${b}`],
   "String.concat"    : [2, a=>b=>`${a}+${b}`],
   "Equal.cast"       : [1, a=>a],
-  "Pos32.from_xyz"   : [3, a=>b=>c=>`(0|(${a}<<20)|(${b}<<8)|${c})`],
-  "Col32.from_rgba"  : [4, a=>b=>c=>d=>`(0|(${a}<<24)|(${b}<<16)|(${c}<<8)|${d})`],
+  "Pos32.from_xyz"   : [3, a=>b=>c=>`(0|${a}|(${b}<<12)|(${c}<<24))`],
+  "Col32.from_rgba"  : [4, a=>b=>c=>d=>`(0|${a}|(${b}<<8)|(${c}<<16)|(${d}<<24))`],
 };
 
 var count = 0;
