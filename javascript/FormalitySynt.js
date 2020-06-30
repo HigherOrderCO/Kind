@@ -894,10 +894,15 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
         done([hols, Ref("Char")])))))));
     case "Str":
       return (
+        deep([[typeinfer, [Ref("Char"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Char.new"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Bit"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Bit.0"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Bit.1"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
         deep([[typeinfer, [Ref("String"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
         deep([[typeinfer, [Ref("String.nil"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
         deep([[typeinfer, [Ref("String.cons"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        done([hols, Ref("String")])))));
+        done([hols, Ref("String")]))))))))));
   };
   return fail(() => Err(locs, ctx, "Can't infer type."));
 };
