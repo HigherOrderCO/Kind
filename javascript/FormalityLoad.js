@@ -1,34 +1,41 @@
 var fms = require("./FormalitySynt.js");
 var fml = require("./FormalityLang.js");
 
-const version = require("./package.json").version;
 module.exports = ({XMLHttpRequest, fs, localStorage}) => {
   // On node, create .fmc directory if it doesn't exist
   if (fs && !fs.existsSync(".fmc")) {
     fs.mkdirSync(".fmc");
   }
 
-  // On node, invalidate cache when version changed
-  if (fs && (!fs.existsSync("./.fmc/version","utf8") || fs.readFileSync("./.fmc/version","utf8") !== version)) {
-    var files = fs.readdirSync("./.fmc");
-    for (var file of files) {
-      if (file.slice(-4) === ".fmc") {
-        fs.unlinkSync("./.fmc/"+file);
-      }
+  async function validate_cache(urls) {
+    try {
+      var version = await load_code_from_moonad("Version", urls);
+    } catch (e) {
+      return;
     }
-    fs.writeFileSync("./.fmc/version", version);
-  }
 
-  // On browser, invalidate cache when version changed
-  if (localStorage && localStorage.getItem("./.fmc/version") !== version) {
-    for (var i = 0; i < localStorage.length; i++){
-      var key = localStorage.key(i);
-      if (key.slice(-4) === ".fmc") {
-        localStorage.removeItem(key);
+    // On node, invalidate cache when version changed
+    if (fs && (!fs.existsSync("./.fmc/Version.fmc","utf8") || fs.readFileSync("./.fmc/Version.fmc","utf8") !== version)) {
+      var files = fs.readdirSync("./.fmc");
+      for (var file of files) {
+        if (file.slice(-4) === ".fmc") {
+          fs.unlinkSync("./.fmc/"+file);
+        }
       }
+      fs.writeFileSync("./.fmc/Version.fmc", version);
     }
-    localStorage.setItem("./.fmc/version", version);
-  }
+
+    // On browser, invalidate cache when version changed
+    if (localStorage && localStorage.getItem("./.fmc/Version.fmc") !== version) {
+      for (var i = 0; i < localStorage.length; i++){
+        var key = localStorage.key(i);
+        if (key.slice(-4) === ".fmc") {
+          localStorage.removeItem(key);
+        }
+      }
+      localStorage.setItem("./.fmc/Version.fmc", version);
+    }
+  };
 
   // Loads a core definition from moonad.org
   function load_code_from_moonad(name, urls) {
@@ -78,7 +85,7 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
   // in parallel and decreasing the amount of calls to typesynth. This function
   // can also be improved aesthetically by making typesynth return an error
   // object instead of a string.
-  async function load_and_typesynth(name, defs, show = fml.stringify, debug = false, urls) {
+  async function load_and_typesynth(name, defs, show = fml.stringify, debug = false, urls, validated_cache = false) {
     // Repeatedly typesynths until either it works or errors, loading found deps
     while (true) {
       try {
@@ -96,6 +103,11 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
             var dep_name = msg.slice(err.length + 2, -2);
             var dep_path = ".fmc/"+dep_name+".fmc";
             try {
+              if (!validated_cache) {
+                validated_cache = true;
+                await validate_cache();
+              }
+
               // Checks if we have it on disk
               if (fs && fs.existsSync(dep_path)) {
                 var dep_code = fs.readFileSync(dep_path, "utf8");
@@ -130,7 +142,7 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
 
               // Synths deps
               for (var new_def in new_defs) {
-                await load_and_typesynth(new_def, defs, show, debug);
+                await load_and_typesynth(new_def, defs, show, debug, urls, validated_cache);
               };
             } catch (_) {
               throw e;
