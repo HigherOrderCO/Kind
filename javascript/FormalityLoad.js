@@ -31,23 +31,31 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
   }
 
   // Loads a core definition from moonad.org
-  function load_code_from_moonad(name) {
+  function load_code_from_moonad(name, urls) {
+    urls = urls || ["http://moonad.org/c/", "http://localhost/c/"];
     return new Promise((resolve, reject) => {
-      let xhr = new XMLHttpRequest();
-      xhr.open('GET', "http://moonad.org/c/"+name);
-      xhr.send();
-      xhr.onload = function() {
-        if (xhr.status === 200
-          && xhr.responseText
-          && xhr.responseText[0] !== "-") {
-          resolve(xhr.responseText);
-        } else {
+      function try_from(urls) {
+        if (urls.length === 0) {
           reject("Couldn't load term.");
-        }
+        } else {
+          let xhr = new XMLHttpRequest();
+          xhr.open('GET', urls[0]+name);
+          xhr.send();
+          xhr.onload = function() {
+            if ( xhr.status === 200
+              && xhr.responseText
+              && xhr.responseText[0] !== "-") {
+              resolve(xhr.responseText);
+            } else {
+              reject("Couldn't load term.");
+            }
+          };
+          xhr.onerror = function() {
+            try_from(urls.slice(1));
+          };
+        };
       };
-      xhr.onerror = function() {
-        reject("Couldn't load term.");
-      };
+      try_from(urls);
     });
   };
 
@@ -70,7 +78,7 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
   // in parallel and decreasing the amount of calls to typesynth. This function
   // can also be improved aesthetically by making typesynth return an error
   // object instead of a string.
-  async function load_and_typesynth(name, defs, show = fml.stringify, debug = false) {
+  async function load_and_typesynth(name, defs, show = fml.stringify, debug = false, urls) {
     // Repeatedly typesynths until either it works or errors, loading found deps
     while (true) {
       try {
@@ -99,7 +107,7 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
               // Otherwise, load it from moonad.org
               } else {
                 if (debug) console.log("... downloading http://moonad.org/c/"+dep_name);
-                var dep_code = await load_code_from_moonad(dep_name);
+                var dep_code = await load_code_from_moonad(dep_name, urls);
               };
 
               // Parses dep
