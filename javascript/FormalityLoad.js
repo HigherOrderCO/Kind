@@ -32,7 +32,7 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
 
   // Loads a core definition from moonad.org
   function load_code_from_moonad(name, urls) {
-    urls = urls || ["http://moonad.org/c/", "http://localhost/c/"];
+    urls = urls || ["http://localhost/c/","http://moonad.org/c/"];
     return new Promise((resolve, reject) => {
       function try_from(urls) {
         if (urls.length === 0) {
@@ -47,7 +47,7 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
               && xhr.responseText[0] !== "-") {
               resolve(xhr.responseText);
             } else {
-              reject("Couldn't load term.");
+              try_from(urls.slice(1));
             }
           };
           xhr.onerror = function() {
