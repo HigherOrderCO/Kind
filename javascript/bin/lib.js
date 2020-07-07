@@ -21,11 +21,30 @@ function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
   if (files.length === 0) {
     error("No local " + ext + " file found.", exit_code);
   } else {
-    var result = {files: {}, defs: {}};
+    var result = {cods: {}, defs: {}};
     for (var file of files) {
       var file_code = fs.readFileSync(path.join(dir, file), "utf8");
       try {
-        var parsed = parse(file_code,0);
+        var parsed = null;
+        if (ext === ".fm" && !fs.existsSync(".fmc")) {
+          fs.mkdirSync(".fmc");
+        }
+        var cache_path = ".fmc/"+file+".cache.json";
+        if (ext === ".fm" && fs.existsSync(cache_path)) {
+          var cached = JSON.parse(fs.readFileSync(cache_path, "utf8"));
+          if (cached.code === file_code) {
+            var parsed = fm.synt.parse(cached.core, 0);
+            for (var def in parsed.defs) {
+              parsed.defs[def].core = {
+                term: parsed.defs[def].term,
+                type: parsed.defs[def].type,
+              }
+            }
+          }
+        }
+        if (!parsed) {
+          parsed = parse(file_code,0);
+        }
         var file_defs = parsed.defs;
       } catch (err) {
         if (debug) console.log(err);
@@ -38,7 +57,8 @@ function load(dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
           error("Redefinition of '" + name + "' in '" + file + "'.", exit_code);
         } else {
           result.defs[name] = file_defs[name];
-          result.files[name] = file_code;
+          result.defs[name].file = file;
+          result.cods[name] = file_code;
         }
       }
     }
@@ -57,7 +77,9 @@ async function _fm_(
   silent = false
 ) {
   var exit_code = main === "--github" ? 1 : 0;
-  var {defs, files} = load(dir, ext, parse, exit_code);
+  var {defs, cods} = load(dir, ext, parse, exit_code);
+
+  var cache_files = {};
 
   // Normalizes and type-checks all terms
   if (!silent) console.log("\033[4m\x1b[1mType-checking:\x1b[0m");
@@ -67,10 +89,25 @@ async function _fm_(
     var show_name = name;
     try {
       var {term,type} = await synth(name, defs, show, true);
+      if (ext === ".fm" && !cache_files[defs[name].file]) {
+        cache_files[defs[name].file] = {
+          code: cods[name],
+          core: "",
+          good: true,
+        };
+      }
+      if (ext === ".fm") {
+        cache_files[defs[name].file].core += name + ": "
+          + fm.synt.stringify(type) + "\n  "
+          + fm.synt.stringify(term) + "\n\n";
+      }
       if (!silent) console.log(show_name + ": \x1b[2m" + show(type) + "\x1b[0m");
     } catch (err) {
       if (debug) console.log(err);
       if (!silent) console.log(show_name + ": " + "\x1b[31merror\x1b[0m");
+      if (ext === ".fm") {
+        cache_files[defs[name].file].good = false;
+      }
       if (typeof err === "function") {
         errors.push([name, err()]);
       } else {
@@ -80,11 +117,26 @@ async function _fm_(
   };
   if (!silent) console.log("");
 
+  // Caches well-typed files. Note: the reason we cache files instead of defs is
+  // that we don't have the source of each top-level definition, so we can't
+  // check if it changed or not.
+  if (ext === ".fm") {
+    for (var cache_file in cache_files) {
+      if (cache_files[cache_file].good) {
+        var json = JSON.stringify({
+          code: cache_files[cache_file].code,
+          core: cache_files[cache_file].core,
+        }, null, 2);
+        fs.writeFileSync(".fmc/"+cache_file+".cache.json", json);
+      };
+    }
+  }
+
   // If there are errors, prints them
   if (errors.length > 0) {
     if (!silent) console.log("\033[4m\x1b[1mFound " + errors.length + " type error(s):\x1b[0m\n");
     for (var i = errors.length - 1; i >= 0; --i) {
-      var err_msg = fm.lang.stringify_err(errors[i][1], files[errors[i][0]]);
+      var err_msg = fm.lang.stringify_err(errors[i][1], cods[errors[i][0]]);
       if (!silent) console.log("\x1b[1mInside \x1b[4m"+errors[i][0]+"\x1b[0m\x1b[1m:\x1b[0m");
       if (!silent) console.log(err_msg);
     };
@@ -120,7 +172,6 @@ async function _fm_(
   }
 
   // Returns core defs
-  
   if (errors.length === 0) {
     var core_defs = {};
     for (var def in defs) {
@@ -144,6 +195,10 @@ async function _fmc_(main = "main", dir) {
     return {defs};
   };
   await _fm_(main, ".", ".fmc", parse, fm.core.stringify, fm.synt.typesynth, fm.synt.normalize);
+};
+
+async function _fms_(main = "main", dir) {
+  await _fm_(main, ".", ".fmc", fm.synt.parse, fm.synt.stringify, fm.synt.typesynth, fm.synt.normalize);
 };
 
 async function _js_(main = "main", dir, ext, parse, show, synth, norm) {
@@ -184,14 +239,15 @@ async function _x_(main = "main", dir, ext, parse, show, synth, norm) {
 
 async function _fm2fmc_(main = "main", dir, ext, parse, show, synth, norm) {
   var defs = await _fm_(main, dir, ext, parse, show, synth, norm, true);
-  var code = "";
   for (var name in defs) {
+    var code = "";
     code += code !== "" ? "\n\n" : "";
     code += name + ": ";
     code += fm.synt.stringify(defs[name].type) + "\n  ";
     code += fm.synt.stringify(defs[name].term) + "";
+    fs.writeFileSync(".fmc/"+name+".fmc", code);
+    console.log("Saved .fmc/"+name+".fmc");
   };
-  console.log(code);
 };
 
-module.exports = {load, _fm_, _fmc_, _io_, _js_, _hs_, _x_, _fm2fmc_};
+module.exports = {load, _fm_, _fmc_, _fms_, _io_, _js_, _hs_, _x_, _fm2fmc_};
