@@ -88,7 +88,6 @@ async function _fm_(
   for (var name in defs) {
     var show_name = name;
     try {
-      var {term,type} = await synth(name, defs, show, true);
       if (ext === ".fm" && !cache_files[defs[name].file]) {
         cache_files[defs[name].file] = {
           code: cods[name],
@@ -96,6 +95,7 @@ async function _fm_(
           good: true,
         };
       }
+      var {term,type} = await synth(name, defs, show, true);
       if (ext === ".fm") {
         cache_files[defs[name].file].core += name + ": "
           + fm.synt.stringify(type) + "\n  "
