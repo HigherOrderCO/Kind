@@ -447,15 +447,26 @@ function parse_us0(code, [indx,tags], err = false) {
 
 // Parses a for loop, `for i = 0 .. 10 with val: f(i, val)`
 // ~> `let val = Nat.for<>(val, 0, 10, (i, val) f(i,val))`
-function parse_for(letter, callfunc) {
+function parse_for(type, callfunc) {
   return function parse_for(code, [indx,tags], err = false) {
+    function parse_typ(code, [indx,tags], err) {
+      if (type) {
+        return (
+          chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
+          chain(parse_txt(code, next(code, [indx,tags]), type, err), ([indx,tags], skip) =>
+          [[indx,tags], null])));
+      } else {
+        return [[indx,tags], null];
+      }
+    };
     var from = next(code, [indx,tags])[0];
     return (
       chain(parse_txt(code, next(code, [indx,tags]), "for ", false), ([indx,tags], skip) =>
       chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], fidx) =>
+      chain(parse_typ(code, next(code, [indx,tags]), err), ([indx,tags], skip) => 
       chain(parse_txt(code, next(code, [indx,tags]), "=", false), ([indx,tags], skip) =>
       chain(parse_trm(code, [indx,tags], err), ([indx,tags], lim0) =>
-      chain(parse_txt(code, next(code, [indx,tags]), "."+letter+".", false), ([indx,tags], skip) =>
+      chain(parse_txt(code, next(code, [indx,tags]), "..", false), ([indx,tags], skip) =>
       chain(parse_trm(code, [indx,tags], err), ([indx,tags], lim1) =>
       chain(parse_txt(code, next(code, [indx,tags]), "with", err), ([indx,tags], skip) =>
       chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
@@ -477,7 +488,7 @@ function parse_for(letter, callfunc) {
           var term = Let(name, term, x => body(Ext([name,x], xs)));
           return Loc(from, indx, term);
         }];
-      })))))))))))));
+      }))))))))))))));
   };
 };
 
@@ -1244,8 +1255,12 @@ function parse_trm(code, [indx = 0, tags = []], err) {
     () => parse_fun(code, [indx,tags], err),
     () => parse_acm(code, [indx,tags], err),
     () => parse_let(code, [indx,tags], err),
-    () => parse_for("","Nat.for")(code, [indx,tags], err),
-    () => parse_for("u","U32.for")(code, [indx,tags], err),
+    () => parse_for(null,"Nat.for")(code, [indx,tags], err),
+    () => parse_for("U8","U8.for")(code, [indx,tags], err),
+    () => parse_for("U16","U16.for")(code, [indx,tags], err),
+    () => parse_for("U32","U32.for")(code, [indx,tags], err),
+    () => parse_for("U64","U64.for")(code, [indx,tags], err),
+    () => parse_for("F64","F64.for")(code, [indx,tags], err),
     () => parse_us0(code, [indx,tags], err),
     () => parse_us1(code, [indx,tags], err),
     () => parse_us2(code, [indx,tags], err),
@@ -1266,7 +1281,6 @@ function parse_trm(code, [indx = 0, tags = []], err) {
     () => parse_cse(code, [indx,tags], err),
     () => parse_ite(code, [indx,tags], err),
     () => parse_don(code, [indx,tags], err),
-
     () => parse_var(code, [indx,tags], err),
   ], err);
 
