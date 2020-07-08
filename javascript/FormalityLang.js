@@ -463,10 +463,10 @@ function parse_for(type, callfunc) {
     return (
       chain(parse_txt(code, next(code, [indx,tags]), "for ", false), ([indx,tags], skip) =>
       chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], fidx) =>
-      chain(parse_typ(code, next(code, [indx,tags]), err), ([indx,tags], skip) => 
+      chain(parse_typ(code, next(code, [indx,tags]), false), ([indx,tags], skip) => 
       chain(parse_txt(code, next(code, [indx,tags]), "=", false), ([indx,tags], skip) =>
       chain(parse_trm(code, [indx,tags], err), ([indx,tags], lim0) =>
-      chain(parse_txt(code, next(code, [indx,tags]), "..", false), ([indx,tags], skip) =>
+      chain(parse_txt(code, next(code, [indx,tags]), "..", err), ([indx,tags], skip) =>
       chain(parse_trm(code, [indx,tags], err), ([indx,tags], lim1) =>
       chain(parse_txt(code, next(code, [indx,tags]), "with", err), ([indx,tags], skip) =>
       chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
