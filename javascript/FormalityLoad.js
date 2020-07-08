@@ -7,9 +7,13 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
     fs.mkdirSync(".fmc");
   }
 
+  var version = null;
+
   async function validate_cache(urls) {
     try {
-      var version = await load_code_from_moonad("Version", urls);
+      if (!version) {
+        version = await load_code_from_moonad("Version", urls);
+      }
     } catch (e) {
       return;
     }
@@ -85,7 +89,7 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
   // in parallel and decreasing the amount of calls to typesynth. This function
   // can also be improved aesthetically by making typesynth return an error
   // object instead of a string.
-  async function load_and_typesynth(name, defs, show = fml.stringify, debug = false, urls, validated_cache = false) {
+  async function load_and_typesynth(name, defs, show = fml.stringify, debug = false, urls) {
     // Repeatedly typesynths until either it works or errors, loading found deps
     while (true) {
       try {
@@ -103,11 +107,6 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
             var dep_name = msg.slice(err.length + 2, -2);
             var dep_path = ".fmc/"+dep_name+".fmc";
             try {
-              if (!validated_cache) {
-                validated_cache = true;
-                await validate_cache();
-              }
-
               // Checks if we have it on disk
               if (fs && fs.existsSync(dep_path)) {
                 var dep_code = fs.readFileSync(dep_path, "utf8");
@@ -118,6 +117,7 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
 
               // Otherwise, load it from moonad.org
               } else {
+                await validate_cache();
                 if (debug) console.log("... downloading http://moonad.org/c/"+dep_name);
                 var dep_code = await load_code_from_moonad(dep_name, urls);
               };
@@ -142,7 +142,7 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
 
               // Synths deps
               for (var new_def in new_defs) {
-                await load_and_typesynth(new_def, defs, show, debug, urls, validated_cache);
+                await load_and_typesynth(new_def, defs, show, debug, urls);
               };
             } catch (_) {
               throw e;
