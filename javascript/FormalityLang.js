@@ -447,19 +447,19 @@ function parse_us0(code, [indx,tags], err = false) {
 
 // Parses a for loop, `for i = 0 .. 10 with val: f(i, val)`
 // ~> `let val = Nat.for<>(val, 0, 10, (i, val) f(i,val))`
-function parse_for(keyword, callfunc) {
+function parse_for(letter, callfunc) {
   return function parse_for(code, [indx,tags], err = false) {
     var from = next(code, [indx,tags])[0];
     return (
-      chain(parse_txt(code, next(code, [indx,tags]), keyword+" ", false), ([indx,tags], skip) =>
-      chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], fidx) =>
-      chain(parse_opt(code, next(code, [indx,tags]), "=", err), ([indx,tags], skip) =>
+      chain(parse_txt(code, next(code, [indx,tags]), "for ", false), ([indx,tags], skip) =>
+      chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], fidx) =>
+      chain(parse_txt(code, next(code, [indx,tags]), "=", false), ([indx,tags], skip) =>
       chain(parse_trm(code, [indx,tags], err), ([indx,tags], lim0) =>
-      chain(parse_opt(code, next(code, [indx,tags]), "..", err), ([indx,tags], skip) =>
+      chain(parse_txt(code, next(code, [indx,tags]), "."+letter+".", false), ([indx,tags], skip) =>
       chain(parse_trm(code, [indx,tags], err), ([indx,tags], lim1) =>
-      chain(parse_opt(code, next(code, [indx,tags]), "with", err), ([indx,tags], skip) =>
+      chain(parse_txt(code, next(code, [indx,tags]), "with", err), ([indx,tags], skip) =>
       chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
-      chain(parse_opt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
+      chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
       chain(parse_trm(code, [indx,tags], err), ([indx,tags], loop) =>
       chain(parse_opt(code, [indx,tags], ";", err), ([indx,tags], skip) => 
       chain(parse_trm(code, [indx,tags], err), ([indx,tags], body) => {
@@ -1244,8 +1244,8 @@ function parse_trm(code, [indx = 0, tags = []], err) {
     () => parse_fun(code, [indx,tags], err),
     () => parse_acm(code, [indx,tags], err),
     () => parse_let(code, [indx,tags], err),
-    () => parse_for("for","Nat.for")(code, [indx,tags], err),
-    () => parse_for("ufor","U32.for")(code, [indx,tags], err),
+    () => parse_for("","Nat.for")(code, [indx,tags], err),
+    () => parse_for("u","U32.for")(code, [indx,tags], err),
     () => parse_us0(code, [indx,tags], err),
     () => parse_us1(code, [indx,tags], err),
     () => parse_us2(code, [indx,tags], err),
