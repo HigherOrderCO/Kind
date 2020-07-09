@@ -1737,7 +1737,11 @@ function stringify_err(err, code) {
   }
   var index = 0;
   if (!err.ctx) {
-    return err;
+    if (__dirname.indexOf("vic/dev") !== -1) {
+      return err;
+    } else {
+      return "Undecidable.";
+    }
   } else {
     var str = "";
     str += err.msg+"\n";
