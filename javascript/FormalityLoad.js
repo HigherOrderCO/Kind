@@ -106,43 +106,63 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
           if (msg.slice(0, err.length) === err) {
             var dep_name = msg.slice(err.length + 2, -2);
             var dep_path = ".fmc/"+dep_name+".fmc";
+            var dep_defs = null;
             try {
-              // Checks if we have it on disk
-              if (fs && fs.existsSync(dep_path)) {
-                var dep_code = fs.readFileSync(dep_path, "utf8");
-
-              // Checks if we have it on localStorage
-              } else if (localStorage && localStorage.getItem(dep_path)) {
-                var dep_code = localStorage.getItem(dep_path);
-
-              // Otherwise, load it from moonad.org
-              } else {
-                await validate_cache();
-                if (debug) console.log("... downloading http://moonad.org/c/"+dep_name);
-                var dep_code = await load_code_from_moonad(dep_name, urls);
-              };
-
-              // Parses dep
-              var {defs: new_defs} = fms.parse(dep_code);
-
-              // Caches deps on disk
+              // Checks if there is a local definition
               if (fs) {
-                fs.writeFileSync(dep_path, dep_code);
+                var words = dep_name.split(".");
+                while (words.length > 0) {
+                  var file = "./"+words.join(".")+".fm";
+                  if (fs.existsSync(file)) {
+                    var dep_code = fs.readFileSync(file, "utf8");
+                    var {defs: got_defs} = fml.parse(dep_code);
+                    if (got_defs[dep_name]) {
+                      dep_defs = got_defs;
+                      break;
+                    }
+                  }
+                  words.pop();
+                }
               }
 
-              // Caches deps on localStorage
-              if (localStorage) {
-                localStorage.setItem(dep_path, dep_code);
+              // Checks if we have the global definition cached on disk
+              if (!dep_defs) {
+                if (fs && fs.existsSync(dep_path)) {
+                  var dep_code = fs.readFileSync(dep_path, "utf8");
+
+                // Checks if we have the global definition cached on localStorage
+                } else if (localStorage && localStorage.getItem(dep_path)) {
+                  var dep_code = localStorage.getItem(dep_path);
+
+                // Otherwise, load the global definition from moonad.org
+                } else {
+                  await validate_cache();
+                  if (debug) console.log("... downloading http://moonad.org/c/"+dep_name);
+                  var dep_code = await load_code_from_moonad(dep_name, urls);
+                };
+
+                // Parses dep
+                var {defs: dep_defs} = fms.parse(dep_code);
+
+                // Caches deps on disk
+                if (fs) {
+                  fs.writeFileSync(dep_path, dep_code);
+                }
+
+                // Caches deps on localStorage
+                if (localStorage) {
+                  localStorage.setItem(dep_path, dep_code);
+                }
               }
 
               // Adds to the defs object
-              for (var new_def in new_defs) {
-                defs[new_def] = new_defs[new_def];
+              for (var dep_def in dep_defs) {
+                defs[dep_def] = dep_defs[dep_def];
               };
 
               // Synths deps
-              for (var new_def in new_defs) {
-                await load_and_typesynth(new_def, defs, show, debug, urls);
+              for (var dep_def in dep_defs) {
+                await load_and_typesynth(dep_def, defs, show, debug, urls);
               };
             } catch (_) {
               throw e;

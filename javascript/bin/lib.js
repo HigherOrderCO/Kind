@@ -17,7 +17,12 @@ function clear_dir(dir, ext) {
 };
 
 function load(main = null, dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
-  var files = fs.readdirSync(dir).filter(file => file.slice(-ext.length) === ext && file !== ext);
+  var files;
+  if (main.slice(-ext.length) === ext) {
+    files = [main];
+  } else {
+    files = fs.readdirSync(dir).filter(file => file.slice(-ext.length) === ext && file !== ext);
+  }
   if (files.length === 0) {
     error("No local " + ext + " file found.", exit_code);
   } else {
@@ -25,9 +30,6 @@ function load(main = null, dir = ".", ext = ".fm", parse = fm.lang.parse, exit_c
     for (var file of files) {
       var file_code = fs.readFileSync(path.join(dir, file), "utf8");
       try {
-        if (ext === ".fm" && !fs.existsSync(".fmc")) {
-          fs.mkdirSync(".fmc");
-        }
         var parsed = parse(file_code,0);
         var file_defs = parsed.defs;
       } catch (err) {
@@ -73,7 +75,11 @@ async function _run_(
       continue;
     }
     try {
-      var {term,type} = await synth(name, defs, show, true);
+      var {term, type} = await synth(name, defs, show, true);
+      var prefix = file.slice(0,-ext.length);
+      if (name.slice(0,prefix.length) !== prefix) {
+        throw () => "Name '"+name+"' doesn't start with '"+prefix+"' inside '"+file+"'.\n"
+      }
       if (!silent) {
         console.log(name + ": \x1b[2m" + show(type) + "\x1b[0m");
       }
