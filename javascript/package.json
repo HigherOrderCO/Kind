@@ -1,21 +1,24 @@
 {
   "name": "formality-lang",
-  "version": "0.4.86",
+  "version": "0.4.87",
   "description": "The Formality proof language",
   "browser": "browser.js",
   "main": "index.js",
   "bin": {
     "fm": "bin/fm.js",
-    "fmjs": "bin/fmcjs.js",
-    "fmio": "bin/fmcio.js",
-    "fmx": "bin/fmcx.js",
+    "fmio": "bin/fmio.js",
+    "fmopt": "bin/fmopt.js",
+    "fmfast": "bin/fmfast.js",
+    "fmjs": "bin/fm2js.js",
+    "fm2js": "bin/fm2js.js",
+    "fmfmc": "bin/fm2fmc.js",
     "fm2fmc": "bin/fm2fmc.js",
+    "fmevm": "bin/fm2evm.js",
+    "fm2evm": "bin/fm2evm.js",
+    "evmfm": "bin/evm2fm.js",
+    "evm2fm": "bin/evm2fm.js",
     "fmc": "bin/fmc.js",
-    "fms": "bin/fms.js",
-    "fmcjs": "bin/fmcjs.js",
-    "fmchs": "bin/fmchs.js",
-    "fmcio": "bin/fmcio.js",
-    "fmcx": "bin/fmcx.js"
+    "fms": "bin/fms.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

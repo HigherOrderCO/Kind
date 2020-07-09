@@ -1,58 +1,9 @@
 const {Var, App, Lam, Ref, Ext, Nil, find, canonicalize} = require("./FormalitySynt.js");
 const {Net, Pointer, addr_of, slot_of, numb_of, ptrn_eq, ptrn_st, NOD} = require("./FormalityInet.js");
+const erase = require("./FormalityEras.js").erase;
 
-function erase(term, dep = 0) {
-  const id = {ctor: "Lam", body: {ctor: "Var", indx: 0}};
-  switch (term.ctor) {
-    case "Var":
-      return {
-        ctor: "Var",
-        indx: dep - term.indx - 1,
-      };
-    case "Ref":
-      return {ctor: "Ref", name: term.name};
-    case "Typ":
-      return id;
-    case "All":
-      return id;
-    case "Lam":
-      if (term.eras) {
-        return erase(term.body(id), dep);
-      } else {
-        return {
-          ctor: "Lam",
-          name: term.name,
-          body: erase(term.body({ctor: "Var", indx: dep}), dep + 1),
-        };
-      }
-    case "App":
-      if (term.eras) {
-        return erase(term.func, dep);
-      } else {
-        return {
-          ctor: "App",
-          func: erase(term.func, dep),
-          argm: erase(term.argm, dep),
-        };
-      }
-    case "Let":
-      return {
-        ctor: "Let",
-        name: term.name,
-        expr: erase(term.expr, dep),
-        body: erase(term.body({ctor: "Var", indx: dep}), dep + 1),
-      };
-    case "Ann":
-      return erase(term.expr, dep);
-    case "Loc":
-      return erase(term.expr, dep);
-    case "Hol":
-      throw "Can't compile hole.";
-  };
-};
-
-function compile(fm_term, defs = {}) {
-  var term = erase(canonicalize(fm_term, {}, true, false));
+function compile(name, defs = {}) {
+  var term = erase(canonicalize(defs[name].term, {}, true, false));
   const ref_ptrs = {};
   const build_net = (term, net, var_ptrs, level) => {
     const get_var = (ptrn) => {
@@ -100,7 +51,7 @@ function compile(fm_term, defs = {}) {
           var dup_addr = net.alloc_node(NOD, 0xFFFD);
           var ref_ptrn = Pointer(dup_addr, 1);
           ref_ptrs[term.name] = ref_ptrn;
-          var dref = erase(defs[term.name].term);
+          var dref = erase(canonicalize(defs[term.name].term, {}, true, false));
           var dref_ptr = build_net(dref, net, var_ptrs, level);
           net.link_ports(Pointer(dup_addr, 0), dref_ptr);
           return Pointer(dup_addr, 2);

@@ -172,7 +172,7 @@ async function _fms_(main = "main") {
   await _run_(main, ".", ".fmc", fm.synt.parse, fm.synt.stringify, fm.synt.typesynth, fm.synt.normalize);
 };
 
-async function _js_(main = "main", dir, ext, parse, show, synth, norm) {
+async function _fm2js_(main = "main", dir, ext, parse, show, synth, norm) {
   var defs = await _run_(main, dir, ext, parse, show, synth, norm, true);
   //var {defs} = load("./.fmc", ".fmc", fm.synt.parse);
   if (!defs[main]) {
@@ -180,11 +180,6 @@ async function _js_(main = "main", dir, ext, parse, show, synth, norm) {
   } else {
     console.log(fm.tojs.compile(main, defs));
   };
-};
-
-function _hs_(main = "main", dir, ext, parse) {
-  console.log("Temporarily disabled.");
-  process.exit();
 };
 
 async function _io_(main = "main", dir, ext, parse, show, synth, norm) {
@@ -197,15 +192,42 @@ async function _io_(main = "main", dir, ext, parse, show, synth, norm) {
   };
 };
 
-async function _x_(main = "main", dir, ext, parse, show, synth, norm) {
+async function _opt_(main = "main", dir, ext, parse, show, synth, norm) {
   var defs = await _run_(main, dir, ext, parse, show, synth, norm, true);
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
-    var result = fm.optx.normalize(defs[main].term, defs);
+    var result = fm.optx.normalize(main, defs);
     console.log(fm.synt.stringify(result.term));
     console.log(JSON.stringify(result.stats));
   };
+};
+
+async function _fast_(main = "main", dir, ext, parse, show, synth, norm) {
+  var defs = await _run_(main, dir, ext, parse, show, synth, norm, true);
+  if (!defs[main]) {
+    console.log("Term '" + main + "' not found.");
+  } else {
+    var result = fm.fast.normalize(main, defs);
+    console.log(fm.synt.stringify(result.term));
+    console.log(JSON.stringify(result.stats));
+  };
+};
+
+async function _fm2evm_(main = "main", dir, ext, parse, show, synth, norm) {
+  var defs = await _run_(main, dir, ext, parse, show, synth, norm, true);
+  if (!defs[main]) {
+    console.log("Term '" + main + "' not found.");
+  } else {
+    var result = fm.toev.compile(main, defs);
+    console.log(result);
+  };
+};
+
+// TODO: untested
+async function _evm2fm_(bytes) {
+  var buffer = Buffer.from(bytes, "hex");
+  console.log(fm.lang.stringify(fm.toev.decompile(buffer)));
 };
 
 async function _fm2fmc_(main = "main", dir, ext, parse, show, synth, norm) {
@@ -221,4 +243,4 @@ async function _fm2fmc_(main = "main", dir, ext, parse, show, synth, norm) {
   };
 };
 
-module.exports = {load, _run_, _fm_, _fmc_, _fms_, _io_, _js_, _hs_, _x_, _fm2fmc_};
+module.exports = {load, _run_, _fm_, _fmc_, _fms_, _io_, _fm2js_, _opt_, _fast_, _fm2evm_, _evm2fm_, _fm2fmc_};

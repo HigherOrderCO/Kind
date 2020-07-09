@@ -6,6 +6,8 @@ module.exports = (deps) => ({
   comp: require("./FormalityComp.js"),
   tojs: require("./FormalityToJS.js"),
   optx: require("./FormalityOptx.js"),
+  toev: require("./FormalityToEV.js"),
   inet: require("./FormalityInet.js"),
+  fast: require("./FormalityFast.js"),
   load: require("./FormalityLoad.js")(deps),
 });
