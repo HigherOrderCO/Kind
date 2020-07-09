@@ -1737,12 +1737,10 @@ function stringify_err(err, code) {
   }
   var index = 0;
   if (!err.ctx) {
-    if (typeof err === "function") {
-      return err();
-    } else if (__dirname.indexOf("vic/dev") !== -1) {
+    if (typeof error === "string" || __dirname.indexOf("vic/dev") !== -1) {
       return err;
     } else {
-      return "Undecidable.";
+      return "Internal error.";
     }
   } else {
     var str = "";
