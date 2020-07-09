@@ -1737,7 +1737,7 @@ function stringify_err(err, code) {
   }
   var index = 0;
   if (!err.ctx) {
-    if (typeof error === "string" || __dirname.indexOf("vic/dev") !== -1) {
+    if (typeof err === "string" || __dirname.indexOf("vic/dev") !== -1) {
       return err;
     } else {
       return "Internal error.";
