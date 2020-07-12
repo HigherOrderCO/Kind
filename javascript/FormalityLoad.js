@@ -158,6 +158,7 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
               // Adds to the defs object
               for (var dep_def in dep_defs) {
                 defs[dep_def] = dep_defs[dep_def];
+                defs[dep_def].code = dep_code;
               };
 
               // Synths deps

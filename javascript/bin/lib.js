@@ -17,16 +17,26 @@ function clear_dir(dir, ext) {
 };
 
 function load(main = null, dir = ".", ext = ".fm", parse = fm.lang.parse, exit_code = 0) {
-  var files;
+  // When main is "file.fm", loads one file
   if (main.slice(-ext.length) === ext) {
     files = [main];
-  } else {
-    files = fs.readdirSync(dir).filter(file => file.slice(-ext.length) === ext && file !== ext);
+  // When main is a name, loads mother file
+  } else if (typeof main === "string" && main !== "") {
+    var words = main.split(".");
+    while (words.length > 0 && !fs.existsSync(words.join(".")+".fm")) {
+      words = words.slice(0,-1);
+    }
+    files = [words.join(".")+".fm"];
+    // If we didn't find the right file, load everything
+    if (!fs.existsSync(files[0])) {
+      files = fs.readdirSync(dir).filter(file => file.slice(-ext.length) === ext && file !== ext);
+    }
   }
+
   if (files.length === 0) {
     error("No local " + ext + " file found.", exit_code);
   } else {
-    var result = {cods: {}, defs: {}};
+    var defs = {};
     for (var file of files) {
       var file_code = fs.readFileSync(path.join(dir, file), "utf8");
       try {
@@ -39,17 +49,17 @@ function load(main = null, dir = ".", ext = ".fm", parse = fm.lang.parse, exit_c
              , exit_code);
       }
       for (var name in file_defs) {
-        if (result.defs[name]) {
+        if (defs[name]) {
           error("Redefinition of '" + name + "' in '" + file + "'.", exit_code);
         } else {
-          result.defs[name] = file_defs[name];
-          result.defs[name].file = file;
-          result.cods[name] = file_code;
+          defs[name] = file_defs[name];
+          defs[name].file = file;
+          defs[name].code = file_code;
         }
       }
     }
   }
-  return result;
+  return defs;
 };
 
 async function _run_(
@@ -63,7 +73,7 @@ async function _run_(
   silent = false
 ) {
   var exit_code = main === "--github" ? 1 : 0;
-  var {defs, cods} = load(main, dir, ext, parse, exit_code);
+  var defs = load(main, dir, ext, parse, exit_code);
 
   // Normalizes and type-checks all terms
   if (!silent) console.log("\033[4m\x1b[1mType-checking:\x1b[0m");
@@ -103,7 +113,7 @@ async function _run_(
   if (errors.length > 0) {
     if (!silent) console.log("\033[4m\x1b[1mFound " + errors.length + " type error(s):\x1b[0m\n");
     for (var i = errors.length - 1; i >= 0; --i) {
-      var err_msg = fm.lang.stringify_err(errors[i][1], cods[errors[i][0]]);
+      var err_msg = fm.lang.stringify_err(errors[i][1], defs[errors[i][0]].code);
       if (!silent) console.log("\x1b[1mInside \x1b[4m"+errors[i][0]+"\x1b[0m\x1b[1m:\x1b[0m");
       if (!silent) console.log(err_msg);
     };
