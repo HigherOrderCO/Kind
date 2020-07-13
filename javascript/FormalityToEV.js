@@ -413,13 +413,13 @@ function decompile(evm_mem) {
   var mem = [];
   for (var i = 0; i < evm_mem.length / 32; ++i) {
     var num
-      = (evm_mem[i * 32 + 28] << 24)
-      + (evm_mem[i * 32 + 29] << 16)
-      + (evm_mem[i * 32 + 30] << 8)
-      + (evm_mem[i * 32 + 31]);
+      = (evm_mem[i * 32 + 28] << 24 >>> 0)
+      + (evm_mem[i * 32 + 29] << 16 >>> 0)
+      + (evm_mem[i * 32 + 30] << 8  >>> 0)
+      + (evm_mem[i * 32 + 31]       >>> 0);
     mem.push(num);
   }
-  return fast.decompile({mem, ptr:mem[0]});
+  return fast.decompile({mem:mem, ptr:mem[0]});
 }
 
 module.exports = {compile, decompile};
