@@ -419,7 +419,7 @@ function decompile(evm_mem) {
       + (evm_mem[i * 32 + 31]       >>> 0);
     mem.push(num);
   }
-  return fast.decompile({mem:mem, ptr:mem[0]});
+  return fast.decompile({mem:mem, ptr:mem[0]},0);
 }
 
 module.exports = {compile, decompile};
