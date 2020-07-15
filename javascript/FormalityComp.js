@@ -22,6 +22,7 @@ var is_prim = {
   U16      : 1,
   U32      : 1,
   U64      : 1,
+  U256     : 1,
   F64      : 1,
   String   : 1,
   Buffer32 : 1,

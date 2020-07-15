@@ -791,13 +791,14 @@ function parsed_var(from, [indx,tags], name, sign = true) {
       if (/^[0-9]*$/.test(name)) {
         if (tags && tags.head) tags.head.ctor = "nat";
         return Nat(BigInt(name));
-      } else if (/^[0-9]*[bsulijfd]$/.test(name)) {
+      } else if (/^[0-9]*[bsulijfde]$/.test(name)) {
         var conv = null;
         switch (name[name.length - 1]) {
           case "b": conv = "Nat.to_u8"; break;
           case "s": conv = "Nat.to_u16"; break;
           case "u": conv = "Nat.to_u32"; break;
           case "l": conv = "Nat.to_u64"; break;
+          case "e": conv = "Nat.to_u256"; break;
         }
         return App(false, Ref(conv), Nat(BigInt(name.slice(0,-1))));
       } else if (/^[0-9]*\.[0-9]*$/.test(name)) {
