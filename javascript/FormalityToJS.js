@@ -58,6 +58,14 @@ var prim_types = {
     },
     cnam: ['u64'],
   },
+  U256: {
+    inst: [[1, x => "word_to_u256("+x+")"]],
+    elim: {
+      ctag: x => "'u256'",
+      ctor: [[x => "u256_to_word("+x+")"]],
+    },
+    cnam: ['u256'],
+  },
   F64: {
     inst: [[1, x => "word_to_f64("+x+")"]],
     elim: {
@@ -131,6 +139,7 @@ var prim_funcs = {
   "Nat.to_u16"       : [1, a=>`Number(${a})`],
   "Nat.to_u32"       : [1, a=>`Number(${a})`],
   "Nat.to_u64"       : [1, a=>`${a}`],
+  "Nat.to_u256"      : [1, a=>`${a}`],
   "Nat.to_f64"       : [3, a=>b=>c=>`f64_make(${a},${b},${c})`],
   "U8.add"           : [2, a=>b=>`(${a}+${b})&0xFF`],
   "U8.sub"           : [2, a=>b=>`Math.max(${a}-${b},0)`],
@@ -201,6 +210,11 @@ var prim_funcs = {
   "U64.and"          : [2, a=>b=>`${a}&${b}`],
   "U64.or"           : [2, a=>b=>`${a}|${b}`],
   "U64.xor"          : [2, a=>b=>`${a}^${b}`],
+  "U256.add"         : [2, a=>b=>`(${a}+${b})&0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn`],
+  "U256.sub"         : [2, a=>b=>`${a}-${b}<=0n?0n:a-b`],
+  "U256.mul"          : [2, a=>b=>`(${a}*${b})&0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn`],
+  "U256.div"          : [2, a=>b=>`${a}/${b}`],
+  "U256.mod"          : [2, a=>b=>`${a}%${b}`],
   "F64.add"          : [2, a=>b=>`${a}+${b}`],
   "F64.sub"          : [2, a=>b=>`${a}-${b}`],
   "F64.mul"          : [2, a=>b=>`${a}*${b}`],
@@ -304,6 +318,8 @@ function application(func, allow_empty = false) {
     } else if (func.name === "Nat.to_u32" && args.length === 1 && args[0].ctor === "Nat") {
       return String(Number(args[0].natx));
     } else if (func.name === "Nat.to_u64" && args.length === 1 && args[0].ctor === "Nat") {
+      return String(args[0].natx)+"n";
+    } else if (func.name === "Nat.to_u256" && args.length === 1 && args[0].ctor === "Nat") {
       return String(args[0].natx)+"n";
     } else if ( func.name === "Nat.to_f64"
             && args.length === 3
@@ -725,6 +741,27 @@ function compile(main, defs, only_expression = false) {
       "    var w = {_: 'Word.nil'};",
       "    for (var i = 0n; i < 64n; i += 1n) {",
       "      w = {_: (u >> (64n-i-1n)) & 1n ? 'Word.1' : 'Word.0', pred: w};",
+      "    };",
+      "    return w;",
+      "  };",
+      ].join("\n");
+    code += "\n";
+  };
+
+  if (used_prim_types["U256"]) {
+    code += [
+      "  function word_to_u256(w) {",
+      "    var u = 0n;",
+      "    for (var i = 0n; i < 256n; i += 1n) {",
+      "      u = u | (w._ === 'Word.1' ? 1n << i : 0n);",
+      "      w = w.pred;",
+      "    };",
+      "    return u;",
+      "  };",
+      "  function u256_to_word(u) {",
+      "    var w = {_: 'Word.nil'};",
+      "    for (var i = 0n; i < 256n; i += 1n) {",
+      "      w = {_: (u >> (256n-i-1n)) & 1n ? 'Word.1' : 'Word.0', pred: w};",
       "    };",
       "    return w;",
       "  };",
