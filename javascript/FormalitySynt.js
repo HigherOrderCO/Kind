@@ -318,6 +318,7 @@ function build_cse(term, type) {
 };
 
 function build_nat(term) {
+  //console.log("build nat: ", term)
   if (term.natx === 0n) {
     return Ref("Nat.zero");
   } else {
@@ -367,6 +368,7 @@ function unloc(term) {
 };
 
 function reduce(term, defs = {}, hols = {}, erased = false, expand = true) {
+  //console.log("reduce: ", term)
   switch (term.ctor) {
     case "Var":
       return Var(term.indx);
@@ -457,6 +459,7 @@ function reduce(term, defs = {}, hols = {}, erased = false, expand = true) {
 };
 
 function normalize(term, defs, hols = {}, erased = false, seen = {}, expand = true) {
+  //console.log("normalize: ", term)
   var norm = reduce(term, defs, hols, erased, expand);
   var term_hash = hash(term);
   var norm_hash = hash(norm);
@@ -665,8 +668,8 @@ function hash(term, dep = 0) {
 // Are two terms equal?
 function equal(a, b, defs, hols, dep = 0, rec = {}) {
   //console.log("eq", stringify(a), stringify(b));
-  let a1 = reduce(a, defs, hols, true);
-  let b1 = reduce(b, defs, hols, true);
+  let a1 = reduce(a, defs, hols, true, expand = false);
+  let b1 = reduce(b, defs, hols, true, expand = false);
   var ah = hash(a1);
   var bh = hash(b1);
   var id = ah + "==" + bh;
@@ -700,6 +703,12 @@ function equal(a, b, defs, hols, dep = 0, rec = {}) {
         return equal(a1.expr, b1.expr, defs, hols, dep, rec);
       case "LocLoc":
         return equal(a1.expr, b1.expr, defs, hols, dep, rec);
+      case "NatNat":
+        return a1.natx == b1.natx;
+      case "ChrChr":
+        return a1.chrx == b1.chrx;
+      case "StrStr":
+        return a1.strx == b1.strx;
       default:
         if (a1.ctor === "Hol") {
           throw [a1.name, b];
@@ -1066,6 +1075,7 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
 };
 
 function typesynth(name, defs, show = stringify) {
+  //console.log("typesynth: ", name)
   if (!defs[name].core) {
     defs[name].core = null;
     var term = defs[name].term;
