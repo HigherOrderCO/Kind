@@ -317,13 +317,13 @@ function build_cse(term, type) {
   return func;
 };
 
-function build_nat(term) {
-  //console.log("build nat: ", term)
-  if (term.natx === 0n) {
-    return Ref("Nat.zero");
-  } else {
-    return App(false, Ref("Nat.succ"), Nat(term.natx - 1n));
-  };
+function build_nat(nat) {
+  //console.log("build nat: ", nat)
+  var term = Ref("Nat.zero");
+  for (var i = nat.natx; i > 0n; i--) {
+    term = App(false, Ref("Nat.succ"), term);
+  }
+  return term
 };
 
 function build_chr(term) {
@@ -668,8 +668,8 @@ function hash(term, dep = 0) {
 // Are two terms equal?
 function equal(a, b, defs, hols, dep = 0, rec = {}) {
   //console.log("eq", stringify(a), stringify(b));
-  let a1 = reduce(a, defs, hols, true, expand = false);
-  let b1 = reduce(b, defs, hols, true, expand = false);
+  let a1 = reduce(a, defs, hols, true);
+  let b1 = reduce(b, defs, hols, true);
   var ah = hash(a1);
   var bh = hash(b1);
   var id = ah + "==" + bh;
@@ -703,12 +703,6 @@ function equal(a, b, defs, hols, dep = 0, rec = {}) {
         return equal(a1.expr, b1.expr, defs, hols, dep, rec);
       case "LocLoc":
         return equal(a1.expr, b1.expr, defs, hols, dep, rec);
-      case "NatNat":
-        return a1.natx == b1.natx;
-      case "ChrChr":
-        return a1.chrx == b1.chrx;
-      case "StrStr":
-        return a1.strx == b1.strx;
       default:
         if (a1.ctor === "Hol") {
           throw [a1.name, b];
