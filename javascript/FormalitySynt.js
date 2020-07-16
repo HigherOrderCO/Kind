@@ -366,7 +366,7 @@ function unloc(term) {
   };
 };
 
-function reduce(term, defs = {}, hols = {}, erased = false) {
+function reduce(term, defs = {}, hols = {}, erased = false, expand = true) {
   switch (term.ctor) {
     case "Var":
       return Var(term.indx);
@@ -386,7 +386,7 @@ function reduce(term, defs = {}, hols = {}, erased = false) {
         if (got.ctor === "Loc" && got.expr.ctor === "Ref" && got.expr.name === term.name) {
           return got;
         } else {
-          return reduce(got, defs, hols, erased);
+          return reduce(got, defs, hols, erased, expand);
         };
       } else {
         return Ref(term.name);
@@ -402,7 +402,7 @@ function reduce(term, defs = {}, hols = {}, erased = false) {
       return All(eras, self, name, bind, body);
     case "Lam":
       if (erased && term.eras) {
-        return reduce(term.body(Lam(false, "", x => x)), defs, hols, erased);
+        return reduce(term.body(Lam(false, "", x => x)), defs, hols, erased, expand);
       } else {
         var eras = term.eras;
         var name = term.name;
@@ -411,13 +411,13 @@ function reduce(term, defs = {}, hols = {}, erased = false) {
       }
     case "App":
       if (erased && term.eras) {
-        return reduce(term.func, defs, hols, erased);
+        return reduce(term.func, defs, hols, erased, expand);
       } else {
         var eras = term.eras;
-        var func = reduce(term.func, defs, hols, erased);
+        var func = reduce(term.func, defs, hols, erased, expand);
         switch (func.ctor) {
           case "Lam":
-            return reduce(func.body(term.argm), defs, hols, erased);
+            return reduce(func.body(term.argm), defs, hols, erased, expand);
           default:
             return App(eras, func, term.argm);
         };
@@ -426,38 +426,38 @@ function reduce(term, defs = {}, hols = {}, erased = false) {
       var name = term.name;
       var expr = term.expr;
       var body = term.body;
-      return reduce(body(expr), defs, hols, erased);
+      return reduce(body(expr), defs, hols, erased, expand);
     case "Ann":
-      return reduce(term.expr, defs, hols, erased);
+      return reduce(term.expr, defs, hols, erased, expand);
     case "Loc":
-      return reduce(term.expr, defs, hols, erased);
+      return reduce(term.expr, defs, hols, erased, expand);
     case "Wat":
       return Wat(term.name);
     case "Hol":
       if (hols[term.name]) {
-        return reduce(hols[term.name](term.vals), defs, hols, erased);
+        return reduce(hols[term.name](term.vals), defs, hols, erased, expand);
       } else {
         return Hol(term.name, term.vals);
       }
     case "Cse":
       if (hols[term.name]) {
         var typ = hols[term.name];
-        return reduce(build_cse(term, hols[term.name]), defs, hols, erased);
+        return reduce(build_cse(term, hols[term.name]), defs, hols, erased, expand);
       } else {
         //console.log("couldn't find", term.name, stringify(term.func));
         return term;
       };
     case "Nat":
-      return reduce(build_nat(term), defs, hols, erased);
+      return expand ? reduce(build_nat(term), defs, hols, erased, expand): term;
     case "Chr":
-      return reduce(build_chr(term), defs, hols, erased);
+      return expand ? reduce(build_chr(term), defs, hols, erased, expand): term;
     case "Str":
-      return reduce(build_str(term), defs, hols, erased);
+      return expand ? reduce(build_str(term), defs, hols, erased, expand): term;
   };
 };
 
-function normalize(term, defs, hols = {}, erased = false, seen = {}) {
-  var norm = reduce(term, defs, hols, erased);
+function normalize(term, defs, hols = {}, erased = false, seen = {}, expand = true) {
+  var norm = reduce(term, defs, hols, erased, expand);
   var term_hash = hash(term);
   var norm_hash = hash(norm);
   if (seen[term_hash] || seen[norm_hash]) {
@@ -475,25 +475,25 @@ function normalize(term, defs, hols = {}, erased = false, seen = {}) {
         var eras = norm.eras;
         var self = norm.self;
         var name = norm.name;
-        var bind = normalize(norm.bind, defs, hols, erased, seen);
-        var body = (s,x) => normalize(norm.body(s,x), defs, hols, erased, seen);
+        var bind = normalize(norm.bind, defs, hols, erased, seen, expand);
+        var body = (s,x) => normalize(norm.body(s,x), defs, hols, erased, seen, expand);
         return All(eras, self, name, bind, body);
       case "Lam":
         var eras = norm.eras;
         var name = norm.name;
-        var body = x => normalize(norm.body(x), defs, hols, erased, seen);
+        var body = x => normalize(norm.body(x), defs, hols, erased, seen, expand);
         return Lam(eras, name, body);
       case "App":
         var eras = norm.eras;
-        var func = normalize(norm.func, defs, hols, erased, seen);
-        var argm = normalize(norm.argm, defs, hols, erased, seen);
+        var func = normalize(norm.func, defs, hols, erased, seen, expand);
+        var argm = normalize(norm.argm, defs, hols, erased, seen, expand);
         return App(eras, func, argm);
       case "Let":
-        return normalize(norm.body(norm.expr), defs, hols, erased, seen);
+        return normalize(norm.body(norm.expr), defs, hols, erased, seen, expand);
       case "Ann":
-        return normalize(norm.expr, defs, hols, erased, seen);
+        return normalize(norm.expr, defs, hols, erased, seen, expand);
       case "Loc":
-        return normalize(norm.expr, defs, hols, erased, seen);
+        return normalize(norm.expr, defs, hols, erased, seen, expand);
       case "Wat":
         return Wat(norm.name);
       case "Hol":
@@ -1033,7 +1033,7 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
       });
       var err = Err(locs, ctx,
         "\x1b[1mHole \x1b[4m"+term.name+"\x1b[0m\x1b[1m:\x1b[0m\n" +
-        "With type: "+show(normalize(type,{},hols,true),ctx));
+        "With type: "+show(normalize(type,{},hols,true,{},false),ctx));
       var msg = require("./FormalityLang.js").stringify_err(err, null).replace(/\n*$/g,"");
       HOLE_LOGS[term.name] = msg;
       return done([hols, type]);
@@ -1043,10 +1043,10 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
           var eq = equal(type, infr, defs, hols, ctx.size);
           if (!eq) {
             return fail(() => {
-              var type0_str = show(normalize(type, {}, hols, true), ctx);
-              var infr0_str = show(normalize(infr, {}, hols, true), ctx);
+              var type0_str = show(normalize(type, {}, hols, true, {}, false), ctx);
+              var infr0_str = show(normalize(infr, {}, hols, true, {}, false), ctx);
               var err_ctx = fold(ctx, Nil(), ({name,type}, ctx) => {
-                var type = normalize(type, {}, hols, true);
+                var type = normalize(type, {}, hols, true, {}, false);
                 return Ext({name,type}, ctx);
               });
               return Err(locs, err_ctx,
