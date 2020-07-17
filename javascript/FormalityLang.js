@@ -1122,7 +1122,10 @@ function parse_num(code, [indx,tags], err) {
           chain(parse_typ(code,[indx,tags]),                    ([indx,tags], typ) =>
           [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,typ))])),
     () => chain(parse_dec(code,[indx,tags],false),              ([indx,tags], num) =>
-          [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,"Nat"))])
+          { console.log("parse_num",num)
+          return [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,"Nat"))]
+          }
+          )
     ]);
 };
 
@@ -1752,6 +1755,7 @@ function stringify_err(err, code) {
     if (typeof err === "string" || __dirname.indexOf("vic/dev") !== -1) {
       return err;
     } else {
+      console.log(err)
       return "Internal error.";
     }
   } else {

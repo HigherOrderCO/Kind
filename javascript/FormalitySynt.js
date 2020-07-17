@@ -102,7 +102,7 @@ function stringify(term, depth = 0) {
     case "Cse":
       return "<parsing_case>";
     case "Num":
-        return ""+term.numx+" :: "+term.type;
+        return ""+term.numx; //+"::"+term.type;
     case "Chr":
       return "'"+print_str(term.chrx)+"'"; 
     case "Str":
@@ -317,20 +317,22 @@ function build_cse(term, type) {
   return func;
 };
 
-function build_num(num) {
-  //console.log("build nat: ", nat)
-  switch (num.type) {
+function build_num(num, type) {
+  console.log("build num: ", num)
+  switch (type) {
     case "Bits":
       var term = Ref("Bits.nil");
-      for (var i = num.numx; i > 0n; i = i >> 1n) {
+      for (var i = num; i > 0n; i = i >> 1n) {
         term = App(false, Ref(i % 2 == 0 ? "Bits.0" : "Bits.1"), done);
       }
+      console.log("build num ret:", term)
       return term;
     case "Nat":
       var term = Ref("Nat.zero");
-      for (var i = num.numx; i > 0n; i--) {
+      for (var i = num; i > 0n; i--) {
         term = App(false, Ref("Nat.succ"), term);
       }
+      console.log("build num ret:", term)
       return term;
     default:
       throw () => Err(null, null, "'"+term.type+"' is not a supported numeric literal type.");
@@ -390,6 +392,7 @@ function reapp(head, args){
 function reduce(term, defs = {}, hols = {}, erased = false, expand = true, args = []) {
   var b = true;
   while(b){
+    //console.log("reduce", stringify(term))
     switch (term.ctor) {
     case "Ref":
       if (defs[term.name]) {
@@ -459,7 +462,7 @@ function reduce(term, defs = {}, hols = {}, erased = false, expand = true, args 
       break;
     case "Num":
       if (expand) {
-        term = build_num(term);
+        term = build_num(term.numx, term.type);
       } else {
         b = false;
       }
@@ -606,22 +609,8 @@ function canonicalize(term, hols = {}, to_core = false, inline_lams = true) {
       }
     case "Num":
       if (to_core) {
-        switch (term.type) {
-          case "Bits":
-            var done = Ref("Bits.nil");
-            for (var i = term.numx; i > 0n; i = i >> 1n) {
-              done = App(false, Ref(i % 2 == 0 ? "Bits.0" : "Bits.1"), done);
-            }
-            return done;
-          case "Nat":
-            var done = Ref("Nat.zero");
-            for (var i = 0n; i < term.natx; i += 1n) {
-              done = App(false, Ref("Nat.succ"), done);
-            }
-            return done;
-          default:
-            throw () => Err(null, null, "'"+term.type+"' is not a supported numeric literal type.");
-        }
+        console.log("case num")
+        return build_num(term);
       } else {
         return term;
       };
@@ -948,6 +937,24 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
       });
     case "Num":
       switch (term.type) {
+        //case "U8":
+        //  return (
+        //    deep([[typeinfer, [Ref("U8"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        //    deep([[typeinfer, [Ref("U8.new"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        //    deep([[typeinfer, [Ref("Word"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        //    deep([[typeinfer, [Ref("Word.nil"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        //    deep([[typeinfer, [Ref("Word.0"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        //    deep([[typeinfer, [Ref("Word.1"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        //    done([hols, Ref("U8")]))))))));
+        //case "U16":
+        //  return (
+        //    deep([[typeinfer, [Ref("U16"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        //    deep([[typeinfer, [Ref("U16.new"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        //    deep([[typeinfer, [Ref("Word"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        //    deep([[typeinfer, [Ref("Word.nil"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        //    deep([[typeinfer, [Ref("Word.0"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        //    deep([[typeinfer, [Ref("Word.1"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        //    done([hols, Ref("U16")]))))))));
         case "Bits":
           return (
             deep([[typeinfer, [Ref("Bits"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
@@ -1194,6 +1201,7 @@ function clear_hole_logs() {
     delete HOLE_LOGS[key];
   }
 };
+
 
 module.exports = {
   Var,
