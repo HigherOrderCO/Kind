@@ -405,7 +405,6 @@ function reduce(term, defs = {}, hols = {}, erased = false, expand = true, args 
     case "Lam":
       if (erased && term.eras) {
         term = term.body(Lam(false, "", x => x));
-        return reduce(term.body(Lam(false, "", x => x)), defs, hols, erased, expand);
       } else {
         if (args.length > 0){
           var arg = args.pop();
