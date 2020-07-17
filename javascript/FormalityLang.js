@@ -2,8 +2,8 @@ var {
   Var, Ref, Typ, All,
   Lam, App, Let, Ann,
   Loc, Ext, Nil, Wat,
-  Hol, Cse, Nat, Chr,
-  Str,
+  Hol, Cse, Chr,
+  Str, Num,
   unloc,
   reduce,
   normalize,
@@ -784,34 +784,20 @@ function parse_don(code, [indx,tags], err = false) {
     [[indx,tags], xs => Loc(from, indx, term(xs))]))))));
 };
 
-function parsed_var(from, [indx,tags], name, sign = true) {
+function parsed_var(from, [indx,tags], name) {
   return xs => {
     if (tags && tags.head) tags.head.ctor = "var";
     return Loc(from, indx, get_var(xs, name, () => {
-      if (/^[0-9]*$/.test(name)) {
-        if (tags && tags.head) tags.head.ctor = "nat";
-        return Nat(BigInt(name));
-      } else if (/^[0-9]*[bsulijfde]$/.test(name)) {
-        var conv = null;
-        switch (name[name.length - 1]) {
-          case "b": conv = "Nat.to_u8"; break;
-          case "s": conv = "Nat.to_u16"; break;
-          case "u": conv = "Nat.to_u32"; break;
-          case "l": conv = "Nat.to_u64"; break;
-          case "e": conv = "Nat.to_u256"; break;
-        }
-        return App(false, Ref(conv), Nat(BigInt(name.slice(0,-1))));
-      } else if (/^[0-9]*\.[0-9]*$/.test(name)) {
-        var [a,b] = name.split(".");
-        var term = Ref("Nat.to_f64");
-        var term = App(false, term, Ref(sign ? "Bool.true" : "Bool.false"));
-        var term = App(false, term, Nat(BigInt(a + b)));
-        var term = App(false, term, Nat(BigInt(b.length)));
-        return term;
-      } else {
-        if (tags && tags.head) tags.head.ctor = "ref";
-        return Ref(name);
-      };
+        if (tags && tags.head) tags.head.ctor = "ref"; return Ref(name);
+      //if (/^[0-9]*\.[0-9]*$/.test(name)) {
+      //  var [a,b] = name.split(".");
+      //  var term = Ref("Nat.to_f64");
+      //  var term = App(false, term, Ref(sign ? "Bool.true" : "Bool.false"));
+      //  var term = App(false, term, Num(false,BigInt(a + b)));
+      //  var term = App(false, term, Num(false,BigInt(b.length)));
+      //  return term;
+      //} else {
+      //};
     }));
   };
 };
@@ -820,16 +806,18 @@ function parsed_var(from, [indx,tags], name, sign = true) {
 function parse_var(code, [indx,tags], err = false) {
   var from = next(code, [indx,tags])[0];
   return (
-    chain(parse_opt(code, next(code, [indx,tags]), "-", false), ([indx,tags], negs) =>
+    //chain(parse_opt(code, next(code, [indx,tags]), "-", false), ([indx,tags], negs) =>
     chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], name) => {
       if (name.length === 0) {
         return parse_error(code, indx, "a variable", err);
       } else {
         var tag_to_mutate = tags && tags.head;
-        return [[indx,tags], parsed_var(from, [indx,tags], name, !negs)]
+        return [[indx,tags], parsed_var(from, [indx,tags], name)]
       };
-    })));
+    }));
 };
+
+
 
 // Parses a single-line hole application, `<term>()`
 function parse_ia1(code, [indx,tags], from, func, err) {
@@ -1110,18 +1098,48 @@ function parse_esc(code,[indx,tags],err,is_string) {
     ]));
 };
 
+// 0b23423 :: Nat
+// 0xabcde :: Bits
+// 1234567 :: U64
+function parse_num(code, [indx,tags], err) {
+  var from = next(code, [indx,tags])[0];
+  function parse_typ(code,[indx,tags]) {
+    return (
+      chain(parse_txt(code, next(code, [indx,tags]), "::"), ([indx,tags], skip) =>
+      chain(parse_nam(code, next(code, [indx,tags])),       ([indx,tags], type) =>
+      [[indx,tags], type])))
+  }
+  return choose([
+    () => chain(parse_txt(code, next(code, [indx,tags]), "0b"), ([indx,tags], skip) =>
+          chain(parse_bin(code,[indx,tags],false),              ([indx,tags], num) =>
+          chain(parse_typ(code,[indx,tags]),                    ([indx,tags], typ) =>
+          [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,typ))]))),
+    () => chain(parse_txt(code, next(code, [indx,tags]), "0x"), ([indx,tags], skip) =>
+          chain(parse_hex(code,[indx,tags],false),              ([indx,tags], num) =>
+          chain(parse_typ(code,[indx,tags]),                    ([indx,tags], typ) =>
+          [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,typ))]))),
+    () => chain(parse_dec(code,[indx,tags],false),              ([indx,tags], num) =>
+          chain(parse_typ(code,[indx,tags]),                    ([indx,tags], typ) =>
+          [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,typ))])),
+    () => chain(parse_dec(code,[indx,tags],false),              ([indx,tags], num) =>
+          [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,"Nat"))])
+    ]);
+};
+
+function parse_dig(code,[indx,tags],digs,err) {
+  return (choose(digs.map(([a,b]) => () =>
+    chain(parse_txt(code,[indx,tags],a,err), ([indx,tags],_) =>
+    [[indx,tags],b]))))
+};
+
 // parse binary literal
 function parse_bin(code,[indx,tags],err) {
   var from = next(code, [indx,tags])[0];
   var digs = [['0',0n],['1',1n]]
-  function dig(code,[indx,tags],err) {
-    return (choose(digs.map(([a,b]) => () =>
-      chain(parse_txt(code,[indx,tags],a,err), ([indx,tags],_) =>
-      [[indx,tags],b]))))
-  };
+  var dig_parse = (c,i,e) => parse_dig(c,i,digs,e)
   return (
-    chain(dig(code,[indx,tags],err), ([indx,tags],d) =>
-    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) => { 
+    chain(parse_dig(code,[indx,tags],digs,err), ([indx,tags],d) =>
+    chain(parse_mny(dig_parse)(code,[indx,tags],false), ([indx,tags],ds) => { 
       ds.unshift(d);
       var [_,num] = ds.reduceRight(([p,a],v) => [p+1n,a + v * 2n**p],[0n,0n]);
       return [[indx,tags], num];
@@ -1133,14 +1151,10 @@ function parse_dec(code,[indx,tags],err) {
   var from = next(code, [indx,tags])[0];
   var digs = [['0',0n],['1',1n],['2',2n],['3',3n],['4',4n],
               ['5',5n],['6',6n],['7',7n],['8',8n],['9',9n]]
-  function dig(code,[indx,tags],err) {
-    return (choose(digs.map(([a,b]) => () =>
-      chain(parse_txt(code,[indx,tags],a,err), ([indx,tags],_) =>
-      [[indx,tags],b]))))
-  };
+  var dig_parse = (c,i,e) => parse_dig(c,i,digs,e)
   return (
-    chain(dig(code,[indx,tags],err), ([indx,tags],d) =>
-    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) => { 
+    chain(parse_dig(code,[indx,tags],digs,err), ([indx,tags],d) =>
+    chain(parse_mny(dig_parse)(code,[indx,tags],false), ([indx,tags],ds) => { 
       ds.unshift(d);
       var [_,num] = ds.reduceRight(([p,a],v) => [p+1n,a + v * 10n**p],[0n,0n]);
       return [[indx,tags], num];
@@ -1154,14 +1168,10 @@ function parse_hex(code,[indx,tags],err) {
               ['a',10n],['b',11n],['c',12n],['d',13n],['e',14n],['f',15n],
               ['A',10n],['B',11n],['C',12n],['D',13n],['E',14n],['F',15n]
               ]
-  function dig(code,[indx,tags],err) {
-    return (choose(digs.map(([a,b]) => () =>
-      chain(parse_txt(code,[indx,tags],a,err), ([indx,tags],_) =>
-      [[indx,tags],b]))))
-  };
+  var dig_parse = (c,i,e) => parse_dig(c,i,digs,e)
   return (
-    chain(dig(code,[indx,tags],err), ([indx,tags],d) =>
-    chain(parse_mny(dig)(code,[indx,tags],err), ([indx,tags],ds) => { 
+    chain(parse_dig(code,[indx,tags],digs,err), ([indx,tags],d) =>
+    chain(parse_mny(dig_parse)(code,[indx,tags],false), ([indx,tags],ds) => { 
       ds.unshift(d);
       var [_,num] = ds.reduceRight(([p,a],v) => [p+1n,a + v * 16n**p],[0n,0n]);
       return [[indx,tags], num];
@@ -1282,6 +1292,7 @@ function parse_trm(code, [indx = 0, tags = []], err) {
     () => parse_cse(code, [indx,tags], err),
     () => parse_ite(code, [indx,tags], err),
     () => parse_don(code, [indx,tags], err),
+    () => parse_num(code, [indx,tags], err),
     () => parse_var(code, [indx,tags], err),
   ], err);
 
@@ -1651,8 +1662,8 @@ function stringify_trm(term) {
         return "<parsing_case>";
       case "Wat":
         return "?"+term.name;
-      case "Nat":
-        return ""+term.natx;
+      case "Num":
+        return term.bits ? ""+term.numx : "0n"+term.numx;
       case "Chr":
         return "'"+term.chrx+"'";
       case "Str":
@@ -2004,6 +2015,7 @@ module.exports = {
   parse_bin,
   parse_dec,
   parse_hex,
+  parse_num,
   parse_trm,
   parse,
   unloc,
