@@ -1664,7 +1664,7 @@ function stringify_trm(term) {
       case "Wat":
         return "?"+term.name;
       case "Num":
-        return term.numx+"::"+term.numx;
+        return term.numx+"::"+term.type;
       case "Chr":
         return "'"+term.chrx+"'";
       case "Str":
