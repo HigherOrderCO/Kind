@@ -319,19 +319,24 @@ function build_cse(term, type) {
 
 function build_num(num) {
   //console.log("build nat: ", nat)
-  if (num.bits) {
-    var term = Ref("Bits.nil");
-    for (var i = term.numx; i > 0n; i = i >> 1n) {
-      term = App(false, Ref(i % 2 == 0 ? "Bits.0" : "Bits.1"), done);
-    }
-  } else {
-    var term = Ref("Nat.zero");
-    for (var i = term.numx; i > 0n; i--) {
-      term = App(false, Ref("Nat.succ"), term);
-    }
+  switch (num.type) {
+    case "Bits":
+      var term = Ref("Bits.nil");
+      for (var i = num.numx; i > 0n; i = i >> 1n) {
+        term = App(false, Ref(i % 2 == 0 ? "Bits.0" : "Bits.1"), done);
+      }
+      return term;
+    case "Nat":
+      var term = Ref("Nat.zero");
+      for (var i = num.numx; i > 0n; i--) {
+        term = App(false, Ref("Nat.succ"), term);
+      }
+      return term;
+    default:
+      throw () => Err(null, null, "'"+term.type+"' is not a supported numeric literal type.");
   }
-  return term
 };
+
 
 function build_chr(term) {
   var done = Ref("Char.new");
