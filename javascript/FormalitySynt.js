@@ -367,99 +367,116 @@ function unloc(term) {
   };
 };
 
-function reduce(term, defs = {}, hols = {}, erased = false, expand = true) {
-  //console.log("reduce: ", term)
-  switch (term.ctor) {
-    case "Var":
-      return Var(term.indx);
+function reapp(head, args){
+  while(args.length > 0){
+    let arg = args.pop();
+    head = App(arg[0], head, arg[1]);
+  }
+  return head;
+}
+
+function reduce(term, defs = {}, hols = {}, erased = false, expand = true, args = []) {
+  var b = true;
+  while(b){
+    switch (term.ctor) {
     case "Ref":
       if (defs[term.name]) {
         // If reference wasn't synthetized, synthetize it
         if (defs[term.name].core === undefined) {
           var got = typesynth(term.name, defs).term;
-        // If reference is being synthetized, return its version with holes
+          // If reference is being synthetized, return its version with holes
         } else if (defs[term.name].core === null) {
           var got = defs[term.name].term;
-        // If reference was synthetized, return its filled core version
+          // If reference was synthetized, return its filled core version
         } else {
           var got = defs[term.name].core.term;
         }
         // Avoids reducing axioms
         if (got.ctor === "Loc" && got.expr.ctor === "Ref" && got.expr.name === term.name) {
-          return got;
+          term = got;
+          b = false;
         } else {
-          return reduce(got, defs, hols, erased, expand);
+          term = got;
         };
       } else {
-        return Ref(term.name);
+        b = false;
       }
-    case "Typ":
-      return Typ();
-    case "All":
-      var eras = term.eras;
-      var self = term.self;
-      var name = term.name;
-      var bind = term.bind;
-      var body = term.body;
-      return All(eras, self, name, bind, body);
+      break;
     case "Lam":
       if (erased && term.eras) {
+        term = term.body(Lam(false, "", x => x));
         return reduce(term.body(Lam(false, "", x => x)), defs, hols, erased, expand);
       } else {
-        var eras = term.eras;
-        var name = term.name;
-        var body = term.body;
-        return Lam(eras, name, body);
+        if (args.length > 0){
+          var arg = args.pop();
+          term = term.body(arg[1]);
+        } else {
+          b = false;
+        }
       }
+      break;
     case "App":
       if (erased && term.eras) {
-        return reduce(term.func, defs, hols, erased, expand);
+        term = term.func;
       } else {
-        var eras = term.eras;
-        var func = reduce(term.func, defs, hols, erased, expand);
-        switch (func.ctor) {
-          case "Lam":
-            return reduce(func.body(term.argm), defs, hols, erased, expand);
-          default:
-            return App(eras, func, term.argm);
-        };
+        args.push([term.eras, term.argm]);
+        term = term.func;
       };
+      break;
     case "Let":
-      var name = term.name;
-      var expr = term.expr;
-      var body = term.body;
-      return reduce(body(expr), defs, hols, erased, expand);
+      term = term.body(term.expr);
+      break;
     case "Ann":
-      return reduce(term.expr, defs, hols, erased, expand);
+      term = term.expr;
+      break;
     case "Loc":
-      return reduce(term.expr, defs, hols, erased, expand);
-    case "Wat":
-      return Wat(term.name);
+      term = term.expr;
+      break;
     case "Hol":
       if (hols[term.name]) {
-        return reduce(hols[term.name](term.vals), defs, hols, erased, expand);
+        term = hols[term.name](term.vals);
       } else {
-        return Hol(term.name, term.vals);
+        b = false;
       }
+      break;
     case "Cse":
       if (hols[term.name]) {
-        var typ = hols[term.name];
-        return reduce(build_cse(term, hols[term.name]), defs, hols, erased, expand);
+        term = build_cse(term, hols[term.name]);
       } else {
-        //console.log("couldn't find", term.name, stringify(term.func));
-        return term;
+        b = false;
       };
+      break;
     case "Nat":
-      return expand ? reduce(build_nat(term), defs, hols, erased, expand): term;
+      if (expand) {
+        term = build_nat(term);
+      } else {
+        b = false;
+      }
+      break;
     case "Chr":
-      return expand ? reduce(build_chr(term), defs, hols, erased, expand): term;
+      if (expand) {
+        term = build_chr(term);
+      } else {
+        b = false;
+      }
+      break;
     case "Str":
-      return expand ? reduce(build_str(term), defs, hols, erased, expand): term;
-  };
-};
+      if (expand) {
+        term = build_str(term);
+      } else {
+        b = false;
+      }
+      break;
+    default:
+      b = false;
+      break;
+    }
+  }
+  term = reapp(term, args);
+  return term;
+}
 
 function normalize(term, defs, hols = {}, erased = false, seen = {}, expand = true) {
-  //console.log("normalize: ", term)
   var norm = reduce(term, defs, hols, erased, expand);
   var term_hash = hash(term);
   var norm_hash = hash(norm);
@@ -668,8 +685,8 @@ function hash(term, dep = 0) {
 // Are two terms equal?
 function equal(a, b, defs, hols, dep = 0, rec = {}) {
   //console.log("eq", stringify(a), stringify(b));
-  let a1 = reduce(a, defs, hols, true);
-  let b1 = reduce(b, defs, hols, true);
+  let a1 = reduce(a, defs, hols, false, true);
+  let b1 = reduce(b, defs, hols, false, true);
   var ah = hash(a1);
   var bh = hash(b1);
   var id = ah + "==" + bh;
