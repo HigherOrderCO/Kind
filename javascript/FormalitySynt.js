@@ -701,128 +701,79 @@ function hash(term, dep = 0) {
 
 // var COUNT = 0;
 // Are two terms equal?
-function equal(a, b, defs, hols, dep = 0, rec = {}) {
-  //console.log("eq", stringify(a), stringify(b));
-  let a1 = reduce(a, defs, hols, false, true);
-  let b1 = reduce(b, defs, hols, false, true);
-  var ah = hash(a1);
-  var bh = hash(b1);
-  var id = ah + "==" + bh;
-  if (ah === bh || rec[id]) {
-    return true;
-  } else {
+function equal(a, b, defs, hols, dep = 0) {
+  //console.log("equal:\n",stringify(a),"\n",stringify(b))
+  var rec = {};
+  var eqs = [];
+  var ret = true;
+  eqs.push([dep,a,b]);
+  while (eqs.length !== 0 && ret == true) {
+    //console.log("eqs", eqs.length);
+    //console.log("eq:\n",stringify(a),"\n",stringify(b))
+    var [dep, a, b] = eqs.pop();
+    let a1 = reduce(a, defs, hols, true, true);
+    let b1 = reduce(b, defs, hols, true, true);
+    //console.log("reduce",stringify(a1),stringify(b1));
+    var ah = hash(a1);
+    var bh = hash(b1);
+    var id = ah + "==" + bh;
+    //console.log(id);
+    if (ah === bh || rec[id]) { continue; }
     rec[id] = true;
     switch (a1.ctor + b1.ctor) {
       case "AllAll":
-        var a1_body = a1.body(Var(a1.self+"#"+(dep)), Var(a1.name+"#"+(dep+1)));
-        var b1_body = b1.body(Var(a1.self+"#"+(dep)), Var(a1.name+"#"+(dep+1)));
-        return a1.eras === b1.eras
-            && a1.self === b1.self
-            && equal(a1.bind, b1.bind, defs, hols, dep+0, rec)
-            && equal(a1_body, b1_body, defs, hols, dep+2, rec);
+        if (a1.eras !== b1.eras || a1.self !== b1.self) {
+          return false;
+        } else {
+          var a1_body = a1.body(Var(a1.self+"#"+(dep)), Var(a1.name+"#"+(dep+1)));
+          var b1_body = b1.body(Var(a1.self+"#"+(dep)), Var(a1.name+"#"+(dep+1)));
+          eqs.push([dep+0,a1.bind,b1.bind])
+          eqs.push([dep+2,a1_body,b1_body])
+        };
+        break;
       case "LamLam":
-        var a1_body = a1.body(Var(a1.name+"#"+(dep)));
-        var b1_body = b1.body(Var(a1.name+"#"+(dep)));
-        return a1.eras === b1.eras
-            && equal(a1_body, b1_body, defs, hols, dep+1, rec);
+        if (a1.eras !== b1.eras) { 
+          ret = false;
+        } else {
+          var a1_body = a1.body(Var(a1.name+"#"+(dep)));
+          var b1_body = b1.body(Var(a1.name+"#"+(dep)));
+          eqs.push([dep+1,a1_body,b1_body]);
+        };
+        break;
       case "AppApp":
-        return a1.eras === b1.eras
-            && equal(a1.func, b1.func, defs, hols, dep, rec)
-            && equal(a1.argm, b1.argm, defs, hols, dep, rec);
+        if (a1.eras !== b1.eras) {
+          ret = false;
+        } else {
+          eqs.push([dep+0,a1.func, b1.func]);
+          eqs.push([dep+0,a1.argm, b1.argm]);
+        };
+        break;
       case "LetLet":
         var a1_body = a1.body(Var(a1.name+"#"+(dep)));
         var b1_body = b1.body(Var(a1.name+"#"+(dep)));
-        return equal(a1.expr, b1.expr, defs, hols, dep+0, rec)
-            && equal(a1_body, b1_body, defs, hols, dep+1, rec);
+        eqs.push([dep+0,a1.expr, b1.expr]);
+        eqs.push([dep+1,a1.body, b1.body]);
+        break;
       case "AnnAnn":
-        return equal(a1.expr, b1.expr, defs, hols, dep, rec);
+        eqs.push([dep+0,a1.expr, b1.expr])
+        break;
       case "LocLoc":
-        return equal(a1.expr, b1.expr, defs, hols, dep, rec);
+        eq.push([dep+0,a1.expr, b1.expr])
+        break;
       default:
         if (a1.ctor === "Hol") {
           throw [a1.name, b];
         } else if (b1.ctor === "Hol") {
           throw [b1.name, a]
         } else {
-          return false;
+          ret = false;
         }
     }
   };
+  //console.log("return", ret);
+  //console.log("------------");
+  return ret;
 };
-
-//function equal(a, b, defs, hols, dep = 0) {
-//  //console.log("equal:\n",stringify(a),"\n",stringify(b))
-//  var rec = {};
-//  var eqs = [];
-//  var ret = true;
-//  eqs.push([dep,a,b]);
-//  while (eqs.length !== 0 && ret == true) {
-//    //console.log("eqs", eqs.length);
-//    //console.log("eq:\n",stringify(a),"\n",stringify(b))
-//    var [dep, a, b] = eqs.pop();
-//    let a1 = reduce(a, defs, hols, true, true);
-//    let b1 = reduce(b, defs, hols, true, true);
-//    //console.log("reduce",stringify(a1),stringify(b1));
-//    var ah = hash(a1);
-//    var bh = hash(b1);
-//    var id = ah + "==" + bh;
-//    //console.log(id);
-//    if (ah === bh || rec[id]) { continue; }
-//    rec[id] = true;
-//    switch (a1.ctor + b1.ctor) {
-//      case "AllAll":
-//        if (a1.eras !== b1.eras || a1.self !== b1.self) {
-//          return false;
-//        } else {
-//          var a1_body = a1.body(Var(a1.self+"#"+(dep)), Var(a1.name+"#"+(dep+1)));
-//          var b1_body = b1.body(Var(a1.self+"#"+(dep)), Var(a1.name+"#"+(dep+1)));
-//          eqs.push([dep+0,a1.bind,b1.bind])
-//          eqs.push([dep+2,a1_body,b1_body])
-//        };
-//        break;
-//      case "LamLam":
-//        if (a1.eras !== b1.eras) { 
-//          ret = false;
-//        } else {
-//          var a1_body = a1.body(Var(a1.name+"#"+(dep)));
-//          var b1_body = b1.body(Var(a1.name+"#"+(dep)));
-//          eqs.push([dep+1,a1_body,b1_body]);
-//        };
-//        break;
-//      case "AppApp":
-//        if (a1.eras !== b1.eras) {
-//          ret = false;
-//        } else {
-//          eqs.push([dep+0,a1.func, b1.func]);
-//          eqs.push([dep+0,a1.argm, b1.argm]);
-//        };
-//        break;
-//      case "LetLet":
-//        var a1_body = a1.body(Var(a1.name+"#"+(dep)));
-//        var b1_body = b1.body(Var(a1.name+"#"+(dep)));
-//        eqs.push([dep+0,a1.expr, b1.expr]);
-//        eqs.push([dep+1,a1.body, b1.body]);
-//        break;
-//      case "AnnAnn":
-//        eqs.push([dep+0,a1.expr, b1.expr])
-//        break;
-//      case "LocLoc":
-//        eq.push([dep+0,a1.expr, b1.expr])
-//        break;
-//      default:
-//        if (a1.ctor === "Hol") {
-//          throw [a1.name, b];
-//        } else if (b1.ctor === "Hol") {
-//          throw [b1.name, a]
-//        } else {
-//          ret = false;
-//        }
-//    }
-//  };
-//  //console.log("return", ret);
-//  //console.log("------------");
-//  return ret;
-//};
 
 // Diagonalization
 // ===============
