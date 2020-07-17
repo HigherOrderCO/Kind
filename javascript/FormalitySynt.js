@@ -102,7 +102,7 @@ function stringify(term, depth = 0) {
     case "Cse":
       return "<parsing_case>";
     case "Num":
-        return ""+term.numx; //+"::"+term.type;
+        return "#"+term.numx+"::"+term.type;
     case "Chr":
       return "'"+print_str(term.chrx)+"'"; 
     case "Str":
@@ -136,6 +136,17 @@ function parse(code, indx, mode = "defs") {
   function parse_name() {
     if (indx < code.length && is_name(code[indx])) {
       return code[indx++] + parse_name();
+    } else {
+      return "";
+    }
+  };
+  function is_numb(chr) {
+    var val = chr.charCodeAt(0);
+    return (val >= 48 && val < 58)   // 0-9
+  };
+  function parse_numb() {
+    if (indx < code.length && is_numb(code[indx])) {
+      return code[indx++] + parse_numb();
     } else {
       return "";
     }
@@ -245,6 +256,12 @@ function parse(code, indx, mode = "defs") {
         }
         var skip = parse_char('"');
         return ctx => Str(strx);
+      case '#':
+        var num  = parse_numb()
+        var skip = parse_char(':');
+        var skip = parse_char(':');
+        var typ  = parse_name()
+        return ctx => Num(BigInt(num),typ);
       default:
         if (is_name(chr)) {
           var name = chr + parse_name();
@@ -253,7 +270,7 @@ function parse(code, indx, mode = "defs") {
             if (got) {
               return got.value[1];
             } else if (/^[0-9]*$/.test(name)) {
-              return Num(BigInt(name),"Nat");
+                return Num(BigInt(name),"Nat");
             } else {
               return Ref(name);
             }
@@ -318,21 +335,23 @@ function build_cse(term, type) {
 };
 
 function build_num(num, type) {
-  console.log("build num: ", num)
+  //console.log("build num: ", num, type)
   switch (type) {
     case "Bits":
       var term = Ref("Bits.nil");
       for (var i = num; i > 0n; i = i >> 1n) {
-        term = App(false, Ref(i % 2 == 0 ? "Bits.0" : "Bits.1"), done);
+        //console.log("build num for1:", term)
+        term = App(false, Ref(i % 2n == 0n ? "Bits.0" : "Bits.1"), term);
+        //console.log("build num for2:", term)
       }
-      console.log("build num ret:", term)
+      //console.log("build num ret:", term)
       return term;
     case "Nat":
       var term = Ref("Nat.zero");
       for (var i = num; i > 0n; i--) {
         term = App(false, Ref("Nat.succ"), term);
       }
-      console.log("build num ret:", term)
+      //console.log("build num ret:", term)
       return term;
     default:
       throw () => Err(null, null, "'"+term.type+"' is not a supported numeric literal type.");
@@ -462,6 +481,7 @@ function reduce(term, defs = {}, hols = {}, erased = false, expand = true, args 
       break;
     case "Num":
       if (expand) {
+        //console.log("red num", term)
         term = build_num(term.numx, term.type);
       } else {
         b = false;
@@ -609,7 +629,6 @@ function canonicalize(term, hols = {}, to_core = false, inline_lams = true) {
       }
     case "Num":
       if (to_core) {
-        console.log("case num")
         return build_num(term);
       } else {
         return term;

@@ -1120,11 +1120,9 @@ function parse_num(code, [indx,tags], err) {
           [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,typ))]))),
     () => chain(parse_dec(code,[indx,tags],false),              ([indx,tags], num) =>
           chain(parse_typ(code,[indx,tags]),                    ([indx,tags], typ) =>
-          [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,typ))])),
+           [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,typ))])),
     () => chain(parse_dec(code,[indx,tags],false),              ([indx,tags], num) =>
-          { console.log("parse_num",num)
-          return [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,"Nat"))]
-          }
+          [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,"Nat"))]
           )
     ]);
 };
@@ -1666,7 +1664,7 @@ function stringify_trm(term) {
       case "Wat":
         return "?"+term.name;
       case "Num":
-        return term.bits ? ""+term.numx : "0n"+term.numx;
+        return term.numx+"::"+term.numx;
       case "Chr":
         return "'"+term.chrx+"'";
       case "Str":
