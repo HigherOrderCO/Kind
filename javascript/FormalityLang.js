@@ -3,7 +3,7 @@ var {
   Lam, App, Let, Ann,
   Loc, Ext, Nil, Wat,
   Hol, Cse, Chr,
-  Str, Num,
+  Str, Bts, Nat,
   unloc,
   reduce,
   normalize,
@@ -151,14 +151,15 @@ function parse_one(code, [indx,tags], ch0, ch1, err) {
   ]);
 };
 
-function parse_mny(parser) {
+function parse_mny(parser, eat_space = true) {
   return function(code, [indx,tags], err = false) {
     var parses = [];
     var parsed = parser(code, [indx,tags], false);
     while (parsed) {
       var [[indx,tags], parse] = parsed;
       parses.push(parse);
-      var parsed = parser(code, next(code, [indx,tags]), false);
+      var next_index = eat_space ? next(code, [indx,tags]) : [indx,tags]
+      var parsed = parser(code, next_index, false);
     };
     return [[indx,tags], parses];
   };
@@ -789,15 +790,6 @@ function parsed_var(from, [indx,tags], name) {
     if (tags && tags.head) tags.head.ctor = "var";
     return Loc(from, indx, get_var(xs, name, () => {
         if (tags && tags.head) tags.head.ctor = "ref"; return Ref(name);
-      //if (/^[0-9]*\.[0-9]*$/.test(name)) {
-      //  var [a,b] = name.split(".");
-      //  var term = Ref("Nat.to_f64");
-      //  var term = App(false, term, Ref(sign ? "Bool.true" : "Bool.false"));
-      //  var term = App(false, term, Num(false,BigInt(a + b)));
-      //  var term = App(false, term, Num(false,BigInt(b.length)));
-      //  return term;
-      //} else {
-      //};
     }));
   };
 };
@@ -1098,32 +1090,46 @@ function parse_esc(code,[indx,tags],err,is_string) {
     ]));
 };
 
-// 0b23423 :: Nat
-// 0xabcde :: Bits
-// 1234567 :: U64
-function parse_num(code, [indx,tags], err) {
+function parse_flt(code, [indx,tags], err) {
   var from = next(code, [indx,tags])[0];
-  function parse_typ(code,[indx,tags]) {
-    return (
-      chain(parse_txt(code, next(code, [indx,tags]), "::"), ([indx,tags], skip) =>
-      chain(parse_nam(code, next(code, [indx,tags])),       ([indx,tags], type) =>
-      [[indx,tags], type])))
-  }
+  return (
+    chain(parse_opt(code, next(code, [indx,tags]), "-", false), ([indx,tags], sign) =>
+    chain(parse_dec(code,[indx,tags],false),              ([indx,tags], a) =>
+    chain(parse_txt(code,[indx,tags],".",false),          ([indx,tags], skip) =>
+    chain(parse_dec(code,[indx,tags],false),              ([indx,tags], b) => {
+      var term = Ref("Nat.to_f64");
+      var term = App(false, term, Ref(sign ? "Bool.true" : "Bool.false"));
+      var term = App(false, term, Nat(BigInt(String(a) + String(b)),"Nat"));
+      var term = App(false, term, Nat(BigInt(String(b).length),"Nat"));
+      return [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, term)]
+    })))))
+};
+
+// 0b01010 :: Nat
+// 0xabcde :: Nat
+// 1234678 :: Nat
+function parse_nat(code, [indx,tags], err) {
+  var from = next(code, [indx,tags])[0];
+  return (
+    chain(parse_dec(code,[indx,tags],false),              ([indx,tags], num) =>
+    [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Nat(num))]))
+};
+
+// #0b01010 :: Bits
+// #0xabcde :: Bits
+// #1234678 :: Bits
+function parse_bts(code, [indx,tags], err) {
+  var from = next(code, [indx,tags])[0];
   return choose([
     () => chain(parse_txt(code, next(code, [indx,tags]), "0b"), ([indx,tags], skip) =>
           chain(parse_bin(code,[indx,tags],false),              ([indx,tags], num) =>
-          chain(parse_typ(code,[indx,tags]),                    ([indx,tags], typ) =>
-          [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,typ))]))),
+          [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Bts(num))])),
     () => chain(parse_txt(code, next(code, [indx,tags]), "0x"), ([indx,tags], skip) =>
           chain(parse_hex(code,[indx,tags],false),              ([indx,tags], num) =>
-          chain(parse_typ(code,[indx,tags]),                    ([indx,tags], typ) =>
-          [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,typ))]))),
-    () => chain(parse_dec(code,[indx,tags],false),              ([indx,tags], num) =>
-          chain(parse_typ(code,[indx,tags]),                    ([indx,tags], typ) =>
-           [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,typ))])),
-    () => chain(parse_dec(code,[indx,tags],false),              ([indx,tags], num) =>
-          [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Num(num,"Nat"))]
-          )
+          [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Bts(num))])),
+    () => chain(parse_txt(code, next(code, [indx,tags]), "0d"), ([indx,tags], skip) =>
+          chain(parse_dec(code,[indx,tags],false),             ([indx,tags], num) =>
+          [[indx,tags&&Ext(Tag("num",code[indx]),tags)], xs => Loc(from, indx, Bts(num))]))
     ]);
 };
 
@@ -1135,12 +1141,11 @@ function parse_dig(code,[indx,tags],digs,err) {
 
 // parse binary literal
 function parse_bin(code,[indx,tags],err) {
-  var from = next(code, [indx,tags])[0];
   var digs = [['0',0n],['1',1n]]
   var dig_parse = (c,i,e) => parse_dig(c,i,digs,e)
   return (
     chain(parse_dig(code,[indx,tags],digs,err), ([indx,tags],d) =>
-    chain(parse_mny(dig_parse)(code,[indx,tags],false), ([indx,tags],ds) => { 
+    chain(parse_mny(dig_parse,false)(code,[indx,tags],false), ([indx,tags],ds) => { 
       ds.unshift(d);
       var [_,num] = ds.reduceRight(([p,a],v) => [p+1n,a + v * 2n**p],[0n,0n]);
       return [[indx,tags], num];
@@ -1149,13 +1154,12 @@ function parse_bin(code,[indx,tags],err) {
 
 // Parses a decimal number
 function parse_dec(code,[indx,tags],err) { 
-  var from = next(code, [indx,tags])[0];
   var digs = [['0',0n],['1',1n],['2',2n],['3',3n],['4',4n],
               ['5',5n],['6',6n],['7',7n],['8',8n],['9',9n]]
   var dig_parse = (c,i,e) => parse_dig(c,i,digs,e)
   return (
     chain(parse_dig(code,[indx,tags],digs,err), ([indx,tags],d) =>
-    chain(parse_mny(dig_parse)(code,[indx,tags],false), ([indx,tags],ds) => { 
+    chain(parse_mny(dig_parse,false)(code,[indx,tags],false), ([indx,tags],ds) => { 
       ds.unshift(d);
       var [_,num] = ds.reduceRight(([p,a],v) => [p+1n,a + v * 10n**p],[0n,0n]);
       return [[indx,tags], num];
@@ -1163,7 +1167,6 @@ function parse_dec(code,[indx,tags],err) {
 };
 
 function parse_hex(code,[indx,tags],err) {
-  var from = next(code, [indx,tags])[0];
   var digs = [['0',0n],['1',1n],['2',2n],['3',3n],['4',4n],
               ['5',5n],['6',6n],['7',7n],['8',8n],['9',9n],
               ['a',10n],['b',11n],['c',12n],['d',13n],['e',14n],['f',15n],
@@ -1172,7 +1175,7 @@ function parse_hex(code,[indx,tags],err) {
   var dig_parse = (c,i,e) => parse_dig(c,i,digs,e)
   return (
     chain(parse_dig(code,[indx,tags],digs,err), ([indx,tags],d) =>
-    chain(parse_mny(dig_parse)(code,[indx,tags],false), ([indx,tags],ds) => { 
+    chain(parse_mny(dig_parse,false)(code,[indx,tags],false), ([indx,tags],ds) => { 
       ds.unshift(d);
       var [_,num] = ds.reduceRight(([p,a],v) => [p+1n,a + v * 16n**p],[0n,0n]);
       return [[indx,tags], num];
@@ -1293,7 +1296,10 @@ function parse_trm(code, [indx = 0, tags = []], err) {
     () => parse_cse(code, [indx,tags], err),
     () => parse_ite(code, [indx,tags], err),
     () => parse_don(code, [indx,tags], err),
-    () => parse_num(code, [indx,tags], err),
+    () => parse_flt(code, [indx,tags], err),
+    () => parse_bts(code, [indx,tags], err),
+    () => parse_bts(code, [indx,tags], err),
+    () => parse_nat(code, [indx,tags], err),
     () => parse_var(code, [indx,tags], err),
   ], err);
 
@@ -1663,8 +1669,10 @@ function stringify_trm(term) {
         return "<parsing_case>";
       case "Wat":
         return "?"+term.name;
-      case "Num":
-        return term.numx+"::"+term.type;
+      case "Bts":
+        return "#"+term.btsx;
+      case "Nat":
+        return ""+term.natx;
       case "Chr":
         return "'"+term.chrx+"'";
       case "Str":
@@ -2017,7 +2025,9 @@ module.exports = {
   parse_bin,
   parse_dec,
   parse_hex,
-  parse_num,
+  parse_nat,
+  parse_bts,
+  parse_flt,
   parse_trm,
   parse,
   unloc,

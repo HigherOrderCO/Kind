@@ -15,7 +15,8 @@ const Loc = (from,upto,expr)           => ({ctor:"Loc",from,upto,expr});
 const Wat = (name)                     => ({ctor:"Wat",name});
 const Hol = (name,vals)                => ({ctor:"Hol",name,vals});
 const Cse = (name,func,info)           => ({ctor:"Cse",name,func,info});
-const Num = (numx,type)                => ({ctor:"Num",numx,type});
+const Nat = (natx)                     => ({ctor:"Nat",natx});
+const Bts = (btsx)                     => ({ctor:"Bts",btsx});
 const Chr = (chrx)                     => ({ctor:"Chr",chrx});
 const Str = (strx)                     => ({ctor:"Str",strx});
 
@@ -101,8 +102,10 @@ function stringify(term, depth = 0) {
       return "_"+term.name;
     case "Cse":
       return "<parsing_case>";
-    case "Num":
-        return "#"+term.numx+"::"+term.type;
+    case "Nat":
+        return ""+term.natx
+    case "Bts":
+        return "&"+term.btsx
     case "Chr":
       return "'"+print_str(term.chrx)+"'"; 
     case "Str":
@@ -256,12 +259,9 @@ function parse(code, indx, mode = "defs") {
         }
         var skip = parse_char('"');
         return ctx => Str(strx);
-      case '#':
+      case '&':
         var num  = parse_numb()
-        var skip = parse_char(':');
-        var skip = parse_char(':');
-        var typ  = parse_name()
-        return ctx => Num(BigInt(num),typ);
+        return ctx => Bts(BigInt(num));
       default:
         if (is_name(chr)) {
           var name = chr + parse_name();
@@ -270,7 +270,7 @@ function parse(code, indx, mode = "defs") {
             if (got) {
               return got.value[1];
             } else if (/^[0-9]*$/.test(name)) {
-                return Num(BigInt(name),"Nat");
+                return Nat(BigInt(name));
             } else {
               return Ref(name);
             }
@@ -334,28 +334,23 @@ function build_cse(term, type) {
   return func;
 };
 
-function build_num(num, type) {
-  //console.log("build num: ", num, type)
-  switch (type) {
-    case "Bits":
-      var term = Ref("Bits.nil");
-      for (var i = num; i > 0n; i = i >> 1n) {
-        //console.log("build num for1:", term)
-        term = App(false, Ref(i % 2n == 0n ? "Bits.0" : "Bits.1"), term);
-        //console.log("build num for2:", term)
-      }
-      //console.log("build num ret:", term)
-      return term;
-    case "Nat":
-      var term = Ref("Nat.zero");
-      for (var i = num; i > 0n; i--) {
-        term = App(false, Ref("Nat.succ"), term);
-      }
-      //console.log("build num ret:", term)
-      return term;
-    default:
-      throw () => Err(null, null, "'"+term.type+"' is not a supported numeric literal type.");
+function build_bts(bts) {
+  var term = Ref("Bits.nil");
+  for (var i = num; i > 0n; i = i >> 1n) {
+    //console.log("build num for1:", term)
+    term = App(false, Ref(i % 2n == 0n ? "Bits.0" : "Bits.1"), term);
+    //console.log("build num for2:", term)
   }
+  //console.log("build num ret:", term)
+  return term;
+};
+
+function build_nat(num, type) {
+  var term = Ref("Nat.zero");
+  for (var i = num; i > 0n; i--) {
+    term = App(false, Ref("Nat.succ"), term);
+  }
+  return term;
 };
 
 
@@ -394,7 +389,8 @@ function unloc(term) {
     case "Wat": return term;
     case "Hol": return term;
     case "Cse": return term;
-    case "Num": return term;
+    case "Nat": return term;
+    case "Bts": return term;
     case "Chr": return term;
     case "Str": return term;
   };
@@ -479,10 +475,18 @@ function reduce(term, defs = {}, hols = {}, erased = false, expand = true, args 
         b = false;
       };
       break;
-    case "Num":
+    case "Nat":
       if (expand) {
         //console.log("red num", term)
-        term = build_num(term.numx, term.type);
+        term = build_nat(term.natx);
+      } else {
+        b = false;
+      }
+      break;
+    case "Bts":
+      if (expand) {
+        //console.log("red num", term)
+        term = build_bts(term.btsx);
       } else {
         b = false;
       }
@@ -554,8 +558,10 @@ function normalize(term, defs, hols = {}, erased = false, seen = {}, expand = tr
         return Hol(norm.name, norm.vals);
       case "Cse":
         return Cse(term.name, term.func, term.info);
-      case "Num":
-        return Num(term.numx,term.type);
+      case "Nat":
+        return Nat(term.natx);
+      case "Bts":
+        return Bts(term.btsx);
       case "Chr":
         return Chr(term.chrx);
       case "Str":
@@ -627,34 +633,40 @@ function canonicalize(term, hols = {}, to_core = false, inline_lams = true) {
       } else {
         throw () => Err(null, null, "Incomplete case.");
       }
-    case "Num":
+    case "Nat":
       if (to_core) {
-        return build_num(term);
+        return build_nat(term);
       } else {
         return term;
       };
-  case "Chr":
-    if (to_core) {
-      var done = Ref("Char.new");
-      var ccod = term.chrx.charCodeAt(0);
-      for (var i = 0; i < 16; ++i) {
-        done = App(false, done, Ref(((ccod>>>(16-i-1))&1) ? "Bit.1" : "Bit.0"));
+    case "Bts":
+      if (to_core) {
+        return build_bts(term);
+      } else {
+        return term;
       };
-      return done;
-    } else {
-      return term;
-    };
-  case "Str":
-    if (to_core) {
-      var done = Ref("String.nil");
-      for (var i = 0; i < term.strx.length; ++i) {
-        var chr = canonicalize(Chr(term.strx[term.strx.length-i-1]), hols, to_core, inline_lams);
-        done = App(false, App(false, Ref("String.cons"), chr), done);
+    case "Chr":
+      if (to_core) {
+        var done = Ref("Char.new");
+        var ccod = term.chrx.charCodeAt(0);
+        for (var i = 0; i < 16; ++i) {
+          done = App(false, done, Ref(((ccod>>>(16-i-1))&1) ? "Bit.1" : "Bit.0"));
+        };
+        return done;
+      } else {
+        return term;
+      };
+    case "Str":
+      if (to_core) {
+        var done = Ref("String.nil");
+        for (var i = 0; i < term.strx.length; ++i) {
+          var chr = canonicalize(Chr(term.strx[term.strx.length-i-1]), hols, to_core, inline_lams);
+          done = App(false, App(false, Ref("String.cons"), chr), done);
+        }
+        return done;
+      } else {
+        return term;
       }
-      return done;
-    } else {
-      return term;
-    }
   };
 };
 
@@ -703,8 +715,10 @@ function hash(term, dep = 0) {
       return "_" + term.name;
     case "Cse":
       return "-"+Math.random();
-    case "Num":
-      return "{"+term.numx+"::"+term.type+"}"
+    case "Nat":
+      return "{"+term.natx+"}";
+    case "Bts":
+      return "{&"+term.numx+"}";
     case "Chr":
       return "'"+term.chrx+"'";
     case "Str":
@@ -954,42 +968,19 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
         var term_val = build_cse(term, func_typ);
         return deep([[typeinfer, [term_val, defs, show, hols, ctx, locs]]], done);
       });
-    case "Num":
-      switch (term.type) {
-        //case "U8":
-        //  return (
-        //    deep([[typeinfer, [Ref("U8"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        //    deep([[typeinfer, [Ref("U8.new"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        //    deep([[typeinfer, [Ref("Word"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        //    deep([[typeinfer, [Ref("Word.nil"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        //    deep([[typeinfer, [Ref("Word.0"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        //    deep([[typeinfer, [Ref("Word.1"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        //    done([hols, Ref("U8")]))))))));
-        //case "U16":
-        //  return (
-        //    deep([[typeinfer, [Ref("U16"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        //    deep([[typeinfer, [Ref("U16.new"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        //    deep([[typeinfer, [Ref("Word"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        //    deep([[typeinfer, [Ref("Word.nil"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        //    deep([[typeinfer, [Ref("Word.0"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        //    deep([[typeinfer, [Ref("Word.1"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        //    done([hols, Ref("U16")]))))))));
-        case "Bits":
-          return (
-            deep([[typeinfer, [Ref("Bits"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-            deep([[typeinfer, [Ref("Bits.nil"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-            deep([[typeinfer, [Ref("Bits.0"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-            deep([[typeinfer, [Ref("Bits.1"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-            done([hols, Ref("Bits")]))))));
-        case "Nat":
-          return (
-            deep([[typeinfer, [Ref("Nat"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-            deep([[typeinfer, [Ref("Nat.zero"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-            deep([[typeinfer, [Ref("Nat.succ"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-            done([hols, Ref("Nat")])))));
-        default:
-          throw () => Err(null, null, "'"+term.type+"' is not a supported numeric literal type.");
-      }
+    case "Bts":
+      return (
+        deep([[typeinfer, [Ref("Bits"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Bits.nil"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Bits.0"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Bits.1"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        done([hols, Ref("Bits")]))))));
+    case "Nat":
+      return (
+        deep([[typeinfer, [Ref("Nat"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Nat.zero"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        deep([[typeinfer, [Ref("Nat.succ"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
+        done([hols, Ref("Nat")])))));
     case "Chr":
       return (
         deep([[typeinfer, [Ref("Char"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
@@ -1235,7 +1226,8 @@ module.exports = {
   Wat,
   Hol,
   Cse,
-  Num,
+  Nat,
+  Bts,
   Chr,
   Str,
   Ext,
@@ -1245,7 +1237,8 @@ module.exports = {
   stringify,
   parse,
   build_cse,
-  build_num,
+  build_bts,
+  build_nat,
   unloc,
   reduce,
   normalize,
