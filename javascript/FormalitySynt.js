@@ -335,17 +335,16 @@ function build_cse(term, type) {
 };
 
 function build_bts(bts) {
+  //console.log("build bts:", bts)
   var term = Ref("Bits.nil");
-  for (var i = num; i > 0n; i = i >> 1n) {
-    //console.log("build num for1:", term)
+  for (var i = bts; i > 0n; i = i >> 1n) {
     term = App(false, Ref(i % 2n == 0n ? "Bits.0" : "Bits.1"), term);
-    //console.log("build num for2:", term)
   }
-  //console.log("build num ret:", term)
+  //console.log("build bts ret:", term)
   return term;
 };
 
-function build_nat(num, type) {
+function build_nat(num) {
   var term = Ref("Nat.zero");
   for (var i = num; i > 0n; i--) {
     term = App(false, Ref("Nat.succ"), term);
@@ -477,7 +476,6 @@ function reduce(term, defs = {}, hols = {}, erased = false, expand = true, args 
       break;
     case "Nat":
       if (expand) {
-        //console.log("red num", term)
         term = build_nat(term.natx);
       } else {
         b = false;
@@ -485,7 +483,7 @@ function reduce(term, defs = {}, hols = {}, erased = false, expand = true, args 
       break;
     case "Bts":
       if (expand) {
-        //console.log("red num", term)
+        //console.log("reduce bts", term)
         term = build_bts(term.btsx);
       } else {
         b = false;
@@ -561,6 +559,7 @@ function normalize(term, defs, hols = {}, erased = false, seen = {}, expand = tr
       case "Nat":
         return Nat(term.natx);
       case "Bts":
+        //console.log("normalize bts",term.btsx)
         return Bts(term.btsx);
       case "Chr":
         return Chr(term.chrx);
@@ -635,13 +634,14 @@ function canonicalize(term, hols = {}, to_core = false, inline_lams = true) {
       }
     case "Nat":
       if (to_core) {
-        return build_nat(term);
+        return build_nat(term.natx);
       } else {
         return term;
       };
     case "Bts":
       if (to_core) {
-        return build_bts(term);
+        //console.log("canonicalize bts", term.btsx)
+        return build_bts(term.btsx);
       } else {
         return term;
       };
