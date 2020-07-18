@@ -8,18 +8,26 @@ An lightweight proof-gramming language. It aims to be:
 
 - **Portable:** the entire language desugars to a 500 lines core type-theory.
 
-Explore our ecossystem at [moonad.org](http://moonad.org) and come hang out with us [on Telegram](https://t.me/formality_lang).
+Explore our ecosystem at [moonad.org](http://moonad.org) and come hang out with us [on Telegram](https://t.me/formality_lang).
 
 Table of contents
 =================
 
+- [Table of contents](#table-of-contents)
 - [Motivation](#motivation)
 - [Examples](#examples)
 - [Installation](#installation)
 - [Commands](#commands)
 - [Introduction](#introduction)
 - [Principles](#principles)
-- [Booleans](#booleans)
+- [Formality Basics](#formality-basics)
+  - [The Bool Type](#the-bool-type)
+  - [A Bool function](#a-bool-function)
+    - [Testing](#testing)
+  - [A Bool theorem](#a-bool-theorem)
+  - [The Nat Type](#the-nat-type)
+  - [A Nat function](#a-nat-function)
+  - [A Nat theorem](#a-nat-theorem)
 
 Motivation
 ==========
@@ -277,7 +285,7 @@ type `A`, for any value `x : A`, a proof that `x == x`. To make sure this is
 correct, type `fm`. This will make Formality type-check all definitions on the
 current directory and let you know if there is any error.
 
-Let's now prove that `not(not(a)) == a`. Since this involes an expression, we
+Let's now prove that `not(not(a)) == a`. Since this involves an expression, we
 need a function:
 
 ```c
