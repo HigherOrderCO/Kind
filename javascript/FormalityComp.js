@@ -12,6 +12,7 @@ const Ins = (prim,expr)      => ({ctor:"Ins",prim,expr});
 const Chr = (chrx)           => ({ctor:"Chr",chrx});
 const Str = (strx)           => ({ctor:"Str",strx});
 const Nat = (natx)           => ({ctor:"Nat",natx});
+const Bts = (btsx)           => ({ctor:"Bts",btsx});
 
 var is_prim = {
   Unit     : 1,
@@ -41,6 +42,7 @@ function stringify(term) {
     case "Chr": return "'"+term.chrx+"'";
     case "Str": return '"'+term.strx+'"';
     case "Nat": return term.natx;
+    case "Bts": return "0d"+term.btsx;
     default: return "?";
   };
 };
@@ -112,6 +114,8 @@ function dependency_sort(defs, main) {
         break;
       case "Loc":
         go(term.expr);
+        break;
+      case "Bts":
         break;
       case "Nat":
         break;
@@ -210,6 +214,11 @@ function infer(term, defs, ctx = fmc.Nil()) {
         comp: Nat(term.natx),
         type: fmc.Ref("Nat"),
       };
+    case "Bts":
+      return {
+        comp: Bts(term.btsx),
+        type: fmc.Ref("Bits"),
+      };
     case "Chr":
       return {
         comp: Chr(term.chrx),
@@ -291,7 +300,7 @@ function core_to_comp(defs, main) {
 module.exports = {
   Var, Ref, Nul, Lam,
   App, Let, Eli, Ins,
-  Chr, Str, Nat,
+  Chr, Str, Nat, Bts,
   stringify,
   is_prim,
   dependency_sort,

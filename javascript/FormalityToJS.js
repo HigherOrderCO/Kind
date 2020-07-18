@@ -625,6 +625,8 @@ function js_code(term, name = null) {
         }
       case "Nat":
         return term.natx+"n";
+      case "Bts":
+        return term.btsx+"n";
       case "Chr":
         return term.chrx.codePointAt(0);
       case "Str":
