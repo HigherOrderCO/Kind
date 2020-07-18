@@ -104,7 +104,7 @@ Installation
 
 3. Clone the Moonad libraries: `git clone http://github.com/moonad/moonad`.
 
-4. Enter the directory with `cd moonad`.
+4. Enter the directory with `cd moonad/lib`.
 
 5. Type `fm`.
 
