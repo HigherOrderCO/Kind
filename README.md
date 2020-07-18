@@ -108,8 +108,7 @@ Installation
 
 5. Type `fm`.
 
-This will type-check every `.fm` file on the `moonad` directory For more
-information and commands, check the [documentation](DOCUMENTATION.md).
+This will type-check every `.fm` file on the `moonad` directory.
 
 Commands
 ========
