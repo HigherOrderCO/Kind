@@ -42,7 +42,7 @@ For comparison, in Agda the definition would be:
 
 ```agda
 data Vec (A : Set) : (len : Nat) -> Set where
-  nil : Vec A len
+  nil : Vec A zero
   cons : (n : Nat) -> (x : A) -> (xs : Vec A n) -> Vec A (succ n)
 ```
 A few differences: in Agda, you separate parameters and indices with a : . In Formality, you write parameters inside <> and indices after the ~ . In Agda, you need -> Set on the first line. In Formality, no. In Agda, you write the fields with (a : A) -> (b : B) -> ... . In Formality, you write with (a: A, b: B) . In Agda, you need to write the return type of each constructor. In Formality, we omit the return type. Problem is, that only works for non-indexed datatypes; for indexed datatypes, you *need* to write the indices. So, to do that while also omitting the return type, we use ~ to configure the index on each case.
@@ -116,5 +116,4 @@ Monadic effects (todo - explain).
 Yes! It's an interesting tradeoff, and we've considered them, along with several other
 strategies. Moonad's treatment of imports is still in the works - if you have
 an opinion, come share it on Telegram.
-
 
