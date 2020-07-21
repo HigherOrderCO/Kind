@@ -138,9 +138,10 @@ Hello.world: IO(Unit)
 The first expression `Hello.world` defines a function called `world` in
 the `Hello` namespace (all definitions must be namespaced with the same
 name as the file they're found in).
-The type of this expression is `IO(Unit)` (more about that later).
+The type of this expression is `IO(Unit)` (more about that later in the
+[tutorial](TUTORIAL.md)).
 
-Let's try running our little program. On a command line, run:
+Let's try running our little program. On a command line, enter:
 
 ```
 fmio Hello.world
@@ -152,16 +153,16 @@ console. Let's look at each of these steps in a little more detail:
 
 ### 📦 Dependencies
 Formality will discover it doesn't have definitions for `IO(Unit)`
-and `IO.print`, and wil download them from [moonad.org](moonad.org).
+and `IO.print`, and will download them from [moonad.org](moonad.org).
 Formality doesn't have a notion of packages or a central package
-repository. Instead, users can post definitions to Moonad, making
+repository; instead, users can post definitions to Moonad, making
 them globally available for all other users, essentially extending the 
 language itself. This is Formality's philosophy on pretty much everything:
 keep the language as small and diamond-perfect as possible, but make it 
 easy to extend and share.
 
 ### ✔️ Type Checking
-With all the definitions in place, Formality will sure
+With all the definitions in place, Formality will make sure
 every definition fulfills its type. This process is *much* more powerful
 in Formality than in traditional languages: as in proof assistants like
 Coq and Agda, types can express deep properties about your programs, and
@@ -178,7 +179,8 @@ quite clean too! Check it out yourself by running:
   ```
 Javascript is currently the default runtime for Formality, and the one we recommend
 for learning the language. But, as mentioned, Haskell and EVM runtimes exist. In
-fact, writing a new runtime in your favorite language is simple and a nice weekend project - check out our tutorial [TODO - tutorial is a work in progress; in the
+fact, writing a new runtime in your favorite language is simple and a nice weekend project - 
+check out our tutorial on the subject [TODO - this tutorial is a work in progress; in the
 meantime, everything you'd need to implement is in [this file](https://github.com/moonad/Formality/blob/master/javascript/FormalityCore.js)]!
 
 ### 🚀 Run
@@ -206,7 +208,8 @@ Reading and printing to the console raises an important issue: Formality is
 a language without side-effects - as in languages like Haskell and Elm, all
 functions are completely pure (i.e, cannot read or write mutable state). Rather
 than issuing side-effects directly, the standard library defines datatypes that
-_describe_ the effects, which are then interpreted by the runtime.
+_describe_ the effects, which are then interpreted by the runtime. This is described
+at length in [IO section of the tutorial][TODO write IO section].
 
 ### 💡 Datatypes, Functions, and Proofs
 
@@ -221,6 +224,11 @@ down to three parts:
 
 3. Propose and prove theorems about your datatypes and functions.
 
+While the first two are commonplace for programmers and the last is usually relegated to
+mathematicians, Formality enables all three in the same simple language, making it a
+powerful *lingua franca* for the exchange of ideas in math, computer science, and software
+engineering.
+
 Learning More
 =============
 
@@ -229,7 +237,7 @@ you'll be proving theorems to the moon and back in no time (throw a little of th
 our way, eh?).
 
 Do you dream in Pi types and eat monoids for breakfast? You'll probably want
-to see the [specification](FMC_SPECIFICATION.md) (it's incomplete, but still
+to see the [specification](FMC_SPECIFICATION.md) (it's incomplete and slightly dated, but still
 covers a lot of ground).
 
 Questions? Queries? Quagmires? Conundrums? Perhaps we've covered it in the [FAQ](./FAQ.md).
