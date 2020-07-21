@@ -268,4 +268,9 @@ the thing!
   want most, send us a PR or let us know [on Telegram](https://t.me/formality_lang). Formality
   is a vast and rich frontier: who knows what dependently-typed glories await the intrepid?
 
-[Insert one last quote here as an outro. We need some Terry Pratchet or sci-fi.]
+> “To every man, in his acquaintance with a new art, there comes a moment when that which before
+> was meaningless first lifts, as it were, one corner of the curtain that hides its mystery,
+> and reveals, in a burst of delight which later and fuller understanding can hardly ever equal,
+> one glimpse of the indefinite possibilities within.”
+>
+> *Out of the Silent Planet*, C.S. Lewis

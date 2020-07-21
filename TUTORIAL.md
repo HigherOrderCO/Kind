@@ -1,3 +1,4 @@
+# A First Look at Formality
 
 ### 🔟 The Bool Type
 
