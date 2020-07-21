@@ -19,15 +19,14 @@ Table of contents
 - [Installation](#installation)
 - [Commands](#commands)
 - [Introduction](#introduction)
-- [Principles](#principles)
-- [Formality Basics](#formality-basics)
-  - [The Bool Type](#the-bool-type)
-  - [A Bool function](#a-bool-function)
-    - [Testing](#testing)
-  - [A Bool theorem](#a-bool-theorem)
-  - [The Nat Type](#the-nat-type)
-  - [A Nat function](#a-nat-function)
-  - [A Nat theorem](#a-nat-theorem)
+    - [📦 Dependencies](#-dependencies)
+    - [✔️ Type Checking](#️-type-checking)
+    - [📜 Compile to Javascript](#-compile-to-javascript)
+    - [🚀 Run](#-run)
+    - [💡 Datatypes, Functions, and Proofs](#-datatypes-functions-and-proofs)
+- [Learning More](#learning-more)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
 
 Motivation
 ==========
@@ -102,14 +101,6 @@ Installation
 
 2. Install the language with `npm i -g formality-lang`.
 
-3. Clone the Moonad libraries: `git clone http://github.com/moonad/moonad`.
-
-4. Enter the directory with `cd moonad/lib`.
-
-5. Type `fm`.
-
-This will type-check every `.fm` file on the `moonad` directory.
-
 Commands
 ========
 
@@ -134,306 +125,139 @@ The commands below load all `.fmc` files in the current directory.
 Introduction
 ============
 
-This is the "Hello, World!" in Formality:
+Let's write "Hello, World!" in Formality!
+
+First, create a new file somewhere called `Hello.fm` and add this text
+to it:
 
 ```javascript
-main: IO(Unit)
+Hello.world: IO(Unit)
   IO.print("Hello, world!")
 ```
 
-To run it, save this file `main.fm` and type `fmio main`. This will download
-some dependencies, compile it to JavaScript and run, printing `Hello, world` to
-the console. Here, [`IO.print`](http://moonad.org/p/0x0000000000000047) is
-just a definition on [moonad.org](http://moonad.org). In Formality, there is no
-such a thing as packages. Instead, once a definition is posted on Moonad, it is
-globally available for all other users. That's because, by philosophy, Formality
-is a very small language that is extended by its own users every time some code
-is posted on Moonad.
+The first expression `Hello.world` defines a function called `world` in
+the `Hello` namespace (all definitions must be namespaced with the same
+name as the file they're found in).
+The type of this expression is `IO(Unit)` (more about that later).
 
-You can also type-check that file by running `fm main`, and you can compile it
-to JavaScript, run `fmjs main`. The generated code is highly optimized and uses
-native structures whenever possible.
+Let's try running our little program. On a command line, run:
 
-For a bigger example, run this with `fmio main`:
+```
+fmio Hello.world
+```
+
+This will download the necessary dependencies, type check the new definitions,
+compile everything to Javascript, and run, printing `Hello, world` in the
+console. Let's look at each of these steps in a little more detail:
+
+### 📦 Dependencies
+Formality will discover it doesn't have definitions for `IO(Unit)`
+and `IO.print`, and wil download them from [moonad.org](moonad.org).
+Formality doesn't have a notion of packages or a central package
+repository. Instead, users can post definitions to Moonad, making
+them globally available for all other users, essentially extending the 
+language itself. This is Formality's philosophy on pretty much everything:
+keep the language as small and diamond-perfect as possible, but make it 
+easy to extend and share.
+
+### ✔️ Type Checking
+With all the definitions in place, Formality will sure
+every definition fulfills its type. This process is *much* more powerful
+in Formality than in traditional languages: as in proof assistants like
+Coq and Agda, types can express deep properties about your programs, and
+Formality will make sure they hold (more about this later in the section on
+[theorem Proving](./THEOREM_PROVING_TUTORIAL.md)).
+
+### 📜 Compile to Javascript
+
+Formality programs compile to fast, tiny Javascript modules. The output is
+quite clean too! Check it out yourself by running:
+
+  ```
+  fm2js Hello.world
+  ```
+Javascript is currently the default runtime for Formality, and the one we recommend
+for learning the language. But, as mentioned, Haskell and EVM runtimes exist. In
+fact, writing a new runtime in your favorite language is simple and a nice weekend project - check out our tutorial [TODO - tutorial is a work in progress; in the
+meantime, everything you'd need to implement is in [this file](https://github.com/moonad/Formality/blob/master/javascript/FormalityCore.js)]!
+
+### 🚀 Run
+The `fm` command will execute the compiled Javascript, printing
+`Hello, world.` to the console.
+
+For a more interactive example, we could add the following function
+to our `Hello.fm` file:
 
 ```javascript
-main: IO(Unit)
+Hello.greet: IO(Unit)
   do IO {
     var name = IO.prompt("What is your name?");
     IO.print(String.concat("Welcome, ", name));
   }
 ```
 
-Since Formality is a pure functional language, it has no built-in notion of
-side-effects (like printing), but we can still **describe** then: that's what
-the `IO` type does, using monads. But what are monads? Simple, monads are
-just... things that you must not worry about for now. Let's focus on the
-fundamental principles of the language first!
-
-Principles
-==========
-
-Formality programs are just a series of top-level definitions: datatype
-declarations and functions (or proofs). As such, programming in Formality almost
-always consists of the following activity:
-
-1. Specify the data formats that are used in your problem.
-
-2. Program functions that transform those data formats.
-
-3. Propose and prove theorems about those.
-
-Of the steps above, 1 and 2 are very familiar to most developers, but 3 is not.
-If you're not familiar with dependent types and theorem proving, we suggest you
-to check our [theorem proving tutorial](THEOREM_PROVING_TUTORIAL.md) before
-proceeding.
-
-Formality Basics
-================
-
-The Bool Type
--------------
-
-The first type we're going to write is the boolean. It is a type with by two
-values: `true` and `false`. In Formality, we declare it as:
-
-```c
-T Bool
-| true;
-| false;
-```
-
-`T` is a keyword to define a new type. `Bool` is the name of the type, and
-`true` and `false` are its two values, or **constructors**. This statement adds
-`Bool.true : Bool` (Bool.true of type Bool), `Bool.false : Bool` (Bool.false of
-type Bool) and `Bool : Type` (Bool of type Type). The `.` here is just part of
-the names.
-
-A Bool function
----------------
-
-The simplest boolean function is the negation, i.e., one that converts `true` to
-`false` and `false` to `true`. We can implement it by case analysis:
-
-```c
-Bool.not(b: Bool): Bool  // Bool.not receives "b of type Bool" and returns "Bool"
-  case b:                // Inspect the value of b...
-  | false => Bool.false; // If it is true, return false.
-  | true  => Bool.true;  // If it is false, return true.
-```
-
-In Formality, it isn't necessary to write the name of each case. This function
-could be written shortly as:
-
-```c
-Bool.not(b: Bool): Bool
-  case b:
-  | Bool.false;
-  | Bool.true;
-```
-
-Since case-analysis on `Bool` is universally known as `if`, this also works:
-
-```c
-Bool.not(b: Bool): Bool
-  if b then
-    Bool.false
-  else
-    Bool.true
-```
-
-Both are equivalent.
-
-### Testing
-
-There are two ways to test a program. We can use `IO` to print values:
-
-```c
-Docs.bool_test_0: IO(Unit)
-  IO.print(Bool.show(Bool.not(Bool.true)))
-```
-
-Run with `fmcio Docs.bool_test_0`. This requires us to be able to stringify
-those values (here, `Bool.show` is defined on `Bool.fm`). An alternative would
-be to just print the values directly, without `IO`:
-
-```c
-Docs.bool_test_1: Bool
-  Bool.not(Bool.true)
-```
-
-Type `fm Docs.bool_test_0`. This will output `(true) (false) false`, which is
-the internal lambda-encoded representation of `Bool.false` (more on that later).
-A last alternative would be to type `fmcio Docs.bool_test_1`. Since the program
-isn't of type `IO`, it will output the compiled JavaScript representation of
-`Bool.false`. In this case, just `false`, but could be a JS object or function.
-
-A Bool theorem
---------------
-
-Let's first prove that `true == true`. Like on the example on the last section,
-it is just a function call. Here, it is called `Equal.to`:
-
-```c
-Docs.true_is_true: Equal(Bool, Bool.true, Bool.true)
-  Equal.to<Bool, Bool.true>
-```
-
-Here, `Equal.to : (A : Type) -> (x : A) -> Equal(A, x, x)`. It returns, for any
-type `A`, for any value `x : A`, a proof that `x == x`. To make sure this is
-correct, type `fm`. This will make Formality type-check all definitions on the
-current directory and let you know if there is any error.
-
-Let's now prove that `not(not(a)) == a`. Since this involves an expression, we
-need a function:
-
-```c
-Docs.not_not_is_b(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
-  Equal.to<Bool, b>
-```
-
-Sadly, this alone doesn't work. Here is the error outputted by `fm`:
-
-```c
-Found type... Equal(Bool)(b)(b)
-Instead of... Equal(Bool)(Bool.not(Bool.not(b)))(b)
-With context:
-- b : Bool
-On line 20:
-    16| Docs.true_is_true: Equal(Bool, Bool.true, Bool.true)
-    17|   Equal.to<Bool, Bool.true>
-    18|
-    19| Docs.not_not_is_b(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
-    20|   Equal.to<Bool, Bool.true>
-    21|
-    22| //Docs.bool_show: IO(Unit)
-    23|   //IO.print(Bool.show(Bool.true))
-```
-
-That's because `Bool.not(Bool.not(b))` is **not** identical to `b`. To make it
-work, we need a case analysis:
-
-```c
-Docs.not_not_is_b(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
-  case b:
-  | Equal.to<Bool, Bool.true>;
-  | Equal.to<Bool, Bool.false>;
-  : Equal(Bool, Bool.not(Bool.not(b.self)), b.self);
-```
-
-The last line tells Formality the type returned by the case expression, with one
-quirk: we use `b.self` to tell Formality to **specialize** that type using the
-concrete value of `b` inside each branch. On the first branch, `b = Bool.true`,
-so `Equal(Bool, Bool.not(Bool.not(b.self)), b.self)` is specialized to
-`Equal(Bool, Bool.not(Bool.not(Bool.true)), Bool.true)`, which reduces to
-`Equal(Bool, Bool.true, Bool.true)`. This allow us to write
-`Equal.to<Bool, Bool.true>` identical, we can use `Equal.to`. The same
-reasoning goes for the last branch. Once all branches are correctly filled,
-Formality **generalizes** `b.self` to the matched value `b`, causing the whole
-`case` expression to have type `Equal(Bool, Bool.not(Bool.not(b)), b)`. This
-completes our first proof!
-
-The Nat Type
-------------
-
-The second type we're going to write is that of natural numbers, i.e.,
-non-negative integers. It can be written like this:
-
-```c
-T Nat
-| zero;
-| succ(pred: Nat);
-```
-
-In other words, a `Nat` is either `zero`, or the successor of another `Nat`. For
-example, `2` is the successor of the successor of `zero`, and can be written as
-`Nat.succ(Nat.succ(Nat.zero))`. With the `Nat` type, we're able to uniquely
-represent any non-negative integer.
-
-A Nat function
---------------
-
-Let's write the addition on `Nat`:
-
-```c
-Nat.add(n: Nat, m: Nat): Nat
-  case n:
-  | m;
-  | Nat.succ(Nat.add(n.pred, m));
-```
-
-Notice that Formality's `case` expression allows us to access the fields
-contained inside the matched values inside their respective cases, with a
-`value.field` name. That is why we can write `n.pred` inside the second case. It
-is not a field accessor: `n.pred` is the actual name of the variable.
-
-The way `add` works is by recursing on the first argument, adding 1 to the result
-on each recursive call. It can be better explained by an example:
+Try running our new `greet` function at the command line:
 
 ```
-add(succ(succ(succ(zero))), succ(succ(zero)))   // add(3, 2)
-= succ(add(succ(succ(zero)), succ(succ(zero)))) // 1 + add(2, 2)
-= succ(succ(add(succ(zero), succ(succ(zero))))) // 1 + 1 + add(1, 2)
-= succ(succ(succ(add(zero, succ(succ(zero)))))) // 1 + 1 + 1 + add(0, 2)
-= succ(succ(succ(succ(succ(zero)))))            // 1 + 1 + 1 + 2
+fmio Hello.greet
 ```
 
-Since `Nat` is a common type, we can write it with numeric literals, which are
-desugared to `Nat.succ(Nat.succ(...Nat.zero))`. Let's test it by adding
-`123456789 + 987654321`:
+Reading and printing to the console raises an important issue: Formality is
+a language without side-effects - as in languages like Haskell and Elm, all
+functions are completely pure (i.e, cannot read or write mutable state). Rather
+than issuing side-effects directly, the standard library defines datatypes that
+_describe_ the effects, which are then interpreted by the runtime.
 
-```c
-Docs.nat_test: Nat
-  Nat.add(123456789, 987654321)
-```
+### 💡 Datatypes, Functions, and Proofs
 
-Running `fmcio Docs.nat_test` outputs `1111111110n`. That's because Formality
-compiles `Nat` to JavaScript `BigInt`, which is a very fast implementation of
-integers.
+Formality is a general purpose language, capable of everything
+from web apps to 3D games to advanced mathematical proofs.
+But all Formality programs share a common structure that comes
+down to three parts:
 
-A Nat theorem
--------------
+1. Specify the datatypes that describe your problem.
 
-Let's now prove two theorems: `add(0, a) == a` and `add(a, 0) == a`. The first
-one is easy:
+2. Write functions that transform those datatypes.
 
-```c
-Docs.0_plus_a_is_a(a: Nat): Equal(Nat, Nat.add(0, a), a)
-  Equal.to<Nat, a>
-```
+3. Propose and prove theorems about your datatypes and functions.
 
-That's because, due to the way `Nat.add` was written, `Nat.add(0, a)` reduces to
-`a`. This allow us to use `Equal.to` directly. The second theorem is harder,
-though. If we try to prove it like the first, we get the following error:
+Learning More
+=============
 
-```c
-Found type... Equal(Nat)(a)(a)
-Instead of... Equal(Nat)(Nat.add(a)(Nat.zero))(a)
-With context:
-- a : Nat
-On line 32:
-    28| Docs.0_plus_a_is_a(a: Nat): Equal(Nat, Nat.add(0, a), a)
-    29|   Equal.to<Nat, a>
-    30|
-    31| Docs.a_plus_0_is_a(a: Nat): Equal(Nat, Nat.add(a, 0), a)
-    32|   Equal.to<Nat, a>
-    33|
-    34| //Docs.bool_show: IO(Unit)
-    35|   //IO.print(Bool.show(Bool.true))
-```
+New to the notion of proving theorems with programs? Check out [our tutorial](TUTORIAL.md) -
+you'll be proving theorems to the moon and back in no time (throw a little of that moon ore
+our way, eh?).
 
-That's because `Nat.add` matches on the first argument, which, here, is a
-variable, so it gets stuck, not unlike `not(not(b)) == b`. For that reason, we
-must proceed by case analysis:
+Do you dream in Pi types and eat monoids for breakfast? You'll probably want
+to see the [specification](FMC_SPECIFICATION.md) (it's incomplete, but still
+covers a lot of ground).
 
-```c
-Docs.a_plus_0_is_a(a: Nat): Equal(Nat, Nat.add(a, 0), a)
-  case a:
-  | Equal.to<Nat, Nat.zero>;
-  | let ind = Docs.a_plus_0_is_a(a.pred)
-    let app = Equal.apply<Nat, Nat, Nat.add(a.pred, Nat.zero), a.pred, Nat.succ, ind>
-    app;
-  : Equal(Nat, Nat.add(a.self, 0), a.self);
-```
+Questions? Queries? Quagmires? Conundrums? Perhaps we've covered it in the [FAQ](./FAQ.md).
+If not, hop on [on Telegram](https://t.me/formality_lang) and we'll see if we can't
+get to the bottom of it.
 
-... to be continued ...
+Roadmap
+=======
+
+TODO - write roadmap section.
+
+Contributing
+============
+
+Are you as excited about democratizing efficient proofs as we are? Come help us build
+the thing! 
+
+- [Moonad.org](moonad.org) is wide open for contributions. Port your favorite library to
+  Formality and integrate it directly into the language by publishing to Moonad. Or
+  deploy a cool app that uses Moonad's IO infrastructure. Soon we'll have toolchain in
+  place for you to publish in an automated way, but for now, you can do so by making a
+  PR to the [Moonad lib](https://github.com/moonad/Moonad/tree/master/lib).
+- The documentation needs helps. One of the best ways you can help us improve it is just ask
+  questions and give feedback on [on Telegram](https://t.me/formality_lang)! Bonus points if
+  you mention @d4hines so we can make sure it gets compiled into the FAQ.
+- Finally, there are lots of fascinating problems to solve in the language itself. We need 
+  all the help we can get for the items in the roadmap - or, if we've missed the thing you
+  want most, send us a PR or let us know [on Telegram](https://t.me/formality_lang). Formality
+  is a vast and rich frontier: who knows what dependently-typed glories await the intrepid?
+
+[Insert one last quote here as an outro. We need some Terry Pratchet or sci-fi.]
