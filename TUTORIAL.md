@@ -1,6 +1,19 @@
 # A First Look at Formality
 
-### 🔟 The Bool Type
+Table of contents
+=================
+- [A First Look at Formality](#a-first-look-at-formality)
+- [Table of contents](#table-of-contents)
+- [🔟 The Bool Type](#-the-bool-type)
+- [➡️ A Bool function](#️-a-bool-function)
+- [📖 A Bool theorem](#-a-bool-theorem)
+- [✨ A More Interesting Bool Theorem](#-a-more-interesting-bool-theorem)
+- [☕ The Nat Type](#-the-nat-type)
+- [A Nat function](#a-nat-function)
+- [A Nat theorem](#a-nat-theorem)
+
+🔟 The Bool Type
+=================
 
 Before we can solve the world's problems, we need some datatypes that describe them.
 The Booleans are a good starting place. Make a new file called `Bool.fm` and copy this
@@ -33,7 +46,8 @@ self_Bool<P: (self: Bool) -> Type> -> (Bool.true: P((Bool.true) (Bool.false) Boo
 ```
 (You can ignore `self_Bool` for now - we'll cover it later.)
 
-### ➡️ A Bool function
+➡️ A Bool function
+===================
 > Every interesting program involves some kind of case-analysis.
 >
 > Gerald Sussman
@@ -70,7 +84,8 @@ Bool.not(b: Bool): Bool
 The `if` keyword works on any two-valued type, using the first constructor
 as the "true" case and the second as the "false" case.
 
-### A Bool theorem
+📖 A Bool theorem
+==============
 
 > Who has despised the day of small beginnings?
 >
@@ -99,13 +114,13 @@ fm Bool.true_is_true
 
 For comparison, try passing `Bool.false` to `Equal.to` instead:
 
-```
+```c
 Bool.true_is_true: Equal(Bool, Bool.true, Bool.true)
   Equal.to<Bool, Bool.false>
 ```
 You'll get the following error:
 
-```
+```c
 Found 1 type error(s):
 
 Inside Bool.true_is_true:
@@ -119,26 +134,32 @@ On line 24:
     24|   Equal.to<Bool, Bool.false>
 ```
 
-Notice that we've encoded facts about _data values_ into the _types_
-of functions. This is power of dependent types, and we'll be taking that
-power to its limit. Go ahead and change it back so things type check correctly.
+Coming from a traditional statically typed language, all this might seem
+magical, but `Equal` isn't a primitive: it's just a normal datatype similar
+to our `Bool` type, except that that it accepts parameters, and the type of
+`Equal` *depends on its arguments* (hence, Formality is called
+a dependently typed language).
 
-### ✨ A Slightly More Interesting Bool Theorem
+Go ahead and fix our `Bool.true_is_true` theorem so it type-checks again.
+
+✨ A More Interesting Bool Theorem
+===========================================
+
 > The reference of 'evening star' would be the same as that of 'morning star',
 > but not the sense.
 > 
-> Gottlob Frege, On Sense and Reference
+> "On Sense and Reference", Gottlob Frege
 
 Let's try proving a more interesting fact about Booleans, namely, that negation
-is it's own inverse: for any boolean `b`, `not(not(b)) == b`. 
+is it's own inverse, i.e, for any Boolean `b`, `not(not(b)) == b`. 
 
-Copy the definition below and try type checking it with the `fm` command:
+An initial attempt might look something like this. Try type-checking it with `fm`.
 ```c
 Bool.not_not_is_b(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
   Equal.to<Bool, b>
 ```
 
-Hmm. Obviously, something didn't quite work:
+Hmm. Something didn't quite work. Here's the output:
 ```c
 Found type... Equal(Bool)(b)(b)
 Instead of... Equal(Bool)(Bool.not(Bool.not(b)))(b)
@@ -153,11 +174,13 @@ On line 20:
 
 What Formality is astutely observing is that `Bool.not(Bool.not(b))` is not
 equal to b _in the sense of identical with_ `b`, just like "evening star" and
-"morning star" two unequal phrases both referring to Venus (this may seem
+"morning star" are two unequal phrases both referring to Venus. Formality will
+(this may seem
 pedantic, but it is called _Formality_ after all).
 
 Formality requires more evidence before admitting our assertion. As usual,
-this comes down to case analysis:
+this comes down to case analysis - we'll prove the statement holds for
+each possible value of the Bool `b`:
 ```c
 Bool.not_not_is_b(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
   case b:
@@ -165,27 +188,95 @@ Bool.not_not_is_b(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
   | Bool.false => Equal.to<Bool, Bool.false>;
   : Equal(Bool, Bool.not(Bool.not(b.self)), b.self);
 ```
-.....................TODO fix al this...............
 
-Case analysis "breaks apart" a generic `Bool` type into a more specific
-`Bool.true` type (in the first branch) or `Bool.false` type (in second).
-With the type specialized on each branch, 
+This case analysis is very similar to the one in `Bool.not`: on each of the
+two branches, the Bool `b` gets "broken apart" into a more
+concrete value - `Bool.true` or `Bool.false`. From there, it's easy to prove
+that `Bool.true` equals `Bool.true` and `Bool.false` equals `Bool.false`.
 
-The last line tells Formality the type returned by the case expression, with one
-quirk: we use `b.self` to tell Formality to **specialize** that type using the
-concrete value of `b` inside each branch. On the first branch, `b = Bool.true`,
-so `Equal(Bool, Bool.not(Bool.not(b.self)), b.self)` is specialized to
-`Equal(Bool, Bool.not(Bool.not(Bool.true)), Bool.true)`, which reduces to
-`Equal(Bool, Bool.true, Bool.true)`. This allow us to write
-`Equal.to<Bool, Bool.true>` identical, we can use `Equal.to`. The same
-reasoning goes for the last branch. Once all branches are correctly filled,
-Formality **generalizes** `b.self` to the matched value `b`, causing the whole
-`case` expression to have type `Equal(Bool, Bool.not(Bool.not(b)), b)`. This
-completes our first proof!
-.......
+The extra stuff at the end requires some explanation. Up to now, we've let
+Formality *infer* the result type of a `case` expression. But for complex things
+(like proofs), Formality sometimes needs help in the form of an *annotation*. The
+annotation at the end of a case analysis is called the *motive*.
+Remember, our goal is to prove `Equal(Bool, Bool.not(Bool.not(b)), b)`. So with
+our annotation, we tell Formality "Hey, this case expression has the type
+`Equal(Bool, Bool.not(Bool.not(b.self)), b.self)`, got it?"
 
-The Nat Type
-------------
+What about the `b.self`'s? `b.self` is a variable name (Formality allows `.`'s in
+variable names), but you can think of it as the `self` field of the Bool `b`.
+What's the `self` field? That gets deeper into Formality's type
+system than we can go at this juncture. For now, just keep in mind that when you do a
+case analysis on a value, you can access that value's `self` field for its respective type.
+
+What can you do with the `self` field? If you permit some hand-waving, the `self` field
+lets you *specialize* a variable any time you do case analysis on it.
+So, in the example above, both values of `b.self` are specialized to `Bool.true`, and, as
+we noted proving `Bool.true == Bool.true` is easy.
+
+To illustrate the importance of `b.self`, let's try omitting them and 
+just using `b`:
+```
+Bool.not_not_is_b(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
+  case b:
+  | Bool.true => Equal.to<Bool, Bool.true>;
+  | Bool.false => Equal.to<Bool, Bool.false>;
+  : Equal(Bool, Bool.not(Bool.not(b)), b);
+```
+
+Type-checking with `fm` will produce the following error.
+```c
+Found 1 type error(s):
+
+Inside Bool.not_not_is_b:
+Found type... Equal(Bool,Bool.true,Bool.true)
+Instead of... Equal(Bool,Bool.not(Bool.not(b)),b)
+With context:
+- b : Bool
+On line 19:
+    15|   | false  => Bool.true;  // If it is false, return true.
+    16|
+    17| Bool.not_not_is_b(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
+    18|   case b:
+    19|   | Bool.true => Equal.to<Bool, Bool.true>;
+    20|   | Bool.false => Equal.to<Bool, Bool.false>;
+    21|   : Equal(Bool, Bool.not(Bool.not(b)), b);
+```
+
+Now let's try replacing just one `b` with `b.self`
+```
+Bool.not_not_is_b(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
+  case b:
+  ...
+  : Equal(Bool, Bool.not(Bool.not(b.self)), b);
+```
+
+We still get an error, the same as the last one save one difference:
+```
+Found 1 type error(s):
+
+Inside Bool.not_not_is_b:
+Found type... Equal(Bool,Bool.true,Bool.true)
+Instead of... Equal(Bool,Bool.not(Bool.not(Bool.true)),b)
+```
+
+You can see that where we replaced `b` with `b.self` in the motive,
+`b` was replaced with `Bool.true` in the `Bool.true` branch of the
+case analysis. And that's the idea of the `self` field: it lets you
+swap variables for the values under consideration in case analysis.
+Learning when and when not to do this is a bit of an art, but you'll
+quickly get the hang of it with practice and feedback from the type
+checker.
+
+Phew! That was a lot! But believe it or not, we've covered a big
+chunk of Formality's feature set. Give yourself and a pat on the
+back, grab a coffee (or tea, let's be fair), and meet us back
+here when you're ready for the natural numbers!
+
+☕ The Nat Type
+============
+
+**⚠️Warning: The rest of this tutorial is under construction
+and might not type check immediately!⚠️** 
 
 The second type we're going to write is that of natural numbers, i.e.,
 non-negative integers. It can be written like this:
@@ -202,7 +293,7 @@ example, `2` is the successor of the successor of `zero`, and can be written as
 represent any non-negative integer.
 
 A Nat function
---------------
+==============
 
 Let's write the addition on `Nat`:
 
@@ -243,7 +334,7 @@ compiles `Nat` to JavaScript `BigInt`, which is a very fast implementation of
 integers.
 
 A Nat theorem
--------------
+=============
 
 Let's now prove two theorems: `add(0, a) == a` and `add(a, 0) == a`. The first
 one is easy:
