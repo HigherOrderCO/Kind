@@ -1,8 +1,8 @@
 # Frequently Asked Questions
 (or, asked at least once anyway 😃)
 
-Not satisfied by the answer? Don't see your question? Swing by our
-[on Telegram](https://t.me/formality_lang) and we'd be happy to help.
+Not satisfied by the answer? Don't see your question? Swing by
+[Telegram](https://t.me/formality_lang) and we'd be happy to help.
 
 ## Table of Contents
 
