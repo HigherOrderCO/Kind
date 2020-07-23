@@ -210,8 +210,8 @@ case analysis on a value, you can access that value's `self` field for its respe
 
 What can you do with the `self` field? If you permit some hand-waving, the `self` field
 lets you *specialize* a variable any time you do case analysis on it.
-So, in the example above, both values of `b.self` are specialized to `Bool.true`, and, as
-we noted proving `Bool.true == Bool.true` is easy.
+So, in the example above, both values of `b.self` are specialized to `Bool.true` in the
+first branch, and, as we noted, proving `Bool.true == Bool.true` is easy.
 
 To illustrate the importance of `b.self`, let's try omitting them and 
 just using `b`:
