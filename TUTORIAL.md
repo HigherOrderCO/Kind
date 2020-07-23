@@ -26,7 +26,7 @@ T Bool
 ```
 
 `T` is a keyword to define a new type. `Bool` is the name of the type, and
-`true` and `false` are its two values, or _constructors_.
+`Bool.true` and `false` are its two values, or _constructors_.
 
 Try type-checking our new definition:
 ```
@@ -175,8 +175,8 @@ On line 20:
 What Formality is astutely observing is that `Bool.not(Bool.not(b))` is not
 equal to b _in the sense of identical with_ `b`, just like "evening star" and
 "morning star" are two unequal phrases both referring to Venus. Formality will
-(this may seem
-pedantic, but it is called _Formality_ after all).
+only consider two things equal when they evaluate to exactly the same terms
+(this may seem pedantic, but it is called _Formality_ after all).
 
 Formality requires more evidence before admitting our assertion. As usual,
 this comes down to case analysis - we'll prove the statement holds for
