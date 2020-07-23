@@ -136,7 +136,7 @@ On line 24:
 
 Coming from a traditional statically typed language, all this might seem
 magical, but `Equal` isn't a primitive: it's just a normal datatype similar
-to our `Bool` type, except that that it accepts parameters, and the type of
+to our `Bool` type, except that it accepts parameters, and the type of
 `Equal` *depends on its arguments* (hence, Formality is called
 a dependently typed language).
 
