@@ -1,4 +1,4 @@
-    var fms = require("./FormalitySynt.js");
+var fms = require("./FormalitySynt.js");
 var fml = require("./FormalityLang.js");
 
 module.exports = ({XMLHttpRequest, fs, localStorage}) => {
@@ -7,43 +7,11 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
     fs.mkdirSync(".fmc");
   }
 
-  var version = null;
-
-  async function validate_cache(urls) {
-    try {
-      if (!version) {
-        version = await load_code("Version", urls);
-      }
-    } catch (e) {
-      return;
-    }
-
-    // On node, invalidate cache when version changed
-    if (fs && (!fs.existsSync("./.fmc/Version.fmc","utf8") || fs.readFileSync("./.fmc/Version.fmc","utf8") !== version)) {
-      var files = fs.readdirSync("./.fmc");
-      for (var file of files) {
-        if (file.slice(-4) === ".fmc") {
-          fs.unlinkSync("./.fmc/"+file);
-        }
-      }
-      fs.writeFileSync("./.fmc/Version.fmc", version);
-    }
-
-    // On browser, invalidate cache when version changed
-    if (localStorage && localStorage.getItem("./.fmc/Version.fmc") !== version) {
-      for (var i = 0; i < localStorage.length; i++){
-        var key = localStorage.key(i);
-        if (key.slice(-4) === ".fmc") {
-          localStorage.removeItem(key);
-        }
-      }
-      localStorage.setItem("./.fmc/Version.fmc", version);
-    }
-  };
+  var default_urls = ["http://localhost/c/","http://moonad.org/c/"];
 
   // Loads a core definition from moonad.org
   function load_code({name, urls}) {
-    urls = urls || ["http://localhost/c/","http://moonad.org/c/"];
+    urls = urls || default_urls;
     return new Promise((resolve, reject) => {
       function try_from(urls) {
         if (urls.length === 0) {
@@ -68,6 +36,67 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
       };
       try_from(urls);
     });
+  };
+
+  // Destroys the cache if the Moonad server signals the global version of the
+  // lib directory changed. This only happens once on the application. If lib
+  // changes during execution, you must refresh. When Moonad finally uses hashes
+  // (no worries, John will never read this) this will improve considerably!
+  async function destroy_outdated_cache({urls}) {
+    urls = urls || default_urls;
+    // On node, invalidate cache when version changed
+    if (fs) {
+      var file_path = "./.fmc/Version.fmc";
+      if (fs.existsSync(file_path,"utf8")) {
+        var last_check = new Date() - fs.statSync(file_path).mtime;
+        // How much time (in milliseconds) until we check the cache again
+        var cache_life = 1000 * 60 * 60 * 3; // 3 hours
+        if (last_check < cache_life) {
+          return;
+        }
+        var cached_version = fs.readFileSync(file_path,"utf8");
+      } else {
+        var cached_version = "<no_cache>";
+      }
+      var global_version = await load_code({name: "Version", urls});
+      if (global_version !== cached_version) {
+        await destroy_cache();
+      }
+      fs.writeFileSync("./.fmc/Version.fmc", global_version);
+    }
+    // On browser, invalidate cache when version changed
+    if (localStorage) {
+      var global_version = await load_code({name: "Version", urls});
+      var cached_version = localStorage.getItem(".fmc/Version.fmc");
+      if (global_version !== cached_version) {
+        await destroy_cache();
+      }
+      localStorage.setItem(".fmc/Version.fmc", global_version);
+    }
+  };
+
+  // Removes all cache files
+  async function destroy_cache() {
+    if (fs) {
+      var files = fs.readdirSync("./.fmc");
+      for (var file of files) {
+        if (file.slice(-4) === ".fmc") {
+          fs.unlinkSync("./.fmc/"+file);
+        }
+      }
+    }
+    if (localStorage) {
+      var remove = [];
+      for (var i = 0; i < localStorage.length; i++){
+        var key = localStorage.key(i);
+        if (key.slice(-4) === ".fmc") {
+          remove.push(key);
+        }
+      }
+      for (var i = 0; i < remove.length; ++i) {
+        localStorage.removeItem(remove[i]);
+      }
+    }
   };
 
   // Attempts to type-synth a term. If it fails due to an undefined reference
@@ -95,11 +124,12 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
     name,                 // name of dependency to load
     defs,                 // object with known defs
     show = fml.stringify, // stringify function
-    debug = false,        // true to log messages
     urls,                 // urls to look for dependencies
-    cached = true,        // cache on localStorage or .fmc directory?
     on_dependency,        // called when an undefined reference is found
+    refresh_cache = true, // destroys invalid cache before loading dependencies
   }) {
+    urls = urls || default_urls;
+
     // Repeatedly typesynths until either it works or errors, loading found deps
     while (true) {
       try {
@@ -137,20 +167,22 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
 
               // Checks if we have the global definition cached on disk
               if (!dep_defs) {
-                if (cached && fs && fs.existsSync(dep_path)) {
+                if (refresh_cache) {
+                  await destroy_outdated_cache({urls});
+                }
+
+                if (fs && fs.existsSync(dep_path)) {
                   var dep_code = fs.readFileSync(dep_path, "utf8");
 
                 // Checks if we have the global definition cached on localStorage
-                } else if (cached && localStorage && localStorage.getItem(dep_path)) {
+                } else if (localStorage && localStorage.getItem(dep_path)) {
                   var dep_code = localStorage.getItem(dep_path);
 
                 // Otherwise, load the global definition from moonad.org
                 } else {
-                  if (cached) {
-                    await validate_cache();
+                  if (on_dependency) {
+                    on_dependency(dep_name);
                   }
-                  if (debug) console.log("... downloading http://moonad.org/c/"+dep_name);
-                  if (on_dependency) on_dependency(dep_name);
                   var dep_code = await load_code({name: dep_name, urls});
                 };
 
@@ -158,12 +190,12 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
                 var {defs: dep_defs} = fms.parse(dep_code);
 
                 // Caches deps on disk
-                if (cached && fs) {
+                if (fs) {
                   fs.writeFileSync(dep_path, dep_code);
                 }
 
                 // Caches deps on localStorage
-                if (cached && localStorage) {
+                if (localStorage) {
                   localStorage.setItem(dep_path, dep_code);
                 }
               }
@@ -180,10 +212,9 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
                   name: dep_def,
                   defs,
                   show,
-                  debug,
                   urls,
-                  cached,
-                  on_dependency
+                  on_dependency,
+                  refresh_cache: false, // only once per call
                 });
               };
             } catch (_) {
@@ -202,5 +233,7 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
   return {
     load_code,
     load_synth,
+    destroy_outdated_cache,
+    destroy_cache,
   };
 };
