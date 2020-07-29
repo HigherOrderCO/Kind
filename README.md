@@ -50,7 +50,7 @@ making it extremely portable and easily auditable.
 >
 > *Diaspora*, Greg Egan
 
-![fm](https://user-images.githubusercontent.com/144776/71642417-62686b80-2cb3-11ea-9bd1-37c1e829d05d.png)
+![inets](https://raw.githubusercontent.com/moonad/Assets/master/images/inet-simulation.gif)
 
 Examples
 ========
