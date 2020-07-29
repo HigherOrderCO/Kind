@@ -14,25 +14,27 @@ and used to reason and prove theorems about itself.
 
 ## Table of Contents
 
-- [0. Motivation](#0-motivation)
-  - [0.0. Modern proof assistants are complex](#00-modern-proof-asistants-are-complex)
-  - [0.1. A simpler alternative](#01-a-simpler-alternative)
-  - [0.2. The cost of consistency](#02-the-cost-of-consistency)
-  - [0.3. Formality's take on consistency](#03-formalitys-take-on-consistency)
-  - [0.4. Efficiency is misunderstood](#04-efficiency-is-misunderstood)
-  - [0.5. Enhancing programmers productivity](#05-enhancing-programmers-productivity)
-- [1. Specification](#1-specification)
-  - [1.0. Terms](#10-terms)
-  - [1.1. Syntax](#11-syntax)
-  - [1.2. Evaluation](#12-evaluation)
-  - [1.3. Equality](#13-equality)
-  - [1.4. Types](#14-types)
-- [2. Formalization](#2-formalization)
-  - [2.0. Terms](#10-terms)
-  - [2.1. Syntax](#11-syntax)
-  - [2.2. Evaluation](#12-evaluation)
-  - [2.3. Equality](#13-equality)
-  - [2.4. Types](#14-types)
+- [Formality](#formality)
+  - [Table of Contents](#table-of-contents)
+  - [0. Motivation](#0-motivation)
+    - [0.0. Modern proof asistants are complex](#00-modern-proof-asistants-are-complex)
+    - [0.1. A simpler alternative](#01-a-simpler-alternative)
+    - [0.2. The cost of consistency](#02-the-cost-of-consistency)
+    - [0.3. Formality's take on consistency](#03-formalitys-take-on-consistency)
+    - [0.4. Efficiency is misunderstood](#04-efficiency-is-misunderstood)
+    - [0.5. Enhancing programmers productivity](#05-enhancing-programmers-productivity)
+  - [1. Specification](#1-specification)
+    - [1.0. Terms](#10-terms)
+    - [1.1. Syntax](#11-syntax)
+    - [1.2. Evaluation](#12-evaluation)
+    - [1.3. Equality](#13-equality)
+    - [1.4. Types](#14-types)
+  - [2. Formalization](#2-formalization)
+    - [2.0. Terms](#20-terms)
+    - [2.1. Syntax](#21-syntax)
+    - [2.2. Evaluation](#22-evaluation)
+    - [2.3. Equality](#23-equality)
+    - [2.4. Types](#24-types)
 
 
 ## 0. Motivation
@@ -65,7 +67,7 @@ Under that perspective, one may be interested on the Calculus of Constructions
 (CoC), a small type theory that easily fits 1000 lines of code in a modern
 programming language. Sadly, that and similar languages aren't capable of
 deriving mathematical induction, an important proof technique without which any
-non-trivial theorem isn't proveable. Moreover, it isn't capable of expressing
+non-trivial theorem isn't provable. Moreover, it isn't capable of expressing
 efficient (constant space and time) pattern-matching, without which functional
 programming isn't viable. The usual solution to both problems is to supplement
 CoC with a native datatype system, but this results in the complexity explosion
@@ -83,7 +85,7 @@ that solution is that providing a semantics and, thus, proving the consistency
 of the resulting system becomes extremely hard.
 
 Aaron Stump moved on from self types towards a very similar solution based on
-dependent intersections. The idea is theat, instead of relying on mutual
+dependent intersections. The idea is that, instead of relying on mutual
 recursion, inductive datatypes can refer to themselves in simplified, erased
 forms. This results in a comparably small language that is much easier to
 provide a semantics for, which Aaron Stump called Cedille-Core. In exchange,
@@ -99,7 +101,7 @@ Formality has a different take on consistency that comes from the realization
 that consistency isn't hard, it is complex. The reason is that consistency
 demands termination, which, due to the halting problem, simply can't be
 implemented without either forbidding a program that is "important to someone",
-or by making the language extremelly more complex.
+or by making the language extremely more complex.
 
 For example, there is a very easy way to make a proof language consistent:
 disable recursion and non-affine lambdas. This would be sound even with
@@ -152,7 +154,7 @@ doing so in Haskell, making it very flexible and powerful.
 
 As a proof assistant, it can still be used to aid someone's theorem proving
 tasks by automating type-checking. Then, if one is interested in making sure a
-proof isn't paradoxal, then he/she simply uses a separate termination checker.
+proof isn't paradoxical, then he/she simply uses a separate termination checker.
 Ultimately, the result is the same, with the added benefit that one may combine
 programs that wouldn't be allowed in traditional proof assistants into a proof
 that turns out to be valid in some context. Not only that, we may pick different
@@ -404,7 +406,7 @@ after substitution, it accidentally refers to the inner lambda. This must be
 somehow avoided.
 
 Formality-Core doesn't define any evaluation order. It could be evaluated
-strictly as in JavaScripy and Python, lazily as in Haskell, or optimally through
+strictly as in JavaScript and Python, lazily as in Haskell, or optimally through
 interaction nets. The reference implementation uses high-order abstract syntax
 (HOAS). That is, in the syntax tree, `Var` variants can be replaced by
 host-language variables bound in the respective `Lam`, `All` or `Let`. For
