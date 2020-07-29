@@ -68,7 +68,7 @@ async function _run_(
   ext    = ".fm",
   parse  = fm.lang.parse,
   show   = fm.lang.stringify,
-  synth  = fm.load.load_and_typesynth,
+  synth  = fm.load.load_synth,
   norm   = fm.synt.normalize,
   silent = false
 ) {
@@ -85,7 +85,7 @@ async function _run_(
       continue;
     }
     try {
-      var {term, type} = await synth(name, defs, show, true);
+      var {term, type} = await synth({name, defs, show, debug: true});
       var prefix = file.slice(0,-ext.length);
       if (name.slice(0,prefix.length) !== prefix) {
         throw () => "Name '"+name+"' doesn't start with '"+prefix+"' inside '"+file+"'.\n"
