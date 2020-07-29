@@ -79,7 +79,7 @@ function foo(a : Number, b : Number) : Number {
 };
 ```
 
-How can Formality know that `abs(b) + 1` isn't `0`? Intuitivelly, we know it is
+How can Formality know that `abs(b) + 1` isn't `0`? Intuitively, we know it is
 true: the absolute of a number plus one can't be `0`. But how is the compiler
 supposed to know? That's where theorem proving shines.
 

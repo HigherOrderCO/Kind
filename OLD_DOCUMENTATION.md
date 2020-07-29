@@ -1,36 +1,58 @@
 Table of contents
 =================
 
+- [Table of contents](#table-of-contents)
 - [Motivation](#motivation)
+  - [An accessible syntax](#an-accessible-syntax)
+  - [Fast and portable "by design"](#fast-and-portable-by-design)
+  - [An elegant underlying Type Theory](#an-elegant-underlying-type-theory)
+  - [An optimal high-order evaluator](#an-optimal-high-order-evaluator)
 - [Installation](#installation)
 - [Commands](#commands)
 - [Introduction](#introduction)
 - [Principles](#principles)
+  - [Type-Checking](#type-checking)
+  - [Compilation](#compilation)
+    - [Ethereum](#ethereum)
+  - [Effects](#effects)
 - [Primitives](#primitives)
-    - [Let](#let)
-    - [Lambda](#lambda)
-    - [Number](#number)
-    - [Self](#self)
-    - [Annotation](#annotation)
-    - [Hole](#hole)
-    - [Log](#log)
-    - [Import](#import)
+  - [Type](#type)
+  - [Lambda](#lambda)
+  - [Number](#number)
+  - [Let](#let)
+  - [Self](#self)
+  - [Annotation](#annotation)
+  - [Hole](#hole)
+  - [Log](#log)
+  - [Import](#import)
 - [Datatypes](#datatypes)
-    - [Basics](#basics)
-    - [Fields](#fields)
-    - [Move](#move)
-    - [Recursion](#recursion)
-    - [Polymorphism](#polymorphism)
-    - [Indices](#indices)
-    - [Motive](#motive)
-    - [Encoding](#encoding)
-- [Advanced](#advanced)
-    - [Proofs](#proofs)
+  - [Basics](#basics)
+  - [Fields](#fields)
+  - [Move](#move)
+  - [Recursion](#recursion)
+  - [Polymorphism](#polymorphism)
+  - [Indices](#indices)
+  - [Motive](#motive)
+      - [Example: proving equalities](#example-proving-equalities)
+      - [Example: proving absurds](#example-proving-absurds)
+      - [Example: avoiding unreachable branches](#example-avoiding-unreachable-branches)
+  - [Encoding](#encoding)
+- [Proofs](#proofs)
 - [Theory](#theory)
-    - [Formality Core](#formality-core)
-    - [Formality Calculus](#formality-calculus)
-    - [Formality Net](#formality-net)
-    - [Compilation](#net-compilation)
+  - [Formality Core](#formality-core)
+  - [Formality Calculus](#formality-calculus)
+  - [Formality Net](#formality-net)
+      - [Rewrite rules](#rewrite-rules)
+      - [Erasure](#erasure)
+      - [Substitution](#substitution)
+      - [Duplication](#duplication)
+      - [If-Then-Else](#if-then-else)
+      - [Num-Operation](#num-operation)
+      - [Implementation](#implementation)
+      - [Rewrites](#rewrites)
+      - [Strict evaluation](#strict-evaluation)
+      - [Lazy evaluation](#lazy-evaluation)
+  - [Net-Compilation](#net-compilation)
 
 Motivation
 ==========
@@ -183,7 +205,7 @@ Docs.welcome: IO(Unit)
 But what are monads? Simple, monads are just... things that you must not worry
 about for now. See, it is tempting to teach monads in the beginning of
 functional programming materials, but we believe that is the wrong approach.
-Instead, we must focus on the building blocks, the foundamental principles that
+Instead, we must focus on the building blocks, the fundamental principles that
 eventually lead to understanding what those are. So that's what we are going to
 do. Forget about IO, printing and let's learn Formality from principles. Ready?
 
@@ -328,7 +350,7 @@ explored later.
 Compilation
 -----------
 
-Since Formality's core language is extremelly simple - it is
+Since Formality's core language is extremely simple - it is
 just the λ-calculus with numbers - it is very easy to
 compile it to multiple targets. For example, let's compile
 the following library to JavaScript:
