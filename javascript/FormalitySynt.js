@@ -1072,7 +1072,7 @@ function typesynth(name, defs, show = stringify) {
     var type = defs[name].type;
     var [hols,_] = exec(() => 
       deep([[typecheck, [type, Typ(), defs, show, {}, Nil(), null]]], ([hols,_]) =>
-      deep([[typecheck, [term, type, defs, show, {}, Nil(), null]]], ([hols,type]) => {
+      deep([[typecheck, [term, type, defs, show, hols, Nil(), null]]], ([hols,type]) => {
         for (var hol in hols) {
           if (hols[hol] === null) {
             return fail(() => Err(null, Nil(), "Unsolved hole: '" + hol + "'."));
