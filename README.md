@@ -155,7 +155,7 @@ console. Let's look at each of these steps in a little more detail:
 
 ### 📦 Dependencies
 Formality will discover it doesn't have definitions for `IO(Unit)`
-and `IO.print`, and will download them from [moonad.org](moonad.org).
+and `IO.print`, and will download them from [moonad.org](http://moonad.org).
 Formality doesn't have a notion of packages or a central package
 repository; instead, users can post definitions to Moonad, making
 them globally available for all other users, essentially extending the 
