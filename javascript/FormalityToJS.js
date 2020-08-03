@@ -911,7 +911,7 @@ function compile(main, defs, only_expression = false) {
     if (isio) {
       code += "\nmodule.exports['$main$']().then(() => process.exit());";
     } else {
-      code += "\nconsole.log(JSON.stringify(module.exports['"+main+"'],null,2) || '<unprintable>');";
+      code += "\nvar MAIN=module.exports['"+main+"']; try { console.log(JSON.stringify(MAIN,null,2) || '<unprintable>') } catch (e) { console.log(MAIN); };";
     };
   };
 
