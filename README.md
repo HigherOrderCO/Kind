@@ -8,7 +8,7 @@ An lightweight proof-gramming language. It aims to be:
 
 - **Portable:** the entire language desugars to a 500 lines core type-theory.
 
-Explore our ecosystem at [moonad.org](http://moonad.org) and come hang out with us [on Telegram](https://t.me/formality_lang).
+Explore our ecosystem at [moonad.org] and come hang out with us [on Telegram](https://t.me/formality_lang).
 
 Table of contents
 =================
@@ -155,7 +155,7 @@ console. Let's look at each of these steps in a little more detail:
 
 ### 📦 Dependencies
 Formality will discover it doesn't have definitions for `IO(Unit)`
-and `IO.print`, and will download them from [moonad.org](moonad.org).
+and `IO.print`, and will download them from [moonad.org].
 Formality doesn't have a notion of packages or a central package
 repository; instead, users can post definitions to Moonad, making
 them globally available for all other users, essentially extending the 
@@ -257,7 +257,7 @@ Contributing
 Are you as excited about democratizing efficient proofs as we are? Come help us build
 the thing! 
 
-- [Moonad.org](moonad.org) is wide open for contributions. Port your favorite library to
+- [Moonad.org] is wide open for contributions. Port your favorite library to
   Formality and integrate it directly into the language by publishing to Moonad. Or
   deploy a cool app that uses Moonad's IO infrastructure. Soon we'll have toolchain in
   place for you to publish in an automated way, but for now, you can do so by making a
@@ -276,3 +276,5 @@ the thing!
 > one glimpse of the indefinite possibilities within.”
 >
 > *Out of the Silent Planet*, C.S. Lewis
+
+[moonad.org]: http://moonad.org
