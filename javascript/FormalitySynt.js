@@ -1070,16 +1070,21 @@ function typesynth(name, defs, show = stringify) {
     defs[name].core = null;
     var term = defs[name].term;
     var type = defs[name].type;
-    var [hols,_] = exec(() => 
-      deep([[typecheck, [type, Typ(), defs, show, {}, Nil(), null]]], ([hols,_]) =>
-      deep([[typecheck, [term, type, defs, show, hols, Nil(), null]]], ([hols,type]) => {
-        for (var hol in hols) {
-          if (hols[hol] === null) {
-            return fail(() => Err(null, Nil(), "Unsolved hole: '" + hol + "'."));
+    try {
+      var [hols,_] = exec(() =>
+        deep([[typecheck, [type, Typ(), defs, show, {}, Nil(), null]]], ([hols,_]) =>
+        deep([[typecheck, [term, type, defs, show, hols, Nil(), null]]], ([hols,type]) => {
+          for (var hol in hols) {
+            if (hols[hol] === null) {
+              return fail(() => Err(null, Nil(), "Unsolved hole: '" + hol + "'."));
+            }
           }
-        }
-        return done([hols,type])
-      })));
+          return done([hols,type])
+        })));
+    } catch (e) {
+      delete defs[name].core;
+      throw e;
+    }
     var core_term = parse(stringify(canonicalize(term, hols)), 0, "term");
     var core_type = parse(stringify(canonicalize(type, hols)), 0, "term");
     defs[name].core = {term: core_term, type: core_type};
