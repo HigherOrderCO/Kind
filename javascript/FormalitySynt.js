@@ -163,6 +163,7 @@ function parse(code, indx, mode = "defs") {
                 JSON.stringify(code[indx])+' at '+indx+': `'+code.slice(indx)+"`.";
             }
           }
+          indx++;
           return String.fromCodePoint(parseInt(point,16));
         case '\\':
         case '"':
