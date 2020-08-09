@@ -220,6 +220,8 @@ function infer(term, defs, ctx = fmc.Nil()) {
         comp: Str(term.strx),
         type: fmc.Ref("String"),
       };
+    default:
+      throw "Unhandled term: " + JSON.stringify(term);
   }
 };
 
