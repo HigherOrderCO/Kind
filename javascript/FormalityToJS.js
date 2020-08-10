@@ -849,7 +849,7 @@ function compile(main, defs, only_expression = false) {
   };
 
   if (isio) {
-    code += "  var rdl = require('readline').createInterface({input:process.stdin,output:process.stdout});\n";
+    code += "  var rdl = require('readline').createInterface({input:process.stdin,output:process.stdout,terminal:false});\n";
     code += "  var run = (p) => {\n";
     code += "    switch (p._) {\n";
     code += "      case 'IO.end': return Promise.resolve(p.value);\n";
