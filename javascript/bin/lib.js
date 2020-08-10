@@ -205,7 +205,11 @@ async function _io_(main = "main", dir, ext, parse, show, synth, norm) {
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
-    eval(fm.tojs.compile(main, defs));
+    try {
+      eval(fm.tojs.compile(main, defs));
+    } catch (e) {
+      console.log("Can't compile ill-typed program.");
+    }
   };
 };
 
