@@ -195,7 +195,11 @@ async function _fm2js_(main = "main", dir, ext, parse, show, synth, norm) {
   if (!defs[main]) {
     console.log("Term '" + main + "' not found.");
   } else {
-    console.log(fm.tojs.compile(main, defs));
+    try {
+      console.log(fm.tojs.compile(main, defs));
+    } catch (e) {
+      console.log("Can't compile ill-typed program.");
+    }
   };
 };
 
@@ -208,7 +212,7 @@ async function _io_(main = "main", dir, ext, parse, show, synth, norm) {
     try {
       eval(fm.tojs.compile(main, defs));
     } catch (e) {
-      console.log("Can't compile ill-typed program.");
+      console.log("Can't run ill-typed program.");
     }
   };
 };

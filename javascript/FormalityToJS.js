@@ -634,7 +634,11 @@ function js_code(term, name = null) {
 };
 
 function js_name(str) {
-  return str.replace(/\./g,"$");
+  switch (str) {
+    case "true": return "$true";
+    case "false": return "$false";
+    default: return str.replace(/\./g,"$");
+  }
 };
 
 function compile(main, defs, only_expression = false) {
