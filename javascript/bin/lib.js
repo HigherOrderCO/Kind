@@ -118,12 +118,20 @@ async function _run_(
 
   // If there are errors, prints them
   if (errors.length > 0) {
+    var omitted = 0;
     if (!silent) console.log("\033[4m\x1b[1mFound " + errors.length + " type error(s):\x1b[0m\n");
     for (var i = errors.length - 1; i >= 0; --i) {
       var err_msg = fm.lang.stringify_err(errors[i][1], defs[errors[i][0]].code);
-      if (!silent) console.log("\x1b[1mInside \x1b[4m"+errors[i][0]+"\x1b[0m\x1b[1m:\x1b[0m");
-      if (!silent) console.log(err_msg);
+      if (err_msg.indexOf("Inside ref") === -1) {
+        if (!silent) console.log("\x1b[1mInside \x1b[4m"+errors[i][0]+"\x1b[0m\x1b[1m:\x1b[0m");
+        if (!silent) console.log(err_msg);
+      } else {
+        omitted++;
+      }
     };
+    if (omitted > 0) {
+      if (!silent) console.log("\033[4m\x1b[1m"+omitted+" indirect errors omitted.\x1b[0m");
+    }
   } else {
     if (!silent) console.log("\033[4m\x1b[1mAll terms check.\x1b[0m");
   };

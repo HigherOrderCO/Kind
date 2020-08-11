@@ -144,7 +144,7 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
 
           // If that error is an undefined reference
           if (msg.slice(0, err.length) === err) {
-            var dep_name = msg.slice(err.length + 2, -2);
+            var dep_name = msg.slice(err.length+2, msg.indexOf("'",err.length+2));
             var dep_path = ".fmc/"+dep_name+".fmc";
             var dep_defs = null;
             try {

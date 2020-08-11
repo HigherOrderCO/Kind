@@ -799,7 +799,7 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
           try {
             var typ = typesynth(term.name, defs, show).type;
           } catch (e) {
-            return fail(() => Err(locs, ctx, e().msg));
+            return fail(() => Err(locs, ctx, e().msg + "\nInside ref... \x1b[2m"+term.name+"\x1b[0m"));
           }
         } else if (defs[term.name].core === null) {
           var typ = defs[term.name].type;
