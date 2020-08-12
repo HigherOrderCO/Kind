@@ -445,7 +445,7 @@ function parse_us0(code, [indx,tags], err = false) {
     }])))));
 };
 
-// Parses a for loop, `for i = 0 .. 10 with val: f(i, val)`
+// Parses a for loop, `let val = for i = 0 .. 10: f(i, val)`
 // ~> `let val = Nat.for<>(val, 0, 10, (i, val) f(i,val))`
 function parse_for(type, callfunc) {
   return function parse_for(code, [indx,tags], err = false) {
@@ -461,6 +461,9 @@ function parse_for(type, callfunc) {
     };
     var from = next(code, [indx,tags])[0];
     return (
+      chain(parse_txt(code, next(code, [indx,tags]), "let ", false), ([indx,tags], skip) =>
+      chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
+      chain(parse_txt(code, next(code, [indx,tags]), "=", false), ([indx,tags], skip) =>
       chain(parse_txt(code, next(code, [indx,tags]), "for ", false), ([indx,tags], skip) =>
       chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], fidx) =>
       chain(parse_typ(code, next(code, [indx,tags]), false), ([indx,tags], skip) => 
@@ -468,8 +471,6 @@ function parse_for(type, callfunc) {
       chain(parse_trm(code, [indx,tags], err), ([indx,tags], lim0) =>
       chain(parse_txt(code, next(code, [indx,tags]), "..", err), ([indx,tags], skip) =>
       chain(parse_trm(code, [indx,tags], err), ([indx,tags], lim1) =>
-      chain(parse_txt(code, next(code, [indx,tags]), "with", err), ([indx,tags], skip) =>
-      chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
       chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
       chain(parse_trm(code, [indx,tags], err), ([indx,tags], loop) =>
       chain(parse_opt(code, [indx,tags], ";", err), ([indx,tags], skip) => 
@@ -488,8 +489,43 @@ function parse_for(type, callfunc) {
           var term = Let(name, term, x => body(Ext([name,x], xs)));
           return Loc(from, indx, term);
         }];
-      }))))))))))))));
+      })))))))))))))));
   };
+};
+
+// Parses a for-in loop, `for x in list with state: f(x, state)`
+// ~> `let state = List.for<,>(state, (x, state) f(x, state), list)`
+function parse_fin(code, [indx,tags], err = false) {
+  var from = next(code, [indx,tags])[0];
+  return (
+    chain(parse_txt(code, next(code, [indx,tags]), "let ", false), ([indx,tags], skip) =>
+    chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
+    chain(parse_txt(code, next(code, [indx,tags]), "=", false), ([indx,tags], skip) =>
+    chain(parse_txt(code, next(code, [indx,tags]), "for ", false), ([indx,tags], skip) =>
+    chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], elem) =>
+    chain(parse_txt(code, next(code, [indx,tags]), "in", false), ([indx,tags], skip) =>
+    chain(parse_trm(code, [indx,tags], err), ([indx,tags], list) =>
+    chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
+    chain(parse_trm(code, [indx,tags], err), ([indx,tags], loop) =>
+    chain(parse_opt(code, [indx,tags], ";", err), ([indx,tags], skip) => 
+    chain(parse_trm(code, [indx,tags], err), ([indx,tags], body) => {
+      let nam0 = new_name();
+      let nam1 = new_name();
+      return [[indx,tags], xs => {
+        var term = Ref("List.for");
+        var term = App(true, term, hole(nam0, xs));
+        var term = App(true, term, hole(nam1, xs));
+        var term = App(false, term, get_var(xs, name));
+        var lamb =
+          Lam(false, elem, i =>
+          Lam(false, name, x =>
+          loop(Ext([elem,i], Ext([name,x], xs)))));
+        var term = App(false, term, lamb);
+        var term = App(false, term, list(xs));
+        var term = Let(name, term, x => body(Ext([name,x], xs)));
+        return Loc(from, indx, term);
+      }];
+    }))))))))))));
 };
 
 // Parses a projection, `get a = x; y` ~> `x<() _>((a) y)`
@@ -1255,13 +1291,14 @@ function parse_trm(code, [indx = 0, tags = []], err) {
     () => parse_lam(code, [indx,tags], err),
     () => parse_fun(code, [indx,tags], err),
     () => parse_acm(code, [indx,tags], err),
-    () => parse_let(code, [indx,tags], err),
     () => parse_for(null,"Nat.for")(code, [indx,tags], err),
     () => parse_for("U8","U8.for")(code, [indx,tags], err),
     () => parse_for("U16","U16.for")(code, [indx,tags], err),
     () => parse_for("U32","U32.for")(code, [indx,tags], err),
     () => parse_for("U64","U64.for")(code, [indx,tags], err),
     () => parse_for("F64","F64.for")(code, [indx,tags], err),
+    () => parse_fin(code, [indx,tags], err),
+    () => parse_let(code, [indx,tags], err),
     () => parse_us0(code, [indx,tags], err),
     () => parse_us1(code, [indx,tags], err),
     () => parse_us2(code, [indx,tags], err),
@@ -1559,12 +1596,9 @@ function stringify_lst(term, type = null, vals = Nil()) {
       return stringify_lst(tail, type, Ext(head, vals));
     }],
     [nil, ({type}) => {
-      return "["
-        + stringify_trm(type) + ";"
-        + (vals.ctor === "Nil" ? "" : " ")
-        + fold(vals, b=>"", (h,t) => b => (b ? "" : ", ")
-        + stringify_trm(h)+t(0))(1)
-        + "]";
+      var strs = [];
+      fold(vals, null, (h,t) => strs.push(stringify_trm(h)));
+      return "["+strs.join(",")+"]";
     }]
   ]);
 };
