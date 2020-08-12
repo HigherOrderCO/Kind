@@ -1,6 +1,6 @@
 {
   "name": "formality-lang",
-  "version": "0.4.114",
+  "version": "0.4.115",
   "description": "The Formality proof language",
   "browser": "browser.js",
   "main": "index.js",
