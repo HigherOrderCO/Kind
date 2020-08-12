@@ -508,6 +508,7 @@ function parse_fin(code, [indx,tags], err = false) {
       return [[indx,tags], xs => {
         var term = Ref("List.for");
         var term = App(true, term, hole(nam0, xs));
+        var term = App(false, term, list(xs));
         var term = App(true, term, hole(nam1, xs));
         var term = App(false, term, get_var(xs, name));
         var lamb =
@@ -515,7 +516,6 @@ function parse_fin(code, [indx,tags], err = false) {
           Lam(false, name, x =>
           loop(Ext([elem,i], Ext([name,x], xs)))));
         var term = App(false, term, lamb);
-        var term = App(false, term, list(xs));
         var term = Let(name, term, x => get_var(Ext([name,x], xs), name));
         return Loc(from, indx, term);
       }];
@@ -591,6 +591,7 @@ function parse_lfn(code, [indx,tags], err = false) {
       return [[indx,tags], xs => {
         var term = Ref("List.for");
         var term = App(true, term, hole(nam0, xs));
+        var term = App(false, term, list(xs));
         var term = App(true, term, hole(nam1, xs));
         var term = App(false, term, get_var(xs, name));
         var lamb =
@@ -598,7 +599,6 @@ function parse_lfn(code, [indx,tags], err = false) {
           Lam(false, name, x =>
           loop(Ext([elem,i], Ext([name,x], xs)))));
         var term = App(false, term, lamb);
-        var term = App(false, term, list(xs));
         var term = Let(name, term, x => body(Ext([name,x], xs)));
         return Loc(from, indx, term);
       }];
