@@ -445,8 +445,8 @@ function parse_us0(code, [indx,tags], err = false) {
     }])))));
 };
 
-// Parses a for loop, `let val = for i = 0 .. 10: f(i, val)`
-// ~> `let val = Nat.for<>(val, 0, 10, (i, val) f(i,val))`
+// Parses a for loop, `for i = 0 .. 10 with val: f(i, val)`
+// ~> `let val = Nat.for<>(val, 0, 10, (i, val) f(i,val)); val`
 function parse_for(type, callfunc) {
   return function parse_for(code, [indx,tags], err = false) {
     function parse_typ(code, [indx,tags], err) {
@@ -461,8 +461,87 @@ function parse_for(type, callfunc) {
     };
     var from = next(code, [indx,tags])[0];
     return (
-      chain(parse_txt(code, next(code, [indx,tags]), "let ", false), ([indx,tags], skip) =>
+      chain(parse_txt(code, next(code, [indx,tags]), "for ", false), ([indx,tags], skip) =>
+      chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], fidx) =>
+      chain(parse_typ(code, next(code, [indx,tags]), false), ([indx,tags], skip) => 
+      chain(parse_txt(code, next(code, [indx,tags]), "=", false), ([indx,tags], skip) =>
+      chain(parse_trm(code, [indx,tags], err), ([indx,tags], lim0) =>
+      chain(parse_txt(code, next(code, [indx,tags]), "..", err), ([indx,tags], skip) =>
+      chain(parse_trm(code, [indx,tags], err), ([indx,tags], lim1) =>
+      chain(parse_txt(code, next(code, [indx,tags]), "with", err), ([indx,tags], skip) =>
       chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
+      chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
+      chain(parse_trm(code, [indx,tags], err), ([indx,tags], loop) =>
+      chain(parse_opt(code, [indx,tags], ";", err), ([indx,tags], skip) => {
+        let nam0 = new_name();
+        return [[indx,tags], xs => {
+          var term = Ref(callfunc);
+          var term = App(true, term, hole(nam0, xs));
+          var term = App(false, term, get_var(xs, name));
+          var term = App(false, term, lim0(xs));
+          var term = App(false, term, lim1(xs));
+          var lamb = Lam(false, fidx, i =>
+                    Lam(false, name, x =>
+                    loop(Ext([fidx,i], Ext([name,x], xs)))));
+          var term = App(false, term, lamb);
+          var term = Let(name, term, x => get_var(Ext([name,x], xs), name));
+          return Loc(from, indx, term);
+        }];
+      })))))))))))));
+  };
+};
+
+// Parses a for-in loop, `for x in list with state: f(x, state)`
+// ~> `let state = List.for<,>(state, (x, state) f(x, state), list); state`
+function parse_fin(code, [indx,tags], err = false) {
+  var from = next(code, [indx,tags])[0];
+  return (
+    chain(parse_txt(code, next(code, [indx,tags]), "for ", false), ([indx,tags], skip) =>
+    chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], elem) =>
+    chain(parse_txt(code, next(code, [indx,tags]), "in", false), ([indx,tags], skip) =>
+    chain(parse_trm(code, [indx,tags], err), ([indx,tags], list) =>
+    chain(parse_txt(code, next(code, [indx,tags]), "with", err), ([indx,tags], skip) =>
+    chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
+    chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
+    chain(parse_trm(code, [indx,tags], err), ([indx,tags], loop) =>
+    chain(parse_opt(code, [indx,tags], ";", err), ([indx,tags], skip) => {
+      let nam0 = new_name();
+      let nam1 = new_name();
+      return [[indx,tags], xs => {
+        var term = Ref("List.for");
+        var term = App(true, term, hole(nam0, xs));
+        var term = App(true, term, hole(nam1, xs));
+        var term = App(false, term, get_var(xs, name));
+        var lamb =
+          Lam(false, elem, i =>
+          Lam(false, name, x =>
+          loop(Ext([elem,i], Ext([name,x], xs)))));
+        var term = App(false, term, lamb);
+        var term = App(false, term, list(xs));
+        var term = Let(name, term, x => get_var(Ext([name,x], xs), name));
+        return Loc(from, indx, term);
+      }];
+    }))))))))));
+};
+
+// Parses a let for loop, `let val = for i = 0 .. 10: f(i, val)`
+// ~> `let val = Nat.for<>(val, 0, 10, (i, val) f(i,val))`
+function parse_lfr(type, callfunc) {
+  return function parse_lfr(code, [indx,tags], err = false) {
+    function parse_typ(code, [indx,tags], err) {
+      if (type) {
+        return (
+          chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
+          chain(parse_txt(code, next(code, [indx,tags]), type, err), ([indx,tags], skip) =>
+          [[indx,tags], null])));
+      } else {
+        return [[indx,tags], null];
+      }
+    };
+    var from = next(code, [indx,tags])[0];
+    return (
+      chain(parse_txt(code, next(code, [indx,tags]), "let ", false), ([indx,tags], skip) =>
+      chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], name) =>
       chain(parse_txt(code, next(code, [indx,tags]), "=", false), ([indx,tags], skip) =>
       chain(parse_txt(code, next(code, [indx,tags]), "for ", false), ([indx,tags], skip) =>
       chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], fidx) =>
@@ -493,13 +572,13 @@ function parse_for(type, callfunc) {
   };
 };
 
-// Parses a for-in loop, `for x in list with state: f(x, state)`
+// Parses a let for-in loop, `let state = for x in list: f(x, state)`
 // ~> `let state = List.for<,>(state, (x, state) f(x, state), list)`
-function parse_fin(code, [indx,tags], err = false) {
+function parse_lfn(code, [indx,tags], err = false) {
   var from = next(code, [indx,tags])[0];
   return (
     chain(parse_txt(code, next(code, [indx,tags]), "let ", false), ([indx,tags], skip) =>
-    chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
+    chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], name) =>
     chain(parse_txt(code, next(code, [indx,tags]), "=", false), ([indx,tags], skip) =>
     chain(parse_txt(code, next(code, [indx,tags]), "for ", false), ([indx,tags], skip) =>
     chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], elem) =>
@@ -1298,6 +1377,13 @@ function parse_trm(code, [indx = 0, tags = []], err) {
     () => parse_for("U64","U64.for")(code, [indx,tags], err),
     () => parse_for("F64","F64.for")(code, [indx,tags], err),
     () => parse_fin(code, [indx,tags], err),
+    () => parse_lfr(null,"Nat.for")(code, [indx,tags], err),
+    () => parse_lfr("U8","U8.for")(code, [indx,tags], err),
+    () => parse_lfr("U16","U16.for")(code, [indx,tags], err),
+    () => parse_lfr("U32","U32.for")(code, [indx,tags], err),
+    () => parse_lfr("U64","U64.for")(code, [indx,tags], err),
+    () => parse_lfr("F64","F64.for")(code, [indx,tags], err),
+    () => parse_lfn(code, [indx,tags], err),
     () => parse_let(code, [indx,tags], err),
     () => parse_us0(code, [indx,tags], err),
     () => parse_us1(code, [indx,tags], err),
