@@ -750,7 +750,7 @@ function parse_cse(code, [indx,tags], err) {
   function parse_opn(code, [indx, tags], err) {
     return (
       chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], term) =>
-      [[indx,tags], term]));
+      [[indx,tags], [term]]));
   };
   function parse_bar(code, [indx, tags], err) {
     return (
@@ -799,7 +799,7 @@ function parse_cse(code, [indx,tags], err) {
     chain(parse_one(code, next(code, [indx,tags]), "case ", "open ", false), ([indx,tags], open) =>
     chain(parse_val(code, next(code, [indx,tags]), err), ([indx,tags], cval) =>
     chain(parse_mny(parse_wth)(code, [indx,tags], err), ([indx,tags], wths) =>
-    chain(parse_mny(open ? parse_opn : parse_bar)(code, [indx,tags], err), ([indx,tags], bars) =>
+    chain((open ? parse_opn : parse_mny(parse_bar))(code, [indx,tags], err), ([indx,tags], bars) =>
     chain(parse_may(parse_mot)(code, [indx,tags], err), ([indx,tags], moti) => {
       var uniq_name = new_name();
       var hole_name = new_name();
