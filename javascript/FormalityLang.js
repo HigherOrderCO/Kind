@@ -471,8 +471,7 @@ function parse_for(type, callfunc) {
       chain(parse_txt(code, next(code, [indx,tags]), "with", err), ([indx,tags], skip) =>
       chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
       chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
-      chain(parse_trm(code, [indx,tags], err), ([indx,tags], loop) =>
-      chain(parse_opt(code, [indx,tags], ";", err), ([indx,tags], skip) => {
+      chain(parse_trm(code, [indx,tags], err), ([indx,tags], loop) => {
         let nam0 = new_name();
         return [[indx,tags], xs => {
           var term = Ref(callfunc);
@@ -487,7 +486,7 @@ function parse_for(type, callfunc) {
           var term = Let(name, term, x => get_var(Ext([name,x], xs), name));
           return Loc(from, indx, term);
         }];
-      })))))))))))));
+      }))))))))))));
   };
 };
 
@@ -503,8 +502,7 @@ function parse_fin(code, [indx,tags], err = false) {
     chain(parse_txt(code, next(code, [indx,tags]), "with", err), ([indx,tags], skip) =>
     chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
     chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
-    chain(parse_trm(code, [indx,tags], err), ([indx,tags], loop) =>
-    chain(parse_opt(code, [indx,tags], ";", err), ([indx,tags], skip) => {
+    chain(parse_trm(code, [indx,tags], err), ([indx,tags], loop) => {
       let nam0 = new_name();
       let nam1 = new_name();
       return [[indx,tags], xs => {
@@ -521,7 +519,7 @@ function parse_fin(code, [indx,tags], err = false) {
         var term = Let(name, term, x => get_var(Ext([name,x], xs), name));
         return Loc(from, indx, term);
       }];
-    }))))))))));
+    })))))))));
 };
 
 // Parses a let for loop, `let val = for i = 0 .. 10: f(i, val)`
