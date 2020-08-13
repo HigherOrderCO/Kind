@@ -151,8 +151,8 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
               // Checks if there is a local definition
               if (fs) {
                 var words = dep_name.split(".");
-                while (words.length > 0) {
-                  var file = "./"+words.join(".")+".fm";
+                while (true) {
+                  var file = "./"+(words.join(".")||"global")+".fm";
                   if (fs.existsSync(file)) {
                     var dep_code = fs.readFileSync(file, "utf8");
                     var {defs: got_defs} = fml.parse(dep_code);
@@ -161,7 +161,11 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
                       break;
                     }
                   }
-                  words.pop();
+                  if (words.length === 0) {
+                    break;
+                  } else {
+                    words.pop();
+                  }
                 }
               }
 
