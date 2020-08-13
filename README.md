@@ -238,6 +238,10 @@ New to the notion of proving theorems with programs? Check out [our tutorial](TU
 you'll be proving theorems to the moon and back in no time (throw a little of that moon ore
 our way, eh?).
 
+Since the documentation is still being developed, a great way to get a feel of how the language
+works is by just looking the files [here](https://github.com/moonad/Moonad/tree/master/lib). It
+contains every Formality function available on Moonad.
+
 Do you dream in Pi types and eat monoids for breakfast? You'll probably want
 to see the [specification](FMC_SPECIFICATION.md) (it's incomplete and slightly dated, but still
 covers a lot of ground).
