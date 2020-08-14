@@ -62,13 +62,26 @@ making it extremely portable and easily auditable.
 Examples
 ========
 
-- Adding all numbers of a list:
+- List functions:
 
     ```c
-    List.sum(xs: List(Nat)) : Nat
-      case xs:
-      | Nat.zero;
-      | Nat.add(xs.head, List.sum(xs.tail));
+    // Polymorphic List
+    T List<A: Type>
+    | nil;
+    | cons(head: A, tail: List(A));
+
+    // Mapping over a List
+    map<A: Type, B: Type>(fn: A -> B, list: List(A)): List(B)
+      case list:
+      | nil  => [];
+      | cons => cons<B>(fn(list.head), map<A,B>(fn, list.tail));
+
+    // Safe head (using a `not_empty` proof)
+    head<A: Type>(list: List(A), not_empty: list != []) : A
+      case list:
+      with nope : list.self != [] = not_empty;
+      | nil  => Empty.absurd<A>(not_empty(_));
+      | cons => list.head;
     ```
 
 - The Black Friday Theorem ("50% off of the double is the same"):
@@ -101,16 +114,39 @@ Examples
       : half(double(n.self)) == n.self;
     ```
 
-- Extracting the first element of a list statically checked to be non-empty:
+- Indexed datatypes:
 
     ```c
-    List.head<A: Type>(xs: List(A), not_empty: List.not_empty<A>(xs)) : A
-      case xs:
-      with is_empty : List.not_empty<A>(xs.self) = not_empty;
-      | Empty.absurd<A>(is_empty);
-      | xs.head;
+    // A Vector is a List with a statically known length
+    T Vector <A: Type>                             ~ (len: Nat)
+    | nil                                          ~ (0);
+    | cons<len: Nat>(head: A, tail: Vector(A,len)) ~ (Nat.succ(len));
+
+    // A Vector with 3 natural numbers
+    example: Vector(Nat, 3)
+      let vec = nil<Nat>
+      let vec = cons<Nat,0>(10, vec)
+      let vec = cons<Nat,1>(20, vec)
+      let vec = cons<Nat,2>(30, vec)
+      vec
     ```
 
+- Handy syntax-sugars like `if` and `for`:
+
+    ```c
+    summation(lim: Nat): Nat
+      let sum = 0
+      for i = 0 .. lim with sum:
+        Nat.add(sum, i)
+
+    show_age(age: U32): String
+      if U32.gte(age, 12u) then
+        "kid"
+      else if U32.gte(age, 18u) then
+        "teen"
+      else
+        "adult"
+    ```
 
 TODO: include examples of Python-looking Formality for non-FP people.
 
