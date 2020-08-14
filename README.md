@@ -111,6 +111,7 @@ Examples
       | xs.head;
     ```
 
+
 TODO: include examples of Python-looking Formality for non-FP people.
 
 TODO: link the upcoming "Why proof languages matter?" Moonad post.
@@ -159,9 +160,9 @@ Hello.world: IO(Unit)
   IO.print("Hello, world!")
 ```
 
-The first expression `Hello.world` defines a function called `world` in
-the `Hello` namespace (all definitions must be namespaced with the same
-name as the file they're found in).
+The first expression `Hello.world` defines a function called `world` in the
+`Hello` namespace (by default, all definitions must be namespaced with the same
+name as the file they're found in, except if your file is named `global.fm`).
 The type of this expression is `IO(Unit)` (more about that later in the
 [tutorial](TUTORIAL.md)).
 
