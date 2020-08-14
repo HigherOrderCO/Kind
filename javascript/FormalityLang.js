@@ -10,6 +10,7 @@ var {
   Err,
   typeinfer,
   typecheck,
+  typesynth,
   equal,
   find,
   fold,
@@ -1600,6 +1601,15 @@ function parse(code, indx = 0, tags_list = Nil()) {
   return {defs, indx, tags};
 };
 
+function parse_and_synth(defs) {
+  var {defs} = parse(code);
+  var core_defs = {};
+  for (var def in defs) {
+    core_defs[def] = typesynth(def, defs);
+  }
+  return {defs: core_defs};
+}
+
 // Stringification
 // ===============
 
@@ -2161,4 +2171,5 @@ module.exports = {
   stringify_defs,
   highlight_code,
   stringify_err,
+  parse_and_synth,
 };
