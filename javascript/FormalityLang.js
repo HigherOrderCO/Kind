@@ -1601,13 +1601,13 @@ function parse(code, indx = 0, tags_list = Nil()) {
   return {defs, indx, tags};
 };
 
-function parse_and_synth(defs) {
-  var {defs} = parse(code);
+function parse_and_synth(code) {
+  var {defs, indx, tags} = parse(code);
   var core_defs = {};
   for (var def in defs) {
     core_defs[def] = typesynth(def, defs);
   }
-  return {defs: core_defs};
+  return {defs: core_defs, indx, tags};
 }
 
 // Stringification
