@@ -64,26 +64,46 @@ Examples
 
 - Adding all numbers of a list:
 
-    ```haskell
+    ```c
     List.sum(xs: List(Nat)) : Nat
       case xs:
       | Nat.zero;
       | Nat.add(xs.head, List.sum(xs.tail));
     ```
 
-- A proof that negating a bool twice returns the same bool:
+- The Black Friday Theorem ("50% off of the double is the same"):
 
-    ```haskell
-    Bool.double_negation_theorem(b: Bool): Equal(_, Bool.not(Bool.not(b)), b)
-      case b
-      | Equal.to<_, Bool.true>;
-      | Equal.to<_, Bool.false>;
-      : Equal(_, Bool.not(Bool.not(b.self)), b.self);
+    ```c
+    // A natural number (non-negative integer)
+    T Nat
+    | zero;
+    | succ(pred: Nat);
+
+    // Double of a natural number
+    double(n: Nat): Nat
+      case n:
+      | zero;
+      | succ(succ(double(n.pred)));
+
+    // Half of a natural number
+    half(n: Nat): Nat
+      case n:
+      | zero;
+      | case n.pred:
+        | zero;
+        | succ(half(n.pred.pred));;
+
+    // Black Friday Theorem: 50% off of double is the same
+    bft(n: Nat): half(double(n)) == n
+      case n:
+      | Equal.to<_,zero>;
+      | Equal.apply<_,_,_,_,Nat.succ>(bft(n.pred));
+      : half(double(n.self)) == n.self;
     ```
 
 - Extracting the first element of a list statically checked to be non-empty:
 
-    ```haskell
+    ```c
     List.head<A: Type>(xs: List(A), not_empty: List.not_empty<A>(xs)) : A
       case xs:
       with is_empty : List.not_empty<A>(xs.self) = not_empty;
