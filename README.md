@@ -114,23 +114,6 @@ Examples
       : half(double(n.self)) == n.self;
     ```
 
-- Indexed datatypes:
-
-    ```c
-    // A Vector is a List with a statically known length
-    T Vector <A: Type>                             ~ (len: Nat)
-    | nil                                          ~ (0);
-    | cons<len: Nat>(head: A, tail: Vector(A,len)) ~ (Nat.succ(len));
-
-    // A Vector with 3 natural numbers
-    example: Vector(Nat, 3)
-      let vec = nil<Nat>
-      let vec = cons<Nat,0>(10, vec)
-      let vec = cons<Nat,1>(20, vec)
-      let vec = cons<Nat,2>(30, vec)
-      vec
-    ```
-
 - Handy syntax-sugars like `if` and `for`:
 
     ```c
