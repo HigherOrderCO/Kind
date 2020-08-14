@@ -42,8 +42,8 @@ programs. Formality prioritizes evaluation from the beginning, providing solid
 compilers to common targets such as JavaScript, Haskell and the EVM, and
 researching novel compilation techniques that may provide practical benefits, as
 well as asymptotical speedups over existing ones; check [this
-article](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07)
-and [this repo](https://github.com/MaiaVictor/abstract-algorithm/blob/master/README.md) for examples. Finally, proof languages tend to be complex and big, which makes
+multiplication algorithm](http://github.com/MaiaVictor/optimul) for example.
+Finally, proof languages tend to be complex and big, which makes
 unportable and hard to audit. Formality compiles entirely to a [500
 lines-of-code core type-theory](https://github.com/moonad/Formality/blob/master/javascript/FormalityCore.js),
 making it extremely portable and easily auditable.
