@@ -106,17 +106,19 @@ Installation
 Commands
 ========
 
-The commands below load all `.fm` files in the current directory.
+The commands below operate on `.fm` files in the current directory.
 
 - `fm`: type-checks all top-level definitions.
 
-- `fm name`: evaluates a term.
+- `fm term`: type-checks and evaluates a term.
 
-- `fmjs name`: compiles a term to JavaScript.
+- `fm file.fm`: type-checks a file.
 
-- `fmio name`: compiles a term to JavaScript and runs.
+- `fmjs term`: compiles a term to JavaScript.
 
-- `fmx name`: compiles a term to [interaction nets](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07) and runs.
+- `fmio term`: compiles a term to JavaScript and runs.
+
+- `fmopt term`: runs a term [β-optimally](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07).
 
 - `fm2fmc`: compiles all terms to Formality-Core.
 
@@ -154,6 +156,7 @@ compile everything to Javascript, and run, printing `Hello, world` in the
 console. Let's look at each of these steps in a little more detail:
 
 ### 📦 Dependencies
+
 Formality will discover it doesn't have definitions for `IO(Unit)`
 and `IO.print`, and will download them from [moonad.org].
 Formality doesn't have a notion of packages or a central package
@@ -164,6 +167,7 @@ keep the language as small and diamond-perfect as possible, but make it
 easy to extend and share.
 
 ### ✔️ Type Checking
+
 With all the definitions in place, Formality will make sure
 every definition fulfills its type. This process is *much* more powerful
 in Formality than in traditional languages: as in proof assistants like
@@ -186,11 +190,12 @@ check out our tutorial on the subject [TODO - this tutorial is a work in progres
 meantime, everything you'd need to implement is in [this file](https://github.com/moonad/Formality/blob/master/javascript/FormalityCore.js)]!
 
 ### 🚀 Run
-The `fm` command will execute the compiled Javascript, printing
-`Hello, world.` to the console.
 
-For a more interactive example, we could add the following function
-to our `Hello.fm` file:
+The `fm` command will execute the compiled Javascript, printing `Hello, world.`
+to the console.
+
+For a more interactive example, we could add the following function to our
+`Hello.fm` file:
 
 ```javascript
 Hello.greet: IO(Unit)
@@ -215,10 +220,9 @@ at length in [IO section of the tutorial][TODO write IO section].
 
 ### 💡 Datatypes, Functions, and Proofs
 
-Formality is a general purpose language, capable of everything
-from web apps to 3D games to advanced mathematical proofs.
-But all Formality programs share a common structure that comes
-down to three parts:
+Formality is a general purpose language, capable of everything from web apps to
+3D games to advanced mathematical proofs.  But all Formality programs share a
+common structure that comes down to three parts:
 
 1. Specify the datatypes that describe your problem.
 
@@ -226,29 +230,30 @@ down to three parts:
 
 3. Propose and prove theorems about your datatypes and functions.
 
-While the first two are commonplace for programmers and the last is usually relegated to
-mathematicians, Formality enables all three in the same simple language, making it a
-powerful *lingua franca* for the exchange of ideas in math, computer science, and software
-engineering.
+While the first two are commonplace for programmers and the last is usually
+relegated to mathematicians, Formality enables all three in the same simple
+language, making it a powerful *lingua franca* for the exchange of ideas in
+math, computer science, and software engineering.
 
 Learning More
 =============
 
-New to the notion of proving theorems with programs? Check out [our tutorial](TUTORIAL.md) -
-you'll be proving theorems to the moon and back in no time (throw a little of that moon ore
-our way, eh?).
+New to the notion of proving theorems with programs? Check out [our
+tutorial](TUTORIAL.md) - you'll be proving theorems to the moon and back in no
+time (throw a little of that moon ore our way, eh?).
 
-Since the documentation is still being developed, a great way to get a feel of how the language
-works is by just looking the files [here](https://github.com/moonad/Moonad/tree/master/lib). It
-contains every Formality function available on Moonad.
+Since the documentation is still being developed, a great way to get a feel of
+how the language works is by just looking the files
+[here](https://github.com/moonad/Moonad/tree/master/lib). It contains every
+Formality function available on Moonad!
 
-Do you dream in Pi types and eat monoids for breakfast? You'll probably want
-to see the [specification](FMC_SPECIFICATION.md) (it's incomplete and slightly dated, but still
-covers a lot of ground).
+Do you dream in Pi types and eat monoids for breakfast? You'll probably want to
+see the [specification](FMC_SPECIFICATION.md) (it's incomplete and slightly
+dated, but still covers a lot of ground).
 
-Questions? Queries? Quagmires? Conundrums? Perhaps we've covered it in the [FAQ](./FAQ.md).
-If not, hop on [on Telegram](https://t.me/formality_lang) and we'll see if we can't
-get to the bottom of it.
+Questions? Queries? Quagmires? Conundrums? Perhaps we've covered it in the
+[FAQ](./FAQ.md).  If not, hop on [on Telegram](https://t.me/formality_lang) and
+we'll see if we can't get to the bottom of it.
 
 Roadmap
 =======
