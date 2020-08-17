@@ -155,11 +155,13 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
                   var file = "./"+(words.join(".")||"global")+".fm";
                   if (fs.existsSync(file)) {
                     var dep_code = fs.readFileSync(file, "utf8");
-                    var {defs: got_defs} = fml.parse(dep_code);
-                    if (got_defs[dep_name]) {
-                      dep_defs = got_defs;
-                      break;
-                    }
+                    try {
+                      var {defs: got_defs} = fml.parse(dep_code);
+                      if (got_defs[dep_name]) {
+                        dep_defs = got_defs;
+                        break;
+                      }
+                    } catch (e) {}
                   }
                   if (words.length === 0) {
                     break;
