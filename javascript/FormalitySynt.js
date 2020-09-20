@@ -613,39 +613,39 @@ function canonicalize(term, hols = {}, to_core = false, inline_lams = true) {
 // ========
 
 // Computes the hash of a term. JS strings are hashed, so we just return one.
-function hash(term, dep = 0) {
+function hash(term, dep = 0, ini = 0) {
   switch (term.ctor) {
     case "Var":
-      var indx = Number(term.indx.split("#")[1]);
-      if (indx < 0) {
-        return "^"+(dep+indx);
+      var lvl = Number(term.indx.split("#")[1]);
+      if (lvl >= ini) {
+        return "^" + (dep - lvl - 1);
       } else {
-        return "#"+indx;
+        return "#" + lvl;
       }
     case "Ref":
       return "$" + term.name;
     case "Typ":
       return "Type";
     case "All":
-      var bind = hash(term.bind, dep);
-      var body = hash(term.body(Var("#"+(-dep-1)), Var("#"+(-dep-2))), dep+2);
+      var bind = hash(term.bind, dep, ini);
+      var body = hash(term.body(Var("#"+dep), Var("#"+(dep+1))), dep+2, ini);
       return "Π" + term.self + bind + body;
     case "Lam":
-      var body = hash(term.body(Var("#"+(-dep-1))), dep+1);
+      var body = hash(term.body(Var("#"+dep)), dep+1, ini);
       return "λ" + body;
     case "App":
-      var func = hash(term.func, dep);
-      var argm = hash(term.argm, dep);
+      var func = hash(term.func, dep, ini);
+      var argm = hash(term.argm, dep, ini);
       return "@" + func + argm;
     case "Let":
-      var expr = hash(term.expr, dep);
-      var body = hash(term.body(Var("#"+(-dep-1))), dep+1);
+      var expr = hash(term.expr, dep, ini);
+      var body = hash(term.body(Var("#"+dep)), dep+1, ini);
       return "$" + expr + body;
     case "Ann":
-      var expr = hash(term.expr, dep);
+      var expr = hash(term.expr, dep, ini);
       return expr;
     case "Loc":
-      var expr = hash(term.expr, dep);
+      var expr = hash(term.expr, dep, ini);
       return expr;
     case "Wat":
       return "?" + term.name;
@@ -668,8 +668,8 @@ function equal(a, b, defs, hols, dep = 0, rec = {}) {
   //console.log("eq", stringify(a), stringify(b));
   let a1 = reduce(a, defs, hols, true);
   let b1 = reduce(b, defs, hols, true);
-  var ah = hash(a1);
-  var bh = hash(b1);
+  var ah = hash(a1, dep, dep);
+  var bh = hash(b1, dep, dep);
   var id = ah + "==" + bh;
   if (ah === bh || rec[id]) {
     return true;
