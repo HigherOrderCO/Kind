@@ -2,6 +2,7 @@ var DEBUG = false;
 var fs = require("fs");
 var fm = require("./../index.js");
 var path = require("path");
+
 function error(msg, exit_code) {
   console.log(msg);
   process.exit(exit_code || 0);
@@ -39,8 +40,9 @@ function load(main = null, dir = ".", ext = ".fm", parse = fm.lang.parse, exit_c
     var defs = {};
     for (var file of files) {
       var file_code = fs.readFileSync(path.join(dir, file), "utf8");
+      var file_name = file.slice(0, -ext.length);
       try {
-        var parsed = parse(file_code,0);
+        var parsed = parse(file_code,0,undefined,file_name);
         var file_defs = parsed.defs;
       } catch (err) {
         if (DEBUG) console.log(err);

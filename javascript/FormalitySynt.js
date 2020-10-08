@@ -55,6 +55,23 @@ function fold(list, nil, cons) {
   }
 };
 
+function deref(name, defs) {
+  if (name.indexOf("/") !== -1) {
+    var base_name = name.slice(name.indexOf("/")+1);
+    var full_name = name.replace("/",".");
+    if (defs[base_name]) {
+      return {def: defs[base_name], name: base_name};
+    } else if (defs[full_name]) {
+      return {def: defs[full_name], name: full_name};
+    }
+  } else {
+    if (defs[name]) {
+      return {def: defs[name], name: name};
+    }
+  }
+  return null;
+};
+
 // Syntax
 // ======
 
@@ -127,7 +144,7 @@ function print_str(str) {
 function parse(code, indx, mode = "defs") {
   function is_name(chr) {
     var val = chr.charCodeAt(0);
-    return (val >= 46 && val < 47)   // .
+    return (val >= 46 && val <= 47)  // ./
         || (val >= 48 && val < 58)   // 0-9
         || (val >= 65 && val < 91)   // A-Z
         || (val >= 95 && val < 96)   // _
@@ -292,10 +309,10 @@ function build_cse(term, type) {
   var tnam = term.name.split("#")[0];
   var func = term.func;
   var info = term.info;
-  var indx = 0;
+  var size = 0;
   var [ctx, args] = info;
   while (type.ctor === "All") {
-    let csev = args[indx];
+    let csev = args[type.name];
     if (csev) {
       var bind = type.bind;
       var argm = (function go(bind, ctx) {
@@ -309,12 +326,15 @@ function build_cse(term, type) {
         };
       })(type.bind, ctx);
     } else {
-      throw "Misformatted case. TODO: improve this error."
+      throw "Missing '"+type.name+"' case.";
     }
     func = App(type.eras, func, argm);
     type = type.body(type, type.bind);
-    indx = indx + 1;
+    ++size;
   };
+  if (size !== Object.keys(args).length) {
+    throw "Too many cases.";
+  }
   return func;
 };
 
@@ -372,16 +392,17 @@ function reduce(term, defs = {}, hols = {}, erased = false) {
     case "Var":
       return Var(term.indx);
     case "Ref":
-      if (defs[term.name]) {
+      var got = deref(term.name, defs);
+      if (got) {
         // If reference wasn't synthetized, synthetize it
-        if (defs[term.name].core === undefined) {
+        if (got.def.core === undefined) {
           var got = typesynth(term.name, defs).term;
         // If reference is being synthetized, return its version with holes
-        } else if (defs[term.name].core === null) {
-          var got = defs[term.name].term;
+        } else if (got.def.core === null) {
+          var got = got.def.term;
         // If reference was synthetized, return its filled core version
         } else {
-          var got = defs[term.name].core.term;
+          var got = got.def.core.term;
         }
         // Avoids reducing axioms
         if (got.ctor === "Loc" && got.expr.ctor === "Ref" && got.expr.name === term.name) {
@@ -662,10 +683,8 @@ function hash(term, dep = 0, ini = 0) {
   }
 };
 
-//var COUNT = 0;
 // Are two terms equal?
 function equal(a, b, defs, hols, dep = 0, rec = {}) {
-  //console.log("eq", stringify(a), stringify(b));
   let a1 = reduce(a, defs, hols, true);
   let b1 = reduce(b, defs, hols, true);
   var ah = hash(a1, dep, dep);
@@ -793,18 +812,18 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
     case "Var":
       return "{" + done([hols, Var(term.indx)]) + "}";
     case "Ref":
-      var got = defs[term.name];
+      var got = deref(term.name, defs);
       if (got) {
-        if (got.core === undefined) {
+        if (got.def.core === undefined) {
           try {
             var typ = typesynth(term.name, defs, show).type;
           } catch (e) {
             return fail(() => Err(locs, ctx, e().msg + "\nInside ref... \x1b[2m"+term.name+"\x1b[0m"));
           }
-        } else if (defs[term.name].core === null) {
-          var typ = defs[term.name].type;
+        } else if (got.def.core === null) {
+          var typ = got.def.type;
         } else {
-          var typ = defs[term.name].core.type;
+          var typ = got.def.core.type;
         }
         return done([hols, typ]);
       } else {
@@ -876,7 +895,11 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
       return deep([[typeinfer, [term.func, defs, show, hols, ctx, locs]]], ([hols, func_typ]) => {
         var func_typ = reduce(func_typ, defs, hols, false);
         var hols = {...hols, [term.name]: func_typ};
-        var term_val = build_cse(term, func_typ);
+        try {
+          var term_val = build_cse(term, func_typ);
+        } catch (err) {
+          return fail(() => Err(locs, ctx, err))
+        }
         return deep([[typeinfer, [term_val, defs, show, hols, ctx, locs]]], done);
       });
     case "Nat":
@@ -954,7 +977,6 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
       if (!hols[term.name]) {
         hols[term.name] = null;
       };
-
       // If we try to type-check a hole and it is of type `(x : A) -> B`, we
       // first try keeping it as it is. If that doesn't work, then we specialize
       // it as `(x) ?` and try again.
@@ -966,7 +988,6 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
         }};
         var path1 = [typecheck, [path1_hols[term.name](term.vals), type, defs, show, path1_hols, ctx, locs]];
         return deep([path0, path1], ([hols, _]) => done([hols,type]));
-
       // If the hole is avariable or an application, then it could possibly be
       // generated by the variables in the scope of the hole. For example, if a
       // hole `?x : A` has the following variables in scope:
@@ -1022,7 +1043,6 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
           return [typecheck, [hols[term.name](term.vals), type, defs, show, hols, ctx, locs]];
         });
         return wide(wides, ([hols,_]) => done([hols, type]));
-
       // Otherwise, we don't have any useful information, so we just keep it
       } else {
         return done([hols, type]);
@@ -1067,6 +1087,7 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
 };
 
 function typesynth(name, defs, show = stringify) {
+  var {name} = deref(name, defs);
   if (!defs[name].core) {
     defs[name].core = null;
     var term = defs[name].term;

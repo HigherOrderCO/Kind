@@ -335,7 +335,7 @@ function parse_par(code, [indx,tags], err = false) {
       let nam0 = new_name();
       let nam1 = new_name();
       return [[indx,tags], (xs) => {
-        var term = Ref("Pair.new");
+        var term = Ref("Pair/new");
         var term = App(true, term, hole(nam0, xs))
         var term = App(true, term, hole(nam1, xs))
         var term = App(false, term, val0(xs));
@@ -529,7 +529,7 @@ function parse_fin(code, [indx,tags], err = false) {
       let nam0 = new_name();
       let nam1 = new_name();
       return [[indx,tags], xs => {
-        var term = Ref("List.for");
+        var term = Ref("List/for");
         var term = App(true, term, hole(nam0, xs));
         var term = App(false, term, list(xs));
         var term = App(true, term, hole(nam1, xs));
@@ -612,7 +612,7 @@ function parse_lfn(code, [indx,tags], err = false) {
       let nam0 = new_name();
       let nam1 = new_name();
       return [[indx,tags], xs => {
-        var term = Ref("List.for");
+        var term = Ref("List/for");
         var term = App(true, term, hole(nam0, xs));
         var term = App(false, term, list(xs));
         var term = App(true, term, hole(nam1, xs));
@@ -755,17 +755,18 @@ function parse_cse(code, [indx,tags], err) {
   };
   function parse_bar(code, [indx, tags], err) {
     return (
-      chain(parse_txt(code, next(code, [indx,tags]), "|", false), ([indx,tags], skip) =>
+      chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], name) =>
+      chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
       chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], term) =>
-      chain(parse_txt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) =>
-      [[indx,tags], term]))));
+      chain(parse_opt(code, next(code, [indx,tags]), ",", err), ([indx,tags], skip) =>
+      [[indx,tags], [name,term]])))));
   };
   function parse_mot(code, [indx, tags], err) {
     return (
       chain(parse_txt(code, next(code, [indx,tags]), ":", false), ([indx,tags], skip) =>
       chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], moti) => 
-      chain(parse_txt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) =>
-      [[indx,tags], moti]))));
+      //chain(parse_txt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) =>
+      [[indx,tags], moti])));
   };
   function parse_wth(code, [indx, tags], err) {
     return (
@@ -775,32 +776,34 @@ function parse_cse(code, [indx,tags], err) {
       chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], type) => 
       chain(parse_txt(code, next(code, [indx,tags]), "=", err), ([indx,tags], skip) =>
       chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], term) => 
-      chain(parse_txt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) =>
+      chain(parse_opt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) =>
       [[indx,tags], [name,type,term]]))))))));
   };
   function parse_val(code, [indx, tags], err) {
     return choose([
       () => (
         chain(parse_nam(code, next(code, [indx,tags]), false, false), ([indx,tags], name) =>
-        chain(parse_txt(code, next(code, [indx,tags]), ":", false), ([indx,tags], skip) =>
-        [[indx,tags], [name, parsed_var(from, [indx,tags], name)]]))),
+        //chain(parse_txt(code, next(code, [indx,tags]), ":", false), ([indx,tags], skip) =>
+        [[indx,tags], [name, parsed_var(from, [indx,tags], name)]])),
       () => (
         chain(parse_trm(code, next(code, [indx,tags]), false), ([indx,tags], func) =>
         chain(parse_txt(code, next(code, [indx,tags]), "as ", false), ([indx,tags], skip) =>
         chain(parse_nam(code, next(code, [indx,tags]), true, false), ([indx,tags], name) =>
-        chain(parse_txt(code, next(code, [indx,tags]), ":", false), ([indx,tags], skip) =>
-        [[indx,tags], [name, func]]))))),
+        //chain(parse_txt(code, next(code, [indx,tags]), ":", false), ([indx,tags], skip) =>
+        [[indx,tags], [name, func]])))),
       () => (
         chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], func) =>
-        chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
-        [[indx,tags], ["self", func]]))),
+        //chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
+        [[indx,tags], ["self", func]])),
     ]);
   };
   return (
     chain(parse_one(code, next(code, [indx,tags]), "case ", "open ", false), ([indx,tags], open) =>
     chain(parse_val(code, next(code, [indx,tags]), err), ([indx,tags], cval) =>
     chain(parse_mny(parse_wth)(code, [indx,tags], err), ([indx,tags], wths) =>
-    chain((open ? parse_opn : parse_mny(parse_bar))(code, [indx,tags], err), ([indx,tags], bars) =>
+    chain(open ? [[indx,tags],null] : parse_txt(code, next(code, [indx,tags]), "{", err), ([indx,tags], skip) =>
+    chain(open ? parse_opn(code, [indx,tags], err) : parse_mny(parse_bar)(code, [indx,tags], err), ([indx,tags], bars) =>
+    chain(open ? [[indx,tags],null] : parse_txt(code, next(code, [indx,tags]), "}", err), ([indx,tags], skip) =>
     chain(parse_may(parse_mot)(code, [indx,tags], err), ([indx,tags], moti) => {
       var uniq_name = new_name();
       var hole_name = new_name();
@@ -818,21 +821,25 @@ function parse_cse(code, [indx,tags], err) {
             return All(false, "", wnam, wtyp(xs), (s,x) => go(i+1, Ext([wnam,x],Ext(["",s],xs))));
           };
         })(0, xs);
-        var func_bars = bars.map(bar => xs => (function go(i, xs) {
+        var func_bars = bars.map(([nam,bar]) => [nam, xs => (function go(i, xs) {
           if (i === wths.length) {
             return bar(xs);
           } else {
             var [wnam, wtyp, wter] = wths[i];
             return Lam(false, wnam, (x) => go(i+1, Ext([wnam,x],xs)));
           };
-        })(0, xs));
-        var term = Cse(name+"#"+uniq_name, func_term, [xs, [func_moti].concat(func_bars)]);
+        })(0, xs)]);
+        var args = {P: func_moti};
+        for (var i = 0; i < func_bars.length; ++i) {
+          args[func_bars[i][0]] = func_bars[i][1];
+        }
+        var term = Loc(from, indx, Cse(name+"#"+uniq_name, func_term, [xs, args]));
         for (var [wnam, wtyp, wter] of wths) {
           term = App(false, term, wter(xs));
         };
         return term;
       }];
-    }))))));
+    }))))))));
 };
 
 function parse_ite(code, [indx,tags], err = false) {
@@ -935,23 +942,23 @@ function parsed_var(from, [indx,tags], name, sign = true) {
       } else if (/^[0-9]*[bsulijfde]$/.test(name)) {
         var conv = null;
         switch (name[name.length - 1]) {
-          case "b": conv = "Nat.to_u8"; break;
-          case "s": conv = "Nat.to_u16"; break;
-          case "u": conv = "Nat.to_u32"; break;
-          case "l": conv = "Nat.to_u64"; break;
-          case "e": conv = "Nat.to_u256"; break;
+          case "b": conv = "Nat/to_u8"; break;
+          case "s": conv = "Nat/to_u16"; break;
+          case "u": conv = "Nat/to_u32"; break;
+          case "l": conv = "Nat/to_u64"; break;
+          case "e": conv = "Nat/to_u256"; break;
         }
         return App(false, Ref(conv), Nat(BigInt(name.slice(0,-1))));
       } else if (/^[0-9]*\.[0-9]*$/.test(name)) {
         var [a,b] = name.split(".");
-        var term = Ref("Nat.to_f64");
+        var term = Ref("Nat/to_f64");
         var term = App(false, term, Ref(sign ? "Bool.true" : "Bool.false"));
         var term = App(false, term, Nat(BigInt(a + b)));
         var term = App(false, term, Nat(BigInt(b.length)));
         return term;
       } else {
         if (tags && tags.head) tags.head.ctor = "ref";
-        return Ref(name);
+        return Ref(FILE_NAME+"/"+name);
       };
     }));
   };
@@ -1315,14 +1322,14 @@ function parse_lst(code, [indx,tags], err) {
   function parse_els(code, [indx,tags], nam0) {
     return chain(parse_opt(code, next(code, [indx,tags]), "]", false), ([indx,tags], done) => {
       if (done) {
-        return [[indx,tags], xs => App(true, Ref("List.nil"), hole(nam0, xs))];
+        return [[indx,tags], xs => App(true, Ref("List/nil"), hole(nam0, xs))];
       } else {
         return (
           chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], elem) =>
           chain(parse_opt(code, next(code, [indx,tags]), ",", false), ([indx,tags], skip) =>
           chain(parse_els(code, next(code, [indx,tags]), nam0), ([indx,tags], tail) =>
           [[indx,tags], xs => {
-            var term = Ref("List.cons");
+            var term = Ref("List/cons");
             var term = App(true, term, hole(nam0, xs));
             var term = App(false, term, elem(xs));
             var term = App(false, term, tail(xs));
@@ -1349,7 +1356,7 @@ function parse_map(code, [indx,tags], err) {
           var Pair = Ref("Pair");
           var Pair = App(false, Pair, hole(nam0, xs));
           var Pair = App(false, Pair, hole(nam1, xs));
-          return App(true, Ref("List.nil"), Pair);
+          return App(true, Ref("List/nil"), Pair);
         }];
       } else {
         return (
@@ -1359,7 +1366,7 @@ function parse_map(code, [indx,tags], err) {
           chain(parse_opt(code, next(code, [indx,tags]), ",", false), ([indx,tags], skip) =>
           chain(parse_els(code, next(code, [indx,tags]), nam0), ([indx,tags], tail) =>
           [[indx,tags], xs => {
-            var pair = Ref("Pair.new");
+            var pair = Ref("Pair/new");
             var pair = App(true, pair, hole(nam0, xs));
             var pair = App(true, pair, hole(nam1, xs));
             var pair = App(false, pair, val0(xs));
@@ -1367,7 +1374,7 @@ function parse_map(code, [indx,tags], err) {
             var Pair = Ref("Pair");
             var Pair = App(false, Pair, hole(nam0, xs));
             var Pair = App(false, Pair, hole(nam1, xs));
-            var term = Ref("List.cons");
+            var term = Ref("List/cons");
             var term = App(true, term, Pair);
             var term = App(false, term, pair);
             var term = App(false, term, tail(xs));
@@ -1397,19 +1404,19 @@ function parse_trm(code, [indx = 0, tags = []], err) {
     () => parse_fun(code, [indx,tags], err),
     () => parse_par(code, [indx,tags], err),
     () => parse_acm(code, [indx,tags], err),
-    () => parse_for(null,"Nat.for")(code, [indx,tags], err),
-    () => parse_for("U8","U8.for")(code, [indx,tags], err),
-    () => parse_for("U16","U16.for")(code, [indx,tags], err),
-    () => parse_for("U32","U32.for")(code, [indx,tags], err),
-    () => parse_for("U64","U64.for")(code, [indx,tags], err),
-    () => parse_for("F64","F64.for")(code, [indx,tags], err),
+    () => parse_for(null,"Nat/for")(code, [indx,tags], err),
+    () => parse_for("U8","U8/for")(code, [indx,tags], err),
+    () => parse_for("U16","U16/for")(code, [indx,tags], err),
+    () => parse_for("U32","U32/for")(code, [indx,tags], err),
+    () => parse_for("U64","U64/for")(code, [indx,tags], err),
+    () => parse_for("F64","F64/for")(code, [indx,tags], err),
     () => parse_fin(code, [indx,tags], err),
-    () => parse_lfr(null,"Nat.for")(code, [indx,tags], err),
-    () => parse_lfr("U8","U8.for")(code, [indx,tags], err),
-    () => parse_lfr("U16","U16.for")(code, [indx,tags], err),
-    () => parse_lfr("U32","U32.for")(code, [indx,tags], err),
-    () => parse_lfr("U64","U64.for")(code, [indx,tags], err),
-    () => parse_lfr("F64","F64.for")(code, [indx,tags], err),
+    () => parse_lfr(null,"Nat/for")(code, [indx,tags], err),
+    () => parse_lfr("U8","U8/for")(code, [indx,tags], err),
+    () => parse_lfr("U16","U16/for")(code, [indx,tags], err),
+    () => parse_lfr("U32","U32/for")(code, [indx,tags], err),
+    () => parse_lfr("U64","U64/for")(code, [indx,tags], err),
+    () => parse_lfr("F64","F64/for")(code, [indx,tags], err),
     () => parse_lfn(code, [indx,tags], err),
     () => parse_let(code, [indx,tags], err),
     () => parse_us0(code, [indx,tags], err),
@@ -1511,37 +1518,49 @@ function parse_ars(code, [indx,tags], err) {
 
 function parse_ctr(code, [indx,tags], err) {
   return (
-    chain(parse_txt(code, next(code, [indx,tags]), "|", false), ([indx,tags], skip) =>
+    //chain(parse_txt(code, next(code, [indx,tags]), "|", false), ([indx,tags], skip) =>
     chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
     chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], fils) =>
     chain(parse_opt(code, next(code, [indx,tags]), "~", err), ([indx,tags], skip) =>
     chain(parse_ars(code, next(code, [indx,tags]), err), ([indx,tags], inds) =>
-    chain(parse_txt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) =>
+    chain(parse_opt(code, next(code, [indx,tags]), ",", err), ([indx,tags], skip) =>
     [[indx,tags], {name, fils, inds}]
-    )))))));
+    ))))));
 };
 
 function parse_adt(code, [indx,tags], err) {
   return (
-    chain(parse_txt(code, next(code, [indx,tags]), "T ", false), ([indx,tags], skip) =>
+    chain(parse_txt(code, next(code, [indx,tags]), "type ", false), ([indx,tags], skip) =>
     chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
     chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], pars) =>
     chain(parse_opt(code, next(code, [indx,tags]), "~", err), ([indx,tags], hasi) => 
     chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], inds) =>
-    chain(parse_mny(parse_ctr)(code, next(code, [indx,tags]), err), ([indx,tags], ctrs) => {
+    chain(parse_txt(code, next(code, [indx,tags]), "{", err), ([indx,tags], skip) =>
+    chain(parse_mny(parse_ctr)(code, next(code, [indx,tags]), err), ([indx,tags], ctrs) =>
+    chain(parse_txt(code, next(code, [indx,tags]), "}", err), ([indx,tags], skip) => {
     return [[indx,tags], {name, pars, inds, ctrs}];
-    })))))));
+    })))))))));
 };
 
 // Parses a defs
-function parse(code, indx = 0, tags_list = Nil()) {
+var FILE_NAME = "main";
+function parse(code, indx = 0, tags_list = Nil(), file_name = "main") {
+  // This is a temporary hack: we use a global variable to remember the name of
+  // the file being parsed, in order to avoid needing to send it down as
+  // arguments all way to the 'parsed_var' function. The API of these functions
+  // is already too complex, so adding a new argument would complicate it and be
+  // a source of bugs in JS, which is untyped. When Formality is refactored in
+  // itself, the API of the parser will improve and we will carry the file_name
+  // as part of the parser state.
+  FILE_NAME = file_name;
   //var LOG = x => console.log(require("util").inspect(x, {showHidden: false, depth: null}));
   var defs = {};
   function define(name, type, term){
-    if (defs[name]){
+    var real_name = name === file_name ? name : file_name + "." + name;
+    if (defs[real_name]){
       throw "Parse error: redefinition of "+name+".";
     } else {
-      defs[name] = {
+      defs[real_name] = {
         type: type,
         term: term,
       }
@@ -1663,11 +1682,11 @@ function stringify_str(term) {
 
 // Stringifies a nat literal
 function stringify_nat(term) {
-  if (term.ctor === "Ref" && term.name === "Nat.zero") {
+  if (term.ctor === "Ref" && term.name === "Nat/zero") {
     return "0";
   } else if (term.ctor === "App"
     && term.func.ctor === "Ref"
-    && term.func.name === "Nat.succ") {
+    && term.func.name === "Nat/succ") {
     var pred = stringify_nat(term.argm);
     if (pred) {
       return String(1 + Number(pred));
@@ -1711,8 +1730,8 @@ function matching(term, patterns) {
 
 // List.cons<T>(a)(List.cons<T>(b)(List.nil<T>))
 function stringify_lst(term, type = null, vals = Nil()) {
-  var cons = App(false, App(false, App(true, Ref("List.cons"), "$type"), "$head"), "$tail");
-  var nil  = App(true, Ref("List.nil"), "$type");
+  var cons = App(false, App(false, App(true, Ref("List/cons"), "$type"), "$head"), "$tail");
+  var nil  = App(true, Ref("List/nil"), "$type");
   return matching(term, [
     [cons, ({type, head, tail}) => {
       return stringify_lst(tail, type, Ext(head, vals));
@@ -1739,7 +1758,11 @@ function stringify_trm(term) {
       case "Var":
         return term.indx.split("#")[0];
       case "Ref":
-        return term.name;
+        if (term.name.indexOf("/") !== -1) {
+          return term.name.slice(term.name.indexOf("/")+1);
+        } else {
+          return term.name;
+        }
       case "Typ":
         return "Type";
       case "All":
@@ -1970,7 +1993,7 @@ function adt_type_term({name, pars, inds, ctrs}) {
               inds[i].term(ctx),
               (s,x) => motive(i + 1, Ext([inds[i].name,x], Ext(["",s], ctx))));
           } else {
-            var slf = Ref(name);
+            var slf = Ref(FILE_NAME+"/"+name);
             for (var P = 0; P < pars.length; ++P) {
               slf = App(false, slf, get_var(ctx, pars[P].name));
             }
@@ -2008,7 +2031,7 @@ function adt_type_term({name, pars, inds, ctrs}) {
                     throw "Insufficient indices for constructor '" + ctrs[i].name + "'.";
                   }
                 }
-                var slf = Ref(ctrs[i].name);
+                var slf = Ref(FILE_NAME+"/"+ctrs[i].name);
                 for (var P = 0; P < pars.length; ++P) {
                   slf = App(true, slf, get_var(ctx, pars[P].name));
                 }
@@ -2053,7 +2076,7 @@ function adt_ctor_type({name, pars, inds, ctrs}, c) {
       var t_body = (s,x) => arg(p, i, f + 1, Ext([t_name,x],Ext(["",s],ctx)));
       return All(t_eras, t_self, t_name, t_bind, t_body);
     } else {
-      var type = Ref(name);
+      var type = Ref(FILE_NAME+"/"+name);
       for (var P = 0; P < pars.length; ++P) {
         type = App(false, type, get_var(ctx, pars[P].name));
       }
