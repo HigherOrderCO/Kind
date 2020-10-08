@@ -138,13 +138,12 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
       } catch (e) {
 
         // If we got an error
-        if (typeof e === "function") {
-          var msg = e().msg;
+        if (e.msg) {
           var err = "Undefined reference";
 
           // If that error is an undefined reference
-          if (msg.slice(0, err.length) === err) {
-            var dep_name = msg.slice(err.length+2, msg.indexOf("'",err.length+2));
+          if (e.msg.slice(0, err.length) === err) {
+            var dep_name = e.msg.slice(err.length+2, e.msg.indexOf("'",err.length+2));
             var dep_path = ".fmc/"+dep_name+".fmc";
             var dep_defs = null;
             try {
@@ -152,11 +151,12 @@ module.exports = ({XMLHttpRequest, fs, localStorage}) => {
               if (fs) {
                 var words = dep_name.split(".");
                 while (true) {
-                  var file = "./"+(words.join(".")||"global")+".fm";
+                  var file_name = words.join(".") || "main";
+                  var file = "./"+file_name+".fm";
                   if (fs.existsSync(file)) {
                     var dep_code = fs.readFileSync(file, "utf8");
                     try {
-                      var {defs: got_defs} = fml.parse(dep_code);
+                      var {defs: got_defs} = fml.parse(dep_code, undefined, undefined, file_name);
                       if (got_defs[dep_name]) {
                         dep_defs = got_defs;
                         break;

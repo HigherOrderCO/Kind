@@ -109,11 +109,7 @@ async function _run_(
       if (!silent) {
         console.log(name + ": " + "\x1b[31merror\x1b[0m");
       }
-      if (typeof err === "function") {
-        errors.push([name, err()]);
-      } else {
-        errors.push([name, "Internal error."]);
-      };
+      errors.push([name, err]);
     }
   };
   if (!silent) console.log("");

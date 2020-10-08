@@ -56,19 +56,17 @@ function fold(list, nil, cons) {
 };
 
 function deref(name, defs) {
-  if (name.indexOf("/") !== -1) {
-    var base_name = name.slice(name.indexOf("/")+1);
-    var full_name = name.replace("/",".");
-    if (defs[base_name]) {
-      return {def: defs[base_name], name: base_name};
-    } else if (defs[full_name]) {
-      return {def: defs[full_name], name: full_name};
-    }
-  } else {
-    if (defs[name]) {
-      return {def: defs[name], name: name};
-    }
+  // If the name is exact, return it
+  if (defs[name]) {
+    return {def: defs[name], name};
   }
+  // Otherwise, search for any `Foo.name` that matches
+  for (var full_def_name in defs) {
+    var last_def_name = full_def_name.replace(/^.*\./g, "");
+    if (last_def_name === name) {
+      return {def: defs[full_def_name], name: full_def_name};
+    }
+  };
   return null;
 };
 
@@ -312,7 +310,8 @@ function build_cse(term, type) {
   var size = 0;
   var [ctx, args] = info;
   while (type.ctor === "All") {
-    let csev = args[type.name];
+    var case_name = type.name.replace(/^.*\./g, "");
+    let csev = args[case_name];
     if (csev) {
       var bind = type.bind;
       var argm = (function go(bind, ctx) {
@@ -326,7 +325,7 @@ function build_cse(term, type) {
         };
       })(type.bind, ctx);
     } else {
-      throw "Missing '"+type.name+"' case.";
+      throw "Missing '"+case_name+"' case.";
     }
     func = App(type.eras, func, argm);
     type = type.body(type, type.bind);
@@ -340,6 +339,7 @@ function build_cse(term, type) {
 
 function build_nat(term) {
   if (term.natx === 0n) {
+    //return Lam(true,"P",()=>Lam(false,"zero",z=>Lam(false,"succ",s=>z)));
     return Ref("Nat.zero");
   } else {
     return App(false, Ref("Nat.succ"), Nat(term.natx - 1n));
@@ -582,18 +582,18 @@ function canonicalize(term, hols = {}, to_core = false, inline_lams = true) {
     case "Loc":
       return canonicalize(term.expr, hols, to_core, inline_lams);
     case "Wat":
-      throw () => Err(null, null, "Incomplete program.");
+      throw Err(null, null, "Incomplete program.");
     case "Hol":
       if (hols[term.name]) {
         return canonicalize(hols[term.name](term.vals), hols, to_core, inline_lams);
       } else {
-        throw () => Err(null, null, "Unfilled hole: " + term.name + ".");
+        throw Err(null, null, "Unfilled hole: " + term.name + ".");
       }
     case "Cse":
       if (hols[term.name]) {
         return canonicalize(build_cse(term, hols[term.name]), hols, to_core, inline_lams);
       } else {
-        throw () => Err(null, null, "Incomplete case.");
+        throw Err(null, null, "Incomplete case.");
       }
     case "Nat":
       if (to_core) {
@@ -732,70 +732,6 @@ function equal(a, b, defs, hols, dep = 0, rec = {}) {
   };
 };
 
-// Diagonalization
-// ===============
-
-function wide(next, then) {
-  return {ctor: "call", deep: false, next, then};
-};
-
-function deep(next, then) {
-  return {ctor: "call", deep: true, next, then};
-};
-
-function fail(msge) {
-  return {ctor: "fail", msge};
-};
-
-function done(retr) {
-  return {ctor: "done", retr};
-};
-
-function exec(fn) {
-  var wides = [[fn(), {ctor:"Nil"}]];
-  var deeps = [];
-  var index = 0;
-  var error = null;
-  while (index < wides.length || deeps.length > 0) {
-    if (deeps.length > 0) {
-      var got = deeps.pop();
-    } else {
-      var got = wides[index];
-      wides[index++] = null;
-    };
-    if (got) {
-      var [func, cont] = got;
-      switch (func.ctor) {
-        case "done":
-          switch (cont.ctor) {
-            case "Nil":
-              return func.retr;
-            case "Ext":
-              deeps.push([cont.head(func.retr), cont.tail]);
-              break;
-          }
-          break;
-        case "fail":
-          error = func.msge;
-          break;
-        case "call":
-          if (func.deep) {
-            for (let i = func.next.length - 1; i >= 0; --i) {
-              var next = func.next[i][0](...func.next[i][1]);
-              deeps.push([next, {ctor:"Ext",head:func.then,tail:cont}]);
-            }
-          } else {
-            for (let i = 0; i < func.next.length; ++i) {
-              var next = func.next[i][0](...func.next[i][1]);
-              wides.push([next, {ctor:"Ext",head:func.then,tail:cont}]);
-            }
-          };
-      };
-    };
-  };
-  throw error || "Search failed.";
-};
-
 // Type-Checking
 // =============
 
@@ -810,7 +746,7 @@ function Err(loc, ctx, msg) {
 function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = null) {
   switch (term.ctor) {
     case "Var":
-      return "{" + done([hols, Var(term.indx)]) + "}";
+      return Var(term.indx);
     case "Ref":
       var got = deref(term.name, defs);
       if (got) {
@@ -818,117 +754,107 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
           try {
             var typ = typesynth(term.name, defs, show).type;
           } catch (e) {
-            return fail(() => Err(locs, ctx, e().msg + "\nInside ref... \x1b[2m"+term.name+"\x1b[0m"));
+            throw Err(locs, ctx, e.msg + "\nInside ref... \x1b[2m"+term.name+"\x1b[0m");
           }
         } else if (got.def.core === null) {
           var typ = got.def.type;
         } else {
           var typ = got.def.core.type;
         }
-        return done([hols, typ]);
+        return [hols, typ];
       } else {
-        return fail(() => Err(locs, ctx, "Undefined reference '" + term.name + "'."));
+        throw Err(locs, ctx, "Undefined reference '" + term.name + "'.");
       }
     case "Typ":
-      return done([hols, Typ()]);
+      return [hols, Typ()];
     case "All":
       var self_var = Ann(true, Var(term.self+"#"+ctx.size), term);
       var name_var = Ann(true, Var(term.name+"#"+(ctx.size+1)), term.bind);
       var body_ctx = Ext({name:term.self,type:self_var.type}, ctx);
       var body_ctx = Ext({name:term.name,type:name_var.type}, body_ctx);
-      return (
-        deep([[typecheck, [term.bind, Typ(), defs, show, hols, ctx, locs]]], ([hols,_]) =>
-        deep([[typecheck, [term.body(self_var,name_var), Typ(), defs, show, hols, body_ctx, locs]]], ([hols,_]) =>
-        done([hols, Typ()]))));
+      var [hols,_] = typecheck(term.bind, Typ(), defs, show, hols, ctx, locs);
+      var [hols,_] = typecheck(term.body(self_var,name_var), Typ(), defs, show, hols, body_ctx, locs);
+      return [hols, Typ()];
     case "App":
-      return deep([[typeinfer, [term.func, defs, show, hols, ctx, locs]]], ([hols, func_typ]) => {
-        var func_typ = reduce(func_typ, defs, hols, false);
-        switch (func_typ.ctor) {
-          case "All":
-            var self_var = Ann(true, term.func, func_typ);
-            var name_var = Ann(true, term.argm, func_typ.bind);
-            return deep([[typecheck, [term.argm, func_typ.bind, defs, show, hols, ctx, locs]]], ([hols, _]) => {
-              var term_typ = func_typ.body(self_var, name_var);
-              if (func_typ.ctor === "All" && term.eras !== func_typ.eras) {
-                return fail(() => Err(locs, ctx, "Mismatched erasure."));
-              };
-              return done([hols, term_typ]);
-            });
-          case "Hol":
-            var nam0 = new_name();
-            var nam1 = new_name();
-            var hols = {...hols, [func_typ.name]: (vals) => {
-              var all_bind = Hol(nam0, vals);
-              var all_body = (s,x) => Hol(nam1, Ext(x, Ext(s, vals)));
-              var all_term = All(term.eras, "", "x", all_bind, all_body);
-              return all_term;
-            }};
-            return deep([[typeinfer, [term, defs, show, hols, ctx, locs]]], done);
-          default:
-            return fail(() => Err(locs, ctx, "Non-function application."));
-        };
-      });
+      var [hols,func_typ] = typeinfer(term.func, defs, show, hols, ctx, locs);
+      var func_typ = reduce(func_typ, defs, hols, false);
+      switch (func_typ.ctor) {
+        case "All":
+          var self_var = Ann(true, term.func, func_typ);
+          var name_var = Ann(true, term.argm, func_typ.bind);
+          var [hols,_] = typecheck(term.argm, func_typ.bind, defs, show, hols, ctx, locs);
+          var term_typ = func_typ.body(self_var, name_var);
+          if (func_typ.ctor === "All" && term.eras !== func_typ.eras) {
+            throw Err(locs, ctx, "Mismatched erasure.");
+          }
+          return [hols, term_typ];
+        case "Hol":
+          var nam0 = new_name();
+          var nam1 = new_name();
+          var hols = {...hols, [func_typ.name]: (vals) => {
+            var all_bind = Hol(nam0, vals);
+            var all_body = (s,x) => Hol(nam1, Ext(x, Ext(s, vals)));
+            var all_term = All(term.eras, "", "x", all_bind, all_body);
+            return all_term;
+          }};
+          return typeinfer(term, defs, show, hols, ctx, locs);
+        default:
+          throw Err(locs, ctx, "Non-function application.");
+      };
     case "Let":
-      return deep([[typeinfer, [term.expr, defs, show, hols, ctx, locs]]], ([hols, expr_typ]) => {
-        var expr_var = Ann(true, Var(term.name+"#"+(ctx.size+1)), expr_typ);
-        var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
-        return deep([[typeinfer, [term.body(expr_var), defs, show, hols, body_ctx, locs]]], ([hols, body_typ]) => {
-          return done([hols, body_typ]);
-        })
-      });
+      var [hols, expr_typ] = typeinfer(term.expr, defs, show, hols, ctx, locs);
+      var expr_var = Ann(true, Var(term.name+"#"+(ctx.size+1)), expr_typ);
+      var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
+      var [hols, body_typ] = typeinfer(term.body(expr_var), defs, show, hols, body_ctx, locs);
+      return [hols, body_typ];
     case "Ann":
       if (!term.done) {
-        return deep([[typecheck, [term.expr, term.type, defs, show, hols, ctx, locs]]], ([hols, _]) => {
-          return done([hols, term.type]);
-        });
+        var [hols,_] = typecheck(term.expr, term.type, defs, show, hols, ctx, locs);
+        return [hols, term.type];
       } else {
-        return done([hols, term.type]);
+        return [hols, term.type];
       }
     case "Loc":
       var locs = {from: term.from, upto: term.upto};
-      return deep([[typeinfer, [term.expr, defs, show, hols, ctx, locs]]], done);
+      return typeinfer(term.expr, defs, show, hols, ctx, locs);
     case "Hol":
       var nam0 = new_name();
       var hols = {...hols, [term.name]: (vals) => Ann(false, Hol(term.name, vals), Hol(nam0, vals))};
-      return done([hols, Hol(nam0, term.vals)]);
+      return [hols, Hol(nam0, term.vals)];
     case "Cse":
-      return deep([[typeinfer, [term.func, defs, show, hols, ctx, locs]]], ([hols, func_typ]) => {
-        var func_typ = reduce(func_typ, defs, hols, false);
-        var hols = {...hols, [term.name]: func_typ};
-        try {
-          var term_val = build_cse(term, func_typ);
-        } catch (err) {
-          return fail(() => Err(locs, ctx, err))
-        }
-        return deep([[typeinfer, [term_val, defs, show, hols, ctx, locs]]], done);
-      });
+      var [hols, func_typ] = typeinfer(term.func, defs, show, hols, ctx, locs);
+      var func_typ = reduce(func_typ, defs, hols, false);
+      var hols = {...hols, [term.name]: func_typ};
+      try {
+        var term_val = build_cse(term, func_typ);
+      } catch (err) {
+        throw Err(locs, ctx, err);
+      }
+      return typeinfer(term_val, defs, show, hols, ctx, locs);
     case "Nat":
-      return (
-        deep([[typeinfer, [Ref("Nat"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("Nat.zero"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("Nat.succ"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        done([hols, Ref("Nat")])))));
+      var [hols, _] = typeinfer(Ref("Nat"), defs, show, hols, ctx, locs);
+      var [hols, _] = typeinfer(Ref("Nat.zero"), defs, show, hols, ctx, locs);
+      var [hols, _] = typeinfer(Ref("Nat.succ"), defs, show, hols, ctx, locs);
+      return [hols, Ref("Nat")];
     case "Chr":
-      return (
-        deep([[typeinfer, [Ref("Char"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("Char.new"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("Bit"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("Bit.0"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("Bit.1"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        done([hols, Ref("Char")])))))));
+      var [hols, _] = typeinfer(Ref("Char"), defs, show, hols, ctx, locs);
+      var [hols, _] = typeinfer(Ref("Char.new"), defs, show, hols, ctx, locs);
+      var [hols, _] = typeinfer(Ref("Bit"), defs, show, hols, ctx, locs);
+      var [hols, _] = typeinfer(Ref("Bit.0"), defs, show, hols, ctx, locs);
+      var [hols, _] = typeinfer(Ref("Bit.1"), defs, show, hols, ctx, locs);
+      return [hols, Ref("Char")];
     case "Str":
-      return (
-        deep([[typeinfer, [Ref("Char"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("Char.new"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("Bit"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("Bit.0"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("Bit.1"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("String"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("String.nil"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        deep([[typeinfer, [Ref("String.cons"), defs, show, hols, ctx, locs]]], ([hols, _]) =>
-        done([hols, Ref("String")]))))))))));
+      var [hols, _] = typeinfer(Ref("Char"), defs, show, hols, ctx, locs);
+      var [hols, _] = typeinfer(Ref("Char.new"), defs, show, hols, ctx, locs);
+      var [hols, _] = typeinfer(Ref("Bit"), defs, show, hols, ctx, locs);
+      var [hols, _] = typeinfer(Ref("Bit.0"), defs, show, hols, ctx, locs);
+      var [hols, _] = typeinfer(Ref("Bit.1"), defs, show, hols, ctx, locs);
+      var [hols, _] = typeinfer(Ref("String"), defs, show, hols, ctx, locs);
+      var [hols, _] = typeinfer(Ref("String.nil"), defs, show, hols, ctx, locs);
+      var [hols, _] = typeinfer(Ref("String.cons"), defs, show, hols, ctx, locs);
+      return [hols, Ref("String")];
   };
-  return fail(() => Err(locs, ctx, "Can't infer type."));
+  throw Err(locs, ctx, "Can't infer type.");
 };
 
 function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), locs = null) {
@@ -940,12 +866,11 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
         var name_var = Ann(true, Var(term.name+"#"+(ctx.size+1)), typv.bind);
         var body_typ = typv.body(self_var, name_var);
         if (term.eras !== typv.eras) {
-          return fail(() => Err(locs, ctx, "Type mismatch."));
+          throw Err(locs, ctx, "Type mismatch.");
         };
         var body_ctx = Ext({name:term.name,type:name_var.type}, ctx);
-        return (
-          deep([[typecheck, [term.body(name_var), body_typ, defs, show, hols, body_ctx, locs]]], ([hols, _]) =>
-          done([hols, type])));
+        var [hols, _] = typecheck(term.body(name_var), body_typ, defs, show, hols, body_ctx, locs);
+        return [hols, type];
       } else if (typv.ctor === "Hol") {
         var nam0 = new_name();
         var nam1 = new_name();
@@ -955,98 +880,22 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
           var all_term = All(term.eras, "", "x", all_bind, all_body);
           return all_term;
         }};
-        return deep([[typecheck, [term, type, defs, show, hols, ctx, locs]]], done);
+        return typecheck(term, type, defs, show, hols, ctx, locs);
       } else {
-        return fail(() => Err(locs, ctx, "Lambda has a non-function type."));
+        throw Err(locs, ctx, "Lambda has a non-function type.");
       }
     case "Let":
-      return deep([[typeinfer, [term.expr, defs, show, hols, ctx, locs]]], ([hols, expr_typ]) => {
-        var expr_var = Ann(true, Var(term.name+"#"+(ctx.size+1)), expr_typ);
-        var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
-        return deep([[typecheck, [term.body(expr_var), type, defs, show, hols, body_ctx, locs]]], ([hols, _]) => {
-          return done([hols, type]);
-        });
-      });
+      var [hols, expr_typ] = typeinfer(term.expr, defs, show, hols, ctx, locs);
+      var expr_var = Ann(true, Var(term.name+"#"+(ctx.size+1)), expr_typ);
+      var body_ctx = Ext({name:term.name,type:expr_var.type}, ctx);
+      var [hols, _] = typecheck(term.body(expr_var), type, defs, show, hols, body_ctx, locs);
+      return [hols, type];
     case "Loc":
       var locs = {from: term.from, upto: term.upto};
-      return deep([[typecheck, [term.expr, type, defs, show, hols, ctx, locs]]], ([hols, _]) => {
-        return done([hols, type]);
-      });
+      var [hols, _] = typecheck(term.expr, type, defs, show, hols, ctx, locs);
+      return [hols, type];
     case "Hol":
-      // Registers this hole as unfilled
-      if (!hols[term.name]) {
-        hols[term.name] = null;
-      };
-      // If we try to type-check a hole and it is of type `(x : A) -> B`, we
-      // first try keeping it as it is. If that doesn't work, then we specialize
-      // it as `(x) ?` and try again.
-      if (typv.ctor === "All") {
-        var path0 = [() => done([hols,type]), []]
-        var nam1 = new_name();
-        var path1_hols = {...hols, [term.name]: (vals) => {
-          return Lam(typv.eras, typv.name||("x"+ctx.size), x => Hol(nam1, Ext(x, vals)));
-        }};
-        var path1 = [typecheck, [path1_hols[term.name](term.vals), type, defs, show, path1_hols, ctx, locs]];
-        return deep([path0, path1], ([hols, _]) => done([hols,type]));
-      // If the hole is avariable or an application, then it could possibly be
-      // generated by the variables in the scope of the hole. For example, if a
-      // hole `?x : A` has the following variables in scope:
-      // - f : A -> A
-      // - g : A -> A -> A
-      // - h : A -> B
-      // - i : A -> A -> B
-      // - x : A
-      // - y : A
-      // Then `x`, `y`, `f(x)`, `f(f(x))`, `g(x)(y)`, and other combinations
-      // could be used to fill the hole. As such, we specialize the hole to 4
-      // alternatives: `{(f _), (g _ _), x, y}`, and start a wide search to see
-      // if any of those work. We don't include `h(_)` since the type returned
-      // by `h` is `B`, so it wouldn't be right. TODO: usage information to
-      // shrink search space on linear variables?
-      } else if (typv.ctor === "App" || typv.ctor === "Var") {
-        var new_hols = [];
-        //console.log("----------------", show(typv));
-        fold(term.vals, i => null, (val, cont) => i => {
-          // Get the return type of the context variable
-          var cmp0 = reduce(val.type, defs, hols, false);
-          var cmp1 = typv;
-          while (cmp0.ctor === "All") { cmp0 = reduce(cmp0.body(Ref("^"), Ref("^")), {}); }
-          while (cmp0.ctor === "App") { cmp0 = reduce(cmp0.func, {}); }
-          while (cmp1.ctor === "App") { cmp1 = reduce(cmp1.func, {}); }
-          //console.log("cmp0", show(cmp0));
-          //console.log("cmp1", show(cmp1));
-          // Checks if it is compatible with the hole's type
-          try {
-            var is_compatible = equal(cmp0, cmp1, defs, {});
-          } catch (e) {
-            var is_compatible = true;
-          }
-          //console.log("- ", show(val.expr), ":", show(val.type), "|", is_compatible);
-          //is_compatible = true;
-          // If so, specialize the hole as this var applied to other holes
-          if (is_compatible) {
-            var nam0 = new_name();
-            new_hols.push({...hols, [term.name]: (vals) => {
-              var hole = at(vals, i);
-              var type = reduce(val.type, defs, hols, false);
-              var arit = 0; 
-              while (type.ctor === "All") {
-                hole = App(type.eras, hole, Hol(nam0 + (arit++), vals));
-                type = reduce(type.body(Ref("^"),Ref("^")), defs, hols, false);
-              };
-              return hole;
-            }});
-          };
-          cont(i + 1);
-        })(0);
-        var wides = new_hols.map((hols,i) => {
-          return [typecheck, [hols[term.name](term.vals), type, defs, show, hols, ctx, locs]];
-        });
-        return wide(wides, ([hols,_]) => done([hols, type]));
-      // Otherwise, we don't have any useful information, so we just keep it
-      } else {
-        return done([hols, type]);
-      };
+      return [hols, type];
     case "Wat":
       var ctx = fold(ctx, Nil(), ({name,type}, ctx) => {
         var type = normalize(type, {}, hols, true);
@@ -1057,32 +906,28 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
         "With type: "+show(normalize(type,{},hols,true),ctx));
       var msg = require("./FormalityLang.js").stringify_err(err, null).replace(/\n*$/g,"");
       HOLE_LOGS[term.name] = msg;
-      return done([hols, type]);
+      return [hols, type];
     default:
-      return deep([[typeinfer, [term, defs, show, hols, ctx, locs]]], ([hols, infr]) => {
-        try {
-          var eq = equal(type, infr, defs, hols, ctx.size);
-          if (!eq) {
-            return fail(() => {
-              var type0_str = show(normalize(type, {}, hols, true), ctx);
-              var infr0_str = show(normalize(infr, {}, hols, true), ctx);
-              var err_ctx = fold(ctx, Nil(), ({name,type}, ctx) => {
-                var type = normalize(type, {}, hols, true);
-                return Ext({name,type}, ctx);
-              });
-              return Err(locs, err_ctx,
-                "Found type... \x1b[2m"+infr0_str+"\x1b[0m\n" +
-                "Instead of... \x1b[2m"+type0_str+"\x1b[0m")
-            });
-          } else {
-            return done([hols, type]);
-          }
-        // Equal filled a hole, so we try again
-        } catch (e) {
-          var hols = {...hols, [e[0]]: x => e[1]};
-          return deep([[typecheck, [term, type, defs, show, hols, ctx, locs]]], done);
-        };
-      });
+      var [hols, infr] = typeinfer(term, defs, show, hols, ctx, locs);
+      try {
+        var eq = equal(type, infr, defs, hols, ctx.size);
+      } catch (e) {
+        var hols = {...hols, [e[0]]: x => e[1]};
+        return typecheck(term, type, defs, show, hols, ctx, locs);
+      }
+      if (!eq) {
+        var type0_str = show(normalize(type, {}, hols, true), ctx);
+        var infr0_str = show(normalize(infr, {}, hols, true), ctx);
+        var err_ctx = fold(ctx, Nil(), ({name,type}, ctx) => {
+          var type = normalize(type, {}, hols, true);
+          return Ext({name,type}, ctx);
+        });
+        throw Err(locs, err_ctx,
+          "Found type... \x1b[2m"+infr0_str+"\x1b[0m\n" +
+          "Instead of... \x1b[2m"+type0_str+"\x1b[0m");
+      } else {
+        return [hols, type];
+      }
   };
 };
 
@@ -1093,16 +938,13 @@ function typesynth(name, defs, show = stringify) {
     var term = defs[name].term;
     var type = defs[name].type;
     try {
-      var [hols,_] = exec(() =>
-        deep([[typecheck, [type, Typ(), defs, show, {}, Nil(), null]]], ([hols,_]) =>
-        deep([[typecheck, [term, type, defs, show, hols, Nil(), null]]], ([hols,type]) => {
-          for (var hol in hols) {
-            if (hols[hol] === null) {
-              return fail(() => Err(null, Nil(), "Unsolved hole: '" + hol + "'."));
-            }
-          }
-          return done([hols,type])
-        })));
+      var [hols, _] = typecheck(type, Typ(), defs, show, {}, Nil(), null);
+      var [hols, type] = typecheck(term, type, defs, show, hols, Nil(), null);
+      for (var hol in hols) {
+        if (hols[hol] === null) {
+          throw Err(null, Nil(), "Unsolved hole: '" + hol + "'.");
+        }
+      }
     } catch (e) {
       delete defs[name].core;
       throw e;
