@@ -1541,30 +1541,34 @@ function parse_ars(code, [indx,tags], err) {
   });
 };
 
-function parse_ctr(code, [indx,tags], err) {
-  return (
-    //chain(parse_txt(code, next(code, [indx,tags]), "|", false), ([indx,tags], skip) =>
-    chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
-    chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], fils) =>
-    chain(parse_opt(code, next(code, [indx,tags]), "~", err), ([indx,tags], skip) =>
-    chain(parse_ars(code, next(code, [indx,tags]), err), ([indx,tags], inds) =>
-    chain(parse_opt(code, next(code, [indx,tags]), ",", err), ([indx,tags], skip) =>
-    [[indx,tags], {name, fils, inds}]
-    ))))));
+function parse_ctr(file) {
+  return function(code, [indx,tags], err) {
+    return (
+      //chain(parse_txt(code, next(code, [indx,tags]), "|", false), ([indx,tags], skip) =>
+      chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
+      chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], fils) =>
+      chain(parse_opt(code, next(code, [indx,tags]), "~", err), ([indx,tags], skip) =>
+      chain(parse_ars(code, next(code, [indx,tags]), err), ([indx,tags], inds) =>
+      chain(parse_opt(code, next(code, [indx,tags]), ",", err), ([indx,tags], skip) =>
+      [[indx,tags], {name: file+"."+name, fils, inds}]
+      ))))));
+  }
 };
 
-function parse_adt(code, [indx,tags], err) {
-  return (
-    chain(parse_txt(code, next(code, [indx,tags]), "type ", false), ([indx,tags], skip) =>
-    chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
-    chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], pars) =>
-    chain(parse_opt(code, next(code, [indx,tags]), "~", err), ([indx,tags], hasi) => 
-    chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], inds) =>
-    chain(parse_txt(code, next(code, [indx,tags]), "{", err), ([indx,tags], skip) =>
-    chain(parse_mny(parse_ctr)(code, next(code, [indx,tags]), err), ([indx,tags], ctrs) =>
-    chain(parse_txt(code, next(code, [indx,tags]), "}", err), ([indx,tags], skip) => {
-    return [[indx,tags], {name, pars, inds, ctrs}];
-    })))))))));
+function parse_adt(file) {
+  return function (code, [indx,tags], err) {
+    return (
+      chain(parse_txt(code, next(code, [indx,tags]), "type ", false), ([indx,tags], skip) =>
+      chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
+      chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], pars) =>
+      chain(parse_opt(code, next(code, [indx,tags]), "~", err), ([indx,tags], hasi) => 
+      chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], inds) =>
+      chain(parse_txt(code, next(code, [indx,tags]), "{", err), ([indx,tags], skip) =>
+      chain(parse_mny(parse_ctr(file))(code, next(code, [indx,tags]), err), ([indx,tags], ctrs) =>
+      chain(parse_txt(code, next(code, [indx,tags]), "}", err), ([indx,tags], skip) => {
+      return [[indx,tags], {name, pars, inds, ctrs}];
+      })))))))));
+  }
 };
 
 // Parses a defs
@@ -1572,11 +1576,11 @@ function parse(code, indx = 0, tags_list = Nil(), file_name = "main") {
   //var LOG = x => console.log(require("util").inspect(x, {showHidden: false, depth: null}));
   var defs = {};
   function define(name, type, term){
-    var real_name = name === file_name ? name : file_name + "." + name;
-    if (defs[real_name]){
+    //var real_name = name === file_name ? name : file_name + "." + name;
+    if (defs[name]){
       throw "Parse error: redefinition of "+name+".";
     } else {
-      defs[real_name] = {
+      defs[name] = {
         type: type,
         term: term,
       }
@@ -1588,7 +1592,7 @@ function parse(code, indx = 0, tags_list = Nil(), file_name = "main") {
       return [indx,tags];
     } else {
       // Parses datatype definitions
-      var parsed_adt = parse_adt(code, [indx,tags], true);
+      var parsed_adt = parse_adt(file_name)(code, [indx,tags], true);
       if (parsed_adt) {
         var [[indx,tags], adt] = parsed_adt;
         define(adt.name, adt_type_type(adt), adt_type_term(adt));

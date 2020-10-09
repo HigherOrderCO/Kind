@@ -56,17 +56,9 @@ function fold(list, nil, cons) {
 };
 
 function deref(name, defs) {
-  // If the name is exact, return it
   if (defs[name]) {
     return {def: defs[name], name};
   }
-  // Otherwise, search for any `Foo.name` that matches
-  for (var full_def_name in defs) {
-    var last_def_name = full_def_name.replace(/^.*\./g, "");
-    if (last_def_name === name) {
-      return {def: defs[full_def_name], name: full_def_name};
-    }
-  };
   return null;
 };
 
