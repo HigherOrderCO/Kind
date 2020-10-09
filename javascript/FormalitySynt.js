@@ -749,6 +749,7 @@ function typeinfer(term, defs, show = stringify, hols = {}, ctx = Nil(), locs = 
       return Var(term.indx);
     case "Ref":
       var got = deref(term.name, defs);
+      var last = Object.keys(defs).slice(0);
       if (got) {
         if (got.def.core === undefined) {
           try {
