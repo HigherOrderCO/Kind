@@ -1,4 +1,5 @@
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class FormalityCore {
 
@@ -22,11 +23,11 @@ public class FormalityCore {
 	}
 	
 	public static final class Ref extends Term {
-		public final String indx;
+		public final String name;
 
-		Ref(String indx) {
+		Ref(String name) {
 			super(CTor.REF);
-			this.indx = indx;
+			this.name = name;
 		}
 	}
 
@@ -41,10 +42,10 @@ public class FormalityCore {
 		public final Object eras;
 		public final Object self;
 		public final String name;
-		public final Object bind;
-		public final Object body;
+		public final Term bind;
+		public final BiFunction<Term, Term, Term> body;
 
-		All(Object eras, Object self, String name, Object bind, Object body) {
+		All(Object eras, Object self, String name, Term bind, BiFunction<Term, Term, Term> body) {
 			super(CTor.ALL);
 			this.eras = eras;
 			this.self = self;
@@ -57,9 +58,9 @@ public class FormalityCore {
 	public static final class Lam extends Term {
 		public final Object eras;
 		public final String name;
-		public final Object body;
+		public final Function<Term, Term> body;
 
-		Lam(Object eras, String name, Object body) {
+		Lam(Object eras, String name, Function<Term, Term> body) {
 			super(CTor.LAM);
 			this.eras = eras;
 			this.name = name;
@@ -69,10 +70,10 @@ public class FormalityCore {
 
 	public static final class App extends Term {
 		public final Object eras;
-		public final Object func;
-		public final Object argm;
+		public final Term func;
+		public final Term argm;
 
-		App(Object eras, Object func, Object argm) {
+		App(Object eras, Term func, Term argm) {
 			super(CTor.APP);
 			this.eras = eras;
 			this.func = func;
@@ -82,10 +83,10 @@ public class FormalityCore {
 
 	public static final class Let extends Term {
 		public final String name;
-		public final Object expr;
-		public final Object body;
+		public final Term expr;
+		public final Function<Term, Term> body;
 
-		Let(String name, Object expr, Object body) {
+		Let(String name, Term expr, Function<Term, Term> body) {
 			super(CTor.LET);
 			this.name = name;
 			this.expr = expr;
@@ -95,10 +96,10 @@ public class FormalityCore {
 
 	public static final class Ann extends Term {
 		public final Object done;
-		public final Object expr;
-		public final Object type;
+		public final Term expr;
+		public final Term type;
 
-		Ann(Object done, Object expr, Object type) {
+		Ann(Object done, Term expr, Term type) {
 			super(CTor.ANN);
 			this.done = done;
 			this.expr = expr;
@@ -109,9 +110,9 @@ public class FormalityCore {
 	public static final class Loc extends Term {
 		public final Object from;
 		public final Object upto;
-		public final Object expr;
+		public final Term expr;
 
-		Loc(Object from, Object upto, Object expr) {
+		Loc(Object from, Object upto, Term expr) {
 			super(CTor.LOC);
 			this.from = from;
 			this.upto = upto;
@@ -159,18 +160,81 @@ public class FormalityCore {
 		System.out.println("FormalityCore");
 	}
 
+	/**
+	* Finds first value satisfying `cond` in a list
+	* @param list
+	* @param cond
+	* @param indx
+	* @return
+	 */
 	public static Value find(List list, BiFunction<Object, Integer, Boolean> cond, int indx) {
-		switch (list.ctor.toString()) {
-			case "Nil":
+		switch (list.ctor) {
+			case NIL:
 				return null;
-			case "Ext":
+			case EXT:
 				Ext ext = (Ext) list;
 				if (cond.apply(ext.head, indx)) {
 					return new Value(ext.head, indx);
 				} else {
 					return find(ext.tail, cond, indx + 1);
 				}
+			default:
+				break;
 		}
 		throw new RuntimeException("Illegal list");
+	}
+
+
+	/** Syntax
+	*/
+	public static String stringify(Term term, int depth) {
+		switch (term.ctor) {
+			case VAR:
+				Var vterm = (Var) term;
+				return vterm.indx.split("#")[0];
+			case REF:
+				Ref ref = (Ref) term;
+				return ref.name;
+			case TYP:
+				Typ typ = (Typ) term;
+				return "*";
+			case ALL:
+				All all = (All) term;
+				String bind = all.eras != null ? "∀" : "Π";
+				String self = all.self != null ? all.self.toString() : ("x"+(depth+0));
+				String name = all.name != null ? all.name : ("x"+(depth+1));
+				String type = stringify(all.bind, depth);
+				String body = stringify(all.body.apply(new Var(self+"#"), new Var(name+"#")), depth+2);
+				return bind + self + "(" + name + ":" + type + ") " + body;
+			case LAM:
+				Lam lam = (Lam) term;
+				bind = lam.eras != null ? "Λ" : "λ";
+				name = lam.name != null ? lam.name : ("x"+(depth+0));
+				body = stringify(lam.body.apply(new Var(name+"#")), depth);
+				return bind + name + " " + body;
+			case APP:
+				App app = (App) term;
+				String open = app.eras != null ? "<" : "(";
+				String func = stringify(app.func, depth);
+				String argm = stringify(app.argm, depth);
+				String clos = app.eras != null ? ">" : ")";
+				return open + func + " " + argm + clos;
+			case LET:
+				Let let = (Let) term;
+				name = let.name != null ? let.name : ("x"+(depth+0));
+				String expr = stringify(let.expr, depth);
+				body = stringify(let.body.apply(new Var(name+"#")), depth+1);
+				return "$" + name + "=" + expr + ";" + body;
+			case ANN:
+				Ann ann = (Ann) term;
+				type = stringify(ann.type, depth);
+				expr = stringify(ann.expr, depth);
+				return ":" + type + " " + expr;
+			case LOC:
+				Loc loc = (Loc) term;
+				return stringify(loc.expr, depth);
+			default:
+				throw new RuntimeException("Illegal list");
+		}
 	}
 }
