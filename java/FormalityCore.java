@@ -1,6 +1,7 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -483,4 +484,50 @@ public class FormalityCore {
 		}
 	}
 
+	public static Term normalize(Term term, Map<String, TypedValue> defs, boolean erased, Set<Term> seen) {
+		var norm = reduce(term, defs, erased);
+		if (seen.contains(term) || seen.contains(norm)) {
+			return term;
+		} else {
+			seen.add(term);
+			seen.add(norm);
+			switch (norm.ctor) {
+				case VAR:
+					return new Var(((Var)norm).indx);
+				case REF:
+					return new Ref(((Ref)norm).name);
+				case TYP:
+					return new Typ();
+				case ALL:
+					All all = (All) norm;
+					var eras = all.eras;
+					var self = all.self;
+					var name = all.name;
+					var bind = normalize(all.bind, defs, erased, seen);
+					BiFunction<Term, Term, Term> body = (s,x) ->
+						normalize(all.body.apply(s,x), defs, erased, seen);
+					return new All(eras, self, name, bind, body);
+				case LAM:
+					Lam lam = (Lam) norm;
+					eras = lam.eras;
+					name = lam.name;
+					Function<Term, Term> lamBody = x -> normalize(lam.body.apply(x), defs, erased, seen);
+					return new Lam(eras, name, lamBody);
+				case APP:
+					App app = (App) norm;
+					eras = app.eras;
+					var func = normalize(app.func, defs, erased, seen);
+					var argm = normalize(app.argm, defs, erased, seen);
+					return new App(eras, func, argm);
+				case LET:
+					return normalize(((Let)norm).body.apply(((Let) norm).expr), defs, erased, seen);
+				case ANN:
+					return normalize(((Ann) norm).expr, defs, erased, seen);
+				case LOC:
+					return normalize(((Loc)norm).expr, defs, erased, seen);
+				default:
+					throw new IllegalArgumentException("Term " + term.ctor);
+			}
+		}
+	}
 }
