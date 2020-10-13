@@ -640,7 +640,7 @@ function parse_gt1(code, [indx,tags], err = false) {
       var nam0 = new_name();
       return [[indx,tags], xs => {
         return Loc(from, indx,
-          App(false, App(true, func(xs), hole(nam0, xs)),
+          App(false, App(true, func(xs), Lam(false, "", () => hole(nam0, xs))),
           Lam(false, name, (x) =>
           body(Ext([name,x],xs)))));
       }]
@@ -660,7 +660,7 @@ function parse_gt2(code, [indx,tags], err = false) {
       var hol0 = new_name();
       return [[indx,tags], xs => {
         return Loc(from, indx,
-          App(false, App(true, func(xs), hole(hol0, xs)),
+          App(false, App(true, func(xs), Lam(false, "", () => hole(hol0, xs))),
           Lam(false, nam0, (x) =>
           Lam(false, nam1, (y) =>
           body(Ext([nam1,y], Ext([nam0,x], xs)))))));
@@ -682,7 +682,7 @@ function parse_gt3(code, [indx,tags], err = false) {
       var hol0 = new_name();
       return [[indx,tags], xs => {
         return Loc(from, indx,
-          App(false, App(true, func(xs), hole(hol0, xs)),
+          App(false, App(true, func(xs), Lam(false, "", () => hole(hol0, xs))),
           Lam(false, nam0, (x) =>
           Lam(false, nam1, (y) =>
           Lam(false, nam2, (z) =>
@@ -706,7 +706,7 @@ function parse_gt4(code, [indx,tags], err = false) {
       var hol0 = new_name();
       return [[indx,tags], xs => {
         return Loc(from, indx,
-          App(false, App(true, func(xs), hole(hol0, xs)),
+          App(false, App(true, func(xs), Lam(false, "", () => hole(hol0, xs))),
           Lam(false, nam0, (x) =>
           Lam(false, nam1, (y) =>
           Lam(false, nam2, (z) =>
