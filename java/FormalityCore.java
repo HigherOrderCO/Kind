@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -71,11 +72,11 @@ public class FormalityCore {
 	}
 
 	public static final class App extends Term {
-		public final Object eras;
+		public final boolean eras;
 		public final Term func;
 		public final Term argm;
 
-		App(final Object eras, final Term func, final Term argm) {
+		App(final boolean eras, final Term func, final Term argm) {
 			super(CTor.APP);
 			this.eras = eras;
 			this.func = func;
@@ -236,7 +237,7 @@ public class FormalityCore {
 				final Ref ref = (Ref) term;
 				return ref.name;
 			case TYP:
-				final Typ typ = (Typ) term;
+				//final Typ typ = (Typ) term;
 				return "*";
 			case ALL:
 				final All all = (All) term;
@@ -249,15 +250,15 @@ public class FormalityCore {
 			case LAM:
 				final Lam lam = (Lam) term;
 				bind = lam.eras ? "Λ" : "λ";
-				name = lam.name != null ? lam.name : ("x"+(depth+0));
+				name = !lam.name.isEmpty() ? lam.name : ("x"+(depth+0));
 				body = stringify(lam.body.apply(new Var(name+"#")), depth);
 				return bind + name + " " + body;
 			case APP:
 				final App app = (App) term;
-				final String open = app.eras != null ? "<" : "(";
+				final String open = app.eras ? "<" : "(";
 				final String func = stringify(app.func, depth);
 				final String argm = stringify(app.argm, depth);
-				final String clos = app.eras != null ? ">" : ")";
+				final String clos = app.eras ? ">" : ")";
 				return open + func + " " + argm + clos;
 			case LET:
 				final Let let = (Let) term;
@@ -383,7 +384,7 @@ public class FormalityCore {
 			}
 		}
 		
-		public HashMap<String, TypedValue> parse_defs() {
+		public Map<String, TypedValue> parse_defs() {
 			final HashMap<String, TypedValue> defs = new HashMap<String, TypedValue>();
 			parse_nuls();
 			final String name = parse_name();
@@ -397,7 +398,7 @@ public class FormalityCore {
 			return defs;
 		}
 
-		public static Either<Term, HashMap<String, TypedValue>> parse(final String code, final int indx, final String mode) {
+		public static Either<Term, Map<String, TypedValue>> parse(final String code, final int indx, final String mode) {
 			final Parser parser = new Parser(code);
 
 			if (mode.equals("defs")) {
@@ -405,6 +406,80 @@ public class FormalityCore {
 			} else {
 				return Either.left(parser.parse_term().apply(new Nil()));
 			}
+		}
+	}
+
+
+
+	// Evaluation
+	// ==========
+
+	public static Term reduce(Term term, Map<String, TypedValue> defs, boolean erased) {
+		switch (term.ctor) {
+			case VAR:
+				Var var = (Var) term;
+				return new Var(var.indx);
+			case REF:
+				Ref ref = (Ref) term;
+				if (defs.containsKey(ref.name)) {
+					Term got = defs.get(ref.name).value;
+					if (got.ctor == CTor.LOC &&
+						((Loc) got).expr.ctor == CTor.REF &&
+						((Ref) ((Loc) got).expr).name == ref.name) {
+						return got;
+					} else {
+						return reduce(got, defs, erased);
+					}
+				} else {
+					return ref;
+				}
+			case TYP:
+				return term;
+			case ALL:
+				All all = (All) term;
+				boolean eras = all.eras;
+				Object self = all.self;
+				String name = all.name;
+				Term bind = all.bind;
+				BiFunction<Term, Term, Term> body = all.body;
+				return new All(eras, self, name, bind, body);
+			case LAM:
+				Lam lam = (Lam) term;
+				if (erased && lam.eras) {
+					return reduce(lam.body.apply(new Lam(false, "", x -> x)), defs, erased);
+				} else {
+					eras = lam.eras;
+					name = lam.name;
+					Function<Term, Term> lamBody = lam.body;
+					return new Lam(eras, name, lamBody);
+				}
+			case APP:
+				App app = (App) term;
+				if (erased && app.eras) {
+					return reduce(app.func, defs, erased);
+				} else {
+					eras = app.eras;
+					Term func = reduce(app.func, defs, erased);
+					switch (func.ctor) {
+						case LAM:
+							return reduce(((Lam) func).body.apply(app.argm), defs, erased);
+						default:
+							return new App(eras, func, app.argm);
+					}
+				}
+			case LET:
+				Let let = (Let) term;
+				name = let.name;
+				Term expr = let.expr;
+				Function<Term, Term> letBody = let.body;
+				return reduce(letBody.apply(expr), defs, erased);
+			case ANN:
+				Ann ann = (Ann) term;
+				return reduce(ann.expr, defs, erased);
+			case LOC:
+				return reduce(((Loc) term).expr, defs, erased);
+			default:
+				throw new IllegalArgumentException("Term " + term.ctor);
 		}
 	}
 
