@@ -1541,7 +1541,7 @@ function parse_ars(code, [indx,tags], err) {
   });
 };
 
-function parse_ctr(file) {
+function parse_ctr(prefix) {
   return function(code, [indx,tags], err) {
     return (
       //chain(parse_txt(code, next(code, [indx,tags]), "|", false), ([indx,tags], skip) =>
@@ -1550,25 +1550,23 @@ function parse_ctr(file) {
       chain(parse_opt(code, next(code, [indx,tags]), "~", err), ([indx,tags], skip) =>
       chain(parse_ars(code, next(code, [indx,tags]), err), ([indx,tags], inds) =>
       chain(parse_opt(code, next(code, [indx,tags]), ",", err), ([indx,tags], skip) =>
-      [[indx,tags], {name: file+"."+name, fils, inds}]
+      [[indx,tags], {name: prefix+"."+name, fils, inds}]
       ))))));
   }
 };
 
-function parse_adt(file) {
-  return function (code, [indx,tags], err) {
-    return (
-      chain(parse_txt(code, next(code, [indx,tags]), "type ", false), ([indx,tags], skip) =>
-      chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
-      chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], pars) =>
-      chain(parse_opt(code, next(code, [indx,tags]), "~", err), ([indx,tags], hasi) => 
-      chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], inds) =>
-      chain(parse_txt(code, next(code, [indx,tags]), "{", err), ([indx,tags], skip) =>
-      chain(parse_mny(parse_ctr(file))(code, next(code, [indx,tags]), err), ([indx,tags], ctrs) =>
-      chain(parse_txt(code, next(code, [indx,tags]), "}", err), ([indx,tags], skip) => {
-      return [[indx,tags], {name, pars, inds, ctrs}];
-      })))))))));
-  }
+function parse_adt(code, [indx,tags], err) {
+  return (
+    chain(parse_txt(code, next(code, [indx,tags]), "type ", false), ([indx,tags], skip) =>
+    chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
+    chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], pars) =>
+    chain(parse_opt(code, next(code, [indx,tags]), "~", err), ([indx,tags], hasi) => 
+    chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], inds) =>
+    chain(parse_txt(code, next(code, [indx,tags]), "{", err), ([indx,tags], skip) =>
+    chain(parse_mny(parse_ctr(name))(code, next(code, [indx,tags]), err), ([indx,tags], ctrs) =>
+    chain(parse_txt(code, next(code, [indx,tags]), "}", err), ([indx,tags], skip) => {
+    return [[indx,tags], {name, pars, inds, ctrs}];
+    })))))))));
 };
 
 // Parses a defs
@@ -1592,7 +1590,7 @@ function parse(code, indx = 0, tags_list = Nil(), file_name = "main") {
       return [indx,tags];
     } else {
       // Parses datatype definitions
-      var parsed_adt = parse_adt(file_name)(code, [indx,tags], true);
+      var parsed_adt = parse_adt(code, [indx,tags], true);
       if (parsed_adt) {
         var [[indx,tags], adt] = parsed_adt;
         define(adt.name, adt_type_type(adt), adt_type_term(adt));
