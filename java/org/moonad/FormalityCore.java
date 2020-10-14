@@ -50,12 +50,12 @@ public class FormalityCore {
 
 	public static final class All extends Term {
 		public final boolean eras;
-		public final Object self;
+		public final String self;
 		public final String name;
 		public final Term bind;
 		public final BiFunction<Term, Term, Term> body;
 
-		All(final boolean eras, final Object self, final String name, final Term bind, final BiFunction<Term, Term, Term> body) {
+		All(final boolean eras, final String self, final String name, final Term bind, final BiFunction<Term, Term, Term> body) {
 			super(CTor.ALL);
 			this.eras = eras;
 			this.self = self;
@@ -105,11 +105,11 @@ public class FormalityCore {
 	}
 
 	public static final class Ann extends Term {
-		public final Object done;
+		public final boolean done;
 		public final Term expr;
 		public final Term type;
 
-		Ann(final Object done, final Term expr, final Term type) {
+		Ann(final boolean done, final Term expr, final Term type) {
 			super(CTor.ANN);
 			this.done = done;
 			this.expr = expr;
@@ -425,6 +425,10 @@ public class FormalityCore {
 	// Evaluation
 	// ==========
 
+	public static Term reduce(Term term, Map<String, TypedValue> defs) {
+		return reduce(term, defs, false);
+	}
+
 	public static Term reduce(Term term, Map<String, TypedValue> defs, boolean erased) {
 		switch (term.ctor) {
 			case VAR:
@@ -449,7 +453,7 @@ public class FormalityCore {
 			case ALL:
 				All all = (All) term;
 				boolean eras = all.eras;
-				Object self = all.self;
+				String self = all.self;
 				String name = all.name;
 				Term bind = all.bind;
 				BiFunction<Term, Term, Term> body = all.body;
@@ -497,6 +501,11 @@ public class FormalityCore {
 	public static Term normalize(Term term, Map<String, TypedValue> defs) {
 		return normalize(term, defs, false, new HashSet<Term>());
 	}
+
+	public static Term normalize(Term term, Map<String, TypedValue> defs, boolean erased) {
+		return normalize(term, defs, erased, new HashSet<Term>());
+	}
+
 	static Term normalize(Term term, Map<String, TypedValue> defs, boolean erased, Set<Term> seen) {
 		var norm = reduce(term, defs, erased);
 		if (seen.contains(term) || seen.contains(norm)) {
@@ -600,7 +609,10 @@ public class FormalityCore {
 
 	// Are two terms equal?
 	public static boolean equal(Term a, Term b, Map<String, TypedValue> defs) {
-		return equal(a, b, defs, 0, new HashSet<String>());
+		return equal(a, b, defs, 0);
+	}
+	public static boolean equal(Term a, Term b, Map<String, TypedValue> defs, int dep) {
+		return equal(a, b, defs, dep, new HashSet<String>());
 	}
 
 	static boolean equal(Term a, Term b, Map<String, TypedValue> defs, int dep, Set<String> seen) {
@@ -656,5 +668,149 @@ public class FormalityCore {
 				return false;
 			}
 		}
+	}
+
+	// Type-Checking
+	// =============
+
+
+	public static final class Err extends RuntimeException {
+		public final Object loc;
+		public final Object ctx;
+		public final String msg;
+		public static final long serialVersionUID = 12345;
+
+		Err(Object loc, Object ctx, String msg) {
+			super(msg);
+			this.loc = loc;
+			this.ctx = ctx;
+			this.msg = msg;
+		}
+	}
+
+	/**
+	 *
+	 */
+	public static Term typeinfer(Term term, Map<String, TypedValue> defs) {
+		return typeinfer(term, defs, FormalityCore::stringify, new Nil(), null);
+	}
+
+	public static Term typeinfer(Term term, Map<String, TypedValue> defs, Function<Term, String> show, List ctx) {
+		return typeinfer(term, defs, show, ctx, null);
+	}
+
+	static Term typeinfer(Term term, Map<String, TypedValue> defs, Function<Term, String> show, List ctx, Object locs) {
+		switch (term.ctor) {
+			case VAR:
+				return new Var(((Var) term).indx);
+			case REF:
+				Ref ref = (Ref) term;
+				if (defs.containsKey(ref.name)) {
+					var got = defs.get(ref.name);
+					return got.type;
+				} else {
+					throw new Err(locs, ctx, "Undefined reference '" + ref.name + "'.");
+				}
+			case TYP:
+				return new Typ();
+			case APP:
+				App app = (App) term;
+				var func_typ = reduce(typeinfer(app.func, defs, show, ctx), defs);
+				switch (func_typ.ctor) {
+					case ALL:
+						var self_var = new Ann(true, app.func, func_typ);
+						var name_var = new Ann(true, app.argm, ((All)func_typ).bind);
+						typecheck(app.argm, ((All)func_typ).bind, defs, show, ctx);
+						var app_typ = ((All) func_typ).body.apply(self_var, name_var);
+						if (func_typ.ctor == CTor.ALL && app.eras != ((All) func_typ).eras) {
+							throw new Err(locs, ctx, "Mismatched erasure.");
+						}
+						return app_typ;
+					default:
+						throw new Err(locs, ctx, "Non-function application.");
+				}
+			case LET:
+				Let let = (Let) term;
+				var expr_typ = typeinfer(let.expr, defs, show, ctx);
+				var expr_var = new Ann(true, new Var(let.name+"#"+(ctx.size+1)), expr_typ);
+				var body_ctx = new Ext(new Value(let.name, expr_var.type), ctx);
+				var body_typ = typeinfer(let.body.apply(expr_var), defs, show, body_ctx);
+				return body_typ;
+			case ALL:
+				All all = (All) term;
+				var self_var = new Ann(true, new Var(all.self+"#"+ctx.size), all);
+				var name_var = new Ann(true, new Var(all.name+"#"+(ctx.size+1)), all.bind);
+				body_ctx = new Ext(new Value(all.self, self_var.type), ctx);
+				body_ctx = new Ext(new Value(all.name, name_var.type), body_ctx);
+				typecheck(all.bind, new Typ(), defs, show, ctx);
+				typecheck(all.body.apply(self_var, name_var), new Typ(), defs, show, body_ctx);
+				return new Typ();
+			case ANN:
+				Ann ann = (Ann) term;
+				if (!ann.done) {
+					typecheck(ann.expr, ann.type, defs, show, ctx);
+				}
+				return ann.type;
+			case LOC:
+				Loc loc = (Loc) term;
+				locs = new Loc(loc.from, loc.upto, null);
+				return typeinfer(loc.expr, defs, show, ctx, locs);
+			default:
+				throw new Err(locs, ctx, "Can't infer type.");
+		}
+	}
+
+	public static TypedValue typecheck(Term term, Term type, Map<String, TypedValue> defs) {
+		return typecheck(term, type, defs, FormalityCore::stringify, new Nil());
+	}
+
+	public static TypedValue typecheck(Term term, Term type, Map<String, TypedValue> defs, Function<Term,String> show, List ctx) {
+		return typecheck(term, type, defs, show, ctx, null);
+	}
+	
+	public static TypedValue typecheck(Term term, Term type, Map<String, TypedValue> defs, Function<Term,String> show, List ctx, Object locs) {
+		var typv = reduce(type, defs);
+		switch (term.ctor) {
+			case LAM:
+				Lam lam = (Lam) term;
+				if (typv.ctor == CTor.ALL) {
+					var self_var = new Ann(true, lam, type);
+					var name_var = new Ann(true, new Var(lam.name+"#"+(ctx.size+1)), ((All) typv).bind);
+					var body_typ = ((All)typv).body.apply(self_var, name_var);
+					if (lam.eras != ((All) typv).eras) {
+						throw new Err(locs, ctx, "Type mismatch.");
+					}
+					var body_ctx = new Ext(new Value(lam.name, name_var.type), ctx);
+					typecheck(lam.body.apply(name_var), body_typ, defs, show, body_ctx);
+				} else {
+					throw new Err(locs, ctx, "Lambda has a non-function type.");
+				}
+				break;
+			case LET:
+				Let let = (Let) term;
+				var expr_typ = typeinfer(let.expr, defs, show, ctx);
+				var expr_var = new Ann(true, new Var(let.name+"#"+(ctx.size+1)), expr_typ);
+				var body_ctx = new Ext(new Value(let.name, expr_var.type), ctx);
+				typecheck(let.body.apply(expr_var), type, defs, show, body_ctx);
+				break;
+			case LOC:
+				Loc loc = (Loc) term;
+				locs = new Loc(loc.from, loc.upto, null);
+				typecheck(loc.expr, type, defs, show, ctx, locs);
+				break;
+			default:
+				var infr = typeinfer(term, defs, show, ctx);
+				boolean eq = equal(type, infr, defs, ctx.size);
+				if (!eq) {
+					// TODO add ctx
+					var type0_str = show.apply(normalize(type, new HashMap<String, TypedValue>(), true));
+					var infr0_str = show.apply(normalize(infr, new HashMap<String, TypedValue>(), true));
+					throw new Err(locs, ctx,
+							"Found type... \u001b[2m"+infr0_str+"\u001b[0m\n" +
+							"Instead of... \u001b[2m"+type0_str+"\u001b[0m");
+				}
+				break;
+		};
+		return new TypedValue(type, term);
 	}
 }
