@@ -819,7 +819,7 @@ function parse_cse(code, [indx,tags], err) {
         chain(parse_nam(code, next(code, [indx,tags]), false), ([indx,tags], name) =>
         //chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
         chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], term) =>
-        [[indx,tags], {name, func: parsed_var(from, [indx,tags], name), wths: [], bars: [["def",term]], moti: null}])))),
+        [[indx,tags], {name, func: parsed_var(from, [indx,tags], name), wths: [], bars: [["_",term]], moti: null}])))),
       // open f(x):
       () => (
         chain(parse_txt(code, next(code, [indx,tags]), "open ", false), ([indx,tags], skip) =>
