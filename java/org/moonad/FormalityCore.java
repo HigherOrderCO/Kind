@@ -1,4 +1,6 @@
+package org.moonad;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -14,6 +16,10 @@ public class FormalityCore {
 		
 		Term(final CTor ctor) {
 			this.ctor = ctor;
+		}
+
+		public String toString() {
+			return stringify(this);
 		}
 	}
 
@@ -229,7 +235,11 @@ public class FormalityCore {
 
 	/** Syntax
 	*/
-	public static String stringify(final Term term, final int depth) {
+	public static String stringify(final Term term) {
+		return stringify(term, 0);
+	}
+
+	static String stringify(final Term term, final int depth) {
 		switch (term.ctor) {
 			case VAR:
 				final Var vterm = (Var) term;
@@ -484,7 +494,10 @@ public class FormalityCore {
 		}
 	}
 
-	public static Term normalize(Term term, Map<String, TypedValue> defs, boolean erased, Set<Term> seen) {
+	public static Term normalize(Term term, Map<String, TypedValue> defs) {
+		return normalize(term, defs, false, new HashSet<Term>());
+	}
+	static Term normalize(Term term, Map<String, TypedValue> defs, boolean erased, Set<Term> seen) {
 		var norm = reduce(term, defs, erased);
 		if (seen.contains(term) || seen.contains(norm)) {
 			return term;
@@ -528,6 +541,59 @@ public class FormalityCore {
 				default:
 					throw new IllegalArgumentException("Term " + term.ctor);
 			}
+		}
+	}
+
+
+	// Equality
+	// ========
+
+	// Computes the hash of a term. JS strings are hashed, so we just return one.
+
+	public static String hash(Term term) {
+		return hash(term, 0);
+	}
+
+	static String hash(Term term, int dep) {
+		switch (term.ctor) {
+			case VAR:
+				var indx = Integer.parseInt(((Var)term).indx.split("#")[1]);
+				if (indx < 0) {
+					return "^"+(dep+indx);
+				} else {
+					return "#"+indx;
+				}
+			case REF:
+				return "$" + ((Ref) term).name;
+			case TYP:
+				return "Type";
+			case ALL:
+				All all = (All) term;
+				var bind = hash(all.bind, dep);
+				var body = hash(all.body.apply(new Var("#"+(-dep-1)), new Var("#"+(-dep-2))), dep+2);
+				return "Π" + all.self + bind + body;
+			case LAM:
+				var lamBody = hash(((Lam)term).body.apply(new Var("#"+(-dep-1))), dep+1);
+				return "λ" + lamBody;
+			case APP:
+				App app = (App) term;
+				var func = hash(app.func, dep);
+				var argm = hash(app.argm, dep);
+				return "@" + func + argm;
+			case LET:
+				Let let = (Let) term;
+				var expr = hash(let.expr, dep);
+				var letBody = hash(let.body.apply(new Var("#"+(-dep-1))), dep+1);
+				return "$" + expr + letBody;
+			case ANN:
+				Ann ann = (Ann) term;
+				expr = hash(ann.expr, dep);
+				return expr;
+			case LOC:
+				expr = hash(((Loc)term).expr, dep);
+				return expr;
+			default:
+				throw new IllegalArgumentException("Term " + term.ctor);
 		}
 	}
 }
