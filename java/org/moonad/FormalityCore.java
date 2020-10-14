@@ -596,4 +596,65 @@ public class FormalityCore {
 				throw new IllegalArgumentException("Term " + term.ctor);
 		}
 	}
+
+
+	// Are two terms equal?
+	public static boolean equal(Term a, Term b, Map<String, TypedValue> defs) {
+		return equal(a, b, defs, 0, new HashSet<String>());
+	}
+
+	static boolean equal(Term a, Term b, Map<String, TypedValue> defs, int dep, Set<String> seen) {
+		Term a1 = reduce(a, defs, true);
+		Term b1 = reduce(b, defs, true);
+		var ah = hash(a1);
+		var bh = hash(b1);
+		var id = ah + "==" + bh;
+		if (ah.equals(bh) || seen.contains(id)) {
+			return true;
+		} else {
+			seen.add(id);
+			if (a1.ctor == b1.ctor) {
+				switch (a1.ctor) {
+					case ALL:
+						All all_a1 = (All) a1;
+						All all_b1 = (All) b1;
+						var a1_body = all_a1.body.apply(new Var("#"+(dep)), new Var("#"+(dep+1)));
+						var b1_body = all_b1.body.apply(new Var("#"+(dep)), new Var("#"+(dep+1)));
+						return all_a1.eras == all_b1.eras
+							&& all_a1.self == all_b1.self
+							&& equal(all_a1.bind, all_b1.bind, defs, dep+0, seen)
+							&& equal(a1_body, b1_body, defs, dep+2, seen);
+					case LAM:
+						Lam lam_a1 = (Lam) a1;
+						Lam lam_b1 = (Lam) b1;
+						a1_body = lam_a1.body.apply(new Var("#"+(dep)));
+						b1_body = lam_b1.body.apply(new Var("#"+(dep)));
+						return lam_a1.eras == lam_b1.eras
+							&& equal(a1_body, b1_body, defs, dep+1, seen);
+					case APP:
+						App app_a1 = (App) a1;
+						App app_b1 = (App) b1;
+						return app_a1.eras == app_b1.eras
+							&& equal(app_a1.func, app_b1.func, defs, dep, seen)
+							&& equal(app_a1.argm, app_b1.argm, defs, dep, seen);
+					case LET:
+						Let let_a1 = (Let) a1;
+						Let let_b1 = (Let) b1;
+						a1_body = let_a1.body.apply(new Var("#"+(dep)));
+						b1_body = let_b1.body.apply(new Var("#"+(dep)));
+						return equal(let_a1.expr, let_b1.expr, defs, dep+0, seen)
+							&& equal(a1_body, b1_body, defs, dep+1, seen);
+					case ANN:
+						return equal(((Ann)a1).expr, ((Ann)b1).expr, defs, dep, seen);
+					case LOC:
+						return equal(((Loc)a1).expr, ((Loc)b1).expr, defs, dep, seen);
+						
+					default:
+						throw new IllegalArgumentException("Term " + a1.ctor);
+				}
+			} else {
+				return false;
+			}
+		}
+	}
 }
