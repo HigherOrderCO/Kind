@@ -813,20 +813,20 @@ function parse_cse(code, [indx,tags], err) {
         chain(parse_txt(code, next(code, [indx,tags]), "}", err), ([indx,tags], skip) =>
         chain(parse_may(parse_mot)(code, [indx,tags], err), ([indx,tags], moti) =>
         [[indx,tags], {name, func, wths, bars, moti}])))))))))),
-      // open f(x):
-      () => (
-        chain(parse_txt(code, next(code, [indx,tags]), "open ", false), ([indx,tags], skip) =>
-        chain(parse_trm(code, next(code, [indx,tags]), false), ([indx,tags], func) =>
-        chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
-        chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], term) =>
-        [[indx,tags], {name: "self", func, wths: [], bars: [term], moti: null}]))))),
       // open f:
       () => (
         chain(parse_txt(code, next(code, [indx,tags]), "open ", false), ([indx,tags], skip) =>
         chain(parse_nam(code, next(code, [indx,tags]), false), ([indx,tags], name) =>
-        chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
+        //chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
         chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], term) =>
-        [[indx,tags], {name: "self", func: parsed_var(from, [indx,tags], name), wths: [], bars: [term], moti: null}]))))),
+        [[indx,tags], {name, func: parsed_var(from, [indx,tags], name), wths: [], bars: [["def",term]], moti: null}])))),
+      // open f(x):
+      () => (
+        chain(parse_txt(code, next(code, [indx,tags]), "open ", false), ([indx,tags], skip) =>
+        chain(parse_trm(code, next(code, [indx,tags]), false), ([indx,tags], func) =>
+        //chain(parse_txt(code, next(code, [indx,tags]), ":", err), ([indx,tags], skip) =>
+        chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], term) =>
+        [[indx,tags], {name: "self", func, wths: [], bars: [["_",term]], moti: null}])))),
     ]);
   };
   return chain(parse_cse(code, next(code, [indx,tags]), err), ([indx,tags], {name,func,wths,bars,moti}) => {

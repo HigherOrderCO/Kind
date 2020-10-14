@@ -303,7 +303,7 @@ function build_cse(term, type) {
   var [ctx, args] = info;
   while (type.ctor === "All") {
     var case_name = type.name.replace(/^.*\./g, "");
-    let csev = args[case_name];
+    let csev = args[case_name] || args["_"];
     if (csev) {
       var bind = type.bind;
       var argm = (function go(bind, ctx) {
@@ -323,7 +323,7 @@ function build_cse(term, type) {
     type = type.body(type, type.bind);
     ++size;
   };
-  if (size !== Object.keys(args).length) {
+  if (Object.keys(args).length > size) {
     throw "Too many cases.";
   }
   return func;
