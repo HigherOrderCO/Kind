@@ -7,7 +7,8 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class FormalityCore {
+public final class FormalityCore {
+	private FormalityCore() {}
 
 	public enum CTor {VAR, REF, TYP, ALL, LAM, APP, LET, ANN, LOC, NIL, EXT}
 
@@ -812,5 +813,12 @@ public class FormalityCore {
 				break;
 		};
 		return new TypedValue(type, term);
+	}
+
+	public static TypedValue typesynth(String name, Map<String, TypedValue> defs, Function<Term, String> show) {
+		var term = defs.get(name).value;
+		var type = defs.get(name).type;
+		/*defs.get(name).core = {term, type};*/
+		return typecheck(term, type, defs, show, new Nil());
 	}
 }
