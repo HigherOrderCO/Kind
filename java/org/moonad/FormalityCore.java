@@ -232,6 +232,14 @@ public final class FormalityCore {
 		R apply(T t) throws E;
 	}
 
+	public static <T> Object returnExceptions(final Function<T, Object> f, final T arg) {
+		try {
+			return f.apply(arg);
+		} catch (Exception e) {
+			return e.toString();
+		}
+	}
+
 	public static <T, R, E extends Exception>
 		Function<T, R> catchAllExceptions(final FunctionWithException<T, R, E> fe) {
 			return arg -> {
@@ -286,7 +294,20 @@ public final class FormalityCore {
 				map.entrySet()
 					.stream()
 					.forEach(entry -> {
-						System.out.format("Name=%s %s", entry.getKey(), entry.getValue());
+						String name = entry.getKey();
+						TypedValue tv = entry.getValue();
+						System.out.format("Name=%s\n TypeValue=%s", name, tv);
+						System.out.format("Reduction=%s", reduce(tv.value, map));
+						System.out.format("Typecheck=%s",
+								returnExceptions(x ->
+									typecheck(tv.value, tv.type, x),
+									map)
+								);
+						System.out.format("Typesynth=%s",
+								returnExceptions(x ->
+									typesynth(entry.getKey(), x, FormalityCore::stringify),
+								map)
+							);
 					});
 			});
 	}
