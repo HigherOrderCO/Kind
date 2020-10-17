@@ -1,15 +1,18 @@
 package org.moonad;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class FormalityCore {
 	private FormalityCore() {}
@@ -22,12 +25,13 @@ public final class FormalityCore {
 		}
 	}
 
-	public enum CTor {VAR, REF, TYP, ALL, LAM, APP, LET, ANN, LOC, NIL, EXT}
+	public enum Ctor {VAR, REF, TYP, ALL, LAM, APP, LET, ANN, LOC}
+	public enum ListCtor {NIL, EXT}
 
 	public static abstract class Term {
-		public final CTor ctor;
+		public final Ctor ctor;
 
-		Term(final CTor ctor) {
+		Term(final Ctor ctor) {
 			this.ctor = ctor;
 		}
 
@@ -40,7 +44,7 @@ public final class FormalityCore {
 		public final String indx;
 
 		Var(final String indx) {
-			super(CTor.VAR);
+			super(Ctor.VAR);
 			this.indx = indx;
 		}
 	}
@@ -49,7 +53,7 @@ public final class FormalityCore {
 		public final String name;
 
 		Ref(final String name) {
-			super(CTor.REF);
+			super(Ctor.REF);
 			this.name = name;
 		}
 	}
@@ -57,7 +61,7 @@ public final class FormalityCore {
 	public static final class Typ extends Term {
 
 		Typ() {
-			super(CTor.TYP);
+			super(Ctor.TYP);
 		}
 	}
 
@@ -69,7 +73,7 @@ public final class FormalityCore {
 		public final BiFunction<Term, Term, Term> body;
 
 		All(final boolean eras, final String self, final String name, final Term bind, final BiFunction<Term, Term, Term> body) {
-			super(CTor.ALL);
+			super(Ctor.ALL);
 			this.eras = eras;
 			this.self = self;
 			this.name = name;
@@ -84,7 +88,7 @@ public final class FormalityCore {
 		public final Function<Term, Term> body;
 
 		Lam(final boolean eras, final String name, final Function<Term, Term> body) {
-			super(CTor.LAM);
+			super(Ctor.LAM);
 			this.eras = eras;
 			this.name = name;
 			this.body = body;
@@ -97,7 +101,7 @@ public final class FormalityCore {
 		public final Term argm;
 
 		App(final boolean eras, final Term func, final Term argm) {
-			super(CTor.APP);
+			super(Ctor.APP);
 			this.eras = eras;
 			this.func = func;
 			this.argm = argm;
@@ -110,7 +114,7 @@ public final class FormalityCore {
 		public final Function<Term, Term> body;
 
 		Let(final String name, final Term expr, final Function<Term, Term> body) {
-			super(CTor.LET);
+			super(Ctor.LET);
 			this.name = name;
 			this.expr = expr;
 			this.body = body;
@@ -123,7 +127,7 @@ public final class FormalityCore {
 		public final Term type;
 
 		Ann(final boolean done, final Term expr, final Term type) {
-			super(CTor.ANN);
+			super(Ctor.ANN);
 			this.done = done;
 			this.expr = expr;
 			this.type = type;
@@ -136,34 +140,35 @@ public final class FormalityCore {
 		public final Term expr;
 
 		Loc(final Object from, final Object upto, final Term expr) {
-			super(CTor.LOC);
+			super(Ctor.LOC);
 			this.from = from;
 			this.upto = upto;
 			this.expr = expr;
 		}
 	}
 
-	public static abstract class List extends Term {
+	public static abstract class Lst {
 		public final int size;
+		public final ListCtor ctor;
 
-		List(final CTor ctor, final int size) {
-			super(ctor);
+		Lst(final ListCtor ctor, final int size) {
+			this.ctor = ctor;
 			this.size = size;
 		}
 	}
-	public static final class Nil extends List {
+	public static final class Nil extends Lst {
 
 		Nil() {
-			super(CTor.NIL, 0);
+			super(ListCtor.NIL, 0);
 		}
 	}
 
-	public static final class Ext extends List {
+	public static final class Ext extends Lst {
 		public final Value head;
-		public final List tail;
+		public final Lst tail;
 
-		Ext(final Value head, final List tail) {
-			super(CTor.NIL, tail.size + 1);
+		Ext(final Value head, final Lst tail) {
+			super(ListCtor.NIL, tail.size + 1);
 			this.head = head;
 			this.tail = tail;
 		}
@@ -196,6 +201,10 @@ public final class FormalityCore {
 		TypedValue(final Term type, final Term value) {
 			this.type = type;
 			this.value = value;
+		}
+
+		public String toString() {
+			return String.format("{value: %s, type: %s}", value, type);
 		}
 	}
 
@@ -233,19 +242,40 @@ public final class FormalityCore {
 				}
 			};
 		}
+	public static class Pair<T,U> {
+		public final T first;
+		public final U second;
+		public Pair(T first, U second) {
+			this.first = first;
+			this.second = second;
+		}
+	}
+
+	public static <T, R> Stream<Pair<T,R>> mapPair(Stream<T> stream, Function<T, R> f) {
+		return stream.map(t -> new Pair<T,R>(t, f.apply(t)));
+	}
 
 	public static void main(final String... args) {
 		if (args.length == 0) {
-			System.out.println("Usage: [file] ...");
+			System.out.println("Usage:  [file | OPTIONS] ...");
 		}
+		debug = Arrays.stream(args)
+			.anyMatch(s -> s.equals("--debug") || s.equals("-d"));
 
-		final java.util.List<Either<Term, Map<String, TypedValue>>> defs =
+		final Stream<Path> paths =
 			Arrays.stream(args)
+			.filter(s -> !s.startsWith("-"))
 			.parallel()
-			.map(catchAllExceptions(Paths::get))
-			.map(catchAllExceptions(Files::readString))
-			.map(code -> {
-				return Parser.parse(code);
+			.map(catchAllExceptions(Paths::get));
+
+		final List<Either<Term, Map<String, TypedValue>>> defs =
+			mapPair(paths, catchAllExceptions(Files::readString))
+			.map(pair -> {
+				try {
+					return Parser.parse(pair.second);
+				} catch (RuntimeException e) {
+					throw new RuntimeException("Failed to parse file: " + pair.first, e);
+				}
 			})
 			.collect(Collectors.toList());
 
@@ -253,9 +283,11 @@ public final class FormalityCore {
 			.map(e -> e.second)
 			.filter(e -> e != null)
 			.forEach(map -> {
-				map.keySet()
+				map.entrySet()
 					.stream()
-					.forEach(System.out::println);
+					.forEach(entry -> {
+						System.out.format("Name=%s %s", entry.getKey(), entry.getValue());
+					});
 			});
 	}
 
@@ -266,7 +298,7 @@ public final class FormalityCore {
 	 * @param indx
 	 * @return
 	 */
-	public static Optional<IndexedValue> find(final List list, final BiFunction<Value, Integer, Boolean> cond, final int indx) {
+	public static Optional<IndexedValue> find(final Lst list, final BiFunction<Value, Integer, Boolean> cond, final int indx) {
 		switch (list.ctor) {
 			case NIL:
 				return Optional.empty();
@@ -341,44 +373,62 @@ public final class FormalityCore {
 		}
 	}
 
-	public static boolean is_name(final String chr) {
-		final int val = chr.charAt(0);
-		return (val >= 46 && val < 47)   // .
-			|| (val >= 48 && val < 58)   // 0-9
-			|| (val >= 65 && val < 91)   // A-Z
-			|| (val >= 95 && val < 96)   // _
-			|| (val >= 97 && val < 123); // a-z
-	}
 
 	public static class Parser {
 		private int indx;
 		private int line;
+		private int col;
 		public final String code;
 
 		private Parser(final String code) {
 			this.code = code;
 			this.indx = 0;
 			this.line = 1;
+			this.col = 1;
+		}
+
+		public static boolean is_name(final char val) {
+			return (val >= 46 && val < 47)   // .
+				|| (val >= 48 && val < 58)   // 0-9
+				|| (val >= 65 && val < 91)   // A-Z
+				|| (val >= 95 && val < 96)   // _
+				|| (val >= 97 && val < 123); // a-z
+		}
+
+		private boolean next_char() {
+			if (indx < code.length() - 1) {
+				col++;
+				indx++;
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		private String location() {
+			return line + ":" + col;
 		}
 
 		public String parse_name() {
-			if (indx < code.length() && is_name(code.substring(indx))) {
-				return code.charAt(indx++) + parse_name();
+			char c = code.charAt(indx);
+			if (is_name(c) && next_char()) {
+				return c + parse_name();
 			} else {
 				return "";
 			}
 		}
 
 		public void parse_nuls() {
-			if (indx < code.length()) {
-				char c = code.charAt(indx);
-				while (indx < code.length() && (c == ' ' || c == '\n' || c == '\r')) {
-					if (c == '\n') line++;
-					++indx;
-					c = code.charAt(indx);
+			char c = code.charAt(indx);
+			while (c == ' ' || c == '\n' || c == '\r') {
+				if (c == '\n') {
+					line++;
+					col = 1;
 				}
-				debug("No more nulls at " + indx + " " + c);
+				if (!next_char()) break;
+				c = code.charAt(indx);
 			}
+			debug("No more nulls at " + indx + " " + c);
 		}
 
 		public void parse_char(final char chr) {
@@ -386,18 +436,17 @@ public final class FormalityCore {
 				throw new RuntimeException("Unexpected eof.");
 			} else if (code.charAt(indx) != chr) {
 				throw new RuntimeException("Expected \""+chr+"\", found "+
-						code.charAt(indx)+" at "+indx+".");
+						code.charAt(indx)+" at (" + location() + ").");
 			}
-			++indx;
+			next_char();
 		}
 
-		public Function<List, Term> parse_term() {
-			debug("parse_term: indx="+indx);
+		public Function<Lst, Term> parse_term() {
 			parse_nuls();
 			final char chr = code.charAt(indx);
 
 			debug("parse_term: chr=" + chr + " indx="+indx);
-			parse_nuls();
+			next_char();
 			switch (chr) {
 				case '*':
 					return (ctx) -> new Typ();
@@ -408,15 +457,15 @@ public final class FormalityCore {
 					parse_char('(');
 					String name = parse_name();
 					parse_char(':');
-					final Function<List, Term> bind = parse_term();
+					final Function<Lst, Term> bind = parse_term();
 					parse_char(')');
-					Function<List, Term> body = parse_term();
+					Function<Lst, Term> body = parse_term();
 					return (ctx) -> new All(eras, self, name, bind.apply(ctx),
 							(s,x) -> body.apply(
-								new Ext(new Value(name,x),
-									new Ext(new Value(self,s),
-								ctx))
-							));
+								new Ext(new Value(name, x),
+									new Ext(new Value(self, s),
+										ctx))
+								));
 				case 'λ':
 				case 'Λ':
 					eras = chr == 'Λ';
@@ -428,26 +477,26 @@ public final class FormalityCore {
 				case '(':
 				case '<':
 					eras = chr == '<';
-					final Function<List, Term> func = parse_term();
-					final Function<List, Term> argm = parse_term();
+					final Function<Lst, Term> func = parse_term();
+					final Function<Lst, Term> argm = parse_term();
 					parse_char(eras ? '>' : ')');
 					return (ctx) -> new App(eras, func.apply(ctx), argm.apply(ctx));
 				case '$':
 					name = parse_name();
 					parse_char('=');
-					Function<List, Term> expr = parse_term();
+					Function<Lst, Term> expr = parse_term();
 					parse_char(';');
 					body = parse_term();
-					final Function<List, Term> ret = (ctx) -> new Let(name, expr.apply(ctx),
+					final Function<Lst, Term> ret = (ctx) -> new Let(name, expr.apply(ctx),
 							(x) -> body.apply(new Ext(new Value(name, x), ctx)
 							));
 					return ret;
 				case ':':
-					   final Function<List, Term> type = parse_term();
+					   final Function<Lst, Term> type = parse_term();
 					   expr = parse_term();
 					   return (ctx) -> new Ann(false, expr.apply(ctx), type.apply(ctx));
 				default:
-					   if (is_name(String.valueOf(chr))) {
+					   if (is_name(chr)) {
 						   name = chr + parse_name();
 						   return (ctx) -> {
 							   final Optional<IndexedValue> got = find(ctx, (x, index) -> x.name.equals(name), 0);
@@ -455,7 +504,7 @@ public final class FormalityCore {
 						   };
 					   } else {
 						   throw new RuntimeException("Unexpected symbol at ("
-								   + line + ":" + indx + ") (\\u"
+								   + location() + ") (\\u"
 								   + Integer.toHexString(chr | 0x10000).substring(1)
 								   + "): \"" + chr + "\".");
 					   }
@@ -466,6 +515,7 @@ public final class FormalityCore {
 			final HashMap<String, TypedValue> defs = new HashMap<String, TypedValue>();
 			parse_nuls();
 			final String name = parse_name();
+			parse_nuls();
 			if (name.length() > 0) {
 				parse_char(':');
 				final Term type = parse_term().apply(new Nil());
@@ -508,8 +558,8 @@ public final class FormalityCore {
 				final Ref ref = (Ref) term;
 				if (defs.containsKey(ref.name)) {
 					final Term got = defs.get(ref.name).value;
-					if (got.ctor == CTor.LOC &&
-						((Loc) got).expr.ctor == CTor.REF &&
+					if (got.ctor == Ctor.LOC &&
+						((Loc) got).expr.ctor == Ctor.REF &&
 						((Ref) ((Loc) got).expr).name == ref.name) {
 						return got;
 					} else {
@@ -765,11 +815,11 @@ public final class FormalityCore {
 		return typeinfer(term, defs, FormalityCore::stringify, new Nil(), null);
 	}
 
-	public static Term typeinfer(final Term term, final Map<String, TypedValue> defs, final Function<Term, String> show, final List ctx) {
+	public static Term typeinfer(final Term term, final Map<String, TypedValue> defs, final Function<Term, String> show, final Lst ctx) {
 		return typeinfer(term, defs, show, ctx, null);
 	}
 
-	static Term typeinfer(final Term term, final Map<String, TypedValue> defs, final Function<Term, String> show, final List ctx, Object locs) {
+	static Term typeinfer(final Term term, final Map<String, TypedValue> defs, final Function<Term, String> show, final Lst ctx, Object locs) {
 		switch (term.ctor) {
 			case VAR:
 				return new Var(((Var) term).indx);
@@ -792,7 +842,7 @@ public final class FormalityCore {
 						final var name_var = new Ann(true, app.argm, ((All)func_typ).bind);
 						typecheck(app.argm, ((All)func_typ).bind, defs, show, ctx);
 						final var app_typ = ((All) func_typ).body.apply(self_var, name_var);
-						if (func_typ.ctor == CTor.ALL && app.eras != ((All) func_typ).eras) {
+						if (func_typ.ctor == Ctor.ALL && app.eras != ((All) func_typ).eras) {
 							throw new Err(locs, ctx, "Mismatched erasure.");
 						}
 						return app_typ;
@@ -834,16 +884,16 @@ public final class FormalityCore {
 		return typecheck(term, type, defs, FormalityCore::stringify, new Nil());
 	}
 
-	public static TypedValue typecheck(final Term term, final Term type, final Map<String, TypedValue> defs, final Function<Term,String> show, final List ctx) {
+	public static TypedValue typecheck(final Term term, final Term type, final Map<String, TypedValue> defs, final Function<Term,String> show, final Lst ctx) {
 		return typecheck(term, type, defs, show, ctx, null);
 	}
 
-	public static TypedValue typecheck(final Term term, final Term type, final Map<String, TypedValue> defs, final Function<Term,String> show, final List ctx, Object locs) {
+	public static TypedValue typecheck(final Term term, final Term type, final Map<String, TypedValue> defs, final Function<Term,String> show, final Lst ctx, Object locs) {
 		final var typv = reduce(type, defs);
 		switch (term.ctor) {
 			case LAM:
 				final Lam lam = (Lam) term;
-				if (typv.ctor == CTor.ALL) {
+				if (typv.ctor == Ctor.ALL) {
 					final var self_var = new Ann(true, lam, type);
 					final var name_var = new Ann(true, new Var(lam.name+"#"+(ctx.size+1)), ((All) typv).bind);
 					final var body_typ = ((All)typv).body.apply(self_var, name_var);
