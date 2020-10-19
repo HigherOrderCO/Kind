@@ -196,8 +196,9 @@ function parse_arg(parser) {
       chain(parse_one(code, [indx,tags], "(", "<", false), ([indx,tags], eras) =>
       chain(parser(code, [indx,tags], false), ([indx,tags], init) =>
       chain(parse_mny(parse_next)(code, [indx,tags], err), ([indx,tags], parses) =>
+      chain(parse_opt(code, next(code, [indx,tags]), ",", err), ([indx,tags], skip) =>
       chain(parse_txt(code, next(code,[indx,tags]), eras ? ">" : ")", err), ([indx,tags], skip) =>
-      [[indx,tags], [eras, [init].concat(parses)]])))));
+      [[indx,tags], [eras, [init].concat(parses)]]))))));
   };
 };
 

@@ -96,7 +96,7 @@ async function _run_(
         },
       });
       var prefix = file.slice(0,-ext.length);
-      if (prefix !== "global" && name.slice(0,prefix.length) !== prefix) {
+      if (prefix !== "main" && name.slice(0,prefix.length) !== prefix) {
         throw "Name '"+name+"' doesn't start with '"+prefix+"' inside '"+file+"'.\n"
       }
       if (!silent) {

@@ -855,7 +855,7 @@ function typecheck(term, type, defs, show = stringify, hols = {}, ctx = Nil(), l
   switch (term.ctor) {
     case "Lam":
       if (typv.ctor === "All") {
-        var self_var = Ann(true, term, type);
+        var self_var = term;
         var name_var = Ann(true, Var(term.name+"#"+(ctx.size+1)), typv.bind);
         var body_typ = typv.body(self_var, name_var);
         if (term.eras !== typv.eras) {
