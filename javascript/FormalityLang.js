@@ -914,6 +914,17 @@ function parse_don(code, [indx,tags], err = false) {
               return term;
             }];
           })))))),
+        () => // let x = expr; body
+          chain(parse_txt(code, next(code, [indx,tags]), "let ", false), ([indx,tags], skip) =>
+          chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
+          chain(parse_txt(code, next(code, [indx,tags]), "=", err), ([indx,tags], skip) =>
+          chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], expr) =>
+          chain(parse_txt(code, next(code, [indx,tags]), ";", err), ([indx,tags], skip) =>
+          chain(parse_stt(code, next(code, [indx,tags]), err), ([indx,tags], body) => {
+            return [[indx,tags], xs => {
+              return Let(name, expr(xs), (x) => body(Ext([name,x],xs)));
+            }];
+          })))))),
         () => // return expr;
           chain(parse_txt(code, next(code, [indx,tags]), "return ", false), ([indx,tags], skip) =>
           chain(parse_trm(code, next(code, [indx,tags]), err), ([indx,tags], expr) =>
