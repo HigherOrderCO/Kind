@@ -2,6 +2,8 @@ const fmc = require("./FormalitySynt.js");
 const fml = require("./FormalityLang.js");
 const cmp = require("./FormalityComp.js");
 
+const PROFILE = false; // TODO: expose as compiler option
+
 var prim_types = {
   Unit: {
     inst: [[0, "1"]],
@@ -123,6 +125,7 @@ var prim_funcs = {
   "Bool.and"         : [2, a=>b=>`${a}&&${b}`],
   "Bool.if"          : [3, a=>b=>c=>`${a}?${b}:${c}`],
   "Bool.or"          : [2, a=>b=>`${a}||${b}`],
+  "Bits.concat"      : [2, a=>b=>`${b}+${a}`],
   "Debug.log"        : [2, a=>b=>`(console.log(${a}),${b}())`],
   "Nat.add"          : [2, a=>b=>`${a}+${b}`],
   "Nat.sub"          : [2, a=>b=>`${a}-${b}<=0n?0n:${a}-${b}`],
@@ -141,6 +144,7 @@ var prim_funcs = {
   "Nat.to_u64"       : [1, a=>`${a}`],
   "Nat.to_u256"      : [1, a=>`${a}`],
   "Nat.to_f64"       : [3, a=>b=>c=>`f64_make(${a},${b},${c})`],
+  "Nat.to_bits"      : [1, a=>`nat_to_bits(${a})`],
   "U8.add"           : [2, a=>b=>`(${a}+${b})&0xFF`],
   "U8.sub"           : [2, a=>b=>`Math.max(${a}-${b},0)`],
   "U8.mul"           : [2, a=>b=>`(${a}*${b})&0xFF`],
@@ -250,6 +254,8 @@ var prim_funcs = {
   "Col32.get_g"      : [1, a=>`((${a}>>>8)&0xFF)`],
   "Col32.get_r"      : [1, a=>`(${a}&0xFF)`],
   "Col32.new"        : [4, a=>b=>c=>d=>`(0|${a}|(${b}<<8)|(${c}<<16)|(${d}<<24))`],
+  "Fm.Name.to_bits"  : [1, a=>`fm_name_to_bits(${a})`],
+  "List.for"         : [3, a=>b=>c=>`list_for(${a})(${b})(${c})`],
 };
 
 var count = 0;
@@ -659,6 +665,46 @@ function compile(main, defs, only_expression = false) {
   // Builds header and initial dependencies
   var isio = fmc.equal(defs[main].type, fmc.App(false, fmc.Ref("IO"), fmc.Ref("Unit")), defs);
   var code = "";
+
+  if (PROFILE) {
+    code += [
+      "var STATS = {};",
+      "function CALL(name, func) {",
+      "  var init = Date.now();",
+      "  var done = func();",
+      "  var stop = Date.now();",
+      "  STATS[name] = STATS[name] || {calls: 0, etime: 0};",
+      "  STATS[name].etime += (stop - init) / 1000;",
+      "  STATS[name].calls += 1;",
+      "  return done;",
+      "};",
+      "function FN(name, arity, func) {",
+      "  switch (arity) {",
+      "    case 0: return func;",
+      "    case 1: return a => CALL(name, () => func(a));",
+      "    case 2: return a => b => CALL(name, () => func(a)(b));",
+      "    case 3: return a => b => c => CALL(name, () => func(a)(b)(c));",
+      "    case 4: return a => b => c => d => CALL(name, () => func(a)(b)(c)(d));",
+      "    case 5: return a => b => c => d => e => CALL(name, () => func(a)(b)(c)(d)(e));",
+      "    case 6: return a => b => c => d => e => f => CALL(name, () => func(a)(b)(c)(d)(e)(f));",
+      "    case 7: return a => b => c => d => e => f => g => CALL(name, () => func(a)(b)(c)(d)(e)(f)(g));",
+      "    case 8: return a => b => c => d => e => f => g => h => CALL(name, () => func(a)(b)(c)(d)(e)(f)(g)(h));",
+      "    default: return func;",
+      "  }",
+      "}",
+      "function SHOW_STATS() {",
+      "  var arr = [];",
+      "  for (var name in STATS) {",
+      "    arr.push({name, ...STATS[name]});",
+      "  }",
+      "  arr.sort((a,b) => a.etime - b.etime);",
+      "  for (var {name,calls,etime} of arr) {",
+      "    console.log(name, calls, etime);",
+      "  }",
+      "}",
+    ].join("\n");
+  }
+
   if (!only_expression) {
     code += "module.exports = ";
   };
@@ -849,6 +895,56 @@ function compile(main, defs, only_expression = false) {
     code += "\n";
   };
 
+  if (used_prim_funcs["List.for"]) {
+    code += [
+      "  var list_for = list => nil => cons => {",
+      "    while (list._ !== 'List.nil') {",
+      "      nil = cons(list.head)(nil);",
+      "      list = list.tail;",
+      "    }",
+      "    return nil;",
+      "  };",
+    ].join("\n");
+  }
+
+  if (used_prim_funcs["Nat.to_bits"]) {
+    code += [
+      "var nat_to_bits = n => {",
+      "  return n === 0n ? '' : n.toString(2);",
+      "};",
+    ].join("\n");
+  }
+
+  if (used_prim_funcs["Fm.Name.to_bits"]) {
+    code += [
+      "var fm_name_to_bits = name => {",
+      "  const TABLE = {",
+      "    'A': '000000', 'B': '100000', 'C': '010000', 'D': '110000',",
+      "    'E': '001000', 'F': '101000', 'G': '011000', 'H': '111000',",
+      "    'I': '000100', 'J': '100100', 'K': '010100', 'L': '110100',",
+      "    'M': '001100', 'N': '101100', 'O': '011100', 'P': '111100',",
+      "    'Q': '000010', 'R': '100010', 'S': '010010', 'T': '110010',",
+      "    'U': '001010', 'V': '101010', 'W': '011010', 'X': '111010',",
+      "    'Y': '000110', 'Z': '100110', 'a': '010110', 'b': '110110',",
+      "    'c': '001110', 'd': '101110', 'e': '011110', 'f': '111110',",
+      "    'g': '000001', 'h': '100001', 'i': '010001', 'j': '110001',",
+      "    'k': '001001', 'l': '101001', 'm': '011001', 'n': '111001',",
+      "    'o': '000101', 'p': '100101', 'q': '010101', 'r': '110101',",
+      "    's': '001101', 't': '101101', 'u': '011101', 'v': '111101',",
+      "    'w': '000011', 'x': '100011', 'y': '010011', 'z': '110011',",
+      "    '0': '001011', '1': '101011', '2': '011011', '3': '111011',",
+      "    '4': '000111', '5': '100111', '6': '010111', '7': '110111',",
+      "    '8': '001111', '9': '101111', '.': '011111', '_': '111111',",
+      "  }",
+      "  var a = '';",
+      "  for (var i = name.length - 1; i >= 0; --i) {",
+      "    a += TABLE[name[i]];",
+      "  }",
+      "  return a;",
+      "};",
+    ].join("\n");
+  };
+
   for (var prim in used_prim_types) {
     code += "  var inst_"+prim.toLowerCase()+" = "+instantiator(used_prim_types[prim].inst)+";\n";
     code += "  var elim_"+prim.toLowerCase()+" = "+js_code(cmp.Lam("x", application(cmp.Eli(prim, cmp.Var("x")), true)))+";\n";
@@ -897,7 +993,17 @@ function compile(main, defs, only_expression = false) {
     };
 
     // Adds to code and register export
-    code += "  var "+js_name(name)+" = "+expr+";\n";
+    if (PROFILE) {
+      var arity = 0;
+      var arity_term = comp;
+      while (arity_term.ctor === "Lam") {
+        arity_term = arity_term.body;
+        arity++;
+      }
+      code += "  var "+js_name(name)+" = FN('"+js_name(name)+"', "+arity+", "+expr+");\n";
+    } else {
+      code += "  var "+js_name(name)+" = "+expr+";\n";
+    }
     exps.push(name);
   };
 
@@ -920,6 +1026,10 @@ function compile(main, defs, only_expression = false) {
       code += "\nvar MAIN=module.exports['"+main+"']; try { console.log(JSON.stringify(MAIN,null,2) || '<unprintable>') } catch (e) { console.log(MAIN); };";
     };
   };
+
+  if (PROFILE) {
+    code += "\nSHOW_STATS();";
+  }
 
   return code;
 };
