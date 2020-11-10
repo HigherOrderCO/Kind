@@ -668,10 +668,13 @@ function compile(main, defs, only_expression = false) {
 
   if (PROFILE) {
     code += [
+      "var DEPTH = 0;",
       "var STATS = {};",
       "function CALL(name, func) {",
       "  var init = Date.now();",
+      "  ++DEPTH;",
       "  var done = func();",
+      "  --DEPTH;",
       "  var stop = Date.now();",
       "  STATS[name] = STATS[name] || {calls: 0, etime: 0};",
       "  STATS[name].etime += (stop - init) / 1000;",
@@ -959,6 +962,8 @@ function compile(main, defs, only_expression = false) {
     code += "        switch (p.query) {\n";
     code += "          case 'print': console.log(p.param); run(p.then(1)).then(res); break;\n";
     code += "          case 'get_line': rdl.question('', (line) => run(p.then(line)).then(res)); break;\n";
+    code += "          case 'get_file': try { run(p.then(require('fs').readFileSync(p.param,'utf8'))).then(res); } catch (e) { console.log('File not found: \"'+p.param+'\"'); process.exit(); }; break;\n";
+    code += "          case 'get_args': run(p.then(process.argv[2]||'')).then(res); break;\n";
     code += "         }\n";
     code += "      });\n";
     code += "    }\n";

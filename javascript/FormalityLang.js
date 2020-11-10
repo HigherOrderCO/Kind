@@ -252,7 +252,7 @@ function parse_all(code, [indx,tags], err = false) {
   return (
     chain(parse_nam(code, next(code, [indx,tags]), true, false), ([indx,tags], self) =>
     chain(parse_arg(parse_bnd)(code, [indx,tags], false), ([indx,tags], [eras,binds]) =>
-    chain(parse_txt(code, next(code, [indx,tags]), "->", false), ([indx,tags], skip) =>
+    chain(parse_opt(code, next(code, [indx,tags]), "->", false), ([indx,tags], skip) =>
     chain(parse_trm(code, [indx,tags], err), ([indx,tags], body) =>
     [[indx,tags], xs => {
       var fold = (ctx,i) => {
@@ -1562,7 +1562,7 @@ function parse_ctr(prefix) {
       chain(parse_nam(code, next(code, [indx,tags]), false, err), ([indx,tags], name) =>
       chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], fils) =>
       chain(parse_opt(code, next(code, [indx,tags]), "~", err), ([indx,tags], skip) =>
-      chain(parse_ars(code, next(code, [indx,tags]), err), ([indx,tags], inds) =>
+      chain(parse_bds(code, next(code, [indx,tags]), err), ([indx,tags], inds) =>
       chain(parse_opt(code, next(code, [indx,tags]), ",", err), ([indx,tags], skip) =>
       [[indx,tags], {name: prefix+"."+name, fils, inds}]
       ))))));
