@@ -189,11 +189,11 @@ function infer(term, defs, ctx = fmc.Nil()) {
       };
     case "Let":
       var expr_cmp = infer(term.expr, defs, ctx);
-      var expr_var = fmc.Ann(true, fmc.Var(term.name+"#"+(ctx.size+1)), expr_cmp.type);
+      var expr_var = fmc.Ann(true, fmc.Var("_"+term.name+"#"+(ctx.size+1)), expr_cmp.type);
       var body_ctx = fmc.Ext({name:term.name,type:expr_var.type}, ctx);
       var body_cmp = infer(term.body(expr_var), defs, body_ctx);
       return {
-        comp: Let(term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp),
+        comp: Let("_"+term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp),
         type: body_cmp.type,
       };
     case "All":
@@ -237,14 +237,14 @@ function check(term, type, defs, ctx = fmc.Nil()) {
     case "Lam":
       if (typv.ctor === "All") {
         var self_var = fmc.Ann(true, term, type);
-        var name_var = fmc.Ann(true, fmc.Var(term.name+"#"+(ctx.size+1)), typv.bind);
+        var name_var = fmc.Ann(true, fmc.Var("_"+term.name+"#"+(ctx.size+1)), typv.bind);
         var body_typ = typv.body(self_var, name_var);
         var body_ctx = fmc.Ext({name:term.name,type:name_var.type}, ctx);
         var body_cmp = check(term.body(name_var), body_typ, defs, body_ctx);
         if (term.eras) {
           comp = body_cmp.comp;
         } else {
-          comp = Lam(term.name+"$"+(ctx.size+1), body_cmp.comp);
+          comp = Lam("_"+term.name+"$"+(ctx.size+1), body_cmp.comp);
         }
         var type_adt = as_adt(type, defs);
         var type_prim = prim_of(type, defs);
@@ -259,11 +259,11 @@ function check(term, type, defs, ctx = fmc.Nil()) {
       return {comp, type};
     case "Let":
       var expr_cmp = infer(term.expr, defs, ctx);
-      var expr_var = fmc.Ann(true, fmc.Var(term.name+"#"+(ctx.size+1)), expr_cmp.type);
+      var expr_var = fmc.Ann(true, fmc.Var("_"+term.name+"#"+(ctx.size+1)), expr_cmp.type);
       var body_ctx = fmc.Ext({name:term.name,type:expr_var.type}, ctx);
       var body_cmp = check(term.body(expr_var), type, defs, body_ctx);
       return {
-        comp: Let(term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp),
+        comp: Let("_"+term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp),
         type: body_cmp.type,
       };
     case "Loc":
