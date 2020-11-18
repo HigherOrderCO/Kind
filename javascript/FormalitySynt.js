@@ -309,13 +309,13 @@ function build_cse(term, type) {
       var argm = (function go(bind, ctx) {
         if (bind.ctor === "All") {
           var eras = bind.eras;
-          var name = tnam+"."+bind.name;
+          var name = bind.name ? tnam+"."+bind.name : tnam;
           var body = x => go(bind.body(bind, bind.bind), Ext([name, x], ctx));
           return Lam(eras, name, body);
         } else {
           return csev(ctx);
         };
-      })(type.bind, ctx);
+      })(type.bind, ctx, 0);
     } else {
       throw "Missing '"+case_name+"' case.";
     }

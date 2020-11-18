@@ -2030,7 +2030,7 @@ function adt_type_term({name, pars, inds, ctrs}) {
             for (var I = 0; I < inds.length; ++I) {
               slf = App(false, slf, get_var(ctx, inds[I].name));
             }
-            return All(false, "", "self", slf, (s,x) => Typ());
+            return All(false, "", "", slf, (s,x) => Typ());
           }
         })(0, ctx),
         // {ctors(0)} = (nil: {fields(0,0)}) -> {ctors(1)}
