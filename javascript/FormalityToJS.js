@@ -8,7 +8,7 @@ var prim_types = {
   Unit: {
     inst: [[0, "1"]],
     elim: {ctag: x => 'unit', ctor: [[]]},
-    cnam: ['unit'],
+    cnam: ['"unit"'],
   },
   Bool: {
     inst: [[0, "true"], [0, "false"]],
@@ -570,7 +570,7 @@ function recursion(term, name) {
   };
   check(term, true);
   if (is_recursive) {
-    return {tail: is_tail_safe, args};
+    return {tail: name.slice(-3) === ".tc" || is_tail_safe, args};
   }
   return null;
 };
