@@ -308,10 +308,18 @@ function build_cse(term, type) {
       var bind = type.bind;
       var argm = (function go(bind, ctx) {
         if (bind.ctor === "All") {
-          var eras = bind.eras;
-          var name = bind.name ? tnam+"."+bind.name : tnam;
-          var body = x => go(bind.body(bind, bind.bind), Ext([name, x], ctx));
-          return Lam(eras, name, body);
+          if (!bind.name) {
+            var eras = bind.eras;
+            var nam0 = tnam+".self";
+            var nam1 = tnam;
+            var body = x => go(bind.body(bind, bind.bind), Ext([nam0,x], Ext([nam1,x], ctx)));
+            return Lam(eras, nam0, body);
+          } else {
+            var eras = bind.eras;
+            var name = tnam+"."+bind.name;
+            var body = x => go(bind.body(bind, bind.bind), Ext([name, x], ctx));
+            return Lam(eras, name, body);
+          }
         } else {
           return csev(ctx);
         };
