@@ -1019,7 +1019,8 @@ function compile(main, defs, only_expression = false) {
   // Builds export list
   code += "  return {\n";
   if (isio) {
-    code += "    '$main$': ()=>run("+js_name(main)+"),\n"
+    code += "    '$main$': ()=>run("+js_name(main)+"),\n";
+    code += "    'run': run,\n";
   };
   for (var name of exps) {
     code += "    '"+name+"': "+js_name(name)+",\n";
