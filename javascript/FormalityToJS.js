@@ -126,6 +126,7 @@ var prim_funcs = {
   "Bool.if"          : [3, a=>b=>c=>`${a}?${b}:${c}`],
   "Bool.or"          : [2, a=>b=>`${a}||${b}`],
   "Bits.concat"      : [2, a=>b=>`${b}+${a}`],
+  "Bits.eql"         : [2, a=>b=>`${b}===${a}`],
   "Debug.log"        : [2, a=>b=>`(console.log(${a}),${b}())`],
   "Nat.add"          : [2, a=>b=>`${a}+${b}`],
   "Nat.sub"          : [2, a=>b=>`${a}-${b}<=0n?0n:${a}-${b}`],
