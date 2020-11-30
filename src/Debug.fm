@@ -1,0 +1,4 @@
+// Logs to the console
+Debug.log<A: Type>(s: String, x: Unit -> A): A
+  x(Unit.new)
+

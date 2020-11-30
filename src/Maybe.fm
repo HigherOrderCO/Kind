@@ -1,0 +1,47 @@
+type Maybe <A: Type> {
+  none,
+  some(value: A),
+}
+
+Maybe.mapped<A: Type>(m: Maybe(A))<B: Type>(f: A -> B): Maybe(B)
+  case m {
+    none: Maybe.none<B>,
+    some: Maybe.some<B>(f(m.value)),
+  }
+
+Maybe.pure<A: Type>(a: A): Maybe(A)
+  Maybe.some<A>(a)
+
+Maybe.bind<A: Type, B: Type>(m: Maybe(A), f: A -> Maybe(B)): Maybe(B)
+  case m {
+    none: Maybe.none<B>,
+    some: f(m.value),
+  }
+
+Maybe.monad: Monad(Maybe)
+  Monad.new<Maybe>(Maybe.bind, Maybe.some)
+
+Maybe.extract<A: Type>(m: Maybe(A))<B: Type>(a: B, f: A -> B): B
+  case m {
+    none: a,
+    some: f(m.value),
+  }
+
+Maybe.default<A: Type>(a: A, m: Maybe(A)): A
+  case m {
+    none: a,
+    some: m.value,
+  }
+
+Maybe.to_bool<A: Type>(m: Maybe(A)): Bool
+  case m {
+    none: Bool.false,
+    some: Bool.true,
+  }
+
+Maybe.or<A: Type>(a: Maybe(A), b: Maybe(A)): Maybe(A)
+  case a {
+    none: b,
+    some: Maybe.some<_>(a.value),
+  }
+

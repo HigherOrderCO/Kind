@@ -1,0 +1,14 @@
+type Pair <A: Type, B: Type> {
+  new(fst: A, snd: B)
+}
+
+Pair.fst<A: Type, B: Type>(pair: Pair(A, B)): A
+  case pair {
+    new: pair.fst
+  }
+
+Pair.snd<A: Type, B: Type>(pair: Pair(A, B)): B
+  case pair {
+    new: pair.snd
+  }
+

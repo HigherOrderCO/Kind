@@ -1,0 +1,23 @@
+type Equal <A: Type> (a: A) ~ (b: A) {
+  refl ~ (b: a)
+}
+
+Equal.mirror<A: Type, a: A, b: A>(e: Equal(A, a, b)): Equal(A, b, a)
+  case e {
+    refl: Equal.refl<A, a>
+  } : Equal(A, e.b, a)
+
+Equal.rewrite<A: Type, a: A, b: A, P: A -> Type>(e: Equal(A,a,b), x: P(a)): P(b)
+  case e {
+    refl: x
+  } : P(e.b)
+
+Equal.apply<A: Type, B: Type, a: A, b: A, f: A -> B>(e: Equal(A,a,b)): Equal(B, f(a), f(b))
+  case e {
+    refl: Equal.refl<B, f(a)>
+  } : Equal(B, f(a), f(e.b))
+
+Equal.chain<A: Type, a: A, b: A, c: A>(d: Equal(A,a,b), e: Equal(A,b,c)): Equal(A,a,c)
+  case e {
+    refl: d
+  } : Equal(A, a, e.b)

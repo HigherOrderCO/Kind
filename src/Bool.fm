@@ -1,0 +1,42 @@
+type Bool {
+  true,
+  false,
+}
+
+Bool.not(a: Bool): Bool
+  case a {
+    true: Bool.false,
+    false: Bool.true,
+  }
+
+Bool.and(a: Bool, b: Bool): Bool
+  case a {
+    true: b,
+    false: Bool.false,
+  }
+
+Bool.or(a: Bool, b: Bool): Bool
+  case a {
+    true: Bool.true,
+    false: b,
+  }
+
+Bool.eql(a: Bool, b: Bool): Bool
+  case a {
+    true: b,
+    false: Bool.not(b),
+  }
+
+// Converts to a string
+Bool.show(b: Bool): String
+  case b{
+    true : "Bool.true"
+    false: "Bool.false"
+  }
+
+// If-then-else
+Bool.if<A: Type>(cond: Bool, true_case: A, false_case: A): A
+  case cond{
+    true : true_case
+    false: false_case
+  }

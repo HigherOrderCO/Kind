@@ -1,0 +1,111 @@
+type Map <A: Type> {
+  new,
+  tie(val: Maybe(A), lft: Map(A), rgt: Map(A)),
+}
+
+Map.fold<A: Type>(map: Map(A)): <P: Type> -> P -> (Maybe(A) -> P -> P -> P) -> P
+  <P> (new, tie)
+  case map {
+    new: new,
+    tie: 
+      tie(
+        map.val,
+        Map.fold<A>(map.lft)<P>(new, tie),
+        Map.fold<A>(map.rgt)<P>(new, tie)),
+  }
+
+Map.get<A: Type>(bits: Bits, map: Map(A)): Maybe(A)
+  case bits {
+    e: case map {
+      new: Maybe.none<_>,
+      tie: map.val,
+    }, 
+    o: case map {
+      new: Maybe.none<_>,
+      tie: Map.get<_>(bits.pred, map.lft),
+    },
+    i: case map {
+      new: Maybe.none<_>,
+      tie: Map.get<_>(bits.pred, map.rgt),
+    }
+  }
+
+Map.set<A: Type>(bits: Bits, val: A, map: Map(A)): Map(A)
+  case bits {
+    e: case map {
+      new: Map.tie<_>(Maybe.some<_>(val), Map.new<_>, Map.new<_>),
+      tie: Map.tie<_>(Maybe.some<_>(val), map.lft, map.rgt)
+    },
+    o: case map {
+      new: Map.tie<_>(Maybe.none<_>, Map.set<_>(bits.pred, val, Map.new<_>), Map.new<_>),
+      tie: Map.tie<_>(map.val, Map.set<_>(bits.pred, val, map.lft), map.rgt)
+    },
+    i: case map {
+      new: Map.tie<_>(Maybe.none<_>, Map.new<_>, Map.set<_>(bits.pred, val, Map.new<_>)),
+      tie: Map.tie<_>(map.val, map.lft, Map.set<_>(bits.pred, val, map.rgt))
+    }
+  }
+
+Map.delete<A: Type>(key: Bits, map: Map(A)): Map(A)
+  case map {
+    new: Map.new<_>,
+    tie: case key {
+      e: Map.tie<_>(Maybe.none<_>, map.lft, map.rgt),
+      o: Map.delete<_>(key.pred, map.lft),
+      i: Map.delete<_>(key.pred, map.rgt)
+    }
+  }
+
+Map.from_list<A: Type, B: Type>(f: A -> Bits, xs: List(Pair(A,B))): Map(B)
+  case xs {
+    nil : Map.new<_>,
+    cons: case xs.head as p {
+      new: Map.set<_>(f(p.fst), p.snd, Map.from_list<_,_>(f, xs.tail))
+    }
+  }
+
+Map.to_list<A: Type>(xs: Map(A)): List(Pair(Bits,A))
+  List.reverse<_>(Map.to_list.go<_>(xs, Bits.e, List.nil<_>))
+
+Map.to_list.go<A: Type>(xs: Map(A), key: Bits, list: List(Pair(Bits,A))): List(Pair(Bits,A))
+  case xs {
+    new:
+      list,
+    tie: 
+      let list0 = case xs.val {
+        none: list,
+        some: List.cons<_>(Pair.new<_,_>(Bits.reverse(key), xs.val.value), list),
+      };
+      let list1 = Map.to_list.go<_>(xs.lft, Bits.o(key), list0);
+      let list2 = Map.to_list.go<_>(xs.rgt, Bits.i(key), list1);
+      list2
+  }
+
+Map.keys<A: Type>(xs: Map(A)): List(Bits)
+  List.reverse<_>(Map.keys.go<_>(xs, Bits.e, List.nil<_>))
+
+Map.keys.go<A: Type>(xs: Map(A), key: Bits, list: List(Bits)): List(Bits)
+  case xs {
+    new:
+      list,
+    tie: 
+      let list0 = case xs.val { none: list, some: List.cons<_>(Bits.reverse(key), list) };
+      let list1 = Map.keys.go<_>(xs.lft, Bits.o(key), list0);
+      let list2 = Map.keys.go<_>(xs.rgt, Bits.i(key), list1);
+      list2
+  }
+
+Map.values<A: Type>(xs: Map(A)): List(A)
+  Map.values.go<A>(xs, List.nil<_>)
+
+Map.values.go<A: Type>(xs: Map(A), list: List(A)): List(A)
+  case xs {
+    new:
+      list,
+    tie: 
+      let list0 = case xs.val { none: list, some: List.cons<_>(xs.val.value, list) };
+      let list1 = Map.values.go<_>(xs.lft, list0);
+      let list2 = Map.values.go<_>(xs.rgt, list1);
+      list2
+  }
+

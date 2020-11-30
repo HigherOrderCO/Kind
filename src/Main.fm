@@ -1,0 +1,11 @@
+EvenNat: Type
+  {x: Nat} (x % 2) == 0
+
+double_is_even(n: Nat): ((2*n)%2) == 0
+  case n {
+    zero: refl
+    succ: double_is_even(n.pred)
+  }!
+
+to_even(n: Nat): EvenNat
+  (2 * n) ~ double_is_even(n)

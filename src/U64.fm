@@ -1,0 +1,3 @@
+type U64 {
+  new(a: Word(64))
+}

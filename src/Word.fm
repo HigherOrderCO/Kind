@@ -1,0 +1,226 @@
+type Word ~ (size: Nat) {
+  e                              ~ (size: Nat.zero),
+  o<size: Nat>(pred: Word(size)) ~ (size: Nat.succ(size)),
+  i<size: Nat>(pred: Word(size)) ~ (size: Nat.succ(size)),
+}
+
+Word.to_bits<size: Nat>(a: Word(size)): Bits
+  case a {
+    e: Bits.e,
+    o: Bits.o(Word.to_bits<a.size>(a.pred)),
+    i: Bits.i(Word.to_bits<a.size>(a.pred)),
+  }
+
+Word.from_bits(size: Nat, bits: Bits): Word(size)
+  case size {
+    zero: Word.e,
+    succ: case bits {
+      e: Word.o<size.pred>(Word.from_bits(size.pred, Bits.e)),
+      o: Word.o<size.pred>(Word.from_bits(size.pred, bits.pred)),
+      i: Word.i<size.pred>(Word.from_bits(size.pred, bits.pred))
+    } : Word(Nat.succ(size.pred))
+  } : Word(size)
+
+Word.zero(size: Nat): Word(size)
+  case size {
+    zero: Word.e,
+    succ: Word.o<size.pred>(Word.zero(size.pred))
+  } : Word(size)
+
+Word.cmp.go<size: Nat>(a: Word(size), b: Word(size), c: Cmp): Cmp
+  case a with b : Word(a.size) = b {
+    e: c,
+   o: case b with a.pred : Word(Nat.pred(b.size)) = a.pred {
+      e: c,
+      o: Word.cmp.go<b.size>(a.pred, b.pred, c),
+      i: Word.cmp.go<b.size>(a.pred, b.pred, Cmp.ltn)
+    },
+    i: case b with a.pred : Word(Nat.pred(b.size)) = a.pred {
+      e: c,
+      o: Word.cmp.go<b.size>(a.pred, b.pred, Cmp.gtn),
+      i: Word.cmp.go<b.size>(a.pred, b.pred, c)
+    }
+  }
+
+// Right fold a word
+Word.fold<P: Nat -> Type, m: Nat>(
+  nil  : P(Nat.zero),
+  w0   : <n: Nat> -> P(n) -> P(Nat.succ(n)),
+  w1   : <n: Nat> -> P(n) -> P(Nat.succ(n)),
+  word : Word(m)
+) : P(m)
+  case word {
+    e: nil,
+    o: w0<word.size>(Word.fold<P,word.size>(nil, w0, w1, word.pred)),
+    i: w1<word.size>(Word.fold<P,word.size>(nil, w0, w1, word.pred))
+  } : P(word.size)
+
+// Left fold a word
+Word.foldl<P: Nat -> Type, m: Nat>(
+  nil  : P(Nat.zero),
+  w0   : <n: Nat> -> P(n) -> P(Nat.succ(n)),
+  w1   : <n: Nat> -> P(n) -> P(Nat.succ(n)),
+  word : Word(m),
+) : P(m)
+  case word {
+    e:
+      nil,
+    o: 
+      def P   = (n) P(Nat.succ(n));
+      def nil = w0<Nat.zero>(nil);
+      def w0  = <x> w0<Nat.succ(x)>;
+      def w1  = <x> w1<Nat.succ(x)>;
+      Word.foldl<P, word.size>(nil, w0, w1, word.pred),
+    i: 
+      def P   = (n) P(Nat.succ(n));
+      def nil = w1<Nat.zero>(nil);
+      def w0  = <x> w0<Nat.succ(x)>;
+      def w1  = <x> w1<Nat.succ(x)>;
+      Word.foldl<P, word.size>(nil, w0, w1, word.pred),
+  } : P(word.size)
+
+Word.trim<size: Nat>(new_size: Nat, word: Word(size)): Word(new_size)
+  case new_size {
+    zero: Word.e,
+    succ: case word {
+      e: Word.o<new_size.pred>(Word.trim<Nat.zero>(new_size.pred, Word.e)),
+      o: Word.o<new_size.pred>(Word.trim<word.size>(new_size.pred, word.pred)),
+      i: Word.i<new_size.pred>(Word.trim<word.size>(new_size.pred, word.pred))
+    }
+  } : Word(new_size)
+
+Word.adder<size: Nat>(a: Word(size), b: Word(size), c: Bool): Word(size)
+  case a with b: Word(a.size) = b {
+    e: Word.e,
+   o: case b with a.pred: Word(Nat.pred(b.size)) = a.pred {
+      e: Word.e,
+      o: case c {
+        true : Word.i<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.false)),
+        false: Word.o<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.false)),
+      },
+      i: case c {
+        true:  Word.o<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.true)),
+        false: Word.i<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.false)),
+      }
+    } : Word(b.size),
+    i: case b with a.pred: Word(Nat.pred(b.size)) = a.pred {
+      e: Word.e,
+      o: case c {
+        true : Word.o<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.true)),
+        false: Word.i<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.false)),
+      },
+      i: case c {
+        true : Word.i<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.true)),
+        false: Word.o<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.true)),
+      }
+    } : Word(b.size)
+  } : Word(a.size)
+
+Word.subber<size: Nat>(a: Word(size), b: Word(size), c: Bool): Word(size)
+  case a with b: Word(a.size) = b {
+    e: Word.e,
+   o: case b with a.pred: Word(Nat.pred(b.size)) = a.pred {
+      e: Word.e,
+      o: case c {
+        true : Word.i<b.size>(Word.subber<b.size>(a.pred, b.pred, Bool.true)),
+        false: Word.o<b.size>(Word.subber<b.size>(a.pred, b.pred, Bool.false)),
+      },
+      i: case c {
+        true:  Word.o<b.size>(Word.subber<b.size>(a.pred, b.pred, Bool.true)),
+        false: Word.i<b.size>(Word.subber<b.size>(a.pred, b.pred, Bool.true)),
+      }
+    } : Word(b.size),
+    i: case b with a.pred: Word(Nat.pred(b.size)) = a.pred {
+      e: Word.e,
+      o: case c {
+        true : Word.o<b.size>(Word.subber<b.size>(a.pred, b.pred, Bool.false)),
+        false: Word.i<b.size>(Word.subber<b.size>(a.pred, b.pred, Bool.false)),
+      },
+      i: case c {
+        true : Word.i<b.size>(Word.subber<b.size>(a.pred, b.pred, Bool.true)),
+        false: Word.o<b.size>(Word.subber<b.size>(a.pred, b.pred, Bool.false)),
+      }
+    } : Word(b.size)
+  } : Word(a.size)
+
+Word.concat<a_size: Nat, b_size: Nat>(a: Word(a_size), b: Word(b_size))
+  : Word(Nat.add(a_size, b_size))
+  case a {
+    e: b
+    o: let rest = Word.concat<a.size, b_size>(a.pred, b)
+      Word.o<Nat.add(a.size, b_size)>(rest)
+    i: let rest = Word.concat<a.size, b_size>(a.pred, b)
+      Word.i<Nat.add(a.size, b_size)>(rest)
+  }: Word(Nat.add(a.size, b_size))
+
+// ++a
+Word.inc<size: Nat>(word: Word(size)): Word(size)
+  case word {
+    e: Word.e,
+    o: Word.i<word.size>(word.pred),
+    i: Word.o<word.size>(Word.inc<word.size>(word.pred))
+  } : Word(word.size)
+
+// a + b
+Word.add<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.adder<size>(a)(b)(Bool.false)
+
+// a - b
+Word.sub<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.subber<size>(a, b, Bool.false)
+
+// a ? b
+Word.cmp<size: Nat>(a: Word(size), b: Word(size)): Cmp
+  Word.cmp.go<size>(a, b, Cmp.eql)
+
+// a <= b
+Word.lte<size:Nat>(a: Word(size), b: Word(size)): Bool
+  Cmp.as_lte(Word.cmp<size>(a, b))
+
+// a < b
+Word.ltn<size:Nat>(a: Word(size), b: Word(size)): Bool
+  Cmp.as_ltn(Word.cmp<size>(a, b))
+
+// a == b
+Word.eql<size:Nat>(a: Word(size), b: Word(size)): Bool
+  Cmp.as_eql(Word.cmp<size>(a, b))
+
+// a >= b
+Word.gte<size:Nat>(a: Word(size), b: Word(size)): Bool
+  Cmp.as_gte(Word.cmp<size>(a, b))
+
+// a > b
+Word.gtn<size:Nat>(a: Word(size), b: Word(size)): Bool
+  Cmp.as_gtn(Word.cmp<size>(a, b))
+
+// a <= b <= c
+Word.btw<size:Nat>(a: Word(size), b: Word(size), c: Word(size)): Bool
+  Bool.and(Word.lte<size>(a, b), Word.lte<size>(b, c))
+
+// TODO Multiplies two words
+Word.mul<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.mul<size>(a,b)
+  
+// TODO
+Word.and<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.and<size>(a,b)
+
+// TODO word division
+Word.div<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.div<size>(a,b)
+
+// TODO word modulus
+Word.mod<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.mod<size>(a,b)
+
+// TODO bitwise OR between two words
+Word.or<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.or<size>(a,b)
+
+// TODO word exponentiation
+Word.pow<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.pow<size>(a, b)
+
+// TODO bitwise XOR between two words
+Word.xor<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.xor<size>(a, b)

@@ -1,329 +1,314 @@
-![](https://raw.githubusercontent.com/moonad/Assets/master/images/formality-banner-white.png)
+Formality
+=========
 
-An lightweight proof-gramming language. It aims to be:
+A modern programming language featuring formal proofs. Now written in itself!
 
-- **Fast:** no garbage-collection, optimal beta-reduction, massively parallel compilers.
+Why formal proofs?
+------------------
 
-- **Secure:** a powerful type system capable of proving mathematical theorems.
+When most people hear about formal proofs, they naturally think about
+mathematics and security, or, "boring stuff". While it is true that formal
+proofs can be used to formalize theorems and verify software correctness,
+Formality's approach is different: we focus in using proofs as a tool to
+**enhance developer productivity**.
 
-- **Portable:** the entire language desugars to a 500 lines core type-theory.
+There is little doubt left that adding types to untyped languages greatly
+increases productivity, specially when the codebase grows past a certain point:
+just see the surge of TypeScript. Formal proofs are, in a way, an evolution of
+the simple types used in common languages.
 
-Explore our ecosystem at [moonad.org] and come hang out with us [on Telegram](https://t.me/formality_lang).
+We believe that proofs are superpowers waiting to be explored, and the proper
+usage of them can enhance the productivity of a developer in a disruptive
+manner: think of Haskell's Hackage on steroids. Formality was designed to
+explore and enable that side of formal proofs, and we'll be publishing more
+about that soon.
 
-Table of contents
-=================
+Why Formality?
+--------------
 
-- [Table of contents](#table-of-contents)
-- [Motivation](#motivation)
-- [Examples](#examples)
-- [Installation](#installation)
-- [Commands](#commands)
-- [Introduction](#introduction)
-    - [📦 Dependencies](#-dependencies)
-    - [✔️ Type Checking](#️-type-checking)
-    - [📜 Compile to Javascript](#-compile-to-javascript)
-    - [🚀 Run](#-run)
-    - [💡 Datatypes, Functions, and Proofs](#-datatypes-functions-and-proofs)
-- [Learning More](#learning-more)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
+There are some interesting proof languages, or theorem provers, as they're often
+called, in the market. [Agda](Agda), [Coq](Coq), [Lean](Lean), [Idris](Idris),
+to name a few. But these (perhaps with exception of Idris, which we love!)
+aren't aligned with the vision highlighted above, in some key aspects:
 
-Motivation
-==========
+### Auditability
 
-> Knowing mathematics and programming might one day be one... fills you with determination.
+Formality is entirely compiled to a small [trusted core](FormCoreJS) that has
+700 lines of code. This is 1 to 2 orders of magnitude smaller than existing
+alternatives. Because of that, auditing Formality is much easier, decreasing the
+need for trust and solving the "who verifies that the verifier" problem.
 
-Formality is the first programming language that features *theorem proving* and
-is simultaneously user-friendly, efficient and portable. Proof languages often
-have complex syntaxes that make them inaccessible to non-experts. Formality
-promotes a simple, clean syntax that feels familiar to common developers. Proof
-languages also tend to focus more on type-checking than on actually running
-programs. Formality prioritizes evaluation from the beginning, providing solid
-compilers to common targets such as JavaScript, Haskell and the EVM, and
-researching novel compilation techniques that may provide practical benefits, as
-well as asymptotical speedups over existing ones; check [this
-multiplication algorithm](http://github.com/MaiaVictor/optimul) for example.
-Finally, proof languages tend to be complex and big, which makes
-unportable and hard to audit. Formality compiles entirely to a [500
-lines-of-code core type-theory](https://github.com/moonad/Formality/blob/master/javascript/FormalityCore.js),
-making it extremely portable and easily auditable.
+### Portability
 
-> "In the Truth Mines though, the tags weren't just references; they included
-> complete statements of the particular definitions, axioms, or theorems the
-> objects represented. The Mines were self-contained: every mathematical result
-> that fleshers and their descendants had ever proven was on display in its
-> entirety. The library's exegesis was helpful - but the truths themselves were
-> all there."
->
-> *Diaspora*, Greg Egan
+Being compiled to such a small core also allows Formality to be easily compiled
+to multiple targets, making it very portable. For example, out
+[Formality-to-Haskell](FormalityToHaskell) compiler was developed in an evening
+and has less than 1000 lines of code. This allows Formality to be used as a a
+lazy, pure functional language that is compiled directly by Haskell's GHC.
 
-![inets](https://raw.githubusercontent.com/moonad/Assets/master/images/inet-simulation.gif)
+### Performance
 
-Examples
-========
+Formality has a long-term approach to performance: make the language fast in
+theory, then build great compilers for each specific target. Our JavaScript
+compiler, for example, is tuned to generate small, fast JS, allowing Formality
+to be used for web development. Other targets may have different optimizations,
+and we're constantly researching new ways of evaluating functional programs; see
+our post about [interaction nets and optimal reduction](absal).
 
-- List functions:
+[FormCoreJS]: https://github.com/moonad/formcorejs
 
-    ```c
-    // Polymorphic List
-    T List<A: Type>
-    | nil;
-    | cons(head: A, tail: List(A));
+[Formality-to-Haskell]: https://github.com/moonad/FormCoreJS/blob/master/FmcToHs.js
 
-    // Mapping over a List
-    map<A: Type, B: Type>(fn: A -> B, list: List(A)): List(B)
-      case list:
-      | nil  => [];
-      | cons => cons<B>(fn(list.head), map<A,B>(fn, list.tail));
+[formality.js]: https://github.com/moonad/FormalityFM/blob/master/bin/js/src/formality.js
 
-    // Safe head (using a `not_empty` proof)
-    head<A: Type>(list: List(A), not_empty: list != []) : A
-      case list:
-      with nope : list.self != [] = not_empty;
-      | nil  => Empty.absurd<A>(not_empty(_));
-      | cons => list.head;
+[Agda]: https://github.com/agda/agda
+
+[Idris]: https://github.com/idris-lang/Idris-dev
+
+[Coq]: https://github.com/coq/coq
+
+[Lean]: https://github.com/leanprover/lean
+
+[Absal]: https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07
+
+### Fun!
+
+For a programming language to be fun, it can't be too serious. It must have
+great supporting tools such as a package manager, an editor. It must have
+friendly error messages. It must have a fast type-checker. It must have a
+non-cryptic syntax that everyone can use and understand. It must be stable and
+provide long term support. All of these are non-goals for many of the existing
+alternatives, but are high priorities for Formaltiy.
+
+Usage
+-----
+
+1. Install
+
+    Using the JavaScript release (`fmjs`):
+
+    ```bash
+    npm i -g formality-js
     ```
 
-- The Black Friday Theorem ("50% off of the double is the same"):
+    Using the Haskell release (uses `fmhs` instead of `fmjs`):
 
-    ```c
-    // A natural number (non-negative integer)
-    T Nat
-    | zero;
-    | succ(pred: Nat);
-
-    // Double of a natural number
-    double(n: Nat): Nat
-      case n:
-      | zero;
-      | succ(succ(double(n.pred)));
-
-    // Half of a natural number
-    half(n: Nat): Nat
-      case n:
-      | zero;
-      | case n.pred:
-        | zero;
-        | succ(half(n.pred.pred));;
-
-    // Black Friday Theorem: 50% off of double is the same
-    bft(n: Nat): half(double(n)) == n
-      case n:
-      | Equal.to<_,zero>;
-      | Equal.apply<_,_,_,_,Nat.succ>(bft(n.pred));
-      : half(double(n.self)) == n.self;
+    ```bash
+    git clone https://github.com/moonad/formality
+    cd formality/bin/hs
+    cabal install
     ```
 
-- Handy syntax-sugars like `if` and `for`:
+2. Clone the base libraries
 
-    ```c
-    summation(lim: Nat): Nat
-      let sum = 0
-      for i = 0 .. lim with sum:
-        Nat.add(sum, i)
-
-    show_age(age: U32): String
-      if U32.gte(age, 12u) then
-        "kid"
-      else if U32.gte(age, 18u) then
-        "teen"
-      else
-        "adult"
+    ```bash
+    git clone https://github.com/moonad/formality
+    cd formality/src
     ```
 
-TODO: include examples of Python-looking Formality for non-FP people.
+3. Edit, check and run
 
-TODO: link the upcoming "Why proof languages matter?" Moonad post.
+    Edit `Main.fm` on `formality/src` to add your code:
 
+    ```c
+    Main: IO(Unit)
+      do IO {
+        IO.print("Hello, world!")
+      }
+    ```
 
-Installation
-============
+    Type-check to see errors and goals:
 
-1. Install [npm](https://www.npmjs.com/get-npm) in your system.
+    ```bash
+    fmjs Main.fm
+    ```
 
-2. Install the language with `npm i -g formality-lang`.
+    Run to see results:
 
-Commands
-========
+    ```bash
+    fmjs Main --run
+    ```
 
-The commands below operate on `.fm` files in the current directory.
+    Since Formality doesn't have a module system yet, you must be at
+    `formality/src` to use the base types (lists, strings, etc.). In this early
+    phase, we'd like all the development to be contained in that directory. Feel
+    encouraged to send your programs and proofs as a PR!
 
-- `fm`: type-checks all top-level definitions.
+Quick Introduction
+------------------
 
-- `fm term`: type-checks and evaluates a term.
+### A simple, clear and fun syntax
 
-- `fm file.fm`: type-checks a file.
+> If you can't explain it simply, you don't understand it well enough.
 
-- `fmjs term`: compiles a term to JavaScript.
+Why make it hard? Formality aims to frame advanced concepts in ways that
+everyone can understand. For example, if you ask a Haskeller to sum a list of
+positive ints (Nats), he might write:
 
-- `fmio term`: compiles a term to JavaScript and runs.
+```c
+sum(list: List(Nat)): Nat
+  case list {
+    nil  : 0
+    cons : list.head + sum(list.tail)
+  }
 
-- `fmopt term`: runs a term [β-optimally](https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07).
-
-- `fm2fmc`: compiles all terms to Formality-Core.
-
-The commands below load all `.fmc` files in the current directory.
-
-- `fmc`: type-checks all top-level definitions.
-
-Introduction
-============
-
-Let's write "Hello, World!" in Formality!
-
-First, create a new file somewhere called `Hello.fm` and add this text
-to it:
-
-```javascript
-Hello.world: IO(Unit)
-  IO.print("Hello, world!")
-```
-
-The first expression `Hello.world` defines a function called `world` in the
-`Hello` namespace (by default, all definitions must be namespaced with the same
-name as the file they're found in, except if your file is named `global.fm`).
-The type of this expression is `IO(Unit)` (more about that later in the
-[tutorial](TUTORIAL.md)).
-
-Let's try running our little program. On a command line, enter:
-
-```
-fmio Hello.world
-```
-
-This will download the necessary dependencies, type check the new definitions,
-compile everything to Javascript, and run, printing `Hello, world` in the
-console. Let's look at each of these steps in a little more detail:
-
-### 📦 Dependencies
-
-Formality will discover it doesn't have definitions for `IO(Unit)`
-and `IO.print`, and will download them from [moonad.org].
-Formality doesn't have a notion of packages or a central package
-repository; instead, users can post definitions to Moonad, making
-them globally available for all other users, essentially extending the 
-language itself. This is Formality's philosophy on pretty much everything:
-keep the language as small and diamond-perfect as possible, but make it 
-easy to extend and share.
-
-### ✔️ Type Checking
-
-With all the definitions in place, Formality will make sure
-every definition fulfills its type. This process is *much* more powerful
-in Formality than in traditional languages: as in proof assistants like
-Coq and Agda, types can express deep properties about your programs, and
-Formality will make sure they hold (more about this later in the section on
-[theorem Proving](./THEOREM_PROVING_TUTORIAL.md)).
-
-### 📜 Compile to Javascript
-
-Formality programs compile to fast, tiny Javascript modules. The output is
-quite clean too! Check it out yourself by running:
-
-  ```
-  fm2js Hello.world
-  ```
-Javascript is currently the default runtime for Formality, and the one we recommend
-for learning the language. But, as mentioned, Haskell and EVM runtimes exist. In
-fact, writing a new runtime in your favorite language is simple and a nice weekend project - 
-check out our tutorial on the subject [TODO - this tutorial is a work in progress; in the
-meantime, everything you'd need to implement is in [this file](https://github.com/moonad/Formality/blob/master/javascript/FormalityCore.js)]!
-
-### 🚀 Run
-
-The `fm` command will execute the compiled Javascript, printing `Hello, world.`
-to the console.
-
-For a more interactive example, we could add the following function to our
-`Hello.fm` file:
-
-```javascript
-Hello.greet: IO(Unit)
+Main: IO(Unit)
   do IO {
-    var name = IO.prompt("What is your name?");
-    IO.print(String.concat("Welcome, ", name));
+    IO.print("Sum is: " | Nat.show(sum([1, 2, 3])))
   }
 ```
 
-Try running our new `greet` function at the command line:
+Or, if he is enlightened enough:
+
+```c
+sum(list: List(Nat)): Nat
+  List.fold<_>(list)<_>(0, Nat.add)
+
+Main: IO(Unit)
+  do IO {
+    IO.print("Sum is: " | Nat.show(sum([1, 2, 3])))
+  }
+```
+
+But, while recursion and folds are nice, this is fine too:
+
+```c
+sum(list: List(Nat)): Nat
+  let sum = 0
+  for x in list:
+    sum = x + sum
+  sum
+```
+
+The code above isn't impure, Formality translates loops to pure folds. It is
+just written in a way that is more familiar to some. Proof languages are already
+hard enough, so why make syntax yet another obstacle?
+
+*(You can test the examples above by editing `Main.fm`, and typing `fmjs Main.fm`
+and `fmjs Main --run` on the `Formality/src` directory.)*
+
+### Powerful types
+
+Let's now see how to write structures with increasingly complex types. Below is
+the simple list, a "variant type" with two constructors, one for the `empty`
+list, and one to `push` a positive number (`Nat`) to another list:
+
+```c
+// NatList is a linked list of Nats
+type NatList {
+  empty
+  push(head: Nat, tail: NatList)
+}
+```
+
+As usual, we can make it **more generic** with polymorphic types:
+
+```c
+// List is a linked list of A's (for any type A)
+type List (A: Type) {
+  empty
+  push(head: A, tail: List(A))
+}
+```
+
+But we can make it **more specific** with indexed types:
+
+```c
+// Vector is a linked list of Nats with a statically known size
+type Vector ~ (len: Nat) {
+  empty                                        ~ (len: 0) 
+  push(len: Nat, head: Nat, tail: Vector(len)) ~ (len: 1 + len)
+}
+```
+
+The type above isn't of a *fixed length* list, but of one that has a length that
+is *statically known*. The difference is that we can still grown and shrink it,
+but we can't, for example, get the the `head` of an empty list. For example:
+
+```c
+Main: IO(Unit)
+  def list = [1,2,3]
+  def vect = Vector.from_list<Nat>(list)
+  def head = Vector.head<Nat,_>(vect)
+  do IO {
+    IO.print("First is: " | Nat.show(head))
+  }
+```
+
+Works fine, but, if you change the list to be empty, it will result in a type
+error! This is in contrast to Haskell, where `head []` results in a runtime
+crash. Formality programs can't crash. Ever!
+
+*(You can also check the program above by editing `Main.fm`.)*
+
+### Theorem proving
+
+Proof languages go beyound checking lengths though. Everything you can think of
+can be statically verified by the type system. With subset types, written as 
+`{x: A} -> B(x)`, you can restrict a type arbitrarily. For example, here we use
+subsets to represent even numbers:
+
+```c
+// An "EvenNat" is a Nat `x`, such that `(x % 2) == 0`
+EvenNat: Type
+  {x: Nat} (x % 2) == 0
+
+six_as_even: EvenNat
+  6 ~ refl
+```
+
+This program only type-checks because `6` is even: try changing it to `7` and it
+will be a type error! But what about `~ refl`? This is a **proof** that `6` is
+indeed even. Since `6` is a compile-time constant, it is very easy for Formality
+to verify that it is even (it just needs to run `6 % 2`), so we write `refl`,
+which stands for "reflexive", or "just reduce it". 
+
+But what if it was an expression instead? For example, what if we wanted to
+write a function that receives a Nat `x`, and returns `x*2` as an EvenNat? It
+makes sense, because the double of every number is even. But if we just write:
+
+```c
+double_as_even(n: Nat): EvenNat
+  (2 * n) ~ refl
+```
+
+Formality will complain:
 
 ```
-fmio Hello.greet
+Type mismatch.
+- Expected: Nat.mod(Nat.double(n),2) == 0
+- Detected: 0 == 0
 ```
 
-Reading and printing to the console raises an important issue: Formality is
-a language without side-effects - as in languages like Haskell and Elm, all
-functions are completely pure (i.e, cannot read or write mutable state). Rather
-than issuing side-effects directly, the standard library defines datatypes that
-_describe_ the effects, which are then interpreted by the runtime. This is described
-at length in [IO section of the tutorial][TODO write IO section].
+That's because Formality doesn't know that `(n*2)%2 == 0` is necessarily true
+for every `n`. We need to convince the type-checker by proving it. Proofs are
+like functions, we just create a separate function that, given a `n: Nat`,
+returns a proof that `((n*2)%2)==0`. That proof will be done by case analysis
+and induction, but we won't get into details on how it works; for now, suffice
+to say it is just pattern-matching and recursion. Here is it:
 
-### 💡 Datatypes, Functions, and Proofs
+```c
+EvenNat: Type
+  {x: Nat} (x % 2) == 0
 
-Formality is a general purpose language, capable of everything from web apps to
-3D games to advanced mathematical proofs.  But all Formality programs share a
-common structure that comes down to three parts:
+six_as_even: EvenNat
+  6 ~ refl
 
-1. Specify the datatypes that describe your problem.
+double_as_even(n: Nat): EvenNat
+  (2 * n) ~ double_is_even(n)
 
-2. Write functions that transform those datatypes.
+double_is_even(n: Nat): ((2 * n) % 2) == 0
+  case n {
+    zero: refl
+    succ: double_is_even(n.pred)
+  }!
+```
 
-3. Propose and prove theorems about your datatypes and functions.
+To sum up, `EvenNat` is the type of `Nat`s that are even. `six_as_even` is just
+the number `6`, viewed as an `EvenNat`; since Formality can verify that 6 is
+even, we write `~ refl` on it. `double_as_even` is a function that, for any
+`Nat` `n`, returns `n*2` as an `EvenNat`. Formality can't verify that `n*2` is
+always even by itself, so, to convince it, we write a separate proof called
+`double_is_even(n)`.
 
-While the first two are commonplace for programmers and the last is usually
-relegated to mathematicians, Formality enables all three in the same simple
-language, making it a powerful *lingua franca* for the exchange of ideas in
-math, computer science, and software engineering.
-
-Learning More
-=============
-
-New to the notion of proving theorems with programs? Check out [our
-tutorial](TUTORIAL.md) - you'll be proving theorems to the moon and back in no
-time (throw a little of that moon ore our way, eh?).
-
-Since the documentation is still being developed, a great way to get a feel of
-how the language works is by just looking the files
-[here](https://github.com/moonad/Moonad/tree/master/lib). It contains every
-Formality function available on Moonad!
-
-Do you dream in Pi types and eat monoids for breakfast? You'll probably want to
-see the [specification](FMC_SPECIFICATION.md) (it's incomplete and slightly
-dated, but still covers a lot of ground).
-
-Questions? Queries? Quagmires? Conundrums? Perhaps we've covered it in the
-[FAQ](./FAQ.md).  If not, hop on [on Telegram](https://t.me/formality_lang) and
-we'll see if we can't get to the bottom of it.
-
-Roadmap
-=======
-
-TODO - write roadmap section.
-
-Contributing
-============
-
-Are you as excited about democratizing efficient proofs as we are? Come help us build
-the thing! 
-
-- [Moonad.org] is wide open for contributions. Port your favorite library to
-  Formality and integrate it directly into the language by publishing to Moonad. Or
-  deploy a cool app that uses Moonad's IO infrastructure. Soon we'll have toolchain in
-  place for you to publish in an automated way, but for now, you can do so by making a
-  PR to the [Moonad lib](https://github.com/moonad/Moonad/tree/master/lib).
-- The documentation needs helps. One of the best ways you can help us improve it is just ask
-  questions and give feedback on [on Telegram](https://t.me/formality_lang)! Bonus points if
-  you mention @d4hines so we can make sure it gets compiled into the FAQ.
-- Finally, there are lots of fascinating problems to solve in the language itself. We need 
-  all the help we can get for the items in the roadmap - or, if we've missed the thing you
-  want most, send us a PR or let us know [on Telegram](https://t.me/formality_lang). Formality
-  is a vast and rich frontier: who knows what dependently-typed glories await the intrepid?
-
-> “To every man, in his acquaintance with a new art, there comes a moment when that which before
-> was meaningless first lifts, as it were, one corner of the curtain that hides its mystery,
-> and reveals, in a burst of delight which later and fuller understanding can hardly ever equal,
-> one glimpse of the indefinite possibilities within.”
->
-> *Out of the Silent Planet*, C.S. Lewis
-
-[moonad.org]: http://moonad.org
+*(Check this program too!)*

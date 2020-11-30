@@ -1,0 +1,5 @@
+type Either <A: Type, B: Type> {
+  left(value: A),
+  right(value: B),
+}
+

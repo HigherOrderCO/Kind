@@ -1,0 +1,116 @@
+type Bits {
+  e,
+  o(pred: Bits),
+  i(pred: Bits),
+}
+
+Bits.inc(a: Bits): Bits
+  case a {
+    e: Bits.i(Bits.e),
+    o: Bits.i(a.pred),
+    i: Bits.o(Bits.inc(a.pred)),
+  }
+
+Bits.add(a: Bits, b: Bits): Bits
+  case b {
+    e: a,
+    o: case a {
+      e: b,
+      o: Bits.o(Bits.add(a.pred, b.pred)),
+      i: Bits.i(Bits.add(a.pred, b.pred)),
+    },
+    i: case a {
+      e: b,
+      o: Bits.i(Bits.add(a.pred, b.pred)),
+      i: Bits.o(Bits.add(Bits.inc(a.pred), b.pred))
+    }
+  }
+
+Bits.eql(a: Bits, b: Bits): Bool
+  case a {
+    e: case b {
+      e: Bool.true,
+      o: Bool.false,
+      i: Bool.false,
+    },
+    o: case b {
+      e: Bool.false,
+      o: Bits.eql(a.pred, b.pred),
+      i: Bool.false,
+    },
+    i: case b {
+      e: Bool.false,
+      o: Bool.false,
+      i: Bits.eql(a.pred, b.pred),
+    }
+  }
+
+Bits.tail(a: Bits): Bits
+  case a {
+    e: Bits.e,
+    o: a.pred,
+    i: a.pred,
+  }
+
+Bits.show(a: Bits): String
+  case a {
+    e: "",
+    o: String.cons('0', Bits.show(a.pred)),
+    i: String.cons('1', Bits.show(a.pred)),
+  }
+
+Bits.reverse(a: Bits): Bits
+  Bits.reverse.tco(a, Bits.e)
+
+Bits.reverse.tco(a: Bits, r: Bits): Bits
+  case a {
+    e: r,
+    o: Bits.reverse.tco(a.pred, Bits.o(r)),
+    i: Bits.reverse.tco(a.pred, Bits.i(r))
+  }
+
+Bits.concat(a: Bits, b: Bits): Bits
+  case a {
+    e: b,
+    o: Bits.o(Bits.concat(a.pred, b)),
+    i: Bits.i(Bits.concat(a.pred, b))
+  }
+
+Bits.chunks_of.go(
+  len   : Nat,  // length of each chunk
+  bits  : Bits, // bits to be split
+  need  : Nat,  // number of vals to complete chunk
+  chunk : Bits  // current chunk
+) : List(Bits)
+  case bits {
+    e: List.cons<_>(Bits.reverse(chunk), List.nil<_>),
+    o: case need {
+      zero: 
+        let head = Bits.reverse(chunk);
+        let tail = Bits.chunks_of.go(len, bits, len, Bits.e);
+        List.cons<_>(head, tail),
+      succ:
+        let chunk = Bits.o(chunk);
+        Bits.chunks_of.go(len, bits.pred, need.pred, chunk)
+    },
+    i: case need {
+      zero:
+        let head = Bits.reverse(chunk);
+        let tail = Bits.chunks_of.go(len, bits, len, Bits.e);
+        List.cons<_>(head, tail),
+      succ:
+        let chunk = Bits.i(chunk);
+        Bits.chunks_of.go(len, bits.pred, need.pred, chunk)
+    }
+  }
+
+Bits.chunks_of(len: Nat, bits: Bits): List(Bits)
+  Bits.chunks_of.go(len, bits, len, Bits.e)
+
+Bits.to_nat(b: Bits): Nat
+  case b {
+    e: 0,
+    o: Nat.mul(2, Bits.to_nat(b.pred)),
+    i: Nat.succ(Nat.mul(2, Bits.to_nat(b.pred)))
+  }
+

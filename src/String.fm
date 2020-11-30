@@ -1,0 +1,255 @@
+type String {
+  nil,
+  cons(head: Char, tail: String),
+}
+
+// A string with only one character.
+String.pure(x : Char) : String
+  String.cons(x, String.nil)
+
+String.is_empty(str: String): Bool
+  case str {
+    nil: Bool.true,
+    cons: Bool.false,
+  }
+
+// Computes the length of the list.
+String.length(xs: String): Nat
+  String.length.go(xs, 0)
+
+// Computes the length of the list.
+String.length.go(xs: String, n: Nat): Nat
+  case xs {
+    nil : n,
+    cons: String.length.go(xs.tail, Nat.succ(n))
+  }
+
+String.concat(as: String, bs: String): String
+  case as {
+    nil: bs,
+    cons: String.cons(as.head, String.concat(as.tail,bs)),
+  }
+
+String.eql(a: String, b: String): Bool
+  case a {
+    nil: case b {
+      nil: Bool.true,
+      cons: Bool.false,
+    },
+    cons: case b {
+      nil: Bool.false,
+      cons: Bool.and(U16.eql(a.head, b.head), String.eql(a.tail,b.tail)),
+    },
+  }
+
+String.join.go(sep: String, list: List(String), fst: Bool): String
+  case list {
+    nil: "",
+    cons: String.flatten([
+      if fst then "" else sep,
+      list.head, 
+      String.join.go(sep, list.tail, Bool.false),
+    ]),
+  }
+  
+String.join(sep: String, list: List(String)): String
+  String.join.go(sep, list, Bool.true)
+
+String.flatten.go(xs: List(String), res: String): String
+  case xs {
+    nil: res,
+    cons: String.flatten.go(xs.tail, String.concat(res, xs.head)),
+  }
+
+String.flatten(xs: List(String)): String
+  String.flatten.go(xs, "")
+
+// Reverse the order of the characters of the string
+String.reverse(xs: String) : String
+  String.reverse.go(xs,String.nil)
+
+String.reverse.go(xs: String, res: String): String
+  case xs {
+    nil: res,
+    cons: String.reverse.go(xs.tail,String.cons(xs.head,res)),
+  }
+
+String.pad_left(size: Nat, chr: Char, str: String): String
+  String.reverse(String.pad_right(size, chr, String.reverse(str)))
+
+String.pad_right(size: Nat, chr: Char, str: String): String
+  case size {
+    zero: str,
+    succ: case str {
+      nil: String.cons(chr, String.pad_right(size.pred, chr, "")),
+      cons: String.cons(str.head, String.pad_right(size.pred, chr, str.tail)),
+    }
+  }
+
+// Appends character to the end of the string.
+String.append(as: String, a: Char): String
+  case as{
+    nil : String.pure(a)
+    cons: String.cons(as.head,String.append(as.tail, a))
+  }
+
+// Check if "xs" starts with "match"
+String.starts_with(xs: String, match: String): Bool
+  case match{
+    nil : Bool.true
+    cons: case xs{
+      nil : Bool.false
+      cons: case Char.eql(match.head, xs.head){
+        true : String.starts_with(xs.tail, match.tail)
+        false: Bool.false
+      }
+    }
+  }
+
+// Check if a String ends with another String
+String.ends_with(xs: String, match: String): Bool
+  let xs_reserved = String.reverse(xs)
+  let match_reversed = String.reverse(match)
+  String.starts_with(xs_reserved, match_reversed)
+
+// Removes all characters that do not satisfy a condition.
+String.filter(f: Char -> Bool, xs: String): String
+  case xs{
+    nil : String.nil
+    cons: case f(xs.head){
+      true : String.cons(xs.head,String.filter(f, xs.tail))
+      false: String.filter(f, xs.tail)
+      }
+  }
+
+// Creates a String from a List(Char)
+String.from_list(xs: List(Char)) : String
+  case xs{
+    nil : String.nil
+    cons: String.cons(xs.head,String.from_list(xs.tail))
+  }
+
+// Get the head of a nonempty string
+String.head(xs: String): Maybe(Char)
+  case xs{
+    nil : Maybe.none<_>
+    cons: Maybe.some<_>(xs.head)
+  }
+
+// Check if "xs" includes "match"
+String.includes(xs: String, match: String): Bool
+  case String.starts_with(xs, match){
+    true : Bool.true
+    false: case String.includes.go(xs, match){
+      nil : Bool.false
+      cons: Bool.true
+    }
+  }
+
+// Search for a Substring
+// if finds it, returns the tail containg the "match" String
+String.includes.go(xs: String, match: String): String
+  case xs{
+    nil : String.nil
+    cons: case String.starts_with(xs.tail, match){
+      true : xs.tail
+      false: String.includes.go(xs.tail, match)
+    }
+  }
+
+// Applies a function to all characters of the string.
+String.map(f: Char -> Char, as: String): String
+  case as{
+    nil : String.nil
+    cons: String.cons(f(as.head),String.map(f,as.tail))
+  }
+
+// A proposition that a string is not the empty string
+String.not_empty(xs: String): Type
+  case xs{
+    nil : Empty
+    cons: Unit
+  }
+
+String.null(xs: String): Bool
+  case xs{
+    nil : Bool.true
+    cons: Bool.false
+  }
+
+// Remove "match" from the beginning of "xs"
+String.remove_start_with(xs: String, match: String): String
+  case xs{
+    nil : String.nil
+    cons: case String.starts_with(xs, match){
+      true : String.remove_start_with.go(xs, match)
+      false: xs
+    }
+  }
+
+// Removes "match" from the beginning of the String and returns the tail
+String.remove_start_with.go(xs: String, match: String): String
+  case match{
+    nil : xs
+    cons: case xs{
+      nil : String.nil //xs < match
+      cons: case Char.eql(match.head, xs.head){
+        true : String.remove_start_with.go(xs.tail, match.tail)
+        false: xs.tail
+      }
+    }
+  }
+
+// Repeats a String for "n" times
+String.repeat(xs: String, n: Nat): String
+  case n{
+    zero: String.nil
+    succ: String.concat(xs, String.repeat(xs, n.pred))
+  }
+
+// Returns the first characters of a string, discards the rest.
+String.take(n: Nat, xs: String): String
+  case xs{
+    nil : String.nil
+    cons: case n{
+      zero : String.nil
+      succ: String.cons(xs.head,String.take(n.pred, xs.tail))
+    }
+  }
+
+// Removes the first characters of a string.
+String.drop(n: Nat, xs: String):  String
+  case n{
+  zero: xs
+  succ: case xs{
+      nil : String.nil
+      cons: String.drop(n.pred,xs.tail)
+    }
+  }
+
+// Get a substring from index i to j
+String.slice(i: Nat, j: Nat, xs: String): String
+  String.take(Nat.sub(j, i), String.drop(i, xs))
+
+// Splits a String given a separator ("match")
+String.split(xs: String, match: String): List(String)
+  case xs{
+    nil : List.nil<_>
+    cons: case String.starts_with(xs, match){
+      true: case match{
+        nil : List.cons<String>(String.cons(xs.head, String.nil), String.split(xs.tail, match))
+        cons: List.cons<String>("", String.split(String.drop(String.length(match), xs), match))
+      }
+      false:
+        case String.split(xs.tail, match) as split{
+          nil : List.nil<_>  // FIXME: mark this impossible
+          cons: List.cons<_>(String.cons(xs.head, split.head),  split.tail)
+        }
+    }
+  }
+
+// String.to_bits(str: String): Bits
+//   case str{
+//     nil : Bits.nil
+//     cons: Bits.concat(U16.to_bits(str.head))(String.to_bits(str.tail))
+//   }

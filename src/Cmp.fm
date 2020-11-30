@@ -1,0 +1,46 @@
+type Cmp {
+  ltn,
+  eql,
+  gtn,
+}
+
+// n == m
+Cmp.as_eql(cmp: Cmp): Bool
+  case cmp {
+    ltn: Bool.false,
+    eql: Bool.true,
+    gtn: Bool.false,
+  }
+
+// n >= m
+Cmp.as_gte(cmp: Cmp): Bool
+  case cmp {
+    ltn: Bool.false,
+    eql: Bool.true,
+    gtn: Bool.true,
+  }
+
+// n > m
+Cmp.as_gtn(cmp: Cmp): Bool
+  case cmp {
+    ltn: Bool.false,
+    eql: Bool.false,
+    gtn: Bool.true,
+  }
+
+// n <= m
+Cmp.as_lte(cmp: Cmp): Bool
+  case cmp {
+    ltn: Bool.true,
+    eql: Bool.true,
+    gtn: Bool.false,
+  }
+
+// n < m
+Cmp.as_ltn(cmp: Cmp): Bool
+  case cmp {
+    ltn: Bool.true,
+    eql: Bool.false,
+    gtn: Bool.false,
+  }
+

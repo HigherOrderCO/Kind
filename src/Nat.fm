@@ -1,0 +1,212 @@
+type Nat {
+  zero,
+  succ(pred: Nat),
+}
+
+Nat.pred(n: Nat): Nat
+  case n {
+    zero: Nat.zero,
+    succ: n.pred
+  }
+
+Nat.is_zero(n: Nat): Bool
+  case n {
+    zero: Bool.true,
+    succ: Bool.false,
+  }
+
+Nat.apply<A: Type>(n: Nat, f: (x:A) A, x: A): A
+  case n {
+    zero: x,
+    succ: Nat.apply<A>(n.pred, f, f(x)),
+  }
+
+Nat.to_base(base: Nat, nat: Nat): List(Nat)
+  Nat.to_base.go(base, nat, List.nil<Nat>)
+
+Nat.to_base.go(base: Nat, nat: Nat, res: List(Nat)): List(Nat)
+  case Nat.div_mod(nat, base) as div_mod {
+    new: case div_mod.fst {
+      zero: List.cons<_>(div_mod.snd, res),
+      succ: Nat.to_base.go(base, div_mod.fst, List.cons<_>(div_mod.snd, res))
+    } 
+  }
+
+Nat.from_base(base: Nat, ds: List(Nat)) : Nat
+  Nat.from_base.go(base, List.reverse<_>(ds),1,0)
+
+Nat.from_base.go(b: Nat, ds: List(Nat), p: Nat, res: Nat) : Nat
+  case ds {
+    nil: res,
+    cons: Nat.from_base.go(b,ds.tail,Nat.mul(b,p), Nat.add(Nat.mul(ds.head,p),res))
+  }
+
+Nat.to_string_base(base: Nat, nat: Nat): String
+  List.fold<_>(Nat.to_base(base, nat))<_>(
+    String.nil,
+    (n, str) String.cons(Nat.show_digit(base,n), str))
+
+Nat.to_bits(n: Nat): Bits
+  case n {
+    zero: Bits.e,
+    succ: Bits.inc(Nat.to_bits(n.pred))
+  }
+
+Nat.add(n: Nat, m: Nat): Nat
+  case n {
+    zero: m,
+    succ: Nat.succ(Nat.add(n.pred, m)),
+  }
+
+Nat.sub(n: Nat, m: Nat): Nat
+  case m {
+    zero: n,
+    succ: case n {
+      zero: 0,
+      succ: Nat.sub(n.pred, m.pred),
+    }
+  }
+
+Nat.cmp(a: Nat, b: Nat): Cmp
+  case a {
+    zero: case b {
+      zero: Cmp.eql,
+      succ: Cmp.ltn,
+    },
+    succ: case b {
+      zero: Cmp.gtn,
+      succ: Nat.cmp(a.pred, b.pred),
+    },
+  }
+
+Nat.mul(n: Nat, m: Nat): Nat
+  case m {
+    zero: Nat.zero,
+    succ: Nat.add(n, Nat.mul(n, m.pred)),
+  }
+
+//Nat.mul(n: Nat, m: Nat): Nat
+  //case n {
+    //zero: Nat.zero,
+    //succ: Nat.add(m, Nat.mul(n.pred, m))
+  //}
+
+Nat.sub_rem(n: Nat, m: Nat): Either(Nat, Nat)
+  case m {
+    zero: Either.left<_,_>(n),
+    succ: case n {
+      zero: Either.right<_,_>(Nat.succ(m.pred)),
+      succ: Nat.sub_rem(n.pred, m.pred),
+    }
+  }
+
+Nat.div_mod(n: Nat, m: Nat): Pair(Nat, Nat)
+  Nat.div_mod.go(n, m, Nat.zero)
+
+Nat.div_mod.go(n: Nat, m: Nat, d: Nat): Pair(Nat, Nat)
+  case Nat.sub_rem(n, m) as p {
+    left: Nat.div_mod.go(p.value, m, Nat.succ(d)),
+    right: Pair.new<_,_>(d, n),
+  }
+
+Nat.div(n: Nat, m: Nat): Nat
+  Pair.fst<_,_>(Nat.div_mod(n, m))
+
+Nat.mod(n: Nat, m: Nat): Nat
+  Nat.mod.go(n, m, 0)
+
+Nat.mod.go(n: Nat, m: Nat, r: Nat): Nat
+  case m {
+    zero: Nat.mod.go(n, r, m),
+    succ: case n {
+      zero: r,
+      succ: Nat.mod.go(n.pred, m.pred, Nat.succ(r)),
+    }
+  }
+
+Nat.double(n: Nat): Nat
+  case n {
+    zero: Nat.zero,
+    succ: Nat.succ(Nat.succ(Nat.double(n.pred))),
+  }
+
+// n >= m
+Nat.gte(n: Nat, m: Nat): Bool
+  case m {
+    zero: Bool.true,
+    succ: case n {
+      zero: Bool.false,
+      succ: Nat.gte(n.pred, m.pred),
+    }
+  }
+
+// n > m
+Nat.gtn(n: Nat, m: Nat): Bool
+  case n {
+    zero: Bool.false,
+    succ: case m {
+      zero: Bool.true,
+      succ: Nat.gtn(n.pred, m.pred),
+    }
+  }
+
+// n == m
+Nat.eql(n: Nat, m: Nat): Bool
+  case n {
+    zero: case m {
+      zero: Bool.true,
+      succ: Bool.false,
+    },
+    succ: case m {
+      zero: Bool.false,
+      succ: Nat.eql(n.pred, m.pred),
+    },
+  }
+
+// n <= m
+Nat.lte(n: Nat, m: Nat): Bool
+  case n {
+    zero: Bool.true,
+    succ: case m {
+      zero: Bool.false,
+      succ: Nat.lte(n.pred, m.pred),
+    }
+  }
+
+// n < m
+Nat.ltn(n: Nat, m: Nat): Bool
+  case m {
+    zero: Bool.false,
+    succ: case n {
+      zero: Bool.true,
+      succ: Nat.ltn(n.pred, m.pred),
+    }
+  }
+
+Nat.is_even(n: Nat): Bool
+  case n {
+    zero: true,
+    succ: Bool.not(Nat.is_even(n.pred)),
+  }
+
+Nat.show(n: Nat): String
+  Nat.to_string_base(10,n)
+
+Nat.show_digit(base: Nat, n: Nat) : Char
+  let m = Nat.mod(n,base);
+  let base64 =
+    ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
+    ,'G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V'
+    ,'W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l'
+    ,'m','n','o','p','q','r','s','t','u','v','w','x','y','z','+','/'];
+  if Bool.and(Nat.gtn(base,0),Nat.lte(base,64)) then 
+    case List.at<_>(m,base64) as c {
+      none: '#',
+      some: c.value,
+    }
+  else '#'
+
+// TODO: optimize (this is swapped on the JS compiler though)
+Nat.to_u16(n: Nat): U16
+  Nat.apply<U16>(n, U16.inc, U16.zero)
+

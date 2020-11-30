@@ -1,0 +1,25 @@
+{
+  "name": "formality-js",
+  "version": "0.2.21",
+  "description": "Formality Language in JavaScript",
+  "main": "src/formality.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "fmjs": "src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moonad/formality.git"
+  },
+  "author": "Victor Maia",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/moonad/formality/issues"
+  },
+  "homepage": "https://github.com/moonad/formality#readme",
+  "dependencies": {
+    "formcore-lang": "^0.1.17"
+  }
+}

@@ -1,0 +1,91 @@
+type U16 {
+  new(value: Word(16))
+}
+
+U16.to_word(a: U16): Word(16)
+  case a {
+    new: a.value
+  }
+
+// 0
+U16.zero: U16
+  U16.new(Word.zero(16))
+
+// ++a
+U16.inc(a: U16): U16
+  case a {
+    new: U16.new(Word.inc<_>(a.value))
+  }
+
+// a + b
+U16.add(a: U16, b: U16): U16
+  case a {
+    new: case b {
+      new: U16.new(Word.add<_>(a.value, b.value))
+    }
+  }
+
+// a - b
+U16.sub(a: U16, b: U16): U16
+  case a {
+    new: case b {
+      new: U16.new(Word.sub<_>(a.value, b.value))  
+    }
+  }
+
+// a == b
+U16.eql(a: U16, b: U16): Bool
+  case a {
+    new: case b {
+      new: Word.eql<_>(a.value, b.value)
+    }
+  }
+
+// a >= b
+U16.gte(a: U16, b: U16): Bool
+  case a {
+    new: case b {
+      new: Word.gte<_>(a.value, b.value)
+    }
+  }
+
+// a > b
+U16.gtn(a: U16, b: U16): Bool
+  case a {
+    new: case b {
+      new: Word.gtn<_>(a.value, b.value)
+    }
+  }
+
+// a <= b
+U16.lte(a: U16, b: U16): Bool
+  case a {
+    new: case b {
+      new: Word.lte<_>(a.value, b.value)
+    }
+  }
+
+// a < b
+U16.ltn(a: U16, b: U16): Bool
+  case a {
+    new: case b {
+      new: Word.ltn<_>(a.value, b.value)
+    }
+  }
+
+// a <= b <= c
+U16.btw(a: U16, b: U16, c: U16): Bool
+  Bool.and(U16.lte(a, b), U16.lte(b, c))
+
+// Stringifies to hex
+U16.show_hex(a: U16): String
+  case a {
+    new: Nat.to_string_base(16, Bits.to_nat(Word.to_bits<16>(a.value)))
+  }
+
+
+U16.to_bits(a: U16): Bits
+  case a {
+    new: Word.to_bits<16>(a.value)
+  }
+

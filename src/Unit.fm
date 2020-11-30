@@ -1,0 +1,4 @@
+type Unit {
+  new
+}
+
