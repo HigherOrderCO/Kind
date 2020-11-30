@@ -1,3 +1,0 @@
-type Show          ~ (str: String) {
-  msg(str: String) ~ (str: str)
-}

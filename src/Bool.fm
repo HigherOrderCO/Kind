@@ -107,6 +107,3 @@ Bool.show(b: Bool): String
 // Dependent elimination of Bool.
 Bool.elim(b: Bool): <P: Bool -> Type> -> P(Bool.true) -> P(Bool.false) -> P(b)
   <P> (t) (f) b<P>(t, f)
-
-Bool.and_var: (n: Nat) -> Variadic(n, Bool, Bool)
-  Variadic.foldr<Bool, Bool>(Bool.and, Bool.true)

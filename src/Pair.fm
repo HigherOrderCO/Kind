@@ -33,22 +33,3 @@ Pair.show<A: Type, B: Type>(
 
 Pair.functor<A: Type>: Functor(Pair(A))
   Functor.new<Pair(A)>(Pair.map<A>)
-
-Pair.functor.verified<A: Type>: VerifiedFunctor(Pair(A), Pair.functor<A>)
-  VerifiedFunctor.new<Pair(A), Pair.functor<A>>(Pair.map.id<A>, Pair.map.comp<A>)
-
-Pair.map.id<A: Type, B: Type>(p: Pair(A, B)): Equal(Pair(A, B), Pair.map<A, B, B>(Function.id<B>, p), p)
-  case p{
-    new: _
-  } : Equal(_, Pair.map<A,B,B>(Function.id<_>, p), p)
-
-Pair.map.comp<A: Type, B: Type, C: Type, D: Type>(e: Pair(A, B), g: (C -> D), h: (B -> C))
-  : Equal(Pair(A, D),
-          Pair.map<A, B, D>(Function.comp<B, C, D>(g, h), e),
-          Function.comp<Pair(A, B), Pair(A, C), Pair(A, D)>(Pair.map<A, C, D>(g), Pair.map<A, B, C>(h), e))
-  case e{
-    new: _
-  } : Equal(_,
-          Pair.map<_,_,_>(Function.comp<_,_,_>(g, h), e),
-          Function.comp<_,_,_>(Pair.map<_,_,_>(g), Pair.map<_,_,_>(h))(e))
-

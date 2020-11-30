@@ -21,24 +21,3 @@ Either.map<A: Type, B: Type, C: Type>(f: B -> C, e: Either(A, B)): Either(A, C)
 
 Either.functor<A: Type>: Functor(Either(A))
   Functor.new<Either(A)>(Either.map<A>)
-
-Either.functor.verified<A: Type>: VerifiedFunctor(Either(A), Either.functor<A>)
-  VerifiedFunctor.new<Either(A), Either.functor<A>>(Either.map.id<A>, Either.map.comp<A>)
-
-Either.map.id<A: Type, B: Type>(e: Either(A, B)): Equal(Either(A, B), Either.map<A, B, B>(Function.id<B>, e), e)
-  case e{
-    left : _
-    right: _
-  } : Equal(_, Either.map<A,B,B>(Function.id<_>, e), e)
-  
-
-Either.map.comp<A: Type, B: Type, C: Type, D: Type>(e: Either(A, B), g: (C -> D), h: (B -> C))
-  : Equal(Either(A, D),
-          Either.map<A, B, D>(Function.comp<B, C, D>(g, h), e),
-          Function.comp<Either(A, B), Either(A, C), Either(A, D)>(Either.map<A, C, D>(g), Either.map<A, B, C>(h), e))
-  case e{
-    left : _
-    right: _
-  } : Equal(_,
-          Either.map<_,_,_>(Function.comp<_,_,_>(g, h), e),
-          Function.comp<_,_,_>(Either.map<_,_,_>(g), Either.map<_,_,_>(h))(e))
