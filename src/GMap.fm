@@ -1,0 +1,915 @@
+// A generic map from keys of type `K` to values of type `V`
+// which under the hood is a size balanced binary tree
+// note that because of this structure, the key type `K` 
+// *must* be able to implement a function with the signature
+//      cmp: K -> K -> Cmp 
+// which is used in many of the map-related operations
+//
+// Implementation based on 
+// "Implementing Sets Efficiently in a Functional Language"
+// by Stephen Adams and Haskell's `containers` package
+//
+// left contains elements whose keys are smaller than the 
+// current node's key, while right contains elements whose keys 
+// are greater 
+type GMap <K: Type, V: Type> {
+  tip,
+  bin(size: Nat, key: K, val: V, left: GMap(K,V), right: GMap(K,V))
+}
+
+// modifies the value associated with a specific key
+// by applying a function to it
+// in case the key is not in the map, do nothing
+// as with other GMap operations, you must provide
+// a way to compare the keys
+GMap.adjust<K: Type, V: Type>(
+  cmp : K -> K -> Cmp,
+  f   : V -> V, 
+  key : K, 
+  map : GMap(K,V) 
+) : GMap(K,V)
+  GMap.adjust_with_key<K,V>(
+    cmp,
+    (k, v) f(v),
+    key,
+    map
+  )
+
+// modifies the value associated with a specific key
+// by applying a function that uses both a key and a
+// value to generate a new value
+// in case the key is not in the map, do nothing
+// as with other GMap operations, you must provide
+// a way to compare the keys
+GMap.adjust_with_key<K: Type, V: Type>(
+  cmp : K -> K -> Cmp,
+  f   : K -> V -> V, 
+  k   : K, 
+  map : GMap(K,V) 
+) : GMap(K,V)
+  case map {
+   tip: map,
+   bin:  
+    case cmp(k, map.key) {
+    // k < map.key, we check the left subtree
+     ltn:  
+      let new_left = GMap.adjust_with_key<K,V>(cmp, f, k, map.left)
+      GMap.node<K,V>(map.key, map.val, new_left, map.right),
+    
+    // we found the key we were looking for, so just
+    // apply the function
+     eql:  
+      let new_val = f(map.key, map.val)
+      GMap.node<K,V>(map.key, new_val, map.left, map.right),
+
+    // k > map.key, we check in the right subtree 
+     gtn:  
+      let new_right = GMap.adjust_with_key<K,V>(cmp, f, k, map.right)
+      GMap.node<K,V>(map.key, map.val, map.left, map.right)
+    }
+  }
+
+// In order to to guarantee the efficiency of the search operation
+// we *must* preserve the tree balanced, otherwise it could become
+// degenerate, looking more like a list, which is much slower
+//
+// Here we use the size information along with a constant (GMap.w)
+// to ensure that one subtree is never more than w times bigger than
+// the other subtree
+//
+// Once a tree is found to be unbalanced, then we build a new tree
+// by rotating the former, shifting part of the heavy subtree to 
+// the lighter subtree. This rotation can be `single` or `double`.
+// In the single rotation the entire subtree of the heavy subtree 
+// is moved to the other side, while in the double only a part is  
+// moved
+//
+// A visual representation of these rotations is given below 
+//
+// { a, b, c } are tree keys and a < b < c 
+// { X, Y, Z } are trees of size Nx, Ny, Nz respectively 
+// The sums inside the parens represent the size of the tree at that level 
+// 
+// SINGLE (LEFT) ROTATION 
+//    a (Nx + Ny + Nz + 2)                          b (Nx + Ny + Nz + 2)
+//   / \                     =>                    / \ 
+//  X   b (Ny + Nz + 1)            (Nx + Ny + 1)  a   Z 
+//     / \                                       / \ 
+//    Y   Z                                     X   Y  
+//
+// DOUBLE (LEFT) ROTATION 
+//                         a (Nx + Ny + Nz + 3)                                  b   (Nx + Ny + Nz + 3) 
+//                        / \                                                  /   \
+//                       X   c  (Ny_1 + Ny_2 + Nz + 2)        (Nx + Ny_1 + 1) a      c 
+//                          / \                          =>                  / \    / \ 
+// (Ny = Ny_1 + Ny_2 + 1)  b   Z                                            X  Y1  Y2  Z 
+//                        / \               
+//                      Y1  Y2             
+
+
+GMap.balance<K: Type, V: Type>(k: K, v: V, l: GMap(K,V), r: GMap(K,V)): GMap(K,V)
+  let size_l             = GMap.size<K,V>(l)
+  let size_r             = GMap.size<K,V>(r)
+  let size_l_plus_size_r = Nat.add(size_l, size_r)
+  let w_x_size_l         = Nat.mul(GMap.w, size_l)
+  let w_x_size_r         = Nat.mul(GMap.w, size_r)
+
+  // size_l_plus_size_r < 2 means that one subtree is empty and the
+  // other contains only one element, hence the tree cannot be balanced 
+  if Nat.ltn(size_l_plus_size_r, 2) then 
+    GMap.node<K,V>(k, v, l, r)
+  // size_r > w * size_l means the right subtree is too heavy
+  else if Nat.gtn(size_r, w_x_size_l) then
+    case r {
+    // this is an impossible case because we already know that
+    // the right subtree is too heavy
+    // question: how to deal with it?
+     tip: GMap.node<K,V>(k, v, l, r),
+     bin:  
+      let size_rl = GMap.size<K,V>(r.left)
+      let size_rr = GMap.size<K,V>(r.right)
+      // size_rl < size_rr means we should perform a single left rotation
+      if Nat.ltn(size_rl, size_rr) then 
+        let new_key   = r.key 
+        let new_val   = r.val 
+        let new_left  = GMap.node<K,V>(k, v, l, r.left)
+        let new_right = r.right 
+        GMap.node<K,V>(new_key, new_val, new_left, new_right)
+      // size_rl > size_rr means we should perform a double left rotation
+      else 
+       // we need to branch on the left subtree of r in order to extract its components 
+       case r.left {
+        tip: GMap.node<K,V>(k, v, l, r), // impossible case
+        bin:  
+         let new_key   = r.left.key
+         let new_val   = r.left.val 
+         let new_left  = GMap.node<K,V>(k, v, l, r.left.left) 
+         let new_right = GMap.node<K,V>(r.key, r.val, r.left.right, r.right)
+         GMap.node<K,V>(new_key, new_val, new_left, new_right)
+       }
+    }
+
+  // size_l > w * size_r means the left subtree is too heavy  
+  else if Nat.gtn(size_l, w_x_size_r) then 
+    case l {
+    // this is an impossible case because we already know that
+    // the left subtree is too heavy
+    // question: how to deal with it?
+     tip: GMap.node<K,V>(k, v, l, r),
+     bin:  
+      let size_ll = GMap.size<K,V>(l.left)
+      let size_lr = GMap.size<K,V>(l.right)
+      // size_lr < size_lln means we should perform a single right rotation
+      if Nat.ltn(size_lr, size_ll) then 
+        let new_key   = l.key 
+        let new_val   = l.val 
+        let new_left  = l.left
+        let new_right = GMap.node<K,V>(k, v, l.right, r)
+        GMap.node<K,V>(new_key, new_val, new_left, new_right)
+      // size_lr > size_ll means we should perform a double right rotation
+      else 
+        // we need to branch on the right subtree of l in order to 
+        // extract its components and move them to the right
+        case l.right {
+         tip: GMap.node<K,V>(k, v, l, r), // impossible case 
+         bin:  
+          let new_key   = l.right.key
+          let new_val   = l.right.val 
+          let new_left  = GMap.node<K,V>(l.key, l.val, l.left, l.right.left)
+          let new_right = GMap.node<K,V>(k, v, l.right.right, r)
+          GMap.node<K,V>(new_key, new_val, new_left, new_right)
+        }
+    }
+  else // neither subtrees are too heavy, no balancing is needed 
+    GMap.node<K,V>(k, v, l, r)
+
+
+// similar to GMap.concat3, but doesn't use a "glue" key-value pair
+// GMap.concat<K: Type, V: Type>(map_a: GMap(K,V), map_b: GMap(K,V)): GMap(K,V)
+//   case map_a {
+//     tip: case map_b {
+//       tip: GMap.tip<K,V>,
+//       bin: map_b
+//     },
+//     bin: case map_b {
+//       tip: map_a,
+//       bin:  
+//         let b_is_too_heavy = Nat.ltn(Nat.mul(GMap.w, map_a.size), map_b.size)
+//         let a_is_too_heavy = Nat.ltn(Nat.mul(GMap.w, map_b.size), map_a.size)
+  
+//         if b_is_too_heavy then 
+//           let new_key   = map_b.key
+//           let new_val   = map_b.val 
+//           let new_left  = GMap.concat<K,V>(map_a, map_b.left)
+//           let new_right = map_b.right
+//           GMap.balance<K,V>(new_key, new_val, new_left, new_right)
+  
+//         else if a_is_too_heavy then 
+//           let new_key   = map_a.key
+//           let new_val   = map_a.val 
+//           let new_left  = map_a.left 
+//           let new_right = GMap.concat<K,V>(map_a.right, map_b)
+//           GMap.balance<K,V>(new_key, new_val, new_left, new_right)
+  
+//         else 
+//           let maybe_min_b = GMap.min<K,V>(map_b)
+//           let dummy       = Pair.new<K,V>(map_b.key, map_b.val) 
+//           let min_b       = Maybe.extract<Pair(K,V)>(maybe_min_b, dummy) // we know map_b isn't empty
+//           let new_key     = Pair.fst<K,V>(min_b)
+//           let new_val     = Pair.snd<K,V>(min_b)
+//           let new_left    = map_a
+//           let new_right   = GMap.delete_min<K,V>(map_b)
+//           GMap.balance<K,V>(new_key, new_val, new_left, new_right)
+//     }
+//   }
+
+// Joins two trees with a key that is greater
+// than the root key of the left, and less than
+// the root key of the right 
+// A comparison function must be provided 
+GMap.concat3<K: Type, V: Type>(
+  cmp  : K -> K -> Cmp, 
+  key  : K,
+  val  : V, 
+  left : GMap(K,V),
+  right: GMap(K,V) 
+) : GMap(K,V)
+
+  case left {
+    tip: case right {
+      tip: GMap.singleton<K,V>(key, val), // trivial case, both trees are empty
+      bin: GMap.insert<K,V>(cmp, key, val, right) // if left is empty, we just insert (key,val) in the right tree
+    },
+    bin: case right {
+      tip: GMap.insert<K,V>(cmp, key, val, left), // if right is empety, we just insert (key,val) in the left tree
+      // if none of the trees are empty, we need to check if we can
+      // make a balanced tree by using (key,val) as a new node
+      // if not, we need to find the largest subtree on the side
+      // "facing" the smaller tree that is small enough to balance 
+      // with the smaller tree
+      bin:  
+      let right_is_heavier = Nat.ltn(Nat.mul(GMap.w, left.size), right.size)
+      let left_is_heavier  = Nat.ltn(Nat.mul(GMap.w, right.size), left.size)
+
+      if right_is_heavier then 
+        let new_key   = right.key 
+        let new_val   = right.val 
+        let new_left  = GMap.concat3<K,V>(cmp, key, val, left, right.left) 
+        let new_right = right.right
+        GMap.balance<K,V>(new_key, new_val, new_left, new_right)
+      
+      else if left_is_heavier then 
+        let new_key   = left.key 
+        let new_val   = left.val 
+        let new_left  = left.left 
+        let new_right = GMap.concat3<K,V>(cmp, key, val, left.right, right)
+        GMap.balance<K,V>(new_key, new_val, new_left, new_right)
+
+      else 
+        GMap.node<K,V>(key, val, left, right)
+    }
+  }
+
+// // Removes an element from a map, using a user-provided comparison 
+// // function, balancing the resulting tree in case such element is found
+// GMap.delete<K: Type, V: Type>(
+//   cmp : K -> K -> Cmp,
+//   key : K,
+//   map : GMap(K,V)
+// ) : GMap(K,V)
+
+//   case map { 
+//     tip: map,
+//     bin: case cmp(key, map.key) {
+//       ltn: GMap.delete<K,V>(cmp, key, map.left), // if key < map.key, we should look for it in the left subtree
+//       // when the element is at the root of the current subtree
+//       // things are a little trickier: we need to get the minimum
+//       // key of the right subtree and then balance the tree composed
+//       // of this minimum key we just found, the left subtree and 
+//       // the right subtree without that minimum element
+//       eql: case map.right {
+//         tip: case map.left {
+//           // if both subtrees are empty, we delete
+//           // the root and return an empty map
+//           tip:  GMap.tip<K,V>,
+//           // if the right subtree is empty, and we just 
+//           // deleted the root, we simply return the left
+//           // subtree, which is not empty 
+//           bin: map.left
+//         },
+//         bin: case map.left {
+//           // conversely, if left is empty and right is not, we 
+//           // return the right subtree
+//           tip: map.right,
+//           // when none of the subtrees are empty, then we need to
+//           // find the smallest value of the right subtree and delete it 
+//           bin:  
+//             let maybe_min_pair = GMap.min<K,V>(map.right)
+//             // a hack, we know it can never be `none` because the right
+//             // subtree is not empty
+//             let dummy    = Pair.new<K,V>(key, map.val)
+//             let min_pair = Maybe.extract<Pair(K,V)>(maybe_min_pair, dummy)
+//             case min_pair {
+//               new:
+//               let new_key   = min_pair.fst 
+//               let new_val   = min_pair.snd 
+//               let new_left  = map.left 
+//               let new_right = GMap.delete<K,V>(cmp, new_key, map.right)
+//               GMap.balance<K,V>(new_key, new_val, new_left, new_right) 
+//             }
+//         }
+//       },
+//       // if key < map.key, we should look for it in the left subtree
+//       gtn:  
+//         let new_key   = map.key 
+//         let new_val   = map.val 
+//         let new_left  = map.left 
+//         let new_right = GMap.delete<K,V>(cmp, key, map.right)
+//         GMap.balance<K,V>(new_key, new_val, new_left, new_right)
+//     }
+//   }
+
+// Removes the minimum key of the map
+// which is always the leftmost one in the tree
+GMap.delete_min<K: Type, V: Type>(map: GMap(K,V)): GMap(K,V)
+  case map {
+    tip: map,
+    bin: case map.left {
+      tip: map.right,
+      bin:  
+        let new_left = GMap.delete_min<K,V>(map.left)
+        GMap.balance<K,V>(map.key, map.val, new_left, map.right)
+    }
+  }
+
+// //   Suppose we have two Maps: T1 and T2  
+// //     T1            T2 
+// //      v             u 
+// //     / \           / \ 
+// //    A   B         C   D        
+// //
+// //    We can implement efficient Map x Map -> Map operations
+// //    but applying a "divide and conque" strategy, that means
+// //    we'll break those sets in smaller parts using `split_ltn`
+// //    and `split_gtn`, perform the desired  operation on those 
+// //    smaller parts, and then combine everything with `concat3`
+// //
+// //    - <> can be union, difference, intersection...
+// //    - v and u are keys
+// //    - A, B, C and D are subtrees
+// //
+// //                 T1 <> T2 
+// //              /           \ 
+// //             v              u   C' = split_ltn(T2)
+// //            / \            / \  D' = split_gtn(T2)  
+// //           A   B          C   D     
+// //             |              |               
+// //             |              |    
+// //             |              |  
+// //           A <> C'        B <> D' 
+// //             \              /
+// //              \            /
+// //               \          /
+// //             concat3(A<>C', v, B<>D')      
+// // 
+// // Asymetric difference
+// GMap.difference<K: Type, V: Type>(
+//   cmp   : K -> K -> Cmp, 
+//   map_a : GMap(K,V), 
+//   map_b : GMap(K,V)
+// ) : GMap(K,V)
+//   case map_a {
+//     tip: case map_b {
+//       tip: GMap.tip<K,V>,
+//       bin: map_b
+//     },
+//     bin: case map_b {
+//       tip: map_a,
+//       bin:  
+//         // divide & conquer 
+//         let ltn   = GMap.split_ltn<K,V>(cmp, map_b.key, map_a) 
+//         let gtn   = GMap.split_gtn<K,V>(cmp, map_b.key, map_a)
+//         let left  = GMap.difference<K,V>(cmp, ltn, map_b.left)
+//         let right = GMap.difference<K,V>(cmp, gtn, map_b.right)
+//         GMap.concat<K,V>(left, right)
+//     }
+//   }
+
+GMap.foldr<K: Type, V: Type, Z: Type>(f: V -> Z -> Z, z: Z, map : GMap(K,V)): Z
+  GMap.foldr.go<K,V,Z>(f, z, map)
+
+GMap.foldr.go<K: Type, V: Type, Z: Type>(f: V -> Z -> Z, z: Z, map: GMap(K,V)): Z 
+  case map {
+    tip: z,
+    bin:  
+      let right_folded = GMap.foldr.go<K,V,Z>(f, z, map.right)
+      let new_z        = f(map.val, right_folded)
+      GMap.foldr.go<K,V,Z>(f, new_z, map.left)
+  }
+
+// like GMap.foldr but with access to both values and keys
+GMap.foldr_with_key<K: Type, V: Type, Z: Type>(f: K -> V -> Z -> Z, z: Z, map: GMap(K,V)): Z 
+  GMap.foldr_with_key.go<K,V,Z>(f, z, map)
+
+
+GMap.foldr_with_key.go<K: Type, V: Type, Z: Type>(
+  f   : K -> V -> Z -> Z, 
+  z   : Z,
+  map : GMap(K,V) 
+) : Z 
+  case map {
+    tip: z,
+    bin:  
+      let right_folded = GMap.foldr_with_key.go<K,V,Z>(f, z, map.right) 
+      let new_z        = f(map.key, map.val, right_folded)
+      GMap.foldr_with_key.go<K,V,Z>(f, new_z, map.left)
+  }
+
+// Creates a map from a list of key-value pairs 
+GMap.from_list<K: Type, V: Type>(
+  cmp : K -> K -> Cmp, 
+  xs  : List(Pair(K,V))
+) : GMap(K,V)
+  GMap.from_list.go<K,V>(cmp, GMap.tip<K,V>, xs)
+
+
+ GMap.from_list.go<K: Type, V: Type>(
+  cmp : K -> K -> Cmp, 
+  acc : GMap(K,V), 
+  xs  : List(Pair(K,V))
+) : GMap(K,V) 
+  case xs {
+    nil : acc,
+    cons:  
+      let key = Pair.fst<K,V>(xs.head)
+      let val = Pair.snd<K,V>(xs.head)
+      let new_acc = GMap.insert<K,V>(cmp, key, val, acc)
+      GMap.from_list.go<K,V>(cmp, new_acc, xs.tail)     
+  }
+
+// Adds a new key-value pair into the map using
+// a user-provided comparison function
+GMap.insert<K: Type, V: Type>(
+  cmp : K -> K -> Cmp,
+  key : K, 
+  val : V, 
+  map : GMap(K,V)
+) : GMap(K,V)
+
+  case map {
+    tip: GMap.singleton<K,V>(key, val),
+    bin: case cmp(key, map.key) {
+      // if key < map.key, the new value should go into the left subtree
+      ltn:  
+        let new_key   = map.key 
+        let new_val   = map.val 
+        let new_left  = GMap.insert<K,V>(cmp, key, val, map.left)
+        let new_right = map.right 
+        GMap.balance<K,V>(new_key, new_val, new_left, new_right),
+    // `val` is already in the map, so how do we proceed? 
+    // if we decide to simply return the map unchanged, we are
+    // ignoring the case where other fields of `val`, which are not 
+    // used in the comparison function, might have changed
+    // this comes at some extra cost, of course
+      eql: GMap.node<K,V>(key, val, map.left, map.right),
+    // if key > map.key, the new value should go into the right subtree
+      gtn:  
+        let new_key = map.key 
+        let new_val = map.val  
+        let new_left = map.left 
+        let new_right = GMap.insert<K,V>(cmp, key, val, map.right)
+        GMap.balance<K,V>(new_key, new_val, new_left, new_right)
+    }
+  }
+
+// //   Suppose we have two Maps: T1 and T2  
+// //     T1            T2 
+// //      v             u 
+// //     / \           / \ 
+// //    A   B         C   D        
+// //
+// //    We can implement efficient Map x Map -> Map operations
+// //    but applying a "divide and conque" strategy, that means
+// //    we'll break those sets in smaller parts using `split_ltn`
+// //    and `split_gtn`, perform the desired  operation on those 
+// //    smaller parts, and then combine everything with `concat3`
+// //
+// //    - <> can be union, difference, intersection...
+// //    - v and u are keys
+// //    - A, B, C and D are subtrees
+// //
+// //                 T1 <> T2 
+// //              /           \ 
+// //             v              u   C' = split_ltn(T2)
+// //            / \            / \  D' = split_gtn(T2)  
+// //           A   B          C   D     
+// //             |              |               
+// //             |              |    
+// //             |              |  
+// //           A <> C'        B <> D' 
+// //             \              /
+// //              \            /
+// //               \          /
+// //             concat3(A<>C', v, B<>D')      
+// // Right-biased operation, meaning that if 
+// // both map contains the same key, the value
+// // from map_b will be chosen
+// //
+// GMap.intersection<K: Type, V: Type>(
+//   cmp   : K -> K -> Cmp, 
+//   map_a : GMap(K,V),
+//   map_b : GMap(K,V)
+// ) : GMap(K,V)
+
+//   case map_a {
+//     tip: case map_b {
+//       tip: GMap.tip<K,V>,
+//       bin: GMap.tip<K,V>
+//     },
+//     bin: case map_b {
+//       tip: GMap.tip<K,V>,
+//       bin:  
+//         // divide & conquer
+//         let ltn   = GMap.split_ltn<K,V>(cmp, map_b.key, map_a) 
+//         let gtn   = GMap.split_gtn<K,V>(cmp, map_b.key, map_a)
+//         let left  = GMap.intersection<K,V>(cmp, ltn, map_b.left)
+//         let right = GMap.intersection<K,V>(cmp, gtn, map_b.right)
+  
+//         if GMap.member<K,V>(cmp, map_b.key, map_a) then 
+//           GMap.concat3<K,V>(cmp, map_b.key, map_b.val, left, right)
+//         else 
+//           GMap.concat<K,V>(left, right)
+//     }
+//   }
+
+
+GMap.is_balanced<K: Type, V: Type>(map: GMap(K,V)): Bool
+  case map {
+    tip: Bool.true,
+    bin:  
+      let size_l = GMap.size<_,_>(map.left)
+      let size_r = GMap.size<_,_>(map.right)
+      let max_size_l = Nat.mul(GMap.w, size_r)
+      let max_size_r = Nat.mul(GMap.w, size_l)
+      let size_l_plus_r = Nat.add(size_l, size_r)
+      let sizes_dont_exceed = List.and([
+          Nat.lte(size_l, max_size_r),
+          Nat.lte(size_r, max_size_l)
+      ])
+      let subtrees_sizes_ok = Bool.or(sizes_dont_exceed, Nat.lte(size_l_plus_r, 1))
+      let left_is_balanced  = GMap.is_balanced<_,_>(map.left)
+      let right_is_balanced = GMap.is_balanced<_,_>(map.right)
+  
+      List.and([subtrees_sizes_ok, left_is_balanced, right_is_balanced])
+  }
+
+// possibly returns the value associated with a key
+GMap.lookup<K: Type, V: Type>(cmp: K -> K -> Cmp, key: K, map: GMap(K,V)): Maybe(V)
+  case map {
+    tip: Maybe.none<V>,
+    bin: case cmp(key, map.key) {
+      ltn: GMap.lookup<K,V>(cmp, key, map.left),
+      eql: Maybe.some<V>(map.val),
+      gtn: GMap.lookup<K,V>(cmp, key, map.right)
+    }
+  }
+
+// similar to GMap.lookup, but will return the provided default value
+// if the given key is not present in the map 
+GMap.lookup_with_default<K: Type, V: Type>(
+  cmp : K -> K -> Cmp,
+  key : K, 
+  dft : V,
+  map : GMap(K,V)
+) : V
+  case GMap.lookup<K,V>(cmp, key, map) as maybe_val {
+    none: dft, 
+    some: maybe_val.value
+  }
+
+// Applies a function to every value present in the map
+GMap.map<K: Type, V: Type, Z: Type>(f: V -> Z, map: GMap(K,V)): GMap(K,Z)
+  case map {
+    tip: GMap.tip<K,Z>,
+    bin:  
+      let new_val   = f(map.val)
+      let new_left  = GMap.map<K,V,Z>(f, map.left)
+      let new_right = GMap.map<K,V,Z>(f, map.right)
+      GMap.node<K,Z>(map.key, new_val, new_left, new_right)
+  }
+
+// checks if a given key is present in the map
+GMap.member<K: Type, V: Type>(cmp: K -> K -> Cmp, key: K, map: GMap(K,V)): Bool
+  case map {
+    tip: Bool.false,
+    bin: case cmp(key, map.key) {
+      ltn: GMap.member<K,V>(cmp, key, map.left),
+      eql: Bool.true,
+      gtn: GMap.member<K,V>(cmp, key, map.right)
+    }
+  }
+
+// Possibly returns a pair of the minimum key and value 
+// of the map
+// Since we're working with a balanced tree we only need
+// to check the the left subtree, if it's empty, the 
+// minimum value is the root, because all elements to the 
+// right are greater than it. If it's not, recurse until 
+// the leftmost element is found
+GMap.min<K: Type, V: Type>(map: GMap(K,V)): Maybe(Pair(K,V))
+  case map {
+    tip: Maybe.none<Pair(K,V)>,
+    bin: case map.left {
+      tip: Maybe.some<Pair(K,V)>(Pair.new<K,V>(map.key, map.val)),
+      bin: GMap.min<K,V>(map.left)
+    }
+  }
+
+// a smart constructor to ensure that the size of the tree is maintained correctly
+// the subtrees passed as arguments must already be balanced
+GMap.node<K: Type, V: Type>(key: K, val: V, left: GMap(K,V), right: GMap(K,V)): GMap(K,V)
+  let size_left  = GMap.size<K,V>(left)
+  let size_right = GMap.size<K,V>(right)
+  let new_size   = List.sum([1, size_left, size_right])
+  GMap.bin<K,V>(new_size, key, val, left, right)
+
+// checks if a key is not present in a map
+GMap.not_member<K: Type, V: Type>(cmp: K -> K -> Cmp, key: K, map: GMap(K,V)): Bool
+  Bool.not(GMap.member<K,V>(cmp, key, map))
+
+// checks if a map is empty or not
+GMap.null<K: Type, V: Type>(map: GMap(K,V)): Bool
+  case map {
+    tip: Bool.true,
+    bin: Bool.false
+  }
+
+GMap.show<K: Type, V: Type>(
+  show_key: K -> String,
+  show_val: V -> String,
+  map     : GMap(K,V)
+): String
+  let show_pair = Pair.show<K,V>(show_key, show_val)
+  let kvs       = GMap.to_list<K,V>(map)
+  let kvs       = List.map<Pair(K,V), String>(show_pair, kvs)
+  List.show<String>(String.show, kvs)
+
+// creates a map from a single pair of key and value
+// note that the key type `K` *must* be able to implement
+// a function with the signature: 
+//         cmp: K -> K -> Cmp 
+// which is used in many map-related operations
+GMap.singleton<K: Type, V: Type>(key: K, val: V): GMap(K,V)
+  GMap.bin<K,V>(1, key, val, GMap.tip<_,_>, GMap.tip<_,_>)
+
+// Returns the size of a given map
+GMap.size<K: Type, V: Type>(map: GMap(K,V)): Nat 
+  case map {
+    tip: 0,
+    bin: map.size
+  }
+
+// Given a comparison function, a map, and a key (cut), this function
+// returns a map with keys which are greater than the cut, discarding
+// the rest
+GMap.split_gtn<K: Type, V: Type>(cmp: K -> K-> Cmp, cut: K, map: GMap(K,V)): GMap(K,V)
+  case map {
+    tip: map,
+    bin: case cmp(cut, map.key) {
+      ltn:  
+        let key   = map.key 
+        let val   = map.val 
+        let left  = GMap.split_gtn<K,V>(cmp, cut, map.left)
+        let right = map.right 
+        GMap.concat3<K,V>(cmp, key, val, left, right),
+      eql: map.right,
+      gtn: GMap.split_gtn<K,V>(cmp, cut, map.right)
+    }
+  }
+
+// Given a comparison function, a map, and a key (cut), this function
+// returns a map with keys which are less than the cut, discarding
+// the rest
+GMap.split_ltn<K: Type, V: Type>(cmp: K -> K-> Cmp, cut: K, map: GMap(K,V)): GMap(K,V)
+  case map {
+    tip: map,
+    bin: case cmp(cut, map.key) {
+      ltn: GMap.split_ltn<K,V>(cmp, cut, map.left),
+      eql: map.left,
+      gtn:  
+        let key   = map.key 
+        let val   = map.val 
+        let left  = map.left 
+        let right = GMap.split_ltn<K,V>(cmp, cut, map.right)
+        GMap.concat3<K,V>(cmp, key, val, left, right)
+    }
+  }
+
+// transforms a map into a list of key-value pairs
+GMap.to_list<K: Type, V: Type>(map: GMap(K,V)): List(Pair(K,V))
+  GMap.foldr_with_key<K,V,List(Pair(K,V))>(
+    (k, v, kvs) List.cons<Pair(K,V)>(Pair.new<K,V>(k,v), kvs),
+    List.nil<Pair(K,V)>,
+    map
+  )
+
+//   Suppose we have two Maps: T1 and T2  
+//     T1            T2 
+//      v             u 
+//     / \           / \ 
+//    A   B         C   D        
+//
+//    We can implement efficient Map x Map -> Map operations
+//    but applying a "divide and conque" strategy, that means
+//    we'll break those sets in smaller parts using `split_ltn`
+//    and `split_gtn`, perform the desired  operation on those 
+//    smaller parts, and then combine everything with `concat3`
+//
+//    - <> can be union, difference, intersection...
+//    - v and u are keys
+//    - A, B, C and D are subtrees
+//
+//                 T1 <> T2 
+//              /           \ 
+//             v              u   C' = split_ltn(T2)
+//            / \            / \  D' = split_gtn(T2)  
+//           A   B          C   D     
+//             |              |               
+//             |              |    
+//             |              |  
+//           A <> C'        B <> D' 
+//             \              /
+//              \            /
+//               \          /
+//             concat3(A<>C', v, B<>D')      
+// Right-biased operation, meaning that if 
+// both map contains the same key, the value
+// from map_b will be chosen
+//       
+GMap.union<K: Type, V: Type>(
+  cmp  : K -> K -> Cmp,
+  map_a: GMap(K,V), 
+  map_b: GMap(K,V)
+) : GMap(K,V)
+  
+  case map_a {
+    tip: case map_b {
+      tip: GMap.tip<K,V>,
+      bin: map_b
+    },
+    bin: case map_b {
+      tip: map_a,
+      bin:  
+        let key   = map_b.key 
+        let val   = map_b.val 
+        let ltn   = GMap.split_ltn<K,V>(cmp, map_b.key, map_a)
+        let gtn   = GMap.split_gtn<K,V>(cmp, map_b.key, map_a)
+        let left  = GMap.union<K,V>(cmp, ltn, map_b.left)
+        let right = GMap.union<K,V>(cmp, gtn, map_b.right)
+        GMap.concat3<K,V>(cmp, key, val, left, right)
+    }
+  }
+
+// used for checking whether a tree is balanced
+// it represents the maximum factor by which
+// one subtree can outweigh its sibling
+//
+// this value was empirically chosen
+// in Haskell's `containers` package
+// and might be changed here later after
+// benchmarks are run
+GMap.w : Nat 
+  3
+
+GMap.tests.1 : IO(Unit)
+  let kvs = [
+    Pair.new<_,_>(1,"a")
+    Pair.new<_,_>(2,"b")
+    Pair.new<_,_>(3,"c")
+  ]
+  let map = GMap.from_list<_,_>(Nat.cmp, kvs)
+  let map = GMap.show<_,_>(Nat.show, String.show, map)
+  IO.print(map) //["(1,"a")","(2,"b")","(3,"c")"]
+
+// GMap.tests.2 : The(String, "b")
+//   def kvs = [
+//     Pair.new<_,_>(1,"a")
+//     Pair.new<_,_>(2,"b")
+//     Pair.new<_,_>(3,"c")
+//   ]
+//   def map = GMap.from_list<_,_>(Nat.cmp, kvs)
+//   def val_at_key_2 = GMap.lookup_with_default<_,_>(Nat.cmp, 2, "?", map)
+//   The.value<_>(val_at_key_2)
+
+// GMap.tests.3 : The(String, "a")
+//   def empty_map = GMap.tip<Nat,String>
+//   def not_empty = GMap.insert<,>(Nat.cmp, 1, "a", empty_map)
+//   def the_a     = GMap.lookup_with_default<,>(Nat.cmp, 1, "?", not_empty)
+//   The.value<>(the_a)
+
+// GMap.tests.4 : The(Maybe(String), Maybe.none<>)
+//   def kvs = [
+//     Pair.new<,>(1,"a")
+//     Pair.new<,>(2,"b")
+//     Pair.new<,>(3,"c")
+//   ]
+//   def map = GMap.from_list<,>(Nat.cmp, kvs)
+//   def map = GMap.delete<,>(Nat.cmp, 2, map)
+//   def res = GMap.lookup<,>(Nat.cmp, 2, map)
+//   The.value<>(res)
+
+// GMap.tests.5 : IO(Unit)
+//   let kvs_a = [
+//     Pair.new<,>(1,"a")
+//     Pair.new<,>(2,"b")
+//     Pair.new<,>(3,"c")
+//   ]
+
+//   let kvs_b = [
+//     Pair.new<,>(2,"?")
+//     Pair.new<,>(4,"d")
+//     Pair.new<,>(5,"e")
+//   ] 
+
+//   let map_a = GMap.from_list<,>(Nat.cmp, kvs_a)
+//   let map_b = GMap.from_list<,>(Nat.cmp, kvs_b)
+
+//   let res = GMap.union<,>(Nat.cmp, map_a, map_b)
+//   let res = GMap.show<,>(Nat.show, String.show, res)
+//   IO.print(res)
+  
+// GMap.tests.6 : IO(Unit)
+//   let kvs_a = [
+//     Pair.new<,>(1,"a")
+//     Pair.new<,>(2,"b")
+//     Pair.new<,>(3,"c")
+//   ]
+
+//   let kvs_b = [
+//     Pair.new<,>(2,"?")
+//     Pair.new<,>(4,"d")
+//     Pair.new<,>(5,"e")
+//   ] 
+
+//   let map_a = GMap.from_list<,>(Nat.cmp, kvs_a)
+//   let map_b = GMap.from_list<,>(Nat.cmp, kvs_b)
+
+//   let res = GMap.intersection<,>(Nat.cmp, map_a, map_b)
+//   let res = GMap.show<,>(Nat.show, String.show, res)
+//   IO.print(res)
+
+// GMap.tests.7 : IO(Unit)
+//   let kvs_a = [
+//     Pair.new<,>(1,"a")
+//     Pair.new<,>(2,"b")
+//     Pair.new<,>(3,"c")
+//   ]
+
+//   let kvs_b = [
+//     Pair.new<,>(2,"?")
+//     Pair.new<,>(4,"d")
+//     Pair.new<,>(5,"e")
+//   ] 
+
+//   let map_a = GMap.from_list<,>(Nat.cmp, kvs_a)
+//   let map_b = GMap.from_list<,>(Nat.cmp, kvs_b)
+
+//   let res = GMap.difference<,>(Nat.cmp, map_a, map_b)
+//   let res = GMap.show<,>(Nat.show, String.show, res)
+//   IO.print(res)
+
+// GMap.tests.8 : IO(Unit)
+//   let kvs_a = [
+//     Pair.new<,>(1,"a")
+//     Pair.new<,>(2,"b")
+//     Pair.new<,>(3,"c")
+//   ]
+//   let map_a = GMap.from_list<,>(Nat.cmp, kvs_a)
+//   let res   = GMap.delete_min<,>(map_a)
+//   let res   = GMap.show<,>(Nat.show, String.show, res)
+//   IO.print(res)
+
+// GMap.tests.9 : IO(Unit)
+//   let kvs = [
+//     Pair.new<,>(1,"Hello"),
+//     Pair.new<,>(2,","),
+//     Pair.new<,>(3," "),
+//     Pair.new<,>(4,"World"),
+//     Pair.new<,>(5,"!")
+//   ]
+//   let map = GMap.from_list<,>(Nat.cmp, kvs)
+//   let res = GMap.foldr<,,>(String.concat, String.nil, map)
+//   IO.print(res)
+
+// GMap.tests.10: The(Bool, Bool.true)
+//   def kvs = [
+//     Pair.new<,>(1,"Hello"),
+//     Pair.new<,>(2,","),
+//     Pair.new<,>(3," "),
+//     Pair.new<,>(4,"World"),
+//     Pair.new<,>(5,"!")
+//   ]
+//   def map = GMap.from_list<,>(Nat.cmp, kvs)
+//   def res = GMap.is_balanced<,>(map)
+//   The.value<>(res)
+

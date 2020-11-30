@@ -1,0 +1,13 @@
+type Export {
+  new(T: Type, value: T)
+}
+
+Export.T(ex: Export): Type
+  open ex
+  ex.T
+
+Export.value(ex: Export): Export.T(ex)
+  case ex{
+    new: ex.value
+  } : case ex{new: ex.T}
+

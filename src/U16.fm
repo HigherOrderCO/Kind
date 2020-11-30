@@ -89,3 +89,6 @@ U16.to_bits(a: U16): Bits
     new: Word.to_bits<16>(a.value)
   }
 
+U16.to_u32(a: U16): U32
+  open a
+  U32.new(Word.trim<16>(32, a.value))

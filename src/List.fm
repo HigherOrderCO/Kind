@@ -25,6 +25,9 @@ List.fold<A: Type>(list: List(A)): <P: Type> -> P -> (A -> P -> P) -> P
     cons: cons(list.head, List.fold<A>(list.tail)<P>(nil, cons))
   }
 
+List.foldr<A: Type,B: Type>(b: B, f: A -> B -> B, xs: List(A)): B
+  List.fold<A>(xs)<B>(b,f)
+
 List.for<A: Type>(xs: List(A))<B: Type>(b: B, f: A -> B -> B): B
   case xs {
     nil : b,
@@ -128,3 +131,59 @@ List.zip<A: Type, B: Type>(as: List(A), bs: List(B)): List(Pair(A,B))
       cons: List.cons<_>(Pair.new<_,_>(as.head, bs.head), List.zip<A,B>(as.tail, bs.tail)),
     }
   }
+
+// Do all elements satisfy a condition?
+List.all<A: Type>(cond: A -> Bool, list: List(A)): Bool
+  case list{
+    nil : Bool.true
+    cons: case cond(list.head){
+      true : List.all<_>(cond, list.tail)
+      false: Bool.false
+    }
+  }
+
+// Do any element satisfy a condition?
+List.any<A: Type>(cond: A -> Bool, list: List(A)): Bool
+  case list{
+    nil : Bool.false
+    cons: case cond(list.head){
+      true : Bool.true
+      false: List.any<_>(cond, list.tail)
+    }
+  }
+
+// Are all elements true?
+List.and(list: List(Bool)): Bool
+  List.all<_>((x) x, list)
+
+// Add the total of a list of natural numbers
+List.sum(xs: List(Nat)) : Nat
+  List.sum.go(xs, Nat.zero)
+
+List.sum.go(xs: List(Nat), n: Nat) : Nat
+  case xs {
+    nil : n,
+    cons: List.sum.go(xs.tail,Nat.add(xs.head,n))
+  }
+
+// Shows a list as String
+List.show<A: Type>(f: A -> String, xs: List(A)): String
+  String.flatten(["[",String.intercalate(",", List.map<_,_>(f,xs)),"]"])
+
+// insert separators between elements, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
+List.intersperse<A: Type>(sep: A, xs: List(A)): List(A)
+  case xs{
+    nil : List.nil<_>
+    cons: case xs.tail{
+      nil : List.pure<_>(xs.head)
+      cons: List.cons<_>(xs.head,List.cons<_>(sep,List.intersperse<A>(sep,xs.tail)))
+    }
+  }
+
+// insert separators between elements, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
+List.intercalate<A: Type>(sep: List(A), xs: List(List(A))): List(A)
+  List.flatten<A>(List.intersperse<List(A)>(sep,xs))
+
+// A list with only one element.
+List.pure<A : Type>(x : A) : List(A)
+  List.cons<A>(x)(List.nil<A>)

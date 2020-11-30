@@ -21,3 +21,25 @@ Equal.chain<A: Type, a: A, b: A, c: A>(d: Equal(A,a,b), e: Equal(A,b,c)): Equal(
   case e {
     refl: d
   } : Equal(A, a, e.b)
+
+Equal.applyd<A: Type, B: A -> Type, a: A, b: A>(f: (x: A) -> B(x), e: Equal(A, a, b))
+  : Equal(B(a), f(a), Equal.rewrite<A,b,a,B>(Equal.mirror<A,a,b>(e))(f(b)))
+  case e{
+    refl: Equal.refl<B(a), f(a)>
+  } : Equal(B(a), f(a), Equal.rewrite<A,e.b,a,B>(Equal.mirror<A,a,e.b>(e),f(e.b)))
+
+// Erased rewrite
+Equal.cast<A: Type, a: A, b: A, P: A -> Type, e: Equal(A,a,b)>(x: P(a)): P(b)
+  case e{
+    refl: x
+  } : P(e.b)
+
+// If a == x and b == x, then a == b
+Equal.left<A: Type, x: A, a: A, b: A>(r: Equal(A, a, x), s: Equal(A, b, x))
+: Equal(A, a, b)
+  Equal.chain<A, a, x, b>(r, Equal.mirror<A, b, x>(s))
+
+// If x == a and x == b, then a == b
+Equal.right<A: Type, x: A, a: A, b: A>(r: Equal(A, x, a), s: Equal(A, x, b))
+: Equal(A, a, b)
+  Equal.chain<A, a, x, b>(Equal.mirror<A, x, a>(r), s)

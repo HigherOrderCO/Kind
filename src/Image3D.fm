@@ -1,0 +1,87 @@
+// An Image3D contains `size` 3d pixels (voxels). Each pixel has a 24-bit
+// position and a 24-bit color. It is stored on the buffer as follows:
+// buffer[0] = voxel0.pos
+// buffer[1] = voxel0.col
+// buffer[2] = voxel1.pos
+// buffer[3] = voxel1.col
+// buffer[4] = voxel2.pos
+// buffer[5] = voxel2.col
+// And so on. Positions and colors are `U32`, interpreted as `Pos32` / `Col32`.
+type Image3D {
+  new(length: U32, capacity: U32, buffer: Buffer32)
+}
+
+// Image3D.alloc_capacity(capacity: U32): Image3D
+//   let buffer = Buffer32.alloc(U32.needed_depth(U32.mul(2u,capacity)))
+//   Image3D.new(0u, capacity, buffer)
+
+// Image3D.clear(img: Image3D): Image3D
+//   Image3D.set_length(0u, img)
+
+Image3D.get_capacity(img: Image3D): U32
+  open img 
+  img.capacity
+
+// Image3D.get_col(idx: U32, vox: Image3D): U32
+//   open vox 
+//   Buffer32.get(U32.add(U32.mul(idx,2u),1u), vox.buffer)
+
+Image3D.get_length(img: Image3D): U32
+  open img
+  img.length
+
+// Image3D.get_pos(idx: U32, vox: Image3D): U32
+//   open vox 
+//   Buffer32.get(U32.mul(idx,2u), vox.buffer)
+
+// Image3D.parse(voxdata: String): Image3D
+//   let siz = U32.div(U32.length(voxdata), 12u)
+//   let img = Image3D.alloc_capacity(siz);
+//   U32.for<Image3D>(img, 0u, siz)
+//   | (i, img)
+//     let x = Image3D.parse_byte(U32.add(U32.mul(i, 6u), 0u), voxdata)
+//     let y = Image3D.parse_byte(U32.add(U32.mul(i, 6u), 1u), voxdata)
+//     let z = Image3D.parse_byte(U32.add(U32.mul(i, 6u), 2u), voxdata)
+//     let r = Image3D.parse_byte(U32.add(U32.mul(i, 6u), 3u), voxdata)
+//     let g = Image3D.parse_byte(U32.add(U32.mul(i, 6u), 4u), voxdata)
+//     let b = Image3D.parse_byte(U32.add(U32.mul(i, 6u), 5u), voxdata)
+//     let pos = Pos32.new(x,y,z)
+//     let col = Col32.new(r,g,b,255u)
+//     let img = Image3D.push(pos, col, img)
+//     img;
+
+// Image3D.parse_byte(idx: U32, voxdata: String): U32
+//   let chr = U32.slice(U32.mul(idx,2u), U32.add(U32.mul(idx,2u),2u), voxdata)
+//   U32.read_base(16u, chr)
+
+// Image3D.push(pos: U32, col: U32, img: Image3D): Image3D
+//   open img
+//   let idx = img.length
+//   let img = Image3D.set_pos(idx, pos, img)
+//   let img = Image3D.set_col(idx, col, img)
+//   let img = Image3D.set_length(U32.add(img.length, 1u), img)
+//   img
+  
+
+// Sets position and color of the idx voxel of an Image3D
+// Image3D.set(idx: U32, pos: U32, col: U32, img: Image3D): Image3D
+//   let img = Image3D.set_pos(idx, pos, img)
+//   let img = Image3D.set_col(idx, col, img)
+//   img
+
+// // Sets the color of the idx voxel of an Image3D
+// Image3D.set_col(idx: U32, col: U32, img: Image3D): Image3D
+//   open img
+//   let img.buffer = Buffer32.set(U32.add(U32.mul(idx,2u),1u), col, img.buffer)
+//   Image3D.new(img.length, img.capacity, img.buffer)
+
+Image3D.set_length(length: U32, img: Image3D): Image3D
+  open img
+  Image3D.new(length, img.capacity, img.buffer)
+
+// // Sets the position of the idx voxel of an Image3D
+// Image3D.set_pos(idx: U32, pos: U32, img: Image3D): Image3D
+//   open img
+//   let img.buffer = Buffer32.set(U32.mul(idx,2u), pos, img.buffer)
+//   Image3D.new(img.length, img.capacity, img.buffer)
+

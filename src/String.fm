@@ -248,8 +248,26 @@ String.split(xs: String, match: String): List(String)
     }
   }
 
-// String.to_bits(str: String): Bits
-//   case str{
-//     nil : Bits.nil
-//     cons: Bits.concat(U16.to_bits(str.head))(String.to_bits(str.tail))
-//   }
+String.to_bits(str: String): Bits
+  case str{
+    nil : Bits.e
+    cons: Bits.concat(U16.to_bits(str.head))(String.to_bits(str.tail))
+  }
+
+// insert separators between characters, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
+String.intercalate(sep: String, xs: List(String)): String
+  String.flatten(List.intersperse<_>(sep,xs))
+
+// insert separators between characters, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
+String.intersperse(sep: Char, xs: String): String
+  case xs{
+  nil : String.nil
+  cons: case xs.tail{
+    nil : String.pure(xs.head)
+    cons: String.cons(xs.head,String.cons(sep,String.intersperse(sep,xs.tail)))
+    }
+  }
+
+// Print a string
+String.show(xs: String): String
+  String.flatten(["\"",xs,"\""])

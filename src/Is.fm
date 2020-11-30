@@ -1,0 +1,6 @@
+Is(a : Bool): Type
+  Equal(Bool,Bool.true,a)
+
+Is.tis : Is(Bool.true)
+  Equal.refl<_,_>
+

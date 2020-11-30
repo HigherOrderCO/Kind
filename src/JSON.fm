@@ -1,0 +1,9 @@
+// JavaScript Object Notation.
+type JSON {
+  null,
+  bool(x: Bool),
+  number(x: F64),
+  string(x: String),
+  array(x: List(JSON)),
+  object(x: List(Pair(String, JSON)))
+}

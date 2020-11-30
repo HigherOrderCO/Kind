@@ -1,0 +1,43 @@
+// A Buffer32 contains 2^depth values of type U32.
+// Note: This is compiled to a mutable array. Because of that, buffers must be
+// used linearly. This is NOT checked yet, so, right now, buffer compilation is
+// unsafe until linearity checks are added!
+type Buffer32 {
+  new(depth: Nat, array: Array(U32, depth))
+}
+
+Buffer32.alloc(depth: Nat): Buffer32
+  Buffer32.new(depth, Array.alloc<U32>(depth, U32.zero))
+
+// Buffer32.get(idx: U32, buf: Buffer32): U32
+//   // TODO: get dep arr = buf
+//   // TODO: get wrd = idx
+//   open buf
+//   let dep = buf.depth
+//   let arr = buf.array
+//   open idx
+//   let wrd = idx.value
+//   let idx = Word.trim<32>(dep, wrd)
+//   Array.get<U32, dep>(idx, arr)
+  
+
+// Converts a hex string into a Buffer32.
+// TODO. We need to:
+// 1. Compute the length of the string with String.length32
+// 2. Divide by 8 to get the buffer length (add U32 consts on Lang?)
+// 3. Use Nat.succ(Word.nat_log2<32>(...)) to compute its depth
+// 4. Allocate the buffer with Buffer32.alloc
+// 5. Split hex into chunks of 8 chars (32 bits)
+// 6. Convert it into a list of U32 using Char.hex_value32
+// 7. Loop with U32.for, using Buffer32.set(i, list[i], buf)
+// Use U32 whenever possible
+// Buffer32.parse_hex(hex: String): Buffer32
+//   Buffer32.parse_hex(hex)
+
+// Buffer32.set(idx: U32, val: U32, buf: Buffer32): Buffer32
+//   get dep arr = buf
+//   get wrd = idx
+//   let idx = Word.trim<32>(dep, wrd)
+//   def arr = Array.set<U32, dep>(idx, val, arr)
+//   Buffer32.new(dep, arr)
+

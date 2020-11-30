@@ -1,0 +1,102 @@
+// An integer is a pair of nats quotiented by `(suc x, suc y) ~ (x, y)`
+Int: Type
+  int<P: Int -> Type> ->
+  (new: (x: Nat) -> (y: Nat) -> P(Int.new(x, y))) ->
+  P(int)
+
+Int.new(x: Nat, y: Nat): Int
+  <P> (new)
+  case x {
+    zero: new(Nat.zero, y),
+    succ: case y {
+      zero: new(Nat.succ(x.pred), Nat.zero),
+      succ: Int.new(Nat.sub(x.pred, y.pred), Nat.sub(y.pred, x.pred))<P>(new),
+    } : P(Int.new(Nat.succ(x.pred), y))
+  } : P(Int.new(x, y))
+
+Int.add(a: Int, b: Int): Int
+  open a
+  open b
+  Int.new(Nat.add(a.x, b.x), Nat.add(a.y, b.y))
+  
+
+Int.0: Int
+  Int.from_nat(0)
+
+Int.1: Int
+  Int.from_nat(1)
+
+Int.cmp(a: Int, b: Int): Cmp
+  open a
+  open b
+  Nat.cmp(Nat.add(a.x, b.y), Nat.add(b.x, a.y))
+
+Int.div_nat(a: Int, n: Nat): Int
+  open a
+  Int.new(Nat.div(a.x, n), Nat.div(a.y, n))
+
+Int.eql(a: Int, b: Int): Bool
+  case Int.cmp(a, b) {
+    ltn: Bool.false,
+    eql: Bool.true,
+    gtn: Bool.false,
+  }
+
+Int.from_nat(n: Nat): Int
+  Int.new(n, 0)
+
+Int.mod_nat(a: Int, n: Nat): Nat
+  open a
+  let b = Nat.mod(a.y, n)
+  let sum = Nat.add(a.x, Nat.sub(n, b))
+  Nat.mod(sum, n)
+
+Int.mul(a: Int, b: Int): Int
+  open a
+  open b
+  Int.new(Nat.add(Nat.mul(a.x, b.x), Nat.mul(a.y, b.y)), Nat.add(Nat.mul(a.x, b.y), Nat.mul(a.y, b.x)))
+  
+Int.neg(a: Int): Int
+  open a
+  Int.new(a.y, a.x)
+ 
+// Int.parse_decimal(str: String): Int
+//   case str {
+//     nil: Int.0,
+//     cons: U16.eql(str.head, '-')<() Int>(
+//       Int.new(0, Nat.parse_decimal(str.tail)),
+//       Int.new(Nat.parse_decimal(String.cons(str.head, str.tail)), 0)),
+//   }
+
+// Int.parse_hex(str: String): Int
+//   case str {
+//     nil: Int.0,
+//     cons: case U16.eql(str.head, '-') {
+//       true:
+//         let b = Nat.parse_hex(str.tail)
+//         Int.new(0, b),
+//       false:
+//         let a = Nat.parse_hex(String.cons(str.head, str.tail))
+//         Int.new(a, 0),
+//     }
+//   }
+
+Int.sub(a: Int, b: Int): Int
+  Int.add(a, Int.neg(b))
+
+// true is negative, false otherwise
+Int.to_nat(a: Int): Pair(Bool, Nat)
+  open a
+  case a.y {
+    zero: Pair.new<_,_>(Bool.false, a.x),
+    succ: Pair.new<_,_>(Bool.true, a.y),
+  }
+  
+
+Int.to_string_base(base: Nat, a: Int): String
+  open a
+  case a.y {
+    zero: Nat.to_string_base(base, a.x),
+    succ: String.cons('-', Nat.to_string_base(base, a.y)),
+  }
+
