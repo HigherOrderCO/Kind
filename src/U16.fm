@@ -3,9 +3,8 @@ type U16 {
 }
 
 U16.to_word(a: U16): Word(16)
-  case a {
-    new: a.value
-  }
+  open a
+  a.value
 
 // 0
 U16.zero: U16
@@ -13,65 +12,50 @@ U16.zero: U16
 
 // ++a
 U16.inc(a: U16): U16
-  case a {
-    new: U16.new(Word.inc<_>(a.value))
-  }
+  open a
+  U16.new(Word.inc<_>(a.value))
 
 // a + b
 U16.add(a: U16, b: U16): U16
-  case a {
-    new: case b {
-      new: U16.new(Word.add<_>(a.value, b.value))
-    }
-  }
+  open a 
+  open b 
+  U16.new(Word.add<_>(a.value, b.value))
 
 // a - b
 U16.sub(a: U16, b: U16): U16
-  case a {
-    new: case b {
-      new: U16.new(Word.sub<_>(a.value, b.value))  
-    }
-  }
+  open a
+  open b
+  U16.new(Word.sub<_>(a.value, b.value))
 
 // a == b
 U16.eql(a: U16, b: U16): Bool
-  case a {
-    new: case b {
-      new: Word.eql<_>(a.value, b.value)
-    }
-  }
+  open a
+  open b
+  Word.eql<_>(a.value, b.value)
 
 // a >= b
 U16.gte(a: U16, b: U16): Bool
-  case a {
-    new: case b {
-      new: Word.gte<_>(a.value, b.value)
-    }
-  }
+  open a
+  open b
+  Word.gte<_>(a.value, b.value)
 
 // a > b
 U16.gtn(a: U16, b: U16): Bool
-  case a {
-    new: case b {
-      new: Word.gtn<_>(a.value, b.value)
-    }
-  }
+  open a
+  open b
+  Word.gtn<_>(a.value, b.value)
 
 // a <= b
 U16.lte(a: U16, b: U16): Bool
-  case a {
-    new: case b {
-      new: Word.lte<_>(a.value, b.value)
-    }
-  }
+  open a
+  open b
+  Word.lte<_>(a.value, b.value)
 
 // a < b
 U16.ltn(a: U16, b: U16): Bool
-  case a {
-    new: case b {
-      new: Word.ltn<_>(a.value, b.value)
-    }
-  }
+  open a
+  open b
+  Word.ltn<_>(a.value, b.value)
 
 // a <= b <= c
 U16.btw(a: U16, b: U16, c: U16): Bool
@@ -79,13 +63,76 @@ U16.btw(a: U16, b: U16, c: U16): Bool
 
 // Stringifies to hex
 U16.show_hex(a: U16): String
-  case a {
-    new: Nat.to_string_base(16, Bits.to_nat(Word.to_bits<16>(a.value)))
-  }
+  open a
+  Nat.to_string_base(16, Bits.to_nat(Word.to_bits<16>(a.value)))
 
+U16.to_u32(a: U16): U32
+  open a
+  U32.new(Word.trim<16>(32, a.value))
+
+U16.pow(a: U16, b: U16): U16
+  open a
+  open b
+  U16.new(Word.pow<_>(a.value, b.value))
+
+U16.shl(n: U16, a: U16): U16
+  U16.shl(n, a)
+
+U16.shr(n: U16, a: U16): U16
+  U16.shl(n, a)
 
 U16.to_bits(a: U16): Bits
-  case a {
-    new: Word.to_bits<16>(a.value)
-  }
+  open a
+  Word.to_bits<_>(a.value)
+
+// U16.to_nat(a: U16): Nat
+//   case a{
+//     new: Word.to_nat<_>(a.value)
+//   }
+
+// TODO: optimize
+// U16.to_string(n: U16): String
+//   Nat.to_string_base(10, U16.to_nat(n))
+
+U16.xor(a: U16, b: U16): U16
+  open a
+  open b
+  U16.new(Word.xor<_>(a.value, b.value))
+
+U16.mod(a: U16, b: U16): U16
+  open a
+  open b
+  U16.new(Word.mod<_>(a.value, b.value))
+  
+U16.and(a: U16, b: U16): U16
+  open a
+  open b
+  U16.new(Word.and<_>(a.value, b.value))
+
+U16.concat(a: U16, b: U16): U32
+  open a
+  open b
+  U32.new(Word.concat<_,_>(a.value, b.value))
+
+U16.div(a: U16, b: U16): U16
+  open a
+  open b
+  U16.new(Word.div<_>(a.value, b.value))
+
+U16.mul(a: U16, b: U16): U16
+  open a
+  open b
+  U16.new(Word.mul<_>(a.value, b.value))
+
+U16.or(a: U16, b: U16): U16
+  open a
+  open b
+  U16.new(Word.or<_>(a.value, b.value))
+
+// U16.parse_hex(str: String): U16
+//   U16.new(Word.from_bits(16, Bits.parse_hex(str)))
+
+U16.to_bits(a: U16): Bits
+  open a
+  Word.to_bits<16>(a.value)
 

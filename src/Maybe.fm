@@ -45,3 +45,58 @@ Maybe.or<A: Type>(a: Maybe(A), b: Maybe(A)): Maybe(A)
     some: Maybe.some<_>(a.value),
   }
 
+
+Maybe.map<A: Type, B: Type>(f: A -> B, m: Maybe(A)): Maybe(B)
+  case m {
+    none: Maybe.none<B>,
+    some: Maybe.some<B>(f(m.value)),
+  }
+
+Maybe.map.comp<A: Type, B: Type, C: Type>(ma: Maybe(A), g: (B -> C), h: (A -> B))
+  : Equal(Maybe(C),
+          Maybe.map<A, C>(Function.comp<A, B, C>(g, h), ma),
+          Function.comp<Maybe(A), Maybe(B), Maybe(C)>(Maybe.map<B, C>(g), Maybe.map<A, B>(h))(ma))
+  case ma{
+    none: _
+    some: _
+  } : Equal(_,
+          Maybe.map<_,_>(Function.comp<_,_,_>(g, h), ma),
+          Function.comp<_,_,_>(Maybe.map<_,_>(g), Maybe.map<_,_>(h))(ma))
+
+Maybe.map.id<A: Type>(ma: Maybe(A)): Equal(Maybe(A), Maybe.map<A, A>(Function.id<A>, ma), ma)
+  case ma{
+  none: _
+  some: _
+  } : Equal(_, Maybe.map<_,_>(Function.id<_>, ma), ma)
+
+// The functor instance for maybe
+Maybe.functor: Functor(Maybe)
+  Functor.new<Maybe>(Maybe.map)
+
+// Proof that Maybe.functor conforms to the functor laws
+Maybe.functor.verified: VerifiedFunctor(Maybe, Maybe.functor)
+  VerifiedFunctor.new<Maybe, Maybe.functor>(Maybe.map.id, Maybe.map.comp)
+
+// Maybe.is_some<A: Type>(x: A): Maybe.IsSome(A,Maybe.some<A>(x))
+//   def y = Maybe.some<A>(x)
+//   case y{
+//     with e : Equal(Maybe(A),y,y.self) = Equal.to<Maybe(A),y>
+//     none: Empty.absurd<>(Maybe.some_isnt_none<A>(x,e))
+//     some: y.value
+//   }
+
+Maybe.IsSome(A: Type,x: Maybe(A)): Type
+  case x{
+    none: Empty
+    some: A
+  }
+
+Maybe.join<A: Type>(m: Maybe(Maybe(A))): Maybe(A)
+  case m{
+    none: Maybe.none<A>
+    some: m.value
+  }
+
+// Maybe.some_isnt_none<A: Type>(x: A) : Not(Equal(Maybe(A),Maybe.some<A>(x),Maybe.none<A>))
+//   def P = ((x) case x { none: Empty, some: Unit) :: Maybe(A) -> Type
+//   (e) Equal.rewrite<Maybe(A), Maybe.some<A>(x), Maybe.none<A>,P>(e, Unit.new)

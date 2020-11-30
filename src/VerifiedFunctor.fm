@@ -1,0 +1,15 @@
+// VerifiedFunctor is a Functor
+// with map satisfying the functor laws
+//   map id == id
+//   map (f . g) == map f . map g
+type VerifiedFunctor<F: Type -> Type, f: Functor(F)>{
+  new(
+    id: <A: Type> ->
+        (fa: F(A)) -> Equal(F(A), Functor.map<F>(f)<A, A>(Function.id<A>, fa), Function.id<F(A)>(fa)),
+    comp: <A: Type, B: Type, C: Type> ->
+        (fa: F(A)) -> (g: B -> C) -> (h: A -> B) ->
+        Equal(F(C),
+                Functor.map<F>(f)<A, C>(Function.comp<A, B, C>(g, h), fa),
+                Function.comp<F(A), F(B), F(C)>(Functor.map<F>(f)<B, C>(g), Functor.map<F>(f)<A, B>(h))(fa))
+  )
+}

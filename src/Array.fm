@@ -1,0 +1,71 @@
+// Array(A, depth) is a container with 2^depth values of type A.
+type Array<A: Type> ~ (depth: Nat) {
+  tip(value: A)                                             ~ (depth: Nat.zero),
+  tie<depth: Nat>(lft: Array(A,depth), rgt: Array(A,depth)) ~ (depth: Nat.succ(depth))
+}
+
+// Creates an array of depth `depth` and initial value `x`.
+Array.alloc<A: Type>(depth: Nat, x: A): Array(A, depth)
+  case depth {
+    zero: Array.tip<A>(x),
+    succ:
+      let half = Array.alloc<A>(depth.pred, x)
+      Array.tie<A, depth.pred>(half, half)
+  } : Array(A, depth)
+
+// Extracts the two subarrays of an array of depth greater than 0.
+Array.extract_tie<A: Type, depth: Nat>(arr: Array(A,Nat.succ(depth))): Pair(Array(A,depth), Array(A,depth))
+  case arr {
+    tip: Unit.new,
+    tie: Pair.new<_,_>(arr.lft, arr.rgt)
+  } : case arr.depth {
+        zero: Unit,
+        succ: Pair(Array(A,arr.depth.pred), Array(A,arr.depth.pred))
+      }
+
+// Extracts the unique value of an array of depth 0.
+Array.extract_tip<A: Type>(arr: Array(A,0)): A
+  case arr {
+    tip: arr.value,
+    tie: Unit.new
+  } : case arr.depth {
+        zero: A,
+        succ: Unit
+      }
+
+// Given array `arr` and little-endian word `idx`, extracts value `arr[idx]`.
+// TODO: infinity loop
+// Array.get<A:Type, depth:Nat>(idx: Word(depth), arr: Array(A,depth)): A
+//   def P = (depth) Array(A,depth) -> A
+//   def nil = Array.extract_tip<A>
+//   def w0 = <idx.size> (rec) (arr)
+//     // get arr_l _ = Array.extract_tie<A, idx.size>(arr)
+//     let arr_l = Array.extract_tie<A, idx.size>(arr)
+//     case arr_l{
+//       new: arr_l.fst
+//     }
+//   def w1 = <idx.size> (rec) (arr)
+//     // get _ arr_r = Array.extract_tie<A, idx.size>(arr)
+//     let arr_r = Array.extract_tie<A, idx.size>(arr)
+//     case arr_r{
+//       new: rec(arr_r.snd)
+//     }
+//   Word.foldl<P, depth>(nil, w0, w1, idx, arr)
+
+// // Given array `arr`, little-endian word `idx` and function `f`, assigns `arr[idx] = f(arr[idx])`.
+// Array.mut<A:Type, depth:Nat>(idx: Word(depth), f: A -> A, arr: Array(A,depth)): Array(A,depth)
+//   def P = (depth) Array(A,depth) -> Array(A,depth)
+//   def nil = (arr) Array.tip<A>(f(Array.extract_tip<A>(arr)))
+//   def w0 = <idx.size> (rec) (arr)
+//     let {arr_l, arr_r} = Array.extract_tie<A, idx.size>(arr)
+//     Array.tie<A, idx.size>(rec(arr_l), arr_r)
+//   def w1 = <idx.size> (rec) (arr)
+//     let {arr_l, arr_r} = Array.extract_tie<A, idx.size>(arr)
+//     Array.tie<A, idx.size>(arr_l, rec(arr_r))
+//   Word.foldl<P, depth>(nil, w0, w1, idx, arr)
+
+// // Given array `arr`, little-endian word `idx` and value `val`, assigns `arr[idx] = val`.
+// Array.set<A:Type, depth:Nat>(idx: Word(depth), val: A, arr: Array(A,depth))
+// : Array(A,depth)
+//   Array.mut<A,depth>(idx, () val, arr)
+

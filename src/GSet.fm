@@ -1,0 +1,739 @@
+// A generic container for values of a given type
+// using sized balanced binary trees
+// left  contains elements which are smaller than val
+// right contains elements which are greater than val 
+// 
+// Implementation based on 
+// "Implementing Sets Efficiently in a Functional Language"
+// by Stephen Adams
+//
+type GSet <A: Type> {
+  tip,
+  bin(size: Nat, val: A, left: GSet(A), right: GSet(A))
+}
+
+// In order to to guarantee the efficiency of the search operation
+// we *must* preserve the tree balanced, otherwise it could become
+// degenerate, looking more like a list, which is much slower
+//
+// Here we use the size information along with a constant (GSet.w)
+// to ensure that one subtree is never more than w times bigger than
+// the other subtree
+//
+// Once a tree is found to be unbalanced, then we build a new tree
+// by rotating the former, shifting part of the heavy subtree to 
+// the lighter subtree. This rotation can be `single` or `double`.
+// In the single rotation the entire subtree of the heavy subtree 
+// is moved to the other side, while in the double only a part is  
+// moved
+//
+// A visual representation of these rotations is given below 
+//
+// { a, b, c } are tree elements (val) and a < b < c 
+// { X, Y, Z } are trees of size Nx, Ny, Nz respectively 
+// The sums inside the parens represent the size of the tree at that level 
+// 
+// SINGLE (LEFT) ROTATION 
+//    a (Nx + Ny + Nz + 2)                          b (Nx + Ny + Nz + 2)
+//   / \                     =>                    / \ 
+//  X   b (Ny + Nz + 1)            (Nx + Ny + 1)  a   Z 
+//     / \                                       / \ 
+//    Y   Z                                     X   Y  
+//
+// DOUBLE (LEFT) ROTATION 
+//                         a (Nx + Ny + Nz + 3)                                  b   (Nx + Ny + Nz + 3) 
+//                        / \                                                  /   \
+//                       X   c  (Ny_1 + Ny_2 + Nz + 2)        (Nx + Ny_1 + 1) a      c 
+//                          / \                          =>                  / \    / \ 
+// (Ny = Ny_1 + Ny_2 + 1)  b   Z                                            X  Y1  Y2  Z 
+//                        / \               
+//                      Y1  Y2             
+
+
+GSet.balance<A: Type>(a: A, l: GSet(A), r: GSet(A)): GSet(A)
+  let size_l             = GSet.size<_>(l)
+  let size_r             = GSet.size<_>(r)
+  let size_l_plus_size_r = Nat.add(size_l, size_r)
+  let w_x_size_l         = Nat.mul(GSet.w, size_l)
+  let w_x_size_r         = Nat.mul(GSet.w, size_r)
+  
+  // size_l_plus_size_r < 2 means that one subtree is empty and the
+  // other contains only one element, hence the tree cannot be balanced 
+  if Nat.ltn(size_l_plus_size_r, 2) then 
+    GSet.node<_>(a, l, r)
+  // size_r > w * size_l means the right subtree is too heavy
+  else if Nat.gtn(size_r, w_x_size_l) then
+    case r {
+    // this is an impossible case because we already know that
+    // the right subtree is too heavy
+    // question: how to deal with it?
+      tip: GSet.node<_>(a, l, r),
+      bin:  
+        let size_rl = GSet.size<_>(r.left)
+        let size_rr = GSet.size<_>(r.right)
+        // size_rl < size_rr means we should perform a single left rotation
+        if Nat.ltn(size_rl, size_rr) then 
+          let new_l = GSet.node<_>(a, l, r.left)
+          GSet.node<_>(r.val, new_l, r.right)
+        // size_rl > size_rr means we should perform a double left rotation
+        else 
+          // we need to branch on the left subtree of r in order to extract its components 
+          case r.left {
+            tip: GSet.node<_>(a, l, r), // impossible case
+            bin: 
+             let new_val   = r.left.val 
+             let new_left  = GSet.node<_>(a, l, r.left.left) 
+             let new_right = GSet.node<_>(r.val, r.left.right, r.right)
+             GSet.node<_>(new_val, new_left, new_right)
+          }
+    }
+    
+  // size_l > w * size_r means the left subtree is too heavy  
+  else if Nat.gtn(size_l, w_x_size_r) then 
+    case l {
+      // this is an impossible case because we already know that
+      // the left subtree is too heavy
+      // question: how to deal with it?
+      tip: GSet.node<_>(a, l, r),
+      bin: 
+        let size_ll = GSet.size<_>(l.left)
+        let size_lr = GSet.size<_>(l.right)
+        // size_lr < size_lln means we should perform a single right rotation
+        if Nat.ltn(size_lr, size_ll) then 
+          let new_left  = l.left
+          let new_right = GSet.node<_>(a, l.right, r)
+          GSet.node<_>(l.val, new_left, new_right)
+        // size_lr > size_ll means we should perform a double right rotation
+        else 
+          // we need to branch on the right subtree of l in order to 
+          // extract its components and move them to the right
+          case l.right {
+            tip: GSet.node<_>(a, l, r), // impossible case
+            bin:  
+              let new_val   = l.right.val 
+              let new_left  = GSet.node<_>(l.val, l.left, l.right.left)
+              let new_right = GSet.node<_>(a, l.right.right, r)
+              GSet.node<_>(new_val, new_left, new_right)
+          }
+    }
+  else // neither subtrees are too heavy, no balancing is needed 
+    GSet.node<_>(a, l, r)
+    
+// // Similar to GSet.concat3, but doesn't use a "glue element"
+// GSet.concat<A: Type>(set_a: GSet(A), set_b: GSet(A)): GSet(A)
+//   case set_a {
+//     tip: case set_b {
+//       tip: GSet.tip<_>,
+//       bin: set_b
+//     },
+//     bin: case set_b {
+//       tip: set_a,
+//       bin:  
+//         let b_is_too_heavy = Nat.ltn(Nat.mul(GSet.w, set_a.size), set_b.size)
+//         let a_is_too_heavy = Nat.ltn(Nat.mul(GSet.w, set_b.size), set_b.size)
+  
+//         if b_is_too_heavy then 
+//           let new_val   = set_b.val 
+//           let new_left  = GSet.concat<_>(set_a, set_b.left)
+//           let new_right = set_b.right  
+//           GSet.balance<_>(new_val, new_left, new_right)
+  
+//         else if a_is_too_heavy then 
+//           let new_val   = set_a.val 
+//           let new_left  = set_a.left 
+//           let new_right = GSet.concat<_>(set_a.right, set_b)
+//           GSet.balance<_>(new_val, new_left, new_right)
+  
+//         else 
+//           let min_b     = GSet.min<_>(set_b)
+//           let new_val   = Maybe.extract<_>(min_b, set_b.val) //we know b isn't empty
+//           let new_left  = set_a
+//           let new_right = GSet.delete_min<_>(set_b)
+//           GSet.balance<_>(new_val, new_left, new_right)
+//     }
+//   }
+
+// Joins two trees with an element that is between
+// the values in the left and the ones in the right 
+// A comparison function must be provided 
+GSet.concat3<A: Type>(
+  cmp  : A -> A -> Cmp,
+  val  : A,
+  left : GSet(A), 
+  right: GSet(A)
+) : GSet(A)
+  case left {
+    tip: case right {
+      // trivial case, both trees are empty
+      tip: GSet.singleton<_>(val),
+      // if the left is empty, we just insert it 
+      // in the right tree
+      bin: GSet.insert<_>(cmp, val, right)
+    },
+    bin: case right {
+      // if the right is empty, we just insert it 
+      // in the left tree
+      tip: GSet.insert<_>(cmp, val, left),
+      // if none of the trees are empty, we need to check if 
+      // we can make a balanced tree by using `val` as a new node
+      // if not, we need to find the largest subtree on the side 
+      // "facing" the smaller tree that is small enough to balance 
+      // with the smaller tree 
+      bin:  
+        let right_is_too_heavy = Nat.ltn(Nat.mul(GSet.w, left.size),  right.size)
+        let left_is_too_heavy  = Nat.ltn(Nat.mul(GSet.w, right.size), left.size)
+  
+        if right_is_too_heavy then 
+          let new_val   = right.val 
+          let new_left  = GSet.concat3<_>(cmp, val, left, right.left)
+          let new_right = right.right 
+          GSet.balance<_>(new_val, new_left, new_right)
+  
+        else if left_is_too_heavy then 
+          let new_val   = left.val 
+          let new_left  = left.left 
+          let new_right = GSet.concat3<_>(cmp, val, left.right, right)
+          GSet.balance<_>(new_val, new_left, new_right)
+  
+        else 
+          GSet.node<_>(val, left, right)  
+    } 
+  }
+
+// // Removes an element from a set, using a user-provided comparison 
+// // function, balancing the resulting tree in case such element is found
+// GSet.delete<A: Type>(cmp: A -> A -> Cmp, a: A, set: GSet(A)): GSet(A)
+//   case set {
+//     tip: set,
+//     bin: case cmp(a, set.val) {
+//       // if `a` is smaller than the current root 
+//       // we should look for it in the left subtree
+//       ltn:  
+//         let new_left = GSet.delete<_>(cmp, a, set.left)
+//         GSet.balance<_>(set.val, new_left, set.right),
+//       // when the element is at the root of the current subtree
+//       // things are a little trickier: we need to get the minimum
+//       // value of the right subtree and then balance the tree composed
+//       // of this minimum value we just found, the left subtree and 
+//       // the right subtree without that minimum element
+//       eql: case set.right {
+//         tip: case set.left {
+//           // if both subtrees are empty and we deleted the root, we 
+//           // return an empty set 
+//           tip: GSet.tip<_>,
+//           // if the right subtree is empty, the left is not and
+//           // we've just deleted the root, all we have left is the 
+//           // left tree         
+//           bin: set.left
+//         },
+//         bin: case set.left {
+//           // conversely, if left is empty and right is not, we 
+//           // return the right subtree
+//           tip: set.right,
+//           // when none of the subtrees are empty, then we need to
+//           // find the smallest value of the right subtree and delete GSet.min
+//           bin: 
+//             let min_val = GSet.min<_>(set.right)
+//             // this is a hack, we know it can never be `none` because the 
+//             // tree is not empty
+//             let min_val = Maybe.extract<_>(min_val, a)
+//             let new_right = GSet.delete<_>(cmp, min_val, set.right)
+//             GSet.balance<_>(min_val, set.left, new_right)  
+//         }
+//       },
+//       // if `a`is greater than the current root 
+//       // we look for it in the right subtree 
+//       gtn:  
+//         let new_right = GSet.delete<_>(cmp, a, set.right)
+//         GSet.balance<_>(set.val, set.left, new_right)
+//     }
+//   }
+
+// Removes the minimum element of the set, which 
+// is always the leftmost one in the tree
+GSet.delete_min<A: Type>(set: GSet(A)): GSet(A)
+  case set {
+    tip: set,
+    bin: case set.left {
+      tip: set.right,
+      bin:  
+        let new_left = GSet.delete_min<_>(set.left)
+        GSet.balance<_>(set.val, new_left, set.right)
+    }
+  }
+
+// //   Suppose we have two Sets: T1 and T2  
+// //     T1            T2 
+// //      v             u 
+// //     / \           / \ 
+// //    A   B         C   D        
+// //
+// //    We can implement efficient Set x Set -> Set operations
+// //    but applying a "divide and conque" strategy, that means
+// //    we'll break those sets in smaller parts using `split_ltn`
+// //    and `split_gtn`, perform the desired  operation on those 
+// //    smaller parts, and then combine everything with `concat3`
+// //
+// //    - <> is a binary operation (union, difference, intersection)
+// //    - v and u are values/elements
+// //    - A, B, C and D are subtrees
+// //
+// //                 T1 <> T2 
+// //              /           \ 
+// //             v              u   C' = split_ltn(T2)
+// //            / \            / \  D' = split_gtn(T2)  
+// //           A   B          C   D     
+// //             |   \__  __/   |               
+// //             |     _\/_     |    
+// //             |    /     \   |  
+// //           A <> C'        B <> D' 
+// //             \              /
+// //              \            /
+// //               \          /
+// //             concat3(A<>C', v, B<>D')      
+// // 
+// // Asymetric set difference
+// GSet.difference<A: Type>(cmp: A -> A -> Cmp, set_a: GSet(A), set_b: GSet(A)): GSet(A) 
+//   case set_a {
+//     tip: case set_b {
+//       tip: GSet.tip<>,
+//       bin: set_b
+//     },
+//     bin: case set_b {
+//       tip: set_a,
+//       bin: 
+//         // divide & conquer
+//         let ltn   = GSet.split_ltn<>(cmp, set_b.val, set_a)
+//         let gtn   = GSet.split_gtn<>(cmp, set_b.val, set_a)
+//         let left  = GSet.difference<>(cmp, ltn, set_b.left)
+//         let right = GSet.difference<>(cmp, gtn, set_b.right)
+//         GSet.concat<>(left, right)
+//     }
+//   }
+
+GSet.foldr<A: Type, B: Type>(f: A -> B -> B, b: B, set: GSet(A)): B 
+  GSet.foldr.go<_,_>(f, b, set)
+
+GSet.foldr.go<A: Type, B: Type>(f: A -> B -> B, acc: B, set: GSet(A)): B 
+  case set {
+    tip: acc,
+    bin: 
+      let right_folded = GSet.foldr.go<_,_>(f, acc, set.right)
+      let new_acc      = f(set.val, right_folded)
+      GSet.foldr.go<_,_>(f, new_acc, set.left)
+  }
+
+GSet.from_list<A: Type>(cmp: A -> A -> Cmp, xs: List(A)): GSet(A)
+  List.foldr<_,_>(GSet.tip<_>, GSet.insert<_>(cmp), xs)
+
+// Adds a new element to a set with a user-provided comparison function
+GSet.insert<A: Type>(cmp: A -> A -> Cmp, a: A, set: GSet(A)): GSet(A)
+  case set {
+    tip: GSet.singleton<_>(a),
+    bin: case cmp(a, set.val) {
+      // if a < set.val, the new value should go into the left subtree 
+      ltn: 
+        let new_left = GSet.insert<_>(cmp, a, set.left)
+        GSet.balance<_>(set.val, new_left, set.right),
+      // `a` is already in the set, so how do we proceed?
+      // if we decide to simply return the set unchanged, we are
+      // ignoring the case where other fields of `a`, which are not 
+      // used in the comparison function, might have changed
+      // this comes at some extra cost, of course
+      eql: GSet.node<_>(a, set.left, set.right),
+      // if a > set.val, the new value should go into the right subtree 
+      gtn:  
+        let new_right = GSet.insert<_>(cmp, a, set.right)
+        GSet.balance<_>(set.val, set.left, new_right)
+    }
+  }
+
+// GSet.intersection<A: Type>(
+//   cmp   : A -> A -> Cmp, 
+//   set_a : GSet(A), 
+//   set_b : GSet(A)
+// ) : GSet(A)
+//   case set_a {
+//     tip: case set_b {
+//         tip: GSet.tip<>,
+//         bin: GSet.tip<>
+//       },
+//     bin: case set_b {
+//       tip: GSet.tip<>,
+//       bin: 
+//         // divide & conquer
+//         let ltn = GSet.split_ltn<>(cmp, set_b.val, set_a)
+//         let gtn = GSet.split_gtn<>(cmp, set_b.val, set_a)
+//         let new_left  = GSet.intersection<>(cmp, ltn, set_b.left)
+//         let new_right = GSet.intersection<>(cmp, gtn, set_b.right)
+  
+//         if GSet.member<>(cmp, set_b.val, set_a) then 
+//           GSet.concat3<>(cmp, set_b.val, new_left, new_right)
+  
+//         else 
+//           GSet.concat<>(new_left, new_right)
+//     }
+//   }
+
+GSet.is_balanced<A: Type>(set: GSet(A)): Bool 
+  case set {
+    tip: Bool.true,
+    bin: 
+      let size_l = GSet.size<_>(set.left)
+      let size_r = GSet.size<_>(set.right)
+      let max_size_l = Nat.mul(GSet.w, size_r)
+      let max_size_r = Nat.mul(GSet.w, size_l)
+      let size_l_plus_r = Nat.add(size_l, size_r)
+      let sizes_dont_exceed = List.and([
+          Nat.lte(size_l, max_size_r),
+          Nat.lte(size_r, max_size_l)
+      ])
+      let subtrees_sizes_ok = Bool.or(sizes_dont_exceed, Nat.lte(size_l_plus_r, 1))
+      let left_is_balanced = GSet.is_balanced<_>(set.left)
+      let right_is_balanced = GSet.is_balanced<_>(set.right)
+  
+      List.and([subtrees_sizes_ok, left_is_balanced, right_is_balanced ])
+  } 
+
+GSet.is_singleton<A: Type>(set: GSet(A)): Bool
+  let size = GSet.size<_>(set)
+  if Nat.eql(size, 1) then Bool.true else Bool.false 
+
+GSet.map<A: Type, B: Type>(f: A -> B, set: GSet(A)): GSet(B)
+  case set {
+    tip: GSet.tip<_>,
+    bin: 
+      let new_val   = f(set.val)
+      let new_left  = GSet.map<_,_>(f, set.left)
+      let new_right = GSet.map<_,_>(f, set.right)
+      GSet.node<_>(new_val, new_left, new_right)  
+  }
+
+GSet.member<A: Type>(cmp: A -> A -> Cmp, a: A, set: GSet(A)): Bool
+  case set {
+    tip: Bool.false,
+    bin: case cmp(a, set.val) {
+      ltn: GSet.member<_>(cmp, a, set.left),
+      eql: Bool.true,
+      gtn: GSet.member<_>(cmp, a, set.right)
+    } 
+  }
+
+// Returns the values of a set in ascending order
+GSet.members<A: Type>(set: GSet(A)): List(A)
+  GSet.foldr<_,_>(List.cons<_>, List.nil<_>, set)
+
+// Possibly returns the minimum value of the set
+// Since we're working with a balanced tree we only need
+// to check the if the left subtree, if it's empty, the 
+// minimum value is the root, because all elements to the 
+// right are greater than it. If it's not, recurse until 
+// the leftmost element is found
+GSet.min<A: Type>(set: GSet(A)): Maybe(A)
+  case set {
+    tip: Maybe.none<_>,
+    bin: case set.left {
+      tip: Maybe.some<_>(set.val),
+      bin: GSet.min<_>(set.left)
+    } 
+  }
+
+// a smart constructor to ensure that the size 
+// of the tree is maintained correctly
+// the subtrees passed as arguments must already
+// be balanced
+GSet.node<A: Type>(val: A, left: GSet(A), right: GSet(A)): GSet(A)
+  let size_left  = GSet.size<_>(left)
+  let size_right = GSet.size<_>(right)
+  let new_size   = List.sum([1, size_left, size_right])
+  GSet.bin<_>(new_size, val, left, right)
+
+GSet.not_member<A: Type>(cmp: A -> A -> Cmp, a: A, set: GSet(A)): Bool
+  Bool.not(GSet.member<_>(cmp, a, set))
+
+GSet.null<A: Type>(set: GSet(A)): Bool
+  case set {
+    tip: Bool.true,
+    bin: Bool.false
+  }
+
+GSet.show<A: Type>(to_str: A -> String, set: GSet(A)): String
+   List.show<_>(to_str, GSet.members<_>(set))
+
+GSet.singleton<A: Type>(a: A): GSet(A)
+  GSet.bin<_>(1, a, GSet.tip<_>, GSet.tip<_>)
+
+GSet.size<A: Type>(set: GSet(A)): Nat 
+  case set {
+    tip: 0,
+    bin: set.size
+  }
+
+// Given a comparison function, set, and a value this function 
+// returns a tree with elements which are greater than the 
+// cut element, discarding the rest 
+GSet.split_gtn<A: Type>(cmp: A -> A -> Cmp, cut: A, set: GSet(A)): GSet(A)
+  case set {
+    tip: set,
+    bin: case cmp(cut, set.val) {
+      ltn:  
+        let left  = GSet.split_gtn<_>(cmp, cut, set.left)
+        GSet.concat3<_>(cmp, set.val, left, set.right),
+      eql: set.right,
+      gtn: GSet.split_gtn<_>(cmp, cut, set.right)
+    }
+  }
+
+// Given a comparison function, set, and a value this function
+// returns a tree with elements which are less than the cut element
+GSet.split_ltn<A: Type>(cmp: A -> A -> Cmp, cut: A, set: GSet(A)): GSet(A)
+  case set {
+    tip: set,
+    bin: case cmp(cut, set.val) {
+      ltn: GSet.split_ltn<_>(cmp, cut, set.left),
+      eql: set.left,
+      gtn: 
+        let right = GSet.split_ltn<_>(cmp, cut, set.right)
+        GSet.concat3<_>(cmp, set.val, set.left, right)
+    }
+  } 
+
+// just a synonym for `members`
+GSet.to_list<A: Type>(set: GSet(A)): List(A)
+  GSet.members<_>(set)
+
+//   Suppose we have two Sets: T1 and T2  
+//     T1            T2 
+//      v             u 
+//     / \           / \ 
+//    A   B         C   D        
+//
+//    We can implement efficient Set x Set -> Set operations
+//    but applying a "divide and conque" strategy, that means
+//    we'll break those sets in smaller parts using `split_ltn`
+//    and `split_gtn`, perform the desired  operation on those 
+//    smaller parts, and then combine everything with `concat3`
+//
+//    - <> is a binary operation (union, difference, intersection)
+//    - v and u are values/elements
+//    - A, B, C and D are subtrees
+//
+//                 T1 <> T2 
+//              /           \ 
+//             v              u   C' = split_ltn(T2)
+//            / \            / \  D' = split_gtn(T2)  
+//           A   B          C   D     
+//             |   \__  __/   |               
+//             |     _\/_     |    
+//             |    /     \   |  
+//           A <> C'        B <> D' 
+//             \              /
+//              \            /
+//               \          /
+//             concat3(A<>C', v, B<>D')      
+//                 
+GSet.union<A: Type>(cmp: A -> A -> Cmp, set_a: GSet(A), set_b: GSet(A)): GSet(A)
+  case set_a {
+    tip: case set_b {
+      tip: GSet.tip<_>,
+      bin: set_b
+    },
+    bin: case set_b {
+      tip: set_a,
+      bin: 
+        // divide & conquer
+        let ltn   = GSet.split_ltn<_>(cmp, set_b.val, set_a)
+        let gtn   = GSet.split_gtn<_>(cmp, set_b.val, set_a)
+        let left  = GSet.union<_>(cmp, ltn, set_b.left)
+        let right = GSet.union<_>(cmp, gtn, set_b.right)
+        GSet.concat3<_>(cmp, set_b.val, left, right)
+    }
+  }
+
+// used for checking whether a tree is balanced
+// it represents the maximum factor by which
+// one subtree can outweigh its sibling
+//
+// this value was empirically chosen
+// in Haskell's `containers` package
+// and might be changed here later after
+// benchmarks are run
+GSet.w : Nat 
+  3  
+
+// Test.the_test: The(ResultType, result_value)
+//   The.value<ResultType>(computation)
+
+// if the input is ordered, `from_list` followed by `to_list` 
+// matches the input
+// GSet.tests.1 : The(List(Nat), [1,2,3,4,5])
+//   The.value<_>(GSet.to_list<_>(GSet.from_list<_>(Nat.cmp, [1,2,3,4,5])))
+
+// if the input is not ordered, `from_list` followed by `to_list`
+// orders the input
+// GSet.tests.2 : The(List(Nat), [1,2,3,4,5])
+//   def xs = [4,3,5,2,1]
+//   def xs = GSet.from_list<_>(Nat.cmp, xs)
+//   def xs = GSet.to_list<_>(xs)
+//   The.value<_>(xs)
+
+// // `to_list` on a set made from the empty list returns an empty list  
+// GSet.tests.3 : The(List(Nat), [])
+//   def xs = []
+//   def xs = GSet.from_list<>(Nat.cmp, xs)
+//   def xs = GSet.to_list<>(xs)
+//   The.value<>(xs)
+
+// // `null` is true for a set made from the empty list
+// GSet.tests.4 : The(Bool, Bool.true)
+//   def xs = []
+//   def xs = GSet.from_list<>(Nat.cmp, xs)
+//   def xs = GSet.null<>(xs)
+//   The.value<>(xs)
+
+// // `member` returns `false` for elements not in the set
+// GSet.tests.5 : The(Bool, Bool.false)
+//   def xs = [1,2,3,5]
+//   def x  = 4 
+//   def xs = GSet.from_list<>(Nat.cmp, xs)
+//   def r  = GSet.member<>(Nat.cmp, x, xs)
+//   The.value<>(r)
+
+// // `member`returns `true`for elements in the set
+// GSet.tests.6 : The(Bool, Bool.true)
+//   def xs = [1,2,3,5]
+//   def x  = 3 
+//   def xs = GSet.from_list<>(Nat.cmp, xs)
+//   def r  = GSet.member<>(Nat.cmp, x, xs)
+//   The.value<>(r)
+
+// // `delete` removes the specified element from the set
+// GSet.tests.7 : The(List(Nat), [1,3,4,5])
+//   def xs = [1,2,3,4,5]
+//   def xs = GSet.from_list<>(Nat.cmp, xs)
+//   def xs = GSet.delete<>(Nat.cmp, 2, xs)
+//   def xs = GSet.to_list<>(xs)
+//   The.value<>(xs)
+
+// // `delete` does not change the set when the specified
+// // element is not present in the set
+// GSet.tests.8 : The(List(Nat), [1,2,3,4,5])
+//   def xs = [1,2,3,4,5]
+//   def xs = GSet.from_list<>(Nat.cmp, xs)
+//   def xs = GSet.delete<>(Nat.cmp, 6, xs)
+//   def xs = GSet.to_list<>(xs)
+//   The.value<>(xs)
+
+// // `delete_min` removes the minimum element in the set
+// GSet.tests.9 : The(List(Nat), [2,3])
+//   def xs = [1,2,3]
+//   def xs = GSet.from_list<>(Nat.cmp, xs)
+//   def xs = GSet.delete_min<>(xs)
+//   def xs = GSet.to_list<>(xs)
+//   The.value<>(xs)
+
+// // `map` applies the provided function to all elements
+// // in the set 
+// GSet.tests.10 : The(List(Nat), [2,3,4])
+//   def xs = [1,2,3]
+//   def xs = GSet.from_list<>(Nat.cmp, xs)
+//   def xs = GSet.map<,>(Nat.add(1), xs)
+//   def xs = GSet.to_list<>(xs)
+//   The.value<>(xs)  
+
+// GSet.tests.11 : The(Nat, 6)
+//   def xs = [1,2,3]
+//   def xs = GSet.from_list<>(Nat.cmp, xs)
+//   def r  = GSet.foldr<,>(Nat.add, 0, xs)
+//   The.value<>(r)
+
+// // `intersection` returns a set whose elements are 
+// // common in both sets
+// GSet.tests.12 : The(List(Nat), [2])
+//   def xs = [1,2,3]
+//   def xs = GSet.from_list<>(Nat.cmp, xs)
+//   def ys = [2,4,5]
+//   def ys = GSet.from_list<>(Nat.cmp, ys)
+//   def r  = GSet.intersection<>(Nat.cmp, xs, ys)
+//   def r  = GSet.to_list<>(r)
+//   The.value<>(r)
+
+// // `union`  
+// GSet.tests.13 : The(List(Nat), [1,2,3,4,5,6])
+//   def xs = [1,2,3]
+//   def xs = GSet.from_list<>(Nat.cmp, xs)
+//   def ys = [4,5,6]
+//   def ys = GSet.from_list<>(Nat.cmp, ys)
+//   def r  = GSet.union<>(Nat.cmp, xs, ys)
+//   def r  = GSet.to_list<>(r)
+//   The.value<>(r) 
+
+// // `union` does not repeat elements
+// GSet.tests.14 : The(List(Nat), [1,2,3,4,5])
+//   def xs = [1,2,3]
+//   def xs = GSet.from_list<>(Nat.cmp, xs)
+//   def ys = [3,4,5]
+//   def ys = GSet.from_list<>(Nat.cmp, ys)
+//   def r  = GSet.union<>(Nat.cmp, xs, ys)
+//   def r  = GSet.to_list<>(r)
+//   The.value<>(r) 
+
+// // `difference` returns a set with elements which are
+// // present in the first set, but not in the second
+// // TODO: check why this test started to fail after updating the syntax
+// // GSet.tests.15 : The(List(Nat), [1,2,3])
+// //   def xs = GSet.from_list<>(Nat.cmp, [1,2,3,4,5])
+// //   def ys = GSet.from_list<>(Nat.cmp, [4,5,6])
+// //   def d  = GSet.difference<>(Nat.cmp, xs, ys)
+// //   def d  = GSet.to_list<>(d)
+// //   The.value<>(d)
+
+// // balance
+// GSet.tests.16 : IO(Unit) 
+//   let set = 
+//     GSet.bin<>
+//     | 7;
+//     | 1;
+//     | GSet.tip<>;
+//     | GSet.bin<>
+//       | 6;
+//       | 2;
+//       | GSet.tip<>;
+//       | GSet.bin<>
+//         | 5;
+//         | 3;
+//         | GSet.tip<>;
+//         | GSet.bin<>
+//           | 4;
+//           | 4;
+//           | GSet.tip<>;
+//           | GSet.bin<>
+//             | 3;
+//             | 5;
+//             | GSet.tip<>;
+//             | GSet.bin<>
+//               | 2;
+//               | 6;
+//               | GSet.tip<>;
+//               | GSet.bin<>
+//                 | 1;
+//                 | 7;
+//                 | GSet.tip<>;
+//                 | GSet.tip<>;
+//               ;
+//             ;
+//           ;
+//         ; 
+//       ;
+//     ;
+
+//   case set {
+//     tip: IO.print("it's not empty..."),
+//     bin: 
+//       let after = GSet.balance<>(set.val, set.left, set.right)
+//       IO.print(Bool.show(GSet.is_balanced<>(after)))
+//   }
+  
+
+
+

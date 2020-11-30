@@ -114,3 +114,70 @@ Bits.to_nat(b: Bits): Nat
     i: Nat.succ(Nat.mul(2, Bits.to_nat(b.pred)))
   }
 
+Bits.from_string(str: String): Bits
+  case str{
+    nil: Bits.e
+    cons: case U16.eql(str.head, Char.parse("1")){
+      true : Bits.i(Bits.from_string(str.tail))
+      false: Bits.o(Bits.from_string(str.tail))
+      // TODO: what is this from past code? 
+      //| Unit.new
+    }
+  }
+
+
+Bits.length(xs: Bits): Nat
+  Bits.length.go(xs, 0)
+
+Bits.length.go(xs: Bits, n: Nat): Nat
+  case xs {
+    e: n,
+    o : Bits.length.go(xs.pred, Nat.succ(n)),
+    i : Bits.length.go(xs.pred, Nat.succ(n))
+  }
+
+Bits.slice(len: Nat, bits: Bits): Bits
+  case len {
+    zero: Bits.e,
+    succ: case bits {
+      e: Bits.e,
+      o : Bits.o(Bits.slice(len.pred, bits.pred)),
+      i : Bits.i(Bits.slice(len.pred, bits.pred))
+    }
+  }
+
+// Converts a bitstring to a string
+Bits.to_string(bits: Bits): String
+  case bits {
+    e: "",
+    o : String.concat("0", Bits.to_string(bits.pred)),
+    i : String.concat("1", Bits.to_string(bits.pred))
+  }
+
+// Converts a bitstring to a U32 value
+Bits.to_u32(bits: Bits): U32
+  U32.new(Word.from_bits(32, bits))
+
+// Multiplies two bitstrings.
+Bits.mul(a: Bits, b: Bits): Bits
+  Bits.mul.go(a, b, Bits.e)
+
+Bits.mul.go(a: Bits, b: Bits, bits: Bits): Bits
+  case b {
+    e: bits,
+    o : Bits.mul.go(Bits.o(a), b.pred, bits),
+    i : Bits.mul.go(Bits.o(a), b.pred, Bits.add(a, bits))
+  }
+
+// TODO Divides two bitstrings.
+Bits.div(a: Bits, b: Bits): Bits
+  Bits.div(a, b)
+
+// TODO Modulus of two Bitstrings.
+Bits.mod(a: Bits, b: Bits): Bits
+  Bits.mod(a, b)
+
+// TODO
+// Subtracts two Bitstrings.
+Bits.sub(a: Bits, b: Bits): Bits
+  Bits.sub(a, b)

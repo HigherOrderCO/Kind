@@ -1,0 +1,112 @@
+type U8 {
+  new(value: Word(8))
+}
+
+U8.0: U8
+  U8.new(Word.zero(8))
+
+U8.add(a: U8, b: U8): U8
+  open a 
+  open b 
+  U8.new(Word.add<_>(a.value, b.value))
+
+U8.and(a: U8, b: U8): U8
+  open a
+  open b 
+  U8.new(Word.and<_>(a.value, b.value))
+
+U8.concat(a: U8, b: U8): U16
+  open a
+  open b 
+  U16.new(Word.concat<_,_>(a.value, b.value))
+
+U8.div(a: U8, b: U8): U8
+  open a
+  open b 
+  U8.new(Word.div<_>(a.value, b.value))
+
+// a == b
+U8.eql(a: U8, b: U8): Bool
+  open a
+  open b 
+  Word.eql<_>(a.value, b.value)
+
+// U8.from_nat(n: Nat): U8
+//   // TODO
+//   U8.parse_hex(Nat.to_string_base(16, n))
+
+// a >= b
+U8.gte(a: U8, b: U8): Bool
+  open a
+  open b 
+  Word.gte<_>(a.value, b.value)
+
+// a > b
+U8.gtn(a: U8, b: U8): Bool
+  open a
+  open b 
+  Word.gtn<_>(a.value, b.value)
+
+U8.inc(a: U8): U8
+  open a 
+  U8.new(Word.inc<_>(a.value))
+
+// a <= b
+U8.lte(a: U8, b: U8): Bool
+  open a
+  open b 
+  Word.lte<_>(a.value, b.value)
+
+// a < b
+U8.ltn(a: U8, b: U8): Bool
+  open a
+  open b 
+  Word.ltn<_>(a.value, b.value)
+
+U8.mod(a: U8, b: U8): U8
+  open a
+  open b 
+  U8.new(Word.mod<_>(a.value, b.value))  
+
+U8.mul(a: U8, b: U8): U8
+  open a
+  open b 
+  U8.new(Word.mul<_>(a.value, b.value))  
+
+U8.or(a: U8, b: U8): U8
+  open a
+  open b 
+  U8.new(Word.or<_>(a.value, b.value))  
+
+// U8.parse_hex(str: String): U8
+//   U8.new(Word.from_bits(8, Bits.parse_hex(str)))
+
+U8.pow(a: U8, b: U8): U8
+  open a
+  open b 
+  U8.new(Word.pow<_>(a.value, b.value))  
+
+U8.shl(n: U32, a: U8): U8
+  U8.shl(n, a)
+
+U8.shr(n: U8, a: U8): U8
+  U8.shr(n, a)
+
+U8.sub(a: U8, b: U8): U8
+  open a
+  open b 
+  U8.new(Word.sub<_>(a.value, b.value))  
+
+U8.to_bits(a: U8): Bits
+  open a 
+  Word.to_bits<_>(a.value)
+
+// U8.to_nat(a: U8): Nat
+//   open a 
+//   Word.to_nat<_>(a.value)
+
+U8.xor(a: U8, b: U8): U8
+  open a
+  open b 
+  U8.new(Word.xor<_>(a.value, b.value))  
+

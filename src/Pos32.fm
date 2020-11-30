@@ -1,0 +1,85 @@
+// A position represented using a U32, such that:
+// x = pos & 0x7FF          // 0 .. 4096
+// y = (pos >>> 12) & 0x7FF // 0 .. 4096
+// z = (pos >>> 24)         // 0 .. 256
+// The `x` and `y` values are 12-bit, and `z` is 8-bit.
+Pos32: Type
+  U32
+
+// // Adds two positions
+// Pos32.add(a: Pos32, b: Pos32): Pos32
+//   let a_x = Pos32.get_x(a)
+//   let a_y = Pos32.get_y(a)
+//   let a_z = Pos32.get_z(a)
+//   let b_x = Pos32.get_x(b)
+//   let b_y = Pos32.get_y(b)
+//   let b_z = Pos32.get_z(b)
+//   let c_x = U32.add(a_x, b_x)
+//   let c_y = U32.add(a_y, b_y)
+//   let c_z = U32.add(a_z, b_z)
+//   Pos32.new(c_x, c_y, c_z)
+
+// // The dot product of two positions
+// // Returns (ax * bx + ay * by + az * bz)
+// Pos32.dot(a: Pos32, b: Pos32): U32
+//   let x = U32.mul(Pos32.get_x(a), Pos32.get_x(b))
+//   let y = U32.mul(Pos32.get_y(a), Pos32.get_y(b))
+//   let z = U32.mul(Pos32.get_z(a), Pos32.get_z(b))
+//   U32.add(U32.add(x, y), z)
+
+// Pos32.get_x(pos: Pos32): U32
+//   U32.and(pos, 2047u)
+
+// Pos32.get_y(pos: Pos32): U32
+//   U32.and(U32.shr(pos, 12u), 2047u)
+
+// Pos32.get_z(pos: Pos32): U32
+//   U32.shr(pos, 24u)
+
+// Pos32.new(x: U32, y: U32, z: U32): Pos32
+//   let pos = 0u
+//   let pos = U32.or(pos, x)
+//   let pos = U32.or(pos, U32.shl(y, 12u))
+//   let pos = U32.or(pos, U32.shl(z, 24u))
+//   pos
+
+// // Multiplies all positions by a scaling factor
+// Pos32.scale(a: Pos32, s: U32): Pos32
+//   let x = U32.mul(Pos32.get_x(a), s)
+//   let y = U32.mul(Pos32.get_y(a), s)
+//   let z = U32.mul(Pos32.get_z(a), s)
+//   Pos32.new(x, y, z)
+
+// Pos32.set_x(pos: Pos32, x: U32): U32
+//   Pos32.new(x, Pos32.get_y(pos), Pos32.get_z(pos))
+
+// Pos32.set_y(pos: Pos32, y: U32): U32
+//   Pos32.new(Pos32.get_x(pos), y, Pos32.get_z(pos))
+
+// Pos32.set_z(pos: Pos32, z: U32): U32
+//   Pos32.new(Pos32.get_x(pos), Pos32.get_y(pos), z)
+
+// // Subtracts two positions
+// Pos32.sub(a: Pos32, b: Pos32): Pos32
+//   let a_x = Pos32.get_x(a)
+//   let a_y = Pos32.get_y(a)
+//   let a_z = Pos32.get_z(a)
+//   let b_x = Pos32.get_x(b)
+//   let b_y = Pos32.get_y(b)
+//   let b_z = Pos32.get_z(b)
+//   let c_x = U32.sub(a_x, b_x)
+//   let c_y = U32.sub(a_y, b_y)
+//   let c_z = U32.sub(a_z, b_z)
+//   Pos32.new(c_x, c_y, c_z)
+
+// Pos32.to_string(pos: Pos32): String
+//   let x = U32.to_string(Pos32.get_x(pos))
+//   let y = U32.to_string(Pos32.get_y(pos))
+//   let z = U32.to_string(Pos32.get_z(pos))
+//   String.flatten(["[",x,",",y,",",z,"]"])
+
+// // TODO
+// // Converts a Pos32 to a F64.V3
+// Pos32.to_v3(pos: Pos32): F64.V3
+//   Pos32.to_v3(pos)
+

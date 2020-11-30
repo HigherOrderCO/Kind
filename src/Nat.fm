@@ -206,7 +206,155 @@ Nat.show_digit(base: Nat, n: Nat) : Char
     }
   else '#'
 
+//Nat.to_u8(n: Nat): U8
+  //Nat.apply<U8>(n, U8.inc, U8.0)
+
 // TODO: optimize (this is swapped on the JS compiler though)
 Nat.to_u16(n: Nat): U16
   Nat.apply<U16>(n, U16.inc, U16.zero)
 
+Nat.to_u32(n: Nat): U32
+  Nat.apply<U32>(n, U32.inc, U32.zero)
+
+ 
+//Nat.to_u64(n: Nat): U64
+  //Nat.apply<U64>(n, U64.inc, U64.0)
+
+//Nat.to_u256(n: Nat): U256
+  //Nat.apply<U256>(n,U256.inc, U256.0)
+
+Nat.bitwise_and(a: Nat, b: Nat): Nat
+  case Bool.or(Nat.eql(a, 0), Nat.eql(a, 0)){
+  true : 0
+  false: 
+    let bit = Bool.if<Nat>(Bool.or(Nat.eql(Nat.mod(a, 2), 0), Nat.eql(Nat.mod(b, 2), 0)), 0, 1)
+    let a = Nat.div(a, 2)
+    let b = Nat.div(b, 2)
+    Nat.add(bit, Nat.mul(2, Nat.bitwise_and(a, b)))
+  }
+
+// Nat.zero_not_succ(a: Nat): Not(0 == Nat.succ(a))
+//   (eq)
+//   def P = (x) 
+//     case x{ 
+//       zero: Unit
+//       succ: Empty
+//     }
+//   Equal.rewrite<Nat, 0, Nat.succ(a), P>(eq, Unit.new)
+
+// Nat.equal(a: Nat, b: Nat): Either(a == b, Not(a == b))
+//   case a {
+//     zero: case b {
+//       zero: Either.left<_,_>(Equal.refl<Nat,0>),
+//       succ: Either.right<_,_>(Nat.zero_not_succ(b.pred))
+//       } : Either(0 == b, Not(0 == b)),
+//     succ: case b {
+//       zero: Either.right<_,_>(Nat.succ_not_zero(a.pred)),
+//       succ: case Nat.equal(a.pred, b.pred) as rec {
+//         left : Either.left<_,_>(Equal.apply<Nat, Nat, a.pred, b.pred, Nat.succ>(rec.value)),
+//         right: Either.right<_,_>((eq) rec.value(Nat.succ_inj(a.pred, b.pred, eq)))
+//       } : Either(Nat.succ(a.pred) == Nat.succ(b.pred), Not(Nat.succ(a.pred) == Nat.succ(b.pred)))
+//     } : Either(Nat.succ(a.pred) == b, Not(Nat.succ(a.pred) == b))
+//   } : Either(a == b, Not(a == b))
+
+Nat.for<S: Type>(state: S, from: Nat, til: Nat, func: Nat -> S -> S): S
+  if Nat.eql(from, til) then
+    state
+  else
+    Nat.for<S>(func(from, state), Nat.succ(from), til, func)
+
+Nat.half(n: Nat): Nat
+  case n {
+    zero: Nat.zero,
+    succ: case n.pred {
+      zero: Nat.zero,
+      succ: Nat.succ(Nat.half(n.pred.pred))
+    }
+  }
+
+Nat.induction(n: Nat): <P: Nat -> Type> -> (z: P(Nat.zero)) -> (s: ((m:Nat) -> P(m) -> P(Nat.succ(m)))) -> P(n)
+  <P> (z) (s) n<P>(z, (pred) s(pred, Nat.induction(pred)<P>(z, s)))
+
+Nat.min(a: Nat, b: Nat): Nat
+  case a {
+    zero: 0,
+    succ: case b {
+      zero: 0,
+      succ: Nat.succ(Nat.min(a.pred, b.pred))
+    }
+  }
+
+Nat.odd(n: Nat): Bool
+  Nat.eql(Nat.mod(n, 2), 1)
+
+Nat.square(a: Nat): Nat
+  Nat.mul(a, a)
+
+Nat.succ_inj(a: Nat, b: Nat, eq: Nat.succ(a) == Nat.succ(b)): a == b
+  Equal.apply<Nat, Nat, Nat.succ(a), Nat.succ(b), Nat.pred>(eq)
+
+Nat.sum(n: Nat): Nat
+  Nat.sum.go(n, Nat.zero)
+
+Nat.sum.go(n: Nat , r: Nat): Nat //loop//
+  case n {
+    zero: r,
+    succ: Nat.sum.go(n.pred, Nat.add(n, r))
+  }
+
+// TODO
+Nat.to_f64(s: Bool, a: Nat, b: Nat): F64
+  Nat.to_f64(s, a, b)
+
+Nat.to_string_unary(n: Nat): String
+  case n {
+    zero: String.nil,
+    succ: String.cons('1', Nat.to_string_unary(n.pred))
+  }
+
+Nat.to_string(n: Nat): String
+  case n {
+    zero: String.cons(Char.parse("z"), String.nil),
+    succ: String.cons(Char.parse("s"), Nat.to_string(n.pred))
+  }
+
+// Nat.succ_isnt_zero<n: Nat>: Not(Equal(Nat, Nat.succ(n), Nat.zero))
+//   def P = (n : Nat)
+//     case n {
+//       zero: Empty
+//       succ: Unit
+//     }
+//   def p_succ = 
+//     Unit.new
+//   (succ_is_zero)
+//     Equal.rewrite<_,_,_,P>(succ_is_zero, p_succ)
+
+// Nat.succ_not_zero(a: Nat): Not(Nat.succ(a) == 0)
+//   (eq)
+//   def P = (x) case x { zero: Empty, succ: Unit }
+//   Equal.rewrite<Nat, Nat.succ(a), 0, P>(eq, Unit.new)
+
+//TODO: error on misformatted Nat
+// Nat.parse_decimal(str: String): Nat
+//   Nat.parse_decimal.go(str, Nat.zero)
+
+// Nat.parse_decimal.go(str: String, res: Nat): Nat
+//   case str {
+//     nil : res,
+//     cons:
+//       let dig = Nat.sub(U16.to_nat(str.head), 48)
+//       let res = Nat.add(dig, Nat.mul(10, res))
+//       Nat.parse_decimal.go(str.tail, res)
+//   }
+
+// Nat.parse_hex(str: String): Nat
+//   Nat.parse_hex.go(str, Nat.zero)
+
+// Nat.parse_hex.go(str: String, res: Nat): Nat
+//   case str {
+//     nil : res,
+//     cons: 
+//       let dig = Char.hex_value(str.head)
+//       let res = Nat.add(dig, Nat.mul(16, res))
+//       Nat.parse_hex.go(str.tail, res)
+//   }

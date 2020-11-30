@@ -1,0 +1,51 @@
+type U256 {
+  new(value: Word(256))
+}
+
+U256.0: U256
+  U256.new(Word.zero(256))
+
+// U256.add(a: U256, b: U256): U256
+//   open a
+//   open b
+//   U256.new(Word.add<_>(a_val, b_val))
+
+// U256.div(a: U256, b: U256): U256
+//   open a
+//   open b
+//   U256.new(Word.div<_>(a_val, b_val))
+
+// U256.eql(a: U256, b: U256): Bool
+//   open a
+//   open b
+//   Word.eql<_>(a_val, b_val)
+
+// U256.gte(a: U256, b: U256): Bool
+//   open a
+//   open b
+//   Word.gte<_>(a_val, b_val)
+
+// U256.inc(a: U256): U256
+//   open a
+//   U256.new(Word.inc<_>(a_val))
+
+// U256.lte(a: U256, b: U256): Bool
+//   open a
+//   open b
+//   Word.lte<_>(a_val, b_val)
+
+// U256.mod(a: U256, b: U256): U256
+//   open a
+//   open b
+//   U256.new(Word.mod<_>(a_val, b_val))
+
+// U256.mul(a: U256, b: U256): U256
+//   open a
+//   open b
+//   U256.new(Word.mul<_>(a_val, b_val))
+
+// U256.sub(a: U256, b: U256): U256
+//   open a
+//   open b
+//   U256.new(Word.sub<_>(a_val, b_val))
+

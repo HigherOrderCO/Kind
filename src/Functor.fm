@@ -1,0 +1,11 @@
+Functor.const<F: Type -> Type>(f: Functor(F)): <A: Type, B: Type> -> A -> F(B) -> F(A)
+  <A, B> (a)
+  Functor.map<_>(f)<_,_>(Function.const<_,_>(a))
+
+type Functor<F: Type -> Type> {
+  new(map: <A: Type, B: Type> -> (A -> B) -> F(A) -> F(B))
+}
+
+Functor.map<F: Type -> Type>(f: Functor(F)): <A: Type, B: Type> -> (A -> B) -> F(A) -> F(B)
+  open f
+  f.map

@@ -1,0 +1,38 @@
+// UFind.equivalent (uf: UFind, path1: Bits, path2: Bits): Bool
+//   // get uf root1 rank1 = UFind.find(uf, path1)
+//   // get uf root2 rank2 = UFind.find(uf, path2)
+//   Bits.eql(root1, root2)
+
+// UFind.find(uf: UFind, path: Bits): <B: Type> -> (UFind -> Bits -> Nat -> B) -> B
+//   <B> (k)
+//   get node uf = Map.lookup<UNode>(path, UNode.root(Nat.zero), uf)
+//   case node:
+//   | k(uf, path, node.rank);
+//   | get uf root rank = UFind.find(uf, node.parent)
+//     let uf = Map.set<UNode>(path, UNode.link(root), uf)
+//     k(uf, root, rank);
+
+UFind: Type
+  Map(UNode)
+
+UFind.new : UFind
+  Map.new<UNode>
+
+UFind.new_node(uf: UFind, path: Bits): UFind
+  Map.set<UNode>(path, UNode.root(Nat.zero), uf)
+
+// UFind.union(uf: UFind, path1: Bits, path2: Bits): UFind
+//   get uf root_path1 rank1 = UFind.find(uf, path1)
+//   get uf root_path2 rank2 = UFind.find(uf, path2)
+//   case Bits.eql(root_path1, root_path2):
+//   | uf;
+//   | case Nat.cmp(rank1, rank2):
+//     | let uf = Map.set<>(root_path1, UNode.link(root_path2), uf)
+//       uf;
+//     | let uf = Map.set<>(root_path1, UNode.link(root_path2), uf)
+//       let uf = Map.set<>(root_path2, UNode.root(Nat.succ(rank2)), uf)
+//       uf;
+//     | let uf = Map.set<>(root_path1, UNode.root(rank2), uf)
+//       let uf = Map.set<>(root_path2, UNode.link(root_path1), uf)
+//       uf;;
+

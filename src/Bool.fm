@@ -40,3 +40,73 @@ Bool.if<A: Type>(cond: Bool, true_case: A, false_case: A): A
     true : true_case
     false: false_case
   }
+
+
+// Boolean negation, fusible
+Bool.notf(a: Bool): Bool
+  <P> (t, f)
+  case a{
+    true: f,
+    false: t,
+  } : P(Bool.notf(a))
+
+// Ensures a Bool is true
+Bool.IsTrue(b: Bool): Type
+  case b {
+    true: Unit,
+    false: Empty,
+  }
+
+// Ensures a Bool is false.
+Bool.IsFalse(b: Bool): Type
+  case b {
+    true: Empty,
+    false: Unit,
+  }
+
+// Proof that not(not(b)) == b
+Bool.double_negation(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
+  case b {
+    true: Equal.refl<_, Bool.true>,
+    false: Equal.refl<_, Bool.false>,
+  } : Equal(Bool, Bool.not(Bool.not(b)), b)
+
+// Proof that false != true
+// Bool.false_isnt_true: Not(Equal(Bool, Bool.false, Bool.true))
+//   def P = ((b: Bool)
+//     case b {
+//       true: Empty,
+//       false: Unit,
+//     }) :: Bool -> Type
+//   (false_is_true) Equal.rewrite<_,_,_,P>(false_is_true, Unit.new)
+
+// Proof that true != false
+// Bool.true_isnt_false: Not(Equal(Bool, Bool.true, Bool.false))
+//   def P = ((b : Bool)
+//     case b {
+//       true: Unit,
+//       false: Empty,
+//     }) :: Bool -> Type
+//   (true_is_false) Equal.rewrite<_,_,_,P>(true_is_false, Unit.new)
+
+// Converts to a string
+Bool.show(b: Bool): String
+  case b {
+    true: "Bool.true",
+    false: "Bool.false",
+  }
+
+// Bool that is provably different from the input
+// Bool.test.different_elem: (a: Bool) -> Subset(Bool, (b) Not(Equal(Bool, a, b)))
+//   (a)
+//   a<(self) Subset(Bool, (b) Not(Equal(Bool, self, b)))>
+//   | Subset.new<Bool, (b) Not(Equal(Bool, Bool.true, b))>(Bool.false)<Bool.true_isnt_false>;
+//   | Subset.new<Bool, (b) Not(Equal(Bool, Bool.false, b))>(Bool.true)<Bool.false_isnt_true>;
+
+
+// Dependent elimination of Bool.
+Bool.elim(b: Bool): <P: Bool -> Type> -> P(Bool.true) -> P(Bool.false) -> P(b)
+  <P> (t) (f) b<P>(t, f)
+
+Bool.and_var: (n: Nat) -> Variadic(n, Bool, Bool)
+  Variadic.foldr<Bool, Bool>(Bool.and, Bool.true)

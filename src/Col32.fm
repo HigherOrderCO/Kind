@@ -1,0 +1,125 @@
+Col32: Type
+  U32
+
+// Col32.new(r: U32, g: U32, b: U32, a: U32): Col32
+//   let col = 0u
+//   let col = U32.or(col, r)
+//   let col = U32.or(col, U32.shl(g, 8u))
+//   let col = U32.or(col, U32.shl(b, 16u))
+//   let col = U32.or(col, U32.shl(a, 24u))
+//   col
+
+// Col32.black : Col32
+//   Col32.new(0u, 0u, 0u, 255u)
+
+// Col32.blue : Col32
+//   Col32.new(0u, 0u, 255u, 255u)
+
+// Col32.cyan : Col32
+//   Col32.new(0u, 255u, 255u, 255u)
+
+// // Alpha is disconsidered
+// // Approximate value due to U32 calculus
+// Col32.darken(rgba: Col32, amount: U32): Col32
+//   let r = Col32.get_r(rgba)
+//   let g = Col32.get_g(rgba)
+//   let b = Col32.get_b(rgba)
+//   let r_upd = U32.percent(amount, r)
+//   let g_upd = U32.percent(amount, g)
+//   let b_upd = U32.percent(amount, b)
+//   Col32.new(r_upd, g_upd, b_upd, 255u)
+
+// Col32.get_a(col: Col32): U32
+//   U32.and(U32.shr(col, 24u), 255u)
+
+// Col32.get_b(col: Col32): U32
+//   U32.and(U32.shr(col, 16u), 255u)
+
+// Col32.get_g(col: Col32): U32
+//   U32.and(U32.shr(col, 8u), 255u)
+
+// Col32.get_r(col: Col32): U32
+//   U32.and(col, 255u)
+
+// Col32.gray : Col32
+//   Col32.new(128u, 128u, 128u, 255u)
+
+// Col32.green : Col32
+//   Col32.new(0u, 128u, 0u, 255u)
+
+// // Alpha is disconsidered
+// Col32.invert(rgba: Col32): Col32
+//   let r = Col32.get_r(rgba)
+//   let g = Col32.get_g(rgba)
+//   let b = Col32.get_b(rgba)
+//   let r_dif = U32.sub(255u, r)
+//   let g_dif = U32.sub(255u, g)
+//   let b_dif = U32.sub(255u, b)
+//   Col32.new(r_dif, g_dif, b_dif, 225u)
+
+// // Alpha is disconsidered
+// // Approximate value due to U32 calculus
+// Col32.lighten(rgba: Col32, amount: U32): Col32
+//   let r = Col32.get_r(rgba)
+//   let g = Col32.get_g(rgba)
+//   let b = Col32.get_b(rgba)
+//   let r_dif = U32.sub(255u, r)
+//   let g_dif = U32.sub(255u, g)
+//   let b_dif = U32.sub(255u, b)
+//   let r_upd = U32.percent(amount, r_dif)
+//   let g_upd = U32.percent(amount, g_dif)
+//   let b_upd = U32.percent(amount, b_dif)
+//   Col32.new(U32.add(r, r_upd), U32.add(g, g_upd), U32.add(b, b_upd), 255u)
+
+
+// Col32.lime : Col32
+//   Col32.new(0u, 255u, 0u, 255u)
+
+// Col32.magenta : Col32
+//   Col32.new(255u, 0u, 255u, 255u)
+
+// Col32.maroon : Col32
+//   Col32.new(128u, 0u, 0u, 255u)
+
+// Col32.navy : Col32
+//   Col32.new(0u, 0u, 128u, 255u)
+
+// Col32.olive : Col32
+//   Col32.new(128u, 128u, 0u, 255u)
+
+// Col32.purple : Col32
+//   Col32.new(128u, 0u, 128u, 255u)
+
+// Col32.red : Col32
+//   Col32.new(255u, 0u, 0u, 255u)
+
+// // Where "a" is between 0u and 100u
+// // Approximate value due to U32 calculus
+// Col32.set_alpha(a: U32): U32
+//   U32.percent(a, 255u)
+
+// Col32.show(rgba: Col32): String
+//     // Get the U32 values
+//   let r = Col32.get_r(rgba)
+//   let g = Col32.get_g(rgba)
+//   let b = Col32.get_b(rgba)
+//   let a = Col32.get_a(rgba)
+//   // TODO: add U32.show
+//   let r_str = Nat.show(U32.to_nat(r))
+//   let g_str = Nat.show(U32.to_nat(g))
+//   let b_str = Nat.show(U32.to_nat(b))
+//   let a_str = Nat.show(U32.to_nat(a))
+//   String.flatten(["rgba(", String.intercalate(",", [r_str, g_str, b_str, a_str]), ")"])
+
+// Col32.silver : Col32
+//   Col32.new(192u, 192u, 192u, 255u)
+
+// Col32.teal : Col32
+//   Col32.new(0u, 128u, 128u, 255u)
+
+// Col32.white : Col32
+//   Col32.new(255u, 255u, 255u, 255u)
+
+// Col32.yellow : Col32
+//   Col32.new(255u, 255u, 0u, 255u)
+

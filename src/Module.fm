@@ -1,0 +1,41 @@
+Module: Type
+  Map(Export)
+
+Module.new: Module
+  Map.new<Export>
+
+Module.Row(field: String, T: Type, m: Module) : Type
+  let got = Map.get<Export>(String.to_bits(field),m)
+  case got {
+    none: Empty
+    some: Equal(Type,T,Export.T(got.value))
+  }
+
+Module.from(defs: List(Pair(String, Export))): Module
+  Map.from_list<_,_>(String.to_bits,defs)
+
+Module.get(key: String, mod: Module): Module.type(key, mod)
+  case Map.get<Export>(String.to_bits(key), mod) as got {
+    none: Unit.new
+    some: Export.value(got.value)
+  } : case got {
+      none: Unit
+      some: Export.T(got.value)
+    }
+
+Module.set(key: String, val: Export, mod: Module): Module
+  Map.set<Export>(String.to_bits(key), val, mod)
+
+// Module.to_list(m : Module) : List(Pair(Bits,Type))
+//   def f  = ((p) let {x, y} = p Pair.new<Bits,Type>(x,Export.T(y)))
+//           :: Pair(Bits,Export) -> Pair(Bits,Type)
+//   List.map<_,_>(f, Map.to_list<_>(m))
+
+Module.type(key: String, mod: Module): Type
+  let got = Map.get<Export>(String.to_bits(key), mod)
+  case got {
+    none: Unit
+    some: Export.T(got.value)
+  }
+
+

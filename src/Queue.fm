@@ -1,0 +1,143 @@
+// Queue implements a First-In-First-Out (FIFO) policy
+// Invariants:
+// - size_front >= size_rear
+// - size_front == 0 implies size_rear == 0
+type Queue<A: Type> {
+  new(front: List(A), size_front: Nat, rear: List(A), size_rear: Nat)
+}
+
+// f  : front 
+// sf : size_front
+// r  : rear
+// sr : size_rear
+// Here we maintain the invariant:
+// sf <= max_diff * sr + 1 /\  sr <= max_diff * sf + 1  
+Queue.balance<A: Type>(f: List(A), sf: Nat, r: List(A), sr: Nat): Queue(A)
+  let max_sf = Nat.add(1, Nat.mul(Queue.max_diff, sf))
+  let max_sr = Nat.add(1, Nat.mul(Queue.max_diff, sr))
+  let size1 = Nat.div(Nat.add(sf, sr), 2)
+  let size2 = Nat.sub(Nat.add(sf, sr), 1)
+  case Nat.gtn(sf, max_sf) {
+  // if the front is way too long
+  true: 
+    let new_f = List.take<A>(size1, f)
+    let tail  = List.reverse<A>(List.drop<A>(size1, f))
+    let new_r = List.concat<A>(r, tail)
+    Queue.new<A>(new_f, size1, new_r, size2),
+  // if the rear is way too long
+  false: case Nat.gtn(sr, max_sr) {
+    true: 
+      let tail  = List.reverse<A>(List.drop<A>(size1, r))
+      let new_f = List.concat<A>(f, tail) 
+      let new_r = List.take<A>(size1, r)
+      Queue.new<A>(new_f, size2, new_r, size1),
+    // queue is balanced
+    false: Queue.new<A>(f, sf, r, sr)
+    }
+  }
+
+// insert at the front
+Queue.cons<A: Type>(a: A, q: Queue(A)): Queue(A)
+  open q
+  let new_f = List.cons<A>(a, q.front)
+  let new_sf = Nat.add(q.size_front, 1)
+  Queue.balance<A>(new_f, new_sf, q.rear, q.size_rear)
+
+Queue.empty<A: Type>: Queue(A)
+  Queue.new<A>(List.nil<A>, 0, List.nil<A>, 0)
+
+Queue.foldr<A: Type, B: Type>(b: B, f: A -> B -> B, q: Queue(A)): B 
+  open q
+  let as_list = List.concat<A>(q.front, List.reverse<A>(q.rear))
+  List.foldr<A,B>(b, f, as_list)
+  
+
+Queue.from_list<A: Type>(as: List(A)): Queue(A)
+  let len = List.length<A>(as)
+  Queue.balance<A>(as, len, List.nil<A>, 0)
+
+// We don't bother to check the rear because 
+// if size_front == 0, size_rear == 0
+Queue.head<A: Type>(q: Queue(A)): Maybe(A)
+  open q
+  case q.front {
+    nil : Maybe.none<A>,
+    cons: Maybe.some<A>(q.front.head)
+  }
+ 
+
+// removes last element
+Queue.init<A: Type>(q: Queue(A)): Maybe(Queue(A))
+  open q
+  case q.rear {
+    nil: case q.front {
+      nil : Maybe.none<Queue(A)>,
+      cons: 
+        let new_f  = List.drop<A>(1, q.front)
+        let new_sf = Nat.sub(q.size_front, 1)
+        let new_q  = Queue.balance<A>(new_f, new_sf, List.nil<A>, 0)
+        Maybe.some<Queue(A)>(new_q)
+    },
+    cons:
+      let new_r  = List.drop<A>(1, q.rear)
+      let new_sr = Nat.sub(q.size_rear, 1)
+      let new_q  = Queue.balance<A>(q.front, q.size_front, new_r, new_sr)
+      Maybe.some<Queue(A)>(new_q)
+  }
+
+
+Queue.last<A: Type>(q: Queue(A)): Maybe(A)
+  open q
+  case q.rear {
+    nil: case q.front {
+      nil : Maybe.none<A>,
+      cons: case List.reverse<A>(q.front) as reversed {
+        nil : Maybe.none<A>,
+        cons: Maybe.some<A>(reversed.head)
+      }, 
+    },
+    cons: Maybe.some<A>(q.rear.head)
+  }
+
+Queue.length<A: Type>(q: Queue(A)): Nat 
+  open q
+  Nat.add(q.size_front, q.size_rear)
+
+Queue.map<A: Type, B: Type>(f: A -> B, q: Queue(A)): Queue(B)
+  open q
+  let new_f = List.map<_,_>(f, q.front)
+  let new_r = List.map<_,_>(f, q.rear)
+  Queue.new<_>(new_f, q.size_front, new_r, q.size_rear)
+
+// this constant represents how many times longer 
+// one half of the queue is allowed to be relative to the other
+Queue.max_diff : Nat 
+  2
+
+Queue.null<A: Type>(q: Queue(A)): Bool
+  open q
+  let front_is_empty = Nat.eql(q.size_front, 0)
+  let rear_is_empty  = Nat.eql(q.size_rear, 0)
+  Bool.and(front_is_empty, rear_is_empty)
+
+// Insert at the back
+Queue.snoc<A: Type>(a: A, q: Queue(A)): Queue(A)
+  open q
+  let new_rear = List.cons<A>(a, q.rear)
+  Queue.balance<A>(q.front, q.size_front, new_rear, Nat.add(q.size_rear, 1))
+
+Queue.tail<A: Type>(q: Queue(A)): Maybe(Queue(A))
+  open q
+  case q.front {
+    nil : Maybe.none<Queue(A)>,
+    cons: 
+      let new_front = List.drop<A>(1, q.front)
+      let new_q = Queue.balance<A>(new_front, Nat.sub(q.size_front, 1), q.rear, q.size_rear)
+      Maybe.some<Queue(A)>(new_q)
+  }
+
+Queue.to_list<A: Type>(q: Queue(A)): List(A)
+  open q
+  List.concat<A>(q.front, List.reverse<A>(q.rear))
+
+
