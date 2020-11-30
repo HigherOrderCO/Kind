@@ -1,0 +1,10 @@
+// logical disjunction
+Or(A:Type,B:Type): Type
+  Either(A,B)
+
+Or.lft<A: Type,B: Type>(x: A): Or(A,B)
+  Either.left<_,_>(x)
+
+Or.rgt<A: Type,B: Type>(x: B): Or(A,B)
+  Either.right<_,_>(x)
+

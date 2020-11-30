@@ -1,0 +1,5 @@
+type UNode{
+  root(rank: Nat),
+  link(parent: Bits)
+}
+

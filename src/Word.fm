@@ -224,3 +224,66 @@ Word.pow<size: Nat>(a: Word(size), b: Word(size)): Word(size)
 // TODO bitwise XOR between two words
 Word.xor<size: Nat>(a: Word(size), b: Word(size)): Word(size)
   Word.xor<size>(a, b)
+
+Word.nat_log2<size: Nat>(word: Word(size)): Nat
+  Word.nat_log2.go<size>(word, 0, 0)
+
+Word.nat_log2.go<size: Nat>(word: Word(size), c: Nat, n: Nat): Nat
+  case word {
+    e: n
+    o : Word.nat_log2.go<word.size>(word.pred, Nat.succ(c), n)
+    i : Word.nat_log2.go<word.size>(word.pred, Nat.succ(c), c)
+  }
+
+Word.neg.aux<size: Nat>(word: Word(size), inc: Bool): Word(size)
+  case word {
+    e: Word.e,
+    o : case inc {
+      true : Word.o<word.size>(Word.neg.aux<word.size>(word.pred, Bool.true)),
+      false: Word.i<word.size>(Word.neg.aux<word.size>(word.pred, Bool.false))
+    }
+    i : case inc {
+      true : Word.i<word.size>(Word.neg.aux<word.size>(word.pred, Bool.false)),
+      false: Word.o<word.size>(Word.neg.aux<word.size>(word.pred, Bool.false))
+    }
+  } : Word(word.size)
+
+Word.neg<size: Nat>(word: Word(size)): Word(size)
+  case word {
+    e: Word.e,
+     o : Word.o<word.size>(Word.neg.aux<word.size>(word.pred, Bool.true)),
+     i : Word.i<word.size>(Word.neg.aux<word.size>(word.pred, Bool.false))
+  } : Word(word.size)
+
+Word.reverse<size: Nat>(word: Word(size)): Word(size)
+  def nil = Word.e
+  def w0  = <size> (rev) Word.o<size>(rev)
+  def w1  = <size> (rev) Word.i<size>(rev)
+  Word.foldl<Word, size>(nil, w0, w1, word)
+
+Word.pred<size: Nat>(word: Word(Nat.succ(size))): Word(size)
+  case word {
+    e: Word.e,
+     o : word.pred,
+     i : word.pred
+  } : Word(Nat.pred(word.size))
+
+Word.drop<size: Nat>(n: Nat, word: Word(Nat.add(n, size))): Word(size)
+  case n with word: Word(Nat.add(n, size)) = word {
+    zero: word,
+    succ:
+      let word.pred = Word.pred<Nat.add(n.pred, size)>(word)
+      Word.drop<size>(n.pred, word.pred)
+  } : Word(size)
+
+// Converts a Word to a Nat
+Word.to_nat<size: Nat>(word: Word(size)): Nat
+  Word.fold<()Nat,size>(0, <_> Nat.mul(2), <_> (x) Nat.succ(Nat.mul(2, x)), word)
+
+// TODO Bitwise-shifts a word left
+Word.shift_left: <size: Nat> -> Nat -> Word(size) -> Word(size)
+  Word.shift_left
+
+// TODO Bitwise-shifts a word right
+Word.shift_right: <size: Nat> -> Nat -> Word(size) -> Word(size)
+  Word.shift_right

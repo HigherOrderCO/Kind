@@ -1,0 +1,9 @@
+type Newtype<A: Type>      ~ (tag: String) {
+  new<tag: String>(val: A) ~ (tag: tag)
+}
+
+Newtype.elim<A: Type, tag: String>(x: Newtype(A, tag)): A
+  open x 
+  x.val
+
+

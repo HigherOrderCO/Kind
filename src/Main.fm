@@ -2,3 +2,79 @@ Main: IO(Unit)
   do IO {
     IO.print("Hello, world!")
   }
+
+// // Formality's "Hello, World" as a String
+// Main.hello_world: String
+//   "Hello, world!"
+
+// // A program that asks the user's name forever
+// Main.greet: IO(Unit)
+//   do IO {
+//     IO.print("What is your name?")
+//     var name = IO.get_line
+//     IO.print("Hello, " | name | "!")
+//     Main.greet
+//   }
+
+// // The suit of a card
+// type Main.Suit {
+//   diamonds
+//   clubs
+//   hearts
+//   spades
+// }
+
+// // Stringifies a suit
+// Main.suit_to_string(suit: Main.Suit): String
+//   case suit {
+//     diamonds: "diamonds"
+//     clubs: "clubs"
+//     hearts: "hearts"
+//     spades: "spades"
+//   }
+
+// // A natural number is either zero or the successor of a natural number
+// type Main.Nat {
+//   zero
+//   succ(pred: Nat)
+// }
+
+// // Doubles a natural number
+// Main.double(n: Nat): Nat
+//   case n {
+//     zero: 0
+//     succ: Nat.succ(Nat.succ(Nat.double(n.pred)))
+//   }
+
+// // A proof that n+0 == n
+// Main.theorem(n: Nat): Nat.add(n,0) == n
+//   case n {
+//     zero: refl
+//     succ: apply(Nat.succ, Main.theorem(n.pred))
+//   }!
+
+// // An even number is a positive integer such that Nat.is_even(x) is true
+// Main.IsEven.A(n: Nat): Type
+//   {x: Nat} Nat.is_even(x) == true
+
+// // Proof that two is even
+// Main.two_is_even.A: Main.IsEven.A(2)
+//   2 ~ refl
+
+// // Zero is even. For any even n, 2+n is even.
+// type Main.IsEven.B ~ (n: Nat) {
+//   zero                              ~ (n: 0)
+//   succ(n: Nat, e: Main.IsEven.B(n)) ~ (n: Nat.add(2,n))
+// }
+
+// // Proof that 2 is even
+// Main.two_is_even.B: Main.IsEven.B(2)
+//   Main.IsEven.B.succ(_, Main.IsEven.B.zero)
+
+// // Example usage of open and let
+// Main.open_and_let: Pair(Nat, String)
+//   let a = {5, "foo"}
+//   let b = {7, "bar"}
+//   open a
+//   let {b_fst, b_snd} = b
+//   {Nat.add(a.fst, b_fst), a.snd | b_snd}

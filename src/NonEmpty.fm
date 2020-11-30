@@ -1,0 +1,10 @@
+type NonEmpty <A: Type> {
+  end(value: A),
+  cons(head: A, tail: NonEmpty(A))
+}
+
+NonEmpty.to_list<A: Type>(xs: NonEmpty(A)): List(A)
+  case xs {
+    end : List.cons<A>(xs.value)(List.nil<A>),
+    cons: List.cons<A>(xs.head)(NonEmpty.to_list<A>(xs.tail))
+  }

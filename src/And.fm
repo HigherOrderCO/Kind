@@ -1,0 +1,14 @@
+// logical conjunction
+And(A:Type,B:Type): Type
+  Pair(A,B)
+
+// simplification
+And.fst<A: Type,B: Type>(x: And(A,B)) : A
+  Pair.fst<A,B>(x)
+
+And.new<A: Type,B: Type>(x: A,y:B) : And(A,B)
+  Pair.new<A,B>(x,y)
+
+And.snd<A: Type,B: Type>(x: And(A,B)) : B
+  Pair.snd<A,B>(x)
+
