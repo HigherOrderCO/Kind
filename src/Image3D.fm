@@ -11,12 +11,19 @@ type Image3D {
   new(length: U32, capacity: U32, buffer: Buffer32)
 }
 
-// Image3D.alloc_capacity(capacity: U32): Image3D
-//   let buffer = Buffer32.alloc(U32.needed_depth(U32.mul(2u,capacity)))
-//   Image3D.new(0u, capacity, buffer)
+u0: U32
+  Nat.to_u32(0)
+
+
+Image3D.alloc_capacity(capacity: U32): Image3D
+  let buffer = Buffer32.alloc(U32.needed_depth(U32.mul(Nat.to_u32(2),capacity)))
+  Image3D.new(0u, capacity, buffer)
 
 // Image3D.clear(img: Image3D): Image3D
 //   Image3D.set_length(0u, img)
+
+Image3D.empty: Image3D
+  Image3D.alloc_capacity(Nat.to_u32(100))
 
 Image3D.get_capacity(img: Image3D): U32
   open img 

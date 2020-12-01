@@ -6,6 +6,12 @@ type U32 {
 U32.zero: U32
   U32.new(Word.zero(32))
 
+u0: U32
+  Nat.to_u32(0)
+
+u1: U32
+  Nat.to_u32(1)
+
 U32.add(a: U32, b: U32): U32
   open a
   open b
@@ -82,14 +88,14 @@ U32.mul(a: U32, b: U32): U32
   open b
   U32.new(Word.mul<_>(a.value, b.value))
 
-// U32.needed_depth(size: U32): Nat
-//   U32.needed_depth.go(U32.sub(size, 1u))
+U32.needed_depth(size: U32): Nat
+  U32.needed_depth.go(U32.sub(size, u1))
 
-// U32.needed_depth.go(n: U32): Nat
-//   case U32.eql(n, 0u){
-//     true : 0
-//     false: Nat.succ(U32.needed_depth.go(U32.shr(n,1u)))
-//   }
+U32.needed_depth.go(n: U32): Nat
+  case U32.eql(n, u0){
+    true : 0
+    false: Nat.succ(U32.needed_depth.go(U32.shr(n,u1)))
+  }
 
 U32.or(a: U32, b: U32): U32
   open a
