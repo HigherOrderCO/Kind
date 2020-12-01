@@ -27,13 +27,12 @@ Why Formality?
 --------------
 
 There are some interesting proof languages, or theorem provers, as they're often
-called, in the market. [Agda](Agda), [Coq](Coq), [Lean](Lean), [Idris](Idris),
-to name a few. But these (perhaps with exception of Idris, which we love!)
+called, in the market. [Agda], [Coq], [Lean], [Idris], to name a few. But these (perhaps with exception of Idris, which we love!)
 aren't aligned with the vision highlighted above, in some key aspects:
 
 ### Auditability
 
-Formality is entirely compiled to a small [trusted core](FormCoreJS) that has
+Formality is entirely compiled to a small [trusted core] that has
 700 lines of code. This is 1 to 2 orders of magnitude smaller than existing
 alternatives. Because of that, auditing Formality is much easier, decreasing the
 need for trust and solving the "who verifies that the verifier" problem.
@@ -42,7 +41,7 @@ need for trust and solving the "who verifies that the verifier" problem.
 
 Being compiled to such a small core also allows Formality to be easily compiled
 to multiple targets, making it very portable. For example, out
-[Formality-to-Haskell](Formality-to-Haskell) compiler was developed in an evening
+[Formality-to-Haskell] compiler was developed in an evening
 and has less than 1000 lines of code. This allows Formality to be used as a a
 lazy, pure functional language that is compiled directly by Haskell's GHC.
 
@@ -50,28 +49,28 @@ lazy, pure functional language that is compiled directly by Haskell's GHC.
 
 Formality has a long-term approach to performance: make the language fast in
 theory, then build great compilers for each specific target. Our [JavaScript
-compiler](JS-compiler), for example, is tuned to generate small, fast JS, allowing Formality
+compiler], for example, is tuned to generate small, fast JS, allowing Formality
 to be used for web development. Other targets may have different optimizations,
 and we're constantly researching new ways of evaluating functional programs; see
-our post about [interaction nets and optimal reduction](Absal).
+our post about interaction nets and optimal reduction ([Absal]).
 
-[FormCoreJS]:https://github.com/moonad/formcorejs
+[trusted core]: https://github.com/moonad/formcorejs
 
-[Formality-to-Haskell]:https://github.com/moonad/FormCoreJS/blob/master/FmcToHs.js
+[Formality-to-Haskell]: https://github.com/moonad/FormCoreJS/blob/master/FmcToHs.js
 
-[formality.js]:https://github.com/moonad/FormalityFM/blob/master/bin/js/src/formality.js
+[formality.js]: https://github.com/moonad/FormalityFM/blob/master/bin/js/src/formality.js
 
-[Agda]:https://github.com/agda/agda
+[Agda]: https://github.com/agda/agda
 
-[Idris]:https://github.com/idris-lang/Idris-dev
+[Idris]: https://github.com/idris-lang/Idris-dev
 
-[Coq]:https://github.com/coq/coq
+[Coq]: https://github.com/coq/coq
 
-[Lean]:https://github.com/leanprover/lean
+[Lean]: https://github.com/leanprover/lean
 
-[Absal]:https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07
+[Absal]: https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07
 
-[JS-compiler]:https://github.com/moonad/FormCoreJS/blob/master/FmcToJs.js
+[JavaScript compiler]:https://github.com/moonad/FormCoreJS/blob/master/FmcToJs.js
 
 ### Fun!
 
