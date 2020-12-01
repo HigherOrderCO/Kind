@@ -9,7 +9,7 @@ Why formal proofs?
 When most people hear about formal proofs, they naturally think about
 mathematics and security, or, "boring stuff". While it is true that formal
 proofs can be used to formalize theorems and verify software correctness,
-Formality's approach is different: we focus in using proofs as a tool to
+Formality's approach is different: we focus on using proofs as a tool to
 **enhance developer productivity**.
 
 There is little doubt left that adding types to untyped languages greatly
@@ -27,13 +27,12 @@ Why Formality?
 --------------
 
 There are some interesting proof languages, or theorem provers, as they're often
-called, in the market. [Agda](Agda), [Coq](Coq), [Lean](Lean), [Idris](Idris),
-to name a few. But these (perhaps with exception of Idris, which we love!)
+called, in the market. [Agda], [Coq], [Lean], [Idris], to name a few. But these (perhaps with exception of Idris, which we love!)
 aren't aligned with the vision highlighted above, in some key aspects:
 
 ### Auditability
 
-Formality is entirely compiled to a small [trusted core](FormCoreJS) that has
+Formality is entirely compiled to a small [trusted core] that has
 700 lines of code. This is 1 to 2 orders of magnitude smaller than existing
 alternatives. Because of that, auditing Formality is much easier, decreasing the
 need for trust and solving the "who verifies that the verifier" problem.
@@ -42,20 +41,20 @@ need for trust and solving the "who verifies that the verifier" problem.
 
 Being compiled to such a small core also allows Formality to be easily compiled
 to multiple targets, making it very portable. For example, out
-[Formality-to-Haskell](FormalityToHaskell) compiler was developed in an evening
+[Formality-to-Haskell] compiler was developed in an evening
 and has less than 1000 lines of code. This allows Formality to be used as a a
 lazy, pure functional language that is compiled directly by Haskell's GHC.
 
 ### Performance
 
 Formality has a long-term approach to performance: make the language fast in
-theory, then build great compilers for each specific target. Our JavaScript
-compiler, for example, is tuned to generate small, fast JS, allowing Formality
+theory, then build great compilers for each specific target. Our [JavaScript
+compiler], for example, is tuned to generate small, fast JS, allowing Formality
 to be used for web development. Other targets may have different optimizations,
 and we're constantly researching new ways of evaluating functional programs; see
-our post about [interaction nets and optimal reduction](absal).
+our post about interaction nets and optimal reduction ([Absal]).
 
-[FormCoreJS]: https://github.com/moonad/formcorejs
+[trusted core]: https://github.com/moonad/formcorejs
 
 [Formality-to-Haskell]: https://github.com/moonad/FormCoreJS/blob/master/FmcToHs.js
 
@@ -70,6 +69,8 @@ our post about [interaction nets and optimal reduction](absal).
 [Lean]: https://github.com/leanprover/lean
 
 [Absal]: https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07
+
+[JavaScript compiler]:https://github.com/moonad/FormCoreJS/blob/master/FmcToJs.js
 
 ### Fun!
 
@@ -137,7 +138,7 @@ Usage
 Quick Introduction
 ------------------
 
-### A simple, clear and fun syntax
+### A simple, clear, and fun syntax
 
 > If you can't explain it simply, you don't understand it well enough.
 
@@ -222,8 +223,8 @@ type Vector ~ (len: Nat) {
 ```
 
 The type above isn't of a *fixed length* list, but of one that has a length that
-is *statically known*. The difference is that we can still grown and shrink it,
-but we can't, for example, get the the `head` of an empty list. For example:
+is *statically known*. The difference is that we can still grow and shrink it,
+but we can't, for example, get the `head` of an empty list. For example:
 
 ```c
 Main: IO(Unit)
@@ -237,13 +238,13 @@ Main: IO(Unit)
 
 Works fine, but, if you change the list to be empty, it will result in a type
 error! This is in contrast to Haskell, where `head []` results in a runtime
-crash. Formality programs can't crash. Ever!
+crash. **Formality programs can't crash. Ever!**
 
 *(You can also check the program above by editing `Main.fm`.)*
 
 ### Theorem proving
 
-Proof languages go beyound checking lengths though. Everything you can think of
+Proof languages go beyond checking lengths though. Everything you can think of
 can be statically verified by the type system. With subset types, written as 
 `{x: A} -> B(x)`, you can restrict a type arbitrarily. For example, here we use
 subsets to represent even numbers:
@@ -265,7 +266,7 @@ which stands for "reflexive", or "just reduce it".
 
 But what if it was an expression instead? For example, what if we wanted to
 write a function that receives a Nat `x`, and returns `x*2` as an EvenNat? It
-makes sense, because the double of every number is even. But if we just write:
+makes sense because the double of every number is even. But if we just write:
 
 ```c
 double_as_even(n: Nat): EvenNat
