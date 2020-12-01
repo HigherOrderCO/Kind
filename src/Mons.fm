@@ -1270,13 +1270,13 @@ Mons.Game.get_tile(pos: Pos32, game: Mons.Game): List(Mons.Object)
 //   | terrain  => obj.dmg;
 //   | inter => obj.dmg;
 
-Mons.Object.get_current_mon(obj: Mons.Object): Mons.Object
-  open obj
-  let idx = U32.to_nat(obj.mon)
-  case List.at<_>(idx, obj.bag) as mon {
-    none: obj,
-    some: mon.value
-  }
+// Mons.Object.get_current_mon(obj: Mons.Object): Mons.Object
+//   open obj
+//   let idx = U32.to_nat(obj.mon)
+//   case List.at<_>(idx, obj.bag) as mon {
+//     none: obj,
+//     some: mon.value
+//   }
 
 // Mons.Object.heal_all_mons(obj: Mons.Object): Mons.Object
 //   open obj:

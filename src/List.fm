@@ -75,6 +75,16 @@ List.update_at<A: Type>(index: Nat, fn: A -> A, list: List(A)): List(A)
     }
   }
 
+// removes an element from the list at given index
+List.delete_at.u32<A: Type>(idx: U32, list: List(A)): List(A)
+  if U32.eql(idx, u0) then
+    List.tail<A>(list)
+  else
+    case list {
+      nil : list,
+      cons: List.cons<A>(list.head, List.delete_at.u32<A>(U32.sub(idx,u1), list.tail))
+    }
+
 //Finds the first occurrence that satisfies a condition
 List.find<A: Type>(cond: A -> Bool, xs: List(A)): Maybe(A)
   case xs{

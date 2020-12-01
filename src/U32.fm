@@ -140,9 +140,9 @@ U32.to_bits(a: U32): Bits
 U32.to_f64(a: U32): F64
   U32.to_f64(a)
 
-// U32.to_nat(a: U32): Nat
-//   open a 
-//   Word.to_nat<_>(a.value)
+U32.to_nat(a: U32): Nat
+  open a 
+  Word.to_nat<_>(a.value)
  
 // TODO: optimize
 // U32.to_string(n: U32): String
