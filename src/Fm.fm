@@ -1315,7 +1315,8 @@ Fm.Term.check(
                 Fm.Term.hol(Bits.e),
               some:
                 let size = List.length<_>(ctx);
-                let moti = Fm.SmartMotive.make(term.name, term.expr, etyp, type.value, size, defs);
+                let typv = Fm.Term.normalize(type.value, Map.new<_>);
+                let moti = Fm.SmartMotive.make(term.name, term.expr, etyp, typv, size, defs);
                 moti,
             };
             Maybe.some<_>(Fm.Term.cse(term.path, term.expr, term.name, term.with, term.cses, Maybe.some<_>(moti))),
