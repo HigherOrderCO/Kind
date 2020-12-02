@@ -716,8 +716,6 @@ Fm.Term.reduce(term: Fm.Term, defs: Fm.Defs): Fm.Term
       Fm.Term.reduce(term.term, defs),
     nat:
       Fm.Term.reduce(Fm.Term.unroll_nat(term.natx), defs),
-    u32:
-      Fm.Term.reduce(Fm.Term.unroll_u32(term.u32x), defs),
     chr:
       Fm.Term.reduce(Fm.Term.unroll_chr(term.chrx), defs),
     str:
