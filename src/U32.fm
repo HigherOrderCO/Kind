@@ -1,3 +1,4 @@
+// Example: 123u
 type U32 {
   new(value: Word(32))
 }
@@ -134,13 +135,13 @@ U32.to_bits(a: U32): Bits
 U32.to_f64(a: U32): F64
   U32.to_f64(a)
 
-// U32.to_nat(a: U32): Nat
-//   open a 
-//   Word.to_nat<_>(a.value)
+U32.to_nat(a: U32): Nat
+  open a 
+  Word.to_nat<_>(a.value)
  
 // TODO: optimize
-// U32.to_string(n: U32): String
-//   Nat.to_string_base(10, U32.to_nat(n))
+U32.to_string(n: U32): String
+  Nat.to_string_base(10, U32.to_nat(n))
 
 U32.xor(a: U32, b: U32): U32
   open a

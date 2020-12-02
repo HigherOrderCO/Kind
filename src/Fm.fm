@@ -716,6 +716,8 @@ Fm.Term.reduce(term: Fm.Term, defs: Fm.Defs): Fm.Term
       Fm.Term.reduce(term.term, defs),
     nat:
       Fm.Term.reduce(Fm.Term.unroll_nat(term.natx), defs),
+    u32:
+      Fm.Term.reduce(Fm.Term.unroll_u32(term.u32x), defs),
     chr:
       Fm.Term.reduce(Fm.Term.unroll_chr(term.chrx), defs),
     str:
@@ -2256,7 +2258,7 @@ Fm.Parser.char: Parser(Fm.Term)
 Fm.Parser.string: Parser(Fm.Term)
   do Parser {
     var init = Fm.Parser.init;
-    let quot = String.cons('"', String.nil);
+    let quot = String.cons('"', String.nil); //"
     Fm.Parser.text(quot);
     var chrs = Parser.until<_>(Parser.text(quot), Fm.Parser.char.single);
     let strx = List.fold<_>(chrs)<_>(String.nil, String.cons);
@@ -2653,6 +2655,58 @@ Fm.Parser.hole: Parser(Fm.Term)
     return Fm.Term.ori(orig, Fm.Term.hol(Bits.e));
   }
 
+// Parses a U8 number: @123s@
+Fm.Parser.u8: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.spaces;
+    var natx = Parser.nat;
+    Fm.Parser.text("s");
+    let term = Fm.Term.ref("Nat.to_u8");
+    let term = Fm.Term.app(term, Fm.Term.nat(natx));
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, term);
+  }
+
+// Parses a U16 number: @123b@
+Fm.Parser.u16: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.spaces;
+    var natx = Parser.nat;
+    Fm.Parser.text("b");
+    let term = Fm.Term.ref("Nat.to_u16");
+    let term = Fm.Term.app(term, Fm.Term.nat(natx));
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, term);
+  }
+
+// Parses a U32 number: @123u@
+Fm.Parser.u32: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.spaces;
+    var natx = Parser.nat;
+    Fm.Parser.text("u");
+    let term = Fm.Term.ref("Nat.to_u32");
+    let term = Fm.Term.app(term, Fm.Term.nat(natx));
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, term);
+  }
+
+// Parses a U64 number: @123l@
+Fm.Parser.u64: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.spaces;
+    var natx = Parser.nat;
+    Fm.Parser.text("l");
+    let term = Fm.Term.ref("Nat.to_u64");
+    let term = Fm.Term.app(term, Fm.Term.nat(natx));
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, term);
+  }
+
 // Parses a natural number: @123@
 Fm.Parser.nat: Parser(Fm.Term)
   do Parser {
@@ -2887,6 +2941,10 @@ Fm.Parser.term: Parser(Fm.Term)
       Fm.Parser.open,
       Fm.Parser.goal,
       Fm.Parser.hole,
+      Fm.Parser.u8,
+      Fm.Parser.u16,
+      Fm.Parser.u32,
+      Fm.Parser.u64,
       Fm.Parser.nat,
       Fm.Parser.reference,
     ]);
