@@ -578,20 +578,20 @@ Mons.Object.is_bag_full(obj: Mons.Object): Bool
   Nat.eql(size, 3)
 
 // Get names in a list of Mons.Objects
-// Mons.Object.get_names(bag: List(Mons.Object)): List(String)
-//   let names = []
-//   for mon in bag with names:
-//     open mon
-//     let name = Mons.Kind.get_name(mon.kin);
-//     List.cons<_>(name, names)
+Mons.Object.get_names(bag: List(Mons.Object)): List(String)
+  let names = []
+  for mon in bag with names:
+    open mon
+    let name = Mons.Kind.get_name(mon.kin);
+    List.cons<_>(name, names)
 
 // Get images in a list of Mons.Objects
-// Mons.Object.get_images(bag: List(Mons.Object)): List(Image3D)
-//   let images = []
-//   for mon in bag with images:
-//     open mon
-//     open Mons.Kind.attr(mon.kin) as mon_attr
-//     List.cons<Image3D>(mon_attr.pic, images)
+Mons.Object.get_images(bag: List(Mons.Object)): List(Image3D)
+  let images = []
+  for mon in bag with images:
+    open mon
+    open Mons.Kind.attr(mon.kin) as mon_attr
+    List.cons<Image3D>(mon_attr.pic, images)
 
 Mons.Object.hero: Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.fire, u1))
@@ -600,11 +600,12 @@ Mons.Object.update_interactive(obj: Mons.Object, fun: Mons.Kind -> Mons.Kind ): 
   open obj
   Mons.Object.set_kin(obj, fun(obj.kin))
 
-// // Mons.Object.can_attack(obj: Mons.Object): Bool 
-// //    open obj: 
-// //    case List.find<>(Mons.Effect.is_sleep, obj.eff) as res:
-// //    | none => Bool.true;
-// //    | some => Bool.false;
+// Mons.Object.can_attack(obj: Mons.Object): Bool 
+//   open obj
+//   case List.find<_>(Mons.Effect.is_sleep, obj.eff) as res{
+//     none => Bool.true
+//     some => Bool.false
+//   }
 
 // // Mons.Object.is_burning(obj: Mons.Object): Bool
 // //    open obj:
@@ -1376,23 +1377,23 @@ Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
 // // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
 // // Mons.Game.cmd_usr(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
-// // Update a Mons.Game by pushing a new obj to a pos
-// Mons.Game.map_push(pos: Pos32, obj: Mons.Object, game: Mons.Game): Mons.Game
-//   open game:
-//   let map = Mons.Map.push(pos, obj, game.map)
-//   Mons.Game.set_map(map, game)
+// Update a Mons.Game by pushing a new obj to a pos
+Mons.Game.map_push(pos: Pos32, obj: Mons.Object, game: Mons.Game): Mons.Game
+  open game
+  let map = Mons.Map.push(pos, obj, game.map)
+  Mons.Game.set_map(map, game)
 
-// // Update a Mons.Game by setting a new obj to a pos
-// Mons.Game.map_set(pos: Pos32, idx: U32, obj: Mons.Object, game: Mons.Game): Mons.Game
-//   open game:
-//   let map = Mons.Map.set(pos, idx, obj, game.map)
-//   Mons.Game.set_map(map, game)
+// Update a Mons.Game by setting a new obj to a pos
+Mons.Game.map_set(pos: Pos32, idx: U32, obj: Mons.Object, game: Mons.Game): Mons.Game
+  open game
+  let map = Mons.Map.set(pos, idx, obj, game.map)
+  Mons.Game.set_map(map, game)
 
-// // Update a Mons.Game by deleting an obj from a tile
-// Mons.Game.map_del(pos: Pos32, idx: U32, game: Mons.Game): Mons.Game 
-//   open game: 
-//   let map = Mons.Map.del(pos, idx, game.map)
-//   Mons.Game.set_map(map, game)
+// Update a Mons.Game by deleting an obj from a tile
+Mons.Game.map_del(pos: Pos32, idx: U32, game: Mons.Game): Mons.Game 
+  open game
+  let map = Mons.Map.del(pos, idx, game.map)
+  Mons.Game.set_map(map, game)
 
 
 
@@ -1751,29 +1752,28 @@ Mons.Game.get_skills_at(idx: Nat, obj: Mons.Object): Mons.Skill
     some: skill.value
   }
 
-// // Update the current Mon by changing it with the keys 'w' (up) and 's' (down)
-// Mons.Object.change_curr_mon(
-//   cmd: Char,
-//   stt: U32 -> Mons.Screen,
-//   pos: Pos32,
-//   hero_obj: Mons.Object,
-//   hero_idx: U32,
-//   game: Mons.Game): Mons.Game
-//   // open game:
-//   open hero_obj:
-//   if Bool.or(U16.eql(cmd, 'a'), U16.eql(cmd, 'w')) then
-//     let hero_obj = Mons.Object.set_mon(U32.sub(hero_obj.mon, 1u), hero_obj)
-//     let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-//     Mons.Game.set_stt(stt(1u), game)
-//   else if Bool.or(U16.eql(cmd, 'd'), U16.eql(cmd, 's')) then
-//     let hero_obj =
-//       let qtd_mon = Nat.to_u32(List.length<>(hero_obj.bag))
-//       if U32.ltn(hero_obj.mon, U32.sub(qtd_mon, 1u)) then
-//         Mons.Object.set_mon(U32.add(hero_obj.mon, 1u), hero_obj)
-//       else Mons.Object.set_mon(hero_obj.mon, hero_obj)
-//     let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-//     Mons.Game.set_stt(stt(2u), game)
-//   else game
+// Update the current Mon by changing it with the keys 'w' (up) and 's' (down)
+Mons.Object.change_curr_mon(
+  cmd: Char,
+  stt: U32 -> Mons.Screen,
+  pos: Pos32,
+  hero_obj: Mons.Object,
+  hero_idx: U32,
+  game: Mons.Game): Mons.Game
+  open hero_obj
+  if Bool.or(U16.eql(cmd, 'a'), U16.eql(cmd, 'w')) then
+    let hero_obj = Mons.Object.set_mon(U32.sub(hero_obj.mon, u1), hero_obj)
+    let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+    Mons.Game.set_stt(stt(u1), game)
+  else if Bool.or(U16.eql(cmd, 'd'), U16.eql(cmd, 's')) then
+    let hero_obj =
+      let qtd_mon = Nat.to_u32(List.length<_>(hero_obj.bag))
+      if U32.ltn(hero_obj.mon, U32.sub(qtd_mon, u1)) then
+        Mons.Object.set_mon(U32.add(hero_obj.mon, u1), hero_obj)
+      else Mons.Object.set_mon(hero_obj.mon, hero_obj)
+    let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+    Mons.Game.set_stt(stt(u2), game)
+  else game
 
 Mons.Object.is_full_bag(obj: Mons.Object): Bool
   open obj
@@ -2354,9 +2354,9 @@ Mons.Kind.new_mon(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): Mons.Object
 //   attr.battle_spr(is_up)
 
 
-// Mons.Kind.get_name(kind: Mons.Kind): String 
-//   open Mons.Kind.attr(kind) as attr
-//   attr.name
+Mons.Kind.get_name(kind: Mons.Kind): String 
+  open Mons.Kind.attr(kind) as attr
+  attr.name
 
 // Mons.Kind.get_blocks(kind: Mons.Kind): Bool
 //   open Mons.Kind.attr(kind) as attr
