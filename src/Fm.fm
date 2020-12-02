@@ -424,7 +424,7 @@ Fm.Context.show(context: Fm.Context): String
     cons: case context.head {
       new:
         let name = Fm.Name.show(context.head.fst);
-        let type = Fm.Term.show(context.head.snd);
+        let type = Fm.Term.show(Fm.Term.normalize(context.head.snd,Map.new<_>));
         let rest = Fm.Context.show(context.tail);
         String.flatten([
           rest,
@@ -2868,6 +2868,27 @@ Fm.Parser.annotation(init: Nat, term: Fm.Term): Parser(Fm.Term)
     var orig = Fm.Parser.stop(init);
     return Fm.Term.ori(orig, Fm.Term.ann(Bool.false, term, type));
   }
+
+// Parses a rewrite expression
+Fm.Parser.rewrite(init: Nat, subt: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("::");
+    Fm.Parser.text("rewrite");
+    var name = Fm.Parser.name1;
+    Fm.Parser.text("in");
+    var type = Fm.Parser.term;
+    Fm.Parser.text("with");
+    var iseq = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("Equal.rewrite");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.lam(name, (x) type));
+    let term = Fm.Term.app(term, iseq);
+    let term = Fm.Term.app(term, subt);
+    return Fm.Term.ori(orig, term);
+  }
   
 // Parses a core term (prefix phase)
 Fm.Parser.term: Parser(Fm.Term)
@@ -2925,6 +2946,7 @@ Fm.Parser.suffix(init: Nat, term: Fm.Term): Parser(Fm.Term)
     Fm.Parser.sigma(init, term),
     Fm.Parser.equality(init, term),
     Fm.Parser.inequality(init, term),
+    Fm.Parser.rewrite(init, term),
     Fm.Parser.annotation(init, term),
   ]);
   case suffix_parser(idx, code) as suffix_parsed {
