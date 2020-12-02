@@ -866,8 +866,8 @@ Fm.Term.patch_at(path: Bits, term: Fm.Term, fn: Fm.Term -> Fm.Term): Fm.Term
     },
     ann: case path {
       e: fn(term),
-      o: Fm.Term.ann(term.done, Fm.Term.patch_at(path,term.term,fn), term.type),
-      i: Fm.Term.ann(term.done, Fm.Term.patch_at(path,term.term,fn), term.type),
+      o: Fm.Term.ann(term.done, Fm.Term.patch_at(path.pred,term.term,fn), term.type),
+      i: Fm.Term.ann(term.done, term.term, Fm.Term.patch_at(path.pred,term.type,fn)),
     },
     ori: Fm.Term.patch_at(path, term.expr, fn),
     _: case path {
@@ -2846,6 +2846,20 @@ Fm.Parser.equality(init: Nat, val0: Fm.Term): Parser(Fm.Term)
     return Fm.Term.ori(orig, term);
   }
 
+// Parses an inequality: @a != b@
+Fm.Parser.inequality(init: Nat, val0: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("!=");
+    var val1 = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("Equal");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, val0);
+    let term = Fm.Term.app(term, val1);
+    let term = Fm.Term.app(Fm.Term.ref("Not"), term);
+    return Fm.Term.ori(orig, term);
+  }
+
 // Parses an annotation: @term :: type@
 Fm.Parser.annotation(init: Nat, term: Fm.Term): Parser(Fm.Term)
   do Parser {
@@ -2910,6 +2924,7 @@ Fm.Parser.suffix(init: Nat, term: Fm.Term): Parser(Fm.Term)
     Fm.Parser.string_concat(init, term),
     Fm.Parser.sigma(init, term),
     Fm.Parser.equality(init, term),
+    Fm.Parser.inequality(init, term),
     Fm.Parser.annotation(init, term),
   ]);
   case suffix_parser(idx, code) as suffix_parsed {
