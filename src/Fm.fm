@@ -424,7 +424,7 @@ Fm.Context.show(context: Fm.Context): String
     cons: case context.head {
       new:
         let name = Fm.Name.show(context.head.fst);
-        let type = Fm.Term.show(context.head.snd);
+        let type = Fm.Term.show(Fm.Term.normalize(context.head.snd,Map.new<_>));
         let rest = Fm.Context.show(context.tail);
         String.flatten([
           rest,
@@ -866,8 +866,8 @@ Fm.Term.patch_at(path: Bits, term: Fm.Term, fn: Fm.Term -> Fm.Term): Fm.Term
     },
     ann: case path {
       e: fn(term),
-      o: Fm.Term.ann(term.done, Fm.Term.patch_at(path,term.term,fn), term.type),
-      i: Fm.Term.ann(term.done, Fm.Term.patch_at(path,term.term,fn), term.type),
+      o: Fm.Term.ann(term.done, Fm.Term.patch_at(path.pred,term.term,fn), term.type),
+      i: Fm.Term.ann(term.done, term.term, Fm.Term.patch_at(path.pred,term.type,fn)),
     },
     ori: Fm.Term.patch_at(path, term.expr, fn),
     _: case path {
@@ -2449,6 +2449,65 @@ Fm.Parser.letforin: Parser(Fm.Term)
     return Fm.Term.ori(orig, term);
   }
 
+// Parses a U32 for range
+Fm.Parser.forrange.u32: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("for ");
+    var elem = Fm.Parser.name1;
+    Fm.Parser.text(":");
+    Fm.Parser.text("U32");
+    Fm.Parser.text("=");
+    var idx0 = Fm.Parser.term;
+    Fm.Parser.text("..");
+    var idx1 = Fm.Parser.term;
+    Fm.Parser.text("with");
+    var name = Fm.Parser.name1;
+    Fm.Parser.text(":");
+    var loop = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("U32.for");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.ref(name));
+    let term = Fm.Term.app(term, idx0);
+    let term = Fm.Term.app(term, idx1);
+    let lamb = Fm.Term.lam(elem, (e) Fm.Term.lam(name, (s) loop));
+    let term = Fm.Term.app(term, lamb);
+    let term = Fm.Term.let(name, term, (x) Fm.Term.ref(name));
+    return Fm.Term.ori(orig, term);
+  }
+
+// Parses a let-for-in expression
+Fm.Parser.letforrange.u32: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("let ");
+    var name = Fm.Parser.name1;
+    Fm.Parser.text("=");
+    Fm.Parser.text("for ");
+    var elem = Fm.Parser.name1;
+    Fm.Parser.text(":");
+    Fm.Parser.text("U32");
+    Fm.Parser.text("=");
+    var idx0 = Fm.Parser.term;
+    Fm.Parser.text("..");
+    var idx1 = Fm.Parser.term;
+    Fm.Parser.text(":");
+    var loop = Fm.Parser.term;
+    Parser.maybe<_>(Fm.Parser.text(";"));
+    var body = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("U32.for");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.ref(name));
+    let term = Fm.Term.app(term, idx0);
+    let term = Fm.Term.app(term, idx1);
+    let lamb = Fm.Term.lam(elem, (e) Fm.Term.lam(name, (s) loop));
+    let term = Fm.Term.app(term, lamb);
+    let term = Fm.Term.let(name, term, (x) body);
+    return Fm.Term.ori(orig, term);
+  }
+
 // Parses statements of the do-notation
 Fm.Parser.do.statements(monad_name: Fm.Name): Parser(Fm.Term)
   Parser.first_of<_>([
@@ -2898,6 +2957,20 @@ Fm.Parser.equality(init: Nat, val0: Fm.Term): Parser(Fm.Term)
     return Fm.Term.ori(orig, term);
   }
 
+// Parses an inequality: @a != b@
+Fm.Parser.inequality(init: Nat, val0: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("!=");
+    var val1 = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("Equal");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, val0);
+    let term = Fm.Term.app(term, val1);
+    let term = Fm.Term.app(Fm.Term.ref("Not"), term);
+    return Fm.Term.ori(orig, term);
+  }
+
 // Parses an annotation: @term :: type@
 Fm.Parser.annotation(init: Nat, term: Fm.Term): Parser(Fm.Term)
   do Parser {
@@ -2905,6 +2978,27 @@ Fm.Parser.annotation(init: Nat, term: Fm.Term): Parser(Fm.Term)
     var type = Fm.Parser.term;
     var orig = Fm.Parser.stop(init);
     return Fm.Term.ori(orig, Fm.Term.ann(Bool.false, term, type));
+  }
+
+// Parses a rewrite expression
+Fm.Parser.rewrite(init: Nat, subt: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("::");
+    Fm.Parser.text("rewrite");
+    var name = Fm.Parser.name1;
+    Fm.Parser.text("in");
+    var type = Fm.Parser.term;
+    Fm.Parser.text("with");
+    var iseq = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("Equal.rewrite");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.lam(name, (x) type));
+    let term = Fm.Term.app(term, iseq);
+    let term = Fm.Term.app(term, subt);
+    return Fm.Term.ori(orig, term);
   }
   
 // Parses a core term (prefix phase)
@@ -2919,6 +3013,7 @@ Fm.Parser.term: Parser(Fm.Term)
       Fm.Parser.lambda.erased,
       Fm.Parser.lambda.nameless,
       Fm.Parser.parenthesis,
+      Fm.Parser.letforrange.u32,
       Fm.Parser.letforin,
       Fm.Parser.let,
       Fm.Parser.get,
@@ -2933,6 +3028,7 @@ Fm.Parser.term: Parser(Fm.Term)
       Fm.Parser.list,
       Fm.Parser.log,
       Fm.Parser.forin,
+      Fm.Parser.forrange.u32,
       Fm.Parser.forin2,
       Fm.Parser.do,
       Fm.Parser.case,
@@ -2966,6 +3062,8 @@ Fm.Parser.suffix(init: Nat, term: Fm.Term): Parser(Fm.Term)
     Fm.Parser.string_concat(init, term),
     Fm.Parser.sigma(init, term),
     Fm.Parser.equality(init, term),
+    Fm.Parser.inequality(init, term),
+    Fm.Parser.rewrite(init, term),
     Fm.Parser.annotation(init, term),
   ]);
   case suffix_parser(idx, code) as suffix_parsed {
