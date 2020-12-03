@@ -2397,7 +2397,7 @@ Fm.Parser.forin: Parser(Fm.Term)
   }
 
 // Parses a for-in expression, second style
-Fm.Parser.forin2: Parser(Fm.Term)
+Fm.Parser.forin.2: Parser(Fm.Term)
   do Parser {
     var init = Fm.Parser.init;
     Fm.Parser.text("for ");
@@ -2477,6 +2477,35 @@ Fm.Parser.forrange.u32: Parser(Fm.Term)
     return Fm.Term.ori(orig, term);
   }
 
+// Parses a U32 for range
+Fm.Parser.forrange.u32.2: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("for ");
+    var elem = Fm.Parser.name1;
+    Fm.Parser.text(":");
+    Fm.Parser.text("U32");
+    Fm.Parser.text("=");
+    var idx0 = Fm.Parser.term;
+    Fm.Parser.text("..");
+    var idx1 = Fm.Parser.term;
+    Fm.Parser.text(":");
+    var name = Fm.Parser.name1;
+    Fm.Parser.text("=");
+    var loop = Fm.Parser.term;
+    Parser.maybe<_>(Fm.Parser.text(";"));
+    var body = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("U32.for");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.ref(name));
+    let term = Fm.Term.app(term, idx0);
+    let term = Fm.Term.app(term, idx1);
+    let lamb = Fm.Term.lam(elem, (e) Fm.Term.lam(name, (s) loop));
+    let term = Fm.Term.app(term, lamb);
+    let term = Fm.Term.let(name, term, (x) body);
+    return Fm.Term.ori(orig, term);
+  }
 // Parses a let-for-in expression
 Fm.Parser.letforrange.u32: Parser(Fm.Term)
   do Parser {
@@ -3027,9 +3056,10 @@ Fm.Parser.term: Parser(Fm.Term)
       Fm.Parser.apply,
       Fm.Parser.list,
       Fm.Parser.log,
-      Fm.Parser.forin,
       Fm.Parser.forrange.u32,
-      Fm.Parser.forin2,
+      Fm.Parser.forrange.u32.2,
+      Fm.Parser.forin,
+      Fm.Parser.forin.2,
       Fm.Parser.do,
       Fm.Parser.case,
       Fm.Parser.open,
