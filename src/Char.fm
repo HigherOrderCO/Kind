@@ -77,13 +77,13 @@ Char.parse.type(str: String): Type
 
 Char.to_lower(char: U16): U16
   if Bool.and(U16.gte(char, 'A'), U16.lte(char, 'Z')) then
-    U16.add(char, 32b)
+    U16.add(char, 32s)
   else
     char
 
 Char.to_upper(char: U16): U16
   if Bool.and(U16.gte(char, 'a'), U16.lte(char, 'z')) then
-    U16.sub(char, 32b)
+    U16.sub(char, 32s)
   else
     char
 
