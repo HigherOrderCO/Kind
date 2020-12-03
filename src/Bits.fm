@@ -125,6 +125,17 @@ Bits.from_string(str: String): Bits
     }
   }
 
+// Bits.parse_hex: String -> Bits
+//   (str) Bits.parse_hex.tco(str, Bits.nil)
+
+// Bits.parse_hex.tco(str: String, res: Bits): Bits
+//   case str{
+//     nil: res
+//     cons: let b0000 = Bits.o(Bits.o(Bits.o(Bits.o(Bits.e))))
+//       let bhead = Nat.apply<Bits>(Char.hex_value(str.head), Bits.inc, b0000)
+//       Bits.parse_hex.tco(str.tail, Bits.concat(bhead, res))
+//   }
+
 
 Bits.length(xs: Bits): Nat
   Bits.length.go(xs, 0)

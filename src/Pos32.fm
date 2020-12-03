@@ -6,27 +6,6 @@
 Pos32: Type
   U32
 
-u0: U32
-  Nat.to_u32(0)
-
-u1: U32
-  Nat.to_u32(1)
-
-u2: U32
-  Nat.to_u32(2)
-
-u12: U32
-  Nat.to_u32(12)
-
-u24: U32
-  Nat.to_u32(24)
-
-u120: U32
-  Nat.to_u32(120)
-
-u2047: U32
-  Nat.to_u32(2047)
-
 // Adds two positions
 Pos32.add(a: Pos32, b: Pos32): Pos32
   let a_x = Pos32.get_x(a)
@@ -49,19 +28,19 @@ Pos32.dot(a: Pos32, b: Pos32): U32
   U32.add(U32.add(x, y), z)
 
 Pos32.get_x(pos: Pos32): U32
-  U32.and(pos, u2047)
+  U32.and(pos, 2047u)
 
 Pos32.get_y(pos: Pos32): U32
-  U32.and(U32.shr(pos, u12), u2047)
+  U32.and(U32.shr(pos, 12u), 2047u)
 
 Pos32.get_z(pos: Pos32): U32
-  U32.shr(pos, u24)
+  U32.shr(pos, 24u)
 
 Pos32.new(x: U32, y: U32, z: U32): Pos32
-  let pos = u0
+  let pos = 0u
   let pos = U32.or(pos, x)
-  let pos = U32.or(pos, U32.shl(y, u12))
-  let pos = U32.or(pos, U32.shl(z, u24))
+  let pos = U32.or(pos, U32.shl(y, 12u))
+  let pos = U32.or(pos, U32.shl(z, 24u))
   pos
 
 // Multiplies all positions by a scaling factor
@@ -93,11 +72,11 @@ Pos32.sub(a: Pos32, b: Pos32): Pos32
   let c_z = U32.sub(a_z, b_z)
   Pos32.new(c_x, c_y, c_z)
 
-// Pos32.to_string(pos: Pos32): String
-//   let x = U32.to_string(Pos32.get_x(pos))
-//   let y = U32.to_string(Pos32.get_y(pos))
-//   let z = U32.to_string(Pos32.get_z(pos))
-//   String.flatten(["[",x,",",y,",",z,"]"])
+Pos32.to_string(pos: Pos32): String
+  let x = U32.to_string(Pos32.get_x(pos))
+  let y = U32.to_string(Pos32.get_y(pos))
+  let z = U32.to_string(Pos32.get_z(pos))
+  String.flatten(["[",x,",",y,",",z,"]"])
 
 // TODO
 // Converts a Pos32 to a F64.V3
