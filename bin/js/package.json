@@ -1,6 +1,6 @@
 {
   "name": "formality-js",
-  "version": "0.2.25",
+  "version": "0.2.26",
   "description": "Formality Language in JavaScript",
   "main": "src/formality.js",
   "scripts": {

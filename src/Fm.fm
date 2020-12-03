@@ -2449,6 +2449,65 @@ Fm.Parser.letforin: Parser(Fm.Term)
     return Fm.Term.ori(orig, term);
   }
 
+// Parses a U32 for range
+Fm.Parser.forrange.u32: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("for ");
+    var elem = Fm.Parser.name1;
+    Fm.Parser.text(":");
+    Fm.Parser.text("U32");
+    Fm.Parser.text("=");
+    var idx0 = Fm.Parser.term;
+    Fm.Parser.text("..");
+    var idx1 = Fm.Parser.term;
+    Fm.Parser.text("with");
+    var name = Fm.Parser.name1;
+    Fm.Parser.text(":");
+    var loop = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("U32.for");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.ref(name));
+    let term = Fm.Term.app(term, idx0);
+    let term = Fm.Term.app(term, idx1);
+    let lamb = Fm.Term.lam(elem, (e) Fm.Term.lam(name, (s) loop));
+    let term = Fm.Term.app(term, lamb);
+    let term = Fm.Term.let(name, term, (x) Fm.Term.ref(name));
+    return Fm.Term.ori(orig, term);
+  }
+
+// Parses a let-for-in expression
+Fm.Parser.letforrange.u32: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("let ");
+    var name = Fm.Parser.name1;
+    Fm.Parser.text("=");
+    Fm.Parser.text("for ");
+    var elem = Fm.Parser.name1;
+    Fm.Parser.text(":");
+    Fm.Parser.text("U32");
+    Fm.Parser.text("=");
+    var idx0 = Fm.Parser.term;
+    Fm.Parser.text("..");
+    var idx1 = Fm.Parser.term;
+    Fm.Parser.text(":");
+    var loop = Fm.Parser.term;
+    Parser.maybe<_>(Fm.Parser.text(";"));
+    var body = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("U32.for");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.ref(name));
+    let term = Fm.Term.app(term, idx0);
+    let term = Fm.Term.app(term, idx1);
+    let lamb = Fm.Term.lam(elem, (e) Fm.Term.lam(name, (s) loop));
+    let term = Fm.Term.app(term, lamb);
+    let term = Fm.Term.let(name, term, (x) body);
+    return Fm.Term.ori(orig, term);
+  }
+
 // Parses statements of the do-notation
 Fm.Parser.do.statements(monad_name: Fm.Name): Parser(Fm.Term)
   Parser.first_of<_>([
@@ -2902,6 +2961,7 @@ Fm.Parser.term: Parser(Fm.Term)
       Fm.Parser.lambda.erased,
       Fm.Parser.lambda.nameless,
       Fm.Parser.parenthesis,
+      Fm.Parser.letforrange.u32,
       Fm.Parser.letforin,
       Fm.Parser.let,
       Fm.Parser.get,
@@ -2916,6 +2976,7 @@ Fm.Parser.term: Parser(Fm.Term)
       Fm.Parser.list,
       Fm.Parser.log,
       Fm.Parser.forin,
+      Fm.Parser.forrange.u32,
       Fm.Parser.forin2,
       Fm.Parser.do,
       Fm.Parser.case,
