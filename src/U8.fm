@@ -2,7 +2,7 @@ type U8 {
   new(value: Word(8))
 }
 
-U8.0: U8
+U8.zero: U8
   U8.new(Word.zero(8))
 
 U8.add(a: U8, b: U8): U8

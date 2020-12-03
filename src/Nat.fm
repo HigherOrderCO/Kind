@@ -206,8 +206,8 @@ Nat.show_digit(base: Nat, n: Nat) : Char
     }
   else '#'
 
-//Nat.to_u8(n: Nat): U8
-  //Nat.apply<U8>(n, U8.inc, U8.0)
+Nat.to_u8(n: Nat): U8
+  Nat.apply<U8>(n, U8.inc, U8.zero)
 
 // TODO: optimize (this is swapped on the JS compiler though)
 Nat.to_u16(n: Nat): U16
