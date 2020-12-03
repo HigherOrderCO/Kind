@@ -3785,7 +3785,7 @@ module.exports = (function() {
     const Fm$Parser$u8 = Monad$bind$(Parser$monad)(Fm$Parser$init)((_init$1 => {
         var $1059 = Monad$bind$(Parser$monad)(Fm$Parser$spaces)((_$2 => {
             var $1060 = Monad$bind$(Parser$monad)(Parser$nat)((_natx$3 => {
-                var $1061 = Monad$bind$(Parser$monad)(Fm$Parser$text$("s"))((_$4 => {
+                var $1061 = Monad$bind$(Parser$monad)(Fm$Parser$text$("b"))((_$4 => {
                     var _term$5 = Fm$Term$ref$("Nat.to_u8");
                     var _term$6 = Fm$Term$app$(_term$5, Fm$Term$nat$(_natx$3));
                     var $1062 = Monad$bind$(Parser$monad)(Fm$Parser$stop$(_init$1))((_orig$7 => {
@@ -3803,7 +3803,7 @@ module.exports = (function() {
     const Fm$Parser$u16 = Monad$bind$(Parser$monad)(Fm$Parser$init)((_init$1 => {
         var $1064 = Monad$bind$(Parser$monad)(Fm$Parser$spaces)((_$2 => {
             var $1065 = Monad$bind$(Parser$monad)(Parser$nat)((_natx$3 => {
-                var $1066 = Monad$bind$(Parser$monad)(Fm$Parser$text$("b"))((_$4 => {
+                var $1066 = Monad$bind$(Parser$monad)(Fm$Parser$text$("s"))((_$4 => {
                     var _term$5 = Fm$Term$ref$("Nat.to_u16");
                     var _term$6 = Fm$Term$app$(_term$5, Fm$Term$nat$(_natx$3));
                     var $1067 = Monad$bind$(Parser$monad)(Fm$Parser$stop$(_init$1))((_orig$7 => {
