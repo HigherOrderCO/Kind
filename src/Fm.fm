@@ -2653,7 +2653,7 @@ Fm.Parser.hole: Parser(Fm.Term)
     return Fm.Term.ori(orig, Fm.Term.hol(Bits.e));
   }
 
-// Parses a U8 number: @123s@
+// Parses a U8 number: @123b@
 Fm.Parser.u8: Parser(Fm.Term)
   do Parser {
     var init = Fm.Parser.init;
@@ -2666,7 +2666,7 @@ Fm.Parser.u8: Parser(Fm.Term)
     return Fm.Term.ori(orig, term);
   }
 
-// Parses a U16 number: @123b@
+// Parses a U16 number: @123s@
 Fm.Parser.u16: Parser(Fm.Term)
   do Parser {
     var init = Fm.Parser.init;
