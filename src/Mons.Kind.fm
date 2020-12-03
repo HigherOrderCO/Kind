@@ -1,0 +1,658 @@
+type Mons.Kind{
+  Mons(ele: Mons.Kind.mons, boss: Bool, pri_type: Mons.Type, agi: U32),
+  Const(ele: Mons.Kind.const),
+  Terrain(ele: Mons.Kind.terrain),
+  Interactive(
+    ele: Mons.Kind.inter,
+    on: Bool,
+    eff: Mons.Kind.inter -> Bool -> Mons.Game -> Mons.Game), // an effect to change the map
+}
+
+type Mons.Kind.mons{
+  HERO,
+  MAGE,
+  BEHOLDER,
+  ZOIO,
+  CYCLOPE,
+  POISOLICK,
+  TROWL,
+  MIMIC,
+  MIMIC2,
+  AZULA,
+  EMERELDER,
+  EMERELDER2,
+}
+
+type Mons.Kind.const{
+  FOUNTAIN(model: U32, slice: U32),
+  CHEST,
+  CRYSTAL,
+  PORTAL,
+}
+
+type Mons.Kind.terrain{
+  VOID,
+  VOID_BLACK,
+  FLOOR(lvl: U32, model: U32),
+  GRASS_PLANT,
+  BUSH(model: U32),
+  PLANT_0,
+  SAND_0,
+  PATH_BLOCKER(lvl: U32, model: U32),
+  MID_CITY(row: U32, column: U32),
+  STAIRS(row: U32, column: U32),
+  MON_AREA(pos_mon: U32),
+}
+
+type Mons.Kind.inter{
+  LEVER(id: U32),
+  MOVE,
+  HEAL,
+}
+
+Mons.Kind.get_mhp(kind: Mons.Kind): U32
+  open Mons.Kind.attr(kind) as attr
+  attr.mhp
+
+Mons.Kind.get_battle_spr(kind: Mons.Kind, is_up: Bool): Image3D
+  open Mons.Kind.attr(kind) as attr
+  attr.battle_spr(is_up)
+
+Mons.Kind.get_name(kind: Mons.Kind): String 
+  open Mons.Kind.attr(kind) as attr
+  attr.name
+
+Mons.Kind.get_blocks(kind: Mons.Kind): Bool
+  open Mons.Kind.attr(kind) as attr
+  attr.blocks
+
+Mons.Kind.get_atk(kind: Mons.Kind): U32
+  open Mons.Kind.attr(kind) as attr
+  attr.atk 
+
+Mons.Kind.get_skills(kind: Mons.Kind): List(Mons.Skill)
+  open Mons.Kind.attr(kind) as attr
+  attr.skills
+
+Mons.Kind.get_agi(kind: Mons.Kind): U32
+ case kind{
+  Mons: kind.agi
+  Const: 3u
+  Terrain: 3u
+  Interactive: 3u
+ }
+
+Mons.Kind.is_hero(kind: Mons.Kind): Bool
+  case kind{
+    Mons: 
+    case kind.ele{
+      HERO       : Bool.true,
+      MAGE       : Bool.false,
+      BEHOLDER   : Bool.false,
+      ZOIO       : Bool.false,
+      CYCLOPE    : Bool.false,
+      POISOLICK  : Bool.false,
+      TROWL      : Bool.false,
+      MIMIC      : Bool.false,
+      MIMIC2     : Bool.false,
+      AZULA      : Bool.false,
+      EMERELDER  : Bool.false,
+      EMERELDER2 : Bool.false,
+    }
+    Const: Bool.false,
+    Terrain: Bool.false,
+    Interactive: Bool.false,
+  }
+
+// Mons.Kind.is_mage(kind: Mons.Kind): Bool
+//   case kind:
+//   | mons => 
+//     case kind.ele:
+//     | HERO        => Bool.false;
+//     | MAGE        => Bool.true;
+//     | BEHOLDER    => Bool.false;
+//     | ZOIO        => Bool.false;
+//     | CYCLOPE     => Bool.false;
+//     | POISOLICK   => Bool.false;
+//     | TROWL       => Bool.false;
+//     | MIMIC       => Bool.false;
+//     | MIMIC2      => Bool.false;
+//     | AZULA       => Bool.false;
+//     | EMERELDER   => Bool.false;
+//     | EMERELDER2   => Bool.false;
+//     ;
+//   | const    => Bool.false;
+//   | terrain  => Bool.false;
+//   | inter => Bool.false;
+
+// Mons.Kind.is_mon_area(adve_kin: Mons.Kind): Bool
+//   case adve_kin:
+//   | mons => Bool.false;
+//   | const => Bool.false;
+//   | terrain =>
+//     case adve_kin.ele:
+//     | VOID => Bool.false;
+//     | VOID_BLACK => Bool.false;
+//     | FLOOR => Bool.false;
+//     | GRASS_PLANT => Bool.false;
+//     | BUSH => Bool.false;
+//     | PLANT_0 => Bool.false;
+//     | SAND_0 => Bool.false;
+//     | PATH_BLOCKER => Bool.false;
+//     | MID_CITY => Bool.false;
+//     | STAIRS => Bool.false;
+//     | MON_AREA => Bool.true;
+//   ;
+//   | inter => Bool.false;
+
+// Mons.Kind.is_void(adve_kin: Mons.Kind): Bool
+//   case adve_kin:
+//   | mons => Bool.false;
+//   | const => Bool.false;
+//   | terrain =>
+//     case adve_kin.ele:
+//     | VOID => Bool.true;
+//     | VOID_BLACK => Bool.true;
+//     | FLOOR => Bool.false;
+//     | GRASS_PLANT => Bool.false;
+//     | BUSH => Bool.false;
+//     | PLANT_0 => Bool.false;
+//     | SAND_0 => Bool.false;
+//     | PATH_BLOCKER => Bool.false;
+//     | MID_CITY => Bool.false;
+//     | STAIRS => Bool.false;
+//     | MON_AREA => Bool.false;
+//   ;
+//   | inter => Bool.false;
+
+// Mons.Kind.area_mon_pos(adve_kin: Mons.Kind, hero_pos: Pos32): Pos32
+//   case adve_kin:
+//   | mons => hero_pos;
+//   | const => hero_pos;
+//   | terrain =>
+//     case adve_kin.ele as terrain:
+//     | VOID => hero_pos;
+//     | VOID_BLACK => hero_pos;
+//     | FLOOR => hero_pos;
+//     | GRASS_PLANT => hero_pos;
+//     | BUSH => hero_pos;
+//     | PLANT_0 => hero_pos;
+//     | SAND_0 => hero_pos;
+//     | PATH_BLOCKER => hero_pos;
+//     | MID_CITY => hero_pos;
+//     | STAIRS => hero_pos;
+//     | MON_AREA => terrain.pos_mon ;
+//   ;
+//   | inter => hero_pos;
+
+// Mons.Kind.is_portal(adve_kin: Mons.Kind): Bool
+//   case adve_kin:
+//   | mons => Bool.false;
+//   | const =>
+//     case adve_kin.ele:
+//     | FOUNTAIN => Bool.false;
+//     | CHEST => Bool.false;
+//     | CRYSTAL => Bool.false;
+//     | PORTAL => Bool.true;
+//   ;
+//   | terrain => Bool.false;
+//   | inter => Bool.false;
+
+// // Swap "on" property
+// Mons.Kind.swap_interactive(kind: Mons.Kind): Mons.Kind
+//   case kind:
+//   | mons => kind;
+//   | const => kind;
+//   | terrain => kind;
+//   | inter => Mons.Kind.Interactive(kind.ele, Bool.not(kind.on), kind.eff);
+
+// Mons.Kind.set_on_interactive(kind: Mons.Kind): Mons.Kind
+//   case kind:
+//   | mons => kind;
+//   | const => kind;
+//   | terrain => kind;
+//   | inter => Mons.Kind.Interactive(kind.ele, Bool.true, kind.eff);
+
+// // Executes an effect in a game
+// Mons.Kind.exec_eff(kind: Mons.Kind, game: Mons.Game): Mons.Game
+//   case kind:
+//   | mons => game;
+//   | const => game;
+//   | terrain => game;
+//   | inter => 
+//     // if kind.on then 
+//     //   use skp = Debug.log<>("Exec eff on")
+//     //   game
+//     // else 
+//     // use skp = Debug.log<>("Exec eff off")
+//     kind.eff(kind.ele, kind.on, game)
+//   ;
+
+// An effect to work with lever kind
+Mons.Kind.inter_lever_eff(kind: Mons.Kind.inter, on: Bool, game: Mons.Game): Mons.Game
+  case Mons.Game.get_hero_pos(game) as hero_pos{
+  none: game
+  some: let hero_pos = hero_pos.value
+    let x = Pos32.get_x(hero_pos)
+    let y = Pos32.get_y(hero_pos)
+    let z = Pos32.get_z(hero_pos) // dim
+    open game
+    let map = game.map
+    let hero_pair = Mons.Map.get_hero(hero_pos, map)
+    let hero_obj  = Pair.fst<_,_>(hero_pair)
+    let hero_idx  = Pair.snd<_,_>(hero_pair)
+    let obj_idx = 0u
+    open hero_obj
+    case kind{
+      LEVER:
+        if U32.eql(z, 1u) then // lvl 1
+          if U32.eql(kind.id, 0u) then // lever 0
+            let sign = Mons.Kind.new_const(Mons.Kind.const.CHEST)
+            let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z)
+            Mons.Game.map_push(obj_pos, sign, game)
+          else game
+        else game
+      MOVE: // an object that the hero can push
+        // TODO: make hero walk to movable_obj_pos
+        let movable_obj_pos = Mons.Object.get_adjacent_pos(hero_pos, hero_obj.dir, map)
+        if Mons.Object.can_move_forward(movable_obj_pos, hero_obj.dir, game) then
+          let obj = Mons.Kind.new_interactive_tool(kind, Bool.true, Mons.Kind.inter_lever_eff)
+          let new_pos = Mons.Object.get_adjacent_pos(movable_obj_pos, hero_obj.dir, map)
+          let game = Mons.Game.map_del(movable_obj_pos, obj_idx, game)
+          Mons.Game.map_push(new_pos, obj, game)
+        else game
+      HEAL:
+        if on then // used heal
+          game
+        else 
+          // use skp = Debug.log<_>("> Heal all Mons")
+          let hero_obj = Mons.Object.heal_all_mons(hero_obj)
+          Mons.Game.map_set(hero_pos, hero_idx, hero_obj, game)
+    }
+  }
+
+Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Terrain(kin))
+
+Mons.Kind.new_const(kin: Mons.Kind.const): Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Const(kin))
+
+// // Mons.Kind.new_portal(kin: Mons.Kind.const): Mons.Object
+// //   Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.true, Bool.true))
+
+Mons.Kind.new_interactive_tool(
+  kin: Mons.Kind.inter,
+  stt: Bool, 
+  fun: Mons.Kind.inter -> Bool -> Mons.Game -> Mons.Game)
+  : Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Interactive(kin, stt, fun))
+
+Mons.Kind.new_mons(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): List(Mons.Object)
+  [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false, type, agi)),
+    // Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH)
+    ]
+
+// Mons.Kind.new_mon(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): Mons.Object
+//   Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false, type, agi))
+
+// Mons.Kind.new_boss(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): List(Mons.Object)
+//   [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.true, type, agi)),
+//     ]
+
+Mons.Kind.set_static_sprites(spr: List(Image3D)): U32 -> U32 -> U32 -> Mons.Dir -> List(Image3D)
+  (x,y,obj_ani,obj_dir) spr
+
+Mons.Kind.set_pic(spr: List(Image3D)): Image3D
+  case spr{
+    nil : Image3D.empty //Mons.Assets.void;
+    cons: spr.head
+  }
+
+// TODO: update default battle image
+Mons.Kind.set_default_battle_spr:  Bool -> Image3D
+  // (is_up) Mons.Assets.battle_croni_u
+  (is_up) Image3D.empty
+
+// Mons.Kind.update_agi(kind: Mons.Kind, agi: U32): Mons.Kind
+//   case kind:
+//   | mons => Mons.Kind.Mons(kind.ele, kind.boss, kind.pri_type, agi);
+//   | const => kind;
+//   | terrain => kind;
+//   | inter => kind;
+
+Mons.Kind.get_pos(kin: Mons.Kind): Pos32
+  open Mons.Kind.attr(kin) as attr
+  attr.pos
+
+
+// blocks: Bool,
+// battles: Bool,
+// mhp: U32,
+// atk: U32
+// name: String
+// spr: (x: U32) -> (y: U32) -> (obj_ani: U32) -> (obj_dir: Mons.Dir)-> List(Image3D)
+Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
+  // let default_pos = Mons.global_scr_mid
+  // let set_pos_lvl1 = 
+  //   ((x: U32, y: U32) Mons.image_to_global(u80, u80, x, y, 1u))
+  //   :: U32 -> U32 -> Pos32
+  // let set_pos_lvl2 = 
+  //   ((x: U32, y: U32) Mons.image_to_global(u20, u20, x, y, 2u))
+  //   :: U32 -> U32 -> Pos32
+  Mons.Attr.new_neutral([Image3D.empty])
+  // case kin{
+  //   Mons: 
+  //   case kin.ele as kin{
+  //     HERO: Mons.Attr.new_hero
+  //     MAGE: Mons.Attr.new_mage
+    
+  //     BEHOLDER:
+      // Mons.Attr.new_battleable(
+      // Mons.Assets.pic_beholder, [Mons.Assets.mons_beholder_d_0], "BEHOLDER",
+      // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d),
+      // [Mons.Skill.super_fang, Mons.Skill.nightmare, Mons.Skill.protect, Mons.Skill.hypnosis], 
+      // set_pos_lvl2(10u, 10u))
+    
+  //     ZOIO:
+  //     // Mons.Attr.new_battleable(
+  //     // Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "ZOIO",
+  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
+  //     // [Mons.Skill.slam, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.dig],
+  //     // set_pos_lvl1(38u, 52u))
+    
+  //     CYCLOPE:
+  //     // Mons.Attr.new_battleable(
+  //     // Mons.Assets.pic_cyclop, [Mons.Assets.mons_cyclop_d_0], "CYCLOPE",
+  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_cyclop_u, Mons.Assets.battle_cyclop_d),
+  //     // [Mons.Skill.slam, Mons.Skill.rock_smash, Mons.Skill.recover, Mons.Skill.counter ],
+  //     // set_pos_lvl1(61u, 49u))
+    
+  //     POISOLICK:
+  //     // Mons.Attr.new_battleable(
+  //     // Mons.Assets.pic_poisolick, [Mons.Assets.mons_poisolick_d_0], "POISOLICK",
+  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_poisolick_u, Mons.Assets.battle_poisolick_d),
+  //     // [Mons.Skill.crunch, Mons.Skill.sludge_bomb, Mons.Skill.iron_defense, Mons.Skill.gyro_ball],
+  //     // set_pos_lvl1(62u, 19u))
+    
+  //     TROWL:
+  //     // Mons.Attr.new_battleable(
+  //     // Mons.Assets.pic_trowl, [Mons.Assets.mons_trowl_d_0], "TROWL",
+  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_trowl_u, Mons.Assets.battle_trowl_d),
+  //     // [Mons.Skill.wing_attack, Mons.Skill.crunch, Mons.Skill.recover, Mons.Skill.agility],
+  //     // set_pos_lvl1(19u, 38u))
+    
+  //     MIMIC:
+  //     // Mons.Attr.new_battleable(
+  //     // Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
+  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d),
+  //     // [Mons.Skill.super_fang, Mons.Skill.crunch, Mons.Skill.hypnosis, Mons.Skill.dream_eater],
+  //     // set_pos_lvl1(41u, 24u))
+    
+  //     MIMIC2:
+  //     // Mons.Attr.new_battleable(
+  //     // Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
+  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d),
+  //     // [Mons.Skill.super_fang, Mons.Skill.crunch, Mons.Skill.hypnosis, Mons.Skill.dream_eater],
+  //     // // set_pos_lvl1(62u, 33u))
+  //     // set_pos_lvl2(10u, 10u))
+    
+  //     AZULA:
+  //     // Mons.Attr.new_battleable(
+  //     // Mons.Assets.pic_azula, [Mons.Assets.mons_azula_d_0], "AZULA",
+  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_azula_u, Mons.Assets.battle_azula_d),
+  //     // [Mons.Skill.wing_attack, Mons.Skill.moonlight, Mons.Skill.play_rough, Mons.Skill.psychic],
+  //     // set_pos_lvl1(46u, 38u))
+    
+  //     EMERELDER:
+  //     // Mons.Attr.new_battleable(
+  //     // Mons.Assets.pic_emerelder, [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
+  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_emerelder_u, Mons.Assets.battle_emerelder_d),
+  //     // [Mons.Skill.ancient_power, Mons.Skill.thunder_wave, Mons.Skill.charge, Mons.Skill.iron_defense],
+  //     // set_pos_lvl1(16u, 22u))
+
+  //     EMERELDER2:
+  //     // Mons.Attr.new_battleable(
+  //     // Mons.Assets.pic_emerelder, [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
+  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_emerelder_u, Mons.Assets.battle_emerelder_d),
+  //     // [Mons.Skill.ancient_power, Mons.Skill.thunder_wave, Mons.Skill.charge, Mons.Skill.iron_defense],
+  //     // set_pos_lvl1(23u, 27u))
+
+  // } // end mons
+  
+  // Construction:
+  //   case kin.ele as kin{
+  //     FOUNTAIN:
+  //       Mons.Attr.new_blockable([
+  //         Mons.Assets.0_fountain_0, Mons.Assets.0_fountain_1,
+  //         Mons.Assets.0_fountain_2, Mons.Assets.0_fountain_3])
+  //     CHEST:
+  //       Mons.Attr.new_neutral([Mons.Assets.tile_chest_0])
+  //     CRYSTAL:
+  //       Mons.Attr.new_neutral([
+  //       Mons.Assets.0_crystal0, Mons.Assets.0_crystal1, Mons.Assets.0_crystal2,
+  //       Mons.Assets.0_crystal3, Mons.Assets.0_crystal4, Mons.Assets.0_crystal5,
+  //       Mons.Assets.0_crystal6, Mons.Assets.0_crystal7])
+  //     PORTAL:Mons.Attr.new_neutral([Image3D.empty])
+  //       Mons.Attr.new_neutral([
+  //       Mons.Assets.portal_0, Mons.Assets.portal_1, Mons.Assets.portal_2,
+  //       Mons.Assets.portal_3, Mons.Assets.portal_4, Mons.Assets.portal_5,
+  //       Mons.Assets.portal_6, Mons.Assets.portal_7])
+  //   } // end of construction
+
+  // Terrain: 
+  //   case kin.ele as kin{
+  //   VOID: Mons.Attr.new_blockable([Mons.Assets.void])
+  //   VOID_BLACK: Mons.Attr.new_blockable([Mons.Assets.void_black])
+  //   FLOOR:
+  //      if U32.eql(kin.lvl, 0u) then Mons.Attr.new_neutral([Mons.Assets.void])
+  //      else Mons.Attr.new_neutral([Mons.Assets.grass_2])
+  //   PLANT: Mons.Attr.new_neutral([Mons.Assets.grass_2])
+  //   BUSH: Mons.Attr.new_neutral([Mons.Assets.bush_0, Mons.Assets.bush_1])
+  //   PLANT_0: Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0])
+  //   SAND_0: Mons.Attr.new_neutral([Mons.Assets.sand_0])
+  //   PATH_BLOCKER:
+  //      if U32.eql(kin.lvl, 1u) then Mons.Attr.new_blockable([Mons.Assets.void])
+  //      else Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m])
+  //   MID_CITY: Mons.Kind.mid_city(kin.row, kin.column)
+  //   STAIRS:
+  //    if U32.eql(kin.row, 38u) then 
+  //      if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.stair_38_0])
+  //      else Mons.Attr.new_neutral([Mons.Assets.stair_38_1])
+  //    else if U32.eql(kin.row, 37u) then
+  //      if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.stair_37_0])
+  //      else Mons.Attr.new_neutral([Mons.Assets.stair_37_1])
+  //    else if U32.eql(kin.row, 36u) then
+  //      if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.stair_36_0])
+  //      else Mons.Attr.new_neutral([Mons.Assets.stair_36_1])
+  //    else if U32.eql(kin.row, 35u) then
+  //      if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.stair_35_0])
+  //      else Mons.Attr.new_neutral([Mons.Assets.stair_35_1])
+  //    else if U32.eql(kin.row, 34u) then
+  //      if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.stair_34_0])
+  //      else Mons.Attr.new_neutral([Mons.Assets.stair_34_1])
+  //    else Mons.Attr.new_neutral([Mons.Assets.stairs])
+  //   MON_AREA: Mons.Attr.new_neutral([Mons.Assets.grass_2])
+  //   } // end terrain
+
+  //   Interactive:
+  //     case kin.ele as kin{
+  //       lever:
+        // if kin.on then Mons.Attr.new_neutral([Mons.Assets.push_tool_on])
+        // else Mons.Attr.new_neutral([Mons.Assets.push_tool_off])
+  //       move: Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0])
+  //       heal:
+        // if kin.on then 
+        //    Mons.Attr.new_neutral([
+        //     Mons.Assets.healing_point_broken_00, Mons.Assets.healing_point_broken_01,
+        //     Mons.Assets.healing_point_broken_02, Mons.Assets.healing_point_broken_03])
+        // else
+        //   Mons.Attr.new_neutral([
+        //     Mons.Assets.healing_point_00, Mons.Assets.healing_point_01,
+        //     Mons.Assets.healing_point_02, Mons.Assets.healing_point_03])
+      
+  //     } // end inter
+  // }
+    
+
+// Mons.Kind.mid_city(row: U32, column: U32): Mons.Attr
+//   if U32.eql(row, 19u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_19_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_19_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_19_3])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_19_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_19_5])
+ 
+//   else if U32.eql(row, 18u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_18_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_18_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_18_3])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_18_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_18_5])
+ 
+//   else if U32.eql(row, 17u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_3])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_17_5])
+ 
+//   else if U32.eql(row, 16u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_16_5])
+ 
+//   else if U32.eql(row, 15u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_15_5])
+ 
+//   else if U32.eql(row, 14u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_14_5])
+ 
+//   else if U32.eql(row, 13u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_13_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_13_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_13_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_13_5])
+ 
+//   else if U32.eql(row, 12u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_12_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_12_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_12_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_12_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_12_5])
+ 
+//   else if U32.eql(row, 11u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_11_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_11_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_11_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_11_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_11_5])
+ 
+//   else if U32.eql(row, 10u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_10_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_10_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_10_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_10_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_10_5])
+ 
+//   else if U32.eql(row, 9u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_9_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_9_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_9_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_9_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_9_5])
+ 
+//   else if U32.eql(row, 8u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_8_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_8_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_8_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_8_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_8_5])
+ 
+//   else if U32.eql(row, 7u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_7_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_7_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_7_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_7_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_7_5])
+ 
+//   else if U32.eql(row, 6u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_6_5])
+ 
+//   else if U32.eql(row, 5u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_5_5])
+ 
+//   else if U32.eql(row, 4u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_4_5])
+ 
+//   else if U32.eql(row, 3u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_3_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_3_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_3_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_3_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_3_5])
+
+//   else if U32.eql(row, 2u) then 
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_2_5])
+
+//   else if U32.eql(row, 1u) then
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_1_5])
+
+//   else if U32.eql(row, 0u) then
+//     if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_1])
+//     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_2])
+//     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_3])
+//     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_4])
+//     else Mons.Attr.new_neutral([Mons.Assets.mid_city_0_5])
+
+//   else Mons.Attr.new_blockable([Mons.Assets.void])
+
+// // Mons.Kind.mid_city(row: U32, column: U32): Mons.Attr
+// //   if U32.eql(row, 6u) then
+// //     if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_0])
+// //     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_2])
+// //     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_3])
+// //     else Mons.Attr.new_neutral([Mons.Assets.mid_city_6_4])
+
+// //   else if U32.eql(row, 5u) then
+// //     if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_2])
+// //     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_3])
+// //     else Mons.Attr.new_neutral([Mons.Assets.mid_city_5_4])
+
+// //   else if U32.eql(row, 4u) then
+// //     if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_2])
+// //     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_3])
+// //     else Mons.Attr.new_neutral([Mons.Assets.mid_city_4_4])
+// //   else Mons.Attr.new_blockable([Mons.Assets.void])
+
+
