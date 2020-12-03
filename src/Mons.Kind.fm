@@ -104,26 +104,27 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
     Interactive: Bool.false,
   }
 
-// Mons.Kind.is_mage(kind: Mons.Kind): Bool
-//   case kind:
-//   | mons => 
-//     case kind.ele:
-//     | HERO        => Bool.false;
-//     | MAGE        => Bool.true;
-//     | BEHOLDER    => Bool.false;
-//     | ZOIO        => Bool.false;
-//     | CYCLOPE     => Bool.false;
-//     | POISOLICK   => Bool.false;
-//     | TROWL       => Bool.false;
-//     | MIMIC       => Bool.false;
-//     | MIMIC2      => Bool.false;
-//     | AZULA       => Bool.false;
-//     | EMERELDER   => Bool.false;
-//     | EMERELDER2   => Bool.false;
-//     ;
-//   | const    => Bool.false;
-//   | terrain  => Bool.false;
-//   | inter => Bool.false;
+Mons.Kind.is_mage(kind: Mons.Kind): Bool
+  case kind{
+    Mons: 
+      case kind.ele{
+        HERO        : false
+        MAGE        : true
+        BEHOLDER    : false
+        ZOIO        : false
+        CYCLOPE     : false
+        POISOLICK   : false
+        TROWL       : false
+        MIMIC       : false
+        MIMIC2      : false
+        AZULA       : false
+        EMERELDER   : false
+        EMERELDER2  : false
+      }
+    Const: false
+    Terrain: false
+    Interactive: false
+  }
 
 // Mons.Kind.is_mon_area(adve_kin: Mons.Kind): Bool
 //   case adve_kin:

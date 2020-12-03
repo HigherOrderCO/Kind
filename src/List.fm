@@ -278,25 +278,25 @@ List.ifind.go<A: Type>(xs: List(A), f: A -> Nat -> Bool, i: Nat): Maybe(Pair(A,N
   }
 
 // Folds over a list with an index, right associative
-// List.ifoldr.u32<A: Type,B: Type>(b: B, f: U32 -> A -> B -> B, xs: List(A)): B
-//   case xs {
-//     nil : b,
-//     cons: f(0u, xs.head, List.ifoldr.u32<_,_>(b, (i) f(U32.add(1u, i)), xs.tail))
-//   }
+List.ifoldr.u32<A: Type,B: Type>(b: B, f: U32 -> A -> B -> B, xs: List(A)): B
+  case xs {
+    nil : b,
+    cons: f(0u, xs.head, List.ifoldr.u32<_,_>(b, (i) f(U32.add(1u, i)), xs.tail))
+  }
 
 // Folds over a list, left associative
-// List.ifor<A: Type>(xs: List(A))<B: Type>(b: B, f: Nat -> A -> B -> B): B
-//   case xs {
-//     nil : b,
-//     cons: List.ifor<A>(xs.tail)<B>(f(0,xs.head,b), (n) f(Nat.succ(n)))
-//   }
+List.ifor<A: Type>(xs: List(A))<B: Type>(b: B, f: Nat -> A -> B -> B): B
+  case xs {
+    nil : b,
+    cons: List.ifor<A>(xs.tail)<B>(f(0,xs.head,b), (n) f(Nat.succ(n)))
+  }
 
 // Folds over a list, left associative
-// List.ifor.u32<A: Type>(xs: List(A))<B: Type>(b: B, f: U32 -> A -> B -> B): B
-//   case xs {
-//     nil : b,
-//     cons: List.ifor.u32<A>(xs.tail)<B>(f(0u,xs.head,b), (n) f(U32.add(n,1u)))
-//   }
+List.ifor.u32<A: Type>(xs: List(A))<B: Type>(b: B, f: U32 -> A -> B -> B): B
+  case xs {
+    nil : b,
+    cons: List.ifor.u32<A>(xs.tail)<B>(f(0u,xs.head,b), (n) f(U32.add(n,1u)))
+  }
 
 // Map over a list with the index
 List.imap<A: Type,B: Type>(f: Nat -> A -> B, xs: List(A)): List(B)
