@@ -2680,6 +2680,73 @@ Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
 Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
   scr
 
+// ------------------ Mons.Skill ------------------------
+Mons.Skill.get_name(skill: Mons.Skill): String
+  case skill{
+    hit_4 : "hit 4"
+    hit_2 : "hit 2"
+    heal  : "heal" 
+    none: "none"
+    run: "Run"
+    dig: "Dig"
+    sand_tomb: "Sand bomb"
+    protect: "Protect"
+    slam: "Slam"
+    counter: "Counter"
+    recover: "Recover"
+    rock_smash: "Rock Smash"
+    crunch: "Crunch"
+    sludge_bomb: "Sludge bomb"
+    gyro_ball: "Gyro Ball"
+    iron_defense: "Iron Defense"
+    super_fang: "Super Fang"
+    hypnosis: "Hypnosis"
+    dream_eater: "Dream Eater"
+    wing_attack: "Wing Attack"
+    moonlight: "Moonlight"
+    play_rough: "Play Rough"
+    psychic: "Psychic"
+    ancient_power: "Ancient Power"
+    thunder_wave: "Thunder Wave"
+    charge: "Charge"
+    agility: "Agility"
+    hero_kill: "ONE PUNCH"
+    nightmare: "Nightmare"
+  }
+
+Mons.Skill.short_description(skill: Mons.Skill): String
+  case skill{
+    hit_4: "damage 4" // test
+    hit_2: "damage 2" // test
+    heal: "heal 3" // test
+    none: "does nothing" // test
+    run: "Run from battle"
+    dig: "Add hit next turn, add invul"
+    sand_tomb: "Dmg this turn + burn(5)"
+    protect: "-50% dmg next turn"
+    slam: "Hit 6hp"
+    counter: "Burn for 5 turns and heal 3hp"
+    recover: "Restore 25% hp, add poison"
+    rock_smash: "Hit 2hp + 50% of critical"
+    crunch: "Hit 4hp + 25% of critical"
+    sludge_bomb: "Hit 2hp + 30% of poisoning"
+    gyro_ball: "Hit 4. If more agility + 50% dmg"
+    iron_defense: "-25% dmg for this and next turn"
+    super_fang: "Hit 50% hp + loses 25% of hp"
+    hypnosis: "50% of sleep if can"
+    dream_eater: "If sleep, hit 6 and heal 4"
+    wing_attack: "Hit 6hp"
+    moonlight: "Hit 4 + 20% of sleep"
+    play_rough: "Hit 4 + 20% of critical"
+    psychic: "Hit 2hp + 10% sleep and hit"
+    ancient_power: "Hit 4hp + 10% adve miss the attack"
+    thunder_wave: "Hit 6"
+    charge: "Hit4, if adve has minimize, hit8"
+    agility: "Invert Mon's agitity value"
+    hero_kill: "Herro atk"
+    nightmare: "If sleep damage hit 20% hp"
+  }
+
 
 // ------------------ Mons.font -------------------------
 Mons.font: Type
@@ -2695,3 +2762,13 @@ Mons.font.get_img(char: Char, map: Mons.font): Maybe(Image3D)
     none: Maybe.none<Image3D>
     some: Maybe.some<Image3D>(got.value)
   }
+
+Mons.font_black: Mons.font
+  let map = Map.new<Image3D>
+  // TODO: add fonts 
+  map
+
+Mons.font_white: Mons.font
+  let map = Map.new<Image3D>
+  // TODO: add fonts 
+  map
