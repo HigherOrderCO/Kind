@@ -215,13 +215,12 @@ Nat.to_u16(n: Nat): U16
 
 Nat.to_u32(n: Nat): U32
   Nat.apply<U32>(n, U32.inc, U32.zero)
-
  
-//Nat.to_u64(n: Nat): U64
-  //Nat.apply<U64>(n, U64.inc, U64.0)
+Nat.to_u64(n: Nat): U64
+  Nat.apply<U64>(n, U64.inc, U64.zero)
 
-//Nat.to_u256(n: Nat): U256
-  //Nat.apply<U256>(n,U256.inc, U256.0)
+// Nat.to_u256(n: Nat): U256
+//   Nat.apply<U256>(n,U256.inc, U256.zero)
 
 Nat.bitwise_and(a: Nat, b: Nat): Nat
   case Bool.or(Nat.eql(a, 0), Nat.eql(a, 0)){
