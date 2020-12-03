@@ -2145,39 +2145,6 @@ Mons.App.room: Word(48)
 //0000000001101001
   //Map.get<>(U16.to_bits('h'), Mons.Input.char_to_code_map)
 
-// ----------------- Mons.Skill.fm --------------------
-type Mons.Skill {
-  hit_4,
-  hit_2,
-  heal,
-  none,
-  run,
-  dig,
-  sand_tomb,
-  protect,
-  slam,
-  counter,
-  recover,
-  rock_smash,
-  crunch,
-  sludge_bomb,
-  gyro_ball,
-  iron_defense,
-  super_fang,
-  hypnosis,
-  dream_eater,
-  wing_attack,
-  moonlight,
-  play_rough,
-  psychic,
-  ancient_power,
-  thunder_wave,
-  charge,
-  agility,
-  hero_kill,
-  nightmare
-}
-
 
 // ---------------- Mons.Kind.fm -------------------
 type Mons.Kind{
@@ -2569,7 +2536,6 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
 
 
 // ------------------------ Mons.Effect ----------------------
-
 // sleep: Can't attack on the next turn
 // burn: Loses 1/16 mhp for X turns
 // protect: Takes 50% less damage on the next turn
@@ -2607,8 +2573,26 @@ Mons.Effect.upd_initial_eff(eff: Mons.Effect): Mons.Effect
     eff.poison,
     Bool.false) 
 
+// TODO: not working. Infinity loop
+// Mons.Effect.upd_end_turn_eff(eff: Mons.Effect): Mons.Effect
+//   open eff
+//   let sleep_turn = Pair.fst<_,_>(eff.sleep)
+//   let protect_turn = Pair.fst<_,_>(eff.protect)
+//   let minimize_turn = Pair.fst<_,_>(eff.minimize)
+//   let invulnerable = Pair.fst<_,_>(eff.invulnerable)
+//   let update_turn_counter = ((val) {U32.sub(val, 1u), U32.eql(val, 2u)}) :: U32 -> Pair(U32, Bool)
+//   Mons.Effect.new(
+//     update_turn_counter(sleep_turn),
+//     eff.burn, 
+//     update_turn_counter(protect_turn),
+//     update_turn_counter(minimize_turn), 
+//     if invulnerable then {Bool.false, Bool.true} else {Bool.false, Bool.false}, 
+//     eff.hit,
+//     eff.poison,
+//     eff.swap_agi)
+
 Mons.Effect.has_sleep(eff: Mons.Effect): Bool
-  open eff
+  open eff 
   let turn = Pair.fst<_,_>(eff.sleep)
   U32.eql(turn, 1u)
 
@@ -2622,7 +2606,7 @@ Mons.Effect.has_hit(eff: Mons.Effect): Bool
   U32.gtn(eff.hit, 0u)
 
 Mons.Effect.has_minimize(eff: Mons.Effect): Bool
-  open eff
+  open eff 
   let {turn, used} = eff.minimize
   U32.gtn(turn, 0u)
 
@@ -2654,6 +2638,56 @@ Mons.Effect.set_sleep(obj: Mons.Object, turn: U32): Mons.Object
     eff.invulnerable, eff.hit, eff.poison, eff.swap_agi)
   Mons.Object.set_eff(new_eff, obj)
 
+Mons.Effect.set_invulnerable(obj: Mons.Object): Mons.Object
+  open obj
+  open obj.eff as eff
+  let {stt, used} = eff.invulnerable
+  let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, eff.minimize, 
+    {Bool.true, Bool.true}, eff.hit, eff.poison, eff.swap_agi)
+  Mons.Object.set_eff(new_eff, obj)
+
+Mons.Effect.set_burn(obj: Mons.Object, turns: U32): Mons.Object
+  open obj
+  open obj.eff as eff
+  let new_eff = Mons.Effect.new(eff.sleep, turns, eff.protect, eff.minimize, 
+    eff.invulnerable, eff.hit, eff.poison, eff.swap_agi)
+  Mons.Object.set_eff(new_eff, obj)
+
+// Hit to be executed next turn
+Mons.Effect.set_hit(obj: Mons.Object, val: U32): Mons.Object
+  open obj
+  open obj.eff as eff
+  let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, eff.minimize, 
+    eff.invulnerable, val, eff.poison, eff.swap_agi)
+  Mons.Object.set_eff(new_eff, obj)
+
+Mons.Effect.set_protect(obj: Mons.Object, turn: U32): Mons.Object
+  open obj
+  open obj.eff as eff
+  let new_eff = Mons.Effect.new(eff.sleep, eff.burn, {turn, Bool.true}, eff.minimize, 
+    eff.invulnerable, eff.hit, eff.poison, eff.swap_agi)
+  Mons.Object.set_eff(new_eff, obj)
+
+Mons.Effect.set_poison(obj: Mons.Object): Mons.Object
+  open obj
+  open obj.eff as eff
+  let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, eff.minimize, 
+    eff.invulnerable, eff.hit, Bool.true, eff.swap_agi)
+  Mons.Object.set_eff(new_eff, obj)
+
+Mons.Effect.set_minimize(obj: Mons.Object): Mons.Object
+  open obj
+  open obj.eff as eff
+  let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, {2u, Bool.true}, 
+    eff.invulnerable, eff.hit, eff.poison, eff.swap_agi)
+  Mons.Object.set_eff(new_eff, obj)
+
+Mons.Effect.set_swap_agi(obj: Mons.Object): Mons.Object
+  open obj
+  open obj.eff as eff
+  let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, eff.minimize, 
+    eff.invulnerable, eff.hit, eff.poison, Bool.true)
+  Mons.Object.set_eff(new_eff, obj)
 
 // ------------------- Mons.Draw -------------------
 // Given a tile (x, y) and an object, returns its global (x, y) positions
@@ -2681,7 +2715,39 @@ Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
 Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
   scr
 
-// ------------------ Mons.Skill ------------------------
+// ------------------ Mons.Skill.fm ------------------------
+type Mons.Skill {
+  hit_4,
+  hit_2,
+  heal,
+  none,
+  run,
+  dig,
+  sand_tomb,
+  protect,
+  slam,
+  counter,
+  recover,
+  rock_smash,
+  crunch,
+  sludge_bomb,
+  gyro_ball,
+  iron_defense,
+  super_fang,
+  hypnosis,
+  dream_eater,
+  wing_attack,
+  moonlight,
+  play_rough,
+  psychic,
+  ancient_power,
+  thunder_wave,
+  charge,
+  agility,
+  hero_kill,
+  nightmare
+}
+
 Mons.Skill.get_name(skill: Mons.Skill): String
   case skill{
     hit_4 : "hit 4"
