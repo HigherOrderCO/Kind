@@ -38,7 +38,7 @@ Image3D.get_length(img: Image3D): U32
   img.length
 
 // Image3D.get_pos(idx: U32, vox: Image3D): U32
-//   open vox 
+//   open vox
 //   Buffer32.get(U32.mul(idx,2u), vox.buffer)
 
 // Image3D.parse(voxdata: String): Image3D

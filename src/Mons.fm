@@ -2675,3 +2675,23 @@ Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
       down : U32.sub(g_y, ani)
     }
   {g_x, g_y}
+
+
+Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
+  scr
+
+
+// ------------------ Mons.font -------------------------
+Mons.font: Type
+  Map(Image3D)
+
+// Adds an Image3D to a char on the map
+Mons.font.set_img(char: Char, img: Image3D, map: Mons.font): Mons.font
+  Map.set<_>(U16.to_bits(char), img, map)
+
+// Get the image given a map
+Mons.font.get_img(char: Char, map: Mons.font): Maybe(Image3D)
+  case Map.get<_>(U16.to_bits(char), map) as got{
+    none: Maybe.none<Image3D>
+    some: Maybe.some<Image3D>(got.value)
+  }
