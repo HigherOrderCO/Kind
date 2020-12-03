@@ -1,4 +1,4 @@
-// Example: 123s
+// Example: 123b
 type U8 {
   new(value: Word(8))
 }
