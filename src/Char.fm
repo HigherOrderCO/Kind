@@ -81,6 +81,9 @@ Char.to_lower(char: U16): U16
   else
     char
 
+Char.is_upper(char: Char): Bool
+  Bool.and(U16.gte(char, 'A'), U16.lte(char, 'Z'))
+
 Char.to_upper(char: U16): U16
   if Bool.and(U16.gte(char, 'a'), U16.lte(char, 'z')) then
     U16.sub(char, 32s)
