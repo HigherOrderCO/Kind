@@ -1835,6 +1835,7 @@ Mons.Game.walk(cmd: Char, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
 
 
 // Build sprites around the hero
+// TODO: move it to Mons.draw.fm
 // Mons.Map.build_sprites(game: Mons.Game, scr: Image3D, hero_pos: Pos32, hero_obj: Mons.Object): Image3D
 //   let sprs = Mons.game_sprites(game)
 //   for spr in sprs with scr:

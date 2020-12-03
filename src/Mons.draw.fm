@@ -1,186 +1,188 @@
-// // TODO: add screen to finish turn:
-// // Ex: hero used ... skill; adve used... skill; show hp lost or healed
-// // Draws the game to screen
-// Mons.draw(game: Mons.Game, scr: Image3D): Image3D
-//   open game:
-//   let hero_pos = Mons.Game.get_hero_pos(game)
-//   let scr = Image3D.clear(scr)
-//   case hero_pos:
-//   | scr;
-//   | let hero_pair = Mons.Map.get_hero(hero_pos.value, game.map)
-//     let hero_obj = Pair.fst<,>(hero_pair)
-//     let hero_idx = Pair.snd<,>(hero_pair)
-//     let adve_obj = Mons.Map.get(hero_pos.value, U32.add(hero_idx, 1u), game.map)
-//     let dim = Mons.Game.dim(game)
-//     open hero_obj:
-//     open adve_obj:
-//     let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
-//     open hero_mon_obj:
-//     // let adve_attr = 
-//     open Mons.Kind.attr(adve_obj.kin) as adve_attr:
-//     let is_standing = Mons.Object.is_standing(hero_obj)
-//     // let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+// TODO: add screen to finish turn:
+// Ex: hero used ... skill; adve used... skill; show hp lost or healed
+// Draws the game to screen
+Mons.draw(game: Mons.Game, scr: Image3D): Image3D
+  open game
+  let hero_pos = Mons.Game.get_hero_pos(game)
+  let scr = Image3D.clear(scr)
+  case hero_pos{
+  none: scr
+  some: let hero_pair = Mons.Map.get_hero(hero_pos.value, game.map)
+    let hero_obj = Pair.fst<_,_>(hero_pair)
+    let hero_idx = Pair.snd<_,_>(hero_pair)
+    let adve_obj = Mons.Map.get(hero_pos.value, U32.add(hero_idx, 1u), game.map)
+    let dim = Mons.Game.dim(game)
+    open hero_obj
+    open adve_obj
+    let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
+    open hero_mon_obj
+    open Mons.Kind.attr(adve_obj.kin) as adve_attr
+    let is_standing = Mons.Object.is_standing(hero_obj)
+    // let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+    
+    case game.stt as stt{
+      welcome:
+      let Mons.Assets.logo = Image3D.empty // TODO: add real image
+      let scr = Mons.draw.image(Mons.Assets.logo, Pos32.new(120u,80u,0u), scr)
+      let scr = Mons.draw.list(["Play", "Credits"], Bool.false, 25u, Mons.font_white, Pos32.new(40u,50u,0u), scr)
+      let scr = Mons.draw.list_selector(stt.idx, Bool.false, 25u, Mons.font_white, Pos32.new(30u,50u,0u), scr)
+      let scr = Mons.draw.text("[c] Select", Mons.font_white, Pos32.new(40u,128u,0u), scr)
+      scr
 
-//     case game.stt as stt:
-//     | welcome =>
-//       let scr = Mons.draw.image(Mons.Assets.logo, Pos32.new(120u,80u,0u), scr)
-//       let scr = Mons.draw.list(["Play", "Credits"], Bool.false, 25u, Mons.font_white, Pos32.new(40u,50u,0u), scr)
-//       let scr = Mons.draw.list_selector(stt.idx, Bool.false, 25u, Mons.font_white, Pos32.new(30u,50u,0u), scr)
-//       let scr = Mons.draw.text("[c] Select", Mons.font_white, Pos32.new(40u,128u,0u), scr)
-//       scr
-//     ;
-//     | credits =>
-//       let scr = Mons.draw.image(Mons.Assets.battle_normal_bg_full, Pos32.new(120u,80u,0u), scr)
-//       let artists0 = ["Alexandre Avila", "Caio Carvalho", "Johnny Azevedo", "Lucca Tuelher", "Maisa Milena", "Marcio Maia", "Marcos Medeiros"]
-//       let artists1 = ["Marcos Motta", "Nathan Danjo", "Paulo Reis", "Pedro Taka", "Rodrigo Rodrigues", "Victor Maia", "Yuri Carvalho"]
-//       let scr = Mons.draw.text("[z] Back", Mons.font_white, Pos32.new(20u,15u,0u), scr)
-//       let scr = Mons.draw.list(artists0, Bool.false, 15u, Mons.font_white, Pos32.new(20u,20u,0u), scr)
-//       let scr = Mons.draw.list(artists1, Bool.false, 15u, Mons.font_white, Pos32.new(125u,20u,0u), scr)
-//       scr
-//     ; 
-//     | introduction => 
-//       if Bool.and(String.eql(adve_attr.name, "MAGE"), is_standing) then
-//         if U32.eql(stt.step, 0u) then
-//           let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-//           Mons.draw.mage_talk(
-//             "Oh! So you really exist... the", "young man of the prophecy. [c]", scr)
-//         else if U32.eql(stt.step, 1u) then // Follow to the game
-//           let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-//           Mons.draw.mage_talk(
-//             "I'm in a hurry and can't explain", "now, but... we depend on you. [c]", scr)
-//         else if U32.eql(stt.step, 2u) then
-//           let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-//           Mons.draw.mage_talk(
-//             "Great choice! You can press", "[e] to check it on the bag. [c]", scr)
+      credits:
+      let Mons.Assets.battle_normal_bg_full = Image3D.empty // TODO: add real image
+      let scr = Mons.draw.image(Mons.Assets.battle_normal_bg_full, Pos32.new(120u,80u,0u), scr)
+      let artists0 = ["Alexandre Avila", "Caio Carvalho", "Johnny Azevedo", "Lucca Tuelher", "Maisa Milena", "Marcio Maia", "Marcos Medeiros"]
+      let artists1 = ["Marcos Motta", "Nathan Danjo", "Paulo Reis", "Pedro Taka", "Rodrigo Rodrigues", "Victor Maia", "Yuri Carvalho"]
+      let scr = Mons.draw.text("[z] Back", Mons.font_white, Pos32.new(20u,15u,0u), scr)
+      let scr = Mons.draw.list(artists0, Bool.false, 15u, Mons.font_white, Pos32.new(20u,20u,0u), scr)
+      let scr = Mons.draw.list(artists1, Bool.false, 15u, Mons.font_white, Pos32.new(125u,20u,0u), scr)
+      scr
+
+      introduction: scr
+    //   if Bool.and(String.eql(adve_attr.name, "MAGE"), is_standing) then
+    //     if U32.eql(stt.step, 0u) then
+    //       let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+    //       Mons.draw.mage_talk(
+    //         "Oh! So you really exist... the", "young man of the prophecy. [c]", scr)
+    //     else if U32.eql(stt.step, 1u) then // Follow to the game
+    //       let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+    //       Mons.draw.mage_talk(
+    //         "I'm in a hurry and can't explain", "now, but... we depend on you. [c]", scr)
+    //     else if U32.eql(stt.step, 2u) then
+    //       let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+    //       Mons.draw.mage_talk(
+    //         "Great choice! You can press", "[e] to check it on the bag. [c]", scr)
         
-//         else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-//       else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+    //     else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+    //   else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
 
-//     | intro_select => 
-//       let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-//       Mons.draw.initial_mons(hero_obj, scr) ;
+      intro_select: scr
+      // let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+      // Mons.draw.initial_mons(hero_obj, scr)
   
-//     | game =>
-//       let hero_mon_attr = Mons.Kind.attr(hero_mon_obj.kin)
-//       open hero_mon_attr:
+      game: scr
+    //   let hero_mon_attr = Mons.Kind.attr(hero_mon_obj.kin)
+    //   open hero_mon_attr:
 
-//       case adve_obj.kin as adve_kind:
-//       | mon => 
-//         let hero_chp = U32.sub(hero_mon_attr.mhp, hero_mon_obj.dmg)
-//         let hero_btl_img = hero_mon_attr.battle_spr(Bool.true);
-//         let hero_txt = String.flatten([hero_mon_attr.name, " ", Mons.draw.img_type(hero_mon_obj.kin)])
-//         let hero_hp = String.flatten([Mons.draw.small_HP, " ", U32.to_string(hero_chp),"/", U32.to_string(hero_mon_attr.mhp)])
+    //   case adve_obj.kin as adve_kind:
+    //   | mon => 
+    //     let hero_chp = U32.sub(hero_mon_attr.mhp, hero_mon_obj.dmg)
+    //     let hero_btl_img = hero_mon_attr.battle_spr(Bool.true);
+    //     let hero_txt = String.flatten([hero_mon_attr.name, " ", Mons.draw.img_type(hero_mon_obj.kin)])
+    //     let hero_hp = String.flatten([Mons.draw.small_HP, " ", U32.to_string(hero_chp),"/", U32.to_string(hero_mon_attr.mhp)])
 
-//         let adve_chp = U32.sub(adve_attr.mhp, adve_obj.dmg)
-//         let adve_btl_img = adve_attr.battle_spr(Bool.false);
-//         let adve_txt = String.flatten([adve_attr.name, " ", Mons.draw.img_type(adve_obj.kin)])
-//         let adve_hp = String.flatten([Mons.draw.small_HP, " ", U32.to_string(adve_chp),"/", U32.to_string(adve_attr.mhp)])
+    //     let adve_chp = U32.sub(adve_attr.mhp, adve_obj.dmg)
+    //     let adve_btl_img = adve_attr.battle_spr(Bool.false);
+    //     let adve_txt = String.flatten([adve_attr.name, " ", Mons.draw.img_type(adve_obj.kin)])
+    //     let adve_hp = String.flatten([Mons.draw.small_HP, " ", U32.to_string(adve_chp),"/", U32.to_string(adve_attr.mhp)])
 
-//         if is_standing then
-//           if Mons.Object.is_battling(adve_obj, hero_mon_obj) then
-//             let scr = Mons.draw.battle_bg(adve_kind.ele, adve_kind.boss, dim, scr)
-//             let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, hero_hp, scr)
-//             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, adve_hp, scr)
-//             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
-//             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
-//             open stt.turn as turn:
-//             let scr = Mons.draw.effects(hero_mon_obj.eff, adve_obj.eff, scr)
-//             if Mons.Turn.is_active(stt.turn) then // Show end turn screen
-//               if Mons.Turn.hero_turn(stt.turn) 
-//               then Mons.draw.turn(hero_mon_attr.name, turn.hero_skill, scr)
-//               else Mons.draw.turn(adve_attr.name, turn.adve_skill, scr)
-//             else
-//               Mons.draw.battle_skills(hero_mon_obj, scr)
+    //     if is_standing then
+    //       if Mons.Object.is_battling(adve_obj, hero_mon_obj) then
+    //         let scr = Mons.draw.battle_bg(adve_kind.ele, adve_kind.boss, dim, scr)
+    //         let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, hero_hp, scr)
+    //         let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, adve_hp, scr)
+    //         let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
+    //         let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
+    //         open stt.turn as turn:
+    //         let scr = Mons.draw.effects(hero_mon_obj.eff, adve_obj.eff, scr)
+    //         if Mons.Turn.is_active(stt.turn) then // Show end turn screen
+    //           if Mons.Turn.hero_turn(stt.turn) 
+    //           then Mons.draw.turn(hero_mon_attr.name, turn.hero_skill, scr)
+    //           else Mons.draw.turn(adve_attr.name, turn.adve_skill, scr)
+    //         else
+    //           Mons.draw.battle_skills(hero_mon_obj, scr)
 
-//           else
-//             let scr = Mons.draw.capture_bg(adve_kind.ele, dim, scr)
-//             let scr = 
-//               if Mons.Object.is_obj_defeated(adve_obj) then
-//                 if adve_kind.boss then
-//                   let scr = Mons.draw.battle_win_bg(adve_kind.ele, dim, scr)
-//                   let scr = Mons.draw.text("You unlocked the next level.", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-//                   let scr = Mons.draw.text("[c] I'm ready!", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
-//                   Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
-//                 else
-//                 let scr = Mons.draw.battle_win_bg(adve_kind.ele, dim, scr)
-//                 let scr = Mons.draw.text("[c] Capture", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-//                 let scr = Mons.draw.text("[z] Free", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
-//                 Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
-//               else if Mons.Object.is_obj_defeated(hero_mon_obj) then
-//                 // let scr = Mons.draw.text(hero_txt, Mons.font_black, Pos32.new(130u,104u,0u), scr)
-//                 let scr = Mons.draw.text("You lost the battle and your Mon.", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-//                 // let scr = Mons.draw.text("your current Mon.", Mons.font_black, Pos32.new(16u,42u,0u), scr)
-//                 let scr = Mons.draw.text("[c] I'll do better next time",Mons.font_black, Mons.draw.msg_screen.line_1, scr)
-//                 Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
-//               else scr
-//             scr
-//         else
-//           Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-//       ;
-//       | cons =>
-//         if Bool.and(is_standing, Mons.Kind.is_portal(adve_obj.kin)) then
-//           let game = Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-//           def captured = Pair.fst<,>(hero_obj.cap)
-//           def boss_def = Nat.to_u32(List.length<>(hero_obj.bos))
-//           def defeated_lvl_boss = U32.eql(boss_def, U32.div(dim, 2u))
-//           // def a =  Mons.Game.defeated_lvl_mons(captured, dim)
-//           if Bool.or(Mons.Game.defeated_lvl_mons(captured, dim), defeated_lvl_boss)
-//           then
-//             let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
-//             Mons.draw.text("Press [c] to access next level", Mons.font_black, Pos32.new(30u,135u,0u), scr)
-//           else
-//             let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
-//             let scr = Mons.draw.text("To access the next level you must", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-//             Mons.draw.text("first defeat all enemies.", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+    //       else
+    //         let scr = Mons.draw.capture_bg(adve_kind.ele, dim, scr)
+    //         let scr = 
+    //           if Mons.Object.is_obj_defeated(adve_obj) then
+    //             if adve_kind.boss then
+    //               let scr = Mons.draw.battle_win_bg(adve_kind.ele, dim, scr)
+    //               let scr = Mons.draw.text("You unlocked the next level.", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+    //               let scr = Mons.draw.text("[c] I'm ready!", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+    //               Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
+    //             else
+    //             let scr = Mons.draw.battle_win_bg(adve_kind.ele, dim, scr)
+    //             let scr = Mons.draw.text("[c] Capture", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+    //             let scr = Mons.draw.text("[z] Free", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+    //             Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
+    //           else if Mons.Object.is_obj_defeated(hero_mon_obj) then
+    //             // let scr = Mons.draw.text(hero_txt, Mons.font_black, Pos32.new(130u,104u,0u), scr)
+    //             let scr = Mons.draw.text("You lost the battle and your Mon.", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+    //             // let scr = Mons.draw.text("your current Mon.", Mons.font_black, Pos32.new(16u,42u,0u), scr)
+    //             let scr = Mons.draw.text("[c] I'll do better next time",Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+    //             Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
+    //           else scr
+    //         scr
+    //     else
+    //       Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+    //   ;
+    //   | cons =>
+    //     if Bool.and(is_standing, Mons.Kind.is_portal(adve_obj.kin)) then
+    //       let game = Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+    //       def captured = Pair.fst<,>(hero_obj.cap)
+    //       def boss_def = Nat.to_u32(List.length<>(hero_obj.bos))
+    //       def defeated_lvl_boss = U32.eql(boss_def, U32.div(dim, 2u))
+    //       // def a =  Mons.Game.defeated_lvl_mons(captured, dim)
+    //       if Bool.or(Mons.Game.defeated_lvl_mons(captured, dim), defeated_lvl_boss)
+    //       then
+    //         let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
+    //         Mons.draw.text("Press [c] to access next level", Mons.font_black, Pos32.new(30u,135u,0u), scr)
+    //       else
+    //         let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
+    //         let scr = Mons.draw.text("To access the next level you must", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+    //         Mons.draw.text("first defeat all enemies.", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
          
-//           // if U32.gtn(boss_def, hero_idx) then
-//           //   let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
-//           //   Mons.draw.text("Press [c] to access next level", Mons.font_black, Pos32.new(30u,135u,0u), scr)
-//           // else
-//           //   let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
-//           //   let scr = Mons.draw.text("To access the next level you must", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-//           //   Mons.draw.text("first defeat the boss.", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+    //       // if U32.gtn(boss_def, hero_idx) then
+    //       //   let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
+    //       //   Mons.draw.text("Press [c] to access next level", Mons.font_black, Pos32.new(30u,135u,0u), scr)
+    //       // else
+    //       //   let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
+    //       //   let scr = Mons.draw.text("To access the next level you must", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+    //       //   Mons.draw.text("first defeat the boss.", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
         
-//         // else if Bool.and(is_standing, Mons.Kind.is_heal_area(adve_obj.kin)) then
-//         //   let scr = Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-//         //   let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
-//         //   let scr = Mons.draw.text("Press [c] to heal 5 on all of", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-//         //   Mons.draw.text("your Mons", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
-//         else
-//           Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-//       ;
-//       | terrain => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
-//       // TODO: add message about interaction
-//       | interact =>
-//         case adve_kind.ele:
-//         | LEVER => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
-//         | MOVE => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
-//         | HEAL => 
-//           if adve_kind.on then
-//             let scr = Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-//             let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
-//             Mons.draw.text("You already used the heal.", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-//           else
-//             let scr = Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-//             let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
-//             let scr = Mons.draw.text("Press [c] to heal 15HP on all of", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-//             Mons.draw.text("your Mons", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
-//         ;
-//       ;
-//       // Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
-//     ; // end case stt.game
-//     | inventory => Mons.draw.bag(hero_obj, dim, scr);
+    //     // else if Bool.and(is_standing, Mons.Kind.is_heal_area(adve_obj.kin)) then
+    //     //   let scr = Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+    //     //   let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
+    //     //   let scr = Mons.draw.text("Press [c] to heal 5 on all of", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+    //     //   Mons.draw.text("your Mons", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+    //     else
+    //       Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+    //   ;
+    //   | terrain => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+    //   // TODO: add message about interaction
+    //   | interact =>
+    //     case adve_kind.ele:
+    //     | LEVER => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+    //     | MOVE => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+    //     | HEAL => 
+    //       if adve_kind.on then
+    //         let scr = Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+    //         let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
+    //         Mons.draw.text("You already used the heal.", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+    //       else
+    //         let scr = Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+    //         let scr = Mons.draw.image(Mons.draw.text_screen_bg, Pos32.new(120u,80u,0u), scr)
+    //         let scr = Mons.draw.text("Press [c] to heal 15HP on all of", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+    //         Mons.draw.text("your Mons", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+    //     ;
+    //   ;
+    //   // Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+    // ; // end case stt.game
 
-//     | capture => // pressed to capture mon
-//       if stt.full_bag then Mons.draw.full_bag(hero_obj, adve_obj, dim, scr) 
-//       else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+      inventory: Mons.draw.bag(hero_obj, dim, scr)
 
-//     | game_over =>
-//       Mons.draw.text("GAME OVER", Mons.font_white, Pos32.new(90u,80u,0u), scr)
-//       // TODO:
-//       // Mons.draw.text("Press [c] to restart", Mons.font_white, Mons.draw.msg_screen.line_0, scr)
-//     ;
-//   ;
+      capture_mon: scr// pressed to capture mon
+      // if stt.full_bag then Mons.draw.full_bag(hero_obj, adve_obj, dim, scr) 
+      // else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+
+      game_over:
+      Mons.draw.text("GAME OVER", Mons.font_white, Pos32.new(90u,80u,0u), scr)
+    //   // TODO:
+    //   // Mons.draw.text("Press [c] to restart", Mons.font_white, Mons.draw.msg_screen.line_0, scr)
+    }
+  }
 
 Mons.draw.text_screen_bg: Image3D // TODO: add real image
   // Mons.Assets.text_screen_bg
