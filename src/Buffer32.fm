@@ -9,18 +9,14 @@ type Buffer32 {
 Buffer32.alloc(depth: Nat): Buffer32
   Buffer32.new(depth, Array.alloc<U32>(depth, U32.zero))
 
-// Buffer32.get(idx: U32, buf: Buffer32): U32
-//   // TODO: get dep arr = buf
-//   // TODO: get wrd = idx
-//   open buf
-//   let dep = buf.depth
-//   let arr = buf.array
-//   open idx
-//   let wrd = idx.value
-//   let idx = Word.trim<32>(dep, wrd)
-//   Array.get<U32, dep>(idx, arr)
-  
+Buffer32.get(idx: U32, buf: Buffer32): U32
+  let {dep, arr} = buf
+  open idx
+  let wrd = idx.value
+  let idx = Word.trim<32>(dep, wrd)
+  Array.get<U32, dep>(idx, arr)
 
+  
 // Converts a hex string into a Buffer32.
 // TODO. We need to:
 // 1. Compute the length of the string with String.length32
@@ -34,10 +30,11 @@ Buffer32.alloc(depth: Nat): Buffer32
 // Buffer32.parse_hex(hex: String): Buffer32
 //   Buffer32.parse_hex(hex)
 
-// Buffer32.set(idx: U32, val: U32, buf: Buffer32): Buffer32
-//   get dep arr = buf
-//   get wrd = idx
-//   let idx = Word.trim<32>(dep, wrd)
-//   def arr = Array.set<U32, dep>(idx, val, arr)
-//   Buffer32.new(dep, arr)
+Buffer32.set(idx: U32, val: U32, buf: Buffer32): Buffer32
+  let {dep, arr} = buf
+  open idx
+  let wrd = idx.value
+  let idx = Word.trim<32>(dep, wrd)
+  def arr = Array.set<U32, dep>(idx, val, arr)
+  Buffer32.new(dep, arr)
 

@@ -186,18 +186,19 @@ Mons.Kind.is_mage(kind: Mons.Kind): Bool
 //   ;
 //   | inter => hero_pos;
 
-// Mons.Kind.is_portal(adve_kin: Mons.Kind): Bool
-//   case adve_kin:
-//   | mons => Bool.false;
-//   | const =>
-//     case adve_kin.ele:
-//     | FOUNTAIN => Bool.false;
-//     | CHEST => Bool.false;
-//     | CRYSTAL => Bool.false;
-//     | PORTAL => Bool.true;
-//   ;
-//   | terrain => Bool.false;
-//   | inter => Bool.false;
+Mons.Kind.is_portal(adve_kin: Mons.Kind): Bool
+  case adve_kin{
+    Mons: Bool.false
+    Const:
+    case adve_kin.ele{
+      FOUNTAIN: Bool.false
+      CHEST: Bool.false
+      CRYSTAL: Bool.false
+      PORTAL: Bool.true
+    }
+    Terrain: Bool.false
+    Interactive: Bool.false
+  }
 
 // // Swap "on" property
 // Mons.Kind.swap_interactive(kind: Mons.Kind): Mons.Kind

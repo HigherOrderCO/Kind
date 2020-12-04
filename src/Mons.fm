@@ -981,23 +981,21 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
   ])
 
 // Converts a string map source to an actual map
-// Mons.Map.build(code: List(List(String))): Mons.Map
-//   List.ifor.u32<_>(code)<_>
-//   | Mons.Map.new;
-//   | (z, plane, map) 
-//     let size = List.length.u32<_>(plane) // NOTE: assumes width == height
-//     List.ifor.u32<_>(plane)<_>
-//     | map;
-//     | (j, row, map)
-//       for i : U32 = 0u .. size with map:
-//         let t_x = U32.add(U32.sub(2048u, U32.div(size, 2u)), i)
-//         let t_y = U32.add(U32.sub(2048u, U32.div(size, 2u)), j)
-//         let t_z = z
-//         let pos = Pos32.new(t_x, t_y, t_z)
-//         let ini = U32.to_nat(U32.mul(i,2u)) // slice start index
-//         let end = U32.to_nat(U32.add(U32.mul(i,2u),2u)) // slice end index
-//         let sli = String.slice(ini, end, row) // slice with tile code
-//         Mons.Map.set_list(pos, Mons.Map.code_to_tile(sli, z), map);;   
+Mons.Map.build(code: List(List(String))): Mons.Map
+  List.ifor.u32<_>(code)<_>(Mons.Map.new,
+    (z, plane, map) 
+    let size = List.length.u32<_>(plane) // NOTE: assumes width == height
+    List.ifor.u32<_>(plane)<_>(map,
+      (j, row, map)
+      for i : U32 = 0u .. size with map:
+        let t_x = U32.add(U32.sub(2048u, U32.div(size, 2u)), i)
+        let t_y = U32.add(U32.sub(2048u, U32.div(size, 2u)), j)
+        let t_z = z
+        let pos = Pos32.new(t_x, t_y, t_z)
+        let ini = U32.to_nat(U32.mul(i,2u)) // slice start index
+        let end = U32.to_nat(U32.add(U32.mul(i,2u),2u)) // slice end index
+        let sli = String.slice(ini, end, row) // slice with tile code
+        Mons.Map.set_list(pos, Mons.Map.code_to_tile(sli, z), map))) 
 
 // Get the game user
 Mons.Game.get_usr(game: Mons.Game): Word(160)
@@ -1788,7 +1786,7 @@ Mons.Game.walk(cmd: Char, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
 //   for img in Mons.Object.get_images(t_x, t_y, obj) with sprs:
 //     let ani = Mons.Object.get_ani(obj)
 //     let dir = Mons.Object.get_dir(obj)
-//     let {s_x s_y} = Mons.draw.global_xy(t_x, t_y, obj)
+//     let {s_x, s_y} = Mons.draw.global_xy(t_x, t_y, obj)
 //     let s_z = t_z
 //     let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
 //     List.cons<_>(spr, sprs)
@@ -1796,85 +1794,86 @@ Mons.Game.walk(cmd: Char, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
 // Converts the game state to a list of sprites to be rendered
 // TODO: for some reason, using a `case obj` here causes the
 // function not to type check anymore. Investigate why.
-// Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
-//   open game
-//   let sprs = []
-//   case Mons.Game.get_hero_pos(game) as cam_pos{
-//   none: []
-//   some: let c_x = Pos32.get_x(cam_pos.value)
-//     let c_y = Pos32.get_y(cam_pos.value)
-//     let c_z = Pos32.get_z(cam_pos.value)
-//     for x : U32 = 0u .. 17u with sprs:
-//       for y : U32 = 0u .. 13u with sprs:
-//         let t_x = U32.add(U32.sub(c_x, 8u), x)
-//         let t_y = U32.add(U32.sub(c_y, 6u), y)
-//         let t_z = c_z
-//         let pos = Pos32.new(t_x, t_y, t_z) // tile position
-//         let got = Map.get<_>(U32.to_bits(pos), game.map)
-//         let objs = case got{
-//           none: [Mons.Object.void]
-//           some: List.reverse<_>(got.value)
-//           }
-//         for obj in objs with sprs: // every obj in the tile
-//           open obj
-//           open Mons.Kind.attr(obj.kin) as obj_attr
-//           let sprites = obj_attr.wlk(t_x, t_y, obj.ani, obj.dir) // walk sprites
-//           get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
-//           let s_z = t_z
-//           if Mons.Object.is_standing(obj) then
-//             let cur_spr = Mons.draw.cur_sprite(game.tik, sprites) // get the sprite
-//             let spr = Mons.Sprite.new(s_x, s_y, s_z, cur_spr)
-//             List.cons<_>(spr, sprs)
-//           else
-//           for img in sprites with sprs: // Get the walk sprites
-//             let ani = Mons.Object.get_ani(obj)
-//             let dir = Mons.Object.get_dir(obj)
-//             let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
-//             List.cons<_>(spr, sprs)
-//   }
+Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
+  open game
+  let sprs = []
+  case Mons.Game.get_hero_pos(game) as cam_pos{
+  none: []
+  some: 
+    let c_x = Pos32.get_x(cam_pos.value)
+    let c_y = Pos32.get_y(cam_pos.value)
+    let c_z = Pos32.get_z(cam_pos.value)
+    for x : U32 = 0u .. 17u with sprs:
+      for y : U32 = 0u .. 13u with sprs:
+        let t_x = U32.add(U32.sub(c_x, 8u), x)
+        let t_y = U32.add(U32.sub(c_y, 6u), y)
+        let t_z = c_z
+        let pos = Pos32.new(t_x, t_y, t_z) // tile position
+        let got = Map.get<_>(U32.to_bits(pos), game.map)
+        let objs = case got{
+            none: [Mons.Object.void]
+            some: List.reverse<_>(got.value)
+          }
+        for obj in objs with sprs: // every obj in the tile
+          open obj
+          open Mons.Kind.attr(obj.kin) as obj_attr
+          let sprites = obj_attr.wlk(t_x, t_y, obj.ani, obj.dir) // walk sprites
+          let {s_x, s_y} = Mons.draw.global_xy(t_x, t_y, obj)
+          let s_z = t_z
+          if Mons.Object.is_standing(obj) then
+            let cur_spr = Mons.draw.cur_sprite(game.tik, sprites) // get the sprite
+            let spr = Mons.Sprite.new(s_x, s_y, s_z, cur_spr)
+            List.cons<_>(spr, sprs)
+          else
+          for img in sprites with sprs: // Get the walk sprites
+            let ani = Mons.Object.get_ani(obj)
+            let dir = Mons.Object.get_dir(obj)
+            let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
+            List.cons<_>(spr, sprs)
+  }
 
 
 // Build sprites around the hero
 // TODO: move it to Mons.draw.fm
-// Mons.Map.build_sprites(game: Mons.Game, scr: Image3D, hero_pos: Pos32, hero_obj: Mons.Object): Image3D
-//   let sprs = Mons.game_sprites(game)
-//   for spr in sprs with scr:
-//   // For each pixel of the sprite...
-//   open spr
-//   let len = Image3D.get_length(spr.img)
-//   for i : U32 = 0u .. len with scr:
-//     let s_w = Pos32.get_x(Mons.scr_mid)
-//     let s_h = Pos32.get_y(Mons.scr_mid)
-//     // The origin global position (centered on hero)
-//     let h_x = Pos32.get_x(hero_pos)
-//     let h_y = Pos32.get_y(hero_pos)
-//     //let o_x = U32.mul(Pos32.get_x(hero_pos.value), 16u)
-//     //let o_y = U32.mul(Pos32.get_y(hero_pos.value), 16u)
-//     get o_x o_y = Mons.draw.global_xy(h_x, h_y, hero_obj)
-//     // Gets the spr global position
-//     let s_x = spr.x
-//     let s_y = spr.y
-//     let s_z = spr.z
-//     // Gets the pixel global position (its cpos on img is x=128, y=128)
-//     let xyz = Image3D.get_pos(i, spr.img)
-//     let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),Pos32.get_x(Mons.vox_mid))
-//     let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),Pos32.get_y(Mons.vox_mid))
-//     let v_z = Pos32.get_z(xyz)
-//     // Temporary: if pixel is out of screen, make it invisible
-//     let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
-//     let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
-//     let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
-//     let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
-//     //let ok  = List.and([ok0, ok1, ok2, ok3])
-//     let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
-//     // Computes the pixel position on the final canvas
-//     let c_x = U32.sub(U32.add(v_x, Pos32.get_x(Mons.scr_mid)), o_x)
-//     let c_y = U32.sub(U32.add(v_y, Pos32.get_y(Mons.scr_mid)), o_y)
-//     let c_z = Bool.if<_>(ok, v_z, 0u)
-//     // Pushes the pixel to the scr
-//     let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
-//     let col = Image3D.get_col(i, spr.img) // final pixel col
-//     Image3D.push(pos, col, scr) // pushes to scr
+Mons.Map.build_sprites(game: Mons.Game, scr: Image3D, hero_pos: Pos32, hero_obj: Mons.Object): Image3D
+  let sprs = Mons.game_sprites(game)
+  for spr in sprs with scr:
+  // For each pixel of the sprite...
+  open spr
+  let len = Image3D.get_length(spr.img)
+  for i : U32 = 0u .. len with scr:
+    let s_w = Pos32.get_x(Mons.scr_mid)
+    let s_h = Pos32.get_y(Mons.scr_mid)
+    // The origin global position (centered on hero)
+    let h_x = Pos32.get_x(hero_pos)
+    let h_y = Pos32.get_y(hero_pos)
+    //let o_x = U32.mul(Pos32.get_x(hero_pos.value), 16u)
+    //let o_y = U32.mul(Pos32.get_y(hero_pos.value), 16u)
+    let {o_x, o_y} = Mons.draw.global_xy(h_x, h_y, hero_obj)
+    // Gets the spr global position
+    let s_x = spr.x
+    let s_y = spr.y
+    let s_z = spr.z
+    // Gets the pixel global position (its cpos on img is x=128, y=128)
+    let xyz = Image3D.get_pos(i, spr.img)
+    let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),Pos32.get_x(Mons.vox_mid))
+    let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),Pos32.get_y(Mons.vox_mid))
+    let v_z = Pos32.get_z(xyz)
+    // Temporary: if pixel is out of screen, make it invisible
+    let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
+    let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
+    let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
+    let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
+    //let ok  = List.and([ok0, ok1, ok2, ok3])
+    let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
+    // Computes the pixel position on the final canvas
+    let c_x = U32.sub(U32.add(v_x, Pos32.get_x(Mons.scr_mid)), o_x)
+    let c_y = U32.sub(U32.add(v_y, Pos32.get_y(Mons.scr_mid)), o_y)
+    let c_z = Bool.if<_>(ok, v_z, 0u)
+    // Pushes the pixel to the scr
+    let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
+    let col = Image3D.get_col(i, spr.img) // final pixel col
+    Image3D.push(pos, col, scr) // pushes to scr
 
 // For each tick, updates an object
 Mons.Object.tick(obj: Mons.Object): Mons.Object
@@ -2364,6 +2363,20 @@ Mons.Kind.is_mage(kind: Mons.Kind): Bool
     Interactive: false
   }
 
+Mons.Kind.is_portal(adve_kin: Mons.Kind): Bool
+  case adve_kin{
+    Mons: Bool.false
+    Const:
+    case adve_kin.ele{
+      FOUNTAIN: Bool.false
+      CHEST: Bool.false
+      CRYSTAL: Bool.false
+      PORTAL: Bool.true
+    }
+    Terrain: Bool.false
+    Interactive: Bool.false
+  }
+
 // blocks: Bool,
 // battles: Bool,
 // mhp: U32,
@@ -2714,6 +2727,16 @@ Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
 
 Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
   scr
+
+// Get the sprite at a given idx in a List of Sprites
+Mons.draw.cur_sprite(idl: U32, sprites: List(Image3D)): Image3D
+  let len_sprite = List.length<_>(sprites)
+  let idl_nat = U32.to_nat(U32.sub(idl, 1u))
+  let idx = Nat.mod(Nat.div(idl_nat, 4), len_sprite)
+  case List.at<_>(idx, sprites) as spr{
+    none: Image3D.empty // TODO: Mons.Assets.void
+    some: spr.value
+  }
 
 // ------------------ Mons.Skill.fm ------------------------
 type Mons.Skill {

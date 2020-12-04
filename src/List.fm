@@ -171,6 +171,17 @@ List.length<A: Type>(xs: List(A)): Nat
     cons: Nat.succ(List.length<A>(xs.tail)),
   }
 
+// Computes the length of the list.
+List.length.u32<A: Type>(xs: List(A)): U32
+  List.length.u32.go<_>(xs, 0u)
+
+// Computes the length of the list.
+List.length.u32.go<A: Type>(xs: List(A), n: U32): U32
+  case xs{
+    nil: n
+    cons: List.length.u32.go<A>(xs.tail, U32.add(1u, n))
+  }
+
 // A range of nats
 List.range.nat.go(nat: Nat, list: List(Nat)): List(Nat)
   case nat {

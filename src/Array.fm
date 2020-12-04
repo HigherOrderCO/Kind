@@ -37,32 +37,32 @@ Array.extract_tip<A: Type>(arr: Array(A,0)): A
 Array.get<A:Type, depth:Nat>(idx: Word(depth), arr: Array(A,depth)): A
   def P = (depth) Array(A,depth) -> A
   def nil = Array.extract_tip<A>
-  def w0 = <idx.size> (rec) (arr)
+  def w0 = <idx.size> (rec, arr)
     let arr_l = Array.extract_tie<A, idx.size>(arr)
     case arr_l{
       new: rec(arr_l.fst)
     }
-  def w1 = <idx.size> (rec) (arr)
+  def w1 = <idx.size> (rec, arr)
     let arr_r = Array.extract_tie<A, idx.size>(arr)
     case arr_r{
       new: rec(arr_r.snd)
     }
   Word.foldl<P, depth>(nil, w0, w1, idx, arr)
 
-// // Given array `arr`, little-endian word `idx` and function `f`, assigns `arr[idx] = f(arr[idx])`.
-// Array.mut<A:Type, depth:Nat>(idx: Word(depth), f: A -> A, arr: Array(A,depth)): Array(A,depth)
-//   def P = (depth) Array(A,depth) -> Array(A,depth)
-//   def nil = (arr) Array.tip<A>(f(Array.extract_tip<A>(arr)))
-//   def w0 = <idx.size> (rec) (arr)
-//     let {arr_l, arr_r} = Array.extract_tie<A, idx.size>(arr)
-//     Array.tie<A, idx.size>(rec(arr_l), arr_r)
-//   def w1 = <idx.size> (rec) (arr)
-//     let {arr_l, arr_r} = Array.extract_tie<A, idx.size>(arr)
-//     Array.tie<A, idx.size>(arr_l, rec(arr_r))
-//   Word.foldl<P, depth>(nil, w0, w1, idx, arr)
+// Given array `arr`, little-endian word `idx` and function `f`, assigns `arr[idx] = f(arr[idx])`.
+Array.mut<A:Type, depth:Nat>(idx: Word(depth), f: A -> A, arr: Array(A,depth)): Array(A,depth)
+  def P = (depth) Array(A,depth) -> Array(A,depth)
+  def nil = (arr) Array.tip<A>(f(Array.extract_tip<A>(arr)))
+  def w0 = <idx.size> (rec, arr)
+    let {arr_l, arr_r} = Array.extract_tie<A, idx.size>(arr)
+    Array.tie<A, idx.size>(rec(arr_l), arr_r)
+  def w1 = <idx.size> (rec, arr)
+    let {arr_l, arr_r} = Array.extract_tie<A, idx.size>(arr)
+    Array.tie<A, idx.size>(arr_l, rec(arr_r))
+  Word.foldl<P, depth>(nil, w0, w1, idx, arr)
 
-// // Given array `arr`, little-endian word `idx` and value `val`, assigns `arr[idx] = val`.
-// Array.set<A:Type, depth:Nat>(idx: Word(depth), val: A, arr: Array(A,depth))
-// : Array(A,depth)
-//   Array.mut<A,depth>(idx, () val, arr)
+// Given array `arr`, little-endian word `idx` and value `val`, assigns `arr[idx] = val`.
+Array.set<A:Type, depth:Nat>(idx: Word(depth), val: A, arr: Array(A,depth))
+: Array(A,depth)
+  Array.mut<A,depth>(idx, () val, arr)
 
