@@ -8647,8 +8647,8 @@ module.exports = (function() {
     };
     const Fm$Parser$application$erased = x0 => x1 => x2 => x3 => Fm$Parser$application$erased$(x0, x1, x2, x3);
 
-    function Fm$Parser$application$hole$(_init$1, _term$2, _idx$3, _code$4) {
-        var self = Fm$Parser$text$("!", _idx$3, _code$4);
+    function Fm$Parser$arrow$(_init$1, _xtyp$2, _idx$3, _code$4) {
+        var self = Fm$Parser$text$("->", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
                 var $3480 = self.idx;
@@ -8661,7 +8661,7 @@ module.exports = (function() {
                 var $3484 = self.idx;
                 var $3485 = self.code;
                 var $3486 = self.val;
-                var self = Fm$Parser$stop$(_init$1, $3484, $3485);
+                var self = Fm$Parser$term$($3484, $3485);
                 switch (self._) {
                     case 'Parser.Reply.error':
                         var $3488 = self.idx;
@@ -8674,7 +8674,26 @@ module.exports = (function() {
                         var $3492 = self.idx;
                         var $3493 = self.code;
                         var $3494 = self.val;
-                        var $3495 = Parser$Reply$value$($3492, $3493, Fm$Term$ori$($3494, Fm$Term$app$(_term$2, Fm$Term$hol$(Bits$e))));
+                        var self = Fm$Parser$stop$(_init$1, $3492, $3493);
+                        switch (self._) {
+                            case 'Parser.Reply.error':
+                                var $3496 = self.idx;
+                                var $3497 = self.code;
+                                var $3498 = self.err;
+                                var $3499 = Parser$Reply$error$($3496, $3497, $3498);
+                                var $3495 = $3499;
+                                break;
+                            case 'Parser.Reply.value':
+                                var $3500 = self.idx;
+                                var $3501 = self.code;
+                                var $3502 = self.val;
+                                var $3503 = Parser$Reply$value$($3500, $3501, Fm$Term$ori$($3502, Fm$Term$all$(Bool$false, "", "", _xtyp$2, (_s$14 => _x$15 => {
+                                    var $3504 = $3494;
+                                    return $3504;
+                                }))));
+                                var $3495 = $3503;
+                                break;
+                        };
                         var $3487 = $3495;
                         break;
                 };
@@ -8683,119 +8702,62 @@ module.exports = (function() {
         };
         return $3479;
     };
-    const Fm$Parser$application$hole = x0 => x1 => x2 => x3 => Fm$Parser$application$hole$(x0, x1, x2, x3);
-
-    function Fm$Parser$arrow$(_init$1, _xtyp$2, _idx$3, _code$4) {
-        var self = Fm$Parser$text$("->", _idx$3, _code$4);
-        switch (self._) {
-            case 'Parser.Reply.error':
-                var $3497 = self.idx;
-                var $3498 = self.code;
-                var $3499 = self.err;
-                var $3500 = Parser$Reply$error$($3497, $3498, $3499);
-                var $3496 = $3500;
-                break;
-            case 'Parser.Reply.value':
-                var $3501 = self.idx;
-                var $3502 = self.code;
-                var $3503 = self.val;
-                var self = Fm$Parser$term$($3501, $3502);
-                switch (self._) {
-                    case 'Parser.Reply.error':
-                        var $3505 = self.idx;
-                        var $3506 = self.code;
-                        var $3507 = self.err;
-                        var $3508 = Parser$Reply$error$($3505, $3506, $3507);
-                        var $3504 = $3508;
-                        break;
-                    case 'Parser.Reply.value':
-                        var $3509 = self.idx;
-                        var $3510 = self.code;
-                        var $3511 = self.val;
-                        var self = Fm$Parser$stop$(_init$1, $3509, $3510);
-                        switch (self._) {
-                            case 'Parser.Reply.error':
-                                var $3513 = self.idx;
-                                var $3514 = self.code;
-                                var $3515 = self.err;
-                                var $3516 = Parser$Reply$error$($3513, $3514, $3515);
-                                var $3512 = $3516;
-                                break;
-                            case 'Parser.Reply.value':
-                                var $3517 = self.idx;
-                                var $3518 = self.code;
-                                var $3519 = self.val;
-                                var $3520 = Parser$Reply$value$($3517, $3518, Fm$Term$ori$($3519, Fm$Term$all$(Bool$false, "", "", _xtyp$2, (_s$14 => _x$15 => {
-                                    var $3521 = $3511;
-                                    return $3521;
-                                }))));
-                                var $3512 = $3520;
-                                break;
-                        };
-                        var $3504 = $3512;
-                        break;
-                };
-                var $3496 = $3504;
-                break;
-        };
-        return $3496;
-    };
     const Fm$Parser$arrow = x0 => x1 => x2 => x3 => Fm$Parser$arrow$(x0, x1, x2, x3);
 
     function Fm$Parser$op$(_sym$1, _ref$2, _init$3, _val0$4, _idx$5, _code$6) {
         var self = Fm$Parser$text$(_sym$1, _idx$5, _code$6);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3523 = self.idx;
-                var $3524 = self.code;
-                var $3525 = self.err;
-                var $3526 = Parser$Reply$error$($3523, $3524, $3525);
-                var $3522 = $3526;
+                var $3506 = self.idx;
+                var $3507 = self.code;
+                var $3508 = self.err;
+                var $3509 = Parser$Reply$error$($3506, $3507, $3508);
+                var $3505 = $3509;
                 break;
             case 'Parser.Reply.value':
-                var $3527 = self.idx;
-                var $3528 = self.code;
-                var $3529 = self.val;
-                var self = Fm$Parser$term$($3527, $3528);
+                var $3510 = self.idx;
+                var $3511 = self.code;
+                var $3512 = self.val;
+                var self = Fm$Parser$term$($3510, $3511);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3531 = self.idx;
-                        var $3532 = self.code;
-                        var $3533 = self.err;
-                        var $3534 = Parser$Reply$error$($3531, $3532, $3533);
-                        var $3530 = $3534;
+                        var $3514 = self.idx;
+                        var $3515 = self.code;
+                        var $3516 = self.err;
+                        var $3517 = Parser$Reply$error$($3514, $3515, $3516);
+                        var $3513 = $3517;
                         break;
                     case 'Parser.Reply.value':
-                        var $3535 = self.idx;
-                        var $3536 = self.code;
-                        var $3537 = self.val;
-                        var self = Fm$Parser$stop$(_init$3, $3535, $3536);
+                        var $3518 = self.idx;
+                        var $3519 = self.code;
+                        var $3520 = self.val;
+                        var self = Fm$Parser$stop$(_init$3, $3518, $3519);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3539 = self.idx;
-                                var $3540 = self.code;
-                                var $3541 = self.err;
-                                var $3542 = Parser$Reply$error$($3539, $3540, $3541);
-                                var $3538 = $3542;
+                                var $3522 = self.idx;
+                                var $3523 = self.code;
+                                var $3524 = self.err;
+                                var $3525 = Parser$Reply$error$($3522, $3523, $3524);
+                                var $3521 = $3525;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3543 = self.idx;
-                                var $3544 = self.code;
-                                var $3545 = self.val;
+                                var $3526 = self.idx;
+                                var $3527 = self.code;
+                                var $3528 = self.val;
                                 var _term$16 = Fm$Term$ref$(_ref$2);
                                 var _term$17 = Fm$Term$app$(_term$16, _val0$4);
-                                var _term$18 = Fm$Term$app$(_term$17, $3537);
-                                var $3546 = Parser$Reply$value$($3543, $3544, Fm$Term$ori$($3545, _term$18));
-                                var $3538 = $3546;
+                                var _term$18 = Fm$Term$app$(_term$17, $3520);
+                                var $3529 = Parser$Reply$value$($3526, $3527, Fm$Term$ori$($3528, _term$18));
+                                var $3521 = $3529;
                                 break;
                         };
-                        var $3530 = $3538;
+                        var $3513 = $3521;
                         break;
                 };
-                var $3522 = $3530;
+                var $3505 = $3513;
                 break;
         };
-        return $3522;
+        return $3505;
     };
     const Fm$Parser$op = x0 => x1 => x2 => x3 => x4 => x5 => Fm$Parser$op$(x0, x1, x2, x3, x4, x5);
     const Fm$Parser$add = Fm$Parser$op("+")("Nat.add");
@@ -8808,73 +8770,73 @@ module.exports = (function() {
         var self = Fm$Parser$text$("&", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3548 = self.idx;
-                var $3549 = self.code;
-                var $3550 = self.err;
-                var $3551 = Parser$Reply$error$($3548, $3549, $3550);
-                var $3547 = $3551;
+                var $3531 = self.idx;
+                var $3532 = self.code;
+                var $3533 = self.err;
+                var $3534 = Parser$Reply$error$($3531, $3532, $3533);
+                var $3530 = $3534;
                 break;
             case 'Parser.Reply.value':
-                var $3552 = self.idx;
-                var $3553 = self.code;
-                var $3554 = self.val;
-                var self = Fm$Parser$term$($3552, $3553);
+                var $3535 = self.idx;
+                var $3536 = self.code;
+                var $3537 = self.val;
+                var self = Fm$Parser$term$($3535, $3536);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3556 = self.idx;
-                        var $3557 = self.code;
-                        var $3558 = self.err;
-                        var $3559 = Parser$Reply$error$($3556, $3557, $3558);
-                        var $3555 = $3559;
+                        var $3539 = self.idx;
+                        var $3540 = self.code;
+                        var $3541 = self.err;
+                        var $3542 = Parser$Reply$error$($3539, $3540, $3541);
+                        var $3538 = $3542;
                         break;
                     case 'Parser.Reply.value':
-                        var $3560 = self.idx;
-                        var $3561 = self.code;
-                        var $3562 = self.val;
-                        var self = Fm$Parser$stop$(_init$1, $3560, $3561);
+                        var $3543 = self.idx;
+                        var $3544 = self.code;
+                        var $3545 = self.val;
+                        var self = Fm$Parser$stop$(_init$1, $3543, $3544);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3564 = self.idx;
-                                var $3565 = self.code;
-                                var $3566 = self.err;
-                                var $3567 = Parser$Reply$error$($3564, $3565, $3566);
-                                var $3563 = $3567;
+                                var $3547 = self.idx;
+                                var $3548 = self.code;
+                                var $3549 = self.err;
+                                var $3550 = Parser$Reply$error$($3547, $3548, $3549);
+                                var $3546 = $3550;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3568 = self.idx;
-                                var $3569 = self.code;
-                                var $3570 = self.val;
+                                var $3551 = self.idx;
+                                var $3552 = self.code;
+                                var $3553 = self.val;
                                 var _term$14 = Fm$Term$ref$("List.cons");
                                 var _term$15 = Fm$Term$app$(_term$14, Fm$Term$hol$(Bits$e));
                                 var _term$16 = Fm$Term$app$(_term$15, _head$2);
-                                var _term$17 = Fm$Term$app$(_term$16, $3562);
-                                var self = Fm$Parser$stop$(_init$1, $3568, $3569);
+                                var _term$17 = Fm$Term$app$(_term$16, $3545);
+                                var self = Fm$Parser$stop$(_init$1, $3551, $3552);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $3572 = self.idx;
-                                        var $3573 = self.code;
-                                        var $3574 = self.err;
-                                        var $3575 = Parser$Reply$error$($3572, $3573, $3574);
-                                        var $3571 = $3575;
+                                        var $3555 = self.idx;
+                                        var $3556 = self.code;
+                                        var $3557 = self.err;
+                                        var $3558 = Parser$Reply$error$($3555, $3556, $3557);
+                                        var $3554 = $3558;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $3576 = self.idx;
-                                        var $3577 = self.code;
-                                        var $3578 = self.val;
-                                        var $3579 = Parser$Reply$value$($3576, $3577, Fm$Term$ori$($3578, _term$17));
-                                        var $3571 = $3579;
+                                        var $3559 = self.idx;
+                                        var $3560 = self.code;
+                                        var $3561 = self.val;
+                                        var $3562 = Parser$Reply$value$($3559, $3560, Fm$Term$ori$($3561, _term$17));
+                                        var $3554 = $3562;
                                         break;
                                 };
-                                var $3563 = $3571;
+                                var $3546 = $3554;
                                 break;
                         };
-                        var $3555 = $3563;
+                        var $3538 = $3546;
                         break;
                 };
-                var $3547 = $3555;
+                var $3530 = $3538;
                 break;
         };
-        return $3547;
+        return $3530;
     };
     const Fm$Parser$cons = x0 => x1 => x2 => x3 => Fm$Parser$cons$(x0, x1, x2, x3);
 
@@ -8882,73 +8844,73 @@ module.exports = (function() {
         var self = Fm$Parser$text$("++", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3581 = self.idx;
-                var $3582 = self.code;
-                var $3583 = self.err;
-                var $3584 = Parser$Reply$error$($3581, $3582, $3583);
-                var $3580 = $3584;
+                var $3564 = self.idx;
+                var $3565 = self.code;
+                var $3566 = self.err;
+                var $3567 = Parser$Reply$error$($3564, $3565, $3566);
+                var $3563 = $3567;
                 break;
             case 'Parser.Reply.value':
-                var $3585 = self.idx;
-                var $3586 = self.code;
-                var $3587 = self.val;
-                var self = Fm$Parser$term$($3585, $3586);
+                var $3568 = self.idx;
+                var $3569 = self.code;
+                var $3570 = self.val;
+                var self = Fm$Parser$term$($3568, $3569);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3589 = self.idx;
-                        var $3590 = self.code;
-                        var $3591 = self.err;
-                        var $3592 = Parser$Reply$error$($3589, $3590, $3591);
-                        var $3588 = $3592;
+                        var $3572 = self.idx;
+                        var $3573 = self.code;
+                        var $3574 = self.err;
+                        var $3575 = Parser$Reply$error$($3572, $3573, $3574);
+                        var $3571 = $3575;
                         break;
                     case 'Parser.Reply.value':
-                        var $3593 = self.idx;
-                        var $3594 = self.code;
-                        var $3595 = self.val;
-                        var self = Fm$Parser$stop$(_init$1, $3593, $3594);
+                        var $3576 = self.idx;
+                        var $3577 = self.code;
+                        var $3578 = self.val;
+                        var self = Fm$Parser$stop$(_init$1, $3576, $3577);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3597 = self.idx;
-                                var $3598 = self.code;
-                                var $3599 = self.err;
-                                var $3600 = Parser$Reply$error$($3597, $3598, $3599);
-                                var $3596 = $3600;
+                                var $3580 = self.idx;
+                                var $3581 = self.code;
+                                var $3582 = self.err;
+                                var $3583 = Parser$Reply$error$($3580, $3581, $3582);
+                                var $3579 = $3583;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3601 = self.idx;
-                                var $3602 = self.code;
-                                var $3603 = self.val;
+                                var $3584 = self.idx;
+                                var $3585 = self.code;
+                                var $3586 = self.val;
                                 var _term$14 = Fm$Term$ref$("List.concat");
                                 var _term$15 = Fm$Term$app$(_term$14, Fm$Term$hol$(Bits$e));
                                 var _term$16 = Fm$Term$app$(_term$15, _lst0$2);
-                                var _term$17 = Fm$Term$app$(_term$16, $3595);
-                                var self = Fm$Parser$stop$(_init$1, $3601, $3602);
+                                var _term$17 = Fm$Term$app$(_term$16, $3578);
+                                var self = Fm$Parser$stop$(_init$1, $3584, $3585);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $3605 = self.idx;
-                                        var $3606 = self.code;
-                                        var $3607 = self.err;
-                                        var $3608 = Parser$Reply$error$($3605, $3606, $3607);
-                                        var $3604 = $3608;
+                                        var $3588 = self.idx;
+                                        var $3589 = self.code;
+                                        var $3590 = self.err;
+                                        var $3591 = Parser$Reply$error$($3588, $3589, $3590);
+                                        var $3587 = $3591;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $3609 = self.idx;
-                                        var $3610 = self.code;
-                                        var $3611 = self.val;
-                                        var $3612 = Parser$Reply$value$($3609, $3610, Fm$Term$ori$($3611, _term$17));
-                                        var $3604 = $3612;
+                                        var $3592 = self.idx;
+                                        var $3593 = self.code;
+                                        var $3594 = self.val;
+                                        var $3595 = Parser$Reply$value$($3592, $3593, Fm$Term$ori$($3594, _term$17));
+                                        var $3587 = $3595;
                                         break;
                                 };
-                                var $3596 = $3604;
+                                var $3579 = $3587;
                                 break;
                         };
-                        var $3588 = $3596;
+                        var $3571 = $3579;
                         break;
                 };
-                var $3580 = $3588;
+                var $3563 = $3571;
                 break;
         };
-        return $3580;
+        return $3563;
     };
     const Fm$Parser$concat = x0 => x1 => x2 => x3 => Fm$Parser$concat$(x0, x1, x2, x3);
 
@@ -8956,72 +8918,72 @@ module.exports = (function() {
         var self = Fm$Parser$text$("|", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3614 = self.idx;
-                var $3615 = self.code;
-                var $3616 = self.err;
-                var $3617 = Parser$Reply$error$($3614, $3615, $3616);
-                var $3613 = $3617;
+                var $3597 = self.idx;
+                var $3598 = self.code;
+                var $3599 = self.err;
+                var $3600 = Parser$Reply$error$($3597, $3598, $3599);
+                var $3596 = $3600;
                 break;
             case 'Parser.Reply.value':
-                var $3618 = self.idx;
-                var $3619 = self.code;
-                var $3620 = self.val;
-                var self = Fm$Parser$term$($3618, $3619);
+                var $3601 = self.idx;
+                var $3602 = self.code;
+                var $3603 = self.val;
+                var self = Fm$Parser$term$($3601, $3602);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3622 = self.idx;
-                        var $3623 = self.code;
-                        var $3624 = self.err;
-                        var $3625 = Parser$Reply$error$($3622, $3623, $3624);
-                        var $3621 = $3625;
+                        var $3605 = self.idx;
+                        var $3606 = self.code;
+                        var $3607 = self.err;
+                        var $3608 = Parser$Reply$error$($3605, $3606, $3607);
+                        var $3604 = $3608;
                         break;
                     case 'Parser.Reply.value':
-                        var $3626 = self.idx;
-                        var $3627 = self.code;
-                        var $3628 = self.val;
-                        var self = Fm$Parser$stop$(_init$1, $3626, $3627);
+                        var $3609 = self.idx;
+                        var $3610 = self.code;
+                        var $3611 = self.val;
+                        var self = Fm$Parser$stop$(_init$1, $3609, $3610);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3630 = self.idx;
-                                var $3631 = self.code;
-                                var $3632 = self.err;
-                                var $3633 = Parser$Reply$error$($3630, $3631, $3632);
-                                var $3629 = $3633;
+                                var $3613 = self.idx;
+                                var $3614 = self.code;
+                                var $3615 = self.err;
+                                var $3616 = Parser$Reply$error$($3613, $3614, $3615);
+                                var $3612 = $3616;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3634 = self.idx;
-                                var $3635 = self.code;
-                                var $3636 = self.val;
+                                var $3617 = self.idx;
+                                var $3618 = self.code;
+                                var $3619 = self.val;
                                 var _term$14 = Fm$Term$ref$("String.concat");
                                 var _term$15 = Fm$Term$app$(_term$14, _str0$2);
-                                var _term$16 = Fm$Term$app$(_term$15, $3628);
-                                var self = Fm$Parser$stop$(_init$1, $3634, $3635);
+                                var _term$16 = Fm$Term$app$(_term$15, $3611);
+                                var self = Fm$Parser$stop$(_init$1, $3617, $3618);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $3638 = self.idx;
-                                        var $3639 = self.code;
-                                        var $3640 = self.err;
-                                        var $3641 = Parser$Reply$error$($3638, $3639, $3640);
-                                        var $3637 = $3641;
+                                        var $3621 = self.idx;
+                                        var $3622 = self.code;
+                                        var $3623 = self.err;
+                                        var $3624 = Parser$Reply$error$($3621, $3622, $3623);
+                                        var $3620 = $3624;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $3642 = self.idx;
-                                        var $3643 = self.code;
-                                        var $3644 = self.val;
-                                        var $3645 = Parser$Reply$value$($3642, $3643, Fm$Term$ori$($3644, _term$16));
-                                        var $3637 = $3645;
+                                        var $3625 = self.idx;
+                                        var $3626 = self.code;
+                                        var $3627 = self.val;
+                                        var $3628 = Parser$Reply$value$($3625, $3626, Fm$Term$ori$($3627, _term$16));
+                                        var $3620 = $3628;
                                         break;
                                 };
-                                var $3629 = $3637;
+                                var $3612 = $3620;
                                 break;
                         };
-                        var $3621 = $3629;
+                        var $3604 = $3612;
                         break;
                 };
-                var $3613 = $3621;
+                var $3596 = $3604;
                 break;
         };
-        return $3613;
+        return $3596;
     };
     const Fm$Parser$string_concat = x0 => x1 => x2 => x3 => Fm$Parser$string_concat$(x0, x1, x2, x3);
 
@@ -9029,58 +8991,58 @@ module.exports = (function() {
         var self = Fm$Parser$text$("~", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3647 = self.idx;
-                var $3648 = self.code;
-                var $3649 = self.err;
-                var $3650 = Parser$Reply$error$($3647, $3648, $3649);
-                var $3646 = $3650;
+                var $3630 = self.idx;
+                var $3631 = self.code;
+                var $3632 = self.err;
+                var $3633 = Parser$Reply$error$($3630, $3631, $3632);
+                var $3629 = $3633;
                 break;
             case 'Parser.Reply.value':
-                var $3651 = self.idx;
-                var $3652 = self.code;
-                var $3653 = self.val;
-                var self = Fm$Parser$term$($3651, $3652);
+                var $3634 = self.idx;
+                var $3635 = self.code;
+                var $3636 = self.val;
+                var self = Fm$Parser$term$($3634, $3635);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3655 = self.idx;
-                        var $3656 = self.code;
-                        var $3657 = self.err;
-                        var $3658 = Parser$Reply$error$($3655, $3656, $3657);
-                        var $3654 = $3658;
+                        var $3638 = self.idx;
+                        var $3639 = self.code;
+                        var $3640 = self.err;
+                        var $3641 = Parser$Reply$error$($3638, $3639, $3640);
+                        var $3637 = $3641;
                         break;
                     case 'Parser.Reply.value':
-                        var $3659 = self.idx;
-                        var $3660 = self.code;
-                        var $3661 = self.val;
-                        var self = Fm$Parser$stop$(_init$1, $3659, $3660);
+                        var $3642 = self.idx;
+                        var $3643 = self.code;
+                        var $3644 = self.val;
+                        var self = Fm$Parser$stop$(_init$1, $3642, $3643);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3663 = self.idx;
-                                var $3664 = self.code;
-                                var $3665 = self.err;
-                                var $3666 = Parser$Reply$error$($3663, $3664, $3665);
-                                var $3662 = $3666;
+                                var $3646 = self.idx;
+                                var $3647 = self.code;
+                                var $3648 = self.err;
+                                var $3649 = Parser$Reply$error$($3646, $3647, $3648);
+                                var $3645 = $3649;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3667 = self.idx;
-                                var $3668 = self.code;
-                                var $3669 = self.val;
+                                var $3650 = self.idx;
+                                var $3651 = self.code;
+                                var $3652 = self.val;
                                 var _term$14 = Fm$Term$ref$("Sigma.new");
                                 var _term$15 = Fm$Term$app$(_term$14, Fm$Term$hol$(Bits$e));
                                 var _term$16 = Fm$Term$app$(_term$15, Fm$Term$hol$(Bits$e));
                                 var _term$17 = Fm$Term$app$(_term$16, _val0$2);
-                                var _term$18 = Fm$Term$app$(_term$17, $3661);
-                                var $3670 = Parser$Reply$value$($3667, $3668, Fm$Term$ori$($3669, _term$18));
-                                var $3662 = $3670;
+                                var _term$18 = Fm$Term$app$(_term$17, $3644);
+                                var $3653 = Parser$Reply$value$($3650, $3651, Fm$Term$ori$($3652, _term$18));
+                                var $3645 = $3653;
                                 break;
                         };
-                        var $3654 = $3662;
+                        var $3637 = $3645;
                         break;
                 };
-                var $3646 = $3654;
+                var $3629 = $3637;
                 break;
         };
-        return $3646;
+        return $3629;
     };
     const Fm$Parser$sigma = x0 => x1 => x2 => x3 => Fm$Parser$sigma$(x0, x1, x2, x3);
 
@@ -9088,57 +9050,57 @@ module.exports = (function() {
         var self = Fm$Parser$text$("==", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3672 = self.idx;
-                var $3673 = self.code;
-                var $3674 = self.err;
-                var $3675 = Parser$Reply$error$($3672, $3673, $3674);
-                var $3671 = $3675;
+                var $3655 = self.idx;
+                var $3656 = self.code;
+                var $3657 = self.err;
+                var $3658 = Parser$Reply$error$($3655, $3656, $3657);
+                var $3654 = $3658;
                 break;
             case 'Parser.Reply.value':
-                var $3676 = self.idx;
-                var $3677 = self.code;
-                var $3678 = self.val;
-                var self = Fm$Parser$term$($3676, $3677);
+                var $3659 = self.idx;
+                var $3660 = self.code;
+                var $3661 = self.val;
+                var self = Fm$Parser$term$($3659, $3660);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3680 = self.idx;
-                        var $3681 = self.code;
-                        var $3682 = self.err;
-                        var $3683 = Parser$Reply$error$($3680, $3681, $3682);
-                        var $3679 = $3683;
+                        var $3663 = self.idx;
+                        var $3664 = self.code;
+                        var $3665 = self.err;
+                        var $3666 = Parser$Reply$error$($3663, $3664, $3665);
+                        var $3662 = $3666;
                         break;
                     case 'Parser.Reply.value':
-                        var $3684 = self.idx;
-                        var $3685 = self.code;
-                        var $3686 = self.val;
-                        var self = Fm$Parser$stop$(_init$1, $3684, $3685);
+                        var $3667 = self.idx;
+                        var $3668 = self.code;
+                        var $3669 = self.val;
+                        var self = Fm$Parser$stop$(_init$1, $3667, $3668);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3688 = self.idx;
-                                var $3689 = self.code;
-                                var $3690 = self.err;
-                                var $3691 = Parser$Reply$error$($3688, $3689, $3690);
-                                var $3687 = $3691;
+                                var $3671 = self.idx;
+                                var $3672 = self.code;
+                                var $3673 = self.err;
+                                var $3674 = Parser$Reply$error$($3671, $3672, $3673);
+                                var $3670 = $3674;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3692 = self.idx;
-                                var $3693 = self.code;
-                                var $3694 = self.val;
+                                var $3675 = self.idx;
+                                var $3676 = self.code;
+                                var $3677 = self.val;
                                 var _term$14 = Fm$Term$ref$("Equal");
                                 var _term$15 = Fm$Term$app$(_term$14, Fm$Term$hol$(Bits$e));
                                 var _term$16 = Fm$Term$app$(_term$15, _val0$2);
-                                var _term$17 = Fm$Term$app$(_term$16, $3686);
-                                var $3695 = Parser$Reply$value$($3692, $3693, Fm$Term$ori$($3694, _term$17));
-                                var $3687 = $3695;
+                                var _term$17 = Fm$Term$app$(_term$16, $3669);
+                                var $3678 = Parser$Reply$value$($3675, $3676, Fm$Term$ori$($3677, _term$17));
+                                var $3670 = $3678;
                                 break;
                         };
-                        var $3679 = $3687;
+                        var $3662 = $3670;
                         break;
                 };
-                var $3671 = $3679;
+                var $3654 = $3662;
                 break;
         };
-        return $3671;
+        return $3654;
     };
     const Fm$Parser$equality = x0 => x1 => x2 => x3 => Fm$Parser$equality$(x0, x1, x2, x3);
 
@@ -9146,58 +9108,58 @@ module.exports = (function() {
         var self = Fm$Parser$text$("!=", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3697 = self.idx;
-                var $3698 = self.code;
-                var $3699 = self.err;
-                var $3700 = Parser$Reply$error$($3697, $3698, $3699);
-                var $3696 = $3700;
+                var $3680 = self.idx;
+                var $3681 = self.code;
+                var $3682 = self.err;
+                var $3683 = Parser$Reply$error$($3680, $3681, $3682);
+                var $3679 = $3683;
                 break;
             case 'Parser.Reply.value':
-                var $3701 = self.idx;
-                var $3702 = self.code;
-                var $3703 = self.val;
-                var self = Fm$Parser$term$($3701, $3702);
+                var $3684 = self.idx;
+                var $3685 = self.code;
+                var $3686 = self.val;
+                var self = Fm$Parser$term$($3684, $3685);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3705 = self.idx;
-                        var $3706 = self.code;
-                        var $3707 = self.err;
-                        var $3708 = Parser$Reply$error$($3705, $3706, $3707);
-                        var $3704 = $3708;
+                        var $3688 = self.idx;
+                        var $3689 = self.code;
+                        var $3690 = self.err;
+                        var $3691 = Parser$Reply$error$($3688, $3689, $3690);
+                        var $3687 = $3691;
                         break;
                     case 'Parser.Reply.value':
-                        var $3709 = self.idx;
-                        var $3710 = self.code;
-                        var $3711 = self.val;
-                        var self = Fm$Parser$stop$(_init$1, $3709, $3710);
+                        var $3692 = self.idx;
+                        var $3693 = self.code;
+                        var $3694 = self.val;
+                        var self = Fm$Parser$stop$(_init$1, $3692, $3693);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3713 = self.idx;
-                                var $3714 = self.code;
-                                var $3715 = self.err;
-                                var $3716 = Parser$Reply$error$($3713, $3714, $3715);
-                                var $3712 = $3716;
+                                var $3696 = self.idx;
+                                var $3697 = self.code;
+                                var $3698 = self.err;
+                                var $3699 = Parser$Reply$error$($3696, $3697, $3698);
+                                var $3695 = $3699;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3717 = self.idx;
-                                var $3718 = self.code;
-                                var $3719 = self.val;
+                                var $3700 = self.idx;
+                                var $3701 = self.code;
+                                var $3702 = self.val;
                                 var _term$14 = Fm$Term$ref$("Equal");
                                 var _term$15 = Fm$Term$app$(_term$14, Fm$Term$hol$(Bits$e));
                                 var _term$16 = Fm$Term$app$(_term$15, _val0$2);
-                                var _term$17 = Fm$Term$app$(_term$16, $3711);
+                                var _term$17 = Fm$Term$app$(_term$16, $3694);
                                 var _term$18 = Fm$Term$app$(Fm$Term$ref$("Not"), _term$17);
-                                var $3720 = Parser$Reply$value$($3717, $3718, Fm$Term$ori$($3719, _term$18));
-                                var $3712 = $3720;
+                                var $3703 = Parser$Reply$value$($3700, $3701, Fm$Term$ori$($3702, _term$18));
+                                var $3695 = $3703;
                                 break;
                         };
-                        var $3704 = $3712;
+                        var $3687 = $3695;
                         break;
                 };
-                var $3696 = $3704;
+                var $3679 = $3687;
                 break;
         };
-        return $3696;
+        return $3679;
     };
     const Fm$Parser$inequality = x0 => x1 => x2 => x3 => Fm$Parser$inequality$(x0, x1, x2, x3);
 
@@ -9205,154 +9167,154 @@ module.exports = (function() {
         var self = Fm$Parser$text$("::", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3722 = self.idx;
-                var $3723 = self.code;
-                var $3724 = self.err;
-                var $3725 = Parser$Reply$error$($3722, $3723, $3724);
-                var $3721 = $3725;
+                var $3705 = self.idx;
+                var $3706 = self.code;
+                var $3707 = self.err;
+                var $3708 = Parser$Reply$error$($3705, $3706, $3707);
+                var $3704 = $3708;
                 break;
             case 'Parser.Reply.value':
-                var $3726 = self.idx;
-                var $3727 = self.code;
-                var $3728 = self.val;
-                var self = Fm$Parser$text$("rewrite", $3726, $3727);
+                var $3709 = self.idx;
+                var $3710 = self.code;
+                var $3711 = self.val;
+                var self = Fm$Parser$text$("rewrite", $3709, $3710);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3730 = self.idx;
-                        var $3731 = self.code;
-                        var $3732 = self.err;
-                        var $3733 = Parser$Reply$error$($3730, $3731, $3732);
-                        var $3729 = $3733;
+                        var $3713 = self.idx;
+                        var $3714 = self.code;
+                        var $3715 = self.err;
+                        var $3716 = Parser$Reply$error$($3713, $3714, $3715);
+                        var $3712 = $3716;
                         break;
                     case 'Parser.Reply.value':
-                        var $3734 = self.idx;
-                        var $3735 = self.code;
-                        var $3736 = self.val;
-                        var self = Fm$Parser$name1$($3734, $3735);
+                        var $3717 = self.idx;
+                        var $3718 = self.code;
+                        var $3719 = self.val;
+                        var self = Fm$Parser$name1$($3717, $3718);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3738 = self.idx;
-                                var $3739 = self.code;
-                                var $3740 = self.err;
-                                var $3741 = Parser$Reply$error$($3738, $3739, $3740);
-                                var $3737 = $3741;
+                                var $3721 = self.idx;
+                                var $3722 = self.code;
+                                var $3723 = self.err;
+                                var $3724 = Parser$Reply$error$($3721, $3722, $3723);
+                                var $3720 = $3724;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3742 = self.idx;
-                                var $3743 = self.code;
-                                var $3744 = self.val;
-                                var self = Fm$Parser$text$("in", $3742, $3743);
+                                var $3725 = self.idx;
+                                var $3726 = self.code;
+                                var $3727 = self.val;
+                                var self = Fm$Parser$text$("in", $3725, $3726);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $3746 = self.idx;
-                                        var $3747 = self.code;
-                                        var $3748 = self.err;
-                                        var $3749 = Parser$Reply$error$($3746, $3747, $3748);
-                                        var $3745 = $3749;
+                                        var $3729 = self.idx;
+                                        var $3730 = self.code;
+                                        var $3731 = self.err;
+                                        var $3732 = Parser$Reply$error$($3729, $3730, $3731);
+                                        var $3728 = $3732;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $3750 = self.idx;
-                                        var $3751 = self.code;
-                                        var $3752 = self.val;
-                                        var self = Fm$Parser$term$($3750, $3751);
+                                        var $3733 = self.idx;
+                                        var $3734 = self.code;
+                                        var $3735 = self.val;
+                                        var self = Fm$Parser$term$($3733, $3734);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $3754 = self.idx;
-                                                var $3755 = self.code;
-                                                var $3756 = self.err;
-                                                var $3757 = Parser$Reply$error$($3754, $3755, $3756);
-                                                var $3753 = $3757;
+                                                var $3737 = self.idx;
+                                                var $3738 = self.code;
+                                                var $3739 = self.err;
+                                                var $3740 = Parser$Reply$error$($3737, $3738, $3739);
+                                                var $3736 = $3740;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $3758 = self.idx;
-                                                var $3759 = self.code;
-                                                var $3760 = self.val;
-                                                var self = Fm$Parser$text$("with", $3758, $3759);
+                                                var $3741 = self.idx;
+                                                var $3742 = self.code;
+                                                var $3743 = self.val;
+                                                var self = Fm$Parser$text$("with", $3741, $3742);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $3762 = self.idx;
-                                                        var $3763 = self.code;
-                                                        var $3764 = self.err;
-                                                        var $3765 = Parser$Reply$error$($3762, $3763, $3764);
-                                                        var $3761 = $3765;
+                                                        var $3745 = self.idx;
+                                                        var $3746 = self.code;
+                                                        var $3747 = self.err;
+                                                        var $3748 = Parser$Reply$error$($3745, $3746, $3747);
+                                                        var $3744 = $3748;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $3766 = self.idx;
-                                                        var $3767 = self.code;
-                                                        var $3768 = self.val;
-                                                        var self = Fm$Parser$term$($3766, $3767);
+                                                        var $3749 = self.idx;
+                                                        var $3750 = self.code;
+                                                        var $3751 = self.val;
+                                                        var self = Fm$Parser$term$($3749, $3750);
                                                         switch (self._) {
                                                             case 'Parser.Reply.error':
-                                                                var $3770 = self.idx;
-                                                                var $3771 = self.code;
-                                                                var $3772 = self.err;
-                                                                var $3773 = Parser$Reply$error$($3770, $3771, $3772);
-                                                                var $3769 = $3773;
+                                                                var $3753 = self.idx;
+                                                                var $3754 = self.code;
+                                                                var $3755 = self.err;
+                                                                var $3756 = Parser$Reply$error$($3753, $3754, $3755);
+                                                                var $3752 = $3756;
                                                                 break;
                                                             case 'Parser.Reply.value':
-                                                                var $3774 = self.idx;
-                                                                var $3775 = self.code;
-                                                                var $3776 = self.val;
-                                                                var self = Fm$Parser$stop$(_init$1, $3774, $3775);
+                                                                var $3757 = self.idx;
+                                                                var $3758 = self.code;
+                                                                var $3759 = self.val;
+                                                                var self = Fm$Parser$stop$(_init$1, $3757, $3758);
                                                                 switch (self._) {
                                                                     case 'Parser.Reply.error':
-                                                                        var $3778 = self.idx;
-                                                                        var $3779 = self.code;
-                                                                        var $3780 = self.err;
-                                                                        var $3781 = Parser$Reply$error$($3778, $3779, $3780);
-                                                                        var $3777 = $3781;
+                                                                        var $3761 = self.idx;
+                                                                        var $3762 = self.code;
+                                                                        var $3763 = self.err;
+                                                                        var $3764 = Parser$Reply$error$($3761, $3762, $3763);
+                                                                        var $3760 = $3764;
                                                                         break;
                                                                     case 'Parser.Reply.value':
-                                                                        var $3782 = self.idx;
-                                                                        var $3783 = self.code;
-                                                                        var $3784 = self.val;
+                                                                        var $3765 = self.idx;
+                                                                        var $3766 = self.code;
+                                                                        var $3767 = self.val;
                                                                         var _term$29 = Fm$Term$ref$("Equal.rewrite");
                                                                         var _term$30 = Fm$Term$app$(_term$29, Fm$Term$hol$(Bits$e));
                                                                         var _term$31 = Fm$Term$app$(_term$30, Fm$Term$hol$(Bits$e));
                                                                         var _term$32 = Fm$Term$app$(_term$31, Fm$Term$hol$(Bits$e));
-                                                                        var _term$33 = Fm$Term$app$(_term$32, Fm$Term$lam$($3744, (_x$33 => {
-                                                                            var $3786 = $3760;
-                                                                            return $3786;
+                                                                        var _term$33 = Fm$Term$app$(_term$32, Fm$Term$lam$($3727, (_x$33 => {
+                                                                            var $3769 = $3743;
+                                                                            return $3769;
                                                                         })));
-                                                                        var _term$34 = Fm$Term$app$(_term$33, $3776);
+                                                                        var _term$34 = Fm$Term$app$(_term$33, $3759);
                                                                         var _term$35 = Fm$Term$app$(_term$34, _subt$2);
-                                                                        var $3785 = Parser$Reply$value$($3782, $3783, Fm$Term$ori$($3784, _term$35));
-                                                                        var $3777 = $3785;
+                                                                        var $3768 = Parser$Reply$value$($3765, $3766, Fm$Term$ori$($3767, _term$35));
+                                                                        var $3760 = $3768;
                                                                         break;
                                                                 };
-                                                                var $3769 = $3777;
+                                                                var $3752 = $3760;
                                                                 break;
                                                         };
-                                                        var $3761 = $3769;
+                                                        var $3744 = $3752;
                                                         break;
                                                 };
-                                                var $3753 = $3761;
+                                                var $3736 = $3744;
                                                 break;
                                         };
-                                        var $3745 = $3753;
+                                        var $3728 = $3736;
                                         break;
                                 };
-                                var $3737 = $3745;
+                                var $3720 = $3728;
                                 break;
                         };
-                        var $3729 = $3737;
+                        var $3712 = $3720;
                         break;
                 };
-                var $3721 = $3729;
+                var $3704 = $3712;
                 break;
         };
-        return $3721;
+        return $3704;
     };
     const Fm$Parser$rewrite = x0 => x1 => x2 => x3 => Fm$Parser$rewrite$(x0, x1, x2, x3);
 
     function Fm$Term$ann$(_done$1, _term$2, _type$3) {
-        var $3787 = ({
+        var $3770 = ({
             _: 'Fm.Term.ann',
             'done': _done$1,
             'term': _term$2,
             'type': _type$3
         });
-        return $3787;
+        return $3770;
     };
     const Fm$Term$ann = x0 => x1 => x2 => Fm$Term$ann$(x0, x1, x2);
 
@@ -9360,55 +9322,93 @@ module.exports = (function() {
         var self = Fm$Parser$text$("::", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3789 = self.idx;
-                var $3790 = self.code;
-                var $3791 = self.err;
-                var $3792 = Parser$Reply$error$($3789, $3790, $3791);
-                var $3788 = $3792;
+                var $3772 = self.idx;
+                var $3773 = self.code;
+                var $3774 = self.err;
+                var $3775 = Parser$Reply$error$($3772, $3773, $3774);
+                var $3771 = $3775;
                 break;
             case 'Parser.Reply.value':
-                var $3793 = self.idx;
-                var $3794 = self.code;
-                var $3795 = self.val;
-                var self = Fm$Parser$term$($3793, $3794);
+                var $3776 = self.idx;
+                var $3777 = self.code;
+                var $3778 = self.val;
+                var self = Fm$Parser$term$($3776, $3777);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3797 = self.idx;
-                        var $3798 = self.code;
-                        var $3799 = self.err;
-                        var $3800 = Parser$Reply$error$($3797, $3798, $3799);
-                        var $3796 = $3800;
+                        var $3780 = self.idx;
+                        var $3781 = self.code;
+                        var $3782 = self.err;
+                        var $3783 = Parser$Reply$error$($3780, $3781, $3782);
+                        var $3779 = $3783;
                         break;
                     case 'Parser.Reply.value':
-                        var $3801 = self.idx;
-                        var $3802 = self.code;
-                        var $3803 = self.val;
-                        var self = Fm$Parser$stop$(_init$1, $3801, $3802);
+                        var $3784 = self.idx;
+                        var $3785 = self.code;
+                        var $3786 = self.val;
+                        var self = Fm$Parser$stop$(_init$1, $3784, $3785);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3805 = self.idx;
-                                var $3806 = self.code;
-                                var $3807 = self.err;
-                                var $3808 = Parser$Reply$error$($3805, $3806, $3807);
-                                var $3804 = $3808;
+                                var $3788 = self.idx;
+                                var $3789 = self.code;
+                                var $3790 = self.err;
+                                var $3791 = Parser$Reply$error$($3788, $3789, $3790);
+                                var $3787 = $3791;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3809 = self.idx;
-                                var $3810 = self.code;
-                                var $3811 = self.val;
-                                var $3812 = Parser$Reply$value$($3809, $3810, Fm$Term$ori$($3811, Fm$Term$ann$(Bool$false, _term$2, $3803)));
-                                var $3804 = $3812;
+                                var $3792 = self.idx;
+                                var $3793 = self.code;
+                                var $3794 = self.val;
+                                var $3795 = Parser$Reply$value$($3792, $3793, Fm$Term$ori$($3794, Fm$Term$ann$(Bool$false, _term$2, $3786)));
+                                var $3787 = $3795;
                                 break;
                         };
-                        var $3796 = $3804;
+                        var $3779 = $3787;
                         break;
                 };
-                var $3788 = $3796;
+                var $3771 = $3779;
                 break;
         };
-        return $3788;
+        return $3771;
     };
     const Fm$Parser$annotation = x0 => x1 => x2 => x3 => Fm$Parser$annotation$(x0, x1, x2, x3);
+
+    function Fm$Parser$application$hole$(_init$1, _term$2, _idx$3, _code$4) {
+        var self = Fm$Parser$text$("!", _idx$3, _code$4);
+        switch (self._) {
+            case 'Parser.Reply.error':
+                var $3797 = self.idx;
+                var $3798 = self.code;
+                var $3799 = self.err;
+                var $3800 = Parser$Reply$error$($3797, $3798, $3799);
+                var $3796 = $3800;
+                break;
+            case 'Parser.Reply.value':
+                var $3801 = self.idx;
+                var $3802 = self.code;
+                var $3803 = self.val;
+                var self = Fm$Parser$stop$(_init$1, $3801, $3802);
+                switch (self._) {
+                    case 'Parser.Reply.error':
+                        var $3805 = self.idx;
+                        var $3806 = self.code;
+                        var $3807 = self.err;
+                        var $3808 = Parser$Reply$error$($3805, $3806, $3807);
+                        var $3804 = $3808;
+                        break;
+                    case 'Parser.Reply.value':
+                        var $3809 = self.idx;
+                        var $3810 = self.code;
+                        var $3811 = self.val;
+                        var $3812 = Parser$Reply$value$($3809, $3810, Fm$Term$ori$($3811, Fm$Term$app$(_term$2, Fm$Term$hol$(Bits$e))));
+                        var $3804 = $3812;
+                        break;
+                };
+                var $3796 = $3804;
+                break;
+        };
+        return $3796;
+    };
+    const Fm$Parser$application$hole = x0 => x1 => x2 => x3 => Fm$Parser$application$hole$(x0, x1, x2, x3);
 
     function Fm$Parser$suffix$(_init$1, _term$2, _idx$3, _code$4) {
         var Fm$Parser$suffix$ = (_init$1, _term$2, _idx$3, _code$4) => ({
@@ -9420,7 +9420,7 @@ module.exports = (function() {
         while (true) {
             let [_init$1, _term$2, _idx$3, _code$4] = arg;
             var R = (() => {
-                var _suffix_parser$5 = Parser$first_of$(List$cons$(Fm$Parser$application(_init$1)(_term$2), List$cons$(Fm$Parser$application$erased(_init$1)(_term$2), List$cons$(Fm$Parser$application$hole(_init$1)(_term$2), List$cons$(Fm$Parser$arrow(_init$1)(_term$2), List$cons$(Fm$Parser$add(_init$1)(_term$2), List$cons$(Fm$Parser$sub(_init$1)(_term$2), List$cons$(Fm$Parser$mul(_init$1)(_term$2), List$cons$(Fm$Parser$div(_init$1)(_term$2), List$cons$(Fm$Parser$mod(_init$1)(_term$2), List$cons$(Fm$Parser$cons(_init$1)(_term$2), List$cons$(Fm$Parser$concat(_init$1)(_term$2), List$cons$(Fm$Parser$string_concat(_init$1)(_term$2), List$cons$(Fm$Parser$sigma(_init$1)(_term$2), List$cons$(Fm$Parser$equality(_init$1)(_term$2), List$cons$(Fm$Parser$inequality(_init$1)(_term$2), List$cons$(Fm$Parser$rewrite(_init$1)(_term$2), List$cons$(Fm$Parser$annotation(_init$1)(_term$2), List$nil))))))))))))))))));
+                var _suffix_parser$5 = Parser$first_of$(List$cons$(Fm$Parser$application(_init$1)(_term$2), List$cons$(Fm$Parser$application$erased(_init$1)(_term$2), List$cons$(Fm$Parser$arrow(_init$1)(_term$2), List$cons$(Fm$Parser$add(_init$1)(_term$2), List$cons$(Fm$Parser$sub(_init$1)(_term$2), List$cons$(Fm$Parser$mul(_init$1)(_term$2), List$cons$(Fm$Parser$div(_init$1)(_term$2), List$cons$(Fm$Parser$mod(_init$1)(_term$2), List$cons$(Fm$Parser$cons(_init$1)(_term$2), List$cons$(Fm$Parser$concat(_init$1)(_term$2), List$cons$(Fm$Parser$string_concat(_init$1)(_term$2), List$cons$(Fm$Parser$sigma(_init$1)(_term$2), List$cons$(Fm$Parser$equality(_init$1)(_term$2), List$cons$(Fm$Parser$inequality(_init$1)(_term$2), List$cons$(Fm$Parser$rewrite(_init$1)(_term$2), List$cons$(Fm$Parser$annotation(_init$1)(_term$2), List$cons$(Fm$Parser$application$hole(_init$1)(_term$2), List$nil))))))))))))))))));
                 var self = _suffix_parser$5(_idx$3)(_code$4);
                 switch (self._) {
                     case 'Parser.Reply.error':
@@ -22719,7 +22719,6 @@ module.exports = (function() {
         'Parser.spaces': Parser$spaces,
         'Parser.spaces_text': Parser$spaces_text,
         'Fm.Parser.application.erased': Fm$Parser$application$erased,
-        'Fm.Parser.application.hole': Fm$Parser$application$hole,
         'Fm.Parser.arrow': Fm$Parser$arrow,
         'Fm.Parser.op': Fm$Parser$op,
         'Fm.Parser.add': Fm$Parser$add,
@@ -22736,6 +22735,7 @@ module.exports = (function() {
         'Fm.Parser.rewrite': Fm$Parser$rewrite,
         'Fm.Term.ann': Fm$Term$ann,
         'Fm.Parser.annotation': Fm$Parser$annotation,
+        'Fm.Parser.application.hole': Fm$Parser$application$hole,
         'Fm.Parser.suffix': Fm$Parser$suffix,
         'Fm.Parser.term': Fm$Parser$term,
         'Fm.Parser.name_term': Fm$Parser$name_term,
