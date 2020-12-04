@@ -1598,12 +1598,12 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
     game_over:
       // use skp = Debug.log<>("game over")
-      if U16.eql(cmd, 'c') then
-        let game = Mons.Game.set_stt(Mons.Screen.introduction(0u), game)
-        let mage = Mons.Game.add_mon(Mons.Kind.mons.MAGE, 0u, Mons.Type.normal, game)
-        let game = Mons.Game.add_mon(mage)
-        Mons.Game.hero_inital_position(game.usr, hero_obj, Pos32.new(0u,0u,0u), hero_idx, game)
-      else 
+      // if U16.eql(cmd, 'c') then
+      //   let game = Mons.Game.set_stt(Mons.Screen.introduction(0u), game)
+      //   let mage = Mons.Game.add_mon(Mons.Kind.mons.MAGE, 0u, Mons.Type.normal, game)
+      //   let game = Mons.Game.add_mon(mage)
+      //   Mons.Game.hero_inital_position(game.usr, hero_obj, Pos32.new(0u,0u,0u), hero_idx, game)
+      // else 
         game
     }
   }
@@ -1961,14 +1961,12 @@ Mons.Game.tick(game: Mons.Game, time: U64): Mons.Game
   let game = Mons.Game.tick_game(game)
   game
 
-  
-
 // Mons.Game.animate(obj: Mons.Object, pos: Pos32, idx: U32,game: Mons.Game): Mons.Game
 //   open obj
 //   open Mons.Kind.attr(obj.kin) as attr
 //   let ani = // each sprite has durantion of 16 ticks
 //     if U32.eql(obj.ani, 0u) then
-//       let qtd_spr = List.length<>(attr.spr)
+//       let qtd_spr = List.length<_>(attr.spr)
 //       U32.mul(qtd_spr, 16u)
 //     else U32.sub(obj.ani, 1u)
 //   let obj = Mons.Object.set_ani(obj, ani)
@@ -2042,28 +2040,33 @@ Mons.Input.char(down: Bool, code: Char): Char
 Mons.App.room: Word(48)
   Word.from_bits(48, String.to_bits("MON"))
 
-// // Startup
-// Mons.start(online: Bool): App(Mons.Game)
-//   let screen = Image3D.alloc_capacity(524288u)
-//   App.new<>
-//   // Initial state
-//   | let game_usr = Word.zero(160)
-//     let game_pos = Map.new<>
-//     let game_map = Mons.Map.build(Mons.map_source)
-//     let game = Mons.Game.new(
-//       game_usr, 
-//       game_pos, 
-//       game_map, 
-//       // Mons.Screen.introduction(0u),
-//       Mons.Screen.welcome(0u),
-//       0u // tik
-//     )
-//     // let game = Mons.Game.add_animated_obj(game)
-//     game;
-//   // Render function
-//   | (game) App.Render.vox(Mons.draw(game, screen));
-//   // Event handlers
-//   | (event, game)
+// Startup
+Mons.start(online: Bool): App(Mons.Game)
+  let screen = Image3D.alloc_capacity(524288u)
+  // Initial state
+  def init = 
+    let game_usr = Word.zero(160)
+    let game_pos = Map.new<_>
+    let game_map = Mons.Map.build(Mons.map_source)
+    let game = Mons.Game.new(
+      game_usr, 
+      game_pos, 
+      game_map, 
+      // Mons.Screen.introduction(0u),
+      Mons.Screen.welcome(0u),
+      0u // tik
+    )
+    // let game = Mons.Game.add_animated_obj(game)
+    game
+
+  // Render function
+  def draw = (game) App.Render.vox(Mons.draw(game, screen))
+
+  def when = (event, game) []
+
+  App.new<_>(init, draw, when)
+    // Event handlers
+    
 //     if online then // online mode
 //       case event:
 //       | init => [
@@ -2144,6 +2147,10 @@ Mons.App.room: Word(48)
   //Map.get<>(U16.to_bits('h'), Mons.Input.char_to_code_map)
 
 
+// -------------- Mons.map_source.fm ------------------
+Mons.map_source: List(List(String))
+  [[""]]
+
 // ---------------- Mons.Kind.fm -------------------
 type Mons.Kind{
   Mons(ele: Mons.Kind.mons, boss: Bool, pri_type: Mons.Type, agi: U32),
@@ -2198,25 +2205,7 @@ type Mons.Kind.inter{
 }
 
 Mons.Kind.is_mon_area(adve_kin: Mons.Kind): Bool
-  case adve_kin{
-    Mons: false
-    Const: false
-    Terrain:
-    case adve_kin.ele{
-      VOID: false
-      VOID_BLACK: false
-      FLOOR: false
-      GRASS_PLANT: false
-      BUSH: false
-      PLANT_0: false
-      SAND_0: false
-      PATH_BLOCKER: false
-      MID_CITY: false
-      STAIRS: false
-      MON_AREA: true
-    }
-    Interactive: false
-  }
+  Bool.true
 
 Mons.Kind.area_mon_pos(adve_kin: Mons.Kind, hero_pos: Pos32): Pos32
   case adve_kin{
@@ -2604,6 +2593,9 @@ Mons.Effect.upd_end_turn_eff(eff: Mons.Effect): Mons.Effect
 
 
 // ------------------- Mons.Draw .fm-------------------
+Mons.draw(game: Mons.Game, scr: Image3D): Image3D
+  scr
+
 // Given a tile (x, y) and an object, returns its global (x, y) positions
 Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
   open obj
