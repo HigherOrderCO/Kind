@@ -873,7 +873,7 @@ Fm.Term.patch_at(path: Bits, term: Fm.Term, fn: Fm.Term -> Fm.Term): Fm.Term
       o: Fm.Term.ann(term.done, Fm.Term.patch_at(path.pred,term.term,fn), term.type),
       i: Fm.Term.ann(term.done, term.term, Fm.Term.patch_at(path.pred,term.type,fn)),
     },
-    ori: Fm.Term.patch_at(path, term.expr, fn),
+    ori: Fm.Term.ori(term.orig, Fm.Term.patch_at(path, term.expr, fn)),
     _: case path {
       e: fn(term),
       o: term,
@@ -2874,7 +2874,7 @@ Fm.Parser.item<V: Type>(parser: Parser(V)): Parser(V)
     return value;
   }
 
-// Parses an application (erased): @func<argm0>@
+// Parses an application (erased): @func<argm>@
 Fm.Parser.application.erased(init: Nat, func: Fm.Term): Parser(Fm.Term)
   do Parser {
     var init = Parser.get_index;
@@ -2887,7 +2887,7 @@ Fm.Parser.application.erased(init: Nat, func: Fm.Term): Parser(Fm.Term)
     return Fm.Term.ori(orig, expr);
   }
 
-// Parses an application: @func<argm0>@
+// Parses an application: @func(argm)@
 Fm.Parser.application(init: Nat, func: Fm.Term): Parser(Fm.Term)
   do Parser {
     Parser.text("(");
@@ -2897,6 +2897,14 @@ Fm.Parser.application(init: Nat, func: Fm.Term): Parser(Fm.Term)
     var orig = Fm.Parser.stop(init);
     let expr = List.for<_>(args)<_>(func, (x,f) Fm.Term.app(f, x));
     return Fm.Term.ori(orig, expr);
+  }
+
+// Parses a hole application: @func!@
+Fm.Parser.application.hole(init: Nat, term: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("!");
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, Fm.Term.app(term, Fm.Term.hol(Bits.e)));
   }
 
 // Parses an arrow: @A -> B@
@@ -3103,6 +3111,7 @@ Fm.Parser.suffix(init: Nat, term: Fm.Term): Parser(Fm.Term)
   let suffix_parser = Parser.first_of<_>([
     Fm.Parser.application(init, term),
     Fm.Parser.application.erased(init, term),
+    Fm.Parser.application.hole(init, term),
     Fm.Parser.arrow(init, term),
     Fm.Parser.add(init, term),
     Fm.Parser.sub(init, term),
@@ -3514,16 +3523,20 @@ Fm.Synth.load(name: Fm.Name, defs: Fm.Defs): IO(Maybe(Fm.Defs))
     let read = Fm.Defs.read(file, code, defs);
     case read {
       left: do IO { // TODO: should return parse error somehow... or perhaps add that on Fm.Synth.file?
-        return Maybe.none<_>;
+        IO.print("Parse error on file '"|file|"'.");
+        IO.exit;
+        return none;
       },
       right: do IO {
         let defs = read.value;
         case Fm.get<_>(name, defs) as got {
           none: do IO {
-            return Maybe.none<_>;
+            IO.print("Couldn't find '"|name|"' on file '"|file|".");
+            IO.exit;
+            return none;
           },
           some: do IO {
-            return Maybe.some<_>(defs);
+            return some(defs);
           },
         };
       },
@@ -3537,7 +3550,6 @@ Fm.Synth.one(name: Fm.Name, defs: Fm.Defs): IO(Fm.Defs)
       var loaded = Fm.Synth.load(name, defs);
       case loaded {
         none: do IO {
-          IO.print(String.flatten(["Undefined: ", name]));
           return defs;
         },
         some: do IO {
@@ -3723,22 +3735,27 @@ Fm.Defs.report.go(defs: Fm.Defs, list: List(Fm.Name), errs: String, typs: String
                 cons:
                   let name_str = Fm.Name.show(got.value.name);
                   let rel_errs = Fm.Error.relevant(got.value.stat.errors, Bool.false);
-                  let rel_msgs = List.mapped<_>(rel_errs)<_>((err)
-                    String.flatten([
-                      Fm.Error.show(err, defs),
-                      case Fm.Error.origin(err) as origin {
-                        none: "",
-                        some: case origin.value {
-                          new: String.flatten([
-                            "Inside '", got.value.file, "':\n",
-                            Fm.highlight(got.value.code, origin.value.from, origin.value.upto),
-                            "\n",
-                          ])
-                        },
-                      }
-                    ]));
-                  let errs = String.flatten([errs, String.join("\n", rel_msgs), "\n"]);
-                  Fm.Defs.report.go(defs, list.tail, errs, typs)
+                  case rel_errs {
+                    nil:
+                      Fm.Defs.report.go(defs, list.tail, errs, typs),
+                    cons: 
+                      let rel_msgs = List.mapped<_>(rel_errs)<_>((err)
+                        String.flatten([
+                          Fm.Error.show(err, defs),
+                          case Fm.Error.origin(err) as origin {
+                            none: "",
+                            some: case origin.value {
+                              new: String.flatten([
+                                "Inside '", got.value.file, "':\n",
+                                Fm.highlight(got.value.code, origin.value.from, origin.value.upto),
+                                "\n",
+                              ])
+                            },
+                          }
+                        ]));
+                      let errs = String.flatten([errs, String.join("\n", rel_msgs), "\n"]);
+                      Fm.Defs.report.go(defs, list.tail, errs, typs)
+                  }
               }
             }
         }
