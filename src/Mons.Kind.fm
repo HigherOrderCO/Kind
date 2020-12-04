@@ -86,22 +86,22 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
   case kind{
     Mons: 
     case kind.ele{
-      HERO       : Bool.true,
-      MAGE       : Bool.false,
-      BEHOLDER   : Bool.false,
-      ZOIO       : Bool.false,
-      CYCLOPE    : Bool.false,
-      POISOLICK  : Bool.false,
-      TROWL      : Bool.false,
-      MIMIC      : Bool.false,
-      MIMIC2     : Bool.false,
-      AZULA      : Bool.false,
-      EMERELDER  : Bool.false,
-      EMERELDER2 : Bool.false,
+      HERO       : true,
+      MAGE       : false,
+      BEHOLDER   : false,
+      ZOIO       : false,
+      CYCLOPE    : false,
+      POISOLICK  : false,
+      TROWL      : false,
+      MIMIC      : false,
+      MIMIC2     : false,
+      AZULA      : false,
+      EMERELDER  : false,
+      EMERELDER2 : false,
     }
-    Const: Bool.false,
-    Terrain: Bool.false,
-    Interactive: Bool.false,
+    Const: false,
+    Terrain: false,
+    Interactive: false,
   }
 
 Mons.Kind.is_mage(kind: Mons.Kind): Bool
@@ -126,109 +126,107 @@ Mons.Kind.is_mage(kind: Mons.Kind): Bool
     Interactive: false
   }
 
-// Mons.Kind.is_mon_area(adve_kin: Mons.Kind): Bool
-//   case adve_kin:
-//   | mons => Bool.false;
-//   | const => Bool.false;
-//   | terrain =>
-//     case adve_kin.ele:
-//     | VOID => Bool.false;
-//     | VOID_BLACK => Bool.false;
-//     | FLOOR => Bool.false;
-//     | GRASS_PLANT => Bool.false;
-//     | BUSH => Bool.false;
-//     | PLANT_0 => Bool.false;
-//     | SAND_0 => Bool.false;
-//     | PATH_BLOCKER => Bool.false;
-//     | MID_CITY => Bool.false;
-//     | STAIRS => Bool.false;
-//     | MON_AREA => Bool.true;
-//   ;
-//   | inter => Bool.false;
+Mons.Kind.is_mon_area(adve_kin: Mons.Kind): Bool
+  case adve_kin{
+    Mons: false
+    Const: false
+    Terrain:
+    case adve_kin.ele{
+      VOID: false
+      VOID_BLACK: false
+      FLOOR: false
+      GRASS_PLANT: false
+      BUSH: false
+      PLANT_0: false
+      SAND_0: false
+      PATH_BLOCKER: false
+      MID_CITY: false
+      STAIRS: false
+      MON_AREA: true
+    }
+    Interactive: false
+  }
 
 // Mons.Kind.is_void(adve_kin: Mons.Kind): Bool
 //   case adve_kin:
-//   | mons => Bool.false;
-//   | const => Bool.false;
+//   | mons => false;
+//   | const => false;
 //   | terrain =>
 //     case adve_kin.ele:
-//     | VOID => Bool.true;
-//     | VOID_BLACK => Bool.true;
-//     | FLOOR => Bool.false;
-//     | GRASS_PLANT => Bool.false;
-//     | BUSH => Bool.false;
-//     | PLANT_0 => Bool.false;
-//     | SAND_0 => Bool.false;
-//     | PATH_BLOCKER => Bool.false;
-//     | MID_CITY => Bool.false;
-//     | STAIRS => Bool.false;
-//     | MON_AREA => Bool.false;
+//     | VOID => true;
+//     | VOID_BLACK => true;
+//     | FLOOR => false;
+//     | GRASS_PLANT => false;
+//     | BUSH => false;
+//     | PLANT_0 => false;
+//     | SAND_0 => false;
+//     | PATH_BLOCKER => false;
+//     | MID_CITY => false;
+//     | STAIRS => false;
+//     | MON_AREA => false;
 //   ;
-//   | inter => Bool.false;
+//   | inter => false;
 
-// Mons.Kind.area_mon_pos(adve_kin: Mons.Kind, hero_pos: Pos32): Pos32
-//   case adve_kin:
-//   | mons => hero_pos;
-//   | const => hero_pos;
-//   | terrain =>
-//     case adve_kin.ele as terrain:
-//     | VOID => hero_pos;
-//     | VOID_BLACK => hero_pos;
-//     | FLOOR => hero_pos;
-//     | GRASS_PLANT => hero_pos;
-//     | BUSH => hero_pos;
-//     | PLANT_0 => hero_pos;
-//     | SAND_0 => hero_pos;
-//     | PATH_BLOCKER => hero_pos;
-//     | MID_CITY => hero_pos;
-//     | STAIRS => hero_pos;
-//     | MON_AREA => terrain.pos_mon ;
-//   ;
-//   | inter => hero_pos;
+Mons.Kind.area_mon_pos(adve_kin: Mons.Kind, hero_pos: Pos32): Pos32
+  case adve_kin{
+    Mons: hero_pos
+    Const: hero_pos
+    Terrain:
+    case adve_kin.ele as terrain{
+      VOID: hero_pos
+      VOID_BLACK: hero_pos
+      FLOOR: hero_pos
+      GRASS_PLANT: hero_pos
+      BUSH: hero_pos
+      PLANT_0: hero_pos
+      SAND_0: hero_pos
+      PATH_BLOCKER: hero_pos
+      MID_CITY: hero_pos
+      STAIRS: hero_pos
+      MON_AREA: terrain.pos_mon
+    }
+    Interactive: hero_pos
+  }
 
 Mons.Kind.is_portal(adve_kin: Mons.Kind): Bool
   case adve_kin{
-    Mons: Bool.false
+    Mons: false
     Const:
     case adve_kin.ele{
-      FOUNTAIN: Bool.false
-      CHEST: Bool.false
-      CRYSTAL: Bool.false
-      PORTAL: Bool.true
+      FOUNTAIN: false
+      CHEST: false
+      CRYSTAL: false
+      PORTAL: true
     }
-    Terrain: Bool.false
-    Interactive: Bool.false
+    Terrain: false
+    Interactive: false
   }
 
-// // Swap "on" property
-// Mons.Kind.swap_interactive(kind: Mons.Kind): Mons.Kind
-//   case kind:
-//   | mons => kind;
-//   | const => kind;
-//   | terrain => kind;
-//   | inter => Mons.Kind.Interactive(kind.ele, Bool.not(kind.on), kind.eff);
+// Swap "on" property
+Mons.Kind.swap_interactive(kind: Mons.Kind): Mons.Kind
+  case kind{
+    Mons: kind
+    Const: kind
+    Terrain: kind
+    Interactive: Mons.Kind.Interactive(kind.ele, Bool.not(kind.on), kind.eff)
+  }
 
-// Mons.Kind.set_on_interactive(kind: Mons.Kind): Mons.Kind
-//   case kind:
-//   | mons => kind;
-//   | const => kind;
-//   | terrain => kind;
-//   | inter => Mons.Kind.Interactive(kind.ele, Bool.true, kind.eff);
+Mons.Kind.set_on_interactive(kind: Mons.Kind): Mons.Kind
+  case kind{
+    Mons: kind
+    Const: kind
+    Terrain: kind
+    Interactive: Mons.Kind.Interactive(kind.ele, true, kind.eff)
+  }
 
-// // Executes an effect in a game
-// Mons.Kind.exec_eff(kind: Mons.Kind, game: Mons.Game): Mons.Game
-//   case kind:
-//   | mons => game;
-//   | const => game;
-//   | terrain => game;
-//   | inter => 
-//     // if kind.on then 
-//     //   use skp = Debug.log<>("Exec eff on")
-//     //   game
-//     // else 
-//     // use skp = Debug.log<>("Exec eff off")
-//     kind.eff(kind.ele, kind.on, game)
-//   ;
+// Executes an effect in a game
+Mons.Kind.exec_eff(kind: Mons.Kind, game: Mons.Game): Mons.Game
+  case kind{
+    Mons: game
+    Const: game
+    Terrain: game
+    Interactive: kind.eff(kind.ele, kind.on, game)
+  }
 
 // An effect to work with lever kind
 Mons.Kind.inter_lever_eff(kind: Mons.Kind.inter, on: Bool, game: Mons.Game): Mons.Game
@@ -258,7 +256,7 @@ Mons.Kind.inter_lever_eff(kind: Mons.Kind.inter, on: Bool, game: Mons.Game): Mon
         // TODO: make hero walk to movable_obj_pos
         let movable_obj_pos = Mons.Object.get_adjacent_pos(hero_pos, hero_obj.dir, map)
         if Mons.Object.can_move_forward(movable_obj_pos, hero_obj.dir, game) then
-          let obj = Mons.Kind.new_interactive_tool(kind, Bool.true, Mons.Kind.inter_lever_eff)
+          let obj = Mons.Kind.new_interactive_tool(kind, true, Mons.Kind.inter_lever_eff)
           let new_pos = Mons.Object.get_adjacent_pos(movable_obj_pos, hero_obj.dir, map)
           let game = Mons.Game.map_del(movable_obj_pos, obj_idx, game)
           Mons.Game.map_push(new_pos, obj, game)
@@ -280,7 +278,7 @@ Mons.Kind.new_const(kin: Mons.Kind.const): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Const(kin))
 
 // // Mons.Kind.new_portal(kin: Mons.Kind.const): Mons.Object
-// //   Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.true, Bool.true))
+// //   Mons.Object.new_of_kind(Mons.Kind.Const(kin, true, true))
 
 Mons.Kind.new_interactive_tool(
   kin: Mons.Kind.inter,
@@ -290,15 +288,15 @@ Mons.Kind.new_interactive_tool(
   Mons.Object.new_of_kind(Mons.Kind.Interactive(kin, stt, fun))
 
 Mons.Kind.new_mons(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): List(Mons.Object)
-  [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false, type, agi)),
+  [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, false, type, agi)),
     // Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH)
     ]
 
 // Mons.Kind.new_mon(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): Mons.Object
-//   Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false, type, agi))
+//   Mons.Object.new_of_kind(Mons.Kind.Mons(kin, false, type, agi))
 
 // Mons.Kind.new_boss(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): List(Mons.Object)
-//   [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.true, type, agi)),
+//   [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, true, type, agi)),
 //     ]
 
 Mons.Kind.set_static_sprites(spr: List(Image3D)): U32 -> U32 -> U32 -> Mons.Dir -> List(Image3D)

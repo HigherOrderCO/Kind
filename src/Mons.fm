@@ -1418,155 +1418,153 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         //   cmd, (cmd: U32) Mons.Screen.intro_select(cmd),
         //   pos, hero_obj, hero_idx, game)
 
-    game: game
-    // if U16.eql(cmd, 'U') then
-    //   Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 0, stt.turn, game)
-    // else if U16.eql(cmd, 'I') then
-    //   Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 1, stt.turn, game)
-    // else if U16.eql(cmd, 'J') then
-    //   Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 2, stt.turn, game)
-    // else if U16.eql(cmd, 'K') then
-    //   Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 3, stt.turn, game)
-    // else if U16.eql(cmd, 'R') then
-    //   Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 4, stt.turn, game)
-    // else if Mons.is_walk_cmd(cmd) then
-    //   if Mons.Kind.is_mon_area(adve_obj.kin) then 
-    //     let adve_pos = Mons.Kind.area_mon_pos(adve_obj.kin, pos)
-    //     let mon_area_obj = Mons.Map.get(adve_pos, 0u, game.map)
-    //     open mon_area_obj
-    //     case mon_area_obj.kin{
-    //       Mons:
-    //         let game = Mons.Game.walk(cmd, pos, hero_idx, game)
-    //         if U32.eql(hero_obj.ani, 0u) then
-    //           // Move adve to hero`s position
-    //           let game = Mons.Game.move_obj(adve_pos, 0u, pos, mon_area_obj, game)
-    //           // Move hero to the same position. This is to be in idx 0u
-    //           let game = Mons.Game.move_obj(pos, 1u, pos, hero_obj, game)
-    //           Mons.Game.set_user_pos(game.usr, pos, game)
-    //         else game
-    //       Const: Mons.Game.walk(cmd, pos, hero_idx, game)
-    //       Terrain: Mons.Game.walk(cmd, pos, hero_idx, game)
-    //       Inter: Mons.Game.walk(cmd, pos, hero_idx, game)
-    //     }
-    //   else
-    //     if Bool.and(
-    //         Mons.Object.is_battling(adve_obj, hero_obj),
-    //         Bool.not(Mons.Kind.is_mage(adve_obj.kin))) 
-    //     then // Can't move when in a battle
-    //       // Avoid bug with infity walk when in the same position as adve
-    //       if U32.eql(hero_obj.ani, 0u) then  
-    //       // TODO: incomment use skp = Debug.log<>("> To run from battle press [R]")
-    //       Mons.Game.move_obj(pos, 0u, pos, hero_obj, game)
-    //       else Mons.Game.walk(cmd, pos, hero_idx, game)
-    //     else 
-    //       // Note: uncomment the code above to insert not moving while in battle
-    //       Mons.Game.walk(cmd, pos, hero_idx, game)
+    game:
+    if U16.eql(cmd, 'U') then
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 0, stt.turn, game)
+    else if U16.eql(cmd, 'I') then
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 1, stt.turn, game)
+    else if U16.eql(cmd, 'J') then
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 2, stt.turn, game)
+    else if U16.eql(cmd, 'K') then
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 3, stt.turn, game)
+    else if U16.eql(cmd, 'R') then
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 4, stt.turn, game)
+    else if Mons.is_walk_cmd(cmd) then
+      if Mons.Kind.is_mon_area(adve_obj.kin) then 
+        let adve_pos = Mons.Kind.area_mon_pos(adve_obj.kin, pos)
+        let mon_area_obj = Mons.Map.get(adve_pos, 0u, game.map)
+        open mon_area_obj
+        case mon_area_obj.kin{
+          Mons:
+            let game = Mons.Game.walk(cmd, pos, hero_idx, game)
+            if U32.eql(hero_obj.ani, 0u) then
+              // Move adve to hero`s position
+              let game = Mons.Game.move_obj(adve_pos, 0u, pos, mon_area_obj, game)
+              // Move hero to the same position. This is to be in idx 0u
+              let game = Mons.Game.move_obj(pos, 1u, pos, hero_obj, game)
+              Mons.Game.set_user_pos(game.usr, pos, game)
+            else game
+          Const: Mons.Game.walk(cmd, pos, hero_idx, game)
+          Terrain: Mons.Game.walk(cmd, pos, hero_idx, game)
+          Interactive: Mons.Game.walk(cmd, pos, hero_idx, game)
+        }
+      else
+        if Bool.and(
+            Mons.Object.is_battling(adve_obj, hero_obj),
+            Bool.not(Mons.Kind.is_mage(adve_obj.kin))) 
+        then // Can't move when in a battle
+          // Avoid bug with infity walk when in the same position as adve
+          if U32.eql(hero_obj.ani, 0u) then  
+          // TODO: incomment use skp = Debug.log<>("> To run from battle press [R]")
+          Mons.Game.move_obj(pos, 0u, pos, hero_obj, game)
+          else Mons.Game.walk(cmd, pos, hero_idx, game)
+        else 
+          // Note: uncomment the code above to insert not moving while in battle
+          Mons.Game.walk(cmd, pos, hero_idx, game)
 
-    // else U16.eql(cmd, 'e') then // Open hero's bag
-//       if Bool.or(is_battling, end_battle) then game
-//       else 
-//         Mons.Game.set_stt(Mons.Screen.inventory(0u), game)
+    else if U16.eql(cmd, 'e') then // Open hero's bag
+      if Bool.or(is_battling, end_battle) then game
+      else 
+        Mons.Game.set_stt(Mons.Screen.inventory(0u), game)
 
-//     else if U16.eql(cmd, 'c') then
-//       case adve_obj.kin as kind:
-//       | mon => 
-//         if Mons.Object.is_obj_defeated(adve_obj) then // Battle ended
-//           let game = Mons.Skill.clear_after_battle(hero_idx, adve_idx, pos, game)
-//           let hero_obj = Mons.Object.add_defeated_mon(adve_obj, hero_obj)
-//           if kind.boss then
-//             let hero_obj = Mons.Object.capture_boss(adve_obj, hero_obj)
-//             Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
-//           else
-//             if Mons.Object.is_full_bag(hero_obj) then
-//               let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-//               Mons.Game.set_stt(Mons.Screen.capture_mon(0u, Bool.true), game)
-//             else
-//               let adve_obj = Mons.Object.set_eff(Mons.Effect.clear, adve_obj)
-//               let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
-//               Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
-//         else if Mons.Object.is_obj_defeated(curr_mon) then // Battle ended
-//           let game = Mons.Skill.clear_after_battle(hero_idx, adve_idx, pos, game)
-//           let game = Mons.Game.add_mon(kind.ele, kind.agi, kind.pri_type, game)
-//           // TODO: review why it isn't working to have a bag count right after delete
-//           let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
-//           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-//           // let bag_len = List.length<>(hero_obj.bag)
-//           // use skp = Debug.log<>(String.flatten(["Bag after delete Len: ", Nat.to_string(bag_len)]))
-//           if Nat.eql(List.length<>(hero_obj.bag), 0) then 
-//             Mons.Game.set_stt(Mons.Screen.game_over, game)
-//           else 
-//             let game = Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
-//             set_stt_game(game)
-//         else // Turn ended
+    else if U16.eql(cmd, 'c') then
+      case adve_obj.kin as kind{
+        Mons: 
+        if Mons.Object.is_obj_defeated(adve_obj) then // Battle ended
+          let game = Mons.Skill.clear_after_battle(hero_idx, adve_idx, pos, game)
+          let hero_obj = Mons.Object.add_defeated_mon(adve_obj, hero_obj)
+          if kind.boss then
+            let hero_obj = Mons.Object.capture_boss(adve_obj, hero_obj)
+            Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
+          else
+            if Mons.Object.is_full_bag(hero_obj) then
+              let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+              Mons.Game.set_stt(Mons.Screen.capture_mon(0u, Bool.true), game)
+            else
+              let adve_obj = Mons.Object.set_eff(Mons.Effect.clear, adve_obj)
+              let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
+              Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
+        else if Mons.Object.is_obj_defeated(curr_mon) then // Battle ended
+          let game = Mons.Skill.clear_after_battle(hero_idx, adve_idx, pos, game)
+          let game = Mons.Game.add_mon(kind.ele, kind.agi, kind.pri_type, game)
+          // TODO: review why it isn't working to have a bag count right after delete
+          let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
+          let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+          // let bag_len = List.length<>(hero_obj.bag)
+          // use skp = Debug.log<>(String.flatten(["Bag after delete Len: ", Nat.to_string(bag_len)]))
+          if Nat.eql(List.length<_>(hero_obj.bag), 0) then 
+            Mons.Game.set_stt(Mons.Screen.game_over, game)
+          else 
+            let game = Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
+            set_stt_game(game)
+        else // Turn ended
 
-//         open stt.turn as turn:
-//         if Mons.Turn.is_active(stt.turn) then
-//           if Bool.or(Mons.Turn.is_last_player_move(stt.turn), Mons.Turn.hero_run(stt.turn)) then
-//             let game = Mons.Skill.apply_end_turn_eff(hero_idx, adve_idx, pos, game)
-//             if Mons.Turn.hero_run(stt.turn) then
-//               use skp = Debug.log<>(String.flatten(["Hero run from battle"]))
-//               let game = Mons.Skill.clear_after_battle(hero_idx, adve_idx, pos, game)
-//               // TODO: Move to last check point
-//               let game = Mons.Game.move_obj(pos, adve_idx, Mons.Kind.get_pos(adve_obj.kin), adve_obj, game)
-//               let game = Mons.Game.move_hero_down(game.usr, hero_obj, pos, hero_idx, game)
-//               set_stt_game(game)
-//             else
-//             set_stt_game(game)
-//           else 
-//           let turn = Mons.Turn.new(
-//             Bool.not(turn.exec_hero),
-//             turn.hero_skill, turn.adve_skill, U32.sub(turn.play, 1u))
-//           Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
-//         else 
-//         set_stt_game(game)
+        open stt.turn as turn
+        if Mons.Turn.is_active(stt.turn) then
+          if Bool.or(Mons.Turn.is_last_player_move(stt.turn), Mons.Turn.hero_run(stt.turn)) then
+            let game = Mons.Skill.apply_end_turn_eff(hero_idx, adve_idx, pos, game)
+            if Mons.Turn.hero_run(stt.turn) then
+              // use skp = Debug.log<>(String.flatten(["Hero run from battle"]))
+              let game = Mons.Skill.clear_after_battle(hero_idx, adve_idx, pos, game)
+              // TODO: Move to last check point
+              let game = Mons.Game.move_obj(pos, adve_idx, Mons.Kind.get_pos(adve_obj.kin), adve_obj, game)
+              let game = Mons.Game.move_hero_down(game.usr, hero_obj, pos, hero_idx, game)
+              set_stt_game(game)
+            else
+            set_stt_game(game)
+          else 
+          let turn = Mons.Turn.new(
+            Bool.not(turn.exec_hero),
+            turn.hero_skill, turn.adve_skill, U32.sub(turn.play, 1u))
+          Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
+        else 
+          set_stt_game(game)
 
-//       ;
+        Const:
+        if Mons.Kind.is_portal(adve_obj.kin) then
+          let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
+          Mons.Game.hero_inital_position(usr, hero_obj, new_pos, hero_idx, game)
+        else game
 
-//       | construction =>
-//         if Mons.Kind.is_portal(adve_obj.kin) then
-//           let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
-//           Mons.Game.hero_inital_position(usr, hero_obj, new_pos, hero_idx, game)
-//         else game
-//       ;
+        Terrain: // Hero can only move objects if he is in a terrain
+        if Mons.Object.hero_can_push_obj(pos, hero_obj.dir, game.map) then
+          let adjacent_obj = Mons.Object.get_adjacent_obj(pos, hero_obj.dir, game.map)
+          open adjacent_obj
+          Mons.Kind.exec_eff(adjacent_obj.kin, game)
+        else set_stt_game(game)
 
-//       | terrain => // Hero can only move objects if he is in a terrain
-//         if Mons.Object.hero_can_push_obj(pos, hero_obj.dir, game.map) then
-//           let adjacent_obj = Mons.Object.get_adjacent_obj(pos, hero_obj.dir, game.map)
-//           open adjacent_obj:
-//           Mons.Kind.exec_eff(adjacent_obj.kin, game)
-//         else set_stt_game(game);
+        Interactive:
+        let game_eff_after_interact = 
+          // This was the code that was working for lever and push
+          // let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.swap_interactive)
+          let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.set_on_interactive)
+          let game = Mons.Game.map_set(pos, adve_idx, inter_obj, game)
+          open inter_obj
+          Mons.Kind.exec_eff(inter_obj.kin, game)
+        case kind.ele as inter{
+          LEVER: game_eff_after_interact
+          MOVE: game_eff_after_interact
+          HEAL: let game = Mons.Kind.exec_eff(adve_obj.kin, game)
+            let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.set_on_interactive)
+            Mons.Game.map_set(pos, adve_idx, inter_obj, game)
+        }
+      }
 
-//       | inter =>
-//         let game_eff_after_interact = 
-//           // This was the code that was working for lever and push
-//           // let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.swap_interactive)
-//           let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.set_on_interactive)
-//           let game = Mons.Game.map_set(pos, adve_idx, inter_obj, game)
-//           open inter_obj:
-//           Mons.Kind.exec_eff(inter_obj.kin, game)
-//         case kind.ele as inter:
-//         | lever => game_eff_after_interact;
-//         | move  => game_eff_after_interact;
-//         | heal => 
-//           let game = Mons.Kind.exec_eff(adve_obj.kin, game)
-//           let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.set_on_interactive)
-//           Mons.Game.map_set(pos, adve_idx, inter_obj, game);
-//       ;
+    else if U16.eql(cmd, 'z') then // Free Mon
+      case adve_obj.kin as kind{
+        Mons:
+          if Mons.Object.is_obj_defeated(adve_obj) then
+            let hero_obj = Mons.Object.add_defeated_mon(adve_obj, hero_obj)
+            let game = Mons.Game.map_del(pos, adve_idx, game)
+            let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+            set_stt_game(game)
+          else game
+        Const: set_stt_game(game)
+        Terrain: set_stt_game(game)
+        Interactive: set_stt_game(game)
+      }
 
-//     else if U16.eql(cmd, 'z') then // Free Mon
-//       case adve_obj.kin as kind:
-//       | mon =>
-//         if Mons.Object.is_obj_defeated(adve_obj) then
-//           let hero_obj = Mons.Object.add_defeated_mon(adve_obj, hero_obj)
-//           let game = Mons.Game.map_del(pos, adve_idx, game)
-//           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-//           set_stt_game(game)
-//         else game;
-//       | const => set_stt_game(game);
-//       | terrain => set_stt_game(game);
-//       | inter => set_stt_game(game);
-
-//     else game ;
+    else game
 
     inventory: game
       // TODO: the code below isn't working. IDK y
@@ -1600,12 +1598,12 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
     game_over:
       // use skp = Debug.log<>("game over")
-      // if U16.eql(cmd, 'c') then
-      //   let game = Mons.Game.set_stt(Mons.Screen.introduction(0u), game)
-      //   let mage = Mons.Game.add_mon(Mons.Kind.mons.MAGE, 0u, Mons.Type.normal, game)
-      //   let game = Mons.Game.add_mon(mage)
-      //   Mons.Game.hero_inital_position(game.usr, hero_obj, Pos32.new(0u,0u,0u), hero_idx, game)
-      // else 
+      if U16.eql(cmd, 'c') then
+        let game = Mons.Game.set_stt(Mons.Screen.introduction(0u), game)
+        let mage = Mons.Game.add_mon(Mons.Kind.mons.MAGE, 0u, Mons.Type.normal, game)
+        let game = Mons.Game.add_mon(mage)
+        Mons.Game.hero_inital_position(game.usr, hero_obj, Pos32.new(0u,0u,0u), hero_idx, game)
+      else 
         game
     }
   }
@@ -2199,6 +2197,48 @@ type Mons.Kind.inter{
   HEAL,
 }
 
+Mons.Kind.is_mon_area(adve_kin: Mons.Kind): Bool
+  case adve_kin{
+    Mons: false
+    Const: false
+    Terrain:
+    case adve_kin.ele{
+      VOID: false
+      VOID_BLACK: false
+      FLOOR: false
+      GRASS_PLANT: false
+      BUSH: false
+      PLANT_0: false
+      SAND_0: false
+      PATH_BLOCKER: false
+      MID_CITY: false
+      STAIRS: false
+      MON_AREA: true
+    }
+    Interactive: false
+  }
+
+Mons.Kind.area_mon_pos(adve_kin: Mons.Kind, hero_pos: Pos32): Pos32
+  case adve_kin{
+    Mons: hero_pos
+    Const: hero_pos
+    Terrain:
+    case adve_kin.ele as terrain{
+      VOID: hero_pos
+      VOID_BLACK: hero_pos
+      FLOOR: hero_pos
+      GRASS_PLANT: hero_pos
+      BUSH: hero_pos
+      PLANT_0: hero_pos
+      SAND_0: hero_pos
+      PATH_BLOCKER: hero_pos
+      MID_CITY: hero_pos
+      STAIRS: hero_pos
+      MON_AREA: terrain.pos_mon
+    }
+    Interactive: hero_pos
+  }
+
 Mons.Kind.set_static_sprites(spr: List(Image3D)): U32 -> U32 -> U32 -> Mons.Dir -> List(Image3D)
   (x,y,obj_ani,obj_dir) spr
 
@@ -2378,12 +2418,20 @@ Mons.Kind.is_portal(adve_kin: Mons.Kind): Bool
     Interactive: Bool.false
   }
 
-// Full function in MOns.Kind.fm
+// Full functions in Mons.Kind.fm
 Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   Mons.Attr.new_neutral([Image3D.empty])
 
+Mons.Kind.exec_eff(kind: Mons.Kind, game: Mons.Game): Mons.Game
+  game
 
-// ------------------------ Mons.Effect ----------------------
+Mons.Kind.set_on_interactive(kind: Mons.Kind): Mons.Kind
+  kind
+
+Mons.Kind.swap_interactive(kind: Mons.Kind): Mons.Kind
+  kind
+
+// ------------------------ Mons.Effect.fm ----------------------
 // sleep: Can't attack on the next turn
 // burn: Loses 1/16 mhp for X turns
 // protect: Takes 50% less damage on the next turn
@@ -2555,7 +2603,7 @@ Mons.Effect.upd_end_turn_eff(eff: Mons.Effect): Mons.Effect
     eff.swap_agi)
 
 
-// ------------------- Mons.Draw -------------------
+// ------------------- Mons.Draw .fm-------------------
 // Given a tile (x, y) and an object, returns its global (x, y) positions
 Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
   open obj
@@ -2697,9 +2745,13 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
 Mons.Skill.apply_inital_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
   game
 
+Mons.Skill.clear_after_battle(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
+  game
 
+Mons.Skill.apply_end_turn_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
+  game
 
-// ------------------ Mons.font -------------------------
+// ------------------ Mons.font.fm  -------------------------
 Mons.font: Type
   Map(Image3D)
 
