@@ -13,6 +13,10 @@ IO.get_line: IO(String)
   IO.ask<String>("get_line", "", (line)
   IO.end<String>(line))
 
+IO.exit: IO(Unit)
+  IO.ask<Unit>("exit", "", (file)
+  IO.end<Unit>(Unit.new))
+
 IO.get_file(name: String): IO(String)
   IO.ask<String>("get_file", name, (file)
   IO.end<String>(file))
