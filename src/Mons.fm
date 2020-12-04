@@ -2020,15 +2020,15 @@ Mons.Input.code_to_char_map: Map(Char)
     Map.set<_>(code, char, map)
 
 // Serializes an input to its code
-// Mons.Input.serialize(char: Char): Maybe(Word(256))
-//   case Map.get<_>(U16.to_bits(char), Mons.Input.char_to_code_map) as code{
-//     none: Maybe.none<_>
-//     some: Maybe.some<_>(Word.from_bits(256, code.value))
-//   }
+Mons.Input.serialize(char: Char): Maybe(Word(256))
+  case Map.get<_>(U16.to_bits(char), Mons.Input.char_to_code_map) as code{
+    none: Maybe.none<_>
+    some: Maybe.some<_>(Word.from_bits(256, code.value))
+  }
 
-// // Deserializes a code to its input
-// Mons.Input.deserialize(code: Word(256)): Maybe(Char)
-//   Map.get<_>(Bits.slice(8, Word.to_bits<256>(code)), Mons.Input.code_to_char_map)
+// Deserializes a code to its input
+Mons.Input.deserialize(code: Word(256)): Maybe(Char)
+  Map.get<_>(Bits.slice(8, Word.to_bits<256>(code)), Mons.Input.code_to_char_map)
 
 // Generates an input char from the event down/code info
 Mons.Input.char(down: Bool, code: Char): Char
@@ -2062,79 +2062,79 @@ Mons.start(online: Bool): App(Mons.Game)
   // Render function
   def draw = (game) App.Render.vox(Mons.draw(game, screen))
 
-  def when = (event, game) []
+  // Event handlers
+  def when = (event, game)
+    if online then 
+       case event{
+         init: [
+            App.Action.print<_>("Starting app."),
+            App.Action.resize<_>(Mons.scr_w, Mons.scr_h),
+            App.Action.state<_>(Mons.Game.set_usr(event.addr, game)),
+            App.Action.watch<_>(Mons.App.room),
+            // Sends a J to init our char. TODO: better initialization.
+            let chr = Mons.Input.char(Bool.true, '.')
+            case Mons.Input.serialize(chr) as data{
+              none: App.Action.print<_>("") // unreachable
+              some: App.Action.post<_>(Mons.App.room, data.value)
+            }
+         ]
+         tick: 
+          [App.Action.state<_>(Mons.Game.tick(game, event.time))]
+         xkey: // send input to server
+            let chr = Mons.Input.char(event.down, event.code)
+            case Mons.Input.serialize(chr) as data{
+              none: []
+              some: [App.Action.post<_>(Mons.App.room, data.value)]
+            }
+         post: // applies input to this post's hero
+          case Mons.Input.deserialize(event.data) as input{
+            none: []
+            some: [ 
+              open game
+              App.Action.state<_>(Mons.Game.cmd(input.value, event.addr, game))
+            ]
+          }
+       }
 
+    else // offline mode
+      case event{
+        init: [
+          App.Action.resize<_>(Mons.scr_w, Mons.scr_h),
+          let game = Mons.Game.set_usr(event.addr, game)
+          let game = Mons.Game.cmd('d', event.addr, game) // inits hero
+          open game
+          let pos = 
+            case Mons.Game.get_hero_pos(game) as pos{
+              none: Mons.scr_mid
+              some: pos.value
+            }
+          let hero_info = Mons.Map.get_hero(pos, game.map)
+          let hero_obj = Pair.fst<_,_>(hero_info)
+          let hero_idx = Pair.snd<_,_>(hero_info)
+          let game = Mons.Game.hero_inital_position(game.usr, hero_obj, pos, 0u, game)
+          App.Action.state<_>(game),
+        ]
+        tick: [App.Action.state<_>(Mons.Game.tick(game, event.time))]
+        xkey: [
+          open game
+          let chr = Mons.Input.char(event.down, event.code)
+          App.Action.state<_>(Mons.Game.cmd(chr, game.usr, game))
+        ]
+        post: []
+      }
   App.new<_>(init, draw, when)
-    // Event handlers
-    
-//     if online then // online mode
-//       case event:
-//       | init => [
-//         App.Action.print<>("Starting app."),
-//         App.Action.resize<>(Mons.scr_w, Mons.scr_h),
-//         App.Action.state<>(Mons.Game.set_usr(event.addr, game)),
-//         App.Action.watch<>(Mons.App.room),
-//         // Sends a J to init our char. TODO: better initialization.
-//         let chr = Mons.Input.char(Bool.true, '.')
-//         case Mons.Input.serialize(chr) as data:
-//         | App.Action.print<>(""); // unreachable
-//         | App.Action.post<>(Mons.App.room, data.value);
-//       ];
-//       | tick => [
-//         App.Action.state<>(Mons.Game.tick(game, event.time)),
-//       ];
-//       | xkey => // send input to server
-//         let chr = Mons.Input.char(event.down, event.code)
-//         case Mons.Input.serialize(chr) as data:
-//         | [];
-//         | [App.Action.post<>(Mons.App.room, data.value)];;
-//       | post => // applies input to this post's hero
-//         // use skp = Debug.log<>("Got post.")
-//         // use skp = Debug.log<>(Bits.to_string(Word.to_bits<256>(event.data)))
-//         case Mons.Input.deserialize(event.data) as input:
-//         | [];
-//         | [
-//           // use skp = Debug.log<>(String.concat("Got input:", String.pure(input.value)))
-//           // use skp = Debug.log<>(String.concat("From user:", Bits.to_string(Word.to_bits<160>(event.addr))))
-//           open game:
-//           App.Action.state<>(Mons.Game.cmd(input.value, event.addr, game))
-//         ];;
-//     else // offline mode
-//       case event:
-//       | init => [
-//         App.Action.resize<>(Mons.scr_w, Mons.scr_h),
-//         let game = Mons.Game.set_usr(event.addr, game)
-//         let game = Mons.Game.cmd('d', event.addr, game) // inits hero
-//         open game:
-//         let pos = 
-//           case Mons.Game.get_hero_pos(game) as pos:
-//           | Mons.scr_mid;
-//           | pos.value;
-//         let hero_info = Mons.Map.get_hero(pos, game.map)
-//         let hero_obj = Pair.fst<,>(hero_info)
-//         let hero_idx = Pair.snd<,>(hero_info)
-//         let game = Mons.Game.hero_inital_position(game.usr, hero_obj, pos, 0u, game)
-//         App.Action.state<>(game),
-//       ];
-//       | tick => [App.Action.state<>(Mons.Game.tick(game, event.time))];
-//       | xkey => [
-//         open game:
-//         let chr = Mons.Input.char(event.down, event.code)
-//         App.Action.state<>(Mons.Game.cmd(chr, game.usr, game))
-//       ];
-//       | post => [];;
 
-// // Startup (online mode)
-// Mons.on: App(Mons.Game)
-//   Mons.start(Bool.true)
+// Startup (online mode)
+Mons.on: App(Mons.Game)
+  Mons.start(Bool.true)
 
-// // Startup (offline mode)
-// Mons.off: App(Mons.Game)
-//   Mons.start(Bool.false)
+// Startup (offline mode)
+Mons.off: App(Mons.Game)
+  Mons.start(Bool.false)
 
 // Startup (default mode = offline)
-// Mons: App(Mons.Game)
-//   Mons.off
+Mons: App(Mons.Game)
+  Mons.off
 
 //Mons: _
   //let map = Map.new<>
