@@ -35,23 +35,22 @@ Mons.Effect.upd_initial_eff(eff: Mons.Effect): Mons.Effect
     eff.poison,
     Bool.false) 
 
-// TODO: not working. Infinity loop
-// Mons.Effect.upd_end_turn_eff(eff: Mons.Effect): Mons.Effect
-//   open eff
-//   let sleep_turn = Pair.fst<_,_>(eff.sleep)
-//   let protect_turn = Pair.fst<_,_>(eff.protect)
-//   let minimize_turn = Pair.fst<_,_>(eff.minimize)
-//   let invulnerable = Pair.fst<_,_>(eff.invulnerable)
-//   let update_turn_counter = ((val) {U32.sub(val, 1u), U32.eql(val, 2u)}) :: U32 -> Pair(U32, Bool)
-//   Mons.Effect.new(
-//     update_turn_counter(sleep_turn),
-//     eff.burn, 
-//     update_turn_counter(protect_turn),
-//     update_turn_counter(minimize_turn), 
-//     if invulnerable then {Bool.false, Bool.true} else {Bool.false, Bool.false}, 
-//     eff.hit,
-//     eff.poison,
-//     eff.swap_agi)
+Mons.Effect.upd_end_turn_eff(eff: Mons.Effect): Mons.Effect
+  open eff
+  let sleep_turn = Pair.fst<_,_>(eff.sleep)
+  let protect_turn = Pair.fst<_,_>(eff.protect)
+  let minimize_turn = Pair.fst<_,_>(eff.minimize)
+  let invulnerable = Pair.fst<_,_>(eff.invulnerable)
+  let update_turn_counter = ((val) {U32.sub(val, 1u), U32.eql(val, 2u)}) :: U32 -> Pair(U32, Bool)
+  Mons.Effect.new(
+    update_turn_counter(sleep_turn),
+    eff.burn, 
+    update_turn_counter(protect_turn),
+    update_turn_counter(minimize_turn), 
+    if invulnerable then {Bool.false, Bool.true} else {Bool.false, Bool.false}, 
+    eff.hit,
+    eff.poison,
+    eff.swap_agi)
 
 Mons.Effect.has_sleep(eff: Mons.Effect): Bool
   open eff 
