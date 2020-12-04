@@ -7936,7 +7936,7 @@ module.exports = (function() {
                                 var $3178 = self.idx;
                                 var $3179 = self.code;
                                 var $3180 = self.val;
-                                var self = Fm$Parser$text$("b", $3178, $3179);
+                                var self = Parser$text$("b", $3178, $3179);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
                                         var $3182 = self.idx;
@@ -8024,7 +8024,7 @@ module.exports = (function() {
                                 var $3219 = self.idx;
                                 var $3220 = self.code;
                                 var $3221 = self.val;
-                                var self = Fm$Parser$text$("s", $3219, $3220);
+                                var self = Parser$text$("s", $3219, $3220);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
                                         var $3223 = self.idx;
@@ -8112,7 +8112,7 @@ module.exports = (function() {
                                 var $3260 = self.idx;
                                 var $3261 = self.code;
                                 var $3262 = self.val;
-                                var self = Fm$Parser$text$("u", $3260, $3261);
+                                var self = Parser$text$("u", $3260, $3261);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
                                         var $3264 = self.idx;
@@ -8200,7 +8200,7 @@ module.exports = (function() {
                                 var $3301 = self.idx;
                                 var $3302 = self.code;
                                 var $3303 = self.val;
-                                var self = Fm$Parser$text$("l", $3301, $3302);
+                                var self = Parser$text$("l", $3301, $3302);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
                                         var $3305 = self.idx;

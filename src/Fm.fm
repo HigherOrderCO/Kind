@@ -2769,7 +2769,7 @@ Fm.Parser.u8: Parser(Fm.Term)
     var init = Fm.Parser.init;
     Fm.Parser.spaces;
     var natx = Parser.nat;
-    Fm.Parser.text("b");
+    Parser.text("b");
     let term = Fm.Term.ref("Nat.to_u8");
     let term = Fm.Term.app(term, Fm.Term.nat(natx));
     var orig = Fm.Parser.stop(init);
@@ -2782,7 +2782,7 @@ Fm.Parser.u16: Parser(Fm.Term)
     var init = Fm.Parser.init;
     Fm.Parser.spaces;
     var natx = Parser.nat;
-    Fm.Parser.text("s");
+    Parser.text("s");
     let term = Fm.Term.ref("Nat.to_u16");
     let term = Fm.Term.app(term, Fm.Term.nat(natx));
     var orig = Fm.Parser.stop(init);
@@ -2795,7 +2795,7 @@ Fm.Parser.u32: Parser(Fm.Term)
     var init = Fm.Parser.init;
     Fm.Parser.spaces;
     var natx = Parser.nat;
-    Fm.Parser.text("u");
+    Parser.text("u");
     let term = Fm.Term.ref("Nat.to_u32");
     let term = Fm.Term.app(term, Fm.Term.nat(natx));
     var orig = Fm.Parser.stop(init);
@@ -2808,7 +2808,7 @@ Fm.Parser.u64: Parser(Fm.Term)
     var init = Fm.Parser.init;
     Fm.Parser.spaces;
     var natx = Parser.nat;
-    Fm.Parser.text("l");
+    Parser.text("l");
     let term = Fm.Term.ref("Nat.to_u64");
     let term = Fm.Term.app(term, Fm.Term.nat(natx));
     var orig = Fm.Parser.stop(init);
