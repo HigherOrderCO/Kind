@@ -34,23 +34,20 @@ Array.extract_tip<A: Type>(arr: Array(A,0)): A
       }
 
 // Given array `arr` and little-endian word `idx`, extracts value `arr[idx]`.
-// TODO: infinity loop
-// Array.get<A:Type, depth:Nat>(idx: Word(depth), arr: Array(A,depth)): A
-//   def P = (depth) Array(A,depth) -> A
-//   def nil = Array.extract_tip<A>
-//   def w0 = <idx.size> (rec) (arr)
-//     // get arr_l _ = Array.extract_tie<A, idx.size>(arr)
-//     let arr_l = Array.extract_tie<A, idx.size>(arr)
-//     case arr_l{
-//       new: arr_l.fst
-//     }
-//   def w1 = <idx.size> (rec) (arr)
-//     // get _ arr_r = Array.extract_tie<A, idx.size>(arr)
-//     let arr_r = Array.extract_tie<A, idx.size>(arr)
-//     case arr_r{
-//       new: rec(arr_r.snd)
-//     }
-//   Word.foldl<P, depth>(nil, w0, w1, idx, arr)
+Array.get<A:Type, depth:Nat>(idx: Word(depth), arr: Array(A,depth)): A
+  def P = (depth) Array(A,depth) -> A
+  def nil = Array.extract_tip<A>
+  def w0 = <idx.size> (rec) (arr)
+    let arr_l = Array.extract_tie<A, idx.size>(arr)
+    case arr_l{
+      new: rec(arr_l.fst)
+    }
+  def w1 = <idx.size> (rec) (arr)
+    let arr_r = Array.extract_tie<A, idx.size>(arr)
+    case arr_r{
+      new: rec(arr_r.snd)
+    }
+  Word.foldl<P, depth>(nil, w0, w1, idx, arr)
 
 // // Given array `arr`, little-endian word `idx` and function `f`, assigns `arr[idx] = f(arr[idx])`.
 // Array.mut<A:Type, depth:Nat>(idx: Word(depth), f: A -> A, arr: Array(A,depth)): Array(A,depth)

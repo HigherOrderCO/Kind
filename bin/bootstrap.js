@@ -9,7 +9,7 @@ var fmhs_path = path.join(__dirname, "hs/src/FormalityInternal.hs");
 process.chdir(path.join(__dirname, "../src"));
 
 // Restores last formality.js from git in case we destroyed it 
-//execSync("git checkout "+fmjs_path);
+execSync("git checkout "+fmjs_path);
 
 // Creates formality.js
 console.log("Generating formality.js");
