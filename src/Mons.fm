@@ -1606,51 +1606,51 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       //   let game = Mons.Game.add_mon(mage)
       //   Mons.Game.hero_inital_position(game.usr, hero_obj, Pos32.new(0u,0u,0u), hero_idx, game)
       // else 
-      game
+        game
     }
   }
 
-// Mons.Game.exec_turn(
-//   hero_obj: Mons.Object, 
-//   adve_obj: Mons.Object,
-//   pos: Pos32,
-//   hero_idx: U32,
-//   adve_idx: U32,
-//   code_skill: Nat,
-//   turn: Mons.Turn,
-//   game: Mons.Game) : Mons.Game
-//   open game
+Mons.Game.exec_turn(
+  hero_obj: Mons.Object, 
+  adve_obj: Mons.Object,
+  pos: Pos32,
+  hero_idx: U32,
+  adve_idx: U32,
+  code_skill: Nat,
+  turn: Mons.Turn,
+  game: Mons.Game) : Mons.Game
+  open game
   
-//   let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
-//   open hero_mon_obj
-//   open adve_obj
+  let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
+  open hero_mon_obj
+  open adve_obj
 
-//   let hero_skill = Mons.Game.get_skills_at(code_skill, hero_mon_obj)
-//   let adve_skill_code = Mons.Game.adve_turn(hero_obj, adve_obj, game)
-//   let adve_skill = Mons.Game.get_skills_at(adve_skill_code, adve_obj)
+  let hero_skill = Mons.Game.get_skills_at(code_skill, hero_mon_obj)
+  let adve_skill_code = Mons.Game.adve_turn(hero_obj, adve_obj, game)
+  let adve_skill = Mons.Game.get_skills_at(adve_skill_code, adve_obj)
 
-//   if Bool.not(Mons.Turn.is_active(turn)) then
-//     let game = Mons.Skill.apply_inital_eff(hero_idx, adve_idx, pos, game)
+  if Bool.not(Mons.Turn.is_active(turn)) then
+    let game = Mons.Skill.apply_inital_eff(hero_idx, adve_idx, pos, game)
 
-//     if Nat.eql(code_skill, 4) then // Run from gram, only adve plays
-//       let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
-//       let game = Mons.Skill.cast(pos, hero_idx, adve_idx, Mons.Skill.run, game)
-//       let turn = Mons.Turn.new(Bool.true, Mons.Skill.run, adve_skill, 5u)
-//       Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
-//     else
+    if Nat.eql(code_skill, 4) then // Run from gram, only adve plays
+      let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
+      let game = Mons.Skill.cast(pos, hero_idx, adve_idx, Mons.Skill.run, game)
+      let turn = Mons.Turn.new(Bool.true, Mons.Skill.run, adve_skill, 5u)
+      Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
+    else
 
-//     if Mons.Game.hero_start_attacking(hero_mon_obj.kin, adve_obj.kin) 
-//     then
-//       let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game) // hero cast
-//       let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
-//       let turn = Mons.Turn.new(Bool.true, hero_skill, adve_skill, 2u)  
-//       Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
-//     else 
-//       let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
-//       let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game) // hero cast
-//       let turn = Mons.Turn.new(Bool.false, hero_skill, adve_skill, 2u)
-//       Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
-//   else game
+    if Mons.Game.hero_start_attacking(hero_mon_obj.kin, adve_obj.kin) 
+    then
+      let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game) // hero cast
+      let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
+      let turn = Mons.Turn.new(Bool.true, hero_skill, adve_skill, 2u)  
+      Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
+    else 
+      let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
+      let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game) // hero cast
+      let turn = Mons.Turn.new(Bool.false, hero_skill, adve_skill, 2u)
+      Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
+  else game
 
 Mons.Game.hero_start_attacking(hero_kin: Mons.Kind, adve_kin: Mons.Kind) : Bool
   let hero_agi = Mons.Kind.get_agi(hero_kin)
@@ -2378,175 +2378,9 @@ Mons.Kind.is_portal(adve_kin: Mons.Kind): Bool
     Interactive: Bool.false
   }
 
-// blocks: Bool,
-// battles: Bool,
-// mhp: U32,
-// atk: U32
-// name: String
-// spr: (x: U32) -> (y: U32) -> (obj_ani: U32) -> (obj_dir: Mons.Dir)-> List(Image3D)
+// Full function in MOns.Kind.fm
 Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
-  // let default_pos = Mons.global_scr_mid
-  // let set_pos_lvl1 = 
-  //   ((x: U32, y: U32) Mons.image_to_global(u80, u80, x, y, 1u))
-  //   :: U32 -> U32 -> Pos32
-  // let set_pos_lvl2 = 
-  //   ((x: U32, y: U32) Mons.image_to_global(u20, u20, x, y, 2u))
-  //   :: U32 -> U32 -> Pos32
   Mons.Attr.new_neutral([Image3D.empty])
-  // case kin{
-  //   Mons: 
-  //   case kin.ele as kin{
-  //     HERO: Mons.Attr.new_hero
-  //     MAGE: Mons.Attr.new_mage
-    
-  //     BEHOLDER:
-      // Mons.Attr.new_battleable(
-      // Mons.Assets.pic_beholder, [Mons.Assets.mons_beholder_d_0], "BEHOLDER",
-      // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d),
-      // [Mons.Skill.super_fang, Mons.Skill.nightmare, Mons.Skill.protect, Mons.Skill.hypnosis], 
-      // set_pos_lvl2(10u, 10u))
-    
-  //     ZOIO:
-  //     // Mons.Attr.new_battleable(
-  //     // Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "ZOIO",
-  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
-  //     // [Mons.Skill.slam, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.dig],
-  //     // set_pos_lvl1(38u, 52u))
-    
-  //     CYCLOPE:
-  //     // Mons.Attr.new_battleable(
-  //     // Mons.Assets.pic_cyclop, [Mons.Assets.mons_cyclop_d_0], "CYCLOPE",
-  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_cyclop_u, Mons.Assets.battle_cyclop_d),
-  //     // [Mons.Skill.slam, Mons.Skill.rock_smash, Mons.Skill.recover, Mons.Skill.counter ],
-  //     // set_pos_lvl1(61u, 49u))
-    
-  //     POISOLICK:
-  //     // Mons.Attr.new_battleable(
-  //     // Mons.Assets.pic_poisolick, [Mons.Assets.mons_poisolick_d_0], "POISOLICK",
-  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_poisolick_u, Mons.Assets.battle_poisolick_d),
-  //     // [Mons.Skill.crunch, Mons.Skill.sludge_bomb, Mons.Skill.iron_defense, Mons.Skill.gyro_ball],
-  //     // set_pos_lvl1(62u, 19u))
-    
-  //     TROWL:
-  //     // Mons.Attr.new_battleable(
-  //     // Mons.Assets.pic_trowl, [Mons.Assets.mons_trowl_d_0], "TROWL",
-  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_trowl_u, Mons.Assets.battle_trowl_d),
-  //     // [Mons.Skill.wing_attack, Mons.Skill.crunch, Mons.Skill.recover, Mons.Skill.agility],
-  //     // set_pos_lvl1(19u, 38u))
-    
-  //     MIMIC:
-  //     // Mons.Attr.new_battleable(
-  //     // Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
-  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d),
-  //     // [Mons.Skill.super_fang, Mons.Skill.crunch, Mons.Skill.hypnosis, Mons.Skill.dream_eater],
-  //     // set_pos_lvl1(41u, 24u))
-    
-  //     MIMIC2:
-  //     // Mons.Attr.new_battleable(
-  //     // Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
-  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d),
-  //     // [Mons.Skill.super_fang, Mons.Skill.crunch, Mons.Skill.hypnosis, Mons.Skill.dream_eater],
-  //     // // set_pos_lvl1(62u, 33u))
-  //     // set_pos_lvl2(10u, 10u))
-    
-  //     AZULA:
-  //     // Mons.Attr.new_battleable(
-  //     // Mons.Assets.pic_azula, [Mons.Assets.mons_azula_d_0], "AZULA",
-  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_azula_u, Mons.Assets.battle_azula_d),
-  //     // [Mons.Skill.wing_attack, Mons.Skill.moonlight, Mons.Skill.play_rough, Mons.Skill.psychic],
-  //     // set_pos_lvl1(46u, 38u))
-    
-  //     EMERELDER:
-  //     // Mons.Attr.new_battleable(
-  //     // Mons.Assets.pic_emerelder, [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
-  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_emerelder_u, Mons.Assets.battle_emerelder_d),
-  //     // [Mons.Skill.ancient_power, Mons.Skill.thunder_wave, Mons.Skill.charge, Mons.Skill.iron_defense],
-  //     // set_pos_lvl1(16u, 22u))
-
-  //     EMERELDER2:
-  //     // Mons.Attr.new_battleable(
-  //     // Mons.Assets.pic_emerelder, [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
-  //     // (is_up) Bool.if<_>(is_up, Mons.Assets.battle_emerelder_u, Mons.Assets.battle_emerelder_d),
-  //     // [Mons.Skill.ancient_power, Mons.Skill.thunder_wave, Mons.Skill.charge, Mons.Skill.iron_defense],
-  //     // set_pos_lvl1(23u, 27u))
-
-  // } // end mons
-  
-  // Construction:
-  //   case kin.ele as kin{
-  //     FOUNTAIN:
-  //       Mons.Attr.new_blockable([
-  //         Mons.Assets.0_fountain_0, Mons.Assets.0_fountain_1,
-  //         Mons.Assets.0_fountain_2, Mons.Assets.0_fountain_3])
-  //     CHEST:
-  //       Mons.Attr.new_neutral([Mons.Assets.tile_chest_0])
-  //     CRYSTAL:
-  //       Mons.Attr.new_neutral([
-  //       Mons.Assets.0_crystal0, Mons.Assets.0_crystal1, Mons.Assets.0_crystal2,
-  //       Mons.Assets.0_crystal3, Mons.Assets.0_crystal4, Mons.Assets.0_crystal5,
-  //       Mons.Assets.0_crystal6, Mons.Assets.0_crystal7])
-  //     PORTAL:Mons.Attr.new_neutral([Image3D.empty])
-  //       Mons.Attr.new_neutral([
-  //       Mons.Assets.portal_0, Mons.Assets.portal_1, Mons.Assets.portal_2,
-  //       Mons.Assets.portal_3, Mons.Assets.portal_4, Mons.Assets.portal_5,
-  //       Mons.Assets.portal_6, Mons.Assets.portal_7])
-  //   } // end of construction
-
-  // Terrain: 
-  //   case kin.ele as kin{
-  //   VOID: Mons.Attr.new_blockable([Mons.Assets.void])
-  //   VOID_BLACK: Mons.Attr.new_blockable([Mons.Assets.void_black])
-  //   FLOOR:
-  //      if U32.eql(kin.lvl, 0u) then Mons.Attr.new_neutral([Mons.Assets.void])
-  //      else Mons.Attr.new_neutral([Mons.Assets.grass_2])
-  //   PLANT: Mons.Attr.new_neutral([Mons.Assets.grass_2])
-  //   BUSH: Mons.Attr.new_neutral([Mons.Assets.bush_0, Mons.Assets.bush_1])
-  //   PLANT_0: Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0])
-  //   SAND_0: Mons.Attr.new_neutral([Mons.Assets.sand_0])
-  //   PATH_BLOCKER:
-  //      if U32.eql(kin.lvl, 1u) then Mons.Attr.new_blockable([Mons.Assets.void])
-  //      else Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m])
-  //   MID_CITY: Mons.Kind.mid_city(kin.row, kin.column)
-  //   STAIRS:
-  //    if U32.eql(kin.row, 38u) then 
-  //      if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.stair_38_0])
-  //      else Mons.Attr.new_neutral([Mons.Assets.stair_38_1])
-  //    else if U32.eql(kin.row, 37u) then
-  //      if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.stair_37_0])
-  //      else Mons.Attr.new_neutral([Mons.Assets.stair_37_1])
-  //    else if U32.eql(kin.row, 36u) then
-  //      if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.stair_36_0])
-  //      else Mons.Attr.new_neutral([Mons.Assets.stair_36_1])
-  //    else if U32.eql(kin.row, 35u) then
-  //      if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.stair_35_0])
-  //      else Mons.Attr.new_neutral([Mons.Assets.stair_35_1])
-  //    else if U32.eql(kin.row, 34u) then
-  //      if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.stair_34_0])
-  //      else Mons.Attr.new_neutral([Mons.Assets.stair_34_1])
-  //    else Mons.Attr.new_neutral([Mons.Assets.stairs])
-  //   MON_AREA: Mons.Attr.new_neutral([Mons.Assets.grass_2])
-  //   } // end terrain
-
-  //   Interactive:
-  //     case kin.ele as kin{
-  //       lever:
-        // if kin.on then Mons.Attr.new_neutral([Mons.Assets.push_tool_on])
-        // else Mons.Attr.new_neutral([Mons.Assets.push_tool_off])
-  //       move: Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0])
-  //       heal:
-        // if kin.on then 
-        //    Mons.Attr.new_neutral([
-        //     Mons.Assets.healing_point_broken_00, Mons.Assets.healing_point_broken_01,
-        //     Mons.Assets.healing_point_broken_02, Mons.Assets.healing_point_broken_03])
-        // else
-        //   Mons.Attr.new_neutral([
-        //     Mons.Assets.healing_point_00, Mons.Assets.healing_point_01,
-        //     Mons.Assets.healing_point_02, Mons.Assets.healing_point_03])
-      
-  //     } // end inter
-  // }
-
-
 
 
 // ------------------------ Mons.Effect ----------------------
@@ -2855,6 +2689,14 @@ Mons.Skill.short_description(skill: Mons.Skill): String
     hero_kill: "Herro atk"
     nightmare: "If sleep damage hit 20% hp"
   }
+
+// Full functions in Mons.Skill.fm
+Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Game): Mons.Game 
+  game
+
+Mons.Skill.apply_inital_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
+  game
+
 
 
 // ------------------ Mons.font -------------------------
