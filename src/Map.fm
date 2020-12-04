@@ -46,6 +46,26 @@ Map.set<A: Type>(bits: Bits, val: A, map: Map(A)): Map(A)
     }
   }
 
+Map.mut<A: Type>(bits: Bits, ini: A, fun: A -> A, map: Map(A)): Map(A)
+  case bits {
+    e: case map {
+      new: Map.tie<_>(Maybe.some<_>(ini), Map.new<_>, Map.new<_>),
+      tie: Map.tie<_>(case map.val {
+        none: Maybe.none<_>,
+        some: Maybe.some<_>(fun(map.val.value)),
+      }, map.lft, map.rgt),
+    },
+    o: case map {
+      new: Map.tie<_>(Maybe.none<_>, Map.mut<_>(bits.pred, ini, fun, Map.new<_>), Map.new<_>),
+      tie: Map.tie<_>(map.val, Map.mut<_>(bits.pred, ini, fun, map.lft), map.rgt),
+    },
+    i: case map {
+      new: Map.tie<_>(Maybe.none<_>, Map.new<_>, Map.mut<_>(bits.pred, ini, fun, Map.new<_>)),
+      tie: Map.tie<_>(map.val, map.lft, Map.mut<_>(bits.pred, ini, fun, map.rgt)),
+    }
+  }
+
+
 Map.delete<A: Type>(key: Bits, map: Map(A)): Map(A)
   case map {
     new: Map.new<_>,
@@ -56,11 +76,11 @@ Map.delete<A: Type>(key: Bits, map: Map(A)): Map(A)
     }
   }
 
-Map.from_list<A: Type, B: Type>(f: A -> Bits, xs: List(Pair(A,B))): Map(B)
+Map.from_list<A: Type>(xs: List(Pair(Bits,A))): Map(A)
   case xs {
     nil : Map.new<_>,
     cons: case xs.head as p {
-      new: Map.set<_>(f(p.fst), p.snd, Map.from_list<_,_>(f, xs.tail))
+      new: Map.set<_>(p.fst, p.snd, Map.from_list<_>(xs.tail))
     }
   }
 
