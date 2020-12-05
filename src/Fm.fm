@@ -487,6 +487,8 @@ Fm.Term.show.app(term: Fm.Term, path: Maybe(Bits -> Bits), args: List(String)): 
     app:
       let argm = Fm.Term.show.go(term.argm, Fm.MPath.i(path));
       Fm.Term.show.app(term.func, Fm.MPath.o(path), List.cons<_>(argm, args)),
+    ori:
+      Fm.Term.show.app(term.expr, path, args),
     _:
       let arity = List.length<_>(args);
       if Bool.and(Fm.Term.show.is_ref(term,"Equal"), Nat.eql(arity,3)) then
@@ -777,53 +779,6 @@ Fm.Term.normalize(term: Fm.Term, defs: Fm.Defs): Fm.Term
       Fm.Term.normalize(term.expr, defs),
   }
 
-//Fm.Term.clean(term: Fm.Term, defs: Fm.Defs): Fm.Term
-  //case term {
-    //ref:
-      //Fm.Term.ref(term.name),
-    //var:
-      //Fm.Term.var(term.name, term.indx),
-    //typ:
-      //Fm.Term.typ,
-    //all: 
-      //def xtyp = Fm.Term.clean(term.xtyp, defs);
-      //def body = (s,x) Fm.Term.clean(term.body(s,x), defs);
-      //Fm.Term.all(term.eras, term.self, term.name, xtyp, body),
-    //lam:
-      //def body = (x) Fm.Term.clean(term.body(x), defs);
-      //Fm.Term.lam(term.name, body),
-    //app:
-      //def func = Fm.Term.clean(term.func, defs);
-      //def argm = Fm.Term.clean(term.argm, defs);
-      //Fm.Term.app(func, argm),
-    //let:
-      //def expr = Fm.Term.clean(term.expr, defs);
-      //def body = (x) Fm.Term.clean(term.body(x), defs);
-      //Fm.Term.let(term.name, expr, body),
-    //def:
-      //def expr = Fm.Term.clean(term.expr, defs);
-      //def body = (x) Fm.Term.clean(term.body(x), defs);
-      //Fm.Term.def(term.name, expr, body),
-    //ann:
-      //def term = Fm.Term.clean(term.term, defs);
-      //def type = Fm.Term.clean(term.type, defs);
-      //Fm.Term.ann(term.done, term, type),
-    //gol:
-      //Fm.Term.gol(term.name, term.dref, term.verb),
-    //hol:
-      //Fm.Term.hol(term.path),
-    //nat:
-      //Fm.Term.nat(term.natx),
-    //chr:
-      //Fm.Term.chr(term.chrx),
-    //str:
-      //Fm.Term.str(term.strx),
-    //cse:
-      //term,
-    //ori:
-      //Fm.Term.clean(term.expr, defs),
-  //}
-
 // Patching
 // ========
 
@@ -968,7 +923,7 @@ Fm.Term.serialize.name(name: String): Bits
   Fm.Name.to_bits(name)
 
 // Helper function
-Fm.Term.serialize(term: Fm.Term, depth: Nat, init: Nat, x: Bits): Bits
+Fm.Term.serialize(term: Fm.Term, depth: Nat, init: Nat, diff: Bits -> Bits, x: Bits): Bits
   case term {
     ref:
       let name = Bits.concat(Fm.Term.serialize.name(term.name));
@@ -985,56 +940,59 @@ Fm.Term.serialize(term: Fm.Term, depth: Nat, init: Nat, x: Bits): Bits
     all:
       let eras = if term.eras then Bits.i else Bits.o
       let self = Bits.concat(Fm.Name.to_bits(term.self));
-      let xtyp = Fm.Term.serialize(term.xtyp, depth, init);
+      let xtyp = Fm.Term.serialize(term.xtyp, depth, init, diff);
       let body = Fm.Term.serialize(
         term.body(
           Fm.Term.var(term.self, depth),
           Fm.Term.var(term.name, Nat.succ(depth))),
         Nat.succ(Nat.succ(depth)),
-        init);
+        init,
+        diff);
       Bits.i(Bits.o(Bits.o(eras(self(xtyp(body(x))))))),
     lam:
       let body = Fm.Term.serialize(
         term.body(Fm.Term.var(term.name, depth)),
         Nat.succ(depth),
-        init);
+        init,
+        diff);
       Bits.i(Bits.o(Bits.i(body(x)))),
     app:
-      let func = Fm.Term.serialize(term.func, depth, init);
-      let argm = Fm.Term.serialize(term.argm, depth, init);
+      let func = Fm.Term.serialize(term.func, depth, init, diff);
+      let argm = Fm.Term.serialize(term.argm, depth, init, diff);
       Bits.i(Bits.i(Bits.o(func(argm(x))))),
     let:
-      let expr = Fm.Term.serialize(term.expr, depth, init);
+      let expr = Fm.Term.serialize(term.expr, depth, init, diff);
       let body = Fm.Term.serialize(
         term.body(Fm.Term.var(term.name, depth)),
         Nat.succ(depth),
-        init);
+        init,
+        diff);
       Bits.i(Bits.i(Bits.i(expr(body(x))))),
     def:
-      Fm.Term.serialize(term.body(term.expr), depth, init, x),
+      Fm.Term.serialize(term.body(term.expr), depth, init, diff, x),
     ann:
-      Fm.Term.serialize(term.term, depth, init, x),
+      Fm.Term.serialize(term.term, depth, init, diff, x),
     gol:
       let name = Bits.concat(Fm.Name.to_bits(term.name));
       Bits.o(Bits.o(Bits.o(name(x)))),
     hol:
       x,
     nat:
-      Fm.Term.serialize(Fm.Term.unroll_nat(term.natx), depth, init, x),
+      Fm.Term.serialize(Fm.Term.unroll_nat(term.natx), depth, init, diff, x),
     chr:
-      Fm.Term.serialize(Fm.Term.unroll_chr(term.chrx), depth, init, x),
+      Fm.Term.serialize(Fm.Term.unroll_chr(term.chrx), depth, init, diff, x),
     str:
-      Fm.Term.serialize(Fm.Term.unroll_str(term.strx), depth, init, x),
+      Fm.Term.serialize(Fm.Term.unroll_str(term.strx), depth, init, diff, x),
     cse:
-      x,
+      diff(x),
     ori:
-      Fm.Term.serialize(term.expr, depth, init, x),
+      Fm.Term.serialize(term.expr, depth, init, diff, x),
   }
 
 // Determines if two terms are identical
 Fm.Term.identical(a: Fm.Term, b: Fm.Term, lv: Nat): Bool
-  let ah = Fm.Term.serialize(a, lv, lv, Bits.e);
-  let bh = Fm.Term.serialize(b, lv, lv, Bits.e);
+  let ah = Fm.Term.serialize(a, lv, lv, Bits.o, Bits.e);
+  let bh = Fm.Term.serialize(b, lv, lv, Bits.i, Bits.e);
   Bits.eql(ah, bh)
 
 // Helper function
@@ -1070,15 +1028,15 @@ Fm.Term.equal.extra_holes(
 
 // EQUAL: Determines if two terms are equal
 Fm.Term.equal(a: Fm.Term, b: Fm.Term, defs: Fm.Defs, lv: Nat, seen: Set): Fm.Check(Bool)
-  let ah = Fm.Term.serialize(Fm.Term.reduce(a,Map.new<_>), lv, lv, Bits.e);
-  let bh = Fm.Term.serialize(Fm.Term.reduce(b,Map.new<_>), lv, lv, Bits.e);
+  let ah = Fm.Term.serialize(Fm.Term.reduce(a,Map.new<_>), lv, lv, Bits.o, Bits.e);
+  let bh = Fm.Term.serialize(Fm.Term.reduce(b,Map.new<_>), lv, lv, Bits.i, Bits.e);
   if Bits.eql(ah, bh) then do Fm.Check {
     return Bool.true;
   } else do Fm.Check {
     let a1 = Fm.Term.reduce(a, defs);
     let b1 = Fm.Term.reduce(b, defs);
-    let ah = Fm.Term.serialize(a1, lv, lv, Bits.e);
-    let bh = Fm.Term.serialize(b1, lv, lv, Bits.e);
+    let ah = Fm.Term.serialize(a1, lv, lv, Bits.o, Bits.e);
+    let bh = Fm.Term.serialize(b1, lv, lv, Bits.i, Bits.e);
     if Bits.eql(ah, bh) then do Fm.Check {
       return Bool.true;
     } else do Fm.Check {
@@ -3460,6 +3418,54 @@ Fm.Defs.core(defs: Fm.Defs): String
 // =====
 
 // SYNTH: Fixes a list of errors, if possible
+//Fm.Synth.fix(
+  //file: String,
+  //code: String,
+  //name: Fm.Name,
+  //term: Fm.Term,
+  //type: Fm.Term,
+  //defs: Fm.Defs,
+  //errs: List(Fm.Error),
+  //fixd: Bool,
+//): IO(Maybe(Fm.Defs))
+  //case errs {
+    //nil:
+      //if fixd then do IO {
+        //let type = Fm.Term.bind([], (x) Bits.i(x), type);
+        //let term = Fm.Term.bind([], (x) Bits.o(x), term);
+        //let defs = Fm.set<_>(name, Fm.Def.new(file, code, name, term, type, Fm.Status.init), defs);
+        //return Maybe.some<_>(defs);
+      //} else do IO {
+        //return Maybe.none<_>;
+      //},
+    //cons: case errs.head {
+      //waiting: do IO {
+        //var defs = Fm.Synth.one(errs.head.name, defs);
+        //Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
+      //},
+      //undefined_reference: do IO {
+        //var defs = Fm.Synth.one(errs.head.name, defs);
+        //Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
+      //},
+      //patch: case errs.head.path {
+        //e: do IO { // shouldn't happen
+          //return Maybe.none<_>;
+        //},
+        //o: do IO { // hole is on term
+          //let term = Fm.Term.patch_at(errs.head.path.pred, term, (x) errs.head.term);
+          //Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
+        //},
+        //i: do IO { // hole is on type
+          //let type = Fm.Term.patch_at(errs.head.path.pred, type, (x) errs.head.term);
+          //Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
+        //},
+      //},
+      //// The error isn't fixable
+      //_: Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, fixd),
+    //}
+  //}
+
+// SYNTH: Fixes a list of errors, if possible
 Fm.Synth.fix(
   file: String,
   code: String,
@@ -3468,6 +3474,7 @@ Fm.Synth.fix(
   type: Fm.Term,
   defs: Fm.Defs,
   errs: List(Fm.Error),
+  skip: Set,
   fixd: Bool,
 ): IO(Maybe(Fm.Defs))
   case errs {
@@ -3483,29 +3490,35 @@ Fm.Synth.fix(
     cons: case errs.head {
       waiting: do IO {
         var defs = Fm.Synth.one(errs.head.name, defs);
-        Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
+        Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, skip, Bool.true);
       },
       undefined_reference: do IO {
         var defs = Fm.Synth.one(errs.head.name, defs);
-        Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
+        Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, skip, Bool.true);
       },
-      patch: case errs.head.path {
-        e: do IO { // shouldn't happen
-          return Maybe.none<_>;
-        },
-        o: do IO { // hole is on term
-          let term = Fm.Term.patch_at(errs.head.path.pred, term, (x) errs.head.term);
-          Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
-        },
-        i: do IO { // hole is on type
-          let type = Fm.Term.patch_at(errs.head.path.pred, type, (x) errs.head.term);
-          Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
-        },
-      },
+      patch:
+        if Set.has(errs.head.path, skip) then
+          Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, skip, Bool.true)
+        else
+          let skip = Set.set(errs.head.path, skip);
+          case errs.head.path {
+            e: do IO { // shouldn't happen
+              return Maybe.none<_>;
+            },
+            o: do IO { // hole is on term
+              let term = Fm.Term.patch_at(errs.head.path.pred, term, (x) errs.head.term);
+              Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, skip, Bool.true);
+            },
+            i: do IO { // hole is on type
+              let type = Fm.Term.patch_at(errs.head.path.pred, type, (x) errs.head.term);
+              Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, skip, Bool.true);
+            },
+          },
       // The error isn't fixable
-      _: Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, fixd),
+      _: Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, skip, fixd),
     }
   }
+
 
 Fm.Synth.file_of(name: Fm.Name): String
   case name {
@@ -3586,7 +3599,7 @@ Fm.Synth.one(name: Fm.Name, defs: Fm.Defs): IO(Fm.Defs)
                   //let defs = Fm.set<_>(name, Fm.Def.new(file, code, name, term, type, Fm.Status.done), defs);
                   return defs;
                 } else do IO {
-                  var fixed = Fm.Synth.fix(file, code, name, term, type, defs, checked.errors, Bool.false);
+                  var fixed = Fm.Synth.fix(file, code, name, term, type, defs, checked.errors, Set.new, Bool.false);
                   case fixed {
                     none: do IO {
                       let stat = Fm.Status.fail(checked.errors);
@@ -3632,80 +3645,6 @@ Fm.Synth.file(file: String, defs: Fm.Defs): IO(Either(String, Pair(List(Fm.Name)
       },
     };
   }
-
-// Load
-// ====
-
-//Fm.Load.missing(errors: List(Fm.Error)): List(String)
-  //case errors {
-    //nil: List.nil<_>,
-    //cons:
-      //let tail = Fm.Load.missing(errors.tail);
-      //case errors.head {
-        //undefined_reference: List.cons<_>(errors.head.name, tail),
-        //_: tail,
-      //}
-  //}
-
-//Fm.Load.one(name: Fm.Name, defs: Fm.Defs): IO(Fm.Defs)
-  //let skip = Debug.log<_>(String.flatten(["Fm.Load.one ", name]), (x) Unit.new);
-  ////let skip = Debug.log<_>(String.flatten(["load_name ", name, " ", String.join("|",List.mapped<_>(Map.keys<_>(defs))<_>(Fm.Name.from_bits))]), (x) Unit.new);
-  //let defs = Fm.Synth.one(name, defs);
-  //case Fm.get<_>(name, defs) as got {
-    //some: case got.value {
-      //new: 
-        //let file = got.value.file;
-        //let code = got.value.code;
-        //let name = got.value.name;
-        //let term = got.value.term;
-        //let type = got.value.type;
-        //let stat = got.value.stat;
-        //case stat {
-          //init: do IO { return defs; },
-          //wait: do IO { return defs; },
-          //done: do IO { return defs; },
-          //fail: do IO {
-            //let missing = Fm.Load.missing(stat.errors);
-            //case missing {
-              //nil : do IO { return defs; },
-              //cons: do IO {
-                //let defs = Fm.set<_>(name, Fm.Def.new(file,code,name,term,type,Fm.Status.init), defs);
-                //var defs = Fm.Load.many(missing, defs);
-                //var defs = Fm.Load.one(name, defs);
-                //return defs;
-              //},
-            //};
-          //},
-        //}
-    //},
-    //none: do IO {
-      //let file = Fm.Load.file_of(name);
-      //var code = IO.get_file(file);
-      //let read = Fm.Defs.read(file, code, defs);
-      //let skip = Debug.log<_>(String.flatten(["loading file: ", file]), (x) Unit.new);
-      //case read {
-        //left: do IO { return defs; },
-        //right: do IO {
-          //let defs = read.value;
-          //case Fm.get<_>(name, defs) as got {
-            //none: do IO { return defs; },
-            //some: Fm.Load.one(name, defs)
-          //};
-        //},
-      //};
-    //},
-  //}
-
-//Fm.Load.many(names: List(Fm.Name), defs: Fm.Defs): IO(Fm.Defs)
-  //do IO {
-    //case names {
-      //nil: do IO { return defs; },
-      //cons: do IO {
-        //var defs = Fm.Load.one(names.head, defs);
-        //Fm.Load.many(names.tail, defs);
-      //}
-    //};
-  //}
 
 // API
 // ===
