@@ -44,7 +44,7 @@ if (!process.argv[2] || process.argv[2] === "--help" || process.argv[2] === "-h"
       console.log(fmc_to_js.compile(fmcc, name, {module}));
     } catch (e) {
       console.log("Compilation error.");
-      //console.log(e);
+      console.log(e);
     }
 
   // JavaScript execution

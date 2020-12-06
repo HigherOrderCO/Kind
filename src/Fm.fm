@@ -995,9 +995,36 @@ Fm.Term.identical(a: Fm.Term, b: Fm.Term, lv: Nat): Bool
   let bh = Fm.Term.serialize(b, lv, lv, Bits.i, Bits.e);
   Bits.eql(ah, bh)
 
+Fm.Term.has_holes(term: Fm.Term): Bool
+  case term {
+    ref: false,
+    var: false,
+    typ: false,
+    all: Bool.or(Fm.Term.has_holes(term.xtyp), Fm.Term.has_holes(term.body(Fm.Term.typ,Fm.Term.typ))),
+    lam: Fm.Term.has_holes(term.body(Fm.Term.typ)),
+    app: Bool.or(Fm.Term.has_holes(term.func), Fm.Term.has_holes(term.argm)),
+    let: Bool.or(Fm.Term.has_holes(term.expr), Fm.Term.has_holes(term.body(Fm.Term.typ))),
+    def: Bool.or(Fm.Term.has_holes(term.expr), Fm.Term.has_holes(term.body(Fm.Term.typ))),
+    ann: Bool.or(Fm.Term.has_holes(term.term), Fm.Term.has_holes(term.type)),
+    gol: false,
+    hol: true,
+    nat: false,
+    chr: false,
+    str: false,
+    cse: false,
+    ori: Fm.Term.has_holes(term.expr),
+  }
+
 // Helper function
-Fm.Term.equal.patch<A: Type>(path: Bits, term: Fm.Term, ret: A): Fm.Check(A)
-  Fm.Check.result<_>(Maybe.some<_>(ret), [Fm.Error.patch(path, Fm.Term.normalize(term, Map.new<_>))])
+Fm.Term.equal.hole(path: Bits, term: Fm.Term): Fm.Check(Bool)
+  case term {
+    hol: Fm.Check.result<_>(some(true), []),
+    _: if Fm.Term.has_holes(term)
+      then Fm.Check.result<_>(some(false), [])
+      else Fm.Check.result<_>(some(true), [
+        Fm.Error.patch(path, Fm.Term.normalize(term, Map.new<_>))
+      ])
+  }
 
 // Fills some extra holes that aren't captured by the Equal function. For
 // example, `Sigma(A, B) == Sigma(_, _)` won't fill these holes since it will
@@ -1014,14 +1041,14 @@ Fm.Term.equal.extra_holes(
         Fm.Term.equal.extra_holes(a.argm, b.argm);
       },
       ori: Fm.Term.equal.extra_holes(a, b.expr),
-      hol: Fm.Term.equal.patch<_>(b.path, a, Unit.new), 
+      hol: do Fm.Check { Fm.Term.equal.hole(b.path, a); return Unit.new; }, 
       _: do Fm.Check { return Unit.new; },
     },
     ori: Fm.Term.equal.extra_holes(a.expr, b),
-    hol: Fm.Term.equal.patch<_>(a.path, b, Unit.new),
+    hol: do Fm.Check { Fm.Term.equal.hole(a.path, b); return Unit.new; },
     _: case b {
       ori: Fm.Term.equal.extra_holes(a, b.expr),
-      hol: Fm.Term.equal.patch<_>(b.path, a, Unit.new), 
+      hol: do Fm.Check { Fm.Term.equal.hole(b.path, a); return Unit.new; }, 
       _: do Fm.Check { return Unit.new; },
     }
   }
@@ -1065,7 +1092,7 @@ Fm.Term.equal(a: Fm.Term, b: Fm.Term, defs: Fm.Defs, lv: Nat, seen: Set): Fm.Che
             };
           },
           hol:
-            Fm.Term.equal.patch<_>(b1.path, a, Bool.true),
+            Fm.Term.equal.hole(b1.path, a),
           _: do Fm.Check {
             return Bool.false;
           },
@@ -1078,7 +1105,7 @@ Fm.Term.equal(a: Fm.Term, b: Fm.Term, defs: Fm.Defs, lv: Nat, seen: Set): Fm.Che
               var eq_body = Fm.Term.equal(a1_body, b1_body, defs, Nat.succ(lv), seen);
               return eq_body;
             },
-            hol: Fm.Term.equal.patch<_>(b1.path, a, Bool.true),
+            hol: Fm.Term.equal.hole(b1.path, a),
             _: do Fm.Check {
               return Bool.false;
             },
@@ -1090,7 +1117,7 @@ Fm.Term.equal(a: Fm.Term, b: Fm.Term, defs: Fm.Defs, lv: Nat, seen: Set): Fm.Che
             var eq_argm = Fm.Term.equal(a1.argm, b1.argm, defs, lv, seen);
             return Bool.and(eq_func, eq_argm);
           },
-          hol: Fm.Term.equal.patch<_>(b1.path, a, Bool.true),
+          hol: Fm.Term.equal.hole(b1.path, a),
           _: do Fm.Check {
             return Bool.false;
           },
@@ -1105,15 +1132,15 @@ Fm.Term.equal(a: Fm.Term, b: Fm.Term, defs: Fm.Defs, lv: Nat, seen: Set): Fm.Che
             return Bool.and(eq_expr, eq_body);
           },
           hol:
-            Fm.Term.equal.patch<_>(b1.path, a, Bool.true),
+            Fm.Term.equal.hole(b1.path, a),
           _: do Fm.Check {
             return Bool.false;
           },
         },
         hol:
-          Fm.Term.equal.patch<_>(a1.path, b, Bool.true),
+          Fm.Term.equal.hole(a1.path, b),
         _: case b1 {
-          hol: Fm.Term.equal.patch<_>(b1.path, a, Bool.true),
+          hol: Fm.Term.equal.hole(b1.path, a),
           _: do Fm.Check {
             return Bool.false;
           },
@@ -1327,7 +1354,6 @@ Fm.Term.check(
         if eqls then do Fm.Check {
           return type.value;
         } else do Fm.Check {
-          Fm.Term.equal.extra_holes(infr, type.value);
           Fm.Check.result<_>(type, [
             Fm.Error.type_mismatch(
               orig,
@@ -3450,20 +3476,19 @@ Fm.Synth.fix(
         var defs = Fm.Synth.one(errs.head.name, defs);
         Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
       },
-      patch:
-        case errs.head.path {
-          e: do IO { // shouldn't happen
-            return Maybe.none<_>;
-          },
-          o: do IO { // hole is on term
-            let term = Fm.Term.patch_at(errs.head.path.pred, term, (x) errs.head.term);
-            Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
-          },
-          i: do IO { // hole is on type
-            let type = Fm.Term.patch_at(errs.head.path.pred, type, (x) errs.head.term);
-            Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
-          },
+      patch: case errs.head.path {
+        e: do IO { // shouldn't happen
+          return Maybe.none<_>;
         },
+        o: do IO { // hole is on term
+          let term = Fm.Term.patch_at(errs.head.path.pred, term, (x) errs.head.term);
+          Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
+        },
+        i: do IO { // hole is on type
+          let type = Fm.Term.patch_at(errs.head.path.pred, type, (x) errs.head.term);
+          Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
+        },
+      },
       // The error isn't fixable
       _: Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, fixd),
     }
