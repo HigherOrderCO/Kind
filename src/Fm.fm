@@ -3281,6 +3281,7 @@ Fm.highlight.tc(
     //"chr=", Fm.escape.char(case code { nil: '_', cons: code.head }), " ",
     //"res={", String.join("|", List.reverse<_>(res)), "}",
   //]))
+  let spa = 3; // how many lines around error to show
   case code {
     nil:
       Fm.highlight.end(col, row, List.reverse<_>(res)),
@@ -3290,7 +3291,6 @@ Fm.highlight.tc(
         if stp then
           Fm.highlight.end(col, row, List.reverse<_>(res))
         else
-          let spa = 3;
           let siz = Nat.succ(Nat.double(spa));
           let lft = case ix1 {
             zero: case lft {
@@ -3303,11 +3303,8 @@ Fm.highlight.tc(
           let ix1 = Nat.pred(ix1);
           let col = 0;
           let row = Nat.succ(row);
-          let res = List.take<_>(siz, List.cons<_>(String.reverse(lin), res));
-          let lin = String.reverse(String.flatten([
-            String.pad_left(4, ' ', Nat.show(row)),
-            " | "
-          ]));
+          let res = List.cons<_>(String.reverse(lin), res);
+          let lin = String.reverse(String.flatten([String.pad_left(4, ' ', Nat.show(row)), " | "]));
           Fm.highlight.tc(code.tail, ix0, ix1, col, row, lft, lin, res)
       else
         let chr = String.cons(code.head, String.nil);
@@ -3316,6 +3313,7 @@ Fm.highlight.tc(
             String.reverse(Fm.color("31", Fm.color("4", chr)))
           else
             chr;
+        let res = if Nat.eql(ix0,1) then List.take!(spa,res) else res;
         let ix0 = Nat.pred(ix0);
         let ix1 = Nat.pred(ix1);
         let col = Nat.succ(col);
