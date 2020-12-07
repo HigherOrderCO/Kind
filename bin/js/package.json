@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/moonad/formality#readme",
   "dependencies": {
-    "formcore-lang": "^0.1.26"
+    "formcore-lang": "^0.1.27"
   }
 }

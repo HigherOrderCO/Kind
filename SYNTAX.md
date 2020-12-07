@@ -786,24 +786,6 @@ The syntax above expands to:
 Maybe.none<_>
 ```
 
-Maybe.default
--------------
-
-```
-a ? b
-```
-
-The syntax above expands to:
-
-```
-Maybe.default<_>(b, a)
-```
-
-Where `b` is of type `T` and `a` is of type `Maybe(T)`. The `Maybe.default`
-function checks if `a` is a `some`. If it is, the expression resolves to
-`a.value`.  Otherwise, it resolves to `b`.
-
-
 List literal
 ------------
 

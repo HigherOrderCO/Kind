@@ -1993,7 +1993,6 @@ Fm.escape.char(chr: Char): String
       String.nil,
     ])
 
-
 Fm.escape(str: String): String
   case str {
     nil:
@@ -2935,18 +2934,18 @@ Fm.Parser.div: Nat -> Fm.Term -> Parser(Fm.Term)
 Fm.Parser.mod: Nat -> Fm.Term -> Parser(Fm.Term)
   Fm.Parser.op("%", "Nat.mod")
 
-// Parses a maybe.default: @x | y@
-Fm.Parser.default(init: Nat, mayb: Fm.Term): Parser(Fm.Term)
-  do Parser {
-    Fm.Parser.text("?");
-    var dflt = Fm.Parser.term;
-    var orig = Fm.Parser.stop(init);
-    let term = Fm.Term.ref("Maybe.default");
-    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
-    let term = Fm.Term.app(term, dflt);
-    let term = Fm.Term.app(term, mayb);
-    return Fm.Term.ori(orig, term);
-  }
+// Parses a maybe.default: @x ? y@
+//Fm.Parser.default(init: Nat, mayb: Fm.Term): Parser(Fm.Term)
+  //do Parser {
+    //Fm.Parser.text("?");
+    //var dflt = Fm.Parser.term;
+    //var orig = Fm.Parser.stop(init);
+    //let term = Fm.Term.ref("Maybe.default");
+    //let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    //let term = Fm.Term.app(term, dflt);
+    //let term = Fm.Term.app(term, mayb);
+    //return Fm.Term.ori(orig, term);
+  //}
 
 // Parses a list conser: @head & tail@
 Fm.Parser.cons(init: Nat, head: Fm.Term): Parser(Fm.Term)
@@ -3117,7 +3116,7 @@ Fm.Parser.suffix(init: Nat, term: Fm.Term): Parser(Fm.Term)
     Fm.Parser.mul(init, term),
     Fm.Parser.div(init, term),
     Fm.Parser.mod(init, term),
-    Fm.Parser.default(init, term),
+    //Fm.Parser.default(init, term),
     Fm.Parser.cons(init, term),
     Fm.Parser.concat(init, term),
     Fm.Parser.string_concat(init, term),
