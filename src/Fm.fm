@@ -3844,6 +3844,42 @@ Fm.to_core.io.one(name: String): IO(String)
     return Fm.Defs.core(defs);
   }
 
+Fm.compute.io.one(name: String): IO(Unit)
+  do IO {
+    var code = IO.get_file(Fm.Synth.file_of(name))
+    case Fm.Defs.read(name | ".fm", code, Map.new!) as read {
+      left:
+        IO.print(read.value)
+      right: do IO {
+        let defs = read.value
+        let defn = Fm.get!(name, defs)
+        case defn {
+          none: IO.print("Term '" | name | "' not found.")
+          some: case defn.value {
+            new: IO.print(Fm.Term.show(Fm.Term.normalize(defn.value.term, defs)))
+          }
+        }
+      }
+    }
+  }
+
+Fm.to_core.io.one(name: String): IO(String)
+  do IO {
+    var new_defs = Fm.Synth.one(name, Map.new<_>);
+    let defs = case new_defs {
+      none: Map.new<_>,
+      some: new_defs.value,
+    };
+    let defs = Map.map<_,_>(
+      (defn) 
+        open defn
+        let term = Fm.Term.inline(defn.term, defs);
+        let type = Fm.Term.inline(defn.type, defs);
+        Fm.Def.new(defn.file, defn.code, defn.name, term, type, defn.stat)
+      , defs);
+    return Fm.Defs.core(defs);
+  }
+
 Fm: IO(Unit)
   do IO {
     let _ = Fm.to_core.io.one;
@@ -3851,11 +3887,6 @@ Fm: IO(Unit)
     let _ = Fm.checker.io.file;
     let _ = Fm.checker.code;
     let _ = Fm.Term.read;
-    //case Fm.Term.read("(x) def a = x; (x) def b = x; (x) def c = x; (x) def t = x; t(a,b,c)") as got {
-      //none: IO.print("nope"),
-      //some: IO.print(Fm.Term.core(Fm.Term.normalize(Fm.Term.bind([],Fm.Path.nil,got.value),Map.new<_>),0,[])),
-    //}
-    var s = Fm.to_core.io.one("Fm");
-    IO.print(s);
-    //Fm.checker.io.file("_2.fm");
+    let _ = Fm.compute.io.one;
+    return Unit.new;
   }

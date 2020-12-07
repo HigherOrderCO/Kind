@@ -43,7 +43,7 @@ module.exports = (function() {
             list = list.tail;
         };
         return BigInt(len);
-    }
+    };
     var nat_to_bits = n => {
         return n === 0n ? '' : n.toString(2);
     };
@@ -23234,20 +23234,67 @@ module.exports = (function() {
         return $9296;
     };
     const Fm$Term$read = x0 => Fm$Term$read$(x0);
+
+    function Fm$compute$io$one$(_name$1) {
+        var $9305 = IO$monad$((_m$bind$2 => _m$pure$3 => {
+            var $9306 = _m$bind$2;
+            return $9306;
+        }))(IO$get_file$(Fm$Synth$file_of$(_name$1)))((_code$2 => {
+            var self = Fm$Defs$read$((_name$1 + ".fm"), _code$2, Map$new);
+            switch (self._) {
+                case 'Either.left':
+                    var $9308 = self.value;
+                    var $9309 = IO$print$($9308);
+                    var $9307 = $9309;
+                    break;
+                case 'Either.right':
+                    var $9310 = self.value;
+                    var _defs$4 = $9310;
+                    var _defn$5 = Fm$get$(_name$1, _defs$4);
+                    var self = _defn$5;
+                    switch (self._) {
+                        case 'Maybe.none':
+                            var $9312 = IO$print$(("Term \'" + (_name$1 + "\' not found.")));
+                            var $9311 = $9312;
+                            break;
+                        case 'Maybe.some':
+                            var $9313 = self.value;
+                            var self = $9313;
+                            switch (self._) {
+                                case 'Fm.Def.new':
+                                    var $9315 = self.file;
+                                    var $9316 = self.code;
+                                    var $9317 = self.name;
+                                    var $9318 = self.term;
+                                    var $9319 = self.type;
+                                    var $9320 = self.stat;
+                                    var $9321 = IO$print$(Fm$Term$show$(Fm$Term$normalize$($9318, _defs$4)));
+                                    var $9314 = $9321;
+                                    break;
+                            };
+                            var $9311 = $9314;
+                            break;
+                    };
+                    var $9307 = $9311;
+                    break;
+            };
+            return $9307;
+        }));
+        return $9305;
+    };
+    const Fm$compute$io$one = x0 => Fm$compute$io$one$(x0);
     const Fm = (() => {
         var __$1 = Fm$to_core$io$one;
         var __$2 = Fm$checker$io$one;
         var __$3 = Fm$checker$io$file;
         var __$4 = Fm$checker$code;
         var __$5 = Fm$Term$read;
-        var $9305 = IO$monad$((_m$bind$6 => _m$pure$7 => {
-            var $9306 = _m$bind$6;
-            return $9306;
-        }))(Fm$to_core$io$one$("Fm"))((_s$6 => {
-            var $9307 = IO$print$(_s$6);
-            return $9307;
-        }));
-        return $9305;
+        var __$6 = Fm$compute$io$one;
+        var $9322 = IO$monad$((_m$bind$7 => _m$pure$8 => {
+            var $9323 = _m$pure$8;
+            return $9323;
+        }))(Unit$new);
+        return $9322;
     })();
     return {
         '$main$': () => run(Fm),
@@ -23641,6 +23688,7 @@ module.exports = (function() {
         'IO.purify': IO$purify,
         'Fm.checker.code': Fm$checker$code,
         'Fm.Term.read': Fm$Term$read,
+        'Fm.compute.io.one': Fm$compute$io$one,
         'Fm': Fm,
     };
 })();

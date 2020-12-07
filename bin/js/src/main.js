@@ -16,6 +16,7 @@ if (!process.argv[2] || process.argv[2] === "--help" || process.argv[2] === "-h"
   console.log("  fmjs <main> --js  # compiles to JavaScript");
   console.log("  fmjs <main> --hs  # compiles to Haskell");
   console.log("  fmjs <main> --run # runs with JavaScript");
+  console.log("  fmjs <main> --lam # interprets as λ-term");
   console.log("");
   console.log("Examples:");
   console.log("");
@@ -57,6 +58,15 @@ if (!process.argv[2] || process.argv[2] === "--help" || process.argv[2] === "-h"
       fs.writeFileSync(js_path, asjs);
       require(js_path);
       fs.unlinkSync(js_path);
+    } catch (e) {
+      console.log("Compilation error.");
+      console.log(e);
+    }
+
+  // Lambda evaluation
+  } else if (process.argv[3] === "--lam") {
+    try {
+      await fm.run(fm["Fm.compute.io.one"](name));
     } catch (e) {
       console.log("Compilation error.");
       console.log(e);
