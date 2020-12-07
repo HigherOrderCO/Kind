@@ -2935,6 +2935,19 @@ Fm.Parser.div: Nat -> Fm.Term -> Parser(Fm.Term)
 Fm.Parser.mod: Nat -> Fm.Term -> Parser(Fm.Term)
   Fm.Parser.op("%", "Nat.mod")
 
+// Parses a maybe.default: @x | y@
+Fm.Parser.default(init: Nat, mayb: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("?");
+    var dflt = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("Maybe.default");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, dflt);
+    let term = Fm.Term.app(term, mayb);
+    return Fm.Term.ori(orig, term);
+  }
+
 // Parses a list conser: @head & tail@
 Fm.Parser.cons(init: Nat, head: Fm.Term): Parser(Fm.Term)
   do Parser {
@@ -3104,6 +3117,7 @@ Fm.Parser.suffix(init: Nat, term: Fm.Term): Parser(Fm.Term)
     Fm.Parser.mul(init, term),
     Fm.Parser.div(init, term),
     Fm.Parser.mod(init, term),
+    Fm.Parser.default(init, term),
     Fm.Parser.cons(init, term),
     Fm.Parser.concat(init, term),
     Fm.Parser.string_concat(init, term),
@@ -3469,12 +3483,18 @@ Fm.Synth.fix(
       },
     cons: case errs.head {
       waiting: do IO {
-        var defs = Fm.Synth.one(errs.head.name, defs);
-        Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
+        var new_defs = Fm.Synth.one(errs.head.name, defs);
+        case new_defs {
+          none: Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, fixd),
+          some: Fm.Synth.fix(file, code, name, term, type, new_defs.value, errs.tail, Bool.true),
+        }
       },
       undefined_reference: do IO {
-        var defs = Fm.Synth.one(errs.head.name, defs);
-        Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, Bool.true);
+        var new_defs = Fm.Synth.one(errs.head.name, defs);
+        case new_defs {
+          none: Fm.Synth.fix(file, code, name, term, type, defs, errs.tail, fixd),
+          some: Fm.Synth.fix(file, code, name, term, type, new_defs.value, errs.tail, Bool.true),
+        }
       },
       patch: case errs.head.path {
         e: do IO { // shouldn't happen
@@ -3506,21 +3526,16 @@ Fm.Synth.file_of(name: Fm.Name): String
 Fm.Synth.load(name: Fm.Name, defs: Fm.Defs): IO(Maybe(Fm.Defs))
   do IO {
     let file = Fm.Synth.file_of(name);
-    //let skip = Debug.log<_>(String.flatten(["loading file: ", file, " (", name, ")"]), (x) Unit.new);
     var code = IO.get_file(file);
     let read = Fm.Defs.read(file, code, defs);
     case read {
       left: do IO { // TODO: should return parse error somehow... or perhaps add that on Fm.Synth.file?
-        IO.print("Parse error on file '"|file|"'.");
-        IO.exit;
         return none;
       },
       right: do IO {
         let defs = read.value;
         case Fm.get<_>(name, defs) as got {
           none: do IO {
-            IO.print("Couldn't find '"|name|"' on file '"|file|".");
-            IO.exit;
             return none;
           },
           some: do IO {
@@ -3532,13 +3547,13 @@ Fm.Synth.load(name: Fm.Name, defs: Fm.Defs): IO(Maybe(Fm.Defs))
   }
 
 // Synths one def
-Fm.Synth.one(name: Fm.Name, defs: Fm.Defs): IO(Fm.Defs)
+Fm.Synth.one(name: Fm.Name, defs: Fm.Defs): IO(Maybe(Fm.Defs))
   case Fm.get<_>(name, defs) as got {
     none: do IO {
       var loaded = Fm.Synth.load(name, defs);
       case loaded {
         none: do IO {
-          return defs;
+          return none;
         },
         some: do IO {
           Fm.Synth.one(name, loaded.value);
@@ -3556,9 +3571,9 @@ Fm.Synth.one(name: Fm.Name, defs: Fm.Defs): IO(Fm.Defs)
         //let skip = Debug.log<_>(String.flatten([name, ": ", Fm.Term.show(type), " = ", Fm.Term.show(term)]), (x) Unit.new);
         //Debug.log<_>(String.flatten(["synth ", name, " ", case stat { init: "INIT", wait: "WAIT", done: "DONE", fail: "FAIL" }]), (x)
         case stat {
-          wait: do IO { return defs; },
-          done: do IO { return defs; },
-          fail: do IO { return defs; },
+          wait: do IO { return some(defs); },
+          done: do IO { return some(defs); },
+          fail: do IO { return some(defs); },
           init: do IO {
             let defs = Fm.set<_>(name, Fm.Def.new(file, code, name, term, type, Fm.Status.wait), defs);
             let checked = do Fm.Check {
@@ -3572,14 +3587,14 @@ Fm.Synth.one(name: Fm.Name, defs: Fm.Defs): IO(Fm.Defs)
                 if List.is_empty<_>(checked.errors) then do IO {
                   let defs = Fm.define(file, code, name, term, type, Bool.true, defs);
                   //let defs = Fm.set<_>(name, Fm.Def.new(file, code, name, term, type, Fm.Status.done), defs);
-                  return defs;
+                  return some(defs);
                 } else do IO {
                   var fixed = Fm.Synth.fix(file, code, name, term, type, defs, checked.errors, Bool.false);
                   case fixed {
                     none: do IO {
                       let stat = Fm.Status.fail(checked.errors);
                       let defs = Fm.set<_>(name, Fm.Def.new(file, code, name, term, type, stat), defs);
-                      return defs;
+                      return some(defs);
                     },
                     some: Fm.Synth.one(name, fixed.value),
                   };
@@ -3598,8 +3613,11 @@ Fm.Synth.many(names: List(String), defs: Fm.Defs): IO(Fm.Defs)
       return defs;
     },
     cons: do IO {
-      var defs = Fm.Synth.one(names.head, defs);
-      Fm.Synth.many(names.tail, defs);
+      var new_defs = Fm.Synth.one(names.head, defs);
+      case new_defs {
+        none: Fm.Synth.many(names.tail, defs),
+        some: Fm.Synth.many(names.tail, new_defs.value),
+      }
     },
   }
 
@@ -3681,8 +3699,11 @@ Fm.Defs.report(defs: Fm.Defs, list: List(Fm.Name)): String
 
 Fm.checker.io.one(name: String): IO(Unit)
   do IO {
-    var defs = Fm.Synth.one(name, Map.new<_>);
-    IO.print(Fm.Defs.report(defs, [name]));
+    var new_defs = Fm.Synth.one(name, Map.new<_>);
+    case new_defs {
+      none: IO.print(Fm.Defs.report(Map.new<_>, [name])),
+      some: IO.print(Fm.Defs.report(new_defs.value, [name])),
+    }
   }
 
 Fm.checker.io.file(file: String): IO(Unit)
@@ -3811,7 +3832,11 @@ Fm.Term.inline(term: Fm.Term, defs: Fm.Defs): Fm.Term
 
 Fm.to_core.io.one(name: String): IO(String)
   do IO {
-    var defs = Fm.Synth.one(name, Map.new<_>);
+    var new_defs = Fm.Synth.one(name, Map.new<_>);
+    let defs = case new_defs {
+      none: Map.new<_>,
+      some: new_defs.value,
+    };
     let defs = Map.map<_,_>(
       (defn) 
         open defn
