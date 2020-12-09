@@ -313,3 +313,14 @@ always even by itself, so, to convince it, we write a separate proof called
 `double_is_even(n)`.
 
 *(Check this program too!)*
+
+
+More information
+----------------
+
+For a list of available syntaxes, check [SYNTAX.md](SYNTAX.md).
+
+If you're brave, browse the [src](https://github.com/moonad/Formality/tree/master/src) directory, where all the base libraries (and Formality itself!) is implemented.
+
+More links and resources will be added soon!
+
