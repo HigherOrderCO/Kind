@@ -83,6 +83,7 @@ alternatives, but are high priorities for Formaltiy.
 
 Usage
 -----
+[![formality-js](https://img.shields.io/npm/v/formality-js)](https://www.npmjs.com/package/formality-js)
 
 1. Install
 
