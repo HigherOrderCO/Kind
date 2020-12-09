@@ -182,7 +182,7 @@ Nat.add(n: Nat, m: Nat): Nat
 ```
 Bool.double_negation(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
 ```
-`Bool.double_negation` returns a proof that for all `Bool`, its double negation is equal to itself.
+`Bool.double_negation` is a proof that for all `Bool`, its double negation is equal to itself.
 
 Since
 Formality functions are self-dependently typed, you can optionally give a name
@@ -202,7 +202,7 @@ and colon, and write just:
 Nat -> Nat
 ```
 
-Which is the type of a function that receives a `Nat` and returns a `Nat`.
+Which is a function that receives a `Nat` and returns a `Nat`.
 
 Datatype
 --------
