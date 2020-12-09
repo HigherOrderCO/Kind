@@ -17,7 +17,7 @@ name(arg0: type0, arg1: type1): return_type
 ...
 ```
 
-Formality programs and proofs are composed by a number of top-level definitions
+Formality programs and proofs are composed of a number of top-level definitions
 containing a `name`, followed by a number of arguments, followed by a `:`,
 followed by a `return_type`, followed by a `return_body`. For example:
 
@@ -70,7 +70,7 @@ There are no true multi-argument lambdas in Formality, this syntax is a mere
 convenience.
 
 Lambdas can also be written using `<x> body` instead of `(x) body`. You can also
-omit the name and write just `() body`. As with applications, difference is
+omit the name and write just `() body`. As with applications, the difference is
 merely stylistic.
 
 
@@ -84,7 +84,7 @@ func(argm)
 
 A function application is written using the conventional mathematical syntax,
 `f(x)`. There can be no spaces between the function and the parenthesis, thus,
-`f (x)` is not allowed. If you want to apply an bigger expression to an
+`f (x)` is not allowed. If you want to apply a bigger expression to an
 argument, you can wrap `()` around it. For example: `((x) body)(argm)` would
 apply the `(x) body` function to `argm`.
 
@@ -135,7 +135,7 @@ let c = 3
 a + b + c
 ```
 
-A `let` expression introduces a new variable on the context. That variable will
+A `let` expression introduces a new variable in the context. That variable will
 appear in error messages and is **not** considered equal to the expression it
 assigns (for theorem proving and type-aliasing purposes).
 
@@ -269,7 +269,7 @@ case expr as name {
 
 Formality's case is the most important syntax of the language, as it allows one
 to branch, extract values from datatypes, and prove theorems. Unlike most
-functional languages, you don't need to write field names on each cases;
+functional languages, you don't need to write field names on each case;
 instead, fields are automatically bound with the `name.field` name (here, `.` is
 just part of the name).  
 
@@ -288,7 +288,7 @@ And `with expression` is ... TODO
 Maybe.is_some<A: Type>(x: A): Maybe.IsSome(A,Maybe.some<A>(x))
   def y = Maybe.some<A>(x)
   case y{
-    with e : Equal(Maybe(A),y,y.self) = Equal.to<Maybe(A),y>
+    with e : Equal(Maybe(A),y,y) = Equal.to<Maybe(A),y>
     none: Empty.absurd<_>(Maybe.some_isnt_none<A>(x,e))
     some: y.value
   }
@@ -385,7 +385,7 @@ Goal
 ```
 
 A goal can be written as `?` followed by a name. For example, `?help` is a goal
-named `help`. Goals are extremelly useful when developing algorithms and proofs,
+named `help`. Goals are extremely useful when developing algorithms and proofs,
 as they allow you to keep a part of your program incomplete while you work on
 the rest. They also allow you to inspect the context and expected type on that
 part. For example, if you write:
@@ -426,7 +426,7 @@ Hole
 _
 ```
 
-A hole is written as a single underscore. It stands for "complete this for me".
+A `hole` is written as a single underscore. It stands for "complete this for me".
 Holes are extremely useful to let Formality fill the "obvious" parts of your
 program for you. Without holes, Formality would be extremely more verbose. For
 example, the list of lists `[[1,2],[3,4]]`, in its full form, would be:
@@ -518,7 +518,8 @@ type with two fields (like `Pair`). It desugars to:
 pair<() _>((x,y) body)
 ```
 
-### If, then, else
+If, then, else
+-----------
 
 ```
 if bool then t else f
@@ -535,7 +536,7 @@ Do notation
 -----------
 
 ```
-do NAME {
+do name {
   statements
 }
 ```
@@ -656,7 +657,7 @@ String literal
 ```
 
 A string literal is written with `"`. Strings aren't primitives in Formality
-either. Instead, they are reprsented as:
+either. Instead, they are represented as:
 
 ```
 type String {
@@ -674,7 +675,7 @@ String.cons('h', "ello")
 ```
 
 If the first character is required for type-checking purposes (such as when
-doing a dependent macros, or implementing `printf()`). Strings are compiled to
+doing dependent macros, or implementing `printf()`). Strings are compiled to
 native strings when available.
 
 String concatenation
@@ -712,14 +713,14 @@ New sigma
 1 ~ refl
 ```
 
-Sigma.new literals can be used to write sigmas, or dependent pairs. They are
+`Sigma.new` literals can be used to write sigmas, or dependent pairs. They are
 expanded to:
 
 ```
 Sigma.new<_,_>(1, refl)
 ```
 
-With `Sigma.new` as defined on the base libraries.
+With `Sigma.new` as defined on the base library.
 
 Sigma type
 ----------
@@ -728,15 +729,15 @@ Sigma type
 {x: A} B(x)
 ```
 
-Sigma literals can be used to write sigma types, or dependent pairs. They are
+Sigma literals can be used to write sigma types or dependent pairs. They are
 expanded to:
 
 ```
 Sigma(A, (x) B(x))
 ```
 
-With `Sigma` as defined in the base libraries. In the same way that forall (aka
-Pi, aka the dependent function type) can be read as "forall", Sigmas can be read
+With `Sigma` as defined in the base library. In the same way that forall (aka
+Pi, aka the dependent function type) can be read as "forall", `Sigma`s can be read
 as "there exists". So, for example, the program below:
 
 ```
@@ -767,6 +768,8 @@ Equal(_, a, b)
 
 It is the type of propositional equality proofs. It is not a boolean equality
 operator. 
+
+`refl` is the constructor of `Equal` and provides an evidence of syntactically equal expressions.
 
 Not equal type
 --------------
