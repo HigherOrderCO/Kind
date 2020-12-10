@@ -1,7 +1,8 @@
-Formality
-=========
-
+![[alt text]](blog/img/formality-banner-white.png
+)
 A modern programming language featuring formal proofs. Now written in itself!
+
+Explore our [lib](src) and come hang out with us on [Telegram](https://t.me/formality_lang).
 
 Why formal proofs?
 ------------------
