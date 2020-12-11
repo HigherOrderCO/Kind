@@ -180,51 +180,24 @@ Bits.mod(a: Bits, b: Bits): Bits
 // Subtracts two Bitstrings.
 // If a is less than b, Bits.e is returned.
 Bits.sub(a: Bits, b: Bits): Bits
-  Bits.reverse(Bits.sub.go(a, b, Bool.false, Bits.e))
+  Bits.reverse(Bits.sub.go(a, b, Bits.e))
 
-
-Bits.sub.go(a: Bits, b: Bits, borrow: Bool, bits: Bits): Bits
-  case a{
-    e: case b{
-      e: case borrow{
-        true: Bits.e
-        false: bits
-      }
-      o: case borrow{
-        true: Bits.e
-        false: Bits.sub.go(a, b.pred, false, Bits.o(bits))
-      }
-      i: Bits.e
-    }
-    
-    o: case b{
-      e: case borrow{ 
-        true: Bits.sub.go(a.pred, b, true, Bits.i(bits))
-        false: Bits.sub.go(a.pred, b, false, Bits.o(bits))
-      }
-      o: case borrow{
-        true: Bits.sub.go(a.pred, b.pred, true, Bits.i(bits))
-        false: Bits.sub.go(a.pred, b.pred, false, Bits.o(bits))
-        }
-      i: case borrow{
-        true: Bits.sub.go(a.pred, b.pred, true, Bits.o(bits)) 
-        false: Bits.sub.go(a.pred, b.pred, true, Bits.i(bits))
-        }
-      }
-
-    i: case b{
-      e: case borrow{ 
-        true: Bits.sub.go(a.pred, b, false, Bits.o(bits)) 
-        false: Bits.sub.go(a.pred, b, false, Bits.i(bits))
-      }
-      o: case borrow{
-        true: Bits.sub.go(a.pred, b.pred, false, Bits.o(bits)) 
-        false: Bits.sub.go(a.pred, b.pred, false, Bits.i(bits))
-      }
-      i: case borrow{
-        true: Bits.sub.go(a.pred, b.pred, true, Bits.i(bits)) 
-        false: Bits.sub.go(a.pred, b.pred, false, Bits.o(bits))
-      }
+Bits.sub.go(a: Bits, b: Bits, bits: Bits): Bits
+  case b {
+    e: case a {
+      e: bits,
+      o: Bits.sub.go(a.pred, b, Bits.o(bits)),
+      i: Bits.sub.go(a.pred, b, Bits.i(bits))
+    },
+    o: case a {
+      e: Bits.sub.go(a, b.pred, Bits.o(bits)),
+      o: Bits.sub.go(a.pred, b.pred, Bits.o(bits)),
+      i: Bits.sub.go(a.pred, b.pred, Bits.i(bits))
+    },
+    i: case a {
+      e: Bits.e,
+      o: Bits.sub.go(a.pred, Bits.inc(b.pred), Bits.i(bits)),
+      i: Bits.sub.go(a.pred, b.pred, Bits.o(bits))
     }
   }
 
