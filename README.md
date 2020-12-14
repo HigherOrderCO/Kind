@@ -26,7 +26,7 @@ about that soon.
 Why Formality?
 --------------
 
-There are some interesting proof languages, or theorem provers, as they're often
+There are some interesting proof languages, or proof assistants, as they're often
 called, in the market. [Agda], [Coq], [Lean], [Idris], to name a few. But these (perhaps with exception of Idris, which we love!)
 aren't aligned with the vision highlighted above, in some key aspects:
 
