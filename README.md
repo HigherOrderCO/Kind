@@ -312,7 +312,8 @@ even, we write `~ refl` on it. `double_as_even` is a function that, for any
 always even by itself, so, to convince it, we write a separate proof called
 `double_is_even(n)`.
 
-*(Check this program too!)*
+For a quick tutorial on how to prove theorems in Formality, check
+[THEOREMS.md](THEOREMS.md).
 
 
 More information
