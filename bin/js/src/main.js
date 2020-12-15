@@ -29,6 +29,18 @@ if (!process.argv[2] || process.argv[2] === "--help" || process.argv[2] === "-h"
   process.exit();
 }
 
+function is_file(name){
+  return name.slice(-3) === ".fm"
+}
+
+function display_error(name, error){
+  if(is_file(name)){
+    console.log("Cannot compile a file (<main>.fm). Choose a term and try again.");
+  } else {
+    console.log("Compilation error.");
+    console.log(error);
+  }
+}
 
 (async () => {
   var name = process.argv[2];
@@ -44,8 +56,7 @@ if (!process.argv[2] || process.argv[2] === "--help" || process.argv[2] === "-h"
       var fmcc = await fm.run(fm["Fm.to_core.io.one"](name));
       console.log(fmc_to_js.compile(fmcc, name, {module}));
     } catch (e) {
-      console.log("Compilation error.");
-      console.log(e);
+      display_error(name, e);
     }
 
   // JavaScript execution
@@ -59,8 +70,7 @@ if (!process.argv[2] || process.argv[2] === "--help" || process.argv[2] === "-h"
       require(js_path);
       fs.unlinkSync(js_path);
     } catch (e) {
-      console.log("Compilation error.");
-      console.log(e);
+      display_error(name, e);
     }
 
   // Lambda evaluation
@@ -68,8 +78,7 @@ if (!process.argv[2] || process.argv[2] === "--help" || process.argv[2] === "-h"
     try {
       await fm.run(fm["Fm.compute.io.one"](name));
     } catch (e) {
-      console.log("Compilation error.");
-      console.log(e);
+      display_error(name, e);
     }
 
   // Haskell compilation
@@ -79,8 +88,7 @@ if (!process.argv[2] || process.argv[2] === "--help" || process.argv[2] === "-h"
       var fmcc = await fm.run(fm["Fm.to_core.io.one"](name));
       console.log(fmc_to_hs.compile(fmcc, name, {module}));
     } catch (e) {
-      console.log("Compilation error.");
-      //console.log(e);
+      display_error(name, e);
     }
 
   // Type-Checking
