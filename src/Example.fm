@@ -1,20 +1,20 @@
 // Random examples
 
 // Formality's "Hello, World" as a String
-Ex.hello_world: String
+Example.hello_world: String
   "Hello, world!"
 
 // A program that asks the user's name forever
-Ex.greet: IO(Unit)
+Example.greet: IO(Unit)
   do IO {
     IO.print("What is your name?")
     var name = IO.get_line
     IO.print("Hello, " | name | "!")
-    Ex.greet
+    Example.greet
   }
 
 // The suit of a card
-type Ex.Suit {
+type Example.Suit {
   diamonds
   clubs
   hearts
@@ -22,7 +22,7 @@ type Ex.Suit {
 }
 
 // Stringifies a suit
-Ex.suit_to_string(suit: Ex.Suit): String
+Example.suit_to_string(suit: Example.Suit): String
   case suit {
     diamonds: "diamonds"
     clubs: "clubs"
@@ -31,69 +31,74 @@ Ex.suit_to_string(suit: Ex.Suit): String
   }
 
 // A natural number is either zero or the successor of a natural number
-type Ex.Nat {
+type Example.Nat {
   zero
   succ(pred: Nat)
 }
 
 // Doubles a natural number
-Ex.double(n: Nat): Nat
+Example.double(n: Nat): Nat
   case n {
     zero: 0
     succ: Nat.succ(Nat.succ(Nat.double(n.pred)))
   }
 
 // A proof that n+0 == n
-Ex.theorem(n: Nat): Nat.add(n,0) == n
+Example.theorem(n: Nat): Nat.add(n,0) == n
   case n {
     zero: refl
-    succ: apply(Nat.succ, Ex.theorem(n.pred))
+    succ: apply(Nat.succ, Example.theorem(n.pred))
   }!
 
 // An even number is a positive integer such that Nat.is_even(x) is true
-Ex.IsEven.A(n: Nat): Type
+Example.IsEven.A(n: Nat): Type
   {x: Nat} Nat.is_even(x) == true
 
 // Proof that two is even
-Ex.two_is_even.A: Ex.IsEven.A(2)
+Example.two_is_even.A: Example.IsEven.A(2)
   2 ~ refl
 
 // Zero is even. For any even n, 2+n is even.
-type Ex.IsEven.B ~ (n: Nat) {
+type Example.IsEven.B ~ (n: Nat) {
   zero                              ~ (n: 0)
-  succ(n: Nat, e: Ex.IsEven.B(n)) ~ (n: Nat.add(2,n))
+  succ(n: Nat, e: Example.IsEven.B(n)) ~ (n: Nat.add(2,n))
 }
 
 // Proof that 2 is even
-Ex.two_is_even.B: Ex.IsEven.B(2)
-  Ex.IsEven.B.succ(_, Ex.IsEven.B.zero)
+Example.two_is_even.B: Example.IsEven.B(2)
+  Example.IsEven.B.succ(_, Example.IsEven.B.zero)
 
 // Example usage of open and let
-Ex.open_and_let: Pair(Nat, String)
+Example.open_and_let: Pair(Nat, String)
   let a = {5, "foo"}
   let b = {7, "bar"}
   open a
   let {b_fst, b_snd} = b
   {Nat.add(a.fst, b_fst), a.snd | b_snd}
 
-Ex.half(n: Nat): Nat
+Example.half(n: Nat): Nat
   case n {
     zero: 0
     succ: case n.pred {
       zero: 0
-      succ: Nat.succ(Ex.half(n.pred.pred))
+      succ: Nat.succ(Example.half(n.pred.pred))
     }
   }
 
-Ex.double(n: Nat): Nat
+Example.double(n: Nat): Nat
   case n {
     zero: 0
-    succ: Nat.succ(Nat.succ(Ex.double(n.pred)))
+    succ: Nat.succ(Nat.succ(Example.double(n.pred)))
   }
 
-
-Ex.black_friday_theorem(n: Nat): Ex.half(Ex.double(n)) == n
+Example.black_friday_theorem(n: Nat): Example.half(Example.double(n)) == n
   case n {
     zero: refl
-    succ: apply(Nat.succ, Ex.black_friday_theorem(n.pred))
+    succ: apply(Nat.succ, Example.black_friday_theorem(n.pred))
   }!
+
+Example.sum(n: Nat): Nat
+  case n {
+    zero: 0
+    succ: n + Example.sum(n.pred)
+  }

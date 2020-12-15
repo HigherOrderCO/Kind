@@ -1,26 +1,23 @@
 Theorem Proving
 ===============
 
-Theorem proving is the main activity available in Formality that isn't present
-in other pure functional languages like Haskell. Because of that, and while a
-more extensive book isn't released, we're writting this small tutorial to serve
-as an introduction to the subject. We'll highlight several simple theorems and
-how to prove them. This will assume the reader is familiar with basic functional
-programming concepts like recursion, pattern matching and algebraic datatypes.
+Theorem proving is the main difference between Formality and traditional pure
+functional languages like Haskell. Since proving theorems requires certain
+techniques that aren't common in these languages, this tutorial aims to fill
+that gap, supplementing a reader that is familiar with basic functional
+programming concepts (like recursion, pattern matching and algebraic datatypes)
+with the required knowledge to start proving theorems right now.
 
 Before starting, make sure to install Formality via Haskell or JavaScript
 (example: `npm i -g formality-lang`), clone this repository
 (`https://github.com/moonad/formality`) and `cd` into the `formality/src`
-directory. That's because Formality doesn't have a module system yet, so, in
-order to use the base libraries and types, you must be on the same directory
-where they are defined. We'll be editing the `Main.fm` file. Type `fmjs Main.fm`
-to type-check it, and `fmjs Main --run` to run `Main` (or `fmhs` if you're using
-the Haskell release).
+directory (you **must** be there for now). You'll be editing the `Main.fm` file
+only. Open it in your favorite editor and type `fmjs Main.fm` to type-check it.
 
 The Equal type
 --------------
 
-To start proving theorems, first you must learn about the `Equal` type:
+To start proving theorems, first you must be aware of the `Equal` type:
 
 ```
 type Equal <A: Type> (a: A) ~ (b: A) {
@@ -28,27 +25,34 @@ type Equal <A: Type> (a: A) ~ (b: A) {
 }
 ```
 
-You do not have to understand how it works for now, but you need to learn what
-it means. It is a dependent type with 3 type variables: a type and two values
-`Equal : (A: Type) -> A -> A -> Type`. That means `Equal` alone isn't a concrete
-type, but `Equal(Nat,2,2)`, `Equal(Bool,true,false)` and `Equal(Nat,4,10)` are.
-An element of the `Equal(A,a,b)` type is a **proof** that `a` and `b` are equal.
-If that sounds confusing to you, remember you already know a dependent type with
-one type variable: `List : Type -> Type`. The only difference is that `Equal`
-accepts 3 type variables, 2 of these being actually values.
+If that looks aliean to you, don't worry. All you need to know is that it is a
+dependent type with 3 type variables: a type and two values `Equal : (A: Type)
+-> A -> A -> Type`. In the same way that `List` needs a type to be a concrete
+type (as in, `List(Bool)`, `List(Nat)` and `List(List(Nat))`), `Equal` needs a
+type and two values to be a concrete type (as in, `Equal(Nat,2,2)`,
+`Equal(Bool,true,false)` and `Equal(Nat,4,10)`). 
 
-The only way to **directly** create an element of type `Equal(A,a,b)` is by
-using the `Equal.refl : (A: Type) -> (x: A) -> Equal(A,a,a)` constructor. That
-means that, given a type `A` and an element `x` of type `A`, `Equal.refl(A,x)`
-returns `Equal(A,x,x)`, i.e., a proof that `x == x`. For example, we can prove
-that `2 == 2` by writting: 
+When you construct a list of type `List(A)`, that means you have a list of
+values of type `A`. When you construct an element of the `Equal(A,a,b)` type,
+that means you have a **proof** that `a` and `b` are equal. Proofs and lists are
+more similar than you think: they're both algebraic datatypes, which can be
+built with constructors, and eliminated with pattern-matching.
 
+The `Equal` type has only one constructor, `refl`, which has the following type:
+
+```
+Equal.refl : (A: Type) -> (x: A) -> Equal(A,a,a)
+````
+
+In other words, `refl` receives a type (`A`), and element `x` of type `A`, and
+returns `Equal(A,x,x)`. In other words, the program below:
 ```
 two_is_two: Equal(Nat, 2, 2)
   Equal.refl(Nat, 2)
 ```
-Since `Equal` and `refl` are common, there is a shortcut to write it. The
-program above is equivalent to:
+
+Is a proof that `2 == 2`. Not that scary, right? Since `Equal` and `refl` are
+common, there is a shortcut to write it. The program above is equivalent to:
 
 ```
 two_is_two: 2 == 2
@@ -73,16 +77,22 @@ two_is_two: (1 + 1) == 2
   refl
 ```
 
-Because `(1 + 1)` is a concrete value that computes to `2`.
+Because `(1 + 1)` is a concrete value that computes to `2`. Now, of course,
+proving that two concrete values are equal isn't that interesting. The real fun
+starts when you start mixing letters; aka, variables; to these equations.
+Theorem proving, in its most essential form, is all about techniques to
+manipulate these equations until you get both sides to be identical. That's what
+we're going to do through all this tutorial. Ready? Let's go!
 
 ---
 
 Our first theorem: double negation
 ----------------------------------
 
-Now let's prove a simple theorem: `for any Boolean b, not(not(b)) == b`. That
-is, negating a boolean twice results on the original boolean. To start this
-proof, we giving the theorem a name, a type, and a body (a goal):
+We'll start proving a simple theorem: that, for any Boolean b, `not(not(b)) ==
+b`. In other words, we'll prove that negating a boolean twice results on the
+original boolean. To start this proof, we give the theorem a name, a type, and
+a body (a goal):
 
 ```
 double_negation(b: Bool): not(not(b)) == b
@@ -117,10 +127,10 @@ With context:
 ```
 
 That's because `Equal.refl(Bool, b)` proves that `b == b`, but we want a proof
-that `Bool.not(Bool.not(b)) == b`. Yes, we know that `Bool.not(Bool.not(b))`
-should always reduce to `b`, but Formality doesn't know that because `b` isn't a
-concrete value, but a variable. To understand why, remember the definition of
-`Bool.not` (from `Bool.fm`):
+that `Bool.not(Bool.not(b)) == b`. Yes, we, humans, know that
+`Bool.not(Bool.not(b))` should always reduce to `b`, but the machine, Formality
+doesn't know that, because `b` isn't a concrete value, but a variable. Let's see
+the definition of `Bool.not` (from `Bool.fm`):
 
 ```
 Bool.not(b: Bool): Bool
@@ -130,16 +140,17 @@ Bool.not(b: Bool): Bool
   }
 ```
 
-When we write `Bool.not(Bool.not(b))`, this will reduce to:
+When Formality sees `Bool.not(Bool.not(b))`, it will reduce it to:
 
 ```
 case (case b { true: false, false: true }) { true: false, false: true }
 ```
 
-Notice that the inner case is **stuck** trying to pattern-match on `b`, but it
-can't chose any branch because it doesn't know what `b` is. Thus, Formality will
-not be able to tell that `Bool.not(Bool.not(b))` and `b` are the same. But we
-can help it by case analysis. Let's pattern-match on `b`:
+But now the inner case is **stuck**, trying to pattern-match on `b`. It can't
+chose any branch, because it doesn't know what `b` is. It isn't `true`, it isn't
+`false`. It is just a variable. That is the only reason Formality is not able to
+tell that `Bool.not(Bool.not(b))` and `b` are the same. But we can help it with
+a **case analysis**. That is, we can **pattern-match** on `b`:
 
 
 ```
@@ -150,7 +161,7 @@ double_negation(b: Bool): not(not(b)) == b
   }
 ```
 
-Let's run it with `fmjs Main`:
+Check it with `fmjs Main`:
 
 ```
 Goal ?a:
@@ -165,12 +176,12 @@ With ctxt:
 ```
 
 Now, instead of one goal, we have two goals. But Formality is still demanding a
-proof that `Bool.not(Bool.not(b)) == b` in each one, so, that wasn't very
-helpful. But let's think about it: on the `true` case, we know that `b` is
-`true`, because we just pattern-matched it. Similarly, on the `false` case, we
-know that `b` is `false`. **Wouldn't it be great if we could ask Formality to
-relax its demands by specializing `b` to its concrete value on each branch?**
-We can do just that by adding a `!` after the case expression:
+proof that `Bool.not(Bool.not(b)) == b` in both, so, that wasn't very helpful.
+But consider the following: on the `true` case, we know that `b` is `true`,
+because we just pattern-matched it. Similarly, on the `false` case, we know that
+`b` is `false`. Wouldn't it be great if Formality noticed that, and relaxed its
+demands by specializing `b` to its concrete value on each branch?  We can ask
+Formality to do just that by adding a `!` after the case expression:
 
 ```
 double_negation(b: Bool): Bool.not(Bool.not(b)) == b
@@ -180,8 +191,8 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   }!
 ```
 
-Here, `!` stands for "specialize b on the type of each case". By running `fmjs
-Main`, we now see:
+Here, `!` stands for "please, be less demanding and specialize b to its concrete
+values on each case". By running `fmjs Main`, we now see:
 
 ```
 Goal ?a:
@@ -195,10 +206,11 @@ With ctxt:
 - b: Bool
 ```
 
-Now Formality demands a proof that `not(not(true)) == true` on the first case,
-and a proof that `not(not(false)) == false`. That's much better, because the
-variable `b` is gone and `not` can get unstuck and compute. To see that this is
-true, Formality allows us to reduce the type of a goal by writing `-` after it:
+Formality now demands a proof that `not(not(true)) == true` on the first case,
+and a proof that `not(not(false)) == false`. That's great, because the variable
+`b` is gone and the `case b` inside `not` is now "unstuck" and ready to compute.
+To see that this is true, Formality allows us to inspect and reduce a goal by
+writing `-` after it:
 
 ```
 double_negation(b: Bool): Bool.not(Bool.not(b)) == b
@@ -222,9 +234,9 @@ With ctxt:
 - b: Bool
 ```
 
-Notice how a `-N` was added after each reducible expression. We can ask
-Formality to reduce any of these by writting that number after the goal. Let's
-reduce the inner `not` (the one labelled `-22`) on each branch:
+Notice how a `-N` was added after each reducible expression. That's a label. We
+can ask Formality to reduce any of these by writting that label after the goal.
+Let's reduce the inner `not` (the one labelled `-22`) on each branch:
 
 ```
 double_negation(b: Bool): Bool.not(Bool.not(b)) == b
@@ -295,7 +307,9 @@ All terms check.
 ```
 
 That means our first proof is complete, and `not(not(b)) == b` is indeed true.
-Good job! Note that you could have written `refl` on its full form (for example,
+Good job!
+
+Note that you could have written `refl` on its full form (for example,
 `Equal.refl(Bool, Bool.true)`) instead of just `refl`. Note also that this last
 step of reducing the goal with `-` is optional. If you knew that `not(not(true))
 == true` would reduce to `true == true`, you could have just written `refl`
@@ -482,7 +496,6 @@ That completes our third proof. The lesson is: again, use `-` to see how your
 goal reduces, use case to specialize stuck variables, and use `refl` when you
 manage to get two sides equal. With this simple procedure and enough patience,
 you can prove any equality theorem.
-
 
 A hard theorem made easy: `b == and(b,true)`
 --------------------------------------------
