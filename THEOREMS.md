@@ -2,7 +2,7 @@ Theorem Proving
 ===============
 
 Theorem proving is the main difference between Formality and traditional pure
-functional languages like Haskell. Since proving theorems requires certain
+functional languages like Haskell. Since proving theorems require certain
 techniques that aren't common in these languages, this tutorial aims to fill
 that gap, supplementing a reader that is familiar with basic functional
 programming concepts (like recursion, pattern matching and algebraic datatypes)

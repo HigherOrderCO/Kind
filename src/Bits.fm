@@ -177,7 +177,67 @@ Bits.div(a: Bits, b: Bits): Bits
 Bits.mod(a: Bits, b: Bits): Bits
   Bits.mod(a, b)
 
-// TODO
 // Subtracts two Bitstrings.
+// If a is less than b, Bits.e is returned.
 Bits.sub(a: Bits, b: Bits): Bits
-  Bits.sub(a, b)
+  Bits.reverse(Bits.sub.go(a, b, Bits.e))
+
+Bits.sub.go(a: Bits, b: Bits, bits: Bits): Bits
+  case b {
+    e: case a {
+      e: bits,
+      o: Bits.sub.go(a.pred, b, Bits.o(bits)),
+      i: Bits.sub.go(a.pred, b, Bits.i(bits))
+    },
+    o: case a {
+      e: Bits.sub.go(a, b.pred, Bits.o(bits)),
+      o: Bits.sub.go(a.pred, b.pred, Bits.o(bits)),
+      i: Bits.sub.go(a.pred, b.pred, Bits.i(bits))
+    },
+    i: case a {
+      e: Bits.e,
+      o: Bits.sub.go(a.pred, Bits.inc(b.pred), Bits.i(bits)),
+      i: Bits.sub.go(a.pred, b.pred, Bits.o(bits))
+    }
+  }
+
+
+// Tests
+Bits.sub_.3: Bits
+  Bits.i(Bits.i(Bits.e))
+
+Bits.sub_.7: Bits
+  Bits.i(Bits.i(Bits.i(Bits.e)))
+
+Bits.sub_.8: Bits
+  Bits.o(Bits.o(Bits.o(Bits.i(Bits.e))))
+
+Bits.sub_.10: Bits
+  Bits.o(Bits.i(Bits.o(Bits.i(Bits.e))))
+
+Bits.sub_.test.0_minus_0: The(Nat, 0)
+  The.value<_>(Bits.to_nat(Bits.sub(Bits.e, Bits.e)))
+
+Bits.sub_.test.0_with_leading_zero_minus_0: The(Nat, 0)
+  The.value<_>(Bits.to_nat(Bits.sub(Bits.o(Bits.e), Bits.e)))
+
+Bits.sub_.test.0_minus_1: The(Nat, 0)
+  The.value<_>(Bits.to_nat(Bits.sub(Bits.o(Bits.e), Bits.i(Bits.e))))
+
+Bits.sub_.test.1_with_leading_zeroes_minus_8: The(Nat, 0)
+  The.value<_>(Bits.to_nat(Bits.sub(Bits.i(Bits.o(Bits.o(Bits.o(Bits.e)))), Bits.sub_.8)))
+
+Bits.sub_.test.10_minus_10: The(Nat, 0)
+  The.value<_>(Bits.to_nat(Bits.sub(Bits.sub_.10, Bits.sub_.10)))
+
+Bits.sub_.test.10_minus_3: The(Nat, 7)
+  The.value<_>(Bits.to_nat(Bits.sub(Bits.sub_.10, Bits.sub_.3)))
+
+Bits.sub_.test.8_minus_7: The(Nat, 1)
+  The.value<_>(Bits.to_nat(Bits.sub(Bits.sub_.8, Bits.sub_.7)))
+
+Bits.sub_.test.2_minus_8: The(Nat, 0)
+  The.value<_>(Bits.to_nat(Bits.sub(Bits.o(Bits.i(Bits.e)), Bits.sub_.8)))
+
+Bits.sub_.test.8_minus_2_where_2_is_longer: The(Nat, 6)
+  The.value<_>(Bits.to_nat(Bits.sub(Bits.sub_.8, Bits.o(Bits.i(Bits.o(Bits.o(Bits.o(Bits.e))))))))
