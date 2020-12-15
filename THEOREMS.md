@@ -26,11 +26,10 @@ type Equal <A: Type> (a: A) ~ (b: A) {
 ```
 
 If that looks aliean to you, don't worry. All you need to know is that it is a
-dependent type with 3 type variables: a type and two values `Equal : (A: Type)
--> A -> A -> Type`. In the same way that `List` needs a type to be a concrete
-type (as in, `List(Bool)`, `List(Nat)` and `List(List(Nat))`), `Equal` needs a
-type and two values to be a concrete type (as in, `Equal(Nat,2,2)`,
-`Equal(Bool,true,false)` and `Equal(Nat,4,10)`). 
+dependent type with 3 type variables: a type and two values. In the same way
+that `List` needs a type to be a concrete type (as in, `List(Bool)`, `List(Nat)`
+and `List(List(Nat))`), `Equal` needs a type and two values to be a concrete
+type (as in, `Equal(Nat,2,2)`, `Equal(Bool,true,false)` and `Equal(Nat,4,10)`). 
 
 When you construct a list of type `List(A)`, that means you have a list of
 values of type `A`. When you construct an element of the `Equal(A,a,b)` type,
@@ -44,15 +43,16 @@ The `Equal` type has only one constructor, `refl`, which has the following type:
 Equal.refl : (A: Type) -> (x: A) -> Equal(A,a,a)
 ````
 
-In other words, `refl` receives a type (`A`), and element `x` of type `A`, and
-returns `Equal(A,x,x)`. In other words, the program below:
+That means `refl` receives a type (`A`), and element `x` of type `A`, and
+returns `Equal(A,x,x)`. As an example, the program below:
+
 ```
 two_is_two: Equal(Nat, 2, 2)
   Equal.refl(Nat, 2)
 ```
 
 Is a proof that `2 == 2`. Not that scary, right? Since `Equal` and `refl` are
-common, there is a shortcut to write it. The program above is equivalent to:
+common, there is a shortcut to write them. The program above is equivalent to:
 
 ```
 two_is_two: 2 == 2
@@ -79,7 +79,7 @@ two_is_two: (1 + 1) == 2
 
 Because `(1 + 1)` is a concrete value that computes to `2`. Now, of course,
 proving that two concrete values are equal isn't that interesting. The real fun
-starts when you start mixing letters; aka, variables; to these equations.
+starts when you start mixing letters; aka, variables; in these equations.
 Theorem proving, in its most essential form, is all about techniques to
 manipulate these equations until you get both sides to be identical. That's what
 we're going to do through all this tutorial. Ready? Let's go!
@@ -128,9 +128,8 @@ With context:
 
 That's because `Equal.refl(Bool, b)` proves that `b == b`, but we want a proof
 that `Bool.not(Bool.not(b)) == b`. Yes, we, humans, know that
-`Bool.not(Bool.not(b))` should always reduce to `b`, but the machine, Formality
-doesn't know that, because `b` isn't a concrete value, but a variable. Let's see
-the definition of `Bool.not` (from `Bool.fm`):
+`Bool.not(Bool.not(b))` should always reduce to `b`, but the machine, Formality,
+doesn't know that. Why? Let's see the definition of `Bool.not` (from `Bool.fm`):
 
 ```
 Bool.not(b: Bool): Bool
@@ -140,7 +139,7 @@ Bool.not(b: Bool): Bool
   }
 ```
 
-When Formality sees `Bool.not(Bool.not(b))`, it will reduce it to:
+When Formality sees `Bool.not(Bool.not(b))`, it reduces it to:
 
 ```
 case (case b { true: false, false: true }) { true: false, false: true }
@@ -207,10 +206,10 @@ With ctxt:
 ```
 
 Formality now demands a proof that `not(not(true)) == true` on the first case,
-and a proof that `not(not(false)) == false`. That's great, because the variable
-`b` is gone and the `case b` inside `not` is now "unstuck" and ready to compute.
-To see that this is true, Formality allows us to inspect and reduce a goal by
-writing `-` after it:
+and a proof that `not(not(false)) == false` on the second one. That's great,
+because the variable `b` is gone and the `case b` inside `not` is now "unstuck"
+and ready to compute.  To see that this is true, Formality allows us to inspect
+and reduce a goal by writing `-` after it:
 
 ```
 double_negation(b: Bool): Bool.not(Bool.not(b)) == b
@@ -313,7 +312,8 @@ Note that you could have written `refl` on its full form (for example,
 `Equal.refl(Bool, Bool.true)`) instead of just `refl`. Note also that this last
 step of reducing the goal with `-` is optional. If you knew that `not(not(true))
 == true` would reduce to `true == true`, you could have just written `refl`
-directly.
+directly. Learning to use `-` can be very handy when you have goals too complex
+to reduce in your head, so keep it in your toolbelt!
 
 An easy theorem: `and(true, b) == b`
 ------------------------------------
