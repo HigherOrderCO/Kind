@@ -321,7 +321,8 @@ More information
 
 For a list of available syntaxes, check [SYNTAX.md](SYNTAX.md).
 
-If you're brave, browse the [src](https://github.com/moonad/Formality/tree/master/src) directory, where all the base libraries (and Formality itself!) is implemented.
+For a tutorial about theorem proving, check [THEOREMS.md](THEOREMS.md).
 
-More links and resources will be added soon!
+If you're brave, browse the [base libraries](https://github.com/moonad/Formality/tree/master/src).
 
+Join our [Telegram chat room](https://t.me/formality_lang)! 
