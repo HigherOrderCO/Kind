@@ -72,14 +72,13 @@ our post about interaction nets and optimal reduction ([Absal]).
 
 [JavaScript compiler]:https://github.com/moonad/FormCoreJS/blob/master/FmcToJs.js
 
-### Fun!
+### Market Readiness
 
-For a programming language to be fun, it can't be too serious. It must have
-great supporting tools such as a package manager, an editor. It must have
-friendly error messages. It must have a fast type-checker. It must have a
-non-cryptic syntax that everyone can use and understand. It must be stable and
-provide long term support. All of these are non-goals for many of the existing
-alternatives, but are high priorities for Formaltiy.
+For a programming language to be used in real-world applications, it must
+satisfy certain minimal requirements. It must have a great package manager, a
+good editor, friendly error messages, a fast compiler and a clear, non-cryptic
+syntax that everyone can use and understand. All of these are non-goals for some
+of the existing alternatives, but are high priorities for Formality.
 
 Usage
 -----
@@ -97,6 +96,7 @@ Usage
     ```bash
     git clone https://github.com/moonad/formality
     cd formality/bin/hs
+    cabal build
     cabal install
     ```
 
@@ -138,7 +138,7 @@ Usage
 Quick Introduction
 ------------------
 
-### A simple, clear, and fun syntax
+### A simple, clear, and unsurprising syntax
 
 > If you can't explain it simply, you don't understand it well enough.
 

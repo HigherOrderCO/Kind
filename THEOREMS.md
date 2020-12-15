@@ -9,7 +9,7 @@ programming concepts (like recursion, pattern matching and algebraic datatypes)
 with the required knowledge to start proving theorems right now.
 
 Before starting, make sure to install Formality via Haskell or JavaScript
-(example: `npm i -g formality-lang`), clone this repository
+(example: `npm i -g formality-js`), clone this repository
 (`https://github.com/moonad/formality`) and `cd` into the `formality/src`
 directory (you **must** be there for now). You'll be editing the `Main.fm` file
 only. Open it in your favorite editor and type `fmjs Main.fm` to type-check it.
@@ -25,17 +25,15 @@ type Equal <A: Type> (a: A) ~ (b: A) {
 }
 ```
 
-If that looks aliean to you, don't worry. All you need to know is that it is a
-dependent type with 3 type variables: a type and two values. In the same way
-that `List` needs a type to be a concrete type (as in, `List(Bool)`, `List(Nat)`
-and `List(List(Nat))`), `Equal` needs a type and two values to be a concrete
-type (as in, `Equal(Nat,2,2)`, `Equal(Bool,true,false)` and `Equal(Nat,4,10)`). 
-
-When you construct a list of type `List(A)`, that means you have a list of
-values of type `A`. When you construct an element of the `Equal(A,a,b)` type,
-that means you have a **proof** that `a` and `b` are equal. Proofs and lists are
-more similar than you think: they're both algebraic datatypes, which can be
-built with constructors, and eliminated with pattern-matching.
+If that looks alien to you, don't worry. All you need to know is the following:
+`Int` and `String` are simple types, `List(String)`, `Pair(Int, String)` are
+polymorphic types (because you have types inside types), `Equal(Int,2,2)`,
+`Equal(Bool,true,false)` and `Equal(Int,4,10)` are dependent types (because you
+have values inside types). When you have a `x : Int`, that means `x` is a
+number. When you have a `xs : List(Int)`, that means `xs` is a list of numbers.
+When you have a `e : Equal(A,a,b)`, that means `e` is a **proof** that `a` and
+`b` are equal. Equality proofs and lists are more similar than you think: both
+are just regular datatypes that can be constructed and deconstructed.
 
 The `Equal` type has only one constructor, `refl`, which has the following type:
 
