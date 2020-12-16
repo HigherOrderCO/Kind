@@ -1456,6 +1456,13 @@ As expected, Formality just tells us we must prove `Not(3 == 2)`, which is the
 same as `(e: 3 == 2) -> Empty`. Since that is a function, we create a lambda:
 
 ```
+three_neq_two: 3 != 2
+  (e) ?a
+```
+
+Check it with `fmjs Main.fm`:
+
+```
 Goal ?a:
 With type: Empty
 With ctxt:
