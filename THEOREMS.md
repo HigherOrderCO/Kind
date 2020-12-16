@@ -58,7 +58,7 @@ two_is_two: 2 == 2
 ```
 
 Make sure to replace the contents of `Main.fm` by the snipped above, and type
-`fmjs Main` to test it. You should see:
+`fmjs Main.fm` to test it. You should see:
 
 ```
 two_is_two: 2 == 2
@@ -158,7 +158,7 @@ double_negation(b: Bool): not(not(b)) == b
   }
 ```
 
-Check it with `fmjs Main`:
+Check it with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -189,7 +189,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
 ```
 
 Here, `!` stands for "please, be less demanding and specialize b to its concrete
-values on each case". By running `fmjs Main`, we now see:
+values on each case". By running `fmjs Main.fm`, we now see:
 
 ```
 Goal ?a:
@@ -217,7 +217,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   }!
 ```
 
-Running `fmjs Main`, we see:
+Running `fmjs Main.fm`, we see:
 
 ```
 Goal ?a:
@@ -243,7 +243,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   }!
 ```
 
-Running `fmjs Main`, we see:
+Running `fmjs Main.fm`, we see:
 
 ```
 Goal ?a:
@@ -269,7 +269,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   }!
 ```
 
-Running `fmjs Main`:
+Running `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -295,7 +295,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   }!
 ```
 
-By running `fmjs Main`, we see:
+By running `fmjs Main.fm`, we see:
 
 ```
 double_negation: (b:Bool) Bool.not(Bool.not(b)) == b
@@ -327,7 +327,7 @@ and_true_b(b: Bool): Bool.and(true, b) == b
   ?a
 ```
 
-By running `fmjs main`, we see:
+By running `fmjs main.fm`, we see:
 
 ```
 Goal ?a:
@@ -358,7 +358,7 @@ and_true_b(b: Bool): Bool.and(true, b) == b
   ?a-
 ```
 
-Run it with `fmjs Main`:
+Run it with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -374,7 +374,7 @@ and_true_b(b: Bool): Bool.and(true, b) == b
   ?a-18
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -390,7 +390,7 @@ and_true_b(b: Bool): Bool.and(true, b) == b
   refl
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 and_true_b: (b:Bool) Bool.and(Bool.true,b) == b
@@ -424,7 +424,7 @@ and_b_true(b: Bool): Bool.and(b, true) == b
   ?a-
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -440,7 +440,7 @@ and_b_true(b: Bool): Bool.and(b, true) == b
   ?a-18
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -464,7 +464,7 @@ and_b_true(b: Bool): Bool.and(b, true) == b
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -589,7 +589,7 @@ double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   ?a
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -629,7 +629,7 @@ double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Run with `fmjs Main`:
+Run with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -655,7 +655,7 @@ double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?b:
@@ -679,7 +679,7 @@ double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?b:
@@ -699,7 +699,7 @@ double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?b:
@@ -719,7 +719,7 @@ double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?b:
@@ -746,7 +746,7 @@ double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -819,7 +819,7 @@ double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -867,7 +867,7 @@ double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-And the following goal (check with `fmjs Main`):
+And the following goal (check with `fmjs Main.fm`):
 
 ```
 Goal ?b:
@@ -892,7 +892,7 @@ double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?b:
@@ -923,7 +923,7 @@ double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?b:
@@ -949,7 +949,7 @@ double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 double_half_theorem: (n:Nat) Nat.half(Nat.double(n)) == n
@@ -976,7 +976,7 @@ add_0_n(n: Nat): (0 + n) == n
   ?a
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1006,7 +1006,7 @@ add_0_n(n: Nat): (0 + n) == n
   refl
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 add_0_n: (n:Nat) Nat.add(0,n) == n
@@ -1026,7 +1026,7 @@ add_n_0(n: Nat): (n + 0) == n
   ?a
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1047,7 +1047,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1073,7 +1073,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1098,7 +1098,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?b:
@@ -1120,7 +1120,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?b:
@@ -1145,7 +1145,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?b:
@@ -1171,7 +1171,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?b:
@@ -1196,7 +1196,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 add_n_0: (n:Nat) Nat.add(n,0) == n
@@ -1331,7 +1331,7 @@ one_neq_zero(e: 1 == 0): Empty
 Which stands for "if 1 == 0, then we can construct an element of the Empty
 type". Which can be read as "1 == 0 is a false theorem".
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1445,7 +1445,7 @@ three_neq_two: 3 != 2
   ?a
 ```
 
-Check it with `fmjs Main`:
+Check it with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1460,7 +1460,7 @@ three_neq_two: 3 != 2
   (e) ?a
 ```
 
-Check it with `fmjs Main.fm`:
+Check it with `fmjs Main.fm.fm`:
 
 ```
 Goal ?a:
@@ -1497,7 +1497,7 @@ three_neq_two: 4 != 2
   ?a
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1517,7 +1517,7 @@ three_neq_two: 3 != 2
   ?a
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1539,7 +1539,7 @@ three_neq_two: 3 != 2
   ?a
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1563,7 +1563,7 @@ three_neq_two: 3 != 2
   ?a
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1590,7 +1590,7 @@ three_neq_two: 3 != 2
   Bool.true_neq_false(e3)
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 three_neq_two: Not(3 == 2)
@@ -1610,7 +1610,7 @@ not_a_neq_a(a: Bool): Bool.not(b) != b
   ?a
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1627,7 +1627,7 @@ not_a_neq_a(b: Bool): Bool.not(b) != b
   (e) ?a
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1648,7 +1648,7 @@ not_a_neq_a(b: Bool): Bool.not(b) != b
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1679,7 +1679,7 @@ not_a_neq_a(b: Bool): Bool.not(b) != b
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 Goal ?a:
@@ -1709,7 +1709,7 @@ not_a_neq_a(b: Bool): Bool.not(b) != b
   }!
 ```
 
-Check with `fmjs Main`:
+Check with `fmjs Main.fm`:
 
 ```
 not_a_neq_a: (b:Bool) Not(Bool.not(b) == b)
