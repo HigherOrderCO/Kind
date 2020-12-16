@@ -93,7 +93,7 @@ original boolean. To start this proof, we give the theorem a name, a type, and
 a body (a goal):
 
 ```
-double_negation(b: Bool): not(not(b)) == b
+double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   ?a
 ```
 
