@@ -144,10 +144,10 @@ case (case b { true: false, false: true }) { true: false, false: true }
 ```
 
 But now the inner case is **stuck**, trying to pattern-match on `b`. It can't
-chose any branch, because it doesn't know what `b` is. It isn't `true`, it isn't
-`false`. It is just a variable. That is the only reason Formality is not able to
-tell that `Bool.not(Bool.not(b))` and `b` are the same. But we can help it with
-a **case analysis**. That is, we can **pattern-match** on `b`:
+choose any branch, because it doesn't know what `b` is. It isn't `true`, it
+isn't `false`. It is just a variable. That is the only reason Formality is not
+able to tell that `Bool.not(Bool.not(b))` and `b` are the same. But we can help
+it with a **case analysis**. That is, we can **pattern-match** on `b`:
 
 
 ```
@@ -498,7 +498,7 @@ you can prove any equality theorem.
 A hard theorem made easy: `b == and(b,true)`
 --------------------------------------------
 
-Let's not prove that `b == and(b,true)`:
+Let's now prove that `b == and(b,true)`:
 
 ```
 right_and_b_true(b: Bool): b == Bool.and(b, true)
