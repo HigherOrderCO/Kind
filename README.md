@@ -144,7 +144,7 @@ Quick Introduction
 
 Why make it hard? Formality aims to frame advanced concepts in ways that
 everyone can understand. For example, if you ask a Haskeller to sum a list of
-positive ints (Nats), he might write:
+positive ints (Nats), they might write:
 
 ```c
 sum(list: List(Nat)): Nat
@@ -159,7 +159,7 @@ Main: IO(Unit)
   }
 ```
 
-Or, if he is enlightened enough:
+Or, if they are enlightened enough:
 
 ```c
 sum(list: List(Nat)): Nat
