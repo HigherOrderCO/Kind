@@ -1320,13 +1320,16 @@ every possible value of `e`. So, did we just prove that `1 == 0`? No! Because
 
 That's the principle of explosion: from an absurd, we can derive any other
 absurd. That's why `Empty` is so useful. If we can derive `Empty` from
-a theorem, then that thing is definitely false. For example, let's prove that `1
-== 2` is not true. We write a function:
+a theorem, then that theorem is definitely false. For example, let's prove 
+that `1 == 0` is not true. We write a function:
 
 ```
 one_neq_zero(e: 1 == 0): Empty
   ?a
 ```
+
+Which stands for "if 1 == 0, then we can construct an element of the Empty
+type". Which can be read as "1 == 0 is a false theorem".
 
 Check with `fmjs Main`:
 
@@ -1337,8 +1340,8 @@ With ctxt:
 - e: 1 == 0
 ```
 
-This means our goal is to construct an element of the `Empty` type, and we have
-a proof that `1 == 0` in our context.
+That means that, to prove that "1 == 0" is indeed false, our goal is to construct 
+an element of the `Empty` type, based on the assumption that `1 == 0` (named `e`).
 
 To do it, you must understand two other things. First, that we can have
 expressions on types. For example:
