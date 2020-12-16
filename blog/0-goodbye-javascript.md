@@ -173,7 +173,7 @@ interpreters), it allows GHC to heavily optimize your Formality programs. Of
 course, speed will still not be comparable to hand-written Haskell, but it will
 not be an issue in most common uses. As we compile more Formality types to
 native Haskell structures, the gap should get smaller. Benchmarks and
-comparisons would be sweet, thuogh, so, if anyone is wondering how to
+comparisons would be sweet, though, so, if anyone is wondering how to
 collaborate, that is a way!
 
 Conclusion
