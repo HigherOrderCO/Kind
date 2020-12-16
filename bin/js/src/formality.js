@@ -211,17 +211,37 @@ module.exports = (function() {
         return $22;
     });
     var run = (p) => {
-        var rdl = require('readline').createInterface({
-            input: process.stdin,
-            output: process.stdout,
-            terminal: false
-        });
-        return run_io(rdl, p).then((x) => {
-            rdl.close();
+        if (typeof window === 'undefined') {
+            var rl = eval("require('readline')").createInterface({
+                input: process.stdin,
+                output: process.stdout,
+                terminal: false
+            });
+            var fs = eval("require('fs')");
+            var pc = eval("process");
+        } else {
+            var rl = {
+                question: (x, f) => f(''),
+                close: () => {}
+            };
+            var fs = {
+                readFileSync: () => ''
+            };
+            var pc = {
+                exit: () => {},
+                argv: []
+            };
+        };
+        return run_io({
+            rl,
+            fs,
+            pc
+        }, p).then((x) => {
+            rl.close();
             return x;
         });
     };
-    var run_io = (rdl, p) => {
+    var run_io = (lib, p) => {
         switch (p._) {
             case 'IO.end':
                 return Promise.resolve(p.value);
@@ -230,23 +250,23 @@ module.exports = (function() {
                     switch (p.query) {
                         case 'print':
                             console.log(p.param);
-                            run_io(rdl, p.then(1)).then(res);
+                            run_io(lib, p.then(1)).then(res);
                             break;
                         case 'exit':
-                            process.exit();
+                            lib.pc.exit();
                             break;
                         case 'get_line':
-                            rdl.question('', (line) => run_io(rdl, p.then(line)).then(res));
+                            lib.rl.question('', (line) => run_io(lib, p.then(line)).then(res));
                             break;
                         case 'get_file':
                             try {
-                                run_io(rdl, p.then(require('fs').readFileSync(p.param, 'utf8'))).then(res);
+                                run_io(lib, p.then(lib.fs.readFileSync(p.param, 'utf8'))).then(res);
                             } catch (e) {
-                                run_io(rdl, p.then('')).then(res);
+                                run_io(lib, p.then('')).then(res);
                             };
                             break;
                         case 'get_args':
-                            run_io(rdl, p.then(process.argv[2] || '')).then(res);
+                            run_io(lib, p.then(lib.pc.argv[2] || '')).then(res);
                             break;
                     }
                 });
