@@ -4,7 +4,7 @@ var fm = require("./formality.js");
 var fs = require("fs");
 //var path = require("path");
 var {fmc_to_js, fmc_to_hs} = require("formcore-lang");
-var {fmc_to_js, fmc_to_hs} = require("./../../../../FormCoreJS");
+//var {fmc_to_js, fmc_to_hs} = require("./../../../../FormCoreJS");
 
 if (!process.argv[2] || process.argv[2] === "--help" || process.argv[2] === "-h") {
   console.log("# FormalityJS "+require("./../package.json").version);
