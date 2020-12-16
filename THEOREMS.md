@@ -38,7 +38,7 @@ are just regular datatypes that can be constructed and deconstructed.
 The `Equal` type has only one constructor, `refl`, which has the following type:
 
 ```
-Equal.refl : (A: Type) -> (x: A) -> Equal(A,a,a)
+Equal.refl : (A: Type) -> (x: A) -> Equal(A,x,x)
 ````
 
 That means `refl` receives a type (`A`), and element `x` of type `A`, and
