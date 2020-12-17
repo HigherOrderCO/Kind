@@ -283,17 +283,6 @@ case List.at<_>(m,base64) as char {
 }
 ```
 
-And `with expression` is ... TODO
-```
-Maybe.is_some<A: Type>(x: A): Maybe.IsSome(A,Maybe.some<A>(x))
-  def y = Maybe.some<A>(x)
-  case y{
-    with e : Equal(Maybe(A),y,y) = Equal.to<Maybe(A),y>
-    none: Empty.absurd<_>(Maybe.some_isnt_none<A>(x,e))
-    some: y.value
-  }
-```
-
 The motive is optional: if it isn't provided,
 it will be replaced by a `hole`. For example, to sum a list, we write:
 
