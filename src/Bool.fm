@@ -5,14 +5,14 @@ type Bool {
 
 Bool.not(a: Bool): Bool
   case a {
-    true: Bool.false,
-    false: Bool.true,
+    true: false,
+    false: true,
   }
 
 Bool.and(a: Bool, b: Bool): Bool
   case a {
     true: b,
-    false: Bool.false,
+    false: false,
   }
 
 Bool.or(a: Bool, b: Bool): Bool
@@ -71,24 +71,6 @@ Bool.double_negation(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
     false: Equal.refl<_, Bool.false>,
   } : Equal(Bool, Bool.not(Bool.not(b)), b)
 
-// Proof that false != true
-// Bool.false_isnt_true: Not(Equal(Bool, Bool.false, Bool.true))
-//   def P = ((b: Bool)
-//     case b {
-//       true: Empty,
-//       false: Unit,
-//     }) :: Bool -> Type
-//   (false_is_true) Equal.rewrite<_,_,_,P>(false_is_true, Unit.new)
-
-// Proof that true != false
-// Bool.true_isnt_false: Not(Equal(Bool, Bool.true, Bool.false))
-//   def P = ((b : Bool)
-//     case b {
-//       true: Unit,
-//       false: Empty,
-//     }) :: Bool -> Type
-//   (true_is_false) Equal.rewrite<_,_,_,P>(true_is_false, Unit.new)
-
 // Converts to a string
 Bool.show(b: Bool): String
   case b {
@@ -96,14 +78,12 @@ Bool.show(b: Bool): String
     false: "Bool.false",
   }
 
-// Bool that is provably different from the input
-// Bool.test.different_elem: (a: Bool) -> Subset(Bool, (b) Not(Equal(Bool, a, b)))
-//   (a)
-//   a<(self) Subset(Bool, (b) Not(Equal(Bool, self, b)))>
-//   | Subset.new<Bool, (b) Not(Equal(Bool, Bool.true, b))>(Bool.false)<Bool.true_isnt_false>;
-//   | Subset.new<Bool, (b) Not(Equal(Bool, Bool.false, b))>(Bool.true)<Bool.false_isnt_true>;
-
-
 // Dependent elimination of Bool.
 Bool.elim(b: Bool): <P: Bool -> Type> -> P(Bool.true) -> P(Bool.false) -> P(b)
   <P> (t) (f) b<P>(t, f)
+
+Bool.true_neq_false: true != false
+  (e) unit :: rewrite x in (if x then Unit else Empty) with e
+
+Bool.false_neq_true: false != true
+  (e) unit :: rewrite x in (if x then Empty else Unit) with e

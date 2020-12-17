@@ -240,6 +240,15 @@ List.zip<A: Type, B: Type>(as: List(A), bs: List(B)): List(Pair(A,B))
     }
   }
 
+List.zip_with<A: Type, B: Type, C: Type>(fn: A -> B -> C, as: List(A), bs: List(B)): List(C)
+  case as {
+    nil: List.nil<_>,
+    cons: case bs {
+      nil: List.nil<_>,
+      cons: List.cons<_>(fn(as.head, bs.head), List.zip_with<A,B,C>(fn, as.tail, bs.tail)),
+    }
+  }
+
 // May get the head of a list
 List.head<A: Type>(xs: List(A)): Maybe(A)
   case xs {

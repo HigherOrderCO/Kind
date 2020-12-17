@@ -27,7 +27,7 @@ about that soon.
 Why Formality?
 --------------
 
-There are some interesting proof languages, or theorem provers, as they're often
+There are some interesting proof languages, or proof assistants, as they're often
 called, in the market. [Agda], [Coq], [Lean], [Idris], to name a few. But these (perhaps with exception of Idris, which we love!)
 aren't aligned with the vision highlighted above, in some key aspects:
 
@@ -73,14 +73,13 @@ our post about interaction nets and optimal reduction ([Absal]).
 
 [JavaScript compiler]:https://github.com/moonad/FormCoreJS/blob/master/FmcToJs.js
 
-### Fun!
+### Market Readiness
 
-For a programming language to be fun, it can't be too serious. It must have
-great supporting tools such as a package manager, an editor. It must have
-friendly error messages. It must have a fast type-checker. It must have a
-non-cryptic syntax that everyone can use and understand. It must be stable and
-provide long term support. All of these are non-goals for many of the existing
-alternatives, but are high priorities for Formaltiy.
+For a programming language to be used in real-world applications, it must
+satisfy certain minimal requirements. It must have a great package manager, a
+good editor, friendly error messages, a fast compiler and a clear, non-cryptic
+syntax that everyone can use and understand. All of these are non-goals for some
+of the existing alternatives, but are high priorities for Formality.
 
 Usage
 -----
@@ -99,6 +98,7 @@ Usage
     ```bash
     git clone https://github.com/moonad/formality
     cd formality/bin/hs
+    cabal build
     cabal install
     ```
 
@@ -140,13 +140,13 @@ Usage
 Quick Introduction
 ------------------
 
-### A simple, clear, and fun syntax
+### A simple, clear, and unsurprising syntax
 
 > If you can't explain it simply, you don't understand it well enough.
 
 Why make it hard? Formality aims to frame advanced concepts in ways that
 everyone can understand. For example, if you ask a Haskeller to sum a list of
-positive ints (Nats), he might write:
+positive ints (Nats), they might write:
 
 ```c
 sum(list: List(Nat)): Nat
@@ -161,7 +161,7 @@ Main: IO(Unit)
   }
 ```
 
-Or, if he is enlightened enough:
+Or, if they are enlightened enough:
 
 ```c
 sum(list: List(Nat)): Nat
@@ -314,7 +314,8 @@ even, we write `~ refl` on it. `double_as_even` is a function that, for any
 always even by itself, so, to convince it, we write a separate proof called
 `double_is_even(n)`.
 
-*(Check this program too!)*
+For a quick tutorial on how to prove theorems in Formality, check
+[THEOREMS.md](THEOREMS.md).
 
 
 More information
@@ -322,7 +323,8 @@ More information
 
 For a list of available syntaxes, check [SYNTAX.md](SYNTAX.md).
 
-If you're brave, browse the [src](https://github.com/moonad/Formality/tree/master/src) directory, where all the base libraries (and Formality itself!) is implemented.
+For a tutorial about theorem proving, check [THEOREMS.md](THEOREMS.md).
 
-More links and resources will be added soon!
+If you're brave, browse the [base libraries](https://github.com/moonad/Formality/tree/master/src).
 
+Join our [Telegram chat room](https://t.me/formality_lang)! 

@@ -15,6 +15,12 @@ Nat.is_zero(n: Nat): Bool
     succ: Bool.false,
   }
 
+Nat.same(n: Nat): Nat
+  case n {
+    zero: 0
+    succ: Nat.succ(Nat.same(n.pred))
+  }
+
 Nat.apply<A: Type>(n: Nat, f: (x:A) A, x: A): A
   case n {
     zero: x,

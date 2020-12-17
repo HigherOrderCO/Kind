@@ -288,20 +288,41 @@ Fm.set<A: Type>(name: Fm.Name, val: A, map: Map(A)): Map(A)
 Fm.mut<A: Type>(name: Fm.Name, ini: A, fun: A -> A, map: Map(A)): Map(A)
   Map.mut<A>(Fm.Name.to_bits(name), ini, fun, map)
 
+Fm.Context.get_name_skips(name: Fm.Name): Pair(Fm.Name, Nat)
+  //log("get_name_skips ", name)
+  case name {
+    nil: {"", 0}
+    cons: 
+      // FIXME: for some reason FormCoreJS compiles this function as tail
+      // recursive if we don't use a "let" here. Investigate and fix.
+      let name_skips = Fm.Context.get_name_skips(name.tail)
+      let {name,skips} = name_skips
+      if U16.eql(name.head, '^') then
+        {name, Nat.succ(skips)}
+      else
+        {String.cons(name.head,name), skips}
+  }
+
+Fm.Context.find.go(name: Fm.Name, skip: Nat, ctx: Fm.Context): Maybe(Fm.Term)
+  case ctx {
+    nil: none,
+    cons:
+      open ctx.head
+      if Fm.Name.eql(name, ctx.head.fst) then
+        case skip {
+          zero: some(ctx.head.snd)
+          succ: Fm.Context.find.go(name, skip.pred, ctx.tail)
+        }
+      else
+        Fm.Context.find.go(name, skip, ctx.tail)
+  }
+  
 // Finds a value in a context
 Fm.Context.find(name: Fm.Name, ctx: Fm.Context): Maybe(Fm.Term)
-  case ctx {
-    nil:
-      Maybe.none<_>,
-    cons:
-      case ctx.head {
-        new:
-          if Fm.Name.eql(name, ctx.head.fst) then
-            Maybe.some<_>(ctx.head.snd)
-          else
-            Fm.Context.find(name, ctx.tail)
-      }
-  }
+  //log("->", name)
+  let {name, skip} = Fm.Context.get_name_skips(name)
+  //log("~>", name, Nat.show(skip))
+  Fm.Context.find.go(name, skip, ctx)
 
 // Gets the names of a context
 Fm.Context.names(ctx: Fm.Context): List(Fm.Name)
@@ -1529,7 +1550,7 @@ Fm.Term.unroll_str(strx: String): Fm.Term
 Fm.Term.desugar_cse(
   expr: Fm.Term,
   name: Fm.Name,
-  with: List(Fm.Def),
+  wyth: List(Fm.Def),
   cses: Map(Fm.Term),
   moti: Fm.Term,
   type: Fm.Term,
@@ -1538,11 +1559,11 @@ Fm.Term.desugar_cse(
 ): Maybe(Fm.Term)
   case Fm.Term.reduce(type, defs) as type {
     all:
-      let moti = Fm.Term.desugar_cse.motive(with, moti);
+      let moti = Fm.Term.desugar_cse.motive(wyth, moti);
       let argm = Fm.Term.desugar_cse.argument(name, [], type.xtyp, moti, defs);
       let expr = Fm.Term.app(expr, argm);
       let type = type.body(Fm.Term.var(type.self,0), Fm.Term.var(type.name,0));
-      Maybe.some<_>(Fm.Term.desugar_cse.cases(expr, name, with, cses, type, defs, ctxt)),
+      Maybe.some<_>(Fm.Term.desugar_cse.cases(expr, name, wyth, cses, type, defs, ctxt)),
     _:
       Maybe.none<_>,
   }
@@ -1912,6 +1933,7 @@ Fm.Name.is_letter(chr: Char): Bool
   else if U16.btw('0', chr, '9') then Bool.true
   else if U16.eql('.', chr)      then Bool.true
   else if U16.eql('_', chr)      then Bool.true
+  else if U16.eql('^', chr)      then Bool.true
   else                                Bool.false
 
 // Converts a String to a Fm.Name
@@ -2336,6 +2358,22 @@ Fm.Parser.apply: Parser(Fm.Term)
     let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
     let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
     let term = Fm.Term.app(term, func);
+    let term = Fm.Term.app(term, equa);
+    return Fm.Term.ori(orig, term);
+  }
+
+// Parses the Equal.mirror function: @mirror(e)@
+Fm.Parser.mirror: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("mirror(");
+    var equa = Fm.Parser.term;
+    Fm.Parser.text(")");
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("Equal.mirror");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
     let term = Fm.Term.app(term, equa);
     return Fm.Term.ori(orig, term);
   }
@@ -2822,6 +2860,8 @@ Fm.Parser.reference: Parser(Fm.Term)
       Parser.fail<_>("Reserved keyword.");
     } else if String.eql(name, "if") then do Parser {
       Parser.fail<_>("Reserved keyword.");
+    } else if String.eql(name, "with") then do Parser {
+      Parser.fail<_>("Reserved keyword.");
     //} else if String.eql(name, "then") then do Parser {
       //Parser.fail<_>("Reserved keyword.");
     //} else if String.eql(name, "else") then do Parser {
@@ -3053,8 +3093,8 @@ Fm.Parser.rewrite(init: Nat, subt: Fm.Term): Parser(Fm.Term)
     let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
     let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
     let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
-    let term = Fm.Term.app(term, Fm.Term.lam(name, (x) type));
     let term = Fm.Term.app(term, iseq);
+    let term = Fm.Term.app(term, Fm.Term.lam(name, (x) type));
     let term = Fm.Term.app(term, subt);
     return Fm.Term.ori(orig, term);
   }
@@ -3062,7 +3102,6 @@ Fm.Parser.rewrite(init: Nat, subt: Fm.Term): Parser(Fm.Term)
 // Parses a core term (prefix phase)
 Fm.Parser.term: Parser(Fm.Term)
   do Parser {
-    var code = Parser.get_code;
     var init = Fm.Parser.init;
     var term = Parser.first_of<_>([
       Fm.Parser.type,
@@ -3083,6 +3122,7 @@ Fm.Parser.term: Parser(Fm.Term)
       Fm.Parser.sigma.type,
       Fm.Parser.some,
       Fm.Parser.apply,
+      Fm.Parser.mirror,
       Fm.Parser.list,
       Fm.Parser.log,
       Fm.Parser.forrange.u32,
@@ -3242,21 +3282,14 @@ Fm.Parser.file(file: String, code: String, defs: Fm.Defs): Parser(Fm.Defs)
     var stop = Parser.is_eof;
     if stop then do Parser {
       return defs;
-    } else Parser.first_of<_>([
-      do Parser {
-        Fm.Parser.text("#");
-        var file = Fm.Parser.name1;
-        Fm.Parser.file(file, code, defs);
-      },
-      do Parser {
-        var defs = Parser.first_of<_>([
-          Fm.Parser.file.def(file, code, defs),
-          Fm.Parser.file.adt(file, code, defs),
-          Fm.Parser.file.end(file, code, defs),
-        ]);
-        Fm.Parser.file(file, code, defs);
-      },
-    ]);
+    } else do Parser {
+      var defs = Parser.first_of<_>([
+        Fm.Parser.file.def(file, code, defs),
+        Fm.Parser.file.adt(file, code, defs),
+        Fm.Parser.file.end(file, code, defs),
+      ]);
+      Fm.Parser.file(file, code, defs);
+    }
   }
 
 // Stringifies a parser error
@@ -3357,23 +3390,23 @@ Fm.Defs.read(file: String, code: String, defs: Fm.Defs): Either(String, Fm.Defs)
 // ========
 
 
-Fm.Term.core.var_name(indx: Nat, name: Fm.Name, brui: Nat, vars: List(Fm.Name)): Fm.Name
+Fm.Core.var_name(indx: Nat, name: Fm.Name, brui: Nat, vars: List(Fm.Name)): Fm.Name
   case indx {
     zero: case brui { zero: name, succ: name | "^" | Nat.show(brui) },
     succ: case vars {
       nil: "unbound",
       cons:
         let brui = if String.eql(name, vars.head) then Nat.succ(brui) else brui;
-        Fm.Term.core.var_name(indx.pred, name, brui, vars.tail),
+        Fm.Core.var_name(indx.pred, name, brui, vars.tail),
     }
   }
 
-Fm.Term.core(term: Fm.Term, indx: Nat, vars: List(Fm.Name)): String
+Fm.Core.show(term: Fm.Term, indx: Nat, vars: List(Fm.Name)): String
   case term {
     ref:
       Fm.Name.show(term.name),
     var:
-      Fm.Term.core.var_name(Nat.pred(Nat.sub(indx,term.indx)), term.name, 0, vars),
+      Fm.Core.var_name(Nat.pred(Nat.sub(indx,term.indx)), term.name, 0, vars),
     typ:
       "*",
     all:
@@ -3381,8 +3414,8 @@ Fm.Term.core(term: Fm.Term, indx: Nat, vars: List(Fm.Name)): String
       let init = if eras then "%" else "@"
       let self = Fm.Name.show(term.self);
       let name = Fm.Name.show(term.name);
-      let xtyp = Fm.Term.core(term.xtyp, indx, vars);
-      let body = Fm.Term.core(
+      let xtyp = Fm.Core.show(term.xtyp, indx, vars);
+      let body = Fm.Core.show(
         term.body(
           Fm.Term.var(term.self,indx),
           Fm.Term.var(term.name,Nat.succ(indx))),
@@ -3391,34 +3424,34 @@ Fm.Term.core(term: Fm.Term, indx: Nat, vars: List(Fm.Name)): String
       String.flatten([init,self,"(",name,":",xtyp,") ",body]),
     lam:
       let name = Fm.Name.show(term.name);
-      let body = Fm.Term.core(
+      let body = Fm.Core.show(
         term.body(Fm.Term.var(term.name,indx)),
         Nat.succ(indx),
         List.cons<_>(term.name, vars));
       String.flatten(["#",name," ",body]),
     app:
-      let func = Fm.Term.core(term.func, indx, vars);
-      let argm = Fm.Term.core(term.argm, indx, vars);
+      let func = Fm.Core.show(term.func, indx, vars);
+      let argm = Fm.Core.show(term.argm, indx, vars);
       String.flatten(["(",func," ",argm,")"]),
     let: 
       let name = Fm.Name.show(term.name);
-      let expr = Fm.Term.core(term.expr, indx, vars);
-      let body = Fm.Term.core(
+      let expr = Fm.Core.show(term.expr, indx, vars);
+      let body = Fm.Core.show(
         term.body(Fm.Term.var(term.name,indx)),
         Nat.succ(indx),
         List.cons<_>(term.name, vars));
       String.flatten(["!", name, " = ", expr, "; ", body]),
     def:
       let name = Fm.Name.show(term.name);
-      let expr = Fm.Term.core(term.expr, indx, vars);
-      let body = Fm.Term.core(
+      let expr = Fm.Core.show(term.expr, indx, vars);
+      let body = Fm.Core.show(
         term.body(Fm.Term.var(term.name,indx)),
         Nat.succ(indx),
         List.cons<_>(term.name, vars));
       String.flatten(["$", name, " = ", expr, "; ", body]),
     ann:
-      let term = Fm.Term.core(term.term, indx, vars);
-      let type = Fm.Term.core(term.type, indx, vars);
+      let term = Fm.Core.show(term.term, indx, vars);
+      let type = Fm.Core.show(term.type, indx, vars);
       String.flatten(["{",term,":",type,"}"]),
     gol:
       "<GOL>",
@@ -3433,7 +3466,7 @@ Fm.Term.core(term: Fm.Term, indx: Nat, vars: List(Fm.Name)): String
     cse:
       "<CSE>",
     ori:
-      Fm.Term.core(term.expr, indx, vars),
+      Fm.Core.show(term.expr, indx, vars),
   }
 
 // Converts everything to FormCore
@@ -3445,14 +3478,139 @@ Fm.Defs.core(defs: Fm.Defs): String
         case defn.stat {
           done:
             let name = defn.name;
-            let term = Fm.Term.core(defn.term, 0, []);
-            let type = Fm.Term.core(defn.type, 0, []);
+            let term = Fm.Core.show(defn.term, 0, []);
+            let type = Fm.Core.show(defn.type, 0, []);
             String.flatten([result, name, " : ", type, " = ", term, ";\n"]),
           wait: result,
           init: result,
           fail: result,
       }
     }
+
+//Fm.Core.Parser.term: Parser(Fm.Term)
+  //Parser.first_of<_>([
+    //Fm.Core.Parser.type,
+    //Fm.Core.Parser.forall,
+    //Fm.Core.Parser.lambda,
+    //Fm.Core.Parser.reference,
+    //Fm.Parser.let,
+    //Fm.Parser.def,
+    //Fm.Parser.char,
+    //Fm.Parser.string,
+    //Fm.Parser.reference,
+  //])
+
+//Fm.Core.Parser.type: Parser(Fm.Term)
+  //do Parser {
+    //Fm.Parser.text("*");
+    //return Fm.Term.typ;
+  //}
+
+//// Parses a core forall
+//Fm.Core.Parser.forall: Parser(Fm.Term)
+  //do Parser {
+    //Fm.Parser.text("@");
+    //var self = Fm.Parser.name1;
+    //Fm.Parser.text("(");
+    //var name = Fm.Parser.name1;
+    //Fm.Parser.text(":");
+    //var bind = Fm.Core.Parser.term;
+    //Fm.Parser.text(")");
+    //var body = Fm.Core.Parser.term;
+    //return Fm.Term.all(false, self, name, bind, (s,x) body);
+  //}
+
+//// Parses a core forall (erased)
+//Fm.Core.Parser.forall.erased: Parser(Fm.Term)
+  //do Parser {
+    //Fm.Parser.text("%");
+    //var self = Fm.Parser.name1;
+    //Fm.Parser.text("(");
+    //var name = Fm.Parser.name1;
+    //Fm.Parser.text(":");
+    //var bind = Fm.Core.Parser.term;
+    //Fm.Parser.text(")");
+    //var body = Fm.Core.Parser.term;
+    //return Fm.Term.all(true, self, name, bind, (s,x) body);
+  //}
+
+////// Parses a core lambda
+//Fm.Core.Parser.lambda: Parser(Fm.Term)
+  //do Parser {
+    //Fm.Parser.text("#");
+    //var name = Fm.Parser.name1;
+    //var body = Fm.Core.Parser.term;
+    //return Fm.Term.lam(name, (x) body);
+  //}
+
+//// Parses a core application
+//Fm.Core.Parser.application: Parser(Fm.Term)
+  //do Parser {
+    //Fm.Parser.text("(");
+    //var func = Fm.Core.Parser.term;
+    //var argm = Fm.Core.Parser.term;
+    //Fm.Parser.text(")");
+    //return Fm.Term.app(func, argm);
+  //}
+
+//// Parses a core let
+//Fm.Core.Parser.let: Parser(Fm.Term)
+  //do Parser {
+    //Fm.Parser.text("!");
+    //var name = Fm.Parser.name1;
+    //Fm.Parser.text("=");
+    //var expr = Fm.Core.Parser.term;
+    //Fm.Parser.text(";");
+    //var body = Fm.Core.Parser.term;
+    //return Fm.Term.let(name, expr, (x) body);
+  //}
+
+//// Parses a core def
+//Fm.Core.Parser.def: Parser(Fm.Term)
+  //do Parser {
+    //Fm.Parser.text("$");
+    //var name = Fm.Parser.name1;
+    //Fm.Parser.text("=");
+    //var expr = Fm.Core.Parser.term;
+    //Fm.Parser.text(";");
+    //var body = Fm.Core.Parser.term;
+    //return Fm.Term.def(name, expr, (x) body);
+  //}
+
+//Fm.Core.Parser.annotation: Parser(Fm.Term)
+  //do Parser {
+    //Fm.Parser.text("{");
+    //var expr = Fm.Core.Parser.term;
+    //Fm.Parser.text(":");
+    //var type = Fm.Core.Parser.term;
+    //Fm.Parser.text("}");
+    //return Fm.Term.ann(false, expr, type);
+  //}
+
+//Fm.Core.Parser.nat: Parser(Fm.Term)
+  //do Parser {
+    //Fm.Parser.text("+");
+    //Fm.Parser.nat;
+  //}
+
+//Fm.Core.Parser.char: Parser(Fm.Term)
+  //Fm.Parser.char
+
+//Fm.Core.Parser.string: Parser(Fm.Term)
+  //Fm.Parser.string
+
+//// Parses a reference: @name@
+//Fm.Core.Parser.reference: Parser(Fm.Term)
+  //do Parser {
+    //var name = Fm.Parser.name1;
+    //return Fm.Term.ref(name);
+  //}
+
+//Fm.Core.read(code: String): Maybe(Fm.Term)
+  //case Fm.Core.Parser.term(0, code) as parsed {
+    //error: none
+    //value: some(parsed.val)
+  //}
 
 // Synth
 // =====
@@ -3511,7 +3669,6 @@ Fm.Synth.fix(
     }
   }
 
-
 Fm.Synth.file_of(name: Fm.Name): String
   case name {
     nil: ".fm"
@@ -3545,6 +3702,7 @@ Fm.Synth.load(name: Fm.Name, defs: Fm.Defs): IO(Maybe(Fm.Defs))
 
 // Synths one def
 Fm.Synth.one(name: Fm.Name, defs: Fm.Defs): IO(Maybe(Fm.Defs))
+  //log("synth ", name)
   case Fm.get<_>(name, defs) as got {
     none: do IO {
       var loaded = Fm.Synth.load(name, defs);
@@ -3844,6 +4002,42 @@ Fm.to_core.io.one(name: String): IO(String)
     return Fm.Defs.core(defs);
   }
 
+Fm.compute.io.one(name: String): IO(Unit)
+  do IO {
+    var code = IO.get_file(Fm.Synth.file_of(name))
+    case Fm.Defs.read(name | ".fm", code, Map.new!) as read {
+      left:
+        IO.print(read.value)
+      right: do IO {
+        let defs = read.value
+        let defn = Fm.get!(name, defs)
+        case defn {
+          none: IO.print("Term '" | name | "' not found.")
+          some: case defn.value {
+            new: IO.print(Fm.Term.show(Fm.Term.normalize(defn.value.term, defs)))
+          }
+        }
+      }
+    }
+  }
+
+Fm.to_core.io.one(name: String): IO(String)
+  do IO {
+    var new_defs = Fm.Synth.one(name, Map.new<_>);
+    let defs = case new_defs {
+      none: Map.new<_>,
+      some: new_defs.value,
+    };
+    let defs = Map.map<_,_>(
+      (defn) 
+        open defn
+        let term = Fm.Term.inline(defn.term, defs);
+        let type = Fm.Term.inline(defn.type, defs);
+        Fm.Def.new(defn.file, defn.code, defn.name, term, type, defn.stat)
+      , defs);
+    return Fm.Defs.core(defs);
+  }
+
 Fm: IO(Unit)
   do IO {
     let _ = Fm.to_core.io.one;
@@ -3851,11 +4045,7 @@ Fm: IO(Unit)
     let _ = Fm.checker.io.file;
     let _ = Fm.checker.code;
     let _ = Fm.Term.read;
-    //case Fm.Term.read("(x) def a = x; (x) def b = x; (x) def c = x; (x) def t = x; t(a,b,c)") as got {
-      //none: IO.print("nope"),
-      //some: IO.print(Fm.Term.core(Fm.Term.normalize(Fm.Term.bind([],Fm.Path.nil,got.value),Map.new<_>),0,[])),
-    //}
-    var s = Fm.to_core.io.one("Fm");
-    IO.print(s);
-    //Fm.checker.io.file("_2.fm");
+    let _ = Fm.compute.io.one;
+    //let t = Fm.Core.read("(#f #x (f (f x)) #f #x (f (f x)))");
+    return Unit.new;
   }

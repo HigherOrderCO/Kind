@@ -1,3 +1,6 @@
 *.class
 .DS_Store
 bin/node_modules/
+src/_*
+src/tmp*
+bin/hs/cabal.project.local*
