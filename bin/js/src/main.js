@@ -23,6 +23,9 @@ if (!process.argv[2] || process.argv[2] === "--help" || process.argv[2] === "-h"
   console.log("  # Check all types inside a file:");
   console.log("  fmjs example.fm");
   console.log("");
+  console.log("  # Check all files inside a directory:");
+  console.log("  fmjs _");
+  console.log("");
   console.log("  # Compile to JS, with 'main' as the entry point:");
   console.log("  fmjs main --js");
   console.log("");
@@ -93,7 +96,14 @@ function display_error(name, error){
 
   // Type-Checking
   } else {
-    if (name.slice(-3) !== ".fm" && name.slice(-5) !== ".fmfm") {
+    if (name === "_") {
+      var files = fs.readdirSync(".").filter(x => x.slice(-3) === ".fm");
+      for (var file of files) {
+        console.log("\x1b[1mChecking ", file, "\x1b[0m\n");
+        fm.run(fm["Fm.checker.io.file"](file));
+        console.log("");
+      }
+    } else if (name.slice(-3) !== ".fm" && name.slice(-5) !== ".fmfm") {
       fm.run(fm["Fm.checker.io.one"](name));
     } else if (name) {
       fm.run(fm["Fm.checker.io.file"](name));
