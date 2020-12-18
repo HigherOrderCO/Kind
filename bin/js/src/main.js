@@ -2,7 +2,7 @@
 
 var fm = require("./formality.js");
 var fs = require("fs");
-//var path = require("path");
+var path = require("path");
 var {fmc_to_js, fmc_to_hs} = require("formcore-lang");
 //var {fmc_to_js, fmc_to_hs} = require("./../../../../FormCoreJS");
 

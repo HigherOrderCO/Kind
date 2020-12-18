@@ -503,26 +503,25 @@ Fm.Term.show.is_ref(term: Fm.Term, name: Fm.Name): Bool
     _: Bool.false,
   }
 
+Fm.Term.show.app.done(term: Fm.Term, path: Maybe(Bits -> Bits), args: List(String)): String
+  let arity = List.length<_>(args);
+  if Bool.and(Fm.Term.show.is_ref(term,"Equal"), Nat.eql(arity,3)) then
+    let func = Fm.Term.show.go(term, path);
+    let eq_lft = Maybe.default<_>("?", List.at<_>(1, args));
+    let eq_rgt = Maybe.default<_>("?", List.at<_>(2, args));
+    String.flatten([eq_lft, " == ", eq_rgt])
+  else
+    let func = Fm.Term.show.go(term, path);
+    let wrap = case func {nil: Bool.false, cons: U16.eql(func.head,'(')};
+    let args = String.join(",", args);
+    let func = if wrap then String.flatten(["(",func,")"]) else func;
+    String.flatten([func, "(", args, ")"])
+
 Fm.Term.show.app(term: Fm.Term, path: Maybe(Bits -> Bits), args: List(String)): String
   case term {
-    app:
-      let argm = Fm.Term.show.go(term.argm, Fm.MPath.i(path));
-      Fm.Term.show.app(term.func, Fm.MPath.o(path), List.cons<_>(argm, args)),
-    ori:
-      Fm.Term.show.app(term.expr, path, args),
-    _:
-      let arity = List.length<_>(args);
-      if Bool.and(Fm.Term.show.is_ref(term,"Equal"), Nat.eql(arity,3)) then
-        let func = Fm.Term.show.go(term, path);
-        let eq_lft = Maybe.default<_>("?", List.at<_>(1, args));
-        let eq_rgt = Maybe.default<_>("?", List.at<_>(2, args));
-        String.flatten([eq_lft, " == ", eq_rgt])
-      else
-        let func = Fm.Term.show.go(term, path);
-        let wrap = case func {nil: Bool.false, cons: U16.eql(func.head,'(')};
-        let args = String.join(",", args);
-        let func = if wrap then String.flatten(["(",func,")"]) else func;
-        String.flatten([func, "(", args, ")"]),
+    app: Fm.Term.show.app(term.func, Fm.MPath.o(path), Fm.Term.show.go(term.argm, Fm.MPath.i(path)) & args),
+    ori: Fm.Term.show.app(term.expr, path, args),
+    _  : Fm.Term.show.app.done(term, path, args)
   }
 
 // SHOW: Stringifies a term
