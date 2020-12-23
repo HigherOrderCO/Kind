@@ -1,6 +1,6 @@
-//// ƛ1
-//Provit.0(x: Bool): x == x
-  //?a
+// ƛ1 MaiaVictor
+Provit.0(x: Bool): x == x
+  refl
 
 //// ƛ1
 //Provit.1(x: Bool): Bool.not(Bool.not(x)) == x
