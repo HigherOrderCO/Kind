@@ -2028,6 +2028,7 @@ Fm.escape(str: String): String
 Fm.Parser.spaces: Parser(List(Unit))
   Parser.many<_>(Parser.first_of<_>([
     Parser.text(" "),
+    Parser.text("\t"),
     Parser.text("\n"),
     do Parser {
       Parser.text("//");

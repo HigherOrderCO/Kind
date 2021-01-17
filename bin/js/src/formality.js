@@ -239,6 +239,9 @@ module.exports = (function() {
         }, p).then((x) => {
             rl.close();
             return x;
+        }).catch((e) => {
+            rl.close();
+            throw e;
         });
     };
     var run_io = (lib, p) => {
@@ -246,27 +249,31 @@ module.exports = (function() {
             case 'IO.end':
                 return Promise.resolve(p.value);
             case 'IO.ask':
-                return new Promise((res, _) => {
+                return new Promise((res, err) => {
                     switch (p.query) {
                         case 'print':
                             console.log(p.param);
-                            run_io(lib, p.then(1)).then(res);
+                            run_io(lib, p.then(1)).then(res).catch(err);
                             break;
                         case 'exit':
                             lib.pc.exit();
                             break;
                         case 'get_line':
-                            lib.rl.question('', (line) => run_io(lib, p.then(line)).then(res));
+                            lib.rl.question('', (line) => run_io(lib, p.then(line)).then(res).catch(err));
                             break;
                         case 'get_file':
                             try {
-                                run_io(lib, p.then(lib.fs.readFileSync(p.param, 'utf8'))).then(res);
+                                run_io(lib, p.then(lib.fs.readFileSync(p.param, 'utf8'))).then(res).catch(err);
                             } catch (e) {
-                                run_io(lib, p.then('')).then(res);
+                                if (e.message.indexOf('NOENT') !== -1) {
+                                    run_io(lib, p.then('')).then(res).catch(err);
+                                } else {
+                                    err(e);
+                                }
                             };
                             break;
                         case 'get_args':
-                            run_io(lib, p.then(lib.pc.argv[2] || '')).then(res);
+                            run_io(lib, p.then(lib.pc.argv[2] || '')).then(res).catch(err);
                             break;
                     }
                 });
@@ -1497,7 +1504,7 @@ module.exports = (function() {
         return $321;
     };
     const Parser$one = x0 => x1 => Parser$one$(x0, x1);
-    const Fm$Parser$spaces = Parser$many$(Parser$first_of$(List$cons$(Parser$text(" "), List$cons$(Parser$text("\u{a}"), List$cons$((_idx$1 => _code$2 => {
+    const Fm$Parser$spaces = Parser$many$(Parser$first_of$(List$cons$(Parser$text(" "), List$cons$(Parser$text("\u{9}"), List$cons$(Parser$text("\u{a}"), List$cons$((_idx$1 => _code$2 => {
         var self = Parser$text$("//", _idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
@@ -1532,7 +1539,7 @@ module.exports = (function() {
                 break;
         };
         return $326;
-    }), List$nil)))));
+    }), List$nil))))));
 
     function Parser$many1$(_parser$2, _idx$3, _code$4) {
         var self = _parser$2(_idx$3)(_code$4);
