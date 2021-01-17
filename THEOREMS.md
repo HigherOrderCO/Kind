@@ -1493,7 +1493,7 @@ it to `Bool.true_neq_false`, resulting in `Empty` (our goal). Let's use
 ```
 three_neq_two: 4 != 2
   (e)
-  let a = apply(Nat.pred, e)
+  let e0 = apply(Nat.pred, e)
   ?a
 ```
 
@@ -1513,7 +1513,7 @@ Now we have `e0: 2 == 1`. Let's do it again:
 three_neq_two: 3 != 2
   (e)
   let e0 = apply(Nat.pred, e)
-  let e1 = apply(Nat.pred, e)
+  let e1 = apply(Nat.pred, e0)
   ?a
 ```
 
