@@ -140,7 +140,7 @@ Bool.not(b: Bool): Bool
 When Formality sees `Bool.not(Bool.not(b))`, it reduces it to:
 
 ```
-case (case b { true: false, false: true }) { true: false, false: true }
+Bool.not(case b { true: false, false: true })
 ```
 
 But now the inner case is **stuck**, trying to pattern-match on `b`. It can't
