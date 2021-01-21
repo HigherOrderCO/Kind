@@ -244,6 +244,37 @@ module.exports = (function() {
             throw e;
         });
     };
+    var get_file = (lib, param) => {
+        return lib.fs.readFileSync(param, 'utf8');
+    }
+    var set_file = (lib, param) => {
+        var path = '';
+        for (var i = 0; i < param.length && param[i] !== '='; ++i) {
+            path += param[i];
+        };
+        var data = param.slice(i + 1);
+        lib.fs.mkdirSync(path.split('/').slice(0, -1).join('/'), {
+            recursive: true
+        });
+        lib.fs.writeFileSync(path, data);
+        return '';
+    };
+    var del_file = (lib, param) => {
+        try {
+            lib.fs.unlinkSync(param);
+            return '';
+        } catch (e) {
+            if (e.message.indexOf('EPERM') !== -1) {
+                lib.fs.rmdirSync(param);
+                return '';
+            } else {
+                throw e;
+            }
+        }
+    };
+    var get_dir = (lib, param) => {
+        return lib.fs.readdirSync(param).join(';');
+    };
     var run_io = (lib, p) => {
         switch (p._) {
             case 'IO.end':
@@ -263,7 +294,40 @@ module.exports = (function() {
                             break;
                         case 'get_file':
                             try {
-                                run_io(lib, p.then(lib.fs.readFileSync(p.param, 'utf8'))).then(res).catch(err);
+                                run_io(lib, p.then(get_file(lib, p.param))).then(res).catch(err);
+                            } catch (e) {
+                                if (e.message.indexOf('NOENT') !== -1) {
+                                    run_io(lib, p.then('')).then(res).catch(err);
+                                } else {
+                                    err(e);
+                                }
+                            };
+                            break;
+                        case 'set_file':
+                            try {
+                                run_io(lib, p.then(set_file(lib, p.param))).then(res).catch(err);
+                            } catch (e) {
+                                if (e.message.indexOf('NOENT') !== -1) {
+                                    run_io(lib, p.then('')).then(res).catch(err);
+                                } else {
+                                    err(e);
+                                }
+                            };
+                            break;
+                        case 'del_file':
+                            try {
+                                run_io(lib, p.then(del_file(lib, p.param))).then(res).catch(err);
+                            } catch (e) {
+                                if (e.message.indexOf('NOENT') !== -1) {
+                                    run_io(lib, p.then('')).then(res).catch(err);
+                                } else {
+                                    err(e);
+                                }
+                            };
+                            break;
+                        case 'get_dir':
+                            try {
+                                run_io(lib, p.then(get_dir(lib, p.param))).then(res).catch(err);
                             } catch (e) {
                                 if (e.message.indexOf('NOENT') !== -1) {
                                     run_io(lib, p.then('')).then(res).catch(err);

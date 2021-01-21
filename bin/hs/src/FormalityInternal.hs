@@ -2,15 +2,38 @@ module FormalityInternal where
 import Unsafe.Coerce
 import Data.Word
 import Data.Bits
+import Data.List (intercalate)
 import Debug.Trace
 import System.Exit
+import System.Directory
+import System.FilePath.Posix (takeDirectory)
 u = unsafeCoerce
+setFile :: String -> IO ()
+setFile param = do
+  let path = takeWhile (/= '=') param
+  let file = drop (length path + 1) param
+  createDirectoryIfMissing True (takeDirectory path)
+  writeFile path file
+delFile :: String -> IO ()
+delFile param = do
+  isDir <- doesDirectoryExist param
+  if isDir then do
+    removeDirectory param
+  else do
+    removeFile param
+getDir :: String -> IO String
+getDir param = do
+  dir <- listDirectory param
+  return $ intercalate ";" dir
 run p = case p of {
   (1,f) -> (u f (\query param cont-> case query of {
     "print"    -> do { putStrLn param; run (cont ()); };
     "exit"     -> do { exitFailure; run (cont ()); };
     "get_line" -> do { line <- getLine; run (u cont line); };
+    "set_file" -> do { setFile param; run (u cont ""); };
     "get_file" -> do { line <- readFile param; run (u cont line); };
+    "del_file" -> do { delFile param; run (u cont ""); };
+    "get_dir" -> do { dir <- getDir param; run (u cont dir); };
     otherwise  -> do { u cont (); };
   }));
   (0,f) -> (u f (\value-> do { (return :: a -> IO a) value; }));
