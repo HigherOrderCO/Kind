@@ -189,6 +189,12 @@ Nat.ltn(n: Nat, m: Nat): Bool
     }
   }
 
+Nat.gcd(n: Nat, m: Nat): Nat
+  case n {
+    zero: m,
+    succ: Nat.gcd(Nat.mod(m, n), n)
+  }
+
 Nat.is_even(n: Nat): Bool
   case n {
     zero: true,
