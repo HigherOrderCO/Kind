@@ -1,0 +1,21 @@
+Mons.Kind.is_hero(kind: Mons.Kind): Bool
+  case kind{
+    Mons: 
+    case kind.ele{
+      HERO       : Bool.true,
+      MAGE       : Bool.false,
+      BEHOLDER   : Bool.false,
+      ZOIO       : Bool.false,
+      CYCLOPE    : Bool.false,
+      POISOLICK  : Bool.false,
+      TROWL      : Bool.false,
+      MIMIC      : Bool.false,
+      MIMIC2     : Bool.false,
+      AZULA      : Bool.false,
+      EMERELDER  : Bool.false,
+      EMERELDER2 : Bool.false,
+    }
+    Const: Bool.false,
+    Terrain: Bool.false,
+    Interactive: Bool.false,
+  }

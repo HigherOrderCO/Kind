@@ -1,0 +1,2 @@
+Nat.sum(n: Nat): Nat
+  Nat.sum.go(n, Nat.zero)

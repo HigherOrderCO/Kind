@@ -1,0 +1,13 @@
+type Fm.Comp {
+  nil,
+  var(name: Fm.Name),
+  ref(name: Fm.Name),
+  lam(name: Fm.Name, body: Fm.Comp),
+  app(func: Fm.Comp, argm: Fm.Comp),
+  let(name: Fm.Name, expr: Fm.Comp, body: Fm.Comp),
+  eli(prim: Fm.Prim, expr: Fm.Comp),
+  ins(prim: Fm.Prim, expr: Fm.Comp),
+  nat(natx: Nat),
+  chr(chrx: Char),
+  str(strx: String),
+}

@@ -1,0 +1,7 @@
+type Fm.Constructor {
+  new(
+    name: Fm.Name,
+    args: List(Fm.Binder),
+    inds: List(Fm.Binder),
+  )
+}

@@ -1,0 +1,5 @@
+String.length32.go(xs: String, n: U32): U32
+  case xs{
+    nil : n
+    cons: String.length32.go(xs.tail, U32.inc(n))
+  }

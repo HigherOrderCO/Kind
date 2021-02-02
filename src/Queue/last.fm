@@ -1,0 +1,12 @@
+Queue.last<A: Type>(q: Queue(A)): Maybe(A)
+  open q
+  case q.rear {
+    nil: case q.front {
+      nil : Maybe.none<A>,
+      cons: case List.reverse<A>(q.front) as reversed {
+        nil : Maybe.none<A>,
+        cons: Maybe.some<A>(reversed.head)
+      }, 
+    },
+    cons: Maybe.some<A>(q.rear.head)
+  }

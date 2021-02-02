@@ -1,0 +1,5 @@
+Maybe.to_bool<A: Type>(m: Maybe(A)): Bool
+  case m {
+    none: Bool.false,
+    some: Bool.true,
+  }

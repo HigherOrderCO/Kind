@@ -1,0 +1,8 @@
+Fm.Parser.nat: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.spaces;
+    var natx = Parser.nat;
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, Fm.Term.nat(natx));
+  }

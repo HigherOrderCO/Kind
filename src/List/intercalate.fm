@@ -1,0 +1,2 @@
+List.intercalate<A: Type>(sep: List(A), xs: List(List(A))): List(A)
+  List.flatten<A>(List.intersperse<List(A)>(sep,xs))

@@ -1,0 +1,9 @@
+List.zip_with<A: Type, B: Type, C: Type>(f: A -> B -> C, as: List(A), bs: List(B))
+  : List(C)
+  case as {
+    nil : List.nil<_>,
+    cons: case bs {
+      nil : List.nil<_>,
+      cons: List.cons<_>(f(as.head,bs.head),List.zip_with<_,_,_>(f,as.tail,bs.tail))
+    }
+  }

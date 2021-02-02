@@ -1,0 +1,6 @@
+Queue.head<A: Type>(q: Queue(A)): Maybe(A)
+  open q
+  case q.front {
+    nil : Maybe.none<A>,
+    cons: Maybe.some<A>(q.front.head)
+  }

@@ -1,0 +1,3 @@
+U16.show_hex(a: U16): String
+  open a
+  Nat.to_string_base(16, Bits.to_nat(Word.to_bits<16>(a.value)))

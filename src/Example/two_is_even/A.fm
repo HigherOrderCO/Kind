@@ -1,0 +1,2 @@
+Example.two_is_even.A: Example.IsEven.A(2)
+  2 ~ refl

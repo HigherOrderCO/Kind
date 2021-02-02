@@ -1,0 +1,6 @@
+type Fm.Status {
+  init,
+  wait,
+  done,
+  fail(errors: List(Fm.Error)),
+}

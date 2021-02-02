@@ -1,0 +1,4 @@
+F64.rotate2d(x: F64, y: F64, a: F64): Pair(F64, F64)
+  let x2 = F64.sub(F64.mul(x, F64.cos(a)), F64.mul(y, F64.sin(a)))
+  let y2 = F64.add(F64.mul(x, F64.sin(a)), F64.mul(y, F64.cos(a)))
+  Pair.new<_,_>(x2, y2)

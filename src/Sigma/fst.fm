@@ -1,0 +1,4 @@
+Sigma.fst<A: Type, B: A -> Type>(sig: Sigma(A, B)): A
+  case sig {
+    new: sig.fst
+  }

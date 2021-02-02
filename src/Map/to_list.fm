@@ -1,0 +1,2 @@
+Map.to_list<A: Type>(xs: Map(A)): List(Pair(Bits,A))
+  List.reverse<_>(Map.to_list.go<_>(xs, Bits.e, List.nil<_>))

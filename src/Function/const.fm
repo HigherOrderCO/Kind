@@ -1,0 +1,2 @@
+Function.const<A: Type, B: Type>(x: A, y: B): A
+  x

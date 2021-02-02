@@ -1,0 +1,8 @@
+List.delete_by<A: Type>(p: A -> A -> Bool, a: A, as: List(A)): List(A)
+  case as {
+    nil : List.nil<_>,
+    cons: case p(a, as.head) {
+      true : List.delete_by<_>(p, a, as.tail),
+      false: List.cons<_>(as.head, List.delete_by<_>(p, a, as.tail))
+    }
+  }

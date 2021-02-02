@@ -1,0 +1,3 @@
+Mons.Pad.set_u(pad: Mons.Pad, val: Bool): Mons.Pad
+  open pad
+  Mons.Pad.new(pad.r, val, pad.l, pad.d)

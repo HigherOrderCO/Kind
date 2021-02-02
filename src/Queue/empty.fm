@@ -1,0 +1,2 @@
+Queue.empty<A: Type>: Queue(A)
+  Queue.new<A>(List.nil<A>, 0, List.nil<A>, 0)

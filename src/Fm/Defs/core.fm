@@ -1,0 +1,16 @@
+Fm.Defs.core(defs: Fm.Defs): String
+  let result = "";
+  for defn in Map.values<_>(defs) with result:
+    case defn {
+      new: 
+        case defn.stat {
+          done:
+            let name = defn.name;
+            let term = Fm.Core.show(defn.term, 0, []);
+            let type = Fm.Core.show(defn.type, 0, []);
+            String.flatten([result, name, " : ", type, " = ", term, ";\n"]),
+          wait: result,
+          init: result,
+          fail: result,
+      }
+    }

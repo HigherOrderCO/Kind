@@ -1,0 +1,5 @@
+type Mons.Kind.inter{
+  Mons.Kind.inter.LEVER(id: U32),
+  Mons.Kind.inter.MOVE,
+  Mons.Kind.inter.HEAL,
+}

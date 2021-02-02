@@ -1,0 +1,27 @@
+Fm.Constructor.build_term.go(
+  type: Fm.Datatype,
+  ctor: Fm.Constructor,
+  name: Fm.Name,
+  pars: List(Fm.Binder),
+  args: List(Fm.Binder),
+): Fm.Term
+  case pars {
+    cons: case pars.head {
+      new:
+        def par_name = pars.head.name;
+        def par_body = (x) Fm.Constructor.build_term.go(type, ctor, name, pars.tail, args);
+        Fm.Term.lam(par_name, par_body),
+    },
+    nil: case args {
+      cons: case args.head {
+        new:
+          def ctr_name = args.head.name;
+          def ctr_body = (x) Fm.Constructor.build_term.go(type, ctor, name, pars, args.tail);
+          Fm.Term.lam(ctr_name, ctr_body),
+      },
+      nil:
+        def lam_name = Fm.Name.read("P");
+        def lam_body = (x) Fm.Constructor.build_term.opt(type, ctor);
+        Fm.Term.lam(lam_name, lam_body),
+    }
+  }

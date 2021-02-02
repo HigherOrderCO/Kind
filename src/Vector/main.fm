@@ -1,0 +1,2 @@
+Vector.main: Nat
+  Vector.head<Nat,_>(Vector.from_list<Nat>([1, 2, 3]))

@@ -1,0 +1,5 @@
+String.flatten.go(xs: List(String), res: String): String
+  case xs {
+    nil: res,
+    cons: String.flatten.go(xs.tail, String.concat(res, xs.head)),
+  }

@@ -1,0 +1,7 @@
+Fm.Parser.item<V: Type>(parser: Parser(V)): Parser(V)
+  do Parser {
+    Fm.Parser.spaces;
+    var value = parser;
+    Parser.maybe<_>(Fm.Parser.text(","));
+    return value;
+  }

@@ -1,0 +1,5 @@
+Nat.pred(n: Nat): Nat
+  case n {
+    zero: Nat.zero,
+    succ: n.pred
+  }

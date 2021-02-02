@@ -1,0 +1,11 @@
+Fm.Parser.u64: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.spaces;
+    var natx = Parser.nat;
+    Parser.text("l");
+    let term = Fm.Term.ref("Nat.to_u64");
+    let term = Fm.Term.app(term, Fm.Term.nat(natx));
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, term);
+  }

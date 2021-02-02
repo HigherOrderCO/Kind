@@ -1,0 +1,2 @@
+List.chunks_of<A: Type>(len: Nat, xs: List(A)): List(List(A))
+  List.chunks_of.go<_>(len, xs, len, List.nil<_>)

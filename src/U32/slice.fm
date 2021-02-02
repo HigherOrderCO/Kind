@@ -1,0 +1,2 @@
+U32.slice(i: U32, j: U32, str: String): String
+  U32.slice(i, j, str)

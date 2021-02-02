@@ -1,0 +1,5 @@
+String.not_empty(xs: String): Type
+  case xs{
+    nil : Empty
+    cons: Unit
+  }

@@ -1,0 +1,46 @@
+Fm.Term.inline(term: Fm.Term, defs: Fm.Defs): Fm.Term
+  case Fm.Term.inline.reduce(term, defs) as term {
+    ref:
+      Fm.Term.ref(term.name),
+    var:
+      Fm.Term.var(term.name, term.indx),
+    typ:
+      Fm.Term.typ,
+    all: 
+      def xtyp = Fm.Term.inline(term.xtyp, defs);
+      def body = (s,x) Fm.Term.inline(term.body(s,x), defs);
+      Fm.Term.all(term.eras, term.self, term.name, xtyp, body),
+    lam:
+      def body = (x) Fm.Term.inline(term.body(x), defs);
+      Fm.Term.lam(term.name, body),
+    app:
+      def func = Fm.Term.inline(term.func, defs);
+      def argm = Fm.Term.inline(term.argm, defs);
+      Fm.Term.app(func, argm),
+    let:
+      def expr = Fm.Term.inline(term.expr, defs);
+      def body = (x) Fm.Term.inline(term.body(x), defs);
+      Fm.Term.let(term.name, expr, body),
+    def:
+      def expr = Fm.Term.inline(term.expr, defs);
+      def body = (x) Fm.Term.inline(term.body(x), defs);
+      Fm.Term.def(term.name, expr, body),
+    ann:
+      def term = Fm.Term.inline(term.term, defs);
+      def type = Fm.Term.inline(term.type, defs);
+      Fm.Term.ann(term.done, term, type),
+    gol:
+      Fm.Term.gol(term.name, term.dref, term.verb),
+    hol:
+      Fm.Term.hol(term.path),
+    nat:
+      Fm.Term.nat(term.natx),
+    chr:
+      Fm.Term.chr(term.chrx),
+    str:
+      Fm.Term.str(term.strx),
+    cse:
+      term,
+    ori:
+      Fm.Term.inline(term.expr, defs),
+  }

@@ -1,0 +1,6 @@
+Cmp.as_lte(cmp: Cmp): Bool
+  case cmp {
+    ltn: Bool.true,
+    eql: Bool.true,
+    gtn: Bool.false,
+  }

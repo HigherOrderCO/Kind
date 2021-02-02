@@ -1,0 +1,5 @@
+Map.Row(A : Type,key: Bits, x: A, xs: Map(A)) : Type
+  case Map.get<A>(key,xs) as v {
+    none: Empty,
+    some: Equal(A,x,v.value)
+  }

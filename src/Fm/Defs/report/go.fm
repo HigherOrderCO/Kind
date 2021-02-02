@@ -1,0 +1,51 @@
+Fm.Defs.report.go(defs: Fm.Defs, list: List(Fm.Name), errs: String, typs: String): String
+  case list {
+    nil: String.flatten([
+      typs, "\n",
+      case errs {
+        nil: "All terms check.",
+        cons: errs,
+      }
+    ]),
+    cons:
+      let name = list.head;
+      case Fm.get<_>(name, defs) as got {
+        none: Fm.Defs.report.go(defs, list.tail, errs, typs),
+        some: case got.value {
+          new:
+            let typs = String.flatten([typs, name,": ",Fm.Term.show(got.value.type),"\n"]);
+            case got.value.stat {
+              init: Fm.Defs.report.go(defs, list.tail, errs, typs),
+              wait: Fm.Defs.report.go(defs, list.tail, errs, typs),
+              done: Fm.Defs.report.go(defs, list.tail, errs, typs),
+              fail: case got.value.stat.errors {
+                nil: Fm.Defs.report.go(defs, list.tail, errs, typs),
+                cons:
+                  let name_str = Fm.Name.show(got.value.name);
+                  let rel_errs = Fm.Error.relevant(got.value.stat.errors, Bool.false);
+                  case rel_errs {
+                    nil:
+                      Fm.Defs.report.go(defs, list.tail, errs, typs),
+                    cons: 
+                      let rel_msgs = List.mapped<_>(rel_errs)<_>((err)
+                        String.flatten([
+                          Fm.Error.show(err, defs),
+                          case Fm.Error.origin(err) as origin {
+                            none: "",
+                            some: case origin.value {
+                              new: String.flatten([
+                                "Inside '", got.value.file, "':\n",
+                                Fm.highlight(got.value.code, origin.value.fst, origin.value.snd),
+                                "\n",
+                              ])
+                            },
+                          }
+                        ]));
+                      let errs = String.flatten([errs, String.join("\n", rel_msgs), "\n"]);
+                      Fm.Defs.report.go(defs, list.tail, errs, typs)
+                  }
+              }
+            }
+        }
+      }
+  }

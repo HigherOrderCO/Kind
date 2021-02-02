@@ -1,0 +1,12 @@
+Fm.Name.from_bits(bits: Bits): Fm.Name
+  let list = Bits.chunks_of(6, bits);
+  let name = List.fold<_>(list)<_>(String.nil, (bts, name)
+    let u16 = U16.new(Word.from_bits(16, Bits.reverse(bts)));
+    let chr = 
+      if      U16.btw( Nat.to_u16(0), u16, Nat.to_u16(25)) then U16.add(u16, Nat.to_u16(65))
+      else if U16.btw(Nat.to_u16(26), u16, Nat.to_u16(51)) then U16.add(u16, Nat.to_u16(71))
+      else if U16.btw(Nat.to_u16(52), u16, Nat.to_u16(61)) then U16.sub(u16, Nat.to_u16(4))
+      else if U16.eql(Nat.to_u16(62), u16)                 then Nat.to_u16(46)
+      else                                                      Nat.to_u16(95);
+    String.cons(chr, name));
+  name

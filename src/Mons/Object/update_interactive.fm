@@ -1,0 +1,3 @@
+Mons.Object.update_interactive(obj: Mons.Object, fun: Mons.Kind -> Mons.Kind ): Mons.Object
+  open obj
+  Mons.Object.set_kin(obj, fun(obj.kin))

@@ -1,0 +1,5 @@
+Fm.SmartMotive.vals(expr: Fm.Term, type: Fm.Term, defs: Fm.Defs): List(Fm.Term)
+  case Fm.Term.reduce(type, defs) as type {
+    all: Fm.SmartMotive.vals(expr, type.body(Fm.Term.typ,Fm.Term.typ), defs),
+    _: Fm.SmartMotive.vals.cont(expr, type, [], defs),
+  }

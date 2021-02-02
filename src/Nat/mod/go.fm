@@ -1,0 +1,8 @@
+Nat.mod.go(n: Nat, m: Nat, r: Nat): Nat
+  case m {
+    zero: Nat.mod.go(n, r, m),
+    succ: case n {
+      zero: r,
+      succ: Nat.mod.go(n.pred, m.pred, Nat.succ(r)),
+    }
+  }

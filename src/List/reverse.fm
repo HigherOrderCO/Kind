@@ -1,0 +1,2 @@
+List.reverse<A: Type>(xs: List(A)) : List(A)
+  List.reverse.go<_>(xs,List.nil<_>)

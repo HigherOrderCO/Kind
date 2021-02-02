@@ -1,0 +1,20 @@
+Fm.Term.desugar_cse(
+  expr: Fm.Term,
+  name: Fm.Name,
+  wyth: List(Fm.Def),
+  cses: Map(Fm.Term),
+  moti: Fm.Term,
+  type: Fm.Term,
+  defs: Fm.Defs,
+  ctxt: Fm.Context,
+): Maybe(Fm.Term)
+  case Fm.Term.reduce(type, defs) as type {
+    all:
+      let moti = Fm.Term.desugar_cse.motive(wyth, moti);
+      let argm = Fm.Term.desugar_cse.argument(name, [], type.xtyp, moti, defs);
+      let expr = Fm.Term.app(expr, argm);
+      let type = type.body(Fm.Term.var(type.self,0), Fm.Term.var(type.name,0));
+      Maybe.some<_>(Fm.Term.desugar_cse.cases(expr, name, wyth, cses, type, defs, ctxt)),
+    _:
+      Maybe.none<_>,
+  }

@@ -1,0 +1,3 @@
+Mons.Game.get_usr(game: Mons.Game): Word(160)
+  open game
+  game.usr

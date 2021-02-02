@@ -1,0 +1,15 @@
+Fm.Parser.sigma.type: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("{");
+    var name = Fm.Parser.name1;
+    Fm.Parser.text(":");
+    var typ0 = Fm.Parser.term;
+    Fm.Parser.text("}");
+    var typ1 = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("Sigma");
+    let term = Fm.Term.app(term, typ0);
+    let term = Fm.Term.app(term, Fm.Term.lam("x", (x) typ1));
+    return Fm.Term.ori(orig, term);
+  }

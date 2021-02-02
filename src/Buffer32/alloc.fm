@@ -1,0 +1,2 @@
+Buffer32.alloc(depth: Nat): Buffer32
+  Buffer32.new(depth, Array.alloc<U32>(depth, U32.zero))

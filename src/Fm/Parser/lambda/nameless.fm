@@ -1,0 +1,9 @@
+Fm.Parser.lambda.nameless: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("()");
+    var body = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let expr = Fm.Term.lam("", (x) body);
+    return Fm.Term.ori(orig, expr);
+  }

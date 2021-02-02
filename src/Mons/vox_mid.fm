@@ -1,0 +1,2 @@
+Mons.vox_mid: Pos32
+  Pos32.new(u128, u128, u0)

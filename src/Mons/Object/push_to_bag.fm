@@ -1,0 +1,16 @@
+Mons.Object.push_to_bag(obj: Mons.Object, hero: Mons.Object): Mons.Object
+  open obj
+  open hero
+  let qtd = List.length<_>(hero.bag)
+  case obj.kin as kind {
+    Mons: 
+      let obj = Mons.Object.set_dmg(obj, u0)
+      if Nat.ltn(qtd, 3) then
+        let new_bag = List.append<_>(hero.bag, obj)
+        Mons.Object.set_bag(new_bag, hero)
+      else
+        hero
+    Const:       hero,
+    Terrain:     hero,
+    Interactive: hero
+  }

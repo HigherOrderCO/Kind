@@ -1,0 +1,5 @@
+String.append(as: String, a: Char): String
+  case as{
+    nil : String.pure(a)
+    cons: String.cons(as.head,String.append(as.tail, a))
+  }

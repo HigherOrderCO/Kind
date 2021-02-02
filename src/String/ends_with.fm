@@ -1,0 +1,4 @@
+String.ends_with(xs: String, match: String): Bool
+  let xs_reserved = String.reverse(xs)
+  let match_reversed = String.reverse(match)
+  String.starts_with(xs_reserved, match_reversed)

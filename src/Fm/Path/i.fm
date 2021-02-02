@@ -1,0 +1,2 @@
+Fm.Path.i(path: Fm.Path): Fm.Path
+  (x) path(Bits.i(x))

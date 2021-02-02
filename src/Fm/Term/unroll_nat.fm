@@ -1,0 +1,9 @@
+Fm.Term.unroll_nat(natx: Nat): Fm.Term
+  case natx {
+    zero:
+      Fm.Term.ref(Fm.Name.read("Nat.zero")),
+    succ:
+      let func = Fm.Term.ref(Fm.Name.read("Nat.succ"));
+      let argm = Fm.Term.nat(natx.pred);
+      Fm.Term.app(func, argm),
+  }

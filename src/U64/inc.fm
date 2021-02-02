@@ -1,0 +1,3 @@
+U64.inc(a: U64): U64
+  open a 
+  U64.new(Word.inc<_>(a.value))

@@ -1,0 +1,45 @@
+Map.merge.go<A: Type,B: Type,C: Type>(
+  f: Bits -> A -> Maybe(C),
+  g: Bits -> B -> Maybe(C),
+  h: Bits -> A -> B -> Maybe(C),
+  key: Bits,
+  a: Map(A),
+  b: Map(B)
+) : Map(C)
+  case a {
+    new: case b {
+      new: Map.new<_>,
+      tie:
+        let val = case b.val as bv {
+          none: Maybe.none<_>,
+          some: g(key,bv.value)
+        }
+        Map.tie<_>(val,
+          Map.merge.go<_,_,_>(f, g, h, Bits.o(key), Map.new<_>,b.lft),
+          Map.merge.go<_,_,_>(f, g, h, Bits.i(key), Map.new<_>,b.rgt))
+    },
+    tie: case b {
+      new: 
+        let val = case a.val as av { 
+          none: Maybe.none<_>, 
+          some: f(key, av.value) 
+        }
+        Map.tie<_>(val,
+          Map.merge.go<_,_,_>(f,g,h,Bits.o(key),a.lft,Map.new<_>),
+          Map.merge.go<_,_,_>(f,g,h,Bits.i(key),a.rgt,Map.new<_>)),
+      tie: 
+        let val = case a.val as av {
+          none: case b.val as bv {
+            none: Maybe.none<_>, 
+            some: g(key, bv.value)
+          },
+          some: case b.val as bv {
+            none: f(key, av.value), 
+            some: h(key, av.value, bv.value)
+          }
+        }
+        Map.tie<_>(val,
+          Map.merge.go<_,_,_>(f, g, h, Bits.o(key), a.lft, b.lft),
+          Map.merge.go<_,_,_>(f, g, h, Bits.i(key), a.rgt, b.rgt))
+    }
+  }

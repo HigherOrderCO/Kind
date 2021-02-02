@@ -1,0 +1,5 @@
+Nat.to_string_unary(n: Nat): String
+  case n {
+    zero: String.nil,
+    succ: String.cons('1', Nat.to_string_unary(n.pred))
+  }

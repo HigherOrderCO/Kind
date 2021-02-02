@@ -1,0 +1,45 @@
+Map.query<A: Type>(cpy: A -> Pair(A, A), bits: Bits, map: Map(A)): Pair(Map(A), Maybe(A))
+  case bits {
+  e: case map {
+    new: 
+      let map = Map.new<_>
+      let val = Maybe.none<_>
+      Pair.new<_,_>(map, val),
+    tie: case map.val {
+      none:
+        let map = Map.tie<_>(Maybe.none<_>, map.lft, map.rgt)
+        let val = Maybe.none<_>
+        Pair.new<_,_>(map, val),
+      some: case cpy(map.val.value) as p {
+        new:
+          let map = Map.tie<_>(Maybe.some<_>(p.fst), map.lft, map.rgt)
+          let val = Maybe.some<_>(p.snd)
+          Pair.new<_,_>(map, val)
+      }
+    }
+  },
+  o: case map {
+    new:
+      let map = Map.new<_>
+      let val = Maybe.none<_>
+      Pair.new<_,_>(map, val),
+    tie: case Map.query<_>(cpy, bits.pred, map.lft) as p {
+      new:
+        let map = Map.tie<_>(map.val, p.fst, map.rgt)
+        let val = p.snd
+        Pair.new<_,_>(map, val)
+    }
+  },
+  i: case map {
+    new: 
+      let map = Map.new<_>
+      let val = Maybe.none<_>
+      Pair.new<_,_>(map, val),
+    tie: case Map.query<_>(cpy, bits.pred, map.rgt) as p {
+      new:
+        let map = Map.tie<_>(map.val, map.lft, p.fst)
+        let val = p.snd
+        Pair.new<_,_>(map, val)
+      }
+    }
+  }

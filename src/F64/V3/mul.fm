@@ -1,0 +1,7 @@
+F64.V3.mul(a: F64.V3, b: F64.V3): F64.V3
+  open a
+  open b
+  let c.x = F64.mul(a.x, a.x)
+  let c.y = F64.mul(a.y, b.y)
+  let c.z = F64.mul(a.z, b.z)
+  F64.V3.new(c.x, c.y, c.z)

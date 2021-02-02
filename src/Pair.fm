@@ -1,35 +1,3 @@
 type Pair <A: Type, B: Type> {
   new(fst: A, snd: B)
 }
-
-Pair.fst<A: Type, B: Type>(pair: Pair(A, B)): A
-  case pair {
-    new: pair.fst
-  }
-
-Pair.snd<A: Type, B: Type>(pair: Pair(A, B)): B
-  case pair {
-    new: pair.snd
-  }
-
-
-Pair.map<A: Type, B: Type, C: Type>(f: B -> C, p: Pair(A, B)): Pair(A, C)
-  case p {
-    new: Pair.new<A, C>(p.fst, f(p.snd))
-  }
-
-Pair.show<A: Type, B: Type>(
-  show_a: A -> String,
-  show_b: B -> String,
-  pair: Pair(A,B)
-) : String
-  case pair{
-    new: let str = String.concat("(", show_a(pair.fst))
-    let str = String.concat(str, ",")
-    let str = String.concat(str, show_b(pair.snd))
-    let str = String.concat(str, ")")
-    str
-  }
-
-Pair.functor<A: Type>: Functor(Pair(A))
-  Functor.new<Pair(A)>(Pair.map<A>)

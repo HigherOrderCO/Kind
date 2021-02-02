@@ -1,0 +1,3 @@
+Mons.Game.get_tile(pos: Pos32, game: Mons.Game): List(Mons.Object)
+  open game
+  Mons.Map.get_list(pos, game.map)

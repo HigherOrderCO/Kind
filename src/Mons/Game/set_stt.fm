@@ -1,0 +1,3 @@
+Mons.Game.set_stt(stt: Mons.Screen, game: Mons.Game): Mons.Game
+  open game
+  Mons.Game.new(game.usr, game.pos, game.map, stt, game.tik)

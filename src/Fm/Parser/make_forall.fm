@@ -1,0 +1,13 @@
+Fm.Parser.make_forall(binds: List(Fm.Binder), body: Fm.Term): Fm.Term
+  case binds {
+    nil: body,
+    cons: case binds.head {
+      new:
+        def all_eras = binds.head.eras;
+        def all_self = "";
+        def all_name = binds.head.name;
+        def all_xtyp = binds.head.term;
+        def all_body = (s,x) Fm.Parser.make_forall(binds.tail, body);
+        Fm.Term.all(all_eras, all_self, all_name, all_xtyp, all_body),
+    }
+  }

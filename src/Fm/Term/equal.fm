@@ -1,0 +1,94 @@
+Fm.Term.equal(a: Fm.Term, b: Fm.Term, defs: Fm.Defs, lv: Nat, seen: Set): Fm.Check(Bool)
+  let ah = Fm.Term.serialize(Fm.Term.reduce(a,Map.new<_>), lv, lv, Bits.o, Bits.e);
+  let bh = Fm.Term.serialize(Fm.Term.reduce(b,Map.new<_>), lv, lv, Bits.i, Bits.e);
+  if Bits.eql(ah, bh) then do Fm.Check {
+    return Bool.true;
+  } else do Fm.Check {
+    let a1 = Fm.Term.reduce(a, defs);
+    let b1 = Fm.Term.reduce(b, defs);
+    let ah = Fm.Term.serialize(a1, lv, lv, Bits.o, Bits.e);
+    let bh = Fm.Term.serialize(b1, lv, lv, Bits.i, Bits.e);
+    if Bits.eql(ah, bh) then do Fm.Check {
+      return Bool.true;
+    } else do Fm.Check {
+      let id = Bits.concat(ah, bh);
+      if Set.has(id, seen) then do Fm.Check {
+        Fm.Term.equal.extra_holes(a, b);
+        return Bool.true;
+      } else case a1 {
+        all: case b1 {
+          all: do Fm.Check {
+            let seen = Set.set(id, seen);
+            let a1_body = a1.body(
+              Fm.Term.var(a1.self, lv),
+              Fm.Term.var(a1.name, Nat.succ(lv)));
+            let b1_body = b1.body(
+              Fm.Term.var(b1.self, lv),
+              Fm.Term.var(b1.name, Nat.succ(lv)));
+            let eq_self = String.eql(a1.self, b1.self);
+            let eq_eras = Bool.eql(a1.eras, b1.eras);
+            if Bool.and(eq_self, eq_eras) then do Fm.Check {
+              var eq_type = Fm.Term.equal(a1.xtyp, b1.xtyp, defs, lv, seen);
+              var eq_body = Fm.Term.equal(a1_body, b1_body, defs, Nat.succ(Nat.succ(lv)), seen);
+              return Bool.and(eq_type, eq_body);
+            } else do Fm.Check {
+              return Bool.false;
+            };
+          },
+          hol:
+            Fm.Term.equal.hole(b1.path, a),
+          _: do Fm.Check {
+            return Bool.false;
+          },
+        },
+        lam: case b1 {
+          lam: do Fm.Check {
+              let seen = Set.set(id, seen);
+              let a1_body = a1.body(Fm.Term.var(a1.name, lv));
+              let b1_body = b1.body(Fm.Term.var(b1.name, lv));
+              var eq_body = Fm.Term.equal(a1_body, b1_body, defs, Nat.succ(lv), seen);
+              return eq_body;
+            },
+            hol: Fm.Term.equal.hole(b1.path, a),
+            _: do Fm.Check {
+              return Bool.false;
+            },
+          },
+        app: case b1 {
+          app: do Fm.Check {
+            let seen = Set.set(id, seen);
+            var eq_func = Fm.Term.equal(a1.func, b1.func, defs, lv, seen);
+            var eq_argm = Fm.Term.equal(a1.argm, b1.argm, defs, lv, seen);
+            return Bool.and(eq_func, eq_argm);
+          },
+          hol: Fm.Term.equal.hole(b1.path, a),
+          _: do Fm.Check {
+            return Bool.false;
+          },
+        },
+        let: case b1 {
+          let: do Fm.Check {
+            let seen = Set.set(id, seen);
+            let a1_body = a1.body(Fm.Term.var(a1.name, lv));
+            let b1_body = b1.body(Fm.Term.var(b1.name, lv));
+            var eq_expr = Fm.Term.equal(a1.expr, b1.expr, defs, lv, seen);
+            var eq_body = Fm.Term.equal(a1_body, b1_body, defs, Nat.succ(lv), seen);
+            return Bool.and(eq_expr, eq_body);
+          },
+          hol:
+            Fm.Term.equal.hole(b1.path, a),
+          _: do Fm.Check {
+            return Bool.false;
+          },
+        },
+        hol:
+          Fm.Term.equal.hole(a1.path, b),
+        _: case b1 {
+          hol: Fm.Term.equal.hole(b1.path, a),
+          _: do Fm.Check {
+            return Bool.false;
+          },
+        },
+      };
+    };
+  }

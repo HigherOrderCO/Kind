@@ -1,0 +1,6 @@
+Parser.many1<V: Type>(parser: Parser(V)): Parser(List(V))
+  do Parser {
+    var head = parser;
+    var tail = Parser.many<V>(parser);
+    return List.cons<V>(head, tail);
+  }

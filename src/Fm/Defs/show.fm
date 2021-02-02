@@ -1,0 +1,16 @@
+Fm.Defs.show(defs: Fm.Defs): String
+  let str = "";
+  for name_defn in Map.to_list<Fm.Def>(defs) with str:
+    case name_defn {
+      new: case name_defn.snd as defn {
+        new: String.flatten([
+          str,
+          Fm.Name.show(defn.name),
+          ": ",
+          Fm.Term.show(defn.type),
+          "\n  ",
+          Fm.Term.show(defn.term),
+          "\n",
+        ])
+      }
+    }

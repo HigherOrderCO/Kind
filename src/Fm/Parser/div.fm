@@ -1,0 +1,2 @@
+Fm.Parser.div: Nat -> Fm.Term -> Parser(Fm.Term)
+  Fm.Parser.op("/", "Nat.div")

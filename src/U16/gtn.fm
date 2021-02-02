@@ -1,0 +1,4 @@
+U16.gtn(a: U16, b: U16): Bool
+  open a
+  open b
+  Word.gtn<_>(a.value, b.value)

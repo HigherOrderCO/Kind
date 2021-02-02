@@ -1,0 +1,28 @@
+Fm.Term.reduce(term: Fm.Term, defs: Fm.Defs): Fm.Term
+  case term {
+    ref: case Fm.get<_>(term.name, defs) as got {
+      none: Fm.Term.ref(term.name),
+      some: case got.value { new: Fm.Term.reduce(got.value.term, defs) },
+    },
+    app:
+      let func = Fm.Term.reduce(term.func, defs);
+      case func {
+        lam: Fm.Term.reduce(func.body(term.argm), defs),
+        _: term,
+      },
+    let:
+      Fm.Term.reduce(term.body(term.expr), defs),
+    def:
+      Fm.Term.reduce(term.body(term.expr), defs),
+    ann:
+      Fm.Term.reduce(term.term, defs),
+    nat:
+      Fm.Term.reduce(Fm.Term.unroll_nat(term.natx), defs),
+    chr:
+      Fm.Term.reduce(Fm.Term.unroll_chr(term.chrx), defs),
+    str:
+      Fm.Term.reduce(Fm.Term.unroll_str(term.strx), defs),
+    ori:
+      Fm.Term.reduce(term.expr, defs),
+    _: term,
+  }

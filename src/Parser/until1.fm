@@ -1,0 +1,6 @@
+Parser.until1<V: Type>(cond: Parser(Unit), parser: Parser(V)): Parser(List(V))
+  do Parser {
+    var head = parser;
+    var tail = Parser.until<V>(cond, parser);
+    return List.cons<V>(head, tail);
+  }

@@ -1,0 +1,6 @@
+Fm.Parser.init: Parser(Nat)
+  do Parser {
+    Fm.Parser.spaces;
+    var from = Parser.get_index;
+    return from;
+  }

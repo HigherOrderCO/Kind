@@ -1,0 +1,8 @@
+Nat.lte(n: Nat, m: Nat): Bool
+  case n {
+    zero: Bool.true,
+    succ: case m {
+      zero: Bool.false,
+      succ: Nat.lte(n.pred, m.pred),
+    }
+  }

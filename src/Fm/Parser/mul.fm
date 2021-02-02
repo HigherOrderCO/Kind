@@ -1,0 +1,2 @@
+Fm.Parser.mul: Nat -> Fm.Term -> Parser(Fm.Term)
+  Fm.Parser.op("*", "Nat.mul")

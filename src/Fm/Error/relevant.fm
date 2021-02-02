@@ -1,0 +1,29 @@
+Fm.Error.relevant(errors: List(Fm.Error), got: Bool): List(Fm.Error)
+  case errors {
+    nil:
+      List.nil<Fm.Error>,
+    cons:
+      let keep = case errors.head {
+        type_mismatch: Bool.not(got),
+        show_goal: Bool.true,
+        waiting: Bool.false,
+        indirect: Bool.false,
+        patch: Bool.false,
+        undefined_reference: Bool.not(got),
+        cant_infer: Bool.not(got),
+      };
+      let got = case errors.head {
+        type_mismatch: Bool.true,
+        show_goal: got,
+        waiting: got,
+        indirect: got,
+        patch: got,
+        undefined_reference: Bool.true,
+        cant_infer: got,
+      };
+      let tail = Fm.Error.relevant(errors.tail, got);
+      if keep then
+        List.cons<_>(errors.head, tail)
+      else
+        tail
+  }

@@ -1,0 +1,5 @@
+F64.from_bool(b: Bool): F64 
+  case b {
+   true : F64.1,
+   false: F64.0
+  }

@@ -1,0 +1,10 @@
+Fm.Parser.string: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    let quot = String.cons('"', String.nil); //"
+    Fm.Parser.text(quot);
+    var chrs = Parser.until<_>(Parser.text(quot), Fm.Parser.char.single);
+    let strx = List.fold<_>(chrs)<_>(String.nil, String.cons);
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, Fm.Term.str(strx));
+  }

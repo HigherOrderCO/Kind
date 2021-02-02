@@ -1,0 +1,5 @@
+Parser.if_not<A: Type>(a: Parser(Unit), b: Parser(A)): Parser(A)
+  (idx,code) case a(idx,code) {
+    error: b(idx,code),
+    value: Parser.Reply.error<A>(idx, code, "Prevented."),
+  }

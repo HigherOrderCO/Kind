@@ -1,0 +1,6 @@
+Bits.mul.go(a: Bits, b: Bits, bits: Bits): Bits
+  case b {
+    e: bits,
+    o : Bits.mul.go(Bits.o(a), b.pred, bits),
+    i : Bits.mul.go(Bits.o(a), b.pred, Bits.add(a, bits))
+  }

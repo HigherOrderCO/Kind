@@ -1,0 +1,2 @@
+Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Terrain(kin))

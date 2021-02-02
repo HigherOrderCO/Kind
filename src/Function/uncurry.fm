@@ -1,0 +1,3 @@
+Function.uncurry<A: Type, B: Type, C: Type>(f: A -> B -> C, p: Pair(A, B)): C
+  open p 
+  f(p.fst, p.snd)

@@ -1,0 +1,53 @@
+Fm.SmartMotive.replace(term: Fm.Term, from: Fm.Term, to: Fm.Term, lv: Nat): Fm.Term
+  //let skip = Debug.log<_>(String.flatten(["replace term=", Fm.Term.show(term), " from=", Fm.Term.show(from), " to=", Fm.Term.show(to), " lv=", Nat.show(lv)]), (x) Unit.new);
+  if Fm.Term.identical(term, from, lv) then
+    to
+  else case term {
+    ref:
+      Fm.Term.ref(term.name),
+    var:
+      Fm.Term.var(term.name, term.indx),
+    typ:
+      Fm.Term.typ,
+    all: 
+      let xtyp = Fm.SmartMotive.replace(term.xtyp, from, to, lv);
+      let body = term.body(Fm.Term.ref(term.self),Fm.Term.ref(term.name));
+      let body = Fm.SmartMotive.replace(body, from, to, Nat.succ(Nat.succ(lv)));
+      Fm.Term.all(term.eras, term.self, term.name, xtyp, (s,x) body),
+    lam:
+      let body = term.body(Fm.Term.ref(term.name));
+      let body = Fm.SmartMotive.replace(body, from, to, Nat.succ(lv));
+      Fm.Term.lam(term.name, (x) body),
+    app:
+      let func = Fm.SmartMotive.replace(term.func, from, to, lv);
+      let argm = Fm.SmartMotive.replace(term.argm, from, to, lv);
+      Fm.Term.app(func, argm),
+    let:
+      let expr = Fm.SmartMotive.replace(term.expr, from, to, lv);
+      let body = term.body(Fm.Term.ref(term.name))
+      let body = Fm.SmartMotive.replace(body, from, to, Nat.succ(lv));
+      Fm.Term.let(term.name, expr, (x) body),
+    def:
+      let expr = Fm.SmartMotive.replace(term.expr, from, to, lv);
+      let body = term.body(Fm.Term.ref(term.name))
+      let body = Fm.SmartMotive.replace(body, from, to, Nat.succ(lv));
+      Fm.Term.def(term.name, expr, (x) body),
+    ann:
+      let term = Fm.SmartMotive.replace(term.term, from, to, lv);
+      let type = Fm.SmartMotive.replace(term.type, from, to, lv);
+      Fm.Term.ann(term.done, term, type),
+    gol:
+      term,
+    hol:
+      term,
+    nat:
+      term,
+    chr:
+      term,
+    str:
+      term,
+    cse:
+      term,
+    ori:
+      Fm.SmartMotive.replace(term.expr, from, to, lv),
+  }

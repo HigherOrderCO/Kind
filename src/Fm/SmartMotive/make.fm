@@ -1,0 +1,22 @@
+Fm.SmartMotive.make(
+  name: Fm.Name,
+  expr: Fm.Term, 
+  type: Fm.Term,
+  moti: Fm.Term,
+  lv  : Nat,
+  defs: Fm.Defs,
+): Fm.Term
+  let vals = Fm.SmartMotive.vals(expr,type,defs);
+  let nams = Fm.SmartMotive.nams(name,type,defs);
+  let subs = List.zip<_,_>(nams,vals);
+  //let skip = Debug.log<_>(String.flatten(["-expr: ", Fm.Term.show(expr)]), (x) Unit.new);
+  //let skip = Debug.log<_>(String.flatten(["-type: ", Fm.Term.show(type)]), (x) Unit.new);
+  //let skip = Debug.log<_>(String.flatten(["-type: ", Fm.Term.show(Fm.Term.reduce(type,defs))]), (x) Unit.new);
+  //let skip = Debug.log<_>(String.flatten(["-vals: ", String.join(", ", List.mapped<_>(vals)<_>(Fm.Term.show))]), (x) Unit.new);
+  //let skip = Debug.log<_>(String.flatten(["-nams: ", String.join(", ", nams)]), (x) Unit.new);
+  //let skip = Debug.log<_>(String.flatten(["-moti: ", Fm.Term.show(moti)]), (x) Unit.new);
+  let moti = List.fold<_>(subs)<_>(moti, (sub,moti) case sub {
+    new: Fm.SmartMotive.replace(moti, sub.snd, Fm.Term.ref(sub.fst), lv),
+  });
+  //let skip = Debug.log<_>(String.flatten(["+moti: ", Fm.Term.show(moti)]), (x) Unit.new);
+  moti

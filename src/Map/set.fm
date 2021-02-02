@@ -1,0 +1,15 @@
+Map.set<A: Type>(bits: Bits, val: A, map: Map(A)): Map(A)
+  case bits {
+    e: case map {
+      new: Map.tie<_>(Maybe.some<_>(val), Map.new<_>, Map.new<_>),
+      tie: Map.tie<_>(Maybe.some<_>(val), map.lft, map.rgt)
+    },
+    o: case map {
+      new: Map.tie<_>(Maybe.none<_>, Map.set<_>(bits.pred, val, Map.new<_>), Map.new<_>),
+      tie: Map.tie<_>(map.val, Map.set<_>(bits.pred, val, map.lft), map.rgt)
+    },
+    i: case map {
+      new: Map.tie<_>(Maybe.none<_>, Map.new<_>, Map.set<_>(bits.pred, val, Map.new<_>)),
+      tie: Map.tie<_>(map.val, map.lft, Map.set<_>(bits.pred, val, map.rgt))
+    }
+  }

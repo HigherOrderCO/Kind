@@ -1,0 +1,5 @@
+Nat.same(n: Nat): Nat
+  case n {
+    zero: 0
+    succ: Nat.succ(Nat.same(n.pred))
+  }

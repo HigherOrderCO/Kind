@@ -1,0 +1,4 @@
+Fm.Term.identical(a: Fm.Term, b: Fm.Term, lv: Nat): Bool
+  let ah = Fm.Term.serialize(a, lv, lv, Bits.o, Bits.e);
+  let bh = Fm.Term.serialize(b, lv, lv, Bits.i, Bits.e);
+  Bits.eql(ah, bh)

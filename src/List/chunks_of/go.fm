@@ -1,0 +1,18 @@
+List.chunks_of.go<A: Type>(
+  len   : Nat,     // length of each chunk
+  list  : List(A), // list to be split
+  need  : Nat,     // number of vals to complete chunk
+  chunk : List(A)  // current chunk
+) : List(List(A))
+  case list {
+    nil : List.cons<_>(List.reverse<_>(chunk), List.nil<_>),
+    cons: case need {
+      zero: 
+        let head = List.reverse<_>(chunk)
+        let tail = List.chunks_of.go<_>(len, list, len, List.nil<_>)
+        List.cons<_>(head, tail),
+      succ: 
+        let chunk = List.cons<_>(list.head, chunk)
+        List.chunks_of.go<_>(len, list.tail, need.pred, chunk)
+    }
+  }

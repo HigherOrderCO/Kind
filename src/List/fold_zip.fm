@@ -1,0 +1,8 @@
+List.fold_zip<A: Type, B: Type>(as: List(A), bs: List(B))<C: Type>(fn: A -> B -> C, nil: C, cons: C -> C -> C): C
+  case as {
+    nil : nil,
+    cons: case bs {
+      nil : nil,
+      cons: cons(fn(as.head, bs.head), List.fold_zip<A,B>(as.tail,bs.tail)<C>(fn, nil, cons))
+    }
+  }

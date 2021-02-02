@@ -1,0 +1,26 @@
+Fm.Parser.suffix(init: Nat, term: Fm.Term): Parser(Fm.Term)
+  (idx, code)
+  let suffix_parser = Parser.first_of<_>([
+    Fm.Parser.application(init, term),
+    Fm.Parser.application.erased(init, term),
+    Fm.Parser.arrow(init, term),
+    Fm.Parser.add(init, term),
+    Fm.Parser.sub(init, term),
+    Fm.Parser.mul(init, term),
+    Fm.Parser.div(init, term),
+    Fm.Parser.mod(init, term),
+    //Fm.Parser.default(init, term),
+    Fm.Parser.cons(init, term),
+    Fm.Parser.concat(init, term),
+    Fm.Parser.string_concat(init, term),
+    Fm.Parser.sigma(init, term),
+    Fm.Parser.equality(init, term),
+    Fm.Parser.inequality(init, term),
+    Fm.Parser.rewrite(init, term),
+    Fm.Parser.annotation(init, term),
+    Fm.Parser.application.hole(init, term),
+  ]);
+  case suffix_parser(idx, code) as suffix_parsed {
+    error: Parser.Reply.value<_>(idx, code, term),
+    value: Fm.Parser.suffix(init, suffix_parsed.val, suffix_parsed.idx, suffix_parsed.code),
+  }

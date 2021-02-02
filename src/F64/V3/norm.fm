@@ -1,0 +1,7 @@
+F64.V3.norm(v: F64.V3): F64.V3
+  open v
+  let len = F64.V3.len(v)
+  let new_x = F64.div(v.x, len)
+  let new_y = F64.div(v.y, len)
+  let new_z = F64.div(v.z, len)
+  F64.V3.new(new_x, new_y, new_z)

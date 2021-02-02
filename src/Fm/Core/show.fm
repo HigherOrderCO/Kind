@@ -1,0 +1,67 @@
+Fm.Core.show(term: Fm.Term, indx: Nat, vars: List(Fm.Name)): String
+  case term {
+    ref:
+      Fm.Name.show(term.name),
+    var:
+      Fm.Core.var_name(Nat.pred(Nat.sub(indx,term.indx)), term.name, 0, vars),
+    typ:
+      "*",
+    all:
+      let eras = term.eras;
+      let init = if eras then "%" else "@"
+      let self = Fm.Name.show(term.self);
+      let name = Fm.Name.show(term.name);
+      let xtyp = Fm.Core.show(term.xtyp, indx, vars);
+      let body = Fm.Core.show(
+        term.body(
+          Fm.Term.var(term.self,indx),
+          Fm.Term.var(term.name,Nat.succ(indx))),
+        Nat.succ(Nat.succ(indx)),
+        List.cons<_>(term.name, List.cons<_>(term.self, vars)));
+      String.flatten([init,self,"(",name,":",xtyp,") ",body]),
+    lam:
+      let name = Fm.Name.show(term.name);
+      let body = Fm.Core.show(
+        term.body(Fm.Term.var(term.name,indx)),
+        Nat.succ(indx),
+        List.cons<_>(term.name, vars));
+      String.flatten(["#",name," ",body]),
+    app:
+      let func = Fm.Core.show(term.func, indx, vars);
+      let argm = Fm.Core.show(term.argm, indx, vars);
+      String.flatten(["(",func," ",argm,")"]),
+    let: 
+      let name = Fm.Name.show(term.name);
+      let expr = Fm.Core.show(term.expr, indx, vars);
+      let body = Fm.Core.show(
+        term.body(Fm.Term.var(term.name,indx)),
+        Nat.succ(indx),
+        List.cons<_>(term.name, vars));
+      String.flatten(["!", name, " = ", expr, "; ", body]),
+    def:
+      let name = Fm.Name.show(term.name);
+      let expr = Fm.Core.show(term.expr, indx, vars);
+      let body = Fm.Core.show(
+        term.body(Fm.Term.var(term.name,indx)),
+        Nat.succ(indx),
+        List.cons<_>(term.name, vars));
+      String.flatten(["$", name, " = ", expr, "; ", body]),
+    ann:
+      let term = Fm.Core.show(term.term, indx, vars);
+      let type = Fm.Core.show(term.type, indx, vars);
+      String.flatten(["{",term,":",type,"}"]),
+    gol:
+      "<GOL>",
+    hol:
+      "<HOL>",
+    nat:
+      String.flatten(["+", Nat.show(term.natx)]),
+    chr:
+      String.flatten(["'", Fm.escape.char(term.chrx), "'"]),
+    str:
+      String.flatten(["\"", Fm.escape(term.strx), "\""]),
+    cse:
+      "<CSE>",
+    ori:
+      Fm.Core.show(term.expr, indx, vars),
+  }

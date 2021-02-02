@@ -1,0 +1,5 @@
+List.for<A: Type>(xs: List(A))<B: Type>(b: B, f: A -> B -> B): B
+  case xs {
+    nil : b,
+    cons: List.for<A>(xs.tail)<B>(f(xs.head,b),f)
+  }

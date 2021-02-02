@@ -1,0 +1,4 @@
+Mons.Object.set_idl(idl: U32, obj: Mons.Object): Mons.Object
+  open obj
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, 
+    obj.mon, obj.bos, obj.cap, idl, obj.eff)

@@ -1,0 +1,5 @@
+Fm.Parser.text(text: String): Parser(Unit)
+  do Parser {
+    Fm.Parser.spaces;
+    Parser.text(text);
+  }

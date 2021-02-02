@@ -1,0 +1,12 @@
+Map.map<A: Type, B: Type>(fn: A -> B, map: Map(A)): Map(B)
+  case map {
+    new: Map.new<_>,
+    tie:
+      let val = case map.val {
+        none: Maybe.none<_>,
+        some: Maybe.some<_>(fn(map.val.value))
+      }
+      let lft = Map.map<A,B>(fn, map.lft)
+      let rgt = Map.map<A,B>(fn, map.rgt)
+      Map.tie<_>(val, lft, rgt) 
+  }

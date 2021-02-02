@@ -1,0 +1,10 @@
+Fm.Parser.application(init: Nat, func: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Parser.text("(");
+    var args = Parser.until1<_>(
+      Fm.Parser.text(")"),
+      Fm.Parser.item<_>(Fm.Parser.term));
+    var orig = Fm.Parser.stop(init);
+    let expr = List.for<_>(args)<_>(func, (x,f) Fm.Term.app(f, x));
+    return Fm.Term.ori(orig, expr);
+  }

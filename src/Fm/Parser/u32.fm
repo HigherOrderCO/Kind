@@ -1,0 +1,11 @@
+Fm.Parser.u32: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.spaces;
+    var natx = Parser.nat;
+    Parser.text("u");
+    let term = Fm.Term.ref("Nat.to_u32");
+    let term = Fm.Term.app(term, Fm.Term.nat(natx));
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, term);
+  }

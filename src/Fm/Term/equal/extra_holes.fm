@@ -1,0 +1,22 @@
+Fm.Term.equal.extra_holes(
+  a: Fm.Term,
+  b: Fm.Term,
+): Fm.Check(Unit)
+  case a {
+    app: case b {
+      app: do Fm.Check {
+        Fm.Term.equal.extra_holes(a.func, b.func);
+        Fm.Term.equal.extra_holes(a.argm, b.argm);
+      },
+      ori: Fm.Term.equal.extra_holes(a, b.expr),
+      hol: do Fm.Check { Fm.Term.equal.hole(b.path, a); return Unit.new; }, 
+      _: do Fm.Check { return Unit.new; },
+    },
+    ori: Fm.Term.equal.extra_holes(a.expr, b),
+    hol: do Fm.Check { Fm.Term.equal.hole(a.path, b); return Unit.new; },
+    _: case b {
+      ori: Fm.Term.equal.extra_holes(a, b.expr),
+      hol: do Fm.Check { Fm.Term.equal.hole(b.path, a); return Unit.new; }, 
+      _: do Fm.Check { return Unit.new; },
+    }
+  }

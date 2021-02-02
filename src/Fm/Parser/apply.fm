@@ -1,0 +1,18 @@
+Fm.Parser.apply: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("apply(");
+    var func = Fm.Parser.term;
+    Fm.Parser.text(",");
+    var equa = Fm.Parser.term;
+    Fm.Parser.text(")");
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("Equal.apply");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, func);
+    let term = Fm.Term.app(term, equa);
+    return Fm.Term.ori(orig, term);
+  }

@@ -1,0 +1,2 @@
+List.product(xs: List(Nat)) : Nat
+  List.product.go(xs, Nat.zero)

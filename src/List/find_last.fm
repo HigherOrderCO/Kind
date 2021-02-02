@@ -1,0 +1,2 @@
+List.find_last<A: Type>(xs: List(A), f: A -> Nat -> Bool): Maybe(Pair(A)(Nat))
+  List.find_last.go<A>(xs,f,Nat.zero,Maybe.none<_>)

@@ -1,0 +1,26 @@
+Word.adder<size: Nat>(a: Word(size), b: Word(size), c: Bool): Word(size)
+  case a with b: Word(a.size) = b {
+    e: Word.e,
+   o: case b with a.pred: Word(Nat.pred(b.size)) = a.pred {
+      e: Word.e,
+      o: case c {
+        true : Word.i<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.false)),
+        false: Word.o<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.false)),
+      },
+      i: case c {
+        true:  Word.o<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.true)),
+        false: Word.i<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.false)),
+      }
+    } : Word(b.size),
+    i: case b with a.pred: Word(Nat.pred(b.size)) = a.pred {
+      e: Word.e,
+      o: case c {
+        true : Word.o<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.true)),
+        false: Word.i<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.false)),
+      },
+      i: case c {
+        true : Word.i<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.true)),
+        false: Word.o<b.size>(Word.adder<b.size>(a.pred, b.pred, Bool.true)),
+      }
+    } : Word(b.size)
+  } : Word(a.size)

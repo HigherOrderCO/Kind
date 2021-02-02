@@ -1,0 +1,8 @@
+Nat.sub_rem(n: Nat, m: Nat): Either(Nat, Nat)
+  case m {
+    zero: Either.left<_,_>(n),
+    succ: case n {
+      zero: Either.right<_,_>(Nat.succ(m.pred)),
+      succ: Nat.sub_rem(n.pred, m.pred),
+    }
+  }

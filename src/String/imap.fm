@@ -1,0 +1,5 @@
+String.imap(f: Nat -> Char -> Char, xs: String): String
+  case xs{
+    nil : String.nil
+    cons: String.cons(f(0,xs.head),String.imap((n) f(Nat.succ(n)),xs.tail))
+  }

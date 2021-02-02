@@ -1,0 +1,14 @@
+Fm.Context.get_name_skips(name: Fm.Name): Pair(Fm.Name, Nat)
+  //log("get_name_skips ", name)
+  case name {
+    nil: {"", 0}
+    cons: 
+      // FIXME: for some reason FormCoreJS compiles this function as tail
+      // recursive if we don't use a "let" here. Investigate and fix.
+      let name_skips = Fm.Context.get_name_skips(name.tail)
+      let {name,skips} = name_skips
+      if U16.eql(name.head, '^') then
+        {name, Nat.succ(skips)}
+      else
+        {String.cons(name.head,name), skips}
+  }

@@ -1,0 +1,2 @@
+String.to_builder(string: String) : String.Builder
+  String.to_builder.go(string, String.Builder.new)

@@ -1,0 +1,2 @@
+U16.btw(a: U16, b: U16, c: U16): Bool
+  Bool.and(U16.lte(a, b), U16.lte(b, c))

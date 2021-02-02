@@ -1,0 +1,2 @@
+Fm.get<A: Type>(name: Fm.Name, map: Map(A)): Maybe(A)
+  Map.get<A>(Fm.Name.to_bits(name), map)

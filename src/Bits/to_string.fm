@@ -1,0 +1,6 @@
+Bits.to_string(bits: Bits): String
+  case bits {
+    e: "",
+    o : String.concat("0", Bits.to_string(bits.pred)),
+    i : String.concat("1", Bits.to_string(bits.pred))
+  }

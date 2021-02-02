@@ -1,0 +1,31 @@
+Fm.Datatype.build_term.constructor.go(
+  type: Fm.Datatype,
+  ctor: Fm.Constructor,
+  args: List(Fm.Binder),
+): Fm.Term
+  case args {
+    cons: case args.head {
+      new:
+        let eras = args.head.eras;
+        let name = args.head.name;
+        let xtyp = args.head.term;
+        let body = Fm.Datatype.build_term.constructor.go(type, ctor, args.tail);
+        Fm.Term.all(eras, "", name, xtyp, (s,x) body)
+    },
+    nil:
+      case type {
+        new: case ctor {
+          new:
+            let ret = Fm.Term.ref(Fm.Name.read("P"));
+            let ret = for var in ctor.inds:
+              Fm.Term.app(ret, case var { new: var.term });
+            let ctr = String.flatten([type.name,Fm.Name.read("."),ctor.name]);
+            let slf = Fm.Term.ref(ctr);
+            let slf = for var in type.pars:
+              Fm.Term.app(slf, Fm.Term.ref(case var { new: var.name }));
+            let slf = for var in ctor.args:
+              Fm.Term.app(slf, Fm.Term.ref(case var { new: var.name }));
+            Fm.Term.app(ret, slf)
+        }
+      }
+  }

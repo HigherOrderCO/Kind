@@ -1,0 +1,5 @@
+Nat.double(n: Nat): Nat
+  case n {
+    zero: Nat.zero,
+    succ: Nat.succ(Nat.succ(Nat.double(n.pred))),
+  }

@@ -1,0 +1,2 @@
+Fm.Term.show(term: Fm.Term): String
+  Fm.Term.show.go(term, Maybe.none<_>)

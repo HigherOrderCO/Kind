@@ -1,0 +1,5 @@
+List.reverse.go<A: Type>(xs: List(A), res: List(A)): List(A)
+  case xs {
+    nil: res,
+    cons: List.reverse.go<_>(xs.tail,List.cons<_>(xs.head,res))
+  }

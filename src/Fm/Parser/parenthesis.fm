@@ -1,0 +1,7 @@
+Fm.Parser.parenthesis: Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("(");
+    var term = Fm.Parser.term;
+    Fm.Parser.text(")");
+    return term;
+  }

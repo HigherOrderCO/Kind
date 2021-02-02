@@ -1,0 +1,12 @@
+F64.V3.polygon_to_segments(
+  pos: F64.V3,
+  dir: F64.V3,
+  pts: List(F64.V3)):
+  List(F64.Segment)
+  List.foldr<F64.V3><Maybe(F64.V3) -> Maybe(F64.V3) -> List(F64.Segment)>(
+    F64.V3.polygon_to_segments.nil(pos, dir),
+    F64.V3.polygon_to_segments.cons(pos, dir),
+    pts,
+    Maybe.none<F64.V3>,
+    Maybe.none<F64.V3>
+  )

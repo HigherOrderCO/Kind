@@ -1,0 +1,12 @@
+type Fm.Def {
+  new(
+    file: String,
+    code: String,
+    orig: Pair(Nat, Nat),
+    name: Fm.Name,
+    term: Fm.Term,
+    type: Fm.Term,
+    isct: Bool,
+    stat: Fm.Status,
+  ),
+}

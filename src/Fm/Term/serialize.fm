@@ -1,0 +1,65 @@
+Fm.Term.serialize(term: Fm.Term, depth: Nat, init: Nat, diff: Bits -> Bits, x: Bits): Bits
+  case term {
+    ref:
+      let name = Bits.concat(Fm.Term.serialize.name(term.name));
+      Bits.o(Bits.o(Bits.o(name(x)))),
+    var:
+      if Nat.gte(term.indx, init) then
+        let name = Bits.concat(Nat.to_bits(Nat.pred(Nat.sub(depth,term.indx))));
+        Bits.o(Bits.o(Bits.i(name(x))))
+      else
+        let name = Bits.concat(Nat.to_bits(term.indx));
+        Bits.o(Bits.i(Bits.o(name(x)))),
+    typ:
+      Bits.o(Bits.i(Bits.i(x))),
+    all:
+      let eras = if term.eras then Bits.i else Bits.o
+      let self = Bits.concat(Fm.Name.to_bits(term.self));
+      let xtyp = Fm.Term.serialize(term.xtyp, depth, init, diff);
+      let body = Fm.Term.serialize(
+        term.body(
+          Fm.Term.var(term.self, depth),
+          Fm.Term.var(term.name, Nat.succ(depth))),
+        Nat.succ(Nat.succ(depth)),
+        init,
+        diff);
+      Bits.i(Bits.o(Bits.o(eras(self(xtyp(body(x))))))),
+    lam:
+      let body = Fm.Term.serialize(
+        term.body(Fm.Term.var(term.name, depth)),
+        Nat.succ(depth),
+        init,
+        diff);
+      Bits.i(Bits.o(Bits.i(body(x)))),
+    app:
+      let func = Fm.Term.serialize(term.func, depth, init, diff);
+      let argm = Fm.Term.serialize(term.argm, depth, init, diff);
+      Bits.i(Bits.i(Bits.o(func(argm(x))))),
+    let:
+      let expr = Fm.Term.serialize(term.expr, depth, init, diff);
+      let body = Fm.Term.serialize(
+        term.body(Fm.Term.var(term.name, depth)),
+        Nat.succ(depth),
+        init,
+        diff);
+      Bits.i(Bits.i(Bits.i(expr(body(x))))),
+    def:
+      Fm.Term.serialize(term.body(term.expr), depth, init, diff, x),
+    ann:
+      Fm.Term.serialize(term.term, depth, init, diff, x),
+    gol:
+      let name = Bits.concat(Fm.Name.to_bits(term.name));
+      Bits.o(Bits.o(Bits.o(name(x)))),
+    hol:
+      x,
+    nat:
+      Fm.Term.serialize(Fm.Term.unroll_nat(term.natx), depth, init, diff, x),
+    chr:
+      Fm.Term.serialize(Fm.Term.unroll_chr(term.chrx), depth, init, diff, x),
+    str:
+      Fm.Term.serialize(Fm.Term.unroll_str(term.strx), depth, init, diff, x),
+    cse:
+      diff(x),
+    ori:
+      Fm.Term.serialize(term.expr, depth, init, diff, x),
+  }

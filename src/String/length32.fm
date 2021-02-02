@@ -1,0 +1,2 @@
+String.length32(xs: String): U32
+  String.length32.go(xs, U32.zero)

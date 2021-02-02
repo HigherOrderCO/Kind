@@ -1,0 +1,12 @@
+Fm.Parser.concat(init: Nat, lst0: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("++");
+    var lst1 = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("List.concat");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, lst0);
+    let term = Fm.Term.app(term, lst1);
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, term);
+  }

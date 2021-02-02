@@ -1,0 +1,16 @@
+Fm.Parser.if: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("if ");
+    var cond = Fm.Parser.term;
+    Fm.Parser.text("then");
+    var tcse = Fm.Parser.term;
+    Fm.Parser.text("else");
+    var fcse = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = cond;
+    let term = Fm.Term.app(term, Fm.Term.lam("", (x) Fm.Term.hol(Bits.e)));
+    let term = Fm.Term.app(term, tcse);
+    let term = Fm.Term.app(term, fcse);
+    return Fm.Term.ori(orig, term);
+  }

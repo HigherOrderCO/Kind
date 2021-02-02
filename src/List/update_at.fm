@@ -1,0 +1,8 @@
+List.update_at<A: Type>(index: Nat, fn: A -> A, list: List(A)): List(A)
+  case list{
+    nil : List.nil<_>
+    cons: case index{
+      zero: List.cons<_>(fn(list.head), list.tail)
+      succ: List.cons<_>(list.head, List.update_at<A>(index.pred, fn, list.tail))
+    }
+  }

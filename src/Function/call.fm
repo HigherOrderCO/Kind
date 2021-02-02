@@ -1,0 +1,2 @@
+Function.call<A: Type, B: Type>(x: A, f: A -> B): B
+  f(x)

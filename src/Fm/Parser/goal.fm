@@ -1,0 +1,18 @@
+Fm.Parser.goal: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("?");
+    var name = Fm.Parser.name;
+    var dref = Parser.many<_>(do Parser {
+      Fm.Parser.text("-");
+      var nat = Parser.nat;
+      let bits = Bits.reverse(Bits.tail(Bits.reverse(Nat.to_bits(nat))));
+      do Parser { return bits; };
+    });
+    var verb = do Parser {
+      var verb = Parser.maybe<_>(Parser.text("-"));
+      return Maybe.to_bool<_>(verb);
+    };
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, Fm.Term.gol(name, dref, verb));
+  }

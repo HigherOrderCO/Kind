@@ -1,0 +1,5 @@
+List.map<A: Type, B: Type>(f: A -> B, as: List(A)): List(B)
+  case as {
+    nil: List.nil<_>,
+    cons: List.cons<_>(f(as.head), List.map<_,_>(f,as.tail)),
+  }

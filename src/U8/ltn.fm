@@ -1,0 +1,4 @@
+U8.ltn(a: U8, b: U8): Bool
+  open a
+  open b 
+  Word.ltn<_>(a.value, b.value)

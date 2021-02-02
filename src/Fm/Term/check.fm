@@ -1,0 +1,183 @@
+Fm.Term.check(
+  term: Fm.Term,
+  type: Maybe(Fm.Term),
+  defs: Fm.Defs,
+  ctx: Fm.Context,
+  path: Fm.MPath,
+  orig: Maybe(Pair(Nat,Nat)),
+): Fm.Check(Fm.Term)
+  do Fm.Check {
+    var infr = case term {
+      ref: case Fm.get<_>(term.name, defs) as got {
+        none: Fm.Check.result<_>(type, [Fm.Error.undefined_reference(orig, term.name)]),
+        some: case got.value {
+          new:
+            let ref_name = got.value.name;
+            let ref_type = got.value.type;
+            let ref_term = got.value.term;
+            let ref_stat = got.value.stat;
+            case ref_stat {
+              init: Fm.Check.result<_>(Maybe.some<_>(ref_type), [Fm.Error.waiting(ref_name)]),
+              wait: Fm.Check.result<_>(Maybe.some<_>(ref_type), []),
+              done: Fm.Check.result<_>(Maybe.some<_>(ref_type), []),
+              fail: Fm.Check.result<_>(Maybe.some<_>(ref_type), [Fm.Error.indirect(ref_name)]),
+            },
+        }
+      },
+      var: case List.at_last<_>(term.indx, ctx) as got {
+        none: Fm.Check.result<_>(type, [Fm.Error.undefined_reference(orig, term.name)]),
+        some: do Fm.Check { return case got.value { new: got.value.snd }; },
+      },
+      typ: do Fm.Check {
+        return Fm.Term.typ;
+      },
+      all: do Fm.Check {
+        let ctx_size = List.length<_>(ctx);
+        let self_var = Fm.Term.var(term.self, ctx_size);
+        let body_var = Fm.Term.var(term.name, Nat.succ(ctx_size));
+        let body_ctx = List.cons<_>({term.name,term.xtyp}, List.cons<_>({term.self,term}, ctx));
+        Fm.Term.check(term.xtyp, Maybe.some<_>(Fm.Term.typ), defs, ctx, Fm.MPath.o(path), orig);
+        Fm.Term.check(term.body(self_var,body_var), Maybe.some<_>(Fm.Term.typ), defs, body_ctx, Fm.MPath.i(path), orig);
+        return Fm.Term.typ;
+      },
+      lam: case type {
+        none: do Fm.Check {
+          //let lam_arit = Fm.Term.arity(term);
+          //let lam_type = Nat.for<_>(Fm.Term.hol(Bits.e),0,lam_arit,(i,t) 
+            //Fm.Term.all(Bool.false, "", "", Fm.Term.hol(Bits.e), (s,x) t));
+          let lam_type = Fm.Term.hol(Bits.e);
+          let lam_term = Fm.Term.ann(Bool.false, term, lam_type);
+          Fm.Check.result<_>(type, [Fm.Error.patch(Fm.MPath.to_bits(path),lam_term)]);
+          //Fm.Check.result<_>(type, [Fm.Error.cant_infer(orig, term, ctx)]);
+        },
+        some: do Fm.Check {
+          let typv = Fm.Term.reduce(type.value, defs);
+          case typv {
+            all: do Fm.Check {
+              let ctx_size = List.length<_>(ctx);
+              let self_var = term;
+              let body_var = Fm.Term.var(term.name, ctx_size);
+              let body_typ = typv.body(self_var, body_var);
+              let body_ctx = List.cons<_>({term.name,typv.xtyp}, ctx);
+              Fm.Term.check(term.body(body_var), Maybe.some<_>(body_typ), defs, body_ctx, Fm.MPath.o(path), orig);
+              return type.value;
+            },
+            //hol: do Fm.Check {
+              //let lam_type = Fm.Term.all(Bool.false, "", "", Fm.Term.hol(Bits.e), (s,x) Fm.Term.hol(Bits.e));
+              //let lam_term = Fm.Term.ann(Bool.false, term, lam_type);
+              //Fm.Check.result<_>(type, [Fm.Error.patch(Fm.MPath.to_bits(path),lam_term)]);
+            //},
+            _: do Fm.Check {
+              let expected = Either.left<_,_>("(function type)");
+              let detected = Either.right<_,_>(type.value);
+              Fm.Check.result<_>(type, [Fm.Error.type_mismatch(orig, expected, detected, ctx)]);
+            }
+          };
+        }
+      },
+      app: do Fm.Check {
+        var func_typ = Fm.Term.check(term.func, Maybe.none<_>, defs, ctx, Fm.MPath.o(path), orig);
+        let func_typ = Fm.Term.reduce(func_typ, defs);
+        case func_typ {
+          all: do Fm.Check {
+            Fm.Term.check(term.argm, Maybe.some<_>(func_typ.xtyp), defs, ctx, Fm.MPath.i(path), orig);
+            return func_typ.body(term.func, term.argm);
+          },
+          _: do Fm.Check {
+            let expected = Either.left<_,_>("(function type)");
+            let detected = Either.right<_,_>(func_typ);
+            Fm.Check.result<_>(type, [Fm.Error.type_mismatch(orig, expected, detected, ctx)]);
+          },
+        };
+      },
+      ann:
+        if term.done then do Fm.Check {
+          return term.type;
+        } else do Fm.Check {
+          Fm.Term.check(term.term, Maybe.some<_>(term.type), defs, ctx, Fm.MPath.o(path), orig);
+          Fm.Term.check(term.type, Maybe.some<_>(Fm.Term.typ), defs, ctx, Fm.MPath.i(path), orig);
+          return term.type;
+        },
+      let: do Fm.Check {
+        let ctx_size = List.length<_>(ctx);
+        var expr_typ = Fm.Term.check(term.expr, Maybe.none<_>, defs, ctx, Fm.MPath.o(path), orig);
+        let body_val = term.body(Fm.Term.var(term.name, ctx_size));
+        let body_ctx = List.cons<_>({term.name, expr_typ}, ctx);
+        var body_typ = Fm.Term.check(body_val, type, defs, body_ctx, Fm.MPath.i(path), orig);
+        return body_typ;
+      },
+      def: do Fm.Check {
+        let ctx_size = List.length<_>(ctx);
+        var expr_typ = Fm.Term.check(term.expr, Maybe.none<_>, defs, ctx, Fm.MPath.o(path), orig);
+        let body_val = term.body(Fm.Term.ann(Bool.true, term.expr, expr_typ));
+        let body_ctx = List.cons<_>({term.name, expr_typ}, ctx);
+        var body_typ = Fm.Term.check(body_val, type, defs, body_ctx, Fm.MPath.i(path), orig);
+        return body_typ;
+        //Fm.Term.check(term.body(term.expr), type, defs, ctx, path, orig);
+      },
+      nat: do Fm.Check {
+        return Fm.Term.ref("Nat");
+      },
+      chr: do Fm.Check {
+        return Fm.Term.ref("Char");
+      },
+      str: do Fm.Check {
+        return Fm.Term.ref("String");
+      },
+      cse: do Fm.Check {
+        let expr = term.expr;
+        var etyp = Fm.Term.check(expr, Maybe.none<_>, defs, ctx, Fm.MPath.o(path), orig);
+        // If cse has no moti and we have an inferred type, then we guess it
+        // with the information we have, substituting selfs and indices.
+        // Otherwise, we just replace it by a normal hole.
+        let dsug = case term.moti {
+          none:
+            let moti = case type {
+              none:
+                Fm.Term.hol(Bits.e),
+              some:
+                let size = List.length<_>(ctx);
+                let typv = Fm.Term.normalize(type.value, Map.new<_>);
+                let moti = Fm.SmartMotive.make(term.name, term.expr, etyp, typv, size, defs);
+                moti,
+            };
+            Maybe.some<_>(Fm.Term.cse(term.path, term.expr, term.name, term.with, term.cses, Maybe.some<_>(moti))),
+          some:
+            Fm.Term.desugar_cse(term.expr, term.name, term.with, term.cses, term.moti.value, etyp, defs, ctx),
+        };
+        case dsug {
+          none: Fm.Check.result<_>(type, [Fm.Error.cant_infer(orig, term, ctx)]),
+          some: Fm.Check.result<_>(type, [Fm.Error.patch(Fm.MPath.to_bits(path),dsug.value)]),
+        };
+      },
+      gol: do Fm.Check {
+        Fm.Check.result<_>(type, [
+          Fm.Error.show_goal(term.name, term.dref, term.verb, type, ctx)
+        ]);
+      },
+      hol: do Fm.Check {
+        Fm.Check.result<_>(type, []);
+      },
+      ori: do Fm.Check {
+        Fm.Term.check(term.expr, type, defs, ctx, path, Maybe.some<_>(term.orig));
+      },
+    };
+    case type {
+      none:
+        Fm.Check.result<_>(Maybe.some<_>(infr), []),
+      some: do Fm.Check {
+        var eqls = Fm.Term.equal(type.value, infr, defs, List.length<_>(ctx), Set.new);
+        if eqls then do Fm.Check {
+          return type.value;
+        } else do Fm.Check {
+          Fm.Check.result<_>(type, [
+            Fm.Error.type_mismatch(
+              orig,
+              Either.right<_,_>(type.value),
+              Either.right<_,_>(infr),
+              ctx)
+          ]);
+        }
+      }
+    };
+  }

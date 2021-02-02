@@ -1,0 +1,2 @@
+U64.zero: U64
+  U64.new(Word.zero(64))

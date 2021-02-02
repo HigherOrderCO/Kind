@@ -1,0 +1,2 @@
+String.show(xs: String): String
+  String.flatten(["\"",xs,"\""])

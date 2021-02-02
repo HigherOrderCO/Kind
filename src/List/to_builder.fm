@@ -1,0 +1,2 @@
+List.to_builder<A: Type>(list: List(A)) : List.Builder(A)
+  List.to_builder.go<_>(list, List.Builder.new<_>)

@@ -1,0 +1,7 @@
+Fm.Term.unroll_chr(chrx: Char): Fm.Term
+  let bits = U16.to_bits(chrx);
+  let term = Fm.Term.ref(Fm.Name.read("Word.from_bits"));
+  let term = Fm.Term.app(term, Fm.Term.nat(16));
+  let term = Fm.Term.app(term, Fm.Term.unroll_chr.bits(bits));
+  let term = Fm.Term.app(Fm.Term.ref(Fm.Name.read("U16.new")), term);
+  term

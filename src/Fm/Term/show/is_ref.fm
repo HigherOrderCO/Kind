@@ -1,0 +1,5 @@
+Fm.Term.show.is_ref(term: Fm.Term, name: Fm.Name): Bool
+  case term {
+    ref: String.eql(name, term.name),
+    _: Bool.false,
+  }

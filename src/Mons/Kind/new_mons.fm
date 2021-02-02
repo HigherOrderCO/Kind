@@ -1,0 +1,4 @@
+Mons.Kind.new_mons(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): List(Mons.Object)
+  [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false, type, agi)),
+    // Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH)
+    ]

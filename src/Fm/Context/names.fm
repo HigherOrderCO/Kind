@@ -1,0 +1,2 @@
+Fm.Context.names(ctx: Fm.Context): List(Fm.Name)
+  List.mapped<_>(ctx)<_>((x) Pair.fst<_,_>(x))

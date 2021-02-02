@@ -1,0 +1,3 @@
+Int.div_nat(a: Int, n: Nat): Int
+  open a
+  Int.new(Nat.div(a.x, n), Nat.div(a.y, n))

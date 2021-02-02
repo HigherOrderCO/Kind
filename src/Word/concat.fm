@@ -1,0 +1,9 @@
+Word.concat<a_size: Nat, b_size: Nat>(a: Word(a_size), b: Word(b_size))
+  : Word(Nat.add(a_size, b_size))
+  case a {
+    e: b
+    o: let rest = Word.concat<a.size, b_size>(a.pred, b)
+      Word.o<Nat.add(a.size, b_size)>(rest)
+    i: let rest = Word.concat<a.size, b_size>(a.pred, b)
+      Word.i<Nat.add(a.size, b_size)>(rest)
+  }: Word(Nat.add(a.size, b_size))

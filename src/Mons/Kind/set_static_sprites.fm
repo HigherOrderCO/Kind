@@ -1,0 +1,2 @@
+Mons.Kind.set_static_sprites(spr: List(Image3D)): U32 -> U32 -> U32 -> Mons.Dir -> List(Image3D)
+  (x,y,obj_ani,obj_dir) spr

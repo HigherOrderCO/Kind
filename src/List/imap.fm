@@ -1,0 +1,5 @@
+List.imap<A: Type,B: Type>(f: Nat -> A -> B, xs: List(A)): List(B)
+  case xs {
+    nil : List.nil<_>,
+    cons: List.cons<_>(f(0,xs.head),List.imap<_,_>((n) f(Nat.succ(n)),xs.tail))
+  }

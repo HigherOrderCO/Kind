@@ -1,0 +1,5 @@
+Char.parse(str: String): Char.parse.type(str)
+  case str {
+    nil : Unit.new,
+    cons: str.head
+  } : Char.parse.type(str)

@@ -1,0 +1,18 @@
+Map.mut<A: Type>(bits: Bits, ini: A, fun: A -> A, map: Map(A)): Map(A)
+  case bits {
+    e: case map {
+      new: Map.tie<_>(Maybe.some<_>(ini), Map.new<_>, Map.new<_>),
+      tie: Map.tie<_>(case map.val {
+        none: Maybe.none<_>,
+        some: Maybe.some<_>(fun(map.val.value)),
+      }, map.lft, map.rgt),
+    },
+    o: case map {
+      new: Map.tie<_>(Maybe.none<_>, Map.mut<_>(bits.pred, ini, fun, Map.new<_>), Map.new<_>),
+      tie: Map.tie<_>(map.val, Map.mut<_>(bits.pred, ini, fun, map.lft), map.rgt),
+    },
+    i: case map {
+      new: Map.tie<_>(Maybe.none<_>, Map.new<_>, Map.mut<_>(bits.pred, ini, fun, Map.new<_>)),
+      tie: Map.tie<_>(map.val, map.lft, Map.mut<_>(bits.pred, ini, fun, map.rgt)),
+    }
+  }

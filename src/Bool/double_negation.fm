@@ -1,0 +1,5 @@
+Bool.double_negation(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
+  case b {
+    true: Equal.refl<_, Bool.true>,
+    false: Equal.refl<_, Bool.false>,
+  } : Equal(Bool, Bool.not(Bool.not(b)), b)

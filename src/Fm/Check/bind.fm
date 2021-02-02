@@ -1,0 +1,9 @@
+Fm.Check.bind<A: Type, B: Type>(a: Fm.Check(A), f: A -> Fm.Check(B)): Fm.Check(B)
+  case a {
+    result: case a.value as got {
+      none: Fm.Check.result<B>(Maybe.none<B>, a.errors),
+      some: case f(got.value) as b {
+        result: Fm.Check.result<B>(b.value, List.concat<_>(a.errors,b.errors)),
+      }
+    }
+  }

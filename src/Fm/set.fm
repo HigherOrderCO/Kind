@@ -1,0 +1,2 @@
+Fm.set<A: Type>(name: Fm.Name, val: A, map: Map(A)): Map(A)
+  Map.set<A>(Fm.Name.to_bits(name), val, map)

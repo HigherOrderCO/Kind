@@ -1,0 +1,2 @@
+Fm.Term.serialize.name(name: String): Bits
+  Fm.Name.to_bits(name)

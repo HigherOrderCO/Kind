@@ -1,0 +1,3 @@
+Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
+  open obj 
+  obj.pad

@@ -1,0 +1,28 @@
+Fm.Term.desugar_cse.cases(
+  expr: Fm.Term,
+  name: Fm.Name,
+  wyth: List(Fm.Def),
+  cses: Map(Fm.Term),
+  type: Fm.Term,
+  defs: Fm.Defs,
+  ctxt: Fm.Context,
+): Fm.Term
+  case Fm.Term.reduce(type, defs) as type {
+    all: 
+      let got = Maybe.or<_>(Fm.get<_>(type.name, cses), Fm.get<_>("_", cses));
+      case got {
+        some:
+          let argm = Fm.Term.desugar_cse.argument(name, wyth, type.xtyp, got.value, defs);
+          let expr = Fm.Term.app(expr, argm);
+          let type = type.body(Fm.Term.var(type.self,0), Fm.Term.var(type.name,0));
+          Fm.Term.desugar_cse.cases(expr, name, wyth, cses, type, defs, ctxt),
+        none: 
+          for defn in wyth with expr:
+            case defn {
+              new: Fm.Term.app(expr, defn.term)
+            },
+      },
+    _:
+      for defn in wyth with expr:
+        Fm.Term.app(expr, case defn { new: defn.term }),
+  }

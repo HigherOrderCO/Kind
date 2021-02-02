@@ -1,0 +1,27 @@
+Fm.Parser.open: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("open ");
+    Fm.Parser.spaces;
+    var expr = Fm.Parser.term;
+    var name = Parser.maybe<_>(do Parser {
+      Fm.Parser.text("as");
+      Fm.Parser.name1;
+    });
+    Parser.maybe<_>(Fm.Parser.text(";"));
+    let name = case name {
+      none: case Fm.Term.reduce(expr, Map.new<_>) as expr {
+        ref: expr.name,
+        var: expr.name,
+        _: Fm.Name.read("self"),
+      },
+      some: name.value,
+    };
+    let wyth = [];
+    var rest = Fm.Parser.term;
+    let cses = Fm.set<_>("_", rest, Map.new<_>);
+    //Map.from_list<_>(Fm.Name.to_bits, [{"_",rest}]);
+    let moti = Maybe.some<_>(Fm.Term.hol(Bits.e));
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, Fm.Term.cse(Bits.e, expr, name, wyth, cses, moti));
+  }

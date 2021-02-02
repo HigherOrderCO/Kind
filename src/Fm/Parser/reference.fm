@@ -1,0 +1,40 @@
+Fm.Parser.reference: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    var name = Fm.Parser.name1;
+    if String.eql(name, "case") then do Parser {
+      Parser.fail<_>("Reserved keyword.");
+    } else if String.eql(name, "do") then do Parser {
+      Parser.fail<_>("Reserved keyword.");
+    } else if String.eql(name, "if") then do Parser {
+      Parser.fail<_>("Reserved keyword.");
+    } else if String.eql(name, "with") then do Parser {
+      Parser.fail<_>("Reserved keyword.");
+    //} else if String.eql(name, "then") then do Parser {
+      //Parser.fail<_>("Reserved keyword.");
+    //} else if String.eql(name, "else") then do Parser {
+      //Parser.fail<_>("Reserved keyword.");
+    } else if String.eql(name, "let") then do Parser {
+      Parser.fail<_>("Reserved keyword.");
+    } else if String.eql(name, "def") then do Parser {
+      Parser.fail<_>("Reserved keyword.");
+    } else if String.eql(name, "true") then do Parser {
+      return Fm.Term.ref("Bool.true");
+    } else if String.eql(name, "false") then do Parser {
+      return Fm.Term.ref("Bool.false");
+    } else if String.eql(name, "unit") then do Parser {
+      return Fm.Term.ref("Unit.new");
+    } else if String.eql(name, "none") then do Parser {
+      let term = Fm.Term.ref("Maybe.none");
+      let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+      return term;
+    } else if String.eql(name, "refl") then do Parser {
+      let term = Fm.Term.ref("Equal.refl");
+      let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+      let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+      return term;
+    } else do Parser {
+      var orig = Fm.Parser.stop(init);
+      return Fm.Term.ori(orig, Fm.Term.ref(name));
+    };
+  }

@@ -1,0 +1,5 @@
+Nat.for<S: Type>(state: S, from: Nat, til: Nat, func: Nat -> S -> S): S
+  if Nat.eql(from, til) then
+    state
+  else
+    Nat.for<S>(func(from, state), Nat.succ(from), til, func)

@@ -1,0 +1,15 @@
+F64.V3.rotate(a: F64, v: F64.V3, p: F64.V3): F64.V3
+  open v
+  open p
+  let rad = F64.mul(a, F64.div(F64.pi, F64.180))
+  let sin = F64.sin(rad)
+  let cos = F64.cos(rad)
+  let x_diff = F64.sub(v.x, p.x)
+  let y_diff = F64.sub(v.y, p.y)
+  let x_diff_times_cos = F64.mul(x_diff, cos)
+  let x_diff_times_sin = F64.mul(x_diff, sin)
+  let y_diff_times_cos = F64.mul(y_diff, cos)
+  let y_diff_times_sin = F64.mul(y_diff, sin)
+  let new_x = F64.sub(F64.add(p.x, x_diff_times_cos), y_diff_times_sin)
+  let new_y = F64.add(F64.add(p.y, x_diff_times_sin), y_diff_times_cos)
+  F64.V3.new(new_x, new_y, v.z)

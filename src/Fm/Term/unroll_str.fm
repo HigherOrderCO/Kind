@@ -1,0 +1,11 @@
+Fm.Term.unroll_str(strx: String): Fm.Term
+  case strx {
+    nil:
+      Fm.Term.ref(Fm.Name.read("String.nil")),
+    cons:
+      let char = Fm.Term.chr(strx.head);
+      let term = Fm.Term.ref(Fm.Name.read("String.cons"));
+      let term = Fm.Term.app(term, char);
+      let term = Fm.Term.app(term, Fm.Term.str(strx.tail));
+      term,
+  }

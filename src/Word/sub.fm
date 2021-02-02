@@ -1,0 +1,2 @@
+Word.sub<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.subber<size>(a, b, Bool.false)

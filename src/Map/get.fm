@@ -1,0 +1,15 @@
+Map.get<A: Type>(bits: Bits, map: Map(A)): Maybe(A)
+  case bits {
+    e: case map {
+      new: Maybe.none<_>,
+      tie: map.val,
+    }, 
+    o: case map {
+      new: Maybe.none<_>,
+      tie: Map.get<_>(bits.pred, map.lft),
+    },
+    i: case map {
+      new: Maybe.none<_>,
+      tie: Map.get<_>(bits.pred, map.rgt),
+    }
+  }

@@ -1,0 +1,9 @@
+Bits.slice(len: Nat, bits: Bits): Bits
+  case len {
+    zero: Bits.e,
+    succ: case bits {
+      e: Bits.e,
+      o : Bits.o(Bits.slice(len.pred, bits.pred)),
+      i : Bits.i(Bits.slice(len.pred, bits.pred))
+    }
+  }

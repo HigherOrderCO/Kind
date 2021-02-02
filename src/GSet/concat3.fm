@@ -1,0 +1,43 @@
+GSet.concat3<A: Type>(
+  cmp  : A -> A -> Cmp,
+  val  : A,
+  left : GSet(A), 
+  right: GSet(A)
+) : GSet(A)
+  case left {
+    tip: case right {
+      // trivial case, both trees are empty
+      tip: GSet.singleton<_>(val),
+      // if the left is empty, we just insert it 
+      // in the right tree
+      bin: GSet.insert<_>(cmp, val, right)
+    },
+    bin: case right {
+      // if the right is empty, we just insert it 
+      // in the left tree
+      tip: GSet.insert<_>(cmp, val, left),
+      // if none of the trees are empty, we need to check if 
+      // we can make a balanced tree by using `val` as a new node
+      // if not, we need to find the largest subtree on the side 
+      // "facing" the smaller tree that is small enough to balance 
+      // with the smaller tree 
+      bin:  
+        let right_is_too_heavy = Nat.ltn(Nat.mul(GSet.w, left.size),  right.size)
+        let left_is_too_heavy  = Nat.ltn(Nat.mul(GSet.w, right.size), left.size)
+  
+        if right_is_too_heavy then 
+          let new_val   = right.val 
+          let new_left  = GSet.concat3<_>(cmp, val, left, right.left)
+          let new_right = right.right 
+          GSet.balance<_>(new_val, new_left, new_right)
+  
+        else if left_is_too_heavy then 
+          let new_val   = left.val 
+          let new_left  = left.left 
+          let new_right = GSet.concat3<_>(cmp, val, left.right, right)
+          GSet.balance<_>(new_val, new_left, new_right)
+  
+        else 
+          GSet.node<_>(val, left, right)  
+    } 
+  }

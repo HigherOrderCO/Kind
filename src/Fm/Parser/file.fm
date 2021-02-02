@@ -1,0 +1,14 @@
+Fm.Parser.file(file: String, code: String, defs: Fm.Defs): Parser(Fm.Defs)
+  do Parser {
+    var stop = Parser.is_eof;
+    if stop then do Parser {
+      return defs;
+    } else do Parser {
+      var defs = Parser.first_of<_>([
+        Fm.Parser.file.def(file, code, defs),
+        Fm.Parser.file.adt(file, code, defs),
+        Fm.Parser.file.end(file, code, defs),
+      ]);
+      Fm.Parser.file(file, code, defs);
+    }
+  }

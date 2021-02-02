@@ -1,0 +1,8 @@
+List.init<A: Type>(list: List(A)): List(A)
+  case list {
+    cons: case list.tail {
+      cons: List.cons<_>(list.head, List.init<A>(list.tail)),
+      nil: List.nil<_>,
+    },
+    nil: List.nil<_>,
+  }

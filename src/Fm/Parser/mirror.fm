@@ -1,0 +1,14 @@
+Fm.Parser.mirror: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("mirror(");
+    var equa = Fm.Parser.term;
+    Fm.Parser.text(")");
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("Equal.mirror");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, equa);
+    return Fm.Term.ori(orig, term);
+  }

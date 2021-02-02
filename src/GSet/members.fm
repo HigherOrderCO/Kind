@@ -1,0 +1,2 @@
+GSet.members<A: Type>(set: GSet(A)): List(A)
+  GSet.foldr<_,_>(List.cons<_>, List.nil<_>, set)

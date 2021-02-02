@@ -1,0 +1,2 @@
+String.slice(i: Nat, j: Nat, xs: String): String
+  String.take(Nat.sub(j, i), String.drop(i, xs))

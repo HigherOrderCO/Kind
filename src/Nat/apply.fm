@@ -1,0 +1,5 @@
+Nat.apply<A: Type>(n: Nat, f: (x:A) A, x: A): A
+  case n {
+    zero: x,
+    succ: Nat.apply<A>(n.pred, f, f(x)),
+  }
