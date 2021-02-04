@@ -1,13 +1,13 @@
-Fm.Synth.many(names: List(String), defs: Fm.Defs, log: Bool): IO(Fm.Defs)
+Fm.Synth.many(names: List(String), defs: Fm.Defs): IO(Fm.Defs)
   case names {
     nil: do IO {
       return defs;
     },
     cons: do IO {
-      var new_defs = Fm.Synth.one(names.head, defs, log);
+      var new_defs = Fm.Synth.one(names.head, defs);
       case new_defs {
-        none: Fm.Synth.many(names.tail, defs, log),
-        some: Fm.Synth.many(names.tail, new_defs.value, log),
+        none: Fm.Synth.many(names.tail, defs),
+        some: Fm.Synth.many(names.tail, new_defs.value),
       }
     },
   }

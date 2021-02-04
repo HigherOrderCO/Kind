@@ -1,6 +1,6 @@
 Fm.to_core.io.one(name: String): IO(String)
   do IO {
-    var new_defs = Fm.Synth.one(name, Map.new!, false);
+    var new_defs = Fm.Synth.one(name, Map.new!);
     let defs = case new_defs {
       none: Map.new!,
       some: new_defs.value,

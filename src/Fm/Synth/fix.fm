@@ -9,7 +9,6 @@ Fm.Synth.fix(
   defs: Fm.Defs,
   errs: List(Fm.Error),
   fixd: Bool,
-  log: Bool,
 ): IO(Maybe(Fm.Defs))
   case errs {
     nil:
@@ -23,17 +22,17 @@ Fm.Synth.fix(
       },
     cons: case errs.head {
       waiting: do IO {
-        var new_defs = Fm.Synth.one(errs.head.name, defs, log);
+        var new_defs = Fm.Synth.one(errs.head.name, defs);
         case new_defs {
-          none: Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, fixd, log),
-          some: Fm.Synth.fix(file, code, orig, name, term, type, isct, new_defs.value, errs.tail, Bool.true, log),
+          none: Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, fixd),
+          some: Fm.Synth.fix(file, code, orig, name, term, type, isct, new_defs.value, errs.tail, Bool.true),
         }
       },
       undefined_reference: do IO {
-        var new_defs = Fm.Synth.one(errs.head.name, defs, log);
+        var new_defs = Fm.Synth.one(errs.head.name, defs);
         case new_defs {
-          none: Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, fixd, log),
-          some: Fm.Synth.fix(file, code, orig, name, term, type, isct, new_defs.value, errs.tail, Bool.true, log),
+          none: Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, fixd),
+          some: Fm.Synth.fix(file, code, orig, name, term, type, isct, new_defs.value, errs.tail, Bool.true),
         }
       },
       patch: case errs.head.path {
@@ -42,14 +41,14 @@ Fm.Synth.fix(
         },
         o: do IO { // hole is on term
           let term = Fm.Term.patch_at(errs.head.path.pred, term, (x) errs.head.term);
-          Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, Bool.true, log);
+          Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, Bool.true);
         },
         i: do IO { // hole is on type
           let type = Fm.Term.patch_at(errs.head.path.pred, type, (x) errs.head.term);
-          Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, Bool.true, log);
+          Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, Bool.true);
         },
       },
       // The error isn't fixable
-      _: Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, fixd, log),
+      _: Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, fixd),
     }
   }
