@@ -3,8 +3,8 @@ Map.values.go<A: Type>(xs: Map(A), list: List(A)): List(A)
     new:
       list,
     tie: 
-      let list0 = case xs.val { none: list, some: List.cons<_>(xs.val.value, list) };
-      let list1 = Map.values.go<_>(xs.lft, list0);
-      let list2 = Map.values.go<_>(xs.rgt, list1);
+      let list0 = case xs.val { none: list, some: List.cons!(xs.val.value, list) };
+      let list1 = Map.values.go!(xs.lft, list0);
+      let list2 = Map.values.go!(xs.rgt, list1);
       list2
   }

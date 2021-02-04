@@ -2,8 +2,8 @@ GSet.member<A: Type>(cmp: A -> A -> Cmp, a: A, set: GSet(A)): Bool
   case set {
     tip: Bool.false,
     bin: case cmp(a, set.val) {
-      ltn: GSet.member<_>(cmp, a, set.left),
+      ltn: GSet.member!(cmp, a, set.left),
       eql: Bool.true,
-      gtn: GSet.member<_>(cmp, a, set.right)
+      gtn: GSet.member!(cmp, a, set.right)
     } 
   }

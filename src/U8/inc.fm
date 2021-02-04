@@ -1,3 +1,3 @@
 U8.inc(a: U8): U8
   open a 
-  U8.new(Word.inc<_>(a.value))
+  U8.new(Word.inc!(a.value))

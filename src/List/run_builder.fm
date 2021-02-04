@@ -1,2 +1,2 @@
 List.run_builder<A: Type>(lb: List.Builder(A)): List(A)
-  lb(List.nil<_>)
+  lb(List.nil!)

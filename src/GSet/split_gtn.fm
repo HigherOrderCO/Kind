@@ -3,9 +3,9 @@ GSet.split_gtn<A: Type>(cmp: A -> A -> Cmp, cut: A, set: GSet(A)): GSet(A)
     tip: set,
     bin: case cmp(cut, set.val) {
       ltn:  
-        let left  = GSet.split_gtn<_>(cmp, cut, set.left)
-        GSet.concat3<_>(cmp, set.val, left, set.right),
+        let left  = GSet.split_gtn!(cmp, cut, set.left)
+        GSet.concat3!(cmp, set.val, left, set.right),
       eql: set.right,
-      gtn: GSet.split_gtn<_>(cmp, cut, set.right)
+      gtn: GSet.split_gtn!(cmp, cut, set.right)
     }
   }

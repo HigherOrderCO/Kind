@@ -1,2 +1,2 @@
 List.and(list: List(Bool)): Bool
-  List.all<_>((x) x, list)
+  List.all!((x) x, list)

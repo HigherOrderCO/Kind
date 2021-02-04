@@ -1,4 +1,4 @@
 U8.lte(a: U8, b: U8): Bool
   open a
   open b 
-  Word.lte<_>(a.value, b.value)
+  Word.lte!(a.value, b.value)

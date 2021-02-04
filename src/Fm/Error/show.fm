@@ -3,11 +3,11 @@ Fm.Error.show(error: Fm.Error, defs: Fm.Defs): String
     type_mismatch: 
       let expected = case error.expected {
         left: error.expected.value,
-        right: Fm.Term.show(Fm.Term.normalize(error.expected.value, Map.new<_>)),
+        right: Fm.Term.show(Fm.Term.normalize(error.expected.value, Map.new!)),
       };
       let detected = case error.detected {
         left: error.detected.value,
-        right: Fm.Term.show(Fm.Term.normalize(error.detected.value, Map.new<_>)),
+        right: Fm.Term.show(Fm.Term.normalize(error.detected.value, Map.new!)),
       };
       String.flatten([
         "Type mismatch.\n",

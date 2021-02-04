@@ -5,4 +5,4 @@ Map.merge<A: Type,B: Type,C: Type>(
   a: Map(A),
   b: Map(B)
 ) : Map(C)
-  Map.merge.go<_,_,_>(a_not_b,b_not_a,a_and_b,Bits.e,a,b)
+  Map.merge.go!!!(a_not_b,b_not_a,a_and_b,Bits.e,a,b)

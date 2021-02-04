@@ -1,4 +1,4 @@
 U64.add(a: U64, b: U64): U64
   open a
   open b
-  U64.new(Word.add<_>(a.value, b.value))
+  U64.new(Word.add!(a.value, b.value))

@@ -1,5 +1,5 @@
 Fm.Term.read(code: String): Maybe(Fm.Term)
   case Fm.Parser.term(0,code) as parsed {
-    error: Maybe.none<_>,
-    value: Maybe.some<_>(parsed.val),
+    error: Maybe.none!,
+    value: Maybe.some!(parsed.val),
   }

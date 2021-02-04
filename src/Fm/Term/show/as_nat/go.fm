@@ -6,13 +6,13 @@ Fm.Term.show.as_nat.go(term: Fm.Term): Maybe(Nat)
           var pred = Fm.Term.show.as_nat.go(term.argm);
           return Nat.succ(pred);
         } else
-          Maybe.none<_>,
-      _: Maybe.none<_>,
+          Maybe.none!,
+      _: Maybe.none!,
     },
     ref:
       if String.eql(term.name, "Nat.zero") then
-        Maybe.some<_>(0)
+        Maybe.some!(0)
       else
-        Maybe.none<_>,
-    _: Maybe.none<_>,
+        Maybe.none!,
+    _: Maybe.none!,
   }

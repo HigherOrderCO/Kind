@@ -1,2 +1,2 @@
 List.or(list: List(Bool)): Bool
-  List.any<_>((x) x)(list)
+  List.any!((x) x)(list)

@@ -3,8 +3,8 @@ Map.keys.go<A: Type>(xs: Map(A), key: Bits, list: List(Bits)): List(Bits)
     new:
       list,
     tie: 
-      let list0 = case xs.val { none: list, some: List.cons<_>(Bits.reverse(key), list) };
-      let list1 = Map.keys.go<_>(xs.lft, Bits.o(key), list0);
-      let list2 = Map.keys.go<_>(xs.rgt, Bits.i(key), list1);
+      let list0 = case xs.val { none: list, some: List.cons!(Bits.reverse(key), list) };
+      let list1 = Map.keys.go!(xs.lft, Bits.o(key), list0);
+      let list2 = Map.keys.go!(xs.rgt, Bits.i(key), list1);
       list2
   }

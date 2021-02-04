@@ -1,6 +1,6 @@
 Fm.Parser.suffix(init: Nat, term: Fm.Term): Parser(Fm.Term)
   (idx, code)
-  let suffix_parser = Parser.first_of<_>([
+  let suffix_parser = Parser.first_of!([
     Fm.Parser.application(init, term),
     Fm.Parser.application.erased(init, term),
     Fm.Parser.arrow(init, term),
@@ -21,6 +21,6 @@ Fm.Parser.suffix(init: Nat, term: Fm.Term): Parser(Fm.Term)
     Fm.Parser.application.hole(init, term),
   ]);
   case suffix_parser(idx, code) as suffix_parsed {
-    error: Parser.Reply.value<_>(idx, code, term),
+    error: Parser.Reply.value!(idx, code, term),
     value: Fm.Parser.suffix(init, suffix_parsed.val, suffix_parsed.idx, suffix_parsed.code),
   }

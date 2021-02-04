@@ -8,7 +8,7 @@ Fm.highlight.tc(
   lin: String,
   res: List(String),
 ): String
-  //use skip = Debug.log<_>(String.flatten([
+  //use skip = Debug.log!(String.flatten([
     //"ix0=", Nat.show(ix0), " ",
     //"ix1=", Nat.show(ix1), " ",
     //"col=", Nat.show(col), " ",
@@ -16,23 +16,23 @@ Fm.highlight.tc(
     //"lft=", case lft { none: "-", some: Nat.show(lft.value) }, " ",
     //"len=", Nat.show(String.length(code)), " ",
     //"chr=", Fm.escape.char(case code { nil: '_', cons: code.head }), " ",
-    //"res={", String.join("|", List.reverse<_>(res)), "}",
+    //"res={", String.join("|", List.reverse!(res)), "}",
   //]))
   let spa = 3; // how many lines around error to show
   case code {
     nil:
-      Fm.highlight.end(col, row, List.reverse<_>(res)),
+      Fm.highlight.end(col, row, List.reverse!(res)),
     cons:
       if U16.eql(code.head, '\n') then
-        let stp = Maybe.extract<_>(lft)<_>(Bool.false, Nat.is_zero);
+        let stp = Maybe.extract!(lft)!(Bool.false, Nat.is_zero);
         if stp then
-          Fm.highlight.end(col, row, List.reverse<_>(res))
+          Fm.highlight.end(col, row, List.reverse!(res))
         else
           let siz = Nat.succ(Nat.double(spa));
           let lft = case ix1 {
             zero: case lft {
-              none: Maybe.some<_>(spa),
-              some: Maybe.some<_>(Nat.pred(lft.value)),
+              none: Maybe.some!(spa),
+              some: Maybe.some!(Nat.pred(lft.value)),
             },
             succ: lft,
           };
@@ -40,7 +40,7 @@ Fm.highlight.tc(
           let ix1 = Nat.pred(ix1);
           let col = 0;
           let row = Nat.succ(row);
-          let res = List.cons<_>(String.reverse(lin), res);
+          let res = List.cons!(String.reverse(lin), res);
           let lin = String.reverse(String.flatten([String.pad_left(4, ' ', Nat.show(row)), " | "]));
           Fm.highlight.tc(code.tail, ix0, ix1, col, row, lft, lin, res)
       else

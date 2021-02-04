@@ -1,20 +1,20 @@
 GSet.insert<A: Type>(cmp: A -> A -> Cmp, a: A, set: GSet(A)): GSet(A)
   case set {
-    tip: GSet.singleton<_>(a),
+    tip: GSet.singleton!(a),
     bin: case cmp(a, set.val) {
       // if a < set.val, the new value should go into the left subtree 
       ltn: 
-        let new_left = GSet.insert<_>(cmp, a, set.left)
-        GSet.balance<_>(set.val, new_left, set.right),
+        let new_left = GSet.insert!(cmp, a, set.left)
+        GSet.balance!(set.val, new_left, set.right),
       // `a` is already in the set, so how do we proceed?
       // if we decide to simply return the set unchanged, we are
       // ignoring the case where other fields of `a`, which are not 
       // used in the comparison function, might have changed
       // this comes at some extra cost, of course
-      eql: GSet.node<_>(a, set.left, set.right),
+      eql: GSet.node!(a, set.left, set.right),
       // if a > set.val, the new value should go into the right subtree 
       gtn:  
-        let new_right = GSet.insert<_>(cmp, a, set.right)
-        GSet.balance<_>(set.val, set.left, new_right)
+        let new_right = GSet.insert!(cmp, a, set.right)
+        GSet.balance!(set.val, set.left, new_right)
     }
   }

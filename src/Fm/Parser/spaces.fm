@@ -1,11 +1,11 @@
 Fm.Parser.spaces: Parser(List(Unit))
-  Parser.many<_>(Parser.first_of<_>([
+  Parser.many!(Parser.first_of!([
     Parser.text(" "),
     Parser.text("\t"),
     Parser.text("\n"),
     do Parser {
       Parser.text("//");
-      Parser.until<_>(Parser.text("\n"), Parser.one);
+      Parser.until!(Parser.text("\n"), Parser.one);
       return Unit.new;
     }
   ]))

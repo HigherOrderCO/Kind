@@ -11,6 +11,6 @@ Map.disj<A: Type>(a: Map(A), b: Map(A)): Bool
             some: Bool.false 
           }
         }
-        Bool.and(v, Bool.and(Map.disj<_>(a.lft, b.lft), Map.disj<_>(a.rgt, b.rgt)))
+        Bool.and(v, Bool.and(Map.disj!(a.lft, b.lft), Map.disj!(a.rgt, b.rgt)))
     }
   }

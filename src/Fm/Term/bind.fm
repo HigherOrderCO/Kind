@@ -4,17 +4,17 @@ Fm.Term.bind(vars: Fm.Context, path: Fm.Path, term: Fm.Term): Fm.Term
       none: Fm.Term.ref(term.name),
       some: got.value,
     },
-    var: case List.at_last<_>(term.indx, vars) as got {
+    var: case List.at_last!(term.indx, vars) as got {
       none: Fm.Term.var(term.name, term.indx),
-      some: Pair.snd<_,_>(got.value),
+      some: Pair.snd!!(got.value),
     },
     typ: Fm.Term.typ,
     all: 
-      let vlen = List.length<_>(vars);
+      let vlen = List.length!(vars);
       def xtyp = Fm.Term.bind(vars, Fm.Path.o(path), term.xtyp);
       def body = (s,x) Fm.Term.bind(
-        List.cons<_>({term.name,x},
-          List.cons<_>({term.self,s},
+        List.cons!({term.name,x},
+          List.cons!({term.self,s},
           vars)),
         Fm.Path.i(path),
         term.body(
@@ -22,9 +22,9 @@ Fm.Term.bind(vars: Fm.Context, path: Fm.Path, term: Fm.Term): Fm.Term
           Fm.Term.var(term.name, Nat.succ(vlen))));
       Fm.Term.all(term.eras, term.self, term.name, xtyp, body),
     lam:
-      let vlen = List.length<_>(vars);
+      let vlen = List.length!(vars);
       def body = (x) Fm.Term.bind(
-        List.cons<_>({term.name,x},vars),
+        List.cons!({term.name,x},vars),
         Fm.Path.o(path),
         term.body(Fm.Term.var(term.name, vlen)));
       Fm.Term.lam(term.name, body),
@@ -33,18 +33,18 @@ Fm.Term.bind(vars: Fm.Context, path: Fm.Path, term: Fm.Term): Fm.Term
       def argm = Fm.Term.bind(vars, Fm.Path.i(path), term.argm);
       Fm.Term.app(func, argm),
     let:
-      let vlen = List.length<_>(vars);
+      let vlen = List.length!(vars);
       def expr = Fm.Term.bind(vars, Fm.Path.o(path), term.expr);
       def body = (x) Fm.Term.bind(
-        List.cons<_>({term.name,x}, vars),
+        List.cons!({term.name,x}, vars),
         Fm.Path.i(path),
         term.body(Fm.Term.var(term.name, vlen)));
       Fm.Term.let(term.name, expr, body),
     def:
-      let vlen = List.length<_>(vars);
+      let vlen = List.length!(vars);
       def expr = Fm.Term.bind(vars, Fm.Path.o(path), term.expr);
       def body = (x) Fm.Term.bind(
-        List.cons<_>({term.name,x}, vars),
+        List.cons!({term.name,x}, vars),
         Fm.Path.i(path),
         term.body(Fm.Term.var(term.name, vlen)));
       Fm.Term.def(term.name, expr, body),

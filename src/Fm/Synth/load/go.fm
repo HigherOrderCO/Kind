@@ -10,7 +10,7 @@ Fm.Synth.load.go(name: String, files: List(String), defs: Fm.Defs): IO(Maybe(Fm.
         left: Fm.Synth.load.go(name, files.tail, defs)
         right: do IO {
           let defs = read.value
-          case Fm.get<_>(name, defs) as got {
+          case Fm.get!(name, defs) as got {
             none: Fm.Synth.load.go(name, files.tail, defs),
             some: do IO {
               return some(defs)

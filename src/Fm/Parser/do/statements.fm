@@ -1,5 +1,5 @@
 Fm.Parser.do.statements(monad_name: Fm.Name): Parser(Fm.Term)
-  Parser.first_of<_>([
+  Parser.first_of!([
     // Binding call: @ask x = expr; rest@
     do Parser {
       var init = Fm.Parser.init;
@@ -7,7 +7,7 @@ Fm.Parser.do.statements(monad_name: Fm.Name): Parser(Fm.Term)
       var name = Fm.Parser.name1;
       Fm.Parser.text("=");
       var expr = Fm.Parser.term;
-      Parser.maybe<_>(Fm.Parser.text(";"));
+      Parser.maybe!(Fm.Parser.text(";"));
       var body = Fm.Parser.do.statements(monad_name);
       var orig = Fm.Parser.stop(init);
       let term = Fm.Term.app(Fm.Term.ref("Monad.bind"), Fm.Term.ref(monad_name));
@@ -25,7 +25,7 @@ Fm.Parser.do.statements(monad_name: Fm.Name): Parser(Fm.Term)
       var name = Fm.Parser.name1;
       Fm.Parser.text("=");
       var expr = Fm.Parser.term;
-      Parser.maybe<_>(Fm.Parser.text(";"));
+      Parser.maybe!(Fm.Parser.text(";"));
       var body = Fm.Parser.do.statements(monad_name);
       var orig = Fm.Parser.stop(init);
       return Fm.Term.ori(orig, Fm.Term.let(name, expr, (x) body));
@@ -35,7 +35,7 @@ Fm.Parser.do.statements(monad_name: Fm.Name): Parser(Fm.Term)
       var init = Fm.Parser.init;
       Fm.Parser.text("return ");
       var expr = Fm.Parser.term;
-      Parser.maybe<_>(Fm.Parser.text(";"));
+      Parser.maybe!(Fm.Parser.text(";"));
       var orig = Fm.Parser.stop(init);
       let term = Fm.Term.app(Fm.Term.ref("Monad.pure"), Fm.Term.ref(monad_name));
       let term = Fm.Term.app(term, Fm.Term.ref(String.concat(monad_name, ".monad")));
@@ -47,7 +47,7 @@ Fm.Parser.do.statements(monad_name: Fm.Name): Parser(Fm.Term)
     do Parser {
       var init = Fm.Parser.init;
       var expr = Fm.Parser.term;
-      Parser.maybe<_>(Fm.Parser.text(";"));
+      Parser.maybe!(Fm.Parser.text(";"));
       var body = Fm.Parser.do.statements(monad_name);
       var orig = Fm.Parser.stop(init);
       let term = Fm.Term.app(Fm.Term.ref("Monad.bind"), Fm.Term.ref(monad_name));
@@ -61,7 +61,7 @@ Fm.Parser.do.statements(monad_name: Fm.Name): Parser(Fm.Term)
     // Return direct: @expr;@
     do Parser {
       var expr = Fm.Parser.term;
-      Parser.maybe<_>(Fm.Parser.text(";"));
+      Parser.maybe!(Fm.Parser.text(";"));
       return expr;
     },
   ])

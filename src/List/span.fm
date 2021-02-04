@@ -1,10 +1,10 @@
 List.span<A: Type>(f: A -> Bool, xs: List(A)): Pair(List(A),List(A))
   case xs {
-    nil : {List.nil<_>, List.nil<_>},
+    nil : {List.nil!, List.nil!},
     cons: case f(xs.head) {
       true: 
-        open List.span<_>(f, xs.tail) as spanned
-        { List.cons<_>(xs.head, spanned.fst), spanned.snd }
-      false: { List.nil<_>, xs } 
+        open List.span!(f, xs.tail) as spanned
+        { List.cons!(xs.head, spanned.fst), spanned.snd }
+      false: { List.nil!, xs } 
     }
   }

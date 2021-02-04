@@ -12,5 +12,5 @@ Fm.Term.inline.names: Set
     "Fm.Check.value",
     "Fm.Check.none",
   ]
-  let kvs = List.mapped<_>(inl)<_>((x) {Fm.Name.to_bits(x), Unit.new});
-  Map.from_list<_>(kvs)
+  let kvs = List.mapped!(inl)!((x) {Fm.Name.to_bits(x), Unit.new});
+  Map.from_list!(kvs)

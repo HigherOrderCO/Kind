@@ -3,21 +3,21 @@ Fm.Parser.reference: Parser(Fm.Term)
     var init = Fm.Parser.init;
     var name = Fm.Parser.name1;
     if String.eql(name, "case") then do Parser {
-      Parser.fail<_>("Reserved keyword.");
+      Parser.fail!("Reserved keyword.");
     } else if String.eql(name, "do") then do Parser {
-      Parser.fail<_>("Reserved keyword.");
+      Parser.fail!("Reserved keyword.");
     } else if String.eql(name, "if") then do Parser {
-      Parser.fail<_>("Reserved keyword.");
+      Parser.fail!("Reserved keyword.");
     } else if String.eql(name, "with") then do Parser {
-      Parser.fail<_>("Reserved keyword.");
+      Parser.fail!("Reserved keyword.");
     //} else if String.eql(name, "then") then do Parser {
-      //Parser.fail<_>("Reserved keyword.");
+      //Parser.fail!("Reserved keyword.");
     //} else if String.eql(name, "else") then do Parser {
-      //Parser.fail<_>("Reserved keyword.");
+      //Parser.fail!("Reserved keyword.");
     } else if String.eql(name, "let") then do Parser {
-      Parser.fail<_>("Reserved keyword.");
+      Parser.fail!("Reserved keyword.");
     } else if String.eql(name, "def") then do Parser {
-      Parser.fail<_>("Reserved keyword.");
+      Parser.fail!("Reserved keyword.");
     } else if String.eql(name, "true") then do Parser {
       return Fm.Term.ref("Bool.true");
     } else if String.eql(name, "false") then do Parser {

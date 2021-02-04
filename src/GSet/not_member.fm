@@ -1,2 +1,2 @@
 GSet.not_member<A: Type>(cmp: A -> A -> Cmp, a: A, set: GSet(A)): Bool
-  Bool.not(GSet.member<_>(cmp, a, set))
+  Bool.not(GSet.member!(cmp, a, set))

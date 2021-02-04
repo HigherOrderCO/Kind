@@ -4,7 +4,7 @@ Fm.Defs.read(file: String, code: String, defs: Fm.Defs): Either(String, Fm.Defs)
       let err = parsed.err;
       let hig = Fm.highlight(code, parsed.idx, Nat.succ(parsed.idx));
       let str = String.flatten([err, "\n", hig]);
-      Either.left<_,_>(str),
+      Either.left!!(str),
     value:
-      Either.right<_,_>(parsed.val),
+      Either.right!!(parsed.val),
   }

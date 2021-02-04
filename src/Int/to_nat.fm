@@ -1,6 +1,6 @@
 Int.to_nat(a: Int): Pair(Bool, Nat)
   open a
   case a.y {
-    zero: Pair.new<_,_>(Bool.false, a.x),
-    succ: Pair.new<_,_>(Bool.true, a.y),
+    zero: Pair.new!!(Bool.false, a.x),
+    succ: Pair.new!!(Bool.true, a.y),
   }

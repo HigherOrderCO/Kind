@@ -9,7 +9,7 @@ Fm.Parser.get: Parser(Fm.Term)
     Fm.Parser.text("}");
     Fm.Parser.text("=");
     var expr = Fm.Parser.term;
-    Parser.maybe<_>(Fm.Parser.text(";"));
+    Parser.maybe!(Fm.Parser.text(";"));
     var body = Fm.Parser.term;
     var orig = Fm.Parser.stop(init);
     let term = expr;

@@ -1,4 +1,4 @@
 U8.mod(a: U8, b: U8): U8
   open a
   open b 
-  U8.new(Word.mod<_>(a.value, b.value))
+  U8.new(Word.mod!(a.value, b.value))

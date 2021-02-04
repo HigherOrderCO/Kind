@@ -2,7 +2,7 @@ GSet.foldr.go<A: Type, B: Type>(f: A -> B -> B, acc: B, set: GSet(A)): B
   case set {
     tip: acc,
     bin: 
-      let right_folded = GSet.foldr.go<_,_>(f, acc, set.right)
+      let right_folded = GSet.foldr.go!!(f, acc, set.right)
       let new_acc      = f(set.val, right_folded)
-      GSet.foldr.go<_,_>(f, new_acc, set.left)
+      GSet.foldr.go!!(f, new_acc, set.left)
   }

@@ -1,2 +1,2 @@
 Mons.Map.set_list(pos: Pos32, objs: List(Mons.Object), map: Mons.Map): Mons.Map
-  Map.set<_>(U32.to_bits(pos), objs, map)
+  Map.set!(U32.to_bits(pos), objs, map)

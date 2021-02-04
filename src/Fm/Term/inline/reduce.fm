@@ -3,7 +3,7 @@ Fm.Term.inline.reduce(term: Fm.Term, defs: Fm.Defs): Fm.Term
     ref: 
       let inli = Set.has(Fm.Name.to_bits(term.name), Fm.Term.inline.names);
       if inli then
-        case Fm.get<_>(term.name, defs) as got {
+        case Fm.get!(term.name, defs) as got {
           none: Fm.Term.ref(term.name),
           some: case got.value { new: Fm.Term.inline.reduce(got.value.term, defs) },
         }

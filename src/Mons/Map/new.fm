@@ -1,2 +1,2 @@
 Mons.Map.new: Mons.Map
-  Map.new<_>
+  Map.new!

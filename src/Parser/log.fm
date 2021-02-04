@@ -1,2 +1,2 @@
 Parser.log(str: String): Parser(Unit)
-  (idx, code) Debug.log<_>(str, (x) Parser.Reply.value<_>(idx, code, Unit.new))
+  (idx, code) Debug.log!(str, (x) Parser.Reply.value!(idx, code, Unit.new))

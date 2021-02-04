@@ -1,7 +1,7 @@
 Array.extract_tie<A: Type, depth: Nat>(arr: Array(A,Nat.succ(depth))): Pair(Array(A,depth), Array(A,depth))
   case arr {
     tip: Unit.new,
-    tie: Pair.new<_,_>(arr.lft, arr.rgt)
+    tie: Pair.new!!(arr.lft, arr.rgt)
   } : case arr.depth {
         zero: Unit,
         succ: Pair(Array(A,arr.depth.pred), Array(A,arr.depth.pred))

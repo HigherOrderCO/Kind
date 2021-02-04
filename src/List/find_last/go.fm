@@ -8,8 +8,8 @@ List.find_last.go<A: Type>(
     nil : res,
     cons:
       let res = case f(xs.head,n) {
-        true : Maybe.some<_>(Pair.new<_,_>(xs.head,n)),
+        true : Maybe.some!(Pair.new!!(xs.head,n)),
         false: res
       }
-      List.find_last.go<_>(xs.tail,f,Nat.succ(n),res)
+      List.find_last.go!(xs.tail,f,Nat.succ(n),res)
   }

@@ -1,9 +1,9 @@
 Fm.checker.io.one(name: String): IO(Unit)
   do IO {
-    var new_defs = Fm.Synth.one(name, Map.new<_>, true);
+    var new_defs = Fm.Synth.one(name, Map.new!, true);
     IO.print("");
     case new_defs {
-      none: IO.print(Fm.Defs.report(Map.new<_>, [name])),
+      none: IO.print(Fm.Defs.report(Map.new!, [name])),
       some: IO.print(Fm.Defs.report(new_defs.value, [name])),
     }
   }

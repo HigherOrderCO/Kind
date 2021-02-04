@@ -3,6 +3,6 @@ Fm.Parser.case.case: Parser(Pair(Fm.Name, Fm.Term))
     var name = Fm.Parser.name1;
     Fm.Parser.text(":");
     var term = Fm.Parser.term;
-    Parser.maybe<_>(Fm.Parser.text(","));
+    Parser.maybe!(Fm.Parser.text(","));
     return {name, term};
   }

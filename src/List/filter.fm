@@ -1,8 +1,8 @@
 List.filter<A: Type>(f: A -> Bool, xs: List(A)): List(A)
   case xs{
-    nil : List.nil<_>
+    nil : List.nil!
     cons: case f(xs.head){
-    true : List.cons<_>(xs.head,List.filter<_>(f, xs.tail))
-    false: List.filter<_>(f, xs.tail)
+    true : List.cons!(xs.head,List.filter!(f, xs.tail))
+    false: List.filter!(f, xs.tail)
     }
   }

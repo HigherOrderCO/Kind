@@ -1,8 +1,8 @@
 List.drop_while<A: Type>(f: A -> Bool, xs: List(A)): List(A)
   case xs{
-    nil : List.nil<_>
+    nil : List.nil!
     cons: case f(xs.head){
-      true : List.drop_while<_>(f,xs.tail)
+      true : List.drop_while!(f,xs.tail)
       false: xs
       }
   }

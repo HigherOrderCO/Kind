@@ -5,14 +5,14 @@ List.chunks_of.go<A: Type>(
   chunk : List(A)  // current chunk
 ) : List(List(A))
   case list {
-    nil : List.cons<_>(List.reverse<_>(chunk), List.nil<_>),
+    nil : List.cons!(List.reverse!(chunk), List.nil!),
     cons: case need {
       zero: 
-        let head = List.reverse<_>(chunk)
-        let tail = List.chunks_of.go<_>(len, list, len, List.nil<_>)
-        List.cons<_>(head, tail),
+        let head = List.reverse!(chunk)
+        let tail = List.chunks_of.go!(len, list, len, List.nil!)
+        List.cons!(head, tail),
       succ: 
-        let chunk = List.cons<_>(list.head, chunk)
-        List.chunks_of.go<_>(len, list.tail, need.pred, chunk)
+        let chunk = List.cons!(list.head, chunk)
+        List.chunks_of.go!(len, list.tail, need.pred, chunk)
     }
   }

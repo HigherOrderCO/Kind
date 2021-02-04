@@ -1,2 +1,2 @@
 GSet.foldr<A: Type, B: Type>(f: A -> B -> B, b: B, set: GSet(A)): B 
-  GSet.foldr.go<_,_>(f, b, set)
+  GSet.foldr.go!!(f, b, set)

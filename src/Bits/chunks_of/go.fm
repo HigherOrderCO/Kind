@@ -5,12 +5,12 @@ Bits.chunks_of.go(
   chunk : Bits  // current chunk
 ) : List(Bits)
   case bits {
-    e: List.cons<_>(Bits.reverse(chunk), List.nil<_>),
+    e: List.cons!(Bits.reverse(chunk), List.nil!),
     o: case need {
       zero: 
         let head = Bits.reverse(chunk);
         let tail = Bits.chunks_of.go(len, bits, len, Bits.e);
-        List.cons<_>(head, tail),
+        List.cons!(head, tail),
       succ:
         let chunk = Bits.o(chunk);
         Bits.chunks_of.go(len, bits.pred, need.pred, chunk)
@@ -19,7 +19,7 @@ Bits.chunks_of.go(
       zero:
         let head = Bits.reverse(chunk);
         let tail = Bits.chunks_of.go(len, bits, len, Bits.e);
-        List.cons<_>(head, tail),
+        List.cons!(head, tail),
       succ:
         let chunk = Bits.i(chunk);
         Bits.chunks_of.go(len, bits.pred, need.pred, chunk)

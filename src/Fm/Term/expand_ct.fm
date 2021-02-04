@@ -1,7 +1,7 @@
 Fm.Term.expand_ct(term: Fm.Term, defs: Fm.Defs, arity: Nat): Fm.Term
   case term {
     ref:
-      case Fm.get<_>(term.name, defs) as got {
+      case Fm.get!(term.name, defs) as got {
         none:
           Fm.Term.ref(term.name)
         some:

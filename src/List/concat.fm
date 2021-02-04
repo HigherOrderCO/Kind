@@ -1,5 +1,5 @@
 List.concat<A: Type>(as: List(A), bs: List(A)): List(A)
   case as {
     nil: bs,
-    cons: List.cons<_>(as.head, List.concat<_>(as.tail,bs))
+    cons: List.cons!(as.head, List.concat!(as.tail,bs))
   }

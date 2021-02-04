@@ -1,5 +1,5 @@
 List.head<A: Type>(xs: List(A)): Maybe(A)
   case xs {
-    nil : Maybe.none<_>,
-    cons: Maybe.some<_>(xs.head)
+    nil : Maybe.none!,
+    cons: Maybe.some!(xs.head)
   }

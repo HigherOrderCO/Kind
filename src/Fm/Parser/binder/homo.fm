@@ -1,10 +1,10 @@
 Fm.Parser.binder.homo(eras: Bool): Parser(List(Fm.Binder))
   do Parser {
     Fm.Parser.text(if eras then "<" else "(");
-    var bind = Parser.until1<_>(
+    var bind = Parser.until1!(
       Fm.Parser.text(if eras then ">" else ")"),
-      Fm.Parser.item<_>(Fm.Parser.name_term));
-    return List.mapped<_>(bind)<_>((pair) case pair {
+      Fm.Parser.item!(Fm.Parser.name_term));
+    return List.mapped!(bind)!((pair) case pair {
       new: Fm.Binder.new(eras, pair.fst, pair.snd)
     });
   }

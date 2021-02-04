@@ -2,7 +2,7 @@ List.all<A: Type>(cond: A -> Bool, list: List(A)): Bool
   case list{
     nil : Bool.true
     cons: case cond(list.head){
-      true : List.all<_>(cond, list.tail)
+      true : List.all!(cond, list.tail)
       false: Bool.false
     }
   }

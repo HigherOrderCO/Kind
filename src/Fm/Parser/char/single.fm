@@ -1,6 +1,6 @@
 Fm.Parser.char.single: Parser(Char)
-  Parser.first_of<_>([
-    Parser.first_of<_>(List.mapped<_>(Fm.escapes)<_>((esc) case esc {
+  Parser.first_of!([
+    Parser.first_of!(List.mapped!(Fm.escapes)!((esc) case esc {
       new: do Parser {
         Parser.text(esc.fst);
         return esc.snd;

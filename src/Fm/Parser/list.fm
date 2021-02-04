@@ -2,11 +2,11 @@ Fm.Parser.list: Parser(Fm.Term)
   do Parser {
     var init = Fm.Parser.init;
     Fm.Parser.text("[");
-    var vals = Parser.until<_>(
+    var vals = Parser.until!(
       Fm.Parser.text("]"),
-      Fm.Parser.item<_>(Fm.Parser.term));
+      Fm.Parser.item!(Fm.Parser.term));
     var orig = Fm.Parser.stop(init);
-    return List.fold<_>(vals)<_>(
+    return List.fold!(vals)!(
       Fm.Term.app(Fm.Term.ref(Fm.Name.read("List.nil")), Fm.Term.hol(Bits.e)),
       (x,xs)
         let term = Fm.Term.ref(Fm.Name.read("List.cons"));

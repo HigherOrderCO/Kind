@@ -1,5 +1,5 @@
 Fm.SmartMotive.replace(term: Fm.Term, from: Fm.Term, to: Fm.Term, lv: Nat): Fm.Term
-  //let skip = Debug.log<_>(String.flatten(["replace term=", Fm.Term.show(term), " from=", Fm.Term.show(from), " to=", Fm.Term.show(to), " lv=", Nat.show(lv)]), (x) Unit.new);
+  //let skip = Debug.log!(String.flatten(["replace term=", Fm.Term.show(term), " from=", Fm.Term.show(from), " to=", Fm.Term.show(to), " lv=", Nat.show(lv)]), (x) Unit.new);
   if Fm.Term.identical(term, from, lv) then
     to
   else case term {

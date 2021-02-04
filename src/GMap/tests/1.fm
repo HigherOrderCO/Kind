@@ -1,9 +1,9 @@
 GMap.tests.1 : IO(Unit)
   let kvs = [
-    Pair.new<_,_>(1,"a")
-    Pair.new<_,_>(2,"b")
-    Pair.new<_,_>(3,"c")
+    Pair.new!!(1,"a")
+    Pair.new!!(2,"b")
+    Pair.new!!(3,"c")
   ]
-  let map = GMap.from_list<_,_>(Nat.cmp, kvs)
-  let map = GMap.show<_,_>(Nat.show, String.show, map)
+  let map = GMap.from_list!!(Nat.cmp, kvs)
+  let map = GMap.show!!(Nat.show, String.show, map)
   IO.print(map)

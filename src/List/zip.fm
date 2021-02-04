@@ -1,8 +1,8 @@
 List.zip<A: Type, B: Type>(as: List(A), bs: List(B)): List(Pair(A,B))
   case as {
-    nil: List.nil<_>,
+    nil: List.nil!,
     cons: case bs {
-      nil: List.nil<_>,
-      cons: List.cons<_>(Pair.new<_,_>(as.head, bs.head), List.zip<A,B>(as.tail, bs.tail)),
+      nil: List.nil!,
+      cons: List.cons!(Pair.new!!(as.head, bs.head), List.zip<A,B>(as.tail, bs.tail)),
     }
   }

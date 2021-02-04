@@ -16,10 +16,10 @@ Fm.Synth.fix(
       if fixd then do IO {
         let type = Fm.Term.bind([], (x) Bits.i(x), type);
         let term = Fm.Term.bind([], (x) Bits.o(x), term);
-        let defs = Fm.set<_>(name, Fm.Def.new(file, code, orig, name, term, type, isct, Fm.Status.init), defs);
-        return Maybe.some<_>(defs);
+        let defs = Fm.set!(name, Fm.Def.new(file, code, orig, name, term, type, isct, Fm.Status.init), defs);
+        return Maybe.some!(defs);
       } else do IO {
-        return Maybe.none<_>;
+        return Maybe.none!;
       },
     cons: case errs.head {
       waiting: do IO {
@@ -38,7 +38,7 @@ Fm.Synth.fix(
       },
       patch: case errs.head.path {
         e: do IO { // shouldn't happen
-          return Maybe.none<_>;
+          return Maybe.none!;
         },
         o: do IO { // hole is on term
           let term = Fm.Term.patch_at(errs.head.path.pred, term, (x) errs.head.term);

@@ -2,19 +2,19 @@ Parser.first_of.go<A: Type>(pars: List(Parser(A)), err: Maybe(Parser.ErrorAt)): 
   (idx,code) 
     case pars {
       nil: case err {
-        none: Parser.Reply.error<_>(idx, code, "No parse."),
+        none: Parser.Reply.error!(idx, code, "No parse."),
         some: case err.value {
-          new: Parser.Reply.error<_>(err.value.idx, err.value.code, err.value.err),
+          new: Parser.Reply.error!(err.value.idx, err.value.code, err.value.err),
         }
       },
       cons:
         let parsed = pars.head(idx, code);
         case parsed {
           error:
-            let neo = Maybe.some<_>(Parser.ErrorAt.new(parsed.idx, parsed.code, parsed.err));
+            let neo = Maybe.some!(Parser.ErrorAt.new(parsed.idx, parsed.code, parsed.err));
             let err = Parser.ErrorAt.combine(neo, err);
-            Parser.first_of.go<_>(pars.tail, err, idx, code),
+            Parser.first_of.go!(pars.tail, err, idx, code),
           value:
-            Parser.Reply.value<_>(parsed.idx, parsed.code, parsed.val),
+            Parser.Reply.value!(parsed.idx, parsed.code, parsed.val),
         }
     }

@@ -13,7 +13,7 @@ Fm.Parser.forrange.u32.2: Parser(Fm.Term)
     var name = Fm.Parser.name1;
     Fm.Parser.text("=");
     var loop = Fm.Parser.term;
-    Parser.maybe<_>(Fm.Parser.text(";"));
+    Parser.maybe!(Fm.Parser.text(";"));
     var body = Fm.Parser.term;
     var orig = Fm.Parser.stop(init);
     let term = Fm.Term.ref("U32.for");

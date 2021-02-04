@@ -1,2 +1,2 @@
 GSet.from_list<A: Type>(cmp: A -> A -> Cmp, xs: List(A)): GSet(A)
-  List.foldr<_,_>(GSet.tip<_>, GSet.insert<_>(cmp), xs)
+  List.foldr!!(GSet.tip!, GSet.insert!(cmp), xs)

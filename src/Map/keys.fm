@@ -1,2 +1,2 @@
 Map.keys<A: Type>(xs: Map(A)): List(Bits)
-  List.reverse<_>(Map.keys.go<_>(xs, Bits.e, List.nil<_>))
+  List.reverse!(Map.keys.go!(xs, Bits.e, List.nil!))

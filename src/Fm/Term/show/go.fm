@@ -37,7 +37,7 @@ Fm.Term.show.go(term: Fm.Term, path: Maybe(Bits -> Bits)): String
           term.body(Fm.Term.var(term.name, 0)),
           Fm.MPath.o(path));
         String.flatten(["(",name,") ",body]),
-      app: Fm.Term.show.app(term, path, List.nil<_>),
+      app: Fm.Term.show.app(term, path, List.nil!),
       let:
         let name = Fm.Name.show(term.name);
         let expr = Fm.Term.show.go(term.expr, Fm.MPath.o(path));
@@ -70,22 +70,22 @@ Fm.Term.show.go(term: Fm.Term, path: Maybe(Bits -> Bits)): String
       cse:
         let expr = Fm.Term.show.go(term.expr, Fm.MPath.o(path));
         let name = Fm.Name.show(term.name);
-        let wyth = String.join("", List.mapped<_>(term.with)<_>((defn)
+        let wyth = String.join("", List.mapped!(term.with)!((defn)
           case defn {
             new:
               let name = Fm.Name.show(defn.name);
-              let type = Fm.Term.show.go(defn.type, Maybe.none<_>);
-              let term = Fm.Term.show.go(defn.term, Maybe.none<_>);
+              let type = Fm.Term.show.go(defn.type, Maybe.none!);
+              let term = Fm.Term.show.go(defn.term, Maybe.none!);
               String.flatten([name, ": ", type, " = " term, ";"])
           }));
-        let cses = Map.to_list<_>(term.cses);
-        let cses = String.join("", List.mapped<_>(cses)<_>((x)
-          let name = Fm.Name.from_bits(Pair.fst<_,_>(x));
-          let term = Fm.Term.show.go(Pair.snd<_,_>(x), Maybe.none<_>);
+        let cses = Map.to_list!(term.cses);
+        let cses = String.join("", List.mapped!(cses)!((x)
+          let name = Fm.Name.from_bits(Pair.fst!!(x));
+          let term = Fm.Term.show.go(Pair.snd!!(x), Maybe.none!);
           String.flatten([name, ": ", term, "; "])));
         let moti = case term.moti {
           none: "",
-          some: String.flatten([": ", Fm.Term.show.go(term.moti.value, Maybe.none<_>)]),
+          some: String.flatten([": ", Fm.Term.show.go(term.moti.value, Maybe.none!)]),
         };
         String.flatten(["case ",expr," as ",name,wyth," { ",cses,"}",moti]),
       ori:

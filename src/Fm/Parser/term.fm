@@ -1,7 +1,7 @@
 Fm.Parser.term: Parser(Fm.Term)
   do Parser {
     var init = Fm.Parser.init;
-    var term = Parser.first_of<_>([
+    var term = Parser.first_of!([
       Fm.Parser.type,
       Fm.Parser.forall,
       Fm.Parser.lambda,

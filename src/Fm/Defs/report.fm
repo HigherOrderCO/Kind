@@ -11,7 +11,7 @@ Fm.Defs.report.errors(defs: Fm.Defs): String
   let errors = ""
   for key in Map.keys!(defs) with errors:
     let name = Fm.Name.from_bits(key)
-    case Fm.get<_>(name, defs) as got {
+    case Fm.get!(name, defs) as got {
       none:
         errors
       some:

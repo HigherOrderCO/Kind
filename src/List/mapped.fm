@@ -1,5 +1,5 @@
 List.mapped<A: Type>(as: List(A))<B: Type>(f: A -> B): List(B)
   case as {
-    nil: List.nil<_>,
-    cons: List.cons<_>(f(as.head),List.mapped<A>(as.tail)<B>(f))
+    nil: List.nil!,
+    cons: List.cons!(f(as.head),List.mapped<A>(as.tail)<B>(f))
   }

@@ -1,5 +1,5 @@
 List.flatten<A: Type>(xs: List(List(A))): List(A)
   case xs {
-    nil: List.nil<_>,
-    cons: List.concat<_>(xs.head, List.flatten<_>(xs.tail))
+    nil: List.nil!,
+    cons: List.concat!(xs.head, List.flatten!(xs.tail))
   }

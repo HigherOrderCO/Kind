@@ -2,11 +2,11 @@ Fm.Parser.log: Parser(Fm.Term)
   do Parser {
     var init = Fm.Parser.init;
     Fm.Parser.text("log(");
-    var strs = Parser.until<_>(Fm.Parser.text(")"), Fm.Parser.item<_>(Fm.Parser.term));
+    var strs = Parser.until!(Fm.Parser.text(")"), Fm.Parser.item!(Fm.Parser.term));
     var cont = Fm.Parser.term;
     let term = Fm.Term.ref("Debug.log");
     let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
-    let args = List.fold<_>(strs)<_>(Fm.Term.ref("String.nil"), (x,xs) 
+    let args = List.fold!(strs)!(Fm.Term.ref("String.nil"), (x,xs) 
       let arg = Fm.Term.ref("String.concat");
       let arg = Fm.Term.app(arg, x);
       let arg = Fm.Term.app(arg, xs);

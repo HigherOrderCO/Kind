@@ -1,6 +1,6 @@
 Fm.Defs.core(defs: Fm.Defs): String
   let result = "";
-  for defn in Map.values<_>(defs) with result:
+  for defn in Map.values!(defs) with result:
     case defn {
       new: 
         case defn.stat {

@@ -2,8 +2,8 @@ GSet.is_balanced<A: Type>(set: GSet(A)): Bool
   case set {
     tip: Bool.true,
     bin: 
-      let size_l = GSet.size<_>(set.left)
-      let size_r = GSet.size<_>(set.right)
+      let size_l = GSet.size!(set.left)
+      let size_r = GSet.size!(set.right)
       let max_size_l = Nat.mul(GSet.w, size_r)
       let max_size_r = Nat.mul(GSet.w, size_l)
       let size_l_plus_r = Nat.add(size_l, size_r)
@@ -12,8 +12,8 @@ GSet.is_balanced<A: Type>(set: GSet(A)): Bool
           Nat.lte(size_r, max_size_l)
       ])
       let subtrees_sizes_ok = Bool.or(sizes_dont_exceed, Nat.lte(size_l_plus_r, 1))
-      let left_is_balanced = GSet.is_balanced<_>(set.left)
-      let right_is_balanced = GSet.is_balanced<_>(set.right)
+      let left_is_balanced = GSet.is_balanced!(set.left)
+      let right_is_balanced = GSet.is_balanced!(set.right)
   
       List.and([subtrees_sizes_ok, left_is_balanced, right_is_balanced ])
   }

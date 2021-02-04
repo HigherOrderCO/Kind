@@ -1,6 +1,6 @@
 Fm.Term.equal(a: Fm.Term, b: Fm.Term, defs: Fm.Defs, lv: Nat, seen: Set): Fm.Check(Bool)
-  let ah = Fm.Term.serialize(Fm.Term.reduce(a,Map.new<_>), lv, lv, Bits.o, Bits.e);
-  let bh = Fm.Term.serialize(Fm.Term.reduce(b,Map.new<_>), lv, lv, Bits.i, Bits.e);
+  let ah = Fm.Term.serialize(Fm.Term.reduce(a,Map.new!), lv, lv, Bits.o, Bits.e);
+  let bh = Fm.Term.serialize(Fm.Term.reduce(b,Map.new!), lv, lv, Bits.i, Bits.e);
   if Bits.eql(ah, bh) then do Fm.Check {
     return Bool.true;
   } else do Fm.Check {

@@ -2,44 +2,44 @@ Map.query<A: Type>(cpy: A -> Pair(A, A), bits: Bits, map: Map(A)): Pair(Map(A), 
   case bits {
   e: case map {
     new: 
-      let map = Map.new<_>
-      let val = Maybe.none<_>
-      Pair.new<_,_>(map, val),
+      let map = Map.new!
+      let val = Maybe.none!
+      Pair.new!!(map, val),
     tie: case map.val {
       none:
-        let map = Map.tie<_>(Maybe.none<_>, map.lft, map.rgt)
-        let val = Maybe.none<_>
-        Pair.new<_,_>(map, val),
+        let map = Map.tie!(Maybe.none!, map.lft, map.rgt)
+        let val = Maybe.none!
+        Pair.new!!(map, val),
       some: case cpy(map.val.value) as p {
         new:
-          let map = Map.tie<_>(Maybe.some<_>(p.fst), map.lft, map.rgt)
-          let val = Maybe.some<_>(p.snd)
-          Pair.new<_,_>(map, val)
+          let map = Map.tie!(Maybe.some!(p.fst), map.lft, map.rgt)
+          let val = Maybe.some!(p.snd)
+          Pair.new!!(map, val)
       }
     }
   },
   o: case map {
     new:
-      let map = Map.new<_>
-      let val = Maybe.none<_>
-      Pair.new<_,_>(map, val),
-    tie: case Map.query<_>(cpy, bits.pred, map.lft) as p {
+      let map = Map.new!
+      let val = Maybe.none!
+      Pair.new!!(map, val),
+    tie: case Map.query!(cpy, bits.pred, map.lft) as p {
       new:
-        let map = Map.tie<_>(map.val, p.fst, map.rgt)
+        let map = Map.tie!(map.val, p.fst, map.rgt)
         let val = p.snd
-        Pair.new<_,_>(map, val)
+        Pair.new!!(map, val)
     }
   },
   i: case map {
     new: 
-      let map = Map.new<_>
-      let val = Maybe.none<_>
-      Pair.new<_,_>(map, val),
-    tie: case Map.query<_>(cpy, bits.pred, map.rgt) as p {
+      let map = Map.new!
+      let val = Maybe.none!
+      Pair.new!!(map, val),
+    tie: case Map.query!(cpy, bits.pred, map.rgt) as p {
       new:
-        let map = Map.tie<_>(map.val, map.lft, p.fst)
+        let map = Map.tie!(map.val, map.lft, p.fst)
         let val = p.snd
-        Pair.new<_,_>(map, val)
+        Pair.new!!(map, val)
       }
     }
   }

@@ -1,2 +1,2 @@
 List.Builder.cons<A: Type>(c: A, lb: List.Builder(A)) : List.Builder(A)
-  (x) List.cons<_>(c,lb(x))
+  (x) List.cons!(c,lb(x))

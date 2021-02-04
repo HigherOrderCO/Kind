@@ -1,8 +1,8 @@
 Fm.Parser.binder: Parser(List(Fm.Binder))
   do Parser {
-    var lists = Parser.many1<_>(Parser.first_of<_>([
+    var lists = Parser.many1!(Parser.first_of!([
       Fm.Parser.binder.homo(Bool.true),
       Fm.Parser.binder.homo(Bool.false),
     ]));
-    return List.flatten<_>(lists);
+    return List.flatten!(lists);
   }

@@ -3,7 +3,7 @@ Mons.Object.capture_boss(boss: Mons.Object, hero: Mons.Object): Mons.Object
   open hero
   case boss.kin as kind {
     Mons: 
-      let new_boss_bag = List.append<_>(hero.bos, boss)
+      let new_boss_bag = List.append!(hero.bos, boss)
       Mons.Object.set_bos(new_boss_bag, hero),
     Const:       hero,
     Terrain:     hero,

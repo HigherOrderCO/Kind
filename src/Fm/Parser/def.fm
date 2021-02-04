@@ -5,7 +5,7 @@ Fm.Parser.def: Parser(Fm.Term)
     var name = Fm.Parser.name;
     Fm.Parser.text("=");
     var expr = Fm.Parser.term;
-    Parser.maybe<_>(Fm.Parser.text(";"));
+    Parser.maybe!(Fm.Parser.text(";"));
     var body = Fm.Parser.term;
     var orig = Fm.Parser.stop(init);
     return Fm.Term.ori(orig, Fm.Term.def(name, expr, (x) body));

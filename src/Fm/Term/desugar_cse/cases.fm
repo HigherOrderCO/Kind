@@ -9,7 +9,7 @@ Fm.Term.desugar_cse.cases(
 ): Fm.Term
   case Fm.Term.reduce(type, defs) as type {
     all: 
-      let got = Maybe.or<_>(Fm.get<_>(type.name, cses), Fm.get<_>("_", cses));
+      let got = Maybe.or!(Fm.get!(type.name, cses), Fm.get!("_", cses));
       case got {
         some:
           let argm = Fm.Term.desugar_cse.argument(name, wyth, type.xtyp, got.value, defs);

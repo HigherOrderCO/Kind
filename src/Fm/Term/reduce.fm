@@ -1,6 +1,6 @@
 Fm.Term.reduce(term: Fm.Term, defs: Fm.Defs): Fm.Term
   case term {
-    ref: case Fm.get<_>(term.name, defs) as got {
+    ref: case Fm.get!(term.name, defs) as got {
       none: Fm.Term.ref(term.name),
       some: case got.value { new: Fm.Term.reduce(got.value.term, defs) },
     },

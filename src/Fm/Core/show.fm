@@ -17,14 +17,14 @@ Fm.Core.show(term: Fm.Term, indx: Nat, vars: List(Fm.Name)): String
           Fm.Term.var(term.self,indx),
           Fm.Term.var(term.name,Nat.succ(indx))),
         Nat.succ(Nat.succ(indx)),
-        List.cons<_>(term.name, List.cons<_>(term.self, vars)));
+        List.cons!(term.name, List.cons!(term.self, vars)));
       String.flatten([init,self,"(",name,":",xtyp,") ",body]),
     lam:
       let name = Fm.Name.show(term.name);
       let body = Fm.Core.show(
         term.body(Fm.Term.var(term.name,indx)),
         Nat.succ(indx),
-        List.cons<_>(term.name, vars));
+        List.cons!(term.name, vars));
       String.flatten(["#",name," ",body]),
     app:
       let func = Fm.Core.show(term.func, indx, vars);
@@ -36,7 +36,7 @@ Fm.Core.show(term: Fm.Term, indx: Nat, vars: List(Fm.Name)): String
       let body = Fm.Core.show(
         term.body(Fm.Term.var(term.name,indx)),
         Nat.succ(indx),
-        List.cons<_>(term.name, vars));
+        List.cons!(term.name, vars));
       String.flatten(["!", name, " = ", expr, "; ", body]),
     def:
       let name = Fm.Name.show(term.name);
@@ -44,7 +44,7 @@ Fm.Core.show(term: Fm.Term, indx: Nat, vars: List(Fm.Name)): String
       let body = Fm.Core.show(
         term.body(Fm.Term.var(term.name,indx)),
         Nat.succ(indx),
-        List.cons<_>(term.name, vars));
+        List.cons!(term.name, vars));
       String.flatten(["$", name, " = ", expr, "; ", body]),
     ann:
       let term = Fm.Core.show(term.term, indx, vars);

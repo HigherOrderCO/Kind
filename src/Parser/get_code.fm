@@ -1,2 +1,2 @@
 Parser.get_code: Parser(String)
-  (idx, code) Parser.Reply.value<_>(idx, code, code)
+  (idx, code) Parser.Reply.value!(idx, code, code)

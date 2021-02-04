@@ -3,9 +3,9 @@ Fm.Parser.forall: Parser(Fm.Term)
     var init = Fm.Parser.init;
     var self = Fm.Parser.name;
     var bind = Fm.Parser.binder;
-    Parser.maybe<_>(Fm.Parser.text("->"));
+    Parser.maybe!(Fm.Parser.text("->"));
     var body = Fm.Parser.term;
-    let term = List.fold<_>(bind)<_>(body, (x,t) case x {
+    let term = List.fold!(bind)!(body, (x,t) case x {
       new: Fm.Term.all(x.eras, "", x.name, x.term, (s,x) t)
     });
     var orig = Fm.Parser.stop(init);

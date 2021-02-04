@@ -1,6 +1,6 @@
 Fm.checker.io.file(file: String): IO(Unit)
   do IO {
-    var loaded = Fm.Synth.file(file, Map.new<_>, true);
+    var loaded = Fm.Synth.file(file, Map.new!, true);
     case loaded {
       left: do IO {
         IO.print(String.flatten(["On '", file, "':"]));

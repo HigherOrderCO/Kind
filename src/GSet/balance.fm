@@ -1,6 +1,6 @@
 GSet.balance<A: Type>(a: A, l: GSet(A), r: GSet(A)): GSet(A)
-  let size_l             = GSet.size<_>(l)
-  let size_r             = GSet.size<_>(r)
+  let size_l             = GSet.size!(l)
+  let size_r             = GSet.size!(r)
   let size_l_plus_size_r = Nat.add(size_l, size_r)
   let w_x_size_l         = Nat.mul(GSet.w, size_l)
   let w_x_size_r         = Nat.mul(GSet.w, size_r)
@@ -8,31 +8,31 @@ GSet.balance<A: Type>(a: A, l: GSet(A), r: GSet(A)): GSet(A)
   // size_l_plus_size_r < 2 means that one subtree is empty and the
   // other contains only one element, hence the tree cannot be balanced 
   if Nat.ltn(size_l_plus_size_r, 2) then 
-    GSet.node<_>(a, l, r)
+    GSet.node!(a, l, r)
   // size_r > w * size_l means the right subtree is too heavy
   else if Nat.gtn(size_r, w_x_size_l) then
     case r {
     // this is an impossible case because we already know that
     // the right subtree is too heavy
     // question: how to deal with it?
-      tip: GSet.node<_>(a, l, r),
+      tip: GSet.node!(a, l, r),
       bin:  
-        let size_rl = GSet.size<_>(r.left)
-        let size_rr = GSet.size<_>(r.right)
+        let size_rl = GSet.size!(r.left)
+        let size_rr = GSet.size!(r.right)
         // size_rl < size_rr means we should perform a single left rotation
         if Nat.ltn(size_rl, size_rr) then 
-          let new_l = GSet.node<_>(a, l, r.left)
-          GSet.node<_>(r.val, new_l, r.right)
+          let new_l = GSet.node!(a, l, r.left)
+          GSet.node!(r.val, new_l, r.right)
         // size_rl > size_rr means we should perform a double left rotation
         else 
           // we need to branch on the left subtree of r in order to extract its components 
           case r.left {
-            tip: GSet.node<_>(a, l, r), // impossible case
+            tip: GSet.node!(a, l, r), // impossible case
             bin: 
              let new_val   = r.left.val 
-             let new_left  = GSet.node<_>(a, l, r.left.left) 
-             let new_right = GSet.node<_>(r.val, r.left.right, r.right)
-             GSet.node<_>(new_val, new_left, new_right)
+             let new_left  = GSet.node!(a, l, r.left.left) 
+             let new_right = GSet.node!(r.val, r.left.right, r.right)
+             GSet.node!(new_val, new_left, new_right)
           }
     }
     
@@ -42,27 +42,27 @@ GSet.balance<A: Type>(a: A, l: GSet(A), r: GSet(A)): GSet(A)
       // this is an impossible case because we already know that
       // the left subtree is too heavy
       // question: how to deal with it?
-      tip: GSet.node<_>(a, l, r),
+      tip: GSet.node!(a, l, r),
       bin: 
-        let size_ll = GSet.size<_>(l.left)
-        let size_lr = GSet.size<_>(l.right)
+        let size_ll = GSet.size!(l.left)
+        let size_lr = GSet.size!(l.right)
         // size_lr < size_lln means we should perform a single right rotation
         if Nat.ltn(size_lr, size_ll) then 
           let new_left  = l.left
-          let new_right = GSet.node<_>(a, l.right, r)
-          GSet.node<_>(l.val, new_left, new_right)
+          let new_right = GSet.node!(a, l.right, r)
+          GSet.node!(l.val, new_left, new_right)
         // size_lr > size_ll means we should perform a double right rotation
         else 
           // we need to branch on the right subtree of l in order to 
           // extract its components and move them to the right
           case l.right {
-            tip: GSet.node<_>(a, l, r), // impossible case
+            tip: GSet.node!(a, l, r), // impossible case
             bin:  
               let new_val   = l.right.val 
-              let new_left  = GSet.node<_>(l.val, l.left, l.right.left)
-              let new_right = GSet.node<_>(a, l.right.right, r)
-              GSet.node<_>(new_val, new_left, new_right)
+              let new_left  = GSet.node!(l.val, l.left, l.right.left)
+              let new_right = GSet.node!(a, l.right.right, r)
+              GSet.node!(new_val, new_left, new_right)
           }
     }
   else // neither subtrees are too heavy, no balancing is needed 
-    GSet.node<_>(a, l, r)
+    GSet.node!(a, l, r)

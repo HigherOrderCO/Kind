@@ -1,4 +1,4 @@
 U64.ltn(a: U64, b: U64): Bool
   open a
   open b
-  Word.ltn<_>(a.value, b.value)
+  Word.ltn!(a.value, b.value)

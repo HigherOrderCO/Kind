@@ -3,4 +3,4 @@ Fm.highlight(
   idx0: Nat,
   idx1: Nat,
 ): String
-  Fm.highlight.tc(code, idx0, idx1, 0, 1, Maybe.none<_>, String.reverse("   1 | "), [])
+  Fm.highlight.tc(code, idx0, idx1, 0, 1, Maybe.none!, String.reverse("   1 | "), [])

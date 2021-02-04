@@ -1,2 +1,2 @@
 Fm.MPath.nil: Maybe(Fm.Path)
-  Maybe.some<_>(Fm.Path.nil)
+  Maybe.some!(Fm.Path.nil)

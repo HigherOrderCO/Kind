@@ -4,37 +4,37 @@ Fm.Parser.case: Parser(Fm.Term)
     Fm.Parser.text("case ");
     Fm.Parser.spaces;
     var expr = Fm.Parser.term;
-    var name = Parser.maybe<_>(do Parser {
+    var name = Parser.maybe!(do Parser {
       Fm.Parser.text("as");
       Fm.Parser.name1;
     });
     let name = case name {
-      none: case Fm.Term.reduce(expr, Map.new<_>) as expr {
+      none: case Fm.Term.reduce(expr, Map.new!) as expr {
         ref: expr.name,
         var: expr.name,
         _: Fm.Name.read("self"),
       },
       some: name.value,
     };
-    var wyth = Parser.many<_>(Fm.Parser.case.with);
+    var wyth = Parser.many!(Fm.Parser.case.with);
     Fm.Parser.text("{");
-    var cses = Parser.until<_>(Fm.Parser.text("}"), Fm.Parser.case.case);
-    let cses = Map.from_list<_>(List.mapped<_>(cses)<_>((x) {Fm.Name.to_bits(Pair.fst<_,_>(x)), Pair.snd<_,_>(x)}));
-    var moti = Parser.first_of<_>([
+    var cses = Parser.until!(Fm.Parser.text("}"), Fm.Parser.case.case);
+    let cses = Map.from_list!(List.mapped!(cses)!((x) {Fm.Name.to_bits(Pair.fst!!(x)), Pair.snd!!(x)}));
+    var moti = Parser.first_of!([
       // Explicit motive
       do Parser {
         Fm.Parser.text(":");
         var term = Fm.Parser.term;
-        return Maybe.some<_>(term);
+        return Maybe.some!(term);
       },
       // Smart motive
       do Parser {
         Fm.Parser.text("!");
-        return Maybe.none<_>;
+        return Maybe.none!;
       },
       // Hole motive
       do Parser {
-        return Maybe.some<_>(Fm.Term.hol(Bits.e));
+        return Maybe.some!(Fm.Term.hol(Bits.e));
       },
     ]);
     var orig = Fm.Parser.stop(init);

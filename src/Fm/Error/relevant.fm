@@ -23,7 +23,7 @@ Fm.Error.relevant(errors: List(Fm.Error), got: Bool): List(Fm.Error)
       };
       let tail = Fm.Error.relevant(errors.tail, got);
       if keep then
-        List.cons<_>(errors.head, tail)
+        List.cons!(errors.head, tail)
       else
         tail
   }

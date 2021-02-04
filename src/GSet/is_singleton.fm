@@ -1,3 +1,3 @@
 GSet.is_singleton<A: Type>(set: GSet(A)): Bool
-  let size = GSet.size<_>(set)
+  let size = GSet.size!(set)
   if Nat.eql(size, 1) then Bool.true else Bool.false

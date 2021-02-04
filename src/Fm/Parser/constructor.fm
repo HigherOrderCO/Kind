@@ -1,12 +1,12 @@
 Fm.Parser.constructor(namespace: Fm.Name): Parser(Fm.Constructor)
   do Parser {
     var name = Fm.Parser.name1;
-    var args = Parser.maybe<_>(Fm.Parser.binder);
-    var inds = Parser.maybe<_>(do Parser {
+    var args = Parser.maybe!(Fm.Parser.binder);
+    var inds = Parser.maybe!(do Parser {
       Fm.Parser.text("~");
       Fm.Parser.binder;
     });
-    let args = Maybe.default<_>([], args);
-    let inds = Maybe.default<_>([], inds);
+    let args = Maybe.default!([], args);
+    let inds = Maybe.default!([], inds);
     return Fm.Constructor.new(name, args, inds);
   }

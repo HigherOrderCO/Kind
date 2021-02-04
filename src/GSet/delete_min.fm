@@ -4,7 +4,7 @@ GSet.delete_min<A: Type>(set: GSet(A)): GSet(A)
     bin: case set.left {
       tip: set.right,
       bin:  
-        let new_left = GSet.delete_min<_>(set.left)
-        GSet.balance<_>(set.val, new_left, set.right)
+        let new_left = GSet.delete_min!(set.left)
+        GSet.balance!(set.val, new_left, set.right)
     }
   }

@@ -2,9 +2,9 @@ Fm.Parser.lambda.erased: Parser(Fm.Term)
   do Parser {
     var init = Fm.Parser.init;
     Fm.Parser.text("<");
-    var name = Parser.until1<_>(
+    var name = Parser.until1!(
       Fm.Parser.text(">"),
-      Fm.Parser.item<_>(Fm.Parser.name1));
+      Fm.Parser.item!(Fm.Parser.name1));
     var body = Fm.Parser.term;
     var orig = Fm.Parser.stop(init);
     let expr = Fm.Parser.make_lambda(name, body);

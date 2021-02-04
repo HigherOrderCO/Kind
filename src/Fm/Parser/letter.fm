@@ -1,9 +1,9 @@
 Fm.Parser.letter: Parser(Fm.Letter)
   (idx, code) case code {
-    nil: Parser.Reply.error<_>(idx, code, "Unexpected eof."),
+    nil: Parser.Reply.error!(idx, code, "Unexpected eof."),
     cons:
       if Fm.Name.is_letter(code.head) then
-        Parser.Reply.value<_>(Nat.succ(idx), code.tail, code.head)
+        Parser.Reply.value!(Nat.succ(idx), code.tail, code.head)
       else
-        Parser.Reply.error<_>(idx, code, "Expected letter."),
+        Parser.Reply.error!(idx, code, "Expected letter."),
   }

@@ -1,5 +1,5 @@
 Parser.eof: Parser(Unit)
   (idx,code) case code {
-    nil: Parser.Reply.value<_>(idx, code, Unit.new),
-    cons: Parser.Reply.error<_>(idx, code, "Expected end-of-file."),
+    nil: Parser.Reply.value!(idx, code, Unit.new),
+    cons: Parser.Reply.error!(idx, code, "Expected end-of-file."),
   }

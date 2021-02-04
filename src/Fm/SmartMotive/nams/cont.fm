@@ -3,7 +3,7 @@ Fm.SmartMotive.nams.cont(name: Fm.Name, term: Fm.Term, binds: List(Fm.Name), def
     all: Fm.SmartMotive.nams.cont(
       name,
       term.body(Fm.Term.ref(term.self),Fm.Term.ref(term.name)),
-      List.cons<_>(String.flatten([name, ".", term.name]), binds),
+      List.cons!(String.flatten([name, ".", term.name]), binds),
       defs),
-    _: List.cons<_>(name, List.tail<_>(binds)),
+    _: List.cons!(name, List.tail!(binds)),
   }

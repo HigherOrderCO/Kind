@@ -10,7 +10,7 @@ Fm.Parser.file.adt(file: String, code: String, defs: Fm.Defs): Parser(Fm.Defs)
         let type = Fm.Datatype.build_type(adt);
         let type = Fm.Term.bind([], (x) Bits.o(x), type);
         let defs = Fm.define(file, code, orig, adt.name, term, type, false, false, defs);
-        let defs = List.fold<_>(adt.ctrs)<_>(defs, (ctr, defs)
+        let defs = List.fold!(adt.ctrs)!(defs, (ctr, defs)
           let typ_name = adt.name;
           let ctr_name = String.flatten([typ_name, Fm.Name.read("."), case ctr { new: ctr.name }]);
           let ctr_term = Fm.Constructor.build_term(adt, ctr);
