@@ -1,4 +1,4 @@
-Fm.Synth.one(name: Fm.Name, defs: Fm.Defs): IO(Maybe(Fm.Defs))
+Fm.Synth.one(name: Fm.Name, defs: Fm.Defs, log: Bool): IO(Maybe(Fm.Defs))
   //log("synth ", name)
   case Fm.get<_>(name, defs) as got {
     none: do IO {
@@ -8,7 +8,7 @@ Fm.Synth.one(name: Fm.Name, defs: Fm.Defs): IO(Maybe(Fm.Defs))
           return none;
         },
         some: do IO {
-          Fm.Synth.one(name, loaded.value);
+          Fm.Synth.one(name, loaded.value, log);
         },
       };
     },
@@ -40,17 +40,22 @@ Fm.Synth.one(name: Fm.Name, defs: Fm.Defs): IO(Maybe(Fm.Defs))
                 //let skip = Debug.log<_>(String.join("\n", List.mapped<_>(checked.errors)<_>((x) String.concat("-- ", Fm.Error.show(x,Map.new<_>)))), (x) Unit.new);
                 if List.is_empty<_>(checked.errors) then do IO {
                   let defs = Fm.define(file, code, orig, name, term, type, isct, true, defs);
+                  if log then do IO {
+                    IO.print(name | " ✓")
+                  } else do IO {
+                    return unit
+                  }
                   //let defs = Fm.set<_>(name, Fm.Def.new(file, code, name, term, type, Fm.Status.done), defs);
                   return some(defs);
                 } else do IO {
-                  var fixed = Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, checked.errors, Bool.false);
+                  var fixed = Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, checked.errors, Bool.false, log);
                   case fixed {
                     none: do IO {
                       let stat = Fm.Status.fail(checked.errors);
                       let defs = Fm.set<_>(name, Fm.Def.new(file, code, orig, name, term, type, isct, stat), defs);
                       return some(defs);
                     },
-                    some: Fm.Synth.one(name, fixed.value),
+                    some: Fm.Synth.one(name, fixed.value, log),
                   };
                 }
             };

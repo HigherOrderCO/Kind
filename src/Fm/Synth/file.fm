@@ -1,4 +1,4 @@
-Fm.Synth.file(file: String, defs: Fm.Defs): IO(Either(String, Pair(List(Fm.Name), Fm.Defs)))
+Fm.Synth.file(file: String, defs: Fm.Defs, log: Bool): IO(Either(String, Pair(List(Fm.Name), Fm.Defs)))
   do IO {
     var code = IO.get_file(file);
     let read = Fm.Defs.read(file, code, defs);
@@ -10,7 +10,7 @@ Fm.Synth.file(file: String, defs: Fm.Defs): IO(Either(String, Pair(List(Fm.Name)
         let file_defs = read.value;
         let file_keys = Map.keys<_>(file_defs);
         let file_nams = List.mapped<_>(file_keys)<_>(Fm.Name.from_bits);
-        var defs = Fm.Synth.many(file_nams, file_defs);
+        var defs = Fm.Synth.many(file_nams, file_defs, log);
         return Either.right<_,_>({file_nams, defs});
       },
     };

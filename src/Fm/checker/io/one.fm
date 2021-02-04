@@ -1,6 +1,7 @@
 Fm.checker.io.one(name: String): IO(Unit)
   do IO {
-    var new_defs = Fm.Synth.one(name, Map.new<_>);
+    var new_defs = Fm.Synth.one(name, Map.new<_>, true);
+    IO.print("");
     case new_defs {
       none: IO.print(Fm.Defs.report(Map.new<_>, [name])),
       some: IO.print(Fm.Defs.report(new_defs.value, [name])),

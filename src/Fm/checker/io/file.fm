@@ -1,6 +1,6 @@
 Fm.checker.io.file(file: String): IO(Unit)
   do IO {
-    var loaded = Fm.Synth.file(file, Map.new<_>);
+    var loaded = Fm.Synth.file(file, Map.new<_>, true);
     case loaded {
       left: do IO {
         IO.print(String.flatten(["On '", file, "':"]));
@@ -10,6 +10,7 @@ Fm.checker.io.file(file: String): IO(Unit)
         new: do IO {
           let nams = loaded.value.fst;
           let defs = loaded.value.snd;
+          IO.print("");
           IO.print(Fm.Defs.report(defs, nams));
         }
       },

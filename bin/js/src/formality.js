@@ -19844,997 +19844,1024 @@ module.exports = (function() {
     };
     const List$is_empty = x0 => List$is_empty$(x0);
 
+    function IO$print$(_text$1) {
+        var $8068 = IO$ask$("print", _text$1, (_skip$2 => {
+            var $8069 = IO$end$(Unit$new);
+            return $8069;
+        }));
+        return $8068;
+    };
+    const IO$print = x0 => IO$print$(x0);
+
     function Fm$Term$patch_at$(_path$1, _term$2, _fn$3) {
         var self = _term$2;
         switch (self._) {
             case 'Fm.Term.var':
-                var $8069 = self.name;
-                var $8070 = self.indx;
+                var $8071 = self.name;
+                var $8072 = self.indx;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8072 = _fn$3(_term$2);
-                        var $8071 = $8072;
+                        var $8074 = _fn$3(_term$2);
+                        var $8073 = $8074;
                         break;
                     case 'o':
-                        var $8073 = self.slice(0, -1);
-                        var $8074 = _term$2;
-                        var $8071 = $8074;
-                        break;
-                    case 'i':
                         var $8075 = self.slice(0, -1);
                         var $8076 = _term$2;
-                        var $8071 = $8076;
+                        var $8073 = $8076;
+                        break;
+                    case 'i':
+                        var $8077 = self.slice(0, -1);
+                        var $8078 = _term$2;
+                        var $8073 = $8078;
                         break;
                 };
-                var $8068 = $8071;
+                var $8070 = $8073;
                 break;
             case 'Fm.Term.ref':
-                var $8077 = self.name;
+                var $8079 = self.name;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8079 = _fn$3(_term$2);
-                        var $8078 = $8079;
+                        var $8081 = _fn$3(_term$2);
+                        var $8080 = $8081;
                         break;
                     case 'o':
-                        var $8080 = self.slice(0, -1);
-                        var $8081 = _term$2;
-                        var $8078 = $8081;
-                        break;
-                    case 'i':
                         var $8082 = self.slice(0, -1);
                         var $8083 = _term$2;
-                        var $8078 = $8083;
+                        var $8080 = $8083;
+                        break;
+                    case 'i':
+                        var $8084 = self.slice(0, -1);
+                        var $8085 = _term$2;
+                        var $8080 = $8085;
                         break;
                 };
-                var $8068 = $8078;
+                var $8070 = $8080;
                 break;
             case 'Fm.Term.typ':
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8085 = _fn$3(_term$2);
-                        var $8084 = $8085;
+                        var $8087 = _fn$3(_term$2);
+                        var $8086 = $8087;
                         break;
                     case 'o':
-                        var $8086 = self.slice(0, -1);
-                        var $8087 = _term$2;
-                        var $8084 = $8087;
-                        break;
-                    case 'i':
                         var $8088 = self.slice(0, -1);
                         var $8089 = _term$2;
-                        var $8084 = $8089;
+                        var $8086 = $8089;
+                        break;
+                    case 'i':
+                        var $8090 = self.slice(0, -1);
+                        var $8091 = _term$2;
+                        var $8086 = $8091;
                         break;
                 };
-                var $8068 = $8084;
+                var $8070 = $8086;
                 break;
             case 'Fm.Term.all':
-                var $8090 = self.eras;
-                var $8091 = self.self;
-                var $8092 = self.name;
-                var $8093 = self.xtyp;
-                var $8094 = self.body;
+                var $8092 = self.eras;
+                var $8093 = self.self;
+                var $8094 = self.name;
+                var $8095 = self.xtyp;
+                var $8096 = self.body;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8096 = _fn$3(_term$2);
-                        var $8095 = $8096;
+                        var $8098 = _fn$3(_term$2);
+                        var $8097 = $8098;
                         break;
                     case 'o':
-                        var $8097 = self.slice(0, -1);
-                        var $8098 = Fm$Term$all$($8090, $8091, $8092, Fm$Term$patch_at$($8097, $8093, _fn$3), $8094);
-                        var $8095 = $8098;
+                        var $8099 = self.slice(0, -1);
+                        var $8100 = Fm$Term$all$($8092, $8093, $8094, Fm$Term$patch_at$($8099, $8095, _fn$3), $8096);
+                        var $8097 = $8100;
                         break;
                     case 'i':
-                        var $8099 = self.slice(0, -1);
-                        var $8100 = Fm$Term$all$($8090, $8091, $8092, $8093, (_s$10 => _x$11 => {
-                            var $8101 = Fm$Term$patch_at$($8099, $8094(_s$10)(_x$11), _fn$3);
-                            return $8101;
+                        var $8101 = self.slice(0, -1);
+                        var $8102 = Fm$Term$all$($8092, $8093, $8094, $8095, (_s$10 => _x$11 => {
+                            var $8103 = Fm$Term$patch_at$($8101, $8096(_s$10)(_x$11), _fn$3);
+                            return $8103;
                         }));
-                        var $8095 = $8100;
+                        var $8097 = $8102;
                         break;
                 };
-                var $8068 = $8095;
+                var $8070 = $8097;
                 break;
             case 'Fm.Term.lam':
-                var $8102 = self.name;
-                var $8103 = self.body;
+                var $8104 = self.name;
+                var $8105 = self.body;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8105 = _fn$3(_term$2);
-                        var $8104 = $8105;
+                        var $8107 = _fn$3(_term$2);
+                        var $8106 = $8107;
                         break;
                     case 'o':
-                        var $8106 = self.slice(0, -1);
-                        var $8107 = Fm$Term$lam$($8102, (_x$7 => {
-                            var $8108 = Fm$Term$patch_at$(Bits$tail$(_path$1), $8103(_x$7), _fn$3);
-                            return $8108;
+                        var $8108 = self.slice(0, -1);
+                        var $8109 = Fm$Term$lam$($8104, (_x$7 => {
+                            var $8110 = Fm$Term$patch_at$(Bits$tail$(_path$1), $8105(_x$7), _fn$3);
+                            return $8110;
                         }));
-                        var $8104 = $8107;
+                        var $8106 = $8109;
                         break;
                     case 'i':
-                        var $8109 = self.slice(0, -1);
-                        var $8110 = Fm$Term$lam$($8102, (_x$7 => {
-                            var $8111 = Fm$Term$patch_at$(Bits$tail$(_path$1), $8103(_x$7), _fn$3);
-                            return $8111;
+                        var $8111 = self.slice(0, -1);
+                        var $8112 = Fm$Term$lam$($8104, (_x$7 => {
+                            var $8113 = Fm$Term$patch_at$(Bits$tail$(_path$1), $8105(_x$7), _fn$3);
+                            return $8113;
                         }));
-                        var $8104 = $8110;
+                        var $8106 = $8112;
                         break;
                 };
-                var $8068 = $8104;
+                var $8070 = $8106;
                 break;
             case 'Fm.Term.app':
-                var $8112 = self.func;
-                var $8113 = self.argm;
+                var $8114 = self.func;
+                var $8115 = self.argm;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8115 = _fn$3(_term$2);
-                        var $8114 = $8115;
+                        var $8117 = _fn$3(_term$2);
+                        var $8116 = $8117;
                         break;
                     case 'o':
-                        var $8116 = self.slice(0, -1);
-                        var $8117 = Fm$Term$app$(Fm$Term$patch_at$($8116, $8112, _fn$3), $8113);
-                        var $8114 = $8117;
+                        var $8118 = self.slice(0, -1);
+                        var $8119 = Fm$Term$app$(Fm$Term$patch_at$($8118, $8114, _fn$3), $8115);
+                        var $8116 = $8119;
                         break;
                     case 'i':
-                        var $8118 = self.slice(0, -1);
-                        var $8119 = Fm$Term$app$($8112, Fm$Term$patch_at$($8118, $8113, _fn$3));
-                        var $8114 = $8119;
+                        var $8120 = self.slice(0, -1);
+                        var $8121 = Fm$Term$app$($8114, Fm$Term$patch_at$($8120, $8115, _fn$3));
+                        var $8116 = $8121;
                         break;
                 };
-                var $8068 = $8114;
+                var $8070 = $8116;
                 break;
             case 'Fm.Term.let':
-                var $8120 = self.name;
-                var $8121 = self.expr;
-                var $8122 = self.body;
+                var $8122 = self.name;
+                var $8123 = self.expr;
+                var $8124 = self.body;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8124 = _fn$3(_term$2);
-                        var $8123 = $8124;
+                        var $8126 = _fn$3(_term$2);
+                        var $8125 = $8126;
                         break;
                     case 'o':
-                        var $8125 = self.slice(0, -1);
-                        var $8126 = Fm$Term$let$($8120, Fm$Term$patch_at$($8125, $8121, _fn$3), $8122);
-                        var $8123 = $8126;
+                        var $8127 = self.slice(0, -1);
+                        var $8128 = Fm$Term$let$($8122, Fm$Term$patch_at$($8127, $8123, _fn$3), $8124);
+                        var $8125 = $8128;
                         break;
                     case 'i':
-                        var $8127 = self.slice(0, -1);
-                        var $8128 = Fm$Term$let$($8120, $8121, (_x$8 => {
-                            var $8129 = Fm$Term$patch_at$($8127, $8122(_x$8), _fn$3);
-                            return $8129;
+                        var $8129 = self.slice(0, -1);
+                        var $8130 = Fm$Term$let$($8122, $8123, (_x$8 => {
+                            var $8131 = Fm$Term$patch_at$($8129, $8124(_x$8), _fn$3);
+                            return $8131;
                         }));
-                        var $8123 = $8128;
+                        var $8125 = $8130;
                         break;
                 };
-                var $8068 = $8123;
+                var $8070 = $8125;
                 break;
             case 'Fm.Term.def':
-                var $8130 = self.name;
-                var $8131 = self.expr;
-                var $8132 = self.body;
+                var $8132 = self.name;
+                var $8133 = self.expr;
+                var $8134 = self.body;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8134 = _fn$3(_term$2);
-                        var $8133 = $8134;
+                        var $8136 = _fn$3(_term$2);
+                        var $8135 = $8136;
                         break;
                     case 'o':
-                        var $8135 = self.slice(0, -1);
-                        var $8136 = Fm$Term$def$($8130, Fm$Term$patch_at$($8135, $8131, _fn$3), $8132);
-                        var $8133 = $8136;
+                        var $8137 = self.slice(0, -1);
+                        var $8138 = Fm$Term$def$($8132, Fm$Term$patch_at$($8137, $8133, _fn$3), $8134);
+                        var $8135 = $8138;
                         break;
                     case 'i':
-                        var $8137 = self.slice(0, -1);
-                        var $8138 = Fm$Term$def$($8130, $8131, (_x$8 => {
-                            var $8139 = Fm$Term$patch_at$($8137, $8132(_x$8), _fn$3);
-                            return $8139;
+                        var $8139 = self.slice(0, -1);
+                        var $8140 = Fm$Term$def$($8132, $8133, (_x$8 => {
+                            var $8141 = Fm$Term$patch_at$($8139, $8134(_x$8), _fn$3);
+                            return $8141;
                         }));
-                        var $8133 = $8138;
+                        var $8135 = $8140;
                         break;
                 };
-                var $8068 = $8133;
+                var $8070 = $8135;
                 break;
             case 'Fm.Term.ann':
-                var $8140 = self.done;
-                var $8141 = self.term;
-                var $8142 = self.type;
+                var $8142 = self.done;
+                var $8143 = self.term;
+                var $8144 = self.type;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8144 = _fn$3(_term$2);
-                        var $8143 = $8144;
+                        var $8146 = _fn$3(_term$2);
+                        var $8145 = $8146;
                         break;
                     case 'o':
-                        var $8145 = self.slice(0, -1);
-                        var $8146 = Fm$Term$ann$($8140, Fm$Term$patch_at$($8145, $8141, _fn$3), $8142);
-                        var $8143 = $8146;
+                        var $8147 = self.slice(0, -1);
+                        var $8148 = Fm$Term$ann$($8142, Fm$Term$patch_at$($8147, $8143, _fn$3), $8144);
+                        var $8145 = $8148;
                         break;
                     case 'i':
-                        var $8147 = self.slice(0, -1);
-                        var $8148 = Fm$Term$ann$($8140, $8141, Fm$Term$patch_at$($8147, $8142, _fn$3));
-                        var $8143 = $8148;
+                        var $8149 = self.slice(0, -1);
+                        var $8150 = Fm$Term$ann$($8142, $8143, Fm$Term$patch_at$($8149, $8144, _fn$3));
+                        var $8145 = $8150;
                         break;
                 };
-                var $8068 = $8143;
+                var $8070 = $8145;
                 break;
             case 'Fm.Term.gol':
-                var $8149 = self.name;
-                var $8150 = self.dref;
-                var $8151 = self.verb;
+                var $8151 = self.name;
+                var $8152 = self.dref;
+                var $8153 = self.verb;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8153 = _fn$3(_term$2);
-                        var $8152 = $8153;
+                        var $8155 = _fn$3(_term$2);
+                        var $8154 = $8155;
                         break;
                     case 'o':
-                        var $8154 = self.slice(0, -1);
-                        var $8155 = _term$2;
-                        var $8152 = $8155;
-                        break;
-                    case 'i':
                         var $8156 = self.slice(0, -1);
                         var $8157 = _term$2;
-                        var $8152 = $8157;
+                        var $8154 = $8157;
+                        break;
+                    case 'i':
+                        var $8158 = self.slice(0, -1);
+                        var $8159 = _term$2;
+                        var $8154 = $8159;
                         break;
                 };
-                var $8068 = $8152;
+                var $8070 = $8154;
                 break;
             case 'Fm.Term.hol':
-                var $8158 = self.path;
+                var $8160 = self.path;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8160 = _fn$3(_term$2);
-                        var $8159 = $8160;
+                        var $8162 = _fn$3(_term$2);
+                        var $8161 = $8162;
                         break;
                     case 'o':
-                        var $8161 = self.slice(0, -1);
-                        var $8162 = _term$2;
-                        var $8159 = $8162;
-                        break;
-                    case 'i':
                         var $8163 = self.slice(0, -1);
                         var $8164 = _term$2;
-                        var $8159 = $8164;
+                        var $8161 = $8164;
+                        break;
+                    case 'i':
+                        var $8165 = self.slice(0, -1);
+                        var $8166 = _term$2;
+                        var $8161 = $8166;
                         break;
                 };
-                var $8068 = $8159;
+                var $8070 = $8161;
                 break;
             case 'Fm.Term.nat':
-                var $8165 = self.natx;
+                var $8167 = self.natx;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8167 = _fn$3(_term$2);
-                        var $8166 = $8167;
+                        var $8169 = _fn$3(_term$2);
+                        var $8168 = $8169;
                         break;
                     case 'o':
-                        var $8168 = self.slice(0, -1);
-                        var $8169 = _term$2;
-                        var $8166 = $8169;
-                        break;
-                    case 'i':
                         var $8170 = self.slice(0, -1);
                         var $8171 = _term$2;
-                        var $8166 = $8171;
+                        var $8168 = $8171;
+                        break;
+                    case 'i':
+                        var $8172 = self.slice(0, -1);
+                        var $8173 = _term$2;
+                        var $8168 = $8173;
                         break;
                 };
-                var $8068 = $8166;
+                var $8070 = $8168;
                 break;
             case 'Fm.Term.chr':
-                var $8172 = self.chrx;
+                var $8174 = self.chrx;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8174 = _fn$3(_term$2);
-                        var $8173 = $8174;
+                        var $8176 = _fn$3(_term$2);
+                        var $8175 = $8176;
                         break;
                     case 'o':
-                        var $8175 = self.slice(0, -1);
-                        var $8176 = _term$2;
-                        var $8173 = $8176;
-                        break;
-                    case 'i':
                         var $8177 = self.slice(0, -1);
                         var $8178 = _term$2;
-                        var $8173 = $8178;
+                        var $8175 = $8178;
+                        break;
+                    case 'i':
+                        var $8179 = self.slice(0, -1);
+                        var $8180 = _term$2;
+                        var $8175 = $8180;
                         break;
                 };
-                var $8068 = $8173;
+                var $8070 = $8175;
                 break;
             case 'Fm.Term.str':
-                var $8179 = self.strx;
+                var $8181 = self.strx;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8181 = _fn$3(_term$2);
-                        var $8180 = $8181;
+                        var $8183 = _fn$3(_term$2);
+                        var $8182 = $8183;
                         break;
                     case 'o':
-                        var $8182 = self.slice(0, -1);
-                        var $8183 = _term$2;
-                        var $8180 = $8183;
-                        break;
-                    case 'i':
                         var $8184 = self.slice(0, -1);
                         var $8185 = _term$2;
-                        var $8180 = $8185;
+                        var $8182 = $8185;
+                        break;
+                    case 'i':
+                        var $8186 = self.slice(0, -1);
+                        var $8187 = _term$2;
+                        var $8182 = $8187;
                         break;
                 };
-                var $8068 = $8180;
+                var $8070 = $8182;
                 break;
             case 'Fm.Term.cse':
-                var $8186 = self.path;
-                var $8187 = self.expr;
-                var $8188 = self.name;
-                var $8189 = self.with;
-                var $8190 = self.cses;
-                var $8191 = self.moti;
+                var $8188 = self.path;
+                var $8189 = self.expr;
+                var $8190 = self.name;
+                var $8191 = self.with;
+                var $8192 = self.cses;
+                var $8193 = self.moti;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $8193 = _fn$3(_term$2);
-                        var $8192 = $8193;
+                        var $8195 = _fn$3(_term$2);
+                        var $8194 = $8195;
                         break;
                     case 'o':
-                        var $8194 = self.slice(0, -1);
-                        var $8195 = _term$2;
-                        var $8192 = $8195;
-                        break;
-                    case 'i':
                         var $8196 = self.slice(0, -1);
                         var $8197 = _term$2;
-                        var $8192 = $8197;
+                        var $8194 = $8197;
+                        break;
+                    case 'i':
+                        var $8198 = self.slice(0, -1);
+                        var $8199 = _term$2;
+                        var $8194 = $8199;
                         break;
                 };
-                var $8068 = $8192;
+                var $8070 = $8194;
                 break;
             case 'Fm.Term.ori':
-                var $8198 = self.orig;
-                var $8199 = self.expr;
-                var $8200 = Fm$Term$ori$($8198, Fm$Term$patch_at$(_path$1, $8199, _fn$3));
-                var $8068 = $8200;
+                var $8200 = self.orig;
+                var $8201 = self.expr;
+                var $8202 = Fm$Term$ori$($8200, Fm$Term$patch_at$(_path$1, $8201, _fn$3));
+                var $8070 = $8202;
                 break;
         };
-        return $8068;
+        return $8070;
     };
     const Fm$Term$patch_at = x0 => x1 => x2 => Fm$Term$patch_at$(x0, x1, x2);
 
-    function Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, _errs$9, _fixd$10) {
+    function Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, _errs$9, _fixd$10, _log$11) {
         var self = _errs$9;
         switch (self._) {
             case 'List.nil':
                 var self = _fixd$10;
                 if (self) {
-                    var _type$11 = Fm$Term$bind$(List$nil, (_x$11 => {
-                        var $8204 = (_x$11 + '1');
-                        return $8204;
-                    }), _type$6);
-                    var _term$12 = Fm$Term$bind$(List$nil, (_x$12 => {
-                        var $8205 = (_x$12 + '0');
-                        return $8205;
-                    }), _term$5);
-                    var _defs$13 = Fm$set$(_name$4, Fm$Def$new$(_file$1, _code$2, _orig$3, _name$4, _term$12, _type$11, _isct$7, Fm$Status$init), _defs$8);
-                    var $8203 = IO$monad$((_m$bind$14 => _m$pure$15 => {
-                        var $8206 = _m$pure$15;
+                    var _type$12 = Fm$Term$bind$(List$nil, (_x$12 => {
+                        var $8206 = (_x$12 + '1');
                         return $8206;
-                    }))(Maybe$some$(_defs$13));
-                    var $8202 = $8203;
-                } else {
-                    var $8207 = IO$monad$((_m$bind$11 => _m$pure$12 => {
-                        var $8208 = _m$pure$12;
+                    }), _type$6);
+                    var _term$13 = Fm$Term$bind$(List$nil, (_x$13 => {
+                        var $8207 = (_x$13 + '0');
+                        return $8207;
+                    }), _term$5);
+                    var _defs$14 = Fm$set$(_name$4, Fm$Def$new$(_file$1, _code$2, _orig$3, _name$4, _term$13, _type$12, _isct$7, Fm$Status$init), _defs$8);
+                    var $8205 = IO$monad$((_m$bind$15 => _m$pure$16 => {
+                        var $8208 = _m$pure$16;
                         return $8208;
+                    }))(Maybe$some$(_defs$14));
+                    var $8204 = $8205;
+                } else {
+                    var $8209 = IO$monad$((_m$bind$12 => _m$pure$13 => {
+                        var $8210 = _m$pure$13;
+                        return $8210;
                     }))(Maybe$none);
-                    var $8202 = $8207;
+                    var $8204 = $8209;
                 };
-                var $8201 = $8202;
+                var $8203 = $8204;
                 break;
             case 'List.cons':
-                var $8209 = self.head;
-                var $8210 = self.tail;
-                var self = $8209;
+                var $8211 = self.head;
+                var $8212 = self.tail;
+                var self = $8211;
                 switch (self._) {
                     case 'Fm.Error.type_mismatch':
-                        var $8212 = self.origin;
-                        var $8213 = self.expected;
-                        var $8214 = self.detected;
-                        var $8215 = self.context;
-                        var $8216 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, $8210, _fixd$10);
-                        var $8211 = $8216;
+                        var $8214 = self.origin;
+                        var $8215 = self.expected;
+                        var $8216 = self.detected;
+                        var $8217 = self.context;
+                        var $8218 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, $8212, _fixd$10, _log$11);
+                        var $8213 = $8218;
                         break;
                     case 'Fm.Error.show_goal':
-                        var $8217 = self.name;
-                        var $8218 = self.dref;
-                        var $8219 = self.verb;
-                        var $8220 = self.goal;
-                        var $8221 = self.context;
-                        var $8222 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, $8210, _fixd$10);
-                        var $8211 = $8222;
+                        var $8219 = self.name;
+                        var $8220 = self.dref;
+                        var $8221 = self.verb;
+                        var $8222 = self.goal;
+                        var $8223 = self.context;
+                        var $8224 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, $8212, _fixd$10, _log$11);
+                        var $8213 = $8224;
                         break;
                     case 'Fm.Error.waiting':
-                        var $8223 = self.name;
-                        var $8224 = IO$monad$((_m$bind$14 => _m$pure$15 => {
-                            var $8225 = _m$bind$14;
-                            return $8225;
-                        }))(Fm$Synth$one$($8223, _defs$8))((_new_defs$14 => {
-                            var self = _new_defs$14;
-                            switch (self._) {
-                                case 'Maybe.none':
-                                    var $8227 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, $8210, _fixd$10);
-                                    var $8226 = $8227;
-                                    break;
-                                case 'Maybe.some':
-                                    var $8228 = self.value;
-                                    var $8229 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, $8228, $8210, Bool$true);
-                                    var $8226 = $8229;
-                                    break;
-                            };
-                            return $8226;
-                        }));
-                        var $8211 = $8224;
-                        break;
-                    case 'Fm.Error.indirect':
-                        var $8230 = self.name;
-                        var $8231 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, $8210, _fixd$10);
-                        var $8211 = $8231;
-                        break;
-                    case 'Fm.Error.patch':
-                        var $8232 = self.path;
-                        var $8233 = self.term;
-                        var self = $8232;
-                        switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
-                            case 'e':
-                                var $8235 = IO$monad$((_m$bind$15 => _m$pure$16 => {
-                                    var $8236 = _m$pure$16;
-                                    return $8236;
-                                }))(Maybe$none);
-                                var $8234 = $8235;
-                                break;
-                            case 'o':
-                                var $8237 = self.slice(0, -1);
-                                var _term$16 = Fm$Term$patch_at$($8237, _term$5, (_x$16 => {
-                                    var $8239 = $8233;
-                                    return $8239;
-                                }));
-                                var $8238 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$16, _type$6, _isct$7, _defs$8, $8210, Bool$true);
-                                var $8234 = $8238;
-                                break;
-                            case 'i':
-                                var $8240 = self.slice(0, -1);
-                                var _type$16 = Fm$Term$patch_at$($8240, _type$6, (_x$16 => {
-                                    var $8242 = $8233;
-                                    return $8242;
-                                }));
-                                var $8241 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$16, _isct$7, _defs$8, $8210, Bool$true);
-                                var $8234 = $8241;
-                                break;
-                        };
-                        var $8211 = $8234;
-                        break;
-                    case 'Fm.Error.undefined_reference':
-                        var $8243 = self.origin;
-                        var $8244 = self.name;
-                        var $8245 = IO$monad$((_m$bind$15 => _m$pure$16 => {
-                            var $8246 = _m$bind$15;
-                            return $8246;
-                        }))(Fm$Synth$one$($8244, _defs$8))((_new_defs$15 => {
+                        var $8225 = self.name;
+                        var $8226 = IO$monad$((_m$bind$15 => _m$pure$16 => {
+                            var $8227 = _m$bind$15;
+                            return $8227;
+                        }))(Fm$Synth$one$($8225, _defs$8, _log$11))((_new_defs$15 => {
                             var self = _new_defs$15;
                             switch (self._) {
                                 case 'Maybe.none':
-                                    var $8248 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, $8210, _fixd$10);
-                                    var $8247 = $8248;
+                                    var $8229 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, $8212, _fixd$10, _log$11);
+                                    var $8228 = $8229;
                                     break;
                                 case 'Maybe.some':
-                                    var $8249 = self.value;
-                                    var $8250 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, $8249, $8210, Bool$true);
-                                    var $8247 = $8250;
+                                    var $8230 = self.value;
+                                    var $8231 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, $8230, $8212, Bool$true, _log$11);
+                                    var $8228 = $8231;
                                     break;
                             };
-                            return $8247;
+                            return $8228;
                         }));
-                        var $8211 = $8245;
+                        var $8213 = $8226;
+                        break;
+                    case 'Fm.Error.indirect':
+                        var $8232 = self.name;
+                        var $8233 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, $8212, _fixd$10, _log$11);
+                        var $8213 = $8233;
+                        break;
+                    case 'Fm.Error.patch':
+                        var $8234 = self.path;
+                        var $8235 = self.term;
+                        var self = $8234;
+                        switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
+                            case 'e':
+                                var $8237 = IO$monad$((_m$bind$16 => _m$pure$17 => {
+                                    var $8238 = _m$pure$17;
+                                    return $8238;
+                                }))(Maybe$none);
+                                var $8236 = $8237;
+                                break;
+                            case 'o':
+                                var $8239 = self.slice(0, -1);
+                                var _term$17 = Fm$Term$patch_at$($8239, _term$5, (_x$17 => {
+                                    var $8241 = $8235;
+                                    return $8241;
+                                }));
+                                var $8240 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$17, _type$6, _isct$7, _defs$8, $8212, Bool$true, _log$11);
+                                var $8236 = $8240;
+                                break;
+                            case 'i':
+                                var $8242 = self.slice(0, -1);
+                                var _type$17 = Fm$Term$patch_at$($8242, _type$6, (_x$17 => {
+                                    var $8244 = $8235;
+                                    return $8244;
+                                }));
+                                var $8243 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$17, _isct$7, _defs$8, $8212, Bool$true, _log$11);
+                                var $8236 = $8243;
+                                break;
+                        };
+                        var $8213 = $8236;
+                        break;
+                    case 'Fm.Error.undefined_reference':
+                        var $8245 = self.origin;
+                        var $8246 = self.name;
+                        var $8247 = IO$monad$((_m$bind$16 => _m$pure$17 => {
+                            var $8248 = _m$bind$16;
+                            return $8248;
+                        }))(Fm$Synth$one$($8246, _defs$8, _log$11))((_new_defs$16 => {
+                            var self = _new_defs$16;
+                            switch (self._) {
+                                case 'Maybe.none':
+                                    var $8250 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, $8212, _fixd$10, _log$11);
+                                    var $8249 = $8250;
+                                    break;
+                                case 'Maybe.some':
+                                    var $8251 = self.value;
+                                    var $8252 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, $8251, $8212, Bool$true, _log$11);
+                                    var $8249 = $8252;
+                                    break;
+                            };
+                            return $8249;
+                        }));
+                        var $8213 = $8247;
                         break;
                     case 'Fm.Error.cant_infer':
-                        var $8251 = self.origin;
-                        var $8252 = self.term;
-                        var $8253 = self.context;
-                        var $8254 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, $8210, _fixd$10);
-                        var $8211 = $8254;
+                        var $8253 = self.origin;
+                        var $8254 = self.term;
+                        var $8255 = self.context;
+                        var $8256 = Fm$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _defs$8, $8212, _fixd$10, _log$11);
+                        var $8213 = $8256;
                         break;
                 };
-                var $8201 = $8211;
+                var $8203 = $8213;
                 break;
         };
-        return $8201;
+        return $8203;
     };
-    const Fm$Synth$fix = x0 => x1 => x2 => x3 => x4 => x5 => x6 => x7 => x8 => x9 => Fm$Synth$fix$(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9);
+    const Fm$Synth$fix = x0 => x1 => x2 => x3 => x4 => x5 => x6 => x7 => x8 => x9 => x10 => Fm$Synth$fix$(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10);
 
     function Fm$Status$fail$(_errors$1) {
-        var $8255 = ({
+        var $8257 = ({
             _: 'Fm.Status.fail',
             'errors': _errors$1
         });
-        return $8255;
+        return $8257;
     };
     const Fm$Status$fail = x0 => Fm$Status$fail$(x0);
 
-    function Fm$Synth$one$(_name$1, _defs$2) {
+    function Fm$Synth$one$(_name$1, _defs$2, _log$3) {
         var self = Fm$get$(_name$1, _defs$2);
         switch (self._) {
             case 'Maybe.none':
-                var $8257 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-                    var $8258 = _m$bind$3;
-                    return $8258;
-                }))(Fm$Synth$load$(_name$1, _defs$2))((_loaded$3 => {
-                    var self = _loaded$3;
+                var $8259 = IO$monad$((_m$bind$4 => _m$pure$5 => {
+                    var $8260 = _m$bind$4;
+                    return $8260;
+                }))(Fm$Synth$load$(_name$1, _defs$2))((_loaded$4 => {
+                    var self = _loaded$4;
                     switch (self._) {
                         case 'Maybe.none':
-                            var $8260 = IO$monad$((_m$bind$4 => _m$pure$5 => {
-                                var $8261 = _m$pure$5;
-                                return $8261;
+                            var $8262 = IO$monad$((_m$bind$5 => _m$pure$6 => {
+                                var $8263 = _m$pure$6;
+                                return $8263;
                             }))(Maybe$none);
-                            var $8259 = $8260;
+                            var $8261 = $8262;
                             break;
                         case 'Maybe.some':
-                            var $8262 = self.value;
-                            var $8263 = Fm$Synth$one$(_name$1, $8262);
-                            var $8259 = $8263;
+                            var $8264 = self.value;
+                            var $8265 = Fm$Synth$one$(_name$1, $8264, _log$3);
+                            var $8261 = $8265;
                             break;
                     };
-                    return $8259;
+                    return $8261;
                 }));
-                var $8256 = $8257;
+                var $8258 = $8259;
                 break;
             case 'Maybe.some':
-                var $8264 = self.value;
-                var self = $8264;
+                var $8266 = self.value;
+                var self = $8266;
                 switch (self._) {
                     case 'Fm.Def.new':
-                        var $8266 = self.file;
-                        var $8267 = self.code;
-                        var $8268 = self.orig;
-                        var $8269 = self.name;
-                        var $8270 = self.term;
-                        var $8271 = self.type;
-                        var $8272 = self.isct;
-                        var $8273 = self.stat;
-                        var _file$12 = $8266;
-                        var _code$13 = $8267;
-                        var _orig$14 = $8268;
-                        var _name$15 = $8269;
-                        var _term$16 = $8270;
-                        var _type$17 = $8271;
-                        var _isct$18 = $8272;
-                        var _stat$19 = $8273;
-                        var self = _stat$19;
+                        var $8268 = self.file;
+                        var $8269 = self.code;
+                        var $8270 = self.orig;
+                        var $8271 = self.name;
+                        var $8272 = self.term;
+                        var $8273 = self.type;
+                        var $8274 = self.isct;
+                        var $8275 = self.stat;
+                        var _file$13 = $8268;
+                        var _code$14 = $8269;
+                        var _orig$15 = $8270;
+                        var _name$16 = $8271;
+                        var _term$17 = $8272;
+                        var _type$18 = $8273;
+                        var _isct$19 = $8274;
+                        var _stat$20 = $8275;
+                        var self = _stat$20;
                         switch (self._) {
                             case 'Fm.Status.init':
-                                var _defs$20 = Fm$set$(_name$15, Fm$Def$new$(_file$12, _code$13, _orig$14, _name$15, _term$16, _type$17, _isct$18, Fm$Status$wait), _defs$2);
-                                var self = Fm$Term$check$(_type$17, Maybe$some$(Fm$Term$typ), _defs$20, List$nil, Fm$MPath$i$(Fm$MPath$nil), Maybe$none);
+                                var _defs$21 = Fm$set$(_name$16, Fm$Def$new$(_file$13, _code$14, _orig$15, _name$16, _term$17, _type$18, _isct$19, Fm$Status$wait), _defs$2);
+                                var self = Fm$Term$check$(_type$18, Maybe$some$(Fm$Term$typ), _defs$21, List$nil, Fm$MPath$i$(Fm$MPath$nil), Maybe$none);
                                 switch (self._) {
                                     case 'Fm.Check.result':
-                                        var $8276 = self.value;
-                                        var $8277 = self.errors;
-                                        var self = $8276;
+                                        var $8278 = self.value;
+                                        var $8279 = self.errors;
+                                        var self = $8278;
                                         switch (self._) {
                                             case 'Maybe.none':
-                                                var $8279 = Fm$Check$result$(Maybe$none, $8277);
-                                                var $8278 = $8279;
+                                                var $8281 = Fm$Check$result$(Maybe$none, $8279);
+                                                var $8280 = $8281;
                                                 break;
                                             case 'Maybe.some':
-                                                var $8280 = self.value;
-                                                var self = Fm$Term$check$(_term$16, Maybe$some$(_type$17), _defs$20, List$nil, Fm$MPath$o$(Fm$MPath$nil), Maybe$none);
+                                                var $8282 = self.value;
+                                                var self = Fm$Term$check$(_term$17, Maybe$some$(_type$18), _defs$21, List$nil, Fm$MPath$o$(Fm$MPath$nil), Maybe$none);
                                                 switch (self._) {
                                                     case 'Fm.Check.result':
-                                                        var $8282 = self.value;
-                                                        var $8283 = self.errors;
-                                                        var self = $8282;
+                                                        var $8284 = self.value;
+                                                        var $8285 = self.errors;
+                                                        var self = $8284;
                                                         switch (self._) {
                                                             case 'Maybe.none':
-                                                                var $8285 = Fm$Check$result$(Maybe$none, $8283);
-                                                                var $8284 = $8285;
+                                                                var $8287 = Fm$Check$result$(Maybe$none, $8285);
+                                                                var $8286 = $8287;
                                                                 break;
                                                             case 'Maybe.some':
-                                                                var $8286 = self.value;
+                                                                var $8288 = self.value;
                                                                 var self = Fm$Check$result$(Maybe$some$(Unit$new), List$nil);
                                                                 switch (self._) {
                                                                     case 'Fm.Check.result':
-                                                                        var $8288 = self.value;
-                                                                        var $8289 = self.errors;
-                                                                        var $8290 = Fm$Check$result$($8288, List$concat$($8283, $8289));
-                                                                        var $8287 = $8290;
+                                                                        var $8290 = self.value;
+                                                                        var $8291 = self.errors;
+                                                                        var $8292 = Fm$Check$result$($8290, List$concat$($8285, $8291));
+                                                                        var $8289 = $8292;
                                                                         break;
                                                                 };
-                                                                var $8284 = $8287;
+                                                                var $8286 = $8289;
                                                                 break;
                                                         };
-                                                        var self = $8284;
+                                                        var self = $8286;
                                                         break;
                                                 };
                                                 switch (self._) {
                                                     case 'Fm.Check.result':
-                                                        var $8291 = self.value;
-                                                        var $8292 = self.errors;
-                                                        var $8293 = Fm$Check$result$($8291, List$concat$($8277, $8292));
-                                                        var $8281 = $8293;
+                                                        var $8293 = self.value;
+                                                        var $8294 = self.errors;
+                                                        var $8295 = Fm$Check$result$($8293, List$concat$($8279, $8294));
+                                                        var $8283 = $8295;
                                                         break;
                                                 };
-                                                var $8278 = $8281;
+                                                var $8280 = $8283;
                                                 break;
                                         };
-                                        var _checked$21 = $8278;
+                                        var _checked$22 = $8280;
                                         break;
                                 };
-                                var self = _checked$21;
+                                var self = _checked$22;
                                 switch (self._) {
                                     case 'Fm.Check.result':
-                                        var $8294 = self.value;
-                                        var $8295 = self.errors;
-                                        var self = List$is_empty$($8295);
+                                        var $8296 = self.value;
+                                        var $8297 = self.errors;
+                                        var self = List$is_empty$($8297);
                                         if (self) {
-                                            var _defs$24 = Fm$define$(_file$12, _code$13, _orig$14, _name$15, _term$16, _type$17, _isct$18, Bool$true, _defs$20);
-                                            var $8297 = IO$monad$((_m$bind$25 => _m$pure$26 => {
-                                                var $8298 = _m$pure$26;
-                                                return $8298;
-                                            }))(Maybe$some$(_defs$24));
-                                            var $8296 = $8297;
-                                        } else {
-                                            var $8299 = IO$monad$((_m$bind$24 => _m$pure$25 => {
-                                                var $8300 = _m$bind$24;
+                                            var _defs$25 = Fm$define$(_file$13, _code$14, _orig$15, _name$16, _term$17, _type$18, _isct$19, Bool$true, _defs$21);
+                                            var $8299 = IO$monad$((_m$bind$26 => _m$pure$27 => {
+                                                var $8300 = _m$bind$26;
                                                 return $8300;
-                                            }))(Fm$Synth$fix$(_file$12, _code$13, _orig$14, _name$15, _term$16, _type$17, _isct$18, _defs$20, $8295, Bool$false))((_fixed$24 => {
-                                                var self = _fixed$24;
+                                            }))((() => {
+                                                var self = _log$3;
+                                                if (self) {
+                                                    var $8301 = IO$print$((_name$16 + " \u{2713}"));
+                                                    return $8301;
+                                                } else {
+                                                    var $8302 = IO$monad$((_m$bind$26 => _m$pure$27 => {
+                                                        var $8303 = _m$pure$27;
+                                                        return $8303;
+                                                    }))(Unit$new);
+                                                    return $8302;
+                                                };
+                                            })())((_$26 => {
+                                                var $8304 = IO$monad$((_m$bind$27 => _m$pure$28 => {
+                                                    var $8305 = _m$pure$28;
+                                                    return $8305;
+                                                }))(Maybe$some$(_defs$25));
+                                                return $8304;
+                                            }));
+                                            var $8298 = $8299;
+                                        } else {
+                                            var $8306 = IO$monad$((_m$bind$25 => _m$pure$26 => {
+                                                var $8307 = _m$bind$25;
+                                                return $8307;
+                                            }))(Fm$Synth$fix$(_file$13, _code$14, _orig$15, _name$16, _term$17, _type$18, _isct$19, _defs$21, $8297, Bool$false, _log$3))((_fixed$25 => {
+                                                var self = _fixed$25;
                                                 switch (self._) {
                                                     case 'Maybe.none':
-                                                        var _stat$25 = Fm$Status$fail$($8295);
-                                                        var _defs$26 = Fm$set$(_name$15, Fm$Def$new$(_file$12, _code$13, _orig$14, _name$15, _term$16, _type$17, _isct$18, _stat$25), _defs$20);
-                                                        var $8302 = IO$monad$((_m$bind$27 => _m$pure$28 => {
-                                                            var $8303 = _m$pure$28;
-                                                            return $8303;
-                                                        }))(Maybe$some$(_defs$26));
-                                                        var $8301 = $8302;
+                                                        var _stat$26 = Fm$Status$fail$($8297);
+                                                        var _defs$27 = Fm$set$(_name$16, Fm$Def$new$(_file$13, _code$14, _orig$15, _name$16, _term$17, _type$18, _isct$19, _stat$26), _defs$21);
+                                                        var $8309 = IO$monad$((_m$bind$28 => _m$pure$29 => {
+                                                            var $8310 = _m$pure$29;
+                                                            return $8310;
+                                                        }))(Maybe$some$(_defs$27));
+                                                        var $8308 = $8309;
                                                         break;
                                                     case 'Maybe.some':
-                                                        var $8304 = self.value;
-                                                        var $8305 = Fm$Synth$one$(_name$15, $8304);
-                                                        var $8301 = $8305;
+                                                        var $8311 = self.value;
+                                                        var $8312 = Fm$Synth$one$(_name$16, $8311, _log$3);
+                                                        var $8308 = $8312;
                                                         break;
                                                 };
-                                                return $8301;
+                                                return $8308;
                                             }));
-                                            var $8296 = $8299;
+                                            var $8298 = $8306;
                                         };
-                                        var $8275 = $8296;
+                                        var $8277 = $8298;
                                         break;
                                 };
-                                var $8274 = $8275;
+                                var $8276 = $8277;
                                 break;
                             case 'Fm.Status.wait':
-                                var $8306 = IO$monad$((_m$bind$20 => _m$pure$21 => {
-                                    var $8307 = _m$pure$21;
-                                    return $8307;
+                                var $8313 = IO$monad$((_m$bind$21 => _m$pure$22 => {
+                                    var $8314 = _m$pure$22;
+                                    return $8314;
                                 }))(Maybe$some$(_defs$2));
-                                var $8274 = $8306;
+                                var $8276 = $8313;
                                 break;
                             case 'Fm.Status.done':
-                                var $8308 = IO$monad$((_m$bind$20 => _m$pure$21 => {
-                                    var $8309 = _m$pure$21;
-                                    return $8309;
+                                var $8315 = IO$monad$((_m$bind$21 => _m$pure$22 => {
+                                    var $8316 = _m$pure$22;
+                                    return $8316;
                                 }))(Maybe$some$(_defs$2));
-                                var $8274 = $8308;
+                                var $8276 = $8315;
                                 break;
                             case 'Fm.Status.fail':
-                                var $8310 = self.errors;
-                                var $8311 = IO$monad$((_m$bind$21 => _m$pure$22 => {
-                                    var $8312 = _m$pure$22;
-                                    return $8312;
+                                var $8317 = self.errors;
+                                var $8318 = IO$monad$((_m$bind$22 => _m$pure$23 => {
+                                    var $8319 = _m$pure$23;
+                                    return $8319;
                                 }))(Maybe$some$(_defs$2));
-                                var $8274 = $8311;
+                                var $8276 = $8318;
                                 break;
                         };
-                        var $8265 = $8274;
+                        var $8267 = $8276;
                         break;
                 };
-                var $8256 = $8265;
+                var $8258 = $8267;
                 break;
         };
-        return $8256;
+        return $8258;
     };
-    const Fm$Synth$one = x0 => x1 => Fm$Synth$one$(x0, x1);
+    const Fm$Synth$one = x0 => x1 => x2 => Fm$Synth$one$(x0, x1, x2);
 
     function Map$map$(_fn$3, _map$4) {
         var self = _map$4;
         switch (self._) {
             case 'Map.new':
-                var $8314 = Map$new;
-                var $8313 = $8314;
+                var $8321 = Map$new;
+                var $8320 = $8321;
                 break;
             case 'Map.tie':
-                var $8315 = self.val;
-                var $8316 = self.lft;
-                var $8317 = self.rgt;
-                var self = $8315;
+                var $8322 = self.val;
+                var $8323 = self.lft;
+                var $8324 = self.rgt;
+                var self = $8322;
                 switch (self._) {
                     case 'Maybe.none':
-                        var $8319 = Maybe$none;
-                        var _val$8 = $8319;
+                        var $8326 = Maybe$none;
+                        var _val$8 = $8326;
                         break;
                     case 'Maybe.some':
-                        var $8320 = self.value;
-                        var $8321 = Maybe$some$(_fn$3($8320));
-                        var _val$8 = $8321;
+                        var $8327 = self.value;
+                        var $8328 = Maybe$some$(_fn$3($8327));
+                        var _val$8 = $8328;
                         break;
                 };
-                var _lft$9 = Map$map$(_fn$3, $8316);
-                var _rgt$10 = Map$map$(_fn$3, $8317);
-                var $8318 = Map$tie$(_val$8, _lft$9, _rgt$10);
-                var $8313 = $8318;
+                var _lft$9 = Map$map$(_fn$3, $8323);
+                var _rgt$10 = Map$map$(_fn$3, $8324);
+                var $8325 = Map$tie$(_val$8, _lft$9, _rgt$10);
+                var $8320 = $8325;
                 break;
         };
-        return $8313;
+        return $8320;
     };
     const Map$map = x0 => x1 => Map$map$(x0, x1);
     const Fm$Term$inline$names = (() => {
         var _inl$1 = List$cons$("Monad.pure", List$cons$("Monad.bind", List$cons$("Monad.new", List$cons$("Parser.monad", List$cons$("Parser.bind", List$cons$("Parser.pure", List$cons$("Fm.Check.pure", List$cons$("Fm.Check.bind", List$cons$("Fm.Check.monad", List$cons$("Fm.Check.value", List$cons$("Fm.Check.none", List$nil)))))))))));
         var _kvs$2 = List$mapped$(_inl$1, (_x$2 => {
-            var $8323 = Pair$new$((fm_name_to_bits(_x$2)), Unit$new);
-            return $8323;
+            var $8330 = Pair$new$((fm_name_to_bits(_x$2)), Unit$new);
+            return $8330;
         }));
-        var $8322 = Map$from_list$(_kvs$2);
-        return $8322;
+        var $8329 = Map$from_list$(_kvs$2);
+        return $8329;
     })();
 
     function Fm$Term$inline$reduce$(_term$1, _defs$2) {
         var self = _term$1;
         switch (self._) {
             case 'Fm.Term.var':
-                var $8325 = self.name;
-                var $8326 = self.indx;
-                var $8327 = _term$1;
-                var $8324 = $8327;
+                var $8332 = self.name;
+                var $8333 = self.indx;
+                var $8334 = _term$1;
+                var $8331 = $8334;
                 break;
             case 'Fm.Term.ref':
-                var $8328 = self.name;
-                var _inli$4 = Set$has$((fm_name_to_bits($8328)), Fm$Term$inline$names);
+                var $8335 = self.name;
+                var _inli$4 = Set$has$((fm_name_to_bits($8335)), Fm$Term$inline$names);
                 var self = _inli$4;
                 if (self) {
-                    var self = Fm$get$($8328, _defs$2);
+                    var self = Fm$get$($8335, _defs$2);
                     switch (self._) {
                         case 'Maybe.none':
-                            var $8331 = Fm$Term$ref$($8328);
-                            var $8330 = $8331;
+                            var $8338 = Fm$Term$ref$($8335);
+                            var $8337 = $8338;
                             break;
                         case 'Maybe.some':
-                            var $8332 = self.value;
-                            var self = $8332;
+                            var $8339 = self.value;
+                            var self = $8339;
                             switch (self._) {
                                 case 'Fm.Def.new':
-                                    var $8334 = self.file;
-                                    var $8335 = self.code;
-                                    var $8336 = self.orig;
-                                    var $8337 = self.name;
-                                    var $8338 = self.term;
-                                    var $8339 = self.type;
-                                    var $8340 = self.isct;
-                                    var $8341 = self.stat;
-                                    var $8342 = Fm$Term$inline$reduce$($8338, _defs$2);
-                                    var $8333 = $8342;
+                                    var $8341 = self.file;
+                                    var $8342 = self.code;
+                                    var $8343 = self.orig;
+                                    var $8344 = self.name;
+                                    var $8345 = self.term;
+                                    var $8346 = self.type;
+                                    var $8347 = self.isct;
+                                    var $8348 = self.stat;
+                                    var $8349 = Fm$Term$inline$reduce$($8345, _defs$2);
+                                    var $8340 = $8349;
                                     break;
                             };
-                            var $8330 = $8333;
+                            var $8337 = $8340;
                             break;
                     };
-                    var $8329 = $8330;
+                    var $8336 = $8337;
                 } else {
-                    var $8343 = _term$1;
-                    var $8329 = $8343;
+                    var $8350 = _term$1;
+                    var $8336 = $8350;
                 };
-                var $8324 = $8329;
+                var $8331 = $8336;
                 break;
             case 'Fm.Term.typ':
-                var $8344 = _term$1;
-                var $8324 = $8344;
+                var $8351 = _term$1;
+                var $8331 = $8351;
                 break;
             case 'Fm.Term.all':
-                var $8345 = self.eras;
-                var $8346 = self.self;
-                var $8347 = self.name;
-                var $8348 = self.xtyp;
-                var $8349 = self.body;
-                var $8350 = _term$1;
-                var $8324 = $8350;
+                var $8352 = self.eras;
+                var $8353 = self.self;
+                var $8354 = self.name;
+                var $8355 = self.xtyp;
+                var $8356 = self.body;
+                var $8357 = _term$1;
+                var $8331 = $8357;
                 break;
             case 'Fm.Term.lam':
-                var $8351 = self.name;
-                var $8352 = self.body;
-                var $8353 = _term$1;
-                var $8324 = $8353;
+                var $8358 = self.name;
+                var $8359 = self.body;
+                var $8360 = _term$1;
+                var $8331 = $8360;
                 break;
             case 'Fm.Term.app':
-                var $8354 = self.func;
-                var $8355 = self.argm;
-                var _func$5 = Fm$Term$inline$reduce$($8354, _defs$2);
+                var $8361 = self.func;
+                var $8362 = self.argm;
+                var _func$5 = Fm$Term$inline$reduce$($8361, _defs$2);
                 var self = _func$5;
                 switch (self._) {
                     case 'Fm.Term.var':
-                        var $8357 = self.name;
-                        var $8358 = self.indx;
-                        var $8359 = _term$1;
-                        var $8356 = $8359;
+                        var $8364 = self.name;
+                        var $8365 = self.indx;
+                        var $8366 = _term$1;
+                        var $8363 = $8366;
                         break;
                     case 'Fm.Term.ref':
-                        var $8360 = self.name;
-                        var $8361 = _term$1;
-                        var $8356 = $8361;
+                        var $8367 = self.name;
+                        var $8368 = _term$1;
+                        var $8363 = $8368;
                         break;
                     case 'Fm.Term.typ':
-                        var $8362 = _term$1;
-                        var $8356 = $8362;
+                        var $8369 = _term$1;
+                        var $8363 = $8369;
                         break;
                     case 'Fm.Term.all':
-                        var $8363 = self.eras;
-                        var $8364 = self.self;
-                        var $8365 = self.name;
-                        var $8366 = self.xtyp;
-                        var $8367 = self.body;
-                        var $8368 = _term$1;
-                        var $8356 = $8368;
+                        var $8370 = self.eras;
+                        var $8371 = self.self;
+                        var $8372 = self.name;
+                        var $8373 = self.xtyp;
+                        var $8374 = self.body;
+                        var $8375 = _term$1;
+                        var $8363 = $8375;
                         break;
                     case 'Fm.Term.lam':
-                        var $8369 = self.name;
-                        var $8370 = self.body;
-                        var $8371 = Fm$Term$inline$reduce$($8370($8355), _defs$2);
-                        var $8356 = $8371;
+                        var $8376 = self.name;
+                        var $8377 = self.body;
+                        var $8378 = Fm$Term$inline$reduce$($8377($8362), _defs$2);
+                        var $8363 = $8378;
                         break;
                     case 'Fm.Term.app':
-                        var $8372 = self.func;
-                        var $8373 = self.argm;
-                        var $8374 = _term$1;
-                        var $8356 = $8374;
+                        var $8379 = self.func;
+                        var $8380 = self.argm;
+                        var $8381 = _term$1;
+                        var $8363 = $8381;
                         break;
                     case 'Fm.Term.let':
-                        var $8375 = self.name;
-                        var $8376 = self.expr;
-                        var $8377 = self.body;
-                        var $8378 = Fm$Term$let$($8375, $8376, (_x$9 => {
-                            var $8379 = Fm$Term$inline$reduce$(Fm$Term$app$($8377(_x$9), $8355), _defs$2);
-                            return $8379;
+                        var $8382 = self.name;
+                        var $8383 = self.expr;
+                        var $8384 = self.body;
+                        var $8385 = Fm$Term$let$($8382, $8383, (_x$9 => {
+                            var $8386 = Fm$Term$inline$reduce$(Fm$Term$app$($8384(_x$9), $8362), _defs$2);
+                            return $8386;
                         }));
-                        var $8356 = $8378;
+                        var $8363 = $8385;
                         break;
                     case 'Fm.Term.def':
-                        var $8380 = self.name;
-                        var $8381 = self.expr;
-                        var $8382 = self.body;
-                        var $8383 = _term$1;
-                        var $8356 = $8383;
+                        var $8387 = self.name;
+                        var $8388 = self.expr;
+                        var $8389 = self.body;
+                        var $8390 = _term$1;
+                        var $8363 = $8390;
                         break;
                     case 'Fm.Term.ann':
-                        var $8384 = self.done;
-                        var $8385 = self.term;
-                        var $8386 = self.type;
-                        var $8387 = _term$1;
-                        var $8356 = $8387;
+                        var $8391 = self.done;
+                        var $8392 = self.term;
+                        var $8393 = self.type;
+                        var $8394 = _term$1;
+                        var $8363 = $8394;
                         break;
                     case 'Fm.Term.gol':
-                        var $8388 = self.name;
-                        var $8389 = self.dref;
-                        var $8390 = self.verb;
-                        var $8391 = _term$1;
-                        var $8356 = $8391;
+                        var $8395 = self.name;
+                        var $8396 = self.dref;
+                        var $8397 = self.verb;
+                        var $8398 = _term$1;
+                        var $8363 = $8398;
                         break;
                     case 'Fm.Term.hol':
-                        var $8392 = self.path;
-                        var $8393 = _term$1;
-                        var $8356 = $8393;
+                        var $8399 = self.path;
+                        var $8400 = _term$1;
+                        var $8363 = $8400;
                         break;
                     case 'Fm.Term.nat':
-                        var $8394 = self.natx;
-                        var $8395 = _term$1;
-                        var $8356 = $8395;
+                        var $8401 = self.natx;
+                        var $8402 = _term$1;
+                        var $8363 = $8402;
                         break;
                     case 'Fm.Term.chr':
-                        var $8396 = self.chrx;
-                        var $8397 = _term$1;
-                        var $8356 = $8397;
+                        var $8403 = self.chrx;
+                        var $8404 = _term$1;
+                        var $8363 = $8404;
                         break;
                     case 'Fm.Term.str':
-                        var $8398 = self.strx;
-                        var $8399 = _term$1;
-                        var $8356 = $8399;
+                        var $8405 = self.strx;
+                        var $8406 = _term$1;
+                        var $8363 = $8406;
                         break;
                     case 'Fm.Term.cse':
-                        var $8400 = self.path;
-                        var $8401 = self.expr;
-                        var $8402 = self.name;
-                        var $8403 = self.with;
-                        var $8404 = self.cses;
-                        var $8405 = self.moti;
-                        var $8406 = _term$1;
-                        var $8356 = $8406;
+                        var $8407 = self.path;
+                        var $8408 = self.expr;
+                        var $8409 = self.name;
+                        var $8410 = self.with;
+                        var $8411 = self.cses;
+                        var $8412 = self.moti;
+                        var $8413 = _term$1;
+                        var $8363 = $8413;
                         break;
                     case 'Fm.Term.ori':
-                        var $8407 = self.orig;
-                        var $8408 = self.expr;
-                        var $8409 = _term$1;
-                        var $8356 = $8409;
+                        var $8414 = self.orig;
+                        var $8415 = self.expr;
+                        var $8416 = _term$1;
+                        var $8363 = $8416;
                         break;
                 };
-                var $8324 = $8356;
+                var $8331 = $8363;
                 break;
             case 'Fm.Term.let':
-                var $8410 = self.name;
-                var $8411 = self.expr;
-                var $8412 = self.body;
-                var $8413 = _term$1;
-                var $8324 = $8413;
+                var $8417 = self.name;
+                var $8418 = self.expr;
+                var $8419 = self.body;
+                var $8420 = _term$1;
+                var $8331 = $8420;
                 break;
             case 'Fm.Term.def':
-                var $8414 = self.name;
-                var $8415 = self.expr;
-                var $8416 = self.body;
-                var $8417 = _term$1;
-                var $8324 = $8417;
+                var $8421 = self.name;
+                var $8422 = self.expr;
+                var $8423 = self.body;
+                var $8424 = _term$1;
+                var $8331 = $8424;
                 break;
             case 'Fm.Term.ann':
-                var $8418 = self.done;
-                var $8419 = self.term;
-                var $8420 = self.type;
-                var $8421 = _term$1;
-                var $8324 = $8421;
+                var $8425 = self.done;
+                var $8426 = self.term;
+                var $8427 = self.type;
+                var $8428 = _term$1;
+                var $8331 = $8428;
                 break;
             case 'Fm.Term.gol':
-                var $8422 = self.name;
-                var $8423 = self.dref;
-                var $8424 = self.verb;
-                var $8425 = _term$1;
-                var $8324 = $8425;
+                var $8429 = self.name;
+                var $8430 = self.dref;
+                var $8431 = self.verb;
+                var $8432 = _term$1;
+                var $8331 = $8432;
                 break;
             case 'Fm.Term.hol':
-                var $8426 = self.path;
-                var $8427 = _term$1;
-                var $8324 = $8427;
+                var $8433 = self.path;
+                var $8434 = _term$1;
+                var $8331 = $8434;
                 break;
             case 'Fm.Term.nat':
-                var $8428 = self.natx;
-                var $8429 = _term$1;
-                var $8324 = $8429;
+                var $8435 = self.natx;
+                var $8436 = _term$1;
+                var $8331 = $8436;
                 break;
             case 'Fm.Term.chr':
-                var $8430 = self.chrx;
-                var $8431 = _term$1;
-                var $8324 = $8431;
+                var $8437 = self.chrx;
+                var $8438 = _term$1;
+                var $8331 = $8438;
                 break;
             case 'Fm.Term.str':
-                var $8432 = self.strx;
-                var $8433 = _term$1;
-                var $8324 = $8433;
+                var $8439 = self.strx;
+                var $8440 = _term$1;
+                var $8331 = $8440;
                 break;
             case 'Fm.Term.cse':
-                var $8434 = self.path;
-                var $8435 = self.expr;
-                var $8436 = self.name;
-                var $8437 = self.with;
-                var $8438 = self.cses;
-                var $8439 = self.moti;
-                var $8440 = _term$1;
-                var $8324 = $8440;
+                var $8441 = self.path;
+                var $8442 = self.expr;
+                var $8443 = self.name;
+                var $8444 = self.with;
+                var $8445 = self.cses;
+                var $8446 = self.moti;
+                var $8447 = _term$1;
+                var $8331 = $8447;
                 break;
             case 'Fm.Term.ori':
-                var $8441 = self.orig;
-                var $8442 = self.expr;
-                var $8443 = Fm$Term$inline$reduce$($8442, _defs$2);
-                var $8324 = $8443;
+                var $8448 = self.orig;
+                var $8449 = self.expr;
+                var $8450 = Fm$Term$inline$reduce$($8449, _defs$2);
+                var $8331 = $8450;
                 break;
         };
-        return $8324;
+        return $8331;
     };
     const Fm$Term$inline$reduce = x0 => x1 => Fm$Term$inline$reduce$(x0, x1);
 
@@ -20842,119 +20869,119 @@ module.exports = (function() {
         var self = Fm$Term$inline$reduce$(_term$1, _defs$2);
         switch (self._) {
             case 'Fm.Term.var':
-                var $8445 = self.name;
-                var $8446 = self.indx;
-                var $8447 = Fm$Term$var$($8445, $8446);
-                var $8444 = $8447;
+                var $8452 = self.name;
+                var $8453 = self.indx;
+                var $8454 = Fm$Term$var$($8452, $8453);
+                var $8451 = $8454;
                 break;
             case 'Fm.Term.ref':
-                var $8448 = self.name;
-                var $8449 = Fm$Term$ref$($8448);
-                var $8444 = $8449;
+                var $8455 = self.name;
+                var $8456 = Fm$Term$ref$($8455);
+                var $8451 = $8456;
                 break;
             case 'Fm.Term.typ':
-                var $8450 = Fm$Term$typ;
-                var $8444 = $8450;
+                var $8457 = Fm$Term$typ;
+                var $8451 = $8457;
                 break;
             case 'Fm.Term.all':
-                var $8451 = self.eras;
-                var $8452 = self.self;
-                var $8453 = self.name;
-                var $8454 = self.xtyp;
-                var $8455 = self.body;
-                var $8456 = Fm$Term$all$($8451, $8452, $8453, Fm$Term$inline$($8454, _defs$2), (_s$8 => _x$9 => {
-                    var $8457 = Fm$Term$inline$($8455(_s$8)(_x$9), _defs$2);
-                    return $8457;
+                var $8458 = self.eras;
+                var $8459 = self.self;
+                var $8460 = self.name;
+                var $8461 = self.xtyp;
+                var $8462 = self.body;
+                var $8463 = Fm$Term$all$($8458, $8459, $8460, Fm$Term$inline$($8461, _defs$2), (_s$8 => _x$9 => {
+                    var $8464 = Fm$Term$inline$($8462(_s$8)(_x$9), _defs$2);
+                    return $8464;
                 }));
-                var $8444 = $8456;
+                var $8451 = $8463;
                 break;
             case 'Fm.Term.lam':
-                var $8458 = self.name;
-                var $8459 = self.body;
-                var $8460 = Fm$Term$lam$($8458, (_x$5 => {
-                    var $8461 = Fm$Term$inline$($8459(_x$5), _defs$2);
-                    return $8461;
+                var $8465 = self.name;
+                var $8466 = self.body;
+                var $8467 = Fm$Term$lam$($8465, (_x$5 => {
+                    var $8468 = Fm$Term$inline$($8466(_x$5), _defs$2);
+                    return $8468;
                 }));
-                var $8444 = $8460;
+                var $8451 = $8467;
                 break;
             case 'Fm.Term.app':
-                var $8462 = self.func;
-                var $8463 = self.argm;
-                var $8464 = Fm$Term$app$(Fm$Term$inline$($8462, _defs$2), Fm$Term$inline$($8463, _defs$2));
-                var $8444 = $8464;
+                var $8469 = self.func;
+                var $8470 = self.argm;
+                var $8471 = Fm$Term$app$(Fm$Term$inline$($8469, _defs$2), Fm$Term$inline$($8470, _defs$2));
+                var $8451 = $8471;
                 break;
             case 'Fm.Term.let':
-                var $8465 = self.name;
-                var $8466 = self.expr;
-                var $8467 = self.body;
-                var $8468 = Fm$Term$let$($8465, Fm$Term$inline$($8466, _defs$2), (_x$6 => {
-                    var $8469 = Fm$Term$inline$($8467(_x$6), _defs$2);
-                    return $8469;
+                var $8472 = self.name;
+                var $8473 = self.expr;
+                var $8474 = self.body;
+                var $8475 = Fm$Term$let$($8472, Fm$Term$inline$($8473, _defs$2), (_x$6 => {
+                    var $8476 = Fm$Term$inline$($8474(_x$6), _defs$2);
+                    return $8476;
                 }));
-                var $8444 = $8468;
+                var $8451 = $8475;
                 break;
             case 'Fm.Term.def':
-                var $8470 = self.name;
-                var $8471 = self.expr;
-                var $8472 = self.body;
-                var $8473 = Fm$Term$def$($8470, Fm$Term$inline$($8471, _defs$2), (_x$6 => {
-                    var $8474 = Fm$Term$inline$($8472(_x$6), _defs$2);
-                    return $8474;
+                var $8477 = self.name;
+                var $8478 = self.expr;
+                var $8479 = self.body;
+                var $8480 = Fm$Term$def$($8477, Fm$Term$inline$($8478, _defs$2), (_x$6 => {
+                    var $8481 = Fm$Term$inline$($8479(_x$6), _defs$2);
+                    return $8481;
                 }));
-                var $8444 = $8473;
+                var $8451 = $8480;
                 break;
             case 'Fm.Term.ann':
-                var $8475 = self.done;
-                var $8476 = self.term;
-                var $8477 = self.type;
-                var $8478 = Fm$Term$ann$($8475, Fm$Term$inline$($8476, _defs$2), Fm$Term$inline$($8477, _defs$2));
-                var $8444 = $8478;
+                var $8482 = self.done;
+                var $8483 = self.term;
+                var $8484 = self.type;
+                var $8485 = Fm$Term$ann$($8482, Fm$Term$inline$($8483, _defs$2), Fm$Term$inline$($8484, _defs$2));
+                var $8451 = $8485;
                 break;
             case 'Fm.Term.gol':
-                var $8479 = self.name;
-                var $8480 = self.dref;
-                var $8481 = self.verb;
-                var $8482 = Fm$Term$gol$($8479, $8480, $8481);
-                var $8444 = $8482;
+                var $8486 = self.name;
+                var $8487 = self.dref;
+                var $8488 = self.verb;
+                var $8489 = Fm$Term$gol$($8486, $8487, $8488);
+                var $8451 = $8489;
                 break;
             case 'Fm.Term.hol':
-                var $8483 = self.path;
-                var $8484 = Fm$Term$hol$($8483);
-                var $8444 = $8484;
+                var $8490 = self.path;
+                var $8491 = Fm$Term$hol$($8490);
+                var $8451 = $8491;
                 break;
             case 'Fm.Term.nat':
-                var $8485 = self.natx;
-                var $8486 = Fm$Term$nat$($8485);
-                var $8444 = $8486;
+                var $8492 = self.natx;
+                var $8493 = Fm$Term$nat$($8492);
+                var $8451 = $8493;
                 break;
             case 'Fm.Term.chr':
-                var $8487 = self.chrx;
-                var $8488 = Fm$Term$chr$($8487);
-                var $8444 = $8488;
+                var $8494 = self.chrx;
+                var $8495 = Fm$Term$chr$($8494);
+                var $8451 = $8495;
                 break;
             case 'Fm.Term.str':
-                var $8489 = self.strx;
-                var $8490 = Fm$Term$str$($8489);
-                var $8444 = $8490;
+                var $8496 = self.strx;
+                var $8497 = Fm$Term$str$($8496);
+                var $8451 = $8497;
                 break;
             case 'Fm.Term.cse':
-                var $8491 = self.path;
-                var $8492 = self.expr;
-                var $8493 = self.name;
-                var $8494 = self.with;
-                var $8495 = self.cses;
-                var $8496 = self.moti;
-                var $8497 = _term$1;
-                var $8444 = $8497;
+                var $8498 = self.path;
+                var $8499 = self.expr;
+                var $8500 = self.name;
+                var $8501 = self.with;
+                var $8502 = self.cses;
+                var $8503 = self.moti;
+                var $8504 = _term$1;
+                var $8451 = $8504;
                 break;
             case 'Fm.Term.ori':
-                var $8498 = self.orig;
-                var $8499 = self.expr;
-                var $8500 = Fm$Term$inline$($8499, _defs$2);
-                var $8444 = $8500;
+                var $8505 = self.orig;
+                var $8506 = self.expr;
+                var $8507 = Fm$Term$inline$($8506, _defs$2);
+                var $8451 = $8507;
                 break;
         };
-        return $8444;
+        return $8451;
     };
     const Fm$Term$inline = x0 => x1 => Fm$Term$inline$(x0, x1);
 
@@ -20962,38 +20989,38 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'Map.new':
-                var $8502 = _list$3;
-                var $8501 = $8502;
+                var $8509 = _list$3;
+                var $8508 = $8509;
                 break;
             case 'Map.tie':
-                var $8503 = self.val;
-                var $8504 = self.lft;
-                var $8505 = self.rgt;
-                var self = $8503;
+                var $8510 = self.val;
+                var $8511 = self.lft;
+                var $8512 = self.rgt;
+                var self = $8510;
                 switch (self._) {
                     case 'Maybe.none':
-                        var $8507 = _list$3;
-                        var _list0$7 = $8507;
+                        var $8514 = _list$3;
+                        var _list0$7 = $8514;
                         break;
                     case 'Maybe.some':
-                        var $8508 = self.value;
-                        var $8509 = List$cons$($8508, _list$3);
-                        var _list0$7 = $8509;
+                        var $8515 = self.value;
+                        var $8516 = List$cons$($8515, _list$3);
+                        var _list0$7 = $8516;
                         break;
                 };
-                var _list1$8 = Map$values$go$($8504, _list0$7);
-                var _list2$9 = Map$values$go$($8505, _list1$8);
-                var $8506 = _list2$9;
-                var $8501 = $8506;
+                var _list1$8 = Map$values$go$($8511, _list0$7);
+                var _list2$9 = Map$values$go$($8512, _list1$8);
+                var $8513 = _list2$9;
+                var $8508 = $8513;
                 break;
         };
-        return $8501;
+        return $8508;
     };
     const Map$values$go = x0 => x1 => Map$values$go$(x0, x1);
 
     function Map$values$(_xs$2) {
-        var $8510 = Map$values$go$(_xs$2, List$nil);
-        return $8510;
+        var $8517 = Map$values$go$(_xs$2, List$nil);
+        return $8517;
     };
     const Map$values = x0 => Map$values$(x0);
 
@@ -21011,38 +21038,38 @@ module.exports = (function() {
                 if (self === 0n) {
                     var self = _brui$3;
                     if (self === 0n) {
-                        var $8512 = _name$2;
-                        var $8511 = $8512;
+                        var $8519 = _name$2;
+                        var $8518 = $8519;
                     } else {
-                        var $8513 = (self - 1n);
-                        var $8514 = (_name$2 + ("^" + Nat$show$(_brui$3)));
-                        var $8511 = $8514;
+                        var $8520 = (self - 1n);
+                        var $8521 = (_name$2 + ("^" + Nat$show$(_brui$3)));
+                        var $8518 = $8521;
                     };
-                    return $8511;
+                    return $8518;
                 } else {
-                    var $8515 = (self - 1n);
+                    var $8522 = (self - 1n);
                     var self = _vars$4;
                     switch (self._) {
                         case 'List.nil':
-                            var $8517 = "unbound";
-                            var $8516 = $8517;
+                            var $8524 = "unbound";
+                            var $8523 = $8524;
                             break;
                         case 'List.cons':
-                            var $8518 = self.head;
-                            var $8519 = self.tail;
-                            var self = (_name$2 === $8518);
+                            var $8525 = self.head;
+                            var $8526 = self.tail;
+                            var self = (_name$2 === $8525);
                             if (self) {
-                                var $8521 = Nat$succ$(_brui$3);
-                                var _brui$8 = $8521;
+                                var $8528 = Nat$succ$(_brui$3);
+                                var _brui$8 = $8528;
                             } else {
-                                var $8522 = _brui$3;
-                                var _brui$8 = $8522;
+                                var $8529 = _brui$3;
+                                var _brui$8 = $8529;
                             };
-                            var $8520 = Fm$Core$var_name$($8515, _name$2, _brui$8, $8519);
-                            var $8516 = $8520;
+                            var $8527 = Fm$Core$var_name$($8522, _name$2, _brui$8, $8526);
+                            var $8523 = $8527;
                             break;
                     };
-                    return $8516;
+                    return $8523;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -21052,8 +21079,8 @@ module.exports = (function() {
     const Fm$Core$var_name = x0 => x1 => x2 => x3 => Fm$Core$var_name$(x0, x1, x2, x3);
 
     function Fm$Name$show$(_name$1) {
-        var $8523 = _name$1;
-        return $8523;
+        var $8530 = _name$1;
+        return $8530;
     };
     const Fm$Name$show = x0 => Fm$Name$show$(x0);
 
@@ -21061,21 +21088,21 @@ module.exports = (function() {
         var self = _b$1;
         switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
             case 'e':
-                var $8525 = 0n;
-                var $8524 = $8525;
+                var $8532 = 0n;
+                var $8531 = $8532;
                 break;
             case 'o':
-                var $8526 = self.slice(0, -1);
-                var $8527 = (2n * Bits$to_nat$($8526));
-                var $8524 = $8527;
+                var $8533 = self.slice(0, -1);
+                var $8534 = (2n * Bits$to_nat$($8533));
+                var $8531 = $8534;
                 break;
             case 'i':
-                var $8528 = self.slice(0, -1);
-                var $8529 = Nat$succ$((2n * Bits$to_nat$($8528)));
-                var $8524 = $8529;
+                var $8535 = self.slice(0, -1);
+                var $8536 = Nat$succ$((2n * Bits$to_nat$($8535)));
+                var $8531 = $8536;
                 break;
         };
-        return $8524;
+        return $8531;
     };
     const Bits$to_nat = x0 => Bits$to_nat$(x0);
 
@@ -21083,63 +21110,63 @@ module.exports = (function() {
         var self = _a$1;
         switch ('u16') {
             case 'u16':
-                var $8531 = u16_to_word(self);
-                var $8532 = Nat$to_string_base$(16n, Bits$to_nat$(Word$to_bits$($8531)));
-                var $8530 = $8532;
+                var $8538 = u16_to_word(self);
+                var $8539 = Nat$to_string_base$(16n, Bits$to_nat$(Word$to_bits$($8538)));
+                var $8537 = $8539;
                 break;
         };
-        return $8530;
+        return $8537;
     };
     const U16$show_hex = x0 => U16$show_hex$(x0);
 
     function Fm$escape$char$(_chr$1) {
         var self = (_chr$1 === Fm$backslash);
         if (self) {
-            var $8534 = String$cons$(Fm$backslash, String$cons$(_chr$1, String$nil));
-            var $8533 = $8534;
+            var $8541 = String$cons$(Fm$backslash, String$cons$(_chr$1, String$nil));
+            var $8540 = $8541;
         } else {
             var self = (_chr$1 === 34);
             if (self) {
-                var $8536 = String$cons$(Fm$backslash, String$cons$(_chr$1, String$nil));
-                var $8535 = $8536;
+                var $8543 = String$cons$(Fm$backslash, String$cons$(_chr$1, String$nil));
+                var $8542 = $8543;
             } else {
                 var self = (_chr$1 === 39);
                 if (self) {
-                    var $8538 = String$cons$(Fm$backslash, String$cons$(_chr$1, String$nil));
-                    var $8537 = $8538;
+                    var $8545 = String$cons$(Fm$backslash, String$cons$(_chr$1, String$nil));
+                    var $8544 = $8545;
                 } else {
                     var self = U16$btw$(32, _chr$1, 126);
                     if (self) {
-                        var $8540 = String$cons$(_chr$1, String$nil);
-                        var $8539 = $8540;
+                        var $8547 = String$cons$(_chr$1, String$nil);
+                        var $8546 = $8547;
                     } else {
-                        var $8541 = String$flatten$(List$cons$(String$cons$(Fm$backslash, String$nil), List$cons$("u{", List$cons$(U16$show_hex$(_chr$1), List$cons$("}", List$cons$(String$nil, List$nil))))));
-                        var $8539 = $8541;
+                        var $8548 = String$flatten$(List$cons$(String$cons$(Fm$backslash, String$nil), List$cons$("u{", List$cons$(U16$show_hex$(_chr$1), List$cons$("}", List$cons$(String$nil, List$nil))))));
+                        var $8546 = $8548;
                     };
-                    var $8537 = $8539;
+                    var $8544 = $8546;
                 };
-                var $8535 = $8537;
+                var $8542 = $8544;
             };
-            var $8533 = $8535;
+            var $8540 = $8542;
         };
-        return $8533;
+        return $8540;
     };
     const Fm$escape$char = x0 => Fm$escape$char$(x0);
 
     function Fm$escape$(_str$1) {
         var self = _str$1;
         if (self.length === 0) {
-            var $8543 = String$nil;
-            var $8542 = $8543;
+            var $8550 = String$nil;
+            var $8549 = $8550;
         } else {
-            var $8544 = self.charCodeAt(0);
-            var $8545 = self.slice(1);
-            var _head$4 = Fm$escape$char$($8544);
-            var _tail$5 = Fm$escape$($8545);
-            var $8546 = (_head$4 + _tail$5);
-            var $8542 = $8546;
+            var $8551 = self.charCodeAt(0);
+            var $8552 = self.slice(1);
+            var _head$4 = Fm$escape$char$($8551);
+            var _tail$5 = Fm$escape$($8552);
+            var $8553 = (_head$4 + _tail$5);
+            var $8549 = $8553;
         };
-        return $8542;
+        return $8549;
     };
     const Fm$escape = x0 => Fm$escape$(x0);
 
@@ -21147,267 +21174,258 @@ module.exports = (function() {
         var self = _term$1;
         switch (self._) {
             case 'Fm.Term.var':
-                var $8548 = self.name;
-                var $8549 = self.indx;
-                var $8550 = Fm$Core$var_name$(Nat$pred$((_indx$2 - $8549 <= 0n ? 0n : _indx$2 - $8549)), $8548, 0n, _vars$3);
-                var $8547 = $8550;
+                var $8555 = self.name;
+                var $8556 = self.indx;
+                var $8557 = Fm$Core$var_name$(Nat$pred$((_indx$2 - $8556 <= 0n ? 0n : _indx$2 - $8556)), $8555, 0n, _vars$3);
+                var $8554 = $8557;
                 break;
             case 'Fm.Term.ref':
-                var $8551 = self.name;
-                var $8552 = Fm$Name$show$($8551);
-                var $8547 = $8552;
+                var $8558 = self.name;
+                var $8559 = Fm$Name$show$($8558);
+                var $8554 = $8559;
                 break;
             case 'Fm.Term.typ':
-                var $8553 = "*";
-                var $8547 = $8553;
+                var $8560 = "*";
+                var $8554 = $8560;
                 break;
             case 'Fm.Term.all':
-                var $8554 = self.eras;
-                var $8555 = self.self;
-                var $8556 = self.name;
-                var $8557 = self.xtyp;
-                var $8558 = self.body;
-                var _eras$9 = $8554;
+                var $8561 = self.eras;
+                var $8562 = self.self;
+                var $8563 = self.name;
+                var $8564 = self.xtyp;
+                var $8565 = self.body;
+                var _eras$9 = $8561;
                 var self = _eras$9;
                 if (self) {
-                    var $8560 = "%";
-                    var _init$10 = $8560;
+                    var $8567 = "%";
+                    var _init$10 = $8567;
                 } else {
-                    var $8561 = "@";
-                    var _init$10 = $8561;
+                    var $8568 = "@";
+                    var _init$10 = $8568;
                 };
-                var _self$11 = Fm$Name$show$($8555);
-                var _name$12 = Fm$Name$show$($8556);
-                var _xtyp$13 = Fm$Core$show$($8557, _indx$2, _vars$3);
-                var _body$14 = Fm$Core$show$($8558(Fm$Term$var$($8555, _indx$2))(Fm$Term$var$($8556, Nat$succ$(_indx$2))), Nat$succ$(Nat$succ$(_indx$2)), List$cons$($8556, List$cons$($8555, _vars$3)));
-                var $8559 = String$flatten$(List$cons$(_init$10, List$cons$(_self$11, List$cons$("(", List$cons$(_name$12, List$cons$(":", List$cons$(_xtyp$13, List$cons$(") ", List$cons$(_body$14, List$nil)))))))));
-                var $8547 = $8559;
+                var _self$11 = Fm$Name$show$($8562);
+                var _name$12 = Fm$Name$show$($8563);
+                var _xtyp$13 = Fm$Core$show$($8564, _indx$2, _vars$3);
+                var _body$14 = Fm$Core$show$($8565(Fm$Term$var$($8562, _indx$2))(Fm$Term$var$($8563, Nat$succ$(_indx$2))), Nat$succ$(Nat$succ$(_indx$2)), List$cons$($8563, List$cons$($8562, _vars$3)));
+                var $8566 = String$flatten$(List$cons$(_init$10, List$cons$(_self$11, List$cons$("(", List$cons$(_name$12, List$cons$(":", List$cons$(_xtyp$13, List$cons$(") ", List$cons$(_body$14, List$nil)))))))));
+                var $8554 = $8566;
                 break;
             case 'Fm.Term.lam':
-                var $8562 = self.name;
-                var $8563 = self.body;
-                var _name$6 = Fm$Name$show$($8562);
-                var _body$7 = Fm$Core$show$($8563(Fm$Term$var$($8562, _indx$2)), Nat$succ$(_indx$2), List$cons$($8562, _vars$3));
-                var $8564 = String$flatten$(List$cons$("#", List$cons$(_name$6, List$cons$(" ", List$cons$(_body$7, List$nil)))));
-                var $8547 = $8564;
+                var $8569 = self.name;
+                var $8570 = self.body;
+                var _name$6 = Fm$Name$show$($8569);
+                var _body$7 = Fm$Core$show$($8570(Fm$Term$var$($8569, _indx$2)), Nat$succ$(_indx$2), List$cons$($8569, _vars$3));
+                var $8571 = String$flatten$(List$cons$("#", List$cons$(_name$6, List$cons$(" ", List$cons$(_body$7, List$nil)))));
+                var $8554 = $8571;
                 break;
             case 'Fm.Term.app':
-                var $8565 = self.func;
-                var $8566 = self.argm;
-                var _func$6 = Fm$Core$show$($8565, _indx$2, _vars$3);
-                var _argm$7 = Fm$Core$show$($8566, _indx$2, _vars$3);
-                var $8567 = String$flatten$(List$cons$("(", List$cons$(_func$6, List$cons$(" ", List$cons$(_argm$7, List$cons$(")", List$nil))))));
-                var $8547 = $8567;
+                var $8572 = self.func;
+                var $8573 = self.argm;
+                var _func$6 = Fm$Core$show$($8572, _indx$2, _vars$3);
+                var _argm$7 = Fm$Core$show$($8573, _indx$2, _vars$3);
+                var $8574 = String$flatten$(List$cons$("(", List$cons$(_func$6, List$cons$(" ", List$cons$(_argm$7, List$cons$(")", List$nil))))));
+                var $8554 = $8574;
                 break;
             case 'Fm.Term.let':
-                var $8568 = self.name;
-                var $8569 = self.expr;
-                var $8570 = self.body;
-                var _name$7 = Fm$Name$show$($8568);
-                var _expr$8 = Fm$Core$show$($8569, _indx$2, _vars$3);
-                var _body$9 = Fm$Core$show$($8570(Fm$Term$var$($8568, _indx$2)), Nat$succ$(_indx$2), List$cons$($8568, _vars$3));
-                var $8571 = String$flatten$(List$cons$("!", List$cons$(_name$7, List$cons$(" = ", List$cons$(_expr$8, List$cons$("; ", List$cons$(_body$9, List$nil)))))));
-                var $8547 = $8571;
+                var $8575 = self.name;
+                var $8576 = self.expr;
+                var $8577 = self.body;
+                var _name$7 = Fm$Name$show$($8575);
+                var _expr$8 = Fm$Core$show$($8576, _indx$2, _vars$3);
+                var _body$9 = Fm$Core$show$($8577(Fm$Term$var$($8575, _indx$2)), Nat$succ$(_indx$2), List$cons$($8575, _vars$3));
+                var $8578 = String$flatten$(List$cons$("!", List$cons$(_name$7, List$cons$(" = ", List$cons$(_expr$8, List$cons$("; ", List$cons$(_body$9, List$nil)))))));
+                var $8554 = $8578;
                 break;
             case 'Fm.Term.def':
-                var $8572 = self.name;
-                var $8573 = self.expr;
-                var $8574 = self.body;
-                var _name$7 = Fm$Name$show$($8572);
-                var _expr$8 = Fm$Core$show$($8573, _indx$2, _vars$3);
-                var _body$9 = Fm$Core$show$($8574(Fm$Term$var$($8572, _indx$2)), Nat$succ$(_indx$2), List$cons$($8572, _vars$3));
-                var $8575 = String$flatten$(List$cons$("$", List$cons$(_name$7, List$cons$(" = ", List$cons$(_expr$8, List$cons$("; ", List$cons$(_body$9, List$nil)))))));
-                var $8547 = $8575;
+                var $8579 = self.name;
+                var $8580 = self.expr;
+                var $8581 = self.body;
+                var _name$7 = Fm$Name$show$($8579);
+                var _expr$8 = Fm$Core$show$($8580, _indx$2, _vars$3);
+                var _body$9 = Fm$Core$show$($8581(Fm$Term$var$($8579, _indx$2)), Nat$succ$(_indx$2), List$cons$($8579, _vars$3));
+                var $8582 = String$flatten$(List$cons$("$", List$cons$(_name$7, List$cons$(" = ", List$cons$(_expr$8, List$cons$("; ", List$cons$(_body$9, List$nil)))))));
+                var $8554 = $8582;
                 break;
             case 'Fm.Term.ann':
-                var $8576 = self.done;
-                var $8577 = self.term;
-                var $8578 = self.type;
-                var _term$7 = Fm$Core$show$($8577, _indx$2, _vars$3);
-                var _type$8 = Fm$Core$show$($8578, _indx$2, _vars$3);
-                var $8579 = String$flatten$(List$cons$("{", List$cons$(_term$7, List$cons$(":", List$cons$(_type$8, List$cons$("}", List$nil))))));
-                var $8547 = $8579;
+                var $8583 = self.done;
+                var $8584 = self.term;
+                var $8585 = self.type;
+                var _term$7 = Fm$Core$show$($8584, _indx$2, _vars$3);
+                var _type$8 = Fm$Core$show$($8585, _indx$2, _vars$3);
+                var $8586 = String$flatten$(List$cons$("{", List$cons$(_term$7, List$cons$(":", List$cons$(_type$8, List$cons$("}", List$nil))))));
+                var $8554 = $8586;
                 break;
             case 'Fm.Term.gol':
-                var $8580 = self.name;
-                var $8581 = self.dref;
-                var $8582 = self.verb;
-                var $8583 = "<GOL>";
-                var $8547 = $8583;
+                var $8587 = self.name;
+                var $8588 = self.dref;
+                var $8589 = self.verb;
+                var $8590 = "<GOL>";
+                var $8554 = $8590;
                 break;
             case 'Fm.Term.hol':
-                var $8584 = self.path;
-                var $8585 = "<HOL>";
-                var $8547 = $8585;
+                var $8591 = self.path;
+                var $8592 = "<HOL>";
+                var $8554 = $8592;
                 break;
             case 'Fm.Term.nat':
-                var $8586 = self.natx;
-                var $8587 = String$flatten$(List$cons$("+", List$cons$(Nat$show$($8586), List$nil)));
-                var $8547 = $8587;
+                var $8593 = self.natx;
+                var $8594 = String$flatten$(List$cons$("+", List$cons$(Nat$show$($8593), List$nil)));
+                var $8554 = $8594;
                 break;
             case 'Fm.Term.chr':
-                var $8588 = self.chrx;
-                var $8589 = String$flatten$(List$cons$("\'", List$cons$(Fm$escape$char$($8588), List$cons$("\'", List$nil))));
-                var $8547 = $8589;
+                var $8595 = self.chrx;
+                var $8596 = String$flatten$(List$cons$("\'", List$cons$(Fm$escape$char$($8595), List$cons$("\'", List$nil))));
+                var $8554 = $8596;
                 break;
             case 'Fm.Term.str':
-                var $8590 = self.strx;
-                var $8591 = String$flatten$(List$cons$("\"", List$cons$(Fm$escape$($8590), List$cons$("\"", List$nil))));
-                var $8547 = $8591;
+                var $8597 = self.strx;
+                var $8598 = String$flatten$(List$cons$("\"", List$cons$(Fm$escape$($8597), List$cons$("\"", List$nil))));
+                var $8554 = $8598;
                 break;
             case 'Fm.Term.cse':
-                var $8592 = self.path;
-                var $8593 = self.expr;
-                var $8594 = self.name;
-                var $8595 = self.with;
-                var $8596 = self.cses;
-                var $8597 = self.moti;
-                var $8598 = "<CSE>";
-                var $8547 = $8598;
+                var $8599 = self.path;
+                var $8600 = self.expr;
+                var $8601 = self.name;
+                var $8602 = self.with;
+                var $8603 = self.cses;
+                var $8604 = self.moti;
+                var $8605 = "<CSE>";
+                var $8554 = $8605;
                 break;
             case 'Fm.Term.ori':
-                var $8599 = self.orig;
-                var $8600 = self.expr;
-                var $8601 = Fm$Core$show$($8600, _indx$2, _vars$3);
-                var $8547 = $8601;
+                var $8606 = self.orig;
+                var $8607 = self.expr;
+                var $8608 = Fm$Core$show$($8607, _indx$2, _vars$3);
+                var $8554 = $8608;
                 break;
         };
-        return $8547;
+        return $8554;
     };
     const Fm$Core$show = x0 => x1 => x2 => Fm$Core$show$(x0, x1, x2);
 
     function Fm$Defs$core$(_defs$1) {
         var _result$2 = "";
         var _result$3 = (() => {
-            var $8604 = _result$2;
-            var $8605 = Map$values$(_defs$1);
-            let _result$4 = $8604;
+            var $8611 = _result$2;
+            var $8612 = Map$values$(_defs$1);
+            let _result$4 = $8611;
             let _defn$3;
-            while ($8605._ === 'List.cons') {
-                _defn$3 = $8605.head;
+            while ($8612._ === 'List.cons') {
+                _defn$3 = $8612.head;
                 var self = _defn$3;
                 switch (self._) {
                     case 'Fm.Def.new':
-                        var $8606 = self.file;
-                        var $8607 = self.code;
-                        var $8608 = self.orig;
-                        var $8609 = self.name;
-                        var $8610 = self.term;
-                        var $8611 = self.type;
-                        var $8612 = self.isct;
-                        var $8613 = self.stat;
-                        var self = $8613;
+                        var $8613 = self.file;
+                        var $8614 = self.code;
+                        var $8615 = self.orig;
+                        var $8616 = self.name;
+                        var $8617 = self.term;
+                        var $8618 = self.type;
+                        var $8619 = self.isct;
+                        var $8620 = self.stat;
+                        var self = $8620;
                         switch (self._) {
                             case 'Fm.Status.init':
-                                var $8615 = _result$4;
-                                var $8614 = $8615;
+                                var $8622 = _result$4;
+                                var $8621 = $8622;
                                 break;
                             case 'Fm.Status.wait':
-                                var $8616 = _result$4;
-                                var $8614 = $8616;
+                                var $8623 = _result$4;
+                                var $8621 = $8623;
                                 break;
                             case 'Fm.Status.done':
-                                var _name$13 = $8609;
-                                var _term$14 = Fm$Core$show$($8610, 0n, List$nil);
-                                var _type$15 = Fm$Core$show$($8611, 0n, List$nil);
-                                var $8617 = String$flatten$(List$cons$(_result$4, List$cons$(_name$13, List$cons$(" : ", List$cons$(_type$15, List$cons$(" = ", List$cons$(_term$14, List$cons$(";\u{a}", List$nil))))))));
-                                var $8614 = $8617;
+                                var _name$13 = $8616;
+                                var _term$14 = Fm$Core$show$($8617, 0n, List$nil);
+                                var _type$15 = Fm$Core$show$($8618, 0n, List$nil);
+                                var $8624 = String$flatten$(List$cons$(_result$4, List$cons$(_name$13, List$cons$(" : ", List$cons$(_type$15, List$cons$(" = ", List$cons$(_term$14, List$cons$(";\u{a}", List$nil))))))));
+                                var $8621 = $8624;
                                 break;
                             case 'Fm.Status.fail':
-                                var $8618 = self.errors;
-                                var $8619 = _result$4;
-                                var $8614 = $8619;
+                                var $8625 = self.errors;
+                                var $8626 = _result$4;
+                                var $8621 = $8626;
                                 break;
                         };
-                        var $8604 = $8614;
+                        var $8611 = $8621;
                         break;
                 };
-                _result$4 = $8604;
-                $8605 = $8605.tail;
+                _result$4 = $8611;
+                $8612 = $8612.tail;
             }
             return _result$4;
         })();
-        var $8602 = _result$3;
-        return $8602;
+        var $8609 = _result$3;
+        return $8609;
     };
     const Fm$Defs$core = x0 => Fm$Defs$core$(x0);
 
     function Fm$to_core$io$one$(_name$1) {
-        var $8620 = IO$monad$((_m$bind$2 => _m$pure$3 => {
-            var $8621 = _m$bind$2;
-            return $8621;
-        }))(Fm$Synth$one$(_name$1, Map$new))((_new_defs$2 => {
+        var $8627 = IO$monad$((_m$bind$2 => _m$pure$3 => {
+            var $8628 = _m$bind$2;
+            return $8628;
+        }))(Fm$Synth$one$(_name$1, Map$new, Bool$false))((_new_defs$2 => {
             var self = _new_defs$2;
             switch (self._) {
                 case 'Maybe.none':
-                    var $8623 = Map$new;
-                    var _defs$3 = $8623;
+                    var $8630 = Map$new;
+                    var _defs$3 = $8630;
                     break;
                 case 'Maybe.some':
-                    var $8624 = self.value;
-                    var $8625 = $8624;
-                    var _defs$3 = $8625;
+                    var $8631 = self.value;
+                    var $8632 = $8631;
+                    var _defs$3 = $8632;
                     break;
             };
             var _defs$4 = Map$map$((_defn$4 => {
                 var self = _defn$4;
                 switch (self._) {
                     case 'Fm.Def.new':
-                        var $8627 = self.file;
-                        var $8628 = self.code;
-                        var $8629 = self.orig;
-                        var $8630 = self.name;
-                        var $8631 = self.term;
-                        var $8632 = self.type;
-                        var $8633 = self.isct;
-                        var $8634 = self.stat;
-                        var _term$13 = Fm$Term$inline$($8631, _defs$3);
-                        var _type$14 = Fm$Term$inline$($8632, _defs$3);
-                        var $8635 = Fm$Def$new$($8627, $8628, $8629, $8630, _term$13, _type$14, $8633, $8634);
-                        var $8626 = $8635;
+                        var $8634 = self.file;
+                        var $8635 = self.code;
+                        var $8636 = self.orig;
+                        var $8637 = self.name;
+                        var $8638 = self.term;
+                        var $8639 = self.type;
+                        var $8640 = self.isct;
+                        var $8641 = self.stat;
+                        var _term$13 = Fm$Term$inline$($8638, _defs$3);
+                        var _type$14 = Fm$Term$inline$($8639, _defs$3);
+                        var $8642 = Fm$Def$new$($8634, $8635, $8636, $8637, _term$13, _type$14, $8640, $8641);
+                        var $8633 = $8642;
                         break;
                 };
-                return $8626;
+                return $8633;
             }), _defs$3);
-            var $8622 = IO$monad$((_m$bind$5 => _m$pure$6 => {
-                var $8636 = _m$pure$6;
-                return $8636;
+            var $8629 = IO$monad$((_m$bind$5 => _m$pure$6 => {
+                var $8643 = _m$pure$6;
+                return $8643;
             }))(Fm$Defs$core$(_defs$4));
-            return $8622;
+            return $8629;
         }));
-        return $8620;
+        return $8627;
     };
     const Fm$to_core$io$one = x0 => Fm$to_core$io$one$(x0);
-
-    function IO$print$(_text$1) {
-        var $8637 = IO$ask$("print", _text$1, (_skip$2 => {
-            var $8638 = IO$end$(Unit$new);
-            return $8638;
-        }));
-        return $8637;
-    };
-    const IO$print = x0 => IO$print$(x0);
 
     function Maybe$bind$(_m$3, _f$4) {
         var self = _m$3;
         switch (self._) {
             case 'Maybe.none':
-                var $8640 = Maybe$none;
-                var $8639 = $8640;
+                var $8645 = Maybe$none;
+                var $8644 = $8645;
                 break;
             case 'Maybe.some':
-                var $8641 = self.value;
-                var $8642 = _f$4($8641);
-                var $8639 = $8642;
+                var $8646 = self.value;
+                var $8647 = _f$4($8646);
+                var $8644 = $8647;
                 break;
         };
-        return $8639;
+        return $8644;
     };
     const Maybe$bind = x0 => x1 => Maybe$bind$(x0, x1);
 
     function Maybe$monad$(_new$2) {
-        var $8643 = _new$2(Maybe$bind)(Maybe$some);
-        return $8643;
+        var $8648 = _new$2(Maybe$bind)(Maybe$some);
+        return $8648;
     };
     const Maybe$monad = x0 => Maybe$monad$(x0);
 
@@ -21415,238 +21433,238 @@ module.exports = (function() {
         var self = _term$1;
         switch (self._) {
             case 'Fm.Term.var':
-                var $8645 = self.name;
-                var $8646 = self.indx;
-                var $8647 = Maybe$none;
-                var $8644 = $8647;
+                var $8650 = self.name;
+                var $8651 = self.indx;
+                var $8652 = Maybe$none;
+                var $8649 = $8652;
                 break;
             case 'Fm.Term.ref':
-                var $8648 = self.name;
-                var self = ($8648 === "Nat.zero");
+                var $8653 = self.name;
+                var self = ($8653 === "Nat.zero");
                 if (self) {
-                    var $8650 = Maybe$some$(0n);
-                    var $8649 = $8650;
+                    var $8655 = Maybe$some$(0n);
+                    var $8654 = $8655;
                 } else {
-                    var $8651 = Maybe$none;
-                    var $8649 = $8651;
+                    var $8656 = Maybe$none;
+                    var $8654 = $8656;
                 };
-                var $8644 = $8649;
+                var $8649 = $8654;
                 break;
             case 'Fm.Term.typ':
-                var $8652 = Maybe$none;
-                var $8644 = $8652;
+                var $8657 = Maybe$none;
+                var $8649 = $8657;
                 break;
             case 'Fm.Term.all':
-                var $8653 = self.eras;
-                var $8654 = self.self;
-                var $8655 = self.name;
-                var $8656 = self.xtyp;
-                var $8657 = self.body;
-                var $8658 = Maybe$none;
-                var $8644 = $8658;
+                var $8658 = self.eras;
+                var $8659 = self.self;
+                var $8660 = self.name;
+                var $8661 = self.xtyp;
+                var $8662 = self.body;
+                var $8663 = Maybe$none;
+                var $8649 = $8663;
                 break;
             case 'Fm.Term.lam':
-                var $8659 = self.name;
-                var $8660 = self.body;
-                var $8661 = Maybe$none;
-                var $8644 = $8661;
+                var $8664 = self.name;
+                var $8665 = self.body;
+                var $8666 = Maybe$none;
+                var $8649 = $8666;
                 break;
             case 'Fm.Term.app':
-                var $8662 = self.func;
-                var $8663 = self.argm;
-                var self = $8662;
+                var $8667 = self.func;
+                var $8668 = self.argm;
+                var self = $8667;
                 switch (self._) {
                     case 'Fm.Term.var':
-                        var $8665 = self.name;
-                        var $8666 = self.indx;
-                        var $8667 = Maybe$none;
-                        var $8664 = $8667;
+                        var $8670 = self.name;
+                        var $8671 = self.indx;
+                        var $8672 = Maybe$none;
+                        var $8669 = $8672;
                         break;
                     case 'Fm.Term.ref':
-                        var $8668 = self.name;
-                        var self = ($8668 === "Nat.succ");
+                        var $8673 = self.name;
+                        var self = ($8673 === "Nat.succ");
                         if (self) {
-                            var $8670 = Maybe$monad$((_m$bind$5 => _m$pure$6 => {
-                                var $8671 = _m$bind$5;
-                                return $8671;
-                            }))(Fm$Term$show$as_nat$go$($8663))((_pred$5 => {
-                                var $8672 = Maybe$monad$((_m$bind$6 => _m$pure$7 => {
-                                    var $8673 = _m$pure$7;
-                                    return $8673;
+                            var $8675 = Maybe$monad$((_m$bind$5 => _m$pure$6 => {
+                                var $8676 = _m$bind$5;
+                                return $8676;
+                            }))(Fm$Term$show$as_nat$go$($8668))((_pred$5 => {
+                                var $8677 = Maybe$monad$((_m$bind$6 => _m$pure$7 => {
+                                    var $8678 = _m$pure$7;
+                                    return $8678;
                                 }))(Nat$succ$(_pred$5));
-                                return $8672;
+                                return $8677;
                             }));
-                            var $8669 = $8670;
+                            var $8674 = $8675;
                         } else {
-                            var $8674 = Maybe$none;
-                            var $8669 = $8674;
+                            var $8679 = Maybe$none;
+                            var $8674 = $8679;
                         };
-                        var $8664 = $8669;
+                        var $8669 = $8674;
                         break;
                     case 'Fm.Term.typ':
-                        var $8675 = Maybe$none;
-                        var $8664 = $8675;
+                        var $8680 = Maybe$none;
+                        var $8669 = $8680;
                         break;
                     case 'Fm.Term.all':
-                        var $8676 = self.eras;
-                        var $8677 = self.self;
-                        var $8678 = self.name;
-                        var $8679 = self.xtyp;
-                        var $8680 = self.body;
-                        var $8681 = Maybe$none;
-                        var $8664 = $8681;
+                        var $8681 = self.eras;
+                        var $8682 = self.self;
+                        var $8683 = self.name;
+                        var $8684 = self.xtyp;
+                        var $8685 = self.body;
+                        var $8686 = Maybe$none;
+                        var $8669 = $8686;
                         break;
                     case 'Fm.Term.lam':
-                        var $8682 = self.name;
-                        var $8683 = self.body;
-                        var $8684 = Maybe$none;
-                        var $8664 = $8684;
+                        var $8687 = self.name;
+                        var $8688 = self.body;
+                        var $8689 = Maybe$none;
+                        var $8669 = $8689;
                         break;
                     case 'Fm.Term.app':
-                        var $8685 = self.func;
-                        var $8686 = self.argm;
-                        var $8687 = Maybe$none;
-                        var $8664 = $8687;
+                        var $8690 = self.func;
+                        var $8691 = self.argm;
+                        var $8692 = Maybe$none;
+                        var $8669 = $8692;
                         break;
                     case 'Fm.Term.let':
-                        var $8688 = self.name;
-                        var $8689 = self.expr;
-                        var $8690 = self.body;
-                        var $8691 = Maybe$none;
-                        var $8664 = $8691;
+                        var $8693 = self.name;
+                        var $8694 = self.expr;
+                        var $8695 = self.body;
+                        var $8696 = Maybe$none;
+                        var $8669 = $8696;
                         break;
                     case 'Fm.Term.def':
-                        var $8692 = self.name;
-                        var $8693 = self.expr;
-                        var $8694 = self.body;
-                        var $8695 = Maybe$none;
-                        var $8664 = $8695;
+                        var $8697 = self.name;
+                        var $8698 = self.expr;
+                        var $8699 = self.body;
+                        var $8700 = Maybe$none;
+                        var $8669 = $8700;
                         break;
                     case 'Fm.Term.ann':
-                        var $8696 = self.done;
-                        var $8697 = self.term;
-                        var $8698 = self.type;
-                        var $8699 = Maybe$none;
-                        var $8664 = $8699;
+                        var $8701 = self.done;
+                        var $8702 = self.term;
+                        var $8703 = self.type;
+                        var $8704 = Maybe$none;
+                        var $8669 = $8704;
                         break;
                     case 'Fm.Term.gol':
-                        var $8700 = self.name;
-                        var $8701 = self.dref;
-                        var $8702 = self.verb;
-                        var $8703 = Maybe$none;
-                        var $8664 = $8703;
+                        var $8705 = self.name;
+                        var $8706 = self.dref;
+                        var $8707 = self.verb;
+                        var $8708 = Maybe$none;
+                        var $8669 = $8708;
                         break;
                     case 'Fm.Term.hol':
-                        var $8704 = self.path;
-                        var $8705 = Maybe$none;
-                        var $8664 = $8705;
+                        var $8709 = self.path;
+                        var $8710 = Maybe$none;
+                        var $8669 = $8710;
                         break;
                     case 'Fm.Term.nat':
-                        var $8706 = self.natx;
-                        var $8707 = Maybe$none;
-                        var $8664 = $8707;
+                        var $8711 = self.natx;
+                        var $8712 = Maybe$none;
+                        var $8669 = $8712;
                         break;
                     case 'Fm.Term.chr':
-                        var $8708 = self.chrx;
-                        var $8709 = Maybe$none;
-                        var $8664 = $8709;
+                        var $8713 = self.chrx;
+                        var $8714 = Maybe$none;
+                        var $8669 = $8714;
                         break;
                     case 'Fm.Term.str':
-                        var $8710 = self.strx;
-                        var $8711 = Maybe$none;
-                        var $8664 = $8711;
+                        var $8715 = self.strx;
+                        var $8716 = Maybe$none;
+                        var $8669 = $8716;
                         break;
                     case 'Fm.Term.cse':
-                        var $8712 = self.path;
-                        var $8713 = self.expr;
-                        var $8714 = self.name;
-                        var $8715 = self.with;
-                        var $8716 = self.cses;
-                        var $8717 = self.moti;
-                        var $8718 = Maybe$none;
-                        var $8664 = $8718;
+                        var $8717 = self.path;
+                        var $8718 = self.expr;
+                        var $8719 = self.name;
+                        var $8720 = self.with;
+                        var $8721 = self.cses;
+                        var $8722 = self.moti;
+                        var $8723 = Maybe$none;
+                        var $8669 = $8723;
                         break;
                     case 'Fm.Term.ori':
-                        var $8719 = self.orig;
-                        var $8720 = self.expr;
-                        var $8721 = Maybe$none;
-                        var $8664 = $8721;
+                        var $8724 = self.orig;
+                        var $8725 = self.expr;
+                        var $8726 = Maybe$none;
+                        var $8669 = $8726;
                         break;
                 };
-                var $8644 = $8664;
+                var $8649 = $8669;
                 break;
             case 'Fm.Term.let':
-                var $8722 = self.name;
-                var $8723 = self.expr;
-                var $8724 = self.body;
-                var $8725 = Maybe$none;
-                var $8644 = $8725;
+                var $8727 = self.name;
+                var $8728 = self.expr;
+                var $8729 = self.body;
+                var $8730 = Maybe$none;
+                var $8649 = $8730;
                 break;
             case 'Fm.Term.def':
-                var $8726 = self.name;
-                var $8727 = self.expr;
-                var $8728 = self.body;
-                var $8729 = Maybe$none;
-                var $8644 = $8729;
+                var $8731 = self.name;
+                var $8732 = self.expr;
+                var $8733 = self.body;
+                var $8734 = Maybe$none;
+                var $8649 = $8734;
                 break;
             case 'Fm.Term.ann':
-                var $8730 = self.done;
-                var $8731 = self.term;
-                var $8732 = self.type;
-                var $8733 = Maybe$none;
-                var $8644 = $8733;
+                var $8735 = self.done;
+                var $8736 = self.term;
+                var $8737 = self.type;
+                var $8738 = Maybe$none;
+                var $8649 = $8738;
                 break;
             case 'Fm.Term.gol':
-                var $8734 = self.name;
-                var $8735 = self.dref;
-                var $8736 = self.verb;
-                var $8737 = Maybe$none;
-                var $8644 = $8737;
+                var $8739 = self.name;
+                var $8740 = self.dref;
+                var $8741 = self.verb;
+                var $8742 = Maybe$none;
+                var $8649 = $8742;
                 break;
             case 'Fm.Term.hol':
-                var $8738 = self.path;
-                var $8739 = Maybe$none;
-                var $8644 = $8739;
+                var $8743 = self.path;
+                var $8744 = Maybe$none;
+                var $8649 = $8744;
                 break;
             case 'Fm.Term.nat':
-                var $8740 = self.natx;
-                var $8741 = Maybe$none;
-                var $8644 = $8741;
+                var $8745 = self.natx;
+                var $8746 = Maybe$none;
+                var $8649 = $8746;
                 break;
             case 'Fm.Term.chr':
-                var $8742 = self.chrx;
-                var $8743 = Maybe$none;
-                var $8644 = $8743;
+                var $8747 = self.chrx;
+                var $8748 = Maybe$none;
+                var $8649 = $8748;
                 break;
             case 'Fm.Term.str':
-                var $8744 = self.strx;
-                var $8745 = Maybe$none;
-                var $8644 = $8745;
+                var $8749 = self.strx;
+                var $8750 = Maybe$none;
+                var $8649 = $8750;
                 break;
             case 'Fm.Term.cse':
-                var $8746 = self.path;
-                var $8747 = self.expr;
-                var $8748 = self.name;
-                var $8749 = self.with;
-                var $8750 = self.cses;
-                var $8751 = self.moti;
-                var $8752 = Maybe$none;
-                var $8644 = $8752;
+                var $8751 = self.path;
+                var $8752 = self.expr;
+                var $8753 = self.name;
+                var $8754 = self.with;
+                var $8755 = self.cses;
+                var $8756 = self.moti;
+                var $8757 = Maybe$none;
+                var $8649 = $8757;
                 break;
             case 'Fm.Term.ori':
-                var $8753 = self.orig;
-                var $8754 = self.expr;
-                var $8755 = Maybe$none;
-                var $8644 = $8755;
+                var $8758 = self.orig;
+                var $8759 = self.expr;
+                var $8760 = Maybe$none;
+                var $8649 = $8760;
                 break;
         };
-        return $8644;
+        return $8649;
     };
     const Fm$Term$show$as_nat$go = x0 => Fm$Term$show$as_nat$go$(x0);
 
     function Fm$Term$show$as_nat$(_term$1) {
-        var $8756 = Maybe$mapped$(Fm$Term$show$as_nat$go$(_term$1), Nat$show);
-        return $8756;
+        var $8761 = Maybe$mapped$(Fm$Term$show$as_nat$go$(_term$1), Nat$show);
+        return $8761;
     };
     const Fm$Term$show$as_nat = x0 => Fm$Term$show$as_nat$(x0);
 
@@ -21654,107 +21672,107 @@ module.exports = (function() {
         var self = _term$1;
         switch (self._) {
             case 'Fm.Term.var':
-                var $8758 = self.name;
-                var $8759 = self.indx;
-                var $8760 = Bool$false;
-                var $8757 = $8760;
+                var $8763 = self.name;
+                var $8764 = self.indx;
+                var $8765 = Bool$false;
+                var $8762 = $8765;
                 break;
             case 'Fm.Term.ref':
-                var $8761 = self.name;
-                var $8762 = (_name$2 === $8761);
-                var $8757 = $8762;
+                var $8766 = self.name;
+                var $8767 = (_name$2 === $8766);
+                var $8762 = $8767;
                 break;
             case 'Fm.Term.typ':
-                var $8763 = Bool$false;
-                var $8757 = $8763;
+                var $8768 = Bool$false;
+                var $8762 = $8768;
                 break;
             case 'Fm.Term.all':
-                var $8764 = self.eras;
-                var $8765 = self.self;
-                var $8766 = self.name;
-                var $8767 = self.xtyp;
-                var $8768 = self.body;
-                var $8769 = Bool$false;
-                var $8757 = $8769;
+                var $8769 = self.eras;
+                var $8770 = self.self;
+                var $8771 = self.name;
+                var $8772 = self.xtyp;
+                var $8773 = self.body;
+                var $8774 = Bool$false;
+                var $8762 = $8774;
                 break;
             case 'Fm.Term.lam':
-                var $8770 = self.name;
-                var $8771 = self.body;
-                var $8772 = Bool$false;
-                var $8757 = $8772;
+                var $8775 = self.name;
+                var $8776 = self.body;
+                var $8777 = Bool$false;
+                var $8762 = $8777;
                 break;
             case 'Fm.Term.app':
-                var $8773 = self.func;
-                var $8774 = self.argm;
-                var $8775 = Bool$false;
-                var $8757 = $8775;
+                var $8778 = self.func;
+                var $8779 = self.argm;
+                var $8780 = Bool$false;
+                var $8762 = $8780;
                 break;
             case 'Fm.Term.let':
-                var $8776 = self.name;
-                var $8777 = self.expr;
-                var $8778 = self.body;
-                var $8779 = Bool$false;
-                var $8757 = $8779;
+                var $8781 = self.name;
+                var $8782 = self.expr;
+                var $8783 = self.body;
+                var $8784 = Bool$false;
+                var $8762 = $8784;
                 break;
             case 'Fm.Term.def':
-                var $8780 = self.name;
-                var $8781 = self.expr;
-                var $8782 = self.body;
-                var $8783 = Bool$false;
-                var $8757 = $8783;
+                var $8785 = self.name;
+                var $8786 = self.expr;
+                var $8787 = self.body;
+                var $8788 = Bool$false;
+                var $8762 = $8788;
                 break;
             case 'Fm.Term.ann':
-                var $8784 = self.done;
-                var $8785 = self.term;
-                var $8786 = self.type;
-                var $8787 = Bool$false;
-                var $8757 = $8787;
+                var $8789 = self.done;
+                var $8790 = self.term;
+                var $8791 = self.type;
+                var $8792 = Bool$false;
+                var $8762 = $8792;
                 break;
             case 'Fm.Term.gol':
-                var $8788 = self.name;
-                var $8789 = self.dref;
-                var $8790 = self.verb;
-                var $8791 = Bool$false;
-                var $8757 = $8791;
+                var $8793 = self.name;
+                var $8794 = self.dref;
+                var $8795 = self.verb;
+                var $8796 = Bool$false;
+                var $8762 = $8796;
                 break;
             case 'Fm.Term.hol':
-                var $8792 = self.path;
-                var $8793 = Bool$false;
-                var $8757 = $8793;
+                var $8797 = self.path;
+                var $8798 = Bool$false;
+                var $8762 = $8798;
                 break;
             case 'Fm.Term.nat':
-                var $8794 = self.natx;
-                var $8795 = Bool$false;
-                var $8757 = $8795;
+                var $8799 = self.natx;
+                var $8800 = Bool$false;
+                var $8762 = $8800;
                 break;
             case 'Fm.Term.chr':
-                var $8796 = self.chrx;
-                var $8797 = Bool$false;
-                var $8757 = $8797;
+                var $8801 = self.chrx;
+                var $8802 = Bool$false;
+                var $8762 = $8802;
                 break;
             case 'Fm.Term.str':
-                var $8798 = self.strx;
-                var $8799 = Bool$false;
-                var $8757 = $8799;
+                var $8803 = self.strx;
+                var $8804 = Bool$false;
+                var $8762 = $8804;
                 break;
             case 'Fm.Term.cse':
-                var $8800 = self.path;
-                var $8801 = self.expr;
-                var $8802 = self.name;
-                var $8803 = self.with;
-                var $8804 = self.cses;
-                var $8805 = self.moti;
-                var $8806 = Bool$false;
-                var $8757 = $8806;
+                var $8805 = self.path;
+                var $8806 = self.expr;
+                var $8807 = self.name;
+                var $8808 = self.with;
+                var $8809 = self.cses;
+                var $8810 = self.moti;
+                var $8811 = Bool$false;
+                var $8762 = $8811;
                 break;
             case 'Fm.Term.ori':
-                var $8807 = self.orig;
-                var $8808 = self.expr;
-                var $8809 = Bool$false;
-                var $8757 = $8809;
+                var $8812 = self.orig;
+                var $8813 = self.expr;
+                var $8814 = Bool$false;
+                var $8762 = $8814;
                 break;
         };
-        return $8757;
+        return $8762;
     };
     const Fm$Term$show$is_ref = x0 => x1 => Fm$Term$show$is_ref$(x0, x1);
 
@@ -21765,33 +21783,33 @@ module.exports = (function() {
             var _func$5 = Fm$Term$show$go$(_term$1, _path$2);
             var _eq_lft$6 = Maybe$default$("?", List$at$(1n, _args$3));
             var _eq_rgt$7 = Maybe$default$("?", List$at$(2n, _args$3));
-            var $8811 = String$flatten$(List$cons$(_eq_lft$6, List$cons$(" == ", List$cons$(_eq_rgt$7, List$nil))));
-            var $8810 = $8811;
+            var $8816 = String$flatten$(List$cons$(_eq_lft$6, List$cons$(" == ", List$cons$(_eq_rgt$7, List$nil))));
+            var $8815 = $8816;
         } else {
             var _func$5 = Fm$Term$show$go$(_term$1, _path$2);
             var self = _func$5;
             if (self.length === 0) {
-                var $8813 = Bool$false;
-                var _wrap$6 = $8813;
+                var $8818 = Bool$false;
+                var _wrap$6 = $8818;
             } else {
-                var $8814 = self.charCodeAt(0);
-                var $8815 = self.slice(1);
-                var $8816 = ($8814 === 40);
-                var _wrap$6 = $8816;
+                var $8819 = self.charCodeAt(0);
+                var $8820 = self.slice(1);
+                var $8821 = ($8819 === 40);
+                var _wrap$6 = $8821;
             };
             var _args$7 = String$join$(",", _args$3);
             var self = _wrap$6;
             if (self) {
-                var $8817 = String$flatten$(List$cons$("(", List$cons$(_func$5, List$cons$(")", List$nil))));
-                var _func$8 = $8817;
+                var $8822 = String$flatten$(List$cons$("(", List$cons$(_func$5, List$cons$(")", List$nil))));
+                var _func$8 = $8822;
             } else {
-                var $8818 = _func$5;
-                var _func$8 = $8818;
+                var $8823 = _func$5;
+                var _func$8 = $8823;
             };
-            var $8812 = String$flatten$(List$cons$(_func$8, List$cons$("(", List$cons$(_args$7, List$cons$(")", List$nil)))));
-            var $8810 = $8812;
+            var $8817 = String$flatten$(List$cons$(_func$8, List$cons$("(", List$cons$(_args$7, List$cons$(")", List$nil)))));
+            var $8815 = $8817;
         };
-        return $8810;
+        return $8815;
     };
     const Fm$Term$show$app$done = x0 => x1 => x2 => Fm$Term$show$app$done$(x0, x1, x2);
 
@@ -21808,89 +21826,89 @@ module.exports = (function() {
                 var self = _term$1;
                 switch (self._) {
                     case 'Fm.Term.var':
-                        var $8819 = self.name;
-                        var $8820 = self.indx;
-                        var $8821 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8821;
+                        var $8824 = self.name;
+                        var $8825 = self.indx;
+                        var $8826 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8826;
                     case 'Fm.Term.ref':
-                        var $8822 = self.name;
-                        var $8823 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8823;
-                    case 'Fm.Term.typ':
-                        var $8824 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8824;
-                    case 'Fm.Term.all':
-                        var $8825 = self.eras;
-                        var $8826 = self.self;
                         var $8827 = self.name;
-                        var $8828 = self.xtyp;
-                        var $8829 = self.body;
-                        var $8830 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8830;
+                        var $8828 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8828;
+                    case 'Fm.Term.typ':
+                        var $8829 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8829;
+                    case 'Fm.Term.all':
+                        var $8830 = self.eras;
+                        var $8831 = self.self;
+                        var $8832 = self.name;
+                        var $8833 = self.xtyp;
+                        var $8834 = self.body;
+                        var $8835 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8835;
                     case 'Fm.Term.lam':
-                        var $8831 = self.name;
-                        var $8832 = self.body;
-                        var $8833 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8833;
+                        var $8836 = self.name;
+                        var $8837 = self.body;
+                        var $8838 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8838;
                     case 'Fm.Term.app':
-                        var $8834 = self.func;
-                        var $8835 = self.argm;
-                        var $8836 = Fm$Term$show$app$($8834, Fm$MPath$o$(_path$2), List$cons$(Fm$Term$show$go$($8835, Fm$MPath$i$(_path$2)), _args$3));
-                        return $8836;
+                        var $8839 = self.func;
+                        var $8840 = self.argm;
+                        var $8841 = Fm$Term$show$app$($8839, Fm$MPath$o$(_path$2), List$cons$(Fm$Term$show$go$($8840, Fm$MPath$i$(_path$2)), _args$3));
+                        return $8841;
                     case 'Fm.Term.let':
-                        var $8837 = self.name;
-                        var $8838 = self.expr;
-                        var $8839 = self.body;
-                        var $8840 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8840;
+                        var $8842 = self.name;
+                        var $8843 = self.expr;
+                        var $8844 = self.body;
+                        var $8845 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8845;
                     case 'Fm.Term.def':
-                        var $8841 = self.name;
-                        var $8842 = self.expr;
-                        var $8843 = self.body;
-                        var $8844 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8844;
+                        var $8846 = self.name;
+                        var $8847 = self.expr;
+                        var $8848 = self.body;
+                        var $8849 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8849;
                     case 'Fm.Term.ann':
-                        var $8845 = self.done;
-                        var $8846 = self.term;
-                        var $8847 = self.type;
-                        var $8848 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8848;
+                        var $8850 = self.done;
+                        var $8851 = self.term;
+                        var $8852 = self.type;
+                        var $8853 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8853;
                     case 'Fm.Term.gol':
-                        var $8849 = self.name;
-                        var $8850 = self.dref;
-                        var $8851 = self.verb;
-                        var $8852 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8852;
+                        var $8854 = self.name;
+                        var $8855 = self.dref;
+                        var $8856 = self.verb;
+                        var $8857 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8857;
                     case 'Fm.Term.hol':
-                        var $8853 = self.path;
-                        var $8854 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8854;
+                        var $8858 = self.path;
+                        var $8859 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8859;
                     case 'Fm.Term.nat':
-                        var $8855 = self.natx;
-                        var $8856 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8856;
+                        var $8860 = self.natx;
+                        var $8861 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8861;
                     case 'Fm.Term.chr':
-                        var $8857 = self.chrx;
-                        var $8858 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8858;
+                        var $8862 = self.chrx;
+                        var $8863 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8863;
                     case 'Fm.Term.str':
-                        var $8859 = self.strx;
-                        var $8860 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8860;
+                        var $8864 = self.strx;
+                        var $8865 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8865;
                     case 'Fm.Term.cse':
-                        var $8861 = self.path;
-                        var $8862 = self.expr;
-                        var $8863 = self.name;
-                        var $8864 = self.with;
-                        var $8865 = self.cses;
-                        var $8866 = self.moti;
-                        var $8867 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $8867;
+                        var $8866 = self.path;
+                        var $8867 = self.expr;
+                        var $8868 = self.name;
+                        var $8869 = self.with;
+                        var $8870 = self.cses;
+                        var $8871 = self.moti;
+                        var $8872 = Fm$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $8872;
                     case 'Fm.Term.ori':
-                        var $8868 = self.orig;
-                        var $8869 = self.expr;
-                        var $8870 = Fm$Term$show$app$($8869, _path$2, _args$3);
-                        return $8870;
+                        var $8873 = self.orig;
+                        var $8874 = self.expr;
+                        var $8875 = Fm$Term$show$app$($8874, _path$2, _args$3);
+                        return $8875;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -21903,38 +21921,38 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'Map.new':
-                var $8872 = _list$4;
-                var $8871 = $8872;
+                var $8877 = _list$4;
+                var $8876 = $8877;
                 break;
             case 'Map.tie':
-                var $8873 = self.val;
-                var $8874 = self.lft;
-                var $8875 = self.rgt;
-                var self = $8873;
+                var $8878 = self.val;
+                var $8879 = self.lft;
+                var $8880 = self.rgt;
+                var self = $8878;
                 switch (self._) {
                     case 'Maybe.none':
-                        var $8877 = _list$4;
-                        var _list0$8 = $8877;
+                        var $8882 = _list$4;
+                        var _list0$8 = $8882;
                         break;
                     case 'Maybe.some':
-                        var $8878 = self.value;
-                        var $8879 = List$cons$(Pair$new$(Bits$reverse$(_key$3), $8878), _list$4);
-                        var _list0$8 = $8879;
+                        var $8883 = self.value;
+                        var $8884 = List$cons$(Pair$new$(Bits$reverse$(_key$3), $8883), _list$4);
+                        var _list0$8 = $8884;
                         break;
                 };
-                var _list1$9 = Map$to_list$go$($8874, (_key$3 + '0'), _list0$8);
-                var _list2$10 = Map$to_list$go$($8875, (_key$3 + '1'), _list1$9);
-                var $8876 = _list2$10;
-                var $8871 = $8876;
+                var _list1$9 = Map$to_list$go$($8879, (_key$3 + '0'), _list0$8);
+                var _list2$10 = Map$to_list$go$($8880, (_key$3 + '1'), _list1$9);
+                var $8881 = _list2$10;
+                var $8876 = $8881;
                 break;
         };
-        return $8871;
+        return $8876;
     };
     const Map$to_list$go = x0 => x1 => x2 => Map$to_list$go$(x0, x1, x2);
 
     function Map$to_list$(_xs$2) {
-        var $8880 = List$reverse$(Map$to_list$go$(_xs$2, Bits$e, List$nil));
-        return $8880;
+        var $8885 = List$reverse$(Map$to_list$go$(_xs$2, Bits$e, List$nil));
+        return $8885;
     };
     const Map$to_list = x0 => Map$to_list$(x0);
 
@@ -21942,26 +21960,10 @@ module.exports = (function() {
         var self = _bits$2;
         switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
             case 'e':
-                var $8882 = List$cons$(Bits$reverse$(_chunk$4), List$nil);
-                var $8881 = $8882;
+                var $8887 = List$cons$(Bits$reverse$(_chunk$4), List$nil);
+                var $8886 = $8887;
                 break;
             case 'o':
-                var $8883 = self.slice(0, -1);
-                var self = _need$3;
-                if (self === 0n) {
-                    var _head$6 = Bits$reverse$(_chunk$4);
-                    var _tail$7 = Bits$chunks_of$go$(_len$1, _bits$2, _len$1, Bits$e);
-                    var $8885 = List$cons$(_head$6, _tail$7);
-                    var $8884 = $8885;
-                } else {
-                    var $8886 = (self - 1n);
-                    var _chunk$7 = (_chunk$4 + '0');
-                    var $8887 = Bits$chunks_of$go$(_len$1, $8883, $8886, _chunk$7);
-                    var $8884 = $8887;
-                };
-                var $8881 = $8884;
-                break;
-            case 'i':
                 var $8888 = self.slice(0, -1);
                 var self = _need$3;
                 if (self === 0n) {
@@ -21971,50 +21973,66 @@ module.exports = (function() {
                     var $8889 = $8890;
                 } else {
                     var $8891 = (self - 1n);
-                    var _chunk$7 = (_chunk$4 + '1');
+                    var _chunk$7 = (_chunk$4 + '0');
                     var $8892 = Bits$chunks_of$go$(_len$1, $8888, $8891, _chunk$7);
                     var $8889 = $8892;
                 };
-                var $8881 = $8889;
+                var $8886 = $8889;
+                break;
+            case 'i':
+                var $8893 = self.slice(0, -1);
+                var self = _need$3;
+                if (self === 0n) {
+                    var _head$6 = Bits$reverse$(_chunk$4);
+                    var _tail$7 = Bits$chunks_of$go$(_len$1, _bits$2, _len$1, Bits$e);
+                    var $8895 = List$cons$(_head$6, _tail$7);
+                    var $8894 = $8895;
+                } else {
+                    var $8896 = (self - 1n);
+                    var _chunk$7 = (_chunk$4 + '1');
+                    var $8897 = Bits$chunks_of$go$(_len$1, $8893, $8896, _chunk$7);
+                    var $8894 = $8897;
+                };
+                var $8886 = $8894;
                 break;
         };
-        return $8881;
+        return $8886;
     };
     const Bits$chunks_of$go = x0 => x1 => x2 => x3 => Bits$chunks_of$go$(x0, x1, x2, x3);
 
     function Bits$chunks_of$(_len$1, _bits$2) {
-        var $8893 = Bits$chunks_of$go$(_len$1, _bits$2, _len$1, Bits$e);
-        return $8893;
+        var $8898 = Bits$chunks_of$go$(_len$1, _bits$2, _len$1, Bits$e);
+        return $8898;
     };
     const Bits$chunks_of = x0 => x1 => Bits$chunks_of$(x0, x1);
 
     function Word$from_bits$(_size$1, _bits$2) {
         var self = _size$1;
         if (self === 0n) {
-            var $8895 = Word$e;
-            var $8894 = $8895;
+            var $8900 = Word$e;
+            var $8899 = $8900;
         } else {
-            var $8896 = (self - 1n);
+            var $8901 = (self - 1n);
             var self = _bits$2;
             switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                 case 'e':
-                    var $8898 = Word$o$(Word$from_bits$($8896, Bits$e));
-                    var $8897 = $8898;
+                    var $8903 = Word$o$(Word$from_bits$($8901, Bits$e));
+                    var $8902 = $8903;
                     break;
                 case 'o':
-                    var $8899 = self.slice(0, -1);
-                    var $8900 = Word$o$(Word$from_bits$($8896, $8899));
-                    var $8897 = $8900;
+                    var $8904 = self.slice(0, -1);
+                    var $8905 = Word$o$(Word$from_bits$($8901, $8904));
+                    var $8902 = $8905;
                     break;
                 case 'i':
-                    var $8901 = self.slice(0, -1);
-                    var $8902 = Word$i$(Word$from_bits$($8896, $8901));
-                    var $8897 = $8902;
+                    var $8906 = self.slice(0, -1);
+                    var $8907 = Word$i$(Word$from_bits$($8901, $8906));
+                    var $8902 = $8907;
                     break;
             };
-            var $8894 = $8897;
+            var $8899 = $8902;
         };
-        return $8894;
+        return $8899;
     };
     const Word$from_bits = x0 => x1 => Word$from_bits$(x0, x1);
 
@@ -22024,38 +22042,38 @@ module.exports = (function() {
             var _u16$5 = U16$new$(Word$from_bits$(16n, Bits$reverse$(_bts$3)));
             var self = U16$btw$(0, _u16$5, 25);
             if (self) {
-                var $8905 = ((_u16$5 + 65) & 0xFFFF);
-                var _chr$6 = $8905;
+                var $8910 = ((_u16$5 + 65) & 0xFFFF);
+                var _chr$6 = $8910;
             } else {
                 var self = U16$btw$(26, _u16$5, 51);
                 if (self) {
-                    var $8907 = ((_u16$5 + 71) & 0xFFFF);
-                    var $8906 = $8907;
+                    var $8912 = ((_u16$5 + 71) & 0xFFFF);
+                    var $8911 = $8912;
                 } else {
                     var self = U16$btw$(52, _u16$5, 61);
                     if (self) {
-                        var $8909 = (Math.max(_u16$5 - 4, 0));
-                        var $8908 = $8909;
+                        var $8914 = (Math.max(_u16$5 - 4, 0));
+                        var $8913 = $8914;
                     } else {
                         var self = (62 === _u16$5);
                         if (self) {
-                            var $8911 = 46;
-                            var $8910 = $8911;
+                            var $8916 = 46;
+                            var $8915 = $8916;
                         } else {
-                            var $8912 = 95;
-                            var $8910 = $8912;
+                            var $8917 = 95;
+                            var $8915 = $8917;
                         };
-                        var $8908 = $8910;
+                        var $8913 = $8915;
                     };
-                    var $8906 = $8908;
+                    var $8911 = $8913;
                 };
-                var _chr$6 = $8906;
+                var _chr$6 = $8911;
             };
-            var $8904 = String$cons$(_chr$6, _name$4);
-            return $8904;
+            var $8909 = String$cons$(_chr$6, _name$4);
+            return $8909;
         }));
-        var $8903 = _name$3;
-        return $8903;
+        var $8908 = _name$3;
+        return $8908;
     };
     const Fm$Name$from_bits = x0 => Fm$Name$from_bits$(x0);
 
@@ -22066,333 +22084,417 @@ module.exports = (function() {
                 var self = _term$1;
                 switch (self._) {
                     case 'Fm.Term.var':
-                        var $8915 = self.name;
-                        var $8916 = self.indx;
-                        var $8917 = Fm$Name$show$($8915);
-                        var $8914 = $8917;
+                        var $8920 = self.name;
+                        var $8921 = self.indx;
+                        var $8922 = Fm$Name$show$($8920);
+                        var $8919 = $8922;
                         break;
                     case 'Fm.Term.ref':
-                        var $8918 = self.name;
-                        var _name$4 = Fm$Name$show$($8918);
+                        var $8923 = self.name;
+                        var _name$4 = Fm$Name$show$($8923);
                         var self = _path$2;
                         switch (self._) {
                             case 'Maybe.none':
-                                var $8920 = _name$4;
-                                var $8919 = $8920;
+                                var $8925 = _name$4;
+                                var $8924 = $8925;
                                 break;
                             case 'Maybe.some':
-                                var $8921 = self.value;
-                                var _path_val$6 = ((Bits$e + '1') + Fm$Path$to_bits$($8921));
+                                var $8926 = self.value;
+                                var _path_val$6 = ((Bits$e + '1') + Fm$Path$to_bits$($8926));
                                 var _path_str$7 = Nat$show$(Bits$to_nat$(_path_val$6));
-                                var $8922 = String$flatten$(List$cons$(_name$4, List$cons$(Fm$color$("2", ("-" + _path_str$7)), List$nil)));
-                                var $8919 = $8922;
+                                var $8927 = String$flatten$(List$cons$(_name$4, List$cons$(Fm$color$("2", ("-" + _path_str$7)), List$nil)));
+                                var $8924 = $8927;
                                 break;
                         };
-                        var $8914 = $8919;
+                        var $8919 = $8924;
                         break;
                     case 'Fm.Term.typ':
-                        var $8923 = "Type";
-                        var $8914 = $8923;
+                        var $8928 = "Type";
+                        var $8919 = $8928;
                         break;
                     case 'Fm.Term.all':
-                        var $8924 = self.eras;
-                        var $8925 = self.self;
-                        var $8926 = self.name;
-                        var $8927 = self.xtyp;
-                        var $8928 = self.body;
-                        var _eras$8 = $8924;
-                        var _self$9 = Fm$Name$show$($8925);
-                        var _name$10 = Fm$Name$show$($8926);
-                        var _type$11 = Fm$Term$show$go$($8927, Fm$MPath$o$(_path$2));
+                        var $8929 = self.eras;
+                        var $8930 = self.self;
+                        var $8931 = self.name;
+                        var $8932 = self.xtyp;
+                        var $8933 = self.body;
+                        var _eras$8 = $8929;
+                        var _self$9 = Fm$Name$show$($8930);
+                        var _name$10 = Fm$Name$show$($8931);
+                        var _type$11 = Fm$Term$show$go$($8932, Fm$MPath$o$(_path$2));
                         var self = _eras$8;
                         if (self) {
-                            var $8930 = "<";
-                            var _open$12 = $8930;
+                            var $8935 = "<";
+                            var _open$12 = $8935;
                         } else {
-                            var $8931 = "(";
-                            var _open$12 = $8931;
+                            var $8936 = "(";
+                            var _open$12 = $8936;
                         };
                         var self = _eras$8;
                         if (self) {
-                            var $8932 = ">";
-                            var _clos$13 = $8932;
+                            var $8937 = ">";
+                            var _clos$13 = $8937;
                         } else {
-                            var $8933 = ")";
-                            var _clos$13 = $8933;
+                            var $8938 = ")";
+                            var _clos$13 = $8938;
                         };
-                        var _body$14 = Fm$Term$show$go$($8928(Fm$Term$var$($8925, 0n))(Fm$Term$var$($8926, 0n)), Fm$MPath$i$(_path$2));
-                        var $8929 = String$flatten$(List$cons$(_self$9, List$cons$(_open$12, List$cons$(_name$10, List$cons$(":", List$cons$(_type$11, List$cons$(_clos$13, List$cons$(" ", List$cons$(_body$14, List$nil)))))))));
-                        var $8914 = $8929;
+                        var _body$14 = Fm$Term$show$go$($8933(Fm$Term$var$($8930, 0n))(Fm$Term$var$($8931, 0n)), Fm$MPath$i$(_path$2));
+                        var $8934 = String$flatten$(List$cons$(_self$9, List$cons$(_open$12, List$cons$(_name$10, List$cons$(":", List$cons$(_type$11, List$cons$(_clos$13, List$cons$(" ", List$cons$(_body$14, List$nil)))))))));
+                        var $8919 = $8934;
                         break;
                     case 'Fm.Term.lam':
-                        var $8934 = self.name;
-                        var $8935 = self.body;
-                        var _name$5 = Fm$Name$show$($8934);
-                        var _body$6 = Fm$Term$show$go$($8935(Fm$Term$var$($8934, 0n)), Fm$MPath$o$(_path$2));
-                        var $8936 = String$flatten$(List$cons$("(", List$cons$(_name$5, List$cons$(") ", List$cons$(_body$6, List$nil)))));
-                        var $8914 = $8936;
+                        var $8939 = self.name;
+                        var $8940 = self.body;
+                        var _name$5 = Fm$Name$show$($8939);
+                        var _body$6 = Fm$Term$show$go$($8940(Fm$Term$var$($8939, 0n)), Fm$MPath$o$(_path$2));
+                        var $8941 = String$flatten$(List$cons$("(", List$cons$(_name$5, List$cons$(") ", List$cons$(_body$6, List$nil)))));
+                        var $8919 = $8941;
                         break;
                     case 'Fm.Term.app':
-                        var $8937 = self.func;
-                        var $8938 = self.argm;
-                        var $8939 = Fm$Term$show$app$(_term$1, _path$2, List$nil);
-                        var $8914 = $8939;
+                        var $8942 = self.func;
+                        var $8943 = self.argm;
+                        var $8944 = Fm$Term$show$app$(_term$1, _path$2, List$nil);
+                        var $8919 = $8944;
                         break;
                     case 'Fm.Term.let':
-                        var $8940 = self.name;
-                        var $8941 = self.expr;
-                        var $8942 = self.body;
-                        var _name$6 = Fm$Name$show$($8940);
-                        var _expr$7 = Fm$Term$show$go$($8941, Fm$MPath$o$(_path$2));
-                        var _body$8 = Fm$Term$show$go$($8942(Fm$Term$var$($8940, 0n)), Fm$MPath$i$(_path$2));
-                        var $8943 = String$flatten$(List$cons$("let ", List$cons$(_name$6, List$cons$(" = ", List$cons$(_expr$7, List$cons$("; ", List$cons$(_body$8, List$nil)))))));
-                        var $8914 = $8943;
+                        var $8945 = self.name;
+                        var $8946 = self.expr;
+                        var $8947 = self.body;
+                        var _name$6 = Fm$Name$show$($8945);
+                        var _expr$7 = Fm$Term$show$go$($8946, Fm$MPath$o$(_path$2));
+                        var _body$8 = Fm$Term$show$go$($8947(Fm$Term$var$($8945, 0n)), Fm$MPath$i$(_path$2));
+                        var $8948 = String$flatten$(List$cons$("let ", List$cons$(_name$6, List$cons$(" = ", List$cons$(_expr$7, List$cons$("; ", List$cons$(_body$8, List$nil)))))));
+                        var $8919 = $8948;
                         break;
                     case 'Fm.Term.def':
-                        var $8944 = self.name;
-                        var $8945 = self.expr;
-                        var $8946 = self.body;
-                        var _name$6 = Fm$Name$show$($8944);
-                        var _expr$7 = Fm$Term$show$go$($8945, Fm$MPath$o$(_path$2));
-                        var _body$8 = Fm$Term$show$go$($8946(Fm$Term$var$($8944, 0n)), Fm$MPath$i$(_path$2));
-                        var $8947 = String$flatten$(List$cons$("def ", List$cons$(_name$6, List$cons$(" = ", List$cons$(_expr$7, List$cons$("; ", List$cons$(_body$8, List$nil)))))));
-                        var $8914 = $8947;
+                        var $8949 = self.name;
+                        var $8950 = self.expr;
+                        var $8951 = self.body;
+                        var _name$6 = Fm$Name$show$($8949);
+                        var _expr$7 = Fm$Term$show$go$($8950, Fm$MPath$o$(_path$2));
+                        var _body$8 = Fm$Term$show$go$($8951(Fm$Term$var$($8949, 0n)), Fm$MPath$i$(_path$2));
+                        var $8952 = String$flatten$(List$cons$("def ", List$cons$(_name$6, List$cons$(" = ", List$cons$(_expr$7, List$cons$("; ", List$cons$(_body$8, List$nil)))))));
+                        var $8919 = $8952;
                         break;
                     case 'Fm.Term.ann':
-                        var $8948 = self.done;
-                        var $8949 = self.term;
-                        var $8950 = self.type;
-                        var _term$6 = Fm$Term$show$go$($8949, Fm$MPath$o$(_path$2));
-                        var _type$7 = Fm$Term$show$go$($8950, Fm$MPath$i$(_path$2));
-                        var $8951 = String$flatten$(List$cons$(_term$6, List$cons$("::", List$cons$(_type$7, List$nil))));
-                        var $8914 = $8951;
+                        var $8953 = self.done;
+                        var $8954 = self.term;
+                        var $8955 = self.type;
+                        var _term$6 = Fm$Term$show$go$($8954, Fm$MPath$o$(_path$2));
+                        var _type$7 = Fm$Term$show$go$($8955, Fm$MPath$i$(_path$2));
+                        var $8956 = String$flatten$(List$cons$(_term$6, List$cons$("::", List$cons$(_type$7, List$nil))));
+                        var $8919 = $8956;
                         break;
                     case 'Fm.Term.gol':
-                        var $8952 = self.name;
-                        var $8953 = self.dref;
-                        var $8954 = self.verb;
-                        var _name$6 = Fm$Name$show$($8952);
-                        var $8955 = String$flatten$(List$cons$("?", List$cons$(_name$6, List$nil)));
-                        var $8914 = $8955;
+                        var $8957 = self.name;
+                        var $8958 = self.dref;
+                        var $8959 = self.verb;
+                        var _name$6 = Fm$Name$show$($8957);
+                        var $8960 = String$flatten$(List$cons$("?", List$cons$(_name$6, List$nil)));
+                        var $8919 = $8960;
                         break;
                     case 'Fm.Term.hol':
-                        var $8956 = self.path;
-                        var $8957 = "_";
-                        var $8914 = $8957;
+                        var $8961 = self.path;
+                        var $8962 = "_";
+                        var $8919 = $8962;
                         break;
                     case 'Fm.Term.nat':
-                        var $8958 = self.natx;
-                        var $8959 = String$flatten$(List$cons$(Nat$show$($8958), List$nil));
-                        var $8914 = $8959;
+                        var $8963 = self.natx;
+                        var $8964 = String$flatten$(List$cons$(Nat$show$($8963), List$nil));
+                        var $8919 = $8964;
                         break;
                     case 'Fm.Term.chr':
-                        var $8960 = self.chrx;
-                        var $8961 = String$flatten$(List$cons$("\'", List$cons$(Fm$escape$char$($8960), List$cons$("\'", List$nil))));
-                        var $8914 = $8961;
+                        var $8965 = self.chrx;
+                        var $8966 = String$flatten$(List$cons$("\'", List$cons$(Fm$escape$char$($8965), List$cons$("\'", List$nil))));
+                        var $8919 = $8966;
                         break;
                     case 'Fm.Term.str':
-                        var $8962 = self.strx;
-                        var $8963 = String$flatten$(List$cons$("\"", List$cons$(Fm$escape$($8962), List$cons$("\"", List$nil))));
-                        var $8914 = $8963;
+                        var $8967 = self.strx;
+                        var $8968 = String$flatten$(List$cons$("\"", List$cons$(Fm$escape$($8967), List$cons$("\"", List$nil))));
+                        var $8919 = $8968;
                         break;
                     case 'Fm.Term.cse':
-                        var $8964 = self.path;
-                        var $8965 = self.expr;
-                        var $8966 = self.name;
-                        var $8967 = self.with;
-                        var $8968 = self.cses;
-                        var $8969 = self.moti;
-                        var _expr$9 = Fm$Term$show$go$($8965, Fm$MPath$o$(_path$2));
-                        var _name$10 = Fm$Name$show$($8966);
-                        var _wyth$11 = String$join$("", List$mapped$($8967, (_defn$11 => {
+                        var $8969 = self.path;
+                        var $8970 = self.expr;
+                        var $8971 = self.name;
+                        var $8972 = self.with;
+                        var $8973 = self.cses;
+                        var $8974 = self.moti;
+                        var _expr$9 = Fm$Term$show$go$($8970, Fm$MPath$o$(_path$2));
+                        var _name$10 = Fm$Name$show$($8971);
+                        var _wyth$11 = String$join$("", List$mapped$($8972, (_defn$11 => {
                             var self = _defn$11;
                             switch (self._) {
                                 case 'Fm.Def.new':
-                                    var $8972 = self.file;
-                                    var $8973 = self.code;
-                                    var $8974 = self.orig;
-                                    var $8975 = self.name;
-                                    var $8976 = self.term;
-                                    var $8977 = self.type;
-                                    var $8978 = self.isct;
-                                    var $8979 = self.stat;
-                                    var _name$20 = Fm$Name$show$($8975);
-                                    var _type$21 = Fm$Term$show$go$($8977, Maybe$none);
-                                    var _term$22 = Fm$Term$show$go$($8976, Maybe$none);
-                                    var $8980 = String$flatten$(List$cons$(_name$20, List$cons$(": ", List$cons$(_type$21, List$cons$(" = ", List$cons$(_term$22, List$cons$(";", List$nil)))))));
-                                    var $8971 = $8980;
+                                    var $8977 = self.file;
+                                    var $8978 = self.code;
+                                    var $8979 = self.orig;
+                                    var $8980 = self.name;
+                                    var $8981 = self.term;
+                                    var $8982 = self.type;
+                                    var $8983 = self.isct;
+                                    var $8984 = self.stat;
+                                    var _name$20 = Fm$Name$show$($8980);
+                                    var _type$21 = Fm$Term$show$go$($8982, Maybe$none);
+                                    var _term$22 = Fm$Term$show$go$($8981, Maybe$none);
+                                    var $8985 = String$flatten$(List$cons$(_name$20, List$cons$(": ", List$cons$(_type$21, List$cons$(" = ", List$cons$(_term$22, List$cons$(";", List$nil)))))));
+                                    var $8976 = $8985;
                                     break;
                             };
-                            return $8971;
+                            return $8976;
                         })));
-                        var _cses$12 = Map$to_list$($8968);
+                        var _cses$12 = Map$to_list$($8973);
                         var _cses$13 = String$join$("", List$mapped$(_cses$12, (_x$13 => {
                             var _name$14 = Fm$Name$from_bits$(Pair$fst$(_x$13));
                             var _term$15 = Fm$Term$show$go$(Pair$snd$(_x$13), Maybe$none);
-                            var $8981 = String$flatten$(List$cons$(_name$14, List$cons$(": ", List$cons$(_term$15, List$cons$("; ", List$nil)))));
-                            return $8981;
+                            var $8986 = String$flatten$(List$cons$(_name$14, List$cons$(": ", List$cons$(_term$15, List$cons$("; ", List$nil)))));
+                            return $8986;
                         })));
-                        var self = $8969;
+                        var self = $8974;
                         switch (self._) {
                             case 'Maybe.none':
-                                var $8982 = "";
-                                var _moti$14 = $8982;
+                                var $8987 = "";
+                                var _moti$14 = $8987;
                                 break;
                             case 'Maybe.some':
-                                var $8983 = self.value;
-                                var $8984 = String$flatten$(List$cons$(": ", List$cons$(Fm$Term$show$go$($8983, Maybe$none), List$nil)));
-                                var _moti$14 = $8984;
+                                var $8988 = self.value;
+                                var $8989 = String$flatten$(List$cons$(": ", List$cons$(Fm$Term$show$go$($8988, Maybe$none), List$nil)));
+                                var _moti$14 = $8989;
                                 break;
                         };
-                        var $8970 = String$flatten$(List$cons$("case ", List$cons$(_expr$9, List$cons$(" as ", List$cons$(_name$10, List$cons$(_wyth$11, List$cons$(" { ", List$cons$(_cses$13, List$cons$("}", List$cons$(_moti$14, List$nil))))))))));
-                        var $8914 = $8970;
+                        var $8975 = String$flatten$(List$cons$("case ", List$cons$(_expr$9, List$cons$(" as ", List$cons$(_name$10, List$cons$(_wyth$11, List$cons$(" { ", List$cons$(_cses$13, List$cons$("}", List$cons$(_moti$14, List$nil))))))))));
+                        var $8919 = $8975;
                         break;
                     case 'Fm.Term.ori':
-                        var $8985 = self.orig;
-                        var $8986 = self.expr;
-                        var $8987 = Fm$Term$show$go$($8986, _path$2);
-                        var $8914 = $8987;
+                        var $8990 = self.orig;
+                        var $8991 = self.expr;
+                        var $8992 = Fm$Term$show$go$($8991, _path$2);
+                        var $8919 = $8992;
                         break;
                 };
-                var $8913 = $8914;
+                var $8918 = $8919;
                 break;
             case 'Maybe.some':
-                var $8988 = self.value;
-                var $8989 = $8988;
-                var $8913 = $8989;
+                var $8993 = self.value;
+                var $8994 = $8993;
+                var $8918 = $8994;
                 break;
         };
-        return $8913;
+        return $8918;
     };
     const Fm$Term$show$go = x0 => x1 => Fm$Term$show$go$(x0, x1);
 
     function Fm$Term$show$(_term$1) {
-        var $8990 = Fm$Term$show$go$(_term$1, Maybe$none);
-        return $8990;
+        var $8995 = Fm$Term$show$go$(_term$1, Maybe$none);
+        return $8995;
     };
     const Fm$Term$show = x0 => Fm$Term$show$(x0);
+
+    function Fm$Defs$report$types$(_defs$1, _names$2) {
+        var _types$3 = "";
+        var _types$4 = (() => {
+            var $8998 = _types$3;
+            var $8999 = _names$2;
+            let _types$5 = $8998;
+            let _name$4;
+            while ($8999._ === 'List.cons') {
+                _name$4 = $8999.head;
+                var self = Fm$get$(_name$4, _defs$1);
+                switch (self._) {
+                    case 'Maybe.none':
+                        var $9000 = _types$5;
+                        var $8998 = $9000;
+                        break;
+                    case 'Maybe.some':
+                        var $9001 = self.value;
+                        var self = $9001;
+                        switch (self._) {
+                            case 'Fm.Def.new':
+                                var $9003 = self.file;
+                                var $9004 = self.code;
+                                var $9005 = self.orig;
+                                var $9006 = self.name;
+                                var $9007 = self.term;
+                                var $9008 = self.type;
+                                var $9009 = self.isct;
+                                var $9010 = self.stat;
+                                var $9011 = (_types$5 + (_name$4 + (": " + (Fm$Term$show$($9008) + "\u{a}"))));
+                                var $9002 = $9011;
+                                break;
+                        };
+                        var $8998 = $9002;
+                        break;
+                };
+                _types$5 = $8998;
+                $8999 = $8999.tail;
+            }
+            return _types$5;
+        })();
+        var $8996 = _types$4;
+        return $8996;
+    };
+    const Fm$Defs$report$types = x0 => x1 => Fm$Defs$report$types$(x0, x1);
+
+    function Map$keys$go$(_xs$2, _key$3, _list$4) {
+        var self = _xs$2;
+        switch (self._) {
+            case 'Map.new':
+                var $9013 = _list$4;
+                var $9012 = $9013;
+                break;
+            case 'Map.tie':
+                var $9014 = self.val;
+                var $9015 = self.lft;
+                var $9016 = self.rgt;
+                var self = $9014;
+                switch (self._) {
+                    case 'Maybe.none':
+                        var $9018 = _list$4;
+                        var _list0$8 = $9018;
+                        break;
+                    case 'Maybe.some':
+                        var $9019 = self.value;
+                        var $9020 = List$cons$(Bits$reverse$(_key$3), _list$4);
+                        var _list0$8 = $9020;
+                        break;
+                };
+                var _list1$9 = Map$keys$go$($9015, (_key$3 + '0'), _list0$8);
+                var _list2$10 = Map$keys$go$($9016, (_key$3 + '1'), _list1$9);
+                var $9017 = _list2$10;
+                var $9012 = $9017;
+                break;
+        };
+        return $9012;
+    };
+    const Map$keys$go = x0 => x1 => x2 => Map$keys$go$(x0, x1, x2);
+
+    function Map$keys$(_xs$2) {
+        var $9021 = List$reverse$(Map$keys$go$(_xs$2, Bits$e, List$nil));
+        return $9021;
+    };
+    const Map$keys = x0 => Map$keys$(x0);
 
     function Fm$Error$relevant$(_errors$1, _got$2) {
         var self = _errors$1;
         switch (self._) {
             case 'List.nil':
-                var $8992 = List$nil;
-                var $8991 = $8992;
+                var $9023 = List$nil;
+                var $9022 = $9023;
                 break;
             case 'List.cons':
-                var $8993 = self.head;
-                var $8994 = self.tail;
-                var self = $8993;
+                var $9024 = self.head;
+                var $9025 = self.tail;
+                var self = $9024;
                 switch (self._) {
                     case 'Fm.Error.type_mismatch':
-                        var $8996 = self.origin;
-                        var $8997 = self.expected;
-                        var $8998 = self.detected;
-                        var $8999 = self.context;
-                        var $9000 = (!_got$2);
-                        var _keep$5 = $9000;
-                        break;
-                    case 'Fm.Error.show_goal':
-                        var $9001 = self.name;
-                        var $9002 = self.dref;
-                        var $9003 = self.verb;
-                        var $9004 = self.goal;
-                        var $9005 = self.context;
-                        var $9006 = Bool$true;
-                        var _keep$5 = $9006;
-                        break;
-                    case 'Fm.Error.waiting':
-                        var $9007 = self.name;
-                        var $9008 = Bool$false;
-                        var _keep$5 = $9008;
-                        break;
-                    case 'Fm.Error.indirect':
-                        var $9009 = self.name;
-                        var $9010 = Bool$false;
-                        var _keep$5 = $9010;
-                        break;
-                    case 'Fm.Error.patch':
-                        var $9011 = self.path;
-                        var $9012 = self.term;
-                        var $9013 = Bool$false;
-                        var _keep$5 = $9013;
-                        break;
-                    case 'Fm.Error.undefined_reference':
-                        var $9014 = self.origin;
-                        var $9015 = self.name;
-                        var $9016 = (!_got$2);
-                        var _keep$5 = $9016;
-                        break;
-                    case 'Fm.Error.cant_infer':
-                        var $9017 = self.origin;
-                        var $9018 = self.term;
-                        var $9019 = self.context;
-                        var $9020 = (!_got$2);
-                        var _keep$5 = $9020;
-                        break;
-                };
-                var self = $8993;
-                switch (self._) {
-                    case 'Fm.Error.type_mismatch':
-                        var $9021 = self.origin;
-                        var $9022 = self.expected;
-                        var $9023 = self.detected;
-                        var $9024 = self.context;
-                        var $9025 = Bool$true;
-                        var _got$6 = $9025;
-                        break;
-                    case 'Fm.Error.show_goal':
-                        var $9026 = self.name;
-                        var $9027 = self.dref;
-                        var $9028 = self.verb;
-                        var $9029 = self.goal;
+                        var $9027 = self.origin;
+                        var $9028 = self.expected;
+                        var $9029 = self.detected;
                         var $9030 = self.context;
-                        var $9031 = _got$2;
-                        var _got$6 = $9031;
+                        var $9031 = (!_got$2);
+                        var _keep$5 = $9031;
+                        break;
+                    case 'Fm.Error.show_goal':
+                        var $9032 = self.name;
+                        var $9033 = self.dref;
+                        var $9034 = self.verb;
+                        var $9035 = self.goal;
+                        var $9036 = self.context;
+                        var $9037 = Bool$true;
+                        var _keep$5 = $9037;
                         break;
                     case 'Fm.Error.waiting':
-                        var $9032 = self.name;
-                        var $9033 = _got$2;
-                        var _got$6 = $9033;
+                        var $9038 = self.name;
+                        var $9039 = Bool$false;
+                        var _keep$5 = $9039;
                         break;
                     case 'Fm.Error.indirect':
-                        var $9034 = self.name;
-                        var $9035 = _got$2;
-                        var _got$6 = $9035;
+                        var $9040 = self.name;
+                        var $9041 = Bool$false;
+                        var _keep$5 = $9041;
                         break;
                     case 'Fm.Error.patch':
-                        var $9036 = self.path;
-                        var $9037 = self.term;
-                        var $9038 = _got$2;
-                        var _got$6 = $9038;
+                        var $9042 = self.path;
+                        var $9043 = self.term;
+                        var $9044 = Bool$false;
+                        var _keep$5 = $9044;
                         break;
                     case 'Fm.Error.undefined_reference':
-                        var $9039 = self.origin;
-                        var $9040 = self.name;
-                        var $9041 = Bool$true;
-                        var _got$6 = $9041;
+                        var $9045 = self.origin;
+                        var $9046 = self.name;
+                        var $9047 = (!_got$2);
+                        var _keep$5 = $9047;
                         break;
                     case 'Fm.Error.cant_infer':
-                        var $9042 = self.origin;
-                        var $9043 = self.term;
-                        var $9044 = self.context;
-                        var $9045 = _got$2;
-                        var _got$6 = $9045;
+                        var $9048 = self.origin;
+                        var $9049 = self.term;
+                        var $9050 = self.context;
+                        var $9051 = (!_got$2);
+                        var _keep$5 = $9051;
                         break;
                 };
-                var _tail$7 = Fm$Error$relevant$($8994, _got$6);
+                var self = $9024;
+                switch (self._) {
+                    case 'Fm.Error.type_mismatch':
+                        var $9052 = self.origin;
+                        var $9053 = self.expected;
+                        var $9054 = self.detected;
+                        var $9055 = self.context;
+                        var $9056 = Bool$true;
+                        var _got$6 = $9056;
+                        break;
+                    case 'Fm.Error.show_goal':
+                        var $9057 = self.name;
+                        var $9058 = self.dref;
+                        var $9059 = self.verb;
+                        var $9060 = self.goal;
+                        var $9061 = self.context;
+                        var $9062 = _got$2;
+                        var _got$6 = $9062;
+                        break;
+                    case 'Fm.Error.waiting':
+                        var $9063 = self.name;
+                        var $9064 = _got$2;
+                        var _got$6 = $9064;
+                        break;
+                    case 'Fm.Error.indirect':
+                        var $9065 = self.name;
+                        var $9066 = _got$2;
+                        var _got$6 = $9066;
+                        break;
+                    case 'Fm.Error.patch':
+                        var $9067 = self.path;
+                        var $9068 = self.term;
+                        var $9069 = _got$2;
+                        var _got$6 = $9069;
+                        break;
+                    case 'Fm.Error.undefined_reference':
+                        var $9070 = self.origin;
+                        var $9071 = self.name;
+                        var $9072 = Bool$true;
+                        var _got$6 = $9072;
+                        break;
+                    case 'Fm.Error.cant_infer':
+                        var $9073 = self.origin;
+                        var $9074 = self.term;
+                        var $9075 = self.context;
+                        var $9076 = _got$2;
+                        var _got$6 = $9076;
+                        break;
+                };
+                var _tail$7 = Fm$Error$relevant$($9025, _got$6);
                 var self = _keep$5;
                 if (self) {
-                    var $9046 = List$cons$($8993, _tail$7);
-                    var $8995 = $9046;
+                    var $9077 = List$cons$($9024, _tail$7);
+                    var $9026 = $9077;
                 } else {
-                    var $9047 = _tail$7;
-                    var $8995 = $9047;
+                    var $9078 = _tail$7;
+                    var $9026 = $9078;
                 };
-                var $8991 = $8995;
+                var $9022 = $9026;
                 break;
         };
-        return $8991;
+        return $9022;
     };
     const Fm$Error$relevant = x0 => x1 => Fm$Error$relevant$(x0, x1);
 
@@ -22400,164 +22502,164 @@ module.exports = (function() {
         var self = _context$1;
         switch (self._) {
             case 'List.nil':
-                var $9049 = "";
-                var $9048 = $9049;
+                var $9080 = "";
+                var $9079 = $9080;
                 break;
             case 'List.cons':
-                var $9050 = self.head;
-                var $9051 = self.tail;
-                var self = $9050;
+                var $9081 = self.head;
+                var $9082 = self.tail;
+                var self = $9081;
                 switch (self._) {
                     case 'Pair.new':
-                        var $9053 = self.fst;
-                        var $9054 = self.snd;
-                        var _name$6 = Fm$Name$show$($9053);
-                        var _type$7 = Fm$Term$show$(Fm$Term$normalize$($9054, Map$new));
-                        var _rest$8 = Fm$Context$show$($9051);
-                        var $9055 = String$flatten$(List$cons$(_rest$8, List$cons$("- ", List$cons$(_name$6, List$cons$(": ", List$cons$(_type$7, List$cons$("\u{a}", List$nil)))))));
-                        var $9052 = $9055;
+                        var $9084 = self.fst;
+                        var $9085 = self.snd;
+                        var _name$6 = Fm$Name$show$($9084);
+                        var _type$7 = Fm$Term$show$(Fm$Term$normalize$($9085, Map$new));
+                        var _rest$8 = Fm$Context$show$($9082);
+                        var $9086 = String$flatten$(List$cons$(_rest$8, List$cons$("- ", List$cons$(_name$6, List$cons$(": ", List$cons$(_type$7, List$cons$("\u{a}", List$nil)))))));
+                        var $9083 = $9086;
                         break;
                 };
-                var $9048 = $9052;
+                var $9079 = $9083;
                 break;
         };
-        return $9048;
+        return $9079;
     };
     const Fm$Context$show = x0 => Fm$Context$show$(x0);
 
     function Fm$Term$expand_at$(_path$1, _term$2, _defs$3) {
-        var $9056 = Fm$Term$patch_at$(_path$1, _term$2, (_term$4 => {
+        var $9087 = Fm$Term$patch_at$(_path$1, _term$2, (_term$4 => {
             var self = _term$4;
             switch (self._) {
                 case 'Fm.Term.var':
-                    var $9058 = self.name;
-                    var $9059 = self.indx;
-                    var $9060 = _term$4;
-                    var $9057 = $9060;
+                    var $9089 = self.name;
+                    var $9090 = self.indx;
+                    var $9091 = _term$4;
+                    var $9088 = $9091;
                     break;
                 case 'Fm.Term.ref':
-                    var $9061 = self.name;
-                    var self = Fm$get$($9061, _defs$3);
+                    var $9092 = self.name;
+                    var self = Fm$get$($9092, _defs$3);
                     switch (self._) {
                         case 'Maybe.none':
-                            var $9063 = Fm$Term$ref$($9061);
-                            var $9062 = $9063;
+                            var $9094 = Fm$Term$ref$($9092);
+                            var $9093 = $9094;
                             break;
                         case 'Maybe.some':
-                            var $9064 = self.value;
-                            var self = $9064;
+                            var $9095 = self.value;
+                            var self = $9095;
                             switch (self._) {
                                 case 'Fm.Def.new':
-                                    var $9066 = self.file;
-                                    var $9067 = self.code;
-                                    var $9068 = self.orig;
-                                    var $9069 = self.name;
-                                    var $9070 = self.term;
-                                    var $9071 = self.type;
-                                    var $9072 = self.isct;
-                                    var $9073 = self.stat;
-                                    var $9074 = $9070;
-                                    var $9065 = $9074;
+                                    var $9097 = self.file;
+                                    var $9098 = self.code;
+                                    var $9099 = self.orig;
+                                    var $9100 = self.name;
+                                    var $9101 = self.term;
+                                    var $9102 = self.type;
+                                    var $9103 = self.isct;
+                                    var $9104 = self.stat;
+                                    var $9105 = $9101;
+                                    var $9096 = $9105;
                                     break;
                             };
-                            var $9062 = $9065;
+                            var $9093 = $9096;
                             break;
                     };
-                    var $9057 = $9062;
+                    var $9088 = $9093;
                     break;
                 case 'Fm.Term.typ':
-                    var $9075 = _term$4;
-                    var $9057 = $9075;
+                    var $9106 = _term$4;
+                    var $9088 = $9106;
                     break;
                 case 'Fm.Term.all':
-                    var $9076 = self.eras;
-                    var $9077 = self.self;
-                    var $9078 = self.name;
-                    var $9079 = self.xtyp;
-                    var $9080 = self.body;
-                    var $9081 = _term$4;
-                    var $9057 = $9081;
+                    var $9107 = self.eras;
+                    var $9108 = self.self;
+                    var $9109 = self.name;
+                    var $9110 = self.xtyp;
+                    var $9111 = self.body;
+                    var $9112 = _term$4;
+                    var $9088 = $9112;
                     break;
                 case 'Fm.Term.lam':
-                    var $9082 = self.name;
-                    var $9083 = self.body;
-                    var $9084 = _term$4;
-                    var $9057 = $9084;
+                    var $9113 = self.name;
+                    var $9114 = self.body;
+                    var $9115 = _term$4;
+                    var $9088 = $9115;
                     break;
                 case 'Fm.Term.app':
-                    var $9085 = self.func;
-                    var $9086 = self.argm;
-                    var $9087 = _term$4;
-                    var $9057 = $9087;
+                    var $9116 = self.func;
+                    var $9117 = self.argm;
+                    var $9118 = _term$4;
+                    var $9088 = $9118;
                     break;
                 case 'Fm.Term.let':
-                    var $9088 = self.name;
-                    var $9089 = self.expr;
-                    var $9090 = self.body;
-                    var $9091 = _term$4;
-                    var $9057 = $9091;
+                    var $9119 = self.name;
+                    var $9120 = self.expr;
+                    var $9121 = self.body;
+                    var $9122 = _term$4;
+                    var $9088 = $9122;
                     break;
                 case 'Fm.Term.def':
-                    var $9092 = self.name;
-                    var $9093 = self.expr;
-                    var $9094 = self.body;
-                    var $9095 = _term$4;
-                    var $9057 = $9095;
+                    var $9123 = self.name;
+                    var $9124 = self.expr;
+                    var $9125 = self.body;
+                    var $9126 = _term$4;
+                    var $9088 = $9126;
                     break;
                 case 'Fm.Term.ann':
-                    var $9096 = self.done;
-                    var $9097 = self.term;
-                    var $9098 = self.type;
-                    var $9099 = _term$4;
-                    var $9057 = $9099;
+                    var $9127 = self.done;
+                    var $9128 = self.term;
+                    var $9129 = self.type;
+                    var $9130 = _term$4;
+                    var $9088 = $9130;
                     break;
                 case 'Fm.Term.gol':
-                    var $9100 = self.name;
-                    var $9101 = self.dref;
-                    var $9102 = self.verb;
-                    var $9103 = _term$4;
-                    var $9057 = $9103;
+                    var $9131 = self.name;
+                    var $9132 = self.dref;
+                    var $9133 = self.verb;
+                    var $9134 = _term$4;
+                    var $9088 = $9134;
                     break;
                 case 'Fm.Term.hol':
-                    var $9104 = self.path;
-                    var $9105 = _term$4;
-                    var $9057 = $9105;
+                    var $9135 = self.path;
+                    var $9136 = _term$4;
+                    var $9088 = $9136;
                     break;
                 case 'Fm.Term.nat':
-                    var $9106 = self.natx;
-                    var $9107 = _term$4;
-                    var $9057 = $9107;
+                    var $9137 = self.natx;
+                    var $9138 = _term$4;
+                    var $9088 = $9138;
                     break;
                 case 'Fm.Term.chr':
-                    var $9108 = self.chrx;
-                    var $9109 = _term$4;
-                    var $9057 = $9109;
+                    var $9139 = self.chrx;
+                    var $9140 = _term$4;
+                    var $9088 = $9140;
                     break;
                 case 'Fm.Term.str':
-                    var $9110 = self.strx;
-                    var $9111 = _term$4;
-                    var $9057 = $9111;
+                    var $9141 = self.strx;
+                    var $9142 = _term$4;
+                    var $9088 = $9142;
                     break;
                 case 'Fm.Term.cse':
-                    var $9112 = self.path;
-                    var $9113 = self.expr;
-                    var $9114 = self.name;
-                    var $9115 = self.with;
-                    var $9116 = self.cses;
-                    var $9117 = self.moti;
-                    var $9118 = _term$4;
-                    var $9057 = $9118;
+                    var $9143 = self.path;
+                    var $9144 = self.expr;
+                    var $9145 = self.name;
+                    var $9146 = self.with;
+                    var $9147 = self.cses;
+                    var $9148 = self.moti;
+                    var $9149 = _term$4;
+                    var $9088 = $9149;
                     break;
                 case 'Fm.Term.ori':
-                    var $9119 = self.orig;
-                    var $9120 = self.expr;
-                    var $9121 = _term$4;
-                    var $9057 = $9121;
+                    var $9150 = self.orig;
+                    var $9151 = self.expr;
+                    var $9152 = _term$4;
+                    var $9088 = $9152;
                     break;
             };
-            return $9057;
+            return $9088;
         }));
-        return $9056;
+        return $9087;
     };
     const Fm$Term$expand_at = x0 => x1 => x2 => Fm$Term$expand_at$(x0, x1, x2);
 
@@ -22565,175 +22667,175 @@ module.exports = (function() {
         var self = _term$1;
         switch (self._) {
             case 'Fm.Term.var':
-                var $9123 = self.name;
-                var $9124 = self.indx;
-                var $9125 = Fm$Term$var$($9123, $9124);
-                var $9122 = $9125;
+                var $9154 = self.name;
+                var $9155 = self.indx;
+                var $9156 = Fm$Term$var$($9154, $9155);
+                var $9153 = $9156;
                 break;
             case 'Fm.Term.ref':
-                var $9126 = self.name;
-                var self = Fm$get$($9126, _defs$2);
+                var $9157 = self.name;
+                var self = Fm$get$($9157, _defs$2);
                 switch (self._) {
                     case 'Maybe.none':
-                        var $9128 = Fm$Term$ref$($9126);
-                        var $9127 = $9128;
+                        var $9159 = Fm$Term$ref$($9157);
+                        var $9158 = $9159;
                         break;
                     case 'Maybe.some':
-                        var $9129 = self.value;
-                        var self = $9129;
+                        var $9160 = self.value;
+                        var self = $9160;
                         switch (self._) {
                             case 'Fm.Def.new':
-                                var $9131 = self.file;
-                                var $9132 = self.code;
-                                var $9133 = self.orig;
-                                var $9134 = self.name;
-                                var $9135 = self.term;
-                                var $9136 = self.type;
-                                var $9137 = self.isct;
-                                var $9138 = self.stat;
-                                var self = $9137;
+                                var $9162 = self.file;
+                                var $9163 = self.code;
+                                var $9164 = self.orig;
+                                var $9165 = self.name;
+                                var $9166 = self.term;
+                                var $9167 = self.type;
+                                var $9168 = self.isct;
+                                var $9169 = self.stat;
+                                var self = $9168;
                                 if (self) {
-                                    var $9140 = Fm$Term$ref$($9126);
-                                    var $9139 = $9140;
+                                    var $9171 = Fm$Term$ref$($9157);
+                                    var $9170 = $9171;
                                 } else {
-                                    var $9141 = $9135;
-                                    var $9139 = $9141;
+                                    var $9172 = $9166;
+                                    var $9170 = $9172;
                                 };
-                                var $9130 = $9139;
+                                var $9161 = $9170;
                                 break;
                         };
-                        var $9127 = $9130;
+                        var $9158 = $9161;
                         break;
                 };
-                var $9122 = $9127;
+                var $9153 = $9158;
                 break;
             case 'Fm.Term.typ':
-                var $9142 = Fm$Term$typ;
-                var $9122 = $9142;
+                var $9173 = Fm$Term$typ;
+                var $9153 = $9173;
                 break;
             case 'Fm.Term.all':
-                var $9143 = self.eras;
-                var $9144 = self.self;
-                var $9145 = self.name;
-                var $9146 = self.xtyp;
-                var $9147 = self.body;
-                var $9148 = Fm$Term$all$($9143, $9144, $9145, Fm$Term$expand_ct$($9146, _defs$2, 0n), (_s$9 => _x$10 => {
-                    var $9149 = Fm$Term$expand_ct$($9147(_s$9)(_x$10), _defs$2, 0n);
-                    return $9149;
+                var $9174 = self.eras;
+                var $9175 = self.self;
+                var $9176 = self.name;
+                var $9177 = self.xtyp;
+                var $9178 = self.body;
+                var $9179 = Fm$Term$all$($9174, $9175, $9176, Fm$Term$expand_ct$($9177, _defs$2, 0n), (_s$9 => _x$10 => {
+                    var $9180 = Fm$Term$expand_ct$($9178(_s$9)(_x$10), _defs$2, 0n);
+                    return $9180;
                 }));
-                var $9122 = $9148;
+                var $9153 = $9179;
                 break;
             case 'Fm.Term.lam':
-                var $9150 = self.name;
-                var $9151 = self.body;
-                var $9152 = Fm$Term$lam$($9150, (_x$6 => {
-                    var $9153 = Fm$Term$expand_ct$($9151(_x$6), _defs$2, 0n);
-                    return $9153;
+                var $9181 = self.name;
+                var $9182 = self.body;
+                var $9183 = Fm$Term$lam$($9181, (_x$6 => {
+                    var $9184 = Fm$Term$expand_ct$($9182(_x$6), _defs$2, 0n);
+                    return $9184;
                 }));
-                var $9122 = $9152;
+                var $9153 = $9183;
                 break;
             case 'Fm.Term.app':
-                var $9154 = self.func;
-                var $9155 = self.argm;
-                var $9156 = Fm$Term$app$(Fm$Term$expand_ct$($9154, _defs$2, Nat$succ$(_arity$3)), Fm$Term$expand_ct$($9155, _defs$2, 0n));
-                var $9122 = $9156;
+                var $9185 = self.func;
+                var $9186 = self.argm;
+                var $9187 = Fm$Term$app$(Fm$Term$expand_ct$($9185, _defs$2, Nat$succ$(_arity$3)), Fm$Term$expand_ct$($9186, _defs$2, 0n));
+                var $9153 = $9187;
                 break;
             case 'Fm.Term.let':
-                var $9157 = self.name;
-                var $9158 = self.expr;
-                var $9159 = self.body;
-                var $9160 = Fm$Term$let$($9157, Fm$Term$expand_ct$($9158, _defs$2, 0n), (_x$7 => {
-                    var $9161 = Fm$Term$expand_ct$($9159(_x$7), _defs$2, 0n);
-                    return $9161;
+                var $9188 = self.name;
+                var $9189 = self.expr;
+                var $9190 = self.body;
+                var $9191 = Fm$Term$let$($9188, Fm$Term$expand_ct$($9189, _defs$2, 0n), (_x$7 => {
+                    var $9192 = Fm$Term$expand_ct$($9190(_x$7), _defs$2, 0n);
+                    return $9192;
                 }));
-                var $9122 = $9160;
+                var $9153 = $9191;
                 break;
             case 'Fm.Term.def':
-                var $9162 = self.name;
-                var $9163 = self.expr;
-                var $9164 = self.body;
-                var $9165 = Fm$Term$def$($9162, Fm$Term$expand_ct$($9163, _defs$2, 0n), (_x$7 => {
-                    var $9166 = Fm$Term$expand_ct$($9164(_x$7), _defs$2, 0n);
-                    return $9166;
+                var $9193 = self.name;
+                var $9194 = self.expr;
+                var $9195 = self.body;
+                var $9196 = Fm$Term$def$($9193, Fm$Term$expand_ct$($9194, _defs$2, 0n), (_x$7 => {
+                    var $9197 = Fm$Term$expand_ct$($9195(_x$7), _defs$2, 0n);
+                    return $9197;
                 }));
-                var $9122 = $9165;
+                var $9153 = $9196;
                 break;
             case 'Fm.Term.ann':
-                var $9167 = self.done;
-                var $9168 = self.term;
-                var $9169 = self.type;
-                var $9170 = Fm$Term$ann$($9167, Fm$Term$expand_ct$($9168, _defs$2, 0n), Fm$Term$expand_ct$($9169, _defs$2, 0n));
-                var $9122 = $9170;
+                var $9198 = self.done;
+                var $9199 = self.term;
+                var $9200 = self.type;
+                var $9201 = Fm$Term$ann$($9198, Fm$Term$expand_ct$($9199, _defs$2, 0n), Fm$Term$expand_ct$($9200, _defs$2, 0n));
+                var $9153 = $9201;
                 break;
             case 'Fm.Term.gol':
-                var $9171 = self.name;
-                var $9172 = self.dref;
-                var $9173 = self.verb;
-                var $9174 = Fm$Term$gol$($9171, $9172, $9173);
-                var $9122 = $9174;
+                var $9202 = self.name;
+                var $9203 = self.dref;
+                var $9204 = self.verb;
+                var $9205 = Fm$Term$gol$($9202, $9203, $9204);
+                var $9153 = $9205;
                 break;
             case 'Fm.Term.hol':
-                var $9175 = self.path;
-                var $9176 = Fm$Term$hol$($9175);
-                var $9122 = $9176;
+                var $9206 = self.path;
+                var $9207 = Fm$Term$hol$($9206);
+                var $9153 = $9207;
                 break;
             case 'Fm.Term.nat':
-                var $9177 = self.natx;
-                var $9178 = Fm$Term$nat$($9177);
-                var $9122 = $9178;
+                var $9208 = self.natx;
+                var $9209 = Fm$Term$nat$($9208);
+                var $9153 = $9209;
                 break;
             case 'Fm.Term.chr':
-                var $9179 = self.chrx;
-                var $9180 = Fm$Term$chr$($9179);
-                var $9122 = $9180;
+                var $9210 = self.chrx;
+                var $9211 = Fm$Term$chr$($9210);
+                var $9153 = $9211;
                 break;
             case 'Fm.Term.str':
-                var $9181 = self.strx;
-                var $9182 = Fm$Term$str$($9181);
-                var $9122 = $9182;
+                var $9212 = self.strx;
+                var $9213 = Fm$Term$str$($9212);
+                var $9153 = $9213;
                 break;
             case 'Fm.Term.cse':
-                var $9183 = self.path;
-                var $9184 = self.expr;
-                var $9185 = self.name;
-                var $9186 = self.with;
-                var $9187 = self.cses;
-                var $9188 = self.moti;
-                var $9189 = _term$1;
-                var $9122 = $9189;
+                var $9214 = self.path;
+                var $9215 = self.expr;
+                var $9216 = self.name;
+                var $9217 = self.with;
+                var $9218 = self.cses;
+                var $9219 = self.moti;
+                var $9220 = _term$1;
+                var $9153 = $9220;
                 break;
             case 'Fm.Term.ori':
-                var $9190 = self.orig;
-                var $9191 = self.expr;
-                var $9192 = Fm$Term$ori$($9190, $9191);
-                var $9122 = $9192;
+                var $9221 = self.orig;
+                var $9222 = self.expr;
+                var $9223 = Fm$Term$ori$($9221, $9222);
+                var $9153 = $9223;
                 break;
         };
-        return $9122;
+        return $9153;
     };
     const Fm$Term$expand_ct = x0 => x1 => x2 => Fm$Term$expand_ct$(x0, x1, x2);
 
     function Fm$Term$expand$(_dref$1, _term$2, _defs$3) {
         var _term$4 = Fm$Term$normalize$(_term$2, Map$new);
         var _term$5 = (() => {
-            var $9195 = _term$4;
-            var $9196 = _dref$1;
-            let _term$6 = $9195;
+            var $9226 = _term$4;
+            var $9227 = _dref$1;
+            let _term$6 = $9226;
             let _path$5;
-            while ($9196._ === 'List.cons') {
-                _path$5 = $9196.head;
+            while ($9227._ === 'List.cons') {
+                _path$5 = $9227.head;
                 var _term$7 = Fm$Term$expand_at$(_path$5, _term$6, _defs$3);
                 var _term$8 = Fm$Term$normalize$(_term$7, Map$new);
                 var _term$9 = Fm$Term$expand_ct$(_term$8, _defs$3, 0n);
                 var _term$10 = Fm$Term$normalize$(_term$9, Map$new);
-                var $9195 = _term$10;
-                _term$6 = $9195;
-                $9196 = $9196.tail;
+                var $9226 = _term$10;
+                _term$6 = $9226;
+                $9227 = $9227.tail;
             }
             return _term$6;
         })();
-        var $9193 = _term$5;
-        return $9193;
+        var $9224 = _term$5;
+        return $9224;
     };
     const Fm$Term$expand = x0 => x1 => x2 => Fm$Term$expand$(x0, x1, x2);
 
@@ -22741,132 +22843,132 @@ module.exports = (function() {
         var self = _error$1;
         switch (self._) {
             case 'Fm.Error.type_mismatch':
-                var $9198 = self.origin;
-                var $9199 = self.expected;
-                var $9200 = self.detected;
-                var $9201 = self.context;
-                var self = $9199;
+                var $9229 = self.origin;
+                var $9230 = self.expected;
+                var $9231 = self.detected;
+                var $9232 = self.context;
+                var self = $9230;
                 switch (self._) {
                     case 'Either.left':
-                        var $9203 = self.value;
-                        var $9204 = $9203;
-                        var _expected$7 = $9204;
+                        var $9234 = self.value;
+                        var $9235 = $9234;
+                        var _expected$7 = $9235;
                         break;
                     case 'Either.right':
-                        var $9205 = self.value;
-                        var $9206 = Fm$Term$show$(Fm$Term$normalize$($9205, Map$new));
-                        var _expected$7 = $9206;
+                        var $9236 = self.value;
+                        var $9237 = Fm$Term$show$(Fm$Term$normalize$($9236, Map$new));
+                        var _expected$7 = $9237;
                         break;
                 };
-                var self = $9200;
+                var self = $9231;
                 switch (self._) {
                     case 'Either.left':
-                        var $9207 = self.value;
-                        var $9208 = $9207;
-                        var _detected$8 = $9208;
+                        var $9238 = self.value;
+                        var $9239 = $9238;
+                        var _detected$8 = $9239;
                         break;
                     case 'Either.right':
-                        var $9209 = self.value;
-                        var $9210 = Fm$Term$show$(Fm$Term$normalize$($9209, Map$new));
-                        var _detected$8 = $9210;
+                        var $9240 = self.value;
+                        var $9241 = Fm$Term$show$(Fm$Term$normalize$($9240, Map$new));
+                        var _detected$8 = $9241;
                         break;
                 };
-                var $9202 = String$flatten$(List$cons$("Type mismatch.\u{a}", List$cons$("- Expected: ", List$cons$(_expected$7, List$cons$("\u{a}", List$cons$("- Detected: ", List$cons$(_detected$8, List$cons$("\u{a}", List$cons$((() => {
-                    var self = $9201;
+                var $9233 = String$flatten$(List$cons$("Type mismatch.\u{a}", List$cons$("- Expected: ", List$cons$(_expected$7, List$cons$("\u{a}", List$cons$("- Detected: ", List$cons$(_detected$8, List$cons$("\u{a}", List$cons$((() => {
+                    var self = $9232;
                     switch (self._) {
                         case 'List.nil':
-                            var $9211 = "";
-                            return $9211;
+                            var $9242 = "";
+                            return $9242;
                         case 'List.cons':
-                            var $9212 = self.head;
-                            var $9213 = self.tail;
-                            var $9214 = String$flatten$(List$cons$("With context:\u{a}", List$cons$(Fm$Context$show$($9201), List$nil)));
-                            return $9214;
+                            var $9243 = self.head;
+                            var $9244 = self.tail;
+                            var $9245 = String$flatten$(List$cons$("With context:\u{a}", List$cons$(Fm$Context$show$($9232), List$nil)));
+                            return $9245;
                     };
                 })(), List$nil)))))))));
-                var $9197 = $9202;
+                var $9228 = $9233;
                 break;
             case 'Fm.Error.show_goal':
-                var $9215 = self.name;
-                var $9216 = self.dref;
-                var $9217 = self.verb;
-                var $9218 = self.goal;
-                var $9219 = self.context;
-                var _goal_name$8 = String$flatten$(List$cons$("Goal ?", List$cons$(Fm$Name$show$($9215), List$cons$(":\u{a}", List$nil))));
-                var self = $9218;
+                var $9246 = self.name;
+                var $9247 = self.dref;
+                var $9248 = self.verb;
+                var $9249 = self.goal;
+                var $9250 = self.context;
+                var _goal_name$8 = String$flatten$(List$cons$("Goal ?", List$cons$(Fm$Name$show$($9246), List$cons$(":\u{a}", List$nil))));
+                var self = $9249;
                 switch (self._) {
                     case 'Maybe.none':
-                        var $9221 = "";
-                        var _with_type$9 = $9221;
+                        var $9252 = "";
+                        var _with_type$9 = $9252;
                         break;
                     case 'Maybe.some':
-                        var $9222 = self.value;
-                        var _goal$10 = Fm$Term$expand$($9216, $9222, _defs$2);
-                        var $9223 = String$flatten$(List$cons$("With type: ", List$cons$((() => {
-                            var self = $9217;
+                        var $9253 = self.value;
+                        var _goal$10 = Fm$Term$expand$($9247, $9253, _defs$2);
+                        var $9254 = String$flatten$(List$cons$("With type: ", List$cons$((() => {
+                            var self = $9248;
                             if (self) {
-                                var $9224 = Fm$Term$show$go$(_goal$10, Maybe$some$((_x$11 => {
-                                    var $9225 = _x$11;
-                                    return $9225;
+                                var $9255 = Fm$Term$show$go$(_goal$10, Maybe$some$((_x$11 => {
+                                    var $9256 = _x$11;
+                                    return $9256;
                                 })));
-                                return $9224;
+                                return $9255;
                             } else {
-                                var $9226 = Fm$Term$show$(_goal$10);
-                                return $9226;
+                                var $9257 = Fm$Term$show$(_goal$10);
+                                return $9257;
                             };
                         })(), List$cons$("\u{a}", List$nil))));
-                        var _with_type$9 = $9223;
+                        var _with_type$9 = $9254;
                         break;
                 };
-                var self = $9219;
+                var self = $9250;
                 switch (self._) {
                     case 'List.nil':
-                        var $9227 = "";
-                        var _with_ctxt$10 = $9227;
+                        var $9258 = "";
+                        var _with_ctxt$10 = $9258;
                         break;
                     case 'List.cons':
-                        var $9228 = self.head;
-                        var $9229 = self.tail;
-                        var $9230 = String$flatten$(List$cons$("With ctxt:\u{a}", List$cons$(Fm$Context$show$($9219), List$nil)));
-                        var _with_ctxt$10 = $9230;
+                        var $9259 = self.head;
+                        var $9260 = self.tail;
+                        var $9261 = String$flatten$(List$cons$("With ctxt:\u{a}", List$cons$(Fm$Context$show$($9250), List$nil)));
+                        var _with_ctxt$10 = $9261;
                         break;
                 };
-                var $9220 = String$flatten$(List$cons$(_goal_name$8, List$cons$(_with_type$9, List$cons$(_with_ctxt$10, List$nil))));
-                var $9197 = $9220;
+                var $9251 = String$flatten$(List$cons$(_goal_name$8, List$cons$(_with_type$9, List$cons$(_with_ctxt$10, List$nil))));
+                var $9228 = $9251;
                 break;
             case 'Fm.Error.waiting':
-                var $9231 = self.name;
-                var $9232 = String$flatten$(List$cons$("Waiting for \'", List$cons$($9231, List$cons$("\'.", List$nil))));
-                var $9197 = $9232;
+                var $9262 = self.name;
+                var $9263 = String$flatten$(List$cons$("Waiting for \'", List$cons$($9262, List$cons$("\'.", List$nil))));
+                var $9228 = $9263;
                 break;
             case 'Fm.Error.indirect':
-                var $9233 = self.name;
-                var $9234 = String$flatten$(List$cons$("Error on dependency \'", List$cons$($9233, List$cons$("\'.", List$nil))));
-                var $9197 = $9234;
+                var $9264 = self.name;
+                var $9265 = String$flatten$(List$cons$("Error on dependency \'", List$cons$($9264, List$cons$("\'.", List$nil))));
+                var $9228 = $9265;
                 break;
             case 'Fm.Error.patch':
-                var $9235 = self.path;
-                var $9236 = self.term;
-                var $9237 = String$flatten$(List$cons$("Patching: ", List$cons$(Fm$Term$show$($9236), List$nil)));
-                var $9197 = $9237;
+                var $9266 = self.path;
+                var $9267 = self.term;
+                var $9268 = String$flatten$(List$cons$("Patching: ", List$cons$(Fm$Term$show$($9267), List$nil)));
+                var $9228 = $9268;
                 break;
             case 'Fm.Error.undefined_reference':
-                var $9238 = self.origin;
-                var $9239 = self.name;
-                var $9240 = String$flatten$(List$cons$("Undefined reference: ", List$cons$(Fm$Name$show$($9239), List$cons$("\u{a}", List$nil))));
-                var $9197 = $9240;
+                var $9269 = self.origin;
+                var $9270 = self.name;
+                var $9271 = String$flatten$(List$cons$("Undefined reference: ", List$cons$(Fm$Name$show$($9270), List$cons$("\u{a}", List$nil))));
+                var $9228 = $9271;
                 break;
             case 'Fm.Error.cant_infer':
-                var $9241 = self.origin;
-                var $9242 = self.term;
-                var $9243 = self.context;
-                var _term$6 = Fm$Term$show$($9242);
-                var _context$7 = Fm$Context$show$($9243);
-                var $9244 = String$flatten$(List$cons$("Can\'t infer type of: ", List$cons$(_term$6, List$cons$("\u{a}", List$cons$("With ctxt:\u{a}", List$cons$(_context$7, List$nil))))));
-                var $9197 = $9244;
+                var $9272 = self.origin;
+                var $9273 = self.term;
+                var $9274 = self.context;
+                var _term$6 = Fm$Term$show$($9273);
+                var _context$7 = Fm$Context$show$($9274);
+                var $9275 = String$flatten$(List$cons$("Can\'t infer type of: ", List$cons$(_term$6, List$cons$("\u{a}", List$cons$("With ctxt:\u{a}", List$cons$(_context$7, List$nil))))));
+                var $9228 = $9275;
                 break;
         };
-        return $9197;
+        return $9228;
     };
     const Fm$Error$show = x0 => x1 => Fm$Error$show$(x0, x1);
 
@@ -22874,374 +22976,339 @@ module.exports = (function() {
         var self = _error$1;
         switch (self._) {
             case 'Fm.Error.type_mismatch':
-                var $9246 = self.origin;
-                var $9247 = self.expected;
-                var $9248 = self.detected;
-                var $9249 = self.context;
-                var $9250 = $9246;
-                var $9245 = $9250;
+                var $9277 = self.origin;
+                var $9278 = self.expected;
+                var $9279 = self.detected;
+                var $9280 = self.context;
+                var $9281 = $9277;
+                var $9276 = $9281;
                 break;
             case 'Fm.Error.show_goal':
-                var $9251 = self.name;
-                var $9252 = self.dref;
-                var $9253 = self.verb;
-                var $9254 = self.goal;
-                var $9255 = self.context;
-                var $9256 = Maybe$none;
-                var $9245 = $9256;
+                var $9282 = self.name;
+                var $9283 = self.dref;
+                var $9284 = self.verb;
+                var $9285 = self.goal;
+                var $9286 = self.context;
+                var $9287 = Maybe$none;
+                var $9276 = $9287;
                 break;
             case 'Fm.Error.waiting':
-                var $9257 = self.name;
-                var $9258 = Maybe$none;
-                var $9245 = $9258;
+                var $9288 = self.name;
+                var $9289 = Maybe$none;
+                var $9276 = $9289;
                 break;
             case 'Fm.Error.indirect':
-                var $9259 = self.name;
-                var $9260 = Maybe$none;
-                var $9245 = $9260;
+                var $9290 = self.name;
+                var $9291 = Maybe$none;
+                var $9276 = $9291;
                 break;
             case 'Fm.Error.patch':
-                var $9261 = self.path;
-                var $9262 = self.term;
-                var $9263 = Maybe$none;
-                var $9245 = $9263;
+                var $9292 = self.path;
+                var $9293 = self.term;
+                var $9294 = Maybe$none;
+                var $9276 = $9294;
                 break;
             case 'Fm.Error.undefined_reference':
-                var $9264 = self.origin;
-                var $9265 = self.name;
-                var $9266 = $9264;
-                var $9245 = $9266;
+                var $9295 = self.origin;
+                var $9296 = self.name;
+                var $9297 = $9295;
+                var $9276 = $9297;
                 break;
             case 'Fm.Error.cant_infer':
-                var $9267 = self.origin;
-                var $9268 = self.term;
-                var $9269 = self.context;
-                var $9270 = $9267;
-                var $9245 = $9270;
+                var $9298 = self.origin;
+                var $9299 = self.term;
+                var $9300 = self.context;
+                var $9301 = $9298;
+                var $9276 = $9301;
                 break;
         };
-        return $9245;
+        return $9276;
     };
     const Fm$Error$origin = x0 => Fm$Error$origin$(x0);
 
-    function Fm$Defs$report$go$(_defs$1, _list$2, _errs$3, _typs$4) {
-        var Fm$Defs$report$go$ = (_defs$1, _list$2, _errs$3, _typs$4) => ({
-            ctr: 'TCO',
-            arg: [_defs$1, _list$2, _errs$3, _typs$4]
-        });
-        var Fm$Defs$report$go = _defs$1 => _list$2 => _errs$3 => _typs$4 => Fm$Defs$report$go$(_defs$1, _list$2, _errs$3, _typs$4);
-        var arg = [_defs$1, _list$2, _errs$3, _typs$4];
-        while (true) {
-            let [_defs$1, _list$2, _errs$3, _typs$4] = arg;
-            var R = (() => {
-                var self = _list$2;
+    function Fm$Defs$report$errors$(_defs$1) {
+        var _errors$2 = "";
+        var _errors$3 = (() => {
+            var $9304 = _errors$2;
+            var $9305 = Map$keys$(_defs$1);
+            let _errors$4 = $9304;
+            let _key$3;
+            while ($9305._ === 'List.cons') {
+                _key$3 = $9305.head;
+                var _name$5 = Fm$Name$from_bits$(_key$3);
+                var self = Fm$get$(_name$5, _defs$1);
                 switch (self._) {
-                    case 'List.nil':
-                        var $9271 = String$flatten$(List$cons$(_typs$4, List$cons$("\u{a}", List$cons$((() => {
-                            var self = _errs$3;
-                            if (self.length === 0) {
-                                var $9272 = "All terms check.";
-                                return $9272;
-                            } else {
-                                var $9273 = self.charCodeAt(0);
-                                var $9274 = self.slice(1);
-                                var $9275 = _errs$3;
-                                return $9275;
-                            };
-                        })(), List$nil))));
-                        return $9271;
-                    case 'List.cons':
-                        var $9276 = self.head;
-                        var $9277 = self.tail;
-                        var _name$7 = $9276;
-                        var self = Fm$get$(_name$7, _defs$1);
+                    case 'Maybe.none':
+                        var $9306 = _errors$4;
+                        var $9304 = $9306;
+                        break;
+                    case 'Maybe.some':
+                        var $9307 = self.value;
+                        var self = $9307;
                         switch (self._) {
-                            case 'Maybe.none':
-                                var $9279 = Fm$Defs$report$go$(_defs$1, $9277, _errs$3, _typs$4);
-                                var $9278 = $9279;
-                                break;
-                            case 'Maybe.some':
-                                var $9280 = self.value;
-                                var self = $9280;
+                            case 'Fm.Def.new':
+                                var $9309 = self.file;
+                                var $9310 = self.code;
+                                var $9311 = self.orig;
+                                var $9312 = self.name;
+                                var $9313 = self.term;
+                                var $9314 = self.type;
+                                var $9315 = self.isct;
+                                var $9316 = self.stat;
+                                var self = $9316;
                                 switch (self._) {
-                                    case 'Fm.Def.new':
-                                        var $9282 = self.file;
-                                        var $9283 = self.code;
-                                        var $9284 = self.orig;
-                                        var $9285 = self.name;
-                                        var $9286 = self.term;
-                                        var $9287 = self.type;
-                                        var $9288 = self.isct;
-                                        var $9289 = self.stat;
-                                        var _typs$17 = String$flatten$(List$cons$(_typs$4, List$cons$(_name$7, List$cons$(": ", List$cons$(Fm$Term$show$($9287), List$cons$("\u{a}", List$nil))))));
-                                        var self = $9289;
+                                    case 'Fm.Status.init':
+                                        var $9318 = _errors$4;
+                                        var $9317 = $9318;
+                                        break;
+                                    case 'Fm.Status.wait':
+                                        var $9319 = _errors$4;
+                                        var $9317 = $9319;
+                                        break;
+                                    case 'Fm.Status.done':
+                                        var $9320 = _errors$4;
+                                        var $9317 = $9320;
+                                        break;
+                                    case 'Fm.Status.fail':
+                                        var $9321 = self.errors;
+                                        var self = $9321;
                                         switch (self._) {
-                                            case 'Fm.Status.init':
-                                                var $9291 = Fm$Defs$report$go$(_defs$1, $9277, _errs$3, _typs$17);
-                                                var $9290 = $9291;
+                                            case 'List.nil':
+                                                var $9323 = _errors$4;
+                                                var $9322 = $9323;
                                                 break;
-                                            case 'Fm.Status.wait':
-                                                var $9292 = Fm$Defs$report$go$(_defs$1, $9277, _errs$3, _typs$17);
-                                                var $9290 = $9292;
-                                                break;
-                                            case 'Fm.Status.done':
-                                                var $9293 = Fm$Defs$report$go$(_defs$1, $9277, _errs$3, _typs$17);
-                                                var $9290 = $9293;
-                                                break;
-                                            case 'Fm.Status.fail':
-                                                var $9294 = self.errors;
-                                                var self = $9294;
-                                                switch (self._) {
-                                                    case 'List.nil':
-                                                        var $9296 = Fm$Defs$report$go$(_defs$1, $9277, _errs$3, _typs$17);
-                                                        var $9295 = $9296;
-                                                        break;
-                                                    case 'List.cons':
-                                                        var $9297 = self.head;
-                                                        var $9298 = self.tail;
-                                                        var _name_str$21 = Fm$Name$show$($9285);
-                                                        var _rel_errs$22 = Fm$Error$relevant$($9294, Bool$false);
-                                                        var self = _rel_errs$22;
+                                            case 'List.cons':
+                                                var $9324 = self.head;
+                                                var $9325 = self.tail;
+                                                var _name_str$18 = $9312;
+                                                var _rel_errs$19 = Fm$Error$relevant$($9321, Bool$false);
+                                                var _errors$20 = (() => {
+                                                    var $9328 = _errors$4;
+                                                    var $9329 = _rel_errs$19;
+                                                    let _errors$21 = $9328;
+                                                    let _err$20;
+                                                    while ($9329._ === 'List.cons') {
+                                                        _err$20 = $9329.head;
+                                                        var _err_msg$22 = Fm$Error$show$(_err$20, _defs$1);
+                                                        var self = Fm$Error$origin$(_err$20);
                                                         switch (self._) {
-                                                            case 'List.nil':
-                                                                var $9300 = Fm$Defs$report$go$(_defs$1, $9277, _errs$3, _typs$17);
-                                                                var $9299 = $9300;
+                                                            case 'Maybe.none':
+                                                                var $9330 = _errors$21;
+                                                                var _ori_msg$23 = $9330;
                                                                 break;
-                                                            case 'List.cons':
-                                                                var $9301 = self.head;
-                                                                var $9302 = self.tail;
-                                                                var _rel_msgs$25 = List$mapped$(_rel_errs$22, (_err$25 => {
-                                                                    var $9304 = String$flatten$(List$cons$(Fm$Error$show$(_err$25, _defs$1), List$cons$((() => {
-                                                                        var self = Fm$Error$origin$(_err$25);
-                                                                        switch (self._) {
-                                                                            case 'Maybe.none':
-                                                                                var $9305 = "";
-                                                                                return $9305;
-                                                                            case 'Maybe.some':
-                                                                                var $9306 = self.value;
-                                                                                var self = $9306;
-                                                                                switch (self._) {
-                                                                                    case 'Pair.new':
-                                                                                        var $9308 = self.fst;
-                                                                                        var $9309 = self.snd;
-                                                                                        var $9310 = String$flatten$(List$cons$("Inside \'", List$cons$($9282, List$cons$("\':\u{a}", List$cons$(Fm$highlight$($9283, $9308, $9309), List$cons$("\u{a}", List$nil))))));
-                                                                                        var $9307 = $9310;
-                                                                                        break;
-                                                                                };
-                                                                                return $9307;
-                                                                        };
-                                                                    })(), List$nil)));
-                                                                    return $9304;
-                                                                }));
-                                                                var _errs$26 = String$flatten$(List$cons$(_errs$3, List$cons$(String$join$("\u{a}", _rel_msgs$25), List$cons$("\u{a}", List$nil))));
-                                                                var $9303 = Fm$Defs$report$go$(_defs$1, $9277, _errs$26, _typs$17);
-                                                                var $9299 = $9303;
+                                                            case 'Maybe.some':
+                                                                var $9331 = self.value;
+                                                                var self = $9331;
+                                                                switch (self._) {
+                                                                    case 'Pair.new':
+                                                                        var $9333 = self.fst;
+                                                                        var $9334 = self.snd;
+                                                                        var _inside$26 = ("Inside \'" + ($9309 + "\':\u{a}"));
+                                                                        var _source$27 = Fm$highlight$($9310, $9333, $9334);
+                                                                        var $9335 = (_inside$26 + _source$27);
+                                                                        var $9332 = $9335;
+                                                                        break;
+                                                                };
+                                                                var _ori_msg$23 = $9332;
                                                                 break;
                                                         };
-                                                        var $9295 = $9299;
-                                                        break;
-                                                };
-                                                var $9290 = $9295;
+                                                        var $9328 = (_errors$21 + (_err_msg$22 + (_ori_msg$23 + "\u{a}\u{a}")));
+                                                        _errors$21 = $9328;
+                                                        $9329 = $9329.tail;
+                                                    }
+                                                    return _errors$21;
+                                                })();
+                                                var $9326 = _errors$20;
+                                                var $9322 = $9326;
                                                 break;
                                         };
-                                        var $9281 = $9290;
+                                        var $9317 = $9322;
                                         break;
                                 };
-                                var $9278 = $9281;
+                                var $9308 = $9317;
                                 break;
                         };
-                        return $9278;
+                        var $9304 = $9308;
+                        break;
                 };
-            })();
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
+                _errors$4 = $9304;
+                $9305 = $9305.tail;
+            }
+            return _errors$4;
+        })();
+        var $9302 = _errors$3;
+        return $9302;
     };
-    const Fm$Defs$report$go = x0 => x1 => x2 => x3 => Fm$Defs$report$go$(x0, x1, x2, x3);
+    const Fm$Defs$report$errors = x0 => Fm$Defs$report$errors$(x0);
 
-    function Fm$Defs$report$(_defs$1, _list$2) {
-        var $9311 = Fm$Defs$report$go$(_defs$1, _list$2, "", "");
-        return $9311;
+    function Fm$Defs$report$(_defs$1, _names$2) {
+        var _types$3 = Fm$Defs$report$types$(_defs$1, _names$2);
+        var _errors$4 = Fm$Defs$report$errors$(_defs$1);
+        var self = _errors$4;
+        if (self.length === 0) {
+            var $9337 = "All terms check.";
+            var _errors$5 = $9337;
+        } else {
+            var $9338 = self.charCodeAt(0);
+            var $9339 = self.slice(1);
+            var $9340 = _errors$4;
+            var _errors$5 = $9340;
+        };
+        var $9336 = (_types$3 + ("\u{a}" + _errors$5));
+        return $9336;
     };
     const Fm$Defs$report = x0 => x1 => Fm$Defs$report$(x0, x1);
 
     function Fm$checker$io$one$(_name$1) {
-        var $9312 = IO$monad$((_m$bind$2 => _m$pure$3 => {
-            var $9313 = _m$bind$2;
-            return $9313;
-        }))(Fm$Synth$one$(_name$1, Map$new))((_new_defs$2 => {
-            var self = _new_defs$2;
-            switch (self._) {
-                case 'Maybe.none':
-                    var $9315 = IO$print$(Fm$Defs$report$(Map$new, List$cons$(_name$1, List$nil)));
-                    var $9314 = $9315;
-                    break;
-                case 'Maybe.some':
-                    var $9316 = self.value;
-                    var $9317 = IO$print$(Fm$Defs$report$($9316, List$cons$(_name$1, List$nil)));
-                    var $9314 = $9317;
-                    break;
-            };
-            return $9314;
+        var $9341 = IO$monad$((_m$bind$2 => _m$pure$3 => {
+            var $9342 = _m$bind$2;
+            return $9342;
+        }))(Fm$Synth$one$(_name$1, Map$new, Bool$true))((_new_defs$2 => {
+            var $9343 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+                var $9344 = _m$bind$3;
+                return $9344;
+            }))(IO$print$(""))((_$3 => {
+                var self = _new_defs$2;
+                switch (self._) {
+                    case 'Maybe.none':
+                        var $9346 = IO$print$(Fm$Defs$report$(Map$new, List$cons$(_name$1, List$nil)));
+                        var $9345 = $9346;
+                        break;
+                    case 'Maybe.some':
+                        var $9347 = self.value;
+                        var $9348 = IO$print$(Fm$Defs$report$($9347, List$cons$(_name$1, List$nil)));
+                        var $9345 = $9348;
+                        break;
+                };
+                return $9345;
+            }));
+            return $9343;
         }));
-        return $9312;
+        return $9341;
     };
     const Fm$checker$io$one = x0 => Fm$checker$io$one$(x0);
 
-    function Map$keys$go$(_xs$2, _key$3, _list$4) {
-        var self = _xs$2;
-        switch (self._) {
-            case 'Map.new':
-                var $9319 = _list$4;
-                var $9318 = $9319;
-                break;
-            case 'Map.tie':
-                var $9320 = self.val;
-                var $9321 = self.lft;
-                var $9322 = self.rgt;
-                var self = $9320;
-                switch (self._) {
-                    case 'Maybe.none':
-                        var $9324 = _list$4;
-                        var _list0$8 = $9324;
-                        break;
-                    case 'Maybe.some':
-                        var $9325 = self.value;
-                        var $9326 = List$cons$(Bits$reverse$(_key$3), _list$4);
-                        var _list0$8 = $9326;
-                        break;
-                };
-                var _list1$9 = Map$keys$go$($9321, (_key$3 + '0'), _list0$8);
-                var _list2$10 = Map$keys$go$($9322, (_key$3 + '1'), _list1$9);
-                var $9323 = _list2$10;
-                var $9318 = $9323;
-                break;
-        };
-        return $9318;
-    };
-    const Map$keys$go = x0 => x1 => x2 => Map$keys$go$(x0, x1, x2);
-
-    function Map$keys$(_xs$2) {
-        var $9327 = List$reverse$(Map$keys$go$(_xs$2, Bits$e, List$nil));
-        return $9327;
-    };
-    const Map$keys = x0 => Map$keys$(x0);
-
-    function Fm$Synth$many$(_names$1, _defs$2) {
+    function Fm$Synth$many$(_names$1, _defs$2, _log$3) {
         var self = _names$1;
         switch (self._) {
             case 'List.nil':
-                var $9329 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-                    var $9330 = _m$pure$4;
-                    return $9330;
+                var $9350 = IO$monad$((_m$bind$4 => _m$pure$5 => {
+                    var $9351 = _m$pure$5;
+                    return $9351;
                 }))(_defs$2);
-                var $9328 = $9329;
+                var $9349 = $9350;
                 break;
             case 'List.cons':
-                var $9331 = self.head;
-                var $9332 = self.tail;
-                var $9333 = IO$monad$((_m$bind$5 => _m$pure$6 => {
-                    var $9334 = _m$bind$5;
-                    return $9334;
-                }))(Fm$Synth$one$($9331, _defs$2))((_new_defs$5 => {
-                    var self = _new_defs$5;
+                var $9352 = self.head;
+                var $9353 = self.tail;
+                var $9354 = IO$monad$((_m$bind$6 => _m$pure$7 => {
+                    var $9355 = _m$bind$6;
+                    return $9355;
+                }))(Fm$Synth$one$($9352, _defs$2, _log$3))((_new_defs$6 => {
+                    var self = _new_defs$6;
                     switch (self._) {
                         case 'Maybe.none':
-                            var $9336 = Fm$Synth$many$($9332, _defs$2);
-                            var $9335 = $9336;
+                            var $9357 = Fm$Synth$many$($9353, _defs$2, _log$3);
+                            var $9356 = $9357;
                             break;
                         case 'Maybe.some':
-                            var $9337 = self.value;
-                            var $9338 = Fm$Synth$many$($9332, $9337);
-                            var $9335 = $9338;
+                            var $9358 = self.value;
+                            var $9359 = Fm$Synth$many$($9353, $9358, _log$3);
+                            var $9356 = $9359;
                             break;
                     };
-                    return $9335;
+                    return $9356;
                 }));
-                var $9328 = $9333;
+                var $9349 = $9354;
                 break;
         };
-        return $9328;
+        return $9349;
     };
-    const Fm$Synth$many = x0 => x1 => Fm$Synth$many$(x0, x1);
+    const Fm$Synth$many = x0 => x1 => x2 => Fm$Synth$many$(x0, x1, x2);
 
-    function Fm$Synth$file$(_file$1, _defs$2) {
-        var $9339 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $9340 = _m$bind$3;
-            return $9340;
-        }))(IO$get_file$(_file$1))((_code$3 => {
-            var _read$4 = Fm$Defs$read$(_file$1, _code$3, _defs$2);
-            var self = _read$4;
+    function Fm$Synth$file$(_file$1, _defs$2, _log$3) {
+        var $9360 = IO$monad$((_m$bind$4 => _m$pure$5 => {
+            var $9361 = _m$bind$4;
+            return $9361;
+        }))(IO$get_file$(_file$1))((_code$4 => {
+            var _read$5 = Fm$Defs$read$(_file$1, _code$4, _defs$2);
+            var self = _read$5;
             switch (self._) {
                 case 'Either.left':
-                    var $9342 = self.value;
-                    var $9343 = IO$monad$((_m$bind$6 => _m$pure$7 => {
-                        var $9344 = _m$pure$7;
-                        return $9344;
-                    }))(Either$left$($9342));
-                    var $9341 = $9343;
+                    var $9363 = self.value;
+                    var $9364 = IO$monad$((_m$bind$7 => _m$pure$8 => {
+                        var $9365 = _m$pure$8;
+                        return $9365;
+                    }))(Either$left$($9363));
+                    var $9362 = $9364;
                     break;
                 case 'Either.right':
-                    var $9345 = self.value;
-                    var _file_defs$6 = $9345;
-                    var _file_keys$7 = Map$keys$(_file_defs$6);
-                    var _file_nams$8 = List$mapped$(_file_keys$7, Fm$Name$from_bits);
-                    var $9346 = IO$monad$((_m$bind$9 => _m$pure$10 => {
-                        var $9347 = _m$bind$9;
-                        return $9347;
-                    }))(Fm$Synth$many$(_file_nams$8, _file_defs$6))((_defs$9 => {
-                        var $9348 = IO$monad$((_m$bind$10 => _m$pure$11 => {
-                            var $9349 = _m$pure$11;
-                            return $9349;
-                        }))(Either$right$(Pair$new$(_file_nams$8, _defs$9)));
-                        return $9348;
+                    var $9366 = self.value;
+                    var _file_defs$7 = $9366;
+                    var _file_keys$8 = Map$keys$(_file_defs$7);
+                    var _file_nams$9 = List$mapped$(_file_keys$8, Fm$Name$from_bits);
+                    var $9367 = IO$monad$((_m$bind$10 => _m$pure$11 => {
+                        var $9368 = _m$bind$10;
+                        return $9368;
+                    }))(Fm$Synth$many$(_file_nams$9, _file_defs$7, _log$3))((_defs$10 => {
+                        var $9369 = IO$monad$((_m$bind$11 => _m$pure$12 => {
+                            var $9370 = _m$pure$12;
+                            return $9370;
+                        }))(Either$right$(Pair$new$(_file_nams$9, _defs$10)));
+                        return $9369;
                     }));
-                    var $9341 = $9346;
+                    var $9362 = $9367;
                     break;
             };
-            return $9341;
+            return $9362;
         }));
-        return $9339;
+        return $9360;
     };
-    const Fm$Synth$file = x0 => x1 => Fm$Synth$file$(x0, x1);
+    const Fm$Synth$file = x0 => x1 => x2 => Fm$Synth$file$(x0, x1, x2);
 
     function Fm$checker$io$file$(_file$1) {
-        var $9350 = IO$monad$((_m$bind$2 => _m$pure$3 => {
-            var $9351 = _m$bind$2;
-            return $9351;
-        }))(Fm$Synth$file$(_file$1, Map$new))((_loaded$2 => {
+        var $9371 = IO$monad$((_m$bind$2 => _m$pure$3 => {
+            var $9372 = _m$bind$2;
+            return $9372;
+        }))(Fm$Synth$file$(_file$1, Map$new, Bool$true))((_loaded$2 => {
             var self = _loaded$2;
             switch (self._) {
                 case 'Either.left':
-                    var $9353 = self.value;
-                    var $9354 = IO$monad$((_m$bind$4 => _m$pure$5 => {
-                        var $9355 = _m$bind$4;
-                        return $9355;
+                    var $9374 = self.value;
+                    var $9375 = IO$monad$((_m$bind$4 => _m$pure$5 => {
+                        var $9376 = _m$bind$4;
+                        return $9376;
                     }))(IO$print$(String$flatten$(List$cons$("On \'", List$cons$(_file$1, List$cons$("\':", List$nil))))))((_$4 => {
-                        var $9356 = IO$print$($9353);
-                        return $9356;
+                        var $9377 = IO$print$($9374);
+                        return $9377;
                     }));
-                    var $9352 = $9354;
+                    var $9373 = $9375;
                     break;
                 case 'Either.right':
-                    var $9357 = self.value;
-                    var self = $9357;
+                    var $9378 = self.value;
+                    var self = $9378;
                     switch (self._) {
                         case 'Pair.new':
-                            var $9359 = self.fst;
-                            var $9360 = self.snd;
-                            var _nams$6 = $9359;
-                            var _defs$7 = $9360;
-                            var $9361 = IO$print$(Fm$Defs$report$(_defs$7, _nams$6));
-                            var $9358 = $9361;
+                            var $9380 = self.fst;
+                            var $9381 = self.snd;
+                            var _nams$6 = $9380;
+                            var _defs$7 = $9381;
+                            var $9382 = IO$monad$((_m$bind$8 => _m$pure$9 => {
+                                var $9383 = _m$bind$8;
+                                return $9383;
+                            }))(IO$print$(""))((_$8 => {
+                                var $9384 = IO$print$(Fm$Defs$report$(_defs$7, _nams$6));
+                                return $9384;
+                            }));
+                            var $9379 = $9382;
                             break;
                     };
-                    var $9352 = $9358;
+                    var $9373 = $9379;
                     break;
             };
-            return $9352;
+            return $9373;
         }));
-        return $9350;
+        return $9371;
     };
     const Fm$checker$io$file = x0 => Fm$checker$io$file$(x0);
 
@@ -23258,15 +23325,15 @@ module.exports = (function() {
                 var self = _io$2;
                 switch (self._) {
                     case 'IO.end':
-                        var $9362 = self.value;
-                        var $9363 = $9362;
-                        return $9363;
+                        var $9385 = self.value;
+                        var $9386 = $9385;
+                        return $9386;
                     case 'IO.ask':
-                        var $9364 = self.query;
-                        var $9365 = self.param;
-                        var $9366 = self.then;
-                        var $9367 = IO$purify$($9366(""));
-                        return $9367;
+                        var $9387 = self.query;
+                        var $9388 = self.param;
+                        var $9389 = self.then;
+                        var $9390 = IO$purify$($9389(""));
+                        return $9390;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -23279,31 +23346,31 @@ module.exports = (function() {
         var self = Fm$Defs$read$("Main.fm", _code$1, Map$new);
         switch (self._) {
             case 'Either.left':
-                var $9369 = self.value;
-                var $9370 = $9369;
-                var $9368 = $9370;
+                var $9392 = self.value;
+                var $9393 = $9392;
+                var $9391 = $9393;
                 break;
             case 'Either.right':
-                var $9371 = self.value;
-                var $9372 = IO$purify$((() => {
-                    var _defs$3 = $9371;
+                var $9394 = self.value;
+                var $9395 = IO$purify$((() => {
+                    var _defs$3 = $9394;
                     var _nams$4 = List$mapped$(Map$keys$(_defs$3), Fm$Name$from_bits);
-                    var $9373 = IO$monad$((_m$bind$5 => _m$pure$6 => {
-                        var $9374 = _m$bind$5;
-                        return $9374;
-                    }))(Fm$Synth$many$(_nams$4, _defs$3))((_defs$5 => {
-                        var $9375 = IO$monad$((_m$bind$6 => _m$pure$7 => {
-                            var $9376 = _m$pure$7;
-                            return $9376;
+                    var $9396 = IO$monad$((_m$bind$5 => _m$pure$6 => {
+                        var $9397 = _m$bind$5;
+                        return $9397;
+                    }))(Fm$Synth$many$(_nams$4, _defs$3, Bool$false))((_defs$5 => {
+                        var $9398 = IO$monad$((_m$bind$6 => _m$pure$7 => {
+                            var $9399 = _m$pure$7;
+                            return $9399;
                         }))(Fm$Defs$report$(_defs$5, _nams$4));
-                        return $9375;
+                        return $9398;
                     }));
-                    return $9373;
+                    return $9396;
                 })());
-                var $9368 = $9372;
+                var $9391 = $9395;
                 break;
         };
-        return $9368;
+        return $9391;
     };
     const Fm$checker$code = x0 => Fm$checker$code$(x0);
 
@@ -23311,21 +23378,21 @@ module.exports = (function() {
         var self = Fm$Parser$term$(0n, _code$1);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $9378 = self.idx;
-                var $9379 = self.code;
-                var $9380 = self.err;
-                var $9381 = Maybe$none;
-                var $9377 = $9381;
+                var $9401 = self.idx;
+                var $9402 = self.code;
+                var $9403 = self.err;
+                var $9404 = Maybe$none;
+                var $9400 = $9404;
                 break;
             case 'Parser.Reply.value':
-                var $9382 = self.idx;
-                var $9383 = self.code;
-                var $9384 = self.val;
-                var $9385 = Maybe$some$($9384);
-                var $9377 = $9385;
+                var $9405 = self.idx;
+                var $9406 = self.code;
+                var $9407 = self.val;
+                var $9408 = Maybe$some$($9407);
+                var $9400 = $9408;
                 break;
         };
-        return $9377;
+        return $9400;
     };
     const Fm$Term$read = x0 => Fm$Term$read$(x0);
     const Fm = (() => {
@@ -23334,11 +23401,11 @@ module.exports = (function() {
         var __$3 = Fm$checker$io$file;
         var __$4 = Fm$checker$code;
         var __$5 = Fm$Term$read;
-        var $9386 = IO$monad$((_m$bind$6 => _m$pure$7 => {
-            var $9387 = _m$pure$7;
-            return $9387;
+        var $9409 = IO$monad$((_m$bind$6 => _m$pure$7 => {
+            var $9410 = _m$pure$7;
+            return $9410;
         }))(Unit$new);
-        return $9386;
+        return $9409;
     })();
     return {
         '$main$': () => run(Fm),
@@ -23690,6 +23757,7 @@ module.exports = (function() {
         'Fm.Path.nil': Fm$Path$nil,
         'Fm.MPath.nil': Fm$MPath$nil,
         'List.is_empty': List$is_empty,
+        'IO.print': IO$print,
         'Fm.Term.patch_at': Fm$Term$patch_at,
         'Fm.Synth.fix': Fm$Synth$fix,
         'Fm.Status.fail': Fm$Status$fail,
@@ -23709,7 +23777,6 @@ module.exports = (function() {
         'Fm.Core.show': Fm$Core$show,
         'Fm.Defs.core': Fm$Defs$core,
         'Fm.to_core.io.one': Fm$to_core$io$one,
-        'IO.print': IO$print,
         'Maybe.bind': Maybe$bind,
         'Maybe.monad': Maybe$monad,
         'Fm.Term.show.as_nat.go': Fm$Term$show$as_nat$go,
@@ -23725,6 +23792,9 @@ module.exports = (function() {
         'Fm.Name.from_bits': Fm$Name$from_bits,
         'Fm.Term.show.go': Fm$Term$show$go,
         'Fm.Term.show': Fm$Term$show,
+        'Fm.Defs.report.types': Fm$Defs$report$types,
+        'Map.keys.go': Map$keys$go,
+        'Map.keys': Map$keys,
         'Fm.Error.relevant': Fm$Error$relevant,
         'Fm.Context.show': Fm$Context$show,
         'Fm.Term.expand_at': Fm$Term$expand_at,
@@ -23732,11 +23802,9 @@ module.exports = (function() {
         'Fm.Term.expand': Fm$Term$expand,
         'Fm.Error.show': Fm$Error$show,
         'Fm.Error.origin': Fm$Error$origin,
-        'Fm.Defs.report.go': Fm$Defs$report$go,
+        'Fm.Defs.report.errors': Fm$Defs$report$errors,
         'Fm.Defs.report': Fm$Defs$report,
         'Fm.checker.io.one': Fm$checker$io$one,
-        'Map.keys.go': Map$keys$go,
-        'Map.keys': Map$keys,
         'Fm.Synth.many': Fm$Synth$many,
         'Fm.Synth.file': Fm$Synth$file,
         'Fm.checker.io.file': Fm$checker$io$file,
