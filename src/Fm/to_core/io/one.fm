@@ -10,7 +10,7 @@ Fm.to_core.io.one(name: String): IO(String)
         open defn
         let term = Fm.Term.inline(defn.term, defs);
         let type = Fm.Term.inline(defn.type, defs);
-        Fm.Def.new(defn.file, defn.code, defn.orig, defn.name, term, type, defn.isct, defn.stat)
+        Fm.Def.new(defn.file, defn.code, defn.orig, defn.name, term, type, defn.isct, defn.arit, defn.stat)
       , defs);
     return Fm.Defs.core(defs);
   }

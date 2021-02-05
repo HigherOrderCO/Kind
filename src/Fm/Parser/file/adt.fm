@@ -9,15 +9,17 @@ Fm.Parser.file.adt(file: String, code: String, defs: Fm.Defs): Parser(Fm.Defs)
         let term = Fm.Term.bind([], (x) Bits.i(x), term);
         let type = Fm.Datatype.build_type(adt);
         let type = Fm.Term.bind([], (x) Bits.o(x), type);
-        let defs = Fm.define(file, code, orig, adt.name, term, type, false, false, defs);
+        let arit = Nat.add(List.length!(adt.pars), List.length!(adt.inds));
+        let defs = Fm.define(file, code, orig, adt.name, term, type, false, arit, false, defs);
         let defs = List.fold!(adt.ctrs)!(defs, (ctr, defs)
           let typ_name = adt.name;
+          let ctr_arit = Nat.add(arit, List.length!(case ctr { new: ctr.args }));
           let ctr_name = String.flatten([typ_name, Fm.Name.read("."), case ctr { new: ctr.name }]);
           let ctr_term = Fm.Constructor.build_term(adt, ctr);
           let ctr_term = Fm.Term.bind([], (x) Bits.i(x), ctr_term);
           let ctr_type = Fm.Constructor.build_type(adt, ctr);
           let ctr_type = Fm.Term.bind([], (x) Bits.o(x), ctr_type);
-          Fm.define(file, code, orig, ctr_name, ctr_term, ctr_type, true, false, defs));
+          Fm.define(file, code, orig, ctr_name, ctr_term, ctr_type, true, ctr_arit, false, defs));
         return defs;
       }
     };
