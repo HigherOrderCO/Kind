@@ -7,6 +7,11 @@ Fm.Defs.report(defs: Fm.Defs, names: List(Fm.Name)): String
   }
   types | "\n" | errors
     
+//Fm.Defs.report.remove_newline(str: String): String
+  //let len = String.length!(str)
+  //if String.eql(String.slice(len - 1, len) 
+  //if 
+
 Fm.Defs.report.errors(defs: Fm.Defs): String
   let errors = ""
   for key in Map.keys!(defs) with errors:
@@ -30,14 +35,14 @@ Fm.Defs.report.errors(defs: Fm.Defs): String
                 let err_msg = Fm.Error.show(err, defs)
                 let ori_msg = case Fm.Error.origin(err) as origin {
                   none:
-                    errors
+                    ""
                   some:
                     open origin.value
                     let inside = "Inside '" | got.value.file | "':\n"
                     let source = Fm.highlight(got.value.code, origin.value.fst, origin.value.snd)
-                    inside | source
+                    inside | source | "\n"
                 }
-                errors | err_msg | ori_msg | "\n\n"
+                errors | err_msg | ori_msg | "\n"
           }
         }
     }

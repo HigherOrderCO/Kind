@@ -6,9 +6,10 @@ Fm.define(
   term: Fm.Term,
   type: Fm.Term,
   isct: Bool,
+  arit: Nat,
   done: Bool,
   defs: Fm.Defs,
 ): Fm.Defs
   //let skip = Debug.log!(String.flatten(["define: ", name]), (x) Unit.new);
   let stat = if done then Fm.Status.done else Fm.Status.init;
-  Fm.set!(name, Fm.Def.new(file, code, orig, name, term, type, isct, stat), defs)
+  Fm.set!(name, Fm.Def.new(file, code, orig, name, term, type, isct, arit, stat), defs)

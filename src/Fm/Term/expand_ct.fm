@@ -6,10 +6,10 @@ Fm.Term.expand_ct(term: Fm.Term, defs: Fm.Defs, arity: Nat): Fm.Term
           Fm.Term.ref(term.name)
         some:
           open got.value
-          if got.value.isct then
-            Fm.Term.ref(term.name)
-          else
+          if Bool.and(got.value.isct, Nat.gtn(arity, got.value.arit)) then
             got.value.term
+          else
+            Fm.Term.ref(term.name)
       }
     var:
       Fm.Term.var(term.name, term.indx),

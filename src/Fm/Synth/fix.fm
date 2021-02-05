@@ -6,6 +6,7 @@ Fm.Synth.fix(
   term: Fm.Term,
   type: Fm.Term,
   isct: Bool,
+  arit: Nat,
   defs: Fm.Defs,
   errs: List(Fm.Error),
   fixd: Bool,
@@ -15,7 +16,7 @@ Fm.Synth.fix(
       if fixd then do IO {
         let type = Fm.Term.bind([], (x) Bits.i(x), type);
         let term = Fm.Term.bind([], (x) Bits.o(x), term);
-        let defs = Fm.set!(name, Fm.Def.new(file, code, orig, name, term, type, isct, Fm.Status.init), defs);
+        let defs = Fm.set!(name, Fm.Def.new(file, code, orig, name, term, type, isct, arit, Fm.Status.init), defs);
         return Maybe.some!(defs);
       } else do IO {
         return Maybe.none!;
@@ -24,15 +25,15 @@ Fm.Synth.fix(
       waiting: do IO {
         var new_defs = Fm.Synth.one(errs.head.name, defs);
         case new_defs {
-          none: Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, fixd),
-          some: Fm.Synth.fix(file, code, orig, name, term, type, isct, new_defs.value, errs.tail, Bool.true),
+          none: Fm.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, errs.tail, fixd),
+          some: Fm.Synth.fix(file, code, orig, name, term, type, isct, arit, new_defs.value, errs.tail, Bool.true),
         }
       },
       undefined_reference: do IO {
         var new_defs = Fm.Synth.one(errs.head.name, defs);
         case new_defs {
-          none: Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, fixd),
-          some: Fm.Synth.fix(file, code, orig, name, term, type, isct, new_defs.value, errs.tail, Bool.true),
+          none: Fm.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, errs.tail, fixd),
+          some: Fm.Synth.fix(file, code, orig, name, term, type, isct, arit, new_defs.value, errs.tail, Bool.true),
         }
       },
       patch: case errs.head.path {
@@ -41,14 +42,14 @@ Fm.Synth.fix(
         },
         o: do IO { // hole is on term
           let term = Fm.Term.patch_at(errs.head.path.pred, term, (x) errs.head.term);
-          Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, Bool.true);
+          Fm.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, errs.tail, Bool.true);
         },
         i: do IO { // hole is on type
           let type = Fm.Term.patch_at(errs.head.path.pred, type, (x) errs.head.term);
-          Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, Bool.true);
+          Fm.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, errs.tail, Bool.true);
         },
       },
       // The error isn't fixable
-      _: Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, fixd),
+      _: Fm.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, errs.tail, fixd),
     }
   }

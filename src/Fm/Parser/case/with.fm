@@ -6,5 +6,5 @@ Fm.Parser.case.with: Parser(Fm.Def)
     var type = Fm.Parser.term;
     Fm.Parser.text("=");
     var term = Fm.Parser.term;
-    return Fm.Def.new("", "", {0,0}, name, term, type, false, Fm.Status.init);
+    return Fm.Def.new("", "", {0,0}, name, term, type, false, 0, Fm.Status.init);
   }
