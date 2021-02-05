@@ -1,0 +1,4 @@
+F64.gte(a: F64, b: F64): Bool
+  open a 
+  open b 
+  Word.gte<64>(a.word, b.word)

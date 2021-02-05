@@ -1,0 +1,2 @@
+Fm.mut<A: Type>(name: Fm.Name, ini: A, fun: A -> A, map: Map(A)): Map(A)
+  Map.mut<A>(Fm.Name.to_bits(name), ini, fun, map)

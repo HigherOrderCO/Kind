@@ -1,0 +1,7 @@
+type Fm.Binder {
+  new(
+    eras: Bool,
+    name: Fm.Name,
+    term: Fm.Term,
+  )
+}

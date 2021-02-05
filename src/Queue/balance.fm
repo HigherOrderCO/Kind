@@ -1,0 +1,23 @@
+Queue.balance<A: Type>(f: List(A), sf: Nat, r: List(A), sr: Nat): Queue(A)
+  let max_sf = Nat.add(1, Nat.mul(Queue.max_diff, sf))
+  let max_sr = Nat.add(1, Nat.mul(Queue.max_diff, sr))
+  let size1 = Nat.div(Nat.add(sf, sr), 2)
+  let size2 = Nat.sub(Nat.add(sf, sr), 1)
+  case Nat.gtn(sf, max_sf) {
+  // if the front is way too long
+  true: 
+    let new_f = List.take<A>(size1, f)
+    let tail  = List.reverse<A>(List.drop<A>(size1, f))
+    let new_r = List.concat<A>(r, tail)
+    Queue.new<A>(new_f, size1, new_r, size2),
+  // if the rear is way too long
+  false: case Nat.gtn(sr, max_sr) {
+    true: 
+      let tail  = List.reverse<A>(List.drop<A>(size1, r))
+      let new_f = List.concat<A>(f, tail) 
+      let new_r = List.take<A>(size1, r)
+      Queue.new<A>(new_f, size2, new_r, size1),
+    // queue is balanced
+    false: Queue.new<A>(f, sf, r, sr)
+    }
+  }

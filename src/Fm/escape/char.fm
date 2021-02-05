@@ -1,0 +1,15 @@
+Fm.escape.char(chr: Char): String
+  if U16.eql(chr, Fm.backslash) then
+    String.cons(Fm.backslash, String.cons(chr, String.nil))
+  else if U16.eql(chr, '"') then
+    String.cons(Fm.backslash, String.cons(chr, String.nil))
+  else if U16.eql(chr, '\'') then
+    String.cons(Fm.backslash, String.cons(chr, String.nil))
+  else if U16.btw(' ', chr, '~') then
+    String.cons(chr, String.nil)
+  else
+    String.flatten([
+      String.cons(Fm.backslash, String.nil),
+      "u{", U16.show_hex(chr), "}",
+      String.nil,
+    ])

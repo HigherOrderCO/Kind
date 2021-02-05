@@ -1,0 +1,12 @@
+type Mons.Type {
+  normal,
+  earth,
+  fire,
+  water,
+  grass,
+  electric,
+  psychic,
+  ice,
+  light,
+  darkness
+}

@@ -1,0 +1,2 @@
+Bool.true_neq_false: true != false
+  (e) unit :: rewrite x in (if x then Unit else Empty) with e

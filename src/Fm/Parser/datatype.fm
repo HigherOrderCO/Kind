@@ -1,0 +1,17 @@
+Fm.Parser.datatype: Parser(Fm.Datatype)
+  do Parser {
+    Fm.Parser.text("type ");
+    var name = Fm.Parser.name1; 
+    var pars = Parser.maybe!(Fm.Parser.binder);
+    var inds = Parser.maybe!(do Parser {
+      Fm.Parser.text("~");
+      Fm.Parser.binder;
+    });
+    let pars = Maybe.default!([], pars);
+    let inds = Maybe.default!([], inds);
+    Fm.Parser.text("{");
+    var ctrs = Parser.until!(
+      Fm.Parser.text("}"),
+      Fm.Parser.item!(Fm.Parser.constructor(name)));
+    return Fm.Datatype.new(name, pars, inds, ctrs);
+  }

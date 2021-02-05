@@ -1,0 +1,8 @@
+Fm.Term.expand(dref: List(Bits), term: Fm.Term, defs: Fm.Defs): Fm.Term
+  let term = Fm.Term.normalize(term, Map.new!);
+  for path in dref with term:
+    let term = Fm.Term.expand_at(path, term, defs);
+    let term = Fm.Term.normalize(term, Map.new!);
+    let term = Fm.Term.expand_ct(term, defs, 0);
+    let term = Fm.Term.normalize(term, Map.new!);
+    term

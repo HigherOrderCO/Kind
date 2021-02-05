@@ -1,0 +1,6 @@
+Bits.show(a: Bits): String
+  case a {
+    e: "",
+    o: String.cons('0', Bits.show(a.pred)),
+    i: String.cons('1', Bits.show(a.pred)),
+  }

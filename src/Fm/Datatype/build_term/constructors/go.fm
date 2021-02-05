@@ -1,0 +1,21 @@
+Fm.Datatype.build_term.constructors.go(
+  type: Fm.Datatype,
+  name: Fm.Name,
+  ctrs: List(Fm.Constructor),
+): Fm.Term
+  case ctrs {
+    cons: case ctrs.head {
+      new: Fm.Term.all(Bool.false, "",
+        ctrs.head.name,
+        Fm.Datatype.build_term.constructor(type, ctrs.head),
+        (s,x) Fm.Datatype.build_term.constructors.go(type, name, ctrs.tail))
+    },
+    nil:
+      case type {
+        new:
+          let ret = Fm.Term.ref(Fm.Name.read("P"));
+          let ret = for var in type.inds:
+            Fm.Term.app(ret, Fm.Term.ref(case var { new: var.name }));
+          Fm.Term.app(ret, Fm.Term.ref(String.concat(name,".Self")))
+      }
+  }

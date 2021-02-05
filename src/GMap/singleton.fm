@@ -1,0 +1,2 @@
+GMap.singleton<K: Type, V: Type>(key: K, val: V): GMap(K,V)
+  GMap.bin<K,V>(1, key, val, GMap.tip!!, GMap.tip!!)

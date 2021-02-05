@@ -1,0 +1,5 @@
+Parser.is_eof: Parser(Bool)
+  (idx,code) case code {
+    nil: Parser.Reply.value!(idx, code, Bool.true),
+    cons: Parser.Reply.value!(idx, code, Bool.false),
+  }

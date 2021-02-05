@@ -1,0 +1,6 @@
+Fm.highlight.end(
+  col: Nat,
+  row: Nat,
+  res: List(String),
+): String
+  String.join("\n", res)

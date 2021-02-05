@@ -1,0 +1,6 @@
+Fm.Term.show.app(term: Fm.Term, path: Maybe(Bits -> Bits), args: List(String)): String
+  case term {
+    app: Fm.Term.show.app(term.func, Fm.MPath.o(path), Fm.Term.show.go(term.argm, Fm.MPath.i(path)) & args),
+    ori: Fm.Term.show.app(term.expr, path, args),
+    _  : Fm.Term.show.app.done(term, path, args)
+  }

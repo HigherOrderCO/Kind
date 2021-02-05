@@ -1,0 +1,5 @@
+String.to_bits(str: String): Bits
+  case str{
+    nil : Bits.e
+    cons: Bits.concat(U16.to_bits(str.head), String.to_bits(str.tail))
+  }

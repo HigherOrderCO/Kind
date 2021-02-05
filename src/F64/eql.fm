@@ -1,0 +1,4 @@
+F64.eql(x: F64, y: F64): Bool
+  open x 
+  open y 
+  Word.eql<64>(x.word, y.word)

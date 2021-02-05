@@ -1,0 +1,8 @@
+String.includes.go(xs: String, match: String): String
+  case xs{
+    nil : String.nil
+    cons: case String.starts_with(xs.tail, match){
+      true : xs.tail
+      false: String.includes.go(xs.tail, match)
+    }
+  }

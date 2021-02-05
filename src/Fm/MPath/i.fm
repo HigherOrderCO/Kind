@@ -1,0 +1,2 @@
+Fm.MPath.i(path: Maybe(Fm.Path)): Maybe(Fm.Path)
+  Maybe.mapped!(path)!(Fm.Path.i)

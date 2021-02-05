@@ -1,0 +1,56 @@
+Fm.Term.expand_ct(term: Fm.Term, defs: Fm.Defs, arity: Nat): Fm.Term
+  case term {
+    ref:
+      case Fm.get!(term.name, defs) as got {
+        none:
+          Fm.Term.ref(term.name)
+        some:
+          open got.value
+          if got.value.isct then
+            Fm.Term.ref(term.name)
+          else
+            got.value.term
+      }
+    var:
+      Fm.Term.var(term.name, term.indx),
+    typ:
+      Fm.Term.typ,
+    all: 
+      def xtyp = Fm.Term.expand_ct(term.xtyp, defs, 0);
+      def body = (s,x) Fm.Term.expand_ct(term.body(s,x), defs, 0);
+      Fm.Term.all(term.eras, term.self, term.name, xtyp, body),
+    lam:
+      def body = (x) Fm.Term.expand_ct(term.body(x), defs, 0);
+      Fm.Term.lam(term.name, body),
+    app:
+      def func = Fm.Term.expand_ct(term.func, defs, Nat.succ(arity));
+      def argm = Fm.Term.expand_ct(term.argm, defs, 0);
+      Fm.Term.app(func, argm),
+    let:
+      def expr = Fm.Term.expand_ct(term.expr, defs, 0);
+      def body = (x) Fm.Term.expand_ct(term.body(x), defs, 0);
+      Fm.Term.let(term.name, expr, body),
+    def:
+      def expr = Fm.Term.expand_ct(term.expr, defs, 0);
+      def body = (x) Fm.Term.expand_ct(term.body(x), defs, 0);
+      Fm.Term.def(term.name, expr, body),
+    ann:
+      def term = Fm.Term.expand_ct(term.term, defs, 0);
+      def type = Fm.Term.expand_ct(term.type, defs, 0);
+      Fm.Term.ann(term.done, term, type),
+    gol:
+      Fm.Term.gol(term.name, term.dref, term.verb),
+    hol:
+      Fm.Term.hol(term.path),
+    nat:
+      Fm.Term.nat(term.natx),
+    chr:
+      Fm.Term.chr(term.chrx),
+    str:
+      Fm.Term.str(term.strx),
+    cse:
+      term,
+    ori:
+      def expr = Fm.Term.expand_ct(term.expr, defs, 0);
+      Fm.Term.ori(term.orig, term.expr),
+  }

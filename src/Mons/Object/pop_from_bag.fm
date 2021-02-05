@@ -1,0 +1,8 @@
+Mons.Object.pop_from_bag(obj: Mons.Object): Mons.Object
+  open obj
+  let qtd = List.length!(obj.bag)
+  if Nat.eql(qtd, 1) then
+    obj
+  else
+    let new_bag = List.drop!(1, obj.bag)
+    Mons.Object.set_bag(new_bag, obj)

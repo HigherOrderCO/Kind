@@ -1,0 +1,4 @@
+Fm.Constructor.build_term.opt(type: Fm.Datatype, ctor: Fm.Constructor): Fm.Term
+  case type {
+    new: Fm.Constructor.build_term.opt.go(type, ctor, type.ctrs)
+  }

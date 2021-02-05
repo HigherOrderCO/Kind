@@ -1,0 +1,2 @@
+Fm.Check.none<A: Type>: Fm.Check(A)
+  Fm.Check.result<A>(Maybe.none<A>, [])

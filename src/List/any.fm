@@ -1,0 +1,8 @@
+List.any<A: Type>(cond: A -> Bool, list: List(A)): Bool
+  case list{
+    nil : Bool.false
+    cons: case cond(list.head){
+      true : Bool.true
+      false: List.any!(cond, list.tail)
+    }
+  }

@@ -1,0 +1,4 @@
+Mons.Object.set_dir(obj: Mons.Object, dir: Mons.Dir): Mons.Object
+  open obj
+  Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.dmg, obj.bag, 
+    obj.mon, obj.bos, obj.cap, obj.idl, obj.eff)

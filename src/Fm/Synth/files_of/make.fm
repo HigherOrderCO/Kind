@@ -1,0 +1,9 @@
+Fm.Synth.files_of.make(names: List(String), last: String): List(String)
+  case names {
+    nil:
+      []
+    cons:
+      let head = last | names.head | ".fm"
+      let tail = Fm.Synth.files_of.make(names.tail, last | names.head | "/")
+      List.cons!(head, tail)
+  }

@@ -1,0 +1,7 @@
+Fm.Parser.annotation(init: Nat, term: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("::");
+    var type = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, Fm.Term.ann(Bool.false, term, type));
+  }

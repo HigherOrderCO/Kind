@@ -1,0 +1,10 @@
+Fm.Parser.op(sym: String, ref: String, init: Nat, val0: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text(sym);
+    var val1 = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref(ref);
+    let term = Fm.Term.app(term, val0);
+    let term = Fm.Term.app(term, val1);
+    return Fm.Term.ori(orig, term);
+  }

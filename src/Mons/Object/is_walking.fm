@@ -1,0 +1,6 @@
+Mons.Object.is_walking(obj: Mons.Object): Bool
+  open obj
+  open obj.pad
+  let is_walking_x = Bool.or(obj.pad.u, obj.pad.d)
+  let is_walking_y = Bool.or(obj.pad.l, obj.pad.r)
+  Bool.or(is_walking_x, is_walking_y)

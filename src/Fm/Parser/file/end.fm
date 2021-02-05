@@ -1,0 +1,6 @@
+Fm.Parser.file.end(file: String, code: String, defs: Fm.Defs): Parser(Fm.Defs)
+  do Parser {
+    Fm.Parser.spaces;
+    Parser.eof;
+    return defs;
+  }

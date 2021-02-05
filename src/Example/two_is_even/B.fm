@@ -1,0 +1,2 @@
+Example.two_is_even.B: Example.IsEven.B(2)
+  Example.IsEven.B.succ(_, Example.IsEven.B.zero)

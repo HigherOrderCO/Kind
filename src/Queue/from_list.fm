@@ -1,0 +1,3 @@
+Queue.from_list<A: Type>(as: List(A)): Queue(A)
+  let len = List.length<A>(as)
+  Queue.balance<A>(as, len, List.nil<A>, 0)

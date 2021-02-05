@@ -1,0 +1,8 @@
+Array.extract_tip<A: Type>(arr: Array(A,0)): A
+  case arr {
+    tip: arr.value,
+    tie: Unit.new
+  } : case arr.depth {
+        zero: A,
+        succ: Unit
+      }

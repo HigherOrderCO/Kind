@@ -1,0 +1,5 @@
+Fm.Parser.make_lambda(names: List(Fm.Name), body: Fm.Term): Fm.Term
+  case names {
+    nil: body,
+    cons: Fm.Term.lam(names.head, (x) Fm.Parser.make_lambda(names.tail, body)),
+  }

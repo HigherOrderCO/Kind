@@ -1,0 +1,2 @@
+String.flatten(xs: List(String)): String
+  String.flatten.go(xs, "")

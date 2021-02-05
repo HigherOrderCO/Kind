@@ -1,0 +1,4 @@
+Int.mul(a: Int, b: Int): Int
+  open a
+  open b
+  Int.new(Nat.add(Nat.mul(a.x, b.x), Nat.mul(a.y, b.y)), Nat.add(Nat.mul(a.x, b.y), Nat.mul(a.y, b.x)))

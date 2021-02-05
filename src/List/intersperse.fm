@@ -1,0 +1,8 @@
+List.intersperse<A: Type>(sep: A, xs: List(A)): List(A)
+  case xs{
+    nil : List.nil!
+    cons: case xs.tail{
+      nil : List.pure!(xs.head)
+      cons: List.cons!(xs.head,List.cons!(sep,List.intersperse<A>(sep,xs.tail)))
+    }
+  }

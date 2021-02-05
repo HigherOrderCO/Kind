@@ -1,0 +1,2 @@
+List.show<A: Type>(f: A -> String, xs: List(A)): String
+  String.flatten(["[",String.intercalate(",", List.map!!(f,xs)),"]"])

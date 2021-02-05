@@ -1,0 +1,7 @@
+Fm.Parser.hole: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("_");
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, Fm.Term.hol(Bits.e));
+  }

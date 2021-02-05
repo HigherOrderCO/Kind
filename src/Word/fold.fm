@@ -1,0 +1,11 @@
+Word.fold<P: Nat -> Type, m: Nat>(
+  nil  : P(Nat.zero),
+  w0   : <n: Nat> -> P(n) -> P(Nat.succ(n)),
+  w1   : <n: Nat> -> P(n) -> P(Nat.succ(n)),
+  word : Word(m)
+) : P(m)
+  case word {
+    e: nil,
+    o: w0<word.size>(Word.fold<P,word.size>(nil, w0, w1, word.pred)),
+    i: w1<word.size>(Word.fold<P,word.size>(nil, w0, w1, word.pred))
+  } : P(word.size)

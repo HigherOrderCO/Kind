@@ -1,0 +1,2 @@
+Mons.Attr.new_mage: Mons.Attr
+  Mons.Attr.new_neutral([Image3D.empty])

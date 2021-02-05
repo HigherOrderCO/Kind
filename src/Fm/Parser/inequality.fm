@@ -1,0 +1,12 @@
+Fm.Parser.inequality(init: Nat, val0: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("!=");
+    var val1 = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("Equal");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, val0);
+    let term = Fm.Term.app(term, val1);
+    let term = Fm.Term.app(Fm.Term.ref("Not"), term);
+    return Fm.Term.ori(orig, term);
+  }

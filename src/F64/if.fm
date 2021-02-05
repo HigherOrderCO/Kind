@@ -1,0 +1,5 @@
+F64.if<A: Type>(x: F64, ct: A, cf: A): A
+  case F64.eql(x, F64.0) {
+   true : cf,
+   false: ct
+  }

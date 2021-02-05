@@ -1,0 +1,6 @@
+type Fm.Check<V: Type> {
+  result(
+    value: Maybe(V), // the returned value
+    errors: List(Fm.Error), // a list of errors
+  ),
+}

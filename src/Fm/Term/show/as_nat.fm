@@ -1,0 +1,2 @@
+Fm.Term.show.as_nat(term: Fm.Term): Maybe(String)
+  Maybe.mapped!(Fm.Term.show.as_nat.go(term))!(Nat.show)

@@ -1,0 +1,16 @@
+Mons.image_to_global(width: U32, height: U32, x: U32, y: U32, lvl: U32): Pos32
+  let g_x = Pos32.get_x(Mons.global_scr_mid)
+  let g_y = Pos32.get_y(Mons.global_scr_mid)
+  let mid_width  = U32.div(width, u2)
+  let mid_height = U32.div(height, u2)
+  let mid_x_diff = U32.sub(mid_width, x)
+  let mid_y_diff = U32.sub(mid_height, y)
+  let upd_g_x =
+    if U32.gtn(x, mid_width) then  U32.add(g_x, U32.sub(x, mid_width))
+    else if U32.ltn(x, mid_width) then U32.sub(g_x, U32.sub(mid_width, x))
+    else g_x
+  let upd_g_y = 
+    if U32.gtn(y, mid_height) then U32.add(g_y, U32.sub(y, mid_height))
+    else if U32.ltn(y, mid_height) then U32.sub(g_y, U32.sub(mid_height, y))
+    else g_y
+  Pos32.new(upd_g_x, upd_g_y, lvl)

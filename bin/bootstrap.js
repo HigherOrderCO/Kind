@@ -1,7 +1,7 @@
 var {execSync} = require("child_process");
 var fs = require("fs");
 var path = require("path");
-var {fmc_to_js, fmc_to_hs, fmc} = require("formcore-lang"); // FormCore, which has the JS compiler
+var {fmc_to_js, fmc_to_hs, fmc} = require("formcore-js"); // FormCore, which has the JS compiler
 //var {fmc_to_js, fmc} = require("./../../FormCoreJS"); // FormCore, which has the JS compiler
 
 var fmjs_path = path.join(__dirname, "js/src/formality.js");

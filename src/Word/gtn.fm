@@ -1,0 +1,2 @@
+Word.gtn<size:Nat>(a: Word(size), b: Word(size)): Bool
+  Cmp.as_gtn(Word.cmp<size>(a, b))

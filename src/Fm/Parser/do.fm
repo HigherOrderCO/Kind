@@ -1,0 +1,9 @@
+Fm.Parser.do: Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("do ");
+    var name = Fm.Parser.name1;
+    Fm.Parser.text("{");
+    var term = Fm.Parser.do.statements(name);
+    Fm.Parser.text("}");
+    return term;
+  }

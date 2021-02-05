@@ -1,0 +1,4 @@
+Mons.Object.set_kin(obj: Mons.Object, kin: Mons.Kind): Mons.Object
+  open obj
+  Mons.Object.new(kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, 
+    obj.mon, obj.bos, obj.cap, obj.idl, obj.eff)

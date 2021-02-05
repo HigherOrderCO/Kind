@@ -1,0 +1,6 @@
+Cmp.as_eql(cmp: Cmp): Bool
+  case cmp {
+    ltn: Bool.false,
+    eql: Bool.true,
+    gtn: Bool.false,
+  }

@@ -1,0 +1,12 @@
+Fm.Parser.def: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("def ");
+    var name = Fm.Parser.name;
+    Fm.Parser.text("=");
+    var expr = Fm.Parser.term;
+    Parser.maybe!(Fm.Parser.text(";"));
+    var body = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, Fm.Term.def(name, expr, (x) body));
+  }

@@ -1,0 +1,4 @@
+Fm.Datatype.build_type(type: Fm.Datatype): Fm.Term
+  case type {
+    new: Fm.Datatype.build_type.go(type, type.name, type.pars, type.inds),
+  }

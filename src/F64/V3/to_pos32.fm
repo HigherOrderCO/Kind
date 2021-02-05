@@ -1,0 +1,2 @@
+F64.V3.to_pos32(pos: F64.V3): Pos32
+  F64.V3.to_pos32(pos)

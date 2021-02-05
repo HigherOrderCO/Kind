@@ -1,0 +1,25 @@
+Fm.Parser.letforin: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("let ");
+    var name = Fm.Parser.name1;
+    Fm.Parser.text("=");
+    Fm.Parser.text("for ");
+    var elem = Fm.Parser.name1;
+    Fm.Parser.text("in");
+    var list = Fm.Parser.term;
+    Fm.Parser.text(":");
+    var loop = Fm.Parser.term;
+    Parser.maybe!(Fm.Parser.text(";"));
+    var body = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("List.for");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, list);
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.ref(name));
+    let lamb = Fm.Term.lam(elem, (i) Fm.Term.lam(name, (x) loop));
+    let term = Fm.Term.app(term, lamb);
+    let term = Fm.Term.let(name, term, (x) body);
+    return Fm.Term.ori(orig, term);
+  }

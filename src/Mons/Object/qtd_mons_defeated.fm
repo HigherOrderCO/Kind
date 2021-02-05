@@ -1,0 +1,3 @@
+Mons.Object.qtd_mons_defeated(obj: Mons.Object): U32
+  open obj
+  Nat.to_u32(List.length!(Pair.snd!!(obj.cap)))

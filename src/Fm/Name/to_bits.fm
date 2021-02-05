@@ -1,0 +1,16 @@
+Fm.Name.to_bits(name: Fm.Name): Bits
+  case name {
+    nil:
+      Bits.e,
+    cons:
+      let chr = name.head;
+      let u16 = 
+        if      U16.btw('A', chr, 'Z') then U16.sub(chr, Nat.to_u16(65))
+        else if U16.btw('a', chr, 'z') then U16.sub(chr, Nat.to_u16(71))
+        else if U16.btw('0', chr, '9') then U16.add(chr, Nat.to_u16(4))
+        else if U16.eql('.', chr)      then Nat.to_u16(62)
+        else if U16.eql('_', chr)      then Nat.to_u16(63)
+        else                                Nat.to_u16(0);
+      let bts = case u16 { new: Word.to_bits<6>(Word.trim<16>(6, u16.value)) };
+      Bits.concat(Bits.reverse(bts), Fm.Name.to_bits(name.tail)),
+  }

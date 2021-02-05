@@ -1,0 +1,9 @@
+Fm.Parser.char: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("'");
+    var chrx = Fm.Parser.char.single;
+    Parser.text("'");
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, Fm.Term.chr(chrx));
+  }

@@ -1,0 +1,3 @@
+Queue.length<A: Type>(q: Queue(A)): Nat 
+  open q
+  Nat.add(q.size_front, q.size_rear)

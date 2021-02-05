@@ -1,0 +1,2 @@
+Fm.Synth.files_of(name: Fm.Name): List(String)
+  List.reverse!(Fm.Synth.files_of.make(String.split(name, "."), ""))

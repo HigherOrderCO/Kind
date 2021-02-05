@@ -1,0 +1,7 @@
+Fm.Parser.arrow(init: Nat, xtyp: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("->");
+    var body = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, Fm.Term.all(Bool.false, "", "", xtyp, (s,x) body));
+  }

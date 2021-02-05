@@ -1,0 +1,12 @@
+Fm.Parser.cons(init: Nat, head: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("&");
+    var tail = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("List.cons");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, head);
+    let term = Fm.Term.app(term, tail);
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, term);
+  }

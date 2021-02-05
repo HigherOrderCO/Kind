@@ -1,0 +1,9 @@
+Nat.bitwise_and(a: Nat, b: Nat): Nat
+  case Bool.or(Nat.eql(a, 0), Nat.eql(a, 0)){
+  true : 0
+  false: 
+    let bit = Bool.if<Nat>(Bool.or(Nat.eql(Nat.mod(a, 2), 0), Nat.eql(Nat.mod(b, 2), 0)), 0, 1)
+    let a = Nat.div(a, 2)
+    let b = Nat.div(b, 2)
+    Nat.add(bit, Nat.mul(2, Nat.bitwise_and(a, b)))
+  }

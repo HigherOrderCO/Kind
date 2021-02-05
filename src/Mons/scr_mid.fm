@@ -1,0 +1,2 @@
+Mons.scr_mid: Pos32
+  Pos32.new(u120, u80, u0)

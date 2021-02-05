@@ -1,0 +1,5 @@
+Maybe.extract<A: Type>(m: Maybe(A))<B: Type>(a: B, f: A -> B): B
+  case m {
+    none: a,
+    some: f(m.value),
+  }

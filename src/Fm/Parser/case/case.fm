@@ -1,0 +1,8 @@
+Fm.Parser.case.case: Parser(Pair(Fm.Name, Fm.Term))
+  do Parser {
+    var name = Fm.Parser.name1;
+    Fm.Parser.text(":");
+    var term = Fm.Parser.term;
+    Parser.maybe!(Fm.Parser.text(","));
+    return {name, term};
+  }

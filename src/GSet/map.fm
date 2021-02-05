@@ -1,0 +1,9 @@
+GSet.map<A: Type, B: Type>(f: A -> B, set: GSet(A)): GSet(B)
+  case set {
+    tip: GSet.tip!,
+    bin: 
+      let new_val   = f(set.val)
+      let new_left  = GSet.map!!(f, set.left)
+      let new_right = GSet.map!!(f, set.right)
+      GSet.node!(new_val, new_left, new_right)  
+  }

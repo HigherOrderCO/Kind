@@ -1,0 +1,2 @@
+List.unfoldr<A: Type, B: Type>(f: A -> Maybe(Pair(A,B)), a: A): List(B)
+  List.unfoldr.go<A,B>(f, a, List.nil<B>)

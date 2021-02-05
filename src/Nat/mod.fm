@@ -1,0 +1,2 @@
+Nat.mod(n: Nat, m: Nat): Nat
+  Nat.mod.go(n, m, 0)

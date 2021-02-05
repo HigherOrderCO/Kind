@@ -1,0 +1,5 @@
+Bool.if<A: Type>(cond: Bool, true_case: A, false_case: A): A
+  case cond{
+    true : true_case
+    false: false_case
+  }

@@ -1,0 +1,5 @@
+Fm.MPath.to_bits(path: Maybe(Fm.Path)): Bits
+  case path {
+    none: Bits.e,
+    some: path.value(Bits.e),
+  }

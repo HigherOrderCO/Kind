@@ -1,0 +1,2 @@
+GSet.show<A: Type>(to_str: A -> String, set: GSet(A)): String
+   List.show!(to_str, GSet.members!(set))

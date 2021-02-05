@@ -1,0 +1,17 @@
+Fm.Parser.file.def(file: String, code: String, defs: Fm.Defs): Parser(Fm.Defs)
+  do Parser {
+    var init = Fm.Parser.init;
+    var name = Fm.Parser.name1;
+    var args = Parser.many!(Fm.Parser.binder);
+    let args = List.flatten!(args);
+    Fm.Parser.text(":");
+    var type = Fm.Parser.term;
+    var term = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let type = Fm.Parser.make_forall(args, type);
+    let term = Fm.Parser.make_lambda(List.mapped!(args)!((x) case x { new: x.name }),term);
+    let type = Fm.Term.bind([], (x) Bits.i(x), type);
+    let term = Fm.Term.bind([], (x) Bits.o(x), term);
+    let defs = Fm.define(file, code, orig, name, term, type, false, false, defs);
+    return defs;
+  }

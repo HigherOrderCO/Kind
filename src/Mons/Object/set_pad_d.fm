@@ -1,0 +1,3 @@
+Mons.Object.set_pad_d(obj: Mons.Object, val: Bool): Mons.Object
+  open obj
+  Mons.Object.set_pad(obj, Mons.Pad.set_d(obj.pad, val))

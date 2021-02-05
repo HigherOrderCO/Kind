@@ -1,0 +1,85 @@
+type Fm.Term {
+  // A variable bound by another constructor
+  var(
+    name: Fm.Name, // the variable name, used for pretty printing
+    indx: Nat, // the variable bruijn level, used for equality and binding
+  ),
+  // A reference to a top-level definition
+  ref(
+    name: Fm.Name, // the reference name
+  ),
+  // The type of types
+  typ,
+  // The self-dependent function type (self-Pi)
+  all(
+    eras: Bool, // if it is erased at runtime
+    self: Fm.Name, // the term name
+    name: Fm.Name, // the input name
+    xtyp: Fm.Term, // the input type
+    body: Fm.Term -> Fm.Term -> Fm.Term, // the returned type
+  ),
+  // An anonymous function (lambda)
+  lam(
+    name: Fm.Name, // the input name
+    body: Fm.Term -> Fm.Term, // the returned body
+  ),
+  // A function application
+  app(
+    func: Fm.Term, // the function
+    argm: Fm.Term, // the argument
+  ),
+  // A local definition
+  let(
+    name: Fm.Name, // the expression name
+    expr: Fm.Term, // the expression value
+    body: Fm.Term -> Fm.Term, // the body where name=value
+  ),
+  // A local alias
+  def(
+    name: Fm.Name, // the expression name
+    expr: Fm.Term, // the expression value
+    body: Fm.Term -> Fm.Term, // the body where name=value
+  ),
+  // An inline annotation
+  ann(
+    done: Bool, // was this type-checked?
+    term: Fm.Term, // the annotated term
+    type: Fm.Term, // the annotated type
+  ),
+  // A hole to show the goal
+  gol(
+    name: Fm.Name, // the goal's name
+    dref: List(Bits), // a list of labels to expand when displaying it
+    verb: Bool, // show labels of expandable terms?
+  ),
+  // A hole to be auto-filled
+  hol(
+    path: Bits,
+  ),
+  // A natural number
+  nat(
+    natx: Nat,
+  ),
+  // A character
+  chr(
+    chrx: Char,
+  ),
+  // A string
+  str(
+    strx: String,
+  ),
+  // A case-of expression
+  cse(
+    path: Bits,
+    expr: Fm.Term,
+    name: Fm.Name,
+    with: List(Fm.Def),
+    cses: Map(Fm.Term),
+    moti: Maybe(Fm.Term),
+  ),
+  // An origin
+  ori(
+    orig: Pair(Nat,Nat),
+    expr: Fm.Term,
+  )
+}

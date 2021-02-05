@@ -1,0 +1,2 @@
+Int.0: Int
+  Int.from_nat(0)

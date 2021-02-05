@@ -1,0 +1,6 @@
+Bits.concat(a: Bits, b: Bits): Bits
+  case a {
+    e: b,
+    o: Bits.o(Bits.concat(a.pred, b)),
+    i: Bits.i(Bits.concat(a.pred, b))
+  }

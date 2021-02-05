@@ -1,0 +1,13 @@
+Fm.escapes: List(Pair(String, Char))
+  [
+    {"\\b" , '\b'},
+    {"\\f" , '\f'},
+    {"\\n" , '\n'},
+    {"\\r" , '\r'},
+    {"\\t" , '\t'},
+    {"\\v" , '\v'},
+    {String.cons(Fm.backslash, String.cons(Fm.backslash, String.nil)), Fm.backslash},
+    {"\\\"", '"'},
+    {"\\0" , '\0'},
+    {"\\'" , '\''},
+  ]

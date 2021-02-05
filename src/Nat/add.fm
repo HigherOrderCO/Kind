@@ -1,0 +1,5 @@
+Nat.add(n: Nat, m: Nat): Nat
+  case n {
+    zero: m,
+    succ: Nat.succ(Nat.add(n.pred, m)),
+  }

@@ -1,0 +1,3 @@
+Mons.Kind.set_default_battle_spr:  Bool -> Image3D
+  // (is_up) Mons.Assets.battle_croni_u
+  (is_up) Image3D.empty

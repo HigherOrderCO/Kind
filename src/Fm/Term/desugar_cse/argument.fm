@@ -1,0 +1,27 @@
+Fm.Term.desugar_cse.argument(
+  name: Fm.Name,
+  wyth: List(Fm.Def),
+  type: Fm.Term,
+  body: Fm.Term,
+  defs: Fm.Defs,
+): Fm.Term
+  case Fm.Term.reduce(type, defs) as type {
+    all:
+      def type = type.body(Fm.Term.var(type.self,0), Fm.Term.var(type.name,0));
+      def lam_name =
+        if String.is_empty(type.name) then
+          name
+        else
+          String.flatten([name, ".", type.name]);
+      def lam_body = (x) Fm.Term.desugar_cse.argument(name, wyth, type, body, defs);
+      Fm.Term.lam(lam_name, lam_body),
+    _: case wyth {
+      cons: case wyth.head {
+        new:
+          def lam_name = wyth.head.name;
+          def lam_body = (x) Fm.Term.desugar_cse.argument(name, wyth.tail, type, body, defs);
+          Fm.Term.lam(lam_name, lam_body)
+      },
+      nil: body,
+    }
+  }

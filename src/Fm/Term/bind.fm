@@ -1,0 +1,74 @@
+Fm.Term.bind(vars: Fm.Context, path: Fm.Path, term: Fm.Term): Fm.Term 
+  case term {
+    ref: case Fm.Context.find(term.name, vars) as got {
+      none: Fm.Term.ref(term.name),
+      some: got.value,
+    },
+    var: case List.at_last!(term.indx, vars) as got {
+      none: Fm.Term.var(term.name, term.indx),
+      some: Pair.snd!!(got.value),
+    },
+    typ: Fm.Term.typ,
+    all: 
+      let vlen = List.length!(vars);
+      def xtyp = Fm.Term.bind(vars, Fm.Path.o(path), term.xtyp);
+      def body = (s,x) Fm.Term.bind(
+        List.cons!({term.name,x},
+          List.cons!({term.self,s},
+          vars)),
+        Fm.Path.i(path),
+        term.body(
+          Fm.Term.var(term.self, vlen),
+          Fm.Term.var(term.name, Nat.succ(vlen))));
+      Fm.Term.all(term.eras, term.self, term.name, xtyp, body),
+    lam:
+      let vlen = List.length!(vars);
+      def body = (x) Fm.Term.bind(
+        List.cons!({term.name,x},vars),
+        Fm.Path.o(path),
+        term.body(Fm.Term.var(term.name, vlen)));
+      Fm.Term.lam(term.name, body),
+    app:
+      def func = Fm.Term.bind(vars, Fm.Path.o(path), term.func);
+      def argm = Fm.Term.bind(vars, Fm.Path.i(path), term.argm);
+      Fm.Term.app(func, argm),
+    let:
+      let vlen = List.length!(vars);
+      def expr = Fm.Term.bind(vars, Fm.Path.o(path), term.expr);
+      def body = (x) Fm.Term.bind(
+        List.cons!({term.name,x}, vars),
+        Fm.Path.i(path),
+        term.body(Fm.Term.var(term.name, vlen)));
+      Fm.Term.let(term.name, expr, body),
+    def:
+      let vlen = List.length!(vars);
+      def expr = Fm.Term.bind(vars, Fm.Path.o(path), term.expr);
+      def body = (x) Fm.Term.bind(
+        List.cons!({term.name,x}, vars),
+        Fm.Path.i(path),
+        term.body(Fm.Term.var(term.name, vlen)));
+      Fm.Term.def(term.name, expr, body),
+    ann:
+      def term = Fm.Term.bind(vars, Fm.Path.o(path), term.term);
+      def type = Fm.Term.bind(vars, Fm.Path.i(path), term.type);
+      Fm.Term.ann(term.done, term, type),
+    gol:
+      Fm.Term.gol(term.name, term.dref, term.verb),
+    hol:
+      Fm.Term.hol(Fm.Path.to_bits(path)),
+    nat:
+      Fm.Term.nat(term.natx),
+    chr:
+      Fm.Term.chr(term.chrx),
+    str:
+      Fm.Term.str(term.strx),
+    cse:
+      let expr = Fm.Term.bind(vars, Fm.Path.o(path), term.expr);
+      let name = term.name; // TODO
+      let wyth = term.with; // TODO
+      let cses = term.cses; // TODO
+      let moti = term.moti; // TODO
+      Fm.Term.cse(Fm.Path.to_bits(path), expr, name, wyth, cses, moti),
+    ori:
+      Fm.Term.ori(term.orig, Fm.Term.bind(vars, path, term.expr)),
+  }

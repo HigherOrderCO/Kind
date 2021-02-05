@@ -1,0 +1,18 @@
+Fm.Context.show(context: Fm.Context): String
+  case context {
+    nil: "",
+    cons: case context.head {
+      new:
+        let name = Fm.Name.show(context.head.fst);
+        let type = Fm.Term.show(Fm.Term.normalize(context.head.snd,Map.new!));
+        let rest = Fm.Context.show(context.tail);
+        String.flatten([
+          rest,
+          "- ",
+          name,
+          ": ",
+          type,
+          "\n",
+        ])
+    }
+  }

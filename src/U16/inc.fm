@@ -1,0 +1,3 @@
+U16.inc(a: U16): U16
+  open a
+  U16.new(Word.inc!(a.value))

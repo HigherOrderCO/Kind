@@ -1,0 +1,43 @@
+Fm.Parser.term: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    var term = Parser.first_of!([
+      Fm.Parser.type,
+      Fm.Parser.forall,
+      Fm.Parser.lambda,
+      Fm.Parser.lambda.erased,
+      Fm.Parser.lambda.nameless,
+      Fm.Parser.parenthesis,
+      Fm.Parser.letforrange.u32,
+      Fm.Parser.letforin,
+      Fm.Parser.let,
+      Fm.Parser.get,
+      Fm.Parser.def,
+      Fm.Parser.if,
+      Fm.Parser.char,
+      Fm.Parser.string,
+      Fm.Parser.pair,
+      Fm.Parser.sigma.type,
+      Fm.Parser.some,
+      Fm.Parser.apply,
+      Fm.Parser.mirror,
+      Fm.Parser.list,
+      Fm.Parser.log,
+      Fm.Parser.forrange.u32,
+      Fm.Parser.forrange.u32.2,
+      Fm.Parser.forin,
+      Fm.Parser.forin.2,
+      Fm.Parser.do,
+      Fm.Parser.case,
+      Fm.Parser.open,
+      Fm.Parser.goal,
+      Fm.Parser.hole,
+      Fm.Parser.u8,
+      Fm.Parser.u16,
+      Fm.Parser.u32,
+      Fm.Parser.u64,
+      Fm.Parser.nat,
+      Fm.Parser.reference,
+    ]);
+    Fm.Parser.suffix(init, term);
+  }

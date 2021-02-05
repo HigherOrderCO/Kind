@@ -1,0 +1,8 @@
+List.drop<A: Type>(n: Nat, xs: List(A)): List(A)
+  case n{
+    zero: xs
+    succ: case xs{
+      nil: List.nil!
+      cons: List.drop!(n.pred,xs.tail)
+    }
+  }

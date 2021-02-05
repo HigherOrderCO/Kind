@@ -1,0 +1,7 @@
+Example.greet: IO(Unit)
+  do IO {
+    IO.print("What is your name?")
+    var name = IO.get_line
+    IO.print("Hello, " | name | "!")
+    Example.greet
+  }

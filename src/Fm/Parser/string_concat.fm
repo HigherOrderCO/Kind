@@ -1,0 +1,11 @@
+Fm.Parser.string_concat(init: Nat, str0: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("|");
+    var str1 = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("String.concat");
+    let term = Fm.Term.app(term, str0);
+    let term = Fm.Term.app(term, str1);
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, term);
+  }

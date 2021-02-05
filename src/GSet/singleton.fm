@@ -1,0 +1,2 @@
+GSet.singleton<A: Type>(a: A): GSet(A)
+  GSet.bin!(1, a, GSet.tip!, GSet.tip!)

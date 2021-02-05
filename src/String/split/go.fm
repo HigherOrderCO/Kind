@@ -1,0 +1,12 @@
+String.split.go(xs: String, match: String, last: String): List(String)
+  case xs {
+    nil:
+      [last]
+    cons:
+      if String.starts_with(xs, match) then
+        let rest = String.drop(String.length(match), xs)
+        List.cons<String>(last, String.split.go(rest, match, ""))
+      else
+        let next = String.cons(xs.head, String.nil)
+        String.split.go(xs.tail, match, String.concat(last, next))
+  }

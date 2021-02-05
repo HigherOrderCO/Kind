@@ -1,0 +1,8 @@
+List.find<A: Type>(cond: A -> Bool, xs: List(A)): Maybe(A)
+  case xs{
+  nil : Maybe.none!
+  cons: case cond(xs.head){
+    true : Maybe.some!(xs.head)
+    false: List.find!(cond, xs.tail)
+    }
+  }

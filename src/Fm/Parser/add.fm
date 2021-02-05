@@ -1,0 +1,2 @@
+Fm.Parser.add: Nat -> Fm.Term -> Parser(Fm.Term)
+  Fm.Parser.op("+", "Nat.add")

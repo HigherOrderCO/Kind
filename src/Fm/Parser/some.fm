@@ -1,0 +1,12 @@
+Fm.Parser.some: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("some(");
+    var expr = Fm.Parser.term;
+    Fm.Parser.text(")");
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("Maybe.some");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, expr);
+    return Fm.Term.ori(orig, term);
+  }

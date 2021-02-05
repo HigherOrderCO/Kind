@@ -1,0 +1,4 @@
+Fm.Check.value<A: Type>(chk: Fm.Check(A)): Maybe(A)
+  case chk {
+    result: chk.value
+  }

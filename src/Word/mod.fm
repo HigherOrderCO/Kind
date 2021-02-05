@@ -1,0 +1,2 @@
+Word.mod<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.mod<size>(a,b)

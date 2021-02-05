@@ -1,0 +1,6 @@
+Fm.Constructor.build_term(type: Fm.Datatype, ctor: Fm.Constructor): Fm.Term
+  case type {
+    new: case ctor {
+      new: Fm.Constructor.build_term.go(type, ctor, type.name, type.pars, ctor.args)
+    }
+  }

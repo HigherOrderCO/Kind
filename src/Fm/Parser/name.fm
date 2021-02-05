@@ -1,0 +1,6 @@
+Fm.Parser.name: Parser(Fm.Name)
+  do Parser {
+    Fm.Parser.spaces;
+    var chrs = Parser.many<Fm.Letter>(Fm.Parser.letter);
+    return List.fold!(chrs)!(String.nil, String.cons);
+  }

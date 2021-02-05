@@ -1,0 +1,4 @@
+U32.div(a: U32, b: U32): U32
+  open a
+  open b
+  U32.new(Word.div!(a.value, b.value))

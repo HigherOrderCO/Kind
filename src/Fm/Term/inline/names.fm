@@ -1,0 +1,16 @@
+Fm.Term.inline.names: Set
+  let inl = [
+    "Monad.pure",
+    "Monad.bind",
+    "Monad.new",
+    "Parser.monad",
+    "Parser.bind",
+    "Parser.pure",
+    "Fm.Check.pure",
+    "Fm.Check.bind",
+    "Fm.Check.monad",
+    "Fm.Check.value",
+    "Fm.Check.none",
+  ]
+  let kvs = List.mapped!(inl)!((x) {Fm.Name.to_bits(x), Unit.new});
+  Map.from_list!(kvs)

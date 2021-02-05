@@ -1,0 +1,11 @@
+F64.V3.look_at(a: F64.V3, b: F64.V3, c: F64.V3): F64.V3 
+  open a 
+  open b 
+  open c 
+  let a_eql_b  = F64.V3.eql(a, b)
+  let diff     = F64.V3.sub(b, a)
+  let normdiff = F64.V3.norm(diff)
+  case a_eql_b {
+    true : normdiff,
+    false: c
+  }

@@ -1,0 +1,4 @@
+Int.cmp(a: Int, b: Int): Cmp
+  open a
+  open b
+  Nat.cmp(Nat.add(a.x, b.y), Nat.add(b.x, a.y))

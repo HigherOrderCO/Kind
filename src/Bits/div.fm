@@ -1,0 +1,2 @@
+Bits.div(a: Bits, b: Bits): Bits
+  Bits.div(a, b)

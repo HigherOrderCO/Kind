@@ -1,0 +1,6 @@
+Word.to_bits<size: Nat>(a: Word(size)): Bits
+  case a {
+    e: Bits.e,
+    o: Bits.o(Word.to_bits<a.size>(a.pred)),
+    i: Bits.i(Word.to_bits<a.size>(a.pred)),
+  }

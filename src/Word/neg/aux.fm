@@ -1,0 +1,12 @@
+Word.neg.aux<size: Nat>(word: Word(size), inc: Bool): Word(size)
+  case word {
+    e: Word.e,
+    o : case inc {
+      true : Word.o<word.size>(Word.neg.aux<word.size>(word.pred, Bool.true)),
+      false: Word.i<word.size>(Word.neg.aux<word.size>(word.pred, Bool.false))
+    }
+    i : case inc {
+      true : Word.i<word.size>(Word.neg.aux<word.size>(word.pred, Bool.false)),
+      false: Word.o<word.size>(Word.neg.aux<word.size>(word.pred, Bool.false))
+    }
+  } : Word(word.size)

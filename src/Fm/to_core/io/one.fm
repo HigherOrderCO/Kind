@@ -1,0 +1,16 @@
+Fm.to_core.io.one(name: String): IO(String)
+  do IO {
+    var new_defs = Fm.Synth.one(name, Map.new!);
+    let defs = case new_defs {
+      none: Map.new!,
+      some: new_defs.value,
+    };
+    let defs = Map.map!!(
+      (defn) 
+        open defn
+        let term = Fm.Term.inline(defn.term, defs);
+        let type = Fm.Term.inline(defn.type, defs);
+        Fm.Def.new(defn.file, defn.code, defn.orig, defn.name, term, type, defn.isct, defn.stat)
+      , defs);
+    return Fm.Defs.core(defs);
+  }

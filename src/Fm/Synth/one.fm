@@ -1,0 +1,61 @@
+Fm.Synth.one(name: Fm.Name, defs: Fm.Defs): IO(Maybe(Fm.Defs))
+  //log("synth ", name)
+  case Fm.get!(name, defs) as got {
+    none: do IO {
+      var loaded = Fm.Synth.load(name, defs);
+      case loaded {
+        none: do IO {
+          return none;
+        },
+        some: do IO {
+          Fm.Synth.one(name, loaded.value);
+        },
+      };
+    },
+    some: case got.value {
+      new: do IO {
+        let file = got.value.file;
+        let code = got.value.code;
+        let orig = got.value.orig;
+        let name = got.value.name;
+        let term = got.value.term;
+        let type = got.value.type;
+        let isct = got.value.isct;
+        let stat = got.value.stat;
+        //let skip = Debug.log!(String.flatten([name, ": ", Fm.Term.show(type), " = ", Fm.Term.show(term)]), (x) Unit.new);
+        //Debug.log!(String.flatten(["synth ", name, " ", case stat { init: "INIT", wait: "WAIT", done: "DONE", fail: "FAIL" }]), (x)
+        case stat {
+          wait: do IO { return some(defs); },
+          done: do IO { return some(defs); },
+          fail: do IO { return some(defs); },
+          init: do IO {
+            let defs = Fm.set!(name, Fm.Def.new(file, code, orig, name, term, type, isct, Fm.Status.wait), defs);
+            let checked = do Fm.Check {
+              var chk_type = Fm.Term.check(type, Maybe.some!(Fm.Term.typ), defs, [], Fm.MPath.i(Fm.MPath.nil), Maybe.none!);
+              var chk_term = Fm.Term.check(term, Maybe.some!(type), defs, [], Fm.MPath.o(Fm.MPath.nil), Maybe.none!);
+              return Unit.new;
+            };
+            case checked {
+              result:
+                //let skip = Debug.log!(String.join("\n", List.mapped!(checked.errors)!((x) String.concat("-- ", Fm.Error.show(x,Map.new!)))), (x) Unit.new);
+                if List.is_empty!(checked.errors) then do IO {
+                  let defs = Fm.define(file, code, orig, name, term, type, isct, true, defs);
+                  //let defs = Fm.set!(name, Fm.Def.new(file, code, name, term, type, Fm.Status.done), defs);
+                  return some(defs);
+                } else do IO {
+                  var fixed = Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, checked.errors, Bool.false);
+                  case fixed {
+                    none: do IO {
+                      let stat = Fm.Status.fail(checked.errors);
+                      let defs = Fm.set!(name, Fm.Def.new(file, code, orig, name, term, type, isct, stat), defs);
+                      return some(defs);
+                    },
+                    some: Fm.Synth.one(name, fixed.value),
+                  };
+                }
+            };
+          }
+        };
+      }
+    }
+  }

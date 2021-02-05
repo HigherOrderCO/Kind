@@ -1,0 +1,4 @@
+Queue.snoc<A: Type>(a: A, q: Queue(A)): Queue(A)
+  open q
+  let new_rear = List.cons<A>(a, q.rear)
+  Queue.balance<A>(q.front, q.size_front, new_rear, Nat.add(q.size_rear, 1))

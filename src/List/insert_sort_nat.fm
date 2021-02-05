@@ -1,0 +1,2 @@
+List.insert_sort_nat(ns: List(Nat)): List(Nat)
+  List.foldr!!(List.nil!, List.insert_sort_nat.aux, ns)

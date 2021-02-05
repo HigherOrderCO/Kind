@@ -1,0 +1,4 @@
+U32.gtn(a: U32, b: U32): Bool
+  open a
+  open b
+  Word.gtn!(a.value, b.value)

@@ -1,0 +1,9 @@
+type Mons.Kind{
+  Mons(ele: Mons.Kind.mons, boss: Bool, pri_type: Mons.Type, agi: U32),
+  Const(ele: Mons.Kind.const),
+  Terrain(ele: Mons.Kind.terrain),
+  Interactive(
+    ele: Mons.Kind.inter,
+    on: Bool,
+    eff: Mons.Kind.inter -> Bool -> Mons.Game -> Mons.Game), // an effect to change the map
+}

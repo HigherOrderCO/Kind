@@ -1,0 +1,4 @@
+F64.cmp(x: F64, y: F64): Cmp 
+  open x
+  open y 
+  Word.cmp<64>(x.word, y.word)

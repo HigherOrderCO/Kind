@@ -1,0 +1,7 @@
+Mons.Object.get_current_mon(obj: Mons.Object): Mons.Object
+  open obj
+  let idx = U32.to_nat(obj.mon)
+  case List.at!(idx, obj.bag) as mon {
+    none: obj,
+    some: mon.value
+  }

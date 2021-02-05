@@ -1,0 +1,5 @@
+Maybe.IsSome(A: Type,x: Maybe(A)): Type
+  case x{
+    none: Empty
+    some: A
+  }

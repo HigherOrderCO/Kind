@@ -1,0 +1,39 @@
+Fm.Term.patch_at(path: Bits, term: Fm.Term, fn: Fm.Term -> Fm.Term): Fm.Term
+  case term {
+    all: case path {
+      e: fn(term),
+      o: Fm.Term.all(term.eras, term.self, term.name, Fm.Term.patch_at(path.pred,term.xtyp,fn), term.body),
+      i: Fm.Term.all(term.eras, term.self, term.name, term.xtyp, (s,x) Fm.Term.patch_at(path.pred,term.body(s,x),fn)),
+    },
+    lam: case path {
+      e: fn(term),
+      o: Fm.Term.lam(term.name, (x) Fm.Term.patch_at(Bits.tail(path), term.body(x), fn)),
+      i: Fm.Term.lam(term.name, (x) Fm.Term.patch_at(Bits.tail(path), term.body(x), fn)),
+    },
+    app: case path {
+      e: fn(term),
+      o: Fm.Term.app(Fm.Term.patch_at(path.pred,term.func,fn), term.argm),
+      i: Fm.Term.app(term.func, Fm.Term.patch_at(path.pred,term.argm,fn)),
+    },
+    let: case path {
+      e: fn(term),
+      o: Fm.Term.let(term.name, Fm.Term.patch_at(path.pred,term.expr,fn), term.body),
+      i: Fm.Term.let(term.name, term.expr, (x) Fm.Term.patch_at(path.pred,term.body(x),fn)),
+    },
+    def: case path {
+      e: fn(term),
+      o: Fm.Term.def(term.name, Fm.Term.patch_at(path.pred,term.expr,fn), term.body),
+      i: Fm.Term.def(term.name, term.expr, (x) Fm.Term.patch_at(path.pred,term.body(x),fn)),
+    },
+    ann: case path {
+      e: fn(term),
+      o: Fm.Term.ann(term.done, Fm.Term.patch_at(path.pred,term.term,fn), term.type),
+      i: Fm.Term.ann(term.done, term.term, Fm.Term.patch_at(path.pred,term.type,fn)),
+    },
+    ori: Fm.Term.ori(term.orig, Fm.Term.patch_at(path, term.expr, fn)),
+    _: case path {
+      e: fn(term),
+      o: term,
+      i: term,
+    },
+  }

@@ -1,0 +1,8 @@
+Nat.min(a: Nat, b: Nat): Nat
+  case a {
+    zero: 0,
+    succ: case b {
+      zero: 0,
+      succ: Nat.succ(Nat.min(a.pred, b.pred))
+    }
+  }

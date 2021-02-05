@@ -1,0 +1,4 @@
+U16.sub(a: U16, b: U16): U16
+  open a
+  open b
+  U16.new(Word.sub!(a.value, b.value))

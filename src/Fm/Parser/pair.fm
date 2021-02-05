@@ -1,0 +1,16 @@
+Fm.Parser.pair: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("{");
+    var val0 = Fm.Parser.term;
+    Fm.Parser.text(",");
+    var val1 = Fm.Parser.term;
+    Fm.Parser.text("}");
+    var orig = Fm.Parser.stop(init);
+    let term = Fm.Term.ref("Pair.new");
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+    let term = Fm.Term.app(term, val0);
+    let term = Fm.Term.app(term, val1);
+    return Fm.Term.ori(orig, term);
+  }

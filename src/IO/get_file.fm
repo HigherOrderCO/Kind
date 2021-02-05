@@ -1,0 +1,3 @@
+IO.get_file(name: String): IO(String)
+  IO.ask<String>("get_file", name, (file)
+  IO.end<String>(file))

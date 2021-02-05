@@ -1,0 +1,13 @@
+type Mons.Kind.terrain{
+  VOID,
+  VOID_BLACK,
+  FLOOR(lvl: U32, model: U32),
+  GRASS_PLANT,
+  BUSH(model: U32),
+  PLANT_0,
+  SAND_0,
+  PATH_BLOCKER(lvl: U32, model: U32),
+  MID_CITY(row: U32, column: U32),
+  STAIRS(row: U32, column: U32),
+  MON_AREA(pos_mon: U32),
+}

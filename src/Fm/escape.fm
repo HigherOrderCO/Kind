@@ -1,0 +1,9 @@
+Fm.escape(str: String): String
+  case str {
+    nil:
+      String.nil,
+    cons:
+      let head = Fm.escape.char(str.head);
+      let tail = Fm.escape(str.tail);
+      String.concat(head, tail)
+  }

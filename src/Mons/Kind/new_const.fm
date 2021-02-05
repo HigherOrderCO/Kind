@@ -1,0 +1,2 @@
+Mons.Kind.new_const(kin: Mons.Kind.const): Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Const(kin))

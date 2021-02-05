@@ -1,0 +1,2 @@
+Word.nat_log2<size: Nat>(word: Word(size)): Nat
+  Word.nat_log2.go<size>(word, 0, 0)

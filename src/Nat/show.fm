@@ -1,0 +1,2 @@
+Nat.show(n: Nat): String
+  Nat.to_string_base(10,n)

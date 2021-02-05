@@ -1,0 +1,4 @@
+Mons.Game.set_user_pos(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
+  open game
+  Mons.Game.new(game.usr, Map.set!(Word.to_bits<160>(user), pos, game.pos), 
+    game.map, game.stt, game.tik)

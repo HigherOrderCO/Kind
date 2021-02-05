@@ -1,0 +1,19 @@
+Fm.Parser.get: Parser(Fm.Term)
+  do Parser {
+    var init = Fm.Parser.init;
+    Fm.Parser.text("let ");
+    Fm.Parser.text("{");
+    var nam0 = Fm.Parser.name;
+    Fm.Parser.text(",");
+    var nam1 = Fm.Parser.name;
+    Fm.Parser.text("}");
+    Fm.Parser.text("=");
+    var expr = Fm.Parser.term;
+    Parser.maybe!(Fm.Parser.text(";"));
+    var body = Fm.Parser.term;
+    var orig = Fm.Parser.stop(init);
+    let term = expr;
+    let term = Fm.Term.app(term, Fm.Term.lam("x", (x) Fm.Term.hol(Bits.e)));
+    let term = Fm.Term.app(term, Fm.Term.lam(nam0, (x) Fm.Term.lam(nam1, (y) body)));
+    return Fm.Term.ori(orig, term);
+  }

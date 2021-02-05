@@ -1,4 +1,3 @@
-// JavaScript Object Notation.
 type JSON {
   null,
   bool(x: Bool),

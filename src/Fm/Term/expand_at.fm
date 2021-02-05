@@ -1,0 +1,8 @@
+Fm.Term.expand_at(path: Bits, term: Fm.Term, defs: Fm.Defs): Fm.Term
+  Fm.Term.patch_at(path, term, (term) case term {
+    ref: case Fm.get!(term.name, defs) as got {
+      none: Fm.Term.ref(term.name),
+      some: case got.value { new: got.value.term },
+    },
+    _: term,
+  })

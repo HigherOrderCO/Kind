@@ -1,0 +1,6 @@
+Fm.Parser.application.hole(init: Nat, term: Fm.Term): Parser(Fm.Term)
+  do Parser {
+    Fm.Parser.text("!");
+    var orig = Fm.Parser.stop(init);
+    return Fm.Term.ori(orig, Fm.Term.app(term, Fm.Term.hol(Bits.e)));
+  }

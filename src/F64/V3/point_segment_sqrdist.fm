@@ -1,0 +1,23 @@
+F64.V3.point_segment_sqrdist(p: F64.V3, s: F64.Segment): F64
+  open p
+  open s
+  open s.a
+  open s.b
+  let ab_x_diff_sqrd = F64.pow(F64.sub(s.a.x, s.b.x), F64.2) 
+  let ab_y_diff_sqrd = F64.pow(F64.sub(s.a.y, s.b.y), F64.2)
+  let pa_x_diff = F64.sub(p.x, s.a.x)
+  let pa_y_diff = F64.sub(p.y, s.a.y)
+  let ba_x_diff = F64.sub(s.b.x, s.a.x)
+  let ba_y_diff = F64.sub(s.b.y, s.a.y)
+  let l = F64.add(ab_x_diff_sqrd, ab_y_diff_sqrd)
+  let t = F64.add(F64.mul(pa_x_diff, ba_x_diff), F64.mul(pa_y_diff, ba_y_diff))
+  let t = F64.div(t, l)
+  let t = F64.max(F64.0, F64.min(F64.1, t))
+  let d = F64.0
+  let t_times_ba_x_diff = F64.mul(t, ba_x_diff)
+  let t_times_ba_y_diff = F64.mul(t, ba_y_diff)
+  let k = F64.pow(F64.sub(p.x, F64.add(s.a.x, t_times_ba_x_diff)), F64.2)
+  let d = F64.add(d, k)
+  let k = F64.pow(F64.sub(p.y, F64.add(s.a.y, t_times_ba_y_diff)), F64.2)
+  let d = F64.add(d, k)
+  d

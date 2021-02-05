@@ -1,0 +1,2 @@
+Word.shift_right: <size: Nat> -> Nat -> Word(size) -> Word(size)
+  Word.shift_right

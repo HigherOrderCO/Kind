@@ -140,7 +140,7 @@ Bool.not(b: Bool): Bool
 When Formality sees `Bool.not(Bool.not(b))`, it reduces it to:
 
 ```
-case (case b { true: false, false: true }) { true: false, false: true }
+Bool.not(case b { true: false, false: true })
 ```
 
 But now the inner case is **stuck**, trying to pattern-match on `b`. It can't
@@ -585,7 +585,7 @@ half of the double of a natural number is itself. As usual, we begin by writting
 a name, a type and a body:
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   ?a
 ```
 
@@ -622,7 +622,7 @@ Since `half` uses `case` on `n`, it gets stuck, so we use `case` on `n` in our
 proof to unstuck it:
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
     zero: ?a
     succ: ?b
@@ -648,7 +648,7 @@ On the `zero` case, we must prove that `half(double(0)) == 0`. This reduces to
 `0 == 0` (you can use `-` to verify that), so we just write `refl`:
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
     zero: refl
     succ: ?b
@@ -672,7 +672,7 @@ us to prove that `half(double(succ(pred))) == succ(pred)`. Let's try to simplify
 the left side of that equation. Write a `-` after the goal:
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
     zero: refl
     succ: ?b-
@@ -692,7 +692,7 @@ With ctxt:
 Reduce the call to `Nat.double` (label `22`):
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
     zero: refl
     succ: ?b-22-
@@ -712,7 +712,7 @@ With ctxt:
 Reduce the call to `Nat.half` (label `10`):
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
     zero: refl
     succ: ?b-22-10
@@ -736,7 +736,7 @@ predecessor of `n`. We could pattern-match on `n.pred` to unstuck it:
 
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
     zero: refl
     succ: case n.pred {
@@ -769,7 +769,7 @@ completed with `refl`:
 
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
     zero: refl
     succ: case n.pred {
@@ -806,7 +806,7 @@ With ctxt:
 But now `Nat.double` is succ on `n.pred.pred`. We can use `case` on it too:
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
     zero: refl
     succ: case n.pred {
@@ -841,7 +841,7 @@ With ctxt:
 Once again, the first goal is now concrete and we can fill with `refl`:
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
     zero: refl
     succ: case n.pred {
@@ -860,7 +860,7 @@ finish this proof because there are infinitely many natural numbers. So, we must
 take a step back where the loop began. Remember we had the following proof:
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
     zero: refl
     succ: ?b-22-10
@@ -879,15 +879,15 @@ With ctxt:
 
 Since we were stuck on `n.pred`, we used `case` on it. But this resulted in an
 endless chain of `case`s. Let's instead try something different: instead of
-pattern-matching on `n.pred`, let's use `double_half_theorem` **recursively** on
+pattern-matching on `n.pred`, let's use `half_double_theorem` **recursively** on
 it:
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
     zero: refl
     succ:
-      let ind = double_half_theorem(n.pred)
+      let ind = half_double_theorem(n.pred)
       ?b-22-10
   }!
 ```
@@ -904,8 +904,8 @@ With ctxt:
 ```
 
 Our goal didn't change, but now we have a new variable, `ind` in our context. We
-gained it "for free" by calling `double_half_theorem` recursively on its
-predecessor. Since `double_half_theorem` returns `half(double(n)) == n` for any
+gained it "for free" by calling `half_double_theorem` recursively on its
+predecessor. Since `half_double_theorem` returns `half(double(n)) == n` for any
 `n`, and since we applied it to `n.pred`, then `ind` has type
 `half(double(n.pred)) == n.pred`. That's the **inductive hypothesis**. Take a
 moment to realize that this type is almost the same as our goal: the only
@@ -913,12 +913,12 @@ difference is that the goal has an extra `Nat.succ` on each side. We can apply a
 function to both sides of an equality using `apply(f,e)`.
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
     zero: refl
     succ:
-      let ind = double_half_theorem(n.pred)
-      let app = apply(Nat.succ, rec)
+      let ind = half_double_theorem(n.pred)
+      let app = apply(Nat.succ, ind)
       ?b-22-10
   }!
 ```
@@ -931,7 +931,7 @@ With type: Nat.succ(Nat.half(Nat.double(n.pred))) == Nat.succ(n.pred)
 With ctxt:
 - n: Nat
 - n.pred: Nat
-- rec: Nat.half(Nat.double(n.pred)) == n.pred
+- ind: Nat.half(Nat.double(n.pred)) == n.pred
 - app: Nat.succ(Nat.half(Nat.double(n.pred))) == Nat.succ(n.pred)
 ```
 
@@ -939,12 +939,12 @@ The type of `app` is exactly the type of our goal, so we can complete the proof
 with it:
 
 ```
-double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
     zero: refl
     succ:
-      let ind = double_half_theorem(n.pred)
-      let app = apply(Nat.succ, rec)
+      let ind = half_double_theorem(n.pred)
+      let app = apply(Nat.succ, ind)
       app
   }!
 ```
@@ -952,7 +952,7 @@ double_half_theorem(n: Nat): Nat.half(Nat.double(n)) == n
 Check with `fmjs Main.fm`:
 
 ```
-double_half_theorem: (n:Nat) Nat.half(Nat.double(n)) == n
+half_double_theorem: (n:Nat) Nat.half(Nat.double(n)) == n
 
 All terms check.
 ```
@@ -1493,7 +1493,7 @@ it to `Bool.true_neq_false`, resulting in `Empty` (our goal). Let's use
 ```
 three_neq_two: 4 != 2
   (e)
-  let a = apply(Nat.pred, e)
+  let e0 = apply(Nat.pred, e)
   ?a
 ```
 
@@ -1513,7 +1513,7 @@ Now we have `e0: 2 == 1`. Let's do it again:
 three_neq_two: 3 != 2
   (e)
   let e0 = apply(Nat.pred, e)
-  let e1 = apply(Nat.pred, e)
+  let e1 = apply(Nat.pred, e0)
   ?a
 ```
 

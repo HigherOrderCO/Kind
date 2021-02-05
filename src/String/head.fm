@@ -1,0 +1,5 @@
+String.head(xs: String): Maybe(Char)
+  case xs{
+    nil : Maybe.none!
+    cons: Maybe.some!(xs.head)
+  }

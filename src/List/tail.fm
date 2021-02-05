@@ -1,0 +1,5 @@
+List.tail<A: Type>(xs: List(A)): List(A)
+  case xs {
+    nil: List.nil!,
+    cons: xs.tail,
+  }

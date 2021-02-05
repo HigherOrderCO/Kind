@@ -1,0 +1,2 @@
+List.range.nat(nat: Nat): List(Nat)
+  List.range.nat.go(nat, List.nil!)

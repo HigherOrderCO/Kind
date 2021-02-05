@@ -1,0 +1,14 @@
+Bits.add(a: Bits, b: Bits): Bits
+  case b {
+    e: a,
+    o: case a {
+      e: b,
+      o: Bits.o(Bits.add(a.pred, b.pred)),
+      i: Bits.i(Bits.add(a.pred, b.pred)),
+    },
+    i: case a {
+      e: b,
+      o: Bits.i(Bits.add(a.pred, b.pred)),
+      i: Bits.o(Bits.add(Bits.inc(a.pred), b.pred))
+    }
+  }

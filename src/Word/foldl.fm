@@ -1,0 +1,22 @@
+Word.foldl<P: Nat -> Type, m: Nat>(
+  nil  : P(Nat.zero),
+  w0   : <n: Nat> -> P(n) -> P(Nat.succ(n)),
+  w1   : <n: Nat> -> P(n) -> P(Nat.succ(n)),
+  word : Word(m),
+) : P(m)
+  case word {
+    e:
+      nil,
+    o: 
+      def P   = (n) P(Nat.succ(n));
+      def nil = w0<Nat.zero>(nil);
+      def w0  = <x> w0<Nat.succ(x)>;
+      def w1  = <x> w1<Nat.succ(x)>;
+      Word.foldl<P, word.size>(nil, w0, w1, word.pred),
+    i: 
+      def P   = (n) P(Nat.succ(n));
+      def nil = w1<Nat.zero>(nil);
+      def w0  = <x> w0<Nat.succ(x)>;
+      def w1  = <x> w1<Nat.succ(x)>;
+      Word.foldl<P, word.size>(nil, w0, w1, word.pred),
+  } : P(word.size)

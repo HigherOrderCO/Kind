@@ -1,0 +1,2 @@
+Word.pow<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.pow<size>(a, b)

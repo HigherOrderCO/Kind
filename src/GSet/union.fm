@@ -1,0 +1,17 @@
+GSet.union<A: Type>(cmp: A -> A -> Cmp, set_a: GSet(A), set_b: GSet(A)): GSet(A)
+  case set_a {
+    tip: case set_b {
+      tip: GSet.tip!,
+      bin: set_b
+    },
+    bin: case set_b {
+      tip: set_a,
+      bin: 
+        // divide & conquer
+        let ltn   = GSet.split_ltn!(cmp, set_b.val, set_a)
+        let gtn   = GSet.split_gtn!(cmp, set_b.val, set_a)
+        let left  = GSet.union!(cmp, ltn, set_b.left)
+        let right = GSet.union!(cmp, gtn, set_b.right)
+        GSet.concat3!(cmp, set_b.val, left, right)
+    }
+  }

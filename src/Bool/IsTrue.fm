@@ -1,0 +1,5 @@
+Bool.IsTrue(b: Bool): Type
+  case b {
+    true: Unit,
+    false: Empty,
+  }

@@ -1,0 +1,2 @@
+String.pure(x : Char) : String
+  String.cons(x, String.nil)

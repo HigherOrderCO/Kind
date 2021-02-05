@@ -1,0 +1,26 @@
+Fm.Datatype.build_term.go(
+  type: Fm.Datatype,
+  name: Fm.Name,
+  pars: List(Fm.Binder),
+  inds: List(Fm.Binder),
+): Fm.Term
+  case pars {
+    cons: case pars.head {
+      new:
+        def par_name = pars.head.name;
+        def par_body = (x) Fm.Datatype.build_term.go(type, name, pars.tail, inds);
+        Fm.Term.lam(par_name, par_body),
+    },
+    nil: case inds {
+      cons: case inds.head {
+        new:
+          def ind_name = inds.head.name;
+          def ind_body = (x) Fm.Datatype.build_term.go(type, name, pars, inds.tail);
+          Fm.Term.lam(ind_name, ind_body),
+      },
+      nil: 
+        def moti = Fm.Datatype.build_term.motive(type);
+        def body = (s,x) Fm.Datatype.build_term.constructors(type); // TODO
+        Fm.Term.all(Bool.true, String.concat(name,".Self"), Fm.Name.read("P"), moti, body)
+    }
+  }

@@ -1,0 +1,2 @@
+Nat.div(n: Nat, m: Nat): Nat
+  Pair.fst!!(Nat.div_mod(n, m))

@@ -1,6 +1,6 @@
 {
   "name": "formality-js",
-  "version": "0.2.46",
+  "version": "0.2.54",
   "description": "Formality Language in JavaScript",
   "main": "src/formality.js",
   "scripts": {
@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/moonad/formality#readme",
   "dependencies": {
-    "formcore-lang": "^0.1.30"
+    "formcore-js": "^0.1.35"
   }
 }

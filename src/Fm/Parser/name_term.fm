@@ -1,0 +1,7 @@
+Fm.Parser.name_term: Parser(Pair(Fm.Name, Fm.Term))
+  do Parser {
+    var name = Fm.Parser.name;
+    Fm.Parser.text(":");
+    var type = Fm.Parser.term;
+    return {name, type};
+  }

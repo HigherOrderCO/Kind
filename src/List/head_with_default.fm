@@ -1,0 +1,5 @@
+List.head_with_default<A: Type>(default: A, xs: List(A)): A
+  case xs {
+    nil : default,
+    cons: xs.head
+  }

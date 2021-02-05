@@ -1,0 +1,8 @@
+type Fm.Datatype {
+  new(
+    name: Fm.Name,
+    pars: List(Fm.Binder),
+    inds: List(Fm.Binder),
+    ctrs: List(Fm.Constructor),
+  )
+}

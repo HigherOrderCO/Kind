@@ -1,0 +1,2 @@
+Mons.Object.hit(obj: Mons.Object, dmg: U32): Mons.Object
+  Mons.Object.set_dmg(obj, U32.add(Mons.Object.get_dmg(obj), dmg))

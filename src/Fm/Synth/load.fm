@@ -1,0 +1,2 @@
+Fm.Synth.load(name: Fm.Name, defs: Fm.Defs): IO(Maybe(Fm.Defs))
+  Fm.Synth.load.go(name, Fm.Synth.files_of(name), defs)

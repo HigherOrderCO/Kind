@@ -1,0 +1,54 @@
+Fm.Synth.fix(
+  file: String,
+  code: String,
+  orig: Pair(Nat,Nat),
+  name: Fm.Name,
+  term: Fm.Term,
+  type: Fm.Term,
+  isct: Bool,
+  defs: Fm.Defs,
+  errs: List(Fm.Error),
+  fixd: Bool,
+): IO(Maybe(Fm.Defs))
+  case errs {
+    nil:
+      if fixd then do IO {
+        let type = Fm.Term.bind([], (x) Bits.i(x), type);
+        let term = Fm.Term.bind([], (x) Bits.o(x), term);
+        let defs = Fm.set!(name, Fm.Def.new(file, code, orig, name, term, type, isct, Fm.Status.init), defs);
+        return Maybe.some!(defs);
+      } else do IO {
+        return Maybe.none!;
+      },
+    cons: case errs.head {
+      waiting: do IO {
+        var new_defs = Fm.Synth.one(errs.head.name, defs);
+        case new_defs {
+          none: Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, fixd),
+          some: Fm.Synth.fix(file, code, orig, name, term, type, isct, new_defs.value, errs.tail, Bool.true),
+        }
+      },
+      undefined_reference: do IO {
+        var new_defs = Fm.Synth.one(errs.head.name, defs);
+        case new_defs {
+          none: Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, fixd),
+          some: Fm.Synth.fix(file, code, orig, name, term, type, isct, new_defs.value, errs.tail, Bool.true),
+        }
+      },
+      patch: case errs.head.path {
+        e: do IO { // shouldn't happen
+          return Maybe.none!;
+        },
+        o: do IO { // hole is on term
+          let term = Fm.Term.patch_at(errs.head.path.pred, term, (x) errs.head.term);
+          Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, Bool.true);
+        },
+        i: do IO { // hole is on type
+          let type = Fm.Term.patch_at(errs.head.path.pred, type, (x) errs.head.term);
+          Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, Bool.true);
+        },
+      },
+      // The error isn't fixable
+      _: Fm.Synth.fix(file, code, orig, name, term, type, isct, defs, errs.tail, fixd),
+    }
+  }

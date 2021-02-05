@@ -1,0 +1,6 @@
+type Mons.Kind.const{
+  FOUNTAIN(model: U32, slice: U32),
+  CHEST,
+  CRYSTAL,
+  PORTAL,
+}

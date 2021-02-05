@@ -1,0 +1,10 @@
+Fm.Core.var_name(indx: Nat, name: Fm.Name, brui: Nat, vars: List(Fm.Name)): Fm.Name
+  case indx {
+    zero: case brui { zero: name, succ: name | "^" | Nat.show(brui) },
+    succ: case vars {
+      nil: "unbound",
+      cons:
+        let brui = if String.eql(name, vars.head) then Nat.succ(brui) else brui;
+        Fm.Core.var_name(indx.pred, name, brui, vars.tail),
+    }
+  }

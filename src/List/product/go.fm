@@ -1,0 +1,5 @@
+List.product.go(xs: List(Nat), n: Nat) : Nat
+  case xs {
+    nil : Nat.zero,
+    cons: List.product.go(xs.tail,Nat.mul(xs.head,n))
+  }

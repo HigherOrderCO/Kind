@@ -1,0 +1,2 @@
+Image3D.empty: Image3D
+  Image3D.alloc_capacity(Nat.to_u32(100))

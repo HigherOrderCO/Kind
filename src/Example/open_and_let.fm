@@ -1,0 +1,6 @@
+Example.open_and_let: Pair(Nat, String)
+  let a = {5, "foo"}
+  let b = {7, "bar"}
+  open a
+  let {b_fst, b_snd} = b
+  {Nat.add(a.fst, b_fst), a.snd | b_snd}

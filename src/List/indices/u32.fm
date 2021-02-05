@@ -1,0 +1,2 @@
+List.indices.u32<A: Type>(xs: List(A)): List(Pair(U32,A))
+  List.imap<A,Pair(U32,A)>((i,x) {Nat.to_u32(i),x}, xs)

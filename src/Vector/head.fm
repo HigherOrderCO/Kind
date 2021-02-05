@@ -1,0 +1,5 @@
+Vector.head<A: Type, size: Nat>(vector: Vector(A, Nat.succ(size))): A
+  case vector {
+    nil: Unit.new
+    ext: vector.head
+  }: case vector.size { zero: Unit, succ: A }

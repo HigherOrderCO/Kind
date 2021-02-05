@@ -1,0 +1,2 @@
+Word.btw<size:Nat>(a: Word(size), b: Word(size), c: Word(size)): Bool
+  Bool.and(Word.lte<size>(a, b), Word.lte<size>(b, c))

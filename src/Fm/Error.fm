@@ -1,0 +1,41 @@
+type Fm.Error {
+  // Two types do not match
+  type_mismatch(
+    origin: Maybe(Pair(Nat,Nat)),
+    expected: Either(String, Fm.Term),
+    detected: Either(String, Fm.Term),
+    context: Fm.Context,
+  ),
+  // Found a goal to be shown
+  show_goal(
+    name: Fm.Name,
+    dref: List(Bits),
+    verb: Bool,
+    goal: Maybe(Fm.Term),
+    context: Fm.Context,
+  ),
+  // Waits for another term's type checking
+  waiting(
+    name: Fm.Name,
+  ),
+  // Error in a dependency
+  indirect(
+    name: Fm.Name,
+  ),
+  // Patch the original term
+  patch(
+    path: Bits,
+    term: Fm.Term,
+  ),
+  // Some reference isn't found
+  undefined_reference(
+    origin: Maybe(Pair(Nat,Nat)),
+    name: Fm.Name,
+  ),
+  // A lambda without a type
+  cant_infer(
+    origin: Maybe(Pair(Nat,Nat)),
+    term: Fm.Term,
+    context: Fm.Context,
+  ),
+}

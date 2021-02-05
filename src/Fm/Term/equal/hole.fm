@@ -1,0 +1,9 @@
+Fm.Term.equal.hole(path: Bits, term: Fm.Term): Fm.Check(Bool)
+  case term {
+    hol: Fm.Check.result!(some(true), []),
+    _: if Fm.Term.has_holes(term)
+      then Fm.Check.result!(some(false), [])
+      else Fm.Check.result!(some(true), [
+        Fm.Error.patch(path, Fm.Term.normalize(term, Map.new!))
+      ])
+  }

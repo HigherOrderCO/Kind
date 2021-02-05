@@ -1,0 +1,3 @@
+Image3D.get_capacity(img: Image3D): U32
+  open img 
+  img.capacity

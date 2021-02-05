@@ -1,0 +1,2 @@
+Fm.Path.to_bits(path: Fm.Path): Bits
+  path(Bits.e)

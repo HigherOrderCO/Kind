@@ -1,0 +1,2 @@
+Mons.Map.get_top(pos: Pos32, map: Mons.Map): Mons.Object 
+  Pair.snd!!(Mons.Map.pop(pos,map))

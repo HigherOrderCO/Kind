@@ -1,0 +1,2 @@
+String.length(xs: String): Nat
+  String.length.go(xs, 0)

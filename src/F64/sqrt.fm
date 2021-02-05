@@ -1,0 +1,2 @@
+F64.sqrt(n: F64): F64 //prim//
+  F64.pow(n, F64.div(F64.1, F64.2))

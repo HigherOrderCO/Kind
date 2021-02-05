@@ -1,0 +1,21 @@
+Fm.Constructor.build_term.opt.go(
+  type: Fm.Datatype,
+  ctor: Fm.Constructor,
+  ctrs: List(Fm.Constructor),
+): Fm.Term
+  case ctrs {
+    cons: case ctrs.head {
+      new:
+        def name = ctrs.head.name;
+        def body = (x) Fm.Constructor.build_term.opt.go(type, ctor, ctrs.tail);
+        Fm.Term.lam(name, body)
+    },
+    nil: 
+      case ctor {
+        new:
+          let ret = Fm.Term.ref(ctor.name);
+          let ret = for arg in ctor.args:
+            Fm.Term.app(ret, Fm.Term.ref(case arg { new: arg.name }));
+          ret
+      },
+  }

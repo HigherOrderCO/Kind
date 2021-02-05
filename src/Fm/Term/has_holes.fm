@@ -1,0 +1,19 @@
+Fm.Term.has_holes(term: Fm.Term): Bool
+  case term {
+    ref: false,
+    var: false,
+    typ: false,
+    all: Bool.or(Fm.Term.has_holes(term.xtyp), Fm.Term.has_holes(term.body(Fm.Term.typ,Fm.Term.typ))),
+    lam: Fm.Term.has_holes(term.body(Fm.Term.typ)),
+    app: Bool.or(Fm.Term.has_holes(term.func), Fm.Term.has_holes(term.argm)),
+    let: Bool.or(Fm.Term.has_holes(term.expr), Fm.Term.has_holes(term.body(Fm.Term.typ))),
+    def: Bool.or(Fm.Term.has_holes(term.expr), Fm.Term.has_holes(term.body(Fm.Term.typ))),
+    ann: Bool.or(Fm.Term.has_holes(term.term), Fm.Term.has_holes(term.type)),
+    gol: false,
+    hol: true,
+    nat: false,
+    chr: false,
+    str: false,
+    cse: false,
+    ori: Fm.Term.has_holes(term.expr),
+  }

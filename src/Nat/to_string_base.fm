@@ -1,0 +1,4 @@
+Nat.to_string_base(base: Nat, nat: Nat): String
+  List.fold!(Nat.to_base(base, nat))!(
+    String.nil,
+    (n, str) String.cons(Nat.show_digit(base,n), str))

@@ -1,0 +1,2 @@
+Fm.Check.pure<V: Type>(value: V): Fm.Check(V)
+  Fm.Check.result<V>(Maybe.some<V>(value), [])

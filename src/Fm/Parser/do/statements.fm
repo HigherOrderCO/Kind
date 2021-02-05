@@ -1,0 +1,67 @@
+Fm.Parser.do.statements(monad_name: Fm.Name): Parser(Fm.Term)
+  Parser.first_of!([
+    // Binding call: @ask x = expr; rest@
+    do Parser {
+      var init = Fm.Parser.init;
+      Fm.Parser.text("var ");
+      var name = Fm.Parser.name1;
+      Fm.Parser.text("=");
+      var expr = Fm.Parser.term;
+      Parser.maybe!(Fm.Parser.text(";"));
+      var body = Fm.Parser.do.statements(monad_name);
+      var orig = Fm.Parser.stop(init);
+      let term = Fm.Term.app(Fm.Term.ref("Monad.bind"), Fm.Term.ref(monad_name));
+      let term = Fm.Term.app(term, Fm.Term.ref(String.concat(monad_name, ".monad")));
+      let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+      let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+      let term = Fm.Term.app(term, expr);
+      let term = Fm.Term.app(term, Fm.Term.lam(name, (x) body));
+      return Fm.Term.ori(orig, term);
+    },
+    // Local definition (let): @let x = expr; rest@
+    do Parser {
+      var init = Fm.Parser.init;
+      Fm.Parser.text("let ");
+      var name = Fm.Parser.name1;
+      Fm.Parser.text("=");
+      var expr = Fm.Parser.term;
+      Parser.maybe!(Fm.Parser.text(";"));
+      var body = Fm.Parser.do.statements(monad_name);
+      var orig = Fm.Parser.stop(init);
+      return Fm.Term.ori(orig, Fm.Term.let(name, expr, (x) body));
+    },
+    // Return pure: @return expr;@
+    do Parser {
+      var init = Fm.Parser.init;
+      Fm.Parser.text("return ");
+      var expr = Fm.Parser.term;
+      Parser.maybe!(Fm.Parser.text(";"));
+      var orig = Fm.Parser.stop(init);
+      let term = Fm.Term.app(Fm.Term.ref("Monad.pure"), Fm.Term.ref(monad_name));
+      let term = Fm.Term.app(term, Fm.Term.ref(String.concat(monad_name, ".monad")));
+      let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+      let term = Fm.Term.app(term, expr);
+      return Fm.Term.ori(orig, term);
+    },
+    // Non-binding call: @expr; rest@
+    do Parser {
+      var init = Fm.Parser.init;
+      var expr = Fm.Parser.term;
+      Parser.maybe!(Fm.Parser.text(";"));
+      var body = Fm.Parser.do.statements(monad_name);
+      var orig = Fm.Parser.stop(init);
+      let term = Fm.Term.app(Fm.Term.ref("Monad.bind"), Fm.Term.ref(monad_name));
+      let term = Fm.Term.app(term, Fm.Term.ref(String.concat(monad_name, ".monad")));
+      let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+      let term = Fm.Term.app(term, Fm.Term.hol(Bits.e));
+      let term = Fm.Term.app(term, expr);
+      let term = Fm.Term.app(term, Fm.Term.lam("", (x) body));
+      return Fm.Term.ori(orig, term);
+    },
+    // Return direct: @expr;@
+    do Parser {
+      var expr = Fm.Parser.term;
+      Parser.maybe!(Fm.Parser.text(";"));
+      return expr;
+    },
+  ])

@@ -1,0 +1,2 @@
+Fm.Check.monad: Monad(Fm.Check)
+  Monad.new<Fm.Check>(Fm.Check.bind, Fm.Check.pure)
