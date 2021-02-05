@@ -23133,7 +23133,7 @@ module.exports = (function() {
                                                         var self = Fm$Error$origin$(_err$21);
                                                         switch (self._) {
                                                             case 'Maybe.none':
-                                                                var $9372 = _errors$22;
+                                                                var $9372 = "";
                                                                 var _ori_msg$24 = $9372;
                                                                 break;
                                                             case 'Maybe.some':
@@ -23145,14 +23145,14 @@ module.exports = (function() {
                                                                         var $9376 = self.snd;
                                                                         var _inside$27 = ("Inside \'" + ($9350 + "\':\u{a}"));
                                                                         var _source$28 = Fm$highlight$($9351, $9375, $9376);
-                                                                        var $9377 = (_inside$27 + _source$28);
+                                                                        var $9377 = (_inside$27 + (_source$28 + "\u{a}"));
                                                                         var $9374 = $9377;
                                                                         break;
                                                                 };
                                                                 var _ori_msg$24 = $9374;
                                                                 break;
                                                         };
-                                                        var $9370 = (_errors$22 + (_err_msg$23 + (_ori_msg$24 + "\u{a}\u{a}")));
+                                                        var $9370 = (_errors$22 + (_err_msg$23 + (_ori_msg$24 + "\u{a}")));
                                                         _errors$22 = $9370;
                                                         $9371 = $9371.tail;
                                                     }
