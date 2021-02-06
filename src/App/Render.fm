@@ -1,0 +1,4 @@
+type App.Redner {
+  App.Render.txt(text: String)
+  App.Render.vox(voxs: Image3D)
+}
