@@ -1,7 +1,7 @@
 type App.Action <S: Type> {
-  App.Action.state(state: S)
-  App.Action.print(text: String)
-  App.Action.post(room: Word(48), data: Word(256))
-  App.Action.watch(room: Word(48))
-  App.Action.resize(width: U32, height: U32)
+  state(value: S)
+  print(text: String)
+  post(room: Word(48), data: Word(256))
+  watch(room: Word(48))
+  resize(width: U32, height: U32)
 }

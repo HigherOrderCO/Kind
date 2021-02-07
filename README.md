@@ -1,6 +1,5 @@
-Formality
-=========
-
+![[alt text]](blog/img/formality-banner-white.png
+)
 A modern programming language featuring formal proofs. Now written in itself!
 
 Why formal proofs?
@@ -40,7 +39,7 @@ need for trust and solving the "who verifies that the verifier" problem.
 ### Portability
 
 Being compiled to such a small core also allows Formality to be easily compiled
-to multiple targets, making it very portable. For example, out
+to multiple targets, making it very portable. For example, our
 [Formality-to-Haskell] compiler was developed in an evening
 and has less than 1000 lines of code. This allows Formality to be used as a a
 lazy, pure functional language that is compiled directly by Haskell's GHC.
@@ -82,6 +81,7 @@ of the existing alternatives, but are high priorities for Formality.
 
 Usage
 -----
+[![formality-js](https://img.shields.io/npm/v/formality-js)](https://www.npmjs.com/package/formality-js)
 
 1. Install
 
@@ -323,6 +323,6 @@ For a list of available syntaxes, check [SYNTAX.md](SYNTAX.md).
 
 For a tutorial about theorem proving, check [THEOREMS.md](THEOREMS.md).
 
-If you're brave, browse the [base libraries](https://github.com/moonad/Formality/tree/master/src).
+Check out what we already have on the [base library](https://github.com/moonad/Formality/tree/master/src).
 
 Join our [Telegram chat room](https://t.me/formality_lang)! 
