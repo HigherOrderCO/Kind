@@ -1,0 +1,203 @@
+Fm.Core.read.is_name(chr: Char): Bool
+  Bool.or(Bool.and(U16.gte(chr,46s), U16.lte(chr,47s)),  // ./
+  Bool.or(Bool.and(U16.gte(chr,48s), U16.ltn(chr,58s)),  // 0-9
+  Bool.or(Bool.and(U16.gte(chr,65s), U16.ltn(chr,91s)),  // A-Z
+  Bool.or(Bool.and(U16.gte(chr,95s), U16.ltn(chr,96s)),  // _
+  Bool.or(Bool.and(U16.gte(chr,97s), U16.ltn(chr,123s)), // a-z
+  Bool.false)))))
+
+Fm.Core.read.name(code: String): Pair(String, String)
+  case code {
+    nil:
+      {code, ""}
+    cons:
+      if Fm.Core.read.is_name(code.head) then
+        let {code, name} = Fm.Core.read.name(code.tail)
+        {code, String.cons(code.head, name)}
+      else
+        {code, ""}
+  }
+  
+Fm.Core.read.spaces(code: String): Pair(String, Unit)
+  case code {
+    nil:
+      {code, unit}
+    cons:
+      let is_space =
+        Bool.or(U16.eql(code.head, ' '),
+        Bool.or(U16.eql(code.head, '\n'),
+        Bool.or(U16.eql(code.head, '\r'),
+        Bool.or(U16.eql(code.head, '\t'),
+        Bool.or(U16.eql(code.head, '\v'),
+        Bool.or(U16.eql(code.head, '\f'),
+        Bool.false))))))
+      if is_space then
+        Fm.Core.read.spaces(code.tail)
+      else
+        {code, unit}
+  }
+
+Fm.Core.read.char(code: String, chr: Char): Pair(String, Unit)
+  let {code, skip} = Fm.Core.read.spaces(code)
+  case code {
+    nil:
+      {"", unit} // unexpected EOF
+    cons:
+      if U16.eql(code.head, chr) then
+        {code.tail, unit}
+      else
+        {"", unit} // unexpected character
+  }
+
+Fm.Core.read.u16(code: String, u16: Char): Pair(String, Char)
+  case code {
+    nil:
+      {code, u16}
+    cons:
+      if Char.is_hex(code.head) then
+        let u16 = U16.add(U16.mul(u16,16s), Char.hex_value16(code.head))
+        Fm.Core.read.u16(code.tail, u16)
+      else
+        {code, u16}
+  }
+
+Fm.Core.read.natx(code: String, nat: Nat): Pair(String, Nat)
+  case code {
+    nil:
+      {code, nat}
+    cons:
+      if Char.is_hex(code.head) then
+        let nat = Nat.add(Nat.mul(nat,10), Char.dec_value(code.head))
+        Fm.Core.read.natx(code.tail, nat)
+      else
+        {code, nat}
+  }
+
+Fm.Core.read.chrx(code: String): Pair(String, Char)
+  if String.starts_with(code, "\\u{") then
+    let code = String.drop(3, code)
+    let {code, chrx} = Fm.Core.read.u16(code, 0s)
+    if String.starts_with(code, "}") then
+      {String.drop(1, code), chrx}
+    else
+      {"", '?'}
+  else case code {
+    nil: {"", '?'}
+    cons: {code.tail, code.head}
+  }
+        
+Fm.Core.read.strx(code: String): Pair(String, String)
+  if String.starts_with(code, "\"") then
+    {code, ""}
+  else
+    let {code, chrx} = Fm.Core.read.chrx(code)
+    let {code, rest} = Fm.Core.read.strx(code)
+    {code, String.cons(chrx, rest)}
+
+Fm.Core.read.find<A: Type>(list: List(A), cond: A -> Nat -> Bool, indx: Nat, skip: Nat): Maybe(Pair(A,Nat))
+  case list {
+    nil:
+      none
+    cons:
+      if cond(list.head, indx) then
+        if Nat.eql(skip, 0) then
+          some({list.head, indx})
+        else
+          Fm.Core.read.find!(list.tail, cond, Nat.succ(indx), Nat.pred(skip))
+      else
+        Fm.Core.read.find!(list.tail, cond, Nat.succ(indx), skip)
+  }
+
+Fm.Core.read.term(code: String): Pair(String, List(Pair(String,Fm.Term)) -> Fm.Term)
+  //log(code)
+  let {code, skip} = Fm.Core.read.spaces(code)
+  case code {
+    nil:
+      {"", (ctx) Fm.Term.ref("error")}
+    cons:
+      let head = code.head
+      let code = code.tail
+      if Char.eql(head, '*') then
+        {code, (ctx) Fm.Term.typ}
+      else if U16.eql(head, '@') then
+        let {code, self} = Fm.Core.read.name(code)
+        let {code, skip} = Fm.Core.read.char(code, '(')
+        let {code, name} = Fm.Core.read.name(code)
+        let {code, skip} = Fm.Core.read.char(code, ':')
+        let {code, bind} = Fm.Core.read.term(code)
+        let {code, skip} = Fm.Core.read.char(code, ')')
+        let {code, body} = Fm.Core.read.term(code)
+        {code, (ctx) Fm.Term.all(false, self, name, bind(ctx), (s,x) body({name,x}&{self,s}&ctx))}
+      else if U16.eql(head, '%') then
+        let {code, self} = Fm.Core.read.name(code)
+        let {code, skip} = Fm.Core.read.char(code, '(')
+        let {code, name} = Fm.Core.read.name(code)
+        let {code, skip} = Fm.Core.read.char(code, ':')
+        let {code, bind} = Fm.Core.read.term(code)
+        let {code, skip} = Fm.Core.read.char(code, ')')
+        let {code, body} = Fm.Core.read.term(code)
+        {code, (ctx) Fm.Term.all(true, self, name, bind(ctx), (s,x) body({name,x}&{self,s}&ctx))}
+      else if U16.eql(head, '#') then
+        let {code, name} = Fm.Core.read.name(code)
+        let {code, body} = Fm.Core.read.term(code)
+        {code, (ctx) Fm.Term.lam(name, (x) body({name,x} & ctx))}
+      else if U16.eql(head, '(') then
+        let {code, func} = Fm.Core.read.term(code)
+        let {code, argm} = Fm.Core.read.term(code)
+        let {code, skip} = Fm.Core.read.char(code, ')')
+        {code, (ctx) Fm.Term.app(func(ctx), argm(ctx))}
+      else if U16.eql(head, '!') then
+        let {code, name} = Fm.Core.read.name(code)
+        let {code, skip} = Fm.Core.read.char(code, '=')
+        let {code, expr} = Fm.Core.read.term(code)
+        let {code, skip} = Fm.Core.read.char(code, ';')
+        let {code, body} = Fm.Core.read.term(code)
+        {code, (ctx) Fm.Term.let(name, expr(ctx), (x) body({name,x} & ctx))}
+      else if U16.eql(head, '$') then
+        let {code, name} = Fm.Core.read.name(code)
+        let {code, skip} = Fm.Core.read.char(code, '=')
+        let {code, expr} = Fm.Core.read.term(code)
+        let {code, skip} = Fm.Core.read.char(code, ';')
+        let {code, body} = Fm.Core.read.term(code)
+        {code, (ctx) Fm.Term.def(name, expr(ctx), (x) body({name,x} & ctx))}
+      else if U16.eql(head, '{') then
+        let {code, expr} = Fm.Core.read.term(code)
+        let {code, skip} = Fm.Core.read.char(code, ':')
+        let {code, type} = Fm.Core.read.term(code)
+        let {code, skip} = Fm.Core.read.char(code, '}')
+        {code, (ctx) Fm.Term.ann(false, expr(ctx), type(ctx))}
+      else if U16.eql(head, '\'') then
+        let {code, chrx} = Fm.Core.read.chrx(code)
+        let {code, skip} = Fm.Core.read.char(code, '\'')
+        {code, (ctx) Fm.Term.chr(chrx)}
+      else if U16.eql(head, '"') then
+        let {code, strx} = Fm.Core.read.strx(code)
+        let {code, skip} = Fm.Core.read.char(code, '"')
+        {code, (ctx) Fm.Term.str(strx)}
+      else if U16.eql(head, '+') then
+        let {code, natx} = Fm.Core.read.natx(code, 0)
+        {code, (ctx) Fm.Term.nat(natx)}
+      else
+        if Fm.Core.read.is_name(head) then
+          let {code, name} = Fm.Core.read.name(code)
+          let name = String.cons(head, name)
+          let {code, brui} = if U16.eql(head,'^')
+            then Fm.Core.read.natx(code, 0)
+            else {code, 0}
+          {code, (ctx)
+            def fun = (x,i) String.eql(Pair.fst!!(x), name)
+            let got = Fm.Core.read.find!(ctx, fun, 0, brui)
+            case got {
+              some: Pair.snd!!(Pair.fst!!(got.value))
+              none: Fm.Term.ref(name)
+            }}
+        else
+          {"", (ctx) Fm.Term.ref("error")}
+  }
+
+Fm.Core.read(code: String): Maybe(Fm.Term)
+  let {code, term} = Fm.Core.read.term(code | ";")
+  case code {
+    nil: none
+    cons: some(term([]))
+  }

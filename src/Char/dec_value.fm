@@ -1,0 +1,12 @@
+Char.dec_value(chr: Char): Nat
+  if      U16.eql(chr,'0') then 0
+  else if U16.eql(chr,'1') then 1
+  else if U16.eql(chr,'2') then 2
+  else if U16.eql(chr,'3') then 3
+  else if U16.eql(chr,'4') then 4
+  else if U16.eql(chr,'5') then 5
+  else if U16.eql(chr,'6') then 6
+  else if U16.eql(chr,'7') then 7
+  else if U16.eql(chr,'8') then 8
+  else if U16.eql(chr,'9') then 9
+  else 0
