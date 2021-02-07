@@ -258,7 +258,7 @@ With ctxt:
 ```
 
 Notice how the inner `Bool.not` was reduced, going from, on the `?a` branch,
-`not(not(false)) == true` to `not(false) == true`. We can repeat the step above
+`not(not(true)) == true` to `not(false) == true`. We can repeat the step above
 to reduce the last `not`:
 
 ```
