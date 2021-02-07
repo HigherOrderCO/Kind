@@ -1,2 +1,0 @@
-Nat.gcd_zero_left(a: Nat): Nat.gcd(0,a) == a
-  refl
