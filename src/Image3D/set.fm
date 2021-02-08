@@ -1,0 +1,5 @@
+// Sets position and color of the idx voxel of an Image3D
+Image3D.set(idx: U32, pos: U32, col: U32, img: Image3D): Image3D
+  let img = Image3D.set_pos(idx, pos, img)
+  let img = Image3D.set_col(idx, col, img)
+  img

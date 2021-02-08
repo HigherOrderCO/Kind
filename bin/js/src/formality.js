@@ -4281,7 +4281,7 @@ module.exports = (function() {
                                                                         var $1548 = self.val;
                                                                         var _term$27 = Fm$Term$ref$("Sigma");
                                                                         var _term$28 = Fm$Term$app$(_term$27, $1524);
-                                                                        var _term$29 = Fm$Term$app$(_term$28, Fm$Term$lam$("x", (_x$29 => {
+                                                                        var _term$29 = Fm$Term$app$(_term$28, Fm$Term$lam$($1508, (_x$29 => {
                                                                             var $1550 = $1540;
                                                                             return $1550;
                                                                         })));

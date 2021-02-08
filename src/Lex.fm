@@ -1,0 +1,12 @@
+type Term ~ (T: Type) {
+  var<A: Type>(val: A)                                   ~ (T: A)
+  lam<A: Type, B: Type>(bod: Term(A) -> Term(B))         ~ (T: A -> B)
+  app<A: Type, B: Type>(fun: Term(A -> B), arg: Term(A)) ~ (T: B)
+}
+
+//data Term : (T : Type) where
+  //var : (A : Type) -> (val: A) -> Term A
+  //lam : (A B : Type) -> (bod : Term A -> Term B) -> Term (A -> B)
+  //app : (A B : Type) -> (fun : Term (A -> B)) -> Term B
+
+//Term.foo: T

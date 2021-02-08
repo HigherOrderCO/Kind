@@ -1,36 +1,3 @@
-Nat.add_comm.aux0(a: Nat): Nat.add(a, 0) == a
-  case a {
-    zero:
-      refl
-    succ:
-      let p0 = Nat.add_comm.aux0(a.pred)
-      let p1 = apply(Nat.succ, p0)
-      p1
-  }!
-
-Nat.add_comm.aux1(a: Nat, b: Nat)
-: Nat.add(a, Nat.succ(b)) == Nat.succ(Nat.add(a, b))
-  case a {
-    zero:
-      refl
-    succ:
-      let p0 = Nat.add_comm.aux1(a.pred, b)
-      let p1 = apply(Nat.succ, p0)
-      p1
-  }!
-
-Nat.add_comm(a: Nat, b: Nat): (a + b) == (b + a)
-  case a {
-    zero:
-      let p0 = Nat.add_comm.aux0(b)
-      let p1 = mirror(p0)
-      p1
-    succ:
-      let p0 = Nat.add_comm.aux1(b, a.pred)
-      let p1 = mirror(p0)
-      let p2 = Nat.add_comm(b, a.pred)
-      let p3 = p1 :: rewrite X in Nat.succ(X) == Nat.add(b,Nat.succ(a.pred)) with p2
-      p3
-  }!
-
-// qed (:
+Test: Nat
+  let k = Word.i!(Word.i!(Word.i!(Word.o!(Word.e))))
+  Word.to_nat<4>(k)

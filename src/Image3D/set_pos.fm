@@ -1,0 +1,8 @@
+// Sets the position of the idx voxel of an Image3D
+Image3D.set_pos(idx: U32, pos: U32, img: Image3D): Image3D
+  case img {
+    new:
+      let img.buffer = Buffer32.set(U32.mul(idx,2u), pos, img.buffer)
+      Image3D.new(img.length, img.capacity, img.buffer)
+  }
+
