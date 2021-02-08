@@ -1,0 +1,3 @@
+Array.set<A:Type, depth:Nat>(idx: Word(depth), val: A, arr: Array(A,depth))
+: Array(A,depth)
+  Array.mut<A,depth>(idx, (x) val, arr)

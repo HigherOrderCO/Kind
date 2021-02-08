@@ -10,6 +10,6 @@ Fm.Parser.sigma.type: Parser(Fm.Term)
     var orig = Fm.Parser.stop(init);
     let term = Fm.Term.ref("Sigma");
     let term = Fm.Term.app(term, typ0);
-    let term = Fm.Term.app(term, Fm.Term.lam("x", (x) typ1));
+    let term = Fm.Term.app(term, Fm.Term.lam(name, (x) typ1));
     return Fm.Term.ori(orig, term);
   }

@@ -1,0 +1,2 @@
+Buffer32.parse_hex(hex: String): Buffer32
+  Buffer32.parse_hex(hex)

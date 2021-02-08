@@ -1,0 +1,6 @@
+Pos32.new(x: U32, y: U32, z: U32): Pos32
+  let pos = 0u
+  let pos = U32.or(pos, x)
+  let pos = U32.or(pos, U32.shl(y, 12u))
+  let pos = U32.or(pos, U32.shl(z, 24u))
+  pos

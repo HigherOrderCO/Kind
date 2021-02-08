@@ -1,0 +1,2 @@
+Image3D.clear(img: Image3D): Image3D
+  Image3D.set_length(0u, img)
