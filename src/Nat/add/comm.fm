@@ -1,0 +1,9 @@
+Nat.add.comm(a: Nat, b:Nat): (a + b) == (b + a)
+  case a{
+    zero: mirror(Nat.add.zero_right(b))
+    succ: 
+      let p0 = Nat.add.succ_right(b, a.pred)
+      let p1 = mirror(p0)
+      let p2 = Nat.add.comm(b, a.pred)
+      p1 :: rewrite X in Nat.succ(X) == Nat.add(b,Nat.succ(a.pred)) with p2
+  }!

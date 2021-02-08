@@ -1,0 +1,2 @@
+Nat.add.zero_left(a: Nat): (0 + a) == a
+  refl
