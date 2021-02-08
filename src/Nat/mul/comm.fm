@@ -1,0 +1,5 @@
+Nat.mul.comm(a: Nat, b: Nat): (a * b) == b * a
+  case b {
+    zero: mirror(Nat.mul.zero_left(a))
+    succ: mirror(Nat.mul.comm(Nat.succ(b.pred), a))
+  }!
