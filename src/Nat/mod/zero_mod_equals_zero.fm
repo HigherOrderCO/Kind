@@ -1,0 +1,2 @@
+Nat.mod.zero_mod_equals_zero(a: Nat): (0 % Nat.succ(a)) == 0
+  refl

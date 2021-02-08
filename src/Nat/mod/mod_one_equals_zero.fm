@@ -1,0 +1,5 @@
+Nat.mod.mod_one_equals_zero(a: Nat): (a % 1) == 0
+  case a{
+    zero: refl
+    succ: Nat.mod.go_mod_one_equals_zero(a.pred)
+  }!

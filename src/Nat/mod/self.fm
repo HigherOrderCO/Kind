@@ -1,0 +1,2 @@
+Nat.mod.self(a: Nat): (Nat.succ(a) % Nat.succ(a)) == 0
+    Nat.mod.go_self(a,0)
