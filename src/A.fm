@@ -1,0 +1,2 @@
+A: App(Unit)
+  App.new!(unit, (state) App.Render.txt("ok"), (e,s) [])

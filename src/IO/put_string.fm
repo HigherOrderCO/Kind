@@ -1,0 +1,3 @@
+IO.put_string(text: String): IO(Unit)
+  IO.ask<Unit>("put_string", text, (skip)
+  IO.end<Unit>(Unit.new))
