@@ -10,6 +10,6 @@
   "license": "MIT",
   "dependencies": {
     "formality-lang": "^0.5.1",
-    "formcore-js": "^0.1.38"
+    "formcore-js": "^0.1.39"
   }
 }
