@@ -1491,7 +1491,7 @@ it to `Bool.true_neq_false`, resulting in `Empty` (our goal). Let's use
 `Nat.pred` to subtract 1 from both sides:
 
 ```
-three_neq_two: 4 != 2
+three_neq_two: 3 != 2
   (e)
   let e0 = apply(Nat.pred, e)
   ?a
