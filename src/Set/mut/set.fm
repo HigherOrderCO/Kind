@@ -1,0 +1,2 @@
+Set.mut.set(bits: Bits, set: Set): Set
+  Set.set(bits, set)
