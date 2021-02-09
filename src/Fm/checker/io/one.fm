@@ -2,7 +2,11 @@ Fm.checker.io.one(name: String): IO(Unit)
   do IO {
     var new_defs = Fm.Synth.one(name, Map.new!);
     case new_defs {
-      none: IO.print(Fm.Defs.report(Map.new!, [name])),
+      none:
+        let notfound = "Term not found: '" | name | "'."
+        let filelist = List.mapped!(Fm.Synth.files_of(name))!((x) "'" | x | "'")
+        let searched = "Searched on: " | String.join(", ",filelist) | "."
+        IO.print(notfound | "\n" | searched)
       some: IO.print(Fm.Defs.report(new_defs.value, [name])),
     }
   }

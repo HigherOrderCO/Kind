@@ -5,13 +5,16 @@ Fm.checker.io.file(file: String): IO(Unit)
       left: do IO {
         IO.print(String.flatten(["On '", file, "':"]));
         IO.print(loaded.value);
-      },
+      }
       right: case loaded.value {
         new: do IO {
           let nams = loaded.value.fst;
           let defs = loaded.value.snd;
-          IO.print(Fm.Defs.report(defs, nams));
+          case nams {
+            nil: IO.print("File not found or empty: '" | file | "'.")
+            cons: IO.print(Fm.Defs.report(defs, nams))
+          }
         }
-      },
-    };
+      }
+    }
   }

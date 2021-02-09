@@ -67,10 +67,10 @@ function display_error(name, error){
     try {
       var fmcc = await fm.run(fm["Fm.to_core.io.one"](name));
       var asjs = fmc_to_js.compile(fmcc, name, {});
-      var js_path = path.join(__dirname,"_formality_tmp_.js");
+      var js_path = ".formality.tmp.js";
       try { fs.unlinkSync(js_path); } catch (e) {};
       fs.writeFileSync(js_path, asjs);
-      require(js_path);
+      require(path.join(process.cwd(),js_path));
       fs.unlinkSync(js_path);
     } catch (e) {
       display_error(name, e);

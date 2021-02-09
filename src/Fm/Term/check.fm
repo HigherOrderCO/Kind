@@ -166,7 +166,7 @@ Fm.Term.check(
       none:
         Fm.Check.result!(Maybe.some!(infr), []),
       some: do Fm.Check {
-        var eqls = Fm.Term.equal(type.value, infr, defs, List.length!(ctx), Set.new);
+        var eqls = Fm.Term.equal(type.value, infr, defs, List.length!(ctx), Set.mut.new(unit));
         if eqls then do Fm.Check {
           return type.value;
         } else do Fm.Check {

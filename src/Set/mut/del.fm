@@ -1,0 +1,2 @@
+Set.mut.del(key: Bits, set: Set): Set
+  Set.del(key, set)

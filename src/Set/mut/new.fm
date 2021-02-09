@@ -1,0 +1,2 @@
+Set.mut.new(a: Unit): Set
+  Set.new
