@@ -1,0 +1,2 @@
+Nat.mul.zero_right(a: Nat): (a * 0) == 0
+  refl

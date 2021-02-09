@@ -1,0 +1,2 @@
+Nat.lcm(a: Nat, b: Nat): Nat
+  (a * b) / Nat.gcd(a , b)

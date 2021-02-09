@@ -1,0 +1,12 @@
+Nat.add.cancel_left(a: Nat, b: Nat, c: Nat, h: (a + b) == a + c)
+  : b == c
+  case a with e: ((a + b) == (a + c)) = h{
+    zero: e
+    succ: 
+      let e2 = e :: rewrite x in x == _ 
+	with Nat.add.succ_left(a.pred, b) 
+      let e3 = e2 :: rewrite x in _ == x 
+	with Nat.add.succ_left(a.pred, c)
+      let e4 = Nat.succ_inj(_ _ e3)
+      Nat.add.cancel_left( _ _ _ e4)
+  }!

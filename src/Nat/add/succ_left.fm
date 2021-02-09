@@ -1,0 +1,2 @@
+Nat.add.succ_left(a: Nat, b: Nat): (Nat.succ(a) + b) == Nat.succ(a + b)
+  refl

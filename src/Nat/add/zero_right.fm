@@ -1,0 +1,8 @@
+Nat.add.zero_right(a: Nat): (a + 0) == a
+  case a {
+    zero: refl
+    succ: 
+      let p0 = Nat.add.zero_right(a.pred)
+      let p1 = Equal.apply!!<Nat.add(a.pred,0), a.pred, Nat.succ>(p0)
+      p1
+  }!
