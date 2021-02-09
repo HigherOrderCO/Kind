@@ -1,4 +1,4 @@
 Main: IO(Unit)
   do IO {
-    IO.print("Hello, world!")
+    IO.put_string("Hello, world!")
   }

@@ -1,3 +1,15 @@
-Test: Nat
-  let k = Word.i!(Word.i!(Word.i!(Word.o!(Word.e))))
-  Word.to_nat<4>(k)
+Nat.add.cancel_left(a: Nat, b: Nat, c: Nat, h: (a + b) == a + c): b == c
+  (case a {
+    zero: ?hole
+    succ: ?holeB
+  }: (h: (a + b) == (a + c)) -> (b == c))(h)
+
+
+
+
+Nat.add.cancel_left(a: Nat, b: Nat, c: Nat, h: (a + b) == a + c): b == c
+  case a
+  with h: ((a + b) == (a + c)) = h {
+    zero: ?hole
+    succ: ?holeB
+  }!
