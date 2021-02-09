@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+  <meta name='apple-mobile-web-app-capable' content='yes' />
+  <link rel="shortcut icon" href="237db229f1e6a224797029452b2c75f0.png"> 
+  <head>
+    <title>Moonad</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+      }
+      #logo { 
+        background-image: url(237db229f1e6a224797029452b2c75f0.png);
+        background-repeat: no-repeat;
+        width: 29px;
+        height: 23px;
+      }
+      html, body {
+        height: 100%;
+        width: 100%;
+        height: 100%;
+        font-family: monospace;
+      }
+      #main {
+        width: 100%;
+        height: 100%;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+      * {
+        -ms-overflow-style: none;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      if (typeof BigInt === "undefined") {
+        document.body.innerHTML
+          = "<div style='width:100%; height:100%; display: flex; flex-flow: column nowrap; justify-content: center; align-items: center;'>"
+          + "  <div>Your browser doesn't support BigInt, which Moonad needs to run.</div>"
+          + "</div>";
+      };
+    </script>
+    <div id="main"></div>
+  </body>
+</html>

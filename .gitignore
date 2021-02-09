@@ -4,3 +4,5 @@ bin/node_modules/
 src/_*
 src/tmp*
 bin/hs/cabal.project.local*
+web/docs/
+web/node_modules/
