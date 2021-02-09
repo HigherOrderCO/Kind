@@ -4,5 +4,5 @@ Nat.add.assoc(a: Nat, b: Nat, c: Nat)
    zero: refl
    succ: 
     let h=Nat.add.assoc(a.pred, b, c)
-    apply(Nat.succ,h)
+    Equal.apply!!<Nat.add(Nat.add(a.pred,b),c), Nat.add(a.pred,Nat.add(b,c)),Nat.succ>(h)
  }!
