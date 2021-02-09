@@ -1,4 +1,4 @@
 type App.Render {
   txt(text: String)
-  vox(voxs: Image3D)
+  pix(pixs: Image3D)
 }

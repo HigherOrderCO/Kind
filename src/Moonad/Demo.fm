@@ -1,27 +1,45 @@
 // A demo application that renders a square on the screen
 Moonad.Demo: App(Pair(U32,U32))
-  let vox = Image3D.alloc_capacity(256u)
-  def init =
-    Pair.new!!(64u, 64u)
+  let pix = Image3D.alloc_capacity(256u)
+
+  // The state is just a position
+  def init = {128u, 128u}
+
+  // Draws a square at the position
   def draw = (state)
     let {mouse_x, mouse_y} = state
-    let vox = Image3D.clear(vox)
-    App.Render.vox(
-      U32.for!(vox, 0u, 256u, (idx, vox)
+    let pix = Image3D.clear(pix)
+    App.Render.pix(
+      U32.for!(pix, 0u, 256u, (idx, pix)
         let p_x = U32.sub(U32.add(mouse_x,U32.mod(idx,16u)),8u) // pixel x
         let p_y = U32.sub(U32.add(mouse_y,U32.div(idx,16u)),8u) // pixel y
         let pos = Pos32.new(p_x, p_y, 128u) // pixel pos (forms a square)
         let col = Col32.new(255u, 0u, 0u, 255u) // pixel color (red)
-        //log("render " | U32.to_string(p_x) | " " | U32.to_string(p_y))
-        let vox = Image3D.push(pos, col, vox)
-        vox))
+        let pix = Image3D.push(pos, col, pix)
+        pix))
+
+  // Reacts to events
   def when = (event, state)
     case event {
       init: []
       tick: []
       xkey: [
-        App.Action.print!("test")
+        let {old_x, old_y} = state
+        let {new_x, new_y} =
+          let spd = 4u
+          if U16.eql(event.code, 'a') then
+            {U32.sub(old_x, spd), old_y}
+          else if U16.eql(event.code, 'd') then
+            {U32.add(old_x, spd), old_y}
+          else if U16.eql(event.code, 'w') then
+            {old_x, U32.sub(old_y, spd)}
+          else if U16.eql(event.code, 's') then
+            {old_x, U32.add(old_y, spd)}
+          else
+            {old_x, old_y}
+        App.Action.state!({new_x, new_y})
       ]
       post: []
     }
+
   App.new!(init, draw, when)
