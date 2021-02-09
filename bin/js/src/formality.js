@@ -23210,13 +23210,19 @@ module.exports = (function() {
             var self = _new_defs$2;
             switch (self._) {
                 case 'Maybe.none':
-                    var $9386 = IO$print$(Fm$Defs$report$(Map$new, List$cons$(_name$1, List$nil)));
+                    var _notfound$3 = ("Term not found: \'" + (_name$1 + "\'."));
+                    var _filelist$4 = List$mapped$(Fm$Synth$files_of$(_name$1), (_x$4 => {
+                        var $9387 = ("\'" + (_x$4 + "\'"));
+                        return $9387;
+                    }));
+                    var _searched$5 = ("Searched on: " + (String$join$(", ", _filelist$4) + "."));
+                    var $9386 = IO$print$((_notfound$3 + ("\u{a}" + _searched$5)));
                     var $9385 = $9386;
                     break;
                 case 'Maybe.some':
-                    var $9387 = self.value;
-                    var $9388 = IO$print$(Fm$Defs$report$($9387, List$cons$(_name$1, List$nil)));
-                    var $9385 = $9388;
+                    var $9388 = self.value;
+                    var $9389 = IO$print$(Fm$Defs$report$($9388, List$cons$(_name$1, List$nil)));
+                    var $9385 = $9389;
                     break;
             };
             return $9385;
@@ -23229,117 +23235,129 @@ module.exports = (function() {
         var self = _names$1;
         switch (self._) {
             case 'List.nil':
-                var $9390 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-                    var $9391 = _m$pure$4;
-                    return $9391;
+                var $9391 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+                    var $9392 = _m$pure$4;
+                    return $9392;
                 }))(_defs$2);
-                var $9389 = $9390;
+                var $9390 = $9391;
                 break;
             case 'List.cons':
-                var $9392 = self.head;
-                var $9393 = self.tail;
-                var $9394 = IO$monad$((_m$bind$5 => _m$pure$6 => {
-                    var $9395 = _m$bind$5;
-                    return $9395;
-                }))(Fm$Synth$one$($9392, _defs$2))((_new_defs$5 => {
+                var $9393 = self.head;
+                var $9394 = self.tail;
+                var $9395 = IO$monad$((_m$bind$5 => _m$pure$6 => {
+                    var $9396 = _m$bind$5;
+                    return $9396;
+                }))(Fm$Synth$one$($9393, _defs$2))((_new_defs$5 => {
                     var self = _new_defs$5;
                     switch (self._) {
                         case 'Maybe.none':
-                            var $9397 = Fm$Synth$many$($9393, _defs$2);
-                            var $9396 = $9397;
+                            var $9398 = Fm$Synth$many$($9394, _defs$2);
+                            var $9397 = $9398;
                             break;
                         case 'Maybe.some':
-                            var $9398 = self.value;
-                            var $9399 = Fm$Synth$many$($9393, $9398);
-                            var $9396 = $9399;
+                            var $9399 = self.value;
+                            var $9400 = Fm$Synth$many$($9394, $9399);
+                            var $9397 = $9400;
                             break;
                     };
-                    return $9396;
+                    return $9397;
                 }));
-                var $9389 = $9394;
+                var $9390 = $9395;
                 break;
         };
-        return $9389;
+        return $9390;
     };
     const Fm$Synth$many = x0 => x1 => Fm$Synth$many$(x0, x1);
 
     function Fm$Synth$file$(_file$1, _defs$2) {
-        var $9400 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $9401 = _m$bind$3;
-            return $9401;
+        var $9401 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $9402 = _m$bind$3;
+            return $9402;
         }))(IO$get_file$(_file$1))((_code$3 => {
             var _read$4 = Fm$Defs$read$(_file$1, _code$3, _defs$2);
             var self = _read$4;
             switch (self._) {
                 case 'Either.left':
-                    var $9403 = self.value;
-                    var $9404 = IO$monad$((_m$bind$6 => _m$pure$7 => {
-                        var $9405 = _m$pure$7;
-                        return $9405;
-                    }))(Either$left$($9403));
-                    var $9402 = $9404;
+                    var $9404 = self.value;
+                    var $9405 = IO$monad$((_m$bind$6 => _m$pure$7 => {
+                        var $9406 = _m$pure$7;
+                        return $9406;
+                    }))(Either$left$($9404));
+                    var $9403 = $9405;
                     break;
                 case 'Either.right':
-                    var $9406 = self.value;
-                    var _file_defs$6 = $9406;
+                    var $9407 = self.value;
+                    var _file_defs$6 = $9407;
                     var _file_keys$7 = Map$keys$(_file_defs$6);
                     var _file_nams$8 = List$mapped$(_file_keys$7, Fm$Name$from_bits);
-                    var $9407 = IO$monad$((_m$bind$9 => _m$pure$10 => {
-                        var $9408 = _m$bind$9;
-                        return $9408;
-                    }))(Fm$Synth$many$(_file_nams$8, _file_defs$6))((_defs$9 => {
-                        var $9409 = IO$monad$((_m$bind$10 => _m$pure$11 => {
-                            var $9410 = _m$pure$11;
-                            return $9410;
-                        }))(Either$right$(Pair$new$(_file_nams$8, _defs$9)));
+                    var $9408 = IO$monad$((_m$bind$9 => _m$pure$10 => {
+                        var $9409 = _m$bind$9;
                         return $9409;
+                    }))(Fm$Synth$many$(_file_nams$8, _file_defs$6))((_defs$9 => {
+                        var $9410 = IO$monad$((_m$bind$10 => _m$pure$11 => {
+                            var $9411 = _m$pure$11;
+                            return $9411;
+                        }))(Either$right$(Pair$new$(_file_nams$8, _defs$9)));
+                        return $9410;
                     }));
-                    var $9402 = $9407;
+                    var $9403 = $9408;
                     break;
             };
-            return $9402;
+            return $9403;
         }));
-        return $9400;
+        return $9401;
     };
     const Fm$Synth$file = x0 => x1 => Fm$Synth$file$(x0, x1);
 
     function Fm$checker$io$file$(_file$1) {
-        var $9411 = IO$monad$((_m$bind$2 => _m$pure$3 => {
-            var $9412 = _m$bind$2;
-            return $9412;
+        var $9412 = IO$monad$((_m$bind$2 => _m$pure$3 => {
+            var $9413 = _m$bind$2;
+            return $9413;
         }))(Fm$Synth$file$(_file$1, Map$new))((_loaded$2 => {
             var self = _loaded$2;
             switch (self._) {
                 case 'Either.left':
-                    var $9414 = self.value;
-                    var $9415 = IO$monad$((_m$bind$4 => _m$pure$5 => {
-                        var $9416 = _m$bind$4;
-                        return $9416;
-                    }))(IO$print$(String$flatten$(List$cons$("On \'", List$cons$(_file$1, List$cons$("\':", List$nil))))))((_$4 => {
-                        var $9417 = IO$print$($9414);
+                    var $9415 = self.value;
+                    var $9416 = IO$monad$((_m$bind$4 => _m$pure$5 => {
+                        var $9417 = _m$bind$4;
                         return $9417;
+                    }))(IO$print$(String$flatten$(List$cons$("On \'", List$cons$(_file$1, List$cons$("\':", List$nil))))))((_$4 => {
+                        var $9418 = IO$print$($9415);
+                        return $9418;
                     }));
-                    var $9413 = $9415;
+                    var $9414 = $9416;
                     break;
                 case 'Either.right':
-                    var $9418 = self.value;
-                    var self = $9418;
+                    var $9419 = self.value;
+                    var self = $9419;
                     switch (self._) {
                         case 'Pair.new':
-                            var $9420 = self.fst;
-                            var $9421 = self.snd;
-                            var _nams$6 = $9420;
-                            var _defs$7 = $9421;
-                            var $9422 = IO$print$(Fm$Defs$report$(_defs$7, _nams$6));
-                            var $9419 = $9422;
+                            var $9421 = self.fst;
+                            var $9422 = self.snd;
+                            var _nams$6 = $9421;
+                            var _defs$7 = $9422;
+                            var self = _nams$6;
+                            switch (self._) {
+                                case 'List.nil':
+                                    var $9424 = IO$print$(("File not found or empty: \'" + (_file$1 + "\'.")));
+                                    var $9423 = $9424;
+                                    break;
+                                case 'List.cons':
+                                    var $9425 = self.head;
+                                    var $9426 = self.tail;
+                                    var $9427 = IO$print$(Fm$Defs$report$(_defs$7, _nams$6));
+                                    var $9423 = $9427;
+                                    break;
+                            };
+                            var $9420 = $9423;
                             break;
                     };
-                    var $9413 = $9419;
+                    var $9414 = $9420;
                     break;
             };
-            return $9413;
+            return $9414;
         }));
-        return $9411;
+        return $9412;
     };
     const Fm$checker$io$file = x0 => Fm$checker$io$file$(x0);
 
@@ -23356,15 +23374,15 @@ module.exports = (function() {
                 var self = _io$2;
                 switch (self._) {
                     case 'IO.end':
-                        var $9423 = self.value;
-                        var $9424 = $9423;
-                        return $9424;
+                        var $9428 = self.value;
+                        var $9429 = $9428;
+                        return $9429;
                     case 'IO.ask':
-                        var $9425 = self.query;
-                        var $9426 = self.param;
-                        var $9427 = self.then;
-                        var $9428 = IO$purify$($9427(""));
-                        return $9428;
+                        var $9430 = self.query;
+                        var $9431 = self.param;
+                        var $9432 = self.then;
+                        var $9433 = IO$purify$($9432(""));
+                        return $9433;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -23377,31 +23395,31 @@ module.exports = (function() {
         var self = Fm$Defs$read$("Main.fm", _code$1, Map$new);
         switch (self._) {
             case 'Either.left':
-                var $9430 = self.value;
-                var $9431 = $9430;
-                var $9429 = $9431;
+                var $9435 = self.value;
+                var $9436 = $9435;
+                var $9434 = $9436;
                 break;
             case 'Either.right':
-                var $9432 = self.value;
-                var $9433 = IO$purify$((() => {
-                    var _defs$3 = $9432;
+                var $9437 = self.value;
+                var $9438 = IO$purify$((() => {
+                    var _defs$3 = $9437;
                     var _nams$4 = List$mapped$(Map$keys$(_defs$3), Fm$Name$from_bits);
-                    var $9434 = IO$monad$((_m$bind$5 => _m$pure$6 => {
-                        var $9435 = _m$bind$5;
-                        return $9435;
+                    var $9439 = IO$monad$((_m$bind$5 => _m$pure$6 => {
+                        var $9440 = _m$bind$5;
+                        return $9440;
                     }))(Fm$Synth$many$(_nams$4, _defs$3))((_defs$5 => {
-                        var $9436 = IO$monad$((_m$bind$6 => _m$pure$7 => {
-                            var $9437 = _m$pure$7;
-                            return $9437;
+                        var $9441 = IO$monad$((_m$bind$6 => _m$pure$7 => {
+                            var $9442 = _m$pure$7;
+                            return $9442;
                         }))(Fm$Defs$report$(_defs$5, _nams$4));
-                        return $9436;
+                        return $9441;
                     }));
-                    return $9434;
+                    return $9439;
                 })());
-                var $9429 = $9433;
+                var $9434 = $9438;
                 break;
         };
-        return $9429;
+        return $9434;
     };
     const Fm$checker$code = x0 => Fm$checker$code$(x0);
 
@@ -23409,21 +23427,21 @@ module.exports = (function() {
         var self = Fm$Parser$term$(0n, _code$1);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $9439 = self.idx;
-                var $9440 = self.code;
-                var $9441 = self.err;
-                var $9442 = Maybe$none;
-                var $9438 = $9442;
+                var $9444 = self.idx;
+                var $9445 = self.code;
+                var $9446 = self.err;
+                var $9447 = Maybe$none;
+                var $9443 = $9447;
                 break;
             case 'Parser.Reply.value':
-                var $9443 = self.idx;
-                var $9444 = self.code;
-                var $9445 = self.val;
-                var $9446 = Maybe$some$($9445);
-                var $9438 = $9446;
+                var $9448 = self.idx;
+                var $9449 = self.code;
+                var $9450 = self.val;
+                var $9451 = Maybe$some$($9450);
+                var $9443 = $9451;
                 break;
         };
-        return $9438;
+        return $9443;
     };
     const Fm$Term$read = x0 => Fm$Term$read$(x0);
     const Fm = (() => {
@@ -23432,11 +23450,11 @@ module.exports = (function() {
         var __$3 = Fm$checker$io$file;
         var __$4 = Fm$checker$code;
         var __$5 = Fm$Term$read;
-        var $9447 = IO$monad$((_m$bind$6 => _m$pure$7 => {
-            var $9448 = _m$pure$7;
-            return $9448;
+        var $9452 = IO$monad$((_m$bind$6 => _m$pure$7 => {
+            var $9453 = _m$pure$7;
+            return $9453;
         }))(Unit$new);
-        return $9447;
+        return $9452;
     })();
     return {
         '$main$': () => run(Fm),
