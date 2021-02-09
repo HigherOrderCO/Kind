@@ -1,2 +1,2 @@
-Nat.mul.zero_right(a: Nat): (a*0) == 0
+Nat.mul.zero_right(a: Nat): (a * 0) == 0
   refl

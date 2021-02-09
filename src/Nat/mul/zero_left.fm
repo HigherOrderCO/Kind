@@ -1,4 +1,4 @@
-Nat.mul.zero_left(a: Nat): (0*a) == 0
+Nat.mul.zero_left(a: Nat): (0 * a) == 0
   case a{
     zero: refl
     succ: 
