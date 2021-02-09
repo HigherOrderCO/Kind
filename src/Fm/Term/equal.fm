@@ -12,13 +12,13 @@ Fm.Term.equal(a: Fm.Term, b: Fm.Term, defs: Fm.Defs, lv: Nat, seen: Set): Fm.Che
       return Bool.true;
     } else do Fm.Check {
       let id = Bits.concat(ah, bh);
-      if Set.has(id, seen) then do Fm.Check {
+      if Set.mut.has(id, seen) then do Fm.Check {
         Fm.Term.equal.extra_holes(a, b);
         return Bool.true;
       } else case a1 {
         all: case b1 {
           all: do Fm.Check {
-            let seen = Set.set(id, seen);
+            let seen = Set.mut.set(id, seen);
             let a1_body = a1.body(
               Fm.Term.var(a1.self, lv),
               Fm.Term.var(a1.name, Nat.succ(lv)));
@@ -43,7 +43,7 @@ Fm.Term.equal(a: Fm.Term, b: Fm.Term, defs: Fm.Defs, lv: Nat, seen: Set): Fm.Che
         },
         lam: case b1 {
           lam: do Fm.Check {
-              let seen = Set.set(id, seen);
+              let seen = Set.mut.set(id, seen);
               let a1_body = a1.body(Fm.Term.var(a1.name, lv));
               let b1_body = b1.body(Fm.Term.var(b1.name, lv));
               var eq_body = Fm.Term.equal(a1_body, b1_body, defs, Nat.succ(lv), seen);
@@ -56,7 +56,7 @@ Fm.Term.equal(a: Fm.Term, b: Fm.Term, defs: Fm.Defs, lv: Nat, seen: Set): Fm.Che
           },
         app: case b1 {
           app: do Fm.Check {
-            let seen = Set.set(id, seen);
+            let seen = Set.mut.set(id, seen);
             var eq_func = Fm.Term.equal(a1.func, b1.func, defs, lv, seen);
             var eq_argm = Fm.Term.equal(a1.argm, b1.argm, defs, lv, seen);
             return Bool.and(eq_func, eq_argm);
@@ -68,7 +68,7 @@ Fm.Term.equal(a: Fm.Term, b: Fm.Term, defs: Fm.Defs, lv: Nat, seen: Set): Fm.Che
         },
         let: case b1 {
           let: do Fm.Check {
-            let seen = Set.set(id, seen);
+            let seen = Set.mut.set(id, seen);
             let a1_body = a1.body(Fm.Term.var(a1.name, lv));
             let b1_body = b1.body(Fm.Term.var(b1.name, lv));
             var eq_expr = Fm.Term.equal(a1.expr, b1.expr, defs, lv, seen);

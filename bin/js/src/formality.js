@@ -14742,6 +14742,7 @@ module.exports = (function() {
         return $5792;
     };
     const Set$has = x0 => x1 => Set$has$(x0, x1);
+    const Set$mut$has = a0 => a1 => (!!(a1[a0]));
     const Bool$or = a0 => a1 => (a0 || a1);
 
     function Fm$Term$has_holes$(_term$1) {
@@ -17038,6 +17039,7 @@ module.exports = (function() {
         return $6857;
     };
     const Set$set = x0 => x1 => Set$set$(x0, x1);
+    const Set$mut$set = a0 => a1 => (((k, s) => ((s[k] = true), s))(a0, a1));
 
     function Bool$eql$(_a$1, _b$2) {
         var self = _a$1;
@@ -17070,7 +17072,7 @@ module.exports = (function() {
                 var $6863 = $6864;
             } else {
                 var _id$12 = (_bh$11 + _ah$10);
-                var self = Set$has$(_id$12, _seen$5);
+                var self = (!!(_seen$5[_id$12]));
                 if (self) {
                     var self = Fm$Term$equal$extra_holes$(_a$1, _b$2);
                     switch (self._) {
@@ -17454,7 +17456,7 @@ module.exports = (function() {
                                     var $7053 = self.name;
                                     var $7054 = self.xtyp;
                                     var $7055 = self.body;
-                                    var _seen$23 = Set$set$(_id$12, _seen$5);
+                                    var _seen$23 = (((k, s) => ((s[k] = true), s))(_id$12, _seen$5));
                                     var _a1_body$24 = $7043(Fm$Term$var$($7040, _lv$4))(Fm$Term$var$($7041, Nat$succ$(_lv$4)));
                                     var _b1_body$25 = $7055(Fm$Term$var$($7052, _lv$4))(Fm$Term$var$($7053, Nat$succ$(_lv$4)));
                                     var _eq_self$26 = ($7040 === $7052);
@@ -17634,7 +17636,7 @@ module.exports = (function() {
                                 case 'Fm.Term.lam':
                                     var $7132 = self.name;
                                     var $7133 = self.body;
-                                    var _seen$17 = Set$set$(_id$12, _seen$5);
+                                    var _seen$17 = (((k, s) => ((s[k] = true), s))(_id$12, _seen$5));
                                     var _a1_body$18 = $7118(Fm$Term$var$($7117, _lv$4));
                                     var _b1_body$19 = $7133(Fm$Term$var$($7132, _lv$4));
                                     var self = Fm$Term$equal$(_a1_body$18, _b1_body$19, _defs$3, Nat$succ$(_lv$4), _seen$17);
@@ -17778,7 +17780,7 @@ module.exports = (function() {
                                 case 'Fm.Term.app':
                                     var $7199 = self.func;
                                     var $7200 = self.argm;
-                                    var _seen$17 = Set$set$(_id$12, _seen$5);
+                                    var _seen$17 = (((k, s) => ((s[k] = true), s))(_id$12, _seen$5));
                                     var self = Fm$Term$equal$($7181, $7199, _defs$3, _lv$4, _seen$17);
                                     switch (self._) {
                                         case 'Fm.Check.result':
@@ -17949,7 +17951,7 @@ module.exports = (function() {
                                     var $7276 = self.name;
                                     var $7277 = self.expr;
                                     var $7278 = self.body;
-                                    var _seen$19 = Set$set$(_id$12, _seen$5);
+                                    var _seen$19 = (((k, s) => ((s[k] = true), s))(_id$12, _seen$5));
                                     var _a1_body$20 = $7256(Fm$Term$var$($7254, _lv$4));
                                     var _b1_body$21 = $7278(Fm$Term$var$($7276, _lv$4));
                                     var self = Fm$Term$equal$($7255, $7277, _defs$3, _lv$4, _seen$19);
@@ -18953,6 +18955,7 @@ module.exports = (function() {
     };
     const Fm$Term$equal = x0 => x1 => x2 => x3 => x4 => Fm$Term$equal$(x0, x1, x2, x3, x4);
     const Set$new = Map$new;
+    const Set$mut$new = a0 => (({}));
 
     function Fm$Term$check$(_term$1, _type$2, _defs$3, _ctx$4, _path$5, _orig$6) {
         var self = _term$1;
@@ -19811,7 +19814,7 @@ module.exports = (function() {
                                 break;
                             case 'Maybe.some':
                                 var $8084 = self.value;
-                                var self = Fm$Term$equal$($8084, $8081, _defs$3, (list_length(_ctx$4)), Set$new);
+                                var self = Fm$Term$equal$($8084, $8081, _defs$3, (list_length(_ctx$4)), (({})));
                                 switch (self._) {
                                     case 'Fm.Check.result':
                                         var $8086 = self.value;
@@ -23773,14 +23776,17 @@ module.exports = (function() {
         'Fm.Term.desugar_cse': Fm$Term$desugar_cse,
         'Fm.Error.cant_infer': Fm$Error$cant_infer,
         'Set.has': Set$has,
+        'Set.mut.has': Set$mut$has,
         'Bool.or': Bool$or,
         'Fm.Term.has_holes': Fm$Term$has_holes,
         'Fm.Term.equal.hole': Fm$Term$equal$hole,
         'Fm.Term.equal.extra_holes': Fm$Term$equal$extra_holes,
         'Set.set': Set$set,
+        'Set.mut.set': Set$mut$set,
         'Bool.eql': Bool$eql,
         'Fm.Term.equal': Fm$Term$equal,
         'Set.new': Set$new,
+        'Set.mut.new': Set$mut$new,
         'Fm.Term.check': Fm$Term$check,
         'Fm.Path.nil': Fm$Path$nil,
         'Fm.MPath.nil': Fm$MPath$nil,

@@ -1,6 +1,24 @@
 type App.Event {
-  init(time: U64, addr: Word(160), screen: Pair(U32,U32), mouse: Pair(U32,U32))
-  tick(time: U64, screen: Pair(U32,U32), mouse: Pair(U32,U32))
-  xkey(time: U64, down: Bool, code: U16)
-  post(time: U64, room: Word(48), addr: Word(160), data: Word(256))
+  init(
+    time: U64,
+    addr: Word(160),
+    screen: Pair(U32,U32),
+    mouse: Pair(U32,U32)
+  )
+  tick(
+    time: U64,
+    screen: Pair(U32,U32),
+    mouse: Pair(U32,U32)
+  )
+  xkey(
+    time: U64,
+    down: Bool,
+    code: U16
+  )
+  post(
+    time: U64,
+    room: Word(48),
+    addr: Word(160),
+    data: Word(256)
+  )
 }

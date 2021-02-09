@@ -15,18 +15,13 @@ Moonad.Demo: App(Pair(U32,U32))
         //log("render " | U32.to_string(p_x) | " " | U32.to_string(p_y))
         let vox = Image3D.push(pos, col, vox)
         vox))
-  //state(value: S)
-  //print(text: String)
-  //post(room: Word(48), data: Word(256))
-  //watch(room: Word(48))
-  //resize(width: U32, height: U32)
   def when = (event, state)
     case event {
       init: []
       tick: []
       xkey: [
-        App.Action.print("test " | U16.to_string(event.code))
+        App.Action.print!("test")
       ]
       post: []
     }
-  App.new<Pair(U32,U32)>(init, draw, when)
+  App.new!(init, draw, when)
