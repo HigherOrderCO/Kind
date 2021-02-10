@@ -1,3 +1,8 @@
+(self["webpackChunkmoonad_web"] = self["webpackChunkmoonad_web"] || []).push([[391],{
+
+/***/ 391:
+/***/ ((module) => {
+
 module.exports = (function() {
     function word_to_u16(w) {
         var u = 0;
@@ -1326,3 +1331,8 @@ module.exports = (function() {
         'Moonad.Demo': Moonad$Demo,
     };
 })();
+
+/***/ })
+
+}]);
+//# sourceMappingURL=391.index.js.map

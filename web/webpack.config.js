@@ -15,7 +15,8 @@ module.exports = {
     }
   ]},
   output: {
-    filename: 'index.[contenthash].js',
+    //filename: 'index.[contenthash].js',
+    filename: 'index.js',
     path: path.resolve(__dirname, 'docs')
   },
   performance: {
