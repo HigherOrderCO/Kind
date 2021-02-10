@@ -1,3 +1,3 @@
 module.exports = {
-  'Moonad.Demo': import('./Moonad.Demo.js'),
+  'Web.Demo': import('./Web.Demo.js'),
 }

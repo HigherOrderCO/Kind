@@ -2737,7 +2737,7 @@ module.exports = class AppPlay extends Component {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = {
-  'Moonad.Demo': __webpack_require__.e(/* import() */ 391).then(__webpack_require__.t.bind(__webpack_require__, 391, 23)),
+  'Web.Demo': __webpack_require__.e(/* import() */ 987).then(__webpack_require__.t.bind(__webpack_require__, 987, 23)),
 }
 
 
@@ -2856,7 +2856,7 @@ module.exports = {
 /******/ 	/* webpack/runtime/load script */
 /******/ 	(() => {
 /******/ 		var inProgress = {};
-/******/ 		var dataWebpackPrefix = "moonad-web:";
+/******/ 		var dataWebpackPrefix = "formality-web:";
 /******/ 		// loadScript function to load a script via script tag
 /******/ 		__webpack_require__.l = (url, done, key, chunkId) => {
 /******/ 			if(inProgress[url]) { inProgress[url].push(done); return; }
@@ -3019,7 +3019,7 @@ module.exports = {
 /******/ 		
 /******/ 		}
 /******/ 		
-/******/ 		var chunkLoadingGlobal = self["webpackChunkmoonad_web"] = self["webpackChunkmoonad_web"] || [];
+/******/ 		var chunkLoadingGlobal = self["webpackChunkformality_web"] = self["webpackChunkformality_web"] || [];
 /******/ 		chunkLoadingGlobal.forEach(webpackJsonpCallback.bind(null, 0));
 /******/ 		chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 /******/ 		
