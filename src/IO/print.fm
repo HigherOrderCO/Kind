@@ -1,3 +1,2 @@
 IO.print(text: String): IO(Unit)
-  IO.ask<Unit>("print", text, (skip)
-  IO.end<Unit>(Unit.new))
+  IO.put_string(text | "\n")
