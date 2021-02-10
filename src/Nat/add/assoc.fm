@@ -1,0 +1,8 @@
+Nat.add.assoc(a: Nat, b: Nat, c: Nat)
+ : ((a + b) + c) == a + (b + c)
+ case a{
+   zero: refl
+   succ: 
+    let h=Nat.add.assoc(a.pred, b, c)
+    Equal.apply!!<Nat.add(Nat.add(a.pred,b),c), Nat.add(a.pred,Nat.add(b,c)),Nat.succ>(h)
+ }!

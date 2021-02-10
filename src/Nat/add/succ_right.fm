@@ -1,0 +1,12 @@
+Nat.add.succ_right(a: Nat, b: Nat)
+  : (a + Nat.succ(b)) == Nat.succ(a + b)
+  case a {
+    zero: refl
+    succ:
+      let h = Nat.add.succ_right(a.pred, b)
+      let h1 = Equal.apply!!<Nat.add(a.pred, Nat.succ(b))
+			    ,Nat.succ(Nat.add(a.pred,b))
+			    ,Nat.succ>(h)
+      h1
+
+  }!

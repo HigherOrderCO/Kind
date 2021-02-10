@@ -1,0 +1,5 @@
+Nat.one_neq_zero: 1 != 0
+  (e) 
+    let e = apply(Nat.is_zero, e)
+    let e1 = mirror(e)
+    Bool.true_neq_false(e1)
