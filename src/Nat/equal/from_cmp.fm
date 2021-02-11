@@ -1,0 +1,6 @@
+Nat.equal.from_cmp(a: Nat, b: Nat, e: Nat.cmp(a, b) == Cmp.eql): a == b
+
+  let p0 = apply(Cmp.as_eql, e) :: Cmp.as_eql(Nat.cmp(a, b)) == true
+  let p1 = _ :: if Cmp.as_eql(Nat.cmp(a, b)) then a == b else Empty
+
+  p1 :: rewrite x in (if x then a == b else Empty) with p0

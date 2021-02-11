@@ -1,0 +1,8 @@
+Nat.equal.to_cmp(a: Nat, b: Nat, e: a == b): Nat.cmp(a, b) == Cmp.eql
+  let p0 =
+    case a {
+      zero: refl
+      succ: Nat.equal.to_cmp(a.pred, a.pred, refl)
+    }! 
+
+  p0 :: rewrite x in Nat.cmp(a, x) == Cmp.eql with e
