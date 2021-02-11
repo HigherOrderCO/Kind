@@ -1,4 +1,5 @@
 IO.prompt(text: String): IO(String)
-  IO.ask<String>("print", text, (skip)
-  IO.ask<String>("get_line", "", (line)
-  IO.end<String>(line)))
+  do IO {
+    IO.put_string(text)
+    IO.get_line
+  }
