@@ -1,0 +1,3 @@
+Equal.right<A: Type, x: A, a: A, b: A>(r: Equal(A, x, a), s: Equal(A, x, b))
+: Equal(A, a, b)
+  Equal.chain<A, a, x, b>(Equal.mirror<A, x, a>(r), s)

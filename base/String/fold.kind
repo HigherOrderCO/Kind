@@ -1,0 +1,6 @@
+String.fold(xs: String) : <P: Type> -> P -> (Char -> P -> P) -> P
+  <P> (nil, cons)
+  case xs{
+    nil : nil
+    cons: cons(xs.head, String.fold(xs.tail)<P>(nil, cons))
+  }

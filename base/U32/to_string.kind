@@ -1,0 +1,2 @@
+U32.to_string(n: U32): String
+  Nat.to_string_base(10, U32.to_nat(n))

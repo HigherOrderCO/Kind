@@ -1,0 +1,8 @@
+Nat.half(n: Nat): Nat
+  case n {
+    zero: Nat.zero,
+    succ: case n.pred {
+      zero: Nat.zero,
+      succ: Nat.succ(Nat.half(n.pred.pred))
+    }
+  }

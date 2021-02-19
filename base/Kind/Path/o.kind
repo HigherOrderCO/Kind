@@ -1,0 +1,2 @@
+Kind.Path.o(path: Kind.Path): Kind.Path
+  (x) path(Bits.o(x))

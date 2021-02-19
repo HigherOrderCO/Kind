@@ -1,0 +1,2 @@
+Kind.Parser.add: Nat -> Kind.Term -> Parser(Kind.Term)
+  Kind.Parser.op("+", "Nat.add")

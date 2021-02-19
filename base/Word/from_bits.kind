@@ -1,0 +1,9 @@
+Word.from_bits(size: Nat, bits: Bits): Word(size)
+  case size {
+    zero: Word.e,
+    succ: case bits {
+      e: Word.o<size.pred>(Word.from_bits(size.pred, Bits.e)),
+      o: Word.o<size.pred>(Word.from_bits(size.pred, bits.pred)),
+      i: Word.i<size.pred>(Word.from_bits(size.pred, bits.pred))
+    } : Word(Nat.succ(size.pred))
+  } : Word(size)

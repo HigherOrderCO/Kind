@@ -1,0 +1,5 @@
+Nat.to_string(n: Nat): String
+  case n {
+    zero: String.cons(Char.parse("z"), String.nil),
+    succ: String.cons(Char.parse("s"), Nat.to_string(n.pred))
+  }

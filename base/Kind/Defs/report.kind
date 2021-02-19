@@ -1,0 +1,59 @@
+Kind.Defs.report(defs: Kind.Defs, names: List(Kind.Name)): String
+  let types = Kind.Defs.report.types(defs, names)
+  let errors = Kind.Defs.report.errors(defs)
+  let errors = case errors {
+    nil  : "All terms check."
+    cons : errors
+  }
+  types | "\n" | errors
+    
+//Kind.Defs.report.remove_newline(str: String): String
+  //let len = String.length!(str)
+  //if String.eql(String.slice(len - 1, len) 
+  //if 
+
+Kind.Defs.report.errors(defs: Kind.Defs): String
+  let errors = ""
+  for key in Map.keys!(defs) with errors:
+    let name = Kind.Name.from_bits(key)
+    case Kind.get!(name, defs) as got {
+      none:
+        errors
+      some:
+        open got.value
+        case got.value.stat {
+          init: errors
+          wait: errors
+          done: errors
+          fail: case got.value.stat.errors {
+            nil:
+              errors
+            cons:
+              let name_str = got.value.name
+              let rel_errs = Kind.Error.relevant(got.value.stat.errors, Bool.false)
+              for err in rel_errs with errors:
+                let err_msg = Kind.Error.show(err, defs)
+                let ori_msg = case Kind.Error.origin(err) as origin {
+                  none:
+                    ""
+                  some:
+                    open origin.value
+                    let inside = "Inside '" | got.value.file | "':\n"
+                    let source = Kind.highlight(got.value.code, origin.value.fst, origin.value.snd)
+                    inside | source | "\n"
+                }
+                errors | err_msg | ori_msg | "\n"
+          }
+        }
+    }
+
+Kind.Defs.report.types(defs: Kind.Defs, names: List(Kind.Name)): String
+  let types = ""
+  for name in names with types:
+    case Kind.get!(name, defs) as got {
+      none:
+        types
+      some:
+        open got.value
+        types | name | ": " | Kind.Term.show(got.value.type) | "\n"
+    }

@@ -1,0 +1,2 @@
+Nat.to_f64(s: Bool, a: Nat, b: Nat): F64
+  Nat.to_f64(s, a, b)

@@ -1,0 +1,14 @@
+Kind.Term.desugar_cse.motive(
+  wyth: List(Kind.Def),
+  moti: Kind.Term,
+): Kind.Term
+  case wyth {
+    cons: case wyth.head {
+      new:
+        def all_name = wyth.head.name;
+        def all_xtyp = wyth.head.type;
+        def all_body = (s,x) Kind.Term.desugar_cse.motive(wyth.tail, moti);
+        Kind.Term.all(Bool.false, "", all_name, all_xtyp, all_body)
+    },
+    nil: moti,
+  }

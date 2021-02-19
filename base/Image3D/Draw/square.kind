@@ -1,0 +1,22 @@
+Image3D.Draw.square(
+  x: U32,
+  y: U32,
+  z: U32,
+  w: U32,
+  h: U32,
+  col: U32 -> U32 -> Col32,
+  img: Image3D,
+): Image3D
+  let siz = U32.mul(w, h)
+  let w_2 = U32.div(w, 2u)
+  let h_2 = U32.div(h, 2u)
+  U32.for!(img, 0u, siz, (idx, pix)
+    let v_x = U32.mod(idx,w)
+    let v_y = U32.div(idx,h)
+    let p_x = U32.sub(U32.add(x,v_x),w_2) // pixel x
+    let p_y = U32.sub(U32.add(y,v_y),h_2) // pixel y
+    let pos = Pos32.new(p_x, p_y, z) // pixel pos (forms a square)
+    let col = col(v_x, v_y)
+    let pix = Image3D.push(pos, col, pix)
+    pix)
+

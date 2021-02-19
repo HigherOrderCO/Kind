@@ -1,0 +1,22 @@
+Kind.Parser.forin: Parser(Kind.Term)
+  do Parser {
+    var init = Kind.Parser.init;
+    Kind.Parser.text("for ");
+    var elem = Kind.Parser.name1;
+    Kind.Parser.text("in");
+    var list = Kind.Parser.term;
+    Kind.Parser.text("with");
+    var name = Kind.Parser.name1;
+    Kind.Parser.text(":");
+    var loop = Kind.Parser.term;
+    var orig = Kind.Parser.stop(init);
+    let term = Kind.Term.ref("List.for");
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, list);
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, Kind.Term.ref(name));
+    let lamb = Kind.Term.lam(elem, (i) Kind.Term.lam(name, (x) loop));
+    let term = Kind.Term.app(term, lamb);
+    let term = Kind.Term.let(name, term, (x) Kind.Term.ref(name));
+    return Kind.Term.ori(orig, term);
+  }

@@ -1,0 +1,4 @@
+Mons.Game.update_obj(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
+  open game
+  let map = Mons.Map.set(pos, idx, obj, game.map)
+  Mons.Game.set_map(map, game)

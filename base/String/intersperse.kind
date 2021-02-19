@@ -1,0 +1,8 @@
+String.intersperse(sep: Char, xs: String): String
+  case xs{
+  nil : String.nil
+  cons: case xs.tail{
+    nil : String.pure(xs.head)
+    cons: String.cons(xs.head,String.cons(sep,String.intersperse(sep,xs.tail)))
+    }
+  }

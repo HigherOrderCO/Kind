@@ -1,0 +1,8 @@
+String.pad_right(size: Nat, chr: Char, str: String): String
+  case size {
+    zero: str,
+    succ: case str {
+      nil: String.cons(chr, String.pad_right(size.pred, chr, "")),
+      cons: String.cons(str.head, String.pad_right(size.pred, chr, str.tail)),
+    }
+  }

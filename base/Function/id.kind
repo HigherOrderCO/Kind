@@ -1,0 +1,2 @@
+Function.id<A: Type>(x: A): A
+  x

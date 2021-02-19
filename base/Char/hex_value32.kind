@@ -1,0 +1,2 @@
+Char.hex_value32(chr: Char): U32
+  U16.to_u32(Char.hex_value16(chr))

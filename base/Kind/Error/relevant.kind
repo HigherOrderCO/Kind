@@ -1,0 +1,29 @@
+Kind.Error.relevant(errors: List(Kind.Error), got: Bool): List(Kind.Error)
+  case errors {
+    nil:
+      List.nil<Kind.Error>,
+    cons:
+      let keep = case errors.head {
+        type_mismatch: Bool.not(got),
+        show_goal: Bool.true,
+        waiting: Bool.false,
+        indirect: Bool.false,
+        patch: Bool.false,
+        undefined_reference: Bool.not(got),
+        cant_infer: Bool.not(got),
+      };
+      let got = case errors.head {
+        type_mismatch: Bool.true,
+        show_goal: got,
+        waiting: got,
+        indirect: got,
+        patch: got,
+        undefined_reference: Bool.true,
+        cant_infer: got,
+      };
+      let tail = Kind.Error.relevant(errors.tail, got);
+      if keep then
+        List.cons!(errors.head, tail)
+      else
+        tail
+  }

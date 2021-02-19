@@ -1,0 +1,9 @@
+F64.V3.len(v: F64.V3): F64
+  open v 
+  let sqr  = F64.0
+  let sqr  = F64.add(sqr, F64.mul(v.x, v.x))
+  let sqr  = F64.add(sqr, F64.mul(v.y, v.y))
+  let sqr  = F64.add(sqr, F64.mul(v.z, v.z))
+  let expo = F64.div(F64.1, F64.add(F64.1, F64.1))
+  let sqr  = F64.pow(sqr, expo)
+  sqr

@@ -1,0 +1,125 @@
+# Kind
+
+A cute proof and programming language.
+
+Usage
+-----
+
+1. Install using the JavaScript release:
+
+    ```bash
+    npm i -g kind-lang                             # install
+    git clone https://github.com/uwu-tech/kind     # clone base libs
+    cd kind/base                                   # enters base dir
+    kind Main                                      # type-checks Main.kind
+    kind Main --run                                # runs Main from Main.kind
+    ```
+
+*Right now, you must be at `kind/base` to use the language.*
+
+Examples
+--------
+
+### A 'Hello, world!'
+
+```c
+Main: IO(Unit)
+  do IO {
+    IO.print("Hello, world!")
+  }
+```
+
+### Some algorithms
+
+```c
+// List sum using recursion
+sum(list: List(Nat)): Nat
+  case list {
+    nil  : 0
+    cons : list.head + sum(list.tail)
+  }
+
+// List sum using a fold
+sum(list: List(Nat)): Nat
+  List.fold!(list)!(0, Nat.add)
+
+// List sum using a loop
+sum(list: List(Nat)): Nat
+  let sum = 0
+  for x in list:
+    sum = x + sum
+  sum
+```
+
+### Some types
+
+```c
+// A struct
+type User {
+  new(name: String, birth: Date, avatar: Image)
+}
+
+// A simple pair
+type Pair <A: Type> <B: Type> {
+  new(fst: A, snd: B)
+}
+
+// A dependent pair
+type Sigma <A: Type> <B: A -> Type> {
+  new(fst: A, snd: B(fst))
+}
+
+// A list
+type List <A: Type> {
+  nil
+  cons(head: A, tail: List(A))
+}
+
+// A list with a statically known size
+type Vector <A: Type> ~ (size: Nat) {
+  nil                                              ~ (size: 0) 
+  cons(size: Nat, head: Nat, tail: Vector(A,size)) ~ (size: 1 + size)
+}
+
+// The propositional equality
+type Equal <A: Type> <a: A> ~ (b: A) {
+  refl ~ (b: a)
+}
+```
+
+### Some proofs
+
+```
+... TODO ...
+```
+
+Resources
+---------
+
+- Syntax reference: [SYNTAX.md](SYNTAX.md).
+
+- Theorem proving tutorial: [THEOREMS.md](THEOREMS.md).
+
+- Base library: [base](https://github.com/uwu-tech/Kind/tree/master/base).
+
+- [Telegram chat](https://t.me/formality_lang)! 
+
+- Discord server (TODO)
+
+[trusted core]: https://github.com/moonad/FormCoreJS
+
+[FormCore-to-Haskell]: https://github.com/moonad/FormCoreJS/blob/master/FmcToHs.js
+
+[kind.js]: https://github.com/uwu-tech/Kind/blob/master/bin/js/base/kind.js
+
+[Agda]: https://github.com/agda/agda
+
+[Idris]: https://github.com/idris-lang/Idris-dev
+
+[Coq]: https://github.com/coq/coq
+
+[Lean]: https://github.com/leanprover/lean
+
+[Absal]: https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07
+
+[JavaScript compiler]:https://github.com/moonad/FormCoreJS/blob/master/FmcToJs.js

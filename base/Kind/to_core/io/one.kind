@@ -1,0 +1,16 @@
+Kind.to_core.io.one(name: String): IO(String)
+  do IO {
+    var new_defs = Kind.Synth.one(name, Map.new!);
+    let defs = case new_defs {
+      none: Map.new!,
+      some: new_defs.value,
+    };
+    let defs = Map.map!!(
+      (defn) 
+        open defn
+        let term = Kind.Term.inline(defn.term, defs);
+        let type = Kind.Term.inline(defn.type, defs);
+        Kind.Def.new(defn.file, defn.code, defn.orig, defn.name, term, type, defn.isct, defn.arit, defn.stat)
+      , defs);
+    return Kind.Defs.core(defs);
+  }

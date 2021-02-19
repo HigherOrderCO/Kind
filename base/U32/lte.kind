@@ -1,0 +1,4 @@
+U32.lte(a: U32, b: U32): Bool
+  open a
+  open b
+  Word.lte!(a.value, b.value)

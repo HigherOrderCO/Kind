@@ -1,0 +1,7 @@
+Nat.mul.one_left(a: Nat): (1 * a) == a
+  case a{
+    zero: refl
+    succ: 
+      let h = Nat.mul.one_left(a.pred)
+      Equal.apply!!<Nat.mul(1,a.pred),a.pred,Nat.succ>(h)
+  }!

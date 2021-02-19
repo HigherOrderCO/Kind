@@ -1,0 +1,2 @@
+Kind.Name.eql(a: Kind.Name, b: Kind.Name): Bool
+  String.eql(a, b)

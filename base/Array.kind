@@ -1,0 +1,4 @@
+type Array<A: Type> ~ (depth: Nat) {
+  tip(value: A)                                             ~ (depth: Nat.zero),
+  tie<depth: Nat>(lft: Array(A,depth), rgt: Array(A,depth)) ~ (depth: Nat.succ(depth))
+}

@@ -1,0 +1,4 @@
+Nat.succ_neq_zero(a: Nat): Nat.succ(a) != 0
+ (e)
+  let h = apply(Nat.is_zero, e)
+  Bool.true_neq_false(mirror(h))

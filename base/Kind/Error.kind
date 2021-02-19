@@ -1,0 +1,41 @@
+type Kind.Error {
+  // Two types do not match
+  type_mismatch(
+    origin: Maybe(Pair(Nat,Nat)),
+    expected: Either(String, Kind.Term),
+    detected: Either(String, Kind.Term),
+    context: Kind.Context,
+  ),
+  // Found a goal to be shown
+  show_goal(
+    name: Kind.Name,
+    dref: List(Bits),
+    verb: Bool,
+    goal: Maybe(Kind.Term),
+    context: Kind.Context,
+  ),
+  // Waits for another term's type checking
+  waiting(
+    name: Kind.Name,
+  ),
+  // Error in a dependency
+  indirect(
+    name: Kind.Name,
+  ),
+  // Patch the original term
+  patch(
+    path: Bits,
+    term: Kind.Term,
+  ),
+  // Some reference isn't found
+  undefined_reference(
+    origin: Maybe(Pair(Nat,Nat)),
+    name: Kind.Name,
+  ),
+  // A lambda without a type
+  cant_infer(
+    origin: Maybe(Pair(Nat,Nat)),
+    term: Kind.Term,
+    context: Kind.Context,
+  ),
+}

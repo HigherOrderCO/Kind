@@ -1,0 +1,9 @@
+Kind.Parser.char: Parser(Kind.Term)
+  do Parser {
+    var init = Kind.Parser.init;
+    Kind.Parser.text("'");
+    var chrx = Kind.Parser.char.single;
+    Parser.text("'");
+    var orig = Kind.Parser.stop(init);
+    return Kind.Term.ori(orig, Kind.Term.chr(chrx));
+  }

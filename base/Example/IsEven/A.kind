@@ -1,0 +1,2 @@
+Example.IsEven.A(n: Nat): Type
+  {x: Nat} Nat.is_even(x) == true

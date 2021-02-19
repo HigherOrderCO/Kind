@@ -1,0 +1,3 @@
+type Queue<A: Type> {
+  new(front: List(A), size_front: Nat, rear: List(A), size_rear: Nat)
+}

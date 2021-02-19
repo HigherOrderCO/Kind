@@ -1,0 +1,56 @@
+Kind.Term.expand_ct(term: Kind.Term, defs: Kind.Defs, arity: Nat): Kind.Term
+  case term {
+    ref:
+      case Kind.get!(term.name, defs) as got {
+        none:
+          Kind.Term.ref(term.name)
+        some:
+          open got.value
+          if Bool.and(got.value.isct, Nat.gtn(arity, got.value.arit)) then
+            got.value.term
+          else
+            Kind.Term.ref(term.name)
+      }
+    var:
+      Kind.Term.var(term.name, term.indx),
+    typ:
+      Kind.Term.typ,
+    all: 
+      def xtyp = Kind.Term.expand_ct(term.xtyp, defs, 0);
+      def body = (s,x) Kind.Term.expand_ct(term.body(s,x), defs, 0);
+      Kind.Term.all(term.eras, term.self, term.name, xtyp, body),
+    lam:
+      def body = (x) Kind.Term.expand_ct(term.body(x), defs, 0);
+      Kind.Term.lam(term.name, body),
+    app:
+      def func = Kind.Term.expand_ct(term.func, defs, Nat.succ(arity));
+      def argm = Kind.Term.expand_ct(term.argm, defs, 0);
+      Kind.Term.app(func, argm),
+    let:
+      def expr = Kind.Term.expand_ct(term.expr, defs, 0);
+      def body = (x) Kind.Term.expand_ct(term.body(x), defs, 0);
+      Kind.Term.let(term.name, expr, body),
+    def:
+      def expr = Kind.Term.expand_ct(term.expr, defs, 0);
+      def body = (x) Kind.Term.expand_ct(term.body(x), defs, 0);
+      Kind.Term.def(term.name, expr, body),
+    ann:
+      def term = Kind.Term.expand_ct(term.term, defs, 0);
+      def type = Kind.Term.expand_ct(term.type, defs, 0);
+      Kind.Term.ann(term.done, term, type),
+    gol:
+      Kind.Term.gol(term.name, term.dref, term.verb),
+    hol:
+      Kind.Term.hol(term.path),
+    nat:
+      Kind.Term.nat(term.natx),
+    chr:
+      Kind.Term.chr(term.chrx),
+    str:
+      Kind.Term.str(term.strx),
+    cse:
+      term,
+    ori:
+      def expr = Kind.Term.expand_ct(term.expr, defs, 0);
+      Kind.Term.ori(term.orig, term.expr),
+  }

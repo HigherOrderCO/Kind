@@ -1,0 +1,4 @@
+Equal.apply<A: Type, B: Type, a: A, b: A, f: A -> B>(e: Equal(A,a,b)): Equal(B, f(a), f(b))
+  case e {
+    refl: Equal.refl<B, f(a)>
+  } : Equal(B, f(a), f(e.b))

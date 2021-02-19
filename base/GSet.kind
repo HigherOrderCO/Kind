@@ -1,0 +1,4 @@
+type GSet <A: Type> {
+  tip,
+  bin(size: Nat, val: A, left: GSet(A), right: GSet(A))
+}

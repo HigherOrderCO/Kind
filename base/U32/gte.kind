@@ -1,0 +1,4 @@
+U32.gte(a: U32, b: U32): Bool
+  open a
+  open b
+  Word.gte!(a.value, b.value)

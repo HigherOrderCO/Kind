@@ -1,0 +1,8 @@
+Kind.Parser.binder: Parser(List(Kind.Binder))
+  do Parser {
+    var lists = Parser.many1!(Parser.first_of!([
+      Kind.Parser.binder.homo(Bool.true),
+      Kind.Parser.binder.homo(Bool.false),
+    ]));
+    return List.flatten!(lists);
+  }

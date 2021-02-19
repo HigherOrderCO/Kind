@@ -1,0 +1,8 @@
+String.drop(n: Nat, xs: String):  String
+  case n{
+  zero: xs
+  succ: case xs{
+      nil : String.nil
+      cons: String.drop(n.pred,xs.tail)
+    }
+  }

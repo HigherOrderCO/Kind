@@ -1,0 +1,5 @@
+List.null<A: Type>(xs: List(A)) : Bool
+  case xs {
+    nil : Bool.true,
+    cons: Bool.false
+  }

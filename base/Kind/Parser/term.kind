@@ -1,0 +1,43 @@
+Kind.Parser.term: Parser(Kind.Term)
+  do Parser {
+    var init = Kind.Parser.init;
+    var term = Parser.first_of!([
+      Kind.Parser.type,
+      Kind.Parser.forall,
+      Kind.Parser.lambda,
+      Kind.Parser.lambda.erased,
+      Kind.Parser.lambda.nameless,
+      Kind.Parser.parenthesis,
+      Kind.Parser.letforrange.u32,
+      Kind.Parser.letforin,
+      Kind.Parser.let,
+      Kind.Parser.get,
+      Kind.Parser.def,
+      Kind.Parser.if,
+      Kind.Parser.char,
+      Kind.Parser.string,
+      Kind.Parser.pair,
+      Kind.Parser.sigma.type,
+      Kind.Parser.some,
+      Kind.Parser.apply,
+      Kind.Parser.mirror,
+      Kind.Parser.list,
+      Kind.Parser.log,
+      Kind.Parser.forrange.u32,
+      Kind.Parser.forrange.u32.2,
+      Kind.Parser.forin,
+      Kind.Parser.forin.2,
+      Kind.Parser.do,
+      Kind.Parser.case,
+      Kind.Parser.open,
+      Kind.Parser.goal,
+      Kind.Parser.hole,
+      Kind.Parser.u8,
+      Kind.Parser.u16,
+      Kind.Parser.u32,
+      Kind.Parser.u64,
+      Kind.Parser.nat,
+      Kind.Parser.reference,
+    ]);
+    Kind.Parser.suffix(init, term);
+  }

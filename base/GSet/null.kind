@@ -1,0 +1,5 @@
+GSet.null<A: Type>(set: GSet(A)): Bool
+  case set {
+    tip: Bool.true,
+    bin: Bool.false
+  }

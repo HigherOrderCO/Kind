@@ -1,0 +1,5 @@
+Nat.gcd.zero_right(a: Nat): Nat.gcd(a,0) == a
+  case a {
+    zero: refl
+    succ: refl
+  }!

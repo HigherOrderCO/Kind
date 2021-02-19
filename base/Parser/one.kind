@@ -1,0 +1,5 @@
+Parser.one: Parser(Char)
+  (idx,code) case code {
+    nil: Parser.Reply.error<Char>(idx, code, "Unexpected end of file."),
+    cons: Parser.Reply.value<Char>(Nat.succ(idx), code.tail, code.head),
+  }

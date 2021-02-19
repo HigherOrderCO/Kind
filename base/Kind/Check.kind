@@ -1,0 +1,6 @@
+type Kind.Check<V: Type> {
+  result(
+    value: Maybe(V), // the returned value
+    errors: List(Kind.Error), // a list of errors
+  ),
+}

@@ -1,0 +1,8 @@
+List.delete_at<A: Type>(idx: Nat, list: List(A)): List(A)
+  case idx{
+    zero: List.tail<A>(list)
+    succ: case list{
+      nil : list
+      cons: List.cons<A>(list.head, List.delete_at<A>(idx.pred, list.tail))
+    }
+  }

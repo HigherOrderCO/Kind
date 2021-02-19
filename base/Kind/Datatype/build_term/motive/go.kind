@@ -1,0 +1,25 @@
+Kind.Datatype.build_term.motive.go(
+  type: Kind.Datatype,
+  name: Kind.Name,
+  inds: List(Kind.Binder),
+): Kind.Term
+  case inds {
+    cons: case inds.head {
+      new:
+        def ind_eras = inds.head.eras;
+        def ind_name = inds.head.name;
+        def ind_xtyp = inds.head.term;
+        def ind_body = (s,x) Kind.Datatype.build_term.motive.go(type, name, inds.tail);
+        Kind.Term.all(ind_eras, "", ind_name, ind_xtyp, ind_body),
+    },
+    nil:
+      case type {
+        new:
+          let slf = Kind.Term.ref(name);
+          let slf = for var in type.pars:
+            Kind.Term.app(slf, Kind.Term.ref(case var { new: var.name }));
+          let slf = for var in type.inds:
+            Kind.Term.app(slf, Kind.Term.ref(case var { new: var.name }));
+          Kind.Term.all(Bool.false, "", "", slf, (s,x) Kind.Term.typ)
+      }
+  }

@@ -1,0 +1,2 @@
+Word.and<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.and<size>(a,b)

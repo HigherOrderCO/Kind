@@ -1,0 +1,11 @@
+GSet.split_ltn<A: Type>(cmp: A -> A -> Cmp, cut: A, set: GSet(A)): GSet(A)
+  case set {
+    tip: set,
+    bin: case cmp(cut, set.val) {
+      ltn: GSet.split_ltn!(cmp, cut, set.left),
+      eql: set.left,
+      gtn: 
+        let right = GSet.split_ltn!(cmp, cut, set.right)
+        GSet.concat3!(cmp, set.val, set.left, right)
+    }
+  }

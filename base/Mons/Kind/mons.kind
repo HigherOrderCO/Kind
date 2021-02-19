@@ -1,0 +1,14 @@
+type Mons.Kind.mons{
+  HERO,
+  MAGE,
+  BEHOLDER,
+  ZOIO,
+  CYCLOPE,
+  POISOLICK,
+  TROWL,
+  MIMIC,
+  MIMIC2,
+  AZULA,
+  EMERELDER,
+  EMERELDER2,
+}

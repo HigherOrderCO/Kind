@@ -1,0 +1,5 @@
+type F64.Ordering {
+  LT,
+  EQ,
+  GT
+}

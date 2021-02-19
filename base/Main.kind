@@ -1,0 +1,8 @@
+Main: IO(Unit)
+  do IO {
+    IO.print("Hello, world!")
+
+    var name = IO.prompt("What is your name? ")
+
+    IO.print("Hello, " | name | "!")
+  }

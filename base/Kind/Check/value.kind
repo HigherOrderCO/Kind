@@ -1,0 +1,4 @@
+Kind.Check.value<A: Type>(chk: Kind.Check(A)): Maybe(A)
+  case chk {
+    result: chk.value
+  }

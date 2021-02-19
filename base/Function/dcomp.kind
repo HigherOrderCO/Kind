@@ -1,0 +1,2 @@
+Function.dcomp<A:Type, B:Type, C:B->Type>(g:(b:B)->C(b), f:A -> B, x:A): C(f(x))
+  g(f(x))

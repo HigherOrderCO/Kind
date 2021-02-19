@@ -1,0 +1,4 @@
+type List <A: Type> {
+  nil,
+  cons(head: A, tail: List(A)),
+}

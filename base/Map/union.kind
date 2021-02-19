@@ -1,0 +1,11 @@
+Map.union<A: Type>(a: Map(A), b: Map(A)): Map(A)
+  case a {
+    new: b,
+    tie: case b {
+      new: a,
+      tie: case a.val {
+        none: Map.tie!(b.val, Map.union!(a.lft,b.lft), Map.union!(a.rgt,b.rgt)),
+        some: Map.tie!(a.val, Map.union!(a.lft,b.lft), Map.union!(a.rgt,b.rgt))
+      }
+    }
+  }

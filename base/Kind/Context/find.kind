@@ -1,0 +1,5 @@
+Kind.Context.find(name: Kind.Name, ctx: Kind.Context): Maybe(Kind.Term)
+  //log("->", name)
+  let {name, skip} = Kind.Context.get_name_skips(name)
+  //log("~>", name, Nat.show(skip))
+  Kind.Context.find.go(name, skip, ctx)

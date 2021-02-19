@@ -1,0 +1,4 @@
+Mons.Object.set_bag(bag: List(Mons.Object), obj: Mons.Object): Mons.Object
+  open obj
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, bag, 
+    obj.mon, obj.bos, obj.cap, obj.idl, obj.eff)

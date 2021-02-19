@@ -1,0 +1,28 @@
+Kind.go(file_names: List(String)): IO(Unit)
+  case file_names {
+    nil: do IO {
+      return Unit.new
+    }
+    cons: do IO {
+      let file = file_names.head
+      var code = IO.get_file(file)
+      let defs = Kind.Defs.read(file, code, Map.new!)
+      case defs {
+        left:
+          IO.print("bad parse")
+        right: do IO {
+          let list = Map.to_list!(defs.value)
+          let files = List.mapped!(list)!((kv)
+            let {key, val} = kv
+            open val
+            let name = Kind.Name.from_bits(key)
+            let {i,j} = val.orig
+            let code = String.slice(i, j, code)
+            {if val.isct then "" else name, code})
+          IO.print("saving " | file_names.head)
+          Kind.save(files)
+          Kind.go(file_names.tail)
+        }
+      }
+    }
+  }

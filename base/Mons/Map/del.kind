@@ -1,0 +1,4 @@
+Mons.Map.del(pos: Pos32, idx: U32, map: Mons.Map): Mons.Map
+  let objs = Mons.Map.get_list(pos, map)
+  let objs = List.delete_at.u32!(idx, objs)
+  Mons.Map.set_list(pos, objs, map)

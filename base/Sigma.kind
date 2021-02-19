@@ -1,0 +1,3 @@
+type Sigma (A: Type) (B: A -> Type) {
+  new(fst: A, snd: B(fst))
+}

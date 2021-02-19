@@ -1,0 +1,6 @@
+Buffer32.set(idx: U32, val: U32, buf: Buffer32): Buffer32
+  let {dep,arr} = buf
+  open idx
+  let idx = Word.trim<32>(dep, idx.value)
+  def arr = Array.set<U32, dep>(idx, val, arr)
+  Buffer32.new(dep, arr)

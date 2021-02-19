@@ -1,0 +1,2 @@
+Either.functor<A: Type>: Functor(Either(A))
+  Functor.new<Either(A)>(Either.map<A>)

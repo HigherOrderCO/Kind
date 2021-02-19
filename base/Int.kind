@@ -1,0 +1,4 @@
+Int: Type
+  int<P: Int -> Type> ->
+  (new: (x: Nat) -> (y: Nat) -> P(Int.new(x, y))) ->
+  P(int)

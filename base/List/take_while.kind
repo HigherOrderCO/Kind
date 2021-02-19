@@ -1,0 +1,8 @@
+List.take_while<A: Type>(f: A -> Bool, xs: List(A)) : List(A)
+  case xs{
+    nil : List.nil!
+    cons: case f(xs.head){
+      true : List.cons!(xs.head,List.take_while!(f, xs.tail))
+      false: List.nil!
+    }
+  }

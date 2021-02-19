@@ -1,0 +1,27 @@
+Kind.Constructor.build_term.go(
+  type: Kind.Datatype,
+  ctor: Kind.Constructor,
+  name: Kind.Name,
+  pars: List(Kind.Binder),
+  args: List(Kind.Binder),
+): Kind.Term
+  case pars {
+    cons: case pars.head {
+      new:
+        def par_name = pars.head.name;
+        def par_body = (x) Kind.Constructor.build_term.go(type, ctor, name, pars.tail, args);
+        Kind.Term.lam(par_name, par_body),
+    },
+    nil: case args {
+      cons: case args.head {
+        new:
+          def ctr_name = args.head.name;
+          def ctr_body = (x) Kind.Constructor.build_term.go(type, ctor, name, pars, args.tail);
+          Kind.Term.lam(ctr_name, ctr_body),
+      },
+      nil:
+        def lam_name = Kind.Name.read("P");
+        def lam_body = (x) Kind.Constructor.build_term.opt(type, ctor);
+        Kind.Term.lam(lam_name, lam_body),
+    }
+  }

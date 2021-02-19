@@ -1,0 +1,22 @@
+Kind.SmartMotive.make(
+  name: Kind.Name,
+  expr: Kind.Term, 
+  type: Kind.Term,
+  moti: Kind.Term,
+  lv  : Nat,
+  defs: Kind.Defs,
+): Kind.Term
+  let vals = Kind.SmartMotive.vals(expr,type,defs);
+  let nams = Kind.SmartMotive.nams(name,type,defs);
+  let subs = List.zip!!(nams,vals);
+  //let skip = Debug.log!(String.flatten(["-expr: ", Kind.Term.show(expr)]), (x) Unit.new);
+  //let skip = Debug.log!(String.flatten(["-type: ", Kind.Term.show(type)]), (x) Unit.new);
+  //let skip = Debug.log!(String.flatten(["-type: ", Kind.Term.show(Kind.Term.reduce(type,defs))]), (x) Unit.new);
+  //let skip = Debug.log!(String.flatten(["-vals: ", String.join(", ", List.mapped!(vals)!(Kind.Term.show))]), (x) Unit.new);
+  //let skip = Debug.log!(String.flatten(["-nams: ", String.join(", ", nams)]), (x) Unit.new);
+  //let skip = Debug.log!(String.flatten(["-moti: ", Kind.Term.show(moti)]), (x) Unit.new);
+  let moti = List.fold!(subs)!(moti, (sub,moti) case sub {
+    new: Kind.SmartMotive.replace(moti, sub.snd, Kind.Term.ref(sub.fst), lv),
+  });
+  //let skip = Debug.log!(String.flatten(["+moti: ", Kind.Term.show(moti)]), (x) Unit.new);
+  moti

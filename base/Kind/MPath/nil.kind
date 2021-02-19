@@ -1,0 +1,2 @@
+Kind.MPath.nil: Maybe(Kind.Path)
+  Maybe.some!(Kind.Path.nil)

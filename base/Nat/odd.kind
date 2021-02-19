@@ -1,0 +1,2 @@
+Nat.odd(n: Nat): Bool
+  Nat.eql(Nat.mod(n, 2), 1)

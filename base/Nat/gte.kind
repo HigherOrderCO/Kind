@@ -1,0 +1,8 @@
+Nat.gte(n: Nat, m: Nat): Bool
+  case m {
+    zero: Bool.true,
+    succ: case n {
+      zero: Bool.false,
+      succ: Nat.gte(n.pred, m.pred),
+    }
+  }

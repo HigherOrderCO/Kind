@@ -1,0 +1,6 @@
+Word.pred<size: Nat>(word: Word(Nat.succ(size))): Word(size)
+  case word {
+    e: Word.e,
+     o : word.pred,
+     i : word.pred
+  } : Word(Nat.pred(word.size))

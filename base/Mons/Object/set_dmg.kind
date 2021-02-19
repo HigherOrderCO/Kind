@@ -1,0 +1,4 @@
+Mons.Object.set_dmg(obj: Mons.Object, dmg: U32): Mons.Object
+  open obj 
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg, obj.bag, 
+    obj.mon, obj.bos, obj.cap, obj.idl, obj.eff)

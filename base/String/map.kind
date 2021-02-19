@@ -1,0 +1,5 @@
+String.map(f: Char -> Char, as: String): String
+  case as{
+    nil : String.nil
+    cons: String.cons(f(as.head),String.map(f,as.tail))
+  }

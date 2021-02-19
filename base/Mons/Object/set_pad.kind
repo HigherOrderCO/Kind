@@ -1,0 +1,4 @@
+Mons.Object.set_pad(obj: Mons.Object, pad: Mons.Pad): Mons.Object
+  open obj
+  Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.dmg, obj.bag, 
+    obj.mon, obj.bos, obj.cap, obj.idl, obj.eff)

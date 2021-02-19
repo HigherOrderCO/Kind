@@ -1,0 +1,4 @@
+U32.eql(a: U32, b: U32): Bool
+  open a
+  open b
+  Word.eql!(a.value, b.value)

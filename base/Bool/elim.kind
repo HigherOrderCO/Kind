@@ -1,0 +1,2 @@
+Bool.elim(b: Bool): <P: Bool -> Type> -> P(Bool.true) -> P(Bool.false) -> P(b)
+  <P> (t) (f) b<P>(t, f)

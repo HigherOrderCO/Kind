@@ -1,0 +1,11 @@
+String.remove_start_with.go(xs: String, match: String): String
+  case match{
+    nil : xs
+    cons: case xs{
+      nil : String.nil //xs < match
+      cons: case Char.eql(match.head, xs.head){
+        true : String.remove_start_with.go(xs.tail, match.tail)
+        false: xs.tail
+      }
+    }
+  }

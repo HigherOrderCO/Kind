@@ -1,0 +1,4 @@
+Mons.Map.push(pos: Pos32, obj: Mons.Object, map: Mons.Map): Mons.Map
+  let objs = Mons.Map.get_list(pos, map)
+  let objs = List.cons!(obj, objs)
+  Mons.Map.set_list(pos, objs, map)

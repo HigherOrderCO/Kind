@@ -1,0 +1,8 @@
+Nat.ltn(n: Nat, m: Nat): Bool
+  case m {
+    zero: Bool.false,
+    succ: case n {
+      zero: Bool.true,
+      succ: Nat.ltn(n.pred, m.pred),
+    }
+  }

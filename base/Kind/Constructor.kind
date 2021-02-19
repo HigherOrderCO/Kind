@@ -1,0 +1,7 @@
+type Kind.Constructor {
+  new(
+    name: Kind.Name,
+    args: List(Kind.Binder),
+    inds: List(Kind.Binder),
+  )
+}

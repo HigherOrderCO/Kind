@@ -1,0 +1,4 @@
+U16.lte(a: U16, b: U16): Bool
+  open a
+  open b
+  Word.lte!(a.value, b.value)

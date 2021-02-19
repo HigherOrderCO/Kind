@@ -1,0 +1,5 @@
+String.to_builder.go(string: String, lb: String.Builder) : String.Builder
+  case string{
+    nil : lb
+    cons: String.to_builder.go(string.tail, String.Builder.snoc(string.head, lb))
+  }

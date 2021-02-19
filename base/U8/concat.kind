@@ -1,0 +1,4 @@
+U8.concat(a: U8, b: U8): U16
+  open a
+  open b 
+  U16.new(Word.concat!!(a.value, b.value))

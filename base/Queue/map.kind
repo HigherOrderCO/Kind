@@ -1,0 +1,5 @@
+Queue.map<A: Type, B: Type>(f: A -> B, q: Queue(A)): Queue(B)
+  open q
+  let new_f = List.map!!(f, q.front)
+  let new_r = List.map!!(f, q.rear)
+  Queue.new!(new_f, q.size_front, new_r, q.size_rear)

@@ -1,0 +1,3 @@
+IO.exit: IO(Unit)
+  IO.ask<Unit>("exit", "", (file)
+  IO.end<Unit>(Unit.new))

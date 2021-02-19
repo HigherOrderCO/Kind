@@ -1,0 +1,8 @@
+String.remove_start_with(xs: String, match: String): String
+  case xs{
+    nil : String.nil
+    cons: case String.starts_with(xs, match){
+      true : String.remove_start_with.go(xs, match)
+      false: xs
+    }
+  }

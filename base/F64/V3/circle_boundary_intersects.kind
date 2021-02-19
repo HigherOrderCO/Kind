@@ -1,0 +1,26 @@
+F64.V3.circle_boundary_intersects(c: F64.Circle, b: F64.Boundary): F64
+  open c
+  open b
+  case b.pts {
+   nil: F64.0,
+   cons:
+    let h0 = b.pts.head
+    let t0 = b.pts.tail
+    case t0 {
+     nil: F64.0,
+     cons:
+      let h1 = t0.head
+      let t1 = t0.tail
+      let p0 = h0
+      let p1 = h1 
+      let sg = F64.Segment.new(p0, p1)
+      let cd = F64.V3.point_segment_sqrdist(c.pos, sg)
+      let test = F64.ltn(cd, F64.mul(cd, cd))
+      case test {
+       true: F64.1,
+       false:
+        let boun = F64.Boundary.new(List.cons<F64.V3>(h1, t1))
+        F64.V3.circle_boundary_intersects(c, boun)
+      }
+    }
+  }

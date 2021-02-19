@@ -1,0 +1,4 @@
+F64.lte(a: F64, b: F64): Bool
+  open a 
+  open b 
+  Word.lte<64>(a.word, b.word)

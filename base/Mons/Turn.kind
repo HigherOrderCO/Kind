@@ -1,0 +1,7 @@
+type Mons.Turn{
+  new(
+    exec_hero: Bool, // if actions of the hero will be executed
+    hero_skill: Mons.Skill, // skill used by the first player
+    adve_skill: Mons.Skill, // skill used by the second player
+    play: U32) // number of plays made
+}

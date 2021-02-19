@@ -1,0 +1,4 @@
+type App.Render {
+  txt(text: String)
+  pix(pixs: Image3D)
+}

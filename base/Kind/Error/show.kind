@@ -1,0 +1,67 @@
+Kind.Error.show(error: Kind.Error, defs: Kind.Defs): String
+  case error {
+    type_mismatch: 
+      let expected = case error.expected {
+        left: error.expected.value,
+        right: Kind.Term.show(Kind.Term.normalize(error.expected.value, Map.new!)),
+      };
+      let detected = case error.detected {
+        left: error.detected.value,
+        right: Kind.Term.show(Kind.Term.normalize(error.detected.value, Map.new!)),
+      };
+      String.flatten([
+        "Type mismatch.\n",
+        "- Expected: ", expected, "\n",
+        "- Detected: ", detected, "\n",
+        case error.context {
+          nil : "",
+          cons: String.flatten(["With context:\n", Kind.Context.show(error.context)]),
+        },
+      ]),
+    waiting:
+      String.flatten([
+        "Waiting for '", error.name, "'."
+      ]),
+    indirect:
+      String.flatten([
+        "Error on dependency '", error.name, "'."
+      ]),
+    show_goal:
+      let goal_name = String.flatten(["Goal ?", Kind.Name.show(error.name), ":\n"]);
+      let with_type = case error.goal {
+        none: "",
+        some: 
+          let goal = Kind.Term.expand(error.dref, error.goal.value, defs);
+          String.flatten([
+            "With type: ",
+            if error.verb then
+              Kind.Term.show.go(goal, Maybe.some<Bits -> Bits>((x) x))
+            else
+              Kind.Term.show(goal),
+            "\n",
+          ]),
+      };
+      let with_ctxt = case error.context {
+        nil: "",
+        cons: String.flatten([
+          "With ctxt:\n",
+          Kind.Context.show(error.context),
+        ]),
+      };
+      String.flatten([goal_name, with_type, with_ctxt]),
+    patch:
+      String.flatten([
+        "Patching: ", Kind.Term.show(error.term),
+      ]),
+    undefined_reference: 
+      String.flatten([
+        "Undefined reference: ", Kind.Name.show(error.name), "\n",
+      ]),
+    cant_infer:
+      let term = Kind.Term.show(error.term);
+      let context = Kind.Context.show(error.context);
+      String.flatten([
+        "Can't infer type of: ", term, "\n",
+        "With ctxt:\n", context,
+      ])
+  }

@@ -1,0 +1,5 @@
+Kind.Term.read(code: String): Maybe(Kind.Term)
+  case Kind.Parser.term(0,code) as parsed {
+    error: Maybe.none!,
+    value: Maybe.some!(parsed.val),
+  }

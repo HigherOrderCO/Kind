@@ -1,0 +1,2 @@
+Nat.mul.one_right(a: Nat): (a * 1) == a
+  Nat.add.zero_right(a)

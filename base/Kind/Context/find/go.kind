@@ -1,0 +1,13 @@
+Kind.Context.find.go(name: Kind.Name, skip: Nat, ctx: Kind.Context): Maybe(Kind.Term)
+  case ctx {
+    nil: none,
+    cons:
+      open ctx.head
+      if Kind.Name.eql(name, ctx.head.fst) then
+        case skip {
+          zero: some(ctx.head.snd)
+          succ: Kind.Context.find.go(name, skip.pred, ctx.tail)
+        }
+      else
+        Kind.Context.find.go(name, skip, ctx.tail)
+  }

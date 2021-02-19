@@ -1,0 +1,5 @@
+type Word ~ (size: Nat) {
+  e                              ~ (size: Nat.zero),
+  o<size: Nat>(pred: Word(size)) ~ (size: Nat.succ(size)),
+  i<size: Nat>(pred: Word(size)) ~ (size: Nat.succ(size)),
+}

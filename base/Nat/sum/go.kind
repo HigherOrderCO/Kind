@@ -1,0 +1,5 @@
+Nat.sum.go(n: Nat , r: Nat): Nat //loop//
+  case n {
+    zero: r,
+    succ: Nat.sum.go(n.pred, Nat.add(n, r))
+  }

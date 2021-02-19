@@ -1,0 +1,6 @@
+Kind.Term.unroll_chr.bits(bits: Bits): Kind.Term
+  case bits {
+    e: Kind.Term.ref(Kind.Name.read("Bits.e")),
+    o: Kind.Term.app(Kind.Term.ref(Kind.Name.read("Bits.o")), Kind.Term.unroll_chr.bits(bits.pred)),
+    i: Kind.Term.app(Kind.Term.ref(Kind.Name.read("Bits.i")), Kind.Term.unroll_chr.bits(bits.pred)),
+  }

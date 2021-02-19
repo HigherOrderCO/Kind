@@ -1,0 +1,9 @@
+Kind.Parser.letter: Parser(Kind.Letter)
+  (idx, code) case code {
+    nil: Parser.Reply.error!(idx, code, "Unexpected eof."),
+    cons:
+      if Kind.Name.is_letter(code.head) then
+        Parser.Reply.value!(Nat.succ(idx), code.tail, code.head)
+      else
+        Parser.Reply.error!(idx, code, "Expected letter."),
+  }

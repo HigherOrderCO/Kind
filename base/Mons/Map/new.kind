@@ -1,0 +1,2 @@
+Mons.Map.new: Mons.Map
+  Map.new!

@@ -1,0 +1,9 @@
+Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
+  // let default_pos = Mons.global_scr_mid
+  // let set_pos_lvl1 = 
+  //   ((x: U32, y: U32) Mons.image_to_global(u80, u80, x, y, u1))
+  //   :: U32 -> U32 -> Pos32
+  // let set_pos_lvl2 = 
+  //   ((x: U32, y: U32) Mons.image_to_global(u20, u20, x, y, u2))
+  //   :: U32 -> U32 -> Pos32
+  Mons.Attr.new_neutral([Image3D.empty])

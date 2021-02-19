@@ -1,0 +1,2 @@
+String.reverse(xs: String) : String
+  String.reverse.go(xs,String.nil)

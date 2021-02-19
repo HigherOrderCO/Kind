@@ -1,0 +1,12 @@
+type Mons.Screen{
+  welcome(idx: U32),
+  credits,
+  introduction(step: U32), // step: number identifying the completion of scene
+  intro_select(idx: U32), // idx: used to choose a Mon
+  game(cmd: Char, turn: Mons.Turn), // cmd: movement
+  inventory(idx: U32),
+  capture_mon(
+    idx: U32, // idx of the Mon to be replaced
+    full_bag: Bool),
+  game_over,
+}

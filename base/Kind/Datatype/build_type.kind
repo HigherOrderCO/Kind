@@ -1,0 +1,4 @@
+Kind.Datatype.build_type(type: Kind.Datatype): Kind.Term
+  case type {
+    new: Kind.Datatype.build_type.go(type, type.name, type.pars, type.inds),
+  }

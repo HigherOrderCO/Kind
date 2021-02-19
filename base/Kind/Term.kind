@@ -1,0 +1,85 @@
+type Kind.Term {
+  // A variable bound by another constructor
+  var(
+    name: Kind.Name, // the variable name, used for pretty printing
+    indx: Nat, // the variable bruijn level, used for equality and binding
+  ),
+  // A reference to a top-level definition
+  ref(
+    name: Kind.Name, // the reference name
+  ),
+  // The type of types
+  typ,
+  // The self-dependent function type (self-Pi)
+  all(
+    eras: Bool, // if it is erased at runtime
+    self: Kind.Name, // the term name
+    name: Kind.Name, // the input name
+    xtyp: Kind.Term, // the input type
+    body: Kind.Term -> Kind.Term -> Kind.Term, // the returned type
+  ),
+  // An anonymous function (lambda)
+  lam(
+    name: Kind.Name, // the input name
+    body: Kind.Term -> Kind.Term, // the returned body
+  ),
+  // A function application
+  app(
+    func: Kind.Term, // the function
+    argm: Kind.Term, // the argument
+  ),
+  // A local definition
+  let(
+    name: Kind.Name, // the expression name
+    expr: Kind.Term, // the expression value
+    body: Kind.Term -> Kind.Term, // the body where name=value
+  ),
+  // A local alias
+  def(
+    name: Kind.Name, // the expression name
+    expr: Kind.Term, // the expression value
+    body: Kind.Term -> Kind.Term, // the body where name=value
+  ),
+  // An inline annotation
+  ann(
+    done: Bool, // was this type-checked?
+    term: Kind.Term, // the annotated term
+    type: Kind.Term, // the annotated type
+  ),
+  // A hole to show the goal
+  gol(
+    name: Kind.Name, // the goal's name
+    dref: List(Bits), // a list of labels to expand when displaying it
+    verb: Bool, // show labels of expandable terms?
+  ),
+  // A hole to be auto-filled
+  hol(
+    path: Bits,
+  ),
+  // A natural number
+  nat(
+    natx: Nat,
+  ),
+  // A character
+  chr(
+    chrx: Char,
+  ),
+  // A string
+  str(
+    strx: String,
+  ),
+  // A case-of expression
+  cse(
+    path: Bits,
+    expr: Kind.Term,
+    name: Kind.Name,
+    with: List(Kind.Def),
+    cses: Map(Kind.Term),
+    moti: Maybe(Kind.Term),
+  ),
+  // An origin
+  ori(
+    orig: Pair(Nat,Nat),
+    expr: Kind.Term,
+  )
+}

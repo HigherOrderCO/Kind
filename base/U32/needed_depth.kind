@@ -1,0 +1,2 @@
+U32.needed_depth(size: U32): Nat
+  U32.needed_depth.go(U32.sub(size, 1u))

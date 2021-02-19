@@ -1,0 +1,2 @@
+Kind.Synth.load(name: Kind.Name, defs: Kind.Defs): IO(Maybe(Kind.Defs))
+  Kind.Synth.load.go(name, Kind.Synth.files_of(name), defs)

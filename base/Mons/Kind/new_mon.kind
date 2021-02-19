@@ -1,0 +1,2 @@
+Mons.Kind.new_mon(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false, type, agi))

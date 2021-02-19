@@ -1,0 +1,8 @@
+type Kind.Datatype {
+  new(
+    name: Kind.Name,
+    pars: List(Kind.Binder),
+    inds: List(Kind.Binder),
+    ctrs: List(Kind.Constructor),
+  )
+}

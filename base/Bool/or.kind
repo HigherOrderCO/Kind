@@ -1,0 +1,5 @@
+Bool.or(a: Bool, b: Bool): Bool
+  case a {
+    true: Bool.true,
+    false: b,
+  }

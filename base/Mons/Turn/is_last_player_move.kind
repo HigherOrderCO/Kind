@@ -1,0 +1,3 @@
+Mons.Turn.is_last_player_move(turn: Mons.Turn): Bool
+  open turn
+  U32.eql(turn.play, u1)

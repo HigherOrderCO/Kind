@@ -1,0 +1,2 @@
+Nat.to_u8(n: Nat): U8
+  Nat.apply<U8>(n, U8.inc, U8.zero)

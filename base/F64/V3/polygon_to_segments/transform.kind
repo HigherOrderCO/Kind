@@ -1,0 +1,11 @@
+F64.V3.polygon_to_segments.transform(pos: F64.V3, dir: F64.V3, pnt: F64.V3): F64.V3
+  open pnt
+  open dir
+  let a = F64.atan(dir.y, dir.x)
+  let pnt_x_times_cos_a = F64.mul(pnt.x, F64.cos(a))
+  let pnt_y_times_sin_a = F64.mul(pnt.y, F64.sin(a))
+  let pnt_x_times_sin_a = F64.mul(pnt.x, F64.sin(a))
+  let pnt_y_times_cos_a = F64.mul(pnt.y, F64.cos(a))
+  let x = F64.sub(pnt_x_times_cos_a, pnt_y_times_sin_a)
+  let y = F64.add(pnt_x_times_sin_a, pnt_y_times_cos_a)
+  F64.V3.add(pos, F64.V3.new(x, y, pnt.z))

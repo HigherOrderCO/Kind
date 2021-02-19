@@ -1,0 +1,55 @@
+Kind.Synth.fix(
+  file: String,
+  code: String,
+  orig: Pair(Nat,Nat),
+  name: Kind.Name,
+  term: Kind.Term,
+  type: Kind.Term,
+  isct: Bool,
+  arit: Nat,
+  defs: Kind.Defs,
+  errs: List(Kind.Error),
+  fixd: Bool,
+): IO(Maybe(Kind.Defs))
+  case errs {
+    nil:
+      if fixd then do IO {
+        let type = Kind.Term.bind([], (x) Bits.i(x), type);
+        let term = Kind.Term.bind([], (x) Bits.o(x), term);
+        let defs = Kind.set!(name, Kind.Def.new(file, code, orig, name, term, type, isct, arit, Kind.Status.init), defs);
+        return Maybe.some!(defs);
+      } else do IO {
+        return Maybe.none!;
+      },
+    cons: case errs.head {
+      waiting: do IO {
+        var new_defs = Kind.Synth.one(errs.head.name, defs);
+        case new_defs {
+          none: Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, errs.tail, fixd),
+          some: Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, new_defs.value, errs.tail, Bool.true),
+        }
+      },
+      undefined_reference: do IO {
+        var new_defs = Kind.Synth.one(errs.head.name, defs);
+        case new_defs {
+          none: Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, errs.tail, fixd),
+          some: Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, new_defs.value, errs.tail, Bool.true),
+        }
+      },
+      patch: case errs.head.path {
+        e: do IO { // shouldn't happen
+          return Maybe.none!;
+        },
+        o: do IO { // hole is on term
+          let term = Kind.Term.patch_at(errs.head.path.pred, term, (x) errs.head.term);
+          Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, errs.tail, Bool.true);
+        },
+        i: do IO { // hole is on type
+          let type = Kind.Term.patch_at(errs.head.path.pred, type, (x) errs.head.term);
+          Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, errs.tail, Bool.true);
+        },
+      },
+      // The error isn't fixable
+      _: Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, errs.tail, fixd),
+    }
+  }

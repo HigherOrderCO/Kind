@@ -1,0 +1,5 @@
+String.repeat(xs: String, n: Nat): String
+  case n{
+    zero: String.nil
+    succ: String.concat(xs, String.repeat(xs, n.pred))
+  }

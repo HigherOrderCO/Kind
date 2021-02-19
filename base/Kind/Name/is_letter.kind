@@ -1,0 +1,8 @@
+Kind.Name.is_letter(chr: Char): Bool
+  if      U16.btw('A', chr, 'Z') then Bool.true
+  else if U16.btw('a', chr, 'z') then Bool.true
+  else if U16.btw('0', chr, '9') then Bool.true
+  else if U16.eql('.', chr)      then Bool.true
+  else if U16.eql('_', chr)      then Bool.true
+  else if U16.eql('^', chr)      then Bool.true
+  else                                Bool.false

@@ -1,0 +1,2 @@
+Kind.Check.monad: Monad(Kind.Check)
+  Monad.new<Kind.Check>(Kind.Check.bind, Kind.Check.pure)

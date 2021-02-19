@@ -1,0 +1,9 @@
+Kind: IO(Unit)
+  do IO {
+    let _ = Kind.to_core.io.one;
+    let _ = Kind.checker.io.one;
+    let _ = Kind.checker.io.file;
+    let _ = Kind.checker.code;
+    let _ = Kind.Term.read;
+    return Unit.new;
+  }

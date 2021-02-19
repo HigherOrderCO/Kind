@@ -1,0 +1,2 @@
+Nat.succ_inj(a: Nat, b: Nat, eq: Nat.succ(a) == Nat.succ(b)): a == b
+  Equal.apply<Nat, Nat, Nat.succ(a), Nat.succ(b), Nat.pred>(eq)

@@ -1,0 +1,8 @@
+Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
+  Mons.Attr.new(
+    Bool.false, u0, u0, "",
+    Mons.Kind.set_static_sprites(spr),
+    spr,
+    Mons.Kind.set_pic(spr),
+    Mons.Kind.set_default_battle_spr, List.nil<Mons.Skill>,
+    Mons.global_scr_mid)

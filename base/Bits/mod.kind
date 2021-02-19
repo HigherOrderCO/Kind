@@ -1,0 +1,2 @@
+Bits.mod(a: Bits, b: Bits): Bits
+  Bits.mod(a, b)

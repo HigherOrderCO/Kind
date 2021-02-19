@@ -1,0 +1,5 @@
+F64.is_between(a: F64, b: F64, x: F64): Bool
+  let a_eql_x = F64.eql(a, x) 
+  let a_ltn_x = F64.ltn(a, x)
+  let x_ltn_b = F64.ltn(x, b)
+  Bool.or(a_eql_x, Bool.and(a_ltn_x, x_ltn_b))

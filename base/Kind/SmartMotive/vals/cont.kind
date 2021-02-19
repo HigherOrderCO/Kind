@@ -1,0 +1,5 @@
+Kind.SmartMotive.vals.cont(expr: Kind.Term, term: Kind.Term, args: List(Kind.Term), defs: Kind.Defs): List(Kind.Term)
+  case Kind.Term.reduce(term, defs) as term {
+    app: Kind.SmartMotive.vals.cont(expr, term.func, List.cons!(term.argm, args), defs),
+    _: List.cons!(expr, List.tail!(List.reverse!(args))),
+  }

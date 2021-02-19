@@ -1,0 +1,5 @@
+IO.bind<A: Type, B: Type>(a: IO(A), f: A -> IO(B)): IO(B)
+  case a {
+    end: f(a.value),
+    ask: IO.ask<B>(a.query, a.param, (x) IO.bind<A,B>(a.then(x), f)),
+  }

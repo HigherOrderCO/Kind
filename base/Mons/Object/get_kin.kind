@@ -1,0 +1,3 @@
+Mons.Object.get_kin(obj: Mons.Object): Mons.Kind
+  open obj
+  obj.kin

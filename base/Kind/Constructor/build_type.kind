@@ -1,0 +1,11 @@
+Kind.Constructor.build_type(type: Kind.Datatype, ctor: Kind.Constructor): Kind.Term
+  case type {
+    new: case ctor {
+      new: Kind.Constructor.build_type.go(
+        type,
+        ctor,
+        type.name,
+        type.pars,
+        ctor.args)
+    }
+  }

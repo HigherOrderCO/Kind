@@ -1,0 +1,8 @@
+Map.merge<A: Type,B: Type,C: Type>(
+  a_not_b : Bits -> A -> Maybe(C),
+  b_not_a : Bits -> B -> Maybe(C),
+  a_and_b : Bits -> A -> B -> Maybe(C),
+  a: Map(A),
+  b: Map(B)
+) : Map(C)
+  Map.merge.go!!!(a_not_b,b_not_a,a_and_b,Bits.e,a,b)

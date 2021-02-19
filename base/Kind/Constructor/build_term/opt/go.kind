@@ -1,0 +1,21 @@
+Kind.Constructor.build_term.opt.go(
+  type: Kind.Datatype,
+  ctor: Kind.Constructor,
+  ctrs: List(Kind.Constructor),
+): Kind.Term
+  case ctrs {
+    cons: case ctrs.head {
+      new:
+        def name = ctrs.head.name;
+        def body = (x) Kind.Constructor.build_term.opt.go(type, ctor, ctrs.tail);
+        Kind.Term.lam(name, body)
+    },
+    nil: 
+      case ctor {
+        new:
+          let ret = Kind.Term.ref(ctor.name);
+          let ret = for arg in ctor.args:
+            Kind.Term.app(ret, Kind.Term.ref(case arg { new: arg.name }));
+          ret
+      },
+  }

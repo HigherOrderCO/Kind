@@ -1,0 +1,15 @@
+Kind.define(
+  file: String,
+  code: String,
+  orig: Pair(Nat,Nat),
+  name: Kind.Name,
+  term: Kind.Term,
+  type: Kind.Term,
+  isct: Bool,
+  arit: Nat,
+  done: Bool,
+  defs: Kind.Defs,
+): Kind.Defs
+  //let skip = Debug.log!(String.flatten(["define: ", name]), (x) Unit.new);
+  let stat = if done then Kind.Status.done else Kind.Status.init;
+  Kind.set!(name, Kind.Def.new(file, code, orig, name, term, type, isct, arit, stat), defs)

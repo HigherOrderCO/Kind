@@ -1,0 +1,31 @@
+Kind.Datatype.build_term.constructor.go(
+  type: Kind.Datatype,
+  ctor: Kind.Constructor,
+  args: List(Kind.Binder),
+): Kind.Term
+  case args {
+    cons: case args.head {
+      new:
+        let eras = args.head.eras;
+        let name = args.head.name;
+        let xtyp = args.head.term;
+        let body = Kind.Datatype.build_term.constructor.go(type, ctor, args.tail);
+        Kind.Term.all(eras, "", name, xtyp, (s,x) body)
+    },
+    nil:
+      case type {
+        new: case ctor {
+          new:
+            let ret = Kind.Term.ref(Kind.Name.read("P"));
+            let ret = for var in ctor.inds:
+              Kind.Term.app(ret, case var { new: var.term });
+            let ctr = String.flatten([type.name,Kind.Name.read("."),ctor.name]);
+            let slf = Kind.Term.ref(ctr);
+            let slf = for var in type.pars:
+              Kind.Term.app(slf, Kind.Term.ref(case var { new: var.name }));
+            let slf = for var in ctor.args:
+              Kind.Term.app(slf, Kind.Term.ref(case var { new: var.name }));
+            Kind.Term.app(ret, slf)
+        }
+      }
+  }

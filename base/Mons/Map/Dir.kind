@@ -1,0 +1,7 @@
+type Mons.Map.Dir {
+  right, // r
+  up,    // u
+  left,  // l
+  down,  // d
+  middle // m
+}

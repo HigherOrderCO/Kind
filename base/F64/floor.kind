@@ -1,0 +1,3 @@
+F64.floor(x: F64): F64
+  let ltn_zero = F64.if!(F64.from_bool(F64.ltn(x, F64.0)), F64.1, F64.0)
+  F64.sub(F64.sub(x, F64.mod(x, F64.1)), ltn_zero)

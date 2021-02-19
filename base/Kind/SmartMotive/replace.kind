@@ -1,0 +1,53 @@
+Kind.SmartMotive.replace(term: Kind.Term, from: Kind.Term, to: Kind.Term, lv: Nat): Kind.Term
+  //let skip = Debug.log!(String.flatten(["replace term=", Kind.Term.show(term), " from=", Kind.Term.show(from), " to=", Kind.Term.show(to), " lv=", Nat.show(lv)]), (x) Unit.new);
+  if Kind.Term.identical(term, from, lv) then
+    to
+  else case term {
+    ref:
+      Kind.Term.ref(term.name),
+    var:
+      Kind.Term.var(term.name, term.indx),
+    typ:
+      Kind.Term.typ,
+    all: 
+      let xtyp = Kind.SmartMotive.replace(term.xtyp, from, to, lv);
+      let body = term.body(Kind.Term.ref(term.self),Kind.Term.ref(term.name));
+      let body = Kind.SmartMotive.replace(body, from, to, Nat.succ(Nat.succ(lv)));
+      Kind.Term.all(term.eras, term.self, term.name, xtyp, (s,x) body),
+    lam:
+      let body = term.body(Kind.Term.ref(term.name));
+      let body = Kind.SmartMotive.replace(body, from, to, Nat.succ(lv));
+      Kind.Term.lam(term.name, (x) body),
+    app:
+      let func = Kind.SmartMotive.replace(term.func, from, to, lv);
+      let argm = Kind.SmartMotive.replace(term.argm, from, to, lv);
+      Kind.Term.app(func, argm),
+    let:
+      let expr = Kind.SmartMotive.replace(term.expr, from, to, lv);
+      let body = term.body(Kind.Term.ref(term.name))
+      let body = Kind.SmartMotive.replace(body, from, to, Nat.succ(lv));
+      Kind.Term.let(term.name, expr, (x) body),
+    def:
+      let expr = Kind.SmartMotive.replace(term.expr, from, to, lv);
+      let body = term.body(Kind.Term.ref(term.name))
+      let body = Kind.SmartMotive.replace(body, from, to, Nat.succ(lv));
+      Kind.Term.def(term.name, expr, (x) body),
+    ann:
+      let term = Kind.SmartMotive.replace(term.term, from, to, lv);
+      let type = Kind.SmartMotive.replace(term.type, from, to, lv);
+      Kind.Term.ann(term.done, term, type),
+    gol:
+      term,
+    hol:
+      term,
+    nat:
+      term,
+    chr:
+      term,
+    str:
+      term,
+    cse:
+      term,
+    ori:
+      Kind.SmartMotive.replace(term.expr, from, to, lv),
+  }

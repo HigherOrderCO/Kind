@@ -1,0 +1,3 @@
+Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
+  open obj 
+  obj.dir

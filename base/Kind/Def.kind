@@ -1,0 +1,13 @@
+type Kind.Def {
+  new(
+    file: String,
+    code: String,
+    orig: Pair(Nat, Nat),
+    name: Kind.Name,
+    term: Kind.Term,
+    type: Kind.Term,
+    isct: Bool,
+    arit: Nat,
+    stat: Kind.Status,
+  ),
+}

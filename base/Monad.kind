@@ -1,0 +1,6 @@
+type Monad <M: Type -> Type> {
+  new(
+    bind: <A: Type, B: Type> (m: M(A)) (f: (x:A) M(B)) M(B),
+    pure: <A: Type> (x: A) M(A),
+  )
+}

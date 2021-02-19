@@ -1,0 +1,16 @@
+Kind.Term.inline.names: Set
+  let inl = [
+    "Monad.pure",
+    "Monad.bind",
+    "Monad.new",
+    "Parser.monad",
+    "Parser.bind",
+    "Parser.pure",
+    "Kind.Check.pure",
+    "Kind.Check.bind",
+    "Kind.Check.monad",
+    "Kind.Check.value",
+    "Kind.Check.none",
+  ]
+  let kvs = List.mapped!(inl)!((x) {Kind.Name.to_bits(x), Unit.new});
+  Map.from_list!(kvs)

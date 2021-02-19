@@ -1,0 +1,11 @@
+Nat.cmp(a: Nat, b: Nat): Cmp
+  case a {
+    zero: case b {
+      zero: Cmp.eql,
+      succ: Cmp.ltn,
+    },
+    succ: case b {
+      zero: Cmp.gtn,
+      succ: Nat.cmp(a.pred, b.pred),
+    },
+  }

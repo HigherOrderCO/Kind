@@ -1,0 +1,4 @@
+Mons.Object.is_full_bag(obj: Mons.Object): Bool
+  open obj
+  let len = List.length!(obj.bag)
+  Nat.eql(len, 3)

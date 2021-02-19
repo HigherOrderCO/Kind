@@ -1,0 +1,20 @@
+Kind.checker.io.file(file: String): IO(Unit)
+  do IO {
+    var loaded = Kind.Synth.file(file, Map.new!);
+    case loaded {
+      left: do IO {
+        IO.print(String.flatten(["On '", file, "':"]));
+        IO.print(loaded.value);
+      }
+      right: case loaded.value {
+        new: do IO {
+          let nams = loaded.value.fst;
+          let defs = loaded.value.snd;
+          case nams {
+            nil: IO.print("File not found or empty: '" | file | "'.")
+            cons: IO.print(Kind.Defs.report(defs, nams))
+          }
+        }
+      }
+    }
+  }

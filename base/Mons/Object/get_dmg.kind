@@ -1,0 +1,3 @@
+Mons.Object.get_dmg(obj: Mons.Object): U32
+  open obj
+  obj.dmg

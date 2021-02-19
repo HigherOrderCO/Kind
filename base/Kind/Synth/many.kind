@@ -1,0 +1,13 @@
+Kind.Synth.many(names: List(String), defs: Kind.Defs): IO(Kind.Defs)
+  case names {
+    nil: do IO {
+      return defs;
+    },
+    cons: do IO {
+      var new_defs = Kind.Synth.one(names.head, defs);
+      case new_defs {
+        none: Kind.Synth.many(names.tail, defs),
+        some: Kind.Synth.many(names.tail, new_defs.value),
+      }
+    },
+  }

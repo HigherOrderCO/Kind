@@ -1,0 +1,2 @@
+IO.print(text: String): IO(Unit)
+  IO.put_string(text | "\n")

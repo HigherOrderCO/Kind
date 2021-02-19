@@ -1,0 +1,9 @@
+Word.trim<size: Nat>(new_size: Nat, word: Word(size)): Word(new_size)
+  case new_size {
+    zero: Word.e,
+    succ: case word {
+      e: Word.o<new_size.pred>(Word.trim<Nat.zero>(new_size.pred, Word.e)),
+      o: Word.o<new_size.pred>(Word.trim<word.size>(new_size.pred, word.pred)),
+      i: Word.i<new_size.pred>(Word.trim<word.size>(new_size.pred, word.pred))
+    }
+  } : Word(new_size)

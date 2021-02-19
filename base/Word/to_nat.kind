@@ -1,0 +1,2 @@
+Word.to_nat<size: Nat>(word: Word(size)): Nat
+  Word.fold<(x) Nat, size>(0, <_> Nat.mul(2), <_> (x) Nat.succ(Nat.mul(2, x)), word)

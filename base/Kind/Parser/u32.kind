@@ -1,0 +1,11 @@
+Kind.Parser.u32: Parser(Kind.Term)
+  do Parser {
+    var init = Kind.Parser.init;
+    Kind.Parser.spaces;
+    var natx = Parser.nat;
+    Parser.text("u");
+    let term = Kind.Term.ref("Nat.to_u32");
+    let term = Kind.Term.app(term, Kind.Term.nat(natx));
+    var orig = Kind.Parser.stop(init);
+    return Kind.Term.ori(orig, term);
+  }

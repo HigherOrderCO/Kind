@@ -1,0 +1,94 @@
+Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: Set): Kind.Check(Bool)
+  let ah = Kind.Term.serialize(Kind.Term.reduce(a,Map.new!), lv, lv, Bits.o, Bits.e);
+  let bh = Kind.Term.serialize(Kind.Term.reduce(b,Map.new!), lv, lv, Bits.i, Bits.e);
+  if Bits.eql(ah, bh) then do Kind.Check {
+    return Bool.true;
+  } else do Kind.Check {
+    let a1 = Kind.Term.reduce(a, defs);
+    let b1 = Kind.Term.reduce(b, defs);
+    let ah = Kind.Term.serialize(a1, lv, lv, Bits.o, Bits.e);
+    let bh = Kind.Term.serialize(b1, lv, lv, Bits.i, Bits.e);
+    if Bits.eql(ah, bh) then do Kind.Check {
+      return Bool.true;
+    } else do Kind.Check {
+      let id = Bits.concat(ah, bh);
+      if Set.mut.has(id, seen) then do Kind.Check {
+        Kind.Term.equal.extra_holes(a, b);
+        return Bool.true;
+      } else case a1 {
+        all: case b1 {
+          all: do Kind.Check {
+            let seen = Set.mut.set(id, seen);
+            let a1_body = a1.body(
+              Kind.Term.var(a1.self, lv),
+              Kind.Term.var(a1.name, Nat.succ(lv)));
+            let b1_body = b1.body(
+              Kind.Term.var(b1.self, lv),
+              Kind.Term.var(b1.name, Nat.succ(lv)));
+            let eq_self = String.eql(a1.self, b1.self);
+            let eq_eras = Bool.eql(a1.eras, b1.eras);
+            if Bool.and(eq_self, eq_eras) then do Kind.Check {
+              var eq_type = Kind.Term.equal(a1.xtyp, b1.xtyp, defs, lv, seen);
+              var eq_body = Kind.Term.equal(a1_body, b1_body, defs, Nat.succ(Nat.succ(lv)), seen);
+              return Bool.and(eq_type, eq_body);
+            } else do Kind.Check {
+              return Bool.false;
+            };
+          },
+          hol:
+            Kind.Term.equal.hole(b1.path, a),
+          _: do Kind.Check {
+            return Bool.false;
+          },
+        },
+        lam: case b1 {
+          lam: do Kind.Check {
+              let seen = Set.mut.set(id, seen);
+              let a1_body = a1.body(Kind.Term.var(a1.name, lv));
+              let b1_body = b1.body(Kind.Term.var(b1.name, lv));
+              var eq_body = Kind.Term.equal(a1_body, b1_body, defs, Nat.succ(lv), seen);
+              return eq_body;
+            },
+            hol: Kind.Term.equal.hole(b1.path, a),
+            _: do Kind.Check {
+              return Bool.false;
+            },
+          },
+        app: case b1 {
+          app: do Kind.Check {
+            let seen = Set.mut.set(id, seen);
+            var eq_func = Kind.Term.equal(a1.func, b1.func, defs, lv, seen);
+            var eq_argm = Kind.Term.equal(a1.argm, b1.argm, defs, lv, seen);
+            return Bool.and(eq_func, eq_argm);
+          },
+          hol: Kind.Term.equal.hole(b1.path, a),
+          _: do Kind.Check {
+            return Bool.false;
+          },
+        },
+        let: case b1 {
+          let: do Kind.Check {
+            let seen = Set.mut.set(id, seen);
+            let a1_body = a1.body(Kind.Term.var(a1.name, lv));
+            let b1_body = b1.body(Kind.Term.var(b1.name, lv));
+            var eq_expr = Kind.Term.equal(a1.expr, b1.expr, defs, lv, seen);
+            var eq_body = Kind.Term.equal(a1_body, b1_body, defs, Nat.succ(lv), seen);
+            return Bool.and(eq_expr, eq_body);
+          },
+          hol:
+            Kind.Term.equal.hole(b1.path, a),
+          _: do Kind.Check {
+            return Bool.false;
+          },
+        },
+        hol:
+          Kind.Term.equal.hole(a1.path, b),
+        _: case b1 {
+          hol: Kind.Term.equal.hole(b1.path, a),
+          _: do Kind.Check {
+            return Bool.false;
+          },
+        },
+      };
+    };
+  }

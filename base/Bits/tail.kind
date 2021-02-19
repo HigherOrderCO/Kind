@@ -1,0 +1,6 @@
+Bits.tail(a: Bits): Bits
+  case a {
+    e: Bits.e,
+    o: a.pred,
+    i: a.pred,
+  }

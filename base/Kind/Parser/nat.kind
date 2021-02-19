@@ -1,0 +1,8 @@
+Kind.Parser.nat: Parser(Kind.Term)
+  do Parser {
+    var init = Kind.Parser.init;
+    Kind.Parser.spaces;
+    var natx = Parser.nat;
+    var orig = Kind.Parser.stop(init);
+    return Kind.Term.ori(orig, Kind.Term.nat(natx));
+  }

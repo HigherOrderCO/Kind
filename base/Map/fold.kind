@@ -1,0 +1,10 @@
+Map.fold<A: Type>(map: Map(A)): <P: Type> -> P -> (Maybe(A) -> P -> P -> P) -> P
+  <P> (new, tie)
+  case map {
+    new: new,
+    tie: 
+      tie(
+        map.val,
+        Map.fold<A>(map.lft)<P>(new, tie),
+        Map.fold<A>(map.rgt)<P>(new, tie)),
+  }

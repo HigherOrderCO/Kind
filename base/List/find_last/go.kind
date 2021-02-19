@@ -1,0 +1,15 @@
+List.find_last.go<A: Type>(
+  xs: List(A),
+  f: A -> Nat -> Bool,
+  n: Nat,
+  res: Maybe(Pair(A,Nat))
+): Maybe(Pair(A,Nat))
+  case xs {
+    nil : res,
+    cons:
+      let res = case f(xs.head,n) {
+        true : Maybe.some!(Pair.new!!(xs.head,n)),
+        false: res
+      }
+      List.find_last.go!(xs.tail,f,Nat.succ(n),res)
+  }

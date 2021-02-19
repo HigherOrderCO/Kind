@@ -1,0 +1,5 @@
+Mons.Kind.set_pic(spr: List(Image3D)): Image3D
+  case spr{
+    nil: Image3D.empty, //Mons.Assets.void,
+    cons: spr.head
+  }

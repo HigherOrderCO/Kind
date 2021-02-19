@@ -1,0 +1,12 @@
+Kind.Parser.cons(init: Nat, head: Kind.Term): Parser(Kind.Term)
+  do Parser {
+    Kind.Parser.text("&");
+    var tail = Kind.Parser.term;
+    var orig = Kind.Parser.stop(init);
+    let term = Kind.Term.ref("List.cons");
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, head);
+    let term = Kind.Term.app(term, tail);
+    var orig = Kind.Parser.stop(init);
+    return Kind.Term.ori(orig, term);
+  }

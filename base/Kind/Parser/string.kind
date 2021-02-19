@@ -1,0 +1,27 @@
+Kind.Parser.string.go(
+  str: String,
+  idx: Nat,
+  code: String,
+): Parser.Reply(String)
+  case code {
+    nil:
+      Parser.Reply.error<String>(idx, code, "Non-terminating string.")
+    cons:
+      if U16.eql(code.head, '"') then
+        Parser.Reply.value<String>(Nat.succ(idx), code.tail, String.reverse(str))
+      else case Kind.Parser.char.single(idx, code) as parsed {
+        error:
+          Parser.Reply.error<String>(parsed.idx, parsed.code, parsed.err)
+        value:
+          Kind.Parser.string.go(String.cons(parsed.val,str), parsed.idx, parsed.code)
+      }
+  }
+
+Kind.Parser.string: Parser(Kind.Term)
+  do Parser {
+    var init = Kind.Parser.init;
+    Kind.Parser.text(String.cons('"', String.nil));
+    var strx = Kind.Parser.string.go("");
+    var orig = Kind.Parser.stop(init);
+    return Kind.Term.ori(orig, Kind.Term.str(strx));
+  }

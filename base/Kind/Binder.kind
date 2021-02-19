@@ -1,0 +1,7 @@
+type Kind.Binder {
+  new(
+    eras: Bool,
+    name: Kind.Name,
+    term: Kind.Term,
+  )
+}

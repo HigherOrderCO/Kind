@@ -1,0 +1,2 @@
+U8.shl(n: U32, a: U8): U8
+  U8.shl(n, a)

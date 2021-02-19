@@ -1,0 +1,46 @@
+Kind.Term.normalize(term: Kind.Term, defs: Kind.Defs): Kind.Term
+  case Kind.Term.reduce(term, defs) as term {
+    ref:
+      Kind.Term.ref(term.name),
+    var:
+      Kind.Term.var(term.name, term.indx),
+    typ:
+      Kind.Term.typ,
+    all: 
+      def xtyp = Kind.Term.normalize(term.xtyp, defs);
+      def body = (s,x) Kind.Term.normalize(term.body(s,x), defs);
+      Kind.Term.all(term.eras, term.self, term.name, xtyp, body),
+    lam:
+      def body = (x) Kind.Term.normalize(term.body(x), defs);
+      Kind.Term.lam(term.name, body),
+    app:
+      def func = Kind.Term.normalize(term.func, defs);
+      def argm = Kind.Term.normalize(term.argm, defs);
+      Kind.Term.app(func, argm),
+    let:
+      def expr = Kind.Term.normalize(term.expr, defs);
+      def body = (x) Kind.Term.normalize(term.body(x), defs);
+      Kind.Term.let(term.name, expr, body),
+    def:
+      def expr = Kind.Term.normalize(term.expr, defs);
+      def body = (x) Kind.Term.normalize(term.body(x), defs);
+      Kind.Term.def(term.name, expr, body),
+    ann:
+      def term = Kind.Term.normalize(term.term, defs);
+      def type = Kind.Term.normalize(term.type, defs);
+      Kind.Term.ann(term.done, term, type),
+    gol:
+      Kind.Term.gol(term.name, term.dref, term.verb),
+    hol:
+      Kind.Term.hol(term.path),
+    nat:
+      Kind.Term.nat(term.natx),
+    chr:
+      Kind.Term.chr(term.chrx),
+    str:
+      Kind.Term.str(term.strx),
+    cse:
+      term,
+    ori:
+      Kind.Term.normalize(term.expr, defs),
+  }

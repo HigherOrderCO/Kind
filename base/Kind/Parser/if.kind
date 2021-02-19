@@ -1,0 +1,16 @@
+Kind.Parser.if: Parser(Kind.Term)
+  do Parser {
+    var init = Kind.Parser.init;
+    Kind.Parser.text("if ");
+    var cond = Kind.Parser.term;
+    Kind.Parser.text("then");
+    var tcse = Kind.Parser.term;
+    Kind.Parser.text("else");
+    var fcse = Kind.Parser.term;
+    var orig = Kind.Parser.stop(init);
+    let term = cond;
+    let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)));
+    let term = Kind.Term.app(term, tcse);
+    let term = Kind.Term.app(term, fcse);
+    return Kind.Term.ori(orig, term);
+  }

@@ -1,0 +1,4 @@
+type Map <A: Type> {
+  new,
+  tie(val: Maybe(A), lft: Map(A), rgt: Map(A)),
+}

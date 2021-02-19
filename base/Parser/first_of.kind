@@ -1,0 +1,2 @@
+Parser.first_of<A: Type>(pars: List(Parser(A))): Parser(A)
+  Parser.first_of.go<A>(pars, Maybe.none!)

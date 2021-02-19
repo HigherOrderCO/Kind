@@ -1,0 +1,9 @@
+Map.delete<A: Type>(key: Bits, map: Map(A)): Map(A)
+  case map {
+    new: Map.new!,
+    tie: case key {
+      e: Map.tie!(Maybe.none!, map.lft, map.rgt),
+      o: Map.delete!(key.pred, map.lft),
+      i: Map.delete!(key.pred, map.rgt)
+    }
+  }

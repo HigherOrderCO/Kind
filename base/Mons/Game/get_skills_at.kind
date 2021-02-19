@@ -1,0 +1,7 @@
+Mons.Game.get_skills_at(idx: Nat, obj: Mons.Object): Mons.Skill
+  open obj
+  let skills = Mons.Kind.get_skills(obj.kin)
+  case List.at!(idx, skills) as skill {
+    none: Mons.Skill.none,
+    some: skill.value
+  }

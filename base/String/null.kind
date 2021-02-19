@@ -1,0 +1,5 @@
+String.null(xs: String): Bool
+  case xs{
+    nil : Bool.true
+    cons: Bool.false
+  }

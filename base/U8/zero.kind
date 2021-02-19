@@ -1,0 +1,2 @@
+U8.zero: U8
+  U8.new(Word.zero(8))

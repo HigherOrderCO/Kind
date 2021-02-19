@@ -1,0 +1,22 @@
+Kind.Term.inline.reduce(term: Kind.Term, defs: Kind.Defs): Kind.Term
+  case term {
+    ref: 
+      let inli = Set.has(Kind.Name.to_bits(term.name), Kind.Term.inline.names);
+      if inli then
+        case Kind.get!(term.name, defs) as got {
+          none: Kind.Term.ref(term.name),
+          some: case got.value { new: Kind.Term.inline.reduce(got.value.term, defs) },
+        }
+      else
+        term,
+    app:
+      let func = Kind.Term.inline.reduce(term.func, defs);
+      case func {
+        lam: Kind.Term.inline.reduce(func.body(term.argm), defs),
+        let: Kind.Term.let(func.name, func.expr, (x) Kind.Term.inline.reduce(Kind.Term.app(func.body(x), term.argm), defs)),
+        _: term,
+      },
+    ori:
+      Kind.Term.inline.reduce(term.expr, defs),
+    _: term,
+  }

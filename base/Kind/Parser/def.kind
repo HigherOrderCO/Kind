@@ -1,0 +1,12 @@
+Kind.Parser.def: Parser(Kind.Term)
+  do Parser {
+    var init = Kind.Parser.init;
+    Kind.Parser.text("def ");
+    var name = Kind.Parser.name;
+    Kind.Parser.text("=");
+    var expr = Kind.Parser.term;
+    Parser.maybe!(Kind.Parser.text(";"));
+    var body = Kind.Parser.term;
+    var orig = Kind.Parser.stop(init);
+    return Kind.Term.ori(orig, Kind.Term.def(name, expr, (x) body));
+  }

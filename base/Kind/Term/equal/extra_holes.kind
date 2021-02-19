@@ -1,0 +1,22 @@
+Kind.Term.equal.extra_holes(
+  a: Kind.Term,
+  b: Kind.Term,
+): Kind.Check(Unit)
+  case a {
+    app: case b {
+      app: do Kind.Check {
+        Kind.Term.equal.extra_holes(a.func, b.func);
+        Kind.Term.equal.extra_holes(a.argm, b.argm);
+      },
+      ori: Kind.Term.equal.extra_holes(a, b.expr),
+      hol: do Kind.Check { Kind.Term.equal.hole(b.path, a); return Unit.new; }, 
+      _: do Kind.Check { return Unit.new; },
+    },
+    ori: Kind.Term.equal.extra_holes(a.expr, b),
+    hol: do Kind.Check { Kind.Term.equal.hole(a.path, b); return Unit.new; },
+    _: case b {
+      ori: Kind.Term.equal.extra_holes(a, b.expr),
+      hol: do Kind.Check { Kind.Term.equal.hole(b.path, a); return Unit.new; }, 
+      _: do Kind.Check { return Unit.new; },
+    }
+  }

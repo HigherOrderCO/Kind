@@ -1,0 +1,10 @@
+Kind.Parser.binder.homo(eras: Bool): Parser(List(Kind.Binder))
+  do Parser {
+    Kind.Parser.text(if eras then "<" else "(");
+    var bind = Parser.until1!(
+      Kind.Parser.text(if eras then ">" else ")"),
+      Kind.Parser.item!(Kind.Parser.name_term));
+    return List.mapped!(bind)!((pair) case pair {
+      new: Kind.Binder.new(eras, pair.fst, pair.snd)
+    });
+  }

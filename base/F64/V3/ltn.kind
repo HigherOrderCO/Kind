@@ -1,0 +1,4 @@
+F64.V3.ltn(a: F64.V3, b: F64.V3): Bool
+  let len_a = F64.V3.len(a)
+  let len_b = F64.V3.len(b)
+  F64.ltn(len_a, len_b)

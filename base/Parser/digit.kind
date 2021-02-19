@@ -1,0 +1,18 @@
+Parser.digit: Parser(Nat)
+  (idx, code) case code {
+    nil:
+      Parser.Reply.error!(idx, code, "Not a digit."),
+    cons:
+      let sidx = Nat.succ(idx);
+      if      U16.eql(code.head, '0') then Parser.Reply.value!(sidx, code.tail, 0)
+      else if U16.eql(code.head, '1') then Parser.Reply.value!(sidx, code.tail, 1)
+      else if U16.eql(code.head, '2') then Parser.Reply.value!(sidx, code.tail, 2)
+      else if U16.eql(code.head, '3') then Parser.Reply.value!(sidx, code.tail, 3)
+      else if U16.eql(code.head, '4') then Parser.Reply.value!(sidx, code.tail, 4)
+      else if U16.eql(code.head, '5') then Parser.Reply.value!(sidx, code.tail, 5)
+      else if U16.eql(code.head, '6') then Parser.Reply.value!(sidx, code.tail, 6)
+      else if U16.eql(code.head, '7') then Parser.Reply.value!(sidx, code.tail, 7)
+      else if U16.eql(code.head, '8') then Parser.Reply.value!(sidx, code.tail, 8)
+      else if U16.eql(code.head, '9') then Parser.Reply.value!(sidx, code.tail, 9)
+      else Parser.Reply.error!(idx, code, "Not a digit."),
+  }

@@ -1,0 +1,6 @@
+Bits.inc(a: Bits): Bits
+  case a {
+    e: Bits.i(Bits.e),
+    o: Bits.i(a.pred),
+    i: Bits.o(Bits.inc(a.pred)),
+  }

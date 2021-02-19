@@ -1,0 +1,2 @@
+List.at_last<A: Type>(index: Nat, list: List(A)): Maybe(A)
+  List.at<A>(index, List.reverse!(list))

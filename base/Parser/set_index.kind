@@ -1,0 +1,2 @@
+Parser.set_index(new_idx: Nat): Parser(Unit)
+  (idx, code) Parser.Reply.value!(new_idx, code, Unit.new)

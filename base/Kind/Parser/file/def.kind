@@ -1,0 +1,18 @@
+Kind.Parser.file.def(file: String, code: String, defs: Kind.Defs): Parser(Kind.Defs)
+  do Parser {
+    var init = Kind.Parser.init;
+    var name = Kind.Parser.name1;
+    var args = Parser.many!(Kind.Parser.binder);
+    let args = List.flatten!(args);
+    Kind.Parser.text(":");
+    var type = Kind.Parser.term;
+    var term = Kind.Parser.term;
+    var orig = Kind.Parser.stop(init);
+    let arit = List.length!(args);
+    let type = Kind.Parser.make_forall(args, type);
+    let term = Kind.Parser.make_lambda(List.mapped!(args)!((x) case x { new: x.name }),term);
+    let type = Kind.Term.bind([], (x) Bits.i(x), type);
+    let term = Kind.Term.bind([], (x) Bits.o(x), term);
+    let defs = Kind.define(file, code, orig, name, term, type, false, arit, false, defs);
+    return defs;
+  }

@@ -1,0 +1,12 @@
+type Mons.Map.Dir.expanded {
+  right,      // r
+  up,         // u
+  left,       // l
+  down,       // d
+  middle,     // m
+  right_up,   // ru
+  right_down, // rd
+  left_up,    // lu
+  left_down   // ld
+//   circle     // c
+}

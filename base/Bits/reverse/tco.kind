@@ -1,0 +1,6 @@
+Bits.reverse.tco(a: Bits, r: Bits): Bits
+  case a {
+    e: r,
+    o: Bits.reverse.tco(a.pred, Bits.o(r)),
+    i: Bits.reverse.tco(a.pred, Bits.i(r))
+  }

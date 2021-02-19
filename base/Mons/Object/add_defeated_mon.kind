@@ -1,0 +1,13 @@
+Mons.Object.add_defeated_mon(obj: Mons.Object, hero: Mons.Object): Mons.Object
+  open obj
+  open hero
+  case obj.kin as kind {
+    Mons:
+      let qtd_mons = Pair.fst!!(hero.cap)
+      let mons_defeated = Pair.snd!!(hero.cap)
+      let new_cap = {qtd_mons, List.append!(mons_defeated, obj)}
+      Mons.Object.set_cap(new_cap, hero),
+    Const:       hero,
+    Terrain:     hero,
+    Interactive: hero
+  }

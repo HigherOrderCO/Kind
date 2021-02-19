@@ -1,0 +1,10 @@
+Nat.gcd.self(a: Nat): Nat.gcd(a,a) == a
+  case a {
+    zero: refl
+    succ: 
+      let h = Nat.mod.self(a.pred)
+      let app = apply((x) Nat.gcd(x,Nat.succ(a.pred)), h)
+      let hh = Nat.gcd.zero_left(Nat.succ(a.pred))
+      //app :: rewrite x in Nat.gcd(Nat.mod(Nat.succ(a.pred),Nat.succ(a.pred)),Nat.succ(a.pred)) == x with hh
+      app :: rewrite x in _ == x with hh
+  }!

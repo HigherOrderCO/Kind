@@ -1,0 +1,12 @@
+Pair.show<A: Type, B: Type>(
+  show_a: A -> String,
+  show_b: B -> String,
+  pair: Pair(A,B)
+) : String
+  case pair{
+    new: let str = String.concat("(", show_a(pair.fst))
+    let str = String.concat(str, ",")
+    let str = String.concat(str, show_b(pair.snd))
+    let str = String.concat(str, ")")
+    str
+  }

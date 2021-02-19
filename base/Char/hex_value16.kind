@@ -1,0 +1,13 @@
+Char.hex_value16(chr: Char): U16
+  def U16.add10 = ((x0)
+    def x1 = U16.inc(U16.inc(U16.inc(U16.inc(U16.inc(x0)))))
+    def x2 = U16.inc(U16.inc(U16.inc(U16.inc(U16.inc(x1)))))
+    x2) :: U16 -> U16
+  if Bool.and(U16.gte(chr,'0'),U16.lte(chr,'9')) then
+    U16.sub(chr,'0')
+  else if Bool.and(U16.gte(chr,'a'),U16.lte(chr,'f')) then
+    U16.add10(U16.sub(chr,'a'))
+  else if Bool.and(U16.gte(chr,'A'),U16.lte(chr,'F')) then
+    U16.add10(U16.sub(chr,'A'))
+  else
+    U16.zero

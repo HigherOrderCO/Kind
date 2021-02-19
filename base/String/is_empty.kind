@@ -1,0 +1,5 @@
+String.is_empty(str: String): Bool
+  case str {
+    nil: Bool.true,
+    cons: Bool.false,
+  }

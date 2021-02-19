@@ -1,0 +1,5 @@
+IO.prompt(text: String): IO(String)
+  do IO {
+    IO.put_string(text)
+    IO.get_line
+  }

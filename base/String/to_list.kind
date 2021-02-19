@@ -1,0 +1,5 @@
+String.to_list(str: String): List(Char)
+  case str{
+    nil : List.nil!
+    cons: List.cons!(str.head, String.to_list(str.tail))
+  }

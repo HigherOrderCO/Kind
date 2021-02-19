@@ -1,0 +1,6 @@
+Mons.Map.get(pos: Pos32, idx: U32, map: Mons.Map): Mons.Object
+  let list = Mons.Map.get_list(pos, map)
+  case List.at!(U32.to_nat(idx), list) as got {
+    none: Mons.Object.void,
+    some: got.value
+  }

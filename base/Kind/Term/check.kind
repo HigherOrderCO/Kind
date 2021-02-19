@@ -1,0 +1,183 @@
+Kind.Term.check(
+  term: Kind.Term,
+  type: Maybe(Kind.Term),
+  defs: Kind.Defs,
+  ctx: Kind.Context,
+  path: Kind.MPath,
+  orig: Maybe(Pair(Nat,Nat)),
+): Kind.Check(Kind.Term)
+  do Kind.Check {
+    var infr = case term {
+      ref: case Kind.get!(term.name, defs) as got {
+        none: Kind.Check.result!(type, [Kind.Error.undefined_reference(orig, term.name)]),
+        some: case got.value {
+          new:
+            let ref_name = got.value.name;
+            let ref_type = got.value.type;
+            let ref_term = got.value.term;
+            let ref_stat = got.value.stat;
+            case ref_stat {
+              init: Kind.Check.result!(Maybe.some!(ref_type), [Kind.Error.waiting(ref_name)]),
+              wait: Kind.Check.result!(Maybe.some!(ref_type), []),
+              done: Kind.Check.result!(Maybe.some!(ref_type), []),
+              fail: Kind.Check.result!(Maybe.some!(ref_type), [Kind.Error.indirect(ref_name)]),
+            },
+        }
+      },
+      var: case List.at_last!(term.indx, ctx) as got {
+        none: Kind.Check.result!(type, [Kind.Error.undefined_reference(orig, term.name)]),
+        some: do Kind.Check { return case got.value { new: got.value.snd }; },
+      },
+      typ: do Kind.Check {
+        return Kind.Term.typ;
+      },
+      all: do Kind.Check {
+        let ctx_size = List.length!(ctx);
+        let self_var = Kind.Term.var(term.self, ctx_size);
+        let body_var = Kind.Term.var(term.name, Nat.succ(ctx_size));
+        let body_ctx = List.cons!({term.name,term.xtyp}, List.cons!({term.self,term}, ctx));
+        Kind.Term.check(term.xtyp, Maybe.some!(Kind.Term.typ), defs, ctx, Kind.MPath.o(path), orig);
+        Kind.Term.check(term.body(self_var,body_var), Maybe.some!(Kind.Term.typ), defs, body_ctx, Kind.MPath.i(path), orig);
+        return Kind.Term.typ;
+      },
+      lam: case type {
+        none: do Kind.Check {
+          //let lam_arit = Kind.Term.arity(term);
+          //let lam_type = Nat.for!(Kind.Term.hol(Bits.e),0,lam_arit,(i,t) 
+            //Kind.Term.all(Bool.false, "", "", Kind.Term.hol(Bits.e), (s,x) t));
+          let lam_type = Kind.Term.hol(Bits.e);
+          let lam_term = Kind.Term.ann(Bool.false, term, lam_type);
+          Kind.Check.result!(type, [Kind.Error.patch(Kind.MPath.to_bits(path),lam_term)]);
+          //Kind.Check.result!(type, [Kind.Error.cant_infer(orig, term, ctx)]);
+        },
+        some: do Kind.Check {
+          let typv = Kind.Term.reduce(type.value, defs);
+          case typv {
+            all: do Kind.Check {
+              let ctx_size = List.length!(ctx);
+              let self_var = term;
+              let body_var = Kind.Term.var(term.name, ctx_size);
+              let body_typ = typv.body(self_var, body_var);
+              let body_ctx = List.cons!({term.name,typv.xtyp}, ctx);
+              Kind.Term.check(term.body(body_var), Maybe.some!(body_typ), defs, body_ctx, Kind.MPath.o(path), orig);
+              return type.value;
+            },
+            //hol: do Kind.Check {
+              //let lam_type = Kind.Term.all(Bool.false, "", "", Kind.Term.hol(Bits.e), (s,x) Kind.Term.hol(Bits.e));
+              //let lam_term = Kind.Term.ann(Bool.false, term, lam_type);
+              //Kind.Check.result!(type, [Kind.Error.patch(Kind.MPath.to_bits(path),lam_term)]);
+            //},
+            _: do Kind.Check {
+              let expected = Either.left!!("(function type)");
+              let detected = Either.right!!(type.value);
+              Kind.Check.result!(type, [Kind.Error.type_mismatch(orig, expected, detected, ctx)]);
+            }
+          };
+        }
+      },
+      app: do Kind.Check {
+        var func_typ = Kind.Term.check(term.func, Maybe.none!, defs, ctx, Kind.MPath.o(path), orig);
+        let func_typ = Kind.Term.reduce(func_typ, defs);
+        case func_typ {
+          all: do Kind.Check {
+            Kind.Term.check(term.argm, Maybe.some!(func_typ.xtyp), defs, ctx, Kind.MPath.i(path), orig);
+            return func_typ.body(term.func, term.argm);
+          },
+          _: do Kind.Check {
+            let expected = Either.left!!("(function type)");
+            let detected = Either.right!!(func_typ);
+            Kind.Check.result!(type, [Kind.Error.type_mismatch(orig, expected, detected, ctx)]);
+          },
+        };
+      },
+      ann:
+        if term.done then do Kind.Check {
+          return term.type;
+        } else do Kind.Check {
+          Kind.Term.check(term.term, Maybe.some!(term.type), defs, ctx, Kind.MPath.o(path), orig);
+          Kind.Term.check(term.type, Maybe.some!(Kind.Term.typ), defs, ctx, Kind.MPath.i(path), orig);
+          return term.type;
+        },
+      let: do Kind.Check {
+        let ctx_size = List.length!(ctx);
+        var expr_typ = Kind.Term.check(term.expr, Maybe.none!, defs, ctx, Kind.MPath.o(path), orig);
+        let body_val = term.body(Kind.Term.var(term.name, ctx_size));
+        let body_ctx = List.cons!({term.name, expr_typ}, ctx);
+        var body_typ = Kind.Term.check(body_val, type, defs, body_ctx, Kind.MPath.i(path), orig);
+        return body_typ;
+      },
+      def: do Kind.Check {
+        let ctx_size = List.length!(ctx);
+        var expr_typ = Kind.Term.check(term.expr, Maybe.none!, defs, ctx, Kind.MPath.o(path), orig);
+        let body_val = term.body(Kind.Term.ann(Bool.true, term.expr, expr_typ));
+        let body_ctx = List.cons!({term.name, expr_typ}, ctx);
+        var body_typ = Kind.Term.check(body_val, type, defs, body_ctx, Kind.MPath.i(path), orig);
+        return body_typ;
+        //Kind.Term.check(term.body(term.expr), type, defs, ctx, path, orig);
+      },
+      nat: do Kind.Check {
+        return Kind.Term.ref("Nat");
+      },
+      chr: do Kind.Check {
+        return Kind.Term.ref("Char");
+      },
+      str: do Kind.Check {
+        return Kind.Term.ref("String");
+      },
+      cse: do Kind.Check {
+        let expr = term.expr;
+        var etyp = Kind.Term.check(expr, Maybe.none!, defs, ctx, Kind.MPath.o(path), orig);
+        // If cse has no moti and we have an inferred type, then we guess it
+        // with the information we have, substituting selfs and indices.
+        // Otherwise, we just replace it by a normal hole.
+        let dsug = case term.moti {
+          none:
+            let moti = case type {
+              none:
+                Kind.Term.hol(Bits.e),
+              some:
+                let size = List.length!(ctx);
+                let typv = Kind.Term.normalize(type.value, Map.new!);
+                let moti = Kind.SmartMotive.make(term.name, term.expr, etyp, typv, size, defs);
+                moti,
+            };
+            Maybe.some!(Kind.Term.cse(term.path, term.expr, term.name, term.with, term.cses, Maybe.some!(moti))),
+          some:
+            Kind.Term.desugar_cse(term.expr, term.name, term.with, term.cses, term.moti.value, etyp, defs, ctx),
+        };
+        case dsug {
+          none: Kind.Check.result!(type, [Kind.Error.cant_infer(orig, term, ctx)]),
+          some: Kind.Check.result!(type, [Kind.Error.patch(Kind.MPath.to_bits(path),dsug.value)]),
+        };
+      },
+      gol: do Kind.Check {
+        Kind.Check.result!(type, [
+          Kind.Error.show_goal(term.name, term.dref, term.verb, type, ctx)
+        ]);
+      },
+      hol: do Kind.Check {
+        Kind.Check.result!(type, []);
+      },
+      ori: do Kind.Check {
+        Kind.Term.check(term.expr, type, defs, ctx, path, Maybe.some!(term.orig));
+      },
+    };
+    case type {
+      none:
+        Kind.Check.result!(Maybe.some!(infr), []),
+      some: do Kind.Check {
+        var eqls = Kind.Term.equal(type.value, infr, defs, List.length!(ctx), Set.mut.new(unit));
+        if eqls then do Kind.Check {
+          return type.value;
+        } else do Kind.Check {
+          Kind.Check.result!(type, [
+            Kind.Error.type_mismatch(
+              orig,
+              Either.right!!(type.value),
+              Either.right!!(infr),
+              ctx)
+          ]);
+        }
+      }
+    };
+  }

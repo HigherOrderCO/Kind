@@ -1,0 +1,20 @@
+F64.V3.polygon_to_segments.cons(
+  pos: F64.V3,
+  dir: F64.V3,
+  pt_b: F64.V3,
+  segs: (Maybe(F64.V3) -> Maybe(F64.V3) -> List(F64.Segment)),
+  pt_a: Maybe(F64.V3),
+  pt_0: Maybe(F64.V3)):
+  List(F64.Segment)
+  case pt_a {
+   none: segs(Maybe.some<F64.V3>(pt_b), Maybe.some<F64.V3>(pt_b)),
+   some:
+    let pt_0 = case pt_0 {
+      none: Maybe.some<F64.V3>(pt_b),
+      some: pt_0
+    }
+    let p0 = F64.V3.polygon_to_segments.transform(pos, dir, pt_a.value)
+    let p1 = F64.V3.polygon_to_segments.transform(pos, dir, pt_b)
+    let sg = F64.Segment.new(p0, p1)
+    List.cons<F64.Segment>(sg, segs(Maybe.some<F64.V3>(pt_b), pt_0))
+  }

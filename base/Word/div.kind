@@ -1,0 +1,2 @@
+Word.div<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  Word.div<size>(a,b)

@@ -1,0 +1,2 @@
+Kind.MPath.o(path: Maybe(Kind.Path)): Maybe(Kind.Path)
+  Maybe.mapped!(path)!(Kind.Path.o)

@@ -1,0 +1,8 @@
+F64.compare_numbers(a: F64, b: F64): F64.Ordering
+  case F64.eql(a, b){
+    true : F64.Ordering.EQ
+    false: case F64.ltn(b, a){
+      true : F64.Ordering.GT
+      false: F64.Ordering.LT
+    }
+  }

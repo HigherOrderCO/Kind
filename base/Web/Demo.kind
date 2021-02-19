@@ -1,0 +1,41 @@
+// A demo application that renders a square on the screen
+Web.Demo: App(Pair(U32,U32))
+  // Allocates the mutable buffer
+  let img = Image3D.alloc_capacity(256u)
+
+  // Application state: just a position
+  def init = {128u, 128u}
+
+  // Render loop: draws a square at the stored position
+  def draw = (state)
+    let {pos_x, pos_y} = state
+    def col = (x, y)
+      let r = U32.add(96u,U32.mul(x,4u)) // red from 96 to 160
+      let g = U32.add(96u,U32.mul(x,4u)) // green from 96 to 160
+      let b = 128u                       // blue constant 128
+      let a = 255u                       // alpha constant 255
+      Col32.new(r, g, b, a)
+    let img = Image3D.clear(img)
+    let img = Image3D.Draw.square(pos_x, pos_y, 128u, 16u, 16u, col, img)
+    App.Render.pix(img)
+
+  // Event handler: moves the position when ASDW are pressed
+  def when = (event, state)
+    case event {
+      init: []
+      tick: []
+      xkey: [
+        let {old_x, old_y} = state
+        let {new_x, new_y} =
+          if      U16.eql(event.code, 'A') then {U32.sub(old_x, 4u), old_y}
+          else if U16.eql(event.code, 'D') then {U32.add(old_x, 4u), old_y}
+          else if U16.eql(event.code, 'W') then {old_x, U32.sub(old_y, 4u)}
+          else if U16.eql(event.code, 'S') then {old_x, U32.add(old_y, 4u)}
+          else                                  {old_x, old_y}
+        App.Action.state!(if event.down then {new_x, new_y} else {old_x, old_y})
+      ]
+      post: []
+    }
+
+  // The application
+  App.new!(init, draw, when)

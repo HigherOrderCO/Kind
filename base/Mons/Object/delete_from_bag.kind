@@ -1,0 +1,9 @@
+Mons.Object.delete_from_bag(idx: U32, hero_obj: Mons.Object): Mons.Object
+  let idx_nat = U32.to_nat(idx)
+  open hero_obj
+  let qtd = List.length!(hero_obj.bag)
+  if Nat.eql(qtd, 0) then hero_obj
+  else
+    let new_bag = List.delete_at!(idx_nat, hero_obj.bag)
+    let hero_obj = Mons.Object.set_bag(new_bag, hero_obj)
+    Mons.Object.set_mon(u0, hero_obj)
