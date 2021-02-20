@@ -5,15 +5,13 @@ A cute proof and programming language.
 Usage
 -----
 
-1. Install using the JavaScript release:
-
-    ```bash
-    npm i -g kind-lang                             # installs Kind
-    git clone https://github.com/uwu-tech/kind     # clones base libs
-    cd kind/base                                   # enters base dir
-    kind Main                                      # checks Main.kind
-    kind Main --run                                # runs Main
-    ```
+```bash
+npm i -g kind-lang                             # installs Kind
+git clone https://github.com/uwu-tech/kind     # clones base libs
+cd kind/base                                   # enters base libs
+kind Main                                      # checks Main.kind
+kind Main --run                                # runs Main
+```
 
 *Right now, you must be at `kind/base` to use the language.*
 
@@ -97,7 +95,7 @@ Nat.add.zero(a: Nat): a == Nat.add(a, 0)
     succ: apply(Nat.succ, Nat.add.zero(a.pred))
   }!
 
-// Proof that `1 + (a + b) == a + (1 + b)
+// Proof that `1 + (a + b) == a + (1 + b)`
 Nat.add.succ(a: Nat, b: Nat): Nat.succ(a + b) == (a + Nat.succ(b))
   case a {
     zero: refl
