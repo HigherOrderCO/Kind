@@ -1,22 +1,60 @@
-Kind.Term.equal.extra_holes(
+// When the equality algorithm returns true on the recursive case, it won't dig
+// further on the identified terms, so it won't fill some potential holes. So,
+// for example, if it identifies `Pair A B == Pair _ B`, it won't fill `_ <- A`,
+// because it will return true without recursing further. This will fill these
+// holes, as long as the arity and function of the outer application matches.
+
+// Finds the function name and arity
+Kind.Term.equal.extra_holes.funari(
+  term: Kind.Term,
+  arity: Nat,
+): Maybe(Pair(String, Nat))
+  case term {
+    app: Kind.Term.equal.extra_holes.funari(term.func, Nat.succ(arity))
+    ori: Kind.Term.equal.extra_holes.funari(term.expr, arity)
+    ref: some({term.name, arity})
+    var: some({term.name, arity}) // is this right?
+    _: none
+  }
+
+// Finds matched holes
+Kind.Term.equal.extra_holes.filler(
   a: Kind.Term,
   b: Kind.Term,
 ): Kind.Check(Unit)
   case a {
     app: case b {
       app: do Kind.Check {
-        Kind.Term.equal.extra_holes(a.func, b.func);
-        Kind.Term.equal.extra_holes(a.argm, b.argm);
+        Kind.Term.equal.extra_holes.filler(a.func, b.func);
+        Kind.Term.equal.extra_holes.filler(a.argm, b.argm);
       },
-      ori: Kind.Term.equal.extra_holes(a, b.expr),
+      ori: Kind.Term.equal.extra_holes.filler(a, b.expr),
       hol: do Kind.Check { Kind.Term.equal.hole(b.path, a); return Unit.new; }, 
       _: do Kind.Check { return Unit.new; },
     },
-    ori: Kind.Term.equal.extra_holes(a.expr, b),
+    ori: Kind.Term.equal.extra_holes.filler(a.expr, b),
     hol: do Kind.Check { Kind.Term.equal.hole(a.path, b); return Unit.new; },
     _: case b {
-      ori: Kind.Term.equal.extra_holes(a, b.expr),
+      ori: Kind.Term.equal.extra_holes.filler(a, b.expr),
       hol: do Kind.Check { Kind.Term.equal.hole(b.path, a); return Unit.new; }, 
       _: do Kind.Check { return Unit.new; },
     }
   }
+
+// Checks eligibility and calls the filler
+Kind.Term.equal.extra_holes(a: Kind.Term, b: Kind.Term): Kind.Check(Unit)
+  case Kind.Term.equal.extra_holes.funari(a,0) as a_funari {
+    none: do Kind.Check { return Unit.new }
+    some: case Kind.Term.equal.extra_holes.funari(b,0) as b_funari {
+      none: do Kind.Check { return Unit.new }
+      some:
+        let {a_fun, a_ari} = a_funari.value
+        let {b_fun, b_ari} = b_funari.value
+        let same_fun = String.eql(a_fun, b_fun)
+        let same_ari = Nat.eql(a_ari, b_ari)
+        if Bool.and(same_fun, same_ari)
+        then Kind.Term.equal.extra_holes.filler(a, b)
+        else do Kind.Check { return Unit.new }
+    }
+  }
+  

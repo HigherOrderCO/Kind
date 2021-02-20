@@ -1,8 +1,21 @@
-Main: IO(Unit)
-  do IO {
-    IO.print("Hello, world!")
+Nat.add.zero(a: Nat): a == Nat.add(a, 0)
+  case a {
+    zero: refl
+    succ: apply(Nat.succ, Nat.add.zero(a.pred))
+  }!
 
-    var name = IO.prompt("What is your name? ")
+Nat.add.succ(a: Nat, b: Nat): Nat.succ(a + b) == (a + Nat.succ(b))
+  case a {
+    zero: refl
+    succ: apply(Nat.succ, Nat.add.succ(a.pred, b))
+  }!
 
-    IO.print("Hello, " | name | "!")
-  }
+Nat.add.comm(a: Nat, b: Nat): (a + b) == (b + a)
+  case a {
+    zero:
+      Nat.add.zero(b)
+    succ: 
+      let p0 = Nat.add.succ(b, a.pred)
+      let p1 = Nat.add.comm(b, a.pred)
+      p0 :: rewrite X in Nat.succ(X) == _ with p1
+  }!

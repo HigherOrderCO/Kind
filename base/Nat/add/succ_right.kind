@@ -4,9 +4,7 @@ Nat.add.succ_right(a: Nat, b: Nat)
     zero: refl
     succ:
       let h = Nat.add.succ_right(a.pred, b)
-      let h1 = Equal.apply!!<Nat.add(a.pred, Nat.succ(b))
-			    ,Nat.succ(Nat.add(a.pred,b))
-			    ,Nat.succ>(h)
+      let h1 = apply(Nat.succ, h)
       h1
 
   }!

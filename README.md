@@ -90,7 +90,30 @@ type Equal <A: Type> <a: A> ~ (b: A) {
 ### Some proofs
 
 ```
-... TODO ...
+// Proof that `a == a + 0`
+Nat.add.zero(a: Nat): a == Nat.add(a, 0)
+  case a {
+    zero: refl
+    succ: apply(Nat.succ, Nat.add.zero(a.pred))
+  }!
+
+// Proof that `1 + (a + b) == a + (1 + b)
+Nat.add.succ(a: Nat, b: Nat): Nat.succ(a + b) == (a + Nat.succ(b))
+  case a {
+    zero: refl
+    succ: apply(Nat.succ, Nat.add.succ(a.pred, b))
+  }!
+
+// Proof that addition is commutative
+Nat.add.comm(a: Nat, b: Nat): (a + b) == (b + a)
+  case a {
+    zero:
+      Nat.add.zero(b)
+    succ: 
+      let p0 = Nat.add.succ(b, a.pred)
+      let p1 = Nat.add.comm(b, a.pred)
+      p0 :: rewrite X in Nat.succ(X) == _ with p1
+  }!
 ```
 
 Resources
