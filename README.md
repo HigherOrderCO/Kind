@@ -8,7 +8,7 @@ Usage
 ```bash
 npm i -g kind-lang                             # installs Kind
 git clone https://github.com/uwu-tech/kind     # clones base libs
-cd kind/base                                   # enters base libs
+cd Kind/base                                   # enters base libs
 kind Main                                      # checks Main.kind
 kind Main --run                                # runs Main
 ```
