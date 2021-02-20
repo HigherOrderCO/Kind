@@ -11,7 +11,7 @@
   "dependencies": {
     "inferno": "^7.4.6",
     "inferno-hyperscript": "^7.4.6",
-    "kind-lang": "^1.0.0"
+    "kind-lang": "^1.0.3"
   },
   "devDependencies": {
     "cors": "^2.8.5",
