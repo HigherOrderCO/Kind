@@ -8,11 +8,11 @@ Usage
 1. Install using the JavaScript release:
 
     ```bash
-    npm i -g kind-lang                             # install
-    git clone https://github.com/uwu-tech/kind     # clone base libs
+    npm i -g kind-lang                             # installs Kind
+    git clone https://github.com/uwu-tech/kind     # clones base libs
     cd kind/base                                   # enters base dir
-    kind Main                                      # type-checks Main.kind
-    kind Main --run                                # runs Main from Main.kind
+    kind Main                                      # checks Main.kind
+    kind Main --run                                # runs Main
     ```
 
 *Right now, you must be at `kind/base` to use the language.*
