@@ -207,8 +207,8 @@ Datatype
 --------
 ```
 type Name (A: Par0, B: Par1 ...) ~ (i: Idx0, j: Idx1 ...) {
-  ctor0(field0: Fld0, field1: Fld1 ...) ~ (i: id0, j: idx1 ...)
-  ctor1(field0: Fld0, field1: Fld1 ...) ~ (i: id0, j: idx1 ...)
+  ctor0(field0: Fld0, field1: Fld1 ...) ~ (i = id0, j = idx1 ...)
+  ctor1(field0: Fld0, field1: Fld1 ...) ~ (i = id0, j = idx1 ...)
   ...
 }
 ```
@@ -236,7 +236,7 @@ type List (A: Type) {
 We can have more complex types as the following type, in Agda:
 
 ```
-data Vector (A : Set) : (len : Nat) -> Set where
+data Vector <A : Set> : (size : Nat) -> Set where
   nil  : Vector A zero
   cons : (n : Nat) -> (head : A) -> (tail : Vector A n) -> Vector A (succ n)
 ```
@@ -244,9 +244,9 @@ data Vector (A : Set) : (len : Nat) -> Set where
 That can be written in Kind as:
 
 ```
-type Vector (A: Type) ~ (len: Nat) {
-  nil                                      ~ (len: zero)
-  cons(n: Nat, head: A, tail: Vector(A,n)) ~ (len: succ(n))
+type Vector <A: Type> ~ (size: Nat) {
+  nil                                      ~ (size = zero)
+  cons(n: Nat, head: A, tail: Vector(A,n)) ~ (size = succ(n))
 }
 ```
 
@@ -609,9 +609,9 @@ of bits of statically known length:
 
 ```
 type Word ~ (size: Nat) {
-  e                              ~ (size: Nat.zero),
-  o<size: Nat>(pred: Word(size)) ~ (size: Nat.succ(size)),
-  i<size: Nat>(pred: Word(size)) ~ (size: Nat.succ(size)),
+  e                              ~ (size = Nat.zero),
+  o<size: Nat>(pred: Word(size)) ~ (size = Nat.succ(size)),
+  i<size: Nat>(pred: Word(size)) ~ (size = Nat.succ(size)),
 }
 ```
 

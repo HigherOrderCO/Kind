@@ -21,21 +21,12 @@ To start proving theorems, first you must be aware of the `Equal` type:
 
 ```
 type Equal <A: Type> (a: A) ~ (b: A) {
-  refl ~ (b: a)
+  refl ~ (b = a)
 }
 ```
 
-If that looks alien to you, don't worry. All you need to know is the following:
-`Int` and `String` are simple types, `List(String)`, `Pair(Int, String)` are
-polymorphic types (because you have types inside types), `Equal(Int,2,2)`,
-`Equal(Bool,true,false)` and `Equal(Int,4,10)` are dependent types (because you
-have values inside types). When you have a `x : Int`, that means `x` is a
-number. When you have a `xs : List(Int)`, that means `xs` is a list of numbers.
-When you have a `e : Equal(A,a,b)`, that means `e` is a **proof** that `a` and
-`b` are equal. Equality proofs and lists are more similar than you think: both
-are just regular datatypes that can be constructed and deconstructed.
-
-The `Equal` type has only one constructor, `refl`, which has the following type:
+If that looks alien to you, don't worry for now, it will become clear. The
+`Equal` type has only one constructor, `refl`, which has the following type:
 
 ```
 Equal.refl : (A: Type) -> (x: A) -> Equal(A,x,x)

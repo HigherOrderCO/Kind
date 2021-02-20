@@ -2,10 +2,10 @@ Kind.Parser.datatype: Parser(Kind.Datatype)
   do Parser {
     Kind.Parser.text("type ");
     var name = Kind.Parser.name1; 
-    var pars = Parser.maybe!(Kind.Parser.binder);
+    var pars = Parser.maybe!(Kind.Parser.binder(":"));
     var inds = Parser.maybe!(do Parser {
       Kind.Parser.text("~");
-      Kind.Parser.binder;
+      Kind.Parser.binder(":");
     });
     let pars = Maybe.default!([], pars);
     let inds = Maybe.default!([], inds);

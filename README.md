@@ -75,13 +75,13 @@ type List <A: Type> {
 
 // A list with a statically known size
 type Vector <A: Type> ~ (size: Nat) {
-  nil                                              ~ (size: 0) 
-  cons(size: Nat, head: Nat, tail: Vector(A,size)) ~ (size: 1 + size)
+  nil                                              ~ (size = 0) 
+  cons(size: Nat, head: Nat, tail: Vector(A,size)) ~ (size = 1 + size)
 }
 
 // The propositional equality
 type Equal <A: Type> <a: A> ~ (b: A) {
-  refl ~ (b: a)
+  refl ~ (b = a)
 }
 ```
 

@@ -1,7 +1,7 @@
-Kind.Parser.name_term: Parser(Pair(Kind.Name, Kind.Term))
+Kind.Parser.name_term(sep: String): Parser(Pair(Kind.Name, Kind.Term))
   do Parser {
     var name = Kind.Parser.name;
-    Kind.Parser.text(":");
+    Kind.Parser.text(sep);
     var type = Kind.Parser.term;
     return {name, type};
   }
