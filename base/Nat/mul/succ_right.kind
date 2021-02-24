@@ -1,0 +1,3 @@
+Nat.mul.succ_right(a: Nat, b: Nat)
+: (a * Nat.succ(b)) == a + (a * b)
+  refl
