@@ -1,0 +1,8 @@
+Bool.equal.excluded_middle(a: Bool, b: Bool): Logic.ExcludedMiddle(a == b)
+  case Bool.equal.either(a, b) as p0 {
+    left: Either.left!!!
+    right:
+      let p1 = Bool.equal.eq_to_neq(a, Bool.not(b), p0.value)
+      let p2 = p1 :: rewrite x in Not(a == x) with Bool.double_negation(b)
+      Either.right!!(p2)
+  }!

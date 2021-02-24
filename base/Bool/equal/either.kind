@@ -1,0 +1,13 @@
+Bool.equal.either(a: Bool, b: Bool): Either(a == b, a == Bool.not(b))
+  case a {
+    true:
+      case b {
+        true: Either.left!!!
+        false: Either.right!!!
+      }!
+    false:
+      case b {
+        true: Either.right!!!
+        false: Either.left!!!
+      }!
+  }!
