@@ -1,0 +1,7 @@
+Nat.mul.succ_left(a: Nat, b: Nat)
+: (Nat.succ(a) * b) == b + (a * b)
+ let h = Nat.mul.succ_right(b,a)
+ let left = h :: rewrite x in x == _ with Nat.mul.comm(_ _)
+ let final = left
+  :: rewrite x in _ == Nat.add(b,x) with Nat.mul.comm(_ _)
+final
