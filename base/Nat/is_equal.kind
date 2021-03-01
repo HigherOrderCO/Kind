@@ -1,0 +1,14 @@
+Nat.is_equal(a: Nat, b: Nat): Decidable(Equal(Nat, a, b))
+  case a {
+    zero: case b {
+      zero: Decidable.yep!(refl)
+      succ: Decidable.nop!(Nat.zero_neq_succ(b.pred))
+    }!
+    succ: case b {
+      zero: Decidable.nop!(Nat.succ_neq_zero(a.pred))
+      succ: case Nat.is_equal(a.pred, b.pred) as dec {
+        yep: Decidable.yep!(apply(Nat.succ, dec.proof))
+        nop: Decidable.nop!((e) dec.proof(apply(Nat.pred, e)))
+      }!
+    }!
+  }: Decidable(Equal(Nat, a, b))

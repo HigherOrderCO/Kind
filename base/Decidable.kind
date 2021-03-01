@@ -1,0 +1,4 @@
+type Decidable <A: Type> {
+  yep(proof: A)
+  nop(proof: Not(A))
+}
