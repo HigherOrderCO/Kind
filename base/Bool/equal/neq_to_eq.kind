@@ -1,0 +1,5 @@
+Bool.equal.neq_to_eq(a: Bool, b: Bool, ne: a != b): a == Bool.not(b)
+  case Bool.equal.either(a, b) as p0 {
+    left: Empty.absurd!!
+    right: p0.value
+  }!
