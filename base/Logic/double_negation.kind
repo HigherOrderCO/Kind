@@ -1,0 +1,7 @@
+Logic.double_negation<A: Type>(lem: Logic.ExcludedMiddle(A), dn: Not(Not(A))): A
+  case lem {
+    left: lem.value
+    right:
+      let p0 = dn(lem.value)
+      Empty.absurd!(p0)
+  }!
