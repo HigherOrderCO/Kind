@@ -1,0 +1,17 @@
+Int.extract<T: Type>(
+  a: Nat,
+  b: Nat,
+  f: Nat -> Nat -> T,
+): Either(
+  Int.new(a, b, (i) T, f) == f(0, Nat.sub(b,a)),
+  Int.new(a, b, (i) T, f) == f(Nat.sub(a,b), 0))
+  case a {
+    zero: Either.left!!(refl)
+    succ: case b {
+      zero: Either.right!!(refl)
+      succ: case Int.extract<T>(a.pred, b.pred, f) as ext {
+        left: Either.left!!(ext.value)
+        right: Either.right!!(ext.value)
+      }!
+    }!
+  }!

@@ -13,6 +13,7 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.let,
       Kind.Parser.get,
       Kind.Parser.def,
+      Kind.Parser.goal_rewrite,
       Kind.Parser.if,
       Kind.Parser.char,
       Kind.Parser.string,
