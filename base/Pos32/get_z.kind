@@ -1,0 +1,3 @@
+Pos32.get_z(p: Pos32): U32
+  let z = U32.shr(p, 24u)
+  U32.and(z, 4095u)

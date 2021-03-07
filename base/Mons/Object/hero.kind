@@ -1,2 +1,2 @@
 Mons.Object.hero: Mons.Object
-  Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.fire, u1))
+  Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.fire, 1u))

@@ -1,7 +1,7 @@
 Mons.Kind.get_agi(kind: Mons.Kind): U32
  case kind{
   Mons: kind.agi
-  Const: u3
-  Terrain: u3
-  Interactive: u3
+  Const: 3u
+  Terrain: 3u
+  Interactive: 3u
  }

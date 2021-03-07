@@ -1,0 +1,3 @@
+Pos32.get_y(p: Pos32): U32
+  let y = U32.shr(p, 12u)
+  U32.and(y, 4095u )
