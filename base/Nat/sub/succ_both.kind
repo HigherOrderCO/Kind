@@ -1,0 +1,5 @@
+Nat.sub.succ_both(a: Nat, b: Nat): Nat.sub(Nat.succ(a), Nat.succ(b)) == Nat.sub(a, b)
+  case a {
+    zero: refl
+    succ: refl
+  }!

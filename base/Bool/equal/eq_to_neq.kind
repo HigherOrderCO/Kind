@@ -1,0 +1,5 @@
+Bool.equal.eq_to_neq(a: Bool, b: Bool, e: a == b): a != Bool.not(b)
+  (et) let p0 = et :: rewrite x in x == Bool.not(b) with e
+       let p1 = Bool.equal.b_neq_not_b(b)
+       let p2 = p1(p0)
+       p2

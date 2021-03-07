@@ -1,0 +1,5 @@
+Bool.equal.b_neq_not_b(b: Bool): b != Bool.not(b)
+  case b {
+    true: (e) Bool.true_neq_false(e)
+    false: (e) Bool.false_neq_true(e)
+  }!

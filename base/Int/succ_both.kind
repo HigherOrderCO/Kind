@@ -1,0 +1,11 @@
+Int.succ_both(a: Nat, b: Nat): Int.new(a, b) == Int.new(Nat.succ(a), Nat.succ(b))
+  case a {
+    zero: case b {
+      zero: refl
+      succ: refl
+    }!
+    succ: case b {
+      zero: refl
+      succ: refl
+    }!
+  }!

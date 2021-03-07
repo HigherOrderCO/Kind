@@ -1,0 +1,6 @@
+Nat.add.succ_both(a: Nat, b: Nat)
+: (Nat.succ(a) + Nat.succ(b)) == Nat.succ(Nat.succ(a + b))
+  case a {
+    zero: refl
+    succ: apply(Nat.succ, Nat.add.succ_both(a.pred, b))
+  }!

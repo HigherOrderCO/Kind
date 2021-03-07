@@ -1,0 +1,58 @@
+Int.add.def1.aux0(a: Nat, b: Nat, i: a == b): Int.new(0, a) == Int.new(0, b)
+  apply(Int.new(0), i)
+
+Int.add.def1(ax: Nat, ay: Nat, bx: Nat, by: Nat): Int.add(Int.new(ax,ay),Int.new(bx,by)) == Int.new(ax+bx, ay+by)
+  case Int.normalize(ax,ay) as ai {
+    left: case Int.normalize(bx,by) as bi {
+      left: case Int.normalize(ax+bx, ay+by) as ci {
+        left:
+          rewrite x in Int.add(x,_) == _ with ai.value
+          rewrite x in Int.add(_,x) == _ with bi.value
+          rewrite x in _            == x with ci.value
+          ?a
+        right:
+          rewrite x in Int.add(x,_) == _ with ai.value
+          rewrite x in Int.add(_,x) == _ with bi.value
+          rewrite x in _            == x with ci.value
+          ?b
+      }!
+      right: case Int.normalize(ax+bx, ay+by) as ci {
+        left:
+          rewrite x in Int.add(x,_) == _ with ai.value
+          rewrite x in Int.add(_,x) == _ with bi.value
+          rewrite x in _            == x with ci.value
+          ?c
+        right:
+          rewrite x in Int.add(x,_) == _ with ai.value
+          rewrite x in Int.add(_,x) == _ with bi.value
+          rewrite x in _            == x with ci.value
+          ?d
+      }!
+    }!
+    right: case Int.normalize(bx,by) as bi {
+      left: case Int.normalize(ax+bx, ay+by) as ci {
+        left:
+          rewrite x in Int.add(x,_) == _ with ai.value
+          rewrite x in Int.add(_,x) == _ with bi.value
+          rewrite x in _            == x with ci.value
+          ?e
+        right:
+          rewrite x in Int.add(x,_) == _ with ai.value
+          rewrite x in Int.add(_,x) == _ with bi.value
+          rewrite x in _            == x with ci.value
+          ?f
+      }!
+      right: case Int.normalize(ax+bx, ay+by) as ci {
+        left:
+          rewrite x in Int.add(x,_) == _ with ai.value
+          rewrite x in Int.add(_,x) == _ with bi.value
+          rewrite x in _            == x with ci.value
+          ?g-18-66-66-74
+        right:
+          rewrite x in Int.add(x,_) == _ with ai.value
+          rewrite x in Int.add(_,x) == _ with bi.value
+          rewrite x in _            == x with ci.value
+          Int.add.def1.aux0(_, _, ?h)
+      }!
+    }!
+  }!
