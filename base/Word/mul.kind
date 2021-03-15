@@ -1,2 +1,2 @@
-Word.mul<size: Nat>(a: Word(size), b: Word(size)): Word(size)
-  Word.mul<size>(a,b)
+Word.mul(size: Nat)(a: Word(size), b: Word(size)): Word(size)
+  Word.mul.go<size, size>(a, b, Word.zero(size))
