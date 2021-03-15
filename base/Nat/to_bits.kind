@@ -1,5 +1,5 @@
 Nat.to_bits(n: Nat): Bits
   case n {
-    zero: Bits.e,
+    zero: Bits.o(Bits.e),
     succ: Bits.inc(Nat.to_bits(n.pred))
   }
