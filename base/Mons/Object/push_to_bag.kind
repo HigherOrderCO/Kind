@@ -4,7 +4,7 @@ Mons.Object.push_to_bag(obj: Mons.Object, hero: Mons.Object): Mons.Object
   let qtd = List.length!(hero.bag)
   case obj.kin as kind {
     Mons: 
-      let obj = Mons.Object.set_dmg(obj, u0)
+      let obj = Mons.Object.set_dmg(obj, 0u)
       if Nat.ltn(qtd, 3) then
         let new_bag = List.append!(hero.bag, obj)
         Mons.Object.set_bag(new_bag, hero)
