@@ -1,0 +1,2 @@
+Pos32.get_x(pos: Pos32): Pos32
+  U32.and(pos, 4095u)

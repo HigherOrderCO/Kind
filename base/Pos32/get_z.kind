@@ -1,0 +1,2 @@
+Pos32.get_z(pos: Pos32): Pos32
+  U32.shr(U32.and(pos, 4278190080u), 24u)

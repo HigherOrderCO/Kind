@@ -1,0 +1,39 @@
+// A demo application that renders a square on the screen
+Web.Jogo: App(Pair(U32,U32))
+  let img = Image3D.alloc_capacity(3200u)
+  def init = {128u, 128u}
+
+  def draw = (state)
+    let {pos_x, pos_y} = state
+    let img = Image3D.clear(img)
+    let img = Image3D.Draw.image(pos_x, pos_y, 0u, Web.Jogo.hero, img)
+    let img = Image3D.Draw.image(0u, 0u, 0u, Web.Jogo.hero, img)
+    App.Render.pix(img)
+
+  def when = (event, state)
+    case event {
+      init: []
+      tick: []
+      xkey: [
+        let {old_x, old_y} = state
+        let {new_x, new_y} =
+          if U16.eql(event.code, 'A') then
+            {U32.sub(old_x, 4u), old_y}
+          else if U16.eql(event.code, 'D') then
+            {U32.add(old_x, 4u), old_y}
+          else if U16.eql(event.code, 'W') then
+            {old_x, U32.sub(old_y, 4u)}
+          else if U16.eql(event.code, 'S') then
+            {old_x, U32.add(old_y, 4u)}
+          else
+            {old_x, old_y}
+        App.Action.state!(
+          if event.down then
+            {new_x, new_y}
+          else
+            {old_x, old_y})
+      ]
+      post: []
+    }
+
+  App.new!(init, draw, when)

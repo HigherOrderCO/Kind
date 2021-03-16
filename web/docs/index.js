@@ -2572,7 +2572,7 @@ module.exports = class AppPlay extends Component {
             var p_z = (pos >>> 24) & 0xFF;
             var idx = p_y * canvas.width + p_x;
             var dep = canvas.depth_u8[idx];
-            if (p_z > dep) {
+            if (p_z >= dep) {
               canvas.image_u32[idx] = col;
               canvas.depth_u8[idx] = p_z;
               canvas.clear.data[canvas.clear.length++] = idx;
@@ -2743,6 +2743,7 @@ module.exports = class AppPlay extends Component {
 
 module.exports = {
   'Web.Demo': __webpack_require__.e(/* import() */ 987).then(__webpack_require__.t.bind(__webpack_require__, 987, 23)),
+  'Web.Jogo': __webpack_require__.e(/* import() */ 160).then(__webpack_require__.t.bind(__webpack_require__, 160, 23)),
 }
 
 

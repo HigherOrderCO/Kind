@@ -1,8 +1,3 @@
-(self["webpackChunkkind_web"] = self["webpackChunkkind_web"] || []).push([[987],{
-
-/***/ 987:
-/***/ ((module) => {
-
 module.exports = (function() {
     function word_to_u16(w) {
         var u = 0;
@@ -709,124 +704,309 @@ module.exports = (function() {
     };
     const Pair$new = x0 => x1 => Pair$new$(x0, x1);
 
+    function Image3D$set_length$(_length$1, _img$2) {
+        var self = _img$2;
+        switch (self._) {
+            case 'Image3D.new':
+                var $128 = self.capacity;
+                var $129 = self.buffer;
+                var $130 = Image3D$new$(_length$1, $128, $129);
+                var $127 = $130;
+                break;
+        };
+        return $127;
+    };
+    const Image3D$set_length = x0 => x1 => Image3D$set_length$(x0, x1);
+
+    function Image3D$clear$(_img$1) {
+        var $131 = Image3D$set_length$(0, _img$1);
+        return $131;
+    };
+    const Image3D$clear = x0 => Image3D$clear$(x0);
+
+    function Image3D$get_len$(_img$1) {
+        var self = _img$1;
+        switch (self._) {
+            case 'Image3D.new':
+                var $133 = self.length;
+                var $134 = $133;
+                var $132 = $134;
+                break;
+        };
+        return $132;
+    };
+    const Image3D$get_len = x0 => Image3D$get_len$(x0);
+    const U32$for = a0 => a1 => a2 => a3 => (u32_for(a0, a1, a2, a3));
+
+    function Word$trim$(_new_size$2, _word$3) {
+        var self = _new_size$2;
+        if (self === 0n) {
+            var $136 = Word$e;
+            var $135 = $136;
+        } else {
+            var $137 = (self - 1n);
+            var self = _word$3;
+            switch (self._) {
+                case 'Word.o':
+                    var $139 = self.pred;
+                    var $140 = Word$o$(Word$trim$($137, $139));
+                    var $138 = $140;
+                    break;
+                case 'Word.i':
+                    var $141 = self.pred;
+                    var $142 = Word$i$(Word$trim$($137, $141));
+                    var $138 = $142;
+                    break;
+                case 'Word.e':
+                    var $143 = Word$o$(Word$trim$($137, Word$e));
+                    var $138 = $143;
+                    break;
+            };
+            var $135 = $138;
+        };
+        return $135;
+    };
+    const Word$trim = x0 => x1 => Word$trim$(x0, x1);
+    const Unit$new = 1;
+
+    function Array$extract_tip$(_arr$2) {
+        var self = _arr$2;
+        switch (self._) {
+            case 'Array.tip':
+                var $145 = self.value;
+                var $146 = $145;
+                var $144 = $146;
+                break;
+            case 'Array.tie':
+                var $147 = Unit$new;
+                var $144 = $147;
+                break;
+        };
+        return $144;
+    };
+    const Array$extract_tip = x0 => Array$extract_tip$(x0);
+
+    function Pair$(_A$1, _B$2) {
+        var $148 = null;
+        return $148;
+    };
+    const Pair = x0 => x1 => Pair$(x0, x1);
+
+    function Array$extract_tie$(_arr$3) {
+        var self = _arr$3;
+        switch (self._) {
+            case 'Array.tie':
+                var $150 = self.lft;
+                var $151 = self.rgt;
+                var $152 = Pair$new$($150, $151);
+                var $149 = $152;
+                break;
+            case 'Array.tip':
+                var $153 = Unit$new;
+                var $149 = $153;
+                break;
+        };
+        return $149;
+    };
+    const Array$extract_tie = x0 => Array$extract_tie$(x0);
+
+    function Word$foldl$(_nil$3, _w0$4, _w1$5, _word$6) {
+        var Word$foldl$ = (_nil$3, _w0$4, _w1$5, _word$6) => ({
+            ctr: 'TCO',
+            arg: [_nil$3, _w0$4, _w1$5, _word$6]
+        });
+        var Word$foldl = _nil$3 => _w0$4 => _w1$5 => _word$6 => Word$foldl$(_nil$3, _w0$4, _w1$5, _word$6);
+        var arg = [_nil$3, _w0$4, _w1$5, _word$6];
+        while (true) {
+            let [_nil$3, _w0$4, _w1$5, _word$6] = arg;
+            var R = (() => {
+                var self = _word$6;
+                switch (self._) {
+                    case 'Word.o':
+                        var $154 = self.pred;
+                        var $155 = Word$foldl$(_w0$4(_nil$3), _w0$4, _w1$5, $154);
+                        return $155;
+                    case 'Word.i':
+                        var $156 = self.pred;
+                        var $157 = Word$foldl$(_w1$5(_nil$3), _w0$4, _w1$5, $156);
+                        return $157;
+                    case 'Word.e':
+                        var $158 = _nil$3;
+                        return $158;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Word$foldl = x0 => x1 => x2 => x3 => Word$foldl$(x0, x1, x2, x3);
+
+    function Array$get$(_idx$3, _arr$4) {
+        var $159 = Word$foldl$(Array$extract_tip, (_rec$6 => _arr$7 => {
+            var _arr_l$8 = Array$extract_tie$(_arr$7);
+            var self = _arr_l$8;
+            switch (self._) {
+                case 'Pair.new':
+                    var $161 = self.fst;
+                    var $162 = _rec$6($161);
+                    var $160 = $162;
+                    break;
+            };
+            return $160;
+        }), (_rec$6 => _arr$7 => {
+            var _arr_r$8 = Array$extract_tie$(_arr$7);
+            var self = _arr_r$8;
+            switch (self._) {
+                case 'Pair.new':
+                    var $164 = self.snd;
+                    var $165 = _rec$6($164);
+                    var $163 = $165;
+                    break;
+            };
+            return $163;
+        }), _idx$3)(_arr$4);
+        return $159;
+    };
+    const Array$get = x0 => x1 => Array$get$(x0, x1);
+    const Buffer32$get = a0 => a1 => ((a1[a0]));
+    const Image3D$get_pos = a0 => a1 => ((a1.buffer[a0 * 2]));
+
     function Word$adder$(_a$2, _b$3, _c$4) {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $128 = self.pred;
-                var $129 = (_b$7 => {
+                var $167 = self.pred;
+                var $168 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $131 = self.pred;
-                            var $132 = (_a$pred$10 => {
+                            var $170 = self.pred;
+                            var $171 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $134 = Word$i$(Word$adder$(_a$pred$10, $131, Bool$false));
-                                    var $133 = $134;
+                                    var $173 = Word$i$(Word$adder$(_a$pred$10, $170, Bool$false));
+                                    var $172 = $173;
                                 } else {
-                                    var $135 = Word$o$(Word$adder$(_a$pred$10, $131, Bool$false));
-                                    var $133 = $135;
+                                    var $174 = Word$o$(Word$adder$(_a$pred$10, $170, Bool$false));
+                                    var $172 = $174;
                                 };
-                                return $133;
+                                return $172;
                             });
-                            var $130 = $132;
+                            var $169 = $171;
                             break;
                         case 'Word.i':
-                            var $136 = self.pred;
-                            var $137 = (_a$pred$10 => {
+                            var $175 = self.pred;
+                            var $176 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $139 = Word$o$(Word$adder$(_a$pred$10, $136, Bool$true));
-                                    var $138 = $139;
+                                    var $178 = Word$o$(Word$adder$(_a$pred$10, $175, Bool$true));
+                                    var $177 = $178;
                                 } else {
-                                    var $140 = Word$i$(Word$adder$(_a$pred$10, $136, Bool$false));
-                                    var $138 = $140;
+                                    var $179 = Word$i$(Word$adder$(_a$pred$10, $175, Bool$false));
+                                    var $177 = $179;
                                 };
-                                return $138;
+                                return $177;
                             });
-                            var $130 = $137;
+                            var $169 = $176;
                             break;
                         case 'Word.e':
-                            var $141 = (_a$pred$8 => {
-                                var $142 = Word$e;
-                                return $142;
+                            var $180 = (_a$pred$8 => {
+                                var $181 = Word$e;
+                                return $181;
                             });
-                            var $130 = $141;
+                            var $169 = $180;
                             break;
                     };
-                    var $130 = $130($128);
-                    return $130;
+                    var $169 = $169($167);
+                    return $169;
                 });
-                var $127 = $129;
+                var $166 = $168;
                 break;
             case 'Word.i':
-                var $143 = self.pred;
-                var $144 = (_b$7 => {
+                var $182 = self.pred;
+                var $183 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $146 = self.pred;
-                            var $147 = (_a$pred$10 => {
+                            var $185 = self.pred;
+                            var $186 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $149 = Word$o$(Word$adder$(_a$pred$10, $146, Bool$true));
-                                    var $148 = $149;
+                                    var $188 = Word$o$(Word$adder$(_a$pred$10, $185, Bool$true));
+                                    var $187 = $188;
                                 } else {
-                                    var $150 = Word$i$(Word$adder$(_a$pred$10, $146, Bool$false));
-                                    var $148 = $150;
+                                    var $189 = Word$i$(Word$adder$(_a$pred$10, $185, Bool$false));
+                                    var $187 = $189;
                                 };
-                                return $148;
+                                return $187;
                             });
-                            var $145 = $147;
+                            var $184 = $186;
                             break;
                         case 'Word.i':
-                            var $151 = self.pred;
-                            var $152 = (_a$pred$10 => {
+                            var $190 = self.pred;
+                            var $191 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $154 = Word$i$(Word$adder$(_a$pred$10, $151, Bool$true));
-                                    var $153 = $154;
+                                    var $193 = Word$i$(Word$adder$(_a$pred$10, $190, Bool$true));
+                                    var $192 = $193;
                                 } else {
-                                    var $155 = Word$o$(Word$adder$(_a$pred$10, $151, Bool$true));
-                                    var $153 = $155;
+                                    var $194 = Word$o$(Word$adder$(_a$pred$10, $190, Bool$true));
+                                    var $192 = $194;
                                 };
-                                return $153;
+                                return $192;
                             });
-                            var $145 = $152;
+                            var $184 = $191;
                             break;
                         case 'Word.e':
-                            var $156 = (_a$pred$8 => {
-                                var $157 = Word$e;
-                                return $157;
+                            var $195 = (_a$pred$8 => {
+                                var $196 = Word$e;
+                                return $196;
                             });
-                            var $145 = $156;
+                            var $184 = $195;
                             break;
                     };
-                    var $145 = $145($143);
-                    return $145;
+                    var $184 = $184($182);
+                    return $184;
                 });
-                var $127 = $144;
+                var $166 = $183;
                 break;
             case 'Word.e':
-                var $158 = (_b$5 => {
-                    var $159 = Word$e;
-                    return $159;
+                var $197 = (_b$5 => {
+                    var $198 = Word$e;
+                    return $198;
                 });
-                var $127 = $158;
+                var $166 = $197;
                 break;
         };
-        var $127 = $127(_b$3);
-        return $127;
+        var $166 = $166(_b$3);
+        return $166;
     };
     const Word$adder = x0 => x1 => x2 => Word$adder$(x0, x1, x2);
 
     function Word$add$(_a$2, _b$3) {
-        var $160 = Word$adder$(_a$2, _b$3, Bool$false);
-        return $160;
+        var $199 = Word$adder$(_a$2, _b$3, Bool$false);
+        return $199;
     };
     const Word$add = x0 => x1 => Word$add$(x0, x1);
     const U32$add = a0 => a1 => ((a0 + a1) >>> 0);
+    const Image3D$get_col = a0 => a1 => ((a1.buffer[a0 * 2 + 1]));
+
+    function Word$and$(_a$2, _b$3) {
+        var Word$and$ = (_a$2, _b$3) => ({
+            ctr: 'TCO',
+            arg: [_a$2, _b$3]
+        });
+        var Word$and = _a$2 => _b$3 => Word$and$(_a$2, _b$3);
+        var arg = [_a$2, _b$3];
+        while (true) {
+            let [_a$2, _b$3] = arg;
+            var R = Word$and$(_a$2, _b$3);
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Word$and = x0 => x1 => Word$and$(x0, x1);
+    const U32$and = a0 => a1 => (a0 & a1);
 
     function Word$or$(_a$2, _b$3) {
         var Word$or$ = (_a$2, _b$3) => ({
@@ -845,27 +1025,78 @@ module.exports = (function() {
     const Word$or = x0 => x1 => Word$or$(x0, x1);
     const U32$or = a0 => a1 => (a0 | a1);
     const U32$shl = a0 => a1 => (a0 << a1);
-    const Col32$new = a0 => a1 => a2 => a3 => ((0 | a0 | (a1 << 8) | (a2 << 16) | (a3 << 24)));
+    const Pos32$new = a0 => a1 => a2 => ((0 | a0 | (a1 << 12) | (a2 << 24)));
 
-    function Image3D$set_length$(_length$1, _img$2) {
-        var self = _img$2;
-        switch (self._) {
-            case 'Image3D.new':
-                var $162 = self.capacity;
-                var $163 = self.buffer;
-                var $164 = Image3D$new$(_length$1, $162, $163);
-                var $161 = $164;
-                break;
-        };
-        return $161;
+    function Array$mut$(_idx$3, _f$4, _arr$5) {
+        var $200 = Word$foldl$((_arr$6 => {
+            var $201 = Array$tip$(_f$4(Array$extract_tip$(_arr$6)));
+            return $201;
+        }), (_rec$7 => _arr$8 => {
+            var self = Array$extract_tie$(_arr$8);
+            switch (self._) {
+                case 'Pair.new':
+                    var $203 = self.fst;
+                    var $204 = self.snd;
+                    var $205 = Array$tie$(_rec$7($203), $204);
+                    var $202 = $205;
+                    break;
+            };
+            return $202;
+        }), (_rec$7 => _arr$8 => {
+            var self = Array$extract_tie$(_arr$8);
+            switch (self._) {
+                case 'Pair.new':
+                    var $207 = self.fst;
+                    var $208 = self.snd;
+                    var $209 = Array$tie$($207, _rec$7($208));
+                    var $206 = $209;
+                    break;
+            };
+            return $206;
+        }), _idx$3)(_arr$5);
+        return $200;
     };
-    const Image3D$set_length = x0 => x1 => Image3D$set_length$(x0, x1);
+    const Array$mut = x0 => x1 => x2 => Array$mut$(x0, x1, x2);
 
-    function Image3D$clear$(_img$1) {
-        var $165 = Image3D$set_length$(0, _img$1);
-        return $165;
+    function Array$set$(_idx$3, _val$4, _arr$5) {
+        var $210 = Array$mut$(_idx$3, (_x$6 => {
+            var $211 = _val$4;
+            return $211;
+        }), _arr$5);
+        return $210;
     };
-    const Image3D$clear = x0 => Image3D$clear$(x0);
+    const Array$set = x0 => x1 => x2 => Array$set$(x0, x1, x2);
+    const Buffer32$set = a0 => a1 => a2 => ((a2[a0] = a1, a2));
+    const Image3D$set_pos = a0 => a1 => a2 => ((a2.buffer[a0 * 2] = a1, a2));
+    const Image3D$set_col = a0 => a1 => a2 => ((a2.buffer[a0 * 2 + 1] = a1, a2));
+    const Image3D$push = a0 => a1 => a2 => ((a2.buffer[a2.length * 2] = a0, a2.buffer[a2.length * 2 + 1] = a1, a2.length++, a2));
+
+    function Image3D$Draw$image$(_x$1, _y$2, _z$3, _src$4, _img$5) {
+        var _len$6 = Image3D$get_len$(_src$4);
+        var _img$7 = (() => {
+            var $213 = _img$5;
+            var $214 = 0;
+            var $215 = _len$6;
+            let _img$8 = $213;
+            for (let _i$7 = $214; _i$7 < $215; ++_i$7) {
+                var _pos$9 = ((_src$4.buffer[_i$7 * 2]));
+                var _col$10 = ((_src$4.buffer[_i$7 * 2 + 1]));
+                var _p_x$11 = (_pos$9 & 4095);
+                var _p_y$12 = ((_pos$9 & 16773120) >>> 12);
+                var _p_z$13 = ((_pos$9 & 4278190080) >>> 24);
+                var _p_x$14 = ((_p_x$11 + _x$1) >>> 0);
+                var _p_y$15 = ((_p_y$12 + _y$2) >>> 0);
+                var _p_z$16 = ((_p_z$13 + _z$3) >>> 0);
+                var _pos$17 = ((0 | _p_x$14 | (_p_y$15 << 12) | (_p_z$16 << 24)));
+                var $213 = ((_img$8.buffer[_img$8.length * 2] = _pos$17, _img$8.buffer[_img$8.length * 2 + 1] = _col$10, _img$8.length++, _img$8));
+                _img$8 = $213;
+            };
+            return _img$8;
+        })();
+        var $212 = _img$7;
+        return $212;
+    };
+    const Image3D$Draw$image = x0 => x1 => x2 => x3 => x4 => Image3D$Draw$image$(x0, x1, x2, x3, x4);
 
     function Word$div$(_a$2, _b$3) {
         var Word$div$ = (_a$2, _b$3) => ({
@@ -883,217 +1114,65 @@ module.exports = (function() {
     };
     const Word$div = x0 => x1 => Word$div$(x0, x1);
     const U32$div = a0 => a1 => ((a0 / a1) >>> 0);
-    const U32$for = a0 => a1 => a2 => a3 => (u32_for(a0, a1, a2, a3));
+    const U32$length = a0 => (a0.length);
+    const U32$slice = a0 => a1 => a2 => (a2.slice(a0, a1));
+    const U32$read_base = a0 => a1 => (parseInt(a1, a0));
 
-    function Word$mod$(_a$2, _b$3) {
-        var Word$mod$ = (_a$2, _b$3) => ({
-            ctr: 'TCO',
-            arg: [_a$2, _b$3]
-        });
-        var Word$mod = _a$2 => _b$3 => Word$mod$(_a$2, _b$3);
-        var arg = [_a$2, _b$3];
-        while (true) {
-            let [_a$2, _b$3] = arg;
-            var R = Word$mod$(_a$2, _b$3);
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
+    function Image3D$parse_byte$(_idx$1, _voxdata$2) {
+        var _chr$3 = (_voxdata$2.slice(((_idx$1 * 2) >>> 0), ((((_idx$1 * 2) >>> 0) + 2) >>> 0)));
+        var $216 = (parseInt(_chr$3, 16));
+        return $216;
     };
-    const Word$mod = x0 => x1 => Word$mod$(x0, x1);
-    const U32$mod = a0 => a1 => (a0 % a1);
-    const Pos32$new = a0 => a1 => a2 => ((0 | a0 | (a1 << 12) | (a2 << 24)));
+    const Image3D$parse_byte = x0 => x1 => Image3D$parse_byte$(x0, x1);
+    const Col32$new = a0 => a1 => a2 => a3 => ((0 | a0 | (a1 << 8) | (a2 << 16) | (a3 << 24)));
 
-    function Word$trim$(_new_size$2, _word$3) {
-        var self = _new_size$2;
-        if (self === 0n) {
-            var $167 = Word$e;
-            var $166 = $167;
-        } else {
-            var $168 = (self - 1n);
-            var self = _word$3;
-            switch (self._) {
-                case 'Word.o':
-                    var $170 = self.pred;
-                    var $171 = Word$o$(Word$trim$($168, $170));
-                    var $169 = $171;
-                    break;
-                case 'Word.i':
-                    var $172 = self.pred;
-                    var $173 = Word$i$(Word$trim$($168, $172));
-                    var $169 = $173;
-                    break;
-                case 'Word.e':
-                    var $174 = Word$o$(Word$trim$($168, Word$e));
-                    var $169 = $174;
-                    break;
+    function Image3D$parse$(_voxdata$1) {
+        var _siz$2 = (((_voxdata$1.length) / 12) >>> 0);
+        var _img$3 = Image3D$alloc_capacity$(_siz$2);
+        var _img$4 = (() => {
+            var $218 = _img$3;
+            var $219 = 0;
+            var $220 = _siz$2;
+            let _img$5 = $218;
+            for (let _i$4 = $219; _i$4 < $220; ++_i$4) {
+                var _x$6 = Image3D$parse_byte$(((((_i$4 * 6) >>> 0) + 0) >>> 0), _voxdata$1);
+                var _y$7 = Image3D$parse_byte$(((((_i$4 * 6) >>> 0) + 1) >>> 0), _voxdata$1);
+                var _z$8 = Image3D$parse_byte$(((((_i$4 * 6) >>> 0) + 2) >>> 0), _voxdata$1);
+                var _r$9 = Image3D$parse_byte$(((((_i$4 * 6) >>> 0) + 3) >>> 0), _voxdata$1);
+                var _g$10 = Image3D$parse_byte$(((((_i$4 * 6) >>> 0) + 4) >>> 0), _voxdata$1);
+                var _b$11 = Image3D$parse_byte$(((((_i$4 * 6) >>> 0) + 5) >>> 0), _voxdata$1);
+                var _pos$12 = ((0 | _x$6 | (_y$7 << 12) | (_z$8 << 24)));
+                var _col$13 = ((0 | _r$9 | (_g$10 << 8) | (_b$11 << 16) | (255 << 24)));
+                var $218 = ((_img$5.buffer[_img$5.length * 2] = _pos$12, _img$5.buffer[_img$5.length * 2 + 1] = _col$13, _img$5.length++, _img$5));
+                _img$5 = $218;
             };
-            var $166 = $169;
-        };
-        return $166;
-    };
-    const Word$trim = x0 => x1 => Word$trim$(x0, x1);
-    const Unit$new = 1;
-
-    function Array$extract_tip$(_arr$2) {
-        var self = _arr$2;
-        switch (self._) {
-            case 'Array.tip':
-                var $176 = self.value;
-                var $177 = $176;
-                var $175 = $177;
-                break;
-            case 'Array.tie':
-                var $178 = Unit$new;
-                var $175 = $178;
-                break;
-        };
-        return $175;
-    };
-    const Array$extract_tip = x0 => Array$extract_tip$(x0);
-
-    function Pair$(_A$1, _B$2) {
-        var $179 = null;
-        return $179;
-    };
-    const Pair = x0 => x1 => Pair$(x0, x1);
-
-    function Array$extract_tie$(_arr$3) {
-        var self = _arr$3;
-        switch (self._) {
-            case 'Array.tie':
-                var $181 = self.lft;
-                var $182 = self.rgt;
-                var $183 = Pair$new$($181, $182);
-                var $180 = $183;
-                break;
-            case 'Array.tip':
-                var $184 = Unit$new;
-                var $180 = $184;
-                break;
-        };
-        return $180;
-    };
-    const Array$extract_tie = x0 => Array$extract_tie$(x0);
-
-    function Word$foldl$(_nil$3, _w0$4, _w1$5, _word$6) {
-        var Word$foldl$ = (_nil$3, _w0$4, _w1$5, _word$6) => ({
-            ctr: 'TCO',
-            arg: [_nil$3, _w0$4, _w1$5, _word$6]
-        });
-        var Word$foldl = _nil$3 => _w0$4 => _w1$5 => _word$6 => Word$foldl$(_nil$3, _w0$4, _w1$5, _word$6);
-        var arg = [_nil$3, _w0$4, _w1$5, _word$6];
-        while (true) {
-            let [_nil$3, _w0$4, _w1$5, _word$6] = arg;
-            var R = (() => {
-                var self = _word$6;
-                switch (self._) {
-                    case 'Word.o':
-                        var $185 = self.pred;
-                        var $186 = Word$foldl$(_w0$4(_nil$3), _w0$4, _w1$5, $185);
-                        return $186;
-                    case 'Word.i':
-                        var $187 = self.pred;
-                        var $188 = Word$foldl$(_w1$5(_nil$3), _w0$4, _w1$5, $187);
-                        return $188;
-                    case 'Word.e':
-                        var $189 = _nil$3;
-                        return $189;
-                };
-            })();
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const Word$foldl = x0 => x1 => x2 => x3 => Word$foldl$(x0, x1, x2, x3);
-
-    function Array$mut$(_idx$3, _f$4, _arr$5) {
-        var $190 = Word$foldl$((_arr$6 => {
-            var $191 = Array$tip$(_f$4(Array$extract_tip$(_arr$6)));
-            return $191;
-        }), (_rec$7 => _arr$8 => {
-            var self = Array$extract_tie$(_arr$8);
-            switch (self._) {
-                case 'Pair.new':
-                    var $193 = self.fst;
-                    var $194 = self.snd;
-                    var $195 = Array$tie$(_rec$7($193), $194);
-                    var $192 = $195;
-                    break;
-            };
-            return $192;
-        }), (_rec$7 => _arr$8 => {
-            var self = Array$extract_tie$(_arr$8);
-            switch (self._) {
-                case 'Pair.new':
-                    var $197 = self.fst;
-                    var $198 = self.snd;
-                    var $199 = Array$tie$($197, _rec$7($198));
-                    var $196 = $199;
-                    break;
-            };
-            return $196;
-        }), _idx$3)(_arr$5);
-        return $190;
-    };
-    const Array$mut = x0 => x1 => x2 => Array$mut$(x0, x1, x2);
-
-    function Array$set$(_idx$3, _val$4, _arr$5) {
-        var $200 = Array$mut$(_idx$3, (_x$6 => {
-            var $201 = _val$4;
-            return $201;
-        }), _arr$5);
-        return $200;
-    };
-    const Array$set = x0 => x1 => x2 => Array$set$(x0, x1, x2);
-    const Buffer32$set = a0 => a1 => a2 => ((a2[a0] = a1, a2));
-    const Image3D$set_pos = a0 => a1 => a2 => ((a2.buffer[a0 * 2] = a1, a2));
-    const Image3D$set_col = a0 => a1 => a2 => ((a2.buffer[a0 * 2 + 1] = a1, a2));
-    const Image3D$push = a0 => a1 => a2 => ((a2.buffer[a2.length * 2] = a0, a2.buffer[a2.length * 2 + 1] = a1, a2.length++, a2));
-
-    function Image3D$Draw$square$(_x$1, _y$2, _z$3, _w$4, _h$5, _col$6, _img$7) {
-        var _siz$8 = ((_w$4 * _h$5) >>> 0);
-        var _w_2$9 = ((_w$4 / 2) >>> 0);
-        var _h_2$10 = ((_h$5 / 2) >>> 0);
-        var $202 = (() => {
-            var $203 = _img$7;
-            var $204 = 0;
-            var $205 = _siz$8;
-            let _pix$12 = $203;
-            for (let _idx$11 = $204; _idx$11 < $205; ++_idx$11) {
-                var _v_x$13 = (_idx$11 % _w$4);
-                var _v_y$14 = ((_idx$11 / _h$5) >>> 0);
-                var _p_x$15 = (Math.max(((_x$1 + _v_x$13) >>> 0) - _w_2$9, 0));
-                var _p_y$16 = (Math.max(((_y$2 + _v_y$14) >>> 0) - _h_2$10, 0));
-                var _pos$17 = ((0 | _p_x$15 | (_p_y$16 << 12) | (_z$3 << 24)));
-                var _col$18 = _col$6(_v_x$13)(_v_y$14);
-                var _pix$19 = ((_pix$12.buffer[_pix$12.length * 2] = _pos$17, _pix$12.buffer[_pix$12.length * 2 + 1] = _col$18, _pix$12.length++, _pix$12));
-                var $203 = _pix$19;
-                _pix$12 = $203;
-            };
-            return _pix$12;
+            return _img$5;
         })();
-        return $202;
+        var $217 = _img$4;
+        return $217;
     };
-    const Image3D$Draw$square = x0 => x1 => x2 => x3 => x4 => x5 => x6 => Image3D$Draw$square$(x0, x1, x2, x3, x4, x5, x6);
+    const Image3D$parse = x0 => Image3D$parse$(x0);
+    const Web$Jogo$hero$hex = "0d00000000000e00000000000f00000000001000000000001100000000000c01000000000d01000000001101000000000b02000000000c02000000001202000000000b03000000001203000000000b04000000000c04000000001104000000000c05000000000d05000000000e05000000001005000000001105000000000e06000000000f06000000000e07000000000e08000000000f08000000000d09000000000e09000000000f09000000000c0a000000000d0a000000000e0a000000000f0a00000000100a000000000c0b000000000e0b00000000100b000000000b0c000000000c0c000000000e0c00000000100c00000000110c000000000b0d000000000e0d00000000110d000000000a0e000000000b0e000000000e0e00000000110e00000000120e000000000a0f000000000e0f00000000120f000000000910000000000a10000000000e10000000001210000000001310000000000911000000000e11000000001311000000000e12000000000d13000000000e13000000000f13000000000d14000000000f14000000000d15000000000f15000000000c16000000000d16000000000f16000000000c17000000000f17000000000c18000000000f18000000000c19000000001019000000000c1a00000000101a000000000b1b000000000c1b00000000101b000000000b1c00000000101c000000000b1d00000000101d00000000111d000000000b1e00000000111e000000000a1f000000000b1f00000000111f00000000";
+    const Web$Jogo$hero = Image3D$parse$(Web$Jogo$hero$hex);
 
     function App$Render$pix$(_pixs$1) {
-        var $206 = ({
+        var $221 = ({
             _: 'App.Render.pix',
             'pixs': _pixs$1
         });
-        return $206;
+        return $221;
     };
     const App$Render$pix = x0 => App$Render$pix$(x0);
 
     function List$(_A$1) {
-        var $207 = null;
-        return $207;
+        var $222 = null;
+        return $222;
     };
     const List = x0 => List$(x0);
 
     function App$Action$(_S$1) {
-        var $208 = null;
-        return $208;
+        var $223 = null;
+        return $223;
     };
     const App$Action = x0 => App$Action$(x0);
     const List$nil = ({
@@ -1101,130 +1180,124 @@ module.exports = (function() {
     });
 
     function List$cons$(_head$2, _tail$3) {
-        var $209 = ({
+        var $224 = ({
             _: 'List.cons',
             'head': _head$2,
             'tail': _tail$3
         });
-        return $209;
+        return $224;
     };
     const List$cons = x0 => x1 => List$cons$(x0, x1);
     const U16$eql = a0 => a1 => (a0 === a1);
 
     function App$Action$state$(_value$2) {
-        var $210 = ({
+        var $225 = ({
             _: 'App.Action.state',
             'value': _value$2
         });
-        return $210;
+        return $225;
     };
     const App$Action$state = x0 => App$Action$state$(x0);
 
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $211 = ({
+        var $226 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $211;
+        return $226;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
-    const Web$Demo = (() => {
-        var _img$1 = Image3D$alloc_capacity$(256);
-        var $212 = App$new$(Pair$new$(128, 128), (_state$2 => {
+    const Web$Jogo = (() => {
+        var _img$1 = Image3D$alloc_capacity$(3200);
+        var $227 = App$new$(Pair$new$(128, 128), (_state$2 => {
             var self = _state$2;
             switch (self._) {
                 case 'Pair.new':
-                    var $214 = self.fst;
-                    var $215 = self.snd;
+                    var $229 = self.fst;
+                    var $230 = self.snd;
                     var _img$5 = Image3D$clear$(_img$1);
-                    var _img$6 = Image3D$Draw$square$($214, $215, 128, 16, 16, (_x$6 => _y$7 => {
-                        var _r$8 = ((96 + ((_x$6 * 4) >>> 0)) >>> 0);
-                        var _g$9 = ((96 + ((_x$6 * 4) >>> 0)) >>> 0);
-                        var _b$10 = 128;
-                        var _a$11 = 255;
-                        var $217 = ((0 | _r$8 | (_g$9 << 8) | (_b$10 << 16) | (_a$11 << 24)));
-                        return $217;
-                    }), _img$5);
-                    var $216 = App$Render$pix$(_img$6);
-                    var $213 = $216;
+                    var _img$6 = Image3D$Draw$image$($229, $230, 0, Web$Jogo$hero, _img$5);
+                    var _img$7 = Image3D$Draw$image$(0, 0, 0, Web$Jogo$hero, _img$6);
+                    var $231 = App$Render$pix$(_img$7);
+                    var $228 = $231;
                     break;
             };
-            return $213;
+            return $228;
         }), (_event$2 => _state$3 => {
             var self = _event$2;
             switch (self._) {
                 case 'App.Event.xkey':
-                    var $219 = self.down;
-                    var $220 = self.code;
-                    var $221 = List$cons$((() => {
+                    var $233 = self.down;
+                    var $234 = self.code;
+                    var $235 = List$cons$((() => {
                         var self = _state$3;
                         switch (self._) {
                             case 'Pair.new':
-                                var $222 = self.fst;
-                                var $223 = self.snd;
-                                var self = ($220 === 65);
+                                var $236 = self.fst;
+                                var $237 = self.snd;
+                                var self = ($234 === 65);
                                 if (self) {
-                                    var $225 = Pair$new$((Math.max($222 - 4, 0)), $223);
-                                    var self = $225;
+                                    var $239 = Pair$new$((Math.max($236 - 4, 0)), $237);
+                                    var self = $239;
                                 } else {
-                                    var self = ($220 === 68);
+                                    var self = ($234 === 68);
                                     if (self) {
-                                        var $227 = Pair$new$((($222 + 4) >>> 0), $223);
-                                        var $226 = $227;
+                                        var $241 = Pair$new$((($236 + 4) >>> 0), $237);
+                                        var $240 = $241;
                                     } else {
-                                        var self = ($220 === 87);
+                                        var self = ($234 === 87);
                                         if (self) {
-                                            var $229 = Pair$new$($222, (Math.max($223 - 4, 0)));
-                                            var $228 = $229;
+                                            var $243 = Pair$new$($236, (Math.max($237 - 4, 0)));
+                                            var $242 = $243;
                                         } else {
-                                            var self = ($220 === 83);
+                                            var self = ($234 === 83);
                                             if (self) {
-                                                var $231 = Pair$new$($222, (($223 + 4) >>> 0));
-                                                var $230 = $231;
+                                                var $245 = Pair$new$($236, (($237 + 4) >>> 0));
+                                                var $244 = $245;
                                             } else {
-                                                var $232 = Pair$new$($222, $223);
-                                                var $230 = $232;
+                                                var $246 = Pair$new$($236, $237);
+                                                var $244 = $246;
                                             };
-                                            var $228 = $230;
+                                            var $242 = $244;
                                         };
-                                        var $226 = $228;
+                                        var $240 = $242;
                                     };
-                                    var self = $226;
+                                    var self = $240;
                                 };
                                 switch (self._) {
                                     case 'Pair.new':
-                                        var $233 = self.fst;
-                                        var $234 = self.snd;
-                                        var $235 = App$Action$state$((() => {
-                                            var self = $219;
+                                        var $247 = self.fst;
+                                        var $248 = self.snd;
+                                        var $249 = App$Action$state$((() => {
+                                            var self = $233;
                                             if (self) {
-                                                var $236 = Pair$new$($233, $234);
-                                                return $236;
+                                                var $250 = Pair$new$($247, $248);
+                                                return $250;
                                             } else {
-                                                var $237 = Pair$new$($222, $223);
-                                                return $237;
+                                                var $251 = Pair$new$($236, $237);
+                                                return $251;
                                             };
                                         })());
-                                        var $224 = $235;
+                                        var $238 = $249;
                                         break;
                                 };
-                                return $224;
+                                return $238;
                         };
                     })(), List$nil);
-                    var $218 = $221;
+                    var $232 = $235;
                     break;
                 case 'App.Event.init':
                 case 'App.Event.tick':
                 case 'App.Event.post':
-                    var $238 = List$nil;
-                    var $218 = $238;
+                    var $252 = List$nil;
+                    var $232 = $252;
                     break;
             };
-            return $218;
+            return $232;
         }));
-        return $212;
+        return $227;
     })();
     return {
         'Buffer32.new': Buffer32$new,
@@ -1267,34 +1340,46 @@ module.exports = (function() {
         'Image3D.new': Image3D$new,
         'Image3D.alloc_capacity': Image3D$alloc_capacity,
         'Pair.new': Pair$new,
-        'Word.adder': Word$adder,
-        'Word.add': Word$add,
-        'U32.add': U32$add,
-        'Word.or': Word$or,
-        'U32.or': U32$or,
-        'U32.shl': U32$shl,
-        'Col32.new': Col32$new,
         'Image3D.set_length': Image3D$set_length,
         'Image3D.clear': Image3D$clear,
-        'Word.div': Word$div,
-        'U32.div': U32$div,
+        'Image3D.get_len': Image3D$get_len,
         'U32.for': U32$for,
-        'Word.mod': Word$mod,
-        'U32.mod': U32$mod,
-        'Pos32.new': Pos32$new,
         'Word.trim': Word$trim,
         'Unit.new': Unit$new,
         'Array.extract_tip': Array$extract_tip,
         'Pair': Pair,
         'Array.extract_tie': Array$extract_tie,
         'Word.foldl': Word$foldl,
+        'Array.get': Array$get,
+        'Buffer32.get': Buffer32$get,
+        'Image3D.get_pos': Image3D$get_pos,
+        'Word.adder': Word$adder,
+        'Word.add': Word$add,
+        'U32.add': U32$add,
+        'Image3D.get_col': Image3D$get_col,
+        'Word.and': Word$and,
+        'U32.and': U32$and,
+        'Word.or': Word$or,
+        'U32.or': U32$or,
+        'U32.shl': U32$shl,
+        'Pos32.new': Pos32$new,
         'Array.mut': Array$mut,
         'Array.set': Array$set,
         'Buffer32.set': Buffer32$set,
         'Image3D.set_pos': Image3D$set_pos,
         'Image3D.set_col': Image3D$set_col,
         'Image3D.push': Image3D$push,
-        'Image3D.Draw.square': Image3D$Draw$square,
+        'Image3D.Draw.image': Image3D$Draw$image,
+        'Word.div': Word$div,
+        'U32.div': U32$div,
+        'U32.length': U32$length,
+        'U32.slice': U32$slice,
+        'U32.read_base': U32$read_base,
+        'Image3D.parse_byte': Image3D$parse_byte,
+        'Col32.new': Col32$new,
+        'Image3D.parse': Image3D$parse,
+        'Web.Jogo.hero.hex': Web$Jogo$hero$hex,
+        'Web.Jogo.hero': Web$Jogo$hero,
         'App.Render.pix': App$Render$pix,
         'List': List,
         'App.Action': App$Action,
@@ -1303,11 +1388,6 @@ module.exports = (function() {
         'U16.eql': U16$eql,
         'App.Action.state': App$Action$state,
         'App.new': App$new,
-        'Web.Demo': Web$Demo,
+        'Web.Jogo': Web$Jogo,
     };
 })();
-
-/***/ })
-
-}]);
-//# sourceMappingURL=987.index.js.map

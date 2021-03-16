@@ -31,3 +31,4 @@ for (var app of apps) {
 index += "}\n";
 fs.writeFileSync("apps/index.js", index);
 
+console.log(exec("npm run build").toString());
