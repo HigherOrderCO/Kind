@@ -1,0 +1,6 @@
+Pos32.sub(a: Pos32, b: Pos32): Pos32
+  // how to deal with overflows?
+  let x = U32.sub(Pos32.get_x(a),Pos32.get_x(b))
+  let y = U32.sub(Pos32.get_y(a),Pos32.get_y(b))
+  let z = U32.sub(Pos32.get_z(a),Pos32.get_z(b))
+  Pos32.new(x,y,z)

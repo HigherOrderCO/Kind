@@ -1,3 +1,3 @@
 Mons.Object.is_free_to_move(obj: Mons.Object): Bool
   open obj
-  U32.eql(obj.ani, u0)
+  U32.eql(obj.ani, 0u)

@@ -1,5 +1,5 @@
 Mons.Effect.clear: Mons.Effect
-  let clean = {u0, Bool.false}
+  let clean = {0u, Bool.false}
   let clean_bool = {Bool.false, Bool.false}
-  Mons.Effect.new(clean, u0, clean, clean, clean_bool, u0, 
+  Mons.Effect.new(clean, 0u, clean, clean, clean_bool, 0u, 
     Bool.false, Bool.false)

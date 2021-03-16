@@ -11,8 +11,8 @@ with the required knowledge to start proving theorems right now.
 Before starting, make sure to install Kind via Haskell or JavaScript
 (example: `npm i -g kind-lang`), clone this repository
 (`https://github.com/moonad/kind`) and `cd` into the `kind/base`
-directory (you **must** be there for now). You'll be editing the `Main.fm` file
-only. Open it in your favorite editor and type `kind Main.fm` to type-check it.
+directory (you **must** be there for now). You'll be editing the `Main.kind` file
+only. Open it in your favorite editor and type `kind Main.kind` to type-check it.
 
 The Equal type
 --------------
@@ -48,8 +48,8 @@ two_is_two: 2 == 2
   refl
 ```
 
-Make sure to replace the contents of `Main.fm` by the snipped above, and type
-`kind Main.fm` to test it. You should see:
+Make sure to replace the contents of `Main.kind` by the snipped above, and type
+`kind Main.kind` to test it. You should see:
 
 ```
 two_is_two: 2 == 2
@@ -88,7 +88,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   ?a
 ```
 
-We now run `kind Main.fm`. That will display:
+We now run `kind Main.kind`. That will display:
 
 ```
 Goal ?a:
@@ -118,7 +118,7 @@ With context:
 That's because `Equal.refl(Bool, b)` proves that `b == b`, but we want a proof
 that `Bool.not(Bool.not(b)) == b`. Yes, we, humans, know that
 `Bool.not(Bool.not(b))` should always reduce to `b`, but the machine, Kind,
-doesn't know that. Why? Let's see the definition of `Bool.not` (from `Bool.fm`):
+doesn't know that. Why? Let's see the definition of `Bool.not` (from `Bool.kind`):
 
 ```
 Bool.not(b: Bool): Bool
@@ -149,7 +149,7 @@ double_negation(b: Bool): not(not(b)) == b
   }
 ```
 
-Check it with `kind Main.fm`:
+Check it with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -180,7 +180,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
 ```
 
 Here, `!` stands for "please, be less demanding and specialize b to its concrete
-values on each case". By running `kind Main.fm`, we now see:
+values on each case". By running `kind Main.kind`, we now see:
 
 ```
 Goal ?a:
@@ -208,7 +208,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   }!
 ```
 
-Running `kind Main.fm`, we see:
+Running `kind Main.kind`, we see:
 
 ```
 Goal ?a:
@@ -234,7 +234,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   }!
 ```
 
-Running `kind Main.fm`, we see:
+Running `kind Main.kind`, we see:
 
 ```
 Goal ?a:
@@ -260,7 +260,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   }!
 ```
 
-Running `kind Main.fm`:
+Running `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -286,7 +286,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   }!
 ```
 
-By running `kind Main.fm`, we see:
+By running `kind Main.kind`, we see:
 
 ```
 double_negation: (b:Bool) Bool.not(Bool.not(b)) == b
@@ -318,7 +318,7 @@ and_true_b(b: Bool): Bool.and(true, b) == b
   ?a
 ```
 
-By running `kind main.fm`, we see:
+By running `kind main.kind`, we see:
 
 ```
 Goal ?a:
@@ -329,7 +329,7 @@ With ctxt:
 
 Notice that there is a variable `b` on the left side of the equation. That means
 that we must pattern-match, because it is stuck... or is it? Let's recall the
-definition of `Bool.and` (from `Bool.fm`):
+definition of `Bool.and` (from `Bool.kind`):
 
 ```
 Bool.and(a: Bool, b: Bool): Bool
@@ -349,7 +349,7 @@ and_true_b(b: Bool): Bool.and(true, b) == b
   ?a-
 ```
 
-Run it with `kind Main.fm`:
+Run it with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -365,7 +365,7 @@ and_true_b(b: Bool): Bool.and(true, b) == b
   ?a-18
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -381,7 +381,7 @@ and_true_b(b: Bool): Bool.and(true, b) == b
   refl
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 and_true_b: (b:Bool) Bool.and(Bool.true,b) == b
@@ -415,7 +415,7 @@ and_b_true(b: Bool): Bool.and(b, true) == b
   ?a-
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -431,7 +431,7 @@ and_b_true(b: Bool): Bool.and(b, true) == b
   ?a-18
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -455,7 +455,7 @@ and_b_true(b: Bool): Bool.and(b, true) == b
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -580,7 +580,7 @@ half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   ?a
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -620,7 +620,7 @@ half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Run with `kind Main.fm`:
+Run with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -646,7 +646,7 @@ half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?b:
@@ -670,7 +670,7 @@ half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?b:
@@ -690,7 +690,7 @@ half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?b:
@@ -710,7 +710,7 @@ half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?b:
@@ -737,7 +737,7 @@ half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -810,7 +810,7 @@ half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -858,7 +858,7 @@ half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-And the following goal (check with `kind Main.fm`):
+And the following goal (check with `kind Main.kind`):
 
 ```
 Goal ?b:
@@ -883,7 +883,7 @@ half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?b:
@@ -914,7 +914,7 @@ half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?b:
@@ -940,7 +940,7 @@ half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 half_double_theorem: (n:Nat) Nat.half(Nat.double(n)) == n
@@ -967,7 +967,7 @@ add_0_n(n: Nat): (0 + n) == n
   ?a
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -978,7 +978,7 @@ With ctxt:
 
 Kind asks us to prove `Nat.add(0,n) == n`. It would be tempting to
 pattern-match on `n`. But let's recall the definition of `Nat.add` (from
-`Nat.fm`):
+`Nat.kind`):
 
 ```
 Nat.add(n: Nat, m: Nat): Nat
@@ -997,7 +997,7 @@ add_0_n(n: Nat): (0 + n) == n
   refl
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 add_0_n: (n:Nat) Nat.add(0,n) == n
@@ -1017,7 +1017,7 @@ add_n_0(n: Nat): (n + 0) == n
   ?a
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1038,7 +1038,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1064,7 +1064,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1089,7 +1089,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?b:
@@ -1111,7 +1111,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?b:
@@ -1136,7 +1136,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?b:
@@ -1162,7 +1162,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?b:
@@ -1187,7 +1187,7 @@ add_n_0(n: Nat): (n + 0) == n
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 add_n_0: (n:Nat) Nat.add(n,0) == n
@@ -1226,7 +1226,7 @@ gte_succ_n_n(n: Nat): Nat.gte(Nat.succ(n), n) == true
 ```
 
 Here, `Nat.lte(a,b)` stands for `a <= b` and `Nat.gte(a,b)` stands for `a >= b`
-for natural numbers `a`, `b`. Check their definitions on `Nat.fm`.
+for natural numbers `a`, `b`. Check their definitions on `Nat.kind`.
 
 Proving an inequality: `1 != 0`
 ===============================
@@ -1322,7 +1322,7 @@ one_neq_zero(e: 1 == 0): Empty
 Which stands for "if 1 == 0, then we can construct an element of the Empty
 type". Which can be read as "1 == 0 is a false theorem".
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1377,7 +1377,7 @@ ys: Vector(Nat, 2)
 ```
 
 Take a moment to make sure the above makes sense to you. If you want to, you may
-check the definition of `rewrite` on the `Equal.fm` file (although that may be a
+check the definition of `rewrite` on the `Equal.kind` file (although that may be a
 little bit too indimidating for now!).
 
 With these two insights in mind (that we have expressions inside types, and that
@@ -1436,7 +1436,7 @@ three_neq_two: 3 != 2
   ?a
 ```
 
-Check it with `kind Main.fm`:
+Check it with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1451,7 +1451,7 @@ three_neq_two: 3 != 2
   (e) ?a
 ```
 
-Check it with `kind Main.fm.fm`:
+Check it with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1463,7 +1463,7 @@ With ctxt:
 Now Kind is demanding that we derive an element of type `Empty` given a
 value of type `3 == 2`. We could proceed by using the rewrite trick above, but,
 let's be honest, it is confusing and doing it every time would be annoying.
-Instead, we will use the following function, exported by `Bool.fm`:
+Instead, we will use the following function, exported by `Bool.kind`:
 
 ```
 Bool.true_neq_false: true != false
@@ -1488,7 +1488,7 @@ three_neq_two: 3 != 2
   ?a
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1508,7 +1508,7 @@ three_neq_two: 3 != 2
   ?a
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1530,7 +1530,7 @@ three_neq_two: 3 != 2
   ?a
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1554,7 +1554,7 @@ three_neq_two: 3 != 2
   ?a
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1581,7 +1581,7 @@ three_neq_two: 3 != 2
   Bool.true_neq_false(e3)
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 three_neq_two: Not(3 == 2)
@@ -1601,7 +1601,7 @@ not_a_neq_a(a: Bool): Bool.not(b) != b
   ?a
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1618,7 +1618,7 @@ not_a_neq_a(b: Bool): Bool.not(b) != b
   (e) ?a
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1639,7 +1639,7 @@ not_a_neq_a(b: Bool): Bool.not(b) != b
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1670,7 +1670,7 @@ not_a_neq_a(b: Bool): Bool.not(b) != b
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 Goal ?a:
@@ -1700,7 +1700,7 @@ not_a_neq_a(b: Bool): Bool.not(b) != b
   }!
 ```
 
-Check with `kind Main.fm`:
+Check with `kind Main.kind`:
 
 ```
 not_a_neq_a: (b:Bool) Not(Bool.not(b) == b)

@@ -4,7 +4,7 @@ Mons.Map.get_hero(pos: Pos32, map: Mons.Map): Pair(Mons.Object, U32)
   let fun = ((obj, idx) obj_is_hero(obj)) :: Mons.Object -> Nat -> Bool
   let both = List.ifind!(tile, fun)
   case both { 
-    none: {Mons.Object.void, u0}
+    none: {Mons.Object.void, 0u}
     some: 
       let hero = Pair.fst!!(both.value)
       let idx = Nat.to_u32(Pair.snd!!(both.value))
