@@ -10,7 +10,7 @@ with the required knowledge to start proving theorems right now.
 
 Before starting, make sure to install Kind via Haskell or JavaScript
 (example: `npm i -g kind-lang`), clone this repository
-(`https://github.com/moonad/kind`) and `cd` into the `kind/base`
+(`https://github.com/uwu-tech/kind`) and `cd` into the `kind/base`
 directory (you **must** be there for now). You'll be editing the `Main.kind` file
 only. Open it in your favorite editor and type `kind Main.kind` to type-check it.
 
