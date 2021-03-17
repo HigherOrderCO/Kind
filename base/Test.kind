@@ -1,2 +1,18 @@
 Test: String
-  Nat.show(U32.to_nat(Image3D.get_len(Web.Jogo.hero)))
+  let str = "C"
+  let test_0 =
+    if String.eql(str, "A") then
+      "a"
+    else if String.eql(str, "B") then
+      "b"
+    else if String.eql(str, "C") then
+      "c"
+    else
+      "?"
+  let test_1 =
+    switch String.eql(str) {
+      "A": "a"
+      "B": "b"
+      "C": "c"
+    } else "?"
+  test_1

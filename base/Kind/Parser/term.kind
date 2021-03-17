@@ -31,6 +31,7 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.do,
       Kind.Parser.case,
       Kind.Parser.open,
+      Kind.Parser.switch,
       Kind.Parser.goal,
       Kind.Parser.hole,
       Kind.Parser.u8,
