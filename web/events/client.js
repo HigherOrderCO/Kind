@@ -7,6 +7,15 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
   var Posts = {};
   var watching = {};
 
+  // Waits ws to be ready and then sends buffer to server
+  function ws_send(buffer) {
+    if (ws.readyState === 1) {
+      ws.send(buffer);
+    } else {
+      setTimeout(() => ws_send(buffer), 20);
+    }
+  }
+
   var on_init_callback = null;
   var on_post_callback = null;
 
@@ -34,7 +43,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
       post_data,
       post_sign,
     ]);
-    ws.send(msge_buff);
+    ws_send(msge_buff);
   };
 
   // Starts watching a room
@@ -47,7 +56,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
         room_name,
       ]);
       Posts[room_name] = [];
-      ws.send(msge_buff); 
+      ws_send(msge_buff); 
     }
   };
 
@@ -60,7 +69,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
         lib.u8_to_hex(lib.UNWATCH),
         room_name,
       ]);
-      ws.send(msge_buff);
+      ws_send(msge_buff);
     }
   };
 
@@ -95,3 +104,4 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     lib,
   };
 };
+

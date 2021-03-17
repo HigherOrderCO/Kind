@@ -18,8 +18,8 @@ api.on_init(() => {
 
 // When there is a new posts, print all posts we have recorded.
 api.on_post((post, Posts) => {
-  console.clear();
+  //console.clear();
   console.log(JSON.stringify(post));
-  console.log(JSON.stringify(Posts, null, 2));
+  //console.log(JSON.stringify(Posts, null, 2));
 });
 

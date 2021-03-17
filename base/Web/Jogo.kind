@@ -1,39 +1,78 @@
+Web.Jogo.State: Type
+  Map(Pair(U32, U32))
+
+Web.Jogo.room: String
+  "0x196581625482"
+
+Web.Jogo.command.A: String
+  "0x0000000000000000000000000000000000000000000000000000000000000000"
+
+Web.Jogo.command.D: String
+  "0x0000000000000000000000000000000000000000000000000000000000000001"
+
+Web.Jogo.command.S: String
+  "0x0000000000000000000000000000000000000000000000000000000000000002"
+
+Web.Jogo.command.W: String
+  "0x0000000000000000000000000000000000000000000000000000000000000003"
+
+Web.Jogo.command(user: String, cmd: String, state: Web.Jogo.State): Web.Jogo.State
+  let key = String.to_bits(user)
+  case Map.get!(key, state) as player {
+    none:
+      Map.set!(key, {128u, 128u}, state)
+    some:
+      open player.value
+      let spd = 3u
+      if String.eql(cmd, Web.Jogo.command.A) then
+        Map.set!(key, {U32.sub(player.value.fst, spd), player.value.snd}, state)
+      else if String.eql(cmd, Web.Jogo.command.D) then
+        Map.set!(key, {U32.add(player.value.fst, spd), player.value.snd}, state)
+      else if String.eql(cmd, Web.Jogo.command.W) then
+        Map.set!(key, {player.value.fst, U32.sub(player.value.snd, spd)}, state)
+      else if String.eql(cmd, Web.Jogo.command.S) then
+        Map.set!(key, {player.value.fst, U32.add(player.value.snd, spd)}, state)
+      else
+        state
+  }
+
 // A demo application that renders a square on the screen
-Web.Jogo: App(Pair(U32,U32))
+Web.Jogo: App(Web.Jogo.State)
   let img = Image3D.alloc_capacity(3200u)
-  def init = {128u, 128u}
+  def init = Map.new!
 
   def draw = (state)
-    let {pos_x, pos_y} = state
     let img = Image3D.clear(img)
-    let img = Image3D.Draw.image(pos_x, pos_y, 0u, Web.Jogo.hero, img)
-    let img = Image3D.Draw.image(0u, 0u, 0u, Web.Jogo.hero, img)
+    let img = for pos in Map.values!(state):
+      open pos
+      Image3D.Draw.image(pos.fst, pos.snd, 0u, Web.Jogo.hero, img)
     App.Render.pix(img)
 
   def when = (event, state)
     case event {
-      init: []
-      tick: []
-      xkey: [
-        let {old_x, old_y} = state
-        let {new_x, new_y} =
-          if U16.eql(event.code, 'A') then
-            {U32.sub(old_x, 4u), old_y}
-          else if U16.eql(event.code, 'D') then
-            {U32.add(old_x, 4u), old_y}
-          else if U16.eql(event.code, 'W') then
-            {old_x, U32.sub(old_y, 4u)}
-          else if U16.eql(event.code, 'S') then
-            {old_x, U32.add(old_y, 4u)}
-          else
-            {old_x, old_y}
-        App.Action.state!(
-          if event.down then
-            {new_x, new_y}
-          else
-            {old_x, old_y})
+      init: [
+        App.Action.print!(">> started app")
+        App.Action.watch!(Web.Jogo.room)
       ]
-      post: []
+      tick: []
+      xkey: 
+        if event.down then
+          if U16.eql(event.code, 'A') then
+            [App.Action.post!(Web.Jogo.room, Web.Jogo.command.A)]
+          else if U16.eql(event.code, 'D') then
+            [App.Action.post!(Web.Jogo.room, Web.Jogo.command.D)]
+          else if U16.eql(event.code, 'W') then
+            [App.Action.post!(Web.Jogo.room, Web.Jogo.command.W)]
+          else if U16.eql(event.code, 'S') then
+            [App.Action.post!(Web.Jogo.room, Web.Jogo.command.S)]
+          else
+            []
+        else
+          []
+      post: [ // time, room, addr, data
+        App.Action.print!(">> received post: " | event.data)
+        App.Action.state!(Web.Jogo.command(event.addr, event.data, state))
+      ]
     }
 
   App.new!(init, draw, when)

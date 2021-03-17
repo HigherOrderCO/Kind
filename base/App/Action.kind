@@ -2,6 +2,6 @@ type App.Action <S: Type> {
   state(value: S)
   resize(width: U32, height: U32)
   print(text: String)
-  post(room: Word(48), data: Word(256))
-  watch(room: Word(48))
+  post(room: String, data: String)
+  watch(room: String)
 }
