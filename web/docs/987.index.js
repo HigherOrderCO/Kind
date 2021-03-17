@@ -1109,7 +1109,6 @@ module.exports = (function() {
         return $209;
     };
     const List$cons = x0 => x1 => List$cons$(x0, x1);
-    const U16$eql = a0 => a1 => (a0 === a1);
 
     function App$Action$state$(_value$2) {
         var $210 = ({
@@ -1119,6 +1118,7 @@ module.exports = (function() {
         return $210;
     };
     const App$Action$state = x0 => App$Action$state$(x0);
+    const U16$eql = a0 => a1 => (a0 === a1);
 
     function App$new$(_init$2, _draw$3, _when$4) {
         var $211 = ({
@@ -1132,98 +1132,92 @@ module.exports = (function() {
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Demo = (() => {
         var _img$1 = Image3D$alloc_capacity$(256);
-        var $212 = App$new$(Pair$new$(128, 128), (_state$2 => {
-            var self = _state$2;
+        var _init$2 = Pair$new$(128, 128);
+        var _draw$3 = (_state$3 => {
+            var self = _state$3;
             switch (self._) {
                 case 'Pair.new':
                     var $214 = self.fst;
                     var $215 = self.snd;
-                    var _img$5 = Image3D$clear$(_img$1);
-                    var _img$6 = Image3D$Draw$square$($214, $215, 128, 16, 16, (_x$6 => _y$7 => {
+                    var _col$6 = (_x$6 => _y$7 => {
                         var _r$8 = ((96 + ((_x$6 * 4) >>> 0)) >>> 0);
                         var _g$9 = ((96 + ((_x$6 * 4) >>> 0)) >>> 0);
                         var _b$10 = 128;
                         var _a$11 = 255;
                         var $217 = ((0 | _r$8 | (_g$9 << 8) | (_b$10 << 16) | (_a$11 << 24)));
                         return $217;
-                    }), _img$5);
-                    var $216 = App$Render$pix$(_img$6);
+                    });
+                    var _img$7 = Image3D$clear$(_img$1);
+                    var _img$8 = Image3D$Draw$square$($214, $215, 128, 16, 16, _col$6, _img$7);
+                    var $216 = App$Render$pix$(_img$8);
                     var $213 = $216;
                     break;
             };
             return $213;
-        }), (_event$2 => _state$3 => {
-            var self = _event$2;
+        });
+        var _when$4 = (_event$4 => _state$5 => {
+            var self = _event$4;
             switch (self._) {
                 case 'App.Event.xkey':
                     var $219 = self.down;
                     var $220 = self.code;
-                    var $221 = List$cons$((() => {
-                        var self = _state$3;
-                        switch (self._) {
-                            case 'Pair.new':
-                                var $222 = self.fst;
-                                var $223 = self.snd;
-                                var self = ($220 === 65);
-                                if (self) {
-                                    var $225 = Pair$new$((Math.max($222 - 4, 0)), $223);
-                                    var self = $225;
-                                } else {
-                                    var self = ($220 === 68);
+                    var self = $219;
+                    if (self) {
+                        var $222 = List$cons$(App$Action$state$((() => {
+                            var self = _state$5;
+                            switch (self._) {
+                                case 'Pair.new':
+                                    var $223 = self.fst;
+                                    var $224 = self.snd;
+                                    var self = ($220 === 65);
                                     if (self) {
-                                        var $227 = Pair$new$((($222 + 4) >>> 0), $223);
-                                        var $226 = $227;
+                                        var $226 = Pair$new$((Math.max($223 - 4, 0)), $224);
+                                        var $225 = $226;
                                     } else {
-                                        var self = ($220 === 87);
+                                        var self = ($220 === 68);
                                         if (self) {
-                                            var $229 = Pair$new$($222, (Math.max($223 - 4, 0)));
-                                            var $228 = $229;
+                                            var $228 = Pair$new$((($223 + 4) >>> 0), $224);
+                                            var $227 = $228;
                                         } else {
-                                            var self = ($220 === 83);
+                                            var self = ($220 === 87);
                                             if (self) {
-                                                var $231 = Pair$new$($222, (($223 + 4) >>> 0));
-                                                var $230 = $231;
+                                                var $230 = Pair$new$($223, (Math.max($224 - 4, 0)));
+                                                var $229 = $230;
                                             } else {
-                                                var $232 = Pair$new$($222, $223);
-                                                var $230 = $232;
+                                                var self = ($220 === 83);
+                                                if (self) {
+                                                    var $232 = Pair$new$($223, (($224 + 4) >>> 0));
+                                                    var $231 = $232;
+                                                } else {
+                                                    var $233 = Pair$new$($223, $224);
+                                                    var $231 = $233;
+                                                };
+                                                var $229 = $231;
                                             };
-                                            var $228 = $230;
+                                            var $227 = $229;
                                         };
-                                        var $226 = $228;
+                                        var $225 = $227;
                                     };
-                                    var self = $226;
-                                };
-                                switch (self._) {
-                                    case 'Pair.new':
-                                        var $233 = self.fst;
-                                        var $234 = self.snd;
-                                        var $235 = App$Action$state$((() => {
-                                            var self = $219;
-                                            if (self) {
-                                                var $236 = Pair$new$($233, $234);
-                                                return $236;
-                                            } else {
-                                                var $237 = Pair$new$($222, $223);
-                                                return $237;
-                                            };
-                                        })());
-                                        var $224 = $235;
-                                        break;
-                                };
-                                return $224;
-                        };
-                    })(), List$nil);
+                                    return $225;
+                            };
+                        })()), List$nil);
+                        var $221 = $222;
+                    } else {
+                        var $234 = List$nil;
+                        var $221 = $234;
+                    };
                     var $218 = $221;
                     break;
                 case 'App.Event.init':
                 case 'App.Event.tick':
                 case 'App.Event.post':
-                    var $238 = List$nil;
-                    var $218 = $238;
+                    var $235 = List$nil;
+                    var $218 = $235;
                     break;
             };
             return $218;
-        }));
+        });
+        var $212 = App$new$(_init$2, _draw$3, _when$4);
         return $212;
     })();
     return {
@@ -1300,8 +1294,8 @@ module.exports = (function() {
         'App.Action': App$Action,
         'List.nil': List$nil,
         'List.cons': List$cons,
-        'U16.eql': U16$eql,
         'App.Action.state': App$Action$state,
+        'U16.eql': U16$eql,
         'App.new': App$new,
         'Web.Demo': Web$Demo,
     };

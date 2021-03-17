@@ -1524,24 +1524,26 @@ module.exports = (function() {
                         var $298 = self.fst;
                         var $299 = self.snd;
                         var _spd$8 = 3;
+                        var _p_x$9 = $298;
+                        var _p_y$10 = $299;
                         var self = (_cmd$2 === Web$Jogo$command$A);
                         if (self) {
-                            var $301 = Map$set$(_key$4, Pair$new$((Math.max($298 - _spd$8, 0)), $299), _state$3);
+                            var $301 = Map$set$(_key$4, Pair$new$((Math.max(_p_x$9 - _spd$8, 0)), _p_y$10), _state$3);
                             var $300 = $301;
                         } else {
                             var self = (_cmd$2 === Web$Jogo$command$D);
                             if (self) {
-                                var $303 = Map$set$(_key$4, Pair$new$((($298 + _spd$8) >>> 0), $299), _state$3);
+                                var $303 = Map$set$(_key$4, Pair$new$(((_p_x$9 + _spd$8) >>> 0), _p_y$10), _state$3);
                                 var $302 = $303;
                             } else {
                                 var self = (_cmd$2 === Web$Jogo$command$W);
                                 if (self) {
-                                    var $305 = Map$set$(_key$4, Pair$new$($298, (Math.max($299 - _spd$8, 0))), _state$3);
+                                    var $305 = Map$set$(_key$4, Pair$new$(_p_x$9, (Math.max(_p_y$10 - _spd$8, 0))), _state$3);
                                     var $304 = $305;
                                 } else {
                                     var self = (_cmd$2 === Web$Jogo$command$S);
                                     if (self) {
-                                        var $307 = Map$set$(_key$4, Pair$new$($298, (($299 + _spd$8) >>> 0)), _state$3);
+                                        var $307 = Map$set$(_key$4, Pair$new$(_p_x$9, ((_p_y$10 + _spd$8) >>> 0)), _state$3);
                                         var $306 = $307;
                                     } else {
                                         var $308 = _state$3;
@@ -1579,33 +1581,35 @@ module.exports = (function() {
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Jogo = (() => {
         var _img$1 = Image3D$alloc_capacity$(3200);
-        var $311 = App$new$(Map$new, (_state$2 => {
-            var _img$3 = Image3D$clear$(_img$1);
-            var _img$4 = (() => {
-                var $314 = _img$3;
-                var $315 = Map$values$(_state$2);
-                let _img$5 = $314;
-                let _pos$4;
+        var _init$2 = Map$new;
+        var _draw$3 = (_state$3 => {
+            var _img$4 = Image3D$clear$(_img$1);
+            var _img$5 = (() => {
+                var $314 = _img$4;
+                var $315 = Map$values$(_state$3);
+                let _img$6 = $314;
+                let _pos$5;
                 while ($315._ === 'List.cons') {
-                    _pos$4 = $315.head;
-                    var self = _pos$4;
+                    _pos$5 = $315.head;
+                    var self = _pos$5;
                     switch (self._) {
                         case 'Pair.new':
                             var $316 = self.fst;
                             var $317 = self.snd;
-                            var $318 = Image3D$Draw$image$($316, $317, 0, Web$Jogo$hero, _img$5);
+                            var $318 = Image3D$Draw$image$($316, $317, 0, Web$Jogo$hero, _img$6);
                             var $314 = $318;
                             break;
                     };
-                    _img$5 = $314;
+                    _img$6 = $314;
                     $315 = $315.tail;
                 }
-                return _img$5;
+                return _img$6;
             })();
-            var $312 = App$Render$pix$(_img$4);
+            var $312 = App$Render$pix$(_img$5);
             return $312;
-        }), (_event$2 => _state$3 => {
-            var self = _event$2;
+        });
+        var _when$4 = (_event$4 => _state$5 => {
+            var self = _event$4;
             switch (self._) {
                 case 'App.Event.xkey':
                     var $320 = self.down;
@@ -1651,7 +1655,7 @@ module.exports = (function() {
                 case 'App.Event.post':
                     var $333 = self.addr;
                     var $334 = self.data;
-                    var $335 = List$cons$(App$Action$print$((">> received post: " + $334)), List$cons$(App$Action$state$(Web$Jogo$command$($333, $334, _state$3)), List$nil));
+                    var $335 = List$cons$(App$Action$print$((">> received post: " + $334)), List$cons$(App$Action$state$(Web$Jogo$command$($333, $334, _state$5)), List$nil));
                     var $319 = $335;
                     break;
                 case 'App.Event.init':
@@ -1664,7 +1668,8 @@ module.exports = (function() {
                     break;
             };
             return $319;
-        }));
+        });
+        var $311 = App$new$(_init$2, _draw$3, _when$4);
         return $311;
     })();
     return {

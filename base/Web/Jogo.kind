@@ -24,31 +24,31 @@ Web.Jogo.command(user: String, cmd: String, state: Web.Jogo.State): Web.Jogo.Sta
     some:
       open player.value
       let spd = 3u
-      if String.eql(cmd, Web.Jogo.command.A) then
-        Map.set!(key, {U32.sub(player.value.fst, spd), player.value.snd}, state)
-      else if String.eql(cmd, Web.Jogo.command.D) then
-        Map.set!(key, {U32.add(player.value.fst, spd), player.value.snd}, state)
-      else if String.eql(cmd, Web.Jogo.command.W) then
-        Map.set!(key, {player.value.fst, U32.sub(player.value.snd, spd)}, state)
-      else if String.eql(cmd, Web.Jogo.command.S) then
-        Map.set!(key, {player.value.fst, U32.add(player.value.snd, spd)}, state)
-      else
-        state
+      let p_x = player.value.fst
+      let p_y = player.value.snd
+      switch String.eql(cmd) {
+        Web.Jogo.command.A:
+          Map.set!(key, {U32.sub(p_x,spd), p_y}, state)
+        Web.Jogo.command.D:
+          Map.set!(key, {U32.add(p_x,spd), p_y}, state)
+        Web.Jogo.command.W:
+          Map.set!(key, {p_x, U32.sub(p_y,spd)}, state)
+        Web.Jogo.command.S:
+          Map.set!(key, {p_x, U32.add(p_y,spd)}, state)
+      } else state
   }
 
 // A demo application that renders a square on the screen
 Web.Jogo: App(Web.Jogo.State)
   let img = Image3D.alloc_capacity(3200u)
-  def init = Map.new!
-
-  def draw = (state)
+  let init = Map.new!
+  let draw = (state)
     let img = Image3D.clear(img)
     let img = for pos in Map.values!(state):
       open pos
       Image3D.Draw.image(pos.fst, pos.snd, 0u, Web.Jogo.hero, img)
     App.Render.pix(img)
-
-  def when = (event, state)
+  let when = (event, state)
     case event {
       init: [
         App.Action.print!(">> started app")
@@ -57,16 +57,12 @@ Web.Jogo: App(Web.Jogo.State)
       tick: []
       xkey: 
         if event.down then
-          if U16.eql(event.code, 'A') then
-            [App.Action.post!(Web.Jogo.room, Web.Jogo.command.A)]
-          else if U16.eql(event.code, 'D') then
-            [App.Action.post!(Web.Jogo.room, Web.Jogo.command.D)]
-          else if U16.eql(event.code, 'W') then
-            [App.Action.post!(Web.Jogo.room, Web.Jogo.command.W)]
-          else if U16.eql(event.code, 'S') then
-            [App.Action.post!(Web.Jogo.room, Web.Jogo.command.S)]
-          else
-            []
+          switch U16.eql(event.code) {
+            'A': [App.Action.post!(Web.Jogo.room, Web.Jogo.command.A)]
+            'D': [App.Action.post!(Web.Jogo.room, Web.Jogo.command.D)]
+            'W': [App.Action.post!(Web.Jogo.room, Web.Jogo.command.W)]
+            'S': [App.Action.post!(Web.Jogo.room, Web.Jogo.command.S)]
+          } else []
         else
           []
       post: [ // time, room, addr, data
@@ -74,5 +70,4 @@ Web.Jogo: App(Web.Jogo.State)
         App.Action.state!(Web.Jogo.command(event.addr, event.data, state))
       ]
     }
-
   App.new!(init, draw, when)
