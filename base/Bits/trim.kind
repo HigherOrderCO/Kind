@@ -1,0 +1,9 @@
+Bits.trim(new_len: Nat, bits: Bits): Bits
+  case new_len {
+    zero: Bits.e,
+    succ: case bits {
+      e: Bits.o(Bits.trim(new_len.pred, Bits.e)),
+      o: Bits.o(Bits.trim(new_len.pred, bits.pred)),
+      i: Bits.i(Bits.trim(new_len.pred, bits.pred)),
+    }
+  }

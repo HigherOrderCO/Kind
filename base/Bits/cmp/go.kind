@@ -1,0 +1,18 @@
+Bits.cmp.go(a: Bits, b: Bits, c: Cmp): Cmp
+  case a {
+    e: case b {
+      e: c,
+      o: Bits.cmp.go(Bits.e, b.pred, c),
+      i: Cmp.ltn
+    },
+    o: case b {
+      e: Bits.cmp.go(a.pred, Bits.e, c),
+      o: Bits.cmp.go(a.pred, b.pred, c),
+      i: Bits.cmp.go(a.pred, b.pred, Cmp.ltn)
+    },
+    i: case b {
+      e: Cmp.gtn,
+      o: Bits.cmp.go(a.pred, b.pred, Cmp.gtn),
+      i: Bits.cmp.go(a.pred, b.pred, c)
+    }
+  }
