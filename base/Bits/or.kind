@@ -1,0 +1,14 @@
+Bits.or(a: Bits, b: Bits): Bits
+  case a {
+    e: b,
+    o: case b {
+      e: a,
+      o: Bits.o(Bits.or(a.pred, b.pred)),
+      i: Bits.i(Bits.or(a.pred, b.pred))
+    }
+    i: case b {
+      e: a,
+      o: Bits.i(Bits.or(a.pred, b.pred)),
+      i: Bits.i(Bits.or(a.pred, b.pred))
+    }
+  }

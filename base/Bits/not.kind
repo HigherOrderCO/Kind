@@ -1,0 +1,6 @@
+Bits.not(bits: Bits): Bits
+  case bits {
+    e: Bits.e,
+    o: Bits.i(Bits.not(bits.pred)),
+    i: Bits.o(Bits.not(bits.pred)),
+  }
