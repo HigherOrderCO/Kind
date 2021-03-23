@@ -1,0 +1,5 @@
+Bits.shift_right(n: Nat, value: Bits): Bits
+  case n {
+    zero: value,
+    succ: Bits.shift_right(n.pred, Bits.tail(value))
+  }

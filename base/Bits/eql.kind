@@ -1,18 +1,2 @@
 Bits.eql(a: Bits, b: Bits): Bool
-  case a {
-    e: case b {
-      e: Bool.true,
-      o: Bool.false,
-      i: Bool.false,
-    },
-    o: case b {
-      e: Bool.false,
-      o: Bits.eql(a.pred, b.pred),
-      i: Bool.false,
-    },
-    i: case b {
-      e: Bool.false,
-      o: Bool.false,
-      i: Bits.eql(a.pred, b.pred),
-    }
-  }
+  Cmp.as_eql(Bits.cmp(a, b))

@@ -1,2 +1,9 @@
 Bits.div(a: Bits, b: Bits): Bits
-  Bits.div(a, b)
+  let a_size = Bits.size(a)
+  let b_size = Bits.size(b)
+  if Nat.ltn(a_size, b_size) then
+    Bits.o(Bits.e)
+  else
+    let shift = Nat.sub(a_size, b_size)
+    let shift_copy = Bits.shift_left(shift, b)
+    Bits.div.go(shift, a, shift_copy, Bits.e)
