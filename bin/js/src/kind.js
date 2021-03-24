@@ -5665,7 +5665,7 @@ module.exports = (function() {
     const Kind$Parser$do$statements = x0 => Kind$Parser$do$statements$(x0);
 
     function Kind$Parser$do$(_idx$1, _code$2) {
-        var self = Kind$Parser$text$("do ", _idx$1, _code$2);
+        var self = Parser$maybe$(Kind$Parser$text("do "), _idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
                 var $2069 = self.idx;

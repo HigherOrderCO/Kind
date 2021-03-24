@@ -1,4 +1,7 @@
 Test: IO(Unit)
-  do IO {
+  IO {
+    IO.print("hello")
+    IO.print("hello")
+    IO.print("hello")
     IO.print("hello")
   }
