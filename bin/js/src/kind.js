@@ -6222,34 +6222,8 @@ module.exports = (function() {
     };
     const Map$from_list = x0 => Map$from_list$(x0);
 
-    function Pair$fst$(_pair$3) {
-        var self = _pair$3;
-        switch (self._) {
-            case 'Pair.new':
-                var $2262 = self.fst;
-                var $2263 = $2262;
-                var $2261 = $2263;
-                break;
-        };
-        return $2261;
-    };
-    const Pair$fst = x0 => Pair$fst$(x0);
-
-    function Pair$snd$(_pair$3) {
-        var self = _pair$3;
-        switch (self._) {
-            case 'Pair.new':
-                var $2265 = self.snd;
-                var $2266 = $2265;
-                var $2264 = $2266;
-                break;
-        };
-        return $2264;
-    };
-    const Pair$snd = x0 => Pair$snd$(x0);
-
     function Kind$Term$cse$(_path$1, _expr$2, _name$3, _with$4, _cses$5, _moti$6) {
-        var $2267 = ({
+        var $2261 = ({
             _: 'Kind.Term.cse',
             'path': _path$1,
             'expr': _expr$2,
@@ -6258,7 +6232,7 @@ module.exports = (function() {
             'cses': _cses$5,
             'moti': _moti$6
         });
-        return $2267;
+        return $2261;
     };
     const Kind$Term$cse = x0 => x1 => x2 => x3 => x4 => x5 => Kind$Term$cse$(x0, x1, x2, x3, x4, x5);
 
@@ -6266,103 +6240,103 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2269 = self.idx;
-                var $2270 = self.code;
-                var $2271 = self.err;
-                var $2272 = Parser$Reply$error$($2269, $2270, $2271);
-                var $2268 = $2272;
+                var $2263 = self.idx;
+                var $2264 = self.code;
+                var $2265 = self.err;
+                var $2266 = Parser$Reply$error$($2263, $2264, $2265);
+                var $2262 = $2266;
                 break;
             case 'Parser.Reply.value':
-                var $2273 = self.idx;
-                var $2274 = self.code;
-                var $2275 = self.val;
-                var self = Kind$Parser$text$("case ", $2273, $2274);
+                var $2267 = self.idx;
+                var $2268 = self.code;
+                var $2269 = self.val;
+                var self = Kind$Parser$text$("case ", $2267, $2268);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2277 = self.idx;
-                        var $2278 = self.code;
-                        var $2279 = self.err;
-                        var $2280 = Parser$Reply$error$($2277, $2278, $2279);
-                        var $2276 = $2280;
+                        var $2271 = self.idx;
+                        var $2272 = self.code;
+                        var $2273 = self.err;
+                        var $2274 = Parser$Reply$error$($2271, $2272, $2273);
+                        var $2270 = $2274;
                         break;
                     case 'Parser.Reply.value':
-                        var $2281 = self.idx;
-                        var $2282 = self.code;
-                        var self = Kind$Parser$spaces($2281)($2282);
+                        var $2275 = self.idx;
+                        var $2276 = self.code;
+                        var self = Kind$Parser$spaces($2275)($2276);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2284 = self.idx;
-                                var $2285 = self.code;
-                                var $2286 = self.err;
-                                var $2287 = Parser$Reply$error$($2284, $2285, $2286);
-                                var $2283 = $2287;
+                                var $2278 = self.idx;
+                                var $2279 = self.code;
+                                var $2280 = self.err;
+                                var $2281 = Parser$Reply$error$($2278, $2279, $2280);
+                                var $2277 = $2281;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2288 = self.idx;
-                                var $2289 = self.code;
-                                var self = Kind$Parser$term$($2288, $2289);
+                                var $2282 = self.idx;
+                                var $2283 = self.code;
+                                var self = Kind$Parser$term$($2282, $2283);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2291 = self.idx;
-                                        var $2292 = self.code;
-                                        var $2293 = self.err;
-                                        var $2294 = Parser$Reply$error$($2291, $2292, $2293);
-                                        var $2290 = $2294;
+                                        var $2285 = self.idx;
+                                        var $2286 = self.code;
+                                        var $2287 = self.err;
+                                        var $2288 = Parser$Reply$error$($2285, $2286, $2287);
+                                        var $2284 = $2288;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2295 = self.idx;
-                                        var $2296 = self.code;
-                                        var $2297 = self.val;
+                                        var $2289 = self.idx;
+                                        var $2290 = self.code;
+                                        var $2291 = self.val;
                                         var self = Parser$maybe$((_idx$15 => _code$16 => {
                                             var self = Kind$Parser$text$("as", _idx$15, _code$16);
                                             switch (self._) {
                                                 case 'Parser.Reply.error':
-                                                    var $2300 = self.idx;
-                                                    var $2301 = self.code;
-                                                    var $2302 = self.err;
-                                                    var $2303 = Parser$Reply$error$($2300, $2301, $2302);
-                                                    var $2299 = $2303;
+                                                    var $2294 = self.idx;
+                                                    var $2295 = self.code;
+                                                    var $2296 = self.err;
+                                                    var $2297 = Parser$Reply$error$($2294, $2295, $2296);
+                                                    var $2293 = $2297;
                                                     break;
                                                 case 'Parser.Reply.value':
-                                                    var $2304 = self.idx;
-                                                    var $2305 = self.code;
-                                                    var $2306 = Kind$Parser$name1$($2304, $2305);
-                                                    var $2299 = $2306;
+                                                    var $2298 = self.idx;
+                                                    var $2299 = self.code;
+                                                    var $2300 = Kind$Parser$name1$($2298, $2299);
+                                                    var $2293 = $2300;
                                                     break;
                                             };
-                                            return $2299;
-                                        }), $2295, $2296);
+                                            return $2293;
+                                        }), $2289, $2290);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2307 = self.idx;
-                                                var $2308 = self.code;
-                                                var $2309 = self.err;
-                                                var $2310 = Parser$Reply$error$($2307, $2308, $2309);
-                                                var $2298 = $2310;
+                                                var $2301 = self.idx;
+                                                var $2302 = self.code;
+                                                var $2303 = self.err;
+                                                var $2304 = Parser$Reply$error$($2301, $2302, $2303);
+                                                var $2292 = $2304;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2311 = self.idx;
-                                                var $2312 = self.code;
-                                                var $2313 = self.val;
-                                                var self = $2313;
+                                                var $2305 = self.idx;
+                                                var $2306 = self.code;
+                                                var $2307 = self.val;
+                                                var self = $2307;
                                                 switch (self._) {
                                                     case 'Maybe.some':
-                                                        var $2315 = self.value;
-                                                        var $2316 = $2315;
-                                                        var _name$18 = $2316;
+                                                        var $2309 = self.value;
+                                                        var $2310 = $2309;
+                                                        var _name$18 = $2310;
                                                         break;
                                                     case 'Maybe.none':
-                                                        var self = Kind$Term$reduce$($2297, Map$new);
+                                                        var self = Kind$Term$reduce$($2291, Map$new);
                                                         switch (self._) {
                                                             case 'Kind.Term.var':
-                                                                var $2318 = self.name;
-                                                                var $2319 = $2318;
-                                                                var $2317 = $2319;
+                                                                var $2312 = self.name;
+                                                                var $2313 = $2312;
+                                                                var $2311 = $2313;
                                                                 break;
                                                             case 'Kind.Term.ref':
-                                                                var $2320 = self.name;
-                                                                var $2321 = $2320;
-                                                                var $2317 = $2321;
+                                                                var $2314 = self.name;
+                                                                var $2315 = $2314;
+                                                                var $2311 = $2315;
                                                                 break;
                                                             case 'Kind.Term.typ':
                                                             case 'Kind.Term.all':
@@ -6378,174 +6352,244 @@ module.exports = (function() {
                                                             case 'Kind.Term.str':
                                                             case 'Kind.Term.cse':
                                                             case 'Kind.Term.ori':
-                                                                var $2322 = Kind$Name$read$("self");
-                                                                var $2317 = $2322;
+                                                                var $2316 = Kind$Name$read$("self");
+                                                                var $2311 = $2316;
                                                                 break;
                                                         };
-                                                        var _name$18 = $2317;
+                                                        var _name$18 = $2311;
                                                         break;
                                                 };
-                                                var self = Parser$many$(Kind$Parser$case$with)($2311)($2312);
+                                                var self = Parser$many$(Kind$Parser$case$with)($2305)($2306);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $2323 = self.idx;
-                                                        var $2324 = self.code;
-                                                        var $2325 = self.err;
-                                                        var $2326 = Parser$Reply$error$($2323, $2324, $2325);
-                                                        var $2314 = $2326;
+                                                        var $2317 = self.idx;
+                                                        var $2318 = self.code;
+                                                        var $2319 = self.err;
+                                                        var $2320 = Parser$Reply$error$($2317, $2318, $2319);
+                                                        var $2308 = $2320;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $2327 = self.idx;
-                                                        var $2328 = self.code;
-                                                        var $2329 = self.val;
-                                                        var self = Kind$Parser$text$("{", $2327, $2328);
+                                                        var $2321 = self.idx;
+                                                        var $2322 = self.code;
+                                                        var $2323 = self.val;
+                                                        var self = Kind$Parser$text$("{", $2321, $2322);
                                                         switch (self._) {
                                                             case 'Parser.Reply.error':
-                                                                var $2331 = self.idx;
-                                                                var $2332 = self.code;
-                                                                var $2333 = self.err;
-                                                                var $2334 = Parser$Reply$error$($2331, $2332, $2333);
-                                                                var $2330 = $2334;
+                                                                var $2325 = self.idx;
+                                                                var $2326 = self.code;
+                                                                var $2327 = self.err;
+                                                                var $2328 = Parser$Reply$error$($2325, $2326, $2327);
+                                                                var $2324 = $2328;
                                                                 break;
                                                             case 'Parser.Reply.value':
-                                                                var $2335 = self.idx;
-                                                                var $2336 = self.code;
-                                                                var self = Parser$until$(Kind$Parser$text("}"), Kind$Parser$case$case)($2335)($2336);
+                                                                var $2329 = self.idx;
+                                                                var $2330 = self.code;
+                                                                var self = Parser$until$(Kind$Parser$text("}"), Kind$Parser$case$case)($2329)($2330);
                                                                 switch (self._) {
                                                                     case 'Parser.Reply.error':
-                                                                        var $2338 = self.idx;
-                                                                        var $2339 = self.code;
-                                                                        var $2340 = self.err;
-                                                                        var $2341 = Parser$Reply$error$($2338, $2339, $2340);
-                                                                        var $2337 = $2341;
+                                                                        var $2332 = self.idx;
+                                                                        var $2333 = self.code;
+                                                                        var $2334 = self.err;
+                                                                        var $2335 = Parser$Reply$error$($2332, $2333, $2334);
+                                                                        var $2331 = $2335;
                                                                         break;
                                                                     case 'Parser.Reply.value':
-                                                                        var $2342 = self.idx;
-                                                                        var $2343 = self.code;
-                                                                        var $2344 = self.val;
-                                                                        var _cses$28 = Map$from_list$(List$mapped$($2344, (_x$28 => {
-                                                                            var $2346 = Pair$new$((kind_name_to_bits(Pair$fst$(_x$28))), Pair$snd$(_x$28));
-                                                                            return $2346;
-                                                                        })));
-                                                                        var self = Parser$first_of$(List$cons$((_idx$29 => _code$30 => {
-                                                                            var self = Kind$Parser$text$(":", _idx$29, _code$30);
+                                                                        var $2336 = self.idx;
+                                                                        var $2337 = self.code;
+                                                                        var $2338 = self.val;
+                                                                        var self = Parser$maybe$((_idx$28 => _code$29 => {
+                                                                            var self = Kind$Parser$text$("else ", _idx$28, _code$29);
                                                                             switch (self._) {
                                                                                 case 'Parser.Reply.error':
-                                                                                    var $2348 = self.idx;
-                                                                                    var $2349 = self.code;
-                                                                                    var $2350 = self.err;
-                                                                                    var $2351 = Parser$Reply$error$($2348, $2349, $2350);
-                                                                                    var $2347 = $2351;
+                                                                                    var $2341 = self.idx;
+                                                                                    var $2342 = self.code;
+                                                                                    var $2343 = self.err;
+                                                                                    var $2344 = Parser$Reply$error$($2341, $2342, $2343);
+                                                                                    var $2340 = $2344;
                                                                                     break;
                                                                                 case 'Parser.Reply.value':
-                                                                                    var $2352 = self.idx;
-                                                                                    var $2353 = self.code;
-                                                                                    var self = Kind$Parser$term$($2352, $2353);
+                                                                                    var $2345 = self.idx;
+                                                                                    var $2346 = self.code;
+                                                                                    var self = Kind$Parser$term$($2345, $2346);
                                                                                     switch (self._) {
                                                                                         case 'Parser.Reply.error':
-                                                                                            var $2355 = self.idx;
-                                                                                            var $2356 = self.code;
-                                                                                            var $2357 = self.err;
-                                                                                            var $2358 = Parser$Reply$error$($2355, $2356, $2357);
-                                                                                            var $2354 = $2358;
+                                                                                            var $2348 = self.idx;
+                                                                                            var $2349 = self.code;
+                                                                                            var $2350 = self.err;
+                                                                                            var $2351 = Parser$Reply$error$($2348, $2349, $2350);
+                                                                                            var $2347 = $2351;
                                                                                             break;
                                                                                         case 'Parser.Reply.value':
-                                                                                            var $2359 = self.idx;
-                                                                                            var $2360 = self.code;
-                                                                                            var $2361 = self.val;
-                                                                                            var $2362 = Parser$Reply$value$($2359, $2360, Maybe$some$($2361));
-                                                                                            var $2354 = $2362;
+                                                                                            var $2352 = self.idx;
+                                                                                            var $2353 = self.code;
+                                                                                            var $2354 = self.val;
+                                                                                            var $2355 = Parser$Reply$value$($2352, $2353, $2354);
+                                                                                            var $2347 = $2355;
                                                                                             break;
                                                                                     };
-                                                                                    var $2347 = $2354;
+                                                                                    var $2340 = $2347;
                                                                                     break;
                                                                             };
-                                                                            return $2347;
-                                                                        }), List$cons$((_idx$29 => _code$30 => {
-                                                                            var self = Kind$Parser$text$("!", _idx$29, _code$30);
-                                                                            switch (self._) {
-                                                                                case 'Parser.Reply.error':
-                                                                                    var $2364 = self.idx;
-                                                                                    var $2365 = self.code;
-                                                                                    var $2366 = self.err;
-                                                                                    var $2367 = Parser$Reply$error$($2364, $2365, $2366);
-                                                                                    var $2363 = $2367;
-                                                                                    break;
-                                                                                case 'Parser.Reply.value':
-                                                                                    var $2368 = self.idx;
-                                                                                    var $2369 = self.code;
-                                                                                    var $2370 = Parser$Reply$value$($2368, $2369, Maybe$none);
-                                                                                    var $2363 = $2370;
-                                                                                    break;
-                                                                            };
-                                                                            return $2363;
-                                                                        }), List$cons$((_idx$29 => _code$30 => {
-                                                                            var $2371 = Parser$Reply$value$(_idx$29, _code$30, Maybe$some$(Kind$Term$hol$(Bits$e)));
-                                                                            return $2371;
-                                                                        }), List$nil))))($2342)($2343);
+                                                                            return $2340;
+                                                                        }), $2336, $2337);
                                                                         switch (self._) {
                                                                             case 'Parser.Reply.error':
-                                                                                var $2372 = self.idx;
-                                                                                var $2373 = self.code;
-                                                                                var $2374 = self.err;
-                                                                                var $2375 = Parser$Reply$error$($2372, $2373, $2374);
-                                                                                var $2345 = $2375;
+                                                                                var $2356 = self.idx;
+                                                                                var $2357 = self.code;
+                                                                                var $2358 = self.err;
+                                                                                var $2359 = Parser$Reply$error$($2356, $2357, $2358);
+                                                                                var $2339 = $2359;
                                                                                 break;
                                                                             case 'Parser.Reply.value':
-                                                                                var $2376 = self.idx;
-                                                                                var $2377 = self.code;
-                                                                                var $2378 = self.val;
-                                                                                var self = Kind$Parser$stop$($2275, $2376, $2377);
+                                                                                var $2360 = self.idx;
+                                                                                var $2361 = self.code;
+                                                                                var $2362 = self.val;
+                                                                                var self = $2362;
                                                                                 switch (self._) {
-                                                                                    case 'Parser.Reply.error':
-                                                                                        var $2380 = self.idx;
-                                                                                        var $2381 = self.code;
-                                                                                        var $2382 = self.err;
-                                                                                        var $2383 = Parser$Reply$error$($2380, $2381, $2382);
-                                                                                        var $2379 = $2383;
+                                                                                    case 'Maybe.some':
+                                                                                        var $2364 = self.value;
+                                                                                        var $2365 = List$cons$(Pair$new$("_", $2364), $2338);
+                                                                                        var _cses$31 = $2365;
                                                                                         break;
-                                                                                    case 'Parser.Reply.value':
-                                                                                        var $2384 = self.idx;
-                                                                                        var $2385 = self.code;
-                                                                                        var $2386 = self.val;
-                                                                                        var $2387 = Parser$Reply$value$($2384, $2385, Kind$Term$ori$($2386, Kind$Term$cse$(Bits$e, $2297, _name$18, $2329, _cses$28, $2378)));
-                                                                                        var $2379 = $2387;
+                                                                                    case 'Maybe.none':
+                                                                                        var $2366 = $2338;
+                                                                                        var _cses$31 = $2366;
                                                                                         break;
                                                                                 };
-                                                                                var $2345 = $2379;
+                                                                                var _cses$32 = Map$from_list$(List$mapped$(_cses$31, (_kv$32 => {
+                                                                                    var self = _kv$32;
+                                                                                    switch (self._) {
+                                                                                        case 'Pair.new':
+                                                                                            var $2368 = self.fst;
+                                                                                            var $2369 = self.snd;
+                                                                                            var $2370 = Pair$new$((kind_name_to_bits($2368)), $2369);
+                                                                                            var $2367 = $2370;
+                                                                                            break;
+                                                                                    };
+                                                                                    return $2367;
+                                                                                })));
+                                                                                var self = Parser$first_of$(List$cons$((_idx$33 => _code$34 => {
+                                                                                    var self = Kind$Parser$text$(":", _idx$33, _code$34);
+                                                                                    switch (self._) {
+                                                                                        case 'Parser.Reply.error':
+                                                                                            var $2372 = self.idx;
+                                                                                            var $2373 = self.code;
+                                                                                            var $2374 = self.err;
+                                                                                            var $2375 = Parser$Reply$error$($2372, $2373, $2374);
+                                                                                            var $2371 = $2375;
+                                                                                            break;
+                                                                                        case 'Parser.Reply.value':
+                                                                                            var $2376 = self.idx;
+                                                                                            var $2377 = self.code;
+                                                                                            var self = Kind$Parser$term$($2376, $2377);
+                                                                                            switch (self._) {
+                                                                                                case 'Parser.Reply.error':
+                                                                                                    var $2379 = self.idx;
+                                                                                                    var $2380 = self.code;
+                                                                                                    var $2381 = self.err;
+                                                                                                    var $2382 = Parser$Reply$error$($2379, $2380, $2381);
+                                                                                                    var $2378 = $2382;
+                                                                                                    break;
+                                                                                                case 'Parser.Reply.value':
+                                                                                                    var $2383 = self.idx;
+                                                                                                    var $2384 = self.code;
+                                                                                                    var $2385 = self.val;
+                                                                                                    var $2386 = Parser$Reply$value$($2383, $2384, Maybe$some$($2385));
+                                                                                                    var $2378 = $2386;
+                                                                                                    break;
+                                                                                            };
+                                                                                            var $2371 = $2378;
+                                                                                            break;
+                                                                                    };
+                                                                                    return $2371;
+                                                                                }), List$cons$((_idx$33 => _code$34 => {
+                                                                                    var self = Kind$Parser$text$("!", _idx$33, _code$34);
+                                                                                    switch (self._) {
+                                                                                        case 'Parser.Reply.error':
+                                                                                            var $2388 = self.idx;
+                                                                                            var $2389 = self.code;
+                                                                                            var $2390 = self.err;
+                                                                                            var $2391 = Parser$Reply$error$($2388, $2389, $2390);
+                                                                                            var $2387 = $2391;
+                                                                                            break;
+                                                                                        case 'Parser.Reply.value':
+                                                                                            var $2392 = self.idx;
+                                                                                            var $2393 = self.code;
+                                                                                            var $2394 = Parser$Reply$value$($2392, $2393, Maybe$none);
+                                                                                            var $2387 = $2394;
+                                                                                            break;
+                                                                                    };
+                                                                                    return $2387;
+                                                                                }), List$cons$((_idx$33 => _code$34 => {
+                                                                                    var $2395 = Parser$Reply$value$(_idx$33, _code$34, Maybe$some$(Kind$Term$hol$(Bits$e)));
+                                                                                    return $2395;
+                                                                                }), List$nil))))($2360)($2361);
+                                                                                switch (self._) {
+                                                                                    case 'Parser.Reply.error':
+                                                                                        var $2396 = self.idx;
+                                                                                        var $2397 = self.code;
+                                                                                        var $2398 = self.err;
+                                                                                        var $2399 = Parser$Reply$error$($2396, $2397, $2398);
+                                                                                        var $2363 = $2399;
+                                                                                        break;
+                                                                                    case 'Parser.Reply.value':
+                                                                                        var $2400 = self.idx;
+                                                                                        var $2401 = self.code;
+                                                                                        var $2402 = self.val;
+                                                                                        var self = Kind$Parser$stop$($2269, $2400, $2401);
+                                                                                        switch (self._) {
+                                                                                            case 'Parser.Reply.error':
+                                                                                                var $2404 = self.idx;
+                                                                                                var $2405 = self.code;
+                                                                                                var $2406 = self.err;
+                                                                                                var $2407 = Parser$Reply$error$($2404, $2405, $2406);
+                                                                                                var $2403 = $2407;
+                                                                                                break;
+                                                                                            case 'Parser.Reply.value':
+                                                                                                var $2408 = self.idx;
+                                                                                                var $2409 = self.code;
+                                                                                                var $2410 = self.val;
+                                                                                                var $2411 = Parser$Reply$value$($2408, $2409, Kind$Term$ori$($2410, Kind$Term$cse$(Bits$e, $2291, _name$18, $2323, _cses$32, $2402)));
+                                                                                                var $2403 = $2411;
+                                                                                                break;
+                                                                                        };
+                                                                                        var $2363 = $2403;
+                                                                                        break;
+                                                                                };
+                                                                                var $2339 = $2363;
                                                                                 break;
                                                                         };
-                                                                        var $2337 = $2345;
+                                                                        var $2331 = $2339;
                                                                         break;
                                                                 };
-                                                                var $2330 = $2337;
+                                                                var $2324 = $2331;
                                                                 break;
                                                         };
-                                                        var $2314 = $2330;
+                                                        var $2308 = $2324;
                                                         break;
                                                 };
-                                                var $2298 = $2314;
+                                                var $2292 = $2308;
                                                 break;
                                         };
-                                        var $2290 = $2298;
+                                        var $2284 = $2292;
                                         break;
                                 };
-                                var $2283 = $2290;
+                                var $2277 = $2284;
                                 break;
                         };
-                        var $2276 = $2283;
+                        var $2270 = $2277;
                         break;
                 };
-                var $2268 = $2276;
+                var $2262 = $2270;
                 break;
         };
-        return $2268;
+        return $2262;
     };
     const Kind$Parser$case = x0 => x1 => Kind$Parser$case$(x0, x1);
 
     function Kind$set$(_name$2, _val$3, _map$4) {
-        var $2388 = Map$set$((kind_name_to_bits(_name$2)), _val$3, _map$4);
-        return $2388;
+        var $2412 = Map$set$((kind_name_to_bits(_name$2)), _val$3, _map$4);
+        return $2412;
     };
     const Kind$set = x0 => x1 => x2 => Kind$set$(x0, x1, x2);
 
@@ -6553,115 +6597,115 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2390 = self.idx;
-                var $2391 = self.code;
-                var $2392 = self.err;
-                var $2393 = Parser$Reply$error$($2390, $2391, $2392);
-                var $2389 = $2393;
+                var $2414 = self.idx;
+                var $2415 = self.code;
+                var $2416 = self.err;
+                var $2417 = Parser$Reply$error$($2414, $2415, $2416);
+                var $2413 = $2417;
                 break;
             case 'Parser.Reply.value':
-                var $2394 = self.idx;
-                var $2395 = self.code;
-                var $2396 = self.val;
-                var self = Kind$Parser$text$("open ", $2394, $2395);
+                var $2418 = self.idx;
+                var $2419 = self.code;
+                var $2420 = self.val;
+                var self = Kind$Parser$text$("open ", $2418, $2419);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2398 = self.idx;
-                        var $2399 = self.code;
-                        var $2400 = self.err;
-                        var $2401 = Parser$Reply$error$($2398, $2399, $2400);
-                        var $2397 = $2401;
+                        var $2422 = self.idx;
+                        var $2423 = self.code;
+                        var $2424 = self.err;
+                        var $2425 = Parser$Reply$error$($2422, $2423, $2424);
+                        var $2421 = $2425;
                         break;
                     case 'Parser.Reply.value':
-                        var $2402 = self.idx;
-                        var $2403 = self.code;
-                        var self = Kind$Parser$spaces($2402)($2403);
+                        var $2426 = self.idx;
+                        var $2427 = self.code;
+                        var self = Kind$Parser$spaces($2426)($2427);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2405 = self.idx;
-                                var $2406 = self.code;
-                                var $2407 = self.err;
-                                var $2408 = Parser$Reply$error$($2405, $2406, $2407);
-                                var $2404 = $2408;
+                                var $2429 = self.idx;
+                                var $2430 = self.code;
+                                var $2431 = self.err;
+                                var $2432 = Parser$Reply$error$($2429, $2430, $2431);
+                                var $2428 = $2432;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2409 = self.idx;
-                                var $2410 = self.code;
-                                var self = Kind$Parser$term$($2409, $2410);
+                                var $2433 = self.idx;
+                                var $2434 = self.code;
+                                var self = Kind$Parser$term$($2433, $2434);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2412 = self.idx;
-                                        var $2413 = self.code;
-                                        var $2414 = self.err;
-                                        var $2415 = Parser$Reply$error$($2412, $2413, $2414);
-                                        var $2411 = $2415;
+                                        var $2436 = self.idx;
+                                        var $2437 = self.code;
+                                        var $2438 = self.err;
+                                        var $2439 = Parser$Reply$error$($2436, $2437, $2438);
+                                        var $2435 = $2439;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2416 = self.idx;
-                                        var $2417 = self.code;
-                                        var $2418 = self.val;
+                                        var $2440 = self.idx;
+                                        var $2441 = self.code;
+                                        var $2442 = self.val;
                                         var self = Parser$maybe$((_idx$15 => _code$16 => {
                                             var self = Kind$Parser$text$("as", _idx$15, _code$16);
                                             switch (self._) {
                                                 case 'Parser.Reply.error':
-                                                    var $2421 = self.idx;
-                                                    var $2422 = self.code;
-                                                    var $2423 = self.err;
-                                                    var $2424 = Parser$Reply$error$($2421, $2422, $2423);
-                                                    var $2420 = $2424;
+                                                    var $2445 = self.idx;
+                                                    var $2446 = self.code;
+                                                    var $2447 = self.err;
+                                                    var $2448 = Parser$Reply$error$($2445, $2446, $2447);
+                                                    var $2444 = $2448;
                                                     break;
                                                 case 'Parser.Reply.value':
-                                                    var $2425 = self.idx;
-                                                    var $2426 = self.code;
-                                                    var $2427 = Kind$Parser$name1$($2425, $2426);
-                                                    var $2420 = $2427;
+                                                    var $2449 = self.idx;
+                                                    var $2450 = self.code;
+                                                    var $2451 = Kind$Parser$name1$($2449, $2450);
+                                                    var $2444 = $2451;
                                                     break;
                                             };
-                                            return $2420;
-                                        }), $2416, $2417);
+                                            return $2444;
+                                        }), $2440, $2441);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2428 = self.idx;
-                                                var $2429 = self.code;
-                                                var $2430 = self.err;
-                                                var $2431 = Parser$Reply$error$($2428, $2429, $2430);
-                                                var $2419 = $2431;
+                                                var $2452 = self.idx;
+                                                var $2453 = self.code;
+                                                var $2454 = self.err;
+                                                var $2455 = Parser$Reply$error$($2452, $2453, $2454);
+                                                var $2443 = $2455;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2432 = self.idx;
-                                                var $2433 = self.code;
-                                                var $2434 = self.val;
-                                                var self = Parser$maybe$(Kind$Parser$text(";"), $2432, $2433);
+                                                var $2456 = self.idx;
+                                                var $2457 = self.code;
+                                                var $2458 = self.val;
+                                                var self = Parser$maybe$(Kind$Parser$text(";"), $2456, $2457);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $2436 = self.idx;
-                                                        var $2437 = self.code;
-                                                        var $2438 = self.err;
-                                                        var $2439 = Parser$Reply$error$($2436, $2437, $2438);
-                                                        var $2435 = $2439;
+                                                        var $2460 = self.idx;
+                                                        var $2461 = self.code;
+                                                        var $2462 = self.err;
+                                                        var $2463 = Parser$Reply$error$($2460, $2461, $2462);
+                                                        var $2459 = $2463;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $2440 = self.idx;
-                                                        var $2441 = self.code;
-                                                        var self = $2434;
+                                                        var $2464 = self.idx;
+                                                        var $2465 = self.code;
+                                                        var self = $2458;
                                                         switch (self._) {
                                                             case 'Maybe.some':
-                                                                var $2443 = self.value;
-                                                                var $2444 = $2443;
-                                                                var _name$21 = $2444;
+                                                                var $2467 = self.value;
+                                                                var $2468 = $2467;
+                                                                var _name$21 = $2468;
                                                                 break;
                                                             case 'Maybe.none':
-                                                                var self = Kind$Term$reduce$($2418, Map$new);
+                                                                var self = Kind$Term$reduce$($2442, Map$new);
                                                                 switch (self._) {
                                                                     case 'Kind.Term.var':
-                                                                        var $2446 = self.name;
-                                                                        var $2447 = $2446;
-                                                                        var $2445 = $2447;
+                                                                        var $2470 = self.name;
+                                                                        var $2471 = $2470;
+                                                                        var $2469 = $2471;
                                                                         break;
                                                                     case 'Kind.Term.ref':
-                                                                        var $2448 = self.name;
-                                                                        var $2449 = $2448;
-                                                                        var $2445 = $2449;
+                                                                        var $2472 = self.name;
+                                                                        var $2473 = $2472;
+                                                                        var $2469 = $2473;
                                                                         break;
                                                                     case 'Kind.Term.typ':
                                                                     case 'Kind.Term.all':
@@ -6677,126 +6721,73 @@ module.exports = (function() {
                                                                     case 'Kind.Term.str':
                                                                     case 'Kind.Term.cse':
                                                                     case 'Kind.Term.ori':
-                                                                        var $2450 = Kind$Name$read$("self");
-                                                                        var $2445 = $2450;
+                                                                        var $2474 = Kind$Name$read$("self");
+                                                                        var $2469 = $2474;
                                                                         break;
                                                                 };
-                                                                var _name$21 = $2445;
+                                                                var _name$21 = $2469;
                                                                 break;
                                                         };
                                                         var _wyth$22 = List$nil;
-                                                        var self = Kind$Parser$term$($2440, $2441);
+                                                        var self = Kind$Parser$term$($2464, $2465);
                                                         switch (self._) {
                                                             case 'Parser.Reply.error':
-                                                                var $2451 = self.idx;
-                                                                var $2452 = self.code;
-                                                                var $2453 = self.err;
-                                                                var $2454 = Parser$Reply$error$($2451, $2452, $2453);
-                                                                var $2442 = $2454;
+                                                                var $2475 = self.idx;
+                                                                var $2476 = self.code;
+                                                                var $2477 = self.err;
+                                                                var $2478 = Parser$Reply$error$($2475, $2476, $2477);
+                                                                var $2466 = $2478;
                                                                 break;
                                                             case 'Parser.Reply.value':
-                                                                var $2455 = self.idx;
-                                                                var $2456 = self.code;
-                                                                var $2457 = self.val;
-                                                                var _cses$26 = Kind$set$("_", $2457, Map$new);
+                                                                var $2479 = self.idx;
+                                                                var $2480 = self.code;
+                                                                var $2481 = self.val;
+                                                                var _cses$26 = Kind$set$("_", $2481, Map$new);
                                                                 var _moti$27 = Maybe$some$(Kind$Term$hol$(Bits$e));
-                                                                var self = Kind$Parser$stop$($2396, $2455, $2456);
+                                                                var self = Kind$Parser$stop$($2420, $2479, $2480);
                                                                 switch (self._) {
                                                                     case 'Parser.Reply.error':
-                                                                        var $2459 = self.idx;
-                                                                        var $2460 = self.code;
-                                                                        var $2461 = self.err;
-                                                                        var $2462 = Parser$Reply$error$($2459, $2460, $2461);
-                                                                        var $2458 = $2462;
+                                                                        var $2483 = self.idx;
+                                                                        var $2484 = self.code;
+                                                                        var $2485 = self.err;
+                                                                        var $2486 = Parser$Reply$error$($2483, $2484, $2485);
+                                                                        var $2482 = $2486;
                                                                         break;
                                                                     case 'Parser.Reply.value':
-                                                                        var $2463 = self.idx;
-                                                                        var $2464 = self.code;
-                                                                        var $2465 = self.val;
-                                                                        var $2466 = Parser$Reply$value$($2463, $2464, Kind$Term$ori$($2465, Kind$Term$cse$(Bits$e, $2418, _name$21, _wyth$22, _cses$26, _moti$27)));
-                                                                        var $2458 = $2466;
+                                                                        var $2487 = self.idx;
+                                                                        var $2488 = self.code;
+                                                                        var $2489 = self.val;
+                                                                        var $2490 = Parser$Reply$value$($2487, $2488, Kind$Term$ori$($2489, Kind$Term$cse$(Bits$e, $2442, _name$21, _wyth$22, _cses$26, _moti$27)));
+                                                                        var $2482 = $2490;
                                                                         break;
                                                                 };
-                                                                var $2442 = $2458;
+                                                                var $2466 = $2482;
                                                                 break;
                                                         };
-                                                        var $2435 = $2442;
+                                                        var $2459 = $2466;
                                                         break;
                                                 };
-                                                var $2419 = $2435;
+                                                var $2443 = $2459;
                                                 break;
                                         };
-                                        var $2411 = $2419;
+                                        var $2435 = $2443;
                                         break;
                                 };
-                                var $2404 = $2411;
+                                var $2428 = $2435;
                                 break;
                         };
-                        var $2397 = $2404;
+                        var $2421 = $2428;
                         break;
                 };
-                var $2389 = $2397;
+                var $2413 = $2421;
                 break;
         };
-        return $2389;
+        return $2413;
     };
     const Kind$Parser$open = x0 => x1 => Kind$Parser$open$(x0, x1);
 
     function Kind$Parser$switch$case$(_idx$1, _code$2) {
         var self = Kind$Parser$term$(_idx$1, _code$2);
-        switch (self._) {
-            case 'Parser.Reply.error':
-                var $2468 = self.idx;
-                var $2469 = self.code;
-                var $2470 = self.err;
-                var $2471 = Parser$Reply$error$($2468, $2469, $2470);
-                var $2467 = $2471;
-                break;
-            case 'Parser.Reply.value':
-                var $2472 = self.idx;
-                var $2473 = self.code;
-                var $2474 = self.val;
-                var self = Kind$Parser$text$(":", $2472, $2473);
-                switch (self._) {
-                    case 'Parser.Reply.error':
-                        var $2476 = self.idx;
-                        var $2477 = self.code;
-                        var $2478 = self.err;
-                        var $2479 = Parser$Reply$error$($2476, $2477, $2478);
-                        var $2475 = $2479;
-                        break;
-                    case 'Parser.Reply.value':
-                        var $2480 = self.idx;
-                        var $2481 = self.code;
-                        var self = Kind$Parser$term$($2480, $2481);
-                        switch (self._) {
-                            case 'Parser.Reply.error':
-                                var $2483 = self.idx;
-                                var $2484 = self.code;
-                                var $2485 = self.err;
-                                var $2486 = Parser$Reply$error$($2483, $2484, $2485);
-                                var $2482 = $2486;
-                                break;
-                            case 'Parser.Reply.value':
-                                var $2487 = self.idx;
-                                var $2488 = self.code;
-                                var $2489 = self.val;
-                                var $2490 = Parser$Reply$value$($2487, $2488, Pair$new$($2474, $2489));
-                                var $2482 = $2490;
-                                break;
-                        };
-                        var $2475 = $2482;
-                        break;
-                };
-                var $2467 = $2475;
-                break;
-        };
-        return $2467;
-    };
-    const Kind$Parser$switch$case = x0 => x1 => Kind$Parser$switch$case$(x0, x1);
-
-    function Kind$Parser$switch$(_idx$1, _code$2) {
-        var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
                 var $2492 = self.idx;
@@ -6809,7 +6800,7 @@ module.exports = (function() {
                 var $2496 = self.idx;
                 var $2497 = self.code;
                 var $2498 = self.val;
-                var self = Kind$Parser$text$("switch ", $2496, $2497);
+                var self = Kind$Parser$text$(":", $2496, $2497);
                 switch (self._) {
                     case 'Parser.Reply.error':
                         var $2500 = self.idx;
@@ -6834,104 +6825,7 @@ module.exports = (function() {
                                 var $2511 = self.idx;
                                 var $2512 = self.code;
                                 var $2513 = self.val;
-                                var self = Kind$Parser$text$("{", $2511, $2512);
-                                switch (self._) {
-                                    case 'Parser.Reply.error':
-                                        var $2515 = self.idx;
-                                        var $2516 = self.code;
-                                        var $2517 = self.err;
-                                        var $2518 = Parser$Reply$error$($2515, $2516, $2517);
-                                        var $2514 = $2518;
-                                        break;
-                                    case 'Parser.Reply.value':
-                                        var $2519 = self.idx;
-                                        var $2520 = self.code;
-                                        var self = Parser$until$(Kind$Parser$text("}"), Kind$Parser$switch$case)($2519)($2520);
-                                        switch (self._) {
-                                            case 'Parser.Reply.error':
-                                                var $2522 = self.idx;
-                                                var $2523 = self.code;
-                                                var $2524 = self.err;
-                                                var $2525 = Parser$Reply$error$($2522, $2523, $2524);
-                                                var $2521 = $2525;
-                                                break;
-                                            case 'Parser.Reply.value':
-                                                var $2526 = self.idx;
-                                                var $2527 = self.code;
-                                                var $2528 = self.val;
-                                                var self = Kind$Parser$text$("else", $2526, $2527);
-                                                switch (self._) {
-                                                    case 'Parser.Reply.error':
-                                                        var $2530 = self.idx;
-                                                        var $2531 = self.code;
-                                                        var $2532 = self.err;
-                                                        var $2533 = Parser$Reply$error$($2530, $2531, $2532);
-                                                        var $2529 = $2533;
-                                                        break;
-                                                    case 'Parser.Reply.value':
-                                                        var $2534 = self.idx;
-                                                        var $2535 = self.code;
-                                                        var self = Kind$Parser$term$($2534, $2535);
-                                                        switch (self._) {
-                                                            case 'Parser.Reply.error':
-                                                                var $2537 = self.idx;
-                                                                var $2538 = self.code;
-                                                                var $2539 = self.err;
-                                                                var $2540 = Parser$Reply$error$($2537, $2538, $2539);
-                                                                var $2536 = $2540;
-                                                                break;
-                                                            case 'Parser.Reply.value':
-                                                                var $2541 = self.idx;
-                                                                var $2542 = self.code;
-                                                                var $2543 = self.val;
-                                                                var self = Kind$Parser$stop$($2498, $2541, $2542);
-                                                                switch (self._) {
-                                                                    case 'Parser.Reply.error':
-                                                                        var $2545 = self.idx;
-                                                                        var $2546 = self.code;
-                                                                        var $2547 = self.err;
-                                                                        var $2548 = Parser$Reply$error$($2545, $2546, $2547);
-                                                                        var $2544 = $2548;
-                                                                        break;
-                                                                    case 'Parser.Reply.value':
-                                                                        var $2549 = self.idx;
-                                                                        var $2550 = self.code;
-                                                                        var $2551 = self.val;
-                                                                        var _term$27 = List$fold$($2528, $2543, (_cse$27 => _rest$28 => {
-                                                                            var self = _cse$27;
-                                                                            switch (self._) {
-                                                                                case 'Pair.new':
-                                                                                    var $2554 = self.fst;
-                                                                                    var $2555 = self.snd;
-                                                                                    var _term$31 = Kind$Term$app$($2513, $2554);
-                                                                                    var _term$32 = Kind$Term$app$(_term$31, Kind$Term$lam$("", (_x$32 => {
-                                                                                        var $2557 = Kind$Term$hol$(Bits$e);
-                                                                                        return $2557;
-                                                                                    })));
-                                                                                    var _term$33 = Kind$Term$app$(_term$32, $2555);
-                                                                                    var _term$34 = Kind$Term$app$(_term$33, _rest$28);
-                                                                                    var $2556 = _term$34;
-                                                                                    var $2553 = $2556;
-                                                                                    break;
-                                                                            };
-                                                                            return $2553;
-                                                                        }));
-                                                                        var $2552 = Parser$Reply$value$($2549, $2550, Kind$Term$ori$($2551, _term$27));
-                                                                        var $2544 = $2552;
-                                                                        break;
-                                                                };
-                                                                var $2536 = $2544;
-                                                                break;
-                                                        };
-                                                        var $2529 = $2536;
-                                                        break;
-                                                };
-                                                var $2521 = $2529;
-                                                break;
-                                        };
-                                        var $2514 = $2521;
-                                        break;
-                                };
+                                var $2514 = Parser$Reply$value$($2511, $2512, Pair$new$($2498, $2513));
                                 var $2506 = $2514;
                                 break;
                         };
@@ -6943,91 +6837,241 @@ module.exports = (function() {
         };
         return $2491;
     };
+    const Kind$Parser$switch$case = x0 => x1 => Kind$Parser$switch$case$(x0, x1);
+
+    function Kind$Parser$switch$(_idx$1, _code$2) {
+        var self = Kind$Parser$init$(_idx$1, _code$2);
+        switch (self._) {
+            case 'Parser.Reply.error':
+                var $2516 = self.idx;
+                var $2517 = self.code;
+                var $2518 = self.err;
+                var $2519 = Parser$Reply$error$($2516, $2517, $2518);
+                var $2515 = $2519;
+                break;
+            case 'Parser.Reply.value':
+                var $2520 = self.idx;
+                var $2521 = self.code;
+                var $2522 = self.val;
+                var self = Kind$Parser$text$("switch ", $2520, $2521);
+                switch (self._) {
+                    case 'Parser.Reply.error':
+                        var $2524 = self.idx;
+                        var $2525 = self.code;
+                        var $2526 = self.err;
+                        var $2527 = Parser$Reply$error$($2524, $2525, $2526);
+                        var $2523 = $2527;
+                        break;
+                    case 'Parser.Reply.value':
+                        var $2528 = self.idx;
+                        var $2529 = self.code;
+                        var self = Kind$Parser$term$($2528, $2529);
+                        switch (self._) {
+                            case 'Parser.Reply.error':
+                                var $2531 = self.idx;
+                                var $2532 = self.code;
+                                var $2533 = self.err;
+                                var $2534 = Parser$Reply$error$($2531, $2532, $2533);
+                                var $2530 = $2534;
+                                break;
+                            case 'Parser.Reply.value':
+                                var $2535 = self.idx;
+                                var $2536 = self.code;
+                                var $2537 = self.val;
+                                var self = Kind$Parser$text$("{", $2535, $2536);
+                                switch (self._) {
+                                    case 'Parser.Reply.error':
+                                        var $2539 = self.idx;
+                                        var $2540 = self.code;
+                                        var $2541 = self.err;
+                                        var $2542 = Parser$Reply$error$($2539, $2540, $2541);
+                                        var $2538 = $2542;
+                                        break;
+                                    case 'Parser.Reply.value':
+                                        var $2543 = self.idx;
+                                        var $2544 = self.code;
+                                        var self = Parser$until$(Kind$Parser$text("}"), Kind$Parser$switch$case)($2543)($2544);
+                                        switch (self._) {
+                                            case 'Parser.Reply.error':
+                                                var $2546 = self.idx;
+                                                var $2547 = self.code;
+                                                var $2548 = self.err;
+                                                var $2549 = Parser$Reply$error$($2546, $2547, $2548);
+                                                var $2545 = $2549;
+                                                break;
+                                            case 'Parser.Reply.value':
+                                                var $2550 = self.idx;
+                                                var $2551 = self.code;
+                                                var $2552 = self.val;
+                                                var self = Kind$Parser$text$("else", $2550, $2551);
+                                                switch (self._) {
+                                                    case 'Parser.Reply.error':
+                                                        var $2554 = self.idx;
+                                                        var $2555 = self.code;
+                                                        var $2556 = self.err;
+                                                        var $2557 = Parser$Reply$error$($2554, $2555, $2556);
+                                                        var $2553 = $2557;
+                                                        break;
+                                                    case 'Parser.Reply.value':
+                                                        var $2558 = self.idx;
+                                                        var $2559 = self.code;
+                                                        var self = Kind$Parser$term$($2558, $2559);
+                                                        switch (self._) {
+                                                            case 'Parser.Reply.error':
+                                                                var $2561 = self.idx;
+                                                                var $2562 = self.code;
+                                                                var $2563 = self.err;
+                                                                var $2564 = Parser$Reply$error$($2561, $2562, $2563);
+                                                                var $2560 = $2564;
+                                                                break;
+                                                            case 'Parser.Reply.value':
+                                                                var $2565 = self.idx;
+                                                                var $2566 = self.code;
+                                                                var $2567 = self.val;
+                                                                var self = Kind$Parser$stop$($2522, $2565, $2566);
+                                                                switch (self._) {
+                                                                    case 'Parser.Reply.error':
+                                                                        var $2569 = self.idx;
+                                                                        var $2570 = self.code;
+                                                                        var $2571 = self.err;
+                                                                        var $2572 = Parser$Reply$error$($2569, $2570, $2571);
+                                                                        var $2568 = $2572;
+                                                                        break;
+                                                                    case 'Parser.Reply.value':
+                                                                        var $2573 = self.idx;
+                                                                        var $2574 = self.code;
+                                                                        var $2575 = self.val;
+                                                                        var _term$27 = List$fold$($2552, $2567, (_cse$27 => _rest$28 => {
+                                                                            var self = _cse$27;
+                                                                            switch (self._) {
+                                                                                case 'Pair.new':
+                                                                                    var $2578 = self.fst;
+                                                                                    var $2579 = self.snd;
+                                                                                    var _term$31 = Kind$Term$app$($2537, $2578);
+                                                                                    var _term$32 = Kind$Term$app$(_term$31, Kind$Term$lam$("", (_x$32 => {
+                                                                                        var $2581 = Kind$Term$hol$(Bits$e);
+                                                                                        return $2581;
+                                                                                    })));
+                                                                                    var _term$33 = Kind$Term$app$(_term$32, $2579);
+                                                                                    var _term$34 = Kind$Term$app$(_term$33, _rest$28);
+                                                                                    var $2580 = _term$34;
+                                                                                    var $2577 = $2580;
+                                                                                    break;
+                                                                            };
+                                                                            return $2577;
+                                                                        }));
+                                                                        var $2576 = Parser$Reply$value$($2573, $2574, Kind$Term$ori$($2575, _term$27));
+                                                                        var $2568 = $2576;
+                                                                        break;
+                                                                };
+                                                                var $2560 = $2568;
+                                                                break;
+                                                        };
+                                                        var $2553 = $2560;
+                                                        break;
+                                                };
+                                                var $2545 = $2553;
+                                                break;
+                                        };
+                                        var $2538 = $2545;
+                                        break;
+                                };
+                                var $2530 = $2538;
+                                break;
+                        };
+                        var $2523 = $2530;
+                        break;
+                };
+                var $2515 = $2523;
+                break;
+        };
+        return $2515;
+    };
     const Kind$Parser$switch = x0 => x1 => Kind$Parser$switch$(x0, x1);
 
     function Parser$digit$(_idx$1, _code$2) {
         var self = _code$2;
         if (self.length === 0) {
-            var $2559 = Parser$Reply$error$(_idx$1, _code$2, "Not a digit.");
-            var $2558 = $2559;
+            var $2583 = Parser$Reply$error$(_idx$1, _code$2, "Not a digit.");
+            var $2582 = $2583;
         } else {
-            var $2560 = self.charCodeAt(0);
-            var $2561 = self.slice(1);
+            var $2584 = self.charCodeAt(0);
+            var $2585 = self.slice(1);
             var _sidx$5 = Nat$succ$(_idx$1);
-            var self = ($2560 === 48);
+            var self = ($2584 === 48);
             if (self) {
-                var $2563 = Parser$Reply$value$(_sidx$5, $2561, 0n);
-                var $2562 = $2563;
+                var $2587 = Parser$Reply$value$(_sidx$5, $2585, 0n);
+                var $2586 = $2587;
             } else {
-                var self = ($2560 === 49);
+                var self = ($2584 === 49);
                 if (self) {
-                    var $2565 = Parser$Reply$value$(_sidx$5, $2561, 1n);
-                    var $2564 = $2565;
+                    var $2589 = Parser$Reply$value$(_sidx$5, $2585, 1n);
+                    var $2588 = $2589;
                 } else {
-                    var self = ($2560 === 50);
+                    var self = ($2584 === 50);
                     if (self) {
-                        var $2567 = Parser$Reply$value$(_sidx$5, $2561, 2n);
-                        var $2566 = $2567;
+                        var $2591 = Parser$Reply$value$(_sidx$5, $2585, 2n);
+                        var $2590 = $2591;
                     } else {
-                        var self = ($2560 === 51);
+                        var self = ($2584 === 51);
                         if (self) {
-                            var $2569 = Parser$Reply$value$(_sidx$5, $2561, 3n);
-                            var $2568 = $2569;
+                            var $2593 = Parser$Reply$value$(_sidx$5, $2585, 3n);
+                            var $2592 = $2593;
                         } else {
-                            var self = ($2560 === 52);
+                            var self = ($2584 === 52);
                             if (self) {
-                                var $2571 = Parser$Reply$value$(_sidx$5, $2561, 4n);
-                                var $2570 = $2571;
+                                var $2595 = Parser$Reply$value$(_sidx$5, $2585, 4n);
+                                var $2594 = $2595;
                             } else {
-                                var self = ($2560 === 53);
+                                var self = ($2584 === 53);
                                 if (self) {
-                                    var $2573 = Parser$Reply$value$(_sidx$5, $2561, 5n);
-                                    var $2572 = $2573;
+                                    var $2597 = Parser$Reply$value$(_sidx$5, $2585, 5n);
+                                    var $2596 = $2597;
                                 } else {
-                                    var self = ($2560 === 54);
+                                    var self = ($2584 === 54);
                                     if (self) {
-                                        var $2575 = Parser$Reply$value$(_sidx$5, $2561, 6n);
-                                        var $2574 = $2575;
+                                        var $2599 = Parser$Reply$value$(_sidx$5, $2585, 6n);
+                                        var $2598 = $2599;
                                     } else {
-                                        var self = ($2560 === 55);
+                                        var self = ($2584 === 55);
                                         if (self) {
-                                            var $2577 = Parser$Reply$value$(_sidx$5, $2561, 7n);
-                                            var $2576 = $2577;
+                                            var $2601 = Parser$Reply$value$(_sidx$5, $2585, 7n);
+                                            var $2600 = $2601;
                                         } else {
-                                            var self = ($2560 === 56);
+                                            var self = ($2584 === 56);
                                             if (self) {
-                                                var $2579 = Parser$Reply$value$(_sidx$5, $2561, 8n);
-                                                var $2578 = $2579;
+                                                var $2603 = Parser$Reply$value$(_sidx$5, $2585, 8n);
+                                                var $2602 = $2603;
                                             } else {
-                                                var self = ($2560 === 57);
+                                                var self = ($2584 === 57);
                                                 if (self) {
-                                                    var $2581 = Parser$Reply$value$(_sidx$5, $2561, 9n);
-                                                    var $2580 = $2581;
+                                                    var $2605 = Parser$Reply$value$(_sidx$5, $2585, 9n);
+                                                    var $2604 = $2605;
                                                 } else {
-                                                    var $2582 = Parser$Reply$error$(_idx$1, _code$2, "Not a digit.");
-                                                    var $2580 = $2582;
+                                                    var $2606 = Parser$Reply$error$(_idx$1, _code$2, "Not a digit.");
+                                                    var $2604 = $2606;
                                                 };
-                                                var $2578 = $2580;
+                                                var $2602 = $2604;
                                             };
-                                            var $2576 = $2578;
+                                            var $2600 = $2602;
                                         };
-                                        var $2574 = $2576;
+                                        var $2598 = $2600;
                                     };
-                                    var $2572 = $2574;
+                                    var $2596 = $2598;
                                 };
-                                var $2570 = $2572;
+                                var $2594 = $2596;
                             };
-                            var $2568 = $2570;
+                            var $2592 = $2594;
                         };
-                        var $2566 = $2568;
+                        var $2590 = $2592;
                     };
-                    var $2564 = $2566;
+                    var $2588 = $2590;
                 };
-                var $2562 = $2564;
+                var $2586 = $2588;
             };
-            var $2558 = $2562;
+            var $2582 = $2586;
         };
-        return $2558;
+        return $2582;
     };
     const Parser$digit = x0 => x1 => Parser$digit$(x0, x1);
     const Nat$add = a0 => a1 => (a0 + a1);
@@ -7046,13 +7090,13 @@ module.exports = (function() {
                 var self = _ds$2;
                 switch (self._) {
                     case 'List.cons':
-                        var $2583 = self.head;
-                        var $2584 = self.tail;
-                        var $2585 = Nat$from_base$go$(_b$1, $2584, (_b$1 * _p$3), (($2583 * _p$3) + _res$4));
-                        return $2585;
+                        var $2607 = self.head;
+                        var $2608 = self.tail;
+                        var $2609 = Nat$from_base$go$(_b$1, $2608, (_b$1 * _p$3), (($2607 * _p$3) + _res$4));
+                        return $2609;
                     case 'List.nil':
-                        var $2586 = _res$4;
-                        return $2586;
+                        var $2610 = _res$4;
+                        return $2610;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -7062,8 +7106,8 @@ module.exports = (function() {
     const Nat$from_base$go = x0 => x1 => x2 => x3 => Nat$from_base$go$(x0, x1, x2, x3);
 
     function Nat$from_base$(_base$1, _ds$2) {
-        var $2587 = Nat$from_base$go$(_base$1, List$reverse$(_ds$2), 1n, 0n);
-        return $2587;
+        var $2611 = Nat$from_base$go$(_base$1, List$reverse$(_ds$2), 1n, 0n);
+        return $2611;
     };
     const Nat$from_base = x0 => x1 => Nat$from_base$(x0, x1);
 
@@ -7071,21 +7115,21 @@ module.exports = (function() {
         var self = Parser$many1$(Parser$digit, _idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2589 = self.idx;
-                var $2590 = self.code;
-                var $2591 = self.err;
-                var $2592 = Parser$Reply$error$($2589, $2590, $2591);
-                var $2588 = $2592;
+                var $2613 = self.idx;
+                var $2614 = self.code;
+                var $2615 = self.err;
+                var $2616 = Parser$Reply$error$($2613, $2614, $2615);
+                var $2612 = $2616;
                 break;
             case 'Parser.Reply.value':
-                var $2593 = self.idx;
-                var $2594 = self.code;
-                var $2595 = self.val;
-                var $2596 = Parser$Reply$value$($2593, $2594, Nat$from_base$(10n, $2595));
-                var $2588 = $2596;
+                var $2617 = self.idx;
+                var $2618 = self.code;
+                var $2619 = self.val;
+                var $2620 = Parser$Reply$value$($2617, $2618, Nat$from_base$(10n, $2619));
+                var $2612 = $2620;
                 break;
         };
-        return $2588;
+        return $2612;
     };
     const Parser$nat = x0 => x1 => Parser$nat$(x0, x1);
 
@@ -7093,21 +7137,21 @@ module.exports = (function() {
         var self = _a$1;
         switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
             case 'o':
-                var $2598 = self.slice(0, -1);
-                var $2599 = $2598;
-                var $2597 = $2599;
+                var $2622 = self.slice(0, -1);
+                var $2623 = $2622;
+                var $2621 = $2623;
                 break;
             case 'i':
-                var $2600 = self.slice(0, -1);
-                var $2601 = $2600;
-                var $2597 = $2601;
+                var $2624 = self.slice(0, -1);
+                var $2625 = $2624;
+                var $2621 = $2625;
                 break;
             case 'e':
-                var $2602 = Bits$e;
-                var $2597 = $2602;
+                var $2626 = Bits$e;
+                var $2621 = $2626;
                 break;
         };
-        return $2597;
+        return $2621;
     };
     const Bits$tail = x0 => Bits$tail$(x0);
 
@@ -7115,21 +7159,21 @@ module.exports = (function() {
         var self = _a$1;
         switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
             case 'o':
-                var $2604 = self.slice(0, -1);
-                var $2605 = ($2604 + '1');
-                var $2603 = $2605;
+                var $2628 = self.slice(0, -1);
+                var $2629 = ($2628 + '1');
+                var $2627 = $2629;
                 break;
             case 'i':
-                var $2606 = self.slice(0, -1);
-                var $2607 = (Bits$inc$($2606) + '0');
-                var $2603 = $2607;
+                var $2630 = self.slice(0, -1);
+                var $2631 = (Bits$inc$($2630) + '0');
+                var $2627 = $2631;
                 break;
             case 'e':
-                var $2608 = (Bits$e + '1');
-                var $2603 = $2608;
+                var $2632 = (Bits$e + '1');
+                var $2627 = $2632;
                 break;
         };
-        return $2603;
+        return $2627;
     };
     const Bits$inc = x0 => Bits$inc$(x0);
     const Nat$to_bits = a0 => (nat_to_bits(a0));
@@ -7138,26 +7182,26 @@ module.exports = (function() {
         var self = _m$2;
         switch (self._) {
             case 'Maybe.none':
-                var $2610 = Bool$false;
-                var $2609 = $2610;
+                var $2634 = Bool$false;
+                var $2633 = $2634;
                 break;
             case 'Maybe.some':
-                var $2611 = Bool$true;
-                var $2609 = $2611;
+                var $2635 = Bool$true;
+                var $2633 = $2635;
                 break;
         };
-        return $2609;
+        return $2633;
     };
     const Maybe$to_bool = x0 => Maybe$to_bool$(x0);
 
     function Kind$Term$gol$(_name$1, _dref$2, _verb$3) {
-        var $2612 = ({
+        var $2636 = ({
             _: 'Kind.Term.gol',
             'name': _name$1,
             'dref': _dref$2,
             'verb': _verb$3
         });
-        return $2612;
+        return $2636;
     };
     const Kind$Term$gol = x0 => x1 => x2 => Kind$Term$gol$(x0, x1, x2);
 
@@ -7165,208 +7209,155 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2614 = self.idx;
-                var $2615 = self.code;
-                var $2616 = self.err;
-                var $2617 = Parser$Reply$error$($2614, $2615, $2616);
-                var $2613 = $2617;
+                var $2638 = self.idx;
+                var $2639 = self.code;
+                var $2640 = self.err;
+                var $2641 = Parser$Reply$error$($2638, $2639, $2640);
+                var $2637 = $2641;
                 break;
             case 'Parser.Reply.value':
-                var $2618 = self.idx;
-                var $2619 = self.code;
-                var $2620 = self.val;
-                var self = Kind$Parser$text$("?", $2618, $2619);
+                var $2642 = self.idx;
+                var $2643 = self.code;
+                var $2644 = self.val;
+                var self = Kind$Parser$text$("?", $2642, $2643);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2622 = self.idx;
-                        var $2623 = self.code;
-                        var $2624 = self.err;
-                        var $2625 = Parser$Reply$error$($2622, $2623, $2624);
-                        var $2621 = $2625;
+                        var $2646 = self.idx;
+                        var $2647 = self.code;
+                        var $2648 = self.err;
+                        var $2649 = Parser$Reply$error$($2646, $2647, $2648);
+                        var $2645 = $2649;
                         break;
                     case 'Parser.Reply.value':
-                        var $2626 = self.idx;
-                        var $2627 = self.code;
-                        var self = Kind$Parser$name$($2626, $2627);
+                        var $2650 = self.idx;
+                        var $2651 = self.code;
+                        var self = Kind$Parser$name$($2650, $2651);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2629 = self.idx;
-                                var $2630 = self.code;
-                                var $2631 = self.err;
-                                var $2632 = Parser$Reply$error$($2629, $2630, $2631);
-                                var $2628 = $2632;
+                                var $2653 = self.idx;
+                                var $2654 = self.code;
+                                var $2655 = self.err;
+                                var $2656 = Parser$Reply$error$($2653, $2654, $2655);
+                                var $2652 = $2656;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2633 = self.idx;
-                                var $2634 = self.code;
-                                var $2635 = self.val;
+                                var $2657 = self.idx;
+                                var $2658 = self.code;
+                                var $2659 = self.val;
                                 var self = Parser$many$((_idx$12 => _code$13 => {
                                     var self = Kind$Parser$text$("-", _idx$12, _code$13);
                                     switch (self._) {
                                         case 'Parser.Reply.error':
-                                            var $2638 = self.idx;
-                                            var $2639 = self.code;
-                                            var $2640 = self.err;
-                                            var $2641 = Parser$Reply$error$($2638, $2639, $2640);
-                                            var $2637 = $2641;
+                                            var $2662 = self.idx;
+                                            var $2663 = self.code;
+                                            var $2664 = self.err;
+                                            var $2665 = Parser$Reply$error$($2662, $2663, $2664);
+                                            var $2661 = $2665;
                                             break;
                                         case 'Parser.Reply.value':
-                                            var $2642 = self.idx;
-                                            var $2643 = self.code;
-                                            var self = Parser$nat$($2642, $2643);
+                                            var $2666 = self.idx;
+                                            var $2667 = self.code;
+                                            var self = Parser$nat$($2666, $2667);
                                             switch (self._) {
                                                 case 'Parser.Reply.error':
-                                                    var $2645 = self.idx;
-                                                    var $2646 = self.code;
-                                                    var $2647 = self.err;
-                                                    var $2648 = Parser$Reply$error$($2645, $2646, $2647);
-                                                    var $2644 = $2648;
+                                                    var $2669 = self.idx;
+                                                    var $2670 = self.code;
+                                                    var $2671 = self.err;
+                                                    var $2672 = Parser$Reply$error$($2669, $2670, $2671);
+                                                    var $2668 = $2672;
                                                     break;
                                                 case 'Parser.Reply.value':
-                                                    var $2649 = self.idx;
-                                                    var $2650 = self.code;
-                                                    var $2651 = self.val;
-                                                    var _bits$20 = Bits$reverse$(Bits$tail$(Bits$reverse$((nat_to_bits($2651)))));
-                                                    var $2652 = Parser$Reply$value$($2649, $2650, _bits$20);
-                                                    var $2644 = $2652;
+                                                    var $2673 = self.idx;
+                                                    var $2674 = self.code;
+                                                    var $2675 = self.val;
+                                                    var _bits$20 = Bits$reverse$(Bits$tail$(Bits$reverse$((nat_to_bits($2675)))));
+                                                    var $2676 = Parser$Reply$value$($2673, $2674, _bits$20);
+                                                    var $2668 = $2676;
                                                     break;
                                             };
-                                            var $2637 = $2644;
+                                            var $2661 = $2668;
                                             break;
                                     };
-                                    return $2637;
-                                }))($2633)($2634);
+                                    return $2661;
+                                }))($2657)($2658);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2653 = self.idx;
-                                        var $2654 = self.code;
-                                        var $2655 = self.err;
-                                        var $2656 = Parser$Reply$error$($2653, $2654, $2655);
-                                        var $2636 = $2656;
+                                        var $2677 = self.idx;
+                                        var $2678 = self.code;
+                                        var $2679 = self.err;
+                                        var $2680 = Parser$Reply$error$($2677, $2678, $2679);
+                                        var $2660 = $2680;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2657 = self.idx;
-                                        var $2658 = self.code;
-                                        var $2659 = self.val;
-                                        var self = Parser$maybe$(Parser$text("-"), $2657, $2658);
+                                        var $2681 = self.idx;
+                                        var $2682 = self.code;
+                                        var $2683 = self.val;
+                                        var self = Parser$maybe$(Parser$text("-"), $2681, $2682);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2661 = self.idx;
-                                                var $2662 = self.code;
-                                                var $2663 = self.err;
-                                                var $2664 = Parser$Reply$error$($2661, $2662, $2663);
-                                                var self = $2664;
+                                                var $2685 = self.idx;
+                                                var $2686 = self.code;
+                                                var $2687 = self.err;
+                                                var $2688 = Parser$Reply$error$($2685, $2686, $2687);
+                                                var self = $2688;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2665 = self.idx;
-                                                var $2666 = self.code;
-                                                var $2667 = self.val;
-                                                var $2668 = Parser$Reply$value$($2665, $2666, Maybe$to_bool$($2667));
-                                                var self = $2668;
+                                                var $2689 = self.idx;
+                                                var $2690 = self.code;
+                                                var $2691 = self.val;
+                                                var $2692 = Parser$Reply$value$($2689, $2690, Maybe$to_bool$($2691));
+                                                var self = $2692;
                                                 break;
                                         };
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2669 = self.idx;
-                                                var $2670 = self.code;
-                                                var $2671 = self.err;
-                                                var $2672 = Parser$Reply$error$($2669, $2670, $2671);
-                                                var $2660 = $2672;
+                                                var $2693 = self.idx;
+                                                var $2694 = self.code;
+                                                var $2695 = self.err;
+                                                var $2696 = Parser$Reply$error$($2693, $2694, $2695);
+                                                var $2684 = $2696;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2673 = self.idx;
-                                                var $2674 = self.code;
-                                                var $2675 = self.val;
-                                                var self = Kind$Parser$stop$($2620, $2673, $2674);
+                                                var $2697 = self.idx;
+                                                var $2698 = self.code;
+                                                var $2699 = self.val;
+                                                var self = Kind$Parser$stop$($2644, $2697, $2698);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $2677 = self.idx;
-                                                        var $2678 = self.code;
-                                                        var $2679 = self.err;
-                                                        var $2680 = Parser$Reply$error$($2677, $2678, $2679);
-                                                        var $2676 = $2680;
+                                                        var $2701 = self.idx;
+                                                        var $2702 = self.code;
+                                                        var $2703 = self.err;
+                                                        var $2704 = Parser$Reply$error$($2701, $2702, $2703);
+                                                        var $2700 = $2704;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $2681 = self.idx;
-                                                        var $2682 = self.code;
-                                                        var $2683 = self.val;
-                                                        var $2684 = Parser$Reply$value$($2681, $2682, Kind$Term$ori$($2683, Kind$Term$gol$($2635, $2659, $2675)));
-                                                        var $2676 = $2684;
+                                                        var $2705 = self.idx;
+                                                        var $2706 = self.code;
+                                                        var $2707 = self.val;
+                                                        var $2708 = Parser$Reply$value$($2705, $2706, Kind$Term$ori$($2707, Kind$Term$gol$($2659, $2683, $2699)));
+                                                        var $2700 = $2708;
                                                         break;
                                                 };
-                                                var $2660 = $2676;
+                                                var $2684 = $2700;
                                                 break;
                                         };
-                                        var $2636 = $2660;
+                                        var $2660 = $2684;
                                         break;
                                 };
-                                var $2628 = $2636;
+                                var $2652 = $2660;
                                 break;
                         };
-                        var $2621 = $2628;
+                        var $2645 = $2652;
                         break;
                 };
-                var $2613 = $2621;
+                var $2637 = $2645;
                 break;
         };
-        return $2613;
+        return $2637;
     };
     const Kind$Parser$goal = x0 => x1 => Kind$Parser$goal$(x0, x1);
 
     function Kind$Parser$hole$(_idx$1, _code$2) {
-        var self = Kind$Parser$init$(_idx$1, _code$2);
-        switch (self._) {
-            case 'Parser.Reply.error':
-                var $2686 = self.idx;
-                var $2687 = self.code;
-                var $2688 = self.err;
-                var $2689 = Parser$Reply$error$($2686, $2687, $2688);
-                var $2685 = $2689;
-                break;
-            case 'Parser.Reply.value':
-                var $2690 = self.idx;
-                var $2691 = self.code;
-                var $2692 = self.val;
-                var self = Kind$Parser$text$("_", $2690, $2691);
-                switch (self._) {
-                    case 'Parser.Reply.error':
-                        var $2694 = self.idx;
-                        var $2695 = self.code;
-                        var $2696 = self.err;
-                        var $2697 = Parser$Reply$error$($2694, $2695, $2696);
-                        var $2693 = $2697;
-                        break;
-                    case 'Parser.Reply.value':
-                        var $2698 = self.idx;
-                        var $2699 = self.code;
-                        var self = Kind$Parser$stop$($2692, $2698, $2699);
-                        switch (self._) {
-                            case 'Parser.Reply.error':
-                                var $2701 = self.idx;
-                                var $2702 = self.code;
-                                var $2703 = self.err;
-                                var $2704 = Parser$Reply$error$($2701, $2702, $2703);
-                                var $2700 = $2704;
-                                break;
-                            case 'Parser.Reply.value':
-                                var $2705 = self.idx;
-                                var $2706 = self.code;
-                                var $2707 = self.val;
-                                var $2708 = Parser$Reply$value$($2705, $2706, Kind$Term$ori$($2707, Kind$Term$hol$(Bits$e)));
-                                var $2700 = $2708;
-                                break;
-                        };
-                        var $2693 = $2700;
-                        break;
-                };
-                var $2685 = $2693;
-                break;
-        };
-        return $2685;
-    };
-    const Kind$Parser$hole = x0 => x1 => Kind$Parser$hole$(x0, x1);
-
-    function Kind$Parser$u8$(_idx$1, _code$2) {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
@@ -7380,7 +7371,7 @@ module.exports = (function() {
                 var $2714 = self.idx;
                 var $2715 = self.code;
                 var $2716 = self.val;
-                var self = Kind$Parser$spaces($2714)($2715);
+                var self = Kind$Parser$text$("_", $2714, $2715);
                 switch (self._) {
                     case 'Parser.Reply.error':
                         var $2718 = self.idx;
@@ -7392,7 +7383,7 @@ module.exports = (function() {
                     case 'Parser.Reply.value':
                         var $2722 = self.idx;
                         var $2723 = self.code;
-                        var self = Parser$nat$($2722, $2723);
+                        var self = Kind$Parser$stop$($2716, $2722, $2723);
                         switch (self._) {
                             case 'Parser.Reply.error':
                                 var $2725 = self.idx;
@@ -7405,40 +7396,7 @@ module.exports = (function() {
                                 var $2729 = self.idx;
                                 var $2730 = self.code;
                                 var $2731 = self.val;
-                                var self = Parser$text$("b", $2729, $2730);
-                                switch (self._) {
-                                    case 'Parser.Reply.error':
-                                        var $2733 = self.idx;
-                                        var $2734 = self.code;
-                                        var $2735 = self.err;
-                                        var $2736 = Parser$Reply$error$($2733, $2734, $2735);
-                                        var $2732 = $2736;
-                                        break;
-                                    case 'Parser.Reply.value':
-                                        var $2737 = self.idx;
-                                        var $2738 = self.code;
-                                        var _term$15 = Kind$Term$ref$("Nat.to_u8");
-                                        var _term$16 = Kind$Term$app$(_term$15, Kind$Term$nat$($2731));
-                                        var self = Kind$Parser$stop$($2716, $2737, $2738);
-                                        switch (self._) {
-                                            case 'Parser.Reply.error':
-                                                var $2740 = self.idx;
-                                                var $2741 = self.code;
-                                                var $2742 = self.err;
-                                                var $2743 = Parser$Reply$error$($2740, $2741, $2742);
-                                                var $2739 = $2743;
-                                                break;
-                                            case 'Parser.Reply.value':
-                                                var $2744 = self.idx;
-                                                var $2745 = self.code;
-                                                var $2746 = self.val;
-                                                var $2747 = Parser$Reply$value$($2744, $2745, Kind$Term$ori$($2746, _term$16));
-                                                var $2739 = $2747;
-                                                break;
-                                        };
-                                        var $2732 = $2739;
-                                        break;
-                                };
+                                var $2732 = Parser$Reply$value$($2729, $2730, Kind$Term$ori$($2731, Kind$Term$hol$(Bits$e)));
                                 var $2724 = $2732;
                                 break;
                         };
@@ -7450,91 +7408,177 @@ module.exports = (function() {
         };
         return $2709;
     };
+    const Kind$Parser$hole = x0 => x1 => Kind$Parser$hole$(x0, x1);
+
+    function Kind$Parser$u8$(_idx$1, _code$2) {
+        var self = Kind$Parser$init$(_idx$1, _code$2);
+        switch (self._) {
+            case 'Parser.Reply.error':
+                var $2734 = self.idx;
+                var $2735 = self.code;
+                var $2736 = self.err;
+                var $2737 = Parser$Reply$error$($2734, $2735, $2736);
+                var $2733 = $2737;
+                break;
+            case 'Parser.Reply.value':
+                var $2738 = self.idx;
+                var $2739 = self.code;
+                var $2740 = self.val;
+                var self = Kind$Parser$spaces($2738)($2739);
+                switch (self._) {
+                    case 'Parser.Reply.error':
+                        var $2742 = self.idx;
+                        var $2743 = self.code;
+                        var $2744 = self.err;
+                        var $2745 = Parser$Reply$error$($2742, $2743, $2744);
+                        var $2741 = $2745;
+                        break;
+                    case 'Parser.Reply.value':
+                        var $2746 = self.idx;
+                        var $2747 = self.code;
+                        var self = Parser$nat$($2746, $2747);
+                        switch (self._) {
+                            case 'Parser.Reply.error':
+                                var $2749 = self.idx;
+                                var $2750 = self.code;
+                                var $2751 = self.err;
+                                var $2752 = Parser$Reply$error$($2749, $2750, $2751);
+                                var $2748 = $2752;
+                                break;
+                            case 'Parser.Reply.value':
+                                var $2753 = self.idx;
+                                var $2754 = self.code;
+                                var $2755 = self.val;
+                                var self = Parser$text$("b", $2753, $2754);
+                                switch (self._) {
+                                    case 'Parser.Reply.error':
+                                        var $2757 = self.idx;
+                                        var $2758 = self.code;
+                                        var $2759 = self.err;
+                                        var $2760 = Parser$Reply$error$($2757, $2758, $2759);
+                                        var $2756 = $2760;
+                                        break;
+                                    case 'Parser.Reply.value':
+                                        var $2761 = self.idx;
+                                        var $2762 = self.code;
+                                        var _term$15 = Kind$Term$ref$("Nat.to_u8");
+                                        var _term$16 = Kind$Term$app$(_term$15, Kind$Term$nat$($2755));
+                                        var self = Kind$Parser$stop$($2740, $2761, $2762);
+                                        switch (self._) {
+                                            case 'Parser.Reply.error':
+                                                var $2764 = self.idx;
+                                                var $2765 = self.code;
+                                                var $2766 = self.err;
+                                                var $2767 = Parser$Reply$error$($2764, $2765, $2766);
+                                                var $2763 = $2767;
+                                                break;
+                                            case 'Parser.Reply.value':
+                                                var $2768 = self.idx;
+                                                var $2769 = self.code;
+                                                var $2770 = self.val;
+                                                var $2771 = Parser$Reply$value$($2768, $2769, Kind$Term$ori$($2770, _term$16));
+                                                var $2763 = $2771;
+                                                break;
+                                        };
+                                        var $2756 = $2763;
+                                        break;
+                                };
+                                var $2748 = $2756;
+                                break;
+                        };
+                        var $2741 = $2748;
+                        break;
+                };
+                var $2733 = $2741;
+                break;
+        };
+        return $2733;
+    };
     const Kind$Parser$u8 = x0 => x1 => Kind$Parser$u8$(x0, x1);
 
     function Kind$Parser$u16$(_idx$1, _code$2) {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2749 = self.idx;
-                var $2750 = self.code;
-                var $2751 = self.err;
-                var $2752 = Parser$Reply$error$($2749, $2750, $2751);
-                var $2748 = $2752;
+                var $2773 = self.idx;
+                var $2774 = self.code;
+                var $2775 = self.err;
+                var $2776 = Parser$Reply$error$($2773, $2774, $2775);
+                var $2772 = $2776;
                 break;
             case 'Parser.Reply.value':
-                var $2753 = self.idx;
-                var $2754 = self.code;
-                var $2755 = self.val;
-                var self = Kind$Parser$spaces($2753)($2754);
+                var $2777 = self.idx;
+                var $2778 = self.code;
+                var $2779 = self.val;
+                var self = Kind$Parser$spaces($2777)($2778);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2757 = self.idx;
-                        var $2758 = self.code;
-                        var $2759 = self.err;
-                        var $2760 = Parser$Reply$error$($2757, $2758, $2759);
-                        var $2756 = $2760;
+                        var $2781 = self.idx;
+                        var $2782 = self.code;
+                        var $2783 = self.err;
+                        var $2784 = Parser$Reply$error$($2781, $2782, $2783);
+                        var $2780 = $2784;
                         break;
                     case 'Parser.Reply.value':
-                        var $2761 = self.idx;
-                        var $2762 = self.code;
-                        var self = Parser$nat$($2761, $2762);
+                        var $2785 = self.idx;
+                        var $2786 = self.code;
+                        var self = Parser$nat$($2785, $2786);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2764 = self.idx;
-                                var $2765 = self.code;
-                                var $2766 = self.err;
-                                var $2767 = Parser$Reply$error$($2764, $2765, $2766);
-                                var $2763 = $2767;
+                                var $2788 = self.idx;
+                                var $2789 = self.code;
+                                var $2790 = self.err;
+                                var $2791 = Parser$Reply$error$($2788, $2789, $2790);
+                                var $2787 = $2791;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2768 = self.idx;
-                                var $2769 = self.code;
-                                var $2770 = self.val;
-                                var self = Parser$text$("s", $2768, $2769);
+                                var $2792 = self.idx;
+                                var $2793 = self.code;
+                                var $2794 = self.val;
+                                var self = Parser$text$("s", $2792, $2793);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2772 = self.idx;
-                                        var $2773 = self.code;
-                                        var $2774 = self.err;
-                                        var $2775 = Parser$Reply$error$($2772, $2773, $2774);
-                                        var $2771 = $2775;
+                                        var $2796 = self.idx;
+                                        var $2797 = self.code;
+                                        var $2798 = self.err;
+                                        var $2799 = Parser$Reply$error$($2796, $2797, $2798);
+                                        var $2795 = $2799;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2776 = self.idx;
-                                        var $2777 = self.code;
+                                        var $2800 = self.idx;
+                                        var $2801 = self.code;
                                         var _term$15 = Kind$Term$ref$("Nat.to_u16");
-                                        var _term$16 = Kind$Term$app$(_term$15, Kind$Term$nat$($2770));
-                                        var self = Kind$Parser$stop$($2755, $2776, $2777);
+                                        var _term$16 = Kind$Term$app$(_term$15, Kind$Term$nat$($2794));
+                                        var self = Kind$Parser$stop$($2779, $2800, $2801);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2779 = self.idx;
-                                                var $2780 = self.code;
-                                                var $2781 = self.err;
-                                                var $2782 = Parser$Reply$error$($2779, $2780, $2781);
-                                                var $2778 = $2782;
+                                                var $2803 = self.idx;
+                                                var $2804 = self.code;
+                                                var $2805 = self.err;
+                                                var $2806 = Parser$Reply$error$($2803, $2804, $2805);
+                                                var $2802 = $2806;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2783 = self.idx;
-                                                var $2784 = self.code;
-                                                var $2785 = self.val;
-                                                var $2786 = Parser$Reply$value$($2783, $2784, Kind$Term$ori$($2785, _term$16));
-                                                var $2778 = $2786;
+                                                var $2807 = self.idx;
+                                                var $2808 = self.code;
+                                                var $2809 = self.val;
+                                                var $2810 = Parser$Reply$value$($2807, $2808, Kind$Term$ori$($2809, _term$16));
+                                                var $2802 = $2810;
                                                 break;
                                         };
-                                        var $2771 = $2778;
+                                        var $2795 = $2802;
                                         break;
                                 };
-                                var $2763 = $2771;
+                                var $2787 = $2795;
                                 break;
                         };
-                        var $2756 = $2763;
+                        var $2780 = $2787;
                         break;
                 };
-                var $2748 = $2756;
+                var $2772 = $2780;
                 break;
         };
-        return $2748;
+        return $2772;
     };
     const Kind$Parser$u16 = x0 => x1 => Kind$Parser$u16$(x0, x1);
 
@@ -7542,85 +7586,85 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2788 = self.idx;
-                var $2789 = self.code;
-                var $2790 = self.err;
-                var $2791 = Parser$Reply$error$($2788, $2789, $2790);
-                var $2787 = $2791;
+                var $2812 = self.idx;
+                var $2813 = self.code;
+                var $2814 = self.err;
+                var $2815 = Parser$Reply$error$($2812, $2813, $2814);
+                var $2811 = $2815;
                 break;
             case 'Parser.Reply.value':
-                var $2792 = self.idx;
-                var $2793 = self.code;
-                var $2794 = self.val;
-                var self = Kind$Parser$spaces($2792)($2793);
+                var $2816 = self.idx;
+                var $2817 = self.code;
+                var $2818 = self.val;
+                var self = Kind$Parser$spaces($2816)($2817);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2796 = self.idx;
-                        var $2797 = self.code;
-                        var $2798 = self.err;
-                        var $2799 = Parser$Reply$error$($2796, $2797, $2798);
-                        var $2795 = $2799;
+                        var $2820 = self.idx;
+                        var $2821 = self.code;
+                        var $2822 = self.err;
+                        var $2823 = Parser$Reply$error$($2820, $2821, $2822);
+                        var $2819 = $2823;
                         break;
                     case 'Parser.Reply.value':
-                        var $2800 = self.idx;
-                        var $2801 = self.code;
-                        var self = Parser$nat$($2800, $2801);
+                        var $2824 = self.idx;
+                        var $2825 = self.code;
+                        var self = Parser$nat$($2824, $2825);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2803 = self.idx;
-                                var $2804 = self.code;
-                                var $2805 = self.err;
-                                var $2806 = Parser$Reply$error$($2803, $2804, $2805);
-                                var $2802 = $2806;
+                                var $2827 = self.idx;
+                                var $2828 = self.code;
+                                var $2829 = self.err;
+                                var $2830 = Parser$Reply$error$($2827, $2828, $2829);
+                                var $2826 = $2830;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2807 = self.idx;
-                                var $2808 = self.code;
-                                var $2809 = self.val;
-                                var self = Parser$text$("u", $2807, $2808);
+                                var $2831 = self.idx;
+                                var $2832 = self.code;
+                                var $2833 = self.val;
+                                var self = Parser$text$("u", $2831, $2832);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2811 = self.idx;
-                                        var $2812 = self.code;
-                                        var $2813 = self.err;
-                                        var $2814 = Parser$Reply$error$($2811, $2812, $2813);
-                                        var $2810 = $2814;
+                                        var $2835 = self.idx;
+                                        var $2836 = self.code;
+                                        var $2837 = self.err;
+                                        var $2838 = Parser$Reply$error$($2835, $2836, $2837);
+                                        var $2834 = $2838;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2815 = self.idx;
-                                        var $2816 = self.code;
+                                        var $2839 = self.idx;
+                                        var $2840 = self.code;
                                         var _term$15 = Kind$Term$ref$("Nat.to_u32");
-                                        var _term$16 = Kind$Term$app$(_term$15, Kind$Term$nat$($2809));
-                                        var self = Kind$Parser$stop$($2794, $2815, $2816);
+                                        var _term$16 = Kind$Term$app$(_term$15, Kind$Term$nat$($2833));
+                                        var self = Kind$Parser$stop$($2818, $2839, $2840);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2818 = self.idx;
-                                                var $2819 = self.code;
-                                                var $2820 = self.err;
-                                                var $2821 = Parser$Reply$error$($2818, $2819, $2820);
-                                                var $2817 = $2821;
+                                                var $2842 = self.idx;
+                                                var $2843 = self.code;
+                                                var $2844 = self.err;
+                                                var $2845 = Parser$Reply$error$($2842, $2843, $2844);
+                                                var $2841 = $2845;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2822 = self.idx;
-                                                var $2823 = self.code;
-                                                var $2824 = self.val;
-                                                var $2825 = Parser$Reply$value$($2822, $2823, Kind$Term$ori$($2824, _term$16));
-                                                var $2817 = $2825;
+                                                var $2846 = self.idx;
+                                                var $2847 = self.code;
+                                                var $2848 = self.val;
+                                                var $2849 = Parser$Reply$value$($2846, $2847, Kind$Term$ori$($2848, _term$16));
+                                                var $2841 = $2849;
                                                 break;
                                         };
-                                        var $2810 = $2817;
+                                        var $2834 = $2841;
                                         break;
                                 };
-                                var $2802 = $2810;
+                                var $2826 = $2834;
                                 break;
                         };
-                        var $2795 = $2802;
+                        var $2819 = $2826;
                         break;
                 };
-                var $2787 = $2795;
+                var $2811 = $2819;
                 break;
         };
-        return $2787;
+        return $2811;
     };
     const Kind$Parser$u32 = x0 => x1 => Kind$Parser$u32$(x0, x1);
 
@@ -7628,85 +7672,85 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2827 = self.idx;
-                var $2828 = self.code;
-                var $2829 = self.err;
-                var $2830 = Parser$Reply$error$($2827, $2828, $2829);
-                var $2826 = $2830;
+                var $2851 = self.idx;
+                var $2852 = self.code;
+                var $2853 = self.err;
+                var $2854 = Parser$Reply$error$($2851, $2852, $2853);
+                var $2850 = $2854;
                 break;
             case 'Parser.Reply.value':
-                var $2831 = self.idx;
-                var $2832 = self.code;
-                var $2833 = self.val;
-                var self = Kind$Parser$spaces($2831)($2832);
+                var $2855 = self.idx;
+                var $2856 = self.code;
+                var $2857 = self.val;
+                var self = Kind$Parser$spaces($2855)($2856);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2835 = self.idx;
-                        var $2836 = self.code;
-                        var $2837 = self.err;
-                        var $2838 = Parser$Reply$error$($2835, $2836, $2837);
-                        var $2834 = $2838;
+                        var $2859 = self.idx;
+                        var $2860 = self.code;
+                        var $2861 = self.err;
+                        var $2862 = Parser$Reply$error$($2859, $2860, $2861);
+                        var $2858 = $2862;
                         break;
                     case 'Parser.Reply.value':
-                        var $2839 = self.idx;
-                        var $2840 = self.code;
-                        var self = Parser$nat$($2839, $2840);
+                        var $2863 = self.idx;
+                        var $2864 = self.code;
+                        var self = Parser$nat$($2863, $2864);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2842 = self.idx;
-                                var $2843 = self.code;
-                                var $2844 = self.err;
-                                var $2845 = Parser$Reply$error$($2842, $2843, $2844);
-                                var $2841 = $2845;
+                                var $2866 = self.idx;
+                                var $2867 = self.code;
+                                var $2868 = self.err;
+                                var $2869 = Parser$Reply$error$($2866, $2867, $2868);
+                                var $2865 = $2869;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2846 = self.idx;
-                                var $2847 = self.code;
-                                var $2848 = self.val;
-                                var self = Parser$text$("l", $2846, $2847);
+                                var $2870 = self.idx;
+                                var $2871 = self.code;
+                                var $2872 = self.val;
+                                var self = Parser$text$("l", $2870, $2871);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2850 = self.idx;
-                                        var $2851 = self.code;
-                                        var $2852 = self.err;
-                                        var $2853 = Parser$Reply$error$($2850, $2851, $2852);
-                                        var $2849 = $2853;
+                                        var $2874 = self.idx;
+                                        var $2875 = self.code;
+                                        var $2876 = self.err;
+                                        var $2877 = Parser$Reply$error$($2874, $2875, $2876);
+                                        var $2873 = $2877;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2854 = self.idx;
-                                        var $2855 = self.code;
+                                        var $2878 = self.idx;
+                                        var $2879 = self.code;
                                         var _term$15 = Kind$Term$ref$("Nat.to_u64");
-                                        var _term$16 = Kind$Term$app$(_term$15, Kind$Term$nat$($2848));
-                                        var self = Kind$Parser$stop$($2833, $2854, $2855);
+                                        var _term$16 = Kind$Term$app$(_term$15, Kind$Term$nat$($2872));
+                                        var self = Kind$Parser$stop$($2857, $2878, $2879);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2857 = self.idx;
-                                                var $2858 = self.code;
-                                                var $2859 = self.err;
-                                                var $2860 = Parser$Reply$error$($2857, $2858, $2859);
-                                                var $2856 = $2860;
+                                                var $2881 = self.idx;
+                                                var $2882 = self.code;
+                                                var $2883 = self.err;
+                                                var $2884 = Parser$Reply$error$($2881, $2882, $2883);
+                                                var $2880 = $2884;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2861 = self.idx;
-                                                var $2862 = self.code;
-                                                var $2863 = self.val;
-                                                var $2864 = Parser$Reply$value$($2861, $2862, Kind$Term$ori$($2863, _term$16));
-                                                var $2856 = $2864;
+                                                var $2885 = self.idx;
+                                                var $2886 = self.code;
+                                                var $2887 = self.val;
+                                                var $2888 = Parser$Reply$value$($2885, $2886, Kind$Term$ori$($2887, _term$16));
+                                                var $2880 = $2888;
                                                 break;
                                         };
-                                        var $2849 = $2856;
+                                        var $2873 = $2880;
                                         break;
                                 };
-                                var $2841 = $2849;
+                                var $2865 = $2873;
                                 break;
                         };
-                        var $2834 = $2841;
+                        var $2858 = $2865;
                         break;
                 };
-                var $2826 = $2834;
+                var $2850 = $2858;
                 break;
         };
-        return $2826;
+        return $2850;
     };
     const Kind$Parser$u64 = x0 => x1 => Kind$Parser$u64$(x0, x1);
 
@@ -7714,75 +7758,75 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2866 = self.idx;
-                var $2867 = self.code;
-                var $2868 = self.err;
-                var $2869 = Parser$Reply$error$($2866, $2867, $2868);
-                var $2865 = $2869;
+                var $2890 = self.idx;
+                var $2891 = self.code;
+                var $2892 = self.err;
+                var $2893 = Parser$Reply$error$($2890, $2891, $2892);
+                var $2889 = $2893;
                 break;
             case 'Parser.Reply.value':
-                var $2870 = self.idx;
-                var $2871 = self.code;
-                var $2872 = self.val;
-                var self = Kind$Parser$spaces($2870)($2871);
+                var $2894 = self.idx;
+                var $2895 = self.code;
+                var $2896 = self.val;
+                var self = Kind$Parser$spaces($2894)($2895);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2874 = self.idx;
-                        var $2875 = self.code;
-                        var $2876 = self.err;
-                        var $2877 = Parser$Reply$error$($2874, $2875, $2876);
-                        var $2873 = $2877;
+                        var $2898 = self.idx;
+                        var $2899 = self.code;
+                        var $2900 = self.err;
+                        var $2901 = Parser$Reply$error$($2898, $2899, $2900);
+                        var $2897 = $2901;
                         break;
                     case 'Parser.Reply.value':
-                        var $2878 = self.idx;
-                        var $2879 = self.code;
-                        var self = Parser$nat$($2878, $2879);
+                        var $2902 = self.idx;
+                        var $2903 = self.code;
+                        var self = Parser$nat$($2902, $2903);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2881 = self.idx;
-                                var $2882 = self.code;
-                                var $2883 = self.err;
-                                var $2884 = Parser$Reply$error$($2881, $2882, $2883);
-                                var $2880 = $2884;
+                                var $2905 = self.idx;
+                                var $2906 = self.code;
+                                var $2907 = self.err;
+                                var $2908 = Parser$Reply$error$($2905, $2906, $2907);
+                                var $2904 = $2908;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2885 = self.idx;
-                                var $2886 = self.code;
-                                var $2887 = self.val;
-                                var self = Kind$Parser$stop$($2872, $2885, $2886);
+                                var $2909 = self.idx;
+                                var $2910 = self.code;
+                                var $2911 = self.val;
+                                var self = Kind$Parser$stop$($2896, $2909, $2910);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2889 = self.idx;
-                                        var $2890 = self.code;
-                                        var $2891 = self.err;
-                                        var $2892 = Parser$Reply$error$($2889, $2890, $2891);
-                                        var $2888 = $2892;
+                                        var $2913 = self.idx;
+                                        var $2914 = self.code;
+                                        var $2915 = self.err;
+                                        var $2916 = Parser$Reply$error$($2913, $2914, $2915);
+                                        var $2912 = $2916;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2893 = self.idx;
-                                        var $2894 = self.code;
-                                        var $2895 = self.val;
-                                        var $2896 = Parser$Reply$value$($2893, $2894, Kind$Term$ori$($2895, Kind$Term$nat$($2887)));
-                                        var $2888 = $2896;
+                                        var $2917 = self.idx;
+                                        var $2918 = self.code;
+                                        var $2919 = self.val;
+                                        var $2920 = Parser$Reply$value$($2917, $2918, Kind$Term$ori$($2919, Kind$Term$nat$($2911)));
+                                        var $2912 = $2920;
                                         break;
                                 };
-                                var $2880 = $2888;
+                                var $2904 = $2912;
                                 break;
                         };
-                        var $2873 = $2880;
+                        var $2897 = $2904;
                         break;
                 };
-                var $2865 = $2873;
+                var $2889 = $2897;
                 break;
         };
-        return $2865;
+        return $2889;
     };
     const Kind$Parser$nat = x0 => x1 => Kind$Parser$nat$(x0, x1);
     const String$eql = a0 => a1 => (a0 === a1);
 
     function Parser$fail$(_error$2, _idx$3, _code$4) {
-        var $2897 = Parser$Reply$error$(_idx$3, _code$4, _error$2);
-        return $2897;
+        var $2921 = Parser$Reply$error$(_idx$3, _code$4, _error$2);
+        return $2921;
     };
     const Parser$fail = x0 => x1 => x2 => Parser$fail$(x0, x1, x2);
 
@@ -7790,154 +7834,154 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2899 = self.idx;
-                var $2900 = self.code;
-                var $2901 = self.err;
-                var $2902 = Parser$Reply$error$($2899, $2900, $2901);
-                var $2898 = $2902;
+                var $2923 = self.idx;
+                var $2924 = self.code;
+                var $2925 = self.err;
+                var $2926 = Parser$Reply$error$($2923, $2924, $2925);
+                var $2922 = $2926;
                 break;
             case 'Parser.Reply.value':
-                var $2903 = self.idx;
-                var $2904 = self.code;
-                var $2905 = self.val;
-                var self = Kind$Parser$name1$($2903, $2904);
+                var $2927 = self.idx;
+                var $2928 = self.code;
+                var $2929 = self.val;
+                var self = Kind$Parser$name1$($2927, $2928);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2907 = self.idx;
-                        var $2908 = self.code;
-                        var $2909 = self.err;
-                        var $2910 = Parser$Reply$error$($2907, $2908, $2909);
-                        var $2906 = $2910;
+                        var $2931 = self.idx;
+                        var $2932 = self.code;
+                        var $2933 = self.err;
+                        var $2934 = Parser$Reply$error$($2931, $2932, $2933);
+                        var $2930 = $2934;
                         break;
                     case 'Parser.Reply.value':
-                        var $2911 = self.idx;
-                        var $2912 = self.code;
-                        var $2913 = self.val;
-                        var self = ($2913 === "case");
+                        var $2935 = self.idx;
+                        var $2936 = self.code;
+                        var $2937 = self.val;
+                        var self = ($2937 === "case");
                         if (self) {
-                            var $2915 = Parser$fail("Reserved keyword.");
-                            var $2914 = $2915;
+                            var $2939 = Parser$fail("Reserved keyword.");
+                            var $2938 = $2939;
                         } else {
-                            var self = ($2913 === "do");
+                            var self = ($2937 === "do");
                             if (self) {
-                                var $2917 = Parser$fail("Reserved keyword.");
-                                var $2916 = $2917;
+                                var $2941 = Parser$fail("Reserved keyword.");
+                                var $2940 = $2941;
                             } else {
-                                var self = ($2913 === "if");
+                                var self = ($2937 === "if");
                                 if (self) {
-                                    var $2919 = Parser$fail("Reserved keyword.");
-                                    var $2918 = $2919;
+                                    var $2943 = Parser$fail("Reserved keyword.");
+                                    var $2942 = $2943;
                                 } else {
-                                    var self = ($2913 === "with");
+                                    var self = ($2937 === "with");
                                     if (self) {
-                                        var $2921 = Parser$fail("Reserved keyword.");
-                                        var $2920 = $2921;
+                                        var $2945 = Parser$fail("Reserved keyword.");
+                                        var $2944 = $2945;
                                     } else {
-                                        var self = ($2913 === "let");
+                                        var self = ($2937 === "let");
                                         if (self) {
-                                            var $2923 = Parser$fail("Reserved keyword.");
-                                            var $2922 = $2923;
+                                            var $2947 = Parser$fail("Reserved keyword.");
+                                            var $2946 = $2947;
                                         } else {
-                                            var self = ($2913 === "def");
+                                            var self = ($2937 === "def");
                                             if (self) {
-                                                var $2925 = Parser$fail("Reserved keyword.");
-                                                var $2924 = $2925;
+                                                var $2949 = Parser$fail("Reserved keyword.");
+                                                var $2948 = $2949;
                                             } else {
-                                                var self = ($2913 === "true");
+                                                var self = ($2937 === "true");
                                                 if (self) {
-                                                    var $2927 = (_idx$9 => _code$10 => {
-                                                        var $2928 = Parser$Reply$value$(_idx$9, _code$10, Kind$Term$ref$("Bool.true"));
-                                                        return $2928;
+                                                    var $2951 = (_idx$9 => _code$10 => {
+                                                        var $2952 = Parser$Reply$value$(_idx$9, _code$10, Kind$Term$ref$("Bool.true"));
+                                                        return $2952;
                                                     });
-                                                    var $2926 = $2927;
+                                                    var $2950 = $2951;
                                                 } else {
-                                                    var self = ($2913 === "false");
+                                                    var self = ($2937 === "false");
                                                     if (self) {
-                                                        var $2930 = (_idx$9 => _code$10 => {
-                                                            var $2931 = Parser$Reply$value$(_idx$9, _code$10, Kind$Term$ref$("Bool.false"));
-                                                            return $2931;
+                                                        var $2954 = (_idx$9 => _code$10 => {
+                                                            var $2955 = Parser$Reply$value$(_idx$9, _code$10, Kind$Term$ref$("Bool.false"));
+                                                            return $2955;
                                                         });
-                                                        var $2929 = $2930;
+                                                        var $2953 = $2954;
                                                     } else {
-                                                        var self = ($2913 === "unit");
+                                                        var self = ($2937 === "unit");
                                                         if (self) {
-                                                            var $2933 = (_idx$9 => _code$10 => {
-                                                                var $2934 = Parser$Reply$value$(_idx$9, _code$10, Kind$Term$ref$("Unit.new"));
-                                                                return $2934;
+                                                            var $2957 = (_idx$9 => _code$10 => {
+                                                                var $2958 = Parser$Reply$value$(_idx$9, _code$10, Kind$Term$ref$("Unit.new"));
+                                                                return $2958;
                                                             });
-                                                            var $2932 = $2933;
+                                                            var $2956 = $2957;
                                                         } else {
-                                                            var self = ($2913 === "none");
+                                                            var self = ($2937 === "none");
                                                             if (self) {
                                                                 var _term$9 = Kind$Term$ref$("Maybe.none");
                                                                 var _term$10 = Kind$Term$app$(_term$9, Kind$Term$hol$(Bits$e));
-                                                                var $2936 = (_idx$11 => _code$12 => {
-                                                                    var $2937 = Parser$Reply$value$(_idx$11, _code$12, _term$10);
-                                                                    return $2937;
+                                                                var $2960 = (_idx$11 => _code$12 => {
+                                                                    var $2961 = Parser$Reply$value$(_idx$11, _code$12, _term$10);
+                                                                    return $2961;
                                                                 });
-                                                                var $2935 = $2936;
+                                                                var $2959 = $2960;
                                                             } else {
-                                                                var self = ($2913 === "refl");
+                                                                var self = ($2937 === "refl");
                                                                 if (self) {
                                                                     var _term$9 = Kind$Term$ref$("Equal.refl");
                                                                     var _term$10 = Kind$Term$app$(_term$9, Kind$Term$hol$(Bits$e));
                                                                     var _term$11 = Kind$Term$app$(_term$10, Kind$Term$hol$(Bits$e));
-                                                                    var $2939 = (_idx$12 => _code$13 => {
-                                                                        var $2940 = Parser$Reply$value$(_idx$12, _code$13, _term$11);
-                                                                        return $2940;
+                                                                    var $2963 = (_idx$12 => _code$13 => {
+                                                                        var $2964 = Parser$Reply$value$(_idx$12, _code$13, _term$11);
+                                                                        return $2964;
                                                                     });
-                                                                    var $2938 = $2939;
+                                                                    var $2962 = $2963;
                                                                 } else {
-                                                                    var $2941 = (_idx$9 => _code$10 => {
-                                                                        var self = Kind$Parser$stop$($2905, _idx$9, _code$10);
+                                                                    var $2965 = (_idx$9 => _code$10 => {
+                                                                        var self = Kind$Parser$stop$($2929, _idx$9, _code$10);
                                                                         switch (self._) {
                                                                             case 'Parser.Reply.error':
-                                                                                var $2943 = self.idx;
-                                                                                var $2944 = self.code;
-                                                                                var $2945 = self.err;
-                                                                                var $2946 = Parser$Reply$error$($2943, $2944, $2945);
-                                                                                var $2942 = $2946;
+                                                                                var $2967 = self.idx;
+                                                                                var $2968 = self.code;
+                                                                                var $2969 = self.err;
+                                                                                var $2970 = Parser$Reply$error$($2967, $2968, $2969);
+                                                                                var $2966 = $2970;
                                                                                 break;
                                                                             case 'Parser.Reply.value':
-                                                                                var $2947 = self.idx;
-                                                                                var $2948 = self.code;
-                                                                                var $2949 = self.val;
-                                                                                var $2950 = Parser$Reply$value$($2947, $2948, Kind$Term$ori$($2949, Kind$Term$ref$($2913)));
-                                                                                var $2942 = $2950;
+                                                                                var $2971 = self.idx;
+                                                                                var $2972 = self.code;
+                                                                                var $2973 = self.val;
+                                                                                var $2974 = Parser$Reply$value$($2971, $2972, Kind$Term$ori$($2973, Kind$Term$ref$($2937)));
+                                                                                var $2966 = $2974;
                                                                                 break;
                                                                         };
-                                                                        return $2942;
+                                                                        return $2966;
                                                                     });
-                                                                    var $2938 = $2941;
+                                                                    var $2962 = $2965;
                                                                 };
-                                                                var $2935 = $2938;
+                                                                var $2959 = $2962;
                                                             };
-                                                            var $2932 = $2935;
+                                                            var $2956 = $2959;
                                                         };
-                                                        var $2929 = $2932;
+                                                        var $2953 = $2956;
                                                     };
-                                                    var $2926 = $2929;
+                                                    var $2950 = $2953;
                                                 };
-                                                var $2924 = $2926;
+                                                var $2948 = $2950;
                                             };
-                                            var $2922 = $2924;
+                                            var $2946 = $2948;
                                         };
-                                        var $2920 = $2922;
+                                        var $2944 = $2946;
                                     };
-                                    var $2918 = $2920;
+                                    var $2942 = $2944;
                                 };
-                                var $2916 = $2918;
+                                var $2940 = $2942;
                             };
-                            var $2914 = $2916;
+                            var $2938 = $2940;
                         };
-                        var $2914 = $2914($2911)($2912);
-                        var $2906 = $2914;
+                        var $2938 = $2938($2935)($2936);
+                        var $2930 = $2938;
                         break;
                 };
-                var $2898 = $2906;
+                var $2922 = $2930;
                 break;
         };
-        return $2898;
+        return $2922;
     };
     const Kind$Parser$reference = x0 => x1 => Kind$Parser$reference$(x0, x1);
     const List$for = a0 => a1 => a2 => (list_for(a0)(a1)(a2));
@@ -7946,65 +7990,65 @@ module.exports = (function() {
         var self = Parser$text$("(", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2952 = self.idx;
-                var $2953 = self.code;
-                var $2954 = self.err;
-                var $2955 = Parser$Reply$error$($2952, $2953, $2954);
-                var $2951 = $2955;
+                var $2976 = self.idx;
+                var $2977 = self.code;
+                var $2978 = self.err;
+                var $2979 = Parser$Reply$error$($2976, $2977, $2978);
+                var $2975 = $2979;
                 break;
             case 'Parser.Reply.value':
-                var $2956 = self.idx;
-                var $2957 = self.code;
-                var self = Parser$until1$(Kind$Parser$text(")"), Kind$Parser$item(Kind$Parser$term), $2956, $2957);
+                var $2980 = self.idx;
+                var $2981 = self.code;
+                var self = Parser$until1$(Kind$Parser$text(")"), Kind$Parser$item(Kind$Parser$term), $2980, $2981);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2959 = self.idx;
-                        var $2960 = self.code;
-                        var $2961 = self.err;
-                        var $2962 = Parser$Reply$error$($2959, $2960, $2961);
-                        var $2958 = $2962;
+                        var $2983 = self.idx;
+                        var $2984 = self.code;
+                        var $2985 = self.err;
+                        var $2986 = Parser$Reply$error$($2983, $2984, $2985);
+                        var $2982 = $2986;
                         break;
                     case 'Parser.Reply.value':
-                        var $2963 = self.idx;
-                        var $2964 = self.code;
-                        var $2965 = self.val;
-                        var self = Kind$Parser$stop$(_init$1, $2963, $2964);
+                        var $2987 = self.idx;
+                        var $2988 = self.code;
+                        var $2989 = self.val;
+                        var self = Kind$Parser$stop$(_init$1, $2987, $2988);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2967 = self.idx;
-                                var $2968 = self.code;
-                                var $2969 = self.err;
-                                var $2970 = Parser$Reply$error$($2967, $2968, $2969);
-                                var $2966 = $2970;
+                                var $2991 = self.idx;
+                                var $2992 = self.code;
+                                var $2993 = self.err;
+                                var $2994 = Parser$Reply$error$($2991, $2992, $2993);
+                                var $2990 = $2994;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2971 = self.idx;
-                                var $2972 = self.code;
-                                var $2973 = self.val;
+                                var $2995 = self.idx;
+                                var $2996 = self.code;
+                                var $2997 = self.val;
                                 var _expr$14 = (() => {
-                                    var $2976 = _func$2;
-                                    var $2977 = $2965;
-                                    let _f$15 = $2976;
+                                    var $3000 = _func$2;
+                                    var $3001 = $2989;
+                                    let _f$15 = $3000;
                                     let _x$14;
-                                    while ($2977._ === 'List.cons') {
-                                        _x$14 = $2977.head;
-                                        var $2976 = Kind$Term$app$(_f$15, _x$14);
-                                        _f$15 = $2976;
-                                        $2977 = $2977.tail;
+                                    while ($3001._ === 'List.cons') {
+                                        _x$14 = $3001.head;
+                                        var $3000 = Kind$Term$app$(_f$15, _x$14);
+                                        _f$15 = $3000;
+                                        $3001 = $3001.tail;
                                     }
                                     return _f$15;
                                 })();
-                                var $2974 = Parser$Reply$value$($2971, $2972, Kind$Term$ori$($2973, _expr$14));
-                                var $2966 = $2974;
+                                var $2998 = Parser$Reply$value$($2995, $2996, Kind$Term$ori$($2997, _expr$14));
+                                var $2990 = $2998;
                                 break;
                         };
-                        var $2958 = $2966;
+                        var $2982 = $2990;
                         break;
                 };
-                var $2951 = $2958;
+                var $2975 = $2982;
                 break;
         };
-        return $2951;
+        return $2975;
     };
     const Kind$Parser$application = x0 => x1 => x2 => x3 => Kind$Parser$application$(x0, x1, x2, x3);
     const Parser$spaces = Parser$many$(Parser$first_of$(List$cons$(Parser$text(" "), List$cons$(Parser$text("\u{a}"), List$nil))));
@@ -8013,20 +8057,20 @@ module.exports = (function() {
         var self = Parser$spaces(_idx$2)(_code$3);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2979 = self.idx;
-                var $2980 = self.code;
-                var $2981 = self.err;
-                var $2982 = Parser$Reply$error$($2979, $2980, $2981);
-                var $2978 = $2982;
+                var $3003 = self.idx;
+                var $3004 = self.code;
+                var $3005 = self.err;
+                var $3006 = Parser$Reply$error$($3003, $3004, $3005);
+                var $3002 = $3006;
                 break;
             case 'Parser.Reply.value':
-                var $2983 = self.idx;
-                var $2984 = self.code;
-                var $2985 = Parser$text$(_text$1, $2983, $2984);
-                var $2978 = $2985;
+                var $3007 = self.idx;
+                var $3008 = self.code;
+                var $3009 = Parser$text$(_text$1, $3007, $3008);
+                var $3002 = $3009;
                 break;
         };
-        return $2978;
+        return $3002;
     };
     const Parser$spaces_text = x0 => x1 => x2 => Parser$spaces_text$(x0, x1, x2);
 
@@ -8034,81 +8078,81 @@ module.exports = (function() {
         var self = Parser$get_index$(_idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2987 = self.idx;
-                var $2988 = self.code;
-                var $2989 = self.err;
-                var $2990 = Parser$Reply$error$($2987, $2988, $2989);
-                var $2986 = $2990;
+                var $3011 = self.idx;
+                var $3012 = self.code;
+                var $3013 = self.err;
+                var $3014 = Parser$Reply$error$($3011, $3012, $3013);
+                var $3010 = $3014;
                 break;
             case 'Parser.Reply.value':
-                var $2991 = self.idx;
-                var $2992 = self.code;
-                var $2993 = self.val;
-                var self = Parser$text$("<", $2991, $2992);
+                var $3015 = self.idx;
+                var $3016 = self.code;
+                var $3017 = self.val;
+                var self = Parser$text$("<", $3015, $3016);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2995 = self.idx;
-                        var $2996 = self.code;
-                        var $2997 = self.err;
-                        var $2998 = Parser$Reply$error$($2995, $2996, $2997);
-                        var $2994 = $2998;
+                        var $3019 = self.idx;
+                        var $3020 = self.code;
+                        var $3021 = self.err;
+                        var $3022 = Parser$Reply$error$($3019, $3020, $3021);
+                        var $3018 = $3022;
                         break;
                     case 'Parser.Reply.value':
-                        var $2999 = self.idx;
-                        var $3000 = self.code;
-                        var self = Parser$until1$(Parser$spaces_text(">"), Kind$Parser$item(Kind$Parser$term), $2999, $3000);
+                        var $3023 = self.idx;
+                        var $3024 = self.code;
+                        var self = Parser$until1$(Parser$spaces_text(">"), Kind$Parser$item(Kind$Parser$term), $3023, $3024);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3002 = self.idx;
-                                var $3003 = self.code;
-                                var $3004 = self.err;
-                                var $3005 = Parser$Reply$error$($3002, $3003, $3004);
-                                var $3001 = $3005;
+                                var $3026 = self.idx;
+                                var $3027 = self.code;
+                                var $3028 = self.err;
+                                var $3029 = Parser$Reply$error$($3026, $3027, $3028);
+                                var $3025 = $3029;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3006 = self.idx;
-                                var $3007 = self.code;
-                                var $3008 = self.val;
-                                var self = Kind$Parser$stop$($2993, $3006, $3007);
+                                var $3030 = self.idx;
+                                var $3031 = self.code;
+                                var $3032 = self.val;
+                                var self = Kind$Parser$stop$($3017, $3030, $3031);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $3010 = self.idx;
-                                        var $3011 = self.code;
-                                        var $3012 = self.err;
-                                        var $3013 = Parser$Reply$error$($3010, $3011, $3012);
-                                        var $3009 = $3013;
+                                        var $3034 = self.idx;
+                                        var $3035 = self.code;
+                                        var $3036 = self.err;
+                                        var $3037 = Parser$Reply$error$($3034, $3035, $3036);
+                                        var $3033 = $3037;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $3014 = self.idx;
-                                        var $3015 = self.code;
-                                        var $3016 = self.val;
+                                        var $3038 = self.idx;
+                                        var $3039 = self.code;
+                                        var $3040 = self.val;
                                         var _expr$17 = (() => {
-                                            var $3019 = _func$2;
-                                            var $3020 = $3008;
-                                            let _f$18 = $3019;
+                                            var $3043 = _func$2;
+                                            var $3044 = $3032;
+                                            let _f$18 = $3043;
                                             let _x$17;
-                                            while ($3020._ === 'List.cons') {
-                                                _x$17 = $3020.head;
-                                                var $3019 = Kind$Term$app$(_f$18, _x$17);
-                                                _f$18 = $3019;
-                                                $3020 = $3020.tail;
+                                            while ($3044._ === 'List.cons') {
+                                                _x$17 = $3044.head;
+                                                var $3043 = Kind$Term$app$(_f$18, _x$17);
+                                                _f$18 = $3043;
+                                                $3044 = $3044.tail;
                                             }
                                             return _f$18;
                                         })();
-                                        var $3017 = Parser$Reply$value$($3014, $3015, Kind$Term$ori$($3016, _expr$17));
-                                        var $3009 = $3017;
+                                        var $3041 = Parser$Reply$value$($3038, $3039, Kind$Term$ori$($3040, _expr$17));
+                                        var $3033 = $3041;
                                         break;
                                 };
-                                var $3001 = $3009;
+                                var $3025 = $3033;
                                 break;
                         };
-                        var $2994 = $3001;
+                        var $3018 = $3025;
                         break;
                 };
-                var $2986 = $2994;
+                var $3010 = $3018;
                 break;
         };
-        return $2986;
+        return $3010;
     };
     const Kind$Parser$application$erased = x0 => x1 => x2 => x3 => Kind$Parser$application$erased$(x0, x1, x2, x3);
 
@@ -8116,121 +8160,60 @@ module.exports = (function() {
         var self = Kind$Parser$text$("->", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3022 = self.idx;
-                var $3023 = self.code;
-                var $3024 = self.err;
-                var $3025 = Parser$Reply$error$($3022, $3023, $3024);
-                var $3021 = $3025;
+                var $3046 = self.idx;
+                var $3047 = self.code;
+                var $3048 = self.err;
+                var $3049 = Parser$Reply$error$($3046, $3047, $3048);
+                var $3045 = $3049;
                 break;
             case 'Parser.Reply.value':
-                var $3026 = self.idx;
-                var $3027 = self.code;
-                var self = Kind$Parser$term$($3026, $3027);
+                var $3050 = self.idx;
+                var $3051 = self.code;
+                var self = Kind$Parser$term$($3050, $3051);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3029 = self.idx;
-                        var $3030 = self.code;
-                        var $3031 = self.err;
-                        var $3032 = Parser$Reply$error$($3029, $3030, $3031);
-                        var $3028 = $3032;
+                        var $3053 = self.idx;
+                        var $3054 = self.code;
+                        var $3055 = self.err;
+                        var $3056 = Parser$Reply$error$($3053, $3054, $3055);
+                        var $3052 = $3056;
                         break;
                     case 'Parser.Reply.value':
-                        var $3033 = self.idx;
-                        var $3034 = self.code;
-                        var $3035 = self.val;
-                        var self = Kind$Parser$stop$(_init$1, $3033, $3034);
+                        var $3057 = self.idx;
+                        var $3058 = self.code;
+                        var $3059 = self.val;
+                        var self = Kind$Parser$stop$(_init$1, $3057, $3058);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3037 = self.idx;
-                                var $3038 = self.code;
-                                var $3039 = self.err;
-                                var $3040 = Parser$Reply$error$($3037, $3038, $3039);
-                                var $3036 = $3040;
+                                var $3061 = self.idx;
+                                var $3062 = self.code;
+                                var $3063 = self.err;
+                                var $3064 = Parser$Reply$error$($3061, $3062, $3063);
+                                var $3060 = $3064;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3041 = self.idx;
-                                var $3042 = self.code;
-                                var $3043 = self.val;
-                                var $3044 = Parser$Reply$value$($3041, $3042, Kind$Term$ori$($3043, Kind$Term$all$(Bool$false, "", "", _xtyp$2, (_s$14 => _x$15 => {
-                                    var $3045 = $3035;
-                                    return $3045;
+                                var $3065 = self.idx;
+                                var $3066 = self.code;
+                                var $3067 = self.val;
+                                var $3068 = Parser$Reply$value$($3065, $3066, Kind$Term$ori$($3067, Kind$Term$all$(Bool$false, "", "", _xtyp$2, (_s$14 => _x$15 => {
+                                    var $3069 = $3059;
+                                    return $3069;
                                 }))));
-                                var $3036 = $3044;
+                                var $3060 = $3068;
                                 break;
                         };
-                        var $3028 = $3036;
+                        var $3052 = $3060;
                         break;
                 };
-                var $3021 = $3028;
+                var $3045 = $3052;
                 break;
         };
-        return $3021;
+        return $3045;
     };
     const Kind$Parser$arrow = x0 => x1 => x2 => x3 => Kind$Parser$arrow$(x0, x1, x2, x3);
 
     function Kind$Parser$op$(_sym$1, _ref$2, _init$3, _val0$4, _idx$5, _code$6) {
         var self = Kind$Parser$text$(_sym$1, _idx$5, _code$6);
-        switch (self._) {
-            case 'Parser.Reply.error':
-                var $3047 = self.idx;
-                var $3048 = self.code;
-                var $3049 = self.err;
-                var $3050 = Parser$Reply$error$($3047, $3048, $3049);
-                var $3046 = $3050;
-                break;
-            case 'Parser.Reply.value':
-                var $3051 = self.idx;
-                var $3052 = self.code;
-                var self = Kind$Parser$term$($3051, $3052);
-                switch (self._) {
-                    case 'Parser.Reply.error':
-                        var $3054 = self.idx;
-                        var $3055 = self.code;
-                        var $3056 = self.err;
-                        var $3057 = Parser$Reply$error$($3054, $3055, $3056);
-                        var $3053 = $3057;
-                        break;
-                    case 'Parser.Reply.value':
-                        var $3058 = self.idx;
-                        var $3059 = self.code;
-                        var $3060 = self.val;
-                        var self = Kind$Parser$stop$(_init$3, $3058, $3059);
-                        switch (self._) {
-                            case 'Parser.Reply.error':
-                                var $3062 = self.idx;
-                                var $3063 = self.code;
-                                var $3064 = self.err;
-                                var $3065 = Parser$Reply$error$($3062, $3063, $3064);
-                                var $3061 = $3065;
-                                break;
-                            case 'Parser.Reply.value':
-                                var $3066 = self.idx;
-                                var $3067 = self.code;
-                                var $3068 = self.val;
-                                var _term$16 = Kind$Term$ref$(_ref$2);
-                                var _term$17 = Kind$Term$app$(_term$16, _val0$4);
-                                var _term$18 = Kind$Term$app$(_term$17, $3060);
-                                var $3069 = Parser$Reply$value$($3066, $3067, Kind$Term$ori$($3068, _term$18));
-                                var $3061 = $3069;
-                                break;
-                        };
-                        var $3053 = $3061;
-                        break;
-                };
-                var $3046 = $3053;
-                break;
-        };
-        return $3046;
-    };
-    const Kind$Parser$op = x0 => x1 => x2 => x3 => x4 => x5 => Kind$Parser$op$(x0, x1, x2, x3, x4, x5);
-    const Kind$Parser$add = Kind$Parser$op("+")("Nat.add");
-    const Kind$Parser$sub = Kind$Parser$op("+")("Nat.add");
-    const Kind$Parser$mul = Kind$Parser$op("*")("Nat.mul");
-    const Kind$Parser$div = Kind$Parser$op("/")("Nat.div");
-    const Kind$Parser$mod = Kind$Parser$op("%")("Nat.mod");
-
-    function Kind$Parser$cons$(_init$1, _head$2, _idx$3, _code$4) {
-        var self = Kind$Parser$text$("&", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
                 var $3071 = self.idx;
@@ -8255,7 +8238,7 @@ module.exports = (function() {
                         var $3082 = self.idx;
                         var $3083 = self.code;
                         var $3084 = self.val;
-                        var self = Kind$Parser$stop$(_init$1, $3082, $3083);
+                        var self = Kind$Parser$stop$(_init$3, $3082, $3083);
                         switch (self._) {
                             case 'Parser.Reply.error':
                                 var $3086 = self.idx;
@@ -8267,28 +8250,12 @@ module.exports = (function() {
                             case 'Parser.Reply.value':
                                 var $3090 = self.idx;
                                 var $3091 = self.code;
-                                var _term$14 = Kind$Term$ref$("List.cons");
-                                var _term$15 = Kind$Term$app$(_term$14, Kind$Term$hol$(Bits$e));
-                                var _term$16 = Kind$Term$app$(_term$15, _head$2);
-                                var _term$17 = Kind$Term$app$(_term$16, $3084);
-                                var self = Kind$Parser$stop$(_init$1, $3090, $3091);
-                                switch (self._) {
-                                    case 'Parser.Reply.error':
-                                        var $3093 = self.idx;
-                                        var $3094 = self.code;
-                                        var $3095 = self.err;
-                                        var $3096 = Parser$Reply$error$($3093, $3094, $3095);
-                                        var $3092 = $3096;
-                                        break;
-                                    case 'Parser.Reply.value':
-                                        var $3097 = self.idx;
-                                        var $3098 = self.code;
-                                        var $3099 = self.val;
-                                        var $3100 = Parser$Reply$value$($3097, $3098, Kind$Term$ori$($3099, _term$17));
-                                        var $3092 = $3100;
-                                        break;
-                                };
-                                var $3085 = $3092;
+                                var $3092 = self.val;
+                                var _term$16 = Kind$Term$ref$(_ref$2);
+                                var _term$17 = Kind$Term$app$(_term$16, _val0$4);
+                                var _term$18 = Kind$Term$app$(_term$17, $3084);
+                                var $3093 = Parser$Reply$value$($3090, $3091, Kind$Term$ori$($3092, _term$18));
+                                var $3085 = $3093;
                                 break;
                         };
                         var $3077 = $3085;
@@ -8299,77 +8266,154 @@ module.exports = (function() {
         };
         return $3070;
     };
+    const Kind$Parser$op = x0 => x1 => x2 => x3 => x4 => x5 => Kind$Parser$op$(x0, x1, x2, x3, x4, x5);
+    const Kind$Parser$add = Kind$Parser$op("+")("Nat.add");
+    const Kind$Parser$sub = Kind$Parser$op("+")("Nat.add");
+    const Kind$Parser$mul = Kind$Parser$op("*")("Nat.mul");
+    const Kind$Parser$div = Kind$Parser$op("/")("Nat.div");
+    const Kind$Parser$mod = Kind$Parser$op("%")("Nat.mod");
+
+    function Kind$Parser$cons$(_init$1, _head$2, _idx$3, _code$4) {
+        var self = Kind$Parser$text$("&", _idx$3, _code$4);
+        switch (self._) {
+            case 'Parser.Reply.error':
+                var $3095 = self.idx;
+                var $3096 = self.code;
+                var $3097 = self.err;
+                var $3098 = Parser$Reply$error$($3095, $3096, $3097);
+                var $3094 = $3098;
+                break;
+            case 'Parser.Reply.value':
+                var $3099 = self.idx;
+                var $3100 = self.code;
+                var self = Kind$Parser$term$($3099, $3100);
+                switch (self._) {
+                    case 'Parser.Reply.error':
+                        var $3102 = self.idx;
+                        var $3103 = self.code;
+                        var $3104 = self.err;
+                        var $3105 = Parser$Reply$error$($3102, $3103, $3104);
+                        var $3101 = $3105;
+                        break;
+                    case 'Parser.Reply.value':
+                        var $3106 = self.idx;
+                        var $3107 = self.code;
+                        var $3108 = self.val;
+                        var self = Kind$Parser$stop$(_init$1, $3106, $3107);
+                        switch (self._) {
+                            case 'Parser.Reply.error':
+                                var $3110 = self.idx;
+                                var $3111 = self.code;
+                                var $3112 = self.err;
+                                var $3113 = Parser$Reply$error$($3110, $3111, $3112);
+                                var $3109 = $3113;
+                                break;
+                            case 'Parser.Reply.value':
+                                var $3114 = self.idx;
+                                var $3115 = self.code;
+                                var _term$14 = Kind$Term$ref$("List.cons");
+                                var _term$15 = Kind$Term$app$(_term$14, Kind$Term$hol$(Bits$e));
+                                var _term$16 = Kind$Term$app$(_term$15, _head$2);
+                                var _term$17 = Kind$Term$app$(_term$16, $3108);
+                                var self = Kind$Parser$stop$(_init$1, $3114, $3115);
+                                switch (self._) {
+                                    case 'Parser.Reply.error':
+                                        var $3117 = self.idx;
+                                        var $3118 = self.code;
+                                        var $3119 = self.err;
+                                        var $3120 = Parser$Reply$error$($3117, $3118, $3119);
+                                        var $3116 = $3120;
+                                        break;
+                                    case 'Parser.Reply.value':
+                                        var $3121 = self.idx;
+                                        var $3122 = self.code;
+                                        var $3123 = self.val;
+                                        var $3124 = Parser$Reply$value$($3121, $3122, Kind$Term$ori$($3123, _term$17));
+                                        var $3116 = $3124;
+                                        break;
+                                };
+                                var $3109 = $3116;
+                                break;
+                        };
+                        var $3101 = $3109;
+                        break;
+                };
+                var $3094 = $3101;
+                break;
+        };
+        return $3094;
+    };
     const Kind$Parser$cons = x0 => x1 => x2 => x3 => Kind$Parser$cons$(x0, x1, x2, x3);
 
     function Kind$Parser$concat$(_init$1, _lst0$2, _idx$3, _code$4) {
         var self = Kind$Parser$text$("++", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3102 = self.idx;
-                var $3103 = self.code;
-                var $3104 = self.err;
-                var $3105 = Parser$Reply$error$($3102, $3103, $3104);
-                var $3101 = $3105;
+                var $3126 = self.idx;
+                var $3127 = self.code;
+                var $3128 = self.err;
+                var $3129 = Parser$Reply$error$($3126, $3127, $3128);
+                var $3125 = $3129;
                 break;
             case 'Parser.Reply.value':
-                var $3106 = self.idx;
-                var $3107 = self.code;
-                var self = Kind$Parser$term$($3106, $3107);
+                var $3130 = self.idx;
+                var $3131 = self.code;
+                var self = Kind$Parser$term$($3130, $3131);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3109 = self.idx;
-                        var $3110 = self.code;
-                        var $3111 = self.err;
-                        var $3112 = Parser$Reply$error$($3109, $3110, $3111);
-                        var $3108 = $3112;
+                        var $3133 = self.idx;
+                        var $3134 = self.code;
+                        var $3135 = self.err;
+                        var $3136 = Parser$Reply$error$($3133, $3134, $3135);
+                        var $3132 = $3136;
                         break;
                     case 'Parser.Reply.value':
-                        var $3113 = self.idx;
-                        var $3114 = self.code;
-                        var $3115 = self.val;
-                        var self = Kind$Parser$stop$(_init$1, $3113, $3114);
+                        var $3137 = self.idx;
+                        var $3138 = self.code;
+                        var $3139 = self.val;
+                        var self = Kind$Parser$stop$(_init$1, $3137, $3138);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3117 = self.idx;
-                                var $3118 = self.code;
-                                var $3119 = self.err;
-                                var $3120 = Parser$Reply$error$($3117, $3118, $3119);
-                                var $3116 = $3120;
+                                var $3141 = self.idx;
+                                var $3142 = self.code;
+                                var $3143 = self.err;
+                                var $3144 = Parser$Reply$error$($3141, $3142, $3143);
+                                var $3140 = $3144;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3121 = self.idx;
-                                var $3122 = self.code;
+                                var $3145 = self.idx;
+                                var $3146 = self.code;
                                 var _term$14 = Kind$Term$ref$("List.concat");
                                 var _term$15 = Kind$Term$app$(_term$14, Kind$Term$hol$(Bits$e));
                                 var _term$16 = Kind$Term$app$(_term$15, _lst0$2);
-                                var _term$17 = Kind$Term$app$(_term$16, $3115);
-                                var self = Kind$Parser$stop$(_init$1, $3121, $3122);
+                                var _term$17 = Kind$Term$app$(_term$16, $3139);
+                                var self = Kind$Parser$stop$(_init$1, $3145, $3146);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $3124 = self.idx;
-                                        var $3125 = self.code;
-                                        var $3126 = self.err;
-                                        var $3127 = Parser$Reply$error$($3124, $3125, $3126);
-                                        var $3123 = $3127;
+                                        var $3148 = self.idx;
+                                        var $3149 = self.code;
+                                        var $3150 = self.err;
+                                        var $3151 = Parser$Reply$error$($3148, $3149, $3150);
+                                        var $3147 = $3151;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $3128 = self.idx;
-                                        var $3129 = self.code;
-                                        var $3130 = self.val;
-                                        var $3131 = Parser$Reply$value$($3128, $3129, Kind$Term$ori$($3130, _term$17));
-                                        var $3123 = $3131;
+                                        var $3152 = self.idx;
+                                        var $3153 = self.code;
+                                        var $3154 = self.val;
+                                        var $3155 = Parser$Reply$value$($3152, $3153, Kind$Term$ori$($3154, _term$17));
+                                        var $3147 = $3155;
                                         break;
                                 };
-                                var $3116 = $3123;
+                                var $3140 = $3147;
                                 break;
                         };
-                        var $3108 = $3116;
+                        var $3132 = $3140;
                         break;
                 };
-                var $3101 = $3108;
+                var $3125 = $3132;
                 break;
         };
-        return $3101;
+        return $3125;
     };
     const Kind$Parser$concat = x0 => x1 => x2 => x3 => Kind$Parser$concat$(x0, x1, x2, x3);
 
@@ -8377,133 +8421,75 @@ module.exports = (function() {
         var self = Kind$Parser$text$("|", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3133 = self.idx;
-                var $3134 = self.code;
-                var $3135 = self.err;
-                var $3136 = Parser$Reply$error$($3133, $3134, $3135);
-                var $3132 = $3136;
+                var $3157 = self.idx;
+                var $3158 = self.code;
+                var $3159 = self.err;
+                var $3160 = Parser$Reply$error$($3157, $3158, $3159);
+                var $3156 = $3160;
                 break;
             case 'Parser.Reply.value':
-                var $3137 = self.idx;
-                var $3138 = self.code;
-                var self = Kind$Parser$term$($3137, $3138);
+                var $3161 = self.idx;
+                var $3162 = self.code;
+                var self = Kind$Parser$term$($3161, $3162);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3140 = self.idx;
-                        var $3141 = self.code;
-                        var $3142 = self.err;
-                        var $3143 = Parser$Reply$error$($3140, $3141, $3142);
-                        var $3139 = $3143;
+                        var $3164 = self.idx;
+                        var $3165 = self.code;
+                        var $3166 = self.err;
+                        var $3167 = Parser$Reply$error$($3164, $3165, $3166);
+                        var $3163 = $3167;
                         break;
                     case 'Parser.Reply.value':
-                        var $3144 = self.idx;
-                        var $3145 = self.code;
-                        var $3146 = self.val;
-                        var self = Kind$Parser$stop$(_init$1, $3144, $3145);
+                        var $3168 = self.idx;
+                        var $3169 = self.code;
+                        var $3170 = self.val;
+                        var self = Kind$Parser$stop$(_init$1, $3168, $3169);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3148 = self.idx;
-                                var $3149 = self.code;
-                                var $3150 = self.err;
-                                var $3151 = Parser$Reply$error$($3148, $3149, $3150);
-                                var $3147 = $3151;
+                                var $3172 = self.idx;
+                                var $3173 = self.code;
+                                var $3174 = self.err;
+                                var $3175 = Parser$Reply$error$($3172, $3173, $3174);
+                                var $3171 = $3175;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3152 = self.idx;
-                                var $3153 = self.code;
+                                var $3176 = self.idx;
+                                var $3177 = self.code;
                                 var _term$14 = Kind$Term$ref$("String.concat");
                                 var _term$15 = Kind$Term$app$(_term$14, _str0$2);
-                                var _term$16 = Kind$Term$app$(_term$15, $3146);
-                                var self = Kind$Parser$stop$(_init$1, $3152, $3153);
+                                var _term$16 = Kind$Term$app$(_term$15, $3170);
+                                var self = Kind$Parser$stop$(_init$1, $3176, $3177);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $3155 = self.idx;
-                                        var $3156 = self.code;
-                                        var $3157 = self.err;
-                                        var $3158 = Parser$Reply$error$($3155, $3156, $3157);
-                                        var $3154 = $3158;
+                                        var $3179 = self.idx;
+                                        var $3180 = self.code;
+                                        var $3181 = self.err;
+                                        var $3182 = Parser$Reply$error$($3179, $3180, $3181);
+                                        var $3178 = $3182;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $3159 = self.idx;
-                                        var $3160 = self.code;
-                                        var $3161 = self.val;
-                                        var $3162 = Parser$Reply$value$($3159, $3160, Kind$Term$ori$($3161, _term$16));
-                                        var $3154 = $3162;
+                                        var $3183 = self.idx;
+                                        var $3184 = self.code;
+                                        var $3185 = self.val;
+                                        var $3186 = Parser$Reply$value$($3183, $3184, Kind$Term$ori$($3185, _term$16));
+                                        var $3178 = $3186;
                                         break;
                                 };
-                                var $3147 = $3154;
+                                var $3171 = $3178;
                                 break;
                         };
-                        var $3139 = $3147;
+                        var $3163 = $3171;
                         break;
                 };
-                var $3132 = $3139;
+                var $3156 = $3163;
                 break;
         };
-        return $3132;
+        return $3156;
     };
     const Kind$Parser$string_concat = x0 => x1 => x2 => x3 => Kind$Parser$string_concat$(x0, x1, x2, x3);
 
     function Kind$Parser$sigma$(_init$1, _val0$2, _idx$3, _code$4) {
         var self = Kind$Parser$text$("~", _idx$3, _code$4);
-        switch (self._) {
-            case 'Parser.Reply.error':
-                var $3164 = self.idx;
-                var $3165 = self.code;
-                var $3166 = self.err;
-                var $3167 = Parser$Reply$error$($3164, $3165, $3166);
-                var $3163 = $3167;
-                break;
-            case 'Parser.Reply.value':
-                var $3168 = self.idx;
-                var $3169 = self.code;
-                var self = Kind$Parser$term$($3168, $3169);
-                switch (self._) {
-                    case 'Parser.Reply.error':
-                        var $3171 = self.idx;
-                        var $3172 = self.code;
-                        var $3173 = self.err;
-                        var $3174 = Parser$Reply$error$($3171, $3172, $3173);
-                        var $3170 = $3174;
-                        break;
-                    case 'Parser.Reply.value':
-                        var $3175 = self.idx;
-                        var $3176 = self.code;
-                        var $3177 = self.val;
-                        var self = Kind$Parser$stop$(_init$1, $3175, $3176);
-                        switch (self._) {
-                            case 'Parser.Reply.error':
-                                var $3179 = self.idx;
-                                var $3180 = self.code;
-                                var $3181 = self.err;
-                                var $3182 = Parser$Reply$error$($3179, $3180, $3181);
-                                var $3178 = $3182;
-                                break;
-                            case 'Parser.Reply.value':
-                                var $3183 = self.idx;
-                                var $3184 = self.code;
-                                var $3185 = self.val;
-                                var _term$14 = Kind$Term$ref$("Sigma.new");
-                                var _term$15 = Kind$Term$app$(_term$14, Kind$Term$hol$(Bits$e));
-                                var _term$16 = Kind$Term$app$(_term$15, Kind$Term$hol$(Bits$e));
-                                var _term$17 = Kind$Term$app$(_term$16, _val0$2);
-                                var _term$18 = Kind$Term$app$(_term$17, $3177);
-                                var $3186 = Parser$Reply$value$($3183, $3184, Kind$Term$ori$($3185, _term$18));
-                                var $3178 = $3186;
-                                break;
-                        };
-                        var $3170 = $3178;
-                        break;
-                };
-                var $3163 = $3170;
-                break;
-        };
-        return $3163;
-    };
-    const Kind$Parser$sigma = x0 => x1 => x2 => x3 => Kind$Parser$sigma$(x0, x1, x2, x3);
-
-    function Kind$Parser$equality$(_init$1, _val0$2, _idx$3, _code$4) {
-        var self = Kind$Parser$text$("==", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
                 var $3188 = self.idx;
@@ -8541,11 +8527,12 @@ module.exports = (function() {
                                 var $3207 = self.idx;
                                 var $3208 = self.code;
                                 var $3209 = self.val;
-                                var _term$14 = Kind$Term$ref$("Equal");
+                                var _term$14 = Kind$Term$ref$("Sigma.new");
                                 var _term$15 = Kind$Term$app$(_term$14, Kind$Term$hol$(Bits$e));
-                                var _term$16 = Kind$Term$app$(_term$15, _val0$2);
-                                var _term$17 = Kind$Term$app$(_term$16, $3201);
-                                var $3210 = Parser$Reply$value$($3207, $3208, Kind$Term$ori$($3209, _term$17));
+                                var _term$16 = Kind$Term$app$(_term$15, Kind$Term$hol$(Bits$e));
+                                var _term$17 = Kind$Term$app$(_term$16, _val0$2);
+                                var _term$18 = Kind$Term$app$(_term$17, $3201);
+                                var $3210 = Parser$Reply$value$($3207, $3208, Kind$Term$ori$($3209, _term$18));
                                 var $3202 = $3210;
                                 break;
                         };
@@ -8557,10 +8544,10 @@ module.exports = (function() {
         };
         return $3187;
     };
-    const Kind$Parser$equality = x0 => x1 => x2 => x3 => Kind$Parser$equality$(x0, x1, x2, x3);
+    const Kind$Parser$sigma = x0 => x1 => x2 => x3 => Kind$Parser$sigma$(x0, x1, x2, x3);
 
-    function Kind$Parser$inequality$(_init$1, _val0$2, _idx$3, _code$4) {
-        var self = Kind$Parser$text$("!=", _idx$3, _code$4);
+    function Kind$Parser$equality$(_init$1, _val0$2, _idx$3, _code$4) {
+        var self = Kind$Parser$text$("==", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
                 var $3212 = self.idx;
@@ -8602,8 +8589,7 @@ module.exports = (function() {
                                 var _term$15 = Kind$Term$app$(_term$14, Kind$Term$hol$(Bits$e));
                                 var _term$16 = Kind$Term$app$(_term$15, _val0$2);
                                 var _term$17 = Kind$Term$app$(_term$16, $3225);
-                                var _term$18 = Kind$Term$app$(Kind$Term$ref$("Not"), _term$17);
-                                var $3234 = Parser$Reply$value$($3231, $3232, Kind$Term$ori$($3233, _term$18));
+                                var $3234 = Parser$Reply$value$($3231, $3232, Kind$Term$ori$($3233, _term$17));
                                 var $3226 = $3234;
                                 break;
                         };
@@ -8615,10 +8601,10 @@ module.exports = (function() {
         };
         return $3211;
     };
-    const Kind$Parser$inequality = x0 => x1 => x2 => x3 => Kind$Parser$inequality$(x0, x1, x2, x3);
+    const Kind$Parser$equality = x0 => x1 => x2 => x3 => Kind$Parser$equality$(x0, x1, x2, x3);
 
-    function Kind$Parser$rewrite$(_init$1, _subt$2, _idx$3, _code$4) {
-        var self = Kind$Parser$text$("::", _idx$3, _code$4);
+    function Kind$Parser$inequality$(_init$1, _val0$2, _idx$3, _code$4) {
+        var self = Kind$Parser$text$("!=", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
                 var $3236 = self.idx;
@@ -8630,7 +8616,7 @@ module.exports = (function() {
             case 'Parser.Reply.value':
                 var $3240 = self.idx;
                 var $3241 = self.code;
-                var self = Kind$Parser$text$("rewrite", $3240, $3241);
+                var self = Kind$Parser$term$($3240, $3241);
                 switch (self._) {
                     case 'Parser.Reply.error':
                         var $3243 = self.idx;
@@ -8642,112 +8628,30 @@ module.exports = (function() {
                     case 'Parser.Reply.value':
                         var $3247 = self.idx;
                         var $3248 = self.code;
-                        var self = Kind$Parser$name1$($3247, $3248);
+                        var $3249 = self.val;
+                        var self = Kind$Parser$stop$(_init$1, $3247, $3248);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3250 = self.idx;
-                                var $3251 = self.code;
-                                var $3252 = self.err;
-                                var $3253 = Parser$Reply$error$($3250, $3251, $3252);
-                                var $3249 = $3253;
+                                var $3251 = self.idx;
+                                var $3252 = self.code;
+                                var $3253 = self.err;
+                                var $3254 = Parser$Reply$error$($3251, $3252, $3253);
+                                var $3250 = $3254;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3254 = self.idx;
-                                var $3255 = self.code;
-                                var $3256 = self.val;
-                                var self = Kind$Parser$text$("in", $3254, $3255);
-                                switch (self._) {
-                                    case 'Parser.Reply.error':
-                                        var $3258 = self.idx;
-                                        var $3259 = self.code;
-                                        var $3260 = self.err;
-                                        var $3261 = Parser$Reply$error$($3258, $3259, $3260);
-                                        var $3257 = $3261;
-                                        break;
-                                    case 'Parser.Reply.value':
-                                        var $3262 = self.idx;
-                                        var $3263 = self.code;
-                                        var self = Kind$Parser$term$($3262, $3263);
-                                        switch (self._) {
-                                            case 'Parser.Reply.error':
-                                                var $3265 = self.idx;
-                                                var $3266 = self.code;
-                                                var $3267 = self.err;
-                                                var $3268 = Parser$Reply$error$($3265, $3266, $3267);
-                                                var $3264 = $3268;
-                                                break;
-                                            case 'Parser.Reply.value':
-                                                var $3269 = self.idx;
-                                                var $3270 = self.code;
-                                                var $3271 = self.val;
-                                                var self = Kind$Parser$text$("with", $3269, $3270);
-                                                switch (self._) {
-                                                    case 'Parser.Reply.error':
-                                                        var $3273 = self.idx;
-                                                        var $3274 = self.code;
-                                                        var $3275 = self.err;
-                                                        var $3276 = Parser$Reply$error$($3273, $3274, $3275);
-                                                        var $3272 = $3276;
-                                                        break;
-                                                    case 'Parser.Reply.value':
-                                                        var $3277 = self.idx;
-                                                        var $3278 = self.code;
-                                                        var self = Kind$Parser$term$($3277, $3278);
-                                                        switch (self._) {
-                                                            case 'Parser.Reply.error':
-                                                                var $3280 = self.idx;
-                                                                var $3281 = self.code;
-                                                                var $3282 = self.err;
-                                                                var $3283 = Parser$Reply$error$($3280, $3281, $3282);
-                                                                var $3279 = $3283;
-                                                                break;
-                                                            case 'Parser.Reply.value':
-                                                                var $3284 = self.idx;
-                                                                var $3285 = self.code;
-                                                                var $3286 = self.val;
-                                                                var self = Kind$Parser$stop$(_init$1, $3284, $3285);
-                                                                switch (self._) {
-                                                                    case 'Parser.Reply.error':
-                                                                        var $3288 = self.idx;
-                                                                        var $3289 = self.code;
-                                                                        var $3290 = self.err;
-                                                                        var $3291 = Parser$Reply$error$($3288, $3289, $3290);
-                                                                        var $3287 = $3291;
-                                                                        break;
-                                                                    case 'Parser.Reply.value':
-                                                                        var $3292 = self.idx;
-                                                                        var $3293 = self.code;
-                                                                        var $3294 = self.val;
-                                                                        var _term$29 = Kind$Term$ref$("Equal.rewrite");
-                                                                        var _term$30 = Kind$Term$app$(_term$29, Kind$Term$hol$(Bits$e));
-                                                                        var _term$31 = Kind$Term$app$(_term$30, Kind$Term$hol$(Bits$e));
-                                                                        var _term$32 = Kind$Term$app$(_term$31, Kind$Term$hol$(Bits$e));
-                                                                        var _term$33 = Kind$Term$app$(_term$32, $3286);
-                                                                        var _term$34 = Kind$Term$app$(_term$33, Kind$Term$lam$($3256, (_x$34 => {
-                                                                            var $3296 = $3271;
-                                                                            return $3296;
-                                                                        })));
-                                                                        var _term$35 = Kind$Term$app$(_term$34, _subt$2);
-                                                                        var $3295 = Parser$Reply$value$($3292, $3293, Kind$Term$ori$($3294, _term$35));
-                                                                        var $3287 = $3295;
-                                                                        break;
-                                                                };
-                                                                var $3279 = $3287;
-                                                                break;
-                                                        };
-                                                        var $3272 = $3279;
-                                                        break;
-                                                };
-                                                var $3264 = $3272;
-                                                break;
-                                        };
-                                        var $3257 = $3264;
-                                        break;
-                                };
-                                var $3249 = $3257;
+                                var $3255 = self.idx;
+                                var $3256 = self.code;
+                                var $3257 = self.val;
+                                var _term$14 = Kind$Term$ref$("Equal");
+                                var _term$15 = Kind$Term$app$(_term$14, Kind$Term$hol$(Bits$e));
+                                var _term$16 = Kind$Term$app$(_term$15, _val0$2);
+                                var _term$17 = Kind$Term$app$(_term$16, $3249);
+                                var _term$18 = Kind$Term$app$(Kind$Term$ref$("Not"), _term$17);
+                                var $3258 = Parser$Reply$value$($3255, $3256, Kind$Term$ori$($3257, _term$18));
+                                var $3250 = $3258;
                                 break;
                         };
-                        var $3242 = $3249;
+                        var $3242 = $3250;
                         break;
                 };
                 var $3235 = $3242;
@@ -8755,74 +8659,161 @@ module.exports = (function() {
         };
         return $3235;
     };
+    const Kind$Parser$inequality = x0 => x1 => x2 => x3 => Kind$Parser$inequality$(x0, x1, x2, x3);
+
+    function Kind$Parser$rewrite$(_init$1, _subt$2, _idx$3, _code$4) {
+        var self = Kind$Parser$text$("::", _idx$3, _code$4);
+        switch (self._) {
+            case 'Parser.Reply.error':
+                var $3260 = self.idx;
+                var $3261 = self.code;
+                var $3262 = self.err;
+                var $3263 = Parser$Reply$error$($3260, $3261, $3262);
+                var $3259 = $3263;
+                break;
+            case 'Parser.Reply.value':
+                var $3264 = self.idx;
+                var $3265 = self.code;
+                var self = Kind$Parser$text$("rewrite", $3264, $3265);
+                switch (self._) {
+                    case 'Parser.Reply.error':
+                        var $3267 = self.idx;
+                        var $3268 = self.code;
+                        var $3269 = self.err;
+                        var $3270 = Parser$Reply$error$($3267, $3268, $3269);
+                        var $3266 = $3270;
+                        break;
+                    case 'Parser.Reply.value':
+                        var $3271 = self.idx;
+                        var $3272 = self.code;
+                        var self = Kind$Parser$name1$($3271, $3272);
+                        switch (self._) {
+                            case 'Parser.Reply.error':
+                                var $3274 = self.idx;
+                                var $3275 = self.code;
+                                var $3276 = self.err;
+                                var $3277 = Parser$Reply$error$($3274, $3275, $3276);
+                                var $3273 = $3277;
+                                break;
+                            case 'Parser.Reply.value':
+                                var $3278 = self.idx;
+                                var $3279 = self.code;
+                                var $3280 = self.val;
+                                var self = Kind$Parser$text$("in", $3278, $3279);
+                                switch (self._) {
+                                    case 'Parser.Reply.error':
+                                        var $3282 = self.idx;
+                                        var $3283 = self.code;
+                                        var $3284 = self.err;
+                                        var $3285 = Parser$Reply$error$($3282, $3283, $3284);
+                                        var $3281 = $3285;
+                                        break;
+                                    case 'Parser.Reply.value':
+                                        var $3286 = self.idx;
+                                        var $3287 = self.code;
+                                        var self = Kind$Parser$term$($3286, $3287);
+                                        switch (self._) {
+                                            case 'Parser.Reply.error':
+                                                var $3289 = self.idx;
+                                                var $3290 = self.code;
+                                                var $3291 = self.err;
+                                                var $3292 = Parser$Reply$error$($3289, $3290, $3291);
+                                                var $3288 = $3292;
+                                                break;
+                                            case 'Parser.Reply.value':
+                                                var $3293 = self.idx;
+                                                var $3294 = self.code;
+                                                var $3295 = self.val;
+                                                var self = Kind$Parser$text$("with", $3293, $3294);
+                                                switch (self._) {
+                                                    case 'Parser.Reply.error':
+                                                        var $3297 = self.idx;
+                                                        var $3298 = self.code;
+                                                        var $3299 = self.err;
+                                                        var $3300 = Parser$Reply$error$($3297, $3298, $3299);
+                                                        var $3296 = $3300;
+                                                        break;
+                                                    case 'Parser.Reply.value':
+                                                        var $3301 = self.idx;
+                                                        var $3302 = self.code;
+                                                        var self = Kind$Parser$term$($3301, $3302);
+                                                        switch (self._) {
+                                                            case 'Parser.Reply.error':
+                                                                var $3304 = self.idx;
+                                                                var $3305 = self.code;
+                                                                var $3306 = self.err;
+                                                                var $3307 = Parser$Reply$error$($3304, $3305, $3306);
+                                                                var $3303 = $3307;
+                                                                break;
+                                                            case 'Parser.Reply.value':
+                                                                var $3308 = self.idx;
+                                                                var $3309 = self.code;
+                                                                var $3310 = self.val;
+                                                                var self = Kind$Parser$stop$(_init$1, $3308, $3309);
+                                                                switch (self._) {
+                                                                    case 'Parser.Reply.error':
+                                                                        var $3312 = self.idx;
+                                                                        var $3313 = self.code;
+                                                                        var $3314 = self.err;
+                                                                        var $3315 = Parser$Reply$error$($3312, $3313, $3314);
+                                                                        var $3311 = $3315;
+                                                                        break;
+                                                                    case 'Parser.Reply.value':
+                                                                        var $3316 = self.idx;
+                                                                        var $3317 = self.code;
+                                                                        var $3318 = self.val;
+                                                                        var _term$29 = Kind$Term$ref$("Equal.rewrite");
+                                                                        var _term$30 = Kind$Term$app$(_term$29, Kind$Term$hol$(Bits$e));
+                                                                        var _term$31 = Kind$Term$app$(_term$30, Kind$Term$hol$(Bits$e));
+                                                                        var _term$32 = Kind$Term$app$(_term$31, Kind$Term$hol$(Bits$e));
+                                                                        var _term$33 = Kind$Term$app$(_term$32, $3310);
+                                                                        var _term$34 = Kind$Term$app$(_term$33, Kind$Term$lam$($3280, (_x$34 => {
+                                                                            var $3320 = $3295;
+                                                                            return $3320;
+                                                                        })));
+                                                                        var _term$35 = Kind$Term$app$(_term$34, _subt$2);
+                                                                        var $3319 = Parser$Reply$value$($3316, $3317, Kind$Term$ori$($3318, _term$35));
+                                                                        var $3311 = $3319;
+                                                                        break;
+                                                                };
+                                                                var $3303 = $3311;
+                                                                break;
+                                                        };
+                                                        var $3296 = $3303;
+                                                        break;
+                                                };
+                                                var $3288 = $3296;
+                                                break;
+                                        };
+                                        var $3281 = $3288;
+                                        break;
+                                };
+                                var $3273 = $3281;
+                                break;
+                        };
+                        var $3266 = $3273;
+                        break;
+                };
+                var $3259 = $3266;
+                break;
+        };
+        return $3259;
+    };
     const Kind$Parser$rewrite = x0 => x1 => x2 => x3 => Kind$Parser$rewrite$(x0, x1, x2, x3);
 
     function Kind$Term$ann$(_done$1, _term$2, _type$3) {
-        var $3297 = ({
+        var $3321 = ({
             _: 'Kind.Term.ann',
             'done': _done$1,
             'term': _term$2,
             'type': _type$3
         });
-        return $3297;
+        return $3321;
     };
     const Kind$Term$ann = x0 => x1 => x2 => Kind$Term$ann$(x0, x1, x2);
 
     function Kind$Parser$annotation$(_init$1, _term$2, _idx$3, _code$4) {
         var self = Kind$Parser$text$("::", _idx$3, _code$4);
-        switch (self._) {
-            case 'Parser.Reply.error':
-                var $3299 = self.idx;
-                var $3300 = self.code;
-                var $3301 = self.err;
-                var $3302 = Parser$Reply$error$($3299, $3300, $3301);
-                var $3298 = $3302;
-                break;
-            case 'Parser.Reply.value':
-                var $3303 = self.idx;
-                var $3304 = self.code;
-                var self = Kind$Parser$term$($3303, $3304);
-                switch (self._) {
-                    case 'Parser.Reply.error':
-                        var $3306 = self.idx;
-                        var $3307 = self.code;
-                        var $3308 = self.err;
-                        var $3309 = Parser$Reply$error$($3306, $3307, $3308);
-                        var $3305 = $3309;
-                        break;
-                    case 'Parser.Reply.value':
-                        var $3310 = self.idx;
-                        var $3311 = self.code;
-                        var $3312 = self.val;
-                        var self = Kind$Parser$stop$(_init$1, $3310, $3311);
-                        switch (self._) {
-                            case 'Parser.Reply.error':
-                                var $3314 = self.idx;
-                                var $3315 = self.code;
-                                var $3316 = self.err;
-                                var $3317 = Parser$Reply$error$($3314, $3315, $3316);
-                                var $3313 = $3317;
-                                break;
-                            case 'Parser.Reply.value':
-                                var $3318 = self.idx;
-                                var $3319 = self.code;
-                                var $3320 = self.val;
-                                var $3321 = Parser$Reply$value$($3318, $3319, Kind$Term$ori$($3320, Kind$Term$ann$(Bool$false, _term$2, $3312)));
-                                var $3313 = $3321;
-                                break;
-                        };
-                        var $3305 = $3313;
-                        break;
-                };
-                var $3298 = $3305;
-                break;
-        };
-        return $3298;
-    };
-    const Kind$Parser$annotation = x0 => x1 => x2 => x3 => Kind$Parser$annotation$(x0, x1, x2, x3);
-
-    function Kind$Parser$application$hole$(_init$1, _term$2, _idx$3, _code$4) {
-        var self = Kind$Parser$text$("!", _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
                 var $3323 = self.idx;
@@ -8834,7 +8825,7 @@ module.exports = (function() {
             case 'Parser.Reply.value':
                 var $3327 = self.idx;
                 var $3328 = self.code;
-                var self = Kind$Parser$stop$(_init$1, $3327, $3328);
+                var self = Kind$Parser$term$($3327, $3328);
                 switch (self._) {
                     case 'Parser.Reply.error':
                         var $3330 = self.idx;
@@ -8847,7 +8838,23 @@ module.exports = (function() {
                         var $3334 = self.idx;
                         var $3335 = self.code;
                         var $3336 = self.val;
-                        var $3337 = Parser$Reply$value$($3334, $3335, Kind$Term$ori$($3336, Kind$Term$app$(_term$2, Kind$Term$hol$(Bits$e))));
+                        var self = Kind$Parser$stop$(_init$1, $3334, $3335);
+                        switch (self._) {
+                            case 'Parser.Reply.error':
+                                var $3338 = self.idx;
+                                var $3339 = self.code;
+                                var $3340 = self.err;
+                                var $3341 = Parser$Reply$error$($3338, $3339, $3340);
+                                var $3337 = $3341;
+                                break;
+                            case 'Parser.Reply.value':
+                                var $3342 = self.idx;
+                                var $3343 = self.code;
+                                var $3344 = self.val;
+                                var $3345 = Parser$Reply$value$($3342, $3343, Kind$Term$ori$($3344, Kind$Term$ann$(Bool$false, _term$2, $3336)));
+                                var $3337 = $3345;
+                                break;
+                        };
                         var $3329 = $3337;
                         break;
                 };
@@ -8855,6 +8862,43 @@ module.exports = (function() {
                 break;
         };
         return $3322;
+    };
+    const Kind$Parser$annotation = x0 => x1 => x2 => x3 => Kind$Parser$annotation$(x0, x1, x2, x3);
+
+    function Kind$Parser$application$hole$(_init$1, _term$2, _idx$3, _code$4) {
+        var self = Kind$Parser$text$("!", _idx$3, _code$4);
+        switch (self._) {
+            case 'Parser.Reply.error':
+                var $3347 = self.idx;
+                var $3348 = self.code;
+                var $3349 = self.err;
+                var $3350 = Parser$Reply$error$($3347, $3348, $3349);
+                var $3346 = $3350;
+                break;
+            case 'Parser.Reply.value':
+                var $3351 = self.idx;
+                var $3352 = self.code;
+                var self = Kind$Parser$stop$(_init$1, $3351, $3352);
+                switch (self._) {
+                    case 'Parser.Reply.error':
+                        var $3354 = self.idx;
+                        var $3355 = self.code;
+                        var $3356 = self.err;
+                        var $3357 = Parser$Reply$error$($3354, $3355, $3356);
+                        var $3353 = $3357;
+                        break;
+                    case 'Parser.Reply.value':
+                        var $3358 = self.idx;
+                        var $3359 = self.code;
+                        var $3360 = self.val;
+                        var $3361 = Parser$Reply$value$($3358, $3359, Kind$Term$ori$($3360, Kind$Term$app$(_term$2, Kind$Term$hol$(Bits$e))));
+                        var $3353 = $3361;
+                        break;
+                };
+                var $3346 = $3353;
+                break;
+        };
+        return $3346;
     };
     const Kind$Parser$application$hole = x0 => x1 => x2 => x3 => Kind$Parser$application$hole$(x0, x1, x2, x3);
 
@@ -8872,18 +8916,18 @@ module.exports = (function() {
                 var self = _suffix_parser$5(_idx$3)(_code$4);
                 switch (self._) {
                     case 'Parser.Reply.value':
-                        var $3339 = self.idx;
-                        var $3340 = self.code;
-                        var $3341 = self.val;
-                        var $3342 = Kind$Parser$suffix$(_init$1, $3341, $3339, $3340);
-                        var $3338 = $3342;
+                        var $3363 = self.idx;
+                        var $3364 = self.code;
+                        var $3365 = self.val;
+                        var $3366 = Kind$Parser$suffix$(_init$1, $3365, $3363, $3364);
+                        var $3362 = $3366;
                         break;
                     case 'Parser.Reply.error':
-                        var $3343 = Parser$Reply$value$(_idx$3, _code$4, _term$2);
-                        var $3338 = $3343;
+                        var $3367 = Parser$Reply$value$(_idx$3, _code$4, _term$2);
+                        var $3362 = $3367;
                         break;
                 };
-                return $3338;
+                return $3362;
             })();
             if (R.ctr === 'TCO') arg = R.arg;
             else return R;
@@ -8895,37 +8939,37 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3345 = self.idx;
-                var $3346 = self.code;
-                var $3347 = self.err;
-                var $3348 = Parser$Reply$error$($3345, $3346, $3347);
-                var $3344 = $3348;
+                var $3369 = self.idx;
+                var $3370 = self.code;
+                var $3371 = self.err;
+                var $3372 = Parser$Reply$error$($3369, $3370, $3371);
+                var $3368 = $3372;
                 break;
             case 'Parser.Reply.value':
-                var $3349 = self.idx;
-                var $3350 = self.code;
-                var $3351 = self.val;
-                var self = Parser$first_of$(List$cons$(Kind$Parser$type, List$cons$(Kind$Parser$forall, List$cons$(Kind$Parser$lambda, List$cons$(Kind$Parser$lambda$erased, List$cons$(Kind$Parser$lambda$nameless, List$cons$(Kind$Parser$parenthesis, List$cons$(Kind$Parser$letforrange$u32, List$cons$(Kind$Parser$letforrange$nat, List$cons$(Kind$Parser$letforin, List$cons$(Kind$Parser$let, List$cons$(Kind$Parser$get, List$cons$(Kind$Parser$def, List$cons$(Kind$Parser$goal_rewrite, List$cons$(Kind$Parser$if, List$cons$(Kind$Parser$char, List$cons$(Kind$Parser$string, List$cons$(Kind$Parser$pair, List$cons$(Kind$Parser$sigma$type, List$cons$(Kind$Parser$some, List$cons$(Kind$Parser$apply, List$cons$(Kind$Parser$mirror, List$cons$(Kind$Parser$list, List$cons$(Kind$Parser$log, List$cons$(Kind$Parser$do, List$cons$(Kind$Parser$case, List$cons$(Kind$Parser$open, List$cons$(Kind$Parser$switch, List$cons$(Kind$Parser$goal, List$cons$(Kind$Parser$hole, List$cons$(Kind$Parser$u8, List$cons$(Kind$Parser$u16, List$cons$(Kind$Parser$u32, List$cons$(Kind$Parser$u64, List$cons$(Kind$Parser$nat, List$cons$(Kind$Parser$reference, List$nil))))))))))))))))))))))))))))))))))))($3349)($3350);
+                var $3373 = self.idx;
+                var $3374 = self.code;
+                var $3375 = self.val;
+                var self = Parser$first_of$(List$cons$(Kind$Parser$type, List$cons$(Kind$Parser$forall, List$cons$(Kind$Parser$lambda, List$cons$(Kind$Parser$lambda$erased, List$cons$(Kind$Parser$lambda$nameless, List$cons$(Kind$Parser$parenthesis, List$cons$(Kind$Parser$letforrange$u32, List$cons$(Kind$Parser$letforrange$nat, List$cons$(Kind$Parser$letforin, List$cons$(Kind$Parser$let, List$cons$(Kind$Parser$get, List$cons$(Kind$Parser$def, List$cons$(Kind$Parser$goal_rewrite, List$cons$(Kind$Parser$if, List$cons$(Kind$Parser$char, List$cons$(Kind$Parser$string, List$cons$(Kind$Parser$pair, List$cons$(Kind$Parser$sigma$type, List$cons$(Kind$Parser$some, List$cons$(Kind$Parser$apply, List$cons$(Kind$Parser$mirror, List$cons$(Kind$Parser$list, List$cons$(Kind$Parser$log, List$cons$(Kind$Parser$do, List$cons$(Kind$Parser$case, List$cons$(Kind$Parser$open, List$cons$(Kind$Parser$switch, List$cons$(Kind$Parser$goal, List$cons$(Kind$Parser$hole, List$cons$(Kind$Parser$u8, List$cons$(Kind$Parser$u16, List$cons$(Kind$Parser$u32, List$cons$(Kind$Parser$u64, List$cons$(Kind$Parser$nat, List$cons$(Kind$Parser$reference, List$nil))))))))))))))))))))))))))))))))))))($3373)($3374);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3353 = self.idx;
-                        var $3354 = self.code;
-                        var $3355 = self.err;
-                        var $3356 = Parser$Reply$error$($3353, $3354, $3355);
-                        var $3352 = $3356;
+                        var $3377 = self.idx;
+                        var $3378 = self.code;
+                        var $3379 = self.err;
+                        var $3380 = Parser$Reply$error$($3377, $3378, $3379);
+                        var $3376 = $3380;
                         break;
                     case 'Parser.Reply.value':
-                        var $3357 = self.idx;
-                        var $3358 = self.code;
-                        var $3359 = self.val;
-                        var $3360 = Kind$Parser$suffix$($3351, $3359, $3357, $3358);
-                        var $3352 = $3360;
+                        var $3381 = self.idx;
+                        var $3382 = self.code;
+                        var $3383 = self.val;
+                        var $3384 = Kind$Parser$suffix$($3375, $3383, $3381, $3382);
+                        var $3376 = $3384;
                         break;
                 };
-                var $3344 = $3352;
+                var $3368 = $3376;
                 break;
         };
-        return $3344;
+        return $3368;
     };
     const Kind$Parser$term = x0 => x1 => Kind$Parser$term$(x0, x1);
 
@@ -8933,63 +8977,63 @@ module.exports = (function() {
         var self = Kind$Parser$name$(_idx$2, _code$3);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3362 = self.idx;
-                var $3363 = self.code;
-                var $3364 = self.err;
-                var $3365 = Parser$Reply$error$($3362, $3363, $3364);
-                var $3361 = $3365;
+                var $3386 = self.idx;
+                var $3387 = self.code;
+                var $3388 = self.err;
+                var $3389 = Parser$Reply$error$($3386, $3387, $3388);
+                var $3385 = $3389;
                 break;
             case 'Parser.Reply.value':
-                var $3366 = self.idx;
-                var $3367 = self.code;
-                var $3368 = self.val;
-                var self = Kind$Parser$text$(_sep$1, $3366, $3367);
+                var $3390 = self.idx;
+                var $3391 = self.code;
+                var $3392 = self.val;
+                var self = Kind$Parser$text$(_sep$1, $3390, $3391);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3370 = self.idx;
-                        var $3371 = self.code;
-                        var $3372 = self.err;
-                        var $3373 = Parser$Reply$error$($3370, $3371, $3372);
-                        var $3369 = $3373;
+                        var $3394 = self.idx;
+                        var $3395 = self.code;
+                        var $3396 = self.err;
+                        var $3397 = Parser$Reply$error$($3394, $3395, $3396);
+                        var $3393 = $3397;
                         break;
                     case 'Parser.Reply.value':
-                        var $3374 = self.idx;
-                        var $3375 = self.code;
-                        var self = Kind$Parser$term$($3374, $3375);
+                        var $3398 = self.idx;
+                        var $3399 = self.code;
+                        var self = Kind$Parser$term$($3398, $3399);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3377 = self.idx;
-                                var $3378 = self.code;
-                                var $3379 = self.err;
-                                var $3380 = Parser$Reply$error$($3377, $3378, $3379);
-                                var $3376 = $3380;
+                                var $3401 = self.idx;
+                                var $3402 = self.code;
+                                var $3403 = self.err;
+                                var $3404 = Parser$Reply$error$($3401, $3402, $3403);
+                                var $3400 = $3404;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3381 = self.idx;
-                                var $3382 = self.code;
-                                var $3383 = self.val;
-                                var $3384 = Parser$Reply$value$($3381, $3382, Pair$new$($3368, $3383));
-                                var $3376 = $3384;
+                                var $3405 = self.idx;
+                                var $3406 = self.code;
+                                var $3407 = self.val;
+                                var $3408 = Parser$Reply$value$($3405, $3406, Pair$new$($3392, $3407));
+                                var $3400 = $3408;
                                 break;
                         };
-                        var $3369 = $3376;
+                        var $3393 = $3400;
                         break;
                 };
-                var $3361 = $3369;
+                var $3385 = $3393;
                 break;
         };
-        return $3361;
+        return $3385;
     };
     const Kind$Parser$name_term = x0 => x1 => x2 => Kind$Parser$name_term$(x0, x1, x2);
 
     function Kind$Binder$new$(_eras$1, _name$2, _term$3) {
-        var $3385 = ({
+        var $3409 = ({
             _: 'Kind.Binder.new',
             'eras': _eras$1,
             'name': _name$2,
             'term': _term$3
         });
-        return $3385;
+        return $3409;
     };
     const Kind$Binder$new = x0 => x1 => x2 => Kind$Binder$new$(x0, x1, x2);
 
@@ -8997,65 +9041,65 @@ module.exports = (function() {
         var self = Kind$Parser$text$((() => {
             var self = _eras$2;
             if (self) {
-                var $3387 = "<";
-                return $3387;
+                var $3411 = "<";
+                return $3411;
             } else {
-                var $3388 = "(";
-                return $3388;
+                var $3412 = "(";
+                return $3412;
             };
         })(), _idx$3, _code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3389 = self.idx;
-                var $3390 = self.code;
-                var $3391 = self.err;
-                var $3392 = Parser$Reply$error$($3389, $3390, $3391);
-                var $3386 = $3392;
+                var $3413 = self.idx;
+                var $3414 = self.code;
+                var $3415 = self.err;
+                var $3416 = Parser$Reply$error$($3413, $3414, $3415);
+                var $3410 = $3416;
                 break;
             case 'Parser.Reply.value':
-                var $3393 = self.idx;
-                var $3394 = self.code;
+                var $3417 = self.idx;
+                var $3418 = self.code;
                 var self = Parser$until1$(Kind$Parser$text((() => {
                     var self = _eras$2;
                     if (self) {
-                        var $3396 = ">";
-                        return $3396;
+                        var $3420 = ">";
+                        return $3420;
                     } else {
-                        var $3397 = ")";
-                        return $3397;
+                        var $3421 = ")";
+                        return $3421;
                     };
-                })()), Kind$Parser$item(Kind$Parser$name_term(_sep$1)), $3393, $3394);
+                })()), Kind$Parser$item(Kind$Parser$name_term(_sep$1)), $3417, $3418);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3398 = self.idx;
-                        var $3399 = self.code;
-                        var $3400 = self.err;
-                        var $3401 = Parser$Reply$error$($3398, $3399, $3400);
-                        var $3395 = $3401;
+                        var $3422 = self.idx;
+                        var $3423 = self.code;
+                        var $3424 = self.err;
+                        var $3425 = Parser$Reply$error$($3422, $3423, $3424);
+                        var $3419 = $3425;
                         break;
                     case 'Parser.Reply.value':
-                        var $3402 = self.idx;
-                        var $3403 = self.code;
-                        var $3404 = self.val;
-                        var $3405 = Parser$Reply$value$($3402, $3403, List$mapped$($3404, (_pair$11 => {
+                        var $3426 = self.idx;
+                        var $3427 = self.code;
+                        var $3428 = self.val;
+                        var $3429 = Parser$Reply$value$($3426, $3427, List$mapped$($3428, (_pair$11 => {
                             var self = _pair$11;
                             switch (self._) {
                                 case 'Pair.new':
-                                    var $3407 = self.fst;
-                                    var $3408 = self.snd;
-                                    var $3409 = Kind$Binder$new$(_eras$2, $3407, $3408);
-                                    var $3406 = $3409;
+                                    var $3431 = self.fst;
+                                    var $3432 = self.snd;
+                                    var $3433 = Kind$Binder$new$(_eras$2, $3431, $3432);
+                                    var $3430 = $3433;
                                     break;
                             };
-                            return $3406;
+                            return $3430;
                         })));
-                        var $3395 = $3405;
+                        var $3419 = $3429;
                         break;
                 };
-                var $3386 = $3395;
+                var $3410 = $3419;
                 break;
         };
-        return $3386;
+        return $3410;
     };
     const Kind$Parser$binder$homo = x0 => x1 => x2 => x3 => Kind$Parser$binder$homo$(x0, x1, x2, x3);
 
@@ -9063,17 +9107,17 @@ module.exports = (function() {
         var self = _as$2;
         switch (self._) {
             case 'List.cons':
-                var $3411 = self.head;
-                var $3412 = self.tail;
-                var $3413 = List$cons$($3411, List$concat$($3412, _bs$3));
-                var $3410 = $3413;
+                var $3435 = self.head;
+                var $3436 = self.tail;
+                var $3437 = List$cons$($3435, List$concat$($3436, _bs$3));
+                var $3434 = $3437;
                 break;
             case 'List.nil':
-                var $3414 = _bs$3;
-                var $3410 = $3414;
+                var $3438 = _bs$3;
+                var $3434 = $3438;
                 break;
         };
-        return $3410;
+        return $3434;
     };
     const List$concat = x0 => x1 => List$concat$(x0, x1);
 
@@ -9081,17 +9125,17 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'List.cons':
-                var $3416 = self.head;
-                var $3417 = self.tail;
-                var $3418 = List$concat$($3416, List$flatten$($3417));
-                var $3415 = $3418;
+                var $3440 = self.head;
+                var $3441 = self.tail;
+                var $3442 = List$concat$($3440, List$flatten$($3441));
+                var $3439 = $3442;
                 break;
             case 'List.nil':
-                var $3419 = List$nil;
-                var $3415 = $3419;
+                var $3443 = List$nil;
+                var $3439 = $3443;
                 break;
         };
-        return $3415;
+        return $3439;
     };
     const List$flatten = x0 => List$flatten$(x0);
 
@@ -9099,21 +9143,21 @@ module.exports = (function() {
         var self = Parser$many1$(Parser$first_of$(List$cons$(Kind$Parser$binder$homo(_sep$1)(Bool$true), List$cons$(Kind$Parser$binder$homo(_sep$1)(Bool$false), List$nil))), _idx$2, _code$3);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3421 = self.idx;
-                var $3422 = self.code;
-                var $3423 = self.err;
-                var $3424 = Parser$Reply$error$($3421, $3422, $3423);
-                var $3420 = $3424;
+                var $3445 = self.idx;
+                var $3446 = self.code;
+                var $3447 = self.err;
+                var $3448 = Parser$Reply$error$($3445, $3446, $3447);
+                var $3444 = $3448;
                 break;
             case 'Parser.Reply.value':
-                var $3425 = self.idx;
-                var $3426 = self.code;
-                var $3427 = self.val;
-                var $3428 = Parser$Reply$value$($3425, $3426, List$flatten$($3427));
-                var $3420 = $3428;
+                var $3449 = self.idx;
+                var $3450 = self.code;
+                var $3451 = self.val;
+                var $3452 = Parser$Reply$value$($3449, $3450, List$flatten$($3451));
+                var $3444 = $3452;
                 break;
         };
-        return $3420;
+        return $3444;
     };
     const Kind$Parser$binder = x0 => x1 => x2 => Kind$Parser$binder$(x0, x1, x2);
     const List$length = a0 => (list_length(a0));
@@ -9122,29 +9166,29 @@ module.exports = (function() {
         var self = _binds$1;
         switch (self._) {
             case 'List.cons':
-                var $3430 = self.head;
-                var $3431 = self.tail;
-                var self = $3430;
+                var $3454 = self.head;
+                var $3455 = self.tail;
+                var self = $3454;
                 switch (self._) {
                     case 'Kind.Binder.new':
-                        var $3433 = self.eras;
-                        var $3434 = self.name;
-                        var $3435 = self.term;
-                        var $3436 = Kind$Term$all$($3433, "", $3434, $3435, (_s$8 => _x$9 => {
-                            var $3437 = Kind$Parser$make_forall$($3431, _body$2);
-                            return $3437;
+                        var $3457 = self.eras;
+                        var $3458 = self.name;
+                        var $3459 = self.term;
+                        var $3460 = Kind$Term$all$($3457, "", $3458, $3459, (_s$8 => _x$9 => {
+                            var $3461 = Kind$Parser$make_forall$($3455, _body$2);
+                            return $3461;
                         }));
-                        var $3432 = $3436;
+                        var $3456 = $3460;
                         break;
                 };
-                var $3429 = $3432;
+                var $3453 = $3456;
                 break;
             case 'List.nil':
-                var $3438 = _body$2;
-                var $3429 = $3438;
+                var $3462 = _body$2;
+                var $3453 = $3462;
                 break;
         };
-        return $3429;
+        return $3453;
     };
     const Kind$Parser$make_forall = x0 => x1 => Kind$Parser$make_forall$(x0, x1);
 
@@ -9161,21 +9205,21 @@ module.exports = (function() {
                 var self = _list$3;
                 switch (self._) {
                     case 'List.cons':
-                        var $3439 = self.head;
-                        var $3440 = self.tail;
+                        var $3463 = self.head;
+                        var $3464 = self.tail;
                         var self = _index$2;
                         if (self === 0n) {
-                            var $3442 = Maybe$some$($3439);
-                            var $3441 = $3442;
+                            var $3466 = Maybe$some$($3463);
+                            var $3465 = $3466;
                         } else {
-                            var $3443 = (self - 1n);
-                            var $3444 = List$at$($3443, $3440);
-                            var $3441 = $3444;
+                            var $3467 = (self - 1n);
+                            var $3468 = List$at$($3467, $3464);
+                            var $3465 = $3468;
                         };
-                        return $3441;
+                        return $3465;
                     case 'List.nil':
-                        var $3445 = Maybe$none;
-                        return $3445;
+                        var $3469 = Maybe$none;
+                        return $3469;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -9185,55 +9229,68 @@ module.exports = (function() {
     const List$at = x0 => x1 => List$at$(x0, x1);
 
     function List$at_last$(_index$2, _list$3) {
-        var $3446 = List$at$(_index$2, List$reverse$(_list$3));
-        return $3446;
+        var $3470 = List$at$(_index$2, List$reverse$(_list$3));
+        return $3470;
     };
     const List$at_last = x0 => x1 => List$at_last$(x0, x1);
 
     function Kind$Term$var$(_name$1, _indx$2) {
-        var $3447 = ({
+        var $3471 = ({
             _: 'Kind.Term.var',
             'name': _name$1,
             'indx': _indx$2
         });
-        return $3447;
+        return $3471;
     };
     const Kind$Term$var = x0 => x1 => Kind$Term$var$(x0, x1);
+
+    function Pair$snd$(_pair$3) {
+        var self = _pair$3;
+        switch (self._) {
+            case 'Pair.new':
+                var $3473 = self.snd;
+                var $3474 = $3473;
+                var $3472 = $3474;
+                break;
+        };
+        return $3472;
+    };
+    const Pair$snd = x0 => Pair$snd$(x0);
 
     function Kind$Context$get_name_skips$(_name$1) {
         var self = _name$1;
         if (self.length === 0) {
-            var $3449 = Pair$new$("", 0n);
-            var $3448 = $3449;
+            var $3476 = Pair$new$("", 0n);
+            var $3475 = $3476;
         } else {
-            var $3450 = self.charCodeAt(0);
-            var $3451 = self.slice(1);
-            var _name_skips$4 = Kind$Context$get_name_skips$($3451);
+            var $3477 = self.charCodeAt(0);
+            var $3478 = self.slice(1);
+            var _name_skips$4 = Kind$Context$get_name_skips$($3478);
             var self = _name_skips$4;
             switch (self._) {
                 case 'Pair.new':
-                    var $3453 = self.fst;
-                    var $3454 = self.snd;
-                    var self = ($3450 === 94);
+                    var $3480 = self.fst;
+                    var $3481 = self.snd;
+                    var self = ($3477 === 94);
                     if (self) {
-                        var $3456 = Pair$new$($3453, Nat$succ$($3454));
-                        var $3455 = $3456;
+                        var $3483 = Pair$new$($3480, Nat$succ$($3481));
+                        var $3482 = $3483;
                     } else {
-                        var $3457 = Pair$new$(String$cons$($3450, $3453), $3454);
-                        var $3455 = $3457;
+                        var $3484 = Pair$new$(String$cons$($3477, $3480), $3481);
+                        var $3482 = $3484;
                     };
-                    var $3452 = $3455;
+                    var $3479 = $3482;
                     break;
             };
-            var $3448 = $3452;
+            var $3475 = $3479;
         };
-        return $3448;
+        return $3475;
     };
     const Kind$Context$get_name_skips = x0 => Kind$Context$get_name_skips$(x0);
 
     function Kind$Name$eql$(_a$1, _b$2) {
-        var $3458 = (_a$1 === _b$2);
-        return $3458;
+        var $3485 = (_a$1 === _b$2);
+        return $3485;
     };
     const Kind$Name$eql = x0 => x1 => Kind$Name$eql$(x0, x1);
 
@@ -9250,36 +9307,36 @@ module.exports = (function() {
                 var self = _ctx$3;
                 switch (self._) {
                     case 'List.cons':
-                        var $3459 = self.head;
-                        var $3460 = self.tail;
-                        var self = $3459;
+                        var $3486 = self.head;
+                        var $3487 = self.tail;
+                        var self = $3486;
                         switch (self._) {
                             case 'Pair.new':
-                                var $3462 = self.fst;
-                                var $3463 = self.snd;
-                                var self = Kind$Name$eql$(_name$1, $3462);
+                                var $3489 = self.fst;
+                                var $3490 = self.snd;
+                                var self = Kind$Name$eql$(_name$1, $3489);
                                 if (self) {
                                     var self = _skip$2;
                                     if (self === 0n) {
-                                        var $3466 = Maybe$some$($3463);
-                                        var $3465 = $3466;
+                                        var $3493 = Maybe$some$($3490);
+                                        var $3492 = $3493;
                                     } else {
-                                        var $3467 = (self - 1n);
-                                        var $3468 = Kind$Context$find$go$(_name$1, $3467, $3460);
-                                        var $3465 = $3468;
+                                        var $3494 = (self - 1n);
+                                        var $3495 = Kind$Context$find$go$(_name$1, $3494, $3487);
+                                        var $3492 = $3495;
                                     };
-                                    var $3464 = $3465;
+                                    var $3491 = $3492;
                                 } else {
-                                    var $3469 = Kind$Context$find$go$(_name$1, _skip$2, $3460);
-                                    var $3464 = $3469;
+                                    var $3496 = Kind$Context$find$go$(_name$1, _skip$2, $3487);
+                                    var $3491 = $3496;
                                 };
-                                var $3461 = $3464;
+                                var $3488 = $3491;
                                 break;
                         };
-                        return $3461;
+                        return $3488;
                     case 'List.nil':
-                        var $3470 = Maybe$none;
-                        return $3470;
+                        var $3497 = Maybe$none;
+                        return $3497;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -9292,31 +9349,31 @@ module.exports = (function() {
         var self = Kind$Context$get_name_skips$(_name$1);
         switch (self._) {
             case 'Pair.new':
-                var $3472 = self.fst;
-                var $3473 = self.snd;
-                var $3474 = Kind$Context$find$go$($3472, $3473, _ctx$2);
-                var $3471 = $3474;
+                var $3499 = self.fst;
+                var $3500 = self.snd;
+                var $3501 = Kind$Context$find$go$($3499, $3500, _ctx$2);
+                var $3498 = $3501;
                 break;
         };
-        return $3471;
+        return $3498;
     };
     const Kind$Context$find = x0 => x1 => Kind$Context$find$(x0, x1);
 
     function Kind$Path$o$(_path$1, _x$2) {
-        var $3475 = _path$1((_x$2 + '0'));
-        return $3475;
+        var $3502 = _path$1((_x$2 + '0'));
+        return $3502;
     };
     const Kind$Path$o = x0 => x1 => Kind$Path$o$(x0, x1);
 
     function Kind$Path$i$(_path$1, _x$2) {
-        var $3476 = _path$1((_x$2 + '1'));
-        return $3476;
+        var $3503 = _path$1((_x$2 + '1'));
+        return $3503;
     };
     const Kind$Path$i = x0 => x1 => Kind$Path$i$(x0, x1);
 
     function Kind$Path$to_bits$(_path$1) {
-        var $3477 = _path$1(Bits$e);
-        return $3477;
+        var $3504 = _path$1(Bits$e);
+        return $3504;
     };
     const Kind$Path$to_bits = x0 => Kind$Path$to_bits$(x0);
 
@@ -9324,148 +9381,148 @@ module.exports = (function() {
         var self = _term$3;
         switch (self._) {
             case 'Kind.Term.var':
-                var $3479 = self.name;
-                var $3480 = self.indx;
-                var self = List$at_last$($3480, _vars$1);
+                var $3506 = self.name;
+                var $3507 = self.indx;
+                var self = List$at_last$($3507, _vars$1);
                 switch (self._) {
                     case 'Maybe.some':
-                        var $3482 = self.value;
-                        var $3483 = Pair$snd$($3482);
-                        var $3481 = $3483;
+                        var $3509 = self.value;
+                        var $3510 = Pair$snd$($3509);
+                        var $3508 = $3510;
                         break;
                     case 'Maybe.none':
-                        var $3484 = Kind$Term$var$($3479, $3480);
-                        var $3481 = $3484;
+                        var $3511 = Kind$Term$var$($3506, $3507);
+                        var $3508 = $3511;
                         break;
                 };
-                var $3478 = $3481;
+                var $3505 = $3508;
                 break;
             case 'Kind.Term.ref':
-                var $3485 = self.name;
-                var self = Kind$Context$find$($3485, _vars$1);
+                var $3512 = self.name;
+                var self = Kind$Context$find$($3512, _vars$1);
                 switch (self._) {
                     case 'Maybe.some':
-                        var $3487 = self.value;
-                        var $3488 = $3487;
-                        var $3486 = $3488;
+                        var $3514 = self.value;
+                        var $3515 = $3514;
+                        var $3513 = $3515;
                         break;
                     case 'Maybe.none':
-                        var $3489 = Kind$Term$ref$($3485);
-                        var $3486 = $3489;
+                        var $3516 = Kind$Term$ref$($3512);
+                        var $3513 = $3516;
                         break;
                 };
-                var $3478 = $3486;
+                var $3505 = $3513;
                 break;
             case 'Kind.Term.all':
-                var $3490 = self.eras;
-                var $3491 = self.self;
-                var $3492 = self.name;
-                var $3493 = self.xtyp;
-                var $3494 = self.body;
+                var $3517 = self.eras;
+                var $3518 = self.self;
+                var $3519 = self.name;
+                var $3520 = self.xtyp;
+                var $3521 = self.body;
                 var _vlen$9 = (list_length(_vars$1));
-                var $3495 = Kind$Term$all$($3490, $3491, $3492, Kind$Term$bind$(_vars$1, Kind$Path$o(_path$2), $3493), (_s$10 => _x$11 => {
-                    var $3496 = Kind$Term$bind$(List$cons$(Pair$new$($3492, _x$11), List$cons$(Pair$new$($3491, _s$10), _vars$1)), Kind$Path$i(_path$2), $3494(Kind$Term$var$($3491, _vlen$9))(Kind$Term$var$($3492, Nat$succ$(_vlen$9))));
-                    return $3496;
+                var $3522 = Kind$Term$all$($3517, $3518, $3519, Kind$Term$bind$(_vars$1, Kind$Path$o(_path$2), $3520), (_s$10 => _x$11 => {
+                    var $3523 = Kind$Term$bind$(List$cons$(Pair$new$($3519, _x$11), List$cons$(Pair$new$($3518, _s$10), _vars$1)), Kind$Path$i(_path$2), $3521(Kind$Term$var$($3518, _vlen$9))(Kind$Term$var$($3519, Nat$succ$(_vlen$9))));
+                    return $3523;
                 }));
-                var $3478 = $3495;
+                var $3505 = $3522;
                 break;
             case 'Kind.Term.lam':
-                var $3497 = self.name;
-                var $3498 = self.body;
+                var $3524 = self.name;
+                var $3525 = self.body;
                 var _vlen$6 = (list_length(_vars$1));
-                var $3499 = Kind$Term$lam$($3497, (_x$7 => {
-                    var $3500 = Kind$Term$bind$(List$cons$(Pair$new$($3497, _x$7), _vars$1), Kind$Path$o(_path$2), $3498(Kind$Term$var$($3497, _vlen$6)));
-                    return $3500;
+                var $3526 = Kind$Term$lam$($3524, (_x$7 => {
+                    var $3527 = Kind$Term$bind$(List$cons$(Pair$new$($3524, _x$7), _vars$1), Kind$Path$o(_path$2), $3525(Kind$Term$var$($3524, _vlen$6)));
+                    return $3527;
                 }));
-                var $3478 = $3499;
+                var $3505 = $3526;
                 break;
             case 'Kind.Term.app':
-                var $3501 = self.func;
-                var $3502 = self.argm;
-                var $3503 = Kind$Term$app$(Kind$Term$bind$(_vars$1, Kind$Path$o(_path$2), $3501), Kind$Term$bind$(_vars$1, Kind$Path$i(_path$2), $3502));
-                var $3478 = $3503;
+                var $3528 = self.func;
+                var $3529 = self.argm;
+                var $3530 = Kind$Term$app$(Kind$Term$bind$(_vars$1, Kind$Path$o(_path$2), $3528), Kind$Term$bind$(_vars$1, Kind$Path$i(_path$2), $3529));
+                var $3505 = $3530;
                 break;
             case 'Kind.Term.let':
-                var $3504 = self.name;
-                var $3505 = self.expr;
-                var $3506 = self.body;
+                var $3531 = self.name;
+                var $3532 = self.expr;
+                var $3533 = self.body;
                 var _vlen$7 = (list_length(_vars$1));
-                var $3507 = Kind$Term$let$($3504, Kind$Term$bind$(_vars$1, Kind$Path$o(_path$2), $3505), (_x$8 => {
-                    var $3508 = Kind$Term$bind$(List$cons$(Pair$new$($3504, _x$8), _vars$1), Kind$Path$i(_path$2), $3506(Kind$Term$var$($3504, _vlen$7)));
-                    return $3508;
+                var $3534 = Kind$Term$let$($3531, Kind$Term$bind$(_vars$1, Kind$Path$o(_path$2), $3532), (_x$8 => {
+                    var $3535 = Kind$Term$bind$(List$cons$(Pair$new$($3531, _x$8), _vars$1), Kind$Path$i(_path$2), $3533(Kind$Term$var$($3531, _vlen$7)));
+                    return $3535;
                 }));
-                var $3478 = $3507;
+                var $3505 = $3534;
                 break;
             case 'Kind.Term.def':
-                var $3509 = self.name;
-                var $3510 = self.expr;
-                var $3511 = self.body;
+                var $3536 = self.name;
+                var $3537 = self.expr;
+                var $3538 = self.body;
                 var _vlen$7 = (list_length(_vars$1));
-                var $3512 = Kind$Term$def$($3509, Kind$Term$bind$(_vars$1, Kind$Path$o(_path$2), $3510), (_x$8 => {
-                    var $3513 = Kind$Term$bind$(List$cons$(Pair$new$($3509, _x$8), _vars$1), Kind$Path$i(_path$2), $3511(Kind$Term$var$($3509, _vlen$7)));
-                    return $3513;
+                var $3539 = Kind$Term$def$($3536, Kind$Term$bind$(_vars$1, Kind$Path$o(_path$2), $3537), (_x$8 => {
+                    var $3540 = Kind$Term$bind$(List$cons$(Pair$new$($3536, _x$8), _vars$1), Kind$Path$i(_path$2), $3538(Kind$Term$var$($3536, _vlen$7)));
+                    return $3540;
                 }));
-                var $3478 = $3512;
+                var $3505 = $3539;
                 break;
             case 'Kind.Term.ann':
-                var $3514 = self.done;
-                var $3515 = self.term;
-                var $3516 = self.type;
-                var $3517 = Kind$Term$ann$($3514, Kind$Term$bind$(_vars$1, Kind$Path$o(_path$2), $3515), Kind$Term$bind$(_vars$1, Kind$Path$i(_path$2), $3516));
-                var $3478 = $3517;
+                var $3541 = self.done;
+                var $3542 = self.term;
+                var $3543 = self.type;
+                var $3544 = Kind$Term$ann$($3541, Kind$Term$bind$(_vars$1, Kind$Path$o(_path$2), $3542), Kind$Term$bind$(_vars$1, Kind$Path$i(_path$2), $3543));
+                var $3505 = $3544;
                 break;
             case 'Kind.Term.gol':
-                var $3518 = self.name;
-                var $3519 = self.dref;
-                var $3520 = self.verb;
-                var $3521 = Kind$Term$gol$($3518, $3519, $3520);
-                var $3478 = $3521;
+                var $3545 = self.name;
+                var $3546 = self.dref;
+                var $3547 = self.verb;
+                var $3548 = Kind$Term$gol$($3545, $3546, $3547);
+                var $3505 = $3548;
                 break;
             case 'Kind.Term.nat':
-                var $3522 = self.natx;
-                var $3523 = Kind$Term$nat$($3522);
-                var $3478 = $3523;
+                var $3549 = self.natx;
+                var $3550 = Kind$Term$nat$($3549);
+                var $3505 = $3550;
                 break;
             case 'Kind.Term.chr':
-                var $3524 = self.chrx;
-                var $3525 = Kind$Term$chr$($3524);
-                var $3478 = $3525;
+                var $3551 = self.chrx;
+                var $3552 = Kind$Term$chr$($3551);
+                var $3505 = $3552;
                 break;
             case 'Kind.Term.str':
-                var $3526 = self.strx;
-                var $3527 = Kind$Term$str$($3526);
-                var $3478 = $3527;
+                var $3553 = self.strx;
+                var $3554 = Kind$Term$str$($3553);
+                var $3505 = $3554;
                 break;
             case 'Kind.Term.cse':
-                var $3528 = self.expr;
-                var $3529 = self.name;
-                var $3530 = self.with;
-                var $3531 = self.cses;
-                var $3532 = self.moti;
-                var _expr$10 = Kind$Term$bind$(_vars$1, Kind$Path$o(_path$2), $3528);
-                var _name$11 = $3529;
-                var _wyth$12 = $3530;
-                var _cses$13 = $3531;
-                var _moti$14 = $3532;
-                var $3533 = Kind$Term$cse$(Kind$Path$to_bits$(_path$2), _expr$10, _name$11, _wyth$12, _cses$13, _moti$14);
-                var $3478 = $3533;
+                var $3555 = self.expr;
+                var $3556 = self.name;
+                var $3557 = self.with;
+                var $3558 = self.cses;
+                var $3559 = self.moti;
+                var _expr$10 = Kind$Term$bind$(_vars$1, Kind$Path$o(_path$2), $3555);
+                var _name$11 = $3556;
+                var _wyth$12 = $3557;
+                var _cses$13 = $3558;
+                var _moti$14 = $3559;
+                var $3560 = Kind$Term$cse$(Kind$Path$to_bits$(_path$2), _expr$10, _name$11, _wyth$12, _cses$13, _moti$14);
+                var $3505 = $3560;
                 break;
             case 'Kind.Term.ori':
-                var $3534 = self.orig;
-                var $3535 = self.expr;
-                var $3536 = Kind$Term$ori$($3534, Kind$Term$bind$(_vars$1, _path$2, $3535));
-                var $3478 = $3536;
+                var $3561 = self.orig;
+                var $3562 = self.expr;
+                var $3563 = Kind$Term$ori$($3561, Kind$Term$bind$(_vars$1, _path$2, $3562));
+                var $3505 = $3563;
                 break;
             case 'Kind.Term.typ':
-                var $3537 = Kind$Term$typ;
-                var $3478 = $3537;
+                var $3564 = Kind$Term$typ;
+                var $3505 = $3564;
                 break;
             case 'Kind.Term.hol':
-                var $3538 = Kind$Term$hol$(Kind$Path$to_bits$(_path$2));
-                var $3478 = $3538;
+                var $3565 = Kind$Term$hol$(Kind$Path$to_bits$(_path$2));
+                var $3505 = $3565;
                 break;
         };
-        return $3478;
+        return $3505;
     };
     const Kind$Term$bind = x0 => x1 => x2 => Kind$Term$bind$(x0, x1, x2);
     const Kind$Status$done = ({
@@ -9475,14 +9532,14 @@ module.exports = (function() {
     function Kind$define$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, _done$9, _defs$10) {
         var self = _done$9;
         if (self) {
-            var $3540 = Kind$Status$done;
-            var _stat$11 = $3540;
+            var $3567 = Kind$Status$done;
+            var _stat$11 = $3567;
         } else {
-            var $3541 = Kind$Status$init;
-            var _stat$11 = $3541;
+            var $3568 = Kind$Status$init;
+            var _stat$11 = $3568;
         };
-        var $3539 = Kind$set$(_name$4, Kind$Def$new$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, _stat$11), _defs$10);
-        return $3539;
+        var $3566 = Kind$set$(_name$4, Kind$Def$new$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, _stat$11), _defs$10);
+        return $3566;
     };
     const Kind$define = x0 => x1 => x2 => x3 => x4 => x5 => x6 => x7 => x8 => x9 => Kind$define$(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9);
 
@@ -9490,139 +9547,139 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$4, _code$5);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3543 = self.idx;
-                var $3544 = self.code;
-                var $3545 = self.err;
-                var $3546 = Parser$Reply$error$($3543, $3544, $3545);
-                var $3542 = $3546;
+                var $3570 = self.idx;
+                var $3571 = self.code;
+                var $3572 = self.err;
+                var $3573 = Parser$Reply$error$($3570, $3571, $3572);
+                var $3569 = $3573;
                 break;
             case 'Parser.Reply.value':
-                var $3547 = self.idx;
-                var $3548 = self.code;
-                var $3549 = self.val;
-                var self = Kind$Parser$name1$($3547, $3548);
+                var $3574 = self.idx;
+                var $3575 = self.code;
+                var $3576 = self.val;
+                var self = Kind$Parser$name1$($3574, $3575);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3551 = self.idx;
-                        var $3552 = self.code;
-                        var $3553 = self.err;
-                        var $3554 = Parser$Reply$error$($3551, $3552, $3553);
-                        var $3550 = $3554;
+                        var $3578 = self.idx;
+                        var $3579 = self.code;
+                        var $3580 = self.err;
+                        var $3581 = Parser$Reply$error$($3578, $3579, $3580);
+                        var $3577 = $3581;
                         break;
                     case 'Parser.Reply.value':
-                        var $3555 = self.idx;
-                        var $3556 = self.code;
-                        var $3557 = self.val;
-                        var self = Parser$many$(Kind$Parser$binder(":"))($3555)($3556);
+                        var $3582 = self.idx;
+                        var $3583 = self.code;
+                        var $3584 = self.val;
+                        var self = Parser$many$(Kind$Parser$binder(":"))($3582)($3583);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3559 = self.idx;
-                                var $3560 = self.code;
-                                var $3561 = self.err;
-                                var $3562 = Parser$Reply$error$($3559, $3560, $3561);
-                                var $3558 = $3562;
+                                var $3586 = self.idx;
+                                var $3587 = self.code;
+                                var $3588 = self.err;
+                                var $3589 = Parser$Reply$error$($3586, $3587, $3588);
+                                var $3585 = $3589;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3563 = self.idx;
-                                var $3564 = self.code;
-                                var $3565 = self.val;
-                                var _args$15 = List$flatten$($3565);
-                                var self = Kind$Parser$text$(":", $3563, $3564);
+                                var $3590 = self.idx;
+                                var $3591 = self.code;
+                                var $3592 = self.val;
+                                var _args$15 = List$flatten$($3592);
+                                var self = Kind$Parser$text$(":", $3590, $3591);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $3567 = self.idx;
-                                        var $3568 = self.code;
-                                        var $3569 = self.err;
-                                        var $3570 = Parser$Reply$error$($3567, $3568, $3569);
-                                        var $3566 = $3570;
+                                        var $3594 = self.idx;
+                                        var $3595 = self.code;
+                                        var $3596 = self.err;
+                                        var $3597 = Parser$Reply$error$($3594, $3595, $3596);
+                                        var $3593 = $3597;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $3571 = self.idx;
-                                        var $3572 = self.code;
-                                        var self = Kind$Parser$term$($3571, $3572);
+                                        var $3598 = self.idx;
+                                        var $3599 = self.code;
+                                        var self = Kind$Parser$term$($3598, $3599);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $3574 = self.idx;
-                                                var $3575 = self.code;
-                                                var $3576 = self.err;
-                                                var $3577 = Parser$Reply$error$($3574, $3575, $3576);
-                                                var $3573 = $3577;
+                                                var $3601 = self.idx;
+                                                var $3602 = self.code;
+                                                var $3603 = self.err;
+                                                var $3604 = Parser$Reply$error$($3601, $3602, $3603);
+                                                var $3600 = $3604;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $3578 = self.idx;
-                                                var $3579 = self.code;
-                                                var $3580 = self.val;
-                                                var self = Kind$Parser$term$($3578, $3579);
+                                                var $3605 = self.idx;
+                                                var $3606 = self.code;
+                                                var $3607 = self.val;
+                                                var self = Kind$Parser$term$($3605, $3606);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $3582 = self.idx;
-                                                        var $3583 = self.code;
-                                                        var $3584 = self.err;
-                                                        var $3585 = Parser$Reply$error$($3582, $3583, $3584);
-                                                        var $3581 = $3585;
+                                                        var $3609 = self.idx;
+                                                        var $3610 = self.code;
+                                                        var $3611 = self.err;
+                                                        var $3612 = Parser$Reply$error$($3609, $3610, $3611);
+                                                        var $3608 = $3612;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $3586 = self.idx;
-                                                        var $3587 = self.code;
-                                                        var $3588 = self.val;
-                                                        var self = Kind$Parser$stop$($3549, $3586, $3587);
+                                                        var $3613 = self.idx;
+                                                        var $3614 = self.code;
+                                                        var $3615 = self.val;
+                                                        var self = Kind$Parser$stop$($3576, $3613, $3614);
                                                         switch (self._) {
                                                             case 'Parser.Reply.error':
-                                                                var $3590 = self.idx;
-                                                                var $3591 = self.code;
-                                                                var $3592 = self.err;
-                                                                var $3593 = Parser$Reply$error$($3590, $3591, $3592);
-                                                                var $3589 = $3593;
+                                                                var $3617 = self.idx;
+                                                                var $3618 = self.code;
+                                                                var $3619 = self.err;
+                                                                var $3620 = Parser$Reply$error$($3617, $3618, $3619);
+                                                                var $3616 = $3620;
                                                                 break;
                                                             case 'Parser.Reply.value':
-                                                                var $3594 = self.idx;
-                                                                var $3595 = self.code;
-                                                                var $3596 = self.val;
+                                                                var $3621 = self.idx;
+                                                                var $3622 = self.code;
+                                                                var $3623 = self.val;
                                                                 var _arit$28 = (list_length(_args$15));
-                                                                var _type$29 = Kind$Parser$make_forall$(_args$15, $3580);
+                                                                var _type$29 = Kind$Parser$make_forall$(_args$15, $3607);
                                                                 var _term$30 = Kind$Parser$make_lambda$(List$mapped$(_args$15, (_x$30 => {
                                                                     var self = _x$30;
                                                                     switch (self._) {
                                                                         case 'Kind.Binder.new':
-                                                                            var $3599 = self.name;
-                                                                            var $3600 = $3599;
-                                                                            var $3598 = $3600;
+                                                                            var $3626 = self.name;
+                                                                            var $3627 = $3626;
+                                                                            var $3625 = $3627;
                                                                             break;
                                                                     };
-                                                                    return $3598;
-                                                                })), $3588);
+                                                                    return $3625;
+                                                                })), $3615);
                                                                 var _type$31 = Kind$Term$bind$(List$nil, (_x$31 => {
-                                                                    var $3601 = (_x$31 + '1');
-                                                                    return $3601;
+                                                                    var $3628 = (_x$31 + '1');
+                                                                    return $3628;
                                                                 }), _type$29);
                                                                 var _term$32 = Kind$Term$bind$(List$nil, (_x$32 => {
-                                                                    var $3602 = (_x$32 + '0');
-                                                                    return $3602;
+                                                                    var $3629 = (_x$32 + '0');
+                                                                    return $3629;
                                                                 }), _term$30);
-                                                                var _defs$33 = Kind$define$(_file$1, _code$2, $3596, $3557, _term$32, _type$31, Bool$false, _arit$28, Bool$false, _defs$3);
-                                                                var $3597 = Parser$Reply$value$($3594, $3595, _defs$33);
-                                                                var $3589 = $3597;
+                                                                var _defs$33 = Kind$define$(_file$1, _code$2, $3623, $3584, _term$32, _type$31, Bool$false, _arit$28, Bool$false, _defs$3);
+                                                                var $3624 = Parser$Reply$value$($3621, $3622, _defs$33);
+                                                                var $3616 = $3624;
                                                                 break;
                                                         };
-                                                        var $3581 = $3589;
+                                                        var $3608 = $3616;
                                                         break;
                                                 };
-                                                var $3573 = $3581;
+                                                var $3600 = $3608;
                                                 break;
                                         };
-                                        var $3566 = $3573;
+                                        var $3593 = $3600;
                                         break;
                                 };
-                                var $3558 = $3566;
+                                var $3585 = $3593;
                                 break;
                         };
-                        var $3550 = $3558;
+                        var $3577 = $3585;
                         break;
                 };
-                var $3542 = $3550;
+                var $3569 = $3577;
                 break;
         };
-        return $3542;
+        return $3569;
     };
     const Kind$Parser$file$def = x0 => x1 => x2 => x3 => x4 => Kind$Parser$file$def$(x0, x1, x2, x3, x4);
 
@@ -9630,27 +9687,27 @@ module.exports = (function() {
         var self = _m$3;
         switch (self._) {
             case 'Maybe.some':
-                var $3604 = self.value;
-                var $3605 = $3604;
-                var $3603 = $3605;
+                var $3631 = self.value;
+                var $3632 = $3631;
+                var $3630 = $3632;
                 break;
             case 'Maybe.none':
-                var $3606 = _a$2;
-                var $3603 = $3606;
+                var $3633 = _a$2;
+                var $3630 = $3633;
                 break;
         };
-        return $3603;
+        return $3630;
     };
     const Maybe$default = x0 => x1 => Maybe$default$(x0, x1);
 
     function Kind$Constructor$new$(_name$1, _args$2, _inds$3) {
-        var $3607 = ({
+        var $3634 = ({
             _: 'Kind.Constructor.new',
             'name': _name$1,
             'args': _args$2,
             'inds': _inds$3
         });
-        return $3607;
+        return $3634;
     };
     const Kind$Constructor$new = x0 => x1 => x2 => Kind$Constructor$new$(x0, x1, x2);
 
@@ -9658,85 +9715,85 @@ module.exports = (function() {
         var self = Kind$Parser$name1$(_idx$2, _code$3);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3609 = self.idx;
-                var $3610 = self.code;
-                var $3611 = self.err;
-                var $3612 = Parser$Reply$error$($3609, $3610, $3611);
-                var $3608 = $3612;
+                var $3636 = self.idx;
+                var $3637 = self.code;
+                var $3638 = self.err;
+                var $3639 = Parser$Reply$error$($3636, $3637, $3638);
+                var $3635 = $3639;
                 break;
             case 'Parser.Reply.value':
-                var $3613 = self.idx;
-                var $3614 = self.code;
-                var $3615 = self.val;
-                var self = Parser$maybe$(Kind$Parser$binder(":"), $3613, $3614);
+                var $3640 = self.idx;
+                var $3641 = self.code;
+                var $3642 = self.val;
+                var self = Parser$maybe$(Kind$Parser$binder(":"), $3640, $3641);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3617 = self.idx;
-                        var $3618 = self.code;
-                        var $3619 = self.err;
-                        var $3620 = Parser$Reply$error$($3617, $3618, $3619);
-                        var $3616 = $3620;
+                        var $3644 = self.idx;
+                        var $3645 = self.code;
+                        var $3646 = self.err;
+                        var $3647 = Parser$Reply$error$($3644, $3645, $3646);
+                        var $3643 = $3647;
                         break;
                     case 'Parser.Reply.value':
-                        var $3621 = self.idx;
-                        var $3622 = self.code;
-                        var $3623 = self.val;
+                        var $3648 = self.idx;
+                        var $3649 = self.code;
+                        var $3650 = self.val;
                         var self = Parser$maybe$((_idx$10 => _code$11 => {
                             var self = Kind$Parser$text$("~", _idx$10, _code$11);
                             switch (self._) {
                                 case 'Parser.Reply.error':
-                                    var $3626 = self.idx;
-                                    var $3627 = self.code;
-                                    var $3628 = self.err;
-                                    var $3629 = Parser$Reply$error$($3626, $3627, $3628);
-                                    var $3625 = $3629;
+                                    var $3653 = self.idx;
+                                    var $3654 = self.code;
+                                    var $3655 = self.err;
+                                    var $3656 = Parser$Reply$error$($3653, $3654, $3655);
+                                    var $3652 = $3656;
                                     break;
                                 case 'Parser.Reply.value':
-                                    var $3630 = self.idx;
-                                    var $3631 = self.code;
-                                    var $3632 = Kind$Parser$binder$("=", $3630, $3631);
-                                    var $3625 = $3632;
+                                    var $3657 = self.idx;
+                                    var $3658 = self.code;
+                                    var $3659 = Kind$Parser$binder$("=", $3657, $3658);
+                                    var $3652 = $3659;
                                     break;
                             };
-                            return $3625;
-                        }), $3621, $3622);
+                            return $3652;
+                        }), $3648, $3649);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3633 = self.idx;
-                                var $3634 = self.code;
-                                var $3635 = self.err;
-                                var $3636 = Parser$Reply$error$($3633, $3634, $3635);
-                                var $3624 = $3636;
+                                var $3660 = self.idx;
+                                var $3661 = self.code;
+                                var $3662 = self.err;
+                                var $3663 = Parser$Reply$error$($3660, $3661, $3662);
+                                var $3651 = $3663;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3637 = self.idx;
-                                var $3638 = self.code;
-                                var $3639 = self.val;
-                                var _args$13 = Maybe$default$(List$nil, $3623);
-                                var _inds$14 = Maybe$default$(List$nil, $3639);
-                                var $3640 = Parser$Reply$value$($3637, $3638, Kind$Constructor$new$($3615, _args$13, _inds$14));
-                                var $3624 = $3640;
+                                var $3664 = self.idx;
+                                var $3665 = self.code;
+                                var $3666 = self.val;
+                                var _args$13 = Maybe$default$(List$nil, $3650);
+                                var _inds$14 = Maybe$default$(List$nil, $3666);
+                                var $3667 = Parser$Reply$value$($3664, $3665, Kind$Constructor$new$($3642, _args$13, _inds$14));
+                                var $3651 = $3667;
                                 break;
                         };
-                        var $3616 = $3624;
+                        var $3643 = $3651;
                         break;
                 };
-                var $3608 = $3616;
+                var $3635 = $3643;
                 break;
         };
-        return $3608;
+        return $3635;
     };
     const Kind$Parser$constructor = x0 => x1 => x2 => Kind$Parser$constructor$(x0, x1, x2);
 
     function Kind$Datatype$new$(_name$1, _pars$2, _inds$3, _ctrs$4) {
-        var $3641 = ({
+        var $3668 = ({
             _: 'Kind.Datatype.new',
             'name': _name$1,
             'pars': _pars$2,
             'inds': _inds$3,
             'ctrs': _ctrs$4
         });
-        return $3641;
+        return $3668;
     };
     const Kind$Datatype$new = x0 => x1 => x2 => x3 => Kind$Datatype$new$(x0, x1, x2, x3);
 
@@ -9744,119 +9801,119 @@ module.exports = (function() {
         var self = Kind$Parser$text$("type ", _idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3643 = self.idx;
-                var $3644 = self.code;
-                var $3645 = self.err;
-                var $3646 = Parser$Reply$error$($3643, $3644, $3645);
-                var $3642 = $3646;
+                var $3670 = self.idx;
+                var $3671 = self.code;
+                var $3672 = self.err;
+                var $3673 = Parser$Reply$error$($3670, $3671, $3672);
+                var $3669 = $3673;
                 break;
             case 'Parser.Reply.value':
-                var $3647 = self.idx;
-                var $3648 = self.code;
-                var self = Kind$Parser$name1$($3647, $3648);
+                var $3674 = self.idx;
+                var $3675 = self.code;
+                var self = Kind$Parser$name1$($3674, $3675);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3650 = self.idx;
-                        var $3651 = self.code;
-                        var $3652 = self.err;
-                        var $3653 = Parser$Reply$error$($3650, $3651, $3652);
-                        var $3649 = $3653;
+                        var $3677 = self.idx;
+                        var $3678 = self.code;
+                        var $3679 = self.err;
+                        var $3680 = Parser$Reply$error$($3677, $3678, $3679);
+                        var $3676 = $3680;
                         break;
                     case 'Parser.Reply.value':
-                        var $3654 = self.idx;
-                        var $3655 = self.code;
-                        var $3656 = self.val;
-                        var self = Parser$maybe$(Kind$Parser$binder(":"), $3654, $3655);
+                        var $3681 = self.idx;
+                        var $3682 = self.code;
+                        var $3683 = self.val;
+                        var self = Parser$maybe$(Kind$Parser$binder(":"), $3681, $3682);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3658 = self.idx;
-                                var $3659 = self.code;
-                                var $3660 = self.err;
-                                var $3661 = Parser$Reply$error$($3658, $3659, $3660);
-                                var $3657 = $3661;
+                                var $3685 = self.idx;
+                                var $3686 = self.code;
+                                var $3687 = self.err;
+                                var $3688 = Parser$Reply$error$($3685, $3686, $3687);
+                                var $3684 = $3688;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3662 = self.idx;
-                                var $3663 = self.code;
-                                var $3664 = self.val;
+                                var $3689 = self.idx;
+                                var $3690 = self.code;
+                                var $3691 = self.val;
                                 var self = Parser$maybe$((_idx$12 => _code$13 => {
                                     var self = Kind$Parser$text$("~", _idx$12, _code$13);
                                     switch (self._) {
                                         case 'Parser.Reply.error':
-                                            var $3667 = self.idx;
-                                            var $3668 = self.code;
-                                            var $3669 = self.err;
-                                            var $3670 = Parser$Reply$error$($3667, $3668, $3669);
-                                            var $3666 = $3670;
+                                            var $3694 = self.idx;
+                                            var $3695 = self.code;
+                                            var $3696 = self.err;
+                                            var $3697 = Parser$Reply$error$($3694, $3695, $3696);
+                                            var $3693 = $3697;
                                             break;
                                         case 'Parser.Reply.value':
-                                            var $3671 = self.idx;
-                                            var $3672 = self.code;
-                                            var $3673 = Kind$Parser$binder$(":", $3671, $3672);
-                                            var $3666 = $3673;
+                                            var $3698 = self.idx;
+                                            var $3699 = self.code;
+                                            var $3700 = Kind$Parser$binder$(":", $3698, $3699);
+                                            var $3693 = $3700;
                                             break;
                                     };
-                                    return $3666;
-                                }), $3662, $3663);
+                                    return $3693;
+                                }), $3689, $3690);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $3674 = self.idx;
-                                        var $3675 = self.code;
-                                        var $3676 = self.err;
-                                        var $3677 = Parser$Reply$error$($3674, $3675, $3676);
-                                        var $3665 = $3677;
+                                        var $3701 = self.idx;
+                                        var $3702 = self.code;
+                                        var $3703 = self.err;
+                                        var $3704 = Parser$Reply$error$($3701, $3702, $3703);
+                                        var $3692 = $3704;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $3678 = self.idx;
-                                        var $3679 = self.code;
-                                        var $3680 = self.val;
-                                        var _pars$15 = Maybe$default$(List$nil, $3664);
-                                        var _inds$16 = Maybe$default$(List$nil, $3680);
-                                        var self = Kind$Parser$text$("{", $3678, $3679);
+                                        var $3705 = self.idx;
+                                        var $3706 = self.code;
+                                        var $3707 = self.val;
+                                        var _pars$15 = Maybe$default$(List$nil, $3691);
+                                        var _inds$16 = Maybe$default$(List$nil, $3707);
+                                        var self = Kind$Parser$text$("{", $3705, $3706);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $3682 = self.idx;
-                                                var $3683 = self.code;
-                                                var $3684 = self.err;
-                                                var $3685 = Parser$Reply$error$($3682, $3683, $3684);
-                                                var $3681 = $3685;
+                                                var $3709 = self.idx;
+                                                var $3710 = self.code;
+                                                var $3711 = self.err;
+                                                var $3712 = Parser$Reply$error$($3709, $3710, $3711);
+                                                var $3708 = $3712;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $3686 = self.idx;
-                                                var $3687 = self.code;
-                                                var self = Parser$until$(Kind$Parser$text("}"), Kind$Parser$item(Kind$Parser$constructor($3656)))($3686)($3687);
+                                                var $3713 = self.idx;
+                                                var $3714 = self.code;
+                                                var self = Parser$until$(Kind$Parser$text("}"), Kind$Parser$item(Kind$Parser$constructor($3683)))($3713)($3714);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $3689 = self.idx;
-                                                        var $3690 = self.code;
-                                                        var $3691 = self.err;
-                                                        var $3692 = Parser$Reply$error$($3689, $3690, $3691);
-                                                        var $3688 = $3692;
+                                                        var $3716 = self.idx;
+                                                        var $3717 = self.code;
+                                                        var $3718 = self.err;
+                                                        var $3719 = Parser$Reply$error$($3716, $3717, $3718);
+                                                        var $3715 = $3719;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $3693 = self.idx;
-                                                        var $3694 = self.code;
-                                                        var $3695 = self.val;
-                                                        var $3696 = Parser$Reply$value$($3693, $3694, Kind$Datatype$new$($3656, _pars$15, _inds$16, $3695));
-                                                        var $3688 = $3696;
+                                                        var $3720 = self.idx;
+                                                        var $3721 = self.code;
+                                                        var $3722 = self.val;
+                                                        var $3723 = Parser$Reply$value$($3720, $3721, Kind$Datatype$new$($3683, _pars$15, _inds$16, $3722));
+                                                        var $3715 = $3723;
                                                         break;
                                                 };
-                                                var $3681 = $3688;
+                                                var $3708 = $3715;
                                                 break;
                                         };
-                                        var $3665 = $3681;
+                                        var $3692 = $3708;
                                         break;
                                 };
-                                var $3657 = $3665;
+                                var $3684 = $3692;
                                 break;
                         };
-                        var $3649 = $3657;
+                        var $3676 = $3684;
                         break;
                 };
-                var $3642 = $3649;
+                var $3669 = $3676;
                 break;
         };
-        return $3642;
+        return $3669;
     };
     const Kind$Parser$datatype = x0 => x1 => Kind$Parser$datatype$(x0, x1);
 
@@ -9864,83 +9921,83 @@ module.exports = (function() {
         var self = _inds$3;
         switch (self._) {
             case 'List.cons':
-                var $3698 = self.head;
-                var $3699 = self.tail;
-                var self = $3698;
+                var $3725 = self.head;
+                var $3726 = self.tail;
+                var self = $3725;
                 switch (self._) {
                     case 'Kind.Binder.new':
-                        var $3701 = self.eras;
-                        var $3702 = self.name;
-                        var $3703 = self.term;
-                        var $3704 = Kind$Term$all$($3701, "", $3702, $3703, (_s$9 => _x$10 => {
-                            var $3705 = Kind$Datatype$build_term$motive$go$(_type$1, _name$2, $3699);
-                            return $3705;
+                        var $3728 = self.eras;
+                        var $3729 = self.name;
+                        var $3730 = self.term;
+                        var $3731 = Kind$Term$all$($3728, "", $3729, $3730, (_s$9 => _x$10 => {
+                            var $3732 = Kind$Datatype$build_term$motive$go$(_type$1, _name$2, $3726);
+                            return $3732;
                         }));
-                        var $3700 = $3704;
+                        var $3727 = $3731;
                         break;
                 };
-                var $3697 = $3700;
+                var $3724 = $3727;
                 break;
             case 'List.nil':
                 var self = _type$1;
                 switch (self._) {
                     case 'Kind.Datatype.new':
-                        var $3707 = self.pars;
-                        var $3708 = self.inds;
+                        var $3734 = self.pars;
+                        var $3735 = self.inds;
                         var _slf$8 = Kind$Term$ref$(_name$2);
                         var _slf$9 = (() => {
-                            var $3711 = _slf$8;
-                            var $3712 = $3707;
-                            let _slf$10 = $3711;
+                            var $3738 = _slf$8;
+                            var $3739 = $3734;
+                            let _slf$10 = $3738;
                             let _var$9;
-                            while ($3712._ === 'List.cons') {
-                                _var$9 = $3712.head;
-                                var $3711 = Kind$Term$app$(_slf$10, Kind$Term$ref$((() => {
+                            while ($3739._ === 'List.cons') {
+                                _var$9 = $3739.head;
+                                var $3738 = Kind$Term$app$(_slf$10, Kind$Term$ref$((() => {
                                     var self = _var$9;
                                     switch (self._) {
                                         case 'Kind.Binder.new':
-                                            var $3713 = self.name;
-                                            var $3714 = $3713;
-                                            return $3714;
+                                            var $3740 = self.name;
+                                            var $3741 = $3740;
+                                            return $3741;
                                     };
                                 })()));
-                                _slf$10 = $3711;
-                                $3712 = $3712.tail;
+                                _slf$10 = $3738;
+                                $3739 = $3739.tail;
                             }
                             return _slf$10;
                         })();
                         var _slf$10 = (() => {
-                            var $3716 = _slf$9;
-                            var $3717 = $3708;
-                            let _slf$11 = $3716;
+                            var $3743 = _slf$9;
+                            var $3744 = $3735;
+                            let _slf$11 = $3743;
                             let _var$10;
-                            while ($3717._ === 'List.cons') {
-                                _var$10 = $3717.head;
-                                var $3716 = Kind$Term$app$(_slf$11, Kind$Term$ref$((() => {
+                            while ($3744._ === 'List.cons') {
+                                _var$10 = $3744.head;
+                                var $3743 = Kind$Term$app$(_slf$11, Kind$Term$ref$((() => {
                                     var self = _var$10;
                                     switch (self._) {
                                         case 'Kind.Binder.new':
-                                            var $3718 = self.name;
-                                            var $3719 = $3718;
-                                            return $3719;
+                                            var $3745 = self.name;
+                                            var $3746 = $3745;
+                                            return $3746;
                                     };
                                 })()));
-                                _slf$11 = $3716;
-                                $3717 = $3717.tail;
+                                _slf$11 = $3743;
+                                $3744 = $3744.tail;
                             }
                             return _slf$11;
                         })();
-                        var $3709 = Kind$Term$all$(Bool$false, "", "", _slf$10, (_s$11 => _x$12 => {
-                            var $3720 = Kind$Term$typ;
-                            return $3720;
+                        var $3736 = Kind$Term$all$(Bool$false, "", "", _slf$10, (_s$11 => _x$12 => {
+                            var $3747 = Kind$Term$typ;
+                            return $3747;
                         }));
-                        var $3706 = $3709;
+                        var $3733 = $3736;
                         break;
                 };
-                var $3697 = $3706;
+                var $3724 = $3733;
                 break;
         };
-        return $3697;
+        return $3724;
     };
     const Kind$Datatype$build_term$motive$go = x0 => x1 => x2 => Kind$Datatype$build_term$motive$go$(x0, x1, x2);
 
@@ -9948,13 +10005,13 @@ module.exports = (function() {
         var self = _type$1;
         switch (self._) {
             case 'Kind.Datatype.new':
-                var $3722 = self.name;
-                var $3723 = self.inds;
-                var $3724 = Kind$Datatype$build_term$motive$go$(_type$1, $3722, $3723);
-                var $3721 = $3724;
+                var $3749 = self.name;
+                var $3750 = self.inds;
+                var $3751 = Kind$Datatype$build_term$motive$go$(_type$1, $3749, $3750);
+                var $3748 = $3751;
                 break;
         };
-        return $3721;
+        return $3748;
     };
     const Kind$Datatype$build_term$motive = x0 => Kind$Datatype$build_term$motive$(x0);
 
@@ -9962,116 +10019,116 @@ module.exports = (function() {
         var self = _args$3;
         switch (self._) {
             case 'List.cons':
-                var $3726 = self.head;
-                var $3727 = self.tail;
-                var self = $3726;
+                var $3753 = self.head;
+                var $3754 = self.tail;
+                var self = $3753;
                 switch (self._) {
                     case 'Kind.Binder.new':
-                        var $3729 = self.eras;
-                        var $3730 = self.name;
-                        var $3731 = self.term;
-                        var _eras$9 = $3729;
-                        var _name$10 = $3730;
-                        var _xtyp$11 = $3731;
-                        var _body$12 = Kind$Datatype$build_term$constructor$go$(_type$1, _ctor$2, $3727);
-                        var $3732 = Kind$Term$all$(_eras$9, "", _name$10, _xtyp$11, (_s$13 => _x$14 => {
-                            var $3733 = _body$12;
-                            return $3733;
+                        var $3756 = self.eras;
+                        var $3757 = self.name;
+                        var $3758 = self.term;
+                        var _eras$9 = $3756;
+                        var _name$10 = $3757;
+                        var _xtyp$11 = $3758;
+                        var _body$12 = Kind$Datatype$build_term$constructor$go$(_type$1, _ctor$2, $3754);
+                        var $3759 = Kind$Term$all$(_eras$9, "", _name$10, _xtyp$11, (_s$13 => _x$14 => {
+                            var $3760 = _body$12;
+                            return $3760;
                         }));
-                        var $3728 = $3732;
+                        var $3755 = $3759;
                         break;
                 };
-                var $3725 = $3728;
+                var $3752 = $3755;
                 break;
             case 'List.nil':
                 var self = _type$1;
                 switch (self._) {
                     case 'Kind.Datatype.new':
-                        var $3735 = self.name;
-                        var $3736 = self.pars;
+                        var $3762 = self.name;
+                        var $3763 = self.pars;
                         var self = _ctor$2;
                         switch (self._) {
                             case 'Kind.Constructor.new':
-                                var $3738 = self.name;
-                                var $3739 = self.args;
-                                var $3740 = self.inds;
+                                var $3765 = self.name;
+                                var $3766 = self.args;
+                                var $3767 = self.inds;
                                 var _ret$11 = Kind$Term$ref$(Kind$Name$read$("P"));
                                 var _ret$12 = (() => {
-                                    var $3743 = _ret$11;
-                                    var $3744 = $3740;
-                                    let _ret$13 = $3743;
+                                    var $3770 = _ret$11;
+                                    var $3771 = $3767;
+                                    let _ret$13 = $3770;
                                     let _var$12;
-                                    while ($3744._ === 'List.cons') {
-                                        _var$12 = $3744.head;
-                                        var $3743 = Kind$Term$app$(_ret$13, (() => {
+                                    while ($3771._ === 'List.cons') {
+                                        _var$12 = $3771.head;
+                                        var $3770 = Kind$Term$app$(_ret$13, (() => {
                                             var self = _var$12;
                                             switch (self._) {
                                                 case 'Kind.Binder.new':
-                                                    var $3745 = self.term;
-                                                    var $3746 = $3745;
-                                                    return $3746;
+                                                    var $3772 = self.term;
+                                                    var $3773 = $3772;
+                                                    return $3773;
                                             };
                                         })());
-                                        _ret$13 = $3743;
-                                        $3744 = $3744.tail;
+                                        _ret$13 = $3770;
+                                        $3771 = $3771.tail;
                                     }
                                     return _ret$13;
                                 })();
-                                var _ctr$13 = String$flatten$(List$cons$($3735, List$cons$(Kind$Name$read$("."), List$cons$($3738, List$nil))));
+                                var _ctr$13 = String$flatten$(List$cons$($3762, List$cons$(Kind$Name$read$("."), List$cons$($3765, List$nil))));
                                 var _slf$14 = Kind$Term$ref$(_ctr$13);
                                 var _slf$15 = (() => {
-                                    var $3748 = _slf$14;
-                                    var $3749 = $3736;
-                                    let _slf$16 = $3748;
+                                    var $3775 = _slf$14;
+                                    var $3776 = $3763;
+                                    let _slf$16 = $3775;
                                     let _var$15;
-                                    while ($3749._ === 'List.cons') {
-                                        _var$15 = $3749.head;
-                                        var $3748 = Kind$Term$app$(_slf$16, Kind$Term$ref$((() => {
+                                    while ($3776._ === 'List.cons') {
+                                        _var$15 = $3776.head;
+                                        var $3775 = Kind$Term$app$(_slf$16, Kind$Term$ref$((() => {
                                             var self = _var$15;
                                             switch (self._) {
                                                 case 'Kind.Binder.new':
-                                                    var $3750 = self.name;
-                                                    var $3751 = $3750;
-                                                    return $3751;
+                                                    var $3777 = self.name;
+                                                    var $3778 = $3777;
+                                                    return $3778;
                                             };
                                         })()));
-                                        _slf$16 = $3748;
-                                        $3749 = $3749.tail;
+                                        _slf$16 = $3775;
+                                        $3776 = $3776.tail;
                                     }
                                     return _slf$16;
                                 })();
                                 var _slf$16 = (() => {
-                                    var $3753 = _slf$15;
-                                    var $3754 = $3739;
-                                    let _slf$17 = $3753;
+                                    var $3780 = _slf$15;
+                                    var $3781 = $3766;
+                                    let _slf$17 = $3780;
                                     let _var$16;
-                                    while ($3754._ === 'List.cons') {
-                                        _var$16 = $3754.head;
-                                        var $3753 = Kind$Term$app$(_slf$17, Kind$Term$ref$((() => {
+                                    while ($3781._ === 'List.cons') {
+                                        _var$16 = $3781.head;
+                                        var $3780 = Kind$Term$app$(_slf$17, Kind$Term$ref$((() => {
                                             var self = _var$16;
                                             switch (self._) {
                                                 case 'Kind.Binder.new':
-                                                    var $3755 = self.name;
-                                                    var $3756 = $3755;
-                                                    return $3756;
+                                                    var $3782 = self.name;
+                                                    var $3783 = $3782;
+                                                    return $3783;
                                             };
                                         })()));
-                                        _slf$17 = $3753;
-                                        $3754 = $3754.tail;
+                                        _slf$17 = $3780;
+                                        $3781 = $3781.tail;
                                     }
                                     return _slf$17;
                                 })();
-                                var $3741 = Kind$Term$app$(_ret$12, _slf$16);
-                                var $3737 = $3741;
+                                var $3768 = Kind$Term$app$(_ret$12, _slf$16);
+                                var $3764 = $3768;
                                 break;
                         };
-                        var $3734 = $3737;
+                        var $3761 = $3764;
                         break;
                 };
-                var $3725 = $3734;
+                var $3752 = $3761;
                 break;
         };
-        return $3725;
+        return $3752;
     };
     const Kind$Datatype$build_term$constructor$go = x0 => x1 => x2 => Kind$Datatype$build_term$constructor$go$(x0, x1, x2);
 
@@ -10079,12 +10136,12 @@ module.exports = (function() {
         var self = _ctor$2;
         switch (self._) {
             case 'Kind.Constructor.new':
-                var $3758 = self.args;
-                var $3759 = Kind$Datatype$build_term$constructor$go$(_type$1, _ctor$2, $3758);
-                var $3757 = $3759;
+                var $3785 = self.args;
+                var $3786 = Kind$Datatype$build_term$constructor$go$(_type$1, _ctor$2, $3785);
+                var $3784 = $3786;
                 break;
         };
-        return $3757;
+        return $3784;
     };
     const Kind$Datatype$build_term$constructor = x0 => x1 => Kind$Datatype$build_term$constructor$(x0, x1);
 
@@ -10092,56 +10149,56 @@ module.exports = (function() {
         var self = _ctrs$3;
         switch (self._) {
             case 'List.cons':
-                var $3761 = self.head;
-                var $3762 = self.tail;
-                var self = $3761;
+                var $3788 = self.head;
+                var $3789 = self.tail;
+                var self = $3788;
                 switch (self._) {
                     case 'Kind.Constructor.new':
-                        var $3764 = self.name;
-                        var $3765 = Kind$Term$all$(Bool$false, "", $3764, Kind$Datatype$build_term$constructor$(_type$1, $3761), (_s$9 => _x$10 => {
-                            var $3766 = Kind$Datatype$build_term$constructors$go$(_type$1, _name$2, $3762);
-                            return $3766;
+                        var $3791 = self.name;
+                        var $3792 = Kind$Term$all$(Bool$false, "", $3791, Kind$Datatype$build_term$constructor$(_type$1, $3788), (_s$9 => _x$10 => {
+                            var $3793 = Kind$Datatype$build_term$constructors$go$(_type$1, _name$2, $3789);
+                            return $3793;
                         }));
-                        var $3763 = $3765;
+                        var $3790 = $3792;
                         break;
                 };
-                var $3760 = $3763;
+                var $3787 = $3790;
                 break;
             case 'List.nil':
                 var self = _type$1;
                 switch (self._) {
                     case 'Kind.Datatype.new':
-                        var $3768 = self.inds;
+                        var $3795 = self.inds;
                         var _ret$8 = Kind$Term$ref$(Kind$Name$read$("P"));
                         var _ret$9 = (() => {
-                            var $3771 = _ret$8;
-                            var $3772 = $3768;
-                            let _ret$10 = $3771;
+                            var $3798 = _ret$8;
+                            var $3799 = $3795;
+                            let _ret$10 = $3798;
                             let _var$9;
-                            while ($3772._ === 'List.cons') {
-                                _var$9 = $3772.head;
-                                var $3771 = Kind$Term$app$(_ret$10, Kind$Term$ref$((() => {
+                            while ($3799._ === 'List.cons') {
+                                _var$9 = $3799.head;
+                                var $3798 = Kind$Term$app$(_ret$10, Kind$Term$ref$((() => {
                                     var self = _var$9;
                                     switch (self._) {
                                         case 'Kind.Binder.new':
-                                            var $3773 = self.name;
-                                            var $3774 = $3773;
-                                            return $3774;
+                                            var $3800 = self.name;
+                                            var $3801 = $3800;
+                                            return $3801;
                                     };
                                 })()));
-                                _ret$10 = $3771;
-                                $3772 = $3772.tail;
+                                _ret$10 = $3798;
+                                $3799 = $3799.tail;
                             }
                             return _ret$10;
                         })();
-                        var $3769 = Kind$Term$app$(_ret$9, Kind$Term$ref$((_name$2 + ".Self")));
-                        var $3767 = $3769;
+                        var $3796 = Kind$Term$app$(_ret$9, Kind$Term$ref$((_name$2 + ".Self")));
+                        var $3794 = $3796;
                         break;
                 };
-                var $3760 = $3767;
+                var $3787 = $3794;
                 break;
         };
-        return $3760;
+        return $3787;
     };
     const Kind$Datatype$build_term$constructors$go = x0 => x1 => x2 => Kind$Datatype$build_term$constructors$go$(x0, x1, x2);
 
@@ -10149,13 +10206,13 @@ module.exports = (function() {
         var self = _type$1;
         switch (self._) {
             case 'Kind.Datatype.new':
-                var $3776 = self.name;
-                var $3777 = self.ctrs;
-                var $3778 = Kind$Datatype$build_term$constructors$go$(_type$1, $3776, $3777);
-                var $3775 = $3778;
+                var $3803 = self.name;
+                var $3804 = self.ctrs;
+                var $3805 = Kind$Datatype$build_term$constructors$go$(_type$1, $3803, $3804);
+                var $3802 = $3805;
                 break;
         };
-        return $3775;
+        return $3802;
     };
     const Kind$Datatype$build_term$constructors = x0 => Kind$Datatype$build_term$constructors$(x0);
 
@@ -10163,52 +10220,52 @@ module.exports = (function() {
         var self = _pars$3;
         switch (self._) {
             case 'List.cons':
-                var $3780 = self.head;
-                var $3781 = self.tail;
-                var self = $3780;
+                var $3807 = self.head;
+                var $3808 = self.tail;
+                var self = $3807;
                 switch (self._) {
                     case 'Kind.Binder.new':
-                        var $3783 = self.name;
-                        var $3784 = Kind$Term$lam$($3783, (_x$10 => {
-                            var $3785 = Kind$Datatype$build_term$go$(_type$1, _name$2, $3781, _inds$4);
-                            return $3785;
+                        var $3810 = self.name;
+                        var $3811 = Kind$Term$lam$($3810, (_x$10 => {
+                            var $3812 = Kind$Datatype$build_term$go$(_type$1, _name$2, $3808, _inds$4);
+                            return $3812;
                         }));
-                        var $3782 = $3784;
+                        var $3809 = $3811;
                         break;
                 };
-                var $3779 = $3782;
+                var $3806 = $3809;
                 break;
             case 'List.nil':
                 var self = _inds$4;
                 switch (self._) {
                     case 'List.cons':
-                        var $3787 = self.head;
-                        var $3788 = self.tail;
-                        var self = $3787;
+                        var $3814 = self.head;
+                        var $3815 = self.tail;
+                        var self = $3814;
                         switch (self._) {
                             case 'Kind.Binder.new':
-                                var $3790 = self.name;
-                                var $3791 = Kind$Term$lam$($3790, (_x$10 => {
-                                    var $3792 = Kind$Datatype$build_term$go$(_type$1, _name$2, _pars$3, $3788);
-                                    return $3792;
+                                var $3817 = self.name;
+                                var $3818 = Kind$Term$lam$($3817, (_x$10 => {
+                                    var $3819 = Kind$Datatype$build_term$go$(_type$1, _name$2, _pars$3, $3815);
+                                    return $3819;
                                 }));
-                                var $3789 = $3791;
+                                var $3816 = $3818;
                                 break;
                         };
-                        var $3786 = $3789;
+                        var $3813 = $3816;
                         break;
                     case 'List.nil':
-                        var $3793 = Kind$Term$all$(Bool$true, (_name$2 + ".Self"), Kind$Name$read$("P"), Kind$Datatype$build_term$motive$(_type$1), (_s$5 => _x$6 => {
-                            var $3794 = Kind$Datatype$build_term$constructors$(_type$1);
-                            return $3794;
+                        var $3820 = Kind$Term$all$(Bool$true, (_name$2 + ".Self"), Kind$Name$read$("P"), Kind$Datatype$build_term$motive$(_type$1), (_s$5 => _x$6 => {
+                            var $3821 = Kind$Datatype$build_term$constructors$(_type$1);
+                            return $3821;
                         }));
-                        var $3786 = $3793;
+                        var $3813 = $3820;
                         break;
                 };
-                var $3779 = $3786;
+                var $3806 = $3813;
                 break;
         };
-        return $3779;
+        return $3806;
     };
     const Kind$Datatype$build_term$go = x0 => x1 => x2 => x3 => Kind$Datatype$build_term$go$(x0, x1, x2, x3);
 
@@ -10216,14 +10273,14 @@ module.exports = (function() {
         var self = _type$1;
         switch (self._) {
             case 'Kind.Datatype.new':
-                var $3796 = self.name;
-                var $3797 = self.pars;
-                var $3798 = self.inds;
-                var $3799 = Kind$Datatype$build_term$go$(_type$1, $3796, $3797, $3798);
-                var $3795 = $3799;
+                var $3823 = self.name;
+                var $3824 = self.pars;
+                var $3825 = self.inds;
+                var $3826 = Kind$Datatype$build_term$go$(_type$1, $3823, $3824, $3825);
+                var $3822 = $3826;
                 break;
         };
-        return $3795;
+        return $3822;
     };
     const Kind$Datatype$build_term = x0 => Kind$Datatype$build_term$(x0);
 
@@ -10231,51 +10288,51 @@ module.exports = (function() {
         var self = _pars$3;
         switch (self._) {
             case 'List.cons':
-                var $3801 = self.head;
-                var $3802 = self.tail;
-                var self = $3801;
+                var $3828 = self.head;
+                var $3829 = self.tail;
+                var self = $3828;
                 switch (self._) {
                     case 'Kind.Binder.new':
-                        var $3804 = self.name;
-                        var $3805 = self.term;
-                        var $3806 = Kind$Term$all$(Bool$false, "", $3804, $3805, (_s$10 => _x$11 => {
-                            var $3807 = Kind$Datatype$build_type$go$(_type$1, _name$2, $3802, _inds$4);
-                            return $3807;
+                        var $3831 = self.name;
+                        var $3832 = self.term;
+                        var $3833 = Kind$Term$all$(Bool$false, "", $3831, $3832, (_s$10 => _x$11 => {
+                            var $3834 = Kind$Datatype$build_type$go$(_type$1, _name$2, $3829, _inds$4);
+                            return $3834;
                         }));
-                        var $3803 = $3806;
+                        var $3830 = $3833;
                         break;
                 };
-                var $3800 = $3803;
+                var $3827 = $3830;
                 break;
             case 'List.nil':
                 var self = _inds$4;
                 switch (self._) {
                     case 'List.cons':
-                        var $3809 = self.head;
-                        var $3810 = self.tail;
-                        var self = $3809;
+                        var $3836 = self.head;
+                        var $3837 = self.tail;
+                        var self = $3836;
                         switch (self._) {
                             case 'Kind.Binder.new':
-                                var $3812 = self.name;
-                                var $3813 = self.term;
-                                var $3814 = Kind$Term$all$(Bool$false, "", $3812, $3813, (_s$10 => _x$11 => {
-                                    var $3815 = Kind$Datatype$build_type$go$(_type$1, _name$2, _pars$3, $3810);
-                                    return $3815;
+                                var $3839 = self.name;
+                                var $3840 = self.term;
+                                var $3841 = Kind$Term$all$(Bool$false, "", $3839, $3840, (_s$10 => _x$11 => {
+                                    var $3842 = Kind$Datatype$build_type$go$(_type$1, _name$2, _pars$3, $3837);
+                                    return $3842;
                                 }));
-                                var $3811 = $3814;
+                                var $3838 = $3841;
                                 break;
                         };
-                        var $3808 = $3811;
+                        var $3835 = $3838;
                         break;
                     case 'List.nil':
-                        var $3816 = Kind$Term$typ;
-                        var $3808 = $3816;
+                        var $3843 = Kind$Term$typ;
+                        var $3835 = $3843;
                         break;
                 };
-                var $3800 = $3808;
+                var $3827 = $3835;
                 break;
         };
-        return $3800;
+        return $3827;
     };
     const Kind$Datatype$build_type$go = x0 => x1 => x2 => x3 => Kind$Datatype$build_type$go$(x0, x1, x2, x3);
 
@@ -10283,14 +10340,14 @@ module.exports = (function() {
         var self = _type$1;
         switch (self._) {
             case 'Kind.Datatype.new':
-                var $3818 = self.name;
-                var $3819 = self.pars;
-                var $3820 = self.inds;
-                var $3821 = Kind$Datatype$build_type$go$(_type$1, $3818, $3819, $3820);
-                var $3817 = $3821;
+                var $3845 = self.name;
+                var $3846 = self.pars;
+                var $3847 = self.inds;
+                var $3848 = Kind$Datatype$build_type$go$(_type$1, $3845, $3846, $3847);
+                var $3844 = $3848;
                 break;
         };
-        return $3817;
+        return $3844;
     };
     const Kind$Datatype$build_type = x0 => Kind$Datatype$build_type$(x0);
 
@@ -10298,57 +10355,57 @@ module.exports = (function() {
         var self = _ctrs$3;
         switch (self._) {
             case 'List.cons':
-                var $3823 = self.head;
-                var $3824 = self.tail;
-                var self = $3823;
+                var $3850 = self.head;
+                var $3851 = self.tail;
+                var self = $3850;
                 switch (self._) {
                     case 'Kind.Constructor.new':
-                        var $3826 = self.name;
-                        var $3827 = Kind$Term$lam$($3826, (_x$9 => {
-                            var $3828 = Kind$Constructor$build_term$opt$go$(_type$1, _ctor$2, $3824);
-                            return $3828;
+                        var $3853 = self.name;
+                        var $3854 = Kind$Term$lam$($3853, (_x$9 => {
+                            var $3855 = Kind$Constructor$build_term$opt$go$(_type$1, _ctor$2, $3851);
+                            return $3855;
                         }));
-                        var $3825 = $3827;
+                        var $3852 = $3854;
                         break;
                 };
-                var $3822 = $3825;
+                var $3849 = $3852;
                 break;
             case 'List.nil':
                 var self = _ctor$2;
                 switch (self._) {
                     case 'Kind.Constructor.new':
-                        var $3830 = self.name;
-                        var $3831 = self.args;
-                        var _ret$7 = Kind$Term$ref$($3830);
+                        var $3857 = self.name;
+                        var $3858 = self.args;
+                        var _ret$7 = Kind$Term$ref$($3857);
                         var _ret$8 = (() => {
-                            var $3834 = _ret$7;
-                            var $3835 = $3831;
-                            let _ret$9 = $3834;
+                            var $3861 = _ret$7;
+                            var $3862 = $3858;
+                            let _ret$9 = $3861;
                             let _arg$8;
-                            while ($3835._ === 'List.cons') {
-                                _arg$8 = $3835.head;
-                                var $3834 = Kind$Term$app$(_ret$9, Kind$Term$ref$((() => {
+                            while ($3862._ === 'List.cons') {
+                                _arg$8 = $3862.head;
+                                var $3861 = Kind$Term$app$(_ret$9, Kind$Term$ref$((() => {
                                     var self = _arg$8;
                                     switch (self._) {
                                         case 'Kind.Binder.new':
-                                            var $3836 = self.name;
-                                            var $3837 = $3836;
-                                            return $3837;
+                                            var $3863 = self.name;
+                                            var $3864 = $3863;
+                                            return $3864;
                                     };
                                 })()));
-                                _ret$9 = $3834;
-                                $3835 = $3835.tail;
+                                _ret$9 = $3861;
+                                $3862 = $3862.tail;
                             }
                             return _ret$9;
                         })();
-                        var $3832 = _ret$8;
-                        var $3829 = $3832;
+                        var $3859 = _ret$8;
+                        var $3856 = $3859;
                         break;
                 };
-                var $3822 = $3829;
+                var $3849 = $3856;
                 break;
         };
-        return $3822;
+        return $3849;
     };
     const Kind$Constructor$build_term$opt$go = x0 => x1 => x2 => Kind$Constructor$build_term$opt$go$(x0, x1, x2);
 
@@ -10356,12 +10413,12 @@ module.exports = (function() {
         var self = _type$1;
         switch (self._) {
             case 'Kind.Datatype.new':
-                var $3839 = self.ctrs;
-                var $3840 = Kind$Constructor$build_term$opt$go$(_type$1, _ctor$2, $3839);
-                var $3838 = $3840;
+                var $3866 = self.ctrs;
+                var $3867 = Kind$Constructor$build_term$opt$go$(_type$1, _ctor$2, $3866);
+                var $3865 = $3867;
                 break;
         };
-        return $3838;
+        return $3865;
     };
     const Kind$Constructor$build_term$opt = x0 => x1 => Kind$Constructor$build_term$opt$(x0, x1);
 
@@ -10369,52 +10426,52 @@ module.exports = (function() {
         var self = _pars$4;
         switch (self._) {
             case 'List.cons':
-                var $3842 = self.head;
-                var $3843 = self.tail;
-                var self = $3842;
+                var $3869 = self.head;
+                var $3870 = self.tail;
+                var self = $3869;
                 switch (self._) {
                     case 'Kind.Binder.new':
-                        var $3845 = self.name;
-                        var $3846 = Kind$Term$lam$($3845, (_x$11 => {
-                            var $3847 = Kind$Constructor$build_term$go$(_type$1, _ctor$2, _name$3, $3843, _args$5);
-                            return $3847;
+                        var $3872 = self.name;
+                        var $3873 = Kind$Term$lam$($3872, (_x$11 => {
+                            var $3874 = Kind$Constructor$build_term$go$(_type$1, _ctor$2, _name$3, $3870, _args$5);
+                            return $3874;
                         }));
-                        var $3844 = $3846;
+                        var $3871 = $3873;
                         break;
                 };
-                var $3841 = $3844;
+                var $3868 = $3871;
                 break;
             case 'List.nil':
                 var self = _args$5;
                 switch (self._) {
                     case 'List.cons':
-                        var $3849 = self.head;
-                        var $3850 = self.tail;
-                        var self = $3849;
+                        var $3876 = self.head;
+                        var $3877 = self.tail;
+                        var self = $3876;
                         switch (self._) {
                             case 'Kind.Binder.new':
-                                var $3852 = self.name;
-                                var $3853 = Kind$Term$lam$($3852, (_x$11 => {
-                                    var $3854 = Kind$Constructor$build_term$go$(_type$1, _ctor$2, _name$3, _pars$4, $3850);
-                                    return $3854;
+                                var $3879 = self.name;
+                                var $3880 = Kind$Term$lam$($3879, (_x$11 => {
+                                    var $3881 = Kind$Constructor$build_term$go$(_type$1, _ctor$2, _name$3, _pars$4, $3877);
+                                    return $3881;
                                 }));
-                                var $3851 = $3853;
+                                var $3878 = $3880;
                                 break;
                         };
-                        var $3848 = $3851;
+                        var $3875 = $3878;
                         break;
                     case 'List.nil':
-                        var $3855 = Kind$Term$lam$(Kind$Name$read$("P"), (_x$6 => {
-                            var $3856 = Kind$Constructor$build_term$opt$(_type$1, _ctor$2);
-                            return $3856;
+                        var $3882 = Kind$Term$lam$(Kind$Name$read$("P"), (_x$6 => {
+                            var $3883 = Kind$Constructor$build_term$opt$(_type$1, _ctor$2);
+                            return $3883;
                         }));
-                        var $3848 = $3855;
+                        var $3875 = $3882;
                         break;
                 };
-                var $3841 = $3848;
+                var $3868 = $3875;
                 break;
         };
-        return $3841;
+        return $3868;
     };
     const Kind$Constructor$build_term$go = x0 => x1 => x2 => x3 => x4 => Kind$Constructor$build_term$go$(x0, x1, x2, x3, x4);
 
@@ -10422,20 +10479,20 @@ module.exports = (function() {
         var self = _type$1;
         switch (self._) {
             case 'Kind.Datatype.new':
-                var $3858 = self.name;
-                var $3859 = self.pars;
+                var $3885 = self.name;
+                var $3886 = self.pars;
                 var self = _ctor$2;
                 switch (self._) {
                     case 'Kind.Constructor.new':
-                        var $3861 = self.args;
-                        var $3862 = Kind$Constructor$build_term$go$(_type$1, _ctor$2, $3858, $3859, $3861);
-                        var $3860 = $3862;
+                        var $3888 = self.args;
+                        var $3889 = Kind$Constructor$build_term$go$(_type$1, _ctor$2, $3885, $3886, $3888);
+                        var $3887 = $3889;
                         break;
                 };
-                var $3857 = $3860;
+                var $3884 = $3887;
                 break;
         };
-        return $3857;
+        return $3884;
     };
     const Kind$Constructor$build_term = x0 => x1 => Kind$Constructor$build_term$(x0, x1);
 
@@ -10443,110 +10500,110 @@ module.exports = (function() {
         var self = _pars$4;
         switch (self._) {
             case 'List.cons':
-                var $3864 = self.head;
-                var $3865 = self.tail;
-                var self = $3864;
+                var $3891 = self.head;
+                var $3892 = self.tail;
+                var self = $3891;
                 switch (self._) {
                     case 'Kind.Binder.new':
-                        var $3867 = self.eras;
-                        var $3868 = self.name;
-                        var $3869 = self.term;
-                        var $3870 = Kind$Term$all$($3867, "", $3868, $3869, (_s$11 => _x$12 => {
-                            var $3871 = Kind$Constructor$build_type$go$(_type$1, _ctor$2, _name$3, $3865, _args$5);
-                            return $3871;
+                        var $3894 = self.eras;
+                        var $3895 = self.name;
+                        var $3896 = self.term;
+                        var $3897 = Kind$Term$all$($3894, "", $3895, $3896, (_s$11 => _x$12 => {
+                            var $3898 = Kind$Constructor$build_type$go$(_type$1, _ctor$2, _name$3, $3892, _args$5);
+                            return $3898;
                         }));
-                        var $3866 = $3870;
+                        var $3893 = $3897;
                         break;
                 };
-                var $3863 = $3866;
+                var $3890 = $3893;
                 break;
             case 'List.nil':
                 var self = _args$5;
                 switch (self._) {
                     case 'List.cons':
-                        var $3873 = self.head;
-                        var $3874 = self.tail;
-                        var self = $3873;
+                        var $3900 = self.head;
+                        var $3901 = self.tail;
+                        var self = $3900;
                         switch (self._) {
                             case 'Kind.Binder.new':
-                                var $3876 = self.eras;
-                                var $3877 = self.name;
-                                var $3878 = self.term;
-                                var $3879 = Kind$Term$all$($3876, "", $3877, $3878, (_s$11 => _x$12 => {
-                                    var $3880 = Kind$Constructor$build_type$go$(_type$1, _ctor$2, _name$3, _pars$4, $3874);
-                                    return $3880;
+                                var $3903 = self.eras;
+                                var $3904 = self.name;
+                                var $3905 = self.term;
+                                var $3906 = Kind$Term$all$($3903, "", $3904, $3905, (_s$11 => _x$12 => {
+                                    var $3907 = Kind$Constructor$build_type$go$(_type$1, _ctor$2, _name$3, _pars$4, $3901);
+                                    return $3907;
                                 }));
-                                var $3875 = $3879;
+                                var $3902 = $3906;
                                 break;
                         };
-                        var $3872 = $3875;
+                        var $3899 = $3902;
                         break;
                     case 'List.nil':
                         var self = _type$1;
                         switch (self._) {
                             case 'Kind.Datatype.new':
-                                var $3882 = self.pars;
+                                var $3909 = self.pars;
                                 var self = _ctor$2;
                                 switch (self._) {
                                     case 'Kind.Constructor.new':
-                                        var $3884 = self.inds;
+                                        var $3911 = self.inds;
                                         var _type$13 = Kind$Term$ref$(_name$3);
                                         var _type$14 = (() => {
-                                            var $3887 = _type$13;
-                                            var $3888 = $3882;
-                                            let _type$15 = $3887;
+                                            var $3914 = _type$13;
+                                            var $3915 = $3909;
+                                            let _type$15 = $3914;
                                             let _var$14;
-                                            while ($3888._ === 'List.cons') {
-                                                _var$14 = $3888.head;
-                                                var $3887 = Kind$Term$app$(_type$15, Kind$Term$ref$((() => {
+                                            while ($3915._ === 'List.cons') {
+                                                _var$14 = $3915.head;
+                                                var $3914 = Kind$Term$app$(_type$15, Kind$Term$ref$((() => {
                                                     var self = _var$14;
                                                     switch (self._) {
                                                         case 'Kind.Binder.new':
-                                                            var $3889 = self.name;
-                                                            var $3890 = $3889;
-                                                            return $3890;
+                                                            var $3916 = self.name;
+                                                            var $3917 = $3916;
+                                                            return $3917;
                                                     };
                                                 })()));
-                                                _type$15 = $3887;
-                                                $3888 = $3888.tail;
+                                                _type$15 = $3914;
+                                                $3915 = $3915.tail;
                                             }
                                             return _type$15;
                                         })();
                                         var _type$15 = (() => {
-                                            var $3892 = _type$14;
-                                            var $3893 = $3884;
-                                            let _type$16 = $3892;
+                                            var $3919 = _type$14;
+                                            var $3920 = $3911;
+                                            let _type$16 = $3919;
                                             let _var$15;
-                                            while ($3893._ === 'List.cons') {
-                                                _var$15 = $3893.head;
-                                                var $3892 = Kind$Term$app$(_type$16, (() => {
+                                            while ($3920._ === 'List.cons') {
+                                                _var$15 = $3920.head;
+                                                var $3919 = Kind$Term$app$(_type$16, (() => {
                                                     var self = _var$15;
                                                     switch (self._) {
                                                         case 'Kind.Binder.new':
-                                                            var $3894 = self.term;
-                                                            var $3895 = $3894;
-                                                            return $3895;
+                                                            var $3921 = self.term;
+                                                            var $3922 = $3921;
+                                                            return $3922;
                                                     };
                                                 })());
-                                                _type$16 = $3892;
-                                                $3893 = $3893.tail;
+                                                _type$16 = $3919;
+                                                $3920 = $3920.tail;
                                             }
                                             return _type$16;
                                         })();
-                                        var $3885 = _type$15;
-                                        var $3883 = $3885;
+                                        var $3912 = _type$15;
+                                        var $3910 = $3912;
                                         break;
                                 };
-                                var $3881 = $3883;
+                                var $3908 = $3910;
                                 break;
                         };
-                        var $3872 = $3881;
+                        var $3899 = $3908;
                         break;
                 };
-                var $3863 = $3872;
+                var $3890 = $3899;
                 break;
         };
-        return $3863;
+        return $3890;
     };
     const Kind$Constructor$build_type$go = x0 => x1 => x2 => x3 => x4 => Kind$Constructor$build_type$go$(x0, x1, x2, x3, x4);
 
@@ -10554,20 +10611,20 @@ module.exports = (function() {
         var self = _type$1;
         switch (self._) {
             case 'Kind.Datatype.new':
-                var $3897 = self.name;
-                var $3898 = self.pars;
+                var $3924 = self.name;
+                var $3925 = self.pars;
                 var self = _ctor$2;
                 switch (self._) {
                     case 'Kind.Constructor.new':
-                        var $3900 = self.args;
-                        var $3901 = Kind$Constructor$build_type$go$(_type$1, _ctor$2, $3897, $3898, $3900);
-                        var $3899 = $3901;
+                        var $3927 = self.args;
+                        var $3928 = Kind$Constructor$build_type$go$(_type$1, _ctor$2, $3924, $3925, $3927);
+                        var $3926 = $3928;
                         break;
                 };
-                var $3896 = $3899;
+                var $3923 = $3926;
                 break;
         };
-        return $3896;
+        return $3923;
     };
     const Kind$Constructor$build_type = x0 => x1 => Kind$Constructor$build_type$(x0, x1);
 
@@ -10575,127 +10632,127 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$4, _code$5);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3903 = self.idx;
-                var $3904 = self.code;
-                var $3905 = self.err;
-                var $3906 = Parser$Reply$error$($3903, $3904, $3905);
-                var $3902 = $3906;
+                var $3930 = self.idx;
+                var $3931 = self.code;
+                var $3932 = self.err;
+                var $3933 = Parser$Reply$error$($3930, $3931, $3932);
+                var $3929 = $3933;
                 break;
             case 'Parser.Reply.value':
-                var $3907 = self.idx;
-                var $3908 = self.code;
-                var $3909 = self.val;
-                var self = Kind$Parser$datatype$($3907, $3908);
+                var $3934 = self.idx;
+                var $3935 = self.code;
+                var $3936 = self.val;
+                var self = Kind$Parser$datatype$($3934, $3935);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3911 = self.idx;
-                        var $3912 = self.code;
-                        var $3913 = self.err;
-                        var $3914 = Parser$Reply$error$($3911, $3912, $3913);
-                        var $3910 = $3914;
+                        var $3938 = self.idx;
+                        var $3939 = self.code;
+                        var $3940 = self.err;
+                        var $3941 = Parser$Reply$error$($3938, $3939, $3940);
+                        var $3937 = $3941;
                         break;
                     case 'Parser.Reply.value':
-                        var $3915 = self.idx;
-                        var $3916 = self.code;
-                        var $3917 = self.val;
-                        var self = Kind$Parser$stop$($3909, $3915, $3916);
+                        var $3942 = self.idx;
+                        var $3943 = self.code;
+                        var $3944 = self.val;
+                        var self = Kind$Parser$stop$($3936, $3942, $3943);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3919 = self.idx;
-                                var $3920 = self.code;
-                                var $3921 = self.err;
-                                var $3922 = Parser$Reply$error$($3919, $3920, $3921);
-                                var $3918 = $3922;
+                                var $3946 = self.idx;
+                                var $3947 = self.code;
+                                var $3948 = self.err;
+                                var $3949 = Parser$Reply$error$($3946, $3947, $3948);
+                                var $3945 = $3949;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3923 = self.idx;
-                                var $3924 = self.code;
-                                var $3925 = self.val;
-                                var self = $3917;
+                                var $3950 = self.idx;
+                                var $3951 = self.code;
+                                var $3952 = self.val;
+                                var self = $3944;
                                 switch (self._) {
                                     case 'Kind.Datatype.new':
-                                        var $3927 = self.name;
-                                        var $3928 = self.pars;
-                                        var $3929 = self.inds;
-                                        var $3930 = self.ctrs;
-                                        var _term$19 = Kind$Datatype$build_term$($3917);
+                                        var $3954 = self.name;
+                                        var $3955 = self.pars;
+                                        var $3956 = self.inds;
+                                        var $3957 = self.ctrs;
+                                        var _term$19 = Kind$Datatype$build_term$($3944);
                                         var _term$20 = Kind$Term$bind$(List$nil, (_x$20 => {
-                                            var $3932 = (_x$20 + '1');
-                                            return $3932;
+                                            var $3959 = (_x$20 + '1');
+                                            return $3959;
                                         }), _term$19);
-                                        var _type$21 = Kind$Datatype$build_type$($3917);
+                                        var _type$21 = Kind$Datatype$build_type$($3944);
                                         var _type$22 = Kind$Term$bind$(List$nil, (_x$22 => {
-                                            var $3933 = (_x$22 + '0');
-                                            return $3933;
+                                            var $3960 = (_x$22 + '0');
+                                            return $3960;
                                         }), _type$21);
-                                        var _arit$23 = ((list_length($3928)) + (list_length($3929)));
-                                        var _defs$24 = Kind$define$(_file$1, _code$2, $3925, $3927, _term$20, _type$22, Bool$false, _arit$23, Bool$false, _defs$3);
-                                        var _defs$25 = List$fold$($3930, _defs$24, (_ctr$25 => _defs$26 => {
-                                            var _typ_name$27 = $3927;
+                                        var _arit$23 = ((list_length($3955)) + (list_length($3956)));
+                                        var _defs$24 = Kind$define$(_file$1, _code$2, $3952, $3954, _term$20, _type$22, Bool$false, _arit$23, Bool$false, _defs$3);
+                                        var _defs$25 = List$fold$($3957, _defs$24, (_ctr$25 => _defs$26 => {
+                                            var _typ_name$27 = $3954;
                                             var _ctr_arit$28 = (_arit$23 + (list_length((() => {
                                                 var self = _ctr$25;
                                                 switch (self._) {
                                                     case 'Kind.Constructor.new':
-                                                        var $3935 = self.args;
-                                                        var $3936 = $3935;
-                                                        return $3936;
+                                                        var $3962 = self.args;
+                                                        var $3963 = $3962;
+                                                        return $3963;
                                                 };
                                             })())));
                                             var _ctr_name$29 = String$flatten$(List$cons$(_typ_name$27, List$cons$(Kind$Name$read$("."), List$cons$((() => {
                                                 var self = _ctr$25;
                                                 switch (self._) {
                                                     case 'Kind.Constructor.new':
-                                                        var $3937 = self.name;
-                                                        var $3938 = $3937;
-                                                        return $3938;
+                                                        var $3964 = self.name;
+                                                        var $3965 = $3964;
+                                                        return $3965;
                                                 };
                                             })(), List$nil))));
-                                            var _ctr_term$30 = Kind$Constructor$build_term$($3917, _ctr$25);
+                                            var _ctr_term$30 = Kind$Constructor$build_term$($3944, _ctr$25);
                                             var _ctr_term$31 = Kind$Term$bind$(List$nil, (_x$31 => {
-                                                var $3939 = (_x$31 + '1');
-                                                return $3939;
+                                                var $3966 = (_x$31 + '1');
+                                                return $3966;
                                             }), _ctr_term$30);
-                                            var _ctr_type$32 = Kind$Constructor$build_type$($3917, _ctr$25);
+                                            var _ctr_type$32 = Kind$Constructor$build_type$($3944, _ctr$25);
                                             var _ctr_type$33 = Kind$Term$bind$(List$nil, (_x$33 => {
-                                                var $3940 = (_x$33 + '0');
-                                                return $3940;
+                                                var $3967 = (_x$33 + '0');
+                                                return $3967;
                                             }), _ctr_type$32);
-                                            var $3934 = Kind$define$(_file$1, _code$2, $3925, _ctr_name$29, _ctr_term$31, _ctr_type$33, Bool$true, _ctr_arit$28, Bool$false, _defs$26);
-                                            return $3934;
+                                            var $3961 = Kind$define$(_file$1, _code$2, $3952, _ctr_name$29, _ctr_term$31, _ctr_type$33, Bool$true, _ctr_arit$28, Bool$false, _defs$26);
+                                            return $3961;
                                         }));
-                                        var $3931 = (_idx$26 => _code$27 => {
-                                            var $3941 = Parser$Reply$value$(_idx$26, _code$27, _defs$25);
-                                            return $3941;
+                                        var $3958 = (_idx$26 => _code$27 => {
+                                            var $3968 = Parser$Reply$value$(_idx$26, _code$27, _defs$25);
+                                            return $3968;
                                         });
-                                        var $3926 = $3931;
+                                        var $3953 = $3958;
                                         break;
                                 };
-                                var $3926 = $3926($3923)($3924);
-                                var $3918 = $3926;
+                                var $3953 = $3953($3950)($3951);
+                                var $3945 = $3953;
                                 break;
                         };
-                        var $3910 = $3918;
+                        var $3937 = $3945;
                         break;
                 };
-                var $3902 = $3910;
+                var $3929 = $3937;
                 break;
         };
-        return $3902;
+        return $3929;
     };
     const Kind$Parser$file$adt = x0 => x1 => x2 => x3 => x4 => Kind$Parser$file$adt$(x0, x1, x2, x3, x4);
 
     function Parser$eof$(_idx$1, _code$2) {
         var self = _code$2;
         if (self.length === 0) {
-            var $3943 = Parser$Reply$value$(_idx$1, _code$2, Unit$new);
-            var $3942 = $3943;
+            var $3970 = Parser$Reply$value$(_idx$1, _code$2, Unit$new);
+            var $3969 = $3970;
         } else {
-            var $3944 = self.charCodeAt(0);
-            var $3945 = self.slice(1);
-            var $3946 = Parser$Reply$error$(_idx$1, _code$2, "Expected end-of-file.");
-            var $3942 = $3946;
+            var $3971 = self.charCodeAt(0);
+            var $3972 = self.slice(1);
+            var $3973 = Parser$Reply$error$(_idx$1, _code$2, "Expected end-of-file.");
+            var $3969 = $3973;
         };
-        return $3942;
+        return $3969;
     };
     const Parser$eof = x0 => x1 => Parser$eof$(x0, x1);
 
@@ -10703,35 +10760,35 @@ module.exports = (function() {
         var self = Kind$Parser$spaces(_idx$4)(_code$5);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3948 = self.idx;
-                var $3949 = self.code;
-                var $3950 = self.err;
-                var $3951 = Parser$Reply$error$($3948, $3949, $3950);
-                var $3947 = $3951;
+                var $3975 = self.idx;
+                var $3976 = self.code;
+                var $3977 = self.err;
+                var $3978 = Parser$Reply$error$($3975, $3976, $3977);
+                var $3974 = $3978;
                 break;
             case 'Parser.Reply.value':
-                var $3952 = self.idx;
-                var $3953 = self.code;
-                var self = Parser$eof$($3952, $3953);
+                var $3979 = self.idx;
+                var $3980 = self.code;
+                var self = Parser$eof$($3979, $3980);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3955 = self.idx;
-                        var $3956 = self.code;
-                        var $3957 = self.err;
-                        var $3958 = Parser$Reply$error$($3955, $3956, $3957);
-                        var $3954 = $3958;
+                        var $3982 = self.idx;
+                        var $3983 = self.code;
+                        var $3984 = self.err;
+                        var $3985 = Parser$Reply$error$($3982, $3983, $3984);
+                        var $3981 = $3985;
                         break;
                     case 'Parser.Reply.value':
-                        var $3959 = self.idx;
-                        var $3960 = self.code;
-                        var $3961 = Parser$Reply$value$($3959, $3960, _defs$3);
-                        var $3954 = $3961;
+                        var $3986 = self.idx;
+                        var $3987 = self.code;
+                        var $3988 = Parser$Reply$value$($3986, $3987, _defs$3);
+                        var $3981 = $3988;
                         break;
                 };
-                var $3947 = $3954;
+                var $3974 = $3981;
                 break;
         };
-        return $3947;
+        return $3974;
     };
     const Kind$Parser$file$end = x0 => x1 => x2 => x3 => x4 => Kind$Parser$file$end$(x0, x1, x2, x3, x4);
 
@@ -10739,57 +10796,57 @@ module.exports = (function() {
         var self = Parser$is_eof$(_idx$4, _code$5);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3963 = self.idx;
-                var $3964 = self.code;
-                var $3965 = self.err;
-                var $3966 = Parser$Reply$error$($3963, $3964, $3965);
-                var $3962 = $3966;
+                var $3990 = self.idx;
+                var $3991 = self.code;
+                var $3992 = self.err;
+                var $3993 = Parser$Reply$error$($3990, $3991, $3992);
+                var $3989 = $3993;
                 break;
             case 'Parser.Reply.value':
-                var $3967 = self.idx;
-                var $3968 = self.code;
-                var $3969 = self.val;
-                var self = $3969;
+                var $3994 = self.idx;
+                var $3995 = self.code;
+                var $3996 = self.val;
+                var self = $3996;
                 if (self) {
-                    var $3971 = (_idx$9 => _code$10 => {
-                        var $3972 = Parser$Reply$value$(_idx$9, _code$10, _defs$3);
-                        return $3972;
+                    var $3998 = (_idx$9 => _code$10 => {
+                        var $3999 = Parser$Reply$value$(_idx$9, _code$10, _defs$3);
+                        return $3999;
                     });
-                    var $3970 = $3971;
+                    var $3997 = $3998;
                 } else {
-                    var $3973 = (_idx$9 => _code$10 => {
+                    var $4000 = (_idx$9 => _code$10 => {
                         var self = Parser$first_of$(List$cons$(Kind$Parser$file$def(_file$1)(_code$2)(_defs$3), List$cons$(Kind$Parser$file$adt(_file$1)(_code$2)(_defs$3), List$cons$(Kind$Parser$file$end(_file$1)(_code$2)(_defs$3), List$nil))))(_idx$9)(_code$10);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3975 = self.idx;
-                                var $3976 = self.code;
-                                var $3977 = self.err;
-                                var $3978 = Parser$Reply$error$($3975, $3976, $3977);
-                                var $3974 = $3978;
+                                var $4002 = self.idx;
+                                var $4003 = self.code;
+                                var $4004 = self.err;
+                                var $4005 = Parser$Reply$error$($4002, $4003, $4004);
+                                var $4001 = $4005;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3979 = self.idx;
-                                var $3980 = self.code;
-                                var $3981 = self.val;
-                                var $3982 = Kind$Parser$file$(_file$1, _code$2, $3981, $3979, $3980);
-                                var $3974 = $3982;
+                                var $4006 = self.idx;
+                                var $4007 = self.code;
+                                var $4008 = self.val;
+                                var $4009 = Kind$Parser$file$(_file$1, _code$2, $4008, $4006, $4007);
+                                var $4001 = $4009;
                                 break;
                         };
-                        return $3974;
+                        return $4001;
                     });
-                    var $3970 = $3973;
+                    var $3997 = $4000;
                 };
-                var $3970 = $3970($3967)($3968);
-                var $3962 = $3970;
+                var $3997 = $3997($3994)($3995);
+                var $3989 = $3997;
                 break;
         };
-        return $3962;
+        return $3989;
     };
     const Kind$Parser$file = x0 => x1 => x2 => x3 => x4 => Kind$Parser$file$(x0, x1, x2, x3, x4);
 
     function Either$(_A$1, _B$2) {
-        var $3983 = null;
-        return $3983;
+        var $4010 = null;
+        return $4010;
     };
     const Either = x0 => x1 => Either$(x0, x1);
 
@@ -10797,38 +10854,38 @@ module.exports = (function() {
         var self = _list$2;
         switch (self._) {
             case 'List.cons':
-                var $3985 = self.head;
-                var $3986 = self.tail;
-                var $3987 = String$flatten$(List$cons$((() => {
+                var $4012 = self.head;
+                var $4013 = self.tail;
+                var $4014 = String$flatten$(List$cons$((() => {
                     var self = _fst$3;
                     if (self) {
-                        var $3988 = "";
-                        return $3988;
+                        var $4015 = "";
+                        return $4015;
                     } else {
-                        var $3989 = _sep$1;
-                        return $3989;
+                        var $4016 = _sep$1;
+                        return $4016;
                     };
-                })(), List$cons$($3985, List$cons$(String$join$go$(_sep$1, $3986, Bool$false), List$nil))));
-                var $3984 = $3987;
+                })(), List$cons$($4012, List$cons$(String$join$go$(_sep$1, $4013, Bool$false), List$nil))));
+                var $4011 = $4014;
                 break;
             case 'List.nil':
-                var $3990 = "";
-                var $3984 = $3990;
+                var $4017 = "";
+                var $4011 = $4017;
                 break;
         };
-        return $3984;
+        return $4011;
     };
     const String$join$go = x0 => x1 => x2 => String$join$go$(x0, x1, x2);
 
     function String$join$(_sep$1, _list$2) {
-        var $3991 = String$join$go$(_sep$1, _list$2, Bool$true);
-        return $3991;
+        var $4018 = String$join$go$(_sep$1, _list$2, Bool$true);
+        return $4018;
     };
     const String$join = x0 => x1 => String$join$(x0, x1);
 
     function Kind$highlight$end$(_col$1, _row$2, _res$3) {
-        var $3992 = String$join$("\u{a}", _res$3);
-        return $3992;
+        var $4019 = String$join$("\u{a}", _res$3);
+        return $4019;
     };
     const Kind$highlight$end = x0 => x1 => x2 => Kind$highlight$end$(x0, x1, x2);
 
@@ -10836,105 +10893,105 @@ module.exports = (function() {
         var self = _m$2;
         switch (self._) {
             case 'Maybe.some':
-                var $3994 = self.value;
-                var $3995 = _f$5($3994);
-                var $3993 = $3995;
+                var $4021 = self.value;
+                var $4022 = _f$5($4021);
+                var $4020 = $4022;
                 break;
             case 'Maybe.none':
-                var $3996 = _a$4;
-                var $3993 = $3996;
+                var $4023 = _a$4;
+                var $4020 = $4023;
                 break;
         };
-        return $3993;
+        return $4020;
     };
     const Maybe$extract = x0 => x1 => x2 => Maybe$extract$(x0, x1, x2);
 
     function Nat$is_zero$(_n$1) {
         var self = _n$1;
         if (self === 0n) {
-            var $3998 = Bool$true;
-            var $3997 = $3998;
+            var $4025 = Bool$true;
+            var $4024 = $4025;
         } else {
-            var $3999 = (self - 1n);
-            var $4000 = Bool$false;
-            var $3997 = $4000;
+            var $4026 = (self - 1n);
+            var $4027 = Bool$false;
+            var $4024 = $4027;
         };
-        return $3997;
+        return $4024;
     };
     const Nat$is_zero = x0 => Nat$is_zero$(x0);
 
     function Nat$double$(_n$1) {
         var self = _n$1;
         if (self === 0n) {
-            var $4002 = Nat$zero;
-            var $4001 = $4002;
+            var $4029 = Nat$zero;
+            var $4028 = $4029;
         } else {
-            var $4003 = (self - 1n);
-            var $4004 = Nat$succ$(Nat$succ$(Nat$double$($4003)));
-            var $4001 = $4004;
+            var $4030 = (self - 1n);
+            var $4031 = Nat$succ$(Nat$succ$(Nat$double$($4030)));
+            var $4028 = $4031;
         };
-        return $4001;
+        return $4028;
     };
     const Nat$double = x0 => Nat$double$(x0);
 
     function Nat$pred$(_n$1) {
         var self = _n$1;
         if (self === 0n) {
-            var $4006 = Nat$zero;
-            var $4005 = $4006;
+            var $4033 = Nat$zero;
+            var $4032 = $4033;
         } else {
-            var $4007 = (self - 1n);
-            var $4008 = $4007;
-            var $4005 = $4008;
+            var $4034 = (self - 1n);
+            var $4035 = $4034;
+            var $4032 = $4035;
         };
-        return $4005;
+        return $4032;
     };
     const Nat$pred = x0 => Nat$pred$(x0);
 
     function String$pad_right$(_size$1, _chr$2, _str$3) {
         var self = _size$1;
         if (self === 0n) {
-            var $4010 = _str$3;
-            var $4009 = $4010;
+            var $4037 = _str$3;
+            var $4036 = $4037;
         } else {
-            var $4011 = (self - 1n);
+            var $4038 = (self - 1n);
             var self = _str$3;
             if (self.length === 0) {
-                var $4013 = String$cons$(_chr$2, String$pad_right$($4011, _chr$2, ""));
-                var $4012 = $4013;
+                var $4040 = String$cons$(_chr$2, String$pad_right$($4038, _chr$2, ""));
+                var $4039 = $4040;
             } else {
-                var $4014 = self.charCodeAt(0);
-                var $4015 = self.slice(1);
-                var $4016 = String$cons$($4014, String$pad_right$($4011, _chr$2, $4015));
-                var $4012 = $4016;
+                var $4041 = self.charCodeAt(0);
+                var $4042 = self.slice(1);
+                var $4043 = String$cons$($4041, String$pad_right$($4038, _chr$2, $4042));
+                var $4039 = $4043;
             };
-            var $4009 = $4012;
+            var $4036 = $4039;
         };
-        return $4009;
+        return $4036;
     };
     const String$pad_right = x0 => x1 => x2 => String$pad_right$(x0, x1, x2);
 
     function String$pad_left$(_size$1, _chr$2, _str$3) {
-        var $4017 = String$reverse$(String$pad_right$(_size$1, _chr$2, String$reverse$(_str$3)));
-        return $4017;
+        var $4044 = String$reverse$(String$pad_right$(_size$1, _chr$2, String$reverse$(_str$3)));
+        return $4044;
     };
     const String$pad_left = x0 => x1 => x2 => String$pad_left$(x0, x1, x2);
 
     function Either$left$(_value$3) {
-        var $4018 = ({
+        var $4045 = ({
             _: 'Either.left',
             'value': _value$3
         });
-        return $4018;
+        return $4045;
     };
     const Either$left = x0 => Either$left$(x0);
 
     function Either$right$(_value$3) {
-        var $4019 = ({
+        var $4046 = ({
             _: 'Either.right',
             'value': _value$3
         });
-        return $4019;
+        return $4046;
     };
     const Either$right = x0 => Either$right$(x0);
 
@@ -10950,20 +11007,20 @@ module.exports = (function() {
             var R = (() => {
                 var self = _m$2;
                 if (self === 0n) {
-                    var $4020 = Either$left$(_n$1);
-                    return $4020;
+                    var $4047 = Either$left$(_n$1);
+                    return $4047;
                 } else {
-                    var $4021 = (self - 1n);
+                    var $4048 = (self - 1n);
                     var self = _n$1;
                     if (self === 0n) {
-                        var $4023 = Either$right$(Nat$succ$($4021));
-                        var $4022 = $4023;
+                        var $4050 = Either$right$(Nat$succ$($4048));
+                        var $4049 = $4050;
                     } else {
-                        var $4024 = (self - 1n);
-                        var $4025 = Nat$sub_rem$($4024, $4021);
-                        var $4022 = $4025;
+                        var $4051 = (self - 1n);
+                        var $4052 = Nat$sub_rem$($4051, $4048);
+                        var $4049 = $4052;
                     };
-                    return $4022;
+                    return $4049;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -10985,12 +11042,12 @@ module.exports = (function() {
                 var self = Nat$sub_rem$(_n$1, _m$2);
                 switch (self._) {
                     case 'Either.left':
-                        var $4026 = self.value;
-                        var $4027 = Nat$div_mod$go$($4026, _m$2, Nat$succ$(_d$3));
-                        return $4027;
+                        var $4053 = self.value;
+                        var $4054 = Nat$div_mod$go$($4053, _m$2, Nat$succ$(_d$3));
+                        return $4054;
                     case 'Either.right':
-                        var $4028 = Pair$new$(_d$3, _n$1);
-                        return $4028;
+                        var $4055 = Pair$new$(_d$3, _n$1);
+                        return $4055;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -11021,18 +11078,18 @@ module.exports = (function() {
                 }));
                 switch (self._) {
                     case 'Pair.new':
-                        var $4029 = self.fst;
-                        var $4030 = self.snd;
-                        var self = $4029;
+                        var $4056 = self.fst;
+                        var $4057 = self.snd;
+                        var self = $4056;
                         if (self === 0n) {
-                            var $4032 = List$cons$($4030, _res$3);
-                            var $4031 = $4032;
+                            var $4059 = List$cons$($4057, _res$3);
+                            var $4058 = $4059;
                         } else {
-                            var $4033 = (self - 1n);
-                            var $4034 = Nat$to_base$go$(_base$1, $4029, List$cons$($4030, _res$3));
-                            var $4031 = $4034;
+                            var $4060 = (self - 1n);
+                            var $4061 = Nat$to_base$go$(_base$1, $4056, List$cons$($4057, _res$3));
+                            var $4058 = $4061;
                         };
-                        return $4031;
+                        return $4058;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -11042,8 +11099,8 @@ module.exports = (function() {
     const Nat$to_base$go = x0 => x1 => x2 => Nat$to_base$go$(x0, x1, x2);
 
     function Nat$to_base$(_base$1, _nat$2) {
-        var $4035 = Nat$to_base$go$(_base$1, _nat$2, List$nil);
-        return $4035;
+        var $4062 = Nat$to_base$go$(_base$1, _nat$2, List$nil);
+        return $4062;
     };
     const Nat$to_base = x0 => x1 => Nat$to_base$(x0, x1);
 
@@ -11059,20 +11116,20 @@ module.exports = (function() {
             var R = (() => {
                 var self = _m$2;
                 if (self === 0n) {
-                    var $4036 = Nat$mod$go$(_n$1, _r$3, _m$2);
-                    return $4036;
+                    var $4063 = Nat$mod$go$(_n$1, _r$3, _m$2);
+                    return $4063;
                 } else {
-                    var $4037 = (self - 1n);
+                    var $4064 = (self - 1n);
                     var self = _n$1;
                     if (self === 0n) {
-                        var $4039 = _r$3;
-                        var $4038 = $4039;
+                        var $4066 = _r$3;
+                        var $4065 = $4066;
                     } else {
-                        var $4040 = (self - 1n);
-                        var $4041 = Nat$mod$go$($4040, $4037, Nat$succ$(_r$3));
-                        var $4038 = $4041;
+                        var $4067 = (self - 1n);
+                        var $4068 = Nat$mod$go$($4067, $4064, Nat$succ$(_r$3));
+                        var $4065 = $4068;
                     };
-                    return $4038;
+                    return $4065;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -11082,8 +11139,8 @@ module.exports = (function() {
     const Nat$mod$go = x0 => x1 => x2 => Nat$mod$go$(x0, x1, x2);
 
     function Nat$mod$(_n$1, _m$2) {
-        var $4042 = Nat$mod$go$(_n$1, _m$2, 0n);
-        return $4042;
+        var $4069 = Nat$mod$go$(_n$1, _m$2, 0n);
+        return $4069;
     };
     const Nat$mod = x0 => x1 => Nat$mod$(x0, x1);
     const Nat$lte = a0 => a1 => (a0 <= a1);
@@ -11096,43 +11153,43 @@ module.exports = (function() {
             var self = List$at$(_m$3, _base64$4);
             switch (self._) {
                 case 'Maybe.some':
-                    var $4045 = self.value;
-                    var $4046 = $4045;
-                    var $4044 = $4046;
+                    var $4072 = self.value;
+                    var $4073 = $4072;
+                    var $4071 = $4073;
                     break;
                 case 'Maybe.none':
-                    var $4047 = 35;
-                    var $4044 = $4047;
+                    var $4074 = 35;
+                    var $4071 = $4074;
                     break;
             };
-            var $4043 = $4044;
+            var $4070 = $4071;
         } else {
-            var $4048 = 35;
-            var $4043 = $4048;
+            var $4075 = 35;
+            var $4070 = $4075;
         };
-        return $4043;
+        return $4070;
     };
     const Nat$show_digit = x0 => x1 => Nat$show_digit$(x0, x1);
 
     function Nat$to_string_base$(_base$1, _nat$2) {
-        var $4049 = List$fold$(Nat$to_base$(_base$1, _nat$2), String$nil, (_n$3 => _str$4 => {
-            var $4050 = String$cons$(Nat$show_digit$(_base$1, _n$3), _str$4);
-            return $4050;
+        var $4076 = List$fold$(Nat$to_base$(_base$1, _nat$2), String$nil, (_n$3 => _str$4 => {
+            var $4077 = String$cons$(Nat$show_digit$(_base$1, _n$3), _str$4);
+            return $4077;
         }));
-        return $4049;
+        return $4076;
     };
     const Nat$to_string_base = x0 => x1 => Nat$to_string_base$(x0, x1);
 
     function Nat$show$(_n$1) {
-        var $4051 = Nat$to_string_base$(10n, _n$1);
-        return $4051;
+        var $4078 = Nat$to_string_base$(10n, _n$1);
+        return $4078;
     };
     const Nat$show = x0 => Nat$show$(x0);
     const Bool$not = a0 => (!a0);
 
     function Kind$color$(_col$1, _str$2) {
-        var $4052 = String$cons$(27, String$cons$(91, (_col$1 + String$cons$(109, (_str$2 + String$cons$(27, String$cons$(91, String$cons$(48, String$cons$(109, String$nil)))))))));
-        return $4052;
+        var $4079 = String$cons$(27, String$cons$(91, (_col$1 + String$cons$(109, (_str$2 + String$cons$(27, String$cons$(91, String$cons$(48, String$cons$(109, String$nil)))))))));
+        return $4079;
     };
     const Kind$color = x0 => x1 => Kind$color$(x0, x1);
     const Nat$eql = a0 => a1 => (a0 === a1);
@@ -11141,25 +11198,25 @@ module.exports = (function() {
         var self = _xs$3;
         switch (self._) {
             case 'List.cons':
-                var $4054 = self.head;
-                var $4055 = self.tail;
+                var $4081 = self.head;
+                var $4082 = self.tail;
                 var self = _n$2;
                 if (self === 0n) {
-                    var $4057 = List$nil;
-                    var $4056 = $4057;
+                    var $4084 = List$nil;
+                    var $4083 = $4084;
                 } else {
-                    var $4058 = (self - 1n);
-                    var $4059 = List$cons$($4054, List$take$($4058, $4055));
-                    var $4056 = $4059;
+                    var $4085 = (self - 1n);
+                    var $4086 = List$cons$($4081, List$take$($4085, $4082));
+                    var $4083 = $4086;
                 };
-                var $4053 = $4056;
+                var $4080 = $4083;
                 break;
             case 'List.nil':
-                var $4060 = List$nil;
-                var $4053 = $4060;
+                var $4087 = List$nil;
+                var $4080 = $4087;
                 break;
         };
-        return $4053;
+        return $4080;
     };
     const List$take = x0 => x1 => List$take$(x0, x1);
 
@@ -11176,18 +11233,18 @@ module.exports = (function() {
                 var _spa$9 = 3n;
                 var self = _code$1;
                 if (self.length === 0) {
-                    var $4062 = Kind$highlight$end$(_col$4, _row$5, List$reverse$(_res$8));
-                    var $4061 = $4062;
+                    var $4089 = Kind$highlight$end$(_col$4, _row$5, List$reverse$(_res$8));
+                    var $4088 = $4089;
                 } else {
-                    var $4063 = self.charCodeAt(0);
-                    var $4064 = self.slice(1);
-                    var self = ($4063 === 10);
+                    var $4090 = self.charCodeAt(0);
+                    var $4091 = self.slice(1);
+                    var self = ($4090 === 10);
                     if (self) {
                         var _stp$12 = Maybe$extract$(_lft$6, Bool$false, Nat$is_zero);
                         var self = _stp$12;
                         if (self) {
-                            var $4067 = Kind$highlight$end$(_col$4, _row$5, List$reverse$(_res$8));
-                            var $4066 = $4067;
+                            var $4094 = Kind$highlight$end$(_col$4, _row$5, List$reverse$(_res$8));
+                            var $4093 = $4094;
                         } else {
                             var _siz$13 = Nat$succ$(Nat$double$(_spa$9));
                             var self = _ix1$3;
@@ -11195,20 +11252,20 @@ module.exports = (function() {
                                 var self = _lft$6;
                                 switch (self._) {
                                     case 'Maybe.some':
-                                        var $4070 = self.value;
-                                        var $4071 = Maybe$some$(Nat$pred$($4070));
-                                        var $4069 = $4071;
+                                        var $4097 = self.value;
+                                        var $4098 = Maybe$some$(Nat$pred$($4097));
+                                        var $4096 = $4098;
                                         break;
                                     case 'Maybe.none':
-                                        var $4072 = Maybe$some$(_spa$9);
-                                        var $4069 = $4072;
+                                        var $4099 = Maybe$some$(_spa$9);
+                                        var $4096 = $4099;
                                         break;
                                 };
-                                var _lft$14 = $4069;
+                                var _lft$14 = $4096;
                             } else {
-                                var $4073 = (self - 1n);
-                                var $4074 = _lft$6;
-                                var _lft$14 = $4074;
+                                var $4100 = (self - 1n);
+                                var $4101 = _lft$6;
+                                var _lft$14 = $4101;
                             };
                             var _ix0$15 = Nat$pred$(_ix0$2);
                             var _ix1$16 = Nat$pred$(_ix1$3);
@@ -11216,38 +11273,38 @@ module.exports = (function() {
                             var _row$18 = Nat$succ$(_row$5);
                             var _res$19 = List$cons$(String$reverse$(_lin$7), _res$8);
                             var _lin$20 = String$reverse$(String$flatten$(List$cons$(String$pad_left$(4n, 32, Nat$show$(_row$18)), List$cons$(" | ", List$nil))));
-                            var $4068 = Kind$highlight$tc$($4064, _ix0$15, _ix1$16, _col$17, _row$18, _lft$14, _lin$20, _res$19);
-                            var $4066 = $4068;
+                            var $4095 = Kind$highlight$tc$($4091, _ix0$15, _ix1$16, _col$17, _row$18, _lft$14, _lin$20, _res$19);
+                            var $4093 = $4095;
                         };
-                        var $4065 = $4066;
+                        var $4092 = $4093;
                     } else {
-                        var _chr$12 = String$cons$($4063, String$nil);
+                        var _chr$12 = String$cons$($4090, String$nil);
                         var self = (Nat$is_zero$(_ix0$2) && (!Nat$is_zero$(_ix1$3)));
                         if (self) {
-                            var $4076 = String$reverse$(Kind$color$("31", Kind$color$("4", _chr$12)));
-                            var _chr$13 = $4076;
+                            var $4103 = String$reverse$(Kind$color$("31", Kind$color$("4", _chr$12)));
+                            var _chr$13 = $4103;
                         } else {
-                            var $4077 = _chr$12;
-                            var _chr$13 = $4077;
+                            var $4104 = _chr$12;
+                            var _chr$13 = $4104;
                         };
                         var self = (_ix0$2 === 1n);
                         if (self) {
-                            var $4078 = List$take$(_spa$9, _res$8);
-                            var _res$14 = $4078;
+                            var $4105 = List$take$(_spa$9, _res$8);
+                            var _res$14 = $4105;
                         } else {
-                            var $4079 = _res$8;
-                            var _res$14 = $4079;
+                            var $4106 = _res$8;
+                            var _res$14 = $4106;
                         };
                         var _ix0$15 = Nat$pred$(_ix0$2);
                         var _ix1$16 = Nat$pred$(_ix1$3);
                         var _col$17 = Nat$succ$(_col$4);
                         var _lin$18 = String$flatten$(List$cons$(_chr$13, List$cons$(_lin$7, List$nil)));
-                        var $4075 = Kind$highlight$tc$($4064, _ix0$15, _ix1$16, _col$17, _row$5, _lft$6, _lin$18, _res$14);
-                        var $4065 = $4075;
+                        var $4102 = Kind$highlight$tc$($4091, _ix0$15, _ix1$16, _col$17, _row$5, _lft$6, _lin$18, _res$14);
+                        var $4092 = $4102;
                     };
-                    var $4061 = $4065;
+                    var $4088 = $4092;
                 };
-                return $4061;
+                return $4088;
             })();
             if (R.ctr === 'TCO') arg = R.arg;
             else return R;
@@ -11256,8 +11313,8 @@ module.exports = (function() {
     const Kind$highlight$tc = x0 => x1 => x2 => x3 => x4 => x5 => x6 => x7 => Kind$highlight$tc$(x0, x1, x2, x3, x4, x5, x6, x7);
 
     function Kind$highlight$(_code$1, _idx0$2, _idx1$3) {
-        var $4080 = Kind$highlight$tc$(_code$1, _idx0$2, _idx1$3, 0n, 1n, Maybe$none, String$reverse$("   1 | "), List$nil);
-        return $4080;
+        var $4107 = Kind$highlight$tc$(_code$1, _idx0$2, _idx1$3, 0n, 1n, Maybe$none, String$reverse$("   1 | "), List$nil);
+        return $4107;
     };
     const Kind$highlight = x0 => x1 => x2 => Kind$highlight$(x0, x1, x2);
 
@@ -11265,21 +11322,21 @@ module.exports = (function() {
         var self = Kind$Parser$file$(_file$1, _code$2, _defs$3, 0n, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $4082 = self.idx;
-                var $4083 = self.err;
-                var _err$7 = $4083;
-                var _hig$8 = Kind$highlight$(_code$2, $4082, Nat$succ$($4082));
+                var $4109 = self.idx;
+                var $4110 = self.err;
+                var _err$7 = $4110;
+                var _hig$8 = Kind$highlight$(_code$2, $4109, Nat$succ$($4109));
                 var _str$9 = String$flatten$(List$cons$(_err$7, List$cons$("\u{a}", List$cons$(_hig$8, List$nil))));
-                var $4084 = Either$left$(_str$9);
-                var $4081 = $4084;
+                var $4111 = Either$left$(_str$9);
+                var $4108 = $4111;
                 break;
             case 'Parser.Reply.value':
-                var $4085 = self.val;
-                var $4086 = Either$right$($4085);
-                var $4081 = $4086;
+                var $4112 = self.val;
+                var $4113 = Either$right$($4112);
+                var $4108 = $4113;
                 break;
         };
-        return $4081;
+        return $4108;
     };
     const Kind$Defs$read = x0 => x1 => x2 => Kind$Defs$read$(x0, x1, x2);
 
@@ -11287,52 +11344,52 @@ module.exports = (function() {
         var self = _files$2;
         switch (self._) {
             case 'List.cons':
-                var $4088 = self.head;
-                var $4089 = self.tail;
-                var $4090 = IO$monad$((_m$bind$6 => _m$pure$7 => {
-                    var $4091 = _m$bind$6;
-                    return $4091;
-                }))(IO$get_file$($4088))((_code$6 => {
-                    var _read$7 = Kind$Defs$read$($4088, _code$6, _defs$3);
+                var $4115 = self.head;
+                var $4116 = self.tail;
+                var $4117 = IO$monad$((_m$bind$6 => _m$pure$7 => {
+                    var $4118 = _m$bind$6;
+                    return $4118;
+                }))(IO$get_file$($4115))((_code$6 => {
+                    var _read$7 = Kind$Defs$read$($4115, _code$6, _defs$3);
                     var self = _read$7;
                     switch (self._) {
                         case 'Either.right':
-                            var $4093 = self.value;
-                            var _defs$9 = $4093;
+                            var $4120 = self.value;
+                            var _defs$9 = $4120;
                             var self = Kind$get$(_name$1, _defs$9);
                             switch (self._) {
                                 case 'Maybe.none':
-                                    var $4095 = Kind$Synth$load$go$(_name$1, $4089, _defs$9);
-                                    var $4094 = $4095;
+                                    var $4122 = Kind$Synth$load$go$(_name$1, $4116, _defs$9);
+                                    var $4121 = $4122;
                                     break;
                                 case 'Maybe.some':
-                                    var $4096 = IO$monad$((_m$bind$11 => _m$pure$12 => {
-                                        var $4097 = _m$pure$12;
-                                        return $4097;
+                                    var $4123 = IO$monad$((_m$bind$11 => _m$pure$12 => {
+                                        var $4124 = _m$pure$12;
+                                        return $4124;
                                     }))(Maybe$some$(_defs$9));
-                                    var $4094 = $4096;
+                                    var $4121 = $4123;
                                     break;
                             };
-                            var $4092 = $4094;
+                            var $4119 = $4121;
                             break;
                         case 'Either.left':
-                            var $4098 = Kind$Synth$load$go$(_name$1, $4089, _defs$3);
-                            var $4092 = $4098;
+                            var $4125 = Kind$Synth$load$go$(_name$1, $4116, _defs$3);
+                            var $4119 = $4125;
                             break;
                     };
-                    return $4092;
+                    return $4119;
                 }));
-                var $4087 = $4090;
+                var $4114 = $4117;
                 break;
             case 'List.nil':
-                var $4099 = IO$monad$((_m$bind$4 => _m$pure$5 => {
-                    var $4100 = _m$pure$5;
-                    return $4100;
+                var $4126 = IO$monad$((_m$bind$4 => _m$pure$5 => {
+                    var $4127 = _m$pure$5;
+                    return $4127;
                 }))(Maybe$none);
-                var $4087 = $4099;
+                var $4114 = $4126;
                 break;
         };
-        return $4087;
+        return $4114;
     };
     const Kind$Synth$load$go = x0 => x1 => x2 => Kind$Synth$load$go$(x0, x1, x2);
 
@@ -11340,25 +11397,25 @@ module.exports = (function() {
         var self = _names$1;
         switch (self._) {
             case 'List.cons':
-                var $4102 = self.head;
-                var $4103 = self.tail;
-                var _head$5 = (_last$2 + ($4102 + ".kind"));
-                var _tail$6 = Kind$Synth$files_of$make$($4103, (_last$2 + ($4102 + "/")));
-                var $4104 = List$cons$(_head$5, _tail$6);
-                var $4101 = $4104;
+                var $4129 = self.head;
+                var $4130 = self.tail;
+                var _head$5 = (_last$2 + ($4129 + ".kind"));
+                var _tail$6 = Kind$Synth$files_of$make$($4130, (_last$2 + ($4129 + "/")));
+                var $4131 = List$cons$(_head$5, _tail$6);
+                var $4128 = $4131;
                 break;
             case 'List.nil':
-                var $4105 = List$nil;
-                var $4101 = $4105;
+                var $4132 = List$nil;
+                var $4128 = $4132;
                 break;
         };
-        return $4101;
+        return $4128;
     };
     const Kind$Synth$files_of$make = x0 => x1 => Kind$Synth$files_of$make$(x0, x1);
 
     function Char$eql$(_a$1, _b$2) {
-        var $4106 = (_a$1 === _b$2);
-        return $4106;
+        var $4133 = (_a$1 === _b$2);
+        return $4133;
     };
     const Char$eql = x0 => x1 => Char$eql$(x0, x1);
 
@@ -11374,29 +11431,29 @@ module.exports = (function() {
             var R = (() => {
                 var self = _match$2;
                 if (self.length === 0) {
-                    var $4107 = Bool$true;
-                    return $4107;
+                    var $4134 = Bool$true;
+                    return $4134;
                 } else {
-                    var $4108 = self.charCodeAt(0);
-                    var $4109 = self.slice(1);
+                    var $4135 = self.charCodeAt(0);
+                    var $4136 = self.slice(1);
                     var self = _xs$1;
                     if (self.length === 0) {
-                        var $4111 = Bool$false;
-                        var $4110 = $4111;
+                        var $4138 = Bool$false;
+                        var $4137 = $4138;
                     } else {
-                        var $4112 = self.charCodeAt(0);
-                        var $4113 = self.slice(1);
-                        var self = Char$eql$($4108, $4112);
+                        var $4139 = self.charCodeAt(0);
+                        var $4140 = self.slice(1);
+                        var self = Char$eql$($4135, $4139);
                         if (self) {
-                            var $4115 = String$starts_with$($4113, $4109);
-                            var $4114 = $4115;
+                            var $4142 = String$starts_with$($4140, $4136);
+                            var $4141 = $4142;
                         } else {
-                            var $4116 = Bool$false;
-                            var $4114 = $4116;
+                            var $4143 = Bool$false;
+                            var $4141 = $4143;
                         };
-                        var $4110 = $4114;
+                        var $4137 = $4141;
                     };
-                    return $4110;
+                    return $4137;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -11417,21 +11474,21 @@ module.exports = (function() {
             var R = (() => {
                 var self = _n$1;
                 if (self === 0n) {
-                    var $4117 = _xs$2;
-                    return $4117;
+                    var $4144 = _xs$2;
+                    return $4144;
                 } else {
-                    var $4118 = (self - 1n);
+                    var $4145 = (self - 1n);
                     var self = _xs$2;
                     if (self.length === 0) {
-                        var $4120 = String$nil;
-                        var $4119 = $4120;
+                        var $4147 = String$nil;
+                        var $4146 = $4147;
                     } else {
-                        var $4121 = self.charCodeAt(0);
-                        var $4122 = self.slice(1);
-                        var $4123 = String$drop$($4118, $4122);
-                        var $4119 = $4123;
+                        var $4148 = self.charCodeAt(0);
+                        var $4149 = self.slice(1);
+                        var $4150 = String$drop$($4145, $4149);
+                        var $4146 = $4150;
                     };
-                    return $4119;
+                    return $4146;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -11452,13 +11509,13 @@ module.exports = (function() {
             var R = (() => {
                 var self = _xs$1;
                 if (self.length === 0) {
-                    var $4124 = _n$2;
-                    return $4124;
+                    var $4151 = _n$2;
+                    return $4151;
                 } else {
-                    var $4125 = self.charCodeAt(0);
-                    var $4126 = self.slice(1);
-                    var $4127 = String$length$go$($4126, Nat$succ$(_n$2));
-                    return $4127;
+                    var $4152 = self.charCodeAt(0);
+                    var $4153 = self.slice(1);
+                    var $4154 = String$length$go$($4153, Nat$succ$(_n$2));
+                    return $4154;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -11468,50 +11525,50 @@ module.exports = (function() {
     const String$length$go = x0 => x1 => String$length$go$(x0, x1);
 
     function String$length$(_xs$1) {
-        var $4128 = String$length$go$(_xs$1, 0n);
-        return $4128;
+        var $4155 = String$length$go$(_xs$1, 0n);
+        return $4155;
     };
     const String$length = x0 => String$length$(x0);
 
     function String$split$go$(_xs$1, _match$2, _last$3) {
         var self = _xs$1;
         if (self.length === 0) {
-            var $4130 = List$cons$(_last$3, List$nil);
-            var $4129 = $4130;
+            var $4157 = List$cons$(_last$3, List$nil);
+            var $4156 = $4157;
         } else {
-            var $4131 = self.charCodeAt(0);
-            var $4132 = self.slice(1);
+            var $4158 = self.charCodeAt(0);
+            var $4159 = self.slice(1);
             var self = String$starts_with$(_xs$1, _match$2);
             if (self) {
                 var _rest$6 = String$drop$(String$length$(_match$2), _xs$1);
-                var $4134 = List$cons$(_last$3, String$split$go$(_rest$6, _match$2, ""));
-                var $4133 = $4134;
+                var $4161 = List$cons$(_last$3, String$split$go$(_rest$6, _match$2, ""));
+                var $4160 = $4161;
             } else {
-                var _next$6 = String$cons$($4131, String$nil);
-                var $4135 = String$split$go$($4132, _match$2, (_last$3 + _next$6));
-                var $4133 = $4135;
+                var _next$6 = String$cons$($4158, String$nil);
+                var $4162 = String$split$go$($4159, _match$2, (_last$3 + _next$6));
+                var $4160 = $4162;
             };
-            var $4129 = $4133;
+            var $4156 = $4160;
         };
-        return $4129;
+        return $4156;
     };
     const String$split$go = x0 => x1 => x2 => String$split$go$(x0, x1, x2);
 
     function String$split$(_xs$1, _match$2) {
-        var $4136 = String$split$go$(_xs$1, _match$2, "");
-        return $4136;
+        var $4163 = String$split$go$(_xs$1, _match$2, "");
+        return $4163;
     };
     const String$split = x0 => x1 => String$split$(x0, x1);
 
     function Kind$Synth$files_of$(_name$1) {
-        var $4137 = List$reverse$(Kind$Synth$files_of$make$(String$split$(_name$1, "."), ""));
-        return $4137;
+        var $4164 = List$reverse$(Kind$Synth$files_of$make$(String$split$(_name$1, "."), ""));
+        return $4164;
     };
     const Kind$Synth$files_of = x0 => Kind$Synth$files_of$(x0);
 
     function Kind$Synth$load$(_name$1, _defs$2) {
-        var $4138 = Kind$Synth$load$go$(_name$1, Kind$Synth$files_of$(_name$1), _defs$2);
-        return $4138;
+        var $4165 = Kind$Synth$load$go$(_name$1, Kind$Synth$files_of$(_name$1), _defs$2);
+        return $4165;
     };
     const Kind$Synth$load = x0 => x1 => Kind$Synth$load$(x0, x1);
     const Kind$Status$wait = ({
@@ -11519,46 +11576,46 @@ module.exports = (function() {
     });
 
     function Kind$Check$(_V$1) {
-        var $4139 = null;
-        return $4139;
+        var $4166 = null;
+        return $4166;
     };
     const Kind$Check = x0 => Kind$Check$(x0);
 
     function Kind$Check$result$(_value$2, _errors$3) {
-        var $4140 = ({
+        var $4167 = ({
             _: 'Kind.Check.result',
             'value': _value$2,
             'errors': _errors$3
         });
-        return $4140;
+        return $4167;
     };
     const Kind$Check$result = x0 => x1 => Kind$Check$result$(x0, x1);
 
     function Kind$Error$undefined_reference$(_origin$1, _name$2) {
-        var $4141 = ({
+        var $4168 = ({
             _: 'Kind.Error.undefined_reference',
             'origin': _origin$1,
             'name': _name$2
         });
-        return $4141;
+        return $4168;
     };
     const Kind$Error$undefined_reference = x0 => x1 => Kind$Error$undefined_reference$(x0, x1);
 
     function Kind$Error$waiting$(_name$1) {
-        var $4142 = ({
+        var $4169 = ({
             _: 'Kind.Error.waiting',
             'name': _name$1
         });
-        return $4142;
+        return $4169;
     };
     const Kind$Error$waiting = x0 => Kind$Error$waiting$(x0);
 
     function Kind$Error$indirect$(_name$1) {
-        var $4143 = ({
+        var $4170 = ({
             _: 'Kind.Error.indirect',
             'name': _name$1
         });
-        return $4143;
+        return $4170;
     };
     const Kind$Error$indirect = x0 => Kind$Error$indirect$(x0);
 
@@ -11566,38 +11623,38 @@ module.exports = (function() {
         var self = _m$2;
         switch (self._) {
             case 'Maybe.some':
-                var $4145 = self.value;
-                var $4146 = Maybe$some$(_f$4($4145));
-                var $4144 = $4146;
+                var $4172 = self.value;
+                var $4173 = Maybe$some$(_f$4($4172));
+                var $4171 = $4173;
                 break;
             case 'Maybe.none':
-                var $4147 = Maybe$none;
-                var $4144 = $4147;
+                var $4174 = Maybe$none;
+                var $4171 = $4174;
                 break;
         };
-        return $4144;
+        return $4171;
     };
     const Maybe$mapped = x0 => x1 => Maybe$mapped$(x0, x1);
 
     function Kind$MPath$o$(_path$1) {
-        var $4148 = Maybe$mapped$(_path$1, Kind$Path$o);
-        return $4148;
+        var $4175 = Maybe$mapped$(_path$1, Kind$Path$o);
+        return $4175;
     };
     const Kind$MPath$o = x0 => Kind$MPath$o$(x0);
 
     function Kind$MPath$i$(_path$1) {
-        var $4149 = Maybe$mapped$(_path$1, Kind$Path$i);
-        return $4149;
+        var $4176 = Maybe$mapped$(_path$1, Kind$Path$i);
+        return $4176;
     };
     const Kind$MPath$i = x0 => Kind$MPath$i$(x0);
 
     function Kind$Error$patch$(_path$1, _term$2) {
-        var $4150 = ({
+        var $4177 = ({
             _: 'Kind.Error.patch',
             'path': _path$1,
             'term': _term$2
         });
-        return $4150;
+        return $4177;
     };
     const Kind$Error$patch = x0 => x1 => Kind$Error$patch$(x0, x1);
 
@@ -11605,33 +11662,33 @@ module.exports = (function() {
         var self = _path$1;
         switch (self._) {
             case 'Maybe.some':
-                var $4152 = self.value;
-                var $4153 = $4152(Bits$e);
-                var $4151 = $4153;
+                var $4179 = self.value;
+                var $4180 = $4179(Bits$e);
+                var $4178 = $4180;
                 break;
             case 'Maybe.none':
-                var $4154 = Bits$e;
-                var $4151 = $4154;
+                var $4181 = Bits$e;
+                var $4178 = $4181;
                 break;
         };
-        return $4151;
+        return $4178;
     };
     const Kind$MPath$to_bits = x0 => Kind$MPath$to_bits$(x0);
 
     function Kind$Error$type_mismatch$(_origin$1, _expected$2, _detected$3, _context$4) {
-        var $4155 = ({
+        var $4182 = ({
             _: 'Kind.Error.type_mismatch',
             'origin': _origin$1,
             'expected': _expected$2,
             'detected': _detected$3,
             'context': _context$4
         });
-        return $4155;
+        return $4182;
     };
     const Kind$Error$type_mismatch = x0 => x1 => x2 => x3 => Kind$Error$type_mismatch$(x0, x1, x2, x3);
 
     function Kind$Error$show_goal$(_name$1, _dref$2, _verb$3, _goal$4, _context$5) {
-        var $4156 = ({
+        var $4183 = ({
             _: 'Kind.Error.show_goal',
             'name': _name$1,
             'dref': _dref$2,
@@ -11639,7 +11696,7 @@ module.exports = (function() {
             'goal': _goal$4,
             'context': _context$5
         });
-        return $4156;
+        return $4183;
     };
     const Kind$Error$show_goal = x0 => x1 => x2 => x3 => x4 => Kind$Error$show_goal$(x0, x1, x2, x3, x4);
 
@@ -11647,112 +11704,112 @@ module.exports = (function() {
         var self = Kind$Term$reduce$(_term$1, _defs$2);
         switch (self._) {
             case 'Kind.Term.var':
-                var $4158 = self.name;
-                var $4159 = self.indx;
-                var $4160 = Kind$Term$var$($4158, $4159);
-                var $4157 = $4160;
+                var $4185 = self.name;
+                var $4186 = self.indx;
+                var $4187 = Kind$Term$var$($4185, $4186);
+                var $4184 = $4187;
                 break;
             case 'Kind.Term.ref':
-                var $4161 = self.name;
-                var $4162 = Kind$Term$ref$($4161);
-                var $4157 = $4162;
+                var $4188 = self.name;
+                var $4189 = Kind$Term$ref$($4188);
+                var $4184 = $4189;
                 break;
             case 'Kind.Term.all':
-                var $4163 = self.eras;
-                var $4164 = self.self;
-                var $4165 = self.name;
-                var $4166 = self.xtyp;
-                var $4167 = self.body;
-                var $4168 = Kind$Term$all$($4163, $4164, $4165, Kind$Term$normalize$($4166, _defs$2), (_s$8 => _x$9 => {
-                    var $4169 = Kind$Term$normalize$($4167(_s$8)(_x$9), _defs$2);
-                    return $4169;
+                var $4190 = self.eras;
+                var $4191 = self.self;
+                var $4192 = self.name;
+                var $4193 = self.xtyp;
+                var $4194 = self.body;
+                var $4195 = Kind$Term$all$($4190, $4191, $4192, Kind$Term$normalize$($4193, _defs$2), (_s$8 => _x$9 => {
+                    var $4196 = Kind$Term$normalize$($4194(_s$8)(_x$9), _defs$2);
+                    return $4196;
                 }));
-                var $4157 = $4168;
+                var $4184 = $4195;
                 break;
             case 'Kind.Term.lam':
-                var $4170 = self.name;
-                var $4171 = self.body;
-                var $4172 = Kind$Term$lam$($4170, (_x$5 => {
-                    var $4173 = Kind$Term$normalize$($4171(_x$5), _defs$2);
-                    return $4173;
+                var $4197 = self.name;
+                var $4198 = self.body;
+                var $4199 = Kind$Term$lam$($4197, (_x$5 => {
+                    var $4200 = Kind$Term$normalize$($4198(_x$5), _defs$2);
+                    return $4200;
                 }));
-                var $4157 = $4172;
+                var $4184 = $4199;
                 break;
             case 'Kind.Term.app':
-                var $4174 = self.func;
-                var $4175 = self.argm;
-                var $4176 = Kind$Term$app$(Kind$Term$normalize$($4174, _defs$2), Kind$Term$normalize$($4175, _defs$2));
-                var $4157 = $4176;
+                var $4201 = self.func;
+                var $4202 = self.argm;
+                var $4203 = Kind$Term$app$(Kind$Term$normalize$($4201, _defs$2), Kind$Term$normalize$($4202, _defs$2));
+                var $4184 = $4203;
                 break;
             case 'Kind.Term.let':
-                var $4177 = self.name;
-                var $4178 = self.expr;
-                var $4179 = self.body;
-                var $4180 = Kind$Term$let$($4177, Kind$Term$normalize$($4178, _defs$2), (_x$6 => {
-                    var $4181 = Kind$Term$normalize$($4179(_x$6), _defs$2);
-                    return $4181;
+                var $4204 = self.name;
+                var $4205 = self.expr;
+                var $4206 = self.body;
+                var $4207 = Kind$Term$let$($4204, Kind$Term$normalize$($4205, _defs$2), (_x$6 => {
+                    var $4208 = Kind$Term$normalize$($4206(_x$6), _defs$2);
+                    return $4208;
                 }));
-                var $4157 = $4180;
+                var $4184 = $4207;
                 break;
             case 'Kind.Term.def':
-                var $4182 = self.name;
-                var $4183 = self.expr;
-                var $4184 = self.body;
-                var $4185 = Kind$Term$def$($4182, Kind$Term$normalize$($4183, _defs$2), (_x$6 => {
-                    var $4186 = Kind$Term$normalize$($4184(_x$6), _defs$2);
-                    return $4186;
+                var $4209 = self.name;
+                var $4210 = self.expr;
+                var $4211 = self.body;
+                var $4212 = Kind$Term$def$($4209, Kind$Term$normalize$($4210, _defs$2), (_x$6 => {
+                    var $4213 = Kind$Term$normalize$($4211(_x$6), _defs$2);
+                    return $4213;
                 }));
-                var $4157 = $4185;
+                var $4184 = $4212;
                 break;
             case 'Kind.Term.ann':
-                var $4187 = self.done;
-                var $4188 = self.term;
-                var $4189 = self.type;
-                var $4190 = Kind$Term$ann$($4187, Kind$Term$normalize$($4188, _defs$2), Kind$Term$normalize$($4189, _defs$2));
-                var $4157 = $4190;
+                var $4214 = self.done;
+                var $4215 = self.term;
+                var $4216 = self.type;
+                var $4217 = Kind$Term$ann$($4214, Kind$Term$normalize$($4215, _defs$2), Kind$Term$normalize$($4216, _defs$2));
+                var $4184 = $4217;
                 break;
             case 'Kind.Term.gol':
-                var $4191 = self.name;
-                var $4192 = self.dref;
-                var $4193 = self.verb;
-                var $4194 = Kind$Term$gol$($4191, $4192, $4193);
-                var $4157 = $4194;
+                var $4218 = self.name;
+                var $4219 = self.dref;
+                var $4220 = self.verb;
+                var $4221 = Kind$Term$gol$($4218, $4219, $4220);
+                var $4184 = $4221;
                 break;
             case 'Kind.Term.hol':
-                var $4195 = self.path;
-                var $4196 = Kind$Term$hol$($4195);
-                var $4157 = $4196;
+                var $4222 = self.path;
+                var $4223 = Kind$Term$hol$($4222);
+                var $4184 = $4223;
                 break;
             case 'Kind.Term.nat':
-                var $4197 = self.natx;
-                var $4198 = Kind$Term$nat$($4197);
-                var $4157 = $4198;
+                var $4224 = self.natx;
+                var $4225 = Kind$Term$nat$($4224);
+                var $4184 = $4225;
                 break;
             case 'Kind.Term.chr':
-                var $4199 = self.chrx;
-                var $4200 = Kind$Term$chr$($4199);
-                var $4157 = $4200;
+                var $4226 = self.chrx;
+                var $4227 = Kind$Term$chr$($4226);
+                var $4184 = $4227;
                 break;
             case 'Kind.Term.str':
-                var $4201 = self.strx;
-                var $4202 = Kind$Term$str$($4201);
-                var $4157 = $4202;
+                var $4228 = self.strx;
+                var $4229 = Kind$Term$str$($4228);
+                var $4184 = $4229;
                 break;
             case 'Kind.Term.ori':
-                var $4203 = self.expr;
-                var $4204 = Kind$Term$normalize$($4203, _defs$2);
-                var $4157 = $4204;
+                var $4230 = self.expr;
+                var $4231 = Kind$Term$normalize$($4230, _defs$2);
+                var $4184 = $4231;
                 break;
             case 'Kind.Term.typ':
-                var $4205 = Kind$Term$typ;
-                var $4157 = $4205;
+                var $4232 = Kind$Term$typ;
+                var $4184 = $4232;
                 break;
             case 'Kind.Term.cse':
-                var $4206 = _term$1;
-                var $4157 = $4206;
+                var $4233 = _term$1;
+                var $4184 = $4233;
                 break;
         };
-        return $4157;
+        return $4184;
     };
     const Kind$Term$normalize = x0 => x1 => Kind$Term$normalize$(x0, x1);
 
@@ -11760,16 +11817,16 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'List.cons':
-                var $4208 = self.tail;
-                var $4209 = $4208;
-                var $4207 = $4209;
+                var $4235 = self.tail;
+                var $4236 = $4235;
+                var $4234 = $4236;
                 break;
             case 'List.nil':
-                var $4210 = List$nil;
-                var $4207 = $4210;
+                var $4237 = List$nil;
+                var $4234 = $4237;
                 break;
         };
-        return $4207;
+        return $4234;
     };
     const List$tail = x0 => List$tail$(x0);
 
@@ -11786,10 +11843,10 @@ module.exports = (function() {
                 var self = Kind$Term$reduce$(_term$2, _defs$4);
                 switch (self._) {
                     case 'Kind.Term.app':
-                        var $4211 = self.func;
-                        var $4212 = self.argm;
-                        var $4213 = Kind$SmartMotive$vals$cont$(_expr$1, $4211, List$cons$($4212, _args$3), _defs$4);
-                        return $4213;
+                        var $4238 = self.func;
+                        var $4239 = self.argm;
+                        var $4240 = Kind$SmartMotive$vals$cont$(_expr$1, $4238, List$cons$($4239, _args$3), _defs$4);
+                        return $4240;
                     case 'Kind.Term.var':
                     case 'Kind.Term.ref':
                     case 'Kind.Term.typ':
@@ -11805,8 +11862,8 @@ module.exports = (function() {
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
                     case 'Kind.Term.ori':
-                        var $4214 = List$cons$(_expr$1, List$tail$(List$reverse$(_args$3)));
-                        return $4214;
+                        var $4241 = List$cons$(_expr$1, List$tail$(List$reverse$(_args$3)));
+                        return $4241;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -11828,9 +11885,9 @@ module.exports = (function() {
                 var self = Kind$Term$reduce$(_type$2, _defs$3);
                 switch (self._) {
                     case 'Kind.Term.all':
-                        var $4215 = self.body;
-                        var $4216 = Kind$SmartMotive$vals$(_expr$1, $4215(Kind$Term$typ)(Kind$Term$typ), _defs$3);
-                        return $4216;
+                        var $4242 = self.body;
+                        var $4243 = Kind$SmartMotive$vals$(_expr$1, $4242(Kind$Term$typ)(Kind$Term$typ), _defs$3);
+                        return $4243;
                     case 'Kind.Term.var':
                     case 'Kind.Term.ref':
                     case 'Kind.Term.typ':
@@ -11846,8 +11903,8 @@ module.exports = (function() {
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
                     case 'Kind.Term.ori':
-                        var $4217 = Kind$SmartMotive$vals$cont$(_expr$1, _type$2, List$nil, _defs$3);
-                        return $4217;
+                        var $4244 = Kind$SmartMotive$vals$cont$(_expr$1, _type$2, List$nil, _defs$3);
+                        return $4244;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -11869,11 +11926,11 @@ module.exports = (function() {
                 var self = Kind$Term$reduce$(_term$2, _defs$4);
                 switch (self._) {
                     case 'Kind.Term.all':
-                        var $4218 = self.self;
-                        var $4219 = self.name;
-                        var $4220 = self.body;
-                        var $4221 = Kind$SmartMotive$nams$cont$(_name$1, $4220(Kind$Term$ref$($4218))(Kind$Term$ref$($4219)), List$cons$(String$flatten$(List$cons$(_name$1, List$cons$(".", List$cons$($4219, List$nil)))), _binds$3), _defs$4);
-                        return $4221;
+                        var $4245 = self.self;
+                        var $4246 = self.name;
+                        var $4247 = self.body;
+                        var $4248 = Kind$SmartMotive$nams$cont$(_name$1, $4247(Kind$Term$ref$($4245))(Kind$Term$ref$($4246)), List$cons$(String$flatten$(List$cons$(_name$1, List$cons$(".", List$cons$($4246, List$nil)))), _binds$3), _defs$4);
+                        return $4248;
                     case 'Kind.Term.var':
                     case 'Kind.Term.ref':
                     case 'Kind.Term.typ':
@@ -11889,8 +11946,8 @@ module.exports = (function() {
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
                     case 'Kind.Term.ori':
-                        var $4222 = List$cons$(_name$1, List$tail$(_binds$3));
-                        return $4222;
+                        var $4249 = List$cons$(_name$1, List$tail$(_binds$3));
+                        return $4249;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -11903,9 +11960,9 @@ module.exports = (function() {
         var self = Kind$Term$reduce$(_type$2, _defs$3);
         switch (self._) {
             case 'Kind.Term.all':
-                var $4224 = self.xtyp;
-                var $4225 = Kind$SmartMotive$nams$cont$(_name$1, $4224, List$nil, _defs$3);
-                var $4223 = $4225;
+                var $4251 = self.xtyp;
+                var $4252 = Kind$SmartMotive$nams$cont$(_name$1, $4251, List$nil, _defs$3);
+                var $4250 = $4252;
                 break;
             case 'Kind.Term.var':
             case 'Kind.Term.ref':
@@ -11922,11 +11979,11 @@ module.exports = (function() {
             case 'Kind.Term.str':
             case 'Kind.Term.cse':
             case 'Kind.Term.ori':
-                var $4226 = List$nil;
-                var $4223 = $4226;
+                var $4253 = List$nil;
+                var $4250 = $4253;
                 break;
         };
-        return $4223;
+        return $4250;
     };
     const Kind$SmartMotive$nams = x0 => x1 => x2 => Kind$SmartMotive$nams$(x0, x1, x2);
 
@@ -11934,37 +11991,37 @@ module.exports = (function() {
         var self = _as$3;
         switch (self._) {
             case 'List.cons':
-                var $4228 = self.head;
-                var $4229 = self.tail;
+                var $4255 = self.head;
+                var $4256 = self.tail;
                 var self = _bs$4;
                 switch (self._) {
                     case 'List.cons':
-                        var $4231 = self.head;
-                        var $4232 = self.tail;
-                        var $4233 = List$cons$(Pair$new$($4228, $4231), List$zip$($4229, $4232));
-                        var $4230 = $4233;
+                        var $4258 = self.head;
+                        var $4259 = self.tail;
+                        var $4260 = List$cons$(Pair$new$($4255, $4258), List$zip$($4256, $4259));
+                        var $4257 = $4260;
                         break;
                     case 'List.nil':
-                        var $4234 = List$nil;
-                        var $4230 = $4234;
+                        var $4261 = List$nil;
+                        var $4257 = $4261;
                         break;
                 };
-                var $4227 = $4230;
+                var $4254 = $4257;
                 break;
             case 'List.nil':
-                var $4235 = List$nil;
-                var $4227 = $4235;
+                var $4262 = List$nil;
+                var $4254 = $4262;
                 break;
         };
-        return $4227;
+        return $4254;
     };
     const List$zip = x0 => x1 => List$zip$(x0, x1);
     const Nat$gte = a0 => a1 => (a0 >= a1);
     const Nat$sub = a0 => a1 => (a0 - a1 <= 0n ? 0n : a0 - a1);
 
     function Kind$Term$serialize$name$(_name$1) {
-        var $4236 = (kind_name_to_bits(_name$1));
-        return $4236;
+        var $4263 = (kind_name_to_bits(_name$1));
+        return $4263;
     };
     const Kind$Term$serialize$name = x0 => Kind$Term$serialize$name$(x0);
 
@@ -11972,120 +12029,120 @@ module.exports = (function() {
         var self = _term$1;
         switch (self._) {
             case 'Kind.Term.var':
-                var $4238 = self.indx;
-                var self = ($4238 >= _init$3);
+                var $4265 = self.indx;
+                var self = ($4265 >= _init$3);
                 if (self) {
-                    var _name$8 = a1 => (a1 + (nat_to_bits(Nat$pred$((_depth$2 - $4238 <= 0n ? 0n : _depth$2 - $4238)))));
-                    var $4240 = (((_name$8(_x$5) + '1') + '0') + '0');
-                    var $4239 = $4240;
+                    var _name$8 = a1 => (a1 + (nat_to_bits(Nat$pred$((_depth$2 - $4265 <= 0n ? 0n : _depth$2 - $4265)))));
+                    var $4267 = (((_name$8(_x$5) + '1') + '0') + '0');
+                    var $4266 = $4267;
                 } else {
-                    var _name$8 = a1 => (a1 + (nat_to_bits($4238)));
-                    var $4241 = (((_name$8(_x$5) + '0') + '1') + '0');
-                    var $4239 = $4241;
+                    var _name$8 = a1 => (a1 + (nat_to_bits($4265)));
+                    var $4268 = (((_name$8(_x$5) + '0') + '1') + '0');
+                    var $4266 = $4268;
                 };
-                var $4237 = $4239;
+                var $4264 = $4266;
                 break;
             case 'Kind.Term.ref':
-                var $4242 = self.name;
-                var _name$7 = a1 => (a1 + Kind$Term$serialize$name$($4242));
-                var $4243 = (((_name$7(_x$5) + '0') + '0') + '0');
-                var $4237 = $4243;
+                var $4269 = self.name;
+                var _name$7 = a1 => (a1 + Kind$Term$serialize$name$($4269));
+                var $4270 = (((_name$7(_x$5) + '0') + '0') + '0');
+                var $4264 = $4270;
                 break;
             case 'Kind.Term.all':
-                var $4244 = self.eras;
-                var $4245 = self.self;
-                var $4246 = self.name;
-                var $4247 = self.xtyp;
-                var $4248 = self.body;
-                var self = $4244;
+                var $4271 = self.eras;
+                var $4272 = self.self;
+                var $4273 = self.name;
+                var $4274 = self.xtyp;
+                var $4275 = self.body;
+                var self = $4271;
                 if (self) {
-                    var $4250 = Bits$i;
-                    var _eras$11 = $4250;
+                    var $4277 = Bits$i;
+                    var _eras$11 = $4277;
                 } else {
-                    var $4251 = Bits$o;
-                    var _eras$11 = $4251;
+                    var $4278 = Bits$o;
+                    var _eras$11 = $4278;
                 };
-                var _self$12 = a1 => (a1 + (kind_name_to_bits($4245)));
-                var _xtyp$13 = Kind$Term$serialize($4247)(_depth$2)(_init$3)(_diff$4);
-                var _body$14 = Kind$Term$serialize($4248(Kind$Term$var$($4245, _depth$2))(Kind$Term$var$($4246, Nat$succ$(_depth$2))))(Nat$succ$(Nat$succ$(_depth$2)))(_init$3)(_diff$4);
-                var $4249 = (((_eras$11(_self$12(_xtyp$13(_body$14(_x$5)))) + '0') + '0') + '1');
-                var $4237 = $4249;
+                var _self$12 = a1 => (a1 + (kind_name_to_bits($4272)));
+                var _xtyp$13 = Kind$Term$serialize($4274)(_depth$2)(_init$3)(_diff$4);
+                var _body$14 = Kind$Term$serialize($4275(Kind$Term$var$($4272, _depth$2))(Kind$Term$var$($4273, Nat$succ$(_depth$2))))(Nat$succ$(Nat$succ$(_depth$2)))(_init$3)(_diff$4);
+                var $4276 = (((_eras$11(_self$12(_xtyp$13(_body$14(_x$5)))) + '0') + '0') + '1');
+                var $4264 = $4276;
                 break;
             case 'Kind.Term.lam':
-                var $4252 = self.name;
-                var $4253 = self.body;
-                var _body$8 = Kind$Term$serialize($4253(Kind$Term$var$($4252, _depth$2)))(Nat$succ$(_depth$2))(_init$3)(_diff$4);
-                var $4254 = (((_body$8(_x$5) + '1') + '0') + '1');
-                var $4237 = $4254;
+                var $4279 = self.name;
+                var $4280 = self.body;
+                var _body$8 = Kind$Term$serialize($4280(Kind$Term$var$($4279, _depth$2)))(Nat$succ$(_depth$2))(_init$3)(_diff$4);
+                var $4281 = (((_body$8(_x$5) + '1') + '0') + '1');
+                var $4264 = $4281;
                 break;
             case 'Kind.Term.app':
-                var $4255 = self.func;
-                var $4256 = self.argm;
-                var _func$8 = Kind$Term$serialize($4255)(_depth$2)(_init$3)(_diff$4);
-                var _argm$9 = Kind$Term$serialize($4256)(_depth$2)(_init$3)(_diff$4);
-                var $4257 = (((_func$8(_argm$9(_x$5)) + '0') + '1') + '1');
-                var $4237 = $4257;
+                var $4282 = self.func;
+                var $4283 = self.argm;
+                var _func$8 = Kind$Term$serialize($4282)(_depth$2)(_init$3)(_diff$4);
+                var _argm$9 = Kind$Term$serialize($4283)(_depth$2)(_init$3)(_diff$4);
+                var $4284 = (((_func$8(_argm$9(_x$5)) + '0') + '1') + '1');
+                var $4264 = $4284;
                 break;
             case 'Kind.Term.let':
-                var $4258 = self.name;
-                var $4259 = self.expr;
-                var $4260 = self.body;
-                var _expr$9 = Kind$Term$serialize($4259)(_depth$2)(_init$3)(_diff$4);
-                var _body$10 = Kind$Term$serialize($4260(Kind$Term$var$($4258, _depth$2)))(Nat$succ$(_depth$2))(_init$3)(_diff$4);
-                var $4261 = (((_expr$9(_body$10(_x$5)) + '1') + '1') + '1');
-                var $4237 = $4261;
+                var $4285 = self.name;
+                var $4286 = self.expr;
+                var $4287 = self.body;
+                var _expr$9 = Kind$Term$serialize($4286)(_depth$2)(_init$3)(_diff$4);
+                var _body$10 = Kind$Term$serialize($4287(Kind$Term$var$($4285, _depth$2)))(Nat$succ$(_depth$2))(_init$3)(_diff$4);
+                var $4288 = (((_expr$9(_body$10(_x$5)) + '1') + '1') + '1');
+                var $4264 = $4288;
                 break;
             case 'Kind.Term.def':
-                var $4262 = self.expr;
-                var $4263 = self.body;
-                var $4264 = Kind$Term$serialize$($4263($4262), _depth$2, _init$3, _diff$4, _x$5);
-                var $4237 = $4264;
+                var $4289 = self.expr;
+                var $4290 = self.body;
+                var $4291 = Kind$Term$serialize$($4290($4289), _depth$2, _init$3, _diff$4, _x$5);
+                var $4264 = $4291;
                 break;
             case 'Kind.Term.ann':
-                var $4265 = self.term;
-                var $4266 = Kind$Term$serialize$($4265, _depth$2, _init$3, _diff$4, _x$5);
-                var $4237 = $4266;
+                var $4292 = self.term;
+                var $4293 = Kind$Term$serialize$($4292, _depth$2, _init$3, _diff$4, _x$5);
+                var $4264 = $4293;
                 break;
             case 'Kind.Term.gol':
-                var $4267 = self.name;
-                var _name$9 = a1 => (a1 + (kind_name_to_bits($4267)));
-                var $4268 = (((_name$9(_x$5) + '0') + '0') + '0');
-                var $4237 = $4268;
+                var $4294 = self.name;
+                var _name$9 = a1 => (a1 + (kind_name_to_bits($4294)));
+                var $4295 = (((_name$9(_x$5) + '0') + '0') + '0');
+                var $4264 = $4295;
                 break;
             case 'Kind.Term.nat':
-                var $4269 = self.natx;
-                var $4270 = Kind$Term$serialize$(Kind$Term$unroll_nat$($4269), _depth$2, _init$3, _diff$4, _x$5);
-                var $4237 = $4270;
+                var $4296 = self.natx;
+                var $4297 = Kind$Term$serialize$(Kind$Term$unroll_nat$($4296), _depth$2, _init$3, _diff$4, _x$5);
+                var $4264 = $4297;
                 break;
             case 'Kind.Term.chr':
-                var $4271 = self.chrx;
-                var $4272 = Kind$Term$serialize$(Kind$Term$unroll_chr$($4271), _depth$2, _init$3, _diff$4, _x$5);
-                var $4237 = $4272;
+                var $4298 = self.chrx;
+                var $4299 = Kind$Term$serialize$(Kind$Term$unroll_chr$($4298), _depth$2, _init$3, _diff$4, _x$5);
+                var $4264 = $4299;
                 break;
             case 'Kind.Term.str':
-                var $4273 = self.strx;
-                var $4274 = Kind$Term$serialize$(Kind$Term$unroll_str$($4273), _depth$2, _init$3, _diff$4, _x$5);
-                var $4237 = $4274;
+                var $4300 = self.strx;
+                var $4301 = Kind$Term$serialize$(Kind$Term$unroll_str$($4300), _depth$2, _init$3, _diff$4, _x$5);
+                var $4264 = $4301;
                 break;
             case 'Kind.Term.ori':
-                var $4275 = self.expr;
-                var $4276 = Kind$Term$serialize$($4275, _depth$2, _init$3, _diff$4, _x$5);
-                var $4237 = $4276;
+                var $4302 = self.expr;
+                var $4303 = Kind$Term$serialize$($4302, _depth$2, _init$3, _diff$4, _x$5);
+                var $4264 = $4303;
                 break;
             case 'Kind.Term.typ':
-                var $4277 = (((_x$5 + '1') + '1') + '0');
-                var $4237 = $4277;
+                var $4304 = (((_x$5 + '1') + '1') + '0');
+                var $4264 = $4304;
                 break;
             case 'Kind.Term.hol':
-                var $4278 = _x$5;
-                var $4237 = $4278;
+                var $4305 = _x$5;
+                var $4264 = $4305;
                 break;
             case 'Kind.Term.cse':
-                var $4279 = _diff$4(_x$5);
-                var $4237 = $4279;
+                var $4306 = _diff$4(_x$5);
+                var $4264 = $4306;
                 break;
         };
-        return $4237;
+        return $4264;
     };
     const Kind$Term$serialize = x0 => x1 => x2 => x3 => x4 => Kind$Term$serialize$(x0, x1, x2, x3, x4);
     const Bits$eql = a0 => a1 => (a1 === a0);
@@ -12093,107 +12150,107 @@ module.exports = (function() {
     function Kind$Term$identical$(_a$1, _b$2, _lv$3) {
         var _ah$4 = Kind$Term$serialize$(_a$1, _lv$3, _lv$3, Bits$o, Bits$e);
         var _bh$5 = Kind$Term$serialize$(_b$2, _lv$3, _lv$3, Bits$i, Bits$e);
-        var $4280 = (_bh$5 === _ah$4);
-        return $4280;
+        var $4307 = (_bh$5 === _ah$4);
+        return $4307;
     };
     const Kind$Term$identical = x0 => x1 => x2 => Kind$Term$identical$(x0, x1, x2);
 
     function Kind$SmartMotive$replace$(_term$1, _from$2, _to$3, _lv$4) {
         var self = Kind$Term$identical$(_term$1, _from$2, _lv$4);
         if (self) {
-            var $4282 = _to$3;
-            var $4281 = $4282;
+            var $4309 = _to$3;
+            var $4308 = $4309;
         } else {
             var self = _term$1;
             switch (self._) {
                 case 'Kind.Term.var':
-                    var $4284 = self.name;
-                    var $4285 = self.indx;
-                    var $4286 = Kind$Term$var$($4284, $4285);
-                    var $4283 = $4286;
+                    var $4311 = self.name;
+                    var $4312 = self.indx;
+                    var $4313 = Kind$Term$var$($4311, $4312);
+                    var $4310 = $4313;
                     break;
                 case 'Kind.Term.ref':
-                    var $4287 = self.name;
-                    var $4288 = Kind$Term$ref$($4287);
-                    var $4283 = $4288;
+                    var $4314 = self.name;
+                    var $4315 = Kind$Term$ref$($4314);
+                    var $4310 = $4315;
                     break;
                 case 'Kind.Term.all':
-                    var $4289 = self.eras;
-                    var $4290 = self.self;
-                    var $4291 = self.name;
-                    var $4292 = self.xtyp;
-                    var $4293 = self.body;
-                    var _xtyp$10 = Kind$SmartMotive$replace$($4292, _from$2, _to$3, _lv$4);
-                    var _body$11 = $4293(Kind$Term$ref$($4290))(Kind$Term$ref$($4291));
+                    var $4316 = self.eras;
+                    var $4317 = self.self;
+                    var $4318 = self.name;
+                    var $4319 = self.xtyp;
+                    var $4320 = self.body;
+                    var _xtyp$10 = Kind$SmartMotive$replace$($4319, _from$2, _to$3, _lv$4);
+                    var _body$11 = $4320(Kind$Term$ref$($4317))(Kind$Term$ref$($4318));
                     var _body$12 = Kind$SmartMotive$replace$(_body$11, _from$2, _to$3, Nat$succ$(Nat$succ$(_lv$4)));
-                    var $4294 = Kind$Term$all$($4289, $4290, $4291, _xtyp$10, (_s$13 => _x$14 => {
-                        var $4295 = _body$12;
-                        return $4295;
+                    var $4321 = Kind$Term$all$($4316, $4317, $4318, _xtyp$10, (_s$13 => _x$14 => {
+                        var $4322 = _body$12;
+                        return $4322;
                     }));
-                    var $4283 = $4294;
+                    var $4310 = $4321;
                     break;
                 case 'Kind.Term.lam':
-                    var $4296 = self.name;
-                    var $4297 = self.body;
-                    var _body$7 = $4297(Kind$Term$ref$($4296));
+                    var $4323 = self.name;
+                    var $4324 = self.body;
+                    var _body$7 = $4324(Kind$Term$ref$($4323));
                     var _body$8 = Kind$SmartMotive$replace$(_body$7, _from$2, _to$3, Nat$succ$(_lv$4));
-                    var $4298 = Kind$Term$lam$($4296, (_x$9 => {
-                        var $4299 = _body$8;
-                        return $4299;
+                    var $4325 = Kind$Term$lam$($4323, (_x$9 => {
+                        var $4326 = _body$8;
+                        return $4326;
                     }));
-                    var $4283 = $4298;
+                    var $4310 = $4325;
                     break;
                 case 'Kind.Term.app':
-                    var $4300 = self.func;
-                    var $4301 = self.argm;
-                    var _func$7 = Kind$SmartMotive$replace$($4300, _from$2, _to$3, _lv$4);
-                    var _argm$8 = Kind$SmartMotive$replace$($4301, _from$2, _to$3, _lv$4);
-                    var $4302 = Kind$Term$app$(_func$7, _argm$8);
-                    var $4283 = $4302;
+                    var $4327 = self.func;
+                    var $4328 = self.argm;
+                    var _func$7 = Kind$SmartMotive$replace$($4327, _from$2, _to$3, _lv$4);
+                    var _argm$8 = Kind$SmartMotive$replace$($4328, _from$2, _to$3, _lv$4);
+                    var $4329 = Kind$Term$app$(_func$7, _argm$8);
+                    var $4310 = $4329;
                     break;
                 case 'Kind.Term.let':
-                    var $4303 = self.name;
-                    var $4304 = self.expr;
-                    var $4305 = self.body;
-                    var _expr$8 = Kind$SmartMotive$replace$($4304, _from$2, _to$3, _lv$4);
-                    var _body$9 = $4305(Kind$Term$ref$($4303));
+                    var $4330 = self.name;
+                    var $4331 = self.expr;
+                    var $4332 = self.body;
+                    var _expr$8 = Kind$SmartMotive$replace$($4331, _from$2, _to$3, _lv$4);
+                    var _body$9 = $4332(Kind$Term$ref$($4330));
                     var _body$10 = Kind$SmartMotive$replace$(_body$9, _from$2, _to$3, Nat$succ$(_lv$4));
-                    var $4306 = Kind$Term$let$($4303, _expr$8, (_x$11 => {
-                        var $4307 = _body$10;
-                        return $4307;
+                    var $4333 = Kind$Term$let$($4330, _expr$8, (_x$11 => {
+                        var $4334 = _body$10;
+                        return $4334;
                     }));
-                    var $4283 = $4306;
+                    var $4310 = $4333;
                     break;
                 case 'Kind.Term.def':
-                    var $4308 = self.name;
-                    var $4309 = self.expr;
-                    var $4310 = self.body;
-                    var _expr$8 = Kind$SmartMotive$replace$($4309, _from$2, _to$3, _lv$4);
-                    var _body$9 = $4310(Kind$Term$ref$($4308));
+                    var $4335 = self.name;
+                    var $4336 = self.expr;
+                    var $4337 = self.body;
+                    var _expr$8 = Kind$SmartMotive$replace$($4336, _from$2, _to$3, _lv$4);
+                    var _body$9 = $4337(Kind$Term$ref$($4335));
                     var _body$10 = Kind$SmartMotive$replace$(_body$9, _from$2, _to$3, Nat$succ$(_lv$4));
-                    var $4311 = Kind$Term$def$($4308, _expr$8, (_x$11 => {
-                        var $4312 = _body$10;
-                        return $4312;
+                    var $4338 = Kind$Term$def$($4335, _expr$8, (_x$11 => {
+                        var $4339 = _body$10;
+                        return $4339;
                     }));
-                    var $4283 = $4311;
+                    var $4310 = $4338;
                     break;
                 case 'Kind.Term.ann':
-                    var $4313 = self.done;
-                    var $4314 = self.term;
-                    var $4315 = self.type;
-                    var _term$8 = Kind$SmartMotive$replace$($4314, _from$2, _to$3, _lv$4);
-                    var _type$9 = Kind$SmartMotive$replace$($4315, _from$2, _to$3, _lv$4);
-                    var $4316 = Kind$Term$ann$($4313, _term$8, _type$9);
-                    var $4283 = $4316;
+                    var $4340 = self.done;
+                    var $4341 = self.term;
+                    var $4342 = self.type;
+                    var _term$8 = Kind$SmartMotive$replace$($4341, _from$2, _to$3, _lv$4);
+                    var _type$9 = Kind$SmartMotive$replace$($4342, _from$2, _to$3, _lv$4);
+                    var $4343 = Kind$Term$ann$($4340, _term$8, _type$9);
+                    var $4310 = $4343;
                     break;
                 case 'Kind.Term.ori':
-                    var $4317 = self.expr;
-                    var $4318 = Kind$SmartMotive$replace$($4317, _from$2, _to$3, _lv$4);
-                    var $4283 = $4318;
+                    var $4344 = self.expr;
+                    var $4345 = Kind$SmartMotive$replace$($4344, _from$2, _to$3, _lv$4);
+                    var $4310 = $4345;
                     break;
                 case 'Kind.Term.typ':
-                    var $4319 = Kind$Term$typ;
-                    var $4283 = $4319;
+                    var $4346 = Kind$Term$typ;
+                    var $4310 = $4346;
                     break;
                 case 'Kind.Term.gol':
                 case 'Kind.Term.hol':
@@ -12201,13 +12258,13 @@ module.exports = (function() {
                 case 'Kind.Term.chr':
                 case 'Kind.Term.str':
                 case 'Kind.Term.cse':
-                    var $4320 = _term$1;
-                    var $4283 = $4320;
+                    var $4347 = _term$1;
+                    var $4310 = $4347;
                     break;
             };
-            var $4281 = $4283;
+            var $4308 = $4310;
         };
-        return $4281;
+        return $4308;
     };
     const Kind$SmartMotive$replace = x0 => x1 => x2 => x3 => Kind$SmartMotive$replace$(x0, x1, x2, x3);
 
@@ -12219,16 +12276,16 @@ module.exports = (function() {
             var self = _sub$10;
             switch (self._) {
                 case 'Pair.new':
-                    var $4323 = self.fst;
-                    var $4324 = self.snd;
-                    var $4325 = Kind$SmartMotive$replace$(_moti$11, $4324, Kind$Term$ref$($4323), _lv$5);
-                    var $4322 = $4325;
+                    var $4350 = self.fst;
+                    var $4351 = self.snd;
+                    var $4352 = Kind$SmartMotive$replace$(_moti$11, $4351, Kind$Term$ref$($4350), _lv$5);
+                    var $4349 = $4352;
                     break;
             };
-            return $4322;
+            return $4349;
         }));
-        var $4321 = _moti$10;
-        return $4321;
+        var $4348 = _moti$10;
+        return $4348;
     };
     const Kind$SmartMotive$make = x0 => x1 => x2 => x3 => x4 => x5 => Kind$SmartMotive$make$(x0, x1, x2, x3, x4, x5);
 
@@ -12236,43 +12293,43 @@ module.exports = (function() {
         var self = _wyth$1;
         switch (self._) {
             case 'List.cons':
-                var $4327 = self.head;
-                var $4328 = self.tail;
-                var self = $4327;
+                var $4354 = self.head;
+                var $4355 = self.tail;
+                var self = $4354;
                 switch (self._) {
                     case 'Kind.Def.new':
-                        var $4330 = self.name;
-                        var $4331 = self.type;
-                        var $4332 = Kind$Term$all$(Bool$false, "", $4330, $4331, (_s$14 => _x$15 => {
-                            var $4333 = Kind$Term$desugar_cse$motive$($4328, _moti$2);
-                            return $4333;
+                        var $4357 = self.name;
+                        var $4358 = self.type;
+                        var $4359 = Kind$Term$all$(Bool$false, "", $4357, $4358, (_s$14 => _x$15 => {
+                            var $4360 = Kind$Term$desugar_cse$motive$($4355, _moti$2);
+                            return $4360;
                         }));
-                        var $4329 = $4332;
+                        var $4356 = $4359;
                         break;
                 };
-                var $4326 = $4329;
+                var $4353 = $4356;
                 break;
             case 'List.nil':
-                var $4334 = _moti$2;
-                var $4326 = $4334;
+                var $4361 = _moti$2;
+                var $4353 = $4361;
                 break;
         };
-        return $4326;
+        return $4353;
     };
     const Kind$Term$desugar_cse$motive = x0 => x1 => Kind$Term$desugar_cse$motive$(x0, x1);
 
     function String$is_empty$(_str$1) {
         var self = _str$1;
         if (self.length === 0) {
-            var $4336 = Bool$true;
-            var $4335 = $4336;
+            var $4363 = Bool$true;
+            var $4362 = $4363;
         } else {
-            var $4337 = self.charCodeAt(0);
-            var $4338 = self.slice(1);
-            var $4339 = Bool$false;
-            var $4335 = $4339;
+            var $4364 = self.charCodeAt(0);
+            var $4365 = self.slice(1);
+            var $4366 = Bool$false;
+            var $4362 = $4366;
         };
-        return $4335;
+        return $4362;
     };
     const String$is_empty = x0 => String$is_empty$(x0);
 
@@ -12280,23 +12337,23 @@ module.exports = (function() {
         var self = Kind$Term$reduce$(_type$3, _defs$5);
         switch (self._) {
             case 'Kind.Term.all':
-                var $4341 = self.self;
-                var $4342 = self.name;
-                var $4343 = self.body;
-                var $4344 = Kind$Term$lam$((() => {
-                    var self = String$is_empty$($4342);
+                var $4368 = self.self;
+                var $4369 = self.name;
+                var $4370 = self.body;
+                var $4371 = Kind$Term$lam$((() => {
+                    var self = String$is_empty$($4369);
                     if (self) {
-                        var $4345 = _name$1;
-                        return $4345;
+                        var $4372 = _name$1;
+                        return $4372;
                     } else {
-                        var $4346 = String$flatten$(List$cons$(_name$1, List$cons$(".", List$cons$($4342, List$nil))));
-                        return $4346;
+                        var $4373 = String$flatten$(List$cons$(_name$1, List$cons$(".", List$cons$($4369, List$nil))));
+                        return $4373;
                     };
                 })(), (_x$11 => {
-                    var $4347 = Kind$Term$desugar_cse$argument$(_name$1, _wyth$2, $4343(Kind$Term$var$($4341, 0n))(Kind$Term$var$($4342, 0n)), _body$4, _defs$5);
-                    return $4347;
+                    var $4374 = Kind$Term$desugar_cse$argument$(_name$1, _wyth$2, $4370(Kind$Term$var$($4368, 0n))(Kind$Term$var$($4369, 0n)), _body$4, _defs$5);
+                    return $4374;
                 }));
-                var $4340 = $4344;
+                var $4367 = $4371;
                 break;
             case 'Kind.Term.var':
             case 'Kind.Term.lam':
@@ -12305,27 +12362,27 @@ module.exports = (function() {
                 var self = _wyth$2;
                 switch (self._) {
                     case 'List.cons':
-                        var $4349 = self.head;
-                        var $4350 = self.tail;
-                        var self = $4349;
+                        var $4376 = self.head;
+                        var $4377 = self.tail;
+                        var self = $4376;
                         switch (self._) {
                             case 'Kind.Def.new':
-                                var $4352 = self.name;
-                                var $4353 = Kind$Term$lam$($4352, (_x$19 => {
-                                    var $4354 = Kind$Term$desugar_cse$argument$(_name$1, $4350, _type$3, _body$4, _defs$5);
-                                    return $4354;
+                                var $4379 = self.name;
+                                var $4380 = Kind$Term$lam$($4379, (_x$19 => {
+                                    var $4381 = Kind$Term$desugar_cse$argument$(_name$1, $4377, _type$3, _body$4, _defs$5);
+                                    return $4381;
                                 }));
-                                var $4351 = $4353;
+                                var $4378 = $4380;
                                 break;
                         };
-                        var $4348 = $4351;
+                        var $4375 = $4378;
                         break;
                     case 'List.nil':
-                        var $4355 = _body$4;
-                        var $4348 = $4355;
+                        var $4382 = _body$4;
+                        var $4375 = $4382;
                         break;
                 };
-                var $4340 = $4348;
+                var $4367 = $4375;
                 break;
             case 'Kind.Term.ref':
             case 'Kind.Term.hol':
@@ -12335,53 +12392,53 @@ module.exports = (function() {
                 var self = _wyth$2;
                 switch (self._) {
                     case 'List.cons':
-                        var $4357 = self.head;
-                        var $4358 = self.tail;
-                        var self = $4357;
+                        var $4384 = self.head;
+                        var $4385 = self.tail;
+                        var self = $4384;
                         switch (self._) {
                             case 'Kind.Def.new':
-                                var $4360 = self.name;
-                                var $4361 = Kind$Term$lam$($4360, (_x$18 => {
-                                    var $4362 = Kind$Term$desugar_cse$argument$(_name$1, $4358, _type$3, _body$4, _defs$5);
-                                    return $4362;
+                                var $4387 = self.name;
+                                var $4388 = Kind$Term$lam$($4387, (_x$18 => {
+                                    var $4389 = Kind$Term$desugar_cse$argument$(_name$1, $4385, _type$3, _body$4, _defs$5);
+                                    return $4389;
                                 }));
-                                var $4359 = $4361;
+                                var $4386 = $4388;
                                 break;
                         };
-                        var $4356 = $4359;
+                        var $4383 = $4386;
                         break;
                     case 'List.nil':
-                        var $4363 = _body$4;
-                        var $4356 = $4363;
+                        var $4390 = _body$4;
+                        var $4383 = $4390;
                         break;
                 };
-                var $4340 = $4356;
+                var $4367 = $4383;
                 break;
             case 'Kind.Term.typ':
                 var self = _wyth$2;
                 switch (self._) {
                     case 'List.cons':
-                        var $4365 = self.head;
-                        var $4366 = self.tail;
-                        var self = $4365;
+                        var $4392 = self.head;
+                        var $4393 = self.tail;
+                        var self = $4392;
                         switch (self._) {
                             case 'Kind.Def.new':
-                                var $4368 = self.name;
-                                var $4369 = Kind$Term$lam$($4368, (_x$17 => {
-                                    var $4370 = Kind$Term$desugar_cse$argument$(_name$1, $4366, _type$3, _body$4, _defs$5);
-                                    return $4370;
+                                var $4395 = self.name;
+                                var $4396 = Kind$Term$lam$($4395, (_x$17 => {
+                                    var $4397 = Kind$Term$desugar_cse$argument$(_name$1, $4393, _type$3, _body$4, _defs$5);
+                                    return $4397;
                                 }));
-                                var $4367 = $4369;
+                                var $4394 = $4396;
                                 break;
                         };
-                        var $4364 = $4367;
+                        var $4391 = $4394;
                         break;
                     case 'List.nil':
-                        var $4371 = _body$4;
-                        var $4364 = $4371;
+                        var $4398 = _body$4;
+                        var $4391 = $4398;
                         break;
                 };
-                var $4340 = $4364;
+                var $4367 = $4391;
                 break;
             case 'Kind.Term.let':
             case 'Kind.Term.def':
@@ -12390,56 +12447,56 @@ module.exports = (function() {
                 var self = _wyth$2;
                 switch (self._) {
                     case 'List.cons':
-                        var $4373 = self.head;
-                        var $4374 = self.tail;
-                        var self = $4373;
+                        var $4400 = self.head;
+                        var $4401 = self.tail;
+                        var self = $4400;
                         switch (self._) {
                             case 'Kind.Def.new':
-                                var $4376 = self.name;
-                                var $4377 = Kind$Term$lam$($4376, (_x$20 => {
-                                    var $4378 = Kind$Term$desugar_cse$argument$(_name$1, $4374, _type$3, _body$4, _defs$5);
-                                    return $4378;
+                                var $4403 = self.name;
+                                var $4404 = Kind$Term$lam$($4403, (_x$20 => {
+                                    var $4405 = Kind$Term$desugar_cse$argument$(_name$1, $4401, _type$3, _body$4, _defs$5);
+                                    return $4405;
                                 }));
-                                var $4375 = $4377;
+                                var $4402 = $4404;
                                 break;
                         };
-                        var $4372 = $4375;
+                        var $4399 = $4402;
                         break;
                     case 'List.nil':
-                        var $4379 = _body$4;
-                        var $4372 = $4379;
+                        var $4406 = _body$4;
+                        var $4399 = $4406;
                         break;
                 };
-                var $4340 = $4372;
+                var $4367 = $4399;
                 break;
             case 'Kind.Term.cse':
                 var self = _wyth$2;
                 switch (self._) {
                     case 'List.cons':
-                        var $4381 = self.head;
-                        var $4382 = self.tail;
-                        var self = $4381;
+                        var $4408 = self.head;
+                        var $4409 = self.tail;
+                        var self = $4408;
                         switch (self._) {
                             case 'Kind.Def.new':
-                                var $4384 = self.name;
-                                var $4385 = Kind$Term$lam$($4384, (_x$23 => {
-                                    var $4386 = Kind$Term$desugar_cse$argument$(_name$1, $4382, _type$3, _body$4, _defs$5);
-                                    return $4386;
+                                var $4411 = self.name;
+                                var $4412 = Kind$Term$lam$($4411, (_x$23 => {
+                                    var $4413 = Kind$Term$desugar_cse$argument$(_name$1, $4409, _type$3, _body$4, _defs$5);
+                                    return $4413;
                                 }));
-                                var $4383 = $4385;
+                                var $4410 = $4412;
                                 break;
                         };
-                        var $4380 = $4383;
+                        var $4407 = $4410;
                         break;
                     case 'List.nil':
-                        var $4387 = _body$4;
-                        var $4380 = $4387;
+                        var $4414 = _body$4;
+                        var $4407 = $4414;
                         break;
                 };
-                var $4340 = $4380;
+                var $4367 = $4407;
                 break;
         };
-        return $4340;
+        return $4367;
     };
     const Kind$Term$desugar_cse$argument = x0 => x1 => x2 => x3 => x4 => Kind$Term$desugar_cse$argument$(x0, x1, x2, x3, x4);
 
@@ -12447,16 +12504,16 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Maybe.some':
-                var $4389 = self.value;
-                var $4390 = Maybe$some$($4389);
-                var $4388 = $4390;
+                var $4416 = self.value;
+                var $4417 = Maybe$some$($4416);
+                var $4415 = $4417;
                 break;
             case 'Maybe.none':
-                var $4391 = _b$3;
-                var $4388 = $4391;
+                var $4418 = _b$3;
+                var $4415 = $4418;
                 break;
         };
-        return $4388;
+        return $4415;
     };
     const Maybe$or = x0 => x1 => Maybe$or$(x0, x1);
 
@@ -12473,177 +12530,177 @@ module.exports = (function() {
                 var self = Kind$Term$reduce$(_type$5, _defs$6);
                 switch (self._) {
                     case 'Kind.Term.all':
-                        var $4392 = self.self;
-                        var $4393 = self.name;
-                        var $4394 = self.xtyp;
-                        var $4395 = self.body;
-                        var _got$13 = Maybe$or$(Kind$get$($4393, _cses$4), Kind$get$("_", _cses$4));
+                        var $4419 = self.self;
+                        var $4420 = self.name;
+                        var $4421 = self.xtyp;
+                        var $4422 = self.body;
+                        var _got$13 = Maybe$or$(Kind$get$($4420, _cses$4), Kind$get$("_", _cses$4));
                         var self = _got$13;
                         switch (self._) {
                             case 'Maybe.some':
-                                var $4397 = self.value;
-                                var _argm$15 = Kind$Term$desugar_cse$argument$(_name$2, _wyth$3, $4394, $4397, _defs$6);
+                                var $4424 = self.value;
+                                var _argm$15 = Kind$Term$desugar_cse$argument$(_name$2, _wyth$3, $4421, $4424, _defs$6);
                                 var _expr$16 = Kind$Term$app$(_expr$1, _argm$15);
-                                var _type$17 = $4395(Kind$Term$var$($4392, 0n))(Kind$Term$var$($4393, 0n));
-                                var $4398 = Kind$Term$desugar_cse$cases$(_expr$16, _name$2, _wyth$3, _cses$4, _type$17, _defs$6, _ctxt$7);
-                                var $4396 = $4398;
+                                var _type$17 = $4422(Kind$Term$var$($4419, 0n))(Kind$Term$var$($4420, 0n));
+                                var $4425 = Kind$Term$desugar_cse$cases$(_expr$16, _name$2, _wyth$3, _cses$4, _type$17, _defs$6, _ctxt$7);
+                                var $4423 = $4425;
                                 break;
                             case 'Maybe.none':
                                 var _expr$14 = (() => {
-                                    var $4401 = _expr$1;
-                                    var $4402 = _wyth$3;
-                                    let _expr$15 = $4401;
+                                    var $4428 = _expr$1;
+                                    var $4429 = _wyth$3;
+                                    let _expr$15 = $4428;
                                     let _defn$14;
-                                    while ($4402._ === 'List.cons') {
-                                        _defn$14 = $4402.head;
+                                    while ($4429._ === 'List.cons') {
+                                        _defn$14 = $4429.head;
                                         var self = _defn$14;
                                         switch (self._) {
                                             case 'Kind.Def.new':
-                                                var $4403 = self.term;
-                                                var $4404 = Kind$Term$app$(_expr$15, $4403);
-                                                var $4401 = $4404;
+                                                var $4430 = self.term;
+                                                var $4431 = Kind$Term$app$(_expr$15, $4430);
+                                                var $4428 = $4431;
                                                 break;
                                         };
-                                        _expr$15 = $4401;
-                                        $4402 = $4402.tail;
+                                        _expr$15 = $4428;
+                                        $4429 = $4429.tail;
                                     }
                                     return _expr$15;
                                 })();
-                                var $4399 = _expr$14;
-                                var $4396 = $4399;
+                                var $4426 = _expr$14;
+                                var $4423 = $4426;
                                 break;
                         };
-                        return $4396;
+                        return $4423;
                     case 'Kind.Term.var':
                     case 'Kind.Term.lam':
                     case 'Kind.Term.app':
                     case 'Kind.Term.ori':
                         var _expr$10 = (() => {
-                            var $4407 = _expr$1;
-                            var $4408 = _wyth$3;
-                            let _expr$11 = $4407;
+                            var $4434 = _expr$1;
+                            var $4435 = _wyth$3;
+                            let _expr$11 = $4434;
                             let _defn$10;
-                            while ($4408._ === 'List.cons') {
-                                _defn$10 = $4408.head;
-                                var $4407 = Kind$Term$app$(_expr$11, (() => {
+                            while ($4435._ === 'List.cons') {
+                                _defn$10 = $4435.head;
+                                var $4434 = Kind$Term$app$(_expr$11, (() => {
                                     var self = _defn$10;
                                     switch (self._) {
                                         case 'Kind.Def.new':
-                                            var $4409 = self.term;
-                                            var $4410 = $4409;
-                                            return $4410;
+                                            var $4436 = self.term;
+                                            var $4437 = $4436;
+                                            return $4437;
                                     };
                                 })());
-                                _expr$11 = $4407;
-                                $4408 = $4408.tail;
+                                _expr$11 = $4434;
+                                $4435 = $4435.tail;
                             }
                             return _expr$11;
                         })();
-                        var $4405 = _expr$10;
-                        return $4405;
+                        var $4432 = _expr$10;
+                        return $4432;
                     case 'Kind.Term.ref':
                     case 'Kind.Term.hol':
                     case 'Kind.Term.nat':
                     case 'Kind.Term.chr':
                     case 'Kind.Term.str':
                         var _expr$9 = (() => {
-                            var $4413 = _expr$1;
-                            var $4414 = _wyth$3;
-                            let _expr$10 = $4413;
+                            var $4440 = _expr$1;
+                            var $4441 = _wyth$3;
+                            let _expr$10 = $4440;
                             let _defn$9;
-                            while ($4414._ === 'List.cons') {
-                                _defn$9 = $4414.head;
-                                var $4413 = Kind$Term$app$(_expr$10, (() => {
+                            while ($4441._ === 'List.cons') {
+                                _defn$9 = $4441.head;
+                                var $4440 = Kind$Term$app$(_expr$10, (() => {
                                     var self = _defn$9;
                                     switch (self._) {
                                         case 'Kind.Def.new':
-                                            var $4415 = self.term;
-                                            var $4416 = $4415;
-                                            return $4416;
+                                            var $4442 = self.term;
+                                            var $4443 = $4442;
+                                            return $4443;
                                     };
                                 })());
-                                _expr$10 = $4413;
-                                $4414 = $4414.tail;
+                                _expr$10 = $4440;
+                                $4441 = $4441.tail;
                             }
                             return _expr$10;
                         })();
-                        var $4411 = _expr$9;
-                        return $4411;
+                        var $4438 = _expr$9;
+                        return $4438;
                     case 'Kind.Term.typ':
                         var _expr$8 = (() => {
-                            var $4419 = _expr$1;
-                            var $4420 = _wyth$3;
-                            let _expr$9 = $4419;
+                            var $4446 = _expr$1;
+                            var $4447 = _wyth$3;
+                            let _expr$9 = $4446;
                             let _defn$8;
-                            while ($4420._ === 'List.cons') {
-                                _defn$8 = $4420.head;
-                                var $4419 = Kind$Term$app$(_expr$9, (() => {
+                            while ($4447._ === 'List.cons') {
+                                _defn$8 = $4447.head;
+                                var $4446 = Kind$Term$app$(_expr$9, (() => {
                                     var self = _defn$8;
                                     switch (self._) {
                                         case 'Kind.Def.new':
-                                            var $4421 = self.term;
-                                            var $4422 = $4421;
-                                            return $4422;
+                                            var $4448 = self.term;
+                                            var $4449 = $4448;
+                                            return $4449;
                                     };
                                 })());
-                                _expr$9 = $4419;
-                                $4420 = $4420.tail;
+                                _expr$9 = $4446;
+                                $4447 = $4447.tail;
                             }
                             return _expr$9;
                         })();
-                        var $4417 = _expr$8;
-                        return $4417;
+                        var $4444 = _expr$8;
+                        return $4444;
                     case 'Kind.Term.let':
                     case 'Kind.Term.def':
                     case 'Kind.Term.ann':
                     case 'Kind.Term.gol':
                         var _expr$11 = (() => {
-                            var $4425 = _expr$1;
-                            var $4426 = _wyth$3;
-                            let _expr$12 = $4425;
+                            var $4452 = _expr$1;
+                            var $4453 = _wyth$3;
+                            let _expr$12 = $4452;
                             let _defn$11;
-                            while ($4426._ === 'List.cons') {
-                                _defn$11 = $4426.head;
-                                var $4425 = Kind$Term$app$(_expr$12, (() => {
+                            while ($4453._ === 'List.cons') {
+                                _defn$11 = $4453.head;
+                                var $4452 = Kind$Term$app$(_expr$12, (() => {
                                     var self = _defn$11;
                                     switch (self._) {
                                         case 'Kind.Def.new':
-                                            var $4427 = self.term;
-                                            var $4428 = $4427;
-                                            return $4428;
+                                            var $4454 = self.term;
+                                            var $4455 = $4454;
+                                            return $4455;
                                     };
                                 })());
-                                _expr$12 = $4425;
-                                $4426 = $4426.tail;
+                                _expr$12 = $4452;
+                                $4453 = $4453.tail;
                             }
                             return _expr$12;
                         })();
-                        var $4423 = _expr$11;
-                        return $4423;
+                        var $4450 = _expr$11;
+                        return $4450;
                     case 'Kind.Term.cse':
                         var _expr$14 = (() => {
-                            var $4431 = _expr$1;
-                            var $4432 = _wyth$3;
-                            let _expr$15 = $4431;
+                            var $4458 = _expr$1;
+                            var $4459 = _wyth$3;
+                            let _expr$15 = $4458;
                             let _defn$14;
-                            while ($4432._ === 'List.cons') {
-                                _defn$14 = $4432.head;
-                                var $4431 = Kind$Term$app$(_expr$15, (() => {
+                            while ($4459._ === 'List.cons') {
+                                _defn$14 = $4459.head;
+                                var $4458 = Kind$Term$app$(_expr$15, (() => {
                                     var self = _defn$14;
                                     switch (self._) {
                                         case 'Kind.Def.new':
-                                            var $4433 = self.term;
-                                            var $4434 = $4433;
-                                            return $4434;
+                                            var $4460 = self.term;
+                                            var $4461 = $4460;
+                                            return $4461;
                                     };
                                 })());
-                                _expr$15 = $4431;
-                                $4432 = $4432.tail;
+                                _expr$15 = $4458;
+                                $4459 = $4459.tail;
                             }
                             return _expr$15;
                         })();
-                        var $4429 = _expr$14;
-                        return $4429;
+                        var $4456 = _expr$14;
+                        return $4456;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -12656,16 +12713,16 @@ module.exports = (function() {
         var self = Kind$Term$reduce$(_type$6, _defs$7);
         switch (self._) {
             case 'Kind.Term.all':
-                var $4436 = self.self;
-                var $4437 = self.name;
-                var $4438 = self.xtyp;
-                var $4439 = self.body;
+                var $4463 = self.self;
+                var $4464 = self.name;
+                var $4465 = self.xtyp;
+                var $4466 = self.body;
                 var _moti$14 = Kind$Term$desugar_cse$motive$(_wyth$3, _moti$5);
-                var _argm$15 = Kind$Term$desugar_cse$argument$(_name$2, List$nil, $4438, _moti$14, _defs$7);
+                var _argm$15 = Kind$Term$desugar_cse$argument$(_name$2, List$nil, $4465, _moti$14, _defs$7);
                 var _expr$16 = Kind$Term$app$(_expr$1, _argm$15);
-                var _type$17 = $4439(Kind$Term$var$($4436, 0n))(Kind$Term$var$($4437, 0n));
-                var $4440 = Maybe$some$(Kind$Term$desugar_cse$cases$(_expr$16, _name$2, _wyth$3, _cses$4, _type$17, _defs$7, _ctxt$8));
-                var $4435 = $4440;
+                var _type$17 = $4466(Kind$Term$var$($4463, 0n))(Kind$Term$var$($4464, 0n));
+                var $4467 = Maybe$some$(Kind$Term$desugar_cse$cases$(_expr$16, _name$2, _wyth$3, _cses$4, _type$17, _defs$7, _ctxt$8));
+                var $4462 = $4467;
                 break;
             case 'Kind.Term.var':
             case 'Kind.Term.ref':
@@ -12682,22 +12739,22 @@ module.exports = (function() {
             case 'Kind.Term.str':
             case 'Kind.Term.cse':
             case 'Kind.Term.ori':
-                var $4441 = Maybe$none;
-                var $4435 = $4441;
+                var $4468 = Maybe$none;
+                var $4462 = $4468;
                 break;
         };
-        return $4435;
+        return $4462;
     };
     const Kind$Term$desugar_cse = x0 => x1 => x2 => x3 => x4 => x5 => x6 => x7 => Kind$Term$desugar_cse$(x0, x1, x2, x3, x4, x5, x6, x7);
 
     function Kind$Error$cant_infer$(_origin$1, _term$2, _context$3) {
-        var $4442 = ({
+        var $4469 = ({
             _: 'Kind.Error.cant_infer',
             'origin': _origin$1,
             'term': _term$2,
             'context': _context$3
         });
-        return $4442;
+        return $4469;
     };
     const Kind$Error$cant_infer = x0 => x1 => x2 => Kind$Error$cant_infer$(x0, x1, x2);
 
@@ -12705,15 +12762,15 @@ module.exports = (function() {
         var self = Map$get$(_bits$1, _set$2);
         switch (self._) {
             case 'Maybe.none':
-                var $4444 = Bool$false;
-                var $4443 = $4444;
+                var $4471 = Bool$false;
+                var $4470 = $4471;
                 break;
             case 'Maybe.some':
-                var $4445 = Bool$true;
-                var $4443 = $4445;
+                var $4472 = Bool$true;
+                var $4470 = $4472;
                 break;
         };
-        return $4443;
+        return $4470;
     };
     const Set$has = x0 => x1 => Set$has$(x0, x1);
     const Set$mut$has = a0 => a1 => (!!(a1[a0]));
@@ -12731,21 +12788,21 @@ module.exports = (function() {
                 var self = _term$1;
                 switch (self._) {
                     case 'Kind.Term.var':
-                        var $4446 = self.name;
-                        var $4447 = Maybe$some$(Pair$new$($4446, _arity$2));
-                        return $4447;
+                        var $4473 = self.name;
+                        var $4474 = Maybe$some$(Pair$new$($4473, _arity$2));
+                        return $4474;
                     case 'Kind.Term.ref':
-                        var $4448 = self.name;
-                        var $4449 = Maybe$some$(Pair$new$($4448, _arity$2));
-                        return $4449;
+                        var $4475 = self.name;
+                        var $4476 = Maybe$some$(Pair$new$($4475, _arity$2));
+                        return $4476;
                     case 'Kind.Term.app':
-                        var $4450 = self.func;
-                        var $4451 = Kind$Term$equal$extra_holes$funari$($4450, Nat$succ$(_arity$2));
-                        return $4451;
+                        var $4477 = self.func;
+                        var $4478 = Kind$Term$equal$extra_holes$funari$($4477, Nat$succ$(_arity$2));
+                        return $4478;
                     case 'Kind.Term.ori':
-                        var $4452 = self.expr;
-                        var $4453 = Kind$Term$equal$extra_holes$funari$($4452, _arity$2);
-                        return $4453;
+                        var $4479 = self.expr;
+                        var $4480 = Kind$Term$equal$extra_holes$funari$($4479, _arity$2);
+                        return $4480;
                     case 'Kind.Term.typ':
                     case 'Kind.Term.all':
                     case 'Kind.Term.lam':
@@ -12758,8 +12815,8 @@ module.exports = (function() {
                     case 'Kind.Term.chr':
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
-                        var $4454 = Maybe$none;
-                        return $4454;
+                        var $4481 = Maybe$none;
+                        return $4481;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -12773,44 +12830,44 @@ module.exports = (function() {
         var self = _term$1;
         switch (self._) {
             case 'Kind.Term.all':
-                var $4456 = self.xtyp;
-                var $4457 = self.body;
-                var $4458 = (Kind$Term$has_holes$($4456) || Kind$Term$has_holes$($4457(Kind$Term$typ)(Kind$Term$typ)));
-                var $4455 = $4458;
+                var $4483 = self.xtyp;
+                var $4484 = self.body;
+                var $4485 = (Kind$Term$has_holes$($4483) || Kind$Term$has_holes$($4484(Kind$Term$typ)(Kind$Term$typ)));
+                var $4482 = $4485;
                 break;
             case 'Kind.Term.lam':
-                var $4459 = self.body;
-                var $4460 = Kind$Term$has_holes$($4459(Kind$Term$typ));
-                var $4455 = $4460;
+                var $4486 = self.body;
+                var $4487 = Kind$Term$has_holes$($4486(Kind$Term$typ));
+                var $4482 = $4487;
                 break;
             case 'Kind.Term.app':
-                var $4461 = self.func;
-                var $4462 = self.argm;
-                var $4463 = (Kind$Term$has_holes$($4461) || Kind$Term$has_holes$($4462));
-                var $4455 = $4463;
+                var $4488 = self.func;
+                var $4489 = self.argm;
+                var $4490 = (Kind$Term$has_holes$($4488) || Kind$Term$has_holes$($4489));
+                var $4482 = $4490;
                 break;
             case 'Kind.Term.let':
-                var $4464 = self.expr;
-                var $4465 = self.body;
-                var $4466 = (Kind$Term$has_holes$($4464) || Kind$Term$has_holes$($4465(Kind$Term$typ)));
-                var $4455 = $4466;
+                var $4491 = self.expr;
+                var $4492 = self.body;
+                var $4493 = (Kind$Term$has_holes$($4491) || Kind$Term$has_holes$($4492(Kind$Term$typ)));
+                var $4482 = $4493;
                 break;
             case 'Kind.Term.def':
-                var $4467 = self.expr;
-                var $4468 = self.body;
-                var $4469 = (Kind$Term$has_holes$($4467) || Kind$Term$has_holes$($4468(Kind$Term$typ)));
-                var $4455 = $4469;
+                var $4494 = self.expr;
+                var $4495 = self.body;
+                var $4496 = (Kind$Term$has_holes$($4494) || Kind$Term$has_holes$($4495(Kind$Term$typ)));
+                var $4482 = $4496;
                 break;
             case 'Kind.Term.ann':
-                var $4470 = self.term;
-                var $4471 = self.type;
-                var $4472 = (Kind$Term$has_holes$($4470) || Kind$Term$has_holes$($4471));
-                var $4455 = $4472;
+                var $4497 = self.term;
+                var $4498 = self.type;
+                var $4499 = (Kind$Term$has_holes$($4497) || Kind$Term$has_holes$($4498));
+                var $4482 = $4499;
                 break;
             case 'Kind.Term.ori':
-                var $4473 = self.expr;
-                var $4474 = Kind$Term$has_holes$($4473);
-                var $4455 = $4474;
+                var $4500 = self.expr;
+                var $4501 = Kind$Term$has_holes$($4500);
+                var $4482 = $4501;
                 break;
             case 'Kind.Term.var':
             case 'Kind.Term.ref':
@@ -12820,15 +12877,15 @@ module.exports = (function() {
             case 'Kind.Term.chr':
             case 'Kind.Term.str':
             case 'Kind.Term.cse':
-                var $4475 = Bool$false;
-                var $4455 = $4475;
+                var $4502 = Bool$false;
+                var $4482 = $4502;
                 break;
             case 'Kind.Term.hol':
-                var $4476 = Bool$true;
-                var $4455 = $4476;
+                var $4503 = Bool$true;
+                var $4482 = $4503;
                 break;
         };
-        return $4455;
+        return $4482;
     };
     const Kind$Term$has_holes = x0 => Kind$Term$has_holes$(x0);
 
@@ -12852,20 +12909,20 @@ module.exports = (function() {
             case 'Kind.Term.ori':
                 var self = Kind$Term$has_holes$(_term$2);
                 if (self) {
-                    var $4479 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
-                    var $4478 = $4479;
+                    var $4506 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
+                    var $4505 = $4506;
                 } else {
-                    var $4480 = Kind$Check$result$(Maybe$some$(Bool$true), List$cons$(Kind$Error$patch$(_path$1, Kind$Term$normalize$(_term$2, Map$new)), List$nil));
-                    var $4478 = $4480;
+                    var $4507 = Kind$Check$result$(Maybe$some$(Bool$true), List$cons$(Kind$Error$patch$(_path$1, Kind$Term$normalize$(_term$2, Map$new)), List$nil));
+                    var $4505 = $4507;
                 };
-                var $4477 = $4478;
+                var $4504 = $4505;
                 break;
             case 'Kind.Term.hol':
-                var $4481 = Kind$Check$result$(Maybe$some$(Bool$true), List$nil);
-                var $4477 = $4481;
+                var $4508 = Kind$Check$result$(Maybe$some$(Bool$true), List$nil);
+                var $4504 = $4508;
                 break;
         };
-        return $4477;
+        return $4504;
     };
     const Kind$Term$equal$hole = x0 => x1 => Kind$Term$equal$hole$(x0, x1);
 
@@ -12873,77 +12930,77 @@ module.exports = (function() {
         var self = _a$1;
         switch (self._) {
             case 'Kind.Term.app':
-                var $4483 = self.func;
-                var $4484 = self.argm;
+                var $4510 = self.func;
+                var $4511 = self.argm;
                 var self = _b$2;
                 switch (self._) {
                     case 'Kind.Term.app':
-                        var $4486 = self.func;
-                        var $4487 = self.argm;
-                        var self = Kind$Term$equal$extra_holes$filler$($4483, $4486);
+                        var $4513 = self.func;
+                        var $4514 = self.argm;
+                        var self = Kind$Term$equal$extra_holes$filler$($4510, $4513);
                         switch (self._) {
                             case 'Kind.Check.result':
-                                var $4489 = self.value;
-                                var $4490 = self.errors;
-                                var self = $4489;
+                                var $4516 = self.value;
+                                var $4517 = self.errors;
+                                var self = $4516;
                                 switch (self._) {
                                     case 'Maybe.none':
-                                        var $4492 = Kind$Check$result$(Maybe$none, $4490);
-                                        var $4491 = $4492;
+                                        var $4519 = Kind$Check$result$(Maybe$none, $4517);
+                                        var $4518 = $4519;
                                         break;
                                     case 'Maybe.some':
-                                        var self = Kind$Term$equal$extra_holes$filler$($4484, $4487);
+                                        var self = Kind$Term$equal$extra_holes$filler$($4511, $4514);
                                         switch (self._) {
                                             case 'Kind.Check.result':
-                                                var $4494 = self.value;
-                                                var $4495 = self.errors;
-                                                var $4496 = Kind$Check$result$($4494, List$concat$($4490, $4495));
-                                                var $4493 = $4496;
+                                                var $4521 = self.value;
+                                                var $4522 = self.errors;
+                                                var $4523 = Kind$Check$result$($4521, List$concat$($4517, $4522));
+                                                var $4520 = $4523;
                                                 break;
                                         };
-                                        var $4491 = $4493;
+                                        var $4518 = $4520;
                                         break;
                                 };
-                                var $4488 = $4491;
+                                var $4515 = $4518;
                                 break;
                         };
-                        var $4485 = $4488;
+                        var $4512 = $4515;
                         break;
                     case 'Kind.Term.hol':
-                        var $4497 = self.path;
-                        var self = Kind$Term$equal$hole$($4497, _a$1);
+                        var $4524 = self.path;
+                        var self = Kind$Term$equal$hole$($4524, _a$1);
                         switch (self._) {
                             case 'Kind.Check.result':
-                                var $4499 = self.value;
-                                var $4500 = self.errors;
-                                var self = $4499;
+                                var $4526 = self.value;
+                                var $4527 = self.errors;
+                                var self = $4526;
                                 switch (self._) {
                                     case 'Maybe.none':
-                                        var $4502 = Kind$Check$result$(Maybe$none, $4500);
-                                        var $4501 = $4502;
+                                        var $4529 = Kind$Check$result$(Maybe$none, $4527);
+                                        var $4528 = $4529;
                                         break;
                                     case 'Maybe.some':
                                         var self = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
                                         switch (self._) {
                                             case 'Kind.Check.result':
-                                                var $4504 = self.value;
-                                                var $4505 = self.errors;
-                                                var $4506 = Kind$Check$result$($4504, List$concat$($4500, $4505));
-                                                var $4503 = $4506;
+                                                var $4531 = self.value;
+                                                var $4532 = self.errors;
+                                                var $4533 = Kind$Check$result$($4531, List$concat$($4527, $4532));
+                                                var $4530 = $4533;
                                                 break;
                                         };
-                                        var $4501 = $4503;
+                                        var $4528 = $4530;
                                         break;
                                 };
-                                var $4498 = $4501;
+                                var $4525 = $4528;
                                 break;
                         };
-                        var $4485 = $4498;
+                        var $4512 = $4525;
                         break;
                     case 'Kind.Term.ori':
-                        var $4507 = self.expr;
-                        var $4508 = Kind$Term$equal$extra_holes$filler$(_a$1, $4507);
-                        var $4485 = $4508;
+                        var $4534 = self.expr;
+                        var $4535 = Kind$Term$equal$extra_holes$filler$(_a$1, $4534);
+                        var $4512 = $4535;
                         break;
                     case 'Kind.Term.var':
                     case 'Kind.Term.ref':
@@ -12958,87 +13015,87 @@ module.exports = (function() {
                     case 'Kind.Term.chr':
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
-                        var $4509 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
-                        var $4485 = $4509;
+                        var $4536 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
+                        var $4512 = $4536;
                         break;
                 };
-                var $4482 = $4485;
+                var $4509 = $4512;
                 break;
             case 'Kind.Term.hol':
-                var $4510 = self.path;
-                var self = Kind$Term$equal$hole$($4510, _b$2);
+                var $4537 = self.path;
+                var self = Kind$Term$equal$hole$($4537, _b$2);
                 switch (self._) {
                     case 'Kind.Check.result':
-                        var $4512 = self.value;
-                        var $4513 = self.errors;
-                        var self = $4512;
+                        var $4539 = self.value;
+                        var $4540 = self.errors;
+                        var self = $4539;
                         switch (self._) {
                             case 'Maybe.none':
-                                var $4515 = Kind$Check$result$(Maybe$none, $4513);
-                                var $4514 = $4515;
+                                var $4542 = Kind$Check$result$(Maybe$none, $4540);
+                                var $4541 = $4542;
                                 break;
                             case 'Maybe.some':
                                 var self = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
                                 switch (self._) {
                                     case 'Kind.Check.result':
-                                        var $4517 = self.value;
-                                        var $4518 = self.errors;
-                                        var $4519 = Kind$Check$result$($4517, List$concat$($4513, $4518));
-                                        var $4516 = $4519;
+                                        var $4544 = self.value;
+                                        var $4545 = self.errors;
+                                        var $4546 = Kind$Check$result$($4544, List$concat$($4540, $4545));
+                                        var $4543 = $4546;
                                         break;
                                 };
-                                var $4514 = $4516;
+                                var $4541 = $4543;
                                 break;
                         };
-                        var $4511 = $4514;
+                        var $4538 = $4541;
                         break;
                 };
-                var $4482 = $4511;
+                var $4509 = $4538;
                 break;
             case 'Kind.Term.ori':
-                var $4520 = self.expr;
-                var $4521 = Kind$Term$equal$extra_holes$filler$($4520, _b$2);
-                var $4482 = $4521;
+                var $4547 = self.expr;
+                var $4548 = Kind$Term$equal$extra_holes$filler$($4547, _b$2);
+                var $4509 = $4548;
                 break;
             case 'Kind.Term.var':
             case 'Kind.Term.lam':
                 var self = _b$2;
                 switch (self._) {
                     case 'Kind.Term.hol':
-                        var $4523 = self.path;
-                        var self = Kind$Term$equal$hole$($4523, _a$1);
+                        var $4550 = self.path;
+                        var self = Kind$Term$equal$hole$($4550, _a$1);
                         switch (self._) {
                             case 'Kind.Check.result':
-                                var $4525 = self.value;
-                                var $4526 = self.errors;
-                                var self = $4525;
+                                var $4552 = self.value;
+                                var $4553 = self.errors;
+                                var self = $4552;
                                 switch (self._) {
                                     case 'Maybe.none':
-                                        var $4528 = Kind$Check$result$(Maybe$none, $4526);
-                                        var $4527 = $4528;
+                                        var $4555 = Kind$Check$result$(Maybe$none, $4553);
+                                        var $4554 = $4555;
                                         break;
                                     case 'Maybe.some':
                                         var self = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
                                         switch (self._) {
                                             case 'Kind.Check.result':
-                                                var $4530 = self.value;
-                                                var $4531 = self.errors;
-                                                var $4532 = Kind$Check$result$($4530, List$concat$($4526, $4531));
-                                                var $4529 = $4532;
+                                                var $4557 = self.value;
+                                                var $4558 = self.errors;
+                                                var $4559 = Kind$Check$result$($4557, List$concat$($4553, $4558));
+                                                var $4556 = $4559;
                                                 break;
                                         };
-                                        var $4527 = $4529;
+                                        var $4554 = $4556;
                                         break;
                                 };
-                                var $4524 = $4527;
+                                var $4551 = $4554;
                                 break;
                         };
-                        var $4522 = $4524;
+                        var $4549 = $4551;
                         break;
                     case 'Kind.Term.ori':
-                        var $4533 = self.expr;
-                        var $4534 = Kind$Term$equal$extra_holes$filler$(_a$1, $4533);
-                        var $4522 = $4534;
+                        var $4560 = self.expr;
+                        var $4561 = Kind$Term$equal$extra_holes$filler$(_a$1, $4560);
+                        var $4549 = $4561;
                         break;
                     case 'Kind.Term.var':
                     case 'Kind.Term.ref':
@@ -13054,11 +13111,11 @@ module.exports = (function() {
                     case 'Kind.Term.chr':
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
-                        var $4535 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
-                        var $4522 = $4535;
+                        var $4562 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
+                        var $4549 = $4562;
                         break;
                 };
-                var $4482 = $4522;
+                var $4509 = $4549;
                 break;
             case 'Kind.Term.ref':
             case 'Kind.Term.nat':
@@ -13067,40 +13124,40 @@ module.exports = (function() {
                 var self = _b$2;
                 switch (self._) {
                     case 'Kind.Term.hol':
-                        var $4537 = self.path;
-                        var self = Kind$Term$equal$hole$($4537, _a$1);
+                        var $4564 = self.path;
+                        var self = Kind$Term$equal$hole$($4564, _a$1);
                         switch (self._) {
                             case 'Kind.Check.result':
-                                var $4539 = self.value;
-                                var $4540 = self.errors;
-                                var self = $4539;
+                                var $4566 = self.value;
+                                var $4567 = self.errors;
+                                var self = $4566;
                                 switch (self._) {
                                     case 'Maybe.none':
-                                        var $4542 = Kind$Check$result$(Maybe$none, $4540);
-                                        var $4541 = $4542;
+                                        var $4569 = Kind$Check$result$(Maybe$none, $4567);
+                                        var $4568 = $4569;
                                         break;
                                     case 'Maybe.some':
                                         var self = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
                                         switch (self._) {
                                             case 'Kind.Check.result':
-                                                var $4544 = self.value;
-                                                var $4545 = self.errors;
-                                                var $4546 = Kind$Check$result$($4544, List$concat$($4540, $4545));
-                                                var $4543 = $4546;
+                                                var $4571 = self.value;
+                                                var $4572 = self.errors;
+                                                var $4573 = Kind$Check$result$($4571, List$concat$($4567, $4572));
+                                                var $4570 = $4573;
                                                 break;
                                         };
-                                        var $4541 = $4543;
+                                        var $4568 = $4570;
                                         break;
                                 };
-                                var $4538 = $4541;
+                                var $4565 = $4568;
                                 break;
                         };
-                        var $4536 = $4538;
+                        var $4563 = $4565;
                         break;
                     case 'Kind.Term.ori':
-                        var $4547 = self.expr;
-                        var $4548 = Kind$Term$equal$extra_holes$filler$(_a$1, $4547);
-                        var $4536 = $4548;
+                        var $4574 = self.expr;
+                        var $4575 = Kind$Term$equal$extra_holes$filler$(_a$1, $4574);
+                        var $4563 = $4575;
                         break;
                     case 'Kind.Term.var':
                     case 'Kind.Term.ref':
@@ -13116,50 +13173,50 @@ module.exports = (function() {
                     case 'Kind.Term.chr':
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
-                        var $4549 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
-                        var $4536 = $4549;
+                        var $4576 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
+                        var $4563 = $4576;
                         break;
                 };
-                var $4482 = $4536;
+                var $4509 = $4563;
                 break;
             case 'Kind.Term.typ':
                 var self = _b$2;
                 switch (self._) {
                     case 'Kind.Term.hol':
-                        var $4551 = self.path;
-                        var self = Kind$Term$equal$hole$($4551, _a$1);
+                        var $4578 = self.path;
+                        var self = Kind$Term$equal$hole$($4578, _a$1);
                         switch (self._) {
                             case 'Kind.Check.result':
-                                var $4553 = self.value;
-                                var $4554 = self.errors;
-                                var self = $4553;
+                                var $4580 = self.value;
+                                var $4581 = self.errors;
+                                var self = $4580;
                                 switch (self._) {
                                     case 'Maybe.none':
-                                        var $4556 = Kind$Check$result$(Maybe$none, $4554);
-                                        var $4555 = $4556;
+                                        var $4583 = Kind$Check$result$(Maybe$none, $4581);
+                                        var $4582 = $4583;
                                         break;
                                     case 'Maybe.some':
                                         var self = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
                                         switch (self._) {
                                             case 'Kind.Check.result':
-                                                var $4558 = self.value;
-                                                var $4559 = self.errors;
-                                                var $4560 = Kind$Check$result$($4558, List$concat$($4554, $4559));
-                                                var $4557 = $4560;
+                                                var $4585 = self.value;
+                                                var $4586 = self.errors;
+                                                var $4587 = Kind$Check$result$($4585, List$concat$($4581, $4586));
+                                                var $4584 = $4587;
                                                 break;
                                         };
-                                        var $4555 = $4557;
+                                        var $4582 = $4584;
                                         break;
                                 };
-                                var $4552 = $4555;
+                                var $4579 = $4582;
                                 break;
                         };
-                        var $4550 = $4552;
+                        var $4577 = $4579;
                         break;
                     case 'Kind.Term.ori':
-                        var $4561 = self.expr;
-                        var $4562 = Kind$Term$equal$extra_holes$filler$(_a$1, $4561);
-                        var $4550 = $4562;
+                        var $4588 = self.expr;
+                        var $4589 = Kind$Term$equal$extra_holes$filler$(_a$1, $4588);
+                        var $4577 = $4589;
                         break;
                     case 'Kind.Term.var':
                     case 'Kind.Term.ref':
@@ -13175,50 +13232,50 @@ module.exports = (function() {
                     case 'Kind.Term.chr':
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
-                        var $4563 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
-                        var $4550 = $4563;
+                        var $4590 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
+                        var $4577 = $4590;
                         break;
                 };
-                var $4482 = $4550;
+                var $4509 = $4577;
                 break;
             case 'Kind.Term.all':
                 var self = _b$2;
                 switch (self._) {
                     case 'Kind.Term.hol':
-                        var $4565 = self.path;
-                        var self = Kind$Term$equal$hole$($4565, _a$1);
+                        var $4592 = self.path;
+                        var self = Kind$Term$equal$hole$($4592, _a$1);
                         switch (self._) {
                             case 'Kind.Check.result':
-                                var $4567 = self.value;
-                                var $4568 = self.errors;
-                                var self = $4567;
+                                var $4594 = self.value;
+                                var $4595 = self.errors;
+                                var self = $4594;
                                 switch (self._) {
                                     case 'Maybe.none':
-                                        var $4570 = Kind$Check$result$(Maybe$none, $4568);
-                                        var $4569 = $4570;
+                                        var $4597 = Kind$Check$result$(Maybe$none, $4595);
+                                        var $4596 = $4597;
                                         break;
                                     case 'Maybe.some':
                                         var self = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
                                         switch (self._) {
                                             case 'Kind.Check.result':
-                                                var $4572 = self.value;
-                                                var $4573 = self.errors;
-                                                var $4574 = Kind$Check$result$($4572, List$concat$($4568, $4573));
-                                                var $4571 = $4574;
+                                                var $4599 = self.value;
+                                                var $4600 = self.errors;
+                                                var $4601 = Kind$Check$result$($4599, List$concat$($4595, $4600));
+                                                var $4598 = $4601;
                                                 break;
                                         };
-                                        var $4569 = $4571;
+                                        var $4596 = $4598;
                                         break;
                                 };
-                                var $4566 = $4569;
+                                var $4593 = $4596;
                                 break;
                         };
-                        var $4564 = $4566;
+                        var $4591 = $4593;
                         break;
                     case 'Kind.Term.ori':
-                        var $4575 = self.expr;
-                        var $4576 = Kind$Term$equal$extra_holes$filler$(_a$1, $4575);
-                        var $4564 = $4576;
+                        var $4602 = self.expr;
+                        var $4603 = Kind$Term$equal$extra_holes$filler$(_a$1, $4602);
+                        var $4591 = $4603;
                         break;
                     case 'Kind.Term.var':
                     case 'Kind.Term.ref':
@@ -13234,11 +13291,11 @@ module.exports = (function() {
                     case 'Kind.Term.chr':
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
-                        var $4577 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
-                        var $4564 = $4577;
+                        var $4604 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
+                        var $4591 = $4604;
                         break;
                 };
-                var $4482 = $4564;
+                var $4509 = $4591;
                 break;
             case 'Kind.Term.let':
             case 'Kind.Term.def':
@@ -13247,40 +13304,40 @@ module.exports = (function() {
                 var self = _b$2;
                 switch (self._) {
                     case 'Kind.Term.hol':
-                        var $4579 = self.path;
-                        var self = Kind$Term$equal$hole$($4579, _a$1);
+                        var $4606 = self.path;
+                        var self = Kind$Term$equal$hole$($4606, _a$1);
                         switch (self._) {
                             case 'Kind.Check.result':
-                                var $4581 = self.value;
-                                var $4582 = self.errors;
-                                var self = $4581;
+                                var $4608 = self.value;
+                                var $4609 = self.errors;
+                                var self = $4608;
                                 switch (self._) {
                                     case 'Maybe.none':
-                                        var $4584 = Kind$Check$result$(Maybe$none, $4582);
-                                        var $4583 = $4584;
+                                        var $4611 = Kind$Check$result$(Maybe$none, $4609);
+                                        var $4610 = $4611;
                                         break;
                                     case 'Maybe.some':
                                         var self = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
                                         switch (self._) {
                                             case 'Kind.Check.result':
-                                                var $4586 = self.value;
-                                                var $4587 = self.errors;
-                                                var $4588 = Kind$Check$result$($4586, List$concat$($4582, $4587));
-                                                var $4585 = $4588;
+                                                var $4613 = self.value;
+                                                var $4614 = self.errors;
+                                                var $4615 = Kind$Check$result$($4613, List$concat$($4609, $4614));
+                                                var $4612 = $4615;
                                                 break;
                                         };
-                                        var $4583 = $4585;
+                                        var $4610 = $4612;
                                         break;
                                 };
-                                var $4580 = $4583;
+                                var $4607 = $4610;
                                 break;
                         };
-                        var $4578 = $4580;
+                        var $4605 = $4607;
                         break;
                     case 'Kind.Term.ori':
-                        var $4589 = self.expr;
-                        var $4590 = Kind$Term$equal$extra_holes$filler$(_a$1, $4589);
-                        var $4578 = $4590;
+                        var $4616 = self.expr;
+                        var $4617 = Kind$Term$equal$extra_holes$filler$(_a$1, $4616);
+                        var $4605 = $4617;
                         break;
                     case 'Kind.Term.var':
                     case 'Kind.Term.ref':
@@ -13296,50 +13353,50 @@ module.exports = (function() {
                     case 'Kind.Term.chr':
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
-                        var $4591 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
-                        var $4578 = $4591;
+                        var $4618 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
+                        var $4605 = $4618;
                         break;
                 };
-                var $4482 = $4578;
+                var $4509 = $4605;
                 break;
             case 'Kind.Term.cse':
                 var self = _b$2;
                 switch (self._) {
                     case 'Kind.Term.hol':
-                        var $4593 = self.path;
-                        var self = Kind$Term$equal$hole$($4593, _a$1);
+                        var $4620 = self.path;
+                        var self = Kind$Term$equal$hole$($4620, _a$1);
                         switch (self._) {
                             case 'Kind.Check.result':
-                                var $4595 = self.value;
-                                var $4596 = self.errors;
-                                var self = $4595;
+                                var $4622 = self.value;
+                                var $4623 = self.errors;
+                                var self = $4622;
                                 switch (self._) {
                                     case 'Maybe.none':
-                                        var $4598 = Kind$Check$result$(Maybe$none, $4596);
-                                        var $4597 = $4598;
+                                        var $4625 = Kind$Check$result$(Maybe$none, $4623);
+                                        var $4624 = $4625;
                                         break;
                                     case 'Maybe.some':
                                         var self = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
                                         switch (self._) {
                                             case 'Kind.Check.result':
-                                                var $4600 = self.value;
-                                                var $4601 = self.errors;
-                                                var $4602 = Kind$Check$result$($4600, List$concat$($4596, $4601));
-                                                var $4599 = $4602;
+                                                var $4627 = self.value;
+                                                var $4628 = self.errors;
+                                                var $4629 = Kind$Check$result$($4627, List$concat$($4623, $4628));
+                                                var $4626 = $4629;
                                                 break;
                                         };
-                                        var $4597 = $4599;
+                                        var $4624 = $4626;
                                         break;
                                 };
-                                var $4594 = $4597;
+                                var $4621 = $4624;
                                 break;
                         };
-                        var $4592 = $4594;
+                        var $4619 = $4621;
                         break;
                     case 'Kind.Term.ori':
-                        var $4603 = self.expr;
-                        var $4604 = Kind$Term$equal$extra_holes$filler$(_a$1, $4603);
-                        var $4592 = $4604;
+                        var $4630 = self.expr;
+                        var $4631 = Kind$Term$equal$extra_holes$filler$(_a$1, $4630);
+                        var $4619 = $4631;
                         break;
                     case 'Kind.Term.var':
                     case 'Kind.Term.ref':
@@ -13355,14 +13412,14 @@ module.exports = (function() {
                     case 'Kind.Term.chr':
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
-                        var $4605 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
-                        var $4592 = $4605;
+                        var $4632 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
+                        var $4619 = $4632;
                         break;
                 };
-                var $4482 = $4592;
+                var $4509 = $4619;
                 break;
         };
-        return $4482;
+        return $4509;
     };
     const Kind$Term$equal$extra_holes$filler = x0 => x1 => Kind$Term$equal$extra_holes$filler$(x0, x1);
 
@@ -13370,58 +13427,58 @@ module.exports = (function() {
         var self = Kind$Term$equal$extra_holes$funari$(_a$1, 0n);
         switch (self._) {
             case 'Maybe.some':
-                var $4607 = self.value;
+                var $4634 = self.value;
                 var self = Kind$Term$equal$extra_holes$funari$(_b$2, 0n);
                 switch (self._) {
                     case 'Maybe.some':
-                        var $4609 = self.value;
-                        var self = $4607;
+                        var $4636 = self.value;
+                        var self = $4634;
                         switch (self._) {
                             case 'Pair.new':
-                                var $4611 = self.fst;
-                                var $4612 = self.snd;
-                                var self = $4609;
+                                var $4638 = self.fst;
+                                var $4639 = self.snd;
+                                var self = $4636;
                                 switch (self._) {
                                     case 'Pair.new':
-                                        var $4614 = self.fst;
-                                        var $4615 = self.snd;
-                                        var _same_fun$9 = ($4611 === $4614);
-                                        var _same_ari$10 = ($4612 === $4615);
+                                        var $4641 = self.fst;
+                                        var $4642 = self.snd;
+                                        var _same_fun$9 = ($4638 === $4641);
+                                        var _same_ari$10 = ($4639 === $4642);
                                         var self = (_same_fun$9 && _same_ari$10);
                                         if (self) {
-                                            var $4617 = Kind$Term$equal$extra_holes$filler$(_a$1, _b$2);
-                                            var $4616 = $4617;
+                                            var $4644 = Kind$Term$equal$extra_holes$filler$(_a$1, _b$2);
+                                            var $4643 = $4644;
                                         } else {
-                                            var $4618 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
-                                            var $4616 = $4618;
+                                            var $4645 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
+                                            var $4643 = $4645;
                                         };
-                                        var $4613 = $4616;
+                                        var $4640 = $4643;
                                         break;
                                 };
-                                var $4610 = $4613;
+                                var $4637 = $4640;
                                 break;
                         };
-                        var $4608 = $4610;
+                        var $4635 = $4637;
                         break;
                     case 'Maybe.none':
-                        var $4619 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
-                        var $4608 = $4619;
+                        var $4646 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
+                        var $4635 = $4646;
                         break;
                 };
-                var $4606 = $4608;
+                var $4633 = $4635;
                 break;
             case 'Maybe.none':
-                var $4620 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
-                var $4606 = $4620;
+                var $4647 = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
+                var $4633 = $4647;
                 break;
         };
-        return $4606;
+        return $4633;
     };
     const Kind$Term$equal$extra_holes = x0 => x1 => Kind$Term$equal$extra_holes$(x0, x1);
 
     function Set$set$(_bits$1, _set$2) {
-        var $4621 = Map$set$(_bits$1, Unit$new, _set$2);
-        return $4621;
+        var $4648 = Map$set$(_bits$1, Unit$new, _set$2);
+        return $4648;
     };
     const Set$set = x0 => x1 => Set$set$(x0, x1);
     const Set$mut$set = a0 => a1 => (((k, s) => ((s[k] = true), s))(a0, a1));
@@ -13429,13 +13486,13 @@ module.exports = (function() {
     function Bool$eql$(_a$1, _b$2) {
         var self = _a$1;
         if (self) {
-            var $4623 = _b$2;
-            var $4622 = $4623;
+            var $4650 = _b$2;
+            var $4649 = $4650;
         } else {
-            var $4624 = (!_b$2);
-            var $4622 = $4624;
+            var $4651 = (!_b$2);
+            var $4649 = $4651;
         };
-        return $4622;
+        return $4649;
     };
     const Bool$eql = x0 => x1 => Bool$eql$(x0, x1);
 
@@ -13444,8 +13501,8 @@ module.exports = (function() {
         var _bh$7 = Kind$Term$serialize$(Kind$Term$reduce$(_b$2, Map$new), _lv$4, _lv$4, Bits$i, Bits$e);
         var self = (_bh$7 === _ah$6);
         if (self) {
-            var $4626 = Kind$Check$result$(Maybe$some$(Bool$true), List$nil);
-            var $4625 = $4626;
+            var $4653 = Kind$Check$result$(Maybe$some$(Bool$true), List$nil);
+            var $4652 = $4653;
         } else {
             var _a1$8 = Kind$Term$reduce$(_a$1, _defs$3);
             var _b1$9 = Kind$Term$reduce$(_b$2, _defs$3);
@@ -13453,8 +13510,8 @@ module.exports = (function() {
             var _bh$11 = Kind$Term$serialize$(_b1$9, _lv$4, _lv$4, Bits$i, Bits$e);
             var self = (_bh$11 === _ah$10);
             if (self) {
-                var $4628 = Kind$Check$result$(Maybe$some$(Bool$true), List$nil);
-                var $4627 = $4628;
+                var $4655 = Kind$Check$result$(Maybe$some$(Bool$true), List$nil);
+                var $4654 = $4655;
             } else {
                 var _id$12 = (_bh$11 + _ah$10);
                 var self = (!!(_seen$5[_id$12]));
@@ -13462,121 +13519,121 @@ module.exports = (function() {
                     var self = Kind$Term$equal$extra_holes$(_a$1, _b$2);
                     switch (self._) {
                         case 'Kind.Check.result':
-                            var $4631 = self.value;
-                            var $4632 = self.errors;
-                            var self = $4631;
+                            var $4658 = self.value;
+                            var $4659 = self.errors;
+                            var self = $4658;
                             switch (self._) {
                                 case 'Maybe.none':
-                                    var $4634 = Kind$Check$result$(Maybe$none, $4632);
-                                    var $4633 = $4634;
+                                    var $4661 = Kind$Check$result$(Maybe$none, $4659);
+                                    var $4660 = $4661;
                                     break;
                                 case 'Maybe.some':
                                     var self = Kind$Check$result$(Maybe$some$(Bool$true), List$nil);
                                     switch (self._) {
                                         case 'Kind.Check.result':
-                                            var $4636 = self.value;
-                                            var $4637 = self.errors;
-                                            var $4638 = Kind$Check$result$($4636, List$concat$($4632, $4637));
-                                            var $4635 = $4638;
+                                            var $4663 = self.value;
+                                            var $4664 = self.errors;
+                                            var $4665 = Kind$Check$result$($4663, List$concat$($4659, $4664));
+                                            var $4662 = $4665;
                                             break;
                                     };
-                                    var $4633 = $4635;
+                                    var $4660 = $4662;
                                     break;
                             };
-                            var $4630 = $4633;
+                            var $4657 = $4660;
                             break;
                     };
-                    var $4629 = $4630;
+                    var $4656 = $4657;
                 } else {
                     var self = _a1$8;
                     switch (self._) {
                         case 'Kind.Term.all':
-                            var $4640 = self.eras;
-                            var $4641 = self.self;
-                            var $4642 = self.name;
-                            var $4643 = self.xtyp;
-                            var $4644 = self.body;
+                            var $4667 = self.eras;
+                            var $4668 = self.self;
+                            var $4669 = self.name;
+                            var $4670 = self.xtyp;
+                            var $4671 = self.body;
                             var self = _b1$9;
                             switch (self._) {
                                 case 'Kind.Term.all':
-                                    var $4646 = self.eras;
-                                    var $4647 = self.self;
-                                    var $4648 = self.name;
-                                    var $4649 = self.xtyp;
-                                    var $4650 = self.body;
+                                    var $4673 = self.eras;
+                                    var $4674 = self.self;
+                                    var $4675 = self.name;
+                                    var $4676 = self.xtyp;
+                                    var $4677 = self.body;
                                     var _seen$23 = (((k, s) => ((s[k] = true), s))(_id$12, _seen$5));
-                                    var _a1_body$24 = $4644(Kind$Term$var$($4641, _lv$4))(Kind$Term$var$($4642, Nat$succ$(_lv$4)));
-                                    var _b1_body$25 = $4650(Kind$Term$var$($4647, _lv$4))(Kind$Term$var$($4648, Nat$succ$(_lv$4)));
-                                    var _eq_self$26 = ($4641 === $4647);
-                                    var _eq_eras$27 = Bool$eql$($4640, $4646);
+                                    var _a1_body$24 = $4671(Kind$Term$var$($4668, _lv$4))(Kind$Term$var$($4669, Nat$succ$(_lv$4)));
+                                    var _b1_body$25 = $4677(Kind$Term$var$($4674, _lv$4))(Kind$Term$var$($4675, Nat$succ$(_lv$4)));
+                                    var _eq_self$26 = ($4668 === $4674);
+                                    var _eq_eras$27 = Bool$eql$($4667, $4673);
                                     var self = (_eq_self$26 && _eq_eras$27);
                                     if (self) {
-                                        var self = Kind$Term$equal$($4643, $4649, _defs$3, _lv$4, _seen$23);
+                                        var self = Kind$Term$equal$($4670, $4676, _defs$3, _lv$4, _seen$23);
                                         switch (self._) {
                                             case 'Kind.Check.result':
-                                                var $4653 = self.value;
-                                                var $4654 = self.errors;
-                                                var self = $4653;
+                                                var $4680 = self.value;
+                                                var $4681 = self.errors;
+                                                var self = $4680;
                                                 switch (self._) {
                                                     case 'Maybe.some':
-                                                        var $4656 = self.value;
+                                                        var $4683 = self.value;
                                                         var self = Kind$Term$equal$(_a1_body$24, _b1_body$25, _defs$3, Nat$succ$(Nat$succ$(_lv$4)), _seen$23);
                                                         switch (self._) {
                                                             case 'Kind.Check.result':
-                                                                var $4658 = self.value;
-                                                                var $4659 = self.errors;
-                                                                var self = $4658;
+                                                                var $4685 = self.value;
+                                                                var $4686 = self.errors;
+                                                                var self = $4685;
                                                                 switch (self._) {
                                                                     case 'Maybe.some':
-                                                                        var $4661 = self.value;
-                                                                        var self = Kind$Check$result$(Maybe$some$(($4656 && $4661)), List$nil);
+                                                                        var $4688 = self.value;
+                                                                        var self = Kind$Check$result$(Maybe$some$(($4683 && $4688)), List$nil);
                                                                         switch (self._) {
                                                                             case 'Kind.Check.result':
-                                                                                var $4663 = self.value;
-                                                                                var $4664 = self.errors;
-                                                                                var $4665 = Kind$Check$result$($4663, List$concat$($4659, $4664));
-                                                                                var $4662 = $4665;
+                                                                                var $4690 = self.value;
+                                                                                var $4691 = self.errors;
+                                                                                var $4692 = Kind$Check$result$($4690, List$concat$($4686, $4691));
+                                                                                var $4689 = $4692;
                                                                                 break;
                                                                         };
-                                                                        var $4660 = $4662;
+                                                                        var $4687 = $4689;
                                                                         break;
                                                                     case 'Maybe.none':
-                                                                        var $4666 = Kind$Check$result$(Maybe$none, $4659);
-                                                                        var $4660 = $4666;
+                                                                        var $4693 = Kind$Check$result$(Maybe$none, $4686);
+                                                                        var $4687 = $4693;
                                                                         break;
                                                                 };
-                                                                var self = $4660;
+                                                                var self = $4687;
                                                                 break;
                                                         };
                                                         switch (self._) {
                                                             case 'Kind.Check.result':
-                                                                var $4667 = self.value;
-                                                                var $4668 = self.errors;
-                                                                var $4669 = Kind$Check$result$($4667, List$concat$($4654, $4668));
-                                                                var $4657 = $4669;
+                                                                var $4694 = self.value;
+                                                                var $4695 = self.errors;
+                                                                var $4696 = Kind$Check$result$($4694, List$concat$($4681, $4695));
+                                                                var $4684 = $4696;
                                                                 break;
                                                         };
-                                                        var $4655 = $4657;
+                                                        var $4682 = $4684;
                                                         break;
                                                     case 'Maybe.none':
-                                                        var $4670 = Kind$Check$result$(Maybe$none, $4654);
-                                                        var $4655 = $4670;
+                                                        var $4697 = Kind$Check$result$(Maybe$none, $4681);
+                                                        var $4682 = $4697;
                                                         break;
                                                 };
-                                                var $4652 = $4655;
+                                                var $4679 = $4682;
                                                 break;
                                         };
-                                        var $4651 = $4652;
+                                        var $4678 = $4679;
                                     } else {
-                                        var $4671 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
-                                        var $4651 = $4671;
+                                        var $4698 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
+                                        var $4678 = $4698;
                                     };
-                                    var $4645 = $4651;
+                                    var $4672 = $4678;
                                     break;
                                 case 'Kind.Term.hol':
-                                    var $4672 = self.path;
-                                    var $4673 = Kind$Term$equal$hole$($4672, _a$1);
-                                    var $4645 = $4673;
+                                    var $4699 = self.path;
+                                    var $4700 = Kind$Term$equal$hole$($4699, _a$1);
+                                    var $4672 = $4700;
                                     break;
                                 case 'Kind.Term.var':
                                 case 'Kind.Term.ref':
@@ -13592,154 +13649,63 @@ module.exports = (function() {
                                 case 'Kind.Term.str':
                                 case 'Kind.Term.cse':
                                 case 'Kind.Term.ori':
-                                    var $4674 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
-                                    var $4645 = $4674;
+                                    var $4701 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
+                                    var $4672 = $4701;
                                     break;
                             };
-                            var $4639 = $4645;
+                            var $4666 = $4672;
                             break;
                         case 'Kind.Term.lam':
-                            var $4675 = self.name;
-                            var $4676 = self.body;
+                            var $4702 = self.name;
+                            var $4703 = self.body;
                             var self = _b1$9;
                             switch (self._) {
                                 case 'Kind.Term.lam':
-                                    var $4678 = self.name;
-                                    var $4679 = self.body;
+                                    var $4705 = self.name;
+                                    var $4706 = self.body;
                                     var _seen$17 = (((k, s) => ((s[k] = true), s))(_id$12, _seen$5));
-                                    var _a1_body$18 = $4676(Kind$Term$var$($4675, _lv$4));
-                                    var _b1_body$19 = $4679(Kind$Term$var$($4678, _lv$4));
+                                    var _a1_body$18 = $4703(Kind$Term$var$($4702, _lv$4));
+                                    var _b1_body$19 = $4706(Kind$Term$var$($4705, _lv$4));
                                     var self = Kind$Term$equal$(_a1_body$18, _b1_body$19, _defs$3, Nat$succ$(_lv$4), _seen$17);
                                     switch (self._) {
                                         case 'Kind.Check.result':
-                                            var $4681 = self.value;
-                                            var $4682 = self.errors;
-                                            var self = $4681;
+                                            var $4708 = self.value;
+                                            var $4709 = self.errors;
+                                            var self = $4708;
                                             switch (self._) {
                                                 case 'Maybe.some':
-                                                    var $4684 = self.value;
-                                                    var self = Kind$Check$result$(Maybe$some$($4684), List$nil);
-                                                    switch (self._) {
-                                                        case 'Kind.Check.result':
-                                                            var $4686 = self.value;
-                                                            var $4687 = self.errors;
-                                                            var $4688 = Kind$Check$result$($4686, List$concat$($4682, $4687));
-                                                            var $4685 = $4688;
-                                                            break;
-                                                    };
-                                                    var $4683 = $4685;
-                                                    break;
-                                                case 'Maybe.none':
-                                                    var $4689 = Kind$Check$result$(Maybe$none, $4682);
-                                                    var $4683 = $4689;
-                                                    break;
-                                            };
-                                            var $4680 = $4683;
-                                            break;
-                                    };
-                                    var $4677 = $4680;
-                                    break;
-                                case 'Kind.Term.hol':
-                                    var $4690 = self.path;
-                                    var $4691 = Kind$Term$equal$hole$($4690, _a$1);
-                                    var $4677 = $4691;
-                                    break;
-                                case 'Kind.Term.var':
-                                case 'Kind.Term.ref':
-                                case 'Kind.Term.typ':
-                                case 'Kind.Term.all':
-                                case 'Kind.Term.app':
-                                case 'Kind.Term.let':
-                                case 'Kind.Term.def':
-                                case 'Kind.Term.ann':
-                                case 'Kind.Term.gol':
-                                case 'Kind.Term.nat':
-                                case 'Kind.Term.chr':
-                                case 'Kind.Term.str':
-                                case 'Kind.Term.cse':
-                                case 'Kind.Term.ori':
-                                    var $4692 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
-                                    var $4677 = $4692;
-                                    break;
-                            };
-                            var $4639 = $4677;
-                            break;
-                        case 'Kind.Term.app':
-                            var $4693 = self.func;
-                            var $4694 = self.argm;
-                            var self = _b1$9;
-                            switch (self._) {
-                                case 'Kind.Term.app':
-                                    var $4696 = self.func;
-                                    var $4697 = self.argm;
-                                    var _seen$17 = (((k, s) => ((s[k] = true), s))(_id$12, _seen$5));
-                                    var self = Kind$Term$equal$($4693, $4696, _defs$3, _lv$4, _seen$17);
-                                    switch (self._) {
-                                        case 'Kind.Check.result':
-                                            var $4699 = self.value;
-                                            var $4700 = self.errors;
-                                            var self = $4699;
-                                            switch (self._) {
-                                                case 'Maybe.some':
-                                                    var $4702 = self.value;
-                                                    var self = Kind$Term$equal$($4694, $4697, _defs$3, _lv$4, _seen$17);
-                                                    switch (self._) {
-                                                        case 'Kind.Check.result':
-                                                            var $4704 = self.value;
-                                                            var $4705 = self.errors;
-                                                            var self = $4704;
-                                                            switch (self._) {
-                                                                case 'Maybe.some':
-                                                                    var $4707 = self.value;
-                                                                    var self = Kind$Check$result$(Maybe$some$(($4702 && $4707)), List$nil);
-                                                                    switch (self._) {
-                                                                        case 'Kind.Check.result':
-                                                                            var $4709 = self.value;
-                                                                            var $4710 = self.errors;
-                                                                            var $4711 = Kind$Check$result$($4709, List$concat$($4705, $4710));
-                                                                            var $4708 = $4711;
-                                                                            break;
-                                                                    };
-                                                                    var $4706 = $4708;
-                                                                    break;
-                                                                case 'Maybe.none':
-                                                                    var $4712 = Kind$Check$result$(Maybe$none, $4705);
-                                                                    var $4706 = $4712;
-                                                                    break;
-                                                            };
-                                                            var self = $4706;
-                                                            break;
-                                                    };
+                                                    var $4711 = self.value;
+                                                    var self = Kind$Check$result$(Maybe$some$($4711), List$nil);
                                                     switch (self._) {
                                                         case 'Kind.Check.result':
                                                             var $4713 = self.value;
                                                             var $4714 = self.errors;
-                                                            var $4715 = Kind$Check$result$($4713, List$concat$($4700, $4714));
-                                                            var $4703 = $4715;
+                                                            var $4715 = Kind$Check$result$($4713, List$concat$($4709, $4714));
+                                                            var $4712 = $4715;
                                                             break;
                                                     };
-                                                    var $4701 = $4703;
+                                                    var $4710 = $4712;
                                                     break;
                                                 case 'Maybe.none':
-                                                    var $4716 = Kind$Check$result$(Maybe$none, $4700);
-                                                    var $4701 = $4716;
+                                                    var $4716 = Kind$Check$result$(Maybe$none, $4709);
+                                                    var $4710 = $4716;
                                                     break;
                                             };
-                                            var $4698 = $4701;
+                                            var $4707 = $4710;
                                             break;
                                     };
-                                    var $4695 = $4698;
+                                    var $4704 = $4707;
                                     break;
                                 case 'Kind.Term.hol':
                                     var $4717 = self.path;
                                     var $4718 = Kind$Term$equal$hole$($4717, _a$1);
-                                    var $4695 = $4718;
+                                    var $4704 = $4718;
                                     break;
                                 case 'Kind.Term.var':
                                 case 'Kind.Term.ref':
                                 case 'Kind.Term.typ':
                                 case 'Kind.Term.all':
-                                case 'Kind.Term.lam':
+                                case 'Kind.Term.app':
                                 case 'Kind.Term.let':
                                 case 'Kind.Term.def':
                                 case 'Kind.Term.ann':
@@ -13750,85 +13716,176 @@ module.exports = (function() {
                                 case 'Kind.Term.cse':
                                 case 'Kind.Term.ori':
                                     var $4719 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
-                                    var $4695 = $4719;
+                                    var $4704 = $4719;
                                     break;
                             };
-                            var $4639 = $4695;
+                            var $4666 = $4704;
+                            break;
+                        case 'Kind.Term.app':
+                            var $4720 = self.func;
+                            var $4721 = self.argm;
+                            var self = _b1$9;
+                            switch (self._) {
+                                case 'Kind.Term.app':
+                                    var $4723 = self.func;
+                                    var $4724 = self.argm;
+                                    var _seen$17 = (((k, s) => ((s[k] = true), s))(_id$12, _seen$5));
+                                    var self = Kind$Term$equal$($4720, $4723, _defs$3, _lv$4, _seen$17);
+                                    switch (self._) {
+                                        case 'Kind.Check.result':
+                                            var $4726 = self.value;
+                                            var $4727 = self.errors;
+                                            var self = $4726;
+                                            switch (self._) {
+                                                case 'Maybe.some':
+                                                    var $4729 = self.value;
+                                                    var self = Kind$Term$equal$($4721, $4724, _defs$3, _lv$4, _seen$17);
+                                                    switch (self._) {
+                                                        case 'Kind.Check.result':
+                                                            var $4731 = self.value;
+                                                            var $4732 = self.errors;
+                                                            var self = $4731;
+                                                            switch (self._) {
+                                                                case 'Maybe.some':
+                                                                    var $4734 = self.value;
+                                                                    var self = Kind$Check$result$(Maybe$some$(($4729 && $4734)), List$nil);
+                                                                    switch (self._) {
+                                                                        case 'Kind.Check.result':
+                                                                            var $4736 = self.value;
+                                                                            var $4737 = self.errors;
+                                                                            var $4738 = Kind$Check$result$($4736, List$concat$($4732, $4737));
+                                                                            var $4735 = $4738;
+                                                                            break;
+                                                                    };
+                                                                    var $4733 = $4735;
+                                                                    break;
+                                                                case 'Maybe.none':
+                                                                    var $4739 = Kind$Check$result$(Maybe$none, $4732);
+                                                                    var $4733 = $4739;
+                                                                    break;
+                                                            };
+                                                            var self = $4733;
+                                                            break;
+                                                    };
+                                                    switch (self._) {
+                                                        case 'Kind.Check.result':
+                                                            var $4740 = self.value;
+                                                            var $4741 = self.errors;
+                                                            var $4742 = Kind$Check$result$($4740, List$concat$($4727, $4741));
+                                                            var $4730 = $4742;
+                                                            break;
+                                                    };
+                                                    var $4728 = $4730;
+                                                    break;
+                                                case 'Maybe.none':
+                                                    var $4743 = Kind$Check$result$(Maybe$none, $4727);
+                                                    var $4728 = $4743;
+                                                    break;
+                                            };
+                                            var $4725 = $4728;
+                                            break;
+                                    };
+                                    var $4722 = $4725;
+                                    break;
+                                case 'Kind.Term.hol':
+                                    var $4744 = self.path;
+                                    var $4745 = Kind$Term$equal$hole$($4744, _a$1);
+                                    var $4722 = $4745;
+                                    break;
+                                case 'Kind.Term.var':
+                                case 'Kind.Term.ref':
+                                case 'Kind.Term.typ':
+                                case 'Kind.Term.all':
+                                case 'Kind.Term.lam':
+                                case 'Kind.Term.let':
+                                case 'Kind.Term.def':
+                                case 'Kind.Term.ann':
+                                case 'Kind.Term.gol':
+                                case 'Kind.Term.nat':
+                                case 'Kind.Term.chr':
+                                case 'Kind.Term.str':
+                                case 'Kind.Term.cse':
+                                case 'Kind.Term.ori':
+                                    var $4746 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
+                                    var $4722 = $4746;
+                                    break;
+                            };
+                            var $4666 = $4722;
                             break;
                         case 'Kind.Term.let':
-                            var $4720 = self.name;
-                            var $4721 = self.expr;
-                            var $4722 = self.body;
+                            var $4747 = self.name;
+                            var $4748 = self.expr;
+                            var $4749 = self.body;
                             var self = _b1$9;
                             switch (self._) {
                                 case 'Kind.Term.let':
-                                    var $4724 = self.name;
-                                    var $4725 = self.expr;
-                                    var $4726 = self.body;
+                                    var $4751 = self.name;
+                                    var $4752 = self.expr;
+                                    var $4753 = self.body;
                                     var _seen$19 = (((k, s) => ((s[k] = true), s))(_id$12, _seen$5));
-                                    var _a1_body$20 = $4722(Kind$Term$var$($4720, _lv$4));
-                                    var _b1_body$21 = $4726(Kind$Term$var$($4724, _lv$4));
-                                    var self = Kind$Term$equal$($4721, $4725, _defs$3, _lv$4, _seen$19);
+                                    var _a1_body$20 = $4749(Kind$Term$var$($4747, _lv$4));
+                                    var _b1_body$21 = $4753(Kind$Term$var$($4751, _lv$4));
+                                    var self = Kind$Term$equal$($4748, $4752, _defs$3, _lv$4, _seen$19);
                                     switch (self._) {
                                         case 'Kind.Check.result':
-                                            var $4728 = self.value;
-                                            var $4729 = self.errors;
-                                            var self = $4728;
+                                            var $4755 = self.value;
+                                            var $4756 = self.errors;
+                                            var self = $4755;
                                             switch (self._) {
                                                 case 'Maybe.some':
-                                                    var $4731 = self.value;
+                                                    var $4758 = self.value;
                                                     var self = Kind$Term$equal$(_a1_body$20, _b1_body$21, _defs$3, Nat$succ$(_lv$4), _seen$19);
                                                     switch (self._) {
                                                         case 'Kind.Check.result':
-                                                            var $4733 = self.value;
-                                                            var $4734 = self.errors;
-                                                            var self = $4733;
+                                                            var $4760 = self.value;
+                                                            var $4761 = self.errors;
+                                                            var self = $4760;
                                                             switch (self._) {
                                                                 case 'Maybe.some':
-                                                                    var $4736 = self.value;
-                                                                    var self = Kind$Check$result$(Maybe$some$(($4731 && $4736)), List$nil);
+                                                                    var $4763 = self.value;
+                                                                    var self = Kind$Check$result$(Maybe$some$(($4758 && $4763)), List$nil);
                                                                     switch (self._) {
                                                                         case 'Kind.Check.result':
-                                                                            var $4738 = self.value;
-                                                                            var $4739 = self.errors;
-                                                                            var $4740 = Kind$Check$result$($4738, List$concat$($4734, $4739));
-                                                                            var $4737 = $4740;
+                                                                            var $4765 = self.value;
+                                                                            var $4766 = self.errors;
+                                                                            var $4767 = Kind$Check$result$($4765, List$concat$($4761, $4766));
+                                                                            var $4764 = $4767;
                                                                             break;
                                                                     };
-                                                                    var $4735 = $4737;
+                                                                    var $4762 = $4764;
                                                                     break;
                                                                 case 'Maybe.none':
-                                                                    var $4741 = Kind$Check$result$(Maybe$none, $4734);
-                                                                    var $4735 = $4741;
+                                                                    var $4768 = Kind$Check$result$(Maybe$none, $4761);
+                                                                    var $4762 = $4768;
                                                                     break;
                                                             };
-                                                            var self = $4735;
+                                                            var self = $4762;
                                                             break;
                                                     };
                                                     switch (self._) {
                                                         case 'Kind.Check.result':
-                                                            var $4742 = self.value;
-                                                            var $4743 = self.errors;
-                                                            var $4744 = Kind$Check$result$($4742, List$concat$($4729, $4743));
-                                                            var $4732 = $4744;
+                                                            var $4769 = self.value;
+                                                            var $4770 = self.errors;
+                                                            var $4771 = Kind$Check$result$($4769, List$concat$($4756, $4770));
+                                                            var $4759 = $4771;
                                                             break;
                                                     };
-                                                    var $4730 = $4732;
+                                                    var $4757 = $4759;
                                                     break;
                                                 case 'Maybe.none':
-                                                    var $4745 = Kind$Check$result$(Maybe$none, $4729);
-                                                    var $4730 = $4745;
+                                                    var $4772 = Kind$Check$result$(Maybe$none, $4756);
+                                                    var $4757 = $4772;
                                                     break;
                                             };
-                                            var $4727 = $4730;
+                                            var $4754 = $4757;
                                             break;
                                     };
-                                    var $4723 = $4727;
+                                    var $4750 = $4754;
                                     break;
                                 case 'Kind.Term.hol':
-                                    var $4746 = self.path;
-                                    var $4747 = Kind$Term$equal$hole$($4746, _a$1);
-                                    var $4723 = $4747;
+                                    var $4773 = self.path;
+                                    var $4774 = Kind$Term$equal$hole$($4773, _a$1);
+                                    var $4750 = $4774;
                                     break;
                                 case 'Kind.Term.var':
                                 case 'Kind.Term.ref':
@@ -13844,25 +13901,25 @@ module.exports = (function() {
                                 case 'Kind.Term.str':
                                 case 'Kind.Term.cse':
                                 case 'Kind.Term.ori':
-                                    var $4748 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
-                                    var $4723 = $4748;
+                                    var $4775 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
+                                    var $4750 = $4775;
                                     break;
                             };
-                            var $4639 = $4723;
+                            var $4666 = $4750;
                             break;
                         case 'Kind.Term.hol':
-                            var $4749 = self.path;
-                            var $4750 = Kind$Term$equal$hole$($4749, _b$2);
-                            var $4639 = $4750;
+                            var $4776 = self.path;
+                            var $4777 = Kind$Term$equal$hole$($4776, _b$2);
+                            var $4666 = $4777;
                             break;
                         case 'Kind.Term.var':
                         case 'Kind.Term.ori':
                             var self = _b1$9;
                             switch (self._) {
                                 case 'Kind.Term.hol':
-                                    var $4752 = self.path;
-                                    var $4753 = Kind$Term$equal$hole$($4752, _a$1);
-                                    var $4751 = $4753;
+                                    var $4779 = self.path;
+                                    var $4780 = Kind$Term$equal$hole$($4779, _a$1);
+                                    var $4778 = $4780;
                                     break;
                                 case 'Kind.Term.var':
                                 case 'Kind.Term.ref':
@@ -13879,11 +13936,11 @@ module.exports = (function() {
                                 case 'Kind.Term.str':
                                 case 'Kind.Term.cse':
                                 case 'Kind.Term.ori':
-                                    var $4754 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
-                                    var $4751 = $4754;
+                                    var $4781 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
+                                    var $4778 = $4781;
                                     break;
                             };
-                            var $4639 = $4751;
+                            var $4666 = $4778;
                             break;
                         case 'Kind.Term.ref':
                         case 'Kind.Term.nat':
@@ -13892,9 +13949,9 @@ module.exports = (function() {
                             var self = _b1$9;
                             switch (self._) {
                                 case 'Kind.Term.hol':
-                                    var $4756 = self.path;
-                                    var $4757 = Kind$Term$equal$hole$($4756, _a$1);
-                                    var $4755 = $4757;
+                                    var $4783 = self.path;
+                                    var $4784 = Kind$Term$equal$hole$($4783, _a$1);
+                                    var $4782 = $4784;
                                     break;
                                 case 'Kind.Term.var':
                                 case 'Kind.Term.ref':
@@ -13911,19 +13968,19 @@ module.exports = (function() {
                                 case 'Kind.Term.str':
                                 case 'Kind.Term.cse':
                                 case 'Kind.Term.ori':
-                                    var $4758 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
-                                    var $4755 = $4758;
+                                    var $4785 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
+                                    var $4782 = $4785;
                                     break;
                             };
-                            var $4639 = $4755;
+                            var $4666 = $4782;
                             break;
                         case 'Kind.Term.typ':
                             var self = _b1$9;
                             switch (self._) {
                                 case 'Kind.Term.hol':
-                                    var $4760 = self.path;
-                                    var $4761 = Kind$Term$equal$hole$($4760, _a$1);
-                                    var $4759 = $4761;
+                                    var $4787 = self.path;
+                                    var $4788 = Kind$Term$equal$hole$($4787, _a$1);
+                                    var $4786 = $4788;
                                     break;
                                 case 'Kind.Term.var':
                                 case 'Kind.Term.ref':
@@ -13940,11 +13997,11 @@ module.exports = (function() {
                                 case 'Kind.Term.str':
                                 case 'Kind.Term.cse':
                                 case 'Kind.Term.ori':
-                                    var $4762 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
-                                    var $4759 = $4762;
+                                    var $4789 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
+                                    var $4786 = $4789;
                                     break;
                             };
-                            var $4639 = $4759;
+                            var $4666 = $4786;
                             break;
                         case 'Kind.Term.def':
                         case 'Kind.Term.ann':
@@ -13952,9 +14009,9 @@ module.exports = (function() {
                             var self = _b1$9;
                             switch (self._) {
                                 case 'Kind.Term.hol':
-                                    var $4764 = self.path;
-                                    var $4765 = Kind$Term$equal$hole$($4764, _a$1);
-                                    var $4763 = $4765;
+                                    var $4791 = self.path;
+                                    var $4792 = Kind$Term$equal$hole$($4791, _a$1);
+                                    var $4790 = $4792;
                                     break;
                                 case 'Kind.Term.var':
                                 case 'Kind.Term.ref':
@@ -13971,19 +14028,19 @@ module.exports = (function() {
                                 case 'Kind.Term.str':
                                 case 'Kind.Term.cse':
                                 case 'Kind.Term.ori':
-                                    var $4766 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
-                                    var $4763 = $4766;
+                                    var $4793 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
+                                    var $4790 = $4793;
                                     break;
                             };
-                            var $4639 = $4763;
+                            var $4666 = $4790;
                             break;
                         case 'Kind.Term.cse':
                             var self = _b1$9;
                             switch (self._) {
                                 case 'Kind.Term.hol':
-                                    var $4768 = self.path;
-                                    var $4769 = Kind$Term$equal$hole$($4768, _a$1);
-                                    var $4767 = $4769;
+                                    var $4795 = self.path;
+                                    var $4796 = Kind$Term$equal$hole$($4795, _a$1);
+                                    var $4794 = $4796;
                                     break;
                                 case 'Kind.Term.var':
                                 case 'Kind.Term.ref':
@@ -14000,20 +14057,20 @@ module.exports = (function() {
                                 case 'Kind.Term.str':
                                 case 'Kind.Term.cse':
                                 case 'Kind.Term.ori':
-                                    var $4770 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
-                                    var $4767 = $4770;
+                                    var $4797 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
+                                    var $4794 = $4797;
                                     break;
                             };
-                            var $4639 = $4767;
+                            var $4666 = $4794;
                             break;
                     };
-                    var $4629 = $4639;
+                    var $4656 = $4666;
                 };
-                var $4627 = $4629;
+                var $4654 = $4656;
             };
-            var $4625 = $4627;
+            var $4652 = $4654;
         };
-        return $4625;
+        return $4652;
     };
     const Kind$Term$equal = x0 => x1 => x2 => x3 => x4 => Kind$Term$equal$(x0, x1, x2, x3, x4);
     const Set$new = Map$new;
@@ -14023,194 +14080,194 @@ module.exports = (function() {
         var self = _term$1;
         switch (self._) {
             case 'Kind.Term.var':
-                var $4772 = self.name;
-                var $4773 = self.indx;
-                var self = List$at_last$($4773, _ctx$4);
+                var $4799 = self.name;
+                var $4800 = self.indx;
+                var self = List$at_last$($4800, _ctx$4);
                 switch (self._) {
                     case 'Maybe.some':
-                        var $4775 = self.value;
-                        var $4776 = Kind$Check$result$(Maybe$some$((() => {
-                            var self = $4775;
+                        var $4802 = self.value;
+                        var $4803 = Kind$Check$result$(Maybe$some$((() => {
+                            var self = $4802;
                             switch (self._) {
                                 case 'Pair.new':
-                                    var $4777 = self.snd;
-                                    var $4778 = $4777;
-                                    return $4778;
+                                    var $4804 = self.snd;
+                                    var $4805 = $4804;
+                                    return $4805;
                             };
                         })()), List$nil);
-                        var $4774 = $4776;
+                        var $4801 = $4803;
                         break;
                     case 'Maybe.none':
-                        var $4779 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$undefined_reference$(_orig$6, $4772), List$nil));
-                        var $4774 = $4779;
+                        var $4806 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$undefined_reference$(_orig$6, $4799), List$nil));
+                        var $4801 = $4806;
                         break;
                 };
-                var self = $4774;
+                var self = $4801;
                 break;
             case 'Kind.Term.ref':
-                var $4780 = self.name;
-                var self = Kind$get$($4780, _defs$3);
+                var $4807 = self.name;
+                var self = Kind$get$($4807, _defs$3);
                 switch (self._) {
                     case 'Maybe.some':
-                        var $4782 = self.value;
-                        var self = $4782;
+                        var $4809 = self.value;
+                        var self = $4809;
                         switch (self._) {
                             case 'Kind.Def.new':
-                                var $4784 = self.name;
-                                var $4785 = self.term;
-                                var $4786 = self.type;
-                                var $4787 = self.stat;
-                                var _ref_name$18 = $4784;
-                                var _ref_type$19 = $4786;
-                                var _ref_term$20 = $4785;
-                                var _ref_stat$21 = $4787;
+                                var $4811 = self.name;
+                                var $4812 = self.term;
+                                var $4813 = self.type;
+                                var $4814 = self.stat;
+                                var _ref_name$18 = $4811;
+                                var _ref_type$19 = $4813;
+                                var _ref_term$20 = $4812;
+                                var _ref_stat$21 = $4814;
                                 var self = _ref_stat$21;
                                 switch (self._) {
                                     case 'Kind.Status.init':
-                                        var $4789 = Kind$Check$result$(Maybe$some$(_ref_type$19), List$cons$(Kind$Error$waiting$(_ref_name$18), List$nil));
-                                        var $4788 = $4789;
+                                        var $4816 = Kind$Check$result$(Maybe$some$(_ref_type$19), List$cons$(Kind$Error$waiting$(_ref_name$18), List$nil));
+                                        var $4815 = $4816;
                                         break;
                                     case 'Kind.Status.wait':
                                     case 'Kind.Status.done':
-                                        var $4790 = Kind$Check$result$(Maybe$some$(_ref_type$19), List$nil);
-                                        var $4788 = $4790;
+                                        var $4817 = Kind$Check$result$(Maybe$some$(_ref_type$19), List$nil);
+                                        var $4815 = $4817;
                                         break;
                                     case 'Kind.Status.fail':
-                                        var $4791 = Kind$Check$result$(Maybe$some$(_ref_type$19), List$cons$(Kind$Error$indirect$(_ref_name$18), List$nil));
-                                        var $4788 = $4791;
+                                        var $4818 = Kind$Check$result$(Maybe$some$(_ref_type$19), List$cons$(Kind$Error$indirect$(_ref_name$18), List$nil));
+                                        var $4815 = $4818;
                                         break;
                                 };
-                                var $4783 = $4788;
+                                var $4810 = $4815;
                                 break;
                         };
-                        var $4781 = $4783;
+                        var $4808 = $4810;
                         break;
                     case 'Maybe.none':
-                        var $4792 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$undefined_reference$(_orig$6, $4780), List$nil));
-                        var $4781 = $4792;
+                        var $4819 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$undefined_reference$(_orig$6, $4807), List$nil));
+                        var $4808 = $4819;
                         break;
                 };
-                var self = $4781;
+                var self = $4808;
                 break;
             case 'Kind.Term.all':
-                var $4793 = self.self;
-                var $4794 = self.name;
-                var $4795 = self.xtyp;
-                var $4796 = self.body;
+                var $4820 = self.self;
+                var $4821 = self.name;
+                var $4822 = self.xtyp;
+                var $4823 = self.body;
                 var _ctx_size$12 = (list_length(_ctx$4));
-                var _self_var$13 = Kind$Term$var$($4793, _ctx_size$12);
-                var _body_var$14 = Kind$Term$var$($4794, Nat$succ$(_ctx_size$12));
-                var _body_ctx$15 = List$cons$(Pair$new$($4794, $4795), List$cons$(Pair$new$($4793, _term$1), _ctx$4));
-                var self = Kind$Term$check$($4795, Maybe$some$(Kind$Term$typ), _defs$3, _ctx$4, Kind$MPath$o$(_path$5), _orig$6);
+                var _self_var$13 = Kind$Term$var$($4820, _ctx_size$12);
+                var _body_var$14 = Kind$Term$var$($4821, Nat$succ$(_ctx_size$12));
+                var _body_ctx$15 = List$cons$(Pair$new$($4821, $4822), List$cons$(Pair$new$($4820, _term$1), _ctx$4));
+                var self = Kind$Term$check$($4822, Maybe$some$(Kind$Term$typ), _defs$3, _ctx$4, Kind$MPath$o$(_path$5), _orig$6);
                 switch (self._) {
                     case 'Kind.Check.result':
-                        var $4798 = self.value;
-                        var $4799 = self.errors;
-                        var self = $4798;
+                        var $4825 = self.value;
+                        var $4826 = self.errors;
+                        var self = $4825;
                         switch (self._) {
                             case 'Maybe.none':
-                                var $4801 = Kind$Check$result$(Maybe$none, $4799);
-                                var $4800 = $4801;
+                                var $4828 = Kind$Check$result$(Maybe$none, $4826);
+                                var $4827 = $4828;
                                 break;
                             case 'Maybe.some':
-                                var self = Kind$Term$check$($4796(_self_var$13)(_body_var$14), Maybe$some$(Kind$Term$typ), _defs$3, _body_ctx$15, Kind$MPath$i$(_path$5), _orig$6);
+                                var self = Kind$Term$check$($4823(_self_var$13)(_body_var$14), Maybe$some$(Kind$Term$typ), _defs$3, _body_ctx$15, Kind$MPath$i$(_path$5), _orig$6);
                                 switch (self._) {
                                     case 'Kind.Check.result':
-                                        var $4803 = self.value;
-                                        var $4804 = self.errors;
-                                        var self = $4803;
+                                        var $4830 = self.value;
+                                        var $4831 = self.errors;
+                                        var self = $4830;
                                         switch (self._) {
                                             case 'Maybe.none':
-                                                var $4806 = Kind$Check$result$(Maybe$none, $4804);
-                                                var $4805 = $4806;
+                                                var $4833 = Kind$Check$result$(Maybe$none, $4831);
+                                                var $4832 = $4833;
                                                 break;
                                             case 'Maybe.some':
                                                 var self = Kind$Check$result$(Maybe$some$(Kind$Term$typ), List$nil);
                                                 switch (self._) {
                                                     case 'Kind.Check.result':
-                                                        var $4808 = self.value;
-                                                        var $4809 = self.errors;
-                                                        var $4810 = Kind$Check$result$($4808, List$concat$($4804, $4809));
-                                                        var $4807 = $4810;
+                                                        var $4835 = self.value;
+                                                        var $4836 = self.errors;
+                                                        var $4837 = Kind$Check$result$($4835, List$concat$($4831, $4836));
+                                                        var $4834 = $4837;
                                                         break;
                                                 };
-                                                var $4805 = $4807;
+                                                var $4832 = $4834;
                                                 break;
                                         };
-                                        var self = $4805;
+                                        var self = $4832;
                                         break;
                                 };
                                 switch (self._) {
                                     case 'Kind.Check.result':
-                                        var $4811 = self.value;
-                                        var $4812 = self.errors;
-                                        var $4813 = Kind$Check$result$($4811, List$concat$($4799, $4812));
-                                        var $4802 = $4813;
+                                        var $4838 = self.value;
+                                        var $4839 = self.errors;
+                                        var $4840 = Kind$Check$result$($4838, List$concat$($4826, $4839));
+                                        var $4829 = $4840;
                                         break;
                                 };
-                                var $4800 = $4802;
+                                var $4827 = $4829;
                                 break;
                         };
-                        var $4797 = $4800;
+                        var $4824 = $4827;
                         break;
                 };
-                var self = $4797;
+                var self = $4824;
                 break;
             case 'Kind.Term.lam':
-                var $4814 = self.name;
-                var $4815 = self.body;
+                var $4841 = self.name;
+                var $4842 = self.body;
                 var self = _type$2;
                 switch (self._) {
                     case 'Maybe.some':
-                        var $4817 = self.value;
-                        var _typv$10 = Kind$Term$reduce$($4817, _defs$3);
+                        var $4844 = self.value;
+                        var _typv$10 = Kind$Term$reduce$($4844, _defs$3);
                         var self = _typv$10;
                         switch (self._) {
                             case 'Kind.Term.all':
-                                var $4819 = self.xtyp;
-                                var $4820 = self.body;
+                                var $4846 = self.xtyp;
+                                var $4847 = self.body;
                                 var _ctx_size$16 = (list_length(_ctx$4));
                                 var _self_var$17 = _term$1;
-                                var _body_var$18 = Kind$Term$var$($4814, _ctx_size$16);
-                                var _body_typ$19 = $4820(_self_var$17)(_body_var$18);
-                                var _body_ctx$20 = List$cons$(Pair$new$($4814, $4819), _ctx$4);
-                                var self = Kind$Term$check$($4815(_body_var$18), Maybe$some$(_body_typ$19), _defs$3, _body_ctx$20, Kind$MPath$o$(_path$5), _orig$6);
+                                var _body_var$18 = Kind$Term$var$($4841, _ctx_size$16);
+                                var _body_typ$19 = $4847(_self_var$17)(_body_var$18);
+                                var _body_ctx$20 = List$cons$(Pair$new$($4841, $4846), _ctx$4);
+                                var self = Kind$Term$check$($4842(_body_var$18), Maybe$some$(_body_typ$19), _defs$3, _body_ctx$20, Kind$MPath$o$(_path$5), _orig$6);
                                 switch (self._) {
                                     case 'Kind.Check.result':
-                                        var $4822 = self.value;
-                                        var $4823 = self.errors;
-                                        var self = $4822;
+                                        var $4849 = self.value;
+                                        var $4850 = self.errors;
+                                        var self = $4849;
                                         switch (self._) {
                                             case 'Maybe.none':
-                                                var $4825 = Kind$Check$result$(Maybe$none, $4823);
-                                                var $4824 = $4825;
+                                                var $4852 = Kind$Check$result$(Maybe$none, $4850);
+                                                var $4851 = $4852;
                                                 break;
                                             case 'Maybe.some':
-                                                var self = Kind$Check$result$(Maybe$some$($4817), List$nil);
+                                                var self = Kind$Check$result$(Maybe$some$($4844), List$nil);
                                                 switch (self._) {
                                                     case 'Kind.Check.result':
-                                                        var $4827 = self.value;
-                                                        var $4828 = self.errors;
-                                                        var $4829 = Kind$Check$result$($4827, List$concat$($4823, $4828));
-                                                        var $4826 = $4829;
+                                                        var $4854 = self.value;
+                                                        var $4855 = self.errors;
+                                                        var $4856 = Kind$Check$result$($4854, List$concat$($4850, $4855));
+                                                        var $4853 = $4856;
                                                         break;
                                                 };
-                                                var $4824 = $4826;
+                                                var $4851 = $4853;
                                                 break;
                                         };
-                                        var $4821 = $4824;
+                                        var $4848 = $4851;
                                         break;
                                 };
-                                var $4818 = $4821;
+                                var $4845 = $4848;
                                 break;
                             case 'Kind.Term.var':
                             case 'Kind.Term.lam':
                             case 'Kind.Term.app':
                             case 'Kind.Term.ori':
                                 var _expected$13 = Either$left$("(function type)");
-                                var _detected$14 = Either$right$($4817);
-                                var $4830 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$13, _detected$14, _ctx$4), List$nil));
-                                var $4818 = $4830;
+                                var _detected$14 = Either$right$($4844);
+                                var $4857 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$13, _detected$14, _ctx$4), List$nil));
+                                var $4845 = $4857;
                                 break;
                             case 'Kind.Term.ref':
                             case 'Kind.Term.hol':
@@ -14218,89 +14275,89 @@ module.exports = (function() {
                             case 'Kind.Term.chr':
                             case 'Kind.Term.str':
                                 var _expected$12 = Either$left$("(function type)");
-                                var _detected$13 = Either$right$($4817);
-                                var $4831 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$12, _detected$13, _ctx$4), List$nil));
-                                var $4818 = $4831;
+                                var _detected$13 = Either$right$($4844);
+                                var $4858 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$12, _detected$13, _ctx$4), List$nil));
+                                var $4845 = $4858;
                                 break;
                             case 'Kind.Term.typ':
                                 var _expected$11 = Either$left$("(function type)");
-                                var _detected$12 = Either$right$($4817);
-                                var $4832 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$11, _detected$12, _ctx$4), List$nil));
-                                var $4818 = $4832;
+                                var _detected$12 = Either$right$($4844);
+                                var $4859 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$11, _detected$12, _ctx$4), List$nil));
+                                var $4845 = $4859;
                                 break;
                             case 'Kind.Term.let':
                             case 'Kind.Term.def':
                             case 'Kind.Term.ann':
                             case 'Kind.Term.gol':
                                 var _expected$14 = Either$left$("(function type)");
-                                var _detected$15 = Either$right$($4817);
-                                var $4833 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$14, _detected$15, _ctx$4), List$nil));
-                                var $4818 = $4833;
+                                var _detected$15 = Either$right$($4844);
+                                var $4860 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$14, _detected$15, _ctx$4), List$nil));
+                                var $4845 = $4860;
                                 break;
                             case 'Kind.Term.cse':
                                 var _expected$17 = Either$left$("(function type)");
-                                var _detected$18 = Either$right$($4817);
-                                var $4834 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$17, _detected$18, _ctx$4), List$nil));
-                                var $4818 = $4834;
+                                var _detected$18 = Either$right$($4844);
+                                var $4861 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$17, _detected$18, _ctx$4), List$nil));
+                                var $4845 = $4861;
                                 break;
                         };
-                        var $4816 = $4818;
+                        var $4843 = $4845;
                         break;
                     case 'Maybe.none':
                         var _lam_type$9 = Kind$Term$hol$(Bits$e);
                         var _lam_term$10 = Kind$Term$ann$(Bool$false, _term$1, _lam_type$9);
-                        var $4835 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$patch$(Kind$MPath$to_bits$(_path$5), _lam_term$10), List$nil));
-                        var $4816 = $4835;
+                        var $4862 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$patch$(Kind$MPath$to_bits$(_path$5), _lam_term$10), List$nil));
+                        var $4843 = $4862;
                         break;
                 };
-                var self = $4816;
+                var self = $4843;
                 break;
             case 'Kind.Term.app':
-                var $4836 = self.func;
-                var $4837 = self.argm;
-                var self = Kind$Term$check$($4836, Maybe$none, _defs$3, _ctx$4, Kind$MPath$o$(_path$5), _orig$6);
+                var $4863 = self.func;
+                var $4864 = self.argm;
+                var self = Kind$Term$check$($4863, Maybe$none, _defs$3, _ctx$4, Kind$MPath$o$(_path$5), _orig$6);
                 switch (self._) {
                     case 'Kind.Check.result':
-                        var $4839 = self.value;
-                        var $4840 = self.errors;
-                        var self = $4839;
+                        var $4866 = self.value;
+                        var $4867 = self.errors;
+                        var self = $4866;
                         switch (self._) {
                             case 'Maybe.some':
-                                var $4842 = self.value;
-                                var _func_typ$12 = Kind$Term$reduce$($4842, _defs$3);
+                                var $4869 = self.value;
+                                var _func_typ$12 = Kind$Term$reduce$($4869, _defs$3);
                                 var self = _func_typ$12;
                                 switch (self._) {
                                     case 'Kind.Term.all':
-                                        var $4844 = self.xtyp;
-                                        var $4845 = self.body;
-                                        var self = Kind$Term$check$($4837, Maybe$some$($4844), _defs$3, _ctx$4, Kind$MPath$i$(_path$5), _orig$6);
+                                        var $4871 = self.xtyp;
+                                        var $4872 = self.body;
+                                        var self = Kind$Term$check$($4864, Maybe$some$($4871), _defs$3, _ctx$4, Kind$MPath$i$(_path$5), _orig$6);
                                         switch (self._) {
                                             case 'Kind.Check.result':
-                                                var $4847 = self.value;
-                                                var $4848 = self.errors;
-                                                var self = $4847;
+                                                var $4874 = self.value;
+                                                var $4875 = self.errors;
+                                                var self = $4874;
                                                 switch (self._) {
                                                     case 'Maybe.none':
-                                                        var $4850 = Kind$Check$result$(Maybe$none, $4848);
-                                                        var $4849 = $4850;
+                                                        var $4877 = Kind$Check$result$(Maybe$none, $4875);
+                                                        var $4876 = $4877;
                                                         break;
                                                     case 'Maybe.some':
-                                                        var self = Kind$Check$result$(Maybe$some$($4845($4836)($4837)), List$nil);
+                                                        var self = Kind$Check$result$(Maybe$some$($4872($4863)($4864)), List$nil);
                                                         switch (self._) {
                                                             case 'Kind.Check.result':
-                                                                var $4852 = self.value;
-                                                                var $4853 = self.errors;
-                                                                var $4854 = Kind$Check$result$($4852, List$concat$($4848, $4853));
-                                                                var $4851 = $4854;
+                                                                var $4879 = self.value;
+                                                                var $4880 = self.errors;
+                                                                var $4881 = Kind$Check$result$($4879, List$concat$($4875, $4880));
+                                                                var $4878 = $4881;
                                                                 break;
                                                         };
-                                                        var $4849 = $4851;
+                                                        var $4876 = $4878;
                                                         break;
                                                 };
-                                                var $4846 = $4849;
+                                                var $4873 = $4876;
                                                 break;
                                         };
-                                        var self = $4846;
+                                        var self = $4873;
                                         break;
                                     case 'Kind.Term.var':
                                     case 'Kind.Term.lam':
@@ -14308,8 +14365,8 @@ module.exports = (function() {
                                     case 'Kind.Term.ori':
                                         var _expected$15 = Either$left$("(function type)");
                                         var _detected$16 = Either$right$(_func_typ$12);
-                                        var $4855 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$15, _detected$16, _ctx$4), List$nil));
-                                        var self = $4855;
+                                        var $4882 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$15, _detected$16, _ctx$4), List$nil));
+                                        var self = $4882;
                                         break;
                                     case 'Kind.Term.ref':
                                     case 'Kind.Term.hol':
@@ -14318,14 +14375,14 @@ module.exports = (function() {
                                     case 'Kind.Term.str':
                                         var _expected$14 = Either$left$("(function type)");
                                         var _detected$15 = Either$right$(_func_typ$12);
-                                        var $4856 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$14, _detected$15, _ctx$4), List$nil));
-                                        var self = $4856;
+                                        var $4883 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$14, _detected$15, _ctx$4), List$nil));
+                                        var self = $4883;
                                         break;
                                     case 'Kind.Term.typ':
                                         var _expected$13 = Either$left$("(function type)");
                                         var _detected$14 = Either$right$(_func_typ$12);
-                                        var $4857 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$13, _detected$14, _ctx$4), List$nil));
-                                        var self = $4857;
+                                        var $4884 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$13, _detected$14, _ctx$4), List$nil));
+                                        var self = $4884;
                                         break;
                                     case 'Kind.Term.let':
                                     case 'Kind.Term.def':
@@ -14333,419 +14390,419 @@ module.exports = (function() {
                                     case 'Kind.Term.gol':
                                         var _expected$16 = Either$left$("(function type)");
                                         var _detected$17 = Either$right$(_func_typ$12);
-                                        var $4858 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$16, _detected$17, _ctx$4), List$nil));
-                                        var self = $4858;
+                                        var $4885 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$16, _detected$17, _ctx$4), List$nil));
+                                        var self = $4885;
                                         break;
                                     case 'Kind.Term.cse':
                                         var _expected$19 = Either$left$("(function type)");
                                         var _detected$20 = Either$right$(_func_typ$12);
-                                        var $4859 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$19, _detected$20, _ctx$4), List$nil));
-                                        var self = $4859;
+                                        var $4886 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, _expected$19, _detected$20, _ctx$4), List$nil));
+                                        var self = $4886;
                                         break;
                                 };
                                 switch (self._) {
                                     case 'Kind.Check.result':
-                                        var $4860 = self.value;
-                                        var $4861 = self.errors;
-                                        var $4862 = Kind$Check$result$($4860, List$concat$($4840, $4861));
-                                        var $4843 = $4862;
+                                        var $4887 = self.value;
+                                        var $4888 = self.errors;
+                                        var $4889 = Kind$Check$result$($4887, List$concat$($4867, $4888));
+                                        var $4870 = $4889;
                                         break;
                                 };
-                                var $4841 = $4843;
+                                var $4868 = $4870;
                                 break;
                             case 'Maybe.none':
-                                var $4863 = Kind$Check$result$(Maybe$none, $4840);
-                                var $4841 = $4863;
+                                var $4890 = Kind$Check$result$(Maybe$none, $4867);
+                                var $4868 = $4890;
                                 break;
                         };
-                        var $4838 = $4841;
+                        var $4865 = $4868;
                         break;
                 };
-                var self = $4838;
+                var self = $4865;
                 break;
             case 'Kind.Term.let':
-                var $4864 = self.name;
-                var $4865 = self.expr;
-                var $4866 = self.body;
+                var $4891 = self.name;
+                var $4892 = self.expr;
+                var $4893 = self.body;
                 var _ctx_size$10 = (list_length(_ctx$4));
-                var self = Kind$Term$check$($4865, Maybe$none, _defs$3, _ctx$4, Kind$MPath$o$(_path$5), _orig$6);
+                var self = Kind$Term$check$($4892, Maybe$none, _defs$3, _ctx$4, Kind$MPath$o$(_path$5), _orig$6);
                 switch (self._) {
                     case 'Kind.Check.result':
-                        var $4868 = self.value;
-                        var $4869 = self.errors;
-                        var self = $4868;
+                        var $4895 = self.value;
+                        var $4896 = self.errors;
+                        var self = $4895;
                         switch (self._) {
                             case 'Maybe.some':
-                                var $4871 = self.value;
-                                var _body_val$14 = $4866(Kind$Term$var$($4864, _ctx_size$10));
-                                var _body_ctx$15 = List$cons$(Pair$new$($4864, $4871), _ctx$4);
+                                var $4898 = self.value;
+                                var _body_val$14 = $4893(Kind$Term$var$($4891, _ctx_size$10));
+                                var _body_ctx$15 = List$cons$(Pair$new$($4891, $4898), _ctx$4);
                                 var self = Kind$Term$check$(_body_val$14, _type$2, _defs$3, _body_ctx$15, Kind$MPath$i$(_path$5), _orig$6);
                                 switch (self._) {
                                     case 'Kind.Check.result':
-                                        var $4873 = self.value;
-                                        var $4874 = self.errors;
-                                        var self = $4873;
+                                        var $4900 = self.value;
+                                        var $4901 = self.errors;
+                                        var self = $4900;
                                         switch (self._) {
                                             case 'Maybe.some':
-                                                var $4876 = self.value;
-                                                var self = Kind$Check$result$(Maybe$some$($4876), List$nil);
+                                                var $4903 = self.value;
+                                                var self = Kind$Check$result$(Maybe$some$($4903), List$nil);
                                                 switch (self._) {
                                                     case 'Kind.Check.result':
-                                                        var $4878 = self.value;
-                                                        var $4879 = self.errors;
-                                                        var $4880 = Kind$Check$result$($4878, List$concat$($4874, $4879));
-                                                        var $4877 = $4880;
+                                                        var $4905 = self.value;
+                                                        var $4906 = self.errors;
+                                                        var $4907 = Kind$Check$result$($4905, List$concat$($4901, $4906));
+                                                        var $4904 = $4907;
                                                         break;
                                                 };
-                                                var $4875 = $4877;
+                                                var $4902 = $4904;
                                                 break;
                                             case 'Maybe.none':
-                                                var $4881 = Kind$Check$result$(Maybe$none, $4874);
-                                                var $4875 = $4881;
+                                                var $4908 = Kind$Check$result$(Maybe$none, $4901);
+                                                var $4902 = $4908;
                                                 break;
                                         };
-                                        var self = $4875;
+                                        var self = $4902;
                                         break;
                                 };
                                 switch (self._) {
                                     case 'Kind.Check.result':
-                                        var $4882 = self.value;
-                                        var $4883 = self.errors;
-                                        var $4884 = Kind$Check$result$($4882, List$concat$($4869, $4883));
-                                        var $4872 = $4884;
+                                        var $4909 = self.value;
+                                        var $4910 = self.errors;
+                                        var $4911 = Kind$Check$result$($4909, List$concat$($4896, $4910));
+                                        var $4899 = $4911;
                                         break;
                                 };
-                                var $4870 = $4872;
+                                var $4897 = $4899;
                                 break;
                             case 'Maybe.none':
-                                var $4885 = Kind$Check$result$(Maybe$none, $4869);
-                                var $4870 = $4885;
+                                var $4912 = Kind$Check$result$(Maybe$none, $4896);
+                                var $4897 = $4912;
                                 break;
                         };
-                        var $4867 = $4870;
+                        var $4894 = $4897;
                         break;
                 };
-                var self = $4867;
+                var self = $4894;
                 break;
             case 'Kind.Term.def':
-                var $4886 = self.name;
-                var $4887 = self.expr;
-                var $4888 = self.body;
+                var $4913 = self.name;
+                var $4914 = self.expr;
+                var $4915 = self.body;
                 var _ctx_size$10 = (list_length(_ctx$4));
-                var self = Kind$Term$check$($4887, Maybe$none, _defs$3, _ctx$4, Kind$MPath$o$(_path$5), _orig$6);
+                var self = Kind$Term$check$($4914, Maybe$none, _defs$3, _ctx$4, Kind$MPath$o$(_path$5), _orig$6);
                 switch (self._) {
                     case 'Kind.Check.result':
-                        var $4890 = self.value;
-                        var $4891 = self.errors;
-                        var self = $4890;
+                        var $4917 = self.value;
+                        var $4918 = self.errors;
+                        var self = $4917;
                         switch (self._) {
                             case 'Maybe.some':
-                                var $4893 = self.value;
-                                var _body_val$14 = $4888(Kind$Term$ann$(Bool$true, $4887, $4893));
-                                var _body_ctx$15 = List$cons$(Pair$new$($4886, $4893), _ctx$4);
+                                var $4920 = self.value;
+                                var _body_val$14 = $4915(Kind$Term$ann$(Bool$true, $4914, $4920));
+                                var _body_ctx$15 = List$cons$(Pair$new$($4913, $4920), _ctx$4);
                                 var self = Kind$Term$check$(_body_val$14, _type$2, _defs$3, _body_ctx$15, Kind$MPath$i$(_path$5), _orig$6);
                                 switch (self._) {
                                     case 'Kind.Check.result':
-                                        var $4895 = self.value;
-                                        var $4896 = self.errors;
-                                        var self = $4895;
+                                        var $4922 = self.value;
+                                        var $4923 = self.errors;
+                                        var self = $4922;
                                         switch (self._) {
                                             case 'Maybe.some':
-                                                var $4898 = self.value;
-                                                var self = Kind$Check$result$(Maybe$some$($4898), List$nil);
+                                                var $4925 = self.value;
+                                                var self = Kind$Check$result$(Maybe$some$($4925), List$nil);
                                                 switch (self._) {
                                                     case 'Kind.Check.result':
-                                                        var $4900 = self.value;
-                                                        var $4901 = self.errors;
-                                                        var $4902 = Kind$Check$result$($4900, List$concat$($4896, $4901));
-                                                        var $4899 = $4902;
+                                                        var $4927 = self.value;
+                                                        var $4928 = self.errors;
+                                                        var $4929 = Kind$Check$result$($4927, List$concat$($4923, $4928));
+                                                        var $4926 = $4929;
                                                         break;
                                                 };
-                                                var $4897 = $4899;
+                                                var $4924 = $4926;
                                                 break;
                                             case 'Maybe.none':
-                                                var $4903 = Kind$Check$result$(Maybe$none, $4896);
-                                                var $4897 = $4903;
+                                                var $4930 = Kind$Check$result$(Maybe$none, $4923);
+                                                var $4924 = $4930;
                                                 break;
                                         };
-                                        var self = $4897;
+                                        var self = $4924;
                                         break;
                                 };
                                 switch (self._) {
                                     case 'Kind.Check.result':
-                                        var $4904 = self.value;
-                                        var $4905 = self.errors;
-                                        var $4906 = Kind$Check$result$($4904, List$concat$($4891, $4905));
-                                        var $4894 = $4906;
+                                        var $4931 = self.value;
+                                        var $4932 = self.errors;
+                                        var $4933 = Kind$Check$result$($4931, List$concat$($4918, $4932));
+                                        var $4921 = $4933;
                                         break;
                                 };
-                                var $4892 = $4894;
+                                var $4919 = $4921;
                                 break;
                             case 'Maybe.none':
-                                var $4907 = Kind$Check$result$(Maybe$none, $4891);
-                                var $4892 = $4907;
+                                var $4934 = Kind$Check$result$(Maybe$none, $4918);
+                                var $4919 = $4934;
                                 break;
                         };
-                        var $4889 = $4892;
+                        var $4916 = $4919;
                         break;
                 };
-                var self = $4889;
+                var self = $4916;
                 break;
             case 'Kind.Term.ann':
-                var $4908 = self.done;
-                var $4909 = self.term;
-                var $4910 = self.type;
-                var self = $4908;
+                var $4935 = self.done;
+                var $4936 = self.term;
+                var $4937 = self.type;
+                var self = $4935;
                 if (self) {
-                    var $4912 = Kind$Check$result$(Maybe$some$($4910), List$nil);
-                    var $4911 = $4912;
+                    var $4939 = Kind$Check$result$(Maybe$some$($4937), List$nil);
+                    var $4938 = $4939;
                 } else {
-                    var self = Kind$Term$check$($4909, Maybe$some$($4910), _defs$3, _ctx$4, Kind$MPath$o$(_path$5), _orig$6);
+                    var self = Kind$Term$check$($4936, Maybe$some$($4937), _defs$3, _ctx$4, Kind$MPath$o$(_path$5), _orig$6);
                     switch (self._) {
                         case 'Kind.Check.result':
-                            var $4914 = self.value;
-                            var $4915 = self.errors;
-                            var self = $4914;
+                            var $4941 = self.value;
+                            var $4942 = self.errors;
+                            var self = $4941;
                             switch (self._) {
                                 case 'Maybe.none':
-                                    var $4917 = Kind$Check$result$(Maybe$none, $4915);
-                                    var $4916 = $4917;
+                                    var $4944 = Kind$Check$result$(Maybe$none, $4942);
+                                    var $4943 = $4944;
                                     break;
                                 case 'Maybe.some':
-                                    var self = Kind$Term$check$($4910, Maybe$some$(Kind$Term$typ), _defs$3, _ctx$4, Kind$MPath$i$(_path$5), _orig$6);
+                                    var self = Kind$Term$check$($4937, Maybe$some$(Kind$Term$typ), _defs$3, _ctx$4, Kind$MPath$i$(_path$5), _orig$6);
                                     switch (self._) {
                                         case 'Kind.Check.result':
-                                            var $4919 = self.value;
-                                            var $4920 = self.errors;
-                                            var self = $4919;
+                                            var $4946 = self.value;
+                                            var $4947 = self.errors;
+                                            var self = $4946;
                                             switch (self._) {
                                                 case 'Maybe.none':
-                                                    var $4922 = Kind$Check$result$(Maybe$none, $4920);
-                                                    var $4921 = $4922;
+                                                    var $4949 = Kind$Check$result$(Maybe$none, $4947);
+                                                    var $4948 = $4949;
                                                     break;
                                                 case 'Maybe.some':
-                                                    var self = Kind$Check$result$(Maybe$some$($4910), List$nil);
+                                                    var self = Kind$Check$result$(Maybe$some$($4937), List$nil);
                                                     switch (self._) {
                                                         case 'Kind.Check.result':
-                                                            var $4924 = self.value;
-                                                            var $4925 = self.errors;
-                                                            var $4926 = Kind$Check$result$($4924, List$concat$($4920, $4925));
-                                                            var $4923 = $4926;
+                                                            var $4951 = self.value;
+                                                            var $4952 = self.errors;
+                                                            var $4953 = Kind$Check$result$($4951, List$concat$($4947, $4952));
+                                                            var $4950 = $4953;
                                                             break;
                                                     };
-                                                    var $4921 = $4923;
+                                                    var $4948 = $4950;
                                                     break;
                                             };
-                                            var self = $4921;
+                                            var self = $4948;
                                             break;
                                     };
                                     switch (self._) {
                                         case 'Kind.Check.result':
-                                            var $4927 = self.value;
-                                            var $4928 = self.errors;
-                                            var $4929 = Kind$Check$result$($4927, List$concat$($4915, $4928));
-                                            var $4918 = $4929;
+                                            var $4954 = self.value;
+                                            var $4955 = self.errors;
+                                            var $4956 = Kind$Check$result$($4954, List$concat$($4942, $4955));
+                                            var $4945 = $4956;
                                             break;
                                     };
-                                    var $4916 = $4918;
+                                    var $4943 = $4945;
                                     break;
                             };
-                            var $4913 = $4916;
+                            var $4940 = $4943;
                             break;
                     };
-                    var $4911 = $4913;
+                    var $4938 = $4940;
                 };
-                var self = $4911;
+                var self = $4938;
                 break;
             case 'Kind.Term.gol':
-                var $4930 = self.name;
-                var $4931 = self.dref;
-                var $4932 = self.verb;
-                var $4933 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$show_goal$($4930, $4931, $4932, _type$2, _ctx$4), List$nil));
-                var self = $4933;
+                var $4957 = self.name;
+                var $4958 = self.dref;
+                var $4959 = self.verb;
+                var $4960 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$show_goal$($4957, $4958, $4959, _type$2, _ctx$4), List$nil));
+                var self = $4960;
                 break;
             case 'Kind.Term.cse':
-                var $4934 = self.path;
-                var $4935 = self.expr;
-                var $4936 = self.name;
-                var $4937 = self.with;
-                var $4938 = self.cses;
-                var $4939 = self.moti;
-                var _expr$13 = $4935;
+                var $4961 = self.path;
+                var $4962 = self.expr;
+                var $4963 = self.name;
+                var $4964 = self.with;
+                var $4965 = self.cses;
+                var $4966 = self.moti;
+                var _expr$13 = $4962;
                 var self = Kind$Term$check$(_expr$13, Maybe$none, _defs$3, _ctx$4, Kind$MPath$o$(_path$5), _orig$6);
                 switch (self._) {
                     case 'Kind.Check.result':
-                        var $4941 = self.value;
-                        var $4942 = self.errors;
-                        var self = $4941;
+                        var $4968 = self.value;
+                        var $4969 = self.errors;
+                        var self = $4968;
                         switch (self._) {
                             case 'Maybe.some':
-                                var $4944 = self.value;
-                                var self = $4939;
+                                var $4971 = self.value;
+                                var self = $4966;
                                 switch (self._) {
                                     case 'Maybe.some':
-                                        var $4946 = self.value;
-                                        var $4947 = Kind$Term$desugar_cse$($4935, $4936, $4937, $4938, $4946, $4944, _defs$3, _ctx$4);
-                                        var _dsug$17 = $4947;
+                                        var $4973 = self.value;
+                                        var $4974 = Kind$Term$desugar_cse$($4962, $4963, $4964, $4965, $4973, $4971, _defs$3, _ctx$4);
+                                        var _dsug$17 = $4974;
                                         break;
                                     case 'Maybe.none':
                                         var self = _type$2;
                                         switch (self._) {
                                             case 'Maybe.some':
-                                                var $4949 = self.value;
+                                                var $4976 = self.value;
                                                 var _size$18 = (list_length(_ctx$4));
-                                                var _typv$19 = Kind$Term$normalize$($4949, Map$new);
-                                                var _moti$20 = Kind$SmartMotive$make$($4936, $4935, $4944, _typv$19, _size$18, _defs$3);
-                                                var $4950 = _moti$20;
-                                                var _moti$17 = $4950;
+                                                var _typv$19 = Kind$Term$normalize$($4976, Map$new);
+                                                var _moti$20 = Kind$SmartMotive$make$($4963, $4962, $4971, _typv$19, _size$18, _defs$3);
+                                                var $4977 = _moti$20;
+                                                var _moti$17 = $4977;
                                                 break;
                                             case 'Maybe.none':
-                                                var $4951 = Kind$Term$hol$(Bits$e);
-                                                var _moti$17 = $4951;
+                                                var $4978 = Kind$Term$hol$(Bits$e);
+                                                var _moti$17 = $4978;
                                                 break;
                                         };
-                                        var $4948 = Maybe$some$(Kind$Term$cse$($4934, $4935, $4936, $4937, $4938, Maybe$some$(_moti$17)));
-                                        var _dsug$17 = $4948;
+                                        var $4975 = Maybe$some$(Kind$Term$cse$($4961, $4962, $4963, $4964, $4965, Maybe$some$(_moti$17)));
+                                        var _dsug$17 = $4975;
                                         break;
                                 };
                                 var self = _dsug$17;
                                 switch (self._) {
                                     case 'Maybe.some':
-                                        var $4952 = self.value;
-                                        var $4953 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$patch$(Kind$MPath$to_bits$(_path$5), $4952), List$nil));
-                                        var self = $4953;
+                                        var $4979 = self.value;
+                                        var $4980 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$patch$(Kind$MPath$to_bits$(_path$5), $4979), List$nil));
+                                        var self = $4980;
                                         break;
                                     case 'Maybe.none':
-                                        var $4954 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$cant_infer$(_orig$6, _term$1, _ctx$4), List$nil));
-                                        var self = $4954;
+                                        var $4981 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$cant_infer$(_orig$6, _term$1, _ctx$4), List$nil));
+                                        var self = $4981;
                                         break;
                                 };
                                 switch (self._) {
                                     case 'Kind.Check.result':
-                                        var $4955 = self.value;
-                                        var $4956 = self.errors;
-                                        var $4957 = Kind$Check$result$($4955, List$concat$($4942, $4956));
-                                        var $4945 = $4957;
+                                        var $4982 = self.value;
+                                        var $4983 = self.errors;
+                                        var $4984 = Kind$Check$result$($4982, List$concat$($4969, $4983));
+                                        var $4972 = $4984;
                                         break;
                                 };
-                                var $4943 = $4945;
+                                var $4970 = $4972;
                                 break;
                             case 'Maybe.none':
-                                var $4958 = Kind$Check$result$(Maybe$none, $4942);
-                                var $4943 = $4958;
+                                var $4985 = Kind$Check$result$(Maybe$none, $4969);
+                                var $4970 = $4985;
                                 break;
                         };
-                        var $4940 = $4943;
+                        var $4967 = $4970;
                         break;
                 };
-                var self = $4940;
+                var self = $4967;
                 break;
             case 'Kind.Term.ori':
-                var $4959 = self.orig;
-                var $4960 = self.expr;
-                var $4961 = Kind$Term$check$($4960, _type$2, _defs$3, _ctx$4, _path$5, Maybe$some$($4959));
-                var self = $4961;
+                var $4986 = self.orig;
+                var $4987 = self.expr;
+                var $4988 = Kind$Term$check$($4987, _type$2, _defs$3, _ctx$4, _path$5, Maybe$some$($4986));
+                var self = $4988;
                 break;
             case 'Kind.Term.typ':
-                var $4962 = Kind$Check$result$(Maybe$some$(Kind$Term$typ), List$nil);
-                var self = $4962;
+                var $4989 = Kind$Check$result$(Maybe$some$(Kind$Term$typ), List$nil);
+                var self = $4989;
                 break;
             case 'Kind.Term.hol':
-                var $4963 = Kind$Check$result$(_type$2, List$nil);
-                var self = $4963;
+                var $4990 = Kind$Check$result$(_type$2, List$nil);
+                var self = $4990;
                 break;
             case 'Kind.Term.nat':
-                var $4964 = Kind$Check$result$(Maybe$some$(Kind$Term$ref$("Nat")), List$nil);
-                var self = $4964;
+                var $4991 = Kind$Check$result$(Maybe$some$(Kind$Term$ref$("Nat")), List$nil);
+                var self = $4991;
                 break;
             case 'Kind.Term.chr':
-                var $4965 = Kind$Check$result$(Maybe$some$(Kind$Term$ref$("Char")), List$nil);
-                var self = $4965;
+                var $4992 = Kind$Check$result$(Maybe$some$(Kind$Term$ref$("Char")), List$nil);
+                var self = $4992;
                 break;
             case 'Kind.Term.str':
-                var $4966 = Kind$Check$result$(Maybe$some$(Kind$Term$ref$("String")), List$nil);
-                var self = $4966;
+                var $4993 = Kind$Check$result$(Maybe$some$(Kind$Term$ref$("String")), List$nil);
+                var self = $4993;
                 break;
         };
         switch (self._) {
             case 'Kind.Check.result':
-                var $4967 = self.value;
-                var $4968 = self.errors;
-                var self = $4967;
+                var $4994 = self.value;
+                var $4995 = self.errors;
+                var self = $4994;
                 switch (self._) {
                     case 'Maybe.some':
-                        var $4970 = self.value;
+                        var $4997 = self.value;
                         var self = _type$2;
                         switch (self._) {
                             case 'Maybe.some':
-                                var $4972 = self.value;
-                                var self = Kind$Term$equal$($4972, $4970, _defs$3, (list_length(_ctx$4)), (({})));
+                                var $4999 = self.value;
+                                var self = Kind$Term$equal$($4999, $4997, _defs$3, (list_length(_ctx$4)), (({})));
                                 switch (self._) {
                                     case 'Kind.Check.result':
-                                        var $4974 = self.value;
-                                        var $4975 = self.errors;
-                                        var self = $4974;
+                                        var $5001 = self.value;
+                                        var $5002 = self.errors;
+                                        var self = $5001;
                                         switch (self._) {
                                             case 'Maybe.some':
-                                                var $4977 = self.value;
-                                                var self = $4977;
+                                                var $5004 = self.value;
+                                                var self = $5004;
                                                 if (self) {
-                                                    var $4979 = Kind$Check$result$(Maybe$some$($4972), List$nil);
-                                                    var self = $4979;
+                                                    var $5006 = Kind$Check$result$(Maybe$some$($4999), List$nil);
+                                                    var self = $5006;
                                                 } else {
-                                                    var $4980 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, Either$right$($4972), Either$right$($4970), _ctx$4), List$nil));
-                                                    var self = $4980;
+                                                    var $5007 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$type_mismatch$(_orig$6, Either$right$($4999), Either$right$($4997), _ctx$4), List$nil));
+                                                    var self = $5007;
                                                 };
                                                 switch (self._) {
                                                     case 'Kind.Check.result':
-                                                        var $4981 = self.value;
-                                                        var $4982 = self.errors;
-                                                        var $4983 = Kind$Check$result$($4981, List$concat$($4975, $4982));
-                                                        var $4978 = $4983;
+                                                        var $5008 = self.value;
+                                                        var $5009 = self.errors;
+                                                        var $5010 = Kind$Check$result$($5008, List$concat$($5002, $5009));
+                                                        var $5005 = $5010;
                                                         break;
                                                 };
-                                                var $4976 = $4978;
+                                                var $5003 = $5005;
                                                 break;
                                             case 'Maybe.none':
-                                                var $4984 = Kind$Check$result$(Maybe$none, $4975);
-                                                var $4976 = $4984;
+                                                var $5011 = Kind$Check$result$(Maybe$none, $5002);
+                                                var $5003 = $5011;
                                                 break;
                                         };
-                                        var $4973 = $4976;
+                                        var $5000 = $5003;
                                         break;
                                 };
-                                var self = $4973;
+                                var self = $5000;
                                 break;
                             case 'Maybe.none':
-                                var $4985 = Kind$Check$result$(Maybe$some$($4970), List$nil);
-                                var self = $4985;
+                                var $5012 = Kind$Check$result$(Maybe$some$($4997), List$nil);
+                                var self = $5012;
                                 break;
                         };
                         switch (self._) {
                             case 'Kind.Check.result':
-                                var $4986 = self.value;
-                                var $4987 = self.errors;
-                                var $4988 = Kind$Check$result$($4986, List$concat$($4968, $4987));
-                                var $4971 = $4988;
+                                var $5013 = self.value;
+                                var $5014 = self.errors;
+                                var $5015 = Kind$Check$result$($5013, List$concat$($4995, $5014));
+                                var $4998 = $5015;
                                 break;
                         };
-                        var $4969 = $4971;
+                        var $4996 = $4998;
                         break;
                     case 'Maybe.none':
-                        var $4989 = Kind$Check$result$(Maybe$none, $4968);
-                        var $4969 = $4989;
+                        var $5016 = Kind$Check$result$(Maybe$none, $4995);
+                        var $4996 = $5016;
                         break;
                 };
-                var $4771 = $4969;
+                var $4798 = $4996;
                 break;
         };
-        return $4771;
+        return $4798;
     };
     const Kind$Term$check = x0 => x1 => x2 => x3 => x4 => x5 => Kind$Term$check$(x0, x1, x2, x3, x4, x5);
 
     function Kind$Path$nil$(_x$1) {
-        var $4990 = _x$1;
-        return $4990;
+        var $5017 = _x$1;
+        return $5017;
     };
     const Kind$Path$nil = x0 => Kind$Path$nil$(x0);
     const Kind$MPath$nil = Maybe$some$(Kind$Path$nil);
@@ -14754,15 +14811,15 @@ module.exports = (function() {
         var self = _list$2;
         switch (self._) {
             case 'List.nil':
-                var $4992 = Bool$true;
-                var $4991 = $4992;
+                var $5019 = Bool$true;
+                var $5018 = $5019;
                 break;
             case 'List.cons':
-                var $4993 = Bool$false;
-                var $4991 = $4993;
+                var $5020 = Bool$false;
+                var $5018 = $5020;
                 break;
         };
-        return $4991;
+        return $5018;
     };
     const List$is_empty = x0 => List$is_empty$(x0);
 
@@ -14770,170 +14827,170 @@ module.exports = (function() {
         var self = _term$2;
         switch (self._) {
             case 'Kind.Term.all':
-                var $4995 = self.eras;
-                var $4996 = self.self;
-                var $4997 = self.name;
-                var $4998 = self.xtyp;
-                var $4999 = self.body;
+                var $5022 = self.eras;
+                var $5023 = self.self;
+                var $5024 = self.name;
+                var $5025 = self.xtyp;
+                var $5026 = self.body;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'o':
-                        var $5001 = self.slice(0, -1);
-                        var $5002 = Kind$Term$all$($4995, $4996, $4997, Kind$Term$patch_at$($5001, $4998, _fn$3), $4999);
-                        var $5000 = $5002;
+                        var $5028 = self.slice(0, -1);
+                        var $5029 = Kind$Term$all$($5022, $5023, $5024, Kind$Term$patch_at$($5028, $5025, _fn$3), $5026);
+                        var $5027 = $5029;
                         break;
                     case 'i':
-                        var $5003 = self.slice(0, -1);
-                        var $5004 = Kind$Term$all$($4995, $4996, $4997, $4998, (_s$10 => _x$11 => {
-                            var $5005 = Kind$Term$patch_at$($5003, $4999(_s$10)(_x$11), _fn$3);
-                            return $5005;
+                        var $5030 = self.slice(0, -1);
+                        var $5031 = Kind$Term$all$($5022, $5023, $5024, $5025, (_s$10 => _x$11 => {
+                            var $5032 = Kind$Term$patch_at$($5030, $5026(_s$10)(_x$11), _fn$3);
+                            return $5032;
                         }));
-                        var $5000 = $5004;
+                        var $5027 = $5031;
                         break;
                     case 'e':
-                        var $5006 = _fn$3(_term$2);
-                        var $5000 = $5006;
+                        var $5033 = _fn$3(_term$2);
+                        var $5027 = $5033;
                         break;
                 };
-                var $4994 = $5000;
+                var $5021 = $5027;
                 break;
             case 'Kind.Term.lam':
-                var $5007 = self.name;
-                var $5008 = self.body;
+                var $5034 = self.name;
+                var $5035 = self.body;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $5010 = _fn$3(_term$2);
-                        var $5009 = $5010;
+                        var $5037 = _fn$3(_term$2);
+                        var $5036 = $5037;
                         break;
                     case 'o':
                     case 'i':
-                        var $5011 = Kind$Term$lam$($5007, (_x$7 => {
-                            var $5012 = Kind$Term$patch_at$(Bits$tail$(_path$1), $5008(_x$7), _fn$3);
-                            return $5012;
-                        }));
-                        var $5009 = $5011;
-                        break;
-                };
-                var $4994 = $5009;
-                break;
-            case 'Kind.Term.app':
-                var $5013 = self.func;
-                var $5014 = self.argm;
-                var self = _path$1;
-                switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
-                    case 'o':
-                        var $5016 = self.slice(0, -1);
-                        var $5017 = Kind$Term$app$(Kind$Term$patch_at$($5016, $5013, _fn$3), $5014);
-                        var $5015 = $5017;
-                        break;
-                    case 'i':
-                        var $5018 = self.slice(0, -1);
-                        var $5019 = Kind$Term$app$($5013, Kind$Term$patch_at$($5018, $5014, _fn$3));
-                        var $5015 = $5019;
-                        break;
-                    case 'e':
-                        var $5020 = _fn$3(_term$2);
-                        var $5015 = $5020;
-                        break;
-                };
-                var $4994 = $5015;
-                break;
-            case 'Kind.Term.let':
-                var $5021 = self.name;
-                var $5022 = self.expr;
-                var $5023 = self.body;
-                var self = _path$1;
-                switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
-                    case 'o':
-                        var $5025 = self.slice(0, -1);
-                        var $5026 = Kind$Term$let$($5021, Kind$Term$patch_at$($5025, $5022, _fn$3), $5023);
-                        var $5024 = $5026;
-                        break;
-                    case 'i':
-                        var $5027 = self.slice(0, -1);
-                        var $5028 = Kind$Term$let$($5021, $5022, (_x$8 => {
-                            var $5029 = Kind$Term$patch_at$($5027, $5023(_x$8), _fn$3);
-                            return $5029;
-                        }));
-                        var $5024 = $5028;
-                        break;
-                    case 'e':
-                        var $5030 = _fn$3(_term$2);
-                        var $5024 = $5030;
-                        break;
-                };
-                var $4994 = $5024;
-                break;
-            case 'Kind.Term.def':
-                var $5031 = self.name;
-                var $5032 = self.expr;
-                var $5033 = self.body;
-                var self = _path$1;
-                switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
-                    case 'o':
-                        var $5035 = self.slice(0, -1);
-                        var $5036 = Kind$Term$def$($5031, Kind$Term$patch_at$($5035, $5032, _fn$3), $5033);
-                        var $5034 = $5036;
-                        break;
-                    case 'i':
-                        var $5037 = self.slice(0, -1);
-                        var $5038 = Kind$Term$def$($5031, $5032, (_x$8 => {
-                            var $5039 = Kind$Term$patch_at$($5037, $5033(_x$8), _fn$3);
+                        var $5038 = Kind$Term$lam$($5034, (_x$7 => {
+                            var $5039 = Kind$Term$patch_at$(Bits$tail$(_path$1), $5035(_x$7), _fn$3);
                             return $5039;
                         }));
-                        var $5034 = $5038;
-                        break;
-                    case 'e':
-                        var $5040 = _fn$3(_term$2);
-                        var $5034 = $5040;
+                        var $5036 = $5038;
                         break;
                 };
-                var $4994 = $5034;
+                var $5021 = $5036;
                 break;
-            case 'Kind.Term.ann':
-                var $5041 = self.done;
-                var $5042 = self.term;
-                var $5043 = self.type;
+            case 'Kind.Term.app':
+                var $5040 = self.func;
+                var $5041 = self.argm;
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'o':
-                        var $5045 = self.slice(0, -1);
-                        var $5046 = Kind$Term$ann$($5041, Kind$Term$patch_at$($5045, $5042, _fn$3), $5043);
-                        var $5044 = $5046;
+                        var $5043 = self.slice(0, -1);
+                        var $5044 = Kind$Term$app$(Kind$Term$patch_at$($5043, $5040, _fn$3), $5041);
+                        var $5042 = $5044;
                         break;
                     case 'i':
-                        var $5047 = self.slice(0, -1);
-                        var $5048 = Kind$Term$ann$($5041, $5042, Kind$Term$patch_at$($5047, $5043, _fn$3));
-                        var $5044 = $5048;
+                        var $5045 = self.slice(0, -1);
+                        var $5046 = Kind$Term$app$($5040, Kind$Term$patch_at$($5045, $5041, _fn$3));
+                        var $5042 = $5046;
                         break;
                     case 'e':
-                        var $5049 = _fn$3(_term$2);
-                        var $5044 = $5049;
+                        var $5047 = _fn$3(_term$2);
+                        var $5042 = $5047;
                         break;
                 };
-                var $4994 = $5044;
+                var $5021 = $5042;
+                break;
+            case 'Kind.Term.let':
+                var $5048 = self.name;
+                var $5049 = self.expr;
+                var $5050 = self.body;
+                var self = _path$1;
+                switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
+                    case 'o':
+                        var $5052 = self.slice(0, -1);
+                        var $5053 = Kind$Term$let$($5048, Kind$Term$patch_at$($5052, $5049, _fn$3), $5050);
+                        var $5051 = $5053;
+                        break;
+                    case 'i':
+                        var $5054 = self.slice(0, -1);
+                        var $5055 = Kind$Term$let$($5048, $5049, (_x$8 => {
+                            var $5056 = Kind$Term$patch_at$($5054, $5050(_x$8), _fn$3);
+                            return $5056;
+                        }));
+                        var $5051 = $5055;
+                        break;
+                    case 'e':
+                        var $5057 = _fn$3(_term$2);
+                        var $5051 = $5057;
+                        break;
+                };
+                var $5021 = $5051;
+                break;
+            case 'Kind.Term.def':
+                var $5058 = self.name;
+                var $5059 = self.expr;
+                var $5060 = self.body;
+                var self = _path$1;
+                switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
+                    case 'o':
+                        var $5062 = self.slice(0, -1);
+                        var $5063 = Kind$Term$def$($5058, Kind$Term$patch_at$($5062, $5059, _fn$3), $5060);
+                        var $5061 = $5063;
+                        break;
+                    case 'i':
+                        var $5064 = self.slice(0, -1);
+                        var $5065 = Kind$Term$def$($5058, $5059, (_x$8 => {
+                            var $5066 = Kind$Term$patch_at$($5064, $5060(_x$8), _fn$3);
+                            return $5066;
+                        }));
+                        var $5061 = $5065;
+                        break;
+                    case 'e':
+                        var $5067 = _fn$3(_term$2);
+                        var $5061 = $5067;
+                        break;
+                };
+                var $5021 = $5061;
+                break;
+            case 'Kind.Term.ann':
+                var $5068 = self.done;
+                var $5069 = self.term;
+                var $5070 = self.type;
+                var self = _path$1;
+                switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
+                    case 'o':
+                        var $5072 = self.slice(0, -1);
+                        var $5073 = Kind$Term$ann$($5068, Kind$Term$patch_at$($5072, $5069, _fn$3), $5070);
+                        var $5071 = $5073;
+                        break;
+                    case 'i':
+                        var $5074 = self.slice(0, -1);
+                        var $5075 = Kind$Term$ann$($5068, $5069, Kind$Term$patch_at$($5074, $5070, _fn$3));
+                        var $5071 = $5075;
+                        break;
+                    case 'e':
+                        var $5076 = _fn$3(_term$2);
+                        var $5071 = $5076;
+                        break;
+                };
+                var $5021 = $5071;
                 break;
             case 'Kind.Term.ori':
-                var $5050 = self.orig;
-                var $5051 = self.expr;
-                var $5052 = Kind$Term$ori$($5050, Kind$Term$patch_at$(_path$1, $5051, _fn$3));
-                var $4994 = $5052;
+                var $5077 = self.orig;
+                var $5078 = self.expr;
+                var $5079 = Kind$Term$ori$($5077, Kind$Term$patch_at$(_path$1, $5078, _fn$3));
+                var $5021 = $5079;
                 break;
             case 'Kind.Term.var':
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $5054 = _fn$3(_term$2);
-                        var $5053 = $5054;
+                        var $5081 = _fn$3(_term$2);
+                        var $5080 = $5081;
                         break;
                     case 'o':
                     case 'i':
-                        var $5055 = _term$2;
-                        var $5053 = $5055;
+                        var $5082 = _term$2;
+                        var $5080 = $5082;
                         break;
                 };
-                var $4994 = $5053;
+                var $5021 = $5080;
                 break;
             case 'Kind.Term.ref':
             case 'Kind.Term.hol':
@@ -14943,64 +15000,64 @@ module.exports = (function() {
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $5057 = _fn$3(_term$2);
-                        var $5056 = $5057;
+                        var $5084 = _fn$3(_term$2);
+                        var $5083 = $5084;
                         break;
                     case 'o':
                     case 'i':
-                        var $5058 = _term$2;
-                        var $5056 = $5058;
+                        var $5085 = _term$2;
+                        var $5083 = $5085;
                         break;
                 };
-                var $4994 = $5056;
+                var $5021 = $5083;
                 break;
             case 'Kind.Term.typ':
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $5060 = _fn$3(_term$2);
-                        var $5059 = $5060;
+                        var $5087 = _fn$3(_term$2);
+                        var $5086 = $5087;
                         break;
                     case 'o':
                     case 'i':
-                        var $5061 = _term$2;
-                        var $5059 = $5061;
+                        var $5088 = _term$2;
+                        var $5086 = $5088;
                         break;
                 };
-                var $4994 = $5059;
+                var $5021 = $5086;
                 break;
             case 'Kind.Term.gol':
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $5063 = _fn$3(_term$2);
-                        var $5062 = $5063;
+                        var $5090 = _fn$3(_term$2);
+                        var $5089 = $5090;
                         break;
                     case 'o':
                     case 'i':
-                        var $5064 = _term$2;
-                        var $5062 = $5064;
+                        var $5091 = _term$2;
+                        var $5089 = $5091;
                         break;
                 };
-                var $4994 = $5062;
+                var $5021 = $5089;
                 break;
             case 'Kind.Term.cse':
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
-                        var $5066 = _fn$3(_term$2);
-                        var $5065 = $5066;
+                        var $5093 = _fn$3(_term$2);
+                        var $5092 = $5093;
                         break;
                     case 'o':
                     case 'i':
-                        var $5067 = _term$2;
-                        var $5065 = $5067;
+                        var $5094 = _term$2;
+                        var $5092 = $5094;
                         break;
                 };
-                var $4994 = $5065;
+                var $5021 = $5092;
                 break;
         };
-        return $4994;
+        return $5021;
     };
     const Kind$Term$patch_at = x0 => x1 => x2 => Kind$Term$patch_at$(x0, x1, x2);
 
@@ -15008,134 +15065,134 @@ module.exports = (function() {
         var self = _errs$10;
         switch (self._) {
             case 'List.cons':
-                var $5069 = self.head;
-                var $5070 = self.tail;
-                var self = $5069;
+                var $5096 = self.head;
+                var $5097 = self.tail;
+                var self = $5096;
                 switch (self._) {
                     case 'Kind.Error.waiting':
-                        var $5072 = self.name;
-                        var $5073 = IO$monad$((_m$bind$15 => _m$pure$16 => {
-                            var $5074 = _m$bind$15;
-                            return $5074;
-                        }))(Kind$Synth$one$($5072, _defs$9))((_new_defs$15 => {
+                        var $5099 = self.name;
+                        var $5100 = IO$monad$((_m$bind$15 => _m$pure$16 => {
+                            var $5101 = _m$bind$15;
+                            return $5101;
+                        }))(Kind$Synth$one$($5099, _defs$9))((_new_defs$15 => {
                             var self = _new_defs$15;
                             switch (self._) {
                                 case 'Maybe.some':
-                                    var $5076 = self.value;
-                                    var $5077 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, $5076, $5070, Bool$true);
-                                    var $5075 = $5077;
+                                    var $5103 = self.value;
+                                    var $5104 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, $5103, $5097, Bool$true);
+                                    var $5102 = $5104;
                                     break;
                                 case 'Maybe.none':
-                                    var $5078 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, _defs$9, $5070, _fixd$11);
-                                    var $5075 = $5078;
+                                    var $5105 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, _defs$9, $5097, _fixd$11);
+                                    var $5102 = $5105;
                                     break;
                             };
-                            return $5075;
+                            return $5102;
                         }));
-                        var $5071 = $5073;
+                        var $5098 = $5100;
                         break;
                     case 'Kind.Error.patch':
-                        var $5079 = self.path;
-                        var $5080 = self.term;
-                        var self = $5079;
+                        var $5106 = self.path;
+                        var $5107 = self.term;
+                        var self = $5106;
                         switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                             case 'o':
-                                var $5082 = self.slice(0, -1);
-                                var _term$17 = Kind$Term$patch_at$($5082, _term$5, (_x$17 => {
-                                    var $5084 = $5080;
-                                    return $5084;
+                                var $5109 = self.slice(0, -1);
+                                var _term$17 = Kind$Term$patch_at$($5109, _term$5, (_x$17 => {
+                                    var $5111 = $5107;
+                                    return $5111;
                                 }));
-                                var $5083 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$17, _type$6, _isct$7, _arit$8, _defs$9, $5070, Bool$true);
-                                var $5081 = $5083;
+                                var $5110 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$17, _type$6, _isct$7, _arit$8, _defs$9, $5097, Bool$true);
+                                var $5108 = $5110;
                                 break;
                             case 'i':
-                                var $5085 = self.slice(0, -1);
-                                var _type$17 = Kind$Term$patch_at$($5085, _type$6, (_x$17 => {
-                                    var $5087 = $5080;
-                                    return $5087;
+                                var $5112 = self.slice(0, -1);
+                                var _type$17 = Kind$Term$patch_at$($5112, _type$6, (_x$17 => {
+                                    var $5114 = $5107;
+                                    return $5114;
                                 }));
-                                var $5086 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$17, _isct$7, _arit$8, _defs$9, $5070, Bool$true);
-                                var $5081 = $5086;
+                                var $5113 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$17, _isct$7, _arit$8, _defs$9, $5097, Bool$true);
+                                var $5108 = $5113;
                                 break;
                             case 'e':
-                                var $5088 = IO$monad$((_m$bind$16 => _m$pure$17 => {
-                                    var $5089 = _m$pure$17;
-                                    return $5089;
+                                var $5115 = IO$monad$((_m$bind$16 => _m$pure$17 => {
+                                    var $5116 = _m$pure$17;
+                                    return $5116;
                                 }))(Maybe$none);
-                                var $5081 = $5088;
+                                var $5108 = $5115;
                                 break;
                         };
-                        var $5071 = $5081;
+                        var $5098 = $5108;
                         break;
                     case 'Kind.Error.undefined_reference':
-                        var $5090 = self.name;
-                        var $5091 = IO$monad$((_m$bind$16 => _m$pure$17 => {
-                            var $5092 = _m$bind$16;
-                            return $5092;
-                        }))(Kind$Synth$one$($5090, _defs$9))((_new_defs$16 => {
+                        var $5117 = self.name;
+                        var $5118 = IO$monad$((_m$bind$16 => _m$pure$17 => {
+                            var $5119 = _m$bind$16;
+                            return $5119;
+                        }))(Kind$Synth$one$($5117, _defs$9))((_new_defs$16 => {
                             var self = _new_defs$16;
                             switch (self._) {
                                 case 'Maybe.some':
-                                    var $5094 = self.value;
-                                    var $5095 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, $5094, $5070, Bool$true);
-                                    var $5093 = $5095;
+                                    var $5121 = self.value;
+                                    var $5122 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, $5121, $5097, Bool$true);
+                                    var $5120 = $5122;
                                     break;
                                 case 'Maybe.none':
-                                    var $5096 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, _defs$9, $5070, _fixd$11);
-                                    var $5093 = $5096;
+                                    var $5123 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, _defs$9, $5097, _fixd$11);
+                                    var $5120 = $5123;
                                     break;
                             };
-                            return $5093;
+                            return $5120;
                         }));
-                        var $5071 = $5091;
+                        var $5098 = $5118;
                         break;
                     case 'Kind.Error.type_mismatch':
                     case 'Kind.Error.show_goal':
                     case 'Kind.Error.indirect':
                     case 'Kind.Error.cant_infer':
-                        var $5097 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, _defs$9, $5070, _fixd$11);
-                        var $5071 = $5097;
+                        var $5124 = Kind$Synth$fix$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, _defs$9, $5097, _fixd$11);
+                        var $5098 = $5124;
                         break;
                 };
-                var $5068 = $5071;
+                var $5095 = $5098;
                 break;
             case 'List.nil':
                 var self = _fixd$11;
                 if (self) {
                     var _type$12 = Kind$Term$bind$(List$nil, (_x$12 => {
-                        var $5100 = (_x$12 + '1');
-                        return $5100;
+                        var $5127 = (_x$12 + '1');
+                        return $5127;
                     }), _type$6);
                     var _term$13 = Kind$Term$bind$(List$nil, (_x$13 => {
-                        var $5101 = (_x$13 + '0');
-                        return $5101;
+                        var $5128 = (_x$13 + '0');
+                        return $5128;
                     }), _term$5);
                     var _defs$14 = Kind$set$(_name$4, Kind$Def$new$(_file$1, _code$2, _orig$3, _name$4, _term$13, _type$12, _isct$7, _arit$8, Kind$Status$init), _defs$9);
-                    var $5099 = IO$monad$((_m$bind$15 => _m$pure$16 => {
-                        var $5102 = _m$pure$16;
-                        return $5102;
+                    var $5126 = IO$monad$((_m$bind$15 => _m$pure$16 => {
+                        var $5129 = _m$pure$16;
+                        return $5129;
                     }))(Maybe$some$(_defs$14));
-                    var $5098 = $5099;
+                    var $5125 = $5126;
                 } else {
-                    var $5103 = IO$monad$((_m$bind$12 => _m$pure$13 => {
-                        var $5104 = _m$pure$13;
-                        return $5104;
+                    var $5130 = IO$monad$((_m$bind$12 => _m$pure$13 => {
+                        var $5131 = _m$pure$13;
+                        return $5131;
                     }))(Maybe$none);
-                    var $5098 = $5103;
+                    var $5125 = $5130;
                 };
-                var $5068 = $5098;
+                var $5095 = $5125;
                 break;
         };
-        return $5068;
+        return $5095;
     };
     const Kind$Synth$fix = x0 => x1 => x2 => x3 => x4 => x5 => x6 => x7 => x8 => x9 => x10 => Kind$Synth$fix$(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10);
 
     function Kind$Status$fail$(_errors$1) {
-        var $5105 = ({
+        var $5132 = ({
             _: 'Kind.Status.fail',
             'errors': _errors$1
         });
-        return $5105;
+        return $5132;
     };
     const Kind$Status$fail = x0 => Kind$Status$fail$(x0);
 
@@ -15143,28 +15200,28 @@ module.exports = (function() {
         var self = Kind$get$(_name$1, _defs$2);
         switch (self._) {
             case 'Maybe.some':
-                var $5107 = self.value;
-                var self = $5107;
+                var $5134 = self.value;
+                var self = $5134;
                 switch (self._) {
                     case 'Kind.Def.new':
-                        var $5109 = self.file;
-                        var $5110 = self.code;
-                        var $5111 = self.orig;
-                        var $5112 = self.name;
-                        var $5113 = self.term;
-                        var $5114 = self.type;
-                        var $5115 = self.isct;
-                        var $5116 = self.arit;
-                        var $5117 = self.stat;
-                        var _file$13 = $5109;
-                        var _code$14 = $5110;
-                        var _orig$15 = $5111;
-                        var _name$16 = $5112;
-                        var _term$17 = $5113;
-                        var _type$18 = $5114;
-                        var _isct$19 = $5115;
-                        var _arit$20 = $5116;
-                        var _stat$21 = $5117;
+                        var $5136 = self.file;
+                        var $5137 = self.code;
+                        var $5138 = self.orig;
+                        var $5139 = self.name;
+                        var $5140 = self.term;
+                        var $5141 = self.type;
+                        var $5142 = self.isct;
+                        var $5143 = self.arit;
+                        var $5144 = self.stat;
+                        var _file$13 = $5136;
+                        var _code$14 = $5137;
+                        var _orig$15 = $5138;
+                        var _name$16 = $5139;
+                        var _term$17 = $5140;
+                        var _type$18 = $5141;
+                        var _isct$19 = $5142;
+                        var _arit$20 = $5143;
+                        var _stat$21 = $5144;
                         var self = _stat$21;
                         switch (self._) {
                             case 'Kind.Status.init':
@@ -15172,146 +15229,146 @@ module.exports = (function() {
                                 var self = Kind$Term$check$(_type$18, Maybe$some$(Kind$Term$typ), _defs$22, List$nil, Kind$MPath$i$(Kind$MPath$nil), Maybe$none);
                                 switch (self._) {
                                     case 'Kind.Check.result':
-                                        var $5120 = self.value;
-                                        var $5121 = self.errors;
-                                        var self = $5120;
+                                        var $5147 = self.value;
+                                        var $5148 = self.errors;
+                                        var self = $5147;
                                         switch (self._) {
                                             case 'Maybe.none':
-                                                var $5123 = Kind$Check$result$(Maybe$none, $5121);
-                                                var $5122 = $5123;
+                                                var $5150 = Kind$Check$result$(Maybe$none, $5148);
+                                                var $5149 = $5150;
                                                 break;
                                             case 'Maybe.some':
                                                 var self = Kind$Term$check$(_term$17, Maybe$some$(_type$18), _defs$22, List$nil, Kind$MPath$o$(Kind$MPath$nil), Maybe$none);
                                                 switch (self._) {
                                                     case 'Kind.Check.result':
-                                                        var $5125 = self.value;
-                                                        var $5126 = self.errors;
-                                                        var self = $5125;
+                                                        var $5152 = self.value;
+                                                        var $5153 = self.errors;
+                                                        var self = $5152;
                                                         switch (self._) {
                                                             case 'Maybe.none':
-                                                                var $5128 = Kind$Check$result$(Maybe$none, $5126);
-                                                                var $5127 = $5128;
+                                                                var $5155 = Kind$Check$result$(Maybe$none, $5153);
+                                                                var $5154 = $5155;
                                                                 break;
                                                             case 'Maybe.some':
                                                                 var self = Kind$Check$result$(Maybe$some$(Unit$new), List$nil);
                                                                 switch (self._) {
                                                                     case 'Kind.Check.result':
-                                                                        var $5130 = self.value;
-                                                                        var $5131 = self.errors;
-                                                                        var $5132 = Kind$Check$result$($5130, List$concat$($5126, $5131));
-                                                                        var $5129 = $5132;
+                                                                        var $5157 = self.value;
+                                                                        var $5158 = self.errors;
+                                                                        var $5159 = Kind$Check$result$($5157, List$concat$($5153, $5158));
+                                                                        var $5156 = $5159;
                                                                         break;
                                                                 };
-                                                                var $5127 = $5129;
+                                                                var $5154 = $5156;
                                                                 break;
                                                         };
-                                                        var self = $5127;
+                                                        var self = $5154;
                                                         break;
                                                 };
                                                 switch (self._) {
                                                     case 'Kind.Check.result':
-                                                        var $5133 = self.value;
-                                                        var $5134 = self.errors;
-                                                        var $5135 = Kind$Check$result$($5133, List$concat$($5121, $5134));
-                                                        var $5124 = $5135;
+                                                        var $5160 = self.value;
+                                                        var $5161 = self.errors;
+                                                        var $5162 = Kind$Check$result$($5160, List$concat$($5148, $5161));
+                                                        var $5151 = $5162;
                                                         break;
                                                 };
-                                                var $5122 = $5124;
+                                                var $5149 = $5151;
                                                 break;
                                         };
-                                        var _checked$23 = $5122;
+                                        var _checked$23 = $5149;
                                         break;
                                 };
                                 var self = _checked$23;
                                 switch (self._) {
                                     case 'Kind.Check.result':
-                                        var $5136 = self.errors;
-                                        var self = List$is_empty$($5136);
+                                        var $5163 = self.errors;
+                                        var self = List$is_empty$($5163);
                                         if (self) {
                                             var _defs$26 = Kind$define$(_file$13, _code$14, _orig$15, _name$16, _term$17, _type$18, _isct$19, _arit$20, Bool$true, _defs$22);
-                                            var $5138 = IO$monad$((_m$bind$27 => _m$pure$28 => {
-                                                var $5139 = _m$pure$28;
-                                                return $5139;
+                                            var $5165 = IO$monad$((_m$bind$27 => _m$pure$28 => {
+                                                var $5166 = _m$pure$28;
+                                                return $5166;
                                             }))(Maybe$some$(_defs$26));
-                                            var $5137 = $5138;
+                                            var $5164 = $5165;
                                         } else {
-                                            var $5140 = IO$monad$((_m$bind$26 => _m$pure$27 => {
-                                                var $5141 = _m$bind$26;
-                                                return $5141;
-                                            }))(Kind$Synth$fix$(_file$13, _code$14, _orig$15, _name$16, _term$17, _type$18, _isct$19, _arit$20, _defs$22, $5136, Bool$false))((_fixed$26 => {
+                                            var $5167 = IO$monad$((_m$bind$26 => _m$pure$27 => {
+                                                var $5168 = _m$bind$26;
+                                                return $5168;
+                                            }))(Kind$Synth$fix$(_file$13, _code$14, _orig$15, _name$16, _term$17, _type$18, _isct$19, _arit$20, _defs$22, $5163, Bool$false))((_fixed$26 => {
                                                 var self = _fixed$26;
                                                 switch (self._) {
                                                     case 'Maybe.some':
-                                                        var $5143 = self.value;
-                                                        var $5144 = Kind$Synth$one$(_name$16, $5143);
-                                                        var $5142 = $5144;
+                                                        var $5170 = self.value;
+                                                        var $5171 = Kind$Synth$one$(_name$16, $5170);
+                                                        var $5169 = $5171;
                                                         break;
                                                     case 'Maybe.none':
-                                                        var _stat$27 = Kind$Status$fail$($5136);
+                                                        var _stat$27 = Kind$Status$fail$($5163);
                                                         var _defs$28 = Kind$set$(_name$16, Kind$Def$new$(_file$13, _code$14, _orig$15, _name$16, _term$17, _type$18, _isct$19, _arit$20, _stat$27), _defs$22);
-                                                        var $5145 = IO$monad$((_m$bind$29 => _m$pure$30 => {
-                                                            var $5146 = _m$pure$30;
-                                                            return $5146;
+                                                        var $5172 = IO$monad$((_m$bind$29 => _m$pure$30 => {
+                                                            var $5173 = _m$pure$30;
+                                                            return $5173;
                                                         }))(Maybe$some$(_defs$28));
-                                                        var $5142 = $5145;
+                                                        var $5169 = $5172;
                                                         break;
                                                 };
-                                                return $5142;
+                                                return $5169;
                                             }));
-                                            var $5137 = $5140;
+                                            var $5164 = $5167;
                                         };
-                                        var $5119 = $5137;
+                                        var $5146 = $5164;
                                         break;
                                 };
-                                var $5118 = $5119;
+                                var $5145 = $5146;
                                 break;
                             case 'Kind.Status.wait':
                             case 'Kind.Status.done':
-                                var $5147 = IO$monad$((_m$bind$22 => _m$pure$23 => {
-                                    var $5148 = _m$pure$23;
-                                    return $5148;
+                                var $5174 = IO$monad$((_m$bind$22 => _m$pure$23 => {
+                                    var $5175 = _m$pure$23;
+                                    return $5175;
                                 }))(Maybe$some$(_defs$2));
-                                var $5118 = $5147;
+                                var $5145 = $5174;
                                 break;
                             case 'Kind.Status.fail':
-                                var $5149 = IO$monad$((_m$bind$23 => _m$pure$24 => {
-                                    var $5150 = _m$pure$24;
-                                    return $5150;
+                                var $5176 = IO$monad$((_m$bind$23 => _m$pure$24 => {
+                                    var $5177 = _m$pure$24;
+                                    return $5177;
                                 }))(Maybe$some$(_defs$2));
-                                var $5118 = $5149;
+                                var $5145 = $5176;
                                 break;
                         };
-                        var $5108 = $5118;
+                        var $5135 = $5145;
                         break;
                 };
-                var $5106 = $5108;
+                var $5133 = $5135;
                 break;
             case 'Maybe.none':
-                var $5151 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-                    var $5152 = _m$bind$3;
-                    return $5152;
+                var $5178 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+                    var $5179 = _m$bind$3;
+                    return $5179;
                 }))(Kind$Synth$load$(_name$1, _defs$2))((_loaded$3 => {
                     var self = _loaded$3;
                     switch (self._) {
                         case 'Maybe.some':
-                            var $5154 = self.value;
-                            var $5155 = Kind$Synth$one$(_name$1, $5154);
-                            var $5153 = $5155;
+                            var $5181 = self.value;
+                            var $5182 = Kind$Synth$one$(_name$1, $5181);
+                            var $5180 = $5182;
                             break;
                         case 'Maybe.none':
-                            var $5156 = IO$monad$((_m$bind$4 => _m$pure$5 => {
-                                var $5157 = _m$pure$5;
-                                return $5157;
+                            var $5183 = IO$monad$((_m$bind$4 => _m$pure$5 => {
+                                var $5184 = _m$pure$5;
+                                return $5184;
                             }))(Maybe$none);
-                            var $5153 = $5156;
+                            var $5180 = $5183;
                             break;
                     };
-                    return $5153;
+                    return $5180;
                 }));
-                var $5106 = $5151;
+                var $5133 = $5178;
                 break;
         };
-        return $5106;
+        return $5133;
     };
     const Kind$Synth$one = x0 => x1 => Kind$Synth$one$(x0, x1);
 
@@ -15319,98 +15376,98 @@ module.exports = (function() {
         var self = _map$4;
         switch (self._) {
             case 'Map.tie':
-                var $5159 = self.val;
-                var $5160 = self.lft;
-                var $5161 = self.rgt;
-                var self = $5159;
+                var $5186 = self.val;
+                var $5187 = self.lft;
+                var $5188 = self.rgt;
+                var self = $5186;
                 switch (self._) {
                     case 'Maybe.some':
-                        var $5163 = self.value;
-                        var $5164 = Maybe$some$(_fn$3($5163));
-                        var _val$8 = $5164;
+                        var $5190 = self.value;
+                        var $5191 = Maybe$some$(_fn$3($5190));
+                        var _val$8 = $5191;
                         break;
                     case 'Maybe.none':
-                        var $5165 = Maybe$none;
-                        var _val$8 = $5165;
+                        var $5192 = Maybe$none;
+                        var _val$8 = $5192;
                         break;
                 };
-                var _lft$9 = Map$map$(_fn$3, $5160);
-                var _rgt$10 = Map$map$(_fn$3, $5161);
-                var $5162 = Map$tie$(_val$8, _lft$9, _rgt$10);
-                var $5158 = $5162;
+                var _lft$9 = Map$map$(_fn$3, $5187);
+                var _rgt$10 = Map$map$(_fn$3, $5188);
+                var $5189 = Map$tie$(_val$8, _lft$9, _rgt$10);
+                var $5185 = $5189;
                 break;
             case 'Map.new':
-                var $5166 = Map$new;
-                var $5158 = $5166;
+                var $5193 = Map$new;
+                var $5185 = $5193;
                 break;
         };
-        return $5158;
+        return $5185;
     };
     const Map$map = x0 => x1 => Map$map$(x0, x1);
     const Kind$Term$inline$names = (() => {
         var _inl$1 = List$cons$("Monad.pure", List$cons$("Monad.bind", List$cons$("Monad.new", List$cons$("Parser.monad", List$cons$("Parser.bind", List$cons$("Parser.pure", List$cons$("Kind.Check.pure", List$cons$("Kind.Check.bind", List$cons$("Kind.Check.monad", List$cons$("Kind.Check.value", List$cons$("Kind.Check.none", List$nil)))))))))));
         var _kvs$2 = List$mapped$(_inl$1, (_x$2 => {
-            var $5168 = Pair$new$((kind_name_to_bits(_x$2)), Unit$new);
-            return $5168;
+            var $5195 = Pair$new$((kind_name_to_bits(_x$2)), Unit$new);
+            return $5195;
         }));
-        var $5167 = Map$from_list$(_kvs$2);
-        return $5167;
+        var $5194 = Map$from_list$(_kvs$2);
+        return $5194;
     })();
 
     function Kind$Term$inline$reduce$(_term$1, _defs$2) {
         var self = _term$1;
         switch (self._) {
             case 'Kind.Term.ref':
-                var $5170 = self.name;
-                var _inli$4 = Set$has$((kind_name_to_bits($5170)), Kind$Term$inline$names);
+                var $5197 = self.name;
+                var _inli$4 = Set$has$((kind_name_to_bits($5197)), Kind$Term$inline$names);
                 var self = _inli$4;
                 if (self) {
-                    var self = Kind$get$($5170, _defs$2);
+                    var self = Kind$get$($5197, _defs$2);
                     switch (self._) {
                         case 'Maybe.some':
-                            var $5173 = self.value;
-                            var self = $5173;
+                            var $5200 = self.value;
+                            var self = $5200;
                             switch (self._) {
                                 case 'Kind.Def.new':
-                                    var $5175 = self.term;
-                                    var $5176 = Kind$Term$inline$reduce$($5175, _defs$2);
-                                    var $5174 = $5176;
+                                    var $5202 = self.term;
+                                    var $5203 = Kind$Term$inline$reduce$($5202, _defs$2);
+                                    var $5201 = $5203;
                                     break;
                             };
-                            var $5172 = $5174;
+                            var $5199 = $5201;
                             break;
                         case 'Maybe.none':
-                            var $5177 = Kind$Term$ref$($5170);
-                            var $5172 = $5177;
+                            var $5204 = Kind$Term$ref$($5197);
+                            var $5199 = $5204;
                             break;
                     };
-                    var $5171 = $5172;
+                    var $5198 = $5199;
                 } else {
-                    var $5178 = _term$1;
-                    var $5171 = $5178;
+                    var $5205 = _term$1;
+                    var $5198 = $5205;
                 };
-                var $5169 = $5171;
+                var $5196 = $5198;
                 break;
             case 'Kind.Term.app':
-                var $5179 = self.func;
-                var $5180 = self.argm;
-                var _func$5 = Kind$Term$inline$reduce$($5179, _defs$2);
+                var $5206 = self.func;
+                var $5207 = self.argm;
+                var _func$5 = Kind$Term$inline$reduce$($5206, _defs$2);
                 var self = _func$5;
                 switch (self._) {
                     case 'Kind.Term.lam':
-                        var $5182 = self.body;
-                        var $5183 = Kind$Term$inline$reduce$($5182($5180), _defs$2);
-                        var $5181 = $5183;
+                        var $5209 = self.body;
+                        var $5210 = Kind$Term$inline$reduce$($5209($5207), _defs$2);
+                        var $5208 = $5210;
                         break;
                     case 'Kind.Term.let':
-                        var $5184 = self.name;
-                        var $5185 = self.expr;
-                        var $5186 = self.body;
-                        var $5187 = Kind$Term$let$($5184, $5185, (_x$9 => {
-                            var $5188 = Kind$Term$inline$reduce$(Kind$Term$app$($5186(_x$9), $5180), _defs$2);
-                            return $5188;
+                        var $5211 = self.name;
+                        var $5212 = self.expr;
+                        var $5213 = self.body;
+                        var $5214 = Kind$Term$let$($5211, $5212, (_x$9 => {
+                            var $5215 = Kind$Term$inline$reduce$(Kind$Term$app$($5213(_x$9), $5207), _defs$2);
+                            return $5215;
                         }));
-                        var $5181 = $5187;
+                        var $5208 = $5214;
                         break;
                     case 'Kind.Term.var':
                     case 'Kind.Term.ref':
@@ -15426,16 +15483,16 @@ module.exports = (function() {
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
                     case 'Kind.Term.ori':
-                        var $5189 = _term$1;
-                        var $5181 = $5189;
+                        var $5216 = _term$1;
+                        var $5208 = $5216;
                         break;
                 };
-                var $5169 = $5181;
+                var $5196 = $5208;
                 break;
             case 'Kind.Term.ori':
-                var $5190 = self.expr;
-                var $5191 = Kind$Term$inline$reduce$($5190, _defs$2);
-                var $5169 = $5191;
+                var $5217 = self.expr;
+                var $5218 = Kind$Term$inline$reduce$($5217, _defs$2);
+                var $5196 = $5218;
                 break;
             case 'Kind.Term.var':
             case 'Kind.Term.typ':
@@ -15450,11 +15507,11 @@ module.exports = (function() {
             case 'Kind.Term.chr':
             case 'Kind.Term.str':
             case 'Kind.Term.cse':
-                var $5192 = _term$1;
-                var $5169 = $5192;
+                var $5219 = _term$1;
+                var $5196 = $5219;
                 break;
         };
-        return $5169;
+        return $5196;
     };
     const Kind$Term$inline$reduce = x0 => x1 => Kind$Term$inline$reduce$(x0, x1);
 
@@ -15462,112 +15519,112 @@ module.exports = (function() {
         var self = Kind$Term$inline$reduce$(_term$1, _defs$2);
         switch (self._) {
             case 'Kind.Term.var':
-                var $5194 = self.name;
-                var $5195 = self.indx;
-                var $5196 = Kind$Term$var$($5194, $5195);
-                var $5193 = $5196;
+                var $5221 = self.name;
+                var $5222 = self.indx;
+                var $5223 = Kind$Term$var$($5221, $5222);
+                var $5220 = $5223;
                 break;
             case 'Kind.Term.ref':
-                var $5197 = self.name;
-                var $5198 = Kind$Term$ref$($5197);
-                var $5193 = $5198;
+                var $5224 = self.name;
+                var $5225 = Kind$Term$ref$($5224);
+                var $5220 = $5225;
                 break;
             case 'Kind.Term.all':
-                var $5199 = self.eras;
-                var $5200 = self.self;
-                var $5201 = self.name;
-                var $5202 = self.xtyp;
-                var $5203 = self.body;
-                var $5204 = Kind$Term$all$($5199, $5200, $5201, Kind$Term$inline$($5202, _defs$2), (_s$8 => _x$9 => {
-                    var $5205 = Kind$Term$inline$($5203(_s$8)(_x$9), _defs$2);
-                    return $5205;
+                var $5226 = self.eras;
+                var $5227 = self.self;
+                var $5228 = self.name;
+                var $5229 = self.xtyp;
+                var $5230 = self.body;
+                var $5231 = Kind$Term$all$($5226, $5227, $5228, Kind$Term$inline$($5229, _defs$2), (_s$8 => _x$9 => {
+                    var $5232 = Kind$Term$inline$($5230(_s$8)(_x$9), _defs$2);
+                    return $5232;
                 }));
-                var $5193 = $5204;
+                var $5220 = $5231;
                 break;
             case 'Kind.Term.lam':
-                var $5206 = self.name;
-                var $5207 = self.body;
-                var $5208 = Kind$Term$lam$($5206, (_x$5 => {
-                    var $5209 = Kind$Term$inline$($5207(_x$5), _defs$2);
-                    return $5209;
+                var $5233 = self.name;
+                var $5234 = self.body;
+                var $5235 = Kind$Term$lam$($5233, (_x$5 => {
+                    var $5236 = Kind$Term$inline$($5234(_x$5), _defs$2);
+                    return $5236;
                 }));
-                var $5193 = $5208;
+                var $5220 = $5235;
                 break;
             case 'Kind.Term.app':
-                var $5210 = self.func;
-                var $5211 = self.argm;
-                var $5212 = Kind$Term$app$(Kind$Term$inline$($5210, _defs$2), Kind$Term$inline$($5211, _defs$2));
-                var $5193 = $5212;
+                var $5237 = self.func;
+                var $5238 = self.argm;
+                var $5239 = Kind$Term$app$(Kind$Term$inline$($5237, _defs$2), Kind$Term$inline$($5238, _defs$2));
+                var $5220 = $5239;
                 break;
             case 'Kind.Term.let':
-                var $5213 = self.name;
-                var $5214 = self.expr;
-                var $5215 = self.body;
-                var $5216 = Kind$Term$let$($5213, Kind$Term$inline$($5214, _defs$2), (_x$6 => {
-                    var $5217 = Kind$Term$inline$($5215(_x$6), _defs$2);
-                    return $5217;
+                var $5240 = self.name;
+                var $5241 = self.expr;
+                var $5242 = self.body;
+                var $5243 = Kind$Term$let$($5240, Kind$Term$inline$($5241, _defs$2), (_x$6 => {
+                    var $5244 = Kind$Term$inline$($5242(_x$6), _defs$2);
+                    return $5244;
                 }));
-                var $5193 = $5216;
+                var $5220 = $5243;
                 break;
             case 'Kind.Term.def':
-                var $5218 = self.name;
-                var $5219 = self.expr;
-                var $5220 = self.body;
-                var $5221 = Kind$Term$def$($5218, Kind$Term$inline$($5219, _defs$2), (_x$6 => {
-                    var $5222 = Kind$Term$inline$($5220(_x$6), _defs$2);
-                    return $5222;
+                var $5245 = self.name;
+                var $5246 = self.expr;
+                var $5247 = self.body;
+                var $5248 = Kind$Term$def$($5245, Kind$Term$inline$($5246, _defs$2), (_x$6 => {
+                    var $5249 = Kind$Term$inline$($5247(_x$6), _defs$2);
+                    return $5249;
                 }));
-                var $5193 = $5221;
+                var $5220 = $5248;
                 break;
             case 'Kind.Term.ann':
-                var $5223 = self.done;
-                var $5224 = self.term;
-                var $5225 = self.type;
-                var $5226 = Kind$Term$ann$($5223, Kind$Term$inline$($5224, _defs$2), Kind$Term$inline$($5225, _defs$2));
-                var $5193 = $5226;
+                var $5250 = self.done;
+                var $5251 = self.term;
+                var $5252 = self.type;
+                var $5253 = Kind$Term$ann$($5250, Kind$Term$inline$($5251, _defs$2), Kind$Term$inline$($5252, _defs$2));
+                var $5220 = $5253;
                 break;
             case 'Kind.Term.gol':
-                var $5227 = self.name;
-                var $5228 = self.dref;
-                var $5229 = self.verb;
-                var $5230 = Kind$Term$gol$($5227, $5228, $5229);
-                var $5193 = $5230;
+                var $5254 = self.name;
+                var $5255 = self.dref;
+                var $5256 = self.verb;
+                var $5257 = Kind$Term$gol$($5254, $5255, $5256);
+                var $5220 = $5257;
                 break;
             case 'Kind.Term.hol':
-                var $5231 = self.path;
-                var $5232 = Kind$Term$hol$($5231);
-                var $5193 = $5232;
+                var $5258 = self.path;
+                var $5259 = Kind$Term$hol$($5258);
+                var $5220 = $5259;
                 break;
             case 'Kind.Term.nat':
-                var $5233 = self.natx;
-                var $5234 = Kind$Term$nat$($5233);
-                var $5193 = $5234;
+                var $5260 = self.natx;
+                var $5261 = Kind$Term$nat$($5260);
+                var $5220 = $5261;
                 break;
             case 'Kind.Term.chr':
-                var $5235 = self.chrx;
-                var $5236 = Kind$Term$chr$($5235);
-                var $5193 = $5236;
+                var $5262 = self.chrx;
+                var $5263 = Kind$Term$chr$($5262);
+                var $5220 = $5263;
                 break;
             case 'Kind.Term.str':
-                var $5237 = self.strx;
-                var $5238 = Kind$Term$str$($5237);
-                var $5193 = $5238;
+                var $5264 = self.strx;
+                var $5265 = Kind$Term$str$($5264);
+                var $5220 = $5265;
                 break;
             case 'Kind.Term.ori':
-                var $5239 = self.expr;
-                var $5240 = Kind$Term$inline$($5239, _defs$2);
-                var $5193 = $5240;
+                var $5266 = self.expr;
+                var $5267 = Kind$Term$inline$($5266, _defs$2);
+                var $5220 = $5267;
                 break;
             case 'Kind.Term.typ':
-                var $5241 = Kind$Term$typ;
-                var $5193 = $5241;
+                var $5268 = Kind$Term$typ;
+                var $5220 = $5268;
                 break;
             case 'Kind.Term.cse':
-                var $5242 = _term$1;
-                var $5193 = $5242;
+                var $5269 = _term$1;
+                var $5220 = $5269;
                 break;
         };
-        return $5193;
+        return $5220;
     };
     const Kind$Term$inline = x0 => x1 => Kind$Term$inline$(x0, x1);
 
@@ -15575,38 +15632,38 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'Map.tie':
-                var $5244 = self.val;
-                var $5245 = self.lft;
-                var $5246 = self.rgt;
-                var self = $5244;
+                var $5271 = self.val;
+                var $5272 = self.lft;
+                var $5273 = self.rgt;
+                var self = $5271;
                 switch (self._) {
                     case 'Maybe.some':
-                        var $5248 = self.value;
-                        var $5249 = List$cons$($5248, _list$3);
-                        var _list0$7 = $5249;
+                        var $5275 = self.value;
+                        var $5276 = List$cons$($5275, _list$3);
+                        var _list0$7 = $5276;
                         break;
                     case 'Maybe.none':
-                        var $5250 = _list$3;
-                        var _list0$7 = $5250;
+                        var $5277 = _list$3;
+                        var _list0$7 = $5277;
                         break;
                 };
-                var _list1$8 = Map$values$go$($5245, _list0$7);
-                var _list2$9 = Map$values$go$($5246, _list1$8);
-                var $5247 = _list2$9;
-                var $5243 = $5247;
+                var _list1$8 = Map$values$go$($5272, _list0$7);
+                var _list2$9 = Map$values$go$($5273, _list1$8);
+                var $5274 = _list2$9;
+                var $5270 = $5274;
                 break;
             case 'Map.new':
-                var $5251 = _list$3;
-                var $5243 = $5251;
+                var $5278 = _list$3;
+                var $5270 = $5278;
                 break;
         };
-        return $5243;
+        return $5270;
     };
     const Map$values$go = x0 => x1 => Map$values$go$(x0, x1);
 
     function Map$values$(_xs$2) {
-        var $5252 = Map$values$go$(_xs$2, List$nil);
-        return $5252;
+        var $5279 = Map$values$go$(_xs$2, List$nil);
+        return $5279;
     };
     const Map$values = x0 => Map$values$(x0);
 
@@ -15624,38 +15681,38 @@ module.exports = (function() {
                 if (self === 0n) {
                     var self = _brui$3;
                     if (self === 0n) {
-                        var $5254 = _name$2;
-                        var $5253 = $5254;
+                        var $5281 = _name$2;
+                        var $5280 = $5281;
                     } else {
-                        var $5255 = (self - 1n);
-                        var $5256 = (_name$2 + ("^" + Nat$show$(_brui$3)));
-                        var $5253 = $5256;
+                        var $5282 = (self - 1n);
+                        var $5283 = (_name$2 + ("^" + Nat$show$(_brui$3)));
+                        var $5280 = $5283;
                     };
-                    return $5253;
+                    return $5280;
                 } else {
-                    var $5257 = (self - 1n);
+                    var $5284 = (self - 1n);
                     var self = _vars$4;
                     switch (self._) {
                         case 'List.cons':
-                            var $5259 = self.head;
-                            var $5260 = self.tail;
-                            var self = (_name$2 === $5259);
+                            var $5286 = self.head;
+                            var $5287 = self.tail;
+                            var self = (_name$2 === $5286);
                             if (self) {
-                                var $5262 = Nat$succ$(_brui$3);
-                                var _brui$8 = $5262;
+                                var $5289 = Nat$succ$(_brui$3);
+                                var _brui$8 = $5289;
                             } else {
-                                var $5263 = _brui$3;
-                                var _brui$8 = $5263;
+                                var $5290 = _brui$3;
+                                var _brui$8 = $5290;
                             };
-                            var $5261 = Kind$Core$var_name$($5257, _name$2, _brui$8, $5260);
-                            var $5258 = $5261;
+                            var $5288 = Kind$Core$var_name$($5284, _name$2, _brui$8, $5287);
+                            var $5285 = $5288;
                             break;
                         case 'List.nil':
-                            var $5264 = "unbound";
-                            var $5258 = $5264;
+                            var $5291 = "unbound";
+                            var $5285 = $5291;
                             break;
                     };
-                    return $5258;
+                    return $5285;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -15665,8 +15722,8 @@ module.exports = (function() {
     const Kind$Core$var_name = x0 => x1 => x2 => x3 => Kind$Core$var_name$(x0, x1, x2, x3);
 
     function Kind$Name$show$(_name$1) {
-        var $5265 = _name$1;
-        return $5265;
+        var $5292 = _name$1;
+        return $5292;
     };
     const Kind$Name$show = x0 => Kind$Name$show$(x0);
 
@@ -15674,21 +15731,21 @@ module.exports = (function() {
         var self = _b$1;
         switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
             case 'o':
-                var $5267 = self.slice(0, -1);
-                var $5268 = (2n * Bits$to_nat$($5267));
-                var $5266 = $5268;
+                var $5294 = self.slice(0, -1);
+                var $5295 = (2n * Bits$to_nat$($5294));
+                var $5293 = $5295;
                 break;
             case 'i':
-                var $5269 = self.slice(0, -1);
-                var $5270 = Nat$succ$((2n * Bits$to_nat$($5269)));
-                var $5266 = $5270;
+                var $5296 = self.slice(0, -1);
+                var $5297 = Nat$succ$((2n * Bits$to_nat$($5296)));
+                var $5293 = $5297;
                 break;
             case 'e':
-                var $5271 = 0n;
-                var $5266 = $5271;
+                var $5298 = 0n;
+                var $5293 = $5298;
                 break;
         };
-        return $5266;
+        return $5293;
     };
     const Bits$to_nat = x0 => Bits$to_nat$(x0);
 
@@ -15696,46 +15753,46 @@ module.exports = (function() {
         var self = _a$1;
         switch ('u16') {
             case 'u16':
-                var $5273 = u16_to_word(self);
-                var $5274 = Nat$to_string_base$(16n, Bits$to_nat$(Word$to_bits$($5273)));
-                var $5272 = $5274;
+                var $5300 = u16_to_word(self);
+                var $5301 = Nat$to_string_base$(16n, Bits$to_nat$(Word$to_bits$($5300)));
+                var $5299 = $5301;
                 break;
         };
-        return $5272;
+        return $5299;
     };
     const U16$show_hex = x0 => U16$show_hex$(x0);
 
     function Kind$escape$char$(_chr$1) {
         var self = (_chr$1 === Kind$backslash);
         if (self) {
-            var $5276 = String$cons$(Kind$backslash, String$cons$(_chr$1, String$nil));
-            var $5275 = $5276;
+            var $5303 = String$cons$(Kind$backslash, String$cons$(_chr$1, String$nil));
+            var $5302 = $5303;
         } else {
             var self = (_chr$1 === 34);
             if (self) {
-                var $5278 = String$cons$(Kind$backslash, String$cons$(_chr$1, String$nil));
-                var $5277 = $5278;
+                var $5305 = String$cons$(Kind$backslash, String$cons$(_chr$1, String$nil));
+                var $5304 = $5305;
             } else {
                 var self = (_chr$1 === 39);
                 if (self) {
-                    var $5280 = String$cons$(Kind$backslash, String$cons$(_chr$1, String$nil));
-                    var $5279 = $5280;
+                    var $5307 = String$cons$(Kind$backslash, String$cons$(_chr$1, String$nil));
+                    var $5306 = $5307;
                 } else {
                     var self = U16$btw$(32, _chr$1, 126);
                     if (self) {
-                        var $5282 = String$cons$(_chr$1, String$nil);
-                        var $5281 = $5282;
+                        var $5309 = String$cons$(_chr$1, String$nil);
+                        var $5308 = $5309;
                     } else {
-                        var $5283 = String$flatten$(List$cons$(String$cons$(Kind$backslash, String$nil), List$cons$("u{", List$cons$(U16$show_hex$(_chr$1), List$cons$("}", List$cons$(String$nil, List$nil))))));
-                        var $5281 = $5283;
+                        var $5310 = String$flatten$(List$cons$(String$cons$(Kind$backslash, String$nil), List$cons$("u{", List$cons$(U16$show_hex$(_chr$1), List$cons$("}", List$cons$(String$nil, List$nil))))));
+                        var $5308 = $5310;
                     };
-                    var $5279 = $5281;
+                    var $5306 = $5308;
                 };
-                var $5277 = $5279;
+                var $5304 = $5306;
             };
-            var $5275 = $5277;
+            var $5302 = $5304;
         };
-        return $5275;
+        return $5302;
     };
     const Kind$escape$char = x0 => Kind$escape$char$(x0);
 
@@ -15751,13 +15808,13 @@ module.exports = (function() {
             var R = (() => {
                 var self = _str$1;
                 if (self.length === 0) {
-                    var $5284 = String$reverse$(_result$2);
-                    return $5284;
+                    var $5311 = String$reverse$(_result$2);
+                    return $5311;
                 } else {
-                    var $5285 = self.charCodeAt(0);
-                    var $5286 = self.slice(1);
-                    var $5287 = Kind$escape$go$($5286, (String$reverse$(Kind$escape$char$($5285)) + _result$2));
-                    return $5287;
+                    var $5312 = self.charCodeAt(0);
+                    var $5313 = self.slice(1);
+                    var $5314 = Kind$escape$go$($5313, (String$reverse$(Kind$escape$char$($5312)) + _result$2));
+                    return $5314;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -15767,8 +15824,8 @@ module.exports = (function() {
     const Kind$escape$go = x0 => x1 => Kind$escape$go$(x0, x1);
 
     function Kind$escape$(_str$1) {
-        var $5288 = Kind$escape$go$(_str$1, "");
-        return $5288;
+        var $5315 = Kind$escape$go$(_str$1, "");
+        return $5315;
     };
     const Kind$escape = x0 => Kind$escape$(x0);
 
@@ -15776,228 +15833,228 @@ module.exports = (function() {
         var self = _term$1;
         switch (self._) {
             case 'Kind.Term.var':
-                var $5290 = self.name;
-                var $5291 = self.indx;
-                var $5292 = Kind$Core$var_name$(Nat$pred$((_indx$2 - $5291 <= 0n ? 0n : _indx$2 - $5291)), $5290, 0n, _vars$3);
-                var $5289 = $5292;
+                var $5317 = self.name;
+                var $5318 = self.indx;
+                var $5319 = Kind$Core$var_name$(Nat$pred$((_indx$2 - $5318 <= 0n ? 0n : _indx$2 - $5318)), $5317, 0n, _vars$3);
+                var $5316 = $5319;
                 break;
             case 'Kind.Term.ref':
-                var $5293 = self.name;
-                var $5294 = Kind$Name$show$($5293);
-                var $5289 = $5294;
+                var $5320 = self.name;
+                var $5321 = Kind$Name$show$($5320);
+                var $5316 = $5321;
                 break;
             case 'Kind.Term.all':
-                var $5295 = self.eras;
-                var $5296 = self.self;
-                var $5297 = self.name;
-                var $5298 = self.xtyp;
-                var $5299 = self.body;
-                var _eras$9 = $5295;
+                var $5322 = self.eras;
+                var $5323 = self.self;
+                var $5324 = self.name;
+                var $5325 = self.xtyp;
+                var $5326 = self.body;
+                var _eras$9 = $5322;
                 var self = _eras$9;
                 if (self) {
-                    var $5301 = "%";
-                    var _init$10 = $5301;
+                    var $5328 = "%";
+                    var _init$10 = $5328;
                 } else {
-                    var $5302 = "@";
-                    var _init$10 = $5302;
+                    var $5329 = "@";
+                    var _init$10 = $5329;
                 };
-                var _self$11 = Kind$Name$show$($5296);
-                var _name$12 = Kind$Name$show$($5297);
-                var _xtyp$13 = Kind$Core$show$($5298, _indx$2, _vars$3);
-                var _body$14 = Kind$Core$show$($5299(Kind$Term$var$($5296, _indx$2))(Kind$Term$var$($5297, Nat$succ$(_indx$2))), Nat$succ$(Nat$succ$(_indx$2)), List$cons$($5297, List$cons$($5296, _vars$3)));
-                var $5300 = String$flatten$(List$cons$(_init$10, List$cons$(_self$11, List$cons$("(", List$cons$(_name$12, List$cons$(":", List$cons$(_xtyp$13, List$cons$(") ", List$cons$(_body$14, List$nil)))))))));
-                var $5289 = $5300;
+                var _self$11 = Kind$Name$show$($5323);
+                var _name$12 = Kind$Name$show$($5324);
+                var _xtyp$13 = Kind$Core$show$($5325, _indx$2, _vars$3);
+                var _body$14 = Kind$Core$show$($5326(Kind$Term$var$($5323, _indx$2))(Kind$Term$var$($5324, Nat$succ$(_indx$2))), Nat$succ$(Nat$succ$(_indx$2)), List$cons$($5324, List$cons$($5323, _vars$3)));
+                var $5327 = String$flatten$(List$cons$(_init$10, List$cons$(_self$11, List$cons$("(", List$cons$(_name$12, List$cons$(":", List$cons$(_xtyp$13, List$cons$(") ", List$cons$(_body$14, List$nil)))))))));
+                var $5316 = $5327;
                 break;
             case 'Kind.Term.lam':
-                var $5303 = self.name;
-                var $5304 = self.body;
-                var _name$6 = Kind$Name$show$($5303);
-                var _body$7 = Kind$Core$show$($5304(Kind$Term$var$($5303, _indx$2)), Nat$succ$(_indx$2), List$cons$($5303, _vars$3));
-                var $5305 = String$flatten$(List$cons$("#", List$cons$(_name$6, List$cons$(" ", List$cons$(_body$7, List$nil)))));
-                var $5289 = $5305;
+                var $5330 = self.name;
+                var $5331 = self.body;
+                var _name$6 = Kind$Name$show$($5330);
+                var _body$7 = Kind$Core$show$($5331(Kind$Term$var$($5330, _indx$2)), Nat$succ$(_indx$2), List$cons$($5330, _vars$3));
+                var $5332 = String$flatten$(List$cons$("#", List$cons$(_name$6, List$cons$(" ", List$cons$(_body$7, List$nil)))));
+                var $5316 = $5332;
                 break;
             case 'Kind.Term.app':
-                var $5306 = self.func;
-                var $5307 = self.argm;
-                var _func$6 = Kind$Core$show$($5306, _indx$2, _vars$3);
-                var _argm$7 = Kind$Core$show$($5307, _indx$2, _vars$3);
-                var $5308 = String$flatten$(List$cons$("(", List$cons$(_func$6, List$cons$(" ", List$cons$(_argm$7, List$cons$(")", List$nil))))));
-                var $5289 = $5308;
+                var $5333 = self.func;
+                var $5334 = self.argm;
+                var _func$6 = Kind$Core$show$($5333, _indx$2, _vars$3);
+                var _argm$7 = Kind$Core$show$($5334, _indx$2, _vars$3);
+                var $5335 = String$flatten$(List$cons$("(", List$cons$(_func$6, List$cons$(" ", List$cons$(_argm$7, List$cons$(")", List$nil))))));
+                var $5316 = $5335;
                 break;
             case 'Kind.Term.let':
-                var $5309 = self.name;
-                var $5310 = self.expr;
-                var $5311 = self.body;
-                var _name$7 = Kind$Name$show$($5309);
-                var _expr$8 = Kind$Core$show$($5310, _indx$2, _vars$3);
-                var _body$9 = Kind$Core$show$($5311(Kind$Term$var$($5309, _indx$2)), Nat$succ$(_indx$2), List$cons$($5309, _vars$3));
-                var $5312 = String$flatten$(List$cons$("!", List$cons$(_name$7, List$cons$(" = ", List$cons$(_expr$8, List$cons$("; ", List$cons$(_body$9, List$nil)))))));
-                var $5289 = $5312;
+                var $5336 = self.name;
+                var $5337 = self.expr;
+                var $5338 = self.body;
+                var _name$7 = Kind$Name$show$($5336);
+                var _expr$8 = Kind$Core$show$($5337, _indx$2, _vars$3);
+                var _body$9 = Kind$Core$show$($5338(Kind$Term$var$($5336, _indx$2)), Nat$succ$(_indx$2), List$cons$($5336, _vars$3));
+                var $5339 = String$flatten$(List$cons$("!", List$cons$(_name$7, List$cons$(" = ", List$cons$(_expr$8, List$cons$("; ", List$cons$(_body$9, List$nil)))))));
+                var $5316 = $5339;
                 break;
             case 'Kind.Term.def':
-                var $5313 = self.name;
-                var $5314 = self.expr;
-                var $5315 = self.body;
-                var _name$7 = Kind$Name$show$($5313);
-                var _expr$8 = Kind$Core$show$($5314, _indx$2, _vars$3);
-                var _body$9 = Kind$Core$show$($5315(Kind$Term$var$($5313, _indx$2)), Nat$succ$(_indx$2), List$cons$($5313, _vars$3));
-                var $5316 = String$flatten$(List$cons$("$", List$cons$(_name$7, List$cons$(" = ", List$cons$(_expr$8, List$cons$("; ", List$cons$(_body$9, List$nil)))))));
-                var $5289 = $5316;
+                var $5340 = self.name;
+                var $5341 = self.expr;
+                var $5342 = self.body;
+                var _name$7 = Kind$Name$show$($5340);
+                var _expr$8 = Kind$Core$show$($5341, _indx$2, _vars$3);
+                var _body$9 = Kind$Core$show$($5342(Kind$Term$var$($5340, _indx$2)), Nat$succ$(_indx$2), List$cons$($5340, _vars$3));
+                var $5343 = String$flatten$(List$cons$("$", List$cons$(_name$7, List$cons$(" = ", List$cons$(_expr$8, List$cons$("; ", List$cons$(_body$9, List$nil)))))));
+                var $5316 = $5343;
                 break;
             case 'Kind.Term.ann':
-                var $5317 = self.term;
-                var $5318 = self.type;
-                var _term$7 = Kind$Core$show$($5317, _indx$2, _vars$3);
-                var _type$8 = Kind$Core$show$($5318, _indx$2, _vars$3);
-                var $5319 = String$flatten$(List$cons$("{", List$cons$(_term$7, List$cons$(":", List$cons$(_type$8, List$cons$("}", List$nil))))));
-                var $5289 = $5319;
+                var $5344 = self.term;
+                var $5345 = self.type;
+                var _term$7 = Kind$Core$show$($5344, _indx$2, _vars$3);
+                var _type$8 = Kind$Core$show$($5345, _indx$2, _vars$3);
+                var $5346 = String$flatten$(List$cons$("{", List$cons$(_term$7, List$cons$(":", List$cons$(_type$8, List$cons$("}", List$nil))))));
+                var $5316 = $5346;
                 break;
             case 'Kind.Term.nat':
-                var $5320 = self.natx;
-                var $5321 = String$flatten$(List$cons$("+", List$cons$(Nat$show$($5320), List$nil)));
-                var $5289 = $5321;
+                var $5347 = self.natx;
+                var $5348 = String$flatten$(List$cons$("+", List$cons$(Nat$show$($5347), List$nil)));
+                var $5316 = $5348;
                 break;
             case 'Kind.Term.chr':
-                var $5322 = self.chrx;
-                var $5323 = String$flatten$(List$cons$("\'", List$cons$(Kind$escape$char$($5322), List$cons$("\'", List$nil))));
-                var $5289 = $5323;
+                var $5349 = self.chrx;
+                var $5350 = String$flatten$(List$cons$("\'", List$cons$(Kind$escape$char$($5349), List$cons$("\'", List$nil))));
+                var $5316 = $5350;
                 break;
             case 'Kind.Term.str':
-                var $5324 = self.strx;
-                var $5325 = String$flatten$(List$cons$("\"", List$cons$(Kind$escape$($5324), List$cons$("\"", List$nil))));
-                var $5289 = $5325;
+                var $5351 = self.strx;
+                var $5352 = String$flatten$(List$cons$("\"", List$cons$(Kind$escape$($5351), List$cons$("\"", List$nil))));
+                var $5316 = $5352;
                 break;
             case 'Kind.Term.ori':
-                var $5326 = self.expr;
-                var $5327 = Kind$Core$show$($5326, _indx$2, _vars$3);
-                var $5289 = $5327;
+                var $5353 = self.expr;
+                var $5354 = Kind$Core$show$($5353, _indx$2, _vars$3);
+                var $5316 = $5354;
                 break;
             case 'Kind.Term.typ':
-                var $5328 = "*";
-                var $5289 = $5328;
+                var $5355 = "*";
+                var $5316 = $5355;
                 break;
             case 'Kind.Term.gol':
-                var $5329 = "<GOL>";
-                var $5289 = $5329;
+                var $5356 = "<GOL>";
+                var $5316 = $5356;
                 break;
             case 'Kind.Term.hol':
-                var $5330 = "<HOL>";
-                var $5289 = $5330;
+                var $5357 = "<HOL>";
+                var $5316 = $5357;
                 break;
             case 'Kind.Term.cse':
-                var $5331 = "<CSE>";
-                var $5289 = $5331;
+                var $5358 = "<CSE>";
+                var $5316 = $5358;
                 break;
         };
-        return $5289;
+        return $5316;
     };
     const Kind$Core$show = x0 => x1 => x2 => Kind$Core$show$(x0, x1, x2);
 
     function Kind$Defs$core$(_defs$1) {
         var _result$2 = "";
         var _result$3 = (() => {
-            var $5334 = _result$2;
-            var $5335 = Map$values$(_defs$1);
-            let _result$4 = $5334;
+            var $5361 = _result$2;
+            var $5362 = Map$values$(_defs$1);
+            let _result$4 = $5361;
             let _defn$3;
-            while ($5335._ === 'List.cons') {
-                _defn$3 = $5335.head;
+            while ($5362._ === 'List.cons') {
+                _defn$3 = $5362.head;
                 var self = _defn$3;
                 switch (self._) {
                     case 'Kind.Def.new':
-                        var $5336 = self.name;
-                        var $5337 = self.term;
-                        var $5338 = self.type;
-                        var $5339 = self.stat;
-                        var self = $5339;
+                        var $5363 = self.name;
+                        var $5364 = self.term;
+                        var $5365 = self.type;
+                        var $5366 = self.stat;
+                        var self = $5366;
                         switch (self._) {
                             case 'Kind.Status.init':
                             case 'Kind.Status.wait':
                             case 'Kind.Status.fail':
-                                var $5341 = _result$4;
-                                var $5340 = $5341;
+                                var $5368 = _result$4;
+                                var $5367 = $5368;
                                 break;
                             case 'Kind.Status.done':
-                                var _name$14 = $5336;
-                                var _term$15 = Kind$Core$show$($5337, 0n, List$nil);
-                                var _type$16 = Kind$Core$show$($5338, 0n, List$nil);
-                                var $5342 = String$flatten$(List$cons$(_result$4, List$cons$(_name$14, List$cons$(" : ", List$cons$(_type$16, List$cons$(" = ", List$cons$(_term$15, List$cons$(";\u{a}", List$nil))))))));
-                                var $5340 = $5342;
+                                var _name$14 = $5363;
+                                var _term$15 = Kind$Core$show$($5364, 0n, List$nil);
+                                var _type$16 = Kind$Core$show$($5365, 0n, List$nil);
+                                var $5369 = String$flatten$(List$cons$(_result$4, List$cons$(_name$14, List$cons$(" : ", List$cons$(_type$16, List$cons$(" = ", List$cons$(_term$15, List$cons$(";\u{a}", List$nil))))))));
+                                var $5367 = $5369;
                                 break;
                         };
-                        var $5334 = $5340;
+                        var $5361 = $5367;
                         break;
                 };
-                _result$4 = $5334;
-                $5335 = $5335.tail;
+                _result$4 = $5361;
+                $5362 = $5362.tail;
             }
             return _result$4;
         })();
-        var $5332 = _result$3;
-        return $5332;
+        var $5359 = _result$3;
+        return $5359;
     };
     const Kind$Defs$core = x0 => Kind$Defs$core$(x0);
 
     function Kind$to_core$io$one$(_name$1) {
-        var $5343 = IO$monad$((_m$bind$2 => _m$pure$3 => {
-            var $5344 = _m$bind$2;
-            return $5344;
+        var $5370 = IO$monad$((_m$bind$2 => _m$pure$3 => {
+            var $5371 = _m$bind$2;
+            return $5371;
         }))(Kind$Synth$one$(_name$1, Map$new))((_new_defs$2 => {
             var self = _new_defs$2;
             switch (self._) {
                 case 'Maybe.some':
-                    var $5346 = self.value;
-                    var $5347 = $5346;
-                    var _defs$3 = $5347;
+                    var $5373 = self.value;
+                    var $5374 = $5373;
+                    var _defs$3 = $5374;
                     break;
                 case 'Maybe.none':
-                    var $5348 = Map$new;
-                    var _defs$3 = $5348;
+                    var $5375 = Map$new;
+                    var _defs$3 = $5375;
                     break;
             };
             var _defs$4 = Map$map$((_defn$4 => {
                 var self = _defn$4;
                 switch (self._) {
                     case 'Kind.Def.new':
-                        var $5350 = self.file;
-                        var $5351 = self.code;
-                        var $5352 = self.orig;
-                        var $5353 = self.name;
-                        var $5354 = self.term;
-                        var $5355 = self.type;
-                        var $5356 = self.isct;
-                        var $5357 = self.arit;
-                        var $5358 = self.stat;
-                        var _term$14 = Kind$Term$inline$($5354, _defs$3);
-                        var _type$15 = Kind$Term$inline$($5355, _defs$3);
-                        var $5359 = Kind$Def$new$($5350, $5351, $5352, $5353, _term$14, _type$15, $5356, $5357, $5358);
-                        var $5349 = $5359;
+                        var $5377 = self.file;
+                        var $5378 = self.code;
+                        var $5379 = self.orig;
+                        var $5380 = self.name;
+                        var $5381 = self.term;
+                        var $5382 = self.type;
+                        var $5383 = self.isct;
+                        var $5384 = self.arit;
+                        var $5385 = self.stat;
+                        var _term$14 = Kind$Term$inline$($5381, _defs$3);
+                        var _type$15 = Kind$Term$inline$($5382, _defs$3);
+                        var $5386 = Kind$Def$new$($5377, $5378, $5379, $5380, _term$14, _type$15, $5383, $5384, $5385);
+                        var $5376 = $5386;
                         break;
                 };
-                return $5349;
+                return $5376;
             }), _defs$3);
-            var $5345 = IO$monad$((_m$bind$5 => _m$pure$6 => {
-                var $5360 = _m$pure$6;
-                return $5360;
+            var $5372 = IO$monad$((_m$bind$5 => _m$pure$6 => {
+                var $5387 = _m$pure$6;
+                return $5387;
             }))(Kind$Defs$core$(_defs$4));
-            return $5345;
+            return $5372;
         }));
-        return $5343;
+        return $5370;
     };
     const Kind$to_core$io$one = x0 => Kind$to_core$io$one$(x0);
 
     function IO$put_string$(_text$1) {
-        var $5361 = IO$ask$("put_string", _text$1, (_skip$2 => {
-            var $5362 = IO$end$(Unit$new);
-            return $5362;
+        var $5388 = IO$ask$("put_string", _text$1, (_skip$2 => {
+            var $5389 = IO$end$(Unit$new);
+            return $5389;
         }));
-        return $5361;
+        return $5388;
     };
     const IO$put_string = x0 => IO$put_string$(x0);
 
     function IO$print$(_text$1) {
-        var $5363 = IO$put_string$((_text$1 + "\u{a}"));
-        return $5363;
+        var $5390 = IO$put_string$((_text$1 + "\u{a}"));
+        return $5390;
     };
     const IO$print = x0 => IO$print$(x0);
 
@@ -16005,22 +16062,22 @@ module.exports = (function() {
         var self = _m$3;
         switch (self._) {
             case 'Maybe.some':
-                var $5365 = self.value;
-                var $5366 = _f$4($5365);
-                var $5364 = $5366;
+                var $5392 = self.value;
+                var $5393 = _f$4($5392);
+                var $5391 = $5393;
                 break;
             case 'Maybe.none':
-                var $5367 = Maybe$none;
-                var $5364 = $5367;
+                var $5394 = Maybe$none;
+                var $5391 = $5394;
                 break;
         };
-        return $5364;
+        return $5391;
     };
     const Maybe$bind = x0 => x1 => Maybe$bind$(x0, x1);
 
     function Maybe$monad$(_new$2) {
-        var $5368 = _new$2(Maybe$bind)(Maybe$some);
-        return $5368;
+        var $5395 = _new$2(Maybe$bind)(Maybe$some);
+        return $5395;
     };
     const Maybe$monad = x0 => Maybe$monad$(x0);
 
@@ -16028,42 +16085,42 @@ module.exports = (function() {
         var self = _term$1;
         switch (self._) {
             case 'Kind.Term.ref':
-                var $5370 = self.name;
-                var self = ($5370 === "Nat.zero");
+                var $5397 = self.name;
+                var self = ($5397 === "Nat.zero");
                 if (self) {
-                    var $5372 = Maybe$some$(0n);
-                    var $5371 = $5372;
+                    var $5399 = Maybe$some$(0n);
+                    var $5398 = $5399;
                 } else {
-                    var $5373 = Maybe$none;
-                    var $5371 = $5373;
+                    var $5400 = Maybe$none;
+                    var $5398 = $5400;
                 };
-                var $5369 = $5371;
+                var $5396 = $5398;
                 break;
             case 'Kind.Term.app':
-                var $5374 = self.func;
-                var $5375 = self.argm;
-                var self = $5374;
+                var $5401 = self.func;
+                var $5402 = self.argm;
+                var self = $5401;
                 switch (self._) {
                     case 'Kind.Term.ref':
-                        var $5377 = self.name;
-                        var self = ($5377 === "Nat.succ");
+                        var $5404 = self.name;
+                        var self = ($5404 === "Nat.succ");
                         if (self) {
-                            var $5379 = Maybe$monad$((_m$bind$5 => _m$pure$6 => {
-                                var $5380 = _m$bind$5;
-                                return $5380;
-                            }))(Kind$Term$show$as_nat$go$($5375))((_pred$5 => {
-                                var $5381 = Maybe$monad$((_m$bind$6 => _m$pure$7 => {
-                                    var $5382 = _m$pure$7;
-                                    return $5382;
+                            var $5406 = Maybe$monad$((_m$bind$5 => _m$pure$6 => {
+                                var $5407 = _m$bind$5;
+                                return $5407;
+                            }))(Kind$Term$show$as_nat$go$($5402))((_pred$5 => {
+                                var $5408 = Maybe$monad$((_m$bind$6 => _m$pure$7 => {
+                                    var $5409 = _m$pure$7;
+                                    return $5409;
                                 }))(Nat$succ$(_pred$5));
-                                return $5381;
+                                return $5408;
                             }));
-                            var $5378 = $5379;
+                            var $5405 = $5406;
                         } else {
-                            var $5383 = Maybe$none;
-                            var $5378 = $5383;
+                            var $5410 = Maybe$none;
+                            var $5405 = $5410;
                         };
-                        var $5376 = $5378;
+                        var $5403 = $5405;
                         break;
                     case 'Kind.Term.var':
                     case 'Kind.Term.typ':
@@ -16080,11 +16137,11 @@ module.exports = (function() {
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
                     case 'Kind.Term.ori':
-                        var $5384 = Maybe$none;
-                        var $5376 = $5384;
+                        var $5411 = Maybe$none;
+                        var $5403 = $5411;
                         break;
                 };
-                var $5369 = $5376;
+                var $5396 = $5403;
                 break;
             case 'Kind.Term.var':
             case 'Kind.Term.typ':
@@ -16100,17 +16157,17 @@ module.exports = (function() {
             case 'Kind.Term.str':
             case 'Kind.Term.cse':
             case 'Kind.Term.ori':
-                var $5385 = Maybe$none;
-                var $5369 = $5385;
+                var $5412 = Maybe$none;
+                var $5396 = $5412;
                 break;
         };
-        return $5369;
+        return $5396;
     };
     const Kind$Term$show$as_nat$go = x0 => Kind$Term$show$as_nat$go$(x0);
 
     function Kind$Term$show$as_nat$(_term$1) {
-        var $5386 = Maybe$mapped$(Kind$Term$show$as_nat$go$(_term$1), Nat$show);
-        return $5386;
+        var $5413 = Maybe$mapped$(Kind$Term$show$as_nat$go$(_term$1), Nat$show);
+        return $5413;
     };
     const Kind$Term$show$as_nat = x0 => Kind$Term$show$as_nat$(x0);
 
@@ -16118,9 +16175,9 @@ module.exports = (function() {
         var self = _term$1;
         switch (self._) {
             case 'Kind.Term.ref':
-                var $5388 = self.name;
-                var $5389 = (_name$2 === $5388);
-                var $5387 = $5389;
+                var $5415 = self.name;
+                var $5416 = (_name$2 === $5415);
+                var $5414 = $5416;
                 break;
             case 'Kind.Term.var':
             case 'Kind.Term.typ':
@@ -16137,11 +16194,11 @@ module.exports = (function() {
             case 'Kind.Term.str':
             case 'Kind.Term.cse':
             case 'Kind.Term.ori':
-                var $5390 = Bool$false;
-                var $5387 = $5390;
+                var $5417 = Bool$false;
+                var $5414 = $5417;
                 break;
         };
-        return $5387;
+        return $5414;
     };
     const Kind$Term$show$is_ref = x0 => x1 => Kind$Term$show$is_ref$(x0, x1);
 
@@ -16152,33 +16209,33 @@ module.exports = (function() {
             var _func$5 = Kind$Term$show$go$(_term$1, _path$2);
             var _eq_lft$6 = Maybe$default$("?", List$at$(1n, _args$3));
             var _eq_rgt$7 = Maybe$default$("?", List$at$(2n, _args$3));
-            var $5392 = String$flatten$(List$cons$(_eq_lft$6, List$cons$(" == ", List$cons$(_eq_rgt$7, List$nil))));
-            var $5391 = $5392;
+            var $5419 = String$flatten$(List$cons$(_eq_lft$6, List$cons$(" == ", List$cons$(_eq_rgt$7, List$nil))));
+            var $5418 = $5419;
         } else {
             var _func$5 = Kind$Term$show$go$(_term$1, _path$2);
             var self = _func$5;
             if (self.length === 0) {
-                var $5394 = Bool$false;
-                var _wrap$6 = $5394;
+                var $5421 = Bool$false;
+                var _wrap$6 = $5421;
             } else {
-                var $5395 = self.charCodeAt(0);
-                var $5396 = self.slice(1);
-                var $5397 = ($5395 === 40);
-                var _wrap$6 = $5397;
+                var $5422 = self.charCodeAt(0);
+                var $5423 = self.slice(1);
+                var $5424 = ($5422 === 40);
+                var _wrap$6 = $5424;
             };
             var _args$7 = String$join$(",", _args$3);
             var self = _wrap$6;
             if (self) {
-                var $5398 = String$flatten$(List$cons$("(", List$cons$(_func$5, List$cons$(")", List$nil))));
-                var _func$8 = $5398;
+                var $5425 = String$flatten$(List$cons$("(", List$cons$(_func$5, List$cons$(")", List$nil))));
+                var _func$8 = $5425;
             } else {
-                var $5399 = _func$5;
-                var _func$8 = $5399;
+                var $5426 = _func$5;
+                var _func$8 = $5426;
             };
-            var $5393 = String$flatten$(List$cons$(_func$8, List$cons$("(", List$cons$(_args$7, List$cons$(")", List$nil)))));
-            var $5391 = $5393;
+            var $5420 = String$flatten$(List$cons$(_func$8, List$cons$("(", List$cons$(_args$7, List$cons$(")", List$nil)))));
+            var $5418 = $5420;
         };
-        return $5391;
+        return $5418;
     };
     const Kind$Term$show$app$done = x0 => x1 => x2 => Kind$Term$show$app$done$(x0, x1, x2);
 
@@ -16195,14 +16252,14 @@ module.exports = (function() {
                 var self = _term$1;
                 switch (self._) {
                     case 'Kind.Term.app':
-                        var $5400 = self.func;
-                        var $5401 = self.argm;
-                        var $5402 = Kind$Term$show$app$($5400, Kind$MPath$o$(_path$2), List$cons$(Kind$Term$show$go$($5401, Kind$MPath$i$(_path$2)), _args$3));
-                        return $5402;
+                        var $5427 = self.func;
+                        var $5428 = self.argm;
+                        var $5429 = Kind$Term$show$app$($5427, Kind$MPath$o$(_path$2), List$cons$(Kind$Term$show$go$($5428, Kind$MPath$i$(_path$2)), _args$3));
+                        return $5429;
                     case 'Kind.Term.ori':
-                        var $5403 = self.expr;
-                        var $5404 = Kind$Term$show$app$($5403, _path$2, _args$3);
-                        return $5404;
+                        var $5430 = self.expr;
+                        var $5431 = Kind$Term$show$app$($5430, _path$2, _args$3);
+                        return $5431;
                     case 'Kind.Term.var':
                     case 'Kind.Term.ref':
                     case 'Kind.Term.typ':
@@ -16217,8 +16274,8 @@ module.exports = (function() {
                     case 'Kind.Term.chr':
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
-                        var $5405 = Kind$Term$show$app$done$(_term$1, _path$2, _args$3);
-                        return $5405;
+                        var $5432 = Kind$Term$show$app$done$(_term$1, _path$2, _args$3);
+                        return $5432;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -16231,38 +16288,38 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'Map.tie':
-                var $5407 = self.val;
-                var $5408 = self.lft;
-                var $5409 = self.rgt;
-                var self = $5407;
+                var $5434 = self.val;
+                var $5435 = self.lft;
+                var $5436 = self.rgt;
+                var self = $5434;
                 switch (self._) {
                     case 'Maybe.some':
-                        var $5411 = self.value;
-                        var $5412 = List$cons$(Pair$new$(Bits$reverse$(_key$3), $5411), _list$4);
-                        var _list0$8 = $5412;
+                        var $5438 = self.value;
+                        var $5439 = List$cons$(Pair$new$(Bits$reverse$(_key$3), $5438), _list$4);
+                        var _list0$8 = $5439;
                         break;
                     case 'Maybe.none':
-                        var $5413 = _list$4;
-                        var _list0$8 = $5413;
+                        var $5440 = _list$4;
+                        var _list0$8 = $5440;
                         break;
                 };
-                var _list1$9 = Map$to_list$go$($5408, (_key$3 + '0'), _list0$8);
-                var _list2$10 = Map$to_list$go$($5409, (_key$3 + '1'), _list1$9);
-                var $5410 = _list2$10;
-                var $5406 = $5410;
+                var _list1$9 = Map$to_list$go$($5435, (_key$3 + '0'), _list0$8);
+                var _list2$10 = Map$to_list$go$($5436, (_key$3 + '1'), _list1$9);
+                var $5437 = _list2$10;
+                var $5433 = $5437;
                 break;
             case 'Map.new':
-                var $5414 = _list$4;
-                var $5406 = $5414;
+                var $5441 = _list$4;
+                var $5433 = $5441;
                 break;
         };
-        return $5406;
+        return $5433;
     };
     const Map$to_list$go = x0 => x1 => x2 => Map$to_list$go$(x0, x1, x2);
 
     function Map$to_list$(_xs$2) {
-        var $5415 = List$reverse$(Map$to_list$go$(_xs$2, Bits$e, List$nil));
-        return $5415;
+        var $5442 = List$reverse$(Map$to_list$go$(_xs$2, Bits$e, List$nil));
+        return $5442;
     };
     const Map$to_list = x0 => Map$to_list$(x0);
 
@@ -16270,79 +16327,79 @@ module.exports = (function() {
         var self = _bits$2;
         switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
             case 'o':
-                var $5417 = self.slice(0, -1);
+                var $5444 = self.slice(0, -1);
                 var self = _need$3;
                 if (self === 0n) {
                     var _head$6 = Bits$reverse$(_chunk$4);
                     var _tail$7 = Bits$chunks_of$go$(_len$1, _bits$2, _len$1, Bits$e);
-                    var $5419 = List$cons$(_head$6, _tail$7);
-                    var $5418 = $5419;
+                    var $5446 = List$cons$(_head$6, _tail$7);
+                    var $5445 = $5446;
                 } else {
-                    var $5420 = (self - 1n);
+                    var $5447 = (self - 1n);
                     var _chunk$7 = (_chunk$4 + '0');
-                    var $5421 = Bits$chunks_of$go$(_len$1, $5417, $5420, _chunk$7);
-                    var $5418 = $5421;
+                    var $5448 = Bits$chunks_of$go$(_len$1, $5444, $5447, _chunk$7);
+                    var $5445 = $5448;
                 };
-                var $5416 = $5418;
+                var $5443 = $5445;
                 break;
             case 'i':
-                var $5422 = self.slice(0, -1);
+                var $5449 = self.slice(0, -1);
                 var self = _need$3;
                 if (self === 0n) {
                     var _head$6 = Bits$reverse$(_chunk$4);
                     var _tail$7 = Bits$chunks_of$go$(_len$1, _bits$2, _len$1, Bits$e);
-                    var $5424 = List$cons$(_head$6, _tail$7);
-                    var $5423 = $5424;
+                    var $5451 = List$cons$(_head$6, _tail$7);
+                    var $5450 = $5451;
                 } else {
-                    var $5425 = (self - 1n);
+                    var $5452 = (self - 1n);
                     var _chunk$7 = (_chunk$4 + '1');
-                    var $5426 = Bits$chunks_of$go$(_len$1, $5422, $5425, _chunk$7);
-                    var $5423 = $5426;
+                    var $5453 = Bits$chunks_of$go$(_len$1, $5449, $5452, _chunk$7);
+                    var $5450 = $5453;
                 };
-                var $5416 = $5423;
+                var $5443 = $5450;
                 break;
             case 'e':
-                var $5427 = List$cons$(Bits$reverse$(_chunk$4), List$nil);
-                var $5416 = $5427;
+                var $5454 = List$cons$(Bits$reverse$(_chunk$4), List$nil);
+                var $5443 = $5454;
                 break;
         };
-        return $5416;
+        return $5443;
     };
     const Bits$chunks_of$go = x0 => x1 => x2 => x3 => Bits$chunks_of$go$(x0, x1, x2, x3);
 
     function Bits$chunks_of$(_len$1, _bits$2) {
-        var $5428 = Bits$chunks_of$go$(_len$1, _bits$2, _len$1, Bits$e);
-        return $5428;
+        var $5455 = Bits$chunks_of$go$(_len$1, _bits$2, _len$1, Bits$e);
+        return $5455;
     };
     const Bits$chunks_of = x0 => x1 => Bits$chunks_of$(x0, x1);
 
     function Word$from_bits$(_size$1, _bits$2) {
         var self = _size$1;
         if (self === 0n) {
-            var $5430 = Word$e;
-            var $5429 = $5430;
+            var $5457 = Word$e;
+            var $5456 = $5457;
         } else {
-            var $5431 = (self - 1n);
+            var $5458 = (self - 1n);
             var self = _bits$2;
             switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                 case 'o':
-                    var $5433 = self.slice(0, -1);
-                    var $5434 = Word$o$(Word$from_bits$($5431, $5433));
-                    var $5432 = $5434;
+                    var $5460 = self.slice(0, -1);
+                    var $5461 = Word$o$(Word$from_bits$($5458, $5460));
+                    var $5459 = $5461;
                     break;
                 case 'i':
-                    var $5435 = self.slice(0, -1);
-                    var $5436 = Word$i$(Word$from_bits$($5431, $5435));
-                    var $5432 = $5436;
+                    var $5462 = self.slice(0, -1);
+                    var $5463 = Word$i$(Word$from_bits$($5458, $5462));
+                    var $5459 = $5463;
                     break;
                 case 'e':
-                    var $5437 = Word$o$(Word$from_bits$($5431, Bits$e));
-                    var $5432 = $5437;
+                    var $5464 = Word$o$(Word$from_bits$($5458, Bits$e));
+                    var $5459 = $5464;
                     break;
             };
-            var $5429 = $5432;
+            var $5456 = $5459;
         };
-        return $5429;
+        return $5456;
     };
     const Word$from_bits = x0 => x1 => Word$from_bits$(x0, x1);
 
@@ -16352,275 +16409,288 @@ module.exports = (function() {
             var _u16$5 = U16$new$(Word$from_bits$(16n, Bits$reverse$(_bts$3)));
             var self = U16$btw$(0, _u16$5, 25);
             if (self) {
-                var $5440 = ((_u16$5 + 65) & 0xFFFF);
-                var _chr$6 = $5440;
+                var $5467 = ((_u16$5 + 65) & 0xFFFF);
+                var _chr$6 = $5467;
             } else {
                 var self = U16$btw$(26, _u16$5, 51);
                 if (self) {
-                    var $5442 = ((_u16$5 + 71) & 0xFFFF);
-                    var $5441 = $5442;
+                    var $5469 = ((_u16$5 + 71) & 0xFFFF);
+                    var $5468 = $5469;
                 } else {
                     var self = U16$btw$(52, _u16$5, 61);
                     if (self) {
-                        var $5444 = (Math.max(_u16$5 - 4, 0));
-                        var $5443 = $5444;
+                        var $5471 = (Math.max(_u16$5 - 4, 0));
+                        var $5470 = $5471;
                     } else {
                         var self = (62 === _u16$5);
                         if (self) {
-                            var $5446 = 46;
-                            var $5445 = $5446;
+                            var $5473 = 46;
+                            var $5472 = $5473;
                         } else {
-                            var $5447 = 95;
-                            var $5445 = $5447;
+                            var $5474 = 95;
+                            var $5472 = $5474;
                         };
-                        var $5443 = $5445;
+                        var $5470 = $5472;
                     };
-                    var $5441 = $5443;
+                    var $5468 = $5470;
                 };
-                var _chr$6 = $5441;
+                var _chr$6 = $5468;
             };
-            var $5439 = String$cons$(_chr$6, _name$4);
-            return $5439;
+            var $5466 = String$cons$(_chr$6, _name$4);
+            return $5466;
         }));
-        var $5438 = _name$3;
-        return $5438;
+        var $5465 = _name$3;
+        return $5465;
     };
     const Kind$Name$from_bits = x0 => Kind$Name$from_bits$(x0);
+
+    function Pair$fst$(_pair$3) {
+        var self = _pair$3;
+        switch (self._) {
+            case 'Pair.new':
+                var $5476 = self.fst;
+                var $5477 = $5476;
+                var $5475 = $5477;
+                break;
+        };
+        return $5475;
+    };
+    const Pair$fst = x0 => Pair$fst$(x0);
 
     function Kind$Term$show$go$(_term$1, _path$2) {
         var self = Kind$Term$show$as_nat$(_term$1);
         switch (self._) {
             case 'Maybe.some':
-                var $5449 = self.value;
-                var $5450 = $5449;
-                var $5448 = $5450;
+                var $5479 = self.value;
+                var $5480 = $5479;
+                var $5478 = $5480;
                 break;
             case 'Maybe.none':
                 var self = _term$1;
                 switch (self._) {
                     case 'Kind.Term.var':
-                        var $5452 = self.name;
-                        var $5453 = Kind$Name$show$($5452);
-                        var $5451 = $5453;
+                        var $5482 = self.name;
+                        var $5483 = Kind$Name$show$($5482);
+                        var $5481 = $5483;
                         break;
                     case 'Kind.Term.ref':
-                        var $5454 = self.name;
-                        var _name$4 = Kind$Name$show$($5454);
+                        var $5484 = self.name;
+                        var _name$4 = Kind$Name$show$($5484);
                         var self = _path$2;
                         switch (self._) {
                             case 'Maybe.some':
-                                var $5456 = self.value;
-                                var _path_val$6 = ((Bits$e + '1') + Kind$Path$to_bits$($5456));
+                                var $5486 = self.value;
+                                var _path_val$6 = ((Bits$e + '1') + Kind$Path$to_bits$($5486));
                                 var _path_str$7 = Nat$show$(Bits$to_nat$(_path_val$6));
-                                var $5457 = String$flatten$(List$cons$(_name$4, List$cons$(Kind$color$("2", ("-" + _path_str$7)), List$nil)));
-                                var $5455 = $5457;
+                                var $5487 = String$flatten$(List$cons$(_name$4, List$cons$(Kind$color$("2", ("-" + _path_str$7)), List$nil)));
+                                var $5485 = $5487;
                                 break;
                             case 'Maybe.none':
-                                var $5458 = _name$4;
-                                var $5455 = $5458;
+                                var $5488 = _name$4;
+                                var $5485 = $5488;
                                 break;
                         };
-                        var $5451 = $5455;
+                        var $5481 = $5485;
                         break;
                     case 'Kind.Term.all':
-                        var $5459 = self.eras;
-                        var $5460 = self.self;
-                        var $5461 = self.name;
-                        var $5462 = self.xtyp;
-                        var $5463 = self.body;
-                        var _eras$8 = $5459;
-                        var _self$9 = Kind$Name$show$($5460);
-                        var _name$10 = Kind$Name$show$($5461);
-                        var _type$11 = Kind$Term$show$go$($5462, Kind$MPath$o$(_path$2));
+                        var $5489 = self.eras;
+                        var $5490 = self.self;
+                        var $5491 = self.name;
+                        var $5492 = self.xtyp;
+                        var $5493 = self.body;
+                        var _eras$8 = $5489;
+                        var _self$9 = Kind$Name$show$($5490);
+                        var _name$10 = Kind$Name$show$($5491);
+                        var _type$11 = Kind$Term$show$go$($5492, Kind$MPath$o$(_path$2));
                         var self = _eras$8;
                         if (self) {
-                            var $5465 = "<";
-                            var _open$12 = $5465;
+                            var $5495 = "<";
+                            var _open$12 = $5495;
                         } else {
-                            var $5466 = "(";
-                            var _open$12 = $5466;
+                            var $5496 = "(";
+                            var _open$12 = $5496;
                         };
                         var self = _eras$8;
                         if (self) {
-                            var $5467 = ">";
-                            var _clos$13 = $5467;
+                            var $5497 = ">";
+                            var _clos$13 = $5497;
                         } else {
-                            var $5468 = ")";
-                            var _clos$13 = $5468;
+                            var $5498 = ")";
+                            var _clos$13 = $5498;
                         };
-                        var _body$14 = Kind$Term$show$go$($5463(Kind$Term$var$($5460, 0n))(Kind$Term$var$($5461, 0n)), Kind$MPath$i$(_path$2));
-                        var $5464 = String$flatten$(List$cons$(_self$9, List$cons$(_open$12, List$cons$(_name$10, List$cons$(":", List$cons$(_type$11, List$cons$(_clos$13, List$cons$(" ", List$cons$(_body$14, List$nil)))))))));
-                        var $5451 = $5464;
+                        var _body$14 = Kind$Term$show$go$($5493(Kind$Term$var$($5490, 0n))(Kind$Term$var$($5491, 0n)), Kind$MPath$i$(_path$2));
+                        var $5494 = String$flatten$(List$cons$(_self$9, List$cons$(_open$12, List$cons$(_name$10, List$cons$(":", List$cons$(_type$11, List$cons$(_clos$13, List$cons$(" ", List$cons$(_body$14, List$nil)))))))));
+                        var $5481 = $5494;
                         break;
                     case 'Kind.Term.lam':
-                        var $5469 = self.name;
-                        var $5470 = self.body;
-                        var _name$5 = Kind$Name$show$($5469);
-                        var _body$6 = Kind$Term$show$go$($5470(Kind$Term$var$($5469, 0n)), Kind$MPath$o$(_path$2));
-                        var $5471 = String$flatten$(List$cons$("(", List$cons$(_name$5, List$cons$(") ", List$cons$(_body$6, List$nil)))));
-                        var $5451 = $5471;
+                        var $5499 = self.name;
+                        var $5500 = self.body;
+                        var _name$5 = Kind$Name$show$($5499);
+                        var _body$6 = Kind$Term$show$go$($5500(Kind$Term$var$($5499, 0n)), Kind$MPath$o$(_path$2));
+                        var $5501 = String$flatten$(List$cons$("(", List$cons$(_name$5, List$cons$(") ", List$cons$(_body$6, List$nil)))));
+                        var $5481 = $5501;
                         break;
                     case 'Kind.Term.let':
-                        var $5472 = self.name;
-                        var $5473 = self.expr;
-                        var $5474 = self.body;
-                        var _name$6 = Kind$Name$show$($5472);
-                        var _expr$7 = Kind$Term$show$go$($5473, Kind$MPath$o$(_path$2));
-                        var _body$8 = Kind$Term$show$go$($5474(Kind$Term$var$($5472, 0n)), Kind$MPath$i$(_path$2));
-                        var $5475 = String$flatten$(List$cons$("let ", List$cons$(_name$6, List$cons$(" = ", List$cons$(_expr$7, List$cons$("; ", List$cons$(_body$8, List$nil)))))));
-                        var $5451 = $5475;
+                        var $5502 = self.name;
+                        var $5503 = self.expr;
+                        var $5504 = self.body;
+                        var _name$6 = Kind$Name$show$($5502);
+                        var _expr$7 = Kind$Term$show$go$($5503, Kind$MPath$o$(_path$2));
+                        var _body$8 = Kind$Term$show$go$($5504(Kind$Term$var$($5502, 0n)), Kind$MPath$i$(_path$2));
+                        var $5505 = String$flatten$(List$cons$("let ", List$cons$(_name$6, List$cons$(" = ", List$cons$(_expr$7, List$cons$("; ", List$cons$(_body$8, List$nil)))))));
+                        var $5481 = $5505;
                         break;
                     case 'Kind.Term.def':
-                        var $5476 = self.name;
-                        var $5477 = self.expr;
-                        var $5478 = self.body;
-                        var _name$6 = Kind$Name$show$($5476);
-                        var _expr$7 = Kind$Term$show$go$($5477, Kind$MPath$o$(_path$2));
-                        var _body$8 = Kind$Term$show$go$($5478(Kind$Term$var$($5476, 0n)), Kind$MPath$i$(_path$2));
-                        var $5479 = String$flatten$(List$cons$("def ", List$cons$(_name$6, List$cons$(" = ", List$cons$(_expr$7, List$cons$("; ", List$cons$(_body$8, List$nil)))))));
-                        var $5451 = $5479;
+                        var $5506 = self.name;
+                        var $5507 = self.expr;
+                        var $5508 = self.body;
+                        var _name$6 = Kind$Name$show$($5506);
+                        var _expr$7 = Kind$Term$show$go$($5507, Kind$MPath$o$(_path$2));
+                        var _body$8 = Kind$Term$show$go$($5508(Kind$Term$var$($5506, 0n)), Kind$MPath$i$(_path$2));
+                        var $5509 = String$flatten$(List$cons$("def ", List$cons$(_name$6, List$cons$(" = ", List$cons$(_expr$7, List$cons$("; ", List$cons$(_body$8, List$nil)))))));
+                        var $5481 = $5509;
                         break;
                     case 'Kind.Term.ann':
-                        var $5480 = self.term;
-                        var $5481 = self.type;
-                        var _term$6 = Kind$Term$show$go$($5480, Kind$MPath$o$(_path$2));
-                        var _type$7 = Kind$Term$show$go$($5481, Kind$MPath$i$(_path$2));
-                        var $5482 = String$flatten$(List$cons$(_term$6, List$cons$("::", List$cons$(_type$7, List$nil))));
-                        var $5451 = $5482;
+                        var $5510 = self.term;
+                        var $5511 = self.type;
+                        var _term$6 = Kind$Term$show$go$($5510, Kind$MPath$o$(_path$2));
+                        var _type$7 = Kind$Term$show$go$($5511, Kind$MPath$i$(_path$2));
+                        var $5512 = String$flatten$(List$cons$(_term$6, List$cons$("::", List$cons$(_type$7, List$nil))));
+                        var $5481 = $5512;
                         break;
                     case 'Kind.Term.gol':
-                        var $5483 = self.name;
-                        var _name$6 = Kind$Name$show$($5483);
-                        var $5484 = String$flatten$(List$cons$("?", List$cons$(_name$6, List$nil)));
-                        var $5451 = $5484;
+                        var $5513 = self.name;
+                        var _name$6 = Kind$Name$show$($5513);
+                        var $5514 = String$flatten$(List$cons$("?", List$cons$(_name$6, List$nil)));
+                        var $5481 = $5514;
                         break;
                     case 'Kind.Term.nat':
-                        var $5485 = self.natx;
-                        var $5486 = String$flatten$(List$cons$(Nat$show$($5485), List$nil));
-                        var $5451 = $5486;
+                        var $5515 = self.natx;
+                        var $5516 = String$flatten$(List$cons$(Nat$show$($5515), List$nil));
+                        var $5481 = $5516;
                         break;
                     case 'Kind.Term.chr':
-                        var $5487 = self.chrx;
-                        var $5488 = String$flatten$(List$cons$("\'", List$cons$(Kind$escape$char$($5487), List$cons$("\'", List$nil))));
-                        var $5451 = $5488;
+                        var $5517 = self.chrx;
+                        var $5518 = String$flatten$(List$cons$("\'", List$cons$(Kind$escape$char$($5517), List$cons$("\'", List$nil))));
+                        var $5481 = $5518;
                         break;
                     case 'Kind.Term.str':
-                        var $5489 = self.strx;
-                        var $5490 = String$flatten$(List$cons$("\"", List$cons$(Kind$escape$($5489), List$cons$("\"", List$nil))));
-                        var $5451 = $5490;
+                        var $5519 = self.strx;
+                        var $5520 = String$flatten$(List$cons$("\"", List$cons$(Kind$escape$($5519), List$cons$("\"", List$nil))));
+                        var $5481 = $5520;
                         break;
                     case 'Kind.Term.cse':
-                        var $5491 = self.expr;
-                        var $5492 = self.name;
-                        var $5493 = self.with;
-                        var $5494 = self.cses;
-                        var $5495 = self.moti;
-                        var _expr$9 = Kind$Term$show$go$($5491, Kind$MPath$o$(_path$2));
-                        var _name$10 = Kind$Name$show$($5492);
-                        var _wyth$11 = String$join$("", List$mapped$($5493, (_defn$11 => {
+                        var $5521 = self.expr;
+                        var $5522 = self.name;
+                        var $5523 = self.with;
+                        var $5524 = self.cses;
+                        var $5525 = self.moti;
+                        var _expr$9 = Kind$Term$show$go$($5521, Kind$MPath$o$(_path$2));
+                        var _name$10 = Kind$Name$show$($5522);
+                        var _wyth$11 = String$join$("", List$mapped$($5523, (_defn$11 => {
                             var self = _defn$11;
                             switch (self._) {
                                 case 'Kind.Def.new':
-                                    var $5498 = self.name;
-                                    var $5499 = self.term;
-                                    var $5500 = self.type;
-                                    var _name$21 = Kind$Name$show$($5498);
-                                    var _type$22 = Kind$Term$show$go$($5500, Maybe$none);
-                                    var _term$23 = Kind$Term$show$go$($5499, Maybe$none);
-                                    var $5501 = String$flatten$(List$cons$(_name$21, List$cons$(": ", List$cons$(_type$22, List$cons$(" = ", List$cons$(_term$23, List$cons$(";", List$nil)))))));
-                                    var $5497 = $5501;
+                                    var $5528 = self.name;
+                                    var $5529 = self.term;
+                                    var $5530 = self.type;
+                                    var _name$21 = Kind$Name$show$($5528);
+                                    var _type$22 = Kind$Term$show$go$($5530, Maybe$none);
+                                    var _term$23 = Kind$Term$show$go$($5529, Maybe$none);
+                                    var $5531 = String$flatten$(List$cons$(_name$21, List$cons$(": ", List$cons$(_type$22, List$cons$(" = ", List$cons$(_term$23, List$cons$(";", List$nil)))))));
+                                    var $5527 = $5531;
                                     break;
                             };
-                            return $5497;
+                            return $5527;
                         })));
-                        var _cses$12 = Map$to_list$($5494);
+                        var _cses$12 = Map$to_list$($5524);
                         var _cses$13 = String$join$("", List$mapped$(_cses$12, (_x$13 => {
                             var _name$14 = Kind$Name$from_bits$(Pair$fst$(_x$13));
                             var _term$15 = Kind$Term$show$go$(Pair$snd$(_x$13), Maybe$none);
-                            var $5502 = String$flatten$(List$cons$(_name$14, List$cons$(": ", List$cons$(_term$15, List$cons$("; ", List$nil)))));
-                            return $5502;
+                            var $5532 = String$flatten$(List$cons$(_name$14, List$cons$(": ", List$cons$(_term$15, List$cons$("; ", List$nil)))));
+                            return $5532;
                         })));
-                        var self = $5495;
+                        var self = $5525;
                         switch (self._) {
                             case 'Maybe.some':
-                                var $5503 = self.value;
-                                var $5504 = String$flatten$(List$cons$(": ", List$cons$(Kind$Term$show$go$($5503, Maybe$none), List$nil)));
-                                var _moti$14 = $5504;
+                                var $5533 = self.value;
+                                var $5534 = String$flatten$(List$cons$(": ", List$cons$(Kind$Term$show$go$($5533, Maybe$none), List$nil)));
+                                var _moti$14 = $5534;
                                 break;
                             case 'Maybe.none':
-                                var $5505 = "";
-                                var _moti$14 = $5505;
+                                var $5535 = "";
+                                var _moti$14 = $5535;
                                 break;
                         };
-                        var $5496 = String$flatten$(List$cons$("case ", List$cons$(_expr$9, List$cons$(" as ", List$cons$(_name$10, List$cons$(_wyth$11, List$cons$(" { ", List$cons$(_cses$13, List$cons$("}", List$cons$(_moti$14, List$nil))))))))));
-                        var $5451 = $5496;
+                        var $5526 = String$flatten$(List$cons$("case ", List$cons$(_expr$9, List$cons$(" as ", List$cons$(_name$10, List$cons$(_wyth$11, List$cons$(" { ", List$cons$(_cses$13, List$cons$("}", List$cons$(_moti$14, List$nil))))))))));
+                        var $5481 = $5526;
                         break;
                     case 'Kind.Term.ori':
-                        var $5506 = self.expr;
-                        var $5507 = Kind$Term$show$go$($5506, _path$2);
-                        var $5451 = $5507;
+                        var $5536 = self.expr;
+                        var $5537 = Kind$Term$show$go$($5536, _path$2);
+                        var $5481 = $5537;
                         break;
                     case 'Kind.Term.typ':
-                        var $5508 = "Type";
-                        var $5451 = $5508;
+                        var $5538 = "Type";
+                        var $5481 = $5538;
                         break;
                     case 'Kind.Term.app':
-                        var $5509 = Kind$Term$show$app$(_term$1, _path$2, List$nil);
-                        var $5451 = $5509;
+                        var $5539 = Kind$Term$show$app$(_term$1, _path$2, List$nil);
+                        var $5481 = $5539;
                         break;
                     case 'Kind.Term.hol':
-                        var $5510 = "_";
-                        var $5451 = $5510;
+                        var $5540 = "_";
+                        var $5481 = $5540;
                         break;
                 };
-                var $5448 = $5451;
+                var $5478 = $5481;
                 break;
         };
-        return $5448;
+        return $5478;
     };
     const Kind$Term$show$go = x0 => x1 => Kind$Term$show$go$(x0, x1);
 
     function Kind$Term$show$(_term$1) {
-        var $5511 = Kind$Term$show$go$(_term$1, Maybe$none);
-        return $5511;
+        var $5541 = Kind$Term$show$go$(_term$1, Maybe$none);
+        return $5541;
     };
     const Kind$Term$show = x0 => Kind$Term$show$(x0);
 
     function Kind$Defs$report$types$(_defs$1, _names$2) {
         var _types$3 = "";
         var _types$4 = (() => {
-            var $5514 = _types$3;
-            var $5515 = _names$2;
-            let _types$5 = $5514;
+            var $5544 = _types$3;
+            var $5545 = _names$2;
+            let _types$5 = $5544;
             let _name$4;
-            while ($5515._ === 'List.cons') {
-                _name$4 = $5515.head;
+            while ($5545._ === 'List.cons') {
+                _name$4 = $5545.head;
                 var self = Kind$get$(_name$4, _defs$1);
                 switch (self._) {
                     case 'Maybe.some':
-                        var $5516 = self.value;
-                        var self = $5516;
+                        var $5546 = self.value;
+                        var self = $5546;
                         switch (self._) {
                             case 'Kind.Def.new':
-                                var $5518 = self.type;
-                                var $5519 = (_types$5 + (_name$4 + (": " + (Kind$Term$show$($5518) + "\u{a}"))));
-                                var $5517 = $5519;
+                                var $5548 = self.type;
+                                var $5549 = (_types$5 + (_name$4 + (": " + (Kind$Term$show$($5548) + "\u{a}"))));
+                                var $5547 = $5549;
                                 break;
                         };
-                        var $5514 = $5517;
+                        var $5544 = $5547;
                         break;
                     case 'Maybe.none':
-                        var $5520 = _types$5;
-                        var $5514 = $5520;
+                        var $5550 = _types$5;
+                        var $5544 = $5550;
                         break;
                 };
-                _types$5 = $5514;
-                $5515 = $5515.tail;
+                _types$5 = $5544;
+                $5545 = $5545.tail;
             }
             return _types$5;
         })();
-        var $5512 = _types$4;
-        return $5512;
+        var $5542 = _types$4;
+        return $5542;
     };
     const Kind$Defs$report$types = x0 => x1 => Kind$Defs$report$types$(x0, x1);
 
@@ -16628,37 +16698,37 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'Map.tie':
-                var $5522 = self.val;
-                var $5523 = self.lft;
-                var $5524 = self.rgt;
-                var self = $5522;
+                var $5552 = self.val;
+                var $5553 = self.lft;
+                var $5554 = self.rgt;
+                var self = $5552;
                 switch (self._) {
                     case 'Maybe.none':
-                        var $5526 = _list$4;
-                        var _list0$8 = $5526;
+                        var $5556 = _list$4;
+                        var _list0$8 = $5556;
                         break;
                     case 'Maybe.some':
-                        var $5527 = List$cons$(Bits$reverse$(_key$3), _list$4);
-                        var _list0$8 = $5527;
+                        var $5557 = List$cons$(Bits$reverse$(_key$3), _list$4);
+                        var _list0$8 = $5557;
                         break;
                 };
-                var _list1$9 = Map$keys$go$($5523, (_key$3 + '0'), _list0$8);
-                var _list2$10 = Map$keys$go$($5524, (_key$3 + '1'), _list1$9);
-                var $5525 = _list2$10;
-                var $5521 = $5525;
+                var _list1$9 = Map$keys$go$($5553, (_key$3 + '0'), _list0$8);
+                var _list2$10 = Map$keys$go$($5554, (_key$3 + '1'), _list1$9);
+                var $5555 = _list2$10;
+                var $5551 = $5555;
                 break;
             case 'Map.new':
-                var $5528 = _list$4;
-                var $5521 = $5528;
+                var $5558 = _list$4;
+                var $5551 = $5558;
                 break;
         };
-        return $5521;
+        return $5551;
     };
     const Map$keys$go = x0 => x1 => x2 => Map$keys$go$(x0, x1, x2);
 
     function Map$keys$(_xs$2) {
-        var $5529 = List$reverse$(Map$keys$go$(_xs$2, Bits$e, List$nil));
-        return $5529;
+        var $5559 = List$reverse$(Map$keys$go$(_xs$2, Bits$e, List$nil));
+        return $5559;
     };
     const Map$keys = x0 => Map$keys$(x0);
 
@@ -16666,60 +16736,60 @@ module.exports = (function() {
         var self = _errors$1;
         switch (self._) {
             case 'List.cons':
-                var $5531 = self.head;
-                var $5532 = self.tail;
-                var self = $5531;
+                var $5561 = self.head;
+                var $5562 = self.tail;
+                var self = $5561;
                 switch (self._) {
                     case 'Kind.Error.type_mismatch':
                     case 'Kind.Error.undefined_reference':
                     case 'Kind.Error.cant_infer':
-                        var $5534 = (!_got$2);
-                        var _keep$5 = $5534;
+                        var $5564 = (!_got$2);
+                        var _keep$5 = $5564;
                         break;
                     case 'Kind.Error.show_goal':
-                        var $5535 = Bool$true;
-                        var _keep$5 = $5535;
+                        var $5565 = Bool$true;
+                        var _keep$5 = $5565;
                         break;
                     case 'Kind.Error.waiting':
                     case 'Kind.Error.indirect':
                     case 'Kind.Error.patch':
-                        var $5536 = Bool$false;
-                        var _keep$5 = $5536;
+                        var $5566 = Bool$false;
+                        var _keep$5 = $5566;
                         break;
                 };
-                var self = $5531;
+                var self = $5561;
                 switch (self._) {
                     case 'Kind.Error.type_mismatch':
                     case 'Kind.Error.undefined_reference':
-                        var $5537 = Bool$true;
-                        var _got$6 = $5537;
+                        var $5567 = Bool$true;
+                        var _got$6 = $5567;
                         break;
                     case 'Kind.Error.show_goal':
                     case 'Kind.Error.waiting':
                     case 'Kind.Error.indirect':
                     case 'Kind.Error.patch':
                     case 'Kind.Error.cant_infer':
-                        var $5538 = _got$2;
-                        var _got$6 = $5538;
+                        var $5568 = _got$2;
+                        var _got$6 = $5568;
                         break;
                 };
-                var _tail$7 = Kind$Error$relevant$($5532, _got$6);
+                var _tail$7 = Kind$Error$relevant$($5562, _got$6);
                 var self = _keep$5;
                 if (self) {
-                    var $5539 = List$cons$($5531, _tail$7);
-                    var $5533 = $5539;
+                    var $5569 = List$cons$($5561, _tail$7);
+                    var $5563 = $5569;
                 } else {
-                    var $5540 = _tail$7;
-                    var $5533 = $5540;
+                    var $5570 = _tail$7;
+                    var $5563 = $5570;
                 };
-                var $5530 = $5533;
+                var $5560 = $5563;
                 break;
             case 'List.nil':
-                var $5541 = List$nil;
-                var $5530 = $5541;
+                var $5571 = List$nil;
+                var $5560 = $5571;
                 break;
         };
-        return $5530;
+        return $5560;
     };
     const Kind$Error$relevant = x0 => x1 => Kind$Error$relevant$(x0, x1);
 
@@ -16727,57 +16797,57 @@ module.exports = (function() {
         var self = _context$1;
         switch (self._) {
             case 'List.cons':
-                var $5543 = self.head;
-                var $5544 = self.tail;
-                var self = $5543;
+                var $5573 = self.head;
+                var $5574 = self.tail;
+                var self = $5573;
                 switch (self._) {
                     case 'Pair.new':
-                        var $5546 = self.fst;
-                        var $5547 = self.snd;
-                        var _name$6 = Kind$Name$show$($5546);
-                        var _type$7 = Kind$Term$show$(Kind$Term$normalize$($5547, Map$new));
-                        var _rest$8 = Kind$Context$show$($5544);
-                        var $5548 = String$flatten$(List$cons$(_rest$8, List$cons$("- ", List$cons$(_name$6, List$cons$(": ", List$cons$(_type$7, List$cons$("\u{a}", List$nil)))))));
-                        var $5545 = $5548;
+                        var $5576 = self.fst;
+                        var $5577 = self.snd;
+                        var _name$6 = Kind$Name$show$($5576);
+                        var _type$7 = Kind$Term$show$(Kind$Term$normalize$($5577, Map$new));
+                        var _rest$8 = Kind$Context$show$($5574);
+                        var $5578 = String$flatten$(List$cons$(_rest$8, List$cons$("- ", List$cons$(_name$6, List$cons$(": ", List$cons$(_type$7, List$cons$("\u{a}", List$nil)))))));
+                        var $5575 = $5578;
                         break;
                 };
-                var $5542 = $5545;
+                var $5572 = $5575;
                 break;
             case 'List.nil':
-                var $5549 = "";
-                var $5542 = $5549;
+                var $5579 = "";
+                var $5572 = $5579;
                 break;
         };
-        return $5542;
+        return $5572;
     };
     const Kind$Context$show = x0 => Kind$Context$show$(x0);
 
     function Kind$Term$expand_at$(_path$1, _term$2, _defs$3) {
-        var $5550 = Kind$Term$patch_at$(_path$1, _term$2, (_term$4 => {
+        var $5580 = Kind$Term$patch_at$(_path$1, _term$2, (_term$4 => {
             var self = _term$4;
             switch (self._) {
                 case 'Kind.Term.ref':
-                    var $5552 = self.name;
-                    var self = Kind$get$($5552, _defs$3);
+                    var $5582 = self.name;
+                    var self = Kind$get$($5582, _defs$3);
                     switch (self._) {
                         case 'Maybe.some':
-                            var $5554 = self.value;
-                            var self = $5554;
+                            var $5584 = self.value;
+                            var self = $5584;
                             switch (self._) {
                                 case 'Kind.Def.new':
-                                    var $5556 = self.term;
-                                    var $5557 = $5556;
-                                    var $5555 = $5557;
+                                    var $5586 = self.term;
+                                    var $5587 = $5586;
+                                    var $5585 = $5587;
                                     break;
                             };
-                            var $5553 = $5555;
+                            var $5583 = $5585;
                             break;
                         case 'Maybe.none':
-                            var $5558 = Kind$Term$ref$($5552);
-                            var $5553 = $5558;
+                            var $5588 = Kind$Term$ref$($5582);
+                            var $5583 = $5588;
                             break;
                     };
-                    var $5551 = $5553;
+                    var $5581 = $5583;
                     break;
                 case 'Kind.Term.var':
                 case 'Kind.Term.typ':
@@ -16794,13 +16864,13 @@ module.exports = (function() {
                 case 'Kind.Term.str':
                 case 'Kind.Term.cse':
                 case 'Kind.Term.ori':
-                    var $5559 = _term$4;
-                    var $5551 = $5559;
+                    var $5589 = _term$4;
+                    var $5581 = $5589;
                     break;
             };
-            return $5551;
+            return $5581;
         }));
-        return $5550;
+        return $5580;
     };
     const Kind$Term$expand_at = x0 => x1 => x2 => Kind$Term$expand_at$(x0, x1, x2);
 
@@ -16808,164 +16878,164 @@ module.exports = (function() {
         var self = _term$1;
         switch (self._) {
             case 'Kind.Term.var':
-                var $5561 = self.name;
-                var $5562 = self.indx;
-                var $5563 = Kind$Term$var$($5561, $5562);
-                var $5560 = $5563;
+                var $5591 = self.name;
+                var $5592 = self.indx;
+                var $5593 = Kind$Term$var$($5591, $5592);
+                var $5590 = $5593;
                 break;
             case 'Kind.Term.ref':
-                var $5564 = self.name;
-                var self = Kind$get$($5564, _defs$2);
+                var $5594 = self.name;
+                var self = Kind$get$($5594, _defs$2);
                 switch (self._) {
                     case 'Maybe.some':
-                        var $5566 = self.value;
-                        var self = $5566;
+                        var $5596 = self.value;
+                        var self = $5596;
                         switch (self._) {
                             case 'Kind.Def.new':
-                                var $5568 = self.term;
-                                var $5569 = self.isct;
-                                var $5570 = self.arit;
-                                var self = ($5569 && (_arity$3 > $5570));
+                                var $5598 = self.term;
+                                var $5599 = self.isct;
+                                var $5600 = self.arit;
+                                var self = ($5599 && (_arity$3 > $5600));
                                 if (self) {
-                                    var $5572 = $5568;
-                                    var $5571 = $5572;
+                                    var $5602 = $5598;
+                                    var $5601 = $5602;
                                 } else {
-                                    var $5573 = Kind$Term$ref$($5564);
-                                    var $5571 = $5573;
+                                    var $5603 = Kind$Term$ref$($5594);
+                                    var $5601 = $5603;
                                 };
-                                var $5567 = $5571;
+                                var $5597 = $5601;
                                 break;
                         };
-                        var $5565 = $5567;
+                        var $5595 = $5597;
                         break;
                     case 'Maybe.none':
-                        var $5574 = Kind$Term$ref$($5564);
-                        var $5565 = $5574;
+                        var $5604 = Kind$Term$ref$($5594);
+                        var $5595 = $5604;
                         break;
                 };
-                var $5560 = $5565;
+                var $5590 = $5595;
                 break;
             case 'Kind.Term.all':
-                var $5575 = self.eras;
-                var $5576 = self.self;
-                var $5577 = self.name;
-                var $5578 = self.xtyp;
-                var $5579 = self.body;
-                var $5580 = Kind$Term$all$($5575, $5576, $5577, Kind$Term$expand_ct$($5578, _defs$2, 0n), (_s$9 => _x$10 => {
-                    var $5581 = Kind$Term$expand_ct$($5579(_s$9)(_x$10), _defs$2, 0n);
-                    return $5581;
+                var $5605 = self.eras;
+                var $5606 = self.self;
+                var $5607 = self.name;
+                var $5608 = self.xtyp;
+                var $5609 = self.body;
+                var $5610 = Kind$Term$all$($5605, $5606, $5607, Kind$Term$expand_ct$($5608, _defs$2, 0n), (_s$9 => _x$10 => {
+                    var $5611 = Kind$Term$expand_ct$($5609(_s$9)(_x$10), _defs$2, 0n);
+                    return $5611;
                 }));
-                var $5560 = $5580;
+                var $5590 = $5610;
                 break;
             case 'Kind.Term.lam':
-                var $5582 = self.name;
-                var $5583 = self.body;
-                var $5584 = Kind$Term$lam$($5582, (_x$6 => {
-                    var $5585 = Kind$Term$expand_ct$($5583(_x$6), _defs$2, 0n);
-                    return $5585;
+                var $5612 = self.name;
+                var $5613 = self.body;
+                var $5614 = Kind$Term$lam$($5612, (_x$6 => {
+                    var $5615 = Kind$Term$expand_ct$($5613(_x$6), _defs$2, 0n);
+                    return $5615;
                 }));
-                var $5560 = $5584;
+                var $5590 = $5614;
                 break;
             case 'Kind.Term.app':
-                var $5586 = self.func;
-                var $5587 = self.argm;
-                var $5588 = Kind$Term$app$(Kind$Term$expand_ct$($5586, _defs$2, Nat$succ$(_arity$3)), Kind$Term$expand_ct$($5587, _defs$2, 0n));
-                var $5560 = $5588;
+                var $5616 = self.func;
+                var $5617 = self.argm;
+                var $5618 = Kind$Term$app$(Kind$Term$expand_ct$($5616, _defs$2, Nat$succ$(_arity$3)), Kind$Term$expand_ct$($5617, _defs$2, 0n));
+                var $5590 = $5618;
                 break;
             case 'Kind.Term.let':
-                var $5589 = self.name;
-                var $5590 = self.expr;
-                var $5591 = self.body;
-                var $5592 = Kind$Term$let$($5589, Kind$Term$expand_ct$($5590, _defs$2, 0n), (_x$7 => {
-                    var $5593 = Kind$Term$expand_ct$($5591(_x$7), _defs$2, 0n);
-                    return $5593;
+                var $5619 = self.name;
+                var $5620 = self.expr;
+                var $5621 = self.body;
+                var $5622 = Kind$Term$let$($5619, Kind$Term$expand_ct$($5620, _defs$2, 0n), (_x$7 => {
+                    var $5623 = Kind$Term$expand_ct$($5621(_x$7), _defs$2, 0n);
+                    return $5623;
                 }));
-                var $5560 = $5592;
+                var $5590 = $5622;
                 break;
             case 'Kind.Term.def':
-                var $5594 = self.name;
-                var $5595 = self.expr;
-                var $5596 = self.body;
-                var $5597 = Kind$Term$def$($5594, Kind$Term$expand_ct$($5595, _defs$2, 0n), (_x$7 => {
-                    var $5598 = Kind$Term$expand_ct$($5596(_x$7), _defs$2, 0n);
-                    return $5598;
+                var $5624 = self.name;
+                var $5625 = self.expr;
+                var $5626 = self.body;
+                var $5627 = Kind$Term$def$($5624, Kind$Term$expand_ct$($5625, _defs$2, 0n), (_x$7 => {
+                    var $5628 = Kind$Term$expand_ct$($5626(_x$7), _defs$2, 0n);
+                    return $5628;
                 }));
-                var $5560 = $5597;
+                var $5590 = $5627;
                 break;
             case 'Kind.Term.ann':
-                var $5599 = self.done;
-                var $5600 = self.term;
-                var $5601 = self.type;
-                var $5602 = Kind$Term$ann$($5599, Kind$Term$expand_ct$($5600, _defs$2, 0n), Kind$Term$expand_ct$($5601, _defs$2, 0n));
-                var $5560 = $5602;
+                var $5629 = self.done;
+                var $5630 = self.term;
+                var $5631 = self.type;
+                var $5632 = Kind$Term$ann$($5629, Kind$Term$expand_ct$($5630, _defs$2, 0n), Kind$Term$expand_ct$($5631, _defs$2, 0n));
+                var $5590 = $5632;
                 break;
             case 'Kind.Term.gol':
-                var $5603 = self.name;
-                var $5604 = self.dref;
-                var $5605 = self.verb;
-                var $5606 = Kind$Term$gol$($5603, $5604, $5605);
-                var $5560 = $5606;
+                var $5633 = self.name;
+                var $5634 = self.dref;
+                var $5635 = self.verb;
+                var $5636 = Kind$Term$gol$($5633, $5634, $5635);
+                var $5590 = $5636;
                 break;
             case 'Kind.Term.hol':
-                var $5607 = self.path;
-                var $5608 = Kind$Term$hol$($5607);
-                var $5560 = $5608;
+                var $5637 = self.path;
+                var $5638 = Kind$Term$hol$($5637);
+                var $5590 = $5638;
                 break;
             case 'Kind.Term.nat':
-                var $5609 = self.natx;
-                var $5610 = Kind$Term$nat$($5609);
-                var $5560 = $5610;
+                var $5639 = self.natx;
+                var $5640 = Kind$Term$nat$($5639);
+                var $5590 = $5640;
                 break;
             case 'Kind.Term.chr':
-                var $5611 = self.chrx;
-                var $5612 = Kind$Term$chr$($5611);
-                var $5560 = $5612;
+                var $5641 = self.chrx;
+                var $5642 = Kind$Term$chr$($5641);
+                var $5590 = $5642;
                 break;
             case 'Kind.Term.str':
-                var $5613 = self.strx;
-                var $5614 = Kind$Term$str$($5613);
-                var $5560 = $5614;
+                var $5643 = self.strx;
+                var $5644 = Kind$Term$str$($5643);
+                var $5590 = $5644;
                 break;
             case 'Kind.Term.ori':
-                var $5615 = self.orig;
-                var $5616 = self.expr;
-                var $5617 = Kind$Term$ori$($5615, $5616);
-                var $5560 = $5617;
+                var $5645 = self.orig;
+                var $5646 = self.expr;
+                var $5647 = Kind$Term$ori$($5645, $5646);
+                var $5590 = $5647;
                 break;
             case 'Kind.Term.typ':
-                var $5618 = Kind$Term$typ;
-                var $5560 = $5618;
+                var $5648 = Kind$Term$typ;
+                var $5590 = $5648;
                 break;
             case 'Kind.Term.cse':
-                var $5619 = _term$1;
-                var $5560 = $5619;
+                var $5649 = _term$1;
+                var $5590 = $5649;
                 break;
         };
-        return $5560;
+        return $5590;
     };
     const Kind$Term$expand_ct = x0 => x1 => x2 => Kind$Term$expand_ct$(x0, x1, x2);
 
     function Kind$Term$expand$(_dref$1, _term$2, _defs$3) {
         var _term$4 = Kind$Term$normalize$(_term$2, Map$new);
         var _term$5 = (() => {
-            var $5622 = _term$4;
-            var $5623 = _dref$1;
-            let _term$6 = $5622;
+            var $5652 = _term$4;
+            var $5653 = _dref$1;
+            let _term$6 = $5652;
             let _path$5;
-            while ($5623._ === 'List.cons') {
-                _path$5 = $5623.head;
+            while ($5653._ === 'List.cons') {
+                _path$5 = $5653.head;
                 var _term$7 = Kind$Term$expand_at$(_path$5, _term$6, _defs$3);
                 var _term$8 = Kind$Term$normalize$(_term$7, Map$new);
                 var _term$9 = Kind$Term$expand_ct$(_term$8, _defs$3, 0n);
                 var _term$10 = Kind$Term$normalize$(_term$9, Map$new);
-                var $5622 = _term$10;
-                _term$6 = $5622;
-                $5623 = $5623.tail;
+                var $5652 = _term$10;
+                _term$6 = $5652;
+                $5653 = $5653.tail;
             }
             return _term$6;
         })();
-        var $5620 = _term$5;
-        return $5620;
+        var $5650 = _term$5;
+        return $5650;
     };
     const Kind$Term$expand = x0 => x1 => x2 => Kind$Term$expand$(x0, x1, x2);
 
@@ -16973,124 +17043,124 @@ module.exports = (function() {
         var self = _error$1;
         switch (self._) {
             case 'Kind.Error.type_mismatch':
-                var $5625 = self.expected;
-                var $5626 = self.detected;
-                var $5627 = self.context;
-                var self = $5625;
+                var $5655 = self.expected;
+                var $5656 = self.detected;
+                var $5657 = self.context;
+                var self = $5655;
                 switch (self._) {
                     case 'Either.left':
-                        var $5629 = self.value;
-                        var $5630 = $5629;
-                        var _expected$7 = $5630;
+                        var $5659 = self.value;
+                        var $5660 = $5659;
+                        var _expected$7 = $5660;
                         break;
                     case 'Either.right':
-                        var $5631 = self.value;
-                        var $5632 = Kind$Term$show$(Kind$Term$normalize$($5631, Map$new));
-                        var _expected$7 = $5632;
+                        var $5661 = self.value;
+                        var $5662 = Kind$Term$show$(Kind$Term$normalize$($5661, Map$new));
+                        var _expected$7 = $5662;
                         break;
                 };
-                var self = $5626;
+                var self = $5656;
                 switch (self._) {
                     case 'Either.left':
-                        var $5633 = self.value;
-                        var $5634 = $5633;
-                        var _detected$8 = $5634;
+                        var $5663 = self.value;
+                        var $5664 = $5663;
+                        var _detected$8 = $5664;
                         break;
                     case 'Either.right':
-                        var $5635 = self.value;
-                        var $5636 = Kind$Term$show$(Kind$Term$normalize$($5635, Map$new));
-                        var _detected$8 = $5636;
+                        var $5665 = self.value;
+                        var $5666 = Kind$Term$show$(Kind$Term$normalize$($5665, Map$new));
+                        var _detected$8 = $5666;
                         break;
                 };
-                var $5628 = String$flatten$(List$cons$("Type mismatch.\u{a}", List$cons$("- Expected: ", List$cons$(_expected$7, List$cons$("\u{a}", List$cons$("- Detected: ", List$cons$(_detected$8, List$cons$("\u{a}", List$cons$((() => {
-                    var self = $5627;
+                var $5658 = String$flatten$(List$cons$("Type mismatch.\u{a}", List$cons$("- Expected: ", List$cons$(_expected$7, List$cons$("\u{a}", List$cons$("- Detected: ", List$cons$(_detected$8, List$cons$("\u{a}", List$cons$((() => {
+                    var self = $5657;
                     switch (self._) {
                         case 'List.nil':
-                            var $5637 = "";
-                            return $5637;
+                            var $5667 = "";
+                            return $5667;
                         case 'List.cons':
-                            var $5638 = String$flatten$(List$cons$("With context:\u{a}", List$cons$(Kind$Context$show$($5627), List$nil)));
-                            return $5638;
+                            var $5668 = String$flatten$(List$cons$("With context:\u{a}", List$cons$(Kind$Context$show$($5657), List$nil)));
+                            return $5668;
                     };
                 })(), List$nil)))))))));
-                var $5624 = $5628;
+                var $5654 = $5658;
                 break;
             case 'Kind.Error.show_goal':
-                var $5639 = self.name;
-                var $5640 = self.dref;
-                var $5641 = self.verb;
-                var $5642 = self.goal;
-                var $5643 = self.context;
-                var _goal_name$8 = String$flatten$(List$cons$("Goal ?", List$cons$(Kind$Name$show$($5639), List$cons$(":\u{a}", List$nil))));
-                var self = $5642;
+                var $5669 = self.name;
+                var $5670 = self.dref;
+                var $5671 = self.verb;
+                var $5672 = self.goal;
+                var $5673 = self.context;
+                var _goal_name$8 = String$flatten$(List$cons$("Goal ?", List$cons$(Kind$Name$show$($5669), List$cons$(":\u{a}", List$nil))));
+                var self = $5672;
                 switch (self._) {
                     case 'Maybe.some':
-                        var $5645 = self.value;
-                        var _goal$10 = Kind$Term$expand$($5640, $5645, _defs$2);
-                        var $5646 = String$flatten$(List$cons$("With type: ", List$cons$((() => {
-                            var self = $5641;
+                        var $5675 = self.value;
+                        var _goal$10 = Kind$Term$expand$($5670, $5675, _defs$2);
+                        var $5676 = String$flatten$(List$cons$("With type: ", List$cons$((() => {
+                            var self = $5671;
                             if (self) {
-                                var $5647 = Kind$Term$show$go$(_goal$10, Maybe$some$((_x$11 => {
-                                    var $5648 = _x$11;
-                                    return $5648;
+                                var $5677 = Kind$Term$show$go$(_goal$10, Maybe$some$((_x$11 => {
+                                    var $5678 = _x$11;
+                                    return $5678;
                                 })));
-                                return $5647;
+                                return $5677;
                             } else {
-                                var $5649 = Kind$Term$show$(_goal$10);
-                                return $5649;
+                                var $5679 = Kind$Term$show$(_goal$10);
+                                return $5679;
                             };
                         })(), List$cons$("\u{a}", List$nil))));
-                        var _with_type$9 = $5646;
+                        var _with_type$9 = $5676;
                         break;
                     case 'Maybe.none':
-                        var $5650 = "";
-                        var _with_type$9 = $5650;
+                        var $5680 = "";
+                        var _with_type$9 = $5680;
                         break;
                 };
-                var self = $5643;
+                var self = $5673;
                 switch (self._) {
                     case 'List.nil':
-                        var $5651 = "";
-                        var _with_ctxt$10 = $5651;
+                        var $5681 = "";
+                        var _with_ctxt$10 = $5681;
                         break;
                     case 'List.cons':
-                        var $5652 = String$flatten$(List$cons$("With ctxt:\u{a}", List$cons$(Kind$Context$show$($5643), List$nil)));
-                        var _with_ctxt$10 = $5652;
+                        var $5682 = String$flatten$(List$cons$("With ctxt:\u{a}", List$cons$(Kind$Context$show$($5673), List$nil)));
+                        var _with_ctxt$10 = $5682;
                         break;
                 };
-                var $5644 = String$flatten$(List$cons$(_goal_name$8, List$cons$(_with_type$9, List$cons$(_with_ctxt$10, List$nil))));
-                var $5624 = $5644;
+                var $5674 = String$flatten$(List$cons$(_goal_name$8, List$cons$(_with_type$9, List$cons$(_with_ctxt$10, List$nil))));
+                var $5654 = $5674;
                 break;
             case 'Kind.Error.waiting':
-                var $5653 = self.name;
-                var $5654 = String$flatten$(List$cons$("Waiting for \'", List$cons$($5653, List$cons$("\'.", List$nil))));
-                var $5624 = $5654;
+                var $5683 = self.name;
+                var $5684 = String$flatten$(List$cons$("Waiting for \'", List$cons$($5683, List$cons$("\'.", List$nil))));
+                var $5654 = $5684;
                 break;
             case 'Kind.Error.indirect':
-                var $5655 = self.name;
-                var $5656 = String$flatten$(List$cons$("Error on dependency \'", List$cons$($5655, List$cons$("\'.", List$nil))));
-                var $5624 = $5656;
+                var $5685 = self.name;
+                var $5686 = String$flatten$(List$cons$("Error on dependency \'", List$cons$($5685, List$cons$("\'.", List$nil))));
+                var $5654 = $5686;
                 break;
             case 'Kind.Error.patch':
-                var $5657 = self.term;
-                var $5658 = String$flatten$(List$cons$("Patching: ", List$cons$(Kind$Term$show$($5657), List$nil)));
-                var $5624 = $5658;
+                var $5687 = self.term;
+                var $5688 = String$flatten$(List$cons$("Patching: ", List$cons$(Kind$Term$show$($5687), List$nil)));
+                var $5654 = $5688;
                 break;
             case 'Kind.Error.undefined_reference':
-                var $5659 = self.name;
-                var $5660 = String$flatten$(List$cons$("Undefined reference: ", List$cons$(Kind$Name$show$($5659), List$cons$("\u{a}", List$nil))));
-                var $5624 = $5660;
+                var $5689 = self.name;
+                var $5690 = String$flatten$(List$cons$("Undefined reference: ", List$cons$(Kind$Name$show$($5689), List$cons$("\u{a}", List$nil))));
+                var $5654 = $5690;
                 break;
             case 'Kind.Error.cant_infer':
-                var $5661 = self.term;
-                var $5662 = self.context;
-                var _term$6 = Kind$Term$show$($5661);
-                var _context$7 = Kind$Context$show$($5662);
-                var $5663 = String$flatten$(List$cons$("Can\'t infer type of: ", List$cons$(_term$6, List$cons$("\u{a}", List$cons$("With ctxt:\u{a}", List$cons$(_context$7, List$nil))))));
-                var $5624 = $5663;
+                var $5691 = self.term;
+                var $5692 = self.context;
+                var _term$6 = Kind$Term$show$($5691);
+                var _context$7 = Kind$Context$show$($5692);
+                var $5693 = String$flatten$(List$cons$("Can\'t infer type of: ", List$cons$(_term$6, List$cons$("\u{a}", List$cons$("With ctxt:\u{a}", List$cons$(_context$7, List$nil))))));
+                var $5654 = $5693;
                 break;
         };
-        return $5624;
+        return $5654;
     };
     const Kind$Error$show = x0 => x1 => Kind$Error$show$(x0, x1);
 
@@ -17098,132 +17168,132 @@ module.exports = (function() {
         var self = _error$1;
         switch (self._) {
             case 'Kind.Error.type_mismatch':
-                var $5665 = self.origin;
-                var $5666 = $5665;
-                var $5664 = $5666;
+                var $5695 = self.origin;
+                var $5696 = $5695;
+                var $5694 = $5696;
                 break;
             case 'Kind.Error.undefined_reference':
-                var $5667 = self.origin;
-                var $5668 = $5667;
-                var $5664 = $5668;
+                var $5697 = self.origin;
+                var $5698 = $5697;
+                var $5694 = $5698;
                 break;
             case 'Kind.Error.cant_infer':
-                var $5669 = self.origin;
-                var $5670 = $5669;
-                var $5664 = $5670;
+                var $5699 = self.origin;
+                var $5700 = $5699;
+                var $5694 = $5700;
                 break;
             case 'Kind.Error.show_goal':
             case 'Kind.Error.waiting':
             case 'Kind.Error.indirect':
             case 'Kind.Error.patch':
-                var $5671 = Maybe$none;
-                var $5664 = $5671;
+                var $5701 = Maybe$none;
+                var $5694 = $5701;
                 break;
         };
-        return $5664;
+        return $5694;
     };
     const Kind$Error$origin = x0 => Kind$Error$origin$(x0);
 
     function Kind$Defs$report$errors$(_defs$1) {
         var _errors$2 = "";
         var _errors$3 = (() => {
-            var $5674 = _errors$2;
-            var $5675 = Map$keys$(_defs$1);
-            let _errors$4 = $5674;
+            var $5704 = _errors$2;
+            var $5705 = Map$keys$(_defs$1);
+            let _errors$4 = $5704;
             let _key$3;
-            while ($5675._ === 'List.cons') {
-                _key$3 = $5675.head;
+            while ($5705._ === 'List.cons') {
+                _key$3 = $5705.head;
                 var _name$5 = Kind$Name$from_bits$(_key$3);
                 var self = Kind$get$(_name$5, _defs$1);
                 switch (self._) {
                     case 'Maybe.some':
-                        var $5676 = self.value;
-                        var self = $5676;
+                        var $5706 = self.value;
+                        var self = $5706;
                         switch (self._) {
                             case 'Kind.Def.new':
-                                var $5678 = self.file;
-                                var $5679 = self.code;
-                                var $5680 = self.name;
-                                var $5681 = self.stat;
-                                var self = $5681;
+                                var $5708 = self.file;
+                                var $5709 = self.code;
+                                var $5710 = self.name;
+                                var $5711 = self.stat;
+                                var self = $5711;
                                 switch (self._) {
                                     case 'Kind.Status.fail':
-                                        var $5683 = self.errors;
-                                        var self = $5683;
+                                        var $5713 = self.errors;
+                                        var self = $5713;
                                         switch (self._) {
                                             case 'List.nil':
-                                                var $5685 = _errors$4;
-                                                var $5684 = $5685;
+                                                var $5715 = _errors$4;
+                                                var $5714 = $5715;
                                                 break;
                                             case 'List.cons':
-                                                var _name_str$19 = $5680;
-                                                var _rel_errs$20 = Kind$Error$relevant$($5683, Bool$false);
+                                                var _name_str$19 = $5710;
+                                                var _rel_errs$20 = Kind$Error$relevant$($5713, Bool$false);
                                                 var _errors$21 = (() => {
-                                                    var $5688 = _errors$4;
-                                                    var $5689 = _rel_errs$20;
-                                                    let _errors$22 = $5688;
+                                                    var $5718 = _errors$4;
+                                                    var $5719 = _rel_errs$20;
+                                                    let _errors$22 = $5718;
                                                     let _err$21;
-                                                    while ($5689._ === 'List.cons') {
-                                                        _err$21 = $5689.head;
+                                                    while ($5719._ === 'List.cons') {
+                                                        _err$21 = $5719.head;
                                                         var _err_msg$23 = Kind$Error$show$(_err$21, _defs$1);
                                                         var self = Kind$Error$origin$(_err$21);
                                                         switch (self._) {
                                                             case 'Maybe.some':
-                                                                var $5690 = self.value;
-                                                                var self = $5690;
+                                                                var $5720 = self.value;
+                                                                var self = $5720;
                                                                 switch (self._) {
                                                                     case 'Pair.new':
-                                                                        var $5692 = self.fst;
-                                                                        var $5693 = self.snd;
-                                                                        var _inside$27 = ("Inside \'" + ($5678 + "\':\u{a}"));
-                                                                        var _source$28 = Kind$highlight$($5679, $5692, $5693);
-                                                                        var $5694 = (_inside$27 + (_source$28 + "\u{a}"));
-                                                                        var $5691 = $5694;
+                                                                        var $5722 = self.fst;
+                                                                        var $5723 = self.snd;
+                                                                        var _inside$27 = ("Inside \'" + ($5708 + "\':\u{a}"));
+                                                                        var _source$28 = Kind$highlight$($5709, $5722, $5723);
+                                                                        var $5724 = (_inside$27 + (_source$28 + "\u{a}"));
+                                                                        var $5721 = $5724;
                                                                         break;
                                                                 };
-                                                                var _ori_msg$24 = $5691;
+                                                                var _ori_msg$24 = $5721;
                                                                 break;
                                                             case 'Maybe.none':
-                                                                var $5695 = "";
-                                                                var _ori_msg$24 = $5695;
+                                                                var $5725 = "";
+                                                                var _ori_msg$24 = $5725;
                                                                 break;
                                                         };
-                                                        var $5688 = (_errors$22 + (_err_msg$23 + (_ori_msg$24 + "\u{a}")));
-                                                        _errors$22 = $5688;
-                                                        $5689 = $5689.tail;
+                                                        var $5718 = (_errors$22 + (_err_msg$23 + (_ori_msg$24 + "\u{a}")));
+                                                        _errors$22 = $5718;
+                                                        $5719 = $5719.tail;
                                                     }
                                                     return _errors$22;
                                                 })();
-                                                var $5686 = _errors$21;
-                                                var $5684 = $5686;
+                                                var $5716 = _errors$21;
+                                                var $5714 = $5716;
                                                 break;
                                         };
-                                        var $5682 = $5684;
+                                        var $5712 = $5714;
                                         break;
                                     case 'Kind.Status.init':
                                     case 'Kind.Status.wait':
                                     case 'Kind.Status.done':
-                                        var $5696 = _errors$4;
-                                        var $5682 = $5696;
+                                        var $5726 = _errors$4;
+                                        var $5712 = $5726;
                                         break;
                                 };
-                                var $5677 = $5682;
+                                var $5707 = $5712;
                                 break;
                         };
-                        var $5674 = $5677;
+                        var $5704 = $5707;
                         break;
                     case 'Maybe.none':
-                        var $5697 = _errors$4;
-                        var $5674 = $5697;
+                        var $5727 = _errors$4;
+                        var $5704 = $5727;
                         break;
                 };
-                _errors$4 = $5674;
-                $5675 = $5675.tail;
+                _errors$4 = $5704;
+                $5705 = $5705.tail;
             }
             return _errors$4;
         })();
-        var $5672 = _errors$3;
-        return $5672;
+        var $5702 = _errors$3;
+        return $5702;
     };
     const Kind$Defs$report$errors = x0 => Kind$Defs$report$errors$(x0);
 
@@ -17232,45 +17302,45 @@ module.exports = (function() {
         var _errors$4 = Kind$Defs$report$errors$(_defs$1);
         var self = _errors$4;
         if (self.length === 0) {
-            var $5699 = "All terms check.";
-            var _errors$5 = $5699;
+            var $5729 = "All terms check.";
+            var _errors$5 = $5729;
         } else {
-            var $5700 = self.charCodeAt(0);
-            var $5701 = self.slice(1);
-            var $5702 = _errors$4;
-            var _errors$5 = $5702;
+            var $5730 = self.charCodeAt(0);
+            var $5731 = self.slice(1);
+            var $5732 = _errors$4;
+            var _errors$5 = $5732;
         };
-        var $5698 = (_types$3 + ("\u{a}" + _errors$5));
-        return $5698;
+        var $5728 = (_types$3 + ("\u{a}" + _errors$5));
+        return $5728;
     };
     const Kind$Defs$report = x0 => x1 => Kind$Defs$report$(x0, x1);
 
     function Kind$checker$io$one$(_name$1) {
-        var $5703 = IO$monad$((_m$bind$2 => _m$pure$3 => {
-            var $5704 = _m$bind$2;
-            return $5704;
+        var $5733 = IO$monad$((_m$bind$2 => _m$pure$3 => {
+            var $5734 = _m$bind$2;
+            return $5734;
         }))(Kind$Synth$one$(_name$1, Map$new))((_new_defs$2 => {
             var self = _new_defs$2;
             switch (self._) {
                 case 'Maybe.some':
-                    var $5706 = self.value;
-                    var $5707 = IO$print$(Kind$Defs$report$($5706, List$cons$(_name$1, List$nil)));
-                    var $5705 = $5707;
+                    var $5736 = self.value;
+                    var $5737 = IO$print$(Kind$Defs$report$($5736, List$cons$(_name$1, List$nil)));
+                    var $5735 = $5737;
                     break;
                 case 'Maybe.none':
                     var _notfound$3 = ("Term not found: \'" + (_name$1 + "\'."));
                     var _filelist$4 = List$mapped$(Kind$Synth$files_of$(_name$1), (_x$4 => {
-                        var $5709 = ("\'" + (_x$4 + "\'"));
-                        return $5709;
+                        var $5739 = ("\'" + (_x$4 + "\'"));
+                        return $5739;
                     }));
                     var _searched$5 = ("Searched on: " + (String$join$(", ", _filelist$4) + "."));
-                    var $5708 = IO$print$((_notfound$3 + ("\u{a}" + _searched$5)));
-                    var $5705 = $5708;
+                    var $5738 = IO$print$((_notfound$3 + ("\u{a}" + _searched$5)));
+                    var $5735 = $5738;
                     break;
             };
-            return $5705;
+            return $5735;
         }));
-        return $5703;
+        return $5733;
     };
     const Kind$checker$io$one = x0 => Kind$checker$io$one$(x0);
 
@@ -17278,127 +17348,127 @@ module.exports = (function() {
         var self = _names$1;
         switch (self._) {
             case 'List.cons':
-                var $5711 = self.head;
-                var $5712 = self.tail;
-                var $5713 = IO$monad$((_m$bind$5 => _m$pure$6 => {
-                    var $5714 = _m$bind$5;
-                    return $5714;
-                }))(Kind$Synth$one$($5711, _defs$2))((_new_defs$5 => {
+                var $5741 = self.head;
+                var $5742 = self.tail;
+                var $5743 = IO$monad$((_m$bind$5 => _m$pure$6 => {
+                    var $5744 = _m$bind$5;
+                    return $5744;
+                }))(Kind$Synth$one$($5741, _defs$2))((_new_defs$5 => {
                     var self = _new_defs$5;
                     switch (self._) {
                         case 'Maybe.some':
-                            var $5716 = self.value;
-                            var $5717 = Kind$Synth$many$($5712, $5716);
-                            var $5715 = $5717;
+                            var $5746 = self.value;
+                            var $5747 = Kind$Synth$many$($5742, $5746);
+                            var $5745 = $5747;
                             break;
                         case 'Maybe.none':
-                            var $5718 = Kind$Synth$many$($5712, _defs$2);
-                            var $5715 = $5718;
+                            var $5748 = Kind$Synth$many$($5742, _defs$2);
+                            var $5745 = $5748;
                             break;
                     };
-                    return $5715;
+                    return $5745;
                 }));
-                var $5710 = $5713;
+                var $5740 = $5743;
                 break;
             case 'List.nil':
-                var $5719 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-                    var $5720 = _m$pure$4;
-                    return $5720;
+                var $5749 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+                    var $5750 = _m$pure$4;
+                    return $5750;
                 }))(_defs$2);
-                var $5710 = $5719;
+                var $5740 = $5749;
                 break;
         };
-        return $5710;
+        return $5740;
     };
     const Kind$Synth$many = x0 => x1 => Kind$Synth$many$(x0, x1);
 
     function Kind$Synth$file$(_file$1, _defs$2) {
-        var $5721 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $5722 = _m$bind$3;
-            return $5722;
+        var $5751 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $5752 = _m$bind$3;
+            return $5752;
         }))(IO$get_file$(_file$1))((_code$3 => {
             var _read$4 = Kind$Defs$read$(_file$1, _code$3, _defs$2);
             var self = _read$4;
             switch (self._) {
                 case 'Either.left':
-                    var $5724 = self.value;
-                    var $5725 = IO$monad$((_m$bind$6 => _m$pure$7 => {
-                        var $5726 = _m$pure$7;
-                        return $5726;
-                    }))(Either$left$($5724));
-                    var $5723 = $5725;
+                    var $5754 = self.value;
+                    var $5755 = IO$monad$((_m$bind$6 => _m$pure$7 => {
+                        var $5756 = _m$pure$7;
+                        return $5756;
+                    }))(Either$left$($5754));
+                    var $5753 = $5755;
                     break;
                 case 'Either.right':
-                    var $5727 = self.value;
-                    var _file_defs$6 = $5727;
+                    var $5757 = self.value;
+                    var _file_defs$6 = $5757;
                     var _file_keys$7 = Map$keys$(_file_defs$6);
                     var _file_nams$8 = List$mapped$(_file_keys$7, Kind$Name$from_bits);
-                    var $5728 = IO$monad$((_m$bind$9 => _m$pure$10 => {
-                        var $5729 = _m$bind$9;
-                        return $5729;
+                    var $5758 = IO$monad$((_m$bind$9 => _m$pure$10 => {
+                        var $5759 = _m$bind$9;
+                        return $5759;
                     }))(Kind$Synth$many$(_file_nams$8, _file_defs$6))((_defs$9 => {
-                        var $5730 = IO$monad$((_m$bind$10 => _m$pure$11 => {
-                            var $5731 = _m$pure$11;
-                            return $5731;
+                        var $5760 = IO$monad$((_m$bind$10 => _m$pure$11 => {
+                            var $5761 = _m$pure$11;
+                            return $5761;
                         }))(Either$right$(Pair$new$(_file_nams$8, _defs$9)));
-                        return $5730;
+                        return $5760;
                     }));
-                    var $5723 = $5728;
+                    var $5753 = $5758;
                     break;
             };
-            return $5723;
+            return $5753;
         }));
-        return $5721;
+        return $5751;
     };
     const Kind$Synth$file = x0 => x1 => Kind$Synth$file$(x0, x1);
 
     function Kind$checker$io$file$(_file$1) {
-        var $5732 = IO$monad$((_m$bind$2 => _m$pure$3 => {
-            var $5733 = _m$bind$2;
-            return $5733;
+        var $5762 = IO$monad$((_m$bind$2 => _m$pure$3 => {
+            var $5763 = _m$bind$2;
+            return $5763;
         }))(Kind$Synth$file$(_file$1, Map$new))((_loaded$2 => {
             var self = _loaded$2;
             switch (self._) {
                 case 'Either.left':
-                    var $5735 = self.value;
-                    var $5736 = IO$monad$((_m$bind$4 => _m$pure$5 => {
-                        var $5737 = _m$bind$4;
-                        return $5737;
+                    var $5765 = self.value;
+                    var $5766 = IO$monad$((_m$bind$4 => _m$pure$5 => {
+                        var $5767 = _m$bind$4;
+                        return $5767;
                     }))(IO$print$(String$flatten$(List$cons$("On \'", List$cons$(_file$1, List$cons$("\':", List$nil))))))((_$4 => {
-                        var $5738 = IO$print$($5735);
-                        return $5738;
+                        var $5768 = IO$print$($5765);
+                        return $5768;
                     }));
-                    var $5734 = $5736;
+                    var $5764 = $5766;
                     break;
                 case 'Either.right':
-                    var $5739 = self.value;
-                    var self = $5739;
+                    var $5769 = self.value;
+                    var self = $5769;
                     switch (self._) {
                         case 'Pair.new':
-                            var $5741 = self.fst;
-                            var $5742 = self.snd;
-                            var _nams$6 = $5741;
-                            var _defs$7 = $5742;
+                            var $5771 = self.fst;
+                            var $5772 = self.snd;
+                            var _nams$6 = $5771;
+                            var _defs$7 = $5772;
                             var self = _nams$6;
                             switch (self._) {
                                 case 'List.nil':
-                                    var $5744 = IO$print$(("File not found or empty: \'" + (_file$1 + "\'.")));
-                                    var $5743 = $5744;
+                                    var $5774 = IO$print$(("File not found or empty: \'" + (_file$1 + "\'.")));
+                                    var $5773 = $5774;
                                     break;
                                 case 'List.cons':
-                                    var $5745 = IO$print$(Kind$Defs$report$(_defs$7, _nams$6));
-                                    var $5743 = $5745;
+                                    var $5775 = IO$print$(Kind$Defs$report$(_defs$7, _nams$6));
+                                    var $5773 = $5775;
                                     break;
                             };
-                            var $5740 = $5743;
+                            var $5770 = $5773;
                             break;
                     };
-                    var $5734 = $5740;
+                    var $5764 = $5770;
                     break;
             };
-            return $5734;
+            return $5764;
         }));
-        return $5732;
+        return $5762;
     };
     const Kind$checker$io$file = x0 => Kind$checker$io$file$(x0);
 
@@ -17415,13 +17485,13 @@ module.exports = (function() {
                 var self = _io$2;
                 switch (self._) {
                     case 'IO.end':
-                        var $5746 = self.value;
-                        var $5747 = $5746;
-                        return $5747;
+                        var $5776 = self.value;
+                        var $5777 = $5776;
+                        return $5777;
                     case 'IO.ask':
-                        var $5748 = self.then;
-                        var $5749 = IO$purify$($5748(""));
-                        return $5749;
+                        var $5778 = self.then;
+                        var $5779 = IO$purify$($5778(""));
+                        return $5779;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -17434,31 +17504,31 @@ module.exports = (function() {
         var self = Kind$Defs$read$("Main.kind", _code$1, Map$new);
         switch (self._) {
             case 'Either.left':
-                var $5751 = self.value;
-                var $5752 = $5751;
-                var $5750 = $5752;
+                var $5781 = self.value;
+                var $5782 = $5781;
+                var $5780 = $5782;
                 break;
             case 'Either.right':
-                var $5753 = self.value;
-                var $5754 = IO$purify$((() => {
-                    var _defs$3 = $5753;
+                var $5783 = self.value;
+                var $5784 = IO$purify$((() => {
+                    var _defs$3 = $5783;
                     var _nams$4 = List$mapped$(Map$keys$(_defs$3), Kind$Name$from_bits);
-                    var $5755 = IO$monad$((_m$bind$5 => _m$pure$6 => {
-                        var $5756 = _m$bind$5;
-                        return $5756;
+                    var $5785 = IO$monad$((_m$bind$5 => _m$pure$6 => {
+                        var $5786 = _m$bind$5;
+                        return $5786;
                     }))(Kind$Synth$many$(_nams$4, _defs$3))((_defs$5 => {
-                        var $5757 = IO$monad$((_m$bind$6 => _m$pure$7 => {
-                            var $5758 = _m$pure$7;
-                            return $5758;
+                        var $5787 = IO$monad$((_m$bind$6 => _m$pure$7 => {
+                            var $5788 = _m$pure$7;
+                            return $5788;
                         }))(Kind$Defs$report$(_defs$5, _nams$4));
-                        return $5757;
+                        return $5787;
                     }));
-                    return $5755;
+                    return $5785;
                 })());
-                var $5750 = $5754;
+                var $5780 = $5784;
                 break;
         };
-        return $5750;
+        return $5780;
     };
     const Kind$checker$code = x0 => Kind$checker$code$(x0);
 
@@ -17466,16 +17536,16 @@ module.exports = (function() {
         var self = Kind$Parser$term$(0n, _code$1);
         switch (self._) {
             case 'Parser.Reply.value':
-                var $5760 = self.val;
-                var $5761 = Maybe$some$($5760);
-                var $5759 = $5761;
+                var $5790 = self.val;
+                var $5791 = Maybe$some$($5790);
+                var $5789 = $5791;
                 break;
             case 'Parser.Reply.error':
-                var $5762 = Maybe$none;
-                var $5759 = $5762;
+                var $5792 = Maybe$none;
+                var $5789 = $5792;
                 break;
         };
-        return $5759;
+        return $5789;
     };
     const Kind$Term$read = x0 => Kind$Term$read$(x0);
     const Kind = (() => {
@@ -17484,11 +17554,11 @@ module.exports = (function() {
         var __$3 = Kind$checker$io$file;
         var __$4 = Kind$checker$code;
         var __$5 = Kind$Term$read;
-        var $5763 = IO$monad$((_m$bind$6 => _m$pure$7 => {
-            var $5764 = _m$pure$7;
-            return $5764;
+        var $5793 = IO$monad$((_m$bind$6 => _m$pure$7 => {
+            var $5794 = _m$pure$7;
+            return $5794;
         }))(Unit$new);
-        return $5763;
+        return $5793;
     })();
     return {
         '$main$': () => run(Kind),
@@ -17652,8 +17722,6 @@ module.exports = (function() {
         'Map.tie': Map$tie,
         'Map.set': Map$set,
         'Map.from_list': Map$from_list,
-        'Pair.fst': Pair$fst,
-        'Pair.snd': Pair$snd,
         'Kind.Term.cse': Kind$Term$cse,
         'Kind.Parser.case': Kind$Parser$case,
         'Kind.set': Kind$set,
@@ -17716,6 +17784,7 @@ module.exports = (function() {
         'List.at': List$at,
         'List.at_last': List$at_last,
         'Kind.Term.var': Kind$Term$var,
+        'Pair.snd': Pair$snd,
         'Kind.Context.get_name_skips': Kind$Context$get_name_skips,
         'Kind.Name.eql': Kind$Name$eql,
         'Kind.Context.find.go': Kind$Context$find$go,
@@ -17881,6 +17950,7 @@ module.exports = (function() {
         'Bits.chunks_of': Bits$chunks_of,
         'Word.from_bits': Word$from_bits,
         'Kind.Name.from_bits': Kind$Name$from_bits,
+        'Pair.fst': Pair$fst,
         'Kind.Term.show.go': Kind$Term$show$go,
         'Kind.Term.show': Kind$Term$show,
         'Kind.Defs.report.types': Kind$Defs$report$types,

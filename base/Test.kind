@@ -1,2 +1,4 @@
-Test: Nat
-  21 + 21
+Test: IO(Unit)
+  do IO {
+    IO.print("hello")
+  }

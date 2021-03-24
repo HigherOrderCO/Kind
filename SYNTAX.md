@@ -266,24 +266,34 @@ case expr as name {
 } : ReturnType
 ```
 
-Kind's case is the most important syntax of the language, as it allows one
-to branch, extract values from datatypes, and prove theorems. Unlike most
-functional languages, you don't need to write field names on each case;
-instead, fields are automatically bound with the `name.field` name (here, `.` is
-just part of the name).  
+Kind's case is the most important syntax of the language, as it allows one to
+branch, extract values from datatypes, and prove theorems. Unlike most
+functional languages, you don't need to write field names on each case; instead,
+fields are automatically bound with the `name.field` name (here, `.` is just
+part of the name).  
 
-The `as name` part is only necessary when the matched
-expression isn't a variable.
+The `as name` part is only necessary when the matched expression isn't a
+variable. For example, here `case` needs a name:
 
 ```
-case List.at<_>(m,base64) as char {
-  none: '#',
-  some: char.value,
+case List.head!([1,2,3]) as list {
+  none: "no head"
+  some: "head is: " | Nat.show(list.head)
 }
 ```
 
-The motive is optional: if it isn't provided,
-it will be replaced by a `hole`. For example, to sum a list, we write:
+And here we don't:
+
+```
+let list = List.head!([1,2,3])
+case list {
+  none: "no head"
+  some: "head is: " | Nat.show(list.head)
+}
+```
+
+The motive is optional: if it isn't provided, it will be replaced by a `hole`.
+For example, to sum a list, we write:
 
 ```
 sum(list: List(Nat)): Nat
@@ -293,18 +303,104 @@ sum(list: List(Nat)): Nat
   }
 ```
 
-This is expanded to:
+This is the same as:
 
 ```
 sum(list: List(Nat)): Nat
-  list<() _>(0, (list.head, list.tail) Nat.add(list.head, sum(list.tail)))
+  case list {
+    nil: 0
+    cons: list.head + sum(list.tail)
+  }: _
 ```
 
-Notice that Kind automatically inserts two lambdas on the `cons` case,
-binding the `list.head` and `list.tail` names to the list's fields. While the
-return type is optional, it is useful when proving theorems. You may also write
-a `!` instead of the motive, to ask Kind to try to smartly guess it for
-you. For more information on theorem proving, check its tutorial.
+Which, for curiosity sake, is expanded to:
+
+```
+sum(list: List(Nat)): Nat
+  def case_nil = 0
+  def case_cons = (list.head, list.tail)
+    Nat.add(list.head, sum(list.tail))
+  list<() _>(case_nil, case_cons)
+```
+
+Which works because datatypes are encoded as lambdas.
+
+For datatypes with many constructors, you can avoid writting them all by adding
+an `else` clause after the `case` expression. For example:
+
+```c
+type Suit {
+  clubs
+  diamonds
+  hearts
+  spades
+}
+  
+Suit.is_clubs(suit: Suit): Bool
+  case suit {
+    clubs: true
+    diamonds: false
+    hearts: false
+    spades: false
+  }
+```
+
+Can be shortened as:
+
+```c
+type Suit {
+  clubs
+  diamonds
+  hearts
+  spades
+}
+  
+Suit.is_clubs(suit: Suit): Bool
+  case suit {
+    clubs: true
+  } else false
+```
+
+If you write an explicit motive, you can access the matched value and, thus,
+return different types on each branch of the case expression. For example, this
+works:
+
+```
+main: String
+  case true as x {
+    true: "im a string"
+    false: 42
+  }: if x then String else Nat
+```
+
+Notice that the `true` case and the `false` case return different types. This is
+perfectly well-typed, because the motive is a computed expression that depends
+on the matched value. This is very useful for theorem proving.
+
+You may also use `!` instead of the motive to ask Formality to fill the motive
+for you, replacing the matched variable by its values on each branch. For
+example, this is the proof that `not(not(b)) == b`:
+
+```
+not_not_theorem(b: Bool): Bool.not(Bool.not(b)) == b
+  case b {
+    true: refl
+    false: refl
+  }: Bool.not(Bool.not(b)) == b
+```
+
+That proof can be shortened by using `!` as:
+  
+```
+not_not_theorem(b: Bool): Bool.not(Bool.not(b)) == b
+  case b {
+    true: refl
+    false: refl
+  }!
+```
+
+For more information on theorem proving, check the `THEOREMS.md` file on this
+repository.
 
 Open
 ----

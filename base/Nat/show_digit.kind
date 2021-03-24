@@ -6,8 +6,8 @@ Nat.show_digit(base: Nat, n: Nat) : Char
     ,'W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l'
     ,'m','n','o','p','q','r','s','t','u','v','w','x','y','z','+','/'];
   if Bool.and(Nat.gtn(base,0),Nat.lte(base,64)) then 
-    case List.at!(m,base64) as c {
+    (case List.at!(m,base64) as c {
       none: '#',
       some: c.value,
-    }
+    })
   else '#'
