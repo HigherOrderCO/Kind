@@ -442,6 +442,32 @@ dot(a: Vector3D, b: Vector3D): Nat
 The `as name` part is only necessary when the matched
 expression isn't a variable.
 
+Switch
+------
+
+Allows you to shorten sequences of if-then-else based on a `A -> Bool` function:
+
+```
+switch String.eql(str) {
+  "A": "a"
+  "B": "b"
+  "C": "c"
+} else "?"
+```
+
+Is equivalent to:
+
+```
+if String.eql(str, "A") then
+  "a"
+else if String.eql(str, "B") then
+  "b"
+else if String.eql(str, "C") then
+  "c"
+else
+  "?"
+```
+
 Annotation
 ----------
 

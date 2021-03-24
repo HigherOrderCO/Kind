@@ -6485,7 +6485,7 @@ module.exports = (function() {
                                                                         var $2373 = self.code;
                                                                         var $2374 = self.val;
                                                                         var self = Parser$maybe$((_idx$28 => _code$29 => {
-                                                                            var self = Kind$Parser$text$("else ", _idx$28, _code$29);
+                                                                            var self = Kind$Parser$text$("default ", _idx$28, _code$29);
                                                                             switch (self._) {
                                                                                 case 'Parser.Reply.error':
                                                                                     var $2377 = self.idx;
@@ -7116,7 +7116,7 @@ module.exports = (function() {
                                                 var $2643 = self.idx;
                                                 var $2644 = self.code;
                                                 var $2645 = self.val;
-                                                var self = Kind$Parser$text$("else", $2643, $2644);
+                                                var self = Kind$Parser$text$("default ", $2643, $2644);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
                                                         var $2647 = self.idx;

@@ -35,7 +35,7 @@ Web.Jogo.command(user: String, cmd: String, state: Web.Jogo.State): Web.Jogo.Sta
           BitsMap.set!(key, {p_x, U32.sub(p_y,spd)}, state)
         Web.Jogo.command.S:
           BitsMap.set!(key, {p_x, U32.add(p_y,spd)}, state)
-      } else state
+      } default state
   }
 
 // A demo application that renders a square on the screen
@@ -62,7 +62,7 @@ Web.Jogo: App(Web.Jogo.State)
             'D': [App.Action.post!(Web.Jogo.room, Web.Jogo.command.D)]
             'W': [App.Action.post!(Web.Jogo.room, Web.Jogo.command.W)]
             'S': [App.Action.post!(Web.Jogo.room, Web.Jogo.command.S)]
-          } else []
+          } default []
         else
           []
       post: [ // time, room, addr, data

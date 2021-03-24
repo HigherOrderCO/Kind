@@ -32,7 +32,7 @@ Web.Demo: App(Pair(U32,U32))
             'D': {U32.add(x, 4u), y}
             'W': {x, U32.sub(y, 4u)}
             'S': {x, U32.add(y, 4u)}
-          } else {x, y})
+          } default {x, y})
         ] else []
       post: []
     }

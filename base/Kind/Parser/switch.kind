@@ -13,7 +13,7 @@ Kind.Parser.switch: Parser(Kind.Term)
     get cond = Kind.Parser.term;
     Kind.Parser.text("{");
     get cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.switch.case);
-    Kind.Parser.text("else");
+    Kind.Parser.text("default ");
     get dflt = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);
     let term = List.fold!(cses)!(dflt, (cse, rest)

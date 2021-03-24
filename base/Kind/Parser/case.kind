@@ -20,7 +20,7 @@ Kind.Parser.case: Parser(Kind.Term)
     Kind.Parser.text("{");
     get cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.case.case);
     get dflt = Parser.maybe!(Parser {
-      Kind.Parser.text("else ");
+      Kind.Parser.text("default ");
       get term = Kind.Parser.term;
       return term;
     });
