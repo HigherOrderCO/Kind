@@ -1,5 +1,5 @@
 Kind.Parser.parenthesis: Parser(Kind.Term)
-  do Parser {
+  Parser {
     Kind.Parser.text("(");
     var term = Kind.Parser.term;
     Kind.Parser.text(")");

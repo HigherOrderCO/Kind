@@ -1,5 +1,5 @@
 Kind.Parser.application.erased(init: Nat, func: Kind.Term): Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Parser.get_index;
     Parser.text("<");
     var args = Parser.until1!(

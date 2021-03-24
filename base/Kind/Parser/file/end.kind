@@ -1,5 +1,5 @@
 Kind.Parser.file.end(file: String, code: String, defs: Kind.Defs): Parser(Kind.Defs)
-  do Parser {
+  Parser {
     Kind.Parser.spaces;
     Parser.eof;
     return defs;

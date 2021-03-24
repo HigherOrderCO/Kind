@@ -22,7 +22,7 @@ Examples
 
 ```c
 Main: IO(Unit)
-  do IO {
+  IO {
     IO.print("Hello, world!")
   }
 ```

@@ -620,7 +620,7 @@ Do notation
 -----------
 
 ```
-do name {
+name {
   statements
 }
 ```
@@ -635,7 +635,7 @@ of `Monad.bind` and `Monad.pure`. For example,
 
 ```
 ask_user_age: IO(Nat)
-  do IO {
+  IO {
     var name = IO.get_line("What is your name?")
     IO.print("Welcome, " | name)
     var year = IO.get_line("When you were born?")

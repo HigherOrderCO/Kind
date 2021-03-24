@@ -1,5 +1,5 @@
 Kind.Parser.letforrange.nat: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text("let ");
     var name = Kind.Parser.name1;

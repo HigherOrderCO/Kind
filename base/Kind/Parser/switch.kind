@@ -1,5 +1,5 @@
 Kind.Parser.switch.case: Parser(Pair(Kind.Term, Kind.Term))
-  do Parser {
+  Parser {
     var key = Kind.Parser.term;
     Kind.Parser.text(":");
     var val = Kind.Parser.term;
@@ -7,7 +7,7 @@ Kind.Parser.switch.case: Parser(Pair(Kind.Term, Kind.Term))
   }
 
 Kind.Parser.switch: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text("switch ");
     var cond = Kind.Parser.term;

@@ -1,5 +1,5 @@
 Kind.Parser.annotation(init: Nat, term: Kind.Term): Parser(Kind.Term)
-  do Parser {
+  Parser {
     Kind.Parser.text("::");
     var type = Kind.Parser.term;
     var orig = Kind.Parser.stop(init);

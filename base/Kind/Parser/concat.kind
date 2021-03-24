@@ -1,5 +1,5 @@
 Kind.Parser.concat(init: Nat, lst0: Kind.Term): Parser(Kind.Term)
-  do Parser {
+  Parser {
     Kind.Parser.text("++");
     var lst1 = Kind.Parser.term;
     var orig = Kind.Parser.stop(init);

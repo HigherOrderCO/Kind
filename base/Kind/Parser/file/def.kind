@@ -1,5 +1,5 @@
 Kind.Parser.file.def(file: String, code: String, defs: Kind.Defs): Parser(Kind.Defs)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     var name = Kind.Parser.name1;
     var args = Parser.many!(Kind.Parser.binder(":"));

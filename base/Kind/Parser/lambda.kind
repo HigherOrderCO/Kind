@@ -1,5 +1,5 @@
 Kind.Parser.lambda: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text("(");
     var name = Parser.until1!(

@@ -1,5 +1,5 @@
 Kind.Parser.op(sym: String, ref: String, init: Nat, val0: Kind.Term): Parser(Kind.Term)
-  do Parser {
+  Parser {
     Kind.Parser.text(sym);
     var val1 = Kind.Parser.term;
     var orig = Kind.Parser.stop(init);

@@ -1,5 +1,5 @@
 Kind.Parser.stop(from: Nat): Parser(Pair(Nat,Nat))
-  do Parser {
+  Parser {
     var upto = Parser.get_index;
     let orig = {from, upto};
     return orig;

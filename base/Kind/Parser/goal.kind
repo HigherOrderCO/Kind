@@ -1,15 +1,15 @@
 Kind.Parser.goal: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text("?");
     var name = Kind.Parser.name;
-    var dref = Parser.many!(do Parser {
+    var dref = Parser.many!(Parser {
       Kind.Parser.text("-");
       var nat = Parser.nat;
       let bits = Bits.reverse(Bits.tail(Bits.reverse(Nat.to_bits(nat))));
-      do Parser { return bits; };
+      Parser { return bits; };
     });
-    var verb = do Parser {
+    var verb = Parser {
       var verb = Parser.maybe!(Parser.text("-"));
       return Maybe.to_bool!(verb);
     };

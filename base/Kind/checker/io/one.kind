@@ -1,5 +1,5 @@
 Kind.checker.io.one(name: String): IO(Unit)
-  do IO {
+  IO {
     var new_defs = Kind.Synth.one(name, Map.new!);
     case new_defs {
       none:

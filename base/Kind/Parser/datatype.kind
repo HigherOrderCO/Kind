@@ -1,9 +1,9 @@
 Kind.Parser.datatype: Parser(Kind.Datatype)
-  do Parser {
+  Parser {
     Kind.Parser.text("type ");
     var name = Kind.Parser.name1; 
     var pars = Parser.maybe!(Kind.Parser.binder(":"));
-    var inds = Parser.maybe!(do Parser {
+    var inds = Parser.maybe!(Parser {
       Kind.Parser.text("~");
       Kind.Parser.binder(":");
     });

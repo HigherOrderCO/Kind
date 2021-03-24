@@ -3,7 +3,7 @@ Kind.Parser.spaces: Parser(List(Unit))
     Parser.text(" "),
     Parser.text("\t"),
     Parser.text("\n"),
-    do Parser {
+    Parser {
       Parser.text("//");
       Parser.until!(Parser.text("\n"), Parser.one);
       return Unit.new;

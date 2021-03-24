@@ -1,5 +1,5 @@
 Kind.Parser.char: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text("'");
     var chrx = Kind.Parser.char.single;

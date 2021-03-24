@@ -1,5 +1,5 @@
 Kind.Parser.hole: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text("_");
     var orig = Kind.Parser.stop(init);

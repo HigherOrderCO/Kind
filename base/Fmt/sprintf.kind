@@ -18,35 +18,35 @@ Fmt.Specifier.show(s: Fmt.Specifier): String
   }
 
 Fmt.Parser.string: Parser(Fmt.Specifier)
-  do Parser {
+  Parser {
     Parser.text("%s")
     return Fmt.Specifier.string;
   }
 
 Fmt.Parser.integer: Parser(Fmt.Specifier)
-  do Parser {
+  Parser {
     Parser.text("%d")
     return Fmt.Specifier.integer;
   }
 
 Fmt.Parser.percent: Parser(Fmt.Specifier)
-  do Parser {
+  Parser {
     Parser.text("%%")
     return Fmt.Specifier.char('%');
   }
 
 Fmt.Parser.char: Parser(Fmt.Specifier)
-  do Parser {
+  Parser {
     var c = Parser.one
     return Fmt.Specifier.char(c);
   }
 
 Fmt.Parser.parser(xs: List(Fmt.Specifier)): Parser(List(Fmt.Specifier))
-  do Parser {
+  Parser {
     var stop = Parser.is_eof;
-    if stop then do Parser {
+    if stop then Parser {
       return xs;
-    } else do Parser {
+    } else Parser {
       var x = Parser.first_of!([
         Fmt.Parser.string,
         Fmt.Parser.integer,

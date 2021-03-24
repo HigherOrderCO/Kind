@@ -1,5 +1,5 @@
 Kind.Parser.pair: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text("{");
     var val0 = Kind.Parser.term;

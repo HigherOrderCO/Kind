@@ -2,7 +2,7 @@ Kind.checker.code(code: String): String
   case Kind.Defs.read("Main.kind", code, Map.new!) as read {
     left:
       read.value,
-    right: IO.purify<String>(do IO {
+    right: IO.purify<String>(IO {
       let defs = read.value;
       let nams = List.mapped!(Map.keys!(defs))!(Kind.Name.from_bits);
       var defs = Kind.Synth.many(nams, defs);

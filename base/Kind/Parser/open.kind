@@ -1,10 +1,10 @@
 Kind.Parser.open: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text("open ");
     Kind.Parser.spaces;
     var expr = Kind.Parser.term;
-    var name = Parser.maybe!(do Parser {
+    var name = Parser.maybe!(Parser {
       Kind.Parser.text("as");
       Kind.Parser.name1;
     });

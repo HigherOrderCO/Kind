@@ -18,7 +18,7 @@ Kind.Parser.string.go(
   }
 
 Kind.Parser.string: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text(String.cons('"', String.nil));
     var strx = Kind.Parser.string.go("");

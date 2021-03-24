@@ -1,5 +1,5 @@
 Kind.Parser.string_concat(init: Nat, str0: Kind.Term): Parser(Kind.Term)
-  do Parser {
+  Parser {
     Kind.Parser.text("|");
     var str1 = Kind.Parser.term;
     var orig = Kind.Parser.stop(init);

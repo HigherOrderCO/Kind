@@ -1,5 +1,5 @@
 Kind.Parser.log: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text("log(");
     var strs = Parser.until!(Kind.Parser.text(")"), Kind.Parser.item!(Kind.Parser.term));

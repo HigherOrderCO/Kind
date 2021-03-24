@@ -1,5 +1,5 @@
 Kind.Parser.do: Parser(Kind.Term)
-  do Parser {
+  Parser {
     Parser.maybe!(Kind.Parser.text("do "));
     var name = Kind.Parser.name1;
     Kind.Parser.text("{");

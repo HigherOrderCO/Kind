@@ -1,5 +1,5 @@
 Kind.Parser.apply: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text("apply(");
     var func = Kind.Parser.term;

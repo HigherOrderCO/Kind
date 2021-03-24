@@ -1,9 +1,9 @@
 Kind.Parser.file(file: String, code: String, defs: Kind.Defs): Parser(Kind.Defs)
-  do Parser {
+  Parser {
     var stop = Parser.is_eof;
-    if stop then do Parser {
+    if stop then Parser {
       return defs;
-    } else do Parser {
+    } else Parser {
       var defs = Parser.first_of!([
         Kind.Parser.file.def(file, code, defs),
         Kind.Parser.file.adt(file, code, defs),

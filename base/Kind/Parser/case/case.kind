@@ -1,5 +1,5 @@
 Kind.Parser.case.case: Parser(Pair(Kind.Name, Kind.Term))
-  do Parser {
+  Parser {
     var name = Kind.Parser.name1;
     Kind.Parser.text(":");
     var term = Kind.Parser.term;

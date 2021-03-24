@@ -1,5 +1,5 @@
 Kind.Parser.binder(sep: String): Parser(List(Kind.Binder))
-  do Parser {
+  Parser {
     var lists = Parser.many1!(Parser.first_of!([
       Kind.Parser.binder.homo(sep, Bool.true),
       Kind.Parser.binder.homo(sep, Bool.false),

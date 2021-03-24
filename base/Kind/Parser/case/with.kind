@@ -1,5 +1,5 @@
 Kind.Parser.case.with: Parser(Kind.Def)
-  do Parser {
+  Parser {
     Kind.Parser.text("with");
     var name = Kind.Parser.name1;
     Kind.Parser.text(":");

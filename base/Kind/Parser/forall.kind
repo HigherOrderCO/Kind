@@ -1,5 +1,5 @@
 Kind.Parser.forall: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     var self = Kind.Parser.name;
     var bind = Kind.Parser.binder(":");

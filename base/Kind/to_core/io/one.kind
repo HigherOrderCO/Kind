@@ -1,5 +1,5 @@
 Kind.to_core.io.one(name: String): IO(String)
-  do IO {
+  IO {
     var new_defs = Kind.Synth.one(name, Map.new!);
     let defs = case new_defs {
       none: Map.new!,

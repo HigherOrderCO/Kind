@@ -1,5 +1,5 @@
 Kind.Parser.some: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text("some(");
     var expr = Kind.Parser.term;

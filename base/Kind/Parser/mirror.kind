@@ -1,5 +1,5 @@
 Kind.Parser.mirror: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text("mirror(");
     var equa = Kind.Parser.term;

@@ -1,10 +1,10 @@
 Kind.Parser.case: Parser(Kind.Term)
-  do Parser {
+  Parser {
     var init = Kind.Parser.init;
     Kind.Parser.text("case ");
     Kind.Parser.spaces;
     var expr = Kind.Parser.term;
-    var name = Parser.maybe!(do Parser {
+    var name = Parser.maybe!(Parser {
       Kind.Parser.text("as");
       Kind.Parser.name1;
     });
@@ -19,7 +19,7 @@ Kind.Parser.case: Parser(Kind.Term)
     var wyth = Parser.many!(Kind.Parser.case.with);
     Kind.Parser.text("{");
     var cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.case.case);
-    var dflt = Parser.maybe!(do Parser {
+    var dflt = Parser.maybe!(Parser {
       Kind.Parser.text("else ");
       var term = Kind.Parser.term;
       return term;
@@ -34,18 +34,18 @@ Kind.Parser.case: Parser(Kind.Term)
     ));
     var moti = Parser.first_of!([
       // Explicit motive
-      do Parser {
+      Parser {
         Kind.Parser.text(":");
         var term = Kind.Parser.term;
         return Maybe.some!(term);
       },
       // Smart motive
-      do Parser {
+      Parser {
         Kind.Parser.text("!");
         return Maybe.none!;
       },
       // Hole motive
-      do Parser {
+      Parser {
         return Maybe.some!(Kind.Term.hol(Bits.e));
       },
     ]);
