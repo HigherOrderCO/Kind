@@ -8,9 +8,9 @@ Kind.Parser.letforrange.u32: Parser(Kind.Term)
     var elem = Kind.Parser.name1;
     Kind.Parser.text(":");
     Kind.Parser.text("U32");
-    Kind.Parser.text("=");
+    Kind.Parser.text("from");
     var idx0 = Kind.Parser.term;
-    Kind.Parser.text("..");
+    Kind.Parser.text("to");
     var idx1 = Kind.Parser.term;
     Kind.Parser.text(":");
     var loop = Kind.Parser.term;

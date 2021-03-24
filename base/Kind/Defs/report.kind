@@ -14,7 +14,7 @@ Kind.Defs.report(defs: Kind.Defs, names: List(Kind.Name)): String
 
 Kind.Defs.report.errors(defs: Kind.Defs): String
   let errors = ""
-  for key in Map.keys!(defs) with errors:
+  let errors = for key in Map.keys!(defs):
     let name = Kind.Name.from_bits(key)
     case Kind.get!(name, defs) as got {
       none:
@@ -31,7 +31,7 @@ Kind.Defs.report.errors(defs: Kind.Defs): String
             cons:
               let name_str = got.value.name
               let rel_errs = Kind.Error.relevant(got.value.stat.errors, Bool.false)
-              for err in rel_errs with errors:
+              let errors = for err in rel_errs:
                 let err_msg = Kind.Error.show(err, defs)
                 let ori_msg = case Kind.Error.origin(err) as origin {
                   none:
@@ -43,13 +43,15 @@ Kind.Defs.report.errors(defs: Kind.Defs): String
                     inside | source | "\n"
                 }
                 errors | err_msg | ori_msg | "\n"
+              errors
           }
         }
     }
+  errors
 
 Kind.Defs.report.types(defs: Kind.Defs, names: List(Kind.Name)): String
   let types = ""
-  for name in names with types:
+  let types = for name in names:
     case Kind.get!(name, defs) as got {
       none:
         types
@@ -57,3 +59,4 @@ Kind.Defs.report.types(defs: Kind.Defs, names: List(Kind.Name)): String
         open got.value
         types | name | ": " | Kind.Term.show(got.value.type) | "\n"
     }
+  types

@@ -1,6 +1,6 @@
 Kind.Defs.show(defs: Kind.Defs): String
   let str = "";
-  for name_defn in Map.to_list<Kind.Def>(defs) with str:
+  let str = for name_defn in Map.to_list<Kind.Def>(defs):
     case name_defn {
       new: case name_defn.snd as defn {
         new: String.flatten([
@@ -14,3 +14,4 @@ Kind.Defs.show(defs: Kind.Defs): String
         ])
       }
     }
+  str

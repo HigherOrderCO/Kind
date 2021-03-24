@@ -10,7 +10,7 @@ Image3D.parse_2d(hex: String): Image3D
   let h = U32.add(U32.mul(b2,16u),b3)
   let siz = U32.mul(w,h)
   let img = Image3D.alloc_capacity(siz);
-  for i : U32 = 0u .. siz with img:
+  let img = for i : U32 from 0u to siz:
     let x = U32.mod(i, w)
     let y = U32.div(i, w)
     let z = 0u
@@ -21,3 +21,4 @@ Image3D.parse_2d(hex: String): Image3D
     let col = Col32.new(r,g,b,255u)
     let img = Image3D.push(pos,col,img)
     img
+  img

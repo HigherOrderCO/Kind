@@ -898,77 +898,52 @@ In your context. Notice that `ys` is just `xs`, except with the type changed to
 replace `10` by `5 + 5`. You can always rewrite inside types if you have a proof
 that the substituted expressions are equal.
 
-For in
+For-in
 ------
 
 ```
-for x in list with state:
-  loop
+let name = for x in list:
+  value
+body
 ```
 
 The for-in syntax can be used to update a state continuously, for each element
-of a list. For example:
+of a list. Since Kind is a pure language, the result must be assigned to a
+variable using `let`. For example:
 
 ```
 let sum = 0
-for n in [1, 2, 3] with sum:
+let sum = for n in [1, 2, 3]:
   sum + n
+sum
 ```
 
 The code above will add all the elements in the `[1,2,3]` list, resulting in
-`6`.  Loops aren't primitives. Instead, the code above is expanded to:
+`6`. Loops aren't primitives. Instead, the code above is expanded to:
 
 ```
 let sum = 0
 List.for(_, [1,2,3], _, 0, (n, sum) Nat.add(sum, n))
 ```
 
-Let for in
-----------
-
-```
-for x in list:
-  state = loop
-```
-
-Similar to the syntax above, but allows you to assign the result of the loop to
-a local variable, instead of returning it. For example:
-
-```
-let sum = 0
-for n in [1, 2, 3]:
-  sum = sum + n
-sum * 2
-```
-
-Adds all the numbers in the `[1, 2, 3]` list, and then returns the double of
-that sum (i.e., `12`). It expands to:
-
-```
-let sum = 0
-let sum = List.for(_, [1,2,3], _, 0, (n,sum) Nat.add(sum, n))
-sum
-```
-
-For range
+For-range
 ---------
 
 ```
-for x in from .. upto:
-  loop
+let name = for x from i0 to i1:
+  value
+body
 ```
 
-Like `for-in`, but operates on numeric ranges instead of lists.
-
-Let for range
--------------
+Like `for-in`, but operates on numeric ranges instead of lists. If unspecified,
+the index will be a `Nat`, but you can annotate it to have other types of
+indices:
 
 ```
-for x in from .. upto:
-  state = loop
+let name = for x : U32 from i0 to i1:
+  value
+body
 ```
-
-Like `let-for-in`, but operates on numeric ranges instead of lists.
 
 Numeric operation
 -----------------

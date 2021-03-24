@@ -1,18 +1,2 @@
-Test: String
-  let str = "C"
-  let test_0 =
-    if String.eql(str, "A") then
-      "a"
-    else if String.eql(str, "B") then
-      "b"
-    else if String.eql(str, "C") then
-      "c"
-    else
-      "?"
-  let test_1 =
-    switch String.eql(str) {
-      "A": "a"
-      "B": "b"
-      "C": "c"
-    } else "?"
-  test_1
+Test: Nat
+  21 + 21

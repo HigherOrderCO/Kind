@@ -3,7 +3,7 @@
 Image3D.parse(voxdata: String): Image3D
   let siz = U32.div(U32.length(voxdata), 12u)
   let img = Image3D.alloc_capacity(siz);
-  for i : U32 = 0u .. siz with img:
+  let img = for i : U32 from 0u to siz:
     let x = Image3D.parse_byte(U32.add(U32.mul(i, 6u), 0u), voxdata)
     let y = Image3D.parse_byte(U32.add(U32.mul(i, 6u), 1u), voxdata)
     let z = Image3D.parse_byte(U32.add(U32.mul(i, 6u), 2u), voxdata)
@@ -13,3 +13,4 @@ Image3D.parse(voxdata: String): Image3D
     let pos = Pos32.new(x,y,z)
     let col = Col32.new(r,g,b,255u)
     Image3D.push(pos, col, img)
+  img
