@@ -18,6 +18,8 @@ Kind.Parser.reference: Parser(Kind.Term)
       Parser.fail!("Reserved keyword.");
     } else if String.eql(name, "def") then Parser {
       Parser.fail!("Reserved keyword.");
+    } else if String.eql(name, "Type") then Parser {
+      return Kind.Term.typ;
     } else if String.eql(name, "true") then Parser {
       return Kind.Term.ref("Bool.true");
     } else if String.eql(name, "false") then Parser {

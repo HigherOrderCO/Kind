@@ -2,7 +2,6 @@ Kind.Parser.term: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
     get term = Parser.first_of!([
-      Kind.Parser.type,
       Kind.Parser.forall,
       Kind.Parser.lambda,
       Kind.Parser.lambda.erased,

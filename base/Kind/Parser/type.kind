@@ -1,7 +1,0 @@
-Kind.Parser.type: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("Type");
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, Kind.Term.typ);
-  }
