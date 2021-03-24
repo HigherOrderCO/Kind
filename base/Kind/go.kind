@@ -5,7 +5,7 @@ Kind.go(file_names: List(String)): IO(Unit)
     }
     cons: IO {
       let file = file_names.head
-      var code = IO.get_file(file)
+      get code = IO.get_file(file)
       let defs = Kind.Defs.read(file, code, BitsMap.new!)
       case defs {
         left:

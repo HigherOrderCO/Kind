@@ -1,10 +1,10 @@
 Kind.Parser.case: Parser(Kind.Term)
   Parser {
-    var init = Kind.Parser.init;
+    get init = Kind.Parser.init;
     Kind.Parser.text("case ");
     Kind.Parser.spaces;
-    var expr = Kind.Parser.term;
-    var name = Parser.maybe!(Parser {
+    get expr = Kind.Parser.term;
+    get name = Parser.maybe!(Parser {
       Kind.Parser.text("as");
       Kind.Parser.name1;
     });
@@ -16,12 +16,12 @@ Kind.Parser.case: Parser(Kind.Term)
       },
       some: name.value,
     };
-    var wyth = Parser.many!(Kind.Parser.case.with);
+    get wyth = Parser.many!(Kind.Parser.case.with);
     Kind.Parser.text("{");
-    var cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.case.case);
-    var dflt = Parser.maybe!(Parser {
+    get cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.case.case);
+    get dflt = Parser.maybe!(Parser {
       Kind.Parser.text("else ");
-      var term = Kind.Parser.term;
+      get term = Kind.Parser.term;
       return term;
     });
     let cses = case dflt {
@@ -32,11 +32,11 @@ Kind.Parser.case: Parser(Kind.Term)
       let {key, val} = kv
       {Kind.Name.to_bits(key), val}
     ));
-    var moti = Parser.first_of!([
+    get moti = Parser.first_of!([
       // Explicit motive
       Parser {
         Kind.Parser.text(":");
-        var term = Kind.Parser.term;
+        get term = Kind.Parser.term;
         return Maybe.some!(term);
       },
       // Smart motive
@@ -49,7 +49,7 @@ Kind.Parser.case: Parser(Kind.Term)
         return Maybe.some!(Kind.Term.hol(Bits.e));
       },
     ]);
-    var orig = Kind.Parser.stop(init);
+    get orig = Kind.Parser.stop(init);
     //let moti = case moti { none: Kind.Term.hol(Bits.e), some: moti.value };
     return Kind.Term.ori(orig, Kind.Term.cse(Bits.e, expr, name, wyth, cses, moti));
   }

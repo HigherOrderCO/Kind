@@ -14,8 +14,8 @@ Kind.Datatype.build_term.constructors.go(
       case type {
         new:
           let ret = Kind.Term.ref(Kind.Name.read("P"));
-          let ret = for var in type.inds:
-            Kind.Term.app(ret, Kind.Term.ref(case var { new: var.name }));
+          let ret = for v in type.inds:
+            Kind.Term.app(ret, Kind.Term.ref(case v { new: v.name }));
           Kind.Term.app(ret, Kind.Term.ref(String.concat(name,".Self")))
       }
   }

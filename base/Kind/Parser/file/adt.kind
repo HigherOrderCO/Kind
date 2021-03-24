@@ -1,8 +1,8 @@
 Kind.Parser.file.adt(file: String, code: String, defs: Kind.Defs): Parser(Kind.Defs)
   Parser {
-    var init = Kind.Parser.init;
-    var adt = Kind.Parser.datatype;
-    var orig = Kind.Parser.stop(init);
+    get init = Kind.Parser.init;
+    get adt = Kind.Parser.datatype;
+    get orig = Kind.Parser.stop(init);
     case adt {
       new: Parser {
         let term = Kind.Datatype.build_term(adt);

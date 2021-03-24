@@ -1,0 +1,2 @@
+Map.delete<A: Type>(key: String, map: Map(A)): Map(A)
+  BitsMap.delete<A>(String.to_bits(key), map)

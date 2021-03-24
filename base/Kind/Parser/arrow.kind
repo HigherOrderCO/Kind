@@ -1,7 +1,7 @@
 Kind.Parser.arrow(init: Nat, xtyp: Kind.Term): Parser(Kind.Term)
   Parser {
     Kind.Parser.text("->");
-    var body = Kind.Parser.term;
-    var orig = Kind.Parser.stop(init);
+    get body = Kind.Parser.term;
+    get orig = Kind.Parser.stop(init);
     return Kind.Term.ori(orig, Kind.Term.all(Bool.false, "", "", xtyp, (s,x) body));
   }

@@ -23,14 +23,14 @@ Kind.Synth.fix(
       },
     cons: case errs.head {
       waiting: IO {
-        var new_defs = Kind.Synth.one(errs.head.name, defs);
+        get new_defs = Kind.Synth.one(errs.head.name, defs);
         case new_defs {
           none: Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, errs.tail, fixd),
           some: Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, new_defs.value, errs.tail, Bool.true),
         }
       },
       undefined_reference: IO {
-        var new_defs = Kind.Synth.one(errs.head.name, defs);
+        get new_defs = Kind.Synth.one(errs.head.name, defs);
         case new_defs {
           none: Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, errs.tail, fixd),
           some: Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, new_defs.value, errs.tail, Bool.true),

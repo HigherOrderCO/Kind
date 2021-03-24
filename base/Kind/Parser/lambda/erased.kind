@@ -1,12 +1,12 @@
 Kind.Parser.lambda.erased: Parser(Kind.Term)
   Parser {
-    var init = Kind.Parser.init;
+    get init = Kind.Parser.init;
     Kind.Parser.text("<");
-    var name = Parser.until1!(
+    get name = Parser.until1!(
       Kind.Parser.text(">"),
       Kind.Parser.item!(Kind.Parser.name1));
-    var body = Kind.Parser.term;
-    var orig = Kind.Parser.stop(init);
+    get body = Kind.Parser.term;
+    get orig = Kind.Parser.stop(init);
     let expr = Kind.Parser.make_lambda(name, body);
     return Kind.Term.ori(orig, expr);
   }

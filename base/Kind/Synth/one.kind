@@ -2,7 +2,7 @@ Kind.Synth.one(name: Kind.Name, defs: Kind.Defs): IO(Maybe(Kind.Defs))
   //log("synth ", name)
   case Kind.get!(name, defs) as got {
     none: IO {
-      var loaded = Kind.Synth.load(name, defs);
+      get loaded = Kind.Synth.load(name, defs);
       case loaded {
         none: IO {
           return none;
@@ -32,8 +32,8 @@ Kind.Synth.one(name: Kind.Name, defs: Kind.Defs): IO(Maybe(Kind.Defs))
           init: IO {
             let defs = Kind.set!(name, Kind.Def.new(file, code, orig, name, term, type, isct, arit, Kind.Status.wait), defs);
             let checked = do Kind.Check {
-              var chk_type = Kind.Term.check(type, Maybe.some!(Kind.Term.typ), defs, [], Kind.MPath.i(Kind.MPath.nil), Maybe.none!);
-              var chk_term = Kind.Term.check(term, Maybe.some!(type), defs, [], Kind.MPath.o(Kind.MPath.nil), Maybe.none!);
+              get chk_type = Kind.Term.check(type, Maybe.some!(Kind.Term.typ), defs, [], Kind.MPath.i(Kind.MPath.nil), Maybe.none!);
+              get chk_term = Kind.Term.check(term, Maybe.some!(type), defs, [], Kind.MPath.o(Kind.MPath.nil), Maybe.none!);
               return Unit.new;
             };
             case checked {
@@ -44,7 +44,7 @@ Kind.Synth.one(name: Kind.Name, defs: Kind.Defs): IO(Maybe(Kind.Defs))
                   //let defs = Kind.set!(name, Kind.Def.new(file, code, name, term, type, Kind.Status.done), defs);
                   return some(defs);
                 } else IO {
-                  var fixed = Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, checked.errors, Bool.false);
+                  get fixed = Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, checked.errors, Bool.false);
                   case fixed {
                     none: IO {
                       let stat = Kind.Status.fail(checked.errors);

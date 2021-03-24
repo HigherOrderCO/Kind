@@ -1,10 +1,10 @@
 Kind.Parser.some: Parser(Kind.Term)
   Parser {
-    var init = Kind.Parser.init;
+    get init = Kind.Parser.init;
     Kind.Parser.text("some(");
-    var expr = Kind.Parser.term;
+    get expr = Kind.Parser.term;
     Kind.Parser.text(")");
-    var orig = Kind.Parser.stop(init);
+    get orig = Kind.Parser.stop(init);
     let term = Kind.Term.ref("Maybe.some");
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
     let term = Kind.Term.app(term, expr);

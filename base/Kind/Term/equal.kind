@@ -28,8 +28,8 @@ Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: Bits
             let eq_self = String.eql(a1.self, b1.self);
             let eq_eras = Bool.eql(a1.eras, b1.eras);
             if Bool.and(eq_self, eq_eras) then do Kind.Check {
-              var eq_type = Kind.Term.equal(a1.xtyp, b1.xtyp, defs, lv, seen);
-              var eq_body = Kind.Term.equal(a1_body, b1_body, defs, Nat.succ(Nat.succ(lv)), seen);
+              get eq_type = Kind.Term.equal(a1.xtyp, b1.xtyp, defs, lv, seen);
+              get eq_body = Kind.Term.equal(a1_body, b1_body, defs, Nat.succ(Nat.succ(lv)), seen);
               return Bool.and(eq_type, eq_body);
             } else do Kind.Check {
               return Bool.false;
@@ -46,7 +46,7 @@ Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: Bits
               let seen = BitsSet.mut.set(id, seen);
               let a1_body = a1.body(Kind.Term.var(a1.name, lv));
               let b1_body = b1.body(Kind.Term.var(b1.name, lv));
-              var eq_body = Kind.Term.equal(a1_body, b1_body, defs, Nat.succ(lv), seen);
+              get eq_body = Kind.Term.equal(a1_body, b1_body, defs, Nat.succ(lv), seen);
               return eq_body;
             },
             hol: Kind.Term.equal.hole(b1.path, a),
@@ -57,8 +57,8 @@ Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: Bits
         app: case b1 {
           app: do Kind.Check {
             let seen = BitsSet.mut.set(id, seen);
-            var eq_func = Kind.Term.equal(a1.func, b1.func, defs, lv, seen);
-            var eq_argm = Kind.Term.equal(a1.argm, b1.argm, defs, lv, seen);
+            get eq_func = Kind.Term.equal(a1.func, b1.func, defs, lv, seen);
+            get eq_argm = Kind.Term.equal(a1.argm, b1.argm, defs, lv, seen);
             return Bool.and(eq_func, eq_argm);
           },
           hol: Kind.Term.equal.hole(b1.path, a),
@@ -71,8 +71,8 @@ Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: Bits
             let seen = BitsSet.mut.set(id, seen);
             let a1_body = a1.body(Kind.Term.var(a1.name, lv));
             let b1_body = b1.body(Kind.Term.var(b1.name, lv));
-            var eq_expr = Kind.Term.equal(a1.expr, b1.expr, defs, lv, seen);
-            var eq_body = Kind.Term.equal(a1_body, b1_body, defs, Nat.succ(lv), seen);
+            get eq_expr = Kind.Term.equal(a1.expr, b1.expr, defs, lv, seen);
+            get eq_body = Kind.Term.equal(a1_body, b1_body, defs, Nat.succ(lv), seen);
             return Bool.and(eq_expr, eq_body);
           },
           hol:

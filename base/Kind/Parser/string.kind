@@ -19,9 +19,9 @@ Kind.Parser.string.go(
 
 Kind.Parser.string: Parser(Kind.Term)
   Parser {
-    var init = Kind.Parser.init;
+    get init = Kind.Parser.init;
     Kind.Parser.text(String.cons('"', String.nil));
-    var strx = Kind.Parser.string.go("");
-    var orig = Kind.Parser.stop(init);
+    get strx = Kind.Parser.string.go("");
+    get orig = Kind.Parser.stop(init);
     return Kind.Term.ori(orig, Kind.Term.str(strx));
   }

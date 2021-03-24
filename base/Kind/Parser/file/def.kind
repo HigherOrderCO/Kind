@@ -1,13 +1,13 @@
 Kind.Parser.file.def(file: String, code: String, defs: Kind.Defs): Parser(Kind.Defs)
   Parser {
-    var init = Kind.Parser.init;
-    var name = Kind.Parser.name1;
-    var args = Parser.many!(Kind.Parser.binder(":"));
+    get init = Kind.Parser.init;
+    get name = Kind.Parser.name1;
+    get args = Parser.many!(Kind.Parser.binder(":"));
     let args = List.flatten!(args);
     Kind.Parser.text(":");
-    var type = Kind.Parser.term;
-    var term = Kind.Parser.term;
-    var orig = Kind.Parser.stop(init);
+    get type = Kind.Parser.term;
+    get term = Kind.Parser.term;
+    get orig = Kind.Parser.stop(init);
     let arit = List.length!(args);
     let type = Kind.Parser.make_forall(args, type);
     let term = Kind.Parser.make_lambda(List.mapped!(args)!((x) case x { new: x.name }),term);

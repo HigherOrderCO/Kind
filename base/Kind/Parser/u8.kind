@@ -1,11 +1,11 @@
 Kind.Parser.u8: Parser(Kind.Term)
   Parser {
-    var init = Kind.Parser.init;
+    get init = Kind.Parser.init;
     Kind.Parser.spaces;
-    var natx = Parser.nat;
+    get natx = Parser.nat;
     Parser.text("b");
     let term = Kind.Term.ref("Nat.to_u8");
     let term = Kind.Term.app(term, Kind.Term.nat(natx));
-    var orig = Kind.Parser.stop(init);
+    get orig = Kind.Parser.stop(init);
     return Kind.Term.ori(orig, term);
   }

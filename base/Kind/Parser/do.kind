@@ -1,9 +1,9 @@
 Kind.Parser.do: Parser(Kind.Term)
   Parser {
     Parser.maybe!(Kind.Parser.text("do "));
-    var name = Kind.Parser.name1;
+    get name = Kind.Parser.name1;
     Kind.Parser.text("{");
-    var term = Kind.Parser.do.statements(name);
+    get term = Kind.Parser.do.statements(name);
     Kind.Parser.text("}");
     return term;
   }

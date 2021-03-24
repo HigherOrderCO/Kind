@@ -1,7 +1,7 @@
 Kind.Parser.term: Parser(Kind.Term)
   Parser {
-    var init = Kind.Parser.init;
-    var term = Parser.first_of!([
+    get init = Kind.Parser.init;
+    get term = Parser.first_of!([
       Kind.Parser.type,
       Kind.Parser.forall,
       Kind.Parser.lambda,

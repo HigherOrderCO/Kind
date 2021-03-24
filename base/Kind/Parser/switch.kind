@@ -1,21 +1,21 @@
 Kind.Parser.switch.case: Parser(Pair(Kind.Term, Kind.Term))
   Parser {
-    var key = Kind.Parser.term;
+    get key = Kind.Parser.term;
     Kind.Parser.text(":");
-    var val = Kind.Parser.term;
+    get val = Kind.Parser.term;
     return {key, val};
   }
 
 Kind.Parser.switch: Parser(Kind.Term)
   Parser {
-    var init = Kind.Parser.init;
+    get init = Kind.Parser.init;
     Kind.Parser.text("switch ");
-    var cond = Kind.Parser.term;
+    get cond = Kind.Parser.term;
     Kind.Parser.text("{");
-    var cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.switch.case);
+    get cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.switch.case);
     Kind.Parser.text("else");
-    var dflt = Kind.Parser.term;
-    var orig = Kind.Parser.stop(init);
+    get dflt = Kind.Parser.term;
+    get orig = Kind.Parser.stop(init);
     let term = List.fold!(cses)!(dflt, (cse, rest)
       open cse
       let term = Kind.Term.app(cond, cse.fst);

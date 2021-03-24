@@ -1,7 +1,7 @@
 Kind.Parser.reference: Parser(Kind.Term)
   Parser {
-    var init = Kind.Parser.init;
-    var name = Kind.Parser.name1;
+    get init = Kind.Parser.init;
+    get name = Kind.Parser.name1;
     if String.eql(name, "case") then Parser {
       Parser.fail!("Reserved keyword.");
     } else if String.eql(name, "do") then Parser {
@@ -34,7 +34,7 @@ Kind.Parser.reference: Parser(Kind.Term)
       let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
       return term;
     } else Parser {
-      var orig = Kind.Parser.stop(init);
+      get orig = Kind.Parser.stop(init);
       return Kind.Term.ori(orig, Kind.Term.ref(name));
     };
   }

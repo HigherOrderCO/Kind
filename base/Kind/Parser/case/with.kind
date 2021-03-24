@@ -1,10 +1,10 @@
 Kind.Parser.case.with: Parser(Kind.Def)
   Parser {
     Kind.Parser.text("with");
-    var name = Kind.Parser.name1;
+    get name = Kind.Parser.name1;
     Kind.Parser.text(":");
-    var type = Kind.Parser.term;
+    get type = Kind.Parser.term;
     Kind.Parser.text("=");
-    var term = Kind.Parser.term;
+    get term = Kind.Parser.term;
     return Kind.Def.new("", "", {0,0}, name, term, type, false, 0, Kind.Status.init);
   }

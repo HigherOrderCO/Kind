@@ -1,0 +1,3 @@
+Map(V: Type): Type
+  BitsMap(V)
+  

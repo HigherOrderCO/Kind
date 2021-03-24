@@ -1,0 +1,2 @@
+Map.set<A: Type>(key: String, val: A, map: Map(A)): Map(A)
+  BitsMap.set<A>(String.to_bits(key), val, map)
