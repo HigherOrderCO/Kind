@@ -3,7 +3,10 @@ Kind.Parser.do.statements(monad_name: Kind.Name): Parser(Kind.Term)
     // Binding call: @ask x = expr; rest@
     Parser {
       var init = Kind.Parser.init;
-      Kind.Parser.text("var ");
+      Parser.first_of!([
+        Kind.Parser.text("var "),
+        Kind.Parser.text("get "),
+      ]);
       var name = Kind.Parser.name1;
       Kind.Parser.text("=");
       var expr = Kind.Parser.term;

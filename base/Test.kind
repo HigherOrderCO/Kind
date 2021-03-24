@@ -1,7 +1,7 @@
-Test: IO(Unit)
-  IO {
-    IO.print("hello")
-    IO.print("hello")
-    IO.print("hello")
-    IO.print("hello")
-  }
+Test: _
+  let key = "foo"
+  let val = 42
+  let map = {"tic": 1, "toc": 2, key: val}
+  let val = Map.get!("foo", map)
+  without val: "key not found"
+  "key found. value: " | Nat.show(val)

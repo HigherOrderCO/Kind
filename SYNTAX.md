@@ -897,6 +897,38 @@ The syntax above expands to:
 Maybe.none<_>
 ```
 
+Without
+-------
+
+```
+without value: value
+body
+```
+
+The `without` syntax allows us to extract the value of a `Maybe`, returning
+something in the case it is `none`. For example:
+
+```c
+let list = [1, 2, 3, 4]
+let head = List.head!(list)
+without head: "List is empty."
+"List has a head: " | Nat.show(head)
+```
+
+This snippet unwraps the value of `head` (a `Maybe`), allowing you to use it
+without manually extracting it with `case`. It is equivalent to:
+
+```
+let list = [1, 2, 3, 4]
+let head = List.head!(list)
+case head {
+  none: "List is empty."
+  some: "List has a head: " | Nat.show(head.value)
+}
+```
+
+This is useful to flatten your code, reducing the required identation.
+
 List literal
 ------------
 
@@ -939,6 +971,34 @@ List.concat<_>(xs, ys)
 ```
 
 It concatenates two lists as one.
+
+Map literal
+-----------
+
+```
+{"foo": 1, "bar": 2, "tic": 3, "toc": 4}
+```
+
+The syntax above expands to:
+
+```
+Map.from_list!([
+  {"foo", 1},
+  {"bar", 2},
+  {"tic", 3},
+  {"toc", 4},
+])
+```
+
+You can also replace string key by variables, for example:
+
+```
+let key = "foo"
+let val = 1
+let map = {key: val, "bar": 2}
+```
+
+This will create the `{"foo": 1, "bar": 2}` map.
 
 Equal.apply
 -----------
