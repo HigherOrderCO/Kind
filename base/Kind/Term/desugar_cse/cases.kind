@@ -2,7 +2,7 @@ Kind.Term.desugar_cse.cases(
   expr: Kind.Term,
   name: Kind.Name,
   wyth: List(Kind.Def),
-  cses: Map(Kind.Term),
+  cses: BitsMap(Kind.Term),
   type: Kind.Term,
   defs: Kind.Defs,
   ctxt: Kind.Context,

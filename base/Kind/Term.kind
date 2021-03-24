@@ -74,7 +74,7 @@ type Kind.Term {
     expr: Kind.Term,
     name: Kind.Name,
     with: List(Kind.Def),
-    cses: Map(Kind.Term),
+    cses: BitsMap(Kind.Term),
     moti: Maybe(Kind.Term),
   ),
   // An origin

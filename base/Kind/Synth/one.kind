@@ -38,7 +38,7 @@ Kind.Synth.one(name: Kind.Name, defs: Kind.Defs): IO(Maybe(Kind.Defs))
             };
             case checked {
               result:
-                //let skip = Debug.log!(String.join("\n", List.mapped!(checked.errors)!((x) String.concat("-- ", Kind.Error.show(x,Map.new!)))), (x) Unit.new);
+                //let skip = Debug.log!(String.join("\n", List.mapped!(checked.errors)!((x) String.concat("-- ", Kind.Error.show(x,BitsMap.new!)))), (x) Unit.new);
                 if List.is_empty!(checked.errors) then IO {
                   let defs = Kind.define(file, code, orig, name, term, type, isct, arit, true, defs);
                   //let defs = Kind.set!(name, Kind.Def.new(file, code, name, term, type, Kind.Status.done), defs);

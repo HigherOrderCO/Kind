@@ -1,0 +1,12 @@
+BitsMap.map<A: Type, B: Type>(fn: A -> B, map: BitsMap(A)): BitsMap(B)
+  case map {
+    new: BitsMap.new!,
+    tie:
+      let val = case map.val {
+        none: Maybe.none!,
+        some: Maybe.some!(fn(map.val.value))
+      }
+      let lft = BitsMap.map<A,B>(fn, map.lft)
+      let rgt = BitsMap.map<A,B>(fn, map.rgt)
+      BitsMap.tie!(val, lft, rgt) 
+  }

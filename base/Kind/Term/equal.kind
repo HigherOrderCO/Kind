@@ -1,6 +1,6 @@
 Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: Set): Kind.Check(Bool)
-  let ah = Kind.Term.serialize(Kind.Term.reduce(a,Map.new!), lv, lv, Bits.o, Bits.e);
-  let bh = Kind.Term.serialize(Kind.Term.reduce(b,Map.new!), lv, lv, Bits.i, Bits.e);
+  let ah = Kind.Term.serialize(Kind.Term.reduce(a,BitsMap.new!), lv, lv, Bits.o, Bits.e);
+  let bh = Kind.Term.serialize(Kind.Term.reduce(b,BitsMap.new!), lv, lv, Bits.i, Bits.e);
   if Bits.eql(ah, bh) then do Kind.Check {
     return Bool.true;
   } else do Kind.Check {

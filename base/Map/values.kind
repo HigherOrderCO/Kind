@@ -1,2 +1,0 @@
-Map.values<A: Type>(xs: Map(A)): List(A)
-  Map.values.go<A>(xs, List.nil!)

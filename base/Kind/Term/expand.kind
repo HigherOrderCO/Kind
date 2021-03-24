@@ -1,9 +1,9 @@
 Kind.Term.expand(dref: List(Bits), term: Kind.Term, defs: Kind.Defs): Kind.Term
-  let term = Kind.Term.normalize(term, Map.new!);
+  let term = Kind.Term.normalize(term, BitsMap.new!);
   let term = for path in dref:
     let term = Kind.Term.expand_at(path, term, defs);
-    let term = Kind.Term.normalize(term, Map.new!);
+    let term = Kind.Term.normalize(term, BitsMap.new!);
     let term = Kind.Term.expand_ct(term, defs, 0);
-    let term = Kind.Term.normalize(term, Map.new!);
+    let term = Kind.Term.normalize(term, BitsMap.new!);
     term
   term

@@ -1,0 +1,15 @@
+BitsMap.set<A: Type>(bits: Bits, val: A, map: BitsMap(A)): BitsMap(A)
+  case bits {
+    e: case map {
+      new: BitsMap.tie!(Maybe.some!(val), BitsMap.new!, BitsMap.new!),
+      tie: BitsMap.tie!(Maybe.some!(val), map.lft, map.rgt)
+    },
+    o: case map {
+      new: BitsMap.tie!(Maybe.none!, BitsMap.set!(bits.pred, val, BitsMap.new!), BitsMap.new!),
+      tie: BitsMap.tie!(map.val, BitsMap.set!(bits.pred, val, map.lft), map.rgt)
+    },
+    i: case map {
+      new: BitsMap.tie!(Maybe.none!, BitsMap.new!, BitsMap.set!(bits.pred, val, BitsMap.new!)),
+      tie: BitsMap.tie!(map.val, map.lft, BitsMap.set!(bits.pred, val, map.rgt))
+    }
+  }

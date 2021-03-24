@@ -137,7 +137,7 @@ Kind.Term.check(
                 Kind.Term.hol(Bits.e),
               some:
                 let size = List.length!(ctx);
-                let typv = Kind.Term.normalize(type.value, Map.new!);
+                let typv = Kind.Term.normalize(type.value, BitsMap.new!);
                 let moti = Kind.SmartMotive.make(term.name, term.expr, etyp, typv, size, defs);
                 moti,
             };

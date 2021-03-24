@@ -1,0 +1,11 @@
+BitsMap.union<A: Type>(a: BitsMap(A), b: BitsMap(A)): BitsMap(A)
+  case a {
+    new: b,
+    tie: case b {
+      new: a,
+      tie: case a.val {
+        none: BitsMap.tie!(b.val, BitsMap.union!(a.lft,b.lft), BitsMap.union!(a.rgt,b.rgt)),
+        some: BitsMap.tie!(a.val, BitsMap.union!(a.lft,b.lft), BitsMap.union!(a.rgt,b.rgt))
+      }
+    }
+  }

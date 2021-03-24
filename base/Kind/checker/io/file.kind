@@ -1,6 +1,6 @@
 Kind.checker.io.file(file: String): IO(Unit)
   IO {
-    var loaded = Kind.Synth.file(file, Map.new!);
+    var loaded = Kind.Synth.file(file, BitsMap.new!);
     case loaded {
       left: IO {
         IO.print(String.flatten(["On '", file, "':"]));

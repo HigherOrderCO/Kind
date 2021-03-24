@@ -1,6 +1,6 @@
 Kind.Defs.core(defs: Kind.Defs): String
   let result = "";
-  let result = for defn in Map.values!(defs):
+  let result = for defn in BitsMap.values!(defs):
     case defn {
       new: 
         case defn.stat {

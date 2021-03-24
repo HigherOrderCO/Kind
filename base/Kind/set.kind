@@ -1,2 +1,2 @@
-Kind.set<A: Type>(name: Kind.Name, val: A, map: Map(A)): Map(A)
-  Map.set<A>(Kind.Name.to_bits(name), val, map)
+Kind.set<A: Type>(name: Kind.Name, val: A, map: BitsMap(A)): BitsMap(A)
+  BitsMap.set<A>(Kind.Name.to_bits(name), val, map)

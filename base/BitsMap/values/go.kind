@@ -1,0 +1,10 @@
+BitsMap.values.go<A: Type>(xs: BitsMap(A), list: List(A)): List(A)
+  case xs {
+    new:
+      list,
+    tie: 
+      let list0 = case xs.val { none: list, some: List.cons!(xs.val.value, list) };
+      let list1 = BitsMap.values.go!(xs.lft, list0);
+      let list2 = BitsMap.values.go!(xs.rgt, list1);
+      list2
+  }

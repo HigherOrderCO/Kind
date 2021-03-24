@@ -9,7 +9,7 @@ Kind.Parser.case: Parser(Kind.Term)
       Kind.Parser.name1;
     });
     let name = case name {
-      none: case Kind.Term.reduce(expr, Map.new!) as expr {
+      none: case Kind.Term.reduce(expr, BitsMap.new!) as expr {
         ref: expr.name,
         var: expr.name,
         _: Kind.Name.read("self"),
@@ -28,7 +28,7 @@ Kind.Parser.case: Parser(Kind.Term)
       none: cses
       some: List.cons!({"_", dflt.value}, cses)
     };
-    let cses = Map.from_list!(List.mapped!(cses)!((kv)
+    let cses = BitsMap.from_list!(List.mapped!(cses)!((kv)
       let {key, val} = kv
       {Kind.Name.to_bits(key), val}
     ));

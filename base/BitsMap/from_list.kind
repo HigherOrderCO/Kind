@@ -1,0 +1,7 @@
+BitsMap.from_list<A: Type>(xs: List(Pair(Bits,A))): BitsMap(A)
+  case xs {
+    nil : BitsMap.new!,
+    cons: case xs.head as p {
+      new: BitsMap.set!(p.fst, p.snd, BitsMap.from_list!(xs.tail))
+    }
+  }
