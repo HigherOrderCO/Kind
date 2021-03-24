@@ -10218,11 +10218,11 @@ module.exports = (function() {
                             var $3855 = _slf$8;
                             var $3856 = $3851;
                             let _slf$10 = $3855;
-                            let _var$9;
+                            let _v$9;
                             while ($3856._ === 'List.cons') {
-                                _var$9 = $3856.head;
+                                _v$9 = $3856.head;
                                 var $3855 = Kind$Term$app$(_slf$10, Kind$Term$ref$((() => {
-                                    var self = _var$9;
+                                    var self = _v$9;
                                     switch (self._) {
                                         case 'Kind.Binder.new':
                                             var $3857 = self.name;
@@ -10239,11 +10239,11 @@ module.exports = (function() {
                             var $3860 = _slf$9;
                             var $3861 = $3852;
                             let _slf$11 = $3860;
-                            let _var$10;
+                            let _v$10;
                             while ($3861._ === 'List.cons') {
-                                _var$10 = $3861.head;
+                                _v$10 = $3861.head;
                                 var $3860 = Kind$Term$app$(_slf$11, Kind$Term$ref$((() => {
-                                    var self = _var$10;
+                                    var self = _v$10;
                                     switch (self._) {
                                         case 'Kind.Binder.new':
                                             var $3862 = self.name;
@@ -10326,11 +10326,11 @@ module.exports = (function() {
                                     var $3887 = _ret$11;
                                     var $3888 = $3884;
                                     let _ret$13 = $3887;
-                                    let _var$12;
+                                    let _v$12;
                                     while ($3888._ === 'List.cons') {
-                                        _var$12 = $3888.head;
+                                        _v$12 = $3888.head;
                                         var $3887 = Kind$Term$app$(_ret$13, (() => {
-                                            var self = _var$12;
+                                            var self = _v$12;
                                             switch (self._) {
                                                 case 'Kind.Binder.new':
                                                     var $3889 = self.term;
@@ -10349,11 +10349,11 @@ module.exports = (function() {
                                     var $3892 = _slf$14;
                                     var $3893 = $3880;
                                     let _slf$16 = $3892;
-                                    let _var$15;
+                                    let _v$15;
                                     while ($3893._ === 'List.cons') {
-                                        _var$15 = $3893.head;
+                                        _v$15 = $3893.head;
                                         var $3892 = Kind$Term$app$(_slf$16, Kind$Term$ref$((() => {
-                                            var self = _var$15;
+                                            var self = _v$15;
                                             switch (self._) {
                                                 case 'Kind.Binder.new':
                                                     var $3894 = self.name;
@@ -10370,11 +10370,11 @@ module.exports = (function() {
                                     var $3897 = _slf$15;
                                     var $3898 = $3883;
                                     let _slf$17 = $3897;
-                                    let _var$16;
+                                    let _v$16;
                                     while ($3898._ === 'List.cons') {
-                                        _var$16 = $3898.head;
+                                        _v$16 = $3898.head;
                                         var $3897 = Kind$Term$app$(_slf$17, Kind$Term$ref$((() => {
-                                            var self = _var$16;
+                                            var self = _v$16;
                                             switch (self._) {
                                                 case 'Kind.Binder.new':
                                                     var $3899 = self.name;
@@ -10443,11 +10443,11 @@ module.exports = (function() {
                             var $3915 = _ret$8;
                             var $3916 = $3912;
                             let _ret$10 = $3915;
-                            let _var$9;
+                            let _v$9;
                             while ($3916._ === 'List.cons') {
-                                _var$9 = $3916.head;
+                                _v$9 = $3916.head;
                                 var $3915 = Kind$Term$app$(_ret$10, Kind$Term$ref$((() => {
-                                    var self = _var$9;
+                                    var self = _v$9;
                                     switch (self._) {
                                         case 'Kind.Binder.new':
                                             var $3917 = self.name;
@@ -10821,11 +10821,11 @@ module.exports = (function() {
                                             var $4031 = _type$13;
                                             var $4032 = $4026;
                                             let _type$15 = $4031;
-                                            let _var$14;
+                                            let _v$14;
                                             while ($4032._ === 'List.cons') {
-                                                _var$14 = $4032.head;
+                                                _v$14 = $4032.head;
                                                 var $4031 = Kind$Term$app$(_type$15, Kind$Term$ref$((() => {
-                                                    var self = _var$14;
+                                                    var self = _v$14;
                                                     switch (self._) {
                                                         case 'Kind.Binder.new':
                                                             var $4033 = self.name;
@@ -10842,11 +10842,11 @@ module.exports = (function() {
                                             var $4036 = _type$14;
                                             var $4037 = $4028;
                                             let _type$16 = $4036;
-                                            let _var$15;
+                                            let _v$15;
                                             while ($4037._ === 'List.cons') {
-                                                _var$15 = $4037.head;
+                                                _v$15 = $4037.head;
                                                 var $4036 = Kind$Term$app$(_type$16, (() => {
-                                                    var self = _var$15;
+                                                    var self = _v$15;
                                                     switch (self._) {
                                                         case 'Kind.Binder.new':
                                                             var $4038 = self.term;
