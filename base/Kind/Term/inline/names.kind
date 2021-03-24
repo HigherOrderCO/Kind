@@ -1,4 +1,4 @@
-Kind.Term.inline.names: Set
+Kind.Term.inline.names: BitsSet
   let inl = [
     "Monad.pure",
     "Monad.bind",

@@ -1,0 +1,2 @@
+BitsSet.mut.has(bits: Bits, set: BitsSet): Bool
+  BitsSet.has(bits, set)

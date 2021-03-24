@@ -166,7 +166,7 @@ Kind.Term.check(
       none:
         Kind.Check.result!(Maybe.some!(infr), []),
       some: do Kind.Check {
-        var eqls = Kind.Term.equal(type.value, infr, defs, List.length!(ctx), Set.mut.new(unit));
+        var eqls = Kind.Term.equal(type.value, infr, defs, List.length!(ctx), BitsSet.mut.new(unit));
         if eqls then do Kind.Check {
           return type.value;
         } else do Kind.Check {

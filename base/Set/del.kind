@@ -1,2 +1,0 @@
-Set.del(key: Bits, set: Set): Set
-  BitsMap.delete<Unit>(key, set)
