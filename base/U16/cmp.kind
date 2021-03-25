@@ -1,0 +1,4 @@
+U16.cmp(a: U16, b: U16): Cmp
+  open a
+  open b
+  Word.cmp!(a.value, b.value)
