@@ -1,0 +1,3 @@
+Pair.swap<A: Type, B: Type>(pair: Pair<A,B>): Pair<B,A>
+  open pair
+  Pair.new<B,A>(pair.snd, pair.fst)

@@ -1,0 +1,218 @@
+// Returs true if both inputs are true
+Problems.Bool.and(a: Bool, b: Bool): Bool
+  ?a
+
+// Returs true if any input is true
+Problems.Bool.or(a: Bool, b: Bool): Bool
+  ?a
+
+// Returs true if both inputs are equal
+Problems.Bool.eql(a: Bool, b: Bool): Bool
+  ?a
+
+// Returns the first element of a pair
+Problems.Pair.fst<A: Type, B: Type>(pair: Pair<A,B>): A
+  ?a
+
+// Returns the second element of a pair
+Problems.Pair.snd<A: Type, B: Type>(pair: Pair<A,B>): B
+  ?a
+
+// Inverses the order of the elements of a pair
+Problems.Pair.swap<A: Type, B: Type>(pair: Pair<A,B>): Pair<B,A>
+  ?a
+
+// Applies a function to both elements of a Pair
+Problems.Pair.map<A: Type, B: Type>(fn: A -> B, pair: Pair<A,A>): Pair<B,B>
+  ?a
+
+// Doubles a number
+Problems.Nat.double(n: Nat): Nat
+  ?a
+
+// Halves a number, rounding down
+Problems.Nat.half(n: Nat): Nat
+  ?a
+
+// Adds two numbers
+Problems.Nat.add(a: Nat, b: Nat): Nat
+  ?a
+
+// Subtracts two numbers
+Problems.Nat.sub(a: Nat, b: Nat): Nat
+  ?a
+
+// Multiplies two numbers
+Problems.Nat.mul(a: Nat, b: Nat): Nat
+  ?a
+
+// Returns true if a < b
+Problems.Nat.ltn(a: Nat, b: Nat): Bool
+  ?a
+
+// Returns true if a == b
+Problems.Nat.eql(a: Nat, b: Nat): Bool
+  ?a
+
+// Returns true if a > b
+Problems.Nat.gtn(a: Nat, b: Nat): Bool
+  ?a
+
+// Returns the first element of a List
+Problems.List.head<A: Type>(xs: List<A>): Maybe(A)
+  ?a
+
+// Returns the list without the first element
+Problems.List.tail<A: Type>(xs: List<A>): Maybe(A)
+  ?a
+
+// Returns the length of a list
+Problems.List.length<A: Type>(xs: List<A>): Nat
+  ?a
+
+// Concatenates two lists
+Problems.List.concat<A: Type>(xs: List<A>, ys: List<A>): List<A>
+  ?a
+
+// Applies a function to all elements of a list
+Problems.List.map<A: Type, B: Type>(fn: A -> B, xs: List<A>): List<B>
+  ?a
+
+// Returns the same list, with the order reversed
+Problems.List.reverse<A: Type>(xs: List<A>): List<A>
+  ?a
+
+// Returns pairs of the elements of the 2 input lists on the same index
+// Ex: List.zip!!([1,2], ["a","b"]) == [{1,"a"},{2,"b"}]
+Problems.List.zip<A: Type, B: Type>(xs: List<A>, ys: List<B>): List<Pair<A,B>>
+  ?a
+
+// Returns the smallest element of a List
+Problems.List.min(xs: List<Nat>): Nat
+  ?a
+
+// Returns the same list without the smallest element
+Problems.List.remove_min(xs: List<Nat>): List<Nat>
+  ?a
+
+// Returns the same list, in ascending order
+Problems.List.sort(xs: List<Nat>): List<Nat>
+  ?a
+
+// PROOFS
+
+Problems.p0: true == true
+  ?a
+
+Problems.p1(a: Bool): Bool.and(false, a) == false
+  ?a
+
+Problems.p2(a: Bool): Bool.and(a, false) == false
+  ?a
+
+Problems.p3(a: Bool): Bool.or(true, a) == true
+  ?a
+
+Problems.p4(a: Bool): Bool.or(a, true) == true
+  ?a
+
+Problems.p5(a: Bool): Bool.eql(a, a) == true
+  ?a
+
+Problems.p6(a: Bool): Bool.not(Bool.not(a)) == a
+  ?a
+
+Problems.p7(a: Bool, b: Bool): Bool.not(Bool.and(a,b)) == Bool.or(Bool.not(a), Bool.not(b))
+  ?a
+
+Problems.p8(a: Bool, b: Bool): Bool.not(Bool.or(a,b)) == Bool.and(Bool.not(a), Bool.not(b))
+  ?a
+
+Problems.p9(a: Pair<Nat,Nat>): Pair.new<Nat,Nat>(Pair.fst<Nat,Nat>(a), Pair.snd<Nat,Nat>(a)) == a
+  ?a
+
+Problems.p10(a: Pair<Nat,Nat>): Pair.swap<Nat,Nat>(Pair.swap<Nat,Nat>(a)) == a
+  ?a
+
+Problems.p11(n: Nat): Nat.same(n) == n
+  ?a
+
+Problems.p12(n: Nat): Nat.half(Nat.double(n)) == n
+  ?a
+
+Problems.p13(n: Nat): Nat.add(0,n) == n
+  ?a
+
+Problems.p14(n: Nat): Nat.add(n,0) == n
+  ?a
+
+Problems.p15(n: Nat, m: Nat): Nat.add(Nat.succ(n),m) == Nat.succ(Nat.add(n,m))
+  ?a
+  
+Problems.p16(n: Nat, m: Nat): Nat.add(n,Nat.succ(m)) == Nat.succ(Nat.add(n,m))
+  ?a
+
+Problems.p17(n: Nat, m: Nat): Nat.add(n, m) == Nat.add(m, n)
+  ?a
+
+Problems.p18(n: Nat): Nat.add(n,n) == Nat.double(n)
+  ?a
+
+Problems.p19(n: Nat): Nat.ltn(n, Nat.succ(n)) == true
+  ?a
+
+Problems.p20(n: Nat): Nat.gtn(Nat.succ(n), n) == true
+  ?a
+
+Problems.p21(n: Nat): Nat.sub(n,n) == 0
+  ?a
+
+Problems.p22(n: Nat): Nat.add(n,n) == Nat.mul(n,2)
+  ?a
+
+Problems.p23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
+  ?a
+
+Problems.p24(xs: List<Nat>): Nat.gtn(List.length<Nat>(List.cons<Nat>(1,xs)),0) == true
+  ?a
+
+Problems.p25(xs: List<Nat>): List.map<Nat,Nat>((x) x, xs) == xs
+  ?a
+
+Problems.p26(xs: List<Nat>, ys: List<Nat>)
+  : def zs     = List.concat<Nat>(xs,ys)
+    def xs_len = List.length<Nat>(xs)
+    def ys_len = List.length<Nat>(ys)
+    def zs_len = List.length<Nat>(zs)
+    Nat.add(xs_len, ys_len) == zs_len
+  ?a
+
+Problems.p27(xs: List<Nat>): List.reverse<Nat>(List.reverse<Nat>(xs)) == xs
+  ?a
+
+Problems.p28: true != false
+  ?a
+
+Problems.p29: 3 != 2
+  ?a
+
+Problems.p30(a: Bool): Bool.or(true, a) != false
+  ?a
+
+Problems.p31(a: Bool): Bool.or(a, true) != false
+  ?a
+
+Problems.p32(a: Bool): Bool.and(false, a) != true
+  ?a
+
+Problems.p33(a: Bool): Bool.and(a, false) != true
+  ?a
+
+Problems.p34(a: Nat, b: Nat, e: a == b): b == a
+  ?a
+
+Problems.p35(a: Nat, b: Nat, c: Nat, e0: a == b, e1: b == c): a == c
+  ?a
+
+Problems.p36(a: Nat, P: Nat -> Type, p: P(a)): P(Nat.same(a))
+  ?a
