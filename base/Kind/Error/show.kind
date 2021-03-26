@@ -23,7 +23,7 @@ Kind.Error.show(error: Kind.Error, defs: Kind.Defs): String
         without error.goal: ""
         let goal = Kind.Term.expand(error.dref, error.goal, defs)
         "With type: "
-        | if error.verb then Kind.Term.show.go(goal, some((x) x)) else Kind.Term.show(goal)
+        | (if error.verb then Kind.Term.show.go(goal, some((x) x)) else Kind.Term.show(goal))
         | "\n"
       let with_ctxt = case error.context {
         nil: ""

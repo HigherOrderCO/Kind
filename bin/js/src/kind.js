@@ -17386,7 +17386,7 @@ module.exports = (function() {
                     case 'Maybe.some':
                         var $5788 = self.value;
                         var _goal$10 = Kind$Term$expand$($5783, $5788, _defs$2);
-                        var $5789 = ("With type: " + (() => {
+                        var $5789 = ("With type: " + ((() => {
                             var self = $5784;
                             if (self) {
                                 var $5790 = Kind$Term$show$go$(_goal$10, Maybe$some$((_x$11 => {
@@ -17395,10 +17395,10 @@ module.exports = (function() {
                                 })));
                                 return $5790;
                             } else {
-                                var $5792 = (Kind$Term$show$(_goal$10) + "\u{a}");
+                                var $5792 = Kind$Term$show$(_goal$10);
                                 return $5792;
                             };
-                        })());
+                        })() + "\u{a}"));
                         var _with_type$9 = $5789;
                         break;
                     case 'Maybe.none':
