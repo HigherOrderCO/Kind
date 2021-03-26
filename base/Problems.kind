@@ -4,6 +4,8 @@
 // 3. Copy that file there:  cp Kind/base/Problems.kind Kind/base/User/YourName
 // 4. Open, uncomment a problem and solve it
 // 5. Send a PR if you want!
+// If you need help, read the tutorial on Kind/THEOREMS.md, or ask on Telegram.
+// Answers are available on Kind/base/User/MaiaVictor/Problems.kind
 
 // -----------------------------------------------------------------------------
 
@@ -24,19 +26,19 @@
 //  ?a
 
 // Returns the first element of a pair
-//Problems.p3(pair: Pair<A,B>): A
+//Problems.p3<A: Type, B: Type>(pair: Pair<A,B>): A
 //  ?a
 
 // Returns the second element of a pair
-//Problems.p4(pair: Pair<A,B>): B
+//Problems.p4<A: Type, B: Type>(pair: Pair<A,B>): B
 //  ?a
 
 // Inverses the order of the elements of a pair
-//Problems.p5(pair: Pair<A,B>): Pair<B,A>
+//Problems.p5<A: Type, B: Type>(pair: Pair<A,B>): Pair<B,A>
 //  ?a
 
 // Applies a function to both elements of a Pair
-//Problems.p6(fn: A -> B, pair: Pair<A,A>): Pair<B,B>
+//Problems.p6<A: Type, B: Type>(fn: A -> B, pair: Pair<A,A>): Pair<B,B>
 //  ?a
 
 // Doubles a number
@@ -67,37 +69,33 @@
 //Problems.p13(a: Nat, b: Nat): Bool
 //  ?a
 
-// Returns true if a > b
-//Problems.p13(a: Nat, b: Nat): Bool
-//  ?a
-
 // Returns the first element of a List
-//Problems.p14(xs: List<A>): Maybe(A)
+//Problems.p14<A: Type>(xs: List<A>): Maybe(A)
 //  ?a
 
 // Returns the list without the first element
-//Problems.p15(xs: List<A>): Maybe(A)
+//Problems.p15<A: Type>(xs: List<A>): Maybe(A)
 //  ?a
 
 // Returns the length of a list
-//Problems.p16(xs: List<A>): Nat
+//Problems.p16<A: Type>(xs: List<A>): Nat
 //  ?a
 
 // Concatenates two lists
-//Problems.p17(xs: List<A>, ys: List<A>): List<A>
+//Problems.p17<A: Type>(xs: List<A>, ys: List<A>): List<A>
 //  ?a
 
 // Applies a function to all elements of a list
-//Problems.p18(fn: A -> B, xs: List<A>): List<B>
+//Problems.p18<A: Type, B: Type>(fn: A -> B, xs: List<A>): List<B>
 //  ?a
 
 // Returns the same list, with the order reversed
-//Problems.p19(xs: List<A>): List<A>
+//Problems.p19<A: Type>(xs: List<A>): List<A>
 //  ?a
 
 // Returns pairs of the elements of the 2 input lists on the same index
-// Ex: //Problems.p20!!([1,2], ["a","b"]) == [{1,"a"},{2,"b"}]
-//Problem.s.p20(xs: List<A>, ys: List<B>): List<Pair<A,B>>
+// Ex: Problems.p20!!([1,2], ["a","b"]) == [{1,"a"},{2,"b"}]
+//Problems.p20<A: Type, B: Type>(xs: List<A>, ys: List<B>): List<Pair<A,B>>
 //  ?a
 
 // Returns the smallest element of a List
@@ -186,7 +184,7 @@
 //Problems.t21(n: Nat): Nat.sub(n,n) == 0
 //  ?a
 
-//Problems.t22(n: Nat): Nat.add(n,n) == Nat.mul(n,2)
+//Problems.t22(n: Nat, e: n == 1): Nat.succ(n) == 2
 //  ?a
 
 //Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
