@@ -1,0 +1,2 @@
+Map.assign<A: Type>(a: Map(A), b: Map(A)): Map(A)
+  BitsMap.assign<A>(a, b)

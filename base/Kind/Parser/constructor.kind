@@ -1,8 +1,8 @@
 Kind.Parser.constructor(namespace: Kind.Name): Parser(Kind.Constructor)
-  do Parser {
-    var name = Kind.Parser.name1;
-    var args = Parser.maybe!(Kind.Parser.binder(":"));
-    var inds = Parser.maybe!(do Parser {
+  Parser {
+    get name = Kind.Parser.name1;
+    get args = Parser.maybe!(Kind.Parser.binder(":"));
+    get inds = Parser.maybe!(Parser {
       Kind.Parser.text("~");
       Kind.Parser.binder("=");
     });

@@ -1,0 +1,12 @@
+// Copies all key/vals from b to a
+BitsMap.assign<A: Type>(a: BitsMap<A>, b: BitsMap<A>): BitsMap<A>
+  case a {
+    new: b
+    tie: case b {
+      new: a
+      tie:
+        let lft = BitsMap.assign<A>(a.lft, b.lft)
+        let rgt = BitsMap.assign<A>(a.rgt, b.rgt)
+        BitsMap.tie<A>(b.val, lft, rgt)
+    }
+  }

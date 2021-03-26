@@ -1,14 +1,14 @@
 Kind.Parser.forall: Parser(Kind.Term)
-  do Parser {
-    var init = Kind.Parser.init;
-    var self = Kind.Parser.name;
-    var bind = Kind.Parser.binder(":");
+  Parser {
+    get init = Kind.Parser.init;
+    get self = Kind.Parser.name;
+    get bind = Kind.Parser.binder(":");
     Parser.maybe!(Kind.Parser.text("->"));
-    var body = Kind.Parser.term;
+    get body = Kind.Parser.term;
     let term = List.fold!(bind)!(body, (x,t) case x {
       new: Kind.Term.all(x.eras, "", x.name, x.term, (s,x) t)
     });
-    var orig = Kind.Parser.stop(init);
+    get orig = Kind.Parser.stop(init);
     return case term {
       all: Kind.Term.ori(orig, Kind.Term.all(term.eras, self, term.name, term.xtyp, term.body)),
       _: term,

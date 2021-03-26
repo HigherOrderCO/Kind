@@ -1,11 +1,11 @@
 Kind.to_core.io.one(name: String): IO(String)
-  do IO {
-    var new_defs = Kind.Synth.one(name, Map.new!);
+  IO {
+    get new_defs = Kind.Synth.one(name, BitsMap.new!);
     let defs = case new_defs {
-      none: Map.new!,
+      none: BitsMap.new!,
       some: new_defs.value,
     };
-    let defs = Map.map!!(
+    let defs = BitsMap.map!!(
       (defn) 
         open defn
         let term = Kind.Term.inline(defn.term, defs);

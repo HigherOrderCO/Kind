@@ -1,7 +1,7 @@
 Kind.Term.inline.reduce(term: Kind.Term, defs: Kind.Defs): Kind.Term
   case term {
     ref: 
-      let inli = Set.has(Kind.Name.to_bits(term.name), Kind.Term.inline.names);
+      let inli = BitsSet.has(Kind.Name.to_bits(term.name), Kind.Term.inline.names);
       if inli then
         case Kind.get!(term.name, defs) as got {
           none: Kind.Term.ref(term.name),

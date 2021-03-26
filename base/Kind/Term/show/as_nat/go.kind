@@ -3,7 +3,7 @@ Kind.Term.show.as_nat.go(term: Kind.Term): Maybe(Nat)
     app: case term.func {
       ref: 
         if String.eql(term.func.name, "Nat.succ") then do Maybe {
-          var pred = Kind.Term.show.as_nat.go(term.argm);
+          get pred = Kind.Term.show.as_nat.go(term.argm);
           return Nat.succ(pred);
         } else
           Maybe.none!,

@@ -1,0 +1,10 @@
+BitsMap.fold<A: Type>(map: BitsMap(A)): <P: Type> -> P -> (Maybe(A) -> P -> P -> P) -> P
+  <P> (new, tie)
+  case map {
+    new: new,
+    tie: 
+      tie(
+        map.val,
+        BitsMap.fold<A>(map.lft)<P>(new, tie),
+        BitsMap.fold<A>(map.rgt)<P>(new, tie)),
+  }

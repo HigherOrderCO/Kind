@@ -1,0 +1,23 @@
+Kind.Parser.goal_rewrite: Parser(Kind.Term)
+  Parser {
+    get init = Kind.Parser.init;
+    Kind.Parser.text("rewrite ");
+    get name = Kind.Parser.name1;
+    Kind.Parser.text("in");
+    get type = Kind.Parser.term;
+    Kind.Parser.text("with");
+    get iseq = Kind.Parser.term;
+    get body = Kind.Parser.term;
+    get orig = Kind.Parser.stop(init);
+    let moti = Kind.Term.lam(name, (s) Kind.Term.lam("", (x) type));
+    let term = Kind.Term.ref("Equal.mirror");
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e)); 
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, iseq);
+    let term = Kind.Term.app(term, moti);
+    let term = Kind.Term.app(term, body);
+    return Kind.Term.ori(orig, term);
+  }
+
+

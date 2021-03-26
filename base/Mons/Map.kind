@@ -1,2 +1,2 @@
 Mons.Map: Type
-  Map(List(Mons.Object))
+  BitsMap(List(Mons.Object))

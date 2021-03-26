@@ -1,0 +1,2 @@
+Nat.zero_neq_succ(a: Nat): Not(Equal(Nat, 0, Nat.succ(a)))
+  (e) Bool.true_neq_false(apply(Nat.is_zero, e))

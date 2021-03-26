@@ -1,9 +1,9 @@
 Kind.Parser.log: Parser(Kind.Term)
-  do Parser {
-    var init = Kind.Parser.init;
+  Parser {
+    get init = Kind.Parser.init;
     Kind.Parser.text("log(");
-    var strs = Parser.until!(Kind.Parser.text(")"), Kind.Parser.item!(Kind.Parser.term));
-    var cont = Kind.Parser.term;
+    get strs = Parser.until!(Kind.Parser.text(")"), Kind.Parser.item!(Kind.Parser.term));
+    get cont = Kind.Parser.term;
     let term = Kind.Term.ref("Debug.log");
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
     let args = List.fold!(strs)!(Kind.Term.ref("String.nil"), (x,xs) 
@@ -13,6 +13,6 @@ Kind.Parser.log: Parser(Kind.Term)
       arg);
     let term = Kind.Term.app(term, args);
     let term = Kind.Term.app(term, Kind.Term.lam("x", (x) cont));
-    var orig = Kind.Parser.stop(init);
+    get orig = Kind.Parser.stop(init);
     return Kind.Term.ori(orig, term);
   }

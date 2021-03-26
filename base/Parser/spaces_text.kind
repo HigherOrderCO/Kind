@@ -1,5 +1,5 @@
 Parser.spaces_text(text: String): Parser(Unit)
-  do Parser {
+  Parser {
     Parser.spaces;
     Parser.text(text);
   }

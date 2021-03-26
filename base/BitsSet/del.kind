@@ -1,0 +1,2 @@
+BitsSet.del(key: Bits, set: BitsSet): BitsSet
+  BitsMap.delete<Unit>(key, set)

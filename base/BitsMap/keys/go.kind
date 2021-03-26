@@ -1,0 +1,10 @@
+BitsMap.keys.go<A: Type>(xs: BitsMap(A), key: Bits, list: List(Bits)): List(Bits)
+  case xs {
+    new:
+      list,
+    tie: 
+      let list0 = case xs.val { none: list, some: List.cons!(Bits.reverse(key), list) };
+      let list1 = BitsMap.keys.go!(xs.lft, Bits.o(key), list0);
+      let list2 = BitsMap.keys.go!(xs.rgt, Bits.i(key), list1);
+      list2
+  }

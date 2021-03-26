@@ -1,0 +1,45 @@
+BitsMap.merge.go<A: Type,B: Type,C: Type>(
+  f: Bits -> A -> Maybe(C),
+  g: Bits -> B -> Maybe(C),
+  h: Bits -> A -> B -> Maybe(C),
+  key: Bits,
+  a: BitsMap(A),
+  b: BitsMap(B)
+) : BitsMap(C)
+  case a {
+    new: case b {
+      new: BitsMap.new!,
+      tie:
+        let val = case b.val as bv {
+          none: Maybe.none!,
+          some: g(key,bv.value)
+        }
+        BitsMap.tie!(val,
+          BitsMap.merge.go!!!(f, g, h, Bits.o(key), BitsMap.new!,b.lft),
+          BitsMap.merge.go!!!(f, g, h, Bits.i(key), BitsMap.new!,b.rgt))
+    },
+    tie: case b {
+      new: 
+        let val = case a.val as av { 
+          none: Maybe.none!, 
+          some: f(key, av.value) 
+        }
+        BitsMap.tie!(val,
+          BitsMap.merge.go!!!(f,g,h,Bits.o(key),a.lft,BitsMap.new!),
+          BitsMap.merge.go!!!(f,g,h,Bits.i(key),a.rgt,BitsMap.new!)),
+      tie: 
+        let val = case a.val as av {
+          none: case b.val as bv {
+            none: Maybe.none!, 
+            some: g(key, bv.value)
+          },
+          some: case b.val as bv {
+            none: f(key, av.value), 
+            some: h(key, av.value, bv.value)
+          }
+        }
+        BitsMap.tie!(val,
+          BitsMap.merge.go!!!(f, g, h, Bits.o(key), a.lft, b.lft),
+          BitsMap.merge.go!!!(f, g, h, Bits.i(key), a.rgt, b.rgt))
+    }
+  }

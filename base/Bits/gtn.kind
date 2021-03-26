@@ -1,0 +1,2 @@
+Bits.gtn(a: Bits, b: Bits): Bool
+  Cmp.as_gtn(Bits.cmp(a, b))

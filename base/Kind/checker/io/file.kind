@@ -1,13 +1,13 @@
 Kind.checker.io.file(file: String): IO(Unit)
-  do IO {
-    var loaded = Kind.Synth.file(file, Map.new!);
+  IO {
+    get loaded = Kind.Synth.file(file, BitsMap.new!);
     case loaded {
-      left: do IO {
+      left: IO {
         IO.print(String.flatten(["On '", file, "':"]));
         IO.print(loaded.value);
       }
       right: case loaded.value {
-        new: do IO {
+        new: IO {
           let nams = loaded.value.fst;
           let defs = loaded.value.snd;
           case nams {

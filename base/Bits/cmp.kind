@@ -1,0 +1,2 @@
+Bits.cmp(a: Bits, b: Bits): Cmp
+  Bits.cmp.go(a, b, Cmp.eql)

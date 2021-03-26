@@ -1,4 +1,4 @@
-// Sets the position of the idx voxel of an Image3D
+// BitsSets the position of the idx voxel of an Image3D
 Image3D.set_pos(idx: U32, pos: U32, img: Image3D): Image3D
   case img {
     new:

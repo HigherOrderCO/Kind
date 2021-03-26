@@ -1,0 +1,9 @@
+Word.take<size: Nat>(len: Nat, word: Word(size)): Word(Nat.min(len, size))
+  case len {
+    zero: Word.e
+    succ: case word {
+      e: Word.e,
+      o: Word.o!(Word.take!(len.pred, word.pred)),
+      i: Word.i!(Word.take!(len.pred, word.pred))
+    }!
+  }!

@@ -1,0 +1,45 @@
+BitsMap.query<A: Type>(cpy: A -> Pair(A, A), bits: Bits, map: BitsMap(A)): Pair(BitsMap(A), Maybe(A))
+  case bits {
+  e: case map {
+    new: 
+      let map = BitsMap.new!
+      let val = Maybe.none!
+      Pair.new!!(map, val),
+    tie: case map.val {
+      none:
+        let map = BitsMap.tie!(Maybe.none!, map.lft, map.rgt)
+        let val = Maybe.none!
+        Pair.new!!(map, val),
+      some: case cpy(map.val.value) as p {
+        new:
+          let map = BitsMap.tie!(Maybe.some!(p.fst), map.lft, map.rgt)
+          let val = Maybe.some!(p.snd)
+          Pair.new!!(map, val)
+      }
+    }
+  },
+  o: case map {
+    new:
+      let map = BitsMap.new!
+      let val = Maybe.none!
+      Pair.new!!(map, val),
+    tie: case BitsMap.query!(cpy, bits.pred, map.lft) as p {
+      new:
+        let map = BitsMap.tie!(map.val, p.fst, map.rgt)
+        let val = p.snd
+        Pair.new!!(map, val)
+    }
+  },
+  i: case map {
+    new: 
+      let map = BitsMap.new!
+      let val = Maybe.none!
+      Pair.new!!(map, val),
+    tie: case BitsMap.query!(cpy, bits.pred, map.rgt) as p {
+      new:
+        let map = BitsMap.tie!(map.val, map.lft, p.fst)
+        let val = p.snd
+        Pair.new!!(map, val)
+      }
+    }
+  }

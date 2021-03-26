@@ -1,5 +1,0 @@
-Set.has(bits: Bits, set: Set): Bool
-  case Map.get<Unit>(bits, set) {
-    none: Bool.false,
-    some: Bool.true,
-  }

@@ -1,3 +1,10 @@
+// Receives a condition, a list, an returns true iff 
+// all the elements of that list satisfy the condition.
+// Examples:
+// - List.all!(Nat.is_even, [1, 2, 3, 4]) == false
+// - List.all!(Nat.is_even, [2, 4, 6, 8]) == true
+// - ...
+// - ...
 List.all<A: Type>(cond: A -> Bool, list: List(A)): Bool
   case list{
     nil : Bool.true

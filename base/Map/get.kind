@@ -1,15 +1,2 @@
-Map.get<A: Type>(bits: Bits, map: Map(A)): Maybe(A)
-  case bits {
-    e: case map {
-      new: Maybe.none!,
-      tie: map.val,
-    }, 
-    o: case map {
-      new: Maybe.none!,
-      tie: Map.get!(bits.pred, map.lft),
-    },
-    i: case map {
-      new: Maybe.none!,
-      tie: Map.get!(bits.pred, map.rgt),
-    }
-  }
+Map.get<A: Type>(key: String, map: BitsMap(A)): Maybe(A)
+  BitsMap.get<A>(String.to_bits(key), map)

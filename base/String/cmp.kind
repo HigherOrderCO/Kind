@@ -1,0 +1,15 @@
+String.cmp(a: String, b: String): Cmp
+  case a {
+    nil: case b {
+      nil: Cmp.eql,
+      cons: Cmp.ltn,
+    },
+    cons: case b {
+      nil: Cmp.gtn,
+      cons: case U16.cmp(a.head, b.head) {
+        ltn: Cmp.ltn,
+        eql: String.cmp(a.tail, b.tail),
+        gtn: Cmp.gtn,
+      }
+    },
+  }

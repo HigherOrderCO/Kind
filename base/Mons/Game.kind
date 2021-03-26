@@ -1,7 +1,7 @@
 type Mons.Game {
   new(
     usr: Word(160), // player name
-    pos: Map(Pos32), // players positions
+    pos: BitsMap(Pos32), // players positions
     map: Mons.Map, // the game map
     stt: Mons.Screen, // the current state of the game
     tik: U32

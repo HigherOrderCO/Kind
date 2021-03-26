@@ -1,0 +1,4 @@
+Word.full_mul(size: Nat)(a: Word(size), b: Word(size)): Word(Nat.add(size, size))
+  let new_a = Word.trim<size>(Nat.add(size, size), a)
+  let new_b = Word.trim<size>(Nat.add(size, size), b)
+  Word.mul<Nat.add(size, size)>(new_a, new_b)

@@ -1,0 +1,16 @@
+BitsMap.disj<A: Type>(a: BitsMap(A), b: BitsMap(A)): Bool
+  case a {
+    new: Bool.true,
+    tie: case b {
+      new: Bool.true,
+      tie: 
+        let v = case a.val {
+          none: Bool.true,
+          some: case b.val {
+            none: Bool.true,
+            some: Bool.false 
+          }
+        }
+        Bool.and(v, Bool.and(BitsMap.disj!(a.lft, b.lft), BitsMap.disj!(a.rgt, b.rgt)))
+    }
+  }

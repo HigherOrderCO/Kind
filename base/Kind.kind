@@ -1,5 +1,5 @@
 Kind: IO(Unit)
-  do IO {
+  IO {
     let _ = Kind.to_core.io.one;
     let _ = Kind.checker.io.one;
     let _ = Kind.checker.io.file;

@@ -1,8 +1,8 @@
 Kind.Parser.op(sym: String, ref: String, init: Nat, val0: Kind.Term): Parser(Kind.Term)
-  do Parser {
+  Parser {
     Kind.Parser.text(sym);
-    var val1 = Kind.Parser.term;
-    var orig = Kind.Parser.stop(init);
+    get val1 = Kind.Parser.term;
+    get orig = Kind.Parser.stop(init);
     let term = Kind.Term.ref(ref);
     let term = Kind.Term.app(term, val0);
     let term = Kind.Term.app(term, val1);

@@ -4,7 +4,7 @@ Kind.Context.show(context: Kind.Context): String
     cons: case context.head {
       new:
         let name = Kind.Name.show(context.head.fst);
-        let type = Kind.Term.show(Kind.Term.normalize(context.head.snd,Map.new!));
+        let type = Kind.Term.show(Kind.Term.normalize(context.head.snd,BitsMap.new!));
         let rest = Kind.Context.show(context.tail);
         String.flatten([
           rest,

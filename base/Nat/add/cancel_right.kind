@@ -1,0 +1,6 @@
+// if a + b == c + b, then a == c. 
+Nat.add.cancel_right(a: Nat, b: Nat, c: Nat, h: (a + b) == c + b)
+  : a == c
+  let h1 = h :: rewrite x in x == Nat.add(c,b) with Nat.add.comm(a, b)
+  let h2 = h1:: rewrite x in Nat.add(b,a) == x with Nat.add.comm(c, b)
+  Nat.add.cancel_left(_ _ _ h2)

@@ -1,2 +1,0 @@
-Set.set(bits: Bits, set: Set): Set
-  Map.set<Unit>(bits, Unit.new, set)

@@ -1,8 +1,7 @@
+**/node_modules
+scripts/
 *.class
 .DS_Store
-bin/node_modules/
 src/_*
 src/tmp*
 bin/hs/cabal.project.local*
-web/node_modules/
-bin/js/node_modules

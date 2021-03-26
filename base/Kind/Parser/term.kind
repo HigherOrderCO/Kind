@@ -1,18 +1,19 @@
 Kind.Parser.term: Parser(Kind.Term)
-  do Parser {
-    var init = Kind.Parser.init;
-    var term = Parser.first_of!([
-      Kind.Parser.type,
+  Parser {
+    get init = Kind.Parser.init;
+    get term = Parser.first_of!([
       Kind.Parser.forall,
       Kind.Parser.lambda,
       Kind.Parser.lambda.erased,
       Kind.Parser.lambda.nameless,
       Kind.Parser.parenthesis,
       Kind.Parser.letforrange.u32,
+      Kind.Parser.letforrange.nat,
       Kind.Parser.letforin,
       Kind.Parser.let,
       Kind.Parser.get,
       Kind.Parser.def,
+      Kind.Parser.goal_rewrite,
       Kind.Parser.if,
       Kind.Parser.char,
       Kind.Parser.string,
@@ -22,14 +23,13 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.apply,
       Kind.Parser.mirror,
       Kind.Parser.list,
+      Kind.Parser.map,
       Kind.Parser.log,
-      Kind.Parser.forrange.u32,
-      Kind.Parser.forrange.u32.2,
-      Kind.Parser.forin,
-      Kind.Parser.forin.2,
       Kind.Parser.do,
       Kind.Parser.case,
       Kind.Parser.open,
+      Kind.Parser.without,
+      Kind.Parser.switch,
       Kind.Parser.goal,
       Kind.Parser.hole,
       Kind.Parser.u8,

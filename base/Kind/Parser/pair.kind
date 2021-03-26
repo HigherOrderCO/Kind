@@ -1,12 +1,12 @@
 Kind.Parser.pair: Parser(Kind.Term)
-  do Parser {
-    var init = Kind.Parser.init;
+  Parser {
+    get init = Kind.Parser.init;
     Kind.Parser.text("{");
-    var val0 = Kind.Parser.term;
+    get val0 = Kind.Parser.term;
     Kind.Parser.text(",");
-    var val1 = Kind.Parser.term;
+    get val1 = Kind.Parser.term;
     Kind.Parser.text("}");
-    var orig = Kind.Parser.stop(init);
+    get orig = Kind.Parser.stop(init);
     let term = Kind.Term.ref("Pair.new");
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));

@@ -15,4 +15,4 @@ Bits.eql(a: Bits, b: Bits): Bool
       o: Bool.false,
       i: Bits.eql(a.pred, b.pred),
     }
-  }
+  } 

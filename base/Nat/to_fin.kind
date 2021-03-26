@@ -1,0 +1,9 @@
+Nat.to_fin(n: Nat)<sobra: Nat>: Fin(Nat.succ(Nat.add(n, sobra)))
+  case n {
+    zero:
+      Fin.zero<sobra>
+    succ: 
+      let a = Nat.to_fin(n.pred)<sobra>
+      let b = Fin.succ!<a>
+      b
+  }!

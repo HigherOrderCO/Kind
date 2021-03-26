@@ -1,2 +1,2 @@
-Kind.mut<A: Type>(name: Kind.Name, ini: A, fun: A -> A, map: Map(A)): Map(A)
-  Map.mut<A>(Kind.Name.to_bits(name), ini, fun, map)
+Kind.mut<A: Type>(name: Kind.Name, ini: A, fun: A -> A, map: BitsMap(A)): BitsMap(A)
+  BitsMap.mut<A>(Kind.Name.to_bits(name), ini, fun, map)

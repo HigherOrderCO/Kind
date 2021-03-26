@@ -1,0 +1,2 @@
+BitsSet.mut.del(key: Bits, set: BitsSet): BitsSet
+  BitsSet.del(key, set)

@@ -1,0 +1,6 @@
+Bits.size.go(bits: Bits, n: Nat, s: Nat): Nat
+  case bits {
+    e: s,
+    o: Bits.size.go(bits.pred, Nat.succ(n), s),
+    i: Bits.size.go(bits.pred, Nat.succ(n), Nat.succ(n))
+  }

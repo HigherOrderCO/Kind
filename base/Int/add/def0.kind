@@ -1,0 +1,59 @@
+Int.add.def0(ax: Nat, ay: Nat, bx: Nat, by: Nat): Int.add(Int.new(ax,ay),Int.new(bx,by)) == Int.new(ax+bx, ay+by)
+  case ax {
+    zero: case ay {
+      zero: case bx {
+        zero: case by {
+          zero: refl
+          succ: refl
+        }!
+        succ: case by {
+          zero: refl
+          succ:
+            let p0 = Int.add.def0(0, 0, bx.pred, by.pred)
+            let p1 = Equal.rewrite<Nat, Nat.add(0,bx.pred), bx.pred, Nat.add.zero_left(bx.pred), (x) _ == Int.new(x,Nat.add(0,by.pred))>(p0)
+            let p2 = Equal.rewrite<Nat, Nat.add(0,by.pred), by.pred, Nat.add.zero_left(by.pred), (x) _ == Int.new(bx.pred,x)>(p1)
+            p2,
+        }!
+      }!
+      succ: case bx {
+        zero: case by {
+          zero: refl
+          succ: refl
+        }!
+        succ: case by {
+          zero: refl
+          succ:
+            let e0 = Int.succ_both(Nat.add(0,bx.pred), Nat.add(Nat.succ(ay.pred),by.pred))
+            let e1 = Nat.add.succ_left(0,bx.pred)
+            let e2 = mirror(Nat.add.succ_right(Nat.succ(ay.pred), by.pred))
+            let p0 = Int.add.def0(0, Nat.succ(ay.pred), bx.pred, by.pred)
+            let p1 = Equal.rewrite<Int, Int.new(Nat.add(0,bx.pred),Nat.add(Nat.succ(ay.pred),by.pred)), Int.new(Nat.succ(Nat.add(0,bx.pred)),Nat.succ(Nat.add(Nat.succ(ay.pred),by.pred))), e0, (x) Int.add(Int.new(0,Nat.succ(ay.pred)),Int.new(bx.pred,by.pred)) == x>(p0)
+            let p2 = Equal.rewrite<Nat, Nat.succ(Nat.add(0,bx.pred)), Nat.add(0,Nat.succ(bx.pred)), e1, (x) Int.add(Int.new(0,Nat.succ(ay.pred)),Int.new(bx.pred,by.pred)) == Int.new(x,Nat.succ(Nat.add(Nat.succ(ay.pred),by.pred)))>(p1)
+            let p3 = Equal.rewrite<Nat, Nat.succ(Nat.add(Nat.succ(ay.pred),by.pred)), Nat.add(Nat.succ(ay.pred),Nat.succ(by.pred)), e2, (x) Int.add(Int.new(0,Nat.succ(ay.pred)),Int.new(bx.pred,by.pred)) == Int.new(Nat.add(0,Nat.succ(bx.pred)),x)>(p2)
+            p3
+        }!
+      }!
+    }!
+    succ: case ay {
+      zero: case bx {
+        zero: case by {
+          zero: refl
+          succ: refl
+        }!
+        succ: case by {
+          zero: refl
+          succ: ?d
+        }!
+      }!
+      succ: case bx {
+        zero: case by {
+          zero: ?e
+          succ: ?f
+        }!
+        succ: case by {
+          zero: ?g
+          succ: ?h
+        }!
+      }!
+    }!
+  }!

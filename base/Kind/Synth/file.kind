@@ -1,16 +1,16 @@
 Kind.Synth.file(file: String, defs: Kind.Defs): IO(Either(String, Pair(List(Kind.Name), Kind.Defs)))
-  do IO {
-    var code = IO.get_file(file);
+  IO {
+    get code = IO.get_file(file);
     let read = Kind.Defs.read(file, code, defs);
     case read {
-      left: do IO {
+      left: IO {
         return Either.left!!(read.value);
       },
-      right: do IO {
+      right: IO {
         let file_defs = read.value;
-        let file_keys = Map.keys!(file_defs);
+        let file_keys = BitsMap.keys!(file_defs);
         let file_nams = List.mapped!(file_keys)!(Kind.Name.from_bits);
-        var defs = Kind.Synth.many(file_nams, file_defs);
+        get defs = Kind.Synth.many(file_nams, file_defs);
         return Either.right!!({file_nams, defs});
       },
     };

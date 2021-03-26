@@ -1,6 +1,6 @@
 Kind.Parser.init: Parser(Nat)
-  do Parser {
+  Parser {
     Kind.Parser.spaces;
-    var from = Parser.get_index;
+    get from = Parser.get_index;
     return from;
   }

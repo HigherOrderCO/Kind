@@ -1,6 +1,6 @@
 Kind.Parser.application.hole(init: Nat, term: Kind.Term): Parser(Kind.Term)
-  do Parser {
+  Parser {
     Kind.Parser.text("!");
-    var orig = Kind.Parser.stop(init);
+    get orig = Kind.Parser.stop(init);
     return Kind.Term.ori(orig, Kind.Term.app(term, Kind.Term.hol(Bits.e)));
   }

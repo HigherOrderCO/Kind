@@ -1,0 +1,15 @@
+// Pastes an image into another
+Image3D.Draw.image(x: U32, y: U32, z: U32, src: Image3D, img: Image3D): Image3D
+  let len = Image3D.get_len(src)
+  let img = for i : U32 from 0u to len:
+    let pos = Image3D.get_pos(i, src)
+    let col = Image3D.get_col(i, src)
+    let p_x = U32.and(pos, 4095u) // Pos32.get_x
+    let p_y = U32.shr(U32.and(pos, 16773120u), 12u) // Pos32.get_y
+    let p_z = U32.shr(U32.and(pos, 4278190080u), 24u) // Pos32.get_z
+    let p_x = U32.add(p_x, x)
+    let p_y = U32.add(p_y, y)
+    let p_z = U32.add(p_z, z)
+    let pos = Pos32.new(p_x, p_y, p_z)
+    Image3D.push(pos, col, img)
+  img

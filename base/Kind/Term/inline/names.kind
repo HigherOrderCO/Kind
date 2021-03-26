@@ -1,4 +1,4 @@
-Kind.Term.inline.names: Set
+Kind.Term.inline.names: BitsSet
   let inl = [
     "Monad.pure",
     "Monad.bind",
@@ -13,4 +13,4 @@ Kind.Term.inline.names: Set
     "Kind.Check.none",
   ]
   let kvs = List.mapped!(inl)!((x) {Kind.Name.to_bits(x), Unit.new});
-  Map.from_list!(kvs)
+  BitsMap.from_list!(kvs)

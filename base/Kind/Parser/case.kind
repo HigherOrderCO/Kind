@@ -1,43 +1,55 @@
 Kind.Parser.case: Parser(Kind.Term)
-  do Parser {
-    var init = Kind.Parser.init;
+  Parser {
+    get init = Kind.Parser.init;
     Kind.Parser.text("case ");
     Kind.Parser.spaces;
-    var expr = Kind.Parser.term;
-    var name = Parser.maybe!(do Parser {
+    get expr = Kind.Parser.term;
+    get name = Parser.maybe!(Parser {
       Kind.Parser.text("as");
       Kind.Parser.name1;
     });
     let name = case name {
-      none: case Kind.Term.reduce(expr, Map.new!) as expr {
+      none: case Kind.Term.reduce(expr, BitsMap.new!) as expr {
         ref: expr.name,
         var: expr.name,
         _: Kind.Name.read("self"),
       },
       some: name.value,
     };
-    var wyth = Parser.many!(Kind.Parser.case.with);
+    get wyth = Parser.many!(Kind.Parser.case.with);
     Kind.Parser.text("{");
-    var cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.case.case);
-    let cses = Map.from_list!(List.mapped!(cses)!((x) {Kind.Name.to_bits(Pair.fst!!(x)), Pair.snd!!(x)}));
-    var moti = Parser.first_of!([
+    get cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.case.case);
+    get dflt = Parser.maybe!(Parser {
+      Kind.Parser.text("default ");
+      get term = Kind.Parser.term;
+      return term;
+    });
+    let cses = case dflt {
+      none: cses
+      some: List.cons!({"_", dflt.value}, cses)
+    };
+    let cses = BitsMap.from_list!(List.mapped!(cses)!((kv)
+      let {key, val} = kv
+      {Kind.Name.to_bits(key), val}
+    ));
+    get moti = Parser.first_of!([
       // Explicit motive
-      do Parser {
+      Parser {
         Kind.Parser.text(":");
-        var term = Kind.Parser.term;
+        get term = Kind.Parser.term;
         return Maybe.some!(term);
       },
       // Smart motive
-      do Parser {
+      Parser {
         Kind.Parser.text("!");
         return Maybe.none!;
       },
       // Hole motive
-      do Parser {
+      Parser {
         return Maybe.some!(Kind.Term.hol(Bits.e));
       },
     ]);
-    var orig = Kind.Parser.stop(init);
+    get orig = Kind.Parser.stop(init);
     //let moti = case moti { none: Kind.Term.hol(Bits.e), some: moti.value };
     return Kind.Term.ori(orig, Kind.Term.cse(Bits.e, expr, name, wyth, cses, moti));
   }

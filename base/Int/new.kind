@@ -4,6 +4,6 @@ Int.new(x: Nat, y: Nat): Int
     zero: new(Nat.zero, y),
     succ: case y {
       zero: new(Nat.succ(x.pred), Nat.zero),
-      succ: Int.new(Nat.sub(x.pred, y.pred), Nat.sub(y.pred, x.pred))<P>(new),
+      succ: Int.new(x.pred, y.pred)<P>(new),
     } : P(Int.new(Nat.succ(x.pred), y))
   } : P(Int.new(x, y))

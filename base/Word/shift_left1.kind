@@ -1,0 +1,6 @@
+Word.shift_left1<size: Nat>(word: Word(size)): Word(size)
+  case word {
+    e: Word.e,
+    o: Word.o<word.size>(Word.shift_left1.aux<word.size>(word.pred, Bool.false)),
+    i: Word.o<word.size>(Word.shift_left1.aux<word.size>(word.pred, Bool.true))
+  } : Word(word.size)

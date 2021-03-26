@@ -22,7 +22,7 @@ Examples
 
 ```c
 Main: IO(Unit)
-  do IO {
+  IO {
     IO.print("Hello, world!")
   }
 ```
@@ -44,8 +44,8 @@ sum(list: List(Nat)): Nat
 // List sum using a loop
 sum(list: List(Nat)): Nat
   let sum = 0
-  for x in list:
-    sum = x + sum
+  let sum = for x in list:
+    x + sum
   sum
 ```
 

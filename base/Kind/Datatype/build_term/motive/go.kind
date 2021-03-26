@@ -16,10 +16,10 @@ Kind.Datatype.build_term.motive.go(
       case type {
         new:
           let slf = Kind.Term.ref(name);
-          let slf = for var in type.pars:
-            Kind.Term.app(slf, Kind.Term.ref(case var { new: var.name }));
-          let slf = for var in type.inds:
-            Kind.Term.app(slf, Kind.Term.ref(case var { new: var.name }));
+          let slf = for v in type.pars:
+            Kind.Term.app(slf, Kind.Term.ref(case v { new: v.name }));
+          let slf = for v in type.inds:
+            Kind.Term.app(slf, Kind.Term.ref(case v { new: v.name }));
           Kind.Term.all(Bool.false, "", "", slf, (s,x) Kind.Term.typ)
       }
   }

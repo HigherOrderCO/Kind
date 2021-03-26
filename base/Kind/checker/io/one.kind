@@ -1,6 +1,6 @@
 Kind.checker.io.one(name: String): IO(Unit)
-  do IO {
-    var new_defs = Kind.Synth.one(name, Map.new!);
+  IO {
+    get new_defs = Kind.Synth.one(name, BitsMap.new!);
     case new_defs {
       none:
         let notfound = "Term not found: '" | name | "'."

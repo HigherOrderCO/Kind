@@ -1,0 +1,18 @@
+BitsMap.mut<A: Type>(bits: Bits, ini: A, fun: A -> A, map: BitsMap(A)): BitsMap(A)
+  case bits {
+    e: case map {
+      new: BitsMap.tie!(Maybe.some!(ini), BitsMap.new!, BitsMap.new!),
+      tie: BitsMap.tie!(case map.val {
+        none: Maybe.none!,
+        some: Maybe.some!(fun(map.val.value)),
+      }, map.lft, map.rgt),
+    },
+    o: case map {
+      new: BitsMap.tie!(Maybe.none!, BitsMap.mut!(bits.pred, ini, fun, BitsMap.new!), BitsMap.new!),
+      tie: BitsMap.tie!(map.val, BitsMap.mut!(bits.pred, ini, fun, map.lft), map.rgt),
+    },
+    i: case map {
+      new: BitsMap.tie!(Maybe.none!, BitsMap.new!, BitsMap.mut!(bits.pred, ini, fun, BitsMap.new!)),
+      tie: BitsMap.tie!(map.val, map.lft, BitsMap.mut!(bits.pred, ini, fun, map.rgt)),
+    }
+  }

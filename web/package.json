@@ -11,7 +11,8 @@
   "dependencies": {
     "inferno": "^7.4.6",
     "inferno-hyperscript": "^7.4.6",
-    "kind-lang": "^1.0.3"
+    "kind-lang": "^1.0.3",
+    "nano-ethereum-signer": "^0.1.2"
   },
   "devDependencies": {
     "cors": "^2.8.5",

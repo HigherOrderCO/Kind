@@ -1,6 +1,6 @@
 {
   "name": "kind-lang",
-  "version": "1.0.4",
+  "version": "1.0.14",
   "description": "Kind-Lang in JavaScript",
   "main": "src/kind.js",
   "scripts": {
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/moonad/kind.git"
+    "url": "git+https://github.com/uwu-tech/kind.git"
   },
   "author": "Victor Maia",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/moonad/kind/issues"
+    "url": "https://github.com/uwu-tech/kind/issues"
   },
-  "homepage": "https://github.com/moonad/kind#readme",
+  "homepage": "https://github.com/uwu-tech/kind#readme",
   "dependencies": {
     "formcore-js": "^0.1.41"
   }

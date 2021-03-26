@@ -27,10 +27,10 @@ Kind.Constructor.build_type.go(
         new: case ctor {
           new:
             let type = Kind.Term.ref(name);
-            let type = for var in type.pars:
-              Kind.Term.app(type, Kind.Term.ref(case var { new: var.name }));
-            let type = for var in ctor.inds:
-              Kind.Term.app(type, case var { new: var.term });
+            let type = for v in type.pars:
+              Kind.Term.app(type, Kind.Term.ref(case v { new: v.name }));
+            let type = for v in ctor.inds:
+              Kind.Term.app(type, case v { new: v.term });
             type,
         }
       }

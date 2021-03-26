@@ -1,16 +1,16 @@
 Kind.Parser.datatype: Parser(Kind.Datatype)
-  do Parser {
+  Parser {
     Kind.Parser.text("type ");
-    var name = Kind.Parser.name1; 
-    var pars = Parser.maybe!(Kind.Parser.binder(":"));
-    var inds = Parser.maybe!(do Parser {
+    get name = Kind.Parser.name1; 
+    get pars = Parser.maybe!(Kind.Parser.binder(":"));
+    get inds = Parser.maybe!(Parser {
       Kind.Parser.text("~");
       Kind.Parser.binder(":");
     });
     let pars = Maybe.default!([], pars);
     let inds = Maybe.default!([], inds);
     Kind.Parser.text("{");
-    var ctrs = Parser.until!(
+    get ctrs = Parser.until!(
       Kind.Parser.text("}"),
       Kind.Parser.item!(Kind.Parser.constructor(name)));
     return Kind.Datatype.new(name, pars, inds, ctrs);

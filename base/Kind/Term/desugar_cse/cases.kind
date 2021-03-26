@@ -2,7 +2,7 @@ Kind.Term.desugar_cse.cases(
   expr: Kind.Term,
   name: Kind.Name,
   wyth: List(Kind.Def),
-  cses: Map(Kind.Term),
+  cses: BitsMap(Kind.Term),
   type: Kind.Term,
   defs: Kind.Defs,
   ctxt: Kind.Context,
@@ -17,12 +17,13 @@ Kind.Term.desugar_cse.cases(
           let type = type.body(Kind.Term.var(type.self,0), Kind.Term.var(type.name,0));
           Kind.Term.desugar_cse.cases(expr, name, wyth, cses, type, defs, ctxt),
         none: 
-          for defn in wyth with expr:
-            case defn {
-              new: Kind.Term.app(expr, defn.term)
-            },
+          let expr = for defn in wyth:
+            open defn
+            Kind.Term.app(expr, defn.term)
+          expr
       },
     _:
-      for defn in wyth with expr:
-        Kind.Term.app(expr, case defn { new: defn.term }),
+      let expr = for defn in wyth:
+        Kind.Term.app(expr, case defn { new: defn.term })
+      expr
   }

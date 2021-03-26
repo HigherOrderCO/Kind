@@ -1,4 +1,4 @@
-// Sets the color of the idx voxel of an Image3D
+// BitsSets the color of the idx voxel of an Image3D
 Image3D.set_col(idx: U32, col: U32, img: Image3D): Image3D
   case img {
     new:

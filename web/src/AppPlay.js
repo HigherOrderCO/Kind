@@ -1,6 +1,11 @@
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const apps = require("./apps/index.js");
+const sign = require("nano-ethereum-signer");
+
+function is_valid_hex(bits, hex) {
+  return new RegExp("^0x[0-9A-Fa-f]{"+Math.floor(bits/4)+"}$").test(hex)
+};
 
 module.exports = class AppPlay extends Component {
   constructor(props) {
@@ -73,18 +78,17 @@ module.exports = class AppPlay extends Component {
     //this.events = []; // this application's events
 
     // Init event
-    //this.register_event({
-      //_: "App.Event.init",
-      //time: 0,
-      ////addr: lib.hex_to_fmword(front.get_addr()),
-      //addr: "0x0000000000000000000000000000000000000000",
-      //screen: {
-        //_: "Pair.new",
-        //fst: this.container ? this.container.offsetWidth : 0,
-        //snd: this.container ? this.container.offsetHeight : 0,
-      //},
-      //mouse: this.mouse_pos,
-    //});
+    this.register_event({
+      _: "App.Event.init",
+      time: 0,
+      addr: sign.addressFromKey(KEY),
+      screen: {
+        _: "Pair.new",
+        fst: this.container ? this.container.offsetWidth : 0,
+        snd: this.container ? this.container.offsetHeight : 0,
+      },
+      mouse: this.mouse_pos,
+    });
 
     // Mouse movement
     this.listeners.mousemove = (e) => {
@@ -174,7 +178,7 @@ module.exports = class AppPlay extends Component {
             var p_z = (pos >>> 24) & 0xFF;
             var idx = p_y * canvas.width + p_x;
             var dep = canvas.depth_u8[idx];
-            if (p_z > dep) {
+            if (p_z >= dep) {
               canvas.image_u32[idx] = col;
               canvas.depth_u8[idx] = p_z;
               canvas.clear.data[canvas.clear.length++] = idx;
@@ -206,44 +210,38 @@ module.exports = class AppPlay extends Component {
 
   // Executes an event, returning the updated state
   execute_event(ev, state) {
-    console.log("execute_event", JSON.stringify(ev));
+    //console.log("execute_event", JSON.stringify(ev));
     var actions = this.app.when(ev)(state);
     while (actions._ === "List.cons") {
       var action = actions.head;
-      console.log("execute_action", JSON.stringify(action));
+      //console.log("execute_action", JSON.stringify(action));
       switch (action._) {
         case "App.Action.state":
           state = action.value;
-          console.log("new state", state)
+          //console.log("new state", state)
           break;
         case "App.Action.print":
-          if (!ev.done) {
-            console.log(action.text);
+          console.log(action.text);
+          break;
+        case "App.Action.post":
+          if (is_valid_hex(48, action.room) && is_valid_hex(256, action.data)) {
+            console.log("Posting: ", action.room, action.data);
+            window.KindEvents.send_post(action.room, action.data);
+          } else {
+            console.log("Error: invalid input on App.Action.post");
           }
           break;
-        //case "App.Action.post":
-          //if (!ev.done) {
-            //var data = lib.hex(256, lib.fmword_to_hex(action.data));
-            //front.logs.send_post(lib.fmword_to_hex(action.room), data);
-          //}
-          //break;
-        //case "App.Action.watch":
-          //if (!ev.done) {
-            //front.logs.watch_room(lib.fmword_to_hex(action.room));
-            ////console.log("watching room");
-            //front.logs.on_post(({room, time, addr, data}) => {
-              ////var text = lib.hex_to_string(data).replace(/\0/g,"");
-              ////console.log("got post");
-              //this.register_event({
-                //_: "App.Event.post",
-                //time: parseInt(time.slice(2), 16),
-                //room: lib.hex_to_fmword(room),
-                //addr: lib.hex_to_fmword(addr),
-                //data: lib.hex_to_fmword(data),
-              //});
-            //});
-          //}
-          //break;
+        case "App.Action.watch":
+          if (is_valid_hex(48, action.room)) {
+            window.KindEvents.watch_room(action.room);
+            window.KindEvents.on_post(({room, time, addr, data}) => {
+              var time = parseInt(time.slice(2), 16);
+              this.register_event({_: "App.Event.post", time, room, addr, data});
+            });
+          } else {
+            console.log("Error: invalid input on App.Action.watch");
+          }
+          break;
         case "App.Action.resize":
           this.init_canvas(action.width, action.height);
           break;

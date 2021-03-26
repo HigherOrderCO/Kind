@@ -1,0 +1,17 @@
+Bits.div.go(shift: Nat, sub_copy: Bits, shift_copy: Bits, value: Bits): Bits
+  let {bit_on, new_value} = if Bits.gte(sub_copy, shift_copy) then
+    {true,  Bits.i(value)}
+  else
+    {false, Bits.o(value)}
+
+  case shift {
+    zero:
+      new_value,
+    succ:
+      let new_shift_copy = Bits.shift_right(1, shift_copy)
+      let new_sub_copy = if bit_on then
+        Bits.sub(sub_copy, shift_copy)
+      else
+        sub_copy
+      Bits.div.go(shift.pred, new_sub_copy, new_shift_copy, new_value)
+  }

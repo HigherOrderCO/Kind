@@ -1,0 +1,5 @@
+BitsMap.Row(A : Type,key: Bits, x: A, xs: BitsMap(A)) : Type
+  case BitsMap.get<A>(key,xs) as v {
+    none: Empty,
+    some: Equal(A,x,v.value)
+  }

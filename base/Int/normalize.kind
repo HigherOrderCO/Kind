@@ -1,0 +1,19 @@
+Int.normalize(a: Nat, b: Nat): Either(Int.new(a,b) == Int.new(Nat.sub(a,b),0), Int.new(a,b) == Int.new(0,Nat.sub(b,a)))
+  case a {
+    zero: Either.right!!(refl)
+    succ: case b {
+      zero: Either.left!!(refl)
+      succ: case Int.normalize(a.pred,b.pred) as in {
+        left: 
+          let p0 = in.value
+          let p1 = p0 :: rewrite x in x == _ with Int.succ_both(a.pred,b.pred)
+          let p2 = p1 :: rewrite x in _ == Int.new(x,0) with mirror(Nat.sub.succ_both(a.pred,b.pred))
+          Either.left!!(p2)
+        right:
+          let p0 = in.value
+          let p1 = p0 :: rewrite x in x == _ with Int.succ_both(a.pred,b.pred)
+          let p2 = p1 :: rewrite x in _ == Int.new(0,x) with mirror(Nat.sub.succ_both(b.pred,a.pred))
+          Either.right!!(p2)
+      }!
+    }!
+  }!
