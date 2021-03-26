@@ -4,7 +4,7 @@ Kind.Context.find(name: Kind.Name, ctx: Kind.Context): Maybe(Kind.Term)
 
 Kind.Context.find.go(name: Kind.Name, skip: Nat, ctx: Kind.Context): Maybe(Kind.Term)
   case ctx {
-    nil
+    nil:
       none
     cons:
       open ctx.head

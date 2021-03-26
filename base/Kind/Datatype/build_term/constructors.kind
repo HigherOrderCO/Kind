@@ -1,4 +1,0 @@
-Kind.Datatype.build_term.constructors(type: Kind.Datatype): Kind.Term
-  case type {
-    new: Kind.Datatype.build_term.constructors.go(type, type.name, type.ctrs)
-  }
