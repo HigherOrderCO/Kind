@@ -1,18 +1,11 @@
 Kind.Context.show(context: Kind.Context): String
   case context {
-    nil: "",
+    nil: ""
     cons: case context.head {
       new:
         let name = Kind.Name.show(context.head.fst);
         let type = Kind.Term.show(Kind.Term.normalize(context.head.snd,Kind.Map.new!));
         let rest = Kind.Context.show(context.tail);
-        String.flatten([
-          rest,
-          "- ",
-          name,
-          ": ",
-          type,
-          "\n",
-        ])
+        rest | "- " | name | ": " | type | "\n"
     }
   }
