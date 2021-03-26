@@ -9,7 +9,7 @@ Kind.Parser.case: Parser(Kind.Term)
       Kind.Parser.name1;
     });
     let name = case name {
-      none: case Kind.Term.reduce(expr, BitsMap.new!) as expr {
+      none: case Kind.Term.reduce(expr, Kind.Map.new!) as expr {
         ref: expr.name,
         var: expr.name,
         _: Kind.Name.read("self"),

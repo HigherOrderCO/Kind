@@ -1,8 +1,8 @@
 Kind.to_core.io.one(name: String): IO(String)
   IO {
-    get new_defs = Kind.Synth.one(name, BitsMap.new!);
+    get new_defs = Kind.Synth.one(name, Kind.Map.new!);
     let defs = case new_defs {
-      none: BitsMap.new!,
+      none: Kind.Map.new!,
       some: new_defs.value,
     };
     let defs = BitsMap.map!!(

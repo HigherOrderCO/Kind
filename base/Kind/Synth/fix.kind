@@ -16,7 +16,7 @@ Kind.Synth.fix(
       if fixd then IO {
         let type = Kind.Term.bind([], (x) Bits.i(x), type);
         let term = Kind.Term.bind([], (x) Bits.o(x), term);
-        let defs = Kind.set!(name, Kind.Def.new(file, code, orig, name, term, type, isct, arit, Kind.Status.init), defs);
+        let defs = Kind.Map.set!(name, Kind.Def.new(file, code, orig, name, term, type, isct, arit, Kind.Status.init), defs);
         return Maybe.some!(defs);
       } else IO {
         return Maybe.none!;

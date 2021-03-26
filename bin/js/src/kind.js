@@ -1087,11 +1087,11 @@ module.exports = (function() {
     const Bits$reverse = x0 => Bits$reverse$(x0);
     const Kind$Name$to_bits = a0 => (kind_name_to_bits(a0));
 
-    function Kind$get$(_name$2, _map$3) {
+    function Kind$Map$get$(_name$2, _map$3) {
         var $196 = BitsMap$get$((kind_name_to_bits(_name$2)), _map$3);
         return $196;
     };
-    const Kind$get = x0 => x1 => Kind$get$(x0, x1);
+    const Kind$Map$get = x0 => x1 => Kind$Map$get$(x0, x1);
 
     function IO$get_file$(_name$1) {
         var $197 = IO$ask$("get_file", _name$1, (_file$2 => {
@@ -5917,7 +5917,7 @@ module.exports = (function() {
         switch (self._) {
             case 'Kind.Term.ref':
                 var $2160 = self.name;
-                var self = Kind$get$($2160, _defs$2);
+                var self = Kind$Map$get$($2160, _defs$2);
                 switch (self._) {
                     case 'Maybe.some':
                         var $2162 = self.value;
@@ -6024,6 +6024,7 @@ module.exports = (function() {
     const BitsMap$new = ({
         _: 'BitsMap.new'
     });
+    const Kind$Map$new = BitsMap$new;
 
     function Kind$Def$new$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, _stat$9) {
         var $2190 = ({
@@ -6413,7 +6414,7 @@ module.exports = (function() {
                                                         var _name$18 = $2346;
                                                         break;
                                                     case 'Maybe.none':
-                                                        var self = Kind$Term$reduce$($2327, BitsMap$new);
+                                                        var self = Kind$Term$reduce$($2327, Kind$Map$new);
                                                         switch (self._) {
                                                             case 'Kind.Term.var':
                                                                 var $2348 = self.name;
@@ -6674,11 +6675,11 @@ module.exports = (function() {
     };
     const Kind$Parser$case = x0 => x1 => Kind$Parser$case$(x0, x1);
 
-    function Kind$set$(_name$2, _val$3, _map$4) {
+    function Kind$Map$set$(_name$2, _val$3, _map$4) {
         var $2448 = BitsMap$set$((kind_name_to_bits(_name$2)), _val$3, _map$4);
         return $2448;
     };
-    const Kind$set = x0 => x1 => x2 => Kind$set$(x0, x1, x2);
+    const Kind$Map$set = x0 => x1 => x2 => Kind$Map$set$(x0, x1, x2);
 
     function Kind$Parser$open$(_idx$1, _code$2) {
         var self = Kind$Parser$init$(_idx$1, _code$2);
@@ -6782,7 +6783,7 @@ module.exports = (function() {
                                                                 var _name$21 = $2504;
                                                                 break;
                                                             case 'Maybe.none':
-                                                                var self = Kind$Term$reduce$($2478, BitsMap$new);
+                                                                var self = Kind$Term$reduce$($2478, Kind$Map$new);
                                                                 switch (self._) {
                                                                     case 'Kind.Term.var':
                                                                         var $2506 = self.name;
@@ -6829,7 +6830,7 @@ module.exports = (function() {
                                                                 var $2515 = self.idx;
                                                                 var $2516 = self.code;
                                                                 var $2517 = self.val;
-                                                                var _cses$26 = Kind$set$("_", $2517, BitsMap$new);
+                                                                var _cses$26 = Kind$Map$set$("_", $2517, Kind$Map$new);
                                                                 var _moti$27 = Maybe$some$(Kind$Term$hol$(Bits$e));
                                                                 var self = Kind$Parser$stop$($2456, $2515, $2516);
                                                                 switch (self._) {
@@ -9764,7 +9765,7 @@ module.exports = (function() {
             var $3664 = Kind$Status$init;
             var _stat$11 = $3664;
         };
-        var $3662 = Kind$set$(_name$4, Kind$Def$new$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, _stat$11), _defs$10);
+        var $3662 = Kind$Map$set$(_name$4, Kind$Def$new$(_file$1, _code$2, _orig$3, _name$4, _term$5, _type$6, _isct$7, _arit$8, _stat$11), _defs$10);
         return $3662;
     };
     const Kind$define = x0 => x1 => x2 => x3 => x4 => x5 => x6 => x7 => x8 => x9 => Kind$define$(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9);
@@ -11582,7 +11583,7 @@ module.exports = (function() {
                         case 'Either.right':
                             var $4216 = self.value;
                             var _defs$9 = $4216;
-                            var self = Kind$get$(_name$1, _defs$9);
+                            var self = Kind$Map$get$(_name$1, _defs$9);
                             switch (self._) {
                                 case 'Maybe.none':
                                     var $4218 = Kind$Synth$load$go$(_name$1, $4212, _defs$9);
@@ -12760,7 +12761,7 @@ module.exports = (function() {
                         var $4516 = self.name;
                         var $4517 = self.xtyp;
                         var $4518 = self.body;
-                        var _got$13 = Maybe$or$(Kind$get$($4516, _cses$4), Kind$get$("_", _cses$4));
+                        var _got$13 = Maybe$or$(Kind$Map$get$($4516, _cses$4), Kind$Map$get$("_", _cses$4));
                         var self = _got$13;
                         switch (self._) {
                             case 'Maybe.some':
@@ -13143,7 +13144,7 @@ module.exports = (function() {
                     var $4603 = Kind$Check$result$(Maybe$some$(Bool$false), List$nil);
                     var $4602 = $4603;
                 } else {
-                    var $4604 = Kind$Check$result$(Maybe$some$(Bool$true), List$cons$(Kind$Error$patch$(_path$1, Kind$Term$normalize$(_term$2, BitsMap$new)), List$nil));
+                    var $4604 = Kind$Check$result$(Maybe$some$(Bool$true), List$cons$(Kind$Error$patch$(_path$1, Kind$Term$normalize$(_term$2, Kind$Map$new)), List$nil));
                     var $4602 = $4604;
                 };
                 var $4601 = $4602;
@@ -13733,8 +13734,8 @@ module.exports = (function() {
     const Bool$eql = x0 => x1 => Bool$eql$(x0, x1);
 
     function Kind$Term$equal$(_a$1, _b$2, _defs$3, _lv$4, _seen$5) {
-        var _ah$6 = Kind$Term$serialize$(Kind$Term$reduce$(_a$1, BitsMap$new), _lv$4, _lv$4, Bits$o, Bits$e);
-        var _bh$7 = Kind$Term$serialize$(Kind$Term$reduce$(_b$2, BitsMap$new), _lv$4, _lv$4, Bits$i, Bits$e);
+        var _ah$6 = Kind$Term$serialize$(Kind$Term$reduce$(_a$1, Kind$Map$new), _lv$4, _lv$4, Bits$o, Bits$e);
+        var _bh$7 = Kind$Term$serialize$(Kind$Term$reduce$(_b$2, Kind$Map$new), _lv$4, _lv$4, Bits$i, Bits$e);
         var self = (_bh$7 === _ah$6);
         if (self) {
             var $4751 = Kind$Check$result$(Maybe$some$(Bool$true), List$nil);
@@ -14347,7 +14348,7 @@ module.exports = (function() {
                 break;
             case 'Kind.Term.ref':
                 var $4906 = self.name;
-                var self = Kind$get$($4906, _defs$3);
+                var self = Kind$Map$get$($4906, _defs$3);
                 switch (self._) {
                     case 'Maybe.some':
                         var $4908 = self.value;
@@ -14892,7 +14893,7 @@ module.exports = (function() {
                                             case 'Maybe.some':
                                                 var $5075 = self.value;
                                                 var _size$18 = (list_length(_ctx$4));
-                                                var _typv$19 = Kind$Term$normalize$($5075, BitsMap$new);
+                                                var _typv$19 = Kind$Term$normalize$($5075, Kind$Map$new);
                                                 var _moti$20 = Kind$SmartMotive$make$($5062, $5061, $5070, _typv$19, _size$18, _defs$3);
                                                 var $5076 = _moti$20;
                                                 var _moti$17 = $5076;
@@ -15408,7 +15409,7 @@ module.exports = (function() {
                         var $5227 = (_x$13 + '0');
                         return $5227;
                     }), _term$5);
-                    var _defs$14 = Kind$set$(_name$4, Kind$Def$new$(_file$1, _code$2, _orig$3, _name$4, _term$13, _type$12, _isct$7, _arit$8, Kind$Status$init), _defs$9);
+                    var _defs$14 = Kind$Map$set$(_name$4, Kind$Def$new$(_file$1, _code$2, _orig$3, _name$4, _term$13, _type$12, _isct$7, _arit$8, Kind$Status$init), _defs$9);
                     var $5225 = IO$monad$((_m$bind$15 => _m$pure$16 => {
                         var $5228 = _m$pure$16;
                         return $5228;
@@ -15438,7 +15439,7 @@ module.exports = (function() {
     const Kind$Status$fail = x0 => Kind$Status$fail$(x0);
 
     function Kind$Synth$one$(_name$1, _defs$2) {
-        var self = Kind$get$(_name$1, _defs$2);
+        var self = Kind$Map$get$(_name$1, _defs$2);
         switch (self._) {
             case 'Maybe.some':
                 var $5233 = self.value;
@@ -15466,7 +15467,7 @@ module.exports = (function() {
                         var self = _stat$21;
                         switch (self._) {
                             case 'Kind.Status.init':
-                                var _defs$22 = Kind$set$(_name$16, Kind$Def$new$(_file$13, _code$14, _orig$15, _name$16, _term$17, _type$18, _isct$19, _arit$20, Kind$Status$wait), _defs$2);
+                                var _defs$22 = Kind$Map$set$(_name$16, Kind$Def$new$(_file$13, _code$14, _orig$15, _name$16, _term$17, _type$18, _isct$19, _arit$20, Kind$Status$wait), _defs$2);
                                 var self = Kind$Term$check$(_type$18, Maybe$some$(Kind$Term$typ), _defs$22, List$nil, Kind$MPath$i$(Kind$MPath$nil), Maybe$none);
                                 switch (self._) {
                                     case 'Kind.Check.result':
@@ -15546,7 +15547,7 @@ module.exports = (function() {
                                                         break;
                                                     case 'Maybe.none':
                                                         var _stat$27 = Kind$Status$fail$($5262);
-                                                        var _defs$28 = Kind$set$(_name$16, Kind$Def$new$(_file$13, _code$14, _orig$15, _name$16, _term$17, _type$18, _isct$19, _arit$20, _stat$27), _defs$22);
+                                                        var _defs$28 = Kind$Map$set$(_name$16, Kind$Def$new$(_file$13, _code$14, _orig$15, _name$16, _term$17, _type$18, _isct$19, _arit$20, _stat$27), _defs$22);
                                                         var $5271 = IO$monad$((_m$bind$29 => _m$pure$30 => {
                                                             var $5272 = _m$pure$30;
                                                             return $5272;
@@ -15663,7 +15664,7 @@ module.exports = (function() {
                 var _inli$4 = BitsSet$has$((kind_name_to_bits($5296)), Kind$Term$inline$names);
                 var self = _inli$4;
                 if (self) {
-                    var self = Kind$get$($5296, _defs$2);
+                    var self = Kind$Map$get$($5296, _defs$2);
                     switch (self._) {
                         case 'Maybe.some':
                             var $5299 = self.value;
@@ -16240,7 +16241,7 @@ module.exports = (function() {
         var $5469 = IO$monad$((_m$bind$2 => _m$pure$3 => {
             var $5470 = _m$bind$2;
             return $5470;
-        }))(Kind$Synth$one$(_name$1, BitsMap$new))((_new_defs$2 => {
+        }))(Kind$Synth$one$(_name$1, Kind$Map$new))((_new_defs$2 => {
             var self = _new_defs$2;
             switch (self._) {
                 case 'Maybe.some':
@@ -16249,7 +16250,7 @@ module.exports = (function() {
                     var _defs$3 = $5473;
                     break;
                 case 'Maybe.none':
-                    var $5474 = BitsMap$new;
+                    var $5474 = Kind$Map$new;
                     var _defs$3 = $5474;
                     break;
             };
@@ -16906,7 +16907,7 @@ module.exports = (function() {
             let _name$4;
             while ($5644._ === 'List.cons') {
                 _name$4 = $5644.head;
-                var self = Kind$get$(_name$4, _defs$1);
+                var self = Kind$Map$get$(_name$4, _defs$1);
                 switch (self._) {
                     case 'Maybe.some':
                         var $5645 = self.value;
@@ -17046,7 +17047,7 @@ module.exports = (function() {
                         var $5675 = self.fst;
                         var $5676 = self.snd;
                         var _name$6 = Kind$Name$show$($5675);
-                        var _type$7 = Kind$Term$show$(Kind$Term$normalize$($5676, BitsMap$new));
+                        var _type$7 = Kind$Term$show$(Kind$Term$normalize$($5676, Kind$Map$new));
                         var _rest$8 = Kind$Context$show$($5673);
                         var $5677 = String$flatten$(List$cons$(_rest$8, List$cons$("- ", List$cons$(_name$6, List$cons$(": ", List$cons$(_type$7, List$cons$("\u{a}", List$nil)))))));
                         var $5674 = $5677;
@@ -17069,7 +17070,7 @@ module.exports = (function() {
             switch (self._) {
                 case 'Kind.Term.ref':
                     var $5681 = self.name;
-                    var self = Kind$get$($5681, _defs$3);
+                    var self = Kind$Map$get$($5681, _defs$3);
                     switch (self._) {
                         case 'Maybe.some':
                             var $5683 = self.value;
@@ -17126,7 +17127,7 @@ module.exports = (function() {
                 break;
             case 'Kind.Term.ref':
                 var $5693 = self.name;
-                var self = Kind$get$($5693, _defs$2);
+                var self = Kind$Map$get$($5693, _defs$2);
                 switch (self._) {
                     case 'Maybe.some':
                         var $5695 = self.value;
@@ -17257,7 +17258,7 @@ module.exports = (function() {
     const Kind$Term$expand_ct = x0 => x1 => x2 => Kind$Term$expand_ct$(x0, x1, x2);
 
     function Kind$Term$expand$(_dref$1, _term$2, _defs$3) {
-        var _term$4 = Kind$Term$normalize$(_term$2, BitsMap$new);
+        var _term$4 = Kind$Term$normalize$(_term$2, Kind$Map$new);
         var _term$5 = (() => {
             var $5751 = _term$4;
             var $5752 = _dref$1;
@@ -17266,9 +17267,9 @@ module.exports = (function() {
             while ($5752._ === 'List.cons') {
                 _path$5 = $5752.head;
                 var _term$7 = Kind$Term$expand_at$(_path$5, _term$6, _defs$3);
-                var _term$8 = Kind$Term$normalize$(_term$7, BitsMap$new);
+                var _term$8 = Kind$Term$normalize$(_term$7, Kind$Map$new);
                 var _term$9 = Kind$Term$expand_ct$(_term$8, _defs$3, 0n);
-                var _term$10 = Kind$Term$normalize$(_term$9, BitsMap$new);
+                var _term$10 = Kind$Term$normalize$(_term$9, Kind$Map$new);
                 var $5751 = _term$10;
                 _term$6 = $5751;
                 $5752 = $5752.tail;
@@ -17296,7 +17297,7 @@ module.exports = (function() {
                         break;
                     case 'Either.right':
                         var $5760 = self.value;
-                        var $5761 = Kind$Term$show$(Kind$Term$normalize$($5760, BitsMap$new));
+                        var $5761 = Kind$Term$show$(Kind$Term$normalize$($5760, Kind$Map$new));
                         var _expected$7 = $5761;
                         break;
                 };
@@ -17309,7 +17310,7 @@ module.exports = (function() {
                         break;
                     case 'Either.right':
                         var $5764 = self.value;
-                        var $5765 = Kind$Term$show$(Kind$Term$normalize$($5764, BitsMap$new));
+                        var $5765 = Kind$Term$show$(Kind$Term$normalize$($5764, Kind$Map$new));
                         var _detected$8 = $5765;
                         break;
                 };
@@ -17445,7 +17446,7 @@ module.exports = (function() {
             while ($5804._ === 'List.cons') {
                 _key$3 = $5804.head;
                 var _name$5 = Kind$Name$from_bits$(_key$3);
-                var self = Kind$get$(_name$5, _defs$1);
+                var self = Kind$Map$get$(_name$5, _defs$1);
                 switch (self._) {
                     case 'Maybe.some':
                         var $5805 = self.value;
@@ -17560,7 +17561,7 @@ module.exports = (function() {
         var $5832 = IO$monad$((_m$bind$2 => _m$pure$3 => {
             var $5833 = _m$bind$2;
             return $5833;
-        }))(Kind$Synth$one$(_name$1, BitsMap$new))((_new_defs$2 => {
+        }))(Kind$Synth$one$(_name$1, Kind$Map$new))((_new_defs$2 => {
             var self = _new_defs$2;
             switch (self._) {
                 case 'Maybe.some':
@@ -17667,7 +17668,7 @@ module.exports = (function() {
         var $5861 = IO$monad$((_m$bind$2 => _m$pure$3 => {
             var $5862 = _m$bind$2;
             return $5862;
-        }))(Kind$Synth$file$(_file$1, BitsMap$new))((_loaded$2 => {
+        }))(Kind$Synth$file$(_file$1, Kind$Map$new))((_loaded$2 => {
             var self = _loaded$2;
             switch (self._) {
                 case 'Either.left':
@@ -17742,7 +17743,7 @@ module.exports = (function() {
     const IO$purify = x0 => IO$purify$(x0);
 
     function Kind$checker$code$(_code$1) {
-        var self = Kind$Defs$read$("Main.kind", _code$1, BitsMap$new);
+        var self = Kind$Defs$read$("Main.kind", _code$1, Kind$Map$new);
         switch (self._) {
             case 'Either.left':
                 var $5880 = self.value;
@@ -17856,7 +17857,7 @@ module.exports = (function() {
         'Bits.reverse.tco': Bits$reverse$tco,
         'Bits.reverse': Bits$reverse,
         'Kind.Name.to_bits': Kind$Name$to_bits,
-        'Kind.get': Kind$get,
+        'Kind.Map.get': Kind$Map$get,
         'IO.get_file': IO$get_file,
         'Parser.Reply': Parser$Reply,
         'Parser.Reply.value': Parser$Reply$value,
@@ -17955,6 +17956,7 @@ module.exports = (function() {
         'Kind.Term.unroll_str': Kind$Term$unroll_str,
         'Kind.Term.reduce': Kind$Term$reduce,
         'BitsMap.new': BitsMap$new,
+        'Kind.Map.new': Kind$Map$new,
         'Kind.Def.new': Kind$Def$new,
         'Kind.Status.init': Kind$Status$init,
         'Kind.Parser.case.with': Kind$Parser$case$with,
@@ -17964,7 +17966,7 @@ module.exports = (function() {
         'BitsMap.from_list': BitsMap$from_list,
         'Kind.Term.cse': Kind$Term$cse,
         'Kind.Parser.case': Kind$Parser$case,
-        'Kind.set': Kind$set,
+        'Kind.Map.set': Kind$Map$set,
         'Kind.Parser.open': Kind$Parser$open,
         'Kind.Parser.without': Kind$Parser$without,
         'Kind.Parser.switch.case': Kind$Parser$switch$case,

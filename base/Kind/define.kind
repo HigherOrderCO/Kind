@@ -12,4 +12,4 @@ Kind.define(
 ): Kind.Defs
   //let skip = Debug.log!(String.flatten(["define: ", name]), (x) Unit.new);
   let stat = if done then Kind.Status.done else Kind.Status.init;
-  Kind.set!(name, Kind.Def.new(file, code, orig, name, term, type, isct, arit, stat), defs)
+  Kind.Map.set!(name, Kind.Def.new(file, code, orig, name, term, type, isct, arit, stat), defs)

@@ -1,5 +1,5 @@
 Kind.checker.code(code: String): String
-  case Kind.Defs.read("Main.kind", code, BitsMap.new!) as read {
+  case Kind.Defs.read("Main.kind", code, Kind.Map.new!) as read {
     left:
       read.value,
     right: IO.purify<String>(IO {

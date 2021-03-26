@@ -16,7 +16,7 @@ Kind.Defs.report.errors(defs: Kind.Defs): String
   let errors = ""
   let errors = for key in BitsMap.keys!(defs):
     let name = Kind.Name.from_bits(key)
-    case Kind.get!(name, defs) as got {
+    case Kind.Map.get!(name, defs) as got {
       none:
         errors
       some:
@@ -52,7 +52,7 @@ Kind.Defs.report.errors(defs: Kind.Defs): String
 Kind.Defs.report.types(defs: Kind.Defs, names: List(Kind.Name)): String
   let types = ""
   let types = for name in names:
-    case Kind.get!(name, defs) as got {
+    case Kind.Map.get!(name, defs) as got {
       none:
         types
       some:
