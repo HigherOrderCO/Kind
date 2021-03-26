@@ -8,8 +8,4 @@ Kind.escape.char(chr: Char): String
   else if U16.btw(' ', chr, '~') then
     String.cons(chr, String.nil)
   else
-    String.flatten([
-      String.cons(Kind.backslash, String.nil),
-      "u{", U16.show_hex(chr), "}",
-      String.nil,
-    ])
+    String.cons(Kind.backslash, String.nil) | "u{" | U16.show_hex(chr) | "}"

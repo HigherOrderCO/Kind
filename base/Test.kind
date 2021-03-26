@@ -1,7 +1,9 @@
-Test: _
-  let sum = 0
-  let sum = for x from 0 to 10:
-    let sum = for y from 0 to 10:
-      sum + 1
-    sum
-  sum
+Nat.random(s: Nat): Nat
+  let m =	1664525
+  let i = 1013904223
+  let q = 4294967296
+  Nat.mod(Nat.add(Nat.mul(s, m), i), q)
+
+Test: Nat
+  let seed = 81681681681
+  Nat.random(seed)
