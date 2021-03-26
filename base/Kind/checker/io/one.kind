@@ -1,12 +1,13 @@
 Kind.checker.io.one(name: String): IO(Unit)
   IO {
-    get new_defs = Kind.Synth.one(name, Kind.Map.new!);
+    get new_defs = Kind.Synth.one(name, Kind.Map.new!)
     case new_defs {
       none:
         let notfound = "Term not found: '" | name | "'."
         let filelist = List.mapped!(Kind.Synth.files_of(name))!((x) "'" | x | "'")
         let searched = "Searched on: " | String.join(", ",filelist) | "."
         IO.print(notfound | "\n" | searched)
-      some: IO.print(Kind.Defs.report(new_defs.value, [name])),
+      some:
+        IO.print(Kind.Defs.report(new_defs.value, [name]))
     }
   }
