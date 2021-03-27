@@ -1,0 +1,262 @@
+// Returs true if both inputs are true
+User.rigille.Bool.and(a: Bool, b: Bool): Bool
+  case a {
+	  true: b
+	  false: Bool.false
+  }
+
+// Returs true if any input is true
+User.rigille.Bool.or(a: Bool, b: Bool): Bool
+  case a {
+	  true: Bool.true
+	  false: b
+  }
+
+// Returs true if both inputs are equal
+User.rigille.Bool.eql(a: Bool, b: Bool): Bool
+  case a {
+	  true: b
+	  false: Bool.not(b)
+  }
+
+// Returns the first element of a pair
+User.rigille.Pair.first<A: Type, B: Type>(pair: Pair<A,B>): A
+  open pair
+  pair.fst
+
+// Inverses the order of the elements of a pair
+User.rigille.Pair.swap<A: Type, B: Type>(pair: Pair<A,B>): Pair<B,A>
+  open pair
+  Pair.new!!(pair.snd, pair.fst)
+
+// Applies a function to both elements of a Pair
+User.rigille.Pair.map<A: Type, B: Type>(pair: Pair<A,A>, fn: A -> B): Pair<B,B>
+  open pair
+  Pair.new!!(fn(pair.fst), fn(pair.snd))
+
+// Doubles a number
+User.rigille.Nat.double(n: Nat): Nat
+  case n {
+    zero: Nat.zero
+    succ: Nat.succ(Nat.succ(n.pred))
+  }!
+
+// Adds two numbers
+User.rigille.Nat.add(a: Nat, b: Nat): Nat
+  case a {
+    zero: b,
+    succ: Nat.succ(Nat.add(a.pred, b)),
+  }
+
+// Subtracts two numbers
+User.rigille.Nat.sub(a: Nat, b: Nat): Nat
+  case a {
+    zero: Nat.zero,
+    succ: case b {
+      zero: a,
+      succ: Nat.sub(a.pred, b.pred),
+    }
+  }
+
+// Multiplies two numbers
+User.rigille.Nat.mul(a: Nat, b: Nat): Nat
+  case a {
+    zero: Nat.zero,
+    succ: case b {
+      zero: Nat.zero,
+      succ: b + Nat.mul(a.pred, b),
+    }
+  }
+
+User.rigille.Nat.lte(a: Nat, b: Nat): Bool
+  case a {
+    zero: true,
+    succ: case b {
+      zero: false,
+      succ: User.rigille.Nat.lte(a.pred, b.pred),
+    }
+  }
+// Returns true if a < b
+User.rigille.Nat.ltn(a: Nat, b: Nat): Bool
+  User.rigille.Nat.lte(Nat.succ(a), b)
+
+// Returns true if a == b
+User.rigille.Nat.eql(a: Nat, b: Nat): Bool
+  case a {
+    zero: case b {
+      zero: true,
+      succ: false,
+    },
+    succ: case b {
+      zero: false,
+      succ: Nat.eql(a.pred, b.pred),
+    },
+  }
+
+// Returns true if a > b
+User.rigille.Nat.gtn(a: Nat, b: Nat): Bool
+  User.rigille.Nat.ltn(b, a)
+
+// Returns the first element of a List
+User.rigille.List.head<A: Type>(xs: List<A>): Maybe(A)
+  case xs {
+    nil: Maybe.none!,
+    cons: Maybe.some!(xs.head),
+  }
+
+// Returns the list without the first element
+User.rigille.List.tail<A: Type>(xs: List<A>): Maybe(List<A>)
+  case xs {
+    nil: Maybe.none!,
+    cons: Maybe.some!(xs.tail),
+  }
+
+// Returns the length of a list
+User.rigille.List.length<A: Type>(xs: List<A>): Nat
+  case xs {
+    nil: Nat.zero,
+    cons: Nat.succ(User.rigille.List.length!(xs.tail)),
+  }
+
+// Applies a function to all elements of a list
+User.rigille.List.map<A: Type, B: Type>(xs: List<A>, fn: A -> B): List<B>
+  case xs {
+    nil: List.nil!,
+    cons: List.cons!(fn(xs.head), User.rigille.List.map!!(xs.tail, fn)),
+  }
+
+// Returns the same list, with the order reversed
+User.rigille.List.reverse<A: Type>(xs: List<A>): List<A>
+  case xs {
+    nil: List.nil!,
+    cons: List.concat!(xs.tail, [xs.head]),
+  }
+
+// Returns pairs of the elements of the 2 input lists on the same index
+// User.rigille.: List.zip!!([1,2], ["a","b"]) == [{1,"a"},{2,"b"}]
+User.rigille.List.zip<A: Type, B: Type>(xs: List<A>, ys: List<B>): List<Pair<A,B>>
+  case xs {
+    nil: List.nil!,
+    cons: case ys {
+      nil: List.nil!,
+      cons: List.cons!(Pair.new!!(xs.head, ys.head), List.zip!!(xs.tail, ys.tail))
+    }
+  }
+
+User.rigille.List.min.aux(n: Nat, xs: List<Nat>): Nat
+  case xs {
+    nil: n,
+    cons: case User.rigille.Nat.ltn(n, xs.head) {
+      true: User.rigille.List.min.aux(n, xs.tail),
+      false: User.rigille.List.min.aux(xs.head, xs.tail),
+    },
+  }
+
+// Returns the smallest element of a List
+User.rigille.List.min(xs: List<Nat>): Nat
+  case xs {
+    nil: Nat.zero,
+    cons: User.rigille.List.min.aux(xs.head, xs.tail)
+  }
+
+// Returns the same list without the smallest element
+User.rigille.List.remove_min(xs: List<Nat>): List<Nat>
+  let min = User.rigille.List.min(xs)
+  case xs {
+    nil: List.nil!,
+    cons: case Nat.eql(xs.head, min) {
+      true: xs.tail,
+      false: List.cons!(xs.head, xs.tail),
+    },
+  }
+
+// Returns the same list, in ascending order
+User.rigille.List.sort(xs: List<Nat>): List<Nat>
+  case xs {
+    nil: xs,
+    cons: List.cons!(User.rigille.List.min(xs), User.rigille.List.sort(User.rigille.List.remove_min(xs))),
+  }
+  
+// PROOFS
+
+User.rigille.p0: true == true
+  refl
+
+p1(a: Bool): Bool.and(false, a) == false
+  refl
+
+p2(a: Bool): Bool.and(a, false) == false
+  case a {
+    true: refl,
+    false: refl,
+  }!
+
+p3(a: Bool): Bool.or(true, a) == true
+  refl
+
+p4(a: Bool): Bool.or(a, true) == true
+  case a {
+    true: refl,
+    false: refl,
+  }!
+
+p5(a: Bool): Bool.eql(a, a) == true
+  case a {
+    true: refl,
+    false: refl,
+  }!
+
+p6(a: Bool): Bool.not(Bool.not(a)) == a
+  case a {
+    true: refl,
+    false: refl,
+  }!
+
+p7(a: Bool, b: Bool): Bool.not(Bool.and(a,b)) == Bool.or(Bool.not(a), Bool.not(b))
+  case a {
+    true: ?a-10-,
+    false: ?b,
+  }!
+
+//p8(a: Bool, b: Bool): Bool.not(Bool.or(a,b)) == Bool.and(Bool.not(a), Bool.not(b))
+  //?a
+
+//p9(n: Nat): Nat.same(n) == n
+  //?a
+
+//p10(n: Nat): Nat.half(Nat.double(n)) == n
+  //?a
+
+//p11(n: Nat): Nat.add(0,n) == n
+  //?a
+
+//p12(n: Nat): Nat.add(n,0) == n
+  //?a
+
+//p13(n: Nat, m: Nat): Nat.add(Nat.succ(n),m) == Nat.succ(Nat.add(n,m))
+  //?a
+  
+//p14(n: Nat, m: Nat): Nat.add(n,Nat.succ(m)) == Nat.succ(Nat.add(n,m))
+  //?a
+
+//p15(n: Nat, m: Nat): Nat.add(n, m) == Nat.add(m, n)
+  //?a
+
+//p16(n: Nat): Nat.add(n,n) == Nat.double(n)
+  //?a
+
+//p17(n: Nat): Nat.ltn(n, Nat.succ(m)) == true
+  //?a
+
+//p18(n: Nat): Nat.gtn(Nat.succ(n), m) == true
+  //?a
+//
+//p19(n: Nat): Nat.sub(n,n) == 0
+  //?a
+//
+//p20(n: Nat): Nat.add(n,n) == Nat.mul(n,2)
+  //?a
+//
+//p21(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
+  //?a
+>>>>>>> Stashed changes
