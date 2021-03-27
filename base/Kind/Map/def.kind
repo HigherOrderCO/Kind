@@ -1,4 +1,4 @@
-Kind.define(
+Kind.Map.def(
   file: String,
   code: String,
   orig: Pair(Nat,Nat),

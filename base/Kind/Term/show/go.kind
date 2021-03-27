@@ -11,7 +11,7 @@ Kind.Term.show.go(term: Kind.Term, path: Maybe(Bits -> Bits)): String
           some: 
             let path_val = Bits.concat(Kind.Path.to_bits(path.value), Bits.i(Bits.e));
             let path_str = Nat.show(Bits.to_nat(path_val));
-            String.flatten([name, Kind.color("2", String.concat("-", path_str))]),
+            String.flatten([name, Kind.Code.color("2", String.concat("-", path_str))]),
         },
       var:
         Kind.Name.show(term.name),
@@ -64,9 +64,9 @@ Kind.Term.show.go(term: Kind.Term, path: Maybe(Bits -> Bits)): String
       nat:
         String.flatten([Nat.show(term.natx)]),
       chr:
-        String.flatten(["'", Kind.escape.char(term.chrx), "'"]),
+        String.flatten(["'", Kind.Code.escape.char(term.chrx), "'"]),
       str:
-        String.flatten(["\"", Kind.escape(term.strx), "\""]),
+        String.flatten(["\"", Kind.Code.escape(term.strx), "\""]),
       cse:
         let expr = Kind.Term.show.go(term.expr, Kind.MPath.o(path));
         let name = Kind.Name.show(term.name);

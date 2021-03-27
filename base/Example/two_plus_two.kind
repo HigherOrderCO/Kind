@@ -1,0 +1,4 @@
+Example.two_plus_two: Nat
+  let x = 2
+  let y = 2
+  x + y

@@ -1,4 +1,4 @@
-Kind.to_core.io.one(name: String): IO(String)
+Kind.api.io.term_to_core(name: String): IO(String)
   IO {
     get new_defs = Kind.Synth.one(name, Kind.Map.new!);
     let defs = case new_defs {

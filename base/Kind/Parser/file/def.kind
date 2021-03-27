@@ -13,6 +13,6 @@ Kind.Parser.file.def(file: String, code: String, defs: Kind.Defs): Parser(Kind.D
     let term = Kind.Parser.make_lambda(List.mapped!(args)!((x) case x { new: x.name }),term);
     let type = Kind.Term.bind([], (x) Bits.i(x), type);
     let term = Kind.Term.bind([], (x) Bits.o(x), term);
-    let defs = Kind.define(file, code, orig, name, term, type, false, arit, false, defs);
+    let defs = Kind.Map.def(file, code, orig, name, term, type, false, arit, false, defs);
     return defs;
   }

@@ -1,4 +1,5 @@
-Kind.checker.io.one(name: String): IO(Unit)
+// TODO: remove duplicate code on Kind/api/io/normalize_term.kind
+Kind.api.io.check_term(name: String): IO(Unit)
   IO {
     get new_defs = Kind.Synth.one(name, Kind.Map.new!)
     case new_defs {

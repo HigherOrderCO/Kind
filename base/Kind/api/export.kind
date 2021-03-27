@@ -1,0 +1,12 @@
+Kind.api.export: IO(Unit)
+  IO {
+    let e = Kind.api.io.term_to_core
+    let e = Kind.api.io.check_file
+    let e = Kind.api.io.check_files
+    let e = Kind.api.io.check_term
+    let e = Kind.api.io.show_term
+    let e = Kind.api.io.show_term_normal
+    let e = Kind.api.check_code
+    let e = Kind.Term.read;
+    return unit;
+  }

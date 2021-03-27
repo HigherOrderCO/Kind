@@ -11,5 +11,5 @@ execSync("git checkout "+kind_path);
 
 // Creates kind.js
 console.log("Generating kind.js");
-execSync("kind Kind --js --module | js-beautify >> "+kind_path+".tmp");
+execSync("kind Kind.api.export --js --module | js-beautify >> "+kind_path+".tmp");
 execSync("mv "+kind_path+".tmp "+kind_path);

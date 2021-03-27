@@ -1,18 +1,18 @@
-Kind.highlight(
+Kind.Code.highlight(
   code: String,
   idx0: Nat,
   idx1: Nat,
 ): String
-  Kind.highlight.go(code, idx0, idx1, 0, 1, Maybe.none!, String.reverse("   1 | "), [])
+  Kind.Code.highlight.go(code, idx0, idx1, 0, 1, Maybe.none!, String.reverse("   1 | "), [])
 
-Kind.highlight.end(
+Kind.Code.highlight.end(
   col: Nat,
   row: Nat,
   res: List(String),
 ): String
   String.join("\n", res)
 
-Kind.highlight.go(
+Kind.Code.highlight.go(
   code: String,
   ix0: Nat,
   ix1: Nat,
@@ -29,18 +29,18 @@ Kind.highlight.go(
     //"row=", Nat.show(row), " ",
     //"lft=", case lft { none: "-", some: Nat.show(lft.value) }, " ",
     //"len=", Nat.show(String.length(code)), " ",
-    //"chr=", Kind.escape.char(case code { nil: '_', cons: code.head }), " ",
+    //"chr=", Kind.Code.escape.char(case code { nil: '_', cons: code.head }), " ",
     //"res={", String.join("|", List.reverse!(res)), "}",
   //]))
   let spa = 3; // how many lines around error to show
   case code {
     nil:
-      Kind.highlight.end(col, row, List.reverse!(res)),
+      Kind.Code.highlight.end(col, row, List.reverse!(res)),
     cons:
       if U16.eql(code.head, '\n') then
         let stp = Maybe.extract!(lft)!(Bool.false, Nat.is_zero);
         if stp then
-          Kind.highlight.end(col, row, List.reverse!(res))
+          Kind.Code.highlight.end(col, row, List.reverse!(res))
         else
           let siz = Nat.succ(Nat.double(spa));
           let lft = case ix1 {
@@ -56,12 +56,12 @@ Kind.highlight.go(
           let row = Nat.succ(row);
           let res = List.cons!(String.reverse(lin), res);
           let lin = String.reverse(String.flatten([String.pad_left(4, ' ', Nat.show(row)), " | "]));
-          Kind.highlight.go(code.tail, ix0, ix1, col, row, lft, lin, res)
+          Kind.Code.highlight.go(code.tail, ix0, ix1, col, row, lft, lin, res)
       else
         let chr = String.cons(code.head, String.nil);
         let chr =
           if Bool.and(Nat.is_zero(ix0), Bool.not(Nat.is_zero(ix1))) then
-            String.reverse(Kind.color("31", Kind.color("4", chr)))
+            String.reverse(Kind.Code.color("31", Kind.Code.color("4", chr)))
           else
             chr;
         let res = if Nat.eql(ix0,1) then List.take!(spa,res) else res;
@@ -69,5 +69,5 @@ Kind.highlight.go(
         let ix1 = Nat.pred(ix1);
         let col = Nat.succ(col);
         let lin = String.flatten([chr, lin]);
-        Kind.highlight.go(code.tail, ix0, ix1, col, row, lft, lin, res)
+        Kind.Code.highlight.go(code.tail, ix0, ix1, col, row, lft, lin, res)
   }

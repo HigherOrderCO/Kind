@@ -1,4 +1,4 @@
-Kind.color(col: String, str: String): String
+Kind.Code.color(col: String, str: String): String
   String.cons(Nat.to_u16(27),
   String.cons('[',
   String.concat(col,

@@ -1,0 +1,33 @@
+Kind.Synth.files.go(files: List<String>, defs: Kind.Defs): IO(Pair(List(Kind.Name), Kind.Defs))
+  case files {
+    nil: IO {
+      return {List.nil!, defs}
+    }
+    cons: IO {
+      get file_synth = Kind.Synth.file(files.head, defs)
+      case file_synth {
+        left: Kind.Synth.files.go(files.tail, defs)
+        right: IO {
+          let nams = Pair.fst!!(file_synth.value)
+          let defs = Pair.snd!!(file_synth.value)
+          get rest = Kind.Synth.files.go(files.tail, defs)
+          let nams = List.concat!(nams, Pair.fst!!(rest))
+          let defs = Pair.snd!!(rest)
+          return {nams, defs}
+        }
+      }
+    }
+  }
+
+Kind.Synth.remove_duplicate_names(names: List<String>): List<String>
+  let map = List.fold!(names)!(Kind.Map.new!, (name) Kind.Map.set!(name, unit))
+  List.mapped!(BitsMap.keys!(map))!(Kind.Name.from_bits)
+
+Kind.Synth.files(files: List<String>, defs: Kind.Defs): IO(Pair(List(Kind.Name), Kind.Defs))
+  IO {
+    var got = Kind.Synth.files.go(files, defs)
+    let nams = Kind.Synth.remove_duplicate_names(Pair.fst!!(got))
+    let defs = Pair.snd!!(got)
+    return {nams, defs}
+  }
+

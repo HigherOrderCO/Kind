@@ -1,0 +1,2 @@
+Set.del(key: String, set: Set): Set
+  BitsMap.delete<Unit>(String.to_bits(key), set)

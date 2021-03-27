@@ -1,0 +1,20 @@
+Kind.Code.escape.go(str: String, result: String): String
+  case str {
+    nil: String.reverse(result)
+    cons: Kind.Code.escape.go(str.tail, String.reverse(Kind.Code.escape.char(str.head)) | result)
+  }
+
+Kind.Code.escape(str: String): String
+  Kind.Code.escape.go(str, "")
+
+Kind.Code.escape.char(chr: Char): String
+  if U16.eql(chr, Kind.Code.backslash) then
+    String.cons(Kind.Code.backslash, String.cons(chr, String.nil))
+  else if U16.eql(chr, '"') then
+    String.cons(Kind.Code.backslash, String.cons(chr, String.nil))
+  else if U16.eql(chr, '\'') then
+    String.cons(Kind.Code.backslash, String.cons(chr, String.nil))
+  else if U16.btw(' ', chr, '~') then
+    String.cons(chr, String.nil)
+  else
+    String.cons(Kind.Code.backslash, String.nil) | "u{" | U16.show_hex(chr) | "}"

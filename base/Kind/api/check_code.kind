@@ -1,4 +1,4 @@
-Kind.checker.code(code: String): String
+Kind.api.check_code(code: String): String
   case Kind.Defs.read("Main.kind", code, Kind.Map.new!) as read {
     left:
       read.value

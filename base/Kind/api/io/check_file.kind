@@ -1,4 +1,4 @@
-Kind.checker.io.file(file: String): IO(Unit)
+Kind.api.io.check_file(file: String): IO(Unit)
   IO {
     get loaded = Kind.Synth.file(file, Kind.Map.new!)
     case loaded {

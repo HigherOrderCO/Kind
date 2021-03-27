@@ -2,25 +2,31 @@
 
 var kind = require("./kind.js");
 var fs = require("fs");
+var fsp = require("fs").promises;
 var path = require("path");
 var {fmc_to_js, fmc_to_hs} = require("formcore-js");
 //var {fmc_to_js, fmc_to_hs} = require("./../../../../FormCoreJS");
 
-function find_kind_dir() {
+// Locates the Kind/base dir and moves to it, or quits if it can't be found
+var ADD_PATH = "";
+function find_base_dir() {
   var full_path = process.cwd();
   var local_dir = fs.readdirSync(".");
   var kind_indx = full_path.toLowerCase().indexOf("/kind/base");
   if (kind_indx !== -1) {
+    if (kind_indx + 10 !== full_path.length) {
+      ADD_PATH = full_path.slice(kind_indx + 10).slice(1)+"/";
+    }
     process.chdir(full_path.slice(0, kind_indx + 10));
   } else if (local_dir.indexOf("kind") !== -1) {
     process.chdir(path.join(full_path, "kind"));
-    find_kind_dir();
+    find_base_dir();
   } else if (local_dir.indexOf("Kind") !== -1) {
     process.chdir(path.join(full_path, "Kind"));
-    find_kind_dir();
+    find_base_dir();
   } else if (local_dir.indexOf("base") !== -1) {
     process.chdir(path.join(full_path, "base"));
-    find_kind_dir();
+    find_base_dir();
   } else {
     console.log("Couldn't find Kind's repository. Please, clone it with:");
     console.log("");
@@ -30,30 +36,72 @@ function find_kind_dir() {
     process.exit();
   }
 };
-find_kind_dir();
+find_base_dir();
+
+// Finds all .kind files inside a directory, recursivelly
+async function find_kind_files(dir) {
+  var files = await fsp.readdir(dir);
+  var found = [];
+  for (let file of files) {
+    var name = path.join(dir, file);
+    var stat = await fsp.stat(name);
+    if (stat.isDirectory()) {
+      var child_found = await find_kind_files(name);
+      for (let child_name of child_found) {
+        found.push(child_name);
+      }
+    } else if (name.slice(-5) === ".kind") {
+      found.push(name);
+    }
+  }
+  return found;
+}
+
+// Converts a JS Array to a Kind list
+function array_to_list(arr) {
+  var list = {_: "List.nil"};
+  for (var i = arr.length - 1; i >= 0; --i) {
+    list = {_: "List.cons", head: arr[i], tail: list};
+  }
+  return list;
+}
 
 if (!process.argv[2] || process.argv[2] === "--help" || process.argv[2] === "-h") {
   console.log("# Kind "+require("./../package.json").version);
   console.log("");
   console.log("Usage:");
   console.log("");
-  console.log("  kind <file>       # type-checks a file");
-  console.log("  kind <main> --run # evaluates a term");
-  console.log("  kind <main> --fmc # compiles a term to FormCore");
-  console.log("  kind <main> --js  # compiles a term to JavaScript");
-  console.log("  kind <main> --hs  # compiles a term to Haskell");
+  console.log("  kind Module/               # type-checks a module");
+  console.log("  kind Module/file.kind      # type-checks a file");
+  console.log("  kind full_term_name --run  # runs a term");
+  console.log("  kind full_term_name --show # prints a term");
+  console.log("  kind full_term_name --norm # prints a term's λ-normal form");
+  console.log("  kind full_term_name --js   # compiles a term to JavaScript");
+  console.log("  kind full_term_name --hs   # compiles a term to Haskell");
+  console.log("  kind full_term_name --fmc  # compiles a term to FormCore");
   console.log("");
   console.log("Examples:");
   console.log("");
-  console.log("  # Check all types inside a file:");
-  console.log("  kind example.kind");
+  console.log("  # Run the 'Main' term (outputs 'Hello, world'):");
+  console.log("  kind Main --run");
   console.log("");
-  console.log("  # Check all files inside a directory:");
-  console.log("  kind _");
+  console.log("  # Type-check all files inside the 'Nat' module:");
+  console.log("  kind Nat/");
   console.log("");
-  console.log("  # Compile to JS, with 'main' as the entry point:");
-  console.log("  kind main --js");
+  console.log("  # Type-check the 'Nat/add.kind' file:");
+  console.log("  kind Nat/add.kind");
   console.log("");
+  console.log("  # Type-check the 'Nat.add' term:");
+  console.log("  kind Nat.add");
+  console.log("");
+  console.log("  # Compile the 'Nat.add' term to JavaScript:");
+  console.log("  kind Nat.add --js");
+  console.log("");
+  console.log("  # Print the λ-encoding of Nat:");
+  console.log("  kind Nat --show");
+  console.log("");
+  console.log("  # Print the λ-normal form of 2 + 2:");
+  console.log("  kind Example.two_plus_two --norm");
   process.exit();
 }
 
@@ -75,13 +123,13 @@ function display_error(name, error){
 
   // FormCore compilation
   if (process.argv[3] === "--fmc") {
-    console.log(await kind.run(kind["Kind.to_core.io.one"](name)));
+    console.log(await kind.run(kind["Kind.api.io.term_to_core"](name)));
 
   // JavaScript compilation
   } else if (process.argv[3] === "--js") {
     var module = process.argv[4] === "--module";
     try {
-        var fmcc = await kind.run(kind["Kind.to_core.io.one"](name));
+        var fmcc = await kind.run(kind["Kind.api.io.term_to_core"](name));
       try {
         console.log(fmc_to_js.compile(fmcc, name, {module}));
       } catch (e) {
@@ -94,7 +142,7 @@ function display_error(name, error){
   // JavaScript execution
   } else if (process.argv[3] === "--run") {
     try {
-      var fmcc = await kind.run(kind["Kind.to_core.io.one"](name));
+      var fmcc = await kind.run(kind["Kind.api.io.term_to_core"](name));
       try {
         var asjs = fmc_to_js.compile(fmcc, name, {});
       } catch (e) {
@@ -110,9 +158,17 @@ function display_error(name, error){
     }
 
   // Lambda evaluation
-  } else if (process.argv[3] === "--lam") {
+  } else if (process.argv[3] === "--show") {
     try {
-      await kind.run(kind["Kind.compute.io.one"](name));
+      await kind.run(kind["Kind.api.io.show_term"](name));
+    } catch (e) {
+      display_error(name, e);
+    }
+
+  // Lambda printing
+  } else if (process.argv[3] === "--norm") {
+    try {
+      await kind.run(kind["Kind.api.io.show_term_normal"](name));
     } catch (e) {
       display_error(name, e);
     }
@@ -121,7 +177,7 @@ function display_error(name, error){
   } else if (process.argv[3] === "--hs") {
     var module = process.argv[4] === "--module" ? process.argv[5]||"Main" : null;
     try {
-      var fmcc = await kind.run(kind["Kind.to_core.io.one"](name));
+      var fmcc = await kind.run(kind["Kind.api.io.term_to_core"](name));
       console.log(fmc_to_hs.compile(fmcc, name, {module}));
     } catch (e) {
       display_error(name, e);
@@ -129,17 +185,13 @@ function display_error(name, error){
 
   // Type-Checking
   } else {
-    if (name === "_") {
-      var files = fs.readdirSync(".").filter(x => x.slice(-5) === ".kind");
-      for (var file of files) {
-        console.log("\x1b[1mChecking ", file, "\x1b[0m\n");
-        kind.run(kind["Kind.checker.io.file"](file));
-        console.log("");
-      }
+    if (name[name.length - 1] === "/") {
+      var files = await find_kind_files(path.join(process.cwd(), name));
+      kind.run(kind["Kind.api.io.check_files"](array_to_list(files)));
     } else if (name.slice(-5) !== ".kind") {
-      kind.run(kind["Kind.checker.io.one"](name));
+      kind.run(kind["Kind.api.io.check_term"](name));
     } else if (name) {
-      kind.run(kind["Kind.checker.io.file"](name));
+      kind.run(kind["Kind.api.io.check_file"](ADD_PATH + name));
     }
   }
 })();
