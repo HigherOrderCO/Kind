@@ -1,148 +1,15 @@
-// #TODO better names
-type List.perm <A: Type> ~ (xs: List<A>, ys: List<A>) {
-  nil ~ (xs = List.nil<A>,
-         ys = List.nil<A>),
-
-  skip(x: A, l0: List<A>, l1: List<A>,
-       Hyp: List.perm<A>(l0, l1)) ~ (xs = List.cons<A>(x, l0),
-                                ys = List.cons<A>(x, l1)),
-
-  swap(x: A, y: A, l: List<A>) ~ (xs = List.cons<A>(y, List.cons<A>(x, l)),
-                                  ys = List.cons<A>(x, List.cons<A>(y, l))),
-
-  trans(l0: List<A>, l1: List<A>, l2: List<A>,
-        Hyp0: List.perm<A>(l0, l1), Hyp1: List.perm<A>(l1, l2)) ~ (xs = l0,
-                                                                   ys = l2)
-}
-
-// [0, 1, 2, 3, 4]
-// [0, 2, 1, 3, 4]
-
-//Trans: List.perm<Nat>([0, 1, 2, 3, 4], [0, 2, 1, 3, 4])
-//  let p = List.perm.swap<Nat>(2, 1, [3, 4]) // List.perm<Nat>([1, 2, 3, 4], [2, 1, 3, 4])
-//  let p = List.perm.skip<Nat>(0, _, _, p) // List.perm<Nat>([1, 2, 3, 4], [2, 1, 3, 4])
-//  p
-
-range3: List<Nat>
-  [0, 1, 2]
-
-rev_range3: List<Nat>
-  [2, 1, 0]
-
-List.permTest: List.perm<Nat>(rev_range3, range3)
-  let h = List.perm.swap<Nat>(0, 1, [2])
-  let j = List.perm.skip<Nat>(1, _, _, List.perm.swap<Nat>(0, 2, List.nil<Nat>))
-  let k = List.perm.swap<Nat>(1, 2, [0])
-  List.perm.trans<Nat>!!!(k, List.perm.trans<Nat>!!!(j, h))
-
-//[0, 1, 2]
-//    ↓
-//[1, 0, 2] — h
-//    ↓
-//[1, 2, 0] — j
-//    ↓
-//[2, 1, 0] — k
-
-List.perm.refl<A: Type>(xs: List<A>): List.perm<A>(xs, xs)
-  case xs {
-    nil: List.perm.nil<A>
-    cons: List.perm.skip<A>(xs.head, _, _, List.perm.refl<A>(xs.tail))
-  }!
-
-List.perm.symm<A: Type>(xs: List<A>, ys: List<A>, Hyp: List.perm<A>(xs, ys)): List.perm<A>(ys, xs)
-  case Hyp {
-    nil: List.perm.nil<A>
-    skip: List.perm.skip<A>(Hyp.x, _, _, List.perm.symm<A>(_, _, Hyp.Hyp))
-    swap: List.perm.swap<A>(Hyp.y, Hyp.x, Hyp.l)
-    trans: List.perm.trans<A>(_, _, _, List.perm.symm<A>(_, _, Hyp.Hyp1), List.perm.symm<A>(_, _, Hyp.Hyp0))
-  }!
-
-List.perm.front_to_back<A: Type>(x: A, xs: List<A>): List.perm<A>(List.concat<A>(xs, [x]), List.cons<A>(x, xs))
-  case xs {
-    nil: List.perm.refl<A>([x])
-    // the type annotations have no use they're just to improve legibility
-    cons: let ind = List.perm.front_to_back<A>(x, xs.tail) :: List.perm<A>(List.concat!(xs.tail, [x]), x & xs.tail)
-          let skip_head = List.perm.skip<A>(xs.head, _, _, ind) :: List.perm<A>(xs.head & List.concat!(xs.tail, [x]), xs.head & x & xs.tail)
-          let swap_top = List.perm.swap<A>(x, xs.head, xs.tail) :: List.perm<A>(xs.head & x & xs.tail, x & xs.head & xs.tail)
-          let qed = List.perm.trans<A>(_, _, _, skip_head, swap_top)
-          qed
-  }!
-
-List.reverse.aux<A: Type>(xs: List<A>): List<A>
-  case xs {
-    nil: List.nil!
-    cons: List.concat!(List.reverse.aux!(xs.tail), [xs.head])
-  }
-
-// #TODO
-//List.reverse.equiv<A: Type>(xs: List<A>): List.reverse!(xs) == List.reverse.aux!(xs)
-
-List.perm.len<A: Type>(xs: List<A>, ys: List<A>, Hyp: List.perm<A>(xs, ys)): List.length!(xs) == List.length!(ys)
-  case Hyp {
-    nil: refl
-    skip: let ind = List.perm.len<A>(_, _, Hyp.Hyp)
-          apply(Nat.succ, ind)
-    swap: let tail_len = Equal.refl!(List.length!(Hyp.l))
-          apply(Nat.add(2), tail_len)
-    trans: let left_eq = List.perm.len<A>!!(Hyp.Hyp0)
-           let right_eq = List.perm.len<A>!!(Hyp.Hyp1)
-           Equal.chain!!!!(left_eq, right_eq)
-  }!
-
-List.perm.push_back<A: Type>(x: A, xs: List<A>, ys: List<A>, Hyp: List.perm<A>(xs, ys)): List.perm<A>(List.concat!(xs, x & List.nil<A>), List.concat!(ys, x & List.nil<A>))
-  let left_perm = List.perm.front_to_back<A>(x, xs)
-  let center_perm = List.perm.skip<A>(x, xs, ys, Hyp)
-  let right_perm = List.perm.symm<A>!!(List.perm.front_to_back<A>(x, ys))
-  let h = List.perm.trans<A>!!!(center_perm, right_perm)
-  let ret = List.perm.trans<A>!!!(left_perm, h)
-  ret
-
-List.perm.rev.aux<A: Type>(xs: List<A>): List.perm<A>(List.reverse.aux!(xs), xs)
-  case xs {
-    nil: List.perm.nil<A>
-    cons: let ind = List.perm.rev.aux<A>(xs.tail)
-          let lemma0 = List.perm.front_to_back<A>(xs.head, xs.tail) :: List.perm<A>(List.concat!(xs.tail, [xs.head]), xs.head & xs.tail)
-          let lemma1 = List.perm.push_back<A>(xs.head, _, _, ind)
-          let qed = List.perm.trans<A>!!!(lemma1, lemma0)
-          qed
-  }!
-
-type Nat.less_eq <a: Nat> ~ (b: Nat) {
-  eq ~ (b = a),
-  skip(base: Nat, pred: Nat, Hyp: Nat.less_eq(a, pred)) ~ (b = Nat.succ(pred)),
-}
-
-type Order <A: Type> {
-  new(rel: A -> A -> Type,
-     refl: (a: A) -> rel(a, a),
-     anti_symm: (a: A) -> (b: A) -> rel(a, b) -> rel(b, a) -> Equal<A>(a, b),
-     chain: (a: A) -> (b: A) -> (c: A) -> rel(a, b) -> rel(b, c) -> rel(a, c),
-  ),
-}
-
-type List.monotone.aux <A: Type, rel: A -> A -> Type> ~ (xs: List<A>) {
-  nil ~ (xs = List.nil<A>),
-  sing(a: A) ~ (xs = List.cons<A>(a, List.nil<A>)),
-  cons(a: A, b: A, tail: List<A>,
-    Hyp0: rel(a, b), Hyp1: List.monotone.aux<A, rel>(tail)) ~ (xs = List.cons<A>(a, List.cons<A>(b, tail))),
-}
-
-List.monotone<A: Type, O: Order<A>>: List<A> -> Type
-  case O {
-    new: List.monotone.aux<A, O.rel>
-  }: List<A> -> Type
-
-List.Order.monotone_suffix<A: Type, O: Order<A>>(x: A, ys: List<A>,
-  Hyp: List.monotone<A, O>(List.cons<A>(x, ys))): List.monotone<A, O>(ys)
+// broken
+User.rigille.List.monotone_suffix<A: Type, O: User.rigille.Order<A>>(x: A, ys: List<A>,
+  Hyp: User.rigille.List.monotone<A, O>(List.cons<A>(x, ys))): User.rigille.List.monotone<A, O>(ys)
   case Hyp {
     nil: ?a,
     sing: ?b,
     cons: ?c,
-  }: List.monotone<A, O>(ys)
+  }: User.rigille.List.monotone<A, O>(ys)
 
-List.unique_monotone_permutation<A: Type, O: Order<A>>(xs: List<A>, ys: List<A>,
-    Hyp0: List.monotone<A, O>(xs), Hyp1: List.monotone<A, O>(ys),
-    Hyp2: List.perm<A>(xs, ys)): xs == ys
+List.unique_monotone_permutation<A: Type, O: User.rigille.Order<A>>(xs: List<A>, ys: List<A>,
+    Hyp0: User.rigille.List.monotone<A, O>(xs), Hyp1: User.rigille.List.monotone<A, O>(ys),
+    Hyp2: User.rigille.List.Perm<A>(xs, ys)): xs == ys
   case Hyp2 {
     nil: refl,
     // List.cons(A,Hyp2.x,Hyp2.l0) == List.cons(A,Hyp2.x,Hyp2.l1)
@@ -154,14 +21,14 @@ List.unique_monotone_permutation<A: Type, O: Order<A>>(xs: List<A>, ys: List<A>,
          //ys = List.nil<A>),
 
   //skip(x: A, l0: List<A>, l1: List<A>,
-       //Hyp: List.perm<A>(l0, l1)) ~ (xs = List.cons<A>(x, l0),
+       //Hyp: User.rigille.List.Perm<A>(l0, l1)) ~ (xs = List.cons<A>(x, l0),
                                 //ys = List.cons<A>(x, l1)),
 
   //swap(x: A, y: A, l: List<A>) ~ (xs = List.cons<A>(y, List.cons<A>(x, l)),
                                   //ys = List.cons<A>(x, List.cons<A>(y, l))),
 
   //trans(l0: List<A>, l1: List<A>, l2: List<A>,
-        //Hyp0: List.perm<A>(l0, l1), Hyp1: List.perm<A>(l1, l2)) ~ (xs = l0,
+        //Hyp0: User.rigille.List.Perm<A>(l0, l1), Hyp1: User.rigille.List.Perm<A>(l1, l2)) ~ (xs = l0,
                                                                    //ys = l2)
 
   }!

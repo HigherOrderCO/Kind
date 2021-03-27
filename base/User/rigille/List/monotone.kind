@@ -1,0 +1,4 @@
+User.rigille.List.monotone<A: Type, O: User.rigille.Order<A>>: List<A> -> Type
+  case O {
+    new: User.rigille.List.monotone.aux<A, O.rel>
+  }: List<A> -> Type

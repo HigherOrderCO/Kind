@@ -259,4 +259,3 @@ p7(a: Bool, b: Bool): Bool.not(Bool.and(a,b)) == Bool.or(Bool.not(a), Bool.not(b
 //
 //p21(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
   //?a
->>>>>>> Stashed changes
