@@ -1,0 +1,32 @@
+// Recursion and induction are similar concepts.
+
+// A recursive function that sums all numbers from 0 to N:
+Example.recursions.sum(n: Nat): Nat
+  case n {
+    zero: 0
+    succ: n + Example.recursions.sum(n.pred)
+  }
+
+// A recursive function that doubles a natural number:
+Example.recursions.double(n: Nat): Nat
+  case n {
+    zero: 0
+    succ: Nat.succ(Nat.succ(Example.recursions.double(n.pred)))
+  }
+
+// A recursive function that halves a natural number:
+Example.recursions.half(n: Nat): Nat
+  case n {
+    zero: 0
+    succ: case n.pred {
+      zero: 0
+      succ: Nat.succ(Example.recursions.half(n.pred.pred))
+    }
+  }
+
+// A proof that (n * 2) / 2 == n
+Example.recursions.half_double_theorem(n: Nat): Nat.half(Nat.double(n)) == n
+  case n {
+    zero: refl
+    succ: apply(Nat.succ, Example.recursions.half_double_theorem(n.pred))
+  }!

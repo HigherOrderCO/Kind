@@ -1,9 +1,4 @@
-Nat.random(s: Nat): Nat
-  let m =	1664525
-  let i = 1013904223
-  let q = 4294967296
-  Nat.mod(Nat.add(Nat.mul(s, m), i), q)
-
-Test: Nat
-  let seed = 81681681681
-  Nat.random(seed)
+Test: _
+  list = [1, 8, 3, 5, 2, 9, 4]
+  list = Example.bubble_sort(list)
+  List.show!(Nat.show, list)

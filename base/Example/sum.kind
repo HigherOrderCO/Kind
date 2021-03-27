@@ -1,5 +1,0 @@
-Example.sum(n: Nat): Nat
-  case n {
-    zero: 0
-    succ: n + Example.sum(n.pred)
-  }

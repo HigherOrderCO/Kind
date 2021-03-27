@@ -1,0 +1,42 @@
+Kind.Parser.letwhile: Parser(Kind.Term)
+  Parser {
+    get init = Kind.Parser.init;
+    Kind.Parser.text("let ");
+    get name = Kind.Parser.name1;
+    Kind.Parser.text("=");
+    Kind.Parser.text("while ");
+    get cond = Kind.Parser.term;
+    Kind.Parser.text(":");
+    get loop = Kind.Parser.term;
+    Parser.maybe!(Kind.Parser.text(";"));
+    get body = Kind.Parser.term;
+    get orig = Kind.Parser.stop(init);
+    let term = Kind.Term.ref("Function.while");
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, Kind.Term.ref(name));
+    let term = Kind.Term.app(term, Kind.Term.lam(name, (s) cond));
+    let term = Kind.Term.app(term, Kind.Term.lam(name, (s) loop));
+    let term = Kind.Term.let(name, term, (x) body);
+    return Kind.Term.ori(orig, term);
+  }
+
+Kind.Parser.letwhile.with: Parser(Kind.Term)
+  Parser {
+    get init = Kind.Parser.init;
+    Kind.Parser.text("while ");
+    get cond = Kind.Parser.term;
+    Kind.Parser.text("with ");
+    get name = Kind.Parser.name1;
+    Kind.Parser.text(":");
+    get loop = Kind.Parser.term;
+    Parser.maybe!(Kind.Parser.text(";"));
+    get body = Kind.Parser.term;
+    get orig = Kind.Parser.stop(init);
+    let term = Kind.Term.ref("Function.while");
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, Kind.Term.ref(name));
+    let term = Kind.Term.app(term, Kind.Term.lam(name, (s) cond));
+    let term = Kind.Term.app(term, Kind.Term.lam(name, (s) loop));
+    let term = Kind.Term.let(name, term, (x) body);
+    return Kind.Term.ori(orig, term);
+  }

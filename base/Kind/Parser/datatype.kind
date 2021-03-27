@@ -7,8 +7,8 @@ Kind.Parser.datatype: Parser(Kind.Datatype)
       Kind.Parser.text("~");
       Kind.Parser.binder(":");
     });
-    let pars = Maybe.default!([], pars);
-    let inds = Maybe.default!([], inds);
+    let pars = Maybe.default!(pars, []);
+    let inds = Maybe.default!(inds, []);
     Kind.Parser.text("{");
     get ctrs = Parser.until!(
       Kind.Parser.text("}"),

@@ -1,4 +1,0 @@
-type Example.IsEven.B ~ (n: Nat) {
-  zero                                 ~(n = 0)
-  succ(n: Nat, e: Example.IsEven.B(n)) ~(n = Nat.add(2,n))
-}

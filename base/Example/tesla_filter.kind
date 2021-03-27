@@ -1,3 +1,6 @@
+// A complex filter function based on Decidable propositions
+// Suggested by Tesla Zhang
+
 Example.tesla_filter.go<A: Type, P: A -> Type>(
   cond: (a: A) Decidable(P(a)),
   list: List(A)

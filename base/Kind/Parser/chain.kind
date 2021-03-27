@@ -1,0 +1,18 @@
+Kind.Parser.chain: Parser(Kind.Term)
+  Parser {
+    get init = Kind.Parser.init;
+    Kind.Parser.text("chain(");
+    get eql0 = Kind.Parser.term;
+    Kind.Parser.text(",");
+    get eql1 = Kind.Parser.term;
+    Kind.Parser.text(")");
+    get orig = Kind.Parser.stop(init);
+    let term = Kind.Term.ref("Equal.chain");
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, eql0);
+    let term = Kind.Term.app(term, eql1);
+    return Kind.Term.ori(orig, term);
+  }

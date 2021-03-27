@@ -1,0 +1,20 @@
+// A bubble sort function, showcasing many Pythonish syntaxes
+Example.bubble_sort(list: List<Nat>): List<Nat>
+  length = List.length!(list)
+  for i from 0 to length - 1 with list:
+    for j from 0 to (length - i) - 1 with list:
+      val_a = list[j + 0] <> 0
+      val_b = list[j + 1] <> 0
+      if val_a >? val_b then
+        list = list[j + 0] <- val_b
+        list = list[j + 1] <- val_a
+        list
+      else
+        list
+    list
+  list
+
+Example.bubble_sort.test: String
+  list = [8, 1, 7, 6, 4, 9, 5, 2, 3]
+  sort = Example.bubble_sort(list)
+  List.show!(Nat.show, sort)

@@ -1,0 +1,6 @@
+// Linear congruential generator: generates pseudo random numbers.
+Nat.random(seed: Nat): Nat
+  let m =	1664525
+  let i = 1013904223
+  let q = 4294967296
+  Nat.mod(Nat.add(Nat.mul(seed, m), i), q)

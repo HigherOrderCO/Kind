@@ -40,19 +40,24 @@ find_base_dir();
 
 // Finds all .kind files inside a directory, recursivelly
 async function find_kind_files(dir) {
-  var files = await fsp.readdir(dir);
-  var found = [];
-  for (let file of files) {
-    var name = path.join(dir, file);
-    var stat = await fsp.stat(name);
-    if (stat.isDirectory()) {
-      var child_found = await find_kind_files(name);
-      for (let child_name of child_found) {
-        found.push(child_name);
+  try {
+    var files = await fsp.readdir(dir);
+    var found = [];
+    for (let file of files) {
+      var name = path.join(dir, file);
+      var stat = await fsp.stat(name);
+      if (stat.isDirectory()) {
+        var child_found = await find_kind_files(name);
+        for (let child_name of child_found) {
+          found.push(child_name);
+        }
+      } else if (name.slice(-5) === ".kind") {
+        found.push(name);
       }
-    } else if (name.slice(-5) === ".kind") {
-      found.push(name);
     }
+  } catch (e) {
+    console.log("Not a directory: " + dir);
+    process.exit();
   }
   return found;
 }
@@ -185,13 +190,18 @@ function display_error(name, error){
 
   // Type-Checking
   } else {
-    if (name[name.length - 1] === "/") {
-      var files = await find_kind_files(path.join(process.cwd(), name));
-      kind.run(kind["Kind.api.io.check_files"](array_to_list(files)));
-    } else if (name.slice(-5) !== ".kind") {
-      kind.run(kind["Kind.api.io.check_term"](name));
-    } else if (name) {
-      kind.run(kind["Kind.api.io.check_file"](ADD_PATH + name));
+    try {
+      if (name[name.length - 1] === "/") {
+        var files = await find_kind_files(path.join(process.cwd(), name));
+        await kind.run(kind["Kind.api.io.check_files"](array_to_list(files)));
+      } else if (name.slice(-5) !== ".kind") {
+        await kind.run(kind["Kind.api.io.check_term"](name));
+      } else if (name) {
+        await kind.run(kind["Kind.api.io.check_file"](ADD_PATH + name));
+      }
+    } catch (e) {
+      console.log("Sorry, KindJS couldn't handle your input. :( ");
+      console.log("Try Haskell/Scheme releases!")
     }
   }
 })();

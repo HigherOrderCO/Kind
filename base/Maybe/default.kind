@@ -1,4 +1,4 @@
-Maybe.default<A: Type>(a: A, m: Maybe(A)): A
+Maybe.default<A: Type>(m: Maybe(A), a: A): A
   case m {
     none: a,
     some: m.value,

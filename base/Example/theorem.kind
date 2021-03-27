@@ -1,5 +1,0 @@
-Example.theorem(n: Nat): Nat.add(n,0) == n
-  case n {
-    zero: refl
-    succ: apply(Nat.succ, Example.theorem(n.pred))
-  }!

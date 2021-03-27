@@ -1,0 +1,2 @@
+Kind.Parser.and: Nat -> Kind.Term -> Parser(Kind.Term)
+  Kind.Parser.op("&&", "Bool.and")

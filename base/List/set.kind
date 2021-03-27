@@ -1,0 +1,8 @@
+List.set<A: Type>(index: Nat, val: A, list: List<A>): List<A>
+  case list {
+    nil: []
+    cons: case index {
+      zero: val & list.tail
+      succ: list.head & List.set<A>(index.pred, val, list.tail)
+    }
+  }
