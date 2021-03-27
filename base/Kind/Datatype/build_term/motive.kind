@@ -1,6 +1,0 @@
-Kind.Datatype.build_term.motive(
-  type: Kind.Datatype,
-): Kind.Term
-  case type {
-    new: Kind.Datatype.build_term.motive.go(type, type.name, type.inds),
-  }

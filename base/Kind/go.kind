@@ -6,7 +6,7 @@ Kind.go(file_names: List(String)): IO(Unit)
     cons: IO {
       let file = file_names.head
       get code = IO.get_file(file)
-      let defs = Kind.Defs.read(file, code, BitsMap.new!)
+      let defs = Kind.Defs.read(file, code, Kind.Map.new!)
       case defs {
         left:
           IO.print("bad parse")

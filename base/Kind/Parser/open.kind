@@ -10,7 +10,7 @@ Kind.Parser.open: Parser(Kind.Term)
     });
     Parser.maybe!(Kind.Parser.text(";"));
     let name = case name {
-      none: case Kind.Term.reduce(expr, BitsMap.new!) as expr {
+      none: case Kind.Term.reduce(expr, Kind.Map.new!) as expr {
         ref: expr.name,
         var: expr.name,
         _: Kind.Name.read("self"),
@@ -19,7 +19,7 @@ Kind.Parser.open: Parser(Kind.Term)
     };
     let wyth = [];
     get rest = Kind.Parser.term;
-    let cses = Kind.set!("_", rest, BitsMap.new!);
+    let cses = Kind.Map.set!("_", rest, Kind.Map.new!);
     //BitsMap.from_list!(Kind.Name.to_bits, [{"_",rest}]);
     let moti = Maybe.some!(Kind.Term.hol(Bits.e));
     get orig = Kind.Parser.stop(init);

@@ -1,7 +1,6 @@
 Kind.Error.relevant(errors: List(Kind.Error), got: Bool): List(Kind.Error)
   case errors {
-    nil:
-      List.nil<Kind.Error>,
+    nil: [],
     cons:
       let keep = case errors.head {
         type_mismatch: Bool.not(got),
@@ -11,7 +10,7 @@ Kind.Error.relevant(errors: List(Kind.Error), got: Bool): List(Kind.Error)
         patch: Bool.false,
         undefined_reference: Bool.not(got),
         cant_infer: Bool.not(got),
-      };
+      }
       let got = case errors.head {
         type_mismatch: Bool.true,
         show_goal: got,
@@ -20,10 +19,10 @@ Kind.Error.relevant(errors: List(Kind.Error), got: Bool): List(Kind.Error)
         patch: got,
         undefined_reference: Bool.true,
         cant_infer: got,
-      };
-      let tail = Kind.Error.relevant(errors.tail, got);
+      }
+      let tail = Kind.Error.relevant(errors.tail, got)
       if keep then
-        List.cons!(errors.head, tail)
+        errors.head & tail
       else
         tail
   }

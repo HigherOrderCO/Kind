@@ -4,6 +4,6 @@ Kind.Term.equal.hole(path: Bits, term: Kind.Term): Kind.Check(Bool)
     _: if Kind.Term.has_holes(term)
       then Kind.Check.result!(some(false), [])
       else Kind.Check.result!(some(true), [
-        Kind.Error.patch(path, Kind.Term.normalize(term, BitsMap.new!))
+        Kind.Error.patch(path, Kind.Term.normalize(term, Kind.Map.new!))
       ])
   }

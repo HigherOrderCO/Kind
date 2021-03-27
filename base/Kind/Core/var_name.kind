@@ -1,10 +1,14 @@
 Kind.Core.var_name(indx: Nat, name: Kind.Name, brui: Nat, vars: List(Kind.Name)): Kind.Name
   case indx {
-    zero: case brui { zero: name, succ: name | "^" | Nat.show(brui) },
+    zero: case brui {
+      zero: name
+      succ: name | "^" | Nat.show(brui)
+    }
     succ: case vars {
-      nil: "unbound",
+      nil:
+        "unbound"
       cons:
-        let brui = if String.eql(name, vars.head) then Nat.succ(brui) else brui;
+        let brui = if String.eql(name, vars.head) then Nat.succ(brui) else brui
         Kind.Core.var_name(indx.pred, name, brui, vars.tail),
     }
   }

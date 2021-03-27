@@ -1,4 +1,0 @@
-Kind.Datatype.build_term.constructor(type: Kind.Datatype, ctor: Kind.Constructor): Kind.Term
-  case ctor {
-    new: Kind.Datatype.build_term.constructor.go(type, ctor, ctor.args),
-  }
