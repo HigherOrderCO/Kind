@@ -1,5 +1,0 @@
-Example.black_friday_theorem(n: Nat): Example.half(Example.double(n)) == n
-  case n {
-    zero: refl
-    succ: apply(Nat.succ, Example.black_friday_theorem(n.pred))
-  }!

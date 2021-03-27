@@ -1,8 +1,0 @@
-Kind.escape.go(str: String, result: String): String
-  case str {
-    nil: String.reverse(result)
-    cons: Kind.escape.go(str.tail, String.reverse(Kind.escape.char(str.head)) | result)
-  }
-
-Kind.escape(str: String): String
-  Kind.escape.go(str, "")

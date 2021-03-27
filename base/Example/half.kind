@@ -1,8 +1,0 @@
-Example.half(n: Nat): Nat
-  case n {
-    zero: 0
-    succ: case n.pred {
-      zero: 0
-      succ: Nat.succ(Example.half(n.pred.pred))
-    }
-  }

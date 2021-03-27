@@ -138,6 +138,15 @@ A `let` expression introduces a new variable in the context. That variable will
 appear in error messages and is **not** considered equal to the expression it
 assigns (for theorem proving and type-aliasing purposes).
 
+The `let` can be omitted, so you could write just:
+
+```
+a = 1
+b = 2
+c = 3
+a + b + c
+```
+
 Def
 ---
 
@@ -923,6 +932,22 @@ The syntax above expands to:
 Maybe.none<_>
 ```
 
+Maybe.default
+-------------
+
+```
+maybe_value <> default_value
+```
+
+The syntax above expands to:
+
+```
+Maybe.default!(maybe, default_value)
+```
+
+It is useful to extract a value from a Maybe by providing a default. For
+example, `some(7) <> 0` returns `7`, and `none <> 0` returns `0`.
+
 Without
 -------
 
@@ -998,6 +1023,37 @@ List.concat<_>(xs, ys)
 
 It concatenates two lists as one.
 
+List getter
+-----------
+
+```
+list[4]
+```
+
+The syntax above expands to:
+
+```
+List.get!(4, list)
+```
+
+This returns the element at index 4 as a `Maybe`.
+
+
+List setter
+-----------
+
+```
+list[4] <- 100
+```
+
+The syntax above expands to:
+
+```
+List.set!(4, 100, list)
+```
+
+This sets the element at index 4 to `100`.
+
 Map literal
 -----------
 
@@ -1025,6 +1081,37 @@ let map = {key: val, "bar": 2}
 ```
 
 This will create the `{"foo": 1, "bar": 2}` map.
+
+Map getter
+----------
+
+```
+map{"foo"}
+```
+
+The syntax above expands to:
+
+```
+Map.get!("foo", map)
+```
+
+This returns the element at key "foo" as a `Maybe`.
+
+
+Map setter
+----------
+
+```
+map{"foo"} <- 100
+```
+
+The syntax above expands to:
+
+```
+Map.set!("foo", 100, map)
+```
+
+This sets the element at key "foo" to `100`.
 
 Equal.apply
 -----------
@@ -1080,39 +1167,43 @@ In your context. Notice that `ys` is just `xs`, except with the type changed to
 replace `10` by `5 + 5`. You can always rewrite inside types if you have a proof
 that the substituted expressions are equal.
 
-For-in
-------
+For loops with lists
+--------------------
 
 ```
-let name = for x in list:
+for x in list with name:
   value
 body
 ```
 
 The for-in syntax can be used to update a state continuously, for each element
-of a list. Since Kind is a pure language, the result must be assigned to a
-variable using `let`. For example:
+of a list. Since Kind is a pure language, the result must be associated with a
+variable that serves as a target for the loop state. For example:
 
 ```
 let sum = 0
-let sum = for n in [1, 2, 3]:
+for n in [1, 2, 3] with sum:
   sum + n
 sum
 ```
 
-The code above will add all the elements in the `[1,2,3]` list, resulting in
-`6`. Loops aren't primitives. Instead, the code above is expanded to:
+The code above will add all the elements in the `[1,2,3]` list, resulting in `6`. 
+
+Loops aren't primitives. The code above is expanded to:
 
 ```
 let sum = 0
-List.for(_, [1,2,3], _, 0, (n, sum) Nat.add(sum, n))
+let sum = List.for(_, [1,2,3], _, 0, (n, sum) Nat.add(sum, n))
+sum
 ```
 
-For-range
----------
+It uses the function `List.for` from the base libraries.
+
+For loops with ranges
+---------------------
 
 ```
-let name = for x from i0 to i1:
+for x from i0 to i1 with name:
   value
 body
 ```
@@ -1122,10 +1213,40 @@ the index will be a `Nat`, but you can annotate it to have other types of
 indices:
 
 ```
-let name = for x : U32 from i0 to i1:
+for x : U32 from i0 to i1 with name:
   value
 body
 ```
+
+Ranged loops are expanded to use the `Nat.for` function.
+
+
+While loops
+-----------
+
+While loops can be used to repeat an operation based on a condition:
+
+```
+let sum = 0
+while sum <? 10 with sum:
+  log("sum: " | Nat.show(sum))
+  sum + 1
+sum
+```
+
+You can also use `get` instead of `let` to store a pair on the state, which is
+useful to keep track of indices.
+
+```
+let idx = 0
+let str = ""
+while idx <? 10 with {idx, str}:
+  log("idx=" | Nat.show(idx) | " str=" | str)
+  {idx + 1, str | Nat.show(idx)}
+str
+```
+
+While is expanded to use the `Function.while` function.
 
 Numeric operation
 -----------------
@@ -1136,6 +1257,11 @@ Numeric operation
 24 * 2
 84 / 2
 128 % 43
+3 <? 2
+3 <=? 2
+3 =? 2
+3 >=? 2
+3 >? 2
 ```
 
 The expressions above are desugared to:
@@ -1146,6 +1272,11 @@ Nat.sub(84, 24)
 Nat.mul(24, 2)
 Nat.div(84, 2)
 Nat.mod(128, 43)
+Nat.ltn(3, 2)
+Nat.lte(3, 2)
+Nat.eql(3, 2)
+Nat.gte(3, 2)
+Nat.gtn(3, 2)
 ```
 
 Operators in Kind have no precedence and are always right associative. That

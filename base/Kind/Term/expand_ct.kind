@@ -1,7 +1,7 @@
 Kind.Term.expand_ct(term: Kind.Term, defs: Kind.Defs, arity: Nat): Kind.Term
   case term {
     ref:
-      case Kind.get!(term.name, defs) as got {
+      case Kind.Map.get!(term.name, defs) as got {
         none:
           Kind.Term.ref(term.name)
         some:

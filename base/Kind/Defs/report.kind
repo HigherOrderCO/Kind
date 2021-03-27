@@ -7,52 +7,37 @@ Kind.Defs.report(defs: Kind.Defs, names: List(Kind.Name)): String
   }
   types | "\n" | errors
     
-//Kind.Defs.report.remove_newline(str: String): String
-  //let len = String.length!(str)
-  //if String.eql(String.slice(len - 1, len) 
-  //if 
-
 Kind.Defs.report.errors(defs: Kind.Defs): String
   let errors = ""
   let errors = for key in BitsMap.keys!(defs):
     let name = Kind.Name.from_bits(key)
-    case Kind.get!(name, defs) as got {
-      none:
-        errors
-      some:
-        open got.value
-        case got.value.stat {
-          init: errors
-          wait: errors
-          done: errors
-          fail: case got.value.stat.errors {
-            nil:
-              errors
-            cons:
-              let name_str = got.value.name
-              let rel_errs = Kind.Error.relevant(got.value.stat.errors, Bool.false)
-              let errors = for err in rel_errs:
-                let err_msg = Kind.Error.show(err, defs)
-                let ori_msg = case Kind.Error.origin(err) as origin {
-                  none:
-                    ""
-                  some:
-                    open origin.value
-                    let inside = "Inside '" | got.value.file | "':\n"
-                    let source = Kind.highlight(got.value.code, origin.value.fst, origin.value.snd)
-                    inside | source | "\n"
-                }
-                errors | err_msg | ori_msg | "\n"
-              errors
-          }
-        }
-    }
+    let defn = Kind.Map.get!(name, defs)
+    without defn: errors
+    open defn
+    case defn.stat {
+      fail: case defn.stat.errors {
+        nil:
+          errors
+        cons:
+          let name_str = defn.name
+          let rel_errs = Kind.Error.relevant(defn.stat.errors, Bool.false)
+          let errors = for err in rel_errs:
+            let err_msg = Kind.Error.show(err, defs)
+            let ori_val = Kind.Error.origin(err)
+            without ori_val: errors | err_msg | "\n"
+            open ori_val
+            let inside = "Inside '" | defn.file | "':\n"
+            let source = Kind.Code.highlight(defn.code, ori_val.fst, ori_val.snd)
+            errors | err_msg | inside | source | "\n" | "\n"
+          errors
+      }
+    } default errors
   errors
 
 Kind.Defs.report.types(defs: Kind.Defs, names: List(Kind.Name)): String
   let types = ""
   let types = for name in names:
-    case Kind.get!(name, defs) as got {
+    case Kind.Map.get!(name, defs) as got {
       none:
         types
       some:

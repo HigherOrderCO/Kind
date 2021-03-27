@@ -1,6 +1,6 @@
 Kind.Parser.char.single: Parser(Char)
   Parser.first_of!([
-    Parser.first_of!(List.mapped!(Kind.escapes)!((esc) case esc {
+    Parser.first_of!(List.mapped!(Kind.Code.escapes)!((esc) case esc {
       new: Parser {
         Parser.text(esc.fst);
         return esc.snd;

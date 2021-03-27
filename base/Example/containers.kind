@@ -1,0 +1,24 @@
+// Many container-related syntax sugars
+
+Example.containers.pair: Nat
+  pair  = {1,2} // Pair.new!!(1, 2)
+  {a,b} = pair  // case pair { new: a = pair.fst; b = pair.snd; ... }
+  a + b
+
+Example.containers.list: Nat
+  list = [1, 2, 3, 4]   // List.cons!(1, List.cons!(2, ...))
+  list = list[1] <- 200 // List.set!(1, 200, list)
+  val0 = list[1] <> 0   // Maybe.default!(List.get!(1,list), 0)
+  val1 = list[2] <> 0   // Maybe.default!(List.get!(2,list), 0)
+  val0 + val1
+
+Example.containers.map: Nat
+  key  = "toe"
+  map  = {"tic": 1, "tac": 2, key: 3} // Map.from_list!([{"tic",1}, ...])
+  map  = map{"tic"} <- 100            // Map.set!("tic", 100, map)
+  map  = map{"tac"} <- 200            // Map.set!("tac", 200, map)
+  map  = map{ key } <- 300            // Map.set!(key, 300, map)
+  val0 = map{"tic"} <> 0              // Maybe.default!(Map.get!("tic",map), 0)
+  val1 = map{"tac"} <> 0              // Maybe.default!(Map.get!("tac",map), 0)
+  val2 = map{ key } <> 0              // Maybe.default!(Map.get!(key, map), 0)
+  val0 + val1 + val2

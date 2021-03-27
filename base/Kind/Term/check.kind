@@ -8,7 +8,7 @@ Kind.Term.check(
 ): Kind.Check(Kind.Term)
   do Kind.Check {
     get infr = case term {
-      ref: case Kind.get!(term.name, defs) as got {
+      ref: case Kind.Map.get!(term.name, defs) as got {
         none: Kind.Check.result!(type, [Kind.Error.undefined_reference(orig, term.name)]),
         some: case got.value {
           new:
@@ -137,7 +137,7 @@ Kind.Term.check(
                 Kind.Term.hol(Bits.e),
               some:
                 let size = List.length!(ctx);
-                let typv = Kind.Term.normalize(type.value, BitsMap.new!);
+                let typv = Kind.Term.normalize(type.value, Kind.Map.new!);
                 let moti = Kind.SmartMotive.make(term.name, term.expr, etyp, typv, size, defs);
                 moti,
             };

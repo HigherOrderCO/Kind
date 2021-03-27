@@ -1,6 +1,6 @@
 Kind.Term.reduce(term: Kind.Term, defs: Kind.Defs): Kind.Term
   case term {
-    ref: case Kind.get!(term.name, defs) as got {
+    ref: case Kind.Map.get!(term.name, defs) as got {
       none: Kind.Term.ref(term.name),
       some: case got.value { new: Kind.Term.reduce(got.value.term, defs) },
     },

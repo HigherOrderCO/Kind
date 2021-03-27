@@ -1,67 +1,67 @@
 Kind.Core.show(term: Kind.Term, indx: Nat, vars: List(Kind.Name)): String
   case term {
     ref:
-      Kind.Name.show(term.name),
+      Kind.Name.show(term.name)
     var:
-      Kind.Core.var_name(Nat.pred(Nat.sub(indx,term.indx)), term.name, 0, vars),
+      Kind.Core.var_name(Nat.pred(Nat.sub(indx,term.indx)), term.name, 0, vars)
     typ:
-      "*",
+      "*"
     all:
-      let eras = term.eras;
+      let eras = term.eras
       let init = if eras then "%" else "@"
-      let self = Kind.Name.show(term.self);
-      let name = Kind.Name.show(term.name);
-      let xtyp = Kind.Core.show(term.xtyp, indx, vars);
+      let self = Kind.Name.show(term.self)
+      let name = Kind.Name.show(term.name)
+      let xtyp = Kind.Core.show(term.xtyp, indx, vars)
       let body = Kind.Core.show(
         term.body(
           Kind.Term.var(term.self,indx),
           Kind.Term.var(term.name,Nat.succ(indx))),
         Nat.succ(Nat.succ(indx)),
-        List.cons!(term.name, List.cons!(term.self, vars)));
-      String.flatten([init,self,"(",name,":",xtyp,") ",body]),
+        List.cons!(term.name, List.cons!(term.self, vars)))
+      String.flatten([init,self,"(",name,":",xtyp,") ",body])
     lam:
-      let name = Kind.Name.show(term.name);
+      let name = Kind.Name.show(term.name)
       let body = Kind.Core.show(
         term.body(Kind.Term.var(term.name,indx)),
         Nat.succ(indx),
-        List.cons!(term.name, vars));
-      String.flatten(["#",name," ",body]),
+        List.cons!(term.name, vars))
+      String.flatten(["#",name," ",body])
     app:
-      let func = Kind.Core.show(term.func, indx, vars);
-      let argm = Kind.Core.show(term.argm, indx, vars);
-      String.flatten(["(",func," ",argm,")"]),
+      let func = Kind.Core.show(term.func, indx, vars)
+      let argm = Kind.Core.show(term.argm, indx, vars)
+      String.flatten(["(",func," ",argm,")"])
     let: 
-      let name = Kind.Name.show(term.name);
-      let expr = Kind.Core.show(term.expr, indx, vars);
+      let name = Kind.Name.show(term.name)
+      let expr = Kind.Core.show(term.expr, indx, vars)
       let body = Kind.Core.show(
         term.body(Kind.Term.var(term.name,indx)),
         Nat.succ(indx),
-        List.cons!(term.name, vars));
-      String.flatten(["!", name, " = ", expr, "; ", body]),
+        List.cons!(term.name, vars))
+      String.flatten(["!", name, " = ", expr, "; ", body])
     def:
-      let name = Kind.Name.show(term.name);
-      let expr = Kind.Core.show(term.expr, indx, vars);
+      let name = Kind.Name.show(term.name)
+      let expr = Kind.Core.show(term.expr, indx, vars)
       let body = Kind.Core.show(
         term.body(Kind.Term.var(term.name,indx)),
         Nat.succ(indx),
-        List.cons!(term.name, vars));
-      String.flatten(["$", name, " = ", expr, "; ", body]),
+        List.cons!(term.name, vars))
+      String.flatten(["$", name, " = ", expr, "; ", body])
     ann:
-      let term = Kind.Core.show(term.term, indx, vars);
-      let type = Kind.Core.show(term.type, indx, vars);
-      String.flatten(["{",term,":",type,"}"]),
+      let term = Kind.Core.show(term.term, indx, vars)
+      let type = Kind.Core.show(term.type, indx, vars)
+      String.flatten(["{",term,":",type,"}"])
     gol:
-      "<GOL>",
+      "<GOL>"
     hol:
-      "<HOL>",
+      "<HOL>"
     nat:
-      String.flatten(["+", Nat.show(term.natx)]),
+      String.flatten(["+", Nat.show(term.natx)])
     chr:
-      String.flatten(["'", Kind.escape.char(term.chrx), "'"]),
+      String.flatten(["'", Kind.Code.escape.char(term.chrx), "'"])
     str:
-      String.flatten(["\"", Kind.escape(term.strx), "\""]),
+      String.flatten(["\"", Kind.Code.escape(term.strx), "\""])
     cse:
-      "<CSE>",
+      "<CSE>"
     ori:
-      Kind.Core.show(term.expr, indx, vars),
+      Kind.Core.show(term.expr, indx, vars)
   }

@@ -1,0 +1,11 @@
+Kind.Code.color(col: String, str: String): String
+  String.cons(Nat.to_u16(27),
+  String.cons('[',
+  String.concat(col,
+  String.cons('m', 
+  String.concat(str,
+  String.cons(Nat.to_u16(27),
+  String.cons('[',
+  String.cons('0',
+  String.cons('m', 
+  String.nil)))))))))

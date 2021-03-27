@@ -1,0 +1,9 @@
+// Sigmas allow us to capture subsets of a type
+
+// A subset of the type Nat containing only even numbers
+Example.subsets.EvenNat: Type
+  {n: Nat} (n % 2) == 0 // Sigma(Nat, (x) (n % 2) == 0)
+
+// This only type-checks if the number is even
+Example.subsets.test: Example.subsets.EvenNat
+  2 ~ refl // Sigma.new!!(2, refl)

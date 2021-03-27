@@ -1,0 +1,2 @@
+Set.has(key: String, set: Set): Bool
+  BitsSet.has(String.to_bits(key), set)

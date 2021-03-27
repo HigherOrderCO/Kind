@@ -1,6 +1,0 @@
-Kind.highlight(
-  code: String,
-  idx0: Nat,
-  idx1: Nat,
-): String
-  Kind.highlight.tc(code, idx0, idx1, 0, 1, Maybe.none!, String.reverse("   1 | "), [])

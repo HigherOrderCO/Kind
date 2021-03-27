@@ -1,9 +1,9 @@
 Kind.Check.bind<A: Type, B: Type>(a: Kind.Check(A), f: A -> Kind.Check(B)): Kind.Check(B)
   case a {
     result: case a.value as got {
-      none: Kind.Check.result<B>(Maybe.none<B>, a.errors),
+      none: Kind.Check.result<B>(Maybe.none<B>, a.errors)
       some: case f(got.value) as b {
-        result: Kind.Check.result<B>(b.value, List.concat!(a.errors,b.errors)),
+        result: Kind.Check.result<B>(b.value, List.concat!(a.errors,b.errors))
       }
     }
   }

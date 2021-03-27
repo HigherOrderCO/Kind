@@ -1,0 +1,2 @@
+Set.set(key: String, set: Set): Set
+  BitsSet.set(String.to_bits(key), set)
