@@ -6,6 +6,32 @@ var path = require("path");
 var {fmc_to_js, fmc_to_hs} = require("formcore-js");
 //var {fmc_to_js, fmc_to_hs} = require("./../../../../FormCoreJS");
 
+function find_kind_dir() {
+  var full_path = process.cwd();
+  var local_dir = fs.readdirSync(".");
+  var kind_indx = full_path.toLowerCase().indexOf("/kind/base");
+  if (kind_indx !== -1) {
+    process.chdir(full_path.slice(0, kind_indx + 10));
+  } else if (local_dir.indexOf("kind") !== -1) {
+    process.chdir(path.join(full_path, "kind"));
+    find_kind_dir();
+  } else if (local_dir.indexOf("Kind") !== -1) {
+    process.chdir(path.join(full_path, "Kind"));
+    find_kind_dir();
+  } else if (local_dir.indexOf("base") !== -1) {
+    process.chdir(path.join(full_path, "base"));
+    find_kind_dir();
+  } else {
+    console.log("Couldn't find Kind's repository. Please, clone it with:");
+    console.log("");
+    console.log("  git clone https://github.com/uwu-tech/Kind");
+    console.log("");
+    console.log("And add your files to the Kind/base directory.");
+    process.exit();
+  }
+};
+find_kind_dir();
+
 if (!process.argv[2] || process.argv[2] === "--help" || process.argv[2] === "-h") {
   console.log("# Kind "+require("./../package.json").version);
   console.log("");
