@@ -1,2 +1,2 @@
 Kind.MPath: Type
-  Maybe(Kind.Path)
+  Maybe<Kind.Path>

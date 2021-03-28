@@ -8,7 +8,7 @@ Kind.Code.highlight(
 Kind.Code.highlight.end(
   col: Nat,
   row: Nat,
-  res: List(String),
+  res: List<String>,
 ): String
   String.join("\n", res)
 
@@ -18,9 +18,9 @@ Kind.Code.highlight.go(
   ix1: Nat,
   col: Nat,
   row: Nat,
-  lft: Maybe(Nat),
+  lft: Maybe<Nat>,
   lin: String,
-  res: List(String),
+  res: List<String>,
 ): String
   //use skip = Debug.log!(String.flatten([
     //"ix0=", Nat.show(ix0), " ",

@@ -1,5 +1,5 @@
 Kind.Term.desugar_cse.motive(
-  wyth: List(Kind.Def),
+  wyth: List<Kind.Def>,
   moti: Kind.Term,
 ): Kind.Term
   case wyth {

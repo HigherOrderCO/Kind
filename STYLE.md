@@ -113,7 +113,7 @@ Mons.global_scr_mid: Pos32
 ```
 // A 2D map of game tiles
 Mons.Map: Type
-  Map(List(Mons.Object))
+  Map(List<Mons.Object>)
 
 create_new_map(...): Mons.Map
 ```
@@ -146,7 +146,7 @@ type Film {
   new(title: String, year: Nat)
 }
 
-main: List(Film)
+main: List<Film>
   let films = [
     Film.new("Fight Club ", 1999), 
     Film.new("Avatar", 2009),
@@ -169,19 +169,19 @@ type Film {
   new(title: String, year: Nat)
 }
 
-catalog: List(Film)
+catalog: List<Film>
   [ Film.new("Fight Club ", 1999), 
     Film.new("Avatar", 2009),
     Film.new("Passengers", 2016),
     Film.new("My Neighbor Totoro", 1988)
     Film.new("The Silence of the Lambs", 1991)]
 
-films_newer_than(year: Nat, films: List(Film)): List(Film)
+films_newer_than(year: Nat, films: List<Film>): List<Film>
   List.filter<_>( 
     (f) open f Nat.gtn(f.year, year), // anonymous function, that is, a function without a name
     films)
 
-main: List(Film)
+main: List<Film>
   let wishlist = films_newer_than(2008, catalog)
   wishlist
 ```

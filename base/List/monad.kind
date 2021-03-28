@@ -1,2 +1,2 @@
-List.monad: Monad(List)
+List.monad: Monad<List>
   Monad.new<List>(List.bind, List.pure)

@@ -1,4 +1,4 @@
-List.update_at<A: Type>(index: Nat, fn: A -> A, list: List(A)): List(A)
+List.update_at<A: Type>(index: Nat, fn: A -> A, list: List<A>): List<A>
   case list{
     nil : List.nil!
     cons: case index{

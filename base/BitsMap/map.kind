@@ -1,4 +1,4 @@
-BitsMap.map<A: Type, B: Type>(fn: A -> B, map: BitsMap(A)): BitsMap(B)
+BitsMap.map<A: Type, B: Type>(fn: A -> B, map: BitsMap<A>): BitsMap<B>
   case map {
     new: BitsMap.new!,
     tie:

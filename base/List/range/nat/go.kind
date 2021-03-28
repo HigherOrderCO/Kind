@@ -1,4 +1,4 @@
-List.range.nat.go(nat: Nat, list: List(Nat)): List(Nat)
+List.range.nat.go(nat: Nat, list: List<Nat>): List<Nat>
   case nat {
     zero: list,
     succ: List.range.nat.go(nat.pred, List.cons!(nat.pred, list)),

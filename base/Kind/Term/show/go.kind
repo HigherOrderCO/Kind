@@ -1,4 +1,4 @@
-Kind.Term.show.go(term: Kind.Term, path: Maybe(Bits -> Bits)): String
+Kind.Term.show.go(term: Kind.Term, path: Maybe<Bits -> Bits>): String
   case Kind.Term.show.as_nat(term) as as_nat {
     some: as_nat.value,
     none: case term {

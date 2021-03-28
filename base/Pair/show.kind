@@ -1,7 +1,7 @@
 Pair.show<A: Type, B: Type>(
   show_a: A -> String,
   show_b: B -> String,
-  pair: Pair(A,B)
+  pair: Pair<A,B>
 ) : String
   case pair{
     new: let str = String.concat("(", show_a(pair.fst))

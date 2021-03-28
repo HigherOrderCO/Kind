@@ -42,7 +42,7 @@ This will install the `fmhs` command in your machine, which is identical to
 commands should output:
 
 ```bash
-Main: IO(Unit)
+Main: IO<Unit>
 
 All terms check.
 ```

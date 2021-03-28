@@ -1,4 +1,4 @@
-List.at<A: Type>(index: Nat, list: List(A)): Maybe(A)
+List.at<A: Type>(index: Nat, list: List<A>): Maybe<A>
   case list {
     nil: Maybe.none!,
     cons: case index {

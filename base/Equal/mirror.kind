@@ -1,4 +1,4 @@
-Equal.mirror<A: Type, a: A, b: A>(e: Equal(A, a, b)): Equal(A, b, a)
+Equal.mirror<A: Type, a: A, b: A>(e: Equal<A, a, b>): Equal<A, b, a>
   case e {
     refl: Equal.refl<A, a>
-  } : Equal(A, e.b, a)
+  } : Equal<A, e.b, a>

@@ -29,14 +29,14 @@ If that looks alien to you, don't worry for now, it will become clear. The
 `Equal` type has only one constructor, `refl`, which has the following type:
 
 ```
-Equal.refl : (A: Type) -> (x: A) -> Equal(A,x,x)
+Equal.refl : (A: Type) -> (x: A) -> Equal<A,x,x>
 ````
 
 That means `refl` receives a type (`A`), and element `x` of type `A`, and
-returns `Equal(A,x,x)`. As an example, the program below:
+returns `Equal<A,x,x>`. As an example, the program below:
 
 ```
-two_is_two: Equal(Nat, 2, 2)
+two_is_two: Equal<Nat, 2, 2>
   Equal.refl(Nat, 2)
 ```
 
@@ -524,7 +524,7 @@ right_and_b_true(b: Bool): b == Bool.and(b, true)
   mirror(and_b_true(b))
 ```
 
-Here, `mirror : (A: Type) -> (a: A) -> (b: B) -> Equal(A,a,b) -> Equal(A,b,a)`
+Here, `mirror : (A: Type) -> (a: A) -> (b: B) -> Equal<A,a,b> -> Equal<A,b,a>`
 is a standard function that flips the two arguments of an equality. That is, it
 turns `a == b` into `b == a`. The lesson here is that not always we will prove
 equalities with `refl` directly. If we did that, every proof would be huge!
@@ -1358,22 +1358,22 @@ b`. For example, suppose we had the following context:
 
 ```
 eq: n == 2
-xs: Vector(Nat, n)
+xs: Vector<Nat, n>
 ```
 
 That is, we have a vector `xs` of `n` natural numbers, and a proof `eq` that `n
-== 2`. We can use `rewrite` and `eq` to cast `xs` to type `Vector(Nat, 2)`:
+== 2`. We can use `rewrite` and `eq` to cast `xs` to type `Vector<Nat, 2>`:
 
 ```
-let ys = xs :: rewrite x in Vector(Nat, x) with eq
+let ys = xs :: rewrite x in Vector<Nat, x> with eq
 ```
 
 This would give us the following context:
 
 ```
 eq: n == 2
-xs: Vector(Nat, n)
-ys: Vector(Nat, 2)
+xs: Vector<Nat, n>
+ys: Vector<Nat, 2>
 ```
 
 Take a moment to make sure the above makes sense to you. If you want to, you may

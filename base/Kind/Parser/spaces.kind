@@ -1,4 +1,4 @@
-Kind.Parser.spaces: Parser(List(Unit))
+Kind.Parser.spaces: Parser(List<Unit>)
   Parser.many!(Parser.first_of!([
     Parser.text(" "),
     Parser.text("\t"),

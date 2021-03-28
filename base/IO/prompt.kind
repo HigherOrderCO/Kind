@@ -1,4 +1,4 @@
-IO.prompt(text: String): IO(String)
+IO.prompt(text: String): IO<String>
   IO {
     IO.put_string(text)
     IO.get_line

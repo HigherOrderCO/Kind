@@ -188,7 +188,7 @@ Nat.add(n: Nat, m: Nat): Nat
 `Nat.add` is a function which takes two `Nat`s and returns its sum.
 
 ```
-Bool.double_negation(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
+Bool.double_negation(b: Bool): Equal<Bool, Bool.not(Bool.not(b)), b>
 ```
 `Bool.double_negation` is a proof that for all `Bool`, its double negation is equal to itself.
 
@@ -197,7 +197,7 @@ Kind functions are self-dependently typed, you can optionally give a name
 to the input variable, and to the value of the function itself. For example,
 
 ```
-(n: Nat) Vector(Bool, n)
+(n: Nat) Vector<Bool, n>
 ```
 
 Is the type of a function that receives a `n: Nat` and returns a `Vector` of `n`
@@ -238,7 +238,7 @@ Can be written in Kind as:
 ```
 type List (A: Type) {
   nil
-  cons(head: A, tail: List(A))
+  cons(head: A, tail: List<A>)
 }
 ```
 
@@ -255,7 +255,7 @@ That can be written in Kind as:
 ```
 type Vector <A: Type> ~ (size: Nat) {
   nil                                      ~ (size = zero)
-  cons(n: Nat, head: A, tail: Vector(A,n)) ~ (size = succ(n))
+  cons(n: Nat, head: A, tail: Vector<A,n>) ~ (size = succ(n))
 }
 ```
 
@@ -305,7 +305,7 @@ The motive is optional: if it isn't provided, it will be replaced by a `hole`.
 For example, to sum a list, we write:
 
 ```
-sum(list: List(Nat)): Nat
+sum(list: List<Nat>): Nat
   case list {
     nil  : 0
     cons : list.head + sum(list.tail)
@@ -315,7 +315,7 @@ sum(list: List(Nat)): Nat
 This is the same as:
 
 ```
-sum(list: List(Nat)): Nat
+sum(list: List<Nat>): Nat
   case list {
     nil: 0
     cons: list.head + sum(list.tail)
@@ -325,7 +325,7 @@ sum(list: List(Nat)): Nat
 Which, for curiosity sake, is expanded to:
 
 ```
-sum(list: List(Nat)): Nat
+sum(list: List<Nat>): Nat
   def case_nil = 0
   def case_cons = (list.head, list.tail)
     Nat.add(list.head, sum(list.tail))
@@ -551,9 +551,9 @@ program for you. Without holes, Kind would be extremely more verbose. For
 example, the list of lists `[[1,2],[3,4]]`, in its full form, would be:
 
 ```
-List.cons<List(Nat)>(List.cons<Nat>(1, List.cons<Nat>(2, List.nil<Nat>)),
-List.cons<List(Nat)>(List.cons<Nat>(3, List.cons<Nat>(4, List.nil<Nat>)),
-List.nil<List(Nat)>))
+List.cons<List<Nat>>(List.cons<Nat>(1, List.cons<Nat>(2, List.nil<Nat>)),
+List.cons<List<Nat>>(List.cons<Nat>(3, List.cons<Nat>(4, List.nil<Nat>)),
+List.nil<List<Nat>>))
 ```
 
 With holes, you can write just:
@@ -669,7 +669,7 @@ execute a monadic computation and drop the result. You can also use local
 of `Monad.bind` and `Monad.pure`. For example,
 
 ```
-ask_user_age: IO(Nat)
+ask_user_age: IO<Nat>
   IO {
     var name = IO.get_line("What is your name?")
     IO.print("Welcome, " | name)
@@ -785,7 +785,7 @@ type String {
 }
 ```
 
-Note that Strings aren't the same as `List(Char)`. They're a new datatype in
+Note that Strings aren't the same as `List<Char>`. They're a new datatype in
 order to make efficient compilation simpler. Kind's type-checker expands
 string literals to strings when needed. For example, `"Hello"` is expanded to:
 
@@ -882,7 +882,7 @@ a == b
 The syntax above expands to:
 
 ```
-Equal(_, a, b)
+Equal<_, a, b>
 ```
 
 It is the type of propositional equality proofs. It is not a boolean equality
@@ -900,7 +900,7 @@ a != b
 The syntax above expands to:
 
 ```
-Not(Equal(_, a, b))
+Not(Equal<_, a, b>)
 ```
 
 It is the type of propositional inequality proofs. It is not a boolean
@@ -1146,21 +1146,21 @@ example, suppose you have the following values in your context:
 
 ```
 eq: 10 == 5 + 5
-xs: Vector(Nat, 10)
+xs: Vector<Nat, 10>
 ```
 
 Then you can use `rewrite` to "cast" the type of `xs`:
 
 ```
-let ys = xs :: rewrite x in Vector(Nat, x) with e
+let ys = xs :: rewrite x in Vector<Nat, x> with e
 ```
 
 And then you'll have:
 
 ```
 eq: 10 == 5 + 5
-xs: Vector(Nat, 10)
-ys: Vector(Nat, 5 + 5)
+xs: Vector<Nat, 10>
+ys: Vector<Nat, 5 + 5>
 ```
 
 In your context. Notice that `ys` is just `xs`, except with the type changed to

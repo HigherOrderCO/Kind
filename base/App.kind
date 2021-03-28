@@ -2,6 +2,6 @@ type App <S: Type> {
   new(
     init: S,
     draw: S -> App.Render,
-    when: App.Event -> S -> List(App.Action(S))
+    when: App.Event -> S -> List<App.Action<S>>
   )
 }

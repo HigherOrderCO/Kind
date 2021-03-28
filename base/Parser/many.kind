@@ -1,2 +1,2 @@
-Parser.many<V: Type>(parser: Parser(V)): Parser(List(V))
+Parser.many<V: Type>(parser: Parser(V)): Parser(List<V>)
   Parser.many.go<V>(parser, (x) x)

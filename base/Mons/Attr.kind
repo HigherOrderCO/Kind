@@ -4,11 +4,11 @@ type Mons.Attr {
     mhp: U32,
     atk: U32,
     name: String,
-    wlk: (x: U32) -> (y: U32) -> (obj_ani: U32) -> (obj_dir: Mons.Dir) -> List(Image3D), // walk
-    idl: List(Image3D), // idle
+    wlk: (x: U32) -> (y: U32) -> (obj_ani: U32) -> (obj_dir: Mons.Dir) -> List<Image3D>, // walk
+    idl: List<Image3D>, // idle
     pic: Image3D,
     battle_spr: (is_up: Bool) -> Image3D,
-    skills: List(Mons.Skill),
+    skills: List<Mons.Skill>,
     pos: Pos32
   )
 }

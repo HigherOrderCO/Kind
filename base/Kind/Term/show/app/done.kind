@@ -1,4 +1,4 @@
-Kind.Term.show.app.done(term: Kind.Term, path: Maybe(Bits -> Bits), args: List(String)): String
+Kind.Term.show.app.done(term: Kind.Term, path: Maybe<Bits -> Bits>, args: List<String>): String
   let arity = List.length!(args);
   if Bool.and(Kind.Term.show.is_ref(term,"Equal"), Nat.eql(arity,3)) then
     let func = Kind.Term.show.go(term, path);

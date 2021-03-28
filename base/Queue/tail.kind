@@ -1,9 +1,9 @@
-Queue.tail<A: Type>(q: Queue(A)): Maybe(Queue(A))
+Queue.tail<A: Type>(q: Queue<A>): Maybe<Queue<A>>
   open q
   case q.front {
-    nil : Maybe.none<Queue(A)>,
+    nil : Maybe.none<Queue<A>>,
     cons: 
       let new_front = List.drop<A>(1, q.front)
       let new_q = Queue.balance<A>(new_front, Nat.sub(q.size_front, 1), q.rear, q.size_rear)
-      Maybe.some<Queue(A)>(new_q)
+      Maybe.some<Queue<A>>(new_q)
   }

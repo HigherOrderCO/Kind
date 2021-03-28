@@ -1,4 +1,4 @@
-List.fold_zip<A: Type, B: Type>(as: List(A), bs: List(B))<C: Type>(fn: A -> B -> C, nil: C, cons: C -> C -> C): C
+List.fold_zip<A: Type, B: Type>(as: List<A>, bs: List<B>)<C: Type>(fn: A -> B -> C, nil: C, cons: C -> C -> C): C
   case as {
     nil : nil,
     cons: case bs {

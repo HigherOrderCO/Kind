@@ -1,13 +1,13 @@
 Kind.Term.desugar_cse(
   expr: Kind.Term,
   name: Kind.Name,
-  wyth: List(Kind.Def),
-  cses: BitsMap(Kind.Term),
+  wyth: List<Kind.Def>,
+  cses: BitsMap<Kind.Term>,
   moti: Kind.Term,
   type: Kind.Term,
   defs: Kind.Defs,
   ctxt: Kind.Context,
-): Maybe(Kind.Term)
+): Maybe<Kind.Term>
   case Kind.Term.reduce(type, defs) as type {
     all:
       let moti = Kind.Term.desugar_cse.motive(wyth, moti);

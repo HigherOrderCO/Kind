@@ -2,13 +2,13 @@ type App.Event {
   init(
     time: U64,
     addr: String,
-    screen: Pair(U32,U32),
-    mouse: Pair(U32,U32),
+    screen: Pair<U32,U32>,
+    mouse: Pair<U32,U32>,
   )
   tick(
     time: U64,
-    screen: Pair(U32,U32),
-    mouse: Pair(U32,U32),
+    screen: Pair<U32,U32>,
+    mouse: Pair<U32,U32>,
   )
   xkey(
     time: U64,

@@ -15,7 +15,7 @@ Mons.walk_char_pack(
   u_2: Image3D,
   l_2: Image3D,
   d_2: Image3D
-): List(Image3D)
+): List<Image3D>
   //0 = parado
   //1 = pe direito pra frente
   //2 = pe esquerdo pra frente

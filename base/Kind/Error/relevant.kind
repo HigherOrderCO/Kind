@@ -1,4 +1,4 @@
-Kind.Error.relevant(errors: List(Kind.Error), got: Bool): List(Kind.Error)
+Kind.Error.relevant(errors: List<Kind.Error>, got: Bool): List<Kind.Error>
   case errors {
     nil: [],
     cons:

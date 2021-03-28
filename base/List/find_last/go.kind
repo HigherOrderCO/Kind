@@ -1,9 +1,9 @@
 List.find_last.go<A: Type>(
-  xs: List(A),
+  xs: List<A>,
   f: A -> Nat -> Bool,
   n: Nat,
-  res: Maybe(Pair(A,Nat))
-): Maybe(Pair(A,Nat))
+  res: Maybe<Pair<A,Nat>>
+): Maybe<Pair<A,Nat>>
   case xs {
     nil : res,
     cons:

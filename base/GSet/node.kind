@@ -1,4 +1,4 @@
-GSet.node<A: Type>(val: A, left: GSet(A), right: GSet(A)): GSet(A)
+GSet.node<A: Type>(val: A, left: GSet<A>, right: GSet<A>): GSet<A>
   let size_left  = GSet.size!(left)
   let size_right = GSet.size!(right)
   let new_size   = List.sum([1, size_left, size_right])

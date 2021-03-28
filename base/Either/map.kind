@@ -1,4 +1,4 @@
-Either.map<A: Type, B: Type, C: Type>(f: B -> C, e: Either(A, B)): Either(A, C)
+Either.map<A: Type, B: Type, C: Type>(f: B -> C, e: Either<A, B>): Either<A, C>
   case e {
     left: Either.left<A, C>(e.value),
     right: Either.right<A, C>(f(e.value)),

@@ -1,4 +1,4 @@
-Kind.Synth.one(name: Kind.Name, defs: Kind.Defs): IO(Maybe(Kind.Defs))
+Kind.Synth.one(name: Kind.Name, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
   //log("synth ", name)
   case Kind.Map.get!(name, defs) as got {
     none: IO {

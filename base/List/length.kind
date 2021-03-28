@@ -1,4 +1,4 @@
-List.length<A: Type>(xs: List(A)): Nat
+List.length<A: Type>(xs: List<A>): Nat
   case xs {
     nil: 0,
     cons: Nat.succ(List.length<A>(xs.tail)),

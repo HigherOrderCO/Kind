@@ -1,4 +1,4 @@
-Kind.SmartMotive.vals(expr: Kind.Term, type: Kind.Term, defs: Kind.Defs): List(Kind.Term)
+Kind.SmartMotive.vals(expr: Kind.Term, type: Kind.Term, defs: Kind.Defs): List<Kind.Term>
   case Kind.Term.reduce(type, defs) as type {
     all: Kind.SmartMotive.vals(expr, type.body(Kind.Term.typ,Kind.Term.typ), defs),
     _: Kind.SmartMotive.vals.cont(expr, type, [], defs),

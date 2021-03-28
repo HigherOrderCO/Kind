@@ -1,4 +1,4 @@
-List.filter<A: Type>(f: A -> Bool, xs: List(A)): List(A)
+List.filter<A: Type>(f: A -> Bool, xs: List<A>): List<A>
   case xs{
     nil : List.nil!
     cons: case f(xs.head){

@@ -1,4 +1,4 @@
-Int.to_nat(a: Int): Pair(Bool, Nat)
+Int.to_nat(a: Int): Pair<Bool, Nat>
   open a
   case a.y {
     zero: Pair.new!!(Bool.false, a.x),

@@ -1,4 +1,4 @@
-Kind.Defs.report(defs: Kind.Defs, names: List(Kind.Name)): String
+Kind.Defs.report(defs: Kind.Defs, names: List<Kind.Name>): String
   let types = Kind.Defs.report.types(defs, names)
   let errors = Kind.Defs.report.errors(defs)
   let errors = case errors {
@@ -34,7 +34,7 @@ Kind.Defs.report.errors(defs: Kind.Defs): String
     } default errors
   errors
 
-Kind.Defs.report.types(defs: Kind.Defs, names: List(Kind.Name)): String
+Kind.Defs.report.types(defs: Kind.Defs, names: List<Kind.Name>): String
   let types = ""
   let types = for name in names:
     case Kind.Map.get!(name, defs) as got {

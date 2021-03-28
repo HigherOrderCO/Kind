@@ -1,11 +1,11 @@
 Kind.Term.check(
   term: Kind.Term,
-  type: Maybe(Kind.Term),
+  type: Maybe<Kind.Term>,
   defs: Kind.Defs,
   ctx: Kind.Context,
   path: Kind.MPath,
-  orig: Maybe(Pair(Nat,Nat)),
-): Kind.Check(Kind.Term)
+  orig: Maybe<Pair<Nat,Nat>>,
+): Kind.Check<Kind.Term>
   do Kind.Check {
     get infr = case term {
       ref: case Kind.Map.get!(term.name, defs) as got {

@@ -41,7 +41,7 @@ Fmt.Parser.char: Parser(Fmt.Specifier)
     return Fmt.Specifier.char(c);
   }
 
-Fmt.Parser.parser(xs: List(Fmt.Specifier)): Parser(List(Fmt.Specifier))
+Fmt.Parser.parser(xs: List<Fmt.Specifier>): Parser(List<Fmt.Specifier>)
   Parser {
     var stop = Parser.is_eof;
     if stop then Parser {
@@ -57,7 +57,7 @@ Fmt.Parser.parser(xs: List(Fmt.Specifier)): Parser(List(Fmt.Specifier))
     }
   }
 
-Fmt.Parser.parse(input: String): List(Fmt.Specifier)
+Fmt.Parser.parse(input: String): List<Fmt.Specifier>
   case Fmt.Parser.parser([], 0, input) as parsed {
     error: []
     value: parsed.val
@@ -67,7 +67,7 @@ Fmt.Parser.parse(input: String): List(Fmt.Specifier)
 // format string, for example, "%d is %d" would evaluate to
 // Nat -> Nat -> String - i.e. the formatter that takes two Nats and returns
 // the formatted String.
-Fmt.arguments(format: List(Fmt.Specifier)): Type
+Fmt.arguments(format: List<Fmt.Specifier>): Type
   case format {
     nil: String // the final result is a String
     cons: case format.head {
@@ -77,7 +77,7 @@ Fmt.arguments(format: List(Fmt.Specifier)): Type
     }
   }
 
-Fmt.sprintf.go(str: String, xs: List(Fmt.Specifier)): Fmt.arguments(xs)
+Fmt.sprintf.go(str: String, xs: List<Fmt.Specifier>): Fmt.arguments(xs)
   case xs {
     nil: str
     cons: case xs.head {

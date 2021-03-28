@@ -1,4 +1,4 @@
-GSet.size<A: Type>(set: GSet(A)): Nat 
+GSet.size<A: Type>(set: GSet<A>): Nat 
   case set {
     tip: 0,
     bin: set.size
