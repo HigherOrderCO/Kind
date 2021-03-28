@@ -1,0 +1,54 @@
+// The Cat in the Hat puzzle
+// from https://www.youtube.com/watch?v=cyb20AgH9vQ
+
+// There are 3 hats which may have a cat (true) or not (false)
+
+Puzzle.CatInTheHat.hat_1: Bool
+  ?hat_1
+
+Puzzle.CatInTheHat.hat_2: Bool
+  ?hat_2
+
+Puzzle.CatInTheHat.hat_3: Bool
+  ?hat_3
+
+// Statement 1: "there is a cat on hat 1"
+
+Puzzle.CatInTheHat.statement_1: Bool
+  Bool.eql(Puzzle.CatInTheHat.hat_1, true)
+
+// Statement 2: "there is a not cat on hat 2"
+
+Puzzle.CatInTheHat.statement_2: Bool
+  Bool.eql(Puzzle.CatInTheHat.hat_2, false)
+
+// Statement 2: "there is a not cat on hat 1"
+
+Puzzle.CatInTheHat.statement_3: Bool
+  Bool.eql(Puzzle.CatInTheHat.hat_3, false)
+
+// Exactly one of the statements is true.
+
+Puzzle.CatInTheHat.Truth1: Type
+  List.count!(Bool.is_true, [
+    Puzzle.CatInTheHat.statement_1,
+    Puzzle.CatInTheHat.statement_2,
+    Puzzle.CatInTheHat.statement_3,
+  ]) == 1
+
+// Exactly one hat contains a cat.
+
+Puzzle.CatInTheHat.Truth2: Type
+  List.count!(Bool.is_true, [
+    Puzzle.CatInTheHat.hat_1,
+    Puzzle.CatInTheHat.hat_2,
+    Puzzle.CatInTheHat.hat_3,
+  ]) == 1
+
+// Can you fill the hats in a way that respect the truths?
+
+Puzzle.CatInTheHat.Truth1.proof: Puzzle.CatInTheHat.Truth1
+  ?proof_1
+
+Puzzle.CatInTheHat.Truth2.proof: Puzzle.CatInTheHat.Truth2
+  ?proof_2

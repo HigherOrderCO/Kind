@@ -1,0 +1,5 @@
+Maybe.is_none<A: Type>(m: Maybe(A)): Bool
+  case m {
+    none: true
+    some: false
+  }

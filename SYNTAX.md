@@ -845,7 +845,7 @@ Sigma type
 ----------
 
 ```
-{x: A} B(x)
+[x: A] B(x)
 ```
 
 Sigma literals can be used to write sigma types or dependent pairs. They are
@@ -860,7 +860,7 @@ Pi, aka the dependent function type) can be read as "forall", `Sigma`s can be re
 as "there exists". So, for example, the program below:
 
 ```
-there_is_an_even_nat: {x: Nat} (x % 2) == 0
+there_is_an_even_nat: [x: Nat] (x % 2) == 0
   0 ~ refl
 ```
 
@@ -869,7 +869,7 @@ can also be used to create subset types:
 
 ```
 EvenNat: Type
-  {x: Nat} (x % 2) == 0
+  [x: Nat] (x % 2) == 0
 ```
 
 Equal type

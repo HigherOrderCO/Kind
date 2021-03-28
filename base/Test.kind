@@ -1,4 +1,5 @@
-Test: _
-  list = [1, 8, 3, 5, 2, 9, 4]
-  list = Example.bubble_sort(list)
-  List.show!(Nat.show, list)
+foo(n: Nat): (vec: Vector<String, n>) -> Nat
+  case n {
+    zero: ?a
+    succ: ?b
+  }!
