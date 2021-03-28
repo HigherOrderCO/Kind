@@ -57,9 +57,9 @@ Kind.Core.show(term: Kind.Term, indx: Nat, vars: List(Kind.Name)): String
     nat:
       String.flatten(["+", Nat.show(term.natx)])
     chr:
-      String.flatten(["'", Kind.escape.char(term.chrx), "'"])
+      String.flatten(["'", Kind.Code.escape.char(term.chrx), "'"])
     str:
-      String.flatten(["\"", Kind.escape(term.strx), "\""])
+      String.flatten(["\"", Kind.Code.escape(term.strx), "\""])
     cse:
       "<CSE>"
     ori:

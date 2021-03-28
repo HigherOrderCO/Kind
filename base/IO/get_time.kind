@@ -1,0 +1,3 @@
+IO.get_time: IO(Nat)
+  IO.ask<Nat>("get_time", "", (time)
+  IO.end<Nat>(Nat.read(time)))

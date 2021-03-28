@@ -1,0 +1,13 @@
+Kind.Code.escapes: List(Pair(String, Char))
+  [
+    {"\\b" , '\b'},
+    {"\\f" , '\f'},
+    {"\\n" , '\n'},
+    {"\\r" , '\r'},
+    {"\\t" , '\t'},
+    {"\\v" , '\v'},
+    {String.cons(Kind.Code.backslash, String.cons(Kind.Code.backslash, String.nil)), Kind.Code.backslash},
+    {"\\\"", '"'},
+    {"\\0" , '\0'},
+    {"\\'" , '\''},
+  ]

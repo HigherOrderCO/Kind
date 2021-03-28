@@ -1,0 +1,5 @@
+Function.while<S: Type>(state: S, cond: S -> Bool, func: S -> S): S
+  if cond(state) then
+    Function.while<S>(func(state), cond, func)
+  else
+    state

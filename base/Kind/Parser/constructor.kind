@@ -6,7 +6,7 @@ Kind.Parser.constructor(namespace: Kind.Name): Parser(Kind.Constructor)
       Kind.Parser.text("~");
       Kind.Parser.binder("=");
     });
-    let args = Maybe.default!([], args);
-    let inds = Maybe.default!([], inds);
+    let args = Maybe.default!(args, []);
+    let inds = Maybe.default!(inds, []);
     return Kind.Constructor.new(name, args, inds);
   }

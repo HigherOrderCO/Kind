@@ -1,0 +1,11 @@
+Kind.Parser.default(init: Nat, val0: Kind.Term): Parser(Kind.Term)
+  Parser {
+    Kind.Parser.text("<>");
+    get val1 = Kind.Parser.term;
+    get orig = Kind.Parser.stop(init);
+    let term = Kind.Term.ref("Maybe.default");
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, val0);
+    let term = Kind.Term.app(term, val1);
+    return Kind.Term.ori(orig, term);
+  }

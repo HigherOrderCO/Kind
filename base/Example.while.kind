@@ -1,0 +1,7 @@
+Example.while: String
+  let idx = 0
+  let str = ""
+  get {idx, str} = while idx <? 10:
+    log("idx=" | Nat.show(idx) | " str=" | str)
+    {idx + 1, str | Nat.show(idx)}
+  str

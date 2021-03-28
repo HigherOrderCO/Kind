@@ -1,7 +1,0 @@
-Example.suit_to_string(suit: Example.Suit): String
-  case suit {
-    diamonds: "diamonds"
-    clubs: "clubs"
-    hearts: "hearts"
-    spades: "spades"
-  }

@@ -1,4 +1,0 @@
-type Example.Nat {
-  zero
-  succ(pred: Nat)
-}

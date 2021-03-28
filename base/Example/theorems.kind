@@ -1,0 +1,36 @@
+// not(not(b)) == b
+Example.theorems.double_negation(b: Bool): Bool.not(Bool.not(b)) == b
+  case b {
+    true: refl
+    false: refl
+  }!
+
+// true != false
+Example.theorems.true_neq_false(e: true == false): Empty
+  rewrite X in (if X then Empty else Unit) with e
+  unit
+
+// (a + b) == (b + a)
+Example.theorems.add.commutative(a: Nat, b: Nat): (a + b) == (b + a)
+  case a {
+    zero:
+      Example.theorems.add.aux0(b)
+    succ:
+      let ind = apply(Nat.succ, Example.theorems.add.commutative(a.pred,b))
+      let aux = Example.theorems.add.aux1(b, a.pred)
+      Equal.chain!!!!(ind, aux)
+  }!
+
+// x == (x + 0)
+Example.theorems.add.aux0(x: Nat): x == Nat.add(x,0)
+  case x {
+    zero: refl
+    succ: apply(Nat.succ, Example.theorems.add.aux0(x.pred))
+  }!
+
+// 1 + (a + b) == a + (1 + b)
+Example.theorems.add.aux1(a: Nat, b: Nat): Nat.succ(Nat.add(a,b)) == Nat.add(a,Nat.succ(b))
+  case a {
+    zero: refl
+    succ: apply(Nat.succ, Example.theorems.add.aux1(a.pred,b))
+  }!

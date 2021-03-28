@@ -1,6 +1,0 @@
-type Example.Suit {
-  diamonds
-  clubs
-  hearts
-  spades
-}
