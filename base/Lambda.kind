@@ -1,0 +1,6 @@
+type Lambda ~ (n: Nat) {
+  var<n: Nat>(index: Fin<n>)                    ~ (n = n)
+  lam<n: Nat>(body: Lambda<Nat.succ(n)>)        ~ (n = n)
+  app<n: Nat>(func: Lambda<n>, argm: Lambda<n>) ~ (n = n)
+}
+

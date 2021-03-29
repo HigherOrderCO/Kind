@@ -1,0 +1,9 @@
+User.rigille.List.Perm.rev.aux<A: Type>(xs: List<A>): User.rigille.List.Perm<A>(User.rigille.List.reverse.aux!(xs), xs)
+  case xs {
+    nil: User.rigille.List.Perm.nil<A>
+    cons: let ind = User.rigille.List.Perm.rev.aux<A>(xs.tail)
+          let lemma0 = User.rigille.List.Perm.front_to_back<A>(xs.head, xs.tail) :: User.rigille.List.Perm<A>(List.concat!(xs.tail, [xs.head]), xs.head & xs.tail)
+          let lemma1 = User.rigille.List.Perm.push_back<A>(xs.head, _, _, ind)
+          let qed = User.rigille.List.Perm.trans<A>!!!(lemma1, lemma0)
+          qed
+  }!

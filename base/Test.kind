@@ -1,5 +1,2 @@
-foo(n: Nat): (vec: Vector<String, n>) -> Nat
-  case n {
-    zero: ?a
-    succ: ?b
-  }!
+Test: String
+  Lambda.test

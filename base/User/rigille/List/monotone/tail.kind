@@ -1,0 +1,8 @@
+User.rigille.List.monotone.tail<A: Type, after: A -> A -> Type, O: User.rigille.Order<A>(after)>(x: A, ys: List<A>,
+  Hyp: User.rigille.List.monotone<A, after, O>(List.cons<A>(x, ys))): User.rigille.List.monotone<A, after, O>(ys)
+  open O
+  case Hyp {
+    nil: ?a,
+    sing: ?b,
+    cons: ?c,
+  }!

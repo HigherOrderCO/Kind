@@ -1,0 +1,5 @@
+Lambda.inc<n: Nat, m: Nat>(fn: Fin<n> -> Fin<m>): Fin<Nat.succ(n)> -> Fin<Nat.succ(m)>
+  (i) case i with fn : (Fin<Nat.pred(i.lim)> -> Fin<m>) = fn {
+    zero: Fin.zero!
+    succ: Fin.succ!(fn(i.pred))
+  }!
