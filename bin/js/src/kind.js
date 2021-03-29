@@ -4649,7 +4649,7 @@ module.exports = (function() {
     };
     const Kind$Parser$let$omit = x0 => x1 => Kind$Parser$let$omit$(x0, x1);
 
-    function Kind$Parser$get$(_idx$1, _code$2) {
+    function Kind$Parser$getwhile$(_idx$1, _code$2) {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
@@ -4663,7 +4663,7 @@ module.exports = (function() {
                 var $1651 = self.idx;
                 var $1652 = self.code;
                 var $1653 = self.val;
-                var self = Kind$Parser$text$("let ", $1651, $1652);
+                var self = Parser$maybe$(Kind$Parser$text("let "), $1651, $1652);
                 switch (self._) {
                     case 'Parser.Reply.error':
                         var $1655 = self.idx;
@@ -4749,7 +4749,7 @@ module.exports = (function() {
                                                                     case 'Parser.Reply.value':
                                                                         var $1703 = self.idx;
                                                                         var $1704 = self.code;
-                                                                        var self = Kind$Parser$term$($1703, $1704);
+                                                                        var self = Kind$Parser$text$("while ", $1703, $1704);
                                                                         switch (self._) {
                                                                             case 'Parser.Reply.error':
                                                                                 var $1706 = self.idx;
@@ -4761,20 +4761,20 @@ module.exports = (function() {
                                                                             case 'Parser.Reply.value':
                                                                                 var $1710 = self.idx;
                                                                                 var $1711 = self.code;
-                                                                                var $1712 = self.val;
-                                                                                var self = Parser$maybe$(Kind$Parser$text(";"), $1710, $1711);
+                                                                                var self = Kind$Parser$term$($1710, $1711);
                                                                                 switch (self._) {
                                                                                     case 'Parser.Reply.error':
-                                                                                        var $1714 = self.idx;
-                                                                                        var $1715 = self.code;
-                                                                                        var $1716 = self.err;
-                                                                                        var $1717 = Parser$Reply$error$($1714, $1715, $1716);
-                                                                                        var $1713 = $1717;
+                                                                                        var $1713 = self.idx;
+                                                                                        var $1714 = self.code;
+                                                                                        var $1715 = self.err;
+                                                                                        var $1716 = Parser$Reply$error$($1713, $1714, $1715);
+                                                                                        var $1712 = $1716;
                                                                                         break;
                                                                                     case 'Parser.Reply.value':
-                                                                                        var $1718 = self.idx;
-                                                                                        var $1719 = self.code;
-                                                                                        var self = Kind$Parser$term$($1718, $1719);
+                                                                                        var $1717 = self.idx;
+                                                                                        var $1718 = self.code;
+                                                                                        var $1719 = self.val;
+                                                                                        var self = Kind$Parser$text$(":", $1717, $1718);
                                                                                         switch (self._) {
                                                                                             case 'Parser.Reply.error':
                                                                                                 var $1721 = self.idx;
@@ -4786,43 +4786,116 @@ module.exports = (function() {
                                                                                             case 'Parser.Reply.value':
                                                                                                 var $1725 = self.idx;
                                                                                                 var $1726 = self.code;
-                                                                                                var $1727 = self.val;
-                                                                                                var self = Kind$Parser$stop$($1653, $1725, $1726);
+                                                                                                var self = Kind$Parser$term$($1725, $1726);
                                                                                                 switch (self._) {
                                                                                                     case 'Parser.Reply.error':
-                                                                                                        var $1729 = self.idx;
-                                                                                                        var $1730 = self.code;
-                                                                                                        var $1731 = self.err;
-                                                                                                        var $1732 = Parser$Reply$error$($1729, $1730, $1731);
-                                                                                                        var $1728 = $1732;
+                                                                                                        var $1728 = self.idx;
+                                                                                                        var $1729 = self.code;
+                                                                                                        var $1730 = self.err;
+                                                                                                        var $1731 = Parser$Reply$error$($1728, $1729, $1730);
+                                                                                                        var $1727 = $1731;
                                                                                                         break;
                                                                                                     case 'Parser.Reply.value':
-                                                                                                        var $1733 = self.idx;
-                                                                                                        var $1734 = self.code;
-                                                                                                        var $1735 = self.val;
-                                                                                                        var _term$39 = $1712;
-                                                                                                        var _term$40 = Kind$Term$app$(_term$39, Kind$Term$lam$("x", (_x$40 => {
-                                                                                                            var $1737 = Kind$Term$hol$(Bits$e);
-                                                                                                            return $1737;
-                                                                                                        })));
-                                                                                                        var _term$41 = Kind$Term$app$(_term$40, Kind$Term$lam$($1675, (_x$41 => {
-                                                                                                            var $1738 = Kind$Term$lam$($1690, (_y$42 => {
-                                                                                                                var $1739 = $1727;
-                                                                                                                return $1739;
-                                                                                                            }));
-                                                                                                            return $1738;
-                                                                                                        })));
-                                                                                                        var $1736 = Parser$Reply$value$($1733, $1734, Kind$Term$ori$($1735, _term$41));
-                                                                                                        var $1728 = $1736;
+                                                                                                        var $1732 = self.idx;
+                                                                                                        var $1733 = self.code;
+                                                                                                        var $1734 = self.val;
+                                                                                                        var self = Parser$maybe$(Kind$Parser$text(";"), $1732, $1733);
+                                                                                                        switch (self._) {
+                                                                                                            case 'Parser.Reply.error':
+                                                                                                                var $1736 = self.idx;
+                                                                                                                var $1737 = self.code;
+                                                                                                                var $1738 = self.err;
+                                                                                                                var $1739 = Parser$Reply$error$($1736, $1737, $1738);
+                                                                                                                var $1735 = $1739;
+                                                                                                                break;
+                                                                                                            case 'Parser.Reply.value':
+                                                                                                                var $1740 = self.idx;
+                                                                                                                var $1741 = self.code;
+                                                                                                                var self = Kind$Parser$term$($1740, $1741);
+                                                                                                                switch (self._) {
+                                                                                                                    case 'Parser.Reply.error':
+                                                                                                                        var $1743 = self.idx;
+                                                                                                                        var $1744 = self.code;
+                                                                                                                        var $1745 = self.err;
+                                                                                                                        var $1746 = Parser$Reply$error$($1743, $1744, $1745);
+                                                                                                                        var $1742 = $1746;
+                                                                                                                        break;
+                                                                                                                    case 'Parser.Reply.value':
+                                                                                                                        var $1747 = self.idx;
+                                                                                                                        var $1748 = self.code;
+                                                                                                                        var $1749 = self.val;
+                                                                                                                        var self = Kind$Parser$stop$($1653, $1747, $1748);
+                                                                                                                        switch (self._) {
+                                                                                                                            case 'Parser.Reply.error':
+                                                                                                                                var $1751 = self.idx;
+                                                                                                                                var $1752 = self.code;
+                                                                                                                                var $1753 = self.err;
+                                                                                                                                var $1754 = Parser$Reply$error$($1751, $1752, $1753);
+                                                                                                                                var $1750 = $1754;
+                                                                                                                                break;
+                                                                                                                            case 'Parser.Reply.value':
+                                                                                                                                var $1755 = self.idx;
+                                                                                                                                var $1756 = self.code;
+                                                                                                                                var $1757 = self.val;
+                                                                                                                                var _moti$48 = Kind$Term$lam$("x", (_x$48 => {
+                                                                                                                                    var $1759 = Kind$Term$hol$(Bits$e);
+                                                                                                                                    return $1759;
+                                                                                                                                }));
+                                                                                                                                var _term$49 = Kind$Term$ref$("Function.while");
+                                                                                                                                var _term$50 = Kind$Term$app$(_term$49, Kind$Term$hol$(Bits$e));
+                                                                                                                                var _init$51 = Kind$Term$ref$("Pair.new");
+                                                                                                                                var _init$52 = Kind$Term$app$(_init$51, Kind$Term$hol$(Bits$e));
+                                                                                                                                var _init$53 = Kind$Term$app$(_init$52, Kind$Term$hol$(Bits$e));
+                                                                                                                                var _init$54 = Kind$Term$app$(_init$53, Kind$Term$ref$($1675));
+                                                                                                                                var _init$55 = Kind$Term$app$(_init$54, Kind$Term$ref$($1690));
+                                                                                                                                var _term$56 = Kind$Term$app$(_term$50, _init$55);
+                                                                                                                                var _term$57 = Kind$Term$app$(_term$56, Kind$Term$lam$("s", (_s$57 => {
+                                                                                                                                    var $1760 = Kind$Term$app$(Kind$Term$app$(_s$57, _moti$48), Kind$Term$lam$($1675, (_x$58 => {
+                                                                                                                                        var $1761 = Kind$Term$lam$($1690, (_y$59 => {
+                                                                                                                                            var $1762 = $1719;
+                                                                                                                                            return $1762;
+                                                                                                                                        }));
+                                                                                                                                        return $1761;
+                                                                                                                                    })));
+                                                                                                                                    return $1760;
+                                                                                                                                })));
+                                                                                                                                var _term$58 = Kind$Term$app$(_term$57, Kind$Term$lam$("s", (_s$58 => {
+                                                                                                                                    var $1763 = Kind$Term$app$(Kind$Term$app$(_s$58, _moti$48), Kind$Term$lam$($1675, (_x$59 => {
+                                                                                                                                        var $1764 = Kind$Term$lam$($1690, (_y$60 => {
+                                                                                                                                            var $1765 = $1734;
+                                                                                                                                            return $1765;
+                                                                                                                                        }));
+                                                                                                                                        return $1764;
+                                                                                                                                    })));
+                                                                                                                                    return $1763;
+                                                                                                                                })));
+                                                                                                                                var _term$59 = Kind$Term$app$(Kind$Term$app$(_term$58, _moti$48), Kind$Term$lam$($1675, (_x$59 => {
+                                                                                                                                    var $1766 = Kind$Term$lam$($1690, (_y$60 => {
+                                                                                                                                        var $1767 = $1749;
+                                                                                                                                        return $1767;
+                                                                                                                                    }));
+                                                                                                                                    return $1766;
+                                                                                                                                })));
+                                                                                                                                var $1758 = Parser$Reply$value$($1755, $1756, Kind$Term$ori$($1757, _term$59));
+                                                                                                                                var $1750 = $1758;
+                                                                                                                                break;
+                                                                                                                        };
+                                                                                                                        var $1742 = $1750;
+                                                                                                                        break;
+                                                                                                                };
+                                                                                                                var $1735 = $1742;
+                                                                                                                break;
+                                                                                                        };
+                                                                                                        var $1727 = $1735;
                                                                                                         break;
                                                                                                 };
-                                                                                                var $1720 = $1728;
+                                                                                                var $1720 = $1727;
                                                                                                 break;
                                                                                         };
-                                                                                        var $1713 = $1720;
+                                                                                        var $1712 = $1720;
                                                                                         break;
                                                                                 };
-                                                                                var $1705 = $1713;
+                                                                                var $1705 = $1712;
                                                                                 break;
                                                                         };
                                                                         var $1698 = $1705;
@@ -4851,759 +4924,671 @@ module.exports = (function() {
         };
         return $1646;
     };
-    const Kind$Parser$get = x0 => x1 => Kind$Parser$get$(x0, x1);
-
-    function Kind$Parser$get$omit$(_idx$1, _code$2) {
-        var self = Kind$Parser$init$(_idx$1, _code$2);
-        switch (self._) {
-            case 'Parser.Reply.error':
-                var $1741 = self.idx;
-                var $1742 = self.code;
-                var $1743 = self.err;
-                var $1744 = Parser$Reply$error$($1741, $1742, $1743);
-                var $1740 = $1744;
-                break;
-            case 'Parser.Reply.value':
-                var $1745 = self.idx;
-                var $1746 = self.code;
-                var $1747 = self.val;
-                var self = Kind$Parser$text$("{", $1745, $1746);
-                switch (self._) {
-                    case 'Parser.Reply.error':
-                        var $1749 = self.idx;
-                        var $1750 = self.code;
-                        var $1751 = self.err;
-                        var $1752 = Parser$Reply$error$($1749, $1750, $1751);
-                        var $1748 = $1752;
-                        break;
-                    case 'Parser.Reply.value':
-                        var $1753 = self.idx;
-                        var $1754 = self.code;
-                        var self = Kind$Parser$name$($1753, $1754);
-                        switch (self._) {
-                            case 'Parser.Reply.error':
-                                var $1756 = self.idx;
-                                var $1757 = self.code;
-                                var $1758 = self.err;
-                                var $1759 = Parser$Reply$error$($1756, $1757, $1758);
-                                var $1755 = $1759;
-                                break;
-                            case 'Parser.Reply.value':
-                                var $1760 = self.idx;
-                                var $1761 = self.code;
-                                var $1762 = self.val;
-                                var self = Kind$Parser$text$(",", $1760, $1761);
-                                switch (self._) {
-                                    case 'Parser.Reply.error':
-                                        var $1764 = self.idx;
-                                        var $1765 = self.code;
-                                        var $1766 = self.err;
-                                        var $1767 = Parser$Reply$error$($1764, $1765, $1766);
-                                        var $1763 = $1767;
-                                        break;
-                                    case 'Parser.Reply.value':
-                                        var $1768 = self.idx;
-                                        var $1769 = self.code;
-                                        var self = Kind$Parser$name$($1768, $1769);
-                                        switch (self._) {
-                                            case 'Parser.Reply.error':
-                                                var $1771 = self.idx;
-                                                var $1772 = self.code;
-                                                var $1773 = self.err;
-                                                var $1774 = Parser$Reply$error$($1771, $1772, $1773);
-                                                var $1770 = $1774;
-                                                break;
-                                            case 'Parser.Reply.value':
-                                                var $1775 = self.idx;
-                                                var $1776 = self.code;
-                                                var $1777 = self.val;
-                                                var self = Kind$Parser$text$("}", $1775, $1776);
-                                                switch (self._) {
-                                                    case 'Parser.Reply.error':
-                                                        var $1779 = self.idx;
-                                                        var $1780 = self.code;
-                                                        var $1781 = self.err;
-                                                        var $1782 = Parser$Reply$error$($1779, $1780, $1781);
-                                                        var $1778 = $1782;
-                                                        break;
-                                                    case 'Parser.Reply.value':
-                                                        var $1783 = self.idx;
-                                                        var $1784 = self.code;
-                                                        var self = Kind$Parser$text$("= ", $1783, $1784);
-                                                        switch (self._) {
-                                                            case 'Parser.Reply.error':
-                                                                var $1786 = self.idx;
-                                                                var $1787 = self.code;
-                                                                var $1788 = self.err;
-                                                                var $1789 = Parser$Reply$error$($1786, $1787, $1788);
-                                                                var $1785 = $1789;
-                                                                break;
-                                                            case 'Parser.Reply.value':
-                                                                var $1790 = self.idx;
-                                                                var $1791 = self.code;
-                                                                var self = Kind$Parser$term$($1790, $1791);
-                                                                switch (self._) {
-                                                                    case 'Parser.Reply.error':
-                                                                        var $1793 = self.idx;
-                                                                        var $1794 = self.code;
-                                                                        var $1795 = self.err;
-                                                                        var $1796 = Parser$Reply$error$($1793, $1794, $1795);
-                                                                        var $1792 = $1796;
-                                                                        break;
-                                                                    case 'Parser.Reply.value':
-                                                                        var $1797 = self.idx;
-                                                                        var $1798 = self.code;
-                                                                        var $1799 = self.val;
-                                                                        var self = Parser$maybe$(Kind$Parser$text(";"), $1797, $1798);
-                                                                        switch (self._) {
-                                                                            case 'Parser.Reply.error':
-                                                                                var $1801 = self.idx;
-                                                                                var $1802 = self.code;
-                                                                                var $1803 = self.err;
-                                                                                var $1804 = Parser$Reply$error$($1801, $1802, $1803);
-                                                                                var $1800 = $1804;
-                                                                                break;
-                                                                            case 'Parser.Reply.value':
-                                                                                var $1805 = self.idx;
-                                                                                var $1806 = self.code;
-                                                                                var self = Kind$Parser$term$($1805, $1806);
-                                                                                switch (self._) {
-                                                                                    case 'Parser.Reply.error':
-                                                                                        var $1808 = self.idx;
-                                                                                        var $1809 = self.code;
-                                                                                        var $1810 = self.err;
-                                                                                        var $1811 = Parser$Reply$error$($1808, $1809, $1810);
-                                                                                        var $1807 = $1811;
-                                                                                        break;
-                                                                                    case 'Parser.Reply.value':
-                                                                                        var $1812 = self.idx;
-                                                                                        var $1813 = self.code;
-                                                                                        var $1814 = self.val;
-                                                                                        var self = Kind$Parser$stop$($1747, $1812, $1813);
-                                                                                        switch (self._) {
-                                                                                            case 'Parser.Reply.error':
-                                                                                                var $1816 = self.idx;
-                                                                                                var $1817 = self.code;
-                                                                                                var $1818 = self.err;
-                                                                                                var $1819 = Parser$Reply$error$($1816, $1817, $1818);
-                                                                                                var $1815 = $1819;
-                                                                                                break;
-                                                                                            case 'Parser.Reply.value':
-                                                                                                var $1820 = self.idx;
-                                                                                                var $1821 = self.code;
-                                                                                                var $1822 = self.val;
-                                                                                                var _term$36 = $1799;
-                                                                                                var _term$37 = Kind$Term$app$(_term$36, Kind$Term$lam$("x", (_x$37 => {
-                                                                                                    var $1824 = Kind$Term$hol$(Bits$e);
-                                                                                                    return $1824;
-                                                                                                })));
-                                                                                                var _term$38 = Kind$Term$app$(_term$37, Kind$Term$lam$($1762, (_x$38 => {
-                                                                                                    var $1825 = Kind$Term$lam$($1777, (_y$39 => {
-                                                                                                        var $1826 = $1814;
-                                                                                                        return $1826;
-                                                                                                    }));
-                                                                                                    return $1825;
-                                                                                                })));
-                                                                                                var $1823 = Parser$Reply$value$($1820, $1821, Kind$Term$ori$($1822, _term$38));
-                                                                                                var $1815 = $1823;
-                                                                                                break;
-                                                                                        };
-                                                                                        var $1807 = $1815;
-                                                                                        break;
-                                                                                };
-                                                                                var $1800 = $1807;
-                                                                                break;
-                                                                        };
-                                                                        var $1792 = $1800;
-                                                                        break;
-                                                                };
-                                                                var $1785 = $1792;
-                                                                break;
-                                                        };
-                                                        var $1778 = $1785;
-                                                        break;
-                                                };
-                                                var $1770 = $1778;
-                                                break;
-                                        };
-                                        var $1763 = $1770;
-                                        break;
-                                };
-                                var $1755 = $1763;
-                                break;
-                        };
-                        var $1748 = $1755;
-                        break;
-                };
-                var $1740 = $1748;
-                break;
-        };
-        return $1740;
-    };
-    const Kind$Parser$get$omit = x0 => x1 => Kind$Parser$get$omit$(x0, x1);
-
-    function Kind$Parser$getwhile$(_idx$1, _code$2) {
-        var self = Kind$Parser$init$(_idx$1, _code$2);
-        switch (self._) {
-            case 'Parser.Reply.error':
-                var $1828 = self.idx;
-                var $1829 = self.code;
-                var $1830 = self.err;
-                var $1831 = Parser$Reply$error$($1828, $1829, $1830);
-                var $1827 = $1831;
-                break;
-            case 'Parser.Reply.value':
-                var $1832 = self.idx;
-                var $1833 = self.code;
-                var $1834 = self.val;
-                var self = Parser$maybe$(Kind$Parser$text("get "), $1832, $1833);
-                switch (self._) {
-                    case 'Parser.Reply.error':
-                        var $1836 = self.idx;
-                        var $1837 = self.code;
-                        var $1838 = self.err;
-                        var $1839 = Parser$Reply$error$($1836, $1837, $1838);
-                        var $1835 = $1839;
-                        break;
-                    case 'Parser.Reply.value':
-                        var $1840 = self.idx;
-                        var $1841 = self.code;
-                        var self = Kind$Parser$text$("{", $1840, $1841);
-                        switch (self._) {
-                            case 'Parser.Reply.error':
-                                var $1843 = self.idx;
-                                var $1844 = self.code;
-                                var $1845 = self.err;
-                                var $1846 = Parser$Reply$error$($1843, $1844, $1845);
-                                var $1842 = $1846;
-                                break;
-                            case 'Parser.Reply.value':
-                                var $1847 = self.idx;
-                                var $1848 = self.code;
-                                var self = Kind$Parser$name$($1847, $1848);
-                                switch (self._) {
-                                    case 'Parser.Reply.error':
-                                        var $1850 = self.idx;
-                                        var $1851 = self.code;
-                                        var $1852 = self.err;
-                                        var $1853 = Parser$Reply$error$($1850, $1851, $1852);
-                                        var $1849 = $1853;
-                                        break;
-                                    case 'Parser.Reply.value':
-                                        var $1854 = self.idx;
-                                        var $1855 = self.code;
-                                        var $1856 = self.val;
-                                        var self = Kind$Parser$text$(",", $1854, $1855);
-                                        switch (self._) {
-                                            case 'Parser.Reply.error':
-                                                var $1858 = self.idx;
-                                                var $1859 = self.code;
-                                                var $1860 = self.err;
-                                                var $1861 = Parser$Reply$error$($1858, $1859, $1860);
-                                                var $1857 = $1861;
-                                                break;
-                                            case 'Parser.Reply.value':
-                                                var $1862 = self.idx;
-                                                var $1863 = self.code;
-                                                var self = Kind$Parser$name$($1862, $1863);
-                                                switch (self._) {
-                                                    case 'Parser.Reply.error':
-                                                        var $1865 = self.idx;
-                                                        var $1866 = self.code;
-                                                        var $1867 = self.err;
-                                                        var $1868 = Parser$Reply$error$($1865, $1866, $1867);
-                                                        var $1864 = $1868;
-                                                        break;
-                                                    case 'Parser.Reply.value':
-                                                        var $1869 = self.idx;
-                                                        var $1870 = self.code;
-                                                        var $1871 = self.val;
-                                                        var self = Kind$Parser$text$("}", $1869, $1870);
-                                                        switch (self._) {
-                                                            case 'Parser.Reply.error':
-                                                                var $1873 = self.idx;
-                                                                var $1874 = self.code;
-                                                                var $1875 = self.err;
-                                                                var $1876 = Parser$Reply$error$($1873, $1874, $1875);
-                                                                var $1872 = $1876;
-                                                                break;
-                                                            case 'Parser.Reply.value':
-                                                                var $1877 = self.idx;
-                                                                var $1878 = self.code;
-                                                                var self = Kind$Parser$text$("=", $1877, $1878);
-                                                                switch (self._) {
-                                                                    case 'Parser.Reply.error':
-                                                                        var $1880 = self.idx;
-                                                                        var $1881 = self.code;
-                                                                        var $1882 = self.err;
-                                                                        var $1883 = Parser$Reply$error$($1880, $1881, $1882);
-                                                                        var $1879 = $1883;
-                                                                        break;
-                                                                    case 'Parser.Reply.value':
-                                                                        var $1884 = self.idx;
-                                                                        var $1885 = self.code;
-                                                                        var self = Kind$Parser$text$("while ", $1884, $1885);
-                                                                        switch (self._) {
-                                                                            case 'Parser.Reply.error':
-                                                                                var $1887 = self.idx;
-                                                                                var $1888 = self.code;
-                                                                                var $1889 = self.err;
-                                                                                var $1890 = Parser$Reply$error$($1887, $1888, $1889);
-                                                                                var $1886 = $1890;
-                                                                                break;
-                                                                            case 'Parser.Reply.value':
-                                                                                var $1891 = self.idx;
-                                                                                var $1892 = self.code;
-                                                                                var self = Kind$Parser$term$($1891, $1892);
-                                                                                switch (self._) {
-                                                                                    case 'Parser.Reply.error':
-                                                                                        var $1894 = self.idx;
-                                                                                        var $1895 = self.code;
-                                                                                        var $1896 = self.err;
-                                                                                        var $1897 = Parser$Reply$error$($1894, $1895, $1896);
-                                                                                        var $1893 = $1897;
-                                                                                        break;
-                                                                                    case 'Parser.Reply.value':
-                                                                                        var $1898 = self.idx;
-                                                                                        var $1899 = self.code;
-                                                                                        var $1900 = self.val;
-                                                                                        var self = Kind$Parser$text$(":", $1898, $1899);
-                                                                                        switch (self._) {
-                                                                                            case 'Parser.Reply.error':
-                                                                                                var $1902 = self.idx;
-                                                                                                var $1903 = self.code;
-                                                                                                var $1904 = self.err;
-                                                                                                var $1905 = Parser$Reply$error$($1902, $1903, $1904);
-                                                                                                var $1901 = $1905;
-                                                                                                break;
-                                                                                            case 'Parser.Reply.value':
-                                                                                                var $1906 = self.idx;
-                                                                                                var $1907 = self.code;
-                                                                                                var self = Kind$Parser$term$($1906, $1907);
-                                                                                                switch (self._) {
-                                                                                                    case 'Parser.Reply.error':
-                                                                                                        var $1909 = self.idx;
-                                                                                                        var $1910 = self.code;
-                                                                                                        var $1911 = self.err;
-                                                                                                        var $1912 = Parser$Reply$error$($1909, $1910, $1911);
-                                                                                                        var $1908 = $1912;
-                                                                                                        break;
-                                                                                                    case 'Parser.Reply.value':
-                                                                                                        var $1913 = self.idx;
-                                                                                                        var $1914 = self.code;
-                                                                                                        var $1915 = self.val;
-                                                                                                        var self = Parser$maybe$(Kind$Parser$text(";"), $1913, $1914);
-                                                                                                        switch (self._) {
-                                                                                                            case 'Parser.Reply.error':
-                                                                                                                var $1917 = self.idx;
-                                                                                                                var $1918 = self.code;
-                                                                                                                var $1919 = self.err;
-                                                                                                                var $1920 = Parser$Reply$error$($1917, $1918, $1919);
-                                                                                                                var $1916 = $1920;
-                                                                                                                break;
-                                                                                                            case 'Parser.Reply.value':
-                                                                                                                var $1921 = self.idx;
-                                                                                                                var $1922 = self.code;
-                                                                                                                var self = Kind$Parser$term$($1921, $1922);
-                                                                                                                switch (self._) {
-                                                                                                                    case 'Parser.Reply.error':
-                                                                                                                        var $1924 = self.idx;
-                                                                                                                        var $1925 = self.code;
-                                                                                                                        var $1926 = self.err;
-                                                                                                                        var $1927 = Parser$Reply$error$($1924, $1925, $1926);
-                                                                                                                        var $1923 = $1927;
-                                                                                                                        break;
-                                                                                                                    case 'Parser.Reply.value':
-                                                                                                                        var $1928 = self.idx;
-                                                                                                                        var $1929 = self.code;
-                                                                                                                        var $1930 = self.val;
-                                                                                                                        var self = Kind$Parser$stop$($1834, $1928, $1929);
-                                                                                                                        switch (self._) {
-                                                                                                                            case 'Parser.Reply.error':
-                                                                                                                                var $1932 = self.idx;
-                                                                                                                                var $1933 = self.code;
-                                                                                                                                var $1934 = self.err;
-                                                                                                                                var $1935 = Parser$Reply$error$($1932, $1933, $1934);
-                                                                                                                                var $1931 = $1935;
-                                                                                                                                break;
-                                                                                                                            case 'Parser.Reply.value':
-                                                                                                                                var $1936 = self.idx;
-                                                                                                                                var $1937 = self.code;
-                                                                                                                                var $1938 = self.val;
-                                                                                                                                var _moti$48 = Kind$Term$lam$("x", (_x$48 => {
-                                                                                                                                    var $1940 = Kind$Term$hol$(Bits$e);
-                                                                                                                                    return $1940;
-                                                                                                                                }));
-                                                                                                                                var _term$49 = Kind$Term$ref$("Function.while");
-                                                                                                                                var _term$50 = Kind$Term$app$(_term$49, Kind$Term$hol$(Bits$e));
-                                                                                                                                var _init$51 = Kind$Term$ref$("Pair.new");
-                                                                                                                                var _init$52 = Kind$Term$app$(_init$51, Kind$Term$hol$(Bits$e));
-                                                                                                                                var _init$53 = Kind$Term$app$(_init$52, Kind$Term$hol$(Bits$e));
-                                                                                                                                var _init$54 = Kind$Term$app$(_init$53, Kind$Term$ref$($1856));
-                                                                                                                                var _init$55 = Kind$Term$app$(_init$54, Kind$Term$ref$($1871));
-                                                                                                                                var _term$56 = Kind$Term$app$(_term$50, _init$55);
-                                                                                                                                var _term$57 = Kind$Term$app$(_term$56, Kind$Term$lam$("s", (_s$57 => {
-                                                                                                                                    var $1941 = Kind$Term$app$(Kind$Term$app$(_s$57, _moti$48), Kind$Term$lam$($1856, (_x$58 => {
-                                                                                                                                        var $1942 = Kind$Term$lam$($1871, (_y$59 => {
-                                                                                                                                            var $1943 = $1900;
-                                                                                                                                            return $1943;
-                                                                                                                                        }));
-                                                                                                                                        return $1942;
-                                                                                                                                    })));
-                                                                                                                                    return $1941;
-                                                                                                                                })));
-                                                                                                                                var _term$58 = Kind$Term$app$(_term$57, Kind$Term$lam$("s", (_s$58 => {
-                                                                                                                                    var $1944 = Kind$Term$app$(Kind$Term$app$(_s$58, _moti$48), Kind$Term$lam$($1856, (_x$59 => {
-                                                                                                                                        var $1945 = Kind$Term$lam$($1871, (_y$60 => {
-                                                                                                                                            var $1946 = $1915;
-                                                                                                                                            return $1946;
-                                                                                                                                        }));
-                                                                                                                                        return $1945;
-                                                                                                                                    })));
-                                                                                                                                    return $1944;
-                                                                                                                                })));
-                                                                                                                                var _term$59 = Kind$Term$app$(Kind$Term$app$(_term$58, _moti$48), Kind$Term$lam$($1856, (_x$59 => {
-                                                                                                                                    var $1947 = Kind$Term$lam$($1871, (_y$60 => {
-                                                                                                                                        var $1948 = $1930;
-                                                                                                                                        return $1948;
-                                                                                                                                    }));
-                                                                                                                                    return $1947;
-                                                                                                                                })));
-                                                                                                                                var $1939 = Parser$Reply$value$($1936, $1937, Kind$Term$ori$($1938, _term$59));
-                                                                                                                                var $1931 = $1939;
-                                                                                                                                break;
-                                                                                                                        };
-                                                                                                                        var $1923 = $1931;
-                                                                                                                        break;
-                                                                                                                };
-                                                                                                                var $1916 = $1923;
-                                                                                                                break;
-                                                                                                        };
-                                                                                                        var $1908 = $1916;
-                                                                                                        break;
-                                                                                                };
-                                                                                                var $1901 = $1908;
-                                                                                                break;
-                                                                                        };
-                                                                                        var $1893 = $1901;
-                                                                                        break;
-                                                                                };
-                                                                                var $1886 = $1893;
-                                                                                break;
-                                                                        };
-                                                                        var $1879 = $1886;
-                                                                        break;
-                                                                };
-                                                                var $1872 = $1879;
-                                                                break;
-                                                        };
-                                                        var $1864 = $1872;
-                                                        break;
-                                                };
-                                                var $1857 = $1864;
-                                                break;
-                                        };
-                                        var $1849 = $1857;
-                                        break;
-                                };
-                                var $1842 = $1849;
-                                break;
-                        };
-                        var $1835 = $1842;
-                        break;
-                };
-                var $1827 = $1835;
-                break;
-        };
-        return $1827;
-    };
     const Kind$Parser$getwhile = x0 => x1 => Kind$Parser$getwhile$(x0, x1);
 
     function Kind$Parser$getwhile$with$(_idx$1, _code$2) {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $1950 = self.idx;
-                var $1951 = self.code;
-                var $1952 = self.err;
-                var $1953 = Parser$Reply$error$($1950, $1951, $1952);
-                var $1949 = $1953;
+                var $1769 = self.idx;
+                var $1770 = self.code;
+                var $1771 = self.err;
+                var $1772 = Parser$Reply$error$($1769, $1770, $1771);
+                var $1768 = $1772;
                 break;
             case 'Parser.Reply.value':
-                var $1954 = self.idx;
-                var $1955 = self.code;
-                var $1956 = self.val;
-                var self = Kind$Parser$text$("=", $1954, $1955);
+                var $1773 = self.idx;
+                var $1774 = self.code;
+                var $1775 = self.val;
+                var self = Kind$Parser$text$("while ", $1773, $1774);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $1958 = self.idx;
-                        var $1959 = self.code;
-                        var $1960 = self.err;
-                        var $1961 = Parser$Reply$error$($1958, $1959, $1960);
-                        var $1957 = $1961;
+                        var $1777 = self.idx;
+                        var $1778 = self.code;
+                        var $1779 = self.err;
+                        var $1780 = Parser$Reply$error$($1777, $1778, $1779);
+                        var $1776 = $1780;
                         break;
                     case 'Parser.Reply.value':
-                        var $1962 = self.idx;
-                        var $1963 = self.code;
-                        var self = Kind$Parser$text$("while ", $1962, $1963);
+                        var $1781 = self.idx;
+                        var $1782 = self.code;
+                        var self = Kind$Parser$term$($1781, $1782);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $1965 = self.idx;
-                                var $1966 = self.code;
-                                var $1967 = self.err;
-                                var $1968 = Parser$Reply$error$($1965, $1966, $1967);
-                                var $1964 = $1968;
+                                var $1784 = self.idx;
+                                var $1785 = self.code;
+                                var $1786 = self.err;
+                                var $1787 = Parser$Reply$error$($1784, $1785, $1786);
+                                var $1783 = $1787;
                                 break;
                             case 'Parser.Reply.value':
-                                var $1969 = self.idx;
-                                var $1970 = self.code;
-                                var self = Kind$Parser$term$($1969, $1970);
+                                var $1788 = self.idx;
+                                var $1789 = self.code;
+                                var $1790 = self.val;
+                                var self = Kind$Parser$text$("with ", $1788, $1789);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $1972 = self.idx;
-                                        var $1973 = self.code;
-                                        var $1974 = self.err;
-                                        var $1975 = Parser$Reply$error$($1972, $1973, $1974);
-                                        var $1971 = $1975;
+                                        var $1792 = self.idx;
+                                        var $1793 = self.code;
+                                        var $1794 = self.err;
+                                        var $1795 = Parser$Reply$error$($1792, $1793, $1794);
+                                        var $1791 = $1795;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $1976 = self.idx;
-                                        var $1977 = self.code;
-                                        var $1978 = self.val;
-                                        var self = Kind$Parser$text$("with ", $1976, $1977);
+                                        var $1796 = self.idx;
+                                        var $1797 = self.code;
+                                        var self = Kind$Parser$text$("{", $1796, $1797);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $1980 = self.idx;
-                                                var $1981 = self.code;
-                                                var $1982 = self.err;
-                                                var $1983 = Parser$Reply$error$($1980, $1981, $1982);
-                                                var $1979 = $1983;
+                                                var $1799 = self.idx;
+                                                var $1800 = self.code;
+                                                var $1801 = self.err;
+                                                var $1802 = Parser$Reply$error$($1799, $1800, $1801);
+                                                var $1798 = $1802;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $1984 = self.idx;
-                                                var $1985 = self.code;
-                                                var self = Kind$Parser$text$("{", $1984, $1985);
+                                                var $1803 = self.idx;
+                                                var $1804 = self.code;
+                                                var self = Kind$Parser$name$($1803, $1804);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $1987 = self.idx;
-                                                        var $1988 = self.code;
-                                                        var $1989 = self.err;
-                                                        var $1990 = Parser$Reply$error$($1987, $1988, $1989);
-                                                        var $1986 = $1990;
+                                                        var $1806 = self.idx;
+                                                        var $1807 = self.code;
+                                                        var $1808 = self.err;
+                                                        var $1809 = Parser$Reply$error$($1806, $1807, $1808);
+                                                        var $1805 = $1809;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $1991 = self.idx;
-                                                        var $1992 = self.code;
-                                                        var self = Kind$Parser$name$($1991, $1992);
+                                                        var $1810 = self.idx;
+                                                        var $1811 = self.code;
+                                                        var $1812 = self.val;
+                                                        var self = Kind$Parser$text$(",", $1810, $1811);
                                                         switch (self._) {
                                                             case 'Parser.Reply.error':
-                                                                var $1994 = self.idx;
-                                                                var $1995 = self.code;
-                                                                var $1996 = self.err;
-                                                                var $1997 = Parser$Reply$error$($1994, $1995, $1996);
-                                                                var $1993 = $1997;
+                                                                var $1814 = self.idx;
+                                                                var $1815 = self.code;
+                                                                var $1816 = self.err;
+                                                                var $1817 = Parser$Reply$error$($1814, $1815, $1816);
+                                                                var $1813 = $1817;
                                                                 break;
                                                             case 'Parser.Reply.value':
-                                                                var $1998 = self.idx;
-                                                                var $1999 = self.code;
-                                                                var $2000 = self.val;
-                                                                var self = Kind$Parser$text$(",", $1998, $1999);
+                                                                var $1818 = self.idx;
+                                                                var $1819 = self.code;
+                                                                var self = Kind$Parser$name$($1818, $1819);
                                                                 switch (self._) {
                                                                     case 'Parser.Reply.error':
-                                                                        var $2002 = self.idx;
-                                                                        var $2003 = self.code;
-                                                                        var $2004 = self.err;
-                                                                        var $2005 = Parser$Reply$error$($2002, $2003, $2004);
-                                                                        var $2001 = $2005;
+                                                                        var $1821 = self.idx;
+                                                                        var $1822 = self.code;
+                                                                        var $1823 = self.err;
+                                                                        var $1824 = Parser$Reply$error$($1821, $1822, $1823);
+                                                                        var $1820 = $1824;
                                                                         break;
                                                                     case 'Parser.Reply.value':
-                                                                        var $2006 = self.idx;
-                                                                        var $2007 = self.code;
-                                                                        var self = Kind$Parser$name$($2006, $2007);
+                                                                        var $1825 = self.idx;
+                                                                        var $1826 = self.code;
+                                                                        var $1827 = self.val;
+                                                                        var self = Kind$Parser$text$("}", $1825, $1826);
                                                                         switch (self._) {
                                                                             case 'Parser.Reply.error':
-                                                                                var $2009 = self.idx;
-                                                                                var $2010 = self.code;
-                                                                                var $2011 = self.err;
-                                                                                var $2012 = Parser$Reply$error$($2009, $2010, $2011);
-                                                                                var $2008 = $2012;
+                                                                                var $1829 = self.idx;
+                                                                                var $1830 = self.code;
+                                                                                var $1831 = self.err;
+                                                                                var $1832 = Parser$Reply$error$($1829, $1830, $1831);
+                                                                                var $1828 = $1832;
                                                                                 break;
                                                                             case 'Parser.Reply.value':
-                                                                                var $2013 = self.idx;
-                                                                                var $2014 = self.code;
-                                                                                var $2015 = self.val;
-                                                                                var self = Kind$Parser$text$("}", $2013, $2014);
+                                                                                var $1833 = self.idx;
+                                                                                var $1834 = self.code;
+                                                                                var self = Kind$Parser$text$(":", $1833, $1834);
                                                                                 switch (self._) {
                                                                                     case 'Parser.Reply.error':
-                                                                                        var $2017 = self.idx;
-                                                                                        var $2018 = self.code;
-                                                                                        var $2019 = self.err;
-                                                                                        var $2020 = Parser$Reply$error$($2017, $2018, $2019);
-                                                                                        var $2016 = $2020;
+                                                                                        var $1836 = self.idx;
+                                                                                        var $1837 = self.code;
+                                                                                        var $1838 = self.err;
+                                                                                        var $1839 = Parser$Reply$error$($1836, $1837, $1838);
+                                                                                        var $1835 = $1839;
                                                                                         break;
                                                                                     case 'Parser.Reply.value':
-                                                                                        var $2021 = self.idx;
-                                                                                        var $2022 = self.code;
-                                                                                        var self = Kind$Parser$text$(":", $2021, $2022);
+                                                                                        var $1840 = self.idx;
+                                                                                        var $1841 = self.code;
+                                                                                        var self = Kind$Parser$term$($1840, $1841);
                                                                                         switch (self._) {
                                                                                             case 'Parser.Reply.error':
-                                                                                                var $2024 = self.idx;
-                                                                                                var $2025 = self.code;
-                                                                                                var $2026 = self.err;
-                                                                                                var $2027 = Parser$Reply$error$($2024, $2025, $2026);
-                                                                                                var $2023 = $2027;
+                                                                                                var $1843 = self.idx;
+                                                                                                var $1844 = self.code;
+                                                                                                var $1845 = self.err;
+                                                                                                var $1846 = Parser$Reply$error$($1843, $1844, $1845);
+                                                                                                var $1842 = $1846;
                                                                                                 break;
                                                                                             case 'Parser.Reply.value':
-                                                                                                var $2028 = self.idx;
-                                                                                                var $2029 = self.code;
-                                                                                                var self = Kind$Parser$term$($2028, $2029);
+                                                                                                var $1847 = self.idx;
+                                                                                                var $1848 = self.code;
+                                                                                                var $1849 = self.val;
+                                                                                                var self = Parser$maybe$(Kind$Parser$text(";"), $1847, $1848);
                                                                                                 switch (self._) {
                                                                                                     case 'Parser.Reply.error':
-                                                                                                        var $2031 = self.idx;
-                                                                                                        var $2032 = self.code;
-                                                                                                        var $2033 = self.err;
-                                                                                                        var $2034 = Parser$Reply$error$($2031, $2032, $2033);
-                                                                                                        var $2030 = $2034;
+                                                                                                        var $1851 = self.idx;
+                                                                                                        var $1852 = self.code;
+                                                                                                        var $1853 = self.err;
+                                                                                                        var $1854 = Parser$Reply$error$($1851, $1852, $1853);
+                                                                                                        var $1850 = $1854;
                                                                                                         break;
                                                                                                     case 'Parser.Reply.value':
-                                                                                                        var $2035 = self.idx;
-                                                                                                        var $2036 = self.code;
-                                                                                                        var $2037 = self.val;
-                                                                                                        var self = Parser$maybe$(Kind$Parser$text(";"), $2035, $2036);
+                                                                                                        var $1855 = self.idx;
+                                                                                                        var $1856 = self.code;
+                                                                                                        var self = Kind$Parser$term$($1855, $1856);
                                                                                                         switch (self._) {
                                                                                                             case 'Parser.Reply.error':
-                                                                                                                var $2039 = self.idx;
-                                                                                                                var $2040 = self.code;
-                                                                                                                var $2041 = self.err;
-                                                                                                                var $2042 = Parser$Reply$error$($2039, $2040, $2041);
-                                                                                                                var $2038 = $2042;
+                                                                                                                var $1858 = self.idx;
+                                                                                                                var $1859 = self.code;
+                                                                                                                var $1860 = self.err;
+                                                                                                                var $1861 = Parser$Reply$error$($1858, $1859, $1860);
+                                                                                                                var $1857 = $1861;
                                                                                                                 break;
                                                                                                             case 'Parser.Reply.value':
-                                                                                                                var $2043 = self.idx;
-                                                                                                                var $2044 = self.code;
-                                                                                                                var self = Kind$Parser$term$($2043, $2044);
+                                                                                                                var $1862 = self.idx;
+                                                                                                                var $1863 = self.code;
+                                                                                                                var $1864 = self.val;
+                                                                                                                var self = Kind$Parser$stop$($1775, $1862, $1863);
                                                                                                                 switch (self._) {
                                                                                                                     case 'Parser.Reply.error':
-                                                                                                                        var $2046 = self.idx;
-                                                                                                                        var $2047 = self.code;
-                                                                                                                        var $2048 = self.err;
-                                                                                                                        var $2049 = Parser$Reply$error$($2046, $2047, $2048);
-                                                                                                                        var $2045 = $2049;
+                                                                                                                        var $1866 = self.idx;
+                                                                                                                        var $1867 = self.code;
+                                                                                                                        var $1868 = self.err;
+                                                                                                                        var $1869 = Parser$Reply$error$($1866, $1867, $1868);
+                                                                                                                        var $1865 = $1869;
                                                                                                                         break;
                                                                                                                     case 'Parser.Reply.value':
-                                                                                                                        var $2050 = self.idx;
-                                                                                                                        var $2051 = self.code;
-                                                                                                                        var $2052 = self.val;
-                                                                                                                        var self = Kind$Parser$stop$($1956, $2050, $2051);
-                                                                                                                        switch (self._) {
-                                                                                                                            case 'Parser.Reply.error':
-                                                                                                                                var $2054 = self.idx;
-                                                                                                                                var $2055 = self.code;
-                                                                                                                                var $2056 = self.err;
-                                                                                                                                var $2057 = Parser$Reply$error$($2054, $2055, $2056);
-                                                                                                                                var $2053 = $2057;
-                                                                                                                                break;
-                                                                                                                            case 'Parser.Reply.value':
-                                                                                                                                var $2058 = self.idx;
-                                                                                                                                var $2059 = self.code;
-                                                                                                                                var $2060 = self.val;
-                                                                                                                                var _moti$48 = Kind$Term$lam$("x", (_x$48 => {
-                                                                                                                                    var $2062 = Kind$Term$hol$(Bits$e);
-                                                                                                                                    return $2062;
+                                                                                                                        var $1870 = self.idx;
+                                                                                                                        var $1871 = self.code;
+                                                                                                                        var $1872 = self.val;
+                                                                                                                        var _moti$45 = Kind$Term$lam$("x", (_x$45 => {
+                                                                                                                            var $1874 = Kind$Term$hol$(Bits$e);
+                                                                                                                            return $1874;
+                                                                                                                        }));
+                                                                                                                        var _term$46 = Kind$Term$ref$("Function.while");
+                                                                                                                        var _term$47 = Kind$Term$app$(_term$46, Kind$Term$hol$(Bits$e));
+                                                                                                                        var _init$48 = Kind$Term$ref$("Pair.new");
+                                                                                                                        var _init$49 = Kind$Term$app$(_init$48, Kind$Term$hol$(Bits$e));
+                                                                                                                        var _init$50 = Kind$Term$app$(_init$49, Kind$Term$hol$(Bits$e));
+                                                                                                                        var _init$51 = Kind$Term$app$(_init$50, Kind$Term$ref$($1812));
+                                                                                                                        var _init$52 = Kind$Term$app$(_init$51, Kind$Term$ref$($1827));
+                                                                                                                        var _term$53 = Kind$Term$app$(_term$47, _init$52);
+                                                                                                                        var _term$54 = Kind$Term$app$(_term$53, Kind$Term$lam$("s", (_s$54 => {
+                                                                                                                            var $1875 = Kind$Term$app$(Kind$Term$app$(_s$54, _moti$45), Kind$Term$lam$($1812, (_x$55 => {
+                                                                                                                                var $1876 = Kind$Term$lam$($1827, (_y$56 => {
+                                                                                                                                    var $1877 = $1790;
+                                                                                                                                    return $1877;
                                                                                                                                 }));
-                                                                                                                                var _term$49 = Kind$Term$ref$("Function.while");
-                                                                                                                                var _term$50 = Kind$Term$app$(_term$49, Kind$Term$hol$(Bits$e));
-                                                                                                                                var _init$51 = Kind$Term$ref$("Pair.new");
-                                                                                                                                var _init$52 = Kind$Term$app$(_init$51, Kind$Term$hol$(Bits$e));
-                                                                                                                                var _init$53 = Kind$Term$app$(_init$52, Kind$Term$hol$(Bits$e));
-                                                                                                                                var _init$54 = Kind$Term$app$(_init$53, Kind$Term$ref$($2000));
-                                                                                                                                var _init$55 = Kind$Term$app$(_init$54, Kind$Term$ref$($2015));
-                                                                                                                                var _term$56 = Kind$Term$app$(_term$50, _init$55);
-                                                                                                                                var _term$57 = Kind$Term$app$(_term$56, Kind$Term$lam$("s", (_s$57 => {
-                                                                                                                                    var $2063 = Kind$Term$app$(Kind$Term$app$(_s$57, _moti$48), Kind$Term$lam$($2000, (_x$58 => {
-                                                                                                                                        var $2064 = Kind$Term$lam$($2015, (_y$59 => {
-                                                                                                                                            var $2065 = $1978;
-                                                                                                                                            return $2065;
-                                                                                                                                        }));
-                                                                                                                                        return $2064;
-                                                                                                                                    })));
-                                                                                                                                    return $2063;
-                                                                                                                                })));
-                                                                                                                                var _term$58 = Kind$Term$app$(_term$57, Kind$Term$lam$("s", (_s$58 => {
-                                                                                                                                    var $2066 = Kind$Term$app$(Kind$Term$app$(_s$58, _moti$48), Kind$Term$lam$($2000, (_x$59 => {
-                                                                                                                                        var $2067 = Kind$Term$lam$($2015, (_y$60 => {
-                                                                                                                                            var $2068 = $2037;
-                                                                                                                                            return $2068;
-                                                                                                                                        }));
-                                                                                                                                        return $2067;
-                                                                                                                                    })));
-                                                                                                                                    return $2066;
-                                                                                                                                })));
-                                                                                                                                var _term$59 = Kind$Term$app$(Kind$Term$app$(_term$58, _moti$48), Kind$Term$lam$($2000, (_x$59 => {
-                                                                                                                                    var $2069 = Kind$Term$lam$($2015, (_y$60 => {
-                                                                                                                                        var $2070 = $2052;
-                                                                                                                                        return $2070;
-                                                                                                                                    }));
-                                                                                                                                    return $2069;
-                                                                                                                                })));
-                                                                                                                                var $2061 = Parser$Reply$value$($2058, $2059, Kind$Term$ori$($2060, _term$59));
-                                                                                                                                var $2053 = $2061;
-                                                                                                                                break;
-                                                                                                                        };
-                                                                                                                        var $2045 = $2053;
+                                                                                                                                return $1876;
+                                                                                                                            })));
+                                                                                                                            return $1875;
+                                                                                                                        })));
+                                                                                                                        var _term$55 = Kind$Term$app$(_term$54, Kind$Term$lam$("s", (_s$55 => {
+                                                                                                                            var $1878 = Kind$Term$app$(Kind$Term$app$(_s$55, _moti$45), Kind$Term$lam$($1812, (_x$56 => {
+                                                                                                                                var $1879 = Kind$Term$lam$($1827, (_y$57 => {
+                                                                                                                                    var $1880 = $1849;
+                                                                                                                                    return $1880;
+                                                                                                                                }));
+                                                                                                                                return $1879;
+                                                                                                                            })));
+                                                                                                                            return $1878;
+                                                                                                                        })));
+                                                                                                                        var _term$56 = Kind$Term$app$(Kind$Term$app$(_term$55, _moti$45), Kind$Term$lam$($1812, (_x$56 => {
+                                                                                                                            var $1881 = Kind$Term$lam$($1827, (_y$57 => {
+                                                                                                                                var $1882 = $1864;
+                                                                                                                                return $1882;
+                                                                                                                            }));
+                                                                                                                            return $1881;
+                                                                                                                        })));
+                                                                                                                        var $1873 = Parser$Reply$value$($1870, $1871, Kind$Term$ori$($1872, _term$56));
+                                                                                                                        var $1865 = $1873;
                                                                                                                         break;
                                                                                                                 };
-                                                                                                                var $2038 = $2045;
+                                                                                                                var $1857 = $1865;
                                                                                                                 break;
                                                                                                         };
-                                                                                                        var $2030 = $2038;
+                                                                                                        var $1850 = $1857;
                                                                                                         break;
                                                                                                 };
-                                                                                                var $2023 = $2030;
+                                                                                                var $1842 = $1850;
                                                                                                 break;
                                                                                         };
-                                                                                        var $2016 = $2023;
+                                                                                        var $1835 = $1842;
                                                                                         break;
                                                                                 };
-                                                                                var $2008 = $2016;
+                                                                                var $1828 = $1835;
                                                                                 break;
                                                                         };
-                                                                        var $2001 = $2008;
+                                                                        var $1820 = $1828;
                                                                         break;
                                                                 };
-                                                                var $1993 = $2001;
+                                                                var $1813 = $1820;
                                                                 break;
                                                         };
-                                                        var $1986 = $1993;
+                                                        var $1805 = $1813;
                                                         break;
                                                 };
-                                                var $1979 = $1986;
+                                                var $1798 = $1805;
                                                 break;
                                         };
-                                        var $1971 = $1979;
+                                        var $1791 = $1798;
                                         break;
                                 };
-                                var $1964 = $1971;
+                                var $1783 = $1791;
                                 break;
                         };
-                        var $1957 = $1964;
+                        var $1776 = $1783;
                         break;
                 };
-                var $1949 = $1957;
+                var $1768 = $1776;
                 break;
         };
-        return $1949;
+        return $1768;
     };
     const Kind$Parser$getwhile$with = x0 => x1 => Kind$Parser$getwhile$with$(x0, x1);
 
+    function Kind$Parser$get$(_idx$1, _code$2) {
+        var self = Kind$Parser$init$(_idx$1, _code$2);
+        switch (self._) {
+            case 'Parser.Reply.error':
+                var $1884 = self.idx;
+                var $1885 = self.code;
+                var $1886 = self.err;
+                var $1887 = Parser$Reply$error$($1884, $1885, $1886);
+                var $1883 = $1887;
+                break;
+            case 'Parser.Reply.value':
+                var $1888 = self.idx;
+                var $1889 = self.code;
+                var $1890 = self.val;
+                var self = Kind$Parser$text$("let ", $1888, $1889);
+                switch (self._) {
+                    case 'Parser.Reply.error':
+                        var $1892 = self.idx;
+                        var $1893 = self.code;
+                        var $1894 = self.err;
+                        var $1895 = Parser$Reply$error$($1892, $1893, $1894);
+                        var $1891 = $1895;
+                        break;
+                    case 'Parser.Reply.value':
+                        var $1896 = self.idx;
+                        var $1897 = self.code;
+                        var self = Kind$Parser$text$("{", $1896, $1897);
+                        switch (self._) {
+                            case 'Parser.Reply.error':
+                                var $1899 = self.idx;
+                                var $1900 = self.code;
+                                var $1901 = self.err;
+                                var $1902 = Parser$Reply$error$($1899, $1900, $1901);
+                                var $1898 = $1902;
+                                break;
+                            case 'Parser.Reply.value':
+                                var $1903 = self.idx;
+                                var $1904 = self.code;
+                                var self = Kind$Parser$name$($1903, $1904);
+                                switch (self._) {
+                                    case 'Parser.Reply.error':
+                                        var $1906 = self.idx;
+                                        var $1907 = self.code;
+                                        var $1908 = self.err;
+                                        var $1909 = Parser$Reply$error$($1906, $1907, $1908);
+                                        var $1905 = $1909;
+                                        break;
+                                    case 'Parser.Reply.value':
+                                        var $1910 = self.idx;
+                                        var $1911 = self.code;
+                                        var $1912 = self.val;
+                                        var self = Kind$Parser$text$(",", $1910, $1911);
+                                        switch (self._) {
+                                            case 'Parser.Reply.error':
+                                                var $1914 = self.idx;
+                                                var $1915 = self.code;
+                                                var $1916 = self.err;
+                                                var $1917 = Parser$Reply$error$($1914, $1915, $1916);
+                                                var $1913 = $1917;
+                                                break;
+                                            case 'Parser.Reply.value':
+                                                var $1918 = self.idx;
+                                                var $1919 = self.code;
+                                                var self = Kind$Parser$name$($1918, $1919);
+                                                switch (self._) {
+                                                    case 'Parser.Reply.error':
+                                                        var $1921 = self.idx;
+                                                        var $1922 = self.code;
+                                                        var $1923 = self.err;
+                                                        var $1924 = Parser$Reply$error$($1921, $1922, $1923);
+                                                        var $1920 = $1924;
+                                                        break;
+                                                    case 'Parser.Reply.value':
+                                                        var $1925 = self.idx;
+                                                        var $1926 = self.code;
+                                                        var $1927 = self.val;
+                                                        var self = Kind$Parser$text$("}", $1925, $1926);
+                                                        switch (self._) {
+                                                            case 'Parser.Reply.error':
+                                                                var $1929 = self.idx;
+                                                                var $1930 = self.code;
+                                                                var $1931 = self.err;
+                                                                var $1932 = Parser$Reply$error$($1929, $1930, $1931);
+                                                                var $1928 = $1932;
+                                                                break;
+                                                            case 'Parser.Reply.value':
+                                                                var $1933 = self.idx;
+                                                                var $1934 = self.code;
+                                                                var self = Kind$Parser$text$("=", $1933, $1934);
+                                                                switch (self._) {
+                                                                    case 'Parser.Reply.error':
+                                                                        var $1936 = self.idx;
+                                                                        var $1937 = self.code;
+                                                                        var $1938 = self.err;
+                                                                        var $1939 = Parser$Reply$error$($1936, $1937, $1938);
+                                                                        var $1935 = $1939;
+                                                                        break;
+                                                                    case 'Parser.Reply.value':
+                                                                        var $1940 = self.idx;
+                                                                        var $1941 = self.code;
+                                                                        var self = Kind$Parser$term$($1940, $1941);
+                                                                        switch (self._) {
+                                                                            case 'Parser.Reply.error':
+                                                                                var $1943 = self.idx;
+                                                                                var $1944 = self.code;
+                                                                                var $1945 = self.err;
+                                                                                var $1946 = Parser$Reply$error$($1943, $1944, $1945);
+                                                                                var $1942 = $1946;
+                                                                                break;
+                                                                            case 'Parser.Reply.value':
+                                                                                var $1947 = self.idx;
+                                                                                var $1948 = self.code;
+                                                                                var $1949 = self.val;
+                                                                                var self = Parser$maybe$(Kind$Parser$text(";"), $1947, $1948);
+                                                                                switch (self._) {
+                                                                                    case 'Parser.Reply.error':
+                                                                                        var $1951 = self.idx;
+                                                                                        var $1952 = self.code;
+                                                                                        var $1953 = self.err;
+                                                                                        var $1954 = Parser$Reply$error$($1951, $1952, $1953);
+                                                                                        var $1950 = $1954;
+                                                                                        break;
+                                                                                    case 'Parser.Reply.value':
+                                                                                        var $1955 = self.idx;
+                                                                                        var $1956 = self.code;
+                                                                                        var self = Kind$Parser$term$($1955, $1956);
+                                                                                        switch (self._) {
+                                                                                            case 'Parser.Reply.error':
+                                                                                                var $1958 = self.idx;
+                                                                                                var $1959 = self.code;
+                                                                                                var $1960 = self.err;
+                                                                                                var $1961 = Parser$Reply$error$($1958, $1959, $1960);
+                                                                                                var $1957 = $1961;
+                                                                                                break;
+                                                                                            case 'Parser.Reply.value':
+                                                                                                var $1962 = self.idx;
+                                                                                                var $1963 = self.code;
+                                                                                                var $1964 = self.val;
+                                                                                                var self = Kind$Parser$stop$($1890, $1962, $1963);
+                                                                                                switch (self._) {
+                                                                                                    case 'Parser.Reply.error':
+                                                                                                        var $1966 = self.idx;
+                                                                                                        var $1967 = self.code;
+                                                                                                        var $1968 = self.err;
+                                                                                                        var $1969 = Parser$Reply$error$($1966, $1967, $1968);
+                                                                                                        var $1965 = $1969;
+                                                                                                        break;
+                                                                                                    case 'Parser.Reply.value':
+                                                                                                        var $1970 = self.idx;
+                                                                                                        var $1971 = self.code;
+                                                                                                        var $1972 = self.val;
+                                                                                                        var _term$39 = $1949;
+                                                                                                        var _term$40 = Kind$Term$app$(_term$39, Kind$Term$lam$("x", (_x$40 => {
+                                                                                                            var $1974 = Kind$Term$hol$(Bits$e);
+                                                                                                            return $1974;
+                                                                                                        })));
+                                                                                                        var _term$41 = Kind$Term$app$(_term$40, Kind$Term$lam$($1912, (_x$41 => {
+                                                                                                            var $1975 = Kind$Term$lam$($1927, (_y$42 => {
+                                                                                                                var $1976 = $1964;
+                                                                                                                return $1976;
+                                                                                                            }));
+                                                                                                            return $1975;
+                                                                                                        })));
+                                                                                                        var $1973 = Parser$Reply$value$($1970, $1971, Kind$Term$ori$($1972, _term$41));
+                                                                                                        var $1965 = $1973;
+                                                                                                        break;
+                                                                                                };
+                                                                                                var $1957 = $1965;
+                                                                                                break;
+                                                                                        };
+                                                                                        var $1950 = $1957;
+                                                                                        break;
+                                                                                };
+                                                                                var $1942 = $1950;
+                                                                                break;
+                                                                        };
+                                                                        var $1935 = $1942;
+                                                                        break;
+                                                                };
+                                                                var $1928 = $1935;
+                                                                break;
+                                                        };
+                                                        var $1920 = $1928;
+                                                        break;
+                                                };
+                                                var $1913 = $1920;
+                                                break;
+                                        };
+                                        var $1905 = $1913;
+                                        break;
+                                };
+                                var $1898 = $1905;
+                                break;
+                        };
+                        var $1891 = $1898;
+                        break;
+                };
+                var $1883 = $1891;
+                break;
+        };
+        return $1883;
+    };
+    const Kind$Parser$get = x0 => x1 => Kind$Parser$get$(x0, x1);
+
+    function Kind$Parser$get$omit$(_idx$1, _code$2) {
+        var self = Kind$Parser$init$(_idx$1, _code$2);
+        switch (self._) {
+            case 'Parser.Reply.error':
+                var $1978 = self.idx;
+                var $1979 = self.code;
+                var $1980 = self.err;
+                var $1981 = Parser$Reply$error$($1978, $1979, $1980);
+                var $1977 = $1981;
+                break;
+            case 'Parser.Reply.value':
+                var $1982 = self.idx;
+                var $1983 = self.code;
+                var $1984 = self.val;
+                var self = Kind$Parser$text$("{", $1982, $1983);
+                switch (self._) {
+                    case 'Parser.Reply.error':
+                        var $1986 = self.idx;
+                        var $1987 = self.code;
+                        var $1988 = self.err;
+                        var $1989 = Parser$Reply$error$($1986, $1987, $1988);
+                        var $1985 = $1989;
+                        break;
+                    case 'Parser.Reply.value':
+                        var $1990 = self.idx;
+                        var $1991 = self.code;
+                        var self = Kind$Parser$name$($1990, $1991);
+                        switch (self._) {
+                            case 'Parser.Reply.error':
+                                var $1993 = self.idx;
+                                var $1994 = self.code;
+                                var $1995 = self.err;
+                                var $1996 = Parser$Reply$error$($1993, $1994, $1995);
+                                var $1992 = $1996;
+                                break;
+                            case 'Parser.Reply.value':
+                                var $1997 = self.idx;
+                                var $1998 = self.code;
+                                var $1999 = self.val;
+                                var self = Kind$Parser$text$(",", $1997, $1998);
+                                switch (self._) {
+                                    case 'Parser.Reply.error':
+                                        var $2001 = self.idx;
+                                        var $2002 = self.code;
+                                        var $2003 = self.err;
+                                        var $2004 = Parser$Reply$error$($2001, $2002, $2003);
+                                        var $2000 = $2004;
+                                        break;
+                                    case 'Parser.Reply.value':
+                                        var $2005 = self.idx;
+                                        var $2006 = self.code;
+                                        var self = Kind$Parser$name$($2005, $2006);
+                                        switch (self._) {
+                                            case 'Parser.Reply.error':
+                                                var $2008 = self.idx;
+                                                var $2009 = self.code;
+                                                var $2010 = self.err;
+                                                var $2011 = Parser$Reply$error$($2008, $2009, $2010);
+                                                var $2007 = $2011;
+                                                break;
+                                            case 'Parser.Reply.value':
+                                                var $2012 = self.idx;
+                                                var $2013 = self.code;
+                                                var $2014 = self.val;
+                                                var self = Kind$Parser$text$("}", $2012, $2013);
+                                                switch (self._) {
+                                                    case 'Parser.Reply.error':
+                                                        var $2016 = self.idx;
+                                                        var $2017 = self.code;
+                                                        var $2018 = self.err;
+                                                        var $2019 = Parser$Reply$error$($2016, $2017, $2018);
+                                                        var $2015 = $2019;
+                                                        break;
+                                                    case 'Parser.Reply.value':
+                                                        var $2020 = self.idx;
+                                                        var $2021 = self.code;
+                                                        var self = Kind$Parser$text$("= ", $2020, $2021);
+                                                        switch (self._) {
+                                                            case 'Parser.Reply.error':
+                                                                var $2023 = self.idx;
+                                                                var $2024 = self.code;
+                                                                var $2025 = self.err;
+                                                                var $2026 = Parser$Reply$error$($2023, $2024, $2025);
+                                                                var $2022 = $2026;
+                                                                break;
+                                                            case 'Parser.Reply.value':
+                                                                var $2027 = self.idx;
+                                                                var $2028 = self.code;
+                                                                var self = Kind$Parser$term$($2027, $2028);
+                                                                switch (self._) {
+                                                                    case 'Parser.Reply.error':
+                                                                        var $2030 = self.idx;
+                                                                        var $2031 = self.code;
+                                                                        var $2032 = self.err;
+                                                                        var $2033 = Parser$Reply$error$($2030, $2031, $2032);
+                                                                        var $2029 = $2033;
+                                                                        break;
+                                                                    case 'Parser.Reply.value':
+                                                                        var $2034 = self.idx;
+                                                                        var $2035 = self.code;
+                                                                        var $2036 = self.val;
+                                                                        var self = Parser$maybe$(Kind$Parser$text(";"), $2034, $2035);
+                                                                        switch (self._) {
+                                                                            case 'Parser.Reply.error':
+                                                                                var $2038 = self.idx;
+                                                                                var $2039 = self.code;
+                                                                                var $2040 = self.err;
+                                                                                var $2041 = Parser$Reply$error$($2038, $2039, $2040);
+                                                                                var $2037 = $2041;
+                                                                                break;
+                                                                            case 'Parser.Reply.value':
+                                                                                var $2042 = self.idx;
+                                                                                var $2043 = self.code;
+                                                                                var self = Kind$Parser$term$($2042, $2043);
+                                                                                switch (self._) {
+                                                                                    case 'Parser.Reply.error':
+                                                                                        var $2045 = self.idx;
+                                                                                        var $2046 = self.code;
+                                                                                        var $2047 = self.err;
+                                                                                        var $2048 = Parser$Reply$error$($2045, $2046, $2047);
+                                                                                        var $2044 = $2048;
+                                                                                        break;
+                                                                                    case 'Parser.Reply.value':
+                                                                                        var $2049 = self.idx;
+                                                                                        var $2050 = self.code;
+                                                                                        var $2051 = self.val;
+                                                                                        var self = Kind$Parser$stop$($1984, $2049, $2050);
+                                                                                        switch (self._) {
+                                                                                            case 'Parser.Reply.error':
+                                                                                                var $2053 = self.idx;
+                                                                                                var $2054 = self.code;
+                                                                                                var $2055 = self.err;
+                                                                                                var $2056 = Parser$Reply$error$($2053, $2054, $2055);
+                                                                                                var $2052 = $2056;
+                                                                                                break;
+                                                                                            case 'Parser.Reply.value':
+                                                                                                var $2057 = self.idx;
+                                                                                                var $2058 = self.code;
+                                                                                                var $2059 = self.val;
+                                                                                                var _term$36 = $2036;
+                                                                                                var _term$37 = Kind$Term$app$(_term$36, Kind$Term$lam$("x", (_x$37 => {
+                                                                                                    var $2061 = Kind$Term$hol$(Bits$e);
+                                                                                                    return $2061;
+                                                                                                })));
+                                                                                                var _term$38 = Kind$Term$app$(_term$37, Kind$Term$lam$($1999, (_x$38 => {
+                                                                                                    var $2062 = Kind$Term$lam$($2014, (_y$39 => {
+                                                                                                        var $2063 = $2051;
+                                                                                                        return $2063;
+                                                                                                    }));
+                                                                                                    return $2062;
+                                                                                                })));
+                                                                                                var $2060 = Parser$Reply$value$($2057, $2058, Kind$Term$ori$($2059, _term$38));
+                                                                                                var $2052 = $2060;
+                                                                                                break;
+                                                                                        };
+                                                                                        var $2044 = $2052;
+                                                                                        break;
+                                                                                };
+                                                                                var $2037 = $2044;
+                                                                                break;
+                                                                        };
+                                                                        var $2029 = $2037;
+                                                                        break;
+                                                                };
+                                                                var $2022 = $2029;
+                                                                break;
+                                                        };
+                                                        var $2015 = $2022;
+                                                        break;
+                                                };
+                                                var $2007 = $2015;
+                                                break;
+                                        };
+                                        var $2000 = $2007;
+                                        break;
+                                };
+                                var $1992 = $2000;
+                                break;
+                        };
+                        var $1985 = $1992;
+                        break;
+                };
+                var $1977 = $1985;
+                break;
+        };
+        return $1977;
+    };
+    const Kind$Parser$get$omit = x0 => x1 => Kind$Parser$get$omit$(x0, x1);
+
     function Kind$Term$def$(_name$1, _expr$2, _body$3) {
-        var $2071 = ({
+        var $2064 = ({
             _: 'Kind.Term.def',
             'name': _name$1,
             'expr': _expr$2,
             'body': _body$3
         });
-        return $2071;
+        return $2064;
     };
     const Kind$Term$def = x0 => x1 => x2 => Kind$Term$def$(x0, x1, x2);
 
@@ -5611,133 +5596,133 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2073 = self.idx;
-                var $2074 = self.code;
-                var $2075 = self.err;
-                var $2076 = Parser$Reply$error$($2073, $2074, $2075);
-                var $2072 = $2076;
+                var $2066 = self.idx;
+                var $2067 = self.code;
+                var $2068 = self.err;
+                var $2069 = Parser$Reply$error$($2066, $2067, $2068);
+                var $2065 = $2069;
                 break;
             case 'Parser.Reply.value':
-                var $2077 = self.idx;
-                var $2078 = self.code;
-                var $2079 = self.val;
-                var self = Kind$Parser$text$("def ", $2077, $2078);
+                var $2070 = self.idx;
+                var $2071 = self.code;
+                var $2072 = self.val;
+                var self = Kind$Parser$text$("def ", $2070, $2071);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2081 = self.idx;
-                        var $2082 = self.code;
-                        var $2083 = self.err;
-                        var $2084 = Parser$Reply$error$($2081, $2082, $2083);
-                        var $2080 = $2084;
+                        var $2074 = self.idx;
+                        var $2075 = self.code;
+                        var $2076 = self.err;
+                        var $2077 = Parser$Reply$error$($2074, $2075, $2076);
+                        var $2073 = $2077;
                         break;
                     case 'Parser.Reply.value':
-                        var $2085 = self.idx;
-                        var $2086 = self.code;
-                        var self = Kind$Parser$name$($2085, $2086);
+                        var $2078 = self.idx;
+                        var $2079 = self.code;
+                        var self = Kind$Parser$name$($2078, $2079);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2088 = self.idx;
-                                var $2089 = self.code;
-                                var $2090 = self.err;
-                                var $2091 = Parser$Reply$error$($2088, $2089, $2090);
-                                var $2087 = $2091;
+                                var $2081 = self.idx;
+                                var $2082 = self.code;
+                                var $2083 = self.err;
+                                var $2084 = Parser$Reply$error$($2081, $2082, $2083);
+                                var $2080 = $2084;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2092 = self.idx;
-                                var $2093 = self.code;
-                                var $2094 = self.val;
-                                var self = Kind$Parser$text$("=", $2092, $2093);
+                                var $2085 = self.idx;
+                                var $2086 = self.code;
+                                var $2087 = self.val;
+                                var self = Kind$Parser$text$("=", $2085, $2086);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2096 = self.idx;
-                                        var $2097 = self.code;
-                                        var $2098 = self.err;
-                                        var $2099 = Parser$Reply$error$($2096, $2097, $2098);
-                                        var $2095 = $2099;
+                                        var $2089 = self.idx;
+                                        var $2090 = self.code;
+                                        var $2091 = self.err;
+                                        var $2092 = Parser$Reply$error$($2089, $2090, $2091);
+                                        var $2088 = $2092;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2100 = self.idx;
-                                        var $2101 = self.code;
-                                        var self = Kind$Parser$term$($2100, $2101);
+                                        var $2093 = self.idx;
+                                        var $2094 = self.code;
+                                        var self = Kind$Parser$term$($2093, $2094);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2103 = self.idx;
-                                                var $2104 = self.code;
-                                                var $2105 = self.err;
-                                                var $2106 = Parser$Reply$error$($2103, $2104, $2105);
-                                                var $2102 = $2106;
+                                                var $2096 = self.idx;
+                                                var $2097 = self.code;
+                                                var $2098 = self.err;
+                                                var $2099 = Parser$Reply$error$($2096, $2097, $2098);
+                                                var $2095 = $2099;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2107 = self.idx;
-                                                var $2108 = self.code;
-                                                var $2109 = self.val;
-                                                var self = Parser$maybe$(Kind$Parser$text(";"), $2107, $2108);
+                                                var $2100 = self.idx;
+                                                var $2101 = self.code;
+                                                var $2102 = self.val;
+                                                var self = Parser$maybe$(Kind$Parser$text(";"), $2100, $2101);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $2111 = self.idx;
-                                                        var $2112 = self.code;
-                                                        var $2113 = self.err;
-                                                        var $2114 = Parser$Reply$error$($2111, $2112, $2113);
-                                                        var $2110 = $2114;
+                                                        var $2104 = self.idx;
+                                                        var $2105 = self.code;
+                                                        var $2106 = self.err;
+                                                        var $2107 = Parser$Reply$error$($2104, $2105, $2106);
+                                                        var $2103 = $2107;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $2115 = self.idx;
-                                                        var $2116 = self.code;
-                                                        var self = Kind$Parser$term$($2115, $2116);
+                                                        var $2108 = self.idx;
+                                                        var $2109 = self.code;
+                                                        var self = Kind$Parser$term$($2108, $2109);
                                                         switch (self._) {
                                                             case 'Parser.Reply.error':
-                                                                var $2118 = self.idx;
-                                                                var $2119 = self.code;
-                                                                var $2120 = self.err;
-                                                                var $2121 = Parser$Reply$error$($2118, $2119, $2120);
-                                                                var $2117 = $2121;
+                                                                var $2111 = self.idx;
+                                                                var $2112 = self.code;
+                                                                var $2113 = self.err;
+                                                                var $2114 = Parser$Reply$error$($2111, $2112, $2113);
+                                                                var $2110 = $2114;
                                                                 break;
                                                             case 'Parser.Reply.value':
-                                                                var $2122 = self.idx;
-                                                                var $2123 = self.code;
-                                                                var $2124 = self.val;
-                                                                var self = Kind$Parser$stop$($2079, $2122, $2123);
+                                                                var $2115 = self.idx;
+                                                                var $2116 = self.code;
+                                                                var $2117 = self.val;
+                                                                var self = Kind$Parser$stop$($2072, $2115, $2116);
                                                                 switch (self._) {
                                                                     case 'Parser.Reply.error':
-                                                                        var $2126 = self.idx;
-                                                                        var $2127 = self.code;
-                                                                        var $2128 = self.err;
-                                                                        var $2129 = Parser$Reply$error$($2126, $2127, $2128);
-                                                                        var $2125 = $2129;
+                                                                        var $2119 = self.idx;
+                                                                        var $2120 = self.code;
+                                                                        var $2121 = self.err;
+                                                                        var $2122 = Parser$Reply$error$($2119, $2120, $2121);
+                                                                        var $2118 = $2122;
                                                                         break;
                                                                     case 'Parser.Reply.value':
-                                                                        var $2130 = self.idx;
-                                                                        var $2131 = self.code;
-                                                                        var $2132 = self.val;
-                                                                        var $2133 = Parser$Reply$value$($2130, $2131, Kind$Term$ori$($2132, Kind$Term$def$($2094, $2109, (_x$27 => {
-                                                                            var $2134 = $2124;
-                                                                            return $2134;
+                                                                        var $2123 = self.idx;
+                                                                        var $2124 = self.code;
+                                                                        var $2125 = self.val;
+                                                                        var $2126 = Parser$Reply$value$($2123, $2124, Kind$Term$ori$($2125, Kind$Term$def$($2087, $2102, (_x$27 => {
+                                                                            var $2127 = $2117;
+                                                                            return $2127;
                                                                         }))));
-                                                                        var $2125 = $2133;
+                                                                        var $2118 = $2126;
                                                                         break;
                                                                 };
-                                                                var $2117 = $2125;
+                                                                var $2110 = $2118;
                                                                 break;
                                                         };
-                                                        var $2110 = $2117;
+                                                        var $2103 = $2110;
                                                         break;
                                                 };
-                                                var $2102 = $2110;
+                                                var $2095 = $2103;
                                                 break;
                                         };
-                                        var $2095 = $2102;
+                                        var $2088 = $2095;
                                         break;
                                 };
-                                var $2087 = $2095;
+                                var $2080 = $2088;
                                 break;
                         };
-                        var $2080 = $2087;
+                        var $2073 = $2080;
                         break;
                 };
-                var $2072 = $2080;
+                var $2065 = $2073;
                 break;
         };
-        return $2072;
+        return $2065;
     };
     const Kind$Parser$def = x0 => x1 => Kind$Parser$def$(x0, x1);
 
@@ -5745,160 +5730,160 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2136 = self.idx;
-                var $2137 = self.code;
-                var $2138 = self.err;
-                var $2139 = Parser$Reply$error$($2136, $2137, $2138);
-                var $2135 = $2139;
+                var $2129 = self.idx;
+                var $2130 = self.code;
+                var $2131 = self.err;
+                var $2132 = Parser$Reply$error$($2129, $2130, $2131);
+                var $2128 = $2132;
                 break;
             case 'Parser.Reply.value':
-                var $2140 = self.idx;
-                var $2141 = self.code;
-                var $2142 = self.val;
-                var self = Kind$Parser$text$("rewrite ", $2140, $2141);
+                var $2133 = self.idx;
+                var $2134 = self.code;
+                var $2135 = self.val;
+                var self = Kind$Parser$text$("rewrite ", $2133, $2134);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2144 = self.idx;
-                        var $2145 = self.code;
-                        var $2146 = self.err;
-                        var $2147 = Parser$Reply$error$($2144, $2145, $2146);
-                        var $2143 = $2147;
+                        var $2137 = self.idx;
+                        var $2138 = self.code;
+                        var $2139 = self.err;
+                        var $2140 = Parser$Reply$error$($2137, $2138, $2139);
+                        var $2136 = $2140;
                         break;
                     case 'Parser.Reply.value':
-                        var $2148 = self.idx;
-                        var $2149 = self.code;
-                        var self = Kind$Parser$name1$($2148, $2149);
+                        var $2141 = self.idx;
+                        var $2142 = self.code;
+                        var self = Kind$Parser$name1$($2141, $2142);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2151 = self.idx;
-                                var $2152 = self.code;
-                                var $2153 = self.err;
-                                var $2154 = Parser$Reply$error$($2151, $2152, $2153);
-                                var $2150 = $2154;
+                                var $2144 = self.idx;
+                                var $2145 = self.code;
+                                var $2146 = self.err;
+                                var $2147 = Parser$Reply$error$($2144, $2145, $2146);
+                                var $2143 = $2147;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2155 = self.idx;
-                                var $2156 = self.code;
-                                var $2157 = self.val;
-                                var self = Kind$Parser$text$("in", $2155, $2156);
+                                var $2148 = self.idx;
+                                var $2149 = self.code;
+                                var $2150 = self.val;
+                                var self = Kind$Parser$text$("in", $2148, $2149);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2159 = self.idx;
-                                        var $2160 = self.code;
-                                        var $2161 = self.err;
-                                        var $2162 = Parser$Reply$error$($2159, $2160, $2161);
-                                        var $2158 = $2162;
+                                        var $2152 = self.idx;
+                                        var $2153 = self.code;
+                                        var $2154 = self.err;
+                                        var $2155 = Parser$Reply$error$($2152, $2153, $2154);
+                                        var $2151 = $2155;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2163 = self.idx;
-                                        var $2164 = self.code;
-                                        var self = Kind$Parser$term$($2163, $2164);
+                                        var $2156 = self.idx;
+                                        var $2157 = self.code;
+                                        var self = Kind$Parser$term$($2156, $2157);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2166 = self.idx;
-                                                var $2167 = self.code;
-                                                var $2168 = self.err;
-                                                var $2169 = Parser$Reply$error$($2166, $2167, $2168);
-                                                var $2165 = $2169;
+                                                var $2159 = self.idx;
+                                                var $2160 = self.code;
+                                                var $2161 = self.err;
+                                                var $2162 = Parser$Reply$error$($2159, $2160, $2161);
+                                                var $2158 = $2162;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2170 = self.idx;
-                                                var $2171 = self.code;
-                                                var $2172 = self.val;
-                                                var self = Kind$Parser$text$("with", $2170, $2171);
+                                                var $2163 = self.idx;
+                                                var $2164 = self.code;
+                                                var $2165 = self.val;
+                                                var self = Kind$Parser$text$("with", $2163, $2164);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $2174 = self.idx;
-                                                        var $2175 = self.code;
-                                                        var $2176 = self.err;
-                                                        var $2177 = Parser$Reply$error$($2174, $2175, $2176);
-                                                        var $2173 = $2177;
+                                                        var $2167 = self.idx;
+                                                        var $2168 = self.code;
+                                                        var $2169 = self.err;
+                                                        var $2170 = Parser$Reply$error$($2167, $2168, $2169);
+                                                        var $2166 = $2170;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $2178 = self.idx;
-                                                        var $2179 = self.code;
-                                                        var self = Kind$Parser$term$($2178, $2179);
+                                                        var $2171 = self.idx;
+                                                        var $2172 = self.code;
+                                                        var self = Kind$Parser$term$($2171, $2172);
                                                         switch (self._) {
                                                             case 'Parser.Reply.error':
-                                                                var $2181 = self.idx;
-                                                                var $2182 = self.code;
-                                                                var $2183 = self.err;
-                                                                var $2184 = Parser$Reply$error$($2181, $2182, $2183);
-                                                                var $2180 = $2184;
+                                                                var $2174 = self.idx;
+                                                                var $2175 = self.code;
+                                                                var $2176 = self.err;
+                                                                var $2177 = Parser$Reply$error$($2174, $2175, $2176);
+                                                                var $2173 = $2177;
                                                                 break;
                                                             case 'Parser.Reply.value':
-                                                                var $2185 = self.idx;
-                                                                var $2186 = self.code;
-                                                                var $2187 = self.val;
-                                                                var self = Kind$Parser$term$($2185, $2186);
+                                                                var $2178 = self.idx;
+                                                                var $2179 = self.code;
+                                                                var $2180 = self.val;
+                                                                var self = Kind$Parser$term$($2178, $2179);
                                                                 switch (self._) {
                                                                     case 'Parser.Reply.error':
-                                                                        var $2189 = self.idx;
-                                                                        var $2190 = self.code;
-                                                                        var $2191 = self.err;
-                                                                        var $2192 = Parser$Reply$error$($2189, $2190, $2191);
-                                                                        var $2188 = $2192;
+                                                                        var $2182 = self.idx;
+                                                                        var $2183 = self.code;
+                                                                        var $2184 = self.err;
+                                                                        var $2185 = Parser$Reply$error$($2182, $2183, $2184);
+                                                                        var $2181 = $2185;
                                                                         break;
                                                                     case 'Parser.Reply.value':
-                                                                        var $2193 = self.idx;
-                                                                        var $2194 = self.code;
-                                                                        var $2195 = self.val;
-                                                                        var self = Kind$Parser$stop$($2142, $2193, $2194);
+                                                                        var $2186 = self.idx;
+                                                                        var $2187 = self.code;
+                                                                        var $2188 = self.val;
+                                                                        var self = Kind$Parser$stop$($2135, $2186, $2187);
                                                                         switch (self._) {
                                                                             case 'Parser.Reply.error':
-                                                                                var $2197 = self.idx;
-                                                                                var $2198 = self.code;
-                                                                                var $2199 = self.err;
-                                                                                var $2200 = Parser$Reply$error$($2197, $2198, $2199);
-                                                                                var $2196 = $2200;
+                                                                                var $2190 = self.idx;
+                                                                                var $2191 = self.code;
+                                                                                var $2192 = self.err;
+                                                                                var $2193 = Parser$Reply$error$($2190, $2191, $2192);
+                                                                                var $2189 = $2193;
                                                                                 break;
                                                                             case 'Parser.Reply.value':
-                                                                                var $2201 = self.idx;
-                                                                                var $2202 = self.code;
-                                                                                var $2203 = self.val;
-                                                                                var _moti$30 = Kind$Term$lam$($2157, (_s$30 => {
-                                                                                    var $2205 = Kind$Term$lam$("", (_x$31 => {
-                                                                                        var $2206 = $2172;
-                                                                                        return $2206;
+                                                                                var $2194 = self.idx;
+                                                                                var $2195 = self.code;
+                                                                                var $2196 = self.val;
+                                                                                var _moti$30 = Kind$Term$lam$($2150, (_s$30 => {
+                                                                                    var $2198 = Kind$Term$lam$("", (_x$31 => {
+                                                                                        var $2199 = $2165;
+                                                                                        return $2199;
                                                                                     }));
-                                                                                    return $2205;
+                                                                                    return $2198;
                                                                                 }));
                                                                                 var _term$31 = Kind$Term$ref$("Equal.mirror");
                                                                                 var _term$32 = Kind$Term$app$(_term$31, Kind$Term$hol$(Bits$e));
                                                                                 var _term$33 = Kind$Term$app$(_term$32, Kind$Term$hol$(Bits$e));
                                                                                 var _term$34 = Kind$Term$app$(_term$33, Kind$Term$hol$(Bits$e));
-                                                                                var _term$35 = Kind$Term$app$(_term$34, $2187);
+                                                                                var _term$35 = Kind$Term$app$(_term$34, $2180);
                                                                                 var _term$36 = Kind$Term$app$(_term$35, _moti$30);
-                                                                                var _term$37 = Kind$Term$app$(_term$36, $2195);
-                                                                                var $2204 = Parser$Reply$value$($2201, $2202, Kind$Term$ori$($2203, _term$37));
-                                                                                var $2196 = $2204;
+                                                                                var _term$37 = Kind$Term$app$(_term$36, $2188);
+                                                                                var $2197 = Parser$Reply$value$($2194, $2195, Kind$Term$ori$($2196, _term$37));
+                                                                                var $2189 = $2197;
                                                                                 break;
                                                                         };
-                                                                        var $2188 = $2196;
+                                                                        var $2181 = $2189;
                                                                         break;
                                                                 };
-                                                                var $2180 = $2188;
+                                                                var $2173 = $2181;
                                                                 break;
                                                         };
-                                                        var $2173 = $2180;
+                                                        var $2166 = $2173;
                                                         break;
                                                 };
-                                                var $2165 = $2173;
+                                                var $2158 = $2166;
                                                 break;
                                         };
-                                        var $2158 = $2165;
+                                        var $2151 = $2158;
                                         break;
                                 };
-                                var $2150 = $2158;
+                                var $2143 = $2151;
                                 break;
                         };
-                        var $2143 = $2150;
+                        var $2136 = $2143;
                         break;
                 };
-                var $2135 = $2143;
+                var $2128 = $2136;
                 break;
         };
-        return $2135;
+        return $2128;
     };
     const Kind$Parser$goal_rewrite = x0 => x1 => Kind$Parser$goal_rewrite$(x0, x1);
 
@@ -5906,137 +5891,137 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2208 = self.idx;
-                var $2209 = self.code;
-                var $2210 = self.err;
-                var $2211 = Parser$Reply$error$($2208, $2209, $2210);
-                var $2207 = $2211;
+                var $2201 = self.idx;
+                var $2202 = self.code;
+                var $2203 = self.err;
+                var $2204 = Parser$Reply$error$($2201, $2202, $2203);
+                var $2200 = $2204;
                 break;
             case 'Parser.Reply.value':
-                var $2212 = self.idx;
-                var $2213 = self.code;
-                var $2214 = self.val;
-                var self = Kind$Parser$text$("if ", $2212, $2213);
+                var $2205 = self.idx;
+                var $2206 = self.code;
+                var $2207 = self.val;
+                var self = Kind$Parser$text$("if ", $2205, $2206);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2216 = self.idx;
-                        var $2217 = self.code;
-                        var $2218 = self.err;
-                        var $2219 = Parser$Reply$error$($2216, $2217, $2218);
-                        var $2215 = $2219;
+                        var $2209 = self.idx;
+                        var $2210 = self.code;
+                        var $2211 = self.err;
+                        var $2212 = Parser$Reply$error$($2209, $2210, $2211);
+                        var $2208 = $2212;
                         break;
                     case 'Parser.Reply.value':
-                        var $2220 = self.idx;
-                        var $2221 = self.code;
-                        var self = Kind$Parser$term$($2220, $2221);
+                        var $2213 = self.idx;
+                        var $2214 = self.code;
+                        var self = Kind$Parser$term$($2213, $2214);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2223 = self.idx;
-                                var $2224 = self.code;
-                                var $2225 = self.err;
-                                var $2226 = Parser$Reply$error$($2223, $2224, $2225);
-                                var $2222 = $2226;
+                                var $2216 = self.idx;
+                                var $2217 = self.code;
+                                var $2218 = self.err;
+                                var $2219 = Parser$Reply$error$($2216, $2217, $2218);
+                                var $2215 = $2219;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2227 = self.idx;
-                                var $2228 = self.code;
-                                var $2229 = self.val;
-                                var self = Kind$Parser$text$("then", $2227, $2228);
+                                var $2220 = self.idx;
+                                var $2221 = self.code;
+                                var $2222 = self.val;
+                                var self = Kind$Parser$text$("then", $2220, $2221);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2231 = self.idx;
-                                        var $2232 = self.code;
-                                        var $2233 = self.err;
-                                        var $2234 = Parser$Reply$error$($2231, $2232, $2233);
-                                        var $2230 = $2234;
+                                        var $2224 = self.idx;
+                                        var $2225 = self.code;
+                                        var $2226 = self.err;
+                                        var $2227 = Parser$Reply$error$($2224, $2225, $2226);
+                                        var $2223 = $2227;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2235 = self.idx;
-                                        var $2236 = self.code;
-                                        var self = Kind$Parser$term$($2235, $2236);
+                                        var $2228 = self.idx;
+                                        var $2229 = self.code;
+                                        var self = Kind$Parser$term$($2228, $2229);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2238 = self.idx;
-                                                var $2239 = self.code;
-                                                var $2240 = self.err;
-                                                var $2241 = Parser$Reply$error$($2238, $2239, $2240);
-                                                var $2237 = $2241;
+                                                var $2231 = self.idx;
+                                                var $2232 = self.code;
+                                                var $2233 = self.err;
+                                                var $2234 = Parser$Reply$error$($2231, $2232, $2233);
+                                                var $2230 = $2234;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2242 = self.idx;
-                                                var $2243 = self.code;
-                                                var $2244 = self.val;
-                                                var self = Kind$Parser$text$("else", $2242, $2243);
+                                                var $2235 = self.idx;
+                                                var $2236 = self.code;
+                                                var $2237 = self.val;
+                                                var self = Kind$Parser$text$("else", $2235, $2236);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $2246 = self.idx;
-                                                        var $2247 = self.code;
-                                                        var $2248 = self.err;
-                                                        var $2249 = Parser$Reply$error$($2246, $2247, $2248);
-                                                        var $2245 = $2249;
+                                                        var $2239 = self.idx;
+                                                        var $2240 = self.code;
+                                                        var $2241 = self.err;
+                                                        var $2242 = Parser$Reply$error$($2239, $2240, $2241);
+                                                        var $2238 = $2242;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $2250 = self.idx;
-                                                        var $2251 = self.code;
-                                                        var self = Kind$Parser$term$($2250, $2251);
+                                                        var $2243 = self.idx;
+                                                        var $2244 = self.code;
+                                                        var self = Kind$Parser$term$($2243, $2244);
                                                         switch (self._) {
                                                             case 'Parser.Reply.error':
-                                                                var $2253 = self.idx;
-                                                                var $2254 = self.code;
-                                                                var $2255 = self.err;
-                                                                var $2256 = Parser$Reply$error$($2253, $2254, $2255);
-                                                                var $2252 = $2256;
+                                                                var $2246 = self.idx;
+                                                                var $2247 = self.code;
+                                                                var $2248 = self.err;
+                                                                var $2249 = Parser$Reply$error$($2246, $2247, $2248);
+                                                                var $2245 = $2249;
                                                                 break;
                                                             case 'Parser.Reply.value':
-                                                                var $2257 = self.idx;
-                                                                var $2258 = self.code;
-                                                                var $2259 = self.val;
-                                                                var self = Kind$Parser$stop$($2214, $2257, $2258);
+                                                                var $2250 = self.idx;
+                                                                var $2251 = self.code;
+                                                                var $2252 = self.val;
+                                                                var self = Kind$Parser$stop$($2207, $2250, $2251);
                                                                 switch (self._) {
                                                                     case 'Parser.Reply.error':
-                                                                        var $2261 = self.idx;
-                                                                        var $2262 = self.code;
-                                                                        var $2263 = self.err;
-                                                                        var $2264 = Parser$Reply$error$($2261, $2262, $2263);
-                                                                        var $2260 = $2264;
+                                                                        var $2254 = self.idx;
+                                                                        var $2255 = self.code;
+                                                                        var $2256 = self.err;
+                                                                        var $2257 = Parser$Reply$error$($2254, $2255, $2256);
+                                                                        var $2253 = $2257;
                                                                         break;
                                                                     case 'Parser.Reply.value':
-                                                                        var $2265 = self.idx;
-                                                                        var $2266 = self.code;
-                                                                        var $2267 = self.val;
-                                                                        var _term$27 = $2229;
+                                                                        var $2258 = self.idx;
+                                                                        var $2259 = self.code;
+                                                                        var $2260 = self.val;
+                                                                        var _term$27 = $2222;
                                                                         var _term$28 = Kind$Term$app$(_term$27, Kind$Term$lam$("", (_x$28 => {
-                                                                            var $2269 = Kind$Term$hol$(Bits$e);
-                                                                            return $2269;
+                                                                            var $2262 = Kind$Term$hol$(Bits$e);
+                                                                            return $2262;
                                                                         })));
-                                                                        var _term$29 = Kind$Term$app$(_term$28, $2244);
-                                                                        var _term$30 = Kind$Term$app$(_term$29, $2259);
-                                                                        var $2268 = Parser$Reply$value$($2265, $2266, Kind$Term$ori$($2267, _term$30));
-                                                                        var $2260 = $2268;
+                                                                        var _term$29 = Kind$Term$app$(_term$28, $2237);
+                                                                        var _term$30 = Kind$Term$app$(_term$29, $2252);
+                                                                        var $2261 = Parser$Reply$value$($2258, $2259, Kind$Term$ori$($2260, _term$30));
+                                                                        var $2253 = $2261;
                                                                         break;
                                                                 };
-                                                                var $2252 = $2260;
+                                                                var $2245 = $2253;
                                                                 break;
                                                         };
-                                                        var $2245 = $2252;
+                                                        var $2238 = $2245;
                                                         break;
                                                 };
-                                                var $2237 = $2245;
+                                                var $2230 = $2238;
                                                 break;
                                         };
-                                        var $2230 = $2237;
+                                        var $2223 = $2230;
                                         break;
                                 };
-                                var $2222 = $2230;
+                                var $2215 = $2223;
                                 break;
                         };
-                        var $2215 = $2222;
+                        var $2208 = $2215;
                         break;
                 };
-                var $2207 = $2215;
+                var $2200 = $2208;
                 break;
         };
-        return $2207;
+        return $2200;
     };
     const Kind$Parser$if = x0 => x1 => Kind$Parser$if$(x0, x1);
 
@@ -6044,17 +6029,17 @@ module.exports = (function() {
         var self = _as$2;
         switch (self._) {
             case 'List.cons':
-                var $2271 = self.head;
-                var $2272 = self.tail;
-                var $2273 = List$cons$(_f$4($2271), List$mapped$($2272, _f$4));
-                var $2270 = $2273;
+                var $2264 = self.head;
+                var $2265 = self.tail;
+                var $2266 = List$cons$(_f$4($2264), List$mapped$($2265, _f$4));
+                var $2263 = $2266;
                 break;
             case 'List.nil':
-                var $2274 = List$nil;
-                var $2270 = $2274;
+                var $2267 = List$nil;
+                var $2263 = $2267;
                 break;
         };
-        return $2270;
+        return $2263;
     };
     const List$mapped = x0 => x1 => List$mapped$(x0, x1);
     const Kind$Code$backslash = 92;
@@ -6063,39 +6048,39 @@ module.exports = (function() {
         var self = _esc$1;
         switch (self._) {
             case 'Pair.new':
-                var $2276 = self.fst;
-                var $2277 = self.snd;
-                var $2278 = (_idx$4 => _code$5 => {
-                    var self = Parser$text$($2276, _idx$4, _code$5);
+                var $2269 = self.fst;
+                var $2270 = self.snd;
+                var $2271 = (_idx$4 => _code$5 => {
+                    var self = Parser$text$($2269, _idx$4, _code$5);
                     switch (self._) {
                         case 'Parser.Reply.error':
-                            var $2280 = self.idx;
-                            var $2281 = self.code;
-                            var $2282 = self.err;
-                            var $2283 = Parser$Reply$error$($2280, $2281, $2282);
-                            var $2279 = $2283;
+                            var $2273 = self.idx;
+                            var $2274 = self.code;
+                            var $2275 = self.err;
+                            var $2276 = Parser$Reply$error$($2273, $2274, $2275);
+                            var $2272 = $2276;
                             break;
                         case 'Parser.Reply.value':
-                            var $2284 = self.idx;
-                            var $2285 = self.code;
-                            var $2286 = Parser$Reply$value$($2284, $2285, $2277);
-                            var $2279 = $2286;
+                            var $2277 = self.idx;
+                            var $2278 = self.code;
+                            var $2279 = Parser$Reply$value$($2277, $2278, $2270);
+                            var $2272 = $2279;
                             break;
                     };
-                    return $2279;
+                    return $2272;
                 });
-                var $2275 = $2278;
+                var $2268 = $2271;
                 break;
         };
-        return $2275;
+        return $2268;
     }))), List$cons$(Parser$one, List$nil)));
 
     function Kind$Term$chr$(_chrx$1) {
-        var $2287 = ({
+        var $2280 = ({
             _: 'Kind.Term.chr',
             'chrx': _chrx$1
         });
-        return $2287;
+        return $2280;
     };
     const Kind$Term$chr = x0 => Kind$Term$chr$(x0);
 
@@ -6103,83 +6088,83 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2289 = self.idx;
-                var $2290 = self.code;
-                var $2291 = self.err;
-                var $2292 = Parser$Reply$error$($2289, $2290, $2291);
-                var $2288 = $2292;
+                var $2282 = self.idx;
+                var $2283 = self.code;
+                var $2284 = self.err;
+                var $2285 = Parser$Reply$error$($2282, $2283, $2284);
+                var $2281 = $2285;
                 break;
             case 'Parser.Reply.value':
-                var $2293 = self.idx;
-                var $2294 = self.code;
-                var $2295 = self.val;
-                var self = Kind$Parser$text$("\'", $2293, $2294);
+                var $2286 = self.idx;
+                var $2287 = self.code;
+                var $2288 = self.val;
+                var self = Kind$Parser$text$("\'", $2286, $2287);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2297 = self.idx;
-                        var $2298 = self.code;
-                        var $2299 = self.err;
-                        var $2300 = Parser$Reply$error$($2297, $2298, $2299);
-                        var $2296 = $2300;
+                        var $2290 = self.idx;
+                        var $2291 = self.code;
+                        var $2292 = self.err;
+                        var $2293 = Parser$Reply$error$($2290, $2291, $2292);
+                        var $2289 = $2293;
                         break;
                     case 'Parser.Reply.value':
-                        var $2301 = self.idx;
-                        var $2302 = self.code;
-                        var self = Kind$Parser$char$single($2301)($2302);
+                        var $2294 = self.idx;
+                        var $2295 = self.code;
+                        var self = Kind$Parser$char$single($2294)($2295);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2304 = self.idx;
-                                var $2305 = self.code;
-                                var $2306 = self.err;
-                                var $2307 = Parser$Reply$error$($2304, $2305, $2306);
-                                var $2303 = $2307;
+                                var $2297 = self.idx;
+                                var $2298 = self.code;
+                                var $2299 = self.err;
+                                var $2300 = Parser$Reply$error$($2297, $2298, $2299);
+                                var $2296 = $2300;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2308 = self.idx;
-                                var $2309 = self.code;
-                                var $2310 = self.val;
-                                var self = Parser$text$("\'", $2308, $2309);
+                                var $2301 = self.idx;
+                                var $2302 = self.code;
+                                var $2303 = self.val;
+                                var self = Parser$text$("\'", $2301, $2302);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2312 = self.idx;
-                                        var $2313 = self.code;
-                                        var $2314 = self.err;
-                                        var $2315 = Parser$Reply$error$($2312, $2313, $2314);
-                                        var $2311 = $2315;
+                                        var $2305 = self.idx;
+                                        var $2306 = self.code;
+                                        var $2307 = self.err;
+                                        var $2308 = Parser$Reply$error$($2305, $2306, $2307);
+                                        var $2304 = $2308;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2316 = self.idx;
-                                        var $2317 = self.code;
-                                        var self = Kind$Parser$stop$($2295, $2316, $2317);
+                                        var $2309 = self.idx;
+                                        var $2310 = self.code;
+                                        var self = Kind$Parser$stop$($2288, $2309, $2310);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2319 = self.idx;
-                                                var $2320 = self.code;
-                                                var $2321 = self.err;
-                                                var $2322 = Parser$Reply$error$($2319, $2320, $2321);
-                                                var $2318 = $2322;
+                                                var $2312 = self.idx;
+                                                var $2313 = self.code;
+                                                var $2314 = self.err;
+                                                var $2315 = Parser$Reply$error$($2312, $2313, $2314);
+                                                var $2311 = $2315;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2323 = self.idx;
-                                                var $2324 = self.code;
-                                                var $2325 = self.val;
-                                                var $2326 = Parser$Reply$value$($2323, $2324, Kind$Term$ori$($2325, Kind$Term$chr$($2310)));
-                                                var $2318 = $2326;
+                                                var $2316 = self.idx;
+                                                var $2317 = self.code;
+                                                var $2318 = self.val;
+                                                var $2319 = Parser$Reply$value$($2316, $2317, Kind$Term$ori$($2318, Kind$Term$chr$($2303)));
+                                                var $2311 = $2319;
                                                 break;
                                         };
-                                        var $2311 = $2318;
+                                        var $2304 = $2311;
                                         break;
                                 };
-                                var $2303 = $2311;
+                                var $2296 = $2304;
                                 break;
                         };
-                        var $2296 = $2303;
+                        var $2289 = $2296;
                         break;
                 };
-                var $2288 = $2296;
+                var $2281 = $2289;
                 break;
         };
-        return $2288;
+        return $2281;
     };
     const Kind$Parser$char = x0 => x1 => Kind$Parser$char$(x0, x1);
 
@@ -6195,13 +6180,13 @@ module.exports = (function() {
             var R = (() => {
                 var self = _xs$1;
                 if (self.length === 0) {
-                    var $2327 = _res$2;
-                    return $2327;
+                    var $2320 = _res$2;
+                    return $2320;
                 } else {
-                    var $2328 = self.charCodeAt(0);
-                    var $2329 = self.slice(1);
-                    var $2330 = String$reverse$go$($2329, String$cons$($2328, _res$2));
-                    return $2330;
+                    var $2321 = self.charCodeAt(0);
+                    var $2322 = self.slice(1);
+                    var $2323 = String$reverse$go$($2322, String$cons$($2321, _res$2));
+                    return $2323;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -6211,8 +6196,8 @@ module.exports = (function() {
     const String$reverse$go = x0 => x1 => String$reverse$go$(x0, x1);
 
     function String$reverse$(_xs$1) {
-        var $2331 = String$reverse$go$(_xs$1, String$nil);
-        return $2331;
+        var $2324 = String$reverse$go$(_xs$1, String$nil);
+        return $2324;
     };
     const String$reverse = x0 => String$reverse$(x0);
 
@@ -6228,36 +6213,36 @@ module.exports = (function() {
             var R = (() => {
                 var self = _code$3;
                 if (self.length === 0) {
-                    var $2332 = Parser$Reply$error$(_idx$2, _code$3, "Non-terminating string.");
-                    return $2332;
+                    var $2325 = Parser$Reply$error$(_idx$2, _code$3, "Non-terminating string.");
+                    return $2325;
                 } else {
-                    var $2333 = self.charCodeAt(0);
-                    var $2334 = self.slice(1);
-                    var self = ($2333 === 34);
+                    var $2326 = self.charCodeAt(0);
+                    var $2327 = self.slice(1);
+                    var self = ($2326 === 34);
                     if (self) {
-                        var $2336 = Parser$Reply$value$(Nat$succ$(_idx$2), $2334, String$reverse$(_str$1));
-                        var $2335 = $2336;
+                        var $2329 = Parser$Reply$value$(Nat$succ$(_idx$2), $2327, String$reverse$(_str$1));
+                        var $2328 = $2329;
                     } else {
                         var self = Kind$Parser$char$single(_idx$2)(_code$3);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2338 = self.idx;
-                                var $2339 = self.code;
-                                var $2340 = self.err;
-                                var $2341 = Parser$Reply$error$($2338, $2339, $2340);
-                                var $2337 = $2341;
+                                var $2331 = self.idx;
+                                var $2332 = self.code;
+                                var $2333 = self.err;
+                                var $2334 = Parser$Reply$error$($2331, $2332, $2333);
+                                var $2330 = $2334;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2342 = self.idx;
-                                var $2343 = self.code;
-                                var $2344 = self.val;
-                                var $2345 = Kind$Parser$string$go$(String$cons$($2344, _str$1), $2342, $2343);
-                                var $2337 = $2345;
+                                var $2335 = self.idx;
+                                var $2336 = self.code;
+                                var $2337 = self.val;
+                                var $2338 = Kind$Parser$string$go$(String$cons$($2337, _str$1), $2335, $2336);
+                                var $2330 = $2338;
                                 break;
                         };
-                        var $2335 = $2337;
+                        var $2328 = $2330;
                     };
-                    return $2335;
+                    return $2328;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -6267,11 +6252,11 @@ module.exports = (function() {
     const Kind$Parser$string$go = x0 => x1 => x2 => Kind$Parser$string$go$(x0, x1, x2);
 
     function Kind$Term$str$(_strx$1) {
-        var $2346 = ({
+        var $2339 = ({
             _: 'Kind.Term.str',
             'strx': _strx$1
         });
-        return $2346;
+        return $2339;
     };
     const Kind$Term$str = x0 => Kind$Term$str$(x0);
 
@@ -6279,68 +6264,68 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2348 = self.idx;
-                var $2349 = self.code;
-                var $2350 = self.err;
-                var $2351 = Parser$Reply$error$($2348, $2349, $2350);
-                var $2347 = $2351;
+                var $2341 = self.idx;
+                var $2342 = self.code;
+                var $2343 = self.err;
+                var $2344 = Parser$Reply$error$($2341, $2342, $2343);
+                var $2340 = $2344;
                 break;
             case 'Parser.Reply.value':
-                var $2352 = self.idx;
-                var $2353 = self.code;
-                var $2354 = self.val;
-                var self = Kind$Parser$text$(String$cons$(34, String$nil), $2352, $2353);
+                var $2345 = self.idx;
+                var $2346 = self.code;
+                var $2347 = self.val;
+                var self = Kind$Parser$text$(String$cons$(34, String$nil), $2345, $2346);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2356 = self.idx;
-                        var $2357 = self.code;
-                        var $2358 = self.err;
-                        var $2359 = Parser$Reply$error$($2356, $2357, $2358);
-                        var $2355 = $2359;
+                        var $2349 = self.idx;
+                        var $2350 = self.code;
+                        var $2351 = self.err;
+                        var $2352 = Parser$Reply$error$($2349, $2350, $2351);
+                        var $2348 = $2352;
                         break;
                     case 'Parser.Reply.value':
-                        var $2360 = self.idx;
-                        var $2361 = self.code;
-                        var self = Kind$Parser$string$go$("", $2360, $2361);
+                        var $2353 = self.idx;
+                        var $2354 = self.code;
+                        var self = Kind$Parser$string$go$("", $2353, $2354);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2363 = self.idx;
-                                var $2364 = self.code;
-                                var $2365 = self.err;
-                                var $2366 = Parser$Reply$error$($2363, $2364, $2365);
-                                var $2362 = $2366;
+                                var $2356 = self.idx;
+                                var $2357 = self.code;
+                                var $2358 = self.err;
+                                var $2359 = Parser$Reply$error$($2356, $2357, $2358);
+                                var $2355 = $2359;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2367 = self.idx;
-                                var $2368 = self.code;
-                                var $2369 = self.val;
-                                var self = Kind$Parser$stop$($2354, $2367, $2368);
+                                var $2360 = self.idx;
+                                var $2361 = self.code;
+                                var $2362 = self.val;
+                                var self = Kind$Parser$stop$($2347, $2360, $2361);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2371 = self.idx;
-                                        var $2372 = self.code;
-                                        var $2373 = self.err;
-                                        var $2374 = Parser$Reply$error$($2371, $2372, $2373);
-                                        var $2370 = $2374;
+                                        var $2364 = self.idx;
+                                        var $2365 = self.code;
+                                        var $2366 = self.err;
+                                        var $2367 = Parser$Reply$error$($2364, $2365, $2366);
+                                        var $2363 = $2367;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2375 = self.idx;
-                                        var $2376 = self.code;
-                                        var $2377 = self.val;
-                                        var $2378 = Parser$Reply$value$($2375, $2376, Kind$Term$ori$($2377, Kind$Term$str$($2369)));
-                                        var $2370 = $2378;
+                                        var $2368 = self.idx;
+                                        var $2369 = self.code;
+                                        var $2370 = self.val;
+                                        var $2371 = Parser$Reply$value$($2368, $2369, Kind$Term$ori$($2370, Kind$Term$str$($2362)));
+                                        var $2363 = $2371;
                                         break;
                                 };
-                                var $2362 = $2370;
+                                var $2355 = $2363;
                                 break;
                         };
-                        var $2355 = $2362;
+                        var $2348 = $2355;
                         break;
                 };
-                var $2347 = $2355;
+                var $2340 = $2348;
                 break;
         };
-        return $2347;
+        return $2340;
     };
     const Kind$Parser$string = x0 => x1 => Kind$Parser$string$(x0, x1);
 
@@ -6348,134 +6333,134 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2380 = self.idx;
-                var $2381 = self.code;
-                var $2382 = self.err;
-                var $2383 = Parser$Reply$error$($2380, $2381, $2382);
-                var $2379 = $2383;
+                var $2373 = self.idx;
+                var $2374 = self.code;
+                var $2375 = self.err;
+                var $2376 = Parser$Reply$error$($2373, $2374, $2375);
+                var $2372 = $2376;
                 break;
             case 'Parser.Reply.value':
-                var $2384 = self.idx;
-                var $2385 = self.code;
-                var $2386 = self.val;
-                var self = Kind$Parser$text$("{", $2384, $2385);
+                var $2377 = self.idx;
+                var $2378 = self.code;
+                var $2379 = self.val;
+                var self = Kind$Parser$text$("{", $2377, $2378);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2388 = self.idx;
-                        var $2389 = self.code;
-                        var $2390 = self.err;
-                        var $2391 = Parser$Reply$error$($2388, $2389, $2390);
-                        var $2387 = $2391;
+                        var $2381 = self.idx;
+                        var $2382 = self.code;
+                        var $2383 = self.err;
+                        var $2384 = Parser$Reply$error$($2381, $2382, $2383);
+                        var $2380 = $2384;
                         break;
                     case 'Parser.Reply.value':
-                        var $2392 = self.idx;
-                        var $2393 = self.code;
-                        var self = Kind$Parser$term$($2392, $2393);
+                        var $2385 = self.idx;
+                        var $2386 = self.code;
+                        var self = Kind$Parser$term$($2385, $2386);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2395 = self.idx;
-                                var $2396 = self.code;
-                                var $2397 = self.err;
-                                var $2398 = Parser$Reply$error$($2395, $2396, $2397);
-                                var $2394 = $2398;
+                                var $2388 = self.idx;
+                                var $2389 = self.code;
+                                var $2390 = self.err;
+                                var $2391 = Parser$Reply$error$($2388, $2389, $2390);
+                                var $2387 = $2391;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2399 = self.idx;
-                                var $2400 = self.code;
-                                var $2401 = self.val;
-                                var self = Parser$maybe$(Kind$Parser$text(","), $2399, $2400);
+                                var $2392 = self.idx;
+                                var $2393 = self.code;
+                                var $2394 = self.val;
+                                var self = Parser$maybe$(Kind$Parser$text(","), $2392, $2393);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2403 = self.idx;
-                                        var $2404 = self.code;
-                                        var $2405 = self.err;
-                                        var $2406 = Parser$Reply$error$($2403, $2404, $2405);
-                                        var $2402 = $2406;
+                                        var $2396 = self.idx;
+                                        var $2397 = self.code;
+                                        var $2398 = self.err;
+                                        var $2399 = Parser$Reply$error$($2396, $2397, $2398);
+                                        var $2395 = $2399;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2407 = self.idx;
-                                        var $2408 = self.code;
-                                        var self = Kind$Parser$term$($2407, $2408);
+                                        var $2400 = self.idx;
+                                        var $2401 = self.code;
+                                        var self = Kind$Parser$term$($2400, $2401);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2410 = self.idx;
-                                                var $2411 = self.code;
-                                                var $2412 = self.err;
-                                                var $2413 = Parser$Reply$error$($2410, $2411, $2412);
-                                                var $2409 = $2413;
+                                                var $2403 = self.idx;
+                                                var $2404 = self.code;
+                                                var $2405 = self.err;
+                                                var $2406 = Parser$Reply$error$($2403, $2404, $2405);
+                                                var $2402 = $2406;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2414 = self.idx;
-                                                var $2415 = self.code;
-                                                var $2416 = self.val;
-                                                var self = Parser$maybe$(Kind$Parser$text(","), $2414, $2415);
+                                                var $2407 = self.idx;
+                                                var $2408 = self.code;
+                                                var $2409 = self.val;
+                                                var self = Parser$maybe$(Kind$Parser$text(","), $2407, $2408);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $2418 = self.idx;
-                                                        var $2419 = self.code;
-                                                        var $2420 = self.err;
-                                                        var $2421 = Parser$Reply$error$($2418, $2419, $2420);
-                                                        var $2417 = $2421;
+                                                        var $2411 = self.idx;
+                                                        var $2412 = self.code;
+                                                        var $2413 = self.err;
+                                                        var $2414 = Parser$Reply$error$($2411, $2412, $2413);
+                                                        var $2410 = $2414;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $2422 = self.idx;
-                                                        var $2423 = self.code;
-                                                        var self = Kind$Parser$text$("}", $2422, $2423);
+                                                        var $2415 = self.idx;
+                                                        var $2416 = self.code;
+                                                        var self = Kind$Parser$text$("}", $2415, $2416);
                                                         switch (self._) {
                                                             case 'Parser.Reply.error':
-                                                                var $2425 = self.idx;
-                                                                var $2426 = self.code;
-                                                                var $2427 = self.err;
-                                                                var $2428 = Parser$Reply$error$($2425, $2426, $2427);
-                                                                var $2424 = $2428;
+                                                                var $2418 = self.idx;
+                                                                var $2419 = self.code;
+                                                                var $2420 = self.err;
+                                                                var $2421 = Parser$Reply$error$($2418, $2419, $2420);
+                                                                var $2417 = $2421;
                                                                 break;
                                                             case 'Parser.Reply.value':
-                                                                var $2429 = self.idx;
-                                                                var $2430 = self.code;
-                                                                var self = Kind$Parser$stop$($2386, $2429, $2430);
+                                                                var $2422 = self.idx;
+                                                                var $2423 = self.code;
+                                                                var self = Kind$Parser$stop$($2379, $2422, $2423);
                                                                 switch (self._) {
                                                                     case 'Parser.Reply.error':
-                                                                        var $2432 = self.idx;
-                                                                        var $2433 = self.code;
-                                                                        var $2434 = self.err;
-                                                                        var $2435 = Parser$Reply$error$($2432, $2433, $2434);
-                                                                        var $2431 = $2435;
+                                                                        var $2425 = self.idx;
+                                                                        var $2426 = self.code;
+                                                                        var $2427 = self.err;
+                                                                        var $2428 = Parser$Reply$error$($2425, $2426, $2427);
+                                                                        var $2424 = $2428;
                                                                         break;
                                                                     case 'Parser.Reply.value':
-                                                                        var $2436 = self.idx;
-                                                                        var $2437 = self.code;
-                                                                        var $2438 = self.val;
+                                                                        var $2429 = self.idx;
+                                                                        var $2430 = self.code;
+                                                                        var $2431 = self.val;
                                                                         var _term$27 = Kind$Term$ref$("Pair.new");
                                                                         var _term$28 = Kind$Term$app$(_term$27, Kind$Term$hol$(Bits$e));
                                                                         var _term$29 = Kind$Term$app$(_term$28, Kind$Term$hol$(Bits$e));
-                                                                        var _term$30 = Kind$Term$app$(_term$29, $2401);
-                                                                        var _term$31 = Kind$Term$app$(_term$30, $2416);
-                                                                        var $2439 = Parser$Reply$value$($2436, $2437, Kind$Term$ori$($2438, _term$31));
-                                                                        var $2431 = $2439;
+                                                                        var _term$30 = Kind$Term$app$(_term$29, $2394);
+                                                                        var _term$31 = Kind$Term$app$(_term$30, $2409);
+                                                                        var $2432 = Parser$Reply$value$($2429, $2430, Kind$Term$ori$($2431, _term$31));
+                                                                        var $2424 = $2432;
                                                                         break;
                                                                 };
-                                                                var $2424 = $2431;
+                                                                var $2417 = $2424;
                                                                 break;
                                                         };
-                                                        var $2417 = $2424;
+                                                        var $2410 = $2417;
                                                         break;
                                                 };
-                                                var $2409 = $2417;
+                                                var $2402 = $2410;
                                                 break;
                                         };
-                                        var $2402 = $2409;
+                                        var $2395 = $2402;
                                         break;
                                 };
-                                var $2394 = $2402;
+                                var $2387 = $2395;
                                 break;
                         };
-                        var $2387 = $2394;
+                        var $2380 = $2387;
                         break;
                 };
-                var $2379 = $2387;
+                var $2372 = $2380;
                 break;
         };
-        return $2379;
+        return $2372;
     };
     const Kind$Parser$pair = x0 => x1 => Kind$Parser$pair$(x0, x1);
 
@@ -6483,136 +6468,136 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2441 = self.idx;
-                var $2442 = self.code;
-                var $2443 = self.err;
-                var $2444 = Parser$Reply$error$($2441, $2442, $2443);
-                var $2440 = $2444;
+                var $2434 = self.idx;
+                var $2435 = self.code;
+                var $2436 = self.err;
+                var $2437 = Parser$Reply$error$($2434, $2435, $2436);
+                var $2433 = $2437;
                 break;
             case 'Parser.Reply.value':
-                var $2445 = self.idx;
-                var $2446 = self.code;
-                var $2447 = self.val;
-                var self = Kind$Parser$text$("[", $2445, $2446);
+                var $2438 = self.idx;
+                var $2439 = self.code;
+                var $2440 = self.val;
+                var self = Kind$Parser$text$("[", $2438, $2439);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2449 = self.idx;
-                        var $2450 = self.code;
-                        var $2451 = self.err;
-                        var $2452 = Parser$Reply$error$($2449, $2450, $2451);
-                        var $2448 = $2452;
+                        var $2442 = self.idx;
+                        var $2443 = self.code;
+                        var $2444 = self.err;
+                        var $2445 = Parser$Reply$error$($2442, $2443, $2444);
+                        var $2441 = $2445;
                         break;
                     case 'Parser.Reply.value':
-                        var $2453 = self.idx;
-                        var $2454 = self.code;
-                        var self = Kind$Parser$name1$($2453, $2454);
+                        var $2446 = self.idx;
+                        var $2447 = self.code;
+                        var self = Kind$Parser$name1$($2446, $2447);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2456 = self.idx;
-                                var $2457 = self.code;
-                                var $2458 = self.err;
-                                var $2459 = Parser$Reply$error$($2456, $2457, $2458);
-                                var $2455 = $2459;
+                                var $2449 = self.idx;
+                                var $2450 = self.code;
+                                var $2451 = self.err;
+                                var $2452 = Parser$Reply$error$($2449, $2450, $2451);
+                                var $2448 = $2452;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2460 = self.idx;
-                                var $2461 = self.code;
-                                var $2462 = self.val;
-                                var self = Kind$Parser$text$(":", $2460, $2461);
+                                var $2453 = self.idx;
+                                var $2454 = self.code;
+                                var $2455 = self.val;
+                                var self = Kind$Parser$text$(":", $2453, $2454);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2464 = self.idx;
-                                        var $2465 = self.code;
-                                        var $2466 = self.err;
-                                        var $2467 = Parser$Reply$error$($2464, $2465, $2466);
-                                        var $2463 = $2467;
+                                        var $2457 = self.idx;
+                                        var $2458 = self.code;
+                                        var $2459 = self.err;
+                                        var $2460 = Parser$Reply$error$($2457, $2458, $2459);
+                                        var $2456 = $2460;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2468 = self.idx;
-                                        var $2469 = self.code;
-                                        var self = Kind$Parser$term$($2468, $2469);
+                                        var $2461 = self.idx;
+                                        var $2462 = self.code;
+                                        var self = Kind$Parser$term$($2461, $2462);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2471 = self.idx;
-                                                var $2472 = self.code;
-                                                var $2473 = self.err;
-                                                var $2474 = Parser$Reply$error$($2471, $2472, $2473);
-                                                var $2470 = $2474;
+                                                var $2464 = self.idx;
+                                                var $2465 = self.code;
+                                                var $2466 = self.err;
+                                                var $2467 = Parser$Reply$error$($2464, $2465, $2466);
+                                                var $2463 = $2467;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2475 = self.idx;
-                                                var $2476 = self.code;
-                                                var $2477 = self.val;
-                                                var self = Kind$Parser$text$("]", $2475, $2476);
+                                                var $2468 = self.idx;
+                                                var $2469 = self.code;
+                                                var $2470 = self.val;
+                                                var self = Kind$Parser$text$("]", $2468, $2469);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $2479 = self.idx;
-                                                        var $2480 = self.code;
-                                                        var $2481 = self.err;
-                                                        var $2482 = Parser$Reply$error$($2479, $2480, $2481);
-                                                        var $2478 = $2482;
+                                                        var $2472 = self.idx;
+                                                        var $2473 = self.code;
+                                                        var $2474 = self.err;
+                                                        var $2475 = Parser$Reply$error$($2472, $2473, $2474);
+                                                        var $2471 = $2475;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $2483 = self.idx;
-                                                        var $2484 = self.code;
-                                                        var self = Kind$Parser$term$($2483, $2484);
+                                                        var $2476 = self.idx;
+                                                        var $2477 = self.code;
+                                                        var self = Kind$Parser$term$($2476, $2477);
                                                         switch (self._) {
                                                             case 'Parser.Reply.error':
-                                                                var $2486 = self.idx;
-                                                                var $2487 = self.code;
-                                                                var $2488 = self.err;
-                                                                var $2489 = Parser$Reply$error$($2486, $2487, $2488);
-                                                                var $2485 = $2489;
+                                                                var $2479 = self.idx;
+                                                                var $2480 = self.code;
+                                                                var $2481 = self.err;
+                                                                var $2482 = Parser$Reply$error$($2479, $2480, $2481);
+                                                                var $2478 = $2482;
                                                                 break;
                                                             case 'Parser.Reply.value':
-                                                                var $2490 = self.idx;
-                                                                var $2491 = self.code;
-                                                                var $2492 = self.val;
-                                                                var self = Kind$Parser$stop$($2447, $2490, $2491);
+                                                                var $2483 = self.idx;
+                                                                var $2484 = self.code;
+                                                                var $2485 = self.val;
+                                                                var self = Kind$Parser$stop$($2440, $2483, $2484);
                                                                 switch (self._) {
                                                                     case 'Parser.Reply.error':
-                                                                        var $2494 = self.idx;
-                                                                        var $2495 = self.code;
-                                                                        var $2496 = self.err;
-                                                                        var $2497 = Parser$Reply$error$($2494, $2495, $2496);
-                                                                        var $2493 = $2497;
+                                                                        var $2487 = self.idx;
+                                                                        var $2488 = self.code;
+                                                                        var $2489 = self.err;
+                                                                        var $2490 = Parser$Reply$error$($2487, $2488, $2489);
+                                                                        var $2486 = $2490;
                                                                         break;
                                                                     case 'Parser.Reply.value':
-                                                                        var $2498 = self.idx;
-                                                                        var $2499 = self.code;
-                                                                        var $2500 = self.val;
+                                                                        var $2491 = self.idx;
+                                                                        var $2492 = self.code;
+                                                                        var $2493 = self.val;
                                                                         var _term$27 = Kind$Term$ref$("Sigma");
-                                                                        var _term$28 = Kind$Term$app$(_term$27, $2477);
-                                                                        var _term$29 = Kind$Term$app$(_term$28, Kind$Term$lam$($2462, (_x$29 => {
-                                                                            var $2502 = $2492;
-                                                                            return $2502;
+                                                                        var _term$28 = Kind$Term$app$(_term$27, $2470);
+                                                                        var _term$29 = Kind$Term$app$(_term$28, Kind$Term$lam$($2455, (_x$29 => {
+                                                                            var $2495 = $2485;
+                                                                            return $2495;
                                                                         })));
-                                                                        var $2501 = Parser$Reply$value$($2498, $2499, Kind$Term$ori$($2500, _term$29));
-                                                                        var $2493 = $2501;
+                                                                        var $2494 = Parser$Reply$value$($2491, $2492, Kind$Term$ori$($2493, _term$29));
+                                                                        var $2486 = $2494;
                                                                         break;
                                                                 };
-                                                                var $2485 = $2493;
+                                                                var $2478 = $2486;
                                                                 break;
                                                         };
-                                                        var $2478 = $2485;
+                                                        var $2471 = $2478;
                                                         break;
                                                 };
-                                                var $2470 = $2478;
+                                                var $2463 = $2471;
                                                 break;
                                         };
-                                        var $2463 = $2470;
+                                        var $2456 = $2463;
                                         break;
                                 };
-                                var $2455 = $2463;
+                                var $2448 = $2456;
                                 break;
                         };
-                        var $2448 = $2455;
+                        var $2441 = $2448;
                         break;
                 };
-                var $2440 = $2448;
+                var $2433 = $2441;
                 break;
         };
-        return $2440;
+        return $2433;
     };
     const Kind$Parser$sigma$type = x0 => x1 => Kind$Parser$sigma$type$(x0, x1);
 
@@ -6620,86 +6605,86 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2504 = self.idx;
-                var $2505 = self.code;
-                var $2506 = self.err;
-                var $2507 = Parser$Reply$error$($2504, $2505, $2506);
-                var $2503 = $2507;
+                var $2497 = self.idx;
+                var $2498 = self.code;
+                var $2499 = self.err;
+                var $2500 = Parser$Reply$error$($2497, $2498, $2499);
+                var $2496 = $2500;
                 break;
             case 'Parser.Reply.value':
-                var $2508 = self.idx;
-                var $2509 = self.code;
-                var $2510 = self.val;
-                var self = Kind$Parser$text$("some(", $2508, $2509);
+                var $2501 = self.idx;
+                var $2502 = self.code;
+                var $2503 = self.val;
+                var self = Kind$Parser$text$("some(", $2501, $2502);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2512 = self.idx;
-                        var $2513 = self.code;
-                        var $2514 = self.err;
-                        var $2515 = Parser$Reply$error$($2512, $2513, $2514);
-                        var $2511 = $2515;
+                        var $2505 = self.idx;
+                        var $2506 = self.code;
+                        var $2507 = self.err;
+                        var $2508 = Parser$Reply$error$($2505, $2506, $2507);
+                        var $2504 = $2508;
                         break;
                     case 'Parser.Reply.value':
-                        var $2516 = self.idx;
-                        var $2517 = self.code;
-                        var self = Kind$Parser$term$($2516, $2517);
+                        var $2509 = self.idx;
+                        var $2510 = self.code;
+                        var self = Kind$Parser$term$($2509, $2510);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2519 = self.idx;
-                                var $2520 = self.code;
-                                var $2521 = self.err;
-                                var $2522 = Parser$Reply$error$($2519, $2520, $2521);
-                                var $2518 = $2522;
+                                var $2512 = self.idx;
+                                var $2513 = self.code;
+                                var $2514 = self.err;
+                                var $2515 = Parser$Reply$error$($2512, $2513, $2514);
+                                var $2511 = $2515;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2523 = self.idx;
-                                var $2524 = self.code;
-                                var $2525 = self.val;
-                                var self = Kind$Parser$text$(")", $2523, $2524);
+                                var $2516 = self.idx;
+                                var $2517 = self.code;
+                                var $2518 = self.val;
+                                var self = Kind$Parser$text$(")", $2516, $2517);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2527 = self.idx;
-                                        var $2528 = self.code;
-                                        var $2529 = self.err;
-                                        var $2530 = Parser$Reply$error$($2527, $2528, $2529);
-                                        var $2526 = $2530;
+                                        var $2520 = self.idx;
+                                        var $2521 = self.code;
+                                        var $2522 = self.err;
+                                        var $2523 = Parser$Reply$error$($2520, $2521, $2522);
+                                        var $2519 = $2523;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2531 = self.idx;
-                                        var $2532 = self.code;
-                                        var self = Kind$Parser$stop$($2510, $2531, $2532);
+                                        var $2524 = self.idx;
+                                        var $2525 = self.code;
+                                        var self = Kind$Parser$stop$($2503, $2524, $2525);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2534 = self.idx;
-                                                var $2535 = self.code;
-                                                var $2536 = self.err;
-                                                var $2537 = Parser$Reply$error$($2534, $2535, $2536);
-                                                var $2533 = $2537;
+                                                var $2527 = self.idx;
+                                                var $2528 = self.code;
+                                                var $2529 = self.err;
+                                                var $2530 = Parser$Reply$error$($2527, $2528, $2529);
+                                                var $2526 = $2530;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2538 = self.idx;
-                                                var $2539 = self.code;
-                                                var $2540 = self.val;
+                                                var $2531 = self.idx;
+                                                var $2532 = self.code;
+                                                var $2533 = self.val;
                                                 var _term$18 = Kind$Term$ref$("Maybe.some");
                                                 var _term$19 = Kind$Term$app$(_term$18, Kind$Term$hol$(Bits$e));
-                                                var _term$20 = Kind$Term$app$(_term$19, $2525);
-                                                var $2541 = Parser$Reply$value$($2538, $2539, Kind$Term$ori$($2540, _term$20));
-                                                var $2533 = $2541;
+                                                var _term$20 = Kind$Term$app$(_term$19, $2518);
+                                                var $2534 = Parser$Reply$value$($2531, $2532, Kind$Term$ori$($2533, _term$20));
+                                                var $2526 = $2534;
                                                 break;
                                         };
-                                        var $2526 = $2533;
+                                        var $2519 = $2526;
                                         break;
                                 };
-                                var $2518 = $2526;
+                                var $2511 = $2519;
                                 break;
                         };
-                        var $2511 = $2518;
+                        var $2504 = $2511;
                         break;
                 };
-                var $2503 = $2511;
+                var $2496 = $2504;
                 break;
         };
-        return $2503;
+        return $2496;
     };
     const Kind$Parser$some = x0 => x1 => Kind$Parser$some$(x0, x1);
 
@@ -6707,121 +6692,121 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2543 = self.idx;
-                var $2544 = self.code;
-                var $2545 = self.err;
-                var $2546 = Parser$Reply$error$($2543, $2544, $2545);
-                var $2542 = $2546;
+                var $2536 = self.idx;
+                var $2537 = self.code;
+                var $2538 = self.err;
+                var $2539 = Parser$Reply$error$($2536, $2537, $2538);
+                var $2535 = $2539;
                 break;
             case 'Parser.Reply.value':
-                var $2547 = self.idx;
-                var $2548 = self.code;
-                var $2549 = self.val;
-                var self = Kind$Parser$text$("apply(", $2547, $2548);
+                var $2540 = self.idx;
+                var $2541 = self.code;
+                var $2542 = self.val;
+                var self = Kind$Parser$text$("apply(", $2540, $2541);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2551 = self.idx;
-                        var $2552 = self.code;
-                        var $2553 = self.err;
-                        var $2554 = Parser$Reply$error$($2551, $2552, $2553);
-                        var $2550 = $2554;
+                        var $2544 = self.idx;
+                        var $2545 = self.code;
+                        var $2546 = self.err;
+                        var $2547 = Parser$Reply$error$($2544, $2545, $2546);
+                        var $2543 = $2547;
                         break;
                     case 'Parser.Reply.value':
-                        var $2555 = self.idx;
-                        var $2556 = self.code;
-                        var self = Kind$Parser$term$($2555, $2556);
+                        var $2548 = self.idx;
+                        var $2549 = self.code;
+                        var self = Kind$Parser$term$($2548, $2549);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2558 = self.idx;
-                                var $2559 = self.code;
-                                var $2560 = self.err;
-                                var $2561 = Parser$Reply$error$($2558, $2559, $2560);
-                                var $2557 = $2561;
+                                var $2551 = self.idx;
+                                var $2552 = self.code;
+                                var $2553 = self.err;
+                                var $2554 = Parser$Reply$error$($2551, $2552, $2553);
+                                var $2550 = $2554;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2562 = self.idx;
-                                var $2563 = self.code;
-                                var $2564 = self.val;
-                                var self = Kind$Parser$text$(",", $2562, $2563);
+                                var $2555 = self.idx;
+                                var $2556 = self.code;
+                                var $2557 = self.val;
+                                var self = Kind$Parser$text$(",", $2555, $2556);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2566 = self.idx;
-                                        var $2567 = self.code;
-                                        var $2568 = self.err;
-                                        var $2569 = Parser$Reply$error$($2566, $2567, $2568);
-                                        var $2565 = $2569;
+                                        var $2559 = self.idx;
+                                        var $2560 = self.code;
+                                        var $2561 = self.err;
+                                        var $2562 = Parser$Reply$error$($2559, $2560, $2561);
+                                        var $2558 = $2562;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2570 = self.idx;
-                                        var $2571 = self.code;
-                                        var self = Kind$Parser$term$($2570, $2571);
+                                        var $2563 = self.idx;
+                                        var $2564 = self.code;
+                                        var self = Kind$Parser$term$($2563, $2564);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2573 = self.idx;
-                                                var $2574 = self.code;
-                                                var $2575 = self.err;
-                                                var $2576 = Parser$Reply$error$($2573, $2574, $2575);
-                                                var $2572 = $2576;
+                                                var $2566 = self.idx;
+                                                var $2567 = self.code;
+                                                var $2568 = self.err;
+                                                var $2569 = Parser$Reply$error$($2566, $2567, $2568);
+                                                var $2565 = $2569;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2577 = self.idx;
-                                                var $2578 = self.code;
-                                                var $2579 = self.val;
-                                                var self = Kind$Parser$text$(")", $2577, $2578);
+                                                var $2570 = self.idx;
+                                                var $2571 = self.code;
+                                                var $2572 = self.val;
+                                                var self = Kind$Parser$text$(")", $2570, $2571);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $2581 = self.idx;
-                                                        var $2582 = self.code;
-                                                        var $2583 = self.err;
-                                                        var $2584 = Parser$Reply$error$($2581, $2582, $2583);
-                                                        var $2580 = $2584;
+                                                        var $2574 = self.idx;
+                                                        var $2575 = self.code;
+                                                        var $2576 = self.err;
+                                                        var $2577 = Parser$Reply$error$($2574, $2575, $2576);
+                                                        var $2573 = $2577;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $2585 = self.idx;
-                                                        var $2586 = self.code;
-                                                        var self = Kind$Parser$stop$($2549, $2585, $2586);
+                                                        var $2578 = self.idx;
+                                                        var $2579 = self.code;
+                                                        var self = Kind$Parser$stop$($2542, $2578, $2579);
                                                         switch (self._) {
                                                             case 'Parser.Reply.error':
-                                                                var $2588 = self.idx;
-                                                                var $2589 = self.code;
-                                                                var $2590 = self.err;
-                                                                var $2591 = Parser$Reply$error$($2588, $2589, $2590);
-                                                                var $2587 = $2591;
+                                                                var $2581 = self.idx;
+                                                                var $2582 = self.code;
+                                                                var $2583 = self.err;
+                                                                var $2584 = Parser$Reply$error$($2581, $2582, $2583);
+                                                                var $2580 = $2584;
                                                                 break;
                                                             case 'Parser.Reply.value':
-                                                                var $2592 = self.idx;
-                                                                var $2593 = self.code;
-                                                                var $2594 = self.val;
+                                                                var $2585 = self.idx;
+                                                                var $2586 = self.code;
+                                                                var $2587 = self.val;
                                                                 var _term$24 = Kind$Term$ref$("Equal.apply");
                                                                 var _term$25 = Kind$Term$app$(_term$24, Kind$Term$hol$(Bits$e));
                                                                 var _term$26 = Kind$Term$app$(_term$25, Kind$Term$hol$(Bits$e));
                                                                 var _term$27 = Kind$Term$app$(_term$26, Kind$Term$hol$(Bits$e));
                                                                 var _term$28 = Kind$Term$app$(_term$27, Kind$Term$hol$(Bits$e));
-                                                                var _term$29 = Kind$Term$app$(_term$28, $2564);
-                                                                var _term$30 = Kind$Term$app$(_term$29, $2579);
-                                                                var $2595 = Parser$Reply$value$($2592, $2593, Kind$Term$ori$($2594, _term$30));
-                                                                var $2587 = $2595;
+                                                                var _term$29 = Kind$Term$app$(_term$28, $2557);
+                                                                var _term$30 = Kind$Term$app$(_term$29, $2572);
+                                                                var $2588 = Parser$Reply$value$($2585, $2586, Kind$Term$ori$($2587, _term$30));
+                                                                var $2580 = $2588;
                                                                 break;
                                                         };
-                                                        var $2580 = $2587;
+                                                        var $2573 = $2580;
                                                         break;
                                                 };
-                                                var $2572 = $2580;
+                                                var $2565 = $2573;
                                                 break;
                                         };
-                                        var $2565 = $2572;
+                                        var $2558 = $2565;
                                         break;
                                 };
-                                var $2557 = $2565;
+                                var $2550 = $2558;
                                 break;
                         };
-                        var $2550 = $2557;
+                        var $2543 = $2550;
                         break;
                 };
-                var $2542 = $2550;
+                var $2535 = $2543;
                 break;
         };
-        return $2542;
+        return $2535;
     };
     const Kind$Parser$apply = x0 => x1 => Kind$Parser$apply$(x0, x1);
 
@@ -6829,121 +6814,121 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2597 = self.idx;
-                var $2598 = self.code;
-                var $2599 = self.err;
-                var $2600 = Parser$Reply$error$($2597, $2598, $2599);
-                var $2596 = $2600;
+                var $2590 = self.idx;
+                var $2591 = self.code;
+                var $2592 = self.err;
+                var $2593 = Parser$Reply$error$($2590, $2591, $2592);
+                var $2589 = $2593;
                 break;
             case 'Parser.Reply.value':
-                var $2601 = self.idx;
-                var $2602 = self.code;
-                var $2603 = self.val;
-                var self = Kind$Parser$text$("chain(", $2601, $2602);
+                var $2594 = self.idx;
+                var $2595 = self.code;
+                var $2596 = self.val;
+                var self = Kind$Parser$text$("chain(", $2594, $2595);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2605 = self.idx;
-                        var $2606 = self.code;
-                        var $2607 = self.err;
-                        var $2608 = Parser$Reply$error$($2605, $2606, $2607);
-                        var $2604 = $2608;
+                        var $2598 = self.idx;
+                        var $2599 = self.code;
+                        var $2600 = self.err;
+                        var $2601 = Parser$Reply$error$($2598, $2599, $2600);
+                        var $2597 = $2601;
                         break;
                     case 'Parser.Reply.value':
-                        var $2609 = self.idx;
-                        var $2610 = self.code;
-                        var self = Kind$Parser$term$($2609, $2610);
+                        var $2602 = self.idx;
+                        var $2603 = self.code;
+                        var self = Kind$Parser$term$($2602, $2603);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2612 = self.idx;
-                                var $2613 = self.code;
-                                var $2614 = self.err;
-                                var $2615 = Parser$Reply$error$($2612, $2613, $2614);
-                                var $2611 = $2615;
+                                var $2605 = self.idx;
+                                var $2606 = self.code;
+                                var $2607 = self.err;
+                                var $2608 = Parser$Reply$error$($2605, $2606, $2607);
+                                var $2604 = $2608;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2616 = self.idx;
-                                var $2617 = self.code;
-                                var $2618 = self.val;
-                                var self = Kind$Parser$text$(",", $2616, $2617);
+                                var $2609 = self.idx;
+                                var $2610 = self.code;
+                                var $2611 = self.val;
+                                var self = Kind$Parser$text$(",", $2609, $2610);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2620 = self.idx;
-                                        var $2621 = self.code;
-                                        var $2622 = self.err;
-                                        var $2623 = Parser$Reply$error$($2620, $2621, $2622);
-                                        var $2619 = $2623;
+                                        var $2613 = self.idx;
+                                        var $2614 = self.code;
+                                        var $2615 = self.err;
+                                        var $2616 = Parser$Reply$error$($2613, $2614, $2615);
+                                        var $2612 = $2616;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2624 = self.idx;
-                                        var $2625 = self.code;
-                                        var self = Kind$Parser$term$($2624, $2625);
+                                        var $2617 = self.idx;
+                                        var $2618 = self.code;
+                                        var self = Kind$Parser$term$($2617, $2618);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2627 = self.idx;
-                                                var $2628 = self.code;
-                                                var $2629 = self.err;
-                                                var $2630 = Parser$Reply$error$($2627, $2628, $2629);
-                                                var $2626 = $2630;
+                                                var $2620 = self.idx;
+                                                var $2621 = self.code;
+                                                var $2622 = self.err;
+                                                var $2623 = Parser$Reply$error$($2620, $2621, $2622);
+                                                var $2619 = $2623;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2631 = self.idx;
-                                                var $2632 = self.code;
-                                                var $2633 = self.val;
-                                                var self = Kind$Parser$text$(")", $2631, $2632);
+                                                var $2624 = self.idx;
+                                                var $2625 = self.code;
+                                                var $2626 = self.val;
+                                                var self = Kind$Parser$text$(")", $2624, $2625);
                                                 switch (self._) {
                                                     case 'Parser.Reply.error':
-                                                        var $2635 = self.idx;
-                                                        var $2636 = self.code;
-                                                        var $2637 = self.err;
-                                                        var $2638 = Parser$Reply$error$($2635, $2636, $2637);
-                                                        var $2634 = $2638;
+                                                        var $2628 = self.idx;
+                                                        var $2629 = self.code;
+                                                        var $2630 = self.err;
+                                                        var $2631 = Parser$Reply$error$($2628, $2629, $2630);
+                                                        var $2627 = $2631;
                                                         break;
                                                     case 'Parser.Reply.value':
-                                                        var $2639 = self.idx;
-                                                        var $2640 = self.code;
-                                                        var self = Kind$Parser$stop$($2603, $2639, $2640);
+                                                        var $2632 = self.idx;
+                                                        var $2633 = self.code;
+                                                        var self = Kind$Parser$stop$($2596, $2632, $2633);
                                                         switch (self._) {
                                                             case 'Parser.Reply.error':
-                                                                var $2642 = self.idx;
-                                                                var $2643 = self.code;
-                                                                var $2644 = self.err;
-                                                                var $2645 = Parser$Reply$error$($2642, $2643, $2644);
-                                                                var $2641 = $2645;
+                                                                var $2635 = self.idx;
+                                                                var $2636 = self.code;
+                                                                var $2637 = self.err;
+                                                                var $2638 = Parser$Reply$error$($2635, $2636, $2637);
+                                                                var $2634 = $2638;
                                                                 break;
                                                             case 'Parser.Reply.value':
-                                                                var $2646 = self.idx;
-                                                                var $2647 = self.code;
-                                                                var $2648 = self.val;
+                                                                var $2639 = self.idx;
+                                                                var $2640 = self.code;
+                                                                var $2641 = self.val;
                                                                 var _term$24 = Kind$Term$ref$("Equal.chain");
                                                                 var _term$25 = Kind$Term$app$(_term$24, Kind$Term$hol$(Bits$e));
                                                                 var _term$26 = Kind$Term$app$(_term$25, Kind$Term$hol$(Bits$e));
                                                                 var _term$27 = Kind$Term$app$(_term$26, Kind$Term$hol$(Bits$e));
                                                                 var _term$28 = Kind$Term$app$(_term$27, Kind$Term$hol$(Bits$e));
-                                                                var _term$29 = Kind$Term$app$(_term$28, $2618);
-                                                                var _term$30 = Kind$Term$app$(_term$29, $2633);
-                                                                var $2649 = Parser$Reply$value$($2646, $2647, Kind$Term$ori$($2648, _term$30));
-                                                                var $2641 = $2649;
+                                                                var _term$29 = Kind$Term$app$(_term$28, $2611);
+                                                                var _term$30 = Kind$Term$app$(_term$29, $2626);
+                                                                var $2642 = Parser$Reply$value$($2639, $2640, Kind$Term$ori$($2641, _term$30));
+                                                                var $2634 = $2642;
                                                                 break;
                                                         };
-                                                        var $2634 = $2641;
+                                                        var $2627 = $2634;
                                                         break;
                                                 };
-                                                var $2626 = $2634;
+                                                var $2619 = $2627;
                                                 break;
                                         };
-                                        var $2619 = $2626;
+                                        var $2612 = $2619;
                                         break;
                                 };
-                                var $2611 = $2619;
+                                var $2604 = $2612;
                                 break;
                         };
-                        var $2604 = $2611;
+                        var $2597 = $2604;
                         break;
                 };
-                var $2596 = $2604;
+                var $2589 = $2597;
                 break;
         };
-        return $2596;
+        return $2589;
     };
     const Kind$Parser$chain = x0 => x1 => Kind$Parser$chain$(x0, x1);
 
@@ -6951,94 +6936,94 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2651 = self.idx;
-                var $2652 = self.code;
-                var $2653 = self.err;
-                var $2654 = Parser$Reply$error$($2651, $2652, $2653);
-                var $2650 = $2654;
+                var $2644 = self.idx;
+                var $2645 = self.code;
+                var $2646 = self.err;
+                var $2647 = Parser$Reply$error$($2644, $2645, $2646);
+                var $2643 = $2647;
                 break;
             case 'Parser.Reply.value':
-                var $2655 = self.idx;
-                var $2656 = self.code;
-                var $2657 = self.val;
-                var self = Kind$Parser$text$("mirror(", $2655, $2656);
+                var $2648 = self.idx;
+                var $2649 = self.code;
+                var $2650 = self.val;
+                var self = Kind$Parser$text$("mirror(", $2648, $2649);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2659 = self.idx;
-                        var $2660 = self.code;
-                        var $2661 = self.err;
-                        var $2662 = Parser$Reply$error$($2659, $2660, $2661);
-                        var $2658 = $2662;
+                        var $2652 = self.idx;
+                        var $2653 = self.code;
+                        var $2654 = self.err;
+                        var $2655 = Parser$Reply$error$($2652, $2653, $2654);
+                        var $2651 = $2655;
                         break;
                     case 'Parser.Reply.value':
-                        var $2663 = self.idx;
-                        var $2664 = self.code;
-                        var self = Kind$Parser$term$($2663, $2664);
+                        var $2656 = self.idx;
+                        var $2657 = self.code;
+                        var self = Kind$Parser$term$($2656, $2657);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2666 = self.idx;
-                                var $2667 = self.code;
-                                var $2668 = self.err;
-                                var $2669 = Parser$Reply$error$($2666, $2667, $2668);
-                                var $2665 = $2669;
+                                var $2659 = self.idx;
+                                var $2660 = self.code;
+                                var $2661 = self.err;
+                                var $2662 = Parser$Reply$error$($2659, $2660, $2661);
+                                var $2658 = $2662;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2670 = self.idx;
-                                var $2671 = self.code;
-                                var $2672 = self.val;
-                                var self = Kind$Parser$text$(")", $2670, $2671);
+                                var $2663 = self.idx;
+                                var $2664 = self.code;
+                                var $2665 = self.val;
+                                var self = Kind$Parser$text$(")", $2663, $2664);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2674 = self.idx;
-                                        var $2675 = self.code;
-                                        var $2676 = self.err;
-                                        var $2677 = Parser$Reply$error$($2674, $2675, $2676);
-                                        var $2673 = $2677;
+                                        var $2667 = self.idx;
+                                        var $2668 = self.code;
+                                        var $2669 = self.err;
+                                        var $2670 = Parser$Reply$error$($2667, $2668, $2669);
+                                        var $2666 = $2670;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2678 = self.idx;
-                                        var $2679 = self.code;
-                                        var self = Kind$Parser$stop$($2657, $2678, $2679);
+                                        var $2671 = self.idx;
+                                        var $2672 = self.code;
+                                        var self = Kind$Parser$stop$($2650, $2671, $2672);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2681 = self.idx;
-                                                var $2682 = self.code;
-                                                var $2683 = self.err;
-                                                var $2684 = Parser$Reply$error$($2681, $2682, $2683);
-                                                var $2680 = $2684;
+                                                var $2674 = self.idx;
+                                                var $2675 = self.code;
+                                                var $2676 = self.err;
+                                                var $2677 = Parser$Reply$error$($2674, $2675, $2676);
+                                                var $2673 = $2677;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2685 = self.idx;
-                                                var $2686 = self.code;
-                                                var $2687 = self.val;
+                                                var $2678 = self.idx;
+                                                var $2679 = self.code;
+                                                var $2680 = self.val;
                                                 var _term$18 = Kind$Term$ref$("Equal.mirror");
                                                 var _term$19 = Kind$Term$app$(_term$18, Kind$Term$hol$(Bits$e));
                                                 var _term$20 = Kind$Term$app$(_term$19, Kind$Term$hol$(Bits$e));
                                                 var _term$21 = Kind$Term$app$(_term$20, Kind$Term$hol$(Bits$e));
-                                                var _term$22 = Kind$Term$app$(_term$21, $2672);
-                                                var $2688 = Parser$Reply$value$($2685, $2686, Kind$Term$ori$($2687, _term$22));
-                                                var $2680 = $2688;
+                                                var _term$22 = Kind$Term$app$(_term$21, $2665);
+                                                var $2681 = Parser$Reply$value$($2678, $2679, Kind$Term$ori$($2680, _term$22));
+                                                var $2673 = $2681;
                                                 break;
                                         };
-                                        var $2673 = $2680;
+                                        var $2666 = $2673;
                                         break;
                                 };
-                                var $2665 = $2673;
+                                var $2658 = $2666;
                                 break;
                         };
-                        var $2658 = $2665;
+                        var $2651 = $2658;
                         break;
                 };
-                var $2650 = $2658;
+                var $2643 = $2651;
                 break;
         };
-        return $2650;
+        return $2643;
     };
     const Kind$Parser$mirror = x0 => x1 => Kind$Parser$mirror$(x0, x1);
 
     function Kind$Name$read$(_str$1) {
-        var $2689 = _str$1;
-        return $2689;
+        var $2682 = _str$1;
+        return $2682;
     };
     const Kind$Name$read = x0 => Kind$Name$read$(x0);
 
@@ -7046,75 +7031,75 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2691 = self.idx;
-                var $2692 = self.code;
-                var $2693 = self.err;
-                var $2694 = Parser$Reply$error$($2691, $2692, $2693);
-                var $2690 = $2694;
+                var $2684 = self.idx;
+                var $2685 = self.code;
+                var $2686 = self.err;
+                var $2687 = Parser$Reply$error$($2684, $2685, $2686);
+                var $2683 = $2687;
                 break;
             case 'Parser.Reply.value':
-                var $2695 = self.idx;
-                var $2696 = self.code;
-                var $2697 = self.val;
-                var self = Kind$Parser$text$("[", $2695, $2696);
+                var $2688 = self.idx;
+                var $2689 = self.code;
+                var $2690 = self.val;
+                var self = Kind$Parser$text$("[", $2688, $2689);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2699 = self.idx;
-                        var $2700 = self.code;
-                        var $2701 = self.err;
-                        var $2702 = Parser$Reply$error$($2699, $2700, $2701);
-                        var $2698 = $2702;
+                        var $2692 = self.idx;
+                        var $2693 = self.code;
+                        var $2694 = self.err;
+                        var $2695 = Parser$Reply$error$($2692, $2693, $2694);
+                        var $2691 = $2695;
                         break;
                     case 'Parser.Reply.value':
-                        var $2703 = self.idx;
-                        var $2704 = self.code;
-                        var self = Parser$until$(Kind$Parser$text("]"), Kind$Parser$item(Kind$Parser$term))($2703)($2704);
+                        var $2696 = self.idx;
+                        var $2697 = self.code;
+                        var self = Parser$until$(Kind$Parser$text("]"), Kind$Parser$item(Kind$Parser$term))($2696)($2697);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2706 = self.idx;
-                                var $2707 = self.code;
-                                var $2708 = self.err;
-                                var $2709 = Parser$Reply$error$($2706, $2707, $2708);
-                                var $2705 = $2709;
+                                var $2699 = self.idx;
+                                var $2700 = self.code;
+                                var $2701 = self.err;
+                                var $2702 = Parser$Reply$error$($2699, $2700, $2701);
+                                var $2698 = $2702;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2710 = self.idx;
-                                var $2711 = self.code;
-                                var $2712 = self.val;
-                                var self = Kind$Parser$stop$($2697, $2710, $2711);
+                                var $2703 = self.idx;
+                                var $2704 = self.code;
+                                var $2705 = self.val;
+                                var self = Kind$Parser$stop$($2690, $2703, $2704);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2714 = self.idx;
-                                        var $2715 = self.code;
-                                        var $2716 = self.err;
-                                        var $2717 = Parser$Reply$error$($2714, $2715, $2716);
-                                        var $2713 = $2717;
+                                        var $2707 = self.idx;
+                                        var $2708 = self.code;
+                                        var $2709 = self.err;
+                                        var $2710 = Parser$Reply$error$($2707, $2708, $2709);
+                                        var $2706 = $2710;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2718 = self.idx;
-                                        var $2719 = self.code;
-                                        var $2720 = self.val;
-                                        var $2721 = Parser$Reply$value$($2718, $2719, List$fold$($2712, Kind$Term$app$(Kind$Term$ref$(Kind$Name$read$("List.nil")), Kind$Term$hol$(Bits$e)), (_x$15 => _xs$16 => {
+                                        var $2711 = self.idx;
+                                        var $2712 = self.code;
+                                        var $2713 = self.val;
+                                        var $2714 = Parser$Reply$value$($2711, $2712, List$fold$($2705, Kind$Term$app$(Kind$Term$ref$(Kind$Name$read$("List.nil")), Kind$Term$hol$(Bits$e)), (_x$15 => _xs$16 => {
                                             var _term$17 = Kind$Term$ref$(Kind$Name$read$("List.cons"));
                                             var _term$18 = Kind$Term$app$(_term$17, Kind$Term$hol$(Bits$e));
                                             var _term$19 = Kind$Term$app$(_term$18, _x$15);
                                             var _term$20 = Kind$Term$app$(_term$19, _xs$16);
-                                            var $2722 = Kind$Term$ori$($2720, _term$20);
-                                            return $2722;
+                                            var $2715 = Kind$Term$ori$($2713, _term$20);
+                                            return $2715;
                                         })));
-                                        var $2713 = $2721;
+                                        var $2706 = $2714;
                                         break;
                                 };
-                                var $2705 = $2713;
+                                var $2698 = $2706;
                                 break;
                         };
-                        var $2698 = $2705;
+                        var $2691 = $2698;
                         break;
                 };
-                var $2690 = $2698;
+                var $2683 = $2691;
                 break;
         };
-        return $2690;
+        return $2683;
     };
     const Kind$Parser$list = x0 => x1 => Kind$Parser$list$(x0, x1);
 
@@ -7122,142 +7107,142 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2724 = self.idx;
-                var $2725 = self.code;
-                var $2726 = self.err;
-                var $2727 = Parser$Reply$error$($2724, $2725, $2726);
-                var $2723 = $2727;
+                var $2717 = self.idx;
+                var $2718 = self.code;
+                var $2719 = self.err;
+                var $2720 = Parser$Reply$error$($2717, $2718, $2719);
+                var $2716 = $2720;
                 break;
             case 'Parser.Reply.value':
-                var $2728 = self.idx;
-                var $2729 = self.code;
-                var $2730 = self.val;
-                var self = Kind$Parser$text$("{", $2728, $2729);
+                var $2721 = self.idx;
+                var $2722 = self.code;
+                var $2723 = self.val;
+                var self = Kind$Parser$text$("{", $2721, $2722);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2732 = self.idx;
-                        var $2733 = self.code;
-                        var $2734 = self.err;
-                        var $2735 = Parser$Reply$error$($2732, $2733, $2734);
-                        var $2731 = $2735;
+                        var $2725 = self.idx;
+                        var $2726 = self.code;
+                        var $2727 = self.err;
+                        var $2728 = Parser$Reply$error$($2725, $2726, $2727);
+                        var $2724 = $2728;
                         break;
                     case 'Parser.Reply.value':
-                        var $2736 = self.idx;
-                        var $2737 = self.code;
+                        var $2729 = self.idx;
+                        var $2730 = self.code;
                         var self = Parser$until$(Kind$Parser$text("}"), Kind$Parser$item((_idx$9 => _code$10 => {
                             var self = Kind$Parser$term$(_idx$9, _code$10);
                             switch (self._) {
                                 case 'Parser.Reply.error':
-                                    var $2740 = self.idx;
-                                    var $2741 = self.code;
-                                    var $2742 = self.err;
-                                    var $2743 = Parser$Reply$error$($2740, $2741, $2742);
-                                    var $2739 = $2743;
+                                    var $2733 = self.idx;
+                                    var $2734 = self.code;
+                                    var $2735 = self.err;
+                                    var $2736 = Parser$Reply$error$($2733, $2734, $2735);
+                                    var $2732 = $2736;
                                     break;
                                 case 'Parser.Reply.value':
-                                    var $2744 = self.idx;
-                                    var $2745 = self.code;
-                                    var $2746 = self.val;
-                                    var self = Kind$Parser$text$(":", $2744, $2745);
+                                    var $2737 = self.idx;
+                                    var $2738 = self.code;
+                                    var $2739 = self.val;
+                                    var self = Kind$Parser$text$(":", $2737, $2738);
                                     switch (self._) {
                                         case 'Parser.Reply.error':
-                                            var $2748 = self.idx;
-                                            var $2749 = self.code;
-                                            var $2750 = self.err;
-                                            var $2751 = Parser$Reply$error$($2748, $2749, $2750);
-                                            var $2747 = $2751;
+                                            var $2741 = self.idx;
+                                            var $2742 = self.code;
+                                            var $2743 = self.err;
+                                            var $2744 = Parser$Reply$error$($2741, $2742, $2743);
+                                            var $2740 = $2744;
                                             break;
                                         case 'Parser.Reply.value':
-                                            var $2752 = self.idx;
-                                            var $2753 = self.code;
-                                            var self = Kind$Parser$term$($2752, $2753);
+                                            var $2745 = self.idx;
+                                            var $2746 = self.code;
+                                            var self = Kind$Parser$term$($2745, $2746);
                                             switch (self._) {
                                                 case 'Parser.Reply.error':
-                                                    var $2755 = self.idx;
-                                                    var $2756 = self.code;
-                                                    var $2757 = self.err;
-                                                    var $2758 = Parser$Reply$error$($2755, $2756, $2757);
-                                                    var $2754 = $2758;
+                                                    var $2748 = self.idx;
+                                                    var $2749 = self.code;
+                                                    var $2750 = self.err;
+                                                    var $2751 = Parser$Reply$error$($2748, $2749, $2750);
+                                                    var $2747 = $2751;
                                                     break;
                                                 case 'Parser.Reply.value':
-                                                    var $2759 = self.idx;
-                                                    var $2760 = self.code;
-                                                    var $2761 = self.val;
-                                                    var $2762 = Parser$Reply$value$($2759, $2760, Pair$new$($2746, $2761));
-                                                    var $2754 = $2762;
+                                                    var $2752 = self.idx;
+                                                    var $2753 = self.code;
+                                                    var $2754 = self.val;
+                                                    var $2755 = Parser$Reply$value$($2752, $2753, Pair$new$($2739, $2754));
+                                                    var $2747 = $2755;
                                                     break;
                                             };
-                                            var $2747 = $2754;
+                                            var $2740 = $2747;
                                             break;
                                     };
-                                    var $2739 = $2747;
+                                    var $2732 = $2740;
                                     break;
                             };
-                            return $2739;
-                        })))($2736)($2737);
+                            return $2732;
+                        })))($2729)($2730);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2763 = self.idx;
-                                var $2764 = self.code;
-                                var $2765 = self.err;
-                                var $2766 = Parser$Reply$error$($2763, $2764, $2765);
-                                var $2738 = $2766;
+                                var $2756 = self.idx;
+                                var $2757 = self.code;
+                                var $2758 = self.err;
+                                var $2759 = Parser$Reply$error$($2756, $2757, $2758);
+                                var $2731 = $2759;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2767 = self.idx;
-                                var $2768 = self.code;
-                                var $2769 = self.val;
-                                var self = Kind$Parser$stop$($2730, $2767, $2768);
+                                var $2760 = self.idx;
+                                var $2761 = self.code;
+                                var $2762 = self.val;
+                                var self = Kind$Parser$stop$($2723, $2760, $2761);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2771 = self.idx;
-                                        var $2772 = self.code;
-                                        var $2773 = self.err;
-                                        var $2774 = Parser$Reply$error$($2771, $2772, $2773);
-                                        var $2770 = $2774;
+                                        var $2764 = self.idx;
+                                        var $2765 = self.code;
+                                        var $2766 = self.err;
+                                        var $2767 = Parser$Reply$error$($2764, $2765, $2766);
+                                        var $2763 = $2767;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2775 = self.idx;
-                                        var $2776 = self.code;
-                                        var $2777 = self.val;
-                                        var _list$15 = List$fold$($2769, Kind$Term$app$(Kind$Term$ref$("List.nil"), Kind$Term$hol$(Bits$e)), (_kv$15 => _xs$16 => {
+                                        var $2768 = self.idx;
+                                        var $2769 = self.code;
+                                        var $2770 = self.val;
+                                        var _list$15 = List$fold$($2762, Kind$Term$app$(Kind$Term$ref$("List.nil"), Kind$Term$hol$(Bits$e)), (_kv$15 => _xs$16 => {
                                             var self = _kv$15;
                                             switch (self._) {
                                                 case 'Pair.new':
-                                                    var $2780 = self.fst;
-                                                    var $2781 = self.snd;
+                                                    var $2773 = self.fst;
+                                                    var $2774 = self.snd;
                                                     var _pair$19 = Kind$Term$ref$("Pair.new");
                                                     var _pair$20 = Kind$Term$app$(_pair$19, Kind$Term$hol$(Bits$e));
                                                     var _pair$21 = Kind$Term$app$(_pair$20, Kind$Term$hol$(Bits$e));
-                                                    var _pair$22 = Kind$Term$app$(_pair$21, $2780);
-                                                    var _pair$23 = Kind$Term$app$(_pair$22, $2781);
+                                                    var _pair$22 = Kind$Term$app$(_pair$21, $2773);
+                                                    var _pair$23 = Kind$Term$app$(_pair$22, $2774);
                                                     var _term$24 = Kind$Term$ref$("List.cons");
                                                     var _term$25 = Kind$Term$app$(_term$24, Kind$Term$hol$(Bits$e));
                                                     var _term$26 = Kind$Term$app$(_term$25, _pair$23);
                                                     var _term$27 = Kind$Term$app$(_term$26, _xs$16);
-                                                    var $2782 = Kind$Term$ori$($2777, _term$27);
-                                                    var $2779 = $2782;
+                                                    var $2775 = Kind$Term$ori$($2770, _term$27);
+                                                    var $2772 = $2775;
                                                     break;
                                             };
-                                            return $2779;
+                                            return $2772;
                                         }));
                                         var _term$16 = Kind$Term$ref$("Map.from_list");
                                         var _term$17 = Kind$Term$app$(_term$16, Kind$Term$hol$(Bits$e));
                                         var _term$18 = Kind$Term$app$(_term$17, _list$15);
-                                        var $2778 = Parser$Reply$value$($2775, $2776, Kind$Term$ori$($2777, _term$18));
-                                        var $2770 = $2778;
+                                        var $2771 = Parser$Reply$value$($2768, $2769, Kind$Term$ori$($2770, _term$18));
+                                        var $2763 = $2771;
                                         break;
                                 };
-                                var $2738 = $2770;
+                                var $2731 = $2763;
                                 break;
                         };
-                        var $2731 = $2738;
+                        var $2724 = $2731;
                         break;
                 };
-                var $2723 = $2731;
+                var $2716 = $2724;
                 break;
         };
-        return $2723;
+        return $2716;
     };
     const Kind$Parser$map = x0 => x1 => Kind$Parser$map$(x0, x1);
 
@@ -7265,582 +7250,582 @@ module.exports = (function() {
         var self = Kind$Parser$init$(_idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $2784 = self.idx;
-                var $2785 = self.code;
-                var $2786 = self.err;
-                var $2787 = Parser$Reply$error$($2784, $2785, $2786);
-                var $2783 = $2787;
+                var $2777 = self.idx;
+                var $2778 = self.code;
+                var $2779 = self.err;
+                var $2780 = Parser$Reply$error$($2777, $2778, $2779);
+                var $2776 = $2780;
                 break;
             case 'Parser.Reply.value':
-                var $2788 = self.idx;
-                var $2789 = self.code;
-                var $2790 = self.val;
-                var self = Kind$Parser$text$("log(", $2788, $2789);
+                var $2781 = self.idx;
+                var $2782 = self.code;
+                var $2783 = self.val;
+                var self = Kind$Parser$text$("log(", $2781, $2782);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $2792 = self.idx;
-                        var $2793 = self.code;
-                        var $2794 = self.err;
-                        var $2795 = Parser$Reply$error$($2792, $2793, $2794);
-                        var $2791 = $2795;
+                        var $2785 = self.idx;
+                        var $2786 = self.code;
+                        var $2787 = self.err;
+                        var $2788 = Parser$Reply$error$($2785, $2786, $2787);
+                        var $2784 = $2788;
                         break;
                     case 'Parser.Reply.value':
-                        var $2796 = self.idx;
-                        var $2797 = self.code;
-                        var self = Parser$until$(Kind$Parser$text(")"), Kind$Parser$item(Kind$Parser$term))($2796)($2797);
+                        var $2789 = self.idx;
+                        var $2790 = self.code;
+                        var self = Parser$until$(Kind$Parser$text(")"), Kind$Parser$item(Kind$Parser$term))($2789)($2790);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $2799 = self.idx;
-                                var $2800 = self.code;
-                                var $2801 = self.err;
-                                var $2802 = Parser$Reply$error$($2799, $2800, $2801);
-                                var $2798 = $2802;
+                                var $2792 = self.idx;
+                                var $2793 = self.code;
+                                var $2794 = self.err;
+                                var $2795 = Parser$Reply$error$($2792, $2793, $2794);
+                                var $2791 = $2795;
                                 break;
                             case 'Parser.Reply.value':
-                                var $2803 = self.idx;
-                                var $2804 = self.code;
-                                var $2805 = self.val;
-                                var self = Kind$Parser$term$($2803, $2804);
+                                var $2796 = self.idx;
+                                var $2797 = self.code;
+                                var $2798 = self.val;
+                                var self = Kind$Parser$term$($2796, $2797);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $2807 = self.idx;
-                                        var $2808 = self.code;
-                                        var $2809 = self.err;
-                                        var $2810 = Parser$Reply$error$($2807, $2808, $2809);
-                                        var $2806 = $2810;
+                                        var $2800 = self.idx;
+                                        var $2801 = self.code;
+                                        var $2802 = self.err;
+                                        var $2803 = Parser$Reply$error$($2800, $2801, $2802);
+                                        var $2799 = $2803;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $2811 = self.idx;
-                                        var $2812 = self.code;
-                                        var $2813 = self.val;
+                                        var $2804 = self.idx;
+                                        var $2805 = self.code;
+                                        var $2806 = self.val;
                                         var _term$15 = Kind$Term$ref$("Debug.log");
                                         var _term$16 = Kind$Term$app$(_term$15, Kind$Term$hol$(Bits$e));
-                                        var _args$17 = List$fold$($2805, Kind$Term$ref$("String.nil"), (_x$17 => _xs$18 => {
+                                        var _args$17 = List$fold$($2798, Kind$Term$ref$("String.nil"), (_x$17 => _xs$18 => {
                                             var _arg$19 = Kind$Term$ref$("String.concat");
                                             var _arg$20 = Kind$Term$app$(_arg$19, _x$17);
                                             var _arg$21 = Kind$Term$app$(_arg$20, _xs$18);
-                                            var $2815 = _arg$21;
-                                            return $2815;
+                                            var $2808 = _arg$21;
+                                            return $2808;
                                         }));
                                         var _term$18 = Kind$Term$app$(_term$16, _args$17);
                                         var _term$19 = Kind$Term$app$(_term$18, Kind$Term$lam$("x", (_x$19 => {
-                                            var $2816 = $2813;
-                                            return $2816;
+                                            var $2809 = $2806;
+                                            return $2809;
                                         })));
-                                        var self = Kind$Parser$stop$($2790, $2811, $2812);
+                                        var self = Kind$Parser$stop$($2783, $2804, $2805);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $2817 = self.idx;
-                                                var $2818 = self.code;
-                                                var $2819 = self.err;
-                                                var $2820 = Parser$Reply$error$($2817, $2818, $2819);
-                                                var $2814 = $2820;
+                                                var $2810 = self.idx;
+                                                var $2811 = self.code;
+                                                var $2812 = self.err;
+                                                var $2813 = Parser$Reply$error$($2810, $2811, $2812);
+                                                var $2807 = $2813;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $2821 = self.idx;
-                                                var $2822 = self.code;
-                                                var $2823 = self.val;
-                                                var $2824 = Parser$Reply$value$($2821, $2822, Kind$Term$ori$($2823, _term$19));
-                                                var $2814 = $2824;
+                                                var $2814 = self.idx;
+                                                var $2815 = self.code;
+                                                var $2816 = self.val;
+                                                var $2817 = Parser$Reply$value$($2814, $2815, Kind$Term$ori$($2816, _term$19));
+                                                var $2807 = $2817;
                                                 break;
                                         };
-                                        var $2806 = $2814;
+                                        var $2799 = $2807;
                                         break;
                                 };
-                                var $2798 = $2806;
+                                var $2791 = $2799;
                                 break;
                         };
-                        var $2791 = $2798;
+                        var $2784 = $2791;
                         break;
                 };
-                var $2783 = $2791;
+                var $2776 = $2784;
                 break;
         };
-        return $2783;
+        return $2776;
     };
     const Kind$Parser$log = x0 => x1 => Kind$Parser$log$(x0, x1);
 
     function Kind$Parser$do$statements$(_monad_name$1) {
-        var $2825 = Parser$first_of$(List$cons$((_idx$2 => _code$3 => {
+        var $2818 = Parser$first_of$(List$cons$((_idx$2 => _code$3 => {
             var self = Kind$Parser$init$(_idx$2, _code$3);
             switch (self._) {
                 case 'Parser.Reply.error':
-                    var $2827 = self.idx;
-                    var $2828 = self.code;
-                    var $2829 = self.err;
-                    var $2830 = Parser$Reply$error$($2827, $2828, $2829);
-                    var $2826 = $2830;
+                    var $2820 = self.idx;
+                    var $2821 = self.code;
+                    var $2822 = self.err;
+                    var $2823 = Parser$Reply$error$($2820, $2821, $2822);
+                    var $2819 = $2823;
                     break;
                 case 'Parser.Reply.value':
-                    var $2831 = self.idx;
-                    var $2832 = self.code;
-                    var $2833 = self.val;
-                    var self = Parser$first_of$(List$cons$(Kind$Parser$text("var "), List$cons$(Kind$Parser$text("get "), List$nil)))($2831)($2832);
+                    var $2824 = self.idx;
+                    var $2825 = self.code;
+                    var $2826 = self.val;
+                    var self = Parser$first_of$(List$cons$(Kind$Parser$text("var "), List$cons$(Kind$Parser$text("get "), List$nil)))($2824)($2825);
                     switch (self._) {
                         case 'Parser.Reply.error':
-                            var $2835 = self.idx;
-                            var $2836 = self.code;
-                            var $2837 = self.err;
-                            var $2838 = Parser$Reply$error$($2835, $2836, $2837);
-                            var $2834 = $2838;
+                            var $2828 = self.idx;
+                            var $2829 = self.code;
+                            var $2830 = self.err;
+                            var $2831 = Parser$Reply$error$($2828, $2829, $2830);
+                            var $2827 = $2831;
                             break;
                         case 'Parser.Reply.value':
-                            var $2839 = self.idx;
-                            var $2840 = self.code;
-                            var self = Kind$Parser$name1$($2839, $2840);
+                            var $2832 = self.idx;
+                            var $2833 = self.code;
+                            var self = Kind$Parser$name1$($2832, $2833);
                             switch (self._) {
                                 case 'Parser.Reply.error':
-                                    var $2842 = self.idx;
-                                    var $2843 = self.code;
-                                    var $2844 = self.err;
-                                    var $2845 = Parser$Reply$error$($2842, $2843, $2844);
-                                    var $2841 = $2845;
+                                    var $2835 = self.idx;
+                                    var $2836 = self.code;
+                                    var $2837 = self.err;
+                                    var $2838 = Parser$Reply$error$($2835, $2836, $2837);
+                                    var $2834 = $2838;
                                     break;
                                 case 'Parser.Reply.value':
-                                    var $2846 = self.idx;
-                                    var $2847 = self.code;
-                                    var $2848 = self.val;
-                                    var self = Kind$Parser$text$("=", $2846, $2847);
+                                    var $2839 = self.idx;
+                                    var $2840 = self.code;
+                                    var $2841 = self.val;
+                                    var self = Kind$Parser$text$("=", $2839, $2840);
                                     switch (self._) {
                                         case 'Parser.Reply.error':
-                                            var $2850 = self.idx;
-                                            var $2851 = self.code;
-                                            var $2852 = self.err;
-                                            var $2853 = Parser$Reply$error$($2850, $2851, $2852);
-                                            var $2849 = $2853;
+                                            var $2843 = self.idx;
+                                            var $2844 = self.code;
+                                            var $2845 = self.err;
+                                            var $2846 = Parser$Reply$error$($2843, $2844, $2845);
+                                            var $2842 = $2846;
                                             break;
                                         case 'Parser.Reply.value':
-                                            var $2854 = self.idx;
-                                            var $2855 = self.code;
-                                            var self = Kind$Parser$term$($2854, $2855);
+                                            var $2847 = self.idx;
+                                            var $2848 = self.code;
+                                            var self = Kind$Parser$term$($2847, $2848);
                                             switch (self._) {
                                                 case 'Parser.Reply.error':
-                                                    var $2857 = self.idx;
-                                                    var $2858 = self.code;
-                                                    var $2859 = self.err;
-                                                    var $2860 = Parser$Reply$error$($2857, $2858, $2859);
-                                                    var $2856 = $2860;
+                                                    var $2850 = self.idx;
+                                                    var $2851 = self.code;
+                                                    var $2852 = self.err;
+                                                    var $2853 = Parser$Reply$error$($2850, $2851, $2852);
+                                                    var $2849 = $2853;
                                                     break;
                                                 case 'Parser.Reply.value':
-                                                    var $2861 = self.idx;
-                                                    var $2862 = self.code;
-                                                    var $2863 = self.val;
-                                                    var self = Parser$maybe$(Kind$Parser$text(";"), $2861, $2862);
+                                                    var $2854 = self.idx;
+                                                    var $2855 = self.code;
+                                                    var $2856 = self.val;
+                                                    var self = Parser$maybe$(Kind$Parser$text(";"), $2854, $2855);
                                                     switch (self._) {
                                                         case 'Parser.Reply.error':
-                                                            var $2865 = self.idx;
-                                                            var $2866 = self.code;
-                                                            var $2867 = self.err;
-                                                            var $2868 = Parser$Reply$error$($2865, $2866, $2867);
-                                                            var $2864 = $2868;
+                                                            var $2858 = self.idx;
+                                                            var $2859 = self.code;
+                                                            var $2860 = self.err;
+                                                            var $2861 = Parser$Reply$error$($2858, $2859, $2860);
+                                                            var $2857 = $2861;
                                                             break;
                                                         case 'Parser.Reply.value':
-                                                            var $2869 = self.idx;
-                                                            var $2870 = self.code;
-                                                            var self = Kind$Parser$do$statements$(_monad_name$1)($2869)($2870);
+                                                            var $2862 = self.idx;
+                                                            var $2863 = self.code;
+                                                            var self = Kind$Parser$do$statements$(_monad_name$1)($2862)($2863);
                                                             switch (self._) {
                                                                 case 'Parser.Reply.error':
-                                                                    var $2872 = self.idx;
-                                                                    var $2873 = self.code;
-                                                                    var $2874 = self.err;
-                                                                    var $2875 = Parser$Reply$error$($2872, $2873, $2874);
-                                                                    var $2871 = $2875;
+                                                                    var $2865 = self.idx;
+                                                                    var $2866 = self.code;
+                                                                    var $2867 = self.err;
+                                                                    var $2868 = Parser$Reply$error$($2865, $2866, $2867);
+                                                                    var $2864 = $2868;
                                                                     break;
                                                                 case 'Parser.Reply.value':
-                                                                    var $2876 = self.idx;
-                                                                    var $2877 = self.code;
-                                                                    var $2878 = self.val;
-                                                                    var self = Kind$Parser$stop$($2833, $2876, $2877);
+                                                                    var $2869 = self.idx;
+                                                                    var $2870 = self.code;
+                                                                    var $2871 = self.val;
+                                                                    var self = Kind$Parser$stop$($2826, $2869, $2870);
                                                                     switch (self._) {
                                                                         case 'Parser.Reply.error':
-                                                                            var $2880 = self.idx;
-                                                                            var $2881 = self.code;
-                                                                            var $2882 = self.err;
-                                                                            var $2883 = Parser$Reply$error$($2880, $2881, $2882);
-                                                                            var $2879 = $2883;
+                                                                            var $2873 = self.idx;
+                                                                            var $2874 = self.code;
+                                                                            var $2875 = self.err;
+                                                                            var $2876 = Parser$Reply$error$($2873, $2874, $2875);
+                                                                            var $2872 = $2876;
                                                                             break;
                                                                         case 'Parser.Reply.value':
-                                                                            var $2884 = self.idx;
-                                                                            var $2885 = self.code;
-                                                                            var $2886 = self.val;
+                                                                            var $2877 = self.idx;
+                                                                            var $2878 = self.code;
+                                                                            var $2879 = self.val;
                                                                             var _term$28 = Kind$Term$app$(Kind$Term$ref$("Monad.bind"), Kind$Term$ref$(_monad_name$1));
                                                                             var _term$29 = Kind$Term$app$(_term$28, Kind$Term$ref$((_monad_name$1 + ".monad")));
                                                                             var _term$30 = Kind$Term$app$(_term$29, Kind$Term$hol$(Bits$e));
                                                                             var _term$31 = Kind$Term$app$(_term$30, Kind$Term$hol$(Bits$e));
-                                                                            var _term$32 = Kind$Term$app$(_term$31, $2863);
-                                                                            var _term$33 = Kind$Term$app$(_term$32, Kind$Term$lam$($2848, (_x$33 => {
-                                                                                var $2888 = $2878;
-                                                                                return $2888;
+                                                                            var _term$32 = Kind$Term$app$(_term$31, $2856);
+                                                                            var _term$33 = Kind$Term$app$(_term$32, Kind$Term$lam$($2841, (_x$33 => {
+                                                                                var $2881 = $2871;
+                                                                                return $2881;
                                                                             })));
-                                                                            var $2887 = Parser$Reply$value$($2884, $2885, Kind$Term$ori$($2886, _term$33));
-                                                                            var $2879 = $2887;
+                                                                            var $2880 = Parser$Reply$value$($2877, $2878, Kind$Term$ori$($2879, _term$33));
+                                                                            var $2872 = $2880;
                                                                             break;
                                                                     };
-                                                                    var $2871 = $2879;
+                                                                    var $2864 = $2872;
                                                                     break;
                                                             };
-                                                            var $2864 = $2871;
+                                                            var $2857 = $2864;
                                                             break;
                                                     };
-                                                    var $2856 = $2864;
+                                                    var $2849 = $2857;
                                                     break;
                                             };
-                                            var $2849 = $2856;
+                                            var $2842 = $2849;
                                             break;
                                     };
-                                    var $2841 = $2849;
+                                    var $2834 = $2842;
                                     break;
                             };
-                            var $2834 = $2841;
+                            var $2827 = $2834;
                             break;
                     };
-                    var $2826 = $2834;
+                    var $2819 = $2827;
                     break;
             };
-            return $2826;
+            return $2819;
         }), List$cons$((_idx$2 => _code$3 => {
             var self = Kind$Parser$init$(_idx$2, _code$3);
             switch (self._) {
                 case 'Parser.Reply.error':
-                    var $2890 = self.idx;
-                    var $2891 = self.code;
-                    var $2892 = self.err;
-                    var $2893 = Parser$Reply$error$($2890, $2891, $2892);
-                    var $2889 = $2893;
+                    var $2883 = self.idx;
+                    var $2884 = self.code;
+                    var $2885 = self.err;
+                    var $2886 = Parser$Reply$error$($2883, $2884, $2885);
+                    var $2882 = $2886;
                     break;
                 case 'Parser.Reply.value':
-                    var $2894 = self.idx;
-                    var $2895 = self.code;
-                    var $2896 = self.val;
-                    var self = Kind$Parser$text$("let ", $2894, $2895);
+                    var $2887 = self.idx;
+                    var $2888 = self.code;
+                    var $2889 = self.val;
+                    var self = Kind$Parser$text$("let ", $2887, $2888);
                     switch (self._) {
                         case 'Parser.Reply.error':
-                            var $2898 = self.idx;
-                            var $2899 = self.code;
-                            var $2900 = self.err;
-                            var $2901 = Parser$Reply$error$($2898, $2899, $2900);
-                            var $2897 = $2901;
+                            var $2891 = self.idx;
+                            var $2892 = self.code;
+                            var $2893 = self.err;
+                            var $2894 = Parser$Reply$error$($2891, $2892, $2893);
+                            var $2890 = $2894;
                             break;
                         case 'Parser.Reply.value':
-                            var $2902 = self.idx;
-                            var $2903 = self.code;
-                            var self = Kind$Parser$name1$($2902, $2903);
+                            var $2895 = self.idx;
+                            var $2896 = self.code;
+                            var self = Kind$Parser$name1$($2895, $2896);
                             switch (self._) {
                                 case 'Parser.Reply.error':
-                                    var $2905 = self.idx;
-                                    var $2906 = self.code;
-                                    var $2907 = self.err;
-                                    var $2908 = Parser$Reply$error$($2905, $2906, $2907);
-                                    var $2904 = $2908;
+                                    var $2898 = self.idx;
+                                    var $2899 = self.code;
+                                    var $2900 = self.err;
+                                    var $2901 = Parser$Reply$error$($2898, $2899, $2900);
+                                    var $2897 = $2901;
                                     break;
                                 case 'Parser.Reply.value':
-                                    var $2909 = self.idx;
-                                    var $2910 = self.code;
-                                    var $2911 = self.val;
-                                    var self = Kind$Parser$text$("=", $2909, $2910);
+                                    var $2902 = self.idx;
+                                    var $2903 = self.code;
+                                    var $2904 = self.val;
+                                    var self = Kind$Parser$text$("=", $2902, $2903);
                                     switch (self._) {
                                         case 'Parser.Reply.error':
-                                            var $2913 = self.idx;
-                                            var $2914 = self.code;
-                                            var $2915 = self.err;
-                                            var $2916 = Parser$Reply$error$($2913, $2914, $2915);
-                                            var $2912 = $2916;
+                                            var $2906 = self.idx;
+                                            var $2907 = self.code;
+                                            var $2908 = self.err;
+                                            var $2909 = Parser$Reply$error$($2906, $2907, $2908);
+                                            var $2905 = $2909;
                                             break;
                                         case 'Parser.Reply.value':
-                                            var $2917 = self.idx;
-                                            var $2918 = self.code;
-                                            var self = Kind$Parser$term$($2917, $2918);
+                                            var $2910 = self.idx;
+                                            var $2911 = self.code;
+                                            var self = Kind$Parser$term$($2910, $2911);
                                             switch (self._) {
                                                 case 'Parser.Reply.error':
-                                                    var $2920 = self.idx;
-                                                    var $2921 = self.code;
-                                                    var $2922 = self.err;
-                                                    var $2923 = Parser$Reply$error$($2920, $2921, $2922);
-                                                    var $2919 = $2923;
+                                                    var $2913 = self.idx;
+                                                    var $2914 = self.code;
+                                                    var $2915 = self.err;
+                                                    var $2916 = Parser$Reply$error$($2913, $2914, $2915);
+                                                    var $2912 = $2916;
                                                     break;
                                                 case 'Parser.Reply.value':
-                                                    var $2924 = self.idx;
-                                                    var $2925 = self.code;
-                                                    var $2926 = self.val;
-                                                    var self = Parser$maybe$(Kind$Parser$text(";"), $2924, $2925);
+                                                    var $2917 = self.idx;
+                                                    var $2918 = self.code;
+                                                    var $2919 = self.val;
+                                                    var self = Parser$maybe$(Kind$Parser$text(";"), $2917, $2918);
                                                     switch (self._) {
                                                         case 'Parser.Reply.error':
-                                                            var $2928 = self.idx;
-                                                            var $2929 = self.code;
-                                                            var $2930 = self.err;
-                                                            var $2931 = Parser$Reply$error$($2928, $2929, $2930);
-                                                            var $2927 = $2931;
+                                                            var $2921 = self.idx;
+                                                            var $2922 = self.code;
+                                                            var $2923 = self.err;
+                                                            var $2924 = Parser$Reply$error$($2921, $2922, $2923);
+                                                            var $2920 = $2924;
                                                             break;
                                                         case 'Parser.Reply.value':
-                                                            var $2932 = self.idx;
-                                                            var $2933 = self.code;
-                                                            var self = Kind$Parser$do$statements$(_monad_name$1)($2932)($2933);
+                                                            var $2925 = self.idx;
+                                                            var $2926 = self.code;
+                                                            var self = Kind$Parser$do$statements$(_monad_name$1)($2925)($2926);
                                                             switch (self._) {
                                                                 case 'Parser.Reply.error':
-                                                                    var $2935 = self.idx;
-                                                                    var $2936 = self.code;
-                                                                    var $2937 = self.err;
-                                                                    var $2938 = Parser$Reply$error$($2935, $2936, $2937);
-                                                                    var $2934 = $2938;
+                                                                    var $2928 = self.idx;
+                                                                    var $2929 = self.code;
+                                                                    var $2930 = self.err;
+                                                                    var $2931 = Parser$Reply$error$($2928, $2929, $2930);
+                                                                    var $2927 = $2931;
                                                                     break;
                                                                 case 'Parser.Reply.value':
-                                                                    var $2939 = self.idx;
-                                                                    var $2940 = self.code;
-                                                                    var $2941 = self.val;
-                                                                    var self = Kind$Parser$stop$($2896, $2939, $2940);
+                                                                    var $2932 = self.idx;
+                                                                    var $2933 = self.code;
+                                                                    var $2934 = self.val;
+                                                                    var self = Kind$Parser$stop$($2889, $2932, $2933);
                                                                     switch (self._) {
                                                                         case 'Parser.Reply.error':
-                                                                            var $2943 = self.idx;
-                                                                            var $2944 = self.code;
-                                                                            var $2945 = self.err;
-                                                                            var $2946 = Parser$Reply$error$($2943, $2944, $2945);
-                                                                            var $2942 = $2946;
+                                                                            var $2936 = self.idx;
+                                                                            var $2937 = self.code;
+                                                                            var $2938 = self.err;
+                                                                            var $2939 = Parser$Reply$error$($2936, $2937, $2938);
+                                                                            var $2935 = $2939;
                                                                             break;
                                                                         case 'Parser.Reply.value':
-                                                                            var $2947 = self.idx;
-                                                                            var $2948 = self.code;
-                                                                            var $2949 = self.val;
-                                                                            var $2950 = Parser$Reply$value$($2947, $2948, Kind$Term$ori$($2949, Kind$Term$let$($2911, $2926, (_x$28 => {
-                                                                                var $2951 = $2941;
-                                                                                return $2951;
+                                                                            var $2940 = self.idx;
+                                                                            var $2941 = self.code;
+                                                                            var $2942 = self.val;
+                                                                            var $2943 = Parser$Reply$value$($2940, $2941, Kind$Term$ori$($2942, Kind$Term$let$($2904, $2919, (_x$28 => {
+                                                                                var $2944 = $2934;
+                                                                                return $2944;
                                                                             }))));
-                                                                            var $2942 = $2950;
+                                                                            var $2935 = $2943;
                                                                             break;
                                                                     };
-                                                                    var $2934 = $2942;
+                                                                    var $2927 = $2935;
                                                                     break;
                                                             };
-                                                            var $2927 = $2934;
+                                                            var $2920 = $2927;
                                                             break;
                                                     };
-                                                    var $2919 = $2927;
+                                                    var $2912 = $2920;
                                                     break;
                                             };
-                                            var $2912 = $2919;
+                                            var $2905 = $2912;
                                             break;
                                     };
-                                    var $2904 = $2912;
+                                    var $2897 = $2905;
                                     break;
                             };
-                            var $2897 = $2904;
+                            var $2890 = $2897;
                             break;
                     };
-                    var $2889 = $2897;
+                    var $2882 = $2890;
                     break;
             };
-            return $2889;
+            return $2882;
         }), List$cons$((_idx$2 => _code$3 => {
             var self = Kind$Parser$init$(_idx$2, _code$3);
             switch (self._) {
                 case 'Parser.Reply.error':
-                    var $2953 = self.idx;
-                    var $2954 = self.code;
-                    var $2955 = self.err;
-                    var $2956 = Parser$Reply$error$($2953, $2954, $2955);
-                    var $2952 = $2956;
+                    var $2946 = self.idx;
+                    var $2947 = self.code;
+                    var $2948 = self.err;
+                    var $2949 = Parser$Reply$error$($2946, $2947, $2948);
+                    var $2945 = $2949;
                     break;
                 case 'Parser.Reply.value':
-                    var $2957 = self.idx;
-                    var $2958 = self.code;
-                    var $2959 = self.val;
-                    var self = Kind$Parser$text$("return ", $2957, $2958);
+                    var $2950 = self.idx;
+                    var $2951 = self.code;
+                    var $2952 = self.val;
+                    var self = Kind$Parser$text$("return ", $2950, $2951);
                     switch (self._) {
                         case 'Parser.Reply.error':
-                            var $2961 = self.idx;
-                            var $2962 = self.code;
-                            var $2963 = self.err;
-                            var $2964 = Parser$Reply$error$($2961, $2962, $2963);
-                            var $2960 = $2964;
+                            var $2954 = self.idx;
+                            var $2955 = self.code;
+                            var $2956 = self.err;
+                            var $2957 = Parser$Reply$error$($2954, $2955, $2956);
+                            var $2953 = $2957;
                             break;
                         case 'Parser.Reply.value':
-                            var $2965 = self.idx;
-                            var $2966 = self.code;
-                            var self = Kind$Parser$term$($2965, $2966);
+                            var $2958 = self.idx;
+                            var $2959 = self.code;
+                            var self = Kind$Parser$term$($2958, $2959);
                             switch (self._) {
                                 case 'Parser.Reply.error':
-                                    var $2968 = self.idx;
-                                    var $2969 = self.code;
-                                    var $2970 = self.err;
-                                    var $2971 = Parser$Reply$error$($2968, $2969, $2970);
-                                    var $2967 = $2971;
+                                    var $2961 = self.idx;
+                                    var $2962 = self.code;
+                                    var $2963 = self.err;
+                                    var $2964 = Parser$Reply$error$($2961, $2962, $2963);
+                                    var $2960 = $2964;
                                     break;
                                 case 'Parser.Reply.value':
-                                    var $2972 = self.idx;
-                                    var $2973 = self.code;
-                                    var $2974 = self.val;
-                                    var self = Parser$maybe$(Kind$Parser$text(";"), $2972, $2973);
+                                    var $2965 = self.idx;
+                                    var $2966 = self.code;
+                                    var $2967 = self.val;
+                                    var self = Parser$maybe$(Kind$Parser$text(";"), $2965, $2966);
                                     switch (self._) {
                                         case 'Parser.Reply.error':
-                                            var $2976 = self.idx;
-                                            var $2977 = self.code;
-                                            var $2978 = self.err;
-                                            var $2979 = Parser$Reply$error$($2976, $2977, $2978);
-                                            var $2975 = $2979;
+                                            var $2969 = self.idx;
+                                            var $2970 = self.code;
+                                            var $2971 = self.err;
+                                            var $2972 = Parser$Reply$error$($2969, $2970, $2971);
+                                            var $2968 = $2972;
                                             break;
                                         case 'Parser.Reply.value':
-                                            var $2980 = self.idx;
-                                            var $2981 = self.code;
-                                            var self = Kind$Parser$stop$($2959, $2980, $2981);
+                                            var $2973 = self.idx;
+                                            var $2974 = self.code;
+                                            var self = Kind$Parser$stop$($2952, $2973, $2974);
                                             switch (self._) {
                                                 case 'Parser.Reply.error':
-                                                    var $2983 = self.idx;
-                                                    var $2984 = self.code;
-                                                    var $2985 = self.err;
-                                                    var $2986 = Parser$Reply$error$($2983, $2984, $2985);
-                                                    var $2982 = $2986;
+                                                    var $2976 = self.idx;
+                                                    var $2977 = self.code;
+                                                    var $2978 = self.err;
+                                                    var $2979 = Parser$Reply$error$($2976, $2977, $2978);
+                                                    var $2975 = $2979;
                                                     break;
                                                 case 'Parser.Reply.value':
-                                                    var $2987 = self.idx;
-                                                    var $2988 = self.code;
-                                                    var $2989 = self.val;
+                                                    var $2980 = self.idx;
+                                                    var $2981 = self.code;
+                                                    var $2982 = self.val;
                                                     var _term$19 = Kind$Term$app$(Kind$Term$ref$("Monad.pure"), Kind$Term$ref$(_monad_name$1));
                                                     var _term$20 = Kind$Term$app$(_term$19, Kind$Term$ref$((_monad_name$1 + ".monad")));
                                                     var _term$21 = Kind$Term$app$(_term$20, Kind$Term$hol$(Bits$e));
-                                                    var _term$22 = Kind$Term$app$(_term$21, $2974);
-                                                    var $2990 = Parser$Reply$value$($2987, $2988, Kind$Term$ori$($2989, _term$22));
-                                                    var $2982 = $2990;
+                                                    var _term$22 = Kind$Term$app$(_term$21, $2967);
+                                                    var $2983 = Parser$Reply$value$($2980, $2981, Kind$Term$ori$($2982, _term$22));
+                                                    var $2975 = $2983;
                                                     break;
                                             };
-                                            var $2975 = $2982;
+                                            var $2968 = $2975;
                                             break;
                                     };
-                                    var $2967 = $2975;
+                                    var $2960 = $2968;
                                     break;
                             };
-                            var $2960 = $2967;
+                            var $2953 = $2960;
                             break;
                     };
-                    var $2952 = $2960;
+                    var $2945 = $2953;
                     break;
             };
-            return $2952;
+            return $2945;
         }), List$cons$((_idx$2 => _code$3 => {
             var self = Kind$Parser$init$(_idx$2, _code$3);
             switch (self._) {
                 case 'Parser.Reply.error':
-                    var $2992 = self.idx;
-                    var $2993 = self.code;
-                    var $2994 = self.err;
-                    var $2995 = Parser$Reply$error$($2992, $2993, $2994);
-                    var $2991 = $2995;
+                    var $2985 = self.idx;
+                    var $2986 = self.code;
+                    var $2987 = self.err;
+                    var $2988 = Parser$Reply$error$($2985, $2986, $2987);
+                    var $2984 = $2988;
                     break;
                 case 'Parser.Reply.value':
-                    var $2996 = self.idx;
-                    var $2997 = self.code;
-                    var $2998 = self.val;
-                    var self = Kind$Parser$term$($2996, $2997);
+                    var $2989 = self.idx;
+                    var $2990 = self.code;
+                    var $2991 = self.val;
+                    var self = Kind$Parser$term$($2989, $2990);
                     switch (self._) {
                         case 'Parser.Reply.error':
-                            var $3000 = self.idx;
-                            var $3001 = self.code;
-                            var $3002 = self.err;
-                            var $3003 = Parser$Reply$error$($3000, $3001, $3002);
-                            var $2999 = $3003;
+                            var $2993 = self.idx;
+                            var $2994 = self.code;
+                            var $2995 = self.err;
+                            var $2996 = Parser$Reply$error$($2993, $2994, $2995);
+                            var $2992 = $2996;
                             break;
                         case 'Parser.Reply.value':
-                            var $3004 = self.idx;
-                            var $3005 = self.code;
-                            var $3006 = self.val;
-                            var self = Parser$maybe$(Kind$Parser$text(";"), $3004, $3005);
+                            var $2997 = self.idx;
+                            var $2998 = self.code;
+                            var $2999 = self.val;
+                            var self = Parser$maybe$(Kind$Parser$text(";"), $2997, $2998);
                             switch (self._) {
                                 case 'Parser.Reply.error':
-                                    var $3008 = self.idx;
-                                    var $3009 = self.code;
-                                    var $3010 = self.err;
-                                    var $3011 = Parser$Reply$error$($3008, $3009, $3010);
-                                    var $3007 = $3011;
+                                    var $3001 = self.idx;
+                                    var $3002 = self.code;
+                                    var $3003 = self.err;
+                                    var $3004 = Parser$Reply$error$($3001, $3002, $3003);
+                                    var $3000 = $3004;
                                     break;
                                 case 'Parser.Reply.value':
-                                    var $3012 = self.idx;
-                                    var $3013 = self.code;
-                                    var self = Kind$Parser$do$statements$(_monad_name$1)($3012)($3013);
+                                    var $3005 = self.idx;
+                                    var $3006 = self.code;
+                                    var self = Kind$Parser$do$statements$(_monad_name$1)($3005)($3006);
                                     switch (self._) {
                                         case 'Parser.Reply.error':
-                                            var $3015 = self.idx;
-                                            var $3016 = self.code;
-                                            var $3017 = self.err;
-                                            var $3018 = Parser$Reply$error$($3015, $3016, $3017);
-                                            var $3014 = $3018;
+                                            var $3008 = self.idx;
+                                            var $3009 = self.code;
+                                            var $3010 = self.err;
+                                            var $3011 = Parser$Reply$error$($3008, $3009, $3010);
+                                            var $3007 = $3011;
                                             break;
                                         case 'Parser.Reply.value':
-                                            var $3019 = self.idx;
-                                            var $3020 = self.code;
-                                            var $3021 = self.val;
-                                            var self = Kind$Parser$stop$($2998, $3019, $3020);
+                                            var $3012 = self.idx;
+                                            var $3013 = self.code;
+                                            var $3014 = self.val;
+                                            var self = Kind$Parser$stop$($2991, $3012, $3013);
                                             switch (self._) {
                                                 case 'Parser.Reply.error':
-                                                    var $3023 = self.idx;
-                                                    var $3024 = self.code;
-                                                    var $3025 = self.err;
-                                                    var $3026 = Parser$Reply$error$($3023, $3024, $3025);
-                                                    var $3022 = $3026;
+                                                    var $3016 = self.idx;
+                                                    var $3017 = self.code;
+                                                    var $3018 = self.err;
+                                                    var $3019 = Parser$Reply$error$($3016, $3017, $3018);
+                                                    var $3015 = $3019;
                                                     break;
                                                 case 'Parser.Reply.value':
-                                                    var $3027 = self.idx;
-                                                    var $3028 = self.code;
-                                                    var $3029 = self.val;
+                                                    var $3020 = self.idx;
+                                                    var $3021 = self.code;
+                                                    var $3022 = self.val;
                                                     var _term$19 = Kind$Term$app$(Kind$Term$ref$("Monad.bind"), Kind$Term$ref$(_monad_name$1));
                                                     var _term$20 = Kind$Term$app$(_term$19, Kind$Term$ref$((_monad_name$1 + ".monad")));
                                                     var _term$21 = Kind$Term$app$(_term$20, Kind$Term$hol$(Bits$e));
                                                     var _term$22 = Kind$Term$app$(_term$21, Kind$Term$hol$(Bits$e));
-                                                    var _term$23 = Kind$Term$app$(_term$22, $3006);
+                                                    var _term$23 = Kind$Term$app$(_term$22, $2999);
                                                     var _term$24 = Kind$Term$app$(_term$23, Kind$Term$lam$("", (_x$24 => {
-                                                        var $3031 = $3021;
-                                                        return $3031;
+                                                        var $3024 = $3014;
+                                                        return $3024;
                                                     })));
-                                                    var $3030 = Parser$Reply$value$($3027, $3028, Kind$Term$ori$($3029, _term$24));
-                                                    var $3022 = $3030;
+                                                    var $3023 = Parser$Reply$value$($3020, $3021, Kind$Term$ori$($3022, _term$24));
+                                                    var $3015 = $3023;
                                                     break;
                                             };
-                                            var $3014 = $3022;
+                                            var $3007 = $3015;
                                             break;
                                     };
-                                    var $3007 = $3014;
+                                    var $3000 = $3007;
                                     break;
                             };
-                            var $2999 = $3007;
+                            var $2992 = $3000;
                             break;
                     };
-                    var $2991 = $2999;
+                    var $2984 = $2992;
                     break;
             };
-            return $2991;
+            return $2984;
         }), List$cons$((_idx$2 => _code$3 => {
             var self = Kind$Parser$term$(_idx$2, _code$3);
             switch (self._) {
                 case 'Parser.Reply.error':
-                    var $3033 = self.idx;
-                    var $3034 = self.code;
-                    var $3035 = self.err;
-                    var $3036 = Parser$Reply$error$($3033, $3034, $3035);
-                    var $3032 = $3036;
+                    var $3026 = self.idx;
+                    var $3027 = self.code;
+                    var $3028 = self.err;
+                    var $3029 = Parser$Reply$error$($3026, $3027, $3028);
+                    var $3025 = $3029;
                     break;
                 case 'Parser.Reply.value':
-                    var $3037 = self.idx;
-                    var $3038 = self.code;
-                    var $3039 = self.val;
-                    var self = Parser$maybe$(Kind$Parser$text(";"), $3037, $3038);
+                    var $3030 = self.idx;
+                    var $3031 = self.code;
+                    var $3032 = self.val;
+                    var self = Parser$maybe$(Kind$Parser$text(";"), $3030, $3031);
                     switch (self._) {
                         case 'Parser.Reply.error':
-                            var $3041 = self.idx;
-                            var $3042 = self.code;
-                            var $3043 = self.err;
-                            var $3044 = Parser$Reply$error$($3041, $3042, $3043);
-                            var $3040 = $3044;
+                            var $3034 = self.idx;
+                            var $3035 = self.code;
+                            var $3036 = self.err;
+                            var $3037 = Parser$Reply$error$($3034, $3035, $3036);
+                            var $3033 = $3037;
                             break;
                         case 'Parser.Reply.value':
-                            var $3045 = self.idx;
-                            var $3046 = self.code;
-                            var $3047 = Parser$Reply$value$($3045, $3046, $3039);
-                            var $3040 = $3047;
+                            var $3038 = self.idx;
+                            var $3039 = self.code;
+                            var $3040 = Parser$Reply$value$($3038, $3039, $3032);
+                            var $3033 = $3040;
                             break;
                     };
-                    var $3032 = $3040;
+                    var $3025 = $3033;
                     break;
             };
-            return $3032;
+            return $3025;
         }), List$nil))))));
-        return $2825;
+        return $2818;
     };
     const Kind$Parser$do$statements = x0 => Kind$Parser$do$statements$(x0);
 
@@ -7848,107 +7833,107 @@ module.exports = (function() {
         var self = Parser$maybe$(Kind$Parser$text("do "), _idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3049 = self.idx;
-                var $3050 = self.code;
-                var $3051 = self.err;
-                var $3052 = Parser$Reply$error$($3049, $3050, $3051);
-                var $3048 = $3052;
+                var $3042 = self.idx;
+                var $3043 = self.code;
+                var $3044 = self.err;
+                var $3045 = Parser$Reply$error$($3042, $3043, $3044);
+                var $3041 = $3045;
                 break;
             case 'Parser.Reply.value':
-                var $3053 = self.idx;
-                var $3054 = self.code;
-                var self = Kind$Parser$name1$($3053, $3054);
+                var $3046 = self.idx;
+                var $3047 = self.code;
+                var self = Kind$Parser$name1$($3046, $3047);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $3056 = self.idx;
-                        var $3057 = self.code;
-                        var $3058 = self.err;
-                        var $3059 = Parser$Reply$error$($3056, $3057, $3058);
-                        var $3055 = $3059;
+                        var $3049 = self.idx;
+                        var $3050 = self.code;
+                        var $3051 = self.err;
+                        var $3052 = Parser$Reply$error$($3049, $3050, $3051);
+                        var $3048 = $3052;
                         break;
                     case 'Parser.Reply.value':
-                        var $3060 = self.idx;
-                        var $3061 = self.code;
-                        var $3062 = self.val;
-                        var self = Parser$text$(" {", $3060, $3061);
+                        var $3053 = self.idx;
+                        var $3054 = self.code;
+                        var $3055 = self.val;
+                        var self = Parser$text$(" {", $3053, $3054);
                         switch (self._) {
                             case 'Parser.Reply.error':
-                                var $3064 = self.idx;
-                                var $3065 = self.code;
-                                var $3066 = self.err;
-                                var $3067 = Parser$Reply$error$($3064, $3065, $3066);
-                                var $3063 = $3067;
+                                var $3057 = self.idx;
+                                var $3058 = self.code;
+                                var $3059 = self.err;
+                                var $3060 = Parser$Reply$error$($3057, $3058, $3059);
+                                var $3056 = $3060;
                                 break;
                             case 'Parser.Reply.value':
-                                var $3068 = self.idx;
-                                var $3069 = self.code;
-                                var self = Kind$Parser$do$statements$($3062)($3068)($3069);
+                                var $3061 = self.idx;
+                                var $3062 = self.code;
+                                var self = Kind$Parser$do$statements$($3055)($3061)($3062);
                                 switch (self._) {
                                     case 'Parser.Reply.error':
-                                        var $3071 = self.idx;
-                                        var $3072 = self.code;
-                                        var $3073 = self.err;
-                                        var $3074 = Parser$Reply$error$($3071, $3072, $3073);
-                                        var $3070 = $3074;
+                                        var $3064 = self.idx;
+                                        var $3065 = self.code;
+                                        var $3066 = self.err;
+                                        var $3067 = Parser$Reply$error$($3064, $3065, $3066);
+                                        var $3063 = $3067;
                                         break;
                                     case 'Parser.Reply.value':
-                                        var $3075 = self.idx;
-                                        var $3076 = self.code;
-                                        var $3077 = self.val;
-                                        var self = Kind$Parser$text$("}", $3075, $3076);
+                                        var $3068 = self.idx;
+                                        var $3069 = self.code;
+                                        var $3070 = self.val;
+                                        var self = Kind$Parser$text$("}", $3068, $3069);
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $3079 = self.idx;
-                                                var $3080 = self.code;
-                                                var $3081 = self.err;
-                                                var $3082 = Parser$Reply$error$($3079, $3080, $3081);
-                                                var $3078 = $3082;
+                                                var $3072 = self.idx;
+                                                var $3073 = self.code;
+                                                var $3074 = self.err;
+                                                var $3075 = Parser$Reply$error$($3072, $3073, $3074);
+                                                var $3071 = $3075;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $3083 = self.idx;
-                                                var $3084 = self.code;
-                                                var $3085 = Parser$Reply$value$($3083, $3084, $3077);
-                                                var $3078 = $3085;
+                                                var $3076 = self.idx;
+                                                var $3077 = self.code;
+                                                var $3078 = Parser$Reply$value$($3076, $3077, $3070);
+                                                var $3071 = $3078;
                                                 break;
                                         };
-                                        var $3070 = $3078;
+                                        var $3063 = $3071;
                                         break;
                                 };
-                                var $3063 = $3070;
+                                var $3056 = $3063;
                                 break;
                         };
-                        var $3055 = $3063;
+                        var $3048 = $3056;
                         break;
                 };
-                var $3048 = $3055;
+                var $3041 = $3048;
                 break;
         };
-        return $3048;
+        return $3041;
     };
     const Kind$Parser$do = x0 => x1 => Kind$Parser$do$(x0, x1);
 
     function Kind$Term$nat$(_natx$1) {
-        var $3086 = ({
+        var $3079 = ({
             _: 'Kind.Term.nat',
             'natx': _natx$1
         });
-        return $3086;
+        return $3079;
     };
     const Kind$Term$nat = x0 => Kind$Term$nat$(x0);
 
     function Kind$Term$unroll_nat$(_natx$1) {
         var self = _natx$1;
         if (self === 0n) {
-            var $3088 = Kind$Term$ref$(Kind$Name$read$("Nat.zero"));
-            var $3087 = $3088;
+            var $3081 = Kind$Term$ref$(Kind$Name$read$("Nat.zero"));
+            var $3080 = $3081;
         } else {
-            var $3089 = (self - 1n);
+            var $3082 = (self - 1n);
             var _func$3 = Kind$Term$ref$(Kind$Name$read$("Nat.succ"));
-            var _argm$4 = Kind$Term$nat$($3089);
-            var $3090 = Kind$Term$app$(_func$3, _argm$4);
-            var $3087 = $3090;
+            var _argm$4 = Kind$Term$nat$($3082);
+            var $3083 = Kind$Term$app$(_func$3, _argm$4);
+            var $3080 = $3083;
         };
-        return $3087;
+        return $3080;
     };
     const Kind$Term$unroll_nat = x0 => Kind$Term$unroll_nat$(x0);
     const U16$to_bits = a0 => (u16_to_bits(a0));
@@ -7957,21 +7942,21 @@ module.exports = (function() {
         var self = _bits$1;
         switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
             case 'o':
-                var $3092 = self.slice(0, -1);
-                var $3093 = Kind$Term$app$(Kind$Term$ref$(Kind$Name$read$("Bits.o")), Kind$Term$unroll_chr$bits$($3092));
-                var $3091 = $3093;
+                var $3085 = self.slice(0, -1);
+                var $3086 = Kind$Term$app$(Kind$Term$ref$(Kind$Name$read$("Bits.o")), Kind$Term$unroll_chr$bits$($3085));
+                var $3084 = $3086;
                 break;
             case 'i':
-                var $3094 = self.slice(0, -1);
-                var $3095 = Kind$Term$app$(Kind$Term$ref$(Kind$Name$read$("Bits.i")), Kind$Term$unroll_chr$bits$($3094));
-                var $3091 = $3095;
+                var $3087 = self.slice(0, -1);
+                var $3088 = Kind$Term$app$(Kind$Term$ref$(Kind$Name$read$("Bits.i")), Kind$Term$unroll_chr$bits$($3087));
+                var $3084 = $3088;
                 break;
             case 'e':
-                var $3096 = Kind$Term$ref$(Kind$Name$read$("Bits.e"));
-                var $3091 = $3096;
+                var $3089 = Kind$Term$ref$(Kind$Name$read$("Bits.e"));
+                var $3084 = $3089;
                 break;
         };
-        return $3091;
+        return $3084;
     };
     const Kind$Term$unroll_chr$bits = x0 => Kind$Term$unroll_chr$bits$(x0);
 
@@ -7981,27 +7966,27 @@ module.exports = (function() {
         var _term$4 = Kind$Term$app$(_term$3, Kind$Term$nat$(16n));
         var _term$5 = Kind$Term$app$(_term$4, Kind$Term$unroll_chr$bits$(_bits$2));
         var _term$6 = Kind$Term$app$(Kind$Term$ref$(Kind$Name$read$("U16.new")), _term$5);
-        var $3097 = _term$6;
-        return $3097;
+        var $3090 = _term$6;
+        return $3090;
     };
     const Kind$Term$unroll_chr = x0 => Kind$Term$unroll_chr$(x0);
 
     function Kind$Term$unroll_str$(_strx$1) {
         var self = _strx$1;
         if (self.length === 0) {
-            var $3099 = Kind$Term$ref$(Kind$Name$read$("String.nil"));
-            var $3098 = $3099;
+            var $3092 = Kind$Term$ref$(Kind$Name$read$("String.nil"));
+            var $3091 = $3092;
         } else {
-            var $3100 = self.charCodeAt(0);
-            var $3101 = self.slice(1);
-            var _char$4 = Kind$Term$chr$($3100);
+            var $3093 = self.charCodeAt(0);
+            var $3094 = self.slice(1);
+            var _char$4 = Kind$Term$chr$($3093);
             var _term$5 = Kind$Term$ref$(Kind$Name$read$("String.cons"));
             var _term$6 = Kind$Term$app$(_term$5, _char$4);
-            var _term$7 = Kind$Term$app$(_term$6, Kind$Term$str$($3101));
-            var $3102 = _term$7;
-            var $3098 = $3102;
+            var _term$7 = Kind$Term$app$(_term$6, Kind$Term$str$($3094));
+            var $3095 = _term$7;
+            var $3091 = $3095;
         };
-        return $3098;
+        return $3091;
     };
     const Kind$Term$unroll_str = x0 => Kind$Term$unroll_str$(x0);
 
@@ -8009,38 +7994,38 @@ module.exports = (function() {
         var self = _term$1;
         switch (self._) {
             case 'Kind.Term.ref':
-                var $3104 = self.name;
-                var self = Kind$Map$get$($3104, _defs$2);
+                var $3097 = self.name;
+                var self = Kind$Map$get$($3097, _defs$2);
                 switch (self._) {
                     case 'Maybe.some':
-                        var $3106 = self.value;
-                        var self = $3106;
+                        var $3099 = self.value;
+                        var self = $3099;
                         switch (self._) {
                             case 'Kind.Def.new':
-                                var $3108 = self.term;
-                                var $3109 = Kind$Term$reduce$($3108, _defs$2);
-                                var $3107 = $3109;
+                                var $3101 = self.term;
+                                var $3102 = Kind$Term$reduce$($3101, _defs$2);
+                                var $3100 = $3102;
                                 break;
                         };
-                        var $3105 = $3107;
+                        var $3098 = $3100;
                         break;
                     case 'Maybe.none':
-                        var $3110 = Kind$Term$ref$($3104);
-                        var $3105 = $3110;
+                        var $3103 = Kind$Term$ref$($3097);
+                        var $3098 = $3103;
                         break;
                 };
-                var $3103 = $3105;
+                var $3096 = $3098;
                 break;
             case 'Kind.Term.app':
-                var $3111 = self.func;
-                var $3112 = self.argm;
-                var _func$5 = Kind$Term$reduce$($3111, _defs$2);
+                var $3104 = self.func;
+                var $3105 = self.argm;
+                var _func$5 = Kind$Term$reduce$($3104, _defs$2);
                 var self = _func$5;
                 switch (self._) {
                     case 'Kind.Term.lam':
-                        var $3114 = self.body;
-                        var $3115 = Kind$Term$reduce$($3114($3112), _defs$2);
-                        var $3113 = $3115;
+                        var $3107 = self.body;
+                        var $3108 = Kind$Term$reduce$($3107($3105), _defs$2);
+                        var $3106 = $3108;
                         break;
                     case 'Kind.Term.var':
                     case 'Kind.Term.ref':
@@ -8057,48 +8042,48 @@ module.exports = (function() {
                     case 'Kind.Term.str':
                     case 'Kind.Term.cse':
                     case 'Kind.Term.ori':
-                        var $3116 = _term$1;
-                        var $3113 = $3116;
+                        var $3109 = _term$1;
+                        var $3106 = $3109;
                         break;
                 };
-                var $3103 = $3113;
+                var $3096 = $3106;
                 break;
             case 'Kind.Term.let':
-                var $3117 = self.expr;
-                var $3118 = self.body;
-                var $3119 = Kind$Term$reduce$($3118($3117), _defs$2);
-                var $3103 = $3119;
+                var $3110 = self.expr;
+                var $3111 = self.body;
+                var $3112 = Kind$Term$reduce$($3111($3110), _defs$2);
+                var $3096 = $3112;
                 break;
             case 'Kind.Term.def':
-                var $3120 = self.expr;
-                var $3121 = self.body;
-                var $3122 = Kind$Term$reduce$($3121($3120), _defs$2);
-                var $3103 = $3122;
+                var $3113 = self.expr;
+                var $3114 = self.body;
+                var $3115 = Kind$Term$reduce$($3114($3113), _defs$2);
+                var $3096 = $3115;
                 break;
             case 'Kind.Term.ann':
-                var $3123 = self.term;
-                var $3124 = Kind$Term$reduce$($3123, _defs$2);
-                var $3103 = $3124;
+                var $3116 = self.term;
+                var $3117 = Kind$Term$reduce$($3116, _defs$2);
+                var $3096 = $3117;
                 break;
             case 'Kind.Term.nat':
-                var $3125 = self.natx;
-                var $3126 = Kind$Term$reduce$(Kind$Term$unroll_nat$($3125), _defs$2);
-                var $3103 = $3126;
+                var $3118 = self.natx;
+                var $3119 = Kind$Term$reduce$(Kind$Term$unroll_nat$($3118), _defs$2);
+                var $3096 = $3119;
                 break;
             case 'Kind.Term.chr':
-                var $3127 = self.chrx;
-                var $3128 = Kind$Term$reduce$(Kind$Term$unroll_chr$($3127), _defs$2);
-                var $3103 = $3128;
+                var $3120 = self.chrx;
+                var $3121 = Kind$Term$reduce$(Kind$Term$unroll_chr$($3120), _defs$2);
+                var $3096 = $3121;
                 break;
             case 'Kind.Term.str':
-                var $3129 = self.strx;
-                var $3130 = Kind$Term$reduce$(Kind$Term$unroll_str$($3129), _defs$2);
-                var $3103 = $3130;
+                var $3122 = self.strx;
+                var $3123 = Kind$Term$reduce$(Kind$Term$unroll_str$($3122), _defs$2);
+                var $3096 = $3123;
                 break;
             case 'Kind.Term.ori':
-                var $3131 = self.expr;
-                var $3132 = Kind$Term$reduce$($3131, _defs$2);
-                var $3103 = $3132;
+                var $3124 = self.expr;
+                var $3125 = Kind$Term$reduce$($3124, _defs$2);
+                var $3096 = $3125;
                 break;
             case 'Kind.Term.var':
             case 'Kind.Term.typ':
@@ -8107,11 +8092,11 @@ module.exports = (function() {
             case 'Kind.Term.gol':
             case 'Kind.Term.hol':
             case 'Kind.Term.cse':
-                var $3133 = _term$1;
-                var $3103 = $3133;
+                var $3126 = _term$1;
+                var $3096 = $3126;
                 break;
         };
-        return $3103;
+        return $3096;
     };
     const Kind$Term$reduce = x0 => x1 => Kind$Term$reduce$(x0, x1);
     const BitsMap$new = ({
@@ -8126,18 +8111,18 @@ module.exports = (function() {
             'term': _term$2,
             'type': _type$3
         });
-        return $3134;
+        return $3127;
     };
     const Kind$Ann$new = x0 => x1 => x2 => Kind$Ann$new$(x0, x1, x2);
     const Kind$Parser$case$with = Parser$first_of$(List$cons$((_idx$1 => _code$2 => {
         var self = Kind$Parser$text$("with ", _idx$1, _code$2);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $3136 = self.idx;
-                var $3137 = self.code;
-                var $3138 = self.err;
-                var $3139 = Parser$Reply$error$($3136, $3137, $3138);
-                var $3135 = $3139;
+                var $3129 = self.idx;
+                var $3130 = self.code;
+                var $3131 = self.err;
+                var $3132 = Parser$Reply$error$($3129, $3130, $3131);
+                var $3128 = $3132;
                 break;
             case 'Parser.Reply.value':
                 var $3140 = self.idx;
@@ -20892,10 +20877,10 @@ module.exports = (function() {
         'Kind.Parser.letwhile.with': Kind$Parser$letwhile$with,
         'Kind.Parser.let': Kind$Parser$let,
         'Kind.Parser.let.omit': Kind$Parser$let$omit,
-        'Kind.Parser.get': Kind$Parser$get,
-        'Kind.Parser.get.omit': Kind$Parser$get$omit,
         'Kind.Parser.getwhile': Kind$Parser$getwhile,
         'Kind.Parser.getwhile.with': Kind$Parser$getwhile$with,
+        'Kind.Parser.get': Kind$Parser$get,
+        'Kind.Parser.get.omit': Kind$Parser$get$omit,
         'Kind.Term.def': Kind$Term$def,
         'Kind.Parser.def': Kind$Parser$def,
         'Kind.Parser.goal_rewrite': Kind$Parser$goal_rewrite,
