@@ -1,5 +1,9 @@
-Test(n: Nat, v: Vector<Nat, 1 + n>, e: n == 5): String
-  case v with e: (v.size - 1) == 5 {
-    nil: ?a
-    ext: ?b
-  }!
+Test: String
+  a = 1
+  b = 1
+  case a b {
+    zero zero: "a"
+    zero succ: "b"
+    succ zero: "c"
+    succ succ: "d"
+  }

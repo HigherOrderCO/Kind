@@ -1,0 +1,7 @@
+Kind.Term.extract_name(term: Kind.Term): String
+  let term = Kind.Term.reduce(term, Kind.Map.new!)
+  case term {
+    ref: term.name
+    var: term.name
+  } default "self"
+

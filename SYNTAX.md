@@ -269,198 +269,158 @@ Case (pattern matching)
 -----------------------
 
 ```
-case expr as name {
-  case0: body0
-  case1: body1
-} : ReturnType
+case val0 as name0; val1 as name1 ... valN as nameN
+with expr0: type0; expr1: type1 {
+  case0: result0
+  case1: result1
+  ...
+  caseN: resultN
+} : motive
 ```
 
 Kind's case is the most important syntax of the language, as it allows one to
-branch, extract values from datatypes, and prove theorems. Unlike most
-functional languages, you don't need to write field names on each case; instead,
-fields are automatically bound with the `name.field` name (here, `.` is just
-part of the name).  
-
-The `as name` part is only necessary when the matched expression isn't a
-variable. For example, here `case` needs a name:
+branch, extract values from datatypes, and prove theorems. In its most basic
+form, it allows you to branch based on a datatype's constructor:
 
 ```
-case List.head!([1,2,3]) as list {
-  none: "no head"
-  some: "head is: " | Nat.show(list.head)
+let x = true
+case x {
+  true: "x is true"
+  false: "x is false"
 }
 ```
 
-And here we don't:
+When a matched constructor has fields, you can access it on the respective
+branch as `name.field`. For example, when matching a `List`, we gain access to
+its head and tail as `list.head` and `list.tail`:
 
 ```
-let list = List.head!([1,2,3])
-case list {
-  none: "no head"
-  some: "head is: " | Nat.show(list.head)
-}
-```
-
-The motive is optional: if it isn't provided, it will be replaced by a `hole`.
-For example, to sum a list, we write:
-
-```
-sum(list: List(Nat)): Nat
-  case list {
-    nil  : 0
-    cons : list.head + sum(list.tail)
-  }
-```
-
-This is the same as:
-
-```
-sum(list: List(Nat)): Nat
+sum(list: List<Nat>): List<Nat>
   case list {
     nil: 0
     cons: list.head + sum(list.tail)
-  }: _
-```
-
-Which, for curiosity sake, is expanded to:
-
-```
-sum(list: List(Nat)): Nat
-  def case_nil = 0
-  def case_cons = (list.head, list.tail)
-    Nat.add(list.head, sum(list.tail))
-  list<() _>(case_nil, case_cons)
-```
-
-Which works because datatypes are encoded as lambdas.
-
-For datatypes with many constructors, you can avoid writting them all by adding
-an `else` clause after the `case` expression. For example:
-
-```c
-type Suit {
-  clubs
-  diamonds
-  hearts
-  spades
-}
-  
-Suit.is_clubs(suit: Suit): Bool
-  case suit {
-    clubs: true
-    diamonds: false
-    hearts: false
-    spades: false
   }
 ```
 
-Can be shortened as:
+When the matched expression isn't a name, you can provide one with `as`:
 
-```c
-type Suit {
-  clubs
-  diamonds
-  hearts
-  spades
+```
+case [1,2,3] as list {
+  nil: 0
+  cons: list.head
 }
+```
+
+You can use `default` to omit missing cases:
+
+```
+case list {
+  cons: list.head
+} default 0
+```
+
+You may pattern-match multiple values:
+
+```
+let x = true
+let y = false
+case x y {
+  true  true  : "both are true"
+  true  false : "one is true"
+  false true  : "one is true"
+  false false : "none is true
+}
+```
+
+You may also provide a return type, called motive. Since Kind has dependent
+types, the motive has access to the value of the matched variable, allowing you
+to return a different type on each branch. For example:
+
+```
+let x = true
+case x {
+  true: "im a string"
+  false: 42
+}: if x then String else Nat
+```
+
+Here, Kind evaluated `if x then String else Nat` with each possible value of `x`
+(in this case, `true` or `false`) to determine the return type of each branch.
+Notice that the `true` case and the `false` case return different types. This
+is very useful for theorem proving. For example:
   
-Suit.is_clubs(suit: Suit): Bool
-  case suit {
-    clubs: true
-  } else false
 ```
-
-If you write an explicit motive, you can access the matched value and, thus,
-return different types on each branch of the case expression. For example, this
-works:
-
-```
-main: String
-  case true as x {
-    true: "im a string"
-    false: 42
-  }: if x then String else Nat
-```
-
-Notice that the `true` case and the `false` case return different types. This is
-perfectly well-typed, because the motive is a computed expression that depends
-on the matched value. This is very useful for theorem proving.
-
-You may also use `!` instead of the motive to ask Formality to fill the motive
-for you, replacing the matched variable by its values on each branch. For
-example, on the term below, Kind demands a proof that `Boolnot(Bool.not(b)) == b`
-on each case:
-
-```
-not_not_theorem(b: Bool): Bool.not(Bool.not(b)) == b
+double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   case b {
-    true : ?a // goal: Bool.not(Bool.not(b)) == b
-    false: ?b // goal: Bool.not(Bool.not(b)) == b
+    true: ?a
+    false: ?b
   }
 ```
 
-But we know that `b` is `true` on the first branch and `false` on the second, so
-we can use a motive to update these goals accordingly:
-  
+To prove this theorem, Formality demands you to provide a proof of
+`not(not(b))==b` on both cases. This isn't possible. But if you write a motive:
+
 ```
-not_not_theorem(b: Bool): Bool.not(Bool.not(b)) == b
+double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   case b {
-    true : ?a // goal: Bool.not(Bool.not(true))  == true
-    false: ?b // goal: Bool.not(Bool.not(false)) == false
+    true: ?a
+    false: ?b
   }: Bool.not(Bool.not(b)) == b
 ```
 
-This allows us to use `refl` to complete both sides. But we could use `!`
-instead of writing the motive explicitly:
+Then Formality demands a proof of `not(not(true))==true` on the `?a` branch, and
+a proof of `not(not(false))==false` on the `?b` branch. Since these equalities
+reduce to `true==true` and `false==false`, you can complete the proof with just
+`refl`.
+
+When the motive is just a copy of the inferred type, you can write `!` instead: 
 
 ```
-not_not_theorem(b: Bool): Bool.not(Bool.not(b)) == b
+double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   case b {
-    true : refl
+    true: refl
     false: refl
   }!
 ```
 
-Sometimes, though, we don't want to modify the goal, but of a variable in the
-context. For example, on the proof below:
+Sometimes, though, we have variables on the context that refer to other
+variables, and we want to specialize their types just like we did with the goal.
+For example, on the proof below:
 
 ```
-some_theorem(b: Bool, e: b == b): String
-  case b {
+some_theorem(x: Bool, y: Bool, e: x == y): String
+  case x {
     true: ?a
     false: ?b
   }!
 ```
 
-We will have, on the context of both goals, a variable `e: b == b`. But we know
-that `b` is `true` on the first branch and `false` on the second, so we could
-want to update the type of `e` to reflect that. We can do that with a `with`
-expression:
+Both branches have a `e: x == y` on the context. But the value of `x` on each
+case is known, so, we can "pass e down" using `with`:
 
 ```
-some_theorem(b: Bool, e: b == b): String
-  case b with e {
+some_theorem(x: Bool, y: Bool, e: x == y): String
+  case x with e {
     true: ?a
     false: ?b
   }!
 ```
 
-This will add a new variable to the context of each branch. On the `true` case,
-it will add `e: true == true`. On the `false` case, with will add `e: false ==
-false`. Under the hoods, this just creates a lambda and applies it immediately,
-so the program above is equivalent to:
+This will send `e: true == y` to the first branch, and `e: false == y` to the
+second branch. The code above works by creating an extra lambda, it is
+equivalent to:
 
 ```
-some_theorem(b: Bool, e: b == b): String
-  (case b {
+some_theorem(x: Bool, y: Bool, e: x == y): String
+  (case x {
     true: (e) ?a
     false: (e) ?b
-  }: (e: b == b) -> String)(e)
+  }: (e: x == y) -> String)(e)
 ```
 
-Notice this also has an additional benefit: it allows you to use `e` twice
-without making your program non-linear, since the same variable was moved to
-both branches.
+The `with` notation can be used not only to specialize the type of a variable on
+the context, but it has the benefit of turning a program linear, since you
+replace two uses of a variable by only one.
 
 You can also annotate the type of the variables moved with a `with`, allowing
 you to perform finer type adjustments. For example, in the program below:

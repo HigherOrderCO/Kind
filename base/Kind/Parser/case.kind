@@ -2,54 +2,143 @@ Kind.Parser.case: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
     Kind.Parser.text("case ");
-    Kind.Parser.spaces;
-    get expr = Kind.Parser.term;
-    get name = Parser.maybe!(Parser {
-      Kind.Parser.text("as");
-      Kind.Parser.name1;
+
+    // Matched values
+    get vals = Parser.many1!(Parser {
+      get expr = Parser.avoiding!(Kind.Parser.text("{"), Kind.Parser.term)
+      get name = Parser.maybe!(Parser {
+        Kind.Parser.text("as");
+        get name = Kind.Parser.name1;
+        Parser.maybe!(Kind.Parser.text(";"));
+        return name;
+      })
+      let name = name <> Kind.Term.extract_name(expr)
+      return {name, expr}
     });
-    let name = case name {
-      none: case Kind.Term.reduce(expr, Kind.Map.new!) as expr {
-        ref: expr.name,
-        var: expr.name,
-        _: Kind.Name.read("self"),
-      },
-      some: name.value,
-    };
+
+    // With variables
     get wyth = Kind.Parser.case.with;
+
+    // Cases
     Kind.Parser.text("{");
     get cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.case.case);
+    get smrt = Parser.maybe!(Kind.Parser.text("!"));
+
+    // Default value
     get dflt = Parser.maybe!(Parser {
       Kind.Parser.text("default ");
       get term = Kind.Parser.term;
       return term;
     });
-    let cses = case dflt {
-      none: cses
-      some: List.cons!({"_", dflt.value}, cses)
-    };
-    let cses = BitsMap.from_list!(List.mapped!(cses)!((kv)
-      let {key, val} = kv
-      {Kind.Name.to_bits(key), val}
-    ));
-    get moti = Parser.first_of!([
-      // Explicit motive
-      Parser {
-        Kind.Parser.text(":");
-        get term = Kind.Parser.term;
-        return Maybe.some!(term);
-      },
-      // Smart motive
-      Parser {
-        Kind.Parser.text("!");
-        return Maybe.none!;
-      },
-      // Hole motive
-      Parser {
-        return Maybe.some!(Kind.Term.hol(Bits.e));
-      },
-    ]);
+
+    // Motive
+    get moti = Parser.maybe!(Parser {
+      Kind.Parser.text(":");
+      Kind.Parser.term;
+    })
+    let moti = case moti {
+      none: case smrt {
+        some: none
+        none: some(Kind.Term.hol(Bits.e))
+      }
+      some: some(moti.value)
+    }
+
     get orig = Kind.Parser.stop(init);
+
+    return Kind.Parser.case.build(vals, wyth, cses, dflt, moti, orig)
     //let moti = case moti { none: Kind.Term.hol(Bits.e), some: moti.value };
-    return Kind.Term.ori(orig, Kind.Term.cse(Bits.e, expr, name, wyth, cses, moti));
+    //return Kind.Term.ori(orig, Kind.Term.cse(Bits.e, expr, name, wyth, cses, moti));
   }
+
+Kind.Parser.case.build(
+  vals: List(Pair(Kind.Name, Kind.Term))
+  wyth: List(Kind.Ann)
+  cses: List(Pair(List(Kind.Name), Kind.Term))
+  dflt: Maybe(Kind.Term)
+  moti: Maybe(Kind.Term)
+  orig: Pair(Nat,Nat)
+): Kind.Term
+  case vals {
+    nil: case cses {
+      nil: log("MISSING CASE") Kind.Term.ref("missing_case")
+      cons: Pair.snd!!(cses.head)
+    }
+    cons:
+      let group = Kind.Parser.case.group(dflt,cses)
+      let name = Pair.fst!!(vals.head)
+      let expr = Pair.snd!!(vals.head)
+      let cses = Kind.Map.map!!((cses) Kind.Parser.case.build(vals.tail,wyth,cses,dflt,moti,orig), group)
+      Kind.Term.ori(orig, Kind.Term.cse(Bits.e, expr, name, wyth, cses, moti))
+  }
+
+Kind.Parser.case.group(
+  dflt: Maybe(Kind.Term)
+  cses: List(Pair(List(Kind.Name), Kind.Term))
+): Kind.Map(List(Pair(List(Kind.Name), Kind.Term)))
+  case cses {
+    nil:
+      case dflt {
+        none: Kind.Map.new!
+        some: Kind.Map.set!("_", [{[],dflt.value}], Kind.Map.new!)
+      }
+    cons:
+      let map = Kind.Parser.case.group(dflt,cses.tail)
+      let {cse_names, cse_value} = cses.head
+      case cse_names {
+        nil:
+          map
+        cons:
+          let rest = Kind.Map.get!(cse_names.head, map) <> []
+          Kind.Map.set!(cse_names.head, {cse_names.tail, cse_value} & rest, map)
+      }
+  }
+
+  //cse(
+    //path: Bits,
+    //expr: Kind.Term,
+    //name: Kind.Name,
+    //with: List(Kind.Ann),
+    //cses: BitsMap(Kind.Term),
+    //moti: Maybe(Kind.Term),
+  //),
+
+      
+//VALS = [x, y, z]
+//CSES = 
+//[
+  //{["A", "A", "A"], 1}
+  //{["A", "A", "B"], 2}
+  //{["A", "B", "A"], 3}
+  //...
+//]
+//GROUP =
+//{"A": [
+  //{["A","A"], 1}
+  //{["A","B"], 2}
+  //{["B","A"], 3}
+  //{["B","B"], 4}
+//],
+//...
+
+
+
+//case x {
+  //A: case y {
+    //A: case z {
+      //A: 1
+      //B: 2
+    //},
+    //B: case z {
+      //A: 3
+      //B: ...
+    //}
+  //},
+  //B: case y {
+  //  ...
+  //},
+  //....
+//}
+
+
+
