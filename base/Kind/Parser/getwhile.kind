@@ -1,7 +1,7 @@
 Kind.Parser.getwhile: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
-    Parser.maybe!(Kind.Parser.text("get "));
+    Parser.maybe!(Kind.Parser.text("let "));
     Kind.Parser.text("{");
     get nam0 = Kind.Parser.name;
     Kind.Parser.text(",");
@@ -33,7 +33,6 @@ Kind.Parser.getwhile: Parser(Kind.Term)
 Kind.Parser.getwhile.with: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
-    Kind.Parser.text("=");
     Kind.Parser.text("while ");
     get cond = Kind.Parser.term;
     Kind.Parser.text("with ");

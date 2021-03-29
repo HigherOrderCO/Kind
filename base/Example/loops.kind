@@ -1,0 +1,19 @@
+Example.while: String
+  let idx = 0
+  let str = ""
+  while idx <? 10 with {idx, str}:
+    log("idx=" | Nat.show(idx) | " str=" | str)
+    {idx + 1, str | Nat.show(idx)}
+  str
+
+Example.for_range: Nat
+  let sum = 0
+  for i from 0 to 5 with sum:
+    sum + i
+  sum
+
+Example.for_in: Nat
+  let sum = 0
+  for i in [0, 1, 2, 3, 4] with sum:
+    sum + i
+  sum
