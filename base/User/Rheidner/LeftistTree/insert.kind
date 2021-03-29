@@ -1,0 +1,3 @@
+// Inserts a value in the tree
+User.Rheidner.LeftistTree.insert<A: Type>(value: A, tree: User.Rheidner.LeftistTree<A>, comparator: (x: A, y: A) -> Bool): User.Rheidner.LeftistTree<A>
+  User.Rheidner.LeftistTree.merge<A>(User.Rheidner.LeftistTree.singleton<A>(value), tree, comparator)
