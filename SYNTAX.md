@@ -388,25 +388,104 @@ on the matched value. This is very useful for theorem proving.
 
 You may also use `!` instead of the motive to ask Formality to fill the motive
 for you, replacing the matched variable by its values on each branch. For
-example, this is the proof that `not(not(b)) == b`:
+example, on the term below, Kind demands a proof that `Boolnot(Bool.not(b)) == b`
+on each case:
 
 ```
 not_not_theorem(b: Bool): Bool.not(Bool.not(b)) == b
   case b {
-    true: refl
-    false: refl
-  }: Bool.not(Bool.not(b)) == b
+    true : ?a // goal: Bool.not(Bool.not(b)) == b
+    false: ?b // goal: Bool.not(Bool.not(b)) == b
+  }
 ```
 
-That proof can be shortened by using `!` as:
+But we know that `b` is `true` on the first branch and `false` on the second, so
+we can use a motive to update these goals accordingly:
   
 ```
 not_not_theorem(b: Bool): Bool.not(Bool.not(b)) == b
   case b {
-    true: refl
+    true : ?a // goal: Bool.not(Bool.not(true))  == true
+    false: ?b // goal: Bool.not(Bool.not(false)) == false
+  }: Bool.not(Bool.not(b)) == b
+```
+
+This allows us to use `refl` to complete both sides. But we could use `!`
+instead of writing the motive explicitly:
+
+```
+not_not_theorem(b: Bool): Bool.not(Bool.not(b)) == b
+  case b {
+    true : refl
     false: refl
   }!
 ```
+
+Sometimes, though, we don't want to modify the goal, but of a variable in the
+context. For example, on the proof below:
+
+```
+some_theorem(b: Bool, e: b == b): String
+  case b {
+    true: ?a
+    false: ?b
+  }!
+```
+
+We will have, on the context of both goals, a variable `e: b == b`. But we know
+that `b` is `true` on the first branch and `false` on the second, so we could
+want to update the type of `e` to reflect that. We can do that with a `with`
+expression:
+
+```
+some_theorem(b: Bool, e: b == b): String
+  case b with e {
+    true: ?a
+    false: ?b
+  }!
+```
+
+This will add a new variable to the context of each branch. On the `true` case,
+it will add `e: true == true`. On the `false` case, with will add `e: false ==
+false`. Under the hoods, this just creates a lambda and applies it immediately,
+so the program above is equivalent to:
+
+```
+some_theorem(b: Bool, e: b == b): String
+  (case b {
+    true: (e) ?a
+    false: (e) ?b
+  }: (e: b == b) -> String)(e)
+```
+
+Notice this also has an additional benefit: it allows you to use `e` twice
+without making your program non-linear, since the same variable was moved to
+both branches.
+
+You can also annotate the type of the variables moved with a `with`, allowing
+you to perform finer type adjustments. For example, in the program below:
+
+```
+foo(n: Nat, vec: Vector<Nat,Nat.succ(n)>, e: n == 5): String
+  case vec {
+    nil: ?a
+    ext: ?b
+  }!
+```
+
+We have `e: n == 5` on both branches. But we also know that `n` is one less than
+the size of the vector. So we may write:
+
+```
+foo(n: Nat, vec: Vector<Nat, 1 + n>, e: n == 5): String
+  case vec with e: (vec.size - 1) == 5 {
+    nil: ?a
+    ext: ?b
+  }!
+```
+
+And we'll have `e` passed to both branches, replacing `n` by `vec.size - 1` on
+both branches.
 
 For more information on theorem proving, check the `THEOREMS.md` file on this
 repository.

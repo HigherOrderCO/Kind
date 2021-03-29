@@ -16,7 +16,7 @@ Kind.Parser.case: Parser(Kind.Term)
       },
       some: name.value,
     };
-    get wyth = Parser.many!(Kind.Parser.case.with);
+    get wyth = Kind.Parser.case.with;
     Kind.Parser.text("{");
     get cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.case.case);
     get dflt = Parser.maybe!(Parser {

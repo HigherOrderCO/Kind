@@ -1,0 +1,8 @@
+Vector.mapped<A: Type, size: Nat>(vector: Vector(A, size))<B: Type>(fn: A -> B): Vector<B, size>
+  case vector {
+    nil:
+      Vector.nil<B>
+    ext: 
+      let rest = Vector.mapped<A, vector.size>(vector.tail)<B>(fn)
+      Vector.ext<B, vector.size>(fn(vector.head), rest)
+  }!

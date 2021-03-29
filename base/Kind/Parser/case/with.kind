@@ -1,10 +1,19 @@
-Kind.Parser.case.with: Parser(Kind.Def)
-  Parser {
-    Kind.Parser.text("with");
-    get name = Kind.Parser.name1;
-    Kind.Parser.text(":");
-    get type = Kind.Parser.term;
-    Kind.Parser.text("=");
-    get term = Kind.Parser.term;
-    return Kind.Def.new("", "", {0,0}, name, term, type, false, 0, Kind.Status.init);
-  }
+Kind.Parser.case.with: Parser(List(Kind.Ann))
+  Parser.first_of!([
+    Parser {
+      Kind.Parser.text("with ")
+      Parser.many!(Parser {
+        get name = Kind.Parser.name1
+        get type = Parser.maybe!(Parser {
+          Kind.Parser.text(":")
+          get type = Kind.Parser.term
+          Parser.maybe!(Kind.Parser.text(";"))
+          return type
+        })
+        return Kind.Ann.new(name, Kind.Term.ref(name), type)
+      })
+    }
+    Parser {
+      return []
+    }
+  ])

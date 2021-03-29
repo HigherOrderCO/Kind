@@ -4,14 +4,14 @@ Lambda.reduce<n: Nat>(term: Lambda<n>): Lambda<n>
     lam: Lambda.lam!(term.body)
     app: 
       case Lambda.reduce!(term.func) as func
-      with term.argm : Lambda<func.n> = term.argm {
+      with term.argm : Lambda<func.n> {
         var:
           let func = Lambda.var!(func.index)
           let argm = term.argm
           Lambda.app!(func, argm)
         lam: 
           let body = Lambda.subst<Nat.succ(func.n), func.n>((i)
-            case i with term.argm : Lambda<Nat.pred(i.lim)> = term.argm {
+            case i with term.argm : Lambda<Nat.pred(i.lim)> {
               zero: term.argm
               succ: Lambda.var!(i.pred)
             }: Lambda(Nat.pred(i.lim))

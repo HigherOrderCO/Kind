@@ -1,2 +1,5 @@
-Test: String
-  Lambda.test
+Test(n: Nat, v: Vector<Nat, 1 + n>, e: n == 5): String
+  case v with e: (v.size - 1) == 5 {
+    nil: ?a
+    ext: ?b
+  }!

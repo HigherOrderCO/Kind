@@ -1,6 +1,6 @@
 Kind.Term.desugar_cse.argument(
   name: Kind.Name,
-  wyth: List(Kind.Def),
+  wyth: List(Kind.Ann),
   type: Kind.Term,
   body: Kind.Term,
   defs: Kind.Defs,
@@ -16,12 +16,12 @@ Kind.Term.desugar_cse.argument(
       def lam_body = (x) Kind.Term.desugar_cse.argument(name, wyth, type, body, defs);
       Kind.Term.lam(lam_name, lam_body),
     _: case wyth {
-      cons: case wyth.head {
-        new:
-          def lam_name = wyth.head.name;
-          def lam_body = (x) Kind.Term.desugar_cse.argument(name, wyth.tail, type, body, defs);
-          Kind.Term.lam(lam_name, lam_body)
-      },
-      nil: body,
+      cons:
+        open wyth.head
+        def lam_name = wyth.head.name;
+        def lam_body = (x) Kind.Term.desugar_cse.argument(name, wyth.tail, type, body, defs);
+        Kind.Term.lam(lam_name, lam_body)
+      nil:
+        body
     }
   }
