@@ -1,0 +1,463 @@
+// How to use this file:
+// 1. Clone Kind's repo:     git clone https://github.com/uwu-tech/kind
+// 2. Create a dir for you:  mkdir Kind/base/User/YourName
+// 3. Copy that file there:  cp Kind/base/Problems.kind Kind/base/User/YourName
+// 4. Open, uncomment a problem and solve it
+// 5. Send a PR if you want!
+// If you need help, read the tutorial on Kind/THEOREMS.md, or ask on Telegram.
+// Answers: https://github.com/uwu-tech/Kind/blob/master/base/User/MaiaVictor/Problems.kind
+
+// -----------------------------------------------------------------------------
+
+// ::::::::::::::
+// :: Programs ::
+// ::::::::::::::
+
+// Returs true if both inputs are true
+User.rigille.Problems.p0(a: Bool, b: Bool): Bool
+  case a {
+	  true: b
+	  false: Bool.false
+  }
+
+// Returs true if any input is true
+User.rigille.Problems.p1(a: Bool, b: Bool): Bool
+  case a {
+	  true: Bool.true
+	  false: b
+  }
+
+// Returs true if both inputs are identical
+User.rigille.Problems.p2(a: Bool, b: Bool): Bool
+  case a {
+    true: b
+    false: Bool.not(b)
+  }
+
+// Returns the first element of a pair
+User.rigille.Problems.p3<A: Type, B: Type>(pair: Pair<A,B>): A
+  open pair
+  pair.fst
+
+// Returns the second element of a pair
+User.rigille.Problems.p4<A: Type, B: Type>(pair: Pair<A,B>): B
+  open pair
+  pair.snd
+
+// Inverses the order of the elements of a pair
+User.rigille.Problems.p5<A: Type, B: Type>(pair: Pair<A,B>): Pair<B,A>
+  open pair
+  Pair.new!!(pair.snd, pair.fst)
+
+// Applies a function to both elements of a Pair
+User.rigille.Problems.p6<A: Type, B: Type>(fn: A -> B, pair: Pair<A,A>): Pair<B,B>
+  open pair
+  Pair.new!!(fn(pair.fst), fn(pair.snd))
+
+// Doubles a number
+User.rigille.Problems.p7(n: Nat): Nat
+  case n {
+    zero: Nat.zero
+    succ: Nat.succ(Nat.succ(n.pred))
+  }!
+
+// Halves a number, rounding down
+User.rigille.Problems.p8(n: Nat): Nat
+  case n {
+    zero: Nat.zero,
+    succ: case n.pred {
+      zero: Nat.zero,
+      succ: Nat.succ(User.rigille.Problems.p8(n.pred.pred)),
+    },
+  }
+
+// Adds two numbers
+User.rigille.Problems.p9(a: Nat, b: Nat): Nat
+  case a {
+    zero: b,
+    succ: Nat.succ(Nat.add(a.pred, b)),
+  }
+
+// Subtracts two numbers
+User.rigille.Problems.p10(a: Nat, b: Nat): Nat
+  case a {
+    zero: Nat.zero,
+    succ: case b {
+      zero: a,
+      succ: Nat.sub(a.pred, b.pred),
+    },
+  }
+
+// Multiplies two numbers
+User.rigille.Problems.p11(a: Nat, b: Nat): Nat
+  case a {
+    zero: Nat.zero,
+    succ: case b {
+      zero: Nat.zero,
+      succ: b + Nat.mul(a.pred, b),
+    },
+  }
+
+// Returns true if a < b
+User.rigille.Problems.p12(a: Nat, b: Nat): Bool
+  Nat.lte(Nat.succ(a), b)
+
+// Returns true if a == b
+User.rigille.Problems.p13(a: Nat, b: Nat): Bool
+  case a {
+    zero: case b {
+      zero: true,
+      succ: false,
+    },
+    succ: case b {
+      zero: false,
+      succ: Nat.eql(a.pred, b.pred),
+    },
+  }
+
+// Returns the first element of a List
+User.rigille.Problems.p14<A: Type>(xs: List<A>): Maybe(A)
+  case xs {
+    nil: none,
+    cons: some(xs.head),
+  }
+
+// Returns the list without the first element
+User.rigille.Problems.p15<A: Type>(xs: List<A>): List(A)
+  case xs {
+    nil: List.nil!,
+    cons: xs.tail,
+  }
+
+// Returns the length of a list
+User.rigille.Problems.p16<A: Type>(xs: List<A>): Nat
+  case xs {
+    nil: Nat.zero,
+    cons: Nat.succ(User.rigille.Problems.p16!(xs.tail)),
+  }
+
+// Concatenates two lists
+User.rigille.Problems.p17<A: Type>(xs: List<A>, ys: List<A>): List<A>
+  case xs {
+    nil: ys,
+    cons: List.cons!(xs.head, User.rigille.Problems.p17!(xs.tail, ys)),
+  }
+
+// Applies a function to all elements of a list
+User.rigille.Problems.p18<A: Type, B: Type>(fn: A -> B, xs: List<A>): List<B>
+  case xs {
+    nil: List.nil<B>,
+    cons: List.cons!(fn(xs.head), User.rigille.Problems.p18!!(fn, xs.tail)),
+  }
+
+User.rigille.Problems.p19.aux<A: Type>(xs: List<A>, ys: List<A>): List<A>
+  case xs {
+    nil: ys,
+    cons: User.rigille.Problems.p19.aux!(xs.tail, List.cons!(xs.head, ys)),
+  }
+
+// Returns the same list, with the order reversed
+User.rigille.Problems.p19<A: Type>(xs: List<A>): List<A>
+  User.rigille.Problems.p19.aux!(xs, List.nil!)
+
+// Returns pairs of the elements of the 2 input lists on the same index
+// Ex: Problems.p20!!([1,2], ["a","b"]) == [{1,"a"},{2,"b"}]
+User.rigille.Problems.p20<A: Type, B: Type>(xs: List<A>, ys: List<B>): List<Pair<A,B>>
+  case xs {
+    nil: List.nil!,
+    cons: case ys {
+      nil: List.nil!,
+      cons: List.cons!(Pair.new!!(xs.head, ys.head), User.rigille.Problems.p20!!(xs.tail, ys.tail)),
+    }
+  }
+
+User.rigille.Problems.p21.aux(n: Nat, xs: List<Nat>): Nat
+  case xs {
+    nil: n,
+    cons: case Nat.ltn(n, xs.head) {
+      true: User.rigille.Problems.p21.aux(n, xs.tail),
+      false: User.rigille.Problems.p21.aux(xs.head, xs.tail),
+    },
+  }
+
+// Returns the smallest element of a List
+User.rigille.Problems.p21(xs: List<Nat>): Nat
+  case xs {
+    nil: Nat.zero,
+    cons: User.rigille.Problems.p21.aux(xs.head, xs.tail),
+  }
+
+// Removes first instance of an element inside a list
+User.rigille.Problems.p22.aux(n: Nat, xs: List<Nat>): List<Nat>
+  case xs {
+    nil: List.nil!,
+    cons: let is_min = Nat.eql(n, xs.head)
+          case is_min {
+            true: xs.tail,
+            false: List.cons!(xs.head, User.rigille.Problems.p22.aux(n, xs)),
+          },
+  }
+
+// Returns the same list without the smallest element
+User.rigille.Problems.p22(xs: List<Nat>): List<Nat>
+  let min = User.rigille.Problems.p21(xs)
+  User.rigille.Problems.p22.aux(min, xs)
+
+// Returns the same list, in ascending order
+User.rigille.Problems.p23(xs: List<Nat>): List<Nat>
+  case xs {
+    nil: List.nil!,
+    cons: let min = User.rigille.Problems.p21(xs)
+          let rest = User.rigille.Problems.p22.aux(min, xs)
+          List.cons!(min, User.rigille.Problems.p23(rest))
+  }
+
+// -----------------------------------------------------------------------------
+
+// ::::::::::::::
+// :: Theorems ::
+// ::::::::::::::
+
+// Note: these problems use functions from the base libs, NOT the ones above
+
+User.rigille.Problems.t0: true == true
+  refl
+
+User.rigille.Problems.t1(a: Bool): Bool.and(false, a) == false
+  refl
+
+User.rigille.Problems.t2(a: Bool): Bool.and(a, false) == false
+  case a {
+    true: refl,
+    false: refl,
+  }!
+
+User.rigille.Problems.t3(a: Bool): Bool.or(true, a) == true
+  refl
+
+User.rigille.Problems.t4(a: Bool): Bool.or(a, true) == true
+  case a {
+    true: refl,
+    false: refl,
+  }!
+
+User.rigille.Problems.t5(a: Bool): Bool.eql(a, a) == true
+  case a {
+    true: refl,
+    false: refl,
+  }!
+
+User.rigille.Problems.t6(a: Bool): Bool.not(Bool.not(a)) == a
+  case a {
+    true: refl,
+    false: refl,
+  }!
+
+User.rigille.Problems.t7(a: Bool, b: Bool): Bool.not(Bool.and(a,b)) == Bool.or(Bool.not(a), Bool.not(b))
+  case a {
+    true: refl,
+    false: refl,
+  }!
+
+User.rigille.Problems.t8(a: Bool, b: Bool): Bool.not(Bool.or(a,b)) == Bool.and(Bool.not(a), Bool.not(b))
+  case a {
+    true: refl,
+    false: refl,
+  }!
+
+User.rigille.Problems.t9(a: Pair<Nat,Nat>): Pair.new<Nat,Nat>(Pair.fst<Nat,Nat>(a), Pair.snd<Nat,Nat>(a)) == a
+  case a {
+    new: refl,
+  }!
+
+User.rigille.Problems.t10(a: Pair<Nat,Nat>): Pair.swap<Nat,Nat>(Pair.swap<Nat,Nat>(a)) == a
+  case a {
+    new: refl,
+  }!
+
+User.rigille.Problems.t11(n: Nat): Nat.same(n) == n
+  case n {
+    zero: refl,
+    succ: let ind = User.rigille.Problems.t11(n.pred)
+          let qed = apply(Nat.succ, ind)
+          qed
+  }!
+
+User.rigille.Problems.t12(n: Nat): Nat.half(Nat.double(n)) == n
+  case n {
+    zero: refl,
+    succ: let ind = User.rigille.Problems.t12(n.pred)
+          let qed = apply(Nat.succ, ind)
+          qed
+  }!
+
+User.rigille.Problems.t13(n: Nat): Nat.add(0,n) == n
+  refl
+
+User.rigille.Problems.t14(n: Nat): Nat.add(n,0) == n
+  case n {
+    zero: refl,
+    succ: let ind = User.rigille.Problems.t14(n.pred)
+          let qed = apply(Nat.succ, ind)
+          qed
+  }!
+
+User.rigille.Problems.t15(n: Nat, m: Nat): Nat.add(Nat.succ(n),m) == Nat.succ(Nat.add(n,m))
+  refl
+  
+User.rigille.Problems.t16(n: Nat, m: Nat): Nat.add(n,Nat.succ(m)) == Nat.succ(Nat.add(n,m))
+  case n {
+    zero: refl,
+    succ: let ind = User.rigille.Problems.t16(n.pred, m)
+          let qed = apply(Nat.succ, ind)
+          qed,
+  }!
+
+User.rigille.Problems.t17(n: Nat, m: Nat): Nat.add(n, m) == Nat.add(m, n)
+  case m {
+    zero: User.rigille.Problems.t14(n),
+    succ: let ind = User.rigille.Problems.t17(n, m.pred)
+          let lem0 = apply(Nat.succ, ind)
+          let left = User.rigille.Problems.t16(n, m.pred)
+          let qed = Equal.chain!!!!(left, lem0)
+          qed,
+  }!
+
+User.rigille.Problems.t18(n: Nat): Nat.add(n,n) == Nat.double(n)
+  case n {
+    zero: refl,
+    succ: let ind = User.rigille.Problems.t18(n.pred)
+          let lem0 = apply(Nat.succ, ind)
+          let left = User.rigille.Problems.t16(n.pred, n.pred)
+          let lem1 = Equal.chain!!!!(left, lem0)
+          let qed = apply(Nat.succ, lem1)
+          qed,
+  }!
+
+User.rigille.Problems.t19(n: Nat): Nat.ltn(n, Nat.succ(n)) == true
+  case n {
+    zero: refl,
+    succ: let ind = User.rigille.Problems.t19(n.pred)
+          ind,
+  }!
+
+User.rigille.Problems.t20(n: Nat): Nat.gtn(Nat.succ(n), n) == true
+  case n {
+    zero: refl,
+    succ: let ind = User.rigille.Problems.t20(n.pred)
+          ind,
+  }!
+
+User.rigille.Problems.t21(n: Nat): Nat.sub(n,n) == 0
+  case n {
+    zero: refl,
+    succ: let ind = User.rigille.Problems.t21(n.pred)
+          ind
+  }!
+
+User.rigille.Problems.t22(n: Nat, e: n == 1): Nat.succ(n) == 2
+  apply(Nat.succ, e)
+
+//User.rigille.Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
+  //case n {
+    //zero: case m {
+      //zero: refl,
+      //succ: ?b, // não ocorre
+    //}!
+    //succ: case m {
+      //zero: ?c, // nào ocorre
+      //succ: //let lem = e :: Nat.eql(n.pred, m.pred) == Nat.eql(n, m)
+            //let hmm = Nat.succ_inj(n.pred, m.pred, e)
+            //?d,
+    //}!
+  //}!
+
+User.rigille.Problems.t24(xs: List<Nat>): Nat.gtn(List.length<Nat>(List.cons<Nat>(1,xs)),0) == true
+  refl
+
+User.rigille.Problems.t25(xs: List<Nat>): List.map<Nat,Nat>((x) x, xs) == xs
+  case xs {
+    nil: refl,
+    cons: let ind = User.rigille.Problems.t25(xs.tail)
+          let qed = apply(List.cons!(xs.head), ind)
+          qed,
+  }!
+
+User.rigille.Problems.t26(xs: List<Nat>, ys: List<Nat>): Nat.add(List.length<Nat>(xs), List.length<Nat>(ys)) == List.length<Nat>(List.concat<Nat>(xs,ys))
+  case xs {
+    nil: refl,
+    cons: let ind = User.rigille.Problems.t26(xs.tail, ys)
+          let qed = apply(Nat.succ, ind)
+          qed
+  }!
+
+User.rigille.Problems.t27.aux0(x: Nat, xs: List<Nat>):
+  User.rigille.List.reverse.aux!(List.concat!(xs, [x])) == List.cons!(x, User.rigille.List.reverse.aux!(xs))
+  case xs {
+    nil: refl,
+    cons: let ind = User.rigille.Problems.t27.aux0(x, xs.tail)
+          def fn = (l) List.concat<Nat>(l, [xs.head])
+          apply(fn, ind)
+  }!
+
+User.rigille.Problems.t27.aux1(xs: List<Nat>):
+  User.rigille.List.reverse.aux<Nat>(User.rigille.List.reverse.aux<Nat>(xs)) == xs
+  case xs {
+    nil: refl,
+    cons: def rev = User.rigille.List.reverse.aux
+          let ind = User.rigille.Problems.t27.aux1(xs.tail)
+          let ind = apply(List.cons!(xs.head), ind)
+          let lem = User.rigille.Problems.t27.aux0(xs.head, rev!(xs.tail))
+          let qed = Equal.chain!!!!(lem, ind)
+          qed,
+  }!
+
+//User.rigille.Problems.t27(xs: List<Nat>): List.reverse<Nat>(List.reverse<Nat>(xs)) == xs
+
+User.rigille.Problems.t28: true != false
+  (x)
+  let unit = Unit.new :: if Bool.true then Unit else Empty
+  let oops = unit :: rewrite X in (if X then Unit else Empty) with x
+  oops
+
+User.rigille.Problems.t29: 3 != 2
+  (x)
+  let contra = apply(Nat.lte(3), x)
+  User.rigille.Problems.t28(contra)
+
+User.rigille.Problems.t30(a: Bool): Bool.or(true, a) != false
+  (x) User.rigille.Problems.t28(x)
+
+User.rigille.Problems.t31(a: Bool): Bool.or(a, true) != false
+  (x) let lem = User.rigille.Problems.t4(a)
+      let lem = mirror(lem)
+      let contra = Equal.chain!!!!(lem, x)
+      User.rigille.Problems.t28(contra)
+
+User.rigille.Problems.t32(a: Bool): Bool.and(false, a) != true
+  (x) let lem = User.rigille.Problems.t1(a)
+      let lem = mirror(lem)
+      let contra = Equal.chain!!!!(lem, x)
+      let contra = mirror(contra)
+      User.rigille.Problems.t28(contra)
+
+User.rigille.Problems.t33(a: Bool): Bool.and(a, false) != true
+  (x) let lem = User.rigille.Problems.t2(a)
+      let lem = mirror(lem)
+      let contra = Equal.chain!!!!(lem, x)
+      let contra = mirror(contra)
+      User.rigille.Problems.t28(contra)
+
+User.rigille.Problems.t34(a: Nat, b: Nat, e: a == b): b == a
+  case e {
+    refl: refl,
+  }!
+
+User.rigille.Problems.t35(a: Nat, b: Nat, c: Nat, e0: a == b, e1: b == c): a == c
+  Equal.chain!!!!(e0, e1)
+
+User.rigille.Problems.t36(a: Nat, P: Nat -> Type, p: P(a)): P(Nat.same(a))
+  let lem = User.rigille.Problems.t11(a)
+  let lem = mirror(lem)
+  let qed = p :: rewrite X in P(X) with lem
+  qed
