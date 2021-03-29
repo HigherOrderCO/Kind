@@ -350,5 +350,81 @@ User.Rheidner.Problems.t20(n: Nat): Nat.add(n,n) == Nat.mul(n,2)
       ?a
   }!
 
-User.Rheidner.Problems.t21(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
+User.Rheidner.Problems.t21(n: Nat): Nat.sub(n,n) == 0
+  case n {
+    zero: refl
+    succ: 
+      let ind = User.Rheidner.Problems.t21(n.pred)
+      ind
+  }!
+
+User.Rheidner.Problems.t22(n: Nat, e: n == 1): Nat.succ(n) == 2
+  apply(Nat.succ, e)
+
+User.Rheidner.Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
   ?a-
+
+User.Rheidner.Problems.t24(xs: List<Nat>): Nat.gtn(List.length<Nat>(List.cons<Nat>(1,xs)),0) == true
+ case xs {
+   nil: refl
+   cons: refl
+ }!
+
+User.Rheidner.Problems.t25(xs: List<Nat>): List.map<Nat,Nat>((x) x, xs) == xs
+  case xs {
+    nil: refl
+    cons: 
+      let ind = User.Rheidner.Problems.t25(xs.tail)
+      let app = apply(List.cons!(xs.head), ind)
+      app
+  }!
+
+User.Rheidner.Problems.t26(xs: List<Nat>, ys: List<Nat>): Nat.add(List.length<Nat>(xs), List.length<Nat>(ys)) == List.length<Nat>(List.concat<Nat>(xs,ys))
+  case xs {
+    nil: refl
+    cons: 
+      let ind = User.Rheidner.Problems.t26(xs.tail, ys)
+      let app = apply(Nat.succ, ind)//?a-74-18-35-9
+      app
+  }!
+
+// User.Rheidner.Problems.t27(xs: List<Nat>): List.reverse<Nat>(List.reverse<Nat>(xs)) == xs
+//   case xs {
+//     nil: refl,
+//     cons: 
+//       let ind = User.Rheidner.Problems.t27(xs.tail)
+//       let app = apply(List.cons<Nat>(xs.head), ind)
+//       app
+//   }!
+
+// User.Rheidner.Problems.t28: true != false
+//   ?a
+
+User.Rheidner.Problems.t30(a: Bool): Bool.or(true, a) != false
+  (e)
+  Bool.true_neq_false(e)
+
+User.Rheidner.Problems.t31(a: Bool): Bool.or(a, true) != false
+  case a {
+    true: (e) Bool.true_neq_false(e)
+    false: (e) Bool.true_neq_false(e)
+  }!
+
+User.Rheidner.Problems.t32(a: Bool): Bool.and(false, a) != true
+  (e)
+  Bool.false_neq_true(e)
+
+User.Rheidner.Problems.t33(a: Bool): Bool.and(a, false) != true
+  case a {
+    true: (e) Bool.false_neq_true(e)
+    false: (e) Bool.false_neq_true(e)
+  }!
+
+User.Rheidner.Problems.t34(a: Nat, b: Nat, e: a == b): b == a
+  mirror(e)
+
+User.Rheidner.Problems.t35(a: Nat, b: Nat, c: Nat, e0: a == b, e1: b == c): a == c
+  Equal.chain!!!!(e0, e1)
+
+User.Rheidner.Problems.t36(a: Nat, P: Nat -> Type, p: P(a)): P(Nat.same(a))
+  p :: rewrite X in P(X) with mirror(User.Rheidner.Problems.t9(a))
