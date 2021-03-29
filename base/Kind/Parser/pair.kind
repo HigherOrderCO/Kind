@@ -3,8 +3,9 @@ Kind.Parser.pair: Parser(Kind.Term)
     get init = Kind.Parser.init;
     Kind.Parser.text("{");
     get val0 = Kind.Parser.term;
-    Kind.Parser.text(",");
+    Parser.maybe!(Kind.Parser.text(","));
     get val1 = Kind.Parser.term;
+    Parser.maybe!(Kind.Parser.text(","));
     Kind.Parser.text("}");
     get orig = Kind.Parser.stop(init);
     let term = Kind.Term.ref("Pair.new");

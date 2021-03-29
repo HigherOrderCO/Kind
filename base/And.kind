@@ -1,0 +1,2 @@
+And<A: Type, B: Type>: Type
+  Pair<A, B>

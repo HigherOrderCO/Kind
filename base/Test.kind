@@ -1,4 +1,2 @@
-Test: _
-  list = [1, 8, 3, 5, 2, 9, 4]
-  list = Example.bubble_sort(list)
-  List.show!(Nat.show, list)
+Test: String
+  Lambda.test
