@@ -1,0 +1,26 @@
+// Computes 2 ^ 3 (exponentiation) using church nats
+Lambda.test: String
+  def lam = Lambda.lam
+  def app = Lambda.app
+  def var = Lambda.var
+  def suc = Fin.succ
+  def zer = Fin.zero
+
+  // zero = λs. λz. z
+  let zero = lam!(lam!(var<2>(zer!)))
+
+  // succ = λn. λs. λz. s (n s z)
+  let succ = lam!(lam!(lam!(app!(var<3>(suc!(zer!)), app!(app!(var<3>(suc!(suc!(zer!))), var<3>(suc!(zer!))), var<3>(zer!))))))
+
+  // exp = λn. λm. (m n)
+  let exp = lam!(lam!(app!(var<2>(zer!), var<2>(suc!(zer!)))))
+
+  // some numbers
+  let c0 = zero
+  let c1 = app!(succ, c0)
+  let c2 = app!(succ, c1)
+  let c3 = app!(succ, c2)
+  let c8 = app!(app!(exp, c2), c3)
+  
+  // computes 2^3 and prints
+  Lambda.show!(Lambda.normalize!(c8))

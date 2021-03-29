@@ -1,0 +1,5 @@
+Fin.to_nat<n: Nat>(i: Fin<n>): Nat
+  case i {
+    zero: Nat.zero
+    succ: Nat.succ(Fin.to_nat!(i.pred))
+  }
