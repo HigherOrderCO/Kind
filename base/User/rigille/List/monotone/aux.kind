@@ -1,6 +1,0 @@
-type User.rigille.List.monotone.aux <A: Type, rel: A -> A -> Type> ~ (xs: List<A>) {
-  nil ~ (xs = List.nil<A>),
-  sing(a: A) ~ (xs = List.cons<A>(a, List.nil<A>)),
-  cons(a: A, b: A, tail: List<A>,
-    Hyp0: rel(a, b), Hyp1: User.rigille.List.monotone.aux<A, rel>(tail)) ~ (xs = List.cons<A>(a, List.cons<A>(b, tail))),
-}

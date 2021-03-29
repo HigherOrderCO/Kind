@@ -1,4 +1,6 @@
-User.rigille.List.monotone<A: Type, O: User.rigille.Order<A>>: List<A> -> Type
-  case O {
-    new: User.rigille.List.monotone.aux<A, O.rel>
-  }: List<A> -> Type
+type User.rigille.List.monotone <A: Type, after: A -> A -> Type, O: User.rigille.Order<A>(after)> ~ (xs: List<A>) {
+  nil ~ (xs = List.nil<A>),
+  sing(a: A) ~ (xs = List.cons<A>(a, List.nil<A>)),
+  cons(a: A, b: A, tail: List<A>,
+    Hyp0: after(a, b), Hyp1: User.rigille.List.monotone<A, after, O>(tail)) ~ (xs = List.cons<A>(a, List.cons<A>(b, tail))),
+}
