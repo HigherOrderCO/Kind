@@ -1,0 +1,3 @@
+// #TODO
+User.rigille.List.reverse.equiv<A: Type>(xs: List<A>): List.reverse!(xs) == User.rigille.List.reverse.aux!(xs)
+  ?a

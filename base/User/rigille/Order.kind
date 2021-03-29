@@ -1,0 +1,9 @@
+// I'm trying to use a struct to pack assumptions about ordered
+// types, but currently its painful to unpack them inside proofs
+type User.rigille.Order <A: Type>(after: A -> A -> Type) {
+  new(refl: (a: A) -> after(a, a),
+     conn: (a: A, b: A) -> Either<after(a, b), after(b, a)>
+     anti_symm: (a: A, b: A) -> after(a, b) -> after(b, a) -> Equal<A>(a, b),
+     chain: (a: A) -> (b: A) -> (c: A) -> after(a, b) -> after(b, c) -> after(a, c),
+  ),
+}

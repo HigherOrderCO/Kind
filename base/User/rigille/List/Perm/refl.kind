@@ -1,0 +1,5 @@
+User.rigille.List.Perm.refl<A: Type>(xs: List<A>): User.rigille.List.Perm<A>(xs, xs)
+  case xs {
+    nil: User.rigille.List.Perm.nil<A>
+    cons: User.rigille.List.Perm.skip<A>(xs.head, _, _, User.rigille.List.Perm.refl<A>(xs.tail))
+  }!

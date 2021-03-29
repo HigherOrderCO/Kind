@@ -1,0 +1,7 @@
+User.rigille.List.Perm.push_back<A: Type>(x: A, xs: List<A>, ys: List<A>, Hyp: User.rigille.List.Perm<A>(xs, ys)): User.rigille.List.Perm<A>(List.concat!(xs, x & List.nil<A>), List.concat!(ys, x & List.nil<A>))
+  let left_perm = User.rigille.List.Perm.front_to_back<A>(x, xs)
+  let center_perm = User.rigille.List.Perm.skip<A>(x, xs, ys, Hyp)
+  let right_perm = User.rigille.List.Perm.symm<A>!!(User.rigille.List.Perm.front_to_back<A>(x, ys))
+  let h = User.rigille.List.Perm.trans<A>!!!(center_perm, right_perm)
+  let ret = User.rigille.List.Perm.trans<A>!!!(left_perm, h)
+  ret
