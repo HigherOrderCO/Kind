@@ -1,0 +1,4 @@
+type User.rigille.Nat.after <a: Nat> ~ (b: Nat) {
+  eq ~ (b = a),
+  skip(base: Nat, pred: Nat, Hyp: Nat.after(a, pred)) ~ (b = Nat.succ(pred)),
+}

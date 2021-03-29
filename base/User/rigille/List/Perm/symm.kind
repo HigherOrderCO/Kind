@@ -1,0 +1,7 @@
+User.rigille.List.Perm.symm<A: Type>(xs: List<A>, ys: List<A>, Hyp: User.rigille.List.Perm<A>(xs, ys)): User.rigille.List.Perm<A>(ys, xs)
+  case Hyp {
+    nil: User.rigille.List.Perm.nil<A>
+    skip: User.rigille.List.Perm.skip<A>(Hyp.x, _, _, User.rigille.List.Perm.symm<A>(_, _, Hyp.Hyp))
+    swap: User.rigille.List.Perm.swap<A>(Hyp.y, Hyp.x, Hyp.l)
+    trans: User.rigille.List.Perm.trans<A>(_, _, _, User.rigille.List.Perm.symm<A>(_, _, Hyp.Hyp1), User.rigille.List.Perm.symm<A>(_, _, Hyp.Hyp0))
+  }!

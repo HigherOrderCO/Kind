@@ -1,0 +1,10 @@
+User.rigille.List.Perm.front_to_back<A: Type>(x: A, xs: List<A>): User.rigille.List.Perm<A>(List.concat<A>(xs, [x]), List.cons<A>(x, xs))
+  case xs {
+    nil: User.rigille.List.Perm.refl<A>([x])
+    // the type annotations have no use they're just to improve legibility
+    cons: let ind = User.rigille.List.Perm.front_to_back<A>(x, xs.tail) :: User.rigille.List.Perm<A>(List.concat!(xs.tail, [x]), x & xs.tail)
+          let skip_head = User.rigille.List.Perm.skip<A>(xs.head, _, _, ind) :: User.rigille.List.Perm<A>(xs.head & List.concat!(xs.tail, [x]), xs.head & x & xs.tail)
+          let swap_top = User.rigille.List.Perm.swap<A>(x, xs.head, xs.tail) :: User.rigille.List.Perm<A>(xs.head & x & xs.tail, x & xs.head & xs.tail)
+          let qed = User.rigille.List.Perm.trans<A>(_, _, _, skip_head, swap_top)
+          qed
+  }!
