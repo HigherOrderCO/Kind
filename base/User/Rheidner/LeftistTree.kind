@@ -1,0 +1,7 @@
+// Defines a structure called leftist tree
+// This structure can serve as a heap
+// It was inspired by http://typeocaml.com/2015/03/12/heap-leftist-tree/
+type User.Rheidner.LeftistTree<A: Type> {
+  empty
+  node(value: A, left: User.Rheidner.LeftistTree<A>, right: User.Rheidner.LeftistTree<A>, rank: Nat)
+}

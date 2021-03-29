@@ -1,0 +1,20 @@
+// merges two given trees based on a comparator
+User.Rheidner.LeftistTree.merge<A: Type>(treeA: User.Rheidner.LeftistTree<A>, treeB: User.Rheidner.LeftistTree<A>, comparator: (x: A, y: A) -> Bool): User.Rheidner.LeftistTree<A>
+  case treeA {
+    empty: treeB
+    node: 
+      case treeB {
+        empty: treeA
+        node:
+          if ( comparator(treeA.value,treeB.value) ) then User.Rheidner.LeftistTree.merge<A>(treeB, treeA, comparator)
+          else
+            let merged_right = User.Rheidner.LeftistTree.merge<A>(treeA.right, treeB, comparator)
+            let rank_left = User.Rheidner.LeftistTree.rank<A>(treeA.left)
+            let rank_right = User.Rheidner.LeftistTree.rank<A>(merged_right)
+
+            if ( Nat.gte(rank_left,rank_right) ) then 
+              User.Rheidner.LeftistTree.node<A>(treeA.value, treeA.left, merged_right, rank_right + 1)
+            else              
+              User.Rheidner.LeftistTree.node<A>(treeA.value, merged_right, treeA.left, rank_left + 1)
+      }!
+  }!
