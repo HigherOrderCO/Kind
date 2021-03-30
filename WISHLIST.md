@@ -1,50 +1,14 @@
-### Smarter "with"
-
-Update the case syntax to allow the "with" variables to be affected by `!`. For example:
-
-```
-Test(n: Nat, e: n == n): n == n
-  case n with e {
-    zero: ?a
-    succ: ?b
-  }!
-```
-
-Here, `?a` would have goal `0 == 0` and `e : 0 == 0` in context.
-
----
-
 ### `open!`
 
 Allow it to change the goal just like `case x { ... }!`.
 
----
-
-### Nested cases
+### alias syntax
 
 ```
-case x y {
-  zero zero: ?a
-  zero succ: ?b
-  succ zero: ?c
-  succ succ: ?d
-}
+alias T = Tic.Tac.Toe
 ```
 
-Would desugar to:
-
-```
-  case x {
-    zero: case y {
-      zero: ?a
-      succ: ?b
-    }
-    zero: case y {
-      zero: ?a
-      succ: ?b
-    }
-  }
-```
+Would allow you to use `T/x` instead of `Tic.Tac.Toe.x`.
 
 ---
 
@@ -157,3 +121,10 @@ for another design?
 We don't have one. We need one. It should be made as an `App`, using
 `App.Render.doc`. It may also includ things like hyperlinked syntax highlighters
 for Kind and a REPL or Try mode for the language.
+
+---
+
+### alias
+
+
+
