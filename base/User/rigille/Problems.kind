@@ -358,19 +358,19 @@ User.rigille.Problems.t21(n: Nat): Nat.sub(n,n) == 0
 User.rigille.Problems.t22(n: Nat, e: n == 1): Nat.succ(n) == 2
   apply(Nat.succ, e)
 
-//User.rigille.Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
-  //case n {
-    //zero: case m {
-      //zero: refl,
-      //succ: ?b, // não ocorre
-    //}!
-    //succ: case m {
-      //zero: ?c, // nào ocorre
-      //succ: //let lem = e :: Nat.eql(n.pred, m.pred) == Nat.eql(n, m)
-            //let hmm = Nat.succ_inj(n.pred, m.pred, e)
-            //?d,
-    //}!
-  //}!
+User.rigille.Problems.t23.aux(n: Nat): Bool.false == Nat.eql(Nat.succ(n), 0)
+   refl
+
+User.rigille.Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
+  case n m with e {
+    zero zero: refl,
+    zero succ: let contra = Bool.true_neq_false(mirror(e))
+               Empty.absurd!(contra),
+    succ zero: let lem = Equal.chain!!!!(User.rigille.Problems.t23.aux(n.pred), e)
+               let contra = Bool.true_neq_false(mirror(e))
+               Empty.absurd!(contra),
+    succ succ: refl,
+  }!
 
 User.rigille.Problems.t24(xs: List<Nat>): Nat.gtn(List.length<Nat>(List.cons<Nat>(1,xs)),0) == true
   refl
