@@ -363,13 +363,16 @@ User.rigille.Problems.t23.aux(n: Nat): Bool.false == Nat.eql(Nat.succ(n), 0)
 
 User.rigille.Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
   case n m with e {
-    zero zero: refl,
+    zero zero: refl
     zero succ: let contra = Bool.true_neq_false(mirror(e))
-               Empty.absurd!(contra),
+               Empty.absurd!(contra)
     succ zero: let lem = Equal.chain!!!!(User.rigille.Problems.t23.aux(n.pred), e)
                let contra = Bool.true_neq_false(mirror(e))
-               Empty.absurd!(contra),
-    succ succ: refl,
+               Empty.absurd!(contra)
+    succ succ: let lem0 = refl :: Nat.eql(n.pred, m.pred) == Nat.eql(Nat.succ(n.pred), Nat.succ(m.pred))
+               let lem1 = Equal.chain!!!!(lem0, e)
+               let ind = User.rigille.Problems.t23(n.pred, m.pred, lem1)
+               apply(Nat.succ, ind)
   }!
 
 User.rigille.Problems.t24(xs: List<Nat>): Nat.gtn(List.length<Nat>(List.cons<Nat>(1,xs)),0) == true
