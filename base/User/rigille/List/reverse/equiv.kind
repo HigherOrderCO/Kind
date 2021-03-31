@@ -7,39 +7,75 @@ User.rigille.List.concat.assoc<A: Type>(xs: List<A>, ys: List<A>, zs: List<A>):
           ind
   }!
 
-User.rigille.List.reverse.equiv.aux0<A: Type>(xs: List<A>, ys: List<A>):
+User.rigille.List.reverse.equiv.aux<A: Type>(xs: List<A>, ys: List<A>):
+  // rev.go(xs, ys) == rev.go(xs, []) ++ ys
   List.reverse.go<A>(xs, ys) == List.concat<A>(List.reverse.go<A>(xs, List.nil<A>), ys)
   case xs {
     nil: refl,
-    cons: def rev = List.reverse.go
-          def theo = User.rigille.List.reverse.equiv.aux0
-          let ind0 = theo<A>(xs.tail, List.cons<A>(xs.head, ys))
-          let lem0 = refl ::
-            List.concat<A>(rev<A>(xs.tail, []), List.cons<A>(xs.head, ys))
-            ==
-            List.concat<A>(rev<A>(xs.tail, []), List.concat<A>([xs.head], ys))
-          let lem1 = User.rigille.List.concat.assoc<A>(rev<A>(xs.tail, []), [xs.head], ys)
+    cons: def rev = List.reverse.go<A>
+          def cons = List.cons<A>
+          def cat = List.concat<A>
+          def theo = User.rigille.List.reverse.equiv.aux<A>
+
+          // rev(xs.tail, xs.head :: ys) == rev(xs.tail, []) ++ (xs.head :: ys)
+          let ind0 = theo(xs.tail, cons(xs.head, ys))
+
+          // rev(xs.tail, []) ++ xs.head :: ys == rev(xs.tail, []) ++ ([xs.head] ++ ys)
+          let lem0 = refl :: 
+            cat(rev(xs.tail, []), cons(xs.head, ys)) == cat(rev(xs.tail, []), cat([xs.head], ys))
+
+          // (rev(xs, []) ++ [xs.head]) ++ ys == rev(xs, [] ++ ([xs.head] ++ ys)
+          let lem1 = User.rigille.List.concat.assoc<A>(rev(xs.tail, []), [xs.head], ys)
+
+          // rev(xs.tail, xs.head :: ys) == rev(xs.tail, []) ++ (xs.head :: ys)
+          // rev(xs.tail, []) ++ xs.head :: ys == rev(xs.tail, []) ++ ([xs.head] ++ ys)
+          //
+          // rev(xs.tail, xs.head :: ys) == rev(xs.tail, []) ++ ([xs.head] ++ ys)
           let lem2 = Equal.chain!!!!(ind0, lem0)
-          let lem3 = Equal.chain!!!!(lem2, lem1)
-          let ind1 = theo<A>(rev<A>(xs.tail, []), [xs.head])
 
-          // lem0, ind0
-          //exp: List.concat(A,List.concat(A,List.reverse.go(A,xs.tail,List.nil(A)),List.cons(A,xs.head,List.nil(A))),ys) == List.reverse.go(A,xs.tail,List.cons(A,xs.head,ys))
-          //fnd: List.concat(A,List.concat(A,List.reverse.go(A,xs.tail,List.nil(A)),List.cons(A,xs.head,List.nil(A))),ys) == List.concat(A,List.reverse.go(A,xs.tail,List.nil(A)),List.concat(A,List.cons(A,xs.head,List.nil(A)),ys)
+          // rev(xs.tail, xs.head :: ys) == rev(xs.tail, []) ++ ([xs.head] ++ ys)
+          // (rev(xs, []) ++ [xs.head]) ++ ys == rev(xs, [] ++ ([xs.head] ++ ys)
+          //
+          // rev(xs.tail, xs.head :: ys) == (rev(xs, []) ++ [xs.head]) ++ ys
+          let lem3 = Equal.chain!!!!(lem2, mirror(lem1))
 
-          // goal := rev(xs.head :: xs.tail, ys) == rev(xs, []) ++ ys
-          //         rev(xs.tail, xs.head :: ys) == rev(xs, []) ++ ys
-          // ind0 := rev(xs.tail, xs.head :: ys) == rev(xs.tail, []) ++ xs.head :: ys
-          // lem0 := rev(xs.tail, []) ++ xs.head :: ys == rev(xs.tail, []) ++ (xs.head ++ ys)
-          // lem1 := rev(xs.tail, []) ++ xs.head ++ ys == (rev(xs.tail, []) ++ xs.head) ++ ys
-          // ind1 := rev(xs.tail, [xs.head]) == rev(xs.tail, []) ++ xs.head
-          // lem2 := (rev(xs.tail, [xs.head]) == rev(xs.tail, [xs.head]) ++ ys
-          ?y,
+          // rev(xs.tail, []) ++ [xs.head] == rev(xs.tail, [xs.head])
+          let ind1 = mirror(theo(xs.tail, [xs.head]))
+
+          // (rev(xs.tail, []) ++ [xs.head]) ++ ys == rev(xs.tail, [xs.head]) ++ ys
+          let lem4 = apply((xs) cat(xs, ys), ind1)
+
+          // rev(xs.tail, xs.head :: ys) == (rev(xs, []) ++ [xs.head]) ++ ys
+          // (rev(xs.tail, []) ++ [xs.head]) ++ ys == rev(xs.tail, [xs.head]) ++ ys
+          // 
+          // rev(xs.tail, xs.head :: ys) == rev(xs.tail, [xs.head]) ++ ys
+          let qed = chain(lem3, lem4)
+          qed
   }!
 
 User.rigille.List.reverse.equiv<A: Type>(xs: List<A>): List.reverse!(xs) == User.rigille.List.reverse.aux!(xs)
+  // aliases
+  def cat = List.concat<A>
+  def rev = List.reverse<A>
+  def rev.go = List.reverse.go<A>
+  def cons = List.cons<A>
+  def nil = List.nil<A>
+  def rev.aux = User.rigille.List.reverse.aux<A>
+
   case xs {
-    nil: refl,
-    cons: let ind = User.rigille.List.reverse.equiv!(xs.tail)
-          ?a,
+    nil: refl
+    cons: // rev(xs.tail) == rev.aux(xs.tail)
+          let ind = User.rigille.List.reverse.equiv!(xs.tail)
+          // rev(xs.tail) ++ [xs.head] == rev.aux(xs.tail) ++ [xs.head]
+          let lem0 = apply((as) cat(as, [xs.head]), ind)
+          // rev.go(xs.tail, []) ++ [xs.head] == rev(xs.tail) ++ [xs.head]
+          let lem1 = refl :: cat(List.reverse.go<A>(xs.tail, []), [xs.head]) == cat(rev(xs.tail), [xs.head])
+          // rev.go(xs.tail, []) ++ [xs.head] == rev.aux(xs.tail) ++ [xs.head]
+          let lem2 = Equal.chain!!!!(lem1, lem0)
+          // rev.go(xs.tail, [xs.head]) == rev.go(xs, []) ++ [xs.head]
+          let lem3 = User.rigille.List.reverse.equiv.aux<A>(xs.tail, [xs.head])
+
+          // rev.go(xs.tail, [xs.head]) == rev.aux(xs.tail) ++ [xs.head]
+          let qed = Equal.chain!!!!(lem3, lem2)
+          qed
   }!
