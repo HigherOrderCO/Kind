@@ -1,0 +1,6 @@
+GMap.show_tree<K: Type, V: Type>(
+  tree: GMap<K,V>, 
+  key_show: K -> String, 
+  val_show: V -> String
+) : String
+  GMap.show_tree.go!!(tree, key_show, val_show, 0)
