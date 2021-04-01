@@ -1,0 +1,26 @@
+GMap.delete<K: Type, V: Type>(
+  key: K, 
+  map: GMap<K, V>, 
+  cmp : K -> K -> Cmp
+) : GMap<K, V>
+  case map {
+    tip: GMap.tip!!
+    bin: 
+      case cmp(key, map.key) {
+        // when recursion comes back rebalance the node
+        ltn: GMap.balance!!(map.key, map.val, GMap.delete!!(key, map.left, cmp), map.right)
+        // when recursion comes back rebalance the node
+        gtn: GMap.balance!!(map.key, map.val, map.left, GMap.delete!!(key, map.right, cmp))
+        eql: 
+          // get min value from right subtree
+          let min = GMap.min!!(map.right)
+          case min {
+            //no nodes on right, return left; if left is empty then will return empty anyway
+            none: map.left
+            some:
+                open min.value
+                let right_without_min = GMap.delete_min!!(map.right) // deletes right's min, rebalancing this subtree
+                GMap.balance!!(min.value.fst, min.value.snd, map.left, right_without_min) // rebalance his own node with the new right tree
+          }!
+      }!
+  }!
