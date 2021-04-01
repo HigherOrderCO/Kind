@@ -1,2 +1,9 @@
 Test: String
-  Lambda.test
+  a = 1
+  b = 1
+  case a b {
+    zero zero: "a"
+    zero succ: "b"
+    succ zero: "c"
+    succ succ: "d"
+  }

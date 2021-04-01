@@ -1,0 +1,3 @@
+Kind.Map.to_list<A: Type>(xs: Kind.Map(A)): List(Pair(Kind.Name,A))
+  let kvs = List.reverse!(BitsMap.to_list.go!(xs, Bits.e, List.nil!))
+  List.mapped!(kvs)!((kv) let {k,v} = kv; {Kind.Name.from_bits(k), v})

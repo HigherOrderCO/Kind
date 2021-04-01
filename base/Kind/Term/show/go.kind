@@ -70,14 +70,12 @@ Kind.Term.show.go(term: Kind.Term, path: Maybe(Bits -> Bits)): String
       cse:
         let expr = Kind.Term.show.go(term.expr, Kind.MPath.o(path));
         let name = Kind.Name.show(term.name);
-        let wyth = String.join("", List.mapped!(term.with)!((defn)
-          case defn {
-            new:
-              let name = Kind.Name.show(defn.name);
-              let type = Kind.Term.show.go(defn.type, Maybe.none!);
-              let term = Kind.Term.show.go(defn.term, Maybe.none!);
-              String.flatten([name, ": ", type, " = " term, ";"])
-          }));
+        let wyth = String.join("; ", List.mapped!(term.with)!((with_var)
+          open with_var
+          case with_var.type {
+            none: with_var.name
+            some: with_var.name | ": " | Kind.Term.show.go(with_var.type.value, none)
+          }))
         let cses = BitsMap.to_list!(term.cses);
         let cses = String.join("", List.mapped!(cses)!((x)
           let name = Kind.Name.from_bits(Pair.fst!!(x));

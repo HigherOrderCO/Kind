@@ -1,0 +1,18 @@
+GMap.show_tree.go<K: Type, V: Type>(
+  tree: GMap<K,V>, 
+  key_show: K -> String, 
+  val_show: V -> String, 
+  nivel: Nat
+) : String
+  case tree {
+    tip:  Nat.apply<String>(nivel, String.concat(" "), "") | "_\n"
+    bin:       
+      let result = Nat.apply<String>(nivel, String.concat(" "), "") 
+                    | key_show(tree.key) 
+                    | " : " 
+                    | val_show(tree.val) 
+                    | "\n"
+      result 
+        | GMap.show_tree.go!!(tree.left, key_show, val_show, nivel+1) 
+        | GMap.show_tree.go!!(tree.right, key_show, val_show, nivel+1)
+  }!

@@ -1,7 +1,7 @@
 Word.drop<size: Nat>(n: Nat, word: Word(Nat.add(n, size))): Word(size)
-  case n with word: Word(Nat.add(n, size)) = word {
-    zero: word,
+  case n with word {
+    zero: word
     succ:
       let word.pred = Word.pred<Nat.add(n.pred, size)>(word)
       Word.drop<size>(n.pred, word.pred)
-  } : Word(size)
+  }!

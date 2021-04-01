@@ -1,0 +1,2 @@
+Kind.Map.map<A: Type, B: Type>(fn: A -> B, map: Kind.Map(A)): Kind.Map(B)
+  BitsMap.map<A,B>(fn, map)

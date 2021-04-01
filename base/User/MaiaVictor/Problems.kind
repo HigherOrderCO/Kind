@@ -324,12 +324,12 @@ Problems.t22(n: Nat, e: n == 1): Nat.succ(n) == 2
   apply(Nat.succ, e)
 
 Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
-  case n with e : Nat.eql(n,m) == true = e {
-    zero: case m with e : (Nat.eql(Nat.zero,m) == true) = e {
+  case n with e {
+    zero: case m with e {
       zero: refl
       succ: Empty.absurd!(Bool.false_neq_true(e))
     }!
-    succ: case m with e : (Nat.eql(Nat.succ(n.pred),m) == true) = e {
+    succ: case m with e {
       zero: Empty.absurd!(Bool.false_neq_true(e))
       succ: apply(Nat.succ, Problems.t23(n.pred, m.pred, e))
     }!
@@ -365,7 +365,7 @@ Problems.t30(a: Bool): Bool.or(true, a) != false
   (e) Problems.t28(e)
 
 Problems.t31(a: Bool): Bool.or(a, true) != false
-  (e) case a with e : Bool.or(a,Bool.true) == Bool.false = e {
+  (e) case a with e {
     true: Problems.t28(e)
     false: Problems.t28(e)
   }!
@@ -374,7 +374,7 @@ Problems.t32(a: Bool): Bool.and(false, a) != true
   (e) Problems.t28(mirror(e))
 
 Problems.t33(a: Bool): Bool.and(a, false) != true
-  (e) case a with e : Bool.and(a, false) == true = e {
+  (e) case a with e {
     true: Problems.t28(mirror(e))
     false: Problems.t28(mirror(e))
   }!
