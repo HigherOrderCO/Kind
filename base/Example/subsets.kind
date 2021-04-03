@@ -2,7 +2,7 @@
 
 // A subset of the type Nat containing only even numbers
 Example.subsets.EvenNat: Type
-  {n: Nat} (n % 2) == 0 // Sigma(Nat, (x) (n % 2) == 0)
+  [n: Nat] (n % 2) == 0 // Sigma(Nat, (x) (n % 2) == 0)
 
 // This only type-checks if the number is even
 Example.subsets.test: Example.subsets.EvenNat

@@ -1,0 +1,19 @@
+// Generates a list from a leftist tree
+// The generated list will be sorted based on the comparator
+User.Rheidner.LeftistTree.to_list.go<A: Type>(
+  tree: User.Rheidner.LeftistTree<A>, result: List<A>, cmp: A -> A -> Cmp): List<A>
+  case tree {
+    empty: result
+    node:
+      let root = User.Rheidner.LeftistTree.get_root!(tree)
+      case root {
+        none: List.nil!
+        some:           
+          User.Rheidner.LeftistTree.to_list.go!( User.Rheidner.LeftistTree.delete_root!(tree, cmp), [ root.value ] ++ result, cmp )
+      }!
+  }!
+
+User.Rheidner.LeftistTree.to_list<A: Type>(
+  tree: User.Rheidner.LeftistTree<A>, 
+  cmp: A -> A -> Cmp): List<A>
+  User.Rheidner.LeftistTree.to_list.go!(tree, List.nil<A>, cmp)

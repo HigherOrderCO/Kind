@@ -1,0 +1,6 @@
+Lambda.rename<n: Nat, m: Nat>(fn: Fin<n> -> Fin<m>, term: Lambda<n>): Lambda<m>
+  case term with fn : (Fin<term.n> -> Fin<m>) {
+    var: Lambda.var!(fn(term.index))
+    lam: Lambda.lam!(Lambda.rename!!(Lambda.inc!!(fn), term.body))
+    app: Lambda.app!(Lambda.rename!!(fn, term.func), Lambda.rename!!(fn, term.argm))
+  }!

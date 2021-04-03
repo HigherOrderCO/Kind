@@ -1,0 +1,26 @@
+// Parses the tree to String format
+// Makes the tree printable
+User.Rheidner.LeftistTree.show.go<A: Type>(
+  tree: User.Rheidner.LeftistTree<A>, 
+  show_fn: (x: A) -> String, nivel: Nat
+) : String
+  case tree {
+    empty: ""
+    node:       
+      let result = Nat.apply<String>(nivel, String.concat(" "), "") 
+                    | show_fn(tree.value) 
+                    | ", rank: " 
+                    | Nat.show(tree.rank) 
+                    | ", nivel: " 
+                    | Nat.show(nivel) 
+                    | "\n"
+      result 
+        | User.Rheidner.LeftistTree.show.go<A>(tree.left, show_fn, nivel+1) 
+        | User.Rheidner.LeftistTree.show.go<A>(tree.right, show_fn, nivel+1)
+  }!
+
+User.Rheidner.LeftistTree.show<A: Type>(
+  tree: User.Rheidner.LeftistTree<A>, 
+  show_fn: (x: A) -> String
+) : String
+  User.Rheidner.LeftistTree.show.go<A>(tree, show_fn, 0)

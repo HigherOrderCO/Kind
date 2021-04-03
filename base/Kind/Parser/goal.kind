@@ -11,7 +11,7 @@ Kind.Parser.goal: Parser(Kind.Term)
     });
     get verb = Parser {
       get verb = Parser.maybe!(Parser.text("-"));
-      return Maybe.to_bool!(verb);
+      return Maybe.is_some!(verb);
     };
     get orig = Kind.Parser.stop(init);
     return Kind.Term.ori(orig, Kind.Term.gol(name, dref, verb));

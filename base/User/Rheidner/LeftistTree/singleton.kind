@@ -1,0 +1,10 @@
+// Creates a tree node from any given value
+User.Rheidner.LeftistTree.singleton<A: Type>(
+  value: A
+) : User.Rheidner.LeftistTree<A>
+  User.Rheidner.LeftistTree.node<A>(
+    value, 
+    User.Rheidner.LeftistTree.empty<A>, 
+    User.Rheidner.LeftistTree.empty<A>, 
+    1
+  )

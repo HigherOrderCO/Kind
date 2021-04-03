@@ -65,7 +65,14 @@ Kind.Term.bind(vars: Kind.Context, path: Kind.Path, term: Kind.Term): Kind.Term
     cse:
       let expr = Kind.Term.bind(vars, Kind.Path.o(path), term.expr);
       let name = term.name; // TODO
-      let wyth = term.with; // TODO
+      let wyth = List.mapped!(term.with)!((with_var)
+        open with_var
+        let with_var_term = Kind.Term.bind(vars, path, with_var.term)
+        let with_var_type = case with_var.type {
+          none: none
+          some: some(Kind.Term.bind(vars, path, with_var.type.value))
+        }
+        Kind.Ann.new(with_var.name, with_var_term, with_var_type));
       let cses = term.cses; // TODO
       let moti = term.moti; // TODO
       Kind.Term.cse(Kind.Path.to_bits(path), expr, name, wyth, cses, moti),

@@ -1,4 +1,9 @@
-Test: _
-  list = [1, 8, 3, 5, 2, 9, 4]
-  list = Example.bubble_sort(list)
-  List.show!(Nat.show, list)
+Test: String
+  a = 1
+  b = 1
+  case a b {
+    zero zero: "a"
+    zero succ: "b"
+    succ zero: "c"
+    succ succ: "d"
+  }

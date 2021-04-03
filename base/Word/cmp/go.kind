@@ -1,12 +1,12 @@
 Word.cmp.go<size: Nat>(a: Word(size), b: Word(size), c: Cmp): Cmp
-  case a with b : Word(a.size) = b {
+  case a with b : Word(a.size) {
     e: c,
-   o: case b with a.pred : Word(Nat.pred(b.size)) = a.pred {
+   o: case b with a.pred : Word(Nat.pred(b.size)) {
       e: c,
       o: Word.cmp.go<b.size>(a.pred, b.pred, c),
       i: Word.cmp.go<b.size>(a.pred, b.pred, Cmp.ltn)
     },
-    i: case b with a.pred : Word(Nat.pred(b.size)) = a.pred {
+    i: case b with a.pred : Word(Nat.pred(b.size)) {
       e: c,
       o: Word.cmp.go<b.size>(a.pred, b.pred, Cmp.gtn),
       i: Word.cmp.go<b.size>(a.pred, b.pred, c)

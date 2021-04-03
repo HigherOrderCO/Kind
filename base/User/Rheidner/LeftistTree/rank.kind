@@ -1,0 +1,8 @@
+// Gets the rank of a node
+User.Rheidner.LeftistTree.rank<A: Type>(
+  node: User.Rheidner.LeftistTree<A>
+) : Nat
+  case node {
+    empty: 0
+    node: node.rank
+  }!

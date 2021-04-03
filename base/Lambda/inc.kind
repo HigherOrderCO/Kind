@@ -1,0 +1,21 @@
+Lambda.inc<n: Nat, m: Nat>(fn: Fin<n> -> Fin<m>): Fin<Nat.succ(n)> -> Fin<Nat.succ(m)>
+  (i) case i with fn : (Fin<Nat.pred(i.lim)> -> Fin<m>) {
+    zero: Fin.zero!
+    succ: Fin.succ!(fn(i.pred))
+  }!
+
+Lambda.inc.v<n: Nat, m: Nat>(vec: Vector<Fin<m>,n>): Vector<Fin<Nat.succ(m)>, Nat.succ<n>>
+  let a = Vector.mapped<Fin<m>,n>(vec)<Fin<Nat.succ(m)>>(Fin.succ<m>)
+  let b = Vector.ext<Fin<Nat.succ(m)>,n>(Fin.zero<m>)
+  let c = b(a)
+  c
+  //case vec {
+    //nil: Vector.ext<Fin(Nat.succ(m)),0>(Fin.zero!, Vector.nil<Fin(Nat.succ(m))>)
+    //ext:
+      ////let a = Vector.ext<Fin(Nat.succ(m))
+      //?c
+  //}!
+  //(i) case i with fn : (Fin<Nat.pred(i.lim)> -> Fin<m>) = fn {
+    //zero: Fin.zero!
+    //succ: Fin.succ!(fn(i.pred))
+  //}!

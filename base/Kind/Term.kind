@@ -73,7 +73,7 @@ type Kind.Term {
     path: Bits,
     expr: Kind.Term,
     name: Kind.Name,
-    with: List(Kind.Def),
+    with: List(Kind.Ann),
     cses: BitsMap(Kind.Term),
     moti: Maybe(Kind.Term),
   ),

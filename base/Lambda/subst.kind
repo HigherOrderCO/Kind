@@ -1,0 +1,6 @@
+Lambda.subst<n: Nat, m: Nat>(subs: Fin<n> -> Lambda<m>, term: Lambda<n>): Lambda<m>
+  case term with subs : Fin<term.n> -> Lambda<m> {
+    var: subs(term.index)
+    lam: Lambda.lam!(Lambda.subst!!(Lambda.shift!!(subs), term.body))
+    app: Lambda.app!(Lambda.subst!!(subs, term.func), Lambda.subst!!(subs, term.argm))
+  }!

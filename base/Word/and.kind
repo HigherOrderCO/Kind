@@ -1,14 +1,14 @@
 Word.and<size: Nat>(a: Word(size), b: Word(size)): Word(size)
-  case a with b: Word(a.size) = b {
+  case a with b {
     e: Word.e,
-    o: case b with a.pred: Word(Nat.pred(b.size)) = a.pred {
+    o: case b with a.pred: Word(Nat.pred(b.size)) {
       e: Word.e,
       o: Word.o<b.size>(Word.and<b.size>(a.pred, b.pred)),
       i: Word.o<b.size>(Word.and<b.size>(a.pred, b.pred))
-    } : Word(b.size),
-    i: case b with a.pred: Word(Nat.pred(b.size)) = a.pred {
+    }!
+    i: case b with a.pred: Word(Nat.pred(b.size)) {
       e: Word.e,
       o: Word.o<b.size>(Word.and<b.size>(a.pred, b.pred)),
       i: Word.i<b.size>(Word.and<b.size>(a.pred, b.pred))
-    } : Word(b.size)
-  } : Word(a.size)
+    }!
+  }!

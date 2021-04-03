@@ -1,0 +1,10 @@
+// Deletes the root of the tree and 
+// merges the root's left with the root's right
+User.Rheidner.LeftistTree.delete_root<A: Type>(
+  tree: User.Rheidner.LeftistTree<A>, 
+  comparator: A -> A -> Cmp
+): User.Rheidner.LeftistTree<A>
+  case tree {
+    empty: User.Rheidner.LeftistTree.empty!
+    node: User.Rheidner.LeftistTree.merge<A>(tree.left, tree.right, comparator)
+  }!

@@ -1,0 +1,5 @@
+Lambda.shift<n: Nat, m: Nat>(ctx: Fin<n> -> Lambda<m>): Fin<Nat.succ(n)> -> Lambda<Nat.succ(m)>
+  (i) case i with ctx : (Fin<Nat.pred(i.lim)> -> Lambda<m>) {
+    zero: Lambda.var!(Fin.zero!)
+    succ: Lambda.rename!!(Fin.succ<m>, ctx(i.pred))
+  }!

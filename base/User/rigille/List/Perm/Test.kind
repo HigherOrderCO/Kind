@@ -1,0 +1,19 @@
+range3: List<Nat>
+  [0, 1, 2]
+
+rev_range3: List<Nat>
+  [2, 1, 0]
+
+User.rigille.List.Perm.Test: User.rigille.List.Perm<Nat>(rev_range3, range3)
+  let h = User.rigille.List.Perm.swap<Nat>(0, 1, [2])
+  let j = User.rigille.List.Perm.skip<Nat>(1, _, _, User.rigille.List.Perm.swap<Nat>(0, 2, List.nil<Nat>))
+  let k = User.rigille.List.Perm.swap<Nat>(1, 2, [0])
+  User.rigille.List.Perm.trans<Nat>!!!(k, User.rigille.List.Perm.trans<Nat>!!!(j, h))
+
+//[0, 1, 2]
+//    ↓
+//[1, 0, 2] — h
+//    ↓
+//[1, 2, 0] — j
+//    ↓
+//[2, 1, 0] — k

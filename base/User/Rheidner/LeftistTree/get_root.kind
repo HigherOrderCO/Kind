@@ -1,0 +1,9 @@
+// Returns the root if is not empty
+// If it is empty returns Maybe.none
+User.Rheidner.LeftistTree.get_root<A: Type>(
+  tree: User.Rheidner.LeftistTree<A>
+): Maybe<A>
+  case tree {
+    empty: Maybe.none!
+    node: Maybe.some!(tree.value)
+  }!

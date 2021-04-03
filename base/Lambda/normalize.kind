@@ -1,0 +1,6 @@
+Lambda.normalize<n: Nat>(term: Lambda<n>): Lambda<n>
+  case Lambda.reduce!(term) as term {
+    var: Lambda.var!(term.index)
+    lam: Lambda.lam!(Lambda.normalize!(term.body))
+    app: Lambda.app!(Lambda.normalize!(term.func), Lambda.normalize!(term.argm))
+  }: Lambda<term.n>

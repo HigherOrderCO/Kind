@@ -1,0 +1,7 @@
+// Sorts one list based on a comparator function
+User.Rheidner.LeftistTree.sort<A: Type>(
+  list: List<A>, 
+  cmp: A -> A -> Cmp
+) : List<A>
+  let tree = User.Rheidner.LeftistTree.from_list!(list, cmp)
+  User.Rheidner.LeftistTree.to_list!(tree, cmp)

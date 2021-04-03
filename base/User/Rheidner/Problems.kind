@@ -1,0 +1,430 @@
+// How to use this file:
+// 1. Clone Kind's repo:     git clone https://github.com/uwu-tech/kind
+// 2. Create a dir for you:  mkdir Kind/base/User/YourName
+// 3. Copy that file there:  cp Kind/base/Problems.kind Kind/base/User/YourName
+// 4. Open, uncomment a problem and solve it
+// 5. Send a PR if you want!
+
+// -----------------------------------------------------------------------------
+
+// ::::::::::::::
+// :: Programs ::
+// ::::::::::::::
+
+
+
+
+// Returs true if both inputs are true
+User.Rheidner.Problems.p0(a: Bool, b: Bool): Bool
+  case a {
+    true: b
+    false: false
+  }
+
+// Returs true if any input is true
+User.Rheidner.Problems.p1(a: Bool, b: Bool): Bool
+  case a {
+    true: true
+    false: b
+  }
+
+// Returs true if both inputs are identical
+User.Rheidner.Problems.p2(a: Bool, b: Bool): Bool
+  case a {
+    true: case b {
+      true: true
+      false: false
+    }
+    false: case b {
+      true: false
+      false: true
+    }
+  }
+
+// Returns the first element of a pair
+User.Rheidner.Problems.p3<A: Type, B: Type>(pair: Pair<A,B>): A
+  open pair
+  pair.fst
+
+// Returns the second element of a pair
+User.Rheidner.Problems.p4<A: Type, B: Type>(pair: Pair<A,B>): B
+  open pair
+  pair.snd
+
+// Inverses the order of the elements of a pair
+User.Rheidner.Problems.p5<A: Type, B: Type>(pair: Pair<A,B>): Pair<B,A>
+  open pair as pair
+  Pair.new!!( pair.snd, pair.fst )
+
+// Applies a function to both elements of a Pair
+User.Rheidner.Problems.p6<A: Type, B: Type>(fn: A -> B, pair: Pair<A,A>): Pair<B,B>
+  open pair
+  Pair.new!!( fn(pair.fst), fn(pair.snd) )
+
+// Doubles a number
+User.Rheidner.Problems.p7(n: Nat): Nat
+  case n {
+    zero: 0
+    succ: Nat.succ(Nat.succ(User.Rheidner.Problems.p7(n.pred)))
+  }!
+
+// Halves a number, rounding down
+User.Rheidner.Problems.p8(n: Nat): Nat
+  ?half
+
+// Adds two numbers
+User.Rheidner.Problems.p9(a: Nat, b: Nat): Nat
+  case a {
+    zero: b
+    succ: Nat.succ(User.Rheidner.Problems.p9(a.pred,b))
+  }
+
+// Subtracts two numbers
+User.Rheidner.Problems.p10(a: Nat, b: Nat): Nat
+  case b {
+    zero: a
+    succ: 
+      case a {
+        zero: 0
+        succ: User.Rheidner.Problems.p10(a.pred, b.pred)
+      }!
+  }!
+
+// Multiplies two numbers
+User.Rheidner.Problems.p11(a: Nat, b: Nat): Nat
+  case b {
+    zero: 0
+    succ: Nat.add(a, Nat.mul(a, b.pred))
+  }
+
+// Returns true if a < b
+User.Rheidner.Problems.p12(a: Nat, b: Nat): Bool
+  case a {
+    zero: 
+      case b {
+        zero: false
+        succ: true
+      }!
+    succ: 
+      case b {
+        zero: false
+        succ: User.Rheidner.Problems.p12(a.pred, b.pred)
+      }!
+  }!
+
+// Returns true if a == b
+User.Rheidner.Problems.p13(a: Nat, b: Nat): Bool
+  case a {
+    zero: 
+      case b {
+        zero: true
+        succ: false
+      }!
+    succ: 
+      case b {
+        zero: false
+        succ: User.Rheidner.Problems.p13(a.pred, b.pred)
+      }!
+  }!
+
+// Returns true if a > b
+User.Rheidner.Problems.p26(a: Nat, b: Nat): Bool
+  case a {
+    zero: 
+      case b {
+        zero: false
+        succ: true
+      }!
+    succ: 
+      case b {
+        zero: false
+        succ: User.Rheidner.Problems.p26(a.pred, b.pred)
+      }!
+  }!
+
+// Returns the first element of a List
+User.Rheidner.Problems.p14<A: Type>(xs: List<A>): Maybe(A)
+  case xs {
+    nil: Maybe.none!
+    cons: Maybe.some!(xs.head)
+  }!
+
+// Returns the list without the first element
+User.Rheidner.Problems.p15<A: Type>(xs: List<A>): List(A)
+  case xs {
+    nil: List.nil!
+    cons: xs.tail
+  }!
+
+// Returns the length of a list
+User.Rheidner.Problems.p16<A: Type>(xs: List<A>): Nat
+  case xs {
+    nil: 0
+    cons: 1 + List.length!(xs.tail)
+  }!
+
+// Concatenates two lists
+User.Rheidner.Problems.p17<A: Type>(xs: List<A>, ys: List<A>): List<A>
+  case xs {
+    nil: ys
+    cons: xs.head & User.Rheidner.Problems.p17<A>(xs.tail, ys)
+  }
+
+// Applies a function to all elements of a list
+User.Rheidner.Problems.p18<A: Type, B: Type>(fn: A -> B, xs: List<A>): List<B>
+  case xs {
+    nil: List.nil!
+    cons: List.cons!( fn(xs.head), User.Rheidner.Problems.p18!!(fn, xs.tail))
+  }!
+
+User.Rheidner.Problems.p18_tail.go<A: Type, B: Type>(xs: List<A>, fn: A -> B, result: List<B>): List<B>
+  case xs {
+    nil: result
+    cons: User.Rheidner.Problems.p18_tail.go!!(xs.tail, fn, List.cons!( fn(xs.head), result) )
+  }!
+
+User.Rheidner.Problems.p18_tail<A: Type, B: Type>(xs: List<A>, fn: A -> B): List<B>
+  User.Rheidner.Problems.p18_tail.go!!(xs, fn, List.nil!)
+
+// Returns the same list, with the order reversed
+User.Rheidner.Problems.p19.go<A: Type>(xs: List<A>, result: List<A>): List<A>
+  case xs {
+    nil: result
+    cons: User.Rheidner.Problems.p19.go!(xs.tail, List.cons!(xs.head, result) )
+  }!
+
+User.Rheidner.Problems.p19<A: Type>(xs: List<A>): List<A>
+  User.Rheidner.Problems.p19.go!(xs, List.nil!)
+
+// Returns pairs of the elements of the 2 input lists on the same index
+// Ex: User.Rheidner.Problems.p20!!([1,2], ["a","b"]) == [{1,"a"},{2,"b"}]
+//User.Rheidner.Problems.p20<A: Type, B: Type>(xs: List<A>, ys: List<B>): List<Pair<A,B>>
+//  ?a
+
+// Returns the smallest element of a List
+User.Rheidner.Problems.p21.go(xs: List<Nat>, m: Nat, first: Bool): Nat
+  case xs {
+    nil: m
+    cons: 
+      let smaller = 
+        if first 
+          then xs.head 
+        else 
+          if Nat.ltn(xs.head, m) then xs.head else m
+      User.Rheidner.Problems.p21.go(xs.tail, smaller, false)
+  }!
+
+User.Rheidner.Problems.p21(xs: List<Nat>): Nat
+  User.Rheidner.Problems.p21.go(xs, 0, true)
+
+// Returns the same list without the smallest element
+User.Rheidner.Problems.p22.go(xs: List<Nat>, min: Nat, result: List<Nat>): List<Nat>
+  case xs {
+    nil: result
+    cons: 
+      if (Nat.eql(xs.head, min)) then 
+        result ++ xs.tail
+      else 
+        User.Rheidner.Problems.p22.go(xs.tail, min, [xs.head] ++ result)
+  }!
+
+User.Rheidner.Problems.p22(xs: List<Nat>): List<Nat>
+  let min = User.Rheidner.Problems.p21(xs)
+  User.Rheidner.Problems.p22.go(xs, min, List.nil!)
+
+// Returns the same list, in ascending order
+User.Rheidner.Problems.p23.go(xs: List<Nat>, result: List<Nat>): List<Nat>
+  case xs {
+    nil: result
+    cons: 
+      let min = User.Rheidner.Problems.p21(xs)
+      let list_without_min = User.Rheidner.Problems.p22(xs)
+      User.Rheidner.Problems.p23.go(list_without_min, result ++ [min])
+  }!
+
+User.Rheidner.Problems.p23(xs: List<Nat>): List<Nat>
+  User.Rheidner.Problems.p23.go(xs, List.nil!)
+
+// -----------------------------------------------------------------------------
+
+// ::::::::::::::
+// :: Theorems ::
+// ::::::::::::::
+User.Rheidner.Problems.t2(a: Bool): Bool.and(a, false) == false
+  case a {
+    true: refl
+    false: refl
+  }!
+
+User.Rheidner.Problems.t5(a: Bool): Bool.eql(a, a) == true
+  case a {
+    true: refl
+    false: refl
+  }!
+
+User.Rheidner.Problems.t7(a: Bool, b: Bool): Bool.not(Bool.and(a,b)) == Bool.or(Bool.not(a), Bool.not(b))
+  case a {
+    true: refl //?a-38-21-9
+    false: refl //?a-38-21-9-10
+  }!
+
+User.Rheidner.Problems.t8(a: Bool, b: Bool): Bool.not(Bool.or(a,b)) == Bool.and(Bool.not(a), Bool.not(b))
+  case a {
+    true: refl
+    false: refl
+  }!
+
+User.Rheidner.Problems.t9(n: Nat): Nat.same(n) == n
+  case n {
+    zero: refl
+    succ: 
+      let ind = User.Rheidner.Problems.t9(n.pred)
+      let app = apply(Nat.succ, ind)
+      app
+  }!
+
+User.Rheidner.Problems.t14(n: Nat, m: Nat): Nat.add(n,Nat.succ(m)) == Nat.succ(Nat.add(n,m))
+  case n {
+    zero: refl
+    succ: 
+      let ind = User.Rheidner.Problems.t14(n.pred, m)
+      let app = apply(Nat.succ, ind)
+      app
+  }!
+
+User.Rheidner.Problems.t16(n: Nat): Nat.add(n,n) == Nat.double(n)
+  case n {
+    zero: refl
+    succ: 
+      let ind = User.Rheidner.Problems.t16(n.pred)
+      let app = apply(Nat.succ, apply(Nat.succ, ind))
+      let aux0 = User.Rheidner.Problems.t14(n.pred,n.pred)
+      let aux1 = apply(Nat.succ, aux0)
+      let aux3 = Equal.chain!!!!(aux1, app)
+      aux3
+  }!
+
+User.Rheidner.Problems.t17(n: Nat): Nat.ltn(n, Nat.succ(n)) == true
+  case n {
+    zero: refl
+    succ: 
+      let ind = User.Rheidner.Problems.t17(n.pred)
+      ind
+  }!
+
+User.Rheidner.Problems.t18(n: Nat): Nat.gtn(Nat.succ(n), n) == true
+  case n {
+    zero: refl
+    succ: 
+      let ind = User.Rheidner.Problems.t18(n.pred)
+      ind
+  }!
+
+User.Rheidner.Problems.t19(n: Nat): Nat.sub(n,n) == 0
+  case n {
+    zero: refl
+    succ:
+      let ind = User.Rheidner.Problems.t19(n.pred)
+      ind
+  }!
+
+User.Rheidner.Problems.t12(n: Nat): Nat.add(n,0) == n
+  case n {
+    zero: refl
+    succ:
+      let ind = User.Rheidner.Problems.t12(n.pred)
+      let app = apply(Nat.succ, ind)
+      app
+  }!
+
+User.Rheidner.Problems.t20(n: Nat): Nat.add(n,n) == Nat.mul(n,2)
+  case n {
+    zero: refl
+    succ: 
+      let ind = User.Rheidner.Problems.t20(n.pred)
+      let app = apply(Nat.succ, ind)
+      let aux0 = User.Rheidner.Problems.t12(n.pred)
+      let aux1 = User.Rheidner.Problems.t14(n.pred, n.pred)   
+      let aux2 = Equal.chain!!!!(aux1, app)
+      let aux3 = apply(Nat.succ, aux2)
+      ?a
+  }!
+
+User.Rheidner.Problems.t21(n: Nat): Nat.sub(n,n) == 0
+  case n {
+    zero: refl
+    succ: 
+      let ind = User.Rheidner.Problems.t21(n.pred)
+      ind
+  }!
+
+User.Rheidner.Problems.t22(n: Nat, e: n == 1): Nat.succ(n) == 2
+  apply(Nat.succ, e)
+
+User.Rheidner.Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
+  ?a-
+
+User.Rheidner.Problems.t24(xs: List<Nat>): Nat.gtn(List.length<Nat>(List.cons<Nat>(1,xs)),0) == true
+ case xs {
+   nil: refl
+   cons: refl
+ }!
+
+User.Rheidner.Problems.t25(xs: List<Nat>): List.map<Nat,Nat>((x) x, xs) == xs
+  case xs {
+    nil: refl
+    cons: 
+      let ind = User.Rheidner.Problems.t25(xs.tail)
+      let app = apply(List.cons!(xs.head), ind)
+      app
+  }!
+
+User.Rheidner.Problems.t26(xs: List<Nat>, ys: List<Nat>): Nat.add(List.length<Nat>(xs), List.length<Nat>(ys)) == List.length<Nat>(List.concat<Nat>(xs,ys))
+  case xs {
+    nil: refl
+    cons: 
+      let ind = User.Rheidner.Problems.t26(xs.tail, ys)
+      let app = apply(Nat.succ, ind)//?a-74-18-35-9
+      app
+  }!
+
+// User.Rheidner.Problems.t27(xs: List<Nat>): List.reverse<Nat>(List.reverse<Nat>(xs)) == xs
+//   case xs {
+//     nil: refl,
+//     cons: 
+//       let ind = User.Rheidner.Problems.t27(xs.tail)
+//       let app = apply(List.cons<Nat>(xs.head), ind)
+//       app
+//   }!
+
+// User.Rheidner.Problems.t28: true != false
+//   ?a
+
+User.Rheidner.Problems.t30(a: Bool): Bool.or(true, a) != false
+  (e)
+  Bool.true_neq_false(e)
+
+User.Rheidner.Problems.t31(a: Bool): Bool.or(a, true) != false
+  case a {
+    true: (e) Bool.true_neq_false(e)
+    false: (e) Bool.true_neq_false(e)
+  }!
+
+User.Rheidner.Problems.t32(a: Bool): Bool.and(false, a) != true
+  (e)
+  Bool.false_neq_true(e)
+
+User.Rheidner.Problems.t33(a: Bool): Bool.and(a, false) != true
+  case a {
+    true: (e) Bool.false_neq_true(e)
+    false: (e) Bool.false_neq_true(e)
+  }!
+
+User.Rheidner.Problems.t34(a: Nat, b: Nat, e: a == b): b == a
+  mirror(e)
+
+User.Rheidner.Problems.t35(a: Nat, b: Nat, c: Nat, e0: a == b, e1: b == c): a == c
+  Equal.chain!!!!(e0, e1)
+
+User.Rheidner.Problems.t36(a: Nat, P: Nat -> Type, p: P(a)): P(Nat.same(a))
+  p :: rewrite X in P(X) with mirror(User.Rheidner.Problems.t9(a))

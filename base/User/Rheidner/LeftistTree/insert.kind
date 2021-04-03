@@ -1,0 +1,11 @@
+// Inserts a value in the tree
+User.Rheidner.LeftistTree.insert<A: Type>(
+  value: A, 
+  tree: User.Rheidner.LeftistTree<A>, 
+  cmp: A -> A -> Cmp
+) : User.Rheidner.LeftistTree<A>
+  User.Rheidner.LeftistTree.merge<A>(
+    User.Rheidner.LeftistTree.singleton<A>(value), 
+    tree, 
+    cmp
+  )

@@ -1,0 +1,11 @@
+User.rigille.List.Perm.len<A: Type>(xs: List<A>, ys: List<A>, Hyp: User.rigille.List.Perm<A>(xs, ys)): List.length!(xs) == List.length!(ys)
+  case Hyp {
+    nil: refl
+    skip: let ind = User.rigille.List.Perm.len<A>(_, _, Hyp.Hyp)
+          apply(Nat.succ, ind)
+    swap: let tail_len = Equal.refl!(List.length!(Hyp.l))
+          apply(Nat.add(2), tail_len)
+    trans: let left_eq = User.rigille.List.Perm.len<A>!!(Hyp.Hyp0)
+           let right_eq = User.rigille.List.Perm.len<A>!!(Hyp.Hyp1)
+           Equal.chain!!!!(left_eq, right_eq)
+  }!

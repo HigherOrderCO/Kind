@@ -1,0 +1,5 @@
+Parser.try<V: Type>(parse: Parser(V)): Parser(Bool)
+  (idx,code) case parse(idx,code) as reply {
+    error: Parser.Reply.value<Bool>(idx, code, false),
+    value: Parser.Reply.value<Bool>(idx, code, true),
+  }

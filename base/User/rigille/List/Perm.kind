@@ -1,0 +1,16 @@
+// #TODO better names
+type User.rigille.List.Perm <A: Type> ~ (xs: List<A>, ys: List<A>) {
+  nil ~ (xs = List.nil<A>,
+         ys = List.nil<A>),
+
+  skip(x: A, l0: List<A>, l1: List<A>,
+       Hyp: User.rigille.List.Perm<A>(l0, l1)) ~ (xs = List.cons<A>(x, l0),
+                                ys = List.cons<A>(x, l1)),
+
+  swap(x: A, y: A, l: List<A>) ~ (xs = List.cons<A>(y, List.cons<A>(x, l)),
+                                  ys = List.cons<A>(x, List.cons<A>(y, l))),
+
+  trans(l0: List<A>, l1: List<A>, l2: List<A>,
+        Hyp0: User.rigille.List.Perm<A>(l0, l1), Hyp1: User.rigille.List.Perm<A>(l1, l2)) ~ (xs = l0,
+                                                                   ys = l2)
+}

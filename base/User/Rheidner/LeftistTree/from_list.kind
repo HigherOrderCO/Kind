@@ -1,0 +1,25 @@
+// Creates a leftist tree from a list of type A
+User.Rheidner.LeftistTree.from_list.go<A: Type>(
+  list: List<A>, 
+  result: User.Rheidner.LeftistTree<A>, 
+  cmp: A -> A -> Cmp
+) : User.Rheidner.LeftistTree<A>
+  case list {
+    nil: result
+    cons:       
+      User.Rheidner.LeftistTree.from_list.go!(
+        list.tail, 
+        User.Rheidner.LeftistTree.insert<A>(list.head,  result, cmp), 
+        cmp
+      )
+  }!
+
+User.Rheidner.LeftistTree.from_list<A: Type>(
+  list: List<A>, 
+  cmp: A -> A -> Cmp
+) : User.Rheidner.LeftistTree<A>
+  User.Rheidner.LeftistTree.from_list.go!(
+    list, 
+    User.Rheidner.LeftistTree.empty<A>, 
+    cmp
+  )
