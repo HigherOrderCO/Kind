@@ -1,0 +1,11 @@
+Web.Kaelin.Room(kaelin_room: String): String
+  "0x4b4145" | kaelin_room
+
+Web.Kaelin.Room.Chat: String
+  Web.Kaelin.Room("000000")
+
+Web.Kaelin.Room.Lobby: String
+  Web.Kaelin.Room("100000")
+
+Web.Kaelin.Room.Game0: String
+  Web.Kaelin.Room("200000")

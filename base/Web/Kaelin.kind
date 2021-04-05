@@ -1,53 +1,183 @@
-Web.Kaelin.Room(kaelin_room: String): String
-  "0x4b4145" | kaelin_room
+// init:
+// Bem-vindo ao Kaelin!
+// Digite uma sala e aperte enter: 0x108309300
 
-Web.Kaelin.ChatGeral: String
-  Web.Kaelin.Room("000000")
+// void:
+// Sala vazia. Digite um DraftString para começar um jogo:
+// sipher@Croni, sejagentil@Zeralul / stanci@Murlok, derenash@Keropao
 
-Web.Kaelin.GlobalLobby: String
-  Web.Kaelin.Room("100000")
+type Web.Kaelin.Entity {
+  new(color: Col32)
+}
 
-Web.Kaelin.GameZero: String
-  Web.Kaelin.Room("200000")
+Web.Kaelin.Tile: Type
+  List(Web.Kaelin.Entity)
+
+Web.Kaelin.Map: Type
+  Map(Web.Kaelin.Tile)
+
+type Web.Kaelin.State {
+  init
+  void(
+    room: String
+  )
+  game(
+    room: String
+    tick: Nat
+    pos: Web.Kaelin.Coord
+    map: Web.Kaelin.Map
+  )
+}
+
+type Web.Kaelin.Coord {
+  new(i: U32, j: U32) 
+}
+
+type Web.Kaelin.Action {
+  walk
+  ability_0
+  ability_1
+}
+
+type Web.Kaelin.DraftInfo {
+  new(
+    player: String
+    hero: String
+    team: String
+  )
+}
+
+type Web.Kaelin.Event {
+  // Will store draft info (player / hero / team)
+  // [Web.Kaelin.Drafted.new("0x01babFc", Web.Kaelin.Hero.Zeralul, Web.Kaelin.Team.Blue)]
+  start_game(players: List(Web.Kaelin.DraftInfo))
+  user_input(coord: Web.Kaelin.Coord, action: Web.Kaelin.Action)
+}
+
+// Serializes an event to a 256-bit hex string ("0x000....")
+Web.Kaelin.Event.serialize(event: Web.Kaelin.Event): String
+  ?web_kaelin_event_serialize
+
+// Converts a 256-bit hex string to an event
+Web.Kaelin.Event.deserialize(code: String): Web.Kaelin.Event
+  ?web_kaelin_event_deserialize
+
+Web.Kaelin.Coord.show(coord: Web.Kaelin.Coord): String
+  open coord
+  U32.to_string(coord.i) | ":" | U32.to_string(coord.j)
+
+Web.Kaelin.Coord.hexagon_radius: U32
+  10u
+
+Web.Kaelin.Coord.to_screen_xy(coord: Web.Kaelin.Coord): Pair(U32,U32)
+  open coord
+  let i   = coord.i
+  let j   = coord.j
+  let rad = Web.Kaelin.Coord.hexagon_radius
+  let hlf = U32.div(rad,2u)
+  let cx  = U32.sub(128u,U32.mul(rad,4u))
+  let cx  = U32.add(cx,U32.mul(U32.mul(rad,2u),i))
+  let cy  = U32.sub(128u,U32.mul(hlf,5u))
+  let cy  = U32.add(cy,U32.mul(U32.mul(hlf,3u),j))
+  let cx  = if U32.eql(U32.mod(j,2u),0u) then cx else U32.add(cx,rad)
+  {cx, cy}
+
+Web.Kaelin.Map.get(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map): Web.Kaelin.Tile
+  map{Web.Kaelin.Coord.show(coord)} <> []
+
+Web.Kaelin.Map.pop(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map): Pair(Web.Kaelin.Map, Maybe(Web.Kaelin.Entity))
+  let key = Web.Kaelin.Coord.show(coord)
+  let tile = map{key} <> []
+  case tile {
+    nil: {map, none}
+    cons: {map{key} <- tile.tail, some(tile.head)}
+  }
+
+Web.Kaelin.Map.push(coord: Web.Kaelin.Coord, ent: Web.Kaelin.Entity, map: Web.Kaelin.Map): Web.Kaelin.Map
+  let key = Web.Kaelin.Coord.show(coord)
+  map{key} <- ent & (map{key} <> [])
+
+Web.Kaelin.Draw.tile(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map, img: Image3D): Image3D
+  open coord
+  let {cx,cy} = Web.Kaelin.Coord.to_screen_xy(coord)
+  let tile = Web.Kaelin.Map.get(coord, map)
+  for ent in tile with img:
+    open ent
+    Image3D.Draw.square(cx, cy, 0u, 4u, 4u, (x,y) ent.color, img)
+  img
 
 // A demo application that renders a square on the screen
-Web.Kaelin: App(Pair(U32,U32))
-  // Allocates the mutable buffer
-  let img = Image3D.alloc_capacity(256u)
+Web.Kaelin: App(Web.Kaelin.State)
+  let img = Image3D.alloc_capacity(65536u)
 
-  // Application state: just a position
-  let init = {128u, 128u}
+  let ent_r = Web.Kaelin.Entity.new(Col32.new(255u,0u,0u,255u))
+  let ent_g = Web.Kaelin.Entity.new(Col32.new(0u,255u,0u,255u))
+  let ent_b = Web.Kaelin.Entity.new(Col32.new(0u,0u,255u,255u))
 
-  // Render loop: draws a square at the stored position
+  // Initial state
+  let init = 
+    let Pos = Web.Kaelin.Coord.new
+    let pos = Pos(0u,2u)
+    let map = {}
+    let map = Web.Kaelin.Map.push(Pos(0u,0u),ent_r,map)
+    let map = Web.Kaelin.Map.push(Pos(1u,0u),ent_g,map)
+    let map = Web.Kaelin.Map.push(pos,ent_b,map)
+    Web.Kaelin.State.game("0x000000000000", 0, pos, map)
+
+  // Render function
+  //  0s - 10s: contagem regressiva
+  // 10s - 20s: escolha do turno 0
+  // 20s - 30s: animação do turno 0
+  // 30s - 40s: escolha do turno 1
+  // 40s - 50s: animação do turno 1
+  // 50s - 60s: escolha do turno 2
   let draw = (state)
-    let {pos_x, pos_y} = state
-    let col = (x, y)
-      let r = U32.add(96u,U32.mul(x,4u)) // red from 96 to 160
-      let g = U32.add(96u,U32.mul(x,4u)) // green from 96 to 160
-      let b = 128u                       // blue constant 128
-      let a = 255u                       // alpha constant 255
-      Col32.new(r, g, b, a)
-    let img = Image3D.clear(img)
-    let img = Image3D.Draw.square(pos_x, pos_y, 128u, 16u, 16u, col, img)
-    App.Render.pix(img)
+    case state {
+      game: 
+        let map = state.map
+        let img = Image3D.clear(img) // O(1)
+        let col = Col32.new(0u, 0u, 255u, 255u)
+        let rad = 10u
+        for j : U32 from 0u to 5u with img:
+          for i : U32 from 0u to 5u with img:
+            let coord = Web.Kaelin.Coord.new(i,j)
+            // Draws the hexagon border
+            let {cx,cy} = Web.Kaelin.Coord.to_screen_xy(coord)
+            let draw_e = Bool.or(Bool.and(U32.eql(U32.mod(j,2u),0u),U32.eql(i,0u)),U32.eql(j,4u))
+            let draw_f = Bool.or(Bool.and(U32.eql(U32.mod(j,2u),1u),U32.eql(i,4u)),U32.eql(j,4u))
+            let img    = Image3D.Draw.deresagon(cx,cy,0u,rad,col,true,true,true,true,draw_e,draw_f,img)
+            // Draws the entities
+            let img = Web.Kaelin.Draw.tile(coord, map, img)
+            img
+          img
+        App.Render.pix(img)
+    } default App.Render.txt("TODO: create the renderer for this game state mode")
 
-  // Event handler: moves the position when ASDW are pressed
+  // Event handler
   let when = (event, state)
     case event {
-      init: []
-      tick: []
-      xkey: if event.down then [
-        App.Action.state!(
-          let {x, y} = state
+      xkey:
+        if event.down then
           switch U16.eql(event.code) {
-            'A': {U32.sub(x, 4u), y}
-            'D': {U32.add(x, 4u), y}
-            'W': {x, U32.sub(y, 4u)}
-            'S': {x, U32.add(y, 4u)}
-          } default {x, y})
-        ] else []
-      post: []
-    }
+            'D':
+              case state {
+                game:
+                  // TODO: Web.Kaelin.Map.swap(i, ca, cb, map)
+                  let old_pos = state.pos
+                  let new_pos = case old_pos {
+                    new: Web.Kaelin.Coord.new(U32.add(old_pos.i,1u),old_pos.j)
+                  }
+                  let {map,ent} = Web.Kaelin.Map.pop(old_pos, state.map)
+                  let map = case ent {
+                    none: map
+                    some: Web.Kaelin.Map.push(new_pos, ent.value, map)
+                  }
+                  let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
+                  [App.Action.state!(state)]
+              } default []
+          } default []
+        else []
+    } default []
 
   // The application
   App.new!(init, draw, when)
