@@ -1,9 +1,6 @@
-Test: String
-  a = 1
-  b = 1
-  case a b {
-    zero zero: "a"
-    zero succ: "b"
-    succ zero: "c"
-    succ succ: "d"
-  }
+Test: Nat
+  let map = {}
+  for i from 0 to 1000 with map:
+    map{Nat.show(i)} <- i
+  map{Nat.show(10)} <> 0
+

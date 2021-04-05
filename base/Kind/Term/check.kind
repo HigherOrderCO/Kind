@@ -138,7 +138,7 @@ Kind.Term.check(
               //some:
                 //let size = List.length!(ctx);
                 //let typv = Kind.Term.normalize(type.value, Kind.Map.new!);
-                //let moti = Kind.SmartMotive.make(term.name, term.expr, etyp, typv, size, defs);
+                //let moti = Kind.Term.SmartMotive.make(term.name, term.expr, etyp, typv, size, defs);
                 //moti,
             //};
             //Maybe.some!(Kind.Term.cse(term.path, term.expr, term.name, term.with, term.cses, Maybe.some!(moti))),
