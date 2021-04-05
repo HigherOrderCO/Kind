@@ -2,7 +2,7 @@
 // merges the root's left with the root's right
 User.Rheidner.LeftistTree.delete_root<A: Type>(
   tree: User.Rheidner.LeftistTree<A>, 
-  comparator: A -> A -> Bool
+  comparator: A -> A -> Cmp
 ): User.Rheidner.LeftistTree<A>
   case tree {
     empty: User.Rheidner.LeftistTree.empty!

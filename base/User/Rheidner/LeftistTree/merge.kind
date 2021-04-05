@@ -2,7 +2,7 @@
 User.Rheidner.LeftistTree.merge<A: Type>(
   treeA: User.Rheidner.LeftistTree<A>, 
   treeB: User.Rheidner.LeftistTree<A>, 
-  cmp: A -> A -> Bool
+  cmp: A -> A -> Cmp
 ) : User.Rheidner.LeftistTree<A>
   case treeA {
     empty: treeB
@@ -10,9 +10,9 @@ User.Rheidner.LeftistTree.merge<A: Type>(
       case treeB {
         empty: treeA
         node:
-          if ( cmp(treeA.value,treeB.value) ) 
-            then User.Rheidner.LeftistTree.merge<A>(treeB, treeA, cmp)
-          else
+          if Cmp.as_ltn(cmp(treeA.value,treeB.value)) then
+            User.Rheidner.LeftistTree.merge<A>(treeB, treeA, cmp)            
+          else 
             let merged_right = User.Rheidner.LeftistTree.merge<A>(treeA.right, treeB, cmp)
             let rank_left = User.Rheidner.LeftistTree.rank<A>(treeA.left)
             let rank_right = User.Rheidner.LeftistTree.rank<A>(merged_right)
