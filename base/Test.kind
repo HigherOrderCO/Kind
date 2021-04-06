@@ -1,2 +1,2 @@
-Test: Either(Nat,Bool)
-  left(8)
+Test: String
+  "hello"
