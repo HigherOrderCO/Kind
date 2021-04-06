@@ -2,6 +2,7 @@ Kind.Parser.reference: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
     get name = Kind.Parser.name1;
+    get orig = Kind.Parser.stop(init);
     if String.eql(name, "case") then Parser {
       Parser.fail!("Reserved keyword.");
     } else if String.eql(name, "do") then Parser {
@@ -19,24 +20,23 @@ Kind.Parser.reference: Parser(Kind.Term)
     } else if String.eql(name, "def") then Parser {
       Parser.fail!("Reserved keyword.");
     } else if String.eql(name, "Type") then Parser {
-      return Kind.Term.typ;
+      return Kind.Term.ori(orig, Kind.Term.typ);
     } else if String.eql(name, "true") then Parser {
-      return Kind.Term.ref("Bool.true");
+      return Kind.Term.ori(orig, Kind.Term.ref("Bool.true"));
     } else if String.eql(name, "false") then Parser {
-      return Kind.Term.ref("Bool.false");
+      return Kind.Term.ori(orig, Kind.Term.ref("Bool.false"));
     } else if String.eql(name, "unit") then Parser {
-      return Kind.Term.ref("Unit.new");
+      return Kind.Term.ori(orig, Kind.Term.ref("Unit.new"));
     } else if String.eql(name, "none") then Parser {
       let term = Kind.Term.ref("Maybe.none");
       let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-      return term;
+      return Kind.Term.ori(orig, term);
     } else if String.eql(name, "refl") then Parser {
       let term = Kind.Term.ref("Equal.refl");
       let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
       let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-      return term;
+      return Kind.Term.ori(orig, term);
     } else Parser {
-      get orig = Kind.Parser.stop(init);
       return Kind.Term.ori(orig, Kind.Term.ref(name));
     };
   }

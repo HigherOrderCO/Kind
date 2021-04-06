@@ -27,7 +27,7 @@ Kind.Error.show(error: Kind.Error, defs: Kind.Defs): String
         | "\n"
       let with_ctxt = case error.context {
         nil: ""
-        cons: "With ctxt:\n" | Kind.Context.show(error.context)
+        cons: "With context:\n" | Kind.Context.show(error.context)
       }
       String.flatten([goal_name, with_type, with_ctxt])
     patch:
@@ -38,5 +38,5 @@ Kind.Error.show(error: Kind.Error, defs: Kind.Defs): String
       let term = Kind.Term.show(error.term)
       let context = Kind.Context.show(error.context)
       "Can't infer type of: " | term | "\n"
-      | "With ctxt:\n" | context
+      | "With context:\n" | context
   }

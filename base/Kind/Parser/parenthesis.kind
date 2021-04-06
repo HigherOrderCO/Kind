@@ -1,7 +1,9 @@
 Kind.Parser.parenthesis: Parser(Kind.Term)
   Parser {
+    get init = Kind.Parser.init;
     Kind.Parser.text("(");
     get term = Kind.Parser.term;
     Kind.Parser.text(")");
-    return term;
+    get orig = Kind.Parser.stop(init);
+    return Kind.Term.ori(orig, term);
   }

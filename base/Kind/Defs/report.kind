@@ -20,7 +20,7 @@ Kind.Defs.report.errors(defs: Kind.Defs): String
           errors
         cons:
           let name_str = defn.name
-          let rel_errs = Kind.Error.relevant(defn.stat.errors, Bool.false)
+          let rel_errs = Kind.Error.relevant(defn.stat.errors)
           let errors = for err in rel_errs:
             let err_msg = Kind.Error.show(err, defs)
             let ori_val = Kind.Error.origin(err)

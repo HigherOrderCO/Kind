@@ -161,6 +161,8 @@ Web.Kaelin: App(Web.Kaelin.State)
           switch U16.eql(event.code) {
             'D':
               case state {
+                init: []
+                void: []
                 game:
                   // TODO: Web.Kaelin.Map.swap(i, ca, cb, map)
                   let old_pos = state.pos
@@ -174,7 +176,7 @@ Web.Kaelin: App(Web.Kaelin.State)
                   }
                   let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
                   [App.Action.state!(state)]
-              } default []
+              }
           } default []
         else []
     } default []

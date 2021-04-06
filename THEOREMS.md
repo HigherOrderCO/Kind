@@ -93,7 +93,7 @@ We now run `kind Main.kind`. That will display:
 ```
 Goal ?a:
 With type: Bool.not(Bool.not(b)) == b
-With ctxt:
+With context:
 - b: Bool
 ```
 
@@ -154,12 +154,12 @@ Check it with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Bool.not(Bool.not(b)) == b
-With ctxt:
+With context:
 - b: Bool
 
 Goal ?b:
 With type: Bool.not(Bool.not(b)) == b
-With ctxt:
+With context:
 - b: Bool
 ```
 
@@ -185,12 +185,12 @@ values on each case". By running `kind Main.kind`, we now see:
 ```
 Goal ?a:
 With type: Bool.not(Bool.not(Bool.true)) == Bool.true
-With ctxt:
+With context:
 - b: Bool
 
 Goal ?b:
 With type: Bool.not(Bool.not(Bool.false)) == Bool.false
-With ctxt:
+With context:
 - b: Bool
 ```
 
@@ -213,12 +213,12 @@ Running `kind Main.kind`, we see:
 ```
 Goal ?a:
 With type: Bool.not-10(Bool.not-22(Bool.true-30)) == Bool.true-3
-With ctxt:
+With context:
 - b: Bool
 
 Goal ?b:
 With type: Bool.not-10(Bool.not-22(Bool.false-30)) == Bool.false-3
-With ctxt:
+With context:
 - b: Bool
 ```
 
@@ -239,12 +239,12 @@ Running `kind Main.kind`, we see:
 ```
 Goal ?a:
 With type: Bool.not(Bool.false) == Bool.true
-With ctxt:
+With context:
 - b: Bool
 
 Goal ?b:
 With type: Bool.not(Bool.true) == Bool.false
-With ctxt:
+With context:
 - b: Bool
 ```
 
@@ -265,12 +265,12 @@ Running `kind Main.kind`:
 ```
 Goal ?a:
 With type: Bool.true == Bool.true
-With ctxt:
+With context:
 - b: Bool
 
 Goal ?b:
 With type: Bool.false == Bool.false
-With ctxt:
+With context:
 - b: Bool
 ```
 
@@ -323,7 +323,7 @@ By running `kind main.kind`, we see:
 ```
 Goal ?a:
 With type: Bool.and(Bool.true,b) == b
-With ctxt:
+With context:
 - b: Bool
 ```
 
@@ -354,7 +354,7 @@ Run it with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Bool.and-18(Bool.true-26,b) == b
-With ctxt:
+With context:
 - b: Bool
 ```
 
@@ -370,7 +370,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: b == b
-With ctxt:
+With context:
 - b: Bool
 ```
 
@@ -420,7 +420,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Bool.and-18(b,Bool.true-14) == b
-With ctxt:
+With context:
 - b: Bool
 ```
 
@@ -436,7 +436,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: b((a) Bool,Bool.true,Bool.false) == b
-With ctxt:
+With context:
 - b: Bool
 ```
 
@@ -460,12 +460,12 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Bool.and(Bool.true,Bool.true) == Bool.true
-With ctxt:
+With context:
 - b: Bool
 
 Goal ?b:
 With type: Bool.and(Bool.false,Bool.true) == Bool.false
-With ctxt:
+With context:
 - b: Bool
 ```
 
@@ -585,7 +585,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Nat.half(Nat.double(n)) == n
-With ctxt:
+With context:
 - n: Nat
 ```
 
@@ -625,12 +625,12 @@ Run with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Nat.half(Nat.double(0)) == 0
-With ctxt:
+With context:
 - n: Nat
 
 Goal ?b:
 With type: Nat.half(Nat.double(Nat.succ(n.pred))) == Nat.succ(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 ```
@@ -651,7 +651,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?b:
 With type: Nat.half(Nat.double(Nat.succ(n.pred))) == Nat.succ(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 ```
@@ -675,7 +675,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?b:
 With type: Nat.half-10(Nat.double-22(Nat.succ-46(n.pred))) == Nat.succ-5(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 ```
@@ -695,7 +695,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?b:
 With type: Nat.half-10(Nat.succ-22(Nat.succ-46(Nat.double-94(n.pred)))) == Nat.succ-5(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 ```
@@ -715,7 +715,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?b:
 With type: Nat.succ(Nat.half(Nat.double(n.pred))) == Nat.succ(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 ```
@@ -742,13 +742,13 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Nat.half(Nat.double(1)) == 1
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 
 Goal ?b:
 With type: Nat.half(Nat.double(Nat.succ(Nat.succ(n.pred.pred)))) == Nat.succ(Nat.succ(n.pred.pred))
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 - n.pred.pred: Nat
@@ -776,7 +776,7 @@ goal now became:
 ```
 Goal ?b:
 With type: Nat.half(Nat.double(Nat.succ(Nat.succ(n.pred.pred)))) == Nat.succ(Nat.succ(n.pred.pred))
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 - n.pred.pred: Nat
@@ -788,7 +788,7 @@ This is similar to the situation we had before. With enough patience, we could
 ```
 Goal ?b:
 With type: Nat.succ(Nat.succ(Nat.half(Nat.double(n.pred.pred)))) == Nat.succ(Nat.succ(n.pred.pred))
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 - n.pred.pred: Nat
@@ -815,14 +815,14 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Nat.half(Nat.double(2)) == 2
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 - n.pred.pred: Nat
 
 Goal ?b:
 With type: Nat.half(Nat.double(Nat.succ(Nat.succ(Nat.succ(n.pred.pred.pred))))) == Nat.succ(Nat.succ(Nat.succ(n.pred.pred.pred)))
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 - n.pred.pred: Nat
@@ -863,7 +863,7 @@ And the following goal (check with `kind Main.kind`):
 ```
 Goal ?b:
 With type: Nat.succ(Nat.half(Nat.double(n.pred))) == Nat.succ(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 ```
@@ -888,7 +888,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?b:
 With type: Nat.succ(Nat.half(Nat.double(n.pred))) == Nat.succ(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 - rec: Nat.half(Nat.double(n.pred)) == n.pred
@@ -919,7 +919,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?b:
 With type: Nat.succ(Nat.half(Nat.double(n.pred))) == Nat.succ(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 - ind: Nat.half(Nat.double(n.pred)) == n.pred
@@ -972,7 +972,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Nat.add(0,n) == n
-With ctxt:
+With context:
 - n: Nat
 ```
 
@@ -1022,7 +1022,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Nat.add(n,0) == n
-With ctxt:
+With context:
 - n: Nat
 ```
 
@@ -1043,12 +1043,12 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Nat.add(0,0) == 0
-With ctxt:
+With context:
 - n: Nat
 
 Goal ?b:
 With type: Nat.add(Nat.succ(n.pred),0) == Nat.succ(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 ```
@@ -1069,12 +1069,12 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: 0 == 0
-With ctxt:
+With context:
 - n: Nat
 
 Goal ?b:
 With type: Nat.add(Nat.succ(n.pred),0) == Nat.succ(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 ```
@@ -1094,7 +1094,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?b:
 With type: Nat.add(Nat.succ(n.pred),0) == Nat.succ(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 ```
@@ -1116,7 +1116,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?b:
 With type: Nat.succ(Nat.add(n.pred,0)) == Nat.succ(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 ```
@@ -1141,7 +1141,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?b:
 With type: Nat.succ(Nat.add(n.pred,0)) == Nat.succ(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 - ind: Nat.add(n.pred,0) == n.pred
@@ -1167,7 +1167,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?b:
 With type: Nat.succ(Nat.add(n.pred,0)) == Nat.succ(n.pred)
-With ctxt:
+With context:
 - n: Nat
 - n.pred: Nat
 - ind: Nat.add(n.pred,0) == n.pred
@@ -1327,7 +1327,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Empty
-With ctxt:
+With context:
 - e: 1 == 0
 ```
 
@@ -1456,7 +1456,7 @@ Check it with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Empty
-With ctxt:
+With context:
 - e: 3 == 2
 ```
 
@@ -1493,7 +1493,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Empty
-With ctxt:
+With context:
 - e: 3 == 2
 - e0: 2 == 1
 ```
@@ -1513,7 +1513,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Empty
-With ctxt:
+With context:
 - e: 3 == 2
 - e0: 2 == 1
 - e1: 1 == 0
@@ -1535,7 +1535,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Empty
-With ctxt:
+With context:
 - e: 3 == 2
 - e0: 2 == 1
 - e1: 1 == 0
@@ -1559,7 +1559,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Empty
-With ctxt:
+With context:
 - e: 3 == 2
 - e0: 2 == 1
 - e1: 1 == 0
@@ -1606,7 +1606,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Not(Bool.not(b) == b)
-With ctxt:
+With context:
 - a: Bool
 ```
 
@@ -1623,7 +1623,7 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Empty
-With ctxt:
+With context:
 - a: Bool
 - e: Bool.not(b) == b
 ```
@@ -1644,13 +1644,13 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Empty
-With ctxt:
+With context:
 - b: Bool
 - e: Bool.not(b) == b
 
 Goal ?b:
 With type: Empty
-With ctxt:
+With context:
 - b: Bool
 - e: Bool.not(b) == b
 ```
@@ -1675,13 +1675,13 @@ Check with `kind Main.kind`:
 ```
 Goal ?a:
 With type: Empty
-With ctxt:
+With context:
 - b: Bool
 - e: Bool.not(Bool.true) == Bool.true
 
 Goal ?b:
 With type: Empty
-With ctxt:
+With context:
 - b: Bool
 - e: Bool.not(Bool.false) == Bool.false
 ```
