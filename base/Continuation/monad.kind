@@ -1,0 +1,2 @@
+Continuation.monad<A: Type>: Monad<Continuation<A>>
+  Monad.new<Continuation<A>>(Continuation.bind<A>, Continuation.pure<A>)
