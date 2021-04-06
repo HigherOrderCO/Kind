@@ -5,3 +5,4 @@ scripts/
 src/_*
 src/tmp*
 bin/hs/cabal.project.local*
+tmp.js
