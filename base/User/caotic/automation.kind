@@ -1,0 +1,40 @@
+
+// Defines an obligation as a pair which *obligatorily* that tries to unify the type of fst with the snd value.
+type Obligation (A : Type) ~ (B : Type) (i : B)  {
+  compromises(B : Type, j : A) ~ (B = A, i = j)
+}
+
+// An induction scheme to solve induction proofs of list that carries an obligation only to fill the kind holes intend for automation.
+User.caotic.automation.easy(
+  A : Type,
+  left : Nat -> A,
+  right : Nat -> A,
+  P0 : Obligation(left(Nat.zero) == right(Nat.zero), right(Nat.zero) == right(Nat.zero), refl),
+  P1 : (x : Nat) (p : left(x) == right(x)) -> Obligation(left(Nat.succ(x)) == right(Nat.succ(x)), left(x) == right(x), p))
+   : (x : Nat) -> left(x) == right(x)
+  (x) case x {
+    zero : 
+      case P0 {
+        compromises : P0.j
+      }
+    succ :
+      let easy_ind = User.caotic.automation.easy(A, left, right, P0, P1, x.pred)
+      case P1(x.pred, easy_ind) {
+        compromises : self.j
+      }
+  }!
+
+// A inductive scheme of two natural number using the first as "gas"
+User.caotic.automation.aux_ind2_nat(
+    P : Nat -> Nat -> Type,
+    P0: (y : Nat) -> P(Nat.zero, y),
+    P1 : (x : Nat) -> P(x, Nat.zero) -> P(Nat.succ(x), Nat.zero),
+    P2 : (x : Nat) (y : Nat) -> P(x, y) -> P(Nat.succ(x), Nat.succ(y)))
+     : (n : Nat) -> (m : Nat) -> P(n, m)
+  (x) case x {
+      zero : P0
+      succ : (y) case y {
+          zero : P1(x.pred, User.caotic.automation.aux_ind2_nat(P, P0, P1, P2, x.pred, Nat.zero))
+          succ : P2(x.pred, y.pred, User.caotic.automation.aux_ind2_nat(P, P0, P1, P2, x.pred, y.pred))
+      } : P(Nat.succ(x.pred), y)
+  } : (y : Nat) -> P(x, y) 
