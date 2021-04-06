@@ -1,0 +1,5 @@
+User.rigille.List.reverse.go<A: Type>(xs: List<A>): List<A>
+  case xs {
+    nil: List.nil!
+    cons: List.concat!(User.rigille.List.reverse.go!(xs.tail), [xs.head])
+  }

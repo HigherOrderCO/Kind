@@ -1,2 +1,6 @@
 List.insert_sort_nat(ns: List(Nat)): List(Nat)
   List.foldr!!(List.nil!, List.insert_sort_nat.aux, ns)
+
+List.insert_sort_nat.aux(n: Nat, ns: List(Nat)): List(Nat)
+  open List.span!(Nat.lte(n), ns) as spanned
+  List.concat!(spanned.fst, List.cons!(n, spanned.snd))
