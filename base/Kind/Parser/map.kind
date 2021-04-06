@@ -12,7 +12,7 @@ Kind.Parser.map: Parser(Kind.Term)
       }));
     get orig = Kind.Parser.stop(init);
     let list = List.fold!(vals)!(
-      Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e)),
+      Kind.Term.ori(orig, Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e))),
       (kv,xs)
         let {key,val} = kv
         let pair = Kind.Term.ref("Pair.new");

@@ -100,6 +100,10 @@ with Kind.
 
 ---
 
+### Implement a markdown renderer using App.Render.doc
+
+---
+
 ### Implement App.Render.wgl
 
 Like App.Render.doc, but this render mode would be based on WebGL and allow rich
@@ -127,4 +131,15 @@ for Kind and a REPL or Try mode for the language.
 ### alias
 
 
+---
+
+### Improve `Map` 
+
+It should use GMap instead of BitsMap
+
+---
+
+### Show line number on error message
+
+Instead of `Inside 'Test.kind'`, should be `Inside line X of 'Test.kind'`.
 

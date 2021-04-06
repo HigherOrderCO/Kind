@@ -2,3 +2,5 @@ Int.add(a: Int, b: Int): Int
   open a
   open b
   Int.new(Nat.add(a.x, b.x), Nat.add(a.y, b.y))
+
+

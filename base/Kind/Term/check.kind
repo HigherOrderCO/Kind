@@ -68,7 +68,7 @@ Kind.Term.check(
               //Kind.Check.result!(type, [Kind.Error.patch(Kind.MPath.to_bits(path),lam_term)]);
             //},
             _: do Kind.Check {
-              let expected = Either.left!!("(function type)");
+              let expected = Either.left!!("function");
               let detected = Either.right!!(type.value);
               Kind.Check.result!(type, [Kind.Error.type_mismatch(orig, expected, detected, ctx)]);
             }
@@ -84,8 +84,9 @@ Kind.Term.check(
             return func_typ.body(term.func, term.argm);
           },
           _: do Kind.Check {
-            let expected = Either.left!!("(function type)");
+            let expected = Either.left!!("function");
             let detected = Either.right!!(func_typ);
+            let orig = case term.func { ori: some(term.func.orig) } default orig
             Kind.Check.result!(type, [Kind.Error.type_mismatch(orig, expected, detected, ctx)]);
           },
         };
@@ -138,7 +139,7 @@ Kind.Term.check(
               //some:
                 //let size = List.length!(ctx);
                 //let typv = Kind.Term.normalize(type.value, Kind.Map.new!);
-                //let moti = Kind.SmartMotive.make(term.name, term.expr, etyp, typv, size, defs);
+                //let moti = Kind.Term.SmartMotive.make(term.name, term.expr, etyp, typv, size, defs);
                 //moti,
             //};
             //Maybe.some!(Kind.Term.cse(term.path, term.expr, term.name, term.with, term.cses, Maybe.some!(moti))),

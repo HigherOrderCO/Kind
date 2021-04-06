@@ -7,7 +7,7 @@ Kind.Parser.list: Parser(Kind.Term)
       Kind.Parser.item!(Kind.Parser.term));
     get orig = Kind.Parser.stop(init);
     return List.fold!(vals)!(
-      Kind.Term.app(Kind.Term.ref(Kind.Name.read("List.nil")), Kind.Term.hol(Bits.e)),
+      Kind.Term.ori(orig, Kind.Term.app(Kind.Term.ref(Kind.Name.read("List.nil")), Kind.Term.hol(Bits.e))),
       (x,xs)
         let term = Kind.Term.ref(Kind.Name.read("List.cons"));
         let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));

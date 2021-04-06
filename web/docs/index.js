@@ -3231,7 +3231,6 @@ module.exports = {
   'Web.Demo': __webpack_require__.e(/* import() */ 987).then(__webpack_require__.t.bind(__webpack_require__, 987, 23)),
   'Web.Jogo': __webpack_require__.e(/* import() */ 160).then(__webpack_require__.t.bind(__webpack_require__, 160, 23)),
   'Web.Kaelin': __webpack_require__.e(/* import() */ 927).then(__webpack_require__.t.bind(__webpack_require__, 927, 23)),
-  'Web.Test': __webpack_require__.e(/* import() */ 801).then(__webpack_require__.t.bind(__webpack_require__, 801, 23)),
 }
 
 

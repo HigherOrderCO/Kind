@@ -1,0 +1,5 @@
+Either.is_left<A: Type, B: Type>(e: Either<A,B>): Bool
+  case e {
+    left: true
+    right: false
+  }

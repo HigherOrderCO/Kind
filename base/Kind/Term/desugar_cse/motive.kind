@@ -40,6 +40,6 @@ Kind.Term.desugar_cse.motive(
 ): Kind.Term
   let done = Kind.Term.desugar_cse.motive.go(wyth, moti, name, expr, etyp, rtyp, defs, size)
   case moti {
-    none: Kind.SmartMotive.make(name, expr, etyp, done, size, defs)
+    none: Kind.Term.SmartMotive.make(name, expr, etyp, done, size, defs)
     some: done
   }

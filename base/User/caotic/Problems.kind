@@ -1,0 +1,506 @@
+// Returs true if both inputs are true
+Problems.p0(a: Bool, b: Bool) : Bool
+  case a {
+      true : b
+      false : false
+   }
+
+// Returs true if any input is true
+Problems.p1(a: Bool, b: Bool): Bool
+  case a {
+      true : true
+      false : b
+  }
+
+Problems.aux_not(a : Bool) : Bool
+  case a {
+      true : false
+      false : true
+  }
+
+// Returs true if both inputs are identical
+Problems.p2(a: Bool, b: Bool): Bool
+  let neg_or = Problems.p0(Problems.aux_not(a), Problems.aux_not(b))
+  Problems.p1(Problems.p0(a, b), neg_or)
+
+//Returns the first element of a pair
+Problems.p3<A: Type, B: Type>(pair: Pair<A,B>): A
+  open pair
+  pair.fst
+
+// Returns the second element of a pair
+Problems.p4<A: Type, B: Type>(pair: Pair<A,B>): B
+  open pair
+  pair.snd
+
+// Inverses the order of the elements of a pair
+Problems.p5<A: Type, B: Type>(pair: Pair<A,B>): Pair<B,A>
+  open pair
+  Pair.new(_, _, pair.snd, pair.fst)
+
+// Applies a function to both elements of a Pair
+Problems.p6<A: Type, B: Type>(fn: A -> B, pair: Pair<A,A>): Pair<B,B>
+  open pair
+  Pair.new(_, _, fn(pair.fst), fn(pair.snd))
+
+// Doubles a number
+Problems.p7(n: Nat): Nat
+  case n {
+      succ : Nat.succ(Nat.succ(Problems.p7(n.pred)))
+      zero : Nat.zero
+  }
+
+
+// Halves a number, rounding down
+Problems.p8(n: Nat): Nat
+  case n {
+      succ : case n.pred {
+          succ : n.pred.pred
+          zero : Nat.zero
+      }
+      zero : Nat.zero
+  }
+
+// Adds two numbers
+Problems.p9(a: Nat, b: Nat): Nat
+ case a {
+     zero : b
+     succ : Nat.succ(Problems.p9(a.pred, b))
+ }
+
+Problems.pred_aux(a : Nat) : Nat
+  case a {
+      zero : Nat.zero
+      succ : a.pred
+  }
+
+ // Subtracts two numbers
+Problems.p10(a: Nat, b: Nat): Nat
+  case b {
+      zero : a
+      succ : Problems.p10(Problems.pred_aux(a), b.pred)
+  }
+
+// Multiplies two numbers
+Problems.p11(a: Nat, b: Nat): Nat
+ case a {
+     zero : Nat.zero
+     succ : Problems.p9(b, Problems.p11(a.pred, b))
+ }
+
+Problems.isSucc(x:Nat) : Bool
+  case x {
+      zero : false
+      succ : true
+  }
+
+Problems.isZero(x:Nat) : Bool
+  case x {
+      zero : true
+      succ : false
+  }
+
+// Returns true if a < b
+Problems.p12(a: Nat, b: Nat): Bool
+  User.caotic.automation.aux_ind2_nat((n) (m) Bool, (y) Problems.isSucc(y), (x) (p) false, (n) (m) (p) p, a, b)
+
+// Returns true if a == b
+Problems.p13(a: Nat, b: Nat): Bool
+  User.caotic.automation.aux_ind2_nat((n) (m) Bool, (y) Problems.isZero(y), (x) (p) false, (n) (m) (p) p, a, b)
+
+// Returns the first element of a List
+Problems.p14<A: Type>(xs: List<A>): Maybe(A)
+  case xs {
+      nil : none
+      cons : some(xs.head)
+  } : Maybe(A)
+
+// Returns the list without the first element
+Problems.p15<A: Type>(xs: List<A>): List(A)
+  case xs {
+      nil : List.nil!
+      cons : xs.tail
+  }
+
+// Returns the length of a list
+Problems.p16<A: Type>(xs: List<A>): Nat
+  case xs {
+      nil : 0
+      cons : Problems.p16!(xs.tail) + 1
+  }
+
+// Concatenates two lists
+Problems.p17<A: Type>(xs: List<A>, ys: List<A>): List<A>
+ case xs {
+     nil : ys
+     cons : List.cons!(xs.head, Problems.p17!(xs.tail, ys))
+ }
+
+// Applies a function to all elements of a list
+Problems.p18<A: Type, B: Type>(fn: A -> B, xs: List<A>): List<B>
+  case xs {
+      nil : List.nil(B)
+      cons : List.cons!(fn(xs.head), Problems.p18(A, B, fn, xs.tail))
+  }
+
+// Returns the same list, with the order reversed
+Problems.p19<A: Type>(xs: List<A>): List<A>
+ case xs {
+     nil : List.nil!
+     cons : Problems.p17!(Problems.p19(A, xs.tail), [xs.head])
+ }
+
+// Returns pairs of the elements of the 2 input lists on the same index
+// Ex: Problems.p20!!([1,2], ["a","b"]) == [{1,"a"},{2,"b"}]
+Problems.p20<A: Type, B: Type>(xs: List<A>, ys: List<B>): List<Pair<A,B>>
+  case xs {
+    nil : []
+    cons : case ys {
+        nil : []
+        cons : List.cons!(Pair.new(A, B, xs.head, ys.head), Problems.p20(A, B, xs.tail, ys.tail))
+    }
+  }
+
+Problems.fold<A : Type, B : Type>(xs : List<A>, fn : A -> B -> B, default : B) : B
+  case xs {
+    nil : default
+    cons : fn(xs.head, Problems.fold(A, B, xs.tail, fn, default))
+  }
+
+Problems.p21(xs : List<Nat>) : Nat
+  Problems.fold(Nat, Nat, xs, (x) (y) if (Problems.p12(x, y)) then x else y, case xs {
+    nil : 0
+    cons : xs.head
+  })
+  
+Problems.filter<A : Type>(xs : List<A>, fn : A -> Bool) : List<A>
+  case xs {
+    nil : List.nil!
+    cons : 
+      def p = Problems.filter(A, xs.tail, fn)
+      if fn(xs.head) then p else List.cons!(xs.head, p)
+  }
+
+// Returns the same list without the smallest element
+Problems.p22(xs: List<Nat>): List<Nat>
+  Problems.filter(Nat, xs, (y) Problems.p13(Problems.p21(xs), y))
+
+Problems.aux_slow_sort(xs: List<Nat>): List<Nat>
+  case xs {
+    nil : []
+    cons : 
+      let v = Problems.p21(xs)
+      let rest = Problems.p22(xs.tail)
+      List.cons(Nat, v, rest) 
+  }
+
+Problems.list_show(xs : List<Nat>) : String
+  case xs {
+    nil : ""
+    cons : Nat.show(xs.head) | " " | Problems.list_show(xs.tail)
+  }
+
+Problems.t0: true == true
+ refl
+
+Problems.t1(a: Bool): Bool.and(false, a) == false
+ refl
+
+Problems.t2(a: Bool): Bool.and(a, false) == false
+  case a {
+    true : refl
+    false : refl
+  }!
+
+Problems.t3(a: Bool): Bool.or(true, a) == true
+  case a {
+     true : refl
+     false : refl
+  }!
+
+Problems.t4(a: Bool): Bool.or(a, true) == true
+  case a {
+    true : refl
+    false : refl
+  }!
+
+Problems.t5(a: Bool): Bool.eql(a, a) == true
+  case a {
+    true : refl
+    false : refl
+  }!
+
+Problems.t6(a: Bool): Bool.not(Bool.not(a)) == a
+ case a {
+   true : refl
+   false : refl
+ }!
+
+Problems.t7(a: Bool, b: Bool): Bool.not(Bool.and(a,b)) == Bool.or(Bool.not(a), Bool.not(b))
+ case a {
+   true : refl
+   false : refl
+ }!
+
+Problems.t8(a: Bool, b: Bool): Bool.not(Bool.or(a,b)) == Bool.and(Bool.not(a), Bool.not(b))
+ case a {
+   true : refl
+   false : refl
+ }!
+
+Problems.t9(a: Pair<Nat,Nat>): Pair.new<Nat,Nat>(Pair.fst<Nat,Nat>(a), Pair.snd<Nat,Nat>(a)) == a
+  case a {
+    new : refl
+  }!
+
+Problems.t10(a: Pair<Nat,Nat>): Pair.swap<Nat,Nat>(Pair.swap<Nat,Nat>(a)) == a
+ case a {
+   new : refl
+ }!
+
+ Problems.t11(n: Nat): Nat.same(n) == n
+  case n {
+   succ : 
+    def p = Problems.t11(n.pred)
+    Equal.apply(_, _, _, _, Nat.succ, p)
+   zero : refl
+ }!
+
+Problems.t12(n: Nat): Nat.half(Nat.double(n)) == n
+  case n {
+    zero : refl
+    succ : 
+      let p = Problems.t12(n.pred)
+      Equal.apply(_, _, _, _ Nat.succ, p)
+  }!
+
+Problems.t13(n: Nat): Nat.add(0,n) == n
+  refl
+
+Problems.t14(n: Nat): Nat.add(n,0) == n
+  case n {
+    zero : refl,
+    succ : 
+      let p = Problems.t14(n.pred)
+      Equal.apply(_, _, _, _ Nat.succ, p) 
+  }!
+
+Problems.t15(n: Nat, m: Nat): Nat.add(Nat.succ(n),m) == Nat.succ(Nat.add(n,m))
+  refl
+
+Problems.t16(n: Nat, m: Nat): Nat.add(n,Nat.succ(m)) == Nat.succ(Nat.add(n,m))
+ case n {
+   zero : refl
+   succ : 
+     let p = Problems.t16(n.pred, m)
+    Equal.apply(_, _, _, _ Nat.succ, p)
+ }!
+
+Problems.t17(n: Nat, m: Nat): Nat.add(n, m) == Nat.add(m, n)
+  case n {
+    zero : Equal.mirror(_, _, _, Problems.t14(m))
+    succ : 
+      let r = Equal.mirror(_, _, _,Problems.t16(m, n.pred))
+      let p = Problems.t17(m, n.pred)
+      r :: rewrite x in 
+        (Nat.succ(x) == Nat.add(m,Nat.succ(n.pred))) with p
+  }!
+
+Problems.t18(n: Nat): Nat.add(n,n) == Nat.double(n)
+  case n {
+    zero : refl
+    succ : 
+      let ind = Equal.apply(_, _, _, _, Nat.succ, Problems.t18(n.pred))
+      let r = Equal.mirror(_, _, _,Problems.t16(n.pred, n.pred))
+      let a = ind :: rewrite x in (x == Nat.succ(Nat.double(n.pred))) with r
+      Equal.apply(_, _, _, _ Nat.succ, a)
+  }!
+
+Problems.t19 : (n: Nat) -> Nat.ltn(n, Nat.succ(n)) == true
+  User.caotic.automation.easy(_, (n) Nat.ltn(n, Nat.succ(n)), (n) true, _ _)
+
+Problems.t20: (n: Nat) -> Nat.gtn(Nat.succ(n), n) == true
+  User.caotic.automation.easy(_, (n) Nat.gtn(Nat.succ(n), n) (n) true, _ _)
+
+Problems.t21 : (n: Nat) Nat.sub(n,n) == 0
+  User.caotic.automation.easy(_, (n) Nat.sub(n,n), (n) 0, _ _)
+
+Problems.t22(n: Nat, e: n == 1): Nat.succ(n) == 2
+  case e with {
+    refl : refl
+  } : Nat.succ(n) == Nat.succ(e.b)
+
+Problems.zero_is_not_succ (n : Nat, h : 0 == Nat.succ(n)) : Empty
+  Equal.cast(_, _, _, (n) case n {
+   succ : Empty
+   zero : Unit 
+  }, h, Unit.new)
+
+Problems.true_is_not_false (h : true == false) : Empty
+  Equal.cast(_, _, _, (n) case n {
+   true : Unit
+   false : Empty 
+  }, h, Unit.new)
+
+Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
+  case n with e {
+    zero : case m with e {
+      zero : refl
+      succ : Empty.absurd!(Problems.true_is_not_false(Equal.mirror(_, _, _, e)))
+    }!
+    succ : case m with e {
+      zero :  Empty.absurd!(Problems.true_is_not_false(Equal.mirror(_, _, _, e)))
+      succ : 
+        let ind = Problems.t23(n.pred, m.pred, e)
+        Equal.apply(_, _, _, _, Nat.succ, ind)
+    }!
+  }!
+
+Problems.t24(xs: List<Nat>): Nat.gtn(List.length<Nat>(List.cons<Nat>(1,xs)),0) == true
+  refl
+
+Problems.t25(xs: List<Nat>): List.map<Nat,Nat>((x) x, xs) == xs
+  case xs {
+    nil : refl
+    cons : Equal.apply(_, _, _, _, (tail) List.cons(Nat, xs.head, tail), Problems.t25(xs.tail))
+  }!
+
+Problems.t26(xs: List<Nat>, ys: List<Nat>): Nat.add(List.length<Nat>(xs), List.length<Nat>(ys)) == List.length<Nat>(List.concat<Nat>(xs,ys))
+  case xs {
+    nil : refl
+    cons : 
+      let ind = Problems.t26(xs.tail, ys)
+      Equal.apply(_, _, _, _, Nat.succ, ind)
+  }!
+
+Problems.aux_reverse(xs : List<Nat>, a : Nat) :
+  List.reverse.go(Nat, xs, [a]) == List.reverse.go(Nat, List.cons(Nat, a, xs), []) 
+  refl
+
+// List.cons(Nat,a,List.reverse.go(Nat,xs.tail,List.cons(Nat,xs.head,List.nil(Nat)))) ==
+  //   List.reverse.go(Nat,List.nil(Nat),List.cons(Nat,a,List.nil(Nat)))
+
+
+push_back(A : Type, xs : List<A>, y : A) : List<A>
+  case xs {
+    nil : List.cons(A, y, List.nil(A))
+    cons : List.cons(A, xs.head, push_back(A, xs.tail, y))
+  }
+
+rev(A : Type, xs : List<A>) : List<A>
+  case xs {
+    nil : List.nil(A)
+    cons : push_back(A, rev(A, xs.tail), xs.head)
+  }
+
+theorem_push_back_reverse(A : Type, xs : List<A>) : Type
+  ((a : A) -> (ls : List<A>) -> push_back(A, List.reverse.go(A, xs, ls), a) == List.reverse.go(A, xs, push_back(A, ls, a)))
+
+normalize_push_back(A : Type, ls : List<A>, a : A, b: A) : List.cons(A, b, push_back(A, ls, a)) == push_back(A,List.cons(A, b,ls), a)
+  refl
+
+push_back_reverse(A : Type, xs : List<A>) : theorem_push_back_reverse(A, xs)
+  case xs {
+    nil  : (x) (y) refl
+    cons : (k) (ls) 
+      let a = push_back_reverse(A, xs.tail, k, List.cons(A, xs.head, ls))
+      let e = mirror(normalize_push_back(A, ls, k, xs.head))
+      let k = Equal.rewrite<
+        List<A>,
+        push_back(A,List.cons(A,xs.head,ls),k),
+        List.cons(A,xs.head,push_back(A,ls,k)),
+        e
+        (X) push_back(A,List.reverse.go(A,xs.tail,List.cons(A,xs.head,ls)),k) == List.reverse.go(A,xs.tail,X),
+        a>
+      k
+  } : theorem_push_back_reverse(A, xs)
+
+//normalize_push_reverse(A : Type, xs : List<A>, a : A)
+ // :  List.reverse.go(A, xs, push_back(A, List.nil(A), a)) == List.reverse.go(A,xs, List.cons(A, a, List.nil(A)))
+ //   Equal.rewrite(List<A>, List.reverse.go(A,xs, List.cons(A, a, List.nil(A))), List.reverse.go(A,xs, List.cons(A, a, List.nil(A))), Equal.refl(List<A>, List.reverse.go(A,xs, List.cons(A, a, List.nil(A)))),
+   //               (X) List.reverse.go(A, xs, X) == List.reverse.go(A,xs, List.cons(A, a, List.nil(A))), ?a)
+
+//tail_rev_to_rev (A : Type, xs : List<A>) : List.reverse<A>(xs) == rev(A, xs)
+//  case xs {
+  //  nil : refl
+  //  cons : 
+    //  let IHxs = tail_rev_to_rev(A, xs.tail)
+    //  Equal.rewrite(List<A>, (List.reverse(A,xs.tail)), (rev(A,xs.tail)), IHxs, 
+      //  (X) List.reverse.go(A,xs.tail,List.cons(A,xs.head,List.nil(A))) == push_back(A, X,xs.head), 
+      //  let q = push_back_reverse(A, xs, xs.head, List.nil(A))
+        
+       // Equal.mirror(List<A>, push_back(A,List.reverse(A,xs.tail),xs.head), List.reverse.go(A,xs.tail,List.cons(A,xs.head,List.nil(A))), ?a-74))
+ // }!
+
+//Problems.t27(xs: List<Nat>): List.reverse<Nat>(List.reverse<Nat>(xs)) == xs
+  //case xs {
+   // nil : refl
+    //cons : ?b
+ // }!
+
+unfold(B : Type, f : B -> Maybe(B), b : B) : B
+   case f(b) as c {
+     none : b
+     some : unfold(B, f, c.value)
+   }
+
+Problems.sqrt(s : Bits) : Bits
+    let aproximation = ((x) Bits.shift_right(1, Bits.add(x, Bits.div(s, x)))) :: Bits -> Bits
+    let accumulator = (x)
+      let x1 = aproximation(x)
+      if Bits.ltn(x1, x) then
+        Maybe.some(Bits, aproximation(x1))
+         else 
+        Maybe.none(Bits)
+    unfold(Bits, accumulator, Bits.shift_right(1, s))
+       
+Problems.t28: true != false
+  Problems.true_is_not_false
+
+Problems.t29: 3 != 2
+  (x) 
+     let q = Equal.mirror(_, _, _, (Equal.apply(_, _, _, _, (y) Problems.pred_aux(Problems.pred_aux(y)), x)))
+     Problems.zero_is_not_succ(_, q)
+
+Problems.t30(a: Bool): Bool.or(true, a) != false
+  (h) 
+     let q = Problems.t3(a) :: rewrite X in (X == true) with h
+     Problems.t28(Equal.mirror(_, _, _, q))
+
+
+Problems.t31(a: Bool): Bool.or(a, true) != false
+  (h) case a with h {
+    true : Problems.true_is_not_false(h)
+    false : Problems.true_is_not_false(h)
+  }!
+
+Problems.t32(a: Bool): Bool.and(false, a) != true
+  (h) Problems.true_is_not_false(Equal.mirror(_, _, _, h))
+
+Problems.t34(a: Nat, b: Nat, e: a == b): b == a
+  case e {
+    refl : refl 
+  }!
+
+Problems.t35(a: Nat, b: Nat, c: Nat, e0: a == b, e1: b == c): a == c
+  case e0 with e1 {
+    refl : e1
+  }!
+
+Problems.equal_same(n : Nat) : Nat.same(n) == n
+  case n {
+    zero : refl
+    succ : 
+      let ind = Problems.equal_same(n.pred)
+      Equal.apply(_, _, _, _, Nat.succ, ind)
+  }!
+
+Problems.t36(a: Nat, P: Nat -> Type, p: P(a)): P(Nat.same(a))
+  case a with p {
+    zero : p
+    succ : 
+      Equal.rewrite(_, _, _, mirror(Problems.equal_same(Nat.succ(a.pred))), (X) P(X), p)
+  }!
+
+User.caotic.Problems : Nat
+  Bits.to_nat(Problems.sqrt(U32.to_bits(100000000u)))

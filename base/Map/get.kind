@@ -1,2 +1,2 @@
-Map.get<A: Type>(key: String, map: BitsMap(A)): Maybe(A)
+Map.get<A: Type>(key: String, map: Map(A)): Maybe(A)
   BitsMap.get<A>(String.to_bits(key), map)

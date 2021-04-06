@@ -1,28 +1,20 @@
-Kind.Error.relevant(errors: List(Kind.Error), got: Bool): List(Kind.Error)
-  case errors {
-    nil: [],
-    cons:
-      let keep = case errors.head {
-        type_mismatch: Bool.not(got),
-        show_goal: Bool.true,
-        waiting: Bool.false,
-        indirect: Bool.false,
-        patch: Bool.false,
-        undefined_reference: Bool.not(got),
-        cant_infer: Bool.not(got),
-      }
-      let got = case errors.head {
-        type_mismatch: Bool.true,
-        show_goal: got,
-        waiting: got,
-        indirect: got,
-        patch: got,
-        undefined_reference: Bool.true,
-        cant_infer: got,
-      }
-      let tail = Kind.Error.relevant(errors.tail, got)
-      if keep then
-        errors.head & tail
-      else
-        tail
+Kind.Error.is_undef(error: Kind.Error): Bool
+  case error { undefined_reference: true } default false
+
+Kind.Error.is_mistake(error: Kind.Error): Bool
+  case error { type_mismatch: true, cant_infer: true } default false
+
+Kind.Error.is_goal(error: Kind.Error): Bool
+  case error { show_goal: true } default false
+
+Kind.Error.relevant(errors: List(Kind.Error)): List(Kind.Error)
+  let undefs   = List.filter!(Kind.Error.is_undef, errors)
+  let mistakes = List.filter!(Kind.Error.is_mistake, errors)
+  let goals    = List.filter!(Kind.Error.is_goal, errors)
+  case undefs {
+    nil: case mistakes {
+      nil: goals
+      cons: [mistakes.head] ++ goals
+    }
+    cons: undefs ++ goals
   }

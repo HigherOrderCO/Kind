@@ -1,4 +1,4 @@
-Kind.SmartMotive.make(
+Kind.Term.SmartMotive.make(
   name: Kind.Name,
   expr: Kind.Term, 
   type: Kind.Term,
@@ -6,8 +6,8 @@ Kind.SmartMotive.make(
   size: Nat,
   defs: Kind.Defs,
 ): Kind.Term
-  let vals = Kind.SmartMotive.vals(expr,type,defs);
-  let nams = Kind.SmartMotive.nams(name,type,defs);
+  let vals = Kind.Term.SmartMotive.vals(expr,type,defs);
+  let nams = Kind.Term.SmartMotive.nams(name,type,defs);
   let subs = List.zip!!(nams,vals);
   //let skip = Debug.log!(String.flatten(["-expr: ", Kind.Term.show(expr)]), (x) Unit.new);
   //let skip = Debug.log!(String.flatten(["-type: ", Kind.Term.show(type)]), (x) Unit.new);
@@ -16,10 +16,10 @@ Kind.SmartMotive.make(
   //let skip = Debug.log!(String.flatten(["-nams: ", String.join(", ", nams)]), (x) Unit.new);
   //let skip = Debug.log!(String.flatten(["-moti: ", Kind.Term.show(moti)]), (x) Unit.new);
   List.fold!(subs)!(moti, (sub,moti) case sub {
-    new: Kind.SmartMotive.replace(moti, sub.snd, Kind.Term.ref(sub.fst), size)
+    new: Kind.Term.SmartMotive.replace(moti, sub.snd, Kind.Term.ref(sub.fst), size)
   })
 
-//Kind.SmartMotive.replace_many(
+//Kind.Term.SmartMotive.replace_many(
   //subs: List(Pair(Kind.Name,Kind.Term)),
   //term: Kind.Term,
   //lv: Nat,
@@ -29,7 +29,7 @@ Kind.SmartMotive.make(
       //term
     //cons:
       //open subs.head
-      //let term = Kind.SmartMotive.replace_many(subs.tail, term)
-      //let term = Kind.SmartMotive.replace(term, subs.head.snd, Kind.Term.ref(subs.head.fst), lv)
+      //let term = Kind.Term.SmartMotive.replace_many(subs.tail, term)
+      //let term = Kind.Term.SmartMotive.replace(term, subs.head.snd, Kind.Term.ref(subs.head.fst), lv)
       //term
   //}

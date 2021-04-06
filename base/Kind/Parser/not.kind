@@ -1,0 +1,11 @@
+Kind.Parser.not: Parser(Kind.Term)
+  Parser {
+    get init = Kind.Parser.init;
+    Kind.Parser.text("not(");
+    get expr = Kind.Parser.term;
+    Kind.Parser.text(")");
+    get orig = Kind.Parser.stop(init);
+    let term = Kind.Term.ref("Bool.not");
+    let term = Kind.Term.app(term, expr);
+    return Kind.Term.ori(orig, term);
+  }
