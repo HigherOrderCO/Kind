@@ -133,6 +133,13 @@ for Kind and a REPL or Try mode for the language.
 
 ---
 
-# Improve `Map` 
+### Improve `Map` 
 
 It should use GMap instead of BitsMap
+
+---
+
+### Show line number on error message
+
+Instead of `Inside 'Test.kind'`, should be `Inside line X of 'Test.kind'`.
+
