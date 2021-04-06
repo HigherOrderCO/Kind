@@ -1,8 +1,2 @@
-foo(a: Nat): _
-  let x = Nat.add(?a, 2)
-  case true {
-    true: {}
-    false:
-      let x = bar(4)
-      {}
-  }
+Test: Either(Nat,Bool)
+  left(8)

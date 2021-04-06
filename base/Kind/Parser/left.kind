@@ -1,0 +1,13 @@
+Kind.Parser.left: Parser(Kind.Term)
+  Parser {
+    get init = Kind.Parser.init;
+    Kind.Parser.text("left(");
+    get expr = Kind.Parser.term;
+    Kind.Parser.text(")");
+    get orig = Kind.Parser.stop(init);
+    let term = Kind.Term.ref("Either.left");
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
+    let term = Kind.Term.app(term, expr);
+    return Kind.Term.ori(orig, term);
+  }
