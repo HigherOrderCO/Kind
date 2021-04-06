@@ -30,7 +30,7 @@ type Web.Kaelin.State {
 }
 
 type Web.Kaelin.Coord {
-  new(i: U32, j: U32) 
+  new(i: Int, j: Int) 
 }
 
 type Web.Kaelin.Action {
@@ -64,23 +64,58 @@ Web.Kaelin.Event.deserialize(code: String): Web.Kaelin.Event
 
 Web.Kaelin.Coord.show(coord: Web.Kaelin.Coord): String
   open coord
-  U32.to_string(coord.i) | ":" | U32.to_string(coord.j)
+  Int.show(coord.i) | ":" | Int.show(coord.j)
 
 Web.Kaelin.Coord.hexagon_radius: U32
   10u
 
 Web.Kaelin.Coord.to_screen_xy(coord: Web.Kaelin.Coord): Pair(U32,U32)
+  let rad = Web.Kaelin.Coord.hexagon_radius
+  let hlf = U32.div(rad,2u)
+
   open coord
   let i   = coord.i
   let j   = coord.j
-  let rad = Web.Kaelin.Coord.hexagon_radius
-  let hlf = U32.div(rad,2u)
-  let cx  = U32.sub(128u,U32.mul(rad,4u))
-  let cx  = U32.add(cx,U32.mul(U32.mul(rad,2u),i))
-  let cy  = U32.sub(128u,U32.mul(hlf,5u))
-  let cy  = U32.add(cy,U32.mul(U32.mul(hlf,3u),j))
-  let cx  = if U32.eql(U32.mod(j,2u),0u) then cx else U32.add(cx,rad)
-  {cx, cy}
+  open i
+  open j
+
+  let cx = 128u
+  let cy = 128u
+  
+  let is_neg_i = Int.is_neg(i)
+  let is_neg_j = Int.is_neg(j)
+  case is_neg_i is_neg_j {
+    false false:
+      let cx = U32.add(cx, U32.mul(  Nat.to_u32(j.y), rad))
+      let cx = U32.add(cx, U32.mul(  Nat.to_u32(i.y), U32.mul(rad,2u)) )
+      let cy = U32.add(cy, U32.mul(  Nat.to_u32(j.y), U32.mul(hlf,3u)))
+      {cx, cy}
+    false true:
+      let cx = U32.sub(cx, U32.mul(Nat.to_u32(j.x), rad))
+      let cx = U32.add(cx, U32.mul(  Nat.to_u32(i.y), U32.mul(rad,2u)) )
+      let cy = U32.sub(cy, U32.mul(  Nat.to_u32(j.x), U32.mul(hlf,3u)))
+      {cx, cy}
+    true false:
+      let cx = U32.add(cx, U32.mul(Nat.to_u32(j.y), rad))
+      let cx = U32.sub(cx, U32.mul(  Nat.to_u32(i.x), U32.mul(rad,2u)) )
+      let cy = U32.add(cy, U32.mul(  Nat.to_u32(j.y), U32.mul(hlf,3u)))
+      {cx, cy}
+    true true:
+      let cx = U32.sub(cx, U32.mul(Nat.to_u32(j.x), rad))
+      let cx = U32.sub(cx, U32.mul(  Nat.to_u32(i.x), U32.mul(rad,2u)) )
+      let cy = U32.sub(cy, U32.mul(  Nat.to_u32(j.x), U32.mul(hlf,3u)))
+      {cx, cy}
+  }!
+
+
+// Web.Kealin.Coord.is_valid(coord: Web.Kaelin.Coord, size: Nat): Bool
+//   open coord
+//   let i = coord.i
+//   let j = coord.j
+//   let k = Int.add(i, j)
+  
+//   let distance = 
+  
 
 Web.Kaelin.Map.get(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map): Web.Kaelin.Tile
   map{Web.Kaelin.Coord.show(coord)} <> []
@@ -117,10 +152,10 @@ Web.Kaelin: App(Web.Kaelin.State)
   // Initial state
   let init = 
     let Pos = Web.Kaelin.Coord.new
-    let pos = Pos(0u,2u)
+    let pos = Pos(Int.new(0, 0), Int.new(0, 2))
     let map = {}
-    let map = Web.Kaelin.Map.push(Pos(0u,0u),ent_r,map)
-    let map = Web.Kaelin.Map.push(Pos(1u,0u),ent_g,map)
+    let map = Web.Kaelin.Map.push( Pos( Int.new(0, 0) ,Int.new(0, 0) ),ent_r,map)
+    let map = Web.Kaelin.Map.push( Pos( Int.new(0, 1) ,Int.new(0, 0) ),ent_g,map)
     let map = Web.Kaelin.Map.push(pos,ent_b,map)
     Web.Kaelin.State.game("0x000000000000", 0, pos, map)
 
@@ -140,7 +175,10 @@ Web.Kaelin: App(Web.Kaelin.State)
         let rad = 10u
         for j : U32 from 0u to 5u with img:
           for i : U32 from 0u to 5u with img:
-            let coord = Web.Kaelin.Coord.new(i,j)
+            let half = U32.div(5u, 2u)
+            let coord_i = Int.sub(Int.new(0, U32.to_nat(i)), Int.new(0, U32.to_nat(half)))
+            let coord_j = Int.sub(Int.new(0, U32.to_nat(j)), Int.new(0, U32.to_nat(half)))
+            let coord = Web.Kaelin.Coord.new( coord_i, coord_j)
             // Draws the hexagon border
             let {cx,cy} = Web.Kaelin.Coord.to_screen_xy(coord)
             let draw_e = Bool.or(Bool.and(U32.eql(U32.mod(j,2u),0u),U32.eql(i,0u)),U32.eql(j,4u))
@@ -165,16 +203,16 @@ Web.Kaelin: App(Web.Kaelin.State)
                 void: []
                 game:
                   // TODO: Web.Kaelin.Map.swap(i, ca, cb, map)
-                  let old_pos = state.pos
-                  let new_pos = case old_pos {
-                    new: Web.Kaelin.Coord.new(U32.add(old_pos.i,1u),old_pos.j)
-                  }
-                  let {map,ent} = Web.Kaelin.Map.pop(old_pos, state.map)
-                  let map = case ent {
-                    none: map
-                    some: Web.Kaelin.Map.push(new_pos, ent.value, map)
-                  }
-                  let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
+                  // let old_pos = state.pos
+                  // let new_pos = case old_pos {
+                  //   new: Web.Kaelin.Coord.new(U32.add(old_pos.i,1u),old_pos.j)
+                  // }
+                  // let {map,ent} = Web.Kaelin.Map.pop(old_pos, state.map)
+                  // let map = case ent {
+                  //   none: map
+                  //   some: Web.Kaelin.Map.push(new_pos, ent.value, map)
+                  // }
+                  //let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
                   [App.Action.state!(state)]
               }
           } default []
