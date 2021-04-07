@@ -9,7 +9,13 @@ Web.Kaelin.Draw.tile(
   for ent in tile with img:
     open ent
     // TEST
-    log(String.concat("x: ", U32.to_string(cx)))
-    log(String.concat("y: ", U32.to_string(cy)))
-    Image3D.Draw.image(50u, 50u, 0u, ent.img, img)
+    // cx: 148
+    // cy: 158
+
+    // If to_scren_xy uses 0u and 0u instead of 128u 128u,
+    // x:20 and y: 30
+    
+    // log(String.concat("x: ", U32.to_string(cx)))
+    // log(String.concat("y: ", U32.to_string(cy)))
+    Image3D.Draw.image(cx, cy, 0u, ent.img, img)
   img

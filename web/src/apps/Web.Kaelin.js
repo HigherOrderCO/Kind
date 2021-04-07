@@ -1408,6 +1408,9 @@ module.exports = (function() {
     };
     const Image3D$parse = x0 => Image3D$parse$(x0);
     const Kaelin$Assets$chars$croni_d_1 = Image3D$parse$("7f7516351d4d807516351d4d7d7615351d4d7e7615351d4d7f76156a3a868076158e4a9d817615351d4d827615351d4d7c7714351d4d7d77146a3a867e77146a3a867f77148e4a9d8077146a3a868177146a3a868277146a3a86837714351d4d7b7813351d4d7c78136a3a867d78136a3a867e78136a3a867f78136a3a868078136a3a868178136a3a868278136a3a868378136a3a86847813351d4d7a7912351d4d7b79126a3a867c79126a3a867d79126a3a867e79126a3a867f79126a3a868079126a3a868179126a3a868279126a3a868379126a3a868479126a3a86857912351d4d7a7a11351d4d7b7a116a3a867c7a116a3a867d7a116a3a867e7a116a3a867f7a116a3a86807a116a3a86817a116a3a86827a116a3a86837a116a3a86847a116a3a86857a11351d4d797b10351d4d7a7b106a3a867b7b106a3a867c7b106a3a867d7b106a3a867e7b106a3a867f7b106a3a86807b106a3a86817b106a3a86827b106a3a86837b106a3a86847b106a3a86857b106a3a86867b10351d4d797c0f351d4d7a7c0f6a3a867b7c0f6a3a867c7c0f602d807d7c0f602d807e7c0f6a3a867f7c0f6a3a86807c0f6a3a86817c0f6a3a86827c0f602d80837c0f602d80847c0f6a3a86857c0f6a3a86867c0f351d4d797d0e351d4d7a7d0e602d807b7d0e602d807c7d0e351d4d7d7d0e351d4d7e7d0e6a3a867f7d0e6a3a86807d0e6a3a86817d0e6a3a86827d0e351d4d837d0e351d4d847d0e602d80857d0e602d80867d0e351d4d797e0d351d4d7a7e0d602d807b7e0d351d4d7c7e0d351d4d7d7e0d531e487e7e0d351d4d7f7e0d6a3a86807e0d6a3a86817e0d351d4d827e0d531e48837e0d351d4d847e0d351d4d857e0d4a3580867e0d351d4d797f0c351d4d7a7f0c4a35807b7f0c351d4d7c7f0c531e487d7f0cdf3e467e7f0c531e487f7f0c351d4d807f0c351d4d817f0c531e48827f0cdf3e46837f0c531e48847f0c351d4d857f0c4a3580867f0c351d4d7a800b351d4d7b800b4a35807c800b351d4d7d800b531e487e800b351d4d7f800b351d4d80800b351d4d81800b351d4d82800b531e4883800b351d4d84800b4a358085800b351d4d7b810a351d4d7c810a4a35807d810a8e4a9d7e810a351d4d7f810a351d4d80810a351d4d81810a351d4d82810a8e4a9d83810a4a358084810a351d4d7d8209351d4d7e8209602d807f8209602d808082094a3580818209602d80828209351d4d7c8308351d4d7d83086a3a867e83086a3a867f83086a3a868083084a35808183086a3a868283086a3a86838308351d4d7c8407351d4d7d84076a3a867e84076a3a867f84076a3a868084074a35808184076a3a868284076a3a86838407351d4d7c8506351d4d7d85068e4a9d7e85066a3a867f85066a3a868085064a35808185066a3a868285068e4a9d838506351d4d7d8605351d4d7e8605351d4d7f8605351d4d808605351d4d818605351d4d828605351d4d818704351d4d828704351d4d");
+    const Web$Jogo$hero$hex = "0d00000000000e00000000000f00000000001000000000001100000000000c01000000000d01000000001101000000000b02000000000c02000000001202000000000b03000000001203000000000b04000000000c04000000001104000000000c05000000000d05000000000e05000000001005000000001105000000000e06000000000f06000000000e07000000000e08000000000f08000000000d09000000000e09000000000f09000000000c0a000000000d0a000000000e0a000000000f0a00000000100a000000000c0b000000000e0b00000000100b000000000b0c000000000c0c000000000e0c00000000100c00000000110c000000000b0d000000000e0d00000000110d000000000a0e000000000b0e000000000e0e00000000110e00000000120e000000000a0f000000000e0f00000000120f000000000910000000000a10000000000e10000000001210000000001310000000000911000000000e11000000001311000000000e12000000000d13000000000e13000000000f13000000000d14000000000f14000000000d15000000000f15000000000c16000000000d16000000000f16000000000c17000000000f17000000000c18000000000f18000000000c19000000001019000000000c1a00000000101a000000000b1b000000000c1b00000000101b000000000b1c00000000101c000000000b1d00000000101d00000000111d000000000b1e00000000111e000000000a1f000000000b1f00000000111f00000000";
+    const Web$Jogo$hero = Image3D$parse$(Web$Jogo$hero$hex);
+    const Kaelin$Assets$dark_grass_0 = Image3D$parse$("787801347e57797801408d647a7801469e657b7801469e657c7801408d647d7801347e577e7801408d647f7801469e65807801469e65817801469e65827801408d64837801469e65847801469e65857801408d64867801408d64877801347e57787901408d64797901469e657a7901469e657b7901469e657c7901408d647d7901408d647e7901408d647f7901469e65807901469e65817901408d64827901408d64837901408d64847901408d64857901408d64867901408d64877901408d64787a01408d64797a01469e657a7a01469e657b7a01408d647c7a01469e657d7a01469e657e7a01408d647f7a01408d64807a01408d64817a01408d64827a01408d64837a01408d64847a01469e65857a01469e65867a01469e65877a01408d64787b01408d64797b01408d647a7b01408d647b7b01408d647c7b01469e657d7b01469e657e7b01408d647f7b01408d64807b01408d64817b01469e65827b01469e65837b01408d64847b01469e65857b01469e65867b01469e65877b01408d64787c01408d64797c01469e657a7c01408d647b7c01408d647c7c01408d647d7c01408d647e7c01408d647f7c01408d64807c01469e65817c01469e65827c01469e65837c01408d64847c01408d64857c01469e65867c01469e65877c01408d64787d01469e65797d01469e657a7d01469e657b7d01347e577c7d01408d647d7d01469e657e7d01469e657f7d01408d64807d01469e65817d01469e65827d01408d64837d01408d64847d01408d64857d01347e57867d01347e57877d01408d64787e01469e65797e01469e657a7e01408d647b7e01347e577c7e01347e577d7e01469e657e7e01469e657f7e01408d64807e01408d64817e01347e57827e01408d64837e01408d64847e01408d64857e01408d64867e01347e57877e01408d64787f01408d64797f01408d647a7f01408d647b7f01408d647c7f01408d647d7f01408d647e7f01408d647f7f01408d64807f01408d64817f01347e57827f01347e57837f01408d64847f01469e65857f01469e65867f01408d64877f01408d64788001347e57798001347e577a8001469e657b8001469e657c8001408d647d8001408d647e8001469e657f8001469e65808001408d64818001469e65828001469e65838001408d64848001469e65858001469e65868001469e65878001408d64788101347e57798101408d647a8101469e657b8101469e657c8101408d647d8101469e657e8101469e657f8101469e65808101408d64818101469e65828101469e65838101408d64848101408d64858101469e65868101469e65878101408d64788201408d64798201408d647a8201408d647b8201408d647c8201408d647d8201469e657e8201469e657f8201408d64808201408d64818201408d64828201408d64838201408d64848201408d64858201408d64868201408d64878201408d64788301469e65798301408d647a8301408d647b8301408d647c8301408d647d8301408d647e8301408d647f8301469e65808301469e65818301408d64828301347e57838301347e57848301408d64858301408d64868301408d64878301469e65788401469e65798401408d647a8401408d647b8401469e657c8401469e657d8401408d647e8401469e657f8401469e65808401469e65818401408d64828401347e57838401408d64848401469e65858401469e65868401408d64878401469e65788501408d64798501408d647a8501469e657b8501469e657c8501469e657d8501408d647e8501469e657f8501469e65808501408d64818501408d64828501408d64838501408d64848501469e65858501469e65868501469e65878501408d64788601408d64798601408d647a8601469e657b8601469e657c8601408d647d8601408d647e8601408d647f8601408d64808601408d64818601408d64828601408d64838601408d64848601408d64858601469e65868601469e65878601408d64788701347e57798701408d647a8701408d647b8701408d647c8701408d647d8701347e577e8701347e577f8701408d64808701469e65818701469e65828701408d64838701469e65848701469e65858701408d64868701408d64878701408d64");
 
     function Web$Kaelin$Entity$new$(_img$1) {
         var $303 = ({
@@ -1907,10 +1910,16 @@ module.exports = (function() {
 
     function Web$Kaelin$Draw$initial_ent$(_map$1) {
         var _croni$2 = Kaelin$Assets$chars$croni_d_1;
-        var _ent_r$3 = Web$Kaelin$Entity$new$(_croni$2);
-        var _new_coord$4 = Web$Kaelin$Coord$new;
-        var _map$5 = Web$Kaelin$Map$push$(_new_coord$4(Int$new(0n)(0n))(Int$new(0n)(2n)), _ent_r$3, _map$1);
-        var $396 = _map$5;
+        var _hero$3 = Web$Jogo$hero;
+        var _grass$4 = Kaelin$Assets$dark_grass_0;
+        var _ent_croni$5 = Web$Kaelin$Entity$new$(_croni$2);
+        var _ent_hero$6 = Web$Kaelin$Entity$new$(_hero$3);
+        var _ent_grass$7 = Web$Kaelin$Entity$new$(_grass$4);
+        var _new_coord$8 = Web$Kaelin$Coord$new;
+        var _map$9 = Web$Kaelin$Map$push$(_new_coord$8(Int$new(0n)(0n))(Int$new(0n)(0n)), _ent_hero$6, _map$1);
+        var _map$10 = Web$Kaelin$Map$push$(_new_coord$8(Int$new(1n)(0n))(Int$new(2n)(0n)), _ent_croni$5, _map$9);
+        var _map$11 = Web$Kaelin$Map$push$(_new_coord$8(Int$new(1n)(0n))(Int$new(3n)(0n)), _ent_grass$7, _map$10);
+        var $396 = _map$11;
         return $396;
     };
     const Web$Kaelin$Draw$initial_ent = x0 => Web$Kaelin$Draw$initial_ent$(x0);
@@ -2310,52 +2319,45 @@ module.exports = (function() {
     };
     const Web$Kaelin$Map$get = x0 => x1 => Web$Kaelin$Map$get$(x0, x1);
     const List$for = a0 => a1 => a2 => (list_for(a0)(a1)(a2));
-    const Debug$log = a0 => a1 => ((console.log(a0), a1()));
-
-    function U32$to_string$(_n$1) {
-        var $478 = Nat$to_string_base$(10n, U32$to_nat$(_n$1));
-        return $478;
-    };
-    const U32$to_string = x0 => U32$to_string$(x0);
 
     function Image3D$get_len$(_img$1) {
         var self = _img$1;
         switch (self._) {
             case 'Image3D.new':
-                var $480 = self.length;
-                var $481 = $480;
-                var $479 = $481;
+                var $479 = self.length;
+                var $480 = $479;
+                var $478 = $480;
                 break;
         };
-        return $479;
+        return $478;
     };
     const Image3D$get_len = x0 => Image3D$get_len$(x0);
 
     function Array$get$(_idx$3, _arr$4) {
-        var $482 = Word$foldl$(Array$extract_tip, (_rec$6 => _arr$7 => {
+        var $481 = Word$foldl$(Array$extract_tip, (_rec$6 => _arr$7 => {
             var _arr_l$8 = Array$extract_tie$(_arr$7);
             var self = _arr_l$8;
             switch (self._) {
                 case 'Pair.new':
-                    var $484 = self.fst;
-                    var $485 = _rec$6($484);
-                    var $483 = $485;
+                    var $483 = self.fst;
+                    var $484 = _rec$6($483);
+                    var $482 = $484;
                     break;
             };
-            return $483;
+            return $482;
         }), (_rec$6 => _arr$7 => {
             var _arr_r$8 = Array$extract_tie$(_arr$7);
             var self = _arr_r$8;
             switch (self._) {
                 case 'Pair.new':
-                    var $487 = self.snd;
-                    var $488 = _rec$6($487);
-                    var $486 = $488;
+                    var $486 = self.snd;
+                    var $487 = _rec$6($486);
+                    var $485 = $487;
                     break;
             };
-            return $486;
+            return $485;
         }), _idx$3)(_arr$4);
-        return $482;
+        return $481;
     };
     const Array$get = x0 => x1 => Array$get$(x0, x1);
     const Buffer32$get = a0 => a1 => ((a1[a0]));
@@ -2366,83 +2368,83 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $490 = self.pred;
-                var $491 = (_b$6 => {
+                var $489 = self.pred;
+                var $490 = (_b$6 => {
                     var self = _b$6;
                     switch (self._) {
                         case 'Word.o':
-                            var $493 = self.pred;
-                            var $494 = (_a$pred$9 => {
-                                var $495 = Word$o$(Word$and$(_a$pred$9, $493));
-                                return $495;
+                            var $492 = self.pred;
+                            var $493 = (_a$pred$9 => {
+                                var $494 = Word$o$(Word$and$(_a$pred$9, $492));
+                                return $494;
                             });
-                            var $492 = $494;
+                            var $491 = $493;
                             break;
                         case 'Word.i':
-                            var $496 = self.pred;
-                            var $497 = (_a$pred$9 => {
-                                var $498 = Word$o$(Word$and$(_a$pred$9, $496));
-                                return $498;
+                            var $495 = self.pred;
+                            var $496 = (_a$pred$9 => {
+                                var $497 = Word$o$(Word$and$(_a$pred$9, $495));
+                                return $497;
                             });
-                            var $492 = $497;
+                            var $491 = $496;
                             break;
                         case 'Word.e':
-                            var $499 = (_a$pred$7 => {
-                                var $500 = Word$e;
-                                return $500;
+                            var $498 = (_a$pred$7 => {
+                                var $499 = Word$e;
+                                return $499;
                             });
-                            var $492 = $499;
+                            var $491 = $498;
                             break;
                     };
-                    var $492 = $492($490);
-                    return $492;
+                    var $491 = $491($489);
+                    return $491;
                 });
-                var $489 = $491;
+                var $488 = $490;
                 break;
             case 'Word.i':
-                var $501 = self.pred;
-                var $502 = (_b$6 => {
+                var $500 = self.pred;
+                var $501 = (_b$6 => {
                     var self = _b$6;
                     switch (self._) {
                         case 'Word.o':
-                            var $504 = self.pred;
-                            var $505 = (_a$pred$9 => {
-                                var $506 = Word$o$(Word$and$(_a$pred$9, $504));
-                                return $506;
+                            var $503 = self.pred;
+                            var $504 = (_a$pred$9 => {
+                                var $505 = Word$o$(Word$and$(_a$pred$9, $503));
+                                return $505;
                             });
-                            var $503 = $505;
+                            var $502 = $504;
                             break;
                         case 'Word.i':
-                            var $507 = self.pred;
-                            var $508 = (_a$pred$9 => {
-                                var $509 = Word$i$(Word$and$(_a$pred$9, $507));
-                                return $509;
+                            var $506 = self.pred;
+                            var $507 = (_a$pred$9 => {
+                                var $508 = Word$i$(Word$and$(_a$pred$9, $506));
+                                return $508;
                             });
-                            var $503 = $508;
+                            var $502 = $507;
                             break;
                         case 'Word.e':
-                            var $510 = (_a$pred$7 => {
-                                var $511 = Word$e;
-                                return $511;
+                            var $509 = (_a$pred$7 => {
+                                var $510 = Word$e;
+                                return $510;
                             });
-                            var $503 = $510;
+                            var $502 = $509;
                             break;
                     };
-                    var $503 = $503($501);
-                    return $503;
+                    var $502 = $502($500);
+                    return $502;
                 });
-                var $489 = $502;
+                var $488 = $501;
                 break;
             case 'Word.e':
-                var $512 = (_b$4 => {
-                    var $513 = Word$e;
-                    return $513;
+                var $511 = (_b$4 => {
+                    var $512 = Word$e;
+                    return $512;
                 });
-                var $489 = $512;
+                var $488 = $511;
                 break;
         };
-        var $489 = $489(_b$3);
-        return $489;
+        var $488 = $488(_b$3);
+        return $488;
     };
     const Word$and = x0 => x1 => Word$and$(x0, x1);
     const U32$and = a0 => a1 => (a0 & a1);
@@ -2450,11 +2452,11 @@ module.exports = (function() {
     function Image3D$Draw$image$(_x$1, _y$2, _z$3, _src$4, _img$5) {
         var _len$6 = Image3D$get_len$(_src$4);
         var _img$7 = (() => {
-            var $515 = _img$5;
-            var $516 = 0;
-            var $517 = _len$6;
-            let _img$8 = $515;
-            for (let _i$7 = $516; _i$7 < $517; ++_i$7) {
+            var $514 = _img$5;
+            var $515 = 0;
+            var $516 = _len$6;
+            let _img$8 = $514;
+            for (let _i$7 = $515; _i$7 < $516; ++_i$7) {
                 var _pos$9 = ((_src$4.buffer[_i$7 * 2]));
                 var _col$10 = ((_src$4.buffer[_i$7 * 2 + 1]));
                 var _p_x$11 = (_pos$9 & 4095);
@@ -2464,13 +2466,13 @@ module.exports = (function() {
                 var _p_y$15 = ((_p_y$12 + _y$2) >>> 0);
                 var _p_z$16 = ((_p_z$13 + _z$3) >>> 0);
                 var _pos$17 = ((0 | _p_x$14 | (_p_y$15 << 12) | (_p_z$16 << 24)));
-                var $515 = ((_img$8.buffer[_img$8.length * 2] = _pos$17, _img$8.buffer[_img$8.length * 2 + 1] = _col$10, _img$8.length++, _img$8));
-                _img$8 = $515;
+                var $514 = ((_img$8.buffer[_img$8.length * 2] = _pos$17, _img$8.buffer[_img$8.length * 2 + 1] = _col$10, _img$8.length++, _img$8));
+                _img$8 = $514;
             };
             return _img$8;
         })();
-        var $514 = _img$7;
-        return $514;
+        var $513 = _img$7;
+        return $513;
     };
     const Image3D$Draw$image = x0 => x1 => x2 => x3 => x4 => Image3D$Draw$image$(x0, x1, x2, x3, x4);
 
@@ -2481,43 +2483,37 @@ module.exports = (function() {
                 var self = Web$Kaelin$Coord$to_screen_xy$(_coord$1);
                 switch (self._) {
                     case 'Pair.new':
-                        var $520 = self.fst;
-                        var $521 = self.snd;
+                        var $519 = self.fst;
+                        var $520 = self.snd;
                         var _tile$8 = Web$Kaelin$Map$get$(_coord$1, _map$2);
                         var _img$9 = (() => {
-                            var $524 = _img$3;
-                            var $525 = _tile$8;
-                            let _img$10 = $524;
+                            var $523 = _img$3;
+                            var $524 = _tile$8;
+                            let _img$10 = $523;
                             let _ent$9;
-                            while ($525._ === 'List.cons') {
-                                _ent$9 = $525.head;
+                            while ($524._ === 'List.cons') {
+                                _ent$9 = $524.head;
                                 var self = _ent$9;
                                 switch (self._) {
                                     case 'Web.Kaelin.Entity.new':
-                                        var $526 = self.img;
-                                        var $527 = ((console.log((("x: " + U32$to_string$($520)) + String$nil)), (_x$12 => {
-                                            var $528 = ((console.log((("y: " + U32$to_string$($521)) + String$nil)), (_x$13 => {
-                                                var $529 = Image3D$Draw$image$(50, 50, 0, $526, _img$10);
-                                                return $529;
-                                            })()));
-                                            return $528;
-                                        })()));
-                                        var $524 = $527;
+                                        var $525 = self.img;
+                                        var $526 = Image3D$Draw$image$($519, $520, 0, $525, _img$10);
+                                        var $523 = $526;
                                         break;
                                 };
-                                _img$10 = $524;
-                                $525 = $525.tail;
+                                _img$10 = $523;
+                                $524 = $524.tail;
                             }
                             return _img$10;
                         })();
-                        var $522 = _img$9;
-                        var $519 = $522;
+                        var $521 = _img$9;
+                        var $518 = $521;
                         break;
                 };
-                var $518 = $519;
+                var $517 = $518;
                 break;
         };
-        return $518;
+        return $517;
     };
     const Web$Kaelin$Draw$tile = x0 => x1 => x2 => Web$Kaelin$Draw$tile$(x0, x1, x2);
 
@@ -2529,17 +2525,17 @@ module.exports = (function() {
         var _height$7 = ((((_map_size$5 * 2) >>> 0) + 1) >>> 0);
         var _hex_rad$8 = Web$Kaelin$Resources$hexagon_radius;
         var _img$9 = (() => {
-            var $531 = _img$3;
-            var $532 = 0;
-            var $533 = _height$7;
-            let _img$10 = $531;
-            for (let _j$9 = $532; _j$9 < $533; ++_j$9) {
+            var $528 = _img$3;
+            var $529 = 0;
+            var $530 = _height$7;
+            let _img$10 = $528;
+            for (let _j$9 = $529; _j$9 < $530; ++_j$9) {
                 var _img$11 = (() => {
-                    var $534 = _img$10;
-                    var $535 = 0;
-                    var $536 = _width$6;
-                    let _img$12 = $534;
-                    for (let _i$11 = $535; _i$11 < $536; ++_i$11) {
+                    var $531 = _img$10;
+                    var $532 = 0;
+                    var $533 = _width$6;
+                    let _img$12 = $531;
+                    for (let _i$11 = $532; _i$11 < $533; ++_i$11) {
                         var _coord_i$13 = Int$sub$(Int$new(0n)(U32$to_nat$(_i$11)), Int$new(0n)(U32$to_nat$(_map_size$5)));
                         var _coord_j$14 = Int$sub$(Int$new(0n)(U32$to_nat$(_j$9)), Int$new(0n)(U32$to_nat$(_map_size$5)));
                         var _coord$15 = Web$Kaelin$Coord$new$(_coord_i$13, _coord_j$14);
@@ -2548,59 +2544,136 @@ module.exports = (function() {
                         if (self) {
                             var _img$17 = Web$Kaelin$Draw$hexagon_border$(_coord$15, _hex_rad$8, _col$4, _img$12);
                             var _img$18 = Web$Kaelin$Draw$tile$(_coord$15, _map$2, _img$17);
-                            var $537 = _img$18;
-                            var $534 = $537;
+                            var $534 = _img$18;
+                            var $531 = $534;
                         } else {
-                            var $538 = _img$12;
-                            var $534 = $538;
+                            var $535 = _img$12;
+                            var $531 = $535;
                         };
-                        _img$12 = $534;
+                        _img$12 = $531;
                     };
                     return _img$12;
                 })();
-                var $531 = _img$11;
-                _img$10 = $531;
+                var $528 = _img$11;
+                _img$10 = $528;
             };
             return _img$10;
         })();
-        var $530 = _img$9;
-        return $530;
+        var $527 = _img$9;
+        return $527;
     };
     const Web$Kaelin$Draw$map = x0 => x1 => Web$Kaelin$Draw$map$(x0, x1);
 
+    function Word$mod$(_a$2, _b$3) {
+        var Word$mod$ = (_a$2, _b$3) => ({
+            ctr: 'TCO',
+            arg: [_a$2, _b$3]
+        });
+        var Word$mod = _a$2 => _b$3 => Word$mod$(_a$2, _b$3);
+        var arg = [_a$2, _b$3];
+        while (true) {
+            let [_a$2, _b$3] = arg;
+            var R = Word$mod$(_a$2, _b$3);
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Word$mod = x0 => x1 => Word$mod$(x0, x1);
+    const U32$mod = a0 => a1 => (a0 % a1);
+
+    function Image3D$Draw$square$(_x$1, _y$2, _z$3, _w$4, _h$5, _col$6, _img$7) {
+        var _siz$8 = ((_w$4 * _h$5) >>> 0);
+        var _w_2$9 = ((_w$4 / 2) >>> 0);
+        var _h_2$10 = ((_h$5 / 2) >>> 0);
+        var $536 = (() => {
+            var $537 = _img$7;
+            var $538 = 0;
+            var $539 = _siz$8;
+            let _pix$12 = $537;
+            for (let _idx$11 = $538; _idx$11 < $539; ++_idx$11) {
+                var _v_x$13 = (_idx$11 % _w$4);
+                var _v_y$14 = ((_idx$11 / _h$5) >>> 0);
+                var _p_x$15 = (Math.max(((_x$1 + _v_x$13) >>> 0) - _w_2$9, 0));
+                var _p_y$16 = (Math.max(((_y$2 + _v_y$14) >>> 0) - _h_2$10, 0));
+                var _pos$17 = ((0 | _p_x$15 | (_p_y$16 << 12) | (_z$3 << 24)));
+                var _col$18 = _col$6(_v_x$13)(_v_y$14);
+                var _pix$19 = ((_pix$12.buffer[_pix$12.length * 2] = _pos$17, _pix$12.buffer[_pix$12.length * 2 + 1] = _col$18, _pix$12.length++, _pix$12));
+                var $537 = _pix$19;
+                _pix$12 = $537;
+            };
+            return _pix$12;
+        })();
+        return $536;
+    };
+    const Image3D$Draw$square = x0 => x1 => x2 => x3 => x4 => x5 => x6 => Image3D$Draw$square$(x0, x1, x2, x3, x4, x5, x6);
+
+    function Web$Kaelin$Draw$initial_ent$dot$(_img$1) {
+        var _center$2 = ((0 | 0 | (255 << 8) | (255 << 16) | (255 << 24)));
+        var _earth$3 = ((0 | 0 | (0 << 8) | (255 << 16) | (255 << 24)));
+        var _new_coord$4 = Web$Kaelin$Coord$new;
+        var _coord_center$5 = _new_coord$4(Int$new(0n)(0n))(Int$new(0n)(0n));
+        var _coord_earth$6 = _new_coord$4(Int$new(1n)(0n))(Int$new(2n)(0n));
+        var self = Web$Kaelin$Coord$to_screen_xy$(_coord_center$5);
+        switch (self._) {
+            case 'Pair.new':
+                var $541 = self.fst;
+                var $542 = self.snd;
+                var self = Web$Kaelin$Coord$to_screen_xy$(_coord_earth$6);
+                switch (self._) {
+                    case 'Pair.new':
+                        var $544 = self.fst;
+                        var $545 = self.snd;
+                        var _img$11 = Image3D$Draw$square$($541, $542, 0, 4, 4, (_cx$11 => _cy$12 => {
+                            var $547 = _center$2;
+                            return $547;
+                        }), _img$1);
+                        var $546 = Image3D$Draw$square$($544, $545, 0, 16, 19, (_ex$12 => _ey$13 => {
+                            var $548 = _earth$3;
+                            return $548;
+                        }), _img$11);
+                        var $543 = $546;
+                        break;
+                };
+                var $540 = $543;
+                break;
+        };
+        return $540;
+    };
+    const Web$Kaelin$Draw$initial_ent$dot = x0 => Web$Kaelin$Draw$initial_ent$dot$(x0);
+
     function App$Render$pix$(_pixs$1) {
-        var $539 = ({
+        var $549 = ({
             _: 'App.Render.pix',
             'pixs': _pixs$1
         });
-        return $539;
+        return $549;
     };
     const App$Render$pix = x0 => App$Render$pix$(x0);
 
     function App$Action$(_S$1) {
-        var $540 = null;
-        return $540;
+        var $550 = null;
+        return $550;
     };
     const App$Action = x0 => App$Action$(x0);
     const U16$eql = a0 => a1 => (a0 === a1);
 
     function App$Action$state$(_value$2) {
-        var $541 = ({
+        var $551 = ({
             _: 'App.Action.state',
             'value': _value$2
         });
-        return $541;
+        return $551;
     };
     const App$Action$state = x0 => App$Action$state$(x0);
 
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $542 = ({
+        var $552 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $542;
+        return $552;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Kaelin = (() => {
@@ -2613,65 +2686,66 @@ module.exports = (function() {
             var self = _state$3;
             switch (self._) {
                 case 'Web.Kaelin.State.game':
-                    var $545 = self.map;
-                    var _map$8 = $545;
+                    var $555 = self.map;
+                    var _map$8 = $555;
                     var _img$9 = Web$Kaelin$Draw$map$(_img$1, _map$8);
-                    var $546 = App$Render$pix$(_img$9);
-                    var $544 = $546;
+                    var _img$10 = Web$Kaelin$Draw$initial_ent$dot$(_img$9);
+                    var $556 = App$Render$pix$(_img$10);
+                    var $554 = $556;
                     break;
                 case 'Web.Kaelin.State.init':
                 case 'Web.Kaelin.State.void':
-                    var $547 = App$Render$txt$("TODO: create the renderer for this game state mode");
-                    var $544 = $547;
+                    var $557 = App$Render$txt$("TODO: create the renderer for this game state mode");
+                    var $554 = $557;
                     break;
             };
-            return $544;
+            return $554;
         });
         var _when$4 = (_event$4 => _state$5 => {
             var self = _event$4;
             switch (self._) {
                 case 'App.Event.xkey':
-                    var $549 = self.down;
-                    var $550 = self.code;
-                    var self = $549;
+                    var $559 = self.down;
+                    var $560 = self.code;
+                    var self = $559;
                     if (self) {
-                        var self = ($550 === 68);
+                        var self = ($560 === 68);
                         if (self) {
                             var self = _state$5;
                             switch (self._) {
                                 case 'Web.Kaelin.State.init':
                                 case 'Web.Kaelin.State.void':
-                                    var $554 = List$nil;
-                                    var $553 = $554;
+                                    var $564 = List$nil;
+                                    var $563 = $564;
                                     break;
                                 case 'Web.Kaelin.State.game':
-                                    var $555 = List$cons$(App$Action$state$(_state$5), List$nil);
-                                    var $553 = $555;
+                                    var $565 = List$cons$(App$Action$state$(_state$5), List$nil);
+                                    var $563 = $565;
                                     break;
                             };
-                            var $552 = $553;
+                            var $562 = $563;
                         } else {
-                            var $556 = List$nil;
-                            var $552 = $556;
+                            var $566 = List$nil;
+                            var $562 = $566;
                         };
-                        var $551 = $552;
+                        var $561 = $562;
                     } else {
-                        var $557 = List$nil;
-                        var $551 = $557;
+                        var $567 = List$nil;
+                        var $561 = $567;
                     };
-                    var $548 = $551;
+                    var $558 = $561;
                     break;
                 case 'App.Event.init':
                 case 'App.Event.tick':
                 case 'App.Event.post':
-                    var $558 = List$nil;
-                    var $548 = $558;
+                    var $568 = List$nil;
+                    var $558 = $568;
                     break;
             };
-            return $548;
+            return $558;
         });
-        var $543 = App$new$(_init$2, _draw$3, _when$4);
-        return $543;
+        var $553 = App$new$(_init$2, _draw$3, _when$4);
+        return $553;
     })();
     return {
         'Buffer32.new': Buffer32$new,
@@ -2764,6 +2838,9 @@ module.exports = (function() {
         'Image3D.push': Image3D$push,
         'Image3D.parse': Image3D$parse,
         'Kaelin.Assets.chars.croni_d_1': Kaelin$Assets$chars$croni_d_1,
+        'Web.Jogo.hero.hex': Web$Jogo$hero$hex,
+        'Web.Jogo.hero': Web$Jogo$hero,
+        'Kaelin.Assets.dark_grass_0': Kaelin$Assets$dark_grass_0,
         'Web.Kaelin.Entity.new': Web$Kaelin$Entity$new,
         'Web.Kaelin.Coord.new': Web$Kaelin$Coord$new,
         'String.cons': String$cons,
@@ -2823,8 +2900,6 @@ module.exports = (function() {
         'Web.Kaelin.Draw.hexagon_border': Web$Kaelin$Draw$hexagon_border,
         'Web.Kaelin.Map.get': Web$Kaelin$Map$get,
         'List.for': List$for,
-        'Debug.log': Debug$log,
-        'U32.to_string': U32$to_string,
         'Image3D.get_len': Image3D$get_len,
         'Array.get': Array$get,
         'Buffer32.get': Buffer32$get,
@@ -2835,6 +2910,10 @@ module.exports = (function() {
         'Image3D.Draw.image': Image3D$Draw$image,
         'Web.Kaelin.Draw.tile': Web$Kaelin$Draw$tile,
         'Web.Kaelin.Draw.map': Web$Kaelin$Draw$map,
+        'Word.mod': Word$mod,
+        'U32.mod': U32$mod,
+        'Image3D.Draw.square': Image3D$Draw$square,
+        'Web.Kaelin.Draw.initial_ent.dot': Web$Kaelin$Draw$initial_ent$dot,
         'App.Render.pix': App$Render$pix,
         'App.Action': App$Action,
         'U16.eql': U16$eql,
