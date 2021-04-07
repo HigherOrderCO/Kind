@@ -30,7 +30,7 @@ Image3D.Draw.line.aux.coords.base_case(
   acc: List<Pair<U32, U32>>
 ): List<Pair<U32, U32>>
   if U32.eql(cx, x1) then
-    List.reverse!(acc)
+    List.reverse!({cx, cy} & acc)
   else
     let b = Image3D.Draw.line.aux.bump(x0, y0, x1, y1, cx, cy)
     Image3D.Draw.line.aux.coords.base_case(U32.add(cx, 1u), U32.add(cy, b), x0, y0, x1, y1, {cx, cy} & acc)
