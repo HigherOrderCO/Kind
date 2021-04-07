@@ -1,0 +1,4 @@
+Continuation.bind<R: Type, A: Type, B: Type>(ca: Continuation<R,A>, f: A -> Continuation<R,B>): Continuation<R,B>
+  case ca {
+    new: Continuation.new<R,B>((cont) ca.run((a) case f(a) as cb { new: cb.run(cont) }))
+  }
