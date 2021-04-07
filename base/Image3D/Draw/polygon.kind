@@ -1,0 +1,9 @@
+// given a list of vertices, draws a polygon
+Image3D.Draw.polygon(
+  // vertices
+  vts: List<Pair<U32, U32>>,
+  z: U32,
+  col: Col32,
+  img: Image3D
+): Image3D
+  ?a
