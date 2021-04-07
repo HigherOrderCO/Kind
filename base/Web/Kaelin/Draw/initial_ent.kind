@@ -1,0 +1,11 @@
+Web.Kaelin.Draw.initial_ent(map: Web.Kaelin.Map): Web.Kaelin.Map
+  let ent_r = Web.Kaelin.Entity.new(Col32.new(255u,0u,0u,255u))
+  let ent_g = Web.Kaelin.Entity.new(Col32.new(0u,255u,0u,255u))
+  let ent_b = Web.Kaelin.Entity.new(Col32.new(0u,0u,255u,255u))
+  
+  let new_coord = Web.Kaelin.Coord.new
+  map = Web.Kaelin.Map.push(new_coord(Int.new(0, 0), Int.new(0, 0)), ent_r, map)
+  map = Web.Kaelin.Map.push(new_coord(Int.new(0, 1), Int.new(0, 0)), ent_g, map)
+  map = Web.Kaelin.Map.push(new_coord(Int.new(0, 0), Int.new(0, 2)), ent_b, map)
+  map
+  

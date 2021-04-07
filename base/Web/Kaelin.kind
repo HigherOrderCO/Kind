@@ -6,23 +6,16 @@
 // Sala vazia. Digite um DraftString para começar um jogo:
 // sipher@Croni, sejagentil@Zeralul / stanci@Murlok, derenash@Keropao
 
+
 // A demo application that renders a square on the screen
 Web.Kaelin: App(Web.Kaelin.State)
   let img = Image3D.alloc_capacity(65536u)
-
-  let ent_r = Web.Kaelin.Entity.new(Col32.new(255u,0u,0u,255u))
-  let ent_g = Web.Kaelin.Entity.new(Col32.new(0u,255u,0u,255u))
-  let ent_b = Web.Kaelin.Entity.new(Col32.new(0u,0u,255u,255u))
-
   // Initial state
   let init = 
-    let Pos = Web.Kaelin.Coord.new
-    let pos = Pos(Int.new(0, 0), Int.new(0, 2))
     let map = {}
-    let map = Web.Kaelin.Map.push( Pos( Int.new(0, 0) ,Int.new(0, 0) ),ent_r,map)
-    let map = Web.Kaelin.Map.push( Pos( Int.new(0, 1) ,Int.new(0, 0) ),ent_g,map)
-    let map = Web.Kaelin.Map.push(pos,ent_b,map)
-    Web.Kaelin.State.game("0x000000000000", 0, pos, map)
+    let map = Web.Kaelin.Draw.initial_ent(map)
+    let init_pos = Web.Kaelin.Coord.new(Int.new(0, 0), Int.new(0, 2))
+    Web.Kaelin.State.game("0x000000000000", 0, init_pos, map)
 
   // Render function
   //  0s - 10s: contagem regressiva
@@ -35,34 +28,7 @@ Web.Kaelin: App(Web.Kaelin.State)
     case state {
       game: 
         let map = state.map
-        let img = Image3D.clear(img) // O(1)
-        let col = Col32.new(0u, 0u, 255u, 255u)
-        let map_size = Web.Kaelin.Resources.map_size
-        let width = U32.add(U32.mul(map_size, 2u), 1u) // map_size * 2 + 1
-        let height = U32.add(U32.mul(map_size, 2u), 1u) // map_size * 2 + 1
-        let hex_rad = Web.Kaelin.Resources.hexagon_radius
-        
-        // loops through the half of the map_size
-        for j : U32 from 0u to height with img:
-          for i : U32 from 0u to width with img:
-            // generate int axial coordinate
-            let coord_i = Int.sub(Int.new(0, U32.to_nat(i)), Int.new(0, U32.to_nat(map_size))) // i - map_size
-            let coord_j = Int.sub(Int.new(0, U32.to_nat(j)), Int.new(0, U32.to_nat(map_size))) // j - map_size
-            let coord = Web.Kaelin.Coord.new( coord_i, coord_j)
-            let fit = Web.Kaelin.Coord.fit(coord, map_size)
-
-            case fit {
-              true:
-                // Draws the hexagon border
-                let img = Web.Kaelin.Draw.hexagon_border(coord, hex_rad, col, img)
-                // Draws the entities
-                let img = Web.Kaelin.Draw.tile(coord, map, img)
-                img
-              false:
-                // Draws nothing
-                img
-            }
-          img
+        let img = Web.Kaelin.Draw.map(img, map)
         App.Render.pix(img)
     } default App.Render.txt("TODO: create the renderer for this game state mode")
 
