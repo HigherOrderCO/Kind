@@ -8,5 +8,8 @@ Web.Kaelin.Draw.tile(
   let tile = Web.Kaelin.Map.get(coord, map)
   for ent in tile with img:
     open ent
-    Image3D.Draw.square(cx, cy, 0u, 4u, 4u, (x,y) ent.color, img)
+    // TEST
+    log(String.concat("x: ", U32.to_string(cx)))
+    log(String.concat("y: ", U32.to_string(cy)))
+    Image3D.Draw.image(50u, 50u, 0u, ent.img, img)
   img

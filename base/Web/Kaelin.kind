@@ -29,6 +29,7 @@ Web.Kaelin: App(Web.Kaelin.State)
       game: 
         let map = state.map
         let img = Web.Kaelin.Draw.map(img, map)
+
         App.Render.pix(img)
     } default App.Render.txt("TODO: create the renderer for this game state mode")
 
