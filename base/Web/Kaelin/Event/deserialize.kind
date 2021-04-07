@@ -1,0 +1,3 @@
+// Converts a 256-bit hex string to an event
+Web.Kaelin.Event.deserialize(code: String): Web.Kaelin.Event
+  ?web_kaelin_event_deserialize
