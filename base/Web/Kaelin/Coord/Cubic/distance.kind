@@ -1,0 +1,7 @@
+Web.Kaelin.Coord.Cubic.distance(a: Web.Kaelin.Coord.Cubic, b: Web.Kaelin.Coord.Cubic): Nat
+    open a
+    open b
+    let subx = Int.sub(a.x, b.x)
+    let suby = Int.sub(a.y, b.y)
+    let subz = Int.sub(a.z, b.z)
+    Nat.max(Nat.max(Int.abs(subx), Int.abs(suby)), Int.abs(subz))

@@ -1,0 +1,3 @@
+type Web.Kaelin.Coord.Axial {
+    new(q:Int, r:Int)
+}
