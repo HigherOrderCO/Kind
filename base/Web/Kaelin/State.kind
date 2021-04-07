@@ -1,0 +1,12 @@
+type Web.Kaelin.State {
+  init
+  void(
+    room: String
+  )
+  game(
+    room: String
+    tick: Nat
+    pos: Web.Kaelin.Coord
+    map: Web.Kaelin.Map
+  )
+}

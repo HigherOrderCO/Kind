@@ -1,0 +1,37 @@
+Web.Kaelin.Coord.to_screen_xy(coord: Web.Kaelin.Coord): Pair(U32,U32)
+  let rad = Web.Kaelin.Resources.hexagon_radius
+  let hlf = U32.div(rad,2u)
+
+  open coord
+  let i   = coord.i
+  let j   = coord.j
+  open i
+  open j
+
+  let cx = 128u
+  let cy = 128u
+  
+  let is_neg_i = Int.is_neg(i)
+  let is_neg_j = Int.is_neg(j)
+  case is_neg_i is_neg_j {
+    false false:
+      let cx = U32.add(cx, U32.mul(  Nat.to_u32(j.y), rad))
+      let cx = U32.add(cx, U32.mul(  Nat.to_u32(i.y), U32.mul(rad,2u)) )
+      let cy = U32.add(cy, U32.mul(  Nat.to_u32(j.y), U32.mul(hlf,3u)))
+      {cx, cy}
+    false true:
+      let cx = U32.sub(cx, U32.mul(Nat.to_u32(j.x), rad))
+      let cx = U32.add(cx, U32.mul(  Nat.to_u32(i.y), U32.mul(rad,2u)) )
+      let cy = U32.sub(cy, U32.mul(  Nat.to_u32(j.x), U32.mul(hlf,3u)))
+      {cx, cy}
+    true false:
+      let cx = U32.add(cx, U32.mul(Nat.to_u32(j.y), rad))
+      let cx = U32.sub(cx, U32.mul(  Nat.to_u32(i.x), U32.mul(rad,2u)) )
+      let cy = U32.add(cy, U32.mul(  Nat.to_u32(j.y), U32.mul(hlf,3u)))
+      {cx, cy}
+    true true:
+      let cx = U32.sub(cx, U32.mul(Nat.to_u32(j.x), rad))
+      let cx = U32.sub(cx, U32.mul(  Nat.to_u32(i.x), U32.mul(rad,2u)) )
+      let cy = U32.sub(cy, U32.mul(  Nat.to_u32(j.x), U32.mul(hlf,3u)))
+      {cx, cy}
+  }!

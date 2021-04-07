@@ -1,0 +1,3 @@
+Int.is_pos(a: Int): Bool
+  open a
+  Nat.ltn(a.x, a.y)
