@@ -1,0 +1,227 @@
+// Returs true if both inputs are true
+Bool.and1(a: Bool, b: Bool): Bool
+  case a {
+    true: b
+    false: false
+  }
+
+// Returs true if any input is true
+Bool.or1(a: Bool, b: Bool): Bool
+  case a {
+    true: true
+    false: b
+  }
+
+// Returs true if both inputs are equal
+Bool.eql1(a: Bool, b: Bool): Bool
+  case a { 
+    true: b
+    false: Bool.not(b)
+  }
+
+// Returns the first element of a pair
+Pair.first1<A: Type, B: Type>(pair: Pair<A,B>): A
+  case pair {
+    new: pair.fst
+  }
+// Inverses the order of the elements of a pair
+Pair.swap1<A: Type, B: Type>(pair: Pair<A,B>): Pair<B,A>
+  case pair {
+    new: Pair.new!!(pair.snd, pair.fst)
+  }
+
+//Applies a function to both elements of a Pair
+Pair.map1<A: Type, B: Type>(pair: Pair<A,A>, fn: A -> B): Pair<B,B>
+  case pair {
+    new: Pair.new!!(fn(pair.fst), fn(pair.snd))
+  }
+
+// Doubles a number
+Nat.double1(n: Nat): Nat
+  case n {
+    zero: 0
+    succ: Nat.succ(Nat.succ(Nat.double1(n.pred)))
+  }
+
+// Adds two numbers
+Nat.add1(a: Nat, b: Nat): Nat
+  case a {
+    zero: b
+    succ: case b {
+      zero: a
+      succ: Nat.succ(Nat.add(a.pred,b))
+    }
+  }
+// Subtracts two numbers
+Nat.sub1(a: Nat, b: Nat): Nat
+  case b {
+    zero: a
+    succ: case a {
+      zero: 0
+      succ: Nat.sub1(a.pred, b.pred)
+    }
+  }
+
+// Multiplies two numbers
+Nat.mul1(a: Nat, b: Nat): Nat
+  case a {
+    zero: 0
+    succ: Nat.add(b, Nat.mul1(a.pred,b))
+  }
+// Returns true if a < b
+Nat.ltn1(a: Nat, b: Nat): Bool
+  case a {
+    zero: case b {
+      zero: false
+      succ: true
+    }
+    succ: case b{
+      zero: false
+      succ: Nat.ltn1(a.pred, b.pred)
+    }
+  }
+
+// Returns true if a == b
+Nat.eql1(a: Nat, b: Nat): Bool
+  case a {
+    zero: case b {
+      zero: true
+      succ: false
+    }
+    succ: case b{
+      zero: false
+      succ: Nat.eql1(a.pred,b.pred)
+    }
+  }
+
+// Returns true if a > b
+Nat.gtn1(a: Nat, b: Nat): Bool
+  case b {
+    zero: case a {
+      zero: false
+      succ: true
+    }
+    succ: case a{
+      zero: false
+      succ: Nat.gtn1(a.pred, b.pred)
+    }
+  }
+
+////Returns the first element of a List
+List.head1<A: Type>(xs: List<A>): Maybe(A)
+  case xs{
+    nil: none
+    cons: Maybe.some!(xs.head)
+  }
+
+//Returns the list without the first element
+List.tail1<A: Type>(xs: List<A>): Maybe(List<A>)
+  case xs{
+    nil: none
+    cons: Maybe.some!(xs.tail)
+  }
+
+//Returns the length of a list
+List.length1<A: Type>(xs: List<A>): Nat
+  ?a
+
+//Applies a function to all elements of a list
+List.map1<A: Type, B: Type>(xs: List<A>, fn: A -> B): List<B>
+  case xs {
+    nil: ?a
+    cons: ?a
+  }
+
+//// Returns the same list, with the order reversed
+//List.reverse1<A: Type>(xs: List<A>): List<A>
+  //?a
+
+//// Returns pairs of the elements of the 2 input lists on the same index
+//// Ex: List.zip!!([1,2], ["a","b"]) == [{1,"a"},{2,"b"}]
+//List.zip1<A: Type, B: Type>(xs: List<A>, ys: List<B>): List<Pair<A,B>>
+  //?a
+
+//// Returns the smallest element of a List
+//List.min1(xs: List<Nat>): Nat
+  //?a
+
+//// Returns the same list without the smallest element
+//List.remove_min1(xs: List<Nat>): List<Nat>
+  //?a
+
+//// Returns the same list, in ascending order
+//List.sort1(xs: List<Nat>): List<Nat>
+  //?a
+
+//// PROOFS
+
+//p0: true == true
+  //?a
+
+//p1(a: Bool): Bool.and(false, a) == false
+  //?a
+
+//p2(a: Bool): Bool.and(a, false) == false
+  //?a
+
+//p3(a: Bool): Bool.or(true, a) == true
+  //?a
+
+//p4(a: Bool): Bool.or(a, true) == true
+  //?a
+
+//p5(a: Bool): Bool.eql(a, a) == true
+  //?a
+
+//p6(a: Bool): Bool.not(Bool.not(a)) == a
+  //?a
+
+//p7(a: Bool, b: Bool): Bool.not(Bool.and(a,b)) == Bool.or(Bool.not(a), Bool.not(b))
+  //?a
+
+//p8(a: Bool, b: Bool): Bool.not(Bool.or(a,b)) == Bool.and(Bool.not(a), Bool.not(b))
+  //?a
+
+//p9(n: Nat): Nat.same(n) == n
+  //?a
+
+//p10(n: Nat): Nat.half(Nat.double(n)) == n
+  //?a
+
+//p11(n: Nat): Nat.add(0,n) == n
+  //?a
+
+//p12(n: Nat): Nat.add(n,0) == n
+  //?a
+
+//p13(n: Nat, m: Nat): Nat.add(Nat.succ(n),m) == Nat.succ(Nat.add(n,m))
+  //?a
+  
+//p14(n: Nat, m: Nat): Nat.add(n,Nat.succ(m)) == Nat.succ(Nat.add(n,m))
+  //?a
+
+//p15(n: Nat, m: Nat): Nat.add(n, m) == Nat.add(m, n)
+  //?a
+
+//p16(n: Nat): Nat.add(n,n) == Nat.double(n)
+  //?a
+
+//p17(n: Nat): Nat.ltn(n, Nat.succ(m)) == true
+  //?a
+
+//p18(n: Nat): Nat.gtn(Nat.succ(n), m) == true
+  //?a
+
+//p19(n: Nat): Nat.sub(n,n) == 0
+  //?a
+
+//p20(n: Nat): Nat.add(n,n) == Nat.mul(n,2)
+  //?a
+
+//p21(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
+ //?a  
+
+
+//Test:_
+//Nat.gtn1(4,3)
+

@@ -1,0 +1,63 @@
+// Número aleatóriamente gerado baseado na hora.
+IO.random(max: Nat): IO(Nat)
+  IO { 
+    get time = IO.get_time
+    let random = Nat.random(time)
+    let random = Nat.mod(random, max)
+    return random
+  }
+
+// Se
+Senhas: IO(Unit)
+  IO {
+    get num_0 = IO.random(10)
+    get num_1 = IO.random(10)
+    get num_2 = IO.random(10)
+    get num_3 = IO.random(10)
+    let senha = [num_0, num_1, num_2, num_3]
+    Senhas.loop(senha, 10)
+  }
+
+// Converte o input do usuário em uma lista com 4 números
+Senhas.read_input(line: String): List(Nat)
+  let split = String.split(line," ")
+  let map = List.map!!(Nat.read, split)
+  let list = List.take!(4, map)
+  list
+
+// Esse número está na senha?
+Senha.tem_numero(num: Nat, senha: List(Nat)): Bool
+  let tmp = List.map!!(Nat.eql(num), senha)
+  //melhorar o código (com 1 fold só) (Map desnecessário)
+  let tmp = List.fold!(tmp,_,false ,Bool.or)
+  tmp
+
+Senhas.aux(pair: Pair(Nat,Nat)): Bool
+  open pair
+    Nat.eql(pair.fst, pair.snd)
+
+
+// Converte senha/tentativa em uma resposta. Sugestão:
+// $ senha     = [ 1 ,  7 ,  6 ,  5 ]
+// $ tentativa = [ 2 ,  7 ,  5 ,  3 ]
+// $ resposta  = ["X", "V", "O", "X"]
+Senhas.resposta(senha: List(Nat), tentativa: List(Nat)): List(String)
+  let nums = List.zip!!(senha, tentativa)
+  let nums = List.map!!(Senhas.aux, nums)
+    ?a
+
+Senhas.loop(senha: List(Nat), tentativas: Nat): IO(Unit)
+  IO {
+
+    IO.print("Escolha 4 números:")
+    get line = IO.get_line;
+    let user_nums = Senhas.read_input(line);
+
+    IO.print("A resposta é:")
+    // ...
+
+    if Nat.eql(tentativas, 0) then
+      IO.print("Acabaram as chances.")
+    else
+      Senhas.loop(senha, tentativas - 1)
+  }
