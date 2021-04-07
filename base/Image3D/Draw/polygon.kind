@@ -6,4 +6,44 @@ Image3D.Draw.polygon(
   col: Col32,
   img: Image3D
 ): Image3D
-  ?a
+
+  let poly = (p, pic) open p
+                      open pic
+                      open pic.snd
+    let imagem =  Image3D.Draw.line(pic.snd.fst, pic.snd.snd, p.fst ,p.snd , z, col, img)
+        {imagem, p}
+  case vts {
+    nil: img
+    cons: 
+      let par = List.fold!(vts.tail, _, Pair.new!!(img, vts.head), poly)
+      open par
+      par.fst
+  }!
+//        4      3                     
+//           \   |      
+//        1      2
+//
+
+
+//Image3D.Draw.line(
+  //x0: U32,
+  //y0: U32,
+  //x1: U32,
+  //y1: U32,
+  //z: U32,
+  //col: Col32,
+  //img: Image3D,
+//): Image3D
+  //let coords = Image3D.Draw.line.aux.coords(x0, y0, x1, y1)
+  //draw_coord = ((coord, img)
+    //open coord
+    //Image3D.push(Pos32.new(coord.fst, coord.snd, z), col, img)) :: Pair<U32, U32> -> Image3D -> Image3D
+  //List.fold<Pair<U32, U32>>(coords, Image3D, img, draw_coord)
+
+//List.fold<A: Type>(list: List(A)): <P: Type> -> P -> (A -> P -> P) -> P
+  //<P> (nil, cons)
+  //case list {
+    //nil : nil,
+    //cons: cons(list.head, List.fold<A>(list.tail)<P>(nil, cons))
+  //}
+
