@@ -8,14 +8,9 @@ Web.Kaelin.Draw.tile(
   let tile = Web.Kaelin.Map.get(coord, map)
   for ent in tile with img:
     open ent
-    // TEST
-    // cx: 148
-    // cy: 158
-
-    // If to_scren_xy uses 0u and 0u instead of 128u 128u,
-    // x:20 and y: 30
-    
-    // log(String.concat("x: ", U32.to_string(cx)))
-    // log(String.concat("y: ", U32.to_string(cy)))
+    let aux_x = U32.sub(Web.Kaelin.Resources.hexagon_radius, 3u)
+    let aux_y = U32.add(Web.Kaelin.Resources.hexagon_radius, 3u)
+    let cx = U32.sub(cx, aux_x)
+    let cy = U32.sub(cy, Web.Kaelin.Resources.hexagon_radius)
     Image3D.Draw.image(cx, cy, 0u, ent.img, img)
   img
