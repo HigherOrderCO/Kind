@@ -1,0 +1,26 @@
+Web.Kaelin.Draw.initial_ent(map: Web.Kaelin.Map): Web.Kaelin.Map
+  let croni = Kaelin.Assets.chars.croni_d_1
+  let hero  = Web.Jogo.hero
+  let grass = Kaelin.Assets.dark_grass_0
+  let ent_croni = Web.Kaelin.Entity.new(croni)
+  let ent_hero = Web.Kaelin.Entity.new(hero)
+  let ent_grass = Web.Kaelin.Entity.new(grass)
+  
+  let new_coord = Web.Kaelin.Coord.new
+  // map = Web.Kaelin.Map.push(new_coord(Int.new(0, 0), Int.new(0, 0)), ent_hero, map)
+  map = Web.Kaelin.Map.push(new_coord(Int.new(0, 1), Int.new(0, 2)),ent_croni, map)
+  map = Web.Kaelin.Map.push(new_coord(Int.new(0, 0), Int.new(0, 0)),ent_grass, map)
+  map
+  
+Web.Kaelin.Draw.initial_ent.dot(img: Image3D): Image3D
+  let center = Col32.new(0u,255u,255u,255u)
+  let earth = Col32.new(0u,0u,255u,255u)
+  let new_coord = Web.Kaelin.Coord.new
+
+  let coord_center = new_coord(Int.new(0, 0), Int.new(0, 0))
+  let coord_earth = new_coord(Int.new(1, 0), Int.new(2, 0))
+
+  let {cx,cy} = Web.Kaelin.Coord.to_screen_xy(coord_center)
+  let {ex,ey} = Web.Kaelin.Coord.to_screen_xy(coord_earth)
+  let img = Image3D.Draw.square(cx, cy, 0u, 4u, 4u, (cx,cy) center, img) 
+  Image3D.Draw.square(ex, ey, 0u, 4u, 4u, (ex,ey) earth, img)

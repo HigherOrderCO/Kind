@@ -1,0 +1,5 @@
+Web.Kaelin.Resources.hexagon_radius: U32
+  10u
+
+Web.Kaelin.Resources.map_size : U32
+  5u
