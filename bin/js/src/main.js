@@ -202,6 +202,7 @@ function display_error(name, error){
     } catch (e) {
       console.log("Sorry, KindJS couldn't handle your input. :( ");
       console.log("Try Haskell/Scheme releases!")
+      console.log(e);
     }
   }
 })();

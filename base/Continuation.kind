@@ -1,3 +1,2 @@
-type Continuation<R: Type, A: Type> {
-  new(run: (A -> R) -> R)
-}
+Continuation(R: Type, A: Type): Type
+  (A -> R) -> R
