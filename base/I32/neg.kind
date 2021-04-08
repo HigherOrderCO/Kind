@@ -1,0 +1,4 @@
+I32.neg(a: I32, b: I32): I32
+  open a
+  open b
+  I32.new(Word.neg!(a.value, b.value))
