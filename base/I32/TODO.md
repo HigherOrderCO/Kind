@@ -1,29 +1,29 @@
 [x] - add.kind
 [x] - neg.kind
-[ ] - and.kind
-[ ] - cmp.kind
-[ ] - div.kind
+[x] - and.kind
+[x] - cmp.kind
+[ ] - div.kind - Difisil
 [x] - eql.kind
-[ ] - for.kind
-[ ] - gte.kind
-[ ] - gtn.kind
+[ ] - for.kind - Difisil
+[x] - gte.kind
+[x] - gtn.kind
 [x] - inc.kind
-[ ] - length.kind
-[ ] - lte.kind
-[ ] - ltn.kind
+[x] - length.kind
+[ ] - lte.kind - Rigille
+[ ] - ltn.kind - Rigille
 [ ] - mod.kind
-[ ] - mul.kind
+[x] - mul.kind
 [ ] - needed_depth.kind e needed_depth/go.kind
-[ ] - or.kind
+[x] - or.kind
 [x] - pow.kind
-[ ] - slice.kind
+[ ] - slice.kind - Todo
 [ ] - sqrt.kind
-[ ] - sub.kind
+[x] - sub.kind
 [ ] - shl.kind
-[ ] - shr.kind
+[ ] - shr.kind - Todo
 [x] - to_bits.kind
-[ ] - to_f64.kind
+[ ] - to_f64.kind - Nodo
 [x] - to_int.kind
-[ ] - to_string.kind
-[ ] - xor.kind
-[ ] - zero.kind
+[x] - to_string.kind
+[x] - xor.kind
+[x] - zero.kind
