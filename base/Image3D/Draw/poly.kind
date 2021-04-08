@@ -1,5 +1,5 @@
 // given a list of vertices, draws a polygon
-Image3D.Draw.polygon(
+Image3D.Draw.poly(
   // vertices
   vts: List<Pair<U32, U32>>,
   z: U32,
