@@ -19,8 +19,8 @@ Web.Kaelin: App(Web.Kaelin.State)
     let Pos = Web.Kaelin.Coord.new
     let pos = Pos(Int.new(0, 0), Int.new(0, 2))
     let map = {}
-    let map = Web.Kaelin.Map.push( Pos( Int.new(0, 0) ,Int.new(0, 0) ),ent_r,map)
-    let map = Web.Kaelin.Map.push( Pos( Int.new(0, 1) ,Int.new(0, 0) ),ent_g,map)
+    // let map = Web.Kaelin.Map.push( Pos( Int.new(0, 0) ,Int.new(0, 0) ),ent_r,map)
+    // let map = Web.Kaelin.Map.push( Pos( Int.new(0, 1) ,Int.new(0, 0) ),ent_g,map)
     let map = Web.Kaelin.Map.push(pos,ent_b,map)
     Web.Kaelin.State.game("0x000000000000", 0, pos, map)
 
@@ -78,20 +78,61 @@ Web.Kaelin: App(Web.Kaelin.State)
                 void: []
                 game:
                   // TODO: Web.Kaelin.Map.swap(i, ca, cb, map)
-                  // let old_pos = state.pos
-                  // let new_pos = case old_pos {
-                  //   new: Web.Kaelin.Coord.new(U32.add(old_pos.i,1u),old_pos.j)
-                  // }
-                  // let {map,ent} = Web.Kaelin.Map.pop(old_pos, state.map)
-                  // let map = case ent {
-                  //   none: map
-                  //   some: Web.Kaelin.Map.push(new_pos, ent.value, map)
-                  // }
-                  //let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
+                  let old_pos = state.pos
+                  let new_pos = case old_pos {
+                    new: Web.Kaelin.Coord.new(Int.add(old_pos.i, Int.new(1, 0)),old_pos.j)
+                  }
+                  let map = Web.Kaelin.Map.swap(0, old_pos, new_pos, state.map)
+                  let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
                   [App.Action.state!(state)]
               }
+            'A':
+              case state {
+                init: []
+                void: []
+                game:
+                  // TODO: Web.Kaelin.Map.swap(i, ca, cb, map)
+                  let old_pos = state.pos
+                  let new_pos = case old_pos {
+                    new: Web.Kaelin.Coord.new(Int.sub(old_pos.i, Int.new(1, 0)),old_pos.j)
+                  }
+                  let map = Web.Kaelin.Map.swap(0, old_pos, new_pos, state.map)
+                  let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
+                  [App.Action.state!(state)]
+              }
+              'S':
+                case state {
+                  init: []
+                  void: []
+                  game:
+                    // TODO: Web.Kaelin.Map.swap(i, ca, cb, map)
+                    let old_pos = state.pos
+                    let new_pos = case old_pos {
+                      new: Web.Kaelin.Coord.new(old_pos.i, Int.add(old_pos.j, Int.new(1, 0)))
+                    }
+                    let map = Web.Kaelin.Map.swap(0, old_pos, new_pos, state.map)
+                    let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
+                    [App.Action.state!(state)]
+                }
+              'W':
+                case state {
+                  init: []
+                  void: []
+                  game:
+                    // TODO: Web.Kaelin.Map.swap(i, ca, cb, map)
+                    let old_pos = state.pos
+                    let new_pos = case old_pos {
+                      new: Web.Kaelin.Coord.new(old_pos.i, Int.sub(old_pos.j, Int.new(1, 0)))
+                    }
+                    let map = Web.Kaelin.Map.swap(0, old_pos, new_pos, state.map)
+                    let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
+                    [App.Action.state!(state)]
+                }
           } default []
         else []
+      tick:
+        log(Pair.show!!(U32.to_string, U32.to_string, event.mouse))
+        []
     } default []
 
   // The application

@@ -1,0 +1,7 @@
+List.pop_at.go<A: Type>(idx: Nat, list: List(A), searched_list: List(A)): Pair(Maybe(A), List(A))
+  case idx list{
+    zero nil: {none, searched_list}
+    zero cons: {some(list.head), searched_list ++ list.tail}
+    succ nil: {none, searched_list}
+    succ cons: List.pop_at.go!(idx.pred, list.tail, searched_list ++ [list.head])
+  }
