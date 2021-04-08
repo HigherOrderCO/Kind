@@ -1,5 +1,5 @@
 // Draws an ASCII text to a position
-Image3D.text(
+Image3D.Draw.text(
   txt: String, 
   font_map: PixelFont, 
   pos: Pos32,
@@ -8,11 +8,11 @@ Image3D.text(
     for pair in List.indices.u32!(String.to_list(txt)):
       let {i, chr} = pair
       let add_pos = Pos32.new(U32.mul(i,6u), 0u, 0u)
-      Image3D.text.char(chr, font_map, Pos32.add(pos, add_pos), scr)
+      Image3D.Draw.text.char(chr, font_map, Pos32.add(pos, add_pos), scr)
   scr
 
 // Draws an ASCII char to a position 
-Image3D.text.char(
+Image3D.Draw.text.char(
   chr: Char, 
   font_map: PixelFont, 
   chr_pos: Pos32,

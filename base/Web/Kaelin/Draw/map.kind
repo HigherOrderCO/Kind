@@ -20,6 +20,8 @@ Web.Kaelin.Draw.map(img: Image3D, map: Web.Kaelin.Map): Image3D
         true:
           // Draws the hexagon border
           let img = Web.Kaelin.Draw.hexagon_border(coord, hex_rad, col, img)
+          // Draw coordinates
+          let img = Web.Kaelin.Draw.tile.empty(coord, map, img)
           // Draws the entities
           let img = Web.Kaelin.Draw.tile(coord, map, img)
           img
