@@ -13,3 +13,12 @@ Image3D.Draw.image(x: U32, y: U32, z: U32, src: Image3D, img: Image3D): Image3D
     let pos = Pos32.new(p_x, p_y, p_z)
     Image3D.push(pos, col, img)
   img
+  // let img = for i : U32 from 0u to len:
+  //   let pos = Pos32.new(x,y,z)
+  //   let mid = Pos32.new(128u, 128u, 0u)
+  //   let pix_pos = Image3D.get_pos(i, src)
+  //   let pix_col = Image3D.get_col(i, src)
+  //   let pix_pos = Pos32.sub(Pos32.add(pos, pix_pos), mid)
+  //   Image3D.push(pix_pos, pix_col, img)
+  // img
+  

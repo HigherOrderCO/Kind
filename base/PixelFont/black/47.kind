@@ -1,0 +1,4 @@
+// z_index: 30
+// char: /
+PixelFont.black.47: Image3D
+  Image3D.parse("03011e21212802021e21212801031e21212800041e212128")

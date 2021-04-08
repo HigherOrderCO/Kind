@@ -8,5 +8,9 @@ Web.Kaelin.Draw.tile(
   let tile = Web.Kaelin.Map.get(coord, map)
   for ent in tile with img:
     open ent
-    Image3D.Draw.square(cx, cy, 0u, 4u, 4u, (x,y) ent.color, img)
+    let aux_x = U32.sub(Web.Kaelin.Resources.hexagon_radius, 3u)
+    let aux_y = U32.add(Web.Kaelin.Resources.hexagon_radius, 3u)
+    let cx = U32.sub(cx, aux_x)
+    let cy = U32.sub(cy, Web.Kaelin.Resources.hexagon_radius)
+    Image3D.Draw.image(cx, cy, 0u, ent.img, img)
   img
