@@ -5,7 +5,7 @@ Web.Kaelin.Coord.fit(
   open coord
   let i = coord.i
   let j = coord.j
-  
+
   let sum = Int.add(i, j)
   let abs = Int.abs(sum)
   let abs = Nat.to_u32(abs)
