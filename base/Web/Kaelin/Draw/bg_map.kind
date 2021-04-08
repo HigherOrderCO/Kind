@@ -1,0 +1,5 @@
+Web.Kaelin.Draw.bg_map(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map): Web.Kaelin.Map
+  let ent_grass = Web.Kaelin.Entity.background(Kaelin.Assets.dark_grass_4)
+  // let new_coord = Web.Kaelin.Coord.new
+  map = Web.Kaelin.Map.push(coord,ent_grass, map)
+  map

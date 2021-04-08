@@ -18,6 +18,7 @@ Web.Kaelin.Draw.map(img: Image3D, map: Web.Kaelin.Map): Image3D
 
       case fit {
         true:
+          let map = Web.Kaelin.Draw.bg_map(coord, map)
           // Draws the hexagon border
           let img = Web.Kaelin.Draw.hexagon_border(coord, hex_rad, col, img)
           // Draw coordinates
