@@ -1,13 +1,17 @@
 Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: BitsSet): Kind.Check(Bool)
-  let ah = Kind.Term.serialize(Kind.Term.reduce(a,Kind.Map.new!), lv, lv, Bits.o, Bits.e);
-  let bh = Kind.Term.serialize(Kind.Term.reduce(b,Kind.Map.new!), lv, lv, Bits.i, Bits.e);
+  //let ah = Kind.Term.serialize(Kind.Term.reduce(a,Kind.Map.new!), lv, lv, Bits.o, Bits.e);
+  //let bh = Kind.Term.serialize(Kind.Term.reduce(b,Kind.Map.new!), lv, lv, Bits.i, Bits.e);
+  let ah = Kind.Term.serialize(Kind.Term.reduce(a,Kind.Map.new!), lv, false);
+  let bh = Kind.Term.serialize(Kind.Term.reduce(b,Kind.Map.new!), lv, true);
   if Bits.eql(ah, bh) then do Kind.Check {
     return Bool.true;
   } else do Kind.Check {
     let a1 = Kind.Term.reduce(a, defs);
     let b1 = Kind.Term.reduce(b, defs);
-    let ah = Kind.Term.serialize(a1, lv, lv, Bits.o, Bits.e);
-    let bh = Kind.Term.serialize(b1, lv, lv, Bits.i, Bits.e);
+    //let ah = Kind.Term.serialize(a1, lv, lv, Bits.o, Bits.e);
+    //let bh = Kind.Term.serialize(b1, lv, lv, Bits.i, Bits.e);
+    let ah = Kind.Term.serialize(a1, lv, false);
+    let bh = Kind.Term.serialize(b1, lv, true);
     if Bits.eql(ah, bh) then do Kind.Check {
       return Bool.true;
     } else do Kind.Check {
