@@ -1,0 +1,3 @@
+type Web.Kaelin.Coord {
+  new(i: Int, j: Int) 
+}

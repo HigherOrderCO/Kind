@@ -1,0 +1,4 @@
+Int.abs(a: Int): Nat
+  let result = Int.to_nat(a)
+  open result
+  result.snd

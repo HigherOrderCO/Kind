@@ -1,0 +1,16 @@
+Web.Kaelin.Draw.tile(
+  coord: Web.Kaelin.Coord, 
+  map: Web.Kaelin.Map, 
+  img: Image3D
+) : Image3D
+  open coord
+  let {cx,cy} = Web.Kaelin.Coord.to_screen_xy(coord)
+  let tile = Web.Kaelin.Map.get(coord, map)
+  for ent in tile with img:
+    open ent
+    let aux_x = U32.sub(Web.Kaelin.Resources.hexagon_radius, 3u)
+    let aux_y = U32.add(Web.Kaelin.Resources.hexagon_radius, 3u)
+    let cx = U32.sub(cx, aux_x)
+    let cy = U32.sub(cy, Web.Kaelin.Resources.hexagon_radius)
+    Image3D.Draw.image(cx, cy, 0u, ent.img, img)
+  img

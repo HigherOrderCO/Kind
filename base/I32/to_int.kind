@@ -1,0 +1,10 @@
+I32.to_int(a: I32): Int
+  open a
+  b = I32.is_neg(a)
+  case b {
+    true: c = Word.neg!(a.value)
+          abs = Word.to_nat!(c)
+          Int.new(0, abs)
+    false: abs = Word.to_nat!(a.value)
+           Int.new(abs, 0)
+  }

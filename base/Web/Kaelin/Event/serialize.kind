@@ -1,0 +1,3 @@
+// Serializes an event to a 256-bit hex string ("0x000....")
+Web.Kaelin.Event.serialize(event: Web.Kaelin.Event): String
+  ?web_kaelin_event_serialize

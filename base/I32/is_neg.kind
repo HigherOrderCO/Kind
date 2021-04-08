@@ -1,0 +1,10 @@
+I32.is_neg(a: I32): Bool
+  open a
+  I32.is_neg.aux<32>(a.value, false)
+
+I32.is_neg.aux<size: Nat>(a: Word(size), b: Bool): Bool
+  case a {
+    e: b
+    o: I32.is_neg.aux<a.size>(a.pred, false)
+    i: I32.is_neg.aux<a.size>(a.pred, true)
+  }
