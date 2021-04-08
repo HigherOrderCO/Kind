@@ -1,0 +1,3 @@
+Web.Kaelin.Coord.Axial.show(coord: Web.Kaelin.Coord.Axial): String
+  open coord
+  Int.show(coord.q) | " " | Int.show(coord.r)
