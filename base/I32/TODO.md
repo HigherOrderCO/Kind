@@ -9,8 +9,8 @@
 [x] - gtn.kind
 [x] - inc.kind
 [x] - length.kind
-[ ] - lte.kind - Rigille
-[ ] - ltn.kind - Rigille
+[x] - lte.kind - Rigille
+[x] - ltn.kind - Rigille
 [ ] - mod.kind
 [x] - mul.kind
 [ ] - needed_depth.kind e needed_depth/go.kind
@@ -24,6 +24,6 @@
 [x] - to_bits.kind
 [ ] - to_f64.kind - Nodo
 [x] - to_int.kind
-[x] - to_string.kind
+[x] - show.kind
 [x] - xor.kind
 [x] - zero.kind
