@@ -1,0 +1,3 @@
+I32.zero: I32
+  I32.new(Word.zero(32))
+
