@@ -2086,7 +2086,7 @@ module.exports = (function() {
                 var _sum$7 = Int$add$(_i$5, _j$6);
                 var _abs$8 = Int$abs$(_sum$7);
                 var _abs$9 = (Number(_abs$8));
-                var $428 = (_abs$9 <= _map_size$2);
+                var $428 = (_abs$9 <= (Math.max(_map_size$2 - 1, 0)));
                 var $425 = $428;
                 break;
         };
@@ -2094,13 +2094,13 @@ module.exports = (function() {
     };
     const Web$Kaelin$Coord$fit = x0 => x1 => Web$Kaelin$Coord$fit$(x0, x1);
 
-    function Web$Kaelin$Draw$bg_map$(_coord$1, _map$2) {
+    function Web$Kaelin$Draw$background$(_coord$1, _map$2) {
         var _ent_grass$3 = Web$Kaelin$Entity$background$(Kaelin$Assets$dark_grass_4);
         var _map$4 = Web$Kaelin$Map$push$(_coord$1, _ent_grass$3, _map$2);
         var $429 = _map$4;
         return $429;
     };
-    const Web$Kaelin$Draw$bg_map = x0 => x1 => Web$Kaelin$Draw$bg_map$(x0, x1);
+    const Web$Kaelin$Draw$background = x0 => x1 => Web$Kaelin$Draw$background$(x0, x1);
 
     function Int$is_neg$(_a$1) {
         var $430 = _a$1((_a$x$2 => _a$y$3 => {
@@ -2974,7 +2974,7 @@ module.exports = (function() {
                         var _fit$16 = Web$Kaelin$Coord$fit$(_coord$15, _map_size$5);
                         var self = _fit$16;
                         if (self) {
-                            var _map$17 = Web$Kaelin$Draw$bg_map$(_coord$15, _map$2);
+                            var _map$17 = Web$Kaelin$Draw$background$(_coord$15, _map$2);
                             var _img$18 = Web$Kaelin$Draw$hexagon_border$(_coord$15, _hex_rad$8, _col$4, _img$12);
                             var _img$19 = Web$Kaelin$Draw$tile$empty$(_coord$15, _map$17, _img$18);
                             var _img$20 = Web$Kaelin$Draw$tile$(_coord$15, _map$17, _img$19);
@@ -3252,7 +3252,7 @@ module.exports = (function() {
         'Word.lte': Word$lte,
         'U32.lte': U32$lte,
         'Web.Kaelin.Coord.fit': Web$Kaelin$Coord$fit,
-        'Web.Kaelin.Draw.bg_map': Web$Kaelin$Draw$bg_map,
+        'Web.Kaelin.Draw.background': Web$Kaelin$Draw$background,
         'Int.is_neg': Int$is_neg,
         'Web.Kaelin.Coord.to_screen_xy': Web$Kaelin$Coord$to_screen_xy,
         'Image3D.Draw.deresagon': Image3D$Draw$deresagon,
