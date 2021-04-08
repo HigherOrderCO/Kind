@@ -1,0 +1,5 @@
+Web.Kaelin.Map.get(
+    coord: Web.Kaelin.Coord, 
+    map: Web.Kaelin.Map
+) : Web.Kaelin.Tile
+  map{Web.Kaelin.Coord.show(coord)} <> []
