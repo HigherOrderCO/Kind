@@ -1,10 +1,10 @@
 Web.Kaelin.Draw.tile(
+  cx: U32,
+  cy: U32,
   coord: Web.Kaelin.Coord, 
   map: Web.Kaelin.Map, 
   img: Image3D
 ) : Image3D
-  open coord
-  let {cx,cy} = Web.Kaelin.Coord.to_screen_xy(coord)
   let tile = Web.Kaelin.Map.get(coord, map)
   for ent in tile with img:
     open ent

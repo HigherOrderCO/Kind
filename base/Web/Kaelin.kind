@@ -41,6 +41,8 @@ Web.Kaelin: App(Web.Kaelin.State)
         let width = U32.add(U32.mul(map_size, 2u), 1u) // map_size * 2 + 1
         let height = U32.add(U32.mul(map_size, 2u), 1u) // map_size * 2 + 1
         let hex_rad = Web.Kaelin.Resources.hexagon_radius
+        let screen_center_x = 128u
+        let screen_center_y = 128u
         
         // loops through the half of the map_size
         for j : U32 from 0u to height with img:
@@ -54,9 +56,10 @@ Web.Kaelin: App(Web.Kaelin.State)
             case fit {
               true:
                 // Draws the hexagon border
-                let img = Web.Kaelin.Draw.hexagon_border(coord, hex_rad, col, img)
+                let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(coord, screen_center_x, screen_center_y, hex_rad)
+                let img = Web.Kaelin.Draw.hexagon_border(cx, cy, hex_rad, col, img)
                 // Draws the entities
-                let img = Web.Kaelin.Draw.tile(coord, map, img)
+                let img = Web.Kaelin.Draw.tile(cx, cy, coord, map, img)
                 img
               false:
                 // Draws nothing
