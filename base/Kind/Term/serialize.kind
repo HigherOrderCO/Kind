@@ -1,7 +1,7 @@
-Kind.Term.serialize(term: Kind.Term, depth: Nat, init: Nat, diff: Bits -> Bits, x: Bits): Bits
+Kind.Term.serialize.go(term: Kind.Term, depth: Nat, init: Nat, diff: Bits -> Bits, x: Bits): Bits
   case term {
     ref:
-      let name = Bits.concat(Kind.Term.serialize.name(term.name));
+      let name = Bits.concat(Kind.Name.to_bits(term.name));
       Bits.o(Bits.o(Bits.o(name(x)))),
     var:
       if Nat.gte(term.indx, init) then
@@ -15,8 +15,8 @@ Kind.Term.serialize(term: Kind.Term, depth: Nat, init: Nat, diff: Bits -> Bits, 
     all:
       let eras = if term.eras then Bits.i else Bits.o
       let self = Bits.concat(Kind.Name.to_bits(term.self));
-      let xtyp = Kind.Term.serialize(term.xtyp, depth, init, diff);
-      let body = Kind.Term.serialize(
+      let xtyp = Kind.Term.serialize.go(term.xtyp, depth, init, diff);
+      let body = Kind.Term.serialize.go(
         term.body(
           Kind.Term.var(term.self, depth),
           Kind.Term.var(term.name, Nat.succ(depth))),
@@ -25,41 +25,106 @@ Kind.Term.serialize(term: Kind.Term, depth: Nat, init: Nat, diff: Bits -> Bits, 
         diff);
       Bits.i(Bits.o(Bits.o(eras(self(xtyp(body(x))))))),
     lam:
-      let body = Kind.Term.serialize(
+      let body = Kind.Term.serialize.go(
         term.body(Kind.Term.var(term.name, depth)),
         Nat.succ(depth),
         init,
         diff);
       Bits.i(Bits.o(Bits.i(body(x)))),
     app:
-      let func = Kind.Term.serialize(term.func, depth, init, diff);
-      let argm = Kind.Term.serialize(term.argm, depth, init, diff);
+      let func = Kind.Term.serialize.go(term.func, depth, init, diff);
+      let argm = Kind.Term.serialize.go(term.argm, depth, init, diff);
       Bits.i(Bits.i(Bits.o(func(argm(x))))),
     let:
-      let expr = Kind.Term.serialize(term.expr, depth, init, diff);
-      let body = Kind.Term.serialize(
+      let expr = Kind.Term.serialize.go(term.expr, depth, init, diff);
+      let body = Kind.Term.serialize.go(
         term.body(Kind.Term.var(term.name, depth)),
         Nat.succ(depth),
         init,
         diff);
       Bits.i(Bits.i(Bits.i(expr(body(x))))),
     def:
-      Kind.Term.serialize(term.body(term.expr), depth, init, diff, x),
+      Kind.Term.serialize.go(term.body(term.expr), depth, init, diff, x),
     ann:
-      Kind.Term.serialize(term.term, depth, init, diff, x),
+      Kind.Term.serialize.go(term.term, depth, init, diff, x),
     gol:
       let name = Bits.concat(Kind.Name.to_bits(term.name));
       Bits.o(Bits.o(Bits.o(name(x)))),
     hol:
       x,
     nat:
-      Kind.Term.serialize(Kind.Term.unroll_nat(term.natx), depth, init, diff, x),
+      Kind.Term.serialize.go(Kind.Term.unroll_nat(term.natx), depth, init, diff, x),
     chr:
-      Kind.Term.serialize(Kind.Term.unroll_chr(term.chrx), depth, init, diff, x),
+      Kind.Term.serialize.go(Kind.Term.unroll_chr(term.chrx), depth, init, diff, x),
     str:
-      Kind.Term.serialize(Kind.Term.unroll_str(term.strx), depth, init, diff, x),
+      Kind.Term.serialize.go(Kind.Term.unroll_str(term.strx), depth, init, diff, x),
     cse:
       diff(x),
     ori:
-      Kind.Term.serialize(term.expr, depth, init, diff, x),
+      Kind.Term.serialize.go(term.expr, depth, init, diff, x),
   }
+
+
+Kind.Term.serialize(term: Kind.Term, depth: Nat, side: Bool): Bits
+  let diff = if side then Bits.o else Bits.i
+  Kind.Term.serialize.go(term, depth, depth, diff, Bits.e)
+
+// TODO: complete this version, that won't stack overflow
+//Kind.Term.serialize.loop(term: Kind.Term, depth: Nat, init: Nat, diff: Bits -> Bits, cont: Bits -> Trampoline(Bits)): Trampoline(Bits)
+  //case term {
+    //ref:
+      //cont(Bits.concat(Bits.o(Bits.o(Bits.o(Bits.e))),Kind.Name.to_bits(term.name)))
+    //var:
+      //if Nat.gte(term.indx, init) then
+        //cont(Bits.o(Bits.o(Bits.i(Nat.to_bits(Nat.pred(Nat.sub(depth,term.indx)))))))
+      //else
+        //cont(Bits.o(Bits.i(Bits.o(Nat.to_bits(term.indx)))))
+    //typ:
+      //cont(Bits.o(Bits.i(Bits.i(Bits.e))))
+    //all:
+      //Kind.Term.serialize.loop(term.xtyp, depth, init, diff, (xtyp) 
+      //Kind.Term.serialize.loop(term.body(Kind.Term.var(term.self, depth), Kind.Term.var(term.name, Nat.succ(depth))), Nat.succ(Nat.succ(depth)), init, diff, (body)
+      //let eras = if term.eras then Bits.i(Bits.e) else Bits.o(Bits.e)
+      //let self = Kind.Name.to_bits(term.self)
+      //cont(Bits.concat(Bits.i(Bits.o(Bits.o(Bits.e))), Bits.concat(eras, Bits.concat(self, Bits.concat(xtyp, body)))))))
+    //lam:
+      //Kind.Term.serialize.loop(term.body(Kind.Term.var(term.name, depth)), Nat.succ(depth), init, diff, (body)
+      //cont(Bits.concat(Bits.i(Bits.o(Bits.i(Bits.e))), body)))
+    //app:
+      //Kind.Term.serialize.loop(term.func, depth, init, diff, (func)
+      //Kind.Term.serialize.loop(term.argm, depth, init, diff, (argm)
+      //Trampoline.wrap!(() cont(Bits.concat(Bits.i(Bits.i(Bits.o(Bits.e))), Bits.concat(func, argm))))))
+    //let:
+      //Kind.Term.serialize.loop(term.expr, depth, init, diff, (expr)
+      //Kind.Term.serialize.loop(term.body(Kind.Term.var(term.name, depth)), Nat.succ(depth), init, diff, (body)
+      //cont(Bits.concat(Bits.i(Bits.i(Bits.i(Bits.e))), Bits.concat(expr, body)))))
+    //def:
+      //Kind.Term.serialize.loop(term.body(term.expr), depth, init, diff, (body)
+      //cont(body))
+    //ann:
+      //Kind.Term.serialize.loop(term.term, depth, init, diff, (term)
+      //cont(term))
+    //gol:
+      //cont(Bits.concat(Bits.o(Bits.o(Bits.o(Bits.e))), Kind.Name.to_bits(term.name)))
+    //hol:
+      //cont(Bits.e)
+    //nat:
+      //Kind.Term.serialize.loop(Kind.Term.unroll_nat(term.natx), depth, init, diff, (natx)
+      //cont(natx))
+    //chr:
+      //Kind.Term.serialize.loop(Kind.Term.unroll_chr(term.chrx), depth, init, diff, (chrx)
+      //cont(chrx))
+    //str:
+      //Kind.Term.serialize.loop(Kind.Term.unroll_str(term.strx), depth, init, diff, (strx)
+      //cont(strx))
+    //cse:
+      //cont(diff(Bits.e))
+    //ori:
+      //Kind.Term.serialize.loop(term.expr, depth, init, diff, (expr)
+      //cont(expr))
+  //}
+
+//Kind.Term.serialize(term: Kind.Term, depth: Nat, side: Bool): Bits
+  //let diff = if side then Bits.o else Bits.i
+  //let tram = Kind.Term.serialize.loop(term, depth, depth, diff, Trampoline.done!)
+  //Trampoline.call!(tram)
