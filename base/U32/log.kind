@@ -1,0 +1,2 @@
+U32.log(x : U32) : U32
+  if (U32.gtn(x, 1u)) then U32.add(U32.log(U32.div(x, 10u)), 1u) else 0u
