@@ -1,3 +1,4 @@
+// put the entity in coordinate ca on cb
 Web.Kaelin.Map.swap(
   idx: Nat, 
   ca: Web.Kaelin.Coord, 

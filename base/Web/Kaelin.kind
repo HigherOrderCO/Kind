@@ -74,60 +74,40 @@ Web.Kaelin: App(Web.Kaelin.State)
           switch U16.eql(event.code) {
             'D':
               case state {
-                init: []
-                void: []
                 game:
-                  // TODO: Web.Kaelin.Map.swap(i, ca, cb, map)
-                  let old_pos = state.pos
-                  let new_pos = case old_pos {
-                    new: Web.Kaelin.Coord.new(Int.add(old_pos.i, Int.new(1, 0)),old_pos.j)
-                  }
-                  let map = Web.Kaelin.Map.swap(0, old_pos, new_pos, state.map)
-                  let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
+                  let state = Web.Kaelin.Action.move(Int.new(1,0), Int.new(0,0), state)
                   [App.Action.state!(state)]
-              }
+              } default []
             'A':
               case state {
-                init: []
-                void: []
                 game:
-                  // TODO: Web.Kaelin.Map.swap(i, ca, cb, map)
-                  let old_pos = state.pos
-                  let new_pos = case old_pos {
-                    new: Web.Kaelin.Coord.new(Int.sub(old_pos.i, Int.new(1, 0)),old_pos.j)
-                  }
-                  let map = Web.Kaelin.Map.swap(0, old_pos, new_pos, state.map)
-                  let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
+                  let state = Web.Kaelin.Action.move(Int.new(0,1), Int.new(0,0), state)
                   [App.Action.state!(state)]
-              }
-              'S':
-                case state {
-                  init: []
-                  void: []
-                  game:
-                    // TODO: Web.Kaelin.Map.swap(i, ca, cb, map)
-                    let old_pos = state.pos
-                    let new_pos = case old_pos {
-                      new: Web.Kaelin.Coord.new(old_pos.i, Int.add(old_pos.j, Int.new(1, 0)))
-                    }
-                    let map = Web.Kaelin.Map.swap(0, old_pos, new_pos, state.map)
-                    let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
-                    [App.Action.state!(state)]
-                }
-              'W':
-                case state {
-                  init: []
-                  void: []
-                  game:
-                    // TODO: Web.Kaelin.Map.swap(i, ca, cb, map)
-                    let old_pos = state.pos
-                    let new_pos = case old_pos {
-                      new: Web.Kaelin.Coord.new(old_pos.i, Int.sub(old_pos.j, Int.new(1, 0)))
-                    }
-                    let map = Web.Kaelin.Map.swap(0, old_pos, new_pos, state.map)
-                    let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
-                    [App.Action.state!(state)]
-                }
+              } default []
+            'C':
+              case state {
+                game:
+                  let state = Web.Kaelin.Action.move(Int.new(0,0), Int.new(1,0), state)
+                  [App.Action.state!(state)]
+              } default []
+            'Z':
+              case state {
+                game:
+                  let state = Web.Kaelin.Action.move(Int.new(0,1), Int.new(1,0), state)
+                  [App.Action.state!(state)]
+              } default []
+            'E':
+              case state {
+                game:
+                  let state = Web.Kaelin.Action.move(Int.new(1,0), Int.new(0,1), state)
+                  [App.Action.state!(state)]
+              } default []
+            'Q':
+              case state {
+                game:
+                  let state = Web.Kaelin.Action.move(Int.new(0,0), Int.new(0,1), state)
+                  [App.Action.state!(state)]
+              } default []
           } default []
         else []
       tick:
