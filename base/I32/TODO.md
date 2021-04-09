@@ -1,10 +1,11 @@
+[x] - abs.kind
 [x] - add.kind
 [x] - neg.kind
 [x] - and.kind
 [x] - cmp.kind
 [ ] - div.kind - Difisil
 [x] - eql.kind
-[ ] - for.kind - Difisil
+[x] - for.kind - Difisil
 [x] - gte.kind
 [x] - gtn.kind
 [x] - inc.kind
@@ -19,10 +20,10 @@
 [ ] - slice.kind - Todo
 [ ] - sqrt.kind
 [x] - sub.kind
-[ ] - shl.kind
-[ ] - shr.kind - Todo
+[x] - shl.kind
+[x] - shr.kind - Todo
 [x] - to_bits.kind
-[ ] - to_f64.kind - Nodo
+[x] - to_f64.kind - Nodo
 [x] - to_int.kind
 [x] - show.kind
 [x] - xor.kind
