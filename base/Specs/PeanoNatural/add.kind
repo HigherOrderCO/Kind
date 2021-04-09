@@ -1,0 +1,6 @@
+type Specs.PeanoNatural.add
+  <N: Type, zero: N, succ: N -> N, m: N> ~ (n: N, sum: N) {
+  plus_0_n ~ (n = zero, sum = m)
+  plus_n_Sm(pred: N, sum: N,
+  Hyp: Specs.PeanoNatural.addition<N, zero, succ>(m, pred, sum)) ~ (n = succ(pred), sum = succ(sum))
+}
