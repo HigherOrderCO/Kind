@@ -1,11 +1,8 @@
 // Specification of a Peano Natural number
-type PeanoNatural(N: Type, succ: N -> N) {
+type Specs.PeanoNatural(N: Type, zero: N, succ: N -> N) {
   new (
-    zero: N
-
-    succ_not_zero: (n: N)
-                   -> Equal<N>(succ(n), zero)
-                   -> Empty
+    succ_neq_zero: (n: N)
+                   -> Not(Equal<N>(succ(n), zero))
 
     inj: (n: N, m: N)
          -> Equal<N>(succ(n), succ(m))
