@@ -1,3 +1,7 @@
+// Construct the Int type given the form {x,y}, where
+// "x - y" is the Int number.
+// - {9, 0} represents the number +9
+// - {2, 9} represents the number -7
 Int: Type
   int<P: Int -> Type> ->
   (new: (x: Nat) -> (y: Nat) -> P(Int.new(x, y))) ->

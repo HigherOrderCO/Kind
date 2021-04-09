@@ -1,3 +1,5 @@
+// implements gresenham algorithm
+// cf. https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm#Derivation
 Image3D.Draw.line(
   x0: U32,
   y0: U32,
@@ -7,4 +9,8 @@ Image3D.Draw.line(
   col: Col32,
   img: Image3D,
 ): Image3D
-  ?a
+  let coords = Image3D.Draw.line.aux.coords(x0, y0, x1, y1)
+  draw_coord = ((coord, img)
+    open coord
+    Image3D.push(Pos32.new(coord.fst, coord.snd, z), col, img)) :: Pair<U32, U32> -> Image3D -> Image3D
+  List.fold<Pair<U32, U32>>(coords, Image3D, img, draw_coord)
