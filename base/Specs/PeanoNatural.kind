@@ -1,0 +1,19 @@
+// Specification of a Peano Natural number
+type PeanoNatural(N: Type, succ: N -> N) {
+  new (
+    zero: N
+
+    succ_not_zero: (n: N)
+                   -> Equal<N>(succ(n), zero)
+                   -> Empty
+
+    inj: (n: N, m: N)
+         -> Equal<N>(succ(n), succ(m))
+         -> Equal<N>(n, m)
+
+    ind: (P: N -> Type,
+          base: P(zero),
+          step: (n: N, Hyp: P(n)) -> P(succ(n)))
+          -> ((n: N) -> P(n))
+  )
+}
