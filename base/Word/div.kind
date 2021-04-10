@@ -1,2 +1,11 @@
 Word.div<size: Nat>(a: Word(size), b: Word(size)): Word(size)
-  Word.div<size>(a,b)
+  def zero = Word.to_zero<size>(a)
+  let a_bits = Word.bit_length<size>(a)
+  let b_bits = Word.bit_length<size>(b)
+
+  if Nat.ltn(a_bits, b_bits) then
+    zero
+  else
+    let shift = Nat.sub(a_bits, b_bits)
+    let shift_copy = Word.shift_left<size>(shift, b)
+    Word.div.go<size>(shift, a, shift_copy, zero)

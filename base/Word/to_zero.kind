@@ -1,0 +1,6 @@
+Word.to_zero<size: Nat>(word: Word(size)): Word(size)
+  case word {
+    e: Word.e,
+    o: Word.o<word.size>(Word.to_zero<word.size>(word.pred)),
+    i: Word.o<word.size>(Word.to_zero<word.size>(word.pred))
+  }: Word(word.size)

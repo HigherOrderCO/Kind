@@ -1,0 +1,2 @@
+Word.bit_length<size: Nat>(word: Word(size)): Nat
+  Word.bit_length.go<size>(word, 0, 0)
