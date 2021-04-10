@@ -1,5 +1,5 @@
 // Specification of a Peano Natural number
-type Specs.PeanoNatural(N: Type, zero: N, succ: N -> N) {
+type User.rigille.Specs.PeanoNatural<N: Type>(zero: N, succ: N -> N) {
   new (
     succ_neq_zero: (n: N)
                    -> Not(Equal<N>(succ(n), zero))

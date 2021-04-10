@@ -1,6 +1,6 @@
-type Specs.PeanoNatural.add
-  <N: Type, zero: N, succ: N -> N, m: N> ~ (n: N, sum: N) {
-  plus_0_n ~ (n = zero, sum = m)
-  plus_n_Sm(pred: N, sum: N,
-  Hyp: Specs.PeanoNatural.addition<N, zero, succ>(m, pred, sum)) ~ (n = succ(pred), sum = succ(sum))
+type User.rigille.Specs.PeanoNatural.add<N: Type>(zero: N, succ: N -> N, ax: User.rigille.Specs.PeanoNatural<N>(zero, succ), add: N -> N -> N) {
+  new(
+    add_zero: (n: N) -> Equal<N>(add(zero, n), n)
+    add_succ: (n: N, m: N) -> Equal<N>(add(succ(n), m), succ(add(n, m)))
+  )
 }
