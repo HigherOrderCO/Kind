@@ -1,0 +1,5 @@
+I32.or(a: I32, b: I32): I32
+  open a
+  open b
+  I32.new(Word.or!(a.value, b.value))
+

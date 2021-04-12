@@ -1,0 +1,4 @@
+I32.eql(a: I32, b: I32): Bool
+  open a
+  open b
+  Word.eql!(a.value, b.value)

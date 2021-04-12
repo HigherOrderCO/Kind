@@ -1,0 +1,4 @@
+I32.sub(a: I32, b: I32): I32
+  open a
+  open b
+  I32.new(Word.sub!(a.value, b.value))

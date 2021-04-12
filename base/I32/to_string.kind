@@ -1,0 +1,2 @@
+I32.to_string(a: I32): String
+  Int.show(I32.to_int(a))
