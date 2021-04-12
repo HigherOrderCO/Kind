@@ -1,11 +1,2 @@
-Nat.pow(base: Nat, exp: Nat): Nat
-  case exp {
-    zero: 1
-    succ: base*Nat.pow(base, exp.pred)
-  }
 Test: String
-  let n = Nat.pow(2, 31)
-  let u = Nat.to_u32(n)
-  open u
-  let i = I32.new(u.value)
-  Int.show(I32.to_int(i))
+  "hello"

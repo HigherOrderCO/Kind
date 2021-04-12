@@ -1,0 +1,6 @@
+Word.pow.go<a_size: Nat, size: Nat>(a: Word(a_size), b: Word(size), acc: Word(a_size)): Word(a_size)
+  case b {
+    e: acc,
+    o: Word.pow.go<a_size, b.size>(Word.mul<a_size>(a, a), b.pred, acc),
+    i: Word.pow.go<a_size, b.size>(Word.mul<a_size>(a, a), b.pred, Word.mul<a_size>(a, acc))
+  }: Word(a_size)

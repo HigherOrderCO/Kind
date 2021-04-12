@@ -1,0 +1,6 @@
+Word.bit_length.go<size: Nat>(word: Word(size), c: Nat, n: Nat): Nat
+  case word {
+    e: n,
+    o: Word.bit_length.go<word.size>(word.pred, Nat.succ(c), n),
+    i: Word.bit_length.go<word.size>(word.pred, Nat.succ(c), Nat.succ(c))
+  }: Nat
