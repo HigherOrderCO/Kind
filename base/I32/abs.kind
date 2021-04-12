@@ -1,0 +1,5 @@
+I32.abs(a: I32): I32
+  case I32.is_neg(a) {
+    true: I32.neg(a)
+    false: a
+  }

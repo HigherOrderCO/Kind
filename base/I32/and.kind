@@ -1,0 +1,4 @@
+I32.and(a: I32, b: I32): I32
+  open a
+  open b
+  I32.new(Word.and!(a.value, b.value))
