@@ -1,0 +1,16 @@
+// Specification of a Peano Natural number
+type User.rigille.Specs.PeanoNatural<N: Type>(zero: N, succ: N -> N) {
+  new (
+    succ_neq_zero: (n: N)
+                   -> Not(Equal<N>(succ(n), zero))
+
+    inj: (n: N, m: N)
+         -> Equal<N>(succ(n), succ(m))
+         -> Equal<N>(n, m)
+
+    ind: (P: N -> Type,
+          base: P(zero),
+          step: (n: N, Hyp: P(n)) -> P(succ(n)))
+          -> ((n: N) -> P(n))
+  )
+}

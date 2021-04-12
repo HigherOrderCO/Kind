@@ -1,0 +1,3 @@
+I32.length(str: String): I32
+  I32.length(str)
+

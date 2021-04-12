@@ -1,0 +1,12 @@
+Nat.Specs.PeanoNatural: Specs.PeanoNatural(Nat, Nat.zero, Nat.succ)
+  succ_neq_zero = Nat.succ_neq_zero
+  succ_inj = Nat.succ_inj
+  induction = Nat.Specs.induction
+  Specs.PeanoNatural.new<Nat, Nat.zero, Nat.succ>(
+    succ_neq_zero,
+    succ_inj,
+    induction,
+  )
+
+Nat.Specs.induction(P: Nat -> Type, base: P(Nat.zero), step: (n: Nat, Hyp: P(n)) -> P(Nat.succ(n))): ((n: Nat) -> P(n))
+  (n) Nat.induction(n, P, base, step)
