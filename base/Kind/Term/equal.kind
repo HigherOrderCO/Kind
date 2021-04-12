@@ -1,4 +1,4 @@
-Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: BitsSet): Kind.Check(Bool)
+Kind.Term.equal.go(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: BitsSet): Kind.Check(Bool)
   //let ah = Kind.Term.serialize(Kind.Term.reduce(a,Kind.Map.new!), lv, lv, Bits.o, Bits.e);
   //let bh = Kind.Term.serialize(Kind.Term.reduce(b,Kind.Map.new!), lv, lv, Bits.i, Bits.e);
   let ah = Kind.Term.serialize(Kind.Term.reduce(a,Kind.Map.new!), lv, false);
@@ -32,8 +32,8 @@ Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: Bits
             let eq_self = String.eql(a1.self, b1.self);
             let eq_eras = Bool.eql(a1.eras, b1.eras);
             if Bool.and(eq_self, eq_eras) then do Kind.Check {
-              get eq_type = Kind.Term.equal(a1.xtyp, b1.xtyp, defs, lv, seen);
-              get eq_body = Kind.Term.equal(a1_body, b1_body, defs, Nat.succ(Nat.succ(lv)), seen);
+              get eq_type = Kind.Term.equal.go(a1.xtyp, b1.xtyp, defs, lv, seen);
+              get eq_body = Kind.Term.equal.go(a1_body, b1_body, defs, Nat.succ(Nat.succ(lv)), seen);
               return Bool.and(eq_type, eq_body);
             } else do Kind.Check {
               return Bool.false;
@@ -50,7 +50,7 @@ Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: Bits
               let seen = BitsSet.mut.set(id, seen);
               let a1_body = a1.body(Kind.Term.var(a1.name, lv));
               let b1_body = b1.body(Kind.Term.var(b1.name, lv));
-              get eq_body = Kind.Term.equal(a1_body, b1_body, defs, Nat.succ(lv), seen);
+              get eq_body = Kind.Term.equal.go(a1_body, b1_body, defs, Nat.succ(lv), seen);
               return eq_body;
             },
             hol: Kind.Term.equal.hole(b1.path, a),
@@ -61,8 +61,8 @@ Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: Bits
         app: case b1 {
           app: do Kind.Check {
             let seen = BitsSet.mut.set(id, seen);
-            get eq_func = Kind.Term.equal(a1.func, b1.func, defs, lv, seen);
-            get eq_argm = Kind.Term.equal(a1.argm, b1.argm, defs, lv, seen);
+            get eq_func = Kind.Term.equal.go(a1.func, b1.func, defs, lv, seen);
+            get eq_argm = Kind.Term.equal.go(a1.argm, b1.argm, defs, lv, seen);
             return Bool.and(eq_func, eq_argm);
           },
           hol: Kind.Term.equal.hole(b1.path, a),
@@ -75,8 +75,8 @@ Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: Bits
             let seen = BitsSet.mut.set(id, seen);
             let a1_body = a1.body(Kind.Term.var(a1.name, lv));
             let b1_body = b1.body(Kind.Term.var(b1.name, lv));
-            get eq_expr = Kind.Term.equal(a1.expr, b1.expr, defs, lv, seen);
-            get eq_body = Kind.Term.equal(a1_body, b1_body, defs, Nat.succ(lv), seen);
+            get eq_expr = Kind.Term.equal.go(a1.expr, b1.expr, defs, lv, seen);
+            get eq_body = Kind.Term.equal.go(a1_body, b1_body, defs, Nat.succ(lv), seen);
             return Bool.and(eq_expr, eq_body);
           },
           hol:
@@ -95,4 +95,9 @@ Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: Bits
         },
       };
     };
+  }
+
+Kind.Term.equal(a: Kind.Term, b: Kind.Term, defs: Kind.Defs): Bool
+  case Kind.Term.equal.go(a, b, defs, 0, BitsSet.new) as check {
+    result: check.value <> false
   }
