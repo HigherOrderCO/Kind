@@ -1,2 +1,4 @@
 Test: String
-  "hello"
+  let six = Nat.to_bits(5)
+  let four = Nat.to_bits(3)
+  Bits.show(Bits.add(four, six))
