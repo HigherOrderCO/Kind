@@ -28,7 +28,7 @@ Senha.verifica(senha: List(Nat), a: Nat, b: Nat): String
       else if Senha.tem_numero(b, senha) then
         "O "
       else 
-      "X "
+        "X "
   }
 
 // Verifica as posições dos valores na senha e retorna uma lista de Strings
@@ -79,7 +79,6 @@ Senhas: IO(Unit)
     get num = IO.random(10)
     get num_1 = IO.randoms(4, 10)
     let lista = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
-    get lista1 = IO.randoms(6, 10)
     let senha = List.random(num_1, lista, [])
     Senhas.loope(senha, 4)
   }
@@ -94,21 +93,21 @@ Senhas.loope(senha: List(Nat), tentativas: Nat): IO(Unit)
     
       if Senha.confirma(user_nums) then
         IO { 
-      IO.print("Sua resposta está:")
-      IO.print(String.join("", user_try))
+          IO.print("Sua resposta está:")
+          IO.print(String.join("", user_try))
   
-    if List.eql!(Nat.eql, user_nums, senha) then
-      IO.print("Parabéns, você venceu!")
-    else
-         
-          if Nat.eql(tentativas, 0) then
-            IO.print("Infelizmente, você perdeu")
+           if List.eql!(Nat.eql, user_nums, senha) then
+            IO { 
+            IO.print("Parabéns, você venceu!")
+              IO.exit
+            }
           else
-            Senhas.loope(senha, tentativas-1)
+             if Nat.eql(tentativas, 0) then
+               IO.print("Infelizmente, você perdeu")
+             else
+               Senhas.loope(senha, tentativas-1)
         }
       else 
-        IO { 
           IO.print("Seu input não foi válido, tente novamente")
           Senhas.loope(senha, tentativas)
-        }
     }
