@@ -1,0 +1,6 @@
+Word.leading_ones.go<size: Nat>(word: Word(size), c: Nat, n: Nat): Nat
+  case word {
+    e: n,
+    o: Word.leading_ones.go<word.size>(word.pred, Nat.succ(c), 0),
+    i: Word.leading_ones.go<word.size>(word.pred, Nat.succ(c), Nat.succ(n))
+  }: Nat

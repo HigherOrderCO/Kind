@@ -1,0 +1,6 @@
+Word.is_neg.go<size: Nat>(word: Word(size), n: Bool): Bool
+  case word {
+    e: n,
+    o: Word.is_neg.go<word.size>(word.pred, false),
+    i: Word.is_neg.go<word.size>(word.pred, true)
+  }: Bool

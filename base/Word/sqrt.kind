@@ -1,0 +1,9 @@
+Word.sqrt<size: Nat>(word: Word(size)): Word(size)
+  def one = Word.inc<size>(Word.to_zero<size>(word))
+  let size_min2 = Nat.sub(Word.to_size<size>(word), 2)
+  let bit = Word.shift_left<size>(size_min2, one)
+
+  while Word.gtn<size>(bit, word) with bit:
+    Word.shift_right<size>(2, bit)
+
+  Word.sqrt.go<size>(word, bit, Word.to_zero<size>(word))
