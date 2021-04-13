@@ -2,10 +2,10 @@ Kind.Parser.i32: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
     Kind.Parser.spaces;
-    get intx = Parser.int;
+    get intx = Kind.Parser.int;
     Parser.text("#32");
     let term = Kind.Term.ref("Int.to_i32");
-    let term = Kind.Term.app(term, Kind.Term.nat(natx));
+    let term = Kind.Term.app(term, intx);
     get orig = Kind.Parser.stop(init);
     return Kind.Term.ori(orig, term);
   }
