@@ -1,0 +1,5 @@
+Kind.Parser.int: Parser(Int)
+  Parser.first_of<Int>([
+    Kind.Parser.int_pos,
+    Kind.Parser.int_neg,
+  ])

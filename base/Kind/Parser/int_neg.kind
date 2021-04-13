@@ -1,0 +1,7 @@
+Kind.Parser.int_neg: Parser(Int)
+  Parser {
+    get sgn = Parser.text("-")
+    get digits = Parser.many1<Nat>(Parser.digit);
+    let n = Nat.from_base(10, digits)
+    return Int.neg(Int.from_nat(n));
+  }
