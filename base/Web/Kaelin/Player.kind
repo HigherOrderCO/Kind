@@ -1,0 +1,6 @@
+type Web.Kaelin.Player {
+  new(
+    pos: Web.Kaelin.Coord,
+    hero: String,  
+  )
+}
