@@ -11,7 +11,7 @@
         {
             "label": "kind-check",
             "type": "shell",
-            "command": "kind ${fileBasename}"
+            "command": "kind  ${file}"
         },
         {
             "label": "kind-build",
