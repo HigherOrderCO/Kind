@@ -1,5 +1,6 @@
 // Compiles apps from `Kind/base/Web/*.kind to `src/apps/*.js`
 
+
 var fs = require("fs");
 var exec = require("child_process").execSync;
 
@@ -8,6 +9,7 @@ var kind_dir = __dirname+"/../base";
 
 process.chdir(kind_dir);
 var files = fs.readdirSync("Web").filter(x => x.slice(-5) === ".kind");
+files = ["Demo.kind", "Jogo.kind"];
 
 var apps = [];
 

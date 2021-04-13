@@ -40,34 +40,23 @@ Web.Jogo.command(user: String, cmd: String, state: Web.Jogo.State): Web.Jogo.Sta
 
 // A demo application that renders a square on the screen
 Web.Jogo: App(Web.Jogo.State)
-  let img = Image3D.alloc_capacity(3200u)
+  let vbox = VoxBox.alloc_capacity(3200u)
   let init = BitsMap.new!
   let draw = (state)
-    let img = Image3D.clear(img)
-    let img = for pos in BitsMap.values!(state):
+    let vbox = VoxBox.clear(vbox)
+    let vbox = for pos in BitsMap.values!(state):
       open pos
-      Image3D.Draw.image(pos.fst, pos.snd, 0u, Web.Jogo.hero, img)
-    App.Render.pix(img)
+      VoxBox.Draw.image(pos.fst, pos.snd, 0u, Web.Jogo.hero, vbox)
+    DOM.vbox({}, {}, vbox)
   let when = (event, state)
     case event {
-      init: [
-        App.Action.print!(">> started app")
-        App.Action.watch!(Web.Jogo.room)
-      ]
-      tick: []
-      xkey: 
-        if event.down then
-          switch U16.eql(event.code) {
-            'A': [App.Action.post!(Web.Jogo.room, Web.Jogo.command.A)]
-            'D': [App.Action.post!(Web.Jogo.room, Web.Jogo.command.D)]
-            'W': [App.Action.post!(Web.Jogo.room, Web.Jogo.command.W)]
-            'S': [App.Action.post!(Web.Jogo.room, Web.Jogo.command.S)]
-          } default []
-        else
-          []
-      post: [ // time, room, addr, data
-        App.Action.print!(">> received post by " | event.addr | ": " | event.data)
-        App.Action.state!(Web.Jogo.command(event.addr, event.data, state))
-      ]
-    }
+      init: App.watch(Web.Jogo.room)
+      key_down: switch U16.eql(event.code) {
+        'A': App.post(Web.Jogo.room, Web.Jogo.command.A)
+        'D': App.post(Web.Jogo.room, Web.Jogo.command.D)
+        'W': App.post(Web.Jogo.room, Web.Jogo.command.W)
+        'S': App.post(Web.Jogo.room, Web.Jogo.command.S)
+      } default App.pass
+      post: App.store!(Web.Jogo.command(event.addr, event.data, state))
+    } default App.pass
   App.new!(init, draw, when)

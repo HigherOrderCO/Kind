@@ -1,0 +1,4 @@
+// Returns the amount of pixels stored on img
+VoxBox.get_len(img: VoxBox): U32
+  open img
+  img.length

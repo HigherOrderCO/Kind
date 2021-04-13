@@ -120,7 +120,7 @@ module.exports = (function() {
         }
         return a;
     };
-    const inst_unit = x => x(1);
+    const inst_unit = x => x(null);
     const elim_unit = (x => {
         var $1 = (() => c0 => {
             var self = x;
@@ -297,7 +297,7 @@ module.exports = (function() {
                             run_io(lib, p.then(String(Date.now()))).then(res).catch(err);
                             break;
                         case 'get_line':
-                            lib.rl.question('', (line) => run_io(lib, p.then(line)).then(res).catch(err));
+                            lib.rl.question(p.param, (line) => run_io(lib, p.then(line)).then(res).catch(err));
                             break;
                         case 'get_file':
                             try {
@@ -1356,7 +1356,7 @@ module.exports = (function() {
         return $251;
     };
     const Parser$many = x0 => Parser$many$(x0);
-    const Unit$new = 1;
+    const Unit$new = null;
 
     function String$cons$(_head$1, _tail$2) {
         var $253 = (String.fromCharCode(_head$1) + _tail$2);

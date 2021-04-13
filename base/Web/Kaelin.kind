@@ -9,7 +9,7 @@
 
 // A demo application that renders a square on the screen
 Web.Kaelin: App(Web.Kaelin.State)
-  let img = Image3D.alloc_capacity(65536u)
+  let vbox = VoxBox.alloc_capacity(65536u)
   // Initial state
   let init = 
     let map = {}
@@ -26,10 +26,7 @@ Web.Kaelin: App(Web.Kaelin.State)
   // 50s - 60s: escolha do turno 2
   let draw = (state)
     case state {
-      game: 
-        let map = state.map
-        let img = Web.Kaelin.Draw.map(img, map)
-        App.Render.pix(img)
+      game: App.Render.pix(Web.Kaelin.Draw.map(vbox, state.map))
     } default App.Render.txt("TODO: create the renderer for this game state mode")
 
   // Event handler
