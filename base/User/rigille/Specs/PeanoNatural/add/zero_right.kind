@@ -1,0 +1,17 @@
+User.rigille.PeanoNatural.add.zero_right<N: Type>(
+  zero: N,
+  succ: N -> N,
+  ax: User.rigille.Specs.PeanoNatural<N>(zero, succ),
+  add: N -> N -> N,
+  ax_add: User.rigille.Specs.PeanoNatural.add<N>(zero, succ, ax, add),
+  n: N)
+  : Equal<N>(add(n, zero), n)
+    open ax
+    open ax_add
+    def goal = (m) Equal<N>(add(m, zero), m)
+    let base = ax_add.add_zero(zero) :: Equal<N>(add(zero, zero), zero)
+    let step = ((m, Hyp) let lem_right = apply(succ, Hyp)
+                         let lem_left = ax_add.add_succ(m, zero)
+                         Equal.chain!!!!(lem_left, lem_right)
+               ) :: (m:N) (Hyp: goal(m)) goal(succ(m))
+    ax.ind(goal, base, step, n)

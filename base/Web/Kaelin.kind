@@ -29,11 +29,7 @@ Web.Kaelin: App(Web.Kaelin.State)
     case state {
       game: 
         let map = state.map
-        let img = Web.Kaelin.Draw.map(img, map, canvas)
-        let img = Web.Kaelin.Draw.initial_ent.dot(img, canvas)
-        let text_pos = Pos32.new(20u,20u,0u)
-        let img = Image3D.text("Croni: seja bem-vindo ao Kaelin!", PixelFont.black, text_pos, img)
-        // let img = Image3D.text.char(109s, PixelFont.small_black, text_pos, img)
+        let img = Web.Kaelin.Draw.map(img, map)
         App.Render.pix(img)
     } default App.Render.txt("TODO: create the renderer for this game state mode")
 

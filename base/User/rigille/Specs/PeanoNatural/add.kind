@@ -1,0 +1,6 @@
+type User.rigille.Specs.PeanoNatural.add<N: Type>(zero: N, succ: N -> N, ax: User.rigille.Specs.PeanoNatural<N>(zero, succ), add: N -> N -> N) {
+  new(
+    add_zero: (n: N) -> Equal<N>(add(zero, n), n)
+    add_succ: (n: N, m: N) -> Equal<N>(add(succ(n), m), succ(add(n, m)))
+  )
+}

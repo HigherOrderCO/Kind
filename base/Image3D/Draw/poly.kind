@@ -10,7 +10,8 @@ Image3D.Draw.poly(
     open p
     open data
     case data.snd {
-      none: Pair.new!!(data.fst, Maybe.some!(p))
+      none: let old_img = data.fst
+            Pair.new!!(old_img, Maybe.some!(p))
       some: open data.snd.value
             let prev_x = data.snd.value.fst
             let prev_y = data.snd.value.snd
