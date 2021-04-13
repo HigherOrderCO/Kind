@@ -9,7 +9,6 @@ var kind_dir = __dirname+"/../base";
 
 process.chdir(kind_dir);
 var files = fs.readdirSync("Web").filter(x => x.slice(-5) === ".kind");
-files = ["Demo.kind", "Jogo.kind"];
 
 var apps = [];
 
