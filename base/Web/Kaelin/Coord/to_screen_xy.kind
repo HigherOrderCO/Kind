@@ -1,37 +1,19 @@
-Web.Kaelin.Coord.to_screen_xy(coord: Web.Kaelin.Coord): Pair(U32,U32)
-  let rad = Web.Kaelin.Resources.hexagon_radius
-  let hlf = U32.div(rad,2u)
-
+Web.Kaelin.Coord.to_screen_xy(
+  coord: Web.Kaelin.Coord,
+) : Pair(U32,U32)
   open coord
   let i   = coord.i
   let j   = coord.j
-  open i
-  open j
-
-  let cx = 128u
-  let cy = 128u
   
-  let is_neg_i = Int.is_neg(i)
-  let is_neg_j = Int.is_neg(j)
-  case is_neg_i is_neg_j {
-    false false:
-      let cx = U32.add(cx, U32.mul(  Nat.to_u32(j.x), rad))
-      let cx = U32.add(cx, U32.mul(  Nat.to_u32(i.x), U32.mul(rad,2u)) )
-      let cy = U32.add(cy, U32.mul(  Nat.to_u32(j.x), U32.mul(hlf,3u)))
-      {cx, cy}
-    false true:
-      let cx = U32.sub(cx, U32.mul(Nat.to_u32(j.y), rad))
-      let cx = U32.add(cx, U32.mul(  Nat.to_u32(i.x), U32.mul(rad,2u)) )
-      let cy = U32.sub(cy, U32.mul(  Nat.to_u32(j.y), U32.mul(hlf,3u)))
-      {cx, cy}
-    true false:
-      let cx = U32.add(cx, U32.mul(Nat.to_u32(j.x), rad))
-      let cx = U32.sub(cx, U32.mul(  Nat.to_u32(i.y), U32.mul(rad,2u)) )
-      let cy = U32.add(cy, U32.mul(  Nat.to_u32(j.x), U32.mul(hlf,3u)))
-      {cx, cy}
-    true true:
-      let cx = U32.sub(cx, U32.mul(Nat.to_u32(j.y), rad))
-      let cx = U32.sub(cx, U32.mul(  Nat.to_u32(i.y), U32.mul(rad,2u)) )
-      let cy = U32.sub(cy, U32.mul(  Nat.to_u32(j.y), U32.mul(hlf,3u)))
-      {cx, cy}
-  }!
+  let int_rad = Int.from_u32(Web.Kaelin.Resources.hexagon_radius)
+  let hlf = Int.div_nat(int_rad, 2)
+  let int_screen_center_x = Int.from_u32(Web.Kaelin.Resources.center_x)
+  let int_screen_center_y = Int.from_u32(Web.Kaelin.Resources.center_y)
+  
+  let cx = Int.add(int_screen_center_x, Int.mul(j, int_rad))  // screen_center + j * rad
+  let cx = Int.add(cx, Int.mul(i, Int.mul(int_rad, Int.from_nat(2)))) // screen_center + j * rad + i * 2rad
+  let cy = Int.add(int_screen_center_y, Int.mul(j, Int.mul(hlf, Int.from_nat(3)))) // screen_center + j * (3rad/2)
+
+  let {_, cx} = Int.to_u32(cx)
+  let {_, cy} = Int.to_u32(cy)
+  {cx, cy}

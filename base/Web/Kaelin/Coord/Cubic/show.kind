@@ -1,0 +1,3 @@
+Web.Kaelin.Coord.Cubic.show(coord: Web.Kaelin.Coord.Cubic): String
+  open coord
+  Int.show(coord.x) | " " | Int.show(coord.y) | " " | Int.show(coord.z)
