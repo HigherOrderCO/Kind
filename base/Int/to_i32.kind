@@ -1,0 +1,6 @@
+Int.to_i32(a: Int): I32
+  open a
+  case a.y {
+    zero: Nat.to_i32(a.x)
+    succ: I32.neg(Nat.to_i32(a.y))
+  }
