@@ -1,7 +1,0 @@
-type Web.Kaelin.Canvas {
-  new(
-    center_x: U32, 
-    center_y: U32, 
-    hex_rad: U32
-  )
-}

@@ -1,4 +1,5 @@
-// move by x and y, receive an entity later
+// move by x and y
+// this function will change when the state change and the click event came
 Web.Kaelin.Action.move(x: Int, y: Int, state: Web.Kaelin.State): Web.Kaelin.State
   case state {
     game: 

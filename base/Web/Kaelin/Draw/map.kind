@@ -1,12 +1,11 @@
 // Draws a map of hexagons given the style "offset coordinates"
-Web.Kaelin.Draw.map(img: Image3D, map: Web.Kaelin.Map, canvas: Web.Kaelin.Canvas): Image3D
-  open canvas
+Web.Kaelin.Draw.map(img: Image3D, map: Web.Kaelin.Map): Image3D
   let img = Image3D.clear(img)
   let col = Col32.new(0u, 0u, 255u, 255u)
   let map_size = Web.Kaelin.Resources.map_size
   let width = U32.add(U32.mul(map_size, 2u), 1u) // map_size * 2 + 1
   let height = U32.add(U32.mul(map_size, 2u), 1u) // map_size * 2 + 1
-  let hex_rad = canvas.hex_rad
+  let hex_rad = Web.Kaelin.Resources.hexagon_radius
 
   // loops through the half of the map_size
   for j : U32 from 0u to height with img:
@@ -21,7 +20,7 @@ Web.Kaelin.Draw.map(img: Image3D, map: Web.Kaelin.Map, canvas: Web.Kaelin.Canvas
         true:
           let map = Web.Kaelin.Draw.background(coord, map)
           // Draws the hexagon border
-          let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(coord, canvas)
+          let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(coord)
           let img = Web.Kaelin.Draw.hexagon_border(cx, cy, hex_rad, col, img)
           // Draw coordinates
           let img = Web.Kaelin.Draw.tile.empty(coord, map, img)
