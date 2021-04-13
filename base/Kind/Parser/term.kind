@@ -45,7 +45,7 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.switch,
       Kind.Parser.goal,
       Kind.Parser.hole,
-      Kind.Parser.i32,
+      //Kind.Parser.i32,
       Kind.Parser.int,
       Kind.Parser.u8,
       Kind.Parser.u16,
