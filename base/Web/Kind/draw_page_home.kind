@@ -23,7 +23,7 @@ Web.Kind.draw_page_home: DOM
       DOM.node("div", {}, {"margin-top": "10px"}, [
         Web.Kind.component.list([
           Web.Kind.component.link(" Github", "https://github.com/uwu-tech/Kind"),
-          Web.Kind.component.link(" Telegram", "https://github.com/uwu-tech/Kind")
+          Web.Kind.component.link(" Telegram", "https://t.me/formality_lang")
         ])
       ])
     DOM.node("div", {}, {"margin": "20px 0px 20px 0px"}, [

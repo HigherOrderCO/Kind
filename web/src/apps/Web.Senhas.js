@@ -1209,14 +1209,14 @@ module.exports = (function() {
     };
     const List$random = x0 => x1 => x2 => List$random$(x0, x1, x2);
 
-    function IO$put_string$(_text$1) {
-        var $253 = IO$ask$("put_string", _text$1, (_skip$2 => {
-            var $254 = IO$end$(Unit$new);
+    function IO$prompt$(_text$1) {
+        var $253 = IO$ask$("get_line", _text$1, (_line$2 => {
+            var $254 = IO$end$(_line$2);
             return $254;
         }));
         return $253;
     };
-    const IO$put_string = x0 => IO$put_string$(x0);
+    const IO$prompt = x0 => IO$prompt$(x0);
 
     function String$cons$(_head$1, _tail$2) {
         var $255 = (String.fromCharCode(_head$1) + _tail$2);
@@ -1225,51 +1225,45 @@ module.exports = (function() {
     const String$cons = x0 => x1 => String$cons$(x0, x1);
     const String$concat = a0 => a1 => (a0 + a1);
 
-    function IO$print$(_text$1) {
-        var $256 = IO$put_string$((_text$1 + "\u{a}"));
-        return $256;
-    };
-    const IO$print = x0 => IO$print$(x0);
-
     function List$fold$(_list$2, _nil$4, _cons$5) {
         var self = _list$2;
         switch (self._) {
             case 'List.cons':
-                var $258 = self.head;
-                var $259 = self.tail;
-                var $260 = _cons$5($258)(List$fold$($259, _nil$4, _cons$5));
-                var $257 = $260;
+                var $257 = self.head;
+                var $258 = self.tail;
+                var $259 = _cons$5($257)(List$fold$($258, _nil$4, _cons$5));
+                var $256 = $259;
                 break;
             case 'List.nil':
-                var $261 = _nil$4;
-                var $257 = $261;
+                var $260 = _nil$4;
+                var $256 = $260;
                 break;
         };
-        return $257;
+        return $256;
     };
     const List$fold = x0 => x1 => x2 => List$fold$(x0, x1, x2);
 
     function Either$(_A$1, _B$2) {
-        var $262 = null;
-        return $262;
+        var $261 = null;
+        return $261;
     };
     const Either = x0 => x1 => Either$(x0, x1);
 
     function Either$left$(_value$3) {
-        var $263 = ({
+        var $262 = ({
             _: 'Either.left',
             'value': _value$3
         });
-        return $263;
+        return $262;
     };
     const Either$left = x0 => Either$left$(x0);
 
     function Either$right$(_value$3) {
-        var $264 = ({
+        var $263 = ({
             _: 'Either.right',
             'value': _value$3
         });
-        return $264;
+        return $263;
     };
     const Either$right = x0 => Either$right$(x0);
 
@@ -1285,20 +1279,20 @@ module.exports = (function() {
             var R = (() => {
                 var self = _m$2;
                 if (self === 0n) {
-                    var $265 = Either$left$(_n$1);
-                    return $265;
+                    var $264 = Either$left$(_n$1);
+                    return $264;
                 } else {
-                    var $266 = (self - 1n);
+                    var $265 = (self - 1n);
                     var self = _n$1;
                     if (self === 0n) {
-                        var $268 = Either$right$(Nat$succ$($266));
-                        var $267 = $268;
+                        var $267 = Either$right$(Nat$succ$($265));
+                        var $266 = $267;
                     } else {
-                        var $269 = (self - 1n);
-                        var $270 = Nat$sub_rem$($269, $266);
-                        var $267 = $270;
+                        var $268 = (self - 1n);
+                        var $269 = Nat$sub_rem$($268, $265);
+                        var $266 = $269;
                     };
-                    return $267;
+                    return $266;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1320,12 +1314,12 @@ module.exports = (function() {
                 var self = Nat$sub_rem$(_n$1, _m$2);
                 switch (self._) {
                     case 'Either.left':
-                        var $271 = self.value;
-                        var $272 = Nat$div_mod$go$($271, _m$2, Nat$succ$(_d$3));
-                        return $272;
+                        var $270 = self.value;
+                        var $271 = Nat$div_mod$go$($270, _m$2, Nat$succ$(_d$3));
+                        return $271;
                     case 'Either.right':
-                        var $273 = Pair$new$(_d$3, _n$1);
-                        return $273;
+                        var $272 = Pair$new$(_d$3, _n$1);
+                        return $272;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1356,18 +1350,18 @@ module.exports = (function() {
                 }));
                 switch (self._) {
                     case 'Pair.new':
-                        var $274 = self.fst;
-                        var $275 = self.snd;
-                        var self = $274;
+                        var $273 = self.fst;
+                        var $274 = self.snd;
+                        var self = $273;
                         if (self === 0n) {
-                            var $277 = List$cons$($275, _res$3);
-                            var $276 = $277;
+                            var $276 = List$cons$($274, _res$3);
+                            var $275 = $276;
                         } else {
-                            var $278 = (self - 1n);
-                            var $279 = Nat$to_base$go$(_base$1, $274, List$cons$($275, _res$3));
-                            var $276 = $279;
+                            var $277 = (self - 1n);
+                            var $278 = Nat$to_base$go$(_base$1, $273, List$cons$($274, _res$3));
+                            var $275 = $278;
                         };
-                        return $276;
+                        return $275;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1377,8 +1371,8 @@ module.exports = (function() {
     const Nat$to_base$go = x0 => x1 => x2 => Nat$to_base$go$(x0, x1, x2);
 
     function Nat$to_base$(_base$1, _nat$2) {
-        var $280 = Nat$to_base$go$(_base$1, _nat$2, List$nil);
-        return $280;
+        var $279 = Nat$to_base$go$(_base$1, _nat$2, List$nil);
+        return $279;
     };
     const Nat$to_base = x0 => x1 => Nat$to_base$(x0, x1);
     const String$nil = '';
@@ -1399,21 +1393,21 @@ module.exports = (function() {
                 var self = _list$3;
                 switch (self._) {
                     case 'List.cons':
-                        var $281 = self.head;
-                        var $282 = self.tail;
+                        var $280 = self.head;
+                        var $281 = self.tail;
                         var self = _index$2;
                         if (self === 0n) {
-                            var $284 = Maybe$some$($281);
-                            var $283 = $284;
+                            var $283 = Maybe$some$($280);
+                            var $282 = $283;
                         } else {
-                            var $285 = (self - 1n);
-                            var $286 = List$at$($285, $282);
-                            var $283 = $286;
+                            var $284 = (self - 1n);
+                            var $285 = List$at$($284, $281);
+                            var $282 = $285;
                         };
-                        return $283;
+                        return $282;
                     case 'List.nil':
-                        var $287 = Maybe$none;
-                        return $287;
+                        var $286 = Maybe$none;
+                        return $286;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1430,46 +1424,42 @@ module.exports = (function() {
             var self = List$at$(_m$3, _base64$4);
             switch (self._) {
                 case 'Maybe.some':
-                    var $290 = self.value;
-                    var $291 = $290;
-                    var $289 = $291;
+                    var $289 = self.value;
+                    var $290 = $289;
+                    var $288 = $290;
                     break;
                 case 'Maybe.none':
-                    var $292 = 35;
-                    var $289 = $292;
+                    var $291 = 35;
+                    var $288 = $291;
                     break;
             };
-            var $288 = $289;
+            var $287 = $288;
         } else {
-            var $293 = 35;
-            var $288 = $293;
+            var $292 = 35;
+            var $287 = $292;
         };
-        return $288;
+        return $287;
     };
     const Nat$show_digit = x0 => x1 => Nat$show_digit$(x0, x1);
 
     function Nat$to_string_base$(_base$1, _nat$2) {
-        var $294 = List$fold$(Nat$to_base$(_base$1, _nat$2), String$nil, (_n$3 => _str$4 => {
-            var $295 = String$cons$(Nat$show_digit$(_base$1, _n$3), _str$4);
-            return $295;
+        var $293 = List$fold$(Nat$to_base$(_base$1, _nat$2), String$nil, (_n$3 => _str$4 => {
+            var $294 = String$cons$(Nat$show_digit$(_base$1, _n$3), _str$4);
+            return $294;
         }));
-        return $294;
+        return $293;
     };
     const Nat$to_string_base = x0 => x1 => Nat$to_string_base$(x0, x1);
 
     function Nat$show$(_n$1) {
-        var $296 = Nat$to_string_base$(10n, _n$1);
-        return $296;
+        var $295 = Nat$to_string_base$(10n, _n$1);
+        return $295;
     };
     const Nat$show = x0 => Nat$show$(x0);
-    const IO$get_line = IO$ask$("get_line", "", (_line$1 => {
-        var $297 = IO$end$(_line$1);
-        return $297;
-    }));
 
     function Char$eql$(_a$1, _b$2) {
-        var $298 = (_a$1 === _b$2);
-        return $298;
+        var $296 = (_a$1 === _b$2);
+        return $296;
     };
     const Char$eql = x0 => x1 => Char$eql$(x0, x1);
 
@@ -1485,29 +1475,29 @@ module.exports = (function() {
             var R = (() => {
                 var self = _match$2;
                 if (self.length === 0) {
-                    var $299 = Bool$true;
-                    return $299;
+                    var $297 = Bool$true;
+                    return $297;
                 } else {
-                    var $300 = self.charCodeAt(0);
-                    var $301 = self.slice(1);
+                    var $298 = self.charCodeAt(0);
+                    var $299 = self.slice(1);
                     var self = _xs$1;
                     if (self.length === 0) {
-                        var $303 = Bool$false;
-                        var $302 = $303;
+                        var $301 = Bool$false;
+                        var $300 = $301;
                     } else {
-                        var $304 = self.charCodeAt(0);
-                        var $305 = self.slice(1);
-                        var self = Char$eql$($300, $304);
+                        var $302 = self.charCodeAt(0);
+                        var $303 = self.slice(1);
+                        var self = Char$eql$($298, $302);
                         if (self) {
-                            var $307 = String$starts_with$($305, $301);
-                            var $306 = $307;
+                            var $305 = String$starts_with$($303, $299);
+                            var $304 = $305;
                         } else {
-                            var $308 = Bool$false;
-                            var $306 = $308;
+                            var $306 = Bool$false;
+                            var $304 = $306;
                         };
-                        var $302 = $306;
+                        var $300 = $304;
                     };
-                    return $302;
+                    return $300;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1528,21 +1518,21 @@ module.exports = (function() {
             var R = (() => {
                 var self = _n$1;
                 if (self === 0n) {
-                    var $309 = _xs$2;
-                    return $309;
+                    var $307 = _xs$2;
+                    return $307;
                 } else {
-                    var $310 = (self - 1n);
+                    var $308 = (self - 1n);
                     var self = _xs$2;
                     if (self.length === 0) {
-                        var $312 = String$nil;
-                        var $311 = $312;
+                        var $310 = String$nil;
+                        var $309 = $310;
                     } else {
-                        var $313 = self.charCodeAt(0);
-                        var $314 = self.slice(1);
-                        var $315 = String$drop$($310, $314);
-                        var $311 = $315;
+                        var $311 = self.charCodeAt(0);
+                        var $312 = self.slice(1);
+                        var $313 = String$drop$($308, $312);
+                        var $309 = $313;
                     };
-                    return $311;
+                    return $309;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1563,13 +1553,13 @@ module.exports = (function() {
             var R = (() => {
                 var self = _xs$1;
                 if (self.length === 0) {
-                    var $316 = _n$2;
-                    return $316;
+                    var $314 = _n$2;
+                    return $314;
                 } else {
-                    var $317 = self.charCodeAt(0);
-                    var $318 = self.slice(1);
-                    var $319 = String$length$go$($318, Nat$succ$(_n$2));
-                    return $319;
+                    var $315 = self.charCodeAt(0);
+                    var $316 = self.slice(1);
+                    var $317 = String$length$go$($316, Nat$succ$(_n$2));
+                    return $317;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1579,38 +1569,38 @@ module.exports = (function() {
     const String$length$go = x0 => x1 => String$length$go$(x0, x1);
 
     function String$length$(_xs$1) {
-        var $320 = String$length$go$(_xs$1, 0n);
-        return $320;
+        var $318 = String$length$go$(_xs$1, 0n);
+        return $318;
     };
     const String$length = x0 => String$length$(x0);
 
     function String$split$go$(_xs$1, _match$2, _last$3) {
         var self = _xs$1;
         if (self.length === 0) {
-            var $322 = List$cons$(_last$3, List$nil);
-            var $321 = $322;
+            var $320 = List$cons$(_last$3, List$nil);
+            var $319 = $320;
         } else {
-            var $323 = self.charCodeAt(0);
-            var $324 = self.slice(1);
+            var $321 = self.charCodeAt(0);
+            var $322 = self.slice(1);
             var self = String$starts_with$(_xs$1, _match$2);
             if (self) {
                 var _rest$6 = String$drop$(String$length$(_match$2), _xs$1);
-                var $326 = List$cons$(_last$3, String$split$go$(_rest$6, _match$2, ""));
-                var $325 = $326;
+                var $324 = List$cons$(_last$3, String$split$go$(_rest$6, _match$2, ""));
+                var $323 = $324;
             } else {
-                var _next$6 = String$cons$($323, String$nil);
-                var $327 = String$split$go$($324, _match$2, (_last$3 + _next$6));
-                var $325 = $327;
+                var _next$6 = String$cons$($321, String$nil);
+                var $325 = String$split$go$($322, _match$2, (_last$3 + _next$6));
+                var $323 = $325;
             };
-            var $321 = $325;
+            var $319 = $323;
         };
-        return $321;
+        return $319;
     };
     const String$split$go = x0 => x1 => x2 => String$split$go$(x0, x1, x2);
 
     function String$split$(_xs$1, _match$2) {
-        var $328 = String$split$go$(_xs$1, _match$2, "");
-        return $328;
+        var $326 = String$split$go$(_xs$1, _match$2, "");
+        return $326;
     };
     const String$split = x0 => x1 => String$split$(x0, x1);
 
@@ -1618,17 +1608,17 @@ module.exports = (function() {
         var self = _as$4;
         switch (self._) {
             case 'List.cons':
-                var $330 = self.head;
-                var $331 = self.tail;
-                var $332 = List$cons$(_f$3($330), List$map$(_f$3, $331));
-                var $329 = $332;
+                var $328 = self.head;
+                var $329 = self.tail;
+                var $330 = List$cons$(_f$3($328), List$map$(_f$3, $329));
+                var $327 = $330;
                 break;
             case 'List.nil':
-                var $333 = List$nil;
-                var $329 = $333;
+                var $331 = List$nil;
+                var $327 = $331;
                 break;
         };
-        return $329;
+        return $327;
     };
     const List$map = x0 => x1 => List$map$(x0, x1);
 
@@ -1636,25 +1626,25 @@ module.exports = (function() {
         var self = _xs$3;
         switch (self._) {
             case 'List.cons':
-                var $335 = self.head;
-                var $336 = self.tail;
+                var $333 = self.head;
+                var $334 = self.tail;
                 var self = _n$2;
                 if (self === 0n) {
-                    var $338 = List$nil;
-                    var $337 = $338;
+                    var $336 = List$nil;
+                    var $335 = $336;
                 } else {
-                    var $339 = (self - 1n);
-                    var $340 = List$cons$($335, List$take$($339, $336));
-                    var $337 = $340;
+                    var $337 = (self - 1n);
+                    var $338 = List$cons$($333, List$take$($337, $334));
+                    var $335 = $338;
                 };
-                var $334 = $337;
+                var $332 = $335;
                 break;
             case 'List.nil':
-                var $341 = List$nil;
-                var $334 = $341;
+                var $339 = List$nil;
+                var $332 = $339;
                 break;
         };
-        return $334;
+        return $332;
     };
     const List$take = x0 => x1 => List$take$(x0, x1);
 
@@ -1662,8 +1652,8 @@ module.exports = (function() {
         var _split$2 = String$split$(_line$1, " ");
         var _map$3 = List$map$(Nat$read, _split$2);
         var _list$4 = List$take$(4n, _map$3);
-        var $342 = _list$4;
-        return $342;
+        var $340 = _list$4;
+        return $340;
     };
     const Senhas$read_input = x0 => Senhas$read_input$(x0);
     const Nat$eql = a0 => a1 => (a0 === a1);
@@ -1672,8 +1662,8 @@ module.exports = (function() {
     function Senha$tem_numero$(_num$1, _senha$2) {
         var _tmp$3 = List$map$(a1 => (_num$1 === a1), _senha$2);
         var _tmp$4 = List$fold$(_tmp$3, Bool$false, Bool$or);
-        var $343 = _tmp$4;
-        return $343;
+        var $341 = _tmp$4;
+        return $341;
     };
     const Senha$tem_numero = x0 => x1 => Senha$tem_numero$(x0, x1);
 
@@ -1681,29 +1671,29 @@ module.exports = (function() {
         var self = _senha$1;
         switch (self._) {
             case 'List.nil':
-                var $345 = "";
-                var $344 = $345;
+                var $343 = "";
+                var $342 = $343;
                 break;
             case 'List.cons':
                 var self = (_a$2 === _b$3);
                 if (self) {
-                    var $347 = "V ";
-                    var $346 = $347;
+                    var $345 = "V ";
+                    var $344 = $345;
                 } else {
                     var self = Senha$tem_numero$(_b$3, _senha$1);
                     if (self) {
-                        var $349 = "O ";
-                        var $348 = $349;
+                        var $347 = "O ";
+                        var $346 = $347;
                     } else {
-                        var $350 = "X ";
-                        var $348 = $350;
+                        var $348 = "X ";
+                        var $346 = $348;
                     };
-                    var $346 = $348;
+                    var $344 = $346;
                 };
-                var $344 = $346;
+                var $342 = $344;
                 break;
         };
-        return $344;
+        return $342;
     };
     const Senha$verifica = x0 => x1 => x2 => Senha$verifica$(x0, x1, x2);
 
@@ -1711,39 +1701,54 @@ module.exports = (function() {
         var self = _tentativa$3;
         switch (self._) {
             case 'List.cons':
-                var $352 = self.head;
-                var $353 = self.tail;
+                var $350 = self.head;
+                var $351 = self.tail;
                 var self = _senha$2;
                 switch (self._) {
                     case 'List.cons':
-                        var $355 = self.head;
-                        var $356 = self.tail;
-                        var $357 = List$cons$(Senha$verifica$(_suporte$1, $352, $355), Senhas$resposta$(_suporte$1, $356, $353));
-                        var $354 = $357;
+                        var $353 = self.head;
+                        var $354 = self.tail;
+                        var $355 = List$cons$(Senha$verifica$(_suporte$1, $350, $353), Senhas$resposta$(_suporte$1, $354, $351));
+                        var $352 = $355;
                         break;
                     case 'List.nil':
-                        var $358 = List$nil;
-                        var $354 = $358;
+                        var $356 = List$nil;
+                        var $352 = $356;
                         break;
                 };
-                var $351 = $354;
+                var $349 = $352;
                 break;
             case 'List.nil':
-                var $359 = List$nil;
-                var $351 = $359;
+                var $357 = List$nil;
+                var $349 = $357;
                 break;
         };
-        return $351;
+        return $349;
     };
     const Senhas$resposta = x0 => x1 => x2 => Senhas$resposta$(x0, x1, x2);
 
     function Senha$confirma$(_xs$1) {
         var _chck$2 = List$map$(a1 => (10n > a1), _xs$1);
         var _chck$3 = List$fold$(_chck$2, Bool$true, Bool$and);
-        var $360 = _chck$3;
-        return $360;
+        var $358 = _chck$3;
+        return $358;
     };
     const Senha$confirma = x0 => Senha$confirma$(x0);
+
+    function IO$put_string$(_text$1) {
+        var $359 = IO$ask$("put_string", _text$1, (_skip$2 => {
+            var $360 = IO$end$(Unit$new);
+            return $360;
+        }));
+        return $359;
+    };
+    const IO$put_string = x0 => IO$put_string$(x0);
+
+    function IO$print$(_text$1) {
+        var $361 = IO$put_string$((_text$1 + "\u{a}"));
+        return $361;
+    };
+    const IO$print = x0 => IO$print$(x0);
 
     function String$flatten$go$(_xs$1, _res$2) {
         var String$flatten$go$ = (_xs$1, _res$2) => ({
@@ -1758,13 +1763,13 @@ module.exports = (function() {
                 var self = _xs$1;
                 switch (self._) {
                     case 'List.cons':
-                        var $361 = self.head;
-                        var $362 = self.tail;
-                        var $363 = String$flatten$go$($362, (_res$2 + $361));
-                        return $363;
-                    case 'List.nil':
-                        var $364 = _res$2;
+                        var $362 = self.head;
+                        var $363 = self.tail;
+                        var $364 = String$flatten$go$($363, (_res$2 + $362));
                         return $364;
+                    case 'List.nil':
+                        var $365 = _res$2;
+                        return $365;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1774,8 +1779,8 @@ module.exports = (function() {
     const String$flatten$go = x0 => x1 => String$flatten$go$(x0, x1);
 
     function String$flatten$(_xs$1) {
-        var $365 = String$flatten$go$(_xs$1, "");
-        return $365;
+        var $366 = String$flatten$go$(_xs$1, "");
+        return $366;
     };
     const String$flatten = x0 => String$flatten$(x0);
 
@@ -1783,32 +1788,32 @@ module.exports = (function() {
         var self = _list$2;
         switch (self._) {
             case 'List.cons':
-                var $367 = self.head;
-                var $368 = self.tail;
-                var $369 = String$flatten$(List$cons$((() => {
+                var $368 = self.head;
+                var $369 = self.tail;
+                var $370 = String$flatten$(List$cons$((() => {
                     var self = _fst$3;
                     if (self) {
-                        var $370 = "";
-                        return $370;
-                    } else {
-                        var $371 = _sep$1;
+                        var $371 = "";
                         return $371;
+                    } else {
+                        var $372 = _sep$1;
+                        return $372;
                     };
-                })(), List$cons$($367, List$cons$(String$join$go$(_sep$1, $368, Bool$false), List$nil))));
-                var $366 = $369;
+                })(), List$cons$($368, List$cons$(String$join$go$(_sep$1, $369, Bool$false), List$nil))));
+                var $367 = $370;
                 break;
             case 'List.nil':
-                var $372 = "";
-                var $366 = $372;
+                var $373 = "";
+                var $367 = $373;
                 break;
         };
-        return $366;
+        return $367;
     };
     const String$join$go = x0 => x1 => x2 => String$join$go$(x0, x1, x2);
 
     function String$join$(_sep$1, _list$2) {
-        var $373 = String$join$go$(_sep$1, _list$2, Bool$true);
-        return $373;
+        var $374 = String$join$go$(_sep$1, _list$2, Bool$true);
+        return $374;
     };
     const String$join = x0 => x1 => String$join$(x0, x1);
 
@@ -1816,144 +1821,132 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'List.cons':
-                var $375 = self.head;
-                var $376 = self.tail;
+                var $376 = self.head;
+                var $377 = self.tail;
                 var self = _b$4;
                 switch (self._) {
                     case 'List.cons':
-                        var $378 = self.head;
-                        var $379 = self.tail;
-                        var $380 = (_eql$2($375)($378) && List$eql$(_eql$2, $376, $379));
-                        var $377 = $380;
+                        var $379 = self.head;
+                        var $380 = self.tail;
+                        var $381 = (_eql$2($376)($379) && List$eql$(_eql$2, $377, $380));
+                        var $378 = $381;
                         break;
                     case 'List.nil':
-                        var $381 = Bool$false;
-                        var $377 = $381;
+                        var $382 = Bool$false;
+                        var $378 = $382;
                         break;
                 };
-                var $374 = $377;
+                var $375 = $378;
                 break;
             case 'List.nil':
                 var self = _b$4;
                 switch (self._) {
                     case 'List.nil':
-                        var $383 = Bool$true;
-                        var $382 = $383;
+                        var $384 = Bool$true;
+                        var $383 = $384;
                         break;
                     case 'List.cons':
-                        var $384 = Bool$false;
-                        var $382 = $384;
+                        var $385 = Bool$false;
+                        var $383 = $385;
                         break;
                 };
-                var $374 = $382;
+                var $375 = $383;
                 break;
         };
-        return $374;
+        return $375;
     };
     const List$eql = x0 => x1 => x2 => List$eql$(x0, x1, x2);
     const Nat$sub = a0 => a1 => (a0 - a1 <= 0n ? 0n : a0 - a1);
 
     function Senhas$loope$(_senha$1, _tentativas$2) {
-        var $385 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $386 = _m$bind$3;
-            return $386;
-        }))(IO$print$(("\u{a}Voc\u{ea} tem: " + (Nat$show$((_tentativas$2 + 1n)) + " Tentativas"))))((_$3 => {
-            var $387 = IO$monad$((_m$bind$4 => _m$pure$5 => {
-                var $388 = _m$bind$4;
-                return $388;
-            }))(IO$print$("Escolha 4 n\u{fa}meros:"))((_$4 => {
-                var $389 = IO$monad$((_m$bind$5 => _m$pure$6 => {
-                    var $390 = _m$bind$5;
+        var $386 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $387 = _m$bind$3;
+            return $387;
+        }))(IO$prompt$(("\u{a}Voc\u{ea} tem: " + (Nat$show$((_tentativas$2 + 1n)) + (" tentativas." + " Escolha 4 n\u{fa}meros:")))))((_line$3 => {
+            var _user_nums$4 = Senhas$read_input$(_line$3);
+            var _user_try$5 = Senhas$resposta$(_senha$1, _user_nums$4, _senha$1);
+            var self = Senha$confirma$(_user_nums$4);
+            if (self) {
+                var $389 = IO$monad$((_m$bind$6 => _m$pure$7 => {
+                    var $390 = _m$bind$6;
                     return $390;
-                }))(IO$get_line)((_line$5 => {
-                    var _user_nums$6 = Senhas$read_input$(_line$5);
-                    var _user_try$7 = Senhas$resposta$(_senha$1, _user_nums$6, _senha$1);
-                    var self = Senha$confirma$(_user_nums$6);
-                    if (self) {
-                        var $392 = IO$monad$((_m$bind$8 => _m$pure$9 => {
-                            var $393 = _m$bind$8;
-                            return $393;
-                        }))(IO$print$("Sua resposta est\u{e1}:"))((_$8 => {
-                            var $394 = IO$monad$((_m$bind$9 => _m$pure$10 => {
-                                var $395 = _m$bind$9;
-                                return $395;
-                            }))(IO$print$(String$join$("", _user_try$7)))((_$9 => {
-                                var self = List$eql$(Nat$eql, _user_nums$6, _senha$1);
-                                if (self) {
-                                    var $397 = IO$print$("Parab\u{e9}ns, voc\u{ea} venceu!");
-                                    var $396 = $397;
-                                } else {
-                                    var self = (_tentativas$2 === 0n);
-                                    if (self) {
-                                        var $399 = IO$print$("Infelizmente, voc\u{ea} perdeu");
-                                        var $398 = $399;
-                                    } else {
-                                        var $400 = Senhas$loope$(_senha$1, (_tentativas$2 - 1n <= 0n ? 0n : _tentativas$2 - 1n));
-                                        var $398 = $400;
-                                    };
-                                    var $396 = $398;
-                                };
-                                return $396;
-                            }));
-                            return $394;
-                        }));
-                        var $391 = $392;
-                    } else {
-                        var $401 = IO$monad$((_m$bind$8 => _m$pure$9 => {
-                            var $402 = _m$bind$8;
-                            return $402;
-                        }))(IO$print$("Seu input n\u{e3}o foi v\u{e1}lido, tente novamente"))((_$8 => {
-                            var $403 = Senhas$loope$(_senha$1, _tentativas$2);
-                            return $403;
-                        }));
-                        var $391 = $401;
-                    };
+                }))(IO$print$("Sua resposta est\u{e1}:"))((_$6 => {
+                    var $391 = IO$monad$((_m$bind$7 => _m$pure$8 => {
+                        var $392 = _m$bind$7;
+                        return $392;
+                    }))(IO$print$(String$join$("", _user_try$5)))((_$7 => {
+                        var self = List$eql$(Nat$eql, _user_nums$4, _senha$1);
+                        if (self) {
+                            var $394 = IO$print$("Parab\u{e9}ns, voc\u{ea} venceu!");
+                            var $393 = $394;
+                        } else {
+                            var self = (_tentativas$2 === 0n);
+                            if (self) {
+                                var $396 = IO$print$("Infelizmente, voc\u{ea} perdeu");
+                                var $395 = $396;
+                            } else {
+                                var $397 = Senhas$loope$(_senha$1, (_tentativas$2 - 1n <= 0n ? 0n : _tentativas$2 - 1n));
+                                var $395 = $397;
+                            };
+                            var $393 = $395;
+                        };
+                        return $393;
+                    }));
                     return $391;
                 }));
-                return $389;
-            }));
-            return $387;
+                var $388 = $389;
+            } else {
+                var $398 = IO$monad$((_m$bind$6 => _m$pure$7 => {
+                    var $399 = _m$bind$6;
+                    return $399;
+                }))(IO$print$("Seu input n\u{e3}o foi v\u{e1}lido, tente novamente"))((_$6 => {
+                    var $400 = Senhas$loope$(_senha$1, _tentativas$2);
+                    return $400;
+                }));
+                var $388 = $398;
+            };
+            return $388;
         }));
-        return $385;
+        return $386;
     };
     const Senhas$loope = x0 => x1 => Senhas$loope$(x0, x1);
     const Senhas = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $404 = _m$bind$1;
-        return $404;
+        var $401 = _m$bind$1;
+        return $401;
     }))(IO$random$(10n))((_num$1 => {
-        var $405 = IO$monad$((_m$bind$2 => _m$pure$3 => {
-            var $406 = _m$bind$2;
-            return $406;
+        var $402 = IO$monad$((_m$bind$2 => _m$pure$3 => {
+            var $403 = _m$bind$2;
+            return $403;
         }))(IO$randoms$(4n, 10n))((_num_1$2 => {
             var _lista$3 = List$cons$(1n, List$cons$(2n, List$cons$(3n, List$cons$(4n, List$cons$(5n, List$cons$(6n, List$cons$(7n, List$cons$(8n, List$cons$(9n, List$cons$(0n, List$nil))))))))));
-            var $407 = IO$monad$((_m$bind$4 => _m$pure$5 => {
-                var $408 = _m$bind$4;
-                return $408;
+            var $404 = IO$monad$((_m$bind$4 => _m$pure$5 => {
+                var $405 = _m$bind$4;
+                return $405;
             }))(IO$randoms$(6n, 10n))((_lista1$4 => {
                 var _senha$5 = List$random$(_num_1$2, _lista$3, List$nil);
-                var $409 = Senhas$loope$(_senha$5, 4n);
-                return $409;
+                var $406 = Senhas$loope$(_senha$5, 4n);
+                return $406;
             }));
-            return $407;
+            return $404;
         }));
-        return $405;
+        return $402;
     }));
     const User$Sipher$Senhas = Senhas;
 
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $410 = ({
+        var $407 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $410;
+        return $407;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Senhas = (() => {
         var _draw$1 = (_state$1 => {
-            var $412 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("Bem-vindo ao joguinho das senhas! Instru\u{e7}\u{f5}es:"), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("... TODO :) ..."), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("Aperte qualquer tecla para come\u{e7}ar."), List$nil)), List$nil))));
-            return $412;
+            var $409 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("Bem-vindo ao joguinho das senhas! Instru\u{e7}\u{f5}es:"), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("... TODO :) ..."), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("Aperte qualquer tecla para come\u{e7}ar."), List$nil)), List$nil))));
+            return $409;
         });
         var _when$2 = (_event$2 => _state$3 => {
             var self = _event$2;
@@ -1965,24 +1958,24 @@ module.exports = (function() {
                 case 'App.Event.mouse_up':
                 case 'App.Event.key_up':
                 case 'App.Event.post':
-                    var $414 = App$pass;
-                    var $413 = $414;
+                    var $411 = App$pass;
+                    var $410 = $411;
                     break;
                 case 'App.Event.key_down':
-                    var $415 = IO$monad$((_m$bind$6 => _m$pure$7 => {
-                        var $416 = _m$bind$6;
-                        return $416;
+                    var $412 = IO$monad$((_m$bind$6 => _m$pure$7 => {
+                        var $413 = _m$bind$6;
+                        return $413;
                     }))(User$Sipher$Senhas)((_$6 => {
-                        var $417 = App$pass;
-                        return $417;
+                        var $414 = App$pass;
+                        return $414;
                     }));
-                    var $413 = $415;
+                    var $410 = $412;
                     break;
             };
-            return $413;
+            return $410;
         });
-        var $411 = App$new$(Unit$new, _draw$1, _when$2);
-        return $411;
+        var $408 = App$new$(Unit$new, _draw$1, _when$2);
+        return $408;
     })();
     return {
         'DOM.node': DOM$node,
@@ -2054,10 +2047,9 @@ module.exports = (function() {
         'List.pop_at.go': List$pop_at$go,
         'List.pop_at': List$pop_at,
         'List.random': List$random,
-        'IO.put_string': IO$put_string,
+        'IO.prompt': IO$prompt,
         'String.cons': String$cons,
         'String.concat': String$concat,
-        'IO.print': IO$print,
         'List.fold': List$fold,
         'Either': Either,
         'Either.left': Either$left,
@@ -2075,7 +2067,6 @@ module.exports = (function() {
         'Nat.show_digit': Nat$show_digit,
         'Nat.to_string_base': Nat$to_string_base,
         'Nat.show': Nat$show,
-        'IO.get_line': IO$get_line,
         'Char.eql': Char$eql,
         'String.starts_with': String$starts_with,
         'String.drop': String$drop,
@@ -2092,6 +2083,8 @@ module.exports = (function() {
         'Senha.verifica': Senha$verifica,
         'Senhas.resposta': Senhas$resposta,
         'Senha.confirma': Senha$confirma,
+        'IO.put_string': IO$put_string,
+        'IO.print': IO$print,
         'String.flatten.go': String$flatten$go,
         'String.flatten': String$flatten,
         'String.join.go': String$join$go,
