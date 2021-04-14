@@ -14,50 +14,69 @@ Web.Kind.component.header(page: Web.KindWebsite.Page): DOM
       "font-family": "verdana",
       "text-align" : "center"
       }, [DOM.text("KIND language")]),
-    line
+    line,
+    Web.Kind.component.header_tabs(page)
   ])
 
+// Returns a DOM for the tabs
 Web.Kind.component.header_tabs(page: Web.KindWebsite.Page): DOM
-  DOM.node("div", {}, {}, [
-    Web.Kind.component.header_tab(true, "Home"),
-    Web.Kind.component.header_tab(true, "Apps"),
-    Web.Kind.component.header_tab(true, "Home")
-  ])
+  let titles = ["Apps", "Home"]
+  let tabs = List.nil<DOM>
+  for title in titles with tabs:
+    List.cons!(
+      Web.Kind.component.header_tab(Web.Kind.helper.is_current(title, page), title), 
+      tabs)
+  DOM.node("div", {}, {"padding-left": "20%"}, tabs)
 
 Web.Kind.component.header_tab(is_active: Bool, title: String): DOM
   if is_active then
-    DOM.node("span", {}, {"padding": "5px 20px 5px 0px", "text-decoration": "underline"}, [DOM.text(title)])
+    DOM.node("span", {}, {
+      "padding": "5px 50px 5px 0px", 
+      "text-decoration": "underline",
+      "font-size": "18px",
+      "cursor": "pointer"}, 
+      [DOM.text(title)])
   else
-    DOM.node("span", {}, {"padding": "5px 20px 5px 0px"}, [DOM.text(title)])
-
-
+    DOM.node("span", {}, {
+      "padding": "5px 50px 5px 0px", 
+      "font-size": "18px"
+      "cursor": "pointer"}, 
+      [DOM.text(title)])
 
 Web.Kind.component.draw_page(page: Web.KindWebsite.Page): DOM
   case page{
-    home: Web.Kind.component.draw_page.home
+    home: Web.Kind.draw_page_home
     apps:
       DOM.node("div", {}, {
         "padding": "20px"
       }, [
         DOM.text("Hello from Apps!")
       ])
-    team:
-      DOM.node("div", {}, {
-        "padding": "20px"
-      }, [
-        DOM.text("Hello from Team!")
-      ])
   }
 
-Web.Kind.component.draw_page.home: DOM
-  let home = 
-    DOM.node("div", {}, {
-      "padding": "20px"
-    }, [
-      DOM.text("Hello from Home!")
-    ])
+Web.Kind.component.body_container(ele: List(DOM)): DOM
+  DOM.node("div", {}, {"margin": "40px 200px 100px 200px"}, ele)
 
-  DOM.node("div", {}, {}, [
-    Web.Kind.component.header(Web.KindWebsite.Page.home), 
-    home])
+Web.Kind.component.title(title: String): DOM
+  DOM.node("div", {}, {
+    "font-size": "20px",
+    "font-family": "Helvetica",
+    "font-weight": "bold"
+  }, [DOM.text(title)])
+
+Web.Kind.component.link(txt: String, href: String): DOM
+  DOM.node("a", {
+      "href": href,
+      "target": "_blank"
+    }, {
+      "cursor": "pointer"
+    }, [DOM.text(txt)])  
+
+Web.Kind.component.list(items: List(DOM)): DOM
+  let li = []
+  for item in items with li:
+    List.cons!(DOM.node("li", {}, {"margin-top": "5px"}, [item]), li)
+  DOM.node("ul", {}, {
+    "list-style-type": "circle", 
+    "margin-left": "20px"}, li)
 

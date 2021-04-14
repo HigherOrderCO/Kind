@@ -5,7 +5,6 @@ type Web.KindWebsite.State{
 type Web.KindWebsite.Page{
   home
   apps
-  team
 }
 
 Web.KindWebsite: App(Web.KindWebsite.State)
