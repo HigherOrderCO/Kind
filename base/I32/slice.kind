@@ -1,0 +1,2 @@
+I32.slice(i: I32, j: I32, str: String): String
+  I32.slice(i, j, str)

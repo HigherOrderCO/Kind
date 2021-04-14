@@ -1,4 +1,3 @@
 // TODO: improve this function, using U32 operations
 U32.sqrt(val: U32): U32
   F64.pow(U32.to_f64(val), F64.div(U32.to_f64(1u), U32.to_f64(2u)))
-

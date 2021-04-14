@@ -1,0 +1,2 @@
+I32.needed_depth(size: I32): Nat
+  I32.needed_depth(size)

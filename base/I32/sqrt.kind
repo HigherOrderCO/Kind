@@ -1,0 +1,2 @@
+I32.sqrt(val: I32): I32
+  I32.sqrt(val)
