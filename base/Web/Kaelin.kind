@@ -34,32 +34,29 @@ Web.Kaelin: App(Web.Kaelin.State)
   let draw = (state)
     case state {
       game: 
-        let map = state.map
         // TODO: resolve background in front of entity
-        let img = Web.Kaelin.Draw.map(img, map)
+        let img = Web.Kaelin.Draw.map(img, state.map)
         let img = Web.Kaelin.Draw.state(img, state)
-        App.Render.pix(img)
-    } default App.Render.txt("TODO: create the renderer for this game state mode")
+        DOM.vbox({}, {}, img)
+    } default DOM.text("TODO: create the renderer for this game state mode")
 
   // Event handler
   let when = (event, state)
     case event state {
-      init game: [
-        App.Action.print!("Kaelin started!!!")
-        App.Action.watch!(Web.Kaelin.Resources.room)
-      ]
-      xkey game:
-        if event.down then 
-          switch U16.eql(event.code) {
-            48s: [App.Action.post!(state.room, Web.Kaelin.Command.create_hero("croni"))]
-          } default []
-        else []
+      init game: IO {
+        App.print("Kaelin started!!!")
+        App.watch(Web.Kaelin.Resources.room)
+      }
+      key_down game:
+        switch U16.eql(event.code) {
+          48s: App.post(state.room, Web.Kaelin.Command.create_hero("croni"))
+        } default App.pass
       post game:
         log(event.data)
         switch String.starts_with(event.data) {
-          "0x1": [App.Action.state!(Web.Kaelin.Action.create_player(event.addr, "croni", state))]
-        } default []
-    } default []
+          "0x1": App.store!(Web.Kaelin.Action.create_player(event.addr, "croni", state))
+        } default App.pass
+    } default App.pass
 
   //// The application
   App.new!(init, draw, when)
