@@ -1,0 +1,4 @@
+// Web.Kind.helper.is_current(page: Web.KindWebsite.Pag): Bool
+//   case page{
+//     home: 
+//   }

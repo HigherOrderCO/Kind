@@ -1,0 +1,63 @@
+Web.Kind.component.header(page: Web.KindWebsite.Page): DOM
+  let vbox = VoxBox.alloc_capacity(100u)
+  let line = 
+    DOM.node("div", {}, {
+        "text-align" : "center", 
+        "padding": "10px 50px 10px 50px"
+        }, 
+      [ DOM.node("p", {}, {"color": "#9370DB"}, [ DOM.text(String.repeat("=", 90)) ]) ] // MediumPurple
+    )
+
+  DOM.node("div", {}, {}, [
+    DOM.node("h2", {}, {
+      "margin-top" : "40px",
+      "font-family": "verdana",
+      "text-align" : "center"
+      }, [DOM.text("KIND language")]),
+    line
+  ])
+
+Web.Kind.component.header_tabs(page: Web.KindWebsite.Page): DOM
+  DOM.node("div", {}, {}, [
+    Web.Kind.component.header_tab(true, "Home"),
+    Web.Kind.component.header_tab(true, "Apps"),
+    Web.Kind.component.header_tab(true, "Home")
+  ])
+
+Web.Kind.component.header_tab(is_active: Bool, title: String): DOM
+  if is_active then
+    DOM.node("span", {}, {"padding": "5px 20px 5px 0px", "text-decoration": "underline"}, [DOM.text(title)])
+  else
+    DOM.node("span", {}, {"padding": "5px 20px 5px 0px"}, [DOM.text(title)])
+
+
+
+Web.Kind.component.draw_page(page: Web.KindWebsite.Page): DOM
+  case page{
+    home: Web.Kind.component.draw_page.home
+    apps:
+      DOM.node("div", {}, {
+        "padding": "20px"
+      }, [
+        DOM.text("Hello from Apps!")
+      ])
+    team:
+      DOM.node("div", {}, {
+        "padding": "20px"
+      }, [
+        DOM.text("Hello from Team!")
+      ])
+  }
+
+Web.Kind.component.draw_page.home: DOM
+  let home = 
+    DOM.node("div", {}, {
+      "padding": "20px"
+    }, [
+      DOM.text("Hello from Home!")
+    ])
+
+  DOM.node("div", {}, {}, [
+    Web.Kind.component.header(Web.KindWebsite.Page.home), 
+    home])
+
