@@ -1,41 +1,42 @@
 // A demo application that renders a square on the screen
 Web.Demo: App(Pair(U32,U32))
   // Allocates the mutable buffer
-  let img = Image3D.alloc_capacity(256u)
+  vbox = VoxBox.alloc_capacity(65536u)
 
   // Application state: just a position
-  let init = {128u, 128u}
+  init = {128u, 128u}
 
   // Render loop: draws a square at the stored position
-  let draw = (state)
-    let {pos_x, pos_y} = state
-    let col = (x, y)
-      let r = U32.add(96u,U32.mul(x,4u)) // red from 96 to 160
-      let g = U32.add(96u,U32.mul(x,4u)) // green from 96 to 160
-      let b = 128u                       // blue constant 128
-      let a = 255u                       // alpha constant 255
-      Col32.new(r, g, b, a)
-    let img = Image3D.clear(img)
-    let img = Image3D.Draw.square(pos_x, pos_y, 128u, 16u, 16u, col, img)
-    App.Render.pix(img)
+  draw = (state)
+    p_x = Pair.fst!!(state)
+    p_y = Pair.snd!!(state)
+    col = (x,y) Col32.new(200u,200u,255u,255u)
+    DOM.node("div", {}, {}, [
+      DOM.node("div", {}, {}, [DOM.text("Kind Demo App")])
+      DOM.node("div", {}, {}, [DOM.text("- Press W/A/S/D to move")])
+      DOM.node("div", {"id": "play_game"},
+        {"color": "blue", "text-decoration": "underline"},
+        [DOM.text("- Click here to play a game")])
+      DOM.vbox({}, {}, VoxBox.Draw.square(p_x, p_y, 128u, 16u, 16u, col, vbox))
+    ])
 
   // Event handler: moves the position when ASDW are pressed
-  let when = (event, state)
+  when = (event, state)
     case event {
-      init: []
-      tick: []
-      xkey: if event.down then [
-        App.Action.state!(
-          let {x, y} = state
-          switch U16.eql(event.code) {
-            'A': {U32.sub(x, 4u), y}
-            'D': {U32.add(x, 4u), y}
-            'W': {x, U32.sub(y, 4u)}
-            'S': {x, U32.add(y, 4u)}
-          } default {x, y})
-        ] else []
-      post: []
-    }
+      dom: IO {
+        get line = IO.prompt("What is your name?")
+        IO.print("You're breath-taking, " | line | "!")
+        App.pass
+      }
+      key_down:
+        {x, y} = state
+        switch U16.eql(event.code) {
+          'A': App.store!({U32.sub(x, 16u), y})
+          'D': App.store!({U32.add(x, 16u), y})
+          'W': App.store!({x, U32.sub(y, 16u)})
+          'S': App.store!({x, U32.add(y, 16u)})
+        } default App.pass
+    } default App.pass
 
   // The application
   App.new!(init, draw, when)

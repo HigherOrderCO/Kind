@@ -9,3 +9,6 @@ Web.Kaelin.Resources.center_x : U32
 
 Web.Kaelin.Resources.center_y : U32
   128u
+
+Web.Kaelin.Resources.room : String
+  "0x196581625483"

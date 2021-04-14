@@ -1,2 +1,2 @@
-BitsMap.values<A: Type>(xs: BitsMap(A)): List(A)
+Map.values<A: Type>(xs: Map(A)): List(A)
   BitsMap.values.go<A>(xs, List.nil!)
