@@ -81,14 +81,17 @@ Senhas: IO(Unit)
     let lista = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
     get lista1 = IO.randoms(6, 10)
     let senha = List.random(num_1, lista, [])
-    Senhas.loope(senha, 4)
+    Senhas.loop(senha, 4)
   }
 
 Senhas.loope(senha: List(Nat), tentativas: Nat): IO(Unit)
   IO {
-    IO.print("\nVocê tem: " | Nat.show(tentativas +1) |  " Tentativas")
-    IO.print("Escolha 4 números:")
-    get line = IO.get_line;
+    get line = IO.prompt(
+      "\nVocê tem: "
+      | Nat.show(tentativas +1)
+      |  " tentativas."
+      | " Escolha 4 números:"
+    );
     let user_nums = Senhas.read_input(line);
     let user_try = Senhas.resposta(senha,user_nums, senha)
     if Senha.confirma(user_nums) then IO { 

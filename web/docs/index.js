@@ -3034,7 +3034,7 @@ module.exports = class AppPlay extends Component {
   
   // Performs an IO computation
   run_io(io) {
-    console.log("Run IO", io);
+    //console.log("Run IO", io);
     switch (io._) {
       case "IO.end":
         if (io.value.value !== null) {
@@ -3044,7 +3044,7 @@ module.exports = class AppPlay extends Component {
         }
         return Promise.resolve(null);
       case "IO.ask":
-        console.log("IO.ask", io.param);
+        //console.log("IO.ask", io.param);
         return new Promise((res, err) => {
           switch (io.query) {
             case "print":
