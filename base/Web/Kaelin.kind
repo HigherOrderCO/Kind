@@ -1,3 +1,5 @@
+// >> FIXME: update to use new App <<
+
 // init:
 // Bem-vindo ao Kaelin!
 // Digite uma sala e aperte enter: 0x108309300
@@ -15,7 +17,7 @@ Web.Kaelin.Command.create_hero(hero_name: String) : String
 
 // A demo application that renders a square on the screen
 Web.Kaelin: App(Web.Kaelin.State)
-  let img = Image3D.alloc_capacity(65536u)
+  let img = VoxBox.alloc_capacity(65536u)
   // Initial state
   let init = 
     let map = {}
@@ -59,5 +61,5 @@ Web.Kaelin: App(Web.Kaelin.State)
         } default []
     } default []
 
-  // The application
+  //// The application
   App.new!(init, draw, when)

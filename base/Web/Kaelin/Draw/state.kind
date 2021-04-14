@@ -1,5 +1,5 @@
 // function to draw according the state
-Web.Kaelin.Draw.state(img: Image3D, state: Web.Kaelin.State): Image3D
+Web.Kaelin.Draw.state(img: VoxBox, state: Web.Kaelin.State): VoxBox
   case state {
       game:
         let new_img = Web.Kaelin.Draw.state.players(img, state.players)

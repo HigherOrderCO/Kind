@@ -1,0 +1,3 @@
+VoxBox.get_capacity(img: VoxBox): U32
+  open img 
+  img.capacity

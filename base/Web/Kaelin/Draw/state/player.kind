@@ -1,6 +1,6 @@
 // draw a player
 // now is only drawing a hero in some coord
-Web.Kaelin.Draw.state.player(img: Image3D, player: Web.Kaelin.Player): Image3D
+Web.Kaelin.Draw.state.player(img: VoxBox, player: Web.Kaelin.Player): VoxBox
   open player
   let {cx,cy} = Web.Kaelin.Coord.to_screen_xy(player.coord)
 
@@ -10,4 +10,4 @@ Web.Kaelin.Draw.state.player(img: Image3D, player: Web.Kaelin.Player): Image3D
   } default Web.Kaelin.Entity.char(Kaelin.Assets.chars.cyclope_d_1) // what default put here?
   
   open ent
-  Image3D.Draw.image(cx, cy, 0u, ent.img, img)
+  VoxBox.Draw.image(cx, cy, 0u, ent.img, img)

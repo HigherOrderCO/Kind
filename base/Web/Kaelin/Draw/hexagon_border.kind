@@ -4,9 +4,9 @@ Web.Kaelin.Draw.hexagon_border(
   cy: U32,
   rad: U32,
   col: Col32,
-  img: Image3D,
-) : Image3D 
+  img: VoxBox,
+) : VoxBox 
 //   let draw_e = Bool.or(Bool.and(U32.eql(U32.mod(j,2u),0u),U32.eql(i,0u)),U32.eql(j,4u))
 //   let draw_f = Bool.or(Bool.and(U32.eql(U32.mod(j,2u),1u),U32.eql(i,4u)),U32.eql(j,4u))
-  let img = Image3D.Draw.deresagon(cx,cy,0u,rad,col,true,true,true,true,true,true,img)
+  let img = VoxBox.Draw.deresagon(cx,cy,0u,rad,col,true,true,true,true,true,true,img)
   img
