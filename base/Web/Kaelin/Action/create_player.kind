@@ -1,11 +1,11 @@
+// TODO change to use serialize
 Web.Kaelin.Action.create_player(
   user: String,
   hero_name: String, 
   state: Web.Kaelin.State
 ) : Web.Kaelin.State
   let key = user
-  log(key)
-  let init_pos = Web.Kaelin.Coord.new(Int.new(0,0), Int.new(0,0))
+  let init_pos = Web.Kaelin.Coord.new(Int.new(0,0), Int.new(1,0))
   case state {
     game :
       case Map.get!(key, state.players) as player {

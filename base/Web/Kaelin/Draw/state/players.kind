@@ -1,0 +1,12 @@
+// draw all players
+Web.Kaelin.Draw.state.players(img: Image3D, players: Map(Web.Kaelin.Player)): Image3D
+  let players_list = Map.values!(players)
+  
+  for player in players_list with img:
+    Web.Kaelin.Draw.state.player(img, player)
+
+  img
+  
+  
+
+  

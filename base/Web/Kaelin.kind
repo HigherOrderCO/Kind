@@ -6,6 +6,8 @@
 // Sala vazia. Digite um DraftString para começar um jogo:
 // sipher@Croni, sejagentil@Zeralul / stanci@Murlok, derenash@Keropao
 
+// for test
+// TODO: serialize and deserialize
 Web.Kaelin.Command.create_hero(hero_name: String) : String
   switch String.eql(hero_name) {
     "croni" : "0x1000000000000000000000000000000000000000000000000000000000000001"    
@@ -30,8 +32,10 @@ Web.Kaelin: App(Web.Kaelin.State)
   let draw = (state)
     case state {
       game: 
-        let map = state.mape
+        let map = state.map
+        // TODO: resolve background in front of entity
         let img = Web.Kaelin.Draw.map(img, map)
+        let img = Web.Kaelin.Draw.state(img, state)
         App.Render.pix(img)
     } default App.Render.txt("TODO: create the renderer for this game state mode")
 
@@ -49,6 +53,7 @@ Web.Kaelin: App(Web.Kaelin.State)
           } default []
         else []
       post game:
+        log(event.data)
         switch String.starts_with(event.data) {
           "0x1": [App.Action.state!(Web.Kaelin.Action.create_player(event.addr, "croni", state))]
         } default []
