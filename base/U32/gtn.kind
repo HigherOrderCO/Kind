@@ -1,4 +1,2 @@
 U32.gtn(a: U32, b: U32): Bool
-  open a
-  open b
-  Word.gtn!(a.value, b.value)
+  Cmp.as_gtn(U32.cmp(a, b))

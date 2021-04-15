@@ -1,7 +1,4 @@
 U32.cmp(a: U32, b: U32): Cmp
-  if U32.gtn(a,b) then
-    Cmp.gtn
-  else if U32.eql(a,b) then
-    Cmp.eql
-  else
-    Cmp.ltn
+  open a
+  open b
+  Word.cmp!(a.value, b.value)

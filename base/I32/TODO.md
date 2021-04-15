@@ -1,7 +1,7 @@
 [x] - abs.kind
 [x] - add.kind
 [x] - and.kind
-[ ] - cmp.kind
+[x] - cmp.kind
 [x] - div.kind ???
 [x] - eql.kind
 [x] - for.kind
