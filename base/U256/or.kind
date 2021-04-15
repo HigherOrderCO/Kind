@@ -1,0 +1,4 @@
+U256.or(a: U256, b: U256): U256
+  open a
+  open b
+  U256.new(Word.or!(a.value, b.value))

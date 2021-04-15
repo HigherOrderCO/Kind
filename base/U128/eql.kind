@@ -1,0 +1,2 @@
+U128.eql(a: U128, b: U128): Bool
+  Cmp.as_eql(U128.cmp(a, b))

@@ -1,0 +1,4 @@
+U128.sub(a: U128, b: U128): U128
+  open a
+  open b
+  U128.new(Word.sub!(a.value, b.value))

@@ -1,0 +1,4 @@
+U128.cmp(a: U128, b: U128): Cmp
+  open a
+  open b
+  Word.cmp!(a.value, b.value)

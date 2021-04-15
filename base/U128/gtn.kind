@@ -1,0 +1,2 @@
+U128.gtn(a: U128, b: U128): Bool
+  Cmp.as_gtn(U128.cmp(a, b))

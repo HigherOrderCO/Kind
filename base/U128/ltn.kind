@@ -1,0 +1,2 @@
+U128.ltn(a: U128, b: U128): Bool
+  Cmp.as_ltn(U128.cmp(a, b))
