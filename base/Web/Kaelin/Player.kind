@@ -1,0 +1,7 @@
+type Web.Kaelin.Player {
+  new(
+    coord: Web.Kaelin.Coord,
+    // change hero to entity
+    hero: String,  
+  )
+}

@@ -1,0 +1,83 @@
+Web.Kind.component.header(page: Web.KindWebsite.Page): DOM
+  let vbox = VoxBox.alloc_capacity(100u)
+  let line = 
+    DOM.node("div", {}, {
+        "text-align" : "center", 
+        "padding": "10px 50px 10px 50px"
+        }, 
+      [ DOM.node("p", {}, {"color": "#9370DB"}, [ DOM.text(String.repeat("=", 90)) ]) ] // MediumPurple
+    )
+
+  DOM.node("div", {}, {}, [
+    DOM.node("h2", {}, {
+      "margin-top" : "40px",
+      "font-family": "verdana",
+      "text-align" : "center"
+      }, [DOM.text("KIND language")]),
+    line,
+    Web.Kind.component.header_tabs(page)
+  ])
+
+// Returns a DOM for the tabs
+Web.Kind.component.header_tabs(page: Web.KindWebsite.Page): DOM
+  let titles = ["Apps", "Home"]
+  let tabs = List.nil<DOM>
+  for title in titles with tabs:
+    List.cons!(
+      Web.Kind.component.header_tab(Web.Kind.helper.is_current(title, page), title), 
+      tabs)
+  DOM.node("div", {}, {"padding-left": "20%"}, tabs)
+
+Web.Kind.component.header_tab(is_active: Bool, title: String): DOM
+  if is_active then
+    DOM.node("span", {}, {
+      "padding": "5px 50px 5px 0px", 
+      "text-decoration": "underline",
+      "font-size": "18px",
+      "cursor": "pointer"}, 
+      [DOM.text(title)])
+  else
+    DOM.node("span", {}, {
+      "padding": "5px 50px 5px 0px", 
+      "font-size": "18px"
+      "cursor": "pointer"}, 
+      [DOM.text(title)])
+
+Web.Kind.component.draw_page(page: Web.KindWebsite.Page): DOM
+  case page{
+    home: Web.Kind.draw_page_home
+    apps:
+      DOM.node("div", {}, {
+        "padding": "20px"
+      }, [
+        DOM.text("Hello from Apps!")
+      ])
+  }
+
+Web.Kind.component.body_container(ele: List(DOM)): DOM
+  DOM.node("div", {}, {
+    "margin": "40px 20% 100px 20%"}, ele)
+
+Web.Kind.component.title(title: String): DOM
+  DOM.node("div", {}, {
+    "font-size": "20px",
+    "font-family": "Helvetica",
+    "font-weight": "bold"
+  }, [DOM.text(title)])
+
+Web.Kind.component.link(txt: String, href: String): DOM
+  DOM.node("a", {
+      "href": href,
+      "target": "_blank"
+    }, {
+      "cursor": "pointer"
+    }, [DOM.text(txt)])  
+
+Web.Kind.component.list(items: List(DOM)): DOM
+  let li = []
+  for item in items with li:
+    List.cons!(DOM.node("li", {}, {"margin-top": "5px"}, [item]), li)
+  DOM.node("ul", {}, {
+    "list-style-type": "circle", 
+    "margin-left": "20px"}, li)
+
