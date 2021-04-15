@@ -1,4 +1,4 @@
 U32.slice(i: U32, j: U32, str: String): String
   open i
   open j
-  Word.slice(i.value, j.value, str)
+  Word.slice!(i.value, j.value, str)
