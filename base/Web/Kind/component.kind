@@ -35,21 +35,24 @@ Web.Kind.component.header_tabs(page: Web.Kind.Page): DOM
 Web.Kind.component.header_tab(is_active: Bool, title: String): DOM
   if is_active then
     DOM.node("div", {}, {
+      "margin-right": "30px"
       "border-style": "none none solid none"
       "border-color": Web.Kind.constant.secondary_color
       "font-size": "18px"
       "cursor": "pointer"
       "width": "70px"
       "display": "flex"
-      "align-content": "center"
+      "justify-content": "center"
       }, [DOM.text(title)])
   else
     DOM.node("div", {}, {
+      "margin-right": "10px"
       "font-size": "18px"
       "cursor": "pointer"
       "width": "70px"
-      "align-self": "center"
       "margin-bottom": "2px"
+      "display": "flex"
+      "justify-content": "center"
       }, [DOM.text(title)])
 
 Web.Kind.component.body_container(ele: List(DOM)): DOM
