@@ -1,4 +1,4 @@
 I32.cmp(a: I32, b: I32): Cmp
   open a
   open b
-  Word.s_cmp!(a, b)
+  Word.s_cmp!(a.value, b.value)
