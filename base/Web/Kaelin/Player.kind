@@ -1,7 +1,10 @@
 type Web.Kaelin.Player {
   new(
+    // create type for player id?
+    addr: String
     coord: Web.Kaelin.Coord,
     // change hero to entity
-    hero: String,  
+    hero: Web.Kaelin.Hero,
+    team: String,
   )
 }

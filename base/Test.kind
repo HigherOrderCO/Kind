@@ -1,4 +1,5 @@
 Test: _
-  2 + 2
+  let c = Web.Kaelin.Coord.new(Int.new(0,0), Int.new(1,0))
+  let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(c)
+  U32.to_string(cx) | " " | U32.to_string(cy)
   
-

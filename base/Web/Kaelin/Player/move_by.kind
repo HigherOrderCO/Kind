@@ -1,0 +1,7 @@
+Web.Kaelin.Player.move_by(i: Int, j: Int, player: Web.Kaelin.Player): Web.Kaelin.Player
+  open player
+  open player.coord as player_coord
+  let new_i = Int.add(player_coord.i, i)
+  let new_j = Int.add(player_coord.j, j)
+  let new_pos = Web.Kaelin.Coord.new(new_i, new_j)
+  Web.Kaelin.Player.new(player.addr, new_pos, player.hero, player.team)

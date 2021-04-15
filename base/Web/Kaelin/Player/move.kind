@@ -1,0 +1,3 @@
+Web.Kaelin.Player.move(new_pos: Web.Kaelin.Coord, player: Web.Kaelin.Player): Web.Kaelin.Player
+  open player
+  Web.Kaelin.Player.new(player.addr, new_pos, player.hero, player.team)
