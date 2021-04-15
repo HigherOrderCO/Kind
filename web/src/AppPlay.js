@@ -140,7 +140,7 @@ module.exports = class AppPlay extends Component {
 
   // Adds an event to the list of events
   register_event(ev) {
-    if (ev._ !== "App.Event.tick") console.log((ev));
+    //if (ev._ !== "App.Event.tick") console.log((ev));
     if (this.app) {
       this.run_io(this.app.when(ev)(this.app_state));
     }
@@ -153,7 +153,7 @@ module.exports = class AppPlay extends Component {
       case "IO.end":
         if (io.value.value !== null) {
           this.app_state = io.value.value;
-          console.log("new state: ", this.state);
+          //console.log("new state: ", this.app_state);
           return Promise.resolve(io.value.value);
         }
         return Promise.resolve(null);
@@ -166,7 +166,7 @@ module.exports = class AppPlay extends Component {
               return this.run_io(io.then("")).then(res).catch(err);
             case "put_string":
               alert(io.param);
-              console.log("->", io.then(""));
+              //console.log("->", io.then(""));
               return this.run_io(io.then("")).then(res).catch(err);
             case "get_time":
               return this.run_io(io.then(String(Date.now()))).then(res).catch(err);
