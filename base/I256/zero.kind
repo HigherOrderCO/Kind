@@ -1,0 +1,2 @@
+I256.zero: I256
+  I256.new(Word.zero!)

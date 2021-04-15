@@ -1,0 +1,3 @@
+I64.show(a: I64): String
+  open a
+  Word.s_show!(a.value)

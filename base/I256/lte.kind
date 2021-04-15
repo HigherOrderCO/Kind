@@ -1,0 +1,2 @@
+I256.lte(a: I256, b: I256): Bool
+  Cmp.as_lte(I256.cmp(a, b))

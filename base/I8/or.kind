@@ -1,0 +1,5 @@
+I8.or(a: I8, b: I8): I8
+  open a
+  open b
+  I8.new(Word.or!(a.value, b.value))
+

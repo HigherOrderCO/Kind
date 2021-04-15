@@ -1,0 +1,5 @@
+I8.for<S: Type>(state: S, from: I8, til: I8, func: I8 -> S -> S): S
+  case I8.eql(from,til) {
+    true: state
+    false: I8.for<S>(func(from,state), I8.inc(from), til, func)
+  }

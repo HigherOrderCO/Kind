@@ -1,0 +1,4 @@
+I8.and(a: I8, b: I8): I8
+  open a
+  open b
+  I8.new(Word.and!(a.value, b.value))

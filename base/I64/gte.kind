@@ -1,0 +1,2 @@
+I64.gte(a: I64, b: I64): Bool
+  Cmp.as_gte(I64.cmp(a, b))

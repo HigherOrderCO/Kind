@@ -1,0 +1,2 @@
+I16.lte(a: I16, b: I16): Bool
+  Cmp.as_lte(I16.cmp(a, b))

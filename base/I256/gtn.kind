@@ -1,0 +1,2 @@
+I256.gtn(a: I256, b: I256): Bool
+  Cmp.as_gtn(I256.cmp(a, b))

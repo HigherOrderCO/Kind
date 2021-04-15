@@ -1,0 +1,3 @@
+I128.length(str: String): I128
+  I128.length(str)
+

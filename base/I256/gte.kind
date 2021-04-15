@@ -1,0 +1,2 @@
+I256.gte(a: I256, b: I256): Bool
+  Cmp.as_gte(I256.cmp(a, b))

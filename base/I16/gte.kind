@@ -1,0 +1,2 @@
+I16.gte(a: I16, b: I16): Bool
+  Cmp.as_gte(I16.cmp(a, b))

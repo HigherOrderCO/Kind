@@ -1,0 +1,3 @@
+I128.neg(a: I128): I128
+  open a
+  I128.new(Word.neg!(a.value))

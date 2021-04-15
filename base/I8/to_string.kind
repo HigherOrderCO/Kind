@@ -1,0 +1,3 @@
+I8.show(a: I8): String
+  open a
+  Word.s_show!(a.value)

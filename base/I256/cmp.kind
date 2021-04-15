@@ -1,0 +1,4 @@
+I256.cmp(a: I256, b: I256): Cmp
+  open a
+  open b
+  Word.s_cmp!(a.value, b.value)

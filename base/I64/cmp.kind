@@ -1,0 +1,4 @@
+I64.cmp(a: I64, b: I64): Cmp
+  open a
+  open b
+  Word.s_cmp!(a.value, b.value)

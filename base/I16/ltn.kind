@@ -1,0 +1,2 @@
+I16.ltn(a: I16, b: I16): Bool
+  Cmp.as_ltn(I16.cmp(a, b))

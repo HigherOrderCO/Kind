@@ -1,0 +1,3 @@
+I256.to_int(a: I256): Int
+  open a
+  Word.to_int!(a.value)

@@ -1,0 +1,3 @@
+I64.length(str: String): I64
+  I64.length(str)
+

@@ -1,0 +1,4 @@
+I256.eql(a: I256, b: I256): Bool
+  open a
+  open b
+  Word.eql!(a.value, b.value)

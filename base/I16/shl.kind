@@ -1,0 +1,4 @@
+I16.shl(n: I16, a: I16): I16
+  open n
+  open a
+  I16.new(Word.s_shl!(n.value, a.value))
