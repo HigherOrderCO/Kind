@@ -1,0 +1,4 @@
+F32.eql(x: F32, y: F32): Bool
+  open x 
+  open y 
+  Word.eql!(x.word, y.word)
