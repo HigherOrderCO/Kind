@@ -1,0 +1,2 @@
+Word.s_slice<size: Nat>(a: Word(size), b: Word(size), str: String): String
+  Word.s_slice!(a, b, str)
