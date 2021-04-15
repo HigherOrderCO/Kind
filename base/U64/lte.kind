@@ -1,4 +1,2 @@
 U64.lte(a: U64, b: U64): Bool
-  open a
-  open b
-  Word.lte!(a.value, b.value)
+  Cmp.as_lte(U64.cmp(a, b))
