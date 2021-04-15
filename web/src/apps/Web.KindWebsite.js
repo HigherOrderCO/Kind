@@ -594,6 +594,7 @@ module.exports = (function() {
         return $101;
     };
     const List$cons = x0 => x1 => List$cons$(x0, x1);
+    const Web$Kind$constant$p_tag_size = "16px";
 
     function DOM$text$(_value$1) {
         var $102 = ({
@@ -603,6 +604,8 @@ module.exports = (function() {
         return $102;
     };
     const DOM$text = x0 => DOM$text$(x0);
+    const Web$Kind$constant$secondary_color = "#3891A6";
+    const Web$Kind$component$btn_go_to_apps_solid = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "btn_go_to_apps"), List$nil)), Map$from_list$(List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("font-family", "Helvetica"), List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("width", "120px"), List$cons$(Pair$new$("height", "30px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$secondary_color), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("border-radius", "7px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil)))))))))))))), List$cons$(DOM$text$("GO TO APPS"), List$nil));
 
     function Web$Kind$component$title$(_title$1) {
         var $103 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", "20px"), List$cons$(Pair$new$("font-family", "Helvetica"), List$cons$(Pair$new$("font-weight", "bold"), List$nil)))), List$cons$(DOM$text$(_title$1), List$nil));
@@ -632,7 +635,7 @@ module.exports = (function() {
             }
             return _li$4;
         })();
-        var $105 = DOM$node$("ul", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("list-style-type", "circle"), List$cons$(Pair$new$("margin-left", "20px"), List$nil))), _li$3);
+        var $105 = DOM$node$("ul", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("list-style-type", "none"), List$nil)), _li$3);
         return $105;
     };
     const Web$Kind$component$list = x0 => Web$Kind$component$list$(x0);
@@ -1207,6 +1210,7 @@ module.exports = (function() {
         return $249;
     };
     const VoxBox$alloc_capacity = x0 => VoxBox$alloc_capacity$(x0);
+    const Web$Kind$constant$primary_color = "#71558C";
     const String$nil = '';
 
     function String$cons$(_head$1, _tail$2) {
@@ -1285,60 +1289,85 @@ module.exports = (function() {
 
     function Web$Kind$component$header$(_page$1) {
         var _vbox$2 = VoxBox$alloc_capacity$(100);
-        var _line$3 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("text-align", "center"), List$cons$(Pair$new$("padding", "10px 50px 10px 50px"), List$nil))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("color", "#9370DB"), List$nil)), List$cons$(DOM$text$(String$repeat$("=", 90n)), List$nil)), List$nil));
+        var _line$3 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("text-align", "center"), List$cons$(Pair$new$("padding", "10px 50px 10px 50px"), List$nil))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("color", Web$Kind$constant$primary_color), List$nil)), List$cons$(DOM$text$(String$repeat$("=", 90n)), List$nil)), List$nil));
         var $265 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("h2", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "40px"), List$cons$(Pair$new$("font-family", "verdana"), List$cons$(Pair$new$("text-align", "center"), List$nil)))), List$cons$(DOM$text$("KIND language"), List$nil)), List$cons$(_line$3, List$cons$(Web$Kind$component$header_tabs$(_page$1), List$nil))));
         return $265;
     };
     const Web$Kind$component$header = x0 => Web$Kind$component$header$(x0);
 
     function Web$Kind$component$body_container$(_ele$1) {
-        var $266 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 20% 100px 20%"), List$nil)), _ele$1);
+        var $266 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 20% 40px 20%"), List$nil)), _ele$1);
         return $266;
     };
     const Web$Kind$component$body_container = x0 => Web$Kind$component$body_container$(x0);
+
+    function Web$Kind$component$link_white$(_txt$1, _href$2) {
+        var $267 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$2), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
+        return $267;
+    };
+    const Web$Kind$component$link_white = x0 => x1 => Web$Kind$component$link_white$(x0, x1);
+    const Web$Kind$constant$dark_pri_color = "#44366B";
+    const Web$Kind$component$footer = (() => {
+        var _join_us_txt$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link_white$(" Github", "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link_white$(" Telegram", "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
+        var _join_us$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "110px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$primary_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-items", "flex-end"), List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("padding-right", "20%"), List$nil))))))))), List$cons$(_join_us_txt$1, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "20px"), List$nil)), List$cons$(DOM$text$("\u{2764} by UwU Tech"), List$nil)), List$nil)));
+        var _msg_footer$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("background-color", Web$Kind$constant$dark_pri_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("padding", "10px 20% 10px 20%"), List$nil))))))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$("This website was created using Kind!"), List$nil)), List$cons$(Web$Kind$component$link_white$("\u{1f9d0}\u{ddd0} show me the code!", "https://github.com/uwu-tech/Kind/tree/master/base/Web/Kind"), List$nil)));
+        var $268 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "170px"), List$cons$(Pair$new$("margin-bottom", "0px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("color", "white"), List$nil)))))), List$cons$(_join_us$1, List$cons$(_msg_footer$2, List$nil)));
+        return $268;
+    })();
     const Web$Kind$draw_page_home = (() => {
         var _line$1 = (_txt$1 => {
-            var $268 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$(_txt$1), List$nil));
-            return $268;
+            var $270 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$1), List$nil));
+            return $270;
         });
-        var _instructions$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$cons$(Pair$new$("padding", "5px"), List$cons$(Pair$new$("border", "1px solid"), List$nil)))), List$cons$(_line$1("npm i -g kind-lang"), List$cons$(_line$1("git clone https://github.com/uwu-tech/Kind"), List$cons$(_line$1("cd Kind/base"), List$cons$(_line$1("kind Main"), List$cons$(_line$1("kind Main --run"), List$nil))))));
-        var _install$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Install"), List$cons$(_instructions$2, List$nil)));
-        var _txt$3 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link$(" Github", "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link$(" Telegram", "https://t.me/formality_lang"), List$nil))), List$nil));
-        var _join_us$3 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Join Us"), List$cons$(_txt$3, List$nil)));
-        var $267 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(Web$Kind$component$header$(Web$KindWebsite$Page$home), List$cons$(Web$Kind$component$body_container$(List$cons$(_install$2, List$cons$(_join_us$3, List$nil))), List$nil)));
-        return $267;
+        var _line_break$2 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil), List$nil));
+        var _span$3 = (_txt$3 => {
+            var $271 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$3), List$nil));
+            return $271;
+        });
+        var _span_bold$4 = (_txt$4 => {
+            var $272 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$4), List$nil));
+            return $272;
+        });
+        var _intro$5 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(_span$3("Kind is a cute "), List$cons$(_span_bold$4("proof"), List$cons$(_span$3("gramming language."), List$cons$(_line_break$2, List$cons$(_span$3("It\'s "), List$cons$(_span_bold$4("capable of everything"), List$cons$(_line$1("from web apps to games to advanced"), List$cons$(_line$1("mathematical proofs."), List$nil)))))))));
+        var _call_to_apps$6 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "100px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))), List$cons$(Web$Kind$component$btn_go_to_apps_solid, List$nil));
+        var _instructions$7 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$cons$(Pair$new$("padding", "5px"), List$cons$(Pair$new$("border", "1px solid"), List$nil)))), List$cons$(_line$1("npm i -g kind-lang"), List$cons$(_line$1("git clone https://github.com/uwu-tech/Kind"), List$cons$(_line$1("cd Kind/base"), List$cons$(_line$1("kind Main"), List$cons$(_line$1("kind Main --run"), List$nil))))));
+        var _install$7 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Install"), List$cons$(_instructions$7, List$nil)));
+        var _txt$8 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link$(" Github", "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link$(" Telegram", "https://t.me/formality_lang"), List$nil))), List$nil));
+        var _join_us$8 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Join Us"), List$cons$(_txt$8, List$nil)));
+        var $269 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(Web$Kind$component$header$(Web$KindWebsite$Page$home), List$cons$(Web$Kind$component$body_container$(List$cons$(_intro$5, List$cons$(_call_to_apps$6, List$cons$(_install$7, List$nil)))), List$cons$(Web$Kind$component$footer, List$nil))));
+        return $269;
     })();
 
     function Web$Kind$component$draw_page$(_page$1) {
         var self = _page$1;
         switch (self._) {
             case 'Web.KindWebsite.Page.home':
-                var $270 = Web$Kind$draw_page_home;
-                var $269 = $270;
+                var $274 = Web$Kind$draw_page_home;
+                var $273 = $274;
                 break;
             case 'Web.KindWebsite.Page.apps':
-                var $271 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("padding", "20px"), List$nil)), List$cons$(DOM$text$("Hello from Apps!"), List$nil));
-                var $269 = $271;
+                var $275 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("padding", "20px"), List$nil)), List$cons$(DOM$text$("Hello from Apps!"), List$nil));
+                var $273 = $275;
                 break;
         };
-        return $269;
+        return $273;
     };
     const Web$Kind$component$draw_page = x0 => Web$Kind$component$draw_page$(x0);
 
     function IO$(_A$1) {
-        var $272 = null;
-        return $272;
+        var $276 = null;
+        return $276;
     };
     const IO = x0 => IO$(x0);
 
     function IO$ask$(_query$2, _param$3, _then$4) {
-        var $273 = ({
+        var $277 = ({
             _: 'IO.ask',
             'query': _query$2,
             'param': _param$3,
             'then': _then$4
         });
-        return $273;
+        return $277;
     };
     const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
 
@@ -1346,62 +1375,62 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'IO.end':
-                var $275 = self.value;
-                var $276 = _f$4($275);
-                var $274 = $276;
+                var $279 = self.value;
+                var $280 = _f$4($279);
+                var $278 = $280;
                 break;
             case 'IO.ask':
-                var $277 = self.query;
-                var $278 = self.param;
-                var $279 = self.then;
-                var $280 = IO$ask$($277, $278, (_x$8 => {
-                    var $281 = IO$bind$($279(_x$8), _f$4);
-                    return $281;
+                var $281 = self.query;
+                var $282 = self.param;
+                var $283 = self.then;
+                var $284 = IO$ask$($281, $282, (_x$8 => {
+                    var $285 = IO$bind$($283(_x$8), _f$4);
+                    return $285;
                 }));
-                var $274 = $280;
+                var $278 = $284;
                 break;
         };
-        return $274;
+        return $278;
     };
     const IO$bind = x0 => x1 => IO$bind$(x0, x1);
 
     function IO$end$(_value$2) {
-        var $282 = ({
+        var $286 = ({
             _: 'IO.end',
             'value': _value$2
         });
-        return $282;
+        return $286;
     };
     const IO$end = x0 => IO$end$(x0);
 
     function IO$monad$(_new$2) {
-        var $283 = _new$2(IO$bind)(IO$end);
-        return $283;
+        var $287 = _new$2(IO$bind)(IO$end);
+        return $287;
     };
     const IO$monad = x0 => IO$monad$(x0);
 
     function Dynamic$new$(_value$2) {
-        var $284 = ({
+        var $288 = ({
             _: 'Dynamic.new',
             'value': _value$2
         });
-        return $284;
+        return $288;
     };
     const Dynamic$new = x0 => Dynamic$new$(x0);
     const Unit$new = null;
     const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $285 = _m$pure$2;
-        return $285;
+        var $289 = _m$pure$2;
+        return $289;
     }))(Dynamic$new$(Unit$new));
 
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $286 = ({
+        var $290 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $286;
+        return $290;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$KindWebsite = (() => {
@@ -1410,12 +1439,12 @@ module.exports = (function() {
             var self = _state$2;
             switch (self._) {
                 case 'Web.KindWebsite.State.new':
-                    var $289 = self.page;
-                    var $290 = Web$Kind$component$draw_page$($289);
-                    var $288 = $290;
+                    var $293 = self.page;
+                    var $294 = Web$Kind$component$draw_page$($293);
+                    var $292 = $294;
                     break;
             };
-            return $288;
+            return $292;
         });
         var _when$3 = (_event$3 => _state$4 => {
             var self = _event$3;
@@ -1428,14 +1457,14 @@ module.exports = (function() {
                 case 'App.Event.key_down':
                 case 'App.Event.key_up':
                 case 'App.Event.post':
-                    var $292 = App$pass;
-                    var $291 = $292;
+                    var $296 = App$pass;
+                    var $295 = $296;
                     break;
             };
-            return $291;
+            return $295;
         });
-        var $287 = App$new$(_init$1, _draw$2, _when$3);
-        return $287;
+        var $291 = App$new$(_init$1, _draw$2, _when$3);
+        return $291;
     })();
     return {
         'Web.KindWebsite.State.new': Web$KindWebsite$State$new,
@@ -1473,7 +1502,10 @@ module.exports = (function() {
         'List.nil': List$nil,
         'Pair': Pair,
         'List.cons': List$cons,
+        'Web.Kind.constant.p_tag_size': Web$Kind$constant$p_tag_size,
         'DOM.text': DOM$text,
+        'Web.Kind.constant.secondary_color': Web$Kind$constant$secondary_color,
+        'Web.Kind.component.btn_go_to_apps_solid': Web$Kind$component$btn_go_to_apps_solid,
         'Web.Kind.component.title': Web$Kind$component$title,
         'List.for': List$for,
         'List': List,
@@ -1511,6 +1543,7 @@ module.exports = (function() {
         'U32.mul': U32$mul,
         'VoxBox.new': VoxBox$new,
         'VoxBox.alloc_capacity': VoxBox$alloc_capacity,
+        'Web.Kind.constant.primary_color': Web$Kind$constant$primary_color,
         'String.nil': String$nil,
         'String.cons': String$cons,
         'String.concat': String$concat,
@@ -1523,6 +1556,9 @@ module.exports = (function() {
         'Web.Kind.component.header_tabs': Web$Kind$component$header_tabs,
         'Web.Kind.component.header': Web$Kind$component$header,
         'Web.Kind.component.body_container': Web$Kind$component$body_container,
+        'Web.Kind.component.link_white': Web$Kind$component$link_white,
+        'Web.Kind.constant.dark_pri_color': Web$Kind$constant$dark_pri_color,
+        'Web.Kind.component.footer': Web$Kind$component$footer,
         'Web.Kind.draw_page_home': Web$Kind$draw_page_home,
         'Web.Kind.component.draw_page': Web$Kind$component$draw_page,
         'IO': IO,
