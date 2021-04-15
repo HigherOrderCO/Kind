@@ -1,2 +1,3 @@
-I32.to_string(a: I32): String
-  Int.show(I32.to_int(a))
+I32.show(a: I32): String
+  open a
+  Word.s_show!(a.value)

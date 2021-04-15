@@ -1,2 +1,4 @@
 I32.slice(i: I32, j: I32, str: String): String
-  I32.slice(i, j, str)
+  open i
+  open j
+  Word.s_slice(i.value, j.value, str)

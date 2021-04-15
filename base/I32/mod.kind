@@ -1,2 +1,4 @@
 I32.mod(a: I32, b: I32): I32
-  I32.mod(a, b)
+  open a
+  open b
+  I32.new(Word.mod!(a.value, b.value))

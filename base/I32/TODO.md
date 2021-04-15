@@ -12,20 +12,20 @@
 [x] - length.kind
 [x] - lte.kind
 [x] - ltn.kind
-[ ] - mod.kind
+[x] - mod.kind
 [x] - mul.kind
-[ ] - needed_depth.kind
+[x] - needed_depth.kind
 [x] - neg.kind
 [x] - or.kind
 [x] - pow.kind
-[ ] - shl.kind
-[ ] - shr.kind
-[ ] - slice.kind
+[x] - shl.kind
+[x] - shr.kind
+[x] - slice.kind
 [x] - sqrt.kind
 [x] - sub.kind
 [x] - to_bits.kind
 [x] - to_f64.kind
-[ ] - to_int.kind
-[ ] - to_string.kind
+[x] - to_int.kind
+[x] - show.kind //
 [x] - xor.kind
 [x] - zero.kind
