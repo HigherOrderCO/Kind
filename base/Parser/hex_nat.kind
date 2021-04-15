@@ -1,0 +1,6 @@
+Parser.hex_nat: Parser(Nat)
+  Parser {
+    Parser.text("0x")
+    var digits = Parser.many1<Nat>(Parser.hex_digit)
+    return Nat.from_base(16, digits)
+  }
