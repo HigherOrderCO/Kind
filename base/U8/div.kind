@@ -1,4 +1,4 @@
 U8.div(a: U8, b: U8): U8
   open a
-  open b 
+  open b
   U8.new(Word.div!(a.value, b.value))

@@ -1,4 +1,2 @@
 U8.eql(a: U8, b: U8): Bool
-  open a
-  open b 
-  Word.eql!(a.value, b.value)
+  Cmp.as_eql(U8.cmp(a, b))
