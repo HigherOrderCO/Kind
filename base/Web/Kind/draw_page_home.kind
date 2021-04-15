@@ -69,7 +69,12 @@ Web.Kind.draw_page_home: DOM
     ])
 
 
-  DOM.node("div", {}, {}, [
+  DOM.node("div", {"id": "page-home"}, {
+    "display": "flex"
+    "flex-direction": "column",
+    "justify-content": "space-between",
+    "height": "100%"
+  }, [
     Web.Kind.component.header(Web.KindWebsite.Page.home), 
     Web.Kind.component.body_container([
       intro,
