@@ -1,7 +1,0 @@
-U32.log_10.ten: U32
-  10u
-
-U32.log_10(x : U32) : U32
-  open x
-  open U32.log_10.ten
-  Word.log(x.value, U32.log_10.ten.value)

@@ -1,4 +1,2 @@
 U16.ltn(a: U16, b: U16): Bool
-  open a
-  open b
-  Word.ltn!(a.value, b.value)
+  Cmp.as_ltn(U16.cmp(a, b))
