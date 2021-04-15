@@ -1,11 +1,4 @@
 I32.cmp(a: I32, b: I32): Cmp
-  a_sign = I32.is_neg(a)
-  b_sign = I32.is_neg(b)
   open a
   open b
-  case a_sign b_sign {
-    false false: Word.cmp!(a.value, b.value)
-    false true: Cmp.gtn
-    true false: Cmp.ltn
-    true true: Cmp.inv(Word.cmp!(a.value, b.value))
-  }
+  Word.s_cmp!(a, b)
