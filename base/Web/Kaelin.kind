@@ -18,7 +18,7 @@ Web.Kaelin.Command.create_hero(hero_name: String) : String
 
 // A demo application that renders a square on the screen
 Web.Kaelin: App(Web.Kaelin.State)
-  let img = VoxBox.alloc_capacity(65536u)
+  let img = VoxBox.alloc_capacity(U32.mul(65536u, 8u))
   // Initial state
   let init = 
     let map = {}
