@@ -11,7 +11,7 @@ Web.KindWebsite: App(Web.KindWebsite.State)
 
   init = 
     Web.KindWebsite.State.new(
-      {500u, 400u},
+      {0#32, 0#32},
       Web.KindWebsite.Page.home)
 
   draw = (state)

@@ -17,7 +17,7 @@ Web.Kaelin.Command.create_hero(hero_name: String) : String
 
 // A demo application that renders a square on the screen
 Web.Kaelin: App(Web.Kaelin.State)
-  let img = VoxBox.alloc_capacity(65536u)
+  let img = VoxBox.alloc_capacity(6#32)
   // Initial state
   let init = 
     let map = {}
@@ -25,12 +25,12 @@ Web.Kaelin: App(Web.Kaelin.State)
     Web.Kaelin.State.game(Web.Kaelin.Resources.room, 0, {}, map)
 
   // Render function
-  //  0s - 10s: contagem regressiva
-  // 10s - 20s: escolha do turno 0
-  // 20s - 30s: animação do turno 0
-  // 30s - 40s: escolha do turno 1
-  // 40s - 50s: animação do turno 1
-  // 50s - 60s: escolha do turno 2
+  //  0#16 - 0#16: contagem regressiva
+  // 0#16 - 0#16: escolha do turno 0
+  // 0#16 - 0#16: animação do turno 0
+  // 0#16 - 0#16: escolha do turno 1
+  // 0#16 - 0#16: animação do turno 1
+  // 0#16 - 0#16: escolha do turno 2
   let draw = (state)
     case state {
       game: 
@@ -49,7 +49,7 @@ Web.Kaelin: App(Web.Kaelin.State)
       }
       key_down game:
         switch U16.eql(event.code) {
-          48s: App.post(state.room, Web.Kaelin.Command.create_hero("croni"))
+          8#16: App.post(state.room, Web.Kaelin.Command.create_hero("croni"))
         } default App.pass
       post game:
         log(event.data)

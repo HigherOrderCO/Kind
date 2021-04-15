@@ -8,9 +8,9 @@ VoxBox.Draw.square(
   img: VoxBox,
 ): VoxBox
   let siz = U32.mul(w, h)
-  let w_2 = U32.div(w, 2u)
-  let h_2 = U32.div(h, 2u)
-  U32.for!(img, 0u, siz, (idx, pix)
+  let w_2 = U32.div(w, 2#32)
+  let h_2 = U32.div(h, 2#32)
+  U32.for!(img, 0#32, siz, (idx, pix)
     let v_x = U32.mod(idx,w)
     let v_y = U32.div(idx,h)
     let p_x = U32.sub(U32.add(x,v_x),w_2) // pixel x
