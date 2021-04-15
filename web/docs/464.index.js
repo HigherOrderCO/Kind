@@ -1,6 +1,6 @@
-(self["webpackChunkkind_web"] = self["webpackChunkkind_web"] || []).push([[870],{
+(self["webpackChunkkind_web"] = self["webpackChunkkind_web"] || []).push([[464],{
 
-/***/ 870:
+/***/ 464:
 /***/ ((module) => {
 
 module.exports = (function() {
@@ -263,15 +263,15 @@ module.exports = (function() {
         return $32;
     });
 
-    function Web$KindWebsite$State$new$(_screen_size$1, _page$2) {
+    function Web$Kind$State$new$(_screen_size$1, _page$2) {
         var $33 = ({
-            _: 'Web.KindWebsite.State.new',
+            _: 'Web.Kind.State.new',
             'screen_size': _screen_size$1,
             'page': _page$2
         });
         return $33;
     };
-    const Web$KindWebsite$State$new = x0 => x1 => Web$KindWebsite$State$new$(x0, x1);
+    const Web$Kind$State$new = x0 => x1 => Web$Kind$State$new$(x0, x1);
 
     function Pair$new$(_fst$3, _snd$4) {
         var $34 = ({
@@ -399,8 +399,8 @@ module.exports = (function() {
     const Word$zero = x0 => Word$zero$(x0);
     const U32$zero = U32$new$(Word$zero$(32n));
     const Nat$to_u32 = a0 => (Number(a0));
-    const Web$KindWebsite$Page$apps = ({
-        _: 'Web.KindWebsite.Page.apps'
+    const Web$Kind$Page$home = ({
+        _: 'Web.Kind.Page.home'
     });
 
     function DOM$node$(_tag$1, _props$2, _style$3, _children$4) {
@@ -609,6 +609,7 @@ module.exports = (function() {
         return $102;
     };
     const DOM$text = x0 => DOM$text$(x0);
+    const Web$Kind$img$croni = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAAXNSR0IArs4c6QAAAxhJREFUSIm1lz9IW1EUh79YR0lTxFhsIKZJOigSMBA6NGnrH5yKUHARHCrYIqGDYMeqtKMBp1BqoR0EOzhlFKND7SApFkpopqQhkIY2JUMzuaWDvdf73rvvvSr1DIF73rv3u79z7znnxcPlWMflucdzGcC155sAjE/G5YP9vWPWXj4G8Mif/wUVQDfoRcC2IbSDAiRTcQur+zzAofA0AAO9AUaCIQCKtSqNVl0o4vDDsWHi/p5xLMxNsS1QZ8ValXwha4Dr1IKz4s5QeJqB3oB0OEHPnqdJpuIW5WbrcoJexEaCISYSaaH03GAAg9p/sWKtysbOssH399JZLqUObKu2WKs6gvOFLGvPN8kXstJnvuFOYABKlRz5QpZGqw5Ao1UnX8iysbNsUWXelJpaytigWgsuVXL4vWH83jClSo5Gq27w+b1hLVw19XKNT8YtcFvFR8N9HA33SbjfG5Y+wADXHYE5f80h14EtOef3hu32J6HifJ3gqmrbPL799Zejr9muMJFIA8h7oLP9vWPtBbMLtafZrtguZoaWKjkAWTZ1cLM51upmu2IJc7NdYSg8bQCqFU7AzWE3m12tluVSzUmziXfMpVTUbEtaKa3xig4KEItOAHDzRoJv3z+xuLCOr/uWHNtBAfp91+jpifL2/Qr37j6wQMEm1KJyjQRDhlS5MxXj4+4X2wioJhqGcu6G6Govl1NHisYGmUik5fk6lVHRMHRmBp+rKzmlkQoXa9uBDVAxYWNnmcWFdenvv36VaGzQsLhb81BUW0qmAWpW8urNMwB+/vhtWVS8W6xVLRvY/XwofUszGZZmMhIuDtzytdFo1ZkaTbo2A3We2IQY69JsNTNPMhWnC+iIUDZadfnyQG/ANYRm1QO9AaZGk4wEQxboia/Damae7a0DQDnj1+9WgNPwiIliciQSkQtEIhHD2GzmzZ74Ojx8ep/ZuTG2tw7Escl/Ep3FhXVm58YAePLoBXDalwWkXC4bNiHGcJb3QnU0NijXAlQgaP5JdADUDSRTcUd1wsrlsvarUgfUDtQNuLzjNsd1/h9Ji2BZJdnEIwAAAABJRU5ErkJggg==";
     const Web$Kind$constant$secondary_color = "#3891A6";
     const Web$Kind$component$btn_go_to_apps_solid = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "btn_go_to_apps"), List$nil)), Map$from_list$(List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("font-family", "Helvetica"), List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("width", "120px"), List$cons$(Pair$new$("height", "30px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$secondary_color), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("border-radius", "7px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil)))))))))))))), List$cons$(DOM$text$("GO TO APPS"), List$nil));
 
@@ -1232,11 +1233,11 @@ module.exports = (function() {
     function Web$Kind$helper$is_current$(_title$1, _page$2) {
         var self = _page$2;
         switch (self._) {
-            case 'Web.KindWebsite.Page.home':
+            case 'Web.Kind.Page.home':
                 var $254 = (_title$1 === "Home");
                 var $253 = $254;
                 break;
-            case 'Web.KindWebsite.Page.apps':
+            case 'Web.Kind.Page.apps':
                 var $255 = (_title$1 === "Apps");
                 var $253 = $255;
                 break;
@@ -1273,9 +1274,6 @@ module.exports = (function() {
         return $260;
     };
     const Web$Kind$component$header = x0 => Web$Kind$component$header$(x0);
-    const Web$KindWebsite$Page$home = ({
-        _: 'Web.KindWebsite.Page.home'
-    });
 
     function Web$Kind$component$body_container$(_ele$1) {
         var $261 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 20% 40px 20%"), List$cons$(Pair$new$("flex", "1"), List$nil))), _ele$1);
@@ -1331,10 +1329,11 @@ module.exports = (function() {
             return $271;
         });
         var _intro$5 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(_span$3("Kind is a cute "), List$cons$(_span_bold$4("proof"), List$cons$(_span$3("gramming language."), List$cons$(_line_break$2, List$cons$(_span$3("It\'s "), List$cons$(_span_bold$4("capable of everything"), List$cons$(_line$1("from web apps to games to advanced"), List$cons$(_line$1("mathematical proofs."), List$nil)))))))));
-        var _call_to_apps$6 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "100px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))), List$cons$(Web$Kind$component$btn_go_to_apps_solid, List$nil));
+        var _croni$6 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-left", "40px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-end"), List$nil)))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "10px"), List$nil)), List$cons$(DOM$text$("gl hf!"), List$nil)), List$cons$(DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", Web$Kind$img$croni), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "30px"), List$cons$(Pair$new$("height", "30px"), List$nil))), List$nil), List$nil)));
+        var _call_to_apps$6 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "100px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))), List$cons$(Web$Kind$component$btn_go_to_apps_solid, List$cons$(_croni$6, List$nil)));
         var _instructions$7 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$cons$(Pair$new$("padding", "5px"), List$cons$(Pair$new$("border", "1px solid"), List$nil)))), List$cons$(_line$1("npm i -g kind-lang"), List$cons$(_line$1("git clone https://github.com/uwu-tech/Kind"), List$cons$(_line$1("cd Kind/base"), List$cons$(_line$1("kind Main"), List$cons$(_line$1("kind Main --run"), List$nil))))));
         var _install$7 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Install"), List$cons$(_instructions$7, List$nil)));
-        var $268 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-home"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(Web$KindWebsite$Page$home), List$cons$(Web$Kind$component$body_container$(List$cons$(_intro$5, List$cons$(_call_to_apps$6, List$cons$(_install$7, List$nil)))), List$cons$(Web$Kind$component$footer, List$nil))));
+        var $268 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-home"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(Web$Kind$Page$home), List$cons$(Web$Kind$component$body_container$(List$cons$(_intro$5, List$cons$(_call_to_apps$6, List$cons$(_install$7, List$nil)))), List$cons$(Web$Kind$component$footer, List$nil))));
         return $268;
     })();
 
@@ -1986,6 +1985,9 @@ module.exports = (function() {
     };
     const VoxBox$parse = x0 => VoxBox$parse$(x0);
     const Kaelin$Assets$chars$croni_idle_00 = VoxBox$parse$("1500210000001600210000001700210000001800210000001900210000001a00210000001b00210000001c0021000000130120000000140120000000150120807d9a160120807d9a170120c3c2cd180120c3c2cd190120c3c2cd1a0120807d9a1b012000000012021f00000013021f807d9a14021f807d9a15021f807d9a16021fc3c2cd17021fc3c2cd18021fc3c2cd19021f807d9a1a021f0000000b031e0000000c031e0000000d031e0000000e031e0000000f031e00000010031e00000011031e00000012031e807d9a13031e807d9a14031e807d9a15031ec3c2cd16031ec3c2cd17031ec3c2cd18031ec3c2cd19031e00000009041d0000000a041d0000000b041d2a234f0c041d2a234f0d041d44366b0e041d71558c0f041d71558c10041d44366b11041d2a234f12041d00000013041d00000014041dc3c2cd15041dc3c2cd16041dc3c2cd17041dc3c2cd18041d807d9a19041d00000007051c00000008051c00000009051c2a234f0a051c2a234f0b051c44366b0c051c71558c0d051c71558c0e051c71558c0f051c71558c10051c71558c11051c71558c12051c71558c13051c44366b14051c00000015051cc3c2cd16051cc3c2cd17051cc3c2cd18051c00000006061b00000007061b2a234f08061b44366b09061b44366b0a061b44366b0b061b71558c0c061b71558c0d061b71558c0e061b71558c0f061b71558c10061b71558c11061b71558c12061b71558c13061b71558c14061b44366b15061b00000016061bc3c2cd17061bc3c2cd18061b00000005071a00000006071a2a234f07071a2a234f08071a44366b09071a44366b0a071a44366b0b071a71558c0c071a71558c0d071a71558c0e071a71558c0f071a71558c10071a71558c11071a71558c12071a71558c13071a71558c14071a71558c15071a44366b16071a00000017071ac3c2cd18071a0000000508190000000608192a234f07081944366b08081944366b09081944366b0a081944366b0b081971558c0c081971558c0d081971558c0e081971558c0f081971558c10081971558c11081971558c12081971558c13081944366b14081900000015081944366b160819000000170819c3c2cd180819807d9a1908190000000409180000000509182a234f0609182a234f07091844366b08091844366b09091844366b0a091844366b0b091844366b0c091871558c0d091871558c0e091871558c0f091871558c10091871558c11091871558c12091871558c130918000000140918807d9a150918000000160918000000170918c3c2cd180918c3c2cd190918000000040a17000000050a172a234f060a17000000070a17000000080a172a234f090a1744366b0a0a172a234f0b0a170000000c0a170000000d0a170000000e0a1771558c0f0a1771558c100a1771558c110a1771558c120a1744366b130a17000000140a17807d9a150a17807d9a160a17000000170a17c3c2cd180a17c3c2cd190a17807d9a1a0a17000000040b16000000050b16000000060b16160e23070b16160e23080b16000000090b162a234f0a0b160000000b0b16160e230c0b16160e230d0b16160e230e0b160000000f0b1671558c100b1671558c110b1671558c120b1644366b130b16000000140b16807d9a150b16807d9a160b16c3c2cd170b16c3c2cd180b16c3c2cd190b16c3c2cd1a0b16807d9a1b0b16000000040c15000000050c15000000060c15de3938070c15de3938080c15160e23090c150000000a0c15160e230b0c15de39380c0c15de39380d0c15160e230e0c15160e230f0c15000000100c1571558c110c1544366b120c1544366b130c15000000140c15807d9a150c15807d9a160c15807d9a170c15c3c2cd180c15c3c2cd190c15c3c2cd1a0c15c3c2cd1b0c15000000050d14000000060d14de3938070d14de3938080d14160e23090d14160e230a0d14160e230b0d14de39380c0d14de39380d0d14160e230e0d14160e230f0d14000000100d1444366b110d1444366b120d14000000130d14807d9a140d14807d9a150d14807d9a160d14807d9a170d14807d9a180d14c3c2cd190d14c3c2cd1a0d14c3c2cd1b0d14807d9a1c0d14000000050e13000000060e13160e23070e13160e23080e13160e23090e13160e230a0e13160e230b0e13160e230c0e13160e230d0e13160e230e0e130000000f0e1344366b100e1344366b110e132a234f120e13000000130e13807d9a140e13807d9a150e13807d9a160e13807d9a170e13807d9a180e13807d9a190e13c3c2cd1a0e13c3c2cd1b0e13807d9a1c0e13000000060f12000000070f12160e23080f12160e23090f12160e230a0f12160e230b0f12160e230c0f12160e230d0f120000000e0f1244366b0f0f1244366b100f122a234f110f12000000120f12000000130f12000000140f12807d9a150f12807d9a160f12807d9a170f12807d9a180f12807d9a190f12807d9a1a0f12c3c2cd1b0f12807d9a1c0f12000000061011000000071011000000081011160e23091011160e230a1011160e230b1011160e230c10110000000d10112a234f0e10112a234f0f10110000001010110000001110112a234f12101144366b13101144366b141011000000151011000000161011807d9a171011807d9a181011807d9a191011807d9a1a1011c3c2cd1b1011807d9a1c10110000000511100000000611102a234f07111044366b0811100000000911100000000a11100000000b11100000000c11100000000d11100000000e11100000000f11102a234f10111044366b11111071558c12111071558c13111071558c14111071558c15111044366b161110000000171110807d9a181110807d9a191110807d9a1a1110807d9a1b111000000004120f00000005120f00000006120f44366b07120f44366b08120f44366b09120f0000000a120f69658b0b120f44366b0c120f44366b0d120f0000000e120f2a234f0f120f44366b10120f71558c11120f71558c12120f71558c13120f71558c14120f71558c15120f71558c16120f44366b17120f00000018120f807d9a19120f807d9a1a120f00000004130e00000005130e2a234f06130e44366b07130e71558c08130e44366b09130e0000000a130e69658b0b130e807d9a0c130e44366b0d130e0000000e130e2a234f0f130e44366b10130e71558c11130e71558c12130e71558c13130e71558c14130e71558c15130e71558c16130e71558c17130e44366b18130e00000019130e00000004140d00000005140d44366b06140d44366b07140d71558c08140d71558c09140d0000000a140d69658b0b140d807d9a0c140d69658b0d140d44366b0e140d0000000f140d44366b10140d44366b11140d71558c12140d71558c13140d71558c14140d71558c15140d71558c16140d71558c17140d71558c18140d44366b19140d00000003150c00000004150c2a234f05150c44366b06150c44366b07150c71558c08150c71558c09150c0000000a150c69658b0b150c807d9a0c150c69658b0d150c44366b0e150c0000000f150c2a234f10150c44366b11150c71558c12150c71558c13150c71558c14150c71558c15150c71558c16150c71558c17150c71558c18150c71558c19150c0000001a150c00000002160b00000003160b2a234f04160b2a234f05160b44366b06160b71558c07160b71558c08160b00000009160b69658b0a160b69658b0b160b807d9a0c160b807d9a0d160b69658b0e160b0000000f160b2a234f10160b44366b11160b44366b12160b71558c13160b71558c14160b71558c15160b71558c16160b71558c17160b71558c18160b71558c19160b44366b1a160b0000001b160b00000001170a00000002170a2a234f03170a2a234f04170a2a234f05170a2a234f06170a71558c07170a71558c08170a00000009170a0000000a170a69658b0b170a69658b0c170a807d9a0d170a69658b0e170a0000000f170a2a234f10170a2a234f11170a44366b12170a44366b13170a44366b14170a71558c15170a71558c16170a71558c17170a2a234f18170a44366b19170a44366b1a170a71558c1b170a71558c1c170a0000000118090000000218092a234f03180944366b04180944366b05180944366b0618092a234f07180971558c0818090000000918090000000a18090000000b18090000000c18090000000d18090000000e18090000000f18090000001018092a234f11180944366b12180944366b1318092a234f1418092a234f15180944366b16180944366b17180971558c18180971558c19180971558c1a180971558c1b180944366b1c1809c3c2cd1d180900000000190800000001190869658b0219082a234f0319082a234f04190871558c05190844366b06190844366b07190844366b0819080000000919080000000a19080000000b19080000000c19080000000d19080000000e19080000000f19080000001019082a234f1119082a234f12190844366b13190844366b14190871558c15190871558c16190871558c17190871558c18190871558c19190871558c1a190869658b1b1908c3c2cd1c190869658b1d1908000000001a07000000011a0769658b021a07c3c2cd031a072a234f041a072a234f051a0771558c061a0771558c071a0771558c081a07000000091a072424240a1a070000000b1a070000000c1a072424240d1a072424240e1a070000000f1a07000000101a072a234f111a072a234f121a0744366b131a0744366b141a0744366b151a0771558c161a0771558c171a0771558c181a0769658b191a07c3c2cd1a1a07c3c2cd1b1a0769658b1c1a07000000011b06000000021b0669658b031b06c3c2cd041b06c3c2cd051b062a234f061b062a234f071b06000000081b06242424091b062424240a1b060000000b1b060000000c1b062424240d1b062424240e1b060000000f1b06000000101b06000000111b062a234f121b062a234f131b062a234f141b0644366b151b0669658b161b06c3c2cd171b06c3c2cd181b06c3c2cd191b0669658b1a1b060000001b1b06000000021c05000000031c05000000041c0569658b051c05c3c2cd061c05c3c2cd071c05000000081c05242424091c052424240a1c052424240b1c052424240c1c052424240d1c052424240e1c052424240f1c05242424101c05242424111c05000000121c05c3c2cd131c05c3c2cd141c05c3c2cd151c05c3c2cd161c05c3c2cd171c0569658b181c05000000191c05000000041d04000000051d04000000061d04000000071d04000000111d04000000121d04000000131d04000000141d04000000151d04000000161d04000000171d04000000");
+    const Web$Kind$Page$apps = ({
+        _: 'Web.Kind.Page.apps'
+    });
     const Web$Kind$draw_page_apps = (() => {
         var _line$1 = (_txt$1 => {
             var $420 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$1), List$nil));
@@ -2003,25 +2005,25 @@ module.exports = (function() {
         var _vbox$5 = VoxBox$alloc_capacity$(1000);
         var _banner$5 = DOM$vbox$(Map$from_list$(List$nil), Map$from_list$(List$nil), VoxBox$Draw$image$(50, 50, 0, Kaelin$Assets$chars$croni_idle_00, _vbox$5));
         var _games$5 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(Web$Kind$component$title$("Games"), List$cons$(_banner$5, List$nil)));
-        var $419 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-home"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(Web$KindWebsite$Page$apps), List$cons$(Web$Kind$component$body_container$(List$cons$(_games$5, List$nil)), List$cons$(Web$Kind$component$footer, List$nil))));
+        var $419 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-home"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(Web$Kind$Page$apps), List$cons$(Web$Kind$component$body_container$(List$cons$(_games$5, List$nil)), List$cons$(Web$Kind$component$footer, List$nil))));
         return $419;
     })();
 
-    function Web$KindWebsite$draw_page$(_page$1) {
+    function Web$Kind$draw_page$(_page$1) {
         var self = _page$1;
         switch (self._) {
-            case 'Web.KindWebsite.Page.home':
+            case 'Web.Kind.Page.home':
                 var $424 = Web$Kind$draw_page_home;
                 var $423 = $424;
                 break;
-            case 'Web.KindWebsite.Page.apps':
+            case 'Web.Kind.Page.apps':
                 var $425 = Web$Kind$draw_page_apps;
                 var $423 = $425;
                 break;
         };
         return $423;
     };
-    const Web$KindWebsite$draw_page = x0 => Web$KindWebsite$draw_page$(x0);
+    const Web$Kind$draw_page = x0 => Web$Kind$draw_page$(x0);
 
     function IO$(_A$1) {
         var $426 = null;
@@ -2101,14 +2103,14 @@ module.exports = (function() {
         return $440;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
-    const Web$KindWebsite = (() => {
-        var _init$1 = Web$KindWebsite$State$new$(Pair$new$(500, 400), Web$KindWebsite$Page$apps);
+    const Web$Kind = (() => {
+        var _init$1 = Web$Kind$State$new$(Pair$new$(500, 400), Web$Kind$Page$home);
         var _draw$2 = (_state$2 => {
             var self = _state$2;
             switch (self._) {
-                case 'Web.KindWebsite.State.new':
+                case 'Web.Kind.State.new':
                     var $443 = self.page;
-                    var $444 = Web$KindWebsite$draw_page$($443);
+                    var $444 = Web$Kind$draw_page$($443);
                     var $442 = $444;
                     break;
             };
@@ -2135,7 +2137,7 @@ module.exports = (function() {
         return $441;
     })();
     return {
-        'Web.KindWebsite.State.new': Web$KindWebsite$State$new,
+        'Web.Kind.State.new': Web$Kind$State$new,
         'Pair.new': Pair$new,
         'Nat.apply': Nat$apply,
         'U32.new': U32$new,
@@ -2150,7 +2152,7 @@ module.exports = (function() {
         'Word.zero': Word$zero,
         'U32.zero': U32$zero,
         'Nat.to_u32': Nat$to_u32,
-        'Web.KindWebsite.Page.apps': Web$KindWebsite$Page$apps,
+        'Web.Kind.Page.home': Web$Kind$Page$home,
         'DOM.node': DOM$node,
         'BitsMap': BitsMap,
         'Map': Map,
@@ -2172,6 +2174,7 @@ module.exports = (function() {
         'List.cons': List$cons,
         'Web.Kind.constant.p_tag_size': Web$Kind$constant$p_tag_size,
         'DOM.text': DOM$text,
+        'Web.Kind.img.croni': Web$Kind$img$croni,
         'Web.Kind.constant.secondary_color': Web$Kind$constant$secondary_color,
         'Web.Kind.component.btn_go_to_apps_solid': Web$Kind$component$btn_go_to_apps_solid,
         'Web.Kind.component.title': Web$Kind$component$title,
@@ -2221,7 +2224,6 @@ module.exports = (function() {
         'Web.Kind.helper.is_current': Web$Kind$helper$is_current,
         'Web.Kind.component.header_tabs': Web$Kind$component$header_tabs,
         'Web.Kind.component.header': Web$Kind$component$header,
-        'Web.KindWebsite.Page.home': Web$KindWebsite$Page$home,
         'Web.Kind.component.body_container': Web$Kind$component$body_container,
         'Web.Kind.component.list': Web$Kind$component$list,
         'Web.Kind.component.link_white': Web$Kind$component$link_white,
@@ -2274,8 +2276,9 @@ module.exports = (function() {
         'Col32.new': Col32$new,
         'VoxBox.parse': VoxBox$parse,
         'Kaelin.Assets.chars.croni_idle_00': Kaelin$Assets$chars$croni_idle_00,
+        'Web.Kind.Page.apps': Web$Kind$Page$apps,
         'Web.Kind.draw_page_apps': Web$Kind$draw_page_apps,
-        'Web.KindWebsite.draw_page': Web$KindWebsite$draw_page,
+        'Web.Kind.draw_page': Web$Kind$draw_page,
         'IO': IO,
         'IO.ask': IO$ask,
         'IO.bind': IO$bind,
@@ -2284,11 +2287,11 @@ module.exports = (function() {
         'Dynamic.new': Dynamic$new,
         'App.pass': App$pass,
         'App.new': App$new,
-        'Web.KindWebsite': Web$KindWebsite,
+        'Web.Kind': Web$Kind,
     };
 })();
 
 /***/ })
 
 }]);
-//# sourceMappingURL=870.index.js.map
+//# sourceMappingURL=464.index.js.map

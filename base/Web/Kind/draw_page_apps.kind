@@ -1,0 +1,46 @@
+Web.Kind.draw_page_apps: DOM
+  // Auxiliars
+  // ----------
+  let line = 
+    ((txt) DOM.node("p", {}, {"font-size": Web.Kind.constant.p_tag_size}, 
+      [DOM.text(txt)])) :: String -> DOM
+  
+  let line_break = DOM.node("p", {}, {"font-size": Web.Kind.constant.p_tag_size}, 
+    [DOM.node("br", {}, {}, [])])
+
+  let span =
+    ((txt) DOM.node("span", {}, {"font-size": Web.Kind.constant.p_tag_size}, 
+    [DOM.text(txt)])) :: String -> DOM
+
+  let span_bold =
+    ((txt) DOM.node("span", {}, {
+      "font-weight": "bold"
+      "font-size": Web.Kind.constant.p_tag_size
+      }, [DOM.text(txt)])) :: String -> DOM
+
+  // Content
+  // ----------
+  let games =
+    let banner =
+      // Allocates the mutable buffer
+      let vbox = VoxBox.alloc_capacity(1000u)
+      DOM.vbox({}, {}, VoxBox.Draw.image(50u, 50u, 0u, Kaelin.Assets.chars.croni_idle_00, vbox))
+
+    DOM.node("div", {}, {}, [
+      Web.Kind.component.title("Games"),
+      banner
+    ])
+  
+
+  DOM.node("div", {"id": "page-home"}, {
+    "display": "flex"
+    "flex-direction": "column",
+    "justify-content": "space-between",
+    "height": "100%"
+  }, [
+    Web.Kind.component.header(Web.Kind.Page.apps), 
+    Web.Kind.component.body_container([
+      games
+    ]),
+    Web.Kind.component.footer
+  ])

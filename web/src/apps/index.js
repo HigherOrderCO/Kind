@@ -1,3 +1,3 @@
 module.exports = {
-  'Web.KindWebsite': import('./Web.KindWebsite.js'),
+  'Web.Kind': import('./Web.Kind.js'),
 }

@@ -3102,7 +3102,7 @@ module.exports = class AppPlay extends Component {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = {
-  'Web.KindWebsite': __webpack_require__.e(/* import() */ 870).then(__webpack_require__.t.bind(__webpack_require__, 870, 23)),
+  'Web.Kind': __webpack_require__.e(/* import() */ 464).then(__webpack_require__.t.bind(__webpack_require__, 464, 23)),
 }
 
 

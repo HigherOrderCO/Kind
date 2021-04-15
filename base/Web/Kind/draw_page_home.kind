@@ -30,13 +30,27 @@ Web.Kind.draw_page_home: DOM
     ])
 
   let call_to_apps =
+    let croni =
+      DOM.node("div", {}, {
+        "margin-left": "40px"
+        "display": "flex"
+        "justify-content": "flex-end"
+      }, [
+        DOM.node("p", {}, {"margin-bottom": "10px"}, [DOM.text("gl hf!")])
+        DOM.node("img", {"src": Web.Kind.img.croni}, {
+          "width": "30px"
+          "height": "30px"
+        }, [])
+      ])
+      
     DOM.node("div", {}, {
       "height": "100px"
       "display": "flex"
       "align-items": "center"
       "justify-content": "center"
     }, [
-      Web.Kind.component.btn_go_to_apps_solid
+      Web.Kind.component.btn_go_to_apps_solid,
+      croni
     ])
     // Kaelin.Assets.chars.croni_idle_00
   
@@ -56,26 +70,13 @@ Web.Kind.draw_page_home: DOM
       Web.Kind.component.title("Install"), instructions
     ])
 
-  let join_us =
-    let txt = 
-      DOM.node("div", {}, {"margin-top": "10px"}, [
-        Web.Kind.component.list([
-          Web.Kind.component.link(" Github", "https://github.com/uwu-tech/Kind"),
-          Web.Kind.component.link(" Telegram", "https://t.me/formality_lang")
-        ])
-      ])
-    DOM.node("div", {}, {"margin": "20px 0px 20px 0px"}, [
-      Web.Kind.component.title("Join Us"), txt 
-    ])
-
-
   DOM.node("div", {"id": "page-home"}, {
     "display": "flex"
     "flex-direction": "column",
     "justify-content": "space-between",
     "height": "100%"
   }, [
-    Web.Kind.component.header(Web.KindWebsite.Page.home), 
+    Web.Kind.component.header(Web.Kind.Page.home), 
     Web.Kind.component.body_container([
       intro,
       call_to_apps,
