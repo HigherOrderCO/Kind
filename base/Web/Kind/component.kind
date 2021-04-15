@@ -118,12 +118,7 @@ Web.Kind.component.btn_go_to_apps_solid: DOM
   }, [DOM.text("GO TO APPS")])
 
 
-// How will
-// Web.Kind.component.img(w: String, h: String, src: String): DOM
-//   DOM.node("img")
-
 Web.Kind.component.footer: DOM
-
   let join_us = 
     let join_us_txt =
       DOM.node("div", {}, {"margin": "20px 0px 20px 0px"}, [
@@ -172,3 +167,23 @@ Web.Kind.component.footer: DOM
     "flex-direction": "column"
     "color": "white"
   }, [ join_us, msg_footer])
+
+
+Web.Kind.component.game_card(src: String, title: String, url: String): DOM
+  let banner = DOM.node("img", {"src": src}, 
+    {"width": "100px", "height": "100px"}, []) 
+
+  let title = 
+    DOM.node("a", {}, {
+      "font-size": Web.Kind.constant.p_tag_size
+      "cursor": "pointer"
+    }, [DOM.text(title)])
+
+  DOM.node("div", {}, {
+    "height": "120px"
+    "display": "flex"
+    "flex-direction": "column"
+  }, [
+    banner
+    title
+  ])

@@ -20,27 +20,28 @@ Web.Kind.draw_page_apps: DOM
 
   // Content
   // ----------
-  let games =
-    let banner =
-      // Allocates the mutable buffer
-      let vbox = VoxBox.alloc_capacity(1000u)
-      DOM.vbox({}, {}, VoxBox.Draw.image(50u, 50u, 0u, Kaelin.Assets.chars.croni_idle_00, vbox))
-
-    DOM.node("div", {}, {}, [
-      Web.Kind.component.title("Games"),
-      banner
+  let game_container =
+    let game = 
+      Web.Kind.component.game_card(Web.Kind.img.banner_template, "Senhas", "senhas")
+      
+    DOM.node("div", {"id": "game-container"}, {}, [
+      Web.Kind.component.title("Games")
+      DOM.node("div", {}, {
+        "display": "flex"
+        "justify-content": "space-evenly"
+      }, [ game, game])
     ])
   
 
-  DOM.node("div", {"id": "page-home"}, {
+  DOM.node("div", {"id": "page-apps"}, {
     "display": "flex"
-    "flex-direction": "column",
-    "justify-content": "space-between",
+    "flex-direction": "column"
+    "justify-content": "space-between"
     "height": "100%"
   }, [
-    Web.Kind.component.header(Web.Kind.Page.apps), 
+    Web.Kind.component.header(Web.Kind.Page.apps)
     Web.Kind.component.body_container([
-      games
+      game_container
     ]),
     Web.Kind.component.footer
   ])

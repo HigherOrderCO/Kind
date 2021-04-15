@@ -18,7 +18,7 @@ Web.Kind: App(Web.Kind.State)
   init = 
     Web.Kind.State.new(
       {500u, 400u},
-      Web.Kind.Page.home)
+      Web.Kind.Page.apps)
 
   draw = (state)
     open state
