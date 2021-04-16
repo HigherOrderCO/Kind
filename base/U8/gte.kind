@@ -1,2 +1,4 @@
 U8.gte(a: U8, b: U8): Bool
-  Cmp.as_gte(U8.cmp(a, b))
+  open a
+  open b
+  Word.gte!(a.value, b.value)

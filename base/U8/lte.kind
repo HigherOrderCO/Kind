@@ -1,2 +1,4 @@
 U8.lte(a: U8, b: U8): Bool
-  Cmp.as_lte(U8.cmp(a, b))
+  open a
+  open b
+  Word.lte!(a.value, b.value)

@@ -1,2 +1,4 @@
 U64.eql(a: U64, b: U64): Bool
-  Cmp.as_eql(U64.cmp(a, b))
+  open a
+  open b
+  Word.eql!(a.value, b.value)

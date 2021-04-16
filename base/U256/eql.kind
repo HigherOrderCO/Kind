@@ -1,2 +1,4 @@
 U256.eql(a: U256, b: U256): Bool
-  Cmp.as_eql(U256.cmp(a, b))
+  open a
+  open b
+  Word.eql!(a.value, b.value)

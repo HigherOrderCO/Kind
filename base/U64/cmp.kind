@@ -1,4 +1,7 @@
 U64.cmp(a: U64, b: U64): Cmp
-  open a
-  open b
-  Word.cmp!(a.value, b.value)
+  if U64.ltn(a, b) then
+    Cmp.ltn
+  else if U64.eql(a, b) then
+    Cmp.eql
+  else
+    Cmp.gtn

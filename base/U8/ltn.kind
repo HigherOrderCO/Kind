@@ -1,2 +1,4 @@
 U8.ltn(a: U8, b: U8): Bool
-  Cmp.as_ltn(U8.cmp(a, b))
+  open a
+  open b
+  Word.ltn!(a.value, b.value)
