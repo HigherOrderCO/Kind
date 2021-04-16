@@ -2884,7 +2884,7 @@ module.exports = class AppList extends Component {
 /***/ 952:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const {Component, render} = __webpack_require__(285);
+const { Component, render } = __webpack_require__(285);
 const h = __webpack_require__(86).h;
 const apps = __webpack_require__(649);
 const sign = __webpack_require__(216);
@@ -2902,7 +2902,7 @@ module.exports = class AppPlay extends Component {
 
     this.intervals = {}; // timed intervals
     this.listeners = {}; // event listeners
-    this.mouse_pos = {_:"Pair.new", fst: 0, snd: 0}; 
+    this.mouse_pos = { _: "Pair.new", fst: 0, snd: 0 };
     this.rendered = null; // document rendered by app, coming from Kind
     this.container = null; // container that holds rendered app
     this.canvas = {}; // canvas that holds rendered pixel-art apps
@@ -2955,6 +2955,13 @@ module.exports = class AppPlay extends Component {
       }
     });
 
+   // Mouse movement event
+    this.listeners.mousemove = (e) => {
+      this.mouse_pos = {_ : "Pair.new", fst: e.offsetX, snd : e.offsetY}
+    }
+
+    document.body.addEventListener("mousemove", this.listeners.mousemove);
+
     // Mouse down event
     this.listeners.mousedown = (e) => {
       this.register_event({
@@ -2990,29 +2997,40 @@ module.exports = class AppPlay extends Component {
       this.register_event({
         _: "App.Event.key_up",
         time: BigInt(Date.now()),
-        code:e.keyCode,
+        code: e.keyCode,
       });
     };
     document.body.addEventListener("keyup", this.listeners.keyup);
 
-    // Tick event
-    //this.intervals.tick = setInterval(() => {
-      //this.register_event({
-        //_: "App.Event.tick",
-        //time: BigInt(Date.now()),
-        //info: {
-          //_: "App.EnvInfo",
-          //screen: {
-            //_: "Pair.new",
-            //fst: this.container ? this.container.offsetWidth : 0,
-            //snd: this.container ? this.container.offsetHeight : 0,
-          //},
-          //mouse: this.mouse_pos,
-        //}
-      //});
-    //}, 1000 / 64);
-  }
+    //Tick event
+    this.intervals.tick = () => {
+      let time = performance.now()
+      let frame = 1000/16
+      let self = (mileseconds) => {
+        if (mileseconds-time > frame) {
+          this.register_event({
+            _: "App.Event.tick",
+            time: BigInt(Date.now()),
+            info: {
+              _: "App.EnvInfo.new",
+              screen_size: {
+                _: "Pair.new",
+                fst: this.container ? this.container.offsetWidth : 0,
+                snd: this.container ? this.container.offsetHeight : 0,
+              },
+              mouse_pos: this.mouse_pos,
+            }
+          })
+          time = performance.now()
+        }
+        window.requestAnimationFrame(self)
+      }
+      return window.requestAnimationFrame(self)
+    }
 
+    this.intervals.tick()
+  }
+  
   // Initializes the main render loop
   async init_renderer() {
     //console.log("to aqui!");
@@ -3026,12 +3044,11 @@ module.exports = class AppPlay extends Component {
 
   // Adds an event to the list of events
   register_event(ev) {
-    //if (ev._ !== "App.Event.tick") console.log((ev));
     if (this.app) {
       this.run_io(this.app.when(ev)(this.app_state));
     }
   }
-  
+
   // Performs an IO computation
   run_io(io) {
     //console.log("Run IO", io);
@@ -3039,7 +3056,6 @@ module.exports = class AppPlay extends Component {
       case "IO.end":
         if (io.value.value !== null) {
           this.app_state = io.value.value;
-          //console.log("new state: ", this.app_state);
           return Promise.resolve(io.value.value);
         }
         return Promise.resolve(null);
@@ -3052,7 +3068,6 @@ module.exports = class AppPlay extends Component {
               return this.run_io(io.then("")).then(res).catch(err);
             case "put_string":
               alert(io.param);
-              //console.log("->", io.then(""));
               return this.run_io(io.then("")).then(res).catch(err);
             case "get_time":
               return this.run_io(io.then(String(Date.now()))).then(res).catch(err);
@@ -3076,16 +3091,16 @@ module.exports = class AppPlay extends Component {
             case "watch":
               if (utils.is_valid_hex(48, io.param)) {
                 window.KindEvents.watch_room(io.param);
-                window.KindEvents.on_post(({room, time, addr, data}) => {
+                window.KindEvents.on_post(({ room, time, addr, data }) => {
                   var time = BigInt(parseInt(time.slice(2), 16));
-                  this.register_event({_: "App.Event.post", time, room, addr, data});
+                  this.register_event({ _: "App.Event.post", time, room, addr, data });
                 });
               } else {
                 console.log("Error: invalid input on App.Action.watch");
               }
               return this.run_io(io.then("")).then(res).catch(err);
             case "post":
-              var [room,data] = io.param.split(";");
+              var [room, data] = io.param.split(";");
               if (utils.is_valid_hex(48, room) && utils.is_valid_hex(256, data)) {
                 console.log("Posting: ", room, data);
                 window.KindEvents.send_post(room, data);
@@ -3130,8 +3145,8 @@ module.exports = class AppPlay extends Component {
         var buffer = elem.value.buffer;
         // Renders pixels to buffers
         for (var i = 0; i < length; ++i) {
-          var pos = buffer[i*2+0];
-          var col = buffer[i*2+1];
+          var pos = buffer[i * 2 + 0];
+          var col = buffer[i * 2 + 1];
           var p_x = (pos >>> 0) & 0xFFF;
           var p_y = (pos >>> 12) & 0xFFF;
           var p_z = (pos >>> 24) & 0xFF;
@@ -3156,14 +3171,14 @@ module.exports = class AppPlay extends Component {
         // Mutably resets the length of the VoxBox
         elem.value.length = 0;
         return h("div", {
-          ref: function(x) { if (x) { x.appendChild(canvas) } }
+          ref: function (x) { if (x) { x.appendChild(canvas) } }
         });
       // Renders plain text
       case "DOM.text":
         return elem.value;
     }
   }
-  
+
   // Component's render function
   render() {
     if (!this.app) {
@@ -3191,9 +3206,9 @@ module.exports = class AppPlay extends Component {
       this.canvas[id].style["image-rendering"] = "pixelated";
       this.canvas[id].width = width;
       this.canvas[id].height = height;
-      this.canvas[id].style.width = width+"px";
-      this.canvas[id].style.height = height+"px";
-      this.canvas[id].clear = {length:0, data:new Uint32Array(width*height*32)};
+      this.canvas[id].style.width = width + "px";
+      this.canvas[id].style.height = height + "px";
+      this.canvas[id].clear = { length: 0, data: new Uint32Array(width * height * 32) };
       this.canvas[id].style.border = "1px solid black";
       this.canvas[id].context = this.canvas[id].getContext("2d");
       this.canvas[id].image_data = this.canvas[id].context.getImageData(0, 0, this.canvas[id].width, this.canvas[id].height)
