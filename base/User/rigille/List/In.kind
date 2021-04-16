@@ -1,0 +1,10 @@
+User.rigille.List.in<A: Type>(xs: List<A>, x: A): Type
+  case xs {
+    nil: Empty
+    cons: Or<x == xs.head,
+             User.rigille.List.in<A>(xs.tail, x)>
+  }
+
+Test: User.rigille.List.in<Nat>([1], 1)
+  let lem = refl :: (1 == 1)
+  Or.left!!(lem)
