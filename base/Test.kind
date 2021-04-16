@@ -1,2 +1,2 @@
-Test: I32
-  +3#32
+Test: String
+  "hey"
