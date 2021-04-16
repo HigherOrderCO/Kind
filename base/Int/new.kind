@@ -1,9 +1,13 @@
-Int.new(x: Nat, y: Nat): Int
-  <P> (new)
-  case x {
-    zero: new(Nat.zero, y),
-    succ: case y {
-      zero: new(Nat.succ(x.pred), Nat.zero),
-      succ: Int.new(x.pred, y.pred)<P>(new),
-    } : P(Int.new(Nat.succ(x.pred), y))
-  } : P(Int.new(x, y))
+Int.new(pos: Nat, neg: Nat): Int
+  (P, new)
+  // if pos=0, return new(0,neg)
+  // if neg=0, return new(pos,0)
+  // else, recurse with pos-1, neg-1
+  case pos {
+    zero: new(Nat.zero, neg)                     
+    succ: case neg {
+      zero: new(Nat.succ(pos.pred), Nat.zero)
+      succ: Int.new(pos.pred, neg.pred)(P, new)
+    }!
+  }: P(Int.new(pos, neg))
+

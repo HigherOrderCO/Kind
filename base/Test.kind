@@ -1,2 +1,2 @@
-Test: _
-  User.Derenash.TicTacToe.Test
+Test: String
+  "hi"

@@ -4,5 +4,5 @@
 // - {2, 9} represents the number -7
 Int: Type
   int<P: Int -> Type> ->
-  (new: (x: Nat) -> (y: Nat) -> P(Int.new(x, y))) ->
+  (new: (pos: Nat) -> (neg: Nat) -> P(Int.new(pos, neg))) ->
   P(int)
