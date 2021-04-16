@@ -294,13 +294,12 @@ of `len` (its length). A Vector with length `0` has only one constructor:
 with a `head` and a `tail`. Tesla argues this is an easier way to implement
 indexed datatypes since it doesn't require dealing with indices. For Kind, that
 isn't relevant, as we already have inductive datatypes from `Self` (which, I
-argue, is even easier to implement).
-
-But this encoding has another benefit: pattern-matching only demands the
-required cases. If you pattern-match a vector with `len > 0`, you don't need to
-provide the `nil` case at all, which is very convenient as you don't need to
-prove it is unreachable. Of course, if the `len` is unknown, then you won't be
-able to pattern-match it at all until you pattern-match on the `len` itself.
+argue, is even easier to implement). But this encoding has another benefit: 
+pattern-matching only demands the required cases. If you pattern-match a vector
+with `len > 0`, you don't need to provide the `nil` case at all, which is very
+convenient as you don't need to prove it is unreachable. Of course, if the `len`
+is unknown, then you won't be able to pattern-match it at all until you 
+pattern-match on the `len` itself.
 
 How can we do it with `Self` types? Let's start defining the conventional
 indexed `Vector` datatype, using the built-in syntax.
