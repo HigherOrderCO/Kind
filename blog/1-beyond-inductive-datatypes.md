@@ -191,8 +191,8 @@ type Int {
 
 This would be technically correct, but algorithms would become considerably
 worse, as we'd need to prove that `eq` still holds every time we construct and
-`Int`. This is terrible.  What if we could, though, have the `Int.new` 
-constructor to automatically "canonicalizes itself", such that 
+`Int`. This is terrible.  What if we could, instead, have an `Int.new` 
+constructor that automatically "canonicalizes itself", such that 
 `Int.new(5, 2)` **reduces to** `Int.new(3, 0)`, making both equal 
 **by definition**?
 
