@@ -1,0 +1,4 @@
+U128.eql(a: U128, b: U128): Bool
+  open a
+  open b
+  Word.eql!(a.value, b.value)

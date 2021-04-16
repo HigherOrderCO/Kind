@@ -1,0 +1,3 @@
+I32.neg(a: I32): I32
+  open a
+  I32.new(Word.neg!(a.value))

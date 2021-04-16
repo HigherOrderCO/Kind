@@ -1,0 +1,14 @@
+// # Take n elements of a list and return the rest of the list as a pair.
+// - List.split([1, 2, 3], 2) == ([1, 2], [3])
+// - List.split(xs, n) == (List.take(xs, n), List.drop(xs, n))
+
+List.split(A : Type, xs : List<A>, n : Nat) : Pair<List<A>, List<A>>
+  case n {
+    zero : {[], xs}
+    succ : case xs {
+      nil : {[], xs}
+      cons :
+       let {xs, ys} = List.split(A, xs.tail, n.pred)
+       {List.cons(A, xs.head, xs), ys}
+    }
+  }

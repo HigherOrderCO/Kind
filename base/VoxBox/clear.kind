@@ -1,0 +1,2 @@
+VoxBox.clear(img: VoxBox): VoxBox
+  VoxBox.set_length(0#32, img)

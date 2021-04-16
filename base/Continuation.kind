@@ -1,0 +1,2 @@
+Continuation(R: Type, A: Type): Type
+  (A -> R) -> R

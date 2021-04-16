@@ -1,0 +1,3 @@
+U16.bit_length(size: U16): Nat
+  open size
+  Word.bit_length!(size.value)

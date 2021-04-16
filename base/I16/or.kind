@@ -1,0 +1,5 @@
+I16.or(a: I16, b: I16): I16
+  open a
+  open b
+  I16.new(Word.or!(a.value, b.value))
+

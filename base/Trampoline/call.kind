@@ -1,0 +1,5 @@
+Trampoline.call<A: Type>(t: Trampoline<A>): A
+  case t {
+    done: t.value
+    wrap: Trampoline.call<A>(t.value(unit))
+  }

@@ -1,0 +1,15 @@
+// move by x and y
+// this function will change when the state change and the click event came
+// waiting for click to be ready
+Web.Kaelin.Action.move(x: Int, y: Int, state: Web.Kaelin.State): Web.Kaelin.State
+  ?a
+//   case state {
+//     game: 
+//         let old_pos = state.pos
+//         let new_pos = case old_pos {
+//         new: Web.Kaelin.Coord.new(Int.add(old_pos.i, x), Int.add(old_pos.j, y))
+//         }
+//         let map = Web.Kaelin.Map.swap(0, old_pos, new_pos, state.map)
+//         let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map, state.interface)
+//         state
+//   } default state

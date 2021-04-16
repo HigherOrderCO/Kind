@@ -3,8 +3,8 @@ Mons.Object.get_adjacent_pos(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Pos32
   let y = Pos32.get_y(pos)
   let z = Pos32.get_z(pos) // dim
   case dir {
-    right: Pos32.new(U32.add(x, 1u), y, z),
-    up   : Pos32.new(x, U32.sub(y, 1u), z),
-    left : Pos32.new(U32.sub(x, 1u), y, z),
-    down : Pos32.new(x, U32.add(y, 1u), z)
+    right: Pos32.new(U32.add(x, 1#32), y, z),
+    up   : Pos32.new(x, U32.sub(y, 1#32), z),
+    left : Pos32.new(U32.sub(x, 1#32), y, z),
+    down : Pos32.new(x, U32.add(y, 1#32), z)
   }

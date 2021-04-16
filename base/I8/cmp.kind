@@ -1,0 +1,7 @@
+I8.cmp(a: I8, b: I8): Cmp
+  if I8.ltn(a, b) then
+    Cmp.ltn
+  else if I8.eql(a, b) then
+    Cmp.eql
+  else
+    Cmp.gtn

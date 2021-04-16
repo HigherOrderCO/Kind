@@ -1,4 +1,6 @@
 Kind.Term.identical(a: Kind.Term, b: Kind.Term, lv: Nat): Bool
-  let ah = Kind.Term.serialize(a, lv, lv, Bits.o, Bits.e);
-  let bh = Kind.Term.serialize(b, lv, lv, Bits.i, Bits.e);
+  //let ah = Kind.Term.serialize(a, lv, lv, Bits.o, Bits.e);
+  //let bh = Kind.Term.serialize(b, lv, lv, Bits.i, Bits.e);
+  let ah = Kind.Term.serialize(a, lv, false);
+  let bh = Kind.Term.serialize(b, lv, true);
   Bits.eql(ah, bh)

@@ -1,0 +1,4 @@
+I256.mod(a: I256, b: I256): I256
+  open a
+  open b
+  I256.new(Word.mod!(a.value, b.value))

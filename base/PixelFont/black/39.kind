@@ -1,0 +1,4 @@
+// z_index: 30
+// char: '
+PixelFont.black.39: VoxBox
+  VoxBox.parse("02021e00000002031e000000")

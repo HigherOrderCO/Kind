@@ -1,0 +1,7 @@
+type Web.Kaelin.DraftInfo {
+  new(
+    player: String
+    hero: String
+    team: String
+  )
+}

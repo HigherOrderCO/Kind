@@ -1,0 +1,5 @@
+U64.for<S: Type>(state: S, from: U64, til: U64, func: U64 -> S -> S): S
+  case U64.eql(from, til){
+    true : state
+    false: U64.for<S>(func(from, state), U64.inc(from), til, func)
+  }

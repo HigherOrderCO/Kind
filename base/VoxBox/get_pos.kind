@@ -1,0 +1,4 @@
+VoxBox.get_pos(idx: U32, img: VoxBox): U32
+  case img {
+    new: Buffer32.get(U32.mul(idx,2#32), img.buffer)
+  }

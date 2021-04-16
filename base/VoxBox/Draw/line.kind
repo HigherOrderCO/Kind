@@ -1,0 +1,16 @@
+// implements gresenham algorithm
+// cf. https://en.wikipedia.org/wiki/Bresenham%7#16_line_algorithm#Derivation
+VoxBox.Draw.line(
+  x0: U32,
+  y0: U32,
+  x1: U32,
+  y1: U32,
+  z: U32,
+  col: Col32,
+  img: VoxBox,
+): VoxBox
+  let coords = VoxBox.Draw.line.aux.coords(x0, y0, x1, y1)
+  draw_coord = ((coord, img)
+    open coord
+    VoxBox.push(Pos32.new(coord.fst, coord.snd, z), col, img)) :: Pair<U32, U32> -> VoxBox -> VoxBox
+  List.fold<Pair<U32, U32>>(coords, VoxBox, img, draw_coord)

@@ -1,0 +1,6 @@
+Kind.Parser.int_neg: Parser(Pair<Bool, Nat>)
+  Parser {
+    get sgn = Parser.text("-")
+    get digits = Parser.many1<Nat>(Parser.digit)
+    return {false, Nat.from_base(10, digits)}
+  }

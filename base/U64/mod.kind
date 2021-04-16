@@ -1,4 +1,4 @@
 U64.mod(a: U64, b: U64): U64
-  open a 
-  open b 
+  open a
+  open b
   U64.new(Word.mod!(a.value, b.value))

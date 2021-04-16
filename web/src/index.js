@@ -26,6 +26,7 @@ function get_from_storage(key, init) {
 window.KEY = get_from_storage("KEY", () => random_hex(256));
 window.KindEvents = KindEventsClient({url: "ws://uwu.tech:7171", key: window.KEY});
 console.log("KEY: ", window.KEY);
+console.log("ADDRESS: ", EthSign.addressFromKey(window.KEY));
 
 class Moonad extends Component {
   constructor(props) {

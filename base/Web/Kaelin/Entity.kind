@@ -1,0 +1,4 @@
+type Web.Kaelin.Entity {
+  background(img: VoxBox)
+  char(img: VoxBox)
+}

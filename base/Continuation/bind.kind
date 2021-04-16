@@ -1,0 +1,2 @@
+Continuation.bind<R: Type, A: Type, B: Type>(ca: Continuation<R,A>, f: A -> Continuation<R,B>): Continuation<R,B>
+  ((cont) ca((a) f(a, cont)))

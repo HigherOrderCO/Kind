@@ -1,4 +1,0 @@
-// Returns the amount of pixels stored on img
-Image3D.get_len(img: Image3D): U32
-  open img
-  img.length

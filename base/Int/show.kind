@@ -1,0 +1,7 @@
+Int.show(a: Int): String
+  let result = Int.to_nat(a)
+  open result
+  case result.fst {
+      true : "-" | Nat.show(result.snd)
+      false: "+" | Nat.show(result.snd)
+  }!

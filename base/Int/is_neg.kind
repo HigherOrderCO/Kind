@@ -1,0 +1,3 @@
+Int.is_neg(a: Int): Bool
+  open a
+  Nat.gtn(a.neg, a.pos)

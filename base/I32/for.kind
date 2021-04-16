@@ -1,0 +1,5 @@
+I32.for<S: Type>(state: S, from: I32, til: I32, func: I32 -> S -> S): S
+  case I32.eql(from,til) {
+    true: state
+    false: I32.for<S>(func(from,state), I32.inc(from), til, func)
+  }

@@ -1,0 +1,3 @@
+U256.to_f64(a: U256): F64
+  open a
+  Word.to_f64!(a.value)

@@ -1,0 +1,4 @@
+I64.gtn(a: I64, b: I64): Bool
+  open a
+  open b
+  Word.s_gtn!(a.value, b.value)

@@ -1,0 +1,9 @@
+Int.abs(a: Int): Nat
+  let neg = Int.is_neg(a)
+  case neg {
+    false: open a
+           a.pos
+    true: a = Int.neg(a)
+          open a
+          a.pos
+  }

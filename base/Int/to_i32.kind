@@ -1,0 +1,6 @@
+Int.to_i32(a: Int): I32
+  open a
+  case a.neg {
+    zero: I32.new(Nat.to_word!(a.pos))
+    succ: I32.neg(I32.new(Nat.to_word!(a.neg)))
+  }

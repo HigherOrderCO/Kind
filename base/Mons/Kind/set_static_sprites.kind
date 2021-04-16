@@ -1,2 +1,2 @@
-Mons.Kind.set_static_sprites(spr: List(Image3D)): U32 -> U32 -> U32 -> Mons.Dir -> List(Image3D)
+Mons.Kind.set_static_sprites(spr: List(VoxBox)): U32 -> U32 -> U32 -> Mons.Dir -> List(VoxBox)
   (x,y,obj_ani,obj_dir) spr

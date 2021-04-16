@@ -1,0 +1,7 @@
+Word.is_neg<size: Nat>(a: Word(size), b: Bool): Bool
+  case a {
+    e: b
+    o: Word.is_neg<a.size>(a.pred, false)
+    i: Word.is_neg<a.size>(a.pred, true)
+  }
+

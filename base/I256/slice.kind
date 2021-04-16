@@ -1,0 +1,4 @@
+I256.slice(i: I256, j: I256, str: String): String
+  open i
+  open j
+  Word.s_slice!(i.value, j.value, str)

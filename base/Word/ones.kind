@@ -1,0 +1,5 @@
+Word.ones(size: Nat): Word(size)
+  case size {
+    zero: Word.e
+    succ: Word.i<size.pred>(Word.ones(size.pred))
+  }: Word(size)

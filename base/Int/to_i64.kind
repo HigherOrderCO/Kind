@@ -1,0 +1,6 @@
+Int.to_i64(a: Int): I64
+  open a
+  case a.neg {
+    zero: I64.new(Nat.to_word!(a.pos))
+    succ: I64.neg(I64.new(Nat.to_word!(a.neg)))
+  }

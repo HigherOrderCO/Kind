@@ -1,0 +1,4 @@
+I16.ltn(a: I16, b: I16): Bool
+  open a
+  open b
+  Word.s_ltn!(a.value, b.value)

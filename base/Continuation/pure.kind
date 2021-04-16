@@ -1,0 +1,2 @@
+Continuation.pure<R: Type, A: Type>(a: A): Continuation<R,A>
+  (cont) cont(a)

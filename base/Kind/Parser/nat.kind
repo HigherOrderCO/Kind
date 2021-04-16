@@ -2,7 +2,8 @@ Kind.Parser.nat: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
     Kind.Parser.spaces;
-    get natx = Parser.nat;
+    get natx = Parser.first_of!([Parser.hex_nat,
+                                 Parser.nat]);
     get orig = Kind.Parser.stop(init);
     return Kind.Term.ori(orig, Kind.Term.nat(natx));
   }

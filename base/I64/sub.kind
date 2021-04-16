@@ -1,0 +1,4 @@
+I64.sub(a: I64, b: I64): I64
+  open a
+  open b
+  I64.new(Word.sub!(a.value, b.value))

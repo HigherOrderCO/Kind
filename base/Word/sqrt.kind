@@ -1,0 +1,3 @@
+// TODO merge guillaume's implementation
+Word.sqrt<size: Nat>(a: Word(size)): Word(size)
+  Word.sqrt<size>(a)

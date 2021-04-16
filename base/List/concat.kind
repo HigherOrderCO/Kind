@@ -1,5 +1,20 @@
+// concatenates two lists
+// example:
+//   as = [3, 4]
+//   bs = [1, 2]
+//   List.concat<Nat>(as, bs) == [3, 4, 1, 2]
+
 List.concat<A: Type>(as: List(A), bs: List(A)): List(A)
   case as {
     nil: bs,
     cons: List.cons!(as.head, List.concat!(as.tail,bs))
   }
+
+// this is also where we define concat the cat
+// please type softly he's sleeping
+//
+// concat: Cat
+//   Zzzzz  |\      _,,,--,,_     
+//         /,`.-'`'   ._  \-;;,_  
+//        |,4-  ) )_   .;.(  `'-' 
+//       '---''(_/._)-'(_\_)      

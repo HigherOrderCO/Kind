@@ -3,23 +3,23 @@ Mons.walk_char_pack(
   t_y: U32,
   ani: U32,
   dir: Mons.Dir,
-  r_0: Image3D,
-  u_0: Image3D,
-  l_0: Image3D,
-  d_0: Image3D,
-  r_1: Image3D,
-  u_1: Image3D,
-  l_1: Image3D,
-  d_1: Image3D,
-  r_2: Image3D,
-  u_2: Image3D,
-  l_2: Image3D,
-  d_2: Image3D
-): List(Image3D)
+  r_0: VoxBox,
+  u_0: VoxBox,
+  l_0: VoxBox,
+  d_0: VoxBox,
+  r_1: VoxBox,
+  u_1: VoxBox,
+  l_1: VoxBox,
+  d_1: VoxBox,
+  r_2: VoxBox,
+  u_2: VoxBox,
+  l_2: VoxBox,
+  d_2: VoxBox
+): List(VoxBox)
   //0 = parado
   //1 = pe direito pra frente
   //2 = pe esquerdo pra frente
-  if U32.eql(ani, 0u) then
+  if U32.eql(ani, 0#32) then
     case dir {
       right: [r_0],
       up:    [u_0],
@@ -27,7 +27,7 @@ Mons.walk_char_pack(
       down:  [d_0]
     }
   else
-    if U32.eql(U32.mod(U32.add(t_x,t_y),2u), 0u) then
+    if U32.eql(U32.mod(U32.add(t_x,t_y),2#32), 0#32) then
       case dir {
         right: [r_1],
         up:    [u_1],

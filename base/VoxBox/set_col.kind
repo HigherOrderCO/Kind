@@ -1,0 +1,7 @@
+// BitsSets the color of the idx voxel of an VoxBox
+VoxBox.set_col(idx: U32, col: U32, img: VoxBox): VoxBox
+  case img {
+    new:
+      let img.buffer = Buffer32.set(U32.add(U32.mul(idx,2#32),1#32), col, img.buffer)
+      VoxBox.new(img.length, img.capacity, img.buffer)
+  }
