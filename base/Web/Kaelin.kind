@@ -58,7 +58,7 @@ Web.Kaelin: App(Web.Kaelin.State)
            open pos
            let {x, y} = {U32.div(pos.fst, 2u), 
              U32.div(pos.snd, 2u)}
-           App.print(Pair.show(U32, U32, U32.to_string, U32.to_string,
+           App.print(Pair.show(U32, U32, U32.show, U32.show,
              {x, y}))
        tick game:
            let info = event.info
