@@ -1,15 +1,17 @@
-User.rigille.List.monotone.tail<A: Type,
-  after: A -> A -> Type,
-  O: User.rigille.Order<A>(after)>(
-  x: A, ys: List<A>,
-  Hyp: User.rigille.List.monotone<A, after, O>(List.cons<A>(x, ys))): User.rigille.List.monotone<A, after, O>(ys)
+User.rigille.List.monotone.tail<A: Type, after: A -> A -> Type, O: User.rigille.Order<A>(after)>(
+  x: A,
+  ys: List<A>,
+  Hyp: User.rigille.List.monotone<A, after, O>(List.cons<A>(x, ys))
+): User.rigille.List.monotone<A, after, O>(ys)
+
   def inc = User.rigille.List.monotone<A, after, O>
   def cons = List.cons<A>
-  case ys {
+
+  let lem = Equal.refl<List<A>, ys>
+  case ys with lem : ys^ == ys {
     nil: Unit.new :: inc(List.nil<A>)
 
-    cons: let lem = ?l :: (ys == List.cons<A>(ys.head, ys.tail))
-          let ohh = Hyp :: rewrite X in inc(cons(x, X)) with lem
+    cons: let ohh = Hyp :: rewrite X in inc(cons(x, X)) with lem
           case ohh {
             new: let qed = ohh.snd
                  qed
