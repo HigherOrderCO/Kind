@@ -290,10 +290,10 @@ data Vector (A : Type) (len : Nat) : Type
 What this is saying is that the very shape of a Vector declaration on the value
 of `len` (its length). A Vector with length `0` has only one constructor:
 `vnil`. A Vector with length `succ(n)` has also only one constructor: `vcons`,
-with a `head` and a `tail` field. Tesla argues this is an easier way to
-implement indexed datatypes, since it doesn't require dealing with indices. For
-Kind, that isn't relevant, as we already have inductive datatypes from `Self` (
-which, I argue, is even easier to implement).
+with a `head` and a `tail`. Tesla argues this is an easier way to implement
+indexed datatypes, since it doesn't require dealing with indices. For Kind, that
+isn't relevant, as we already have inductive datatypes from `Self` (which, I
+argue, is even easier to implement).
 
 But this encoding has another benefit: pattern-matching only demands the
 required cases. If you pattern-match a vector with `len > 0`, you don't need to
