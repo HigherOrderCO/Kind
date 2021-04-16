@@ -386,20 +386,27 @@ module.exports = (function() {
         return $58;
     };
     const Word$to_bits = x0 => Word$to_bits$(x0);
+
+    function Nat$succ$(_pred$1) {
+        var $64 = 1n + _pred$1;
+        return $64;
+    };
+    const Nat$succ = x0 => Nat$succ$(x0);
+    const Nat$zero = 0n;
     const U16$to_bits = a0 => (u16_to_bits(a0));
 
     function String$to_bits$(_str$1) {
         var self = _str$1;
         if (self.length === 0) {
-            var $65 = Bits$e;
-            var $64 = $65;
+            var $66 = Bits$e;
+            var $65 = $66;
         } else {
-            var $66 = self.charCodeAt(0);
-            var $67 = self.slice(1);
-            var $68 = (String$to_bits$($67) + (u16_to_bits($66)));
-            var $64 = $68;
+            var $67 = self.charCodeAt(0);
+            var $68 = self.slice(1);
+            var $69 = (String$to_bits$($68) + (u16_to_bits($67)));
+            var $65 = $69;
         };
-        return $64;
+        return $65;
     };
     const String$to_bits = x0 => String$to_bits$(x0);
 
@@ -407,25 +414,25 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'List.cons':
-                var $70 = self.head;
-                var $71 = self.tail;
-                var self = $70;
+                var $71 = self.head;
+                var $72 = self.tail;
+                var self = $71;
                 switch (self._) {
                     case 'Pair.new':
-                        var $73 = self.fst;
-                        var $74 = self.snd;
-                        var $75 = BitsMap$set$(String$to_bits$($73), $74, Map$from_list$($71));
-                        var $72 = $75;
+                        var $74 = self.fst;
+                        var $75 = self.snd;
+                        var $76 = BitsMap$set$(String$to_bits$($74), $75, Map$from_list$($72));
+                        var $73 = $76;
                         break;
                 };
-                var $69 = $72;
+                var $70 = $73;
                 break;
             case 'List.nil':
-                var $76 = BitsMap$new;
-                var $69 = $76;
+                var $77 = BitsMap$new;
+                var $70 = $77;
                 break;
         };
-        return $69;
+        return $70;
     };
     const Map$from_list = x0 => Map$from_list$(x0);
     const List$nil = ({
@@ -433,44 +440,44 @@ module.exports = (function() {
     });
 
     function Pair$(_A$1, _B$2) {
-        var $77 = null;
-        return $77;
+        var $78 = null;
+        return $78;
     };
     const Pair = x0 => x1 => Pair$(x0, x1);
 
     function List$cons$(_head$2, _tail$3) {
-        var $78 = ({
+        var $79 = ({
             _: 'List.cons',
             'head': _head$2,
             'tail': _tail$3
         });
-        return $78;
+        return $79;
     };
     const List$cons = x0 => x1 => List$cons$(x0, x1);
 
     function DOM$text$(_value$1) {
-        var $79 = ({
+        var $80 = ({
             _: 'DOM.text',
             'value': _value$1
         });
-        return $79;
+        return $80;
     };
     const DOM$text = x0 => DOM$text$(x0);
 
     function IO$(_A$1) {
-        var $80 = null;
-        return $80;
+        var $81 = null;
+        return $81;
     };
     const IO = x0 => IO$(x0);
 
     function IO$ask$(_query$2, _param$3, _then$4) {
-        var $81 = ({
+        var $82 = ({
             _: 'IO.ask',
             'query': _query$2,
             'param': _param$3,
             'then': _then$4
         });
-        return $81;
+        return $82;
     };
     const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
 
@@ -478,85 +485,85 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'IO.end':
-                var $83 = self.value;
-                var $84 = _f$4($83);
-                var $82 = $84;
+                var $84 = self.value;
+                var $85 = _f$4($84);
+                var $83 = $85;
                 break;
             case 'IO.ask':
-                var $85 = self.query;
-                var $86 = self.param;
-                var $87 = self.then;
-                var $88 = IO$ask$($85, $86, (_x$8 => {
-                    var $89 = IO$bind$($87(_x$8), _f$4);
-                    return $89;
+                var $86 = self.query;
+                var $87 = self.param;
+                var $88 = self.then;
+                var $89 = IO$ask$($86, $87, (_x$8 => {
+                    var $90 = IO$bind$($88(_x$8), _f$4);
+                    return $90;
                 }));
-                var $82 = $88;
+                var $83 = $89;
                 break;
         };
-        return $82;
+        return $83;
     };
     const IO$bind = x0 => x1 => IO$bind$(x0, x1);
 
     function IO$end$(_value$2) {
-        var $90 = ({
+        var $91 = ({
             _: 'IO.end',
             'value': _value$2
         });
-        return $90;
+        return $91;
     };
     const IO$end = x0 => IO$end$(x0);
 
     function IO$monad$(_new$2) {
-        var $91 = _new$2(IO$bind)(IO$end);
-        return $91;
+        var $92 = _new$2(IO$bind)(IO$end);
+        return $92;
     };
     const IO$monad = x0 => IO$monad$(x0);
 
     function Dynamic$new$(_value$2) {
-        var $92 = ({
+        var $93 = ({
             _: 'Dynamic.new',
             'value': _value$2
         });
-        return $92;
+        return $93;
     };
     const Dynamic$new = x0 => Dynamic$new$(x0);
     const Unit$new = null;
     const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $93 = _m$pure$2;
-        return $93;
+        var $94 = _m$pure$2;
+        return $94;
     }))(Dynamic$new$(Unit$new));
 
     function Parser$Reply$(_V$1) {
-        var $94 = null;
-        return $94;
+        var $95 = null;
+        return $95;
     };
     const Parser$Reply = x0 => Parser$Reply$(x0);
 
     function List$(_A$1) {
-        var $95 = null;
-        return $95;
+        var $96 = null;
+        return $96;
     };
     const List = x0 => List$(x0);
 
     function Parser$Reply$error$(_idx$2, _code$3, _err$4) {
-        var $96 = ({
+        var $97 = ({
             _: 'Parser.Reply.error',
             'idx': _idx$2,
             'code': _code$3,
             'err': _err$4
         });
-        return $96;
+        return $97;
     };
     const Parser$Reply$error = x0 => x1 => x2 => Parser$Reply$error$(x0, x1, x2);
 
     function Parser$Reply$value$(_idx$2, _code$3, _val$4) {
-        var $97 = ({
+        var $98 = ({
             _: 'Parser.Reply.value',
             'idx': _idx$2,
             'code': _code$3,
             'val': _val$4
         });
-        return $97;
+        return $98;
     };
     const Parser$Reply$value = x0 => x1 => x2 => Parser$Reply$value$(x0, x1, x2);
 
@@ -573,17 +580,17 @@ module.exports = (function() {
                 var self = _parse$2(_idx$4)(_code$5);
                 switch (self._) {
                     case 'Parser.Reply.value':
-                        var $98 = self.idx;
-                        var $99 = self.code;
-                        var $100 = self.val;
-                        var $101 = Parser$many$go$(_parse$2, (_xs$9 => {
-                            var $102 = _values$3(List$cons$($100, _xs$9));
-                            return $102;
-                        }), $98, $99);
-                        return $101;
+                        var $99 = self.idx;
+                        var $100 = self.code;
+                        var $101 = self.val;
+                        var $102 = Parser$many$go$(_parse$2, (_xs$9 => {
+                            var $103 = _values$3(List$cons$($101, _xs$9));
+                            return $103;
+                        }), $99, $100);
+                        return $102;
                     case 'Parser.Reply.error':
-                        var $103 = Parser$Reply$value$(_idx$4, _code$5, _values$3(List$nil));
-                        return $103;
+                        var $104 = Parser$Reply$value$(_idx$4, _code$5, _values$3(List$nil));
+                        return $104;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -593,11 +600,11 @@ module.exports = (function() {
     const Parser$many$go = x0 => x1 => x2 => x3 => Parser$many$go$(x0, x1, x2, x3);
 
     function Parser$many$(_parser$2) {
-        var $104 = Parser$many$go(_parser$2)((_x$3 => {
-            var $105 = _x$3;
-            return $105;
+        var $105 = Parser$many$go(_parser$2)((_x$3 => {
+            var $106 = _x$3;
+            return $106;
         }));
-        return $104;
+        return $105;
     };
     const Parser$many = x0 => Parser$many$(x0);
 
@@ -605,45 +612,39 @@ module.exports = (function() {
         var self = _parser$2(_idx$3)(_code$4);
         switch (self._) {
             case 'Parser.Reply.error':
-                var $107 = self.idx;
-                var $108 = self.code;
-                var $109 = self.err;
-                var $110 = Parser$Reply$error$($107, $108, $109);
-                var $106 = $110;
+                var $108 = self.idx;
+                var $109 = self.code;
+                var $110 = self.err;
+                var $111 = Parser$Reply$error$($108, $109, $110);
+                var $107 = $111;
                 break;
             case 'Parser.Reply.value':
-                var $111 = self.idx;
-                var $112 = self.code;
-                var $113 = self.val;
-                var self = Parser$many$(_parser$2)($111)($112);
+                var $112 = self.idx;
+                var $113 = self.code;
+                var $114 = self.val;
+                var self = Parser$many$(_parser$2)($112)($113);
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $115 = self.idx;
-                        var $116 = self.code;
-                        var $117 = self.err;
-                        var $118 = Parser$Reply$error$($115, $116, $117);
-                        var $114 = $118;
+                        var $116 = self.idx;
+                        var $117 = self.code;
+                        var $118 = self.err;
+                        var $119 = Parser$Reply$error$($116, $117, $118);
+                        var $115 = $119;
                         break;
                     case 'Parser.Reply.value':
-                        var $119 = self.idx;
-                        var $120 = self.code;
-                        var $121 = self.val;
-                        var $122 = Parser$Reply$value$($119, $120, List$cons$($113, $121));
-                        var $114 = $122;
+                        var $120 = self.idx;
+                        var $121 = self.code;
+                        var $122 = self.val;
+                        var $123 = Parser$Reply$value$($120, $121, List$cons$($114, $122));
+                        var $115 = $123;
                         break;
                 };
-                var $106 = $114;
+                var $107 = $115;
                 break;
         };
-        return $106;
+        return $107;
     };
     const Parser$many1 = x0 => x1 => x2 => Parser$many1$(x0, x1, x2);
-
-    function Nat$succ$(_pred$1) {
-        var $123 = 1n + _pred$1;
-        return $123;
-    };
-    const Nat$succ = x0 => Nat$succ$(x0);
     const Bool$false = false;
     const Bool$true = true;
 
@@ -768,7 +769,6 @@ module.exports = (function() {
         return $153;
     };
     const Word$eql = x0 => x1 => Word$eql$(x0, x1);
-    const Nat$zero = 0n;
     const U16$eql = a0 => a1 => (a0 === a1);
 
     function Parser$digit$(_idx$1, _code$2) {
@@ -1991,6 +1991,8 @@ module.exports = (function() {
         'Bits.i': Bits$i,
         'Bits.concat': Bits$concat,
         'Word.to_bits': Word$to_bits,
+        'Nat.succ': Nat$succ,
+        'Nat.zero': Nat$zero,
         'U16.to_bits': U16$to_bits,
         'String.to_bits': String$to_bits,
         'Map.from_list': Map$from_list,
@@ -2013,7 +2015,6 @@ module.exports = (function() {
         'Parser.many.go': Parser$many$go,
         'Parser.many': Parser$many,
         'Parser.many1': Parser$many1,
-        'Nat.succ': Nat$succ,
         'Bool.false': Bool$false,
         'Bool.true': Bool$true,
         'Cmp.as_eql': Cmp$as_eql,
@@ -2023,7 +2024,6 @@ module.exports = (function() {
         'Cmp.eql': Cmp$eql,
         'Word.cmp': Word$cmp,
         'Word.eql': Word$eql,
-        'Nat.zero': Nat$zero,
         'U16.eql': U16$eql,
         'Parser.digit': Parser$digit,
         'Nat.add': Nat$add,

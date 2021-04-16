@@ -1,23 +1,23 @@
 // A demo application that renders a square on the screen
 Web.Demo: App(Pair(U32,U32))
   // Allocates the mutable buffer
-  vbox = VoxBox.alloc_capacity(6#32)
+  vbox = VoxBox.alloc_capacity(65536u)
 
   // Application state: just a position
-  init = {8#32, 8#32}
+  init = {128u, 128u}
 
   // Render loop: draws a square at the stored position
   draw = (state)
     p_x = Pair.fst!!(state)
     p_y = Pair.snd!!(state)
-    col = (x,y) Col32.new(0#32,0#32,5#32,5#32)
+    col = (x,y) Col32.new(200u,200u,255u,255u)
     DOM.node("div", {}, {}, [
       DOM.node("div", {}, {}, [DOM.text("Kind Demo App")])
       DOM.node("div", {}, {}, [DOM.text("- Press W/A/S/D to move")])
       DOM.node("div", {"id": "play_game"},
         {"color": "blue", "text-decoration": "underline"},
         [DOM.text("- Click here to play a game")])
-      DOM.vbox({}, {}, VoxBox.Draw.square(p_x, p_y, 8#32, 6#32, 6#32, col, vbox))
+      DOM.vbox({}, {}, VoxBox.Draw.square(p_x, p_y, 128u, 16u, 16u, col, vbox))
     ])
 
   // Event handler: moves the position when ASDW are pressed
@@ -31,10 +31,10 @@ Web.Demo: App(Pair(U32,U32))
       key_down:
         {x, y} = state
         switch U16.eql(event.code) {
-          'A': App.store!({U32.sub(x, 6#32), y})
-          'D': App.store!({U32.add(x, 6#32), y})
-          'W': App.store!({x, U32.sub(y, 6#32)})
-          'S': App.store!({x, U32.add(y, 6#32)})
+          'A': App.store!({U32.sub(x, 16u), y})
+          'D': App.store!({U32.add(x, 16u), y})
+          'W': App.store!({x, U32.sub(y, 16u)})
+          'S': App.store!({x, U32.add(y, 16u)})
         } default App.pass
     } default App.pass
 

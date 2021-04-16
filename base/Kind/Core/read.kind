@@ -1,9 +1,9 @@
 Kind.Core.read.is_name(chr: Char): Bool
-  Bool.or(Bool.and(U16.gte(chr,6#16), U16.lte(chr,7#16)),  // ./
-  Bool.or(Bool.and(U16.gte(chr,8#16), U16.ltn(chr,8#16)),  // 0-9
-  Bool.or(Bool.and(U16.gte(chr,5#16), U16.ltn(chr,1#16)),  // A-Z
-  Bool.or(Bool.and(U16.gte(chr,5#16), U16.ltn(chr,6#16)),  // _
-  Bool.or(Bool.and(U16.gte(chr,7#16), U16.ltn(chr,3#16)), // a-z
+  Bool.or(Bool.and(U16.gte(chr,46s), U16.lte(chr,47s)),  // ./
+  Bool.or(Bool.and(U16.gte(chr,48s), U16.ltn(chr,58s)),  // 0-9
+  Bool.or(Bool.and(U16.gte(chr,65s), U16.ltn(chr,91s)),  // A-Z
+  Bool.or(Bool.and(U16.gte(chr,95s), U16.ltn(chr,96s)),  // _
+  Bool.or(Bool.and(U16.gte(chr,97s), U16.ltn(chr,123s)), // a-z
   Bool.false)))))
 
 Kind.Core.read.name(code: String): Pair(String, String)
@@ -55,7 +55,7 @@ Kind.Core.read.u16(code: String, u16: Char): Pair(String, Char)
       {code, u16}
     cons:
       if Char.is_hex(code.head) then
-        let u16 = U16.add(U16.mul(u16,6#16), Char.hex_value16(code.head))
+        let u16 = U16.add(U16.mul(u16,16s), Char.hex_value16(code.head))
         Kind.Core.read.u16(code.tail, u16)
       else
         {code, u16}
@@ -76,7 +76,7 @@ Kind.Core.read.natx(code: String, nat: Nat): Pair(String, Nat)
 Kind.Core.read.chrx(code: String): Pair(String, Char)
   if String.starts_with(code, "\\u{") then
     let code = String.drop(3, code)
-    let {code, chrx} = Kind.Core.read.u16(code, 0#16)
+    let {code, chrx} = Kind.Core.read.u16(code, 0s)
     if String.starts_with(code, "}") then
       {String.drop(1, code), chrx}
     else

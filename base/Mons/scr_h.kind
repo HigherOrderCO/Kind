@@ -1,2 +1,2 @@
 Mons.scr_h: U32
-  U32.mul(Pos32.get_y(Mons.scr_mid), 2#32)
+  U32.mul(Pos32.get_y(Mons.scr_mid), 2u)

@@ -1,4 +1,4 @@
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
   // kin, dir, pad, ani, dmg, bag, mon, bos, cap
-  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0#32, 0#32, [], 0#32, [], {Nat.to_u32(11), []}, 
-    0#32, Mons.Effect.clear)
+  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0u, [], {Nat.to_u32(11), []}, 
+    0u, Mons.Effect.clear)

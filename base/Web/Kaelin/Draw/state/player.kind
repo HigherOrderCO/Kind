@@ -10,4 +10,4 @@ Web.Kaelin.Draw.state.player(img: VoxBox, player: Web.Kaelin.Player): VoxBox
   } default Web.Kaelin.Entity.char(Kaelin.Assets.chars.cyclope_d_1) // what default put here?
   
   open ent
-  VoxBox.Draw.image(cx, cy, 0#32, ent.img, img)
+  VoxBox.Draw.image(cx, cy, 0u, ent.img, img)
