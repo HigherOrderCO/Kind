@@ -1,7 +1,13 @@
 User.rigille.List.monotone.tail<A: Type, after: A -> A -> Type, O: User.rigille.Order<A>(after)>(x: A, ys: List<A>,
   Hyp: User.rigille.List.monotone<A, after, O>(List.cons<A>(x, ys))): User.rigille.List.monotone<A, after, O>(ys)
-  case ys with Hyp {
-    nil: ?a
-    cons: let ind = User.rigille.List.monotone.tail<A, after, O>(ys.head, ys.tail)
-          ?a
-  } 
+  case ys {
+    nil: lem = ?x :: (List.nil<A> == ys)
+         Unit.new :: rewrite X in User.rigille.List.monotone<A, after, O>(X) with lem
+    cons: let lem = ?y :: (ys == List.cons<A>(ys.head, ys.tail))
+          let ohh = Hyp :: rewrite X in User.rigille.List.monotone<A, after, O>(List.cons<A>(x, X)) with lem
+          case ohh {
+            new: let qed = (ohh.snd :: rewrite X in User.rigille.List.monotone<A, after, O>(X) with mirror(lem))
+                 // I can't return qed here for some reason
+                 ?a
+          }
+  }
