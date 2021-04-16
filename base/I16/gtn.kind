@@ -1,2 +1,4 @@
 I16.gtn(a: I16, b: I16): Bool
-  Cmp.as_gtn(I16.cmp(a, b))
+  open a
+  open b
+  Word.s_gtn!(a.value, b.value)

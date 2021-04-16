@@ -1,2 +1,4 @@
 I8.ltn(a: I8, b: I8): Bool
-  Cmp.as_ltn(I8.cmp(a, b))
+  open a
+  open b
+  Word.s_ltn!(a.value, b.value)

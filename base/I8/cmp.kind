@@ -1,4 +1,7 @@
 I8.cmp(a: I8, b: I8): Cmp
-  open a
-  open b
-  Word.s_cmp!(a.value, b.value)
+  if I8.ltn(a, b) then
+    Cmp.ltn
+  else if I8.eql(a, b) then
+    Cmp.eql
+  else
+    Cmp.gtn

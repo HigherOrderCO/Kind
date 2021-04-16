@@ -1,2 +1,4 @@
 I128.gte(a: I128, b: I128): Bool
-  Cmp.as_gte(I128.cmp(a, b))
+  open a
+  open b
+  Word.s_gte!(a.value, b.value)

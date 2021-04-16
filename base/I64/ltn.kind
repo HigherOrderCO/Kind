@@ -1,2 +1,4 @@
 I64.ltn(a: I64, b: I64): Bool
-  Cmp.as_ltn(I64.cmp(a, b))
+  open a
+  open b
+  Word.s_ltn!(a.value, b.value)

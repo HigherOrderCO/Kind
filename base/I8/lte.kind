@@ -1,2 +1,4 @@
 I8.lte(a: I8, b: I8): Bool
-  Cmp.as_lte(I8.cmp(a, b))
+  open a
+  open b
+  Word.s_lte!(a.value, b.value)

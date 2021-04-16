@@ -1,2 +1,4 @@
 I128.lte(a: I128, b: I128): Bool
-  Cmp.as_lte(I128.cmp(a, b))
+  open a
+  open b
+  Word.s_lte!(a.value, b.value)

@@ -1,2 +1,4 @@
 I256.ltn(a: I256, b: I256): Bool
-  Cmp.as_ltn(I256.cmp(a, b))
+  open a
+  open b
+  Word.s_ltn!(a.value, b.value)
