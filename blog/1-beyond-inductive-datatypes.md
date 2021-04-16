@@ -90,7 +90,7 @@ destroy(a: Nat): Nat
 destroy_theorem(a: Nat): destroy(a) == Nat.zero
   a((a) destroy(a) == Nat.zero, refl, (a.pred) destroy_theorem(a.pred))
 
-// Syntax note:s 
+// Syntax notes:
 // - "self(x: A) -> B" is a self-forall (self-dependent function type)
 // - "(f, x) f(f(x))" is a lambda (as in, "λf. λx. (f (f x))")
 // - "." is just a name-valid character (so "foo.bar" is just a name)
