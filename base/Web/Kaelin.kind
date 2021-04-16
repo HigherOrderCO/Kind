@@ -22,7 +22,7 @@ Web.Kaelin: App(Web.Kaelin.State)
   let init = 
     let map = {}
     let map = Web.Kaelin.Draw.initial_ent(map)
-    Web.Kaelin.State.game(Web.Kaelin.Resources.room, 0, {}, map)
+    Web.Kaelin.State.game(Web.Kaelin.Resources.room, 0, {}, map, App.EnvInfo.new({0u, 0u}, {0u, 0u}))
 
   // Render function
   //  0s - 10s: contagem regressiva
@@ -51,6 +51,10 @@ Web.Kaelin: App(Web.Kaelin.State)
         switch U16.eql(event.code) {
           48s: App.post(state.room, Web.Kaelin.Command.create_hero("croni"))
         } default App.pass
+       mouse_up game :
+           App.print("Clicou")
+       tick game:
+           App.pass
       post game:
         log(event.data)
         switch String.starts_with(event.data) {
