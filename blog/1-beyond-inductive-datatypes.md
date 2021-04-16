@@ -176,7 +176,7 @@ Int.add(a: Int, b: Int): Int
   }
 ```
 
-This is beautiful. But while this representation is great for algorithms, it
+This is beautiful. But while this type is great for algorithms, it
 breaks theorem proving. That's because there are multiple representations of the
 same integer. For example, `3` can be written as `Int.new(3, 0)`, `Int.new(4,
 1)`, `Int.new(5, 2)` and so on. This is bad. We could solve this issue by adding
