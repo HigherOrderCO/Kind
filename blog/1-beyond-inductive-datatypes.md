@@ -119,7 +119,7 @@ type Int {
 ```
 
 The idea is that an `Int` is either a positive `Nat` or a negative `Nat`. In
-order to avoid having two zeros, which the `neg` constructor starts as `-1`.
+order to avoid having two zeros, the `neg` constructor starts as `-1`.
 This works, but it results in complex, confusing arithmetic functions, as we
 have to cautiously consider many cases of signs. For example, here is `negate`
 nad `add`, ported from `Agda`:
