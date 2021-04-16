@@ -288,7 +288,7 @@ data Vector (A : Type) (len : Nat) : Type
 | A (succ pred) => vcons (head : A) (tail : Vect A pred)
 ```
 
-What this is saying is that the very shape of a Vector declaration on the value
+What this is saying is that the very shape of a Vector depends on the value
 of `len` (its length). A Vector with length `0` has only one constructor:
 `vnil`. A Vector with length `succ(n)` has also only one constructor: `vcons`,
 with a `head` and a `tail`. Tesla argues this is an easier way to implement
