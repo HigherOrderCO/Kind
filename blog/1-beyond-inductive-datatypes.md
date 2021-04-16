@@ -414,7 +414,7 @@ head(A: Type, len: Nat, vec: Vector(A, len)): Maybe(A)
 
 
 Kind graciously demands only the `nil` case on the `zero` branch and only the
-`cons` case on the `zero` branch!
+`cons` case on the `succ` branch!
 
 To be honest, I'm surprised it just works so well, given that I wasn't even
 aware of this encoding when I implemented the language. In a future, I may
