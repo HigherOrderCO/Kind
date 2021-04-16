@@ -180,7 +180,7 @@ This is beautiful. But while this type is great for algorithms, it
 breaks theorem proving. That's because there are multiple representations of the
 same integer. For example, `3` can be written as `Int.new(3, 0)`, `Int.new(4,
 1)`, `Int.new(5, 2)` and so on. This is bad. We could solve this issue by adding
-an extra field enforcing that either `a` or `b` is `zero`:
+an extra field enforcing that either `pos` or `neg` is `zero`:
 
 ```javascript
 // Int.val(a, b) represents `a - b`
@@ -191,11 +191,10 @@ type Int {
 
 This would be technically correct, but algorithms would become considerably
 worse, as we'd need to prove that `eq` still holds every time we construct and
-`Int`. This is terrible.  
-
-What if we could, though, have the `Int.new` constructor to automatically
-"canonicalizes itself", such that `Int.new(5, 2)` **reduces to** `Int.new(3,
-0)`, making both equal **by definition**?
+`Int`. This is terrible.  What if we could, though, have the `Int.new` 
+constructor to automatically "canonicalizes itself", such that 
+`Int.new(5, 2)` **reduces to** `Int.new(3, 0)`, making both equal 
+**by definition**?
 
 A friend of mine, Tesla Zhang, has some unpublished work, where he uses this
 idea, which he calls "inductive types with conditions", to encode higher
