@@ -358,7 +358,7 @@ returning two different types. When `len` zero, `Vector` becomes a datatype only
 the `nil` constructor. When `len` is `succ(n)`, it becomes a datatype with only
 the `cons` constructor. It is as if we wrote this hypothetical syntax:
 
-```
+```javascript
 type Vector(A: Type, len: Nat) {
   case len {
     zero: nil
@@ -370,7 +370,7 @@ type Vector(A: Type, len: Nat) {
 Is that enough to implement Tesla's datatypes? Yes, and it behaves exactly as
 expected! We can construct Vectors using `cons`:
 
-```
+```javascript
 my_vec: Vector(Nat, 3)
   cons!!(100, cons!!(200, cons!!(300, nil!)))
 ```
@@ -378,7 +378,7 @@ my_vec: Vector(Nat, 3)
 And we can destruct using the `case` syntax, which will work since the
 desugaring is the same:
 
-```
+```javascript
 head(A: Type, len: Nat, vec: Vector(A, Nat.succ(len))): A
   case vec {
     cons: vec.head
@@ -388,7 +388,7 @@ head(A: Type, len: Nat, vec: Vector(A, Nat.succ(len))): A
 The `head` function magically type-checks with only the `cons` case, because
 Kind knows that the `size` is not `0`. If the size of the vector was unknown:
 
-```
+```javascript
 head(A: Type, len: Nat, vec: Vector(A, len)): Maybe(A)
   case vec {
     nil: ?a
@@ -400,7 +400,7 @@ Kind would complain that it can't infer the type of `case`. We can't
 pattern-match on `vec` on the body of `head` at all. But we can if we
 pattern-match on `len` first and then specialize the type of `vec` with `with`:
 
-```
+```javascript
 head(A: Type, len: Nat, vec: Vector(A, len)): Maybe(A)
   case len with vec {
     zero: case vec {
@@ -432,7 +432,7 @@ it is as if a datatype could have constructors with types that aren't
 necessarily the same as the type being defined, but, instead, equalities. For
 example, we could define a type for "unordered pairs" as:
 
-```
+```agda
 data UnordPair (A : Set) : Set where
   make : (a : A) -> (b : A) -> UnordPair A
   swap : make a b == make b a
@@ -550,7 +550,7 @@ eliminate an interval, both cases must be equal. The Path type proposes that
 two values `a, b : A` are equal if there exists a function `t : I -> A` such
 that `t(i0) = a` and `t(i1) = b`. In other words, it is the equivalent of:
 
-```
+```agda
 data I : Set where
  i0 : I
  i1 : I
@@ -562,7 +562,7 @@ data Path (A: I -> Set) : (A i0) -> (A i1) -> Set where
 
 Here is it:
 
-```
+```javascript
 // The Interval type:
 // Γ ⊢
 // ------------
