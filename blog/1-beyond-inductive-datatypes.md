@@ -264,7 +264,7 @@ And the algorithms become as clean as you'd expect. Check them on the
 directory!
 
 This idea, I believe, can be generalized to represent quotient types; see Aaron
-Stump's [Quotients by Idemporent Functions in
+Stump's [Quotients by Idempotent Functions in
 Cedille](https://homepage.cs.uiowa.edu/~cwjnkins/assets/MJS19_Quotients-Idempotent-Functions-Cedille.pdf).
 
 Possibility #1: conditional constructors
