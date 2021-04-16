@@ -37,8 +37,6 @@ destroy_theorem(a: Nat): destroy(a) == 0
     zero: refl
     succ: destroy_theorem(a.pred)
   }!
-
-// Note: period (".") is just a name-valid character, just like letters.
 ```
 
 This should be familiar to a reader used to traditional proof assistants. For
@@ -69,36 +67,34 @@ top-level definitions that represent the datatype using raw lambdas. Then, the
 "desugaring" process, the program above becomes: 
 
 ```javascript
-// Natural numbers
+// Natural numbers                            
 Nat: Type
-  Nat.Self<P:(:Nat) Type>
-  (zero: P(Nat.zero))
-  (succ: (pred:Nat) P(Nat.succ(pred)))
-  P(Nat.Self)
+  self(P: Nat -> Type) ->
+  (zero: P(Nat.zero)) ->
+  (succ: (pred: Nat) -> P(Nat.succ(pred))) ->
+  P(self)
 
 // The zero constructor of Nat
 Nat.zero: Nat
-  (P, zero, succ) zero // same as "λP. λzero. λsucc. zero"
+  (P, zero, succ) zero // same as: "λP. λzero. λsucc. zero"
 
 // The succ constructor of Nat
 Nat.succ(pred: Nat): Nat
-  (P, zero, succ) succ(pred) // same as "λP. λzero. λsucc. (succ zero)"
+  (P, zero, succ) succ(pred) // same as: "λP. λzero. λsucc. (succ zero)"
 
 // A recursive function that removes all `succ` constructors
 destroy(a: Nat): Nat
-  a<(a) Nat>(
-    Nat.zero,
-    (a.pred) destroy(a.pred)
-  )
+  a((a) Nat)(Nat.zero, (a.pred) destroy(a.pred))
 
 // An inductive proof that destroying a natural number results in zero
 destroy_theorem(a: Nat): destroy(a) == Nat.zero
-  a<(a) destroy(a) == Nat.zero>(
-    refl,
-    (a.pred) destroy_theorem(a.pred)
-  )
+  a((a) destroy(a) == Nat.zero, refl, (a.pred) destroy_theorem(a.pred))
 
-// Note: period (".") is just a name-valid character, just like letters.
+// Syntax note:s 
+// - "self(x: A) -> B" is a self-forall (self-dependent function type)
+// - "(f, x) f(f(x))" is a lambda (as in, "λf. λx. (f (f x))")
+// - "." is just a name-valid character (so "foo.bar" is just a name)
+// - There are better syntaxes for all these, but I'm trying to keep it familiar
 ```
 
 In other words, after parsing, the first program is exactly equivalent to this
@@ -212,8 +208,8 @@ with `Kind Int --show`:
 
 ```javascript
 Int: Type
-  self<P: (self: Int) Type>
-  (new: (pos:Nat) (neg:Nat) P(Int.new(pos,neg)))
+  self(P: Int -> Type) ->
+  (new: (pos:Nat) -> (neg:Nat) -> P(Int.new(pos,neg))) ->
   P(self)
 
 Int.new(pos: Nat, neg: Nat): Int
@@ -307,9 +303,9 @@ How can we do it with `Self` types? Let's start defining the conventional
 indexed `Vector` datatype, using the built-in syntax.
 
 ```javascript
-type Vector <A: Type> ~ (len: Nat) {
-  nil ~ (len = Nat.zero),
-  cons<len: Nat>(head: A, tail: Vector(A,len)) ~ (len = Nat.succ(len)),
+type Vector (A: Type) ~ (len: Nat) {
+  nil                                          ~ (len = Nat.zero)
+  cons(len: Nat, head: A, tail: Vector(A,len)) ~ (len = Nat.succ(len))
 }
 ```
 
@@ -319,15 +315,15 @@ Vector --show` on the terminal. The result, adapted for readability, is:
 
 ```javascript
 Vector(A: Type, len: Nat): Type
-  self<P: (len: Nat) (self: Vector(A,len)) Type>
-  (nil: P(0, nil(A)))
-  (cons: <len: Nat> (head: A) (tail: Vector(A,len)) P(Nat.succ(len), cons(A,len,head,tail)))
+  self(P: Nat -> Vector(A,len) -> Type) ->
+  (nil: P(0, nil(A))) ->
+  (cons: (len: Nat) -> (head: A) -> (tail: Vector(A,len)) -> P(Nat.succ(len), cons(A,len,head,tail))) ->
   P(len, self)
 
-nil<A: Type>: Vector<A, Nat.zero>
+nil(A: Type): Vector(A, Nat.zero)
   (P, nil, cons) nil
 
-cons<A: Type, len: Nat>(head: A, tail: Vector<A, len>): Vector<A, Nat.succ(len)>
+cons(A: Type, len: Nat, head: A, tail: Vector(A, len)): Vector(A, Nat.succ(len))
   (P, nil, cons) cons(len,head,tail)
 ```
 
@@ -339,19 +335,19 @@ a regular definition, so we can "hack" it too by adding a computation inside:
 Vector(A: Type, len: Nat): Type
   case len {
     zero:
-      self<P: (self: Vector(A,0)) Type>
-      (nil: P(nil<A>))
+      self(P: (self: Vector(A,0)) Type) ->
+      (nil: P(nil(A))) ->
       P(self)
     succ:
-      self<P: (self: Vector(A,Nat.succ(len.pred))) Type>
-      (cons: (head: A) (tail: Vector<A, len.pred>) P(cons(A,len.pred,head,tail)))
+      self(P: (self: Vector(A,Nat.succ(len.pred))) Type) ->
+      (cons: (head: A) -> (tail: Vector(A, len.pred)) -> P(cons(A,len.pred,head,tail))) ->
       P(self)
   }
 
-nil<A: Type>: Vector<A, 0>
+nil(A: Type): Vector(A, 0)
   (self, nil) nil
 
-cons<A: Type, len: Nat>(head: A, tail: Vector<A, len>): Vector<A, Nat.succ(len)>
+cons(A: Type, len: Nat, head: A, tail: Vector(A, len)): Vector(A, Nat.succ(len))
   (self, cons) cons(head, tail)
 ```
 
@@ -361,10 +357,10 @@ the `nil` constructor. When `len` is `succ(n)`, it becomes a datatype with only
 the `cons` constructor. It is as if we wrote this hypothetical syntax:
 
 ```
-type Vector<A: Type, len: Nat> {
+type Vector(A: Type, len: Nat) {
   case len {
     zero: nil
-    succ: cons(head: A, tail: Vector<A, len.pred>)
+    succ: cons(head: A, tail: Vector(A, len.pred))
   }
 }
 ```
@@ -373,7 +369,7 @@ Is that enough to implement Tesla's datatypes? Yes, and it behaves exactly as
 expected! We can construct Vectors using `cons`:
 
 ```
-my_vec: Vector<Nat, 3>
+my_vec: Vector(Nat, 3)
   cons!!(100, cons!!(200, cons!!(300, nil!)))
 ```
 
@@ -381,7 +377,7 @@ And we can destruct using the `case` syntax, which will work since the
 desugaring is the same:
 
 ```
-head<A: Type, len: Nat>(vec: Vector<A, Nat.succ(len)>): A
+head(A: Type, len: Nat, vec: Vector(A, Nat.succ(len))): A
   case vec {
     cons: vec.head
   }
@@ -391,7 +387,7 @@ The `head` function magically type-checks with only the `cons` case, because
 Kind knows that the `size` is not `0`. If the size of the vector was unknown:
 
 ```
-head<A: Type, len: Nat>(vec: Vector<A, len>): Maybe<A>
+head(A: Type, len: Nat, vec: Vector(A, len)): Maybe(A)
   case vec {
     nil: ?a
     cons: ?b
@@ -403,7 +399,7 @@ pattern-match on `vec` on the body of `head` at all. But we can if we
 pattern-match on `len` first and then specialize the type of `vec` with `with`:
 
 ```
-head<A: Type, len: Nat>(vec: Vector<A, len>): Maybe<A>
+head(A: Type, len: Nat, vec: Vector(A, len)): Maybe(A)
   case len with vec {
     zero: case vec {
       nil: none
@@ -453,11 +449,11 @@ encoding it without the `swap` constructor:
 
 ```javascript
 UPair(A: Type): Type
-  self<P: UPair<A> -> Type>
-  (make: (a: A) (b: A) P(UPair.make<A>(a,b)))
+  self(P: UPair(A) -> Type) ->
+  (make: (a: A) -> (b: A) -> P(UPair.make(A, a,b))) ->
   P(self)
 
-UPair.make<A: Type>(a: A, b: A): UPair<A>
+UPair.make(A: Type, a: A, b: A): UPair(A)
   (P, make) make(a, b)
 ```
 
@@ -466,12 +462,12 @@ constructor:
 
 ```javascript
 UPair(A: Type): Type
-  self<P: UPair<A> -> Type>
-  (make: (a: A) (b: A) P(UPair.make<A>(a,b)))
-  (swap: (a: A) (b: A) Equal(_, make(a,b), make(b,a)))
+  self(P: UPair(A) -> Type) ->
+  (make: (a: A) -> (b: A) -> P(UPair.make(A, a,b))) ->
+  (swap: (a: A) -> (b: A) -> Equal(_, make(a,b), make(b,a))) ->
   P(self)
 
-UPair.make<A: Type>(a: A, b: A): UPair<A>
+UPair.make(A: Type, a: A, b: A): UPair(A)
   (P, make, swap) make(a, b)
 ```
 
@@ -480,18 +476,18 @@ As you can see, all we did is add a new constructor, `swap`, that returns an
 pattern-match an `UPair`, demand a proof that the value returned by the `make`
 branch doesn't depend on the order of `a` and `b`. Does that work? No! That's
 because Kind doesn't have heterogeneous equality, and `make(a,b)` and
-`make(b,a)` have different types (`P(UPair.make<A>(a,b))` and
-`P(UPair.make<A>(b,a))`). We can make it work, though, if we create a
+`make(b,a)` have different types (`P(UPair.make(A, a,b))` and
+`P(UPair.make(A, b,a))`). We can make it work, though, if we create a
 non-inductive version of UPair:
 
 ```javascript
 UPair(A: Type): Type
-  self<P: Type>
-  (make: (a: A) (b: A) P)
-  (swap: (a: A) (b: A) Equal(P, make(a,b), make(b,a)))
+  self(P: Type) ->
+  (make: (a: A) -> (b: A) -> P) ->
+  (swap: (a: A) -> (b: A) -> Equal(P, make(a,b), make(b,a))) ->
   P
 
-UPair.make<A: Type>(a: A, b: A): UPair<A>
+UPair.make(A: Type, a: A, b: A): UPair(A)
   (P, make, swap) make(a, b)
 ```
 
