@@ -1,4 +1,4 @@
 I16.pow(a: I16, b: I16): I16
   open a
   open b
-  I16.new(Word.pow!(a.value, b.value))
+  I16.new(Word.s_pow!(a.value, b.value))
