@@ -52,9 +52,17 @@ Web.Kaelin: App(Web.Kaelin.State)
           48s: App.post(state.room, Web.Kaelin.Command.create_hero("croni"))
         } default App.pass
        mouse_up game :
-           App.print("Clicou")
+           let info = state.interface
+           open info
+           let pos = info.mouse_pos
+           open pos
+           let {x, y} = {U32.div(pos.fst, 2u), 
+             U32.div(pos.snd, 2u)}
+           App.print(Pair.show(U32, U32, U32.to_string, U32.to_string,
+             {x, y}))
        tick game:
-           App.pass
+           let info = event.info
+           App.store!(Web.Kaelin.Action.update_interface(info, state))
       post game:
         log(event.data)
         switch String.starts_with(event.data) {
