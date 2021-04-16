@@ -220,7 +220,7 @@ Int.new(pos: Nat, neg: Nat): Int
 
 As you can see, the `Int.new` constructor isn't an atomic value, but instead, it
 is just a regular definition. Does that mean we can add computations inside that
-definition? Sure! And that is exactly what we going to do:
+definition? Sure! And that is exactly what we are going to do:
 
 ```javascript
 Int.new(pos: Nat, neg: Nat): Int
