@@ -17,7 +17,7 @@ Web.Kaelin.Command.create_player(hero_id: String) : String
 Web.Kaelin: App(Web.Kaelin.State)
   let img = VoxBox.alloc_capacity(U32.mul(65536u, 8u))
   // Initial state
-  let init = Web.Kaelin.State.game(Web.Kaelin.Resources.room, 0, {}, {})
+  let init = Web.Kaelin.State.game(Web.Kaelin.Resources.room, 0, {}, {}, App.EnvInfo.new({256u, 256u}, {0u, 0u}))
 
   // Render function
   //  0s - 10s: contagem regressiva

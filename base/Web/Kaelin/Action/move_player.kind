@@ -10,7 +10,7 @@ Web.Kaelin.Action.move_player(player_addr: String, x: Int, y: Int, state: Web.Ka
           some: 
             let player = Web.Kaelin.Player.move_by(x, y, player.value)
             let players = state.players{player_addr} <- player
-            Web.Kaelin.State.game(state.room, state.tick, players, state.map)
+            Web.Kaelin.State.game(state.room, state.tick, players, state.map, state.interface)
         }
   } default state
 //   case state {
