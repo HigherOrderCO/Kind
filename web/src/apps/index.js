@@ -4,4 +4,5 @@ module.exports = {
   'Web.KindWebsite': import('./Web.KindWebsite.js'),
   'Web.Online': import('./Web.Online.js'),
   'Web.Senhas': import('./Web.Senhas.js'),
+  'Web.TicTacToe': import('./Web.TicTacToe.js'),
 }
