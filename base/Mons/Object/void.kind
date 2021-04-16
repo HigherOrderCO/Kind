@@ -1,4 +1,4 @@
 Mons.Object.void: Mons.Object
   let void = Mons.Kind.Terrain(Mons.Kind.terrain.VOID)
-  Mons.Object.new(void, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0u, [], {33u, []},
-   0u, Mons.Effect.clear)
+  Mons.Object.new(void, Mons.Dir.down, Mons.Pad.null, 0#32, 0#32, [], 0#32, [], {3#32, []},
+   0#32, Mons.Effect.clear)

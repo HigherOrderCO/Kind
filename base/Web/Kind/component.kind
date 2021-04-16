@@ -1,5 +1,5 @@
 Web.Kind.component.header(page: Web.KindWebsite.Page): DOM
-  let vbox = VoxBox.alloc_capacity(100u)
+  let vbox = VoxBox.alloc_capacity(0#32)
   let line = 
     DOM.node("div", {}, {
         "text-align" : "center", 

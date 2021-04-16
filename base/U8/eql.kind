@@ -1,4 +1,4 @@
 U8.eql(a: U8, b: U8): Bool
   open a
-  open b 
+  open b
   Word.eql!(a.value, b.value)

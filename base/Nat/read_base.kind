@@ -1,0 +1,3 @@
+// TODO
+Nat.read_base(base: Nat, str: String): Nat
+  Nat.read_base(base, str)

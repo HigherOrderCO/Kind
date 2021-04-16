@@ -1,0 +1,3 @@
+I64.to_bits(a: I64): Bits
+  open a
+  Word.to_bits!(a.value)

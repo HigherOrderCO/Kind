@@ -1,0 +1,3 @@
+U256.to_bits(a: U256): Bits
+  open a
+  Word.to_bits!(a.value)

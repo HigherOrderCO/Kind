@@ -1,0 +1,3 @@
+U128.to_bits(a: U128): Bits
+  open a
+  Word.to_bits!(a.value)

@@ -1,0 +1,3 @@
+U256.inc(a: U256): U256
+  open a
+  U256.new(Word.inc!(a.value))

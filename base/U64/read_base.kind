@@ -1,0 +1,2 @@
+U64.read_base(base: U64, str: String): U64
+  U64.read_base(base, str)

@@ -1,6 +1,2 @@
 Int.to_nat(a: Int): Pair(Bool, Nat)
-  open a
-  case a.neg {
-    zero: Pair.new!!(Bool.false, a.pos),
-    succ: Pair.new!!(Bool.true, a.neg),
-  }
+  {Int.is_neg(a), Int.abs(a)}

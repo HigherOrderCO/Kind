@@ -1,0 +1,3 @@
+I16.to_int(a: I16): Int
+  open a
+  Word.to_int!(a.value)

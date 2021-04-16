@@ -1,0 +1,5 @@
+I64.mul(a: I64, b: I64): I64
+  open a
+  open b
+  I64.new(Word.mul!(a.value, b.value))
+

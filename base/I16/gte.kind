@@ -1,0 +1,4 @@
+I16.gte(a: I16, b: I16): Bool
+  open a
+  open b
+  Word.s_gte!(a.value, b.value)

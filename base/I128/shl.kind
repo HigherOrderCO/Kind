@@ -1,0 +1,4 @@
+I128.shl(n: I128, a: I128): I128
+  open n
+  open a
+  I128.new(Word.s_shl!(n.value, a.value))

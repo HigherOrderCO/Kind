@@ -1,0 +1,4 @@
+I8.eql(a: I8, b: I8): Bool
+  open a
+  open b
+  Word.eql!(a.value, b.value)
