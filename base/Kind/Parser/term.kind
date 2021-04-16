@@ -60,6 +60,10 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.machine_integer.unsigned(32),
       Kind.Parser.machine_integer.unsigned(16),
       Kind.Parser.machine_integer.unsigned(8),
+      Kind.Parser.u64,
+      Kind.Parser.u32,
+      Kind.Parser.u16,
+      Kind.Parser.u8,
       Kind.Parser.nat,
       Kind.Parser.reference,
     ]);
