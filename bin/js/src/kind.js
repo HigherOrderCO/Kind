@@ -12447,7 +12447,7 @@ module.exports = (function() {
             case 'Parser.Reply.value':
                 var $4816 = self.idx;
                 var $4817 = self.code;
-                var self = Kind$Parser$text$(" ", $4816, $4817);
+                var self = Parser$text$(" ", $4816, $4817);
                 switch (self._) {
                     case 'Parser.Reply.error':
                         var $4819 = self.idx;

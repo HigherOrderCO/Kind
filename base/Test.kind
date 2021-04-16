@@ -1,2 +1,2 @@
-Test: String
-  "hey"
+Test: Nat
+  7 % 2
