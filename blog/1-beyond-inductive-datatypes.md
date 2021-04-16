@@ -37,6 +37,8 @@ destroy_theorem(a: Nat): destroy(a) == 0
     zero: refl
     succ: destroy_theorem(a.pred)
   }!
+
+// Note: period (".") is just a name-valid character, just like letters.
 ```
 
 This should be familiar to a reader used to traditional proof assistants. For
