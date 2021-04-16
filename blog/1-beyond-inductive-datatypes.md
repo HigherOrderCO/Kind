@@ -193,7 +193,7 @@ This would be technically correct, but algorithms would become considerably
 worse, as we'd need to prove that `eq` still holds every time we construct and
 `Int`. This is terrible.  What if we could, instead, have an `Int.new` 
 constructor that automatically "canonicalized itself", such that 
-`Int.new(5, 2)` **reduces to** `Int.new(3, 0)`, making both equal 
+`Int.new(5, 2)` **reduced to** `Int.new(3, 0)`, making both equal 
 **by definition**?
 
 A friend of mine, Tesla Zhang, has some unpublished work, where he uses this
