@@ -25,8 +25,6 @@ type App.Event {
   tick(
     time: U64
     info: App.EnvInfo
-    screen_size: Pair(U32,U32)
-    mouse_pos: Pair(U32,U32)
   )
   dom(
     time: U64
