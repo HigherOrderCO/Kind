@@ -20,6 +20,6 @@ Web.Kaelin.Action.move_player(player_addr: String, x: Int, y: Int, state: Web.Ka
 //         new: Web.Kaelin.Coord.new(Int.add(old_pos.i, x), Int.add(old_pos.j, y))
 //         }
 //         let map = Web.Kaelin.Map.swap(0, old_pos, new_pos, state.map)
-//         let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
+//         let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map, state.interface)
 //         state
 //   } default state

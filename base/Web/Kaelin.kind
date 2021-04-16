@@ -54,6 +54,18 @@ Web.Kaelin: App(Web.Kaelin.State)
           'W': App.post(state.room, "0x2300000000000000000000000000000000000000000000000000000000000001")
           'S': App.post(state.room, "0x2400000000000000000000000000000000000000000000000000000000000001")
         } default App.pass
+       mouse_up game :
+           let info = state.interface
+           open info
+           let pos = info.mouse_pos
+           open pos
+           let {x, y} = {U32.div(pos.fst, 2u), 
+             U32.div(pos.snd, 2u)}
+           App.print(Pair.show(U32, U32, U32.to_string, U32.to_string,
+             {x, y}))
+       tick game:
+           let info = event.info
+           App.store!(Web.Kaelin.Action.update_interface(info, state))
       post game:
       // this will be replaced by deserialze when it is ready
         switch String.starts_with(event.data) {
