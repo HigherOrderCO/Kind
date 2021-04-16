@@ -45,6 +45,8 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.switch,
       Kind.Parser.goal,
       Kind.Parser.hole,
+      Kind.Parser.float.64,
+      Kind.Parser.float.32,
       Kind.Parser.machine_integer.signed(256),
       Kind.Parser.machine_integer.signed(128),
       Kind.Parser.machine_integer.signed(64),
