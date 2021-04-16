@@ -257,16 +257,13 @@ module.exports = class AppPlay extends Component {
         var length = elem.value.length;
         var capacity = elem.value.capacity;
         var buffer = elem.value.buffer;
-        console.log("..", length);
         // Renders pixels to buffers
         for (var i = 0; i < length; ++i) {
           var pos = buffer[i * 2 + 0];
           var col = buffer[i * 2 + 1];
-          var col = 0xFF0000FF;
           var p_x = (pos >>> 0) & 0xFFF;
           var p_y = (pos >>> 12) & 0xFFF;
           var p_z = (pos >>> 24) & 0xFF;
-          console.log("->", p_x, p_y, p_z, col.toString(16));
           var idx = p_y * canvas.width + p_x;
           var dep = canvas.depth_u8[idx];
           if (p_x >= 0 && p_x < width && p_y >= 0 && p_y < height && p_z >= dep) {

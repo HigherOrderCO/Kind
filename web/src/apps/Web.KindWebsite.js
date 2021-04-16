@@ -1187,7 +1187,7 @@ module.exports = (function() {
     const Web$Kind$component$header_tabs = x0 => Web$Kind$component$header_tabs$(x0);
 
     function Web$Kind$component$header$(_page$1) {
-        var _vbox$2 = VoxBox$alloc_capacity$(0);
+        var _vbox$2 = VoxBox$alloc_capacity$(100);
         var _line$3 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("text-align", "center"), List$cons$(Pair$new$("padding", "10px 50px 10px 50px"), List$nil))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("color", "#9370DB"), List$nil)), List$cons$(DOM$text$(String$repeat$("=", 90n)), List$nil)), List$nil));
         var $234 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("h2", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "40px"), List$cons$(Pair$new$("font-family", "verdana"), List$cons$(Pair$new$("text-align", "center"), List$nil)))), List$cons$(DOM$text$("KIND language"), List$nil)), List$cons$(_line$3, List$cons$(Web$Kind$component$header_tabs$(_page$1), List$nil))));
         return $234;
@@ -1308,7 +1308,7 @@ module.exports = (function() {
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$KindWebsite = (() => {
-        var _init$1 = Web$KindWebsite$State$new$(Pair$new$(0, 0), Web$KindWebsite$Page$home);
+        var _init$1 = Web$KindWebsite$State$new$(Pair$new$(500, 400), Web$KindWebsite$Page$home);
         var _draw$2 = (_state$2 => {
             var self = _state$2;
             switch (self._) {

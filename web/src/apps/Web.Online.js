@@ -1325,9 +1325,9 @@ module.exports = (function() {
             for (let _i$7 = $282; _i$7 < $283; ++_i$7) {
                 var _pos$9 = ((_src$4.buffer[_i$7 * 2]));
                 var _col$10 = ((_src$4.buffer[_i$7 * 2 + 1]));
-                var _p_x$11 = (_pos$9 & 5);
-                var _p_y$12 = ((_pos$9 & 0) >>> 2);
-                var _p_z$13 = ((_pos$9 & 0) >>> 4);
+                var _p_x$11 = (_pos$9 & 4095);
+                var _p_y$12 = ((_pos$9 & 16773120) >>> 12);
+                var _p_z$13 = ((_pos$9 & 4278190080) >>> 24);
                 var _p_x$14 = ((_p_x$11 + _x$1) >>> 0);
                 var _p_y$15 = ((_p_y$12 + _y$2) >>> 0);
                 var _p_z$16 = ((_p_z$13 + _z$3) >>> 0);
@@ -1643,14 +1643,14 @@ module.exports = (function() {
 
     function VoxBox$parse_byte$(_idx$1, _voxdata$2) {
         var _chr$3 = (_voxdata$2.slice(((_idx$1 * 2) >>> 0), ((((_idx$1 * 2) >>> 0) + 2) >>> 0)));
-        var $350 = (parseInt(_chr$3, 6));
+        var $350 = (parseInt(_chr$3, 16));
         return $350;
     };
     const VoxBox$parse_byte = x0 => x1 => VoxBox$parse_byte$(x0, x1);
     const Col32$new = a0 => a1 => a2 => a3 => ((0 | a0 | (a1 << 8) | (a2 << 16) | (a3 << 24)));
 
     function VoxBox$parse$(_voxdata$1) {
-        var _siz$2 = (((_voxdata$1.length) / 2) >>> 0);
+        var _siz$2 = (((_voxdata$1.length) / 12) >>> 0);
         var _img$3 = VoxBox$alloc_capacity$(_siz$2);
         var _img$4 = (() => {
             var $352 = _img$3;
@@ -1665,7 +1665,7 @@ module.exports = (function() {
                 var _g$10 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 4) >>> 0), _voxdata$1);
                 var _b$11 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 5) >>> 0), _voxdata$1);
                 var _pos$12 = ((0 | _x$6 | (_y$7 << 12) | (_z$8 << 24)));
-                var _col$13 = ((0 | _r$9 | (_g$10 << 8) | (_b$11 << 16) | (5 << 24)));
+                var _col$13 = ((0 | _r$9 | (_g$10 << 8) | (_b$11 << 16) | (255 << 24)));
                 var $352 = ((_img$5.buffer[_img$5.length * 2] = _pos$12, _img$5.buffer[_img$5.length * 2 + 1] = _col$13, _img$5.length++, _img$5));
                 _img$5 = $352;
             };
@@ -2097,7 +2097,7 @@ module.exports = (function() {
                 var $438 = $440;
                 break;
             case 'Maybe.none':
-                var $452 = BitsMap$set$(_key$4, Pair$new$(8, 8), _state$3);
+                var $452 = BitsMap$set$(_key$4, Pair$new$(128, 128), _state$3);
                 var $438 = $452;
                 break;
         };
@@ -2116,7 +2116,7 @@ module.exports = (function() {
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Online = (() => {
-        var _vbox$1 = VoxBox$alloc_capacity$(0);
+        var _vbox$1 = VoxBox$alloc_capacity$(3200);
         var _init$2 = BitsMap$new;
         var _draw$3 = (_state$3 => {
             var _vbox$4 = VoxBox$clear$(_vbox$1);

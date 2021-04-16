@@ -1444,7 +1444,7 @@ module.exports = (function() {
 
     function VoxBox$parse_byte$(_idx$1, _voxdata$2) {
         var _chr$3 = (_voxdata$2.slice(((_idx$1 * 2) >>> 0), ((((_idx$1 * 2) >>> 0) + 2) >>> 0)));
-        var $304 = (parseInt(_chr$3, 6));
+        var $304 = (parseInt(_chr$3, 16));
         return $304;
     };
     const VoxBox$parse_byte = x0 => x1 => VoxBox$parse_byte$(x0, x1);
@@ -1609,7 +1609,7 @@ module.exports = (function() {
     const VoxBox$push = a0 => a1 => a2 => ((a2.buffer[a2.length * 2] = a0, a2.buffer[a2.length * 2 + 1] = a1, a2.length++, a2));
 
     function VoxBox$parse$(_voxdata$1) {
-        var _siz$2 = (((_voxdata$1.length) / 2) >>> 0);
+        var _siz$2 = (((_voxdata$1.length) / 12) >>> 0);
         var _img$3 = VoxBox$alloc_capacity$(_siz$2);
         var _img$4 = (() => {
             var $345 = _img$3;
@@ -1624,7 +1624,7 @@ module.exports = (function() {
                 var _g$10 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 4) >>> 0), _voxdata$1);
                 var _b$11 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 5) >>> 0), _voxdata$1);
                 var _pos$12 = ((0 | _x$6 | (_y$7 << 12) | (_z$8 << 24)));
-                var _col$13 = ((0 | _r$9 | (_g$10 << 8) | (_b$11 << 16) | (5 << 24)));
+                var _col$13 = ((0 | _r$9 | (_g$10 << 8) | (_b$11 << 16) | (255 << 24)));
                 var $345 = ((_img$5.buffer[_img$5.length * 2] = _pos$12, _img$5.buffer[_img$5.length * 2 + 1] = _col$13, _img$5.length++, _img$5));
                 _img$5 = $345;
             };
@@ -2220,7 +2220,7 @@ module.exports = (function() {
     };
     const VoxBox$clear = x0 => VoxBox$clear$(x0);
     const Web$Kaelin$Resources$map_size = 5;
-    const Web$Kaelin$Resources$hexagon_radius = 5;
+    const Web$Kaelin$Resources$hexagon_radius = 15;
     const Nat$add = a0 => a1 => (a0 + a1);
 
     function Int$add$(_a$1, _b$2) {
@@ -2366,8 +2366,8 @@ module.exports = (function() {
         return $479;
     };
     const Int$div_nat = x0 => x1 => Int$div_nat$(x0, x1);
-    const Web$Kaelin$Resources$center_x = 8;
-    const Web$Kaelin$Resources$center_y = 8;
+    const Web$Kaelin$Resources$center_x = 128;
+    const Web$Kaelin$Resources$center_y = 128;
 
     function Int$mul$(_a$1, _b$2) {
         var $481 = _a$1((_a$pos$3 => _a$neg$4 => {
@@ -2834,9 +2834,9 @@ module.exports = (function() {
             for (let _i$7 = $593; _i$7 < $594; ++_i$7) {
                 var _pos$9 = ((_src$4.buffer[_i$7 * 2]));
                 var _col$10 = ((_src$4.buffer[_i$7 * 2 + 1]));
-                var _p_x$11 = (_pos$9 & 5);
-                var _p_y$12 = ((_pos$9 & 0) >>> 2);
-                var _p_z$13 = ((_pos$9 & 0) >>> 4);
+                var _p_x$11 = (_pos$9 & 4095);
+                var _p_y$12 = ((_pos$9 & 16773120) >>> 12);
+                var _p_z$13 = ((_pos$9 & 4278190080) >>> 24);
                 var _p_x$14 = ((_p_x$11 + _x$1) >>> 0);
                 var _p_y$15 = ((_p_y$12 + _y$2) >>> 0);
                 var _p_z$16 = ((_p_z$13 + _z$3) >>> 0);
@@ -3018,101 +3018,101 @@ module.exports = (function() {
     const PixelFont$small_black$99 = VoxBox$parse$("01001e21212802001e21212803001e21212800011e21212800021e21212800031e21212801041e21212802041e21212803041e212128");
     const PixelFont$small_black = (() => {
         var _map$1 = Map$new;
-        var _map$2 = PixelFont$set_img$(0, PixelFont$small_black$100, _map$1);
-        var _map$3 = PixelFont$set_img$(1, PixelFont$small_black$101, _map$2);
-        var _map$4 = PixelFont$set_img$(2, PixelFont$small_black$102, _map$3);
-        var _map$5 = PixelFont$set_img$(3, PixelFont$small_black$103, _map$4);
-        var _map$6 = PixelFont$set_img$(4, PixelFont$small_black$104, _map$5);
-        var _map$7 = PixelFont$set_img$(5, PixelFont$small_black$105, _map$6);
-        var _map$8 = PixelFont$set_img$(6, PixelFont$small_black$106, _map$7);
-        var _map$9 = PixelFont$set_img$(7, PixelFont$small_black$107, _map$8);
-        var _map$10 = PixelFont$set_img$(8, PixelFont$small_black$108, _map$9);
-        var _map$11 = PixelFont$set_img$(9, PixelFont$small_black$109, _map$10);
-        var _map$12 = PixelFont$set_img$(0, PixelFont$small_black$110, _map$11);
-        var _map$13 = PixelFont$set_img$(1, PixelFont$small_black$111, _map$12);
-        var _map$14 = PixelFont$set_img$(2, PixelFont$small_black$112, _map$13);
-        var _map$15 = PixelFont$set_img$(3, PixelFont$small_black$113, _map$14);
-        var _map$16 = PixelFont$set_img$(4, PixelFont$small_black$114, _map$15);
-        var _map$17 = PixelFont$set_img$(5, PixelFont$small_black$115, _map$16);
-        var _map$18 = PixelFont$set_img$(6, PixelFont$small_black$116, _map$17);
-        var _map$19 = PixelFont$set_img$(7, PixelFont$small_black$117, _map$18);
-        var _map$20 = PixelFont$set_img$(8, PixelFont$small_black$118, _map$19);
-        var _map$21 = PixelFont$set_img$(9, PixelFont$small_black$119, _map$20);
-        var _map$22 = PixelFont$set_img$(0, PixelFont$small_black$120, _map$21);
-        var _map$23 = PixelFont$set_img$(1, PixelFont$small_black$121, _map$22);
-        var _map$24 = PixelFont$set_img$(2, PixelFont$small_black$122, _map$23);
-        var _map$25 = PixelFont$set_img$(3, PixelFont$small_black$123, _map$24);
-        var _map$26 = PixelFont$set_img$(4, PixelFont$small_black$124, _map$25);
-        var _map$27 = PixelFont$set_img$(5, PixelFont$small_black$125, _map$26);
-        var _map$28 = PixelFont$set_img$(6, PixelFont$small_black$126, _map$27);
-        var _map$29 = PixelFont$set_img$(2, PixelFont$small_black$32, _map$28);
-        var _map$30 = PixelFont$set_img$(3, PixelFont$small_black$33, _map$29);
-        var _map$31 = PixelFont$set_img$(4, PixelFont$small_black$34, _map$30);
-        var _map$32 = PixelFont$set_img$(5, PixelFont$small_black$35, _map$31);
-        var _map$33 = PixelFont$set_img$(6, PixelFont$small_black$36, _map$32);
-        var _map$34 = PixelFont$set_img$(7, PixelFont$small_black$37, _map$33);
-        var _map$35 = PixelFont$set_img$(8, PixelFont$small_black$38, _map$34);
-        var _map$36 = PixelFont$set_img$(9, PixelFont$small_black$39, _map$35);
-        var _map$37 = PixelFont$set_img$(0, PixelFont$small_black$40, _map$36);
-        var _map$38 = PixelFont$set_img$(1, PixelFont$small_black$41, _map$37);
-        var _map$39 = PixelFont$set_img$(2, PixelFont$small_black$42, _map$38);
-        var _map$40 = PixelFont$set_img$(3, PixelFont$small_black$43, _map$39);
-        var _map$41 = PixelFont$set_img$(4, PixelFont$small_black$44, _map$40);
-        var _map$42 = PixelFont$set_img$(5, PixelFont$small_black$45, _map$41);
-        var _map$43 = PixelFont$set_img$(6, PixelFont$small_black$46, _map$42);
-        var _map$44 = PixelFont$set_img$(7, PixelFont$small_black$47, _map$43);
-        var _map$45 = PixelFont$set_img$(8, PixelFont$small_black$48, _map$44);
-        var _map$46 = PixelFont$set_img$(9, PixelFont$small_black$49, _map$45);
-        var _map$47 = PixelFont$set_img$(0, PixelFont$small_black$50, _map$46);
-        var _map$48 = PixelFont$set_img$(1, PixelFont$small_black$51, _map$47);
-        var _map$49 = PixelFont$set_img$(2, PixelFont$small_black$52, _map$48);
-        var _map$50 = PixelFont$set_img$(3, PixelFont$small_black$53, _map$49);
-        var _map$51 = PixelFont$set_img$(4, PixelFont$small_black$54, _map$50);
-        var _map$52 = PixelFont$set_img$(5, PixelFont$small_black$55, _map$51);
-        var _map$53 = PixelFont$set_img$(6, PixelFont$small_black$56, _map$52);
-        var _map$54 = PixelFont$set_img$(7, PixelFont$small_black$57, _map$53);
-        var _map$55 = PixelFont$set_img$(8, PixelFont$small_black$58, _map$54);
-        var _map$56 = PixelFont$set_img$(9, PixelFont$small_black$59, _map$55);
-        var _map$57 = PixelFont$set_img$(0, PixelFont$small_black$60, _map$56);
-        var _map$58 = PixelFont$set_img$(1, PixelFont$small_black$61, _map$57);
-        var _map$59 = PixelFont$set_img$(2, PixelFont$small_black$62, _map$58);
-        var _map$60 = PixelFont$set_img$(3, PixelFont$small_black$63, _map$59);
-        var _map$61 = PixelFont$set_img$(4, PixelFont$small_black$64, _map$60);
-        var _map$62 = PixelFont$set_img$(5, PixelFont$small_black$65, _map$61);
-        var _map$63 = PixelFont$set_img$(6, PixelFont$small_black$66, _map$62);
-        var _map$64 = PixelFont$set_img$(7, PixelFont$small_black$67, _map$63);
-        var _map$65 = PixelFont$set_img$(8, PixelFont$small_black$68, _map$64);
-        var _map$66 = PixelFont$set_img$(9, PixelFont$small_black$69, _map$65);
-        var _map$67 = PixelFont$set_img$(0, PixelFont$small_black$70, _map$66);
-        var _map$68 = PixelFont$set_img$(1, PixelFont$small_black$71, _map$67);
-        var _map$69 = PixelFont$set_img$(2, PixelFont$small_black$72, _map$68);
-        var _map$70 = PixelFont$set_img$(3, PixelFont$small_black$73, _map$69);
-        var _map$71 = PixelFont$set_img$(4, PixelFont$small_black$74, _map$70);
-        var _map$72 = PixelFont$set_img$(5, PixelFont$small_black$75, _map$71);
-        var _map$73 = PixelFont$set_img$(6, PixelFont$small_black$76, _map$72);
-        var _map$74 = PixelFont$set_img$(7, PixelFont$small_black$77, _map$73);
-        var _map$75 = PixelFont$set_img$(8, PixelFont$small_black$78, _map$74);
-        var _map$76 = PixelFont$set_img$(9, PixelFont$small_black$79, _map$75);
-        var _map$77 = PixelFont$set_img$(0, PixelFont$small_black$80, _map$76);
-        var _map$78 = PixelFont$set_img$(1, PixelFont$small_black$81, _map$77);
-        var _map$79 = PixelFont$set_img$(2, PixelFont$small_black$82, _map$78);
-        var _map$80 = PixelFont$set_img$(3, PixelFont$small_black$83, _map$79);
-        var _map$81 = PixelFont$set_img$(4, PixelFont$small_black$84, _map$80);
-        var _map$82 = PixelFont$set_img$(5, PixelFont$small_black$85, _map$81);
-        var _map$83 = PixelFont$set_img$(6, PixelFont$small_black$86, _map$82);
-        var _map$84 = PixelFont$set_img$(7, PixelFont$small_black$87, _map$83);
-        var _map$85 = PixelFont$set_img$(8, PixelFont$small_black$88, _map$84);
-        var _map$86 = PixelFont$set_img$(9, PixelFont$small_black$89, _map$85);
-        var _map$87 = PixelFont$set_img$(0, PixelFont$small_black$90, _map$86);
-        var _map$88 = PixelFont$set_img$(1, PixelFont$small_black$91, _map$87);
-        var _map$89 = PixelFont$set_img$(2, PixelFont$small_black$92, _map$88);
-        var _map$90 = PixelFont$set_img$(3, PixelFont$small_black$93, _map$89);
-        var _map$91 = PixelFont$set_img$(4, PixelFont$small_black$94, _map$90);
-        var _map$92 = PixelFont$set_img$(5, PixelFont$small_black$95, _map$91);
-        var _map$93 = PixelFont$set_img$(6, PixelFont$small_black$96, _map$92);
-        var _map$94 = PixelFont$set_img$(7, PixelFont$small_black$97, _map$93);
-        var _map$95 = PixelFont$set_img$(8, PixelFont$small_black$98, _map$94);
-        var _map$96 = PixelFont$set_img$(9, PixelFont$small_black$99, _map$95);
+        var _map$2 = PixelFont$set_img$(100, PixelFont$small_black$100, _map$1);
+        var _map$3 = PixelFont$set_img$(101, PixelFont$small_black$101, _map$2);
+        var _map$4 = PixelFont$set_img$(102, PixelFont$small_black$102, _map$3);
+        var _map$5 = PixelFont$set_img$(103, PixelFont$small_black$103, _map$4);
+        var _map$6 = PixelFont$set_img$(104, PixelFont$small_black$104, _map$5);
+        var _map$7 = PixelFont$set_img$(105, PixelFont$small_black$105, _map$6);
+        var _map$8 = PixelFont$set_img$(106, PixelFont$small_black$106, _map$7);
+        var _map$9 = PixelFont$set_img$(107, PixelFont$small_black$107, _map$8);
+        var _map$10 = PixelFont$set_img$(108, PixelFont$small_black$108, _map$9);
+        var _map$11 = PixelFont$set_img$(109, PixelFont$small_black$109, _map$10);
+        var _map$12 = PixelFont$set_img$(110, PixelFont$small_black$110, _map$11);
+        var _map$13 = PixelFont$set_img$(111, PixelFont$small_black$111, _map$12);
+        var _map$14 = PixelFont$set_img$(112, PixelFont$small_black$112, _map$13);
+        var _map$15 = PixelFont$set_img$(113, PixelFont$small_black$113, _map$14);
+        var _map$16 = PixelFont$set_img$(114, PixelFont$small_black$114, _map$15);
+        var _map$17 = PixelFont$set_img$(115, PixelFont$small_black$115, _map$16);
+        var _map$18 = PixelFont$set_img$(116, PixelFont$small_black$116, _map$17);
+        var _map$19 = PixelFont$set_img$(117, PixelFont$small_black$117, _map$18);
+        var _map$20 = PixelFont$set_img$(118, PixelFont$small_black$118, _map$19);
+        var _map$21 = PixelFont$set_img$(119, PixelFont$small_black$119, _map$20);
+        var _map$22 = PixelFont$set_img$(120, PixelFont$small_black$120, _map$21);
+        var _map$23 = PixelFont$set_img$(121, PixelFont$small_black$121, _map$22);
+        var _map$24 = PixelFont$set_img$(122, PixelFont$small_black$122, _map$23);
+        var _map$25 = PixelFont$set_img$(123, PixelFont$small_black$123, _map$24);
+        var _map$26 = PixelFont$set_img$(124, PixelFont$small_black$124, _map$25);
+        var _map$27 = PixelFont$set_img$(125, PixelFont$small_black$125, _map$26);
+        var _map$28 = PixelFont$set_img$(126, PixelFont$small_black$126, _map$27);
+        var _map$29 = PixelFont$set_img$(32, PixelFont$small_black$32, _map$28);
+        var _map$30 = PixelFont$set_img$(33, PixelFont$small_black$33, _map$29);
+        var _map$31 = PixelFont$set_img$(34, PixelFont$small_black$34, _map$30);
+        var _map$32 = PixelFont$set_img$(35, PixelFont$small_black$35, _map$31);
+        var _map$33 = PixelFont$set_img$(36, PixelFont$small_black$36, _map$32);
+        var _map$34 = PixelFont$set_img$(37, PixelFont$small_black$37, _map$33);
+        var _map$35 = PixelFont$set_img$(38, PixelFont$small_black$38, _map$34);
+        var _map$36 = PixelFont$set_img$(39, PixelFont$small_black$39, _map$35);
+        var _map$37 = PixelFont$set_img$(40, PixelFont$small_black$40, _map$36);
+        var _map$38 = PixelFont$set_img$(41, PixelFont$small_black$41, _map$37);
+        var _map$39 = PixelFont$set_img$(42, PixelFont$small_black$42, _map$38);
+        var _map$40 = PixelFont$set_img$(43, PixelFont$small_black$43, _map$39);
+        var _map$41 = PixelFont$set_img$(44, PixelFont$small_black$44, _map$40);
+        var _map$42 = PixelFont$set_img$(45, PixelFont$small_black$45, _map$41);
+        var _map$43 = PixelFont$set_img$(46, PixelFont$small_black$46, _map$42);
+        var _map$44 = PixelFont$set_img$(47, PixelFont$small_black$47, _map$43);
+        var _map$45 = PixelFont$set_img$(48, PixelFont$small_black$48, _map$44);
+        var _map$46 = PixelFont$set_img$(49, PixelFont$small_black$49, _map$45);
+        var _map$47 = PixelFont$set_img$(50, PixelFont$small_black$50, _map$46);
+        var _map$48 = PixelFont$set_img$(51, PixelFont$small_black$51, _map$47);
+        var _map$49 = PixelFont$set_img$(52, PixelFont$small_black$52, _map$48);
+        var _map$50 = PixelFont$set_img$(53, PixelFont$small_black$53, _map$49);
+        var _map$51 = PixelFont$set_img$(54, PixelFont$small_black$54, _map$50);
+        var _map$52 = PixelFont$set_img$(55, PixelFont$small_black$55, _map$51);
+        var _map$53 = PixelFont$set_img$(56, PixelFont$small_black$56, _map$52);
+        var _map$54 = PixelFont$set_img$(57, PixelFont$small_black$57, _map$53);
+        var _map$55 = PixelFont$set_img$(58, PixelFont$small_black$58, _map$54);
+        var _map$56 = PixelFont$set_img$(59, PixelFont$small_black$59, _map$55);
+        var _map$57 = PixelFont$set_img$(60, PixelFont$small_black$60, _map$56);
+        var _map$58 = PixelFont$set_img$(61, PixelFont$small_black$61, _map$57);
+        var _map$59 = PixelFont$set_img$(62, PixelFont$small_black$62, _map$58);
+        var _map$60 = PixelFont$set_img$(63, PixelFont$small_black$63, _map$59);
+        var _map$61 = PixelFont$set_img$(64, PixelFont$small_black$64, _map$60);
+        var _map$62 = PixelFont$set_img$(65, PixelFont$small_black$65, _map$61);
+        var _map$63 = PixelFont$set_img$(66, PixelFont$small_black$66, _map$62);
+        var _map$64 = PixelFont$set_img$(67, PixelFont$small_black$67, _map$63);
+        var _map$65 = PixelFont$set_img$(68, PixelFont$small_black$68, _map$64);
+        var _map$66 = PixelFont$set_img$(69, PixelFont$small_black$69, _map$65);
+        var _map$67 = PixelFont$set_img$(70, PixelFont$small_black$70, _map$66);
+        var _map$68 = PixelFont$set_img$(71, PixelFont$small_black$71, _map$67);
+        var _map$69 = PixelFont$set_img$(72, PixelFont$small_black$72, _map$68);
+        var _map$70 = PixelFont$set_img$(73, PixelFont$small_black$73, _map$69);
+        var _map$71 = PixelFont$set_img$(74, PixelFont$small_black$74, _map$70);
+        var _map$72 = PixelFont$set_img$(75, PixelFont$small_black$75, _map$71);
+        var _map$73 = PixelFont$set_img$(76, PixelFont$small_black$76, _map$72);
+        var _map$74 = PixelFont$set_img$(77, PixelFont$small_black$77, _map$73);
+        var _map$75 = PixelFont$set_img$(78, PixelFont$small_black$78, _map$74);
+        var _map$76 = PixelFont$set_img$(79, PixelFont$small_black$79, _map$75);
+        var _map$77 = PixelFont$set_img$(80, PixelFont$small_black$80, _map$76);
+        var _map$78 = PixelFont$set_img$(81, PixelFont$small_black$81, _map$77);
+        var _map$79 = PixelFont$set_img$(82, PixelFont$small_black$82, _map$78);
+        var _map$80 = PixelFont$set_img$(83, PixelFont$small_black$83, _map$79);
+        var _map$81 = PixelFont$set_img$(84, PixelFont$small_black$84, _map$80);
+        var _map$82 = PixelFont$set_img$(85, PixelFont$small_black$85, _map$81);
+        var _map$83 = PixelFont$set_img$(86, PixelFont$small_black$86, _map$82);
+        var _map$84 = PixelFont$set_img$(87, PixelFont$small_black$87, _map$83);
+        var _map$85 = PixelFont$set_img$(88, PixelFont$small_black$88, _map$84);
+        var _map$86 = PixelFont$set_img$(89, PixelFont$small_black$89, _map$85);
+        var _map$87 = PixelFont$set_img$(90, PixelFont$small_black$90, _map$86);
+        var _map$88 = PixelFont$set_img$(91, PixelFont$small_black$91, _map$87);
+        var _map$89 = PixelFont$set_img$(92, PixelFont$small_black$92, _map$88);
+        var _map$90 = PixelFont$set_img$(93, PixelFont$small_black$93, _map$89);
+        var _map$91 = PixelFont$set_img$(94, PixelFont$small_black$94, _map$90);
+        var _map$92 = PixelFont$set_img$(95, PixelFont$small_black$95, _map$91);
+        var _map$93 = PixelFont$set_img$(96, PixelFont$small_black$96, _map$92);
+        var _map$94 = PixelFont$set_img$(97, PixelFont$small_black$97, _map$93);
+        var _map$95 = PixelFont$set_img$(98, PixelFont$small_black$98, _map$94);
+        var _map$96 = PixelFont$set_img$(99, PixelFont$small_black$99, _map$95);
         var $609 = _map$96;
         return $609;
     })();
@@ -3199,7 +3199,7 @@ module.exports = (function() {
 
     function Web$Kaelin$Draw$map$(_img$1, _map$2) {
         var _img$3 = VoxBox$clear$(_img$1);
-        var _col$4 = ((0 | 0 | (0 << 8) | (5 << 16) | (5 << 24)));
+        var _col$4 = ((0 | 0 | (0 << 8) | (255 << 16) | (255 << 24)));
         var _map_size$5 = Web$Kaelin$Resources$map_size;
         var _width$6 = ((((_map_size$5 * 2) >>> 0) + 1) >>> 0);
         var _height$7 = ((((_map_size$5 * 2) >>> 0) + 1) >>> 0);
@@ -3703,7 +3703,7 @@ module.exports = (function() {
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Kaelin = (() => {
-        var _img$1 = VoxBox$alloc_capacity$(6);
+        var _img$1 = VoxBox$alloc_capacity$(65536);
         var _map$2 = Map$from_list$(List$nil);
         var _map$3 = Web$Kaelin$Draw$initial_ent$(_map$2);
         var _init$2 = Web$Kaelin$State$game$(Web$Kaelin$Resources$room, 0n, Map$from_list$(List$nil), _map$3, App$EnvInfo$new$(Pair$new$(0, 0), Pair$new$(0, 0)));
@@ -3751,7 +3751,7 @@ module.exports = (function() {
                     switch (self._) {
                         case 'Web.Kaelin.State.game':
                             var $756 = self.room;
-                            var self = ($754 === 8);
+                            var self = ($754 === 48);
                             if (self) {
                                 var $758 = App$post$($756, Web$Kaelin$Command$create_hero$("croni"));
                                 var $757 = $758;

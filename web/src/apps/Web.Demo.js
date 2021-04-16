@@ -1784,15 +1784,15 @@ module.exports = (function() {
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Demo = (() => {
         var _vbox$1 = VoxBox$alloc_capacity$(65536);
-        var _init$2 = Pair$new$(8, 8);
+        var _init$2 = Pair$new$(128, 128);
         var _draw$3 = (_state$3 => {
             var _p_x$4 = Pair$fst$(_state$3);
             var _p_y$5 = Pair$snd$(_state$3);
             var _col$6 = (_x$6 => _y$7 => {
-                var $381 = ((0 | 0 | (0 << 8) | (5 << 16) | (5 << 24)));
+                var $381 = ((0 | 200 | (200 << 8) | (255 << 16) | (255 << 24)));
                 return $381;
             });
-            var $380 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("Kind Demo App"), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("- Press W/A/S/D to move"), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "play_game"), List$nil)), Map$from_list$(List$cons$(Pair$new$("color", "blue"), List$cons$(Pair$new$("text-decoration", "underline"), List$nil))), List$cons$(DOM$text$("- Click here to play a game"), List$nil)), List$cons$(DOM$vbox$(Map$from_list$(List$nil), Map$from_list$(List$nil), VoxBox$Draw$square$(_p_x$4, _p_y$5, 8, 6, 6, _col$6, _vbox$1)), List$nil)))));
+            var $380 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("Kind Demo App"), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("- Press W/A/S/D to move"), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "play_game"), List$nil)), Map$from_list$(List$cons$(Pair$new$("color", "blue"), List$cons$(Pair$new$("text-decoration", "underline"), List$nil))), List$cons$(DOM$text$("- Click here to play a game"), List$nil)), List$cons$(DOM$vbox$(Map$from_list$(List$nil), Map$from_list$(List$nil), VoxBox$Draw$square$(_p_x$4, _p_y$5, 128, 16, 16, _col$6, _vbox$1)), List$nil)))));
             return $380;
         });
         var _when$4 = (_event$4 => _state$5 => {
@@ -1807,22 +1807,22 @@ module.exports = (function() {
                             var $386 = self.snd;
                             var self = ($383 === 65);
                             if (self) {
-                                var $388 = App$store$(Pair$new$((Math.max($385 - 6, 0)), $386));
+                                var $388 = App$store$(Pair$new$((Math.max($385 - 16, 0)), $386));
                                 var $387 = $388;
                             } else {
                                 var self = ($383 === 68);
                                 if (self) {
-                                    var $390 = App$store$(Pair$new$((($385 + 6) >>> 0), $386));
+                                    var $390 = App$store$(Pair$new$((($385 + 16) >>> 0), $386));
                                     var $389 = $390;
                                 } else {
                                     var self = ($383 === 87);
                                     if (self) {
-                                        var $392 = App$store$(Pair$new$($385, (Math.max($386 - 6, 0))));
+                                        var $392 = App$store$(Pair$new$($385, (Math.max($386 - 16, 0))));
                                         var $391 = $392;
                                     } else {
                                         var self = ($383 === 83);
                                         if (self) {
-                                            var $394 = App$store$(Pair$new$($385, (($386 + 6) >>> 0)));
+                                            var $394 = App$store$(Pair$new$($385, (($386 + 16) >>> 0)));
                                             var $393 = $394;
                                         } else {
                                             var $395 = App$pass;
