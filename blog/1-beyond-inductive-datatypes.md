@@ -150,8 +150,8 @@ Int.add(a: Int, b: Int): Int
 Disgusting, right? The odds I've inverted some sign or off-by-one error when
 porting this code are great, and I don't want to prove it either.
 
-An alternative would be to represent an `Int` as a pair of two `Nat`s, one
-representing the positive and negative magnitude.
+An alternative would be to represent an `Int` as a pair of two `Nat`s,
+representing the positive and negative magnitudes.
 
 ```javascript
 // Int.val(a, b) represents `a - b`
