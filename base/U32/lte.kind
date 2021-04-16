@@ -1,2 +1,4 @@
 U32.lte(a: U32, b: U32): Bool
-  Cmp.as_lte(U32.cmp(a, b))
+  open a
+  open b
+  Word.lte!(a.value, b.value)

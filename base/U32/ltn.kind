@@ -1,2 +1,4 @@
 U32.ltn(a: U32, b: U32): Bool
-  Cmp.as_ltn(U32.cmp(a, b))
+  open a
+  open b
+  Word.ltn!(a.value, b.value)
