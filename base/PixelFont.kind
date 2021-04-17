@@ -1,13 +1,13 @@
 PixelFont: Type
-  Map(Image3D)
+  Map(VoxBox)
 
-// Adds an Image3D to a char on the map
-PixelFont.set_img(char: Char, img: Image3D, map: PixelFont): PixelFont
+// Adds an VoxBox to a char on the map
+PixelFont.set_img(char: Char, img: VoxBox, map: PixelFont): PixelFont
   Map.set!(U16.show_hex(char), img, map)
 
 // Get the image given a map
-PixelFont.get_img(char: Char, map: PixelFont): Maybe(Image3D)
+PixelFont.get_img(char: Char, map: PixelFont): Maybe(VoxBox)
   case Map.get!(U16.show_hex(char), map) as got{
-    none: Maybe.none<Image3D>
-    some: Maybe.some<Image3D>(got.value)
+    none: Maybe.none<VoxBox>
+    some: Maybe.some<VoxBox>(got.value)
   }

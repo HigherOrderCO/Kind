@@ -1,0 +1,3 @@
+I16.length(str: String): I16
+  I16.length(str)
+

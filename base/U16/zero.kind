@@ -1,2 +1,2 @@
 U16.zero: U16
-  U16.new(Word.zero(16))
+  U16.new(Word.zero!)

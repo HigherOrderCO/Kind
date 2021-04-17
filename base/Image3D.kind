@@ -1,3 +1,0 @@
-type Image3D {
-  new(length: U32, capacity: U32, buffer: Buffer32)
-}

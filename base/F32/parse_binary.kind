@@ -1,0 +1,3 @@
+// FIXME: Returning the wrong result after compilation. Why?
+F32.parse_binary(str: String): F32
+  F32.new(Word.from_bits!(String.to_bits(str)))

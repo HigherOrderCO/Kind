@@ -1,0 +1,6 @@
+Int.to_i256(a: Int): I256
+  open a
+  case a.neg {
+    zero: I256.new(Nat.to_word!(a.pos))
+    succ: I256.neg(I256.new(Nat.to_word!(a.neg)))
+  }

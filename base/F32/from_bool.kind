@@ -1,0 +1,5 @@
+F32.from_bool(b: Bool): F32 
+  case b {
+   true : F32.1,
+   false: F32.0
+  }

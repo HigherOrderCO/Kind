@@ -1,0 +1,3 @@
+I16.neg(a: I16): I16
+  open a
+  I16.new(Word.neg!(a.value))

@@ -1,0 +1,27 @@
+Web.Kaelin.Coord.Cubic.range(coord: Web.Kaelin.Coord.Cubic, distance: Nat): List<Web.Kaelin.Coord.Cubic>
+  let distance_32 = Nat.to_u32(distance)
+  let double_distance = U32.add(U32.mul(distance_32, 2u), 1u) // distance * 2 + 1
+  let result = []
+  for j : U32 from 0u to double_distance with result:
+    let negative_distance = Int.new(0, distance)
+    let positive_distance = Int.new(distance, 0)
+    let x = Int.sub(Int.new(U32.to_nat(j), 0), 
+                    positive_distance) // j - distance
+
+    let max = Int.max(negative_distance, Int.add(Int.neg(x), negative_distance)) //-1  1-1 0
+    let min = Int.min(positive_distance, Int.add(Int.neg(x), positive_distance)) //1   2   1
+    
+    let distance_between_max_min = Nat.succ(Pair.snd!!(Int.to_nat_signed(Int.sub(max, min)))) // 1
+    let distance_between_max_min = Nat.to_u32(distance_between_max_min)
+    // let double_distance_max_min = U32.add(U32.mul( Nat.to_u32(distance_between_max_min) , 2u), 1u) // 3
+    for i : U32 from 0u to distance_between_max_min with result:
+
+      let y = Int.add(Int.new(U32.to_nat(i), 0), 
+                      max)
+      
+      let z = Int.sub(Int.neg(x), y)
+      let new_coord = Web.Kaelin.Coord.Cubic.add(coord, Web.Kaelin.Coord.Cubic.new(x,y,z))
+      result = result ++ [new_coord]
+      result
+    result
+  result

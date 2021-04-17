@@ -1,2 +1,2 @@
 Nat.to_u64(n: Nat): U64
-  Nat.apply<U64>(n, U64.inc, U64.zero)
+  U64.new(Nat.to_word!(n))

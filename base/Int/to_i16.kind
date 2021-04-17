@@ -1,0 +1,6 @@
+Int.to_i16(a: Int): I16
+  open a
+  case a.neg {
+    zero: I16.new(Nat.to_word!(a.pos))
+    succ: I16.neg(I16.new(Nat.to_word!(a.neg)))
+  }

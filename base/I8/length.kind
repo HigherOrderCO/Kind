@@ -1,0 +1,3 @@
+I8.length(str: String): I8
+  I8.length(str)
+

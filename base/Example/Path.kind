@@ -1,0 +1,166 @@
+//The main insight is that we can encode the Interval type and the Path type as
+//Self-encodings that refer to each other. The Interval type is like a boolean,
+//but with an extra constructor of type `i0 == i1` forcing that, in order to
+//eliminate an interval, both cases must be equal. The Path type proposes that
+//two values `a, b : A` are equal if there exists a function `t : I -> A` such
+//that `t(i0) = a` and `t(i1) = b`. In other words, it is the equivalent of:
+
+//```
+//data I : Set where
+ //i0 : I
+ //i1 : I
+ //ie : Path A i0 i1
+
+//data Path (A: I -> Set) : (A i0) -> (A i1) -> Set where
+  //abs : (t : (i: I) -> A i) -> Path A (t i0) (t i1)
+//```
+
+// The Interval type:
+// Γ ⊢
+// ------------
+// Γ ⊢ I : Type
+
+I: Type
+  i(P: I -> Type) ->
+  (i0: P(i0)) ->
+  (i1: P(i1)) ->
+  (ie: Path(P, i0, i1)) ->
+  P(i)
+
+// The i0 interval:
+// Γ ⊢
+// ----------
+// Γ ⊢ i0 : I
+
+i0: I
+  (P, i0, i1, ie) i0
+
+// The i1 interval:
+// Γ ⊢
+// ----------
+// Γ ⊢ i1 : I
+
+i1: I
+  (P, i0, i1, ie) i1
+
+// Interval equality:
+// Γ ⊢
+// -----------------
+// Γ ⊢ ie : i0 == i1
+
+ie: Path((i) I, i0, i1)
+  (P, abs) abs((i) i)
+  
+// The Path type:
+// Γ, i : Type ⊢ A(i) : Type
+// Γ           ⊢ a    : A(i)
+// Γ           ⊢ b    : A(i)
+// -------------------------------
+// Γ ⊢ Path(A, a, b) : Type
+
+Path(A: I -> Type, a: A(i0), b: A(i1)) : Type
+  path(P: (a: A(i0)) -> (b: A(i1)) -> Path(A, a, b) -> Type) ->
+  (abs: (t: (i:I) -> A(i)) -> P(t(i0), t(i1), Path.abs(A, t))) ->
+  P(a, b, path)
+
+// Path abstraction:
+// Γ ⊢ A            Γ, i : I ⊢ t : A
+// ---------------------------------
+// Γ ⊢ (i) t : Path(A, t(i0), t(i1))
+
+Path.abs (A: I -> Type) (t: (i:I) -> A(i)): Path(A, t(i0), t(i1))
+  (P, abs) abs(t)
+
+// Path application:
+// Γ ⊢ e : Path(A, a, b)
+// Γ ⊢ i : I
+// ---------------------
+// Γ ⊢ e(i) : A 
+
+app(A: I -> Type, a: A(i0), b: A(i1), e: Path(A, a, b), i: I): A(i)
+  i(A, a, b, e)
+
+// Path left:
+// Γ ⊢ a : A
+// Γ ⊢ b : B
+// Γ ⊢ e : Path A a b
+// --------------------------
+// Γ ⊢ p0(a,b,e) : e(i0) == a
+
+p0(A: Type, a: A, b: A, P: A -> Type, e: Path((i) A,a,b), p: P(app((i) A,a,b,e,i0))): P(a)
+  e((x, y, e) P(app((i) A,x,y,e,i0)) -> P(x), (t) (p) p, p)
+
+// Path right:
+// Γ ⊢ A : Type
+// Γ ⊢ a : A
+// Γ ⊢ b : B
+// Γ ⊢ e : Path A a b
+// --------------------------
+// Γ ⊢ p1(a,b,e) : e(i1) == b
+
+p1(A: Type, a: A, b: A, P: A -> Type, e: Path((i) A,a,b), p: P(app((i) A,a,b,e,i1))): P(b)
+  e((x, y, e) P(app((i) A,x,y,e,i1)) -> P(y), (t) (k) k, p)
+
+// Path reflexivity:
+// refl : ∀ {ℓ} {A : Set ℓ} {x : A} → Path A x x
+// refl {x = x} = λ i → x
+
+Path.refl(A: Type, x: A): Path((i) A, x, x)
+  (P, abs) abs((i) x)
+
+// Path congruence:
+// cong : ∀ {ℓ} {A : Set ℓ} {x y : A} {B : A → Set ℓ} (f : (a : A) → B a) (p : x ≡ y) → PathP (λ i → B (p i)) (f x) (f y)
+// cong f p i = f (p i)
+
+cong(
+  A: Type,
+  B: A -> Type,
+  x: A,
+  y: A,
+  f: (a: A) -> B(a),
+  p: Path((i) A, x, y)
+): Path((i) B(app((i) A, x, y, p, i)), f(x), f(y))
+  (P, abs) abs((i) f(app((i) A, x, y, p, i)))
+
+// Path symmetry: (TODO: depends on `neg`)
+// sym : ∀ {ℓ} {A : Set ℓ} {x y : A} → x ≡ y → y ≡ x
+// sym p = λ i → p (~ i)
+
+// Examples
+
+// We can prove that `true = true` by using a constant
+tt0: Path((i) Bool, Bool.true, Bool.true)
+  Path.abs((i) Bool, (i) Bool.true)
+
+// We can prove that `true == true` by pattern-matching
+tt1: Path((i) Bool, Bool.true, Bool.true)
+  Path.abs((i) Bool, (i)
+    i(() Bool,
+      Bool.true,
+      Bool.true,
+      Path.refl<Bool>(Bool.true)))
+
+// We can't prove that `true = false`!
+
+// The fact that the images of two equal elements are equal:
+// Γ ⊢ a : A
+// Γ ⊢ b : A
+// Γ ⊢ f : A → B
+// Γ ⊢ p : Path A a b
+// -------------------------------------
+// Γ ⊢ Path.abs((i) f (p i)) : Path B (f a) (f b)
+img(A: Type, B: Type, a: A, b: A, f: A -> B, p: Path((i) A, a, b)): Path((i) B, f(a), f(b))
+  Path.abs((i) B, (i) f(app((i) A,a,b,p,i)))
+
+// Function extensionality:
+// Note that this is eta-expanded as `(x) f(x) = (x) g(x)` because Formality
+// doesn't eta-reduce for performance and code-simplicity reasons, but this
+// could easily be added to the language to have `f = g`.
+funext(
+  A: Type,
+  B: A -> Type,
+  f: (x: A) -> B(x),
+  g: (x: A) -> B(x),
+  h: (x: A) -> Path((i) B(x), f(x), g(x)),
+) : Path((i) (x: A) -> B(x), (x) f(x), (x) g(x))
+  Path.abs((i) (x:A) -> B(x))((i) (x) app((i) B(x), f(x), g(x), h(x), i))

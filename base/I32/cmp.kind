@@ -1,0 +1,7 @@
+I32.cmp(a: I32, b: I32): Cmp
+  if I32.ltn(a, b) then
+    Cmp.ltn
+  else if I32.eql(a, b) then
+    Cmp.eql
+  else
+    Cmp.gtn

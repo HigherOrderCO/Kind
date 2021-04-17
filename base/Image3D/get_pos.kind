@@ -1,4 +1,0 @@
-Image3D.get_pos(idx: U32, img: Image3D): U32
-  case img {
-    new: Buffer32.get(U32.mul(idx,2u), img.buffer)
-  }

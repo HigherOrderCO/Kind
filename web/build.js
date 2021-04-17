@@ -1,5 +1,6 @@
 // Compiles apps from `Kind/base/Web/*.kind to `src/apps/*.js`
 
+
 var fs = require("fs");
 var exec = require("child_process").execSync;
 

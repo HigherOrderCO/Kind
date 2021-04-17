@@ -1,0 +1,6 @@
+Int.min(a: Int, b: Int): Int
+  let cmp = Cmp.as_ltn(Int.cmp(a, b))
+  case cmp {
+      true: a
+      false: b
+  }

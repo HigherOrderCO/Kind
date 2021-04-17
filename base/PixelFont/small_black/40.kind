@@ -1,4 +1,4 @@
 // z_index: 30
 // char: (
-PixelFont.small_black.40: Image3D
-  Image3D.parse("03001e21212802011e21212802021e21212802031e21212803041e212128")
+PixelFont.small_black.40: VoxBox
+  VoxBox.parse("03001e21212802011e21212802021e21212802031e21212803041e212128")

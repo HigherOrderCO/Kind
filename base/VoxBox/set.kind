@@ -1,0 +1,5 @@
+// BitsSets position and color of the idx voxel of an VoxBox
+VoxBox.set(idx: U32, pos: U32, col: U32, img: VoxBox): VoxBox
+  let img = VoxBox.set_pos(idx, pos, img)
+  let img = VoxBox.set_col(idx, col, img)
+  img

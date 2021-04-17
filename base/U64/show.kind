@@ -1,0 +1,3 @@
+U64.show(a: U64): String
+  open a
+  Word.show!(a.value)

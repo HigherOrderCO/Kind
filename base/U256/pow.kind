@@ -1,0 +1,4 @@
+U256.pow(a: U256, b: U256): U256
+  open a
+  open b
+  U256.new(Word.pow!(a.value, b.value))

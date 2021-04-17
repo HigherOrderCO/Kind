@@ -1,3 +1,0 @@
-Image3D.get_length(img: Image3D): U32
-  open img
-  img.length

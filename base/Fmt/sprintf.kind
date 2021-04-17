@@ -114,39 +114,3 @@ Fmt.sprintf.example.empty: String
 
 Fmt.sprintf.example.percent: String
   Fmt.sprintf("%%")
-
-Fmt.sprintf.test.string1a: Fmt.arguments(List.nil!) == String
-  refl
-
-Fmt.sprintf.test.string1b: Fmt.arguments([Fmt.Specifier.char('a')]) == String
-  refl
-
-Fmt.sprintf.test.string1c: Fmt.arguments([Fmt.Specifier.char('a'), Fmt.Specifier.integer]) == Nat -> String
-  refl
-
-Fmt.sprintf.test.string2a: Fmt.arguments(Fmt.Parser.parse("a")) == String
-  refl
-
-Fmt.sprintf.test.string2: Fmt.sprintf("a") == "a"
-  refl
-
-Fmt.sprintf.test.string3a: Fmt.arguments(Fmt.Parser.parse("%d")) == Nat -> String
-  refl
-
-Fmt.sprintf.test.string3: Fmt.sprintf("%d")(1) == "1"
-  refl
-
-Fmt.sprintf.test.string4a: Fmt.arguments(Fmt.Parser.parse("%s world")) == String -> String
-  refl
-
-Fmt.sprintf.test.string4: Fmt.sprintf("%s world", "hello") == "hello world"
-  refl
-
-Fmt.sprintf.test.string5a: Fmt.arguments(Fmt.Parser.parse("%%")) == String
-  refl
-
-Fmt.sprintf.test.string5: Fmt.sprintf("%%") == "%"
-  refl
-
-Fmt.sprintf.test.string_and_number: Fmt.sprintf("%s %d!", "hello", 5) == "hello 5!"
-  refl

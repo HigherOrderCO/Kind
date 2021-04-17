@@ -6,7 +6,8 @@ type Web.Kaelin.State {
   game(
     room: String
     tick: Nat
-    pos: Web.Kaelin.Coord
-    map: Web.Kaelin.Map
+    players: Map(Web.Kaelin.Player)
+    map: Web.Kaelin.Map,
+    interface : App.EnvInfo
   )
 }

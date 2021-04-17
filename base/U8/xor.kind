@@ -1,4 +1,4 @@
 U8.xor(a: U8, b: U8): U8
   open a
-  open b 
+  open b
   U8.new(Word.xor!(a.value, b.value))

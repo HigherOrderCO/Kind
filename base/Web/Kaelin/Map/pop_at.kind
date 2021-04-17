@@ -1,0 +1,9 @@
+Web.Kaelin.Map.pop_at(
+  idx: Nat, 
+  coord: Web.Kaelin.Coord, 
+  map: Web.Kaelin.Map
+) : Pair(Web.Kaelin.Map, Maybe(Web.Kaelin.Entity))
+  let key = Web.Kaelin.Coord.show(coord)
+  let tile = map{key} <> []
+  let {ent, remaining_tile} = List.pop_at!(idx, tile)
+  { map{key} <- remaining_tile, ent }

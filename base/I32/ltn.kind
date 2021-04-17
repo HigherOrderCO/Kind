@@ -1,0 +1,4 @@
+I32.ltn(a: I32, b: I32): Bool
+  open a
+  open b
+  Word.s_ltn!(a.value, b.value)

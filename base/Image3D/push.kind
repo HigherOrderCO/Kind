@@ -1,9 +1,0 @@
-Image3D.push(pos: U32, col: U32, img: Image3D): Image3D
-  case img {
-    new:
-      let idx = img.length
-      let img = Image3D.set_pos(idx, pos, img)
-      let img = Image3D.set_col(idx, col, img)
-      let img = Image3D.set_length(U32.add(img.length, 1u), img)
-      img
-  }

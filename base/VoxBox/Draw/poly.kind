@@ -1,0 +1,26 @@
+// given a list of vertices, draws a polygon
+VoxBox.Draw.poly(
+  // vertices
+  vts: List<Pair<U32, U32>>,
+  z: U32,
+  col: Col32,
+  img: VoxBox
+): VoxBox
+  let draw_segment = (p, data)
+    open p
+    open data
+    case data.snd {
+      none: let old_img = data.fst
+            Pair.new!!(old_img, Maybe.some!(p))
+      some: open data.snd.value
+            let prev_x = data.snd.value.fst
+            let prev_y = data.snd.value.snd
+
+            let curr_x = p.fst
+            let curr_y = p.snd
+
+            let new_img = VoxBox.Draw.line(prev_x, prev_y, p.fst, p.snd, z, col, data.fst)
+            {new_img, Maybe.some!(p)}
+    }
+  let data = List.fold!(vts, _, {img, Maybe.none<Pair<U32, U32>>}, draw_segment)
+  Pair.fst!!(data)

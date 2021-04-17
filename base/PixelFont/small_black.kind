@@ -1,7 +1,7 @@
-// Creates a Map of (key: String, value: Image3D)
+// Creates a Map of (key: String, value: VoxBox)
 // Qtd characters: 95
 PixelFont.small_black: PixelFont
-  let map = Map.new<Image3D>
+  let map = Map.new<VoxBox>
   let map = PixelFont.set_img(100s, PixelFont.small_black.100, map) // add d
   let map = PixelFont.set_img(101s, PixelFont.small_black.101, map) // add e
   let map = PixelFont.set_img(102s, PixelFont.small_black.102, map) // add f

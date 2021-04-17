@@ -1,0 +1,12 @@
+// draw all players
+Web.Kaelin.Draw.state.players(img: VoxBox, players: Map(Web.Kaelin.Player)): VoxBox
+  let players_list = Map.values!(players)
+  
+  for player in players_list with img:
+    Web.Kaelin.Draw.state.player(img, player)
+
+  img
+  
+  
+
+  

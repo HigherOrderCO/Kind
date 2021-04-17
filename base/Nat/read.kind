@@ -4,4 +4,3 @@ Nat.read(str: String): Nat
     error: 0
     value: p.val
   }
-  
