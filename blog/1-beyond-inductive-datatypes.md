@@ -122,7 +122,7 @@ The idea is that an `Int` is either a positive `Nat` or a negative `Nat`. In
 order to avoid having two zeros, the `neg` constructor starts as `-1`.
 This works, but it results in complex, confusing arithmetic functions, as we
 have to cautiously consider many cases of signs. For example, here is `negate`
-nad `add`, ported from `Agda`:
+and `add`, ported from `Agda`:
 
 
 ```javascript
@@ -199,7 +199,7 @@ constructor that automatically "canonicalized itself", such that
 A friend of mine, Tesla Zhang, has some unpublished work, where he uses this
 idea, which he calls "inductive types with conditions", to encode higher
 inductive types (HITs) and the cubical path type. I'm a simpler person, so I just
-call this "smart constructors". The concept is implemented in Arend language 
+call this "smart constructors". The concept is implemented in the Arend language 
 with a nice syntax, and the idea was invented individually by me and the 
 language authors.  
 
