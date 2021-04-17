@@ -53,6 +53,9 @@ Web.Kaelin: App(Web.Kaelin.State)
           'A': App.post(state.room, "0x2200000000000000000000000000000000000000000000000000000000000001")
           'W': App.post(state.room, "0x2300000000000000000000000000000000000000000000000000000000000001")
           'S': App.post(state.room, "0x2400000000000000000000000000000000000000000000000000000000000001")
+          'Z': App.post(state.room, "0x3100000000000000000000000000000000000000000000000000000000000001")
+          'X': App.post(state.room, "0x3200000000000000000000000000000000000000000000000000000000000001")
+          'C': App.post(state.room, "0x3300000000000000000000000000000000000000000000000000000000000001")
         } default App.pass
        mouse_up game :
            let info = state.interface
@@ -84,9 +87,14 @@ Web.Kaelin: App(Web.Kaelin.State)
               "3": {Int.new(0,0), Int.new(0,1)}
               "4": {Int.new(0,0), Int.new(1,0)}
             } default {Int.new(0,0), Int.new(0,0)}
-            
+
             open coord
             App.store!(Web.Kaelin.Action.move_player(event.addr, coord.fst, coord.snd, state))
+
+          //"0x3":
+            //let skill = switch String.eql( String.slice(3, 4, event.data) ) {
+              //"1": ?a
+            //}
         } default App.pass
         
     } default App.pass

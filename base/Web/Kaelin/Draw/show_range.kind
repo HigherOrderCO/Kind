@@ -1,0 +1,13 @@
+Web.Kaelin.Draw.show_range(player: Web.Kaelin.Player, map: Web.Kaelin.Map, range: Nat): Web.Kaelin.Map
+let imagem = Web.Kaelin.Entity.background(Kaelin.Assets.hex_range)
+open player
+let list_coords = 
+  Web.Kaelin.Coord.Axial.range(player.coord, range)
+  case list_coords { 
+    nil: map
+    cons: 
+      Web.Kaelin.Map.push(list_coords.head, imagem, map)
+  }!
+  
+ //let map = Web.Kaelin.Map.push(list.coord.head, imagem, map)
+  //map
