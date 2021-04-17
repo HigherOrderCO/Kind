@@ -1,2 +1,2 @@
 Mons.Object.is_standing(obj: Mons.Object): Bool
-  U32.eql(Mons.Object.get_ani(obj), 0#32)
+  U32.eql(Mons.Object.get_ani(obj), 0u)

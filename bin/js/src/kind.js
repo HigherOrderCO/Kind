@@ -775,7 +775,7 @@ module.exports = (function() {
         return $120;
     };
     const Word$sub = x0 => x1 => Word$sub$(x0, x1);
-    const U16$sub = a0 => a1 => (Math.max(a0 - a1, 0));
+    const U16$sub = a0 => a1 => ((a0 - a1) & 0xFFFF);
 
     function Nat$apply$(_n$2, _f$3, _x$4) {
         var Nat$apply$ = (_n$2, _f$3, _x$4) => ({
@@ -839,12 +839,12 @@ module.exports = (function() {
     };
     const Word$zero = x0 => Word$zero$(x0);
 
-    function Nat$to_word$(_n$2) {
+    function Nat$to_word$(_size$1, _n$2) {
         var $134 = Nat$apply$(_n$2, Word$inc, Word$zero$(_size$1));
         return $134;
     };
-    const Nat$to_word = x0 => Nat$to_word$(x0);
-    const Nat$to_u16 = a0 => (Number(a0));
+    const Nat$to_word = x0 => x1 => Nat$to_word$(x0, x1);
+    const Nat$to_u16 = a0 => (Number(a0) & 0xFFFF);
 
     function Word$adder$(_a$2, _b$3, _c$4) {
         var self = _a$2;
@@ -12447,7 +12447,7 @@ module.exports = (function() {
             case 'Parser.Reply.value':
                 var $4816 = self.idx;
                 var $4817 = self.code;
-                var self = Kind$Parser$text$(" ", $4816, $4817);
+                var self = Parser$text$(" ", $4816, $4817);
                 switch (self._) {
                     case 'Parser.Reply.error':
                         var $4819 = self.idx;
@@ -20500,7 +20500,7 @@ module.exports = (function() {
                 } else {
                     var self = U16$btw$(52, _u16$5, 61);
                     if (self) {
-                        var $7213 = (Math.max(_u16$5 - 4, 0));
+                        var $7213 = ((_u16$5 - 4) & 0xFFFF);
                         var $7212 = $7213;
                     } else {
                         var self = (62 === _u16$5);

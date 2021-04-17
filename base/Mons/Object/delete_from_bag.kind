@@ -6,4 +6,4 @@ Mons.Object.delete_from_bag(idx: U32, hero_obj: Mons.Object): Mons.Object
   else
     let new_bag = List.delete_at!(idx_nat, hero_obj.bag)
     let hero_obj = Mons.Object.set_bag(new_bag, hero_obj)
-    Mons.Object.set_mon(0#32, hero_obj)
+    Mons.Object.set_mon(0u, hero_obj)

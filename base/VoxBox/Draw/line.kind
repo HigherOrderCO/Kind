@@ -1,5 +1,5 @@
 // implements gresenham algorithm
-// cf. https://en.wikipedia.org/wiki/Bresenham%7#16_line_algorithm#Derivation
+// cf. https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm#Derivation
 VoxBox.Draw.line(
   x0: U32,
   y0: U32,

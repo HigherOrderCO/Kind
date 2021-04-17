@@ -1,8 +1,8 @@
 Mons.image_to_global(width: U32, height: U32, x: U32, y: U32, lvl: U32): Pos32
   let g_x = Pos32.get_x(Mons.global_scr_mid)
   let g_y = Pos32.get_y(Mons.global_scr_mid)
-  let mid_width  = U32.div(width, 2#32)
-  let mid_height = U32.div(height, 2#32)
+  let mid_width  = U32.div(width, 2u)
+  let mid_height = U32.div(height, 2u)
   let mid_x_diff = U32.sub(mid_width, x)
   let mid_y_diff = U32.sub(mid_height, y)
   let upd_g_x =

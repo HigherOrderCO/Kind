@@ -119,10 +119,10 @@ type Int {
 ```
 
 The idea is that an `Int` is either a positive `Nat` or a negative `Nat`. In
-order to avoid having two zeros, which the `neg` constructor starts as `-1`.
+order to avoid having two zeros, the `neg` constructor starts as `-1`.
 This works, but it results in complex, confusing arithmetic functions, as we
 have to cautiously consider many cases of signs. For example, here is `negate`
-nad `add`, ported from `Agda`:
+and `add`, ported from `Agda`:
 
 
 ```javascript
@@ -176,11 +176,11 @@ Int.add(a: Int, b: Int): Int
   }
 ```
 
-This is beautiful. But while this representation is great for algorithms, it
+This is beautiful. But while this type is great for algorithms, it
 breaks theorem proving. That's because there are multiple representations of the
 same integer. For example, `3` can be written as `Int.new(3, 0)`, `Int.new(4,
 1)`, `Int.new(5, 2)` and so on. This is bad. We could solve this issue by adding
-an extra field enforcing that either `a` or `b` is `zero`:
+an extra field enforcing that either `pos` or `neg` is `zero`:
 
 ```javascript
 // Int.val(a, b) represents `a - b`
@@ -191,16 +191,15 @@ type Int {
 
 This would be technically correct, but algorithms would become considerably
 worse, as we'd need to prove that `eq` still holds every time we construct and
-`Int`. This is terrible.  
-
-What if we could, though, have the `Int.new` constructor to automatically
-"canonicalizes itself", such that `Int.new(5, 2)` **reduces to** `Int.new(3,
-0)`, making both equal **by definition**?
+`Int`. This is terrible.  What if we could, instead, have an `Int.new` 
+constructor that automatically "canonicalized itself", such that 
+`Int.new(5, 2)` **reduced to** `Int.new(3, 0)`, making both equal 
+**by definition**?
 
 A friend of mine, Tesla Zhang, has some unpublished work, where he uses this
 idea, which he calls "inductive types with conditions", to encode higher
 inductive types (HITs) and the cubical path type. I'm a simpler person, so I just
-call this "smart constructors". The concept is implemented in Arend language 
+call this "smart constructors". The concept is implemented in the Arend language 
 with a nice syntax, and the idea was invented individually by me and the 
 language authors.  
 
@@ -288,19 +287,18 @@ data Vector (A : Type) (len : Nat) : Type
 | A (succ pred) => vcons (head : A) (tail : Vect A pred)
 ```
 
-What this is saying is that the very shape of a Vector declaration on the value
+What this is saying is that the very shape of a Vector depends on the value
 of `len` (its length). A Vector with length `0` has only one constructor:
 `vnil`. A Vector with length `succ(n)` has also only one constructor: `vcons`,
 with a `head` and a `tail`. Tesla argues this is an easier way to implement
 indexed datatypes since it doesn't require dealing with indices. For Kind, that
 isn't relevant, as we already have inductive datatypes from `Self` (which, I
-argue, is even easier to implement).
-
-But this encoding has another benefit: pattern-matching only demands the
-required cases. If you pattern-match a vector with `len > 0`, you don't need to
-provide the `nil` case at all, which is very convenient as you don't need to
-prove it is unreachable. Of course, if the `len` is unknown, then you won't be
-able to pattern-match it at all until you pattern-match on the `len` itself.
+argue, is even easier to implement). But this encoding has another benefit: 
+pattern-matching only demands the required cases. If you pattern-match a vector
+with `len > 0`, you don't need to provide the `nil` case at all, which is very
+convenient as you don't need to prove it is unreachable. Of course, if the `len`
+is unknown, then you won't be able to pattern-match it at all until you 
+pattern-match on the `len` itself.
 
 How can we do it with `Self` types? Let's start defining the conventional
 indexed `Vector` datatype, using the built-in syntax.
@@ -415,9 +413,9 @@ head(A: Type, len: Nat, vec: Vector(A, len)): Maybe(A)
 
 
 Kind graciously demands only the `nil` case on the `zero` branch and only the
-`cons` case on the `zero` branch!
+`cons` case on the `succ` branch!
 
-To be honest, I'm surprised it just works so well, given that I wasn't even
+To be honest, I'm surprised it works so well, given that I wasn't even
 aware of this encoding when I implemented the language. In a future, I may
 update Kind to incorporate Tesla's syntax for this kind of datatype, but the
 fact you can already do that by manually tweaking the Self-encodings is

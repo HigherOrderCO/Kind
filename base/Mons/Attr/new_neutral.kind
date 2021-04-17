@@ -1,6 +1,6 @@
 Mons.Attr.new_neutral(spr: List(VoxBox)): Mons.Attr
   Mons.Attr.new(
-    Bool.false, 0#32, 0#32, "",
+    Bool.false, 0u, 0u, "",
     Mons.Kind.set_static_sprites(spr),
     spr,
     Mons.Kind.set_pic(spr),

@@ -1,5 +1,5 @@
 U32.log_10.ten: U32
-  0#32
+  10u
 
 U32.log_10(x : U32) : U32
   open x
