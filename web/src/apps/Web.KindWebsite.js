@@ -373,11 +373,11 @@ module.exports = (function() {
     };
     const Word$zero = x0 => Word$zero$(x0);
 
-    function Nat$to_word$(_n$2) {
+    function Nat$to_word$(_size$1, _n$2) {
         var $52 = Nat$apply$(_n$2, Word$inc, Word$zero$(_size$1));
         return $52;
     };
-    const Nat$to_word = x0 => Nat$to_word$(x0);
+    const Nat$to_word = x0 => x1 => Nat$to_word$(x0, x1);
 
     function Nat$succ$(_pred$1) {
         var $53 = 1n + _pred$1;
@@ -385,7 +385,7 @@ module.exports = (function() {
     };
     const Nat$succ = x0 => Nat$succ$(x0);
     const Nat$zero = 0n;
-    const Nat$to_u32 = a0 => (Number(a0));
+    const Nat$to_u32 = a0 => (Number(a0) >>> 0);
     const Web$KindWebsite$Page$home = ({
         _: 'Web.KindWebsite.Page.home'
     });
