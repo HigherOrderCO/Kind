@@ -11,3 +11,367 @@ type Kind.Comp {
   chr(chrx: Char),
   str(strx: String),
 }
+
+type Kind.Comp.Prim {
+  bool,
+  nat,
+  string,
+  data(ctrs: Kind.Comp.Prim.ADT),
+}
+
+Kind.Comp.Prim.ADT: Type
+  List(Pair(String, List(String)))
+
+Kind.Comp.as_adt.get_fields(term: Kind.Term): List(String)
+  case term {
+    all:
+      let head = term.name
+      let tail = Kind.Comp.as_adt.get_fields(term.body(Kind.Term.var("",0),Kind.Term.var("",0)))
+      head & tail
+  } default []
+
+Kind.Comp.as_adt.get_constructors(term: Kind.Term): Kind.Comp.Prim.ADT
+  case term {
+    all:
+      let tail = Kind.Comp.as_adt.get_constructors(term.body(Kind.Term.var("",0), Kind.Term.var("",0)))
+      let name = term.name
+      let flds = Kind.Comp.as_adt.get_fields(term.xtyp)
+      {name,flds} & tail
+  } default []
+
+Kind.Comp.as_adt(term: Kind.Term, defs: Kind.Defs): Maybe(Kind.Comp.Prim)
+  let term = Kind.Term.reduce(term, defs)
+  case term {
+    all:
+      if String.ends_with(term.self, ".Self") then
+        let body = term.body(Kind.Term.var("",0),Kind.Term.var("",0))
+        let data = Kind.Comp.as_adt.get_constructors(body)
+        some(Kind.Comp.Prim.data(data))
+      else
+        none
+  } default none
+
+Kind.Comp.prims: List(Pair(String, Kind.Comp.Prim))
+  [
+    {"Bool", Kind.Comp.Prim.bool}
+    {"Nat", Kind.Comp.Prim.nat}
+    //"Bits"
+    //"U8"
+    //"U16"
+    //"U32"
+    //"U64"
+    //"U256"
+    //"F64"
+    //"String"
+    //"Buffer32"
+  ]
+
+Kind.Comp.prim_names: List(String)
+  List.map!!(Pair.fst!!, Kind.Comp.prims)
+
+Kind.Comp.prim_of(type: Kind.Term, defs: Kind.Defs): Maybe(Kind.Comp.Prim)
+  let result = none
+  for prim in Kind.Comp.prims with result:
+    open prim
+    case result {
+      none:
+        if Kind.Term.equal(type, Kind.Term.ref(prim.fst), defs) then
+          some(prim.snd)
+        else
+          none
+      some: result
+    }
+  result
+
+
+//var is_prim = {
+  //Unit     : 1,
+  //Bool     : 1,
+  //Nat      : 1,
+  //Bits     : 1,
+  //U8       : 1,
+  //U16      : 1,
+  //U32      : 1,
+  //U64      : 1,
+  //U256     : 1,
+  //F64      : 1,
+  //String   : 1,
+  //Buffer32 : 1,
+//};
+
+Kind.Comp.from_core.go(term: Kind.Term, type: Maybe(Kind.Term), defs: Kind.Defs, size: Nat): Pair(Kind.Comp, Kind.Term)
+  case type {
+    some:
+      let typv = Kind.Term.reduce(type.value, defs)
+      case term {
+        lam: case typv {
+          all:
+            let self_var = Kind.Term.ann(true, term, type.value)
+            let name_var = Kind.Term.ann(true, Kind.Term.var("_" | term.name, size + 1), typv.xtyp)
+            let body_typ = typv.body(self_var, name_var)
+            let {body_cmp,body_typ} = Kind.Comp.from_core.go(term.body(name_var), some(body_typ), defs, size + 1)
+            let term_cmp = if typv.eras
+              then body_cmp
+              else Kind.Comp.lam("_" | term.name | "$" | Nat.show(size + 1), body_cmp)
+            let term_cmp = case Kind.Comp.as_adt(type.value, defs) as got_adt {
+              some: Kind.Comp.ins(got_adt.value, term_cmp)
+              none: case Kind.Comp.prim_of(type.value, defs) as got_prim {
+                some: Kind.Comp.ins(got_prim.value, term_cmp)
+                none: term_cmp
+              }
+            }
+            {term_cmp, type.value}
+        } default {Kind.Comp.nil, Kind.Term.typ}
+        let:
+          let {expr_cmp,expr_typ} = Kind.Comp.from_core.go(term.expr, none, defs, size)
+          let expr_var = Kind.Term.ann(true, Kind.Term.var("_" | term.name, size + 1), expr_typ)
+          let {body_cmp,body_typ} = Kind.Comp.from_core.go(term.body(expr_var), type, defs, size + 1)
+          let term_cmp = Kind.Comp.let("_" | term.name | "$" | Nat.show(size + 1), expr_cmp, body_cmp)
+          let term_typ = body_typ
+          {term_cmp, term_typ}
+        loc:
+          ?c
+          //Kind.Comp.from_core.go(term.expr, type, defs)
+      } default case typv {
+        typ: {Kind.Comp.nil, Kind.Term.typ}
+      } default {Pair.fst!!(Kind.Comp.from_core.go(term,none,defs,size)), type.value}
+    none: case term {
+      var: {
+        Kind.Comp.var(term.name | "$" | Nat.show(term.indx))
+        Kind.Term.var(term.name, term.indx)
+      }
+      ref:
+        let got = defs{term.name}
+        without got: {Kind.Comp.nil, Kind.Term.typ}
+        {
+          Kind.Comp.ref(term.name)
+          open got; got.type
+        }
+      typ: {
+        Kind.Comp.nil
+        Kind.Term.typ
+      }
+      app:
+        let {func_cmp, func_typ} = Kind.Comp.from_core.go(term.func, none, defs, size)
+        case Kind.Term.reduce(func_typ, defs) as func_typ {
+          all:
+            let {argm_cmp, argm_typ} = Kind.Comp.from_core.go(term.argm, some(func_typ.xtyp), defs, size)
+            let term_typ = func_typ.body(term.func, term.argm)
+            let term_cmp = case Kind.Comp.as_adt(func_typ, defs) as ftyp_adt {
+              some: Kind.Comp.eli(ftyp_adt.value, func_cmp)
+              none: case Kind.Comp.prim_of(func_typ, defs) as ftyp_pri {
+                some: Kind.Comp.eli(ftyp_pri.value, func_cmp)
+                none: func_cmp
+              }
+            }
+            let term_cmp = if func_typ.eras
+              then term_cmp
+              else Kind.Comp.app(term_cmp, argm_cmp)
+            {term_cmp, term_typ}
+        } default {Kind.Comp.nil, Kind.Term.typ}
+        let:
+          let {expr_cmp, expr_typ} = Kind.Comp.from_core.go(term.expr, none, defs, size)
+          let expr_var = Kind.Term.ann(true, Kind.Term.var("_" | term.name, size + 1), expr_typ)
+          let {body_cmp, body_typ} = Kind.Comp.from_core.go(term.body(expr_var), none, defs, size + 1)
+          {Kind.Comp.let("_" | term.name | "$" | Nat.show(size + 1), expr_cmp, body_cmp), body_typ}
+        def:
+          Kind.Comp.from_core.go(term.body(term.expr), none, defs, size)
+        all:
+          {Kind.Comp.nil, Kind.Term.typ}
+        ann:
+          Kind.Comp.from_core.go(term.term, some(term.type), defs, size)
+        loc:
+          Kind.Comp.from_core.go(term.term, none, defs, size)
+        nat:
+          {Kind.Comp.nat(term.natx), Kind.Term.ref("Nat")}
+        chr:
+          {Kind.Comp.chr(term.chrx), Kind.Term.ref("Char")}
+        str:
+          {Kind.Comp.str(term.strx), Kind.Term.ref("String")}
+    } default {Kind.Comp.nil, Kind.Term.typ}
+  }
+
+////function check(term, type, defs, ctx = fmc.Nil()) {
+  ////var typv = fmc.reduce(type, defs);
+
+  ////if (typv.ctor === "Typ") {
+    ////var comp = Nul();
+    ////var type = fmc.Typ();
+    ////return {comp, type};
+  ////};
+
+  ////var comp = null;
+  ////switch (term.ctor) {
+    ////case "Lam":
+      ////if (typv.ctor === "All") {
+        ////var self_var = fmc.Ann(true, term, type);
+        ////var name_var = fmc.Ann(true, fmc.Var("_"+term.name, ctx.size+1), typv.bind);
+        ////var body_typ = typv.body(self_var, name_var);
+        ////var body_ctx = fmc.Ext({name:term.name,type:name_var.type}, ctx);
+        ////var body_cmp = check(term.body(name_var), body_typ, defs, body_ctx);
+        ////if (typv.eras) {
+          ////comp = body_cmp.comp;
+        ////} else {
+          ////comp = Lam("_"+term.name+"$"+(ctx.size+1), body_cmp.comp);
+        ////}
+        ////var type_adt = as_adt(type, defs);
+        ////var type_prim = prim_of(type, defs);
+        ////if (type_prim) {
+          ////comp = Ins(type_prim, comp);
+        ////} else if (type_adt) {
+          ////comp = Ins(type_adt, comp);
+        ////}
+      ////} else {
+        ////throw "Lambda has non-function type.";
+      ////}
+      ////return {comp, type};
+    ////case "Let":
+      ////var expr_cmp = infer(term.expr, defs, ctx);
+      ////var expr_var = fmc.Ann(true, fmc.Var("_"+term.name, ctx.size+1), expr_cmp.type);
+      ////var body_ctx = fmc.Ext({name:term.name,type:expr_var.type}, ctx);
+      ////var body_cmp = check(term.body(expr_var), type, defs, body_ctx);
+      ////return {
+        ////comp: Let("_"+term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp),
+        ////type: body_cmp.type,
+      ////};
+    ////case "Loc":
+      ////return check(term.expr, type, defs);
+    ////default:
+      ////var term_cmp = infer(term, defs, ctx);
+      ////var comp = term_cmp.comp;
+      ////return {comp, type};
+  ////};
+////}
+
+////function infer(term, defs, ctx = fmc.Nil()) {
+  ////switch (term.ctor) {
+    ////case "Var":
+      ////return {
+        ////comp: Var(term.name+"$"+term.indx),
+        ////type: fmc.Var(term.name,term.indx),
+      ////};
+    ////case "Ref":
+      ////var got_def = defs[term.name];
+      ////return {
+        ////comp: Ref(term.name),
+        ////type: got_def.type,
+      ////};
+    ////case "Typ":
+      ////return {
+        ////comp: Nul(),
+        ////type: fmc.Typ(),
+      ////};
+    ////case "App":
+      ////var func_cmp = infer(term.func, defs, ctx);
+      ////var func_typ = fmc.reduce(func_cmp.type, defs);
+      ////switch (func_typ.ctor) {
+        ////case "All":
+          ////var self_var = fmc.Ann(true, term.func, func_typ);
+          ////var name_var = fmc.Ann(true, term.argm, func_typ.bind);
+          ////var argm_cmp = check(term.argm, func_typ.bind, defs, ctx);
+          ////var term_typ = func_typ.body(self_var, name_var);
+          ////var comp = func_cmp.comp;
+          ////var func_typ_adt = as_adt(func_typ, defs);
+          ////var func_typ_prim = prim_of(func_typ, defs);
+          ////if (func_typ_prim) {
+            ////comp = Eli(func_typ_prim, comp);
+          ////} else if (func_typ_adt) {
+            ////comp = Eli(func_typ_adt, comp);
+          ////};
+          ////if (!func_typ.eras) {
+            ////comp = App(comp, argm_cmp.comp);
+          ////}
+          ////return {comp, type: term_typ};
+        ////default:
+          ////throw "Non-function application.";
+      ////};
+    ////case "Let":
+      ////var expr_cmp = infer(term.expr, defs, ctx);
+      ////var expr_var = fmc.Ann(true, fmc.Var("_"+term.name, ctx.size+1), expr_cmp.type);
+      ////var body_ctx = fmc.Ext({name:term.name,type:expr_var.type}, ctx);
+      ////var body_cmp = infer(term.body(expr_var), defs, body_ctx);
+      ////return {
+        ////comp: Let("_"+term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp),
+        ////type: body_cmp.type,
+      ////};
+    ////case "Def":
+      ////return infer(term.body(term.expr), defs, ctx);
+    ////case "All":
+      ////return {
+        ////comp: Nul(),
+        ////type: fmc.Typ(),
+      ////};
+    ////case "Ann":
+      ////return check(term.expr, term.type, defs, ctx);
+    ////case "Loc":
+      ////return infer(term.expr, defs, ctx);
+    ////case "Nat":
+      ////return {
+        ////comp: Nat(term.natx),
+        ////type: fmc.Ref("Nat"),
+      ////};
+    ////case "Chr":
+      ////return {
+        ////comp: Chr(term.chrx),
+        ////type: fmc.Ref("Char"),
+      ////};
+    ////case "Str":
+      ////return {
+        ////comp: Str(term.strx),
+        ////type: fmc.Ref("String"),
+      ////};
+  ////}
+////};
+
+////function check(term, type, defs, ctx = fmc.Nil()) {
+  ////var typv = fmc.reduce(type, defs);
+
+  ////if (typv.ctor === "Typ") {
+    ////var comp = Nul();
+    ////var type = fmc.Typ();
+    ////return {comp, type};
+  ////};
+
+  ////var comp = null;
+  ////switch (term.ctor) {
+    ////case "Lam":
+      ////if (typv.ctor === "All") {
+        ////var self_var = fmc.Ann(true, term, type);
+        ////var name_var = fmc.Ann(true, fmc.Var("_"+term.name, ctx.size+1), typv.bind);
+        ////var body_typ = typv.body(self_var, name_var);
+        ////var body_ctx = fmc.Ext({name:term.name,type:name_var.type}, ctx);
+        ////var body_cmp = check(term.body(name_var), body_typ, defs, body_ctx);
+        ////if (typv.eras) {
+          ////comp = body_cmp.comp;
+        ////} else {
+          ////comp = Lam("_"+term.name+"$"+(ctx.size+1), body_cmp.comp);
+        ////}
+        ////var type_adt = as_adt(type, defs);
+        ////var type_prim = prim_of(type, defs);
+        ////if (type_prim) {
+          ////comp = Ins(type_prim, comp);
+        ////} else if (type_adt) {
+          ////comp = Ins(type_adt, comp);
+        ////}
+      ////} else {
+        ////throw "Lambda has non-function type.";
+      ////}
+      ////return {comp, type};
+    ////case "Let":
+      ////var expr_cmp = infer(term.expr, defs, ctx);
+      ////var expr_var = fmc.Ann(true, fmc.Var("_"+term.name, ctx.size+1), expr_cmp.type);
+      ////var body_ctx = fmc.Ext({name:term.name,type:expr_var.type}, ctx);
+      ////var body_cmp = check(term.body(expr_var), type, defs, body_ctx);
+      ////return {
+        ////comp: Let("_"+term.name+"$"+(ctx.size+1), expr_cmp.comp, body_cmp.comp),
+        ////type: body_cmp.type,
+      ////};
+    ////case "Loc":
+      ////return check(term.expr, type, defs);
+    ////default:
+      ////var term_cmp = infer(term, defs, ctx);
+      ////var comp = term_cmp.comp;
+      ////return {comp, type};
+  ////};
+////};
+  
