@@ -1,0 +1,4 @@
+I8.gtn(a: I8, b: I8): Bool
+  open a
+  open b
+  Word.s_gtn!(a.value, b.value)

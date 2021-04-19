@@ -1,0 +1,2 @@
+F32.sqrt(n: F32): F32 //prim//
+  F32.pow(n, F32.div(F32.1, F32.2))

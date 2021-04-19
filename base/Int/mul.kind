@@ -3,4 +3,9 @@ Int.mul(a: Int, b: Int): Int
   open b
   Int.new(
     Nat.add(Nat.mul(a.pos, b.pos), Nat.mul(a.neg, b.neg)),
-    Nat.add(Nat.mul(a.pos, b.neg), Nat.mul(a.pos, b.neg)))
+    Nat.add(Nat.mul(a.pos, b.neg), Nat.mul(a.neg, b.pos)))
+
+
+
+//(a_pos * b_pos + a_neg * b_neg, - (a_pos * b_neg + a_neg * b_pos))
+

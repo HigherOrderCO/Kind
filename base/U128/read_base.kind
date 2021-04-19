@@ -1,0 +1,2 @@
+U128.read_base(base: U128, str: String): U128
+  U128.read_base(base, str)

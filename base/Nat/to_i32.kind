@@ -1,2 +1,0 @@
-Nat.to_i32(n: Nat): I32
-  Nat.apply<I32>(n, I32.inc, I32.zero)

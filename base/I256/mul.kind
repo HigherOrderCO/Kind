@@ -1,0 +1,5 @@
+I256.mul(a: I256, b: I256): I256
+  open a
+  open b
+  I256.new(Word.mul!(a.value, b.value))
+

@@ -1,0 +1,2 @@
+F32.parse: String -> F32
+  F32.parse

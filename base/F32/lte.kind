@@ -1,0 +1,4 @@
+F32.lte(a: F32, b: F32): Bool
+  open a 
+  open b 
+  Word.lte!(a.word, b.word)

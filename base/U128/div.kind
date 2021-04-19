@@ -1,0 +1,4 @@
+U128.div(a: U128, b: U128): U128
+  open a
+  open b
+  U128.new(Word.div!(a.value, b.value))

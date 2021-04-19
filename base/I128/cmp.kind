@@ -1,0 +1,7 @@
+I128.cmp(a: I128, b: I128): Cmp
+  if I128.ltn(a, b) then
+    Cmp.ltn
+  else if I128.eql(a, b) then
+    Cmp.eql
+  else
+    Cmp.gtn

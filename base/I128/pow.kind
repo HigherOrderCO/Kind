@@ -1,0 +1,4 @@
+I128.pow(a: I128, b: I128): I128
+  open a
+  open b
+  I128.new(Word.s_pow!(a.value, b.value))

@@ -1,0 +1,4 @@
+I8.xor(a: I8, b: I8): I8
+  open a
+  open b
+  I8.new(Word.xor!(a.value, b.value))

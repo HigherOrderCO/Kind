@@ -1,0 +1,23 @@
+Kind.Parser.int: Parser(Kind.Term)
+  Parser {
+    get init = Kind.Parser.init;
+    Kind.Parser.spaces;
+    get sgn_num = Parser.first_of!([
+      Kind.Parser.int_pos,
+      Kind.Parser.int_neg,
+    ])
+    // #TODO removing let causes weird errors
+    // as of kind 1.0.28
+    let term = case sgn_num {
+      new:
+        ret = Kind.Term.ref("Int.from_nat")
+        ret = Kind.Term.app(ret, Kind.Term.nat(sgn_num.snd))
+        case sgn_num.fst {
+          true: ret
+          false: inv = Kind.Term.ref("Int.neg")
+                 Kind.Term.app(inv, ret)
+        }
+    }
+    get orig = Kind.Parser.stop(init)
+    return Kind.Term.ori(orig, term)
+  }

@@ -1,0 +1,2 @@
+U256.length(str: String): U256
+  U256.length(str)

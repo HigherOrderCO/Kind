@@ -1,5 +1,5 @@
 Int.show(a: Int): String
-  let result = Int.to_nat(a)
+  let result = Int.to_nat_signed(a)
   open result
   case result.fst {
       true : "-" | Nat.show(result.snd)

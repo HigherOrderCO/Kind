@@ -1,2 +1,3 @@
-Test: String
-  "hey"
+Test: Int
+  Int.mul(+123450000000, -10000000000)
+  

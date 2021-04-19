@@ -1,4 +1,4 @@
 U8.gtn(a: U8, b: U8): Bool
   open a
-  open b 
+  open b
   Word.gtn!(a.value, b.value)

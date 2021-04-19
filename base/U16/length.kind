@@ -1,0 +1,2 @@
+U16.length(str: String): U16
+  U16.length(str)
