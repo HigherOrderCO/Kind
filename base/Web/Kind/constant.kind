@@ -9,3 +9,10 @@ Web.Kind.constant.dark_pri_color: String
 
 Web.Kind.constant.p_tag_size: String
   "16px"
+
+
+Web.Kind.constant.action_go_to_apps: String
+  "action_go_to_apps"
+
+Web.Kind.constant.action_go_to_home: String
+  "action_go_to_home"

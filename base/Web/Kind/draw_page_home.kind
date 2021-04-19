@@ -49,7 +49,7 @@ Web.Kind.draw_page_home: DOM
       "align-items": "center"
       "justify-content": "center"
     }, [
-      Web.Kind.component.btn_go_to_apps_solid,
+      Web.Kind.component.btn_primary_solid("GO TO APPS", Web.Kind.constant.action_go_to_apps),
       croni
     ])
     // Kaelin.Assets.chars.croni_idle_00

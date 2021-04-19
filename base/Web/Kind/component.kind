@@ -20,21 +20,27 @@ Web.Kind.component.header(page: Web.Kind.Page): DOM
 
 // Returns a DOM for the tabs
 Web.Kind.component.header_tabs(page: Web.Kind.Page): DOM
-  let titles = ["Apps", "Home"]
-  let tabs = List.nil<DOM>
-  for title in titles with tabs:
-    List.cons!(
-      Web.Kind.component.header_tab(Web.Kind.helper.is_current(title, page), title), 
-      tabs)
+  let tabs =
+    [
+      Web.Kind.component.header_tab(
+        Web.Kind.helper.is_current("Home", page), "Home", Web.Kind.constant.action_go_to_home)
+
+      Web.Kind.component.header_tab(
+        Web.Kind.helper.is_current("Apps", page), "Apps", Web.Kind.constant.action_go_to_apps)
+    ]
+
   DOM.node("div", {}, {
     "padding-left": "20%"
     "display": "flex"
     "flex-direction": "row"
     }, tabs)
 
-Web.Kind.component.header_tab(is_active: Bool, title: String): DOM
+
+Web.Kind.component.header_tab(is_active: Bool, title: String, id: String): DOM
   if is_active then
-    DOM.node("div", {}, {
+    DOM.node("div", {
+      "id": id
+    }, {
       "margin-right": "30px"
       "border-style": "none none solid none"
       "border-color": Web.Kind.constant.secondary_color
@@ -45,8 +51,10 @@ Web.Kind.component.header_tab(is_active: Bool, title: String): DOM
       "justify-content": "center"
       }, [DOM.text(title)])
   else
-    DOM.node("div", {}, {
-      "margin-right": "10px"
+    DOM.node("div", {
+      "id": id
+    }, {
+      "margin-right": "30px"
       "font-size": "18px"
       "cursor": "pointer"
       "width": "70px"
@@ -95,12 +103,9 @@ Web.Kind.component.list(items: List(DOM)): DOM
   DOM.node("ul", {}, {
     "list-style-type": "none"}, li)
 
-Web.Kind.component.btn_go_to_apps_solid: DOM
+Web.Kind.component.btn_primary_solid(title: String, id: String): DOM
   DOM.node("div", {
-    "id": "btn_go_to_apps"
-    // "onclick": "
-    // document.getElementById('btn_go_to_apps').onclick = () => console.log('test btn')
-    // "
+    "id": id
   }, {
     "cursor": "pointer"
     "font-size": "14px"
@@ -115,7 +120,7 @@ Web.Kind.component.btn_go_to_apps_solid: DOM
     "flex-direction": "row"
     "align-items": "center"
     "justify-content": "center"
-  }, [DOM.text("GO TO APPS")])
+  }, [DOM.text(title)])
 
 
 Web.Kind.component.footer: DOM

@@ -7,6 +7,17 @@ type Web.Kind.Page{
   apps
 }
 
+Web.Kind.exe_event(stt: Web.Kind.State, e_id: String, e_name: String): Web.Kind.State
+  open stt
+  switch String.eql(e_id){
+    Web.Kind.constant.action_go_to_home: 
+      Web.Kind.State.new(stt.screen_size, Web.Kind.Page.home)
+
+    Web.Kind.constant.action_go_to_apps: 
+      Web.Kind.State.new(stt.screen_size, Web.Kind.Page.apps)
+
+  } default Web.Kind.State.new(stt.screen_size, stt.page) // same page
+
 Web.Kind.draw_page(page: Web.Kind.Page): DOM
   case page{
     home: Web.Kind.draw_page_home
@@ -16,9 +27,7 @@ Web.Kind.draw_page(page: Web.Kind.Page): DOM
 Web.Kind: App(Web.Kind.State)
 
   init = 
-    Web.Kind.State.new(
-      {500u, 400u},
-      Web.Kind.Page.apps)
+    Web.Kind.State.new({500u, 400u}, Web.Kind.Page.apps)
 
   draw = (state)
     open state
@@ -27,6 +36,8 @@ Web.Kind: App(Web.Kind.State)
   when = (event, state)
     case event {
       init: App.pass
+      dom: log("DOM!! " | event.name)
+        App.store!(Web.Kind.exe_event(state, event.id, event.name))
     } default App.pass
   
   // The application
