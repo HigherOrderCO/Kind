@@ -1,3 +1,25 @@
-Test: Int
-  Int.mul(+123450000000, -10000000000)
+Test: String
+  defs = Kind.Defs.read_main("
+    type Bool {
+      true
+      false
+    }
+
+    not(b: Bool): Bool
+      case b {
+        true: false
+        false: true
+      }
+  ")
+  //List.show!(Pair.fst!!, Kind.Map.to_list)
+  case Kind.Map.get!("not", defs) as got {
+    none:
+      "not found"
+    some: 
+      open got.value
+      let {comp, type} = Kind.Comp.compile(got.value.term, some(got.value.type), defs, 0)
+      Kind.Comp.show(comp)
+  }
+
+
   
