@@ -18,7 +18,7 @@ Web.Kaelin.Draw.map(img: VoxBox, map: Web.Kaelin.Map): VoxBox
 
       case fit {
         true:
-          let map = Web.Kaelin.Draw.background(coord, map)
+          let map = Web.Kaelin.Map.background(coord, map)
           // Draws the hexagon border
           let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(coord)
           let img = Web.Kaelin.Draw.hexagon_border(cx, cy, hex_rad, col, img) // TODO remove

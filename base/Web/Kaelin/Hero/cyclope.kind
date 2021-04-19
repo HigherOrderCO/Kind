@@ -1,5 +1,5 @@
 Web.Kaelin.Hero.cyclope: Web.Kaelin.Hero
   Web.Kaelin.Hero.new(
     "0x00000002", 
-    Web.Kaelin.Entity.char(Kaelin.Assets.chars.cyclope_d_1)
+    Web.Kaelin.Entity.char(Web.Kaelin.Assets.hero.cyclope_d_1)
   )
