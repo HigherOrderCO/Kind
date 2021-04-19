@@ -2,7 +2,7 @@ Web.Online.State: Type
   BitsMap(Pair(U32, U32))
 
 Web.Online.room: String
-  "0x196581625482"
+  "0x196581625483"
 
 Web.Online.command.A: String
   "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -20,10 +20,10 @@ Web.Online.command(user: String, cmd: String, state: Web.Online.State): Web.Onli
   let key = String.to_bits(user)
   case BitsMap.get!(key, state) as player {
     none:
-      BitsMap.set!(key, {128u, 128u}, state)
+      BitsMap.set!(key, {128#32, 128#32}, state)
     some:
       open player.value
-      let spd = 3u
+      let spd = 3#32
       let p_x = player.value.fst
       let p_y = player.value.snd
       switch String.eql(cmd) {
@@ -40,13 +40,13 @@ Web.Online.command(user: String, cmd: String, state: Web.Online.State): Web.Onli
 
 // A demo application that renders a square on the screen
 Web.Online: App(Web.Online.State)
-  let vbox = VoxBox.alloc_capacity(3200u)
+  let vbox = VoxBox.alloc_capacity(3200#32)
   let init = BitsMap.new!
   let draw = (state)
     let vbox = VoxBox.clear(vbox)
     let vbox = for pos in BitsMap.values!(state):
       open pos
-      VoxBox.Draw.image(pos.fst, pos.snd, 0u, Web.Online.hero, vbox)
+      VoxBox.Draw.image(pos.fst, pos.snd, 0#32, Web.Online.hero, vbox)
     DOM.vbox({}, {}, vbox)
   let when = (event, state)
     case event {

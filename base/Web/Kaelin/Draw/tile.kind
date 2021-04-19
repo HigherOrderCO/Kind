@@ -11,11 +11,11 @@ Web.Kaelin.Draw.tile(
     case ent{
       background:
         let cy = U32.sub(cy, Web.Kaelin.Resources.hexagon_radius)
-        VoxBox.Draw.image(cx, cy, 3u, ent.img, img)
+        VoxBox.Draw.image(cx, cy, 0#32, ent.img, img)
       char:
-        let aux_y = U32.mul(Web.Kaelin.Resources.hexagon_radius, 2u)
+        let aux_y = U32.mul(Web.Kaelin.Resources.hexagon_radius, 2#32)
         let cy = U32.sub(cy, aux_y)
-        VoxBox.Draw.image(cx, cy, 0u, ent.img, img)
+        VoxBox.Draw.image(cx, cy, 0#32, ent.img, img)
     }
   img
 

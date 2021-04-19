@@ -88,7 +88,7 @@ Senhas.loope(senha: List(Nat), tentativas: Nat): IO(Unit)
   IO {
     get line = IO.prompt(
       "\nVocê tem: "
-      | Nat.show(tentativas +1)
+      | Nat.show(tentativas + 1)
       |  " tentativas."
       | " Escolha 4 números:"
     );
@@ -103,7 +103,7 @@ Senhas.loope(senha: List(Nat), tentativas: Nat): IO(Unit)
         if Nat.eql(tentativas, 0) then
           IO.print("Infelizmente, você perdeu")
         else
-          Senhas.loope(senha, tentativas-1)
+          Senhas.loope(senha, tentativas - 1)
     } else IO { 
       IO.print("Seu input não foi válido, tente novamente")
       Senhas.loope(senha, tentativas)

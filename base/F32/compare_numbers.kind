@@ -1,0 +1,8 @@
+F32.compare_numbers(a: F32, b: F32): F32.Ordering
+  case F32.eql(a, b){
+    true : F32.Ordering.EQ
+    false: case F32.ltn(b, a){
+      true : F32.Ordering.GT
+      false: F32.Ordering.LT
+    }
+  }

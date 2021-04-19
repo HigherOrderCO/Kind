@@ -1,0 +1,3 @@
+U16.sqrt(val: U16): U16
+  open val
+  U16.new(Word.sqrt!(val.value))

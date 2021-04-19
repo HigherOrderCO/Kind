@@ -14,8 +14,8 @@ Web.Kaelin.Draw.initial_ent(map: Web.Kaelin.Map): Web.Kaelin.Map
   map
   
 Web.Kaelin.Draw.initial_ent.dot(img: VoxBox): VoxBox
-  let center = Col32.new(0u,255u,255u,255u)
-  let earth = Col32.new(0u,0u,255u,255u)
+  let center = Col32.new(0#32,255#32,255#32,255#32)
+  let earth = Col32.new(0#32,0#32,255#32,255#32)
   let new_coord = Web.Kaelin.Coord.new
 
   let coord_center = new_coord(Int.new(0, 0), Int.new(0, 0))
@@ -23,6 +23,6 @@ Web.Kaelin.Draw.initial_ent.dot(img: VoxBox): VoxBox
 
   let {cx,cy} = Web.Kaelin.Coord.to_screen_xy(coord_center)
   let {ex,ey} = Web.Kaelin.Coord.to_screen_xy(coord_earth)
-  let img = VoxBox.Draw.square(cx, cy, 0u, 4u, 4u, (cx,cy) center, img) 
-  VoxBox.Draw.square(ex, ey, 0u, 4u, 4u, (ex,ey) earth, img)
+  let img = VoxBox.Draw.square(cx, cy, 0#32, 4#32, 4#32, (cx,cy) center, img) 
+  VoxBox.Draw.square(ex, ey, 0#32, 4#32, 4#32, (ex,ey) earth, img)
 

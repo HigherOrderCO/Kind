@@ -1,0 +1,3 @@
+I8.to_bits(a: I8): Bits
+  open a
+  Word.to_bits!(a.value)

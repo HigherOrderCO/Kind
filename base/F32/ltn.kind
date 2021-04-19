@@ -1,0 +1,4 @@
+F32.ltn(a: F32, b: F32): Bool
+  open a 
+  open b 
+  Word.ltn!(a.word, b.word)

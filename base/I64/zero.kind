@@ -1,0 +1,2 @@
+I64.zero: I64
+  I64.new(Word.zero!)

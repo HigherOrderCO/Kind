@@ -2,7 +2,7 @@ type Mons.Effect {
   new(
     sleep: Pair(U32, Bool),
     burn: U32, // turns that will last
-    protect: Pair(U32, Bool), // fst: if 1u, will be applied on the same turn
+    protect: Pair(U32, Bool), // fst: if 1#32, will be applied on the same turn
     minimize: Pair(U32, Bool),
     invulnerable: Pair(Bool, Bool), // fst: if is invulnerable, snd: if used it last turn
     hit: U32,

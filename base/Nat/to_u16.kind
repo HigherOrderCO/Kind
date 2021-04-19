@@ -1,2 +1,2 @@
 Nat.to_u16(n: Nat): U16
-  Nat.apply<U16>(n, U16.inc, U16.zero)
+  U16.new(Nat.to_word!(n))

@@ -1,0 +1,7 @@
+I64.cmp(a: I64, b: I64): Cmp
+  if I64.ltn(a, b) then
+    Cmp.ltn
+  else if I64.eql(a, b) then
+    Cmp.eql
+  else
+    Cmp.gtn

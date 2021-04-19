@@ -1,0 +1,2 @@
+Nat.to_word(size: Nat, n: Nat): Word(size)
+  Nat.apply!(n, Word.inc!, Word.zero!)

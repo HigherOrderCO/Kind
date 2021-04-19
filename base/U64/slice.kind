@@ -1,0 +1,4 @@
+U64.slice(i: U64, j: U64, str: String): String
+  open i
+  open j
+  Word.slice!(i.value, j.value, str)

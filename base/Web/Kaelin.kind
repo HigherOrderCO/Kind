@@ -15,19 +15,19 @@ Web.Kaelin.Command.create_player(hero_id: String) : String
 
 // A demo application that renders a square on the screen
 Web.Kaelin: App(Web.Kaelin.State)
-  let img = VoxBox.alloc_capacity(U32.mul(65536u, 8u))
+  let img = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
   // Initial state
   let map = Web.Kaelin.Draw.initial_ent({})
   // TODO insert tiles in map web.kaelin.map.create_inital_map()
-  let init = Web.Kaelin.State.game(Web.Kaelin.Resources.room, 0, {}, map, App.EnvInfo.new({256u, 256u}, {0u, 0u}))
+  let init = Web.Kaelin.State.game(Web.Kaelin.Resources.room, 0, {}, map, App.EnvInfo.new({256#32, 256#32}, {0#32, 0#32}))
 
   // Render function
-  //  0s - 10s: contagem regressiva
-  // 10s - 20s: escolha do turno 0
-  // 20s - 30s: animação do turno 0
-  // 30s - 40s: escolha do turno 1
-  // 40s - 50s: animação do turno 1
-  // 50s - 60s: escolha do turno 2
+  //  0#16 - 10#16: contagem regressiva
+  // 10#16 - 20#16: escolha do turno 0
+  // 20#16 - 30#16: animação do turno 0
+  // 30#16 - 40#16: escolha do turno 1
+  // 40#16 - 50#16: animação do turno 1
+  // 50#16 - 60#16: escolha do turno 2
   let draw = (state)
     case state {
       game: 
@@ -47,10 +47,10 @@ Web.Kaelin: App(Web.Kaelin.State)
       key_down game:
       // this will be replaced by serialze when it is ready 
         switch U16.eql(event.code) {
-          49s: App.post(state.room, Web.Kaelin.Command.create_player("0x00000001")) // croni
-          50s: App.post(state.room, Web.Kaelin.Command.create_player("0x00000002")) // cyclope
-          51s: App.post(state.room, Web.Kaelin.Command.create_player("0x00000003")) // lela
-          52s: App.post(state.room, Web.Kaelin.Command.create_player("0x00000004")) // octoking
+          49#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000001")) // croni
+          50#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000002")) // cyclope
+          51#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000003")) // lela
+          52#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000004")) // octoking
           'D': App.post(state.room, "0x2100000000000000000000000000000000000000000000000000000000000001")
           'A': App.post(state.room, "0x2200000000000000000000000000000000000000000000000000000000000001")
           'W': App.post(state.room, "0x2300000000000000000000000000000000000000000000000000000000000001")
@@ -61,9 +61,9 @@ Web.Kaelin: App(Web.Kaelin.State)
            open info
            let pos = info.mouse_pos
            open pos
-           let {x, y} = {U32.div(pos.fst, 2u), 
-             U32.div(pos.snd, 2u)}
-           App.print(Pair.show(U32, U32, U32.to_string, U32.to_string,
+           let {x, y} = {U32.div(pos.fst, 2#32), 
+             U32.div(pos.snd, 2#32)}
+           App.print(Pair.show(U32, U32, U32.show, U32.show,
              {x, y}))
        tick game:
            let info = event.info

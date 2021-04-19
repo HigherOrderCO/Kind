@@ -1,0 +1,4 @@
+I256.div(a: I256, b: I256): I256
+  open a
+  open b
+  I256.new(Word.div!(a.value, b.value))

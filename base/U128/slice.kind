@@ -1,0 +1,4 @@
+U128.slice(i: U128, j: U128, str: String): String
+  open i
+  open j
+  Word.slice!(i.value, j.value, str)

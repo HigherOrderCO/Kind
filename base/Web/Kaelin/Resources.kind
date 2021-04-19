@@ -1,15 +1,15 @@
 // TODO rename to constants
 Web.Kaelin.Resources.hexagon_radius: U32
-  15u
+  15#32
 
 Web.Kaelin.Resources.map_size : U32
-  5u
+  5#32
 
 Web.Kaelin.Resources.center_x : U32
-  128u
+  128#32
 
 Web.Kaelin.Resources.center_y : U32
-  128u
+  128#32
 
 Web.Kaelin.Resources.room : String
   "0x196581625485"

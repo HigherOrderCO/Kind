@@ -1,0 +1,6 @@
+Int.to_i8(a: Int): I8
+  open a
+  case a.neg {
+    zero: I8.new(Nat.to_word!(a.pos))
+    succ: I8.neg(I8.new(Nat.to_word!(a.neg)))
+  }

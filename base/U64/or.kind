@@ -1,4 +1,4 @@
 U64.or(a: U64, b: U64): U64
-  open a 
-  open b 
+  open a
+  open b
   U64.new(Word.or!(a.value, b.value))
