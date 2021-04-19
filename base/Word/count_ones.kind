@@ -1,0 +1,2 @@
+Word.count_ones<size: Nat>(word: Word(size)): Nat
+  Word.count_ones.go<size>(word, 0)

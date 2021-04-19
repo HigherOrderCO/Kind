@@ -1,9 +1,9 @@
 Web.Kaelin.Draw.initial_ent(map: Web.Kaelin.Map): Web.Kaelin.Map
-  let ent_croni = Web.Kaelin.Entity.char(Kaelin.Assets.chars.croni0_d_1)
-  let ent_cyclope = Web.Kaelin.Entity.char(Kaelin.Assets.chars.cyclope_d_1)
-  let ent_lela = Web.Kaelin.Entity.char(Kaelin.Assets.chars.lela_d_1)
-  let ent_octoking = Web.Kaelin.Entity.char(Kaelin.Assets.chars.octoking_d_1)
-  let ent_grass = Web.Kaelin.Entity.background(Kaelin.Assets.dark_grass_4)
+  let ent_croni = Web.Kaelin.Entity.char(Web.Kaelin.Assets.hero.croni0_d_1)
+  let ent_cyclope = Web.Kaelin.Entity.char(Web.Kaelin.Assets.hero.cyclope_d_1)
+  let ent_lela = Web.Kaelin.Entity.char(Web.Kaelin.Assets.hero.lela_d_1)
+  let ent_octoking = Web.Kaelin.Entity.char(Web.Kaelin.Assets.hero.octoking_d_1)
+  let ent_grass = Web.Kaelin.Entity.background(Web.Kaelin.Assets.dark_grass_4)
   
   let new_coord = Web.Kaelin.Coord.new
   map = Web.Kaelin.Map.push(new_coord(Int.new(0, 0), Int.new(0, 0)),ent_grass, map)

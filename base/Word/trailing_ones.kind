@@ -1,0 +1,2 @@
+Word.trailing_ones<size: Nat>(word: Word(size)): Nat
+  Word.trailing_ones.go<size>(word, 0)
