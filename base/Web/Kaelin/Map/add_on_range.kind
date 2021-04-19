@@ -1,5 +1,5 @@
 Web.Kaelin.Map.add_on_range(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map, range: Nat): Web.Kaelin.Map
-let imagem = Web.Kaelin.Entity.background(Web.Kaelin.Assets.hex_range)
+let imagem = Web.Kaelin.Entity.background(Web.Kaelin.Assets.tile.hex_range)
 let list_coords = 
   Web.Kaelin.Coord.Axial.range(coord, range)
   let new_map = map
