@@ -20,16 +20,13 @@ Web.Kind.draw_page_apps: DOM
 
   // Content
   // ----------
-  let game_container =
-    let game = 
-      Web.Kind.component.game_card(Web.Kind.img.banner_template, "Senhas", "senhas")
-      
+  let games =
     DOM.node("div", {"id": "game-container"}, {}, [
       Web.Kind.component.title("Games")
       DOM.node("div", {}, {
         "display": "flex"
         "justify-content": "space-evenly"
-      }, [ game, game])
+      }, Web.Kind.content_apps)
     ])
   
 
@@ -41,7 +38,7 @@ Web.Kind.draw_page_apps: DOM
   }, [
     Web.Kind.component.header(Web.Kind.Page.apps)
     Web.Kind.component.body_container([
-      game_container
+      games
     ]),
     Web.Kind.component.footer
   ])

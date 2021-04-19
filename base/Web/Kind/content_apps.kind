@@ -1,0 +1,7 @@
+Web.Kind.content_apps: List(DOM)
+ [
+  Web.Kind.component.game_card(
+    Web.Kind.img.banner_template, "Senhas", "Web.Senhas")
+  Web.Kind.component.game_card(
+    Web.Kind.img.banner_template, "TicTacToe", "Web.TicTacToe")
+ ]

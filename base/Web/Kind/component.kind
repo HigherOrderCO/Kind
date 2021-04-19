@@ -1,4 +1,4 @@
-Web.Kind.component.header(page: Web.KindWebsite.Page): DOM
+Web.Kind.component.header(page: Web.Kind.Page): DOM
   let vbox = VoxBox.alloc_capacity(100#32)
   let line = 
     DOM.node("div", {}, {
@@ -169,14 +169,19 @@ Web.Kind.component.footer: DOM
   }, [ join_us, msg_footer])
 
 
-Web.Kind.component.game_card(src: String, title: String, url: String): DOM
+Web.Kind.component.game_card(src: String, title: String, path: String): DOM
   let banner = DOM.node("img", {"src": src}, 
     {"width": "100px", "height": "100px"}, []) 
 
   let title = 
-    DOM.node("a", {}, {
+    DOM.node("a", {
+      "href": path
+      "target": "_blank"
+      }, {
       "font-size": Web.Kind.constant.p_tag_size
       "cursor": "pointer"
+      "color": "black"
+      "text-decoration": "none"
     }, [DOM.text(title)])
 
   DOM.node("div", {}, {
