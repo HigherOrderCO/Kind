@@ -1,0 +1,12 @@
+Word.sqrt.go<size: Nat>(word: Word(size), bit: Word(size), res: Word(size)): Word(size)
+  if Bool.not(Word.is_zero<size>(bit)) then
+    let sum = Word.add<size>(res, bit)
+    let {new_word, new_res} =
+      if Word.gte<size>(word, sum) then
+        { Word.sub<size>(word, sum),
+          Word.add<size>(Word.shift_right<size>(1, res), bit) }
+      else
+        { word, Word.shift_right<size>(1, res) }
+    Word.sqrt.go<size>(new_word, Word.shift_right<size>(2, bit), new_res)
+  else
+    res

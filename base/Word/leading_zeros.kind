@@ -1,0 +1,2 @@
+Word.leading_zeros<size: Nat>(word: Word(size)): Nat
+  Word.leading_zeros.go<size>(word, 0)

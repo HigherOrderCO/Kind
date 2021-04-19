@@ -1,0 +1,2 @@
+Word.trailing_zeros<size: Nat>(word: Word(size)): Nat
+  Word.trailing_zeros.go<size>(word, 0)
