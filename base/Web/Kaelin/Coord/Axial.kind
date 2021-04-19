@@ -1,3 +1,4 @@
-type Web.Kaelin.Coord.Axial {
-    new(q:Int, r:Int)
-}
+//Renamed to Coord.kind at Web/Kaelin/Coord.kind
+//type Web.Kaelin.Coord.Axial {
+    //new(q:Int, r:Int)
+//}

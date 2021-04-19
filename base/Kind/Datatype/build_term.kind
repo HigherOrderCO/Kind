@@ -6,8 +6,8 @@ Kind.Datatype.build_term(type: Kind.Datatype): Kind.Term
 Kind.Datatype.build_term.go(
   type: Kind.Datatype,
   name: Kind.Name,
-  pars: List(Kind.Binder),
-  inds: List(Kind.Binder),
+  pars: List<Kind.Binder>,
+  inds: List<Kind.Binder>,
 ): Kind.Term
   case pars {
     cons:
@@ -35,7 +35,7 @@ Kind.Datatype.build_term.constructor(type: Kind.Datatype, ctor: Kind.Constructor
 Kind.Datatype.build_term.constructor.go(
   type: Kind.Datatype,
   ctor: Kind.Constructor,
-  args: List(Kind.Binder),
+  args: List<Kind.Binder>,
 ): Kind.Term
   case args {
     cons:
@@ -67,7 +67,7 @@ Kind.Datatype.build_term.constructors(type: Kind.Datatype): Kind.Term
 Kind.Datatype.build_term.constructors.go(
   type: Kind.Datatype,
   name: Kind.Name,
-  ctrs: List(Kind.Constructor),
+  ctrs: List<Kind.Constructor>,
 ): Kind.Term
   case ctrs {
     cons:
@@ -93,7 +93,7 @@ Kind.Datatype.build_term.motive(
 Kind.Datatype.build_term.motive.go(
   type: Kind.Datatype,
   name: Kind.Name,
-  inds: List(Kind.Binder),
+  inds: List<Kind.Binder>,
 ): Kind.Term
   case inds {
     cons:

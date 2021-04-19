@@ -2,10 +2,10 @@
 Web.Kaelin.Draw.map(img: VoxBox, map: Web.Kaelin.Map): VoxBox
   let img = VoxBox.clear(img)
   let col = Col32.new(0#32, 0#32, 255#32, 255#32)
-  let map_size = Web.Kaelin.Resources.map_size
+  let map_size = Web.Kaelin.Constants.map_size
   let width = U32.add(U32.mul(map_size, 2#32), 1#32) // map_size * 2 + 1
   let height = U32.add(U32.mul(map_size, 2#32), 1#32) // map_size * 2 + 1
-  let hex_rad = Web.Kaelin.Resources.hexagon_radius
+  let hex_rad = Web.Kaelin.Constants.hexagon_radius
 
   // loops through the half of the map_size
   for j : U32 from 0#32 to height with img:
@@ -18,10 +18,10 @@ Web.Kaelin.Draw.map(img: VoxBox, map: Web.Kaelin.Map): VoxBox
 
       case fit {
         true:
-          let map = Web.Kaelin.Draw.background(coord, map)
+          let map = Web.Kaelin.Map.background(coord, map)
           // Draws the hexagon border
           let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(coord)
-          let img = Web.Kaelin.Draw.hexagon_border(cx, cy, hex_rad, col, img)
+          let img = Web.Kaelin.Draw.hexagon_border(cx, cy, hex_rad, col, img) // TODO remove
           // Draw coordinates
           let img = Web.Kaelin.Draw.tile.empty(coord, map, img)
           // Draws the entities

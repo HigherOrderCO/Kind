@@ -1,4 +1,4 @@
-Queue.last<A: Type>(q: Queue(A)): Maybe(A)
+Queue.last<A: Type>(q: Queue<A>): Maybe<A>
   open q
   case q.rear {
     nil: case q.front {

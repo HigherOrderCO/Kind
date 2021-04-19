@@ -1,0 +1,6 @@
+Word.trailing_zeros.go<size: Nat>(word: Word(size), n: Nat): Nat
+  case word {
+    e: n
+    o: Word.trailing_zeros.go<word.size>(word.pred, Nat.succ(n)),
+    i: n
+  }: Nat

@@ -1,5 +1,5 @@
 // A demo application that renders a square on the screen
-Web.Demo: App(Pair(U32,U32))
+Web.Demo: App<Pair<U32,U32>>
   // Allocates the mutable buffer
   vbox = VoxBox.alloc_capacity(65536#32)
 

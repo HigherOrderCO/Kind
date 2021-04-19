@@ -1,4 +1,4 @@
-Kind.Term.expand(dref: List(Bits), term: Kind.Term, defs: Kind.Defs): Kind.Term
+Kind.Term.expand(dref: List<Bits>, term: Kind.Term, defs: Kind.Defs): Kind.Term
   let term = Kind.Term.normalize(term, Kind.Map.new!);
   let term = for path in dref:
     let term = Kind.Term.expand_at(path, term, defs);

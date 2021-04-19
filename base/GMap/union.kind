@@ -1,8 +1,8 @@
 GMap.union<K: Type, V: Type>(
   cmp  : K -> K -> Cmp,
-  map_a: GMap(K,V), 
-  map_b: GMap(K,V)
-) : GMap(K,V)
+  map_a: GMap<K,V>, 
+  map_b: GMap<K,V>
+) : GMap<K,V>
   
   case map_a {
     tip: case map_b {

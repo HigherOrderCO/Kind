@@ -6,7 +6,7 @@ type TicTacToe.Piece {
 type TicTacToe {
   new(
     turn: Nat
-    pieces: List(List(Maybe(TicTacToe.Piece)))
+    pieces: List<List<Maybe<TicTacToe.Piece>>>
   )
 }
 
@@ -23,7 +23,7 @@ TicTacToe.move(x: Nat, y: Nat, ttt: TicTacToe): TicTacToe
   ?a
 
 // Is there a winner?
-TicTacToe.winner(ttt: TicTacToe): Maybe(TicTacToe.Piece)
+TicTacToe.winner(ttt: TicTacToe): Maybe<TicTacToe.Piece>
   ?a
 
 // Converts a TicTacToe board to a String. Example:
@@ -35,7 +35,7 @@ TicTacToe.winner(ttt: TicTacToe): Maybe(TicTacToe.Piece)
 TicTacToe.show(ttt: TicTacToe): String
   ?a
 
-TicTacToe.test: IO(Unit)
+TicTacToe.test: IO<Unit>
   IO {
     // Prints the initial board
     let ttt = TicTacToe.init

@@ -1,4 +1,4 @@
-Mons.Map.code_to_tile.go(code: String, cond: List(Pair(String, List(Mons.Object)))) : List(Mons.Object)
+Mons.Map.code_to_tile.go(code: String, cond: List<Pair<String, List<Mons.Object>>>) : List<Mons.Object>
   case cond {
     nil : [],
     cons: 

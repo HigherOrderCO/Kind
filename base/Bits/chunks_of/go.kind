@@ -3,7 +3,7 @@ Bits.chunks_of.go(
   bits  : Bits, // bits to be split
   need  : Nat,  // number of vals to complete chunk
   chunk : Bits  // current chunk
-) : List(Bits)
+) : List<Bits>
   case bits {
     e: List.cons!(Bits.reverse(chunk), List.nil!),
     o: case need {

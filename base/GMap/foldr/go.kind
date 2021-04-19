@@ -1,4 +1,4 @@
-GMap.foldr.go<K: Type, V: Type, Z: Type>(f: V -> Z -> Z, z: Z, map: GMap(K,V)): Z 
+GMap.foldr.go<K: Type, V: Type, Z: Type>(f: V -> Z -> Z, z: Z, map: GMap<K,V>): Z 
   case map {
     tip: z,
     bin:  

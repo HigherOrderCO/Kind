@@ -1,4 +1,4 @@
-String.from_list(xs: List(Char)) : String
+String.from_list(xs: List<Char>) : String
   case xs{
     nil : String.nil
     cons: String.cons(xs.head,String.from_list(xs.tail))

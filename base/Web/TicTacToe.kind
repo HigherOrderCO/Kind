@@ -1,4 +1,4 @@
-Web.TicTacToe: App(List(List(String)))
+Web.TicTacToe: App<List<List<String>>>
 
   place_style = {
     "cursor": "pointer"

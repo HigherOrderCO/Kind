@@ -1,4 +1,4 @@
-Kind.api.export: IO(Unit)
+Kind.api.export: IO<Unit>
   IO {
     let e = Kind.api.io.term_to_core
     let e = Kind.api.io.check_file

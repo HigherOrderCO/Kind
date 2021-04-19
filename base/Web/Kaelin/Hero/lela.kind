@@ -1,0 +1,5 @@
+Web.Kaelin.Hero.lela: Web.Kaelin.Hero
+  Web.Kaelin.Hero.new(
+    "0x00000003", 
+    Web.Kaelin.Entity.hero(Web.Kaelin.Assets.hero.lela_d_1)
+  )

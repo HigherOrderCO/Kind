@@ -116,14 +116,14 @@ User.rigille.Problems.p13(a: Nat, b: Nat): Bool
   }
 
 // Returns the first element of a List
-User.rigille.Problems.p14<A: Type>(xs: List<A>): Maybe(A)
+User.rigille.Problems.p14<A: Type>(xs: List<A>): Maybe<A>
   case xs {
     nil: none,
     cons: some(xs.head),
   }
 
 // Returns the list without the first element
-User.rigille.Problems.p15<A: Type>(xs: List<A>): List(A)
+User.rigille.Problems.p15<A: Type>(xs: List<A>): List<A>
   case xs {
     nil: List.nil!,
     cons: xs.tail,

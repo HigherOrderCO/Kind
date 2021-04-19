@@ -1,10 +1,10 @@
 Kind.Term.desugar_cse.motive.go(
-  wyth: List(Kind.Ann),
-  moti: Maybe(Kind.Term),
+  wyth: List<Kind.Ann>,
+  moti: Maybe<Kind.Term>,
   name: String,
   expr: Kind.Term,
   etyp: Kind.Term,
-  rtyp: Maybe(Kind.Term),
+  rtyp: Maybe<Kind.Term>,
   defs: Kind.Defs,
   size: Nat,
 ): Kind.Term
@@ -29,12 +29,12 @@ Kind.Term.desugar_cse.motive.go(
   }
 
 Kind.Term.desugar_cse.motive(
-  wyth: List(Kind.Ann),
-  moti: Maybe(Kind.Term),
+  wyth: List<Kind.Ann>,
+  moti: Maybe<Kind.Term>,
   name: String,
   expr: Kind.Term,
   etyp: Kind.Term,
-  rtyp: Maybe(Kind.Term),
+  rtyp: Maybe<Kind.Term>,
   defs: Kind.Defs,
   size: Nat,
 ): Kind.Term

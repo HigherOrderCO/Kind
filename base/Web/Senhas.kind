@@ -1,5 +1,5 @@
 // A demo application that renders a square on the screen
-Web.Senhas: App(Unit)
+Web.Senhas: App<Unit>
 
   draw = (state)
     DOM.node("div", {}, {}, [

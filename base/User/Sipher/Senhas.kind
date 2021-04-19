@@ -1,25 +1,25 @@
 // Converte o input do usuário em uma lista com 4 números
-Senhas.read_input(line: String): List(Nat)
+Senhas.read_input(line: String): List<Nat>
   let split = String.split(line," ")
   let map = List.map!!(Nat.read, split)
   let list = List.take!(4, map)
   list
 
 // Verifica se o número está contido na senha
-Senha.tem_numero(num: Nat, senha: List(Nat)): Bool
+Senha.tem_numero(num: Nat, senha: List<Nat>): Bool
   let tmp = List.map!!(Nat.eql(num), senha)
   let tmp = List.fold!(tmp,_,false ,Bool.or)
   tmp
 
 // Verifica o input do usuário para saber se todos os números são válidos
-Senha.confirma(xs: List(Nat)): Bool
+Senha.confirma(xs: List<Nat>): Bool
   let chck = List.map!!(Nat.gtn(10), xs)
   let chck = List.fold!(chck,_, true, Bool.and)
   chck
 
 // Verifica se o número está contido na senha e retorna um valor em string do
 // resultado
-Senha.verifica(senha: List(Nat), a: Nat, b: Nat): String
+Senha.verifica(senha: List<Nat>, a: Nat, b: Nat): String
   case senha { 
     nil:""
     cons:
@@ -32,7 +32,7 @@ Senha.verifica(senha: List(Nat), a: Nat, b: Nat): String
   }
 
 // Verifica as posições dos valores na senha e retorna uma lista de Strings
-Senhas.resposta(suporte: List(Nat), senha: List(Nat), tentativa: List(Nat)): List(String)
+Senhas.resposta(suporte: List<Nat>, senha: List<Nat>, tentativa: List<Nat>): List<String>
   case tentativa { 
     nil: []
     cons: case senha { 
@@ -42,7 +42,7 @@ Senhas.resposta(suporte: List(Nat), senha: List(Nat), tentativa: List(Nat)): Lis
   }
 
 // Gera uma lista aleatória de números aleatórios
-Nat.randoms(len: Nat, seed: Nat, max: Nat): List(Nat)
+Nat.randoms(len: Nat, seed: Nat, max: Nat): List<Nat>
   case len { 
     zero:
       []
@@ -52,14 +52,14 @@ Nat.randoms(len: Nat, seed: Nat, max: Nat): List(Nat)
     }
 
 // Gera uma lista aleatória de números aleatórios cujo a seed é a hora
-IO.randoms(len: Nat, max: Nat): IO(List(Nat))
+IO.randoms(len: Nat, max: Nat): IO<List<Nat>>
   IO { 
     get seed = IO.get_time
     return Nat.randoms(len, seed, max)
   }
   
 // Gera uma lista random baseada no index de outras listas
-List.random(xs: List(Nat), ys: List(Nat), zs: List(Nat)): List(Nat)
+List.random(xs: List<Nat>, ys: List<Nat>, zs: List<Nat>): List<Nat>
   case xs { 
     nil: zs
     cons: case ys { 
@@ -74,7 +74,7 @@ List.random(xs: List(Nat), ys: List(Nat), zs: List(Nat)): List(Nat)
   }
 
 // Gerador de senha
-Senhas: IO(Unit)
+Senhas: IO<Unit>
   IO {
     get num = IO.random(10)
     get num_1 = IO.randoms(4, 10)
@@ -84,7 +84,7 @@ Senhas: IO(Unit)
     Senhas.loope(senha, 4)
   }
 
-Senhas.loope(senha: List(Nat), tentativas: Nat): IO(Unit)
+Senhas.loope(senha: List<Nat>, tentativas: Nat): IO<Unit>
   IO {
     get line = IO.prompt(
       "\nVocê tem: "
@@ -110,5 +110,5 @@ Senhas.loope(senha: List(Nat), tentativas: Nat): IO(Unit)
     }
   }
 
-User.Sipher.Senhas: IO(Unit)
+User.Sipher.Senhas: IO<Unit>
   Senhas

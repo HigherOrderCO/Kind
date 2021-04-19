@@ -62,7 +62,7 @@ Web.Kind.component.header_tab(is_active: Bool, title: String, id: String): DOM
       "justify-content": "center"
       }, [DOM.text(title)])
 
-Web.Kind.component.body_container(ele: List(DOM)): DOM
+Web.Kind.component.body_container(ele: List<DOM>): DOM
   DOM.node("div", {}, {
     "margin": "40px 20% 40px 20%",
     "flex": "1"
@@ -105,7 +105,7 @@ Web.Kind.component.link_black(txt: String, href: String): DOM
       "cursor": "pointer"
     }, [DOM.text(txt)]) 
 
-Web.Kind.component.list(items: List(DOM)): DOM
+Web.Kind.component.list(items: List<DOM>): DOM
   let li = []
   for item in items with li:
     List.cons!(DOM.node("li", {}, {"margin-top": "5px"}, [item]), li)

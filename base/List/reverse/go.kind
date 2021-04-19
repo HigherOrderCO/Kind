@@ -1,4 +1,4 @@
-List.reverse.go<A: Type>(xs: List(A), res: List(A)): List(A)
+List.reverse.go<A: Type>(xs: List<A>, res: List<A>): List<A>
   case xs {
     nil: res,
     cons: List.reverse.go!(xs.tail,List.cons!(xs.head,res))
