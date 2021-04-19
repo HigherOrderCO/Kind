@@ -1,0 +1,14 @@
+// we can be heroes
+Web.Kaelin.Resources.heroes: Map(Web.Kaelin.Hero)
+  let heroes = [
+    Web.Kaelin.Hero.croni,
+    Web.Kaelin.Hero.cyclope,
+    Web.Kaelin.Hero.lela,
+    Web.Kaelin.Hero.octoking,
+  ]
+
+  List.fold!(heroes)!({}, (hero, map) 
+    open hero
+    map{hero.id} <- hero
+  )
+  

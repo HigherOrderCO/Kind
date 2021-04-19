@@ -8,6 +8,8 @@ type Web.Kaelin.State {
     tick: Nat
     players: Map(Web.Kaelin.Player)
     map: Web.Kaelin.Map,
-    interface : App.EnvInfo
+    interface : App.EnvInfo // TODO rename to env_info
+    // TODO new field cast_info: maybe(web.kaelin.castinfo)
+    // castinfo : 
   )
 }
