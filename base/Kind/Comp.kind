@@ -98,6 +98,9 @@ Kind.Comp.prim_of(type: Kind.Term, defs: Kind.Defs): Maybe(Kind.Comp.Prim)
   //Buffer32 : 1,
 //};
 
+
+
+
 Kind.Comp.compile(term: Kind.Term, type: Maybe(Kind.Term), defs: Kind.Defs, size: Nat): Pair(Kind.Comp, Kind.Term)
   case type {
     some:
