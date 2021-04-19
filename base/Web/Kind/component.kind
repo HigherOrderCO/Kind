@@ -192,7 +192,8 @@ Web.Kind.component.game_card(src: String, title: String, path: String): DOM
   DOM.node("div", {}, {
     "height": "120px"
     "display": "flex"
-    "flex-direction": "column"
+    "flex-direction": "column",
+    "margin": "10px 20px"
   }, [
     banner
     title

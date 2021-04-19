@@ -25,7 +25,9 @@ Web.Kind.draw_page_apps: DOM
       Web.Kind.component.title("Games")
       DOM.node("div", {}, {
         "display": "flex"
-        "justify-content": "space-evenly"
+        "justify-content": "flex-start"
+        "flex-direction": "row"
+        "flex-wrap": "wrap"
       }, Web.Kind.content_apps)
     ])
   
