@@ -1,4 +1,4 @@
-List.append<A: Type>(as: List(A), a: A): List(A)
+List.append<A: Type>(as: List<A>, a: A): List<A>
   case as{
     nil : List.pure!(a)
     cons: List.cons!(as.head,List.append!(as.tail, a))

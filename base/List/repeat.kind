@@ -1,0 +1,5 @@
+List.repeat<A: Type>(len: Nat, value: A): List<A>
+  case len {
+    zero: []
+    succ: value & List.repeat<A>(len.pred, value)
+  }

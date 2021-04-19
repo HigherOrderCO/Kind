@@ -1,4 +1,4 @@
-Kind.Term.SmartMotive.nams(name: Kind.Name, type: Kind.Term, defs: Kind.Defs): List(Kind.Name)
+Kind.Term.SmartMotive.nams(name: Kind.Name, type: Kind.Term, defs: Kind.Defs): List<Kind.Name>
   case Kind.Term.reduce(type, defs) as type {
     all: Kind.Term.SmartMotive.nams.cont(name, type.xtyp, [], defs),
     _: [],

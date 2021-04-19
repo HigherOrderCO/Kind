@@ -1,3 +1,0 @@
-Image3D.set_len(length: U32, img: Image3D): Image3D
-  open img
-  Image3D.new(length, img.capacity, img.buffer)

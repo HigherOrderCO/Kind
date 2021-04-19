@@ -1,4 +1,4 @@
-BitsMap.union<A: Type>(a: BitsMap(A), b: BitsMap(A)): BitsMap(A)
+BitsMap.union<A: Type>(a: BitsMap<A>, b: BitsMap<A>): BitsMap<A>
   case a {
     new: b,
     tie: case b {

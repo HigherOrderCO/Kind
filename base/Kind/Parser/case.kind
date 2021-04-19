@@ -52,12 +52,12 @@ Kind.Parser.case: Parser(Kind.Term)
   }
 
 Kind.Parser.case.build(
-  vals: List(Pair(Kind.Name, Kind.Term))
-  wyth: List(Kind.Ann)
-  cses: List(Pair(List(Kind.Name), Kind.Term))
-  dflt: Maybe(Kind.Term)
-  moti: Maybe(Kind.Term)
-  orig: Pair(Nat,Nat)
+  vals: List<Pair<Kind.Name, Kind.Term>>
+  wyth: List<Kind.Ann>
+  cses: List<Pair<List<Kind.Name>, Kind.Term>>
+  dflt: Maybe<Kind.Term>
+  moti: Maybe<Kind.Term>
+  orig: Pair<Nat,Nat>
 ): Kind.Term
   case vals {
     nil: case cses {
@@ -73,9 +73,9 @@ Kind.Parser.case.build(
   }
 
 Kind.Parser.case.group(
-  dflt: Maybe(Kind.Term)
-  cses: List(Pair(List(Kind.Name), Kind.Term))
-): Kind.Map(List(Pair(List(Kind.Name), Kind.Term)))
+  dflt: Maybe<Kind.Term>
+  cses: List<Pair<List<Kind.Name>, Kind.Term>>
+): Kind.Map(List<Pair<List<Kind.Name>, Kind.Term>>)
   case cses {
     nil:
       case dflt {
@@ -98,9 +98,9 @@ Kind.Parser.case.group(
     //path: Bits,
     //expr: Kind.Term,
     //name: Kind.Name,
-    //with: List(Kind.Ann),
-    //cses: BitsMap(Kind.Term),
-    //moti: Maybe(Kind.Term),
+    //with: List<Kind.Ann>,
+    //cses: BitsMap<Kind.Term>,
+    //moti: Maybe<Kind.Term>,
   //),
 
       

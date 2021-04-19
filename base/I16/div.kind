@@ -1,0 +1,4 @@
+I16.div(a: I16, b: I16): I16
+  open a
+  open b
+  I16.new(Word.div!(a.value, b.value))

@@ -1,0 +1,27 @@
+// Draws an ASCII text to a position
+VoxBox.Draw.text(
+  txt: String, 
+  font_map: PixelFont, 
+  pos: Pos32,
+  scr: VoxBox): VoxBox
+  let scr = 
+    for pair in List.indices.u32!(String.to_list(txt)):
+      let {i, chr} = pair
+      let add_pos = Pos32.new(U32.mul(i,6#32), 0#32, 0#32)
+      VoxBox.Draw.text.char(chr, font_map, Pos32.add(pos, add_pos), scr)
+  scr
+
+// Draws an ASCII char to a position 
+VoxBox.Draw.text.char(
+  chr: Char, 
+  font_map: PixelFont, 
+  chr_pos: Pos32,
+  scr: VoxBox): VoxBox
+  case PixelFont.get_img(chr, font_map) as got{
+    none: scr
+    some:
+      let x = Pos32.get_x(chr_pos)
+      let y = Pos32.get_y(chr_pos)
+      let z = Pos32.get_z(chr_pos)
+      VoxBox.Draw.image(x, y, z, got.value, scr)
+  }

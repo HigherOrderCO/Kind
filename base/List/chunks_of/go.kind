@@ -1,9 +1,9 @@
 List.chunks_of.go<A: Type>(
   len   : Nat,     // length of each chunk
-  list  : List(A), // list to be split
+  list  : List<A>, // list to be split
   need  : Nat,     // number of vals to complete chunk
-  chunk : List(A)  // current chunk
-) : List(List(A))
+  chunk : List<A>  // current chunk
+) : List<List<A>>
   case list {
     nil : List.cons!(List.reverse!(chunk), List.nil!),
     cons: case need {

@@ -1,0 +1,90 @@
+// TODO: fix duplicate lines on render
+VoxBox.Draw.deresagon(
+  cx: U32,
+  cy: U32,
+  cz: U32,
+  rad: U32,
+  col: Col32,
+  draw_a: Bool,
+  draw_b: Bool,
+  draw_c: Bool,
+  draw_d: Bool,
+  draw_e: Bool,
+  draw_f: Bool,
+  img: VoxBox,
+): VoxBox 
+  let hlf = U32.div(rad, 2#32)
+  let v0x = U32.add(cx, rad)
+  let v0y = U32.add(cy, hlf)
+  let v1x = U32.add(cx, rad)
+  let v1y = U32.sub(cy, hlf)
+  let v2x = cx
+  let v2y = U32.sub(cy, rad)
+  let v3x = U32.sub(cx, rad)
+  let v3y = U32.sub(cy, hlf)
+  let v4x = U32.sub(cx, rad)
+  let v4y = U32.add(cy, hlf)
+  let v5x = cx
+  let v5y = U32.add(cy, rad)
+
+  // Line 0-1
+  let img = if draw_a then
+    for i : U32 from 0#32 to rad with img:
+      let px = v1x
+      let py = U32.add(v1y, i)
+      VoxBox.push(Pos32.new(px,py,cz), col, img)
+    img
+  else
+    img
+
+  // Line 3-4
+  let img = if draw_d then
+    for i : U32 from 0#32 to rad with img:
+      let px = v3x
+      let py = U32.add(v3y, i)
+      VoxBox.push(Pos32.new(px,py,cz), col, img)
+    img
+  else
+    img
+
+  // Line 2-1
+  let img = if draw_b then
+    for i : U32 from 0#32 to rad with img:
+      let px = U32.add(v2x, i)
+      let py = U32.add(v2y, U32.div(i,2#32))
+      VoxBox.push(Pos32.new(px,py,cz), col, img)
+    img
+  else
+    img
+
+  // Line 2-3
+  let img = if draw_c then
+    for i : U32 from 0#32 to rad with img:
+      let px = U32.sub(v2x, i)
+      let py = U32.add(v2y, U32.div(i,2#32))
+      VoxBox.push(Pos32.new(px,py,cz), col, img)
+    img
+  else
+    img
+
+  // Line 0-5
+  let img = if draw_f then
+    for i : U32 from 0#32 to rad with img:
+      let px = U32.sub(U32.sub(v0x, i), 1#32)
+      let py = U32.add(v0y, U32.div(i,2#32))
+      VoxBox.push(Pos32.new(px,py,cz), col, img)
+    img
+  else
+    img
+
+  // Line 4-5
+  let img = if draw_e then
+    for i : U32 from 0#32 to rad with img:
+      let px = U32.add(U32.add(v4x, i), 1#32)
+      let py = U32.add(v4y, U32.div(i,2#32))
+      VoxBox.push(Pos32.new(px,py,cz), col, img)
+    img
+  else
+    img
+
+  img

@@ -1,0 +1,3 @@
+I16.abs(a: I16): I16
+  open a
+  I16.new(Word.abs!(a.value))

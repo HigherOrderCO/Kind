@@ -1,11 +1,15 @@
-Kind.Parser.spaces: Parser(List(Unit))
+Kind.Parser.spaces: Parser(List<Unit>)
   Parser.many!(Parser.first_of!([
     Parser.text(" "),
     Parser.text("\t"),
     Parser.text("\n"),
     Parser {
       Parser.text("//");
-      Parser.until!(Parser.text("\n"), Parser.one);
+      let endl_or_eof = Parser.first_of!([
+          Parser.text("\n"),
+          Parser.eof,
+      ])
+      Parser.until!(endl_or_eof, Parser.one);
       return Unit.new;
     }
   ]))

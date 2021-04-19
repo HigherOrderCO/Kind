@@ -1,0 +1,4 @@
+F32.rotate2d(x: F32, y: F32, a: F32): Pair<F32, F32>
+  let x2 = F32.sub(F32.mul(x, F32.cos(a)), F32.mul(y, F32.sin(a)))
+  let y2 = F32.add(F32.mul(x, F32.sin(a)), F32.mul(y, F32.cos(a)))
+  Pair.new!!(x2, y2)

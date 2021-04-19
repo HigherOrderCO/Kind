@@ -123,14 +123,14 @@ Problems.p13(a: Nat, b: Nat): Bool
   }
 
 // Returns the first element of a List
-Problems.p14<A: Type>(xs: List<A>): Maybe(A)
+Problems.p14<A: Type>(xs: List<A>): Maybe<A>
   case xs {
     nil: none
     cons: some(xs.head)
   }
 
 // Returns the list without the first element
-Problems.p15<A: Type>(xs: List<A>): List(A)
+Problems.p15<A: Type>(xs: List<A>): List<A>
   case xs {
     nil: []
     cons: xs.tail

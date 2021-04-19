@@ -1,0 +1,5 @@
+F32.if<A: Type>(x: F32, ct: A, cf: A): A
+  case F32.eql(x, F32.0) {
+   true : cf,
+   false: ct
+  }

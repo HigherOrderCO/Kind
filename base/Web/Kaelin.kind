@@ -1,3 +1,5 @@
+// >> FIXME: update to use new App <<
+
 // init:
 // Bem-vindo ao Kaelin!
 // Digite uma sala e aperte enter: 0x108309300
@@ -6,80 +8,90 @@
 // Sala vazia. Digite um DraftString para começar um jogo:
 // sipher@Croni, sejagentil@Zeralul / stanci@Murlok, derenash@Keropao
 
+// for test
+// TODO: serialize and deserialize
+Web.Kaelin.Command.create_player(hero_id: String) : String
+  "0x1" | String.repeat("0", 55) | String.drop(2, hero_id)
 
 // A demo application that renders a square on the screen
-Web.Kaelin: App(Web.Kaelin.State)
-  let img = Image3D.alloc_capacity(65536u)
+Web.Kaelin: App<Web.Kaelin.State>
+  let img = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
   // Initial state
-  let init = 
-    let map = {}
-    let map = Web.Kaelin.Draw.initial_ent(map)
-    let init_pos = Web.Kaelin.Coord.new(Int.new(0, 0), Int.new(0, 2))
-    Web.Kaelin.State.game("0x000000000000", 0, init_pos, map)
+  let map = Web.Kaelin.Draw.initial_ent({})
+  // TODO insert tiles in map web.kaelin.map.create_inital_map()
+  let init = Web.Kaelin.State.game(Web.Kaelin.Resources.room, 0, {}, map, App.EnvInfo.new({256#32, 256#32}, {0#32, 0#32}))
 
   // Render function
-  //  0s - 10s: contagem regressiva
-  // 10s - 20s: escolha do turno 0
-  // 20s - 30s: animação do turno 0
-  // 30s - 40s: escolha do turno 1
-  // 40s - 50s: animação do turno 1
-  // 50s - 60s: escolha do turno 2
+  //  0#16 - 10#16: contagem regressiva
+  // 10#16 - 20#16: escolha do turno 0
+  // 20#16 - 30#16: animação do turno 0
+  // 30#16 - 40#16: escolha do turno 1
+  // 40#16 - 50#16: animação do turno 1
+  // 50#16 - 60#16: escolha do turno 2
   let draw = (state)
     case state {
       game: 
-        let map = state.map
-        let img = Web.Kaelin.Draw.map(img, map)
-        App.Render.pix(img)
-    } default App.Render.txt("TODO: create the renderer for this game state mode")
+        // TODO: resolve background in front of entity
+        let img = Web.Kaelin.Draw.map(img, state.map)
+        let img = Web.Kaelin.Draw.state(img, state)
+        DOM.vbox({}, {}, img)
+    } default DOM.text("TODO: create the renderer for this game state mode")
 
   // Event handler
   let when = (event, state)
-    case event {
-      xkey:
-        if event.down then
-          switch U16.eql(event.code) {
-            'D':
-              case state {
-                game:
-                  let state = Web.Kaelin.Action.move(Int.new(1,0), Int.new(0,0), state)
-                  [App.Action.state!(state)]
-              } default []
-            'A':
-              case state {
-                game:
-                  let state = Web.Kaelin.Action.move(Int.new(0,1), Int.new(0,0), state)
-                  [App.Action.state!(state)]
-              } default []
-            'C':
-              case state {
-                game:
-                  let state = Web.Kaelin.Action.move(Int.new(0,0), Int.new(1,0), state)
-                  [App.Action.state!(state)]
-              } default []
-            'Z':
-              case state {
-                game:
-                  let state = Web.Kaelin.Action.move(Int.new(0,1), Int.new(1,0), state)
-                  [App.Action.state!(state)]
-              } default []
-            'E':
-              case state {
-                game:
-                  let state = Web.Kaelin.Action.move(Int.new(1,0), Int.new(0,1), state)
-                  [App.Action.state!(state)]
-              } default []
-            'Q':
-              case state {
-                game:
-                  let state = Web.Kaelin.Action.move(Int.new(0,0), Int.new(0,1), state)
-                  [App.Action.state!(state)]
-              } default []
-          } default []
-        else []
-      tick:
-        log(Pair.show!!(U32.to_string, U32.to_string, event.mouse))
-        []
-    } default []
+    case event state {
+      init game: IO {
+        App.print("Kaelin started!!!")
+        App.watch(Web.Kaelin.Resources.room)
+      }
+      key_down game:
+      // this will be replaced by serialze when it is ready 
+        switch U16.eql(event.code) {
+          49#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000001")) // croni
+          50#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000002")) // cyclope
+          51#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000003")) // lela
+          52#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000004")) // octoking
+          'D': App.post(state.room, "0x2100000000000000000000000000000000000000000000000000000000000001")
+          'A': App.post(state.room, "0x2200000000000000000000000000000000000000000000000000000000000001")
+          'W': App.post(state.room, "0x2300000000000000000000000000000000000000000000000000000000000001")
+          'S': App.post(state.room, "0x2400000000000000000000000000000000000000000000000000000000000001")
+        } default App.pass
+       mouse_up game :
+           let info = state.interface
+           open info
+           let pos = info.mouse_pos
+           open pos
+           let {x, y} = {U32.div(pos.fst, 2#32), 
+             U32.div(pos.snd, 2#32)}
+           App.print(Pair.show(U32, U32, U32.show, U32.show,
+             {x, y}))
+       tick game:
+           let info = event.info
+           App.store!(Web.Kaelin.Action.update_interface(info, state))
+      post game:
+      // this will be replaced by deserialze when it is ready
+        switch String.starts_with(event.data) {
+          
+          "0x1": 
+            let hero_id = "0x" | String.drop(58, event.data)
+            let hero = Web.Kaelin.Resources.heroes{hero_id}
+            case hero {
+              none: App.pass
+              some: App.store!(Web.Kaelin.Action.create_player(event.addr, hero.value, state))
+            }
+          "0x2":
+            let coord = switch String.eql( String.slice(3, 4, event.data) ) {
+              "1": {Int.new(1,0), Int.new(0,0)}
+              "2": {Int.new(0,1), Int.new(0,0)}
+              "3": {Int.new(0,0), Int.new(0,1)}
+              "4": {Int.new(0,0), Int.new(1,0)}
+            } default {Int.new(0,0), Int.new(0,0)}
+            
+            open coord
+            App.store!(Web.Kaelin.Action.move_player(event.addr, coord.fst, coord.snd, state))
+        } default App.pass
+        
+    } default App.pass
 
-  // The application
+  //// The application
   App.new!(init, draw, when)

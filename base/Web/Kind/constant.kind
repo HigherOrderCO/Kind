@@ -1,0 +1,2 @@
+Web.Kind.constant.primary_color: Col32
+  Col32.new(177#32, 146#32, 204#32, 100#32)

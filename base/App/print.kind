@@ -1,0 +1,5 @@
+App.print(str: String): IO<Dynamic>
+  IO {
+    IO.print(str)
+    App.pass
+  }

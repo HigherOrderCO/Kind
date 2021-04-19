@@ -1,0 +1,3 @@
+F32.floor(x: F32): F32
+  let ltn_zero = F32.if!(F32.from_bool(F32.ltn(x, F32.0)), F32.1, F32.0)
+  F32.sub(F32.sub(x, F32.mod(x, F32.1)), ltn_zero)

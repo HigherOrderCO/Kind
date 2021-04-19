@@ -1,4 +1,4 @@
-Queue.cons<A: Type>(a: A, q: Queue(A)): Queue(A)
+Queue.cons<A: Type>(a: A, q: Queue<A>): Queue<A>
   open q
   let new_f = List.cons<A>(a, q.front)
   let new_sf = Nat.add(q.size_front, 1)

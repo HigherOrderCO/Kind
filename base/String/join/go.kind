@@ -1,4 +1,4 @@
-String.join.go(sep: String, list: List(String), fst: Bool): String
+String.join.go(sep: String, list: List<String>, fst: Bool): String
   case list {
     nil: "",
     cons: String.flatten([

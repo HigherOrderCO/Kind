@@ -1,4 +1,4 @@
-Kind.Parser.case.with: Parser(List(Kind.Ann))
+Kind.Parser.case.with: Parser(List<Kind.Ann>)
   Parser.first_of!([
     Parser {
       Kind.Parser.text("with ")

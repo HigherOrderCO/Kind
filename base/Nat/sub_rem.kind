@@ -1,4 +1,4 @@
-Nat.sub_rem(n: Nat, m: Nat): Either(Nat, Nat)
+Nat.sub_rem(n: Nat, m: Nat): Either<Nat, Nat>
   case m {
     zero: Either.left!!(n),
     succ: case n {

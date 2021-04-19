@@ -1,4 +1,4 @@
-Queue.balance<A: Type>(f: List(A), sf: Nat, r: List(A), sr: Nat): Queue(A)
+Queue.balance<A: Type>(f: List<A>, sf: Nat, r: List<A>, sr: Nat): Queue<A>
   let max_sf = Nat.add(1, Nat.mul(Queue.max_diff, sf))
   let max_sr = Nat.add(1, Nat.mul(Queue.max_diff, sr))
   let size1 = Nat.div(Nat.add(sf, sr), 2)

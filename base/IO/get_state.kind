@@ -1,0 +1,3 @@
+// Returns the global state stored in a key
+IO.get_state(key: String): IO<Maybe<String>>
+  ?a

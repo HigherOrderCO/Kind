@@ -1,0 +1,8 @@
+Bits.read(str: String): Bits
+  case str{
+    nil: Bits.e
+    cons: case U16.eql(str.head, Char.parse("1")){
+      true : Bits.i(Bits.read(str.tail))
+      false: Bits.o(Bits.read(str.tail))
+    }
+  }

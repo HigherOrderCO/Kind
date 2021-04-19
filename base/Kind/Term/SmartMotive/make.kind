@@ -20,7 +20,7 @@ Kind.Term.SmartMotive.make(
   })
 
 //Kind.Term.SmartMotive.replace_many(
-  //subs: List(Pair(Kind.Name,Kind.Term)),
+  //subs: List<Pair<Kind.Name,Kind.Term>>,
   //term: Kind.Term,
   //lv: Nat,
 //): Kind.Term

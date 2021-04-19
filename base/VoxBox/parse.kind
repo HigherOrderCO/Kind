@@ -1,0 +1,16 @@
+// Parses a hex string containing an VoxBox.
+// Format: [XXYYZZRRGGBB] (64 bit per voxel).
+VoxBox.parse(voxdata: String): VoxBox
+  let siz = U32.div(U32.length(voxdata), 12#32)
+  let img = VoxBox.alloc_capacity(siz);
+  let img = for i : U32 from 0#32 to siz:
+    let x = VoxBox.parse_byte(U32.add(U32.mul(i, 6#32), 0#32), voxdata)
+    let y = VoxBox.parse_byte(U32.add(U32.mul(i, 6#32), 1#32), voxdata)
+    let z = VoxBox.parse_byte(U32.add(U32.mul(i, 6#32), 2#32), voxdata)
+    let r = VoxBox.parse_byte(U32.add(U32.mul(i, 6#32), 3#32), voxdata)
+    let g = VoxBox.parse_byte(U32.add(U32.mul(i, 6#32), 4#32), voxdata)
+    let b = VoxBox.parse_byte(U32.add(U32.mul(i, 6#32), 5#32), voxdata)
+    let pos = Pos32.new(x,y,z)
+    let col = Col32.new(r,g,b,255#32)
+    VoxBox.push(pos, col, img)
+  img

@@ -1,4 +1,4 @@
-String.span(f: Char -> Bool, xs: String): Pair(String,String)
+String.span(f: Char -> Bool, xs: String): Pair<String,String>
   case xs{
     nil : Pair.new!!(String.nil,String.nil)
     cons: case f(xs.head){

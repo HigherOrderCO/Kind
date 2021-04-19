@@ -1,9 +1,9 @@
 GSet.concat3<A: Type>(
   cmp  : A -> A -> Cmp,
   val  : A,
-  left : GSet(A), 
-  right: GSet(A)
-) : GSet(A)
+  left : GSet<A>, 
+  right: GSet<A>
+) : GSet<A>
   case left {
     tip: case right {
       // trivial case, both trees are empty

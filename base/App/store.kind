@@ -1,0 +1,4 @@
+App.store<A: Type>(value: A): IO<Dynamic>
+  IO {
+    return Dynamic.new<A>(value)
+  }

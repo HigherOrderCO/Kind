@@ -1,0 +1,2 @@
+Int.gte(a: Int, b: Int): Bool
+  Cmp.as_gte(Int.cmp(a, b))

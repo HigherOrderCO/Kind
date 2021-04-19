@@ -1,4 +1,4 @@
-Kind.Term.show.as_nat.go(term: Kind.Term): Maybe(Nat)
+Kind.Term.show.as_nat.go(term: Kind.Term): Maybe<Nat>
   case term {
     app: case term.func {
       ref: 

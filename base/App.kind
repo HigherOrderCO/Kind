@@ -1,7 +1,56 @@
 type App <S: Type> {
   new(
-    init: S,
-    draw: S -> App.Render,
-    when: App.Event -> S -> List(App.Action(S))
+    init: S
+    draw: S -> DOM
+    when: App.Event -> S -> IO<Dynamic>
+  )
+}
+
+type App.EnvInfo {
+  new(
+    screen_size: Pair<U32, U32>
+    mouse_pos: Pair<U32, U32>
+  )
+}
+
+App.UserAddress: Type
+  String
+
+type App.Event {
+  init(
+    time: U64
+    user: App.UserAddress
+    info: App.EnvInfo
+  )
+  tick(
+    time: U64
+    info: App.EnvInfo
+  )
+  dom(
+    time: U64
+    name: String
+    id: String
+  )
+  mouse_down(
+    time: U64
+    button: U16
+  )
+  mouse_up(
+    time: U64
+    button: U16
+  )
+  key_down(
+    time: U64
+    code: U16
+  )
+  key_up(
+    time: U64
+    code: U16
+  )
+  post(
+    time: U64
+    room: String
+    addr: String
+    data: String
   )
 }

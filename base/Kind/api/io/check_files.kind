@@ -1,4 +1,4 @@
-Kind.api.io.check_files(files: List<String>): IO(Unit)
+Kind.api.io.check_files(files: List<String>): IO<Unit>
   IO {
     get loaded = Kind.Synth.files(files, Kind.Map.new!)
     let nams = Pair.fst!!(loaded)

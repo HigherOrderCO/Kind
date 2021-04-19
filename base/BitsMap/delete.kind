@@ -1,4 +1,4 @@
-BitsMap.delete<A: Type>(key: Bits, map: BitsMap(A)): BitsMap(A)
+BitsMap.delete<A: Type>(key: Bits, map: BitsMap<A>): BitsMap<A>
   case map {
     new: BitsMap.new!,
     tie: case key {

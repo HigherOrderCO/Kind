@@ -1,0 +1,4 @@
+I128.lte(a: I128, b: I128): Bool
+  open a
+  open b
+  Word.s_lte!(a.value, b.value)

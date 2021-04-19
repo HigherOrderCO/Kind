@@ -1,0 +1,3 @@
+VoxBox.parse_byte(idx: U32, voxdata: String): U32
+  let chr = U32.slice(U32.mul(idx,2#32), U32.add(U32.mul(idx,2#32),2#32), voxdata)
+  U32.read_base(16#32, chr)

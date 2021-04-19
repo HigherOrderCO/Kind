@@ -1,6 +1,6 @@
 // Given array `arr`, little-endian word `idx` and function `f`, assigns `arr[idx] = f(arr[idx])`.
-Array.mut<A:Type, depth:Nat>(idx: Word(depth), f: A -> A, arr: Array(A,depth)): Array(A,depth)
-  def P = (depth) Array(A,depth) -> Array(A,depth)
+Array.mut<A:Type, depth:Nat>(idx: Word(depth), f: A -> A, arr: Array<A,depth>): Array<A,depth>
+  def P = (depth) Array<A,depth> -> Array<A,depth>
   def nil = (arr) Array.tip<A>(f(Array.extract_tip<A>(arr)))
   def w0 = <idx.size> (rec) (arr)
     let {arr_l,arr_r} = Array.extract_tie<A, idx.size>(arr)

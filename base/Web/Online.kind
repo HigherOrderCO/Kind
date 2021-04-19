@@ -1,0 +1,68 @@
+Web.Online.State: Type
+  BitsMap<Pair<U32, U32>>
+
+Web.Online.room: String
+  "0x196581625483"
+
+Web.Online.command.A: String
+  "0x0000000000000000000000000000000000000000000000000000000000000000"
+
+Web.Online.command.D: String
+  "0x0000000000000000000000000000000000000000000000000000000000000001"
+
+Web.Online.command.S: String
+  "0x0000000000000000000000000000000000000000000000000000000000000002"
+
+Web.Online.command.W: String
+  "0x0000000000000000000000000000000000000000000000000000000000000003"
+
+Web.Online.command(user: String, cmd: String, state: Web.Online.State): Web.Online.State
+  let key = String.to_bits(user)
+  case BitsMap.get!(key, state) as player {
+    none:
+      BitsMap.set!(key, {128#32, 128#32}, state)
+    some:
+      open player.value
+      let spd = 3#32
+      let p_x = player.value.fst
+      let p_y = player.value.snd
+      switch String.eql(cmd) {
+        Web.Online.command.A:
+          BitsMap.set!(key, {U32.sub(p_x,spd), p_y}, state)
+        Web.Online.command.D:
+          BitsMap.set!(key, {U32.add(p_x,spd), p_y}, state)
+        Web.Online.command.W:
+          BitsMap.set!(key, {p_x, U32.sub(p_y,spd)}, state)
+        Web.Online.command.S:
+          BitsMap.set!(key, {p_x, U32.add(p_y,spd)}, state)
+      } default state
+  }
+
+// A demo application that renders a square on the screen
+Web.Online: App<Web.Online.State>
+  let vbox = VoxBox.alloc_capacity(3200#32)
+  let init = BitsMap.new!
+  let draw = (state)
+    let vbox = VoxBox.clear(vbox)
+    let vbox = for pos in BitsMap.values!(state):
+      open pos
+      VoxBox.Draw.image(pos.fst, pos.snd, 0#32, Web.Online.hero, vbox)
+    DOM.vbox({}, {}, vbox)
+  let when = (event, state)
+    case event {
+      init: App.watch(Web.Online.room)
+      key_down: switch U16.eql(event.code) {
+        'A': App.post(Web.Online.room, Web.Online.command.A)
+        'D': App.post(Web.Online.room, Web.Online.command.D)
+        'W': App.post(Web.Online.room, Web.Online.command.W)
+        'S': App.post(Web.Online.room, Web.Online.command.S)
+      } default App.pass
+      post: App.store!(Web.Online.command(event.addr, event.data, state))
+    } default App.pass
+  App.new!(init, draw, when)
+
+Web.Online.hero.hex: String
+  "0d00000000000e00000000000f00000000001000000000001100000000000c01000000000d01000000001101000000000b02000000000c02000000001202000000000b03000000001203000000000b04000000000c04000000001104000000000c05000000000d05000000000e05000000001005000000001105000000000e06000000000f06000000000e07000000000e08000000000f08000000000d09000000000e09000000000f09000000000c0a000000000d0a000000000e0a000000000f0a00000000100a000000000c0b000000000e0b00000000100b000000000b0c000000000c0c000000000e0c00000000100c00000000110c000000000b0d000000000e0d00000000110d000000000a0e000000000b0e000000000e0e00000000110e00000000120e000000000a0f000000000e0f00000000120f000000000910000000000a10000000000e10000000001210000000001310000000000911000000000e11000000001311000000000e12000000000d13000000000e13000000000f13000000000d14000000000f14000000000d15000000000f15000000000c16000000000d16000000000f16000000000c17000000000f17000000000c18000000000f18000000000c19000000001019000000000c1a00000000101a000000000b1b000000000c1b00000000101b000000000b1c00000000101c000000000b1d00000000101d00000000111d000000000b1e00000000111e000000000a1f000000000b1f00000000111f00000000"
+
+Web.Online.hero: VoxBox
+  VoxBox.parse(Web.Online.hero.hex)

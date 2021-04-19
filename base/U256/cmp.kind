@@ -1,0 +1,7 @@
+U256.cmp(a: U256, b: U256): Cmp
+  if U256.ltn(a, b) then
+    Cmp.ltn
+  else if U256.eql(a, b) then
+    Cmp.eql
+  else
+    Cmp.gtn

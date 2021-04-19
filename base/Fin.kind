@@ -1,4 +1,4 @@
 type Fin ~ <lim: Nat> {
   zero<n: Nat>               ~ (lim = Nat.succ(n))
-  succ<n: Nat>(pred: Fin(n)) ~ (lim = Nat.succ(n))
+  succ<n: Nat>(pred: Fin<n>) ~ (lim = Nat.succ(n))
 }

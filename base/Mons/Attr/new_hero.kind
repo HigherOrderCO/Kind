@@ -1,2 +1,2 @@
 Mons.Attr.new_hero: Mons.Attr
-  Mons.Attr.new_neutral([Image3D.empty])
+  Mons.Attr.new_neutral([VoxBox.empty])

@@ -1,0 +1,4 @@
+U256.sub(a: U256, b: U256): U256
+  open a
+  open b
+  U256.new(Word.sub!(a.value, b.value))

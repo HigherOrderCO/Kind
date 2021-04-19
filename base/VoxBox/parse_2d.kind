@@ -1,0 +1,24 @@
+// Parses a hex string containing a 2D image.
+// Format: WWWW HHHH RRGGBB RRGGBB RRGGBB ...
+// That is, width/height (2 byte each), followed by a sequence of 3-byte cols.
+VoxBox.parse_2d(hex: String): VoxBox
+  let b0 = VoxBox.parse_byte(0#32, hex)
+  let b1 = VoxBox.parse_byte(1#32, hex)
+  let b2 = VoxBox.parse_byte(2#32, hex)
+  let b3 = VoxBox.parse_byte(3#32, hex)
+  let w = U32.add(U32.mul(b0,16#32),b1)
+  let h = U32.add(U32.mul(b2,16#32),b3)
+  let siz = U32.mul(w,h)
+  let img = VoxBox.alloc_capacity(siz);
+  let img = for i : U32 from 0#32 to siz:
+    let x = U32.mod(i, w)
+    let y = U32.div(i, w)
+    let z = 0#32
+    let r = VoxBox.parse_byte(U32.add(U32.add(U32.mul(i,3#32),0#32),4#32),hex)
+    let g = VoxBox.parse_byte(U32.add(U32.add(U32.mul(i,3#32),1#32),4#32),hex)
+    let b = VoxBox.parse_byte(U32.add(U32.add(U32.mul(i,3#32),2#32),4#32),hex)
+    let pos = Pos32.new(x,y,z)
+    let col = Col32.new(r,g,b,255#32)
+    let img = VoxBox.push(pos,col,img)
+    img
+  img

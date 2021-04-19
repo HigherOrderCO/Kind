@@ -1,2 +1,2 @@
-Function.curry<A: Type, B: Type, C: Type>(f: Pair(A, B) -> C, x: A, y: B): C
+Function.curry<A: Type, B: Type, C: Type>(f: Pair<A, B> -> C, x: A, y: B): C
   f(Pair.new<A, B>(x, y))

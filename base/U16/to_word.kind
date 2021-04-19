@@ -1,3 +1,0 @@
-U16.to_word(a: U16): Word(16)
-  open a
-  a.value

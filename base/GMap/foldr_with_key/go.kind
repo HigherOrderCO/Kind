@@ -1,7 +1,7 @@
 GMap.foldr_with_key.go<K: Type, V: Type, Z: Type>(
   f   : K -> V -> Z -> Z, 
   z   : Z,
-  map : GMap(K,V) 
+  map : GMap<K,V> 
 ) : Z 
   case map {
     tip: z,

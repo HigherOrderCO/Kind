@@ -1,0 +1,3 @@
+type I16 {
+  new(value: Word(16))
+}

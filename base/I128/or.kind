@@ -1,0 +1,5 @@
+I128.or(a: I128, b: I128): I128
+  open a
+  open b
+  I128.new(Word.or!(a.value, b.value))
+

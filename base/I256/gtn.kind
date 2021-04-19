@@ -1,0 +1,4 @@
+I256.gtn(a: I256, b: I256): Bool
+  open a
+  open b
+  Word.s_gtn!(a.value, b.value)

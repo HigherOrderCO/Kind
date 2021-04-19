@@ -1,2 +1,2 @@
-Pair.functor<A: Type>: Functor(Pair(A))
-  Functor.new<Pair(A)>(Pair.map<A>)
+Pair.functor<A: Type>: Functor<Pair<A>>
+  Functor.new<Pair<A>>(Pair.map<A>)

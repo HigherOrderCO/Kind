@@ -1,0 +1,3 @@
+I16.show(a: I16): String
+  open a
+  Word.s_show!(a.value)
