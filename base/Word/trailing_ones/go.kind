@@ -1,0 +1,6 @@
+Word.trailing_ones.go<size: Nat>(word: Word(size), n: Nat): Nat
+  case word {
+    e: n
+    o: n,
+    i: Word.trailing_ones.go<word.size>(word.pred, Nat.succ(n))
+  }: Nat

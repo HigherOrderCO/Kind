@@ -1,0 +1,6 @@
+Word.is_zero<size: Nat>(word: Word(size)): Bool
+  case word {
+    e: true,
+    o: Word.is_zero<word.size>(word.pred),
+    i: false
+  }: Bool
