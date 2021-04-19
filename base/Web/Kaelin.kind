@@ -19,7 +19,7 @@ Web.Kaelin: App<Web.Kaelin.State>
   // Initial state
   let map = Web.Kaelin.Draw.initial_ent({})
   // TODO insert tiles in map web.kaelin.map.create_inital_map()
-  let init = Web.Kaelin.State.game(Web.Kaelin.Resources.room, 0, {}, map, App.EnvInfo.new({256#32, 256#32}, {0#32, 0#32}))
+  let init = Web.Kaelin.State.game(Web.Kaelin.Resources.room, 0, {}, none, map, App.EnvInfo.new({256#32, 256#32}, {0#32, 0#32}))
 
   // Render function
   //  0#16 - 10#16: contagem regressiva
