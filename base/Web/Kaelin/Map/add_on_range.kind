@@ -1,0 +1,10 @@
+Web.Kaelin.Map.add_on_range(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map, range: Nat): Web.Kaelin.Map
+let imagem = Web.Kaelin.Entity.background(Kaelin.Assets.hex_range)
+let list_coords = 
+  Web.Kaelin.Coord.Axial.range(coord, range)
+  let new_map = map
+  for n in list_coords with new_map:
+    Web.Kaelin.Map.push(n, imagem, new_map)
+  new_map
+
+//Na verdade coloca coisas no range (não desenha)

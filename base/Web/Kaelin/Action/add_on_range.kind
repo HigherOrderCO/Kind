@@ -1,0 +1,13 @@
+Web.Kaelin.Action.add_on_range(adress: String, range: Nat, state: Web.Kaelin.State): Web.Kaelin.State
+case state{
+    game:
+        let player = state.players{adress}
+        case player {
+            none:state
+            some:
+            open player.value
+            let new_map =  Web.Kaelin.Map.add_on_range(player.value.coord, state.map, range)
+            Web.Kaelin.State.game(state.room, state.tick, state.players, new_map, state.interface)
+        }
+        
+} default state
