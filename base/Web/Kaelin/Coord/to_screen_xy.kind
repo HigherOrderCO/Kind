@@ -1,6 +1,6 @@
 Web.Kaelin.Coord.to_screen_xy(
   coord: Web.Kaelin.Coord,
-) : Pair(U32,U32)
+) : Pair<U32,U32>
   open coord
   let i   = coord.i
   let j   = coord.j

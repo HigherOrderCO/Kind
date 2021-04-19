@@ -1,11 +1,11 @@
 Kind.Term.check(
   term: Kind.Term,
-  type: Maybe(Kind.Term),
+  type: Maybe<Kind.Term>,
   defs: Kind.Defs,
   ctx: Kind.Context,
   path: Kind.MPath,
-  orig: Maybe(Pair(Nat,Nat)),
-): Kind.Check(Kind.Term)
+  orig: Maybe<Pair<Nat,Nat>>,
+): Kind.Check<Kind.Term>
   do Kind.Check {
     get infr = case term {
       ref: case Kind.Map.get!(term.name, defs) as got {
@@ -188,12 +188,12 @@ Kind.Term.check(
 
 // Infers the type of the variables on the 'with' field of Kind.Term.cse
 Kind.Term.check.infer_with_types(
-  vars: List(Kind.Ann), 
+  vars: List<Kind.Ann>, 
   defs: Kind.Defs,
   ctx: Kind.Context,
   path: Kind.MPath,
-  orig: Maybe(Pair(Nat,Nat)),
-): Kind.Check(List(Kind.Ann))
+  orig: Maybe<Pair<Nat,Nat>>,
+): Kind.Check<List<Kind.Ann>>
   case vars {
     nil: do Kind.Check {
       return []

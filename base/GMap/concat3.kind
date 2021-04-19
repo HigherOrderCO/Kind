@@ -2,9 +2,9 @@ GMap.concat3<K: Type, V: Type>(
   cmp  : K -> K -> Cmp, 
   key  : K,
   val  : V, 
-  left : GMap(K,V),
-  right: GMap(K,V) 
-) : GMap(K,V)
+  left : GMap<K,V>,
+  right: GMap<K,V> 
+) : GMap<K,V>
 
   case left {
     tip: case right {

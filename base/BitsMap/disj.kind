@@ -1,4 +1,4 @@
-BitsMap.disj<A: Type>(a: BitsMap(A), b: BitsMap(A)): Bool
+BitsMap.disj<A: Type>(a: BitsMap<A>, b: BitsMap<A>): Bool
   case a {
     new: Bool.true,
     tie: case b {

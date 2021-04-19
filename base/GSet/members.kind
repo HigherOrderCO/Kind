@@ -1,2 +1,2 @@
-GSet.members<A: Type>(set: GSet(A)): List(A)
+GSet.members<A: Type>(set: GSet<A>): List<A>
   GSet.foldr!!(List.cons!, List.nil!, set)

@@ -1,2 +1,2 @@
-Maybe.monad: Monad(Maybe)
+Maybe.monad: Monad<Maybe>
   Monad.new<Maybe>(Maybe.bind, Maybe.some)

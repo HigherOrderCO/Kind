@@ -1,4 +1,4 @@
-GMap.balance<K: Type, V: Type>(k: K, v: V, l: GMap(K,V), r: GMap(K,V)): GMap(K,V)
+GMap.balance<K: Type, V: Type>(k: K, v: V, l: GMap<K,V>, r: GMap<K,V>): GMap<K,V>
   let size_l             = GMap.size<K,V>(l)
   let size_r             = GMap.size<K,V>(r)
   let size_l_plus_size_r = Nat.add(size_l, size_r)

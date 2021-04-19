@@ -1,4 +1,4 @@
-Web.Kaelin.Coord.to_axial(coord: Pair(U32, U32)) : Web.Kaelin.Coord
+Web.Kaelin.Coord.to_axial(coord: Pair<U32, U32>) : Web.Kaelin.Coord
   open coord
   let rad = Web.Kaelin.Resources.hexagon_radius
   let x = coord.fst

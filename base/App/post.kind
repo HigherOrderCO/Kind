@@ -1,2 +1,2 @@
-App.post(room: String, data: String): IO(Dynamic)
+App.post(room: String, data: String): IO<Dynamic>
   App.do("post", room | ";" | data)

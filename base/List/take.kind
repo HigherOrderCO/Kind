@@ -1,4 +1,4 @@
-List.take<A: Type>(n: Nat, xs: List(A)): List(A)
+List.take<A: Type>(n: Nat, xs: List<A>): List<A>
   case xs {
     nil : List.nil!,
     cons: case n {

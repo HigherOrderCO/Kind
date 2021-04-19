@@ -1,4 +1,4 @@
-List.chunk<A: Type>(n: Nat, xs: List(A)): Maybe(List(A))
+List.chunk<A: Type>(n: Nat, xs: List<A>): Maybe<List<A>>
   case n {
     zero: Maybe.some!(List.nil!),
     succ: case xs {

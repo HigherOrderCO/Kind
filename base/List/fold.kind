@@ -1,4 +1,4 @@
-List.fold<A: Type>(list: List(A)): <P: Type> -> P -> (A -> P -> P) -> P
+List.fold<A: Type>(list: List<A>): <P: Type> -> P -> (A -> P -> P) -> P
   <P> (nil, cons)
   case list {
     nil : nil,

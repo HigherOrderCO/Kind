@@ -109,14 +109,14 @@ Problems.p13(a: Nat, b: Nat): Bool
   User.caotic.automation.aux_ind2_nat((n) (m) Bool, (y) Problems.isZero(y), (x) (p) false, (n) (m) (p) p, a, b)
 
 // Returns the first element of a List
-Problems.p14<A: Type>(xs: List<A>): Maybe(A)
+Problems.p14<A: Type>(xs: List<A>): Maybe<A>
   case xs {
       nil : none
       cons : some(xs.head)
-  } : Maybe(A)
+  } : Maybe<A>
 
 // Returns the list without the first element
-Problems.p15<A: Type>(xs: List<A>): List(A)
+Problems.p15<A: Type>(xs: List<A>): List<A>
   case xs {
       nil : List.nil!
       cons : xs.tail
@@ -438,7 +438,7 @@ push_back_reverse(A : Type, xs : List<A>) : theorem_push_back_reverse(A, xs)
     //cons : ?b
  // }!
 
-unfold(B : Type, f : B -> Maybe(B), b : B) : B
+unfold(B : Type, f : B -> Maybe<B>, b : B) : B
    case f(b) as c {
      none : b
      some : unfold(B, f, c.value)

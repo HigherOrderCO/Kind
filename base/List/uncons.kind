@@ -1,4 +1,4 @@
-List.uncons<A: Type>(xs: List(A)): Maybe(Pair(A,List(A)))
+List.uncons<A: Type>(xs: List<A>): Maybe<Pair<A,List<A>>>
   case xs {
     nil : Maybe.none!,
     cons: Maybe.some!(Pair.new!!(xs.head,xs.tail))

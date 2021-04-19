@@ -1,2 +1,2 @@
 Logic.ExcludedMiddle(A: Type): Type
-  Either(A, Not(A))
+  Either<A, Not(A)>

@@ -1,4 +1,4 @@
-Kind.Error.origin(error: Kind.Error): Maybe(Pair(Nat,Nat))
+Kind.Error.origin(error: Kind.Error): Maybe<Pair<Nat,Nat>>
   case error {
     type_mismatch: error.origin,
     undefined_reference: error.origin,

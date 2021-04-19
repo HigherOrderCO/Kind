@@ -1,2 +1,2 @@
-String.split(xs: String, match: String): List(String)
+String.split(xs: String, match: String): List<String>
   String.split.go(xs, match, "")

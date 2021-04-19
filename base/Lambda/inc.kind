@@ -10,9 +10,9 @@ Lambda.inc.v<n: Nat, m: Nat>(vec: Vector<Fin<m>,n>): Vector<Fin<Nat.succ(m)>, Na
   let c = b(a)
   c
   //case vec {
-    //nil: Vector.ext<Fin(Nat.succ(m)),0>(Fin.zero!, Vector.nil<Fin(Nat.succ(m))>)
+    //nil: Vector.ext<Fin<Nat.succ(m)>,0>(Fin.zero!, Vector.nil<Fin<Nat.succ(m)>>)
     //ext:
-      ////let a = Vector.ext<Fin(Nat.succ(m))
+      ////let a = Vector.ext<Fin<Nat.succ(m)>
       //?c
   //}!
   //(i) case i with fn : (Fin<Nat.pred(i.lim)> -> Fin<m>) = fn {

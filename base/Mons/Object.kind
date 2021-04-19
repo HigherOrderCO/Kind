@@ -5,10 +5,10 @@ type Mons.Object{
     pad: Mons.Pad,  // movement key pad
     ani: U32,       // number of walk frames to animate
     dmg: U32,       // object's current health points
-    bag: List(Mons.Object), // store normal Mons
+    bag: List<Mons.Object>, // store normal Mons
     mon: U32, // idx of the current Mon. Default 0#32
-    bos: List(Mons.Object), // store Mons that are boss
-    cap: Pair(U32, List(Mons.Object)), // store the quantity of Mons and a copy of the captured during game
+    bos: List<Mons.Object>, // store Mons that are boss
+    cap: Pair<U32, List<Mons.Object>>, // store the quantity of Mons and a copy of the captured during game
     idl: U32, // frame for idle animation
     eff: Mons.Effect
   )

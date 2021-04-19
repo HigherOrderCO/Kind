@@ -1,2 +1,2 @@
 Kind.Context: Type
-  List(Pair(Kind.Name,Kind.Term))
+  List<Pair<Kind.Name,Kind.Term>>

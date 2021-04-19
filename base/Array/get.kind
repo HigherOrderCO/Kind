@@ -1,5 +1,5 @@
-Array.get<A:Type, depth:Nat>(idx: Word(depth), arr: Array(A,depth)): A
-  def P = (depth) Array(A,depth) -> A
+Array.get<A:Type, depth:Nat>(idx: Word(depth), arr: Array<A,depth>): A
+  def P = (depth) Array<A,depth> -> A
   def nil = Array.extract_tip<A>
   def w0 = <idx.size> (rec) (arr)
     let arr_l = Array.extract_tie<A, idx.size>(arr)

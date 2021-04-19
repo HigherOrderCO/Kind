@@ -1,4 +1,4 @@
-List.to_builder.go<A: Type>(list: List(A), lb: List.Builder(A)) : List.Builder(A)
+List.to_builder.go<A: Type>(list: List<A>, lb: List.Builder(A)) : List.Builder(A)
   case list {
     nil : lb,
     cons: List.to_builder.go!(list.tail, List.Builder.snoc!(list.head, lb))

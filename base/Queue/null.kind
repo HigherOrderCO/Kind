@@ -1,4 +1,4 @@
-Queue.null<A: Type>(q: Queue(A)): Bool
+Queue.null<A: Type>(q: Queue<A>): Bool
   open q
   let front_is_empty = Nat.eql(q.size_front, 0)
   let rear_is_empty  = Nat.eql(q.size_rear, 0)

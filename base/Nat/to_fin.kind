@@ -1,4 +1,4 @@
-Nat.to_fin(n: Nat)<sobra: Nat>: Fin(Nat.succ(Nat.add(n, sobra)))
+Nat.to_fin(n: Nat)<sobra: Nat>: Fin<Nat.succ(Nat.add(n, sobra))>
   case n {
     zero:
       Fin.zero<sobra>

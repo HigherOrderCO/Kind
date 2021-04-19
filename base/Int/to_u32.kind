@@ -1,4 +1,4 @@
-Int.to_u32(a: Int): Pair(Bool, U32)
+Int.to_u32(a: Int): Pair<Bool, U32>
   open a
   case a.neg {
     zero: Pair.new!!(Bool.false, Nat.to_u32(a.pos)),

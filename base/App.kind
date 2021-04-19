@@ -2,14 +2,14 @@ type App <S: Type> {
   new(
     init: S
     draw: S -> DOM
-    when: App.Event -> S -> IO(Dynamic)
+    when: App.Event -> S -> IO<Dynamic>
   )
 }
 
 type App.EnvInfo {
   new(
-    screen_size: Pair(U32, U32)
-    mouse_pos: Pair(U32, U32)
+    screen_size: Pair<U32, U32>
+    mouse_pos: Pair<U32, U32>
   )
 }
 

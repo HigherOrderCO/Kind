@@ -1,5 +1,5 @@
 Web.Online.State: Type
-  BitsMap(Pair(U32, U32))
+  BitsMap<Pair<U32, U32>>
 
 Web.Online.room: String
   "0x196581625483"
@@ -39,7 +39,7 @@ Web.Online.command(user: String, cmd: String, state: Web.Online.State): Web.Onli
   }
 
 // A demo application that renders a square on the screen
-Web.Online: App(Web.Online.State)
+Web.Online: App<Web.Online.State>
   let vbox = VoxBox.alloc_capacity(3200#32)
   let init = BitsMap.new!
   let draw = (state)

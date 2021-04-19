@@ -1,2 +1,2 @@
-Kind.Synth.files_of(name: Kind.Name): List(String)
+Kind.Synth.files_of(name: Kind.Name): List<String>
   List.reverse!(Kind.Synth.files_of.make(String.split(name, "."), ""))

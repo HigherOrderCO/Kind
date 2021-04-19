@@ -2,7 +2,7 @@ Kind.Parser.string.go(
   str: String,
   idx: Nat,
   code: String,
-): Parser.Reply(String)
+): Parser.Reply<String>
   case code {
     nil:
       Parser.Reply.error<String>(idx, code, "Non-terminating string.")

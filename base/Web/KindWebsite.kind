@@ -1,5 +1,5 @@
 type Web.KindWebsite.State{
-  new(screen_size: Pair(U32,U32), page: Web.KindWebsite.Page)
+  new(screen_size: Pair<U32,U32>, page: Web.KindWebsite.Page)
 }
 
 type Web.KindWebsite.Page{
@@ -7,7 +7,7 @@ type Web.KindWebsite.Page{
   apps
 }
 
-Web.KindWebsite: App(Web.KindWebsite.State)
+Web.KindWebsite: App<Web.KindWebsite.State>
 
   init = 
     Web.KindWebsite.State.new(

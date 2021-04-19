@@ -1,4 +1,4 @@
-GSet.member<A: Type>(cmp: A -> A -> Cmp, a: A, set: GSet(A)): Bool
+GSet.member<A: Type>(cmp: A -> A -> Cmp, a: A, set: GSet<A>): Bool
   case set {
     tip: Bool.false,
     bin: case cmp(a, set.val) {

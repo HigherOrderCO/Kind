@@ -3,7 +3,7 @@ type DOM {
     tag: String
     props: Map(String)
     style: Map(String)
-    children: List(DOM)
+    children: List<DOM>
   )
   vbox(
     props: Map(String)
