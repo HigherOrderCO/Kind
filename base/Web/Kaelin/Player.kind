@@ -2,9 +2,9 @@ type Web.Kaelin.Player {
   new(
     // create type for player id?
     addr: String
+    // TODO replace by web.kaelin.map.find_players(map: web.kaelin.map): Map(web.kaelin.coord)
     coord: Web.Kaelin.Coord,
-    // change hero to entity
-    hero: Web.Kaelin.Hero,
+    hero: Web.Kaelin.Hero // TODO remove hero from player
     team: String,
   )
 }

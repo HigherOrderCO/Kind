@@ -19,6 +19,7 @@ Web.Kaelin.Draw.tile(
     }
   img
 
+// TODO rename to draw_coords
 Web.Kaelin.Draw.tile.empty(
   coord: Web.Kaelin.Coord, 
   map: Web.Kaelin.Map, 
