@@ -25,8 +25,8 @@ Web.Kind.draw_page_home: DOM
       span("Kind is a cute ") span_bold("proof")
       span("gramming language.") line_break
       span("It's ") span_bold("capable of everything")
-      line("from web apps to games to advanced")
-      line("mathematical proofs.")
+      line("from web apps to games to")
+      line("advanced mathematical proofs.")
     ])
 
   let call_to_apps =

@@ -27,7 +27,7 @@ Web.Kind.draw_page(page: Web.Kind.Page): DOM
 Web.Kind: App(Web.Kind.State)
 
   init = 
-    Web.Kind.State.new({500u, 400u}, Web.Kind.Page.apps)
+    Web.Kind.State.new({500u, 400u}, Web.Kind.Page.home)
 
   draw = (state)
     open state
@@ -36,8 +36,7 @@ Web.Kind: App(Web.Kind.State)
   when = (event, state)
     case event {
       init: App.pass
-      dom: log("DOM!! " | event.name)
-        App.store!(Web.Kind.exe_event(state, event.id, event.name))
+      dom: App.store!(Web.Kind.exe_event(state, event.id, event.name))
     } default App.pass
   
   // The application

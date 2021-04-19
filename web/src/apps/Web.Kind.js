@@ -386,8 +386,8 @@ module.exports = (function() {
     const Nat$succ = x0 => Nat$succ$(x0);
     const Nat$zero = 0n;
     const Nat$to_u32 = a0 => (Number(a0) >>> 0);
-    const Web$Kind$Page$apps = ({
-        _: 'Web.Kind.Page.apps'
+    const Web$Kind$Page$home = ({
+        _: 'Web.Kind.Page.home'
     });
 
     function DOM$node$(_tag$1, _props$2, _style$3, _children$4) {
@@ -1158,9 +1158,6 @@ module.exports = (function() {
         return $226;
     };
     const Web$Kind$component$header = x0 => Web$Kind$component$header$(x0);
-    const Web$Kind$Page$home = ({
-        _: 'Web.Kind.Page.home'
-    });
 
     function Web$Kind$component$body_container$(_ele$1) {
         var $227 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 20% 40px 20%"), List$cons$(Pair$new$("flex", "1"), List$nil))), _ele$1);
@@ -1204,8 +1201,8 @@ module.exports = (function() {
     const Web$Kind$component$footer = (() => {
         var _join_us_txt$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link_white$(" Github", "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link_white$(" Telegram", "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
         var _join_us$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "110px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$primary_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-items", "flex-end"), List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("padding-right", "20%"), List$nil))))))))), List$cons$(_join_us_txt$1, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "20px"), List$nil)), List$cons$(DOM$text$("\u{2764} by UwU Tech"), List$nil)), List$nil)));
-        var _msg_footer$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("background-color", Web$Kind$constant$dark_pri_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("padding", "10px 20% 10px 20%"), List$nil))))))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$("This website was created using Kind!"), List$nil)), List$cons$(Web$Kind$component$link_white$("\u{1f9d0}\u{ddd0} show me the code!", "https://github.com/uwu-tech/Kind/tree/master/base/Web/Kind"), List$nil)));
-        var $234 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "170px"), List$cons$(Pair$new$("margin-bottom", "0px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("color", "white"), List$nil)))))), List$cons$(_join_us$1, List$cons$(_msg_footer$2, List$nil)));
+        var _msg_footer$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("background-color", Web$Kind$constant$dark_pri_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("padding", "10px 20% 10px 20%"), List$nil))))))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$("This website was created using Kind!"), List$nil)), List$cons$(Web$Kind$component$link_white$("*u* show me the code!", "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind"), List$nil)));
+        var $234 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "0px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("color", "white"), List$nil))))), List$cons$(_join_us$1, List$cons$(_msg_footer$2, List$nil)));
         return $234;
     })();
     const Web$Kind$draw_page_home = (() => {
@@ -1222,7 +1219,7 @@ module.exports = (function() {
             var $238 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$4), List$nil));
             return $238;
         });
-        var _intro$5 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(_span$3("Kind is a cute "), List$cons$(_span_bold$4("proof"), List$cons$(_span$3("gramming language."), List$cons$(_line_break$2, List$cons$(_span$3("It\'s "), List$cons$(_span_bold$4("capable of everything"), List$cons$(_line$1("from web apps to games to advanced"), List$cons$(_line$1("mathematical proofs."), List$nil)))))))));
+        var _intro$5 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(_span$3("Kind is a cute "), List$cons$(_span_bold$4("proof"), List$cons$(_span$3("gramming language."), List$cons$(_line_break$2, List$cons$(_span$3("It\'s "), List$cons$(_span_bold$4("capable of everything"), List$cons$(_line$1("from web apps to games to"), List$cons$(_line$1("advanced mathematical proofs."), List$nil)))))))));
         var _croni$6 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-left", "40px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-end"), List$nil)))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "10px"), List$nil)), List$cons$(DOM$text$("gl hf!"), List$nil)), List$cons$(DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", Web$Kind$img$croni), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "30px"), List$cons$(Pair$new$("height", "30px"), List$nil))), List$nil), List$nil)));
         var _call_to_apps$6 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "100px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))), List$cons$(Web$Kind$component$btn_primary_solid$("GO TO APPS", Web$Kind$constant$action_go_to_apps), List$cons$(_croni$6, List$nil)));
         var _instructions$7 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$cons$(Pair$new$("padding", "5px"), List$cons$(Pair$new$("border", "1px solid"), List$nil)))), List$cons$(_line$1("npm i -g kind-lang"), List$cons$(_line$1("git clone https://github.com/uwu-tech/Kind"), List$cons$(_line$1("cd Kind/base"), List$cons$(_line$1("kind Main"), List$cons$(_line$1("kind Main --run"), List$nil))))));
@@ -1234,61 +1231,75 @@ module.exports = (function() {
     function Web$Kind$component$game_card$(_src$1, _title$2, _path$3) {
         var _banner$4 = DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", _src$1), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "100px"), List$cons$(Pair$new$("height", "100px"), List$nil))), List$nil);
         var _title$5 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _path$3), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("text-decoration", "none"), List$nil))))), List$cons$(DOM$text$(_title$2), List$nil));
-        var $239 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "120px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("margin", "10px 20px"), List$nil))))), List$cons$(_banner$4, List$cons$(_title$5, List$nil)));
+        var $239 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "120px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("margin", "10px 20px"), List$cons$(Pair$new$("border", "solid 1px"), List$cons$(Pair$new$("padding", "2px"), List$nil))))))), List$cons$(_banner$4, List$cons$(_title$5, List$nil)));
         return $239;
     };
     const Web$Kind$component$game_card = x0 => x1 => x2 => Web$Kind$component$game_card$(x0, x1, x2);
-    const Web$Kind$img$banner_template = "data:image/png;base64,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";
-    const Web$Kind$content_apps = List$cons$(Web$Kind$component$game_card$(Web$Kind$img$banner_template, "Senhas", "Web.Senhas"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$banner_template, "TicTacToe", "Web.TicTacToe"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$banner_template, "Kaelin", "Web.Kaelin"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$banner_template, "Demo", "Web.Demo"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$banner_template, "Demo", "Web.Demo"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$banner_template, "Demo", "Web.Demo"), List$nil))))));
+    const Web$Kind$img$app_senhas = "data:image/png;base64,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";
+    const Web$Kind$img$app_tic_tac_toe = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAAAAXNSR0IArs4c6QAAAdlJREFUeJztm01uglAURrFxRyylm2nSQdNBk27GpbgmHDBpFHnvwH0/lXNmTu41hw9FPjxN0zRIHm+t38B/QlkAZQGUBVAWQFkAZQGUBVAWQFkAZQGUBVAWQFkAZQGUBVAWQFkAZQGUBVAWQFkAZQGUBTiHT/z5+v378vP7I3xFq9UmC5BO1mUccwa9X6+b30TpFZnzkytMFiD3M2tFef5xa7tiPTU5K0wWIDdZs/i7gxOVqWordo41WYB0suZDvXIo9nwPVlsRMjb+onQDyZNi8QwtsddLhzC6SNbM4lFNnqFRu7x0CIYlq9AXeYXhIfNNFiDg585+ig4PnG+yAMoCnJ79HeXuruPRWLzLarIAygIoC6AswNMP+M1YhckwKAuhLICyAO0b6ai6uMIKkwXopZHeXxdXWGGyAB010uu7SqygmCxAF4106YFRizrqDevzCo30ZRxL12LbOGiybKSL00sj/Tg5fJeNdFXaN9IVLhRspBugLICyAMoC+KzDMj7rsBdlAZQFUBbAZx0AJgtgyQrmmyyAJSuYb7IAlqwAkwXosWStwLZT5KBVmKdhcXpMVv0Kw0uHePotWTtcYbIAlqwAkwVQFiD+TukLY7IAygIoC6AsgLIANxbY0ByDNCtkAAAAAElFTkSuQmCC";
+    const Web$Kind$img$app_kaelin = "data:image/png;base64,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";
+    const Web$Kind$content_apps = List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_senhas, "Senhas", "Web.Senhas"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_tic_tac_toe, "TicTacToe", "Web.TicTacToe"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_kaelin, "Kaelin", "Web.Kaelin"), List$nil)));
+
+    function Web$Kind$component$link_black$(_txt$1, _href$2) {
+        var $240 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$2), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
+        return $240;
+    };
+    const Web$Kind$component$link_black = x0 => x1 => Web$Kind$component$link_black$(x0, x1);
+    const Web$Kind$content_apps_text = Web$Kind$component$list$(List$cons$(Web$Kind$component$link_black$("Demo", "Web.Demo"), List$cons$(Web$Kind$component$link_black$("Online", "Web.Online"), List$nil)));
+    const Web$Kind$Page$apps = ({
+        _: 'Web.Kind.Page.apps'
+    });
     const Web$Kind$draw_page_apps = (() => {
         var _line$1 = (_txt$1 => {
-            var $241 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$1), List$nil));
-            return $241;
+            var $242 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$1), List$nil));
+            return $242;
         });
         var _line_break$2 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil), List$nil));
         var _span$3 = (_txt$3 => {
-            var $242 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$3), List$nil));
-            return $242;
-        });
-        var _span_bold$4 = (_txt$4 => {
-            var $243 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$4), List$nil));
+            var $243 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$3), List$nil));
             return $243;
         });
-        var _games$5 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "game-container"), List$nil)), Map$from_list$(List$nil), List$cons$(Web$Kind$component$title$("Games"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("flex-wrap", "wrap"), List$nil))))), Web$Kind$content_apps), List$nil)));
-        var $240 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-apps"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(Web$Kind$Page$apps), List$cons$(Web$Kind$component$body_container$(List$cons$(_games$5, List$nil)), List$cons$(Web$Kind$component$footer, List$nil))));
-        return $240;
+        var _span_bold$4 = (_txt$4 => {
+            var $244 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$4), List$nil));
+            return $244;
+        });
+        var _with_banner$5 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("flex-wrap", "wrap"), List$nil))))), Web$Kind$content_apps);
+        var _no_banner$6 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "30px"), List$nil)), List$cons$(Web$Kind$content_apps_text, List$nil));
+        var _games$5 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "game-container"), List$nil)), Map$from_list$(List$nil), List$cons$(Web$Kind$component$title$("Games"), List$cons$(_with_banner$5, List$cons$(_no_banner$6, List$nil))));
+        var $241 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-apps"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(Web$Kind$Page$apps), List$cons$(Web$Kind$component$body_container$(List$cons$(_games$5, List$nil)), List$cons$(Web$Kind$component$footer, List$nil))));
+        return $241;
     })();
 
     function Web$Kind$draw_page$(_page$1) {
         var self = _page$1;
         switch (self._) {
             case 'Web.Kind.Page.home':
-                var $245 = Web$Kind$draw_page_home;
-                var $244 = $245;
+                var $246 = Web$Kind$draw_page_home;
+                var $245 = $246;
                 break;
             case 'Web.Kind.Page.apps':
-                var $246 = Web$Kind$draw_page_apps;
-                var $244 = $246;
+                var $247 = Web$Kind$draw_page_apps;
+                var $245 = $247;
                 break;
         };
-        return $244;
+        return $245;
     };
     const Web$Kind$draw_page = x0 => Web$Kind$draw_page$(x0);
 
     function IO$(_A$1) {
-        var $247 = null;
-        return $247;
+        var $248 = null;
+        return $248;
     };
     const IO = x0 => IO$(x0);
 
     function IO$ask$(_query$2, _param$3, _then$4) {
-        var $248 = ({
+        var $249 = ({
             _: 'IO.ask',
             'query': _query$2,
             'param': _param$3,
             'then': _then$4
         });
-        return $248;
+        return $249;
     };
     const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
 
@@ -1296,61 +1307,60 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'IO.end':
-                var $250 = self.value;
-                var $251 = _f$4($250);
-                var $249 = $251;
+                var $251 = self.value;
+                var $252 = _f$4($251);
+                var $250 = $252;
                 break;
             case 'IO.ask':
-                var $252 = self.query;
-                var $253 = self.param;
-                var $254 = self.then;
-                var $255 = IO$ask$($252, $253, (_x$8 => {
-                    var $256 = IO$bind$($254(_x$8), _f$4);
-                    return $256;
+                var $253 = self.query;
+                var $254 = self.param;
+                var $255 = self.then;
+                var $256 = IO$ask$($253, $254, (_x$8 => {
+                    var $257 = IO$bind$($255(_x$8), _f$4);
+                    return $257;
                 }));
-                var $249 = $255;
+                var $250 = $256;
                 break;
         };
-        return $249;
+        return $250;
     };
     const IO$bind = x0 => x1 => IO$bind$(x0, x1);
 
     function IO$end$(_value$2) {
-        var $257 = ({
+        var $258 = ({
             _: 'IO.end',
             'value': _value$2
         });
-        return $257;
+        return $258;
     };
     const IO$end = x0 => IO$end$(x0);
 
     function IO$monad$(_new$2) {
-        var $258 = _new$2(IO$bind)(IO$end);
-        return $258;
+        var $259 = _new$2(IO$bind)(IO$end);
+        return $259;
     };
     const IO$monad = x0 => IO$monad$(x0);
 
     function Dynamic$new$(_value$2) {
-        var $259 = ({
+        var $260 = ({
             _: 'Dynamic.new',
             'value': _value$2
         });
-        return $259;
+        return $260;
     };
     const Dynamic$new = x0 => Dynamic$new$(x0);
     const Unit$new = null;
     const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $260 = _m$pure$2;
-        return $260;
+        var $261 = _m$pure$2;
+        return $261;
     }))(Dynamic$new$(Unit$new));
-    const Debug$log = a0 => a1 => ((console.log(a0), a1()));
 
     function App$store$(_value$2) {
-        var $261 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $262 = _m$pure$4;
-            return $262;
+        var $262 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $263 = _m$pure$4;
+            return $263;
         }))(Dynamic$new$(_value$2));
-        return $261;
+        return $262;
     };
     const App$store = x0 => App$store$(x0);
 
@@ -1358,64 +1368,61 @@ module.exports = (function() {
         var self = _stt$1;
         switch (self._) {
             case 'Web.Kind.State.new':
-                var $264 = self.screen_size;
-                var $265 = self.page;
+                var $265 = self.screen_size;
+                var $266 = self.page;
                 var self = (_e_id$2 === Web$Kind$constant$action_go_to_home);
                 if (self) {
-                    var $267 = Web$Kind$State$new$($264, Web$Kind$Page$home);
-                    var $266 = $267;
+                    var $268 = Web$Kind$State$new$($265, Web$Kind$Page$home);
+                    var $267 = $268;
                 } else {
                     var self = (_e_id$2 === Web$Kind$constant$action_go_to_apps);
                     if (self) {
-                        var $269 = Web$Kind$State$new$($264, Web$Kind$Page$apps);
-                        var $268 = $269;
+                        var $270 = Web$Kind$State$new$($265, Web$Kind$Page$apps);
+                        var $269 = $270;
                     } else {
-                        var $270 = Web$Kind$State$new$($264, $265);
-                        var $268 = $270;
+                        var $271 = Web$Kind$State$new$($265, $266);
+                        var $269 = $271;
                     };
-                    var $266 = $268;
+                    var $267 = $269;
                 };
-                var $263 = $266;
+                var $264 = $267;
                 break;
         };
-        return $263;
+        return $264;
     };
     const Web$Kind$exe_event = x0 => x1 => x2 => Web$Kind$exe_event$(x0, x1, x2);
 
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $271 = ({
+        var $272 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $271;
+        return $272;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Kind = (() => {
-        var _init$1 = Web$Kind$State$new$(Pair$new$(500, 400), Web$Kind$Page$apps);
+        var _init$1 = Web$Kind$State$new$(Pair$new$(500, 400), Web$Kind$Page$home);
         var _draw$2 = (_state$2 => {
             var self = _state$2;
             switch (self._) {
                 case 'Web.Kind.State.new':
-                    var $274 = self.page;
-                    var $275 = Web$Kind$draw_page$($274);
-                    var $273 = $275;
+                    var $275 = self.page;
+                    var $276 = Web$Kind$draw_page$($275);
+                    var $274 = $276;
                     break;
             };
-            return $273;
+            return $274;
         });
         var _when$3 = (_event$3 => _state$4 => {
             var self = _event$3;
             switch (self._) {
                 case 'App.Event.dom':
-                    var $277 = self.name;
-                    var $278 = self.id;
-                    var $279 = ((console.log((("DOM!! " + $277) + String$nil)), (_x$8 => {
-                        var $280 = App$store$(Web$Kind$exe_event$(_state$4, $278, $277));
-                        return $280;
-                    })()));
-                    var $276 = $279;
+                    var $278 = self.name;
+                    var $279 = self.id;
+                    var $280 = App$store$(Web$Kind$exe_event$(_state$4, $279, $278));
+                    var $277 = $280;
                     break;
                 case 'App.Event.init':
                 case 'App.Event.tick':
@@ -1425,13 +1432,13 @@ module.exports = (function() {
                 case 'App.Event.key_up':
                 case 'App.Event.post':
                     var $281 = App$pass;
-                    var $276 = $281;
+                    var $277 = $281;
                     break;
             };
-            return $276;
+            return $277;
         });
-        var $272 = App$new$(_init$1, _draw$2, _when$3);
-        return $272;
+        var $273 = App$new$(_init$1, _draw$2, _when$3);
+        return $273;
     })();
     return {
         'Web.Kind.State.new': Web$Kind$State$new,
@@ -1448,7 +1455,7 @@ module.exports = (function() {
         'Nat.succ': Nat$succ,
         'Nat.zero': Nat$zero,
         'Nat.to_u32': Nat$to_u32,
-        'Web.Kind.Page.apps': Web$Kind$Page$apps,
+        'Web.Kind.Page.home': Web$Kind$Page$home,
         'DOM.node': DOM$node,
         'BitsMap': BitsMap,
         'Map': Map,
@@ -1517,7 +1524,6 @@ module.exports = (function() {
         'Web.Kind.constant.action_go_to_home': Web$Kind$constant$action_go_to_home,
         'Web.Kind.component.header_tabs': Web$Kind$component$header_tabs,
         'Web.Kind.component.header': Web$Kind$component$header,
-        'Web.Kind.Page.home': Web$Kind$Page$home,
         'Web.Kind.component.body_container': Web$Kind$component$body_container,
         'List.for': List$for,
         'List': List,
@@ -1527,8 +1533,13 @@ module.exports = (function() {
         'Web.Kind.component.footer': Web$Kind$component$footer,
         'Web.Kind.draw_page_home': Web$Kind$draw_page_home,
         'Web.Kind.component.game_card': Web$Kind$component$game_card,
-        'Web.Kind.img.banner_template': Web$Kind$img$banner_template,
+        'Web.Kind.img.app_senhas': Web$Kind$img$app_senhas,
+        'Web.Kind.img.app_tic_tac_toe': Web$Kind$img$app_tic_tac_toe,
+        'Web.Kind.img.app_kaelin': Web$Kind$img$app_kaelin,
         'Web.Kind.content_apps': Web$Kind$content_apps,
+        'Web.Kind.component.link_black': Web$Kind$component$link_black,
+        'Web.Kind.content_apps_text': Web$Kind$content_apps_text,
+        'Web.Kind.Page.apps': Web$Kind$Page$apps,
         'Web.Kind.draw_page_apps': Web$Kind$draw_page_apps,
         'Web.Kind.draw_page': Web$Kind$draw_page,
         'IO': IO,
@@ -1539,7 +1550,6 @@ module.exports = (function() {
         'Dynamic.new': Dynamic$new,
         'Unit.new': Unit$new,
         'App.pass': App$pass,
-        'Debug.log': Debug$log,
         'App.store': App$store,
         'Web.Kind.exe_event': Web$Kind$exe_event,
         'App.new': App$new,

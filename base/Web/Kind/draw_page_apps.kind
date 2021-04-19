@@ -21,14 +21,23 @@ Web.Kind.draw_page_apps: DOM
   // Content
   // ----------
   let games =
+    let with_banner = 
+      DOM.node("div", {}, {
+      "display": "flex"
+      "justify-content": "flex-start"
+      "flex-direction": "row"
+      "flex-wrap": "wrap"
+    }, Web.Kind.content_apps)
+
+    let no_banner = 
+      DOM.node("div", {}, {
+        "margin-top": "30px"
+      }, [Web.Kind.content_apps_text])
+
     DOM.node("div", {"id": "game-container"}, {}, [
       Web.Kind.component.title("Games")
-      DOM.node("div", {}, {
-        "display": "flex"
-        "justify-content": "flex-start"
-        "flex-direction": "row"
-        "flex-wrap": "wrap"
-      }, Web.Kind.content_apps)
+      with_banner
+      no_banner
     ])
   
 
