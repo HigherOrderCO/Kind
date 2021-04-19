@@ -1,2 +1,18 @@
-Web.Kind.constant.primary_color: Col32
-  Col32.new(177#32, 146#32, 204#32, 100#32)
+Web.Kind.constant.primary_color: String
+  "#71558C"
+
+Web.Kind.constant.secondary_color: String
+  "#3891A6"
+
+Web.Kind.constant.dark_pri_color: String
+  "#44366B"
+
+Web.Kind.constant.p_tag_size: String
+  "16px"
+
+
+Web.Kind.constant.action_go_to_apps: String
+  "action_go_to_apps"
+
+Web.Kind.constant.action_go_to_home: String
+  "action_go_to_home"
