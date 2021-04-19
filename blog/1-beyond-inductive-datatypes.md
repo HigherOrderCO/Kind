@@ -80,7 +80,7 @@ Nat.zero: Nat
 
 // The succ constructor of Nat
 Nat.succ(pred: Nat): Nat
-  (P, zero, succ) succ(pred) // same as: "λP. λzero. λsucc. (succ zero)"
+  (P, zero, succ) succ(pred) // same as: "λP. λzero. λsucc. (succ pred)"
 
 // A recursive function that removes all `succ` constructors
 destroy(a: Nat): Nat
