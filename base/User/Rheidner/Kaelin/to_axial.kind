@@ -1,49 +1,60 @@
-User.Rheidner.Kaelin.to_axial(coord: Pair(U32, U32)): Pair(U32, U32)
+// round negative
+// sum is broke
+User.Rheidner.Kaelin.to_axial(coord: Pair(U32, U32)): Pair(F64, F64)
   let {x, y} = coord
 
   let f = U32.to_f64
   let u = F64.to_u32
-
-  let float_x = F64.sub(f(128u), f(x))
-  let float_y = F64.sub(f(128u), f(y))
+  let float_hex_rad = F64.div(f(Web.Kaelin.Resources.hexagon_radius), f(2u))
+  
+  let float_x = F64.sub(f(x), f(128u))
+  let float_y = F64.sub(f(y), f(128u))
+  
+  // {float_x, float_y}
 
   let fourth = F64.div(f(1u), f(4u))
   let sixth = F64.div(f(1u), f(6u))
   let third = F64.div(f(1u), f(3u))
-  let half = F64.div(f(1u), f(2u))
+  let half = F64.div(f(499u), f(1000u)) // generates 0.499 -> numbers like x.5 will be 'floored' correctly
 
   let axial_x = F64.sub( F64.mul(float_x, fourth), F64.mul(float_y, sixth) )
   let axial_y = F64.mul(float_y, third)
   let axial_z = F64.sub(F64.sub(f(0u), axial_x), axial_y)
 
-  let axial_x_half = F64.add(axial_x, half)
-  let axial_y_half = F64.add(axial_y, half)
-  let axial_z_half = F64.add(axial_z, half)
+  let round_x = round(axial_x)
+  let round_y = round(axial_y)
+  let round_z = round(axial_z)
 
-  let round_x = F64.floor(axial_x_half)
-  let round_y = F64.floor(axial_y_half)
-  let round_z = F64.floor(axial_z_half)
+  {round_x, round_z}
 
-  let diff_x = F64.sub(axial_x, round_x)
-  let diff_y = F64.sub(axial_y, round_y)
-  let diff_z = F64.sub(axial_z, round_z)
+  // let diff_x = F64.sub(axial_x, round_x)
+  // let diff_y = F64.sub(axial_y, round_y)
+  // let diff_z = F64.sub(axial_z, round_z)
   
-  case F64.gtn(diff_x, diff_z) {
-    true:
-      case F64.gtn(diff_y, diff_x){
-        true: 
-          let new_y = F64.sub(F64.sub(f(0u), round_x), round_z)
-          {u(round_x), u(new_y)}
-        false:
-          let new_x = F64.sub(F64.sub(f(0u), round_y), round_z)
-          {u(new_x), u(round_y)}
-      }
-    false:
-      case F64.gtn(diff_y, diff_z) {
-        true:
-          let new_y = F64.sub(F64.sub(f(0u), round_x), round_z)
-          {u(round_x), u(new_y)}
-        false:
-          {u(round_x), u(round_y)}
-      }
-  }
+  // case F64.gtn(diff_x, diff_z) {
+  //   true:
+  //     case F64.gtn(diff_y, diff_x){
+  //       true: 
+  //         let new_y = F64.sub(F64.sub(f(0u), round_x), round_z)
+  //         {u(round_x), u(new_y)}
+  //       false:
+  //         let new_x = F64.sub(F64.sub(f(0u), round_y), round_z)
+  //         {u(new_x), u(round_y)}
+  //     }
+  //   false:
+  //     case F64.gtn(diff_y, diff_z) {
+  //       true:
+  //         let new_y = F64.sub(F64.sub(f(0u), round_x), round_z)
+  //         {u(round_x), u(new_y)}
+  //       false:
+  //         {u(round_x), u(round_y)}
+  //     }
+  // }
+
+floor(n: F64): F64
+  U32.to_f64(F64.to_u32(n))
+
+round(n: F64): F64
+  let f = U32.to_f64
+  let half = F64.div(f(499u), f(1000u))
+  floor(F64.add(n, half))
