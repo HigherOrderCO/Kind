@@ -3,5 +3,9 @@ Web.Kaelin.Map.push(
   ent: Web.Kaelin.Entity, 
   map: Web.Kaelin.Map
 ) : Web.Kaelin.Map
-  let key = Web.Kaelin.Coord.show(coord)
-  map{key} <- ent & (map{key} <> [])
+  let key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+  NatMap.set!(key, [ent], map)
+
+  //let key = Web.Kaelin.Coord.show(coord)
+  //map{key} <-  ent & (map{key} <> [])
+             

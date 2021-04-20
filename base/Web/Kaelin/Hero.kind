@@ -2,6 +2,6 @@
 type Web.Kaelin.Hero {
   new(
     id: String,
-    ent: Web.Kaelin.Entity
+    img: VoxBox
   )
 }

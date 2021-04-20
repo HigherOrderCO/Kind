@@ -1,0 +1,10 @@
+Web.Kaelin.Coord.Convert.axial_to_nat(coord: Web.Kaelin.Coord): Nat
+  open coord
+  let i = Int.add(coord.i, +1000)
+  let i = Int.mul(i, +10000)
+  let i = Int.to_nat(i)
+  let j = Int.add(coord.j, +1000)
+  let j = Int.to_nat(j)
+  Nat.add(i,j)
+  
+

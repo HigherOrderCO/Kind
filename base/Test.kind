@@ -1,19 +1,20 @@
-Test: _
-<<<<<<< HEAD
-  // Web.Kaelin.Coord.show(Web.Kaelin.Coord.to_axial({144u, 136u}))
-  let n1 = Bits.from_string("001101")
-  let n2 = Bits.from_string("000111")
-  let n3 = Bits.shift_right(4, n1)
-  let n5 = Bits.shift_right(4, n3)
-  let n4 = Bits.mask(n1, n2)
-  List.show!(Bits.to_string, asd(Bits.from_string("00010010001101000101011000101000")))
+a(a: Int, b: Int): Nat
+  let x = Int.add(a, +1000)
+  let x = Int.mul(x, +10000)
+  let x = Int.to_nat(x)
+  let y = Int.add(b, +1000)
+  let y = Int.to_nat(y)
+  Nat.add(x,y)
+b(c: Nat): Web.Kaelin.Coord
+  let coord_i = Nat.div(c, 10000)
+  let coord_i = Int.from_nat(coord_i)
+  let coord_i = Int.sub(coord_i, +1000)
+  let coord_j = Nat.mod(c, 10000)
+  let coord_j = Int.from_nat(coord_j)
+  let coord_j = Int.sub(coord_j, +1000)
+  Web.Kaelin.Coord.new(coord_i, coord_j)
+  
 
-asd(b: Bits): List(Bits)
-  let aux = Bits.mask(b, Bits.from_string("1111"))
-  let tail = Bits.shift_right(4, b)
-  case tail {
-    e: List.nil!
-  } default List.cons!(aux, asd(tail))
-=======
-  2
->>>>>>> master
+
+Test:_
+  Nat.show(192347234829)

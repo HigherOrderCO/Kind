@@ -1,21 +1,27 @@
 // draw all players
-Web.Kaelin.Draw.state.players(img: VoxBox, players: Map(Web.Kaelin.Player)): VoxBox
+Web.Kaelin.Draw.state.players(img: VoxBox, map: Web.Kaelin.Map): VoxBox
   // get all players in the map of players
-  let players_list = Map.values!(players)
+  //let players_list = Map.values!(players)
+  let lista = Web.Kaelin.Map.find_players(map)
+  let player_list = Map.to_list!(lista)
 
-  for player in players_list with img:
-    // draw one player
-    Web.Kaelin.Draw.state.player(img, player)
-  img
+    //for pair in player_list with img:
+    
+  //for player in player_list with img:
+    //// draw one player
+    //Web.Kaelin.Draw.state.player(img, player)
+  //img
+  ?a
+  
 
 // draw one player
 // now is only drawing a hero in some coord
-Web.Kaelin.Draw.state.player(img: VoxBox, player: Web.Kaelin.Player): VoxBox
-  open player
-  // get canvas coordinates
+//Web.Kaelin.Draw.state.player(img: VoxBox, player: Web.Kaelin.Player): VoxBox
+  //open player
+  //// get canvas coordinates
   
-  let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(player.coord)
+  //let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(player.coord)
   
-  // draw hero in these coordinates
-  Web.Kaelin.Draw.hero(cx, cy, 0u, player.hero, img)
+  //// draw hero in these coordinates
+  //Web.Kaelin.Draw.hero(cx, cy, 0u, player.hero, img)
   
