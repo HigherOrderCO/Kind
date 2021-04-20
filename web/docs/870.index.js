@@ -591,6 +591,7 @@ module.exports = (function() {
         return $99;
     };
     const List$cons = x0 => x1 => List$cons$(x0, x1);
+    const Web$Kind$constant$p_tag_size = "16px";
 
     function DOM$text$(_value$1) {
         var $100 = ({
@@ -600,13 +601,14 @@ module.exports = (function() {
         return $100;
     };
     const DOM$text = x0 => DOM$text$(x0);
+    const Web$Kind$constant$secondary_color = "#3891A6";
+    const Web$Kind$component$btn_go_to_apps_solid = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "btn_go_to_apps"), List$nil)), Map$from_list$(List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("font-family", "Helvetica"), List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("width", "120px"), List$cons$(Pair$new$("height", "30px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$secondary_color), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("border-radius", "7px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil)))))))))))))), List$cons$(DOM$text$("GO TO APPS"), List$nil));
 
     function Web$Kind$component$title$(_title$1) {
         var $101 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", "20px"), List$cons$(Pair$new$("font-family", "Helvetica"), List$cons$(Pair$new$("font-weight", "bold"), List$nil)))), List$cons$(DOM$text$(_title$1), List$nil));
         return $101;
     };
     const Web$Kind$component$title = x0 => Web$Kind$component$title$(x0);
-    const List$for = a0 => a1 => a2 => (list_for(a0)(a1)(a2));
 
     function List$(_A$1) {
         var $102 = null;
@@ -993,6 +995,7 @@ module.exports = (function() {
         return $188;
     };
     const VoxBox$alloc_capacity = x0 => VoxBox$alloc_capacity$(x0);
+    const Web$Kind$constant$primary_color = "#71558C";
     const String$nil = '';
 
     function String$cons$(_head$1, _tail$2) {
@@ -1015,6 +1018,13 @@ module.exports = (function() {
         return $190;
     };
     const String$repeat = x0 => x1 => String$repeat$(x0, x1);
+    const List$for = a0 => a1 => a2 => (list_for(a0)(a1)(a2));
+
+    function List$(_A$1) {
+        var $249 = null;
+        return $249;
+    };
+    const List = x0 => List$(x0);
 
     function Web$Kind$component$header_tab$(_is_active$1, _title$2) {
         var self = _is_active$1;
@@ -1198,12 +1208,23 @@ module.exports = (function() {
         return $234;
     };
     const Web$Kind$component$header = x0 => Web$Kind$component$header$(x0);
+    const Web$KindWebsite$Page$home = ({
+        _: 'Web.KindWebsite.Page.home'
+    });
 
     function Web$Kind$component$body_container$(_ele$1) {
         var $235 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 20% 100px 20%"), List$nil)), _ele$1);
         return $235;
     };
-    const Web$Kind$component$body_container = x0 => Web$Kind$component$body_container$(x0);
+    const Web$Kind$component$link_white = x0 => x1 => Web$Kind$component$link_white$(x0, x1);
+    const Web$Kind$constant$dark_pri_color = "#44366B";
+    const Web$Kind$component$footer = (() => {
+        var _join_us_txt$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link_white$(" Github", "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link_white$(" Telegram", "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
+        var _join_us$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "110px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$primary_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-items", "flex-end"), List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("padding-right", "20%"), List$nil))))))))), List$cons$(_join_us_txt$1, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "20px"), List$nil)), List$cons$(DOM$text$("\u{2764} by UwU Tech"), List$nil)), List$nil)));
+        var _msg_footer$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("background-color", Web$Kind$constant$dark_pri_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("padding", "10px 20% 10px 20%"), List$nil))))))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$("This website was created using Kind!"), List$nil)), List$cons$(Web$Kind$component$link_white$("\u{1f9d0}\u{ddd0} show me the code!", "https://github.com/uwu-tech/Kind/tree/master/base/Web/Kind"), List$nil)));
+        var $267 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "170px"), List$cons$(Pair$new$("margin-bottom", "0px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("color", "white"), List$nil)))))), List$cons$(_join_us$1, List$cons$(_msg_footer$2, List$nil)));
+        return $267;
+    })();
     const Web$Kind$draw_page_home = (() => {
         var _line$1 = (_txt$1 => {
             var $237 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$(_txt$1), List$nil));
@@ -1217,7 +1238,676 @@ module.exports = (function() {
         return $236;
     })();
 
-    function Web$Kind$component$draw_page$(_page$1) {
+    function DOM$vbox$(_props$1, _style$2, _value$3) {
+        var $272 = ({
+            _: 'DOM.vbox',
+            'props': _props$1,
+            'style': _style$2,
+            'value': _value$3
+        });
+        return $272;
+    };
+    const DOM$vbox = x0 => x1 => x2 => DOM$vbox$(x0, x1, x2);
+
+    function VoxBox$get_len$(_img$1) {
+        var self = _img$1;
+        switch (self._) {
+            case 'VoxBox.new':
+                var $274 = self.length;
+                var $275 = $274;
+                var $273 = $275;
+                break;
+        };
+        return $273;
+    };
+    const VoxBox$get_len = x0 => VoxBox$get_len$(x0);
+    const U32$for = a0 => a1 => a2 => a3 => (u32_for(a0, a1, a2, a3));
+
+    function Word$trim$(_new_size$2, _word$3) {
+        var self = _new_size$2;
+        if (self === 0n) {
+            var $277 = Word$e;
+            var $276 = $277;
+        } else {
+            var $278 = (self - 1n);
+            var self = _word$3;
+            switch (self._) {
+                case 'Word.o':
+                    var $280 = self.pred;
+                    var $281 = Word$o$(Word$trim$($278, $280));
+                    var $279 = $281;
+                    break;
+                case 'Word.i':
+                    var $282 = self.pred;
+                    var $283 = Word$i$(Word$trim$($278, $282));
+                    var $279 = $283;
+                    break;
+                case 'Word.e':
+                    var $284 = Word$o$(Word$trim$($278, Word$e));
+                    var $279 = $284;
+                    break;
+            };
+            var $276 = $279;
+        };
+        return $276;
+    };
+    const Word$trim = x0 => x1 => Word$trim$(x0, x1);
+    const Unit$new = null;
+
+    function Array$extract_tip$(_arr$2) {
+        var self = _arr$2;
+        switch (self._) {
+            case 'Array.tip':
+                var $286 = self.value;
+                var $287 = $286;
+                var $285 = $287;
+                break;
+            case 'Array.tie':
+                var $288 = Unit$new;
+                var $285 = $288;
+                break;
+        };
+        return $285;
+    };
+    const Array$extract_tip = x0 => Array$extract_tip$(x0);
+
+    function Array$extract_tie$(_arr$3) {
+        var self = _arr$3;
+        switch (self._) {
+            case 'Array.tie':
+                var $290 = self.lft;
+                var $291 = self.rgt;
+                var $292 = Pair$new$($290, $291);
+                var $289 = $292;
+                break;
+            case 'Array.tip':
+                var $293 = Unit$new;
+                var $289 = $293;
+                break;
+        };
+        return $289;
+    };
+    const Array$extract_tie = x0 => Array$extract_tie$(x0);
+
+    function Word$foldl$(_nil$3, _w0$4, _w1$5, _word$6) {
+        var Word$foldl$ = (_nil$3, _w0$4, _w1$5, _word$6) => ({
+            ctr: 'TCO',
+            arg: [_nil$3, _w0$4, _w1$5, _word$6]
+        });
+        var Word$foldl = _nil$3 => _w0$4 => _w1$5 => _word$6 => Word$foldl$(_nil$3, _w0$4, _w1$5, _word$6);
+        var arg = [_nil$3, _w0$4, _w1$5, _word$6];
+        while (true) {
+            let [_nil$3, _w0$4, _w1$5, _word$6] = arg;
+            var R = (() => {
+                var self = _word$6;
+                switch (self._) {
+                    case 'Word.o':
+                        var $294 = self.pred;
+                        var $295 = Word$foldl$(_w0$4(_nil$3), _w0$4, _w1$5, $294);
+                        return $295;
+                    case 'Word.i':
+                        var $296 = self.pred;
+                        var $297 = Word$foldl$(_w1$5(_nil$3), _w0$4, _w1$5, $296);
+                        return $297;
+                    case 'Word.e':
+                        var $298 = _nil$3;
+                        return $298;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Word$foldl = x0 => x1 => x2 => x3 => Word$foldl$(x0, x1, x2, x3);
+
+    function Array$get$(_idx$3, _arr$4) {
+        var $299 = Word$foldl$(Array$extract_tip, (_rec$6 => _arr$7 => {
+            var _arr_l$8 = Array$extract_tie$(_arr$7);
+            var self = _arr_l$8;
+            switch (self._) {
+                case 'Pair.new':
+                    var $301 = self.fst;
+                    var $302 = _rec$6($301);
+                    var $300 = $302;
+                    break;
+            };
+            return $300;
+        }), (_rec$6 => _arr$7 => {
+            var _arr_r$8 = Array$extract_tie$(_arr$7);
+            var self = _arr_r$8;
+            switch (self._) {
+                case 'Pair.new':
+                    var $304 = self.snd;
+                    var $305 = _rec$6($304);
+                    var $303 = $305;
+                    break;
+            };
+            return $303;
+        }), _idx$3)(_arr$4);
+        return $299;
+    };
+    const Array$get = x0 => x1 => Array$get$(x0, x1);
+    const Buffer32$get = a0 => a1 => ((a1[a0]));
+    const VoxBox$get_pos = a0 => a1 => ((a1.buffer[a0 * 2]));
+    const U32$add = a0 => a1 => ((a0 + a1) >>> 0);
+    const VoxBox$get_col = a0 => a1 => ((a1.buffer[a0 * 2 + 1]));
+
+    function Word$and$(_a$2, _b$3) {
+        var self = _a$2;
+        switch (self._) {
+            case 'Word.o':
+                var $307 = self.pred;
+                var $308 = (_b$6 => {
+                    var self = _b$6;
+                    switch (self._) {
+                        case 'Word.o':
+                            var $310 = self.pred;
+                            var $311 = (_a$pred$9 => {
+                                var $312 = Word$o$(Word$and$(_a$pred$9, $310));
+                                return $312;
+                            });
+                            var $309 = $311;
+                            break;
+                        case 'Word.i':
+                            var $313 = self.pred;
+                            var $314 = (_a$pred$9 => {
+                                var $315 = Word$o$(Word$and$(_a$pred$9, $313));
+                                return $315;
+                            });
+                            var $309 = $314;
+                            break;
+                        case 'Word.e':
+                            var $316 = (_a$pred$7 => {
+                                var $317 = Word$e;
+                                return $317;
+                            });
+                            var $309 = $316;
+                            break;
+                    };
+                    var $309 = $309($307);
+                    return $309;
+                });
+                var $306 = $308;
+                break;
+            case 'Word.i':
+                var $318 = self.pred;
+                var $319 = (_b$6 => {
+                    var self = _b$6;
+                    switch (self._) {
+                        case 'Word.o':
+                            var $321 = self.pred;
+                            var $322 = (_a$pred$9 => {
+                                var $323 = Word$o$(Word$and$(_a$pred$9, $321));
+                                return $323;
+                            });
+                            var $320 = $322;
+                            break;
+                        case 'Word.i':
+                            var $324 = self.pred;
+                            var $325 = (_a$pred$9 => {
+                                var $326 = Word$i$(Word$and$(_a$pred$9, $324));
+                                return $326;
+                            });
+                            var $320 = $325;
+                            break;
+                        case 'Word.e':
+                            var $327 = (_a$pred$7 => {
+                                var $328 = Word$e;
+                                return $328;
+                            });
+                            var $320 = $327;
+                            break;
+                    };
+                    var $320 = $320($318);
+                    return $320;
+                });
+                var $306 = $319;
+                break;
+            case 'Word.e':
+                var $329 = (_b$4 => {
+                    var $330 = Word$e;
+                    return $330;
+                });
+                var $306 = $329;
+                break;
+        };
+        var $306 = $306(_b$3);
+        return $306;
+    };
+    const Word$and = x0 => x1 => Word$and$(x0, x1);
+    const U32$and = a0 => a1 => (a0 & a1);
+
+    function Word$or$(_a$2, _b$3) {
+        var self = _a$2;
+        switch (self._) {
+            case 'Word.o':
+                var $332 = self.pred;
+                var $333 = (_b$6 => {
+                    var self = _b$6;
+                    switch (self._) {
+                        case 'Word.o':
+                            var $335 = self.pred;
+                            var $336 = (_a$pred$9 => {
+                                var $337 = Word$o$(Word$or$(_a$pred$9, $335));
+                                return $337;
+                            });
+                            var $334 = $336;
+                            break;
+                        case 'Word.i':
+                            var $338 = self.pred;
+                            var $339 = (_a$pred$9 => {
+                                var $340 = Word$i$(Word$or$(_a$pred$9, $338));
+                                return $340;
+                            });
+                            var $334 = $339;
+                            break;
+                        case 'Word.e':
+                            var $341 = (_a$pred$7 => {
+                                var $342 = Word$e;
+                                return $342;
+                            });
+                            var $334 = $341;
+                            break;
+                    };
+                    var $334 = $334($332);
+                    return $334;
+                });
+                var $331 = $333;
+                break;
+            case 'Word.i':
+                var $343 = self.pred;
+                var $344 = (_b$6 => {
+                    var self = _b$6;
+                    switch (self._) {
+                        case 'Word.o':
+                            var $346 = self.pred;
+                            var $347 = (_a$pred$9 => {
+                                var $348 = Word$i$(Word$or$(_a$pred$9, $346));
+                                return $348;
+                            });
+                            var $345 = $347;
+                            break;
+                        case 'Word.i':
+                            var $349 = self.pred;
+                            var $350 = (_a$pred$9 => {
+                                var $351 = Word$i$(Word$or$(_a$pred$9, $349));
+                                return $351;
+                            });
+                            var $345 = $350;
+                            break;
+                        case 'Word.e':
+                            var $352 = (_a$pred$7 => {
+                                var $353 = Word$e;
+                                return $353;
+                            });
+                            var $345 = $352;
+                            break;
+                    };
+                    var $345 = $345($343);
+                    return $345;
+                });
+                var $331 = $344;
+                break;
+            case 'Word.e':
+                var $354 = (_b$4 => {
+                    var $355 = Word$e;
+                    return $355;
+                });
+                var $331 = $354;
+                break;
+        };
+        var $331 = $331(_b$3);
+        return $331;
+    };
+    const Word$or = x0 => x1 => Word$or$(x0, x1);
+    const U32$or = a0 => a1 => (a0 | a1);
+    const U32$shl = a0 => a1 => ((a0 << a1) >>> 0);
+    const Pos32$new = a0 => a1 => a2 => ((0 | a0 | (a1 << 12) | (a2 << 24)));
+
+    function Array$mut$(_idx$3, _f$4, _arr$5) {
+        var $356 = Word$foldl$((_arr$6 => {
+            var $357 = Array$tip$(_f$4(Array$extract_tip$(_arr$6)));
+            return $357;
+        }), (_rec$7 => _arr$8 => {
+            var self = Array$extract_tie$(_arr$8);
+            switch (self._) {
+                case 'Pair.new':
+                    var $359 = self.fst;
+                    var $360 = self.snd;
+                    var $361 = Array$tie$(_rec$7($359), $360);
+                    var $358 = $361;
+                    break;
+            };
+            return $358;
+        }), (_rec$7 => _arr$8 => {
+            var self = Array$extract_tie$(_arr$8);
+            switch (self._) {
+                case 'Pair.new':
+                    var $363 = self.fst;
+                    var $364 = self.snd;
+                    var $365 = Array$tie$($363, _rec$7($364));
+                    var $362 = $365;
+                    break;
+            };
+            return $362;
+        }), _idx$3)(_arr$5);
+        return $356;
+    };
+    const Array$mut = x0 => x1 => x2 => Array$mut$(x0, x1, x2);
+
+    function Array$set$(_idx$3, _val$4, _arr$5) {
+        var $366 = Array$mut$(_idx$3, (_x$6 => {
+            var $367 = _val$4;
+            return $367;
+        }), _arr$5);
+        return $366;
+    };
+    const Array$set = x0 => x1 => x2 => Array$set$(x0, x1, x2);
+    const Buffer32$set = a0 => a1 => a2 => ((a2[a0] = a1, a2));
+    const VoxBox$set_pos = a0 => a1 => a2 => ((a2.buffer[a0 * 2] = a1, a2));
+    const VoxBox$set_col = a0 => a1 => a2 => ((a2.buffer[a0 * 2 + 1] = a1, a2));
+
+    function VoxBox$set_length$(_length$1, _img$2) {
+        var self = _img$2;
+        switch (self._) {
+            case 'VoxBox.new':
+                var $369 = self.capacity;
+                var $370 = self.buffer;
+                var $371 = VoxBox$new$(_length$1, $369, $370);
+                var $368 = $371;
+                break;
+        };
+        return $368;
+    };
+    const VoxBox$set_length = x0 => x1 => VoxBox$set_length$(x0, x1);
+    const VoxBox$push = a0 => a1 => a2 => ((a2.buffer[a2.length * 2] = a0, a2.buffer[a2.length * 2 + 1] = a1, a2.length++, a2));
+
+    function VoxBox$Draw$image$(_x$1, _y$2, _z$3, _src$4, _img$5) {
+        var _len$6 = VoxBox$get_len$(_src$4);
+        var _img$7 = (() => {
+            var $373 = _img$5;
+            var $374 = 0;
+            var $375 = _len$6;
+            let _img$8 = $373;
+            for (let _i$7 = $374; _i$7 < $375; ++_i$7) {
+                var _pos$9 = ((_src$4.buffer[_i$7 * 2]));
+                var _col$10 = ((_src$4.buffer[_i$7 * 2 + 1]));
+                var _p_x$11 = (_pos$9 & 4095);
+                var _p_y$12 = ((_pos$9 & 16773120) >>> 12);
+                var _p_z$13 = ((_pos$9 & 4278190080) >>> 24);
+                var _p_x$14 = ((_p_x$11 + _x$1) >>> 0);
+                var _p_y$15 = ((_p_y$12 + _y$2) >>> 0);
+                var _p_z$16 = ((_p_z$13 + _z$3) >>> 0);
+                var _pos$17 = ((0 | _p_x$14 | (_p_y$15 << 12) | (_p_z$16 << 24)));
+                var $373 = ((_img$8.buffer[_img$8.length * 2] = _pos$17, _img$8.buffer[_img$8.length * 2 + 1] = _col$10, _img$8.length++, _img$8));
+                _img$8 = $373;
+            };
+            return _img$8;
+        })();
+        var $372 = _img$7;
+        return $372;
+    };
+    const VoxBox$Draw$image = x0 => x1 => x2 => x3 => x4 => VoxBox$Draw$image$(x0, x1, x2, x3, x4);
+
+    function Word$bit_length$go$(_word$2, _c$3, _n$4) {
+        var Word$bit_length$go$ = (_word$2, _c$3, _n$4) => ({
+            ctr: 'TCO',
+            arg: [_word$2, _c$3, _n$4]
+        });
+        var Word$bit_length$go = _word$2 => _c$3 => _n$4 => Word$bit_length$go$(_word$2, _c$3, _n$4);
+        var arg = [_word$2, _c$3, _n$4];
+        while (true) {
+            let [_word$2, _c$3, _n$4] = arg;
+            var R = (() => {
+                var self = _word$2;
+                switch (self._) {
+                    case 'Word.o':
+                        var $376 = self.pred;
+                        var $377 = Word$bit_length$go$($376, Nat$succ$(_c$3), _n$4);
+                        return $377;
+                    case 'Word.i':
+                        var $378 = self.pred;
+                        var $379 = Word$bit_length$go$($378, Nat$succ$(_c$3), Nat$succ$(_c$3));
+                        return $379;
+                    case 'Word.e':
+                        var $380 = _n$4;
+                        return $380;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Word$bit_length$go = x0 => x1 => x2 => Word$bit_length$go$(x0, x1, x2);
+
+    function Word$bit_length$(_word$2) {
+        var $381 = Word$bit_length$go$(_word$2, 0n, 0n);
+        return $381;
+    };
+    const Word$bit_length = x0 => Word$bit_length$(x0);
+    const Nat$ltn = a0 => a1 => (a0 < a1);
+    const Nat$sub = a0 => a1 => (a0 - a1 <= 0n ? 0n : a0 - a1);
+
+    function Word$shift_left$(_n$2, _value$3) {
+        var Word$shift_left$ = (_n$2, _value$3) => ({
+            ctr: 'TCO',
+            arg: [_n$2, _value$3]
+        });
+        var Word$shift_left = _n$2 => _value$3 => Word$shift_left$(_n$2, _value$3);
+        var arg = [_n$2, _value$3];
+        while (true) {
+            let [_n$2, _value$3] = arg;
+            var R = (() => {
+                var self = _n$2;
+                if (self === 0n) {
+                    var $382 = _value$3;
+                    return $382;
+                } else {
+                    var $383 = (self - 1n);
+                    var $384 = Word$shift_left$($383, Word$shift_left1$(_value$3));
+                    return $384;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Word$shift_left = x0 => x1 => Word$shift_left$(x0, x1);
+
+    function Cmp$as_gte$(_cmp$1) {
+        var self = _cmp$1;
+        switch (self._) {
+            case 'Cmp.ltn':
+                var $386 = Bool$false;
+                var $385 = $386;
+                break;
+            case 'Cmp.eql':
+            case 'Cmp.gtn':
+                var $387 = Bool$true;
+                var $385 = $387;
+                break;
+        };
+        return $385;
+    };
+    const Cmp$as_gte = x0 => Cmp$as_gte$(x0);
+
+    function Word$gte$(_a$2, _b$3) {
+        var $388 = Cmp$as_gte$(Word$cmp$(_a$2, _b$3));
+        return $388;
+    };
+    const Word$gte = x0 => x1 => Word$gte$(x0, x1);
+
+    function Word$shift_right1$aux$(_word$2) {
+        var self = _word$2;
+        switch (self._) {
+            case 'Word.o':
+                var $390 = self.pred;
+                var $391 = Word$o$(Word$shift_right1$aux$($390));
+                var $389 = $391;
+                break;
+            case 'Word.i':
+                var $392 = self.pred;
+                var $393 = Word$i$(Word$shift_right1$aux$($392));
+                var $389 = $393;
+                break;
+            case 'Word.e':
+                var $394 = Word$o$(Word$e);
+                var $389 = $394;
+                break;
+        };
+        return $389;
+    };
+    const Word$shift_right1$aux = x0 => Word$shift_right1$aux$(x0);
+
+    function Word$shift_right1$(_word$2) {
+        var self = _word$2;
+        switch (self._) {
+            case 'Word.o':
+                var $396 = self.pred;
+                var $397 = Word$shift_right1$aux$($396);
+                var $395 = $397;
+                break;
+            case 'Word.i':
+                var $398 = self.pred;
+                var $399 = Word$shift_right1$aux$($398);
+                var $395 = $399;
+                break;
+            case 'Word.e':
+                var $400 = Word$e;
+                var $395 = $400;
+                break;
+        };
+        return $395;
+    };
+    const Word$shift_right1 = x0 => Word$shift_right1$(x0);
+
+    function Word$div$go$(_shift$2, _sub_copy$3, _shift_copy$4, _value$5) {
+        var Word$div$go$ = (_shift$2, _sub_copy$3, _shift_copy$4, _value$5) => ({
+            ctr: 'TCO',
+            arg: [_shift$2, _sub_copy$3, _shift_copy$4, _value$5]
+        });
+        var Word$div$go = _shift$2 => _sub_copy$3 => _shift_copy$4 => _value$5 => Word$div$go$(_shift$2, _sub_copy$3, _shift_copy$4, _value$5);
+        var arg = [_shift$2, _sub_copy$3, _shift_copy$4, _value$5];
+        while (true) {
+            let [_shift$2, _sub_copy$3, _shift_copy$4, _value$5] = arg;
+            var R = (() => {
+                var self = Word$gte$(_sub_copy$3, _shift_copy$4);
+                if (self) {
+                    var _mask$6 = Word$shift_left$(_shift$2, Word$inc$(Word$to_zero$(_sub_copy$3)));
+                    var $401 = Pair$new$(Bool$true, Word$or$(_value$5, _mask$6));
+                    var self = $401;
+                } else {
+                    var $402 = Pair$new$(Bool$false, _value$5);
+                    var self = $402;
+                };
+                switch (self._) {
+                    case 'Pair.new':
+                        var $403 = self.fst;
+                        var $404 = self.snd;
+                        var self = _shift$2;
+                        if (self === 0n) {
+                            var $406 = $404;
+                            var $405 = $406;
+                        } else {
+                            var $407 = (self - 1n);
+                            var _new_shift_copy$9 = Word$shift_right1$(_shift_copy$4);
+                            var self = $403;
+                            if (self) {
+                                var $409 = Word$div$go$($407, Word$sub$(_sub_copy$3, _shift_copy$4), _new_shift_copy$9, $404);
+                                var $408 = $409;
+                            } else {
+                                var $410 = Word$div$go$($407, _sub_copy$3, _new_shift_copy$9, $404);
+                                var $408 = $410;
+                            };
+                            var $405 = $408;
+                        };
+                        return $405;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Word$div$go = x0 => x1 => x2 => x3 => Word$div$go$(x0, x1, x2, x3);
+
+    function Word$div$(_a$2, _b$3) {
+        var _a_bits$4 = Word$bit_length$(_a$2);
+        var _b_bits$5 = Word$bit_length$(_b$3);
+        var self = (_a_bits$4 < _b_bits$5);
+        if (self) {
+            var $412 = Word$to_zero$(_a$2);
+            var $411 = $412;
+        } else {
+            var _shift$6 = (_a_bits$4 - _b_bits$5 <= 0n ? 0n : _a_bits$4 - _b_bits$5);
+            var _shift_copy$7 = Word$shift_left$(_shift$6, _b$3);
+            var $413 = Word$div$go$(_shift$6, _a$2, _shift_copy$7, Word$to_zero$(_a$2));
+            var $411 = $413;
+        };
+        return $411;
+    };
+    const Word$div = x0 => x1 => Word$div$(x0, x1);
+    const U32$div = a0 => a1 => ((a0 / a1) >>> 0);
+    const U32$length = a0 => (a0.length);
+    const U32$slice = a0 => a1 => a2 => (a2.slice(a0, a1));
+    const U32$read_base = a0 => a1 => (parseInt(a1, a0));
+
+    function VoxBox$parse_byte$(_idx$1, _voxdata$2) {
+        var _chr$3 = (_voxdata$2.slice(((_idx$1 * 2) >>> 0), ((((_idx$1 * 2) >>> 0) + 2) >>> 0)));
+        var $414 = (parseInt(_chr$3, 16));
+        return $414;
+    };
+    const VoxBox$parse_byte = x0 => x1 => VoxBox$parse_byte$(x0, x1);
+    const Col32$new = a0 => a1 => a2 => a3 => ((0 | a0 | (a1 << 8) | (a2 << 16) | (a3 << 24)));
+
+    function VoxBox$parse$(_voxdata$1) {
+        var _siz$2 = (((_voxdata$1.length) / 12) >>> 0);
+        var _img$3 = VoxBox$alloc_capacity$(_siz$2);
+        var _img$4 = (() => {
+            var $416 = _img$3;
+            var $417 = 0;
+            var $418 = _siz$2;
+            let _img$5 = $416;
+            for (let _i$4 = $417; _i$4 < $418; ++_i$4) {
+                var _x$6 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 0) >>> 0), _voxdata$1);
+                var _y$7 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 1) >>> 0), _voxdata$1);
+                var _z$8 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 2) >>> 0), _voxdata$1);
+                var _r$9 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 3) >>> 0), _voxdata$1);
+                var _g$10 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 4) >>> 0), _voxdata$1);
+                var _b$11 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 5) >>> 0), _voxdata$1);
+                var _pos$12 = ((0 | _x$6 | (_y$7 << 12) | (_z$8 << 24)));
+                var _col$13 = ((0 | _r$9 | (_g$10 << 8) | (_b$11 << 16) | (255 << 24)));
+                var $416 = ((_img$5.buffer[_img$5.length * 2] = _pos$12, _img$5.buffer[_img$5.length * 2 + 1] = _col$13, _img$5.length++, _img$5));
+                _img$5 = $416;
+            };
+            return _img$5;
+        })();
+        var $415 = _img$4;
+        return $415;
+    };
+    const VoxBox$parse = x0 => VoxBox$parse$(x0);
+    const Kaelin$Assets$chars$croni_idle_00 = VoxBox$parse$("1500210000001600210000001700210000001800210000001900210000001a00210000001b00210000001c0021000000130120000000140120000000150120807d9a160120807d9a170120c3c2cd180120c3c2cd190120c3c2cd1a0120807d9a1b012000000012021f00000013021f807d9a14021f807d9a15021f807d9a16021fc3c2cd17021fc3c2cd18021fc3c2cd19021f807d9a1a021f0000000b031e0000000c031e0000000d031e0000000e031e0000000f031e00000010031e00000011031e00000012031e807d9a13031e807d9a14031e807d9a15031ec3c2cd16031ec3c2cd17031ec3c2cd18031ec3c2cd19031e00000009041d0000000a041d0000000b041d2a234f0c041d2a234f0d041d44366b0e041d71558c0f041d71558c10041d44366b11041d2a234f12041d00000013041d00000014041dc3c2cd15041dc3c2cd16041dc3c2cd17041dc3c2cd18041d807d9a19041d00000007051c00000008051c00000009051c2a234f0a051c2a234f0b051c44366b0c051c71558c0d051c71558c0e051c71558c0f051c71558c10051c71558c11051c71558c12051c71558c13051c44366b14051c00000015051cc3c2cd16051cc3c2cd17051cc3c2cd18051c00000006061b00000007061b2a234f08061b44366b09061b44366b0a061b44366b0b061b71558c0c061b71558c0d061b71558c0e061b71558c0f061b71558c10061b71558c11061b71558c12061b71558c13061b71558c14061b44366b15061b00000016061bc3c2cd17061bc3c2cd18061b00000005071a00000006071a2a234f07071a2a234f08071a44366b09071a44366b0a071a44366b0b071a71558c0c071a71558c0d071a71558c0e071a71558c0f071a71558c10071a71558c11071a71558c12071a71558c13071a71558c14071a71558c15071a44366b16071a00000017071ac3c2cd18071a0000000508190000000608192a234f07081944366b08081944366b09081944366b0a081944366b0b081971558c0c081971558c0d081971558c0e081971558c0f081971558c10081971558c11081971558c12081971558c13081944366b14081900000015081944366b160819000000170819c3c2cd180819807d9a1908190000000409180000000509182a234f0609182a234f07091844366b08091844366b09091844366b0a091844366b0b091844366b0c091871558c0d091871558c0e091871558c0f091871558c10091871558c11091871558c12091871558c130918000000140918807d9a150918000000160918000000170918c3c2cd180918c3c2cd190918000000040a17000000050a172a234f060a17000000070a17000000080a172a234f090a1744366b0a0a172a234f0b0a170000000c0a170000000d0a170000000e0a1771558c0f0a1771558c100a1771558c110a1771558c120a1744366b130a17000000140a17807d9a150a17807d9a160a17000000170a17c3c2cd180a17c3c2cd190a17807d9a1a0a17000000040b16000000050b16000000060b16160e23070b16160e23080b16000000090b162a234f0a0b160000000b0b16160e230c0b16160e230d0b16160e230e0b160000000f0b1671558c100b1671558c110b1671558c120b1644366b130b16000000140b16807d9a150b16807d9a160b16c3c2cd170b16c3c2cd180b16c3c2cd190b16c3c2cd1a0b16807d9a1b0b16000000040c15000000050c15000000060c15de3938070c15de3938080c15160e23090c150000000a0c15160e230b0c15de39380c0c15de39380d0c15160e230e0c15160e230f0c15000000100c1571558c110c1544366b120c1544366b130c15000000140c15807d9a150c15807d9a160c15807d9a170c15c3c2cd180c15c3c2cd190c15c3c2cd1a0c15c3c2cd1b0c15000000050d14000000060d14de3938070d14de3938080d14160e23090d14160e230a0d14160e230b0d14de39380c0d14de39380d0d14160e230e0d14160e230f0d14000000100d1444366b110d1444366b120d14000000130d14807d9a140d14807d9a150d14807d9a160d14807d9a170d14807d9a180d14c3c2cd190d14c3c2cd1a0d14c3c2cd1b0d14807d9a1c0d14000000050e13000000060e13160e23070e13160e23080e13160e23090e13160e230a0e13160e230b0e13160e230c0e13160e230d0e13160e230e0e130000000f0e1344366b100e1344366b110e132a234f120e13000000130e13807d9a140e13807d9a150e13807d9a160e13807d9a170e13807d9a180e13807d9a190e13c3c2cd1a0e13c3c2cd1b0e13807d9a1c0e13000000060f12000000070f12160e23080f12160e23090f12160e230a0f12160e230b0f12160e230c0f12160e230d0f120000000e0f1244366b0f0f1244366b100f122a234f110f12000000120f12000000130f12000000140f12807d9a150f12807d9a160f12807d9a170f12807d9a180f12807d9a190f12807d9a1a0f12c3c2cd1b0f12807d9a1c0f12000000061011000000071011000000081011160e23091011160e230a1011160e230b1011160e230c10110000000d10112a234f0e10112a234f0f10110000001010110000001110112a234f12101144366b13101144366b141011000000151011000000161011807d9a171011807d9a181011807d9a191011807d9a1a1011c3c2cd1b1011807d9a1c10110000000511100000000611102a234f07111044366b0811100000000911100000000a11100000000b11100000000c11100000000d11100000000e11100000000f11102a234f10111044366b11111071558c12111071558c13111071558c14111071558c15111044366b161110000000171110807d9a181110807d9a191110807d9a1a1110807d9a1b111000000004120f00000005120f00000006120f44366b07120f44366b08120f44366b09120f0000000a120f69658b0b120f44366b0c120f44366b0d120f0000000e120f2a234f0f120f44366b10120f71558c11120f71558c12120f71558c13120f71558c14120f71558c15120f71558c16120f44366b17120f00000018120f807d9a19120f807d9a1a120f00000004130e00000005130e2a234f06130e44366b07130e71558c08130e44366b09130e0000000a130e69658b0b130e807d9a0c130e44366b0d130e0000000e130e2a234f0f130e44366b10130e71558c11130e71558c12130e71558c13130e71558c14130e71558c15130e71558c16130e71558c17130e44366b18130e00000019130e00000004140d00000005140d44366b06140d44366b07140d71558c08140d71558c09140d0000000a140d69658b0b140d807d9a0c140d69658b0d140d44366b0e140d0000000f140d44366b10140d44366b11140d71558c12140d71558c13140d71558c14140d71558c15140d71558c16140d71558c17140d71558c18140d44366b19140d00000003150c00000004150c2a234f05150c44366b06150c44366b07150c71558c08150c71558c09150c0000000a150c69658b0b150c807d9a0c150c69658b0d150c44366b0e150c0000000f150c2a234f10150c44366b11150c71558c12150c71558c13150c71558c14150c71558c15150c71558c16150c71558c17150c71558c18150c71558c19150c0000001a150c00000002160b00000003160b2a234f04160b2a234f05160b44366b06160b71558c07160b71558c08160b00000009160b69658b0a160b69658b0b160b807d9a0c160b807d9a0d160b69658b0e160b0000000f160b2a234f10160b44366b11160b44366b12160b71558c13160b71558c14160b71558c15160b71558c16160b71558c17160b71558c18160b71558c19160b44366b1a160b0000001b160b00000001170a00000002170a2a234f03170a2a234f04170a2a234f05170a2a234f06170a71558c07170a71558c08170a00000009170a0000000a170a69658b0b170a69658b0c170a807d9a0d170a69658b0e170a0000000f170a2a234f10170a2a234f11170a44366b12170a44366b13170a44366b14170a71558c15170a71558c16170a71558c17170a2a234f18170a44366b19170a44366b1a170a71558c1b170a71558c1c170a0000000118090000000218092a234f03180944366b04180944366b05180944366b0618092a234f07180971558c0818090000000918090000000a18090000000b18090000000c18090000000d18090000000e18090000000f18090000001018092a234f11180944366b12180944366b1318092a234f1418092a234f15180944366b16180944366b17180971558c18180971558c19180971558c1a180971558c1b180944366b1c1809c3c2cd1d180900000000190800000001190869658b0219082a234f0319082a234f04190871558c05190844366b06190844366b07190844366b0819080000000919080000000a19080000000b19080000000c19080000000d19080000000e19080000000f19080000001019082a234f1119082a234f12190844366b13190844366b14190871558c15190871558c16190871558c17190871558c18190871558c19190871558c1a190869658b1b1908c3c2cd1c190869658b1d1908000000001a07000000011a0769658b021a07c3c2cd031a072a234f041a072a234f051a0771558c061a0771558c071a0771558c081a07000000091a072424240a1a070000000b1a070000000c1a072424240d1a072424240e1a070000000f1a07000000101a072a234f111a072a234f121a0744366b131a0744366b141a0744366b151a0771558c161a0771558c171a0771558c181a0769658b191a07c3c2cd1a1a07c3c2cd1b1a0769658b1c1a07000000011b06000000021b0669658b031b06c3c2cd041b06c3c2cd051b062a234f061b062a234f071b06000000081b06242424091b062424240a1b060000000b1b060000000c1b062424240d1b062424240e1b060000000f1b06000000101b06000000111b062a234f121b062a234f131b062a234f141b0644366b151b0669658b161b06c3c2cd171b06c3c2cd181b06c3c2cd191b0669658b1a1b060000001b1b06000000021c05000000031c05000000041c0569658b051c05c3c2cd061c05c3c2cd071c05000000081c05242424091c052424240a1c052424240b1c052424240c1c052424240d1c052424240e1c052424240f1c05242424101c05242424111c05000000121c05c3c2cd131c05c3c2cd141c05c3c2cd151c05c3c2cd161c05c3c2cd171c0569658b181c05000000191c05000000041d04000000051d04000000061d04000000071d04000000111d04000000121d04000000131d04000000141d04000000151d04000000161d04000000171d04000000");
+    const Web$Kind$draw_page_apps = (() => {
+        var _line$1 = (_txt$1 => {
+            var $420 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$1), List$nil));
+            return $420;
+        });
+        var _line_break$2 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil), List$nil));
+        var _span$3 = (_txt$3 => {
+            var $421 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$3), List$nil));
+            return $421;
+        });
+        var _span_bold$4 = (_txt$4 => {
+            var $422 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$4), List$nil));
+            return $422;
+        });
+        var _vbox$5 = VoxBox$alloc_capacity$(1000);
+        var _banner$5 = DOM$vbox$(Map$from_list$(List$nil), Map$from_list$(List$nil), VoxBox$Draw$image$(50, 50, 0, Kaelin$Assets$chars$croni_idle_00, _vbox$5));
+        var _games$5 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(Web$Kind$component$title$("Games"), List$cons$(_banner$5, List$nil)));
+        var $419 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-home"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(Web$KindWebsite$Page$apps), List$cons$(Web$Kind$component$body_container$(List$cons$(_games$5, List$nil)), List$cons$(Web$Kind$component$footer, List$nil))));
+        return $419;
+    })();
+
+    function Web$KindWebsite$draw_page$(_page$1) {
         var self = _page$1;
         switch (self._) {
             case 'Web.KindWebsite.Page.home':
@@ -1231,7 +1921,7 @@ module.exports = (function() {
         };
         return $238;
     };
-    const Web$Kind$component$draw_page = x0 => Web$Kind$component$draw_page$(x0);
+    const Web$KindWebsite$draw_page = x0 => Web$KindWebsite$draw_page$(x0);
 
     function IO$(_A$1) {
         var $241 = null;
@@ -1296,7 +1986,6 @@ module.exports = (function() {
         return $253;
     };
     const Dynamic$new = x0 => Dynamic$new$(x0);
-    const Unit$new = null;
     const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
         var $254 = _m$pure$2;
         return $254;
@@ -1313,7 +2002,7 @@ module.exports = (function() {
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$KindWebsite = (() => {
-        var _init$1 = Web$KindWebsite$State$new$(Pair$new$(500, 400), Web$KindWebsite$Page$home);
+        var _init$1 = Web$KindWebsite$State$new$(Pair$new$(500, 400), Web$KindWebsite$Page$apps);
         var _draw$2 = (_state$2 => {
             var self = _state$2;
             switch (self._) {
@@ -1360,7 +2049,7 @@ module.exports = (function() {
         'Nat.succ': Nat$succ,
         'Nat.zero': Nat$zero,
         'Nat.to_u32': Nat$to_u32,
-        'Web.KindWebsite.Page.home': Web$KindWebsite$Page$home,
+        'Web.KindWebsite.Page.apps': Web$KindWebsite$Page$apps,
         'DOM.node': DOM$node,
         'BitsMap': BitsMap,
         'Map': Map,
@@ -1380,12 +2069,11 @@ module.exports = (function() {
         'List.nil': List$nil,
         'Pair': Pair,
         'List.cons': List$cons,
+        'Web.Kind.constant.p_tag_size': Web$Kind$constant$p_tag_size,
         'DOM.text': DOM$text,
+        'Web.Kind.constant.secondary_color': Web$Kind$constant$secondary_color,
+        'Web.Kind.component.btn_go_to_apps_solid': Web$Kind$component$btn_go_to_apps_solid,
         'Web.Kind.component.title': Web$Kind$component$title,
-        'List.for': List$for,
-        'List': List,
-        'Web.Kind.component.list': Web$Kind$component$list,
-        'Web.Kind.component.link': Web$Kind$component$link,
         'Buffer32.new': Buffer32$new,
         'Array': Array,
         'Array.tip': Array$tip,
@@ -1408,10 +2096,13 @@ module.exports = (function() {
         'U32.mul': U32$mul,
         'VoxBox.new': VoxBox$new,
         'VoxBox.alloc_capacity': VoxBox$alloc_capacity,
+        'Web.Kind.constant.primary_color': Web$Kind$constant$primary_color,
         'String.nil': String$nil,
         'String.cons': String$cons,
         'String.concat': String$concat,
         'String.repeat': String$repeat,
+        'List.for': List$for,
+        'List': List,
         'Web.Kind.component.header_tab': Web$Kind$component$header_tab,
         'Bool.and': Bool$and,
         'Cmp.as_eql': Cmp$as_eql,
@@ -1426,16 +2117,67 @@ module.exports = (function() {
         'Web.Kind.helper.is_current': Web$Kind$helper$is_current,
         'Web.Kind.component.header_tabs': Web$Kind$component$header_tabs,
         'Web.Kind.component.header': Web$Kind$component$header,
+        'Web.KindWebsite.Page.home': Web$KindWebsite$Page$home,
         'Web.Kind.component.body_container': Web$Kind$component$body_container,
+        'Web.Kind.component.list': Web$Kind$component$list,
+        'Web.Kind.component.link_white': Web$Kind$component$link_white,
+        'Web.Kind.constant.dark_pri_color': Web$Kind$constant$dark_pri_color,
+        'Web.Kind.component.footer': Web$Kind$component$footer,
         'Web.Kind.draw_page_home': Web$Kind$draw_page_home,
-        'Web.Kind.component.draw_page': Web$Kind$component$draw_page,
+        'DOM.vbox': DOM$vbox,
+        'VoxBox.get_len': VoxBox$get_len,
+        'U32.for': U32$for,
+        'Word.trim': Word$trim,
+        'Unit.new': Unit$new,
+        'Array.extract_tip': Array$extract_tip,
+        'Array.extract_tie': Array$extract_tie,
+        'Word.foldl': Word$foldl,
+        'Array.get': Array$get,
+        'Buffer32.get': Buffer32$get,
+        'VoxBox.get_pos': VoxBox$get_pos,
+        'U32.add': U32$add,
+        'VoxBox.get_col': VoxBox$get_col,
+        'Word.and': Word$and,
+        'U32.and': U32$and,
+        'Word.or': Word$or,
+        'U32.or': U32$or,
+        'U32.shl': U32$shl,
+        'Pos32.new': Pos32$new,
+        'Array.mut': Array$mut,
+        'Array.set': Array$set,
+        'Buffer32.set': Buffer32$set,
+        'VoxBox.set_pos': VoxBox$set_pos,
+        'VoxBox.set_col': VoxBox$set_col,
+        'VoxBox.set_length': VoxBox$set_length,
+        'VoxBox.push': VoxBox$push,
+        'VoxBox.Draw.image': VoxBox$Draw$image,
+        'Word.bit_length.go': Word$bit_length$go,
+        'Word.bit_length': Word$bit_length,
+        'Nat.ltn': Nat$ltn,
+        'Nat.sub': Nat$sub,
+        'Word.shift_left': Word$shift_left,
+        'Cmp.as_gte': Cmp$as_gte,
+        'Word.gte': Word$gte,
+        'Word.shift_right1.aux': Word$shift_right1$aux,
+        'Word.shift_right1': Word$shift_right1,
+        'Word.div.go': Word$div$go,
+        'Word.div': Word$div,
+        'U32.div': U32$div,
+        'U32.length': U32$length,
+        'U32.slice': U32$slice,
+        'U32.read_base': U32$read_base,
+        'VoxBox.parse_byte': VoxBox$parse_byte,
+        'Col32.new': Col32$new,
+        'VoxBox.parse': VoxBox$parse,
+        'Kaelin.Assets.chars.croni_idle_00': Kaelin$Assets$chars$croni_idle_00,
+        'Web.Kind.draw_page_apps': Web$Kind$draw_page_apps,
+        'Web.KindWebsite.draw_page': Web$KindWebsite$draw_page,
         'IO': IO,
         'IO.ask': IO$ask,
         'IO.bind': IO$bind,
         'IO.end': IO$end,
         'IO.monad': IO$monad,
         'Dynamic.new': Dynamic$new,
-        'Unit.new': Unit$new,
         'App.pass': App$pass,
         'App.new': App$new,
         'Web.KindWebsite': Web$KindWebsite,

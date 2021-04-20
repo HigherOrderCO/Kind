@@ -1,0 +1,55 @@
+Web.Kind.draw_page_apps: DOM
+  // Auxiliars
+  // ----------
+  let line = 
+    ((txt) DOM.node("p", {}, {"font-size": Web.Kind.constant.p_tag_size}, 
+      [DOM.text(txt)])) :: String -> DOM
+  
+  let line_break = DOM.node("p", {}, {"font-size": Web.Kind.constant.p_tag_size}, 
+    [DOM.node("br", {}, {}, [])])
+
+  let span =
+    ((txt) DOM.node("span", {}, {"font-size": Web.Kind.constant.p_tag_size}, 
+    [DOM.text(txt)])) :: String -> DOM
+
+  let span_bold =
+    ((txt) DOM.node("span", {}, {
+      "font-weight": "bold"
+      "font-size": Web.Kind.constant.p_tag_size
+      }, [DOM.text(txt)])) :: String -> DOM
+
+  // Content
+  // ----------
+  let games =
+    let with_banner = 
+      DOM.node("div", {}, {
+      "display": "flex"
+      "justify-content": "flex-start"
+      "flex-direction": "row"
+      "flex-wrap": "wrap"
+    }, Web.Kind.content_apps)
+
+    let no_banner = 
+      DOM.node("div", {}, {
+        "margin-top": "30px"
+      }, [Web.Kind.content_apps_text])
+
+    DOM.node("div", {"id": "game-container"}, {}, [
+      Web.Kind.component.title("Games")
+      with_banner
+      no_banner
+    ])
+  
+
+  DOM.node("div", {"id": "page-apps"}, {
+    "display": "flex"
+    "flex-direction": "column"
+    "justify-content": "space-between"
+    "height": "100%"
+  }, [
+    Web.Kind.component.header(Web.Kind.Page.apps)
+    Web.Kind.component.body_container([
+      games
+    ]),
+    Web.Kind.component.footer
+  ])
