@@ -1,0 +1,6 @@
+Bits.break(shift : Nat, a: Bits): List<Bits>
+   if (Bits.gtn(a, U32.to_bits(0u))) then
+     List.cons!(Bits.mod(a, Nat.to_bits(Nat.square(shift))), 
+       Bits.break(shift, Bits.shift_right(shift, a)))
+    else
+     []
