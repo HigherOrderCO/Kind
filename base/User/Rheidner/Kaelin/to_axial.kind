@@ -1,5 +1,3 @@
-// round negative
-// sum is broke
 User.Rheidner.Kaelin.to_axial(coord: Pair(U32, U32)): Pair(I32, I32)
   let {x, y} = coord
 

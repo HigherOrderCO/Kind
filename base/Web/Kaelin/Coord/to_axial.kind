@@ -1,35 +1,20 @@
-Web.Kaelin.Coord.to_axial(coord: Pair<U32, U32>) : Web.Kaelin.Coord
-  open coord
-  let rad = Web.Kaelin.Constants.hexagon_radius
-  let x = coord.fst
-  let y = coord.snd
-  let x_pos = U32.gte(x, 128#32)
-  let y_pos = U32.gte(y, 128#32)
-  case y_pos {
-     true : 
-      let r = U32.div(U32.mul(2#32, U32.sub(y, U32.sub(128#32, U32.div(rad, 2#32)))), U32.mul(3#32, rad))
-      let ct = U32.sub(x, U32.mul(rad, r))
-      let q = if (U32.gte(ct, 128#32)) then 
-                  let distance_x_center = U32.sub(x, U32.mul(rad, r))
-                  let d = U32.div(U32.sub(distance_x_center, U32.sub(128#32, rad)), U32.mul(rad, 2#32))
-                  Int.from_nat(U32.to_nat(d))
-               else
-                 let distance_x_center = U32.sub(x, U32.mul(rad, r))
-                 let d = U32.div(U32.sub(U32.add(128#32, rad), distance_x_center), U32.mul(rad, 2#32))
-                 Int.neg(Int.from_nat(U32.to_nat(d)))
-  
-     Web.Kaelin.Coord.new(q, Int.from_nat(U32.to_nat(r)))
-     false : 
-      let r = U32.div(U32.sub(U32.sub(128#32, U32.div(rad, 2#32)), y), rad)
-      let ct = U32.add(x, U32.mul(rad, r))
-      let q = if (U32.gte(ct, 128#32)) then 
-                  let distance_x_center = U32.add(x, U32.mul(rad, r))
-                  let d = U32.div(U32.sub(distance_x_center, U32.sub(128#32, U32.div(rad, 2#32))), U32.mul(rad, 2#32))
-                  Int.from_nat(U32.to_nat(d))
-               else
-                 let distance_x_center = U32.add(x, U32.mul(rad, r))
-                 let d = U32.div(U32.sub(U32.add(128#32, rad), distance_x_center), U32.mul(rad, 2#32))
-                 Int.neg(Int.from_nat(U32.to_nat(d)))
+User.Rheidner.Kaelin.to_axial(coord: Pair(U32, U32)): Pair(I32, I32)
+  let {x, y} = coord
 
-     Web.Kaelin.Coord.new(q, Int.neg(Int.from_nat(U32.to_nat(r))))
-  }
+  let f = U32.to_f64
+  let i = F64.to_i32
+  let float_hex_rad = F64.div(f(Web.Kaelin.Constants.hexagon_radius), 2.0#64)
+  
+  let float_x = F64.div(F64.sub(f(x), f(128u)), float_hex_rad)
+  let float_y = F64.div(F64.sub(f(y), f(128u)), float_hex_rad)
+  
+  // {float_x, float_y}
+
+  let fourth = 0.25#64
+  let sixth = F64.div(1.0#64, 6.0#64)
+  let third = F64.div(1.0#64, 3.0#64)
+  let half = 0.5#64
+
+  let axial_x = F64.sub( F64.mul(float_x, fourth), F64.mul(float_y, sixth) )
+  let axial_y = F64.mul(float_y, third)
+  Web.Kaelin.Coord.round(axial_x, axial_y)
