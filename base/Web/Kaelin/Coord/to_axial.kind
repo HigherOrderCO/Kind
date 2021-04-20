@@ -1,4 +1,4 @@
-User.Rheidner.Kaelin.to_axial(coord: Pair(U32, U32)): Pair(I32, I32)
+Web.Kaelin.Coord.to_axial(coord: Pair(U32, U32)): Pair(I32, I32)
   let {x, y} = coord
 
   let f = U32.to_f64
