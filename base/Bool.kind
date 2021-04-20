@@ -2,12 +2,3 @@ type Bool {
   true,
   false,
 }
-
-Bool: Type
-  self(P: Bool -> Type)
-  (true: P(Bool.true))
-  (false: P(Bool.false))
-  P(self)
-
-Bool.true: Bool
-  (P, t, f) t
