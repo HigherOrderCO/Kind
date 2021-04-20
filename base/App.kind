@@ -31,10 +31,12 @@ type App.Event {
     name: String
     id: String
   )
+  // The event occurs when the user presses a mouse button over an element
   mouse_down(
     time: U64
     button: U16
   )
+  // The event occurs when a user releases a mouse button over an element
   mouse_up(
     time: U64
     button: U16
@@ -52,5 +54,11 @@ type App.Event {
     room: String
     addr: String
     data: String
+  )
+  // The event occurs when the pointer is moved onto an element, or onto one of its children
+  mouse_over(
+    time: U64
+    button: U16
+    id: String
   )
 }

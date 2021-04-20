@@ -1,4 +1,4 @@
-Web.Kind.component.header(page: Web.Kind.Page): DOM
+Web.Kind.component.header(stt: Web.Kind.State): DOM
   let vbox = VoxBox.alloc_capacity(100#32)
   let line = 
     DOM.node("div", {}, {
@@ -15,17 +15,20 @@ Web.Kind.component.header(page: Web.Kind.Page): DOM
       "text-align" : "center"
       }, [DOM.text("KIND language")]),
     line,
-    Web.Kind.component.header_tabs(page)
+    Web.Kind.component.header_tabs(stt)
   ])
 
-Web.Kind.component.header_tabs(page: Web.Kind.Page): DOM
+Web.Kind.component.header_tabs(stt: Web.Kind.State): DOM
+  open stt
   let tabs =
     [
       Web.Kind.component.header_tab(
-        Web.Kind.helper.is_current("Home", page), "Home", Web.Kind.constant.action_go_to_home)
+        Web.Kind.helper.is_eql(Web.Kind.Page.home, stt.page), 
+        "Home", Web.Kind.constant.action_go_to_home)
 
       Web.Kind.component.header_tab(
-        Web.Kind.helper.is_current("Apps", page), "Apps", Web.Kind.constant.action_go_to_apps)
+        Web.Kind.helper.is_eql(Web.Kind.Page.apps, stt.page),
+        "Apps", Web.Kind.constant.action_go_to_apps)
     ]
 
   DOM.node("div", {}, {

@@ -1,5 +1,8 @@
 type Web.Kind.State{
-  new(screen_size: Pair(U32,U32), page: Web.Kind.Page)
+  new(
+    screen_size: Pair(U32,U32), 
+    page: Web.Kind.Page,
+    events: Map(String)) // id: event_name 
 }
 
 type Web.Kind.Page{
@@ -11,33 +14,44 @@ Web.Kind.exe_event(stt: Web.Kind.State, e_id: String, e_name: String): Web.Kind.
   open stt
   switch String.eql(e_id){
     Web.Kind.constant.action_go_to_home: 
-      Web.Kind.State.new(stt.screen_size, Web.Kind.Page.home)
+      Web.Kind.State.new(stt.screen_size, Web.Kind.Page.home, stt.events)
 
     Web.Kind.constant.action_go_to_apps: 
-      Web.Kind.State.new(stt.screen_size, Web.Kind.Page.apps)
+      Web.Kind.State.new(stt.screen_size, Web.Kind.Page.apps, stt.events)
 
-  } default Web.Kind.State.new(stt.screen_size, stt.page) // same page
+  } default Web.Kind.State.new(stt.screen_size, stt.page, stt.events) // same page
 
-Web.Kind.draw_page(page: Web.Kind.Page): DOM
-  case page{
-    home: Web.Kind.draw_page_home
-    apps: Web.Kind.draw_page_apps
+Web.Kind.draw_page(stt: Web.Kind.State): DOM
+  open stt
+  case stt.page{
+    home: Web.Kind.draw_page_home(stt)
+    apps: Web.Kind.draw_page_apps(stt)
   }
 
 Web.Kind: App(Web.Kind.State)
 
   init = 
-    Web.Kind.State.new({500u, 400u}, Web.Kind.Page.home)
+    Web.Kind.State.new({500u, 400u}, Web.Kind.Page.home, {})
 
   draw = (state)
     open state
-    Web.Kind.draw_page(state.page)
+    Web.Kind.draw_page(state)
 
   when = (event, state)
+    open state
     case event {
       init: App.pass
       dom: App.store!(Web.Kind.exe_event(state, event.id, event.name))
+      mouse_over:
+        App.store!(Web.Kind.State.new(
+          state.screen_size,
+          state.page,
+          Map.set!(event.id, "hover", state.events)
+          ))
+        // App.pass
     } default App.pass
   
   // The application
   App.new!(init, draw, when)
+
+

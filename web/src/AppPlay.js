@@ -85,6 +85,15 @@ module.exports = class AppPlay extends Component {
     };
     document.body.addEventListener("mousedown", this.listeners.mousedown);
 
+    this.listeners.mouseover = (e) => {
+      this.register_event({
+        _: "App.Event.mouse_over",
+        time: BigInt(Date.now()),
+        id: e.target.id
+      });
+    };
+    document.body.addEventListener("mouseover", this.listeners.mouseover); 
+
     // Mouse up event
     this.listeners.mouseup = (e) => {
       this.register_event({
