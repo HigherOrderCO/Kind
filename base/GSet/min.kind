@@ -1,4 +1,4 @@
-GSet.min<A: Type>(set: GSet(A)): Maybe(A)
+GSet.min<A: Type>(set: GSet<A>): Maybe<A>
   case set {
     tip: Maybe.none!,
     bin: case set.left {

@@ -1,4 +1,4 @@
-Nat.to_base.go(base: Nat, nat: Nat, res: List(Nat)): List(Nat)
+Nat.to_base.go(base: Nat, nat: Nat, res: List<Nat>): List<Nat>
   case Nat.div_mod(nat, base) as div_mod {
     new: case div_mod.fst {
       zero: List.cons!(div_mod.snd, res),

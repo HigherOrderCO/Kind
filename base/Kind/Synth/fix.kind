@@ -1,16 +1,16 @@
 Kind.Synth.fix(
   file: String,
   code: String,
-  orig: Pair(Nat,Nat),
+  orig: Pair<Nat,Nat>,
   name: Kind.Name,
   term: Kind.Term,
   type: Kind.Term,
   isct: Bool,
   arit: Nat,
   defs: Kind.Defs,
-  errs: List(Kind.Error),
+  errs: List<Kind.Error>,
   fixd: Bool,
-): IO(Maybe(Kind.Defs))
+): IO<Maybe<Kind.Defs>>
   case errs {
     nil:
       if fixd then IO {

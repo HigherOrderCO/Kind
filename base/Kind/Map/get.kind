@@ -1,2 +1,2 @@
-Kind.Map.get<A: Type>(name: Kind.Name, map: BitsMap(A)): Maybe(A)
+Kind.Map.get<A: Type>(name: Kind.Name, map: BitsMap<A>): Maybe<A>
   BitsMap.get<A>(Kind.Name.to_bits(name), map)

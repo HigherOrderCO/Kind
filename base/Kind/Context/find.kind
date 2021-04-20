@@ -1,8 +1,8 @@
-Kind.Context.find(name: Kind.Name, ctx: Kind.Context): Maybe(Kind.Term)
+Kind.Context.find(name: Kind.Name, ctx: Kind.Context): Maybe<Kind.Term>
   let {name, skip} = Kind.Context.get_name_skips(name)
   Kind.Context.find.go(name, skip, ctx)
 
-Kind.Context.find.go(name: Kind.Name, skip: Nat, ctx: Kind.Context): Maybe(Kind.Term)
+Kind.Context.find.go(name: Kind.Name, skip: Nat, ctx: Kind.Context): Maybe<Kind.Term>
   case ctx {
     nil:
       none

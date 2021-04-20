@@ -6,8 +6,8 @@ Kind.Datatype.build_type(type: Kind.Datatype): Kind.Term
 Kind.Datatype.build_type.go(
   type: Kind.Datatype,
   name: Kind.Name,
-  pars: List(Kind.Binder),
-  inds: List(Kind.Binder),
+  pars: List<Kind.Binder>,
+  inds: List<Kind.Binder>,
 ): Kind.Term
   case pars {
     cons: case pars.head {

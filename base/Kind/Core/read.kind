@@ -6,7 +6,7 @@ Kind.Core.read.is_name(chr: Char): Bool
   Bool.or(Bool.and(U16.gte(chr,97#16), U16.ltn(chr,123#16)), // a-z
   Bool.false)))))
 
-Kind.Core.read.name(code: String): Pair(String, String)
+Kind.Core.read.name(code: String): Pair<String, String>
   case code {
     nil:
       {code, ""}
@@ -18,7 +18,7 @@ Kind.Core.read.name(code: String): Pair(String, String)
         {code, ""}
   }
   
-Kind.Core.read.spaces(code: String): Pair(String, Unit)
+Kind.Core.read.spaces(code: String): Pair<String, Unit>
   case code {
     nil:
       {code, unit}
@@ -37,7 +37,7 @@ Kind.Core.read.spaces(code: String): Pair(String, Unit)
         {code, unit}
   }
 
-Kind.Core.read.char(code: String, chr: Char): Pair(String, Unit)
+Kind.Core.read.char(code: String, chr: Char): Pair<String, Unit>
   let {code, skip} = Kind.Core.read.spaces(code)
   case code {
     nil:
@@ -49,7 +49,7 @@ Kind.Core.read.char(code: String, chr: Char): Pair(String, Unit)
         {"", unit} // unexpected character
   }
 
-Kind.Core.read.u16(code: String, u16: Char): Pair(String, Char)
+Kind.Core.read.u16(code: String, u16: Char): Pair<String, Char>
   case code {
     nil:
       {code, u16}
@@ -61,7 +61,7 @@ Kind.Core.read.u16(code: String, u16: Char): Pair(String, Char)
         {code, u16}
   }
 
-Kind.Core.read.natx(code: String, nat: Nat): Pair(String, Nat)
+Kind.Core.read.natx(code: String, nat: Nat): Pair<String, Nat>
   case code {
     nil:
       {code, nat}
@@ -73,7 +73,7 @@ Kind.Core.read.natx(code: String, nat: Nat): Pair(String, Nat)
         {code, nat}
   }
 
-Kind.Core.read.chrx(code: String): Pair(String, Char)
+Kind.Core.read.chrx(code: String): Pair<String, Char>
   if String.starts_with(code, "\\u{") then
     let code = String.drop(3, code)
     let {code, chrx} = Kind.Core.read.u16(code, 0#16)
@@ -86,7 +86,7 @@ Kind.Core.read.chrx(code: String): Pair(String, Char)
     cons: {code.tail, code.head}
   }
         
-Kind.Core.read.strx(code: String): Pair(String, String)
+Kind.Core.read.strx(code: String): Pair<String, String>
   if String.starts_with(code, "\"") then
     {code, ""}
   else
@@ -94,7 +94,7 @@ Kind.Core.read.strx(code: String): Pair(String, String)
     let {code, rest} = Kind.Core.read.strx(code)
     {code, String.cons(chrx, rest)}
 
-Kind.Core.read.find<A: Type>(list: List(A), cond: A -> Nat -> Bool, indx: Nat, skip: Nat): Maybe(Pair(A,Nat))
+Kind.Core.read.find<A: Type>(list: List<A>, cond: A -> Nat -> Bool, indx: Nat, skip: Nat): Maybe<Pair<A,Nat>>
   case list {
     nil:
       none
@@ -108,7 +108,7 @@ Kind.Core.read.find<A: Type>(list: List(A), cond: A -> Nat -> Bool, indx: Nat, s
         Kind.Core.read.find!(list.tail, cond, Nat.succ(indx), skip)
   }
 
-Kind.Core.read.term(code: String): Pair(String, List(Pair(String,Kind.Term)) -> Kind.Term)
+Kind.Core.read.term(code: String): Pair<String, List<Pair<String,Kind.Term>> -> Kind.Term>
   //log(code)
   let {code, skip} = Kind.Core.read.spaces(code)
   case code {
@@ -195,7 +195,7 @@ Kind.Core.read.term(code: String): Pair(String, List(Pair(String,Kind.Term)) -> 
           {"", (ctx) Kind.Term.ref("error")}
   }
 
-Kind.Core.read(code: String): Maybe(Kind.Term)
+Kind.Core.read(code: String): Maybe<Kind.Term>
   let {code, term} = Kind.Core.read.term(code | ";")
   case code {
     nil: none

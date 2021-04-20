@@ -1,5 +1,5 @@
 Web.Kaelin.Hero.croni: Web.Kaelin.Hero
   Web.Kaelin.Hero.new(
     "0x00000001", 
-    Web.Kaelin.Entity.char(Kaelin.Assets.chars.croni0_d_1) 
+    Web.Kaelin.Entity.hero(Web.Kaelin.Assets.hero.croni0_d_1) 
   )

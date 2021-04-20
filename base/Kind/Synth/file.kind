@@ -1,4 +1,4 @@
-Kind.Synth.file(file: String, defs: Kind.Defs): IO(Either(String, Pair(List(Kind.Name), Kind.Defs)))
+Kind.Synth.file(file: String, defs: Kind.Defs): IO<Either<String, Pair<List<Kind.Name>, Kind.Defs>>>
   IO {
     get code = IO.get_file(file);
     let read = Kind.Defs.read(file, code, defs);

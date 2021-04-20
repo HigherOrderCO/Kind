@@ -1,4 +1,4 @@
-Kind.Synth.files_of.make(names: List(String), last: String): List(String)
+Kind.Synth.files_of.make(names: List<String>, last: String): List<String>
   case names {
     nil:
       []

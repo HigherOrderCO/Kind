@@ -1,4 +1,4 @@
-Vector.mapped<A: Type, size: Nat>(vector: Vector(A, size))<B: Type>(fn: A -> B): Vector<B, size>
+Vector.mapped<A: Type, size: Nat>(vector: Vector<A, size>)<B: Type>(fn: A -> B): Vector<B, size>
   case vector {
     nil:
       Vector.nil<B>

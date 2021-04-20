@@ -4,7 +4,7 @@
 //   bs = [1, 2]
 //   List.concat<Nat>(as, bs) == [3, 4, 1, 2]
 
-List.concat<A: Type>(as: List(A), bs: List(A)): List(A)
+List.concat<A: Type>(as: List<A>, bs: List<A>): List<A>
   case as {
     nil: bs,
     cons: List.cons!(as.head, List.concat!(as.tail,bs))

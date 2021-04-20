@@ -1,4 +1,4 @@
-BitsMap.keys.go<A: Type>(xs: BitsMap(A), key: Bits, list: List(Bits)): List(Bits)
+BitsMap.keys.go<A: Type>(xs: BitsMap<A>, key: Bits, list: List<Bits>): List<Bits>
   case xs {
     new:
       list,

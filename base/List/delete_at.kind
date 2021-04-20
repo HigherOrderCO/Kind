@@ -1,4 +1,4 @@
-List.delete_at<A: Type>(idx: Nat, list: List(A)): List(A)
+List.delete_at<A: Type>(idx: Nat, list: List<A>): List<A>
   case idx{
     zero: List.tail<A>(list)
     succ: case list{

@@ -70,11 +70,11 @@
 //  ?a
 
 // Returns the first element of a List
-//Problems.p14<A: Type>(xs: List<A>): Maybe(A)
+//Problems.p14<A: Type>(xs: List<A>): Maybe<A>
 //  ?a
 
 // Returns the list without the first element
-//Problems.p15<A: Type>(xs: List<A>): List(A)
+//Problems.p15<A: Type>(xs: List<A>): List<A>
 //  ?a
 
 // Returns the length of a list

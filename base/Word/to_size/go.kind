@@ -1,0 +1,6 @@
+Word.to_size.go<size: Nat>(word: Word(size), n: Nat): Nat
+  case word {
+    e: n,
+    o: Word.to_size.go<word.size>(word.pred, Nat.succ(n)),
+    i: Word.to_size.go<word.size>(word.pred, Nat.succ(n))
+  }: Nat

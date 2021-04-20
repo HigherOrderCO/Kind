@@ -1,4 +1,4 @@
-GMap.tests.1 : IO(Unit)
+GMap.tests.1 : IO<Unit>
   let kvs = [
     Pair.new!!(1,"a")
     Pair.new!!(2,"b")

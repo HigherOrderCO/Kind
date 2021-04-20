@@ -143,14 +143,14 @@ User.Rheidner.Problems.p26(a: Nat, b: Nat): Bool
   }!
 
 // Returns the first element of a List
-User.Rheidner.Problems.p14<A: Type>(xs: List<A>): Maybe(A)
+User.Rheidner.Problems.p14<A: Type>(xs: List<A>): Maybe<A>
   case xs {
     nil: Maybe.none!
     cons: Maybe.some!(xs.head)
   }!
 
 // Returns the list without the first element
-User.Rheidner.Problems.p15<A: Type>(xs: List<A>): List(A)
+User.Rheidner.Problems.p15<A: Type>(xs: List<A>): List<A>
   case xs {
     nil: List.nil!
     cons: xs.tail

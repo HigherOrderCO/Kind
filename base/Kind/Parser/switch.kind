@@ -1,4 +1,4 @@
-Kind.Parser.switch.case: Parser(Pair(Kind.Term, Kind.Term))
+Kind.Parser.switch.case: Parser(Pair<Kind.Term, Kind.Term>)
   Parser {
     get key = Kind.Parser.term;
     Kind.Parser.text(":");

@@ -1,4 +1,4 @@
-GSet.union<A: Type>(cmp: A -> A -> Cmp, set_a: GSet(A), set_b: GSet(A)): GSet(A)
+GSet.union<A: Type>(cmp: A -> A -> Cmp, set_a: GSet<A>, set_b: GSet<A>): GSet<A>
   case set_a {
     tip: case set_b {
       tip: GSet.tip!,
