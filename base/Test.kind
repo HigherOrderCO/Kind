@@ -14,13 +14,15 @@ Test: String
   BitsMap.new!)
   case defs {
     left: ""
-    right: //List.show!(Pair.fst!!, Kind.Map.to_list)
-           case Kind.Map.get!("not", defs.value) as got {
+    right: case Kind.Map.get!("not", defs.value) as got {
              none:
                "not found"
              some:
                open got.value
+               log("term:")
+               log(Kind.Term.show(got.value.term))
                let {comp, type} = Kind.Comp.compile(got.value.term, some(got.value.type), defs.value, 0)
+               log("comp:")
                Kind.Comp.show(comp)
            }
   }
