@@ -1,4 +1,26 @@
-Test: Nat
-  (P, zero, succ) succ((P, zero, succ) succ((P, zero, succ) zero))
+Test: String
+  defs = Kind.Defs.read("", "
+    type Bool {
+      true
+      false
+    }
 
-  
+    not(b: Bool): Bool
+      case b {
+        true: false
+        false: true
+      }
+  ",
+  BitsMap.new!)
+  case defs {
+    left: ""
+    right: //List.show!(Pair.fst!!, Kind.Map.to_list)
+           case Kind.Map.get!("not", defs.value) as got {
+             none:
+               "not found"
+             some:
+               open got.value
+               let {comp, type} = Kind.Comp.compile(got.value.term, some(got.value.type), defs.value, 0)
+               Kind.Comp.show(comp)
+           }
+  }
