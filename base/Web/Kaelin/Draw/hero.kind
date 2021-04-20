@@ -2,8 +2,14 @@
 Web.Kaelin.Draw.hero(cx: U32, cy: U32, z: U32, hero: Web.Kaelin.Hero, img: VoxBox): VoxBox
   open hero
   open hero.ent
+<<<<<<< HEAD
   let aux_y = U32.mul(Web.Kaelin.Resources.hexagon_radius, 2u)
   let cy = U32.sub(cy, aux_y)
   let cx = U32.sub(cx, Web.Kaelin.Resources.hexagon_radius)
+=======
+  let aux_y = U32.mul(Web.Kaelin.Constants.hexagon_radius, 2u)
+  let cy = U32.sub(cy, aux_y)
+  let cx = U32.sub(cx, Web.Kaelin.Constants.hexagon_radius)
+>>>>>>> master
 
   VoxBox.Draw.image(cx, cy, 0u, hero.ent.img, img)

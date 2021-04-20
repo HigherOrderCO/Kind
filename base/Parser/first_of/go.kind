@@ -1,4 +1,4 @@
-Parser.first_of.go<A: Type>(pars: List(Parser(A)), err: Maybe(Parser.ErrorAt)): Parser(A)
+Parser.first_of.go<A: Type>(pars: List<Parser(A)>, err: Maybe<Parser.ErrorAt>): Parser(A)
   (idx,code) 
     case pars {
       nil: case err {

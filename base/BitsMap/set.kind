@@ -1,4 +1,4 @@
-BitsMap.set<A: Type>(bits: Bits, val: A, map: BitsMap(A)): BitsMap(A)
+BitsMap.set<A: Type>(bits: Bits, val: A, map: BitsMap<A>): BitsMap<A>
   case bits {
     e: case map {
       new: BitsMap.tie!(Maybe.some!(val), BitsMap.new!, BitsMap.new!),
@@ -14,10 +14,10 @@ BitsMap.set<A: Type>(bits: Bits, val: A, map: BitsMap(A)): BitsMap(A)
     }
   }
 
-BitsMap.set.cps<A: Type>(bits: Bits, val: A, map: BitsMap(A)): BitsMap(A)
+BitsMap.set.cps<A: Type>(bits: Bits, val: A, map: BitsMap<A>): BitsMap<A>
   Trampoline.call!(BitsMap.set.cps.go<A>(bits, val, map, Trampoline.done!))
 
-BitsMap.set.cps.go<A: Type>(bits: Bits, val: A, map: BitsMap(A), cont: BitsMap(A) -> Trampoline(BitsMap(A))): Trampoline(BitsMap(A))
+BitsMap.set.cps.go<A: Type>(bits: Bits, val: A, map: BitsMap<A>, cont: BitsMap<A> -> Trampoline(BitsMap<A>)): Trampoline(BitsMap<A>)
   case bits map {
     e new: cont(BitsMap.tie!(some(val), BitsMap.new!, BitsMap.new!))
     e tie: cont(BitsMap.tie!(some(val), map.lft, map.rgt))

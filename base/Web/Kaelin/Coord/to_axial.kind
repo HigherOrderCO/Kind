@@ -1,34 +1,34 @@
-Web.Kaelin.Coord.to_axial(coord: Pair(U32, U32)) : Web.Kaelin.Coord
+Web.Kaelin.Coord.to_axial(coord: Pair<U32, U32>) : Web.Kaelin.Coord
   open coord
-  let rad = Web.Kaelin.Resources.hexagon_radius
+  let rad = Web.Kaelin.Constants.hexagon_radius
   let x = coord.fst
   let y = coord.snd
-  let x_pos = U32.gte(x, 128u)
-  let y_pos = U32.gte(y, 128u)
+  let x_pos = U32.gte(x, 128#32)
+  let y_pos = U32.gte(y, 128#32)
   case y_pos {
      true : 
-      let r = U32.div(U32.mul(2u, U32.sub(y, U32.sub(128u, U32.div(rad, 2u)))), U32.mul(3u, rad))
+      let r = U32.div(U32.mul(2#32, U32.sub(y, U32.sub(128#32, U32.div(rad, 2#32)))), U32.mul(3#32, rad))
       let ct = U32.sub(x, U32.mul(rad, r))
-      let q = if (U32.gte(ct, 128u)) then 
+      let q = if (U32.gte(ct, 128#32)) then 
                   let distance_x_center = U32.sub(x, U32.mul(rad, r))
-                  let d = U32.div(U32.sub(distance_x_center, U32.sub(128u, rad)), U32.mul(rad, 2u))
+                  let d = U32.div(U32.sub(distance_x_center, U32.sub(128#32, rad)), U32.mul(rad, 2#32))
                   Int.from_nat(U32.to_nat(d))
                else
                  let distance_x_center = U32.sub(x, U32.mul(rad, r))
-                 let d = U32.div(U32.sub(U32.add(128u, rad), distance_x_center), U32.mul(rad, 2u))
+                 let d = U32.div(U32.sub(U32.add(128#32, rad), distance_x_center), U32.mul(rad, 2#32))
                  Int.neg(Int.from_nat(U32.to_nat(d)))
   
      Web.Kaelin.Coord.new(q, Int.from_nat(U32.to_nat(r)))
      false : 
-      let r = U32.div(U32.sub(U32.sub(128u, U32.div(rad, 2u)), y), rad)
+      let r = U32.div(U32.sub(U32.sub(128#32, U32.div(rad, 2#32)), y), rad)
       let ct = U32.add(x, U32.mul(rad, r))
-      let q = if (U32.gte(ct, 128u)) then 
+      let q = if (U32.gte(ct, 128#32)) then 
                   let distance_x_center = U32.add(x, U32.mul(rad, r))
-                  let d = U32.div(U32.sub(distance_x_center, U32.sub(128u, U32.div(rad, 2u))), U32.mul(rad, 2u))
+                  let d = U32.div(U32.sub(distance_x_center, U32.sub(128#32, U32.div(rad, 2#32))), U32.mul(rad, 2#32))
                   Int.from_nat(U32.to_nat(d))
                else
                  let distance_x_center = U32.add(x, U32.mul(rad, r))
-                 let d = U32.div(U32.sub(U32.add(128u, rad), distance_x_center), U32.mul(rad, 2u))
+                 let d = U32.div(U32.sub(U32.add(128#32, rad), distance_x_center), U32.mul(rad, 2#32))
                  Int.neg(Int.from_nat(U32.to_nat(d)))
 
      Web.Kaelin.Coord.new(q, Int.neg(Int.from_nat(U32.to_nat(r))))

@@ -1,4 +1,4 @@
-Int.normalize(a: Nat, b: Nat): Either(Int.new(a,b) == Int.new(Nat.sub(a,b),0), Int.new(a,b) == Int.new(0,Nat.sub(b,a)))
+Int.normalize(a: Nat, b: Nat): Either<Int.new(a,b) == Int.new(Nat.sub(a,b),0), Int.new(a,b) == Int.new(0,Nat.sub(b,a))>
   case a {
     zero: Either.right!!(refl)
     succ: case b {

@@ -240,6 +240,7 @@ module.exports = class AppPlay extends Component {
           style: style,
           onclick: (e) => {
             if (props.id !== undefined) {
+              console.log("App.Event.dom: ", props)
               this.register_event({
                 _: "App.Event.dom",
                 id: props.id,

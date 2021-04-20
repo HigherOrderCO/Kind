@@ -1,4 +1,4 @@
-BitsMap.from_list<A: Type>(xs: List(Pair(Bits,A))): BitsMap(A)
+BitsMap.from_list<A: Type>(xs: List<Pair<Bits,A>>): BitsMap<A>
   case xs {
     nil : BitsMap.new!,
     cons: case xs.head as p {

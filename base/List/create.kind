@@ -5,5 +5,5 @@ List.create.go<A: Type>(len: Nat, create_value: Nat -> A, result: List<A>): List
   }
 
 
-List.create<A: Type>(len: Nat, create_value: Nat -> A): List(A)
+List.create<A: Type>(len: Nat, create_value: Nat -> A): List<A>
   List.create.go<A>(len, create_value, [])

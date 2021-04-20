@@ -1,5 +1,5 @@
 // Asks the user name forever
-Example.monads.hello: IO(Unit)
+Example.monads.hello: IO<Unit>
   IO {
     IO.print("What is your name?")
     var name = IO.get_line
@@ -8,14 +8,14 @@ Example.monads.hello: IO(Unit)
   }
 
 // Prints a random numbers
-Example.monads.random: IO(Unit)
+Example.monads.random: IO<Unit>
   IO {
     get seed = IO.get_time
     IO.print(Nat.show(Nat.random(seed)))
   }
 
 // This will return none if you attempt to access the list out of bound
-Example.monads.maybe: Maybe(Nat)
+Example.monads.maybe: Maybe<Nat>
   let list = [1, 2, 3]
   Maybe {
     get a = list[0]

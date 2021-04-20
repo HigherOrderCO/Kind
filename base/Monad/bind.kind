@@ -1,4 +1,4 @@
-Monad.bind<M: Type -> Type>(m: Monad(M)): <A: Type, B: Type> -> M(A) -> (A -> M(B)) -> M(B)
+Monad.bind<M: Type -> Type>(m: Monad<M>): <A: Type, B: Type> -> M(A) -> (A -> M(B)) -> M(B)
   case m {
     new: m.bind
   }

@@ -1,6 +1,6 @@
-Web.Kaelin.Coord.from_screen_xy(screen_coord: Pair(U32, U32)): Web.Kaelin.Coord
-  let rad = Web.Kaelin.Resources.hexagon_radius
-  let hlf = U32.div(rad, 2u)
+Web.Kaelin.Coord.from_screen_xy(screen_coord: Pair<U32, U32>): Web.Kaelin.Coord
+  let rad = Web.Kaelin.Constants.hexagon_radius
+  let hlf = U32.div(rad, 2#32)
 
   open screen_coord
   let i   = Int.new(U32.to_nat(screen_coord.fst), 0)
@@ -11,17 +11,17 @@ Web.Kaelin.Coord.from_screen_xy(screen_coord: Pair(U32, U32)): Web.Kaelin.Coord
   let cx = Int.new(128, 0)
   let cy = Int.new(128, 0)
   
+  let x_distance = Int.sub(i, cx)
   let y_distance = Int.sub(j, cy)
   let y_distance = Int.add(y_distance, Int.new(U32.to_nat(rad), 0)) // offset distance by rad
-  let pos_y = Int.div_nat(y_distance, U32.to_nat(U32.mul(hlf, 3u))) // (j - cy) // (3 * hlf)
+  let pos_y = Int.div_nat(y_distance, U32.to_nat(U32.mul(hlf, 3#32))) // (j - cy) // (3 * hlf)
   let pos_y = if Int.is_neg(x_distance) then Int.sub(pos_y, Int.new(1,0)) else pos_y // 'fix' int by nat division
   
   log(Int.show(Int.sub(i, cx)))
   let cx = Int.add(cx, Int.mul(pos_y, Int.new(U32.to_nat(rad), 0))) // offset cx by pos_y * rad
   log(Int.show(cx))
-  let x_distance = Int.sub(i, cx)
   let x_distance = Int.add(x_distance, Int.new(U32.to_nat(rad), 0)) // offset distance by rad
   log(Int.show(x_distance))
-  let pos_x = Int.div_nat(x_distance, U32.to_nat(U32.mul(rad, 2u))) // (i - cx) // (rad * 2)
+  let pos_x = Int.div_nat(x_distance, U32.to_nat(U32.mul(rad, 2#32))) // (i - cx) // (rad * 2)
   let pos_x = if Int.is_neg(x_distance) then Int.sub(pos_x, Int.new(1,0)) else pos_x // 'fix' int by nat division
   Web.Kaelin.Coord.new(pos_x, pos_y)

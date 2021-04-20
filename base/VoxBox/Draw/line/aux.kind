@@ -33,7 +33,7 @@ VoxBox.Draw.line.aux.coords.base_case(
     List.reverse!({cx, cy} & acc)
   else
     let b = VoxBox.Draw.line.aux.bump(x0, y0, x1, y1, cx, cy)
-    VoxBox.Draw.line.aux.coords.base_case(U32.add(cx, 1u), U32.add(cy, b), x0, y0, x1, y1, {cx, cy} & acc)
+    VoxBox.Draw.line.aux.coords.base_case(U32.add(cx, 1#32), U32.add(cy, b), x0, y0, x1, y1, {cx, cy} & acc)
 
 // Decides wether we should bump one pixel up or not
 // inside VoxBox.Draw.line.aux.coords.base
@@ -51,12 +51,12 @@ VoxBox.Draw.line.aux.bump(
   // absolute value of y coordinate of the gradient
   // (it's positive)
   let grad_y = U32.sub(x1, x0)
-  let my_x = U32.mul(U32.sub(U32.mul(2u, U32.add(cx, 1u)), U32.mul(2u, x0)), grad_x)
-  let my_y = U32.mul(U32.sub(U32.add(U32.mul(2u, cy), 1u), U32.mul(2u, y0)), grad_y)
+  let my_x = U32.mul(U32.sub(U32.mul(2#32, U32.add(cx, 1#32)), U32.mul(2#32, x0)), grad_x)
+  let my_y = U32.mul(U32.sub(U32.add(U32.mul(2#32, cy), 1#32), U32.mul(2#32, y0)), grad_y)
   if U32.gtn(my_x, my_y) then
-    1u
+    1#32
   else
-    0u
+    0#32
 
 VoxBox.Draw.line.aux.reflect_y(y0: U32, y1: U32, p: Pair<U32, U32>): Pair<U32, U32>
   open p

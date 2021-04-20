@@ -2,18 +2,19 @@
 // only a draft
 // waiting for I32
 Web.Kaelin.Event.serialize(event: Web.Kaelin.Event): String
-  case event {
-    // 0x
-    // 1 - type of event
-    // 8 - player coord x
-    // 8 - player coord y
-    // 8 - player hero ?
-    // 40 - player user ?
-    create_user:
-      open event.player as player
-      open player.coord as coord
+ ?a
+  //case event {
+    //// 0x
+    //// 1 - type of event
+    //// 8 - player coord x
+    //// 8 - player coord y
+    //// 8 - player hero ?
+    //// 40 - player user ?
+    //create_user:
+      //open event.player as player
+      //open player.coord as coord
 
-      let result = "0x"
-      let type_event = "1"
-      let coord_x = Int.to_nat(coord.i)
-  } default "0x" | String.repeat("0", 256)
+      //let result = "0x"
+      //let type_event = "1"
+      //let coord_x = Int.to_nat(coord.i)
+  //} default "0x" | String.repeat("0", 256)

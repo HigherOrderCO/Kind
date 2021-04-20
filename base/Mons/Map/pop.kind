@@ -1,4 +1,4 @@
-Mons.Map.pop(pos: Pos32, map: Mons.Map): Pair(Mons.Map, Mons.Object)
+Mons.Map.pop(pos: Pos32, map: Mons.Map): Pair<Mons.Map, Mons.Object>
   let objs = Mons.Map.get_list(pos, map)
   case objs {
     nil : {map, Mons.Object.void},

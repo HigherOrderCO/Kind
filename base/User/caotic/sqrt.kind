@@ -1,4 +1,4 @@
-unfold(B : Type, f : B -> Maybe(B), b : B) : B
+unfold(B : Type, f : B -> Maybe<B>, b : B) : B
    case f(b) as c {
      none : b
      some : unfold(B, f, c.value)

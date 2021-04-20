@@ -1,0 +1,7 @@
+NatMap.from_list<A: Type>(xs: List<Pair<Nat,A>>): NatMap(A)
+  case xs {
+    nil : BitsMap.new!,
+    cons: case xs.head as p {
+      new: BitsMap.set!(Nat.to_bits(p.fst), p.snd, NatMap.from_list!(xs.tail))
+    }
+  }

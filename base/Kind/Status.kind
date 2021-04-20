@@ -2,5 +2,5 @@ type Kind.Status {
   init,
   wait,
   done,
-  fail(errors: List(Kind.Error)),
+  fail(errors: List<Kind.Error>),
 }

@@ -1,4 +1,4 @@
-Kind.MPath.to_bits(path: Maybe(Kind.Path)): Bits
+Kind.MPath.to_bits(path: Maybe<Kind.Path>): Bits
   case path {
     none: Bits.e,
     some: path.value(Bits.e),

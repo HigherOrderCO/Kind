@@ -6,7 +6,7 @@ PixelFont.set_img(char: Char, img: VoxBox, map: PixelFont): PixelFont
   Map.set!(U16.show_hex(char), img, map)
 
 // Get the image given a map
-PixelFont.get_img(char: Char, map: PixelFont): Maybe(VoxBox)
+PixelFont.get_img(char: Char, map: PixelFont): Maybe<VoxBox>
   case Map.get!(U16.show_hex(char), map) as got{
     none: Maybe.none<VoxBox>
     some: Maybe.some<VoxBox>(got.value)

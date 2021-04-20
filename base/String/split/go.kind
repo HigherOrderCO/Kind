@@ -1,4 +1,4 @@
-String.split.go(xs: String, match: String, last: String): List(String)
+String.split.go(xs: String, match: String, last: String): List<String>
   case xs {
     nil:
       [last]

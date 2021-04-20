@@ -1,8 +1,8 @@
-List.commute_cons_map<A: Type, B: Type>(a :A, ls: List(A), f: A -> B)
-  : Equal(List(B),
+List.commute_cons_map<A: Type, B: Type>(a :A, ls: List<A>, f: A -> B)
+  : Equal<List<B>,
           List.cons<B>(f(a), List.map<A, B>(f, ls)),
-          List.map<A, B>(f, List.cons<A>(a, ls)))
+          List.map<A, B>(f, List.cons<A>(a, ls))>
   case ls {
     nil : Equal.refl!!
     cons: Equal.refl!!
-  } : Equal(_, List.cons!(f(a), List.map!!(f, ls)), List.map!!(f, List.cons!(a, ls)))
+  } : Equal<_, List.cons!(f(a), List.map!!(f, ls)), List.map!!(f, List.cons!(a, ls))>

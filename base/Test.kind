@@ -1,4 +1,5 @@
 Test: _
+<<<<<<< HEAD
   // Web.Kaelin.Coord.show(Web.Kaelin.Coord.to_axial({144u, 136u}))
   let n1 = Bits.from_string("001101")
   let n2 = Bits.from_string("000111")
@@ -13,3 +14,6 @@ asd(b: Bits): List(Bits)
   case tail {
     e: List.nil!
   } default List.cons!(aux, asd(tail))
+=======
+  2
+>>>>>>> master

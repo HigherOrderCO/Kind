@@ -1,7 +1,0 @@
-Bits.mask(bit: Bits, mask: Bits): Bits
-  case bit mask {
-    o o: Bits.o(Bits.mask(bit.pred, mask.pred))
-    o i: Bits.o(Bits.mask(bit.pred, mask.pred))
-    i o: Bits.o(Bits.mask(bit.pred, mask.pred))
-    i i: Bits.i(Bits.mask(bit.pred, mask.pred))
-  } default Bits.e

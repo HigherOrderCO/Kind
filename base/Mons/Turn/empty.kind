@@ -1,2 +1,2 @@
 Mons.Turn.empty: Mons.Turn
-  Mons.Turn.new(Bool.false, Mons.Skill.none, Mons.Skill.none, 0u)
+  Mons.Turn.new(Bool.false, Mons.Skill.none, Mons.Skill.none, 0#32)

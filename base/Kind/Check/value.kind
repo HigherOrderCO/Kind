@@ -1,3 +1,3 @@
-Kind.Check.value<A: Type>(chk: Kind.Check(A)): Maybe(A)
+Kind.Check.value<A: Type>(chk: Kind.Check<A>): Maybe<A>
   open chk
   chk.value
