@@ -1,27 +1,38 @@
 Web.Kaelin.Player.move_by(i:  Int, j: Int, map: Web.Kaelin.Map, address: String): Web.Kaelin.Map
-  let coord = Web.Kaelin.Map.find_players(map)
-  let get = coord{address}
-  let key = Web.Kaelin.Coord.Convert.axial_to_nat(Web.Kaelin.Coord.new(i,j))
-  case get { 
+  let players = Web.Kaelin.Map.find_players(map)
+  let origin = players{address}
+  
+  let is_occupied = false
+  case origin { 
     none: map
-    some: open get.value
-      let new_i = Int.add(get.value.i, i)
-      let new_j = Int.add(get.value.j, j)
-      let new_pos = Web.Kaelin.Coord.new(new_i, new_j)
-      let background = Web.Kaelin.Map.pop(get.value,map)
-      let champ = Web.Kaelin.Map.pop(get.value,Pair.fst!!(background))
-      let background_1 = Web.Kaelin.Map.pop(new_pos, map)
-      let old_map = NatMap.del!(key, map)
-      let key_1 = Web.Kaelin.Coord.Convert.axial_to_nat(get.value)
-      let new_map = NatMap.del!(key_1, map)
-      open background
-      let new_background = case background.snd {
-        none:map
-        some:
-      Web.Kaelin.Map.push(get.value, [background.snd.value],new_map)
-      }
-      ?b
-      //Web.Kaelin.Map.push(new_pos, 
-      //Web.Kaelin.Player.new(player.addr, new_pos, player.hero, player.team)
-
+    some:
+      open origin.value as o
+      let pop = Web.Kaelin.Map.pop
+      let destination = Web.Kaelin.Coord.new(Int.add(o.i, i), Int.add(o.j, j))
+      let destination_tile = Web.Kaelin.Map.get(destination, map)
+        // Checks if its occupied
+      for entity in destination_tile with is_occupied:
+        case entity {
+          background: Bool.or(is_occupied, false)
+          creature: Bool.or(is_occupied, true)
+        }
+      if is_occupied then
+        map
+      else
+        // Gets entities from both tiles
+        let map_o = pop(origin.value,map)
+        let background_o = Pair.snd!!(map_o)
+        let background_d = Pair.snd!!(pop(destination, map))
+        let hero = Pair.snd!!(pop(origin.value,Pair.fst!!(map_o)))
+        let new_map = Web.Kaelin.Map.del(origin.value, map)        
+        let new_map = Web.Kaelin.Map.del(destination, map)
+        open background_o
+        let new_map = case background_o {
+          none: map
+          some: Web.Kaelin.Map.push(origin.value, [background_o.value],new_map)
+        }
+        let new_map = case hero background_d {
+          some some: Web.Kaelin.Map.push(destination, [hero.value, background_d.value], new_map)
+        }default map
+        new_map
   }

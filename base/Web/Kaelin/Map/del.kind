@@ -1,0 +1,3 @@
+Web.Kaelin.Map.del(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map): Web.Kaelin.Map
+  let key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+  NatMap.del!(key, map)

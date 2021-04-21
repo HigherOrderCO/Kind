@@ -91,15 +91,15 @@ Web.Kaelin: App<Web.Kaelin.State>
             } default {Int.new(0,0), Int.new(0,0)}
 
             open coord
-            App.store!(Web.Kaelin.Action.move_player(event.addr, coord.fst, coord.snd, state))
+            App.store!(Web.Kaelin.Player.move_by(coord.fst, coord.snd, state.map, event.addr))
 
-          "0x3":
-            let skill = switch String.eql( String.slice(3, 4, event.data) ) {
-              "1": 1
-              "2": 2
-              "3": 3
-            } default 0
-            App.store!(Web.Kaelin.Action.show_range(event.addr, skill, state))
+          // "0x3":
+          //   let skill = switch String.eql( String.slice(3, 4, event.data) ) {
+          //     "1": 1
+          //     "2": 2
+          //     "3": 3
+          //   } default 0
+          //   App.store!(Web.Kaelin.Action.show_range(event.addr, skill, state))
 
         } default App.pass
         
