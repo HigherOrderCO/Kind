@@ -1,7 +1,27 @@
-Web.Kaelin.Player.move_by(i: Int, j: Int, player: Web.Kaelin.Player): Web.Kaelin.Player
-  open player
-  open player.coord as player_coord
-  let new_i = Int.add(player_coord.i, i)
-  let new_j = Int.add(player_coord.j, j)
-  let new_pos = Web.Kaelin.Coord.new(new_i, new_j)
-  Web.Kaelin.Player.new(player.addr, new_pos, player.hero, player.team)
+Web.Kaelin.Player.move_by(i:  Int, j: Int, map: Web.Kaelin.Map, address: String): Web.Kaelin.Map
+  let coord = Web.Kaelin.Map.find_players(map)
+  let get = coord{address}
+  let key = Web.Kaelin.Coord.Convert.axial_to_nat(Web.Kaelin.Coord.new(i,j))
+  case get { 
+    none: map
+    some: open get.value
+      let new_i = Int.add(get.value.i, i)
+      let new_j = Int.add(get.value.j, j)
+      let new_pos = Web.Kaelin.Coord.new(new_i, new_j)
+      let background = Web.Kaelin.Map.pop(get.value,map)
+      let champ = Web.Kaelin.Map.pop(get.value,Pair.fst!!(background))
+      let background_1 = Web.Kaelin.Map.pop(new_pos, map)
+      let old_map = NatMap.del!(key, map)
+      let key_1 = Web.Kaelin.Coord.Convert.axial_to_nat(get.value)
+      let new_map = NatMap.del!(key_1, map)
+      open background
+      let new_background = case background.snd {
+        none:map
+        some:
+      Web.Kaelin.Map.push(get.value, [background.snd.value],new_map)
+      }
+      ?b
+      //Web.Kaelin.Map.push(new_pos, 
+      //Web.Kaelin.Player.new(player.addr, new_pos, player.hero, player.team)
+
+  }

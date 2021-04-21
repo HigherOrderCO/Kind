@@ -1,10 +1,10 @@
 Web.Kaelin.Map.push(
   coord: Web.Kaelin.Coord, 
-  ent: Web.Kaelin.Entity, 
+  tile: Web.Kaelin.Tile, 
   map: Web.Kaelin.Map
 ) : Web.Kaelin.Map
   let key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
-  NatMap.set!(key, [ent], map)
+  NatMap.set!(key, tile, map)
 
   //let key = Web.Kaelin.Coord.show(coord)
   //map{key} <-  ent & (map{key} <> [])
