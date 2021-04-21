@@ -1,4 +1,5 @@
 // almost there, stopped because of an stack overflow :(
+// i think i'll have to do my own verified insertion sort
 User.rigille.List.span_splits<A: Type>(
   f: A -> Bool,
   xs: List<A>
