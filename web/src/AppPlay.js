@@ -101,7 +101,17 @@ module.exports = class AppPlay extends Component {
         id: e.target.id
       });
     };
-    document.body.addEventListener("mouseout", this.listeners.mouseout); 
+    document.body.addEventListener("mouseout", this.listeners.mouseout);
+
+    this.listeners.click = (e) => {
+      console.log("action_click: ", e.target)
+      this.register_event({
+        _: "App.Event.mouse_click",
+        time: BigInt(Date.now()),
+        id: e.target.id
+      });
+    };
+    document.body.addEventListener("click", this.listeners.click); 
 
     // Mouse up event
     this.listeners.mouseup = (e) => {
@@ -258,7 +268,7 @@ module.exports = class AppPlay extends Component {
           style: style,
           onclick: (e) => {
             if (props.id !== undefined) {
-              console.log("App.Event.dom: ", props)
+              // console.log("App.Event.dom: ", props)
               this.register_event({
                 _: "App.Event.dom",
                 id: props.id,

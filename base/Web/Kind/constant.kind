@@ -19,6 +19,3 @@ Web.Kind.constant.action_go_to_apps: String
 
 Web.Kind.constant.action_go_to_home: String
   "action_go_to_home"
-
-// Web.Kind.constant.hover_on(id: String): String
-//   "hover_on_" | id

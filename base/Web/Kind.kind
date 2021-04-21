@@ -1,25 +1,54 @@
-type Web.Kind.State{
+type Web.Kind.State {
   new(
     screen_size: Pair(U32,U32), 
     page: Web.Kind.Page,
     events: Map(String)) // id: event_name 
 }
 
-type Web.Kind.Page{
+type Web.Kind.Page {
   home
   apps
 }
 
-Web.Kind.exe_event(stt: Web.Kind.State, e_id: String, e_name: String): Web.Kind.State
+type Web.Kind.Event {
+  go_to_home
+  go_to_apps
+}
+
+Web.Kind.Event.name(e: Web.Kind.Event): String
+  case e {
+    go_to_home: "action_go_to_home"
+    go_to_apps: "action_go_to_apps"
+  }
+
+// Web.Kind.Event.from_element_id(id: String): Web.Kind.Event
+//   switch String.eql(id){
+//     "tab_home": Web.Kind.Event.go_to_home
+//     "tab_apps": Web.Kind.Event.go_to_apps
+//     "btn_pri_home_go_to_apps": Web.Kind.Event.go_to_apps
+//   } default ""
+  
+  // open stt
+  // let actions = Web.Kind.component.id_action
+  // case Map.get!(id, actions) as event {
+  //   none: stt
+  //   some: Web.Kind.State.new(stt.screen_size, event.value, stt.events)
+  // }
+  
+
+// TODO: search in stt.events for the available events. 
+// After execute them, remove from events
+Web.Kind.exe_event(id: String, stt: Web.Kind.State): Web.Kind.State
   open stt
-  switch String.eql(e_id){
-    Web.Kind.constant.action_go_to_home: 
-      Web.Kind.State.new(stt.screen_size, Web.Kind.Page.home, stt.events)
-
-    Web.Kind.constant.action_go_to_apps: 
-      Web.Kind.State.new(stt.screen_size, Web.Kind.Page.apps, stt.events)
-
-  } default Web.Kind.State.new(stt.screen_size, stt.page, stt.events) // same page
+  let actions = Web.Kind.component.id_action
+  case Map.get!(id, actions) as event {
+    none: stt
+    some: 
+      case event.value{
+        go_to_home: Web.Kind.State.new(stt.screen_size, Web.Kind.Page.home, stt.events)
+        go_to_apps: Web.Kind.State.new(stt.screen_size, Web.Kind.Page.apps, stt.events)
+      } 
+  }
 
 Web.Kind.draw_page(stt: Web.Kind.State): DOM
   open stt
@@ -27,6 +56,14 @@ Web.Kind.draw_page(stt: Web.Kind.State): DOM
     home: Web.Kind.draw_page_home(stt)
     apps: Web.Kind.draw_page_apps(stt)
   }
+
+Web.Kind.add_event(e: App.Event, value: String, stt: Web.Kind.State): Web.Kind.State
+  open stt
+  Web.Kind.State.new(
+    stt.screen_size,
+    stt.page,
+    Map.set!(App.Event.name(e), value, stt.events)
+  )
 
 Web.Kind: App(Web.Kind.State)
 
@@ -38,17 +75,13 @@ Web.Kind: App(Web.Kind.State)
     Web.Kind.draw_page(state)
 
   when = (event, state)
-    open state
     case event {
       init: App.pass
-      dom: App.store!(Web.Kind.exe_event(state, event.id, event.name))
-      mouse_over:
-        App.store!(Web.Kind.State.new(
-          state.screen_size,
-          state.page,
-          Map.set!("mouse_over", event.id, state.events)
-          ))
-        // App.pass
+      dom: App.pass
+      mouse_click: App.store!(Web.Kind.exe_event(event.id, state))
+
+      mouse_over: 
+        App.store!(Web.Kind.add_event(event, event.id, state))
     } default App.pass
   
   // The application
