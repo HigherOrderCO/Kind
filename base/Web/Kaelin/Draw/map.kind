@@ -21,10 +21,10 @@ Web.Kaelin.Draw.map(img: VoxBox, map: Web.Kaelin.Map): VoxBox
           let map = Web.Kaelin.Map.background(coord, map)
           // Draws the hexagon border
           let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(coord)
-          let img = Web.Kaelin.Draw.hexagon_border(cx, cy, hex_rad, col, img) // TODO remove
-          // Draw coordinates
-          let img = Web.Kaelin.Draw.tile.empty(coord, map, img)
-          // Draws the entities
+          // let img = Web.Kaelin.Draw.hexagon_border(cx, cy, hex_rad, col, img) // TODO remove
+          //// Draw coordinates
+          // let img = Web.Kaelin.Draw.tile.empty(coord, map, img)
+          //// Draws the entities
           let img = Web.Kaelin.Draw.tile(coord, map, img)
           img
         false:
