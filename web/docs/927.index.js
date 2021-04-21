@@ -3680,7 +3680,10 @@ module.exports = (function() {
                     };
                     var $742 = $791;
                     break;
-                case 'App.Event.dom':
+                case 'App.Event.mouse_down':
+                case 'App.Event.key_up':
+                case 'App.Event.mouse_over':
+                case 'App.Event.mouse_out':
                     var self = _state$6;
                     switch (self._) {
                         case 'Web.Kaelin.State.init':
@@ -3692,60 +3695,58 @@ module.exports = (function() {
                     };
                     var $742 = $796;
                     break;
-                case 'App.Event.mouse_down':
-                case 'App.Event.key_up':
-                case 'App.Event.mouse_over':
-                    var self = _state$6;
-                    switch (self._) {
-                        case 'Web.Kaelin.State.init':
-                        case 'Web.Kaelin.State.void':
-                        case 'Web.Kaelin.State.game':
-                            var $799 = App$pass;
-                            var $798 = $799;
-                            break;
-                    };
-                    var $742 = $798;
-                    break;
                 case 'App.Event.mouse_up':
                     var self = _state$6;
                     switch (self._) {
                         case 'Web.Kaelin.State.game':
-                            var $801 = self.interface;
-                            var _info$15 = $801;
+                            var $799 = self.interface;
+                            var _info$15 = $799;
                             var self = _info$15;
                             switch (self._) {
                                 case 'App.EnvInfo.new':
-                                    var $803 = self.mouse_pos;
-                                    var _pos$18 = $803;
+                                    var $801 = self.mouse_pos;
+                                    var _pos$18 = $801;
                                     var self = _pos$18;
                                     switch (self._) {
                                         case 'Pair.new':
-                                            var $805 = self.fst;
-                                            var $806 = self.snd;
-                                            var self = Pair$new$((($805 / 2) >>> 0), (($806 / 2) >>> 0));
+                                            var $803 = self.fst;
+                                            var $804 = self.snd;
+                                            var self = Pair$new$((($803 / 2) >>> 0), (($804 / 2) >>> 0));
                                             switch (self._) {
                                                 case 'Pair.new':
-                                                    var $808 = self.fst;
-                                                    var $809 = self.snd;
-                                                    var $810 = App$print$(Pair$show$(U32$show, U32$show, Pair$new$($808, $809)));
-                                                    var $807 = $810;
+                                                    var $806 = self.fst;
+                                                    var $807 = self.snd;
+                                                    var $808 = App$print$(Pair$show$(U32$show, U32$show, Pair$new$($806, $807)));
+                                                    var $805 = $808;
                                                     break;
                                             };
-                                            var $804 = $807;
+                                            var $802 = $805;
                                             break;
                                     };
-                                    var $802 = $804;
+                                    var $800 = $802;
                                     break;
                             };
-                            var $800 = $802;
+                            var $798 = $800;
                             break;
                         case 'Web.Kaelin.State.init':
                         case 'Web.Kaelin.State.void':
-                            var $811 = App$pass;
-                            var $800 = $811;
+                            var $809 = App$pass;
+                            var $798 = $809;
                             break;
                     };
-                    var $742 = $800;
+                    var $742 = $798;
+                    break;
+                case 'App.Event.mouse_click':
+                    var self = _state$6;
+                    switch (self._) {
+                        case 'Web.Kaelin.State.init':
+                        case 'Web.Kaelin.State.void':
+                        case 'Web.Kaelin.State.game':
+                            var $811 = App$pass;
+                            var $810 = $811;
+                            break;
+                    };
+                    var $742 = $810;
                     break;
             };
             return $742;

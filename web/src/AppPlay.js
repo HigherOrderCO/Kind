@@ -264,17 +264,7 @@ module.exports = class AppPlay extends Component {
         let style = utils.map_to_object(elem.style);
         return h(elem.tag, {
           ...props,
-          style: style,
-          onclick: (e) => {
-            if (props.id !== undefined) {
-              // console.log("App.Event.dom: ", props)
-              this.register_event({
-                _: "App.Event.dom",
-                id: props.id,
-                time: BigInt(Date.now()),
-              });
-            }
-          },
+          style: style
         }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
       // Renders a VoxBox using a canvas
       case "DOM.vbox":

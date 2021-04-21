@@ -51,7 +51,6 @@ Web.Kind: App(Web.Kind.State)
   when = (event, state)
     case event {
       init: App.pass
-      dom : App.pass
       mouse_click: App.store!(Web.Kind.exe_event(event.id, state))
       mouse_over : App.store!(Web.Kind.set_mouse_over(event.id, state))
     } default App.pass

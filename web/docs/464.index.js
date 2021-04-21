@@ -1644,7 +1644,6 @@ module.exports = (function() {
                     break;
                 case 'App.Event.init':
                 case 'App.Event.tick':
-                case 'App.Event.dom':
                 case 'App.Event.mouse_down':
                 case 'App.Event.mouse_up':
                 case 'App.Event.key_down':

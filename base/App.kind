@@ -26,12 +26,6 @@ type App.Event {
     time: U64
     info: App.EnvInfo
   )
-  // TODO: remover o DOM e só usar o mouse_click
-  dom(
-    time: U64
-    name: String
-    id: String
-  )
   // The event occurs when the user presses a mouse button over an element and before it is released
   mouse_down(
     time: U64

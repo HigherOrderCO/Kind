@@ -1958,12 +1958,13 @@ module.exports = (function() {
             switch (self._) {
                 case 'App.Event.init':
                 case 'App.Event.tick':
-                case 'App.Event.dom':
                 case 'App.Event.mouse_down':
                 case 'App.Event.mouse_up':
                 case 'App.Event.key_up':
                 case 'App.Event.post':
                 case 'App.Event.mouse_over':
+                case 'App.Event.mouse_out':
+                case 'App.Event.mouse_click':
                     var $411 = App$pass;
                     var $410 = $411;
                     break;

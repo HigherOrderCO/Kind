@@ -752,6 +752,7 @@ module.exports = (function() {
         var $137 = _m$pure$2;
         return $137;
     }))(Dynamic$new$(Unit$new));
+    const String$nil = '';
 
     function App$store$(_value$2) {
         var $138 = IO$monad$((_m$bind$3 => _m$pure$4 => {
@@ -761,7 +762,6 @@ module.exports = (function() {
         return $138;
     };
     const App$store = x0 => App$store$(x0);
-    const String$nil = '';
 
     function App$new$(_init$2, _draw$3, _when$4) {
         var $140 = ({
@@ -792,16 +792,16 @@ module.exports = (function() {
         var _when$4 = (_event$4 => _state$5 => {
             var self = _event$4;
             switch (self._) {
-                case 'App.Event.dom':
-                    var $144 = self.id;
-                    var _id$9 = $144;
-                    var $145 = App$store$(List$cons$(List$cons$(_id$9, List$cons$(_id$9, List$cons$(_id$9, List$nil))), List$cons$(List$cons$(_id$9, List$cons$(_id$9, List$cons$(_id$9, List$nil))), List$cons$(List$cons$(_id$9, List$cons$(_id$9, List$cons$(_id$9, List$nil))), List$nil))));
+                case 'App.Event.key_down':
+                    var $144 = self.code;
+                    var _key$8 = String$cons$($144, String$nil);
+                    var $145 = App$store$(List$cons$(List$cons$(_key$8, List$cons$(_key$8, List$cons$(_key$8, List$nil))), List$cons$(List$cons$(_key$8, List$cons$(_key$8, List$cons$(_key$8, List$nil))), List$cons$(List$cons$(_key$8, List$cons$(_key$8, List$cons$(_key$8, List$nil))), List$nil))));
                     var $143 = $145;
                     break;
-                case 'App.Event.key_down':
-                    var $146 = self.code;
-                    var _key$8 = String$cons$($146, String$nil);
-                    var $147 = App$store$(List$cons$(List$cons$(_key$8, List$cons$(_key$8, List$cons$(_key$8, List$nil))), List$cons$(List$cons$(_key$8, List$cons$(_key$8, List$cons$(_key$8, List$nil))), List$cons$(List$cons$(_key$8, List$cons$(_key$8, List$cons$(_key$8, List$nil))), List$nil))));
+                case 'App.Event.mouse_click':
+                    var $146 = self.id;
+                    var _id$9 = $146;
+                    var $147 = App$store$(List$cons$(List$cons$(_id$9, List$cons$(_id$9, List$cons$(_id$9, List$nil))), List$cons$(List$cons$(_id$9, List$cons$(_id$9, List$cons$(_id$9, List$nil))), List$cons$(List$cons$(_id$9, List$cons$(_id$9, List$cons$(_id$9, List$nil))), List$nil))));
                     var $143 = $147;
                     break;
                 case 'App.Event.init':
@@ -811,6 +811,7 @@ module.exports = (function() {
                 case 'App.Event.key_up':
                 case 'App.Event.post':
                 case 'App.Event.mouse_over':
+                case 'App.Event.mouse_out':
                     var $148 = App$pass;
                     var $143 = $148;
                     break;
@@ -869,8 +870,8 @@ module.exports = (function() {
         'Dynamic.new': Dynamic$new,
         'Unit.new': Unit$new,
         'App.pass': App$pass,
-        'App.store': App$store,
         'String.nil': String$nil,
+        'App.store': App$store,
         'App.new': App$new,
         'Web.TicTacToe': Web$TicTacToe,
     };
