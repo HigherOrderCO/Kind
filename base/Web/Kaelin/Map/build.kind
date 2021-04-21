@@ -1,0 +1,24 @@
+// Draws a map of hexagons given the style "offset coordinates"
+Web.Kaelin.Map.build(map: Web.Kaelin.Map): Web.Kaelin.Map
+  let map_size = Web.Kaelin.Constants.map_size
+  let width = U32.add(U32.mul(map_size, 2#32), 1#32) // map_size * 2 + 1
+  let height = U32.add(U32.mul(map_size, 2#32), 1#32) // map_size * 2 + 1
+
+  // loops through the half of the map_size
+  for j : U32 from 0#32 to height with map:
+    for i : U32 from 0#32 to width with map:
+      // generate int axial coordinate
+      let coord_i = Int.sub(Int.new(0, U32.to_nat(i)), Int.new(0, U32.to_nat(map_size))) // i - map_size
+      let coord_j = Int.sub(Int.new(0, U32.to_nat(j)), Int.new(0, U32.to_nat(map_size))) // j - map_size
+      let coord = Web.Kaelin.Coord.new( coord_i, coord_j)
+      let fit = Web.Kaelin.Coord.fit(coord, map_size)
+
+      case fit {
+        true:
+          let map = Web.Kaelin.Map.background(coord, map)          
+          map
+        false:
+          map
+      }
+    map
+  map

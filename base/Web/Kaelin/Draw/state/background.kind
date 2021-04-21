@@ -1,0 +1,8 @@
+// Draws a map of hexagons given the style "offset coordinates"
+Web.Kaelin.Draw.state.background(img: VoxBox, map: Web.Kaelin.Map): VoxBox
+  let list = NatMap.to_list!(map)
+  for pair in list with img:
+    open pair
+    let img = Web.Kaelin.Draw.tile(Web.Kaelin.Coord.Convert.nat_to_axial(pair.fst), map, img)
+    img
+  img

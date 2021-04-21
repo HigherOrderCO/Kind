@@ -28,11 +28,13 @@ Web.Kaelin: App<Web.Kaelin.State>
   // 30#16 - 40#16: escolha do turno 1
   // 40#16 - 50#16: animação do turno 1
   // 50#16 - 60#16: escolha do turno 2
+  
+  
   let draw = (state)
     case state {
       game: 
         // TODO: resolve background in front of entity
-        let img = Web.Kaelin.Draw.map(img, state.map)
+        let map = Web.Kaelin.Map.build(state.map)
         let img = Web.Kaelin.Draw.state(img, state)
         DOM.vbox({}, {}, img)
     } default DOM.text("TODO: create the renderer for this game state mode")
