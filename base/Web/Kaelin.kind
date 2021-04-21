@@ -61,10 +61,11 @@ Web.Kaelin: App<Web.Kaelin.State>
            open info
            let pos = info.mouse_pos
            open pos
-           let {x, y} = {U32.div(pos.fst, 2#32), 
-             U32.div(pos.snd, 2#32)}
-           App.print(Pair.show(U32, U32, U32.show, U32.show,
-             {x, y}))
+           let {x, y} = pos
+           let {axial_x, axial_y} = Web.Kaelin.Coord.to_axial({x, y})
+           let axial_x = I32.to_int(axial_x)
+           let axial_y = I32.to_int(axial_y)
+           App.print(Pair.show!!(Int.show, Int.show, {axial_x, axial_y}))
        tick game:
            let info = event.info
            App.store!(Web.Kaelin.Action.update_interface(info, state))
