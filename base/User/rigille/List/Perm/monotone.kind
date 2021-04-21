@@ -1,17 +1,17 @@
-User.rigille.List.Perm.monotone<A: Type>(
+User.rigille.List.Perm.Monotone<A: Type>(
   after: A -> A -> Type,
   O: User.rigille.Order<A>(after),
   xs: List<A>,
   ys: List<A>,
-  Hyp0: User.rigille.List.monotone<A, after, O>(xs),
-  Hyp1: User.rigille.List.monotone<A, after, O>(ys),
+  Hyp0: User.rigille.List.Monotone<A, after, O>(xs),
+  Hyp1: User.rigille.List.Monotone<A, after, O>(ys),
   Hyp2: User.rigille.List.Perm<A>(xs, ys)
 ): xs == ys
-  def this = User.rigille.List.Perm.monotone<A, after, O>
+  def this = User.rigille.List.Perm.Monotone<A, after, O>
   case Hyp2 with Hyp0 Hyp1 Hyp2 {
     nil: refl
-    skip: l0_monotone = User.rigille.List.monotone.tail<A, after, O>!!(Hyp0)
-          l1_monotone = User.rigille.List.monotone.tail<A, after, O>!!(Hyp1)
+    skip: l0_monotone = User.rigille.List.Monotone.tail<A, after, O>!!(Hyp0)
+          l1_monotone = User.rigille.List.Monotone.tail<A, after, O>!!(Hyp1)
           ind = this(Hyp2.l0, Hyp2.l1, l0_monotone, l1_monotone, Hyp2.Hyp)
           qed = apply(List.cons<A>(Hyp2.x), ind)
           qed

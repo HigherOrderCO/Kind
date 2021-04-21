@@ -1,9 +1,0 @@
-User.rigille.List.monotone<A: Type, after: A -> A -> Type, O: User.rigille.Order<A>(after)>(xs: List<A>): Type
-  case xs {
-    nil: Unit
-    cons: case xs.tail {
-            nil: Unit
-            cons: Pair<after(xs.head, xs.tail.head),
-                       User.rigille.List.monotone<A, after, O>(List.cons<A>(xs.tail.head, xs.tail.tail))>
-          }
-  }
