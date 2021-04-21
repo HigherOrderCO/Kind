@@ -72,7 +72,7 @@ Web.Kaelin: App<Web.Kaelin.State>
              {x, y}))
        tick game:
            let info = event.info
-           App.store!(Web.Kaelin.Action.update_interface(info, state))
+           App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_interface(info, state))
       post game:
       // this will be replaced by deserialze when it is ready
         switch String.starts_with(event.data) {
@@ -82,7 +82,7 @@ Web.Kaelin: App<Web.Kaelin.State>
             let hero = Web.Kaelin.Resources.heroes{hero_id}
             case hero {
               none: App.pass
-              some: App.store!(Web.Kaelin.Action.create_player(event.addr, hero.value, state))
+              some: App.store<Web.Kaelin.State>(Web.Kaelin.Action.create_player(event.addr, hero.value, state))
             }
           "0x2":
             let coord = switch String.eql( String.slice(3, 4, event.data) ) {
@@ -93,7 +93,7 @@ Web.Kaelin: App<Web.Kaelin.State>
             } default {Int.new(0,0), Int.new(0,0)}
 
             open coord
-            App.store!(Web.Kaelin.Player.move_by(coord.fst, coord.snd, state.map, event.addr))
+            App.store<Web.Kaelin.State>(Web.Kaelin.Player.move_by(coord.fst, coord.snd, state, event.addr))
 
           // "0x3":
           //   let skill = switch String.eql( String.slice(3, 4, event.data) ) {
@@ -101,7 +101,7 @@ Web.Kaelin: App<Web.Kaelin.State>
           //     "2": 2
           //     "3": 3
           //   } default 0
-          //   App.store!(Web.Kaelin.Action.show_range(event.addr, skill, state))
+          //   <Web.Kaelin.State>(Web.Kaelin.Action.show_range(event.addr, skill, state))
 
         } default App.pass
         

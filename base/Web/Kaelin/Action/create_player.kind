@@ -10,8 +10,9 @@ Web.Kaelin.Action.create_player(
       case Map.get!(key, state.players) as player {
         none:
           let new_player = Web.Kaelin.Player.new(user, "blue")
+          let map = Web.Kaelin.Map.push(init_pos, [Web.Kaelin.Entity.creature(some(user),hero)], state.map)
           let new_players = Map.set!(key, new_player, state.players)
-          Web.Kaelin.State.game(state.room, state.tick, new_players, state.cast_info, state.map, state.interface)
+          Web.Kaelin.State.game(state.room, state.tick, new_players, state.cast_info, map, state.interface)
         some:
           state
       }

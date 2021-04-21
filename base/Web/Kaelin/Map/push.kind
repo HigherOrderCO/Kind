@@ -4,6 +4,8 @@ Web.Kaelin.Map.push(
   map: Web.Kaelin.Map
 ) : Web.Kaelin.Map
   let key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+  //let tile1 = Web.Kaelin.Map.get(coord, map)
+  //let tile = tile ++ tile1
   NatMap.set!(key, tile, map)
 
   //let key = Web.Kaelin.Coord.show(coord)
