@@ -1,4 +1,4 @@
-User.rigille.List.Ext.exists<A: Type, after: A -> A -> Type, O: User.rigille.Order<A>(after)>(
+User.rigille.List.Ext.exists<A: Type>(after: A -> A -> Type, O: User.rigille.Order<A>(after),
   xs: List<A>,
   Hyp: Not(List.length<A>(xs) == 0)
 ): [x: A] [H: User.rigille.List.In<A>(xs, x)] User.rigille.List.Ext<A, after, O>(xs, x)

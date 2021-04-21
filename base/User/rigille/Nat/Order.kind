@@ -1,0 +1,80 @@
+User.rigille.Nat.Order: User.rigille.Order<Nat>(User.rigille.Nat.after)
+  User.rigille.Order.new<Nat>(
+    User.rigille.Nat.after,
+    User.rigille.Nat.Order.refl,
+    User.rigille.Nat.Order.conn,
+    User.rigille.Nat.Order.anti_symm,
+    User.rigille.Nat.Order.chain
+  )
+
+User.rigille.Nat.Order.refl(a: Nat): User.rigille.Nat.after(a, a)
+  case a {
+    zero: refl
+    succ: ind = User.rigille.Nat.Order.refl(a.pred)
+          ind
+  }!
+
+User.rigille.Nat.Order.conn(a: Nat, b: Nat): Or<User.rigille.Nat.after(a, b), User.rigille.Nat.after(b, a)>
+  case a b {
+    zero zero: Or.left!!(refl)
+    zero succ: Or.left!!(refl)
+    succ zero: Or.right!!(refl)
+    succ succ: ind = User.rigille.Nat.Order.conn(a.pred, b.pred)
+               ind
+  }!
+
+User.rigille.Nat.Order.anti_symm(
+  a: Nat,
+  b: Nat,
+  Hyp0: User.rigille.Nat.after(a, b),
+  Hyp1: User.rigille.Nat.after(b, a)
+): a == b
+  case a b with Hyp0 Hyp1 {
+    zero zero: refl
+    zero succ: contra = Bool.true_neq_false(mirror(Hyp1))
+               Empty.absurd!(contra)
+    succ zero: contra = Bool.true_neq_false(mirror(Hyp0))
+               Empty.absurd!(contra)
+    succ succ: ind = User.rigille.Nat.Order.anti_symm(
+                       a.pred,
+                       b.pred,
+                       Hyp0,
+                       Hyp1
+                     )
+               qed = apply(Nat.succ, ind)
+               qed
+  }!
+  
+
+User.rigille.Nat.Order.chain.aux(
+  a: Nat,
+  Hyp: User.rigille.Nat.after(a, 0)
+): a == 0
+  case a with Hyp {
+    zero: refl
+    succ: contra = Bool.true_neq_false(mirror(Hyp))
+          Empty.absurd!(contra)
+  }!
+
+User.rigille.Nat.Order.chain(
+  a: Nat,
+  b: Nat,
+  c: Nat,
+  Hyp0: User.rigille.Nat.after(a, b),
+  Hyp1: User.rigille.Nat.after(b, c)
+): User.rigille.Nat.after(a, c)
+  case b with Hyp0 Hyp1 {
+    zero: a_zero = mirror(User.rigille.Nat.Order.chain.aux(a, Hyp0))
+          qed = Hyp1 :: rewrite X in User.rigille.Nat.after(X, _) with a_zero
+          qed
+    succ: case a with Hyp0 Hyp1 {
+            zero: refl
+            succ: case c with Hyp0 Hyp1 {
+                    zero: b_zero = User.rigille.Nat.Order.chain.aux(Nat.succ(b.pred), Hyp1)
+                          contra = Nat.succ_neq_zero!(b_zero)
+                          Empty.absurd!(contra)
+                    succ: ind = User.rigille.Nat.Order.chain(a.pred, b.pred, c.pred, Hyp0, Hyp1)
+                          ind
+                  }!
+          }!
+  }!

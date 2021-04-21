@@ -1,2 +1,10 @@
+cert_sort: List<Nat> -> List<Nat>
+  (xs)
+  let certificate = User.rigille.List.Monotone.exists<Nat, User.rigille.Nat.after, User.rigille.Nat.Order>(xs)
+  open certificate
+  certificate.fst
+
 Test: String
-  "hello"
+  show = List.show!(Nat.show)
+  let a = [3, 1, 2]
+  show(cert_sort(a))
