@@ -58,7 +58,11 @@ type App.Event {
   // The event occurs when the pointer is moved onto an element, or onto one of its children
   mouse_over(
     time: U64
-    button: U16
+    id: String
+  )
+  // The event occurs when a user moves the mouse pointer out of an element, or out of one of its children
+  mouse_out(
+    time: U64
     id: String
   )
 }

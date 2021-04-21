@@ -24,10 +24,12 @@ Web.Kind.component.header_tabs(stt: Web.Kind.State): DOM
     [
       Web.Kind.component.header_tab(
         Web.Kind.helper.is_eql(Web.Kind.Page.home, stt.page), 
+        Web.Kind.helper.is_mouse_over(Web.Kind.constant.action_go_to_home, stt.events)
         "Home", Web.Kind.constant.action_go_to_home)
 
       Web.Kind.component.header_tab(
         Web.Kind.helper.is_eql(Web.Kind.Page.apps, stt.page),
+        Web.Kind.helper.is_mouse_over(Web.Kind.constant.action_go_to_apps, stt.events)
         "Apps", Web.Kind.constant.action_go_to_apps)
     ]
 
@@ -38,32 +40,55 @@ Web.Kind.component.header_tabs(stt: Web.Kind.State): DOM
     }, tabs)
 
 
-Web.Kind.component.header_tab(is_active: Bool, title: String, id: String): DOM
-  if is_active then
-    DOM.node("div", {
-      "id": id
-    }, {
-      "margin-right": "30px"
-      "border-style": "none none solid none"
-      "border-color": Web.Kind.constant.secondary_color
-      "font-size": "18px"
-      "cursor": "pointer"
-      "width": "70px"
-      "display": "flex"
-      "justify-content": "center"
-      }, [DOM.text(title)])
-  else
-    DOM.node("div", {
-      "id": id
-    }, {
-      "margin-right": "30px"
-      "font-size": "18px"
-      "cursor": "pointer"
-      "width": "70px"
-      "margin-bottom": "2px"
-      "display": "flex"
-      "justify-content": "center"
-      }, [DOM.text(title)])
+Web.Kind.component.header_tab(is_active: Bool, is_hover: Bool, title: String, id: String): DOM
+  let active = {
+    "margin-right": "30px"
+    "border-style": "none none solid none"
+    "border-color": Web.Kind.constant.secondary_color
+    "font-size": "18px"
+    "cursor": "pointer"
+    "width": "70px"
+    "display": "flex"
+    "justify-content": "center"
+    }
+  
+  let normal = {
+    "margin-right": "30px"
+    "font-size": "18px"
+    "cursor": "pointer"
+    "width": "70px"
+    "margin-bottom": "2px"
+    "display": "flex"
+    "justify-content": "center"
+    }
+
+  let hover = {
+    "border-style": "none none solid none"
+    "border-color": Web.Kind.constant.light_gray_color
+    "margin-right": "30px"
+    "font-size": "18px"
+    "cursor": "pointer"
+    "width": "70px"
+    // "margin-bottom": "2px"
+    "display": "flex"
+    "justify-content": "center"
+    // "font-weight": "bold"
+    }
+
+  DOM.node("div", {"id": id}, 
+    if is_active then active
+    else if is_hover then hover
+    else normal 
+    , [DOM.text(title)])
+
+  // if is_active then
+  //   DOM.node("div", {
+  //     "id": id
+  //   }, active, [DOM.text(title)])
+  // else
+  //   DOM.node("div", {
+  //     "id": id
+  //   }, normal, [DOM.text(title)])
 
 Web.Kind.component.body_container(ele: List<DOM>): DOM
   DOM.node("div", {}, {

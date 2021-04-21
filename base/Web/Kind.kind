@@ -46,7 +46,7 @@ Web.Kind: App(Web.Kind.State)
         App.store!(Web.Kind.State.new(
           state.screen_size,
           state.page,
-          Map.set!(event.id, "hover", state.events)
+          Map.set!("mouse_over", event.id, state.events)
           ))
         // App.pass
     } default App.pass

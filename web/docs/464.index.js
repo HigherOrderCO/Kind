@@ -994,19 +994,32 @@ module.exports = (function() {
         return $185;
     };
     const String$repeat = x0 => x1 => String$repeat$(x0, x1);
+    const Web$Kind$constant$light_gray_color = "#D3D3D3";
 
-    function Web$Kind$component$header_tab$(_is_active$1, _title$2, _id$3) {
-        var self = _is_active$1;
-        if (self) {
-            var $190 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", _id$3), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin-right", "30px"), List$cons$(Pair$new$("border-style", "none none solid none"), List$cons$(Pair$new$("border-color", Web$Kind$constant$secondary_color), List$cons$(Pair$new$("font-size", "18px"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("width", "70px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))))))), List$cons$(DOM$text$(_title$2), List$nil));
-            var $189 = $190;
-        } else {
-            var $191 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", _id$3), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin-right", "30px"), List$cons$(Pair$new$("font-size", "18px"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("width", "70px"), List$cons$(Pair$new$("margin-bottom", "2px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$nil)))))))), List$cons$(DOM$text$(_title$2), List$nil));
-            var $189 = $191;
-        };
+    function Web$Kind$component$header_tab$(_is_active$1, _is_hover$2, _title$3, _id$4) {
+        var _active$5 = Map$from_list$(List$cons$(Pair$new$("margin-right", "30px"), List$cons$(Pair$new$("border-style", "none none solid none"), List$cons$(Pair$new$("border-color", Web$Kind$constant$secondary_color), List$cons$(Pair$new$("font-size", "18px"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("width", "70px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$nil)))))))));
+        var _normal$6 = Map$from_list$(List$cons$(Pair$new$("margin-right", "30px"), List$cons$(Pair$new$("font-size", "18px"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("width", "70px"), List$cons$(Pair$new$("margin-bottom", "2px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))))));
+        var _hover$7 = Map$from_list$(List$cons$(Pair$new$("border-style", "none none solid none"), List$cons$(Pair$new$("border-color", Web$Kind$constant$light_gray_color), List$cons$(Pair$new$("margin-right", "30px"), List$cons$(Pair$new$("font-size", "18px"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("width", "70px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$nil)))))))));
+        var $189 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", _id$4), List$nil)), (() => {
+            var self = _is_active$1;
+            if (self) {
+                var $190 = _active$5;
+                return $190;
+            } else {
+                var self = _is_hover$2;
+                if (self) {
+                    var $192 = _hover$7;
+                    var $191 = $192;
+                } else {
+                    var $193 = _normal$6;
+                    var $191 = $193;
+                };
+                return $191;
+            };
+        })(), List$cons$(DOM$text$(_title$3), List$nil));
         return $189;
     };
-    const Web$Kind$component$header_tab = x0 => x1 => x2 => Web$Kind$component$header_tab$(x0, x1, x2);
+    const Web$Kind$component$header_tab = x0 => x1 => x2 => x3 => Web$Kind$component$header_tab$(x0, x1, x2, x3);
 
     function Web$Kind$helper$is_eql$(_src$1, _trg$2) {
         var self = _src$1;
@@ -1015,279 +1028,34 @@ module.exports = (function() {
                 var self = _trg$2;
                 switch (self._) {
                     case 'Web.Kind.Page.home':
-                        var $194 = Bool$true;
-                        var $193 = $194;
+                        var $196 = Bool$true;
+                        var $195 = $196;
                         break;
                     case 'Web.Kind.Page.apps':
-                        var $195 = Bool$false;
-                        var $193 = $195;
+                        var $197 = Bool$false;
+                        var $195 = $197;
                         break;
                 };
-                var $192 = $193;
+                var $194 = $195;
                 break;
             case 'Web.Kind.Page.apps':
                 var self = _trg$2;
                 switch (self._) {
                     case 'Web.Kind.Page.home':
-                        var $197 = Bool$false;
-                        var $196 = $197;
+                        var $199 = Bool$false;
+                        var $198 = $199;
                         break;
                     case 'Web.Kind.Page.apps':
-                        var $198 = Bool$true;
-                        var $196 = $198;
+                        var $200 = Bool$true;
+                        var $198 = $200;
                         break;
                 };
-                var $192 = $196;
+                var $194 = $198;
                 break;
         };
-        return $192;
+        return $194;
     };
     const Web$Kind$helper$is_eql = x0 => x1 => Web$Kind$helper$is_eql$(x0, x1);
-    const Web$Kind$constant$action_go_to_home = "action_go_to_home";
-    const Web$Kind$Page$apps = ({
-        _: 'Web.Kind.Page.apps'
-    });
-
-    function Web$Kind$component$header_tabs$(_stt$1) {
-        var self = _stt$1;
-        switch (self._) {
-            case 'Web.Kind.State.new':
-                var $200 = self.page;
-                var _tabs$5 = List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$home, $200), "Home", Web$Kind$constant$action_go_to_home), List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$apps, $200), "Apps", Web$Kind$constant$action_go_to_apps), List$nil));
-                var $201 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$nil)))), _tabs$5);
-                var $199 = $201;
-                break;
-        };
-        return $199;
-    };
-    const Web$Kind$component$header_tabs = x0 => Web$Kind$component$header_tabs$(x0);
-
-    function Web$Kind$component$header$(_stt$1) {
-        var _vbox$2 = VoxBox$alloc_capacity$(100);
-        var _line$3 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("text-align", "center"), List$cons$(Pair$new$("padding", "10px 50px 10px 50px"), List$nil))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("color", Web$Kind$constant$primary_color), List$nil)), List$cons$(DOM$text$(String$repeat$("=", 90n)), List$nil)), List$nil));
-        var $202 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("h2", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "40px"), List$cons$(Pair$new$("font-family", "verdana"), List$cons$(Pair$new$("text-align", "center"), List$nil)))), List$cons$(DOM$text$("KIND language"), List$nil)), List$cons$(_line$3, List$cons$(Web$Kind$component$header_tabs$(_stt$1), List$nil))));
-        return $202;
-    };
-    const Web$Kind$component$header = x0 => Web$Kind$component$header$(x0);
-
-    function Web$Kind$component$body_container$(_ele$1) {
-        var $203 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 20% 40px 20%"), List$cons$(Pair$new$("flex", "1"), List$nil))), _ele$1);
-        return $203;
-    };
-    const Web$Kind$component$body_container = x0 => Web$Kind$component$body_container$(x0);
-    const List$for = a0 => a1 => a2 => (list_for(a0)(a1)(a2));
-
-    function List$(_A$1) {
-        var $204 = null;
-        return $204;
-    };
-    const List = x0 => List$(x0);
-
-    function Web$Kind$component$list$(_items$1) {
-        var _li$2 = List$nil;
-        var _li$3 = (() => {
-            var $207 = _li$2;
-            var $208 = _items$1;
-            let _li$4 = $207;
-            let _item$3;
-            while ($208._ === 'List.cons') {
-                _item$3 = $208.head;
-                var $207 = List$cons$(DOM$node$("li", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "5px"), List$nil)), List$cons$(_item$3, List$nil)), _li$4);
-                _li$4 = $207;
-                $208 = $208.tail;
-            }
-            return _li$4;
-        })();
-        var $205 = DOM$node$("ul", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("list-style-type", "none"), List$nil)), _li$3);
-        return $205;
-    };
-    const Web$Kind$component$list = x0 => Web$Kind$component$list$(x0);
-
-    function Web$Kind$component$link_white$(_txt$1, _href$2) {
-        var $209 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$2), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
-        return $209;
-    };
-    const Web$Kind$component$link_white = x0 => x1 => Web$Kind$component$link_white$(x0, x1);
-    const Web$Kind$constant$dark_pri_color = "#44366B";
-    const Web$Kind$component$footer = (() => {
-        var _join_us_txt$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link_white$(" Github", "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link_white$(" Telegram", "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
-        var _join_us$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "110px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$primary_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-items", "flex-end"), List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("padding-right", "20%"), List$nil))))))))), List$cons$(_join_us_txt$1, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "20px"), List$nil)), List$cons$(DOM$text$("\u{2764} by UwU Tech"), List$nil)), List$nil)));
-        var _msg_footer$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("background-color", Web$Kind$constant$dark_pri_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("padding", "10px 20% 10px 20%"), List$nil))))))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$("This website was created using Kind!"), List$nil)), List$cons$(Web$Kind$component$link_white$("*u* show me the code!", "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind"), List$nil)));
-        var $210 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "0px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("color", "white"), List$nil))))), List$cons$(_join_us$1, List$cons$(_msg_footer$2, List$nil)));
-        return $210;
-    })();
-
-    function Web$Kind$draw_page_home$(_stt$1) {
-        var self = _stt$1;
-        switch (self._) {
-            case 'Web.Kind.State.new':
-                var _line$5 = (_txt$5 => {
-                    var $213 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$5), List$nil));
-                    return $213;
-                });
-                var _line_break$6 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil), List$nil));
-                var _span$7 = (_txt$7 => {
-                    var $214 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$7), List$nil));
-                    return $214;
-                });
-                var _span_bold$8 = (_txt$8 => {
-                    var $215 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$8), List$nil));
-                    return $215;
-                });
-                var _intro$9 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(_span$7("Kind is a cute "), List$cons$(_span_bold$8("proof"), List$cons$(_span$7("gramming language."), List$cons$(_line_break$6, List$cons$(_span$7("It\'s "), List$cons$(_span_bold$8("capable of everything"), List$cons$(_line$5("from web apps to games to"), List$cons$(_line$5("advanced mathematical proofs."), List$nil)))))))));
-                var _croni$10 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-left", "40px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-end"), List$nil)))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "10px"), List$nil)), List$cons$(DOM$text$("gl hf!"), List$nil)), List$cons$(DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", Web$Kind$img$croni), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "30px"), List$cons$(Pair$new$("height", "30px"), List$nil))), List$nil), List$nil)));
-                var _call_to_apps$10 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "100px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))), List$cons$(Web$Kind$component$btn_primary_solid$("GO TO APPS", Web$Kind$constant$action_go_to_apps), List$cons$(_croni$10, List$nil)));
-                var _instructions$11 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$cons$(Pair$new$("padding", "5px"), List$cons$(Pair$new$("border", "1px solid"), List$nil)))), List$cons$(_line$5("npm i -g kind-lang"), List$cons$(_line$5("git clone https://github.com/uwu-tech/Kind"), List$cons$(_line$5("cd Kind/base"), List$cons$(_line$5("kind Main"), List$cons$(_line$5("kind Main --run"), List$nil))))));
-                var _install$11 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Install"), List$cons$(_instructions$11, List$nil)));
-                var $212 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-home"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_intro$9, List$cons$(_call_to_apps$10, List$cons$(_install$11, List$nil)))), List$cons$(Web$Kind$component$footer, List$nil))));
-                var $211 = $212;
-                break;
-        };
-        return $211;
-    };
-    const Web$Kind$draw_page_home = x0 => Web$Kind$draw_page_home$(x0);
-
-    function Web$Kind$component$game_card$(_src$1, _title$2, _path$3) {
-        var _banner$4 = DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", _src$1), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "100px"), List$cons$(Pair$new$("height", "100px"), List$nil))), List$nil);
-        var _title$5 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _path$3), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("text-decoration", "none"), List$nil))))), List$cons$(DOM$text$(_title$2), List$nil));
-        var $216 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "120px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("margin", "10px 20px"), List$cons$(Pair$new$("border", "solid 1px"), List$cons$(Pair$new$("padding", "2px"), List$nil))))))), List$cons$(_banner$4, List$cons$(_title$5, List$nil)));
-        return $216;
-    };
-    const Web$Kind$component$game_card = x0 => x1 => x2 => Web$Kind$component$game_card$(x0, x1, x2);
-    const Web$Kind$img$app_senhas = "data:image/png;base64,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";
-    const Web$Kind$img$app_tic_tac_toe = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAAAAXNSR0IArs4c6QAAAdlJREFUeJztm01uglAURrFxRyylm2nSQdNBk27GpbgmHDBpFHnvwH0/lXNmTu41hw9FPjxN0zRIHm+t38B/QlkAZQGUBVAWQFkAZQGUBVAWQFkAZQGUBVAWQFkAZQGUBVAWQFkAZQGUBVAWQFkAZQGUBTiHT/z5+v378vP7I3xFq9UmC5BO1mUccwa9X6+b30TpFZnzkytMFiD3M2tFef5xa7tiPTU5K0wWIDdZs/i7gxOVqWordo41WYB0suZDvXIo9nwPVlsRMjb+onQDyZNi8QwtsddLhzC6SNbM4lFNnqFRu7x0CIYlq9AXeYXhIfNNFiDg585+ig4PnG+yAMoCnJ79HeXuruPRWLzLarIAygIoC6AswNMP+M1YhckwKAuhLICyAO0b6ai6uMIKkwXopZHeXxdXWGGyAB010uu7SqygmCxAF4106YFRizrqDevzCo30ZRxL12LbOGiybKSL00sj/Tg5fJeNdFXaN9IVLhRspBugLICyAMoC+KzDMj7rsBdlAZQFUBbAZx0AJgtgyQrmmyyAJSuYb7IAlqwAkwXosWStwLZT5KBVmKdhcXpMVv0Kw0uHePotWTtcYbIAlqwAkwVQFiD+TukLY7IAygIoC6AsgLIANxbY0ByDNCtkAAAAAElFTkSuQmCC";
-    const Web$Kind$img$app_kaelin = "data:image/png;base64,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";
-    const Web$Kind$content_apps = List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_senhas, "Senhas", "Web.Senhas"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_tic_tac_toe, "TicTacToe", "Web.TicTacToe"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_kaelin, "Kaelin", "Web.Kaelin"), List$nil)));
-
-    function Web$Kind$component$link_black$(_txt$1, _href$2) {
-        var $217 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$2), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
-        return $217;
-    };
-    const Web$Kind$component$link_black = x0 => x1 => Web$Kind$component$link_black$(x0, x1);
-    const Web$Kind$content_apps_text = Web$Kind$component$list$(List$cons$(Web$Kind$component$link_black$("Demo", "Web.Demo"), List$cons$(Web$Kind$component$link_black$("Online", "Web.Online"), List$nil)));
-
-    function Web$Kind$draw_page_apps$(_stt$1) {
-        var _line$2 = (_txt$2 => {
-            var $219 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$2), List$nil));
-            return $219;
-        });
-        var _line_break$3 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil), List$nil));
-        var _span$4 = (_txt$4 => {
-            var $220 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$4), List$nil));
-            return $220;
-        });
-        var _span_bold$5 = (_txt$5 => {
-            var $221 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$5), List$nil));
-            return $221;
-        });
-        var _with_banner$6 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("flex-wrap", "wrap"), List$nil))))), Web$Kind$content_apps);
-        var _no_banner$7 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "30px"), List$nil)), List$cons$(Web$Kind$content_apps_text, List$nil));
-        var _games$6 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "game-container"), List$nil)), Map$from_list$(List$nil), List$cons$(Web$Kind$component$title$("Games"), List$cons$(_with_banner$6, List$cons$(_no_banner$7, List$nil))));
-        var $218 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-apps"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_games$6, List$nil)), List$cons$(Web$Kind$component$footer, List$nil))));
-        return $218;
-    };
-    const Web$Kind$draw_page_apps = x0 => Web$Kind$draw_page_apps$(x0);
-
-    function Web$Kind$draw_page$(_stt$1) {
-        var self = _stt$1;
-        switch (self._) {
-            case 'Web.Kind.State.new':
-                var $223 = self.page;
-                var self = $223;
-                switch (self._) {
-                    case 'Web.Kind.Page.home':
-                        var $225 = Web$Kind$draw_page_home$(_stt$1);
-                        var $224 = $225;
-                        break;
-                    case 'Web.Kind.Page.apps':
-                        var $226 = Web$Kind$draw_page_apps$(_stt$1);
-                        var $224 = $226;
-                        break;
-                };
-                var $222 = $224;
-                break;
-        };
-        return $222;
-    };
-    const Web$Kind$draw_page = x0 => Web$Kind$draw_page$(x0);
-
-    function IO$(_A$1) {
-        var $227 = null;
-        return $227;
-    };
-    const IO = x0 => IO$(x0);
-
-    function IO$ask$(_query$2, _param$3, _then$4) {
-        var $228 = ({
-            _: 'IO.ask',
-            'query': _query$2,
-            'param': _param$3,
-            'then': _then$4
-        });
-        return $228;
-    };
-    const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
-
-    function IO$bind$(_a$3, _f$4) {
-        var self = _a$3;
-        switch (self._) {
-            case 'IO.end':
-                var $230 = self.value;
-                var $231 = _f$4($230);
-                var $229 = $231;
-                break;
-            case 'IO.ask':
-                var $232 = self.query;
-                var $233 = self.param;
-                var $234 = self.then;
-                var $235 = IO$ask$($232, $233, (_x$8 => {
-                    var $236 = IO$bind$($234(_x$8), _f$4);
-                    return $236;
-                }));
-                var $229 = $235;
-                break;
-        };
-        return $229;
-    };
-    const IO$bind = x0 => x1 => IO$bind$(x0, x1);
-
-    function IO$end$(_value$2) {
-        var $237 = ({
-            _: 'IO.end',
-            'value': _value$2
-        });
-        return $237;
-    };
-    const IO$end = x0 => IO$end$(x0);
-
-    function IO$monad$(_new$2) {
-        var $238 = _new$2(IO$bind)(IO$end);
-        return $238;
-    };
-    const IO$monad = x0 => IO$monad$(x0);
-
-    function Dynamic$new$(_value$2) {
-        var $239 = ({
-            _: 'Dynamic.new',
-            'value': _value$2
-        });
-        return $239;
-    };
-    const Dynamic$new = x0 => Dynamic$new$(x0);
-    const Unit$new = null;
-    const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $240 = _m$pure$2;
-        return $240;
-    }))(Dynamic$new$(Unit$new));
-
-    function App$store$(_value$2) {
-        var $241 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $242 = _m$pure$4;
-            return $242;
-        }))(Dynamic$new$(_value$2));
-        return $241;
-    };
-    const App$store = x0 => App$store$(x0);
     const Bool$and = a0 => a1 => (a0 && a1);
 
     function Cmp$as_eql$(_cmp$1) {
@@ -1295,15 +1063,15 @@ module.exports = (function() {
         switch (self._) {
             case 'Cmp.ltn':
             case 'Cmp.gtn':
-                var $244 = Bool$false;
-                var $243 = $244;
+                var $202 = Bool$false;
+                var $201 = $202;
                 break;
             case 'Cmp.eql':
-                var $245 = Bool$true;
-                var $243 = $245;
+                var $203 = Bool$true;
+                var $201 = $203;
                 break;
         };
-        return $243;
+        return $201;
     };
     const Cmp$as_eql = x0 => Cmp$as_eql$(x0);
     const Cmp$ltn = ({
@@ -1317,83 +1085,83 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $247 = self.pred;
-                var $248 = (_b$7 => {
+                var $205 = self.pred;
+                var $206 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $250 = self.pred;
-                            var $251 = (_a$pred$10 => {
-                                var $252 = Word$cmp$go$(_a$pred$10, $250, _c$4);
-                                return $252;
+                            var $208 = self.pred;
+                            var $209 = (_a$pred$10 => {
+                                var $210 = Word$cmp$go$(_a$pred$10, $208, _c$4);
+                                return $210;
                             });
-                            var $249 = $251;
+                            var $207 = $209;
                             break;
                         case 'Word.i':
-                            var $253 = self.pred;
-                            var $254 = (_a$pred$10 => {
-                                var $255 = Word$cmp$go$(_a$pred$10, $253, Cmp$ltn);
-                                return $255;
+                            var $211 = self.pred;
+                            var $212 = (_a$pred$10 => {
+                                var $213 = Word$cmp$go$(_a$pred$10, $211, Cmp$ltn);
+                                return $213;
                             });
-                            var $249 = $254;
+                            var $207 = $212;
                             break;
                         case 'Word.e':
-                            var $256 = (_a$pred$8 => {
-                                var $257 = _c$4;
-                                return $257;
+                            var $214 = (_a$pred$8 => {
+                                var $215 = _c$4;
+                                return $215;
                             });
-                            var $249 = $256;
+                            var $207 = $214;
                             break;
                     };
-                    var $249 = $249($247);
-                    return $249;
+                    var $207 = $207($205);
+                    return $207;
                 });
-                var $246 = $248;
+                var $204 = $206;
                 break;
             case 'Word.i':
-                var $258 = self.pred;
-                var $259 = (_b$7 => {
+                var $216 = self.pred;
+                var $217 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $261 = self.pred;
-                            var $262 = (_a$pred$10 => {
-                                var $263 = Word$cmp$go$(_a$pred$10, $261, Cmp$gtn);
-                                return $263;
+                            var $219 = self.pred;
+                            var $220 = (_a$pred$10 => {
+                                var $221 = Word$cmp$go$(_a$pred$10, $219, Cmp$gtn);
+                                return $221;
                             });
-                            var $260 = $262;
+                            var $218 = $220;
                             break;
                         case 'Word.i':
-                            var $264 = self.pred;
-                            var $265 = (_a$pred$10 => {
-                                var $266 = Word$cmp$go$(_a$pred$10, $264, _c$4);
-                                return $266;
+                            var $222 = self.pred;
+                            var $223 = (_a$pred$10 => {
+                                var $224 = Word$cmp$go$(_a$pred$10, $222, _c$4);
+                                return $224;
                             });
-                            var $260 = $265;
+                            var $218 = $223;
                             break;
                         case 'Word.e':
-                            var $267 = (_a$pred$8 => {
-                                var $268 = _c$4;
-                                return $268;
+                            var $225 = (_a$pred$8 => {
+                                var $226 = _c$4;
+                                return $226;
                             });
-                            var $260 = $267;
+                            var $218 = $225;
                             break;
                     };
-                    var $260 = $260($258);
-                    return $260;
+                    var $218 = $218($216);
+                    return $218;
                 });
-                var $246 = $259;
+                var $204 = $217;
                 break;
             case 'Word.e':
-                var $269 = (_b$5 => {
-                    var $270 = _c$4;
-                    return $270;
+                var $227 = (_b$5 => {
+                    var $228 = _c$4;
+                    return $228;
                 });
-                var $246 = $269;
+                var $204 = $227;
                 break;
         };
-        var $246 = $246(_b$3);
-        return $246;
+        var $204 = $204(_b$3);
+        return $204;
     };
     const Word$cmp$go = x0 => x1 => x2 => Word$cmp$go$(x0, x1, x2);
     const Cmp$eql = ({
@@ -1401,63 +1169,407 @@ module.exports = (function() {
     });
 
     function Word$cmp$(_a$2, _b$3) {
-        var $271 = Word$cmp$go$(_a$2, _b$3, Cmp$eql);
-        return $271;
+        var $229 = Word$cmp$go$(_a$2, _b$3, Cmp$eql);
+        return $229;
     };
     const Word$cmp = x0 => x1 => Word$cmp$(x0, x1);
 
     function Word$eql$(_a$2, _b$3) {
-        var $272 = Cmp$as_eql$(Word$cmp$(_a$2, _b$3));
-        return $272;
+        var $230 = Cmp$as_eql$(Word$cmp$(_a$2, _b$3));
+        return $230;
     };
     const Word$eql = x0 => x1 => Word$eql$(x0, x1);
     const U16$eql = a0 => a1 => (a0 === a1);
     const String$eql = a0 => a1 => (a0 === a1);
 
+    function Maybe$default$(_m$2, _a$3) {
+        var self = _m$2;
+        switch (self._) {
+            case 'Maybe.some':
+                var $232 = self.value;
+                var $233 = $232;
+                var $231 = $233;
+                break;
+            case 'Maybe.none':
+                var $234 = _a$3;
+                var $231 = $234;
+                break;
+        };
+        return $231;
+    };
+    const Maybe$default = x0 => x1 => Maybe$default$(x0, x1);
+
+    function Maybe$(_A$1) {
+        var $235 = null;
+        return $235;
+    };
+    const Maybe = x0 => Maybe$(x0);
+
+    function BitsMap$get$(_bits$2, _map$3) {
+        var BitsMap$get$ = (_bits$2, _map$3) => ({
+            ctr: 'TCO',
+            arg: [_bits$2, _map$3]
+        });
+        var BitsMap$get = _bits$2 => _map$3 => BitsMap$get$(_bits$2, _map$3);
+        var arg = [_bits$2, _map$3];
+        while (true) {
+            let [_bits$2, _map$3] = arg;
+            var R = (() => {
+                var self = _bits$2;
+                switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
+                    case 'o':
+                        var $236 = self.slice(0, -1);
+                        var self = _map$3;
+                        switch (self._) {
+                            case 'BitsMap.tie':
+                                var $238 = self.lft;
+                                var $239 = BitsMap$get$($236, $238);
+                                var $237 = $239;
+                                break;
+                            case 'BitsMap.new':
+                                var $240 = Maybe$none;
+                                var $237 = $240;
+                                break;
+                        };
+                        return $237;
+                    case 'i':
+                        var $241 = self.slice(0, -1);
+                        var self = _map$3;
+                        switch (self._) {
+                            case 'BitsMap.tie':
+                                var $243 = self.rgt;
+                                var $244 = BitsMap$get$($241, $243);
+                                var $242 = $244;
+                                break;
+                            case 'BitsMap.new':
+                                var $245 = Maybe$none;
+                                var $242 = $245;
+                                break;
+                        };
+                        return $242;
+                    case 'e':
+                        var self = _map$3;
+                        switch (self._) {
+                            case 'BitsMap.tie':
+                                var $247 = self.val;
+                                var $248 = $247;
+                                var $246 = $248;
+                                break;
+                            case 'BitsMap.new':
+                                var $249 = Maybe$none;
+                                var $246 = $249;
+                                break;
+                        };
+                        return $246;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const BitsMap$get = x0 => x1 => BitsMap$get$(x0, x1);
+
+    function Map$get$(_key$2, _map$3) {
+        var $250 = BitsMap$get$(String$to_bits$(_key$2), _map$3);
+        return $250;
+    };
+    const Map$get = x0 => x1 => Map$get$(x0, x1);
+
+    function Web$Kind$helper$is_mouse_over$(_id$1, _events$2) {
+        var $251 = (_id$1 === Maybe$default$(Map$get$("mouse_over", _events$2), ""));
+        return $251;
+    };
+    const Web$Kind$helper$is_mouse_over = x0 => x1 => Web$Kind$helper$is_mouse_over$(x0, x1);
+    const Web$Kind$constant$action_go_to_home = "action_go_to_home";
+    const Web$Kind$Page$apps = ({
+        _: 'Web.Kind.Page.apps'
+    });
+
+    function Web$Kind$component$header_tabs$(_stt$1) {
+        var self = _stt$1;
+        switch (self._) {
+            case 'Web.Kind.State.new':
+                var $253 = self.page;
+                var $254 = self.events;
+                var _tabs$5 = List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$home, $253), Web$Kind$helper$is_mouse_over$(Web$Kind$constant$action_go_to_home, $254), "Home", Web$Kind$constant$action_go_to_home), List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$apps, $253), Web$Kind$helper$is_mouse_over$(Web$Kind$constant$action_go_to_apps, $254), "Apps", Web$Kind$constant$action_go_to_apps), List$nil));
+                var $255 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$nil)))), _tabs$5);
+                var $252 = $255;
+                break;
+        };
+        return $252;
+    };
+    const Web$Kind$component$header_tabs = x0 => Web$Kind$component$header_tabs$(x0);
+
+    function Web$Kind$component$header$(_stt$1) {
+        var _vbox$2 = VoxBox$alloc_capacity$(100);
+        var _line$3 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("text-align", "center"), List$cons$(Pair$new$("padding", "10px 50px 10px 50px"), List$nil))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("color", Web$Kind$constant$primary_color), List$nil)), List$cons$(DOM$text$(String$repeat$("=", 90n)), List$nil)), List$nil));
+        var $256 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("h2", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "40px"), List$cons$(Pair$new$("font-family", "verdana"), List$cons$(Pair$new$("text-align", "center"), List$nil)))), List$cons$(DOM$text$("KIND language"), List$nil)), List$cons$(_line$3, List$cons$(Web$Kind$component$header_tabs$(_stt$1), List$nil))));
+        return $256;
+    };
+    const Web$Kind$component$header = x0 => Web$Kind$component$header$(x0);
+
+    function Web$Kind$component$body_container$(_ele$1) {
+        var $257 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 20% 40px 20%"), List$cons$(Pair$new$("flex", "1"), List$nil))), _ele$1);
+        return $257;
+    };
+    const Web$Kind$component$body_container = x0 => Web$Kind$component$body_container$(x0);
+    const List$for = a0 => a1 => a2 => (list_for(a0)(a1)(a2));
+
+    function List$(_A$1) {
+        var $258 = null;
+        return $258;
+    };
+    const List = x0 => List$(x0);
+
+    function Web$Kind$component$list$(_items$1) {
+        var _li$2 = List$nil;
+        var _li$3 = (() => {
+            var $261 = _li$2;
+            var $262 = _items$1;
+            let _li$4 = $261;
+            let _item$3;
+            while ($262._ === 'List.cons') {
+                _item$3 = $262.head;
+                var $261 = List$cons$(DOM$node$("li", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "5px"), List$nil)), List$cons$(_item$3, List$nil)), _li$4);
+                _li$4 = $261;
+                $262 = $262.tail;
+            }
+            return _li$4;
+        })();
+        var $259 = DOM$node$("ul", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("list-style-type", "none"), List$nil)), _li$3);
+        return $259;
+    };
+    const Web$Kind$component$list = x0 => Web$Kind$component$list$(x0);
+
+    function Web$Kind$component$link_white$(_txt$1, _href$2) {
+        var $263 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$2), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
+        return $263;
+    };
+    const Web$Kind$component$link_white = x0 => x1 => Web$Kind$component$link_white$(x0, x1);
+    const Web$Kind$constant$dark_pri_color = "#44366B";
+    const Web$Kind$component$footer = (() => {
+        var _join_us_txt$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link_white$(" Github", "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link_white$(" Telegram", "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
+        var _join_us$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "110px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$primary_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-items", "flex-end"), List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("padding-right", "20%"), List$nil))))))))), List$cons$(_join_us_txt$1, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "20px"), List$nil)), List$cons$(DOM$text$("\u{2764} by UwU Tech"), List$nil)), List$nil)));
+        var _msg_footer$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("background-color", Web$Kind$constant$dark_pri_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("padding", "10px 20% 10px 20%"), List$nil))))))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$("This website was created using Kind!"), List$nil)), List$cons$(Web$Kind$component$link_white$("*u* show me the code!", "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind"), List$nil)));
+        var $264 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "0px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("color", "white"), List$nil))))), List$cons$(_join_us$1, List$cons$(_msg_footer$2, List$nil)));
+        return $264;
+    })();
+
+    function Web$Kind$draw_page_home$(_stt$1) {
+        var self = _stt$1;
+        switch (self._) {
+            case 'Web.Kind.State.new':
+                var _line$5 = (_txt$5 => {
+                    var $267 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$5), List$nil));
+                    return $267;
+                });
+                var _line_break$6 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil), List$nil));
+                var _span$7 = (_txt$7 => {
+                    var $268 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$7), List$nil));
+                    return $268;
+                });
+                var _span_bold$8 = (_txt$8 => {
+                    var $269 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$8), List$nil));
+                    return $269;
+                });
+                var _intro$9 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(_span$7("Kind is a cute "), List$cons$(_span_bold$8("proof"), List$cons$(_span$7("gramming language."), List$cons$(_line_break$6, List$cons$(_span$7("It\'s "), List$cons$(_span_bold$8("capable of everything"), List$cons$(_line$5("from web apps to games to"), List$cons$(_line$5("advanced mathematical proofs."), List$nil)))))))));
+                var _croni$10 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-left", "40px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-end"), List$nil)))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "10px"), List$nil)), List$cons$(DOM$text$("gl hf!"), List$nil)), List$cons$(DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", Web$Kind$img$croni), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "30px"), List$cons$(Pair$new$("height", "30px"), List$nil))), List$nil), List$nil)));
+                var _call_to_apps$10 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "100px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))), List$cons$(Web$Kind$component$btn_primary_solid$("GO TO APPS", Web$Kind$constant$action_go_to_apps), List$cons$(_croni$10, List$nil)));
+                var _instructions$11 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$cons$(Pair$new$("padding", "5px"), List$cons$(Pair$new$("border", "1px solid"), List$nil)))), List$cons$(_line$5("npm i -g kind-lang"), List$cons$(_line$5("git clone https://github.com/uwu-tech/Kind"), List$cons$(_line$5("cd Kind/base"), List$cons$(_line$5("kind Main"), List$cons$(_line$5("kind Main --run"), List$nil))))));
+                var _install$11 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Install"), List$cons$(_instructions$11, List$nil)));
+                var $266 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-home"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_intro$9, List$cons$(_call_to_apps$10, List$cons$(_install$11, List$nil)))), List$cons$(Web$Kind$component$footer, List$nil))));
+                var $265 = $266;
+                break;
+        };
+        return $265;
+    };
+    const Web$Kind$draw_page_home = x0 => Web$Kind$draw_page_home$(x0);
+
+    function Web$Kind$component$game_card$(_src$1, _title$2, _path$3) {
+        var _banner$4 = DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", _src$1), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "100px"), List$cons$(Pair$new$("height", "100px"), List$nil))), List$nil);
+        var _title$5 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _path$3), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("text-decoration", "none"), List$nil))))), List$cons$(DOM$text$(_title$2), List$nil));
+        var $270 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "120px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("margin", "10px 20px"), List$cons$(Pair$new$("border", "solid 1px"), List$cons$(Pair$new$("padding", "2px"), List$nil))))))), List$cons$(_banner$4, List$cons$(_title$5, List$nil)));
+        return $270;
+    };
+    const Web$Kind$component$game_card = x0 => x1 => x2 => Web$Kind$component$game_card$(x0, x1, x2);
+    const Web$Kind$img$app_senhas = "data:image/png;base64,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";
+    const Web$Kind$img$app_tic_tac_toe = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAAAAXNSR0IArs4c6QAAAdlJREFUeJztm01uglAURrFxRyylm2nSQdNBk27GpbgmHDBpFHnvwH0/lXNmTu41hw9FPjxN0zRIHm+t38B/QlkAZQGUBVAWQFkAZQGUBVAWQFkAZQGUBVAWQFkAZQGUBVAWQFkAZQGUBVAWQFkAZQGUBTiHT/z5+v378vP7I3xFq9UmC5BO1mUccwa9X6+b30TpFZnzkytMFiD3M2tFef5xa7tiPTU5K0wWIDdZs/i7gxOVqWordo41WYB0suZDvXIo9nwPVlsRMjb+onQDyZNi8QwtsddLhzC6SNbM4lFNnqFRu7x0CIYlq9AXeYXhIfNNFiDg585+ig4PnG+yAMoCnJ79HeXuruPRWLzLarIAygIoC6AswNMP+M1YhckwKAuhLICyAO0b6ai6uMIKkwXopZHeXxdXWGGyAB010uu7SqygmCxAF4106YFRizrqDevzCo30ZRxL12LbOGiybKSL00sj/Tg5fJeNdFXaN9IVLhRspBugLICyAMoC+KzDMj7rsBdlAZQFUBbAZx0AJgtgyQrmmyyAJSuYb7IAlqwAkwXosWStwLZT5KBVmKdhcXpMVv0Kw0uHePotWTtcYbIAlqwAkwVQFiD+TukLY7IAygIoC6AsgLIANxbY0ByDNCtkAAAAAElFTkSuQmCC";
+    const Web$Kind$img$app_kaelin = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAAAAXNSR0IArs4c6QAAEj9JREFUeJzlnXtQVde9x788QjyiHMJLAdGgVCEKJVpSMdiMoNhMpJg2U8wkJNOZAGlmOmgltxOLOhgumQSo8Q+diLcPi7nCTGI06E1ihNxmfM21VqMoSBkhgcPrIOWg5NygxPvHj/NjsfbjbA4bX/c7zJl1Fnuvs/fnfH9r/dZaW/Ta8+EnMEPlm/bmJGRSufJiBdc/uSB7rp/l6pCTXgHUNh7dWPIynZIWm278I2obj0rHc1PSBey5cIjrTZSXWbAgXG7lxYqYxU9TZfM/PnlyQbZ0ZG3jUQB8bwRR1Fw/i7L+xJVKAGJrIiy6ACpMBimYCwuuy53i1Z0Ul8iVZxrOZ8fn0p2zvwiHWzGvE1cqYxY/rUQv8ZpU+ZrbHF33zt+/I1YmxSVWXqzIjs+ltymRMzvsjohQK7/qNEhMKy9WJMUlwtmZFJd4oqGSmhJ9x56SrsRcmQxLVIu9LTo0isrE63epr9PbiFArv1JBwke/Io58mKS5fpY9Fw5hbG/FrRE+c5GZHIasnb9/JyQkmGGRzjSc/13q6x12x9UhZ0rkTINNvV1XSkHN9CmudU5h4kW1f4V5yMx0lhgLU7yAseYCkBSX+HZdKYDs+Nzjti4jvI7busS3UoMYG4wUs6I3t6a9BKBo015TeJkDizCJscDZg5IXl5mXagySTlypFE+RJA2XlKCotmOKJgqL3SSSAvDkguwTVypDQoLh4qU0BUlJSuqzoGYoKEhROlILANia9pLppDBBWFLPCtcNzPWzzPWzzI3PrbxYYZCX9MpKikvkc6mGC6KkBKJo096chMx7yFlapOAKBwDZY3nR69Phv6DDpC5GK3xEUgB6e6/p9+4ANpa8LHag91wHz6Q4HAilyAsAkSKaWqmD2Gas3xOfdH4o8SJxfgsgLTa9fGwvfh/kWaqTNdEIlDREQA4QKfMSj386/BefdH5Ib8lWnMqK04C5CZmTnZp6CEsZg9CeeYjGMZ5eAUiJnHnc1kW8RqrCoZP0Ky+p3KSkgeQ9kZNFO+jM0cTg6rA79Oc3klIiZzLfq0POq0POcZ2eo2Y3j+V5GIp+cbskwne458KhtNj0qzYnR5DOmCWeBTXjSJfh2Y0Yl+ew9HM/1TgFkBabTiMAeGXKDgjI6J6l4SItNl1rlUKLFF8bmesuZ/Dj/UpHcNhHMI0gw8jbqzaVDBMArfbx0KkDRaJM34G5dvMQ1saSl4s27aWZV0SodWvaS+L8S8tWdDDsuDrkzLztfSNuJURqgtJi06c1HKMDxCRDKSlHE78DOtFEXuYv0WiR4oAlXjOmBc7Ou+Xs6AHSeb2YCj/L6LBE3PqmMLBbI2sVmxUHGbHrLN+0F7HplKOYFYmej4YbS16mBRBRSlJ7LhyiH4yd0HTPW+7s6LFEhClbtkSEOTt6uuctp7cSKbFBqadTytzp9IScRcHIZZEUz3hyEjLpxvZcOJSTkMn3fHXImeQixb0+70dYIsK4BYkUHSB9JRIR2grhMDSL10TDULWfUm5AkJiXWJmVd6t6ty91f8dtXVl5t6SzDA4jfACR4uzMxG5rQkkpS4fU1SGn6AK2Rm3jUWdHD5Wz8m5FrmmPXNPOpJwdPWLHT3ertJU+BY56s5xlAiytqQ8VtPKjnITM/NJ6Z0cPIyNRTX5pvdZ4KommBFJiTLbivr+o9q+m5FnmOIvEXyBNfcgIotF2vL4IYw2SX1r/cU0E83J29HxcE6FKis+6i5ooLNFWZHtxksgb0XwM8eLf5iRk1jYezS+tr97tW73bN7+0vrbxaE5CphTLREo817jMshVMzLOU487IClxsOi885ZfWs7lyEjIljgDmJmRCGElJRKpie6oUsKIoBg/vPoaxYzRMXaUxDRb3plI2zw86IDadTCSeJS7giZVc5uijjgwa02nWG0XPvrX1o0nao55oGHLfJGbSW9Ne4oURYiGahc1FJ44s2As/3LgYfSJlZZDemR18Ezp44iVmQ+QvmmHQsCg5iHsfRiaJ61X7KdUR9vDuY28UPQvgjaJnKR71VbF+F/8YuU2YFYbUPfEGlJTX1DYepaWFNFckEgK2jCqvHa8vyi+tt0SE5W6o40pK8XncoB1847YSuSRFJQOICZxB9bnvvqZ/7uHdx0zrs8R1CKkewvyD9vUophgEU5MKAERSEHpAiRTbSkuEKTQg5lFrKNUQJtLz8Wv1eVH7Zq466AxDPDKOLv4BuRvqCv2DAFgiwr4pPF/oH8QFAPZdHYX+QcWDfdwIpRTj9RRjAqAk1dzffabtFAB9Ui+++hQm78EQVfGjfsSLoLgV8VIlRX3TmryVkrPaOvv2vfe3NXkrAVSs30Wk4IIVEzijub+beO2/eFA/AMWWJ/GRI6XIX2mx6YSs2GUxVWrsKe6n+FX0FOUKWp+oJAWASDEvHZGn2jr7osKD2jr77qizSJRViE+Hai2WUkHsp+hIJsVf+1tbP3rx1aeiwkehv7X1o46GJiUpCM5q7u8GcKbtlNJc5FmKPiIVFR50F2CRlMj0JWEiMay2zj4ABItu7De/fJtJAXjUGtrqsIvIRIm8GBMxokoq39EwFMWjJL3VosamM54fiDdJ0icFICkquWL9roi4+XC5Ca4vAPeCsyRpbYW6ZaRMGto6+97J3yPaCgZ4ATjTdurfduSINcz9LjtLklnzFbKAsl4i9e31ISpMne6n2o6jxccaPczmombNXM+6K1qTt/KtrR/RXfGwRb+yDzTbB5r5yFaHvdVh//b60LfXhy71n6UfosbsSI4WHyow93vLWRPRmryV+947BuCNomfZWSImUZf6z0pvF2LJ1Ol+zItJQei2qHDfO4u0Jm8lWQzCHQKY7XVzhNpUK6Za7QPNs71uzva6KZ0ukrJGDwOwRg87Wnzohw97EJwFYbznuwUw2+tm2aPfA9/9sqU5dOoSoQYFrTe/uf0Qn94zBfaus3nrX4XLWcyIWqMwfECcBdeQT46g2/7m9kMFrd4Frd4A7F1nxRomFTpzSc8UzTaZO7n1AXEWd1sZq1PFetE+zEt5ur3r7I9WPaGsl/z1gMACQNPmGmHZLzQgRqubJz0fv3b/xYMAfrTqiSULF5+99I8lCxfzb8mkbC7c4VWHOywjS6Cpv1o10D6yUyvyUpLCgw2LpIUsIm5+xKzAgFlWAI2nv+Z6DmSR1L73/ga3Ybi9ugLAhiw3z53fy+IZcsX6XVLHRKQG2h0dDU30qyULF9d8VqdshGJcD9b26orwFAsV7mterIBZ1uCgwGt9/fQKYKDd8ffP/4d+SwGYsTpVij4A+947tiZvpWbqwKQAvFAwnyx2v0siJYqRiaSiwoNoPvDiq0+ZuWFxX4gYsacAdLTL1HSk7izRVgDqTrc9AObKffe1uj9/DmCg3cGkOhqa3J7I5lJxlkSKNMKr7L7vvIiXjsSMgaflD9p0Z7zKffc1aem95rM6GgpVFx6gDENVW7Hu92DU2fXKffc1WrpgXspVhzGw9Ek9GJJ4KfExL2v08KJlVnFw/P81GpLc8gJgjR7mfQquHHWWQVste37mfR2JRrQmbyXNb3iRuq2zz9HiMyYMbddu6LfSYhuYvEu8B6XurO3VFd/HDUcGT9Pilbp09B+CGzTXwc1bDm7eMrGrvcviXVvq5sf0WbZrN4hXZPC0CX4MYXrucesHAq+1b26bYLN3RtJeJJGq+azOF8D26ooXCuZXHmmABi+ylfEYPLh5y3OPWz84N7JOFBPmB6B/cJgI3svIaC2fSNWfHP0XCTWf1Y1OpCuPNGQ/E5f9TBwEXvSr8ZISdd4mP1wb4u9zz8bm4d3HMlanZqxOrT/pUJIC4Eu9FQRelUcaJH/VnW6Ljhrz5OOy52du3+9m6hMT5pcYaWnuGdI5xiyVFVZzuaA4y+N2dBazIPVZlUcarFfs2b/9CVzsMJZUS5vDdu1GSmKk2089b3MmRlo+OOegGATQOzgc4u+jf5ZnKius/vnGjVRubLKVFVZ5xouhaGk0dbBesVPh4z98CUAk1dI25t8THT9vO37ept9uYqRFGYMAegeHze2zJFKx8yMfy1gnGs1EeVMMWq/YHQtCmRep7nQbgJY2BzsrOspa0vRKSdMrnw6t12qRendyFlf2T5qtWESqsckGYJJ4eUNB6me//QkVqGuXnLUzuUqnOeq8idR5m5PHwUBPSe0oKdlRUuL2MJEUgMHe7sng5a1KqvJIA2USqUujRGcBiI6y7kyuOvBVy3/N+42Umh7cvIXoECl2VqC/T//gMMYfgztKSi6e3GfkSImUf8iMwd5u4x9kUN6qpOityEs8JzrKeuSntQe+apHaWvvmNhr72FlUT6QmVeQsKk8SKZCzxPc0IEoHSXkDXLyUzZFxJFIUgx7Y6i87Nxk8WOks4x9kXKOjIdlKikp2mVJKgizVGByXiFRw8CMGj78zzhrJs4gUJQ3Ey7PmqNtSxqBBW3GX/NBUvPAr7p7nuT1RchaAr099MZHsVFWjSSmRIkm8oiMDjE93lDHY3DNkkBRlTDy0MYKywioYS80nr3cHweJcgUWRSLw4lTcosXfXiUFpgqJDCsBjGesGe7uNzGkmjxTYWaKtYCAST+7vgsYzEJKzdAKQ6ZQVVkmkqCwe/PWpL/iYyzVyrncH8gYAvte/n/l+WdN0xZaYKi9iBN1HRUpvTl8FJ9xlDAXFWWWF5Y9lrOMayU2iBnu7f75xY2OTbbC3W9kZiacQqcnosAD40m2rrnx6u0bC913btm53WFsWzQpPsXx+PGxVTw/c9esFxVllhVXES9VNJLLJgfIxZLU0eaTAYWjKPnNZYbVP/Ej50+4fLJ3W6PZ4ABRT9KrEIUacEkRZYbURgmbJF4CRyRcpf5NmllhWWO0T76D9ofAUSyccpy/G6nzD4moBS7LP5Zoq8ZgD5eVSCxKpSbUVAK9FS5b7/0D+WzlaGvynrxYvERaAzuPOzPRtdHvKqydS0sBHWaUYicrfQkB2h0kB8PrxuuRxnaDFS4KVujTq/bKmzPRtUDgCgEhK/+OUaYT6VWmTUl3F9mxNbdywoMaLnHLo6JbwFAuv2Z/c37Xg0TwAbAqSeNvUeU9wKqdP6rnHrQA+OOfgVbbzNqfBPFnS+Lbv47MSAZwurtc6QHV3Q8sUnA3p20dMmpRYx0uK9pxiwvwObt4yXl6+EPJ15Svl7uLNny6uVw1Dus+P//Clcj6gqss1VXOSV1CqqZq1szh1gqKforFSIiXFnUSK9wQ8kK9EB4D4CsObYLHzI6+0jpTdziWJFJV1SF2uGcnC/ENm0PFS7q7VndOuJTESo48P8GyJzVciJSr7mTjpnrVsBeBAeTklWTrm4lulOxdnMFoxyPUcgEbGO6mHYlLiMnfv+Hn56pOS1pS1FON16bnHrf/ddONMdPh079H/dULVCGWF1eL0TX+wU86oDe50KUmReCHEbQtK+U6cFG/niJUn93dtyMqFgaRHh9Sc5BWXa6qQsW68vHhNTYtUiEfO8lYlhbE7YCSdGCT1Dg5vyMq9/r3eHzHnxJ3DSkw4RfHqsJSUwsBOlw6piWzKyc5S7kKPVxuycsf1ULOqs3ilZU7yigPl5coklvwlnVVQnCXuWqqSoree7fX6qq5b0V6hyMutrcQ0T5+UdNv09qvtfxpzWcDgjxPd8pJaLiusAhYC7Rj7TIpIiqLPswzeZ1540Hch/vz+h/NDAZy73DO6Cx0Z8EjAw/VH2pYuX67aRGzqigP/+anxheOQ4AC64dAFi778y56AZlv36XOvJKxYPCN68YzooCnTUucsDJoyrfXShe+CptOJjvbWhlOnlmesJl69167Tq9R+6IJFU4NDj5zpi5k2+jy2WaQA+DzycPT02zeY14V/9v5wfmj0LOu5yz2PWKdERwYA2P/rk/q2ik1dYeTDTtZdilu2jG8YQECzjTC1OuyBU/zpry+0OuwA5gaGtV664G3r8rZ1/ev2/xYUZ/3x3/fYm+olatJH+E2dNjU49GzjAPFiUr2Dw9/evL32zW0GL1VVIxm8WEWL7uJzkSZKDKXLNVXzvEc2u/gvehAp0so5rr9h93U9hAyrrLAcgDRKkqizm5O84tNToAU1yhJMeRpF/V9Y8HZhi23Ara3GJZGUuFalJCVJ2q0oKM66XFMljZLSAnyvawfArOd2vPM3bfI9/C+plqeE0sb9BFVQnHWgvFy8vYefWf0fF76Ay1k6585JXiGlC8yL3oqkaGptIibS/wHOKiZJzstVfQAAAABJRU5ErkJggg==";
+    const Web$Kind$content_apps = List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_senhas, "Senhas", "Web.Senhas"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_tic_tac_toe, "TicTacToe", "Web.TicTacToe"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_kaelin, "Kaelin", "Web.Kaelin"), List$nil)));
+
+    function Web$Kind$component$link_black$(_txt$1, _href$2) {
+        var $271 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$2), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
+        return $271;
+    };
+    const Web$Kind$component$link_black = x0 => x1 => Web$Kind$component$link_black$(x0, x1);
+    const Web$Kind$content_apps_text = Web$Kind$component$list$(List$cons$(Web$Kind$component$link_black$("Demo", "Web.Demo"), List$cons$(Web$Kind$component$link_black$("Online", "Web.Online"), List$nil)));
+
+    function Web$Kind$draw_page_apps$(_stt$1) {
+        var _line$2 = (_txt$2 => {
+            var $273 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$2), List$nil));
+            return $273;
+        });
+        var _line_break$3 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil), List$nil));
+        var _span$4 = (_txt$4 => {
+            var $274 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$4), List$nil));
+            return $274;
+        });
+        var _span_bold$5 = (_txt$5 => {
+            var $275 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$5), List$nil));
+            return $275;
+        });
+        var _with_banner$6 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("flex-wrap", "wrap"), List$nil))))), Web$Kind$content_apps);
+        var _no_banner$7 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "30px"), List$nil)), List$cons$(Web$Kind$content_apps_text, List$nil));
+        var _games$6 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "game-container"), List$nil)), Map$from_list$(List$nil), List$cons$(Web$Kind$component$title$("Games"), List$cons$(_with_banner$6, List$cons$(_no_banner$7, List$nil))));
+        var $272 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-apps"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_games$6, List$nil)), List$cons$(Web$Kind$component$footer, List$nil))));
+        return $272;
+    };
+    const Web$Kind$draw_page_apps = x0 => Web$Kind$draw_page_apps$(x0);
+
+    function Web$Kind$draw_page$(_stt$1) {
+        var self = _stt$1;
+        switch (self._) {
+            case 'Web.Kind.State.new':
+                var $277 = self.page;
+                var self = $277;
+                switch (self._) {
+                    case 'Web.Kind.Page.home':
+                        var $279 = Web$Kind$draw_page_home$(_stt$1);
+                        var $278 = $279;
+                        break;
+                    case 'Web.Kind.Page.apps':
+                        var $280 = Web$Kind$draw_page_apps$(_stt$1);
+                        var $278 = $280;
+                        break;
+                };
+                var $276 = $278;
+                break;
+        };
+        return $276;
+    };
+    const Web$Kind$draw_page = x0 => Web$Kind$draw_page$(x0);
+
+    function IO$(_A$1) {
+        var $281 = null;
+        return $281;
+    };
+    const IO = x0 => IO$(x0);
+
+    function IO$ask$(_query$2, _param$3, _then$4) {
+        var $282 = ({
+            _: 'IO.ask',
+            'query': _query$2,
+            'param': _param$3,
+            'then': _then$4
+        });
+        return $282;
+    };
+    const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
+
+    function IO$bind$(_a$3, _f$4) {
+        var self = _a$3;
+        switch (self._) {
+            case 'IO.end':
+                var $284 = self.value;
+                var $285 = _f$4($284);
+                var $283 = $285;
+                break;
+            case 'IO.ask':
+                var $286 = self.query;
+                var $287 = self.param;
+                var $288 = self.then;
+                var $289 = IO$ask$($286, $287, (_x$8 => {
+                    var $290 = IO$bind$($288(_x$8), _f$4);
+                    return $290;
+                }));
+                var $283 = $289;
+                break;
+        };
+        return $283;
+    };
+    const IO$bind = x0 => x1 => IO$bind$(x0, x1);
+
+    function IO$end$(_value$2) {
+        var $291 = ({
+            _: 'IO.end',
+            'value': _value$2
+        });
+        return $291;
+    };
+    const IO$end = x0 => IO$end$(x0);
+
+    function IO$monad$(_new$2) {
+        var $292 = _new$2(IO$bind)(IO$end);
+        return $292;
+    };
+    const IO$monad = x0 => IO$monad$(x0);
+
+    function Dynamic$new$(_value$2) {
+        var $293 = ({
+            _: 'Dynamic.new',
+            'value': _value$2
+        });
+        return $293;
+    };
+    const Dynamic$new = x0 => Dynamic$new$(x0);
+    const Unit$new = null;
+    const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
+        var $294 = _m$pure$2;
+        return $294;
+    }))(Dynamic$new$(Unit$new));
+
+    function App$store$(_value$2) {
+        var $295 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $296 = _m$pure$4;
+            return $296;
+        }))(Dynamic$new$(_value$2));
+        return $295;
+    };
+    const App$store = x0 => App$store$(x0);
+
     function Web$Kind$exe_event$(_stt$1, _e_id$2, _e_name$3) {
         var self = _stt$1;
         switch (self._) {
             case 'Web.Kind.State.new':
-                var $274 = self.screen_size;
-                var $275 = self.page;
-                var $276 = self.events;
+                var $298 = self.screen_size;
+                var $299 = self.page;
+                var $300 = self.events;
                 var self = (_e_id$2 === Web$Kind$constant$action_go_to_home);
                 if (self) {
-                    var $278 = Web$Kind$State$new$($274, Web$Kind$Page$home, $276);
-                    var $277 = $278;
+                    var $302 = Web$Kind$State$new$($298, Web$Kind$Page$home, $300);
+                    var $301 = $302;
                 } else {
                     var self = (_e_id$2 === Web$Kind$constant$action_go_to_apps);
                     if (self) {
-                        var $280 = Web$Kind$State$new$($274, Web$Kind$Page$apps, $276);
-                        var $279 = $280;
+                        var $304 = Web$Kind$State$new$($298, Web$Kind$Page$apps, $300);
+                        var $303 = $304;
                     } else {
-                        var $281 = Web$Kind$State$new$($274, $275, $276);
-                        var $279 = $281;
+                        var $305 = Web$Kind$State$new$($298, $299, $300);
+                        var $303 = $305;
                     };
-                    var $277 = $279;
+                    var $301 = $303;
                 };
-                var $273 = $277;
+                var $297 = $301;
                 break;
         };
-        return $273;
+        return $297;
     };
     const Web$Kind$exe_event = x0 => x1 => x2 => Web$Kind$exe_event$(x0, x1, x2);
-    const Debug$log = a0 => a1 => ((console.log(a0), a1()));
 
     function Map$set$(_key$2, _val$3, _map$4) {
-        var $282 = BitsMap$set$(String$to_bits$(_key$2), _val$3, _map$4);
-        return $282;
+        var $306 = BitsMap$set$(String$to_bits$(_key$2), _val$3, _map$4);
+        return $306;
     };
     const Map$set = x0 => x1 => x2 => Map$set$(x0, x1, x2);
 
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $283 = ({
+        var $307 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $283;
+        return $307;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Kind = (() => {
@@ -1466,34 +1578,31 @@ module.exports = (function() {
             var self = _state$2;
             switch (self._) {
                 case 'Web.Kind.State.new':
-                    var $286 = Web$Kind$draw_page$(_state$2);
-                    var $285 = $286;
+                    var $310 = Web$Kind$draw_page$(_state$2);
+                    var $309 = $310;
                     break;
             };
-            return $285;
+            return $309;
         });
         var _when$3 = (_event$3 => _state$4 => {
             var self = _state$4;
             switch (self._) {
                 case 'Web.Kind.State.new':
-                    var $288 = self.screen_size;
-                    var $289 = self.page;
-                    var $290 = self.events;
+                    var $312 = self.screen_size;
+                    var $313 = self.page;
+                    var $314 = self.events;
                     var self = _event$3;
                     switch (self._) {
                         case 'App.Event.dom':
-                            var $292 = self.name;
-                            var $293 = self.id;
-                            var $294 = App$store$(Web$Kind$exe_event$(_state$4, $293, $292));
-                            var $291 = $294;
+                            var $316 = self.name;
+                            var $317 = self.id;
+                            var $318 = App$store$(Web$Kind$exe_event$(_state$4, $317, $316));
+                            var $315 = $318;
                             break;
                         case 'App.Event.mouse_over':
-                            var $295 = self.id;
-                            var $296 = ((console.log((("Mouse over in App: " + $295) + String$nil)), (_x$11 => {
-                                var $297 = App$store$(Web$Kind$State$new$($288, $289, Map$set$($295, "hover", $290)));
-                                return $297;
-                            })()));
-                            var $291 = $296;
+                            var $319 = self.id;
+                            var $320 = App$store$(Web$Kind$State$new$($312, $313, Map$set$("mouse_over", $319, $314)));
+                            var $315 = $320;
                             break;
                         case 'App.Event.init':
                         case 'App.Event.tick':
@@ -1502,17 +1611,18 @@ module.exports = (function() {
                         case 'App.Event.key_down':
                         case 'App.Event.key_up':
                         case 'App.Event.post':
-                            var $298 = App$pass;
-                            var $291 = $298;
+                        case 'App.Event.mouse_out':
+                            var $321 = App$pass;
+                            var $315 = $321;
                             break;
                     };
-                    var $287 = $291;
+                    var $311 = $315;
                     break;
             };
-            return $287;
+            return $311;
         });
-        var $284 = App$new$(_init$1, _draw$2, _when$3);
-        return $284;
+        var $308 = App$new$(_init$1, _draw$2, _when$3);
+        return $308;
     })();
     return {
         'Web.Kind.State.new': Web$Kind$State$new,
@@ -1583,8 +1693,24 @@ module.exports = (function() {
         'String.cons': String$cons,
         'String.concat': String$concat,
         'String.repeat': String$repeat,
+        'Web.Kind.constant.light_gray_color': Web$Kind$constant$light_gray_color,
         'Web.Kind.component.header_tab': Web$Kind$component$header_tab,
         'Web.Kind.helper.is_eql': Web$Kind$helper$is_eql,
+        'Bool.and': Bool$and,
+        'Cmp.as_eql': Cmp$as_eql,
+        'Cmp.ltn': Cmp$ltn,
+        'Cmp.gtn': Cmp$gtn,
+        'Word.cmp.go': Word$cmp$go,
+        'Cmp.eql': Cmp$eql,
+        'Word.cmp': Word$cmp,
+        'Word.eql': Word$eql,
+        'U16.eql': U16$eql,
+        'String.eql': String$eql,
+        'Maybe.default': Maybe$default,
+        'Maybe': Maybe,
+        'BitsMap.get': BitsMap$get,
+        'Map.get': Map$get,
+        'Web.Kind.helper.is_mouse_over': Web$Kind$helper$is_mouse_over,
         'Web.Kind.constant.action_go_to_home': Web$Kind$constant$action_go_to_home,
         'Web.Kind.Page.apps': Web$Kind$Page$apps,
         'Web.Kind.component.header_tabs': Web$Kind$component$header_tabs,
@@ -1615,18 +1741,7 @@ module.exports = (function() {
         'Unit.new': Unit$new,
         'App.pass': App$pass,
         'App.store': App$store,
-        'Bool.and': Bool$and,
-        'Cmp.as_eql': Cmp$as_eql,
-        'Cmp.ltn': Cmp$ltn,
-        'Cmp.gtn': Cmp$gtn,
-        'Word.cmp.go': Word$cmp$go,
-        'Cmp.eql': Cmp$eql,
-        'Word.cmp': Word$cmp,
-        'Word.eql': Word$eql,
-        'U16.eql': U16$eql,
-        'String.eql': String$eql,
         'Web.Kind.exe_event': Web$Kind$exe_event,
-        'Debug.log': Debug$log,
         'Map.set': Map$set,
         'App.new': App$new,
         'Web.Kind': Web$Kind,
