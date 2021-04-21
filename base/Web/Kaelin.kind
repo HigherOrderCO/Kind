@@ -16,10 +16,16 @@ Web.Kaelin.Command.create_player(hero_id: String) : String
 // A demo application that renders a square on the screen
 Web.Kaelin: App<Web.Kaelin.State>
   let img = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
-  // Initial state
-  let map = Web.Kaelin.Draw.initial_ent({})
-  // TODO insert tiles in map web.kaelin.map.create_inital_map()
-  let init = Web.Kaelin.State.game(Web.Kaelin.Constants.room, 0, {}, none, map, App.EnvInfo.new({256#32, 256#32}, {0#32, 0#32}))
+
+
+  let init =
+    room      = Web.Kaelin.Constants.room
+    tick      = 0
+    players   = {}
+    cast_info = none
+    map       = Web.Kaelin.Map.init(Web.Kaelin.Map.arena)
+    interface = App.EnvInfo.new({256#32, 256#32}, {0#32, 0#32})
+    Web.Kaelin.State.game(room, tick, players, cast_info, map, interface)
 
   // Render function
   //  0#16 - 10#16: contagem regressiva
@@ -29,14 +35,10 @@ Web.Kaelin: App<Web.Kaelin.State>
   // 40#16 - 50#16: animação do turno 1
   // 50#16 - 60#16: escolha do turno 2
   
-  
   let draw = (state)
     case state {
-      game: 
-        // TODO: resolve background in front of entity
-        let map = Web.Kaelin.Map.build(state.map)
-        let img = Web.Kaelin.Draw.state(img, state)
-        DOM.vbox({}, {}, img)
+      // FIXME: background is displayed in front of entity
+      game: DOM.vbox({}, {}, Web.Kaelin.Draw.state(img, state))
     } default DOM.text("TODO: create the renderer for this game state mode")
 
   // Event handler

@@ -1,4 +1,0 @@
-Web.Kaelin.Map.background(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map): Web.Kaelin.Map
-  let ent_grass = Web.Kaelin.Entity.background(Web.Kaelin.Assets.tile.dark_grass_4)
-  map = Web.Kaelin.Map.push(coord,[ent_grass], map)
-  map

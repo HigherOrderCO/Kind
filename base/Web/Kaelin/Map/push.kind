@@ -1,13 +1,9 @@
+// Rename to "Web.Kaelin.Map.set", and add a separate "Web.Kaelin.Map.push".
 Web.Kaelin.Map.push(
-  coord: Web.Kaelin.Coord, 
-  tile: Web.Kaelin.Tile, 
+  coord: Web.Kaelin.Coord
+  entity: Web.Kaelin.Entity
   map: Web.Kaelin.Map
 ) : Web.Kaelin.Map
-  let key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
-  //let tile1 = Web.Kaelin.Map.get(coord, map)
-  //let tile = tile ++ tile1
+  key  = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+  tile = entity & Web.Kaelin.Map.get(coord, map)
   NatMap.set!(key, tile, map)
-
-  //let key = Web.Kaelin.Coord.show(coord)
-  //map{key} <-  ent & (map{key} <> [])
-             

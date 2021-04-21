@@ -1,47 +1,18 @@
-Web.Kaelin.Player.move_by(i:  Int, j: Int, state: Web.Kaelin.State, address: String): Web.Kaelin.State
-  
+// TODO: document?
+Web.Kaelin.Player.move_by(i: Int, j: Int, state: Web.Kaelin.State, address: String): Web.Kaelin.State
   case state {
     game: 
-    let players = Web.Kaelin.Map.find_players(state.map)
-    let origin = players{address}
-    let is_occupied = false
-    case origin { 
-      none: state
-      some:
-        open origin.value as o
-        let pop = Web.Kaelin.Map.pop
-        let destination = Web.Kaelin.Coord.new(Int.add(o.i, i), Int.add(o.j, j))
-        let new_map = Web.Kaelin.Map.swap(1,origin.value,destination,state.map)
-        Web.Kaelin.State.game(state.room, state.tick, state.players, state.cast_info, new_map, state.interface)
-    }
-  }default state
-
-
-  //       let destination_tile = Web.Kaelin.Map.get(destination, state.map)
-  //         // Checks if its occupied
-  //       for entity in destination_tile with is_occupied:
-  //         case entity {
-  //           background: Bool.or(is_occupied, false)
-  //           creature: Bool.or(is_occupied, true)
-  //         }
-  //       if is_occupied then
-  //         state
-  //       else
-  //         // Gets entities from both tiles
-  //         let map_o = pop(origin.value,state.map)
-  //         let background_o = Pair.snd!!(map_o)
-  //         let background_d = Pair.snd!!(pop(destination, state.map))
-  //         let hero = Pair.snd!!(pop(origin.value,Pair.fst!!(map_o)))
-  //         let new_map = Web.Kaelin.Map.del(origin.value, state.map)        
-  //         let new_map = Web.Kaelin.Map.del(destination, state.map)
-  //         open background_o
-  //         let new_map = case background_o {
-  //           none: state.map
-  //           some: Web.Kaelin.Map.push(origin.value, [background_o.value],new_map)
-  //         }
-  //         let new_map = case hero background_d {
-  //           some some: Web.Kaelin.Map.push(destination, [?s, background_d.value], new_map)
-  //         }default state.map
-  //         Web.Kaelin.State.game(state.room, state.tick, state.players, state.cast_info, new_map, state.interface)
-  //     }default state
-  // }default state
+      players = Web.Kaelin.Map.find_players(state.map)
+      origin = players{address}
+      is_occupied = false
+      case origin { 
+        none:
+          state
+        some:
+          open origin.value as o
+          pop = Web.Kaelin.Map.pop
+          destination = Web.Kaelin.Coord.new(Int.add(o.i, i), Int.add(o.j, j))
+          new_map = Web.Kaelin.Map.swap(1,origin.value,destination,state.map)
+          Web.Kaelin.State.game(state.room, state.tick, state.players, state.cast_info, new_map, state.interface)
+      }
+  } default state

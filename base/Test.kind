@@ -1,20 +1,5 @@
-a(a: Int, b: Int): Nat
-  let x = Int.add(a, +1000)
-  let x = Int.mul(x, +10000)
-  let x = Int.to_nat(x)
-  let y = Int.add(b, +1000)
-  let y = Int.to_nat(y)
-  Nat.add(x,y)
-b(c: Nat): Web.Kaelin.Coord
-  let coord_i = Nat.div(c, 10000)
-  let coord_i = Int.from_nat(coord_i)
-  let coord_i = Int.sub(coord_i, +1000)
-  let coord_j = Nat.mod(c, 10000)
-  let coord_j = Int.from_nat(coord_j)
-  let coord_j = Int.sub(coord_j, +1000)
-  Web.Kaelin.Coord.new(coord_i, coord_j)
-  
-
-
-Test:_
-  Nat.show(192347234829)
+Test: Nat
+  sum = 0
+  for i from 0 to 10 with sum:
+    ?a
+  sum
