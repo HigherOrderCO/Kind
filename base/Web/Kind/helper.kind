@@ -5,13 +5,3 @@ Web.Kind.helper.is_eql(src: Web.Kind.Page, trg: Web.Kind.Page): Bool
     apps apps: true
   } default false
 
-Web.Kind.helper.is_mouse_over(id: String, events: Map(String)): Bool
-  String.eql(id, Map.get!("mouse_over", events) <> "")
-
-Web.Kind.helper.click_event(events: Map(String)): String
-  Map.get!("click", events) <> ""
-
-Web.Kind.helper.clear_action(action: String, events: Map(String)): Map(String)
-  log("Clear action: " | action)
-  Map.set!(action, "", events)
-

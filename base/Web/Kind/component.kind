@@ -31,13 +31,13 @@ Web.Kind.component.header_tabs(stt: Web.Kind.State): DOM
   let tabs = [
     Web.Kind.component.header_tab(
       Web.Kind.helper.is_eql(Web.Kind.Page.home, stt.page), 
-      Web.Kind.helper.is_mouse_over("tab_home", stt.events)
-      "Home", "tab_home", Web.Kind.Event.go_to_home)
+      String.eql("tab_home", stt.mouse_over)
+      "Home", "tab_home")
 
     Web.Kind.component.header_tab(
       Web.Kind.helper.is_eql(Web.Kind.Page.apps, stt.page),
-      Web.Kind.helper.is_mouse_over("tab_apps", stt.events)
-      "Apps", "tab_apps", Web.Kind.Event.go_to_apps)
+      String.eql("tab_apps", stt.mouse_over)
+      "Apps", "tab_apps")
   ]
   DOM.node("div", {}, {
     "padding-left": "20%"
@@ -51,8 +51,7 @@ Web.Kind.component.header_tab(
   is_active: Bool, 
   is_hover: Bool, 
   title: String, 
-  id: String, 
-  on_click: Web.Kind.Event): DOM
+  id: String): DOM
   let normal = {
     "margin-right": "30px"
     "font-size": "18px"

@@ -104,7 +104,6 @@ module.exports = class AppPlay extends Component {
     document.body.addEventListener("mouseout", this.listeners.mouseout);
 
     this.listeners.click = (e) => {
-      console.log("action_click: ", e.target)
       this.register_event({
         _: "App.Event.mouse_click",
         time: BigInt(Date.now()),
