@@ -1,2 +1,2 @@
 Web.Kaelin.Map: Type
-  Map(Web.Kaelin.Tile)
+  NatMap(Web.Kaelin.Tile)

@@ -1,5 +1,5 @@
-Web.Kaelin.Map.get(
-    coord: Web.Kaelin.Coord, 
-    map: Web.Kaelin.Map
-) : Web.Kaelin.Tile
-  map{Web.Kaelin.Coord.show(coord)} <> []
+// TODO: it should return a maybe
+Web.Kaelin.Map.get(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map): Web.Kaelin.Tile
+  let key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+  let maybe_tile = NatMap.get!(key, map)
+  maybe_tile <> []

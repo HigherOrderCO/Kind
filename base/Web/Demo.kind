@@ -23,7 +23,7 @@ Web.Demo: App<Pair<U32,U32>>
   // Event handler: moves the position when ASDW are pressed
   when = (event, state)
     case event {
-      dom: IO {
+      mouse_click: IO {
         get line = IO.prompt("What is your name?")
         IO.print("You're breath-taking, " | line | "!")
         App.pass

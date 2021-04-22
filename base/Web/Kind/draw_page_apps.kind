@@ -1,4 +1,4 @@
-Web.Kind.draw_page_apps: DOM
+Web.Kind.draw_page_apps(stt: Web.Kind.State): DOM
   // Auxiliars
   // ----------
   let line = 
@@ -47,7 +47,7 @@ Web.Kind.draw_page_apps: DOM
     "justify-content": "space-between"
     "height": "100%"
   }, [
-    Web.Kind.component.header(Web.Kind.Page.apps)
+    Web.Kind.component.header(stt)
     Web.Kind.component.body_container([
       games
     ]),

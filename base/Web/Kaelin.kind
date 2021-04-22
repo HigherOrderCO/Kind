@@ -16,10 +16,16 @@ Web.Kaelin.Command.create_player(hero_id: String) : String
 // A demo application that renders a square on the screen
 Web.Kaelin: App<Web.Kaelin.State>
   let img = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
-  // Initial state
-  let map = Web.Kaelin.Draw.initial_ent({})
-  // TODO insert tiles in map web.kaelin.map.create_inital_map()
-  let init = Web.Kaelin.State.game(Web.Kaelin.Constants.room, 0, {}, none, map, App.EnvInfo.new({256#32, 256#32}, {0#32, 0#32}))
+
+
+  let init =
+    room      = Web.Kaelin.Constants.room
+    tick      = 0
+    players   = {}
+    cast_info = none
+    map       = Web.Kaelin.Map.init(Web.Kaelin.Map.arena)
+    interface = App.EnvInfo.new({256#32, 256#32}, {0#32, 0#32})
+    Web.Kaelin.State.game(room, tick, players, cast_info, map, interface)
 
   // Render function
   //  0#16 - 10#16: contagem regressiva
@@ -28,18 +34,16 @@ Web.Kaelin: App<Web.Kaelin.State>
   // 30#16 - 40#16: escolha do turno 1
   // 40#16 - 50#16: animação do turno 1
   // 50#16 - 60#16: escolha do turno 2
+  
   let draw = (state)
     case state {
-      game: 
-        // TODO: resolve background in front of entity
-        let img = Web.Kaelin.Draw.map(img, state.map)
-        let img = Web.Kaelin.Draw.state(img, state)
-        DOM.vbox({}, {}, img)
+      // FIXME: background is displayed in front of entity
+      game: DOM.vbox({}, {}, Web.Kaelin.Draw.state(img, state))
     } default DOM.text("TODO: create the renderer for this game state mode")
-
+  
   // Event handler
   let when = (event, state)
-    case event state {
+    case event state{
       init game: IO {
         App.print("Kaelin started!!!")
         App.watch(Web.Kaelin.Constants.room)
@@ -68,7 +72,7 @@ Web.Kaelin: App<Web.Kaelin.State>
            App.print(Pair.show!!(Int.show, Int.show, {axial_x, axial_y}))
        tick game:
            let info = event.info
-           App.store!(Web.Kaelin.Action.update_interface(info, state))
+           App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_interface(info, state))
       post game:
       // this will be replaced by deserialze when it is ready
         switch String.starts_with(event.data) {
@@ -78,21 +82,23 @@ Web.Kaelin: App<Web.Kaelin.State>
             let hero = Web.Kaelin.Resources.heroes{hero_id}
             case hero {
               none: App.pass
-              some: App.store!(Web.Kaelin.Action.create_player(event.addr, hero.value, state))
+              some: App.store<Web.Kaelin.State>(Web.Kaelin.Action.create_player(event.addr, hero.value, state))
             }
+            // TODO: change movement so it uses range 2 and mouse (Web.Kaelin.Coord.Range)
+            // draw the range in Web.Kaelin.Draw.state.background through State.Cast_info
+            // draw hovered hex differently from movement hexes.
+            // use mouse click to move
           "0x2":
-            let coord = switch String.eql( String.slice(3, 4, event.data) ) {
-              "1": {+1#32, +0#32}
-              "2": {-1#32, +0#32}
-              "3": {+0#32, -1#32}
-              "4": {+0#32, +1#32}
-            } default {+0#32, +0#32}
-            
-            open coord
-            App.store!(Web.Kaelin.Action.move_player(event.addr, coord.fst, coord.snd, state))
-        } default App.pass
-        
-    } default App.pass
+            let {coord.fst, coord.snd} = switch String.eql( String.slice(3, 4, event.data) ) {
+              "1": {+1, +0}
+              "2": {-1, +0}
+              "3": {+0, -1}
+              "4": {+0, +1}
+            } default {+0, +0}
+            // App.store<Web.Kaelin.State>(Web.Kaelin.Player.move(Web.Kaelin.Coord.new(+1,+0) state, event.addr))            
+            App.store<Web.Kaelin.State>(Web.Kaelin.Player.move_by(coord.fst, coord.snd, state, event.addr))
 
+        } default App.pass
+    } default App.pass
   //// The application
   App.new!(init, draw, when)

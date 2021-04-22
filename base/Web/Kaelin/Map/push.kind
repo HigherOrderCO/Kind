@@ -1,7 +1,6 @@
-Web.Kaelin.Map.push(
-  coord: Web.Kaelin.Coord, 
-  ent: Web.Kaelin.Entity, 
-  map: Web.Kaelin.Map
-) : Web.Kaelin.Map
-  let key = Web.Kaelin.Coord.show(coord)
-  map{key} <- ent & (map{key} <> [])
+// TODO: fix inconsistences between set and push
+Web.Kaelin.Map.push(coord: Web.Kaelin.Coord, tile: Web.Kaelin.Tile, map:Web.Kaelin.Map): Web.Kaelin.Map
+tiles = NatMap.to_list!(map)
+key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+map = {key,tile} & tiles
+NatMap.from_list!(map)

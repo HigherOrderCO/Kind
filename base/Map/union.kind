@@ -1,0 +1,2 @@
+Map.union<A: Type>(a: Map(A), b: Map(A)): Map(A)
+  BitsMap.union(A, a, b)
