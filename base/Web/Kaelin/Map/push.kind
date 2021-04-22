@@ -1,6 +1,4 @@
-// TODO: fix inconsistences between set and push
-Web.Kaelin.Map.push(coord: Web.Kaelin.Coord, tile: Web.Kaelin.Tile, map:Web.Kaelin.Map): Web.Kaelin.Map
-tiles = NatMap.to_list!(map)
-key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
-map = {key,tile} & tiles
-NatMap.from_list!(map)
+// TODO: Fix so it doesn't use push and del, and fix inconsistences between set and push
+Web.Kaelin.Map.push(coord: Web.Kaelin.Coord, entity: Web.Kaelin.Entity, map: Web.Kaelin.Map) : Web.Kaelin.Map
+  tile = entity & Web.Kaelin.Map.get(coord, map)
+  Web.Kaelin.Map.set(coord, tile, map)

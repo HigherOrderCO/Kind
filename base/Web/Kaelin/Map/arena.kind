@@ -17,7 +17,7 @@ Web.Kaelin.Map.arena: Web.Kaelin.Map
 
       case fit {
         true:
-          Web.Kaelin.Map.push(coord, [background_entity], map)
+          Web.Kaelin.Map.push(coord, background_entity, map)
         false:
           map
       }
