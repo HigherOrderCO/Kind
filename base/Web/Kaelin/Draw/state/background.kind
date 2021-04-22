@@ -1,5 +1,5 @@
 // Draws a map of hexagons given the style "offset coordinates"
-// TODO: Change the hexagon's color based on Web.Kaelin.Cast_info
+// TODO: Change the hexagon's color based on Web.Kaelin.CastInfo
 Web.Kaelin.Draw.state.background(state: Web.Kaelin.State, img: VoxBox, map: Web.Kaelin.Map): VoxBox
   case state { 
     game :
