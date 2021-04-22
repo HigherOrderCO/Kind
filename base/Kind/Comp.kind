@@ -104,10 +104,14 @@ Kind.Comp.prim_of(type: Kind.Term, defs: Kind.Defs): Maybe(Kind.Comp.Prim)
 Kind.Comp.compile(term: Kind.Term, type: Maybe(Kind.Term), defs: Kind.Defs, size: Nat): Pair(Kind.Comp, Kind.Term)
   case type {
     some:
+      log("107") // DEBUG
       let typv = Kind.Term.reduce(type.value, defs)
       case term {
-        lam: case typv {
+        lam: 
+          log("110") // DEBUG
+          case typv {
           all:
+            log("113") // DEBUG
             let self_var = Kind.Term.ann(true, term, type.value)
             let name_var = Kind.Term.ann(true, Kind.Term.var("_" | term.name, size + 1), typv.xtyp)
             let body_typ = typv.body(self_var, name_var)
@@ -125,6 +129,7 @@ Kind.Comp.compile(term: Kind.Term, type: Maybe(Kind.Term), defs: Kind.Defs, size
             {term_cmp, type.value}
         } default {Kind.Comp.nil, Kind.Term.typ}
         let:
+          log("132") // DEBUG
           let {expr_cmp,expr_typ} = Kind.Comp.compile(term.expr, none, defs, size)
           let expr_var = Kind.Term.ann(true, Kind.Term.var("_" | term.name, size + 1), expr_typ)
           let {body_cmp,body_typ} = Kind.Comp.compile(term.body(expr_var), type, defs, size + 1)
@@ -132,16 +137,23 @@ Kind.Comp.compile(term: Kind.Term, type: Maybe(Kind.Term), defs: Kind.Defs, size
           let term_typ = body_typ
           {term_cmp, term_typ}
         ori:
+          log("140") // DEBUG
           Kind.Comp.compile(term.expr, type, defs, size)
-      } default case typv {
+      } default 
+        log("143") // DEBUG
+        case typv {
         typ: {Kind.Comp.nil, Kind.Term.typ}
-      } default {Pair.fst!!(Kind.Comp.compile(term,none,defs,size)), type.value}
+      } default 
+        log("147") // DEBUG
+        {Pair.fst!!(Kind.Comp.compile(term,none,defs,size)), type.value}
     none: case term {
       var: {
+        log("151") // DEBUG
         Kind.Comp.var(term.name | "$" | Nat.show(term.indx))
         Kind.Term.var(term.name, term.indx)
       }
       ref:
+        log("156") // DEBUG
         let got = defs{term.name}
         without got: {Kind.Comp.nil, Kind.Term.typ}
         {
@@ -149,13 +161,16 @@ Kind.Comp.compile(term: Kind.Term, type: Maybe(Kind.Term), defs: Kind.Defs, size
           open got; got.type
         }
       typ: {
+        log("164") // DEBUG
         Kind.Comp.nil
         Kind.Term.typ
       }
       app:
+        log("169") // DEBUG
         let {func_cmp, func_typ} = Kind.Comp.compile(term.func, none, defs, size)
         case Kind.Term.reduce(func_typ, defs) as func_typ {
           all:
+            log("173") // DEBUG
             let {argm_cmp, argm_typ} = Kind.Comp.compile(term.argm, some(func_typ.xtyp), defs, size)
             let term_typ = func_typ.body(term.func, term.argm)
             let term_cmp = case Kind.Comp.as_adt(func_typ, defs) as ftyp_adt {
@@ -169,28 +184,39 @@ Kind.Comp.compile(term: Kind.Term, type: Maybe(Kind.Term), defs: Kind.Defs, size
               then term_cmp
               else Kind.Comp.app(term_cmp, argm_cmp)
             {term_cmp, term_typ}
-        } default {Kind.Comp.nil, Kind.Term.typ}
+        } default 
+          log("188") // DEBUG
+          log(Kind.Term.show(func_typ)) // DEBUG
+          {Kind.Comp.nil, Kind.Term.typ}
       let:
+        log("192") // DEBUG
         let {expr_cmp, expr_typ} = Kind.Comp.compile(term.expr, none, defs, size)
         let expr_var = Kind.Term.ann(true, Kind.Term.var("_" | term.name, size + 1), expr_typ)
         let {body_cmp, body_typ} = Kind.Comp.compile(term.body(expr_var), none, defs, size + 1)
         {Kind.Comp.let("_" | term.name | "$" | Nat.show(size + 1), expr_cmp, body_cmp), body_typ}
       def:
+        log("198") // DEBUG
         Kind.Comp.compile(term.body(term.expr), none, defs, size)
       all:
+        log("201") // DEBUG
         {Kind.Comp.nil, Kind.Term.typ}
       ann:
+        log("204") // DEBUG
         Kind.Comp.compile(term.term, some(term.type), defs, size)
       loc:
+        log("207") // DEBUG
         Kind.Comp.compile(term.term, none, defs, size)
       nat:
+        log("210") // DEBUG
         {Kind.Comp.nat(term.natx), Kind.Term.ref("Nat")}
       chr:
+        log("213") // DEBUG
         {Kind.Comp.chr(term.chrx), Kind.Term.ref("Char")}
       str:
+        log("216") // DEBUG
         {Kind.Comp.str(term.strx), Kind.Term.ref("String")}
       cse:
-        //log("got cse") // TODO DEBUG
+        log("219") // TODO DEBUG
         {Kind.Comp.nil, Kind.Term.typ}
     } default {Kind.Comp.nil, Kind.Term.typ}
   }

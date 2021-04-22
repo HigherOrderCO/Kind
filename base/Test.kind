@@ -1,80 +1,140 @@
-Test: String
-  defs = Kind.Defs.read("", "
-    type Bool {
-      true
-      false
-    }
+// queria fazer um show no estilo sexp pra ficar com a estrutura mais
+// explícita, mas tava dando muito trabalho
+Kind.Term.show.var(
+  name: Kind.Name, 
+  indx: Nat, 
+  indentation: Nat
+): String
+  let spaces = Nat.apply!(indentation, String.concat("  "), "")
+  spaces | "(name \"" | name | "\")\n"
 
-    not(b: Bool): Bool
-      case b {
-        true: false
-        false: true
-      }
-  ",
-  BitsMap.new!)
-  case defs {
-    left: ""
-    right: case Kind.Map.get!("not", defs.value) as got {
-             none:
-               "not found"
-             some:
-               open got.value
-               log("term:")
-               log(Kind.Term.show(got.value.term))
-//               let k = IO {
-//                 get synth_defs = Kind.Synth.one("not", defs.value)
-//                 case synth_defs {
-//                   none: "synth failed"
-//                   some: case Kind.Map.get!("not", synth_defs.value) as synthed_term {
-//                           none: "get failed"
-//                           some: log("term (after synth):")
-//                                 log(Kind.Term.show(synthed_term.value))
-//                                 "ok!"
-//                         }
-//                 }
-//               }
-               let {comp, type} = Kind.Comp.compile(got.value.term, some(got.value.type), defs.value, 0)
-               log("comp:")
-               Kind.Comp.show(comp)
-           }
-  }
-// Press ENTER or type command to continue
-// Test: String
-// 
-// Type mismatch.
-// - Expected: BitsMap(Kind.Term)
-// - Detected: Kind.Defs
-// With context:
-// - defs: Either(String,Kind.Defs)
-// - defs.value: Kind.Defs
-// - got.value: Kind.Def
-// - got.value.file: String
-// - got.value.code: String
-// - got.value.orig: Pair(Nat,Nat)
-// - got.value.name: Kind.Name
-// - got.value.term: Kind.Term
-// - got.value.type: Kind.Term
-// - got.value.isct: Bool
-// - got.value.arit: Nat
-// - got.value.stat: Kind.Status
-// - x: Unit
-// - x: Unit
-// - synth_defs: Maybe(Kind.Defs)
-// - synth_defs.value: Kind.Defs
-// Inside 'Test.kind':
-//   25 |                  get synth_defs = Kind.Synth.one("not", defs.value)
-//   26 |                  case synth_defs {
-//   27 |                    none: "synth failed"
-//   28 |                    some: case Kind.Map.get!("not", synth_defs.value) as synthed_term {
-//   29 |                            none: "get failed"
-//   30 |                            some: log("term (after synth):")
-//   31 |                                  log(Kind.Term.show(synthed_term.value))
-// 
-// 
-// 
-// real	0m38,155s
-// user	0m42,775s
-// sys	0m1,070s
-// 
-// Press ENTER or type command to continue
-// 
+Kind.Term.show.ref(
+  name: Kind.Name, 
+  indentation: Nat
+): String
+  let spaces = Nat.apply!(indentation, String.concat("  "), "")
+  ?a
+
+Kind.Term.show.typ(indentation: Nat): String
+  let spaces = Nat.apply!(indentation, String.concat("  "), "")
+  ?a
+
+Kind.Term.show.all(
+  eras: Bool,
+  self: Kind.Name, 
+  name: Kind.Name, 
+  xtyp: Kind.Term, 
+  body: Kind.Term, 
+  indentation: Nat
+): String
+  let spaces = Nat.apply!(indentation, String.concat("  "), "")
+  ?a
+
+Kind.Term.show.lam(
+  name: Kind.Name,
+  body: Kind.Term -> Kind.Term,
+  indentation: Nat
+): String
+  let spaces = Nat.apply!(indentation, String.concat("  "), "")
+  ?a
+
+Kind.Term.show.app(
+  func: Kind.Term,
+  argm: Kind.Term,
+  indentation: Nat
+): String
+  let spaces = Nat.apply!(indentation, String.concat("  "), "")
+  ?a
+
+Kind.Term.show_sexp.aux(t: Kind.Term, indentation: Nat): String
+  let body =
+    case t {
+      var: "?\n"
+      ref: "?\n"
+      typ: "?\n"
+      all: "?\n"
+      lam: "?\n"
+      app: "?\n"
+      let: "?\n"
+      def: "?\n"
+      ann: "?\n"
+      gol: "?\n"
+      hol: "?\n"
+      nat: "?\n"
+      chr: "?\n"
+      str: "?\n"
+      cse: "?\n"
+      ori: "?\n"
+    }
+  spaces | "(" | body | spaces | ")"
+
+Kind.Term.show_sexp(t: Kind.Term): String
+  Kind.Term.show_sexp.aux(t, 0)
+
+Test: String
+  "okok"
+//  defs = Kind.Defs.read("", "
+//    type Bool {
+//      true
+//      false
+//    }
+//
+//    not(b: Bool): Bool
+//      case b {
+//        true: false
+//        false: true
+//      }
+//  ",
+//  BitsMap.new!)
+//  case defs {
+//    left: defs.value
+//    right: 
+//      case Kind.Map.get!("not", defs.value) as got {
+//        none:
+//          "not found"
+//        some:
+//          open got.value
+//          log("term:")
+//          log(Kind.Term.show(got.value.term))
+//          log("name: ", got.value.name)
+//          let maybe_defs = IO.purify!(Kind.Synth.one(got.value.name, defs.value))
+//          case maybe_defs {
+//            none: 
+//              "no defs, sorry"
+//            some:
+//              log("got defs")
+//              case Kind.Map.get!(got.value.name, maybe_defs.value) as got2 {
+//                none:
+//                  "wtf, \"" | got.value.name | "\" is gone"
+//                some:
+//                  open got2.value
+//                  log("the term now:")
+//                  log(Kind.Term.show_sexp(got2.value.term))
+//                  let {comp, type} = Kind.Comp.compile(got2.value.term, some(got2.value.type), maybe_defs.value, 0)
+//                  log("comp:")
+//                  Kind.Comp.show(comp)
+//              }
+//          }
+//      }
+//  }
+
+//  (b) b((b) Bool,Bool.false,Bool.true)
+//  107
+//  110
+//  113 -
+//  107 - chamada recursiva
+//  140 - come o orig
+//  107 - chamada recursiva
+//  143
+//  147 - faz uma chamada
+//  169
+//  169
+//  169
+//  188
+//  Type
+//  188
+//  Type
+//  188
+//  Type
+//  comp:
+//  "λ_b$1.?"

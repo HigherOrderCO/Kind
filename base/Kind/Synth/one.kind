@@ -14,7 +14,6 @@ Kind.Synth.one(name: Kind.Name, defs: Kind.Defs): IO(Maybe(Kind.Defs))
         },
       };
     },
-    // check state of definition
     some: IO {
       open got.value
       let file = got.value.file;
@@ -27,7 +26,8 @@ Kind.Synth.one(name: Kind.Name, defs: Kind.Defs): IO(Maybe(Kind.Defs))
       let arit = got.value.arit;
       let stat = got.value.stat;
       //let skip = Debug.log!(String.flatten([name, ": ", Kind.Term.show(type), " = ", Kind.Term.show(term)]), (x) Unit.new);
-      //Debug.log!(String.flatten(["synth ", name, " ", case stat { init: "INIT", wait: "WAIT", done: "DONE", fail: "FAIL" }]), (x)
+      log(String.flatten(["synth ", name, " ", case stat { init: "INIT", wait: "WAIT", done: "DONE", fail: "FAIL" }])) // DEBUG
+      // check state of definition
       case stat {
         wait: IO { return some(defs); },
         done: IO { return some(defs); },
