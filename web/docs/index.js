@@ -2834,8 +2834,8 @@ module.exports = class AppPlay extends Component {
         _: "App.EnvInfo.new",
         screen_size: {
           _: "Pair.new",
-          fst: this.container ? this.container.offsetWidth : 0,
-          snd: this.container ? this.container.offsetHeight : 0,
+          fst: window.innerWidth, // this.container ? this.container.offsetWidth : 0,
+          snd: window.innerHeight // this.container ? this.container.offsetHeight : 0,
         },
         mouse_pos: this.mouse_pos,
       }
@@ -2914,6 +2914,24 @@ module.exports = class AppPlay extends Component {
       });
     };
     document.body.addEventListener("keyup", this.listeners.keyup);
+
+    // Resize event
+    this.listeners.resize = (e) => {
+      this.register_event({
+        _: "App.Event.resize",
+        time: BigInt(Date.now()),
+        info: {
+          _: "App.EnvInfo.new",
+          screen_size: {
+            _: "Pair.new",
+            fst: e.target.innerWidth,
+            snd: e.target.innerHeight,
+          },
+          mouse_pos: this.mouse_pos,
+        }
+      });
+    };
+    window.addEventListener("resize", this.listeners.resize);
 
     //Tick event
     this.intervals.tick = () => {
@@ -3135,12 +3153,7 @@ module.exports = class AppPlay extends Component {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = {
-  'Web.Demo': __webpack_require__.e(/* import() */ 987).then(__webpack_require__.t.bind(__webpack_require__, 987, 23)),
-  'Web.Kaelin': __webpack_require__.e(/* import() */ 927).then(__webpack_require__.t.bind(__webpack_require__, 927, 23)),
   'Web.Kind': __webpack_require__.e(/* import() */ 464).then(__webpack_require__.t.bind(__webpack_require__, 464, 23)),
-  'Web.Online': __webpack_require__.e(/* import() */ 523).then(__webpack_require__.t.bind(__webpack_require__, 523, 23)),
-  'Web.Senhas': __webpack_require__.e(/* import() */ 936).then(__webpack_require__.t.bind(__webpack_require__, 936, 23)),
-  'Web.TicTacToe': __webpack_require__.e(/* import() */ 734).then(__webpack_require__.t.bind(__webpack_require__, 734, 23)),
 }
 
 

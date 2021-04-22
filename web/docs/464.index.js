@@ -1459,20 +1459,20 @@ module.exports = (function() {
         return $286;
     };
     const Dynamic$new = x0 => Dynamic$new$(x0);
-    const Unit$new = null;
-    const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $287 = _m$pure$2;
-        return $287;
-    }))(Dynamic$new$(Unit$new));
 
     function App$store$(_value$2) {
-        var $288 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $289 = _m$pure$4;
-            return $289;
+        var $287 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $288 = _m$pure$4;
+            return $288;
         }))(Dynamic$new$(_value$2));
-        return $288;
+        return $287;
     };
     const App$store = x0 => App$store$(x0);
+    const Unit$new = null;
+    const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
+        var $289 = _m$pure$2;
+        return $289;
+    }))(Dynamic$new$(Unit$new));
 
     function Web$Kind$set_mouse_over$(_id$1, _stt$2) {
         var self = _stt$2;
@@ -1632,17 +1632,48 @@ module.exports = (function() {
         var _when$3 = (_event$3 => _state$4 => {
             var self = _event$3;
             switch (self._) {
-                case 'App.Event.mouse_over':
-                    var $324 = self.id;
-                    var $325 = App$store$(Web$Kind$set_mouse_over$($324, _state$4));
+                case 'App.Event.init':
+                    var $324 = self.info;
+                    var self = $324;
+                    switch (self._) {
+                        case 'App.EnvInfo.new':
+                            var $326 = self.screen_size;
+                            var $327 = App$store$(Web$Kind$State$new$($326, Web$Kind$Page$home, ""));
+                            var $325 = $327;
+                            break;
+                    };
                     var $323 = $325;
                     break;
-                case 'App.Event.mouse_click':
-                    var $326 = self.id;
-                    var $327 = App$store$(Web$Kind$exe_event$($326, _state$4));
-                    var $323 = $327;
+                case 'App.Event.mouse_over':
+                    var $328 = self.id;
+                    var $329 = App$store$(Web$Kind$set_mouse_over$($328, _state$4));
+                    var $323 = $329;
                     break;
-                case 'App.Event.init':
+                case 'App.Event.mouse_click':
+                    var $330 = self.id;
+                    var $331 = App$store$(Web$Kind$exe_event$($330, _state$4));
+                    var $323 = $331;
+                    break;
+                case 'App.Event.resize':
+                    var $332 = self.info;
+                    var self = $332;
+                    switch (self._) {
+                        case 'App.EnvInfo.new':
+                            var $334 = self.screen_size;
+                            var self = _state$4;
+                            switch (self._) {
+                                case 'Web.Kind.State.new':
+                                    var $336 = self.page;
+                                    var $337 = self.mouse_over;
+                                    var $338 = App$store$(Web$Kind$State$new$($334, $336, $337));
+                                    var $335 = $338;
+                                    break;
+                            };
+                            var $333 = $335;
+                            break;
+                    };
+                    var $323 = $333;
+                    break;
                 case 'App.Event.tick':
                 case 'App.Event.mouse_down':
                 case 'App.Event.mouse_up':
@@ -1650,8 +1681,8 @@ module.exports = (function() {
                 case 'App.Event.key_up':
                 case 'App.Event.post':
                 case 'App.Event.mouse_out':
-                    var $328 = App$pass;
-                    var $323 = $328;
+                    var $339 = App$pass;
+                    var $323 = $339;
                     break;
             };
             return $323;
@@ -1768,9 +1799,9 @@ module.exports = (function() {
         'IO.end': IO$end,
         'IO.monad': IO$monad,
         'Dynamic.new': Dynamic$new,
+        'App.store': App$store,
         'Unit.new': Unit$new,
         'App.pass': App$pass,
-        'App.store': App$store,
         'Web.Kind.set_mouse_over': Web$Kind$set_mouse_over,
         'Web.Kind.Event.go_to_home': Web$Kind$Event$go_to_home,
         'Web.Kind.Event.go_to_apps': Web$Kind$Event$go_to_apps,

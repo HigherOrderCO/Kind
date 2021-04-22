@@ -50,9 +50,15 @@ Web.Kind: App(Web.Kind.State)
 
   when = (event, state)
     case event {
-      init: App.pass
+      init: 
+        open event.info
+        App.store!(Web.Kind.State.new(event.info.screen_size, Web.Kind.Page.home, ""))
       mouse_click: App.store!(Web.Kind.exe_event(event.id, state))
       mouse_over : App.store!(Web.Kind.set_mouse_over(event.id, state))
+      resize: 
+        open event.info
+        open state
+        App.store!(Web.Kind.State.new(event.info.screen_size, state.page, state.mouse_over))
     } default App.pass
   
   // The application
