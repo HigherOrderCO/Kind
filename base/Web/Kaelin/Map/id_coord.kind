@@ -1,3 +1,3 @@
 Web.Kaelin.Map.id_coord(addr: String, map: Web.Kaelin.Map): Maybe(Web.Kaelin.Coord)
 let list = Web.Kaelin.Map.find_players(map)
-list{addr}
+Map.get!(addr, list)
