@@ -82,11 +82,11 @@ Web.Kaelin: App<Web.Kaelin.State>
             }
           "0x2":
             let coord = switch String.eql( String.slice(3, 4, event.data) ) {
-              "1": {Int.new(1,0), Int.new(0,0)}
-              "2": {Int.new(0,1), Int.new(0,0)}
-              "3": {Int.new(0,0), Int.new(0,1)}
-              "4": {Int.new(0,0), Int.new(1,0)}
-            } default {Int.new(0,0), Int.new(0,0)}
+              "1": {+1#32, +0#32}
+              "2": {-1#32, +0#32}
+              "3": {+0#32, -1#32}
+              "4": {+0#32, +1#32}
+            } default {+0#32, +0#32}
             
             open coord
             App.store!(Web.Kaelin.Action.move_player(event.addr, coord.fst, coord.snd, state))

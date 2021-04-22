@@ -11,12 +11,16 @@ Web.Kaelin.Draw.map(img: VoxBox, map: Web.Kaelin.Map): VoxBox
   for j : U32 from 0#32 to height with img:
     for i : U32 from 0#32 to width with img:
       // generate int axial coordinate
-      let coord_i = Int.sub(Int.new(0, U32.to_nat(i)), Int.new(0, U32.to_nat(map_size))) // i - map_size
-      let coord_j = Int.sub(Int.new(0, U32.to_nat(j)), Int.new(0, U32.to_nat(map_size))) // j - map_size
+      
+      let to_i32 = U32.to_i32
+
+      let coord_i = I32.sub(to_i32(i), to_i32(map_size)) // i - map_size
+      let coord_j = I32.sub(to_i32(j), to_i32(map_size)) // j - map_size
       let coord = Web.Kaelin.Coord.new( coord_i, coord_j)
       let fit = Web.Kaelin.Coord.fit(coord, map_size)
 
       case fit {
+        
         true:
           let map = Web.Kaelin.Map.background(coord, map)
           // Draws the hexagon border

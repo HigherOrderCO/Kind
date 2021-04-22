@@ -6,7 +6,7 @@ Web.Kaelin.Coord.fit(
   let i = coord.i
   let j = coord.j
 
-  let sum = Int.add(i, j)
-  let abs = Int.abs(sum)
-  let abs = Nat.to_u32(abs)
+  let sum = I32.add(i, j)
+  let abs = I32.abs(sum)
+  let abs = I32.to_u32(abs)
   U32.lte(abs, map_size)

@@ -1,7 +1,7 @@
 // move by x and y
 // this function will change when the state change and the click event 
 // waiting for click to be ready
-Web.Kaelin.Action.move_player(player_addr: String, x: Int, y: Int, state: Web.Kaelin.State): Web.Kaelin.State
+Web.Kaelin.Action.move_player(player_addr: String, x: I32, y: I32, state: Web.Kaelin.State): Web.Kaelin.State
   case state {
     game: 
       let player = state.players{player_addr}
