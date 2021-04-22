@@ -1,16 +1,39 @@
 // Draws a map of hexagons given the style "offset coordinates"
 // TODO: Change the hexagon's color based on Web.Kaelin.Cast_info
-Web.Kaelin.Draw.state.background(img: VoxBox, map: Web.Kaelin.Map): VoxBox
-  let list = NatMap.to_list!(map)
-    for pair in list with img:
-      open pair
-      let coord = Web.Kaelin.Coord.Convert.nat_to_axial(pair.fst)
-      let {i,   j} = Web.Kaelin.Coord.to_screen_xy(coord)
-      let i = U32.sub(i, Web.Kaelin.Constants.hexagon_radius)
-      let j = U32.sub(j, Web.Kaelin.Constants.hexagon_radius)
-      for entity in pair.snd with img:
-        case entity {
-          background: VoxBox.Draw.image(i, j, 0#32, entity.img, img)
-        }default img
-      img
-    img
+Web.Kaelin.Draw.state.background(state: Web.Kaelin.State, img: VoxBox, map: Web.Kaelin.Map): VoxBox
+  case state { 
+    game :
+      case state.cast_info { 
+        none:
+          let list = NatMap.to_list!(map)
+          for pair in list with img:
+            open pair
+            let coord = Web.Kaelin.Coord.Convert.nat_to_axial(pair.fst)
+            let {i,   j} = Web.Kaelin.Coord.to_screen_xy(coord)
+            let i = U32.sub(i, Web.Kaelin.Constants.hexagon_radius)
+            let j = U32.sub(j, Web.Kaelin.Constants.hexagon_radius)
+            for entity in pair.snd with img:
+              case entity {
+              background: VoxBox.Draw.image(i, j, 0#32, entity.img, img)
+              }default img
+                img
+              img
+
+        some: 
+          open state.cast_info.value
+          Web.Kaelin.Draw.skill_range_show(state.cast_info.value.hero_pos,state.map , img, state.cast_info.value.range)
+      }
+  }default img
+  //let list = NatMap.to_list!(map)
+    //for pair in list with img:
+      //open pair
+      //let coord = Web.Kaelin.Coord.Convert.nat_to_axial(pair.fst)
+      //let {i,   j} = Web.Kaelin.Coord.to_screen_xy(coord)
+      //let i = U32.sub(i, Web.Kaelin.Constants.hexagon_radius)
+      //let j = U32.sub(j, Web.Kaelin.Constants.hexagon_radius)
+      //for entity in pair.snd with img:
+        //case entity {
+          //background: VoxBox.Draw.image(i, j, 0#32, entity.img, img)
+        //}default img
+      //img
+    //img
