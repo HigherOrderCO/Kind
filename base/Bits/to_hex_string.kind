@@ -1,0 +1,4 @@
+Bits.to_hex_string (x : Bits): String
+  let ls = Bits.break(4, x)
+  List.foldr(Bits, String, "", 
+    (x) Function.flip(_, _ , _, String.concat)(Hex.to_hex_string(x)), ls)
