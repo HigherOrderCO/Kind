@@ -1,7 +1,7 @@
 // will the attributes of the heroes be placed here?
 type Web.Kaelin.Hero {
   new(
-    id: String,
-    ent: Web.Kaelin.Entity
+    id: String
+    img: VoxBox
   )
 }
