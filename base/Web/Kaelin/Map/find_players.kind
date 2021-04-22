@@ -10,7 +10,7 @@ Web.Kaelin.Map.find_players(map: Web.Kaelin.Map): Map(Web.Kaelin.Coord)
       case entity { 
         background: players
         creature: case entity.player { 
-          none: players
+          none: players 
           some:          
             let axial_coord = Web.Kaelin.Coord.Convert.nat_to_axial(coord)
             players ++ [{entity.player.value, axial_coord}]

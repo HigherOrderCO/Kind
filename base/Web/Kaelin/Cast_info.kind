@@ -3,5 +3,6 @@ type Web.Kaelin.Cast_info {
     mouse_pos: Web.Kaelin.Coord
     hero_pos: Web.Kaelin.Coord
     range: Nat
+    hex_effect: Web.Kaelin.Hex_effect
   )
 }
