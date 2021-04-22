@@ -1,7 +1,7 @@
 // Check which is the current page. 
-// TODO: improve it
-Web.Kind.helper.is_current(title: String, page: Web.Kind.Page): Bool
-  case page{
-    home: String.eql(title, "Home")
-    apps: String.eql(title, "Apps")
-  }
+Web.Kind.helper.is_eql(src: Web.Kind.Page, trg: Web.Kind.Page): Bool
+  case src trg {
+    home home: true
+    apps apps: true
+  } default false
+

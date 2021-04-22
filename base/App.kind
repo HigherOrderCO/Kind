@@ -26,15 +26,12 @@ type App.Event {
     time: U64
     info: App.EnvInfo
   )
-  dom(
-    time: U64
-    name: String
-    id: String
-  )
+  // The event occurs when the user presses a mouse button over an element and before it is released
   mouse_down(
     time: U64
     button: U16
   )
+  // The event occurs when a user releases a mouse button over an element
   mouse_up(
     time: U64
     button: U16
@@ -53,4 +50,28 @@ type App.Event {
     addr: String
     data: String
   )
+  // The event occurs when the pointer is moved onto an element, or onto one of its children
+  mouse_over(
+    time: U64
+    id: String
+  )
+  // The event occurs when a user moves the mouse pointer out of an element, or out of one of its children
+  mouse_out(
+    time: U64
+    id: String
+  )
+  // The event occurs when the user clicks on an element. It's fired after the mousedown and mouseup events
+  mouse_click(
+    time: U64
+    id: String
+    action: String
+  )
 }
+
+App.Event.name(e: App.Event): String
+  case e{
+    mouse_down: "mouse_down"
+    mouse_up: "mouse_up"
+    mouse_over: "mouse_over"
+    mouse_click: "mouse_click"
+  } default ""

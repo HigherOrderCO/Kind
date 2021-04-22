@@ -1,4 +1,11 @@
-Web.Kind.component.header(page: Web.Kind.Page): DOM
+Web.Kind.component.id_action: Map(Web.Kind.Event)
+  {
+    "tab_home": Web.Kind.Event.go_to_home
+    "tab_apps": Web.Kind.Event.go_to_apps
+    "btn_pri_home_go_to_apps": Web.Kind.Event.go_to_apps
+  }
+
+Web.Kind.component.header(stt: Web.Kind.State): DOM
   let vbox = VoxBox.alloc_capacity(100#32)
   let line = 
     DOM.node("div", {}, {
@@ -15,19 +22,23 @@ Web.Kind.component.header(page: Web.Kind.Page): DOM
       "text-align" : "center"
       }, [DOM.text("KIND language")]),
     line,
-    Web.Kind.component.header_tabs(page)
+    Web.Kind.component.header_tabs(stt)
   ])
 
-Web.Kind.component.header_tabs(page: Web.Kind.Page): DOM
-  let tabs =
-    [
-      Web.Kind.component.header_tab(
-        Web.Kind.helper.is_current("Home", page), "Home", Web.Kind.constant.action_go_to_home)
+// Setup the tabs to change page
+Web.Kind.component.header_tabs(stt: Web.Kind.State): DOM
+  open stt
+  let tabs = [
+    Web.Kind.component.header_tab(
+      Web.Kind.helper.is_eql(Web.Kind.Page.home, stt.page), 
+      String.eql("tab_home", stt.mouse_over)
+      "Home", "tab_home")
 
-      Web.Kind.component.header_tab(
-        Web.Kind.helper.is_current("Apps", page), "Apps", Web.Kind.constant.action_go_to_apps)
-    ]
-
+    Web.Kind.component.header_tab(
+      Web.Kind.helper.is_eql(Web.Kind.Page.apps, stt.page),
+      String.eql("tab_apps", stt.mouse_over)
+      "Apps", "tab_apps")
+  ]
   DOM.node("div", {}, {
     "padding-left": "20%"
     "display": "flex"
@@ -35,39 +46,41 @@ Web.Kind.component.header_tabs(page: Web.Kind.Page): DOM
     }, tabs)
 
 
-Web.Kind.component.header_tab(is_active: Bool, title: String, id: String): DOM
-  if is_active then
-    DOM.node("div", {
-      "id": id
-    }, {
-      "margin-right": "30px"
-      "border-style": "none none solid none"
-      "border-color": Web.Kind.constant.secondary_color
-      "font-size": "18px"
-      "cursor": "pointer"
-      "width": "70px"
-      "display": "flex"
-      "justify-content": "center"
-      }, [DOM.text(title)])
-  else
-    DOM.node("div", {
-      "id": id
-    }, {
-      "margin-right": "30px"
-      "font-size": "18px"
-      "cursor": "pointer"
-      "width": "70px"
-      "margin-bottom": "2px"
-      "display": "flex"
-      "justify-content": "center"
-      }, [DOM.text(title)])
+// Configure a tab
+Web.Kind.component.header_tab(
+  is_active: Bool, 
+  is_hover: Bool, 
+  title: String, 
+  id: String): DOM
+  let normal = {
+    "margin-right": "30px"
+    "font-size": "18px"
+    "cursor": "pointer"
+    "width": "70px"
+    "padding-bottom": "4px"
+    "display": "flex"
+    "justify-content": "center"
+    }
+  let active = {
+    "border-style": "none none solid none"
+    "border-color": Web.Kind.constant.secondary_color
+    "border-width": "thin"
+    }
+  let hover = {
+    "border-style": "none none solid none"
+    "border-color": Web.Kind.constant.light_gray_color
+    "border-width": "thin"
+    }
+  DOM.node("div", {"id": id}, 
+    if is_active then Map.union!(normal, active)
+    else if is_hover then Map.union!(normal, hover)
+    else normal,
+    [DOM.text(title)])
 
 Web.Kind.component.body_container(ele: List<DOM>): DOM
   DOM.node("div", {}, {
     "margin": "40px 20% 40px 20%",
     "flex": "1"
-    // "display": "flex"
-    // "justify-content": "flex-start"
     }, ele)
 
 Web.Kind.component.title(title: String): DOM
