@@ -13,9 +13,9 @@ Web.Kaelin.Map.find_players(map: Web.Kaelin.Map): Map(Web.Kaelin.Coord)
           none: players 
           some:          
             let axial_coord = Web.Kaelin.Coord.Convert.nat_to_axial(coord)
-            players ++ [{entity.player.value, axial_coord}]
+            [{entity.player.value, axial_coord}]
         }
       }
-    players
+    result ++ players
   Map.from_list!(result)
 

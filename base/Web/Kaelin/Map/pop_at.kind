@@ -1,3 +1,5 @@
+// TODO: turn into a pop entity, so you can decide what to pop (background or hero)
+// Improve it
 Web.Kaelin.Map.pop_at(
   idx: Nat, 
   coord: Web.Kaelin.Coord, 
@@ -9,5 +11,7 @@ Web.Kaelin.Map.pop_at(
     none:{map, none}
     some:
       let {ent, remaining_tile} = List.pop_at!(idx, tile.value)
-      {(NatMap.set!(key, remaining_tile, map)), ent} 
+      let new_map = Web.Kaelin.Map.del(coord,map)
+      let new_map = Web.Kaelin.Map.push(coord, remaining_tile, new_map)
+      {new_map, ent}
   }

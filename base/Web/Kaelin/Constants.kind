@@ -2,7 +2,7 @@ Web.Kaelin.Constants.hexagon_radius: U32
   15#32
 
 Web.Kaelin.Constants.map_size : U32
-  5#32
+  4#32
 
 Web.Kaelin.Constants.center_x : U32
   128#32
@@ -10,5 +10,6 @@ Web.Kaelin.Constants.center_x : U32
 Web.Kaelin.Constants.center_y : U32
   128#32
 
+// TODO: Randomize or change it every time you build
 Web.Kaelin.Constants.room : String
-  "0x196581625793"
+  "0x215512345232"

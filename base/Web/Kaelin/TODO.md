@@ -1,12 +1,17 @@
 TODO list on Kaelin
 
+1 - Web.Kaelin.Map.push, Web.Kaelin.Map.set - fix inconsistences
 
-1 - Replace Coord on Player.kind
+2 - Web.Kaelin.Constants - randomize or update each build
 
-2 - Remove HERO from Player.kind
+3 - Web.Kaelin.Map.pop_at - improve it
 
-3 - Modify the file map.kind inside Web/Kaelin/Draw/map.kind
+4 - Web.Kaelin.move - improve it 
 
-4 - Rename Web.Kaelin.Draw.tile.empty inside Web/Kaelin/Draw/tile.kind to draw_coords
+5 - Web.Kaelin.get - should return maybe
 
-5 - Serialize.kind and Deserialize.kind
+6 - Web.Kaelin - update how movement works 
+
+7 - Web.Kaelin.Draw.background - change hexagon color based on Web.Kaelin.Cast_info
+
+8 - Serialize.kind and Deserialize.kind

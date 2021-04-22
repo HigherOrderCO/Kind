@@ -1,13 +1,13 @@
 // Adds initial creatures to a map
 Web.Kaelin.Map.init(map: Web.Kaelin.Map): Web.Kaelin.Map
-  // new_coord = Web.Kaelin.Coord.new
-  // creature  = Web.Kaelin.Entity.creature
-  // croni     = Web.Kaelin.Hero.croni
-  // cyclope   = Web.Kaelin.Hero.cyclope
-  // lela      = Web.Kaelin.Hero.lela
-  // octoking  = Web.Kaelin.Hero.octoking
-  // map       = Web.Kaelin.Map.push(new_coord(-1,-2), creature(none,croni), map)
-  // //map       = Web.Kaelin.Map.push(new_coord(+0,+0), creature(none,cyclope), map)
-  // map       = Web.Kaelin.Map.push(new_coord(+0,+0), creature(none,lela), map)
-  // map       = Web.Kaelin.Map.push(new_coord(+3,+2), creature(none,octoking), map)
+  new_coord = Web.Kaelin.Coord.new
+  creature  = Web.Kaelin.Entity.creature
+  croni     = Web.Kaelin.Hero.croni
+  cyclope   = Web.Kaelin.Hero.cyclope
+  lela      = Web.Kaelin.Hero.lela
+  octoking  = Web.Kaelin.Hero.octoking
+  map       = Web.Kaelin.Map.set(new_coord(-1,-2), creature(none,croni), map)
+  map       = Web.Kaelin.Map.set(new_coord(+0,+3), creature(none,cyclope), map)
+  map       = Web.Kaelin.Map.set(new_coord(-2,+0), creature(none,lela), map)
+  map       = Web.Kaelin.Map.set(new_coord(+3,-2), creature(none,octoking), map)
   map

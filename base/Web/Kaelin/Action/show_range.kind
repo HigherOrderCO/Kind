@@ -1,3 +1,4 @@
+// Not working and not being used
 Web.Kaelin.Action.show_range(address: String, range: Nat, state: Web.Kaelin.State): Web.Kaelin.State
   case state{
     game:

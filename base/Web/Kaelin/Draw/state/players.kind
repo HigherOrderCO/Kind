@@ -1,35 +1,14 @@
 // draw all players
 Web.Kaelin.Draw.state.players(img: VoxBox, map: Web.Kaelin.Map): VoxBox
-  let lista = Web.Kaelin.Map.find_players(map)
-  let player_list = Map.to_list!(lista)
+  let player_list = NatMap.to_list!(map)
   for prs in player_list with img:
     open prs
-      let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(prs.snd)
-      let hero = Web.Kaelin.Coord.coord_to_hero(prs.snd, map)
-      case hero {
-        none: img
-        some: Web.Kaelin.Draw.hero(cx, cy, 0u, hero.value, img)
-      }
+      let coord = Web.Kaelin.Coord.Convert.nat_to_axial(prs.fst)
+      let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(coord)
+      for entity in prs.snd with img:      
+        case entity {
+          background: img
+          creature: Web.Kaelin.Draw.hero(cx, cy, 0u, entity.hero, img)
+      }img
   img
-      
-
-    //for pair in player_list with img:
-    
-  //for player in player_list with img:
-    //// draw one player
-    //Web.Kaelin.Draw.state.player(img, player)
-  //img
-
-  
-
-// draw one player
-// now is only drawing a hero in some coord
-//Web.Kaelin.Draw.state.player(img: VoxBox, player: Web.Kaelin.Player): VoxBox
-  //open player
-  //// get canvas coordinates
-  
-  //let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(player.coord)
-  
-  //// draw hero in these coordinates
-  //Web.Kaelin.Draw.hero(cx, cy, 0u, player.hero, img)
   

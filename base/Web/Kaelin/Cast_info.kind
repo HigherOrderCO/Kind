@@ -1,4 +1,3 @@
-// TODO: rename to CastInfo. Types use CamelCase
 type Web.Kaelin.Cast_info {
   new(
     mouse_pos: Web.Kaelin.Coord

@@ -1,9 +1,6 @@
-// Rename to "Web.Kaelin.Map.set", and add a separate "Web.Kaelin.Map.push".
-Web.Kaelin.Map.push(
-  coord: Web.Kaelin.Coord
-  entity: Web.Kaelin.Entity
-  map: Web.Kaelin.Map
-) : Web.Kaelin.Map
-  key  = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
-  tile = entity & Web.Kaelin.Map.get(coord, map)
-  NatMap.set!(key, tile, map)
+// TODO: fix inconsistences between set and push
+Web.Kaelin.Map.push(coord: Web.Kaelin.Coord, tile: Web.Kaelin.Tile, map:Web.Kaelin.Map): Web.Kaelin.Map
+tiles = NatMap.to_list!(map)
+key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+map = {key,tile} & tiles
+NatMap.from_list!(map)
