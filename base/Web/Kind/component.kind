@@ -2,10 +2,18 @@ Web.Kind.component.header(page: Web.Kind.Page): DOM
   let vbox = VoxBox.alloc_capacity(100#32)
   let line = 
     DOM.node("div", {}, {
-        "text-align" : "center" 
-        "padding": "10px 50px 10px 50px"
+        "margin":  "auto"
+        "max-width": "65em"
         }, 
-      [ DOM.node("p", {}, {"color": Web.Kind.constant.primary_color}, [ DOM.text(String.repeat("=", 90)) ]) ]
+      [ DOM.node("div", {}, {
+        "height": "4px"
+        "border-top": Web.Kind.constant.primary_color | " dashed 1px"
+        "border-bottom": Web.Kind.constant.primary_color | " dashed 1px"
+        "margin-top": "1em"
+        "margin-bottom": "1em"
+        "margin-left": "15%"
+        "margin-right": "15%"
+        }, []) ]
     )
 
   DOM.node("div", {}, {}, [
