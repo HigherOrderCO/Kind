@@ -1,0 +1,17 @@
+Web.Kaelin.Draw.skill_range_show(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map, img: VoxBox, range: Nat): VoxBox
+  skill_hex = Web.Kaelin.Entity.background(Kaelin.Assets.hex_range)
+  coords = Web.Kaelin.Coord.Axial.range(coord, range)
+  for n in coords with img:
+  {i,   j} = Web.Kaelin.Coord.to_screen_xy(coord)
+    case skill_hex { 
+      background: VoxBox.Draw.image(i, j, 0#32, skill_hex.img, img)
+    }default img
+  img
+  
+  
+
+
+      
+
+
+

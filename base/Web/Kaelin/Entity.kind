@@ -1,5 +1,4 @@
 type Web.Kaelin.Entity {
   background(img: VoxBox)
-  // TODO rename hero to hero
-  hero(img: VoxBox) // add player -> maybe(addr)
+  creature(player: Maybe(String), hero: Web.Kaelin.Hero)
 }

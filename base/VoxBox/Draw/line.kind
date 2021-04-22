@@ -14,3 +14,67 @@ VoxBox.Draw.line(
     open coord
     VoxBox.push(Pos32.new(coord.fst, coord.snd, z), col, img)) :: Pair<U32, U32> -> VoxBox -> VoxBox
   List.fold<Pair<U32, U32>>(coords, VoxBox, img, draw_coord)
+
+// returns a list of integer coordinates that approximate
+// the segment joining (x0, y0) and (x1, y1)
+VoxBox.Draw.line.aux.coords(
+  x0: U32,
+  y0: U32,
+  x1: U32,
+  y1: U32,
+): List<Pair<U32, U32>>
+  if U32.gtn(x0, x1) then
+    List.reverse!(VoxBox.Draw.line.aux.coords(x1, y1, x0, y0))
+  else if U32.gtn(y0, y1) then
+    List.map!!(VoxBox.Draw.line.aux.reflect_y(y0, y1), VoxBox.Draw.line.aux.coords(x0, y1, x1, y0))
+  else if U32.gtn(U32.sub(y1, y0), U32.sub(x1, x0)) then
+    List.map!!(Pair.swap!!, VoxBox.Draw.line.aux.coords(y0, x0, y1, x1))
+  else
+    VoxBox.Draw.line.aux.coords.base_case(x0, y0, x0, y0, x1, y1, [])
+
+// TODO optimize as a tail-recursive function
+// the base_case only works when
+// * x1 >= x0
+// * y1 >= y0
+// * (x1 - x0) >= (y1 - y0)
+VoxBox.Draw.line.aux.coords.base_case(
+  cx: U32,
+  cy: U32,
+  x0: U32,
+  y0: U32,
+  x1: U32,
+  y1: U32,
+  acc: List<Pair<U32, U32>>
+): List<Pair<U32, U32>>
+  if U32.eql(cx, x1) then
+    List.reverse!({cx, cy} & acc)
+  else
+    let b = VoxBox.Draw.line.aux.bump(x0, y0, x1, y1, cx, cy)
+    VoxBox.Draw.line.aux.coords.base_case(U32.add(cx, 1#32), U32.add(cy, b), x0, y0, x1, y1, {cx, cy} & acc)
+
+// Decides wether we should bump one pixel up or not
+// inside VoxBox.Draw.line.aux.coords.base
+VoxBox.Draw.line.aux.bump(
+  x0: U32,
+  y0: U32,
+  x1: U32,
+  y1: U32,
+  cx: U32,
+  cy: U32,
+): U32
+  // absolute value of x coordinate of the gradient
+  // (it's negative)
+  let grad_x = U32.sub(y1, y0)
+  // absolute value of y coordinate of the gradient
+  // (it's positive)
+  let grad_y = U32.sub(x1, x0)
+  let my_x = U32.mul(U32.sub(U32.mul(2#32, U32.add(cx, 1#32)), U32.mul(2#32, x0)), grad_x)
+  let my_y = U32.mul(U32.sub(U32.add(U32.mul(2#32, cy), 1#32), U32.mul(2#32, y0)), grad_y)
+  if U32.gtn(my_x, my_y) then
+    1#32
+  else
+    0#32
+
+VoxBox.Draw.line.aux.reflect_y(y0: U32, y1: U32, p: Pair<U32, U32>): Pair<U32, U32>
+  open p
+  {p.fst, U32.sub(U32.add(y0, y1), p.snd)}

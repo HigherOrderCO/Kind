@@ -57,7 +57,7 @@ IO.randoms(len: Nat, max: Nat): IO<List<Nat>>
     get seed = IO.get_time
     return Nat.randoms(len, seed, max)
   }
-  
+
 // Gera uma lista random baseada no index de outras listas
 List.random(xs: List<Nat>, ys: List<Nat>, zs: List<Nat>): List<Nat>
   case xs { 

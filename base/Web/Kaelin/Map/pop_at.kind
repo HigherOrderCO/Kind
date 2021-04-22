@@ -1,9 +1,17 @@
+// TODO: turn into a pop entity, so you can decide what to pop (background or hero)
+// Improve it
 Web.Kaelin.Map.pop_at(
   idx: Nat, 
   coord: Web.Kaelin.Coord, 
   map: Web.Kaelin.Map
 ) : Pair<Web.Kaelin.Map, Maybe<Web.Kaelin.Entity>>
-  let key = Web.Kaelin.Coord.show(coord)
-  let tile = map{key} <> []
-  let {ent, remaining_tile} = List.pop_at!(idx, tile)
-  { map{key} <- remaining_tile, ent }
+  let key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+  let tile = NatMap.get!(key, map)
+  case tile {
+    none:{map, none}
+    some:
+      let {ent, remaining_tile} = List.pop_at!(idx, tile.value)
+      let new_map = Web.Kaelin.Map.del(coord,map)
+      let new_map = Web.Kaelin.Map.push(coord, remaining_tile, new_map)
+      {new_map, ent}
+  }

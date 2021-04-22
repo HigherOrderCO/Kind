@@ -1,0 +1,5 @@
+// TODO: Fix so it doesn't use push and del, and fix inconsistences between set and push
+Web.Kaelin.Map.set(coord: Web.Kaelin.Coord, entity: Web.Kaelin.Entity, map: Web.Kaelin.Map) : Web.Kaelin.Map
+  tile = entity & Web.Kaelin.Map.get(coord, map)
+  map  = Web.Kaelin.Map.del(coord, map)
+  Web.Kaelin.Map.push(coord, tile, map)
