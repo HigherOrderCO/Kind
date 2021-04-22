@@ -21,8 +21,60 @@ Test: String
                open got.value
                log("term:")
                log(Kind.Term.show(got.value.term))
+//               let k = IO {
+//                 get synth_defs = Kind.Synth.one("not", defs.value)
+//                 case synth_defs {
+//                   none: "synth failed"
+//                   some: case Kind.Map.get!("not", synth_defs.value) as synthed_term {
+//                           none: "get failed"
+//                           some: log("term (after synth):")
+//                                 log(Kind.Term.show(synthed_term.value))
+//                                 "ok!"
+//                         }
+//                 }
+//               }
                let {comp, type} = Kind.Comp.compile(got.value.term, some(got.value.type), defs.value, 0)
                log("comp:")
                Kind.Comp.show(comp)
            }
   }
+// Press ENTER or type command to continue
+// Test: String
+// 
+// Type mismatch.
+// - Expected: BitsMap(Kind.Term)
+// - Detected: Kind.Defs
+// With context:
+// - defs: Either(String,Kind.Defs)
+// - defs.value: Kind.Defs
+// - got.value: Kind.Def
+// - got.value.file: String
+// - got.value.code: String
+// - got.value.orig: Pair(Nat,Nat)
+// - got.value.name: Kind.Name
+// - got.value.term: Kind.Term
+// - got.value.type: Kind.Term
+// - got.value.isct: Bool
+// - got.value.arit: Nat
+// - got.value.stat: Kind.Status
+// - x: Unit
+// - x: Unit
+// - synth_defs: Maybe(Kind.Defs)
+// - synth_defs.value: Kind.Defs
+// Inside 'Test.kind':
+//   25 |                  get synth_defs = Kind.Synth.one("not", defs.value)
+//   26 |                  case synth_defs {
+//   27 |                    none: "synth failed"
+//   28 |                    some: case Kind.Map.get!("not", synth_defs.value) as synthed_term {
+//   29 |                            none: "get failed"
+//   30 |                            some: log("term (after synth):")
+//   31 |                                  log(Kind.Term.show(synthed_term.value))
+// 
+// 
+// 
+// real	0m38,155s
+// user	0m42,775s
+// sys	0m1,070s
+// 
+// Press ENTER or type command to continue
+// 
