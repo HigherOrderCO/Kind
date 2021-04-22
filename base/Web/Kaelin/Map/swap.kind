@@ -8,5 +8,5 @@ Web.Kaelin.Map.swap(
   {new_map, ent} = Web.Kaelin.Map.pop_at(idx, ca, map)
   case ent {
     none: map
-    some: Web.Kaelin.Map.set(cb, ent.value, new_map)
+    some: Web.Kaelin.Map.push(cb, ent.value, new_map)
   }
