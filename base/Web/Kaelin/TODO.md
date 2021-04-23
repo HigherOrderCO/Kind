@@ -1,17 +1,19 @@
 TODO list on Kaelin
 
-1 - Web.Kaelin.Constants - randomize or update each build
+- [ ] Web.Kaelin.Constants - randomize or update each build
 
-2 - Web.Kaelin.move - improve it 
+- [ ] Web.Kaelin.move - improve it 
 
-3 - Web.Kaelin - update how movement works 
+- [ ] Web.Kaelin - update how movement works 
 
-4 - Web.Kaelin.Draw.background - change hexagon color based on Web.Kaelin.CastInfo
+- [X] Web.Kaelin.Draw.background - change hexagon color based on Web.Kaelin.CastInfo
 
-5 - Serialize.kind and Deserialize.kind
+- [ ] Serialize.kind and Deserialize.kind
 
-6 - Fix add_on_range and skill_range_show functions
+- [ ] Fix add_on_range and skill_range_show functions
 
-7 - Improve Draw/state/background function
+- [X] Improve Draw/state/background function
 
-8 - Find out why coord eql in select.kind is never true
+- [ ] I32.show bug (when printing negative numbers goes to 2ˆ32 - absolute value) 
+
+- [ ] Find out why coord eql in select.kind is never true
