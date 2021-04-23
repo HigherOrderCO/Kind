@@ -5,18 +5,18 @@ Kind.Term.show_sexp.var(
   indx: Nat, 
   indentation: Nat
 ): String
-  let spaces = Nat.apply!(indentation, String.concat("  "), "")
+  let spaces = Nat.apply!(indentation, String.concat(" "), "")
   spaces | "(var (name \"" | name | "\"))"
 
 Kind.Term.show_sexp.ref(
   name: Kind.Name, 
   indentation: Nat
 ): String
-  let spaces = Nat.apply!(indentation, String.concat("  "), "")
+  let spaces = Nat.apply!(indentation, String.concat(" "), "")
   spaces | "(ref (name \"" | name | "\"))"
 
 Kind.Term.show_sexp.typ(indentation: Nat): String
-  let spaces = Nat.apply!(indentation, String.concat("  "), "")
+  let spaces = Nat.apply!(indentation, String.concat(" "), "")
   spaces | "(Type)\n"
 
 Kind.Term.show_sexp.all(
@@ -27,7 +27,7 @@ Kind.Term.show_sexp.all(
   body: Kind.Term -> Kind.Term -> Kind.Term, 
   indentation: Nat
 ): String
-  let spaces = Nat.apply!(indentation, String.concat("  "), "")
+  let spaces = Nat.apply!(indentation, String.concat(" "), "")
   spaces | "(all\n" |
   spaces | "  (eras " | Bool.show(eras) | ")\n" |
   spaces | "  (self \"" | self | "\")\n" |
@@ -40,38 +40,57 @@ Kind.Term.show_sexp.lam(
   body: Kind.Term -> Kind.Term,
   indentation: Nat
 ): String
-  let spaces = Nat.apply!(indentation, String.concat("  "), "")
+  let spaces = Nat.apply!(indentation, String.concat(" "), "")
   spaces | "(lam\n" |
   spaces | "  (name \"" | name | "\")\n" |
   spaces | "  (body\n" | 
-  Kind.Term.show_sexp.aux(body(Kind.Term.var(name, 0)), 1 + indentation) | "))"
+  Kind.Term.show_sexp.aux(body(Kind.Term.var(name, 0)), 4 + indentation) | "))"
 
 Kind.Term.show_sexp.app(
   func: Kind.Term,
   argm: Kind.Term,
   indentation: Nat
 ): String
-  let spaces = Nat.apply!(indentation, String.concat("  "), "")
+  let spaces = Nat.apply!(indentation, String.concat(" "), "")
   spaces | "(app\n" |
   spaces | "  (func\n" |
-  Kind.Term.show_sexp.aux(func, 1 + indentation) | ")\n" |
+  Kind.Term.show_sexp.aux(func, 4 + indentation) | ")\n" |
   spaces | "  (argm\n" |
-  Kind.Term.show_sexp.aux(argm, 1 + indentation) | "))"
+  Kind.Term.show_sexp.aux(argm, 4 + indentation) | "))"
 
 Kind.Term.show_sexp.ori(
   orig: Pair<Nat, Nat>,
   expr: Kind.Term,
   indentation: Nat
 ): String
-  let spaces = Nat.apply!(indentation, String.concat("  "), "")
+  let spaces = Nat.apply!(indentation, String.concat(" "), "")
   open orig
   spaces | "(ori\n" |
   spaces | "  (orig (" | Nat.show(orig.fst) | ", " | Nat.show(orig.snd) | "))\n" |
   spaces | "  (expr\n" |
-  Kind.Term.show_sexp.aux(expr, 1 + indentation) | "))"
+  Kind.Term.show_sexp.aux(expr, 4 + indentation) | "))"
+
+//(lam
+//  (name "b")
+//  (body
+//    (app
+//      (func
+//        (app
+//          (func
+//            (app
+//              (func
+//                (var (name "b")))
+//              (argm
+//                (lam
+//                  (name "b")
+//                  (body
+//                    (ref (name "Bool")))))))
+//          (argm
+//            (ref (name "Bool.false")))))
+//      (argm
+//        (ref (name "Bool.true"))))))
 
 Kind.Term.show_sexp.aux(t: Kind.Term, indentation: Nat): String
-  let spaces = Nat.apply!(indentation, String.concat("  "), "")
   let body =
     case t {
       var: Kind.Term.show_sexp.var(t.name, t.indx, indentation)
@@ -91,7 +110,7 @@ Kind.Term.show_sexp.aux(t: Kind.Term, indentation: Nat): String
       cse: "(cse?)"
       ori: Kind.Term.show_sexp.aux(t.expr, indentation)
     } default "(?)"
-  spaces | body
+  body
 
 Kind.Term.show_sexp(t: Kind.Term): String
   Kind.Term.show_sexp.aux(t, 0)
