@@ -17,7 +17,7 @@ type Web.Kind.Event {
   
 Web.Kind.exe_event(id: String, stt: Web.Kind.State): Web.Kind.State
   open stt
-  let actions = Web.Kind.component.id_action
+  let actions = Web.Kind.comp.id_action
   case Map.get!(id, actions) as event {
     none: stt
     some: 
