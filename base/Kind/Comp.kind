@@ -98,8 +98,25 @@ Kind.Comp.prim_of(type: Kind.Term, defs: Kind.Defs): Maybe(Kind.Comp.Prim)
   //Buffer32 : 1,
 //};
 
-
-
+//(lam
+//  (name "b")
+//  (body
+//    (app
+//      (func
+//        (app
+//          (func
+//            (app
+//              (func
+//                (var (name "b")))
+//              (argm
+//                (lam
+//                  (name "b")
+//                  (body
+//                    (ref (name "Bool")))))))
+//          (argm
+//            (ref (name "Bool.false")))))
+//      (argm
+//        (ref (name "Bool.true"))))))
 
 Kind.Comp.compile(term: Kind.Term, type: Maybe(Kind.Term), defs: Kind.Defs, size: Nat): Pair(Kind.Comp, Kind.Term)
   case type {
@@ -184,10 +201,7 @@ Kind.Comp.compile(term: Kind.Term, type: Maybe(Kind.Term), defs: Kind.Defs, size
               then term_cmp
               else Kind.Comp.app(term_cmp, argm_cmp)
             {term_cmp, term_typ}
-        } default 
-          log("188") // DEBUG
-          log(Kind.Term.show(func_typ)) // DEBUG
-          {Kind.Comp.nil, Kind.Term.typ}
+        } default {Kind.Comp.nil, Kind.Term.typ}
       let:
         log("192") // DEBUG
         let {expr_cmp, expr_typ} = Kind.Comp.compile(term.expr, none, defs, size)
