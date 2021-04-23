@@ -852,7 +852,7 @@ module.exports = (function() {
         return $142;
     };
     const VoxBox$alloc_capacity = x0 => VoxBox$alloc_capacity$(x0);
-    const Web$Kaelin$Constants$room = "0x215512345232";
+    const Web$Kaelin$Constants$room = "0x200000000002";
 
     function BitsMap$(_A$1) {
         var $143 = null;
@@ -1779,62 +1779,286 @@ module.exports = (function() {
     const Web$Kaelin$Assets$hero$octoking_d_1 = VoxBox$parse$("0a0a21192a020b0a21192a020d0a21192a020e0a21192a02100a21192a02110a21192a02120a21192a02130a21192a02150a21192a02160a21192a02180a21192a02190a21192a020a0b20192a020b0b20192a020d0b20192a020e0b20192a02100b20192a02110b20192a02120b20192a02130b20192a02150b20192a02160b20192a02180b20192a02190b20192a02080c1f192a02090c1f192a020a0c1fe6d7510b0c1fe6d7510c0c1f192a020d0c1f70681e0e0c1f70681e0f0c1f192a02100c1ffff6a6110c1ffff6a6120c1ffff6a6130c1ffff6a6140c1f192a02150c1f70681e160c1f70681e170c1f192a02180c1fe6d751190c1fe6d7511a0c1f192a021b0c1f192a02080d1e192a02090d1e192a020a0d1ee6d7510b0d1ee6d7510c0d1efff6a60d0d1e192a020e0d1e192a020f0d1ee6d751100d1ee6d751110d1ee6d751120d1ee6d751130d1ee6d751140d1ee6d751150d1e192a02160d1e192a02170d1efff6a6180d1ee6d751190d1ee6d7511a0d1e192a021b0d1e192a02080e1d192a02090e1d192a020a0e1de6d7510b0e1de6d7510c0e1dfff6a60d0e1d192a020e0e1d192a020f0e1de6d751100e1de6d751110e1de6d751120e1de6d751130e1de6d751140e1de6d751150e1d192a02160e1d192a02170e1dfff6a6180e1de6d751190e1de6d7511a0e1d192a021b0e1d192a02080f1c192a02090f1c192a020a0f1cc9ae530b0f1cc9ae530c0f1ce6d7510d0f1ce6d7510e0f1ce6d7510f0f1ce6d751100f1cb8321d110f1cb8321d120f1cb8321d130f1cb8321d140f1ce6d751150f1ce6d751160f1ce6d751170f1ce6d751180f1cc9ae53190f1cc9ae531a0f1c192a021b0f1c192a0208101b192a0209101b192a020a101bc9ae530b101bc9ae530c101be6d7510d101be6d7510e101be6d7510f101be6d75110101bb8321d11101bb8321d12101bb8321d13101bb8321d14101be6d75115101be6d75116101be6d75117101be6d75118101bc9ae5319101bc9ae531a101b192a021b101b192a0205111a192a0206111a192a0207111a192a0208111a192a0209111a192a020a111a4281350b111a4281350c111a4281350d111a4281350e111a4281350f111ac9ae5310111ac9ae5311111ac9ae5312111ac9ae5313111ac9ae5314111ac9ae5315111a42813516111a42813517111a42813518111a42813519111a4281351a111a192a021b111a192a021c111a192a021d111a192a021e111a192a02041219192a020512199fd95d0612199fd95d0712199fd95d081219192a02091219192a020a12199fd95d0b12199fd95d0c12195ea6420d12195ea6420e12195ea6420f12194281351012194281351112194281351212194281351312194281351412194281351512195ea6421612195ea6421712195ea6421812199fd95d1912199fd95d1a1219192a021b1219192a021c12199fd95d1d12199fd95d1e12199fd95d1f1219192a02041318192a020513189fd95d0613189fd95d0713189fd95d081318192a02091318192a020a13189fd95d0b13189fd95d0c13185ea6420d13185ea6420e13185ea6420f13184281351013184281351113184281351213184281351313184281351413184281351513185ea6421613185ea6421713185ea6421813189fd95d1913189fd95d1a1318192a021b1318192a021c13189fd95d1d13189fd95d1e13189fd95d1f1318192a02021417192a02031417192a020414179fd95d0514175ea6420614175ea6420714175ea642081417192a02091417192a020a14175ea6420b14175ea6420c14175ea6420d14175ea6420e14175ea6420f14175ea6421014175ea6421114175ea6421214175ea6421314175ea6421414175ea6421514175ea6421614175ea6421714175ea6421814175ea6421914175ea6421a1417192a021b1417192a021c14175ea6421d14175ea6421e14175ea6421f14179fd95d201417192a02211417192a02041516192a020515165ea6420615165ea6420715165ea642081516192a02091516192a020a15164281350b15164281350c15164281350d15164281350e15164281350f15164281351015165ea6421115165ea6421215165ea6421315165ea6421415164281351515164281351615164281351715164281351815164281351915164281351a1516192a021b1516192a021c15165ea6421d15165ea6421e15165ea6421f1516192a02041615192a020516155ea6420616155ea6420716155ea642081615192a02091615192a020a16154281350b16154281350c16154281350d16154281350e16154281350f16154281351016155ea6421116155ea6421216155ea6421316155ea6421416154281351516154281351616154281351716154281351816154281351916154281351a1615192a021b1615192a021c16155ea6421d16155ea6421e16155ea6421f1615192a02051714192a02061714192a020717145ea6420817145ea6420917145ea6420a1714192a020b1714192a020c17144281350d1714e6d7510e1714e6d7510f1714e6d751101714428135111714428135121714428135131714428135141714e6d751151714e6d751161714e6d751171714428135181714192a02191714192a021a17145ea6421b17145ea6421c17145ea6421d1714192a021e1714192a02071813192a020818135ea6420918135ea6420a1813366d2a0b1813366d2a0c1813192a020d18134281350e18134281350f1813173e0f101813173e0f111813173e0f121813173e0f131813173e0f141813173e0f151813428135161813428135171813192a02181813366d2a191813366d2a1a18135ea6421b18135ea6421c1813192a02071912192a020819125ea6420919125ea6420a1912366d2a0b1912366d2a0c1912192a020d19124281350e19124281350f1912173e0f101912173e0f111912173e0f121912173e0f131912173e0f141912173e0f151912428135161912428135171912192a02181912366d2a191912366d2a1a19125ea6421b19125ea6421c1912192a02051a11192a02061a11192a02071a11192a02081a11428135091a114281350a1a115ea6420b1a115ea6420c1a114281350d1a11192a020e1a11192a020f1a119fd95d101a119fd95d111a119fd95d121a119fd95d131a119fd95d141a119fd95d151a11192a02161a11192a02171a11428135181a115ea642191a115ea6421a1a114281351b1a114281351c1a11192a021d1a11192a021e1a11192a02051b10192a02061b10192a02071b10192a02081b10428135091b104281350a1b105ea6420b1b105ea6420c1b104281350d1b10192a020e1b10192a020f1b109fd95d101b109fd95d111b109fd95d121b109fd95d131b109fd95d141b109fd95d151b10192a02161b10192a02171b10428135181b105ea642191b105ea6421a1b104281351b1b104281351c1b10192a021d1b10192a021e1b10192a02041c0f192a02051c0f366d2a061c0f366d2a071c0f192a02081c0f5ea642091c0f5ea6420a1c0f4281350b1c0f4281350c1c0f192a020d1c0f9fd95d0e1c0f9fd95d0f1c0f5ea642101c0f428135111c0f428135121c0f428135131c0f428135141c0f5ea642151c0f9fd95d161c0f9fd95d171c0f192a02181c0f428135191c0f4281351a1c0f5ea6421b1c0f5ea6421c1c0f192a021d1c0f366d2a1e1c0f366d2a1f1c0f192a02021d0e192a02031d0e192a02041d0e428135051d0e428135061d0e428135071d0e192a02081d0e428135091d0e4281350a1d0e4281350b1d0e4281350c1d0e192a020d1d0e5ea6420e1d0e5ea6420f1d0e5ea642101d0e428135111d0e428135121d0e428135131d0e428135141d0e5ea642151d0e5ea642161d0e5ea642171d0e192a02181d0e428135191d0e4281351a1d0e4281351b1d0e4281351c1d0e192a021d1d0e4281351e1d0e4281351f1d0e428135201d0e192a02211d0e192a02021e0d192a02031e0d192a02041e0d428135051e0d428135061e0d428135071e0d192a02081e0d428135091e0d4281350a1e0d4281350b1e0d4281350c1e0d192a020d1e0d5ea6420e1e0d5ea6420f1e0d5ea642101e0d428135111e0d428135121e0d428135131e0d428135141e0d5ea642151e0d5ea642161e0d5ea642171e0d192a02181e0d428135191e0d4281351a1e0d4281351b1e0d4281351c1e0d192a021d1e0d4281351e1e0d4281351f1e0d428135201e0d192a02211e0d192a02001f0c192a02011f0c192a02021f0c9fd95d031f0c9fd95d041f0c5ea642051f0c428135061f0c428135071f0c192a02081f0c5ea642091f0c5ea6420a1f0c4281350b1f0c4281350c1f0c192a020d1f0c5ea6420e1f0c5ea6420f1f0c5ea642101f0c428135111f0c428135121f0c428135131f0c428135141f0c5ea642151f0c5ea642161f0c5ea642171f0c192a02181f0c428135191f0c4281351a1f0c5ea6421b1f0c5ea6421c1f0c192a021d1f0c4281351e1f0c4281351f1f0c5ea642201f0c9fd95d211f0c9fd95d221f0c192a0202200b192a0203200b192a0204200b192a0205200b42813506200b42813507200b42813508200b192a0209200b192a020a200b366d2a0b200b366d2a0c200b192a020d200b5ea6420e200b5ea6420f200b5ea64210200b42813511200b42813512200b42813513200b42813514200b5ea64215200b5ea64216200b5ea64217200b192a0218200b366d2a19200b366d2a1a200b192a021b200b192a021c200b4281351d200b4281351e200b4281351f200b192a0220200b192a0221200b192a0202210a192a0203210a192a0204210a192a0205210a42813506210a42813507210a42813508210a192a0209210a192a020a210a366d2a0b210a366d2a0c210a192a020d210a5ea6420e210a5ea6420f210a5ea64210210a42813511210a42813512210a42813513210a42813514210a5ea64215210a5ea64216210a5ea64217210a192a0218210a366d2a19210a366d2a1a210a192a021b210a192a021c210a4281351d210a4281351e210a4281351f210a192a0220210a192a0221210a192a02052209192a02062209192a02072209192a020a2209192a020b2209192a020c2209192a020d22095ea6420e22095ea6420f22094281351022094281351122094281351222094281351322094281351422094281351522095ea6421622095ea642172209192a02182209192a02192209192a021c2209192a021d2209192a021e2209192a02052308192a02062308192a02072308192a020a2308192a020b2308192a020c2308192a020d23085ea6420e23085ea6420f23084281351023084281351123084281351223084281351323084281351423084281351523085ea6421623085ea642172308192a02182308192a02192308192a021c2308192a021d2308192a021e2308192a02082407192a02092407192a020a2407192a020b2407192a020c24075ea6420d24074281350e24074281350f2407428135102407366d2a112407366d2a122407366d2a132407366d2a1424074281351524074281351624074281351724075ea642182407192a02192407192a021a2407192a021b2407192a02072506192a020825065ea6420925065ea6420a25065ea6420b25065ea6420c25064281350d25064281350e25064281350f2506366d2a102506192a02112506192a02122506192a02132506192a02142506366d2a1525064281351625064281351725064281351825065ea6421925065ea6421a25065ea6421b25065ea6421c2506192a02072605192a020826055ea6420926055ea6420a26055ea6420b26055ea6420c26054281350d26054281350e26054281350f2605366d2a102605192a02112605192a02122605192a02132605192a02142605366d2a1526054281351626054281351726054281351826055ea6421926055ea6421a26055ea6421b26055ea6421c2605192a02082704192a02092704192a020a2704192a020b2704192a020c2704192a020d2704192a020e2704192a020f2704192a02142704192a02152704192a02162704192a02172704192a02182704192a02192704192a021a2704192a021b2704192a02");
     const Web$Kaelin$Hero$octoking = Web$Kaelin$Hero$new$("0x00000004", Web$Kaelin$Assets$hero$octoking_d_1);
 
-    function List$cons$(_head$2, _tail$3) {
-        var $356 = ({
-            _: 'List.cons',
-            'head': _head$2,
-            'tail': _tail$3
-        });
+    function Maybe$default$(_m$2, _a$3) {
+        var self = _m$2;
+        switch (self._) {
+            case 'Maybe.some':
+                var $357 = self.value;
+                var $358 = $357;
+                var $356 = $358;
+                break;
+            case 'Maybe.none':
+                var $359 = _a$3;
+                var $356 = $359;
+                break;
+        };
         return $356;
     };
-    const List$cons = x0 => x1 => List$cons$(x0, x1);
+    const Maybe$default = x0 => x1 => Maybe$default$(x0, x1);
+
+    function List$(_A$1) {
+        var $360 = null;
+        return $360;
+    };
+    const List = x0 => List$(x0);
+
+    function I32$new$(_value$1) {
+        var $361 = word_to_i32(_value$1);
+        return $361;
+    };
+    const I32$new = x0 => I32$new$(x0);
+    const I32$add = a0 => a1 => ((a0 + a1) >> 0);
+
+    function Word$neg$aux$(_word$2, _inc$3) {
+        var self = _word$2;
+        switch (self._) {
+            case 'Word.o':
+                var $363 = self.pred;
+                var self = _inc$3;
+                if (self) {
+                    var $365 = Word$o$(Word$neg$aux$($363, Bool$true));
+                    var $364 = $365;
+                } else {
+                    var $366 = Word$i$(Word$neg$aux$($363, Bool$false));
+                    var $364 = $366;
+                };
+                var $362 = $364;
+                break;
+            case 'Word.i':
+                var $367 = self.pred;
+                var self = _inc$3;
+                if (self) {
+                    var $369 = Word$i$(Word$neg$aux$($367, Bool$false));
+                    var $368 = $369;
+                } else {
+                    var $370 = Word$o$(Word$neg$aux$($367, Bool$false));
+                    var $368 = $370;
+                };
+                var $362 = $368;
+                break;
+            case 'Word.e':
+                var $371 = Word$e;
+                var $362 = $371;
+                break;
+        };
+        return $362;
+    };
+    const Word$neg$aux = x0 => x1 => Word$neg$aux$(x0, x1);
+
+    function Word$neg$(_word$2) {
+        var self = _word$2;
+        switch (self._) {
+            case 'Word.o':
+                var $373 = self.pred;
+                var $374 = Word$o$(Word$neg$aux$($373, Bool$true));
+                var $372 = $374;
+                break;
+            case 'Word.i':
+                var $375 = self.pred;
+                var $376 = Word$i$(Word$neg$aux$($375, Bool$false));
+                var $372 = $376;
+                break;
+            case 'Word.e':
+                var $377 = Word$e;
+                var $372 = $377;
+                break;
+        };
+        return $372;
+    };
+    const Word$neg = x0 => Word$neg$(x0);
+    const I32$neg = a0 => ((-a0));
+
+    function Int$to_i32$(_a$1) {
+        var self = _a$1;
+        switch ("new") {
+            case 'new':
+                var $379 = int_pos(self);
+                var $380 = int_neg(self);
+                var self = $380;
+                if (self === 0n) {
+                    var $382 = I32$new$(Nat$to_word$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$zero)))))))))))))))))))))))))))))))), $379));
+                    var $381 = $382;
+                } else {
+                    var $383 = (self - 1n);
+                    var $384 = ((-I32$new$(Nat$to_word$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$zero)))))))))))))))))))))))))))))))), $380))));
+                    var $381 = $384;
+                };
+                var $378 = $381;
+                break;
+        };
+        return $378;
+    };
+    const Int$to_i32 = x0 => Int$to_i32$(x0);
     const Int$new = a0 => a1 => (a0 - a1);
-    const Nat$add = a0 => a1 => (a0 + a1);
-    const Int$add = a0 => a1 => (a0 + a1);
 
     function Int$from_nat$(_n$1) {
-        var $357 = (_n$1 - 0n);
-        return $357;
+        var $385 = (_n$1 - 0n);
+        return $385;
     };
     const Int$from_nat = x0 => Int$from_nat$(x0);
-    const Nat$mul = a0 => a1 => (a0 * a1);
-    const Int$mul = a0 => a1 => (a0 * a1);
+    const I32$mul = a0 => a1 => ((a0 * a1) >> 0);
 
     function Int$to_nat$(_a$1) {
         var self = _a$1;
         switch ("new") {
             case 'new':
-                var $359 = int_pos(self);
-                var $360 = $359;
-                var $358 = $360;
+                var $387 = int_pos(self);
+                var $388 = $387;
+                var $386 = $388;
                 break;
         };
-        return $358;
+        return $386;
     };
     const Int$to_nat = x0 => Int$to_nat$(x0);
+
+    function Word$is_neg$go$(_word$2, _n$3) {
+        var Word$is_neg$go$ = (_word$2, _n$3) => ({
+            ctr: 'TCO',
+            arg: [_word$2, _n$3]
+        });
+        var Word$is_neg$go = _word$2 => _n$3 => Word$is_neg$go$(_word$2, _n$3);
+        var arg = [_word$2, _n$3];
+        while (true) {
+            let [_word$2, _n$3] = arg;
+            var R = (() => {
+                var self = _word$2;
+                switch (self._) {
+                    case 'Word.o':
+                        var $389 = self.pred;
+                        var $390 = Word$is_neg$go$($389, Bool$false);
+                        return $390;
+                    case 'Word.i':
+                        var $391 = self.pred;
+                        var $392 = Word$is_neg$go$($391, Bool$true);
+                        return $392;
+                    case 'Word.e':
+                        var $393 = _n$3;
+                        return $393;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Word$is_neg$go = x0 => x1 => Word$is_neg$go$(x0, x1);
+
+    function Word$is_neg$(_word$2) {
+        var $394 = Word$is_neg$go$(_word$2, Bool$false);
+        return $394;
+    };
+    const Word$is_neg = x0 => Word$is_neg$(x0);
+
+    function Word$fold$(_nil$3, _w0$4, _w1$5, _word$6) {
+        var self = _word$6;
+        switch (self._) {
+            case 'Word.o':
+                var $396 = self.pred;
+                var $397 = _w0$4(Word$fold$(_nil$3, _w0$4, _w1$5, $396));
+                var $395 = $397;
+                break;
+            case 'Word.i':
+                var $398 = self.pred;
+                var $399 = _w1$5(Word$fold$(_nil$3, _w0$4, _w1$5, $398));
+                var $395 = $399;
+                break;
+            case 'Word.e':
+                var $400 = _nil$3;
+                var $395 = $400;
+                break;
+        };
+        return $395;
+    };
+    const Word$fold = x0 => x1 => x2 => x3 => Word$fold$(x0, x1, x2, x3);
+    const Nat$add = a0 => a1 => (a0 + a1);
+    const Nat$mul = a0 => a1 => (a0 * a1);
+
+    function Word$to_nat$(_word$2) {
+        var $401 = Word$fold$(0n, a1 => (2n * a1), (_x$4 => {
+            var $402 = Nat$succ$((2n * _x$4));
+            return $402;
+        }), _word$2);
+        return $401;
+    };
+    const Word$to_nat = x0 => Word$to_nat$(x0);
+
+    function Word$abs$(_a$2) {
+        var _neg$3 = Word$is_neg$(_a$2);
+        var self = _neg$3;
+        if (self) {
+            var $404 = Word$neg$(_a$2);
+            var $403 = $404;
+        } else {
+            var $405 = _a$2;
+            var $403 = $405;
+        };
+        return $403;
+    };
+    const Word$abs = x0 => Word$abs$(x0);
+
+    function Int$neg$(_a$1) {
+        var self = _a$1;
+        switch ("new") {
+            case 'new':
+                var $407 = int_pos(self);
+                var $408 = int_neg(self);
+                var $409 = ($408 - $407);
+                var $406 = $409;
+                break;
+        };
+        return $406;
+    };
+    const Int$neg = x0 => Int$neg$(x0);
+
+    function Word$to_int$(_a$2) {
+        var _neg$3 = Word$is_neg$(_a$2);
+        var _i$4 = Int$from_nat$(Word$to_nat$(Word$abs$(_a$2)));
+        var self = _neg$3;
+        if (self) {
+            var $411 = Int$neg$(_i$4);
+            var $410 = $411;
+        } else {
+            var $412 = _i$4;
+            var $410 = $412;
+        };
+        return $410;
+    };
+    const Word$to_int = x0 => Word$to_int$(x0);
+
+    function I32$to_int$(_a$1) {
+        var self = _a$1;
+        switch ('i32') {
+            case 'i32':
+                var $414 = i32_to_word(self);
+                var $415 = Word$to_int$($414);
+                var $413 = $415;
+                break;
+        };
+        return $413;
+    };
+    const I32$to_int = x0 => I32$to_int$(x0);
 
     function Web$Kaelin$Coord$Convert$axial_to_nat$(_coord$1) {
         var self = _coord$1;
         switch (self._) {
             case 'Web.Kaelin.Coord.new':
-                var $362 = self.i;
-                var $363 = self.j;
-                var _i$4 = ($362 + Int$from_nat$(1000n));
-                var _i$5 = (_i$4 * Int$from_nat$(10000n));
-                var _i$6 = Int$to_nat$(_i$5);
-                var _j$7 = ($363 + Int$from_nat$(1000n));
-                var _j$8 = Int$to_nat$(_j$7);
-                var $364 = (_i$6 + _j$8);
-                var $361 = $364;
+                var $417 = self.i;
+                var $418 = self.j;
+                var _i$4 = (($417 + Int$to_i32$(Int$from_nat$(1000n))) >> 0);
+                var _i$5 = ((_i$4 * Int$to_i32$(Int$from_nat$(10000n))) >> 0);
+                var _i$6 = Int$to_nat$(I32$to_int$(_i$5));
+                var _j$7 = (($418 + Int$to_i32$(Int$from_nat$(1000n))) >> 0);
+                var _j$8 = Int$to_nat$(I32$to_int$(_j$7));
+                var $419 = (_i$6 + _j$8);
+                var $416 = $419;
                 break;
         };
-        return $361;
+        return $416;
     };
     const Web$Kaelin$Coord$Convert$axial_to_nat = x0 => Web$Kaelin$Coord$Convert$axial_to_nat$(x0);
 
     function Maybe$(_A$1) {
-        var $365 = null;
-        return $365;
+        var $420 = null;
+        return $420;
     };
     const Maybe = x0 => Maybe$(x0);
 
@@ -1851,49 +2075,49 @@ module.exports = (function() {
                 var self = _bits$2;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'o':
-                        var $366 = self.slice(0, -1);
+                        var $421 = self.slice(0, -1);
                         var self = _map$3;
                         switch (self._) {
                             case 'BitsMap.tie':
-                                var $368 = self.lft;
-                                var $369 = BitsMap$get$($366, $368);
-                                var $367 = $369;
+                                var $423 = self.lft;
+                                var $424 = BitsMap$get$($421, $423);
+                                var $422 = $424;
                                 break;
                             case 'BitsMap.new':
-                                var $370 = Maybe$none;
-                                var $367 = $370;
+                                var $425 = Maybe$none;
+                                var $422 = $425;
                                 break;
                         };
-                        return $367;
+                        return $422;
                     case 'i':
-                        var $371 = self.slice(0, -1);
+                        var $426 = self.slice(0, -1);
                         var self = _map$3;
                         switch (self._) {
                             case 'BitsMap.tie':
-                                var $373 = self.rgt;
-                                var $374 = BitsMap$get$($371, $373);
-                                var $372 = $374;
+                                var $428 = self.rgt;
+                                var $429 = BitsMap$get$($426, $428);
+                                var $427 = $429;
                                 break;
                             case 'BitsMap.new':
-                                var $375 = Maybe$none;
-                                var $372 = $375;
+                                var $430 = Maybe$none;
+                                var $427 = $430;
                                 break;
                         };
-                        return $372;
+                        return $427;
                     case 'e':
                         var self = _map$3;
                         switch (self._) {
                             case 'BitsMap.tie':
-                                var $377 = self.val;
-                                var $378 = $377;
-                                var $376 = $378;
+                                var $432 = self.val;
+                                var $433 = $432;
+                                var $431 = $433;
                                 break;
                             case 'BitsMap.new':
-                                var $379 = Maybe$none;
-                                var $376 = $379;
+                                var $434 = Maybe$none;
+                                var $431 = $434;
                                 break;
                         };
-                        return $376;
+                        return $431;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1906,109 +2130,301 @@ module.exports = (function() {
         var self = _a$1;
         switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
             case 'o':
-                var $381 = self.slice(0, -1);
-                var $382 = ($381 + '1');
-                var $380 = $382;
+                var $436 = self.slice(0, -1);
+                var $437 = ($436 + '1');
+                var $435 = $437;
                 break;
             case 'i':
-                var $383 = self.slice(0, -1);
-                var $384 = (Bits$inc$($383) + '0');
-                var $380 = $384;
+                var $438 = self.slice(0, -1);
+                var $439 = (Bits$inc$($438) + '0');
+                var $435 = $439;
                 break;
             case 'e':
-                var $385 = (Bits$e + '1');
-                var $380 = $385;
+                var $440 = (Bits$e + '1');
+                var $435 = $440;
                 break;
         };
-        return $380;
+        return $435;
     };
     const Bits$inc = x0 => Bits$inc$(x0);
     const Nat$to_bits = a0 => (nat_to_bits(a0));
 
     function NatMap$get$(_key$2, _map$3) {
-        var $386 = BitsMap$get$((nat_to_bits(_key$2)), _map$3);
-        return $386;
+        var $441 = BitsMap$get$((nat_to_bits(_key$2)), _map$3);
+        return $441;
     };
     const NatMap$get = x0 => x1 => NatMap$get$(x0, x1);
 
-    function List$(_A$1) {
-        var $387 = null;
-        return $387;
-    };
-    const List = x0 => List$(x0);
-
-    function Maybe$default$(_m$2, _a$3) {
-        var self = _m$2;
-        switch (self._) {
-            case 'Maybe.some':
-                var $389 = self.value;
-                var $390 = $389;
-                var $388 = $390;
-                break;
-            case 'Maybe.none':
-                var $391 = _a$3;
-                var $388 = $391;
-                break;
-        };
-        return $388;
-    };
-    const Maybe$default = x0 => x1 => Maybe$default$(x0, x1);
-
     function Web$Kaelin$Map$get$(_coord$1, _map$2) {
         var _key$3 = Web$Kaelin$Coord$Convert$axial_to_nat$(_coord$1);
-        var _maybe_tile$4 = NatMap$get$(_key$3, _map$2);
-        var $392 = Maybe$default$(_maybe_tile$4, List$nil);
-        return $392;
+        var $442 = NatMap$get$(_key$3, _map$2);
+        return $442;
     };
     const Web$Kaelin$Map$get = x0 => x1 => Web$Kaelin$Map$get$(x0, x1);
 
-    function BitsMap$delete$(_key$2, _map$3) {
-        var self = _map$3;
-        switch (self._) {
-            case 'BitsMap.tie':
-                var $394 = self.val;
-                var $395 = self.lft;
-                var $396 = self.rgt;
-                var self = _key$2;
-                switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
-                    case 'o':
-                        var $398 = self.slice(0, -1);
-                        var $399 = BitsMap$tie$($394, BitsMap$delete$($398, $395), $396);
-                        var $397 = $399;
-                        break;
-                    case 'i':
-                        var $400 = self.slice(0, -1);
-                        var $401 = BitsMap$tie$($394, $395, BitsMap$delete$($400, $396));
-                        var $397 = $401;
-                        break;
-                    case 'e':
-                        var $402 = BitsMap$tie$(Maybe$none, $395, $396);
-                        var $397 = $402;
-                        break;
-                };
-                var $393 = $397;
-                break;
-            case 'BitsMap.new':
-                var $403 = BitsMap$new;
-                var $393 = $403;
+    function List$cons$(_head$2, _tail$3) {
+        var $443 = ({
+            _: 'List.cons',
+            'head': _head$2,
+            'tail': _tail$3
+        });
+        return $443;
+    };
+    const List$cons = x0 => x1 => List$cons$(x0, x1);
+
+    function NatMap$set$(_key$2, _val$3, _map$4) {
+        var $444 = BitsMap$set$((nat_to_bits(_key$2)), _val$3, _map$4);
+        return $444;
+    };
+    const NatMap$set = x0 => x1 => x2 => NatMap$set$(x0, x1, x2);
+
+    function Web$Kaelin$Map$set$(_coord$1, _tile$2, _map$3) {
+        var _key$4 = Web$Kaelin$Coord$Convert$axial_to_nat$(_coord$1);
+        var $445 = NatMap$set$(_key$4, _tile$2, _map$3);
+        return $445;
+    };
+    const Web$Kaelin$Map$set = x0 => x1 => x2 => Web$Kaelin$Map$set$(x0, x1, x2);
+
+    function Web$Kaelin$Map$push$(_coord$1, _entity$2, _map$3) {
+        var _tile$4 = Maybe$default$(Web$Kaelin$Map$get$(_coord$1, _map$3), List$nil);
+        var _tile$5 = List$cons$(_entity$2, _tile$4);
+        var $446 = Web$Kaelin$Map$set$(_coord$1, _tile$5, _map$3);
+        return $446;
+    };
+    const Web$Kaelin$Map$push = x0 => x1 => x2 => Web$Kaelin$Map$push$(x0, x1, x2);
+
+    function Web$Kaelin$Map$init$(_map$1) {
+        var _new_coord$2 = Web$Kaelin$Coord$new;
+        var _creature$3 = Web$Kaelin$Entity$creature;
+        var _croni$4 = Web$Kaelin$Hero$croni;
+        var _cyclope$5 = Web$Kaelin$Hero$cyclope;
+        var _lela$6 = Web$Kaelin$Hero$lela;
+        var _octoking$7 = Web$Kaelin$Hero$octoking;
+        var _map$8 = Web$Kaelin$Map$push$(_new_coord$2(Int$to_i32$(Int$neg$(Int$from_nat$(1n))))(Int$to_i32$(Int$neg$(Int$from_nat$(2n)))), _creature$3(Maybe$none)(_croni$4), _map$1);
+        var _map$9 = Web$Kaelin$Map$push$(_new_coord$2(Int$to_i32$(Int$from_nat$(0n)))(Int$to_i32$(Int$from_nat$(3n))), _creature$3(Maybe$none)(_cyclope$5), _map$8);
+        var _map$10 = Web$Kaelin$Map$push$(_new_coord$2(Int$to_i32$(Int$neg$(Int$from_nat$(2n))))(Int$to_i32$(Int$from_nat$(0n))), _creature$3(Maybe$none)(_lela$6), _map$9);
+        var _map$11 = Web$Kaelin$Map$push$(_new_coord$2(Int$to_i32$(Int$from_nat$(3n)))(Int$to_i32$(Int$neg$(Int$from_nat$(2n)))), _creature$3(Maybe$none)(_octoking$7), _map$10);
+        var $447 = _map$11;
+        return $447;
+    };
+    const Web$Kaelin$Map$init = x0 => Web$Kaelin$Map$init$(x0);
+    const NatMap$new = BitsMap$new;
+    const Web$Kaelin$Constants$map_size = 5;
+
+    function Web$Kaelin$Terrain$grass$(_normal$1, _ability$2, _movement$3) {
+        var $448 = ({
+            _: 'Web.Kaelin.Terrain.grass',
+            'normal': _normal$1,
+            'ability': _ability$2,
+            'movement': _movement$3
+        });
+        return $448;
+    };
+    const Web$Kaelin$Terrain$grass = x0 => x1 => x2 => Web$Kaelin$Terrain$grass$(x0, x1, x2);
+    const Web$Kaelin$Assets$tile$dark_grass_4 = VoxBox$parse$("0e00010600000f00010600001000010600000c01010600000d01010600000e0101408d640f0101408d64100101469e651101010600001201010600000a02010600000b02010600000c0201469e650d0201469e650e0201469e650f0201408d64100201469e65110201469e65120201408d641302010600001402010600000803010600000903010600000a0301469e650b0301408d640c0301469e650d0301469e650e0301469e650f0301408d64100301408d64110301408d64120301408d64130301469e65140301469e65150301060000160301060000060401060000070401060000080401469e65090401469e650a0401469e650b0401408d640c0401408d640d0401469e650e0401469e650f0401408d64100401469e65110401408d64120401408d64130401408d64140401408d64150401408d64160401408d64170401060000180401060000040501060000050501060000060501469e65070501408d64080501469e65090501469e650a0501408d640b0501408d640c0501408d640d0501347e570e0501347e570f0501469e65100501469e65110501469e65120501347e57130501408d64140501469e65150501469e65160501408d64170501469e65180501469e651905010600001a0501060000020601060000030601060000040601347e57050601469e65060601469e65070601408d64080601408d64090601347e570a0601408d640b0601408d640c0601408d640d0601408d640e0601347e570f0601469e65100601469e65110601408d64120601347e57130601347e57140601469e65150601469e65160601408d64170601408d64180601347e57190601408d641a0601408d641b06010600001c0601060000000701060000010701060000020701408d64030701408d64040701408d64050701408d64060701408d64070701408d64080701408d64090701347e570a0701347e570b0701408d640c0701469e650d0701469e650e0701408d640f0701408d64100701408d64110701408d64120701408d64130701408d64140701408d64150701408d64160701408d64170701408d64180701347e57190701347e571a0701408d641b0701469e651c0701469e651d07010600001e0701060000000801060000010801347e57020801469e65030801469e65040801408d64050801408d64060801469e65070801469e65080801408d64090801469e650a0801469e650b0801408d640c0801469e650d0801469e650e0801469e650f0801347e57100801347e57110801469e65120801469e65130801408d64140801408d64150801469e65160801469e65170801408d64180801469e65190801469e651a0801408d641b0801469e651c0801469e651d0801469e651e0801060000000901060000010901408d64020901469e65030901469e65040901408d64050901469e65060901469e65070901469e65080901408d64090901469e650a0901469e650b0901408d640c0901408d640d0901469e650e0901469e650f0901347e57100901408d64110901469e65120901469e65130901408d64140901469e65150901469e65160901469e65170901408d64180901469e65190901469e651a0901408d641b0901408d641c0901469e651d0901469e651e0901060000000a01060000010a01408d64020a01408d64030a01408d64040a01408d64050a01469e65060a01469e65070a01408d64080a01408d64090a01408d640a0a01408d640b0a01408d640c0a01408d640d0a01408d640e0a01408d640f0a01408d64100a01408d64110a01408d64120a01408d64130a01408d64140a01469e65150a01469e65160a01408d64170a01408d64180a01408d64190a01408d641a0a01408d641b0a01408d641c0a01408d641d0a01408d641e0a01060000000b01060000010b01408d64020b01408d64030b01408d64040b01408d64050b01408d64060b01408d64070b01469e65080b01469e65090b01408d640a0b01347e570b0b01347e570c0b01408d640d0b01408d640e0b01408d640f0b01469e65100b01408d64110b01408d64120b01408d64130b01408d64140b01408d64150b01408d64160b01469e65170b01469e65180b01408d64190b01347e571a0b01347e571b0b01408d641c0b01408d641d0b01408d641e0b01060000000c01060000010c01408d64020c01408d64030c01469e65040c01469e65050c01408d64060c01469e65070c01469e65080c01469e65090c01408d640a0c01347e570b0c01408d640c0c01469e650d0c01469e650e0c01408d640f0c01469e65100c01408d64110c01408d64120c01469e65130c01469e65140c01408d64150c01469e65160c01469e65170c01469e65180c01408d64190c01347e571a0c01408d641b0c01469e651c0c01469e651d0c01408d641e0c01060000000d01060000010d01408d64020d01469e65030d01469e65040d01469e65050d01408d64060d01469e65070d01469e65080d01408d64090d01408d640a0d01408d640b0d01408d640c0d01469e650d0d01469e650e0d01469e650f0d01408d64100d01408d64110d01469e65120d01469e65130d01469e65140d01408d64150d01469e65160d01469e65170d01408d64180d01408d64190d01408d641a0d01408d641b0d01469e651c0d01469e651d0d01469e651e0d01060000000e01060000010e01408d64020e01469e65030e01469e65040e01408d64050e01408d64060e01408d64070e01408d64080e01408d64090e01408d640a0e01408d640b0e01408d640c0e01408d640d0e01469e650e0e01469e650f0e01408d64100e01408d64110e01469e65120e01469e65130e01408d64140e01408d64150e01408d64160e01408d64170e01408d64180e01408d64190e01408d641a0e01408d641b0e01408d641c0e01469e651d0e01469e651e0e01060000000f01060000010f01408d64020f01469e65030f01469e65040f01408d64050f01347e57060f01408d64070f01469e65080f01469e65090f01469e650a0f01408d640b0f01469e650c0f01469e650d0f01408d640e0f01408d640f0f01469e65100f01408d64110f01469e65120f01469e65130f01408d64140f01347e57150f01408d64160f01469e65170f01469e65180f01469e65190f01408d641a0f01469e651b0f01469e651c0f01408d641d0f01408d641e0f01060000001001060000011001469e65021001469e65031001469e65041001408d64051001408d64061001408d64071001469e65081001469e65091001408d640a1001408d640b1001408d640c1001408d640d1001408d640e1001408d640f1001408d64101001469e65111001469e65121001469e65131001408d64141001408d64151001408d64161001469e65171001469e65181001408d64191001408d641a1001408d641b1001408d641c1001408d641d1001408d641e1001060000001101060000011101469e65021101469e65031101408d64041101469e65051101469e65061101408d64071101408d64081101408d64091101408d640a1101408d640b1101408d640c1101469e650d1101469e650e1101469e650f1101408d64101101469e65111101469e65121101408d64131101469e65141101469e65151101408d64161101408d64171101408d64181101408d64191101408d641a1101408d641b1101469e651c1101469e651d1101469e651e1101060000001201060000011201408d64021201408d64031201408d64041201469e65051201469e65061201408d64071201408d64081201408d64091201469e650a1201469e650b1201408d640c1201469e650d1201469e650e1201469e650f1201408d64101201408d64111201408d64121201408d64131201469e65141201469e65151201408d64161201408d64171201408d64181201469e65191201469e651a1201408d641b1201469e651c1201469e651d1201469e651e1201060000001301060000011301469e65021301408d64031301408d64041301408d64051301408d64061301408d64071301408d64081301469e65091301469e650a1301469e650b1301408d640c1301408d640d1301469e650e1301469e650f1301408d64101301469e65111301408d64121301408d64131301408d64141301408d64151301408d64161301408d64171301469e65181301469e65191301469e651a1301408d641b1301408d641c1301469e651d1301469e651e1301060000001401060000011401469e65021401469e65031401347e57041401408d64051401469e65061401469e65071401408d64081401469e65091401469e650a1401408d640b1401408d640c1401408d640d1401347e570e1401347e570f1401469e65101401469e65111401469e65121401347e57131401408d64141401469e65151401469e65161401408d64171401469e65181401469e65191401408d641a1401408d641b1401408d641c1401347e571d1401347e571e1401060000001501060000011501469e65021501408d64031501347e57041501347e57051501469e65061501469e65071501408d64081501408d64091501347e570a1501408d640b1501408d640c1501408d640d1501408d640e1501347e570f1501469e65101501469e65111501408d64121501347e57131501347e57141501469e65151501469e65161501408d64171501408d64181501347e57191501408d641a1501408d641b1501408d641c1501408d641d1501347e571e1501060000001601060000011601060000021601408d64031601408d64041601408d64051601408d64061601408d64071601408d64081601408d64091601347e570a1601347e570b1601408d640c1601469e650d1601469e650e1601408d640f1601408d64101601408d64111601408d64121601408d64131601408d64141601408d64151601408d64161601408d64171601408d64181601347e57191601347e571a1601408d641b1601469e651c1601469e651d16010600001e1601060000021701060000031701060000041701408d64051701408d64061701469e65071701469e65081701408d64091701469e650a1701469e650b1701408d640c1701469e650d1701469e650e1701469e650f1701347e57101701347e57111701469e65121701469e65131701408d64141701408d64151701469e65161701469e65171701408d64181701469e65191701469e651a1701408d641b17010600001c1701060000041801060000051801060000061801469e65071801469e65081801408d64091801469e650a1801469e650b1801408d640c1801408d640d1801469e650e1801469e650f1801347e57101801408d64111801469e65121801469e65131801408d64141801469e65151801469e65161801469e65171801408d64181801469e651918010600001a1801060000061901060000071901060000081901408d64091901408d640a1901408d640b1901408d640c1901408d640d1901408d640e1901408d640f1901408d64101901408d64111901408d64121901408d64131901408d64141901469e65151901469e65161901408d64171901060000181901060000081a01060000091a010600000a1a01347e570b1a01347e570c1a01408d640d1a01408d640e1a01408d640f1a01469e65101a01408d64111a01408d64121a01408d64131a01408d64141a01408d64151a01060000161a010600000a1b010600000b1b010600000c1b01469e650d1b01469e650e1b01408d640f1b01469e65101b01408d64111b01408d64121b01469e65131b01060000141b010600000c1c010600000d1c010600000e1c01469e650f1c01408d64101c01408d64111c01060000121c010600000e1d010600000f1d01060000101d01060000");
+    const Web$Kaelin$Assets$tile$hex_range = VoxBox$parse$("0e010298755e0f01028e675610010298755e0c020298755e0d020298755e0e020298755e0f02028e67561002028e67561102028e67561202028e67560a030298755e0b03028e67560c03028e67560d030298755e0e030298755e0f03028e675610030298755e1103028e67561203028e67561303028e67561403028e675608040298755e09040298755e0a04028e67560b04028e67560c04028e67560d04028159490e04028159490f040298755e10040298755e11040298755e1204028159491304028e675614040298755e15040298755e1604028e675606050298755e0705028e67560805028e67560905028159490a05028e67560b05028e67560c05028e67560d05028e67560e05028159490f050298755e10050298755e1105028e675612050281594913050281594914050298755e15050298755e1605028e67561705028e67561805028159490406028e67560506028e67560606028e67560706028e67560806028e67560906028159490a06028159490b06028e67560c060298755e0d060298755e0e06028e67560f06028e67561006028e67561106028e67561206028e67561306028e67561406028e67561506028e67561606028e67561706028e67561806028159491906028159491a06028e675602070298755e03070298755e0407028e67560507028e675606070298755e07070298755e0807028e675609070298755e0a070298755e0b07028e67560c070298755e0d070298755e0e070298755e0f070281594910070281594911070298755e12070298755e1307028e67561407028e675615070298755e16070298755e1707028e675618070298755e19070298755e1a07028e67561b070298755e1c070298755e0108028e675602080298755e03080298755e0408028e675605080298755e06080298755e07080298755e0808028e675609080298755e0a080298755e0b08028e67560c08028e67560d080298755e0e080298755e0f08028159491008028e675611080298755e12080298755e1308028e675614080298755e15080298755e16080298755e1708028e675618080298755e19080298755e1a08028e67561b08028e67561c080298755e1d080298755e0109028e67560209028e67560309028e67560409028e675605090298755e06090298755e0709028e67560809028e67560909028e67560a09028e67560b09028e67560c09028e67560d09028e67560e09028e67560f09028e67561009028e67561109028e67561209028e67561309028e675614090298755e15090298755e1609028e67561709028e67561809028e67561909028e67561a09028e67561b09028e67561c09028e67561d09028e6756010a028e6756020a028e6756030a028e6756040a028e6756050a028e6756060a028e6756070a0298755e080a0298755e090a028e67560a0a028159490b0a028159490c0a028e67560d0a028e67560e0a028e67560f0a0298755e100a028e6756110a028e6756120a028e6756130a028e6756140a028e6756150a028e6756160a0298755e170a0298755e180a028e6756190a028159491a0a028159491b0a028e67561c0a028e67561d0a028e6756010b028e6756020b028e6756030b0298755e040b0298755e050b028e6756060b0298755e070b0298755e080b0298755e090b028e67560a0b028159490b0b028e67560c0b0298755e0d0b0298755e0e0b028e67560f0b0298755e100b028e6756110b028e6756120b0298755e130b0298755e140b028e6756150b0298755e160b0298755e170b0298755e180b028e6756190b028159491a0b028e67561b0b0298755e1c0b0298755e1d0b028e6756010c028e6756020c0298755e030c0298755e040c0298755e050c028e6756060c0298755e070c0298755e080c028e6756090c028e67560a0c028e67560b0c028e67560c0c0298755e0d0c0298755e0e0c0298755e0f0c028e6756100c028e6756110c0298755e120c0298755e130c0298755e140c028e6756150c0298755e160c0298755e170c028e6756180c028e6756190c028e67561a0c028e67561b0c0298755e1c0c0298755e1d0c0298755e010d028e6756020d0298755e030d0298755e040d028e6756050d028e6756060d028e6756070d028e6756080d028e6756090d028e67560a0d028e67560b0d028e67560c0d028e67560d0d0298755e0e0d0298755e0f0d028e6756100d028e6756110d0298755e120d0298755e130d028e6756140d028e6756150d028e6756160d028e6756170d028e6756180d028e6756190d028e67561a0d028e67561b0d028e67561c0d0298755e1d0d0298755e010e028e6756020e0298755e030e0298755e040e028e6756050e02815949060e028e6756070e0298755e080e0298755e090e0298755e0a0e028e67560b0e0298755e0c0e0298755e0d0e028e67560e0e028e67560f0e0298755e100e028e6756110e0298755e120e0298755e130e028e6756140e02815949150e028e6756160e0298755e170e0298755e180e0298755e190e028e67561a0e0298755e1b0e0298755e1c0e028e67561d0e028e6756010f0298755e020f0298755e030f0298755e040f028e6756050f028e6756060f028e6756070f0298755e080f0298755e090f028e67560a0f0298755e0b0f0298755e0c0f028e67560d0f028e67560e0f028e67560f0f028e6756100f0298755e110f0298755e120f0298755e130f028e6756140f028e6756150f0298755e160f0298755e170f0298755e180f028e6756190f028e67561a0f028e67561b0f028e67561c0f028e67561d0f028e675601100298755e02100298755e0310028e67560410028e675605100298755e06100298755e0710028e67560810028e67560910028e67560a10028e67560b10028e67560c100298755e0d100298755e0e100298755e0f100281594910100298755e1110028e67561210028e675613100298755e14100298755e15100298755e1610028e67561710028e67561810028159491910028e67561a10028e67561b100298755e1c100298755e1d100298755e0111028e67560211028e67560311028e675604110298755e05110298755e0611028e67560711028e675608110281594909110298755e0a110298755e0b11028e67560c110298755e0d110298755e0e110298755e0f11028e67561011028e675611110298755e1211028e675613110298755e14110298755e1511028e67561611028e67561711028e675618110298755e19110298755e1a11028e67561b110298755e1c110298755e1d110298755e01120298755e0212028e67560312028e67560412028e67560512028e67560612028e67560712028e675608120298755e09120298755e0a120298755e0b120298755e0c12028e67560d120298755e0e120298755e0f12028e675610120298755e1112028e67561212028e67561312028e67561412028e67561512028e675616120298755e17120298755e1812028e675619120298755e1a12028e67561b12028e67561c120298755e1d120298755e01130298755e02130298755e0313028159490413028e675605130298755e06130298755e0713028e675608130298755e09130298755e0a13028e67560b13028e67560c13028e67560d13028159490e13028159490f130298755e10130298755e11130298755e1213028159491313028e675614130298755e15130298755e1613028e675617130298755e18130298755e1913028e67561a13028e67561b13028e67561c13028159491d130281594901140298755e0214028e675603140281594904140281594905140298755e06140298755e0714028e67560814028e67560914028159490a14028e67560b14028e67560c14028e67560d14028e67560e14028159490f140298755e10140298755e1114028e675612140281594913140281594914140298755e15140298755e1614028e67561714028e67561814028159491914028e67561a14028e67561b14028e67561c14028e67561d14028159490215028e67560315028e67560415028e67560515028e67560615028e67560715028e67560815028e67560915028159490a15028159490b15028e67560c150298755e0d150298755e0e15028e67560f15028e67561015028e67561115028e67561215028e67561315028e67561415028e67561515028e67561615028e67561715028e67561815028159491915028159491a15028e67561b150298755e1c150298755e0416028e67560516028e675606160298755e07160298755e0816028e675609160298755e0a160298755e0b16028e67560c160298755e0d160298755e0e160298755e0f160281594910160281594911160298755e12160298755e1316028e67561416028e675615160298755e16160298755e1716028e675618160298755e19160298755e1a16028e675606170298755e07170298755e0817028e675609170298755e0a170298755e0b17028e67560c17028e67560d170298755e0e170298755e0f17028159491017028e675611170298755e12170298755e1317028e675614170298755e15170298755e16170298755e1717028e675618170298755e0818028e67560918028e67560a18028e67560b18028e67560c18028e67560d18028e67560e18028e67560f18028e67561018028e67561118028e67561218028e67561318028e675614180298755e15180298755e1618028e67560a19028159490b19028159490c19028e67560d19028e67560e19028e67560f190298755e1019028e67561119028e67561219028e67561319028e67561419028e67560c1a0298755e0d1a0298755e0e1a028e67560f1a0298755e101a028e6756111a028e6756121a0298755e0e1b0298755e0f1b028e6756101b028e6756");
+
+    function Web$Kaelin$Entity$background$(_terrain$1) {
+        var $449 = ({
+            _: 'Web.Kaelin.Entity.background',
+            'terrain': _terrain$1
+        });
+        return $449;
+    };
+    const Web$Kaelin$Entity$background = x0 => Web$Kaelin$Entity$background$(x0);
+    const NatMap = null;
+    const I32$sub = a0 => a1 => ((a0 - a1) >> 0);
+    const F64$to_i32 = a0 => ((a0 >> 0));
+
+    function Word$to_f64$(_a$2) {
+        var Word$to_f64$ = (_a$2) => ({
+            ctr: 'TCO',
+            arg: [_a$2]
+        });
+        var Word$to_f64 = _a$2 => Word$to_f64$(_a$2);
+        var arg = [_a$2];
+        while (true) {
+            let [_a$2] = arg;
+            var R = Word$to_f64$(_a$2);
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Word$to_f64 = x0 => Word$to_f64$(x0);
+    const U32$to_f64 = a0 => (a0);
+
+    function U32$to_i32$(_n$1) {
+        var $450 = (((_n$1) >> 0));
+        return $450;
+    };
+    const U32$to_i32 = x0 => U32$to_i32$(x0);
+
+    function I32$abs$(_a$1) {
+        var self = _a$1;
+        switch ('i32') {
+            case 'i32':
+                var $452 = i32_to_word(self);
+                var $453 = I32$new$(Word$abs$($452));
+                var $451 = $453;
                 break;
         };
-        return $393;
+        return $451;
     };
-    const BitsMap$delete = x0 => x1 => BitsMap$delete$(x0, x1);
+    const I32$abs = x0 => I32$abs$(x0);
+    const F64$to_u32 = a0 => ((a0 >>> 0));
 
-    function NatMap$del$(_key$2, _map$3) {
-        var $404 = BitsMap$delete$((nat_to_bits(_key$2)), _map$3);
-        return $404;
+    function Word$s_to_f64$(_a$2) {
+        var Word$s_to_f64$ = (_a$2) => ({
+            ctr: 'TCO',
+            arg: [_a$2]
+        });
+        var Word$s_to_f64 = _a$2 => Word$s_to_f64$(_a$2);
+        var arg = [_a$2];
+        while (true) {
+            let [_a$2] = arg;
+            var R = Word$s_to_f64$(_a$2);
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
     };
-    const NatMap$del = x0 => x1 => NatMap$del$(x0, x1);
+    const Word$s_to_f64 = x0 => Word$s_to_f64$(x0);
+    const I32$to_f64 = a0 => (a0);
 
-    function Web$Kaelin$Map$del$(_coord$1, _map$2) {
-        var _key$3 = Web$Kaelin$Coord$Convert$axial_to_nat$(_coord$1);
-        var $405 = NatMap$del$(_key$3, _map$2);
-        return $405;
+    function I32$to_u32$(_n$1) {
+        var $454 = (((_n$1) >>> 0));
+        return $454;
     };
-    const Web$Kaelin$Map$del = x0 => x1 => Web$Kaelin$Map$del$(x0, x1);
+    const I32$to_u32 = x0 => I32$to_u32$(x0);
+
+    function Cmp$as_lte$(_cmp$1) {
+        var self = _cmp$1;
+        switch (self._) {
+            case 'Cmp.ltn':
+            case 'Cmp.eql':
+                var $456 = Bool$true;
+                var $455 = $456;
+                break;
+            case 'Cmp.gtn':
+                var $457 = Bool$false;
+                var $455 = $457;
+                break;
+        };
+        return $455;
+    };
+    const Cmp$as_lte = x0 => Cmp$as_lte$(x0);
+
+    function Word$lte$(_a$2, _b$3) {
+        var $458 = Cmp$as_lte$(Word$cmp$(_a$2, _b$3));
+        return $458;
+    };
+    const Word$lte = x0 => x1 => Word$lte$(x0, x1);
+    const U32$lte = a0 => a1 => (a0 <= a1);
+
+    function Web$Kaelin$Coord$fit$(_coord$1, _map_size$2) {
+        var self = _coord$1;
+        switch (self._) {
+            case 'Web.Kaelin.Coord.new':
+                var $460 = self.i;
+                var $461 = self.j;
+                var _i$5 = $460;
+                var _j$6 = $461;
+                var _sum$7 = ((_i$5 + _j$6) >> 0);
+                var _abs$8 = I32$abs$(_sum$7);
+                var _abs$9 = I32$to_u32$(_abs$8);
+                var $462 = (_abs$9 <= _map_size$2);
+                var $459 = $462;
+                break;
+        };
+        return $459;
+    };
+    const Web$Kaelin$Coord$fit = x0 => x1 => Web$Kaelin$Coord$fit$(x0, x1);
+    const Web$Kaelin$Map$arena = (() => {
+        var _map$1 = NatMap$new;
+        var _map_size$2 = Web$Kaelin$Constants$map_size;
+        var _width$3 = ((((_map_size$2 * 2) >>> 0) + 1) >>> 0);
+        var _height$4 = ((((_map_size$2 * 2) >>> 0) + 1) >>> 0);
+        var _new_terrain$5 = Web$Kaelin$Terrain$grass$(Web$Kaelin$Assets$tile$dark_grass_4, Web$Kaelin$Assets$tile$hex_range, Web$Kaelin$Assets$tile$dark_grass_4);
+        var _new_terrain$6 = Web$Kaelin$Entity$background$(_new_terrain$5);
+        var _map$7 = (() => {
+            var $464 = _map$1;
+            var $465 = 0;
+            var $466 = _height$4;
+            let _map$8 = $464;
+            for (let _j$7 = $465; _j$7 < $466; ++_j$7) {
+                var _map$9 = (() => {
+                    var $467 = _map$8;
+                    var $468 = 0;
+                    var $469 = _width$3;
+                    let _map$10 = $467;
+                    for (let _i$9 = $468; _i$9 < $469; ++_i$9) {
+                        var _coord_i$11 = ((U32$to_i32$(_i$9) - U32$to_i32$(_map_size$2)) >> 0);
+                        var _coord_j$12 = ((U32$to_i32$(_j$7) - U32$to_i32$(_map_size$2)) >> 0);
+                        var _coord$13 = Web$Kaelin$Coord$new$(_coord_i$11, _coord_j$12);
+                        var _fit$14 = Web$Kaelin$Coord$fit$(_coord$13, _map_size$2);
+                        var self = _fit$14;
+                        if (self) {
+                            var $470 = Web$Kaelin$Map$push$(_coord$13, _new_terrain$6, _map$10);
+                            var $467 = $470;
+                        } else {
+                            var $471 = _map$10;
+                            var $467 = $471;
+                        };
+                        _map$10 = $467;
+                    };
+                    return _map$10;
+                })();
+                var $464 = _map$9;
+                _map$8 = $464;
+            };
+            return _map$8;
+        })();
+        var $463 = _map$7;
+        return $463;
+    })();
+
+    function App$EnvInfo$new$(_screen_size$1, _mouse_pos$2) {
+        var $472 = ({
+            _: 'App.EnvInfo.new',
+            'screen_size': _screen_size$1,
+            'mouse_pos': _mouse_pos$2
+        });
+        return $472;
+    };
+    const App$EnvInfo$new = x0 => x1 => App$EnvInfo$new$(x0, x1);
+
+    function Web$Kaelin$State$game$(_room$1, _tick$2, _players$3, _cast_info$4, _map$5, _interface$6) {
+        var $473 = ({
+            _: 'Web.Kaelin.State.game',
+            'room': _room$1,
+            'tick': _tick$2,
+            'players': _players$3,
+            'cast_info': _cast_info$4,
+            'map': _map$5,
+            'interface': _interface$6
+        });
+        return $473;
+    };
+    const Web$Kaelin$State$game = x0 => x1 => x2 => x3 => x4 => x5 => Web$Kaelin$State$game$(x0, x1, x2, x3, x4, x5);
+
+    function DOM$text$(_value$1) {
+        var $474 = ({
+            _: 'DOM.text',
+            'value': _value$1
+        });
+        return $474;
+    };
+    const DOM$text = x0 => DOM$text$(x0);
+
+    function DOM$vbox$(_props$1, _style$2, _value$3) {
+        var $475 = ({
+            _: 'DOM.vbox',
+            'props': _props$1,
+            'style': _style$2,
+            'value': _value$3
+        });
+        return $475;
+    };
+    const DOM$vbox = x0 => x1 => x2 => DOM$vbox$(x0, x1, x2);
 
     function List$reverse$go$(_xs$2, _res$3) {
         var List$reverse$go$ = (_xs$2, _res$3) => ({
@@ -2023,13 +2439,13 @@ module.exports = (function() {
                 var self = _xs$2;
                 switch (self._) {
                     case 'List.cons':
-                        var $406 = self.head;
-                        var $407 = self.tail;
-                        var $408 = List$reverse$go$($407, List$cons$($406, _res$3));
-                        return $408;
+                        var $476 = self.head;
+                        var $477 = self.tail;
+                        var $478 = List$reverse$go$($477, List$cons$($476, _res$3));
+                        return $478;
                     case 'List.nil':
-                        var $409 = _res$3;
-                        return $409;
+                        var $479 = _res$3;
+                        return $479;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -2039,8 +2455,8 @@ module.exports = (function() {
     const List$reverse$go = x0 => x1 => List$reverse$go$(x0, x1);
 
     function List$reverse$(_xs$2) {
-        var $410 = List$reverse$go$(_xs$2, List$nil);
-        return $410;
+        var $480 = List$reverse$go$(_xs$2, List$nil);
+        return $480;
     };
     const List$reverse = x0 => List$reverse$(x0);
 
@@ -2057,16 +2473,16 @@ module.exports = (function() {
                 var self = _a$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'o':
-                        var $411 = self.slice(0, -1);
-                        var $412 = Bits$reverse$tco$($411, (_r$2 + '0'));
-                        return $412;
+                        var $481 = self.slice(0, -1);
+                        var $482 = Bits$reverse$tco$($481, (_r$2 + '0'));
+                        return $482;
                     case 'i':
-                        var $413 = self.slice(0, -1);
-                        var $414 = Bits$reverse$tco$($413, (_r$2 + '1'));
-                        return $414;
+                        var $483 = self.slice(0, -1);
+                        var $484 = Bits$reverse$tco$($483, (_r$2 + '1'));
+                        return $484;
                     case 'e':
-                        var $415 = _r$2;
-                        return $415;
+                        var $485 = _r$2;
+                        return $485;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -2076,8 +2492,8 @@ module.exports = (function() {
     const Bits$reverse$tco = x0 => x1 => Bits$reverse$tco$(x0, x1);
 
     function Bits$reverse$(_a$1) {
-        var $416 = Bits$reverse$tco$(_a$1, Bits$e);
-        return $416;
+        var $486 = Bits$reverse$tco$(_a$1, Bits$e);
+        return $486;
     };
     const Bits$reverse = x0 => Bits$reverse$(x0);
 
@@ -2085,32 +2501,32 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'BitsMap.tie':
-                var $418 = self.val;
-                var $419 = self.lft;
-                var $420 = self.rgt;
-                var self = $418;
+                var $488 = self.val;
+                var $489 = self.lft;
+                var $490 = self.rgt;
+                var self = $488;
                 switch (self._) {
                     case 'Maybe.some':
-                        var $422 = self.value;
-                        var $423 = List$cons$(Pair$new$(Bits$reverse$(_key$3), $422), _list$4);
-                        var _list0$8 = $423;
+                        var $492 = self.value;
+                        var $493 = List$cons$(Pair$new$(Bits$reverse$(_key$3), $492), _list$4);
+                        var _list0$8 = $493;
                         break;
                     case 'Maybe.none':
-                        var $424 = _list$4;
-                        var _list0$8 = $424;
+                        var $494 = _list$4;
+                        var _list0$8 = $494;
                         break;
                 };
-                var _list1$9 = BitsMap$to_list$go$($419, (_key$3 + '0'), _list0$8);
-                var _list2$10 = BitsMap$to_list$go$($420, (_key$3 + '1'), _list1$9);
-                var $421 = _list2$10;
-                var $417 = $421;
+                var _list1$9 = BitsMap$to_list$go$($489, (_key$3 + '0'), _list0$8);
+                var _list2$10 = BitsMap$to_list$go$($490, (_key$3 + '1'), _list1$9);
+                var $491 = _list2$10;
+                var $487 = $491;
                 break;
             case 'BitsMap.new':
-                var $425 = _list$4;
-                var $417 = $425;
+                var $495 = _list$4;
+                var $487 = $495;
                 break;
         };
-        return $417;
+        return $487;
     };
     const BitsMap$to_list$go = x0 => x1 => x2 => BitsMap$to_list$go$(x0, x1, x2);
 
@@ -2118,17 +2534,17 @@ module.exports = (function() {
         var self = _as$2;
         switch (self._) {
             case 'List.cons':
-                var $427 = self.head;
-                var $428 = self.tail;
-                var $429 = List$cons$(_f$4($427), List$mapped$($428, _f$4));
-                var $426 = $429;
+                var $497 = self.head;
+                var $498 = self.tail;
+                var $499 = List$cons$(_f$4($497), List$mapped$($498, _f$4));
+                var $496 = $499;
                 break;
             case 'List.nil':
-                var $430 = List$nil;
-                var $426 = $430;
+                var $500 = List$nil;
+                var $496 = $500;
                 break;
         };
-        return $426;
+        return $496;
     };
     const List$mapped = x0 => x1 => List$mapped$(x0, x1);
 
@@ -2136,369 +2552,77 @@ module.exports = (function() {
         var self = _b$1;
         switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
             case 'o':
-                var $432 = self.slice(0, -1);
-                var $433 = (2n * Bits$to_nat$($432));
-                var $431 = $433;
+                var $502 = self.slice(0, -1);
+                var $503 = (2n * Bits$to_nat$($502));
+                var $501 = $503;
                 break;
             case 'i':
-                var $434 = self.slice(0, -1);
-                var $435 = Nat$succ$((2n * Bits$to_nat$($434)));
-                var $431 = $435;
+                var $504 = self.slice(0, -1);
+                var $505 = Nat$succ$((2n * Bits$to_nat$($504)));
+                var $501 = $505;
                 break;
             case 'e':
-                var $436 = 0n;
-                var $431 = $436;
+                var $506 = 0n;
+                var $501 = $506;
                 break;
         };
-        return $431;
+        return $501;
     };
     const Bits$to_nat = x0 => Bits$to_nat$(x0);
 
     function NatMap$to_list$(_xs$2) {
         var _kvs$3 = List$reverse$(BitsMap$to_list$go$(_xs$2, Bits$e, List$nil));
-        var $437 = List$mapped$(_kvs$3, (_kv$4 => {
+        var $507 = List$mapped$(_kvs$3, (_kv$4 => {
             var self = _kv$4;
             switch (self._) {
                 case 'Pair.new':
-                    var $439 = self.fst;
-                    var $440 = self.snd;
-                    var $441 = Pair$new$(Bits$to_nat$($439), $440);
-                    var $438 = $441;
+                    var $509 = self.fst;
+                    var $510 = self.snd;
+                    var $511 = Pair$new$(Bits$to_nat$($509), $510);
+                    var $508 = $511;
                     break;
             };
-            return $438;
+            return $508;
         }));
-        return $437;
+        return $507;
     };
     const NatMap$to_list = x0 => NatMap$to_list$(x0);
-    const NatMap = null;
-
-    function NatMap$from_list$(_xs$2) {
-        var self = _xs$2;
-        switch (self._) {
-            case 'List.cons':
-                var $443 = self.head;
-                var $444 = self.tail;
-                var self = $443;
-                switch (self._) {
-                    case 'Pair.new':
-                        var $446 = self.fst;
-                        var $447 = self.snd;
-                        var $448 = BitsMap$set$((nat_to_bits($446)), $447, NatMap$from_list$($444));
-                        var $445 = $448;
-                        break;
-                };
-                var $442 = $445;
-                break;
-            case 'List.nil':
-                var $449 = BitsMap$new;
-                var $442 = $449;
-                break;
-        };
-        return $442;
-    };
-    const NatMap$from_list = x0 => NatMap$from_list$(x0);
-
-    function Web$Kaelin$Map$push$(_coord$1, _tile$2, _map$3) {
-        var _tiles$4 = NatMap$to_list$(_map$3);
-        var _key$5 = Web$Kaelin$Coord$Convert$axial_to_nat$(_coord$1);
-        var _map$6 = List$cons$(Pair$new$(_key$5, _tile$2), _tiles$4);
-        var $450 = NatMap$from_list$(_map$6);
-        return $450;
-    };
-    const Web$Kaelin$Map$push = x0 => x1 => x2 => Web$Kaelin$Map$push$(x0, x1, x2);
-
-    function Web$Kaelin$Map$set$(_coord$1, _entity$2, _map$3) {
-        var _tile$4 = List$cons$(_entity$2, Web$Kaelin$Map$get$(_coord$1, _map$3));
-        var _map$5 = Web$Kaelin$Map$del$(_coord$1, _map$3);
-        var $451 = Web$Kaelin$Map$push$(_coord$1, _tile$4, _map$5);
-        return $451;
-    };
-    const Web$Kaelin$Map$set = x0 => x1 => x2 => Web$Kaelin$Map$set$(x0, x1, x2);
-
-    function Int$neg$(_a$1) {
-        var self = _a$1;
-        switch ("new") {
-            case 'new':
-                var $453 = int_pos(self);
-                var $454 = int_neg(self);
-                var $455 = ($454 - $453);
-                var $452 = $455;
-                break;
-        };
-        return $452;
-    };
-    const Int$neg = x0 => Int$neg$(x0);
-
-    function Web$Kaelin$Map$init$(_map$1) {
-        var _new_coord$2 = Web$Kaelin$Coord$new;
-        var _creature$3 = Web$Kaelin$Entity$creature;
-        var _croni$4 = Web$Kaelin$Hero$croni;
-        var _cyclope$5 = Web$Kaelin$Hero$cyclope;
-        var _lela$6 = Web$Kaelin$Hero$lela;
-        var _octoking$7 = Web$Kaelin$Hero$octoking;
-        var _map$8 = Web$Kaelin$Map$set$(_new_coord$2(Int$neg$(Int$from_nat$(1n)))(Int$neg$(Int$from_nat$(2n))), _creature$3(Maybe$none)(_croni$4), _map$1);
-        var _map$9 = Web$Kaelin$Map$set$(_new_coord$2(Int$from_nat$(0n))(Int$from_nat$(3n)), _creature$3(Maybe$none)(_cyclope$5), _map$8);
-        var _map$10 = Web$Kaelin$Map$set$(_new_coord$2(Int$neg$(Int$from_nat$(2n)))(Int$from_nat$(0n)), _creature$3(Maybe$none)(_lela$6), _map$9);
-        var _map$11 = Web$Kaelin$Map$set$(_new_coord$2(Int$from_nat$(3n))(Int$neg$(Int$from_nat$(2n))), _creature$3(Maybe$none)(_octoking$7), _map$10);
-        var $456 = _map$11;
-        return $456;
-    };
-    const Web$Kaelin$Map$init = x0 => Web$Kaelin$Map$init$(x0);
-    const NatMap$new = BitsMap$new;
-    const Web$Kaelin$Constants$map_size = 4;
-
-    function Web$Kaelin$Entity$background$(_img$1) {
-        var $457 = ({
-            _: 'Web.Kaelin.Entity.background',
-            'img': _img$1
-        });
-        return $457;
-    };
-    const Web$Kaelin$Entity$background = x0 => Web$Kaelin$Entity$background$(x0);
-    const Web$Kaelin$Assets$tile$dark_grass_4 = VoxBox$parse$("0e00010600000f00010600001000010600000c01010600000d01010600000e0101408d640f0101408d64100101469e651101010600001201010600000a02010600000b02010600000c0201469e650d0201469e650e0201469e650f0201408d64100201469e65110201469e65120201408d641302010600001402010600000803010600000903010600000a0301469e650b0301408d640c0301469e650d0301469e650e0301469e650f0301408d64100301408d64110301408d64120301408d64130301469e65140301469e65150301060000160301060000060401060000070401060000080401469e65090401469e650a0401469e650b0401408d640c0401408d640d0401469e650e0401469e650f0401408d64100401469e65110401408d64120401408d64130401408d64140401408d64150401408d64160401408d64170401060000180401060000040501060000050501060000060501469e65070501408d64080501469e65090501469e650a0501408d640b0501408d640c0501408d640d0501347e570e0501347e570f0501469e65100501469e65110501469e65120501347e57130501408d64140501469e65150501469e65160501408d64170501469e65180501469e651905010600001a0501060000020601060000030601060000040601347e57050601469e65060601469e65070601408d64080601408d64090601347e570a0601408d640b0601408d640c0601408d640d0601408d640e0601347e570f0601469e65100601469e65110601408d64120601347e57130601347e57140601469e65150601469e65160601408d64170601408d64180601347e57190601408d641a0601408d641b06010600001c0601060000000701060000010701060000020701408d64030701408d64040701408d64050701408d64060701408d64070701408d64080701408d64090701347e570a0701347e570b0701408d640c0701469e650d0701469e650e0701408d640f0701408d64100701408d64110701408d64120701408d64130701408d64140701408d64150701408d64160701408d64170701408d64180701347e57190701347e571a0701408d641b0701469e651c0701469e651d07010600001e0701060000000801060000010801347e57020801469e65030801469e65040801408d64050801408d64060801469e65070801469e65080801408d64090801469e650a0801469e650b0801408d640c0801469e650d0801469e650e0801469e650f0801347e57100801347e57110801469e65120801469e65130801408d64140801408d64150801469e65160801469e65170801408d64180801469e65190801469e651a0801408d641b0801469e651c0801469e651d0801469e651e0801060000000901060000010901408d64020901469e65030901469e65040901408d64050901469e65060901469e65070901469e65080901408d64090901469e650a0901469e650b0901408d640c0901408d640d0901469e650e0901469e650f0901347e57100901408d64110901469e65120901469e65130901408d64140901469e65150901469e65160901469e65170901408d64180901469e65190901469e651a0901408d641b0901408d641c0901469e651d0901469e651e0901060000000a01060000010a01408d64020a01408d64030a01408d64040a01408d64050a01469e65060a01469e65070a01408d64080a01408d64090a01408d640a0a01408d640b0a01408d640c0a01408d640d0a01408d640e0a01408d640f0a01408d64100a01408d64110a01408d64120a01408d64130a01408d64140a01469e65150a01469e65160a01408d64170a01408d64180a01408d64190a01408d641a0a01408d641b0a01408d641c0a01408d641d0a01408d641e0a01060000000b01060000010b01408d64020b01408d64030b01408d64040b01408d64050b01408d64060b01408d64070b01469e65080b01469e65090b01408d640a0b01347e570b0b01347e570c0b01408d640d0b01408d640e0b01408d640f0b01469e65100b01408d64110b01408d64120b01408d64130b01408d64140b01408d64150b01408d64160b01469e65170b01469e65180b01408d64190b01347e571a0b01347e571b0b01408d641c0b01408d641d0b01408d641e0b01060000000c01060000010c01408d64020c01408d64030c01469e65040c01469e65050c01408d64060c01469e65070c01469e65080c01469e65090c01408d640a0c01347e570b0c01408d640c0c01469e650d0c01469e650e0c01408d640f0c01469e65100c01408d64110c01408d64120c01469e65130c01469e65140c01408d64150c01469e65160c01469e65170c01469e65180c01408d64190c01347e571a0c01408d641b0c01469e651c0c01469e651d0c01408d641e0c01060000000d01060000010d01408d64020d01469e65030d01469e65040d01469e65050d01408d64060d01469e65070d01469e65080d01408d64090d01408d640a0d01408d640b0d01408d640c0d01469e650d0d01469e650e0d01469e650f0d01408d64100d01408d64110d01469e65120d01469e65130d01469e65140d01408d64150d01469e65160d01469e65170d01408d64180d01408d64190d01408d641a0d01408d641b0d01469e651c0d01469e651d0d01469e651e0d01060000000e01060000010e01408d64020e01469e65030e01469e65040e01408d64050e01408d64060e01408d64070e01408d64080e01408d64090e01408d640a0e01408d640b0e01408d640c0e01408d640d0e01469e650e0e01469e650f0e01408d64100e01408d64110e01469e65120e01469e65130e01408d64140e01408d64150e01408d64160e01408d64170e01408d64180e01408d64190e01408d641a0e01408d641b0e01408d641c0e01469e651d0e01469e651e0e01060000000f01060000010f01408d64020f01469e65030f01469e65040f01408d64050f01347e57060f01408d64070f01469e65080f01469e65090f01469e650a0f01408d640b0f01469e650c0f01469e650d0f01408d640e0f01408d640f0f01469e65100f01408d64110f01469e65120f01469e65130f01408d64140f01347e57150f01408d64160f01469e65170f01469e65180f01469e65190f01408d641a0f01469e651b0f01469e651c0f01408d641d0f01408d641e0f01060000001001060000011001469e65021001469e65031001469e65041001408d64051001408d64061001408d64071001469e65081001469e65091001408d640a1001408d640b1001408d640c1001408d640d1001408d640e1001408d640f1001408d64101001469e65111001469e65121001469e65131001408d64141001408d64151001408d64161001469e65171001469e65181001408d64191001408d641a1001408d641b1001408d641c1001408d641d1001408d641e1001060000001101060000011101469e65021101469e65031101408d64041101469e65051101469e65061101408d64071101408d64081101408d64091101408d640a1101408d640b1101408d640c1101469e650d1101469e650e1101469e650f1101408d64101101469e65111101469e65121101408d64131101469e65141101469e65151101408d64161101408d64171101408d64181101408d64191101408d641a1101408d641b1101469e651c1101469e651d1101469e651e1101060000001201060000011201408d64021201408d64031201408d64041201469e65051201469e65061201408d64071201408d64081201408d64091201469e650a1201469e650b1201408d640c1201469e650d1201469e650e1201469e650f1201408d64101201408d64111201408d64121201408d64131201469e65141201469e65151201408d64161201408d64171201408d64181201469e65191201469e651a1201408d641b1201469e651c1201469e651d1201469e651e1201060000001301060000011301469e65021301408d64031301408d64041301408d64051301408d64061301408d64071301408d64081301469e65091301469e650a1301469e650b1301408d640c1301408d640d1301469e650e1301469e650f1301408d64101301469e65111301408d64121301408d64131301408d64141301408d64151301408d64161301408d64171301469e65181301469e65191301469e651a1301408d641b1301408d641c1301469e651d1301469e651e1301060000001401060000011401469e65021401469e65031401347e57041401408d64051401469e65061401469e65071401408d64081401469e65091401469e650a1401408d640b1401408d640c1401408d640d1401347e570e1401347e570f1401469e65101401469e65111401469e65121401347e57131401408d64141401469e65151401469e65161401408d64171401469e65181401469e65191401408d641a1401408d641b1401408d641c1401347e571d1401347e571e1401060000001501060000011501469e65021501408d64031501347e57041501347e57051501469e65061501469e65071501408d64081501408d64091501347e570a1501408d640b1501408d640c1501408d640d1501408d640e1501347e570f1501469e65101501469e65111501408d64121501347e57131501347e57141501469e65151501469e65161501408d64171501408d64181501347e57191501408d641a1501408d641b1501408d641c1501408d641d1501347e571e1501060000001601060000011601060000021601408d64031601408d64041601408d64051601408d64061601408d64071601408d64081601408d64091601347e570a1601347e570b1601408d640c1601469e650d1601469e650e1601408d640f1601408d64101601408d64111601408d64121601408d64131601408d64141601408d64151601408d64161601408d64171601408d64181601347e57191601347e571a1601408d641b1601469e651c1601469e651d16010600001e1601060000021701060000031701060000041701408d64051701408d64061701469e65071701469e65081701408d64091701469e650a1701469e650b1701408d640c1701469e650d1701469e650e1701469e650f1701347e57101701347e57111701469e65121701469e65131701408d64141701408d64151701469e65161701469e65171701408d64181701469e65191701469e651a1701408d641b17010600001c1701060000041801060000051801060000061801469e65071801469e65081801408d64091801469e650a1801469e650b1801408d640c1801408d640d1801469e650e1801469e650f1801347e57101801408d64111801469e65121801469e65131801408d64141801469e65151801469e65161801469e65171801408d64181801469e651918010600001a1801060000061901060000071901060000081901408d64091901408d640a1901408d640b1901408d640c1901408d640d1901408d640e1901408d640f1901408d64101901408d64111901408d64121901408d64131901408d64141901469e65151901469e65161901408d64171901060000181901060000081a01060000091a010600000a1a01347e570b1a01347e570c1a01408d640d1a01408d640e1a01408d640f1a01469e65101a01408d64111a01408d64121a01408d64131a01408d64141a01408d64151a01060000161a010600000a1b010600000b1b010600000c1b01469e650d1b01469e650e1b01408d640f1b01469e65101b01408d64111b01408d64121b01469e65131b01060000141b010600000c1c010600000d1c010600000e1c01469e650f1c01408d64101c01408d64111c01060000121c010600000e1d010600000f1d01060000101d01060000");
-    const Int$sub = a0 => a1 => (a0 - a1);
-
-    function Word$fold$(_nil$3, _w0$4, _w1$5, _word$6) {
-        var self = _word$6;
-        switch (self._) {
-            case 'Word.o':
-                var $459 = self.pred;
-                var $460 = _w0$4(Word$fold$(_nil$3, _w0$4, _w1$5, $459));
-                var $458 = $460;
-                break;
-            case 'Word.i':
-                var $461 = self.pred;
-                var $462 = _w1$5(Word$fold$(_nil$3, _w0$4, _w1$5, $461));
-                var $458 = $462;
-                break;
-            case 'Word.e':
-                var $463 = _nil$3;
-                var $458 = $463;
-                break;
-        };
-        return $458;
-    };
-    const Word$fold = x0 => x1 => x2 => x3 => Word$fold$(x0, x1, x2, x3);
-
-    function Word$to_nat$(_word$2) {
-        var $464 = Word$fold$(0n, a1 => (2n * a1), (_x$4 => {
-            var $465 = Nat$succ$((2n * _x$4));
-            return $465;
-        }), _word$2);
-        return $464;
-    };
-    const Word$to_nat = x0 => Word$to_nat$(x0);
-    const U32$to_nat = a0 => (BigInt(a0));
-    const Nat$gtn = a0 => a1 => (a0 > a1);
-
-    function Int$is_neg$(_a$1) {
-        var self = _a$1;
-        switch ("new") {
-            case 'new':
-                var $467 = int_pos(self);
-                var $468 = int_neg(self);
-                var $469 = ($468 > $467);
-                var $466 = $469;
-                break;
-        };
-        return $466;
-    };
-    const Int$is_neg = x0 => Int$is_neg$(x0);
-
-    function Int$abs$(_a$1) {
-        var _neg$2 = Int$is_neg$(_a$1);
-        var self = _neg$2;
-        if (self) {
-            var _a$3 = Int$neg$(_a$1);
-            var self = _a$3;
-            switch ("new") {
-                case 'new':
-                    var $472 = int_pos(self);
-                    var $473 = $472;
-                    var $471 = $473;
-                    break;
-            };
-            var $470 = $471;
-        } else {
-            var self = _a$1;
-            switch ("new") {
-                case 'new':
-                    var $475 = int_pos(self);
-                    var $476 = $475;
-                    var $474 = $476;
-                    break;
-            };
-            var $470 = $474;
-        };
-        return $470;
-    };
-    const Int$abs = x0 => Int$abs$(x0);
-
-    function Cmp$as_lte$(_cmp$1) {
-        var self = _cmp$1;
-        switch (self._) {
-            case 'Cmp.ltn':
-            case 'Cmp.eql':
-                var $478 = Bool$true;
-                var $477 = $478;
-                break;
-            case 'Cmp.gtn':
-                var $479 = Bool$false;
-                var $477 = $479;
-                break;
-        };
-        return $477;
-    };
-    const Cmp$as_lte = x0 => Cmp$as_lte$(x0);
-
-    function Word$lte$(_a$2, _b$3) {
-        var $480 = Cmp$as_lte$(Word$cmp$(_a$2, _b$3));
-        return $480;
-    };
-    const Word$lte = x0 => x1 => Word$lte$(x0, x1);
-    const U32$lte = a0 => a1 => (a0 <= a1);
-
-    function Web$Kaelin$Coord$fit$(_coord$1, _map_size$2) {
-        var self = _coord$1;
-        switch (self._) {
-            case 'Web.Kaelin.Coord.new':
-                var $482 = self.i;
-                var $483 = self.j;
-                var _i$5 = $482;
-                var _j$6 = $483;
-                var _sum$7 = (_i$5 + _j$6);
-                var _abs$8 = Int$abs$(_sum$7);
-                var _abs$9 = (Number(_abs$8) >>> 0);
-                var $484 = (_abs$9 <= _map_size$2);
-                var $481 = $484;
-                break;
-        };
-        return $481;
-    };
-    const Web$Kaelin$Coord$fit = x0 => x1 => Web$Kaelin$Coord$fit$(x0, x1);
-    const Web$Kaelin$Map$arena = (() => {
-        var _map$1 = NatMap$new;
-        var _map_size$2 = Web$Kaelin$Constants$map_size;
-        var _width$3 = ((((_map_size$2 * 2) >>> 0) + 1) >>> 0);
-        var _height$4 = ((((_map_size$2 * 2) >>> 0) + 1) >>> 0);
-        var _background_entity$5 = Web$Kaelin$Entity$background$(Web$Kaelin$Assets$tile$dark_grass_4);
-        var _map$6 = (() => {
-            var $486 = _map$1;
-            var $487 = 0;
-            var $488 = _height$4;
-            let _map$7 = $486;
-            for (let _j$6 = $487; _j$6 < $488; ++_j$6) {
-                var _map$8 = (() => {
-                    var $489 = _map$7;
-                    var $490 = 0;
-                    var $491 = _width$3;
-                    let _map$9 = $489;
-                    for (let _i$8 = $490; _i$8 < $491; ++_i$8) {
-                        var _coord_i$10 = ((0n - (BigInt(_i$8))) - (0n - (BigInt(_map_size$2))));
-                        var _coord_j$11 = ((0n - (BigInt(_j$6))) - (0n - (BigInt(_map_size$2))));
-                        var _coord$12 = Web$Kaelin$Coord$new$(_coord_i$10, _coord_j$11);
-                        var _fit$13 = Web$Kaelin$Coord$fit$(_coord$12, _map_size$2);
-                        var self = _fit$13;
-                        if (self) {
-                            var $492 = Web$Kaelin$Map$push$(_coord$12, List$cons$(_background_entity$5, List$nil), _map$9);
-                            var $489 = $492;
-                        } else {
-                            var $493 = _map$9;
-                            var $489 = $493;
-                        };
-                        _map$9 = $489;
-                    };
-                    return _map$9;
-                })();
-                var $486 = _map$8;
-                _map$7 = $486;
-            };
-            return _map$7;
-        })();
-        var $485 = _map$6;
-        return $485;
-    })();
-
-    function App$EnvInfo$new$(_screen_size$1, _mouse_pos$2) {
-        var $494 = ({
-            _: 'App.EnvInfo.new',
-            'screen_size': _screen_size$1,
-            'mouse_pos': _mouse_pos$2
-        });
-        return $494;
-    };
-    const App$EnvInfo$new = x0 => x1 => App$EnvInfo$new$(x0, x1);
-
-    function Web$Kaelin$State$game$(_room$1, _tick$2, _players$3, _cast_info$4, _map$5, _interface$6) {
-        var $495 = ({
-            _: 'Web.Kaelin.State.game',
-            'room': _room$1,
-            'tick': _tick$2,
-            'players': _players$3,
-            'cast_info': _cast_info$4,
-            'map': _map$5,
-            'interface': _interface$6
-        });
-        return $495;
-    };
-    const Web$Kaelin$State$game = x0 => x1 => x2 => x3 => x4 => x5 => Web$Kaelin$State$game$(x0, x1, x2, x3, x4, x5);
-
-    function DOM$text$(_value$1) {
-        var $496 = ({
-            _: 'DOM.text',
-            'value': _value$1
-        });
-        return $496;
-    };
-    const DOM$text = x0 => DOM$text$(x0);
-
-    function DOM$vbox$(_props$1, _style$2, _value$3) {
-        var $497 = ({
-            _: 'DOM.vbox',
-            'props': _props$1,
-            'style': _style$2,
-            'value': _value$3
-        });
-        return $497;
-    };
-    const DOM$vbox = x0 => x1 => x2 => DOM$vbox$(x0, x1, x2);
     const List$for = a0 => a1 => a2 => (list_for(a0)(a1)(a2));
 
     function Pair$fst$(_pair$3) {
         var self = _pair$3;
         switch (self._) {
             case 'Pair.new':
-                var $499 = self.fst;
-                var $500 = $499;
-                var $498 = $500;
+                var $513 = self.fst;
+                var $514 = $513;
+                var $512 = $514;
                 break;
         };
-        return $498;
+        return $512;
     };
     const Pair$fst = x0 => Pair$fst$(x0);
 
     function Either$(_A$1, _B$2) {
-        var $501 = null;
-        return $501;
+        var $515 = null;
+        return $515;
     };
     const Either = x0 => x1 => Either$(x0, x1);
 
     function Either$left$(_value$3) {
-        var $502 = ({
+        var $516 = ({
             _: 'Either.left',
             'value': _value$3
         });
-        return $502;
+        return $516;
     };
     const Either$left = x0 => Either$left$(x0);
 
     function Either$right$(_value$3) {
-        var $503 = ({
+        var $517 = ({
             _: 'Either.right',
             'value': _value$3
         });
-        return $503;
+        return $517;
     };
     const Either$right = x0 => Either$right$(x0);
 
@@ -2514,20 +2638,20 @@ module.exports = (function() {
             var R = (() => {
                 var self = _m$2;
                 if (self === 0n) {
-                    var $504 = Either$left$(_n$1);
-                    return $504;
+                    var $518 = Either$left$(_n$1);
+                    return $518;
                 } else {
-                    var $505 = (self - 1n);
+                    var $519 = (self - 1n);
                     var self = _n$1;
                     if (self === 0n) {
-                        var $507 = Either$right$(Nat$succ$($505));
-                        var $506 = $507;
+                        var $521 = Either$right$(Nat$succ$($519));
+                        var $520 = $521;
                     } else {
-                        var $508 = (self - 1n);
-                        var $509 = Nat$sub_rem$($508, $505);
-                        var $506 = $509;
+                        var $522 = (self - 1n);
+                        var $523 = Nat$sub_rem$($522, $519);
+                        var $520 = $523;
                     };
-                    return $506;
+                    return $520;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -2549,12 +2673,12 @@ module.exports = (function() {
                 var self = Nat$sub_rem$(_n$1, _m$2);
                 switch (self._) {
                     case 'Either.left':
-                        var $510 = self.value;
-                        var $511 = Nat$div_mod$go$($510, _m$2, Nat$succ$(_d$3));
-                        return $511;
+                        var $524 = self.value;
+                        var $525 = Nat$div_mod$go$($524, _m$2, Nat$succ$(_d$3));
+                        return $525;
                     case 'Either.right':
-                        var $512 = Pair$new$(_d$3, _n$1);
-                        return $512;
+                        var $526 = Pair$new$(_d$3, _n$1);
+                        return $526;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -2568,6 +2692,8 @@ module.exports = (function() {
         'snd': a0 % a1
     }));
     const Nat$div = a0 => a1 => (a0 / a1);
+    const Int$add = a0 => a1 => (a0 + a1);
+    const Int$sub = a0 => a1 => (a0 - a1);
 
     function Nat$mod$go$(_n$1, _m$2, _r$3) {
         var Nat$mod$go$ = (_n$1, _m$2, _r$3) => ({
@@ -2581,20 +2707,20 @@ module.exports = (function() {
             var R = (() => {
                 var self = _m$2;
                 if (self === 0n) {
-                    var $513 = Nat$mod$go$(_n$1, _r$3, _m$2);
-                    return $513;
+                    var $527 = Nat$mod$go$(_n$1, _r$3, _m$2);
+                    return $527;
                 } else {
-                    var $514 = (self - 1n);
+                    var $528 = (self - 1n);
                     var self = _n$1;
                     if (self === 0n) {
-                        var $516 = _r$3;
-                        var $515 = $516;
+                        var $530 = _r$3;
+                        var $529 = $530;
                     } else {
-                        var $517 = (self - 1n);
-                        var $518 = Nat$mod$go$($517, $514, Nat$succ$(_r$3));
-                        var $515 = $518;
+                        var $531 = (self - 1n);
+                        var $532 = Nat$mod$go$($531, $528, Nat$succ$(_r$3));
+                        var $529 = $532;
                     };
-                    return $515;
+                    return $529;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -2611,132 +2737,129 @@ module.exports = (function() {
         var _coord_j$5 = (_a$1 % 10000n);
         var _coord_j$6 = Int$from_nat$(_coord_j$5);
         var _coord_j$7 = (_coord_j$6 - Int$from_nat$(1000n));
-        var $519 = Web$Kaelin$Coord$new$(_coord_i$4, _coord_j$7);
-        return $519;
+        var _coord_i$8 = Int$to_i32$(_coord_i$4);
+        var _coord_j$9 = Int$to_i32$(_coord_j$7);
+        var $533 = Web$Kaelin$Coord$new$(_coord_i$8, _coord_j$9);
+        return $533;
     };
     const Web$Kaelin$Coord$Convert$nat_to_axial = x0 => Web$Kaelin$Coord$Convert$nat_to_axial$(x0);
-
-    function Int$from_u32$(_n$1) {
-        var $520 = ((BigInt(_n$1)) - 0n);
-        return $520;
-    };
-    const Int$from_u32 = x0 => Int$from_u32$(x0);
     const Web$Kaelin$Constants$hexagon_radius = 15;
-
-    function Int$div_nat$(_a$1, _n$2) {
-        var self = _a$1;
-        switch ("new") {
-            case 'new':
-                var $522 = int_pos(self);
-                var $523 = int_neg(self);
-                var $524 = (($522 / _n$2) - ($523 / _n$2));
-                var $521 = $524;
-                break;
-        };
-        return $521;
-    };
-    const Int$div_nat = x0 => x1 => Int$div_nat$(x0, x1);
+    const I32$div = a0 => a1 => ((a0 / a1) >> 0);
     const Web$Kaelin$Constants$center_x = 128;
     const Web$Kaelin$Constants$center_y = 128;
-
-    function Int$to_u32$(_a$1) {
-        var self = _a$1;
-        switch ("new") {
-            case 'new':
-                var $526 = int_pos(self);
-                var $527 = int_neg(self);
-                var self = $527;
-                if (self === 0n) {
-                    var $529 = Pair$new$(Bool$false, (Number($526) >>> 0));
-                    var $528 = $529;
-                } else {
-                    var $530 = (self - 1n);
-                    var $531 = Pair$new$(Bool$true, (Number($527) >>> 0));
-                    var $528 = $531;
-                };
-                var $525 = $528;
-                break;
-        };
-        return $525;
-    };
-    const Int$to_u32 = x0 => Int$to_u32$(x0);
 
     function Web$Kaelin$Coord$to_screen_xy$(_coord$1) {
         var self = _coord$1;
         switch (self._) {
             case 'Web.Kaelin.Coord.new':
-                var $533 = self.i;
-                var $534 = self.j;
-                var _i$4 = $533;
-                var _j$5 = $534;
-                var _int_rad$6 = Int$from_u32$(Web$Kaelin$Constants$hexagon_radius);
-                var _hlf$7 = Int$div_nat$(_int_rad$6, 2n);
-                var _int_screen_center_x$8 = Int$from_u32$(Web$Kaelin$Constants$center_x);
-                var _int_screen_center_y$9 = Int$from_u32$(Web$Kaelin$Constants$center_y);
-                var _cx$10 = (_int_screen_center_x$8 + (_j$5 * _int_rad$6));
-                var _cx$11 = (_cx$10 + (_i$4 * (_int_rad$6 * Int$from_nat$(2n))));
-                var _cy$12 = (_int_screen_center_y$9 + (_j$5 * (_hlf$7 * Int$from_nat$(3n))));
-                var self = Int$to_u32$(_cx$11);
-                switch (self._) {
-                    case 'Pair.new':
-                        var $536 = self.snd;
-                        var self = Int$to_u32$(_cy$12);
-                        switch (self._) {
-                            case 'Pair.new':
-                                var $538 = self.snd;
-                                var $539 = Pair$new$($536, $538);
-                                var $537 = $539;
-                                break;
-                        };
-                        var $535 = $537;
-                        break;
-                };
-                var $532 = $535;
+                var $535 = self.i;
+                var $536 = self.j;
+                var _i$4 = $535;
+                var _j$5 = $536;
+                var _int_rad$6 = U32$to_i32$(Web$Kaelin$Constants$hexagon_radius);
+                var _hlf$7 = ((_int_rad$6 / Int$to_i32$(Int$from_nat$(2n))) >> 0);
+                var _int_screen_center_x$8 = U32$to_i32$(Web$Kaelin$Constants$center_x);
+                var _int_screen_center_y$9 = U32$to_i32$(Web$Kaelin$Constants$center_y);
+                var _cx$10 = ((_int_screen_center_x$8 + ((_j$5 * _int_rad$6) >> 0)) >> 0);
+                var _cx$11 = ((_cx$10 + ((_i$4 * ((_int_rad$6 * Int$to_i32$(Int$from_nat$(2n))) >> 0)) >> 0)) >> 0);
+                var _cy$12 = ((_int_screen_center_y$9 + ((_j$5 * ((_hlf$7 * Int$to_i32$(Int$from_nat$(3n))) >> 0)) >> 0)) >> 0);
+                var _cx$13 = I32$to_u32$(_cx$11);
+                var _cy$14 = I32$to_u32$(_cy$12);
+                var $537 = Pair$new$(_cx$13, _cy$14);
+                var $534 = $537;
                 break;
         };
-        return $532;
+        return $534;
     };
     const Web$Kaelin$Coord$to_screen_xy = x0 => Web$Kaelin$Coord$to_screen_xy$(x0);
     const U32$sub = a0 => a1 => ((a0 - a1) >>> 0);
+
+    function Web$Kaelin$Draw$terrain$(_coord$1, _tile$2, _img$3, _cast_info$4) {
+        var _img$5 = (() => {
+            var $540 = _img$3;
+            var $541 = _tile$2;
+            let _img$6 = $540;
+            let _entity$5;
+            while ($541._ === 'List.cons') {
+                _entity$5 = $541.head;
+                var self = _entity$5;
+                switch (self._) {
+                    case 'Web.Kaelin.Entity.background':
+                        var $542 = self.terrain;
+                        var self = $542;
+                        switch (self._) {
+                            case 'Web.Kaelin.Terrain.grass':
+                                var $544 = self.normal;
+                                var $545 = self.ability;
+                                var self = _cast_info$4;
+                                switch (self._) {
+                                    case 'Maybe.none':
+                                        var $547 = $544;
+                                        var $546 = $547;
+                                        break;
+                                    case 'Maybe.some':
+                                        var $548 = $545;
+                                        var $546 = $548;
+                                        break;
+                                };
+                                var $543 = $546;
+                                break;
+                        };
+                        var $540 = $543;
+                        break;
+                    case 'Web.Kaelin.Entity.creature':
+                        var $549 = _img$6;
+                        var $540 = $549;
+                        break;
+                };
+                _img$6 = $540;
+                $541 = $541.tail;
+            }
+            return _img$6;
+        })();
+        var $538 = _img$5;
+        return $538;
+    };
+    const Web$Kaelin$Draw$terrain = x0 => x1 => x2 => x3 => Web$Kaelin$Draw$terrain$(x0, x1, x2, x3);
 
     function VoxBox$get_len$(_img$1) {
         var self = _img$1;
         switch (self._) {
             case 'VoxBox.new':
-                var $541 = self.length;
-                var $542 = $541;
-                var $540 = $542;
+                var $551 = self.length;
+                var $552 = $551;
+                var $550 = $552;
                 break;
         };
-        return $540;
+        return $550;
     };
     const VoxBox$get_len = x0 => VoxBox$get_len$(x0);
 
     function Array$get$(_idx$3, _arr$4) {
-        var $543 = Word$foldl$(Array$extract_tip, (_rec$6 => _arr$7 => {
+        var $553 = Word$foldl$(Array$extract_tip, (_rec$6 => _arr$7 => {
             var _arr_l$8 = Array$extract_tie$(_arr$7);
             var self = _arr_l$8;
             switch (self._) {
                 case 'Pair.new':
-                    var $545 = self.fst;
-                    var $546 = _rec$6($545);
-                    var $544 = $546;
+                    var $555 = self.fst;
+                    var $556 = _rec$6($555);
+                    var $554 = $556;
                     break;
             };
-            return $544;
+            return $554;
         }), (_rec$6 => _arr$7 => {
             var _arr_r$8 = Array$extract_tie$(_arr$7);
             var self = _arr_r$8;
             switch (self._) {
                 case 'Pair.new':
-                    var $548 = self.snd;
-                    var $549 = _rec$6($548);
-                    var $547 = $549;
+                    var $558 = self.snd;
+                    var $559 = _rec$6($558);
+                    var $557 = $559;
                     break;
             };
-            return $547;
+            return $557;
         }), _idx$3)(_arr$4);
-        return $543;
+        return $553;
     };
     const Array$get = x0 => x1 => Array$get$(x0, x1);
     const Buffer32$get = a0 => a1 => ((a1[a0]));
@@ -2747,83 +2870,83 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $551 = self.pred;
-                var $552 = (_b$6 => {
+                var $561 = self.pred;
+                var $562 = (_b$6 => {
                     var self = _b$6;
                     switch (self._) {
                         case 'Word.o':
-                            var $554 = self.pred;
-                            var $555 = (_a$pred$9 => {
-                                var $556 = Word$o$(Word$and$(_a$pred$9, $554));
-                                return $556;
+                            var $564 = self.pred;
+                            var $565 = (_a$pred$9 => {
+                                var $566 = Word$o$(Word$and$(_a$pred$9, $564));
+                                return $566;
                             });
-                            var $553 = $555;
+                            var $563 = $565;
                             break;
                         case 'Word.i':
-                            var $557 = self.pred;
-                            var $558 = (_a$pred$9 => {
-                                var $559 = Word$o$(Word$and$(_a$pred$9, $557));
-                                return $559;
+                            var $567 = self.pred;
+                            var $568 = (_a$pred$9 => {
+                                var $569 = Word$o$(Word$and$(_a$pred$9, $567));
+                                return $569;
                             });
-                            var $553 = $558;
+                            var $563 = $568;
                             break;
                         case 'Word.e':
-                            var $560 = (_a$pred$7 => {
-                                var $561 = Word$e;
-                                return $561;
+                            var $570 = (_a$pred$7 => {
+                                var $571 = Word$e;
+                                return $571;
                             });
-                            var $553 = $560;
+                            var $563 = $570;
                             break;
                     };
-                    var $553 = $553($551);
-                    return $553;
+                    var $563 = $563($561);
+                    return $563;
                 });
-                var $550 = $552;
+                var $560 = $562;
                 break;
             case 'Word.i':
-                var $562 = self.pred;
-                var $563 = (_b$6 => {
+                var $572 = self.pred;
+                var $573 = (_b$6 => {
                     var self = _b$6;
                     switch (self._) {
                         case 'Word.o':
-                            var $565 = self.pred;
-                            var $566 = (_a$pred$9 => {
-                                var $567 = Word$o$(Word$and$(_a$pred$9, $565));
-                                return $567;
+                            var $575 = self.pred;
+                            var $576 = (_a$pred$9 => {
+                                var $577 = Word$o$(Word$and$(_a$pred$9, $575));
+                                return $577;
                             });
-                            var $564 = $566;
+                            var $574 = $576;
                             break;
                         case 'Word.i':
-                            var $568 = self.pred;
-                            var $569 = (_a$pred$9 => {
-                                var $570 = Word$i$(Word$and$(_a$pred$9, $568));
-                                return $570;
+                            var $578 = self.pred;
+                            var $579 = (_a$pred$9 => {
+                                var $580 = Word$i$(Word$and$(_a$pred$9, $578));
+                                return $580;
                             });
-                            var $564 = $569;
+                            var $574 = $579;
                             break;
                         case 'Word.e':
-                            var $571 = (_a$pred$7 => {
-                                var $572 = Word$e;
-                                return $572;
+                            var $581 = (_a$pred$7 => {
+                                var $582 = Word$e;
+                                return $582;
                             });
-                            var $564 = $571;
+                            var $574 = $581;
                             break;
                     };
-                    var $564 = $564($562);
-                    return $564;
-                });
-                var $550 = $563;
-                break;
-            case 'Word.e':
-                var $573 = (_b$4 => {
-                    var $574 = Word$e;
+                    var $574 = $574($572);
                     return $574;
                 });
-                var $550 = $573;
+                var $560 = $573;
+                break;
+            case 'Word.e':
+                var $583 = (_b$4 => {
+                    var $584 = Word$e;
+                    return $584;
+                });
+                var $560 = $583;
                 break;
         };
-        var $550 = $550(_b$3);
-        return $550;
+        var $560 = $560(_b$3);
+        return $560;
     };
     const Word$and = x0 => x1 => Word$and$(x0, x1);
     const U32$and = a0 => a1 => (a0 & a1);
@@ -2832,11 +2955,11 @@ module.exports = (function() {
     function VoxBox$Draw$image$(_x$1, _y$2, _z$3, _src$4, _img$5) {
         var _len$6 = VoxBox$get_len$(_src$4);
         var _img$7 = (() => {
-            var $576 = _img$5;
-            var $577 = 0;
-            var $578 = _len$6;
-            let _img$8 = $576;
-            for (let _i$7 = $577; _i$7 < $578; ++_i$7) {
+            var $586 = _img$5;
+            var $587 = 0;
+            var $588 = _len$6;
+            let _img$8 = $586;
+            for (let _i$7 = $587; _i$7 < $588; ++_i$7) {
                 var _pos$9 = ((_src$4.buffer[_i$7 * 2]));
                 var _col$10 = ((_src$4.buffer[_i$7 * 2 + 1]));
                 var _p_x$11 = (_pos$9 & 4095);
@@ -2846,451 +2969,88 @@ module.exports = (function() {
                 var _p_y$15 = ((_p_y$12 + _y$2) >>> 0);
                 var _p_z$16 = ((_p_z$13 + _z$3) >>> 0);
                 var _pos$17 = ((0 | _p_x$14 | (_p_y$15 << 12) | (_p_z$16 << 24)));
-                var $576 = ((_img$8.buffer[_img$8.length * 2] = _pos$17, _img$8.buffer[_img$8.length * 2 + 1] = _col$10, _img$8.length++, _img$8));
-                _img$8 = $576;
+                var $586 = ((_img$8.buffer[_img$8.length * 2] = _pos$17, _img$8.buffer[_img$8.length * 2 + 1] = _col$10, _img$8.length++, _img$8));
+                _img$8 = $586;
             };
             return _img$8;
         })();
-        var $575 = _img$7;
-        return $575;
+        var $585 = _img$7;
+        return $585;
     };
     const VoxBox$Draw$image = x0 => x1 => x2 => x3 => x4 => VoxBox$Draw$image$(x0, x1, x2, x3, x4);
-    const Kaelin$Assets$hex_range = VoxBox$parse$("0e00023d15150f00023d15151000023d15150c01023d15150d01023d15150e010298755e0f01028e675610010298755e1101023d15151201023d15150a02023d15150b02023d15150c020298755e0d020298755e0e020298755e0f02028e67561002028e67561102028e67561202028e67561302023d15151402023d15150803023d15150903023d15150a030298755e0b03028e67560c03028e67560d030298755e0e030298755e0f03028e675610030298755e1103028e67561203028e67561303028e67561403028e67561503023d15151603023d15150604023d15150704023d151508040298755e09040298755e0a04028e67560b04028e67560c04028e67560d04028159490e04028159490f040298755e10040298755e11040298755e1204028159491304028e675614040298755e15040298755e1604028e67561704023d15151804023d15150405023d15150505023d151506050298755e0705028e67560805028e67560905028159490a05028e67560b05028e67560c05028e67560d05028e67560e05028159490f050298755e10050298755e1105028e675612050281594913050281594914050298755e15050298755e1605028e67561705028e67561805028159491905023d15151a05023d15150206023d15150306023d15150406028e67560506028e67560606028e67560706028e67560806028e67560906028159490a06028159490b06028e67560c060298755e0d060298755e0e06028e67560f06028e67561006028e67561106028e67561206028e67561306028e67561406028e67561506028e67561606028e67561706028e67561806028159491906028159491a06028e67561b06023d15151c06023d15150007023d15150107023d151502070298755e03070298755e0407028e67560507028e675606070298755e07070298755e0807028e675609070298755e0a070298755e0b07028e67560c070298755e0d070298755e0e070298755e0f070281594910070281594911070298755e12070298755e1307028e67561407028e675615070298755e16070298755e1707028e675618070298755e19070298755e1a07028e67561b070298755e1c070298755e1d07023d15151e07023d15150008023d15150108028e675602080298755e03080298755e0408028e675605080298755e06080298755e07080298755e0808028e675609080298755e0a080298755e0b08028e67560c08028e67560d080298755e0e080298755e0f08028159491008028e675611080298755e12080298755e1308028e675614080298755e15080298755e16080298755e1708028e675618080298755e19080298755e1a08028e67561b08028e67561c080298755e1d080298755e1e08023d15150009023d15150109028e67560209028e67560309028e67560409028e675605090298755e06090298755e0709028e67560809028e67560909028e67560a09028e67560b09028e67560c09028e67560d09028e67560e09028e67560f09028e67561009028e67561109028e67561209028e67561309028e675614090298755e15090298755e1609028e67561709028e67561809028e67561909028e67561a09028e67561b09028e67561c09028e67561d09028e67561e09023d1515000a023d1515010a028e6756020a028e6756030a028e6756040a028e6756050a028e6756060a028e6756070a0298755e080a0298755e090a028e67560a0a028159490b0a028159490c0a028e67560d0a028e67560e0a028e67560f0a0298755e100a028e6756110a028e6756120a028e6756130a028e6756140a028e6756150a028e6756160a0298755e170a0298755e180a028e6756190a028159491a0a028159491b0a028e67561c0a028e67561d0a028e67561e0a023d1515000b023d1515010b028e6756020b028e6756030b0298755e040b0298755e050b028e6756060b0298755e070b0298755e080b0298755e090b028e67560a0b028159490b0b028e67560c0b0298755e0d0b0298755e0e0b028e67560f0b0298755e100b028e6756110b028e6756120b0298755e130b0298755e140b028e6756150b0298755e160b0298755e170b0298755e180b028e6756190b028159491a0b028e67561b0b0298755e1c0b0298755e1d0b028e67561e0b023d1515000c023d1515010c028e6756020c0298755e030c0298755e040c0298755e050c028e6756060c0298755e070c0298755e080c028e6756090c028e67560a0c028e67560b0c028e67560c0c0298755e0d0c0298755e0e0c0298755e0f0c028e6756100c028e6756110c0298755e120c0298755e130c0298755e140c028e6756150c0298755e160c0298755e170c028e6756180c028e6756190c028e67561a0c028e67561b0c0298755e1c0c0298755e1d0c0298755e1e0c023d1515000d023d1515010d028e6756020d0298755e030d0298755e040d028e6756050d028e6756060d028e6756070d028e6756080d028e6756090d028e67560a0d028e67560b0d028e67560c0d028e67560d0d0298755e0e0d0298755e0f0d028e6756100d028e6756110d0298755e120d0298755e130d028e6756140d028e6756150d028e6756160d028e6756170d028e6756180d028e6756190d028e67561a0d028e67561b0d028e67561c0d0298755e1d0d0298755e1e0d023d1515000e023d1515010e028e6756020e0298755e030e0298755e040e028e6756050e02815949060e028e6756070e0298755e080e0298755e090e0298755e0a0e028e67560b0e0298755e0c0e0298755e0d0e028e67560e0e028e67560f0e0298755e100e028e6756110e0298755e120e0298755e130e028e6756140e02815949150e028e6756160e0298755e170e0298755e180e0298755e190e028e67561a0e0298755e1b0e0298755e1c0e028e67561d0e028e67561e0e023d1515000f023d1515010f028e6756020f0298755e030f0298755e040f028e6756050f02815949060f028e6756070f0298755e080f0298755e090f0298755e0a0f028e67560b0f0298755e0c0f0298755e0d0f028e67560e0f028e67560f0f0298755e100f028e6756110f0298755e120f0298755e130f028e6756140f02815949150f028e6756160f0298755e170f0298755e180f0298755e190f028e67561a0f0298755e1b0f0298755e1c0f028e67561d0f028e67561e0f023d15150010023d151501100298755e02100298755e03100298755e0410028e67560510028e67560610028e675607100298755e08100298755e0910028e67560a100298755e0b100298755e0c10028e67560d10028e67560e10028e67560f10028e675610100298755e11100298755e12100298755e1310028e67561410028e675615100298755e16100298755e17100298755e1810028e67561910028e67561a10028e67561b10028e67561c10028e67561d10028e67561e10023d15150011023d151501110298755e02110298755e0311028e67560411028e675605110298755e06110298755e0711028e67560811028e67560911028e67560a11028e67560b11028e67560c110298755e0d110298755e0e110298755e0f110281594910110298755e1111028e67561211028e675613110298755e14110298755e15110298755e1611028e67561711028e67561811028159491911028e67561a11028e67561b110298755e1c110298755e1d110298755e1e11023d15150012023d15150112028e67560212028e67560312028e675604120298755e05120298755e0612028e67560712028e675608120281594909120298755e0a120298755e0b12028e67560c120298755e0d120298755e0e120298755e0f12028e67561012028e675611120298755e1212028e675613120298755e14120298755e1512028e67561612028e67561712028e675618120298755e19120298755e1a12028e67561b120298755e1c120298755e1d120298755e1e12023d15150013023d151501130298755e0213028e67560313028e67560413028e67560513028e67560613028e67560713028e675608130298755e09130298755e0a130298755e0b130298755e0c13028e67560d130298755e0e130298755e0f13028e675610130298755e1113028e67561213028e67561313028e67561413028e67561513028e675616130298755e17130298755e1813028e675619130298755e1a13028e67561b13028e67561c130298755e1d130298755e1e13023d15150014023d151501140298755e02140298755e0314028159490414028e675605140298755e06140298755e0714028e675608140298755e09140298755e0a14028e67560b14028e67560c14028e67560d14028159490e14028159490f140298755e10140298755e11140298755e1214028159491314028e675614140298755e15140298755e1614028e675617140298755e18140298755e1914028e67561a14028e67561b14028e67561c14028159491d14028159491e14023d15150015023d151501150298755e0215028e675603150281594904150281594905150298755e06150298755e0715028e67560815028e67560915028159490a15028e67560b15028e67560c15028e67560d15028e67560e15028159490f150298755e10150298755e1115028e675612150281594913150281594914150298755e15150298755e1615028e67561715028e67561815028159491915028e67561a15028e67561b15028e67561c15028e67561d15028159491e15023d15150016023d15150116023d15150216028e67560316028e67560416028e67560516028e67560616028e67560716028e67560816028e67560916028159490a16028159490b16028e67560c160298755e0d160298755e0e16028e67560f16028e67561016028e67561116028e67561216028e67561316028e67561416028e67561516028e67561616028e67561716028e67561816028159491916028159491a16028e67561b160298755e1c160298755e1d16023d15151e16023d15150217023d15150317023d15150417028e67560517028e675606170298755e07170298755e0817028e675609170298755e0a170298755e0b17028e67560c170298755e0d170298755e0e170298755e0f170281594910170281594911170298755e12170298755e1317028e67561417028e675615170298755e16170298755e1717028e675618170298755e19170298755e1a17028e67561b17023d15151c17023d15150418023d15150518023d151506180298755e07180298755e0818028e675609180298755e0a180298755e0b18028e67560c18028e67560d180298755e0e180298755e0f18028159491018028e675611180298755e12180298755e1318028e675614180298755e15180298755e16180298755e1718028e675618180298755e1918023d15151a18023d15150619023d15150719023d15150819028e67560919028e67560a19028e67560b19028e67560c19028e67560d19028e67560e19028e67560f19028e67561019028e67561119028e67561219028e67561319028e675614190298755e15190298755e1619028e67561719023d15151819023d1515081a023d1515091a023d15150a1a028159490b1a028159490c1a028e67560d1a028e67560e1a028e67560f1a0298755e101a028e6756111a028e6756121a028e6756131a028e6756141a028e6756151a023d1515161a023d15150a1b023d15150b1b023d15150c1b0298755e0d1b0298755e0e1b028e67560f1b0298755e101b028e6756111b028e6756121b0298755e131b023d1515141b023d15150c1c023d15150d1c023d15150e1c0298755e0f1c028e6756101c028e6756111c023d1515121c023d15150e1d023d15150f1d023d1515101d023d1515");
-
-    function Web$Kaelin$Coord$Cubic$new$(_x$1, _y$2, _z$3) {
-        var $579 = ({
-            _: 'Web.Kaelin.Coord.Cubic.new',
-            'x': _x$1,
-            'y': _y$2,
-            'z': _z$3
-        });
-        return $579;
-    };
-    const Web$Kaelin$Coord$Cubic$new = x0 => x1 => x2 => Web$Kaelin$Coord$Cubic$new$(x0, x1, x2);
-
-    function Web$Kaelin$Coord$Convert$axial_to_cubic$(_coord$1) {
-        var self = _coord$1;
-        switch (self._) {
-            case 'Web.Kaelin.Coord.new':
-                var $581 = self.i;
-                var $582 = self.j;
-                var _x$4 = $581;
-                var _z$5 = $582;
-                var _y$6 = (Int$neg$(_x$4) - _z$5);
-                var $583 = Web$Kaelin$Coord$Cubic$new$(_x$4, _y$6, _z$5);
-                var $580 = $583;
-                break;
-        };
-        return $580;
-    };
-    const Web$Kaelin$Coord$Convert$axial_to_cubic = x0 => Web$Kaelin$Coord$Convert$axial_to_cubic$(x0);
-
-    function List$map$(_f$3, _as$4) {
-        var self = _as$4;
-        switch (self._) {
-            case 'List.cons':
-                var $585 = self.head;
-                var $586 = self.tail;
-                var $587 = List$cons$(_f$3($585), List$map$(_f$3, $586));
-                var $584 = $587;
-                break;
-            case 'List.nil':
-                var $588 = List$nil;
-                var $584 = $588;
-                break;
-        };
-        return $584;
-    };
-    const List$map = x0 => x1 => List$map$(x0, x1);
-
-    function Web$Kaelin$Coord$Convert$cubic_to_axial$(_coord$1) {
-        var self = _coord$1;
-        switch (self._) {
-            case 'Web.Kaelin.Coord.Cubic.new':
-                var $590 = self.x;
-                var $591 = self.z;
-                var _i$5 = $590;
-                var _j$6 = $591;
-                var $592 = Web$Kaelin$Coord$new$(_i$5, _j$6);
-                var $589 = $592;
-                break;
-        };
-        return $589;
-    };
-    const Web$Kaelin$Coord$Convert$cubic_to_axial = x0 => Web$Kaelin$Coord$Convert$cubic_to_axial$(x0);
-
-    function Cmp$as_gtn$(_cmp$1) {
-        var self = _cmp$1;
-        switch (self._) {
-            case 'Cmp.ltn':
-            case 'Cmp.eql':
-                var $594 = Bool$false;
-                var $593 = $594;
-                break;
-            case 'Cmp.gtn':
-                var $595 = Bool$true;
-                var $593 = $595;
-                break;
-        };
-        return $593;
-    };
-    const Cmp$as_gtn = x0 => Cmp$as_gtn$(x0);
-
-    function Nat$cmp$(_a$1, _b$2) {
-        var Nat$cmp$ = (_a$1, _b$2) => ({
-            ctr: 'TCO',
-            arg: [_a$1, _b$2]
-        });
-        var Nat$cmp = _a$1 => _b$2 => Nat$cmp$(_a$1, _b$2);
-        var arg = [_a$1, _b$2];
-        while (true) {
-            let [_a$1, _b$2] = arg;
-            var R = (() => {
-                var self = _a$1;
-                if (self === 0n) {
-                    var self = _b$2;
-                    if (self === 0n) {
-                        var $597 = Cmp$eql;
-                        var $596 = $597;
-                    } else {
-                        var $598 = (self - 1n);
-                        var $599 = Cmp$ltn;
-                        var $596 = $599;
-                    };
-                    return $596;
-                } else {
-                    var $600 = (self - 1n);
-                    var self = _b$2;
-                    if (self === 0n) {
-                        var $602 = Cmp$gtn;
-                        var $601 = $602;
-                    } else {
-                        var $603 = (self - 1n);
-                        var $604 = Nat$cmp$($600, $603);
-                        var $601 = $604;
-                    };
-                    return $601;
-                };
-            })();
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const Nat$cmp = x0 => x1 => Nat$cmp$(x0, x1);
-
-    function Int$cmp$(_a$1, _b$2) {
-        var self = _a$1;
-        switch ("new") {
-            case 'new':
-                var $606 = int_pos(self);
-                var $607 = int_neg(self);
-                var self = _b$2;
-                switch ("new") {
-                    case 'new':
-                        var $609 = int_pos(self);
-                        var $610 = int_neg(self);
-                        var $611 = Nat$cmp$(($606 + $610), ($609 + $607));
-                        var $608 = $611;
-                        break;
-                };
-                var $605 = $608;
-                break;
-        };
-        return $605;
-    };
-    const Int$cmp = x0 => x1 => Int$cmp$(x0, x1);
-
-    function Int$max$(_a$1, _b$2) {
-        var _cmp$3 = Cmp$as_gtn$(Int$cmp$(_a$1, _b$2));
-        var self = _cmp$3;
-        if (self) {
-            var $613 = _a$1;
-            var $612 = $613;
-        } else {
-            var $614 = _b$2;
-            var $612 = $614;
-        };
-        return $612;
-    };
-    const Int$max = x0 => x1 => Int$max$(x0, x1);
-
-    function Cmp$as_ltn$(_cmp$1) {
-        var self = _cmp$1;
-        switch (self._) {
-            case 'Cmp.ltn':
-                var $616 = Bool$true;
-                var $615 = $616;
-                break;
-            case 'Cmp.eql':
-            case 'Cmp.gtn':
-                var $617 = Bool$false;
-                var $615 = $617;
-                break;
-        };
-        return $615;
-    };
-    const Cmp$as_ltn = x0 => Cmp$as_ltn$(x0);
-
-    function Int$min$(_a$1, _b$2) {
-        var _cmp$3 = Cmp$as_ltn$(Int$cmp$(_a$1, _b$2));
-        var self = _cmp$3;
-        if (self) {
-            var $619 = _a$1;
-            var $618 = $619;
-        } else {
-            var $620 = _b$2;
-            var $618 = $620;
-        };
-        return $618;
-    };
-    const Int$min = x0 => x1 => Int$min$(x0, x1);
-
-    function Pair$snd$(_pair$3) {
-        var self = _pair$3;
-        switch (self._) {
-            case 'Pair.new':
-                var $622 = self.snd;
-                var $623 = $622;
-                var $621 = $623;
-                break;
-        };
-        return $621;
-    };
-    const Pair$snd = x0 => Pair$snd$(x0);
-
-    function Int$to_nat_signed$(_a$1) {
-        var $624 = Pair$new$(Int$is_neg$(_a$1), Int$abs$(_a$1));
-        return $624;
-    };
-    const Int$to_nat_signed = x0 => Int$to_nat_signed$(x0);
-
-    function Web$Kaelin$Coord$Cubic$add$(_a$1, _b$2) {
-        var self = _a$1;
-        switch (self._) {
-            case 'Web.Kaelin.Coord.Cubic.new':
-                var $626 = self.x;
-                var $627 = self.y;
-                var $628 = self.z;
-                var self = _b$2;
-                switch (self._) {
-                    case 'Web.Kaelin.Coord.Cubic.new':
-                        var $630 = self.x;
-                        var $631 = self.y;
-                        var $632 = self.z;
-                        var _x$9 = ($626 + $630);
-                        var _y$10 = ($627 + $631);
-                        var _z$11 = ($628 + $632);
-                        var $633 = Web$Kaelin$Coord$Cubic$new$(_x$9, _y$10, _z$11);
-                        var $629 = $633;
-                        break;
-                };
-                var $625 = $629;
-                break;
-        };
-        return $625;
-    };
-    const Web$Kaelin$Coord$Cubic$add = x0 => x1 => Web$Kaelin$Coord$Cubic$add$(x0, x1);
-
-    function List$concat$(_as$2, _bs$3) {
-        var self = _as$2;
-        switch (self._) {
-            case 'List.cons':
-                var $635 = self.head;
-                var $636 = self.tail;
-                var $637 = List$cons$($635, List$concat$($636, _bs$3));
-                var $634 = $637;
-                break;
-            case 'List.nil':
-                var $638 = _bs$3;
-                var $634 = $638;
-                break;
-        };
-        return $634;
-    };
-    const List$concat = x0 => x1 => List$concat$(x0, x1);
-
-    function Web$Kaelin$Coord$Cubic$range$(_coord$1, _distance$2) {
-        var _distance_32$3 = (Number(_distance$2) >>> 0);
-        var _double_distance$4 = ((((_distance_32$3 * 2) >>> 0) + 1) >>> 0);
-        var _result$5 = List$nil;
-        var _result$6 = (() => {
-            var $640 = _result$5;
-            var $641 = 0;
-            var $642 = _double_distance$4;
-            let _result$7 = $640;
-            for (let _j$6 = $641; _j$6 < $642; ++_j$6) {
-                var _negative_distance$8 = (0n - _distance$2);
-                var _positive_distance$9 = (_distance$2 - 0n);
-                var _x$10 = (((BigInt(_j$6)) - 0n) - _positive_distance$9);
-                var _max$11 = Int$max$(_negative_distance$8, (Int$neg$(_x$10) + _negative_distance$8));
-                var _min$12 = Int$min$(_positive_distance$9, (Int$neg$(_x$10) + _positive_distance$9));
-                var _distance_between_max_min$13 = Nat$succ$(Pair$snd$(Int$to_nat_signed$((_max$11 - _min$12))));
-                var _distance_between_max_min$14 = (Number(_distance_between_max_min$13) >>> 0);
-                var _result$15 = (() => {
-                    var $643 = _result$7;
-                    var $644 = 0;
-                    var $645 = _distance_between_max_min$14;
-                    let _result$16 = $643;
-                    for (let _i$15 = $644; _i$15 < $645; ++_i$15) {
-                        var _y$17 = (((BigInt(_i$15)) - 0n) + _max$11);
-                        var _z$18 = (Int$neg$(_x$10) - _y$17);
-                        var _new_coord$19 = Web$Kaelin$Coord$Cubic$add$(_coord$1, Web$Kaelin$Coord$Cubic$new$(_x$10, _y$17, _z$18));
-                        var _result$20 = List$concat$(_result$16, List$cons$(_new_coord$19, List$nil));
-                        var $643 = _result$20;
-                        _result$16 = $643;
-                    };
-                    return _result$16;
-                })();
-                var $640 = _result$15;
-                _result$7 = $640;
-            };
-            return _result$7;
-        })();
-        var $639 = _result$6;
-        return $639;
-    };
-    const Web$Kaelin$Coord$Cubic$range = x0 => x1 => Web$Kaelin$Coord$Cubic$range$(x0, x1);
-
-    function Web$Kaelin$Coord$Axial$range$(_a$1, _distance$2) {
-        var _ab$3 = Web$Kaelin$Coord$Convert$axial_to_cubic$(_a$1);
-        var _d$4 = _distance$2;
-        var $646 = List$map$(Web$Kaelin$Coord$Convert$cubic_to_axial, Web$Kaelin$Coord$Cubic$range$(_ab$3, _d$4));
-        return $646;
-    };
-    const Web$Kaelin$Coord$Axial$range = x0 => x1 => Web$Kaelin$Coord$Axial$range$(x0, x1);
-
-    function Web$Kaelin$Draw$skill_range_show$(_coord$1, _map$2, _img$3, _range$4) {
-        var _skill_hex$5 = Web$Kaelin$Entity$background$(Kaelin$Assets$hex_range);
-        var _coords$6 = Web$Kaelin$Coord$Axial$range$(_coord$1, _range$4);
-        var _img$7 = (() => {
-            var $649 = _img$3;
-            var $650 = _coords$6;
-            let _img$8 = $649;
-            let _n$7;
-            while ($650._ === 'List.cons') {
-                _n$7 = $650.head;
-                var self = Web$Kaelin$Coord$to_screen_xy$(_coord$1);
-                switch (self._) {
-                    case 'Pair.new':
-                        var $651 = self.fst;
-                        var $652 = self.snd;
-                        var self = _skill_hex$5;
-                        switch (self._) {
-                            case 'Web.Kaelin.Entity.background':
-                                var $654 = self.img;
-                                var $655 = VoxBox$Draw$image$($651, $652, 0, $654, _img$8);
-                                var $653 = $655;
-                                break;
-                            case 'Web.Kaelin.Entity.creature':
-                                var $656 = _img$8;
-                                var $653 = $656;
-                                break;
-                        };
-                        var $649 = $653;
-                        break;
-                };
-                _img$8 = $649;
-                $650 = $650.tail;
-            }
-            return _img$8;
-        })();
-        var $647 = _img$7;
-        return $647;
-    };
-    const Web$Kaelin$Draw$skill_range_show = x0 => x1 => x2 => x3 => Web$Kaelin$Draw$skill_range_show$(x0, x1, x2, x3);
 
     function Web$Kaelin$Draw$state$background$(_state$1, _img$2, _map$3) {
-        var self = _state$1;
-        switch (self._) {
-            case 'Web.Kaelin.State.game':
-                var $658 = self.cast_info;
-                var $659 = self.map;
-                var self = $658;
+        var _list$4 = NatMap$to_list$(_map$3);
+        var _img$5 = (() => {
+            var $591 = _img$2;
+            var $592 = _list$4;
+            let _img$6 = $591;
+            let _pair$5;
+            while ($592._ === 'List.cons') {
+                _pair$5 = $592.head;
+                var self = _pair$5;
                 switch (self._) {
-                    case 'Maybe.some':
-                        var $661 = self.value;
-                        var self = $661;
+                    case 'Pair.new':
+                        var $593 = self.fst;
+                        var $594 = self.snd;
+                        var _coord$9 = Web$Kaelin$Coord$Convert$nat_to_axial$($593);
+                        var self = Web$Kaelin$Coord$to_screen_xy$(_coord$9);
                         switch (self._) {
-                            case 'Web.Kaelin.Cast_info.new':
-                                var $663 = self.hero_pos;
-                                var $664 = self.range;
-                                var $665 = Web$Kaelin$Draw$skill_range_show$($663, $659, _img$2, $664);
-                                var $662 = $665;
-                                break;
-                        };
-                        var $660 = $662;
-                        break;
-                    case 'Maybe.none':
-                        var _list$10 = NatMap$to_list$(_map$3);
-                        var _img$11 = (() => {
-                            var $668 = _img$2;
-                            var $669 = _list$10;
-                            let _img$12 = $668;
-                            let _pair$11;
-                            while ($669._ === 'List.cons') {
-                                _pair$11 = $669.head;
-                                var self = _pair$11;
-                                switch (self._) {
-                                    case 'Pair.new':
-                                        var $670 = self.fst;
-                                        var $671 = self.snd;
-                                        var _coord$15 = Web$Kaelin$Coord$Convert$nat_to_axial$($670);
-                                        var self = Web$Kaelin$Coord$to_screen_xy$(_coord$15);
+                            case 'Pair.new':
+                                var $596 = self.fst;
+                                var $597 = self.snd;
+                                var _i$12 = (($596 - Web$Kaelin$Constants$hexagon_radius) >>> 0);
+                                var _j$13 = (($597 - Web$Kaelin$Constants$hexagon_radius) >>> 0);
+                                var _img$14 = (() => {
+                                    var $600 = _img$6;
+                                    var $601 = $594;
+                                    let _img$15 = $600;
+                                    let _entity$14;
+                                    while ($601._ === 'List.cons') {
+                                        _entity$14 = $601.head;
+                                        var self = _entity$14;
                                         switch (self._) {
-                                            case 'Pair.new':
-                                                var $673 = self.fst;
-                                                var $674 = self.snd;
-                                                var _i$18 = (($673 - Web$Kaelin$Constants$hexagon_radius) >>> 0);
-                                                var _j$19 = (($674 - Web$Kaelin$Constants$hexagon_radius) >>> 0);
-                                                var _img$20 = (() => {
-                                                    var $677 = _img$12;
-                                                    var $678 = $671;
-                                                    let _img$21 = $677;
-                                                    let _entity$20;
-                                                    while ($678._ === 'List.cons') {
-                                                        _entity$20 = $678.head;
-                                                        var self = _entity$20;
-                                                        switch (self._) {
-                                                            case 'Web.Kaelin.Entity.background':
-                                                                var $679 = self.img;
-                                                                var $680 = VoxBox$Draw$image$(_i$18, _j$19, 0, $679, _img$21);
-                                                                var $677 = $680;
-                                                                break;
-                                                            case 'Web.Kaelin.Entity.creature':
-                                                                var $681 = _img$21;
-                                                                var $677 = $681;
-                                                                break;
-                                                        };
-                                                        _img$21 = $677;
-                                                        $678 = $678.tail;
-                                                    }
-                                                    return _img$21;
-                                                })();
-                                                var $675 = _img$20;
-                                                var $672 = $675;
+                                            case 'Web.Kaelin.Entity.background':
+                                                var self = _state$1;
+                                                switch (self._) {
+                                                    case 'Web.Kaelin.State.game':
+                                                        var $603 = self.cast_info;
+                                                        var _grass$23 = Web$Kaelin$Draw$terrain$(_coord$9, $594, _img$15, $603);
+                                                        var $604 = VoxBox$Draw$image$(_i$12, _j$13, 0, _grass$23, _img$15);
+                                                        var $602 = $604;
+                                                        break;
+                                                    case 'Web.Kaelin.State.init':
+                                                    case 'Web.Kaelin.State.void':
+                                                        var $605 = _img$15;
+                                                        var $602 = $605;
+                                                        break;
+                                                };
+                                                var $600 = $602;
+                                                break;
+                                            case 'Web.Kaelin.Entity.creature':
+                                                var $606 = _img$15;
+                                                var $600 = $606;
                                                 break;
                                         };
-                                        var $668 = $672;
-                                        break;
-                                };
-                                _img$12 = $668;
-                                $669 = $669.tail;
-                            }
-                            return _img$12;
-                        })();
-                        var $666 = _img$11;
-                        var $660 = $666;
+                                        _img$15 = $600;
+                                        $601 = $601.tail;
+                                    }
+                                    return _img$15;
+                                })();
+                                var $598 = _img$14;
+                                var $595 = $598;
+                                break;
+                        };
+                        var $591 = $595;
                         break;
                 };
-                var $657 = $660;
-                break;
-            case 'Web.Kaelin.State.init':
-            case 'Web.Kaelin.State.void':
-                var $682 = _img$2;
-                var $657 = $682;
-                break;
-        };
-        return $657;
+                _img$6 = $591;
+                $592 = $592.tail;
+            }
+            return _img$6;
+        })();
+        var $589 = _img$5;
+        return $589;
     };
     const Web$Kaelin$Draw$state$background = x0 => x1 => x2 => Web$Kaelin$Draw$state$background$(x0, x1, x2);
 
@@ -3298,76 +3058,76 @@ module.exports = (function() {
         var self = _hero$4;
         switch (self._) {
             case 'Web.Kaelin.Hero.new':
-                var $684 = self.img;
+                var $608 = self.img;
                 var _aux_y$8 = ((Web$Kaelin$Constants$hexagon_radius * 2) >>> 0);
                 var _cy$9 = ((_cy$2 - _aux_y$8) >>> 0);
                 var _cx$10 = ((_cx$1 - Web$Kaelin$Constants$hexagon_radius) >>> 0);
-                var $685 = VoxBox$Draw$image$(_cx$10, _cy$9, 0, $684, _img$5);
-                var $683 = $685;
+                var $609 = VoxBox$Draw$image$(_cx$10, _cy$9, 0, $608, _img$5);
+                var $607 = $609;
                 break;
         };
-        return $683;
+        return $607;
     };
     const Web$Kaelin$Draw$hero = x0 => x1 => x2 => x3 => x4 => Web$Kaelin$Draw$hero$(x0, x1, x2, x3, x4);
 
     function Web$Kaelin$Draw$state$players$(_img$1, _map$2) {
         var _player_list$3 = NatMap$to_list$(_map$2);
         var _img$4 = (() => {
-            var $688 = _img$1;
-            var $689 = _player_list$3;
-            let _img$5 = $688;
+            var $612 = _img$1;
+            var $613 = _player_list$3;
+            let _img$5 = $612;
             let _prs$4;
-            while ($689._ === 'List.cons') {
-                _prs$4 = $689.head;
+            while ($613._ === 'List.cons') {
+                _prs$4 = $613.head;
                 var self = _prs$4;
                 switch (self._) {
                     case 'Pair.new':
-                        var $690 = self.fst;
-                        var $691 = self.snd;
-                        var _coord$8 = Web$Kaelin$Coord$Convert$nat_to_axial$($690);
+                        var $614 = self.fst;
+                        var $615 = self.snd;
+                        var _coord$8 = Web$Kaelin$Coord$Convert$nat_to_axial$($614);
                         var self = Web$Kaelin$Coord$to_screen_xy$(_coord$8);
                         switch (self._) {
                             case 'Pair.new':
-                                var $693 = self.fst;
-                                var $694 = self.snd;
+                                var $617 = self.fst;
+                                var $618 = self.snd;
                                 var _img$11 = (() => {
-                                    var $697 = _img$5;
-                                    var $698 = $691;
-                                    let _img$12 = $697;
+                                    var $621 = _img$5;
+                                    var $622 = $615;
+                                    let _img$12 = $621;
                                     let _entity$11;
-                                    while ($698._ === 'List.cons') {
-                                        _entity$11 = $698.head;
+                                    while ($622._ === 'List.cons') {
+                                        _entity$11 = $622.head;
                                         var self = _entity$11;
                                         switch (self._) {
                                             case 'Web.Kaelin.Entity.creature':
-                                                var $699 = self.hero;
-                                                var $700 = Web$Kaelin$Draw$hero$($693, $694, 0, $699, _img$12);
-                                                var $697 = $700;
+                                                var $623 = self.hero;
+                                                var $624 = Web$Kaelin$Draw$hero$($617, $618, 0, $623, _img$12);
+                                                var $621 = $624;
                                                 break;
                                             case 'Web.Kaelin.Entity.background':
-                                                var $701 = _img$12;
-                                                var $697 = $701;
+                                                var $625 = _img$12;
+                                                var $621 = $625;
                                                 break;
                                         };
-                                        _img$12 = $697;
-                                        $698 = $698.tail;
+                                        _img$12 = $621;
+                                        $622 = $622.tail;
                                     }
                                     return _img$12;
                                 })();
-                                var $695 = _img$11;
-                                var $692 = $695;
+                                var $619 = _img$11;
+                                var $616 = $619;
                                 break;
                         };
-                        var $688 = $692;
+                        var $612 = $616;
                         break;
                 };
-                _img$5 = $688;
-                $689 = $689.tail;
+                _img$5 = $612;
+                $613 = $613.tail;
             }
             return _img$5;
         })();
-        var $686 = _img$4;
-        return $686;
+        var $610 = _img$4;
+        return $610;
     };
     const Web$Kaelin$Draw$state$players = x0 => x1 => Web$Kaelin$Draw$state$players$(x0, x1);
 
@@ -3375,36 +3135,36 @@ module.exports = (function() {
         var self = _state$2;
         switch (self._) {
             case 'Web.Kaelin.State.game':
-                var $703 = self.map;
-                var _new_img$9 = Web$Kaelin$Draw$state$background$(_state$2, _img$1, $703);
-                var _new_img$10 = Web$Kaelin$Draw$state$players$(_new_img$9, $703);
-                var $704 = _new_img$10;
-                var $702 = $704;
+                var $627 = self.map;
+                var _new_img$9 = Web$Kaelin$Draw$state$background$(_state$2, _img$1, $627);
+                var _new_img$10 = Web$Kaelin$Draw$state$players$(_new_img$9, $627);
+                var $628 = _new_img$10;
+                var $626 = $628;
                 break;
             case 'Web.Kaelin.State.init':
             case 'Web.Kaelin.State.void':
-                var $705 = _img$1;
-                var $702 = $705;
+                var $629 = _img$1;
+                var $626 = $629;
                 break;
         };
-        return $702;
+        return $626;
     };
     const Web$Kaelin$Draw$state = x0 => x1 => Web$Kaelin$Draw$state$(x0, x1);
 
     function IO$(_A$1) {
-        var $706 = null;
-        return $706;
+        var $630 = null;
+        return $630;
     };
     const IO = x0 => IO$(x0);
 
     function IO$ask$(_query$2, _param$3, _then$4) {
-        var $707 = ({
+        var $631 = ({
             _: 'IO.ask',
             'query': _query$2,
             'param': _param$3,
             'then': _then$4
         });
-        return $707;
+        return $631;
     };
     const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
 
@@ -3412,120 +3172,120 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'IO.end':
-                var $709 = self.value;
-                var $710 = _f$4($709);
-                var $708 = $710;
+                var $633 = self.value;
+                var $634 = _f$4($633);
+                var $632 = $634;
                 break;
             case 'IO.ask':
-                var $711 = self.query;
-                var $712 = self.param;
-                var $713 = self.then;
-                var $714 = IO$ask$($711, $712, (_x$8 => {
-                    var $715 = IO$bind$($713(_x$8), _f$4);
-                    return $715;
+                var $635 = self.query;
+                var $636 = self.param;
+                var $637 = self.then;
+                var $638 = IO$ask$($635, $636, (_x$8 => {
+                    var $639 = IO$bind$($637(_x$8), _f$4);
+                    return $639;
                 }));
-                var $708 = $714;
+                var $632 = $638;
                 break;
         };
-        return $708;
+        return $632;
     };
     const IO$bind = x0 => x1 => IO$bind$(x0, x1);
 
     function IO$end$(_value$2) {
-        var $716 = ({
+        var $640 = ({
             _: 'IO.end',
             'value': _value$2
         });
-        return $716;
+        return $640;
     };
     const IO$end = x0 => IO$end$(x0);
 
     function IO$monad$(_new$2) {
-        var $717 = _new$2(IO$bind)(IO$end);
-        return $717;
+        var $641 = _new$2(IO$bind)(IO$end);
+        return $641;
     };
     const IO$monad = x0 => IO$monad$(x0);
 
     function Dynamic$new$(_value$2) {
-        var $718 = ({
+        var $642 = ({
             _: 'Dynamic.new',
             'value': _value$2
         });
-        return $718;
+        return $642;
     };
     const Dynamic$new = x0 => Dynamic$new$(x0);
     const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $719 = _m$pure$2;
-        return $719;
+        var $643 = _m$pure$2;
+        return $643;
     }))(Dynamic$new$(Unit$new));
 
     function IO$put_string$(_text$1) {
-        var $720 = IO$ask$("put_string", _text$1, (_skip$2 => {
-            var $721 = IO$end$(Unit$new);
-            return $721;
+        var $644 = IO$ask$("put_string", _text$1, (_skip$2 => {
+            var $645 = IO$end$(Unit$new);
+            return $645;
         }));
-        return $720;
+        return $644;
     };
     const IO$put_string = x0 => IO$put_string$(x0);
 
     function String$cons$(_head$1, _tail$2) {
-        var $722 = (String.fromCharCode(_head$1) + _tail$2);
-        return $722;
+        var $646 = (String.fromCharCode(_head$1) + _tail$2);
+        return $646;
     };
     const String$cons = x0 => x1 => String$cons$(x0, x1);
     const String$concat = a0 => a1 => (a0 + a1);
 
     function IO$print$(_text$1) {
-        var $723 = IO$put_string$((_text$1 + "\u{a}"));
-        return $723;
+        var $647 = IO$put_string$((_text$1 + "\u{a}"));
+        return $647;
     };
     const IO$print = x0 => IO$print$(x0);
 
     function App$print$(_str$1) {
-        var $724 = IO$monad$((_m$bind$2 => _m$pure$3 => {
-            var $725 = _m$bind$2;
-            return $725;
+        var $648 = IO$monad$((_m$bind$2 => _m$pure$3 => {
+            var $649 = _m$bind$2;
+            return $649;
         }))(IO$print$(_str$1))((_$2 => {
-            var $726 = App$pass;
-            return $726;
+            var $650 = App$pass;
+            return $650;
         }));
-        return $724;
+        return $648;
     };
     const App$print = x0 => App$print$(x0);
 
     function IO$do$(_call$1, _param$2) {
-        var $727 = IO$ask$(_call$1, _param$2, (_answer$3 => {
-            var $728 = IO$end$(Unit$new);
-            return $728;
+        var $651 = IO$ask$(_call$1, _param$2, (_answer$3 => {
+            var $652 = IO$end$(Unit$new);
+            return $652;
         }));
-        return $727;
+        return $651;
     };
     const IO$do = x0 => x1 => IO$do$(x0, x1);
 
     function App$do$(_call$1, _param$2) {
-        var $729 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $730 = _m$bind$3;
-            return $730;
+        var $653 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $654 = _m$bind$3;
+            return $654;
         }))(IO$do$(_call$1, _param$2))((_$3 => {
-            var $731 = App$pass;
-            return $731;
+            var $655 = App$pass;
+            return $655;
         }));
-        return $729;
+        return $653;
     };
     const App$do = x0 => x1 => App$do$(x0, x1);
 
     function App$watch$(_room$1) {
-        var $732 = App$do$("watch", _room$1);
-        return $732;
+        var $656 = App$do$("watch", _room$1);
+        return $656;
     };
     const App$watch = x0 => App$watch$(x0);
 
     function App$store$(_value$2) {
-        var $733 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $734 = _m$pure$4;
-            return $734;
+        var $657 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $658 = _m$pure$4;
+            return $658;
         }))(Dynamic$new$(_value$2));
-        return $733;
+        return $657;
     };
     const App$store = x0 => App$store$(x0);
 
@@ -3533,67 +3293,32 @@ module.exports = (function() {
         var self = _state$2;
         switch (self._) {
             case 'Web.Kaelin.State.game':
-                var $736 = self.room;
-                var $737 = self.tick;
-                var $738 = self.players;
-                var $739 = self.cast_info;
-                var $740 = self.map;
-                var $741 = Web$Kaelin$State$game$($736, $737, $738, $739, $740, _interface$1);
-                var $735 = $741;
+                var $660 = self.room;
+                var $661 = self.tick;
+                var $662 = self.players;
+                var $663 = self.cast_info;
+                var $664 = self.map;
+                var $665 = Web$Kaelin$State$game$($660, $661, $662, $663, $664, _interface$1);
+                var $659 = $665;
                 break;
             case 'Web.Kaelin.State.init':
             case 'Web.Kaelin.State.void':
-                var $742 = _state$2;
-                var $735 = $742;
+                var $666 = _state$2;
+                var $659 = $666;
                 break;
         };
-        return $735;
+        return $659;
     };
     const Web$Kaelin$Action$update_interface = x0 => x1 => Web$Kaelin$Action$update_interface$(x0, x1);
-
-    function Word$to_f64$(_a$2) {
-        var Word$to_f64$ = (_a$2) => ({
-            ctr: 'TCO',
-            arg: [_a$2]
-        });
-        var Word$to_f64 = _a$2 => Word$to_f64$(_a$2);
-        var arg = [_a$2];
-        while (true) {
-            let [_a$2] = arg;
-            var R = Word$to_f64$(_a$2);
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const Word$to_f64 = x0 => Word$to_f64$(x0);
-    const U32$to_f64 = a0 => (a0);
-    const F64$to_i32 = a0 => ((a0 >> 0));
     const F64$div = a0 => a1 => (a0 / a1);
     const F64$parse = a0 => (parseFloat(a0));
     const F64$sub = a0 => a1 => (a0 - a1);
     const F64$mul = a0 => a1 => (a0 * a1);
     const F64$add = a0 => a1 => (a0 + a1);
 
-    function Word$s_to_f64$(_a$2) {
-        var Word$s_to_f64$ = (_a$2) => ({
-            ctr: 'TCO',
-            arg: [_a$2]
-        });
-        var Word$s_to_f64 = _a$2 => Word$s_to_f64$(_a$2);
-        var arg = [_a$2];
-        while (true) {
-            let [_a$2] = arg;
-            var R = Word$s_to_f64$(_a$2);
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const Word$s_to_f64 = x0 => Word$s_to_f64$(x0);
-    const I32$to_f64 = a0 => (a0);
-
     function Web$Kaelin$Coord$round$floor$(_n$1) {
-        var $743 = (((_n$1 >> 0)));
-        return $743;
+        var $667 = (((_n$1 >> 0)));
+        return $667;
     };
     const Web$Kaelin$Coord$round$floor = x0 => Web$Kaelin$Coord$round$floor$(x0);
 
@@ -3602,14 +3327,31 @@ module.exports = (function() {
         var _big_number$3 = (parseFloat("1000.0"));
         var _n$4 = (_n$1 + _big_number$3);
         var _result$5 = Web$Kaelin$Coord$round$floor$((_n$4 + _half$2));
-        var $744 = (_result$5 - _big_number$3);
-        return $744;
+        var $668 = (_result$5 - _big_number$3);
+        return $668;
     };
     const Web$Kaelin$Coord$round$round_F64 = x0 => Web$Kaelin$Coord$round$round_F64$(x0);
 
+    function Cmp$as_gtn$(_cmp$1) {
+        var self = _cmp$1;
+        switch (self._) {
+            case 'Cmp.ltn':
+            case 'Cmp.eql':
+                var $670 = Bool$false;
+                var $669 = $670;
+                break;
+            case 'Cmp.gtn':
+                var $671 = Bool$true;
+                var $669 = $671;
+                break;
+        };
+        return $669;
+    };
+    const Cmp$as_gtn = x0 => Cmp$as_gtn$(x0);
+
     function Word$gtn$(_a$2, _b$3) {
-        var $745 = Cmp$as_gtn$(Word$cmp$(_a$2, _b$3));
-        return $745;
+        var $672 = Cmp$as_gtn$(Word$cmp$(_a$2, _b$3));
+        return $672;
     };
     const Word$gtn = x0 => x1 => Word$gtn$(x0, x1);
 
@@ -3617,19 +3359,19 @@ module.exports = (function() {
         var self = _a$1;
         switch ('f64') {
             case 'f64':
-                var $747 = f64_to_word(self);
+                var $674 = f64_to_word(self);
                 var self = _b$2;
                 switch ('f64') {
                     case 'f64':
-                        var $749 = f64_to_word(self);
-                        var $750 = Word$gtn$($747, $749);
-                        var $748 = $750;
+                        var $676 = f64_to_word(self);
+                        var $677 = Word$gtn$($674, $676);
+                        var $675 = $677;
                         break;
                 };
-                var $746 = $748;
+                var $673 = $675;
                 break;
         };
-        return $746;
+        return $673;
     };
     const F64$gtn = x0 => x1 => F64$gtn$(x0, x1);
 
@@ -3639,13 +3381,13 @@ module.exports = (function() {
         var _y$5 = (_y$2 + _big_number$3);
         var self = F64$gtn$(_x$4, _y$5);
         if (self) {
-            var $752 = (_x$4 - _y$5);
-            var $751 = $752;
+            var $679 = (_x$4 - _y$5);
+            var $678 = $679;
         } else {
-            var $753 = (_y$5 - _x$4);
-            var $751 = $753;
+            var $680 = (_y$5 - _x$4);
+            var $678 = $680;
         };
-        return $751;
+        return $678;
     };
     const Web$Kaelin$Coord$round$diff = x0 => x1 => Web$Kaelin$Coord$round$diff$(x0, x1);
 
@@ -3664,28 +3406,28 @@ module.exports = (function() {
             var self = F64$gtn$(_diff_y$10, _diff_x$9);
             if (self) {
                 var _new_y$12 = ((_f$3(0) - _round_x$6) - _round_z$8);
-                var $756 = Pair$new$(_i$4(_round_x$6), _i$4(_new_y$12));
-                var $755 = $756;
+                var $683 = Pair$new$(_i$4(_round_x$6), _i$4(_new_y$12));
+                var $682 = $683;
             } else {
                 var _new_x$12 = ((_f$3(0) - _round_y$7) - _round_z$8);
-                var $757 = Pair$new$(_i$4(_new_x$12), _i$4(_round_y$7));
-                var $755 = $757;
+                var $684 = Pair$new$(_i$4(_new_x$12), _i$4(_round_y$7));
+                var $682 = $684;
             };
-            var _result$12 = $755;
+            var _result$12 = $682;
         } else {
             var self = F64$gtn$(_diff_y$10, _diff_z$11);
             if (self) {
                 var _new_y$12 = ((_f$3(0) - _round_x$6) - _round_z$8);
-                var $759 = Pair$new$(_i$4(_round_x$6), _i$4(_new_y$12));
-                var $758 = $759;
+                var $686 = Pair$new$(_i$4(_round_x$6), _i$4(_new_y$12));
+                var $685 = $686;
             } else {
-                var $760 = Pair$new$(_i$4(_round_x$6), _i$4(_round_y$7));
-                var $758 = $760;
+                var $687 = Pair$new$(_i$4(_round_x$6), _i$4(_round_y$7));
+                var $685 = $687;
             };
-            var _result$12 = $758;
+            var _result$12 = $685;
         };
-        var $754 = _result$12;
-        return $754;
+        var $681 = _result$12;
+        return $681;
     };
     const Web$Kaelin$Coord$round = x0 => x1 => Web$Kaelin$Coord$round$(x0, x1);
 
@@ -3693,199 +3435,120 @@ module.exports = (function() {
         var self = _coord$1;
         switch (self._) {
             case 'Pair.new':
-                var $762 = self.fst;
-                var $763 = self.snd;
+                var $689 = self.fst;
+                var $690 = self.snd;
                 var _f$4 = U32$to_f64;
                 var _i$5 = F64$to_i32;
                 var _float_hex_rad$6 = (_f$4(Web$Kaelin$Constants$hexagon_radius) / (parseFloat("2.0")));
                 var _center_x$7 = Web$Kaelin$Constants$center_x;
                 var _center_y$8 = Web$Kaelin$Constants$center_y;
-                var _float_x$9 = ((_f$4($762) - _f$4(_center_x$7)) / _float_hex_rad$6);
-                var _float_y$10 = ((_f$4($763) - _f$4(_center_y$8)) / _float_hex_rad$6);
+                var _float_x$9 = ((_f$4($689) - _f$4(_center_x$7)) / _float_hex_rad$6);
+                var _float_y$10 = ((_f$4($690) - _f$4(_center_y$8)) / _float_hex_rad$6);
                 var _fourth$11 = (parseFloat("0.25"));
                 var _sixth$12 = ((parseFloat("1.0")) / (parseFloat("6.0")));
                 var _third$13 = ((parseFloat("1.0")) / (parseFloat("3.0")));
                 var _half$14 = (parseFloat("0.5"));
                 var _axial_x$15 = ((_float_x$9 * _fourth$11) - (_float_y$10 * _sixth$12));
                 var _axial_y$16 = (_float_y$10 * _third$13);
-                var $764 = Web$Kaelin$Coord$round$(_axial_x$15, _axial_y$16);
-                var $761 = $764;
+                var self = Web$Kaelin$Coord$round$(_axial_x$15, _axial_y$16);
+                switch (self._) {
+                    case 'Pair.new':
+                        var $692 = self.fst;
+                        var $693 = self.snd;
+                        var $694 = Web$Kaelin$Coord$new$($692, $693);
+                        var $691 = $694;
+                        break;
+                };
+                var $688 = $691;
                 break;
         };
-        return $761;
+        return $688;
     };
     const Web$Kaelin$Coord$to_axial = x0 => Web$Kaelin$Coord$to_axial$(x0);
-
-    function Word$is_neg$go$(_word$2, _n$3) {
-        var Word$is_neg$go$ = (_word$2, _n$3) => ({
-            ctr: 'TCO',
-            arg: [_word$2, _n$3]
-        });
-        var Word$is_neg$go = _word$2 => _n$3 => Word$is_neg$go$(_word$2, _n$3);
-        var arg = [_word$2, _n$3];
-        while (true) {
-            let [_word$2, _n$3] = arg;
-            var R = (() => {
-                var self = _word$2;
-                switch (self._) {
-                    case 'Word.o':
-                        var $765 = self.pred;
-                        var $766 = Word$is_neg$go$($765, Bool$false);
-                        return $766;
-                    case 'Word.i':
-                        var $767 = self.pred;
-                        var $768 = Word$is_neg$go$($767, Bool$true);
-                        return $768;
-                    case 'Word.e':
-                        var $769 = _n$3;
-                        return $769;
-                };
-            })();
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const Word$is_neg$go = x0 => x1 => Word$is_neg$go$(x0, x1);
-
-    function Word$is_neg$(_word$2) {
-        var $770 = Word$is_neg$go$(_word$2, Bool$false);
-        return $770;
-    };
-    const Word$is_neg = x0 => Word$is_neg$(x0);
-
-    function Word$neg$aux$(_word$2, _inc$3) {
-        var self = _word$2;
-        switch (self._) {
-            case 'Word.o':
-                var $772 = self.pred;
-                var self = _inc$3;
-                if (self) {
-                    var $774 = Word$o$(Word$neg$aux$($772, Bool$true));
-                    var $773 = $774;
-                } else {
-                    var $775 = Word$i$(Word$neg$aux$($772, Bool$false));
-                    var $773 = $775;
-                };
-                var $771 = $773;
-                break;
-            case 'Word.i':
-                var $776 = self.pred;
-                var self = _inc$3;
-                if (self) {
-                    var $778 = Word$i$(Word$neg$aux$($776, Bool$false));
-                    var $777 = $778;
-                } else {
-                    var $779 = Word$o$(Word$neg$aux$($776, Bool$false));
-                    var $777 = $779;
-                };
-                var $771 = $777;
-                break;
-            case 'Word.e':
-                var $780 = Word$e;
-                var $771 = $780;
-                break;
-        };
-        return $771;
-    };
-    const Word$neg$aux = x0 => x1 => Word$neg$aux$(x0, x1);
-
-    function Word$neg$(_word$2) {
-        var self = _word$2;
-        switch (self._) {
-            case 'Word.o':
-                var $782 = self.pred;
-                var $783 = Word$o$(Word$neg$aux$($782, Bool$true));
-                var $781 = $783;
-                break;
-            case 'Word.i':
-                var $784 = self.pred;
-                var $785 = Word$i$(Word$neg$aux$($784, Bool$false));
-                var $781 = $785;
-                break;
-            case 'Word.e':
-                var $786 = Word$e;
-                var $781 = $786;
-                break;
-        };
-        return $781;
-    };
-    const Word$neg = x0 => Word$neg$(x0);
-
-    function Word$abs$(_a$2) {
-        var _neg$3 = Word$is_neg$(_a$2);
-        var self = _neg$3;
-        if (self) {
-            var $788 = Word$neg$(_a$2);
-            var $787 = $788;
-        } else {
-            var $789 = _a$2;
-            var $787 = $789;
-        };
-        return $787;
-    };
-    const Word$abs = x0 => Word$abs$(x0);
-
-    function Word$to_int$(_a$2) {
-        var _neg$3 = Word$is_neg$(_a$2);
-        var _i$4 = Int$from_nat$(Word$to_nat$(Word$abs$(_a$2)));
-        var self = _neg$3;
-        if (self) {
-            var $791 = Int$neg$(_i$4);
-            var $790 = $791;
-        } else {
-            var $792 = _i$4;
-            var $790 = $792;
-        };
-        return $790;
-    };
-    const Word$to_int = x0 => Word$to_int$(x0);
-
-    function I32$to_int$(_a$1) {
-        var self = _a$1;
-        switch ('i32') {
-            case 'i32':
-                var $794 = i32_to_word(self);
-                var $795 = Word$to_int$($794);
-                var $793 = $795;
-                break;
-        };
-        return $793;
-    };
-    const I32$to_int = x0 => I32$to_int$(x0);
 
     function Pair$show$(_show_a$3, _show_b$4, _pair$5) {
         var self = _pair$5;
         switch (self._) {
             case 'Pair.new':
-                var $797 = self.fst;
-                var $798 = self.snd;
-                var _str$8 = ("(" + _show_a$3($797));
+                var $696 = self.fst;
+                var $697 = self.snd;
+                var _str$8 = ("(" + _show_a$3($696));
                 var _str$9 = (_str$8 + ",");
-                var _str$10 = (_str$9 + _show_b$4($798));
+                var _str$10 = (_str$9 + _show_b$4($697));
                 var _str$11 = (_str$10 + ")");
-                var $799 = _str$11;
-                var $796 = $799;
+                var $698 = _str$11;
+                var $695 = $698;
                 break;
         };
-        return $796;
+        return $695;
     };
     const Pair$show = x0 => x1 => x2 => Pair$show$(x0, x1, x2);
+    const Nat$gtn = a0 => a1 => (a0 > a1);
+
+    function Int$is_neg$(_a$1) {
+        var self = _a$1;
+        switch ("new") {
+            case 'new':
+                var $700 = int_pos(self);
+                var $701 = int_neg(self);
+                var $702 = ($701 > $700);
+                var $699 = $702;
+                break;
+        };
+        return $699;
+    };
+    const Int$is_neg = x0 => Int$is_neg$(x0);
+
+    function Int$abs$(_a$1) {
+        var _neg$2 = Int$is_neg$(_a$1);
+        var self = _neg$2;
+        if (self) {
+            var _a$3 = Int$neg$(_a$1);
+            var self = _a$3;
+            switch ("new") {
+                case 'new':
+                    var $705 = int_pos(self);
+                    var $706 = $705;
+                    var $704 = $706;
+                    break;
+            };
+            var $703 = $704;
+        } else {
+            var self = _a$1;
+            switch ("new") {
+                case 'new':
+                    var $708 = int_pos(self);
+                    var $709 = $708;
+                    var $707 = $709;
+                    break;
+            };
+            var $703 = $707;
+        };
+        return $703;
+    };
+    const Int$abs = x0 => Int$abs$(x0);
+
+    function Int$to_nat_signed$(_a$1) {
+        var $710 = Pair$new$(Int$is_neg$(_a$1), Int$abs$(_a$1));
+        return $710;
+    };
+    const Int$to_nat_signed = x0 => Int$to_nat_signed$(x0);
 
     function List$fold$(_list$2, _nil$4, _cons$5) {
         var self = _list$2;
         switch (self._) {
             case 'List.cons':
-                var $801 = self.head;
-                var $802 = self.tail;
-                var $803 = _cons$5($801)(List$fold$($802, _nil$4, _cons$5));
-                var $800 = $803;
+                var $712 = self.head;
+                var $713 = self.tail;
+                var $714 = _cons$5($712)(List$fold$($713, _nil$4, _cons$5));
+                var $711 = $714;
                 break;
             case 'List.nil':
-                var $804 = _nil$4;
-                var $800 = $804;
+                var $715 = _nil$4;
+                var $711 = $715;
                 break;
         };
-        return $800;
+        return $711;
     };
     const List$fold = x0 => x1 => x2 => List$fold$(x0, x1, x2);
 
@@ -3906,18 +3569,18 @@ module.exports = (function() {
                 }));
                 switch (self._) {
                     case 'Pair.new':
-                        var $805 = self.fst;
-                        var $806 = self.snd;
-                        var self = $805;
+                        var $716 = self.fst;
+                        var $717 = self.snd;
+                        var self = $716;
                         if (self === 0n) {
-                            var $808 = List$cons$($806, _res$3);
-                            var $807 = $808;
+                            var $719 = List$cons$($717, _res$3);
+                            var $718 = $719;
                         } else {
-                            var $809 = (self - 1n);
-                            var $810 = Nat$to_base$go$(_base$1, $805, List$cons$($806, _res$3));
-                            var $807 = $810;
+                            var $720 = (self - 1n);
+                            var $721 = Nat$to_base$go$(_base$1, $716, List$cons$($717, _res$3));
+                            var $718 = $721;
                         };
-                        return $807;
+                        return $718;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -3927,8 +3590,8 @@ module.exports = (function() {
     const Nat$to_base$go = x0 => x1 => x2 => Nat$to_base$go$(x0, x1, x2);
 
     function Nat$to_base$(_base$1, _nat$2) {
-        var $811 = Nat$to_base$go$(_base$1, _nat$2, List$nil);
-        return $811;
+        var $722 = Nat$to_base$go$(_base$1, _nat$2, List$nil);
+        return $722;
     };
     const Nat$to_base = x0 => x1 => Nat$to_base$(x0, x1);
     const String$nil = '';
@@ -3948,21 +3611,21 @@ module.exports = (function() {
                 var self = _list$3;
                 switch (self._) {
                     case 'List.cons':
-                        var $812 = self.head;
-                        var $813 = self.tail;
+                        var $723 = self.head;
+                        var $724 = self.tail;
                         var self = _index$2;
                         if (self === 0n) {
-                            var $815 = Maybe$some$($812);
-                            var $814 = $815;
+                            var $726 = Maybe$some$($723);
+                            var $725 = $726;
                         } else {
-                            var $816 = (self - 1n);
-                            var $817 = List$at$($816, $813);
-                            var $814 = $817;
+                            var $727 = (self - 1n);
+                            var $728 = List$at$($727, $724);
+                            var $725 = $728;
                         };
-                        return $814;
+                        return $725;
                     case 'List.nil':
-                        var $818 = Maybe$none;
-                        return $818;
+                        var $729 = Maybe$none;
+                        return $729;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -3979,36 +3642,36 @@ module.exports = (function() {
             var self = List$at$(_m$3, _base64$4);
             switch (self._) {
                 case 'Maybe.some':
-                    var $821 = self.value;
-                    var $822 = $821;
-                    var $820 = $822;
+                    var $732 = self.value;
+                    var $733 = $732;
+                    var $731 = $733;
                     break;
                 case 'Maybe.none':
-                    var $823 = 35;
-                    var $820 = $823;
+                    var $734 = 35;
+                    var $731 = $734;
                     break;
             };
-            var $819 = $820;
+            var $730 = $731;
         } else {
-            var $824 = 35;
-            var $819 = $824;
+            var $735 = 35;
+            var $730 = $735;
         };
-        return $819;
+        return $730;
     };
     const Nat$show_digit = x0 => x1 => Nat$show_digit$(x0, x1);
 
     function Nat$to_string_base$(_base$1, _nat$2) {
-        var $825 = List$fold$(Nat$to_base$(_base$1, _nat$2), String$nil, (_n$3 => _str$4 => {
-            var $826 = String$cons$(Nat$show_digit$(_base$1, _n$3), _str$4);
-            return $826;
+        var $736 = List$fold$(Nat$to_base$(_base$1, _nat$2), String$nil, (_n$3 => _str$4 => {
+            var $737 = String$cons$(Nat$show_digit$(_base$1, _n$3), _str$4);
+            return $737;
         }));
-        return $825;
+        return $736;
     };
     const Nat$to_string_base = x0 => x1 => Nat$to_string_base$(x0, x1);
 
     function Nat$show$(_n$1) {
-        var $827 = Nat$to_string_base$(10n, _n$1);
-        return $827;
+        var $738 = Nat$to_string_base$(10n, _n$1);
+        return $738;
     };
     const Nat$show = x0 => Nat$show$(x0);
 
@@ -4017,48 +3680,48 @@ module.exports = (function() {
         var self = _result$2;
         switch (self._) {
             case 'Pair.new':
-                var $829 = self.fst;
-                var $830 = self.snd;
-                var self = $829;
+                var $740 = self.fst;
+                var $741 = self.snd;
+                var self = $740;
                 if (self) {
-                    var $832 = ("-" + Nat$show$($830));
-                    var $831 = $832;
+                    var $743 = ("-" + Nat$show$($741));
+                    var $742 = $743;
                 } else {
-                    var $833 = ("+" + Nat$show$($830));
-                    var $831 = $833;
+                    var $744 = ("+" + Nat$show$($741));
+                    var $742 = $744;
                 };
-                var $828 = $831;
+                var $739 = $742;
                 break;
         };
-        return $828;
+        return $739;
     };
     const Int$show = x0 => Int$show$(x0);
     const U16$eql = a0 => a1 => (a0 === a1);
 
     function U16$new$(_value$1) {
-        var $834 = word_to_u16(_value$1);
-        return $834;
+        var $745 = word_to_u16(_value$1);
+        return $745;
     };
     const U16$new = x0 => U16$new$(x0);
     const Nat$to_u16 = a0 => (Number(a0) & 0xFFFF);
 
     function App$post$(_room$1, _data$2) {
-        var $835 = App$do$("post", (_room$1 + (";" + _data$2)));
-        return $835;
+        var $746 = App$do$("post", (_room$1 + (";" + _data$2)));
+        return $746;
     };
     const App$post = x0 => x1 => App$post$(x0, x1);
 
     function String$repeat$(_xs$1, _n$2) {
         var self = _n$2;
         if (self === 0n) {
-            var $837 = String$nil;
-            var $836 = $837;
+            var $748 = String$nil;
+            var $747 = $748;
         } else {
-            var $838 = (self - 1n);
-            var $839 = (_xs$1 + String$repeat$(_xs$1, $838));
-            var $836 = $839;
+            var $749 = (self - 1n);
+            var $750 = (_xs$1 + String$repeat$(_xs$1, $749));
+            var $747 = $750;
         };
-        return $836;
+        return $747;
     };
     const String$repeat = x0 => x1 => String$repeat$(x0, x1);
 
@@ -4074,21 +3737,21 @@ module.exports = (function() {
             var R = (() => {
                 var self = _n$1;
                 if (self === 0n) {
-                    var $840 = _xs$2;
-                    return $840;
+                    var $751 = _xs$2;
+                    return $751;
                 } else {
-                    var $841 = (self - 1n);
+                    var $752 = (self - 1n);
                     var self = _xs$2;
                     if (self.length === 0) {
-                        var $843 = String$nil;
-                        var $842 = $843;
+                        var $754 = String$nil;
+                        var $753 = $754;
                     } else {
-                        var $844 = self.charCodeAt(0);
-                        var $845 = self.slice(1);
-                        var $846 = String$drop$($841, $845);
-                        var $842 = $846;
+                        var $755 = self.charCodeAt(0);
+                        var $756 = self.slice(1);
+                        var $757 = String$drop$($752, $756);
+                        var $753 = $757;
                     };
-                    return $842;
+                    return $753;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -4098,14 +3761,14 @@ module.exports = (function() {
     const String$drop = x0 => x1 => String$drop$(x0, x1);
 
     function Web$Kaelin$Command$create_player$(_hero_id$1) {
-        var $847 = ("0x1" + (String$repeat$("0", 55n) + String$drop$(2n, _hero_id$1)));
-        return $847;
+        var $758 = ("0x1" + (String$repeat$("0", 55n) + String$drop$(2n, _hero_id$1)));
+        return $758;
     };
     const Web$Kaelin$Command$create_player = x0 => Web$Kaelin$Command$create_player$(x0);
 
     function Char$eql$(_a$1, _b$2) {
-        var $848 = (_a$1 === _b$2);
-        return $848;
+        var $759 = (_a$1 === _b$2);
+        return $759;
     };
     const Char$eql = x0 => x1 => Char$eql$(x0, x1);
 
@@ -4121,29 +3784,29 @@ module.exports = (function() {
             var R = (() => {
                 var self = _match$2;
                 if (self.length === 0) {
-                    var $849 = Bool$true;
-                    return $849;
+                    var $760 = Bool$true;
+                    return $760;
                 } else {
-                    var $850 = self.charCodeAt(0);
-                    var $851 = self.slice(1);
+                    var $761 = self.charCodeAt(0);
+                    var $762 = self.slice(1);
                     var self = _xs$1;
                     if (self.length === 0) {
-                        var $853 = Bool$false;
-                        var $852 = $853;
+                        var $764 = Bool$false;
+                        var $763 = $764;
                     } else {
-                        var $854 = self.charCodeAt(0);
-                        var $855 = self.slice(1);
-                        var self = Char$eql$($850, $854);
+                        var $765 = self.charCodeAt(0);
+                        var $766 = self.slice(1);
+                        var self = Char$eql$($761, $765);
                         if (self) {
-                            var $857 = String$starts_with$($855, $851);
-                            var $856 = $857;
+                            var $768 = String$starts_with$($766, $762);
+                            var $767 = $768;
                         } else {
-                            var $858 = Bool$false;
-                            var $856 = $858;
+                            var $769 = Bool$false;
+                            var $767 = $769;
                         };
-                        var $852 = $856;
+                        var $763 = $767;
                     };
-                    return $852;
+                    return $763;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -4153,78 +3816,78 @@ module.exports = (function() {
     const String$starts_with = x0 => x1 => String$starts_with$(x0, x1);
 
     function Map$get$(_key$2, _map$3) {
-        var $859 = BitsMap$get$(String$to_bits$(_key$2), _map$3);
-        return $859;
+        var $770 = BitsMap$get$(String$to_bits$(_key$2), _map$3);
+        return $770;
     };
     const Map$get = x0 => x1 => Map$get$(x0, x1);
 
     function Map$set$(_key$2, _val$3, _map$4) {
-        var $860 = BitsMap$set$(String$to_bits$(_key$2), _val$3, _map$4);
-        return $860;
+        var $771 = BitsMap$set$(String$to_bits$(_key$2), _val$3, _map$4);
+        return $771;
     };
     const Map$set = x0 => x1 => x2 => Map$set$(x0, x1, x2);
     const Web$Kaelin$Resources$heroes = (() => {
         var _heroes$1 = List$cons$(Web$Kaelin$Hero$croni, List$cons$(Web$Kaelin$Hero$cyclope, List$cons$(Web$Kaelin$Hero$lela, List$cons$(Web$Kaelin$Hero$octoking, List$nil))));
-        var $861 = List$fold$(_heroes$1, Map$from_list$(List$nil), (_hero$2 => _map$3 => {
+        var $772 = List$fold$(_heroes$1, Map$from_list$(List$nil), (_hero$2 => _map$3 => {
             var self = _hero$2;
             switch (self._) {
                 case 'Web.Kaelin.Hero.new':
-                    var $863 = self.id;
-                    var $864 = Map$set$($863, _hero$2, _map$3);
-                    var $862 = $864;
+                    var $774 = self.id;
+                    var $775 = Map$set$($774, _hero$2, _map$3);
+                    var $773 = $775;
                     break;
             };
-            return $862;
+            return $773;
         }));
-        return $861;
+        return $772;
     })();
 
     function Web$Kaelin$Player$new$(_addr$1, _team$2) {
-        var $865 = ({
+        var $776 = ({
             _: 'Web.Kaelin.Player.new',
             'addr': _addr$1,
             'team': _team$2
         });
-        return $865;
+        return $776;
     };
     const Web$Kaelin$Player$new = x0 => x1 => Web$Kaelin$Player$new$(x0, x1);
 
     function Web$Kaelin$Action$create_player$(_user$1, _hero$2, _state$3) {
         var _key$4 = _user$1;
-        var _init_pos$5 = Web$Kaelin$Coord$new$(Int$from_nat$(0n), Int$from_nat$(0n));
+        var _init_pos$5 = Web$Kaelin$Coord$new$(Int$to_i32$(Int$from_nat$(0n)), Int$to_i32$(Int$from_nat$(0n)));
         var self = _state$3;
         switch (self._) {
             case 'Web.Kaelin.State.game':
-                var $867 = self.room;
-                var $868 = self.tick;
-                var $869 = self.players;
-                var $870 = self.cast_info;
-                var $871 = self.map;
-                var $872 = self.interface;
-                var self = Map$get$(_key$4, $869);
+                var $778 = self.room;
+                var $779 = self.tick;
+                var $780 = self.players;
+                var $781 = self.cast_info;
+                var $782 = self.map;
+                var $783 = self.interface;
+                var self = Map$get$(_key$4, $780);
                 switch (self._) {
                     case 'Maybe.none':
                         var _creature$12 = Web$Kaelin$Entity$creature;
                         var _new_player$13 = Web$Kaelin$Player$new$(_user$1, "blue");
-                        var _map$14 = Web$Kaelin$Map$set$(_init_pos$5, _creature$12(Maybe$some$(_user$1))(_hero$2), $871);
-                        var _new_players$15 = Map$set$(_key$4, _new_player$13, $869);
-                        var $874 = Web$Kaelin$State$game$($867, $868, _new_players$15, $870, _map$14, $872);
-                        var $873 = $874;
+                        var _map$14 = Web$Kaelin$Map$push$(_init_pos$5, _creature$12(Maybe$some$(_user$1))(_hero$2), $782);
+                        var _new_players$15 = Map$set$(_key$4, _new_player$13, $780);
+                        var $785 = Web$Kaelin$State$game$($778, $779, _new_players$15, $781, _map$14, $783);
+                        var $784 = $785;
                         break;
                     case 'Maybe.some':
-                        var $875 = _state$3;
-                        var $873 = $875;
+                        var $786 = _state$3;
+                        var $784 = $786;
                         break;
                 };
-                var $866 = $873;
+                var $777 = $784;
                 break;
             case 'Web.Kaelin.State.init':
             case 'Web.Kaelin.State.void':
-                var $876 = _state$3;
-                var $866 = $876;
+                var $787 = _state$3;
+                var $777 = $787;
                 break;
         };
-        return $866;
+        return $777;
     };
     const Web$Kaelin$Action$create_player = x0 => x1 => x2 => Web$Kaelin$Action$create_player$(x0, x1, x2);
     const String$eql = a0 => a1 => (a0 === a1);
@@ -4232,136 +3895,154 @@ module.exports = (function() {
     function String$take$(_n$1, _xs$2) {
         var self = _xs$2;
         if (self.length === 0) {
-            var $878 = String$nil;
-            var $877 = $878;
+            var $789 = String$nil;
+            var $788 = $789;
         } else {
-            var $879 = self.charCodeAt(0);
-            var $880 = self.slice(1);
+            var $790 = self.charCodeAt(0);
+            var $791 = self.slice(1);
             var self = _n$1;
             if (self === 0n) {
-                var $882 = String$nil;
-                var $881 = $882;
+                var $793 = String$nil;
+                var $792 = $793;
             } else {
-                var $883 = (self - 1n);
-                var $884 = String$cons$($879, String$take$($883, $880));
-                var $881 = $884;
+                var $794 = (self - 1n);
+                var $795 = String$cons$($790, String$take$($794, $791));
+                var $792 = $795;
             };
-            var $877 = $881;
+            var $788 = $792;
         };
-        return $877;
+        return $788;
     };
     const String$take = x0 => x1 => String$take$(x0, x1);
 
     function String$slice$(_i$1, _j$2, _xs$3) {
-        var $885 = String$take$((_j$2 - _i$1 <= 0n ? 0n : _j$2 - _i$1), String$drop$(_i$1, _xs$3));
-        return $885;
+        var $796 = String$take$((_j$2 - _i$1 <= 0n ? 0n : _j$2 - _i$1), String$drop$(_i$1, _xs$3));
+        return $796;
     };
     const String$slice = x0 => x1 => x2 => String$slice$(x0, x1, x2);
+
+    function List$concat$(_as$2, _bs$3) {
+        var self = _as$2;
+        switch (self._) {
+            case 'List.cons':
+                var $798 = self.head;
+                var $799 = self.tail;
+                var $800 = List$cons$($798, List$concat$($799, _bs$3));
+                var $797 = $800;
+                break;
+            case 'List.nil':
+                var $801 = _bs$3;
+                var $797 = $801;
+                break;
+        };
+        return $797;
+    };
+    const List$concat = x0 => x1 => List$concat$(x0, x1);
 
     function Web$Kaelin$Map$find_players$(_map$1) {
         var _lmap$2 = NatMap$to_list$(_map$1);
         var _result$3 = List$nil;
         var _players$4 = List$nil;
         var _result$5 = (() => {
-            var $888 = _result$3;
-            var $889 = _lmap$2;
-            let _result$6 = $888;
+            var $804 = _result$3;
+            var $805 = _lmap$2;
+            let _result$6 = $804;
             let _pair$5;
-            while ($889._ === 'List.cons') {
-                _pair$5 = $889.head;
+            while ($805._ === 'List.cons') {
+                _pair$5 = $805.head;
                 var self = _pair$5;
                 switch (self._) {
                     case 'Pair.new':
-                        var $890 = self.fst;
-                        var $891 = self.snd;
-                        var _coord$9 = $890;
-                        var _tile$10 = $891;
+                        var $806 = self.fst;
+                        var $807 = self.snd;
+                        var _coord$9 = $806;
+                        var _tile$10 = $807;
                         var _players$11 = (() => {
-                            var $894 = _players$4;
-                            var $895 = _tile$10;
-                            let _players$12 = $894;
+                            var $810 = _players$4;
+                            var $811 = _tile$10;
+                            let _players$12 = $810;
                             let _entity$11;
-                            while ($895._ === 'List.cons') {
-                                _entity$11 = $895.head;
+                            while ($811._ === 'List.cons') {
+                                _entity$11 = $811.head;
                                 var self = _entity$11;
                                 switch (self._) {
                                     case 'Web.Kaelin.Entity.creature':
-                                        var $896 = self.player;
-                                        var self = $896;
+                                        var $812 = self.player;
+                                        var self = $812;
                                         switch (self._) {
                                             case 'Maybe.some':
-                                                var $898 = self.value;
+                                                var $814 = self.value;
                                                 var _axial_coord$16 = Web$Kaelin$Coord$Convert$nat_to_axial$(_coord$9);
-                                                var $899 = List$cons$(Pair$new$($898, _axial_coord$16), List$nil);
-                                                var $897 = $899;
+                                                var $815 = List$cons$(Pair$new$($814, _axial_coord$16), List$nil);
+                                                var $813 = $815;
                                                 break;
                                             case 'Maybe.none':
-                                                var $900 = _players$12;
-                                                var $897 = $900;
+                                                var $816 = _players$12;
+                                                var $813 = $816;
                                                 break;
                                         };
-                                        var $894 = $897;
+                                        var $810 = $813;
                                         break;
                                     case 'Web.Kaelin.Entity.background':
-                                        var $901 = _players$12;
-                                        var $894 = $901;
+                                        var $817 = _players$12;
+                                        var $810 = $817;
                                         break;
                                 };
-                                _players$12 = $894;
-                                $895 = $895.tail;
+                                _players$12 = $810;
+                                $811 = $811.tail;
                             }
                             return _players$12;
                         })();
-                        var $892 = List$concat$(_result$6, _players$11);
-                        var $888 = $892;
+                        var $808 = List$concat$(_result$6, _players$11);
+                        var $804 = $808;
                         break;
                 };
-                _result$6 = $888;
-                $889 = $889.tail;
+                _result$6 = $804;
+                $805 = $805.tail;
             }
             return _result$6;
         })();
-        var $886 = Map$from_list$(_result$5);
-        return $886;
+        var $802 = Map$from_list$(_result$5);
+        return $802;
     };
     const Web$Kaelin$Map$find_players = x0 => Web$Kaelin$Map$find_players$(x0);
 
     function Web$Kaelin$Map$id_coord$(_addr$1, _map$2) {
         var _list$3 = Web$Kaelin$Map$find_players$(_map$2);
-        var $902 = Map$get$(_addr$1, _list$3);
-        return $902;
+        var $818 = Map$get$(_addr$1, _list$3);
+        return $818;
     };
     const Web$Kaelin$Map$id_coord = x0 => x1 => Web$Kaelin$Map$id_coord$(x0, x1);
     const Bool$or = a0 => a1 => (a0 || a1);
 
     function Web$Kaelin$Map$is_occupied$(_coord$1, _map$2) {
-        var _tile$3 = Web$Kaelin$Map$get$(_coord$1, _map$2);
+        var _tile$3 = Maybe$default$(Web$Kaelin$Map$get$(_coord$1, _map$2), List$nil);
         var _is_occupied$4 = Bool$false;
         var _is_occupied$5 = (() => {
-            var $905 = _is_occupied$4;
-            var $906 = _tile$3;
-            let _is_occupied$6 = $905;
+            var $821 = _is_occupied$4;
+            var $822 = _tile$3;
+            let _is_occupied$6 = $821;
             let _ent$5;
-            while ($906._ === 'List.cons') {
-                _ent$5 = $906.head;
+            while ($822._ === 'List.cons') {
+                _ent$5 = $822.head;
                 var self = _ent$5;
                 switch (self._) {
                     case 'Web.Kaelin.Entity.background':
-                        var $907 = (_is_occupied$6 || Bool$false);
-                        var $905 = $907;
+                        var $823 = (_is_occupied$6 || Bool$false);
+                        var $821 = $823;
                         break;
                     case 'Web.Kaelin.Entity.creature':
-                        var $908 = Bool$true;
-                        var $905 = $908;
+                        var $824 = Bool$true;
+                        var $821 = $824;
                         break;
                 };
-                _is_occupied$6 = $905;
-                $906 = $906.tail;
+                _is_occupied$6 = $821;
+                $822 = $822.tail;
             }
             return _is_occupied$6;
         })();
-        var $903 = _is_occupied$5;
-        return $903;
+        var $819 = _is_occupied$5;
+        return $819;
     };
     const Web$Kaelin$Map$is_occupied = x0 => x1 => Web$Kaelin$Map$is_occupied$(x0, x1);
 
@@ -4380,33 +4061,33 @@ module.exports = (function() {
                     var self = _list$3;
                     switch (self._) {
                         case 'List.cons':
-                            var $910 = self.head;
-                            var $911 = self.tail;
-                            var $912 = Pair$new$(Maybe$some$($910), List$concat$(_searched_list$4, $911));
-                            var $909 = $912;
+                            var $826 = self.head;
+                            var $827 = self.tail;
+                            var $828 = Pair$new$(Maybe$some$($826), List$concat$(_searched_list$4, $827));
+                            var $825 = $828;
                             break;
                         case 'List.nil':
-                            var $913 = Pair$new$(Maybe$none, _searched_list$4);
-                            var $909 = $913;
+                            var $829 = Pair$new$(Maybe$none, _searched_list$4);
+                            var $825 = $829;
                             break;
                     };
-                    return $909;
+                    return $825;
                 } else {
-                    var $914 = (self - 1n);
+                    var $830 = (self - 1n);
                     var self = _list$3;
                     switch (self._) {
                         case 'List.cons':
-                            var $916 = self.head;
-                            var $917 = self.tail;
-                            var $918 = List$pop_at$go$($914, $917, List$concat$(_searched_list$4, List$cons$($916, List$nil)));
-                            var $915 = $918;
+                            var $832 = self.head;
+                            var $833 = self.tail;
+                            var $834 = List$pop_at$go$($830, $833, List$concat$(_searched_list$4, List$cons$($832, List$nil)));
+                            var $831 = $834;
                             break;
                         case 'List.nil':
-                            var $919 = Pair$new$(Maybe$none, _searched_list$4);
-                            var $915 = $919;
+                            var $835 = Pair$new$(Maybe$none, _searched_list$4);
+                            var $831 = $835;
                             break;
                     };
-                    return $915;
+                    return $831;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -4416,37 +4097,35 @@ module.exports = (function() {
     const List$pop_at$go = x0 => x1 => x2 => List$pop_at$go$(x0, x1, x2);
 
     function List$pop_at$(_idx$2, _list$3) {
-        var $920 = List$pop_at$go$(_idx$2, _list$3, List$nil);
-        return $920;
+        var $836 = List$pop_at$go$(_idx$2, _list$3, List$nil);
+        return $836;
     };
     const List$pop_at = x0 => x1 => List$pop_at$(x0, x1);
 
     function Web$Kaelin$Map$pop_at$(_idx$1, _coord$2, _map$3) {
-        var _key$4 = Web$Kaelin$Coord$Convert$axial_to_nat$(_coord$2);
-        var _tile$5 = NatMap$get$(_key$4, _map$3);
-        var self = _tile$5;
+        var _tile$4 = Web$Kaelin$Map$get$(_coord$2, _map$3);
+        var self = _tile$4;
         switch (self._) {
             case 'Maybe.some':
-                var $922 = self.value;
-                var self = List$pop_at$(_idx$1, $922);
+                var $838 = self.value;
+                var self = List$pop_at$(_idx$1, $838);
                 switch (self._) {
                     case 'Pair.new':
-                        var $924 = self.fst;
-                        var $925 = self.snd;
-                        var _new_map$9 = Web$Kaelin$Map$del$(_coord$2, _map$3);
-                        var _new_map$10 = Web$Kaelin$Map$push$(_coord$2, $925, _new_map$9);
-                        var $926 = Pair$new$(_new_map$10, $924);
-                        var $923 = $926;
+                        var $840 = self.fst;
+                        var $841 = self.snd;
+                        var _map$8 = Web$Kaelin$Map$set$(_coord$2, $841, _map$3);
+                        var $842 = Pair$new$(_map$8, $840);
+                        var $839 = $842;
                         break;
                 };
-                var $921 = $923;
+                var $837 = $839;
                 break;
             case 'Maybe.none':
-                var $927 = Pair$new$(_map$3, Maybe$none);
-                var $921 = $927;
+                var $843 = Pair$new$(_map$3, Maybe$none);
+                var $837 = $843;
                 break;
         };
-        return $921;
+        return $837;
     };
     const Web$Kaelin$Map$pop_at = x0 => x1 => x2 => Web$Kaelin$Map$pop_at$(x0, x1, x2);
 
@@ -4454,24 +4133,24 @@ module.exports = (function() {
         var self = Web$Kaelin$Map$pop_at$(_idx$1, _ca$2, _map$4);
         switch (self._) {
             case 'Pair.new':
-                var $929 = self.fst;
-                var $930 = self.snd;
-                var self = $930;
+                var $845 = self.fst;
+                var $846 = self.snd;
+                var self = $846;
                 switch (self._) {
                     case 'Maybe.some':
-                        var $932 = self.value;
-                        var $933 = Web$Kaelin$Map$set$(_cb$3, $932, $929);
-                        var $931 = $933;
+                        var $848 = self.value;
+                        var $849 = Web$Kaelin$Map$push$(_cb$3, $848, $845);
+                        var $847 = $849;
                         break;
                     case 'Maybe.none':
-                        var $934 = _map$4;
-                        var $931 = $934;
+                        var $850 = _map$4;
+                        var $847 = $850;
                         break;
                 };
-                var $928 = $931;
+                var $844 = $847;
                 break;
         };
-        return $928;
+        return $844;
     };
     const Web$Kaelin$Map$swap = x0 => x1 => x2 => x3 => Web$Kaelin$Map$swap$(x0, x1, x2, x3);
 
@@ -4479,43 +4158,43 @@ module.exports = (function() {
         var self = _state$2;
         switch (self._) {
             case 'Web.Kaelin.State.game':
-                var $936 = self.room;
-                var $937 = self.tick;
-                var $938 = self.players;
-                var $939 = self.cast_info;
-                var $940 = self.map;
-                var $941 = self.interface;
-                var _coord_a$10 = Web$Kaelin$Map$id_coord$(_address$3, $940);
-                var _is_occupied$11 = Web$Kaelin$Map$is_occupied$(_coord_b$1, $940);
-                var _tile_b$12 = Web$Kaelin$Map$get$(_coord_b$1, $940);
+                var $852 = self.room;
+                var $853 = self.tick;
+                var $854 = self.players;
+                var $855 = self.cast_info;
+                var $856 = self.map;
+                var $857 = self.interface;
+                var _coord_a$10 = Web$Kaelin$Map$id_coord$(_address$3, $856);
+                var _is_occupied$11 = Web$Kaelin$Map$is_occupied$(_coord_b$1, $856);
+                var _tile_b$12 = Web$Kaelin$Map$get$(_coord_b$1, $856);
                 var self = _tile_b$12;
                 switch (self._) {
-                    case 'List.nil':
-                        var $943 = _state$2;
-                        var $942 = $943;
+                    case 'Maybe.none':
+                        var $859 = _state$2;
+                        var $858 = $859;
                         break;
-                    case 'List.cons':
+                    case 'Maybe.some':
                         var self = _is_occupied$11;
                         if (self) {
-                            var $945 = _state$2;
-                            var $944 = $945;
+                            var $861 = _state$2;
+                            var $860 = $861;
                         } else {
-                            var _new_map$15 = Web$Kaelin$Map$swap$(0n, Maybe$default$(_coord_a$10, _coord_b$1), _coord_b$1, $940);
-                            var $946 = Web$Kaelin$State$game$($936, $937, $938, $939, _new_map$15, $941);
-                            var $944 = $946;
+                            var _new_map$14 = Web$Kaelin$Map$swap$(0n, Maybe$default$(_coord_a$10, _coord_b$1), _coord_b$1, $856);
+                            var $862 = Web$Kaelin$State$game$($852, $853, $854, $855, _new_map$14, $857);
+                            var $860 = $862;
                         };
-                        var $942 = $944;
+                        var $858 = $860;
                         break;
                 };
-                var $935 = $942;
+                var $851 = $858;
                 break;
             case 'Web.Kaelin.State.init':
             case 'Web.Kaelin.State.void':
-                var $947 = _state$2;
-                var $935 = $947;
+                var $863 = _state$2;
+                var $851 = $863;
                 break;
         };
-        return $935;
+        return $851;
     };
     const Web$Kaelin$Player$move = x0 => x1 => x2 => Web$Kaelin$Player$move$(x0, x1, x2);
 
@@ -4523,50 +4202,108 @@ module.exports = (function() {
         var self = _state$3;
         switch (self._) {
             case 'Web.Kaelin.State.game':
-                var $949 = self.map;
-                var _coord_a$11 = Web$Kaelin$Map$id_coord$(_addr$4, $949);
+                var $865 = self.map;
+                var _coord_a$11 = Web$Kaelin$Map$id_coord$(_addr$4, $865);
                 var self = _coord_a$11;
                 switch (self._) {
                     case 'Maybe.some':
-                        var $951 = self.value;
-                        var _coord$13 = $951;
+                        var $867 = self.value;
+                        var _coord$13 = $867;
                         var self = _coord$13;
                         switch (self._) {
                             case 'Web.Kaelin.Coord.new':
-                                var $953 = self.i;
-                                var $954 = self.j;
-                                var _coord_b$16 = Web$Kaelin$Coord$new$(($953 + _i$1), ($954 + _j$2));
-                                var $955 = Web$Kaelin$Player$move$(_coord_b$16, _state$3, _addr$4);
-                                var $952 = $955;
+                                var $869 = self.i;
+                                var $870 = self.j;
+                                var _coord_b$16 = Web$Kaelin$Coord$new$((($869 + _i$1) >> 0), (($870 + _j$2) >> 0));
+                                var $871 = Web$Kaelin$Player$move$(_coord_b$16, _state$3, _addr$4);
+                                var $868 = $871;
                                 break;
                         };
-                        var $950 = $952;
+                        var $866 = $868;
                         break;
                     case 'Maybe.none':
-                        var $956 = _state$3;
-                        var $950 = $956;
+                        var $872 = _state$3;
+                        var $866 = $872;
                         break;
                 };
-                var $948 = $950;
+                var $864 = $866;
                 break;
             case 'Web.Kaelin.State.init':
             case 'Web.Kaelin.State.void':
-                var $957 = _state$3;
-                var $948 = $957;
+                var $873 = _state$3;
+                var $864 = $873;
                 break;
         };
-        return $948;
+        return $864;
     };
     const Web$Kaelin$Player$move_by = x0 => x1 => x2 => x3 => Web$Kaelin$Player$move_by$(x0, x1, x2, x3);
+    const Web$Kaelin$HexEffect$ability = ({
+        _: 'Web.Kaelin.HexEffect.ability'
+    });
+
+    function Web$Kaelin$CastInfo$new$(_mouse_pos$1, _hero_pos$2, _range$3, _hex_effect$4) {
+        var $874 = ({
+            _: 'Web.Kaelin.CastInfo.new',
+            'mouse_pos': _mouse_pos$1,
+            'hero_pos': _hero_pos$2,
+            'range': _range$3,
+            'hex_effect': _hex_effect$4
+        });
+        return $874;
+    };
+    const Web$Kaelin$CastInfo$new = x0 => x1 => x2 => x3 => Web$Kaelin$CastInfo$new$(x0, x1, x2, x3);
+
+    function Web$Kaelin$Action$cast$(_range$1, _hex_effect$2, _state$3, _addr$4) {
+        var self = _state$3;
+        switch (self._) {
+            case 'Web.Kaelin.State.game':
+                var $876 = self.room;
+                var $877 = self.tick;
+                var $878 = self.players;
+                var $879 = self.map;
+                var $880 = self.interface;
+                var self = $880;
+                switch (self._) {
+                    case 'App.EnvInfo.new':
+                        var $882 = self.mouse_pos;
+                        var _hero_coord$13 = Web$Kaelin$Map$id_coord$(_addr$4, $879);
+                        var self = _hero_coord$13;
+                        switch (self._) {
+                            case 'Maybe.some':
+                                var $884 = self.value;
+                                var _mouse_coord$15 = Web$Kaelin$Coord$to_axial$($882);
+                                var _cast_info$16 = Web$Kaelin$CastInfo$new$(_mouse_coord$15, $884, _range$1, _hex_effect$2);
+                                var $885 = Web$Kaelin$State$game$($876, $877, $878, Maybe$some$(_cast_info$16), $879, $880);
+                                var $883 = $885;
+                                break;
+                            case 'Maybe.none':
+                                var $886 = _state$3;
+                                var $883 = $886;
+                                break;
+                        };
+                        var $881 = $883;
+                        break;
+                };
+                var $875 = $881;
+                break;
+            case 'Web.Kaelin.State.init':
+            case 'Web.Kaelin.State.void':
+                var $887 = _state$3;
+                var $875 = $887;
+                break;
+        };
+        return $875;
+    };
+    const Web$Kaelin$Action$cast = x0 => x1 => x2 => x3 => Web$Kaelin$Action$cast$(x0, x1, x2, x3);
 
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $958 = ({
+        var $888 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $958;
+        return $888;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Kaelin = (() => {
@@ -4583,209 +4320,252 @@ module.exports = (function() {
             switch (self._) {
                 case 'Web.Kaelin.State.init':
                 case 'Web.Kaelin.State.void':
-                    var $961 = DOM$text$("TODO: create the renderer for this game state mode");
-                    var $960 = $961;
+                    var $891 = DOM$text$("TODO: create the renderer for this game state mode");
+                    var $890 = $891;
                     break;
                 case 'Web.Kaelin.State.game':
-                    var $962 = DOM$vbox$(Map$from_list$(List$nil), Map$from_list$(List$nil), Web$Kaelin$Draw$state$(_img$1, _state$3));
-                    var $960 = $962;
+                    var $892 = DOM$vbox$(Map$from_list$(List$nil), Map$from_list$(List$nil), Web$Kaelin$Draw$state$(_img$1, _state$3));
+                    var $890 = $892;
                     break;
             };
-            return $960;
+            return $890;
         });
         var _when$4 = (_event$4 => _state$5 => {
             var self = _event$4;
             switch (self._) {
                 case 'App.Event.tick':
-                    var $964 = self.info;
+                    var $894 = self.info;
                     var self = _state$5;
                     switch (self._) {
                         case 'Web.Kaelin.State.init':
                         case 'Web.Kaelin.State.void':
-                            var $966 = App$pass;
-                            var $965 = $966;
+                            var $896 = App$pass;
+                            var $895 = $896;
                             break;
                         case 'Web.Kaelin.State.game':
-                            var _info$14 = $964;
-                            var $967 = App$store$(Web$Kaelin$Action$update_interface$(_info$14, _state$5));
-                            var $965 = $967;
+                            var _info$14 = $894;
+                            var $897 = App$store$(Web$Kaelin$Action$update_interface$(_info$14, _state$5));
+                            var $895 = $897;
                             break;
                     };
-                    var $963 = $965;
+                    var $893 = $895;
                     break;
                 case 'App.Event.key_down':
-                    var $968 = self.code;
+                    var $898 = self.code;
                     var self = _state$5;
                     switch (self._) {
                         case 'Web.Kaelin.State.game':
-                            var $970 = self.room;
-                            var self = ($968 === 49);
+                            var $900 = self.room;
+                            var self = ($898 === 49);
                             if (self) {
-                                var $972 = App$post$($970, Web$Kaelin$Command$create_player$("0x00000001"));
-                                var $971 = $972;
+                                var $902 = App$post$($900, Web$Kaelin$Command$create_player$("0x00000001"));
+                                var $901 = $902;
                             } else {
-                                var self = ($968 === 50);
+                                var self = ($898 === 50);
                                 if (self) {
-                                    var $974 = App$post$($970, Web$Kaelin$Command$create_player$("0x00000002"));
-                                    var $973 = $974;
+                                    var $904 = App$post$($900, Web$Kaelin$Command$create_player$("0x00000002"));
+                                    var $903 = $904;
                                 } else {
-                                    var self = ($968 === 51);
+                                    var self = ($898 === 51);
                                     if (self) {
-                                        var $976 = App$post$($970, Web$Kaelin$Command$create_player$("0x00000003"));
-                                        var $975 = $976;
+                                        var $906 = App$post$($900, Web$Kaelin$Command$create_player$("0x00000003"));
+                                        var $905 = $906;
                                     } else {
-                                        var self = ($968 === 52);
+                                        var self = ($898 === 52);
                                         if (self) {
-                                            var $978 = App$post$($970, Web$Kaelin$Command$create_player$("0x00000004"));
-                                            var $977 = $978;
+                                            var $908 = App$post$($900, Web$Kaelin$Command$create_player$("0x00000004"));
+                                            var $907 = $908;
                                         } else {
-                                            var self = ($968 === 68);
+                                            var self = ($898 === 68);
                                             if (self) {
-                                                var $980 = App$post$($970, "0x2100000000000000000000000000000000000000000000000000000000000001");
-                                                var $979 = $980;
+                                                var $910 = App$post$($900, "0x2100000000000000000000000000000000000000000000000000000000000001");
+                                                var $909 = $910;
                                             } else {
-                                                var self = ($968 === 65);
+                                                var self = ($898 === 65);
                                                 if (self) {
-                                                    var $982 = App$post$($970, "0x2200000000000000000000000000000000000000000000000000000000000001");
-                                                    var $981 = $982;
+                                                    var $912 = App$post$($900, "0x2200000000000000000000000000000000000000000000000000000000000001");
+                                                    var $911 = $912;
                                                 } else {
-                                                    var self = ($968 === 87);
+                                                    var self = ($898 === 87);
                                                     if (self) {
-                                                        var $984 = App$post$($970, "0x2300000000000000000000000000000000000000000000000000000000000001");
-                                                        var $983 = $984;
+                                                        var $914 = App$post$($900, "0x2300000000000000000000000000000000000000000000000000000000000001");
+                                                        var $913 = $914;
                                                     } else {
-                                                        var self = ($968 === 83);
+                                                        var self = ($898 === 83);
                                                         if (self) {
-                                                            var $986 = App$post$($970, "0x2400000000000000000000000000000000000000000000000000000000000001");
-                                                            var $985 = $986;
+                                                            var $916 = App$post$($900, "0x2400000000000000000000000000000000000000000000000000000000000001");
+                                                            var $915 = $916;
                                                         } else {
-                                                            var $987 = App$pass;
-                                                            var $985 = $987;
+                                                            var self = ($898 === 90);
+                                                            if (self) {
+                                                                var $918 = App$post$($900, "0x3100000000000000000000000000000000000000000000000000000000000001");
+                                                                var $917 = $918;
+                                                            } else {
+                                                                var self = ($898 === 88);
+                                                                if (self) {
+                                                                    var $920 = App$post$($900, "0x3200000000000000000000000000000000000000000000000000000000000001");
+                                                                    var $919 = $920;
+                                                                } else {
+                                                                    var $921 = App$pass;
+                                                                    var $919 = $921;
+                                                                };
+                                                                var $917 = $919;
+                                                            };
+                                                            var $915 = $917;
                                                         };
-                                                        var $983 = $985;
+                                                        var $913 = $915;
                                                     };
-                                                    var $981 = $983;
+                                                    var $911 = $913;
                                                 };
-                                                var $979 = $981;
+                                                var $909 = $911;
                                             };
-                                            var $977 = $979;
+                                            var $907 = $909;
                                         };
-                                        var $975 = $977;
+                                        var $905 = $907;
                                     };
-                                    var $973 = $975;
+                                    var $903 = $905;
                                 };
-                                var $971 = $973;
+                                var $901 = $903;
                             };
-                            var $969 = $971;
+                            var $899 = $901;
                             break;
                         case 'Web.Kaelin.State.init':
                         case 'Web.Kaelin.State.void':
-                            var $988 = App$pass;
-                            var $969 = $988;
+                            var $922 = App$pass;
+                            var $899 = $922;
                             break;
                     };
-                    var $963 = $969;
+                    var $893 = $899;
                     break;
                 case 'App.Event.post':
-                    var $989 = self.addr;
-                    var $990 = self.data;
+                    var $923 = self.addr;
+                    var $924 = self.data;
                     var self = _state$5;
                     switch (self._) {
                         case 'Web.Kaelin.State.init':
                         case 'Web.Kaelin.State.void':
-                            var $992 = App$pass;
-                            var $991 = $992;
+                            var $926 = App$pass;
+                            var $925 = $926;
                             break;
                         case 'Web.Kaelin.State.game':
-                            var self = String$starts_with$($990, "0x1");
+                            var self = String$starts_with$($924, "0x1");
                             if (self) {
-                                var _hero_id$16 = ("0x" + String$drop$(58n, $990));
+                                var _hero_id$16 = ("0x" + String$drop$(58n, $924));
                                 var _hero$17 = Map$get$(_hero_id$16, Web$Kaelin$Resources$heroes);
                                 var self = _hero$17;
                                 switch (self._) {
                                     case 'Maybe.some':
-                                        var $995 = self.value;
-                                        var $996 = App$store$(Web$Kaelin$Action$create_player$($989, $995, _state$5));
-                                        var $994 = $996;
+                                        var $929 = self.value;
+                                        var $930 = App$store$(Web$Kaelin$Action$create_player$($923, $929, _state$5));
+                                        var $928 = $930;
                                         break;
                                     case 'Maybe.none':
-                                        var $997 = App$pass;
-                                        var $994 = $997;
+                                        var $931 = App$pass;
+                                        var $928 = $931;
                                         break;
                                 };
-                                var $993 = $994;
+                                var $927 = $928;
                             } else {
-                                var self = String$starts_with$($990, "0x2");
+                                var self = String$starts_with$($924, "0x2");
                                 if (self) {
-                                    var self = (String$slice$(3n, 4n, $990) === "1");
+                                    var self = (String$slice$(3n, 4n, $924) === "1");
                                     if (self) {
-                                        var $1000 = Pair$new$(Int$from_nat$(1n), Int$from_nat$(0n));
-                                        var self = $1000;
+                                        var $934 = Pair$new$(Int$to_i32$(Int$from_nat$(1n)), Int$to_i32$(Int$from_nat$(0n)));
+                                        var self = $934;
                                     } else {
-                                        var self = (String$slice$(3n, 4n, $990) === "2");
+                                        var self = (String$slice$(3n, 4n, $924) === "2");
                                         if (self) {
-                                            var $1002 = Pair$new$(Int$neg$(Int$from_nat$(1n)), Int$from_nat$(0n));
-                                            var $1001 = $1002;
+                                            var $936 = Pair$new$(Int$to_i32$(Int$neg$(Int$from_nat$(1n))), Int$to_i32$(Int$from_nat$(0n)));
+                                            var $935 = $936;
                                         } else {
-                                            var self = (String$slice$(3n, 4n, $990) === "3");
+                                            var self = (String$slice$(3n, 4n, $924) === "3");
                                             if (self) {
-                                                var $1004 = Pair$new$(Int$from_nat$(0n), Int$neg$(Int$from_nat$(1n)));
-                                                var $1003 = $1004;
+                                                var $938 = Pair$new$(Int$to_i32$(Int$from_nat$(0n)), Int$to_i32$(Int$neg$(Int$from_nat$(1n))));
+                                                var $937 = $938;
                                             } else {
-                                                var self = (String$slice$(3n, 4n, $990) === "4");
+                                                var self = (String$slice$(3n, 4n, $924) === "4");
                                                 if (self) {
-                                                    var $1006 = Pair$new$(Int$from_nat$(0n), Int$from_nat$(1n));
-                                                    var $1005 = $1006;
+                                                    var $940 = Pair$new$(Int$to_i32$(Int$from_nat$(0n)), Int$to_i32$(Int$from_nat$(1n)));
+                                                    var $939 = $940;
                                                 } else {
-                                                    var $1007 = Pair$new$(Int$from_nat$(0n), Int$from_nat$(0n));
-                                                    var $1005 = $1007;
+                                                    var $941 = Pair$new$(Int$to_i32$(Int$from_nat$(0n)), Int$to_i32$(Int$from_nat$(0n)));
+                                                    var $939 = $941;
                                                 };
-                                                var $1003 = $1005;
+                                                var $937 = $939;
                                             };
-                                            var $1001 = $1003;
+                                            var $935 = $937;
                                         };
-                                        var self = $1001;
+                                        var self = $935;
                                     };
                                     switch (self._) {
                                         case 'Pair.new':
-                                            var $1008 = self.fst;
-                                            var $1009 = self.snd;
-                                            var $1010 = App$store$(Web$Kaelin$Player$move_by$($1008, $1009, _state$5, $989));
-                                            var $999 = $1010;
+                                            var $942 = self.fst;
+                                            var $943 = self.snd;
+                                            var $944 = App$store$(Web$Kaelin$Player$move_by$($942, $943, _state$5, $923));
+                                            var $933 = $944;
                                             break;
                                     };
-                                    var $998 = $999;
+                                    var $932 = $933;
                                 } else {
-                                    var $1011 = App$pass;
-                                    var $998 = $1011;
+                                    var self = String$starts_with$($924, "0x3");
+                                    if (self) {
+                                        var self = (String$slice$(3n, 4n, $924) === "1");
+                                        if (self) {
+                                            var $947 = Pair$new$(1n, Web$Kaelin$HexEffect$ability);
+                                            var self = $947;
+                                        } else {
+                                            var self = (String$slice$(3n, 4n, $924) === "2");
+                                            if (self) {
+                                                var $949 = Pair$new$(2n, Web$Kaelin$HexEffect$ability);
+                                                var $948 = $949;
+                                            } else {
+                                                var $950 = Pair$new$(0n, Web$Kaelin$HexEffect$ability);
+                                                var $948 = $950;
+                                            };
+                                            var self = $948;
+                                        };
+                                        switch (self._) {
+                                            case 'Pair.new':
+                                                var $951 = self.fst;
+                                                var $952 = self.snd;
+                                                var $953 = App$store$(Web$Kaelin$Action$cast$($951, $952, _state$5, $923));
+                                                var $946 = $953;
+                                                break;
+                                        };
+                                        var $945 = $946;
+                                    } else {
+                                        var $954 = App$pass;
+                                        var $945 = $954;
+                                    };
+                                    var $932 = $945;
                                 };
-                                var $993 = $998;
+                                var $927 = $932;
                             };
-                            var $991 = $993;
+                            var $925 = $927;
                             break;
                     };
-                    var $963 = $991;
+                    var $893 = $925;
                     break;
                 case 'App.Event.init':
                     var self = _state$5;
                     switch (self._) {
                         case 'Web.Kaelin.State.init':
                         case 'Web.Kaelin.State.void':
-                            var $1013 = App$pass;
-                            var $1012 = $1013;
+                            var $956 = App$pass;
+                            var $955 = $956;
                             break;
                         case 'Web.Kaelin.State.game':
-                            var $1014 = IO$monad$((_m$bind$15 => _m$pure$16 => {
-                                var $1015 = _m$bind$15;
-                                return $1015;
+                            var $957 = IO$monad$((_m$bind$15 => _m$pure$16 => {
+                                var $958 = _m$bind$15;
+                                return $958;
                             }))(App$print$("Kaelin started!!!"))((_$15 => {
-                                var $1016 = App$watch$(Web$Kaelin$Constants$room);
-                                return $1016;
+                                var $959 = App$watch$(Web$Kaelin$Constants$room);
+                                return $959;
                             }));
-                            var $1012 = $1014;
+                            var $955 = $957;
                             break;
                     };
-                    var $963 = $1012;
+                    var $893 = $955;
                     break;
                 case 'App.Event.mouse_down':
                 case 'App.Event.key_up':
@@ -4796,60 +4576,60 @@ module.exports = (function() {
                         case 'Web.Kaelin.State.init':
                         case 'Web.Kaelin.State.void':
                         case 'Web.Kaelin.State.game':
-                            var $1018 = App$pass;
-                            var $1017 = $1018;
+                            var $961 = App$pass;
+                            var $960 = $961;
                             break;
                     };
-                    var $963 = $1017;
+                    var $893 = $960;
                     break;
                 case 'App.Event.mouse_up':
                     var self = _state$5;
                     switch (self._) {
                         case 'Web.Kaelin.State.game':
-                            var $1020 = self.interface;
-                            var _info$14 = $1020;
+                            var $963 = self.interface;
+                            var _info$14 = $963;
                             var self = _info$14;
                             switch (self._) {
                                 case 'App.EnvInfo.new':
-                                    var $1022 = self.mouse_pos;
-                                    var _pos$17 = $1022;
+                                    var $965 = self.mouse_pos;
+                                    var _pos$17 = $965;
                                     var self = _pos$17;
                                     switch (self._) {
                                         case 'Pair.new':
                                             var self = _pos$17;
                                             switch (self._) {
                                                 case 'Pair.new':
-                                                    var $1025 = self.fst;
-                                                    var $1026 = self.snd;
-                                                    var self = Web$Kaelin$Coord$to_axial$(Pair$new$($1025, $1026));
+                                                    var $968 = self.fst;
+                                                    var $969 = self.snd;
+                                                    var self = Web$Kaelin$Coord$to_axial$(Pair$new$($968, $969));
                                                     switch (self._) {
-                                                        case 'Pair.new':
-                                                            var $1028 = self.fst;
-                                                            var $1029 = self.snd;
-                                                            var _axial_x$24 = I32$to_int$($1028);
-                                                            var _axial_y$25 = I32$to_int$($1029);
-                                                            var $1030 = App$print$(Pair$show$(Int$show, Int$show, Pair$new$(_axial_x$24, _axial_y$25)));
-                                                            var $1027 = $1030;
+                                                        case 'Web.Kaelin.Coord.new':
+                                                            var $971 = self.i;
+                                                            var $972 = self.j;
+                                                            var _axial_x$24 = I32$to_int$($971);
+                                                            var _axial_y$25 = I32$to_int$($972);
+                                                            var $973 = App$print$(Pair$show$(Int$show, Int$show, Pair$new$(_axial_x$24, _axial_y$25)));
+                                                            var $970 = $973;
                                                             break;
                                                     };
-                                                    var $1024 = $1027;
+                                                    var $967 = $970;
                                                     break;
                                             };
-                                            var $1023 = $1024;
+                                            var $966 = $967;
                                             break;
                                     };
-                                    var $1021 = $1023;
+                                    var $964 = $966;
                                     break;
                             };
-                            var $1019 = $1021;
+                            var $962 = $964;
                             break;
                         case 'Web.Kaelin.State.init':
                         case 'Web.Kaelin.State.void':
-                            var $1031 = App$pass;
-                            var $1019 = $1031;
+                            var $974 = App$pass;
+                            var $962 = $974;
                             break;
                     };
-                    var $963 = $1019;
+                    var $893 = $962;
                     break;
                 case 'App.Event.mouse_click':
                     var self = _state$5;
@@ -4857,17 +4637,17 @@ module.exports = (function() {
                         case 'Web.Kaelin.State.init':
                         case 'Web.Kaelin.State.void':
                         case 'Web.Kaelin.State.game':
-                            var $1033 = App$pass;
-                            var $1032 = $1033;
+                            var $976 = App$pass;
+                            var $975 = $976;
                             break;
                     };
-                    var $963 = $1032;
+                    var $893 = $975;
                     break;
             };
-            return $963;
+            return $893;
         });
-        var $959 = App$new$(_init$2, _draw$3, _when$4);
-        return $959;
+        var $889 = App$new$(_init$2, _draw$3, _when$4);
+        return $889;
     })();
     return {
         'Buffer32.new': Buffer32$new,
@@ -4980,51 +4760,57 @@ module.exports = (function() {
         'Web.Kaelin.Hero.lela': Web$Kaelin$Hero$lela,
         'Web.Kaelin.Assets.hero.octoking_d_1': Web$Kaelin$Assets$hero$octoking_d_1,
         'Web.Kaelin.Hero.octoking': Web$Kaelin$Hero$octoking,
-        'List.cons': List$cons,
+        'Maybe.default': Maybe$default,
+        'List': List,
+        'I32.new': I32$new,
+        'I32.add': I32$add,
+        'Word.neg.aux': Word$neg$aux,
+        'Word.neg': Word$neg,
+        'I32.neg': I32$neg,
+        'Int.to_i32': Int$to_i32,
         'Int.new': Int$new,
-        'Nat.add': Nat$add,
-        'Int.add': Int$add,
         'Int.from_nat': Int$from_nat,
-        'Nat.mul': Nat$mul,
-        'Int.mul': Int$mul,
+        'I32.mul': I32$mul,
         'Int.to_nat': Int$to_nat,
+        'Word.is_neg.go': Word$is_neg$go,
+        'Word.is_neg': Word$is_neg,
+        'Word.fold': Word$fold,
+        'Nat.add': Nat$add,
+        'Nat.mul': Nat$mul,
+        'Word.to_nat': Word$to_nat,
+        'Word.abs': Word$abs,
+        'Int.neg': Int$neg,
+        'Word.to_int': Word$to_int,
+        'I32.to_int': I32$to_int,
         'Web.Kaelin.Coord.Convert.axial_to_nat': Web$Kaelin$Coord$Convert$axial_to_nat,
         'Maybe': Maybe,
         'BitsMap.get': BitsMap$get,
         'Bits.inc': Bits$inc,
         'Nat.to_bits': Nat$to_bits,
         'NatMap.get': NatMap$get,
-        'List': List,
-        'Maybe.default': Maybe$default,
         'Web.Kaelin.Map.get': Web$Kaelin$Map$get,
-        'BitsMap.delete': BitsMap$delete,
-        'NatMap.del': NatMap$del,
-        'Web.Kaelin.Map.del': Web$Kaelin$Map$del,
-        'List.reverse.go': List$reverse$go,
-        'List.reverse': List$reverse,
-        'Bits.reverse.tco': Bits$reverse$tco,
-        'Bits.reverse': Bits$reverse,
-        'BitsMap.to_list.go': BitsMap$to_list$go,
-        'List.mapped': List$mapped,
-        'Bits.to_nat': Bits$to_nat,
-        'NatMap.to_list': NatMap$to_list,
-        'NatMap': NatMap,
-        'NatMap.from_list': NatMap$from_list,
-        'Web.Kaelin.Map.push': Web$Kaelin$Map$push,
+        'List.cons': List$cons,
+        'NatMap.set': NatMap$set,
         'Web.Kaelin.Map.set': Web$Kaelin$Map$set,
-        'Int.neg': Int$neg,
+        'Web.Kaelin.Map.push': Web$Kaelin$Map$push,
         'Web.Kaelin.Map.init': Web$Kaelin$Map$init,
         'NatMap.new': NatMap$new,
         'Web.Kaelin.Constants.map_size': Web$Kaelin$Constants$map_size,
-        'Web.Kaelin.Entity.background': Web$Kaelin$Entity$background,
+        'Web.Kaelin.Terrain.grass': Web$Kaelin$Terrain$grass,
         'Web.Kaelin.Assets.tile.dark_grass_4': Web$Kaelin$Assets$tile$dark_grass_4,
-        'Int.sub': Int$sub,
-        'Word.fold': Word$fold,
-        'Word.to_nat': Word$to_nat,
-        'U32.to_nat': U32$to_nat,
-        'Nat.gtn': Nat$gtn,
-        'Int.is_neg': Int$is_neg,
-        'Int.abs': Int$abs,
+        'Web.Kaelin.Assets.tile.hex_range': Web$Kaelin$Assets$tile$hex_range,
+        'Web.Kaelin.Entity.background': Web$Kaelin$Entity$background,
+        'NatMap': NatMap,
+        'I32.sub': I32$sub,
+        'F64.to_i32': F64$to_i32,
+        'Word.to_f64': Word$to_f64,
+        'U32.to_f64': U32$to_f64,
+        'U32.to_i32': U32$to_i32,
+        'I32.abs': I32$abs,
+        'F64.to_u32': F64$to_u32,
+        'Word.s_to_f64': Word$s_to_f64,
+        'I32.to_f64': I32$to_f64,
+        'I32.to_u32': I32$to_u32,
         'Cmp.as_lte': Cmp$as_lte,
         'Word.lte': Word$lte,
         'U32.lte': U32$lte,
@@ -5034,6 +4820,14 @@ module.exports = (function() {
         'Web.Kaelin.State.game': Web$Kaelin$State$game,
         'DOM.text': DOM$text,
         'DOM.vbox': DOM$vbox,
+        'List.reverse.go': List$reverse$go,
+        'List.reverse': List$reverse,
+        'Bits.reverse.tco': Bits$reverse$tco,
+        'Bits.reverse': Bits$reverse,
+        'BitsMap.to_list.go': BitsMap$to_list$go,
+        'List.mapped': List$mapped,
+        'Bits.to_nat': Bits$to_nat,
+        'NatMap.to_list': NatMap$to_list,
         'List.for': List$for,
         'Pair.fst': Pair$fst,
         'Either': Either,
@@ -5043,17 +4837,18 @@ module.exports = (function() {
         'Nat.div_mod.go': Nat$div_mod$go,
         'Nat.div_mod': Nat$div_mod,
         'Nat.div': Nat$div,
+        'Int.add': Int$add,
+        'Int.sub': Int$sub,
         'Nat.mod.go': Nat$mod$go,
         'Nat.mod': Nat$mod,
         'Web.Kaelin.Coord.Convert.nat_to_axial': Web$Kaelin$Coord$Convert$nat_to_axial,
-        'Int.from_u32': Int$from_u32,
         'Web.Kaelin.Constants.hexagon_radius': Web$Kaelin$Constants$hexagon_radius,
-        'Int.div_nat': Int$div_nat,
+        'I32.div': I32$div,
         'Web.Kaelin.Constants.center_x': Web$Kaelin$Constants$center_x,
         'Web.Kaelin.Constants.center_y': Web$Kaelin$Constants$center_y,
-        'Int.to_u32': Int$to_u32,
         'Web.Kaelin.Coord.to_screen_xy': Web$Kaelin$Coord$to_screen_xy,
         'U32.sub': U32$sub,
+        'Web.Kaelin.Draw.terrain': Web$Kaelin$Draw$terrain,
         'VoxBox.get_len': VoxBox$get_len,
         'Array.get': Array$get,
         'Buffer32.get': Buffer32$get,
@@ -5063,24 +4858,6 @@ module.exports = (function() {
         'U32.and': U32$and,
         'U32.shr': U32$shr,
         'VoxBox.Draw.image': VoxBox$Draw$image,
-        'Kaelin.Assets.hex_range': Kaelin$Assets$hex_range,
-        'Web.Kaelin.Coord.Cubic.new': Web$Kaelin$Coord$Cubic$new,
-        'Web.Kaelin.Coord.Convert.axial_to_cubic': Web$Kaelin$Coord$Convert$axial_to_cubic,
-        'List.map': List$map,
-        'Web.Kaelin.Coord.Convert.cubic_to_axial': Web$Kaelin$Coord$Convert$cubic_to_axial,
-        'Cmp.as_gtn': Cmp$as_gtn,
-        'Nat.cmp': Nat$cmp,
-        'Int.cmp': Int$cmp,
-        'Int.max': Int$max,
-        'Cmp.as_ltn': Cmp$as_ltn,
-        'Int.min': Int$min,
-        'Pair.snd': Pair$snd,
-        'Int.to_nat_signed': Int$to_nat_signed,
-        'Web.Kaelin.Coord.Cubic.add': Web$Kaelin$Coord$Cubic$add,
-        'List.concat': List$concat,
-        'Web.Kaelin.Coord.Cubic.range': Web$Kaelin$Coord$Cubic$range,
-        'Web.Kaelin.Coord.Axial.range': Web$Kaelin$Coord$Axial$range,
-        'Web.Kaelin.Draw.skill_range_show': Web$Kaelin$Draw$skill_range_show,
         'Web.Kaelin.Draw.state.background': Web$Kaelin$Draw$state$background,
         'Web.Kaelin.Draw.hero': Web$Kaelin$Draw$hero,
         'Web.Kaelin.Draw.state.players': Web$Kaelin$Draw$state$players,
@@ -5102,31 +4879,24 @@ module.exports = (function() {
         'App.watch': App$watch,
         'App.store': App$store,
         'Web.Kaelin.Action.update_interface': Web$Kaelin$Action$update_interface,
-        'Word.to_f64': Word$to_f64,
-        'U32.to_f64': U32$to_f64,
-        'F64.to_i32': F64$to_i32,
         'F64.div': F64$div,
         'F64.parse': F64$parse,
         'F64.sub': F64$sub,
         'F64.mul': F64$mul,
         'F64.add': F64$add,
-        'Word.s_to_f64': Word$s_to_f64,
-        'I32.to_f64': I32$to_f64,
         'Web.Kaelin.Coord.round.floor': Web$Kaelin$Coord$round$floor,
         'Web.Kaelin.Coord.round.round_F64': Web$Kaelin$Coord$round$round_F64,
+        'Cmp.as_gtn': Cmp$as_gtn,
         'Word.gtn': Word$gtn,
         'F64.gtn': F64$gtn,
         'Web.Kaelin.Coord.round.diff': Web$Kaelin$Coord$round$diff,
         'Web.Kaelin.Coord.round': Web$Kaelin$Coord$round,
         'Web.Kaelin.Coord.to_axial': Web$Kaelin$Coord$to_axial,
-        'Word.is_neg.go': Word$is_neg$go,
-        'Word.is_neg': Word$is_neg,
-        'Word.neg.aux': Word$neg$aux,
-        'Word.neg': Word$neg,
-        'Word.abs': Word$abs,
-        'Word.to_int': Word$to_int,
-        'I32.to_int': I32$to_int,
         'Pair.show': Pair$show,
+        'Nat.gtn': Nat$gtn,
+        'Int.is_neg': Int$is_neg,
+        'Int.abs': Int$abs,
+        'Int.to_nat_signed': Int$to_nat_signed,
         'List.fold': List$fold,
         'Nat.to_base.go': Nat$to_base$go,
         'Nat.to_base': Nat$to_base,
@@ -5155,6 +4925,7 @@ module.exports = (function() {
         'String.eql': String$eql,
         'String.take': String$take,
         'String.slice': String$slice,
+        'List.concat': List$concat,
         'Web.Kaelin.Map.find_players': Web$Kaelin$Map$find_players,
         'Web.Kaelin.Map.id_coord': Web$Kaelin$Map$id_coord,
         'Bool.or': Bool$or,
@@ -5165,6 +4936,9 @@ module.exports = (function() {
         'Web.Kaelin.Map.swap': Web$Kaelin$Map$swap,
         'Web.Kaelin.Player.move': Web$Kaelin$Player$move,
         'Web.Kaelin.Player.move_by': Web$Kaelin$Player$move_by,
+        'Web.Kaelin.HexEffect.ability': Web$Kaelin$HexEffect$ability,
+        'Web.Kaelin.CastInfo.new': Web$Kaelin$CastInfo$new,
+        'Web.Kaelin.Action.cast': Web$Kaelin$Action$cast,
         'App.new': App$new,
         'Web.Kaelin': Web$Kaelin,
     };

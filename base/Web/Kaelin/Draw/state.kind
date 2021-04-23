@@ -1,8 +1,9 @@
 // function to draw according the state
 Web.Kaelin.Draw.state(img: VoxBox, state: Web.Kaelin.State): VoxBox
   case state {
-      game:
-        let new_img = Web.Kaelin.Draw.state.background(state, img, state.map)
-        let new_img = Web.Kaelin.Draw.state.players(new_img, state.map)
-        new_img
+      game:      
+        let img = Web.Kaelin.Draw.state.background(state.map, img)
+        let img = Web.Kaelin.Draw.state.range_cast(state.map, state.cast_info, img)
+        let img = Web.Kaelin.Draw.state.players(state.map, img)
+        img
   } default img
