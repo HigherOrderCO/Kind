@@ -44,10 +44,8 @@ Web.Kaelin: App<Web.Kaelin.State>
   // Event handler
   let when = (event, state)
     case event state{
-      init game: IO {
-        App.print("Kaelin started!!!")
-        App.watch(Web.Kaelin.Constants.room)
-      }
+      init game: App.watch(Web.Kaelin.Constants.room)
+      
       key_down game:
       // this will be replaced by serialze when it is ready 
         switch U16.eql(event.code) {
@@ -62,16 +60,6 @@ Web.Kaelin: App<Web.Kaelin.State>
           'Z': App.post(state.room, "0x3100000000000000000000000000000000000000000000000000000000000001")
           'X': App.post(state.room, "0x3200000000000000000000000000000000000000000000000000000000000001")
         } default App.pass
-       mouse_up game :
-           let info = state.interface
-           open info
-           let pos = info.mouse_pos
-           open pos
-           let {x, y} = pos
-           let {axial_x, axial_y} = Web.Kaelin.Coord.to_axial({x, y})
-           let axial_x = I32.to_int(axial_x)
-           let axial_y = I32.to_int(axial_y)
-           App.print(Pair.show!!(Int.show, Int.show, {axial_x, axial_y}))
        tick game:
            let info = event.info
            App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_interface(info, state))
