@@ -1,32 +1,32 @@
-Web.Kind.component.id_action: Map(Web.Kind.Event)
+Web.Kind.comp.id_action: Map(Web.Kind.Event)
   {
     "tab_home": Web.Kind.Event.go_to_home
     "tab_apps": Web.Kind.Event.go_to_apps
     "btn_pri_home_go_to_apps": Web.Kind.Event.go_to_apps
   }  
 
-Web.Kind.component.h1(title: String): DOM
+Web.Kind.comp.h1(title: String): DOM
   DOM.node("div", {}, {
     "font-size": "20px"
     "font-family": "Helvetica"
     "font-weight": "bold"
   }, [DOM.text(title)])
 
-Web.Kind.component.h3(title: String): DOM
+Web.Kind.comp.h3(title: String): DOM
   DOM.node("div", {}, {
     "font-size": "16px"
     "font-family": "Helvetica"
     "font-weight": "bold"
   }, [DOM.text(title)])
 
-Web.Kind.component.title_phone(title: String): DOM
+Web.Kind.comp.title_phone(title: String): DOM
   DOM.node("div", {}, {
     "font-size": "16px"
     "font-family": "Helvetica"
     "font-weight": "bold"
   }, [DOM.text(title)])
 
-Web.Kind.component.link(txt: String, href: String): DOM
+Web.Kind.comp.link(txt: String, href: String): DOM
   DOM.node("a", {
       "href": href,
       "target": "_blank"
@@ -34,7 +34,7 @@ Web.Kind.component.link(txt: String, href: String): DOM
       "cursor": "pointer"
     }, [DOM.text(txt)])
 
-Web.Kind.component.link_white(txt: String, font_size: String, href: String): DOM
+Web.Kind.comp.link_white(txt: String, font_size: String, href: String): DOM
   DOM.node("a", {
       "href": href,
       "target": "_blank"
@@ -44,7 +44,7 @@ Web.Kind.component.link_white(txt: String, font_size: String, href: String): DOM
       "cursor": "pointer"
     }, [DOM.text(txt)])
 
-Web.Kind.component.link_black(txt: String, href: String): DOM
+Web.Kind.comp.link_black(txt: String, href: String): DOM
   DOM.node("a", {
       "href": href,
       "target": "_blank"
@@ -54,14 +54,14 @@ Web.Kind.component.link_black(txt: String, href: String): DOM
       "cursor": "pointer"
     }, [DOM.text(txt)]) 
 
-Web.Kind.component.list(items: List<DOM>): DOM
+Web.Kind.comp.list(items: List<DOM>): DOM
   let li = []
   for item in items with li:
     List.cons!(DOM.node("li", {}, {"margin-top": "5px"}, [item]), li)
   DOM.node("ul", {}, {
     "list-style-type": "none"}, li)
 
-Web.Kind.component.btn_primary_solid(title: String, id: String): DOM
+Web.Kind.comp.btn_primary_solid(title: String, id: String): DOM
   DOM.node("div", {
     "id": id
   }, {

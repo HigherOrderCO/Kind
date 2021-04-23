@@ -4,11 +4,11 @@ Web.Kind.comp.footer(device: Device): DOM
       phone:
       let join_us_txt =
         DOM.node("div", {}, {"margin": "20px 0px 10px 0px"}, [
-          Web.Kind.component.h3("Join Us"),
+          Web.Kind.comp.h3("Join Us"),
           DOM.node("div", {}, {"margin-top": "5px"}, [
-            Web.Kind.component.list([
-              Web.Kind.component.link_white(" Github", "12px", "https://github.com/uwu-tech/Kind"),
-              Web.Kind.component.link_white(" Telegram", "12px", "https://t.me/formality_lang")
+            Web.Kind.comp.list([
+              Web.Kind.comp.link_white(" Github", "12px", "https://github.com/uwu-tech/Kind"),
+              Web.Kind.comp.link_white(" Telegram", "12px", "https://t.me/formality_lang")
             ])
           ]) 
         ])
@@ -29,11 +29,11 @@ Web.Kind.comp.footer(device: Device): DOM
 
     let join_us_txt =
       DOM.node("div", {}, {"margin": "20px 0px 20px 0px"}, [
-        Web.Kind.component.h1("Join Us"),
+        Web.Kind.comp.h1("Join Us"),
         DOM.node("div", {}, {"margin-top": "10px"}, [
-          Web.Kind.component.list([
-            Web.Kind.component.link_white(" Github", Web.Kind.constant.p_tag_size, "https://github.com/uwu-tech/Kind"),
-            Web.Kind.component.link_white(" Telegram", Web.Kind.constant.p_tag_size, "https://t.me/formality_lang")
+          Web.Kind.comp.list([
+            Web.Kind.comp.link_white(" Github", Web.Kind.constant.p_tag_size, "https://github.com/uwu-tech/Kind"),
+            Web.Kind.comp.link_white(" Telegram", Web.Kind.constant.p_tag_size, "https://t.me/formality_lang")
           ])
         ]) 
       ])
@@ -63,7 +63,7 @@ Web.Kind.comp.footer(device: Device): DOM
         "padding": "10px 30px"
       }, [
         DOM.node("p", {}, {"font-size": "10px" }, [DOM.text("This website was created using Kind!")])
-        Web.Kind.component.link_white("*u* show me the code!", "10px", "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind")
+        Web.Kind.comp.link_white("*u* show me the code!", "10px", "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind")
       ])
     } default 
       DOM.node("div", {}, {
@@ -75,7 +75,7 @@ Web.Kind.comp.footer(device: Device): DOM
       "padding": "10px 20% 10px 20%"
        }, [
         DOM.node("p", {}, {"font-size": "14px" }, [ DOM.text("This website was created using Kind!")]),
-        Web.Kind.component.link_white("*u* show me the code!", "14px", "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind")
+        Web.Kind.comp.link_white("*u* show me the code!", "14px", "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind")
       ])
   
 
