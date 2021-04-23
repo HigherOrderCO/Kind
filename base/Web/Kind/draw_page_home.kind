@@ -82,6 +82,6 @@ Web.Kind.draw_page_home(stt: Web.Kind.State): DOM
       intro,
       call_to_apps,
       install
-    ]),
-    Web.Kind.component.footer
+    ], stt.device),
+    Web.Kind.component.footer(stt.device)
   ])

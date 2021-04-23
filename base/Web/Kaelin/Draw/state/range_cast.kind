@@ -7,7 +7,7 @@ Web.Kaelin.Draw.state.range_cast(
     none: img
       some: 
       open cast.value
-      let range = Web.Kaelin.Coord.Axial.range(cast.value.hero_pos, cast.value.range) // Gets the list of affected hexagons
+      let range = Web.Kaelin.Coord.range(cast.value.hero_pos, cast.value.range) // Gets the list of affected hexagons
       for coord_range in range with img:
         let tile    = Web.Kaelin.Map.get(coord_range, map) 
         let terrain = Web.Kaelin.Draw.terrain(coord_range, tile <> [], img, cast.value) 
