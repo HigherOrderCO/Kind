@@ -1,6 +1,6 @@
 Web.Kaelin.Action.create_player(user: String, hero: Web.Kaelin.Hero, state: Web.Kaelin.State): Web.Kaelin.State
   let key = user
-  let init_pos = Web.Kaelin.Coord.new(+0, +0)
+  let init_pos = Web.Kaelin.Coord.new(+0#32, +0#32)
   case state {
     game :
       case Map.get!(key, state.players) as player {

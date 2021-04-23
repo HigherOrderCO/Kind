@@ -1,4 +1,4 @@
-Web.Kaelin.Player.move_by(i: Int, j: Int, state: Web.Kaelin.State, addr: String): Web.Kaelin.State
+Web.Kaelin.Player.move_by(i: I32, j: I32, state: Web.Kaelin.State, addr: String): Web.Kaelin.State
 case state {
   game:
     coord_a = Web.Kaelin.Map.id_coord(addr,state.map)
@@ -7,7 +7,7 @@ case state {
       some: 
         coord = coord_a.value
         open coord                  
-        coord_b = Web.Kaelin.Coord.new(Int.add(coord.i,i), Int.add(coord.j,j))
+        coord_b = Web.Kaelin.Coord.new(I32.add(coord.i,i), I32.add(coord.j,j))
         Web.Kaelin.Player.move(coord_b, state, addr)
     }
 }default state
