@@ -1,0 +1,14 @@
+type Device {
+  phone
+  tablet
+  desktop
+  big_desktop
+}
+
+Device.classify(width: U32): Device
+  switch U32.lte(width) {
+    600#32: Device.phone // Extra small devices (phones, 600px and down)
+    768#32: Device.tablet // Small devices (portrait tablets and large phones, 600px and up)
+    992#32: Device.desktop // Large devices (laptops/desktops, 992px and up)
+  } default Device.big_desktop // Extra large devices (large laptops and desktops, 1200px and up)
+

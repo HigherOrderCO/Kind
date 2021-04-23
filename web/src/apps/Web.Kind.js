@@ -258,160 +258,44 @@ module.exports = (function() {
         return $32;
     });
 
-    function Web$Kind$State$new$(_screen_size$1, _page$2, _mouse_over$3) {
+    function Web$Kind$State$new$(_device$1, _page$2, _mouse_over$3) {
         var $33 = ({
             _: 'Web.Kind.State.new',
-            'screen_size': _screen_size$1,
+            'device': _device$1,
             'page': _page$2,
             'mouse_over': _mouse_over$3
         });
         return $33;
     };
     const Web$Kind$State$new = x0 => x1 => x2 => Web$Kind$State$new$(x0, x1, x2);
-
-    function Pair$new$(_fst$3, _snd$4) {
-        var $34 = ({
-            _: 'Pair.new',
-            'fst': _fst$3,
-            'snd': _snd$4
-        });
-        return $34;
-    };
-    const Pair$new = x0 => x1 => Pair$new$(x0, x1);
-
-    function U32$new$(_value$1) {
-        var $35 = word_to_u32(_value$1);
-        return $35;
-    };
-    const U32$new = x0 => U32$new$(x0);
-
-    function Nat$apply$(_n$2, _f$3, _x$4) {
-        var Nat$apply$ = (_n$2, _f$3, _x$4) => ({
-            ctr: 'TCO',
-            arg: [_n$2, _f$3, _x$4]
-        });
-        var Nat$apply = _n$2 => _f$3 => _x$4 => Nat$apply$(_n$2, _f$3, _x$4);
-        var arg = [_n$2, _f$3, _x$4];
-        while (true) {
-            let [_n$2, _f$3, _x$4] = arg;
-            var R = (() => {
-                var self = _n$2;
-                if (self === 0n) {
-                    var $36 = _x$4;
-                    return $36;
-                } else {
-                    var $37 = (self - 1n);
-                    var $38 = Nat$apply$($37, _f$3, _f$3(_x$4));
-                    return $38;
-                };
-            })();
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const Nat$apply = x0 => x1 => x2 => Nat$apply$(x0, x1, x2);
-
-    function Word$(_size$1) {
-        var $39 = null;
-        return $39;
-    };
-    const Word = x0 => Word$(x0);
-    const Word$e = ({
-        _: 'Word.e'
+    const Device$big_desktop = ({
+        _: 'Device.big_desktop'
     });
-
-    function Word$i$(_pred$2) {
-        var $40 = ({
-            _: 'Word.i',
-            'pred': _pred$2
-        });
-        return $40;
-    };
-    const Word$i = x0 => Word$i$(x0);
-
-    function Word$o$(_pred$2) {
-        var $41 = ({
-            _: 'Word.o',
-            'pred': _pred$2
-        });
-        return $41;
-    };
-    const Word$o = x0 => Word$o$(x0);
-
-    function Word$inc$(_word$2) {
-        var self = _word$2;
-        switch (self._) {
-            case 'Word.o':
-                var $43 = self.pred;
-                var $44 = Word$i$($43);
-                var $42 = $44;
-                break;
-            case 'Word.i':
-                var $45 = self.pred;
-                var $46 = Word$o$(Word$inc$($45));
-                var $42 = $46;
-                break;
-            case 'Word.e':
-                var $47 = Word$e;
-                var $42 = $47;
-                break;
-        };
-        return $42;
-    };
-    const Word$inc = x0 => Word$inc$(x0);
-
-    function Word$zero$(_size$1) {
-        var self = _size$1;
-        if (self === 0n) {
-            var $49 = Word$e;
-            var $48 = $49;
-        } else {
-            var $50 = (self - 1n);
-            var $51 = Word$o$(Word$zero$($50));
-            var $48 = $51;
-        };
-        return $48;
-    };
-    const Word$zero = x0 => Word$zero$(x0);
-
-    function Nat$to_word$(_size$1, _n$2) {
-        var $52 = Nat$apply$(_n$2, Word$inc, Word$zero$(_size$1));
-        return $52;
-    };
-    const Nat$to_word = x0 => x1 => Nat$to_word$(x0, x1);
-
-    function Nat$succ$(_pred$1) {
-        var $53 = 1n + _pred$1;
-        return $53;
-    };
-    const Nat$succ = x0 => Nat$succ$(x0);
-    const Nat$zero = 0n;
-    const Nat$to_u32 = a0 => (Number(a0) >>> 0);
     const Web$Kind$Page$home = ({
         _: 'Web.Kind.Page.home'
     });
 
     function DOM$node$(_tag$1, _props$2, _style$3, _children$4) {
-        var $54 = ({
+        var $34 = ({
             _: 'DOM.node',
             'tag': _tag$1,
             'props': _props$2,
             'style': _style$3,
             'children': _children$4
         });
-        return $54;
+        return $34;
     };
     const DOM$node = x0 => x1 => x2 => x3 => DOM$node$(x0, x1, x2, x3);
 
     function BitsMap$(_A$1) {
-        var $55 = null;
-        return $55;
+        var $35 = null;
+        return $35;
     };
     const BitsMap = x0 => BitsMap$(x0);
 
     function Map$(_V$1) {
-        var $56 = null;
-        return $56;
+        var $36 = null;
+        return $36;
     };
     const Map = x0 => Map$(x0);
     const BitsMap$new = ({
@@ -419,22 +303,22 @@ module.exports = (function() {
     });
 
     function BitsMap$tie$(_val$2, _lft$3, _rgt$4) {
-        var $57 = ({
+        var $37 = ({
             _: 'BitsMap.tie',
             'val': _val$2,
             'lft': _lft$3,
             'rgt': _rgt$4
         });
-        return $57;
+        return $37;
     };
     const BitsMap$tie = x0 => x1 => x2 => BitsMap$tie$(x0, x1, x2);
 
     function Maybe$some$(_value$2) {
-        var $58 = ({
+        var $38 = ({
             _: 'Maybe.some',
             'value': _value$2
         });
-        return $58;
+        return $38;
     };
     const Maybe$some = x0 => Maybe$some$(x0);
     const Maybe$none = ({
@@ -445,59 +329,59 @@ module.exports = (function() {
         var self = _bits$2;
         switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
             case 'o':
-                var $60 = self.slice(0, -1);
+                var $40 = self.slice(0, -1);
                 var self = _map$4;
                 switch (self._) {
                     case 'BitsMap.tie':
-                        var $62 = self.val;
-                        var $63 = self.lft;
-                        var $64 = self.rgt;
-                        var $65 = BitsMap$tie$($62, BitsMap$set$($60, _val$3, $63), $64);
-                        var $61 = $65;
+                        var $42 = self.val;
+                        var $43 = self.lft;
+                        var $44 = self.rgt;
+                        var $45 = BitsMap$tie$($42, BitsMap$set$($40, _val$3, $43), $44);
+                        var $41 = $45;
                         break;
                     case 'BitsMap.new':
-                        var $66 = BitsMap$tie$(Maybe$none, BitsMap$set$($60, _val$3, BitsMap$new), BitsMap$new);
-                        var $61 = $66;
+                        var $46 = BitsMap$tie$(Maybe$none, BitsMap$set$($40, _val$3, BitsMap$new), BitsMap$new);
+                        var $41 = $46;
                         break;
                 };
-                var $59 = $61;
+                var $39 = $41;
                 break;
             case 'i':
-                var $67 = self.slice(0, -1);
+                var $47 = self.slice(0, -1);
                 var self = _map$4;
                 switch (self._) {
                     case 'BitsMap.tie':
-                        var $69 = self.val;
-                        var $70 = self.lft;
-                        var $71 = self.rgt;
-                        var $72 = BitsMap$tie$($69, $70, BitsMap$set$($67, _val$3, $71));
-                        var $68 = $72;
+                        var $49 = self.val;
+                        var $50 = self.lft;
+                        var $51 = self.rgt;
+                        var $52 = BitsMap$tie$($49, $50, BitsMap$set$($47, _val$3, $51));
+                        var $48 = $52;
                         break;
                     case 'BitsMap.new':
-                        var $73 = BitsMap$tie$(Maybe$none, BitsMap$new, BitsMap$set$($67, _val$3, BitsMap$new));
-                        var $68 = $73;
+                        var $53 = BitsMap$tie$(Maybe$none, BitsMap$new, BitsMap$set$($47, _val$3, BitsMap$new));
+                        var $48 = $53;
                         break;
                 };
-                var $59 = $68;
+                var $39 = $48;
                 break;
             case 'e':
                 var self = _map$4;
                 switch (self._) {
                     case 'BitsMap.tie':
-                        var $75 = self.lft;
-                        var $76 = self.rgt;
-                        var $77 = BitsMap$tie$(Maybe$some$(_val$3), $75, $76);
-                        var $74 = $77;
+                        var $55 = self.lft;
+                        var $56 = self.rgt;
+                        var $57 = BitsMap$tie$(Maybe$some$(_val$3), $55, $56);
+                        var $54 = $57;
                         break;
                     case 'BitsMap.new':
-                        var $78 = BitsMap$tie$(Maybe$some$(_val$3), BitsMap$new, BitsMap$new);
-                        var $74 = $78;
+                        var $58 = BitsMap$tie$(Maybe$some$(_val$3), BitsMap$new, BitsMap$new);
+                        var $54 = $58;
                         break;
                 };
-                var $59 = $74;
+                var $39 = $54;
                 break;
         };
-        return $59;
+        return $39;
     };
     const BitsMap$set = x0 => x1 => x2 => BitsMap$set$(x0, x1, x2);
     const Bits$e = '';
@@ -509,37 +393,44 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $80 = self.pred;
-                var $81 = (Word$to_bits$($80) + '0');
-                var $79 = $81;
+                var $60 = self.pred;
+                var $61 = (Word$to_bits$($60) + '0');
+                var $59 = $61;
                 break;
             case 'Word.i':
-                var $82 = self.pred;
-                var $83 = (Word$to_bits$($82) + '1');
-                var $79 = $83;
+                var $62 = self.pred;
+                var $63 = (Word$to_bits$($62) + '1');
+                var $59 = $63;
                 break;
             case 'Word.e':
-                var $84 = Bits$e;
-                var $79 = $84;
+                var $64 = Bits$e;
+                var $59 = $64;
                 break;
         };
-        return $79;
+        return $59;
     };
     const Word$to_bits = x0 => Word$to_bits$(x0);
+
+    function Nat$succ$(_pred$1) {
+        var $65 = 1n + _pred$1;
+        return $65;
+    };
+    const Nat$succ = x0 => Nat$succ$(x0);
+    const Nat$zero = 0n;
     const U16$to_bits = a0 => (u16_to_bits(a0));
 
     function String$to_bits$(_str$1) {
         var self = _str$1;
         if (self.length === 0) {
-            var $86 = Bits$e;
-            var $85 = $86;
+            var $67 = Bits$e;
+            var $66 = $67;
         } else {
-            var $87 = self.charCodeAt(0);
-            var $88 = self.slice(1);
-            var $89 = (String$to_bits$($88) + (u16_to_bits($87)));
-            var $85 = $89;
+            var $68 = self.charCodeAt(0);
+            var $69 = self.slice(1);
+            var $70 = (String$to_bits$($69) + (u16_to_bits($68)));
+            var $66 = $70;
         };
-        return $85;
+        return $66;
     };
     const String$to_bits = x0 => String$to_bits$(x0);
 
@@ -547,25 +438,25 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'List.cons':
-                var $91 = self.head;
-                var $92 = self.tail;
-                var self = $91;
+                var $72 = self.head;
+                var $73 = self.tail;
+                var self = $72;
                 switch (self._) {
                     case 'Pair.new':
-                        var $94 = self.fst;
-                        var $95 = self.snd;
-                        var $96 = BitsMap$set$(String$to_bits$($94), $95, Map$from_list$($92));
-                        var $93 = $96;
+                        var $75 = self.fst;
+                        var $76 = self.snd;
+                        var $77 = BitsMap$set$(String$to_bits$($75), $76, Map$from_list$($73));
+                        var $74 = $77;
                         break;
                 };
-                var $90 = $93;
+                var $71 = $74;
                 break;
             case 'List.nil':
-                var $97 = BitsMap$new;
-                var $90 = $97;
+                var $78 = BitsMap$new;
+                var $71 = $78;
                 break;
         };
-        return $90;
+        return $71;
     };
     const Map$from_list = x0 => Map$from_list$(x0);
     const List$nil = ({
@@ -573,90 +464,138 @@ module.exports = (function() {
     });
 
     function Pair$(_A$1, _B$2) {
-        var $98 = null;
-        return $98;
+        var $79 = null;
+        return $79;
     };
     const Pair = x0 => x1 => Pair$(x0, x1);
 
     function List$cons$(_head$2, _tail$3) {
-        var $99 = ({
+        var $80 = ({
             _: 'List.cons',
             'head': _head$2,
             'tail': _tail$3
         });
-        return $99;
+        return $80;
     };
     const List$cons = x0 => x1 => List$cons$(x0, x1);
+
+    function Pair$new$(_fst$3, _snd$4) {
+        var $81 = ({
+            _: 'Pair.new',
+            'fst': _fst$3,
+            'snd': _snd$4
+        });
+        return $81;
+    };
+    const Pair$new = x0 => x1 => Pair$new$(x0, x1);
     const Web$Kind$constant$p_tag_size = "16px";
 
     function DOM$text$(_value$1) {
-        var $100 = ({
+        var $82 = ({
             _: 'DOM.text',
             'value': _value$1
         });
-        return $100;
+        return $82;
     };
     const DOM$text = x0 => DOM$text$(x0);
     const Web$Kind$img$croni = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAAXNSR0IArs4c6QAAAxhJREFUSIm1lz9IW1EUh79YR0lTxFhsIKZJOigSMBA6NGnrH5yKUHARHCrYIqGDYMeqtKMBp1BqoR0EOzhlFKND7SApFkpopqQhkIY2JUMzuaWDvdf73rvvvSr1DIF73rv3u79z7znnxcPlWMflucdzGcC155sAjE/G5YP9vWPWXj4G8Mif/wUVQDfoRcC2IbSDAiRTcQur+zzAofA0AAO9AUaCIQCKtSqNVl0o4vDDsWHi/p5xLMxNsS1QZ8ValXwha4Dr1IKz4s5QeJqB3oB0OEHPnqdJpuIW5WbrcoJexEaCISYSaaH03GAAg9p/sWKtysbOssH399JZLqUObKu2WKs6gvOFLGvPN8kXstJnvuFOYABKlRz5QpZGqw5Ao1UnX8iysbNsUWXelJpaytigWgsuVXL4vWH83jClSo5Gq27w+b1hLVw19XKNT8YtcFvFR8N9HA33SbjfG5Y+wADXHYE5f80h14EtOef3hu32J6HifJ3gqmrbPL799Zejr9muMJFIA8h7oLP9vWPtBbMLtafZrtguZoaWKjkAWTZ1cLM51upmu2IJc7NdYSg8bQCqFU7AzWE3m12tluVSzUmziXfMpVTUbEtaKa3xig4KEItOAHDzRoJv3z+xuLCOr/uWHNtBAfp91+jpifL2/Qr37j6wQMEm1KJyjQRDhlS5MxXj4+4X2wioJhqGcu6G6Govl1NHisYGmUik5fk6lVHRMHRmBp+rKzmlkQoXa9uBDVAxYWNnmcWFdenvv36VaGzQsLhb81BUW0qmAWpW8urNMwB+/vhtWVS8W6xVLRvY/XwofUszGZZmMhIuDtzytdFo1ZkaTbo2A3We2IQY69JsNTNPMhWnC+iIUDZadfnyQG/ANYRm1QO9AaZGk4wEQxboia/Damae7a0DQDnj1+9WgNPwiIliciQSkQtEIhHD2GzmzZ74Ojx8ep/ZuTG2tw7Escl/Ep3FhXVm58YAePLoBXDalwWkXC4bNiHGcJb3QnU0NijXAlQgaP5JdADUDSRTcUd1wsrlsvarUgfUDtQNuLzjNsd1/h9Ji2BZJdnEIwAAAABJRU5ErkJggg==";
     const Web$Kind$constant$secondary_color = "#3891A6";
 
     function Web$Kind$component$btn_primary_solid$(_title$1, _id$2) {
-        var $101 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", _id$2), List$nil)), Map$from_list$(List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("font-family", "Helvetica"), List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("width", "120px"), List$cons$(Pair$new$("height", "30px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$secondary_color), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("border-radius", "7px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil)))))))))))))), List$cons$(DOM$text$(_title$1), List$nil));
-        return $101;
+        var $83 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", _id$2), List$nil)), Map$from_list$(List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("font-family", "Helvetica"), List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("width", "120px"), List$cons$(Pair$new$("height", "30px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$secondary_color), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("border-radius", "7px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil)))))))))))))), List$cons$(DOM$text$(_title$1), List$nil));
+        return $83;
     };
     const Web$Kind$component$btn_primary_solid = x0 => x1 => Web$Kind$component$btn_primary_solid$(x0, x1);
 
     function Web$Kind$component$title$(_title$1) {
-        var $102 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", "20px"), List$cons$(Pair$new$("font-family", "Helvetica"), List$cons$(Pair$new$("font-weight", "bold"), List$nil)))), List$cons$(DOM$text$(_title$1), List$nil));
-        return $102;
+        var $84 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", "20px"), List$cons$(Pair$new$("font-family", "Helvetica"), List$cons$(Pair$new$("font-weight", "bold"), List$nil)))), List$cons$(DOM$text$(_title$1), List$nil));
+        return $84;
     };
     const Web$Kind$component$title = x0 => Web$Kind$component$title$(x0);
 
     function Buffer32$new$(_depth$1, _array$2) {
-        var $103 = u32array_to_buffer32(_array$2);
-        return $103;
+        var $85 = u32array_to_buffer32(_array$2);
+        return $85;
     };
     const Buffer32$new = x0 => x1 => Buffer32$new$(x0, x1);
 
     function Array$(_A$1, _depth$2) {
-        var $104 = null;
-        return $104;
+        var $86 = null;
+        return $86;
     };
     const Array = x0 => x1 => Array$(x0, x1);
 
     function Array$tip$(_value$2) {
-        var $105 = ({
+        var $87 = ({
             _: 'Array.tip',
             'value': _value$2
         });
-        return $105;
+        return $87;
     };
     const Array$tip = x0 => Array$tip$(x0);
 
     function Array$tie$(_lft$3, _rgt$4) {
-        var $106 = ({
+        var $88 = ({
             _: 'Array.tie',
             'lft': _lft$3,
             'rgt': _rgt$4
         });
-        return $106;
+        return $88;
     };
     const Array$tie = x0 => x1 => Array$tie$(x0, x1);
 
     function Array$alloc$(_depth$2, _x$3) {
         var self = _depth$2;
         if (self === 0n) {
-            var $108 = Array$tip$(_x$3);
-            var $107 = $108;
+            var $90 = Array$tip$(_x$3);
+            var $89 = $90;
         } else {
-            var $109 = (self - 1n);
-            var _half$5 = Array$alloc$($109, _x$3);
-            var $110 = Array$tie$(_half$5, _half$5);
-            var $107 = $110;
+            var $91 = (self - 1n);
+            var _half$5 = Array$alloc$($91, _x$3);
+            var $92 = Array$tie$(_half$5, _half$5);
+            var $89 = $92;
         };
-        return $107;
+        return $89;
     };
     const Array$alloc = x0 => x1 => Array$alloc$(x0, x1);
+
+    function U32$new$(_value$1) {
+        var $93 = word_to_u32(_value$1);
+        return $93;
+    };
+    const U32$new = x0 => U32$new$(x0);
+
+    function Word$(_size$1) {
+        var $94 = null;
+        return $94;
+    };
+    const Word = x0 => Word$(x0);
+    const Word$e = ({
+        _: 'Word.e'
+    });
+
+    function Word$o$(_pred$2) {
+        var $95 = ({
+            _: 'Word.o',
+            'pred': _pred$2
+        });
+        return $95;
+    };
+    const Word$o = x0 => Word$o$(x0);
+
+    function Word$zero$(_size$1) {
+        var self = _size$1;
+        if (self === 0n) {
+            var $97 = Word$e;
+            var $96 = $97;
+        } else {
+            var $98 = (self - 1n);
+            var $99 = Word$o$(Word$zero$($98));
+            var $96 = $99;
+        };
+        return $96;
+    };
+    const Word$zero = x0 => Word$zero$(x0);
     const U32$zero = U32$new$(Word$zero$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$succ$(Nat$zero))))))))))))))))))))))))))))))))));
     const Buffer32$alloc = a0 => (new Uint32Array(2 ** Number(a0)));
 
@@ -673,16 +612,16 @@ module.exports = (function() {
                 var self = _word$2;
                 switch (self._) {
                     case 'Word.o':
-                        var $111 = self.pred;
-                        var $112 = Word$bit_length$go$($111, Nat$succ$(_c$3), _n$4);
-                        return $112;
+                        var $100 = self.pred;
+                        var $101 = Word$bit_length$go$($100, Nat$succ$(_c$3), _n$4);
+                        return $101;
                     case 'Word.i':
-                        var $113 = self.pred;
-                        var $114 = Word$bit_length$go$($113, Nat$succ$(_c$3), Nat$succ$(_c$3));
-                        return $114;
+                        var $102 = self.pred;
+                        var $103 = Word$bit_length$go$($102, Nat$succ$(_c$3), Nat$succ$(_c$3));
+                        return $103;
                     case 'Word.e':
-                        var $115 = _n$4;
-                        return $115;
+                        var $104 = _n$4;
+                        return $104;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -692,8 +631,8 @@ module.exports = (function() {
     const Word$bit_length$go = x0 => x1 => x2 => Word$bit_length$go$(x0, x1, x2);
 
     function Word$bit_length$(_word$2) {
-        var $116 = Word$bit_length$go$(_word$2, 0n, 0n);
-        return $116;
+        var $105 = Word$bit_length$go$(_word$2, 0n, 0n);
+        return $105;
     };
     const Word$bit_length = x0 => Word$bit_length$(x0);
 
@@ -701,14 +640,23 @@ module.exports = (function() {
         var self = _size$1;
         switch ('u32') {
             case 'u32':
-                var $118 = u32_to_word(self);
-                var $119 = Word$bit_length$($118);
-                var $117 = $119;
+                var $107 = u32_to_word(self);
+                var $108 = Word$bit_length$($107);
+                var $106 = $108;
                 break;
         };
-        return $117;
+        return $106;
     };
     const U32$bit_length = x0 => U32$bit_length$(x0);
+
+    function Word$i$(_pred$2) {
+        var $109 = ({
+            _: 'Word.i',
+            'pred': _pred$2
+        });
+        return $109;
+    };
+    const Word$i = x0 => Word$i$(x0);
     const Bool$false = false;
     const Bool$true = true;
 
@@ -716,35 +664,35 @@ module.exports = (function() {
         var self = _word$2;
         switch (self._) {
             case 'Word.o':
-                var $121 = self.pred;
+                var $111 = self.pred;
                 var self = _prev$3;
                 if (self) {
-                    var $123 = Word$i$(Word$shift_left1$aux$($121, Bool$false));
-                    var $122 = $123;
+                    var $113 = Word$i$(Word$shift_left1$aux$($111, Bool$false));
+                    var $112 = $113;
                 } else {
-                    var $124 = Word$o$(Word$shift_left1$aux$($121, Bool$false));
-                    var $122 = $124;
+                    var $114 = Word$o$(Word$shift_left1$aux$($111, Bool$false));
+                    var $112 = $114;
                 };
-                var $120 = $122;
+                var $110 = $112;
                 break;
             case 'Word.i':
-                var $125 = self.pred;
+                var $115 = self.pred;
                 var self = _prev$3;
                 if (self) {
-                    var $127 = Word$i$(Word$shift_left1$aux$($125, Bool$true));
-                    var $126 = $127;
+                    var $117 = Word$i$(Word$shift_left1$aux$($115, Bool$true));
+                    var $116 = $117;
                 } else {
-                    var $128 = Word$o$(Word$shift_left1$aux$($125, Bool$true));
-                    var $126 = $128;
+                    var $118 = Word$o$(Word$shift_left1$aux$($115, Bool$true));
+                    var $116 = $118;
                 };
-                var $120 = $126;
+                var $110 = $116;
                 break;
             case 'Word.e':
-                var $129 = Word$e;
-                var $120 = $129;
+                var $119 = Word$e;
+                var $110 = $119;
                 break;
         };
-        return $120;
+        return $110;
     };
     const Word$shift_left1$aux = x0 => x1 => Word$shift_left1$aux$(x0, x1);
 
@@ -752,21 +700,21 @@ module.exports = (function() {
         var self = _word$2;
         switch (self._) {
             case 'Word.o':
-                var $131 = self.pred;
-                var $132 = Word$o$(Word$shift_left1$aux$($131, Bool$false));
-                var $130 = $132;
+                var $121 = self.pred;
+                var $122 = Word$o$(Word$shift_left1$aux$($121, Bool$false));
+                var $120 = $122;
                 break;
             case 'Word.i':
-                var $133 = self.pred;
-                var $134 = Word$o$(Word$shift_left1$aux$($133, Bool$true));
-                var $130 = $134;
+                var $123 = self.pred;
+                var $124 = Word$o$(Word$shift_left1$aux$($123, Bool$true));
+                var $120 = $124;
                 break;
             case 'Word.e':
-                var $135 = Word$e;
-                var $130 = $135;
+                var $125 = Word$e;
+                var $120 = $125;
                 break;
         };
-        return $130;
+        return $120;
     };
     const Word$shift_left1 = x0 => Word$shift_left1$(x0);
 
@@ -774,26 +722,59 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $137 = self.pred;
-                var $138 = (_b$7 => {
+                var $127 = self.pred;
+                var $128 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $140 = self.pred;
-                            var $141 = (_a$pred$10 => {
+                            var $130 = self.pred;
+                            var $131 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $143 = Word$i$(Word$adder$(_a$pred$10, $140, Bool$false));
-                                    var $142 = $143;
+                                    var $133 = Word$i$(Word$adder$(_a$pred$10, $130, Bool$false));
+                                    var $132 = $133;
                                 } else {
-                                    var $144 = Word$o$(Word$adder$(_a$pred$10, $140, Bool$false));
-                                    var $142 = $144;
+                                    var $134 = Word$o$(Word$adder$(_a$pred$10, $130, Bool$false));
+                                    var $132 = $134;
                                 };
-                                return $142;
+                                return $132;
                             });
-                            var $139 = $141;
+                            var $129 = $131;
                             break;
                         case 'Word.i':
+                            var $135 = self.pred;
+                            var $136 = (_a$pred$10 => {
+                                var self = _c$4;
+                                if (self) {
+                                    var $138 = Word$o$(Word$adder$(_a$pred$10, $135, Bool$true));
+                                    var $137 = $138;
+                                } else {
+                                    var $139 = Word$i$(Word$adder$(_a$pred$10, $135, Bool$false));
+                                    var $137 = $139;
+                                };
+                                return $137;
+                            });
+                            var $129 = $136;
+                            break;
+                        case 'Word.e':
+                            var $140 = (_a$pred$8 => {
+                                var $141 = Word$e;
+                                return $141;
+                            });
+                            var $129 = $140;
+                            break;
+                    };
+                    var $129 = $129($127);
+                    return $129;
+                });
+                var $126 = $128;
+                break;
+            case 'Word.i':
+                var $142 = self.pred;
+                var $143 = (_b$7 => {
+                    var self = _b$7;
+                    switch (self._) {
+                        case 'Word.o':
                             var $145 = self.pred;
                             var $146 = (_a$pred$10 => {
                                 var self = _c$4;
@@ -806,85 +787,52 @@ module.exports = (function() {
                                 };
                                 return $147;
                             });
-                            var $139 = $146;
-                            break;
-                        case 'Word.e':
-                            var $150 = (_a$pred$8 => {
-                                var $151 = Word$e;
-                                return $151;
-                            });
-                            var $139 = $150;
-                            break;
-                    };
-                    var $139 = $139($137);
-                    return $139;
-                });
-                var $136 = $138;
-                break;
-            case 'Word.i':
-                var $152 = self.pred;
-                var $153 = (_b$7 => {
-                    var self = _b$7;
-                    switch (self._) {
-                        case 'Word.o':
-                            var $155 = self.pred;
-                            var $156 = (_a$pred$10 => {
-                                var self = _c$4;
-                                if (self) {
-                                    var $158 = Word$o$(Word$adder$(_a$pred$10, $155, Bool$true));
-                                    var $157 = $158;
-                                } else {
-                                    var $159 = Word$i$(Word$adder$(_a$pred$10, $155, Bool$false));
-                                    var $157 = $159;
-                                };
-                                return $157;
-                            });
-                            var $154 = $156;
+                            var $144 = $146;
                             break;
                         case 'Word.i':
-                            var $160 = self.pred;
-                            var $161 = (_a$pred$10 => {
+                            var $150 = self.pred;
+                            var $151 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $163 = Word$i$(Word$adder$(_a$pred$10, $160, Bool$true));
-                                    var $162 = $163;
+                                    var $153 = Word$i$(Word$adder$(_a$pred$10, $150, Bool$true));
+                                    var $152 = $153;
                                 } else {
-                                    var $164 = Word$o$(Word$adder$(_a$pred$10, $160, Bool$true));
-                                    var $162 = $164;
+                                    var $154 = Word$o$(Word$adder$(_a$pred$10, $150, Bool$true));
+                                    var $152 = $154;
                                 };
-                                return $162;
+                                return $152;
                             });
-                            var $154 = $161;
+                            var $144 = $151;
                             break;
                         case 'Word.e':
-                            var $165 = (_a$pred$8 => {
-                                var $166 = Word$e;
-                                return $166;
+                            var $155 = (_a$pred$8 => {
+                                var $156 = Word$e;
+                                return $156;
                             });
-                            var $154 = $165;
+                            var $144 = $155;
                             break;
                     };
-                    var $154 = $154($152);
-                    return $154;
+                    var $144 = $144($142);
+                    return $144;
                 });
-                var $136 = $153;
+                var $126 = $143;
                 break;
             case 'Word.e':
-                var $167 = (_b$5 => {
-                    var $168 = Word$e;
-                    return $168;
+                var $157 = (_b$5 => {
+                    var $158 = Word$e;
+                    return $158;
                 });
-                var $136 = $167;
+                var $126 = $157;
                 break;
         };
-        var $136 = $136(_b$3);
-        return $136;
+        var $126 = $126(_b$3);
+        return $126;
     };
     const Word$adder = x0 => x1 => x2 => Word$adder$(x0, x1, x2);
 
     function Word$add$(_a$2, _b$3) {
-        var $169 = Word$adder$(_a$2, _b$3, Bool$false);
-        return $169;
+        var $159 = Word$adder$(_a$2, _b$3, Bool$false);
+        return $159;
     };
     const Word$add = x0 => x1 => Word$add$(x0, x1);
 
@@ -901,16 +849,16 @@ module.exports = (function() {
                 var self = _a$3;
                 switch (self._) {
                     case 'Word.o':
-                        var $170 = self.pred;
-                        var $171 = Word$mul$go$($170, Word$shift_left1$(_b$4), _acc$5);
-                        return $171;
+                        var $160 = self.pred;
+                        var $161 = Word$mul$go$($160, Word$shift_left1$(_b$4), _acc$5);
+                        return $161;
                     case 'Word.i':
-                        var $172 = self.pred;
-                        var $173 = Word$mul$go$($172, Word$shift_left1$(_b$4), Word$add$(_b$4, _acc$5));
-                        return $173;
+                        var $162 = self.pred;
+                        var $163 = Word$mul$go$($162, Word$shift_left1$(_b$4), Word$add$(_b$4, _acc$5));
+                        return $163;
                     case 'Word.e':
-                        var $174 = _acc$5;
-                        return $174;
+                        var $164 = _acc$5;
+                        return $164;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -923,13 +871,68 @@ module.exports = (function() {
         var self = _word$2;
         switch (self._) {
             case 'Word.o':
+                var $166 = self.pred;
+                var $167 = Word$o$(Word$to_zero$($166));
+                var $165 = $167;
+                break;
+            case 'Word.i':
+                var $168 = self.pred;
+                var $169 = Word$o$(Word$to_zero$($168));
+                var $165 = $169;
+                break;
+            case 'Word.e':
+                var $170 = Word$e;
+                var $165 = $170;
+                break;
+        };
+        return $165;
+    };
+    const Word$to_zero = x0 => Word$to_zero$(x0);
+
+    function Word$mul$(_a$2, _b$3) {
+        var $171 = Word$mul$go$(_a$2, _b$3, Word$to_zero$(_a$2));
+        return $171;
+    };
+    const Word$mul = x0 => x1 => Word$mul$(x0, x1);
+    const U32$mul = a0 => a1 => ((a0 * a1) >>> 0);
+
+    function Nat$apply$(_n$2, _f$3, _x$4) {
+        var Nat$apply$ = (_n$2, _f$3, _x$4) => ({
+            ctr: 'TCO',
+            arg: [_n$2, _f$3, _x$4]
+        });
+        var Nat$apply = _n$2 => _f$3 => _x$4 => Nat$apply$(_n$2, _f$3, _x$4);
+        var arg = [_n$2, _f$3, _x$4];
+        while (true) {
+            let [_n$2, _f$3, _x$4] = arg;
+            var R = (() => {
+                var self = _n$2;
+                if (self === 0n) {
+                    var $172 = _x$4;
+                    return $172;
+                } else {
+                    var $173 = (self - 1n);
+                    var $174 = Nat$apply$($173, _f$3, _f$3(_x$4));
+                    return $174;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Nat$apply = x0 => x1 => x2 => Nat$apply$(x0, x1, x2);
+
+    function Word$inc$(_word$2) {
+        var self = _word$2;
+        switch (self._) {
+            case 'Word.o':
                 var $176 = self.pred;
-                var $177 = Word$o$(Word$to_zero$($176));
+                var $177 = Word$i$($176);
                 var $175 = $177;
                 break;
             case 'Word.i':
                 var $178 = self.pred;
-                var $179 = Word$o$(Word$to_zero$($178));
+                var $179 = Word$o$(Word$inc$($178));
                 var $175 = $179;
                 break;
             case 'Word.e':
@@ -939,14 +942,14 @@ module.exports = (function() {
         };
         return $175;
     };
-    const Word$to_zero = x0 => Word$to_zero$(x0);
+    const Word$inc = x0 => Word$inc$(x0);
 
-    function Word$mul$(_a$2, _b$3) {
-        var $181 = Word$mul$go$(_a$2, _b$3, Word$to_zero$(_a$2));
+    function Nat$to_word$(_size$1, _n$2) {
+        var $181 = Nat$apply$(_n$2, Word$inc, Word$zero$(_size$1));
         return $181;
     };
-    const Word$mul = x0 => x1 => Word$mul$(x0, x1);
-    const U32$mul = a0 => a1 => ((a0 * a1) >>> 0);
+    const Nat$to_word = x0 => x1 => Nat$to_word$(x0, x1);
+    const Nat$to_u32 = a0 => (Number(a0) >>> 0);
 
     function VoxBox$new$(_length$1, _capacity$2, _buffer$3) {
         var $182 = ({
@@ -1216,11 +1219,24 @@ module.exports = (function() {
         var self = _stt$1;
         switch (self._) {
             case 'Web.Kind.State.new':
-                var $242 = self.page;
-                var $243 = self.mouse_over;
-                var _tabs$5 = List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$home, $242), ("tab_home" === $243), "Home", "tab_home"), List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$apps, $242), ("tab_apps" === $243), "Apps", "tab_apps"), List$nil));
-                var $244 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$nil)))), _tabs$5);
-                var $241 = $244;
+                var $242 = self.device;
+                var $243 = self.page;
+                var $244 = self.mouse_over;
+                var _tabs$5 = List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$home, $243), ("tab_home" === $244), "Home", "tab_home"), List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$apps, $243), ("tab_apps" === $244), "Apps", "tab_apps"), List$nil));
+                var self = $242;
+                switch (self._) {
+                    case 'Device.phone':
+                        var $246 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("padding-left", "30px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$nil)))), _tabs$5);
+                        var $245 = $246;
+                        break;
+                    case 'Device.tablet':
+                    case 'Device.desktop':
+                    case 'Device.big_desktop':
+                        var $247 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$nil)))), _tabs$5);
+                        var $245 = $247;
+                        break;
+                };
+                var $241 = $245;
                 break;
         };
         return $241;
@@ -1230,93 +1246,139 @@ module.exports = (function() {
     function Web$Kind$component$header$(_stt$1) {
         var _vbox$2 = VoxBox$alloc_capacity$(100);
         var _line$3 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "auto"), List$cons$(Pair$new$("max-width", "65em"), List$nil))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "4px"), List$cons$(Pair$new$("border-top", (Web$Kind$constant$primary_color + " dashed 1px")), List$cons$(Pair$new$("border-bottom", (Web$Kind$constant$primary_color + " dashed 1px")), List$cons$(Pair$new$("margin-top", "1em"), List$cons$(Pair$new$("margin-bottom", "1em"), List$cons$(Pair$new$("margin-left", "15%"), List$cons$(Pair$new$("margin-right", "15%"), List$nil)))))))), List$nil), List$nil));
-        var $245 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("h2", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "40px"), List$cons$(Pair$new$("font-family", "verdana"), List$cons$(Pair$new$("text-align", "center"), List$nil)))), List$cons$(DOM$text$("KIND language"), List$nil)), List$cons$(_line$3, List$cons$(Web$Kind$component$header_tabs$(_stt$1), List$nil))));
-        return $245;
+        var $248 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("h2", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "40px"), List$cons$(Pair$new$("font-family", "verdana"), List$cons$(Pair$new$("text-align", "center"), List$nil)))), List$cons$(DOM$text$("KIND language"), List$nil)), List$cons$(_line$3, List$cons$(Web$Kind$component$header_tabs$(_stt$1), List$nil))));
+        return $248;
     };
     const Web$Kind$component$header = x0 => Web$Kind$component$header$(x0);
 
-    function Web$Kind$component$body_container$(_ele$1) {
-        var $246 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 20% 40px 20%"), List$cons$(Pair$new$("flex", "1"), List$nil))), _ele$1);
-        return $246;
+    function Web$Kind$component$body_container$(_ele$1, _device$2) {
+        var self = _device$2;
+        switch (self._) {
+            case 'Device.phone':
+                var $250 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 30px"), List$cons$(Pair$new$("flex", "1"), List$nil))), _ele$1);
+                var $249 = $250;
+                break;
+            case 'Device.tablet':
+            case 'Device.desktop':
+            case 'Device.big_desktop':
+                var $251 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 20% 40px 20%"), List$cons$(Pair$new$("flex", "1"), List$nil))), _ele$1);
+                var $249 = $251;
+                break;
+        };
+        return $249;
     };
-    const Web$Kind$component$body_container = x0 => Web$Kind$component$body_container$(x0);
+    const Web$Kind$component$body_container = x0 => x1 => Web$Kind$component$body_container$(x0, x1);
+
+    function Web$Kind$component$title_phone$(_title$1) {
+        var $252 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", "16px"), List$cons$(Pair$new$("font-family", "Helvetica"), List$cons$(Pair$new$("font-weight", "bold"), List$nil)))), List$cons$(DOM$text$(_title$1), List$nil));
+        return $252;
+    };
+    const Web$Kind$component$title_phone = x0 => Web$Kind$component$title_phone$(x0);
     const List$for = a0 => a1 => a2 => (list_for(a0)(a1)(a2));
 
     function List$(_A$1) {
-        var $247 = null;
-        return $247;
+        var $253 = null;
+        return $253;
     };
     const List = x0 => List$(x0);
 
     function Web$Kind$component$list$(_items$1) {
         var _li$2 = List$nil;
         var _li$3 = (() => {
-            var $250 = _li$2;
-            var $251 = _items$1;
-            let _li$4 = $250;
+            var $256 = _li$2;
+            var $257 = _items$1;
+            let _li$4 = $256;
             let _item$3;
-            while ($251._ === 'List.cons') {
-                _item$3 = $251.head;
-                var $250 = List$cons$(DOM$node$("li", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "5px"), List$nil)), List$cons$(_item$3, List$nil)), _li$4);
-                _li$4 = $250;
-                $251 = $251.tail;
+            while ($257._ === 'List.cons') {
+                _item$3 = $257.head;
+                var $256 = List$cons$(DOM$node$("li", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "5px"), List$nil)), List$cons$(_item$3, List$nil)), _li$4);
+                _li$4 = $256;
+                $257 = $257.tail;
             }
             return _li$4;
         })();
-        var $248 = DOM$node$("ul", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("list-style-type", "none"), List$nil)), _li$3);
-        return $248;
+        var $254 = DOM$node$("ul", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("list-style-type", "none"), List$nil)), _li$3);
+        return $254;
     };
     const Web$Kind$component$list = x0 => Web$Kind$component$list$(x0);
 
-    function Web$Kind$component$link_white$(_txt$1, _href$2) {
-        var $252 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$2), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
-        return $252;
+    function Web$Kind$component$link_white$(_txt$1, _font_size$2, _href$3) {
+        var $258 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$3), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", _font_size$2), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
+        return $258;
     };
-    const Web$Kind$component$link_white = x0 => x1 => Web$Kind$component$link_white$(x0, x1);
+    const Web$Kind$component$link_white = x0 => x1 => x2 => Web$Kind$component$link_white$(x0, x1, x2);
     const Web$Kind$constant$dark_pri_color = "#44366B";
-    const Web$Kind$component$footer = (() => {
-        var _join_us_txt$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link_white$(" Github", "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link_white$(" Telegram", "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
-        var _join_us$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "110px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$primary_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-items", "flex-end"), List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("padding-right", "20%"), List$nil))))))))), List$cons$(_join_us_txt$1, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "20px"), List$nil)), List$cons$(DOM$text$("\u{2764} by UwU Tech"), List$nil)), List$nil)));
-        var _msg_footer$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("background-color", Web$Kind$constant$dark_pri_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("padding", "10px 20% 10px 20%"), List$nil))))))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$("This website was created using Kind!"), List$nil)), List$cons$(Web$Kind$component$link_white$("*u* show me the code!", "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind"), List$nil)));
-        var $253 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "0px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("color", "white"), List$nil))))), List$cons$(_join_us$1, List$cons$(_msg_footer$2, List$nil)));
-        return $253;
-    })();
+
+    function Web$Kind$component$footer$(_device$1) {
+        var self = _device$1;
+        switch (self._) {
+            case 'Device.phone':
+                var _join_us_txt$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 10px 0px"), List$nil)), List$cons$(Web$Kind$component$title_phone$("Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "5px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link_white$(" Github", "12px", "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link_white$(" Telegram", "12px", "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
+                var $260 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "80px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$primary_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-items", "flex-end"), List$cons$(Pair$new$("padding-left", "30px"), List$cons$(Pair$new$("padding-right", "30px"), List$nil))))))))), List$cons$(_join_us_txt$2, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "10px"), List$cons$(Pair$new$("font-size", "12px"), List$nil))), List$cons$(DOM$text$("\u{2764} by UwU Tech"), List$nil)), List$nil)));
+                var _join_us$2 = $260;
+                break;
+            case 'Device.tablet':
+            case 'Device.desktop':
+            case 'Device.big_desktop':
+                var _join_us_txt$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link_white$(" Github", Web$Kind$constant$p_tag_size, "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link_white$(" Telegram", Web$Kind$constant$p_tag_size, "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
+                var $261 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "110px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$primary_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-items", "flex-end"), List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("padding-right", "20%"), List$nil))))))))), List$cons$(_join_us_txt$2, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "20px"), List$nil)), List$cons$(DOM$text$("\u{2764} by UwU Tech"), List$nil)), List$nil)));
+                var _join_us$2 = $261;
+                break;
+        };
+        var self = _device$1;
+        switch (self._) {
+            case 'Device.phone':
+                var $262 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("background-color", Web$Kind$constant$dark_pri_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("padding", "10px 30px"), List$nil))))))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", "10px"), List$nil)), List$cons$(DOM$text$("This website was created using Kind!"), List$nil)), List$cons$(Web$Kind$component$link_white$("*u* show me the code!", "10px", "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind"), List$nil)));
+                var _msg_footer$3 = $262;
+                break;
+            case 'Device.tablet':
+            case 'Device.desktop':
+            case 'Device.big_desktop':
+                var $263 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("background-color", Web$Kind$constant$dark_pri_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("padding", "10px 20% 10px 20%"), List$nil))))))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", "14px"), List$nil)), List$cons$(DOM$text$("This website was created using Kind!"), List$nil)), List$cons$(Web$Kind$component$link_white$("*u* show me the code!", "14px", "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind"), List$nil)));
+                var _msg_footer$3 = $263;
+                break;
+        };
+        var $259 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "0px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("color", "white"), List$nil))))), List$cons$(_join_us$2, List$cons$(_msg_footer$3, List$nil)));
+        return $259;
+    };
+    const Web$Kind$component$footer = x0 => Web$Kind$component$footer$(x0);
 
     function Web$Kind$draw_page_home$(_stt$1) {
         var self = _stt$1;
         switch (self._) {
             case 'Web.Kind.State.new':
+                var $265 = self.device;
                 var _line$5 = (_txt$5 => {
-                    var $256 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$5), List$nil));
-                    return $256;
+                    var $267 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$5), List$nil));
+                    return $267;
                 });
                 var _line_break$6 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil), List$nil));
                 var _span$7 = (_txt$7 => {
-                    var $257 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$7), List$nil));
-                    return $257;
+                    var $268 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$7), List$nil));
+                    return $268;
                 });
                 var _span_bold$8 = (_txt$8 => {
-                    var $258 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$8), List$nil));
-                    return $258;
+                    var $269 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$8), List$nil));
+                    return $269;
                 });
                 var _intro$9 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(_span$7("Kind is a cute "), List$cons$(_span_bold$8("proof"), List$cons$(_span$7("gramming language."), List$cons$(_line_break$6, List$cons$(_span$7("It\'s "), List$cons$(_span_bold$8("capable of everything"), List$cons$(_line$5("from web apps to games to"), List$cons$(_line$5("advanced mathematical proofs."), List$nil)))))))));
                 var _croni$10 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-left", "40px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-end"), List$nil)))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "10px"), List$nil)), List$cons$(DOM$text$("gl hf!"), List$nil)), List$cons$(DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", Web$Kind$img$croni), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "30px"), List$cons$(Pair$new$("height", "30px"), List$nil))), List$nil), List$nil)));
                 var _call_to_apps$10 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "100px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))), List$cons$(Web$Kind$component$btn_primary_solid$("GO TO APPS", "btn_pri_home_go_to_apps"), List$cons$(_croni$10, List$nil)));
                 var _instructions$11 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$cons$(Pair$new$("padding", "5px"), List$cons$(Pair$new$("border", "1px solid"), List$nil)))), List$cons$(_line$5("npm i -g kind-lang"), List$cons$(_line$5("git clone https://github.com/uwu-tech/Kind"), List$cons$(_line$5("cd Kind/base"), List$cons$(_line$5("kind Main"), List$cons$(_line$5("kind Main --run"), List$nil))))));
                 var _install$11 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Install"), List$cons$(_instructions$11, List$nil)));
-                var $255 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-home"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_intro$9, List$cons$(_call_to_apps$10, List$cons$(_install$11, List$nil)))), List$cons$(Web$Kind$component$footer, List$nil))));
-                var $254 = $255;
+                var $266 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-home"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_intro$9, List$cons$(_call_to_apps$10, List$cons$(_install$11, List$nil))), $265), List$cons$(Web$Kind$component$footer$($265), List$nil))));
+                var $264 = $266;
                 break;
         };
-        return $254;
+        return $264;
     };
     const Web$Kind$draw_page_home = x0 => Web$Kind$draw_page_home$(x0);
 
     function Web$Kind$component$game_card$(_src$1, _title$2, _path$3) {
         var _banner$4 = DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", _src$1), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "100px"), List$cons$(Pair$new$("height", "100px"), List$nil))), List$nil);
         var _title$5 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _path$3), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("text-decoration", "none"), List$nil))))), List$cons$(DOM$text$(_title$2), List$nil));
-        var $259 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "120px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("margin", "10px 20px"), List$cons$(Pair$new$("border", "solid 1px"), List$cons$(Pair$new$("padding", "2px"), List$nil))))))), List$cons$(_banner$4, List$cons$(_title$5, List$nil)));
-        return $259;
+        var $270 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "120px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("margin", "10px 20px"), List$cons$(Pair$new$("border", "solid 1px"), List$cons$(Pair$new$("padding", "2px"), List$nil))))))), List$cons$(_banner$4, List$cons$(_title$5, List$nil)));
+        return $270;
     };
     const Web$Kind$component$game_card = x0 => x1 => x2 => Web$Kind$component$game_card$(x0, x1, x2);
     const Web$Kind$img$app_senhas = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAAAAXNSR0IArs4c6QAACCVJREFUeJztmV9oU1ccx7+2OrSppQWpNaWb0mS1ZbRicVilo5Cn1RRBlnb45sAomQxBYegGEzZXBB2FuWC7P751azuF0eieAm7SdaNUZjfqNCmW1bRp6KjERgWr28MvOTu9t7k5J03MvfF+H8q555x7c+7nfM/v/M7tqpHAIkyJqSDXAzCSTFgSMmFJyIQlIROWhExYEjJhSWi1RtuhA80p7+++eD1XPakbSbyz+ADUMp0lIS1nARi9/otGa2Pzrkz1bGzeRfXJerIO6gemHICis/hQFUoBS/ApaffMkhRktXuKP9ZchhKScJZ6rpJNi2BP8flf9pkZ6Sz+UkgJSyo0iPyeHpTeS0E/yzDlcKUmIEuztaLdUPwuXXktvZeCfpxlCEnHrMz21L5L0Zqpzmnb3HSWhFaZ3+DFZTpLQiYsCZmwJGTCkpAJS0JaedYOe9LWkcBi9lo1hpRbpUhK2dB32FfzZalWXoL36lPmMpTQ84Clc7+IKwWsZVeNYGv+KQUs7UgkGKfyRrmPWQbi+zxgaW+L7FL/S1jrq0NWMyl1B/1bzPxEI6HcxywDyTzuSCgzxx1e5nHHFJApWNqO0LlfxLWi486LphUdd1405T5mGYh+ZmBpv3DeHHdSjG/ZDzIaNYKtlGopOujfYuZxR0K5j1kGktY6On64I1nT2Qt92WvVGFJulSJmbe0/SIW/2r/ky9lu1afyZxm625zZ/on8gYXleLnbnBmEmFewFMq41/IHVs+gT6o+DYkmzSwGP+dWbfHe6Rn0KbhkEBMpBSx+q4Jqt8pea0oRpgp7+frSUqo5tbfl1A/XpB4iqxQZvDoh4vOg7LVqy93mZJhmp0Nb+w/uPHkWwPfXHwPgkZ3a26K4dyVAjXfcYaRmp0MA3rTM3b14AgDxQgIZ6a3mtaw8O/MEQN+ddaxGdp0aDBZP6quXqwFc+uc3AId7zl1wH9u4ac3vtx9tq4nj+PXT41TYefIskQLw07+vACBXBkbuQAaZ3r+KqMVI2WrrgrfGZ6KLm0pWX3AfQ8I7szNPyGtMVM9jIleWVFoAuNucgryM5ywA/U318x01AMr6bgM4f3doU8mSWT/cc+79NXNbDnQCmIku3llfjaWYoqEYErDoUoSXwfIseqX5jpoqmw2ArbaO6meiS6b8gvvYlgOdM9FFntTsdGh2OhQNxaKhmLVgwVqwQMjEZbxlCIBIHTo60N3lQn3NkT4AOH93iO/TvGqbbRW+Ln6ABClCU7/+/lws/tbWgoXIYxSttQj+riFhAWh1dgKostkqLt8d6agBcIRLPGy1dSP1TwHgi5+IVFGRJYqYtWCBkUpDxoPVM+hrdcZDcqvTCeCq78TC6SsUxXaMFQII3hqv2rdnKhhkd4UDEfLUBssi+xspKxa3FQwXs7Dc5tXq7GwfHjt0dKDKZtv+zXfhfVvah8cAVNls4UCEIjoAxojK7HbB6A7DwXK3Oa/6TtCeqP6oQGuT/rICRXQAzFNUJluJk4KxYBEpwc5Eiu8/9qB0g2Xx3Y8PbrAsjr9UKrUASbqIWb0OFxX2+wdSdp4KBru7XCLfqnhS3V2uv8/cKNhXci8QZKSkbAU9wOp1uDwOO5W9Dhc0kS2cvoKOGgA33nk7vG9Lq7Ozv6memihOAbjqO9Hq7OzucgGYCgb7m+r/2F54LxAE8OxyFEB6pJDzDJ4nxeT1B6hA1JjvPA57+/AYozPfUVPWd5sOPQCKP9jD9sSyvtuscHMynnkOLoyyn5gsqYSxnMWTolycXhsA1ZPRlvQZHntvLlwevtNW3IgzN8o2x+POfEfNfDC4o7Yu2Bd/wkeJDAsFiIZiirwhvQHnfhnenIwNTUx7uLOLx2H3+gMehz0ZSgCDC6MfvvYGs9W3bp/HYae06pM/fwaAilf5X1k5KeQc1s3JWMNmC2D1+gPEixGhJjUmUqmlUFETZwSUWgrvx56qf4vxOrCxAc8AoKHJ4nW4koXIXlUAzTGshs0WgjI0sXwHNSbSsjiQIFVqKYyomv4npSk+RALgaeYS1n7/gNfh2l1tZTFYrYT1ElG/CAAebX1909SoujMjteyjFKdCsq0nERmZ+LWvmKocO2u/f6DX4dpdbaVLGpzXH9hdbWWmo6BG03utzQngwf37qGpUP02DFC96Jl9DA2hIbBfJ1n7uM/j9/oGhiWkA/AsMTUx7/QH2ly2EnkFfOBAB8VqqyZLKlKQiZcWfF4SZW4O3xm21dR6HfWhimgjaauvIUGzadBSzSOQvRU2yzj2DPnebs+XhOjgqFJM/U9UIQL1CSyotkcdAIh1lnuX7UM2lH0caNlsUiR6TLmAp5HHYNTYpAC0P1/GprNcfuFb0qKKoPG43WqFLrcdOgtFQrD001t9Uz/OiZIU2maGJpFOlF1gJc1kVE87ENnI+xrGVS3YDUGEvV69QAEVFFlq/lLJ7uYfwY9AepF5gKUTmUtSA27ko6lOZXpIosAM2UdtorSR24UBEcbJJNisa0td/d8g1yV6DbYsiXykUnyUUpOikpUgOFOFcLX05iy1GVsPA8QkEeyV1ks2U7ITcu/S8yaSR6zHpCxZUOyOf2Sug9Dpcnx3ZG7w17hUwmiIvh+poJTI23cGC2CdAUjxRSlyqqakZ8feCw8Rnc8mkr5glKxZ66JI5hSVKakZMPCaIzZCxYWFpDFJT48UOT3Sp2ExFZHhYJD7M8W5igPi8nCTOiClPYPFSnJyY0qCjUB7Cyp5y/9XBQDJhSciEJSETloRMWBIyYUnIhCUhE5aETFgS+g+yYLjgWhyRswAAAABJRU5ErkJggg==";
@@ -1325,31 +1387,38 @@ module.exports = (function() {
     const Web$Kind$content_apps = List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_senhas, "Senhas", "Web.Senhas"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_tic_tac_toe, "TicTacToe", "Web.TicTacToe"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_kaelin, "Kaelin", "Web.Kaelin"), List$nil)));
 
     function Web$Kind$component$link_black$(_txt$1, _href$2) {
-        var $260 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$2), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
-        return $260;
+        var $271 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$2), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
+        return $271;
     };
     const Web$Kind$component$link_black = x0 => x1 => Web$Kind$component$link_black$(x0, x1);
     const Web$Kind$content_apps_text = Web$Kind$component$list$(List$cons$(Web$Kind$component$link_black$("Demo", "Web.Demo"), List$cons$(Web$Kind$component$link_black$("Online", "Web.Online"), List$nil)));
 
     function Web$Kind$draw_page_apps$(_stt$1) {
-        var _line$2 = (_txt$2 => {
-            var $262 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$2), List$nil));
-            return $262;
-        });
-        var _line_break$3 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil), List$nil));
-        var _span$4 = (_txt$4 => {
-            var $263 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$4), List$nil));
-            return $263;
-        });
-        var _span_bold$5 = (_txt$5 => {
-            var $264 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$5), List$nil));
-            return $264;
-        });
-        var _with_banner$6 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("flex-wrap", "wrap"), List$nil))))), Web$Kind$content_apps);
-        var _no_banner$7 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "30px"), List$nil)), List$cons$(Web$Kind$content_apps_text, List$nil));
-        var _games$6 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "game-container"), List$nil)), Map$from_list$(List$nil), List$cons$(Web$Kind$component$title$("Games"), List$cons$(_with_banner$6, List$cons$(_no_banner$7, List$nil))));
-        var $261 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-apps"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_games$6, List$nil)), List$cons$(Web$Kind$component$footer, List$nil))));
-        return $261;
+        var self = _stt$1;
+        switch (self._) {
+            case 'Web.Kind.State.new':
+                var $273 = self.device;
+                var _line$5 = (_txt$5 => {
+                    var $275 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$5), List$nil));
+                    return $275;
+                });
+                var _line_break$6 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil), List$nil));
+                var _span$7 = (_txt$7 => {
+                    var $276 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$7), List$nil));
+                    return $276;
+                });
+                var _span_bold$8 = (_txt$8 => {
+                    var $277 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$8), List$nil));
+                    return $277;
+                });
+                var _with_banner$9 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("flex-wrap", "wrap"), List$nil))))), Web$Kind$content_apps);
+                var _no_banner$10 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "30px"), List$nil)), List$cons$(Web$Kind$content_apps_text, List$nil));
+                var _games$9 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "game-container"), List$nil)), Map$from_list$(List$nil), List$cons$(Web$Kind$component$title$("Games"), List$cons$(_with_banner$9, List$cons$(_no_banner$10, List$nil))));
+                var $274 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-apps"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_games$9, List$nil), $273), List$cons$(Web$Kind$component$footer$($273), List$nil))));
+                var $272 = $274;
+                break;
+        };
+        return $272;
     };
     const Web$Kind$draw_page_apps = x0 => Web$Kind$draw_page_apps$(x0);
 
@@ -1357,39 +1426,99 @@ module.exports = (function() {
         var self = _stt$1;
         switch (self._) {
             case 'Web.Kind.State.new':
-                var $266 = self.page;
-                var self = $266;
+                var $279 = self.page;
+                var self = $279;
                 switch (self._) {
                     case 'Web.Kind.Page.home':
-                        var $268 = Web$Kind$draw_page_home$(_stt$1);
-                        var $267 = $268;
+                        var $281 = Web$Kind$draw_page_home$(_stt$1);
+                        var $280 = $281;
                         break;
                     case 'Web.Kind.Page.apps':
-                        var $269 = Web$Kind$draw_page_apps$(_stt$1);
-                        var $267 = $269;
+                        var $282 = Web$Kind$draw_page_apps$(_stt$1);
+                        var $280 = $282;
                         break;
                 };
-                var $265 = $267;
+                var $278 = $280;
                 break;
         };
-        return $265;
+        return $278;
     };
     const Web$Kind$draw_page = x0 => Web$Kind$draw_page$(x0);
 
     function IO$(_A$1) {
-        var $270 = null;
-        return $270;
+        var $283 = null;
+        return $283;
     };
     const IO = x0 => IO$(x0);
 
+    function Cmp$as_lte$(_cmp$1) {
+        var self = _cmp$1;
+        switch (self._) {
+            case 'Cmp.ltn':
+            case 'Cmp.eql':
+                var $285 = Bool$true;
+                var $284 = $285;
+                break;
+            case 'Cmp.gtn':
+                var $286 = Bool$false;
+                var $284 = $286;
+                break;
+        };
+        return $284;
+    };
+    const Cmp$as_lte = x0 => Cmp$as_lte$(x0);
+
+    function Word$lte$(_a$2, _b$3) {
+        var $287 = Cmp$as_lte$(Word$cmp$(_a$2, _b$3));
+        return $287;
+    };
+    const Word$lte = x0 => x1 => Word$lte$(x0, x1);
+    const U32$lte = a0 => a1 => (a0 <= a1);
+    const Device$phone = ({
+        _: 'Device.phone'
+    });
+    const Device$tablet = ({
+        _: 'Device.tablet'
+    });
+    const Device$desktop = ({
+        _: 'Device.desktop'
+    });
+
+    function Device$classify$(_width$1) {
+        var self = (_width$1 <= 600);
+        if (self) {
+            var $289 = Device$phone;
+            var $288 = $289;
+        } else {
+            var self = (_width$1 <= 768);
+            if (self) {
+                var $291 = Device$tablet;
+                var $290 = $291;
+            } else {
+                var self = (_width$1 <= 992);
+                if (self) {
+                    var $293 = Device$desktop;
+                    var $292 = $293;
+                } else {
+                    var $294 = Device$big_desktop;
+                    var $292 = $294;
+                };
+                var $290 = $292;
+            };
+            var $288 = $290;
+        };
+        return $288;
+    };
+    const Device$classify = x0 => Device$classify$(x0);
+
     function IO$ask$(_query$2, _param$3, _then$4) {
-        var $271 = ({
+        var $295 = ({
             _: 'IO.ask',
             'query': _query$2,
             'param': _param$3,
             'then': _then$4
         });
-        return $271;
+        return $295;
     };
     const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
 
@@ -1397,89 +1526,74 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'IO.end':
-                var $273 = self.value;
-                var $274 = _f$4($273);
-                var $272 = $274;
+                var $297 = self.value;
+                var $298 = _f$4($297);
+                var $296 = $298;
                 break;
             case 'IO.ask':
-                var $275 = self.query;
-                var $276 = self.param;
-                var $277 = self.then;
-                var $278 = IO$ask$($275, $276, (_x$8 => {
-                    var $279 = IO$bind$($277(_x$8), _f$4);
-                    return $279;
+                var $299 = self.query;
+                var $300 = self.param;
+                var $301 = self.then;
+                var $302 = IO$ask$($299, $300, (_x$8 => {
+                    var $303 = IO$bind$($301(_x$8), _f$4);
+                    return $303;
                 }));
-                var $272 = $278;
+                var $296 = $302;
                 break;
         };
-        return $272;
+        return $296;
     };
     const IO$bind = x0 => x1 => IO$bind$(x0, x1);
 
     function IO$end$(_value$2) {
-        var $280 = ({
+        var $304 = ({
             _: 'IO.end',
             'value': _value$2
         });
-        return $280;
+        return $304;
     };
     const IO$end = x0 => IO$end$(x0);
 
     function IO$monad$(_new$2) {
-        var $281 = _new$2(IO$bind)(IO$end);
-        return $281;
+        var $305 = _new$2(IO$bind)(IO$end);
+        return $305;
     };
     const IO$monad = x0 => IO$monad$(x0);
 
     function Dynamic$new$(_value$2) {
-        var $282 = ({
+        var $306 = ({
             _: 'Dynamic.new',
             'value': _value$2
         });
-        return $282;
+        return $306;
     };
     const Dynamic$new = x0 => Dynamic$new$(x0);
-<<<<<<< HEAD
 
     function App$store$(_value$2) {
-        var $287 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $288 = _m$pure$4;
-            return $288;
+        var $307 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $308 = _m$pure$4;
+            return $308;
         }))(Dynamic$new$(_value$2));
-        return $287;
-=======
-    const Unit$new = null;
-    const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $283 = _m$pure$2;
-        return $283;
-    }))(Dynamic$new$(Unit$new));
-
-    function App$store$(_value$2) {
-        var $284 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $285 = _m$pure$4;
-            return $285;
-        }))(Dynamic$new$(_value$2));
-        return $284;
->>>>>>> master
+        return $307;
     };
     const App$store = x0 => App$store$(x0);
     const Unit$new = null;
     const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $289 = _m$pure$2;
-        return $289;
+        var $309 = _m$pure$2;
+        return $309;
     }))(Dynamic$new$(Unit$new));
 
     function Web$Kind$set_mouse_over$(_id$1, _stt$2) {
         var self = _stt$2;
         switch (self._) {
             case 'Web.Kind.State.new':
-                var $287 = self.screen_size;
-                var $288 = self.page;
-                var $289 = Web$Kind$State$new$($287, $288, _id$1);
-                var $286 = $289;
+                var $311 = self.device;
+                var $312 = self.page;
+                var $313 = Web$Kind$State$new$($311, $312, _id$1);
+                var $310 = $313;
                 break;
         };
-        return $286;
+        return $310;
     };
     const Web$Kind$set_mouse_over = x0 => x1 => Web$Kind$set_mouse_over$(x0, x1);
     const Web$Kind$Event$go_to_home = ({
@@ -1491,8 +1605,8 @@ module.exports = (function() {
     const Web$Kind$component$id_action = Map$from_list$(List$cons$(Pair$new$("tab_home", Web$Kind$Event$go_to_home), List$cons$(Pair$new$("tab_apps", Web$Kind$Event$go_to_apps), List$cons$(Pair$new$("btn_pri_home_go_to_apps", Web$Kind$Event$go_to_apps), List$nil))));
 
     function Maybe$(_A$1) {
-        var $290 = null;
-        return $290;
+        var $314 = null;
+        return $314;
     };
     const Maybe = x0 => Maybe$(x0);
 
@@ -1509,49 +1623,49 @@ module.exports = (function() {
                 var self = _bits$2;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'o':
-                        var $291 = self.slice(0, -1);
+                        var $315 = self.slice(0, -1);
                         var self = _map$3;
                         switch (self._) {
                             case 'BitsMap.tie':
-                                var $293 = self.lft;
-                                var $294 = BitsMap$get$($291, $293);
-                                var $292 = $294;
+                                var $317 = self.lft;
+                                var $318 = BitsMap$get$($315, $317);
+                                var $316 = $318;
                                 break;
                             case 'BitsMap.new':
-                                var $295 = Maybe$none;
-                                var $292 = $295;
+                                var $319 = Maybe$none;
+                                var $316 = $319;
                                 break;
                         };
-                        return $292;
+                        return $316;
                     case 'i':
-                        var $296 = self.slice(0, -1);
+                        var $320 = self.slice(0, -1);
                         var self = _map$3;
                         switch (self._) {
                             case 'BitsMap.tie':
-                                var $298 = self.rgt;
-                                var $299 = BitsMap$get$($296, $298);
-                                var $297 = $299;
+                                var $322 = self.rgt;
+                                var $323 = BitsMap$get$($320, $322);
+                                var $321 = $323;
                                 break;
                             case 'BitsMap.new':
-                                var $300 = Maybe$none;
-                                var $297 = $300;
+                                var $324 = Maybe$none;
+                                var $321 = $324;
                                 break;
                         };
-                        return $297;
+                        return $321;
                     case 'e':
                         var self = _map$3;
                         switch (self._) {
                             case 'BitsMap.tie':
-                                var $302 = self.val;
-                                var $303 = $302;
-                                var $301 = $303;
+                                var $326 = self.val;
+                                var $327 = $326;
+                                var $325 = $327;
                                 break;
                             case 'BitsMap.new':
-                                var $304 = Maybe$none;
-                                var $301 = $304;
+                                var $328 = Maybe$none;
+                                var $325 = $328;
                                 break;
                         };
-                        return $301;
+                        return $325;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1561,8 +1675,8 @@ module.exports = (function() {
     const BitsMap$get = x0 => x1 => BitsMap$get$(x0, x1);
 
     function Map$get$(_key$2, _map$3) {
-        var $305 = BitsMap$get$(String$to_bits$(_key$2), _map$3);
-        return $305;
+        var $329 = BitsMap$get$(String$to_bits$(_key$2), _map$3);
+        return $329;
     };
     const Map$get = x0 => x1 => Map$get$(x0, x1);
 
@@ -1570,117 +1684,120 @@ module.exports = (function() {
         var self = _stt$2;
         switch (self._) {
             case 'Web.Kind.State.new':
-                var $307 = self.screen_size;
-                var $308 = self.mouse_over;
+                var $331 = self.device;
+                var $332 = self.mouse_over;
                 var _actions$6 = Web$Kind$component$id_action;
                 var self = Map$get$(_id$1, _actions$6);
                 switch (self._) {
                     case 'Maybe.some':
-                        var $310 = self.value;
-                        var self = $310;
+                        var $334 = self.value;
+                        var self = $334;
                         switch (self._) {
                             case 'Web.Kind.Event.go_to_home':
-                                var $312 = Web$Kind$State$new$($307, Web$Kind$Page$home, $308);
-                                var $311 = $312;
+                                var $336 = Web$Kind$State$new$($331, Web$Kind$Page$home, $332);
+                                var $335 = $336;
                                 break;
                             case 'Web.Kind.Event.go_to_apps':
-                                var $313 = Web$Kind$State$new$($307, Web$Kind$Page$apps, $308);
-                                var $311 = $313;
+                                var $337 = Web$Kind$State$new$($331, Web$Kind$Page$apps, $332);
+                                var $335 = $337;
                                 break;
                         };
-                        var $309 = $311;
+                        var $333 = $335;
                         break;
                     case 'Maybe.none':
-                        var $314 = _stt$2;
-                        var $309 = $314;
+                        var $338 = _stt$2;
+                        var $333 = $338;
                         break;
                 };
-                var $306 = $309;
+                var $330 = $333;
                 break;
         };
-        return $306;
+        return $330;
     };
     const Web$Kind$exe_event = x0 => x1 => Web$Kind$exe_event$(x0, x1);
 
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $315 = ({
+        var $339 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $315;
+        return $339;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Kind = (() => {
-        var _init$1 = Web$Kind$State$new$(Pair$new$(500, 400), Web$Kind$Page$home, "");
+        var _init$1 = Web$Kind$State$new$(Device$big_desktop, Web$Kind$Page$home, "");
         var _draw$2 = (_state$2 => {
             var self = _state$2;
             switch (self._) {
                 case 'Web.Kind.State.new':
-                    var $318 = Web$Kind$draw_page$(_state$2);
-                    var $317 = $318;
+                    var $342 = Web$Kind$draw_page$(_state$2);
+                    var $341 = $342;
                     break;
             };
-            return $317;
+            return $341;
         });
         var _when$3 = (_event$3 => _state$4 => {
             var self = _event$3;
             switch (self._) {
-<<<<<<< HEAD
                 case 'App.Event.init':
-                    var $324 = self.info;
-                    var self = $324;
+                    var $344 = self.info;
+                    var self = $344;
                     switch (self._) {
                         case 'App.EnvInfo.new':
-                            var $326 = self.screen_size;
-                            var $327 = App$store$(Web$Kind$State$new$($326, Web$Kind$Page$home, ""));
-                            var $325 = $327;
-                            break;
-                    };
-                    var $323 = $325;
-=======
-                case 'App.Event.mouse_over':
-                    var $320 = self.id;
-                    var $321 = App$store$(Web$Kind$set_mouse_over$($320, _state$4));
-                    var $319 = $321;
->>>>>>> master
-                    break;
-                case 'App.Event.mouse_over':
-                    var $328 = self.id;
-                    var $329 = App$store$(Web$Kind$set_mouse_over$($328, _state$4));
-                    var $323 = $329;
-                    break;
-                case 'App.Event.mouse_click':
-<<<<<<< HEAD
-                    var $330 = self.id;
-                    var $331 = App$store$(Web$Kind$exe_event$($330, _state$4));
-                    var $323 = $331;
-                    break;
-                case 'App.Event.resize':
-                    var $332 = self.info;
-                    var self = $332;
-                    switch (self._) {
-                        case 'App.EnvInfo.new':
-                            var $334 = self.screen_size;
-                            var self = _state$4;
+                            var $346 = self.screen_size;
+                            var self = $346;
                             switch (self._) {
-                                case 'Web.Kind.State.new':
-                                    var $336 = self.page;
-                                    var $337 = self.mouse_over;
-                                    var $338 = App$store$(Web$Kind$State$new$($334, $336, $337));
-                                    var $335 = $338;
+                                case 'Pair.new':
+                                    var $348 = self.fst;
+                                    var _device$12 = Device$classify$($348);
+                                    var $349 = App$store$(Web$Kind$State$new$(_device$12, Web$Kind$Page$home, ""));
+                                    var $347 = $349;
                                     break;
                             };
-                            var $333 = $335;
+                            var $345 = $347;
                             break;
                     };
-                    var $323 = $333;
-=======
-                    var $322 = self.id;
-                    var $323 = App$store$(Web$Kind$exe_event$($322, _state$4));
-                    var $319 = $323;
->>>>>>> master
+                    var $343 = $345;
+                    break;
+                case 'App.Event.mouse_over':
+                    var $350 = self.id;
+                    var $351 = App$store$(Web$Kind$set_mouse_over$($350, _state$4));
+                    var $343 = $351;
+                    break;
+                case 'App.Event.mouse_click':
+                    var $352 = self.id;
+                    var $353 = App$store$(Web$Kind$exe_event$($352, _state$4));
+                    var $343 = $353;
+                    break;
+                case 'App.Event.resize':
+                    var $354 = self.info;
+                    var self = $354;
+                    switch (self._) {
+                        case 'App.EnvInfo.new':
+                            var $356 = self.screen_size;
+                            var self = $356;
+                            switch (self._) {
+                                case 'Pair.new':
+                                    var $358 = self.fst;
+                                    var self = _state$4;
+                                    switch (self._) {
+                                        case 'Web.Kind.State.new':
+                                            var $360 = self.page;
+                                            var $361 = self.mouse_over;
+                                            var _device$14 = Device$classify$($358);
+                                            var $362 = App$store$(Web$Kind$State$new$(_device$14, $360, $361));
+                                            var $359 = $362;
+                                            break;
+                                    };
+                                    var $357 = $359;
+                                    break;
+                            };
+                            var $355 = $357;
+                            break;
+                    };
+                    var $343 = $355;
                     break;
                 case 'App.Event.tick':
                 case 'App.Event.mouse_down':
@@ -1689,35 +1806,18 @@ module.exports = (function() {
                 case 'App.Event.key_up':
                 case 'App.Event.post':
                 case 'App.Event.mouse_out':
-<<<<<<< HEAD
-                    var $339 = App$pass;
-                    var $323 = $339;
-=======
-                    var $324 = App$pass;
-                    var $319 = $324;
->>>>>>> master
+                    var $363 = App$pass;
+                    var $343 = $363;
                     break;
             };
-            return $319;
+            return $343;
         });
-        var $316 = App$new$(_init$1, _draw$2, _when$3);
-        return $316;
+        var $340 = App$new$(_init$1, _draw$2, _when$3);
+        return $340;
     })();
     return {
         'Web.Kind.State.new': Web$Kind$State$new,
-        'Pair.new': Pair$new,
-        'U32.new': U32$new,
-        'Nat.apply': Nat$apply,
-        'Word': Word,
-        'Word.e': Word$e,
-        'Word.i': Word$i,
-        'Word.o': Word$o,
-        'Word.inc': Word$inc,
-        'Word.zero': Word$zero,
-        'Nat.to_word': Nat$to_word,
-        'Nat.succ': Nat$succ,
-        'Nat.zero': Nat$zero,
-        'Nat.to_u32': Nat$to_u32,
+        'Device.big_desktop': Device$big_desktop,
         'Web.Kind.Page.home': Web$Kind$Page$home,
         'DOM.node': DOM$node,
         'BitsMap': BitsMap,
@@ -1732,12 +1832,15 @@ module.exports = (function() {
         'Bits.i': Bits$i,
         'Bits.concat': Bits$concat,
         'Word.to_bits': Word$to_bits,
+        'Nat.succ': Nat$succ,
+        'Nat.zero': Nat$zero,
         'U16.to_bits': U16$to_bits,
         'String.to_bits': String$to_bits,
         'Map.from_list': Map$from_list,
         'List.nil': List$nil,
         'Pair': Pair,
         'List.cons': List$cons,
+        'Pair.new': Pair$new,
         'Web.Kind.constant.p_tag_size': Web$Kind$constant$p_tag_size,
         'DOM.text': DOM$text,
         'Web.Kind.img.croni': Web$Kind$img$croni,
@@ -1749,11 +1852,17 @@ module.exports = (function() {
         'Array.tip': Array$tip,
         'Array.tie': Array$tie,
         'Array.alloc': Array$alloc,
+        'U32.new': U32$new,
+        'Word': Word,
+        'Word.e': Word$e,
+        'Word.o': Word$o,
+        'Word.zero': Word$zero,
         'U32.zero': U32$zero,
         'Buffer32.alloc': Buffer32$alloc,
         'Word.bit_length.go': Word$bit_length$go,
         'Word.bit_length': Word$bit_length,
         'U32.bit_length': U32$bit_length,
+        'Word.i': Word$i,
         'Bool.false': Bool$false,
         'Bool.true': Bool$true,
         'Word.shift_left1.aux': Word$shift_left1$aux,
@@ -1764,6 +1873,10 @@ module.exports = (function() {
         'Word.to_zero': Word$to_zero,
         'Word.mul': Word$mul,
         'U32.mul': U32$mul,
+        'Nat.apply': Nat$apply,
+        'Word.inc': Word$inc,
+        'Nat.to_word': Nat$to_word,
+        'Nat.to_u32': Nat$to_u32,
         'VoxBox.new': VoxBox$new,
         'VoxBox.alloc_capacity': VoxBox$alloc_capacity,
         'String.cons': String$cons,
@@ -1788,6 +1901,7 @@ module.exports = (function() {
         'Web.Kind.component.header_tabs': Web$Kind$component$header_tabs,
         'Web.Kind.component.header': Web$Kind$component$header,
         'Web.Kind.component.body_container': Web$Kind$component$body_container,
+        'Web.Kind.component.title_phone': Web$Kind$component$title_phone,
         'List.for': List$for,
         'List': List,
         'Web.Kind.component.list': Web$Kind$component$list,
@@ -1805,6 +1919,13 @@ module.exports = (function() {
         'Web.Kind.draw_page_apps': Web$Kind$draw_page_apps,
         'Web.Kind.draw_page': Web$Kind$draw_page,
         'IO': IO,
+        'Cmp.as_lte': Cmp$as_lte,
+        'Word.lte': Word$lte,
+        'U32.lte': U32$lte,
+        'Device.phone': Device$phone,
+        'Device.tablet': Device$tablet,
+        'Device.desktop': Device$desktop,
+        'Device.classify': Device$classify,
         'IO.ask': IO$ask,
         'IO.bind': IO$bind,
         'IO.end': IO$end,
