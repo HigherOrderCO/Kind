@@ -6,8 +6,8 @@ Web.Kaelin.Map.init(map: Web.Kaelin.Map): Web.Kaelin.Map
   cyclope   = Web.Kaelin.Hero.cyclope
   lela      = Web.Kaelin.Hero.lela
   octoking  = Web.Kaelin.Hero.octoking
-  map       = Web.Kaelin.Map.set(new_coord(-1#32,-2#32), creature(none,croni), map)
-  map       = Web.Kaelin.Map.set(new_coord(+0#32,+3#32), creature(none,cyclope), map)
-  map       = Web.Kaelin.Map.set(new_coord(-2#32,+0#32), creature(none,lela), map)
-  map       = Web.Kaelin.Map.set(new_coord(+3#32,-2#32), creature(none,octoking), map)
+  map       = Web.Kaelin.Map.push(new_coord(-1#32,-2#32), creature(none,croni), map)
+  map       = Web.Kaelin.Map.push(new_coord(+0#32,+3#32), creature(none,cyclope), map)
+  map       = Web.Kaelin.Map.push(new_coord(-2#32,+0#32), creature(none,lela), map)
+  map       = Web.Kaelin.Map.push(new_coord(+3#32,-2#32), creature(none,octoking), map)
   map

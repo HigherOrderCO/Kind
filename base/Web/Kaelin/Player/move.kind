@@ -6,8 +6,8 @@ Web.Kaelin.Player.move(coord_b: Web.Kaelin.Coord, state: Web.Kaelin.State, addre
       let is_occupied = Web.Kaelin.Map.is_occupied(coord_b,state.map)
       let tile_b = Web.Kaelin.Map.get(coord_b,state.map)
       case tile_b{
-        nil: state
-        cons:if is_occupied then
+        none: state
+        some:if is_occupied then
         state
       else
         new_map = Web.Kaelin.Map.swap(0,coord_a <> coord_b ,coord_b,state.map)

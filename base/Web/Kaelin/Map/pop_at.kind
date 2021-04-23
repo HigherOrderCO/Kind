@@ -5,13 +5,11 @@ Web.Kaelin.Map.pop_at(
   coord: Web.Kaelin.Coord, 
   map: Web.Kaelin.Map
 ) : Pair<Web.Kaelin.Map, Maybe<Web.Kaelin.Entity>>
-  let key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
-  let tile = NatMap.get!(key, map)
+  let tile = Web.Kaelin.Map.get(coord, map)
   case tile {
     none:{map, none}
     some:
       let {ent, remaining_tile} = List.pop_at!(idx, tile.value)
-      let new_map = Web.Kaelin.Map.del(coord,map)
-      let new_map = Web.Kaelin.Map.push(coord, remaining_tile, new_map)
-      {new_map, ent}
+      let map = Web.Kaelin.Map.set(coord, remaining_tile, map)
+      {map, ent}
   }

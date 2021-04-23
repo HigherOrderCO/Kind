@@ -1,4 +1,0 @@
-type Web.Kaelin.Hex_effect {
-  movement  
-  ability
-}

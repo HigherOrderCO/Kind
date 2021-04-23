@@ -1,0 +1,3 @@
+type Web.Kaelin.Terrain { 
+  grass(normal: VoxBox, ability: VoxBox, movement: VoxBox)
+}
