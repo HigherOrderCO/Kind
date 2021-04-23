@@ -1,0 +1,14 @@
+Web.Kaelin.Draw.terrain(coord: Web.Kaelin.Coord, tile: Web.Kaelin.Tile, img: VoxBox, cast_info: Maybe(Web.Kaelin.CastInfo)): VoxBox
+  for entity in tile with img:
+    case entity {
+      background:
+        open entity.terrain as hex
+        case cast_info { 
+          none: 
+            hex.normal
+          some: 
+            hex.ability
+      }
+    }default img
+img
+

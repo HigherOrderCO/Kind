@@ -1,11 +1,15 @@
 TODO list on Kaelin
 
-2 - Web.Kaelin.Constants - randomize or update each build
+1 - Web.Kaelin.Constants - randomize or update each build
 
-4 - Web.Kaelin.move - improve it 
+2 - Web.Kaelin.move - improve it 
 
-6 - Web.Kaelin - update how movement works 
+3 - Web.Kaelin - update how movement works 
 
-7 - Web.Kaelin.Draw.background - change hexagon color based on Web.Kaelin.CastInfo
+4 - Web.Kaelin.Draw.background - change hexagon color based on Web.Kaelin.CastInfo
 
-8 - Serialize.kind and Deserialize.kind
+5 - Serialize.kind and Deserialize.kind
+
+6 - Fix add_on_range and skill_range_show functions
+
+7 - Improve Draw/state/background function
