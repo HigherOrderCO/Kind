@@ -1,5 +1,5 @@
 // draw all players
-Web.Kaelin.Draw.state.players(img: VoxBox, map: Web.Kaelin.Map): VoxBox
+Web.Kaelin.Draw.state.players(map: Web.Kaelin.Map, img: VoxBox): VoxBox
   let player_list = NatMap.to_list!(map)
   for prs in player_list with img:
     open prs
