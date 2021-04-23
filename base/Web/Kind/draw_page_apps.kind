@@ -1,4 +1,5 @@
 Web.Kind.draw_page_apps(stt: Web.Kind.State): DOM
+  open stt
   // Auxiliars
   // ----------
   let line = 
@@ -50,6 +51,6 @@ Web.Kind.draw_page_apps(stt: Web.Kind.State): DOM
     Web.Kind.component.header(stt)
     Web.Kind.component.body_container([
       games
-    ]),
-    Web.Kind.component.footer
+    ], stt.device),
+    Web.Kind.component.footer(stt.device)
   ])
