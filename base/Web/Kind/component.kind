@@ -19,6 +19,13 @@ Web.Kind.component.h3(title: String): DOM
     "font-weight": "bold"
   }, [DOM.text(title)])
 
+Web.Kind.component.title_phone(title: String): DOM
+  DOM.node("div", {}, {
+    "font-size": "16px"
+    "font-family": "Helvetica"
+    "font-weight": "bold"
+  }, [DOM.text(title)])
+
 Web.Kind.component.link(txt: String, href: String): DOM
   DOM.node("a", {
       "href": href,

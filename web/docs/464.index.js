@@ -512,7 +512,11 @@ module.exports = (function() {
     };
     const Web$Kind$component$btn_primary_solid = x0 => x1 => Web$Kind$component$btn_primary_solid$(x0, x1);
 
+<<<<<<< HEAD
     function Web$Kind$component$h1$(_title$1) {
+=======
+    function Web$Kind$component$title$(_title$1) {
+>>>>>>> master
         var $84 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", "20px"), List$cons$(Pair$new$("font-family", "Helvetica"), List$cons$(Pair$new$("font-weight", "bold"), List$nil)))), List$cons$(DOM$text$(_title$1), List$nil));
         return $84;
     };
@@ -1227,7 +1231,11 @@ module.exports = (function() {
                 var $242 = self.device;
                 var $243 = self.page;
                 var $244 = self.mouse_over;
+<<<<<<< HEAD
                 var _tabs$5 = List$cons$(Web$Kind$comp$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$home, $243), ("tab_home" === $244), "Home", "tab_home"), List$cons$(Web$Kind$comp$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$apps, $243), ("tab_apps" === $244), "Apps", "tab_apps"), List$nil));
+=======
+                var _tabs$5 = List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$home, $243), ("tab_home" === $244), "Home", "tab_home"), List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$apps, $243), ("tab_apps" === $244), "Apps", "tab_apps"), List$nil));
+>>>>>>> master
                 var self = $242;
                 switch (self._) {
                     case 'Device.phone':
@@ -1251,6 +1259,7 @@ module.exports = (function() {
     function Web$Kind$comp$header$(_stt$1) {
         var _vbox$2 = VoxBox$alloc_capacity$(100);
         var _line$3 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "auto"), List$cons$(Pair$new$("max-width", "65em"), List$nil))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "4px"), List$cons$(Pair$new$("border-top", (Web$Kind$constant$primary_color + " dashed 1px")), List$cons$(Pair$new$("border-bottom", (Web$Kind$constant$primary_color + " dashed 1px")), List$cons$(Pair$new$("margin-top", "1em"), List$cons$(Pair$new$("margin-bottom", "1em"), List$cons$(Pair$new$("margin-left", "15%"), List$cons$(Pair$new$("margin-right", "15%"), List$nil)))))))), List$nil), List$nil));
+<<<<<<< HEAD
         var $248 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("h2", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "40px"), List$cons$(Pair$new$("font-family", "verdana"), List$cons$(Pair$new$("text-align", "center"), List$nil)))), List$cons$(DOM$text$("KIND language"), List$nil)), List$cons$(_line$3, List$cons$(Web$Kind$comp$header_tabs$(_stt$1), List$nil))));
         return $248;
     };
@@ -1271,14 +1280,44 @@ module.exports = (function() {
                 break;
         };
         return $249;
+=======
+        var $248 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("h2", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "40px"), List$cons$(Pair$new$("font-family", "verdana"), List$cons$(Pair$new$("text-align", "center"), List$nil)))), List$cons$(DOM$text$("KIND language"), List$nil)), List$cons$(_line$3, List$cons$(Web$Kind$component$header_tabs$(_stt$1), List$nil))));
+        return $248;
+>>>>>>> master
     };
     const Web$Kind$comp$body_container = x0 => x1 => Web$Kind$comp$body_container$(x0, x1);
 
+<<<<<<< HEAD
     function Web$Kind$component$h3$(_title$1) {
         var $252 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", "16px"), List$cons$(Pair$new$("font-family", "Helvetica"), List$cons$(Pair$new$("font-weight", "bold"), List$nil)))), List$cons$(DOM$text$(_title$1), List$nil));
         return $252;
     };
     const Web$Kind$component$h3 = x0 => Web$Kind$component$h3$(x0);
+=======
+    function Web$Kind$component$body_container$(_ele$1, _device$2) {
+        var self = _device$2;
+        switch (self._) {
+            case 'Device.phone':
+                var $250 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 30px"), List$cons$(Pair$new$("flex", "1"), List$nil))), _ele$1);
+                var $249 = $250;
+                break;
+            case 'Device.tablet':
+            case 'Device.desktop':
+            case 'Device.big_desktop':
+                var $251 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 20% 40px 20%"), List$cons$(Pair$new$("flex", "1"), List$nil))), _ele$1);
+                var $249 = $251;
+                break;
+        };
+        return $249;
+    };
+    const Web$Kind$component$body_container = x0 => x1 => Web$Kind$component$body_container$(x0, x1);
+
+    function Web$Kind$component$title_phone$(_title$1) {
+        var $252 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", "16px"), List$cons$(Pair$new$("font-family", "Helvetica"), List$cons$(Pair$new$("font-weight", "bold"), List$nil)))), List$cons$(DOM$text$(_title$1), List$nil));
+        return $252;
+    };
+    const Web$Kind$component$title_phone = x0 => Web$Kind$component$title_phone$(x0);
+>>>>>>> master
     const List$for = a0 => a1 => a2 => (list_for(a0)(a1)(a2));
 
     function List$(_A$1) {
@@ -1314,18 +1353,30 @@ module.exports = (function() {
     const Web$Kind$component$link_white = x0 => x1 => x2 => Web$Kind$component$link_white$(x0, x1, x2);
     const Web$Kind$constant$dark_pri_color = "#44366B";
 
+<<<<<<< HEAD
     function Web$Kind$comp$footer$(_device$1) {
         var self = _device$1;
         switch (self._) {
             case 'Device.phone':
                 var _join_us_txt$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 10px 0px"), List$nil)), List$cons$(Web$Kind$component$h3$("Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "5px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link_white$(" Github", "12px", "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link_white$(" Telegram", "12px", "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
+=======
+    function Web$Kind$component$footer$(_device$1) {
+        var self = _device$1;
+        switch (self._) {
+            case 'Device.phone':
+                var _join_us_txt$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 10px 0px"), List$nil)), List$cons$(Web$Kind$component$title_phone$("Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "5px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link_white$(" Github", "12px", "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link_white$(" Telegram", "12px", "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
+>>>>>>> master
                 var $260 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "80px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$primary_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-items", "flex-end"), List$cons$(Pair$new$("padding-left", "30px"), List$cons$(Pair$new$("padding-right", "30px"), List$nil))))))))), List$cons$(_join_us_txt$2, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "10px"), List$cons$(Pair$new$("font-size", "12px"), List$nil))), List$cons$(DOM$text$("\u{2764} by UwU Tech"), List$nil)), List$nil)));
                 var _join_us$2 = $260;
                 break;
             case 'Device.tablet':
             case 'Device.desktop':
             case 'Device.big_desktop':
+<<<<<<< HEAD
                 var _join_us_txt$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$h1$("Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link_white$(" Github", Web$Kind$constant$p_tag_size, "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link_white$(" Telegram", Web$Kind$constant$p_tag_size, "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
+=======
+                var _join_us_txt$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link_white$(" Github", Web$Kind$constant$p_tag_size, "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link_white$(" Telegram", Web$Kind$constant$p_tag_size, "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
+>>>>>>> master
                 var $261 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "110px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$primary_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-items", "flex-end"), List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("padding-right", "20%"), List$nil))))))))), List$cons$(_join_us_txt$2, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "20px"), List$nil)), List$cons$(DOM$text$("\u{2764} by UwU Tech"), List$nil)), List$nil)));
                 var _join_us$2 = $261;
                 break;
@@ -1346,7 +1397,11 @@ module.exports = (function() {
         var $259 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "0px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("color", "white"), List$nil))))), List$cons$(_join_us$2, List$cons$(_msg_footer$3, List$nil)));
         return $259;
     };
+<<<<<<< HEAD
     const Web$Kind$comp$footer = x0 => Web$Kind$comp$footer$(x0);
+=======
+    const Web$Kind$component$footer = x0 => Web$Kind$component$footer$(x0);
+>>>>>>> master
 
     function Web$Kind$draw_page_home$(_stt$1) {
         var self = _stt$1;
@@ -1370,8 +1425,13 @@ module.exports = (function() {
                 var _croni$10 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-left", "40px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-end"), List$nil)))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "10px"), List$nil)), List$cons$(DOM$text$("gl hf!"), List$nil)), List$cons$(DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", Web$Kind$img$croni), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "30px"), List$cons$(Pair$new$("height", "30px"), List$nil))), List$nil), List$nil)));
                 var _call_to_apps$10 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "100px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))), List$cons$(Web$Kind$component$btn_primary_solid$("GO TO APPS", "btn_pri_home_go_to_apps"), List$cons$(_croni$10, List$nil)));
                 var _instructions$11 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$cons$(Pair$new$("padding", "5px"), List$cons$(Pair$new$("border", "1px solid"), List$nil)))), List$cons$(_line$5("npm i -g kind-lang"), List$cons$(_line$5("git clone https://github.com/uwu-tech/Kind"), List$cons$(_line$5("cd Kind/base"), List$cons$(_line$5("kind Main"), List$cons$(_line$5("kind Main --run"), List$nil))))));
+<<<<<<< HEAD
                 var _install$11 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$h1$("Install"), List$cons$(_instructions$11, List$nil)));
                 var $266 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-home"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$comp$header$(_stt$1), List$cons$(Web$Kind$comp$body_container$(List$cons$(_intro$9, List$cons$(_call_to_apps$10, List$cons$(_install$11, List$nil))), $265), List$cons$(Web$Kind$comp$footer$($265), List$nil))));
+=======
+                var _install$11 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Install"), List$cons$(_instructions$11, List$nil)));
+                var $266 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-home"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_intro$9, List$cons$(_call_to_apps$10, List$cons$(_install$11, List$nil))), $265), List$cons$(Web$Kind$component$footer$($265), List$nil))));
+>>>>>>> master
                 var $264 = $266;
                 break;
         };
@@ -1418,8 +1478,13 @@ module.exports = (function() {
                 });
                 var _with_banner$9 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("flex-wrap", "wrap"), List$nil))))), Web$Kind$content_apps);
                 var _no_banner$10 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "30px"), List$nil)), List$cons$(Web$Kind$content_apps_text, List$nil));
+<<<<<<< HEAD
                 var _games$9 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "game-container"), List$nil)), Map$from_list$(List$nil), List$cons$(Web$Kind$component$h1$("Games"), List$cons$(_with_banner$9, List$cons$(_no_banner$10, List$nil))));
                 var $274 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-apps"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$comp$header$(_stt$1), List$cons$(Web$Kind$comp$body_container$(List$cons$(_games$9, List$nil), $273), List$cons$(Web$Kind$comp$footer$($273), List$nil))));
+=======
+                var _games$9 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "game-container"), List$nil)), Map$from_list$(List$nil), List$cons$(Web$Kind$component$title$("Games"), List$cons$(_with_banner$9, List$cons$(_no_banner$10, List$nil))));
+                var $274 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-apps"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_games$9, List$nil), $273), List$cons$(Web$Kind$component$footer$($273), List$nil))));
+>>>>>>> master
                 var $272 = $274;
                 break;
         };
@@ -1903,10 +1968,17 @@ module.exports = (function() {
         'U16.eql': U16$eql,
         'String.eql': String$eql,
         'Web.Kind.Page.apps': Web$Kind$Page$apps,
+<<<<<<< HEAD
         'Web.Kind.comp.header_tabs': Web$Kind$comp$header_tabs,
         'Web.Kind.comp.header': Web$Kind$comp$header,
         'Web.Kind.comp.body_container': Web$Kind$comp$body_container,
         'Web.Kind.component.h3': Web$Kind$component$h3,
+=======
+        'Web.Kind.component.header_tabs': Web$Kind$component$header_tabs,
+        'Web.Kind.component.header': Web$Kind$component$header,
+        'Web.Kind.component.body_container': Web$Kind$component$body_container,
+        'Web.Kind.component.title_phone': Web$Kind$component$title_phone,
+>>>>>>> master
         'List.for': List$for,
         'List': List,
         'Web.Kind.component.list': Web$Kind$component$list,
