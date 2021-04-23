@@ -13,3 +13,5 @@ TODO list on Kaelin
 6 - Fix add_on_range and skill_range_show functions
 
 7 - Improve Draw/state/background function
+
+8 - Find out why coord eql in select.kind is never true

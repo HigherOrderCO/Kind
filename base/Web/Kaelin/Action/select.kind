@@ -1,0 +1,14 @@
+Web.Kaelin.Action.select(state: Web.Kaelin.State, addr: String): Web.Kaelin.State
+  case state {
+    game:
+      open state.interface as info
+      let coord = Web.Kaelin.Map.id_coord(addr,state.map) <> Web.Kaelin.Coord.new(+0#32,+0#32)
+      let pos = info.mouse_pos
+      open pos
+      let {x, y} = pos
+      let mouse = Web.Kaelin.Coord.to_axial({x, y})
+      if Web.Kaelin.Coord.eql(coord, mouse) then
+        Web.Kaelin.Action.cast(2, Web.Kaelin.HexEffect.movement, state, addr)
+      else
+        state
+  }default state
