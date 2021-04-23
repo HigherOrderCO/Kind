@@ -15,3 +15,5 @@ TODO list on Kaelin
 - [ ] Improve Draw/state/background function
 
 - [ ] I32.show bug (when printing negative numbers goes to 2ˆ32 - absolute value) 
+
+- [ ] log inside a function that contains a variable named as 'x' brokes typecheck
