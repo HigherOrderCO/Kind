@@ -970,8 +970,6 @@ module.exports = (function() {
         return $183;
     };
     const VoxBox$alloc_capacity = x0 => VoxBox$alloc_capacity$(x0);
-    const Web$Kind$constant$primary_color = "#71558C";
-    const String$nil = '';
 
     function String$cons$(_head$1, _tail$2) {
         var $184 = (String.fromCharCode(_head$1) + _tail$2);
@@ -979,67 +977,54 @@ module.exports = (function() {
     };
     const String$cons = x0 => x1 => String$cons$(x0, x1);
     const String$concat = a0 => a1 => (a0 + a1);
-
-    function String$repeat$(_xs$1, _n$2) {
-        var self = _n$2;
-        if (self === 0n) {
-            var $186 = String$nil;
-            var $185 = $186;
-        } else {
-            var $187 = (self - 1n);
-            var $188 = (_xs$1 + String$repeat$(_xs$1, $187));
-            var $185 = $188;
-        };
-        return $185;
-    };
-    const String$repeat = x0 => x1 => String$repeat$(x0, x1);
+    const Web$Kind$constant$primary_color = "#71558C";
     const Web$Kind$constant$light_gray_color = "#D3D3D3";
 
     function BitsMap$union$(_a$2, _b$3) {
         var self = _a$2;
         switch (self._) {
             case 'BitsMap.tie':
-                var $190 = self.val;
-                var $191 = self.lft;
-                var $192 = self.rgt;
+                var $186 = self.val;
+                var $187 = self.lft;
+                var $188 = self.rgt;
                 var self = _b$3;
                 switch (self._) {
                     case 'BitsMap.tie':
-                        var $194 = self.val;
-                        var $195 = self.lft;
-                        var $196 = self.rgt;
-                        var self = $190;
+                        var $190 = self.val;
+                        var $191 = self.lft;
+                        var $192 = self.rgt;
+                        var self = $186;
                         switch (self._) {
                             case 'Maybe.none':
-                                var $198 = BitsMap$tie$($194, BitsMap$union$($191, $195), BitsMap$union$($192, $196));
-                                var $197 = $198;
+                                var $194 = BitsMap$tie$($190, BitsMap$union$($187, $191), BitsMap$union$($188, $192));
+                                var $193 = $194;
                                 break;
                             case 'Maybe.some':
-                                var $199 = BitsMap$tie$($190, BitsMap$union$($191, $195), BitsMap$union$($192, $196));
-                                var $197 = $199;
+                                var $195 = BitsMap$tie$($186, BitsMap$union$($187, $191), BitsMap$union$($188, $192));
+                                var $193 = $195;
                                 break;
                         };
-                        var $193 = $197;
+                        var $189 = $193;
                         break;
                     case 'BitsMap.new':
-                        var $200 = _a$2;
-                        var $193 = $200;
+                        var $196 = _a$2;
+                        var $189 = $196;
                         break;
                 };
-                var $189 = $193;
+                var $185 = $189;
                 break;
             case 'BitsMap.new':
-                var $201 = _b$3;
-                var $189 = $201;
+                var $197 = _b$3;
+                var $185 = $197;
                 break;
         };
-        return $189;
+        return $185;
     };
     const BitsMap$union = x0 => x1 => BitsMap$union$(x0, x1);
 
     function Map$union$(_a$2, _b$3) {
-        var $202 = BitsMap$union$(_a$2, _b$3);
-        return $202;
+        var $198 = BitsMap$union$(_a$2, _b$3);
+        return $198;
     };
     const Map$union = x0 => x1 => Map$union$(x0, x1);
 
@@ -1047,24 +1032,24 @@ module.exports = (function() {
         var _normal$5 = Map$from_list$(List$cons$(Pair$new$("margin-right", "30px"), List$cons$(Pair$new$("font-size", "18px"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("width", "70px"), List$cons$(Pair$new$("padding-bottom", "4px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))))));
         var _active$6 = Map$from_list$(List$cons$(Pair$new$("border-style", "none none solid none"), List$cons$(Pair$new$("border-color", Web$Kind$constant$secondary_color), List$cons$(Pair$new$("border-width", "thin"), List$nil))));
         var _hover$7 = Map$from_list$(List$cons$(Pair$new$("border-style", "none none solid none"), List$cons$(Pair$new$("border-color", Web$Kind$constant$light_gray_color), List$cons$(Pair$new$("border-width", "thin"), List$nil))));
-        var $203 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", _id$4), List$nil)), (() => {
+        var $199 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", _id$4), List$nil)), (() => {
             var self = _is_active$1;
             if (self) {
-                var $204 = Map$union$(_normal$5, _active$6);
-                return $204;
+                var $200 = Map$union$(_normal$5, _active$6);
+                return $200;
             } else {
                 var self = _is_hover$2;
                 if (self) {
-                    var $206 = Map$union$(_normal$5, _hover$7);
-                    var $205 = $206;
+                    var $202 = Map$union$(_normal$5, _hover$7);
+                    var $201 = $202;
                 } else {
-                    var $207 = _normal$5;
-                    var $205 = $207;
+                    var $203 = _normal$5;
+                    var $201 = $203;
                 };
-                return $205;
+                return $201;
             };
         })(), List$cons$(DOM$text$(_title$3), List$nil));
-        return $203;
+        return $199;
     };
     const Web$Kind$component$header_tab = x0 => x1 => x2 => x3 => Web$Kind$component$header_tab$(x0, x1, x2, x3);
 
@@ -1075,32 +1060,32 @@ module.exports = (function() {
                 var self = _trg$2;
                 switch (self._) {
                     case 'Web.Kind.Page.home':
-                        var $210 = Bool$true;
-                        var $209 = $210;
+                        var $206 = Bool$true;
+                        var $205 = $206;
                         break;
                     case 'Web.Kind.Page.apps':
-                        var $211 = Bool$false;
-                        var $209 = $211;
+                        var $207 = Bool$false;
+                        var $205 = $207;
                         break;
                 };
-                var $208 = $209;
+                var $204 = $205;
                 break;
             case 'Web.Kind.Page.apps':
                 var self = _trg$2;
                 switch (self._) {
                     case 'Web.Kind.Page.home':
-                        var $213 = Bool$false;
-                        var $212 = $213;
+                        var $209 = Bool$false;
+                        var $208 = $209;
                         break;
                     case 'Web.Kind.Page.apps':
-                        var $214 = Bool$true;
-                        var $212 = $214;
+                        var $210 = Bool$true;
+                        var $208 = $210;
                         break;
                 };
-                var $208 = $212;
+                var $204 = $208;
                 break;
         };
-        return $208;
+        return $204;
     };
     const Web$Kind$helper$is_eql = x0 => x1 => Web$Kind$helper$is_eql$(x0, x1);
     const Bool$and = a0 => a1 => (a0 && a1);
@@ -1110,15 +1095,15 @@ module.exports = (function() {
         switch (self._) {
             case 'Cmp.ltn':
             case 'Cmp.gtn':
-                var $216 = Bool$false;
-                var $215 = $216;
+                var $212 = Bool$false;
+                var $211 = $212;
                 break;
             case 'Cmp.eql':
-                var $217 = Bool$true;
-                var $215 = $217;
+                var $213 = Bool$true;
+                var $211 = $213;
                 break;
         };
-        return $215;
+        return $211;
     };
     const Cmp$as_eql = x0 => Cmp$as_eql$(x0);
     const Cmp$ltn = ({
@@ -1132,83 +1117,83 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $219 = self.pred;
-                var $220 = (_b$7 => {
+                var $215 = self.pred;
+                var $216 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $222 = self.pred;
-                            var $223 = (_a$pred$10 => {
-                                var $224 = Word$cmp$go$(_a$pred$10, $222, _c$4);
-                                return $224;
+                            var $218 = self.pred;
+                            var $219 = (_a$pred$10 => {
+                                var $220 = Word$cmp$go$(_a$pred$10, $218, _c$4);
+                                return $220;
                             });
-                            var $221 = $223;
+                            var $217 = $219;
                             break;
                         case 'Word.i':
-                            var $225 = self.pred;
-                            var $226 = (_a$pred$10 => {
-                                var $227 = Word$cmp$go$(_a$pred$10, $225, Cmp$ltn);
-                                return $227;
+                            var $221 = self.pred;
+                            var $222 = (_a$pred$10 => {
+                                var $223 = Word$cmp$go$(_a$pred$10, $221, Cmp$ltn);
+                                return $223;
                             });
-                            var $221 = $226;
+                            var $217 = $222;
                             break;
                         case 'Word.e':
-                            var $228 = (_a$pred$8 => {
-                                var $229 = _c$4;
-                                return $229;
+                            var $224 = (_a$pred$8 => {
+                                var $225 = _c$4;
+                                return $225;
                             });
-                            var $221 = $228;
+                            var $217 = $224;
                             break;
                     };
-                    var $221 = $221($219);
-                    return $221;
+                    var $217 = $217($215);
+                    return $217;
                 });
-                var $218 = $220;
+                var $214 = $216;
                 break;
             case 'Word.i':
-                var $230 = self.pred;
-                var $231 = (_b$7 => {
+                var $226 = self.pred;
+                var $227 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $233 = self.pred;
-                            var $234 = (_a$pred$10 => {
-                                var $235 = Word$cmp$go$(_a$pred$10, $233, Cmp$gtn);
-                                return $235;
+                            var $229 = self.pred;
+                            var $230 = (_a$pred$10 => {
+                                var $231 = Word$cmp$go$(_a$pred$10, $229, Cmp$gtn);
+                                return $231;
                             });
-                            var $232 = $234;
+                            var $228 = $230;
                             break;
                         case 'Word.i':
-                            var $236 = self.pred;
-                            var $237 = (_a$pred$10 => {
-                                var $238 = Word$cmp$go$(_a$pred$10, $236, _c$4);
-                                return $238;
+                            var $232 = self.pred;
+                            var $233 = (_a$pred$10 => {
+                                var $234 = Word$cmp$go$(_a$pred$10, $232, _c$4);
+                                return $234;
                             });
-                            var $232 = $237;
+                            var $228 = $233;
                             break;
                         case 'Word.e':
-                            var $239 = (_a$pred$8 => {
-                                var $240 = _c$4;
-                                return $240;
+                            var $235 = (_a$pred$8 => {
+                                var $236 = _c$4;
+                                return $236;
                             });
-                            var $232 = $239;
+                            var $228 = $235;
                             break;
                     };
-                    var $232 = $232($230);
-                    return $232;
+                    var $228 = $228($226);
+                    return $228;
                 });
-                var $218 = $231;
+                var $214 = $227;
                 break;
             case 'Word.e':
-                var $241 = (_b$5 => {
-                    var $242 = _c$4;
-                    return $242;
+                var $237 = (_b$5 => {
+                    var $238 = _c$4;
+                    return $238;
                 });
-                var $218 = $241;
+                var $214 = $237;
                 break;
         };
-        var $218 = $218(_b$3);
-        return $218;
+        var $214 = $214(_b$3);
+        return $214;
     };
     const Word$cmp$go = x0 => x1 => x2 => Word$cmp$go$(x0, x1, x2);
     const Cmp$eql = ({
@@ -1216,14 +1201,14 @@ module.exports = (function() {
     });
 
     function Word$cmp$(_a$2, _b$3) {
-        var $243 = Word$cmp$go$(_a$2, _b$3, Cmp$eql);
-        return $243;
+        var $239 = Word$cmp$go$(_a$2, _b$3, Cmp$eql);
+        return $239;
     };
     const Word$cmp = x0 => x1 => Word$cmp$(x0, x1);
 
     function Word$eql$(_a$2, _b$3) {
-        var $244 = Cmp$as_eql$(Word$cmp$(_a$2, _b$3));
-        return $244;
+        var $240 = Cmp$as_eql$(Word$cmp$(_a$2, _b$3));
+        return $240;
     };
     const Word$eql = x0 => x1 => Word$eql$(x0, x1);
     const U16$eql = a0 => a1 => (a0 === a1);
@@ -1236,61 +1221,61 @@ module.exports = (function() {
         var self = _stt$1;
         switch (self._) {
             case 'Web.Kind.State.new':
-                var $246 = self.page;
-                var $247 = self.mouse_over;
-                var _tabs$5 = List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$home, $246), ("tab_home" === $247), "Home", "tab_home"), List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$apps, $246), ("tab_apps" === $247), "Apps", "tab_apps"), List$nil));
-                var $248 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$nil)))), _tabs$5);
-                var $245 = $248;
+                var $242 = self.page;
+                var $243 = self.mouse_over;
+                var _tabs$5 = List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$home, $242), ("tab_home" === $243), "Home", "tab_home"), List$cons$(Web$Kind$component$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$apps, $242), ("tab_apps" === $243), "Apps", "tab_apps"), List$nil));
+                var $244 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$nil)))), _tabs$5);
+                var $241 = $244;
                 break;
         };
-        return $245;
+        return $241;
     };
     const Web$Kind$component$header_tabs = x0 => Web$Kind$component$header_tabs$(x0);
 
     function Web$Kind$component$header$(_stt$1) {
         var _vbox$2 = VoxBox$alloc_capacity$(100);
-        var _line$3 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("text-align", "center"), List$cons$(Pair$new$("padding", "10px 50px 10px 50px"), List$nil))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("color", Web$Kind$constant$primary_color), List$nil)), List$cons$(DOM$text$(String$repeat$("=", 90n)), List$nil)), List$nil));
-        var $249 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("h2", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "40px"), List$cons$(Pair$new$("font-family", "verdana"), List$cons$(Pair$new$("text-align", "center"), List$nil)))), List$cons$(DOM$text$("KIND language"), List$nil)), List$cons$(_line$3, List$cons$(Web$Kind$component$header_tabs$(_stt$1), List$nil))));
-        return $249;
+        var _line$3 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "auto"), List$cons$(Pair$new$("max-width", "65em"), List$nil))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "4px"), List$cons$(Pair$new$("border-top", (Web$Kind$constant$primary_color + " dashed 1px")), List$cons$(Pair$new$("border-bottom", (Web$Kind$constant$primary_color + " dashed 1px")), List$cons$(Pair$new$("margin-top", "1em"), List$cons$(Pair$new$("margin-bottom", "1em"), List$cons$(Pair$new$("margin-left", "15%"), List$cons$(Pair$new$("margin-right", "15%"), List$nil)))))))), List$nil), List$nil));
+        var $245 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("h2", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "40px"), List$cons$(Pair$new$("font-family", "verdana"), List$cons$(Pair$new$("text-align", "center"), List$nil)))), List$cons$(DOM$text$("KIND language"), List$nil)), List$cons$(_line$3, List$cons$(Web$Kind$component$header_tabs$(_stt$1), List$nil))));
+        return $245;
     };
     const Web$Kind$component$header = x0 => Web$Kind$component$header$(x0);
 
     function Web$Kind$component$body_container$(_ele$1) {
-        var $250 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 20% 40px 20%"), List$cons$(Pair$new$("flex", "1"), List$nil))), _ele$1);
-        return $250;
+        var $246 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "40px 20% 40px 20%"), List$cons$(Pair$new$("flex", "1"), List$nil))), _ele$1);
+        return $246;
     };
     const Web$Kind$component$body_container = x0 => Web$Kind$component$body_container$(x0);
     const List$for = a0 => a1 => a2 => (list_for(a0)(a1)(a2));
 
     function List$(_A$1) {
-        var $251 = null;
-        return $251;
+        var $247 = null;
+        return $247;
     };
     const List = x0 => List$(x0);
 
     function Web$Kind$component$list$(_items$1) {
         var _li$2 = List$nil;
         var _li$3 = (() => {
-            var $254 = _li$2;
-            var $255 = _items$1;
-            let _li$4 = $254;
+            var $250 = _li$2;
+            var $251 = _items$1;
+            let _li$4 = $250;
             let _item$3;
-            while ($255._ === 'List.cons') {
-                _item$3 = $255.head;
-                var $254 = List$cons$(DOM$node$("li", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "5px"), List$nil)), List$cons$(_item$3, List$nil)), _li$4);
-                _li$4 = $254;
-                $255 = $255.tail;
+            while ($251._ === 'List.cons') {
+                _item$3 = $251.head;
+                var $250 = List$cons$(DOM$node$("li", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "5px"), List$nil)), List$cons$(_item$3, List$nil)), _li$4);
+                _li$4 = $250;
+                $251 = $251.tail;
             }
             return _li$4;
         })();
-        var $252 = DOM$node$("ul", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("list-style-type", "none"), List$nil)), _li$3);
-        return $252;
+        var $248 = DOM$node$("ul", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("list-style-type", "none"), List$nil)), _li$3);
+        return $248;
     };
     const Web$Kind$component$list = x0 => Web$Kind$component$list$(x0);
 
     function Web$Kind$component$link_white$(_txt$1, _href$2) {
-        var $256 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$2), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
-        return $256;
+        var $252 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$2), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
+        return $252;
     };
     const Web$Kind$component$link_white = x0 => x1 => Web$Kind$component$link_white$(x0, x1);
     const Web$Kind$constant$dark_pri_color = "#44366B";
@@ -1298,8 +1283,8 @@ module.exports = (function() {
         var _join_us_txt$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(Web$Kind$component$list$(List$cons$(Web$Kind$component$link_white$(" Github", "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$component$link_white$(" Telegram", "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
         var _join_us$1 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "110px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$primary_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-items", "flex-end"), List$cons$(Pair$new$("padding-left", "20%"), List$cons$(Pair$new$("padding-right", "20%"), List$nil))))))))), List$cons$(_join_us_txt$1, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "20px"), List$nil)), List$cons$(DOM$text$("\u{2764} by UwU Tech"), List$nil)), List$nil)));
         var _msg_footer$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("background-color", Web$Kind$constant$dark_pri_color), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("padding", "10px 20% 10px 20%"), List$nil))))))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$("This website was created using Kind!"), List$nil)), List$cons$(Web$Kind$component$link_white$("*u* show me the code!", "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind"), List$nil)));
-        var $257 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "0px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("color", "white"), List$nil))))), List$cons$(_join_us$1, List$cons$(_msg_footer$2, List$nil)));
-        return $257;
+        var $253 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "0px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("color", "white"), List$nil))))), List$cons$(_join_us$1, List$cons$(_msg_footer$2, List$nil)));
+        return $253;
     })();
 
     function Web$Kind$draw_page_home$(_stt$1) {
@@ -1307,36 +1292,36 @@ module.exports = (function() {
         switch (self._) {
             case 'Web.Kind.State.new':
                 var _line$5 = (_txt$5 => {
-                    var $260 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$5), List$nil));
-                    return $260;
+                    var $256 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$5), List$nil));
+                    return $256;
                 });
                 var _line_break$6 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil), List$nil));
                 var _span$7 = (_txt$7 => {
-                    var $261 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$7), List$nil));
-                    return $261;
+                    var $257 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$7), List$nil));
+                    return $257;
                 });
                 var _span_bold$8 = (_txt$8 => {
-                    var $262 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$8), List$nil));
-                    return $262;
+                    var $258 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$8), List$nil));
+                    return $258;
                 });
                 var _intro$9 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(_span$7("Kind is a cute "), List$cons$(_span_bold$8("proof"), List$cons$(_span$7("gramming language."), List$cons$(_line_break$6, List$cons$(_span$7("It\'s "), List$cons$(_span_bold$8("capable of everything"), List$cons$(_line$5("from web apps to games to"), List$cons$(_line$5("advanced mathematical proofs."), List$nil)))))))));
                 var _croni$10 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-left", "40px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-end"), List$nil)))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "10px"), List$nil)), List$cons$(DOM$text$("gl hf!"), List$nil)), List$cons$(DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", Web$Kind$img$croni), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "30px"), List$cons$(Pair$new$("height", "30px"), List$nil))), List$nil), List$nil)));
                 var _call_to_apps$10 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "100px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))), List$cons$(Web$Kind$component$btn_primary_solid$("GO TO APPS", "btn_pri_home_go_to_apps"), List$cons$(_croni$10, List$nil)));
                 var _instructions$11 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$cons$(Pair$new$("padding", "5px"), List$cons$(Pair$new$("border", "1px solid"), List$nil)))), List$cons$(_line$5("npm i -g kind-lang"), List$cons$(_line$5("git clone https://github.com/uwu-tech/Kind"), List$cons$(_line$5("cd Kind/base"), List$cons$(_line$5("kind Main"), List$cons$(_line$5("kind Main --run"), List$nil))))));
                 var _install$11 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "20px 0px 20px 0px"), List$nil)), List$cons$(Web$Kind$component$title$("Install"), List$cons$(_instructions$11, List$nil)));
-                var $259 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-home"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_intro$9, List$cons$(_call_to_apps$10, List$cons$(_install$11, List$nil)))), List$cons$(Web$Kind$component$footer, List$nil))));
-                var $258 = $259;
+                var $255 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-home"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_intro$9, List$cons$(_call_to_apps$10, List$cons$(_install$11, List$nil)))), List$cons$(Web$Kind$component$footer, List$nil))));
+                var $254 = $255;
                 break;
         };
-        return $258;
+        return $254;
     };
     const Web$Kind$draw_page_home = x0 => Web$Kind$draw_page_home$(x0);
 
     function Web$Kind$component$game_card$(_src$1, _title$2, _path$3) {
         var _banner$4 = DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", _src$1), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "100px"), List$cons$(Pair$new$("height", "100px"), List$nil))), List$nil);
         var _title$5 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _path$3), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("text-decoration", "none"), List$nil))))), List$cons$(DOM$text$(_title$2), List$nil));
-        var $263 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "120px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("margin", "10px 20px"), List$cons$(Pair$new$("border", "solid 1px"), List$cons$(Pair$new$("padding", "2px"), List$nil))))))), List$cons$(_banner$4, List$cons$(_title$5, List$nil)));
-        return $263;
+        var $259 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "120px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("margin", "10px 20px"), List$cons$(Pair$new$("border", "solid 1px"), List$cons$(Pair$new$("padding", "2px"), List$nil))))))), List$cons$(_banner$4, List$cons$(_title$5, List$nil)));
+        return $259;
     };
     const Web$Kind$component$game_card = x0 => x1 => x2 => Web$Kind$component$game_card$(x0, x1, x2);
     const Web$Kind$img$app_senhas = "data:image/png;base64,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";
@@ -1345,31 +1330,31 @@ module.exports = (function() {
     const Web$Kind$content_apps = List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_senhas, "Senhas", "Web.Senhas"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_tic_tac_toe, "TicTacToe", "Web.TicTacToe"), List$cons$(Web$Kind$component$game_card$(Web$Kind$img$app_kaelin, "Kaelin", "Web.Kaelin"), List$nil)));
 
     function Web$Kind$component$link_black$(_txt$1, _href$2) {
-        var $264 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$2), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
-        return $264;
+        var $260 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _href$2), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("cursor", "pointer"), List$nil)))), List$cons$(DOM$text$(_txt$1), List$nil));
+        return $260;
     };
     const Web$Kind$component$link_black = x0 => x1 => Web$Kind$component$link_black$(x0, x1);
     const Web$Kind$content_apps_text = Web$Kind$component$list$(List$cons$(Web$Kind$component$link_black$("Demo", "Web.Demo"), List$cons$(Web$Kind$component$link_black$("Online", "Web.Online"), List$nil)));
 
     function Web$Kind$draw_page_apps$(_stt$1) {
         var _line$2 = (_txt$2 => {
-            var $266 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$2), List$nil));
-            return $266;
+            var $262 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$2), List$nil));
+            return $262;
         });
         var _line_break$3 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil), List$nil));
         var _span$4 = (_txt$4 => {
-            var $267 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$4), List$nil));
-            return $267;
+            var $263 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil)), List$cons$(DOM$text$(_txt$4), List$nil));
+            return $263;
         });
         var _span_bold$5 = (_txt$5 => {
-            var $268 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$5), List$nil));
-            return $268;
+            var $264 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("font-size", Web$Kind$constant$p_tag_size), List$nil))), List$cons$(DOM$text$(_txt$5), List$nil));
+            return $264;
         });
         var _with_banner$6 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("flex-wrap", "wrap"), List$nil))))), Web$Kind$content_apps);
         var _no_banner$7 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "30px"), List$nil)), List$cons$(Web$Kind$content_apps_text, List$nil));
         var _games$6 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "game-container"), List$nil)), Map$from_list$(List$nil), List$cons$(Web$Kind$component$title$("Games"), List$cons$(_with_banner$6, List$cons$(_no_banner$7, List$nil))));
-        var $265 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-apps"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_games$6, List$nil)), List$cons$(Web$Kind$component$footer, List$nil))));
-        return $265;
+        var $261 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page-apps"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("height", "100%"), List$nil))))), List$cons$(Web$Kind$component$header$(_stt$1), List$cons$(Web$Kind$component$body_container$(List$cons$(_games$6, List$nil)), List$cons$(Web$Kind$component$footer, List$nil))));
+        return $261;
     };
     const Web$Kind$draw_page_apps = x0 => Web$Kind$draw_page_apps$(x0);
 
@@ -1377,39 +1362,39 @@ module.exports = (function() {
         var self = _stt$1;
         switch (self._) {
             case 'Web.Kind.State.new':
-                var $270 = self.page;
-                var self = $270;
+                var $266 = self.page;
+                var self = $266;
                 switch (self._) {
                     case 'Web.Kind.Page.home':
-                        var $272 = Web$Kind$draw_page_home$(_stt$1);
-                        var $271 = $272;
+                        var $268 = Web$Kind$draw_page_home$(_stt$1);
+                        var $267 = $268;
                         break;
                     case 'Web.Kind.Page.apps':
-                        var $273 = Web$Kind$draw_page_apps$(_stt$1);
-                        var $271 = $273;
+                        var $269 = Web$Kind$draw_page_apps$(_stt$1);
+                        var $267 = $269;
                         break;
                 };
-                var $269 = $271;
+                var $265 = $267;
                 break;
         };
-        return $269;
+        return $265;
     };
     const Web$Kind$draw_page = x0 => Web$Kind$draw_page$(x0);
 
     function IO$(_A$1) {
-        var $274 = null;
-        return $274;
+        var $270 = null;
+        return $270;
     };
     const IO = x0 => IO$(x0);
 
     function IO$ask$(_query$2, _param$3, _then$4) {
-        var $275 = ({
+        var $271 = ({
             _: 'IO.ask',
             'query': _query$2,
             'param': _param$3,
             'then': _then$4
         });
-        return $275;
+        return $271;
     };
     const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
 
@@ -1417,60 +1402,60 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'IO.end':
-                var $277 = self.value;
-                var $278 = _f$4($277);
-                var $276 = $278;
+                var $273 = self.value;
+                var $274 = _f$4($273);
+                var $272 = $274;
                 break;
             case 'IO.ask':
-                var $279 = self.query;
-                var $280 = self.param;
-                var $281 = self.then;
-                var $282 = IO$ask$($279, $280, (_x$8 => {
-                    var $283 = IO$bind$($281(_x$8), _f$4);
-                    return $283;
+                var $275 = self.query;
+                var $276 = self.param;
+                var $277 = self.then;
+                var $278 = IO$ask$($275, $276, (_x$8 => {
+                    var $279 = IO$bind$($277(_x$8), _f$4);
+                    return $279;
                 }));
-                var $276 = $282;
+                var $272 = $278;
                 break;
         };
-        return $276;
+        return $272;
     };
     const IO$bind = x0 => x1 => IO$bind$(x0, x1);
 
     function IO$end$(_value$2) {
-        var $284 = ({
+        var $280 = ({
             _: 'IO.end',
             'value': _value$2
         });
-        return $284;
+        return $280;
     };
     const IO$end = x0 => IO$end$(x0);
 
     function IO$monad$(_new$2) {
-        var $285 = _new$2(IO$bind)(IO$end);
-        return $285;
+        var $281 = _new$2(IO$bind)(IO$end);
+        return $281;
     };
     const IO$monad = x0 => IO$monad$(x0);
 
     function Dynamic$new$(_value$2) {
-        var $286 = ({
+        var $282 = ({
             _: 'Dynamic.new',
             'value': _value$2
         });
-        return $286;
+        return $282;
     };
     const Dynamic$new = x0 => Dynamic$new$(x0);
     const Unit$new = null;
     const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $287 = _m$pure$2;
-        return $287;
+        var $283 = _m$pure$2;
+        return $283;
     }))(Dynamic$new$(Unit$new));
 
     function App$store$(_value$2) {
-        var $288 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $289 = _m$pure$4;
-            return $289;
+        var $284 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $285 = _m$pure$4;
+            return $285;
         }))(Dynamic$new$(_value$2));
-        return $288;
+        return $284;
     };
     const App$store = x0 => App$store$(x0);
 
@@ -1478,13 +1463,13 @@ module.exports = (function() {
         var self = _stt$2;
         switch (self._) {
             case 'Web.Kind.State.new':
-                var $291 = self.screen_size;
-                var $292 = self.page;
-                var $293 = Web$Kind$State$new$($291, $292, _id$1);
-                var $290 = $293;
+                var $287 = self.screen_size;
+                var $288 = self.page;
+                var $289 = Web$Kind$State$new$($287, $288, _id$1);
+                var $286 = $289;
                 break;
         };
-        return $290;
+        return $286;
     };
     const Web$Kind$set_mouse_over = x0 => x1 => Web$Kind$set_mouse_over$(x0, x1);
     const Web$Kind$Event$go_to_home = ({
@@ -1496,8 +1481,8 @@ module.exports = (function() {
     const Web$Kind$component$id_action = Map$from_list$(List$cons$(Pair$new$("tab_home", Web$Kind$Event$go_to_home), List$cons$(Pair$new$("tab_apps", Web$Kind$Event$go_to_apps), List$cons$(Pair$new$("btn_pri_home_go_to_apps", Web$Kind$Event$go_to_apps), List$nil))));
 
     function Maybe$(_A$1) {
-        var $294 = null;
-        return $294;
+        var $290 = null;
+        return $290;
     };
     const Maybe = x0 => Maybe$(x0);
 
@@ -1514,27 +1499,41 @@ module.exports = (function() {
                 var self = _bits$2;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'o':
-                        var $295 = self.slice(0, -1);
+                        var $291 = self.slice(0, -1);
                         var self = _map$3;
                         switch (self._) {
                             case 'BitsMap.tie':
-                                var $297 = self.lft;
-                                var $298 = BitsMap$get$($295, $297);
-                                var $296 = $298;
+                                var $293 = self.lft;
+                                var $294 = BitsMap$get$($291, $293);
+                                var $292 = $294;
                                 break;
                             case 'BitsMap.new':
-                                var $299 = Maybe$none;
-                                var $296 = $299;
+                                var $295 = Maybe$none;
+                                var $292 = $295;
                                 break;
                         };
-                        return $296;
+                        return $292;
                     case 'i':
-                        var $300 = self.slice(0, -1);
+                        var $296 = self.slice(0, -1);
                         var self = _map$3;
                         switch (self._) {
                             case 'BitsMap.tie':
-                                var $302 = self.rgt;
-                                var $303 = BitsMap$get$($300, $302);
+                                var $298 = self.rgt;
+                                var $299 = BitsMap$get$($296, $298);
+                                var $297 = $299;
+                                break;
+                            case 'BitsMap.new':
+                                var $300 = Maybe$none;
+                                var $297 = $300;
+                                break;
+                        };
+                        return $297;
+                    case 'e':
+                        var self = _map$3;
+                        switch (self._) {
+                            case 'BitsMap.tie':
+                                var $302 = self.val;
+                                var $303 = $302;
                                 var $301 = $303;
                                 break;
                             case 'BitsMap.new':
@@ -1543,20 +1542,6 @@ module.exports = (function() {
                                 break;
                         };
                         return $301;
-                    case 'e':
-                        var self = _map$3;
-                        switch (self._) {
-                            case 'BitsMap.tie':
-                                var $306 = self.val;
-                                var $307 = $306;
-                                var $305 = $307;
-                                break;
-                            case 'BitsMap.new':
-                                var $308 = Maybe$none;
-                                var $305 = $308;
-                                break;
-                        };
-                        return $305;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1566,8 +1551,8 @@ module.exports = (function() {
     const BitsMap$get = x0 => x1 => BitsMap$get$(x0, x1);
 
     function Map$get$(_key$2, _map$3) {
-        var $309 = BitsMap$get$(String$to_bits$(_key$2), _map$3);
-        return $309;
+        var $305 = BitsMap$get$(String$to_bits$(_key$2), _map$3);
+        return $305;
     };
     const Map$get = x0 => x1 => Map$get$(x0, x1);
 
@@ -1575,46 +1560,46 @@ module.exports = (function() {
         var self = _stt$2;
         switch (self._) {
             case 'Web.Kind.State.new':
-                var $311 = self.screen_size;
-                var $312 = self.mouse_over;
+                var $307 = self.screen_size;
+                var $308 = self.mouse_over;
                 var _actions$6 = Web$Kind$component$id_action;
                 var self = Map$get$(_id$1, _actions$6);
                 switch (self._) {
                     case 'Maybe.some':
-                        var $314 = self.value;
-                        var self = $314;
+                        var $310 = self.value;
+                        var self = $310;
                         switch (self._) {
                             case 'Web.Kind.Event.go_to_home':
-                                var $316 = Web$Kind$State$new$($311, Web$Kind$Page$home, $312);
-                                var $315 = $316;
+                                var $312 = Web$Kind$State$new$($307, Web$Kind$Page$home, $308);
+                                var $311 = $312;
                                 break;
                             case 'Web.Kind.Event.go_to_apps':
-                                var $317 = Web$Kind$State$new$($311, Web$Kind$Page$apps, $312);
-                                var $315 = $317;
+                                var $313 = Web$Kind$State$new$($307, Web$Kind$Page$apps, $308);
+                                var $311 = $313;
                                 break;
                         };
-                        var $313 = $315;
+                        var $309 = $311;
                         break;
                     case 'Maybe.none':
-                        var $318 = _stt$2;
-                        var $313 = $318;
+                        var $314 = _stt$2;
+                        var $309 = $314;
                         break;
                 };
-                var $310 = $313;
+                var $306 = $309;
                 break;
         };
-        return $310;
+        return $306;
     };
     const Web$Kind$exe_event = x0 => x1 => Web$Kind$exe_event$(x0, x1);
 
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $319 = ({
+        var $315 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $319;
+        return $315;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Kind = (() => {
@@ -1623,24 +1608,24 @@ module.exports = (function() {
             var self = _state$2;
             switch (self._) {
                 case 'Web.Kind.State.new':
-                    var $322 = Web$Kind$draw_page$(_state$2);
-                    var $321 = $322;
+                    var $318 = Web$Kind$draw_page$(_state$2);
+                    var $317 = $318;
                     break;
             };
-            return $321;
+            return $317;
         });
         var _when$3 = (_event$3 => _state$4 => {
             var self = _event$3;
             switch (self._) {
                 case 'App.Event.mouse_over':
-                    var $324 = self.id;
-                    var $325 = App$store$(Web$Kind$set_mouse_over$($324, _state$4));
-                    var $323 = $325;
+                    var $320 = self.id;
+                    var $321 = App$store$(Web$Kind$set_mouse_over$($320, _state$4));
+                    var $319 = $321;
                     break;
                 case 'App.Event.mouse_click':
-                    var $326 = self.id;
-                    var $327 = App$store$(Web$Kind$exe_event$($326, _state$4));
-                    var $323 = $327;
+                    var $322 = self.id;
+                    var $323 = App$store$(Web$Kind$exe_event$($322, _state$4));
+                    var $319 = $323;
                     break;
                 case 'App.Event.init':
                 case 'App.Event.tick':
@@ -1650,14 +1635,14 @@ module.exports = (function() {
                 case 'App.Event.key_up':
                 case 'App.Event.post':
                 case 'App.Event.mouse_out':
-                    var $328 = App$pass;
-                    var $323 = $328;
+                    var $324 = App$pass;
+                    var $319 = $324;
                     break;
             };
-            return $323;
+            return $319;
         });
-        var $320 = App$new$(_init$1, _draw$2, _when$3);
-        return $320;
+        var $316 = App$new$(_init$1, _draw$2, _when$3);
+        return $316;
     })();
     return {
         'Web.Kind.State.new': Web$Kind$State$new,
@@ -1722,11 +1707,9 @@ module.exports = (function() {
         'U32.mul': U32$mul,
         'VoxBox.new': VoxBox$new,
         'VoxBox.alloc_capacity': VoxBox$alloc_capacity,
-        'Web.Kind.constant.primary_color': Web$Kind$constant$primary_color,
-        'String.nil': String$nil,
         'String.cons': String$cons,
         'String.concat': String$concat,
-        'String.repeat': String$repeat,
+        'Web.Kind.constant.primary_color': Web$Kind$constant$primary_color,
         'Web.Kind.constant.light_gray_color': Web$Kind$constant$light_gray_color,
         'BitsMap.union': BitsMap$union,
         'Map.union': Map$union,
