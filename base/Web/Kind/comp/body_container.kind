@@ -1,0 +1,12 @@
+Web.Kind.comp.body_container(ele: List<DOM>, device: Device): DOM
+  case device{
+    phone:
+      DOM.node("div", {}, {
+      "margin": "40px 30px",
+      "flex": "1"
+      }, ele)
+  } default 
+    DOM.node("div", {}, {
+    "margin": "40px 20% 40px 20%",
+    "flex": "1"
+    }, ele)
