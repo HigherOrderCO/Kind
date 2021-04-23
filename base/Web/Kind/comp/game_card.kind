@@ -1,0 +1,27 @@
+Web.Kind.comp.game_card(src: String, title: String, path: String): DOM
+  let banner =
+    DOM.node("img", {"src": src}, 
+    {"width": "100px", "height": "100px"}, []) 
+
+  let title = 
+    DOM.node("a", {
+      "href": path
+      "target": "_blank"
+      }, {
+      "font-size": Web.Kind.constant.p_tag_size
+      "cursor": "pointer"
+      "color": "black"
+      "text-decoration": "none"
+    }, [DOM.text(title)])
+
+  DOM.node("div", {}, {
+    "height": "120px"
+    "display": "flex"
+    "flex-direction": "column"
+    "margin": "10px 20px"
+    "border": "solid 1px"
+    "padding": "2px"
+  }, [
+    banner
+    title
+  ])

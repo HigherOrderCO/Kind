@@ -36,7 +36,7 @@ Web.Kind.draw_page_apps(stt: Web.Kind.State): DOM
       }, [Web.Kind.content_apps_text])
 
     DOM.node("div", {"id": "game-container"}, {}, [
-      Web.Kind.component.title("Games")
+      Web.Kind.component.h1("Games")
       with_banner
       no_banner
     ])
@@ -48,9 +48,9 @@ Web.Kind.draw_page_apps(stt: Web.Kind.State): DOM
     "justify-content": "space-between"
     "height": "100%"
   }, [
-    Web.Kind.component.header(stt)
-    Web.Kind.component.body_container([
+    Web.Kind.comp.header(stt)
+    Web.Kind.comp.body_container([
       games
     ], stt.device),
-    Web.Kind.component.footer(stt.device)
+    Web.Kind.comp.footer(stt.device)
   ])

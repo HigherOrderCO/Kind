@@ -1,12 +1,12 @@
 Web.Kind.content_apps: List(DOM)
  [
-  Web.Kind.component.game_card(
+  Web.Kind.comp.game_card(
     Web.Kind.img.app_senhas, "Senhas", "Web.Senhas")
 
-  Web.Kind.component.game_card(
+  Web.Kind.comp.game_card(
     Web.Kind.img.app_tic_tac_toe, "TicTacToe", "Web.TicTacToe")
 
-  Web.Kind.component.game_card(
+  Web.Kind.comp.game_card(
     Web.Kind.img.app_kaelin, "Kaelin", "Web.Kaelin")
  ] 
 
