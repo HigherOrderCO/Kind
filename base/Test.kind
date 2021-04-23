@@ -161,22 +161,22 @@ Test: String
       }
   }
 
-//  107      //(lam
-//  110      //  (name "b")
-//  113      //  (body
-//  107      //    (app
-//  140      //      (func
-//  107      //        (app
-//  143      //          (func
-//  147      //            (app
-//  169      //              (func
-//  169      //               >(var (name "b")))
-//  169      //              (argm
-//  188<     //                (lam
-//  Type     //                  (name "b")
-//  188      //                  (body
-//  Type     //                    (ref (name "Bool")))))))
-//  188      //          (argm
-//  Type     //            (ref (name "Bool.false")))))
-//  comp:    //      (argm
-//  "λ_b$1.?"//        (ref (name "Bool.true"))))))
+// 107      //(lam
+// 110      //  (name "b")
+// 113      //  (body
+// 107      //    (app
+// 140      //      (func
+// 107      //        (app
+// 143      //          (func
+// 147      //            (app
+// 169      //              (func
+// 169      //                (var (name "b")))
+// 169      //              (argm
+// comp:    //                (lam
+// "λ_b$1.?"//                  (name "b")
+            //                  (body
+            //                    (ref (name "Bool")))))))
+            //          (argm
+            //            (ref (name "Bool.false")))))
+            //      (argm
+            //        (ref (name "Bool.true"))))))
