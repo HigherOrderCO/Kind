@@ -48,7 +48,6 @@ Web.Kind.comp.link_black(txt: String, href: String): DOM
       "href": href,
       "target": "_blank"
     }, {
-      "font-size": Web.Kind.constant.p_tag_size
       "color": "black"
       "cursor": "pointer"
     }, [DOM.text(txt)]) 

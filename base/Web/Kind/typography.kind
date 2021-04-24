@@ -38,7 +38,7 @@ Web.Kind.typography.xxl: String
 Web.Kind.typography.xxxl: String
   "24pt"
 
-// Typegraphy: font
+// Typography: font
 // --
 Web.Kind.typography.body: Map(String)
   {
@@ -116,7 +116,7 @@ Web.Kind.typography.button: Map(String)
   }
 
 
-// Typegraphy: paragraph
+// Typography: paragraph
 // --
 
 Web.Kind.typography.paragraph(txt: String): DOM
