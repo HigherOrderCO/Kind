@@ -1,0 +1,81 @@
+type Web.Playground.State {
+  new(
+    device: Device, 
+    window: Web.Playground.Window,
+    mouse_over: String,
+    code: String)
+}
+
+type Web.Playground.Window {
+  input
+  terminal
+}
+
+type Web.Playground.Event {
+  check_terms
+  run_code
+  // download_app
+  display_output
+}
+
+Web.Playground.Actions: Map(Web.Playground.Event)
+  { 
+    "btn_check_terms": Web.Playground.Event.check_terms
+    "btn_run_code": Web.Playground.Event.run_code
+    // "btn_output": Web.Playground.Event.
+    "display_output": Web.Playground.Event.display_output
+  } 
+  
+Web.Playground.exe_event(id: String, stt: Web.Playground.State): Web.Playground.State
+  open stt
+  let actions = Web.Playground.Actions
+  case Map.get!(id, actions) as event {
+    none: stt
+    some: stt
+      // TODO: add state change
+      // case event.value{
+      //   check_terms: Web.Playground.State.new(stt.device, Web.Playground.Page.home, stt.mouse_over)
+      //   go_to_apps : Web.Playground.State.new(stt.device, Web.Playground.Page.apps, stt.mouse_over)
+      // } 
+  }
+
+Web.Playground.set_mouse_over(id: String, stt: Web.Playground.State): Web.Playground.State
+  open stt
+  Web.Playground.State.new(stt.device, stt.window, id, stt.code)
+
+Web.playground.body(stt: Web.Playground.State): DOM
+  DOM.node("div", {"id": "page"}, {
+    "margin": "100px"
+    "height": "500px"
+  },[Web.Playground.draw(stt)])
+
+// Executes the application
+Web.Playground: App(Web.Playground.State)
+
+  init = 
+    Web.Playground.State.new(Device.big_desktop, Web.Playground.Window.input, "", "")
+
+  draw = (state)
+    Web.playground.body(state)
+
+  when = (event, state)
+    case event {
+      init: 
+        open event.info
+        open event.info.screen_size as screen_size
+        let device = Device.classify(screen_size.fst)
+        App.store!(Web.Playground.State.new(device, Web.Playground.Window.input, "", ""))
+      mouse_click: App.store!(Web.Playground.exe_event(event.id, state))
+      mouse_over : App.store!(Web.Playground.set_mouse_over(event.id, state))
+      resize: 
+        open event.info
+        open event.info.screen_size as screen_size
+        open state
+        let device = Device.classify(screen_size.fst)
+        App.store!(Web.Playground.State.new(device, state.window, state.mouse_over, state.code))
+    } default App.pass
+  
+  // The application
+  App.new!(init, draw, when)
+
+

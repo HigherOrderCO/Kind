@@ -1,0 +1,67 @@
+Web.Playground.comp.header(stt: Web.Playground.State): DOM
+  // open stt
+  let tab = 
+    DOM.node("div", {}, {
+      "font-size": "14px"
+      "height": "30px"
+      "padding": "5px 10px"
+      "border-style": "solid"
+      "border-width": "thin"
+      "border-color": Web.Playground.constant.light_gray_color
+      "display": "flex"
+    }, [DOM.text("playground.kind")])
+
+  let title = 
+    DOM.node("div", {}, {"font-size": "18px"}, [DOM.text("KIND Playground")])
+
+  let btn_run = Web.Playground.comp.run_code(false, ">", "btn_run_code")  
+
+  DOM.node("div", {}, {
+    "display": "flex"
+    "flex-direction": "row"
+    "justify-content": "space-between"
+    "align-content": "center"
+    "justify-content": "center"
+  }, [tab, btn_run])
+
+
+
+Web.Playground.comp.run_code(is_hover: Bool, title: String, id: String): DOM
+  let normal = {
+    "width" : "20px"
+    "height": "20px"
+    "margin": "5px 0px"
+    "background-color": Web.Kind.constant.secondary_color
+    "font-color": "white"
+  }
+  let hover = {
+    "background-color": "#44B8D3"
+  }
+  DOM.node("div", {"id": id},
+    if is_hover then Map.union!(normal, hover)
+    else normal,
+    [DOM.text(title)])
+  
+
+Web.Playground.comp.code(code: String): DOM
+  DOM.node("textarea", {"id": "input_code"}, {
+    "width": "100%",
+    "height": "100%"
+    "border": "solid 1px"
+    "resize": "none"
+  }, [
+    DOM.text("Placeholder")
+  ])
+
+Web.Playground.comp.main_area(stt: Web.Playground.State): DOM
+  open stt
+  DOM.node("div", {
+    "cols": "80"
+  }, {
+    "width": "100%"
+    "display": "flex"
+    "flex-direction": "column"
+  }, [
+    Web.Playground.comp.header(stt),
+    Web.Playground.comp.code(stt.code)
+  ])
