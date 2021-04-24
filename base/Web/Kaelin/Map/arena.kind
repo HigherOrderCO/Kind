@@ -2,9 +2,15 @@
 Web.Kaelin.Map.arena: Web.Kaelin.Map
   let map = NatMap.new!
   let map_size = Web.Kaelin.Constants.map_size
-  let width = U32.add(U32.mul(map_size, 2#32), 1#32) // map_size * 2 + 1
-  let height = U32.add(U32.mul(map_size, 2#32), 1#32) // map_size * 2 + 1
-  let new_terrain = Web.Kaelin.Terrain.grass(Web.Kaelin.Assets.tile.dark_grass_4,Web.Kaelin.Assets.tile.hex_range, Web.Kaelin.Assets.tile.hex_hovered)
+  let width    = U32.add(U32.mul(map_size, 2#32), 1#32) // map_size * 2 + 1
+  let height   = U32.add(U32.mul(map_size, 2#32), 1#32) // map_size * 2 + 1
+
+  // TODO: Define this elsewhere?
+  let Normal   = Web.Kaelin.Assets.tile.green_2
+  let Casting  = Web.Kaelin.Assets.tile.effect.light_red1
+  let Moving   = Web.Kaelin.Assets.tile.effect.blue_green1
+  
+  let new_terrain = Web.Kaelin.Terrain.grass(Normal, Casting, Moving)
   let new_terrain = Web.Kaelin.Entity.background(new_terrain)
 
   //// loops through the half of the map_size

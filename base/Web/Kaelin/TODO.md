@@ -1,5 +1,7 @@
 TODO list on Kaelin
 
+- [ ] Rename state.interface to env_info
+
 - [ ] Web.Kaelin.Constants - randomize or update each build
 
 - [ ] Web.Kaelin.move - improve it 
@@ -18,4 +20,12 @@ TODO list on Kaelin
 
 - [ ] log inside a function that contains a variable named as 'x' brokes typecheck
 
-- [ ] Find out why coord eql in select.kind is never true
+- [ ] fix mouse position not corresponding to the respective hexagon
+
+- [ ] organize folders, files, and names
+
+- [ ] remove state.interface from Web.Kaelin.Draw.state.highlight
+
+- [ ] define tile images in Web.Kaelin.Map.arena elsewhere
+
+- [ ] make Web.Kaelin.Draw.state.highlight get the images from Web.Kaelin.Terrain
