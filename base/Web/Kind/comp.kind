@@ -6,25 +6,36 @@ Web.Kind.comp.id_action: Map(Web.Kind.Event)
   }  
 
 Web.Kind.comp.h1(title: String): DOM
-  DOM.node("div", {}, {
-    "font-size": "20px"
-    "font-family": "Helvetica"
-    "font-weight": "bold"
-  }, [DOM.text(title)])
+  DOM.node("div", {}, Map.union!(
+    Web.Kind.typography.header1, {
+      "width": "100%"
+  }), [DOM.text(title)])
+
+Web.Kind.comp.h2(title: String): DOM
+  DOM.node("div", {}, Map.union!(
+    Web.Kind.typography.header2, {
+      "width": "100%"
+  }), [DOM.text(title)])
 
 Web.Kind.comp.h3(title: String): DOM
-  DOM.node("div", {}, {
-    "font-size": "16px"
-    "font-family": "Helvetica"
-    "font-weight": "bold"
-  }, [DOM.text(title)])
+  DOM.node("div", {}, Map.union!(
+    Web.Kind.typography.header3, {
+      "width": "100%"
+  }), [DOM.text(title)])
+
+Web.Kind.comp.title(title: String): DOM
+  DOM.node("div", {}, Map.union!(
+    Web.Kind.typography.title, {
+      "margin-top": "1em"
+      "width": "100%"
+  }), [DOM.text(title)])
 
 Web.Kind.comp.title_phone(title: String): DOM
-  DOM.node("div", {}, {
-    "font-size": "16px"
-    "font-family": "Helvetica"
-    "font-weight": "bold"
-  }, [DOM.text(title)])
+  DOM.node("div", {}, Map.union!(
+    Web.Kind.typography.title, {
+      "margin-top": "1em"
+      "width": "100%"
+  }), [DOM.text(title)])
 
 Web.Kind.comp.link(txt: String, href: String): DOM
   DOM.node("a", {
@@ -64,11 +75,8 @@ Web.Kind.comp.list(items: List<DOM>): DOM
 Web.Kind.comp.btn_primary_solid(title: String, id: String): DOM
   DOM.node("div", {
     "id": id
-  }, {
+  }, Map.union!(Web.Kind.typography.button, {
     "cursor": "pointer"
-    "font-size": "14px"
-    "font-family": "Helvetica"
-    "font-weight": "bold"
     "width": "120px"
     "height": "30px"
     "background-color": Web.Kind.constant.secondary_color
@@ -78,5 +86,5 @@ Web.Kind.comp.btn_primary_solid(title: String, id: String): DOM
     "flex-direction": "row"
     "align-items": "center"
     "justify-content": "center"
-  }, [DOM.text(title)])
+  }), [DOM.text(title)])
 

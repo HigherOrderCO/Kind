@@ -1,4 +1,6 @@
-Web.Kind.comp.header(stt: Web.Kind.State): DOM
+Web.Kind.comp.header(stt: Web.Kind.State, container_width: String): DOM
+  open stt
+
   let vbox = VoxBox.alloc_capacity(100#32)
   let line = 
     DOM.node("div", {}, {
@@ -6,22 +8,22 @@ Web.Kind.comp.header(stt: Web.Kind.State): DOM
         "max-width": "65em"
         }, 
       [ DOM.node("div", {}, {
-        "height": "4px"
-        "border-top": Web.Kind.constant.primary_color | " dashed 1px"
-        "border-bottom": Web.Kind.constant.primary_color | " dashed 1px"
-        "margin-top": "1em"
-        "margin-bottom": "1em"
-        "margin-left": "15%"
-        "margin-right": "15%"
+        "height": "3pt"
+        "border-top": Web.Kind.constant.primary_color | " dashed 1pt"
+        "border-bottom": Web.Kind.constant.primary_color | " dashed 1pt"
+        "margin-left": "10%"
+        "margin-right": "10%"
         }, []) ]
     )
 
-  DOM.node("div", {}, {}, [
-    DOM.node("h2", {}, {
-      "margin-top" : "40px"
-      "font-family": "verdana"
-      "text-align" : "center"
-      }, [DOM.text("KIND language")]),
+  DOM.node("div", {"id": "header"}, {
+    "margin": "auto"
+    "width": container_width
+  }, [
+    (case stt.device {
+      phone: 
+        Web.Kind.comp.title_phone("KIND language")
+     } default Web.Kind.comp.title("KIND language")),
     line,
     Web.Kind.comp.header_tabs(stt)
   ])
@@ -40,19 +42,11 @@ Web.Kind.comp.header_tabs(stt: Web.Kind.State): DOM
       String.eql("tab_apps", stt.mouse_over)
       "Apps", "tab_apps")
   ]
-  case stt.device {
-    phone: 
-      DOM.node("div", {}, {
-      "padding-left": "30px"
-      "display": "flex"
-      "flex-direction": "row"
-      }, tabs)
-  } default 
-    DOM.node("div", {}, {
-    "padding-left": "20%"
-    "display": "flex"
-    "flex-direction": "row"
-    }, tabs)
+  DOM.node("div", {}, {
+  "padding-top": "1em"
+  "display": "flex"
+  "flex-direction": "row"
+  }, tabs)
 
 
 // Configure a tab

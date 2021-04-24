@@ -10,12 +10,25 @@ Web.Kind.constant.dark_pri_color: String
 Web.Kind.constant.light_gray_color: String
   "#D3D3D3"
 
-Web.Kind.constant.p_tag_size: String
-  "16px"
-
 
 Web.Kind.constant.action_go_to_apps: String
   "action_go_to_apps"
 
 Web.Kind.constant.action_go_to_home: String
   "action_go_to_home"
+
+
+Web.Kind.constant.typeface_body: String
+  "'JetBrains Mono', 'Monaco', 'Courier New', monospace"
+
+Web.Kind.constant.typeface_code: String
+  "'JetBrains Mono', 'Monaco', 'Courier New', monospace"
+
+Web.Kind.constant.typeface_title: String
+  "'Source Sans Pro', 'Helvetica', 'Verdana', sans-serif"
+
+Web.Kind.constant.typeface_header: String
+  "'Source Sans Pro', 'Helvetica', 'Verdana', sans-serif"
+
+Web.Kind.constant.p_tag_size: String
+  "16px"

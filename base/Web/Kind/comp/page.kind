@@ -1,0 +1,25 @@
+Web.Kind.comp.page(page_name: String, stt: Web.Kind.State, body_contents: List<DOM>): DOM
+  open stt
+  let page_layout = {
+      "display": "flex"
+      "flex-direction": "column",
+      "justify-content": "space-between",
+      "height": "100%"
+     }
+
+  let container_width = case stt.device {
+    phone: "85%"
+  } default 
+    "60%"
+
+  DOM.node("div", {"id": "page-" | page_name},
+    Map.union!(Web.Kind.typography.body, page_layout),[
+      Web.Kind.comp.header(stt, container_width), 
+      DOM.node("div", {"id": "body-container"}, {
+        "flex": "1"
+        "width": container_width
+        "margin": "auto"
+        },
+        body_contents),
+      Web.Kind.comp.footer(stt.device, container_width)
+  ])

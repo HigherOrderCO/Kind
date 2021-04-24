@@ -1,5 +1,4 @@
 Web.Kind.draw_page_apps(stt: Web.Kind.State): DOM
-  open stt
   // Auxiliars
   // ----------
   let line = 
@@ -42,15 +41,5 @@ Web.Kind.draw_page_apps(stt: Web.Kind.State): DOM
     ])
   
 
-  DOM.node("div", {"id": "page-apps"}, {
-    "display": "flex"
-    "flex-direction": "column"
-    "justify-content": "space-between"
-    "height": "100%"
-  }, [
-    Web.Kind.comp.header(stt)
-    Web.Kind.comp.body_container([
-      games
-    ], stt.device),
-    Web.Kind.comp.footer(stt.device)
-  ])
+  Web.Kind.comp.page("apps", stt, [
+        games])
