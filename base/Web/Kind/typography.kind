@@ -1,0 +1,71 @@
+Web.Kind.typography.typeface_body: String
+  "'JetBrains Mono', 'Monaco', 'Courier New', monospace"
+
+Web.Kind.typography.typeface_code: String
+  "'JetBrains Mono', 'Monaco', 'Courier New', monospace"
+
+Web.Kind.typography.typeface_title: String
+  "'Source Sans Pro', 'Helvetica', 'Verdana', sans-serif"
+
+Web.Kind.typography.typeface_header: String
+  "'Source Sans Pro', 'Helvetica', 'Verdana', sans-serif"
+
+Web.Kind.typography.body_size: String
+  "12pt"
+
+Web.Kind.typography.body: Map(String)
+  {
+    "font-size": Web.Kind.typography.body_size
+    "font-family": Web.Kind.typography.typeface_body
+    "font-weight": "400"
+    "line-height": "1.35"
+  }
+
+Web.Kind.typography.code: Map(String)
+  {
+    "font-size": Web.Kind.typography.body_size
+    "font-family": Web.Kind.typography.typeface_code
+    "font-weight": "400"
+    "line-height": "1.35"
+  }
+
+Web.Kind.typography.title: Map(String)
+  {
+    "font-size": "30pt"
+    "font-family": Web.Kind.typography.typeface_header
+    "font-weight": "700"
+    "text-align": "center"
+    "line-height": "2"
+  }
+
+Web.Kind.typography.header1: Map(String)
+  {
+    "font-size": "20pt"
+    "font-family": Web.Kind.typography.typeface_header
+    "font-weight": "700"
+    "line-height": "2"
+  }
+
+Web.Kind.typography.header2: Map(String)
+  {
+    "font-size": "16pt"
+    "font-family": Web.Kind.typography.typeface_header
+    "font-weight": "700"
+    "line-height": "2"
+  }
+
+Web.Kind.typography.header3: Map(String)
+  {
+    "font-size": Web.Kind.typography.body_size
+    "font-family": Web.Kind.typography.typeface_header
+    "font-weight": "700"
+    "line-height": "2"
+  }
+
+Web.Kind.typography.button: Map(String)
+  {
+    "text-align": "center"
+    "font-size": Web.Kind.typography.body_size
+    "font-family": Web.Kind.typography.typeface_header
+    "font-weight": "600"
+  }
