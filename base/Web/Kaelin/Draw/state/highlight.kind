@@ -3,9 +3,7 @@ Web.Kaelin.Draw.state.highlight(map: Web.Kaelin.Map, cast_info: Maybe(Web.Kaelin
   open env_info as info
   let coord = Web.Kaelin.Coord.to_axial(info.mouse_pos)
   if Web.Kaelin.Coord.fit(coord,Web.Kaelin.Constants.map_size) then
-    let {i,   j} = Web.Kaelin.Coord.to_screen_xy(coord)
-    let i = U32.sub(i, Web.Kaelin.Constants.hexagon_radius)
-    let j = U32.sub(j, Web.Kaelin.Constants.hexagon_radius)
+    let {i, j} = Web.Kaelin.Draw.support.centralize(coord)
     let hex_img = 
     case cast_info {
       none: Web.Kaelin.Assets.tile.effect.blue_green1

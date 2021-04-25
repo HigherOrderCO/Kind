@@ -6,11 +6,18 @@ Web.Kaelin.Map.arena: Web.Kaelin.Map
   let height   = U32.add(U32.mul(map_size, 2#32), 1#32) // map_size * 2 + 1
 
   // TODO: Define this elsewhere?
-  let Normal   = Web.Kaelin.Assets.tile.green_2
-  let Casting  = Web.Kaelin.Assets.tile.effect.light_red1
-  let Moving   = Web.Kaelin.Assets.tile.effect.blue_green1
-  
-  let new_terrain = Web.Kaelin.Terrain.grass(Normal, Casting, Moving)
+  terrain_img = (sprite)
+    open sprite 
+    case sprite.mouse_over sprite.effect {
+      true normal: Web.Kaelin.Assets.tile.effect.blue_green2
+      true movement: Web.Kaelin.Assets.tile.effect.dark_blue2
+      true ability: Web.Kaelin.Assets.tile.effect.dark_red2
+      false normal: Web.Kaelin.Assets.tile.green_2
+      false movement: Web.Kaelin.Assets.tile.effect.light_blue2
+      false ability: Web.Kaelin.Assets.tile.effect.light_red2
+  }
+
+  let new_terrain = Web.Kaelin.Terrain.grass(terrain_img)
   let new_terrain = Web.Kaelin.Entity.background(new_terrain)
 
   //// loops through the half of the map_size

@@ -1,3 +1,10 @@
 type Web.Kaelin.Terrain { 
-  grass(normal: VoxBox, ability: VoxBox, movement: VoxBox)
+  grass(draw: Web.Kaelin.Terrain.Sprite -> VoxBox)
+}
+
+type Web.Kaelin.Terrain.Sprite {
+  new(
+    effect: Web.Kaelin.HexEffect
+    mouse_over: Bool
+  )
 }

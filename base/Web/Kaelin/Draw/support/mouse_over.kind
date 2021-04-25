@@ -1,0 +1,4 @@
+Web.Kaelin.Draw.support.mouse_over(coord: Web.Kaelin.Coord, env_info: App.EnvInfo): Bool
+  open env_info as info
+    mouse_pos = Web.Kaelin.Coord.to_axial(info.mouse_pos)
+    Web.Kaelin.Coord.eql(coord,mouse_pos)
