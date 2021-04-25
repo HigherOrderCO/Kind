@@ -8,7 +8,7 @@
 Kind.Term.equal.extra_holes.funari(
   term: Kind.Term,
   arity: Nat,
-): Maybe(Pair(String, Nat))
+): Maybe<Pair<String, Nat>>
   case term {
     app: Kind.Term.equal.extra_holes.funari(term.func, Nat.succ(arity))
     ori: Kind.Term.equal.extra_holes.funari(term.expr, arity)
@@ -21,7 +21,7 @@ Kind.Term.equal.extra_holes.funari(
 Kind.Term.equal.extra_holes.filler(
   a: Kind.Term,
   b: Kind.Term,
-): Kind.Check(Unit)
+): Kind.Check<Unit>
   case a {
     app: case b {
       app: do Kind.Check {
@@ -42,7 +42,7 @@ Kind.Term.equal.extra_holes.filler(
   }
 
 // Checks eligibility and calls the filler
-Kind.Term.equal.extra_holes(a: Kind.Term, b: Kind.Term): Kind.Check(Unit)
+Kind.Term.equal.extra_holes(a: Kind.Term, b: Kind.Term): Kind.Check<Unit>
   case Kind.Term.equal.extra_holes.funari(a,0) as a_funari {
     none: do Kind.Check { return Unit.new }
     some: case Kind.Term.equal.extra_holes.funari(b,0) as b_funari {

@@ -1,4 +1,4 @@
-Either.bind<A: Type, B: Type, C: Type>(e: Either(A,B), f: B -> Either(A,C)): Either(A,C)
+Either.bind<A: Type, B: Type, C: Type>(e: Either<A,B>, f: B -> Either<A,C>): Either<A,C>
   case e {
     left: Either.left!!(e.value),
     right: f(e.value),

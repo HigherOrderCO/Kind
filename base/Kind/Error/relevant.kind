@@ -7,7 +7,7 @@ Kind.Error.is_mistake(error: Kind.Error): Bool
 Kind.Error.is_goal(error: Kind.Error): Bool
   case error { show_goal: true } default false
 
-Kind.Error.relevant(errors: List(Kind.Error)): List(Kind.Error)
+Kind.Error.relevant(errors: List<Kind.Error>): List<Kind.Error>
   let undefs   = List.filter!(Kind.Error.is_undef, errors)
   let mistakes = List.filter!(Kind.Error.is_mistake, errors)
   let goals    = List.filter!(Kind.Error.is_goal, errors)

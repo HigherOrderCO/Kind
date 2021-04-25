@@ -2179,10 +2179,13 @@ module.exports = (function() {
                     var $459 = $473;
                     break;
                 case 'App.Event.tick':
-                case 'App.Event.dom':
                 case 'App.Event.mouse_down':
                 case 'App.Event.mouse_up':
                 case 'App.Event.key_up':
+                case 'App.Event.mouse_over':
+                case 'App.Event.mouse_out':
+                case 'App.Event.mouse_click':
+                case 'App.Event.resize':
                     var $474 = App$pass;
                     var $459 = $474;
                     break;

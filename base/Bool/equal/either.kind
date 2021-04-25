@@ -1,4 +1,4 @@
-Bool.equal.either(a: Bool, b: Bool): Either(a == b, a == Bool.not(b))
+Bool.equal.either(a: Bool, b: Bool): Either<a == b, a == Bool.not(b)>
   case a {
     true:
       case b {

@@ -1,0 +1,2 @@
+NatMap.get<A: Type>(key: Nat, map: NatMap(A)): Maybe<A>
+  BitsMap.get<A>(Nat.to_bits(key), map)

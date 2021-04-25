@@ -62,8 +62,8 @@ module.exports = class AppPlay extends Component {
         _: "App.EnvInfo.new",
         screen_size: {
           _: "Pair.new",
-          fst: this.container ? this.container.offsetWidth : 0,
-          snd: this.container ? this.container.offsetHeight : 0,
+          fst: window.innerWidth, // this.container ? this.container.offsetWidth : 0,
+          snd: window.innerHeight // this.container ? this.container.offsetHeight : 0,
         },
         mouse_pos: this.mouse_pos,
       }
@@ -84,6 +84,33 @@ module.exports = class AppPlay extends Component {
       });
     };
     document.body.addEventListener("mousedown", this.listeners.mousedown);
+
+    this.listeners.mouseover = (e) => {
+      this.register_event({
+        _: "App.Event.mouse_over",
+        time: BigInt(Date.now()),
+        id: e.target.id
+      });
+    };
+    document.body.addEventListener("mouseover", this.listeners.mouseover); 
+
+    this.listeners.mouseover = (e) => {
+      this.register_event({
+        _: "App.Event.mouse_out",
+        time: BigInt(Date.now()),
+        id: e.target.id
+      });
+    };
+    document.body.addEventListener("mouseout", this.listeners.mouseout);
+
+    this.listeners.click = (e) => {
+      this.register_event({
+        _: "App.Event.mouse_click",
+        time: BigInt(Date.now()),
+        id: e.target.id
+      });
+    };
+    document.body.addEventListener("click", this.listeners.click); 
 
     // Mouse up event
     this.listeners.mouseup = (e) => {
@@ -115,6 +142,24 @@ module.exports = class AppPlay extends Component {
       });
     };
     document.body.addEventListener("keyup", this.listeners.keyup);
+
+    // Resize event
+    this.listeners.resize = (e) => {
+      this.register_event({
+        _: "App.Event.resize",
+        time: BigInt(Date.now()),
+        info: {
+          _: "App.EnvInfo.new",
+          screen_size: {
+            _: "Pair.new",
+            fst: e.target.innerWidth,
+            snd: e.target.innerHeight,
+          },
+          mouse_pos: this.mouse_pos,
+        }
+      });
+    };
+    window.addEventListener("resize", this.listeners.resize);
 
     //Tick event
     this.intervals.tick = () => {
@@ -237,16 +282,7 @@ module.exports = class AppPlay extends Component {
         let style = utils.map_to_object(elem.style);
         return h(elem.tag, {
           ...props,
-          style: style,
-          onclick: (e) => {
-            if (props.id !== undefined) {
-              this.register_event({
-                _: "App.Event.dom",
-                id: props.id,
-                time: BigInt(Date.now()),
-              });
-            }
-          },
+          style: style
         }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
       // Renders a VoxBox using a canvas
       case "DOM.vbox":

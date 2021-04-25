@@ -9,7 +9,7 @@ type Web.Kaelin.State {
     players: Map(Web.Kaelin.Player)
     cast_status: Maybe(CastStatus)
     map: Web.Kaelin.Map,
-    interface : App.EnvInfo
+    interface : App.EnvInfo // TODO rename to env_info
   )
 }
 

@@ -1,4 +1,4 @@
-IO.purify<A: Type>(io: IO(A)): A
+IO.purify<A: Type>(io: IO<A>): A
   case io {
     end: io.value,
     ask: IO.purify<A>(io.then("")),

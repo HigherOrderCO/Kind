@@ -1,4 +1,4 @@
-Kind.Core.var_name(indx: Nat, name: Kind.Name, brui: Nat, vars: List(Kind.Name)): Kind.Name
+Kind.Core.var_name(indx: Nat, name: Kind.Name, brui: Nat, vars: List<Kind.Name>): Kind.Name
   case indx {
     zero: case brui {
       zero: name

@@ -3,8 +3,7 @@ All syntaxes
 
 This document lists all the high-level syntaxes available on the Kind
 language. Every syntax listed below is expanded (desugared) to either a
-primitive [FormCore](https://github.com/moonad/formcorejs) term, or to one of
-the functions available on the [base library](https://github.com/uwu-tech/Kind/tree/master/base).
+primitive [FormCore](https://github.com/moonad/formcorejs) term, or to one of the functions available on the [base library](https://github.com/uwu-tech/Kind/tree/master/base).
 
 Top-level definition
 --------------------
@@ -348,7 +347,7 @@ Here, Kind evaluated `if x then String else Nat` with each possible value of `x`
 (in this case, `true` or `false`) to determine the return type of each branch.
 Notice that the `true` case and the `false` case return different types. This
 is very useful for theorem proving. For example:
-  
+
 ```
 double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   case b {
@@ -747,22 +746,28 @@ represented as BigInts until they are needed for type-checking purposes. Also,
 Kind compiles every `Nat` (not just literals) to efficient BigInts, when
 available on the target language.
 
-Uint literal
+Fixed width literals
 ------------
 
 ```
-42b
-42s
-42u
-42l
+42#8
+42#16
+0xff2a#32
+42#64
 ```
 
-The literals above can be used to create uints of `8`, `16`, `32` and `64` bits
-respectivelly. So, for example:
+The literals above can be used to create unsigned integers of `8`, `16`, `32` and `64` bits
+respectively. There are also `32` bits signed integers:
+```
++0#32
++5#32
+-120#32
+```
+So, for example:
 
 ```
 num: U32
-  42u
+  42#32
 ```
 
 Is a 32-bit unsigned integer. These aren't primitive either. The code above is
@@ -1318,5 +1323,5 @@ Nat.gte(3, 2)
 Nat.gtn(3, 2)
 ```
 
-Operators in Kind have no precedence and are always right associative. That
+Note that spaces are required before and after operators, also that operators in Kind have no precedence and are always right associative. That
 means, for example, `a * b + c - d` is parsed as `(((a * b) + c) - d)`.

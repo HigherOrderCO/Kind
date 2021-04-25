@@ -1,4 +1,4 @@
-BitsMap.get<A: Type>(bits: Bits, map: BitsMap(A)): Maybe(A)
+BitsMap.get<A: Type>(bits: Bits, map: BitsMap<A>): Maybe<A>
   case bits {
     e: case map {
       new: Maybe.none!,

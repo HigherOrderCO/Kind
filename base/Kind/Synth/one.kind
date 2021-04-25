@@ -1,6 +1,5 @@
 // synthesizes all definitions needed for a term
-Kind.Synth.one(name: Kind.Name, defs: Kind.Defs): IO(Maybe(Kind.Defs))
-  // check if definition is in map
+Kind.Synth.one(name: Kind.Name, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
   case Kind.Map.get!(name, defs) as got {
     // load needed definitions from files
     none: IO {

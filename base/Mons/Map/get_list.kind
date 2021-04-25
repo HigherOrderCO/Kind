@@ -1,4 +1,4 @@
-Mons.Map.get_list(pos: Pos32, map: Mons.Map): List(Mons.Object)
+Mons.Map.get_list(pos: Pos32, map: Mons.Map): List<Mons.Object>
   case BitsMap.get!(U32.to_bits(pos), map) as got {
     none: [],
     some: got.value

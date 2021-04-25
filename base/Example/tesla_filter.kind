@@ -2,9 +2,9 @@
 // Suggested by Tesla Zhang
 
 Example.tesla_filter.go<A: Type, P: A -> Type>(
-  cond: (a: A) Decidable(P(a)),
-  list: List(A)
-): List(A)
+  cond: (a: A) Decidable<P(a)>,
+  list: List<A>
+): List<A>
   case list {
     nil: []
     cons: case cond(list.head) {
@@ -13,5 +13,5 @@ Example.tesla_filter.go<A: Type, P: A -> Type>(
     }!
   }!
 
-Example.tesla_filter: List(Nat)
+Example.tesla_filter: List<Nat>
   Example.tesla_filter.go!<(a) 4 == a>(Nat.is_equal(4), [1,2,3,4,5])

@@ -1718,47 +1718,47 @@ module.exports = (function() {
         var $366 = _m$pure$2;
         return $366;
     }))(Dynamic$new$(Unit$new));
+    const U16$eql = a0 => a1 => (a0 === a1);
 
-    function IO$prompt$(_text$1) {
-        var $367 = IO$ask$("get_line", _text$1, (_line$2 => {
-            var $368 = IO$end$(_line$2);
+    function App$store$(_value$2) {
+        var $367 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $368 = _m$pure$4;
             return $368;
-        }));
+        }))(Dynamic$new$(_value$2));
         return $367;
     };
-    const IO$prompt = x0 => IO$prompt$(x0);
+    const App$store = x0 => App$store$(x0);
 
-    function IO$put_string$(_text$1) {
-        var $369 = IO$ask$("put_string", _text$1, (_skip$2 => {
-            var $370 = IO$end$(Unit$new);
+    function IO$prompt$(_text$1) {
+        var $369 = IO$ask$("get_line", _text$1, (_line$2 => {
+            var $370 = IO$end$(_line$2);
             return $370;
         }));
         return $369;
     };
+    const IO$prompt = x0 => IO$prompt$(x0);
+
+    function IO$put_string$(_text$1) {
+        var $371 = IO$ask$("put_string", _text$1, (_skip$2 => {
+            var $372 = IO$end$(Unit$new);
+            return $372;
+        }));
+        return $371;
+    };
     const IO$put_string = x0 => IO$put_string$(x0);
 
     function String$cons$(_head$1, _tail$2) {
-        var $371 = (String.fromCharCode(_head$1) + _tail$2);
-        return $371;
+        var $373 = (String.fromCharCode(_head$1) + _tail$2);
+        return $373;
     };
     const String$cons = x0 => x1 => String$cons$(x0, x1);
     const String$concat = a0 => a1 => (a0 + a1);
 
     function IO$print$(_text$1) {
-        var $372 = IO$put_string$((_text$1 + "\u{a}"));
-        return $372;
+        var $374 = IO$put_string$((_text$1 + "\u{a}"));
+        return $374;
     };
     const IO$print = x0 => IO$print$(x0);
-    const U16$eql = a0 => a1 => (a0 === a1);
-
-    function App$store$(_value$2) {
-        var $373 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $374 = _m$pure$4;
-            return $374;
-        }))(Dynamic$new$(_value$2));
-        return $373;
-    };
-    const App$store = x0 => App$store$(x0);
 
     function App$new$(_init$2, _draw$3, _when$4) {
         var $375 = ({
@@ -1833,10 +1833,13 @@ module.exports = (function() {
                 case 'App.Event.mouse_up':
                 case 'App.Event.key_up':
                 case 'App.Event.post':
+                case 'App.Event.mouse_over':
+                case 'App.Event.mouse_out':
+                case 'App.Event.resize':
                     var $393 = App$pass;
                     var $379 = $393;
                     break;
-                case 'App.Event.dom':
+                case 'App.Event.mouse_click':
                     var $394 = IO$monad$((_m$bind$9 => _m$pure$10 => {
                         var $395 = _m$bind$9;
                         return $395;
@@ -1968,13 +1971,13 @@ module.exports = (function() {
         'IO.monad': IO$monad,
         'Dynamic.new': Dynamic$new,
         'App.pass': App$pass,
+        'U16.eql': U16$eql,
+        'App.store': App$store,
         'IO.prompt': IO$prompt,
         'IO.put_string': IO$put_string,
         'String.cons': String$cons,
         'String.concat': String$concat,
         'IO.print': IO$print,
-        'U16.eql': U16$eql,
-        'App.store': App$store,
         'App.new': App$new,
         'Web.Demo': Web$Demo,
     };

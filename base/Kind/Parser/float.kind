@@ -16,9 +16,8 @@ Kind.Parser.float.sign: Parser(Char)
     nil:
       Parser.Reply.error!(idx, code, "Expected '+' or '-'."),
     cons:
-      let signs = ['+', '-']
       let sidx = Nat.succ(idx)
-      if U16.eql(code.head, '+') then
+      if U16.eql(code.head, '+') || U16.eql(code.head, '-') then
         Parser.Reply.value!(sidx, code.tail, code.head)
       else
         Parser.Reply.error!(idx, code, "Expected '+' ou '-'.")
@@ -27,11 +26,13 @@ Kind.Parser.float.sign: Parser(Char)
 Kind.Parser.float.32: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
+    get sign = Parser.maybe<Char>(Kind.Parser.float.sign)
+    let sign = sign <> '+'
     get digits = Parser.many1<Char>(Kind.Parser.float.str_digit)
     Parser.text(".")
     get frac = Parser.many1<Char>(Kind.Parser.float.str_digit)
     Parser.text("#32")
-    let float_str = Kind.Term.str(String.from_list(digits)
+    let float_str = Kind.Term.str(String.cons(sign, String.from_list(digits))
                                   | "."
                                   | String.from_list(frac))
     let conv = Kind.Term.ref("F32.parse")
@@ -43,11 +44,13 @@ Kind.Parser.float.32: Parser(Kind.Term)
 Kind.Parser.float.64: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
+    get sign = Parser.maybe<Char>(Kind.Parser.float.sign)
+    let sign = sign <> '+'
     get digits = Parser.many1<Char>(Kind.Parser.float.str_digit)
     Parser.text(".")
     get frac = Parser.many1<Char>(Kind.Parser.float.str_digit)
     Parser.text("#64")
-    let float_str = Kind.Term.str(String.from_list(digits)
+    let float_str = Kind.Term.str(String.cons(sign, String.from_list(digits))
                                   | "."
                                   | String.from_list(frac))
     let conv = Kind.Term.ref("F64.parse")

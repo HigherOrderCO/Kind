@@ -1,7 +1,23 @@
-Web.Kaelin.Map.pop(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map): Pair(Web.Kaelin.Map, Maybe(Web.Kaelin.Entity))
-  let key = Web.Kaelin.Coord.show(coord)
-  let tile = map{key} <> []
+Web.Kaelin.Map.pop(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map): Pair<Web.Kaelin.Map, Maybe<Web.Kaelin.Entity>>
+ 
+ let key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+  let tile = NatMap.get!(key, map)
   case tile {
-    nil: {map, none}
-    cons: {map{key} <- tile.tail, some(tile.head)}
+    none:{map, none}
+    some: 
+    case tile.value { 
+      nil: {map, none}
+      cons: 
+    let new_map = NatMap.set!(key, tile.value.tail, map)
+    {new_map, some(tile.value.head)}
+    }
   }
+
+
+  //let key = Web.Kaelin.Coord.show(coord)
+  //let tile = map{key} <> []
+  //case tile {
+    //nil: {map, none}
+    //cons:
+      //{map{key} <- tile.tail, some(tile.head)}
+  //}  

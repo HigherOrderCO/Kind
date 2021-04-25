@@ -2,6 +2,6 @@ type Kind.Ann {
   new(
     name: Kind.Name,
     term: Kind.Term,
-    type: Maybe(Kind.Term),
+    type: Maybe<Kind.Term>,
   )
 }

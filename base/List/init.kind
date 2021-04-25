@@ -1,4 +1,4 @@
-List.init<A: Type>(list: List(A)): List(A)
+List.init<A: Type>(list: List<A>): List<A>
   case list {
     cons: case list.tail {
       cons: List.cons!(list.head, List.init<A>(list.tail)),

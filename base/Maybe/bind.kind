@@ -1,4 +1,4 @@
-Maybe.bind<A: Type, B: Type>(m: Maybe(A), f: A -> Maybe(B)): Maybe(B)
+Maybe.bind<A: Type, B: Type>(m: Maybe<A>, f: A -> Maybe<B>): Maybe<B>
   case m {
     none: Maybe.none<B>,
     some: f(m.value),

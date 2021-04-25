@@ -1,0 +1,8 @@
+// Not working and not being used
+Web.Kaelin.Map.add_on_range(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map, range: Nat): Web.Kaelin.Map
+  imagem = Web.Kaelin.Entity.background(Kaelin.Assets.hex_range)
+  coords = Web.Kaelin.Coord.range(coord, range)
+  for n in coords with map:
+    Web.Kaelin.Map.push(n, imagem, map)
+  map
+

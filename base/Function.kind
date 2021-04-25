@@ -1,2 +1,2 @@
 Function(A: Type, B: A -> Type): Type
-  (x: A) -> B(x)
+  (x : A) -> B(x)

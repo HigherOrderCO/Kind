@@ -1,4 +1,4 @@
-Kind.Term.equal.go(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: BitsSet): Kind.Check(Bool)
+Kind.Term.equal.go(a: Kind.Term, b: Kind.Term, defs: Kind.Defs, lv: Nat, seen: BitsSet): Kind.Check<Bool>
   //let ah = Kind.Term.serialize(Kind.Term.reduce(a,Kind.Map.new!), lv, lv, Bits.o, Bits.e);
   //let bh = Kind.Term.serialize(Kind.Term.reduce(b,Kind.Map.new!), lv, lv, Bits.i, Bits.e);
   let ah = Kind.Term.serialize(Kind.Term.reduce(a,Kind.Map.new!), lv, false);

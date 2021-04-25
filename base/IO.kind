@@ -1,4 +1,4 @@
 type IO <A: Type> {
   end(value: A),
-  ask(query: String, param: String, then: (response: String) IO(A)),
+  ask(query: String, param: String, then: (response: String) IO<A>),
 }

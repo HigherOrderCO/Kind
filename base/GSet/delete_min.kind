@@ -1,4 +1,4 @@
-GSet.delete_min<A: Type>(set: GSet(A)): GSet(A)
+GSet.delete_min<A: Type>(set: GSet<A>): GSet<A>
   case set {
     tip: set,
     bin: case set.left {

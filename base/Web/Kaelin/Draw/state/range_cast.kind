@@ -1,0 +1,20 @@
+Web.Kaelin.Draw.state.range_cast(
+  map: Web.Kaelin.Map,
+  cast_info: Maybe(Web.Kaelin.CastInfo),
+  img: VoxBox
+) : VoxBox
+  case cast_info as cast { 
+    none: img
+      some: 
+      open cast.value
+      let range = Web.Kaelin.Coord.range(cast.value.hero_pos, cast.value.range) // Gets the list of affected hexagons
+      for coord_range in range with img:
+        let tile    = Web.Kaelin.Map.get(coord_range, map) 
+        let terrain = Web.Kaelin.Draw.terrain(coord_range, tile <> [], img, cast.value) 
+        //let map     = Web.Kaelin.Map.del(coord_range, map) // Deletes that tile from the list
+        let {i, j}  = Web.Kaelin.Coord.to_screen_xy(coord_range)
+        let i       = U32.sub(i, Web.Kaelin.Constants.hexagon_radius)
+        let j       = U32.sub(j, Web.Kaelin.Constants.hexagon_radius)
+        VoxBox.Draw.image(i, j, 0#32, terrain, img)
+      img
+    }

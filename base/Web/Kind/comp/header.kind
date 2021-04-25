@@ -1,0 +1,77 @@
+Web.Kind.comp.header(stt: Web.Kind.State, container_layout: Map(String)): DOM
+  open stt
+
+  let vbox = VoxBox.alloc_capacity(100#32)
+  let line = 
+    DOM.node("div", {}, {
+        "margin":  "auto"
+        "max-width": "65em"
+        "padding": "0.5em 0"
+        }, 
+      [ DOM.node("div", {}, {
+        "height": "3pt"
+        "border-top": Web.Kind.constant.primary_color | " dashed 1pt"
+        "border-bottom": Web.Kind.constant.primary_color | " dashed 1pt"
+        "margin-left": "10%"
+        "margin-right": "10%"
+        }, []) ]
+    )
+
+  DOM.node("div", {"id": "header"}, container_layout, [
+    (case stt.device {
+      phone: 
+        Web.Kind.comp.title_phone("KIND language")
+     } default Web.Kind.comp.title("KIND language")),
+    line,
+    Web.Kind.comp.header_tabs(stt)
+  ])
+
+// Setup the tabs to change page
+Web.Kind.comp.header_tabs(stt: Web.Kind.State): DOM
+  open stt
+  let tabs = [
+    Web.Kind.comp.header_tab(
+      Web.Kind.helper.is_eql(Web.Kind.Page.home, stt.page), 
+      String.eql("tab_home", stt.mouse_over)
+      "Home", "tab_home")
+
+    Web.Kind.comp.header_tab(
+      Web.Kind.helper.is_eql(Web.Kind.Page.apps, stt.page),
+      String.eql("tab_apps", stt.mouse_over)
+      "Apps", "tab_apps")
+  ]
+  DOM.node("div", {}, Map.union!(Web.Kind.typography.button, {
+  "padding-top": "0.5em"
+  "display": "flex"
+  "flex-direction": "row"
+  }), tabs)
+
+// Configure a tab
+Web.Kind.comp.header_tab(
+  is_active: Bool, 
+  is_hover: Bool, 
+  title: String, 
+  id: String): DOM
+  let normal = {
+    "padding": "0.5em 1em"
+    "font-weight": "500"
+    "font-size": "1.1em"
+    "cursor": "pointer"
+    "display": "flex"
+    "justify-content": "center"
+    }
+  let active = {
+    "border-style": "none none solid none"
+    "border-color": Web.Kind.constant.secondary_color
+    "border-width": "thin"
+    }
+  let hover = {
+    "border-style": "none none solid none"
+    "border-color": Web.Kind.constant.light_gray_color
+    "border-width": "thin"
+    }
+  DOM.node("div", {"id": id}, 
+    if is_active then Map.union!(normal, active)
+    else if is_hover then Map.union!(normal, hover)
+    else normal,
+    [DOM.text(title)])

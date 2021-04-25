@@ -1,11 +1,11 @@
 BitsMap.merge.go<A: Type,B: Type,C: Type>(
-  f: Bits -> A -> Maybe(C),
-  g: Bits -> B -> Maybe(C),
-  h: Bits -> A -> B -> Maybe(C),
+  f: Bits -> A -> Maybe<C>,
+  g: Bits -> B -> Maybe<C>,
+  h: Bits -> A -> B -> Maybe<C>,
   key: Bits,
-  a: BitsMap(A),
-  b: BitsMap(B)
-) : BitsMap(C)
+  a: BitsMap<A>,
+  b: BitsMap<B>
+) : BitsMap<C>
   case a {
     new: case b {
       new: BitsMap.new!,

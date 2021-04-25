@@ -1,2 +1,2 @@
-List.and(list: List(Bool)): Bool
+List.and(list: List<Bool>): Bool
   List.all!((x) x, list)

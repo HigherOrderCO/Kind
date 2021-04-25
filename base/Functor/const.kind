@@ -1,3 +1,3 @@
-Functor.const<F: Type -> Type>(f: Functor(F)): <A: Type, B: Type> -> A -> F(B) -> F(A)
+Functor.const<F: Type -> Type>(f: Functor<F>): <A: Type, B: Type> -> A -> F(B) -> F(A)
   <A, B> (a)
   Functor.map!(f)!!(Function.const!!(a))

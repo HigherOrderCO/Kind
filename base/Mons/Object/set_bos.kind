@@ -1,4 +1,4 @@
-Mons.Object.set_bos(bos: List(Mons.Object), obj: Mons.Object): Mons.Object
+Mons.Object.set_bos(bos: List<Mons.Object>, obj: Mons.Object): Mons.Object
   open obj 
   Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, 
     obj.mon, bos, obj.cap, obj.idl, obj.eff)

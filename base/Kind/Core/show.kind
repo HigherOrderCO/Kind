@@ -1,7 +1,7 @@
 Kind.Core.show(term: Kind.Term): String
   Kind.Core.show.go(term, 0, [])
 
-Kind.Core.show.go(term: Kind.Term, indx: Nat, vars: List(Kind.Name)): String
+Kind.Core.show.go(term: Kind.Term, indx: Nat, vars: List<Kind.Name>): String
   case term {
     ref:
       Kind.Name.show(term.name)

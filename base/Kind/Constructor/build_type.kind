@@ -14,8 +14,8 @@ Kind.Constructor.build_type.go(
   type: Kind.Datatype,
   ctor: Kind.Constructor,
   name: Kind.Name,
-  pars: List(Kind.Binder),
-  args: List(Kind.Binder),
+  pars: List<Kind.Binder>,
+  args: List<Kind.Binder>,
 ): Kind.Term
   case pars {
     cons: case pars.head {

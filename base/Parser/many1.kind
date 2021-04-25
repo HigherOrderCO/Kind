@@ -1,4 +1,4 @@
-Parser.many1<V: Type>(parser: Parser(V)): Parser(List(V))
+Parser.many1<V: Type>(parser: Parser(V)): Parser(List<V>)
   Parser {
     var head = parser;
     var tail = Parser.many<V>(parser);

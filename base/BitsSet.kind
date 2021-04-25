@@ -1,2 +1,2 @@
 BitsSet: Type
-  BitsMap(Unit)
+  BitsMap<Unit>

@@ -1,0 +1,76 @@
+Web.Kind.comp.id_action: Map(Web.Kind.Event)
+  {
+    "tab_home": Web.Kind.Event.go_to_home
+    "tab_apps": Web.Kind.Event.go_to_apps
+    "btn_pri_home_go_to_apps": Web.Kind.Event.go_to_apps
+  }  
+
+Web.Kind.comp.heading(typography: Map(String), title: String): DOM
+  DOM.node("div", {}, Map.union!(
+    typography, {
+      "width": "100%"
+  }), [DOM.text(title)])
+
+Web.Kind.comp.title(title: String): DOM
+  DOM.node("div", {}, Map.union!(
+    Web.Kind.typography.title, {
+      "margin-top": "1em"
+      "width": "100%"
+  }), [DOM.text(title)])
+
+Web.Kind.comp.title_phone(title: String): DOM
+  DOM.node("div", {}, Map.union!(
+    Web.Kind.typography.subtitle, {
+      "margin-top": "1em"
+      "width": "100%"
+  }), [DOM.text(title)])
+
+Web.Kind.comp.link(txt: String, href: String): DOM
+  DOM.node("a", {
+      "href": href,
+      "target": "_blank"
+    }, {
+      "cursor": "pointer"
+    }, [DOM.text(txt)])
+
+Web.Kind.comp.link_white(txt: String, font_size: String, href: String): DOM
+  DOM.node("a", {
+      "href": href,
+      "target": "_blank"
+    }, {
+      "font-size": font_size
+      "color": "white"
+      "cursor": "pointer"
+    }, [DOM.text(txt)])
+
+Web.Kind.comp.link_black(txt: String, href: String): DOM
+  DOM.node("a", {
+      "href": href,
+      "target": "_blank"
+    }, {
+      "color": "black"
+      "cursor": "pointer"
+    }, [DOM.text(txt)]) 
+
+Web.Kind.comp.list(items: List<DOM>): DOM
+  let li = []
+  for item in items with li:
+    List.cons!(DOM.node("li", {}, {"line-height": "1.35"}, [item]), li)
+  DOM.node("ul", {}, {
+    "list-style-type": "none"}, li)
+
+Web.Kind.comp.btn_primary_solid(title: String, id: String): DOM
+  DOM.node("div", {
+    "id": id
+  }, Map.union!(Web.Kind.typography.button, {
+    "cursor": "pointer"
+    "padding": "0.5em 1em"
+    "background-color": Web.Kind.constant.secondary_color
+    "color": "white"
+    "border-radius": "7px"
+    "display": "flex"
+    "flex-direction": "row"
+    "align-items": "center"
+    "justify-content": "center"
+  }), [DOM.text(title)])
+

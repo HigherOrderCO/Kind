@@ -1,4 +1,4 @@
-List.span<A: Type>(f: A -> Bool, xs: List(A)): Pair(List(A),List(A))
+List.span<A: Type>(f: A -> Bool, xs: List<A>): Pair<List<A>,List<A>>
   case xs {
     nil : {List.nil!, List.nil!},
     cons: case f(xs.head) {

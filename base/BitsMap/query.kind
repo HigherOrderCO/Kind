@@ -1,4 +1,4 @@
-BitsMap.query<A: Type>(cpy: A -> Pair(A, A), bits: Bits, map: BitsMap(A)): Pair(BitsMap(A), Maybe(A))
+BitsMap.query<A: Type>(cpy: A -> Pair<A, A>, bits: Bits, map: BitsMap<A>): Pair<BitsMap<A>, Maybe<A>>
   case bits {
   e: case map {
     new: 

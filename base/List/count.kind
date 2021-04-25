@@ -1,4 +1,4 @@
-List.count<A: Type>(cond: A -> Bool, list: List(A)): Nat
+List.count<A: Type>(cond: A -> Bool, list: List<A>): Nat
   case list {
     nil:
       0
