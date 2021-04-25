@@ -1,0 +1,1 @@
+#V #parser ((((((Monad.bind Parser) Parser.monad) (List Unit)) V) Kind.Parser.spaces) # ((((((Monad.bind Parser) Parser.monad) V) V) parser) #value ((((((Monad.bind Parser) Parser.monad) (Maybe Unit)) V) ((Parser.maybe Unit) (Kind.Parser.text ","))) # ((((Monad.pure Parser) Parser.monad) V) value))))

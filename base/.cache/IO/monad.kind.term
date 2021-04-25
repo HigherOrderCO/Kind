@@ -1,0 +1,1 @@
+(((Monad.new IO) IO.bind) IO.end)

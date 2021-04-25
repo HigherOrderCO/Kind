@@ -1,0 +1,1 @@
+#V #cond #parser ((((((Monad.bind Parser) Parser.monad) V) (List V)) parser) #head ((((((Monad.bind Parser) Parser.monad) (List V)) (List V)) (((Parser.until V) cond) parser)) #tail ((((Monad.pure Parser) Parser.monad) (List V)) (((List.cons V) head) tail))))

@@ -1,0 +1,1 @@
+%(size:Nat) @(new_size:Nat) @(word:(Word size)) (Word new_size)

@@ -1,0 +1,1 @@
+%Kind.Status.Self(P:@(:Kind.Status) *) @(init:(P Kind.Status.init)) @(wait:(P Kind.Status.wait)) @(done:(P Kind.Status.done)) @(fail:@(errors:(List Kind.Error)) (P (Kind.Status.fail errors))) (P Kind.Status.Self)

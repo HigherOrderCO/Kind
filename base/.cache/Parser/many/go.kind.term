@@ -1,0 +1,1 @@
+#V #parse #values #idx #code (((((parse idx) code) #reply (Parser.Reply (List V))) #reply.idx #reply.code #reply.err ((((Parser.Reply.value (List V)) idx) code) (values (List.nil V)))) #reply.idx #reply.code #reply.val (((((Parser.many.go V) parse) #xs (values (((List.cons V) reply.val) xs))) reply.idx) reply.code))

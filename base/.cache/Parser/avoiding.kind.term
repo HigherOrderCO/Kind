@@ -1,0 +1,1 @@
+#V #test #parse ((((((Monad.bind Parser) Parser.monad) Bool) V) ((Parser.try Unit) test)) #avoided (((avoided # (Parser V)) ((Parser.fail V) "Avoided.")) parse))

@@ -1,0 +1,1 @@
+#bits ((((bits #bits Kind.Term) (Kind.Term.ref (Kind.Name.read "Bits.e"))) #bits.pred ((Kind.Term.app (Kind.Term.ref (Kind.Name.read "Bits.o"))) (Kind.Term.unroll_chr.bits bits.pred))) #bits.pred ((Kind.Term.app (Kind.Term.ref (Kind.Name.read "Bits.i"))) (Kind.Term.unroll_chr.bits bits.pred)))

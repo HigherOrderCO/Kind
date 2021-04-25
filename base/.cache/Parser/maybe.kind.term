@@ -1,0 +1,1 @@
+#V #parse #idx #code (((((parse idx) code) #reply (Parser.Reply (Maybe V))) #reply.idx #reply.code #reply.err ((((Parser.Reply.value (Maybe V)) idx) code) (Maybe.none V))) #reply.idx #reply.code #reply.val ((((Parser.Reply.value (Maybe V)) reply.idx) reply.code) ((Maybe.some V) reply.val)))

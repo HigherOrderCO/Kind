@@ -1,0 +1,1 @@
+%(A:*) @(name:Kind.Name) @(val:A) @(map:(BitsMap A)) (BitsMap A)

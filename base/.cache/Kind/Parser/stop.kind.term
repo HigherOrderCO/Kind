@@ -1,0 +1,1 @@
+#from ((((((Monad.bind Parser) Parser.monad) Nat) ((Pair Nat) Nat)) Parser.get_index) #upto !orig = ((((Pair.new Nat) Nat) from) upto); ((((Monad.pure Parser) Parser.monad) ((Pair Nat) Nat)) orig))

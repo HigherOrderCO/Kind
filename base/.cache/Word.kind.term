@@ -1,0 +1,1 @@
+#size %Word.Self(P:@(size:Nat) @(:(Word size)) *) @(e:((P Nat.zero) Word.e)) @(o:%(size:Nat) @(pred:(Word size)) ((P (Nat.succ size)) ((Word.o size) pred))) @(i:%(size:Nat) @(pred:(Word size)) ((P (Nat.succ size)) ((Word.i size) pred))) ((P size) Word.Self)

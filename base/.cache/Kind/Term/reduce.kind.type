@@ -1,0 +1,1 @@
+@(term:Kind.Term) @(defs:Kind.Defs) Kind.Term

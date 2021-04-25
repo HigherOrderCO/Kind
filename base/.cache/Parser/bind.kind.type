@@ -1,0 +1,1 @@
+%(A:*) %(B:*) @(parse:(Parser A)) @(next:@(:A) (Parser B)) (Parser B)

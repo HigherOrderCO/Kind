@@ -1,0 +1,1 @@
+#A #B %Either.Self(P:@(:((Either A) B)) *) @(left:@(value:A) (P (((Either.left A) B) value))) @(right:@(value:B) (P (((Either.right A) B) value))) (P Either.Self)

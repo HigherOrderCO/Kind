@@ -1,0 +1,1 @@
+#idx #code (((code #code (Parser.Reply Kind.Letter)) ((((Parser.Reply.error Kind.Letter) idx) code) "Unexpected eof.")) #code.head #code.tail ((((Kind.Name.is_letter code.head) # (Parser.Reply Kind.Letter)) ((((Parser.Reply.value Char) (Nat.succ idx)) code.tail) code.head)) ((((Parser.Reply.error Kind.Letter) idx) code) "Expected letter.")))

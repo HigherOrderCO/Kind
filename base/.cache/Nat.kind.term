@@ -1,0 +1,1 @@
+%Nat.Self(P:@(:Nat) *) @(zero:(P Nat.zero)) @(succ:@(pred:Nat) (P (Nat.succ pred))) (P Nat.Self)

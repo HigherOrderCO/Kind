@@ -1,0 +1,1 @@
+#A #B %Pair.Self(P:@(:((Pair A) B)) *) @(new:@(fst:A) @(snd:B) (P ((((Pair.new A) B) fst) snd))) (P Pair.Self)

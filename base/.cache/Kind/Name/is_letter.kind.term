@@ -1,0 +1,1 @@
+#chr ((((((U16.btw 'A') chr) 'Z') # Bool) Bool.true) ((((((U16.btw 'a') chr) 'z') # Bool) Bool.true) ((((((U16.btw '0') chr) '9') # Bool) Bool.true) (((((U16.eql '.') chr) # Bool) Bool.true) (((((U16.eql '_') chr) # Bool) Bool.true) (((((U16.eql '^') chr) # Bool) Bool.true) Bool.false))))))

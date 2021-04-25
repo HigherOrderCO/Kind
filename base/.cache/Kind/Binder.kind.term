@@ -1,0 +1,1 @@
+%Kind.Binder.Self(P:@(:Kind.Binder) *) @(new:@(eras:Bool) @(name:Kind.Name) @(term:Kind.Term) (P (((Kind.Binder.new eras) name) term))) (P Kind.Binder.Self)

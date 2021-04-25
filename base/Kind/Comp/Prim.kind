@@ -1,0 +1,9 @@
+type Kind.Comp.Prim {
+  bool,
+  nat,
+  string,
+  data(ctrs: Kind.Comp.Prim.ADT),
+}
+
+Kind.Comp.Prim.ADT: Type
+  List(Pair(String, List(String)))

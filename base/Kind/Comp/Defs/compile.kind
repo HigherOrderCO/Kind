@@ -1,0 +1,7 @@
+Kind.Comp.Defs.compile.defn(defn: Kind.Def, defs: Kind.Defs): Kind.Comp
+  open defn
+  let {comp,type} = Kind.Comp.compile(defn.term, some(defn.type), defs, 0)
+  comp
+
+Kind.Comp.Defs.compile(defs: Kind.Defs): Kind.Comp.Defs
+  BitsMap.map!!((x) Kind.Comp.Defs.compile.defn(x,defs), defs)

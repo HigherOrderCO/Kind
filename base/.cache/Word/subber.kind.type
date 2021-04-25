@@ -1,0 +1,1 @@
+%(size:Nat) @(a:(Word size)) @(b:(Word size)) @(c:Bool) (Word size)

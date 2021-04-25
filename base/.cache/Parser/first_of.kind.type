@@ -1,0 +1,1 @@
+%(A:*) @(pars:(List (Parser A))) (Parser A)

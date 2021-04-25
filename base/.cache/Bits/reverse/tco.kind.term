@@ -1,0 +1,1 @@
+#a #r ((((a #a Bits) r) #a.pred ((Bits.reverse.tco a.pred) (Bits.o r))) #a.pred ((Bits.reverse.tco a.pred) (Bits.i r)))

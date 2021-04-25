@@ -1,0 +1,1 @@
+#chrx !bits = (U16.to_bits chrx); !term = (Kind.Term.ref (Kind.Name.read "Word.from_bits")); !term = ((Kind.Term.app term) (Kind.Term.nat +16)); !term = ((Kind.Term.app term) (Kind.Term.unroll_chr.bits bits)); !term = ((Kind.Term.app (Kind.Term.ref (Kind.Name.read "U16.new"))) term); term

@@ -1,0 +1,1 @@
+#idx #code (((code #code (Parser.Reply Char)) ((((Parser.Reply.error Char) idx) code) "Unexpected end of file.")) #code.head #code.tail ((((Parser.Reply.value Char) (Nat.succ idx)) code.tail) code.head))

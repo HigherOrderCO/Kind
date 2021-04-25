@@ -1,0 +1,1 @@
+#a #b (((a #a (Maybe Parser.ErrorAt)) b) #a.value (((b #b (Maybe Parser.ErrorAt)) a) #b.value ((a.value #a.value (Maybe Parser.ErrorAt)) #a.value.idx #a.value.code #a.value.err ((b.value #b.value (Maybe Parser.ErrorAt)) #b.value.idx #b.value.code #b.value.err (((((Nat.gtn a.value.idx) b.value.idx) # (Maybe Parser.ErrorAt)) a) b)))))

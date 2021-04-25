@@ -1,0 +1,1 @@
+#text (IO.put_string ((String.concat text) "\u{A}"))

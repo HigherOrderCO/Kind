@@ -1,0 +1,17 @@
+Kind.Comp.Prim.natives: List(Pair(String, Kind.Comp.Prim))
+  [
+    {"Bool", Kind.Comp.Prim.bool}
+    {"Nat", Kind.Comp.Prim.nat}
+    //"Bits"
+    //"U8"
+    //"U16"
+    //"U32"
+    //"U64"
+    //"U256"
+    //"F64"
+    //"String"
+    //"Buffer32"
+  ]
+
+Kind.Comp.Prim.natives.names: List(String)
+  List.map!!(Pair.fst!!, Kind.Comp.Prim.natives)

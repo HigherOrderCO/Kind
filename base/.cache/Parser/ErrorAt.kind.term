@@ -1,0 +1,1 @@
+%Parser.ErrorAt.Self(P:@(:Parser.ErrorAt) *) @(new:@(idx:Nat) @(code:String) @(err:String) (P (((Parser.ErrorAt.new idx) code) err))) (P Parser.ErrorAt.Self)

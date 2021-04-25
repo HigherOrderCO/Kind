@@ -1,0 +1,1 @@
+%Bits.Self(P:@(:Bits) *) @(e:(P Bits.e)) @(o:@(pred:Bits) (P (Bits.o pred))) @(i:@(pred:Bits) (P (Bits.i pred))) (P Bits.Self)

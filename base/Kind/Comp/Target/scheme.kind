@@ -1,0 +1,35 @@
+Kind.Comp.Target.scheme(defs: Kind.Comp.Defs): String
+  let defs = Kind.Map.to_list!(defs)
+  let code = "(let (\n"
+  for defn in defs with code:
+    let {name, comp} = defn
+    code | "  (" | name | " " | Kind.Comp.Target.scheme.term(comp) | ")\n"
+  code | ") (display \"hello\"))"
+
+
+Kind.Comp.Target.scheme.term(comp: Kind.Comp): String
+  let go = Kind.Comp.Target.scheme.term
+  case comp {
+    nil:
+      "()"
+    var: // TODO: generate safe Scheme name
+      comp.name
+    ref: // TODO: generate safe Scheme name
+      comp.name
+    lam:
+      "(lambda (" | comp.name | ") " | go(comp.body) | ")"
+    app:
+      "(" | go(comp.func) | " " | go(comp.argm) | ")"
+    let:
+      "(let ((" | comp.name | " " | go(comp.expr) | ")) " | go(comp.body) | ")"
+    eli: // TODO: optimized eliminators
+      go(comp.expr)
+    ins: // TODO: optimized instantiators
+      go(comp.expr)
+    nat:
+      Nat.show(comp.natx)
+    chr:
+      "'" | String.cons(comp.chrx, String.nil) | "'"
+    str:
+      "\"" | comp.strx | "\""
+  }

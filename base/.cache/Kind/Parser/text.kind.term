@@ -1,0 +1,1 @@
+#text ((((((Monad.bind Parser) Parser.monad) (List Unit)) Unit) Kind.Parser.spaces) # (Parser.text text))

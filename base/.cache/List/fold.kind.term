@@ -1,0 +1,1 @@
+#A #list #P #nil #cons (((list #list P) nil) #list.head #list.tail ((cons list.head) (((((List.fold A) list.tail) P) nil) cons)))

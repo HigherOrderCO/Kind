@@ -1,0 +1,1 @@
+#idx #code (((code #code (Parser.Reply Bool)) ((((Parser.Reply.value Bool) idx) code) Bool.true)) #code.head #code.tail ((((Parser.Reply.value Bool) idx) code) Bool.false))

@@ -1,0 +1,1 @@
+%(V:*) @(parser:(Parser V)) (Parser (List V))

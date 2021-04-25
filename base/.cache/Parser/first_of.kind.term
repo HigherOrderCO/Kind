@@ -1,0 +1,1 @@
+#A #pars (((Parser.first_of.go A) pars) (Maybe.none Parser.ErrorAt))

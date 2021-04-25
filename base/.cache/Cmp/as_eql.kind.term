@@ -1,0 +1,1 @@
+#cmp ((((cmp #cmp Bool) Bool.false) Bool.true) Bool.false)

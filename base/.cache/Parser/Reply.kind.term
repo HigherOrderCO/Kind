@@ -1,0 +1,1 @@
+#V %Parser.Reply.Self(P:@(:(Parser.Reply V)) *) @(error:@(idx:Nat) @(code:String) @(err:String) (P ((((Parser.Reply.error V) idx) code) err))) @(value:@(idx:Nat) @(code:String) @(val:V) (P ((((Parser.Reply.value V) idx) code) val))) (P Parser.Reply.Self)

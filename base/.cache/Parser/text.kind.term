@@ -1,0 +1,1 @@
+#text #idx #code ((((((Parser.text.go text) idx) code) #reply (Parser.Reply Unit)) #reply.idx #reply.code #reply.err ((((Parser.Reply.error Unit) idx) code) reply.err)) #reply.idx #reply.code #reply.val ((((Parser.Reply.value Unit) reply.idx) reply.code) reply.val))

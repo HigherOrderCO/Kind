@@ -1,182 +1,19 @@
-// queria fazer um show no estilo sexp pra ficar com a estrutura mais
-// explícita, mas tava dando muito trabalho
-Kind.Term.show_sexp.var(
-  name: Kind.Name, 
-  indx: Nat, 
-  indentation: Nat
-): String
-  let spaces = Nat.apply!(indentation, String.concat(" "), "")
-  spaces | "(var (name \"" | name | "\"))"
-
-Kind.Term.show_sexp.ref(
-  name: Kind.Name, 
-  indentation: Nat
-): String
-  let spaces = Nat.apply!(indentation, String.concat(" "), "")
-  spaces | "(ref (name \"" | name | "\"))"
-
-Kind.Term.show_sexp.typ(indentation: Nat): String
-  let spaces = Nat.apply!(indentation, String.concat(" "), "")
-  spaces | "(Type)\n"
-
-Kind.Term.show_sexp.all(
-  eras: Bool,
-  self: Kind.Name, 
-  name: Kind.Name, 
-  xtyp: Kind.Term, 
-  body: Kind.Term -> Kind.Term -> Kind.Term, 
-  indentation: Nat
-): String
-  let spaces = Nat.apply!(indentation, String.concat(" "), "")
-  spaces | "(all\n" |
-  spaces | "  (eras " | Bool.show(eras) | ")\n" |
-  spaces | "  (self \"" | self | "\")\n" |
-  spaces | "  (name \"" | name | "\")\n" |
-  spaces | "  (xtyp)\n" |
-  spaces | "  (body))"
-
-Kind.Term.show_sexp.lam(
-  name: Kind.Name,
-  body: Kind.Term -> Kind.Term,
-  indentation: Nat
-): String
-  let spaces = Nat.apply!(indentation, String.concat(" "), "")
-  spaces | "(lam\n" |
-  spaces | "  (name \"" | name | "\")\n" |
-  spaces | "  (body\n" | 
-  Kind.Term.show_sexp.aux(body(Kind.Term.var(name, 0)), 4 + indentation) | "))"
-
-Kind.Term.show_sexp.app(
-  func: Kind.Term,
-  argm: Kind.Term,
-  indentation: Nat
-): String
-  let spaces = Nat.apply!(indentation, String.concat(" "), "")
-  spaces | "(app\n" |
-  spaces | "  (func\n" |
-  Kind.Term.show_sexp.aux(func, 4 + indentation) | ")\n" |
-  spaces | "  (argm\n" |
-  Kind.Term.show_sexp.aux(argm, 4 + indentation) | "))"
-
-Kind.Term.show_sexp.ori(
-  orig: Pair<Nat, Nat>,
-  expr: Kind.Term,
-  indentation: Nat
-): String
-  let spaces = Nat.apply!(indentation, String.concat(" "), "")
-  open orig
-  spaces | "(ori\n" |
-  spaces | "  (orig (" | Nat.show(orig.fst) | ", " | Nat.show(orig.snd) | "))\n" |
-  spaces | "  (expr\n" |
-  Kind.Term.show_sexp.aux(expr, 4 + indentation) | "))"
-
-//(lam
-//  (name "b")
-//  (body
-//    (app
-//      (func
-//        (app
-//          (func
-//            (app
-//              (func
-//                (var (name "b")))
-//              (argm
-//                (lam
-//                  (name "b")
-//                  (body
-//                    (ref (name "Bool")))))))
-//          (argm
-//            (ref (name "Bool.false")))))
-//      (argm
-//        (ref (name "Bool.true"))))))
-
-Kind.Term.show_sexp.aux(t: Kind.Term, indentation: Nat): String
-  let body =
-    case t {
-      var: Kind.Term.show_sexp.var(t.name, t.indx, indentation)
-      ref: Kind.Term.show_sexp.ref(t.name, indentation)
-      typ: Kind.Term.show_sexp.typ(indentation)
-      all: Kind.Term.show_sexp.all(t.eras, t.self, t.name, t.xtyp, t.body, indentation)
-      lam: Kind.Term.show_sexp.lam(t.name, t.body, indentation)
-      app: Kind.Term.show_sexp.app(t.func, t.argm, indentation)
-      let: "(let?)"
-      def: "(def?)"
-      ann: "(ann?)"
-      gol: "(gol?)"
-      hol: "(hol?)"
-      nat: "(nat?)"
-      chr: "(chr?)"
-      str: "(str?)"
-      cse: "(cse?)"
-      ori: Kind.Term.show_sexp.aux(t.expr, indentation)
-    } default "(?)"
-  body
-
-Kind.Term.show_sexp(t: Kind.Term): String
-  Kind.Term.show_sexp.aux(t, 0)
-
-Test: String
-  defs = Kind.Defs.read("", "
-    type Bool {
-      true
-      false
-    }
-
-    not(b: Bool): Bool
-      case b {
-        true: false
-        false: true
+Test: IO(Unit)
+  IO {
+    let defs = Kind.Defs.read_main("
+      type Bool {
+        true
+        false
       }
-  ",
-  BitsMap.new!)
-  case defs {
-    left: defs.value
-    right: 
-      case Kind.Map.get!("not", defs.value) as got {
-        none:
-          "not found"
-        some:
-          open got.value
-          log("term:")
-          log(Kind.Term.show(got.value.term))
-          log("name: ", got.value.name)
-          let maybe_defs = IO.purify!(Kind.Synth.one(got.value.name, defs.value))
-          case maybe_defs {
-            none: 
-              "no defs, sorry"
-            some:
-              log("got defs")
-              case Kind.Map.get!(got.value.name, maybe_defs.value) as got2 {
-                none:
-                  "wtf, \"" | got.value.name | "\" is gone"
-                some:
-                  open got2.value
-                  log("the term now:")
-                  log(Kind.Term.show_sexp(got2.value.term))
-                  let {comp, type} = Kind.Comp.compile(got2.value.term, some(got2.value.type), maybe_defs.value, 0)
-                  log("comp:")
-                  Kind.Comp.show(comp)
-              }
-          }
-      }
+
+      not(b: Bool): Bool
+        let b0 = ((P, t, f) f) :: Bool
+        let b1 = Bool.true
+        case b {
+          true: b0
+          false: b1
+        }
+    ")
+    let defs = IO.purify!(Kind.Synth.one("not", defs)) <> Kind.Map.new!
+    IO.print(Kind.Comp.Target.scheme(Kind.Comp.Defs.compile(defs)))
   }
-
-// 107      //(lam
-// 110      //  (name "b")
-// 113      //  (body
-// 107      //    (app
-// 140      //      (func
-// 107      //        (app
-// 143      //          (func
-// 147      //            (app
-// 169      //              (func
-// 169      //                (var (name "b")))
-// 169      //              (argm
-// comp:    //                (lam
-// "λ_b$1.?"//                  (name "b")
-            //                  (body
-            //                    (ref (name "Bool")))))))
-            //          (argm
-            //            (ref (name "Bool.false")))))
-            //      (argm
-            //        (ref (name "Bool.true"))))))
