@@ -1,3 +1,4 @@
+// Returns the cast affecting a tile
 Web.Kaelin.Draw.support.which_effect(
   coord: Web.Kaelin.Coord,
   cast_info: Web.Kaelin.CastInfo

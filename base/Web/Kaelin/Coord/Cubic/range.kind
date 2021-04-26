@@ -1,3 +1,4 @@
+// Returns a list with all coordinates within a certain range
 Web.Kaelin.Coord.Cubic.range(coord: Web.Kaelin.Coord.Cubic, distance: Nat): List<Web.Kaelin.Coord.Cubic>
   let distance_32 = Nat.to_u32(distance)
   let distance_i32 = U32.to_i32(distance_32)

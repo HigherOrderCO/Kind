@@ -1,3 +1,5 @@
+// Converts an axial coordinate to a natural number, so it can be used as a key in a NatMap(Web.Kaelin.Tile)
+// The coordinate {+2, -3} is transformed to 10020997 
 Web.Kaelin.Coord.Convert.axial_to_nat(coord: Web.Kaelin.Coord): Nat
   open coord
   let i = I32.add(coord.i, +1000#32)

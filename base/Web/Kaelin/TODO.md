@@ -12,20 +12,21 @@ TODO list on Kaelin
 
 - [ ] Serialize.kind and Deserialize.kind
 
-- [ ] Fix add_on_range and skill_range_show functions
-
 - [X] Improve Draw/state/background function
-
-- [ ] I32.show bug (when printing negative numbers goes to 2ˆ32 - absolute value) 
-
-- [ ] log inside a function that contains a variable named as 'x' brokes typecheck
 
 - [ ] fix mouse position not corresponding to the respective hexagon
 
 - [ ] organize folders, files, and names
 
-- [ ] remove state.interface from Web.Kaelin.Draw.state.highlight
-
 - [ ] define tile images in Web.Kaelin.Map.arena elsewhere
 
-- [ ] make Web.Kaelin.Draw.state.highlight get the images from Web.Kaelin.Terrain
+- [ ] Maybe organize main folder?
+
+
+Kind:
+
+- [ ] I32.show bug (when printing negative numbers goes to 2ˆ32 - absolute value) 
+
+- [ ] log inside a function that contains a variable named as 'x' brokes typecheck
+
+- [ ] maybe add I32.to_nat?

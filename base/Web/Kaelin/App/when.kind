@@ -53,7 +53,7 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
               "3": {2, Web.Kaelin.HexEffect.movement}
             }default {0, Web.Kaelin.HexEffect.ability}
             // App.store<Web.Kaelin.State>(Web.Kaelin.Player.move(Web.Kaelin.Coord.new(+1,+0) state, event.addr))            
-            App.store<Web.Kaelin.State>(Web.Kaelin.Action.cast(range, hex_effect, state, event.addr))
+            App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_cast(range, hex_effect, state, event.addr))
 
           "0x4":
             App.store<Web.Kaelin.State>(Web.Kaelin.Action.select(state, event.addr))

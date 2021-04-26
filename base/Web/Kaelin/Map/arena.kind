@@ -6,6 +6,7 @@ Web.Kaelin.Map.arena: Web.Kaelin.Map
   let height   = U32.add(U32.mul(map_size, 2#32), 1#32) // map_size * 2 + 1
 
   // TODO: Define this elsewhere?
+  // Defines all possible images inside a tile
   terrain_img = (sprite)
     open sprite 
     case sprite.mouse_over sprite.effect {
