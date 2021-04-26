@@ -1,0 +1,3 @@
+Hex.append(hex : String, size : Nat, x : Bits) : String
+  let hex2 = Hex.format_hex(size, Bits.to_hex_string(x))
+  hex | hex2
