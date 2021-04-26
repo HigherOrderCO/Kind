@@ -4,6 +4,7 @@ A cute proof and programming language.
 
 Usage
 -----
+![npm](https://img.shields.io/npm/v/kind-lang)  
 
 ```bash
 npm i -g kind-lang                             # installs Kind
