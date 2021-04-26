@@ -2,29 +2,33 @@ Web.Kind.draw_page_home(stt: Web.Kind.State): DOM
   open stt
   // Auxiliars
   // ----------
-  let line = 
-    ((txt) DOM.node("p", {}, {"font-size": Web.Kind.constant.p_tag_size}, 
-      [DOM.text(txt)])) :: String -> DOM
-  
-  let line_break = DOM.node("p", {}, {"font-size": Web.Kind.constant.p_tag_size}, 
-    [DOM.node("br", {}, {}, [])])
-
   let span =
-    ((txt) DOM.node("span", {}, {"font-size": Web.Kind.constant.p_tag_size}, 
+    ((txt) DOM.node("span", {}, {}, 
     [DOM.text(txt)])) :: String -> DOM
 
+  let line = 
+    ((txt) DOM.node("p", {}, {}, 
+    [DOM.text(txt)])) :: String -> DOM
+
+  let line_break = DOM.node("br", {}, {}, [])
+
   let span_bold =
-    ((txt) DOM.node("span", {}, {
-      "font-weight": "bold"
-      "font-size": Web.Kind.constant.p_tag_size
-      }, [DOM.text(txt)])) :: String -> DOM
+    ((txt) DOM.node("span", {}, Web.Kind.typography.body_strong,
+    [DOM.text(txt)])) :: String -> DOM
 
   // Content
   // ----------
+  let go_to_apps_height = case stt.device {
+    phone: "6em"
+  } default "10em"
+  let heading_typography = case stt.device {
+    phone: Web.Kind.typography.h2
+  } default Web.Kind.typography.h1
+
   let intro =
-    DOM.node("div", {}, {}, [
+    DOM.node("div", {}, Web.Kind.typography.body, [
       span("Kind is a cute ") span_bold("proof")
-      span("gramming language.") line_break
+      span("gramming language.") line_break line_break
       span("It's ") span_bold("capable of everything")
       line("from web apps to games to")
       line("advanced mathematical proofs.")
@@ -33,19 +37,19 @@ Web.Kind.draw_page_home(stt: Web.Kind.State): DOM
   let call_to_apps =
     let croni =
       DOM.node("div", {}, {
-        "margin-left": "40px"
+        "margin-left": "3em"
         "display": "flex"
         "justify-content": "flex-end"
       }, [
-        DOM.node("p", {}, {"margin-bottom": "10px"}, [DOM.text("gl hf!")])
+        span("gl hf!")
         DOM.node("img", {"src": Web.Kind.img.croni}, {
-          "width": "30px"
-          "height": "30px"
+          "width": "2em"
+          "height": "2em"
         }, [])
       ])
       
     DOM.node("div", {}, {
-      "height": "100px"
+      "height": go_to_apps_height
       "display": "flex"
       "align-items": "center"
       "justify-content": "center"
@@ -57,31 +61,21 @@ Web.Kind.draw_page_home(stt: Web.Kind.State): DOM
   
   let install =
     let instructions = 
-      DOM.node("div", {}, {
-        "margin-top": "10px"
-        "padding": "5px"
-        "border": "1px solid"}, [
+      DOM.node("div", {}, Map.union!(Web.Kind.typography.code, {
+        "margin-top": "0.5em"
+        "padding": "0.5em"
+        "box-shadow": Web.Kind.constant.primary_color | " -2px 2px 1px"
+        "border": "1px solid"}), [
           line("npm i -g kind-lang")
           line("git clone https://github.com/uwu-tech/Kind")
           line("cd Kind/base")
           line("kind Main")
           line("kind Main --run")
         ])
-    DOM.node("div", {}, {"margin": "20px 0px 20px 0px"}, [
-      Web.Kind.comp.h1("Install"), instructions
+    DOM.node("div", {"id": "instructions"}, {}, [
+      Web.Kind.comp.heading(heading_typography, "Install"), instructions
     ])
-
-  DOM.node("div", {"id": "page-home"}, {
-    "display": "flex"
-    "flex-direction": "column",
-    "justify-content": "space-between",
-    "height": "100%"
-  }, [
-    Web.Kind.comp.header(stt), 
-    Web.Kind.comp.body_container([
-      intro,
-      call_to_apps,
-      install
-    ], stt.device),
-    Web.Kind.comp.footer(stt.device)
-  ])
+  Web.Kind.comp.page("home", stt, [
+        intro,
+        call_to_apps,
+        install])

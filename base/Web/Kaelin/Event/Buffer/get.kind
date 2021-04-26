@@ -1,0 +1,7 @@
+Web.Kaelin.Event.Buffer.get(buffer : Web.Kaelin.Event.Buffer) : Nat
+  open buffer
+  case buffer.snd as xs {
+      nil : 0
+      cons :  
+      Hex.to_nat(String.take(U8.to_nat(xs.head), buffer.fst))
+  }

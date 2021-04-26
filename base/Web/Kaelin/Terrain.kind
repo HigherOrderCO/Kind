@@ -1,3 +1,11 @@
 type Web.Kaelin.Terrain { 
-  grass(normal: VoxBox, ability: VoxBox, movement: VoxBox)
+  grass(draw: Web.Kaelin.Terrain.Sprite -> VoxBox)
+}
+
+// Checks which effect is affecting a tile and if the mouse is over it, to tell which tile should be drawn
+type Web.Kaelin.Terrain.Sprite {
+  new(
+    effect: Web.Kaelin.HexEffect
+    mouse_over: Bool
+  )
 }

@@ -1,87 +1,64 @@
-Web.Kind.comp.footer(device: Device): DOM
-  let join_us =
-    case device{
-      phone:
-      let join_us_txt =
-        DOM.node("div", {}, {"margin": "20px 0px 10px 0px"}, [
-          Web.Kind.comp.h3("Join Us"),
-          DOM.node("div", {}, {"margin-top": "5px"}, [
-            Web.Kind.comp.list([
-              Web.Kind.comp.link_white(" Github", "12px", "https://github.com/uwu-tech/Kind"),
-              Web.Kind.comp.link_white(" Telegram", "12px", "https://t.me/formality_lang")
-            ])
-          ]) 
-        ])
-      DOM.node("div", {}, {
-        "height": "80px"
-        "background-color": Web.Kind.constant.primary_color
-        "display": "flex"
-        "flex-direction": "row"
-        "justify-content": "space-between"
-        "align-items": "flex-end"
-        "padding-left": "30px"
-        "padding-right": "30px"
-      }, [
-        join_us_txt,
-        DOM.node("div", {}, {"margin-bottom": "10px", "font-size": "12px"}, [DOM.text("❤ by UwU Tech")])
-      ])
-    } default // other devices
+Web.Kind.comp.footer(device: Device, container_layout: Map(String)): DOM
+  let vertical_padding = case device {
+    phone: "0.5em 0"
+  } default "1em 0"
+  let footer_font_size = case device {
+    phone: Web.Kind.typography.xs
+  } default Web.Kind.typography.body_size
 
-    let join_us_txt =
-      DOM.node("div", {}, {"margin": "20px 0px 20px 0px"}, [
-        Web.Kind.comp.h1("Join Us"),
-        DOM.node("div", {}, {"margin-top": "10px"}, [
-          Web.Kind.comp.list([
-            Web.Kind.comp.link_white(" Github", Web.Kind.constant.p_tag_size, "https://github.com/uwu-tech/Kind"),
-            Web.Kind.comp.link_white(" Telegram", Web.Kind.constant.p_tag_size, "https://t.me/formality_lang")
-          ])
-        ]) 
-      ])
-     DOM.node("div", {}, {
-      "height": "110px"
-      "background-color": Web.Kind.constant.primary_color
+  let footer_font_size_s = case device {
+    phone: Web.Kind.typography.xxs
+  } default Web.Kind.typography.s
+
+  let heading_typography = case device {
+    phone: Web.Kind.typography.h3
+  } default Web.Kind.typography.h2
+
+  let join_us_txt =
+    DOM.node("div", {}, {}, [
+      Web.Kind.comp.heading(heading_typography, "Join Us"),
+      DOM.node("div", {}, {}, [
+        Web.Kind.comp.list([
+          Web.Kind.comp.link_white("Github", footer_font_size, "https://github.com/uwu-tech/Kind"),
+          Web.Kind.comp.link_white("Telegram", footer_font_size, "https://t.me/formality_lang")
+        ])
+      ]) 
+    ])
+  let join_us =
+    DOM.node("div", {}, Map.union!(container_layout, {
       "display": "flex"
       "flex-direction": "row"
       "justify-content": "space-between"
       "align-items": "flex-end"
-      "padding-left": "20%"
-      "padding-right": "20%"
-    }, [
+    }), [
       join_us_txt,
-      DOM.node("div", {}, {"margin-bottom": "20px"}, [DOM.text("❤ by UwU Tech")])
+      DOM.node("div", {}, {"font-size": footer_font_size}, [DOM.text("❤ by UwU Tech")])
     ])
 
+  let join_us_wrapper = DOM.node("div", {}{
+    "padding": vertical_padding
+    "background-color": Web.Kind.constant.primary_color
+  }, [join_us])
+
   let msg_footer =
-    case device{
-      phone: 
-        DOM.node("div", {}, {
-        "background-color": Web.Kind.constant.dark_pri_color
-        "display": "flex"
-        "flex-direction": "column"
-        "justify-content": "center"
-        "align-items": "center"
-        "padding": "10px 30px"
-      }, [
-        DOM.node("p", {}, {"font-size": "10px" }, [DOM.text("This website was created using Kind!")])
-        Web.Kind.comp.link_white("*u* show me the code!", "10px", "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind")
-      ])
-    } default 
-      DOM.node("div", {}, {
-      "background-color": Web.Kind.constant.dark_pri_color
+      DOM.node("div", {}, Map.union!(container_layout, {
       "display": "flex"
       "flex-direction": "column"
       "justify-content": "center"
       "align-items": "center"
-      "padding": "10px 20% 10px 20%"
-       }, [
-        DOM.node("p", {}, {"font-size": "14px" }, [ DOM.text("This website was created using Kind!")]),
-        Web.Kind.comp.link_white("*u* show me the code!", "14px", "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind")
-      ])
+    }), [
+      DOM.node("p", {}, {"font-size": footer_font_size_s}, [DOM.text("This website was created using Kind!")])
+      Web.Kind.comp.link_white("*u* show me the code!", footer_font_size_s, "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind")
+    ])
+
+  let msg_footer_wrapper = DOM.node("div", {}{
+    "padding": "0.5em 0"
+    "background-color": Web.Kind.constant.dark_pri_color
+  }, [msg_footer])
   
 
-  DOM.node("div", {}, {
-    "margin-bottom": "0px"
+  DOM.node("div", {"id": "footer"}, {
     "display": "flex"
     "flex-direction": "column"
     "color": "white"
-  }, [join_us, msg_footer])
+  }, [join_us_wrapper, msg_footer_wrapper])

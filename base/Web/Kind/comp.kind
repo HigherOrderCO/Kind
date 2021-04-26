@@ -5,26 +5,25 @@ Web.Kind.comp.id_action: Map(Web.Kind.Event)
     "btn_pri_home_go_to_apps": Web.Kind.Event.go_to_apps
   }  
 
-Web.Kind.comp.h1(title: String): DOM
-  DOM.node("div", {}, {
-    "font-size": "20px"
-    "font-family": "Helvetica"
-    "font-weight": "bold"
-  }, [DOM.text(title)])
+Web.Kind.comp.heading(typography: Map(String), title: String): DOM
+  DOM.node("div", {}, Map.union!(
+    typography, {
+      "width": "100%"
+  }), [DOM.text(title)])
 
-Web.Kind.comp.h3(title: String): DOM
-  DOM.node("div", {}, {
-    "font-size": "16px"
-    "font-family": "Helvetica"
-    "font-weight": "bold"
-  }, [DOM.text(title)])
+Web.Kind.comp.title(title: String): DOM
+  DOM.node("div", {}, Map.union!(
+    Web.Kind.typography.title, {
+      "margin-top": "1em"
+      "width": "100%"
+  }), [DOM.text(title)])
 
 Web.Kind.comp.title_phone(title: String): DOM
-  DOM.node("div", {}, {
-    "font-size": "16px"
-    "font-family": "Helvetica"
-    "font-weight": "bold"
-  }, [DOM.text(title)])
+  DOM.node("div", {}, Map.union!(
+    Web.Kind.typography.subtitle, {
+      "margin-top": "1em"
+      "width": "100%"
+  }), [DOM.text(title)])
 
 Web.Kind.comp.link(txt: String, href: String): DOM
   DOM.node("a", {
@@ -49,7 +48,6 @@ Web.Kind.comp.link_black(txt: String, href: String): DOM
       "href": href,
       "target": "_blank"
     }, {
-      "font-size": Web.Kind.constant.p_tag_size
       "color": "black"
       "cursor": "pointer"
     }, [DOM.text(txt)]) 
@@ -57,20 +55,16 @@ Web.Kind.comp.link_black(txt: String, href: String): DOM
 Web.Kind.comp.list(items: List<DOM>): DOM
   let li = []
   for item in items with li:
-    List.cons!(DOM.node("li", {}, {"margin-top": "5px"}, [item]), li)
+    List.cons!(DOM.node("li", {}, {"line-height": "1.35"}, [item]), li)
   DOM.node("ul", {}, {
     "list-style-type": "none"}, li)
 
 Web.Kind.comp.btn_primary_solid(title: String, id: String): DOM
   DOM.node("div", {
     "id": id
-  }, {
+  }, Map.union!(Web.Kind.typography.button, {
     "cursor": "pointer"
-    "font-size": "14px"
-    "font-family": "Helvetica"
-    "font-weight": "bold"
-    "width": "120px"
-    "height": "30px"
+    "padding": "0.5em 1em"
     "background-color": Web.Kind.constant.secondary_color
     "color": "white"
     "border-radius": "7px"
@@ -78,5 +72,5 @@ Web.Kind.comp.btn_primary_solid(title: String, id: String): DOM
     "flex-direction": "row"
     "align-items": "center"
     "justify-content": "center"
-  }, [DOM.text(title)])
+  }), [DOM.text(title)])
 
