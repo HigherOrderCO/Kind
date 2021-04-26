@@ -1,0 +1,8 @@
+type Web.Kaelin.CastInfo {
+  new(
+    mouse_pos: Web.Kaelin.Coord
+    hero_pos: Web.Kaelin.Coord
+    range: Nat
+    hex_effect: Web.Kaelin.HexEffect
+  )
+}

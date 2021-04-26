@@ -66,12 +66,8 @@ type App.Event {
     id: String
     action: String
   )
+  resize(
+    time: U64
+    info: App.EnvInfo
+  )
 }
-
-App.Event.name(e: App.Event): String
-  case e{
-    mouse_down: "mouse_down"
-    mouse_up: "mouse_up"
-    mouse_over: "mouse_over"
-    mouse_click: "mouse_click"
-  } default ""

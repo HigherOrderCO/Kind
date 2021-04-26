@@ -1,3 +1,3 @@
 Web.Kaelin.Coord.show(coord: Web.Kaelin.Coord): String
   open coord
-  Int.show(I32.to_int(coord.i)) | ":" | Int.show(I32.to_int(coord.j))
+  I32.show(coord.i) | ":" | I32.show(coord.j)

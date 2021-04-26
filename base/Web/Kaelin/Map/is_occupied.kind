@@ -1,5 +1,6 @@
+// Checks if a tile is occupied by a creature
 Web.Kaelin.Map.is_occupied(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map): Bool
-tile = Web.Kaelin.Map.get(coord, map)
+tile = Web.Kaelin.Map.get(coord, map) <> []
 is_occupied = false
 for ent in tile with is_occupied:
   case ent {

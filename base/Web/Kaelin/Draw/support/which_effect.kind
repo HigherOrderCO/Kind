@@ -1,0 +1,14 @@
+// Returns the cast affecting a tile
+Web.Kaelin.Draw.support.which_effect(
+  coord: Web.Kaelin.Coord,
+  cast_info: Web.Kaelin.CastInfo
+  range_list: List<Web.Kaelin.Coord>,
+) : Web.Kaelin.HexEffect
+  open cast_info as cast
+  let is_in_range = List.any!(Web.Kaelin.Coord.eql(coord), range_list)
+    if is_in_range then
+      cast.hex_effect
+    else
+      Web.Kaelin.HexEffect.normal
+
+    

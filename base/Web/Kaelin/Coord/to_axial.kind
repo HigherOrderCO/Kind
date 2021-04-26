@@ -1,4 +1,4 @@
-Web.Kaelin.Coord.to_axial(coord: Pair(U32, U32)): Pair(I32, I32)
+Web.Kaelin.Coord.to_axial(coord: Pair(U32, U32)): Web.Kaelin.Coord
   let {x, y} = coord
 
   let f = U32.to_f64
@@ -19,4 +19,5 @@ Web.Kaelin.Coord.to_axial(coord: Pair(U32, U32)): Pair(I32, I32)
 
   let axial_x = F64.sub( F64.mul(float_x, fourth), F64.mul(float_y, sixth) )
   let axial_y = F64.mul(float_y, third)
-  Web.Kaelin.Coord.round(axial_x, axial_y)
+  let {i, j}  = Web.Kaelin.Coord.round(axial_x, axial_y)
+  Web.Kaelin.Coord.new(i, j)

@@ -62,8 +62,8 @@ module.exports = class AppPlay extends Component {
         _: "App.EnvInfo.new",
         screen_size: {
           _: "Pair.new",
-          fst: this.container ? this.container.offsetWidth : 0,
-          snd: this.container ? this.container.offsetHeight : 0,
+          fst: window.innerWidth, // this.container ? this.container.offsetWidth : 0,
+          snd: window.innerHeight // this.container ? this.container.offsetHeight : 0,
         },
         mouse_pos: this.mouse_pos,
       }
@@ -142,6 +142,24 @@ module.exports = class AppPlay extends Component {
       });
     };
     document.body.addEventListener("keyup", this.listeners.keyup);
+
+    // Resize event
+    this.listeners.resize = (e) => {
+      this.register_event({
+        _: "App.Event.resize",
+        time: BigInt(Date.now()),
+        info: {
+          _: "App.EnvInfo.new",
+          screen_size: {
+            _: "Pair.new",
+            fst: e.target.innerWidth,
+            snd: e.target.innerHeight,
+          },
+          mouse_pos: this.mouse_pos,
+        }
+      });
+    };
+    window.addEventListener("resize", this.listeners.resize);
 
     //Tick event
     this.intervals.tick = () => {

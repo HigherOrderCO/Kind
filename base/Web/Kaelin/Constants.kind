@@ -2,7 +2,7 @@ Web.Kaelin.Constants.hexagon_radius: U32
   15#32
 
 Web.Kaelin.Constants.map_size : U32
-  10#32
+  5#32
 
 Web.Kaelin.Constants.center_x : U32
   128#32

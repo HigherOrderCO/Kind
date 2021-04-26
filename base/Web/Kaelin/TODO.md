@@ -1,17 +1,32 @@
 TODO list on Kaelin
 
-1 - Web.Kaelin.Map.push, Web.Kaelin.Map.set - fix inconsistences
+- [ ] Rename state.interface to env_info
 
-2 - Web.Kaelin.Constants - randomize or update each build
+- [ ] Web.Kaelin.Constants - randomize or update each build
 
-3 - Web.Kaelin.Map.pop_at - improve it
+- [ ] Web.Kaelin.move - improve it 
 
-4 - Web.Kaelin.move - improve it 
+- [ ] Web.Kaelin - update how movement works 
 
-5 - Web.Kaelin.get - should return maybe
+- [X] Web.Kaelin.Draw.background - change hexagon color based on Web.Kaelin.CastInfo
 
-6 - Web.Kaelin - update how movement works 
+- [ ] Serialize.kind and Deserialize.kind
 
-7 - Web.Kaelin.Draw.background - change hexagon color based on Web.Kaelin.Cast_info
+- [X] Improve Draw/state/background function
 
-8 - Serialize.kind and Deserialize.kind
+- [ ] fix mouse position not corresponding to the respective hexagon
+
+- [ ] organize folders, files, and names
+
+- [ ] define tile images in Web.Kaelin.Map.arena elsewhere
+
+- [ ] Maybe organize main folder?
+
+
+Kind:
+
+- [ ] I32.show bug (when printing negative numbers goes to 2ˆ32 - absolute value) 
+
+- [ ] log inside a function that contains a variable named as 'x' brokes typecheck
+
+- [ ] maybe add I32.to_nat?
