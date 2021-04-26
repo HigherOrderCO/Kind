@@ -1,0 +1,5 @@
+Web.Kaelin.Event.Code.create_hero : List<U8>
+  [
+    // 2
+    2#8, // 2
+  ] //constraint 4 <= 64

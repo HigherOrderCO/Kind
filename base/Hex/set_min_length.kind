@@ -1,0 +1,3 @@
+Hex.set_min_length(min : Nat, hex : String) : String
+  let dif = min - String.length(hex)
+  hex | String.repeat("0", dif)
