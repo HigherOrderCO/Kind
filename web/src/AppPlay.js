@@ -161,6 +161,16 @@ module.exports = class AppPlay extends Component {
     };
     window.addEventListener("resize", this.listeners.resize);
 
+    this.listeners.submit = (e) => {
+      e.preventDefault(); // prevents page to reload on submit
+      this.register_event({
+        _: "App.Event.onsubmit",
+        time: BigInt(Date.now()),
+        value: event.target[0].value
+      });
+    };
+    document.body.addEventListener("submit", this.listeners.submit);
+
     //Tick event
     this.intervals.tick = () => {
       let time = performance.now()

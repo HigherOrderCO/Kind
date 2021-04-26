@@ -70,4 +70,9 @@ type App.Event {
     time: U64
     info: App.EnvInfo
   )
+  onsubmit(
+    time: U64
+    value: String
+  )
 }
+
