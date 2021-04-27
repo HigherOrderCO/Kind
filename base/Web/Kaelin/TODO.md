@@ -1,6 +1,6 @@
 TODO list on Kaelin
 
-- [ ] Rename state.interface to env_info
+- [X] Rename state.interface to env_info
 
 - [ ] Web.Kaelin.Constants - randomize or update each build
 
