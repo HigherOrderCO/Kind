@@ -1,7 +1,6 @@
-Web.Kaelin.Resources.abilities: Map(Web.Kaelin.Hero)
+Web.Kaelin.Resources.abilities: Map(Web.Kaelin.Ability)
   let abilities = [
-    Web.Kaelin.Abilities.quick_shot,
-    Web.Kaelin.Abilities.
+    Web.Kaelin.Ability.abilities.quick_shot
   ]
 
 	List.fold!(abilities)!({}, (ability, map) 

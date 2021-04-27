@@ -1,6 +1,0 @@
-Web.Kaelin.Ability.abilities.tumble: Web.Kaelin.Ability
-  Web.Kaelin.Ability.new(
-    1,
-    [Web.Kaelin.Effect.coord_mod],
-    Web.Kaelin.Areas.single
-  )

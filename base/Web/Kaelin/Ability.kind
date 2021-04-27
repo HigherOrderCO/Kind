@@ -1,16 +1,11 @@
 type Web.Kaelin.Ability{
 	new(
+  id: U8
 	range: Nat
-	effects: List(Web.Kaelin.Effect)
+	effects: List(Web.Kaelin.Ability.Effect)
 	)
 }
 
-type Web.Kaelin.Ability.area{
-  self
-  single
-  radial(range: Nat)
-  line(range: Nat)
-}
 
 
 // Mien    -  e rapose gamer
