@@ -1,0 +1,20 @@
+type Web.Kaelin.Ability{
+	new(
+	range: Nat
+	effects: List(Web.Kaelin.Effect)
+	)
+}
+
+type Web.Kaelin.Ability.area{
+  self
+  single
+  radial(range: Nat)
+  line(range: Nat)
+}
+
+
+// Mien    -  e rapose gamer
+// tiro    -> skilshot, range 5, acertar primeiro segundo alvo em linha
+// tumble  -> E da caitlyn que deixa traps no chão no tile a frente e no lugar onde tava
+// morango -> Cura 2 vida e dá um cleanse
+

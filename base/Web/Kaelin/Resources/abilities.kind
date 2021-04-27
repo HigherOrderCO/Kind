@@ -1,0 +1,11 @@
+Web.Kaelin.Resources.abilities: Map(Web.Kaelin.Hero)
+  let abilities = [
+    Web.Kaelin.Abilities.quick_shot,
+    Web.Kaelin.Abilities.
+  ]
+
+	List.fold!(abilities)!({}, (ability, map) 
+  open ability
+    map{U8.show(ability.id)} <- ability
+  )
+  

@@ -1,6 +1,8 @@
 type Web.Kaelin.Player {
   new(
     addr: String
-    team: String,
+    team: String
+    health: U32
+    //status: Web.Kaelin.Status
   )
 }

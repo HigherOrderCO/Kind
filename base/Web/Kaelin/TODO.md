@@ -10,11 +10,11 @@ TODO list on Kaelin
 
 - [X] Web.Kaelin.Draw.background - change hexagon color based on Web.Kaelin.CastInfo
 
-- [ ] Serialize.kind and Deserialize.kind
+- [X] Serialize.kind and Deserialize.kind
 
 - [X] Improve Draw/state/background function
 
-- [ ] fix mouse position not corresponding to the respective hexagon
+- [X] fix mouse position not corresponding to the respective hexagon
 
 - [ ] organize folders, files, and names
 
@@ -30,3 +30,5 @@ Kind:
 - [ ] log inside a function that contains a variable named as 'x' brokes typecheck
 
 - [ ] maybe add I32.to_nat?
+
+- [ ] NatMap to 

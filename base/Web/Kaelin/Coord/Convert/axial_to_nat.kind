@@ -2,10 +2,10 @@
 // The coordinate {+2, -3} is transformed to 10020997 
 Web.Kaelin.Coord.Convert.axial_to_nat(coord: Web.Kaelin.Coord): Nat
   open coord
-  let i = I32.add(coord.i, +1000#32)
-  let i = I32.mul(i, +10000#32)
+  let i = I32.add(coord.i, +100#32)
+  let i = I32.mul(i, +1000#32)
   let i = Int.to_nat(I32.to_int(i))
-  let j = I32.add(coord.j, +1000#32)
+  let j = I32.add(coord.j, +100#32)
   let j = Int.to_nat(I32.to_int(j))
   Nat.add(i,j)
   
