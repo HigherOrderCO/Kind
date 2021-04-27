@@ -1,5 +1,5 @@
 Word.s_shr<size: Nat>(n: Word(size), value: Word(size)): Word(size)
-  neg = Word.is_neg!(n, false)
+  neg = Word.is_neg!(n)
   case neg {
     false: Word.shr!(n, value)
     true: n = Word.neg!(n)
