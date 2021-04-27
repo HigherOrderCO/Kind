@@ -2,13 +2,6 @@
 // 10020997 is transformed to the coordinate {+2, -3}
 // TODO maybe add I32 to nat?
 Web.Kaelin.Coord.Convert.nat_to_axial(a: Nat): Web.Kaelin.Coord
-  let coord_i = Nat.div(a, 10000)
-  let coord_i = Int.from_nat(coord_i)
-  let coord_i = Int.sub(coord_i, +1000)
-  let coord_j = Nat.mod(a, 10000)
-  let coord_j = Int.from_nat(coord_j)
-  let coord_j = Int.sub(coord_j, +1000)
-
-  let coord_i = Int.to_i32(coord_i)
-  let coord_j = Int.to_i32(coord_j)
-  Web.Kaelin.Coord.new(coord_i, coord_j)
+  let {x, y} = Arith.N_to_NxN(a)
+  let a = Debug.log(Unit, I32.show(Int.to_i32(-1)), (x) Unit.new)
+  Web.Kaelin.Coord.new(Int.to_i32(Arith.N_to_Z(x)), Int.to_i32(Arith.N_to_Z(y)))

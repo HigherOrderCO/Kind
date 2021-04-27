@@ -41,6 +41,7 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
              create_hero : App.pass
              user_input : 
                let pos = eventdata.coord
+               log(Web.Kaelin.Coord.show(pos))
                // App.store<Web.Kaelin.State>(Web.Kaelin.Action.move_player(data.addr,  ))
                App.pass
             }
