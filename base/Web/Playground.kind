@@ -43,6 +43,7 @@ Web.Playground.set_mouse_over(id: String, stt: Web.Playground.State): Web.Playgr
   open stt
   Web.Playground.State.new(stt.device, stt.window, id, stt.code)
 
+// Represents a page containing the Playground
 Web.playground.body(stt: Web.Playground.State): DOM
   DOM.node("div", {"id": "page"}, {
     "margin": "100px"
@@ -73,6 +74,10 @@ Web.Playground: App(Web.Playground.State)
         open state
         let device = Device.classify(screen_size.fst)
         App.store!(Web.Playground.State.new(device, state.window, state.mouse_over, state.code))
+      onsubmit:
+        // let res = Kind.api.check_code(event.value)
+        // log("Res: ", res)
+        App.pass
     } default App.pass
   
   // The application

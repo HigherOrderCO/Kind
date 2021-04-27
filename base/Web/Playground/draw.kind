@@ -1,6 +1,7 @@
 Web.Playground.draw(stt: Web.Playground.State): DOM
   DOM.node("div", {}, {
     "width": "100%"
+    "height": "100%"
     "margin": "20px 0x"
   }, [
     Web.Playground.comp.main_area(stt)

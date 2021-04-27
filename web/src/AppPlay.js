@@ -3,6 +3,7 @@ const h = require("inferno-hyperscript").h;
 const apps = require("./apps/index.js");
 const sign = require("nano-ethereum-signer");
 const utils = require("./utils.js");
+const kind = require("kind-lang");
 
 module.exports = class AppPlay extends Component {
 
@@ -39,8 +40,15 @@ module.exports = class AppPlay extends Component {
     };
   }
 
+  async type_check() {
+    const code = "type Foo { new(a: Nat)} "
+    await kind.run(kind["Kind.api.io.check_file"]("Main.kind"))
+    // console.log("Check: ", res)
+  }
+
   // Loads the application from Moonad, which was pre-compiled to JavaScript
   async init_app() {
+    await this.type_check()
     if (!this.app && apps[this.name]) {
       //console.log("loading app...");
       this.app = (await apps[this.name])[this.name];
