@@ -11,7 +11,7 @@ Web.Kaelin.Player.move(coord_b: Web.Kaelin.Coord, state: Web.Kaelin.State, addre
         state
       else
         new_map = Web.Kaelin.Map.swap(0,coord_a <> coord_b ,coord_b,state.map)
-        Web.Kaelin.State.game(state.room, state.tick, state.players, state.cast_info, new_map, state.interface)
+        Web.Kaelin.State.game(state.room, state.tick, state.players, state.cast_info, new_map, state.env_info)
       }      
   }default state
        

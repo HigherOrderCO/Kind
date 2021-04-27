@@ -22,27 +22,29 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
       //    'X': App.post(state.room, "0x3200000000000000000000000000000000000000000000000000000000000001")
       //    'C': App.post(state.room, "0x3300000000000000000000000000000000000000000000000000000000000001")
        // } default App.pass
-
        tick game:
          let info = event.info
          App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_interface(info, state))
+
        mouse_up game :
-         let info = state.interface
+         let info = state.env_info
          open info
          let {axial_x, axial_y} = Web.Kaelin.Coord.to_axial(info.mouse_pos)
          let hex = serialize(Web.Kaelin.Event.user_input(Web.Kaelin.Coord.new(axial_x, axial_y), Web.Kaelin.Action.walk))
          App.post(state.room, hex)
+
       post game:
          case deserialize(String.drop(2, event.data)) as data { // drop the 0x thing
            none : App.pass
-           some : case data.value as eventdata {
+           some : case data.value as event_data {
              start_game : App.pass
              create_user : App.pass
              create_hero : App.pass
              user_input : 
-               let pos = eventdata.coord
-               // App.store<Web.Kaelin.State>(Web.Kaelin.Action.move_player(data.addr,  ))
+               let pos = event_data.coord
                App.pass
+              //  App.store<Web.Kaelin.State>(Web.Kaelin.Action.move_player(data.addr,  ))
+               
             }
           }
      
