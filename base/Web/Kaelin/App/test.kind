@@ -1,0 +1,4 @@
+Web.Kaelin.App.test : String
+  let n = Web.Kaelin.Coord.Convert.axial_to_nat(
+      Web.Kaelin.Coord.new(-1102#32, -1100#32))
+  Web.Kaelin.Coord.show(Web.Kaelin.Coord.Convert.nat_to_axial(n))

@@ -1,3 +1,4 @@
+// Not being used
 // draws the hexagon border
 Web.Kaelin.Draw.hexagon_border(
   cx: U32,

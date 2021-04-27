@@ -1,0 +1,5 @@
+Hex.to_nat (x : String): Nat
+  case (Parser.run!(Hex.parser, x)) as k {
+    some : k.value
+    none : 0
+  }

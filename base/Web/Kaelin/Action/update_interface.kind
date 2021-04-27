@@ -1,3 +1,4 @@
+// Returns state with updated cast_info
 Web.Kaelin.Action.update_interface(interface : App.EnvInfo, state: Web.Kaelin.State): Web.Kaelin.State
    case state {
      game: 

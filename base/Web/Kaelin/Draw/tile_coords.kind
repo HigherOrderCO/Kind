@@ -1,3 +1,4 @@
+// Draws the coordinates of a tile
 Web.Kaelin.Draw.tile_coords(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map, img: VoxBox): VoxBox
   open coord
   let {cx,cy} = Web.Kaelin.Coord.to_screen_xy(coord)

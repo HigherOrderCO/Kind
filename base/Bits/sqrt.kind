@@ -1,0 +1,9 @@
+Bits.sqrt(s : Bits) : Bits
+  let aproximation = ((x) Bits.shift_right(1, Bits.add(x, Bits.div(s, x)))) :: Bits -> Bits
+  let accumulator = (x)
+    let x1 = aproximation(x)
+    if Bits.ltn(x1, x) then
+      Maybe.some(Bits, aproximation(x1))
+    else 
+      Maybe.none(Bits)
+  Maybe.unfold(Bits, accumulator, Bits.shift_right(1, s))

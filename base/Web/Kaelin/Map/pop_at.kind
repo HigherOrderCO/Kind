@@ -1,5 +1,3 @@
-// TODO: turn into a pop entity, so you can decide what to pop (background or hero)
-// Improve it
 Web.Kaelin.Map.pop_at(
   idx: Nat, 
   coord: Web.Kaelin.Coord, 
