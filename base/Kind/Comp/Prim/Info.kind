@@ -1,0 +1,15 @@
+type Kind.Comp.Prim.Shape {
+  new(
+    inst: List(Pair(Nat, String))
+    elim: Pair(String, List(Pair(String ,List(String))))
+  )
+}
+
+  //Nat: {
+    //inst: [[0, "0n"], [1, p => "1n+"+p]],
+    //elim: {
+      //ctag: x => x+"===0n",
+      //ctor: [[], [x => "("+x+"-1n)"]],
+    //},
+    //cnam: {mode: "if"},
+  //},

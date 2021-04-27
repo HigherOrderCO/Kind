@@ -8,8 +8,10 @@ Kind.Comp.Prim.show.ctrs(ctrs: List(Pair(String, List(String)))): String
 
 Kind.Comp.Prim.show(prim: Kind.Comp.Prim): String
   case prim {
+    unit: "Unit"
     bool: "Bool"
     nat: "Nat"
+    u16: "U16"
     string: "String"
     data: Kind.Comp.Prim.show.ctrs(prim.ctrs)
   }

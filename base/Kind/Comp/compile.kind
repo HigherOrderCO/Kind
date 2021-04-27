@@ -18,13 +18,14 @@ Kind.Comp.compile(
             let term_cmp = if typv.eras
               then body_cmp
               else Kind.Comp.lam(term.name, body_cmp)
-            let term_cmp = case Kind.Comp.compile.adt(type.value, defs) as got_adt {
-              some: Kind.Comp.ins(got_adt.value, term_cmp)
-              none: case Kind.Comp.Prim.of(type.value, defs) as got_prim {
-                some: Kind.Comp.ins(got_prim.value, term_cmp)
-                none: term_cmp
+            let term_cmp = 
+              case Kind.Comp.compile.prim_of(type.value, defs) as got {
+                some: Kind.Comp.ins(got.value, term_cmp)
+                none: case Kind.Comp.compile.adt(type.value, defs) as got {
+                  some: Kind.Comp.ins(got.value, term_cmp)
+                  none: term_cmp
+                }
               }
-            }
             {term_cmp, type.value}
         } default {Kind.Comp.nil, Kind.Term.typ}
         let:
@@ -47,11 +48,9 @@ Kind.Comp.compile(
         Kind.Term.var(term.name, term.indx)
       }
       ref:
-        log("compiling ref " | term.name)
-        log("defs:" | String.join(", ", List.mapped!(BitsMap.to_list!(defs))!((x) Kind.Name.from_bits(Pair.fst!!(x)))))
         case Kind.Map.get!(term.name, defs) as got {
-          none: log("no got") {Kind.Comp.nil, Kind.Term.typ}
-          some: log("yes got") {Kind.Comp.ref(term.name), open got.value; got.value.type}
+          none: {Kind.Comp.nil, Kind.Term.typ}
+          some: {Kind.Comp.ref(term.name), open got.value; got.value.type}
         }
       typ: {
         Kind.Comp.nil
@@ -63,10 +62,10 @@ Kind.Comp.compile(
           all:
             let {argm_cmp, argm_typ} = Kind.Comp.compile(term.argm, some(func_typ.xtyp), defs, size)
             let term_typ = func_typ.body(term.func, term.argm)
-            let term_cmp = case Kind.Comp.compile.adt(func_typ, defs) as ftyp_adt {
-              some: Kind.Comp.eli(ftyp_adt.value, func_cmp)
-              none: case Kind.Comp.Prim.of(func_typ, defs) as ftyp_pri {
-                some: Kind.Comp.eli(ftyp_pri.value, func_cmp)
+            let term_cmp = case Kind.Comp.compile.prim_of(func_typ, defs) as got {
+              some: Kind.Comp.eli(got.value, func_cmp)
+              none: case Kind.Comp.compile.adt(func_typ, defs) as got {
+                some: Kind.Comp.eli(got.value, func_cmp)
                 none: func_cmp
               }
             }

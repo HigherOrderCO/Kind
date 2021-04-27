@@ -1,19 +1,25 @@
-Test: IO(Unit)
-  IO {
-    let defs = Kind.Defs.read_main("
-      type Bool {
-        true
-        false
-      }
+Test: _
+  Kind.Comp.Target.scheme.instantiation(
+    Kind.Comp.ins(
+      Kind.Comp.Prim.nat,
+      Kind.Comp.lam("z", Kind.Comp.lam("s",
+        Kind.Comp.app(
+          Kind.Comp.var("s"),
+          Kind.Comp.nat(7))))))
 
-      not(b: Bool): Bool
-        let b0 = ((P, t, f) f) :: Bool
-        let b1 = Bool.true
-        case b {
-          true: b0
-          false: b1
-        }
-    ")
-    let defs = IO.purify!(Kind.Synth.one("not", defs)) <> Kind.Map.new!
-    IO.print(Kind.Comp.Target.scheme(Kind.Comp.Defs.compile(defs)))
-  }
+
+//Test.stuff: Nat
+  //let str = "oi, tudo bem?"
+  //let nat = String.length(str)
+  //nat + nat
+
+//Test: IO(Unit)
+  //IO {
+    //IO.print("Compiling...")
+    //get defs = Kind.Synth.one("Test.stuff", Kind.Map.new!)
+    //without defs: IO.print("Something is wrong.")
+    //IO.print(Kind.Comp.Target.scheme(Kind.Comp.Defs.compile(defs)))
+  //}
+
+  
+

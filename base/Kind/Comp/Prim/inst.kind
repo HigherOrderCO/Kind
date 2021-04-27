@@ -1,0 +1,38 @@
+Kind.Comp.Prim.inst.make(
+  name: String
+  inst: List(Pair(Nat,String))
+  vars: List(String)
+  args: List(Kind.Comp)
+  show: Kind.Comp -> String
+): Maybe(String)
+  case inst vars {
+    nil  nil : none
+    nil  cons: none
+    cons nil : none
+    cons cons: 
+      if String.eql(name, vars.head) then
+        let {ctor_arity, ctor_maker} = inst.head
+        if ctor_arity =? List.length!(args) then
+          some(Kind.Comp.subst(ctor_maker, List.mapped!(args)!(show)))
+        else
+          none
+      else
+        Kind.Comp.Prim.inst.make(name, inst.tail, vars.tail, args, show)
+  }
+
+Kind.Comp.Prim.inst(
+  shape: Kind.Comp.Prim.Shape
+  expr: Kind.Comp
+  show: Kind.Comp -> String
+): Maybe(String)
+  open shape
+  log("ata" | Kind.Comp.show(expr))
+  let {vars,expr} = Kind.Comp.get_vars(expr)
+  if List.length!(shape.inst) =? List.length!(vars) then
+    let {expr,args} = Kind.Comp.get_args(expr)
+    case expr { 
+      var: Kind.Comp.Prim.inst.make(expr.name, shape.inst, vars, args, show)
+      ref: Kind.Comp.Prim.inst.make(expr.name, shape.inst, vars, args, show)
+    } default none
+  else
+    none
