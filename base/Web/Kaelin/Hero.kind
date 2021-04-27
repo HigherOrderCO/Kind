@@ -3,5 +3,7 @@ type Web.Kaelin.Hero {
   new(
     id: U8
     img: VoxBox
+    health: I32
+    //abilities: 
   )
 }

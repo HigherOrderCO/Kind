@@ -1,0 +1,29 @@
+Web.Kaelin.Ability.abilities.quick_shot: Web.Kaelin.Ability
+  let hp  = Web.Kaelin.Ability.Modifier.hp
+  let stt = Web.Kaelin.Ability.Modifier.status
+  let pos = Web.Kaelin.Ability.Modifier.position
+  let eff = Web.Kaelin.Ability.Effect
+
+  Web.Kaelin.Ability.new(
+    1#8
+    1,
+    [Web.Kaelin.Ability.Effect.hp(7#32, Web.Kaelin.Ability.Modifier.hp.damage, Web.Kaelin.Ability.area.single)]
+  )
+   
+   
+   // [Web.Kaelin.Ability.Effect.hp(7#32, Web.Kaelin.Ability.Modifier.hp.damage, Web.Kaelin.Ability.area.single)]
+  
+
+
+//TODO: Create Skill_range to update cast_info
+//TODO: Create Apply_effect to one effect to a coord (a case for each kind of effect)
+//TODO: Create Update_Player to update with statuses and hp changes
+//TODO: Create Function to determine what area.single, area.self and area.range is
+//TODO: Create SkillUse to apply various effects to the selected target
+
+    // [
+    // Web.Kaelin.Ability.Effect.status(1#32, Web.Kaelin.Ability.Modifier.status.stun, Web.Kaelin.Ability.area.single),
+    // Web.Kaelin.Ability.Effect.hp(8#32, Web.Kaelin.Ability.Modifier.hp.damage, Web.Kaelin.Ability.area.line(2)),
+    // Web.Kaelin.Ability.Effect.position(2#32, Web.Kaelin.Ability.Modifier.position.knockback, Web.Kaelin.Ability.area.single),
+    // Web.Kaelin.Ability.Effect.hp(4#32, Web.Kaelin.Ability.Modifier.hp.heal, Web.Kaelin.Ability.area.self)
+    // ]

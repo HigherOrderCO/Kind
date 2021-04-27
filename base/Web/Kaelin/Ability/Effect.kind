@@ -1,0 +1,5 @@
+type Web.Kaelin.Ability.Effect{
+	hp(value: I32, modifier: Web.Kaelin.Ability.Modifier.hp, area: Web.Kaelin.Ability.area)
+	position(value:  I32, modifier: Web.Kaelin.Ability.Modifier.position, area: Web.Kaelin.Ability.area)
+	status(duration: I32, modifier: Web.Kaelin.Ability.Modifier.status, area: Web.Kaelin.Ability.area)
+}
