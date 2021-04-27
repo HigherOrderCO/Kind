@@ -1,6 +1,6 @@
 type Web.Kaelin.Ability{
 	new(
-  id: U8
+  	id: U8
 	range: Nat
 	effects: List(Web.Kaelin.Ability.Effect)
 	)

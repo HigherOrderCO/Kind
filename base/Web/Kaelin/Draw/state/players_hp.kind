@@ -1,0 +1,9 @@
+Web.Kaelin.Draw.state.players_hp(cx: U32, cy: U32, player: Maybe<Web.Kaelin.Player>, img: VoxBox): VoxBox
+  case player {
+  none: img
+  some: 
+  open player.value
+  let cy = U32.add(cy, Web.Kaelin.Constants.hexagon_radius)
+  let str = Int.show(I32.to_int(player.value.current_hp))
+  VoxBox.Draw.text(str, PixelFont.small_black, Pos32.new(cx,cy,0u), img)
+  }
