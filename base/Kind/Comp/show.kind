@@ -11,4 +11,5 @@ Kind.Comp.show(comp: Kind.Comp): String
     nat: Nat.show(comp.natx) // natx: Nat),
     chr: "'" | String.cons(comp.chrx, String.nil) | "'" // chrx: Char),
     str: "\"" | comp.strx | "\"" // strx: String),
+    txt: comp.text
   }

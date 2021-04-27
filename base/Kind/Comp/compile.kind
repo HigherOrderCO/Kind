@@ -105,7 +105,10 @@ Kind.Comp.compile.adt.get_fields(term: Kind.Term): List(String)
     all:
       let head = term.name
       let tail = Kind.Comp.compile.adt.get_fields(term.body(Kind.Term.var("",0),Kind.Term.var("",0)))
-      head & tail
+      if term.eras then
+        tail
+      else
+        head & tail
   } default []
 
 Kind.Comp.compile.adt.get_constructors(term: Kind.Term): Kind.Comp.Prim.ADT
