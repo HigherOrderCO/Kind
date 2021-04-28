@@ -1,0 +1,6 @@
+type Web.Kaelin.Ability.Modifier.position {
+    knockback
+    switch_places
+}
+
+

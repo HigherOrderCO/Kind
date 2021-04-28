@@ -56,7 +56,8 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
             App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_cast(range, hex_effect, state, event.addr))
 
           "0x4":
-            App.store<Web.Kaelin.State>(Web.Kaelin.Action.select(state, event.addr))
+            open state.cast_info
+            App.store<Web.Kaelin.State>(Web.Kaelin.Ability.skill_use(state,state.cast_info.ability))
             
           
         } default App.pass
@@ -64,3 +65,4 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
 
 Web.Kaelin.Command.create_player(hero_id: String) : String
   "0x1" | String.repeat("0", 55) | String.drop(2, hero_id)
+

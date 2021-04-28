@@ -1,4 +1,5 @@
 // Returns state with updated cast_info
+//Placeholder: Skill to be removed
 Web.Kaelin.Action.update_cast(range: Nat, hex_effect: Web.Kaelin.HexEffect, state: Web.Kaelin.State, addr: String): Web.Kaelin.State
 case state {
   game:
@@ -8,7 +9,7 @@ case state {
       none:state
       some:
         mouse_coord = Web.Kaelin.Coord.to_axial(info.mouse_pos)
-        cast_info = Web.Kaelin.CastInfo.new(mouse_coord, hero_coord.value, range, hex_effect)
+        cast_info = Web.Kaelin.CastInfo.new(mouse_coord, hero_coord.value, range, hex_effect, Web.Kaelin.Ability.abilities.quick_shot)
         Web.Kaelin.State.game(state.room, state.tick, state.players, cast_info, state.map, state.env_info)
     }
 }default state
