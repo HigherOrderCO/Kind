@@ -120,6 +120,86 @@ module.exports = (function() {
     function buffer32_to_depth(b) {
         return BigInt(Math.log(b.length) / Math.log(2));
     };
+    var bitsmap_new = {
+        _: 'BitsMap.new'
+    };
+    var bitsmap_tie = function(val, lft, rgt) {
+        return {
+            _: 'BitsMap.tip',
+            val,
+            lft,
+            rgt
+        };
+    }
+    var maybe_none = {
+        _: 'Maybe.none'
+    };
+    var maybe_some = function(value) {
+        return {
+            _: 'Maybe.some',
+            value
+        };
+    }
+    var bitsmap_get = function(bits, map) {
+        for (var i = bits.length - 1; i >= 0; --i) {
+            if (map._ !== 'BitsMap.new') {
+                map = bits[i] === '0' ? map.lft : map.rgt;
+            }
+        }
+        return map._ === 'BitsMap.new' ? maybe_none : map.val;
+    }
+    var bitsmap_set = function(bits, val, map, mode) {
+        var res = {
+            value: map
+        };
+        var key = 'value';
+        var obj = res;
+        for (var i = bits.length - 1; i >= 0; --i) {
+            var map = obj[key];
+            if (map._ === 'BitsMap.new') {
+                obj[key] = {
+                    _: 'BitsMap.tie',
+                    val: maybe_none,
+                    lft: bitsmap_new,
+                    rgt: bitsmap_new
+                };
+            } else {
+                obj[key] = {
+                    _: 'BitsMap.tie',
+                    val: map.val,
+                    lft: map.lft,
+                    rgt: map.rgt
+                };
+            }
+            obj = obj[key];
+            key = bits[i] === '0' ? 'lft' : 'rgt';
+        }
+        var map = obj[key];
+        if (map._ === 'BitsMap.new') {
+            var x = mode === 'del' ? maybe_none : {
+                _: 'Maybe.some',
+                value: val
+            };
+            obj[key] = {
+                _: 'BitsMap.tie',
+                val: x,
+                lft: bitsmap_new,
+                rgt: bitsmap_new
+            };
+        } else {
+            var x = mode === 'set' ? {
+                _: 'Maybe.some',
+                value: val
+            } : mode === 'del' ? maybe_none : map.val;
+            obj[key] = {
+                _: 'BitsMap.tie',
+                val: x,
+                lft: map.lft,
+                rgt: map.rgt
+            };
+        }
+        return res.value;
+    };
     const inst_unit = x => x(null);
     const elim_unit = (x => {
         var $1 = (() => c0 => {
@@ -318,66 +398,7 @@ module.exports = (function() {
     const Maybe$none = ({
         _: 'Maybe.none'
     });
-
-    function BitsMap$set$(_bits$2, _val$3, _map$4) {
-        var self = _bits$2;
-        switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
-            case 'o':
-                var $40 = self.slice(0, -1);
-                var self = _map$4;
-                switch (self._) {
-                    case 'BitsMap.tie':
-                        var $42 = self.val;
-                        var $43 = self.lft;
-                        var $44 = self.rgt;
-                        var $45 = BitsMap$tie$($42, BitsMap$set$($40, _val$3, $43), $44);
-                        var $41 = $45;
-                        break;
-                    case 'BitsMap.new':
-                        var $46 = BitsMap$tie$(Maybe$none, BitsMap$set$($40, _val$3, BitsMap$new), BitsMap$new);
-                        var $41 = $46;
-                        break;
-                };
-                var $39 = $41;
-                break;
-            case 'i':
-                var $47 = self.slice(0, -1);
-                var self = _map$4;
-                switch (self._) {
-                    case 'BitsMap.tie':
-                        var $49 = self.val;
-                        var $50 = self.lft;
-                        var $51 = self.rgt;
-                        var $52 = BitsMap$tie$($49, $50, BitsMap$set$($47, _val$3, $51));
-                        var $48 = $52;
-                        break;
-                    case 'BitsMap.new':
-                        var $53 = BitsMap$tie$(Maybe$none, BitsMap$new, BitsMap$set$($47, _val$3, BitsMap$new));
-                        var $48 = $53;
-                        break;
-                };
-                var $39 = $48;
-                break;
-            case 'e':
-                var self = _map$4;
-                switch (self._) {
-                    case 'BitsMap.tie':
-                        var $55 = self.lft;
-                        var $56 = self.rgt;
-                        var $57 = BitsMap$tie$(Maybe$some$(_val$3), $55, $56);
-                        var $54 = $57;
-                        break;
-                    case 'BitsMap.new':
-                        var $58 = BitsMap$tie$(Maybe$some$(_val$3), BitsMap$new, BitsMap$new);
-                        var $54 = $58;
-                        break;
-                };
-                var $39 = $54;
-                break;
-        };
-        return $39;
-    };
-    const BitsMap$set = x0 => x1 => x2 => BitsMap$set$(x0, x1, x2);
+    const BitsMap$set = a0 => a1 => a2 => (bitsmap_set(a0, a1, a2, 'set'));
     const Bits$e = '';
     const Bits$o = a0 => (a0 + '0');
     const Bits$i = a0 => (a0 + '1');
@@ -387,27 +408,27 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $60 = self.pred;
-                var $61 = (Word$to_bits$($60) + '0');
-                var $59 = $61;
+                var $40 = self.pred;
+                var $41 = (Word$to_bits$($40) + '0');
+                var $39 = $41;
                 break;
             case 'Word.i':
-                var $62 = self.pred;
-                var $63 = (Word$to_bits$($62) + '1');
-                var $59 = $63;
+                var $42 = self.pred;
+                var $43 = (Word$to_bits$($42) + '1');
+                var $39 = $43;
                 break;
             case 'Word.e':
-                var $64 = Bits$e;
-                var $59 = $64;
+                var $44 = Bits$e;
+                var $39 = $44;
                 break;
         };
-        return $59;
+        return $39;
     };
     const Word$to_bits = x0 => Word$to_bits$(x0);
 
     function Nat$succ$(_pred$1) {
-        var $65 = 1n + _pred$1;
-        return $65;
+        var $45 = 1n + _pred$1;
+        return $45;
     };
     const Nat$succ = x0 => Nat$succ$(x0);
     const Nat$zero = 0n;
@@ -416,15 +437,15 @@ module.exports = (function() {
     function String$to_bits$(_str$1) {
         var self = _str$1;
         if (self.length === 0) {
-            var $67 = Bits$e;
-            var $66 = $67;
+            var $47 = Bits$e;
+            var $46 = $47;
         } else {
-            var $68 = self.charCodeAt(0);
-            var $69 = self.slice(1);
-            var $70 = (String$to_bits$($69) + (u16_to_bits($68)));
-            var $66 = $70;
+            var $48 = self.charCodeAt(0);
+            var $49 = self.slice(1);
+            var $50 = (String$to_bits$($49) + (u16_to_bits($48)));
+            var $46 = $50;
         };
-        return $66;
+        return $46;
     };
     const String$to_bits = x0 => String$to_bits$(x0);
 
@@ -432,51 +453,51 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'List.cons':
-                var $72 = self.head;
-                var $73 = self.tail;
-                var self = $72;
+                var $52 = self.head;
+                var $53 = self.tail;
+                var self = $52;
                 switch (self._) {
                     case 'Pair.new':
-                        var $75 = self.fst;
-                        var $76 = self.snd;
-                        var $77 = BitsMap$set$(String$to_bits$($75), $76, Map$from_list$($73));
-                        var $74 = $77;
+                        var $55 = self.fst;
+                        var $56 = self.snd;
+                        var $57 = (bitsmap_set(String$to_bits$($55), $56, Map$from_list$($53), 'set'));
+                        var $54 = $57;
                         break;
                 };
-                var $71 = $74;
+                var $51 = $54;
                 break;
             case 'List.nil':
-                var $78 = BitsMap$new;
-                var $71 = $78;
+                var $58 = BitsMap$new;
+                var $51 = $58;
                 break;
         };
-        return $71;
+        return $51;
     };
     const Map$from_list = x0 => Map$from_list$(x0);
 
     function List$cons$(_head$2, _tail$3) {
-        var $79 = ({
+        var $59 = ({
             _: 'List.cons',
             'head': _head$2,
             'tail': _tail$3
         });
-        return $79;
+        return $59;
     };
     const List$cons = x0 => x1 => List$cons$(x0, x1);
 
     function Pair$(_A$1, _B$2) {
-        var $80 = null;
-        return $80;
+        var $60 = null;
+        return $60;
     };
     const Pair = x0 => x1 => Pair$(x0, x1);
 
     function Pair$new$(_fst$3, _snd$4) {
-        var $81 = ({
+        var $61 = ({
             _: 'Pair.new',
             'fst': _fst$3,
             'snd': _snd$4
         });
-        return $81;
+        return $61;
     };
     const Pair$new = x0 => x1 => Pair$new$(x0, x1);
     const List$nil = ({
@@ -485,11 +506,11 @@ module.exports = (function() {
     const Web$Playground$constant$light_gray_color = "#F3F4F7";
 
     function DOM$text$(_value$1) {
-        var $82 = ({
+        var $62 = ({
             _: 'DOM.text',
             'value': _value$1
         });
-        return $82;
+        return $62;
     };
     const DOM$text = x0 => DOM$text$(x0);
     const Web$Kind$constant$secondary_color = "#3891A6";
@@ -498,64 +519,64 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'BitsMap.tie':
-                var $84 = self.val;
-                var $85 = self.lft;
-                var $86 = self.rgt;
+                var $64 = self.val;
+                var $65 = self.lft;
+                var $66 = self.rgt;
                 var self = _b$3;
                 switch (self._) {
                     case 'BitsMap.tie':
-                        var $88 = self.val;
-                        var $89 = self.lft;
-                        var $90 = self.rgt;
-                        var self = $84;
+                        var $68 = self.val;
+                        var $69 = self.lft;
+                        var $70 = self.rgt;
+                        var self = $64;
                         switch (self._) {
                             case 'Maybe.none':
-                                var $92 = BitsMap$tie$($88, BitsMap$union$($85, $89), BitsMap$union$($86, $90));
-                                var $91 = $92;
+                                var $72 = BitsMap$tie$($68, BitsMap$union$($65, $69), BitsMap$union$($66, $70));
+                                var $71 = $72;
                                 break;
                             case 'Maybe.some':
-                                var $93 = BitsMap$tie$($84, BitsMap$union$($85, $89), BitsMap$union$($86, $90));
-                                var $91 = $93;
+                                var $73 = BitsMap$tie$($64, BitsMap$union$($65, $69), BitsMap$union$($66, $70));
+                                var $71 = $73;
                                 break;
                         };
-                        var $87 = $91;
+                        var $67 = $71;
                         break;
                     case 'BitsMap.new':
-                        var $94 = _a$2;
-                        var $87 = $94;
+                        var $74 = _a$2;
+                        var $67 = $74;
                         break;
                 };
-                var $83 = $87;
+                var $63 = $67;
                 break;
             case 'BitsMap.new':
-                var $95 = _b$3;
-                var $83 = $95;
+                var $75 = _b$3;
+                var $63 = $75;
                 break;
         };
-        return $83;
+        return $63;
     };
     const BitsMap$union = x0 => x1 => BitsMap$union$(x0, x1);
 
     function Map$union$(_a$2, _b$3) {
-        var $96 = BitsMap$union$(_a$2, _b$3);
-        return $96;
+        var $76 = BitsMap$union$(_a$2, _b$3);
+        return $76;
     };
     const Map$union = x0 => x1 => Map$union$(x0, x1);
 
     function Web$Playground$comp$btn_run_code$(_is_hover$1, _title$2, _id$3) {
         var _normal$4 = Map$from_list$(List$cons$(Pair$new$("width", "40px"), List$cons$(Pair$new$("height", "20px"), List$cons$(Pair$new$("margin", "5px 0px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$secondary_color), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("border", "none"), List$cons$(Pair$new$("border-radius", "4px"), List$nil)))))))));
         var _hover$5 = Map$from_list$(List$cons$(Pair$new$("background-color", "#44B8D3"), List$nil));
-        var $97 = DOM$node$("input", Map$from_list$(List$cons$(Pair$new$("id", _id$3), List$cons$(Pair$new$("type", "submit"), List$cons$(Pair$new$("value", ">"), List$nil)))), (() => {
+        var $77 = DOM$node$("input", Map$from_list$(List$cons$(Pair$new$("id", _id$3), List$cons$(Pair$new$("type", "submit"), List$cons$(Pair$new$("value", ">"), List$nil)))), (() => {
             var self = _is_hover$1;
             if (self) {
-                var $98 = Map$union$(_normal$4, _hover$5);
-                return $98;
+                var $78 = Map$union$(_normal$4, _hover$5);
+                return $78;
             } else {
-                var $99 = _normal$4;
-                return $99;
+                var $79 = _normal$4;
+                return $79;
             };
         })(), List$nil);
-        return $97;
+        return $77;
     };
     const Web$Playground$comp$btn_run_code = x0 => x1 => x2 => Web$Playground$comp$btn_run_code$(x0, x1, x2);
     const Bool$false = false;
@@ -564,21 +585,21 @@ module.exports = (function() {
         var _tab$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("height", "30px"), List$cons$(Pair$new$("padding", "8px 15px 0px 15px"), List$cons$(Pair$new$("background-color", Web$Playground$constant$light_gray_color), List$cons$(Pair$new$("display", "flex"), List$nil)))))), List$cons$(DOM$text$("playground.kind"), List$nil));
         var _title$3 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", "18px"), List$nil)), List$cons$(DOM$text$("KIND Playground"), List$nil));
         var _btn_run$4 = Web$Playground$comp$btn_run_code$(Bool$false, ">", "btn_run_code");
-        var $100 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-content", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil)))))), List$cons$(_tab$2, List$cons$(_btn_run$4, List$nil)));
-        return $100;
+        var $80 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-content", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil)))))), List$cons$(_tab$2, List$cons$(_btn_run$4, List$nil)));
+        return $80;
     };
     const Web$Playground$comp$header = x0 => Web$Playground$comp$header$(x0);
 
     function String$cons$(_head$1, _tail$2) {
-        var $101 = (String.fromCharCode(_head$1) + _tail$2);
-        return $101;
+        var $81 = (String.fromCharCode(_head$1) + _tail$2);
+        return $81;
     };
     const String$cons = x0 => x1 => String$cons$(x0, x1);
     const String$concat = a0 => a1 => (a0 + a1);
 
     function Web$Playground$comp$input$(_code$1) {
-        var $102 = DOM$node$("textarea", Map$from_list$(List$cons$(Pair$new$("id", "input_code"), List$cons$(Pair$new$("placeholder", "Write Kind code in this online editor and run it <3"), List$nil))), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("border", ("solid 5px " + Web$Playground$constant$light_gray_color)), List$cons$(Pair$new$("resize", "none"), List$cons$(Pair$new$("padding", "10px"), List$nil)))))), List$cons$(DOM$text$(_code$1), List$nil));
-        return $102;
+        var $82 = DOM$node$("textarea", Map$from_list$(List$cons$(Pair$new$("id", "input_code"), List$cons$(Pair$new$("placeholder", "Write Kind code in this online editor and run it <3"), List$nil))), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("border", ("solid 5px " + Web$Playground$constant$light_gray_color)), List$cons$(Pair$new$("resize", "none"), List$cons$(Pair$new$("padding", "10px"), List$nil)))))), List$cons$(DOM$text$(_code$1), List$nil));
+        return $82;
     };
     const Web$Playground$comp$input = x0 => Web$Playground$comp$input$(x0);
 
@@ -586,30 +607,30 @@ module.exports = (function() {
         var self = _stt$1;
         switch (self._) {
             case 'Web.Playground.State.new':
-                var $104 = self.code;
-                var $105 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$nil))))), List$cons$(DOM$node$("form", Map$from_list$(List$cons$(Pair$new$("id", "code_input"), List$nil)), Map$from_list$(List$cons$(Pair$new$("height", "100%"), List$nil)), List$cons$(Web$Playground$comp$header$(_stt$1), List$cons$(Web$Playground$comp$input$($104), List$nil))), List$nil));
-                var $103 = $105;
+                var $84 = self.code;
+                var $85 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$nil))))), List$cons$(DOM$node$("form", Map$from_list$(List$cons$(Pair$new$("id", "code_input"), List$cons$(Pair$new$("method", "get"), List$cons$(Pair$new$("action", "http://localhost/api/lib"), List$nil)))), Map$from_list$(List$cons$(Pair$new$("height", "100%"), List$nil)), List$cons$(Web$Playground$comp$header$(_stt$1), List$cons$(Web$Playground$comp$input$($84), List$nil))), List$nil));
+                var $83 = $85;
                 break;
         };
-        return $103;
+        return $83;
     };
     const Web$Playground$comp$main_area = x0 => Web$Playground$comp$main_area$(x0);
 
     function Web$Playground$draw$(_stt$1) {
-        var $106 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("margin", "20px 0x"), List$nil)))), List$cons$(Web$Playground$comp$main_area$(_stt$1), List$nil));
-        return $106;
+        var $86 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("margin", "20px 0x"), List$nil)))), List$cons$(Web$Playground$comp$main_area$(_stt$1), List$nil));
+        return $86;
     };
     const Web$Playground$draw = x0 => Web$Playground$draw$(x0);
 
     function Web$playground$body$(_stt$1) {
-        var $107 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin", "100px"), List$cons$(Pair$new$("height", "500px"), List$nil))), List$cons$(Web$Playground$draw$(_stt$1), List$nil));
-        return $107;
+        var $87 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin", "100px"), List$cons$(Pair$new$("height", "500px"), List$nil))), List$cons$(Web$Playground$draw$(_stt$1), List$nil));
+        return $87;
     };
     const Web$playground$body = x0 => Web$playground$body$(x0);
 
     function IO$(_A$1) {
-        var $108 = null;
-        return $108;
+        var $88 = null;
+        return $88;
     };
     const IO = x0 => IO$(x0);
     const Bool$true = true;
@@ -619,15 +640,15 @@ module.exports = (function() {
         switch (self._) {
             case 'Cmp.ltn':
             case 'Cmp.eql':
-                var $110 = Bool$true;
-                var $109 = $110;
+                var $90 = Bool$true;
+                var $89 = $90;
                 break;
             case 'Cmp.gtn':
-                var $111 = Bool$false;
-                var $109 = $111;
+                var $91 = Bool$false;
+                var $89 = $91;
                 break;
         };
-        return $109;
+        return $89;
     };
     const Cmp$as_lte = x0 => Cmp$as_lte$(x0);
     const Cmp$ltn = ({
@@ -641,83 +662,83 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $113 = self.pred;
-                var $114 = (_b$7 => {
+                var $93 = self.pred;
+                var $94 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $116 = self.pred;
-                            var $117 = (_a$pred$10 => {
-                                var $118 = Word$cmp$go$(_a$pred$10, $116, _c$4);
-                                return $118;
+                            var $96 = self.pred;
+                            var $97 = (_a$pred$10 => {
+                                var $98 = Word$cmp$go$(_a$pred$10, $96, _c$4);
+                                return $98;
                             });
-                            var $115 = $117;
+                            var $95 = $97;
                             break;
                         case 'Word.i':
-                            var $119 = self.pred;
-                            var $120 = (_a$pred$10 => {
-                                var $121 = Word$cmp$go$(_a$pred$10, $119, Cmp$ltn);
-                                return $121;
+                            var $99 = self.pred;
+                            var $100 = (_a$pred$10 => {
+                                var $101 = Word$cmp$go$(_a$pred$10, $99, Cmp$ltn);
+                                return $101;
                             });
-                            var $115 = $120;
+                            var $95 = $100;
                             break;
                         case 'Word.e':
-                            var $122 = (_a$pred$8 => {
-                                var $123 = _c$4;
-                                return $123;
+                            var $102 = (_a$pred$8 => {
+                                var $103 = _c$4;
+                                return $103;
                             });
-                            var $115 = $122;
+                            var $95 = $102;
                             break;
                     };
-                    var $115 = $115($113);
-                    return $115;
+                    var $95 = $95($93);
+                    return $95;
                 });
-                var $112 = $114;
+                var $92 = $94;
                 break;
             case 'Word.i':
-                var $124 = self.pred;
-                var $125 = (_b$7 => {
+                var $104 = self.pred;
+                var $105 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $127 = self.pred;
-                            var $128 = (_a$pred$10 => {
-                                var $129 = Word$cmp$go$(_a$pred$10, $127, Cmp$gtn);
-                                return $129;
+                            var $107 = self.pred;
+                            var $108 = (_a$pred$10 => {
+                                var $109 = Word$cmp$go$(_a$pred$10, $107, Cmp$gtn);
+                                return $109;
                             });
-                            var $126 = $128;
+                            var $106 = $108;
                             break;
                         case 'Word.i':
-                            var $130 = self.pred;
-                            var $131 = (_a$pred$10 => {
-                                var $132 = Word$cmp$go$(_a$pred$10, $130, _c$4);
-                                return $132;
+                            var $110 = self.pred;
+                            var $111 = (_a$pred$10 => {
+                                var $112 = Word$cmp$go$(_a$pred$10, $110, _c$4);
+                                return $112;
                             });
-                            var $126 = $131;
+                            var $106 = $111;
                             break;
                         case 'Word.e':
-                            var $133 = (_a$pred$8 => {
-                                var $134 = _c$4;
-                                return $134;
+                            var $113 = (_a$pred$8 => {
+                                var $114 = _c$4;
+                                return $114;
                             });
-                            var $126 = $133;
+                            var $106 = $113;
                             break;
                     };
-                    var $126 = $126($124);
-                    return $126;
+                    var $106 = $106($104);
+                    return $106;
                 });
-                var $112 = $125;
+                var $92 = $105;
                 break;
             case 'Word.e':
-                var $135 = (_b$5 => {
-                    var $136 = _c$4;
-                    return $136;
+                var $115 = (_b$5 => {
+                    var $116 = _c$4;
+                    return $116;
                 });
-                var $112 = $135;
+                var $92 = $115;
                 break;
         };
-        var $112 = $112(_b$3);
-        return $112;
+        var $92 = $92(_b$3);
+        return $92;
     };
     const Word$cmp$go = x0 => x1 => x2 => Word$cmp$go$(x0, x1, x2);
     const Cmp$eql = ({
@@ -725,21 +746,21 @@ module.exports = (function() {
     });
 
     function Word$cmp$(_a$2, _b$3) {
-        var $137 = Word$cmp$go$(_a$2, _b$3, Cmp$eql);
-        return $137;
+        var $117 = Word$cmp$go$(_a$2, _b$3, Cmp$eql);
+        return $117;
     };
     const Word$cmp = x0 => x1 => Word$cmp$(x0, x1);
 
     function Word$lte$(_a$2, _b$3) {
-        var $138 = Cmp$as_lte$(Word$cmp$(_a$2, _b$3));
-        return $138;
+        var $118 = Cmp$as_lte$(Word$cmp$(_a$2, _b$3));
+        return $118;
     };
     const Word$lte = x0 => x1 => Word$lte$(x0, x1);
     const U32$lte = a0 => a1 => (a0 <= a1);
 
     function U32$new$(_value$1) {
-        var $139 = word_to_u32(_value$1);
-        return $139;
+        var $119 = word_to_u32(_value$1);
+        return $119;
     };
     const U32$new = x0 => U32$new$(x0);
 
@@ -755,12 +776,12 @@ module.exports = (function() {
             var R = (() => {
                 var self = _n$2;
                 if (self === 0n) {
-                    var $140 = _x$4;
-                    return $140;
+                    var $120 = _x$4;
+                    return $120;
                 } else {
-                    var $141 = (self - 1n);
-                    var $142 = Nat$apply$($141, _f$3, _f$3(_x$4));
-                    return $142;
+                    var $121 = (self - 1n);
+                    var $122 = Nat$apply$($121, _f$3, _f$3(_x$4));
+                    return $122;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -770,8 +791,8 @@ module.exports = (function() {
     const Nat$apply = x0 => x1 => x2 => Nat$apply$(x0, x1, x2);
 
     function Word$(_size$1) {
-        var $143 = null;
-        return $143;
+        var $123 = null;
+        return $123;
     };
     const Word = x0 => Word$(x0);
     const Word$e = ({
@@ -779,20 +800,20 @@ module.exports = (function() {
     });
 
     function Word$i$(_pred$2) {
-        var $144 = ({
+        var $124 = ({
             _: 'Word.i',
             'pred': _pred$2
         });
-        return $144;
+        return $124;
     };
     const Word$i = x0 => Word$i$(x0);
 
     function Word$o$(_pred$2) {
-        var $145 = ({
+        var $125 = ({
             _: 'Word.o',
             'pred': _pred$2
         });
-        return $145;
+        return $125;
     };
     const Word$o = x0 => Word$o$(x0);
 
@@ -800,41 +821,41 @@ module.exports = (function() {
         var self = _word$2;
         switch (self._) {
             case 'Word.o':
-                var $147 = self.pred;
-                var $148 = Word$i$($147);
-                var $146 = $148;
+                var $127 = self.pred;
+                var $128 = Word$i$($127);
+                var $126 = $128;
                 break;
             case 'Word.i':
-                var $149 = self.pred;
-                var $150 = Word$o$(Word$inc$($149));
-                var $146 = $150;
+                var $129 = self.pred;
+                var $130 = Word$o$(Word$inc$($129));
+                var $126 = $130;
                 break;
             case 'Word.e':
-                var $151 = Word$e;
-                var $146 = $151;
+                var $131 = Word$e;
+                var $126 = $131;
                 break;
         };
-        return $146;
+        return $126;
     };
     const Word$inc = x0 => Word$inc$(x0);
 
     function Word$zero$(_size$1) {
         var self = _size$1;
         if (self === 0n) {
-            var $153 = Word$e;
-            var $152 = $153;
+            var $133 = Word$e;
+            var $132 = $133;
         } else {
-            var $154 = (self - 1n);
-            var $155 = Word$o$(Word$zero$($154));
-            var $152 = $155;
+            var $134 = (self - 1n);
+            var $135 = Word$o$(Word$zero$($134));
+            var $132 = $135;
         };
-        return $152;
+        return $132;
     };
     const Word$zero = x0 => Word$zero$(x0);
 
     function Nat$to_word$(_size$1, _n$2) {
-        var $156 = Nat$apply$(_n$2, Word$inc, Word$zero$(_size$1));
-        return $156;
+        var $136 = Nat$apply$(_n$2, Word$inc, Word$zero$(_size$1));
+        return $136;
     };
     const Nat$to_word = x0 => x1 => Nat$to_word$(x0, x1);
     const Nat$to_u32 = a0 => (Number(a0) >>> 0);
@@ -851,38 +872,38 @@ module.exports = (function() {
     function Device$classify$(_width$1) {
         var self = (_width$1 <= 600);
         if (self) {
-            var $158 = Device$phone;
-            var $157 = $158;
+            var $138 = Device$phone;
+            var $137 = $138;
         } else {
             var self = (_width$1 <= 768);
             if (self) {
-                var $160 = Device$tablet;
-                var $159 = $160;
+                var $140 = Device$tablet;
+                var $139 = $140;
             } else {
                 var self = (_width$1 <= 992);
                 if (self) {
-                    var $162 = Device$desktop;
-                    var $161 = $162;
+                    var $142 = Device$desktop;
+                    var $141 = $142;
                 } else {
-                    var $163 = Device$big_desktop;
-                    var $161 = $163;
+                    var $143 = Device$big_desktop;
+                    var $141 = $143;
                 };
-                var $159 = $161;
+                var $139 = $141;
             };
-            var $157 = $159;
+            var $137 = $139;
         };
-        return $157;
+        return $137;
     };
     const Device$classify = x0 => Device$classify$(x0);
 
     function IO$ask$(_query$2, _param$3, _then$4) {
-        var $164 = ({
+        var $144 = ({
             _: 'IO.ask',
             'query': _query$2,
             'param': _param$3,
             'then': _then$4
         });
-        return $164;
+        return $144;
     };
     const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
 
@@ -890,75 +911,75 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'IO.end':
-                var $166 = self.value;
-                var $167 = _f$4($166);
-                var $165 = $167;
+                var $146 = self.value;
+                var $147 = _f$4($146);
+                var $145 = $147;
                 break;
             case 'IO.ask':
-                var $168 = self.query;
-                var $169 = self.param;
-                var $170 = self.then;
-                var $171 = IO$ask$($168, $169, (_x$8 => {
-                    var $172 = IO$bind$($170(_x$8), _f$4);
-                    return $172;
+                var $148 = self.query;
+                var $149 = self.param;
+                var $150 = self.then;
+                var $151 = IO$ask$($148, $149, (_x$8 => {
+                    var $152 = IO$bind$($150(_x$8), _f$4);
+                    return $152;
                 }));
-                var $165 = $171;
+                var $145 = $151;
                 break;
         };
-        return $165;
+        return $145;
     };
     const IO$bind = x0 => x1 => IO$bind$(x0, x1);
 
     function IO$end$(_value$2) {
-        var $173 = ({
+        var $153 = ({
             _: 'IO.end',
             'value': _value$2
         });
-        return $173;
+        return $153;
     };
     const IO$end = x0 => IO$end$(x0);
 
     function IO$monad$(_new$2) {
-        var $174 = _new$2(IO$bind)(IO$end);
-        return $174;
+        var $154 = _new$2(IO$bind)(IO$end);
+        return $154;
     };
     const IO$monad = x0 => IO$monad$(x0);
 
     function Dynamic$new$(_value$2) {
-        var $175 = ({
+        var $155 = ({
             _: 'Dynamic.new',
             'value': _value$2
         });
-        return $175;
+        return $155;
     };
     const Dynamic$new = x0 => Dynamic$new$(x0);
 
     function App$store$(_value$2) {
-        var $176 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $177 = _m$pure$4;
-            return $177;
+        var $156 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $157 = _m$pure$4;
+            return $157;
         }))(Dynamic$new$(_value$2));
-        return $176;
+        return $156;
     };
     const App$store = x0 => App$store$(x0);
     const Unit$new = null;
     const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $178 = _m$pure$2;
-        return $178;
+        var $158 = _m$pure$2;
+        return $158;
     }))(Dynamic$new$(Unit$new));
 
     function Web$Playground$set_mouse_over$(_id$1, _stt$2) {
         var self = _stt$2;
         switch (self._) {
             case 'Web.Playground.State.new':
-                var $180 = self.device;
-                var $181 = self.window;
-                var $182 = self.code;
-                var $183 = Web$Playground$State$new$($180, $181, _id$1, $182);
-                var $179 = $183;
+                var $160 = self.device;
+                var $161 = self.window;
+                var $162 = self.code;
+                var $163 = Web$Playground$State$new$($160, $161, _id$1, $162);
+                var $159 = $163;
                 break;
         };
-        return $179;
+        return $159;
     };
     const Web$Playground$set_mouse_over = x0 => x1 => Web$Playground$set_mouse_over$(x0, x1);
     const Web$Playground$Event$check_terms = ({
@@ -973,78 +994,15 @@ module.exports = (function() {
     const Web$Playground$Actions = Map$from_list$(List$cons$(Pair$new$("btn_check_terms", Web$Playground$Event$check_terms), List$cons$(Pair$new$("btn_run_code", Web$Playground$Event$run_code), List$cons$(Pair$new$("display_output", Web$Playground$Event$display_output), List$nil))));
 
     function Maybe$(_A$1) {
-        var $184 = null;
-        return $184;
+        var $164 = null;
+        return $164;
     };
     const Maybe = x0 => Maybe$(x0);
-
-    function BitsMap$get$(_bits$2, _map$3) {
-        var BitsMap$get$ = (_bits$2, _map$3) => ({
-            ctr: 'TCO',
-            arg: [_bits$2, _map$3]
-        });
-        var BitsMap$get = _bits$2 => _map$3 => BitsMap$get$(_bits$2, _map$3);
-        var arg = [_bits$2, _map$3];
-        while (true) {
-            let [_bits$2, _map$3] = arg;
-            var R = (() => {
-                var self = _bits$2;
-                switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
-                    case 'o':
-                        var $185 = self.slice(0, -1);
-                        var self = _map$3;
-                        switch (self._) {
-                            case 'BitsMap.tie':
-                                var $187 = self.lft;
-                                var $188 = BitsMap$get$($185, $187);
-                                var $186 = $188;
-                                break;
-                            case 'BitsMap.new':
-                                var $189 = Maybe$none;
-                                var $186 = $189;
-                                break;
-                        };
-                        return $186;
-                    case 'i':
-                        var $190 = self.slice(0, -1);
-                        var self = _map$3;
-                        switch (self._) {
-                            case 'BitsMap.tie':
-                                var $192 = self.rgt;
-                                var $193 = BitsMap$get$($190, $192);
-                                var $191 = $193;
-                                break;
-                            case 'BitsMap.new':
-                                var $194 = Maybe$none;
-                                var $191 = $194;
-                                break;
-                        };
-                        return $191;
-                    case 'e':
-                        var self = _map$3;
-                        switch (self._) {
-                            case 'BitsMap.tie':
-                                var $196 = self.val;
-                                var $197 = $196;
-                                var $195 = $197;
-                                break;
-                            case 'BitsMap.new':
-                                var $198 = Maybe$none;
-                                var $195 = $198;
-                                break;
-                        };
-                        return $195;
-                };
-            })();
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const BitsMap$get = x0 => x1 => BitsMap$get$(x0, x1);
+    const BitsMap$get = a0 => a1 => (bitsmap_get(a0, a1));
 
     function Map$get$(_key$2, _map$3) {
-        var $199 = BitsMap$get$(String$to_bits$(_key$2), _map$3);
-        return $199;
+        var $165 = (bitsmap_get(String$to_bits$(_key$2), _map$3));
+        return $165;
     };
     const Map$get = x0 => x1 => Map$get$(x0, x1);
 
@@ -1057,94 +1015,102 @@ module.exports = (function() {
                 switch (self._) {
                     case 'Maybe.none':
                     case 'Maybe.some':
-                        var $202 = _stt$2;
-                        var $201 = $202;
+                        var $168 = _stt$2;
+                        var $167 = $168;
                         break;
                 };
-                var $200 = $201;
+                var $166 = $167;
                 break;
         };
-        return $200;
+        return $166;
     };
     const Web$Playground$exe_event = x0 => x1 => Web$Playground$exe_event$(x0, x1);
 
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $203 = ({
+        var $169 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $203;
+        return $169;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Playground = (() => {
         var _init$1 = Web$Playground$State$new$(Device$big_desktop, Web$Playground$Window$input, "", "");
         var _draw$2 = (_state$2 => {
-            var $205 = Web$playground$body$(_state$2);
-            return $205;
+            var $171 = Web$playground$body$(_state$2);
+            return $171;
         });
         var _when$3 = (_event$3 => _state$4 => {
             var self = _event$3;
             switch (self._) {
                 case 'App.Event.init':
-                    var $207 = self.info;
-                    var self = $207;
+                    var $173 = self.info;
+                    var self = $173;
                     switch (self._) {
                         case 'App.EnvInfo.new':
-                            var $209 = self.screen_size;
-                            var self = $209;
+                            var $175 = self.screen_size;
+                            var self = $175;
                             switch (self._) {
                                 case 'Pair.new':
-                                    var $211 = self.fst;
-                                    var _device$12 = Device$classify$($211);
-                                    var $212 = App$store$(Web$Playground$State$new$(_device$12, Web$Playground$Window$input, "", ""));
-                                    var $210 = $212;
+                                    var $177 = self.fst;
+                                    var _device$12 = Device$classify$($177);
+                                    var $178 = App$store$(Web$Playground$State$new$(_device$12, Web$Playground$Window$input, "", ""));
+                                    var $176 = $178;
                                     break;
                             };
-                            var $208 = $210;
+                            var $174 = $176;
                             break;
                     };
-                    var $206 = $208;
+                    var $172 = $174;
                     break;
                 case 'App.Event.mouse_over':
-                    var $213 = self.id;
-                    var $214 = App$store$(Web$Playground$set_mouse_over$($213, _state$4));
-                    var $206 = $214;
+                    var $179 = self.id;
+                    var $180 = App$store$(Web$Playground$set_mouse_over$($179, _state$4));
+                    var $172 = $180;
                     break;
                 case 'App.Event.mouse_click':
-                    var $215 = self.id;
-                    var $216 = App$store$(Web$Playground$exe_event$($215, _state$4));
-                    var $206 = $216;
+                    var $181 = self.id;
+                    var $182 = App$store$(Web$Playground$exe_event$($181, _state$4));
+                    var $172 = $182;
                     break;
                 case 'App.Event.resize':
-                    var $217 = self.info;
-                    var self = $217;
+                    var $183 = self.info;
+                    var self = $183;
                     switch (self._) {
                         case 'App.EnvInfo.new':
-                            var $219 = self.screen_size;
-                            var self = $219;
+                            var $185 = self.screen_size;
+                            var self = $185;
                             switch (self._) {
                                 case 'Pair.new':
-                                    var $221 = self.fst;
+                                    var $187 = self.fst;
                                     var self = _state$4;
                                     switch (self._) {
                                         case 'Web.Playground.State.new':
-                                            var $223 = self.window;
-                                            var $224 = self.mouse_over;
-                                            var $225 = self.code;
-                                            var _device$15 = Device$classify$($221);
-                                            var $226 = App$store$(Web$Playground$State$new$(_device$15, $223, $224, $225));
-                                            var $222 = $226;
+                                            var $189 = self.window;
+                                            var $190 = self.mouse_over;
+                                            var $191 = self.code;
+                                            var _device$15 = Device$classify$($187);
+                                            var $192 = App$store$(Web$Playground$State$new$(_device$15, $189, $190, $191));
+                                            var $188 = $192;
                                             break;
                                     };
-                                    var $220 = $222;
+                                    var $186 = $188;
                                     break;
                             };
-                            var $218 = $220;
+                            var $184 = $186;
                             break;
                     };
-                    var $206 = $218;
+                    var $172 = $184;
+                    break;
+                case 'App.Event.onsubmit':
+                    var $193 = self.response;
+                    var $194 = ((console.log(("Submit " + ($193 + String$nil))), (_x$8 => {
+                        var $195 = App$pass;
+                        return $195;
+                    })()));
+                    var $172 = $194;
                     break;
                 case 'App.Event.tick':
                 case 'App.Event.mouse_down':
@@ -1153,15 +1119,14 @@ module.exports = (function() {
                 case 'App.Event.key_up':
                 case 'App.Event.post':
                 case 'App.Event.mouse_out':
-                case 'App.Event.onsubmit':
-                    var $227 = App$pass;
-                    var $206 = $227;
+                    var $196 = App$pass;
+                    var $172 = $196;
                     break;
             };
-            return $206;
+            return $172;
         });
-        var $204 = App$new$(_init$1, _draw$2, _when$3);
-        return $204;
+        var $170 = App$new$(_init$1, _draw$2, _when$3);
+        return $170;
     })();
     return {
         'Web.Playground.State.new': Web$Playground$State$new,
