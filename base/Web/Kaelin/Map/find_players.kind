@@ -1,3 +1,4 @@
+// Returns a map with the player Address as the key to its respective coordinate 
 Web.Kaelin.Map.find_players(map: Web.Kaelin.Map): Map(Web.Kaelin.Coord)
   let lmap = NatMap.to_list!(map)
   let result   = []

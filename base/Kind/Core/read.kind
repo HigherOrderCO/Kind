@@ -81,6 +81,12 @@ Kind.Core.read.chrx(code: String): Pair<String, Char>
       {String.drop(1, code), chrx}
     else
       {"", '?'}
+  else if String.starts_with(code, "\\'") then
+    {String.drop(2,code), '\''}
+  else if String.starts_with(code, "\\\"") then
+    {String.drop(2,code), '\"'}
+  else if String.starts_with(code, "\\\\") then
+    {String.drop(2,code), '\\'}
   else case code {
     nil: {"", '?'}
     cons: {code.tail, code.head}
@@ -109,7 +115,6 @@ Kind.Core.read.find<A: Type>(list: List<A>, cond: A -> Nat -> Bool, indx: Nat, s
   }
 
 Kind.Core.read.term(code: String): Pair<String, List<Pair<String,Kind.Term>> -> Kind.Term>
-  //log(code)
   let {code, skip} = Kind.Core.read.spaces(code)
   case code {
     nil:
@@ -181,9 +186,12 @@ Kind.Core.read.term(code: String): Pair<String, List<Pair<String,Kind.Term>> -> 
         if Kind.Core.read.is_name(head) then
           let {code, name} = Kind.Core.read.name(code)
           let name = String.cons(head, name)
-          let {code, brui} = if U16.eql(head,'^')
-            then Kind.Core.read.natx(code, 0)
-            else {code, 0}
+          let {code, brui} = case code {
+            nil: {"", 0}
+            cons: if U16.eql(code.head,'^')
+              then Kind.Core.read.natx(code.tail, 0)
+              else {code, 0}
+          }
           {code, (ctx)
             def fun = (x,i) String.eql(Pair.fst!!(x), name)
             let got = Kind.Core.read.find!(ctx, fun, 0, brui)

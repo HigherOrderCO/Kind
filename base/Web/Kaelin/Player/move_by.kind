@@ -1,7 +1,7 @@
 Web.Kaelin.Player.move_by(i: I32, j: I32, state: Web.Kaelin.State, addr: String): Web.Kaelin.State
 case state {
   game:
-    coord_a = Web.Kaelin.Map.id_coord(addr,state.map)
+    coord_a = Web.Kaelin.Map.addr_to_coord(addr,state.map)
     case coord_a{
       none:state
       some: 

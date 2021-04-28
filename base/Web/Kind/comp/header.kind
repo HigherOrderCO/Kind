@@ -1,27 +1,27 @@
-Web.Kind.comp.header(stt: Web.Kind.State): DOM
+Web.Kind.comp.header(stt: Web.Kind.State, container_layout: Map(String)): DOM
+  open stt
+
   let vbox = VoxBox.alloc_capacity(100#32)
   let line = 
     DOM.node("div", {}, {
         "margin":  "auto"
         "max-width": "65em"
+        "padding": "0.5em 0"
         }, 
       [ DOM.node("div", {}, {
-        "height": "4px"
-        "border-top": Web.Kind.constant.primary_color | " dashed 1px"
-        "border-bottom": Web.Kind.constant.primary_color | " dashed 1px"
-        "margin-top": "1em"
-        "margin-bottom": "1em"
-        "margin-left": "15%"
-        "margin-right": "15%"
+        "height": "3pt"
+        "border-top": Web.Kind.constant.primary_color | " dashed 1pt"
+        "border-bottom": Web.Kind.constant.primary_color | " dashed 1pt"
+        "margin-left": "10%"
+        "margin-right": "10%"
         }, []) ]
     )
 
-  DOM.node("div", {}, {}, [
-    DOM.node("h2", {}, {
-      "margin-top" : "40px"
-      "font-family": "verdana"
-      "text-align" : "center"
-      }, [DOM.text("KIND language")]),
+  DOM.node("div", {"id": "header"}, container_layout, [
+    (case stt.device {
+      phone: 
+        Web.Kind.comp.title_phone("KIND language")
+     } default Web.Kind.comp.title("KIND language")),
     line,
     Web.Kind.comp.header_tabs(stt)
   ])
@@ -40,20 +40,11 @@ Web.Kind.comp.header_tabs(stt: Web.Kind.State): DOM
       String.eql("tab_apps", stt.mouse_over)
       "Apps", "tab_apps")
   ]
-  case stt.device {
-    phone: 
-      DOM.node("div", {}, {
-      "padding-left": "30px"
-      "display": "flex"
-      "flex-direction": "row"
-      }, tabs)
-  } default 
-    DOM.node("div", {}, {
-    "padding-left": "20%"
-    "display": "flex"
-    "flex-direction": "row"
-    }, tabs)
-
+  DOM.node("div", {}, Map.union!(Web.Kind.typography.button, {
+  "padding-top": "0.5em"
+  "display": "flex"
+  "flex-direction": "row"
+  }), tabs)
 
 // Configure a tab
 Web.Kind.comp.header_tab(
@@ -62,11 +53,10 @@ Web.Kind.comp.header_tab(
   title: String, 
   id: String): DOM
   let normal = {
-    "margin-right": "30px"
-    "font-size": "18px"
+    "padding": "0.5em 1em"
+    "font-weight": "500"
+    "font-size": "1.1em"
     "cursor": "pointer"
-    "width": "70px"
-    "padding-bottom": "4px"
     "display": "flex"
     "justify-content": "center"
     }

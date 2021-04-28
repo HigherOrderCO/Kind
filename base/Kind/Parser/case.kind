@@ -26,7 +26,7 @@ Kind.Parser.case: Parser(Kind.Term)
 
     // Default value
     get dflt = Parser.maybe!(Parser {
-      Kind.Parser.text("default ");
+      Kind.Parser.text("default");
       get term = Kind.Parser.term;
       return term;
     });

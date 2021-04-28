@@ -1,63 +1,88 @@
 Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
 (event, state)
+    def serialize = Web.Kaelin.Event.serialize
+    def deserialize = Web.Kaelin.Event.deserialize
+
     case event state{
       init game: App.watch(Web.Kaelin.Constants.room)
       
       key_down game:
+        App.pass
       // this will be replaced by serialze when it is ready 
-        switch U16.eql(event.code) {
-          49#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000001")) // croni
-          50#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000002")) // cyclope
-          51#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000003")) // lela
-          52#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000004")) // octoking
-          'D': App.post(state.room, "0x2100000000000000000000000000000000000000000000000000000000000001")
-          'A': App.post(state.room, "0x2200000000000000000000000000000000000000000000000000000000000001")
-          'W': App.post(state.room, "0x2300000000000000000000000000000000000000000000000000000000000001")
-          'S': App.post(state.room, "0x2400000000000000000000000000000000000000000000000000000000000001")
-          'Z': App.post(state.room, "0x3100000000000000000000000000000000000000000000000000000000000001")
-          'X': App.post(state.room, "0x3200000000000000000000000000000000000000000000000000000000000001")
-        } default App.pass
+     //   switch U16.eql(event.code) {
+     //     49#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000001")) // croni
+      //    50#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000002")) // cyclope
+      //    51#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000003")) // lela
+      //    52#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000004")) // octoking
+      //    'D': App.post(state.room, "0x2100000000000000000000000000000000000000000000000000000000000001")
+      //    'A': App.post(state.room, "0x2200000000000000000000000000000000000000000000000000000000000001")
+      //    'W': App.post(state.room, "0x2300000000000000000000000000000000000000000000000000000000000001")
+      //    'S': App.post(state.room, "0x2400000000000000000000000000000000000000000000000000000000000001")
+      //    'Z': App.post(state.room, "0x3100000000000000000000000000000000000000000000000000000000000001")
+      //    'X': App.post(state.room, "0x3200000000000000000000000000000000000000000000000000000000000001")
+      //    'C': App.post(state.room, "0x3300000000000000000000000000000000000000000000000000000000000001")
+       // } default App.pass
+
        tick game:
-           let info = event.info
-           App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_interface(info, state))
+         let info = event.info
+         App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_interface(info, state))
+       mouse_up game :
+         let info = state.interface
+         open info
+         let {axial_x, axial_y} = Web.Kaelin.Coord.to_axial(info.mouse_pos)
+         let hex = serialize(Web.Kaelin.Event.user_input(Web.Kaelin.Coord.new(axial_x, axial_y), Web.Kaelin.Action.walk))
+         App.post(state.room, hex)
       post game:
-      // this will be replaced by deserialze when it is ready
-        switch String.starts_with(event.data) {
-          
-          "0x1": 
-            let hero_id = "0x" | String.drop(58, event.data)
-            let hero = Web.Kaelin.Resources.heroes{hero_id}
-            case hero {
-              none: App.pass
-              some: App.store<Web.Kaelin.State>(Web.Kaelin.Action.create_player(event.addr, hero.value, state))
+         case deserialize(String.drop(2, event.data)) as data { // drop the 0x thing
+           none : App.pass
+           some : case data.value as eventdata {
+             start_game : App.pass
+             create_user : App.pass
+             create_hero : App.pass
+             user_input : 
+               let pos = eventdata.coord
+               log(Web.Kaelin.Coord.show(pos))
+               // App.store<Web.Kaelin.State>(Web.Kaelin.Action.move_player(data.addr,  ))
+               App.pass
             }
+          }
+     
+      // this will be replaced by deserialze when it is ready
+      //  switch String.starts_with(event.data) {
+          
+         // "0x1": 
+         //   let hero_id = "0x" | String.drop(58, event.data)
+         //   let hero = Web.Kaelin.Resources.heroes{hero_id}
+          //  case hero {
+           //   none: App.pass
+           //   some: App.store<Web.Kaelin.State>(Web.Kaelin.Action.create_player(event.addr, hero.value, state))
+        //    }
             // TODO: change movement so it uses range 2 and mouse (Web.Kaelin.Coord.Range)
             // draw the range in Web.Kaelin.Draw.state.background through State.Cast_info
             // draw hovered hex differently from movement hexes.
             // use mouse click to move
-          "0x2":
-            let {coord.fst, coord.snd} = switch String.eql( String.slice(3, 4, event.data) ) {
-              "1": {+1#32, +0#32}
-              "2": {-1#32, +0#32}
-              "3": {+0#32, -1#32}
-              "4": {+0#32, +1#32}
-            } default {+0#32, +0#32}
+         // "0x2":
+         //   let {coord.fst, coord.snd} = switch String.eql( String.slice(3, 4, event.data) ) {
+         //     "1": {+1#32, +0#32}
+         //     "2": {-1#32, +0#32}
+         //     "3": {+0#32, -1#32}
+         //     "4": {+0#32, +1#32}
+          //  } default {+0#32, +0#32}
             // App.store<Web.Kaelin.State>(Web.Kaelin.Player.move(Web.Kaelin.Coord.new(+1,+0) state, event.addr))            
-            App.store<Web.Kaelin.State>(Web.Kaelin.Player.move_by(coord.fst, coord.snd, state, event.addr))
+          //  App.store<Web.Kaelin.State>(Web.Kaelin.Player.move_by(coord.fst, coord.snd, state, event.addr))
           
-          "0x3":
-            let {range, hex_effect} = switch String.eql( String.slice(3, 4, event.data) ) {
-              "1": {1, Web.Kaelin.HexEffect.ability} 
-              "2": {2, Web.Kaelin.HexEffect.ability}
-            }default {0, Web.Kaelin.HexEffect.ability}
+         // "0x3":
+         //   let {range, hex_effect} = switch String.eql( String.slice(3, 4, event.data) ) {
+         //     "1": {1, Web.Kaelin.HexEffect.ability} 
+         //     "2": {2, Web.Kaelin.HexEffect.ability}
+          //    "3": {2, Web.Kaelin.HexEffect.movement}
+          //  }default {0, Web.Kaelin.HexEffect.ability}
             // App.store<Web.Kaelin.State>(Web.Kaelin.Player.move(Web.Kaelin.Coord.new(+1,+0) state, event.addr))            
-            App.store<Web.Kaelin.State>(Web.Kaelin.Action.cast(range, hex_effect, state, event.addr))
+        //    App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_cast(range, hex_effect, state, event.addr))
 
-          "0x4":
-            App.store<Web.Kaelin.State>(Web.Kaelin.Action.select(state, event.addr))
-            
-          
-        } default App.pass
+        //  "0x4":
+        //    App.store<Web.Kaelin.State>(Web.Kaelin.Action.select(state, event.addr))
+      //  } default App.pass
     } default App.pass
 
 Web.Kaelin.Command.create_player(hero_id: String) : String

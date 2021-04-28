@@ -1,2 +1,0 @@
-Hex.to_bits (x : String): Maybe(Bits)
-  Maybe.bind(Nat, Bits, Parser.run!(Hex.parser, x), (x) Maybe.some!(Nat.to_bits(x)))

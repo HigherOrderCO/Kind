@@ -1,0 +1,3 @@
+Nat.sqrt(x : Nat) : Nat
+  let n = Nat.to_bits(x)
+  Bits.to_nat(Bits.sqrt(n))

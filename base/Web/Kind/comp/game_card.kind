@@ -7,7 +7,6 @@ Web.Kind.comp.game_card(src: String, title: String, path: String): DOM
       "href": path
       "target": "_blank"
       }, {
-      "font-size": Web.Kind.constant.p_tag_size
       "cursor": "pointer"
       "color": "black"
       "text-decoration": "none"

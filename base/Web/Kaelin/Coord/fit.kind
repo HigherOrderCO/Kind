@@ -1,3 +1,4 @@
+// Checks if a coord is inside the map boundaries
 Web.Kaelin.Coord.fit(
   coord: Web.Kaelin.Coord,
   map_size: U32

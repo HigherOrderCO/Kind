@@ -1,3 +1,4 @@
 I32.show(a: I32): String
   open a
-  Word.show!(a.value)
+  Word.s_show!(a.value)
+

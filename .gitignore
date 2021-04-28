@@ -7,3 +7,6 @@ src/tmp*
 bin/hs/cabal.project.local*
 tmp.js
 .vscode
+*.orig
+web/*.lock
+base/.cache

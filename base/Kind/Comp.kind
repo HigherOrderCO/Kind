@@ -1,13 +1,15 @@
 type Kind.Comp {
-  nil,
-  var(name: Kind.Name),
-  ref(name: Kind.Name),
-  lam(name: Kind.Name, body: Kind.Comp),
-  app(func: Kind.Comp, argm: Kind.Comp),
-  let(name: Kind.Name, expr: Kind.Comp, body: Kind.Comp),
-  eli(prim: Kind.Prim, expr: Kind.Comp),
-  ins(prim: Kind.Prim, expr: Kind.Comp),
-  nat(natx: Nat),
-  chr(chrx: Char),
-  str(strx: String),
+  nil
+  var(name: Kind.Name)
+  ref(name: Kind.Name)
+  lam(name: Kind.Name, body: Kind.Comp)
+  app(func: Kind.Comp, argm: Kind.Comp)
+  let(name: Kind.Name, expr: Kind.Comp, body: Kind.Comp)
+  eli(prim: Kind.Comp.Prim, expr: Kind.Comp)
+  ins(prim: Kind.Comp.Prim, expr: Kind.Comp)
+  nat(natx: Nat)
+  chr(chrx: Char)
+  str(strx: String)
+  txt(text: String)
 }
+
