@@ -1,10 +1,4 @@
 I32.shr(n: I32, a: I32): I32
   open n
-  open I32.abs(a) as a_abs
-  let a_nat = Word.to_nat!(a_abs.value)
-  // reverse direction?
-  let b = I32.is_neg(a)
-  case b {
-    false: Word.shift_right!(a_nat, n.value),
-    true: Word.shift_left!(a_nat, n.value,
-  }
+  open a
+  I32.new(Word.s_shr!(n.value, a.value))

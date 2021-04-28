@@ -1,0 +1,2 @@
+U8.read_base(base: U8, str: String): U8
+  U8.read_base(base, str)

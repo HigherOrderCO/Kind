@@ -1,0 +1,8 @@
+// Generates a random number using the hour as a seed
+IO.random(a: Nat): IO<Nat>
+  IO { 
+    get seed = IO.get_time
+    let seed = Nat.random(seed)
+    return Nat.mod(seed, a)
+  }
+

@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S node --stack-size=100000
 
 var kind = require("./kind.js");
 var fs = require("fs");
@@ -202,7 +202,7 @@ function display_error(name, error){
     } catch (e) {
       console.log("Sorry, KindJS couldn't handle your input. :( ");
       console.log("Try Haskell/Scheme releases!")
-      console.log(e);
+      //console.log(e);
     }
   }
 })();

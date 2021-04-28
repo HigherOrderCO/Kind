@@ -1,0 +1,3 @@
+Word.show(size: Nat, a: Word(size)): String
+  n = Word.to_nat!(a)
+  Nat.show(n) | "#" | Nat.show(size)

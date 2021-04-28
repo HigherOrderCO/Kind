@@ -1,0 +1,4 @@
+// TODO fix I32.show
+Web.Kaelin.Coord.Cubic.show(coord: Web.Kaelin.Coord.Cubic): String
+  open coord
+  Int.show(I32.to_int(coord.x)) | " " | Int.show(I32.to_int(coord.y)) | " " | Int.show(I32.to_int(coord.z))

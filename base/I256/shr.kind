@@ -1,0 +1,4 @@
+I256.shr(n: I256, a: I256): I256
+  open n
+  open a
+  I256.new(Word.s_shr!(n.value, a.value))

@@ -1,0 +1,4 @@
+I64.gte(a: I64, b: I64): Bool
+  open a
+  open b
+  Word.s_gte!(a.value, b.value)

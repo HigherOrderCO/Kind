@@ -1,0 +1,9 @@
+Word.s_gte<size:Nat>(a: Word(size), b: Word(size)): Bool
+  let neg_a = Word.is_neg!(a)
+  let neg_b = Word.is_neg!(b)
+  case neg_a neg_b {
+    false false: Cmp.as_gte(Word.cmp<size>(a, b))
+    false true: true
+    true  false: false
+    true  true: Cmp.as_gte(Cmp.inv(Word.cmp<size>(a, b)))
+  }

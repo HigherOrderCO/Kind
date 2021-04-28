@@ -1,0 +1,7 @@
+Kind.Comp.get_args.go(term: Kind.Comp, args: List(Kind.Comp)): Pair(Kind.Comp, List(Kind.Comp))
+  case term {
+    app: Kind.Comp.get_args.go(term.func, term.argm & args)
+  } default {term, args}
+
+Kind.Comp.get_args(term: Kind.Comp): Pair(Kind.Comp, List(Kind.Comp))
+  Kind.Comp.get_args.go(term, [])

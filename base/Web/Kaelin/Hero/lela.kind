@@ -1,0 +1,5 @@
+Web.Kaelin.Hero.lela: Web.Kaelin.Hero
+  Web.Kaelin.Hero.new(
+    3#8, 
+    Web.Kaelin.Assets.hero.lela_d_1
+  )

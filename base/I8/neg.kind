@@ -1,0 +1,3 @@
+I8.neg(a: I8): I8
+  open a
+  I8.new(Word.neg!(a.value))

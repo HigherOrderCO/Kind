@@ -1,0 +1,13 @@
+Web.Kaelin.Map.pop_at(
+  idx: Nat, 
+  coord: Web.Kaelin.Coord, 
+  map: Web.Kaelin.Map
+) : Pair<Web.Kaelin.Map, Maybe<Web.Kaelin.Entity>>
+  let tile = Web.Kaelin.Map.get(coord, map)
+  case tile {
+    none:{map, none}
+    some:
+      let {ent, remaining_tile} = List.pop_at!(idx, tile.value)
+      let map = Web.Kaelin.Map.set(coord, remaining_tile, map)
+      {map, ent}
+  }

@@ -1,0 +1,3 @@
+IO.get(call: String, param: String): IO<String>
+  IO.ask<String>(call, param, (answer)
+  IO.end<String>(answer))

@@ -1,4 +1,4 @@
-Maybe.mapped<A: Type>(m: Maybe(A))<B: Type>(f: A -> B): Maybe(B)
+Maybe.mapped<A: Type>(m: Maybe<A>)<B: Type>(f: A -> B): Maybe<B>
   case m {
     none: Maybe.none<B>,
     some: Maybe.some<B>(f(m.value)),

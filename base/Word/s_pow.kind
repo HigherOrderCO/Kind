@@ -1,0 +1,5 @@
+Word.s_pow<size: Nat>(a: Word(size), b: Word(size)): Word(size)
+  case Word.is_neg!(b) as neg {
+    true: Word.zero!
+    false: Word.pow!(a, b)
+  }

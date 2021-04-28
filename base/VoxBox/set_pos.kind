@@ -1,0 +1,8 @@
+// BitsSets the position of the idx voxel of an VoxBox
+VoxBox.set_pos(idx: U32, pos: U32, img: VoxBox): VoxBox
+  case img {
+    new:
+      let img.buffer = Buffer32.set(U32.mul(idx,2#32), pos, img.buffer)
+      VoxBox.new(img.length, img.capacity, img.buffer)
+  }
+

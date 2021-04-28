@@ -1,0 +1,5 @@
+type F32.Ordering {
+  LT,
+  EQ,
+  GT
+}

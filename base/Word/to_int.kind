@@ -1,0 +1,7 @@
+Word.to_int<size: Nat>(a: Word(size)): Int
+  neg = Word.is_neg!(a)
+  i = Int.from_nat(Word.to_nat!(Word.abs!(a)))
+  if neg then
+    Int.neg(i)
+  else
+    i

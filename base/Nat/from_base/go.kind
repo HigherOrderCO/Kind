@@ -1,5 +1,9 @@
-Nat.from_base.go(b: Nat, ds: List(Nat), p: Nat, res: Nat) : Nat
+Nat.from_base.go(b: Nat, ds: List<Nat>, p: Nat, res: Nat) : Nat
   case ds {
     nil: res,
-    cons: Nat.from_base.go(b,ds.tail,Nat.mul(b,p), Nat.add(Nat.mul(ds.head,p),res))
+    cons: Nat.from_base.go(b,
+                           ds.tail,
+                           Nat.mul(b, p),
+                           Nat.add(Nat.mul(ds.head, p),
+                                   res))
   }

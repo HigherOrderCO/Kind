@@ -1,2 +1,2 @@
 Web.Kaelin.Tile: Type
-  List(Web.Kaelin.Entity)
+  List<Web.Kaelin.Entity>

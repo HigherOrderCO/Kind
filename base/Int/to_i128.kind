@@ -1,0 +1,6 @@
+Int.to_i128(a: Int): I128
+  open a
+  case a.neg {
+    zero: I128.new(Nat.to_word!(a.pos))
+    succ: I128.neg(I128.new(Nat.to_word!(a.neg)))
+  }

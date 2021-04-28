@@ -1,3 +1,0 @@
-Image3D.alloc_capacity(capacity: U32): Image3D
-  let buffer = Buffer32.alloc(U32.needed_depth(U32.mul(Nat.to_u32(2),capacity)))
-  Image3D.new(0u, capacity, buffer)

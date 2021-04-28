@@ -1,0 +1,4 @@
+I128.and(a: I128, b: I128): I128
+  open a
+  open b
+  I128.new(Word.and!(a.value, b.value))

@@ -1,0 +1,12 @@
+// Moves the entity at coordinate "ca" to coordinate "cb"
+Web.Kaelin.Map.swap(
+  idx: Nat,
+  ca: Web.Kaelin.Coord
+  cb: Web.Kaelin.Coord
+  map: Web.Kaelin.Map
+) : Web.Kaelin.Map
+  {new_map, ent} = Web.Kaelin.Map.pop_at(idx, ca, map)
+  case ent {
+    none: map
+    some: Web.Kaelin.Map.push(cb, ent.value, new_map)
+  }

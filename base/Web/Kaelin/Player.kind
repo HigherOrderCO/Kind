@@ -1,0 +1,6 @@
+type Web.Kaelin.Player {
+  new(
+    addr: String
+    team: String,
+  )
+}

@@ -1,0 +1,3 @@
+VoxBox.get_length(img: VoxBox): U32
+  open img
+  img.length

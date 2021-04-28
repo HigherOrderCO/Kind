@@ -1,0 +1,4 @@
+VoxBox.get_col(idx: U32, vox: VoxBox): U32
+  case vox {
+    new: Buffer32.get(U32.add(U32.mul(idx,2#32),1#32), vox.buffer)
+  }

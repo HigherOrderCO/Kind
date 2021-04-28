@@ -1,0 +1,2 @@
+NatMap<A: Type>: Type
+  BitsMap<A>

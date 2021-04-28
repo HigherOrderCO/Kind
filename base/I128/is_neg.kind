@@ -1,0 +1,3 @@
+I128.is_neg(a: I128): Bool
+  open a
+  Word.is_neg!(a.value)

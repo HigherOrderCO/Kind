@@ -1,0 +1,3 @@
+I8.is_neg(a: I8): Bool
+  open a
+  Word.is_neg!(a.value)

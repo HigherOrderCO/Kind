@@ -1,0 +1,5 @@
+Word.log<size: Nat>(w: Word(size), base: Word(size)): Word(size)
+  if (Word.gtn!(w, Word.inc!(Word.zero!))) then
+    Word.inc!(Word.log!(Word.div!(w, base), base))
+  else
+    Word.zero!

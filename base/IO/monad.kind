@@ -1,2 +1,2 @@
-IO.monad: Monad(IO)
+IO.monad: Monad<IO>
   Monad.new<IO>(IO.bind, IO.end)

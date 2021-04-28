@@ -1,0 +1,3 @@
+I32.bit_length(size: I32): Nat
+  open size
+  Word.bit_length!(size.value)

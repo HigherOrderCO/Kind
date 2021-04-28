@@ -1,4 +1,4 @@
 type Web.Kaelin.Entity {
-  background(img: Image3D)
-  char(img: Image3D)
+  background(terrain: Web.Kaelin.Terrain)
+  creature(player: Maybe(String), hero: Web.Kaelin.Hero)
 }

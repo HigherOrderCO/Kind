@@ -1,0 +1,56 @@
+type TicTacToe.Piece {
+  O
+  X
+}
+
+type TicTacToe {
+  new(
+    turn: Nat
+    pieces: List<List<Maybe<TicTacToe.Piece>>>
+  )
+}
+
+// The initial board state
+TicTacToe.init: TicTacToe
+  ?a
+
+// Who is the next one to play?
+TicTacToe.next_piece(ttt: TicTacToe): TicTacToe.Piece
+  ?a
+
+// Adds a piece at given location and increments the turn
+TicTacToe.move(x: Nat, y: Nat, ttt: TicTacToe): TicTacToe
+  ?a
+
+// Is there a winner?
+TicTacToe.winner(ttt: TicTacToe): Maybe<TicTacToe.Piece>
+  ?a
+
+// Converts a TicTacToe board to a String. Example:
+//   O |   |   
+// ------------- 
+//     | O |    
+// -------------
+//     |    | X  
+TicTacToe.show(ttt: TicTacToe): String
+  ?a
+
+TicTacToe.test: IO<Unit>
+  IO {
+    // Prints the initial board
+    let ttt = TicTacToe.init
+    IO.print(TicTacToe.show(ttt))
+
+    // Inserts an O at the upper-left corner
+    let ttt = TicTacToe.move(0, 0, ttt)
+
+    // Inserts an X at the lower-right corner
+    let ttt = TicTacToe.move(2, 2, ttt)
+
+    // Inserts an O at the center of the board
+    let ttt = TicTacToe.move(1, 1, ttt)
+
+    // Prints the result
+    IO.print(TicTacToe.show(ttt))
+
+  }

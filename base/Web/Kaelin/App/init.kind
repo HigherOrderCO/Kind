@@ -1,0 +1,8 @@
+Web.Kaelin.App.init: Web.Kaelin.State
+    room      = Web.Kaelin.Constants.room
+    tick      = 0
+    players   = {}
+    cast_info = Web.Kaelin.CastInfo.new(Web.Kaelin.Coord.new(+0#32,+0#32),Web.Kaelin.Coord.new(+0#32,+0#32),0,Web.Kaelin.HexEffect.normal) // Hero.pos = 0,0 - Mouse.pos = 0,0 - Range 0 - HexEffect = Normal
+    map       = Web.Kaelin.Map.init(Web.Kaelin.Map.arena)
+    interface = App.EnvInfo.new({256#32, 256#32}, {0#32, 0#32})
+    Web.Kaelin.State.game(room, tick, players, cast_info, map, interface)

@@ -1,0 +1,5 @@
+Arith.N_to_Z(n : Nat) : Int
+  if Nat.eql(Nat.mod(n, 2), 0) then 
+    Int.div(Int.from_nat(n), -2) 
+  else
+    Int.add(Int.div(Int.from_nat(n), +2), +1)

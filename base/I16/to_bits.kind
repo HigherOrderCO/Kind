@@ -1,0 +1,3 @@
+I16.to_bits(a: I16): Bits
+  open a
+  Word.to_bits!(a.value)

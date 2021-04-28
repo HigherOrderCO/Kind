@@ -1,0 +1,9 @@
+VoxBox.push(pos: U32, col: U32, img: VoxBox): VoxBox
+  case img {
+    new:
+      let idx = img.length
+      let img = VoxBox.set_pos(idx, pos, img)
+      let img = VoxBox.set_col(idx, col, img)
+      let img = VoxBox.set_length(U32.add(img.length, 1#32), img)
+      img
+  }

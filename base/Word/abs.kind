@@ -1,0 +1,6 @@
+Word.abs<size: Nat>(a: Word(size)): Word(size)
+  neg = Word.is_neg!(a)
+  if neg then
+    Word.neg!(a)
+  else
+    a

@@ -1,0 +1,4 @@
+I8.sub(a: I8, b: I8): I8
+  open a
+  open b
+  I8.new(Word.sub!(a.value, b.value))

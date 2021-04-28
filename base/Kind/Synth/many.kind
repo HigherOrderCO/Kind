@@ -1,4 +1,4 @@
-Kind.Synth.many(names: List(String), defs: Kind.Defs): IO(Kind.Defs)
+Kind.Synth.many(names: List<String>, defs: Kind.Defs): IO<Kind.Defs>
   case names {
     nil: IO {
       return defs;

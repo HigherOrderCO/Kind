@@ -1,0 +1,2 @@
+U8.length(str: String): U8
+  U8.length(str)

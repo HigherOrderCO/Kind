@@ -1,7 +1,0 @@
-// BitsSets the color of the idx voxel of an Image3D
-Image3D.set_col(idx: U32, col: U32, img: Image3D): Image3D
-  case img {
-    new:
-      let img.buffer = Buffer32.set(U32.add(U32.mul(idx,2u),1u), col, img.buffer)
-      Image3D.new(img.length, img.capacity, img.buffer)
-  }

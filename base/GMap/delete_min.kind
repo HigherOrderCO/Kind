@@ -1,4 +1,4 @@
-GMap.delete_min<K: Type, V: Type>(map: GMap(K,V)): GMap(K,V)
+GMap.delete_min<K: Type, V: Type>(map: GMap<K,V>): GMap<K,V>
   case map {
     tip: map,
     bin: case map.left {

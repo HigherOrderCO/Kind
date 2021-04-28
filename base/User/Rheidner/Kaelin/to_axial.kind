@@ -1,0 +1,75 @@
+User.Rheidner.Kaelin.to_axial(coord: Pair(U32, U32)): Pair(I32, I32)
+  let {x, y} = coord
+
+  let f = U32.to_f64
+  let i = F64.to_i32
+  let float_hex_rad = F64.div(f(Web.Kaelin.Constants.hexagon_radius), 2.0#64)
+  
+  let float_x = F64.div(F64.sub(f(x), f(128u)), float_hex_rad)
+  let float_y = F64.div(F64.sub(f(y), f(128u)), float_hex_rad)
+  
+  // {float_x, float_y}
+
+  let fourth = 0.25#64
+  let sixth = F64.div(1.0#64, 6.0#64)
+  let third = F64.div(1.0#64, 3.0#64)
+  let half = 0.5#64 // generates 0.499 -> numbers like x.5 will be 'floored' correctly
+
+  let axial_x = F64.sub( F64.mul(float_x, fourth), F64.mul(float_y, sixth) )
+  let axial_y = F64.mul(float_y, third)
+  round_axial(axial_x, axial_y)
+  
+round_axial(axial_x: F64, axial_y: F64): Pair(I32, I32)
+  let f = U32.to_f64
+  let i = F64.to_i32
+  let axial_z = F64.sub(F64.sub(f(0u), axial_x), axial_y)
+
+  let round_x = round(axial_x)
+  let round_y = round(axial_y)
+  let round_z = round(axial_z)
+
+  let diff_x = diff(axial_x, round_x)
+  let diff_y = diff(axial_y, round_y)
+  let diff_z = diff(axial_z, round_z)
+  
+  let result = case F64.gtn(diff_x, diff_z) {
+    true:
+      case F64.gtn(diff_y, diff_x){
+        true: 
+          let new_y = F64.sub(F64.sub(f(0u), round_x), round_z)
+          {i(round_x), i(new_y)}
+        false:
+          let new_x = F64.sub(F64.sub(f(0u), round_y), round_z)
+          {i(new_x), i(round_y)}
+      }
+    false:
+      case F64.gtn(diff_y, diff_z) {
+        true:
+          let new_y = F64.sub(F64.sub(f(0u), round_x), round_z)
+          {i(round_x), i(new_y)}
+        false:
+          {i(round_x), i(round_y)}
+      }
+  }
+  result
+  
+
+floor(n: F64): F64
+  I32.to_f64(F64.to_i32(n))
+
+diff(x: F64, y: F64): F64 // while F64.abs doesnt exist
+  let big_number = 1000.0#64 // while F64.gtn, cmp and ltn is broken
+  let x = F64.add(x, big_number)
+  let y = F64.add(y, big_number)
+
+  case F64.gtn(x, y) {
+    true: F64.sub(x, y)
+    false: F64.sub(y, x)
+  }
+
+round(n: F64): F64
+  let half = 0.5#64
+  let big_number = 1000.0#64 // while F64.gtn, cmp and ltn is broken
+  let n = F64.add(n, big_number)
+  let result = floor(F64.add(n, half))
+  F64.sub(result, big_number)

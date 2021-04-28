@@ -1,0 +1,8 @@
+Hex.parser : Parser(Nat)
+  let k = Parser.many1(Nat, Hex.parser.char_hex)
+  Parser.bind(List<Nat>, Nat, k, (xs)
+  Parser.pure!(
+    case xs {
+      nil : 0
+      cons : List.fold_right(Nat, Nat, xs.head, Function.flip(_, _ , _Nat.append_2(3)), xs.tail)
+    }))

@@ -1,0 +1,2 @@
+Int.from_u32(n: U32): Int
+  Int.new(U32.to_nat(n), 0)

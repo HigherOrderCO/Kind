@@ -1,0 +1,2 @@
+Nat.show_list(list: List<Nat>): String
+  List.show!(Nat.show, list)

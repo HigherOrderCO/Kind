@@ -1,0 +1,2 @@
+Word.is_neg<size: Nat>(word: Word(size)): Bool
+  Word.is_neg.go<size>(word, false)

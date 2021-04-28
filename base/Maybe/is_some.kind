@@ -1,4 +1,4 @@
-Maybe.is_some<A: Type>(m: Maybe(A)): Bool
+Maybe.is_some<A: Type>(m: Maybe<A>): Bool
   case m {
     none: false
     some: true

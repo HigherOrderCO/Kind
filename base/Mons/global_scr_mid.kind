@@ -1,2 +1,2 @@
 Mons.global_scr_mid: Pos32
-  Pos32.new(2048u, 2048u, 0u)
+  Pos32.new(2048#32, 2048#32, 0#32)

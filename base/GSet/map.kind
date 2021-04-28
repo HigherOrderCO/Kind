@@ -1,4 +1,4 @@
-GSet.map<A: Type, B: Type>(f: A -> B, set: GSet(A)): GSet(B)
+GSet.map<A: Type, B: Type>(f: A -> B, set: GSet<A>): GSet<B>
   case set {
     tip: GSet.tip!,
     bin: 

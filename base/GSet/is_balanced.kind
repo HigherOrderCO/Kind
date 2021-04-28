@@ -1,4 +1,4 @@
-GSet.is_balanced<A: Type>(set: GSet(A)): Bool 
+GSet.is_balanced<A: Type>(set: GSet<A>): Bool 
   case set {
     tip: Bool.true,
     bin: 

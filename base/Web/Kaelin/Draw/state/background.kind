@@ -1,0 +1,21 @@
+Web.Kaelin.Draw.state.background(map: Web.Kaelin.Map, cast_info: Web.Kaelin.CastInfo, env_info: App.EnvInfo, img:VoxBox): VoxBox
+open cast_info as cast
+let list = NatMap.to_list!(map)
+let range = Web.Kaelin.Coord.range(cast.hero_pos, cast.range) // creates a list for all tiles inside cast range
+
+  for pair in list with img:
+    open pair
+    let coord = Web.Kaelin.Coord.Convert.nat_to_axial(pair.fst)
+    let {i, j} = Web.Kaelin.Draw.support.centralize(coord)
+    let hex_effect = Web.Kaelin.Draw.support.which_effect(coord,cast_info,range) // Returns the cast affecting a tile
+    let mouse_over = Web.Kaelin.Draw.support.mouse_on_coord(coord,env_info) // Checks if mouse is over a tile
+    let sprite = Web.Kaelin.Terrain.Sprite.new(hex_effect, mouse_over) // Function to return the image for the tile
+    let tile = Web.Kaelin.Map.get(coord,map) <> []
+      for entity in tile with img:
+        case entity {
+          background: open entity.terrain
+            VoxBox.Draw.image(i, j, 0#32, entity.terrain.draw(sprite), img)
+          creature: img
+        }
+    img  
+img

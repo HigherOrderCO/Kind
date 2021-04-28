@@ -1,0 +1,4 @@
+I64.shr(n: I64, a: I64): I64
+  open n
+  open a
+  I64.new(Word.s_shr!(n.value, a.value))

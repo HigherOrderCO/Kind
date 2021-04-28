@@ -1,0 +1,111 @@
+// implements gresenham algorithm
+// cf. https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm#Derivation
+VoxBox.Draw.line(
+  x0: I32,
+  y0: I32,
+  x1: I32,
+  y1: I32,
+  z:  I32,
+  col: Col32,
+  img: VoxBox,
+): VoxBox
+  let coords = VoxBox.Draw.line.coords(x0, y0, x1, y1)
+  for coord in coords with img:
+    open coord
+    VoxBox.push(Pos32.new(I32.to_u32(coord.fst), I32.to_u32(coord.snd), I32.to_u32(z)), col, img)
+  img
+
+// returns a list of integer coordinates that approximate
+// the segment joining (x0, y0) and (x1, y1)
+// basically a copy-paste of wikipedia:
+//   https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm#All_cases
+VoxBox.Draw.line.coords(
+  x0: I32,
+  y0: I32,
+  x1: I32,
+  y1: I32,
+): List<Pair<I32, I32>>
+  let dist_y = I32.abs(I32.sub(y1, y0))
+  let dist_x = I32.abs(I32.sub(x1, x0))
+  // checks if line is more horizontal than vertical
+  let low = I32.ltn(dist_y, dist_x)
+  if low then
+    if I32.gtn(x0, x1) then
+      VoxBox.Draw.line.coords.low(x1, y1, x0, y0)
+    else
+      VoxBox.Draw.line.coords.low(x0, y0, x1, y1)
+  else
+    if I32.gtn(y0, y1) then
+      VoxBox.Draw.line.coords.high(x1, y1, x0, y0)
+    else
+      VoxBox.Draw.line.coords.high(x0, y0, x1, y1)
+
+VoxBox.Draw.line.coords.low(
+  x0: I32,
+  y0: I32,
+  x1: I32,
+  y1: I32,
+): List<Pair<I32, I32>>
+  dx = I32.sub(x1, x0)
+  dy = I32.abs(I32.sub(y1, y0))
+  yi = if I32.gtn(y1, y0) then +1#32 else -1#32
+  d = I32.sub(I32.mul(+2#32, dy), dx)
+  VoxBox.Draw.line.coords.low.go(x0, y0, x1, y1, yi, dx, dy, d, [])
+
+VoxBox.Draw.line.coords.low.go(
+  x0: I32, // starting pixel
+  y0: I32,
+  x1: I32, // ending
+  y1: I32,
+  yi: I32, // we go up or down?
+  dx: I32,
+  dy: I32,
+  d:  I32, // error
+  coords: List<Pair<I32, I32>> // coords so far
+): List<Pair<I32, I32>>
+  if I32.eql(x0, x1) then
+    {x0, y0} & coords
+  else
+    new_x = I32.add(+1#32, x0)
+    if I32.gtn(d, +0#32) then
+      new_y = I32.add(yi, y0)
+      new_d = I32.add(d, I32.mul(+2#32, I32.sub(dy, dx)))
+      VoxBox.Draw.line.coords.low.go(new_x, new_y, x1, y1, yi, dx, dy, new_d, {x0, y0} & coords)
+    else
+      new_d = I32.add(d, I32.mul(+2#32, dy))
+      VoxBox.Draw.line.coords.low.go(new_x, y0, x1, y1, yi, dx, dy, new_d, {x0, y0} & coords)
+
+VoxBox.Draw.line.coords.high(
+  x0: I32,
+  y0: I32,
+  x1: I32,
+  y1: I32,
+): List<Pair<I32, I32>>
+  dx = I32.abs(I32.sub(x1, x0))
+  dy = I32.sub(y1, y0)
+  xi = if I32.gtn(x0, x1) then -1#32 else +1#32
+  d = I32.sub(I32.mul(+2#32, dx), dy)
+  VoxBox.Draw.line.coords.high.go(x0, y0, x1, y1, xi, dx, dy, d, [])
+
+VoxBox.Draw.line.coords.high.go(
+  x0: I32, // starting pixel
+  y0: I32,
+  x1: I32, // ending
+  y1: I32,
+  xi: I32, // we go up or down?
+  dx: I32,
+  dy: I32,
+  d:  I32, // error
+  coords: List<Pair<I32, I32>> // coords so far
+): List<Pair<I32, I32>>
+  if I32.eql(y0, y1) then
+    {x0, y0} & coords
+  else
+    new_y = I32.add(+1#32, y0)
+    if I32.gtn(d, +0#32) then
+      new_x = I32.add(x0, xi)
+      new_d = I32.add(d, I32.mul(+2#32, I32.sub(dx, dy)))
+      VoxBox.Draw.line.coords.high.go(new_x, new_y, x1, y1, xi, dx, dy, new_d, {x0, y0} & coords)
+    else
+      new_d = I32.add(d, I32.mul(+2#32, dx))
+      VoxBox.Draw.line.coords.high.go(x0, new_y, x1, y1, xi, dx, dy, new_d, {x0, y0} & coords)

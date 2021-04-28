@@ -1,0 +1,5 @@
+U256.for<S: Type>(state: S, from: U256, til: U256, func: U256 -> S -> S): S
+  case U256.eql(from, til){
+    true : state
+    false: U256.for<S>(func(from, state), U256.inc(from), til, func)
+  }

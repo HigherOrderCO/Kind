@@ -2,10 +2,10 @@ F64.V3.polygon_to_segments.cons(
   pos: F64.V3,
   dir: F64.V3,
   pt_b: F64.V3,
-  segs: (Maybe(F64.V3) -> Maybe(F64.V3) -> List(F64.Segment)),
-  pt_a: Maybe(F64.V3),
-  pt_0: Maybe(F64.V3)):
-  List(F64.Segment)
+  segs: (Maybe<F64.V3> -> Maybe<F64.V3> -> List<F64.Segment>),
+  pt_a: Maybe<F64.V3>,
+  pt_0: Maybe<F64.V3>):
+  List<F64.Segment>
   case pt_a {
    none: segs(Maybe.some<F64.V3>(pt_b), Maybe.some<F64.V3>(pt_b)),
    some:

@@ -1,0 +1,4 @@
+I64.pow(a: I64, b: I64): I64
+  open a
+  open b
+  I64.new(Word.s_pow!(a.value, b.value))

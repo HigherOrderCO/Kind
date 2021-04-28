@@ -1,0 +1,3 @@
+VoxBox.alloc_capacity(capacity: U32): VoxBox
+  let buffer = Buffer32.alloc(U32.bit_length(U32.mul(Nat.to_u32(2),capacity)))
+  VoxBox.new(0#32, capacity, buffer)

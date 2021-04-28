@@ -1,0 +1,6 @@
+Kind.Comp.get_vars(term: Kind.Comp): Pair(List(String), Kind.Comp)
+  case term {
+    lam:
+      let {vars, body} = Kind.Comp.get_vars(term.body)
+      {term.name & vars, body}
+  } default {[], term}

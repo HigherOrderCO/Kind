@@ -1,0 +1,5 @@
+Web.Kaelin.Coord.Convert.cubic_to_axial(coord: Web.Kaelin.Coord.Cubic): Web.Kaelin.Coord
+    open coord
+    let i = coord.x
+    let j = coord.z
+    Web.Kaelin.Coord.new(i, j)

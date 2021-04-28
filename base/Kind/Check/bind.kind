@@ -1,4 +1,4 @@
-Kind.Check.bind<A: Type, B: Type>(a: Kind.Check(A), f: A -> Kind.Check(B)): Kind.Check(B)
+Kind.Check.bind<A: Type, B: Type>(a: Kind.Check<A>, f: A -> Kind.Check<B>): Kind.Check<B>
   case a {
     result: case a.value as got {
       none: Kind.Check.result<B>(Maybe.none<B>, a.errors)

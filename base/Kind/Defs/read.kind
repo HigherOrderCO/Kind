@@ -1,4 +1,4 @@
-Kind.Defs.read(file: String, code: String, defs: Kind.Defs): Either(String, Kind.Defs)
+Kind.Defs.read(file: String, code: String, defs: Kind.Defs): Either<String, Kind.Defs>
   case Kind.Parser.file(file, code, defs, 0, code) as parsed {
     error:
       let err = parsed.err

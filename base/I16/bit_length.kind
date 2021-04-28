@@ -1,0 +1,3 @@
+I16.bit_length(size: I16): Nat
+  open size
+  Word.bit_length!(size.value)

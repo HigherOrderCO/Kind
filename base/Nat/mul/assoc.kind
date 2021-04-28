@@ -2,7 +2,7 @@ Nat.mul.assoc(a: Nat, b: Nat, c: Nat): (a * b * c) == (a * b) * c
   case c{
     zero: refl
     succ: 
-      let begin = Equal.refl<_,(a*b)+(a*(b*c.pred))>
-      let second = begin :: rewrite x in x == (a*b)+(a*(b*c.pred)) with mirror(Nat.mul.distrib_left(a,b,b * c.pred))
-      second :: rewrite x in _ == (a*b) + x with Nat.mul.assoc(a,b,c.pred)
+      let begin = Equal.refl<_, (a * b) + (a * (b * c.pred))>
+      let second = begin :: rewrite x in x == (a * b) + (a * (b * c.pred)) with mirror(Nat.mul.distrib_left(a, b, b * c.pred))
+      second :: rewrite x in _ == (a * b) + x with Nat.mul.assoc(a,b,c.pred)
   }!

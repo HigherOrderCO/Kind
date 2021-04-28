@@ -1,0 +1,60 @@
+Kind.Parser.float.str_digit: Parser(Char)
+  (idx, code) case code {
+    nil:
+      Parser.Reply.error!(idx, code, "Not a digit."),
+    cons:
+      let sidx = Nat.succ(idx)
+      let digits = ['0', '1', '2', '3', '4', '4', '5', '6', '7', '8', '9']
+      if List.any!(U16.eql(code.head), digits) then
+        Parser.Reply.value!(sidx, code.tail, code.head)
+      else
+        Parser.Reply.error!(idx, code, "Not a digit.")
+  }
+
+Kind.Parser.float.sign: Parser(Char)
+  (idx, code) case code {
+    nil:
+      Parser.Reply.error!(idx, code, "Expected '+' or '-'."),
+    cons:
+      let sidx = Nat.succ(idx)
+      if U16.eql(code.head, '+') || U16.eql(code.head, '-') then
+        Parser.Reply.value!(sidx, code.tail, code.head)
+      else
+        Parser.Reply.error!(idx, code, "Expected '+' ou '-'.")
+  }
+
+Kind.Parser.float.32: Parser(Kind.Term)
+  Parser {
+    get init = Kind.Parser.init;
+    get sign = Parser.maybe<Char>(Kind.Parser.float.sign)
+    let sign = sign <> '+'
+    get digits = Parser.many1<Char>(Kind.Parser.float.str_digit)
+    Parser.text(".")
+    get frac = Parser.many1<Char>(Kind.Parser.float.str_digit)
+    Parser.text("#32")
+    let float_str = Kind.Term.str(String.cons(sign, String.from_list(digits))
+                                  | "."
+                                  | String.from_list(frac))
+    let conv = Kind.Term.ref("F32.parse")
+    let term = Kind.Term.app(conv, float_str)
+    get orig = Kind.Parser.stop(init)
+    return Kind.Term.ori(orig, term)
+  }
+
+Kind.Parser.float.64: Parser(Kind.Term)
+  Parser {
+    get init = Kind.Parser.init;
+    get sign = Parser.maybe<Char>(Kind.Parser.float.sign)
+    let sign = sign <> '+'
+    get digits = Parser.many1<Char>(Kind.Parser.float.str_digit)
+    Parser.text(".")
+    get frac = Parser.many1<Char>(Kind.Parser.float.str_digit)
+    Parser.text("#64")
+    let float_str = Kind.Term.str(String.cons(sign, String.from_list(digits))
+                                  | "."
+                                  | String.from_list(frac))
+    let conv = Kind.Term.ref("F64.parse")
+    let term = Kind.Term.app(conv, float_str)
+    get orig = Kind.Parser.stop(init)
+    return Kind.Term.ori(orig, term)
+  }

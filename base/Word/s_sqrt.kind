@@ -1,0 +1,6 @@
+Word.s_sqrt<size: Nat>(a: Word(size)): Word(size)
+  neg = Word.is_neg!(a)
+  if neg then
+    Word.zero!
+  else
+    Word.sqrt!(a)

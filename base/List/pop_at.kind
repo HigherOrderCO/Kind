@@ -1,0 +1,2 @@
+List.pop_at<A: Type>(idx: Nat, list: List<A>): Pair<Maybe<A>, List<A>> 
+  List.pop_at.go!(idx, list, [])

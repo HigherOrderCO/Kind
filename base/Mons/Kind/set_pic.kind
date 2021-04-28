@@ -1,5 +1,5 @@
-Mons.Kind.set_pic(spr: List(Image3D)): Image3D
+Mons.Kind.set_pic(spr: List<VoxBox>): VoxBox
   case spr{
-    nil: Image3D.empty, //Mons.Assets.void,
+    nil: VoxBox.empty, //Mons.Assets.void,
     cons: spr.head
   }

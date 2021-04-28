@@ -1,0 +1,4 @@
+I64.and(a: I64, b: I64): I64
+  open a
+  open b
+  I64.new(Word.and!(a.value, b.value))

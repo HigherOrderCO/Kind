@@ -1,2 +1,2 @@
 Pos32.get_z(p: Pos32): U32
-  U32.and(U32.shr(p, 24u), 255u)
+  U32.and(U32.shr(p, 24#32), 255#32)

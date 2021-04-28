@@ -1,2 +1,2 @@
 Kind.Defs: Type
-  BitsMap(Kind.Def)
+  BitsMap<Kind.Def>

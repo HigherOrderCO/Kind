@@ -1,0 +1,186 @@
+type TicTacToe.Piece {
+  O
+  X
+}
+
+type TicTacToe {
+  new(
+    turn: Nat
+    board: List<List<Maybe<TicTacToe.Piece>>>
+  )
+}
+
+// The initial board state
+TicTacToe.init: TicTacToe
+  TicTacToe.new(0, [[none, none, none],
+                    [none, none, none],
+                    [none, none, none]])
+
+// Who is the next one to play?
+TicTacToe.next_piece(game: TicTacToe): TicTacToe.Piece
+  open game
+  if Nat.is_even(game.turn) then
+    TicTacToe.Piece.X
+  else
+    TicTacToe.Piece.O
+
+
+// Adds a piece at given location and increments the turn
+TicTacToe.move(x: Nat, y: Nat, game: TicTacToe): TicTacToe
+  open game
+  let piece = TicTacToe.next_piece(game)
+  let line = game.board[y] <> []
+  let new_line = line[x] <- some(piece)
+  let new_board = game.board[y] <- new_line
+  TicTacToe.new(Nat.succ(game.turn), new_board)
+
+TicTacToe.eql(a:TicTacToe.Piece, b:TicTacToe.Piece):Bool
+  case a b {
+    X X: true
+    O O: true
+  } default false
+
+TicTacToe.Piece.to_string(a: Maybe<TicTacToe.Piece>): String
+  case a { 
+    none: " "
+    some: case a.value {
+      O: "O"
+      X: "X"
+  }
+}
+
+//Senhas.read_input(line: String): List<Nat>
+TicTacToe.read_input(line: String): List<Nat>
+  if String.eql(line, "") then
+    []
+  else
+    let chars = String.split(line," ")
+    let nats = List.map!!(Nat.read, chars)
+    List.take!(2, nats)
+
+TicTacToe.get(x: Nat, y: Nat, game: TicTacToe): Maybe<TicTacToe.Piece>
+  open game
+  let line = game.board[y] <> []
+  let elem = line[x] <> none
+  elem
+
+TicTacToe.winner(row: Nat, col: Nat, game: TicTacToe, team: TicTacToe.Piece): Maybe<TicTacToe.Piece>
+  let wins = List.eql!(Maybe.eql!(TicTacToe.eql), [some(team), some(team), some(team)])
+  let at = TicTacToe.get
+  open game
+  if col <? 3 then
+    if wins(game.board[col]<>[]) then
+      some(team)
+    else
+      TicTacToe.winner(row,col+1,game, team)
+  else if row <? 3 then
+    if wins([at(row, col - 3, game), at(row, col - 2, game), at(row, col - 1, game)]) then
+      some(team)
+    else
+      TicTacToe.winner(row+1,col,game, team)
+  else 
+    let diag1 = [at(0,0,game), at(1,1,game), at(2,2,game)]
+    let diag2 = [at(0,2,game), at(1,1,game), at(2,0,game)]
+    if wins(diag1) then
+      some(team)
+    else if wins(diag2) then
+      some(team)
+    else case team {
+      X: TicTacToe.winner(0,0,game,TicTacToe.Piece.O)
+      O: none
+    }
+
+TicTacToe.winner2(game: TicTacToe): Maybe<TicTacToe.Piece>
+  open game
+  let equals = List.eql!(Maybe.eql!(TicTacToe.eql))
+  let wins = List.repeat!(3, some(TicTacToe.Piece.O))
+  let wins = List.repeat!(3, some(TicTacToe.Piece.X))
+  let winner = none
+  for piece in [TicTacToe.Piece.X, TicTacToe.Piece.O] with winner:
+    for y from 0 to 3 with winner:
+      let col = game.board[y] <> []
+      if equals(List.repeat!(3,some(piece)), col) then
+        some(piece)
+      else
+        winner
+    winner
+  // TODO: checar colunas e diagonais
+  winner
+        
+TicTacToe.winner3(game: TicTacToe): Maybe<TicTacToe.Piece>
+  let at = TicTacToe.get
+  let pO = TicTacToe.Piece.O
+  let pX = TicTacToe.Piece.X
+  let wO = List.eql!(Maybe.eql!(TicTacToe.eql), List.map!!(Maybe.some!,[pO,pO,pO]))
+  let wX = List.eql!(Maybe.eql!(TicTacToe.eql), List.map!!(Maybe.some!,[pX,pX,pX]))
+  let c0 = List.create!(3, (i) at(i,i,game)) // diagonal 0
+  let c1 = List.create!(3, (i) at(i,2 - i,game)) // diagonal 1
+  let c2 = List.create!(3, (i) at(i,0,game)) // row 0
+  let c3 = List.create!(3, (i) at(i,1,game)) // row 1
+  let c4 = List.create!(3, (i) at(i,2,game)) // row 2
+  let c5 = List.create!(3, (i) at(0,i,game)) // col 0
+  let c6 = List.create!(3, (i) at(1,i,game)) // col 1
+  let c7 = List.create!(3, (i) at(2,i,game)) // col 2
+  let cs = [c0, c1, c2, c3, c4, c5, c6, c7]
+  if List.all!(wO, cs)
+  then some(pO)
+  else if List.all!(wX, cs)
+    then some(pX)
+    else none
+
+TicTacToe.show(game: TicTacToe):String
+  open game
+  let gs = game
+  let pc = TicTacToe.get
+  let ts = TicTacToe.Piece.to_string
+  let board = " " |
+    ts(pc(0,0,gs)) | " | " | ts(pc(0,1,gs)) | " | " | ts(pc(0,2,gs)) | "\n-----------\n " |
+    ts(pc(1,0,gs)) | " | " | ts(pc(1,1,gs)) | " | " | ts(pc(1,2,gs)) | "\n-----------\n " |
+    ts(pc(2,0,gs)) | " | " | ts(pc(2,1,gs)) | " | " | ts(pc(2,2,gs)) | "\n " 
+    board
+
+User.Derenash.TicTacToe.Test: IO<Unit>
+  IO {
+    // Prints the initial board
+    let ttt = TicTacToe.init
+    IO.print(TicTacToe.show(ttt))
+    TicTacToe.play(ttt)
+  }
+
+TicTacToe.play(game: TicTacToe): IO<Unit>
+  IO {
+    IO.print("Qual lacuna deseja preencher?")
+    get line = IO.get_line
+    let pos_list = TicTacToe.read_input(line)
+
+    // Inserts a piece at requested position
+    let x = pos_list[0] <> 3
+    let y = pos_list[1] <> 3
+    get game = case TicTacToe.get(x, y, game) {
+      none: IO {
+        return TicTacToe.move(x, y, game)
+      }
+      some: IO {
+        IO.print("Você não pode jogar aí!")
+        return game
+      }
+    }
+
+    // Prints the result
+    IO.print(TicTacToe.show(game))
+
+    let Winner = TicTacToe.winner(0,0 game, TicTacToe.Piece.X)
+    open game
+    case Winner { 
+      none: case game.turn { 
+        zero: TicTacToe.play(game)
+        succ: if Nat.eql(game.turn, 9)
+          then IO.print("Empatou")
+          else TicTacToe.play(game)
+      }
+      some: case Winner.value { 
+        X: IO.print("X Venceu!")
+        O: IO.print("O Venceu!")
+      }
+    }
+  }

@@ -1,5 +1,5 @@
-List.zip_with<A: Type, B: Type, C: Type>(f: A -> B -> C, as: List(A), bs: List(B))
-  : List(C)
+List.zip_with<A: Type, B: Type, C: Type>(f: A -> B -> C, as: List<A>, bs: List<B>)
+  : List<C>
   case as {
     nil : List.nil!,
     cons: case bs {

@@ -1,8 +1,5 @@
-for<N: Type>(eq: N -> N -> Bool, inc: N -> N)<S: Type>(state: S, from: N, til: N, func: N -> S -> S): S
-  case eq(from,til) {
-    true: state
-    false: for<N>(eq, inc)<S>(func(from,state), inc(from), til, func)
-  }
-
 I32.for<S: Type>(state: S, from: I32, til: I32, func: I32 -> S -> S): S
-  for<I32>(I32.eql, I32.inc)<S>(state, from, til, func)
+  case I32.eql(from,til) {
+    true: state
+    false: I32.for<S>(func(from,state), I32.inc(from), til, func)
+  }

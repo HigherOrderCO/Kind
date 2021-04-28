@@ -1,0 +1,7 @@
+I16.cmp(a: I16, b: I16): Cmp
+  if I16.ltn(a, b) then
+    Cmp.ltn
+  else if I16.eql(a, b) then
+    Cmp.eql
+  else
+    Cmp.gtn

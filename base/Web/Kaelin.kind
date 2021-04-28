@@ -1,64 +1,22 @@
-// init:
-// Bem-vindo ao Kaelin!
-// Digite uma sala e aperte enter: 0x108309300
+Web.Kaelin: App<Web.Kaelin.State>
+  let img = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
+  let init = Web.Kaelin.App.init
+  let draw = Web.Kaelin.App.draw(img)
+  let when = Web.Kaelin.App.when
+  App.new!(init, draw, when)
+  
+  // init:
+  // Bem-vindo ao Kaelin!
+  // Digite uma sala e aperte enter: 0x108309300
 
-// void:
-// Sala vazia. Digite um DraftString para começar um jogo:
-// sipher@Croni, sejagentil@Zeralul / stanci@Murlok, derenash@Keropao
-
-
-// A demo application that renders a square on the screen
-Web.Kaelin: App(Web.Kaelin.State)
-  let img = Image3D.alloc_capacity(65536u)
-  // Initial state
-  let init = 
-    let map = {}
-    let map = Web.Kaelin.Draw.initial_ent(map)
-    let init_pos = Web.Kaelin.Coord.new(Int.new(0, 0), Int.new(0, 2))
-    Web.Kaelin.State.game("0x000000000000", 0, init_pos, map)
+  // void
+  // Sala vazia. Digite um DraftString para começar um jogo:
+  // sipher@Croni, sejagentil@Zeralul / stanci@Murlok, derenash@Keropao
 
   // Render function
-  //  0s - 10s: contagem regressiva
-  // 10s - 20s: escolha do turno 0
-  // 20s - 30s: animação do turno 0
-  // 30s - 40s: escolha do turno 1
-  // 40s - 50s: animação do turno 1
-  // 50s - 60s: escolha do turno 2
-  let draw = (state)
-    case state {
-      game: 
-        let map = state.map
-        let img = Web.Kaelin.Draw.map(img, map)
-        App.Render.pix(img)
-    } default App.Render.txt("TODO: create the renderer for this game state mode")
-
-  // Event handler
-  let when = (event, state)
-    case event {
-      xkey:
-        if event.down then
-          switch U16.eql(event.code) {
-            'D':
-              case state {
-                init: []
-                void: []
-                game:
-                  // TODO: Web.Kaelin.Map.swap(i, ca, cb, map)
-                  // let old_pos = state.pos
-                  // let new_pos = case old_pos {
-                  //   new: Web.Kaelin.Coord.new(U32.add(old_pos.i,1u),old_pos.j)
-                  // }
-                  // let {map,ent} = Web.Kaelin.Map.pop(old_pos, state.map)
-                  // let map = case ent {
-                  //   none: map
-                  //   some: Web.Kaelin.Map.push(new_pos, ent.value, map)
-                  // }
-                  //let state = Web.Kaelin.State.game(state.room, state.tick, new_pos, map)
-                  [App.Action.state!(state)]
-              }
-          } default []
-        else []
-    } default []
-
-  // The application
-  App.new!(init, draw, when)
+  //  0#16 - 10#16: contagem regressiva
+  // 10#16 - 20#16: escolha do turno 0
+  // 20#16 - 30#16: animação do turno 0
+  // 30#16 - 40#16: escolha do turno 1
+  // 40#16 - 50#16: animação do turno 1
+ // 50#16 - 60#16: escolha do turno 2

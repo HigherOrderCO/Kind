@@ -1,4 +1,4 @@
-BitsMap.mut<A: Type>(bits: Bits, ini: A, fun: A -> A, map: BitsMap(A)): BitsMap(A)
+BitsMap.mut<A: Type>(bits: Bits, ini: A, fun: A -> A, map: BitsMap<A>): BitsMap<A>
   case bits {
     e: case map {
       new: BitsMap.tie!(Maybe.some!(ini), BitsMap.new!, BitsMap.new!),

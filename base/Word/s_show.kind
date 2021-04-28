@@ -1,0 +1,5 @@
+Word.s_show(size: Nat)(a: Word(size)): String
+  neg = Word.is_neg(size, a)
+  n = Word.to_nat!(Word.abs!(a))
+  sgn = if neg then "-" else "+"
+  sgn | Nat.show(n) | "#" | Nat.show(size)

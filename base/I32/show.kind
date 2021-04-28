@@ -1,0 +1,4 @@
+I32.show(a: I32): String
+  open a
+  Word.s_show!(a.value)
+

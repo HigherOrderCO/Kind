@@ -1,0 +1,7 @@
+
+type Test (A:Type) (B : Type) (idx : A) ~ (idx2 : A) (idx3 : B){
+  new ~ (idx = idx, ) 
+}
+
+Web.Kaelin.App.test : String
+  "a"
