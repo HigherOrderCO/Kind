@@ -23,6 +23,6 @@ Test: _
   for i : U32 from 0#32 to 100000#32 with st:
     let {key, map} = st
     let key = Bits.inc(key)
-    let map = set!(key, i, map)
+    let map = BitsMap.set!(key, i, map)
     {key, map}
   Pair.fst!!(st)

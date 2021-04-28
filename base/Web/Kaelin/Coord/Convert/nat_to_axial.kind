@@ -3,5 +3,4 @@
 // TODO maybe add I32 to nat?
 Web.Kaelin.Coord.Convert.nat_to_axial(a: Nat): Web.Kaelin.Coord
   let {x, y} = Arith.N_to_NxN(a)
-  let a = Debug.log(Unit, I32.show(Int.to_i32(-1)), (x) Unit.new)
   Web.Kaelin.Coord.new(Int.to_i32(Arith.N_to_Z(x)), Int.to_i32(Arith.N_to_Z(y)))
