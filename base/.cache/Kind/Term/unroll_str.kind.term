@@ -1,1 +1,0 @@
-#strx (((strx #strx Kind.Term) (Kind.Term.ref (Kind.Name.read "String.nil"))) #strx.head #strx.tail !char = (Kind.Term.chr strx.head); !term = (Kind.Term.ref (Kind.Name.read "String.cons")); !term = ((Kind.Term.app term) char); !term = ((Kind.Term.app term) (Kind.Term.str strx.tail)); term)

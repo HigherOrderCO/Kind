@@ -1,1 +1,0 @@
-%Kind.Ann.Self(P:@(:Kind.Ann) *) @(new:@(name:Kind.Name) @(term:Kind.Term) @(type:(Maybe Kind.Term)) (P (((Kind.Ann.new name) term) type))) (P Kind.Ann.Self)

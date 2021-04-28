@@ -1,1 +1,0 @@
-((((((Monad.bind Parser) Parser.monad) (List Unit)) Kind.Name) Kind.Parser.spaces) # ((((((Monad.bind Parser) Parser.monad) (List Kind.Letter)) Kind.Name) ((Parser.many1 Kind.Letter) Kind.Parser.letter)) #chrs ((((Monad.pure Parser) Parser.monad) String) (((((List.fold Char) chrs) String) String.nil) String.cons))))

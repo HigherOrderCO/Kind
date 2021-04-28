@@ -1,1 +1,0 @@
-#size #n ((((Nat.apply (Word size)) n) (Word.inc size)) (Word.zero size))

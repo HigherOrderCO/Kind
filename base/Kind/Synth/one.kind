@@ -3,69 +3,76 @@ Kind.Synth.one(name: Kind.Name, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
   case Kind.Map.get!(name, defs) as got {
     // load needed definitions from files
     none: IO {
+      get time_a = IO.get_time
+      //IO.print("- load " | name)
       get loaded = Kind.Synth.load(name, defs);
       case loaded {
         none: IO {
-          return none;
-        },
-        some: IO {
-          Kind.Synth.one(name, loaded.value);
-        },
-      };
-    },
-    some: IO {
-      open got.value
-      let file = got.value.file;
-      let code = got.value.code;
-      let orig = got.value.orig;
-      let name = got.value.name;
-      let term = got.value.term;
-      let type = got.value.type;
-      let isct = got.value.isct;
-      let arit = got.value.arit;
-      let stat = got.value.stat;
-      //let skip = Debug.log!(String.flatten([name, ": ", Kind.Term.show(type), " = ", Kind.Term.show(term)]), (x) Unit.new);
-      //log(String.flatten(["synth ", name, " ", case stat { init: "INIT", wait: "WAIT", done: "DONE", fail: "FAIL" }])) // DEBUG
-      // check state of definition
-      case stat {
-        wait: IO { return some(defs); },
-        done: IO { return some(defs); },
-        fail: IO { return some(defs); },
-        init: IO {
-          let defs = Kind.Map.set!(name, Kind.Def.new(file, code, orig, name, term, type, isct, arit, Kind.Status.wait), defs);
-          let checked = do Kind.Check {
-            get chk_type = Kind.Term.check(type, Maybe.some!(Kind.Term.typ), defs, [], Kind.MPath.i(Kind.MPath.nil), Maybe.none!);
-            get chk_term = Kind.Term.check(term, Maybe.some!(type), defs, [], Kind.MPath.o(Kind.MPath.nil), Maybe.none!);
-            return Unit.new;
-          };
-          case checked {
-            result:
-              //let skip = Debug.log!(String.join("\n", List.mapped!(checked.errors)!((x) String.concat("-- ", Kind.Error.show(x,Kind.Map.new!)))), (x) Unit.new);
-              if List.is_empty!(checked.errors) then IO {
-                let defs = Kind.Map.def(file, code, orig, name, term, type, isct, arit, true, defs);
-                //get time = IO.get_file_mtime(file)
-                //IO.set_file(".cache/" | file | ".term", Kind.Core.show(term))
-                //IO.set_file(".cache/" | file | ".type", Kind.Core.show(type))
-                //IO.set_file(".cache/" | file | ".time", time)
-                //IO.print("done " | name)
-                //IO.print("- file: " | file)
-                //IO.print("- term: " | Kind.Core.show(term))
-                //IO.print("- type: " | Kind.Core.show(type))
-                //let defs = Kind.Map.set!(name, Kind.Def.new(file, code, name, term, type, Kind.Status.done), defs);
-                return some(defs);
-              } else IO {
-                get fixed = Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, checked.errors, Bool.false);
-                case fixed {
-                  none: IO {
-                    let stat = Kind.Status.fail(checked.errors);
-                    let defs = Kind.Map.set!(name, Kind.Def.new(file, code, orig, name, term, type, isct, arit, stat), defs);
-                    return some(defs);
-                  },
-                  some: Kind.Synth.one(name, fixed.value),
-                };
-              }
-          };
+          return none
         }
-      };
+        some: IO {
+          get time_b = IO.get_time
+          //IO.print("- gots " | name | " " | Nat.show(time_b - time_a))
+          get result = Kind.Synth.one(name, loaded.value)
+          get time_c = IO.get_time
+          //IO.print("- done " | name | " " | Nat.show(time_c - time_a))
+          return result
+        }
+      }
     }
+    some: 
+      open got.value
+      IO {
+        let file = got.value.file;
+        let code = got.value.code;
+        let orig = got.value.orig;
+        let name = got.value.name;
+        let term = got.value.term;
+        let type = got.value.type;
+        let isct = got.value.isct;
+        let arit = got.value.arit;
+        let stat = got.value.stat;
+        //let skip = Debug.log!(String.flatten([name, ": ", Kind.Term.show(type), " = ", Kind.Term.show(term)]), (x) Unit.new);
+        //log(String.flatten(["synth ", name, " ", case stat { init: "INIT", wait: "WAIT", done: "DONE", fail: "FAIL" }])) // DEBUG
+        // check state of definition
+        case stat {
+          wait: IO { return some(defs); },
+          done: IO { return some(defs); },
+          fail: IO { return some(defs); },
+          init: IO {
+            //IO.print("- CHEK " | name)
+            let defs = Kind.Map.set!(name, Kind.Def.new(file, code, orig, name, term, type, isct, arit, Kind.Status.wait), defs);
+            let checked = do Kind.Check {
+              get chk_type = Kind.Term.check(type, Maybe.some!(Kind.Term.typ), defs, [], Kind.MPath.i(Kind.MPath.nil), Maybe.none!);
+              get chk_term = Kind.Term.check(term, Maybe.some!(type), defs, [], Kind.MPath.o(Kind.MPath.nil), Maybe.none!);
+              return Unit.new;
+            };
+            case checked {
+              result:
+                //let skip = Debug.log!(String.join("\n", List.mapped!(checked.errors)!((x) String.concat("-- ", Kind.Error.show(x,Kind.Map.new!)))), (x) Unit.new);
+                if List.is_empty!(checked.errors) then IO {
+                  let defs = Kind.Map.def(file, code, orig, name, term, type, isct, arit, true, defs);
+                  get time = IO.get_file_mtime(file)
+                  IO.set_file(".cache/" | name | ".term", Kind.Core.show(term))
+                  IO.set_file(".cache/" | name | ".type", Kind.Core.show(type))
+                  IO.set_file(".cache/" | name | ".isct", Bool.show(isct))
+                  IO.set_file(".cache/" | name | ".arit", Nat.show(arit))
+                  IO.set_file(".cache/" | name | ".time", time)
+                  IO.set_file(".cache/" | name | ".file", file)
+                  return some(defs);
+                } else IO {
+                  get fixed = Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, checked.errors, Bool.false);
+                  case fixed {
+                    none: IO {
+                      let stat = Kind.Status.fail(checked.errors);
+                      let defs = Kind.Map.set!(name, Kind.Def.new(file, code, orig, name, term, type, isct, arit, stat), defs);
+                      return some(defs);
+                    },
+                    some: Kind.Synth.one(name, fixed.value),
+                  };
+                }
+            };
+          }
+        };
+      }
   }

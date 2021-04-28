@@ -1,1 +1,0 @@
-((((((Monad.bind IO) IO.monad) String) Unit) (IO.get_file "Test.kind")) #file ((((((Monad.bind IO) IO.monad) String) Unit) (IO.get_file_mtime "Test.kind")) #time ((((((Monad.bind IO) IO.monad) Unit) Unit) (IO.print file)) # (IO.print time))))

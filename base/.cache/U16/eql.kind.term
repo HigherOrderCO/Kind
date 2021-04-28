@@ -1,1 +1,0 @@
-#a #b ((a #a Bool) #a.value ((b #b Bool) #b.value (((Word.eql (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ Nat.zero))))))))))))))))) a.value) b.value)))

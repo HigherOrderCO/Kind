@@ -1,1 +1,0 @@
-#A #bits #map ((((bits #bits (Maybe A)) (((map #map (Maybe A)) (Maybe.none A)) #map.val #map.lft #map.rgt map.val)) #bits.pred (((map #map (Maybe A)) (Maybe.none A)) #map.val #map.lft #map.rgt (((BitsMap.get A) bits.pred) map.lft))) #bits.pred (((map #map (Maybe A)) (Maybe.none A)) #map.val #map.lft #map.rgt (((BitsMap.get A) bits.pred) map.rgt)))

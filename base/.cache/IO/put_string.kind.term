@@ -1,1 +1,0 @@
-#text ((((IO.ask Unit) "put_string") text) #skip ((IO.end Unit) Unit.new))

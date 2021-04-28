@@ -1,1 +1,0 @@
-%Cmp.Self(P:@(:Cmp) *) @(ltn:(P Cmp.ltn)) @(eql:(P Cmp.eql)) @(gtn:(P Cmp.gtn)) (P Cmp.Self)

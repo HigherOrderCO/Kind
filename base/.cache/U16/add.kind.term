@@ -1,1 +1,0 @@
-#a #b ((a #a U16) #a.value ((b #b U16) #b.value (U16.new (((Word.add (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ Nat.zero))))))))))))))))) a.value) b.value))))

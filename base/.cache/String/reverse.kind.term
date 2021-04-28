@@ -1,1 +1,0 @@
-#xs ((String.reverse.go xs) String.nil)

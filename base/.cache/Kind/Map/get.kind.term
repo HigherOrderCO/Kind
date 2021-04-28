@@ -1,1 +1,0 @@
-#A #name #map (((BitsMap.get A) (Kind.Name.to_bits name)) map)

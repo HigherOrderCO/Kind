@@ -1,1 +1,0 @@
-((((((Monad.bind Parser) Parser.monad) (List Unit)) Nat) Kind.Parser.spaces) # ((((((Monad.bind Parser) Parser.monad) Nat) Nat) Parser.get_index) #from ((((Monad.pure Parser) Parser.monad) Nat) from)))

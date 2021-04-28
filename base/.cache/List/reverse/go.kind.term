@@ -1,1 +1,0 @@
-#A #xs #res (((xs #xs (List A)) res) #xs.head #xs.tail (((List.reverse.go A) xs.tail) (((List.cons A) xs.head) res)))

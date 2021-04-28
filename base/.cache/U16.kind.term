@@ -1,1 +1,0 @@
-%U16.Self(P:@(:U16) *) @(new:@(value:(Word +16)) (P (U16.new value))) (P U16.Self)

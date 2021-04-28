@@ -1,1 +1,0 @@
-%(A:*) @(xs:(List A)) @(res:(List A)) (List A)

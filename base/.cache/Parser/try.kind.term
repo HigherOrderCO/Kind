@@ -1,1 +1,0 @@
-#V #parse #idx #code (((((parse idx) code) #reply (Parser.Reply Bool)) #reply.idx #reply.code #reply.err ((((Parser.Reply.value Bool) idx) code) Bool.false)) #reply.idx #reply.code #reply.val ((((Parser.Reply.value Bool) idx) code) Bool.true))

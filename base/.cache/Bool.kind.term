@@ -1,1 +1,0 @@
-%Bool.Self(P:@(:Bool) *) @(true:(P Bool.true)) @(false:(P Bool.false)) (P Bool.Self)

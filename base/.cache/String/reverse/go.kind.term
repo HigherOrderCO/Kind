@@ -1,1 +1,0 @@
-#xs #res (((xs #xs String) res) #xs.head #xs.tail ((String.reverse.go xs.tail) ((String.cons xs.head) res)))

@@ -1,1 +1,0 @@
-#n #m (((n #n Bool) Bool.false) #n.pred (((m #m Bool) Bool.true) #m.pred ((Nat.gtn n.pred) m.pred)))
