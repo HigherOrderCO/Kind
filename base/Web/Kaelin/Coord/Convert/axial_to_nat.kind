@@ -3,5 +3,4 @@
 Web.Kaelin.Coord.Convert.axial_to_nat(coord: Web.Kaelin.Coord): Nat
   open coord
   let pair = {Arith.Z_to_N(I32.to_int(coord.i)), Arith.Z_to_N(I32.to_int(coord.j))}
-  log(Nat.show(Arith.NxN_to_N(pair)))
   Arith.NxN_to_N(pair)
