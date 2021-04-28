@@ -12,6 +12,7 @@ User.rigille.List.Perm.push_tail<A: Type>(
           qed
     swap: qed = User.rigille.List.Perm.swap<A>(Hyp.x, Hyp.y, Hyp.l ++ zs)
           qed
+    // TODO this is non-terminating :/
     trans: qed = User.rigille.List.Perm.push_tail<A>(Hyp.l0, Hyp.l2, zs, Hyp)
            qed
   }!
