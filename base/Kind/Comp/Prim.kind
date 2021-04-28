@@ -1,3 +1,5 @@
+// Types that are optimized to primitive values.
+// To learn more, see Kind/Comp/Prim/Shape.kind.
 type Kind.Comp.Prim {
   unit,
   bool,

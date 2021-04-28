@@ -1,3 +1,4 @@
+// Converts a Comp term to a readable string
 Kind.Comp.show(comp: Kind.Comp): String
   case comp {
     nil: "?"

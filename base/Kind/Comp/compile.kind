@@ -1,3 +1,5 @@
+// Compiles a Term to a Comp, converting optimized datatypes to insts and elims 
+// Requires the term to be pre-type-checked, with all holes filled.
 Kind.Comp.compile(
   term: Kind.Term
   type: Maybe(Kind.Term)

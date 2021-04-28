@@ -1,6 +1,9 @@
 // Shapes
 // ======
 
+// Describes the shape of each primitive when compiled to Scheme.
+// For example, Kind's λ-encoded Nats are converted to Scheme numbers. This
+// describes how to convert from λ-encodings to native numbers.
 Kind.Comp.Target.Scheme.shape_of(prim: Kind.Comp.Prim): Kind.Comp.Prim.Shape
   case prim {
     unit: Kind.Comp.Prim.Shape.new(
@@ -99,6 +102,23 @@ Kind.Comp.Target.Scheme.shape_of(prim: Kind.Comp.Prim): Kind.Comp.Prim.Shape
 // Instantiators
 // =============
 
+// Compiles an instantiation. Converts a λ-encoded layer to a native value.
+// - inst(`ins{Nat, `λz. λs. (s 5)`}`) == "(+ 5 1)"
+Kind.Comp.Target.Scheme.inst(term: Kind.Comp, depth: Nat): Maybe(String)
+  case term {
+    ins:
+      let shape = Kind.Comp.Target.Scheme.shape_of(term.prim) open shape
+      let {vars,expr} = Kind.Comp.get_vars(term.expr)
+      if List.length!(shape.inst) =? List.length!(vars) then
+        let {expr,args} = Kind.Comp.get_args(expr)
+        case expr { 
+          var: Kind.Comp.Target.Scheme.inst.go(expr.name, shape.inst, vars, args)
+          ref: Kind.Comp.Target.Scheme.inst.go(expr.name, shape.inst, vars, args)
+        } default none
+      else
+        none
+  } default none
+
 // Helper function
 Kind.Comp.Target.Scheme.inst.go(
   name: String
@@ -121,23 +141,10 @@ Kind.Comp.Target.Scheme.inst.go(
         Kind.Comp.Target.Scheme.inst.go(name, inst.tail, vars.tail, args)
   }
 
-// Compiles an instantiation (ex: ins{Nat, (z,s) s(5)}).
-Kind.Comp.Target.Scheme.inst(term: Kind.Comp, depth: Nat): Maybe(String)
-  case term {
-    ins:
-      let shape = Kind.Comp.Target.Scheme.shape_of(term.prim) open shape
-      let {vars,expr} = Kind.Comp.get_vars(term.expr)
-      if List.length!(shape.inst) =? List.length!(vars) then
-        let {expr,args} = Kind.Comp.get_args(expr)
-        case expr { 
-          var: Kind.Comp.Target.Scheme.inst.go(expr.name, shape.inst, vars, args)
-          ref: Kind.Comp.Target.Scheme.inst.go(expr.name, shape.inst, vars, args)
-        } default none
-      else
-        none
-  } default none
 
-// Creates an instantiator function (ex: Nat-inst)
+// Creates an instantiator function. This is like inst, but instead of being
+// applied to an inline argument, it generates a whole function.
+// - instantiator(`Nat`) == "(lambda (t) (t 0 (lambda (pred) (+ pred 1))))"
 Kind.Comp.Target.Scheme.instantiator(prim: Kind.Comp.Prim): String
   let shape = Kind.Comp.Target.Scheme.shape_of(prim) open shape
   let text = "x"
@@ -156,7 +163,11 @@ Kind.Comp.Target.Scheme.instantiator(prim: Kind.Comp.Prim): String
 // Eliminators
 // ===========
 
-// Compiles a complete elimination (ex: ((eli{Nat,n} cse_zero) cse_succ)).
+// Compiles a complete elimination, extracting a λ-layer from a native value.
+// Compiles an instantiation. Converts a λ-encoded layer to a native value.
+// Inlines appications when possible.
+// - elim(`eli{Nat,5}`) == "(if (= 5 0) (lambda (z) (lambda (s) z)) (lambda (z) (lambda (s) (s 4))))`
+// - elim(`((eli{Nat,5} Z) S)` == "(if (= 5 0) Z (S 4))"
 Kind.Comp.Target.Scheme.elim(term: Kind.Comp, depth: Nat): Maybe(String)
   let {term,args} = Kind.Comp.get_args(term)
   case term {
@@ -191,7 +202,9 @@ Kind.Comp.Target.Scheme.elim(term: Kind.Comp, depth: Nat): Maybe(String)
       some(text)
   } default none
 
-// Creates an elimination function (ex: Nat-elim).
+// Creates an elimination function. This is like "elim", but instead of being
+// applied to an inline argument, it generates a whole function.
+// - eliminator(Nat) == "(lambda (n) (if (= n 0) (lambda (z) (lambda (s) z)) (lambda (z) (lambda (s) (s (- n 1))))))"
 Kind.Comp.Target.Scheme.eliminator(prim: Kind.Comp.Prim): String
   let term = Kind.Comp.eli(prim,Kind.Comp.var("x"))
   let text = Kind.Comp.Target.Scheme.elim(term, 0) <> ""
@@ -200,6 +213,10 @@ Kind.Comp.Target.Scheme.eliminator(prim: Kind.Comp.Prim): String
       
 // Compilers
 // =========
+
+// Converts a Comp term to a Scheme expression.
+Kind.Comp.Target.Scheme.term(comp: Kind.Comp): String
+  Kind.Comp.Target.Scheme.term.go(comp, 0)
 
 Kind.Comp.Target.Scheme.term.go(comp: Kind.Comp, depth: Nat): String
   let go = Kind.Comp.Target.Scheme.term.go
@@ -246,11 +263,11 @@ Kind.Comp.Target.Scheme.term.go(comp: Kind.Comp, depth: Nat): String
     })
   ]) <> ""
 
-Kind.Comp.Target.Scheme.term(comp: Kind.Comp): String
-  Kind.Comp.Target.Scheme.term.go(comp, 0)
 
+// Converts Comp definitions to a Scheme program.
 Kind.Comp.Target.Scheme(defs: Kind.Comp.Defs): String
   let defs = Kind.Map.to_list!(defs)
+  // Basic dependencies
   let code = String.join("\n", [
     "(define-syntax def (syntax-rules () (($ name body) (define name (memo 'body)))))",
     "(define-syntax λ (syntax-rules () ((λ var bod) (lambda (var) bod))))",
@@ -263,11 +280,13 @@ Kind.Comp.Target.Scheme(defs: Kind.Comp.Defs): String
     "(define (u16-to-word x) (u16-to-word-go 0 x (vector 'Word.e)))",
     "(define (u16-to-word-go i x w) (if (= 16 i) w (u16-to-word-go (+ i 1) x (if (= (fxand (fxarithmetic-shift-right x (- 15 i)) 1) 0) (vector 'Word.o w) (vector 'Word.i w)))))(define (Bool-inst x) (lambda (x) ((x #t) #f)))",
   ])
+  // Instantiatior and Eliminator functions
   for nati in Kind.Comp.Prim.natives with code:
     let {name,prim} = nati
     let code = code|"(define "|name|"-inst "|Kind.Comp.Target.Scheme.instantiator(prim)|")\n"
     let code = code|"(define "|name|"-elim "|Kind.Comp.Target.Scheme.eliminator(prim)|")\n"
     code
+  // Top-level definitions
   for defn in defs with code:
     let {name, comp} = defn
     code

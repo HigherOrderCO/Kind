@@ -1,11 +1,4 @@
-Kind.Comp.Prim.show.ctr(ctr: Pair(String, List(String))): String
-  let {name, fields} = ctr
-  name | "[" | String.join(",", fields) | "]"
-
-Kind.Comp.Prim.show.ctrs(ctrs: List(Pair(String, List(String)))): String
-  let ctrs = List.mapped!(ctrs)!(Kind.Comp.Prim.show.ctr)
-  "data{" | String.join("|", ctrs) | "}"
-
+// Converts a primitive to a String
 Kind.Comp.Prim.show(prim: Kind.Comp.Prim): String
   case prim {
     unit: "Unit"
@@ -15,3 +8,11 @@ Kind.Comp.Prim.show(prim: Kind.Comp.Prim): String
     string: "String"
     data: Kind.Comp.Prim.show.ctrs(prim.ctrs)
   }
+
+Kind.Comp.Prim.show.ctr(ctr: Pair(String, List(String))): String
+  let {name, fields} = ctr
+  name | "[" | String.join(",", fields) | "]"
+
+Kind.Comp.Prim.show.ctrs(ctrs: List(Pair(String, List(String)))): String
+  let ctrs = List.mapped!(ctrs)!(Kind.Comp.Prim.show.ctr)
+  "data{" | String.join("|", ctrs) | "}"

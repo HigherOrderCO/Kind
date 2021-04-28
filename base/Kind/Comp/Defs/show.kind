@@ -1,3 +1,4 @@
+// Converts a defs to a readable string
 Kind.Comp.Defs.show(defs: Kind.Comp.Defs): String
   let defs = Kind.Map.to_list!(defs)
   let text = ""
