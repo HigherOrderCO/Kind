@@ -8,7 +8,7 @@ type Web.Kaelin.State {
     room: String
     tick: Nat
     players: Map(Web.Kaelin.Player)
-    cast_info: Web.Kaelin.CastInfo
+    cast_info: Maybe<Web.Kaelin.CastInfo>
     map: Web.Kaelin.Map,
     env_info : App.EnvInfo 
   )
