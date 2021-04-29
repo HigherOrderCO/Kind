@@ -12,3 +12,14 @@ type Web.Kaelin.State {
     env_info : App.EnvInfo 
   )
 }
+
+type Web.Kaelin.CastStatus {
+  new(
+    center_pos: Web.Kaelin.Coord
+    target_pos: Web.Kaelin.Coord
+    range: Nat
+  )
+}
+
+
+

@@ -9,3 +9,4 @@ tmp.js
 .vscode
 *.orig
 web/*.lock
+base/.cache

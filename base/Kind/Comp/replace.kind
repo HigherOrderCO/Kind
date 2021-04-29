@@ -1,0 +1,17 @@
+// Replaces "$0", "$1" and so on by the strings on the "vars" list
+// - Kind.Comp.subst(["Mary","Sunday"], "Hello $0, today is $1!") == "Hello mary, today is Sunday!"
+Kind.Comp.replace(str: String, vars: List(String)): String
+  //log(str)
+  case str {
+    nil: str
+    cons: case str.tail {
+      nil: str
+      cons:
+        let a = str.head
+        let b = str.tail.head
+        if U16.eql(a, '$') && U16.gte(b, '0') && U16.lte(b, '9') then
+          (vars[Char.dec_value(b)] <> "?") | Kind.Comp.replace(str.tail.tail, vars)
+        else
+          String.cons(a, Kind.Comp.replace(str.tail, vars))
+    }
+  }

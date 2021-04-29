@@ -2,6 +2,7 @@ var {execSync} = require("child_process");
 var fs = require("fs");
 var path = require("path");
 var {fmc_to_js, fmc_to_hs, fmc} = require("formcore-js"); // FormCore, which has the JS compiler
+//var {fmc_to_js, fmc_to_hs} = require("./../../FormCoreJS");
 
 var kind_path = path.join(__dirname, "js/src/kind.js");
 process.chdir(path.join(__dirname, "../base"));

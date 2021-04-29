@@ -1,80 +1,111 @@
 // implements gresenham algorithm
 // cf. https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm#Derivation
 VoxBox.Draw.line(
-  x0: U32,
-  y0: U32,
-  x1: U32,
-  y1: U32,
-  z: U32,
+  x0: I32,
+  y0: I32,
+  x1: I32,
+  y1: I32,
+  z:  I32,
   col: Col32,
   img: VoxBox,
 ): VoxBox
-  let coords = VoxBox.Draw.line.aux.coords(x0, y0, x1, y1)
-  draw_coord = ((coord, img)
+  let coords = VoxBox.Draw.line.coords(x0, y0, x1, y1)
+  for coord in coords with img:
     open coord
-    VoxBox.push(Pos32.new(coord.fst, coord.snd, z), col, img)) :: Pair<U32, U32> -> VoxBox -> VoxBox
-  List.fold<Pair<U32, U32>>(coords, VoxBox, img, draw_coord)
+    VoxBox.push(Pos32.new(I32.to_u32(coord.fst), I32.to_u32(coord.snd), I32.to_u32(z)), col, img)
+  img
 
 // returns a list of integer coordinates that approximate
 // the segment joining (x0, y0) and (x1, y1)
-VoxBox.Draw.line.aux.coords(
-  x0: U32,
-  y0: U32,
-  x1: U32,
-  y1: U32,
-): List<Pair<U32, U32>>
-  if U32.gtn(x0, x1) then
-    List.reverse!(VoxBox.Draw.line.aux.coords(x1, y1, x0, y0))
-  else if U32.gtn(y0, y1) then
-    List.map!!(VoxBox.Draw.line.aux.reflect_y(y0, y1), VoxBox.Draw.line.aux.coords(x0, y1, x1, y0))
-  else if U32.gtn(U32.sub(y1, y0), U32.sub(x1, x0)) then
-    List.map!!(Pair.swap!!, VoxBox.Draw.line.aux.coords(y0, x0, y1, x1))
+// basically a copy-paste of wikipedia:
+//   https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm#All_cases
+VoxBox.Draw.line.coords(
+  x0: I32,
+  y0: I32,
+  x1: I32,
+  y1: I32,
+): List<Pair<I32, I32>>
+  let dist_y = I32.abs(I32.sub(y1, y0))
+  let dist_x = I32.abs(I32.sub(x1, x0))
+  // checks if line is more horizontal than vertical
+  let low = I32.ltn(dist_y, dist_x)
+  if low then
+    if I32.gtn(x0, x1) then
+      VoxBox.Draw.line.coords.low(x1, y1, x0, y0)
+    else
+      VoxBox.Draw.line.coords.low(x0, y0, x1, y1)
   else
-    VoxBox.Draw.line.aux.coords.base_case(x0, y0, x0, y0, x1, y1, [])
+    if I32.gtn(y0, y1) then
+      VoxBox.Draw.line.coords.high(x1, y1, x0, y0)
+    else
+      VoxBox.Draw.line.coords.high(x0, y0, x1, y1)
 
-// TODO optimize as a tail-recursive function
-// the base_case only works when
-// * x1 >= x0
-// * y1 >= y0
-// * (x1 - x0) >= (y1 - y0)
-VoxBox.Draw.line.aux.coords.base_case(
-  cx: U32,
-  cy: U32,
-  x0: U32,
-  y0: U32,
-  x1: U32,
-  y1: U32,
-  acc: List<Pair<U32, U32>>
-): List<Pair<U32, U32>>
-  if U32.eql(cx, x1) then
-    List.reverse!({cx, cy} & acc)
+VoxBox.Draw.line.coords.low(
+  x0: I32,
+  y0: I32,
+  x1: I32,
+  y1: I32,
+): List<Pair<I32, I32>>
+  dx = I32.sub(x1, x0)
+  dy = I32.abs(I32.sub(y1, y0))
+  yi = if I32.gtn(y1, y0) then +1#32 else -1#32
+  d = I32.sub(I32.mul(+2#32, dy), dx)
+  VoxBox.Draw.line.coords.low.go(x0, y0, x1, y1, yi, dx, dy, d, [])
+
+VoxBox.Draw.line.coords.low.go(
+  x0: I32, // starting pixel
+  y0: I32,
+  x1: I32, // ending
+  y1: I32,
+  yi: I32, // we go up or down?
+  dx: I32,
+  dy: I32,
+  d:  I32, // error
+  coords: List<Pair<I32, I32>> // coords so far
+): List<Pair<I32, I32>>
+  if I32.eql(x0, x1) then
+    {x0, y0} & coords
   else
-    let b = VoxBox.Draw.line.aux.bump(x0, y0, x1, y1, cx, cy)
-    VoxBox.Draw.line.aux.coords.base_case(U32.add(cx, 1#32), U32.add(cy, b), x0, y0, x1, y1, {cx, cy} & acc)
+    new_x = I32.add(+1#32, x0)
+    if I32.gtn(d, +0#32) then
+      new_y = I32.add(yi, y0)
+      new_d = I32.add(d, I32.mul(+2#32, I32.sub(dy, dx)))
+      VoxBox.Draw.line.coords.low.go(new_x, new_y, x1, y1, yi, dx, dy, new_d, {x0, y0} & coords)
+    else
+      new_d = I32.add(d, I32.mul(+2#32, dy))
+      VoxBox.Draw.line.coords.low.go(new_x, y0, x1, y1, yi, dx, dy, new_d, {x0, y0} & coords)
 
-// Decides wether we should bump one pixel up or not
-// inside VoxBox.Draw.line.aux.coords.base
-VoxBox.Draw.line.aux.bump(
-  x0: U32,
-  y0: U32,
-  x1: U32,
-  y1: U32,
-  cx: U32,
-  cy: U32,
-): U32
-  // absolute value of x coordinate of the gradient
-  // (it's negative)
-  let grad_x = U32.sub(y1, y0)
-  // absolute value of y coordinate of the gradient
-  // (it's positive)
-  let grad_y = U32.sub(x1, x0)
-  let my_x = U32.mul(U32.sub(U32.mul(2#32, U32.add(cx, 1#32)), U32.mul(2#32, x0)), grad_x)
-  let my_y = U32.mul(U32.sub(U32.add(U32.mul(2#32, cy), 1#32), U32.mul(2#32, y0)), grad_y)
-  if U32.gtn(my_x, my_y) then
-    1#32
+VoxBox.Draw.line.coords.high(
+  x0: I32,
+  y0: I32,
+  x1: I32,
+  y1: I32,
+): List<Pair<I32, I32>>
+  dx = I32.abs(I32.sub(x1, x0))
+  dy = I32.sub(y1, y0)
+  xi = if I32.gtn(x0, x1) then -1#32 else +1#32
+  d = I32.sub(I32.mul(+2#32, dx), dy)
+  VoxBox.Draw.line.coords.high.go(x0, y0, x1, y1, xi, dx, dy, d, [])
+
+VoxBox.Draw.line.coords.high.go(
+  x0: I32, // starting pixel
+  y0: I32,
+  x1: I32, // ending
+  y1: I32,
+  xi: I32, // we go up or down?
+  dx: I32,
+  dy: I32,
+  d:  I32, // error
+  coords: List<Pair<I32, I32>> // coords so far
+): List<Pair<I32, I32>>
+  if I32.eql(y0, y1) then
+    {x0, y0} & coords
   else
-    0#32
-
-VoxBox.Draw.line.aux.reflect_y(y0: U32, y1: U32, p: Pair<U32, U32>): Pair<U32, U32>
-  open p
-  {p.fst, U32.sub(U32.add(y0, y1), p.snd)}
+    new_y = I32.add(+1#32, y0)
+    if I32.gtn(d, +0#32) then
+      new_x = I32.add(x0, xi)
+      new_d = I32.add(d, I32.mul(+2#32, I32.sub(dx, dy)))
+      VoxBox.Draw.line.coords.high.go(new_x, new_y, x1, y1, xi, dx, dy, new_d, {x0, y0} & coords)
+    else
+      new_d = I32.add(d, I32.mul(+2#32, dx))
+      VoxBox.Draw.line.coords.high.go(x0, new_y, x1, y1, xi, dx, dy, new_d, {x0, y0} & coords)
