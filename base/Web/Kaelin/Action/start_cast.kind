@@ -1,23 +1,24 @@
 Web.Kaelin.Action.start_cast(key_code: U16, state: Web.Kaelin.State): Web.Kaelin.State
   case state {
     game: 
-      let player_entity = Web.Kaelin.Map.addr_to_entity(state.user, state.map)
-      let player_coord = Web.Kaelin.Map.addr_to_coord(state.user, state.map)
-      case player_entity player_coord {
-        some some: 
-          case player_entity.value {
+      let player_info = Web.Kaelin.Map.player.info(state.user, state.map)
+      case player_info {
+        none: state
+        some: 
+          let {player_coord, player_entity} = player_info.value
+          case player_entity {
             background: state
             creature:
-              open player_entity.value
-              let skill = Web.Kaelin.Hero.skill.from_key(key_code, player_entity.value.hero)
+              open player_entity
+              let skill = Web.Kaelin.Hero.skill.from_key(key_code, player_entity.hero)
               case skill {
                 none: state
                 some: 
                   open skill.value as skill_value
 
                   let cast = Web.Kaelin.CastInfo.new(
-                    player_coord.value,                
-                    player_coord.value,
+                    player_coord,
+                    player_coord,
                     skill_value.range,
                     Web.Kaelin.HexEffect.normal,
                     skill.value
@@ -25,5 +26,5 @@ Web.Kaelin.Action.start_cast(key_code: U16, state: Web.Kaelin.State): Web.Kaelin
                   Web.Kaelin.State.game.set_cast_info(cast, state)
               }
           } 
-      } default state
+      }
   } default state

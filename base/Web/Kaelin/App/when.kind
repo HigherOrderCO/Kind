@@ -50,9 +50,12 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
             App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_cast(range, hex_effect, state, event.addr))
 
           "0x4":
-            open state.cast_info
-            App.store<Web.Kaelin.State>(Web.Kaelin.Skill.skill_use(state,state.cast_info.ability))
-            
+            case state.cast_info {
+              none: App.pass
+              some:
+                open state.cast_info.value
+                App.store<Web.Kaelin.State>(Web.Kaelin.Skill.skill_use(state,state.cast_info.value.ability))
+            }
           
         } default App.pass
     } default App.pass

@@ -1,18 +1,22 @@
 Web.Kaelin.Skill.skill_use(state: Web.Kaelin.State, skill: Web.Kaelin.Skill): Web.Kaelin.State
   case state { 
     game:
-    open state.cast_info
-    open skill
-    for effect in skill.effects with state:
-      case effect { 
-        hp:
-          let area = Web.Kaelin.Skill.area.which(effect.area, state.cast_info.hero_pos, state.cast_info.mouse_pos)
-          Web.Kaelin.Skill.apply_effect(state, effect, area)
-          
-      }default state
-      //?retorno_do_for
-    state
-
+    case state.cast_info {
+      none: state
+      some: 
+        open skill
+        open state.cast_info.value as cast
+        
+        for effect in skill.effects with state:
+          case effect { 
+            hp:
+              let area = Web.Kaelin.Skill.area.which(effect.area, cast.hero_pos, cast.mouse_pos)
+              Web.Kaelin.Skill.apply_effect(state, effect, area)
+              
+          }default state
+          //?retorno_do_for
+        state
+    }
   }default state
 //skill.effects.head.duration: I32
 //- skill.effects.head.modifier: Web.Kaelin.Skill.Modifier.status

@@ -4,12 +4,12 @@ Web.Kaelin.Action.update_cast(range: Nat, hex_effect: Web.Kaelin.HexEffect, stat
 case state {
   game:
     open state.env_info as info
-    hero_coord = Web.Kaelin.Map.addr_to_coord(addr, state.map)
+    hero_coord = Web.Kaelin.Map.player.to_coord(addr, state.map)
     case hero_coord {
       none:state
       some:
         mouse_coord = Web.Kaelin.Coord.to_axial(info.mouse_pos)
-        cast_info = Web.Kaelin.CastInfo.new(mouse_coord, hero_coord.value, range, hex_effect, Web.Kaelin.Skill.skills.quick_shot)
-        Web.Kaelin.State.game(state.user, state.room, state.tick, state.players, cast_info, state.map, state.env_info)
+        cast_info = Web.Kaelin.CastInfo.new(mouse_coord, hero_coord.value, range, hex_effect, Web.Kaelin.Heroes.Croni.skills.quick_shot)
+        Web.Kaelin.State.game(state.user, state.room, state.tick, state.players, some(cast_info), state.map, state.env_info)
     }
 }default state
