@@ -1,0 +1,10 @@
+List.take_while.go<A: Type>(f: A -> Bool, xs: List<A>) : Pair<List<A>, List<A>>
+  case xs {
+    nil : {List.nil!, List.nil!}
+    cons: case f(xs.head){
+      true : 
+        let {zs, ys} = List.take_while.go!(f, xs.tail)
+        {List.cons!(xs.head, zs), ys}
+      false: {List.nil!, xs}
+    }
+  }

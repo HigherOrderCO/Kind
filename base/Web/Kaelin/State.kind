@@ -9,7 +9,8 @@ type Web.Kaelin.State {
     players: Map(Web.Kaelin.Player)
     cast_info: Web.Kaelin.CastInfo
     map: Web.Kaelin.Map,
-    interface : App.EnvInfo // TODO rename to env_info
+    timer : List<Web.Kaelin.Timer>
+    interface : App.EnvInfo, // TODO rename to env_info
   )
 }
 

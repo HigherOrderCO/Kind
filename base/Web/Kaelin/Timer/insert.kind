@@ -1,0 +1,13 @@
+Web.Kaelin.Timer.insert(tick : Nat,
+                     f : Web.Kaelin.State -> Web.Kaelin.State,
+                     state : Web.Kaelin.State
+                     ) : Web.Kaelin.State
+  let sort = ((x, y) 
+    open x
+    open y
+    Nat.lte(x.time, y.time)) :: Web.Kaelin.Timer -> Web.Kaelin.Timer -> Bool
+    case state {
+      game : 
+        let timer = List.insert_sort!(sort, state.timer, Web.Kaelin.Timer.new(tick, f))
+        Web.Kaelin.State.game(state.room, tick, state.players, state.cast_info, state.map, timer, state.interface)
+    } default state
