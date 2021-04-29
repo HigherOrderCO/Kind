@@ -1,4 +1,4 @@
-Web.Kaelin.Hero.cyclope: Web.Kaelin.Hero
+Web.Kaelin.Heroes.Cyclope.cyclope: Web.Kaelin.Hero
   Web.Kaelin.Hero.new(
     2#8, 
     Web.Kaelin.Assets.hero.cyclope_d_1
