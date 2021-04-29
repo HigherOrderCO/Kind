@@ -1,0 +1,3 @@
+Web.Kaelin.Hero.ability.from_key(key: U16, hero: Web.Kaelin.Hero): Maybe<Web.Kaelin.Ability>
+  open hero
+  List.find!(Web.Kaelin.Ability.has_key(key),hero.abilities)

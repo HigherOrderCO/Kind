@@ -1,5 +1,3 @@
 Test:_
-  definição de tipos
-
-
+  String.to_upper("0x43d6ee28b2a93ea66d77d140eac6b20bbc931979")
 

@@ -1,26 +1,18 @@
 Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
 (event, state)
     case event state{
-      init game: App.watch(Web.Kaelin.Constants.room)
+      init game: IO {
+        App.watch(Web.Kaelin.Constants.room)
+        App.store!(Web.Kaelin.State.game(event.user, Web.Kaelin.Constants.room, state.tick, state.players, state.cast_info, state.map, state.env_info))
+      }
       
       key_down game:
-      // this will be replaced by serialze when it is ready 
-        switch U16.eql(event.code) {
-          49#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000001")) // croni
-          50#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000002")) // cyclope
-          51#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000003")) // lela
-          52#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000004")) // octoking
-          'D': App.post(state.room, "0x2100000000000000000000000000000000000000000000000000000000000001")
-          'A': App.post(state.room, "0x2200000000000000000000000000000000000000000000000000000000000001")
-          'W': App.post(state.room, "0x2300000000000000000000000000000000000000000000000000000000000001")
-          'S': App.post(state.room, "0x2400000000000000000000000000000000000000000000000000000000000001")
-          'Z': App.post(state.room, "0x3100000000000000000000000000000000000000000000000000000000000001")
-          'X': App.post(state.room, "0x3200000000000000000000000000000000000000000000000000000000000001")
-          'C': App.post(state.room, "0x3300000000000000000000000000000000000000000000000000000000000001")
-        } default App.pass
-       tick game:
+        App.store!(Web.Kaelin.Action.start_cast(event.code, state))
+        
+      tick game:
            let info = event.info
            App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_interface(info, state))
+
       post game:
       // this will be replaced by deserialze when it is ready
         switch String.starts_with(event.data) {

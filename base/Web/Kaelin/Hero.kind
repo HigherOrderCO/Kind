@@ -4,6 +4,6 @@ type Web.Kaelin.Hero {
     id: U8
     img: VoxBox
     health: I32
-    abilities: U8
+    abilities: List<Web.Kaelin.Ability>
   )
 }
