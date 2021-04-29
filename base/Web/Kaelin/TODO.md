@@ -22,11 +22,13 @@ TODO list on Kaelin
 
 - [ ] Maybe organize main folder?
 
-- [ ] Change croni, and other heroes to other directory (maybe to resouce hero?)
+- [X] Change croni, and other heroes to other directory (maybe to resouce hero?)
 
-- [ ] Change abilities to other folder than skill/skills. It has to be together with the hero
+- [X] Change abilities to other folder than skill/skills. It has to be together with the hero
 
 - [X] Change 'ability' to 'skill'
+
+- [X] Organize map's players functions
 
 - [ ] Remove mouse_pos and range from CastInfo
 
