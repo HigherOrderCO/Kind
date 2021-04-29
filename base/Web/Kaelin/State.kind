@@ -4,6 +4,7 @@ type Web.Kaelin.State {
     room: String
   )
   game(
+    user: String
     room: String
     tick: Nat
     players: Map(Web.Kaelin.Player)

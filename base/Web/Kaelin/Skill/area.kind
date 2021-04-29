@@ -1,11 +1,11 @@
-type Web.Kaelin.Ability.area{
+type Web.Kaelin.Skill.area{
   self
   single
   radial(range: Nat)
   line(range: Nat)
 }
 
-Web.Kaelin.Ability.area.which(area: Web.Kaelin.Ability.area, a: Web.Kaelin.Coord, b: Web.Kaelin.Coord): List<Web.Kaelin.Coord>
+Web.Kaelin.Skill.area.which(area: Web.Kaelin.Skill.area, a: Web.Kaelin.Coord, b: Web.Kaelin.Coord): List<Web.Kaelin.Coord>
   case area {
     self: [a]
     single: [b]

@@ -22,6 +22,11 @@ TODO list on Kaelin
 
 - [ ] Maybe organize main folder?
 
+- [ ] Change croni, and other heroes to othe directory (maybe to resouce hero?)
+
+- [ ] Change 'ability' to 'skill'
+
+- [ ] Remove mouse_pos and range from CastInfo
 
 Kind:
 

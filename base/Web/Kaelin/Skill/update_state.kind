@@ -1,6 +1,6 @@
-Web.Kaelin.Ability.update_state(
+Web.Kaelin.Skill.update_state(
 state: Web.Kaelin.State,
-effect: Web.Kaelin.Ability.Effect, 
+effect: Web.Kaelin.Skill.Effect, 
 player: Web.Kaelin.Player,
 target: Web.Kaelin.Coord
 ): Web.Kaelin.State
@@ -10,23 +10,23 @@ open player
         case effect { 
           hp: 
             let new_hp = 
-              Web.Kaelin.Ability.updated_player_hp(
+              Web.Kaelin.Skill.updated_player_hp(
               player,
               effect.modifier,
               effect.value
               )
             let new_players_hp = Map.set!(player.addr, new_hp, state.players)
-            Web.Kaelin.State.game(state.room, state.tick, new_players_hp, state.cast_info, state.map, state.env_info)
+            Web.Kaelin.State.game(state.user, state.room, state.tick, new_players_hp, state.cast_info, state.map, state.env_info)
 
           position: state
           status:
             let new_effect = 
-              Web.Kaelin.Ability.updated_player_status(
+              Web.Kaelin.Skill.updated_player_status(
               player,
               effect.modifier,
               effect.duration
               )
             let new_players_effect = Map.set!(player.addr, new_effect, state.players)
-            Web.Kaelin.State.game(state.room, state.tick, new_players_effect, state.cast_info, state.map, state.env_info)
+            Web.Kaelin.State.game(state.user, state.room, state.tick, new_players_effect, state.cast_info, state.map, state.env_info)
         }
   }default state
