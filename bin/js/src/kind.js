@@ -299,6 +299,8 @@ module.exports = (function() {
             });
             var fs = eval("require('fs')");
             var pc = eval("process");
+            var ht = eval("require('http')");
+            var hs = eval("require('https')");
         } else {
             var rl = {
                 question: (x, f) => f(''),
@@ -311,6 +313,8 @@ module.exports = (function() {
                 exit: () => {},
                 argv: []
             };
+            var ht = null;
+            var hs = null;
         };
         return run_io({
             rl,
@@ -358,6 +362,21 @@ module.exports = (function() {
     var get_file_mtime = (lib, param) => {
         return String(lib.fs.statSync(param).mtime.getTime());
     };
+    var request = (lib, param) => {
+        if (typeof fetch === 'undefined') {
+            return new Promise((res, err) => {
+                (/^https/.test(param) ? lib.hs : lib.ht).get(param, r => {
+                    let data = '';
+                    r.on('data', chunk => {
+                        data += chunk;
+                    });
+                    r.on('end', () => res(data));
+                }).on('error', e => res(''));
+            });
+        } else {
+            return fetch(param).then(res => res.text()).catch(e => '');
+        }
+    }
     var run_io = (lib, p) => {
         switch (p._) {
             case 'IO.end':
@@ -375,6 +394,13 @@ module.exports = (function() {
                             break;
                         case 'exit':
                             lib.pc.exit();
+                            break;
+                        case 'request':
+                            try {
+                                request(lib, p.param).then(x => run_io(lib, p.then(x))).then(res).catch(err);
+                            } catch (e) {
+                                err(e);
+                            };
                             break;
                         case 'get_time':
                             run_io(lib, p.then(String(Date.now()))).then(res).catch(err);
