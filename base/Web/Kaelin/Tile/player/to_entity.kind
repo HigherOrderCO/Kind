@@ -9,9 +9,7 @@ Web.Kaelin.Tile.player.to_entity(addr: String, tile: Web.Kaelin.Tile): Maybe<Web
           case tile.head.player {
             none: Web.Kaelin.Tile.player.to_entity(addr, tile.tail)
             some: 
-              log(addr)
-              log(tile.head.player.value)
-              if String.eql(addr, tile.head.player.value) then some(tile.head)
+              if String.eql_no_sensitive(addr, tile.head.player.value) then some(tile.head)
               else Web.Kaelin.Tile.player.to_entity(addr, tile.tail)
           }
       }

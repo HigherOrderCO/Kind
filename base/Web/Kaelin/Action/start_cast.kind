@@ -22,8 +22,6 @@ Web.Kaelin.Action.start_cast(key_code: U16, state: Web.Kaelin.State): Web.Kaelin
                     Web.Kaelin.HexEffect.normal,
                     skill.value
                   )
-                  log("a")
-                  log(Nat.show(skill_value.range))
                   Web.Kaelin.State.game.set_cast_info(cast, state)
               }
           } 

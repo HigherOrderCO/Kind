@@ -1,10 +1,12 @@
 Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
 (event, state)
     case event state{
-      init game: IO {
-        App.watch(Web.Kaelin.Constants.room)
-        App.store!(Web.Kaelin.State.game(event.user, Web.Kaelin.Constants.room, state.tick, state.players, state.cast_info, state.map, state.env_info))
-      }
+      init game: 
+        let user = String.to_lower(event.user)
+        IO {
+          App.watch(Web.Kaelin.Constants.room)
+          App.store!(Web.Kaelin.State.game(user, Web.Kaelin.Constants.room, state.tick, state.players, state.cast_info, state.map, state.env_info))
+        }
       
       key_down game:
         App.store!(Web.Kaelin.Action.start_cast(event.code, state))
