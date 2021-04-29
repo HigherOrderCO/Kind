@@ -1,0 +1,2 @@
+Example.Bugs.bug1_aux : Example.Test
+  Example.Test.new(true, Unit.new)
