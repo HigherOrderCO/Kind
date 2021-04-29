@@ -1,3 +1,28 @@
-Test:_
-  String.to_upper("0x43d6ee28b2a93ea66d77d140eac6b20bbc931979")
-
+Test: _
+  let key =
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
+    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.e
+    ))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+    ))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+  let map = BitsMap.new<U32>
+  let st = {key, map}
+  for i : U32 from 0#32 to 100000#32 with st:
+    let {key, map} = st
+    let key = Bits.inc(key)
+    let map = BitsMap.set!(key, i, map)
+    {key, map}
+  Pair.fst!!(st)

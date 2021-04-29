@@ -1,4 +1,5 @@
 BitsMap.set<A: Type>(bits: Bits, val: A, map: BitsMap<A>): BitsMap<A>
+  //BitsMap.set.cps<A>(bits, val, map)
   case bits {
     e: case map {
       new: BitsMap.tie!(Maybe.some!(val), BitsMap.new!, BitsMap.new!),
@@ -14,15 +15,15 @@ BitsMap.set<A: Type>(bits: Bits, val: A, map: BitsMap<A>): BitsMap<A>
     }
   }
 
-BitsMap.set.cps<A: Type>(bits: Bits, val: A, map: BitsMap<A>): BitsMap<A>
-  Trampoline.call!(BitsMap.set.cps.go<A>(bits, val, map, Trampoline.done!))
+//BitsMap.set.cps<A: Type>(bits: Bits, val: A, map: BitsMap<A>): BitsMap<A>
+  //Trampoline.call!(BitsMap.set.cps.go<A>(bits, val, map, Trampoline.done!))
 
-BitsMap.set.cps.go<A: Type>(bits: Bits, val: A, map: BitsMap<A>, cont: BitsMap<A> -> Trampoline(BitsMap<A>)): Trampoline(BitsMap<A>)
-  case bits map {
-    e new: cont(BitsMap.tie!(some(val), BitsMap.new!, BitsMap.new!))
-    e tie: cont(BitsMap.tie!(some(val), map.lft, map.rgt))
-    o new: BitsMap.set.cps.go<A>(bits.pred, val, BitsMap.new!, (lft) Trampoline.wrap!(() cont(BitsMap.tie!(none   , lft         , BitsMap.new!))))
-    o tie: BitsMap.set.cps.go<A>(bits.pred, val, map.lft     , (lft) Trampoline.wrap!(() cont(BitsMap.tie!(map.val, lft         , map.rgt     ))))
-    i new: BitsMap.set.cps.go<A>(bits.pred, val, BitsMap.new!, (rgt) Trampoline.wrap!(() cont(BitsMap.tie!(none   , BitsMap.new!, rgt         ))))
-    i tie: BitsMap.set.cps.go<A>(bits.pred, val, map.rgt     , (rgt) Trampoline.wrap!(() cont(BitsMap.tie!(map.val, map.lft     , rgt         ))))
-  }
+//BitsMap.set.cps.go<A: Type>(bits: Bits, val: A, map: BitsMap<A>, cont: BitsMap<A> -> Trampoline(BitsMap<A>)): Trampoline(BitsMap<A>)
+  //case bits map {
+    //e new: cont(BitsMap.tie!(some(val), BitsMap.new!, BitsMap.new!))
+    //e tie: cont(BitsMap.tie!(some(val), map.lft, map.rgt))
+    //o new: BitsMap.set.cps.go<A>(bits.pred, val, BitsMap.new!, (lft) Trampoline.wrap!(() cont(BitsMap.tie!(none   , lft         , BitsMap.new!))))
+    //o tie: BitsMap.set.cps.go<A>(bits.pred, val, map.lft     , (lft) Trampoline.wrap!(() cont(BitsMap.tie!(map.val, lft         , map.rgt     ))))
+    //i new: BitsMap.set.cps.go<A>(bits.pred, val, BitsMap.new!, (rgt) Trampoline.wrap!(() cont(BitsMap.tie!(none   , BitsMap.new!, rgt         ))))
+    //i tie: BitsMap.set.cps.go<A>(bits.pred, val, map.rgt     , (rgt) Trampoline.wrap!(() cont(BitsMap.tie!(map.val, map.lft     , rgt         ))))
+  //}

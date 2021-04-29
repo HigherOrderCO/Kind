@@ -1,0 +1,5 @@
+Char.to_lower(char: Char): Char
+  if Bool.and(U16.gte(char, 'A'), U16.lte(char, 'Z')) then
+    U16.add(char, 32#16)
+  else
+    char
