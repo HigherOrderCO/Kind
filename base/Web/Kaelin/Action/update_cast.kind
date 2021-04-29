@@ -9,7 +9,7 @@ case state {
       none:state
       some:
         mouse_coord = Web.Kaelin.Coord.to_axial(info.mouse_pos)
-        cast_info = Web.Kaelin.CastInfo.new(mouse_coord, hero_coord.value, range, hex_effect, Web.Kaelin.Heroes.Croni.skills.quick_shot)
+        cast_info = Web.Kaelin.CastInfo.new(hero_coord.value, hex_effect, Web.Kaelin.Heroes.Croni.skills.quick_shot)
         Web.Kaelin.State.game(state.user, state.room, state.tick, state.players, some(cast_info), state.map, state.env_info)
     }
 }default state

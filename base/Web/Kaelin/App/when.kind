@@ -42,10 +42,10 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
           
           "0x3":
             let {range, hex_effect} = switch String.eql( String.slice(3, 4, event.data) ) {
-              "1": {1, Web.Kaelin.HexEffect.ability} 
-              "2": {2, Web.Kaelin.HexEffect.ability}
+              "1": {1, Web.Kaelin.HexEffect.skill} 
+              "2": {2, Web.Kaelin.HexEffect.skill}
               "3": {2, Web.Kaelin.HexEffect.movement}
-            }default {0, Web.Kaelin.HexEffect.ability}
+            }default {0, Web.Kaelin.HexEffect.skill}
             // App.store<Web.Kaelin.State>(Web.Kaelin.Player.move(Web.Kaelin.Coord.new(+1,+0) state, event.addr))            
             App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_cast(range, hex_effect, state, event.addr))
 
@@ -54,7 +54,7 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
               none: App.pass
               some:
                 open state.cast_info.value
-                App.store<Web.Kaelin.State>(Web.Kaelin.Skill.skill_use(state,state.cast_info.value.ability))
+                App.store<Web.Kaelin.State>(Web.Kaelin.Skill.skill_use(state,state.cast_info.value.skill))
             }
           
         } default App.pass

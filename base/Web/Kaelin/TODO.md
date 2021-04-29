@@ -30,7 +30,7 @@ TODO list on Kaelin
 
 - [X] Organize map's players functions
 
-- [ ] Remove mouse_pos and range from CastInfo
+- [X] Remove mouse_pos and range from CastInfo and change ability to skill there too
 
 Kind:
 

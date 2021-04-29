@@ -18,8 +18,6 @@ Web.Kaelin.Action.start_cast(key_code: U16, state: Web.Kaelin.State): Web.Kaelin
 
                   let cast = Web.Kaelin.CastInfo.new(
                     player_coord,
-                    player_coord,
-                    skill_value.range,
                     Web.Kaelin.HexEffect.normal,
                     skill.value
                   )

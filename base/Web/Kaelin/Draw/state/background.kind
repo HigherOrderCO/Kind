@@ -8,8 +8,8 @@ let list = NatMap.to_list!(map)
       none: Web.Kaelin.HexEffect.normal
       some: 
         open cast_info.value
-        open cast_info.value.ability
-        let range = Web.Kaelin.Coord.range(cast_info.value.hero_pos, cast_info.value.ability.range) // creates a list for all tiles inside cast range
+        open cast_info.value.skill
+        let range = Web.Kaelin.Coord.range(cast_info.value.hero_pos, cast_info.value.skill.range) // creates a list for all tiles inside cast range
         Web.Kaelin.Draw.support.which_effect(coord,cast_info.value,range) // Returns the cast affecting a tile
     }
     let mouse_over = Web.Kaelin.Draw.support.mouse_on_coord(coord,env_info) // Checks if mouse is over a tile

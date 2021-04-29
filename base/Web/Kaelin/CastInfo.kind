@@ -2,6 +2,6 @@ type Web.Kaelin.CastInfo {
   new(
     hero_pos: Web.Kaelin.Coord
     hex_effect: Web.Kaelin.HexEffect
-    ability: Web.Kaelin.Skill
+    skill: Web.Kaelin.Skill
   )
 }
