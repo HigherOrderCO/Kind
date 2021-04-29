@@ -1,10 +1,10 @@
 Kind.Parser.file.def(file: String, code: String, defs: Kind.Defs): Parser(Kind.Defs)
   Parser {
     get init = Kind.Parser.init;
-    get name = Kind.Parser.name1;
+    get name = Parser.override_error!(Kind.Parser.name1, "Top-level definitions need to be valid identifiers");
     get args = Parser.many!(Kind.Parser.binder(":"));
     let args = List.flatten!(args);
-    Kind.Parser.text(":");
+    Kind.Parser.text_error(":", "Type of top-level definition needs to be separated by a ':'");
     get type = Kind.Parser.term;
     get term = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);

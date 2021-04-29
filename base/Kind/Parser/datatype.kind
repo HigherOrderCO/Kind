@@ -1,6 +1,6 @@
 Kind.Parser.datatype: Parser(Kind.Datatype)
   Parser {
-    Kind.Parser.text("type ");
+    Kind.Parser.text_error("type ", "Datatype declarations must start with \"type\"");
     get name = Kind.Parser.name1; 
     get pars = Parser.maybe!(Kind.Parser.binder(":"));
     get inds = Parser.maybe!(Parser {

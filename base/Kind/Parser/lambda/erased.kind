@@ -1,9 +1,9 @@
 Kind.Parser.lambda.erased: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
-    Kind.Parser.text("<");
+    Kind.Parser.text_error("<", "Erased lambdas need to begin with '<'");
     get name = Parser.until1!(
-      Kind.Parser.text(">"),
+      Kind.Parser.text_error(">", "No matching '>' in lambda parameter list"),
       Kind.Parser.item!(Kind.Parser.name1));
     get body = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);
