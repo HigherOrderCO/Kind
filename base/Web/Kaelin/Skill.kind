@@ -1,8 +1,8 @@
-type Web.Kaelin.Ability{
+type Web.Kaelin.Skill{
 	new(
   	id: U8
 		range: Nat
-		effects: List(Web.Kaelin.Ability.Effect)
+		effects: List(Web.Kaelin.Skill.Effect)
 		key: U16
 	)
 }

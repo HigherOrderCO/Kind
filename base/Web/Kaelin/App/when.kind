@@ -49,7 +49,7 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
 
           "0x4":
             open state.cast_info
-            App.store<Web.Kaelin.State>(Web.Kaelin.Ability.skill_use(state,state.cast_info.ability))
+            App.store<Web.Kaelin.State>(Web.Kaelin.Skill.skill_use(state,state.cast_info.ability))
             
           
         } default App.pass

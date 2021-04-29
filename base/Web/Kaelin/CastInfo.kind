@@ -4,6 +4,6 @@ type Web.Kaelin.CastInfo {
     hero_pos: Web.Kaelin.Coord
     range: Nat
     hex_effect: Web.Kaelin.HexEffect
-    ability: Web.Kaelin.Ability
+    ability: Web.Kaelin.Skill
   )
 }

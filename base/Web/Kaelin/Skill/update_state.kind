@@ -1,6 +1,6 @@
-Web.Kaelin.Ability.update_state(
+Web.Kaelin.Skill.update_state(
 state: Web.Kaelin.State,
-effect: Web.Kaelin.Ability.Effect, 
+effect: Web.Kaelin.Skill.Effect, 
 player: Web.Kaelin.Player,
 target: Web.Kaelin.Coord
 ): Web.Kaelin.State
@@ -10,7 +10,7 @@ open player
         case effect { 
           hp: 
             let new_hp = 
-              Web.Kaelin.Ability.updated_player_hp(
+              Web.Kaelin.Skill.updated_player_hp(
               player,
               effect.modifier,
               effect.value
@@ -21,7 +21,7 @@ open player
           position: state
           status:
             let new_effect = 
-              Web.Kaelin.Ability.updated_player_status(
+              Web.Kaelin.Skill.updated_player_status(
               player,
               effect.modifier,
               effect.duration

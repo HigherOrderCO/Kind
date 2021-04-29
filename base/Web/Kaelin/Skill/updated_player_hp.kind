@@ -1,6 +1,6 @@
-Web.Kaelin.Ability.updated_player_hp(
+Web.Kaelin.Skill.updated_player_hp(
 player: Web.Kaelin.Player, 
-modifier: Web.Kaelin.Ability.Modifier.hp, 
+modifier: Web.Kaelin.Skill.Modifier.hp, 
 value: I32
 ): Web.Kaelin.Player
 open player
