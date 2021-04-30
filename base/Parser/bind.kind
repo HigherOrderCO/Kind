@@ -6,7 +6,7 @@ Parser.bind<A: Type, B: Type>(parse: Parser(A), next: A -> Parser(B)): Parser(B)
         none:
           Parser.Reply.error<B>(reply.val),
         some:
-          val = Parser.ErrorAt.combine(reply.val, long.value)
+          val = Parser.ErrorAt.combine(long.value, reply.val)
           Parser.Reply.error<B>(val)
       }
       value:
