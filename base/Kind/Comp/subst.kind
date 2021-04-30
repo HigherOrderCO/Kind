@@ -1,0 +1,16 @@
+// Performs a variable substitution. Doesn't check for name capture.
+Kind.Comp.subst(name: String, value: Kind.Comp, term: Kind.Comp): Kind.Comp
+  case term {
+    nil: Kind.Comp.nil
+    var: if String.eql(name,term.name) then value else Kind.Comp.var(term.name)
+    ref: Kind.Comp.ref(term.name)
+    lam: Kind.Comp.lam(term.name, if String.eql(name,term.name) then term.body else Kind.Comp.subst(name,value,term.body))
+    app: Kind.Comp.app(Kind.Comp.subst(name,value,term.func), Kind.Comp.subst(name,value,term.argm))
+    let: Kind.Comp.let(term.name, Kind.Comp.subst(name,value,term.expr), if String.eql(name,term.name) then term.body else Kind.Comp.subst(name,value,term.body))
+    eli: Kind.Comp.eli(term.prim, Kind.Comp.subst(name,value,term.expr))
+    ins: Kind.Comp.ins(term.prim, Kind.Comp.subst(name,value,term.expr))
+    nat: Kind.Comp.nat(term.natx)
+    chr: Kind.Comp.chr(term.chrx)
+    str: Kind.Comp.str(term.strx)
+    txt: Kind.Comp.txt(term.text)
+  }

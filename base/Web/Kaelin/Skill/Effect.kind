@@ -1,0 +1,11 @@
+// TODO: add constructor for creating new objects, like a wall
+// TODO: add a condition type to check if the game meets said conditions to activate certain effects?
+// e.g. a spell that drains life from a target should only heal the user if there is a target in the target cell.
+// Furthermore, there are certain skills that will be casted regardless of if there is a target nearby, like a self destruction skill.
+
+
+type Web.Kaelin.Skill.Effect{
+	hp(value: I32, modifier: Web.Kaelin.Skill.Modifier.hp, area: Web.Kaelin.Skill.area, indicator: Maybe(Web.Kaelin.Skill.area.indicator))
+	position(value:  I32, modifier: Web.Kaelin.Skill.Modifier.position, area: Web.Kaelin.Skill.area, indicator: Maybe(Web.Kaelin.Skill.area.indicator))
+	status(duration: I32, modifier: Web.Kaelin.Skill.Modifier.status, area: Web.Kaelin.Skill.area, indicator: Maybe(Web.Kaelin.Skill.area.indicator))
+}

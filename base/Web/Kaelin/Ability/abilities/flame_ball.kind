@@ -1,8 +1,0 @@
-Web.Kaelin.Ability.abilities.flame_ball: Web.Kaelin.Ability
-
-  Web.Kaelin.Ability.new(
-    2#8 // id  - not called anywhere so far
-    4 // range - not called anywhere so far
-    [Web.Kaelin.Ability.Effect.hp(+3#32, Web.Kaelin.Ability.Modifier.hp.damage, Web.Kaelin.Ability.area.radial(2), some(Web.Kaelin.Ability.area.indicator.red))]
-  )
- 

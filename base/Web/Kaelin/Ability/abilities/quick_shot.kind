@@ -1,8 +1,0 @@
-Web.Kaelin.Ability.abilities.quick_shot: Web.Kaelin.Ability
-
-  Web.Kaelin.Ability.new(
-    1#8 //id
-    5, // range
-    [Web.Kaelin.Ability.Effect.hp(+7#32, Web.Kaelin.Ability.Modifier.hp.damage, Web.Kaelin.Ability.area.single, some(Web.Kaelin.Ability.area.indicator.red))]
-  )
-      

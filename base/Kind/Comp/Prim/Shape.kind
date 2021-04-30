@@ -1,0 +1,30 @@
+// This defines the shape of an optimized type by specifying its elims/insts.
+// 
+// Inst is formatted as `[{field_count, inst_expr}]`. It describes how to
+// convert an λ-encoded layer to an optimized representation. `field_count`
+// represents how many fields the nth constructor have, and `inst_expr`
+// describes how to convert these N fields into an optimized value of that
+// constructor.
+// 
+// Elim is formatted as `{tag_expr, [{ctor_tag, [field_expr}]}`. It describes
+// how to extract a λ-encoded layer from an optimized implementation. `tag_expr`
+// converts a native representation into a tag representing which constructor it
+// is made of, and then, for each constructor of the datatype, we have a list of
+// `field_expr`, which describes how to extract each field of that constructor.
+// 
+// - inst(`λz. λs. s 3`) == `4`
+// - elim(`4`) == `λs. λz. s 3`.
+// 
+// To learn by example, just check Kind/Comp/Target/Scheme.kind's shapes.
+type Kind.Comp.Prim.Shape {
+  new(
+    inst: List(Pair(Nat, String))
+    elim: Pair(String, List(Pair(String ,List(String))))
+  )
+}
+type Kind.Comp.Prim.Shape {
+  new(
+    inst: List(Pair(Nat, String))
+    elim: Pair(String, List(Pair(String, List(String))))
+  )
+}

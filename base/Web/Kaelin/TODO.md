@@ -32,6 +32,12 @@ TODO list on Kaelin
 
 - [ ] CastInfo should go back to none after a movement or after using a skill
 
+- [ ] Change croni, and other heroes to othe directory (maybe to resouce hero?)
+
+- [ ] Change 'ability' to 'skill'
+
+- [ ] Remove mouse_pos and range from CastInfo
+
 Kind:
 
 - [ ] I32.show bug (when printing negative numbers goes to 2ˆ32 - absolute value) 

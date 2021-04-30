@@ -1,0 +1,2 @@
+Kind.Map.set_if_empty<A: Type>(name: Kind.Name, val: A, map: BitsMap<A>): BitsMap<A>
+  BitsMap.set_if_empty<A>(Kind.Name.to_bits(name), val, map)

@@ -4,7 +4,7 @@ open env_info as info
 let list = NatMap.to_list!(map)
 let range = Web.Kaelin.Coord.range(cast.hero_pos, cast.range) // creates a list for all tiles inside cast range // It should be moved to cast_info
 let target_coord = Web.Kaelin.Coord.to_axial(info.mouse_pos) 
-let area = Web.Kaelin.Ability.indicator(cast.ability, cast.hero_pos, target_coord) // Should be created inside ability/cast_info??
+let area = Web.Kaelin.Skill.indicator(cast.ability, cast.hero_pos, target_coord) // Should be created inside ability/cast_info??
 
   for pair in list with img:
     open pair

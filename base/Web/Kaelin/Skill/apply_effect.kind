@@ -1,0 +1,13 @@
+Web.Kaelin.Skill.apply_effect(state: Web.Kaelin.State, effect: Web.Kaelin.Skill.Effect, area: List(Web.Kaelin.Coord)): Web.Kaelin.State
+   case state {
+    game: let list = Web.Kaelin.Map.find_players_on_coords(area,state.map)
+    for pair in list with state:
+      open pair
+      let new_player = Map.get!(pair.fst, state.players)
+      case new_player{
+        none: state
+        some: Web.Kaelin.Skill.update_state(state, effect, new_player.value, pair.snd)
+      }
+    state
+    
+  }default state

@@ -3,6 +3,6 @@ type Web.Kaelin.Player {
     addr: String
     team: String
     current_hp: I32
-    current_status: List<Web.Kaelin.Ability.Modifier.status>
+    current_status: List<Web.Kaelin.Skill.Modifier.status>
   )
 }

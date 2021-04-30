@@ -2,9 +2,9 @@ Web.Kaelin.Draw.support.area_of_effect(
   hex_effect: Web.Kaelin.HexEffect,
   mouse_coord: Web.Kaelin.Coord,
   coord: Web.Kaelin.Coord,
-  area: NatMap(Web.Kaelin.Ability.area.indicator),
+  area: NatMap(Web.Kaelin.Skill.area.indicator),
   range: List(Web.Kaelin.Coord)
-  ): Maybe(Web.Kaelin.Ability.area.indicator)
+  ): Maybe(Web.Kaelin.Skill.area.indicator)
 
   case hex_effect {
     ability:

@@ -1,0 +1,36 @@
+Kind.Core.dependencies(term: Kind.Term): List(String)
+  Kind.Map.keys!(Kind.Core.dependencies.go(term, Kind.Map.new!))
+  
+Kind.Core.dependencies.go(term: Kind.Term, deps: Kind.Map(Unit)): Kind.Map(Unit)
+  let nil = Kind.Term.typ
+  case term {
+    var:
+      deps
+    ref:
+      Kind.Map.set!(term.name, unit, deps)
+    typ:
+      deps
+    all: 
+      let deps = Kind.Core.dependencies.go(term.xtyp, deps)
+      let deps = Kind.Core.dependencies.go(term.body(nil,nil), deps)
+      deps
+    lam:
+      let deps = Kind.Core.dependencies.go(term.body(nil), deps)
+      deps
+    app:
+      let deps = Kind.Core.dependencies.go(term.func, deps)
+      let deps = Kind.Core.dependencies.go(term.argm, deps)
+      deps
+    let:
+      let deps = Kind.Core.dependencies.go(term.expr, deps)
+      let deps = Kind.Core.dependencies.go(term.body(nil), deps)
+      deps
+    def:
+      let deps = Kind.Core.dependencies.go(term.expr, deps)
+      let deps = Kind.Core.dependencies.go(term.body(nil), deps)
+      deps
+    ann:
+      let deps = Kind.Core.dependencies.go(term.term, deps)
+      let deps = Kind.Core.dependencies.go(term.type, deps)
+      deps
+  } default deps

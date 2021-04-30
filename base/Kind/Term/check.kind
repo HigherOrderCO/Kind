@@ -170,7 +170,7 @@ Kind.Term.check(
       none:
         Kind.Check.result!(Maybe.some!(infr), []),
       some: do Kind.Check {
-        get eqls = Kind.Term.equal(type.value, infr, defs, List.length!(ctx), BitsSet.mut.new(unit));
+        get eqls = Kind.Term.equal.go(type.value, infr, defs, List.length!(ctx), BitsSet.mut.new(unit));
         if eqls then do Kind.Check {
           return type.value;
         } else do Kind.Check {
