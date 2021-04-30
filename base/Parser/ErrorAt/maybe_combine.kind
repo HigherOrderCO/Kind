@@ -1,0 +1,10 @@
+Parser.ErrorAt.maybe_combine(
+  a: Maybe<Parser.ErrorAt>,
+  b: Maybe<Parser.ErrorAt>,
+): Maybe<Parser.ErrorAt>
+  case a b {
+    some some: some(Parser.ErrorAt.combine(a.value, b.value))
+    none some: b
+    some none: a
+    none none: none
+  }

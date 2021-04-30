@@ -1,7 +1,0 @@
-Parser.ErrorAt.from_reply<V: Type>(a: Parser.Reply<V>): Maybe<Parser.ErrorAt>
-  case a {
-    error: 
-      some(Parser.ErrorAt.new(a.idx, a.code, a.err))
-    value:
-      a.long
-  }
