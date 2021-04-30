@@ -1,4 +1,4 @@
 type Parser.Reply <V: Type> {
   error(idx: Nat, code: String, err: String),
-  value(idx: Nat, code: String, val: V),
+  value(long: Maybe(Parser.ErrorAt), idx: Nat, code: String, val: V),
 }

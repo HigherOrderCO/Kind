@@ -1,2 +1,2 @@
 Parser(V: Type): Type
-  Nat -> String -> Parser.Reply<V>
+  Maybe(Parser.ErrorAt) -> Nat -> String -> Parser.Reply<V>
