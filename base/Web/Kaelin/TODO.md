@@ -24,6 +24,18 @@ TODO list on Kaelin
 
 - [X] Change croni, and other heroes to other directory (maybe to resouce hero?)
 
+- [ ] organize area.kind
+
+- [ ] consider adding condition and object creation in Effect
+
+- [ ] update skill_use
+
+- [ ] fix vampirism through conditions on Effects
+
+- [ ] CastInfo should go back to none after a movement or after using a skill
+
+- [ ] Change croni, and other heroes to othe directory (maybe to resouce hero?)
+
 - [X] Change abilities to other folder than skill/skills. It has to be together with the hero
 
 - [X] Change 'ability' to 'skill'
@@ -39,5 +51,3 @@ Kind:
 - [ ] log inside a function that contains a variable named as 'x' brokes typecheck
 
 - [ ] maybe add I32.to_nat?
-
-- [ ] NatMap to 

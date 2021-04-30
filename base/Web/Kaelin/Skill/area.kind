@@ -5,10 +5,15 @@ type Web.Kaelin.Skill.area{
   line(range: Nat)
 }
 
-Web.Kaelin.Skill.area.which(area: Web.Kaelin.Skill.area, a: Web.Kaelin.Coord, b: Web.Kaelin.Coord): List<Web.Kaelin.Coord>
+Web.Kaelin.Skill.area.to_list(area: Web.Kaelin.Skill.area, a: Web.Kaelin.Coord, b: Web.Kaelin.Coord): List<Web.Kaelin.Coord>
   case area {
     self: [a]
     single: [b]
     radial: Web.Kaelin.Coord.range(b, area.range)
   }default [a]
 
+type Web.Kaelin.Skill.area.indicator{
+  green
+  red
+  yellow
+}
