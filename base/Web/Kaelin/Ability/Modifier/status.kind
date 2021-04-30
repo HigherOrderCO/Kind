@@ -5,5 +5,6 @@ type Web.Kaelin.Ability.Modifier.status {
     slow
     haste
     cleanse
+    root
 }
 

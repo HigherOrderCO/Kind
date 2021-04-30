@@ -22,6 +22,15 @@ TODO list on Kaelin
 
 - [ ] Maybe organize main folder?
 
+- [ ] organize area.kind
+
+- [ ] consider adding condition and object creation in Effect
+
+- [ ] update skill_use
+
+- [ ] fix vampirism through conditions on Effects
+
+- [ ] CastInfo should go back to none after a movement or after using a skill
 
 Kind:
 
@@ -30,5 +39,3 @@ Kind:
 - [ ] log inside a function that contains a variable named as 'x' brokes typecheck
 
 - [ ] maybe add I32.to_nat?
-
-- [ ] NatMap to 

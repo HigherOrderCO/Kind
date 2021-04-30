@@ -1,3 +1,5 @@
+//changes only for testing
+
 Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
 (event, state)
     case event state{
@@ -17,6 +19,7 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
           'Z': App.post(state.room, "0x3100000000000000000000000000000000000000000000000000000000000001")
           'X': App.post(state.room, "0x3200000000000000000000000000000000000000000000000000000000000001")
           'C': App.post(state.room, "0x3300000000000000000000000000000000000000000000000000000000000001")
+          'Q': App.post(state.room, "0x4100000000000000000000000000000000000000000000000000000000000001")
         } default App.pass
        tick game:
            let info = event.info

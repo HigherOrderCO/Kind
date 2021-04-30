@@ -1,0 +1,10 @@
+Web.Kaelin.Ability.abilities.earth_root: Web.Kaelin.Ability
+
+  Web.Kaelin.Ability.new(
+    3#8 // id  - not called anywhere so far
+    0 // range - not called anywhere so far
+    [
+    Web.Kaelin.Ability.Effect.hp(+20#32, Web.Kaelin.Ability.Modifier.hp.heal, Web.Kaelin.Ability.area.self, some(Web.Kaelin.Ability.area.indicator.green)),
+    Web.Kaelin.Ability.Effect.status(+3#32, Web.Kaelin.Ability.Modifier.status.root, Web.Kaelin.Ability.area.self, none)]
+  )
+ 

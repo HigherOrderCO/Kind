@@ -1,0 +1,5 @@
+Web.Kaelin.Draw.state.mouse_ui(info: App.EnvInfo, img: VoxBox): VoxBox
+  open info 
+  coord = Web.Kaelin.Coord.to_axial(info.mouse_pos)
+  {x,y} = Web.Kaelin.Draw.support.centralize(coord)
+  VoxBox.Draw.image(x, y, 0#32, Web.Kaelin.Assets.tile.mouse_ui, img)

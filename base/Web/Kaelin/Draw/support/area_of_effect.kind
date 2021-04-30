@@ -1,0 +1,17 @@
+Web.Kaelin.Draw.support.area_of_effect(
+  hex_effect: Web.Kaelin.HexEffect,
+  mouse_coord: Web.Kaelin.Coord,
+  coord: Web.Kaelin.Coord,
+  area: NatMap(Web.Kaelin.Ability.area.indicator),
+  range: List(Web.Kaelin.Coord)
+  ): Maybe(Web.Kaelin.Ability.area.indicator)
+
+  case hex_effect {
+    ability:
+  if List.any!(Web.Kaelin.Coord.eql(mouse_coord), range) then 
+    coord = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+    NatMap.get!(coord,area)
+  else
+    none 
+  }default none
+

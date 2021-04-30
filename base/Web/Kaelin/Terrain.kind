@@ -6,6 +6,6 @@ type Web.Kaelin.Terrain {
 type Web.Kaelin.Terrain.Sprite {
   new(
     effect: Web.Kaelin.HexEffect
-    mouse_over: Bool
+    indicator: Maybe(Web.Kaelin.Ability.area.indicator)
   )
 }

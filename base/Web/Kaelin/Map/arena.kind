@@ -9,13 +9,18 @@ Web.Kaelin.Map.arena: Web.Kaelin.Map
   // Defines all possible images inside a tile
   terrain_img = (sprite)
     open sprite 
-    case sprite.mouse_over sprite.effect {
-      true normal: Web.Kaelin.Assets.tile.effect.blue_green2
-      true movement: Web.Kaelin.Assets.tile.effect.dark_blue2
-      true ability: Web.Kaelin.Assets.tile.effect.dark_red2
-      false normal: Web.Kaelin.Assets.tile.green_2
-      false movement: Web.Kaelin.Assets.tile.effect.light_blue2
-      false ability: Web.Kaelin.Assets.tile.effect.light_red2
+    case sprite.indicator{
+      none: case sprite.effect {
+        normal: Web.Kaelin.Assets.tile.green_2
+        movement: Web.Kaelin.Assets.tile.effect.light_blue2
+        ability: Web.Kaelin.Assets.tile.effect.dark_blue2
+      }
+      some: case sprite.indicator.value {
+        green: Web.Kaelin.Assets.tile.effect.blue_green2
+        red: Web.Kaelin.Assets.tile.effect.dark_red2
+        yellow: Web.Kaelin.Assets.tile.effect.light_red2
+      }
+
   }
 
   let new_terrain = Web.Kaelin.Terrain.grass(terrain_img)
