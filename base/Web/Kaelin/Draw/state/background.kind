@@ -2,14 +2,13 @@ Web.Kaelin.Draw.state.background(map: Web.Kaelin.Map, cast_info: Maybe<Web.Kaeli
   open env_info as info
   let list = NatMap.to_list!(map)
   let target_coord = Web.Kaelin.Coord.to_axial(info.mouse_pos) 
-  let {area_aux, range} = case cast_info {
-    none: {none, none}
+  let area_aux = case cast_info {
+    none: none
     some:
       open cast_info.value
       open cast_info.value.skill
       let area_aux = Web.Kaelin.Skill.indicator(cast_info.value.skill, cast_info.value.hero_pos, target_coord) // Should be created inside ability/cast_info??
-      let range = Web.Kaelin.Coord.range(cast_info.value.hero_pos, cast_info.value.skill.range)
-      {some(area_aux), some(range)}
+      some(area_aux)
   }
   
   for pair in list with img:
@@ -22,10 +21,7 @@ Web.Kaelin.Draw.state.background(map: Web.Kaelin.Map, cast_info: Maybe<Web.Kaeli
         some: 
           open cast_info.value
           open cast_info.value.skill
-          case range {
-            none: Web.Kaelin.HexEffect.normal
-            some: Web.Kaelin.Draw.support.which_effect(coord,cast_info.value,range.value) // Returns the cast affecting a tile
-          }
+          Web.Kaelin.Draw.support.which_effect(coord,cast_info.value, cast_info.value.range) // Returns the cast affecting a tile
       }
       
     let area = 
@@ -34,10 +30,11 @@ Web.Kaelin.Draw.state.background(map: Web.Kaelin.Map, cast_info: Maybe<Web.Kaeli
         some: 
           open cast_info.value
           open cast_info.value.skill
-          case range area_aux {
-            some some:
-              Web.Kaelin.Draw.support.area_of_effect(cast_info.value.hex_effect, target_coord, coord, area_aux.value, range.value) // TODO see if the logic here is correct
-          } default none
+          case area_aux {
+            none: none
+            some:
+              Web.Kaelin.Draw.support.area_of_effect(cast_info.value.hex_effect, target_coord, coord, area_aux.value, cast_info.value.range) // TODO see if the logic here is correct
+          }
       }
       
     let sprite = Web.Kaelin.Terrain.Sprite.new(hex_effect, area) // Function to return the image for the tile
