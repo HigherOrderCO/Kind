@@ -32,37 +32,7 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
               none: App.pass
               some: App.store<Web.Kaelin.State>(Web.Kaelin.Action.create_player(event.addr, hero.value, state))
             }
-            // TODO: change movement so it uses range 2 and mouse (Web.Kaelin.Coord.Range)
-            // draw the range in Web.Kaelin.Draw.state.background through State.Cast_info
-            // draw hovered hex differently from movement hexes.
-            // use mouse click to move
-          "0x2":
-            let {coord.fst, coord.snd} = switch String.eql( String.slice(3, 4, event.data) ) {
-              "1": {+1#32, +0#32}
-              "2": {-1#32, +0#32}
-              "3": {+0#32, -1#32}
-              "4": {+0#32, +1#32}
-            } default {+0#32, +0#32}
-            // App.store<Web.Kaelin.State>(Web.Kaelin.Player.move(Web.Kaelin.Coord.new(+1,+0) state, event.addr))            
-            App.store<Web.Kaelin.State>(Web.Kaelin.Player.move_by(coord.fst, coord.snd, state, event.addr))
-          
-          "0x3":
-            let {range, hex_effect} = switch String.eql( String.slice(3, 4, event.data) ) {
-              "1": {1, Web.Kaelin.HexEffect.skill} 
-              "2": {2, Web.Kaelin.HexEffect.skill}
-              "3": {2, Web.Kaelin.HexEffect.movement}
-            }default {0, Web.Kaelin.HexEffect.skill}
-            // App.store<Web.Kaelin.State>(Web.Kaelin.Player.move(Web.Kaelin.Coord.new(+1,+0) state, event.addr))            
-            App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_cast(range, hex_effect, state, event.addr))
-
-          "0x4":
-            case state.cast_info {
-              none: App.pass
-              some:
-                open state.cast_info.value
-                App.store<Web.Kaelin.State>(Web.Kaelin.Skill.skill_use(state,state.cast_info.value.skill))
-            }
-          
+                      
         } default App.pass
     } default App.pass
 
