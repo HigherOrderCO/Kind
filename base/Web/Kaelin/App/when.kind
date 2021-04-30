@@ -4,14 +4,18 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
 (event, state)
     case event state{
       init game: 
+        log(event.user)
         let user = String.to_lower(event.user)
+        log(user)
         IO {
           App.watch(Web.Kaelin.Constants.room)
           App.store!(Web.Kaelin.State.game(user, Web.Kaelin.Constants.room, state.tick, state.players, state.cast_info, state.map, state.env_info))
         }
       
       key_down game:
-        App.store!(Web.Kaelin.Action.start_cast(event.code, state))
+        switch U16.eql(event.code) {
+          49#16: App.post(state.room, Web.Kaelin.Command.create_player("0x00000001")) // croni
+        } default App.store!(Web.Kaelin.Action.start_cast(event.code, state))
         
       tick game:
            let info = event.info
@@ -20,7 +24,7 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
       post game:
       // this will be replaced by deserialze when it is ready
         switch String.starts_with(event.data) {
-          
+          log(state.user)
           "0x1": 
             let hero_id = 1#8
             let hero = Web.Kaelin.Resources.heroes{U8.show(hero_id)}

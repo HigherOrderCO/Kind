@@ -8,17 +8,17 @@ Web.Kaelin.Action.start_cast(key_code: U16, state: Web.Kaelin.State): Web.Kaelin
           let {player_coord, player_entity} = player_info.value
           case player_entity {
             background: state
-            creature:
+            creature:     
               open player_entity
               let skill = Web.Kaelin.Hero.skill.from_key(key_code, player_entity.hero)
               case skill {
                 none: state
-                some: 
+                some:           
                   open skill.value as skill_value
 
                   let cast = Web.Kaelin.CastInfo.new(
                     player_coord,
-                    Web.Kaelin.HexEffect.normal,
+                    Web.Kaelin.HexEffect.skill,
                     skill.value
                   )
                   Web.Kaelin.State.game.set_cast_info(cast, state)

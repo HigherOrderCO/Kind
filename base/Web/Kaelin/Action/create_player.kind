@@ -5,6 +5,7 @@ Web.Kaelin.Action.create_player(user: String, hero: Web.Kaelin.Hero, state: Web.
     game :
       case Map.get!(key, state.players) as player {
         none:
+          log(state.user)
           open hero
           let creature = Web.Kaelin.Entity.creature
           let new_player = Web.Kaelin.Player.new(user, "blue", hero.health, [])

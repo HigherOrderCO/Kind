@@ -24,7 +24,7 @@ Web.Kaelin.Draw.state.background(map: Web.Kaelin.Map, cast_info: Maybe<Web.Kaeli
           open cast_info.value
           open cast_info.value.skill
           let area_aux = Web.Kaelin.Skill.indicator(cast_info.value.skill, cast_info.value.hero_pos, target_coord) // Should be created inside ability/cast_info??
-          let range = Web.Kaelin.Coord.range(coord, cast_info.value.skill.range)
+          let range = Web.Kaelin.Coord.range(cast_info.value.hero_pos, cast_info.value.skill.range)
           Web.Kaelin.Draw.support.area_of_effect(cast_info.value.hex_effect, target_coord, coord, area_aux, range) // TODO see if the logic here is correct
       }
       

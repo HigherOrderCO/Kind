@@ -1,8 +1,12 @@
-Web.Kaelin.Skill.skills.quick_shot: Web.Kaelin.Skill
+Web.Kaelin.Heroes.Croni.skills: List<Web.Kaelin.Skill>
+  [
+    Web.Kaelin.Heroes.Croni.skills.quick_shot
+  ]
+
+Web.Kaelin.Heroes.Croni.skills.quick_shot: Web.Kaelin.Skill
   Web.Kaelin.Skill.new(
     1#8
-    5,
-    [Web.Kaelin.Skill.Effect.hp(+7#32, Web.Kaelin.Skill.Modifier.hp.damage, Web.Kaelin.Skill.area.single, some(Web.Kaelin.Skill.area.indicator.red))]
+    2,
+    [Web.Kaelin.Skill.Effect.hp(+7#32, Web.Kaelin.Skill.Modifier.hp.damage, Web.Kaelin.Skill.area.radial(1), some(Web.Kaelin.Skill.area.indicator.red))]
     48#16
   )
-  

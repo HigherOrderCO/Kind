@@ -7,11 +7,11 @@ Web.Kaelin.Draw.support.area_of_effect(
   ): Maybe(Web.Kaelin.Skill.area.indicator)
 
   case hex_effect {
-    ability:
-  if List.any!(Web.Kaelin.Coord.eql(mouse_coord), range) then 
-    coord = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
-    NatMap.get!(coord,area)
-  else
-    none 
-  }default none
+    skill:
+    if List.any!(Web.Kaelin.Coord.eql(mouse_coord), range) then 
+      coord = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+      NatMap.get!(coord,area)
+    else
+      none 
+  } default none
 
