@@ -1,0 +1,137 @@
+type Packet<D: Type> {
+  new(
+    data: D,
+    address: List<Bool>
+  )
+}
+
+type RedTree<D: Type> {
+  nil(
+    inbox: List<Packet<D>>
+  )
+
+  edge(
+    loaded: Bool,
+    payload: Maybe<Packet<D>>,
+    left: RedTree<D>,
+    right: RedTree<D>
+  )
+}
+
+//type Rednet<D: Type> {
+//  new(top: RedTree<D>, bottom: RedTree<D>)
+//}
+
+type RedTransition<Data: Type> ~ (now: RedTree<Data>, after: RedTree<Data>) {
+  toggle(
+    loaded: Bool
+    payload: Maybe<Packet<Data>>
+    left: RedTree<Data>
+    right: RedTree<Data>) 
+ ~ (now =
+      RedTree.edge<Data>(
+        loaded
+        payload
+        left
+        right
+      )
+    after =
+      RedTree.edge<Data>(
+        Bool.not(loaded)
+        payload
+        left
+        right
+      )
+    )
+
+  send_left(
+    data: Data,
+    tail: List<Bool>,
+    my_left: RedTree<Data>,
+    their_left: RedTree<Data>,
+    their_right: RedTree<Data>,
+  )
+ ~ (now = 
+      RedTree.edge<Data>(
+        true,
+        some(Packet.new<Data>(data, true & tail)),
+        my_left,
+        RedTree.edge<Data>(
+          true,
+          none,
+          their_left,
+          their_right,
+        )
+      ),
+    after =
+      RedTree.edge<Data>(
+        true,
+        none,
+        my_left,
+        RedTree.edge<Data>(
+          true,
+          some(Packet.new<Data>(data, tail)),
+          their_left,
+          their_right,
+        )
+      )
+   )
+
+//  send_right(
+//    data: Data
+//    tail: List<Bool>
+//    my_right: RedTree<Data>
+//    their_left: RedTree<Data>
+//    their_right: RedTree<Data>
+//  )
+// ~ (now = 
+//      RedTree.edge<Data>(
+//        true
+//        some(Packet.new<Data>(data, false & tail))
+//        RedTree.edge<Data>(
+//          true
+//          none
+//          their_left
+//          their_right
+//        )
+//        my_right
+//      )
+//    after =
+//      RedTree.edge<Data>(
+//        true
+//        none
+//        RedTree.edge<Data>(
+//          true
+//          some(Packet.new<Data>(data, tail))
+//          their_left
+//          their_right
+//        )
+//        my_right
+//      )
+//   )
+//  child//(
+//    //loaded: Bool
+//    //payload: Maybe<Packet<Data>>
+//    //old_left: RedTree<Data>
+//    //new_left: RedTree<Data>
+//    //left_trans: RedTransition<Data>(old_left, new_left)
+//    //old_right: RedTree<Data>
+//    //new_right: RedTree<Data>
+//    //right_trans: RedTransition<Data>(old_right, new_right)
+//  //)
+// ~ (now =
+//      RedTree.edge<Data>(
+//        ?b//loaded
+//        ?c//payload
+//        ?d//old_left
+//        ?e//old_right
+//      )
+//    after =
+//      RedTree.edge<Data>(
+//        ?f//loaded
+//        ?g//payload
+//        ?h//new_left
+//        ?i//new_right
+//      )
+//   )
+}
