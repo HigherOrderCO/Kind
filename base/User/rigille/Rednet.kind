@@ -201,3 +201,13 @@ type RedTree.Transition<Data: Type> ~ (now: RedTree<Data>, after: RedTree<Data>)
       )
    )
 }
+
+type RedNet <D: Type> {
+  new(
+    outbox: List<Packet<D>>
+    outnet: RedTree<D>
+
+    inbox: List<Packet<D>>
+    innet: RedTree<D>
+  )
+}
