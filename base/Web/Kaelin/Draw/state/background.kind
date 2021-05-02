@@ -1,49 +1,21 @@
 Web.Kaelin.Draw.state.background(map: Web.Kaelin.Map, cast_info: Maybe<Web.Kaelin.CastInfo>, env_info: App.EnvInfo, img:VoxBox): VoxBox
   open env_info as info
   let list = NatMap.to_list!(map)
-  let target_coord = Web.Kaelin.Coord.to_axial(info.mouse_pos) 
-  let area_aux = case cast_info {
-    none: none
-    some:
-      open cast_info.value
-      open cast_info.value.skill
-      let area_aux = Web.Kaelin.Skill.indicator(cast_info.value.skill, cast_info.value.hero_pos, target_coord) // Should be created inside ability/cast_info??
-      some(area_aux)
-  }
-  
+  let mouse_coord = Web.Kaelin.Coord.to_axial(info.mouse_pos)
   for pair in list with img:
     open pair
-    let coord = Web.Kaelin.Coord.Convert.nat_to_axial(pair.fst)
-    let {i, j} = Web.Kaelin.Draw.support.centralize(coord)
-    let hex_effect = 
-      case cast_info {
-        none: Web.Kaelin.HexEffect.normal
-        some: 
-          open cast_info.value
-          open cast_info.value.skill
-          Web.Kaelin.Draw.support.which_effect(coord,cast_info.value, cast_info.value.range) // Returns the cast affecting a tile
-      }
-      
-    let area = 
-      case cast_info {
-        none: none
-        some: 
-          open cast_info.value
-          open cast_info.value.skill
-          case area_aux {
-            none: none
-            some:
-              Web.Kaelin.Draw.support.area_of_effect(cast_info.value.hex_effect, target_coord, coord, area_aux.value, cast_info.value.range) // TODO see if the logic here is correct
-          }
-      }
-      
-    let sprite = Web.Kaelin.Terrain.Sprite.new(hex_effect, area) // Function to return the image for the tile
-    let tile = Web.Kaelin.Map.get(coord,map) <> []
+    let coord     = Web.Kaelin.Coord.Convert.nat_to_axial(pair.fst)
+    let coord_nat = pair.fst // Saves the coord as a nat so it doesn't convert again inside functions
+    let sprite    = Web.Kaelin.Draw.support.get_sprite(coord, coord_nat,cast_info)
+    let tile      = pair.snd
       for entity in tile with img:
         case entity {
-          background: open entity.terrain
+          background: 
+            open entity.terrain
+            let {i, j} = Web.Kaelin.Draw.support.centralize(coord)
             VoxBox.Draw.image(i, j, 0#32, entity.terrain.draw(sprite), img)
           creature: img
         }
-    img  
-img
+      img  
+  img
+

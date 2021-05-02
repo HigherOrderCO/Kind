@@ -4,5 +4,7 @@ type Web.Kaelin.CastInfo {
     hex_effect: Web.Kaelin.HexEffect
     skill: Web.Kaelin.Skill
     range: List<Web.Kaelin.Coord>
+    area: NatMap<Web.Kaelin.Skill.area.indicator>
+    mouse_pos: Web.Kaelin.Coord
   )
 }

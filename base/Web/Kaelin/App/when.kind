@@ -19,7 +19,9 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
         
       tick game:
            let info = event.info
-           App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_interface(info, state))
+           let state = Web.Kaelin.Action.update_interface(info, state)
+           App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_area(state))
+           
 
       post game:
       // this will be replaced by deserialze when it is ready

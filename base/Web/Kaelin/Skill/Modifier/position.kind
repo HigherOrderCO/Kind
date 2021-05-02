@@ -1,6 +1,5 @@
 type Web.Kaelin.Skill.Modifier.position {
-    knockback
-    switch_places
+    move_to
 }
 
 
