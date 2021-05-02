@@ -13,7 +13,7 @@ Kind.Parser.get: Parser(Kind.Term)
     get body = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);
     let term = expr;
-    let term = Kind.Term.app(term, Kind.Term.lam("x", (x) Kind.Term.hol(Bits.e)));
+    let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)));
     let term = Kind.Term.app(term, Kind.Term.lam(nam0, (x) Kind.Term.lam(nam1, (y) body)));
     return Kind.Term.ori(orig, term);
   }
@@ -32,7 +32,7 @@ Kind.Parser.get.omit: Parser(Kind.Term)
     get body = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);
     let term = expr;
-    let term = Kind.Term.app(term, Kind.Term.lam("x", (x) Kind.Term.hol(Bits.e)));
+    let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)));
     let term = Kind.Term.app(term, Kind.Term.lam(nam0, (x) Kind.Term.lam(nam1, (y) body)));
     return Kind.Term.ori(orig, term);
   }

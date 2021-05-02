@@ -6988,7 +6988,7 @@ module.exports = (function() {
                                                                                                                                 var $2308 = self.idx;
                                                                                                                                 var $2309 = self.code;
                                                                                                                                 var $2310 = self.val;
-                                                                                                                                var _moti$48 = Kind$Term$lam$("x", (_x$48 => {
+                                                                                                                                var _moti$48 = Kind$Term$lam$("", (_x$48 => {
                                                                                                                                     var $2312 = Kind$Term$hol$(Bits$e);
                                                                                                                                     return $2312;
                                                                                                                                 }));
@@ -7253,7 +7253,7 @@ module.exports = (function() {
                                                                                                                         var $2423 = self.idx;
                                                                                                                         var $2424 = self.code;
                                                                                                                         var $2425 = self.val;
-                                                                                                                        var _moti$45 = Kind$Term$lam$("x", (_x$45 => {
+                                                                                                                        var _moti$45 = Kind$Term$lam$("", (_x$45 => {
                                                                                                                             var $2427 = Kind$Term$hol$(Bits$e);
                                                                                                                             return $2427;
                                                                                                                         }));
@@ -7491,7 +7491,7 @@ module.exports = (function() {
                                                                                                         var $2524 = self.code;
                                                                                                         var $2525 = self.val;
                                                                                                         var _term$39 = $2502;
-                                                                                                        var _term$40 = Kind$Term$app$(_term$39, Kind$Term$lam$("x", (_x$40 => {
+                                                                                                        var _term$40 = Kind$Term$app$(_term$39, Kind$Term$lam$("", (_x$40 => {
                                                                                                             var $2527 = Kind$Term$hol$(Bits$e);
                                                                                                             return $2527;
                                                                                                         })));
@@ -7683,7 +7683,7 @@ module.exports = (function() {
                                                                                                 var $2611 = self.code;
                                                                                                 var $2612 = self.val;
                                                                                                 var _term$36 = $2589;
-                                                                                                var _term$37 = Kind$Term$app$(_term$36, Kind$Term$lam$("x", (_x$37 => {
+                                                                                                var _term$37 = Kind$Term$app$(_term$36, Kind$Term$lam$("", (_x$37 => {
                                                                                                     var $2614 = Kind$Term$hol$(Bits$e);
                                                                                                     return $2614;
                                                                                                 })));
@@ -9674,7 +9674,7 @@ module.exports = (function() {
                                             return $3470;
                                         }));
                                         var _term$18 = Kind$Term$app$(_term$16, _args$17);
-                                        var _term$19 = Kind$Term$app$(_term$18, Kind$Term$lam$("x", (_x$19 => {
+                                        var _term$19 = Kind$Term$app$(_term$18, Kind$Term$lam$("", (_x$19 => {
                                             var $3471 = $3468;
                                             return $3471;
                                         })));
@@ -11483,7 +11483,7 @@ module.exports = (function() {
                                                                 var $4201 = self.code;
                                                                 var $4202 = self.val;
                                                                 var _term$24 = Kind$Term$ref$($4171);
-                                                                var _term$25 = Kind$Term$app$(_term$24, Kind$Term$lam$("x", (_x$25 => {
+                                                                var _term$25 = Kind$Term$app$(_term$24, Kind$Term$lam$("", (_x$25 => {
                                                                     var $4204 = Kind$Term$hol$(Bits$e);
                                                                     return $4204;
                                                                 })));
