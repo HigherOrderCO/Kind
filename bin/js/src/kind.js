@@ -379,97 +379,87 @@ module.exports = (function() {
             return fetch(param).then(res => res.text()).catch(e => '');
         }
     }
-    var run_io = (lib, p) => {
-        switch (p._) {
+    var file_error = e => {
+        if (e.message.indexOf('NOENT') !== -1) {
+            return '';
+        } else {
+            throw e;
+        }
+    };
+    var io_action = {
+        print: async (lib, param) => {
+            console.log(param);
+            return '';
+        },
+        put_string: async (lib, param) => {
+            process.stdout.write(param);
+            return '';
+        },
+        get_file: async (lib, param) => {
+            try {
+                return get_file(lib, param);
+            } catch (e) {
+                return file_error(e);
+            }
+        },
+        set_file: async (lib, param) => {
+            try {
+                return set_file(lib, param)
+            } catch (e) {
+                return file_error(e);
+            }
+        },
+        del_file: async (lib, param) => {
+            try {
+                return del_file(lib, param);
+            } catch (e) {
+                return file_error(e);
+            }
+        },
+        get_dir: async (lib, param) => {
+            try {
+                return get_dir(lib, param);
+            } catch (e) {
+                return file_error(e);
+            }
+        },
+        get_file_mtime: async (lib, param) => {
+            try {
+                return get_file_mtime(lib, param);
+            } catch (e) {
+                return file_error(e);
+            }
+        },
+        get_time: async (lib, param) => {
+            return String(Date.now());
+        },
+        exit: async (lib, param) => {
+            lib.pc.exit();
+            return '';
+        },
+        request: async (lib, param) => {
+            return request(lib, param);
+        },
+        get_time: async (lib, param) => {
+            return String(Date.now());
+        },
+        get_line: async (lib, param) => {
+            return await new Promise((res, err) => {
+                lib.rl.question(p.param, (line) => res(line));
+            });
+        },
+        get_args: async (lib, param) => {
+            return lib.pc.argv[2] || '';
+        },
+    };
+    var run_io = async (lib, io, depth = 0) => {
+        switch (io._) {
             case 'IO.end':
-                return Promise.resolve(p.value);
+                return Promise.resolve(io.value);
             case 'IO.ask':
-                return new Promise((res, err) => {
-                    switch (p.query) {
-                        case 'print':
-                            console.log(p.param);
-                            run_io(lib, p.then('')).then(res).catch(err);
-                            break;
-                        case 'put_string':
-                            process.stdout.write(p.param);
-                            run_io(lib, p.then('')).then(res).catch(err);
-                            break;
-                        case 'exit':
-                            lib.pc.exit();
-                            break;
-                        case 'request':
-                            try {
-                                request(lib, p.param).then(x => run_io(lib, p.then(x))).then(res).catch(err);
-                            } catch (e) {
-                                err(e);
-                            };
-                            break;
-                        case 'get_time':
-                            run_io(lib, p.then(String(Date.now()))).then(res).catch(err);
-                            break;
-                        case 'get_line':
-                            lib.rl.question(p.param, (line) => run_io(lib, p.then(line)).then(res).catch(err));
-                            break;
-                        case 'get_file':
-                            try {
-                                run_io(lib, p.then(get_file(lib, p.param))).then(res).catch(err);
-                            } catch (e) {
-                                if (e.message.indexOf('NOENT') !== -1) {
-                                    run_io(lib, p.then('')).then(res).catch(err);
-                                } else {
-                                    err(e);
-                                }
-                            };
-                            break;
-                        case 'set_file':
-                            try {
-                                run_io(lib, p.then(set_file(lib, p.param))).then(res).catch(err);
-                            } catch (e) {
-                                if (e.message.indexOf('NOENT') !== -1) {
-                                    run_io(lib, p.then('')).then(res).catch(err);
-                                } else {
-                                    err(e);
-                                }
-                            };
-                            break;
-                        case 'del_file':
-                            try {
-                                run_io(lib, p.then(del_file(lib, p.param))).then(res).catch(err);
-                            } catch (e) {
-                                if (e.message.indexOf('NOENT') !== -1) {
-                                    run_io(lib, p.then('')).then(res).catch(err);
-                                } else {
-                                    err(e);
-                                }
-                            };
-                            break;
-                        case 'get_dir':
-                            try {
-                                run_io(lib, p.then(get_dir(lib, p.param))).then(res).catch(err);
-                            } catch (e) {
-                                if (e.message.indexOf('NOENT') !== -1) {
-                                    run_io(lib, p.then('')).then(res).catch(err);
-                                } else {
-                                    err(e);
-                                }
-                            };
-                            break;
-                        case 'get_file_mtime':
-                            try {
-                                run_io(lib, p.then(get_file_mtime(lib, p.param))).then(res).catch(err);
-                            } catch (e) {
-                                if (e.message.indexOf('NOENT') !== -1) {
-                                    run_io(lib, p.then('')).then(res).catch(err);
-                                } else {
-                                    err(e);
-                                }
-                            };
-                            break;
-                        case 'get_args':
-                            run_io(lib, p.then(lib.pc.argv[2] || '')).then(res).catch(err);
-                            break;
-                    }
-                });
+                var action = io_action[io.query];
+                var answer = await action(lib, io.param);
+                return await run_io(lib, io.then(answer), depth + 1);
         }
     };
 
