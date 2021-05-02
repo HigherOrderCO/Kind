@@ -6,28 +6,25 @@ type Packet<D: Type> {
 }
 
 type RedTree<D: Type> {
-  nil(
+  leaf(
     inbox: List<Packet<D>>
   )
 
   edge(
-    loaded: Bool,
-    payload: Maybe<Packet<D>>,
-    left: RedTree<D>,
+    loaded: Bool
+    payload: Maybe<Packet<D>>
+    left: RedTree<D>
     right: RedTree<D>
   )
 }
 
-//type Rednet<D: Type> {
-//  new(top: RedTree<D>, bottom: RedTree<D>)
-//}
-
-type RedTransition<Data: Type> ~ (now: RedTree<Data>, after: RedTree<Data>) {
+type RedTree.Transition<Data: Type> ~ (now: RedTree<Data>, after: RedTree<Data>) {
   toggle(
     loaded: Bool
     payload: Maybe<Packet<Data>>
     left: RedTree<Data>
-    right: RedTree<Data>) 
+    right: RedTree<Data>
+  ) 
  ~ (now =
       RedTree.edge<Data>(
         loaded
@@ -42,96 +39,165 @@ type RedTransition<Data: Type> ~ (now: RedTree<Data>, after: RedTree<Data>) {
         left
         right
       )
-    )
+   )
 
   send_left(
-    data: Data,
-    tail: List<Bool>,
-    my_left: RedTree<Data>,
-    their_left: RedTree<Data>,
-    their_right: RedTree<Data>,
+    payload: Data
+    addr_tail: List<Bool>
+    their_left: RedTree<Data>
+    their_right: RedTree<Data>
+    my_right: RedTree<Data>
   )
- ~ (now = 
+ ~ (now =
       RedTree.edge<Data>(
-        true,
-        some(Packet.new<Data>(data, true & tail)),
-        my_left,
-        RedTree.edge<Data>(
-          true,
-          none,
-          their_left,
-          their_right,
+        true
+        Maybe.some<Packet<Data>>(
+          Packet.new<Data>(
+            payload,
+            List.cons<Bool>(false, addr_tail)
+          )
         )
-      ),
+        RedTree.edge<Data>(
+          true
+          Maybe.none<Packet<Data>>
+          their_left
+          their_right
+        )
+        my_right
+      )
     after =
       RedTree.edge<Data>(
-        true,
-        none,
-        my_left,
+        true
+        Maybe.none<Packet<Data>>
         RedTree.edge<Data>(
-          true,
-          some(Packet.new<Data>(data, tail)),
-          their_left,
-          their_right,
+          true
+          Maybe.some<Packet<Data>>(
+            Packet.new<Data>(
+              payload,
+              addr_tail
+            )
+          )
+          their_left
+          their_right
+        )
+        my_right
+      )
+   )
+
+  send_right(
+    payload: Data
+    addr_tail: List<Bool>
+    my_left: RedTree<Data>
+    their_left: RedTree<Data>
+    their_right: RedTree<Data>
+  )
+ ~ (now =
+      RedTree.edge<Data>(
+        true
+        Maybe.some<Packet<Data>>(
+          Packet.new<Data>(
+            payload,
+            List.cons<Bool>(true, addr_tail)
+          )
+        )
+        my_left
+        RedTree.edge<Data>(
+          true
+          Maybe.none<Packet<Data>>
+          their_left
+          their_right
+        )
+      )
+    after =
+      RedTree.edge<Data>(
+        true
+        Maybe.none<Packet<Data>>
+        my_left
+        RedTree.edge<Data>(
+          true
+          Maybe.some<Packet<Data>>(
+            Packet.new<Data>(
+              payload,
+              addr_tail
+            )
+          )
+          their_left
+          their_right
         )
       )
    )
 
-//  send_right(
-//    data: Data
-//    tail: List<Bool>
-//    my_right: RedTree<Data>
-//    their_left: RedTree<Data>
-//    their_right: RedTree<Data>
-//  )
-// ~ (now = 
-//      RedTree.edge<Data>(
-//        true
-//        some(Packet.new<Data>(data, false & tail))
-//        RedTree.edge<Data>(
-//          true
-//          none
-//          their_left
-//          their_right
-//        )
-//        my_right
-//      )
-//    after =
-//      RedTree.edge<Data>(
-//        true
-//        none
-//        RedTree.edge<Data>(
-//          true
-//          some(Packet.new<Data>(data, tail))
-//          their_left
-//          their_right
-//        )
-//        my_right
-//      )
-//   )
-//  child//(
-//    //loaded: Bool
-//    //payload: Maybe<Packet<Data>>
-//    //old_left: RedTree<Data>
-//    //new_left: RedTree<Data>
-//    //left_trans: RedTransition<Data>(old_left, new_left)
-//    //old_right: RedTree<Data>
-//    //new_right: RedTree<Data>
-//    //right_trans: RedTransition<Data>(old_right, new_right)
-//  //)
-// ~ (now =
-//      RedTree.edge<Data>(
-//        ?b//loaded
-//        ?c//payload
-//        ?d//old_left
-//        ?e//old_right
-//      )
-//    after =
-//      RedTree.edge<Data>(
-//        ?f//loaded
-//        ?g//payload
-//        ?h//new_left
-//        ?i//new_right
-//      )
-//   )
+  mail_left(
+    payload: Data
+    addr_tail: List<Bool>
+    inbox: List<Packet<Data>>
+    my_right: RedTree<Data>
+  )
+ ~ (now =
+      RedTree.edge<Data>(
+        true
+        Maybe.some<Packet<Data>>(
+          Packet.new<Data>(
+            payload,
+            List.cons<Bool>(false, addr_tail)
+          )
+        )
+        RedTree.leaf<Data>(
+          inbox
+        )
+        my_right
+      )
+    after =
+      RedTree.edge<Data>(
+        true
+        Maybe.none<Packet<Data>>
+        RedTree.leaf<Data>(
+          List.cons<Packet<Data>>(
+            Packet.new<Data>(
+              payload,
+              addr_tail
+            )
+            inbox
+          )
+        )
+        my_right
+      )
+   )
+
+  mail_right(
+    payload: Data
+    addr_tail: List<Bool>
+    inbox: List<Packet<Data>>
+    my_left: RedTree<Data>
+  )
+ ~ (now =
+      RedTree.edge<Data>(
+        true
+        Maybe.some<Packet<Data>>(
+          Packet.new<Data>(
+            payload,
+            List.cons<Bool>(false, addr_tail)
+          )
+        )
+        my_left
+        RedTree.leaf<Data>(
+          inbox
+        )
+      )
+    after =
+      RedTree.edge<Data>(
+        true
+        Maybe.none<Packet<Data>>
+        my_left
+        RedTree.leaf<Data>(
+          List.cons<Packet<Data>>(
+            Packet.new<Data>(
+              payload,
+              addr_tail
+            )
+            inbox
+          )
+        )
+      )
+   )
 }
