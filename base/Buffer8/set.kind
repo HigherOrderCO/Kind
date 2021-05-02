@@ -1,0 +1,6 @@
+Buffer8.set(idx: U32, val: U8, buf: Buffer8): Buffer8
+  let {dep,arr} = buf
+  open idx
+  let idx = Word.trim<32>(dep, idx.value)
+  def arr = Array.set<U8, dep>(idx, val, arr)
+  Buffer8.new(dep, arr)
