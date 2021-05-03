@@ -16,9 +16,7 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
         App.pass
 
        tick game:
-         let app = Web.Kaelin.Action.update_interface(event.info, U64.to_nat(event.time), state)
-        // let f = Web.Kaelin.Timer.get(state.tick, state.timer)
-         App.store<Web.Kaelin.State>(app)
+         App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_interface(event.info, U64.to_nat(event.time), state))
        mouse_up game :
          let info = state.interface
          open info
@@ -35,7 +33,20 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
              user_input : 
                let pos = eventdata.coord
                open pos
-               App.store<Web.Kaelin.State>(Web.Kaelin.Player.move(pos, state, event.addr))
+                let origin = Web.Kaelin.Map.addr_to_coord(event.addr, state.map)
+                case origin {
+                  none : App.pass
+                  some :
+                   let path = Web.Kaelin.Coord.path(origin.value, pos)
+                   case path {
+                     none : App.pass
+                     some :
+                        let moves = List.foldr!(List<Web.Kaelin.State -> Web.Kaelin.State>, [],
+                          (pos, xs) Web.Kaelin.Player.move(pos, event.addr) & xs, path.value)
+                        let interval = Web.Kaelin.Timer.interval(List.reverse!(moves), (x) Nat.mul(x, 7), state)
+                        App.store<Web.Kaelin.State>(interval)
+                   }
+                }
             }
           }
     } default App.pass

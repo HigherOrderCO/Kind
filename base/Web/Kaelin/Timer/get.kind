@@ -1,7 +1,0 @@
-Web.Kaelin.Timer.get(tick : Nat,
-                     timer : List<Web.Kaelin.Timer>
-                     ) : Web.Kaelin.State -> Web.Kaelin.State
-  
-  let {xs, ys} = List.take_while.go!((x) open x Nat.ltn(x.time, tick), timer)
-  def foldr = List.foldr(Web.Kaelin.Timer, Web.Kaelin.State -> Web.Kaelin.State)
-  foldr((x) x, (x, f) open x x.action, xs)

@@ -5,11 +5,10 @@ type Web.Kaelin.State {
   )
   game(
     room: String
-    tick: Nat
     players: Map(Web.Kaelin.Player)
     cast_info: Web.Kaelin.CastInfo
     map: Web.Kaelin.Map,
-    timer : List<Web.Kaelin.Timer>
+    internal : Web.Kaelin.Internal
     interface : App.EnvInfo, // TODO rename to env_info
   )
 }
