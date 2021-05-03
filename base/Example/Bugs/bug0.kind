@@ -1,0 +1,7 @@
+// How to reproduce 
+// Just call the type checker for this file
+
+Example.bugs.bug0(x : List<Bool>) : List<Bool>
+  case x {
+      true : x.head
+  } default x
