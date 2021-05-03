@@ -1,0 +1,21 @@
+Web.Kaelin.Skill.skill_use(state: Web.Kaelin.State, skill: Web.Kaelin.Skill): Web.Kaelin.State
+  case state { 
+    game:
+      case state.cast_info {
+        none: state
+        some:
+          open state.env_info as info
+          open state.cast_info.value
+          open skill
+          for effect in skill.effects with state:
+            case effect { 
+              hp:
+                let mouse_pos = Web.Kaelin.Coord.to_axial(info.mouse_pos)
+                let area = Web.Kaelin.Skill.area.to_list(effect.area, state.cast_info.value.hero_pos, mouse_pos)
+                Web.Kaelin.Skill.apply_effect(state, effect, area)
+            } default state
+          state
+      }
+
+  }default state
+

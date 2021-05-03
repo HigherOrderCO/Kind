@@ -1,0 +1,12 @@
+Web.Kaelin.Skill.updated_player_position(map: Web.Kaelin.Map, coord: Web.Kaelin.Coord, mod: Web.Kaelin.Skill.Modifier.position, address: String, value: I32): Web.Kaelin.Map
+let player_coord = Web.Kaelin.Map.addr_to_coord(address, map)
+  case player_coord { 
+    none: map
+    some:
+        let new_coord = player_coord.value 
+        {a, b} = case mod {
+        move_to: {new_coord,coord}
+      }
+    Web.Kaelin.Map.swap(0,a,b,map)
+  }
+

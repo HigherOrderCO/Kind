@@ -1,5 +1,5 @@
 // draw all players
-Web.Kaelin.Draw.state.players(map: Web.Kaelin.Map, img: VoxBox): VoxBox
+Web.Kaelin.Draw.state.players(map: Web.Kaelin.Map, players: Map(Web.Kaelin.Player) img: VoxBox): VoxBox
   let player_list = NatMap.to_list!(map)
   for prs in player_list with img:
     open prs
@@ -8,7 +8,13 @@ Web.Kaelin.Draw.state.players(map: Web.Kaelin.Map, img: VoxBox): VoxBox
       for entity in prs.snd with img:      
         case entity {
           background: img
-          creature: Web.Kaelin.Draw.hero(cx, cy, 0u, entity.hero, img)
+          creature: 
+            let img = Web.Kaelin.Draw.hero(cx, cy, 0u, entity.hero, img)
+            case entity.player {
+              none: img
+              some: let player = players{entity.player.value}
+              Web.Kaelin.Draw.state.players_hp(cx,U32.sub(cy, Web.Kaelin.Constants.hexagon_radius), player, img)
+            }
       }img
   img
   
