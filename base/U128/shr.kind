@@ -1,2 +1,4 @@
 U128.shr(n: U128, a: U128): U128
-  U128.shr(n, a)
+  open n
+  open a
+  U128.new(Word.shr!(n.value, a.value))
