@@ -12,6 +12,6 @@ Kind.Map.def(
 ): Kind.Defs
   let defn = Kind.Def.new(file, code, orig, name, term, type, isct, arit)
   if done then
-    Kind.Map.set!(name, defn(Kind.Status.done), defs)
+    Kind.Map.set!(name, defn(Kind.Status.done(false)), defs)
   else
     Kind.Map.set_if_empty!(name, defn(Kind.Status.init), defs)

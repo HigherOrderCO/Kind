@@ -15,7 +15,7 @@ Kind.Parser.getwhile: Parser(Kind.Term)
     Parser.maybe!(Kind.Parser.text(";"));
     get body = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);
-    let moti = Kind.Term.lam("x", (x) Kind.Term.hol(Bits.e));
+    let moti = Kind.Term.lam("", (x) Kind.Term.hol(Bits.e));
     let term = Kind.Term.ref("Function.while");
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
     let init = Kind.Term.ref("Pair.new");
@@ -46,7 +46,7 @@ Kind.Parser.getwhile.with: Parser(Kind.Term)
     Parser.maybe!(Kind.Parser.text(";"));
     get body = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);
-    let moti = Kind.Term.lam("x", (x) Kind.Term.hol(Bits.e));
+    let moti = Kind.Term.lam("", (x) Kind.Term.hol(Bits.e));
     let term = Kind.Term.ref("Function.while");
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
     let init = Kind.Term.ref("Pair.new");

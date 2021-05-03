@@ -52,13 +52,13 @@ Kind.Synth.one(name: Kind.Name, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
                 //let skip = Debug.log!(String.join("\n", List.mapped!(checked.errors)!((x) String.concat("-- ", Kind.Error.show(x,Kind.Map.new!)))), (x) Unit.new);
                 if List.is_empty!(checked.errors) then IO {
                   let defs = Kind.Map.def(file, code, orig, name, term, type, isct, arit, true, defs);
-                  get time = IO.get_file_mtime(file)
-                  IO.set_file(".cache/" | name | ".term", Kind.Core.show(term))
-                  IO.set_file(".cache/" | name | ".type", Kind.Core.show(type))
-                  IO.set_file(".cache/" | name | ".isct", Bool.show(isct))
-                  IO.set_file(".cache/" | name | ".arit", Nat.show(arit))
-                  IO.set_file(".cache/" | name | ".time", time)
-                  IO.set_file(".cache/" | name | ".file", file)
+                  //get time = IO.get_file_mtime(file)
+                  //IO.set_file(".cache/" | name | ".term", Kind.Core.show(term))
+                  //IO.set_file(".cache/" | name | ".type", Kind.Core.show(type))
+                  //IO.set_file(".cache/" | name | ".isct", Bool.show(isct))
+                  //IO.set_file(".cache/" | name | ".arit", Nat.show(arit))
+                  //IO.set_file(".cache/" | name | ".time", time)
+                  //IO.set_file(".cache/" | name | ".file", file)
                   return some(defs);
                 } else IO {
                   get fixed = Kind.Synth.fix(file, code, orig, name, term, type, isct, arit, defs, checked.errors, Bool.false);
