@@ -3,7 +3,7 @@ type Web.Kaelin.Skill{
   	id: U8
 		range: Nat
 		effects: List(Web.Kaelin.Skill.Effect)
-		key: U16
+		key: Char
 	)
 }
 

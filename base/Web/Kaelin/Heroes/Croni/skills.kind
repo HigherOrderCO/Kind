@@ -1,6 +1,7 @@
 Web.Kaelin.Heroes.Croni.skills: List<Web.Kaelin.Skill>
   [
-    Web.Kaelin.Heroes.Croni.skills.quick_shot
+    Web.Kaelin.Heroes.Croni.skills.quick_shot,
+    Web.Kaelin.Heroes.Croni.skills.vampirism
   ]
 
 Web.Kaelin.Heroes.Croni.skills.quick_shot: Web.Kaelin.Skill
@@ -8,5 +9,15 @@ Web.Kaelin.Heroes.Croni.skills.quick_shot: Web.Kaelin.Skill
     1#8
     2,
     [Web.Kaelin.Skill.Effect.hp(+7#32, Web.Kaelin.Skill.Modifier.hp.damage, Web.Kaelin.Skill.area.radial(1), some(Web.Kaelin.Skill.area.indicator.red))]
-    48#16
+    '0'
+  )
+
+Web.Kaelin.Heroes.Croni.skills.vampirism: Web.Kaelin.Skill
+  Web.Kaelin.Skill.new(
+    4#8 // id  - not called anywhere so far
+    3,
+    [
+    Web.Kaelin.Skill.Effect.hp(+5#32, Web.Kaelin.Skill.Modifier.hp.damage, Web.Kaelin.Skill.area.single, some(Web.Kaelin.Skill.area.indicator.red)),
+    Web.Kaelin.Skill.Effect.hp(+5#32, Web.Kaelin.Skill.Modifier.hp.heal, Web.Kaelin.Skill.area.self, some(Web.Kaelin.Skill.area.indicator.green))],
+    'V' // 0 
   )
