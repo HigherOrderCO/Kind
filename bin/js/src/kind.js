@@ -8314,29 +8314,29 @@ module.exports = (function() {
     };
     const String$reverse = x0 => String$reverse$(x0);
 
-    function Kind$Parser$string$go$(_str$1, _idx$2, _code$3) {
-        var Kind$Parser$string$go$ = (_str$1, _idx$2, _code$3) => ({
+    function Kind$Parser$string$go$(_delim$1, _str$2, _idx$3, _code$4) {
+        var Kind$Parser$string$go$ = (_delim$1, _str$2, _idx$3, _code$4) => ({
             ctr: 'TCO',
-            arg: [_str$1, _idx$2, _code$3]
+            arg: [_delim$1, _str$2, _idx$3, _code$4]
         });
-        var Kind$Parser$string$go = _str$1 => _idx$2 => _code$3 => Kind$Parser$string$go$(_str$1, _idx$2, _code$3);
-        var arg = [_str$1, _idx$2, _code$3];
+        var Kind$Parser$string$go = _delim$1 => _str$2 => _idx$3 => _code$4 => Kind$Parser$string$go$(_delim$1, _str$2, _idx$3, _code$4);
+        var arg = [_delim$1, _str$2, _idx$3, _code$4];
         while (true) {
-            let [_str$1, _idx$2, _code$3] = arg;
+            let [_delim$1, _str$2, _idx$3, _code$4] = arg;
             var R = (() => {
-                var self = _code$3;
+                var self = _code$4;
                 if (self.length === 0) {
-                    var $2871 = Parser$Reply$error$(_idx$2, _code$3, "Non-terminating string.");
+                    var $2871 = Parser$Reply$error$(_idx$3, _code$4, "Non-terminating string.");
                     return $2871;
                 } else {
                     var $2872 = self.charCodeAt(0);
                     var $2873 = self.slice(1);
-                    var self = ($2872 === 34);
+                    var self = ($2872 === _delim$1);
                     if (self) {
-                        var $2875 = Parser$Reply$value$(Nat$succ$(_idx$2), $2873, String$reverse$(_str$1));
+                        var $2875 = Parser$Reply$value$(Nat$succ$(_idx$3), $2873, String$reverse$(_str$2));
                         var $2874 = $2875;
                     } else {
-                        var self = Kind$Parser$char$single(_idx$2)(_code$3);
+                        var self = Kind$Parser$char$single(_idx$3)(_code$4);
                         switch (self._) {
                             case 'Parser.Reply.error':
                                 var $2877 = self.idx;
@@ -8349,7 +8349,7 @@ module.exports = (function() {
                                 var $2881 = self.idx;
                                 var $2882 = self.code;
                                 var $2883 = self.val;
-                                var $2884 = Kind$Parser$string$go$(String$cons$($2883, _str$1), $2881, $2882);
+                                var $2884 = Kind$Parser$string$go$(_delim$1, String$cons$($2883, _str$2), $2881, $2882);
                                 var $2876 = $2884;
                                 break;
                         };
@@ -8362,10 +8362,10 @@ module.exports = (function() {
             else return R;
         }
     };
-    const Kind$Parser$string$go = x0 => x1 => x2 => Kind$Parser$string$go$(x0, x1, x2);
+    const Kind$Parser$string$go = x0 => x1 => x2 => x3 => Kind$Parser$string$go$(x0, x1, x2, x3);
 
-    function Kind$Parser$string$(_idx$1, _code$2) {
-        var self = Kind$Parser$init$(_idx$1, _code$2);
+    function Kind$Parser$string$(_delim$1, _idx$2, _code$3) {
+        var self = Kind$Parser$init$(_idx$2, _code$3);
         switch (self._) {
             case 'Parser.Reply.error':
                 var $2886 = self.idx;
@@ -8378,7 +8378,7 @@ module.exports = (function() {
                 var $2890 = self.idx;
                 var $2891 = self.code;
                 var $2892 = self.val;
-                var self = Kind$Parser$text$(String$cons$(34, String$nil), $2890, $2891);
+                var self = Kind$Parser$text$(String$cons$(_delim$1, String$nil), $2890, $2891);
                 switch (self._) {
                     case 'Parser.Reply.error':
                         var $2894 = self.idx;
@@ -8390,7 +8390,7 @@ module.exports = (function() {
                     case 'Parser.Reply.value':
                         var $2898 = self.idx;
                         var $2899 = self.code;
-                        var self = Kind$Parser$string$go$("", $2898, $2899);
+                        var self = Kind$Parser$string$go$(_delim$1, "", $2898, $2899);
                         switch (self._) {
                             case 'Parser.Reply.error':
                                 var $2901 = self.idx;
@@ -8431,7 +8431,7 @@ module.exports = (function() {
         };
         return $2885;
     };
-    const Kind$Parser$string = x0 => x1 => Kind$Parser$string$(x0, x1);
+    const Kind$Parser$string = x0 => x1 => x2 => Kind$Parser$string$(x0, x1, x2);
 
     function Kind$Parser$pair$(_idx$1, _code$2) {
         var self = Kind$Parser$init$(_idx$1, _code$2);
@@ -10862,7 +10862,7 @@ module.exports = (function() {
                         var $3918 = $3920;
                         break;
                     case 'List.nil':
-                        var $3921 = ((console.log(("MISSING CASE" + String$nil)), (_x$7 => {
+                        var $3921 = ((console.log(("MISSING CASE" + String$nil)), (_$7 => {
                             var $3922 = Kind$Term$ref$("missing_case");
                             return $3922;
                         })()));
@@ -15095,7 +15095,7 @@ module.exports = (function() {
                 var $5625 = self.idx;
                 var $5626 = self.code;
                 var $5627 = self.val;
-                var self = Parser$first_of$(List$cons$(Kind$Parser$forall, List$cons$(Kind$Parser$lambda, List$cons$(Kind$Parser$lambda$erased, List$cons$(Kind$Parser$lambda$nameless, List$cons$(Kind$Parser$parenthesis, List$cons$(Kind$Parser$letforrange$u32, List$cons$(Kind$Parser$letforrange$u32$with, List$cons$(Kind$Parser$letforrange$nat, List$cons$(Kind$Parser$letforrange$nat$with, List$cons$(Kind$Parser$letforin, List$cons$(Kind$Parser$letforin$with, List$cons$(Kind$Parser$letwhile, List$cons$(Kind$Parser$letwhile$with, List$cons$(Kind$Parser$let, List$cons$(Kind$Parser$let$omit, List$cons$(Kind$Parser$getwhile, List$cons$(Kind$Parser$getwhile$with, List$cons$(Kind$Parser$get, List$cons$(Kind$Parser$get$omit, List$cons$(Kind$Parser$def, List$cons$(Kind$Parser$goal_rewrite, List$cons$(Kind$Parser$if, List$cons$(Kind$Parser$char, List$cons$(Kind$Parser$string, List$cons$(Kind$Parser$pair, List$cons$(Kind$Parser$sigma$type, List$cons$(Kind$Parser$some, List$cons$(Kind$Parser$not, List$cons$(Kind$Parser$left, List$cons$(Kind$Parser$right, List$cons$(Kind$Parser$apply, List$cons$(Kind$Parser$chain, List$cons$(Kind$Parser$mirror, List$cons$(Kind$Parser$list, List$cons$(Kind$Parser$map, List$cons$(Kind$Parser$log, List$cons$(Kind$Parser$do, List$cons$(Kind$Parser$case, List$cons$(Kind$Parser$open, List$cons$(Kind$Parser$without, List$cons$(Kind$Parser$switch, List$cons$(Kind$Parser$goal, List$cons$(Kind$Parser$hole, List$cons$(Kind$Parser$float$64, List$cons$(Kind$Parser$float$32, List$cons$(Kind$Parser$machine_integer$signed$(256n), List$cons$(Kind$Parser$machine_integer$signed$(128n), List$cons$(Kind$Parser$machine_integer$signed$(64n), List$cons$(Kind$Parser$machine_integer$signed$(32n), List$cons$(Kind$Parser$machine_integer$signed$(16n), List$cons$(Kind$Parser$machine_integer$signed$(8n), List$cons$(Kind$Parser$int, List$cons$(Kind$Parser$machine_integer$unsigned$(256n), List$cons$(Kind$Parser$machine_integer$unsigned$(128n), List$cons$(Kind$Parser$machine_integer$unsigned$(64n), List$cons$(Kind$Parser$machine_integer$unsigned$(32n), List$cons$(Kind$Parser$machine_integer$unsigned$(16n), List$cons$(Kind$Parser$machine_integer$unsigned$(8n), List$cons$(Kind$Parser$u64, List$cons$(Kind$Parser$u32, List$cons$(Kind$Parser$u16, List$cons$(Kind$Parser$u8, List$cons$(Kind$Parser$nat, List$cons$(Kind$Parser$reference, List$nil)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))($5625)($5626);
+                var self = Parser$first_of$(List$cons$(Kind$Parser$forall, List$cons$(Kind$Parser$lambda, List$cons$(Kind$Parser$lambda$erased, List$cons$(Kind$Parser$lambda$nameless, List$cons$(Kind$Parser$parenthesis, List$cons$(Kind$Parser$letforrange$u32, List$cons$(Kind$Parser$letforrange$u32$with, List$cons$(Kind$Parser$letforrange$nat, List$cons$(Kind$Parser$letforrange$nat$with, List$cons$(Kind$Parser$letforin, List$cons$(Kind$Parser$letforin$with, List$cons$(Kind$Parser$letwhile, List$cons$(Kind$Parser$letwhile$with, List$cons$(Kind$Parser$let, List$cons$(Kind$Parser$let$omit, List$cons$(Kind$Parser$getwhile, List$cons$(Kind$Parser$getwhile$with, List$cons$(Kind$Parser$get, List$cons$(Kind$Parser$get$omit, List$cons$(Kind$Parser$def, List$cons$(Kind$Parser$goal_rewrite, List$cons$(Kind$Parser$if, List$cons$(Kind$Parser$char, List$cons$(Kind$Parser$string(34), List$cons$(Kind$Parser$string(96), List$cons$(Kind$Parser$pair, List$cons$(Kind$Parser$sigma$type, List$cons$(Kind$Parser$some, List$cons$(Kind$Parser$not, List$cons$(Kind$Parser$left, List$cons$(Kind$Parser$right, List$cons$(Kind$Parser$apply, List$cons$(Kind$Parser$chain, List$cons$(Kind$Parser$mirror, List$cons$(Kind$Parser$list, List$cons$(Kind$Parser$map, List$cons$(Kind$Parser$log, List$cons$(Kind$Parser$do, List$cons$(Kind$Parser$case, List$cons$(Kind$Parser$open, List$cons$(Kind$Parser$without, List$cons$(Kind$Parser$switch, List$cons$(Kind$Parser$goal, List$cons$(Kind$Parser$hole, List$cons$(Kind$Parser$float$64, List$cons$(Kind$Parser$float$32, List$cons$(Kind$Parser$machine_integer$signed$(256n), List$cons$(Kind$Parser$machine_integer$signed$(128n), List$cons$(Kind$Parser$machine_integer$signed$(64n), List$cons$(Kind$Parser$machine_integer$signed$(32n), List$cons$(Kind$Parser$machine_integer$signed$(16n), List$cons$(Kind$Parser$machine_integer$signed$(8n), List$cons$(Kind$Parser$int, List$cons$(Kind$Parser$machine_integer$unsigned$(256n), List$cons$(Kind$Parser$machine_integer$unsigned$(128n), List$cons$(Kind$Parser$machine_integer$unsigned$(64n), List$cons$(Kind$Parser$machine_integer$unsigned$(32n), List$cons$(Kind$Parser$machine_integer$unsigned$(16n), List$cons$(Kind$Parser$machine_integer$unsigned$(8n), List$cons$(Kind$Parser$u64, List$cons$(Kind$Parser$u32, List$cons$(Kind$Parser$u16, List$cons$(Kind$Parser$u8, List$cons$(Kind$Parser$nat, List$cons$(Kind$Parser$reference, List$nil))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))($5625)($5626);
                 switch (self._) {
                     case 'Parser.Reply.error':
                         var $5629 = self.idx;
