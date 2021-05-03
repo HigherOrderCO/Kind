@@ -1,5 +1,5 @@
 Parser.run<A: Type>(parser: Parser(A), code: String): Maybe<A>
-  case parser(0, code) as parsed {
+  case parser(none, 0, code) as parsed {
     error: none
     value: some(parsed.val)
   }

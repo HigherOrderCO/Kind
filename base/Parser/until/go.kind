@@ -2,20 +2,19 @@ Parser.until.go<V: Type>(
   until: Parser(Unit),
   parse: Parser(V),
   values: List<V>,
-  idx: Nat,
-  code: String
-): Parser.Reply<List<V>>
-  let until_reply = until(idx,code);
+): Parser<List<V>>
+  (long, idx, code)
+  let until_reply = until(long, idx, code);
   case until_reply {
     error:
-      let reply = parse(idx,code);
+      let reply = parse(long, idx, code);
       case reply {
         error:
-          Parser.Reply.error<List<V>>(reply.idx, reply.code, reply.err),
+          Parser.Reply.error<List<V>>(reply.val),
         value:
           def values = List.cons<V>(reply.val, values)
-          Parser.until.go<V>(until, parse, values, reply.idx, reply.code)
+          Parser.until.go<V>(until, parse, values, long, reply.idx, reply.code)
       }
     value:
-      Parser.Reply.value<List<V>>(until_reply.idx, until_reply.code, List.reverse<V>(values)),
+      Parser.Reply.value<List<V>>(until_reply.long, until_reply.idx, until_reply.code, List.reverse<V>(values)),
   }

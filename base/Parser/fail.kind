@@ -1,2 +1,2 @@
 Parser.fail<V: Type>(error: String): Parser(V)
-  (idx,code) Parser.Reply.error<V>(idx, code, error)
+  (long, idx, code) Parser.Reply.error_long<V>(idx, code, error)

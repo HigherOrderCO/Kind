@@ -1,2 +1,2 @@
 Parser.get_index: Parser(Nat)
-  (idx, code) Parser.Reply.value!(idx, code, idx)
+  (long, idx, code) Parser.Reply.value!(long, idx, code, idx)

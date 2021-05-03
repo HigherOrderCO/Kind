@@ -1,2 +1,2 @@
 Parser.log_code: Parser(Unit)
-  (idx, code) Debug.log!(code, (x) Parser.Reply.value!(idx, code, Unit.new))
+  (long, idx, code) Debug.log!(code, (x) Parser.Reply.value!(long, idx, code, Unit.new))
