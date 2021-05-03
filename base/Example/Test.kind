@@ -1,3 +1,0 @@
-type Example.Test {
-    new(x : Bool, y : Unit)
-}

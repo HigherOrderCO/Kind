@@ -1,0 +1,3 @@
+IO.request(url: String): IO<String>
+  IO.ask<String>("request", url, (text)
+  IO.end<String>(text))

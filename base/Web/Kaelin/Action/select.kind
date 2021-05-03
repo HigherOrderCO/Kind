@@ -1,8 +1,8 @@
 Web.Kaelin.Action.select(state: Web.Kaelin.State, addr: String): Web.Kaelin.State
   case state {
     game:
-      open state.interface as info
-      let coord = Web.Kaelin.Map.addr_to_coord(addr,state.map) <> Web.Kaelin.Coord.new(+0#32,+0#32)
+      open state.env_info as info
+      let coord = Web.Kaelin.Map.player.to_coord(addr,state.map) <> Web.Kaelin.Coord.new(+0#32,+0#32)
       let pos = info.mouse_pos
       open pos
       let {x, y} = pos

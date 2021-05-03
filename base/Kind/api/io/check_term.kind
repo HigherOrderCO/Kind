@@ -1,14 +1,16 @@
 // TODO: remove duplicate code on Kind/api/io/normalize_term.kind
 Kind.api.io.check_term(name: String): IO<Unit>
   IO {
-    get new_defs = Kind.Synth.one(name, Kind.Map.new!)
-    case new_defs {
+    get defs = Kind.Synth.one(name, Kind.Map.new!)
+    case defs {
       none:
         let notfound = "Term not found: '" | name | "'."
         let filelist = List.mapped!(Kind.Synth.files_of(name))!((x) "'" | x | "'")
         let searched = "Searched on: " | String.join(", ",filelist) | "."
         IO.print(notfound | "\n" | searched)
-      some:
-        IO.print(Kind.Defs.report(new_defs.value, [name]))
+      some: IO {
+        IO.print(Kind.Defs.report(defs.value, [name]))
+        Kind.Defs.cache(defs.value)
+      }
     }
   }

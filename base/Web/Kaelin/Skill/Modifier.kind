@@ -1,0 +1,18 @@
+type Web.Kaelin.Skill.Modifier.hp{
+    damage
+    heal
+}
+
+type Web.Kaelin.Skill.Modifier.position {
+    knockback
+    switch_places
+}
+
+type Web.Kaelin.Skill.Modifier.status {
+    burn
+    poison
+    stun
+    slow
+    haste
+    cleanse
+}

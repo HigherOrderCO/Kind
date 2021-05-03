@@ -1,0 +1,18 @@
+Web.Kaelin.Skill.indicator(hero_pos: Web.Kaelin.Coord, skill:Web.Kaelin.Skill, mouse_coord: Web.Kaelin.Coord): NatMap<Web.Kaelin.Skill.area.indicator>
+  open skill
+  coords = []
+  pair = []
+  // Returning each effect's List of affected coords
+  for effect in skill.effects with coords:
+    open effect
+    let area = Web.Kaelin.Skill.area.to_list(effect.area, hero_pos,mouse_coord)
+
+    // Creating a map with each coord as key to its indicator
+    case effect.indicator{
+      none: coords
+      some: for coord in area with pair:
+        key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+        pair ++ [{key,effect.indicator.value}]
+    coords ++ pair
+    }
+  NatMap.from_list!(coords)

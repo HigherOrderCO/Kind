@@ -2,7 +2,7 @@
 Web.Kaelin.Player.move(coord_b: Web.Kaelin.Coord, address: String, state: Web.Kaelin.State): Web.Kaelin.State
   case state {
     game: 
-      let coord_a = Web.Kaelin.Map.addr_to_coord(address,state.map)
+      let coord_a = Web.Kaelin.Map.player.to_coord(address,state.map)
       let is_occupied = Web.Kaelin.Map.is_occupied(coord_b,state.map)
       let tile_b = Web.Kaelin.Map.get(coord_b,state.map)
       case tile_b{
@@ -11,7 +11,7 @@ Web.Kaelin.Player.move(coord_b: Web.Kaelin.Coord, address: String, state: Web.Ka
         state
       else
         new_map = Web.Kaelin.Map.swap(0,coord_a <> coord_b ,coord_b,state.map)
-        Web.Kaelin.State.game(state.room, state.players, state.cast_info, new_map, state.internal, state.interface)
+        Web.Kaelin.State.game(state.user, state.room, state.players, state.cast_info, new_map, state.internal, state.env_info)
       }      
   }default state
        

@@ -19,7 +19,6 @@ Web.Kaelin.Coord.Cubic.range(coord: Web.Kaelin.Coord.Cubic, distance: Nat): List
       
       let z = I32.sub(I32.neg(x), y)
       let new_coord = Web.Kaelin.Coord.Cubic.add(coord, Web.Kaelin.Coord.Cubic.new(x,y,z))
-      result = result ++ [new_coord]
-      result
+      List.cons!(new_coord, result)
     result
   result
