@@ -1,0 +1,11 @@
+List.merge_sort.merge(A : Type, f : A -> A -> Bool, xs : List<A>, ys : List<A>) : List<A>
+  case xs {
+      nil : ys
+      cons : case ys {
+          nil : xs
+          cons : if f(xs.head, ys.head) then
+                   xs.head & List.merge_sort.merge!(f, xs.tail, ys)
+                 else
+                   ys.head & List.merge_sort.merge!(f, xs, ys.tail)
+      }
+  }

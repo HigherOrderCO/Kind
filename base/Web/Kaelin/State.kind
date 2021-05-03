@@ -6,11 +6,11 @@ type Web.Kaelin.State {
   game(
     user: String
     room: String
-    tick: Nat
     players: Map(Web.Kaelin.Player)
     cast_info: Maybe<Web.Kaelin.CastInfo>
     map: Web.Kaelin.Map,
-    env_info : App.EnvInfo 
+    internal : Web.Kaelin.Internal
+    env_info : App.EnvInfo
   )
 }
 

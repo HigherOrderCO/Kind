@@ -1,0 +1,9 @@
+Web.Kaelin.Coord.Path.moore(c : Web.Kaelin.Coord) : List<Web.Kaelin.Coord>
+  open c
+  let U32_i = ((i) Int.to_i32(Int.sub(Int.from_nat(U32.to_nat(i)), +1))) :: U32 -> I32
+  let r = [] :: List<Web.Kaelin.Coord>
+  for i : U32 from 0#32 to 3#32 with r:
+    for j : U32 from 0#32 to 3#32 with r:
+       if (U32.eql(i, j)) then r else Web.Kaelin.Coord.new(I32.add(c.i, U32_i(i)), I32.add(c.j, U32_i(j))) & r
+    r
+  r

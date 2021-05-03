@@ -1,0 +1,8 @@
+IO.union<A : Type>(f : A -> A -> IO<A>, x : List<IO<A>>, io_a : IO<A>) : IO<A>
+  case x {
+      nil : io_a
+      cons : IO.bind!(A, io_a, (a)   
+               IO.bind!(A, x.head, (a2)
+                  IO.union(A, f, x.tail, f(a, a2))
+                 ))
+  }

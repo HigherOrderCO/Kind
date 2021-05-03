@@ -1,6 +1,7 @@
 Web.Kaelin.Action.start_cast(key_code: U16, state: Web.Kaelin.State): Web.Kaelin.State
   case state {
     game: 
+      log(state.user)
       let player_info = Web.Kaelin.Map.player.info(state.user, state.map)
       case player_info {
         none: state

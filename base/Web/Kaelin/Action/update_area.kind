@@ -13,7 +13,7 @@ Web.Kaelin.Action.update_area(state: Web.Kaelin.State): Web.Kaelin.State
           else
             area = Web.Kaelin.Skill.indicator(cast.hero_pos, cast.skill, mouse_coord)
             new_cast_info = some(Web.Kaelin.CastInfo.new(cast.hero_pos, cast.hex_effect, cast.skill, cast.range, area, mouse_coord))
-            new_state = Web.Kaelin.State.game(state.user,state.room,state.tick,state.players,new_cast_info,state.map,state.env_info)
+            new_state = Web.Kaelin.State.game(state.user, state.room, state.players,new_cast_info,state.map, state.internal, state.env_info)
             new_state
       }        
   }default state
