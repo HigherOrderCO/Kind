@@ -129,7 +129,8 @@ Kind.Comp.compile.adt(term: Kind.Term, defs: Kind.Defs): Maybe(Kind.Comp.Prim)
       if String.ends_with(term.self, ".Self") then
         let body = term.body(Kind.Term.var("",0),Kind.Term.var("",0))
         let data = Kind.Comp.compile.adt.get_constructors(body)
-        some(Kind.Comp.Prim.data(data))
+        let name = String.take(String.length(term.self) - 5, term.self)
+        some(Kind.Comp.Prim.data(name, data))
       else
         none
   } default none

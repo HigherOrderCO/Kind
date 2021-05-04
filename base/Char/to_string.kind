@@ -1,0 +1,2 @@
+Char.to_string(chr: Char): String
+  String.cons(chr, String.nil)
