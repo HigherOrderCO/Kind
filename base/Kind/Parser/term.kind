@@ -68,5 +68,6 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.reference,
       Parser.fail!("Expected a term.") // if no parser consumes input, that'll be the error
     ]);
+    get term = Kind.Parser.suffix(init, term);
     return term
   }
