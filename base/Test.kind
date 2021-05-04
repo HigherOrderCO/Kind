@@ -1,12 +1,5 @@
 Test.main: IO(Unit)
-  let map = {}
-  let sum = 0
-  let lim = 200000
-  for i from 0 to lim with map:
-    map{Nat.show(i)} <- i
-  for i from 0 to lim with sum:
-    sum + (map{Nat.show(i)} <> 0)
-  IO.print(Nat.show(sum))
+  Kind.api.io.check_file("./Kind/api/export.kind")
 
 Test: IO(Unit)
   IO {
@@ -23,4 +16,3 @@ Test: IO(Unit)
       }
     }
   }
-  //Test.main
