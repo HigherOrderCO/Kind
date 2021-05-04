@@ -1,28 +1,22 @@
-Test: _
-  let key =
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(
-    Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.o(Bits.e
-    ))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
-    ))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
-  let map = BitsMap.new<U32>
-  let st = {key, map}
-  for i : U32 from 0#32 to 100000#32 with st:
-    let {key, map} = st
-    let key = Bits.inc(key)
-    let map = BitsMap.set!(key, i, map)
-    {key, map}
-  Pair.fst!!(st)
+Test.main: IO(Unit)
+  IO {
+    IO.print("What is your name?")
+    get name = IO.get_line
+    IO.print("Hello, " | name)
+  }
+
+Test: IO(Unit)
+  IO {
+    let name = "Test.main"
+    IO.print("Compiling "|name|" to Scheme...")
+    get defs = Kind.Synth.one(name, Kind.Map.new!)
+    case defs {
+      none: IO.print("Something is wrong.")
+      some: IO {
+        let defs = Kind.Comp.Defs.compile(defs.value)
+        let file = Kind.Comp.Target.Scheme(defs)|"(run_io ("|name|"))\n"
+        IO.print(file)
+        IO.set_file("./main.scm", file)
+      }
+    }
+  }

@@ -2836,7 +2836,7 @@ module.exports = class AppPlay extends Component {
     this.register_event({
       _: "App.Event.init",
       time: BigInt(0),
-      user: sign.addressFromKey(KEY),
+      user: sign.addressFromKey(KEY).toLowerCase(),
       info: {
         _: "App.EnvInfo.new",
         screen_size: {
@@ -3057,7 +3057,7 @@ module.exports = class AppPlay extends Component {
                 window.KindEvents.watch_room(io.param);
                 window.KindEvents.on_post(({ room, time, addr, data }) => {
                   var time = BigInt(parseInt(time.slice(2), 16));
-                  this.register_event({ _: "App.Event.post", time, room, addr, data });
+                  this.register_event({ _: "App.Event.post", time, room, addr : addr.toLowerCase(), data });
                 });
               } else {
                 console.log("Error: invalid input on App.Action.watch");
@@ -3503,7 +3503,7 @@ module.exports = {
 /******/ 					__webpack_require__.m[moduleId] = moreModules[moduleId];
 /******/ 				}
 /******/ 			}
-/******/ 			if(runtime) runtime(__webpack_require__);
+/******/ 			if(runtime) var result = runtime(__webpack_require__);
 /******/ 			if(parentChunkLoadingFunction) parentChunkLoadingFunction(data);
 /******/ 			for(;i < chunkIds.length; i++) {
 /******/ 				chunkId = chunkIds[i];

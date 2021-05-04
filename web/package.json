@@ -13,7 +13,7 @@
     "inferno": "^7.4.6",
     "inferno-hyperscript": "^7.4.6",
     "isomorphic-ws": "^4.0.1",
-    "kind-lang": "^1.0.37",
+    "kind-lang": "^1.0.39",
     "nano-ethereum-signer": "^0.1.2"
   },
   "devDependencies": {
@@ -23,7 +23,7 @@
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^4.5.0",
     "http-server": "^0.12.3",
-    "webpack": "^5.11.1",
-    "webpack-cli": "^4.3.1"
+    "webpack": "^5.36.1",
+    "webpack-cli": "^4.6.0"
   }
 }

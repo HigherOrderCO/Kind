@@ -1,6 +1,6 @@
 TODO list on Kaelin
 
-- [ ] Rename state.interface to env_info
+- [X] Rename state.interface to env_info
 
 - [ ] Web.Kaelin.Constants - randomize or update each build
 
@@ -10,11 +10,11 @@ TODO list on Kaelin
 
 - [X] Web.Kaelin.Draw.background - change hexagon color based on Web.Kaelin.CastInfo
 
-- [ ] Serialize.kind and Deserialize.kind
+- [X] Serialize.kind and Deserialize.kind
 
 - [X] Improve Draw/state/background function
 
-- [ ] fix mouse position not corresponding to the respective hexagon
+- [X] fix mouse position not corresponding to the respective hexagon
 
 - [ ] organize folders, files, and names
 
@@ -22,6 +22,27 @@ TODO list on Kaelin
 
 - [ ] Maybe organize main folder?
 
+- [X] Change croni, and other heroes to other directory (maybe to resouce hero?)
+
+- [ ] organize area.kind
+
+- [ ] consider adding condition and object creation in Effect
+
+- [ ] update skill_use
+
+- [ ] fix vampirism through conditions on Effects
+
+- [ ] CastInfo should go back to none after a movement or after using a skill
+
+- [ ] Change croni, and other heroes to othe directory (maybe to resouce hero?)
+
+- [X] Change abilities to other folder than skill/skills. It has to be together with the hero
+
+- [X] Change 'ability' to 'skill'
+
+- [X] Organize map's players functions
+
+- [X] Remove mouse_pos and range from CastInfo and change ability to skill there too
 
 Kind:
 

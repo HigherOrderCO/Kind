@@ -1,5 +1,5 @@
 type Web.Kaelin.HexEffect {
   normal
   movement  
-  ability
+  skill
 }

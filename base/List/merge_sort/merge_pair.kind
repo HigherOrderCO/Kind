@@ -1,0 +1,8 @@
+List.merge_sort.merge_pair(A : Type, f : A -> A -> Bool, xs : List<List<A>>) : List<List<A>>
+  case xs {
+      cons : case xs.tail as xss {
+          cons : 
+            List.merge_sort.merge!(f, xs.head, xss.head) &
+                    List.merge_sort.merge_pair!(f, xss.tail)
+      } default xs
+  } default xs

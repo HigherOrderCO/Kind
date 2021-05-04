@@ -1,0 +1,5 @@
+Char.to_upper(char: Char): Char
+  if Bool.and(U16.gte(char, 'a'), U16.lte(char, 'z')) then
+    U16.sub(char, 32#16)
+  else
+    char
