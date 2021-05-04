@@ -259,6 +259,12 @@ module.exports = class AppPlay extends Component {
             case "del_file":
               localStorage.removeItem(io.param);
               return this.run_io(io.then("")).then(res).catch(err);
+            case "request": 
+              return fetch(io.param)
+              .then(result => result.text())
+              .then(result => this.run_io(io.then(result)))
+              .then(res)
+              .catch(err);
             case "watch":
               if (utils.is_valid_hex(48, io.param)) {
                 window.KindEvents.watch_room(io.param);
